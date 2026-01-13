@@ -38,8 +38,8 @@ ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
 
 void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
-  for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
-    const auto &bankName = this->bankName(wksp_index);
+  for (size_t bank_index = range.begin(); bank_index < range.end(); ++bank_index) {
+    const auto &bankName = this->bankName(bank_index);
     // empty bank names indicate spectra to skip; control should never get here, but just in case
     if (bankName.empty()) {
       continue;
@@ -66,7 +66,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
     std::vector<API::ISpectrum *> spectra;
     std::vector<std::vector<uint32_t>> y_temps;
     for (const auto &wksp : m_wksps) {
-      spectra.push_back(&wksp->getSpectrum(wksp_index));
+      spectra.push_back(&wksp->getSpectrum(bank_index));
       y_temps.emplace_back(spectra.back()->dataY().size());
     }
 
@@ -76,7 +76,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
     Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
     // now the calibration for the output group can be created
     // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
-    const auto calibration = this->getCalibration(tof_unit, wksp_index);
+    const auto calibration = this->getCalibration(tof_unit, bank_index);
 
     const auto frequency_log =
         dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(m_wksps.at(0)->run().getProperty("frequency"));

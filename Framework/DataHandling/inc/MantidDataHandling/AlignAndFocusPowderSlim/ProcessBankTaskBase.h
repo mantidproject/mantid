@@ -19,6 +19,7 @@ public:
                       const BankCalibrationFactory &calibFactory);
   const std::string &bankName(const size_t wksp_index) const;
   BankCalibration getCalibration(const std::string &tof_unit, const size_t wksp_index) const;
+  std::vector<BankCalibration> getCalibrations(const std::string &tof_unit, const size_t bank_index) const;
 
   /**
    *  Load detid and tof at the same time

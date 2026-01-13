@@ -22,7 +22,6 @@ As a result, there is a significantly smaller memory usage and the processing is
 Current limitations compared to ``AlignAndFocusPowderFromFiles``
 
 - only supports the VULCAN instrument
-- hard coded for 6 particular groups
 - does not support copping data
 - does not support removing prompt pulse
 
@@ -138,6 +137,25 @@ This algorithm accepts the same ``SplitterWorkspace`` inputs as :ref:`FilterEven
     ws2 = Rebin(ws2, "0,50000,50000", PreserveEvents=False)
 
     CompareWorkspaces(ws, ws2, CheckSpectraMap=False, CheckInstrument=False)
+
+
+**Example - using a GroupingWorkspace**
+
+You can provide a ``GroupingWorkspace`` to define how the detectors are grouped in the output workspace. If a ``GroupingWorkspace`` is not provided, the grouping from the calibration file will be used if provided, else a default grouping of one group per bank is used.
+
+The example done here is using :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` to create a grouping workspace. With an angle step of 45 degrees, this will create 3 groups.
+
+.. code-block:: python
+
+    inst = LoadEmptyInstrument(InstrumentName="VULCAN")
+    GenerateGroupingPowder(inst, GroupingWorkspace='powder_group', AngleStep=45)
+
+    ws = AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5", GroupingWorkspace="powder_group",
+                                 L1=43.755,
+                                 L2=[2, 2.25, 2.5],
+                                 Polar=[90]*3)
+
+    print(ws.getNumberHistograms())  # should be 3 histograms in the output workspace
 
 .. categories::
 

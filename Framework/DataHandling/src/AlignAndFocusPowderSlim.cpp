@@ -12,12 +12,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitFullTimeTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTask.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -53,6 +55,7 @@ using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceProperty;
+using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::TimeSplitter;
 using Mantid::DataObjects::Workspace2D;
@@ -82,25 +85,15 @@ typedef Mantid::Kernel::EnumeratedString<BinUnit, &unitNames> BINUNIT;
 
 const size_t NUM_HIST{6}; // TODO make this determined from groupin
 
+const std::string ENTRY_TOP_LEVEL("entry");
+
 // TODO refactor this to use the actual grouping
-double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_focus) {
-  // grouping taken from the IDF for VULCAN
-  if (detid < 0) {
-    throw std::runtime_error("detid < 0 is not supported");
-  } else if (detid < 100000) { // bank1 0-99095
-    return difc_focus[0];
-  } else if (detid < 200000) { // bank2 100000-199095
-    return difc_focus[1];
-  } else if (detid < 300000) { // bank3 200000-289095
-    return difc_focus[2];
-  } else if (detid < 400000) { // bank4 300000-389095
-    return difc_focus[3];
-  } else if (detid < 500000) { // bank5 400000-440095
-    return difc_focus[4];
-  } else if (detid < 600000) { // bank6 500000-554095
-    return difc_focus[5];
+double getFocussedPostion(const detid_t detid, const std::vector<double> &difc_focus,
+                          std::map<detid_t, size_t> &detIDToSpecNum) {
+  if (detIDToSpecNum.contains(detid)) {
+    return difc_focus[detIDToSpecNum[detid]];
   } else {
-    throw std::runtime_error("detid > 600000 is not supported");
+    return IGNORE_PIXEL;
   }
 }
 
@@ -183,6 +176,10 @@ void AlignAndFocusPowderSlim::init() {
   range->setBounds(0., 100.);
   declareProperty(PropertyNames::FILTER_BAD_PULSES_LOWER_CUTOFF, 95., range,
                   "The percentage of the average to use as the lower bound when filtering bad pulses.");
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
+                      PropertyNames::GROUPING_WS, "", Direction::Input, API::PropertyMode::Optional),
+                  "A GroupingWorkspace giving the grouping info. If not provided then the grouping from the "
+                  "calibration file will be used if provided, else a default grouping of one group per bank.");
   const std::vector<std::string> cal_exts{".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
@@ -239,16 +236,16 @@ void AlignAndFocusPowderSlim::init() {
   positionArrayValidator->add(mandatoryDblArrayValidator);
   positionArrayValidator->add(mustBePosArr);
   declareProperty(std::make_unique<PropertyWithValue<double>>(PropertyNames::L1, EMPTY_DBL(), l1Validator),
-                  "The primary distance $\\ell_1$ from beam to sample");
+                  "The primary distance :math:`\\ell_1` from beam to sample");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(PropertyNames::L2, std::vector<double>{}, positionArrayValidator),
-      "The secondary distances $\\ell_2$ from sample to focus group");
+      "The secondary distances :math:`\\ell_2` from sample to focus group");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(PropertyNames::POLARS, std::vector<double>{}, positionArrayValidator),
-      "The effective polar angle (2$\\theta$) of each focus group");
+      "The effective polar angle (:math:`2\\theta`) of each focus group");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(PropertyNames::AZIMUTHALS, std::vector<double>{}, mustBePosArr),
-      "The effective azimuthal angle $\\phi$ for each focus group");
+      "The effective azimuthal angle :math:`\\phi` for each focus group");
 }
 
 std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
@@ -264,7 +261,39 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
     errors[PropertyNames::EVENTS_PER_THREAD] = msg;
   }
 
-  // validate binning information is consistent with each other
+  // For now only support either grouping or splitter workspace, not both at the same time
+  if ((!isDefault(PropertyNames::GROUPING_WS)) && (!isDefault(PropertyNames::SPLITTER_WS))) {
+    const std::string limitationMsg =
+        "Both grouping and splitter workspaces cannot be used together (limitation to be addressed in a future update)";
+    errors[PropertyNames::GROUPING_WS] = limitationMsg;
+    errors[PropertyNames::SPLITTER_WS] = limitationMsg;
+  }
+
+  // only specify allow or block list for logs
+  if ((!isDefault(PropertyNames::ALLOW_LOGS)) && (!isDefault(PropertyNames::BLOCK_LOGS))) {
+    errors[PropertyNames::ALLOW_LOGS] = "Cannot specify both allow and block lists";
+    errors[PropertyNames::BLOCK_LOGS] = "Cannot specify both allow and block lists";
+  }
+
+  // the focus group position parameters must have same lengths
+  std::vector<double> l2s = getProperty(PropertyNames::L2);
+  const auto num_l2s = l2s.size();
+  std::vector<double> twoTheta = getProperty(PropertyNames::POLARS);
+  if (num_l2s != twoTheta.size()) {
+    errors[PropertyNames::L2] = strmakef("L2S has inconsistent length %zu", num_l2s);
+    errors[PropertyNames::POLARS] = strmakef("Polar has inconsistent length %zu", twoTheta.size());
+  }
+  // phi is optional, but if set must also have same size
+  std::vector<double> phi = getProperty(PropertyNames::AZIMUTHALS);
+  if (!phi.empty()) {
+    if (num_l2s != phi.size()) {
+      errors[PropertyNames::L2] = strmakef("L2S has inconsistent length %zu", num_l2s);
+      errors[PropertyNames::AZIMUTHALS] = strmakef("Azimuthal has inconsistent length %zu", phi.size());
+      ;
+    }
+  }
+
+  // validate binning information is consistent with each other and number of focus groups
   const std::vector<double> xmins = getProperty(PropertyNames::X_MIN);
   const std::vector<double> xmaxs = getProperty(PropertyNames::X_MAX);
   const std::vector<double> deltas = getProperty(PropertyNames::X_DELTA);
@@ -275,38 +304,13 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
 
   if (std::any_of(deltas.cbegin(), deltas.cend(), [](double d) { return !std::isfinite(d) || d == 0; }))
     errors[PropertyNames::X_DELTA] = "All must be nonzero";
-  else if (!(numDelta == 1 || numDelta == NUM_HIST))
-    errors[PropertyNames::X_DELTA] = "Must have 1 or 6 values";
+  else if (!(numDelta == 1 || numDelta == num_l2s))
+    errors[PropertyNames::X_DELTA] = "Must have 1 or consistent number of values";
 
-  if (!(numMin == 1 || numMin == NUM_HIST))
-    errors[PropertyNames::X_MIN] = "Must have 1 or 6 values";
-
-  if (!(numMax == 1 || numMax == NUM_HIST))
-    errors[PropertyNames::X_MAX] = "Must have 1 or 6 values";
-
-  // only specify allow or block list for logs
-  if ((!isDefault(PropertyNames::ALLOW_LOGS)) && (!isDefault(PropertyNames::BLOCK_LOGS))) {
-    errors[PropertyNames::ALLOW_LOGS] = "Cannot specify both allow and block lists";
-    errors[PropertyNames::BLOCK_LOGS] = "Cannot specify both allow and block lists";
-  }
-
-  // the focus group position parameters must have same lengths
-  std::vector<double> l2s = getProperty(PropertyNames::L2);
-  std::vector<double> twoTheta = getProperty(PropertyNames::POLARS);
-  if (l2s.size() != twoTheta.size()) {
-    errors[PropertyNames::L2] = strmakef("L2S has inconsistent length %zu", l2s.size());
-    errors[PropertyNames::POLARS] = strmakef("Polar has inconsistent length %zu", twoTheta.size());
-  }
-  // phi is optional, but if set must also have same size
-  std::vector<double> phi = getProperty(PropertyNames::AZIMUTHALS);
-  if (!phi.empty()) {
-    if (l2s.size() != phi.size()) {
-      errors[PropertyNames::L2] = strmakef("L2S has inconsistent length %zu", l2s.size());
-      errors[PropertyNames::AZIMUTHALS] = strmakef("Azimuthal has inconsistent length %zu", phi.size());
-      ;
-    }
-  }
-
+  if (!(numMin == 1 || numMin == num_l2s))
+    errors[PropertyNames::X_MIN] = "Must have 1 or consistent number of values";
+  if (!(numMax == 1 || numMax == num_l2s))
+    errors[PropertyNames::X_MAX] = "Must have 1 or consistent number of values";
   return errors;
 }
 
@@ -314,15 +318,6 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
 /** Execute the algorithm.
  */
 void AlignAndFocusPowderSlim::exec() {
-  // create a histogram workspace
-
-  // These give the limits in each file as to which events we actually load (when filtering by time).
-  loadStart.resize(1, 0);
-  loadSize.resize(1, 0);
-
-  this->progress(.0, "Create output workspace");
-
-  MatrixWorkspace_sptr wksp = createOutputWorkspace();
 
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
   { // TODO TEMPORARY - this algorithm is hard coded for VULCAN
@@ -333,9 +328,49 @@ void AlignAndFocusPowderSlim::exec() {
   }
   const Nexus::NexusDescriptor descriptor(filename);
 
-  // instrument is needed for lots of things
-  const std::string ENTRY_TOP_LEVEL("entry");
-  LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
+  // These give the limits in each file as to which events we actually load (when filtering by time).
+  loadStart.resize(1, 0);
+  loadSize.resize(1, 0);
+
+  size_t num_hist;
+  std::map<size_t, std::set<detid_t>> grouping;
+  GroupingWorkspace_sptr groupingWS = this->getProperty(PropertyNames::GROUPING_WS);
+
+  // Create a temporary workspace to load the instrument. This is needed for LoadDiffCal but we cannot create the
+  // output workspace yet because we need grouping information from the cal file to know the correct number of
+  // spectra.
+  auto inst_ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+  LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, inst_ws, ENTRY_TOP_LEVEL, this, &descriptor);
+
+  // load calibration file if provided
+  const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
+  ITableWorkspace_sptr calibrationWS;
+  if (!cal_filename.empty()) {
+    calibrationWS = this->loadCalFile(inst_ws, cal_filename, groupingWS);
+  }
+
+  if (groupingWS) {
+    const auto groupIds = groupingWS->getGroupIDs(false);
+    num_hist = groupIds.size();
+    g_log.information() << "Using grouping workspace with " << num_hist << " groups\n";
+    for (size_t outputSpecNum = 0; outputSpecNum < groupIds.size(); ++outputSpecNum) {
+      const auto detids = groupingWS->getDetectorIDsOfGroup(groupIds[outputSpecNum]);
+      grouping[outputSpecNum] = std::set<detid_t>(detids.begin(), detids.end());
+    }
+  } else {
+    // if no grouping defined then everything goes to one spectrum
+    num_hist = 1;
+  }
+
+  // temparary until we update splitting workflow to support arbitrary grouping
+  API::Workspace_sptr splitter_ws = this->getProperty(PropertyNames::SPLITTER_WS);
+  if (splitter_ws != nullptr) {
+    num_hist = NUM_HIST;
+  }
+
+  this->progress(.0, "Create output workspace");
+  // create a histogram workspace with correct number of histograms and bins
+  MatrixWorkspace_sptr wksp = createOutputWorkspace(inst_ws->getInstrument(), num_hist);
 
   // TODO parameters should be input information
   const double l1 = getProperty(PropertyNames::L1);
@@ -350,39 +385,8 @@ void AlignAndFocusPowderSlim::exec() {
   const std::vector<specnum_t> specids;
   const auto difc_focused = calculate_difc_focused(l1, l2s, polars);
 
-  // create values for focusing time-of-flight
-  this->progress(.05, "Creating calibration constants");
-  const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
-  if (!cal_filename.empty()) {
-    this->loadCalFile(wksp, cal_filename, difc_focused);
-  } else {
-    this->initCalibrationConstants(wksp, difc_focused);
-  }
-
-  // calculate correction for tof of the neutron at the sample position
-  if (this->getProperty(PropertyNames::FULL_TIME)) {
-    this->initScaleAtSample(wksp);
-  }
-
-  // set the instrument
-  this->progress(.07, "Set instrument geometry");
-  wksp = this->editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
-
-  // convert to TOF if not already
-  this->progress(.1, "Convert bins to TOF");
-  wksp = this->convertToTOF(wksp);
-
-  // TODO parameters should be read in from a file and should always be sorted
-  std::map<size_t, std::vector<detid_t>> grouping;
-  constexpr detid_t NUM_DETS_PER_BANK{100000};
-  for (size_t outputSpecNum : std::views::iota(0, 6)) {
-    grouping[outputSpecNum] = std::vector<detid_t>(NUM_DETS_PER_BANK);
-    std::iota(grouping[outputSpecNum].begin(), grouping[outputSpecNum].end(),
-              static_cast<detid_t>(NUM_DETS_PER_BANK * outputSpecNum));
-  }
-
   // load run metadata
-  this->progress(.11, "Loading metadata");
+  this->progress(.01, "Loading metadata");
   // prog->doReport("Loading metadata"); TODO add progress bar stuff
   try {
     LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL, descriptor);
@@ -391,7 +395,7 @@ void AlignAndFocusPowderSlim::exec() {
   }
 
   // load logs
-  this->progress(.12, "Loading logs");
+  this->progress(.02, "Loading logs");
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
   const std::vector<std::string> &allow_logs = getProperty(PropertyNames::ALLOW_LOGS);
   const std::vector<std::string> &block_logs = getProperty(PropertyNames::BLOCK_LOGS);
@@ -402,7 +406,7 @@ void AlignAndFocusPowderSlim::exec() {
   const auto timeSplitter = this->timeSplitterFromSplitterWorkspace(wksp->run().startTime());
   const auto filterROI = this->getFilterROI(wksp);
   // determine the pulse indices from the time and splitter workspace
-  this->progress(.15, "Determining pulse indices");
+  this->progress(.05, "Determining pulse indices");
 
   // Now we want to go through all the bankN_event entries
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
@@ -415,11 +419,12 @@ void AlignAndFocusPowderSlim::exec() {
     throw std::runtime_error("No NXevent_data entries found in file");
   }
 
-  this->progress(.17, "Reading events");
+  this->progress(.07, "Reading events");
 
   // hard coded for VULCAN 6 banks
   std::vector<std::string> bankEntryNames;
   std::size_t num_banks_to_read;
+
   int outputSpecNum = getProperty(PropertyNames::OUTPUT_SPEC_NUM);
   if (outputSpecNum == EMPTY_INT()) {
     for (size_t i = 1; i <= NUM_HIST; ++i) {
@@ -436,8 +441,61 @@ void AlignAndFocusPowderSlim::exec() {
     num_banks_to_read = 1;
   }
 
+  // get detector ids for each bank
+  std::map<size_t, std::set<detid_t>> bank_detids;
+  for (size_t i = 1; i <= NUM_HIST; ++i) {
+    bank_detids[i - 1] = wksp->getInstrument()->getDetectorIDsInBank("bank" + std::to_string(i));
+  }
+
+  // create map of detid to output spectrum number to be used in focusing
+  if (!grouping.empty()) {
+    for (const auto &group : grouping) {
+      for (const auto &detid : group.second) {
+        detIDToSpecNum[detid] = group.first;
+      }
+    }
+  } else if (splitter_ws) {
+    // this is temporary until we update splitting workflow to support arbitrary grouping
+    for (const auto &[i, detids] : bank_detids) {
+      grouping[i] = detids;
+      for (const auto &detid : detids) {
+        detIDToSpecNum[detid] = i;
+      }
+    }
+  } else {
+    // no grouping provided so evenything goes in the 1 output spectrum
+    grouping[0] = std::set<detid_t>{};
+    for (const auto &[i, detids] : bank_detids) {
+      grouping[0].insert(detids.begin(), detids.end());
+      for (const auto &detid : detids) {
+        detIDToSpecNum[detid] = 0;
+      }
+    }
+  }
+
+  // create values for focusing time-of-flight
+  this->progress(.1, "Creating calibration constants");
+  if (calibrationWS) {
+    this->initCalibrationConstantsFromCalWS(difc_focused, calibrationWS);
+  } else {
+    this->initCalibrationConstants(wksp, difc_focused);
+  }
+
+  // calculate correction for tof of the neutron at the sample position
+  if (this->getProperty(PropertyNames::FULL_TIME)) {
+    this->initScaleAtSample(wksp);
+  }
+
+  // set the instrument. Needs to happen after we get detector ids for each bank
+  this->progress(.15, "Set instrument geometry");
+  wksp = this->editInstrumentGeometry(wksp, l1, polars, specids, l2s, azimuthals);
+
+  // convert to TOF if not already
+  this->progress(.17, "Convert bins to TOF");
+  wksp = this->convertToTOF(wksp);
+
   // create the bank calibration factory to share with all of the ProcessBank*Task objects
-  BankCalibrationFactory calibFactory(m_calibration, m_scale_at_sample, grouping, m_masked);
+  BankCalibrationFactory calibFactory(m_calibration, m_scale_at_sample, grouping, m_masked, bank_detids);
 
   // threaded processing of the banks
   const int DISK_CHUNK = getProperty(PropertyNames::READ_SIZE_FROM_DISK);
@@ -446,11 +504,13 @@ void AlignAndFocusPowderSlim::exec() {
 
   if (timeSplitter.empty()) {
     // create the nexus loader for handling combined calls to hdf5
+
+    SpectraProcessingData processingData = initializeSpectraProcessingData(wksp);
     const auto pulse_indices = this->determinePulseIndices(wksp, filterROI);
     auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices);
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
-    ProcessBankTask task(bankEntryNames, h5file, loader, wksp, calibFactory, static_cast<size_t>(DISK_CHUNK),
+    ProcessBankTask task(bankEntryNames, h5file, loader, processingData, calibFactory, static_cast<size_t>(DISK_CHUNK),
                          static_cast<size_t>(GRAINSIZE_EVENTS), progress);
     // generate threads only if appropriate
     if (num_banks_to_read > 1) {
@@ -462,6 +522,9 @@ void AlignAndFocusPowderSlim::exec() {
 
     // close the file so child algorithms can do their thing
     h5file.close();
+
+    // copy data from processingData to wksp
+    storeSpectraProcessingData(processingData, wksp);
 
     // update the run TimeROI and remove log data outside the time ROI
     wksp->mutableRun().setTimeROI(filterROI);
@@ -545,11 +608,12 @@ void AlignAndFocusPowderSlim::exec() {
 
               // clone wksp for this target
               MatrixWorkspace_sptr target_wksp = workspaces[target_index];
+              SpectraProcessingData processingData = initializeSpectraProcessingData(target_wksp);
 
               const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
               auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices);
 
-              ProcessBankTask task(bankEntryNames, h5file, loader, target_wksp, calibFactory,
+              ProcessBankTask task(bankEntryNames, h5file, loader, processingData, calibFactory,
                                    static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), progress);
               // generate threads only if appropriate
               if (num_banks_to_read > 1) {
@@ -558,6 +622,7 @@ void AlignAndFocusPowderSlim::exec() {
                 // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
                 task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
               }
+              storeSpectraProcessingData(processingData, target_wksp);
             }
           });
     }
@@ -597,7 +662,8 @@ void AlignAndFocusPowderSlim::exec() {
   }
 }
 
-MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
+MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(const Geometry::Instrument_const_sptr inst,
+                                                                    size_t num_hist) {
   // set up the output workspace binning
   const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
   const bool linearBins = bool(binmode == BinningMode::LINEAR);
@@ -621,18 +687,18 @@ MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
     UNUSED_ARG(
         Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
   }
-  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(NUM_HIST, XValues);
+  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(inst, num_hist, XValues);
 
   if (raggedBins) {
     // if ragged bins, we need to resize the x-values for each histogram after the first one
     if (x_delta.size() == 1)
-      x_delta.resize(NUM_HIST, x_delta[0]);
+      x_delta.resize(num_hist, x_delta[0]);
     if (x_min.size() == 1)
-      x_min.resize(NUM_HIST, x_min[0]);
+      x_min.resize(num_hist, x_min[0]);
     if (x_max.size() == 1)
-      x_max.resize(NUM_HIST, x_max[0]);
+      x_max.resize(num_hist, x_max[0]);
 
-    for (size_t i = 1; i < NUM_HIST; ++i) {
+    for (size_t i = 1; i < num_hist; ++i) {
       HistogramData::BinEdges XValues_new(0);
 
       if (linearBins) {
@@ -655,41 +721,90 @@ MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace() {
   return wksp;
 }
 
+SpectraProcessingData
+AlignAndFocusPowderSlim::initializeSpectraProcessingData(const API::MatrixWorkspace_sptr &outputWS) {
+  SpectraProcessingData processingData;
+  const size_t numSpectra = outputWS->getNumberHistograms();
+  for (size_t i = 0; i < numSpectra; ++i) {
+    const auto &spectrum = outputWS->getSpectrum(i);
+    processingData.binedges.emplace_back(&spectrum.readX());
+    processingData.counts.emplace_back(spectrum.dataY().size());
+  }
+  return processingData;
+}
+
+void AlignAndFocusPowderSlim::storeSpectraProcessingData(const SpectraProcessingData &processingData,
+                                                         const API::MatrixWorkspace_sptr &outputWS) {
+  const size_t numSpectra = outputWS->getNumberHistograms();
+  for (size_t i = 0; i < numSpectra; ++i) {
+    auto &spectrum = outputWS->getSpectrum(i);
+    auto &y_values = spectrum.dataY();
+    std::transform(
+        processingData.counts[i].cbegin(), processingData.counts[i].cend(), y_values.begin(),
+        [](const std::atomic_uint32_t &val) { return static_cast<double>(val.load(std::memory_order_relaxed)); });
+    auto &e_values = spectrum.dataE();
+    std::transform(processingData.counts[i].cbegin(), processingData.counts[i].cend(), e_values.begin(),
+                   [](const std::atomic_uint32_t &val) {
+                     return std::sqrt(static_cast<double>(val.load(std::memory_order_relaxed)));
+                   });
+  }
+}
+
 void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr &wksp,
                                                        const std::vector<double> &difc_focus) {
   const auto detInfo = wksp->detectorInfo();
 
   for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
     if (!iter->isMonitor()) {
-      const auto difc_focussed = getFocussedPostion(static_cast<detid_t>(iter->detid()), difc_focus);
-      m_calibration.emplace(static_cast<detid_t>(iter->detid()),
-                            difc_focussed / detInfo.difcUncalibrated(iter->index()));
+      const auto difc_focussed = getFocussedPostion(static_cast<detid_t>(iter->detid()), difc_focus, detIDToSpecNum);
+      if (difc_focussed == IGNORE_PIXEL)
+        m_calibration.emplace(static_cast<detid_t>(iter->detid()), IGNORE_PIXEL);
+      else
+        m_calibration.emplace(static_cast<detid_t>(iter->detid()),
+                              difc_focussed / detInfo.difcUncalibrated(iter->index()));
     }
   }
 }
 
-void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS, const std::string &filename,
-                                          const std::vector<double> &difc_focus) {
+void AlignAndFocusPowderSlim::initCalibrationConstantsFromCalWS(const std::vector<double> &difc_focus,
+                                                                const ITableWorkspace_sptr calibrationWS) {
+  for (size_t row = 0; row < calibrationWS->rowCount(); ++row) {
+    const detid_t detid = calibrationWS->cell<int>(row, 0);
+    const double detc = calibrationWS->cell<double>(row, 1);
+    const auto difc_focussed = getFocussedPostion(detid, difc_focus, detIDToSpecNum);
+    if (difc_focussed == IGNORE_PIXEL)
+      m_calibration.emplace(detid, IGNORE_PIXEL);
+    else
+      m_calibration.emplace(detid, difc_focussed / detc);
+  }
+}
+
+const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS,
+                                                                const std::string &filename,
+                                                                GroupingWorkspace_sptr &groupingWS) {
+  const bool load_grouping = !groupingWS;
+
   auto alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("Filename", filename);
   alg->setProperty<bool>("MakeCalWorkspace", true);
-  alg->setProperty<bool>("MakeGroupingWorkspace", false);
+  alg->setProperty<bool>("MakeGroupingWorkspace", load_grouping);
   alg->setProperty<bool>("MakeMaskWorkspace", true);
   alg->setPropertyValue("WorkspaceName", "temp");
   alg->executeAsChildAlg();
 
-  const ITableWorkspace_sptr calibrationWS = alg->getProperty("OutputCalWorkspace");
-  for (size_t row = 0; row < calibrationWS->rowCount(); ++row) {
-    const detid_t detid = calibrationWS->cell<int>(row, 0);
-    const double detc = calibrationWS->cell<double>(row, 1);
-    const auto difc_focussed = getFocussedPostion(detid, difc_focus);
-    m_calibration.emplace(detid, difc_focussed / detc);
+  if (load_grouping) {
+    g_log.debug() << "Loading grouping workspace from calibration file\n";
+    groupingWS = alg->getProperty("OutputGroupingWorkspace");
   }
+
+  const ITableWorkspace_sptr calibrationWS = alg->getProperty("OutputCalWorkspace");
 
   const MaskWorkspace_sptr maskWS = alg->getProperty("OutputMaskWorkspace");
   m_masked = maskWS->getMaskedDetectors();
   g_log.debug() << "Masked detectors: " << m_masked.size() << '\n';
+
+  return calibrationWS;
 }
 
 /**
