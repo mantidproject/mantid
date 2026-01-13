@@ -58,7 +58,6 @@ requirements:
     - rattler-build ==0.51.0
     - rattler-index
     - requests>=2.32.4
-    - scipy ${{ scipy }}
     - setuptools
     - sphinx ${{ sphinx }}
     - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
@@ -89,11 +88,13 @@ requirements:
         - xorg-libxtst>=1.2.3
         # Development tooling:
         - gcovr>=4.2
+        - scipy==1.16.3
     - if: win
       then:
         - conda-wrappers
         - gdk-pixbuf ${{ gdk_pixbuf }}
         - lib3mf
+        - scipy==1.16.3
     - if: osx
       then:
         - python.app
@@ -102,6 +103,7 @@ requirements:
         - clang_osx-arm64 ${{ c_compiler_version }}
         - clangxx_osx-arm64 ${{ cxx_compiler_version }}
         - llvm-openmp ${{ llvm_openmp }}
+        - scipy ${{ scipy }}
         # Development tooling:
         - libcxx
     - if: osx or linux
