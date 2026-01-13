@@ -15,6 +15,7 @@ import time
 import traceback
 from contextlib import contextmanager
 from functools import wraps
+from itertools import chain
 from typing import Optional
 
 from mantidqt.utils.observer_pattern import GenericObserver
@@ -1109,77 +1110,87 @@ class RunTabPresenter(PresenterCommon):
 
         state_model.save_types = self._run_tab_model.get_save_types().to_all_states()
 
-        try:
-            # Run tab view
-            self._set_on_custom_model("zero_error_free", state_model)
-            self._set_on_custom_model("compatibility_mode", state_model)
-            self._set_on_custom_model("event_slice_optimisation", state_model)
-            self._set_on_custom_model("merge_scale", state_model)
-            self._set_on_custom_model("merge_shift", state_model)
-            self._set_on_custom_model("merge_scale_fit", state_model)
-            self._set_on_custom_model("merge_shift_fit", state_model)
-            self._set_on_custom_model("merge_q_range_start", state_model)
-            self._set_on_custom_model("merge_q_range_stop", state_model)
-            self._set_on_custom_model("merge_mask", state_model)
-            self._set_on_custom_model("merge_max", state_model)
-            self._set_on_custom_model("merge_min", state_model)
+        # This dictionary is flattened when updating the model, but is defined as a dict for clarity
+        state_model_properties = {
+            "run_tab": [
+                "zero_error_free",
+                "compatibility_mode",
+                "event_slice_optimisation",
+                "merge_scale",
+                "merge_shift",
+                "merge_scale_fit",
+                "merge_shift_fit",
+                "merge_q_range_start",
+                "merge_q_range_stop",
+                "merge_mask",
+                "merge_max",
+                "merge_min",
+            ],
+            "settings_tab": [
+                "reduction_dimensionality",
+                "reduction_mode",
+                "event_slices",
+                "event_binning",
+                "wavelength_min",
+                "wavelength_max",
+                "wavelength_range",
+                "wavelength_step",
+                "wavelength_step_type",
+                "absolute_scale",
+                "z_offset",
+            ],
+            "Q_tab": [
+                "q_xy_max",
+                "q_xy_step",
+                "gravity_on_off",
+                "gravity_extra_length",
+                "use_q_resolution",
+                "q_resolution_source_a",
+                "q_resolution_sample_a",
+                "q_resolution_source_h",
+                "q_resolution_sample_h",
+                "q_resolution_source_w",
+                "q_resolution_sample_w",
+                "q_resolution_delta_r",
+                "q_resolution_collimation_length",
+                "q_resolution_moderator_file",
+                "r_cut",
+                "w_cut",
+                "q_1d",
+            ],
+            "mask": ["phi_limit_min", "phi_limit_max", "phi_limit_use_mirror", "phi_range", "radius_limit_min", "radius_limit_max"],
+            "user_file": ["user_file", "batch_file"],
+            "beam_centre": ["rear_pos_1", "rear_pos_2", "front_pos_1", "front_pos_2"],
+        }
+        set_decimals_on_mm = ["z_offset", "q_resolution_delta_r", "r_cut", "radius_limit_min", "radius_limit_max"]
+        q_res = [
+            "q_resolution_source_a",
+            "q_resolution_sample_a",
+            "q_resolution_source_h",
+            "q_resolution_sample_h",
+            "q_resolution_source_w",
+            "q_resolution_sample_w",
+        ]
 
-            # Settings tab
-            self._set_on_custom_model("reduction_dimensionality", state_model)
-            self._set_on_custom_model("reduction_mode", state_model)
-            self._set_on_custom_model("event_slices", state_model)
-            self._set_on_custom_model("event_binning", state_model)
+        for model_prop in chain.from_iterable(state_model_properties.values()):
+            try:
+                if model_prop in state_model_properties["beam_centre"]:
+                    self._beam_centre_presenter.set_on_state_model(model_prop, state_model)
+                elif model_prop == "q_1d":
+                    self._set_on_state_model_q_1d_rebin_string(state_model)
+                else:
+                    self._set_on_custom_model(model_prop, state_model)
 
-            self._set_on_custom_model("wavelength_min", state_model)
-            self._set_on_custom_model("wavelength_max", state_model)
-            self._set_on_custom_model("wavelength_range", state_model)
-            self._set_on_custom_model("wavelength_step", state_model)
-            self._set_on_custom_model("wavelength_step_type", state_model)
-
-            self._set_on_custom_model("absolute_scale", state_model)
-            self._set_on_custom_model("z_offset", state_model)
-
-            # Q tab
-            self._set_on_state_model_q_1d_rebin_string(state_model)
-            self._set_on_custom_model("q_xy_max", state_model)
-            self._set_on_custom_model("q_xy_step", state_model)
-
-            self._set_on_custom_model("gravity_on_off", state_model)
-            self._set_on_custom_model("gravity_extra_length", state_model)
-
-            self._set_on_custom_model("use_q_resolution", state_model)
-            self._set_on_custom_model("q_resolution_source_a", state_model)
-            self._set_on_custom_model("q_resolution_sample_a", state_model)
-            self._set_on_custom_model("q_resolution_source_h", state_model)
-            self._set_on_custom_model("q_resolution_sample_h", state_model)
-            self._set_on_custom_model("q_resolution_source_w", state_model)
-            self._set_on_custom_model("q_resolution_sample_w", state_model)
-            self._set_on_custom_model("q_resolution_delta_r", state_model)
-            self._set_on_custom_model("q_resolution_collimation_length", state_model)
-            self._set_on_custom_model("q_resolution_moderator_file", state_model)
-
-            self._set_on_custom_model("r_cut", state_model)
-            self._set_on_custom_model("w_cut", state_model)
-
-            # Mask
-            self._set_on_custom_model("phi_limit_min", state_model)
-            self._set_on_custom_model("phi_limit_max", state_model)
-            self._set_on_custom_model("phi_limit_use_mirror", state_model)
-            self._set_on_custom_model("phi_range", state_model)
-            self._set_on_custom_model("radius_limit_min", state_model)
-            self._set_on_custom_model("radius_limit_max", state_model)
-
-            # User file and batch file
-            self._set_on_custom_model("user_file", state_model)
-            self._set_on_custom_model("batch_file", state_model)
-
-            # Beam Centre
-            self._beam_centre_presenter.set_on_state_model("rear_pos_1", state_model)
-            self._beam_centre_presenter.set_on_state_model("rear_pos_2", state_model)
-            self._beam_centre_presenter.set_on_state_model("front_pos_1", state_model)
-            self._beam_centre_presenter.set_on_state_model("front_pos_2", state_model)
-        except (RuntimeError, ValueError) as e:
-            self.display_warning_box(title="Invalid Settings Entered", text=str(e), detailed_text=str(e))
+            except (RuntimeError, ValueError) as e:
+                self.display_warning_box(title="Invalid Settings Entered", text=str(e), detailed_text=str(e))
+                if model_prop in set_decimals_on_mm:
+                    self._set_on_view(model_prop, self.DEFAULT_DECIMAL_PLACES_MM)
+                elif model_prop in q_res:
+                    self._set_on_view_q_resolution_aperture()
+                elif model_prop == "q_1d":
+                    self._set_on_view_q_rebin_string()
+                else:
+                    self._set_on_view(model_prop)
 
         return state_model
 
