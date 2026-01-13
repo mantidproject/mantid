@@ -57,7 +57,7 @@ public:
   std::pair<std::string, std::string> const &firstEntryNameType() const noexcept { return m_firstEntryNameType; };
 
   /// Query if the given attribute exists on the root node
-  bool hasRootAttr(std::string const &name);
+  bool hasRootAttr(std::string const &name) const;
 
   /**
    * Returns a const reference of the internal map holding all entries in the
@@ -77,7 +77,7 @@ public:
    * @param groupClass e.g. NxLog , Nexus entry attribute
    * @return true: entryName exists for a groupClass, otherwise false
    */
-  bool isEntry(std::string const &entryName, std::string const &groupClass) {
+  bool isEntry(std::string const &entryName, std::string const &groupClass) const {
     if (isEntry(entryName)) {
       return m_allEntries.at(entryName) == groupClass;
     } else {
@@ -118,19 +118,23 @@ private:
   std::string const m_extension;
   /// HDF5 File Handle
   UniqueID<&H5Fclose> m_fileID;
-  /// Root attributes
-  std::unordered_set<std::string> m_rootAttrs;
+
+  /** Root attributes cache. This is mutable because it is modified in a const method. */
+  mutable std::unordered_set<std::string> m_rootAttrs;
 
   std::pair<std::string, std::string> m_firstEntryNameType;
 
   /**
-   * All entries metadata
+   * All entries metadata. The map is mutable because additional values can be added lazily.
    * <pre>
    *   key: group address
    *   value: group class (e.g. NXentry, NXlog)
    * </pre>
    */
   mutable std::map<std::string, std::string> m_allEntries;
+
+  /// mutex to protect reading from file after initialization in const methods
+  mutable std::mutex m_readNexusMutex;
 };
 
 } // namespace Nexus

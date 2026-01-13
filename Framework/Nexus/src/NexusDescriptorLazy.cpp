@@ -70,6 +70,9 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) const {
   if (it != m_allEntries.end()) {
     return it->second != NONEXISTENT;
   } else {
+    // modifying m_allEntries, need lock
+    std::lock_guard<std::mutex> lock(m_readNexusMutex);
+
     UniqueID<&H5Oclose> entryID(H5Oopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
     if (entryID.isValid()) {
       m_allEntries[entryName] = UNKNOWN_CLASS;
@@ -114,10 +117,13 @@ bool NexusDescriptorLazy::classTypeExistsChild(const std::string &parentPath, co
   return false;
 }
 
-bool NexusDescriptorLazy::hasRootAttr(std::string const &name) {
+bool NexusDescriptorLazy::hasRootAttr(std::string const &name) const {
   if (m_rootAttrs.count(name) == 1) {
     return true;
   } else {
+    // mutex has the wrong name, but it's what we have
+    std::lock_guard<std::mutex> lock(m_readNexusMutex);
+
     if (H5Aexists(m_fileID, name.c_str()) > 0) {
       m_rootAttrs.emplace(name);
       return true;
