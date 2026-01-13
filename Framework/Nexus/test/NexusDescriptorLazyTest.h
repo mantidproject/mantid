@@ -123,4 +123,15 @@ public:
     // verify that non-existing data returns empty string
     TS_ASSERT_EQUALS(descriptor.getStrData("/entry/instrument/not_a_data"), "");
   }
+
+  void test_init_loads_class() {
+    std::cout << "\nTesting classTypeExists in NexusDescriptorLazy" << std::endl;
+    // create a descriptor with the correct values
+    std::string const filename = NexusTest::getFullPath("HB3A_data.nxs");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+    // verify that class types are correctly identified
+    TS_ASSERT_EQUALS(descriptor.classTypeExists("NXentry"), true);
+    TS_ASSERT(descriptor.isEntry("/MDHistoWorkspace"));
+    TS_ASSERT(descriptor.isEntry("/MDHistoWorkspace", "NXentry"));
+  }
 };
