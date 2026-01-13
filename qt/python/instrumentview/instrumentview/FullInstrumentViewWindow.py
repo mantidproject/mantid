@@ -189,16 +189,6 @@ class FullInstrumentViewWindow(QMainWindow):
             self._contour_range_group_box
         )
 
-        # multi_select_group_box = QGroupBox("Multi-Select")
-        # multi_select_layout = QHBoxLayout(multi_select_group_box)
-        # self._multi_select_check = QCheckBox()
-        # self._multi_select_check.setText("Rectangular Select")
-        # self._multi_select_check.setToolTip("Currently only working on 3D view.")
-        # self._clear_selection_button = QPushButton("Clear Selection")
-        # self._clear_selection_button.setToolTip("Clear the current selection of detectors")
-        # multi_select_layout.addWidget(self._multi_select_check)
-        # multi_select_layout.addWidget(self._clear_selection_button)
-
         projection_group_box = QGroupBox("Projection")
         projection_layout = QHBoxLayout(projection_group_box)
         self._projection_combo_box = QComboBox(self)
@@ -235,8 +225,8 @@ class FullInstrumentViewWindow(QMainWindow):
         shapes_layout.addWidget(self._add_rectangle)
         self._shape_buttons = [self._add_circle, self._add_rectangle]
 
-        tab_1 = QWidget()
-        picking_layout = QVBoxLayout(tab_1)
+        selection_tab = QWidget()
+        picking_layout = QVBoxLayout(selection_tab)
         self._add_selection = QPushButton("Add Selection")
         self._clear_selections = QPushButton("Clear Selections")
         pre_list_layout = QHBoxLayout()
@@ -256,8 +246,8 @@ class FullInstrumentViewWindow(QMainWindow):
         picking_layout.addWidget(self._selection_list)
         picking_layout.addLayout(post_list_layout)
 
-        tab_2 = QWidget()
-        masking_layout = QVBoxLayout(tab_2)
+        mask_tab = QWidget()
+        masking_layout = QVBoxLayout(mask_tab)
         self._add_mask = QPushButton("Add Mask")
         self._clear_masks = QPushButton("Clear Masks")
         pre_list_layout = QHBoxLayout()
@@ -278,8 +268,8 @@ class FullInstrumentViewWindow(QMainWindow):
         masking_layout.addLayout(post_list_layout)
 
         picking_masking_tab = QTabWidget()
-        picking_masking_tab.addTab(tab_1, "Grouping")
-        picking_masking_tab.addTab(tab_2, "Masking")
+        picking_masking_tab.addTab(selection_tab, "Grouping")
+        picking_masking_tab.addTab(mask_tab, "Masking")
         grouping_masking_group_layout.addWidget(shapes_widget)
         grouping_masking_group_layout.addWidget(picking_masking_tab)
 
@@ -470,14 +460,15 @@ class FullInstrumentViewWindow(QMainWindow):
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
         self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
         self._mask_list.itemChanged.connect(self._presenter.on_mask_item_selected)
-        self._selection_list.itemChanged.connect(self._presenter.on_pick_selection_item_selected)
+        self._selection_list.itemChanged.connect(self._presenter.on_roi_item_selected)
         self._save_mask_to_ws.clicked.connect(self._presenter.on_save_mask_to_workspace_clicked)
         self._save_selection_to_ws.clicked.connect(self._presenter.on_save_roi_to_workspace_clicked)
         self._save_mask_to_file.clicked.connect(self._presenter.on_save_xml_mask_clicked)
         self._save_selection_to_file.clicked.connect(self._presenter.on_save_xml_roi_clicked)
         self._overwrite_mask.clicked.connect(self._presenter.on_overwrite_mask_clicked)
+        self._overwrite_selection.clicked.connect(self._presenter.on_overwrite_roi_clicked)
         self._clear_masks.clicked.connect(self._presenter.on_clear_masks_clicked)
-        self._clear_selections.clicked.connect(self._presenter.on_clear_pick_selections_clicked)
+        self._clear_selections.clicked.connect(self._presenter.on_clear_roi_clicked)
         self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
 
         self._add_connections_to_edits_and_slider(
@@ -961,7 +952,7 @@ class FullInstrumentViewWindow(QMainWindow):
             del removed
         self.refresh_mask_ws_list()
 
-    def clear_pick_selections_list(self) -> None:
+    def clear_roi_list(self) -> None:
         # Iterate backwards otherwise breaks indexing
         for i in range(self._selection_list.count() - 1, -1, -1):
             removed = self._selection_list.takeItem(i)

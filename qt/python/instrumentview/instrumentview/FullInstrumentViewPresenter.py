@@ -237,7 +237,7 @@ class FullInstrumentViewPresenter:
         new_key = self._model.add_new_detector_picking_selection(mask)
         self._view.set_new_picking_selection_key(new_key)
 
-    def on_pick_selection_item_selected(self) -> None:
+    def on_roi_item_selected(self) -> None:
         self._model.apply_detector_pick_selections(self._view.selected_pick_selections())
         # Update to visibility shows up in real time
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
@@ -254,21 +254,30 @@ class FullInstrumentViewPresenter:
 
     def on_save_mask_to_workspace_clicked(self) -> None:
         self._model.save_mask_workspace_to_ads()
-        self.on_mask_item_selected()
+        # self.on_mask_item_selected()
 
     def on_overwrite_mask_clicked(self) -> None:
         self._model.overwrite_mask_to_current_workspace()
-        self.on_clear_masks_clicked()
+        self._view.clear_mask_list()
 
-    def on_clear_pick_selections_clicked(self) -> None:
-        self._view.clear_pick_selections_list()
-        self._model.clear_all_picked_detectors()
-        self.on_pick_selection_item_selected()
+    def on_overwrite_roi_clicked(self) -> None:
+        self._model.overwrite_roi_to_current_workspace()
+        self._view.clear_roi_list()
+
+    # def on_clear_pick_selections_clicked(self) -> None:
+    #     self._view.clear_roi_list()
+    #     self._model.clear_all_picked_detectors()
+    #     self.on_roi_item_selected()
 
     def on_clear_masks_clicked(self) -> None:
         self._view.clear_mask_list()
         self._model.clear_stored_masks()
         self.on_mask_item_selected()
+
+    def on_clear_roi_clicked(self) -> None:
+        self._view.clear_roi_list()
+        self._model.clear_stored_rois()
+        self.on_roi_item_selected()
 
     def on_save_xml_mask_clicked(self):
         filename = self._get_filename_from_dialog()
@@ -315,9 +324,9 @@ class FullInstrumentViewPresenter:
         else:
             self._view.set_relative_detector_angle(self._model.relative_detector_angle())
 
-    def on_clear_selected_detectors_clicked(self) -> None:
-        # TODO: Figure out what triggers clearing the picking
-        return
+    # def on_clear_selected_detectors_clicked(self) -> None:
+    #     # TODO: Figure out what triggers clearing the picking
+    #     return
 
     def create_poly_data_mesh(self, points: np.ndarray, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""
@@ -369,6 +378,7 @@ class FullInstrumentViewPresenter:
                 return
             self._model._workspace = AnalysisDataService.retrieve(ws_name)
             self._model.setup()
+            self.update_plotter()
 
     def add_workspace_callback(self, ws_name, ws):
         self._reload_peaks_workspaces()

@@ -24,7 +24,6 @@ from mantid.simpleapi import (
     ExtractMaskToTable,
     SaveMask,
     MaskDetectors,
-    RenameWorkspace,
     CloneWorkspace,
 )
 from mantid.api import MatrixWorkspace
@@ -96,7 +95,7 @@ class FullInstrumentViewModel:
         self._cached_projections_map = {}
 
         self._cached_masks_map = {}
-        self._cached_pick_selections_map = {}
+        self._cached_rois_map = {}
 
         # Get min and max integration values
         if self._workspace.isRaggedWorkspace():
@@ -421,10 +420,10 @@ class FullInstrumentViewModel:
         return new_key
 
     def add_new_detector_picking_selection(self, new_selection: list[bool]) -> str:
-        new_key = f"Pick Selection {len(self._cached_pick_selections_map) + 1} (unsaved)"
+        new_key = f"Pick Selection {len(self._cached_rois_map) + 1} (unsaved)"
         selection_to_save = np.zeros_like(self._workspace_indices)
         selection_to_save[self.is_pickable] = new_selection
-        self._cached_pick_selections_map[new_key] = selection_to_save
+        self._cached_rois_map[new_key] = selection_to_save
         return new_key
 
     def apply_detector_masks(self, mask_keys: list[str]) -> None:
@@ -441,9 +440,7 @@ class FullInstrumentViewModel:
         self._detector_is_picked[~self.is_pickable] = False
 
     def apply_detector_pick_selections(self, selection_keys: list[str]) -> None:
-        cached_selections = [
-            self._cached_pick_selections_map[key] for key in selection_keys if key in self._cached_pick_selections_map.keys()
-        ]
+        cached_selections = [self._cached_rois_map[key] for key in selection_keys if key in self._cached_rois_map.keys()]
         if not cached_selections:
             self._detector_is_picked = self._point_picked_detectors
             return
@@ -453,13 +450,16 @@ class FullInstrumentViewModel:
     def clear_stored_masks(self) -> None:
         self._cached_masks_map.clear()
 
+    def clear_stored_rois(self) -> None:
+        self._cached_rois_map.clear()
+
     @property
     def cached_masks_keys(self) -> list[str]:
         return list(self._cached_masks_map.keys())
 
     @property
     def cached_pick_selections_keys(self) -> list[str]:
-        return list(self._cached_pick_selections_map.keys())
+        return list(self._cached_rois_map.keys())
 
     def save_mask_workspace_to_ads(self) -> None:
         self._save_mask_workspace_to_ads(self.mask_ws)
@@ -486,12 +486,18 @@ class FullInstrumentViewModel:
         SaveMask(ws, OutputFile=filename)
 
     def overwrite_mask_to_current_workspace(self) -> None:
+        self._overwrite_mask_to_current_workspace(self.mask_ws)
+
+    def overwrite_roi_to_current_workspace(self) -> None:
+        self._overwrite_mask_to_current_workspace(self.roi_ws)
+
+    def _overwrite_mask_to_current_workspace(self, mask_ws) -> None:
         # TODO: Check if copies are expensive with big workspaces
         temp_ws = CloneWorkspace(self._workspace.name(), StoreInADS=False)
         temp_ws_name = f"__instrument_view_temp_{self._workspace.name()}"
         AnalysisDataService.addOrReplace(temp_ws_name, temp_ws)
-        MaskDetectors(temp_ws_name, MaskedWorkspace=self.mask_ws)
-        RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._workspace.name())
+        MaskDetectors(temp_ws_name, MaskedWorkspace=mask_ws)
+        AnalysisDataService.addOrReplace(self._workspace.name(), AnalysisDataService.retrieve(temp_ws_name))
 
     def get_mask_workspaces_in_ads(self) -> list[MaskWorkspace]:
         ads = AnalysisDataService.Instance()
