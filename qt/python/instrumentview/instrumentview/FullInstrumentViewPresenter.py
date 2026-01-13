@@ -22,7 +22,6 @@ from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
 from vtkmodules.vtkRenderingCore import vtkCoordinate
-from vtkmodules.vtkCommonDataModel import vtkCylinder
 
 
 class SuppressRendering:
@@ -264,16 +263,11 @@ class FullInstrumentViewPresenter:
         self._view.remove_peak_cursor_from_lineplot()
         self._update_peak_buttons()
 
-    def on_add_cylinder_clicked(self) -> None:
-        self._view.add_cylinder_widget(self._detector_mesh_bounds)
-
-    def on_cylinder_select_clicked(self) -> None:
-        widget = self._view.get_current_widget()
-        if widget is None:
+    def on_add_mask_clicked(self) -> None:
+        implicit_function = self._view.get_current_widget_implicit_function()
+        if not implicit_function:
             return
-        cylinder = vtkCylinder()
-        widget.GetCylinderRepresentation().GetCylinder(cylinder)
-        mask = [(cylinder.FunctionValue(pt) < 0) for pt in self._detector_mesh.points]
+        mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points]
         new_key = self._model.add_new_detector_mask(mask)
         self._view.set_new_mask_key(new_key)
 

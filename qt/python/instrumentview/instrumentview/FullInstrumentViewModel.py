@@ -463,7 +463,7 @@ class FullInstrumentViewModel:
         return q_lab / np.linalg.norm(q_lab)
 
     def add_new_detector_mask(self, new_mask: list[bool]) -> str:
-        new_key = f"Mask {len(self._cached_masks_map) + 1}"
+        new_key = f"Mask {len(self._cached_masks_map) + 1} (unsaved)"
         mask_to_save = self._is_masked_in_ws.copy()
         mask_to_save[self.is_pickable] = new_mask
         self._cached_masks_map[new_key] = mask_to_save
@@ -507,8 +507,9 @@ class FullInstrumentViewModel:
 
     def overwrite_mask_to_current_workspace(self) -> None:
         # TODO: Check if copies are expensive with big workspaces
+        temp_ws = CloneWorkspace(self._workspace.name(), StoreInADS=False)
         temp_ws_name = f"__instrument_view_temp_{self._workspace.name()}"
-        CloneWorkspace(self._workspace.name(), OutputWorkspace=temp_ws_name)
+        AnalysisDataService.addOrReplace(temp_ws_name, temp_ws)
         MaskDetectors(temp_ws_name, MaskedWorkspace=self.mask_ws)
         RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._workspace.name())
 

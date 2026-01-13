@@ -597,7 +597,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._is_valid = np.array([True, True, True])
         model._is_masked = np.array([True, False, False])
         model.add_new_detector_mask([True, True])
-        np.testing.assert_array_equal(model._cached_masks_map["Mask 1"], np.array([True, True, True]))
+        np.testing.assert_array_equal(list(model._cached_masks_map.values())[0], np.array([True, True, True]))
 
     def test_apply_detector_mask(self):
         model, _ = self._setup_model([1, 2, 3])
