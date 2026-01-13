@@ -509,15 +509,13 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(Nexus::File &file, Kerne
  * @param oldNeXusFileNames Whether to try using old names. This variable will
  * be changed if it is determined that old names are being used.
  * @param prefix current entry name prefix (e.g. /entry)
- * @param descriptor input containing metadata information
  * @return The number of events.
  */
-std::size_t numEvents(Nexus::File &file, bool &hasTotalCounts, bool &oldNeXusFileNames, const std::string &prefix,
-                      const Nexus::NexusDescriptor &descriptor) {
+std::size_t numEvents(Nexus::File &file, bool &hasTotalCounts, bool &oldNeXusFileNames, const std::string &prefix) {
   // try getting the value of total_counts
   if (hasTotalCounts) {
     hasTotalCounts = false;
-    if (descriptor.isEntry(prefix + "/total_counts")) {
+    if (file.hasData(prefix + "/total_counts")) {
       try {
         file.openData("total_counts");
         auto info = file.getInfo();
@@ -942,14 +940,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     run_start = createFromSanitizedISO8601(tmp);
     m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(), true);
   }
-  // set more properties on the workspace
-  const std::shared_ptr<Nexus::NexusDescriptor> descriptor = getFileInfo();
 
+  // set more properties on the workspace
+  Nexus::NexusDescriptor const &descriptor = m_file->getFileDescriptor();
   try {
     // this is a static method that is why it is passing the
     // file object and the file path
 
-    loadEntryMetadata<EventWorkspaceCollection_sptr>(m_filename, m_ws, m_top_entry_name, *descriptor);
+    loadEntryMetadata<EventWorkspaceCollection_sptr>(m_filename, m_ws, m_top_entry_name);
   } catch (std::runtime_error &e) {
     // Missing metadata is not a fatal error. Log and go on with your life
     g_log.error() << "Error loading metadata: " << e.what() << '\n';
@@ -972,7 +970,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     // This may not be needed in the future if both LoadEventNexus and
     // LoadInstrument are made to use the same Nexus/HDF5 library
     m_file->close();
-    m_instrument_loaded_correctly = loadInstrument(m_filename, m_ws, m_top_entry_name, this, descriptor.get());
+    m_instrument_loaded_correctly = loadInstrument(m_filename, m_ws, m_top_entry_name, this, &descriptor);
 
     if (!m_instrument_loaded_correctly)
       throw std::runtime_error("Instrument was not initialized correctly! Loading cannot continue.");
@@ -992,52 +990,38 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   bool oldNeXusFileNames(false);
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();
-
-  const std::map<std::string, std::set<std::string>> &allEntries = descriptor->getAllEntries();
-
-  auto itClassEntries = allEntries.find(classType);
-
-  if (itClassEntries != allEntries.end()) {
-
-    const std::set<std::string> &classEntries = itClassEntries->second;
-    const std::regex classRegex("(/" + m_top_entry_name + "/)([^/]*)");
-    std::smatch groups;
-
-    for (const std::string &classEntry : classEntries) {
-
-      if (std::regex_match(classEntry, groups, classRegex)) {
-        const std::string entry_name(groups[2].str());
-
-        // skip entries with junk data
-        if (entry_name == "bank_error_events" || entry_name == "bank_unmapped_events")
-          continue;
-
-        m_file->openGroup(entry_name, classType);
-
-        // get the number of events
-        const std::string prefix = "/" + m_top_entry_name + "/" + entry_name;
-        bool hasTotalCounts = true;
-        std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames, prefix, *descriptor);
-        bankNames.emplace_back(entry_name);
-        bankNumEvents.emplace_back(num);
-
-        if (takeTimesFromEvents && num > 0) {
-          /* If we are here, we are loading logs, but have failed to establish
-           * the run_start from the proton_charge log. We are going to get this
-           * from our event_time_zero instead
-           */
-          auto localFirstLast = firstLastPulseTimes(*m_file, this->g_log);
-          firstPulseT = std::min(firstPulseT, localFirstLast.first);
-        }
-
-        // Look for weights in simulated file
-        const std::string absoluteEventWeightName = prefix + "/event_weight";
-        haveWeights = descriptor->isEntry(absoluteEventWeightName);
-        m_file->closeGroup();
+  if (m_file->classTypeExists(classType)) {
+    std::map<std::string, std::string> entries = m_file->getEntries();
+    for (auto entry : entries) {
+      if (entry.second != classType) {
+        continue;
       }
+
+      // skip entries with junk data
+      if (entry.first == "bank_error_events" || entry.first == "bank_unmapped_events")
+        continue;
+
+      m_file->openGroup(entry.first, classType);
+      // get the number of events
+      const std::string prefix = "/" + m_top_entry_name + "/" + entry.first;
+      bool hasTotalCounts = true;
+      std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames, prefix);
+      bankNames.emplace_back(entry.first);
+      bankNumEvents.emplace_back(num);
+      if (takeTimesFromEvents && num > 0) {
+        /* If we are here, we are loading logs, but have failed to establish
+         * the run_start from the proton_charge log. We are going to get this
+         * from our event_time_zero instead
+         */
+        auto localFirstLast = firstLastPulseTimes(*m_file, this->g_log);
+        firstPulseT = std::min(firstPulseT, localFirstLast.first);
+      }
+      // Look for weights in simulated file
+      const std::string absoluteEventWeightName = prefix + "/event_weight";
+      haveWeights = m_file->hasAddress(absoluteEventWeightName);
+      m_file->closeGroup();
     }
   }
-
   if (takeTimesFromEvents)
     run_start = firstPulseT;
 
@@ -1219,7 +1203,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     m_ws->setAllX(HistogramData::BinEdges{0.0, 1.0});
 
   // if there is time_of_flight load it
-  adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType, descriptor.get());
+  adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType, &descriptor);
 
   if (m_is_time_filtered) {
     // events were filtered during read

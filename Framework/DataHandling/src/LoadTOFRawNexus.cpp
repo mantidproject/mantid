@@ -490,7 +490,7 @@ void LoadTOFRawNexus::exec() {
   Nexus::NexusDescriptor descriptor(filename);
 
   try {
-    LoadEventNexus::loadEntryMetadata(filename, WS, entry_name, descriptor);
+    LoadEventNexus::loadEntryMetadata(filename, WS, entry_name);
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }
