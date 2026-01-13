@@ -5,17 +5,17 @@ on:
       - opened
       - synchronize
       - reopened
-    paths:
-      - '**.cpp'
-      - '**.h'
-      - 'Framework/Doxygen/**'
-      - 'conda/recipes/mantid-developer/**'
-      - 'conda/recipes/conda_build_config.yaml'
-      - 'buildconfig/Jenkins/Conda/doxygen.sh'
-      - '.github/workflows/doxygen.yml'
+  push:
+    branches: [main]
+
+# cancel previous job if new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   doxygen:
+    if: ${{ github.repository_owner == 'mantidproject' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -23,9 +23,59 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        if: ${{  github.ref_name == 'main' }}
         with:
           fetch-depth: 0
 
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            doxygen:
+              - '**/*.cpp'
+              - '**/*.h'
+              - '**/*.hxx'
+              - 'Framework/Doxygen/**'
+              - 'conda/recipes/mantid-developer/**'
+              - 'conda/recipes/conda_build_config.yaml'
+              - 'buildconfig/Jenkins/Conda/doxygen.sh'
+              - '.github/workflows/doxygen.yml'
+
+      - uses: actions/checkout@v6
+        if: ${{ steps.changes.outputs.doxygen == 'true' && github.ref_name != 'main' }}
+        with:
+          fetch-depth: 0
+
+      - uses: prefix-dev/setup-pixi@v0.9.3
+        if: steps.changes.outputs.doxygen == 'true'
+        with:
+          frozen: true
+
       - name: build doxygen
+        if: steps.changes.outputs.doxygen == 'true'
         run: |
           $GITHUB_WORKSPACE/buildconfig/Jenkins/Conda/doxygen.sh $GITHUB_WORKSPACE
+
+      # publish documentation if on main branch of mantidproject/mantid
+      - name: Checkout Doxygen repository
+        if: ${{ github.ref_name == 'main' && steps.changes.outputs.doxygen == 'true' }}
+        env:
+          DOXYGEN_REPO_TOKEN: ${{ secrets.DOXYGEN_REPO_TOKEN }}
+        run: |
+          git clone https://$DOXYGEN_REPO_TOKEN@github.com/mantidproject/doxygen.git doxygen_repo
+          rm -rf doxygen_repo/*
+
+      - name: Copy Doxygen artifacts
+        if: ${{ github.ref_name == 'main' && steps.changes.outputs.doxygen == 'true' }}
+        run: |
+          cp -r $GITHUB_WORKSPACE/build/doxygen/html/* doxygen_repo/
+
+      - name: Commit Doxygen and push
+        if: ${{ github.ref_name == 'main' && steps.changes.outputs.doxygen == 'true' }}
+        working-directory: doxygen_repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update Doxygen docs"
+          git push origin main

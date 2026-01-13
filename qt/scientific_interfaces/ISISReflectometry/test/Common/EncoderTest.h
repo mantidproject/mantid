@@ -57,6 +57,40 @@ public:
     auto constexpr expectedVersion = "2";
     TS_ASSERT_EQUALS(expectedVersion, map[QString("version")].toString().toStdString())
   }
+
+  void test_extractFromEncodingValidKey() {
+    QVariantMap subItem{{"testsubkey", "testsubval"}};
+    QVariantMap m{{"testkey", "testval"}, {"testkey1", subItem}, {"testkey2", "testval2"}};
+
+    Encoder encoder;
+    std::vector<std::string> key1{"testkey"};
+    auto extract1 = encoder.extractFromEncoding(m, key1);
+
+    std::vector<std::string> key2{"testkey1", "testsubkey"};
+    auto extract2 = encoder.extractFromEncoding(m, key2);
+
+    TS_ASSERT_EQUALS("testval", extract1)
+    TS_ASSERT_EQUALS("testsubval", extract2)
+  }
+
+  void test_extractFromEncodingInvalidKey() {
+    QVariantMap m{{"testkey", "testval"}};
+
+    Encoder encoder;
+    std::vector<std::string> key{"testkeyfalse"};
+    TS_ASSERT_THROWS_EQUALS(encoder.extractFromEncoding(m, key), const std::invalid_argument &e, std::string(e.what()),
+                            "Invalid json key provided. Json key not in map. Invalid element: testkeyfalse")
+  }
+
+  void test_extractFromEncodingInvalidPath() {
+    QVariantMap m{{"testkey", "testval"}};
+
+    Encoder encoder;
+    std::vector<std::string> key{"testkey", "falsepath"};
+    TS_ASSERT_THROWS_EQUALS(
+        encoder.extractFromEncoding(m, key), const std::invalid_argument &e, std::string(e.what()),
+        "Invalid json key provided. Json key must allow traversal of nested QMaps. Invalid element: falsepath")
+  }
 };
 
 } // namespace ISISReflectometry

@@ -9,9 +9,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidKernel/ConfigService.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using Mantid::API::Grouping;
 using Mantid::API::GroupingLoader;
@@ -31,9 +30,9 @@ public:
 
     // Find the path of AutoTestData
     for (auto &dataPath : dataPaths) {
-      Poco::Path path(dataPath);
+      std::filesystem::path path(dataPath);
 
-      if (path.directory(path.depth() - 1) == "UnitTest") {
+      if (!path.empty() && path.parent_path().filename() == "UnitTest") {
         m_testDataDir = dataPath;
         break;
       }

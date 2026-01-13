@@ -1,6 +1,6 @@
 name: Add milestone to new PRs
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, reopened]
     branches: [main, release-next]
 
@@ -9,6 +9,8 @@ permissions:
 
 jobs:
   add-milestone:
+    # Do not run in forks.
+    if: ${{ github.repository_owner == 'mantidproject' }}
     runs-on: ubuntu-latest
     steps:
       - uses: benelan/milestone-action@v3

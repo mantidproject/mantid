@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import hashlib
-import io
 import json
 import os
 from pathlib import Path
@@ -514,7 +513,7 @@ class IO(BaseModel):
         hash_calculator = hashlib.sha512()
 
         # chop content of a file into chunks to minimize memory consumption for hash creation
-        with io.open(file=filename, mode="rb", buffering=BUF, newline=None) as file_handle:
+        with open(file=filename, mode="rb", buffering=BUF, newline=None) as file_handle:
             while True:
                 data = file_handle.read(BUF)
                 if not data:

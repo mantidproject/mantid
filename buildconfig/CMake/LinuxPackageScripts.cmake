@@ -121,17 +121,6 @@ configure_file(
 # Needs to be executable
 execute_process(COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPythonPath.py" OUTPUT_QUIET ERROR_QUIET)
 
-if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
-  configure_file(
-    ${CMAKE_MODULE_PATH}/Packaging/activate_mantid.sh.in ${CMAKE_BINARY_DIR}/etc/conda/activate.d/mantid.sh @ONLY
-  )
-  configure_file(
-    ${CMAKE_MODULE_PATH}/Packaging/deactivate_mantid.sh.in ${CMAKE_BINARY_DIR}/etc/conda/deactivate.d/mantid.sh @ONLY
-  )
-  install(FILES ${CMAKE_BINARY_DIR}/etc/conda/activate.d/mantid.sh DESTINATION ${ETC_DIR}/conda/activate.d)
-  install(FILES ${CMAKE_BINARY_DIR}/etc/conda/deactivate.d/mantid.sh DESTINATION ${ETC_DIR}/conda/deactivate.d)
-endif()
-
 # Package version
 unset(PYTHON_ARGS)
 

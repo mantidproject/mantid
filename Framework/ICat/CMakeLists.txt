@@ -66,7 +66,7 @@ add_library(ICat ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::ICat ALIAS ICat)
 
 # Add a precompiled header
-target_precompile_headers(ICat PRIVATE inc/MantidICat/PrecompiledHeader.h)
+target_precompile_headers(ICat PRIVATE <MantidAPI/Algorithm.h>)
 
 target_include_directories(
   ICat PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

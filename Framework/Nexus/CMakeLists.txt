@@ -4,6 +4,7 @@ set(SRC_FILES
     src/inverted_napi.cpp
     src/hdf5_type_helper.cpp
     src/NexusDescriptor.cpp
+    src/NexusDescriptorLazy.cpp
     src/NexusException.cpp
     src/NexusFile.cpp
     src/NexusAddress.cpp
@@ -18,6 +19,7 @@ set(INC_FILES
     inc/MantidNexus/inverted_napi.h
     inc/MantidNexus/hdf5_type_helper.h
     inc/MantidNexus/NexusDescriptor.h
+    inc/MantidNexus/NexusDescriptorLazy.h
     inc/MantidNexus/NexusException.h
     inc/MantidNexus/NexusFile.h
     inc/MantidNexus/NexusAddress.h
@@ -29,6 +31,7 @@ set(TEST_FILES
     NexusIOHelperTest.h
     NexusClassesTest.h
     NexusDescriptorTest.h
+    NexusDescriptorLazyTest.h
     NexusFileTest.h
     NexusFileLeakTest.h
     NexusFileNapiTest.h
@@ -47,6 +50,17 @@ endif()
 # Add the target for this directory
 add_library(Nexus ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Nexus ALIAS Nexus)
+
+# Use a precompiled header
+target_precompile_headers(
+  Nexus
+  PRIVATE
+  inc/MantidNexus/NexusFile.h
+  <climits>
+  <map>
+  <string>
+  <vector>
+)
 
 target_include_directories(
   Nexus PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

@@ -1,6 +1,7 @@
 #include "test_helper.h"
 #include "MantidKernel/ConfigService.h"
 #include <cstdarg>
+#include <hdf5.h>
 #include <iostream>
 
 void NexusTest::removeFile(const std::string &filename) {
@@ -48,6 +49,36 @@ std::string NexusTest::strmakef(const char *const fmt, ...) {
   std::vsnprintf(&(*s.begin()), len + 1, fmt, args);
   va_end(args);
   return s;
+}
+
+bool NexusTest::hdf_file_is_closed(std::string const &filename) {
+  ssize_t file_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_FILE);
+  if (file_count < 0) {
+    throw std::runtime_error("failure to get opened file count");
+  } else if (file_count == 0) {
+    // no files are opened
+    return true;
+  } else {
+    // some files are opened -- see if maybe ours is
+    std::vector<hid_t> file_ids(file_count);
+    ssize_t ret = H5Fget_obj_ids(H5F_OBJ_ALL, H5F_OBJ_FILE, file_count, file_ids.data());
+    if (ret < 0) {
+      throw std::runtime_error("failure to find opened files");
+    } else if (ret == 0) {
+      return true;
+    } else {
+      for (hid_t file_id : file_ids) {
+        // get the name and check it
+        ssize_t name_size = H5Fget_name(file_id, nullptr, 0);
+        std::string check_name(name_size, 'X');
+        H5Fget_name(file_id, check_name.data(), name_size + 1);
+        if (check_name == filename) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
 }
 
 NexusTest::FileResource::FileResource(const std::string &fileName, bool debugMode) : m_debugMode(debugMode) {

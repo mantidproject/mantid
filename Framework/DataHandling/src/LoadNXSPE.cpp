@@ -24,8 +24,6 @@
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <boost/regex.hpp>
-
 #include <filesystem>
 #include <map>
 #include <sstream>
@@ -34,25 +32,29 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadNXSPE)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::HistogramData::BinEdges;
 
 /**
- * Calculate the confidence in the string value. This is used for file
- * identification.
+ * Calculate the confidence in the string value. This is used for file identification.
  * @param value
  * @return confidence 0 - 100%
  */
 int LoadNXSPE::identiferConfidence(const std::string &value) {
-  int identifierConfidence = 0;
-  if (value == "NXSPE") {
+  int identifierConfidence(0);
+  if (value.empty()) {
+    identifierConfidence = 0;
+  } else if (value == "NXSPE") {
     identifierConfidence = 99;
   } else {
-    boost::regex re("^NXSP", boost::regex::icase);
-    if (boost::regex_match(value, re)) {
+    // convert to be uppercase for case insensitive comparison
+    std::string valueUpper = value;
+    std::transform(valueUpper.begin(), valueUpper.end(), valueUpper.begin(),
+                   [](unsigned char c) { return std::toupper(c); });
+    if (valueUpper.starts_with("NXSP")) {
       identifierConfidence = 95;
     }
   }
@@ -65,21 +67,21 @@ int LoadNXSPE::identiferConfidence(const std::string &value) {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadNXSPE::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadNXSPE::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   int confidence(0);
-  using string_map_t = std::map<std::string, std::string>;
-  try {
-    Nexus::File file = Nexus::File(descriptor.filename());
-    string_map_t entries = file.getEntries();
-    for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it) {
-      if (it->second == "NXentry") {
-        file.openGroup(it->first, it->second);
-        file.openData("definition");
-        const std::string value = file.getStrData();
-        confidence = identiferConfidence(value);
+  auto entries = descriptor.getAllEntries();
+  // look for a group of type NXentry with a dataset called definition
+  for (const auto &it : entries) {
+    if (it.second == "NXentry") {
+      std::string defAddress = it.first + "/definition";
+      if (descriptor.isEntry(defAddress, Mantid::Nexus::SCIENTIFIC_DATA_SET)) {
+        // check the dataset to see if it matches the definition we are looking for
+        confidence = identiferConfidence(descriptor.getStrData(defAddress));
       }
     }
-  } catch (Nexus::Exception const &) {
+    if (confidence > 80) {
+      break; // no need to continue checking
+    }
   }
   return confidence;
 }

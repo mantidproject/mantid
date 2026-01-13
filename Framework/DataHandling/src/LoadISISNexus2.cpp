@@ -57,7 +57,7 @@ Mantid::DataHandling::DataBlockComposite getMonitorsFromComposite(Mantid::DataHa
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadISISNexus2)
 
 using namespace Kernel;
 using namespace API;
@@ -78,7 +78,7 @@ LoadISISNexus2::LoadISISNexus2()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadISISNexus2::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadISISNexus2::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   if (descriptor.isEntry("/raw_data_1", "NXentry")) {
     // It also could be an Event Nexus file or a TOFRaw file,
     // so confidence is set to less than 80.

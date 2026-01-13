@@ -32,7 +32,7 @@ public:
 
   /// If a new value should be set, the change is applied here.
   /// Return true if current property was changed.
-  bool applyChanges(const Mantid::Kernel::IPropertyManager *algo, const std::string &currentPropName) override;
+  bool applyChanges(const Mantid::Kernel::IPropertyManager *algo, const std::string &currentPropName) const override;
 
   /// Other properties that this property depends on.
   std::vector<std::string> dependsOn(const std::string &thisProp) const override;

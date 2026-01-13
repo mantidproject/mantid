@@ -372,7 +372,10 @@ add_library(MDAlgorithms ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::MDAlgorithms ALIAS MDAlgorithms)
 
 # Use a precompiled header
-target_precompile_headers(MDAlgorithms PRIVATE inc/MantidMDAlgorithms/PrecompiledHeader.h)
+target_precompile_headers(
+  MDAlgorithms PRIVATE <MantidAPI/Algorithm.h> <MantidDataObjects/EventWorkspace.h>
+  <MantidDataObjects/MDEventWorkspace.h> <MantidKernel/Exception.h>
+)
 
 target_include_directories(
   MDAlgorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

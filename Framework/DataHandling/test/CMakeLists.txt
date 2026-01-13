@@ -12,15 +12,20 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(DataHandlingTest ${TEST_FILES})
 
   target_link_libraries(
-    DataHandlingTest
-    PRIVATE Mantid::Kernel
-            Mantid::Catalog
-            Mantid::DataHandling
-            Mantid::Nexus
-            Mantid::NexusGeometry
-            Mantid::HistogramData
-            gmock
+    DataHandlingTest PRIVATE Mantid::Kernel Mantid::Catalog Mantid::DataHandling Mantid::Nexus Mantid::NexusGeometry
+                             Mantid::HistogramData
   )
+
+  target_precompile_headers(
+    DataHandlingTest PRIVATE <cxxtest/WrappedTestSuite.h> <MantidAPI/Algorithm.h>
+    <MantidFrameworkTestHelpers/WorkspaceCreationHelper.h> <MantidKernel/System.h>
+  )
+
+  if(TARGET GTest::gmock AND TARGET GTest::gtest)
+    target_link_libraries(DataHandlingTest PRIVATE GTest::gmock GTest::gtest)
+  else()
+    target_link_libraries(DataHandlingTest PRIVATE gmock gtest)
+  endif()
 
   if(ENABLE_LIB3MF)
     target_link_libraries(DataHandlingTest LINK_PRIVATE ${LIB3MF_LIBRARIES})

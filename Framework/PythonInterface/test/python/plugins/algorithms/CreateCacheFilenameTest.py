@@ -35,7 +35,7 @@ class CreateCacheFilename(unittest.TestCase):
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        expected = os.path.join(ConfigService.getUserPropertiesDir(), "cache", "%s.nxs" % hashlib.sha1("a=3".encode("utf-8")).hexdigest())
+        expected = os.path.join(ConfigService.getUserPropertiesDir(), "cache", "%s.nxs" % hashlib.sha1(b"a=3").hexdigest())
         self.assertEqual(alg_test.getPropertyValue("OutputFilename"), expected)
 
         # Another test. don't specify the default values
@@ -46,7 +46,7 @@ class CreateCacheFilename(unittest.TestCase):
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        expected = os.path.join(ConfigService.getUserPropertiesDir(), "cache", "%s.nxs" % hashlib.sha1("a=3".encode("utf-8")).hexdigest())
+        expected = os.path.join(ConfigService.getUserPropertiesDir(), "cache", "%s.nxs" % hashlib.sha1(b"a=3").hexdigest())
         self.assertEqual(alg_test.getPropertyValue("OutputFilename"), expected)
         return
 
@@ -94,9 +94,7 @@ class CreateCacheFilename(unittest.TestCase):
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        expected = os.path.join(
-            ConfigService.getUserPropertiesDir(), "cache", "%s.nxs" % hashlib.sha1("a=1,b=2".encode("utf-8")).hexdigest()
-        )
+        expected = os.path.join(ConfigService.getUserPropertiesDir(), "cache", "%s.nxs" % hashlib.sha1(b"a=1,b=2").hexdigest())
         self.assertEqual(alg_test.getPropertyValue("OutputFilename"), expected)
         return
 
@@ -137,9 +135,7 @@ class CreateCacheFilename(unittest.TestCase):
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        expected = os.path.join(
-            ConfigService.getUserPropertiesDir(), "cache", "vanadium_%s.nxs" % hashlib.sha1("a=1,b=2".encode("utf-8")).hexdigest()
-        )
+        expected = os.path.join(ConfigService.getUserPropertiesDir(), "cache", "vanadium_%s.nxs" % hashlib.sha1(b"a=1,b=2").hexdigest())
         self.assertEqual(alg_test.getPropertyValue("OutputFilename"), expected)
         return
 
@@ -154,7 +150,7 @@ class CreateCacheFilename(unittest.TestCase):
         # executed?
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
-        expected = f"{hashlib.sha1('a=1,b=2'.encode('utf-8')).hexdigest()}.nxs"
+        expected = f"{hashlib.sha1(b'a=1,b=2').hexdigest()}.nxs"
         self.assertEqual(Path(alg_test.getPropertyValue("OutputFilename")).name, expected)
         return
 

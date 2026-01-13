@@ -11,7 +11,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -57,10 +57,9 @@ public:
     std::string Filename = do_test("mdhisto3", "SaveZODS_test.h5");
 
     // Check the results
-    Poco::File file(Filename);
-    TS_ASSERT(file.exists());
-    if (file.exists())
-      file.remove();
+    TS_ASSERT(std::filesystem::exists(Filename));
+    if (std::filesystem::exists(Filename))
+      std::filesystem::remove(Filename);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove("mdhisto3");

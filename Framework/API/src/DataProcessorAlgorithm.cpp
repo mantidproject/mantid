@@ -16,7 +16,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
-#include "Poco/Path.h"
+#include <filesystem>
 #include <stdexcept>
 #include <utility>
 
@@ -236,8 +236,8 @@ Workspace_sptr GenericDataProcessorAlgorithm<Base>::load(const std::string &inpu
     }
 
     if (!foundFile.empty()) {
-      Poco::Path p(foundFile);
-      const std::string outputWSName = p.getBaseName();
+      std::filesystem::path p(foundFile);
+      const std::string outputWSName = p.stem().string();
 
       auto loadAlg = createChildAlgorithm(m_loadAlg);
       loadAlg->setProperty(m_loadAlgFileProp, foundFile);

@@ -627,6 +627,18 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui
 )
 
+set(PRECOMP_HEADERS
+    <MantidAPI/Algorithm.h>
+    <MantidAPI/AnalysisDataService.h>
+    <QApplication>
+    <QDialog>
+    <QObject>
+    <QPushButton>
+    <QString>
+    <QStringList>
+    <QWidget>
+)
+
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -683,8 +695,7 @@ mtd_add_qt_library(
   MOC ${QT5_MOC_FILES}
   NOMOC ${QT5_INC_FILES} ${_sip_include_dir}/sip.h
   UI ${QT5_UI_FILES}
-  DEFS IN_MANTIDQT_COMMON QSCINTILLA_DLL QT5_DEFS ${_webengine_def} PRECOMPILED
-       inc/MantidQtWidgets/Common/PrecompiledHeader.h
+  DEFS IN_MANTIDQT_COMMON QSCINTILLA_DLL QT5_DEFS ${_webengine_def} PRECOMPILED ${PRECOMP_HEADERS}
   INCLUDE_DIRS inc
   SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${_sip_include_dir}
   LINK_LIBS ${TARGET_LIBRARIES} PUBLIC Mantid::PythonInterfaceCore
@@ -694,9 +705,6 @@ mtd_add_qt_library(
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
-
-# Help collection file
-set(QCH_FILES)
 
 # For the new help system target_link_libraries(MantidQtWidgetsCommon PRIVATE Mantid::Framework PythonInterface::mantid)
 # # This line is now removed/commented
@@ -742,6 +750,7 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTes
 
 set(QT5_TEST_FILES
     test/AlgorithmRunnerTest.h
+    test/AlgorithmPropertiesWidgetTest.h
     test/BatchAlgorithmRunnerTest.h
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h
@@ -784,17 +793,18 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
     QT_VERSION 5
     SRC ${QT5_TEST_FILES}
     INCLUDE_DIRS ../../../Framework/DataObjects/inc ../../../Framework/Crystal/inc
-    LINK_LIBS ${TARGET_LIBRARIES}
-              ${Boost_LIBRARIES}
-              Mantid::PythonInterfaceCore
-              Mantid::DataObjects
-              gmock
-              Qt5::Test
+    LINK_LIBS ${TARGET_LIBRARIES} ${Boost_LIBRARIES} Mantid::PythonInterfaceCore Mantid::DataObjects Qt5::Test
               Python::Python
     MTD_QT_LINK_LIBS MantidQtWidgetsCommon
     PARENT_DEPENDENCIES GUITests
   )
 
   add_framework_test_helpers(MantidQtWidgetsCommonTestQt5)
+
+  if(TARGET GTest::gmock AND TARGET GTest::gtest)
+    target_link_libraries(MantidQtWidgetsCommonTestQt5 PRIVATE GTest::gmock GTest::gtest)
+  else()
+    target_link_libraries(MantidQtWidgetsCommonTestQt5 PRIVATE gmock gtest)
+  endif()
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} MantidQtWidgetsCommonPyTest ${TEST_PY_FILES})
 endif()

@@ -8,7 +8,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 #include <H5Cpp.h>
 
@@ -17,14 +17,14 @@ namespace DataHandling {
 
 /** LoadILLLagrange : Loads nexus files from ILL instrument LAGRANGE.
  */
-class MANTID_DATAHANDLING_DLL LoadILLLagrange : public API::IFileLoader<Nexus::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLLagrange : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"LagrangeILLReduction"}; }
   const std::string category() const override;
   const std::string summary() const override;
-  int confidence(Nexus::NexusDescriptor &) const override;
+  int confidence(Nexus::NexusDescriptorLazy &) const override;
   LoadILLLagrange();
 
 private:

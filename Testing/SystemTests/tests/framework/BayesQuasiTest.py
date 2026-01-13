@@ -5,9 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
+import tempfile
 
 from sys import platform
 from systemtesting import MantidSystemTest
+from mantid.kernel import config
 from mantid.simpleapi import BayesQuasi, CropWorkspace, Load
 
 
@@ -20,6 +22,8 @@ class BayesQuasiTest(MantidSystemTest):
         return platform == "darwin"
 
     def runTest(self):
+        workdir = tempfile.mkdtemp(prefix="bayes_")
+        config["defaultsave.directory"] = workdir
         Load(Filename=f"{self._sample_name}.nxs", OutputWorkspace=self._sample_name, LoadHistory=False)
         Load(Filename=f"{self._resolution_name}.nxs", OutputWorkspace=self._resolution_name, LoadHistory=False)
         BayesQuasi(

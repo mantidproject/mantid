@@ -1,6 +1,4 @@
 /** This class defines data types which are used as part of the Nexus API.
- * They should more properly be moved into NexusFile, when the nexus layer has been cleaned up.
- * OR all type and enum definitions in NexusFile all moved here.
  */
 
 #pragma once
@@ -111,6 +109,8 @@ MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXcompression 
 
 // forward declare
 namespace Mantid::Nexus {
+
+inline std::string const SCIENTIFIC_DATA_SET("SDS");
 
 typedef hsize_t dimsize_t;
 typedef std::vector<dimsize_t> DimVector;

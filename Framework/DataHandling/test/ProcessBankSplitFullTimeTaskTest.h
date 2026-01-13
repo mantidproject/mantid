@@ -1,6 +1,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitFullTimeTask.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -13,6 +14,7 @@
 #include <H5Cpp.h>
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
+#include <map>
 #include <ranges>
 
 using namespace Mantid::DataHandling::AlignAndFocusPowderSlim;
@@ -35,7 +37,7 @@ public:
   }
 
   void loadData(H5::DataSet & /*SDS*/, std::unique_ptr<std::vector<uint32_t>> &data,
-                const std::vector<size_t> & /*offsets*/, const std::vector<size_t> & /*slabsizes*/) override {
+                const std::vector<size_t> & /*offsets*/, const std::vector<size_t> & /*slabsizes*/) const override {
     // add detIDs
     data->resize(15);
     for (size_t i = 0; i < 15; ++i) {
@@ -44,7 +46,7 @@ public:
   }
 
   void loadData(H5::DataSet & /*SDS*/, std::unique_ptr<std::vector<float>> &data,
-                const std::vector<size_t> & /*offsets*/, const std::vector<size_t> & /*slabsizes*/) override {
+                const std::vector<size_t> & /*offsets*/, const std::vector<size_t> & /*slabsizes*/) const override {
     // add TOFS
     data->resize(15);
     for (size_t i = 0; i < 15; ++i) {
@@ -68,7 +70,7 @@ public:
 
     std::vector<int> workspaceIndices{0, 1};
     std::vector<Mantid::API::MatrixWorkspace_sptr> wksps;
-
+    std::map<size_t, std::vector<Mantid::detid_t>> det_in_group; // empty signifies all into one group
     // create a two workspaces for output
     Mantid::HistogramData::BinEdges XValues(0);
     Mantid::Kernel::VectorHelper::createAxisFromRebinParams({0, 6000, 12000}, XValues.mutableRawData(), true, false);
@@ -89,6 +91,8 @@ public:
     const std::map<Mantid::detid_t, double> calibration{{1, 1.}, {2, 2.}};
     const std::map<Mantid::detid_t, double> scale_at_sample{{1, 1000.0}, {2, 1000.0}};
     const std::set<Mantid::detid_t> masked;
+    BankCalibrationFactory calibFactory(calibration, scale_at_sample, std::map<size_t, std::vector<Mantid::detid_t>>(),
+                                        masked);
     std::map<Mantid::Types::Core::DateAndTime, int> splitterMap;
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00"), 0);
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00.005"), 1);
@@ -98,8 +102,8 @@ public:
 
     std::shared_ptr<Mantid::API::Progress> progress = std::make_shared<Mantid::API::Progress>();
 
-    ProcessBankSplitFullTimeTask task(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibration,
-                                      scale_at_sample, masked, 1000, 100, splitterMap, progress);
+    ProcessBankSplitFullTimeTask task(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibFactory, 1000,
+                                      100, splitterMap, progress);
 
     // Run the task
     task(tbb::blocked_range<size_t>(0, 1));
@@ -138,9 +142,10 @@ public:
 
     // now test with different correction to sample
     const std::map<Mantid::detid_t, double> scale_at_sample2{{1, 1000.}, {2, 500.}};
-
-    ProcessBankSplitFullTimeTask task2(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibration,
-                                       scale_at_sample2, masked, 1000, 100, splitterMap, progress);
+    BankCalibrationFactory calibFactory2(calibration, scale_at_sample2,
+                                         std::map<size_t, std::vector<Mantid::detid_t>>(), masked);
+    ProcessBankSplitFullTimeTask task2(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibFactory2, 1000,
+                                       100, splitterMap, progress);
 
     // Run the task
     task2(tbb::blocked_range<size_t>(0, 1));

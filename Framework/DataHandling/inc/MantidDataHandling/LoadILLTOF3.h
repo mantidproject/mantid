@@ -10,14 +10,14 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 namespace Mantid {
 namespace DataHandling {
 /**
  Loads an ILL IN4/5/6/Panther NeXus file into a Mantid workspace.
  */
-class MANTID_DATAHANDLING_DLL LoadILLTOF3 : public API::IFileLoader<Nexus::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLTOF3 : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   /// Constructor
   LoadILLTOF3();
@@ -33,7 +33,7 @@ public:
   const std::string category() const override { return "DataHandling\\Nexus;ILL\\Direct"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
 private:
   // Initialisation code

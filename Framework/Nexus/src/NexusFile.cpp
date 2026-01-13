@@ -48,7 +48,6 @@ namespace { // anonymous namespace to keep it in the file
 
 std::string const GROUP_CLASS_SPEC("NX_class");
 std::string const TARGET_ATTR_NAME("target");
-std::string const SCIENTIFIC_DATA_SET("SDS");
 std::string const UNKNOWN_GROUP_SPEC("NX_UNKNOWN_GROUP");
 constexpr int DEFAULT_DEFLATE_LEVEL(6);
 
@@ -137,7 +136,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   // create file acccess property list
   ParameterID fapl = H5Pcopy(H5Util::defaultFileAcc().getId());
 
-  FileID temp_fid;
+  UniqueFileID temp_fid;
   if (am != NXaccess::CREATE5) {
     if (H5Fis_accessible(filename.c_str(), fapl) <= 0) {
       throw NXEXCEPTION("File is not HDF5");
@@ -180,18 +179,18 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
     msg << "File::initOpenFile(" << filename << ", " << am << ") failed";
     throw NXEXCEPTION(msg.str());
   } else {
-    m_pfile = std::make_shared<FileID>(temp_fid.release());
+    m_fileID = temp_fid.release();
   }
 }
 
 // copy constructors
 
 File::File(File const &f)
-    : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_pfile(f.m_pfile), m_current_group_id(0),
+    : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_fileID(f.m_fileID), m_current_group_id(0),
       m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
   // NOTE warning to future devs
   // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
-  if (!m_pfile->isValid())
+  if (!m_fileID.isValid())
     throw NXEXCEPTION("Error reopening file");
 }
 
@@ -199,25 +198,27 @@ File::File(File const &f)
 
 File::~File() {
   // release all open groups and datasets
-  if (m_current_data_id != 0) {
+  if (H5Iis_valid(m_current_data_id) > 0) {
     H5Dclose(m_current_data_id);
-    m_current_data_id = 0;
+    m_current_data_id = INVALID_HID;
   }
-  if (m_current_type_id != 0) {
+  if (H5Iis_valid(m_current_type_id) > 0) {
     H5Tclose(m_current_type_id);
-    m_current_type_id = 0;
+    m_current_type_id = INVALID_HID;
   }
-  if (m_current_space_id != 0) {
+  if (H5Iis_valid(m_current_space_id) > 0) {
     H5Sclose(m_current_space_id);
-    m_current_space_id = 0;
+    m_current_space_id = INVALID_HID;
   }
-  if (m_current_group_id != 0) {
+  if (H5Iis_valid(m_current_group_id) > 0) {
     H5Gclose(m_current_group_id);
-    m_current_group_id = 0;
+    m_current_group_id = INVALID_HID;
   }
   for (hid_t &gid : m_gid_stack) {
-    H5Gclose(gid);
-    gid = 0;
+    if (H5Iis_valid(gid) > 0) {
+      H5Gclose(gid);
+    }
+    gid = INVALID_HID;
   }
   m_gid_stack.clear();
   // decrease reference counts to this file
@@ -226,10 +227,8 @@ File::~File() {
 }
 
 void File::close() {
-  if (m_pfile != nullptr) {
-    // decrease reference counts to this file
-    m_pfile.reset();
-  }
+  // decrease reference counts to this file
+  m_fileID.reset();
 }
 
 void File::flush() {
@@ -265,14 +264,14 @@ void File::openAddress(std::string const &address) {
     H5Dclose(m_current_data_id);
     H5Tclose(m_current_type_id);
     H5Sclose(m_current_space_id);
-    m_current_data_id = 0;
-    m_current_space_id = 0;
-    m_current_type_id = 0;
+    m_current_data_id = INVALID_HID;
+    m_current_space_id = INVALID_HID;
+    m_current_type_id = INVALID_HID;
   }
 
   // close all groups in the stack
   for (hid_t const &gid : m_gid_stack) {
-    if (gid != 0) {
+    if (H5Iis_valid(gid) > 0) {
       H5Gclose(gid);
     }
   }
@@ -282,7 +281,7 @@ void File::openAddress(std::string const &address) {
 
   // if we wanted to go to root, then stop here
   if (absaddr == NexusAddress::root()) {
-    m_current_group_id = 0;
+    m_current_group_id = 0; // root!
     return;
   }
 
@@ -290,13 +289,13 @@ void File::openAddress(std::string const &address) {
   NexusAddress groupstack(absaddr.parent_path());
   NexusAddress fromroot;
   if (groupstack.isRoot()) {
-    m_current_group_id = 0;
+    m_current_group_id = 0; // root!
   } else {
-    m_current_group_id = m_pfile->get();
+    m_current_group_id = m_fileID.get();
     for (auto const &name : groupstack.parts()) {
       fromroot /= name;
       if (m_descriptor.isEntry(fromroot, m_descriptor.classTypeForName(fromroot))) {
-        hid_t gid = H5Gopen(*m_pfile, fromroot.c_str(), H5P_DEFAULT);
+        hid_t gid = H5Gopen(m_fileID, fromroot.c_str(), H5P_DEFAULT);
         m_gid_stack.push_back(gid);
         // update stack in case of failure
         m_current_group_id = gid;
@@ -308,11 +307,11 @@ void File::openAddress(std::string const &address) {
   }
   // open the last element -- either a group or a dataset
   if (hasData(absaddr)) { // is a dataset
-    m_current_data_id = H5Dopen(*m_pfile, absaddr.c_str(), H5P_DEFAULT);
+    m_current_data_id = H5Dopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
     m_current_type_id = H5Dget_type(m_current_data_id);
     m_current_space_id = H5Dget_space(m_current_data_id);
   } else if (hasAddress(absaddr)) { // not a dataset but exists = is a group
-    hid_t gid = H5Gopen(*m_pfile, absaddr.c_str(), H5P_DEFAULT);
+    hid_t gid = H5Gopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
     m_gid_stack.push_back(gid);
     m_current_group_id = gid;
   } else {
@@ -358,7 +357,7 @@ bool File::hasData(std::string const &name) const {
 }
 
 bool File::isDataSetOpen() const {
-  if (m_current_data_id == 0) {
+  if (H5Iis_valid(m_current_data_id) <= 0) {
     return false;
   } else {
     return H5Iget_type(m_current_data_id) == H5I_DATASET;
@@ -366,7 +365,7 @@ bool File::isDataSetOpen() const {
 }
 
 bool File::isDataInt() const {
-  if (m_current_type_id == 0) {
+  if (H5Iis_valid(m_current_type_id) <= 0) {
     throw NXEXCEPTION("No dataset is open");
   }
   return H5Tget_class(m_current_type_id) == H5T_INTEGER;
@@ -384,22 +383,22 @@ NexusAddress File::formAbsoluteAddress(NexusAddress const &name) const {
 }
 
 hid_t File::getCurrentId() const {
-  if (m_current_data_id != 0) {
+  if (H5Iis_valid(m_current_data_id) > 0) {
     return m_current_data_id;
-  } else if (m_current_group_id != 0) {
+  } else if (H5Iis_valid(m_current_group_id) > 0) {
     return m_current_group_id;
   } else {
-    return *m_pfile;
+    return m_fileID;
   }
 }
 
 std::shared_ptr<H5::H5Object> File::getCurrentObject() const {
-  if (m_current_data_id != 0) {
+  if (H5Iis_valid(m_current_data_id) > 0) {
     return std::make_shared<H5::DataSet>(m_current_data_id);
-  } else if (m_current_group_id != 0) {
+  } else if (H5Iis_valid(m_current_group_id) > 0) {
     return std::make_shared<H5::Group>(m_current_group_id);
   } else {
-    return std::make_shared<H5::H5File>(*m_pfile);
+    return std::make_shared<H5::H5File>(m_fileID);
   }
 }
 
@@ -429,7 +428,7 @@ void File::makeGroup(const std::string &name, const std::string &nxclass, bool o
   // get full address
   NexusAddress const absaddr(formAbsoluteAddress(name));
   // create group with H5Util by getting an H5File object from iFID
-  H5::H5File h5file(*m_pfile);
+  H5::H5File h5file(m_fileID);
   H5::Group grp = H5Util::createGroupNXS(h5file, absaddr, nxclass);
 
   // cleanup
@@ -440,7 +439,7 @@ void File::makeGroup(const std::string &name, const std::string &nxclass, bool o
     m_gid_stack.push_back(m_current_group_id);
     m_address = absaddr;
     // if we are opening a new group, close whatever dataset is already open
-    if (m_current_data_id != 0) {
+    if (H5Iis_valid(m_current_data_id) > 0) {
       closeData();
     }
   }
@@ -462,7 +461,7 @@ void File::openGroup(std::string const &name, std::string const &nxclass) {
 
   hid_t iVID;
   if (m_descriptor.isEntry(absaddr, nxclass)) {
-    iVID = H5Gopen(*m_pfile, absaddr.c_str(), H5P_DEFAULT);
+    iVID = H5Gopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
   } else {
     throw NXEXCEPTION("The supplied group " + absaddr + " does not exist");
   }
@@ -478,18 +477,18 @@ void File::openGroup(std::string const &name, std::string const &nxclass) {
   m_gid_stack.push_back(iVID);
   m_address = absaddr;
   // if we are opening a new group, close whatever dataset is already open
-  if (m_current_data_id != 0) {
+  if (H5Iis_valid(m_current_data_id) > 0) {
     closeData();
   }
 }
 
 void File::closeGroup() {
-  if (m_current_group_id == 0) {
+  if (H5Iis_valid(m_current_group_id) <= 0) {
     // do nothing
   } else {
     // if a group is closed while a dataset is still open,
     // make sure the dataset and all its parts are closed
-    if (m_current_data_id != 0) {
+    if (H5Iis_valid(m_current_data_id) > 0) {
       closeData();
     }
     // close the current group and maintain stack
@@ -500,7 +499,7 @@ void File::closeGroup() {
     if (!m_gid_stack.empty()) {
       m_current_group_id = m_gid_stack.back();
     } else {
-      m_current_group_id = 0;
+      m_current_group_id = 0; // root!
     }
     m_address = m_address.parent_path();
   }
@@ -535,17 +534,17 @@ void File::openData(std::string const &name) {
   }
 
   // close any open dataset
-  if (m_current_data_id != 0) {
+  if (H5Iis_valid(m_current_data_id) > 0) {
     closeData();
   }
-  m_current_data_id = 0;
-  m_current_type_id = 0;
-  m_current_space_id = 0;
+  m_current_data_id = INVALID_HID;
+  m_current_type_id = INVALID_HID;
+  m_current_space_id = INVALID_HID;
 
   NexusAddress absaddr(formAbsoluteAddress(name));
 
   /* find the ID number and open the dataset */
-  DataSetID newData = H5Dopen(*m_pfile, absaddr.c_str(), H5P_DEFAULT);
+  DataSetID newData = H5Dopen(m_fileID, absaddr.c_str(), H5P_DEFAULT);
   if (!newData.isValid()) {
     throw NXEXCEPTION("Dataset (" + absaddr + ") not found at this level");
   }
@@ -568,19 +567,19 @@ void File::openData(std::string const &name) {
 
 void File::closeData() {
   herr_t iRet;
-  if (m_current_space_id != 0) {
+  if (H5Iis_valid(m_current_space_id) > 0) {
     iRet = H5Sclose(m_current_space_id);
     if (iRet < 0) {
       throw NXEXCEPTION("Cannot end access to dataset: failed to close dataspace");
     }
   }
-  if (m_current_type_id != 0) {
+  if (H5Iis_valid(m_current_type_id) > 0) {
     iRet = H5Tclose(m_current_type_id);
     if (iRet < 0) {
       throw NXEXCEPTION("Cannot end access to dataset: failed to close datatype");
     }
   }
-  if (m_current_data_id != 0) {
+  if (H5Iis_valid(m_current_data_id) > 0) {
     iRet = H5Dclose(m_current_data_id);
     if (iRet < 0) {
       throw NXEXCEPTION("Cannot end access to dataset: failed to close dataset");
@@ -588,9 +587,9 @@ void File::closeData() {
   } else {
     throw NXEXCEPTION("Cannot end access to dataset: no data open");
   }
-  m_current_data_id = 0;
-  m_current_space_id = 0;
-  m_current_type_id = 0;
+  m_current_data_id = INVALID_HID;
+  m_current_space_id = INVALID_HID;
+  m_current_type_id = INVALID_HID;
   m_address = m_address.parent_path();
 }
 
@@ -657,7 +656,7 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
 // GET DATA -- STRING / CHAR
 
 template <> void File::getData<char>(char *data) {
-  if (m_current_data_id == 0) {
+  if (H5Iis_valid(m_current_data_id) <= 0) {
     throw NXEXCEPTION("getData ERROR: no dataset open");
   }
 
@@ -749,7 +748,7 @@ template <typename NumT> void File::getData(NumT *data) {
     throw NXEXCEPTION("Supplied null pointer to hold data");
   }
 
-  if (m_current_data_id == 0) {
+  if (H5Iis_valid(m_current_data_id) <= 0) {
     throw NXEXCEPTION("No dataset open");
   }
 
@@ -914,7 +913,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
 
   // create the dataset with the compression parameters
   NexusAddress absaddr(formAbsoluteAddress(name));
-  DataSetID dataset = H5Dcreate(*m_pfile, absaddr.c_str(), datatype, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+  DataSetID dataset = H5Dcreate(m_fileID, absaddr.c_str(), datatype, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
   if (!dataset.isValid()) {
     msg << "Creating chunked dataset failed";
     throw NXEXCEPTION(msg.str());
@@ -1520,6 +1519,7 @@ std::vector<AttrInfo> File::getAttrInfos() {
     cname[namelen] = '\0'; // ensure null termination
     // do not include the group class spec
     if (GROUP_CLASS_SPEC == cname) {
+      delete[] cname;
       continue;
     }
     // 2. get the attribute type
@@ -1530,6 +1530,7 @@ std::vector<AttrInfo> File::getAttrInfos() {
     DataSpaceID attrspace = H5Aget_space(attr);
     int rank = H5Sget_simple_extent_ndims(attrspace);
     if (rank > 2 || (rank == 2 && type != NXnumtype::CHAR)) {
+      delete[] cname;
       throw NXEXCEPTION("ERROR iterating through attributes found array attribute not understood by this api");
     }
     DimVector dims(rank, 0);
@@ -1559,7 +1560,7 @@ bool File::hasAttr(const std::string &name) const {
 
 NXlink File::getGroupID() {
   NXlink link;
-  if (m_current_group_id == 0) {
+  if (H5Iis_valid(m_current_group_id) <= 0) {
     throw NXEXCEPTION("getGroupID failed, No current group open");
   }
 
@@ -1590,7 +1591,7 @@ NXlink File::getDataID() {
 }
 
 void File::makeLink(NXlink const &link) {
-  if (m_current_group_id == 0) { /* root level, can not link here */
+  if (H5Iis_valid(m_current_group_id) <= 0) { /* root level, can not link here */
     throw NXEXCEPTION("makeLink failed : cannot form link at root level");
   }
 
@@ -1600,7 +1601,7 @@ void File::makeLink(NXlink const &link) {
 
   // build addressname to link from our current group and the name of the thing to link
   std::string linkTarget(groupAddress(m_address) / itemName);
-  H5Lcreate_hard(*m_pfile, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+  H5Lcreate_hard(m_fileID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
 
   // register the entry
   registerEntry(linkTarget, m_descriptor.classTypeForName(link.targetAddress));

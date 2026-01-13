@@ -135,7 +135,7 @@ template <typename Derived, typename ValType> std::string SingleValueParameter<D
 // Macro for generating concrete types of SingleValueParameters.
 //
 // Use of macro enables parameter names to be assigned to each type.
-// Most of the work is done in the VectorParamter base class, which utilises
+// Most of the work is done in the VectorParameter base class, which utilises
 // CRTP.
 //
 //-----------------------------------------------------------------------------------------------------------------//

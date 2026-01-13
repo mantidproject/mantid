@@ -83,9 +83,9 @@ variableScope:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ChebfunBa
 duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldFunction.cpp:120
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/DynamicKuboToyabe.cpp:69
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:432
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:567
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:593
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:611
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:566
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:592
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLDiffraction.cpp:610
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPLN.cpp:659
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
@@ -107,7 +107,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAlig
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:665
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/LeanElasticPeaksWorkspace.cpp:384
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:170
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MaskWorkspace.cpp:341
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:680
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:627
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TimeSplitter.cpp:36
@@ -137,9 +136,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/VectorHelp
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:167
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:168
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:169
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:148
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:149
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:150
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:256
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/MantidVersion.cpp:100
 invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142

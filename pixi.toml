@@ -9,6 +9,62 @@ version = "6.14"
 
 [tasks]
 
+[environments]
+rattler-builder = { features = ["rattler-builder"], no-default-feature = true }
+delete-old-packages = { features = [
+  "delete-old-packages",
+], no-default-feature = true }
+devsite = { features = ["devsite"], no-default-feature = true }
+publish-gh = { features = ["publish-gh"], no-default-feature = true }
+publish-anaconda = { features = [
+  "publish-anaconda",
+], no-default-feature = true }
+package-standalone = { features = [
+  "package-standalone",
+], no-default-feature = true }
+docs-build = { features = ["docs-build"] }
+
+[feature.rattler-builder.dependencies]
+rattler-build = "==0.51.0"
+versioningit = ">=3.3.0,<4"
+rattler-index = ">=0.27.6,<0.28"
+
+[feature.rattler-builder.target.linux-64.dependencies]
+jq = ">=1.8.1,<2"
+
+[feature.rattler-builder.target.osx-arm64.dependencies]
+jq = ">=1.8.1,<2"
+
+[feature.rattler-builder.target.win-64.dependencies]
+m2w64-jq = ">=1.6,<2"
+
+[feature.delete-old-packages.target.linux-64.dependencies]
+curl = "*"
+jq = "*"
+
+[feature.devsite.target.linux-64.dependencies]
+sphinx = "*"
+sphinx_bootstrap_theme = "*"
+
+[feature.publish-gh.target.linux-64.dependencies]
+gh = "*"
+
+[feature.publish-anaconda.target.linux-64.dependencies]
+anaconda-client = "*"
+
+[feature.package-standalone.dependencies]
+# Pin conda in the base environment to avoid post-link.bat problems
+conda = "24.7.*"
+rattler-index = "*"
+mamba = "<2"
+
+[feature.docs-build]
+channels = ["mantid/label/nightly"]
+
+[feature.docs-build.target.linux-64.dependencies]
+rsync = "*"
+mantidqt = "*"
+
 [dependencies]
 cmake = ">=3.21.0"
 doxygen = "1.9.*"
@@ -17,6 +73,8 @@ euphonic = ">=1.4.5,<2.0"
 seekpath = { version = "==2.1.0", build = "*2" }
 graphviz = ">=2.47.0"
 gsl = "2.8.*"
+gtest = "==1.17.0"
+gmock = "==1.17.0"
 hdf4 = "4.2.*"
 hdf5 = ">1.14.0,<1.15"
 jsoncpp = ">=1.9.4,<2"
@@ -47,7 +105,7 @@ quickbayes = "==1.0.2"
 rattler-build = "==0.51.0"
 requests = ">=2.32.4"
 scipy = ">=1.10.0"
-sphinx = ">=4.5,<9"
+sphinx = ">=9.0,<10"
 sphinx_bootstrap_theme = "==0.8.1"
 tbb-devel = "2021.*"
 toml = ">=0.10.2"
@@ -79,7 +137,6 @@ gcovr = ">=4.2"
 lz4 = ">=4.4.5,<5"
 pystack = ">=1.5.1,<2"
 qt-gtk-platformtheme = ">=5.15.15,<6"
-texlive-core = ">=20180414"
 libgl-devel = ">=1.7.0,<2"
 libglu = ">=9.0"
 libopenblas = "==0.3.27"

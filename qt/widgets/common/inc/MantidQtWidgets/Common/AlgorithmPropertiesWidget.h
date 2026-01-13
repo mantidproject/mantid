@@ -52,6 +52,8 @@ public:
 
   void addEnabledAndDisableLists(const QStringList &enabled, const QStringList &disabled);
 
+  void shareErrorsMap(const QHash<QString, QString> &errors);
+
   void hideOrDisableProperties(const QString &changedPropName = "");
 
   void saveInput();
@@ -75,8 +77,18 @@ public slots:
   /// Replace WS button was clicked
   void replaceWSClicked(const QString &propName);
 
+protected:
+  // These methods are `protected` rather than `private` to facilitate unit testing:
+  //   they should really not be used outside of this dialog class.
+  // For the external methods, see `IPropertyManager::isPropertyEnabled` and
+  // `IPropertyManager::isPropertyVisible`.
+  bool isWidgetEnabled(const Mantid::Kernel::Property *prop) const;
+
+  bool isWidgetVisible(const Mantid::Kernel::Property *prop) const;
+
 private:
-  bool isWidgetEnabled(const Mantid::Kernel::Property *property, const QString &propName) const;
+  /// Check if there is any input workspace in the properties list
+  bool hasInputWS(const std::vector<Mantid::Kernel::Property *> &prop_list) const;
 
   /// Chosen algorithm name
   QString m_algoName;
@@ -90,9 +102,11 @@ private:
   /// The current grid widget for sub-boxes
   QGridLayout *m_currentGrid;
 
-  /// A map where key = property name; value = the error for this property (i.e.
+  /// A map where key = property name; value = any error for this property (i.e.
   /// it is not valid).
-  QHash<QString, QString> m_errors;
+  // The current widget is no longer responsible for setting property values, so this map points
+  // to the corresponding map from the parent dialog.
+  QHash<QString, QString> const *m_errors;
 
   /// A list of property names that are FORCED to stay enabled.
   QStringList m_enabled;

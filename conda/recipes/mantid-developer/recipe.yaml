@@ -19,6 +19,8 @@ requirements:
     - seekpath ==2.1.0 *2
     - graphviz ${{ graphviz }}
     - gsl ${{ gsl }}
+    - gtest ${{ gtest }}
+    - gmock ${{ gmock }}
     - h5py
     - hdf4 ${{ hdf4 }}
     - hdf5 ${{ hdf5 }}
@@ -75,7 +77,6 @@ requirements:
         - lz4
         - pystack
         - qt-gtk-platformtheme
-        - texlive-core ${{ texlive_core }}
         # OpenGL implementation:
         - libgl-devel
         - gxx_linux-64 ${{ cxx_compiler_version }}

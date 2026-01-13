@@ -46,15 +46,14 @@ public:
     groupWS->setValue(3, 45);
     offsetsWS->setValue(1, 0.123);
     offsetsWS->setValue(2, 0.456);
-    maskWS->getSpectrum(0).clearData();
-    maskWS->mutableSpectrumInfo().setMasked(0, true);
+    maskWS->setMasked(1, true);
 
     SaveCalFile alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", groupWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", offsetsWS));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(maskWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "SaveCalFileTest.cal"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());

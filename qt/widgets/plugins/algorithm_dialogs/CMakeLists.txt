@@ -46,6 +46,19 @@ set(UI_FILES
     inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SortTableWorkspaceDialog.ui
 )
 
+set(PRECOMP_HEADERS
+    <MantidAPI/Algorithm.h>
+    <MantidAPI/MatrixWorkspace_fwd.h>
+    <MantidKernel/System.h>
+    <QDialog>
+    <QString>
+    <QWidget>
+    <map>
+    <set>
+    <string>
+    <vector>
+)
+
 include_directories(inc inc/MantidQtWidgets/Plugins/AlgorithmDialogs)
 
 mtd_add_qt_library(
@@ -54,7 +67,7 @@ mtd_add_qt_library(
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
-  UI ${UI_FILES} PRECOMPILED inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h
+  UI ${UI_FILES} PRECOMPILED ${PRECOMP_HEADERS}
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES} ${OPENGL_LIBRARIES}
   QT5_LINK_LIBS Qt5::OpenGL Qt5::Qscintilla
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon

@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidNexus/NexusClasses_fwd.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 #include "MantidTypes/Core/DateAndTime.h"
 
 namespace Mantid {
@@ -18,11 +18,11 @@ namespace DataHandling {
 
 /*! LoadILLReflectometry : Loads an ILL reflectometry Nexus data file.
  */
-class MANTID_DATAHANDLING_DLL LoadILLReflectometry : public API::IFileLoader<Nexus::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLReflectometry : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   LoadILLReflectometry() = default;
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string name() const override { return "LoadILLReflectometry"; }
   /// Algorithm's version for identification. @see Algorithm::version

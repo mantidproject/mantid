@@ -10,14 +10,13 @@
 // Includes
 //---------------------------------------------------
 
-// #include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/NexusFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadANSTOHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidNexus/NexusClasses_fwd.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -30,7 +29,7 @@ to recognise a file as the one containing Bilby data.
 @date 11/07/2014
 */
 
-class MANTID_DATAHANDLING_DLL LoadBBY2 : public API::NexusFileLoader {
+class MANTID_DATAHANDLING_DLL LoadBBY2 : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 
   struct InstrumentInfo {
     // core values or non standard conversion
@@ -58,13 +57,13 @@ public:
   const std::string summary() const override { return "Loads a Bilby data file into a workspace."; }
 
   // returns a confidence value that this algorithm can load a specified file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
 protected:
   // initialisation
   void init() override;
   // execution
-  void execLoader() override;
+  void exec() override;
 
 private:
   // region of interest

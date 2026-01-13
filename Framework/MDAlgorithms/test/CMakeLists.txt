@@ -11,8 +11,26 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries(
     MDAlgorithmsTest PRIVATE Mantid::DataHandling Mantid::CurveFitting Mantid::MDAlgorithms Mantid::Nexus
-                             Mantid::Kernel gmock
+                             Mantid::Kernel
   )
+
+  target_precompile_headers(
+    MDAlgorithmsTest
+    PRIVATE
+    <MantidAPI/AnalysisDataService.h>
+    <MantidFrameworkTestHelpers/MDEventsTestHelper.h>
+    <MantidFrameworkTestHelpers/WorkspaceCreationHelper.h>
+    <cxxtest/WrappedTestSuite.h>
+    <set>
+    <string>
+    <vector>
+  )
+
+  if(TARGET GTest::gmock AND TARGET GTest::gtest)
+    target_link_libraries(MDAlgorithmsTest PRIVATE GTest::gmock GTest::gtest)
+  else()
+    target_link_libraries(MDAlgorithmsTest PRIVATE gmock gtest)
+  endif()
 
   target_include_directories(MDAlgorithmsTest PRIVATE CurveFitting DataHandling)
 

@@ -78,4 +78,18 @@ QMap<QString, QVariant> loadJSONFromString(const QString &jsonString) {
   return jsonObj.toVariantMap();
 }
 
+std::string outputJsonToString(QVariant &v) {
+  QJsonDocument doc;
+  if (v.type() == 8 && v.canConvert(8)) { // 8 = map - is there an enum?
+    QVariantMap map = v.toMap();
+    doc = QJsonDocument{QJsonObject::fromVariantMap(map)};
+  } else if (v.canConvert<QString>()) {
+    return v.toString().toStdString();
+  } else {
+    doc = QJsonDocument::fromVariant(v);
+  }
+  QString jsonString(doc.toJson(QJsonDocument::Compact));
+  return jsonString.toStdString();
+}
+
 } // namespace MantidQt::API
