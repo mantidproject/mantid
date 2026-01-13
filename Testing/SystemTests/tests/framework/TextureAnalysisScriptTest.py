@@ -9,7 +9,7 @@ import shutil
 import systemtesting
 from mantid import config
 from mantid.api import AnalysisDataService as ADS
-from Engineering.texture.TextureUtils import run_abs_corr, fit_all_peaks, is_macOS
+from Engineering.texture.TextureUtils import run_abs_corr, fit_all_peaks
 from mantid.simpleapi import LoadEmptyInstrument, CreateSampleShape, SetSampleMaterial, Load, ExtractSingleSpectrum, ConvertUnits
 from Engineering.common.xml_shapes import get_cube_xml
 import numpy as np
@@ -238,9 +238,7 @@ class PeakFitMixin(object):
 
         for c in out_table.getColumnNames():
             self.assertIn(c, expected_cols)
-            if not is_macOS():
-                # fitting results currently flaky on mac os
-                np.testing.assert_allclose(np.nan_to_num(out_table.column(c)), expected_dict[c], rtol=1e-3)
+            np.testing.assert_allclose(np.nan_to_num(out_table.column(c)), expected_dict[c], rtol=1e-3)
 
     def validate_missing_peaks_vals(self, peak_1_vals, peak_2_vals):
         param_table1 = ADS.retrieve("ENGINX_280625_2.3_GROUP_Fit_Parameters")
