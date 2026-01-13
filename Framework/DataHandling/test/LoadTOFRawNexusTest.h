@@ -37,15 +37,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     alg.setPropertyValue("Filename", "REF_L_32035.nxs");
-    Mantid::Nexus::NexusDescriptor descr(alg.getPropertyValue("Filename"));
+    Mantid::Nexus::NexusDescriptorLazy descr(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr), 80);
 
     alg.setPropertyValue("Filename", "CNCS_7860_event.nxs");
-    Mantid::Nexus::NexusDescriptor descr2(alg.getPropertyValue("Filename"));
+    Mantid::Nexus::NexusDescriptorLazy descr2(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr2), 20);
 
     alg.setPropertyValue("Filename", "PG3_733.nxs");
-    Mantid::Nexus::NexusDescriptor descr4(alg.getPropertyValue("Filename"));
+    Mantid::Nexus::NexusDescriptorLazy descr4(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr4), 0);
   }
 
