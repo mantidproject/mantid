@@ -122,8 +122,12 @@ void BayesFitting::setBackend(const QString &text) {
   BayesBackendType newBackend = m_backend;
   if (text == "quasielasticbayes") {
     newBackend = BayesBackendType::QUASI_ELASTIC_BAYES;
+    m_uiForm.warningLabel->setHidden(false);
+    m_uiForm.backendChoice->setToolTip("Old Fortran library");
   } else if (text == "quickbayes") {
     newBackend = BayesBackendType::QUICK_BAYES;
+    m_uiForm.warningLabel->setHidden(true);
+    m_uiForm.backendChoice->setToolTip("New Python library");
   }
   if (newBackend != m_backend) {
     m_backend = newBackend;

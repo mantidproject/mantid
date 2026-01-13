@@ -85,7 +85,24 @@
        </spacer>
       </item>
       <item>
+       <widget class="QLabel" name="warningLabel">
+        <property name="styleSheet">
+         <string notr="true">QLabel { color : red; }</string>
+        </property>
+        <property name="text">
+         <string>Warning: quasielasticbayes (old Fortran library) is deprecated
+and will be removed in a future release</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::AutoText</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QComboBox" name="backendChoice">
+        <property name="toolTip">
+         <string>Old Fortran library</string>
+        </property>
         <property name="currentIndex">
          <number>0</number>
         </property>
