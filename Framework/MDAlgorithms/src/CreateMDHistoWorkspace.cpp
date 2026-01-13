@@ -85,20 +85,19 @@ void CreateMDHistoWorkspace::init() {
 
 std::map<std::string, std::string> CreateMDHistoWorkspace::validateInputs() {
   std::map<std::string, std::string> errors;
-  size_t binProduct = this->getBinProduct();
 
   const std::vector<double> &signalValues = getProperty("SignalInput");
   const std::vector<double> &errorValues = getProperty("ErrorInput");
   const std::vector<double> &numberOfEvents = getProperty("NumberOfEvents");
 
-  const std::string msg("All inputs must match size: " + std::to_string(binProduct));
+  const std::string msg("All inputs must match size: " + std::to_string(signalValues.size()));
 
-  if (signalValues.size() != binProduct)
+  if (signalValues.size() != errorValues.size()) {
     errors["SignalInput"] = msg;
-  if (errorValues.size() != binProduct)
     errors["ErrorInput"] = msg;
+  }
   // don't need to add message to empty array
-  if ((!numberOfEvents.empty()) && (numberOfEvents.size() != binProduct))
+  if ((!numberOfEvents.empty()) && (numberOfEvents.size() != signalValues.size()))
     errors["NumberOfEvents"] = msg;
 
   return errors;
@@ -112,11 +111,17 @@ void CreateMDHistoWorkspace::exec() {
   auto signals = ws->mutableSignalArray();
   auto errors = ws->mutableErrorSquaredArray();
   auto nEvents = ws->mutableNumEventsArray();
-  size_t binProduct = this->getBinProduct();
+  const size_t binProduct = this->getBinProduct();
 
   const std::vector<double> &signalValues = getProperty("SignalInput");
   const std::vector<double> &errorValues = getProperty("ErrorInput");
   const std::vector<double> &numberOfEvents = getProperty("NumberOfEvents");
+
+  // this->createEmptyOutputWorkspace() initializes the value returned by this->getBinProduct()
+  if (signalValues.size() != binProduct) {
+    const std::string msg("All inputs must match size: " + std::to_string(binProduct));
+    throw std::invalid_argument(msg);
+  }
 
   // Fast memory copies and squaring
   std::memcpy(signals, signalValues.data(), binProduct * sizeof(double));
