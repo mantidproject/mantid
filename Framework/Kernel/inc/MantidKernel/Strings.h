@@ -17,6 +17,7 @@
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #endif
+#include <algorithm>
 #include <iosfwd>
 #include <map>
 #include <set>
