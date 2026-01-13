@@ -433,7 +433,6 @@ the user interface while providing more repeatable processing.
                include_atten_table = include_atten_table,
                eval_point = eval_point,
                eval_units = eval_units,
-               exp_name = exp_name,
                root_dir = root_dir,
                include_div_corr = include_div_corr,
                div_hoz = div_hoz,

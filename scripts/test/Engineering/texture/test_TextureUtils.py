@@ -85,7 +85,6 @@ class TextureUtilsTest(unittest.TestCase):
                 include_atten_table=True,
                 eval_point="1.54",
                 eval_units="Angstrom",
-                exp_name="exp1",
                 root_dir=d,
                 include_div_corr=True,
                 div_hoz=1.0,
@@ -124,7 +123,6 @@ class TextureUtilsTest(unittest.TestCase):
         mock_model.set_include_abs.assert_called_once_with(True)
         mock_model.set_include_atten.assert_called_once_with(True)
         mock_model.set_include_div.assert_called_once_with(True)
-        mock_model.set_rb_num.assert_called_once_with("exp1")
         mock_model.set_remove_after_processing.assert_called_once_with(True)
 
         # corrections call: check args and kwargs

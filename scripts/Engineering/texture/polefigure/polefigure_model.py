@@ -38,7 +38,8 @@ class TextureProjection:
         save_dirs: Optional[Sequence[str]] = None,
         ax_transform: Sequence[float] = np.eye(3),
         readout_col: str = "",
-        include_spec_info: bool = False,
+        include_spec_info: bool = True,
+        save_ascii: bool = False,
     ) -> None:
         create_pole_figure_tables(
             wss=wss,
@@ -54,9 +55,9 @@ class TextureProjection:
             readout_col=readout_col,
             include_spec_info=include_spec_info,
         )
-        self._save_files(out_ws_name, save_dirs)
+        self._save_files(out_ws_name, save_dirs, ascii=save_ascii)
         if combined_ws_name:
-            self._save_files(combined_ws_name, save_dirs, ascii=False)
+            self._save_files(combined_ws_name, save_dirs, ascii=save_ascii)
 
     @staticmethod
     def get_pf_output_names(

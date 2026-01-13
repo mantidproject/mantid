@@ -49,7 +49,6 @@ class AbsCorrMixin(object):
             "include_atten_table": False,
             "eval_point": "2.00",
             "eval_units": "dSpacing",
-            "exp_name": "Test",
             "root_dir": CWDIR,
             "clear_ads_after": False,
         }

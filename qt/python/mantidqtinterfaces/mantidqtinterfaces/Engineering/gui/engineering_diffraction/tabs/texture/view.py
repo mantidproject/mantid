@@ -247,10 +247,16 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
 
         self.toolbar = NavigationToolbar(self.canvas, self)
 
+        self.canvas.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.canvas.setFocus()
+
         layout = QVBoxLayout()
         self.plot_canvas.setLayout(layout)
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
+
+    def get_debug_points(self):
+        return self.action_debug_points
 
     def get_plot_axis(self):
         return self.figure, self.canvas

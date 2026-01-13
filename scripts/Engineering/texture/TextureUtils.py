@@ -116,7 +116,6 @@ def run_abs_corr(
     include_atten_table: bool = False,
     eval_point: Optional[Union[str, float]] = None,
     eval_units: Optional[str] = None,
-    exp_name: Optional[str] = None,
     root_dir: str = ".",
     include_div_corr: bool = False,
     div_hoz: Optional[float] = None,
@@ -140,7 +139,6 @@ def run_abs_corr(
     include_atten_table: flag for whether a table of attenuation values at a specified point should be created
     eval_point: point to calculate the attenuation coefficient at
     eval_units: units which the eval_point is given in
-    exp_name: Name of the experiment to act as main folder name
     root_dir: Directory path in which the experiment directory is constructed
     include_div_corr: Flag for whether to include a beam divergence correction
     div_hoz: Value of beam divergence in the horizontal plane
@@ -149,7 +147,7 @@ def run_abs_corr(
     clear_ads_after: Flag for whether the produced files should be removed from the ADS after they have been saved
     """
     model = TextureCorrectionModel()
-    model.set_reference_ws = ref_ws
+    model.set_reference_ws(ref_ws)
 
     valid_inputs, error_msg = validate_abs_corr_inputs(
         ref_ws,
@@ -184,7 +182,6 @@ def run_abs_corr(
     model.set_include_abs(include_abs_corr)
     model.set_include_atten(include_atten_table)
     model.set_include_div(include_div_corr)
-    model.set_rb_num(exp_name)
     model.set_remove_after_processing(clear_ads_after)
 
     abs_args = {"gauge_vol_preset": gauge_vol_preset, "gauge_vol_file": gauge_vol_shape_file, "mc_param_str": monte_carlo_args}
@@ -540,8 +537,9 @@ def create_pf(
     chi2_thresh: Optional[float] = None,
     peak_thresh: Optional[float] = None,
     override_dir: bool = False,
-    create_combined_output: bool = True,
+    create_combined_output: bool = False,
     debug_info_level: int = 0,
+    save_ascii: bool = True,
 ) -> None:
     """
     Create a single pole figure, for use in texture analysis workflow
@@ -572,6 +570,7 @@ def create_pf(
     override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
     create_combined_output: flag which controls whether to create a combined workspace which contains every spectra in the pole figure
     debug_info_level: 0 - No debug info; 1 - will label with alpha, beta and value; 2 - will include spectra information in label
+    save_ascii: whether to save files as txt as well as nxs
     """
     model = TextureProjection()
     has_xtal = False
@@ -613,6 +612,7 @@ def create_pf(
         ax_transform,
         readout_column,
         include_spec_info,
+        save_ascii,
     )
 
     fig, ax = plot_pole_figure(
@@ -664,6 +664,7 @@ def create_pf_loop(
     peak_thresh: Optional[float] = None,
     create_combined_output: bool = True,
     debug_info_level: int = 0,
+    save_ascii: bool = True,
 ) -> None:
     """
     Create a series of pole figures, for use in texture analysis workflow
@@ -694,6 +695,7 @@ def create_pf_loop(
                  X0 corresponding to the provided HKL
     create_combined_output: flag which controls whether to create a combined workspace which contains every spectra in the pole figure
     debug_info_level: 0 - No debug info; 1 - will label with alpha, beta and value; 2 - will include spectra information in label
+    save_ascii: whether to save files as txt as well as nxs
     """
     # get ws paths
     for iparam, params in enumerate(param_wss):
@@ -722,6 +724,7 @@ def create_pf_loop(
                 "projection_method": projection_method,
                 "create_combined_output": create_combined_output,
                 "debug_info_level": debug_info_level,
+                "save_ascii": save_ascii,
             }
             if scatter == "both":
                 for scat in (True, False):
