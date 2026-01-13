@@ -14,6 +14,7 @@
 #include <H5Cpp.h>
 #include <hdf5.h>
 
+#include <algorithm>
 #include <cstdlib> // malloc, calloc
 #include <cstring> // strcpy
 #include <filesystem>
@@ -32,16 +33,23 @@ static std::string const UNKNOWN_CLASS = "UNKNOWN_CLASS";
 namespace {
 template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::UniqueID<H5Xclose> const &oid) {
   std::string nxClass = UNKNOWN_CLASS;
-  if (H5Aexists(oid, "NX_class") > 0) {
-    Mantid::Nexus::UniqueID<&H5Aclose> attrID = H5Aopen_name(oid, "NX_class");
+  if (H5Aexists(oid, Mantid::Nexus::GROUP_CLASS_SPEC.c_str()) > 0) {
+    Mantid::Nexus::UniqueID<&H5Aclose> attrID = H5Aopen(oid, Mantid::Nexus::GROUP_CLASS_SPEC.c_str(), H5P_DEFAULT);
     if (attrID.isValid()) {
-      H5A_info_t ainfo;
-      if (H5Aget_info(attrID, &ainfo) >= 0) {
-        nxClass.resize(ainfo.data_size);
-        Mantid::Nexus::UniqueID<&H5Tclose> typeID(H5Aget_type(attrID));
-        H5Aread(attrID, typeID, nxClass.data());
+      Mantid::Nexus::UniqueID<&H5Tclose> atype(H5Aget_type(attrID));
+      if (H5Tis_variable_str(atype)) {
+        // variable length string
+        char *rdata;
+        if (H5Aread(attrID, atype, &rdata) >= 0) {
+          nxClass = std::string(rdata);
+        }
+        // reclaim memory allocated for rdata by HDF5
+        H5free_memory(rdata);
       } else {
-        nxClass = UNKNOWN_CLASS;
+        // fixed length string
+        std::size_t size = H5Tget_size(atype);
+        nxClass.resize(size);
+        H5Aread(attrID, atype, nxClass.data());
       }
     }
   }
@@ -82,12 +90,12 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
   }
 }
 
-/// @brief not implemented yet
+/// @brief Check if a class type exists in the file
 /// @param classType the NX_class type to check for
 /// @return true if the class type exists anywhere in the file
-/// @throws std::logic_error always
-bool NexusDescriptorLazy::classTypeExists(std::string const &) const {
-  throw std::logic_error("NexusDescriptorLazy::classTypeExists not implemented yet");
+bool NexusDescriptorLazy::classTypeExists(std::string const &classType) const {
+  return std::any_of(m_allEntries.begin(), m_allEntries.end(),
+                     [&classType](auto const &entry) { return entry.second == classType; });
 }
 
 bool NexusDescriptorLazy::hasRootAttr(std::string const &name) {

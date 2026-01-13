@@ -7,6 +7,7 @@
 #include "MantidNexus/UniqueID.h"
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -574,6 +575,14 @@ public:
    * \return true if the class type exists
    */
   bool classTypeExists(std::string const &class_type) const { return m_descriptor.classTypeExists(class_type); }
+  /**
+   * Return all entries of a given class type in the current location
+   * \param class_type The class type to search for (e.g. "NXentry")
+   * \return A set of string names of all entries of the given class type
+   */
+  std::set<std::string> getEntriesByClass(std::string const &class_type) const;
+
+  NexusDescriptor const &getFileDescriptor() const { return m_descriptor; }
 
   //------------------------------------------------------------------------------------------------------------------
   // ATTRIBUTE METHODS

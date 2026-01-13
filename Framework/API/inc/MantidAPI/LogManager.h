@@ -9,7 +9,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidNexus/NexusDescriptor.h"
 
 #include <memory>
 #include <vector>
@@ -182,11 +181,10 @@ public:
   /// Save the run to a NeXus file with a given group name
   virtual void saveNexus(Nexus::File *file, const std::string &group, bool keepOpen = false) const;
 
-  /// Load the run from a NeXus file with a given group name. Overload that uses NexusDescriptor for faster
-  virtual void loadNexus(Nexus::File *file, const std::string &group, const Mantid::Nexus::NexusDescriptor &fileInfo,
-                         const std::string &prefix, bool keepOpen = false);
+  /// Load the run from a NeXus file with a given group name. Overload that uses the file's NexusDescriptor for faster
+  virtual void loadNexus(Nexus::File *file, std::string const &group, std::string const &prefix, bool keepOpen = false);
   /// Load the run from a NeXus file with a given group name
-  virtual void loadNexus(Nexus::File *file, const std::string &group, bool keepOpen = false);
+  virtual void loadNexus(Nexus::File *file, std::string const &group, bool keepOpen);
   /// Clear the logs
   void clearLogs();
 
@@ -210,7 +208,7 @@ protected:
   bool hasEndTime() const;
   bool hasValidProtonChargeLog(std::string &error) const;
 
-  void loadNexus(Nexus::File *file, const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &prefix);
+  void loadNexus(Nexus::File *file, const std::string &prefix);
   /// Load the run from a NeXus file with a given group name
   void loadNexus(Nexus::File *file, const std::map<std::string, std::string> &entries);
   /// A pointer to a property manager

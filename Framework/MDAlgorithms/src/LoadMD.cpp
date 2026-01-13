@@ -44,7 +44,7 @@ using file_holder_type = std::unique_ptr<Mantid::DataObjects::BoxControllerNeXus
 
 namespace Mantid::MDAlgorithms {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadMD)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -60,15 +60,13 @@ LoadMD::LoadMD()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMD::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadMD::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   int confidence = 0;
-  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
-  if (allEntries.count("NXentry") == 1) {
+  if (descriptor.classTypeExists("NXentry")) {
     if (descriptor.isEntry("/MDEventWorkspace") || descriptor.isEntry("/MDHistoWorkspace")) {
       confidence = 95;
     }
   }
-
   return confidence;
 }
 
@@ -108,7 +106,7 @@ void LoadMD::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void LoadMD::execLoader() {
+void LoadMD::exec() {
   m_filename = getPropertyValue("Filename");
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // Start loading
@@ -136,9 +134,6 @@ void LoadMD::execLoader() {
 
   if (!m_file)
     throw Kernel::Exception::FileError("Can not open file " + for_access, m_filename);
-
-  // The main entry
-  const std::shared_ptr<Mantid::Nexus::NexusDescriptor> fileInfo = getFileInfo();
 
   std::string entryName;
   if (m_file->hasGroup("/MDEventWorkspace", "NXentry")) {
@@ -207,7 +202,7 @@ void LoadMD::execLoader() {
     auto prog = std::make_unique<Progress>(this, 0.0, 0.1, 1);
     prog->report("Load experiment information.");
     bool lazyLoadExpt = fileBacked;
-    MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws, *fileInfo.get(), "MDEventWorkspace", lazyLoadExpt);
+    MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws, "MDEventWorkspace", lazyLoadExpt);
 
     // Wrapper to cast to MDEventWorkspace then call the function
     CALL_MDEVENT_FUNCTION(this->doLoad, ws);

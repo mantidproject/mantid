@@ -46,7 +46,6 @@ const auto g_log = &Poco::Logger::get("NexusFile");
 
 namespace { // anonymous namespace to keep it in the file
 
-std::string const GROUP_CLASS_SPEC("NX_class");
 std::string const TARGET_ATTR_NAME("target");
 std::string const UNKNOWN_GROUP_SPEC("NX_UNKNOWN_GROUP");
 constexpr int DEFAULT_DEFLATE_LEVEL(6);
@@ -1370,24 +1369,13 @@ Entries File::getEntries() const {
 
 void File::getEntries(Entries &result) const {
   result.clear();
-  auto current = getCurrentObject();
-  for (size_t i = 0; i < current->getNumObjs(); i++) {
-    std::string name = current->getObjnameByIdx(i);
-    std::string className;
-    H5G_obj_t type = current->getObjTypeByIdx(i);
-    if (type == H5G_GROUP) {
-      H5::Group grp = current->openGroup(name);
-      if (grp.attrExists(GROUP_CLASS_SPEC)) {
-        H5::Attribute attr = grp.openAttribute(GROUP_CLASS_SPEC);
-        attr.read(attr.getDataType(), className);
-      } else {
-        className = UNKNOWN_GROUP_SPEC;
+  NexusAddress const currentAddress = m_address;
+  for (auto const &entry : m_descriptor.getAllEntries()) {
+    for (NexusAddress const addr : entry.second) { // cppcheck-suppress iterateByValue
+      if (addr.parent_path() == currentAddress) {
+        result.emplace(addr.stem(), entry.first);
       }
-    } else if (type == H5G_DATASET) {
-      className = SCIENTIFIC_DATA_SET;
     }
-    if (!className.empty())
-      result[name] = className;
   }
 }
 
@@ -1404,6 +1392,11 @@ std::string File::getTopLevelEntryName() const {
     throw NXEXCEPTION("unable to find top-level entry, no valid groups");
   }
   return top;
+}
+
+std::set<std::string> File::getEntriesByClass(std::string const &class_type) const {
+  std::vector<std::string> allAddresses = m_descriptor.allAddressesOfType(class_type);
+  return std::set<std::string>(allAddresses.begin(), allAddresses.end());
 }
 
 //------------------------------------------------------------------------------------------------------------------
