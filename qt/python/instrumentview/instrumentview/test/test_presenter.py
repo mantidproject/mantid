@@ -125,6 +125,21 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.replace_workspace_callback("not_my_workspace", None)
         self._mock_view.setup.assert_not_called()
 
+    def test_on_add_selection_clicked(self):
+        mock_implicit_return = np.linspace(-1, 1, self._ws.getNumberHistograms())
+        mock_implicit_function = MagicMock(EvaluateFunction=MagicMock(side_effect=mock_implicit_return))
+        self._mock_view.get_current_widget_implicit_function.return_value = mock_implicit_function
+        self._model.add_new_detector_picking_selection = MagicMock(return_value="mock_key")
+        self._presenter.on_add_selection_clicked()
+        np.testing.assert_allclose(self._model.add_new_detector_picking_selection.call_args.args[0], mock_implicit_return < 0)
+        self._mock_view.set_new_picking_selection_key.assert_called_once_with("mock_key")
+
+    def test_on_save_mask_to_workspace_clicked(self):
+        self._model.save_mask_workspace_to_ads = MagicMock()
+        self._presenter.on_save_mask_to_workspace_clicked()
+        self._model.save_mask_workspace_to_ads.assert_called_once()
+        self._mock_view.on_mask_item_selected.assert_not_called()
+
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_peaks_workspace_selected")
     def test_reload_peaks_workspaces(self, mock_on_peaks_workspace_selected):
         self._presenter._reload_peaks_workspaces()

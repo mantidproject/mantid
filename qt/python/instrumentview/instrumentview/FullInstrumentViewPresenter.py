@@ -279,7 +279,6 @@ class FullInstrumentViewPresenter:
 
     def on_save_mask_to_workspace_clicked(self) -> None:
         self._model.save_mask_workspace_to_ads()
-        # self.on_mask_item_selected()
 
     def on_overwrite_mask_clicked(self) -> None:
         self._model.overwrite_mask_to_current_workspace()
@@ -288,11 +287,6 @@ class FullInstrumentViewPresenter:
     def on_overwrite_roi_clicked(self) -> None:
         self._model.overwrite_roi_to_current_workspace()
         self._view.clear_roi_list()
-
-    # def on_clear_pick_selections_clicked(self) -> None:
-    #     self._view.clear_roi_list()
-    #     self._model.clear_all_picked_detectors()
-    #     self.on_roi_item_selected()
 
     def on_clear_masks_clicked(self) -> None:
         self._view.clear_mask_list()
@@ -348,10 +342,6 @@ class FullInstrumentViewPresenter:
             self._view.set_relative_detector_angle(None)
         else:
             self._view.set_relative_detector_angle(self._model.relative_detector_angle())
-
-    # def on_clear_selected_detectors_clicked(self) -> None:
-    #     # TODO: Figure out what triggers clearing the picking
-    #     return
 
     def create_poly_data_mesh(self, points: np.ndarray, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""
