@@ -219,6 +219,7 @@ class StateMask(metaclass=JsonSerializable):
         self.phi_min = -90.0
         self.phi_max = 90.0
         self.use_mask_phi_mirror = True
+        self.phi_range: List[float] = []  # This attribute is not set from the user file, but from sans gui
 
         # Beam stop
         self.beam_stop_arm_width: float = 0.0

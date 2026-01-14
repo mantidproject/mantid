@@ -148,7 +148,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
         """
         Perform the main reduction.
         :param reduction_alg: SANSReductionCore algorithm
-        :param reduction_setting_bundles: a list of lists containing workspaces to be reduced.
+        :param reduction_setting_bundle: a list of lists containing workspaces to be reduced.
                                           The outer list is for compatibility with version 2
                                           and only contains one inner list
         :param use_optimizations: bool. If true, use can optimizations

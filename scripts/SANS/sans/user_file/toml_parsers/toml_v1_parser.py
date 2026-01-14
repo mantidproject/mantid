@@ -516,6 +516,8 @@ class TomlV1ParserImpl(TomlParserImplBase):
                 self.mask.phi_min = phi_mask["start"]
             if "stop" in phi_mask:
                 self.mask.phi_max = phi_mask["stop"]
+            if "range" in phi_mask:
+                self.mask.phi_range = phi_mask["range"]
 
     @staticmethod
     def _get_1d_min_max(one_d_binning: str):
