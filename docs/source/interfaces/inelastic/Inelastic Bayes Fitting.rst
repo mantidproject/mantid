@@ -26,7 +26,7 @@ Settings
   Opens this help page.
 
 Backend selection box
-  This drop down selects weather to use the ``quasielasticbayes`` or ``quickbayes``
+  This drop down selects whether to use the ``quasielasticbayes`` or ``quickbayes``
   package as the underlying model for the Quasi and Stretch tabs.
 
 Manage Directories
