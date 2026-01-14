@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MultipleFileProperty, FileAction, PropertyMode, FileFinder
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MultipleFileProperty, FileAction, PropertyMode
 from mantid.kernel import (
     StringListValidator,
     Direction,
@@ -12,7 +12,6 @@ from mantid.kernel import (
     FloatBoundedValidator,
     IntArrayProperty,
     SetDefaultWhenProperty,
-    amend_config,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
 import h5py
@@ -129,6 +128,28 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             doc="Specifies either single output workspace or output group workspace containing several workspaces.",
         )
 
+        def readIntFromFile(filename, dataset):
+            intValue = 0
+            with h5py.File(filename, "r") as f:
+                intValue = f[dataset][0]
+                intValue = intValue.decode("utf-8")
+                intValue = int(intValue)
+            return intValue
+
+        def readFloatFromFile(filename, dataset):
+            floatValue = 0.0
+            with h5py.File(filename, "r") as f:
+                floatValue = f[dataset][0]
+                floatValue = floatValue.decode("utf-8")
+                floatValue = float(floatValue)
+            return floatValue
+
+        def readArrayFromFile(filename, dataset):
+            array = np.array([])
+            with h5py.File(filename, "r") as f:
+                array = f[dataset][()]
+            return array
+
         def checkFilenameforInstrument(algo, currentProp, watchedProp):
             run = watchedProp.value
             instrumentName = ""
@@ -148,10 +169,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             if not run:
                 return False
             wavelength = 0.0
-            with h5py.File(run[0], "r") as f:
-                wavelength = f["/entry/wavelength"][0]
-                wavelength = wavelength.decode("utf-8")
-                wavelength = float(wavelength)
+            wavelength = readFloatFromFile(run[0], "/entry/wavelength")
             currentProp.value = wavelength
             return True
 
@@ -162,10 +180,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             if not run:
                 return False
             diameter = 0.0
-            with h5py.File(run[0], "r") as f:
-                diameter = f["/entry/vanadium_diameter"][0]
-                diameter = diameter.decode("utf-8")
-                diameter = float(diameter)
+            diameter = readFloatFromFile(run[0], "/entry/vanadium_diameter")
             currentProp.value = diameter
             return True
 
@@ -185,9 +200,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             run = watchedProp.value
             if not run:
                 return False
-            vanadiumRunNumbers = np.array([])
-            with h5py.File(run[0], "r") as f:
-                vanadiumRunNumbers = f["/entry/vanadium_run_numbers"][()]
+            vanadiumRunNumbers = readArrayFromFile(run[0], "/entry/vanadium_run_numbers")
             self.setProperty("VanadiumRunNumbers", vanadiumRunNumbers)
             return True
 
@@ -197,9 +210,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             run = watchedProp.value
             if not run:
                 return False
-            vanadiumBGRunNumbers = []
-            with h5py.File(run[0], "r") as f:
-                vanadiumBGRunNumbers = f["/entry/vanadium_background_run_numbers"][()]
+            vanadiumBGRunNumbers = readArrayFromFile(run[0], "/entry/vanadium_background_run_numbers")
             self.setProperty("VanadiumBackgroundRunNumbers", vanadiumBGRunNumbers)
             return True
 
@@ -207,29 +218,27 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             "VanadiumBackgroundRunNumbers", SetDefaultWhenProperty("SampleFilename", checkFilenameforVanadiumBackgroundRunNumbers)
         )
 
-        def checkRunNumbersforWavelength(algo, currentProp, watchedProp):
+        def getRuns():
+            runs = []
             sampleIPTS = self.getProperty("SampleIPTS").value
             sampleRunNumbers = self.getProperty("SampleRunNumbers").value
             instrument = self.getProperty("Instrument").value
             if sampleIPTS == Property.EMPTY_INT or len(sampleRunNumbers) == 0 or instrument == "":
-                return False
+                return runs
             else:
                 if instrument == "WAND^2":
-                    run_str = "HB2C_{}".format(sampleRunNumbers[0])
+                    runs = ["/HFIR/HB2C/IPTS-{}/nexus/HB2C_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
                 elif instrument == "MIDAS":
-                    run_str = "HB2A_{}".format(sampleRunNumbers[0])
-                else:
-                    return False
-                runs = []
-                with amend_config(facility="HFIR", instrument="HB2C" if instrument == "WAND^2" else "HB2A"):
-                    runs = FileFinder.findRuns(run_str)
-                if not runs:
-                    return False
+                    runs = ["/HFIR/HB2A/IPTS-{}/nexus/HB2A_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
+            return runs
+
+        def checkRunNumbersforWavelength(algo, currentProp, watchedProp):
+            runs = getRuns()
+            if len(runs) == 0:
+                return False
+            else:
                 wavelength = 0.0
-                with h5py.File(runs[0], "r") as f:
-                    wavelength = f["/entry/wavelength"][0]
-                    wavelength = wavelength.decode("utf-8")
-                    wavelength = float(wavelength)
+                wavelength = readFloatFromFile(runs[0], "/entry/wavelength")
                 currentProp.value = wavelength
             return True
 
@@ -238,28 +247,12 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         self.setPropertySettings("Wavelength", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforWavelength))
 
         def checkRunNumbersforVanadiumDiameter(algo, currentProp, watchedProp):
-            sampleIPTS = self.getProperty("SampleIPTS").value
-            sampleRunNumbers = self.getProperty("SampleRunNumbers").value
-            instrument = self.getProperty("Instrument").value
-            if sampleIPTS == Property.EMPTY_INT or len(sampleRunNumbers) == 0 or instrument == "":
+            runs = getRuns()
+            if len(runs) == 0:
                 return False
             else:
-                if instrument == "WAND^2":
-                    run_str = "HB2C_{}".format(sampleRunNumbers[0])
-                elif instrument == "MIDAS":
-                    run_str = "HB2A_{}".format(sampleRunNumbers[0])
-                else:
-                    return False
-                runs = []
-                with amend_config(facility="HFIR", instrument="HB2C" if instrument == "WAND^2" else "HB2A"):
-                    runs = FileFinder.findRuns(run_str)
-                if not runs:
-                    return False
                 diameter = 0.0
-                with h5py.File(runs[0], "r") as f:
-                    diameter = f["/entry/vanadium_diameter"][0]
-                    diameter = diameter.decode("utf-8")
-                    diameter = float(diameter)
+                diameter = readFloatFromFile(runs[0], "/entry/vanadium_diameter")
                 currentProp.value = diameter
 
             return True
@@ -269,26 +262,11 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         self.setPropertySettings("VanadiumDiameter", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforVanadiumDiameter))
 
         def checkRunNumbersforVanadiumRunNumbers(algo, currentProp, watchedProp):
-            sampleIPTS = self.getProperty("SampleIPTS").value
-            sampleRunNumbers = self.getProperty("SampleRunNumbers").value
-            instrument = self.getProperty("Instrument").value
-            if sampleIPTS == Property.EMPTY_INT or len(sampleRunNumbers) == 0 or instrument == "":
+            runs = getRuns()
+            if len(runs) == 0:
                 return False
             else:
-                if instrument == "WAND^2":
-                    run_str = "HB2C_{}".format(sampleRunNumbers[0])
-                elif instrument == "MIDAS":
-                    run_str = "HB2A_{}".format(sampleRunNumbers[0])
-                else:
-                    return False
-                runs = []
-                with amend_config(facility="HFIR", instrument="HB2C" if instrument == "WAND^2" else "HB2A"):
-                    runs = FileFinder.findRuns(run_str)
-                if not runs:
-                    return False
-                vanadiumRunNumbers = []
-                with h5py.File(runs[0], "r") as f:
-                    vanadiumRunNumbers = f["/entry/vanadium_run_numbers"][()]
+                vanadiumRunNumbers = readArrayFromFile(runs[0], "/entry/vanadium_run_numbers")
                 self.setProperty("VanadiumRunNumbers", vanadiumRunNumbers)
 
             return True
@@ -297,27 +275,26 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         self.setPropertySettings("VanadiumRunNumbers", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforVanadiumRunNumbers))
         self.setPropertySettings("VanadiumRunNumbers", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforVanadiumRunNumbers))
 
-        def checkRunNumbersforVanadiumBackgroundRunNumbers(algo, currentProp, watchedProp):
-            sampleIPTS = self.getProperty("SampleIPTS").value
-            sampleRunNumbers = self.getProperty("SampleRunNumbers").value
-            instrument = self.getProperty("Instrument").value
-            if sampleIPTS == Property.EMPTY_INT or len(sampleRunNumbers) == 0 or instrument == "":
+        def checkRunNumbersforVanadiumIPTS(algo, currentProp, watchedProp):
+            runs = getRuns()
+            if len(runs) == 0:
                 return False
             else:
-                if instrument == "WAND^2":
-                    run_str = "HB2C_{}".format(sampleRunNumbers[0])
-                elif instrument == "MIDAS":
-                    run_str = "HB2A_{}".format(sampleRunNumbers[0])
-                else:
-                    return False
-                runs = []
-                with amend_config(facility="HFIR", instrument="HB2C" if instrument == "WAND^2" else "HB2A"):
-                    runs = FileFinder.findRuns(run_str)
-                if not runs:
-                    return False
-                vanadiumBGRunNumbers = []
-                with h5py.File(runs[0], "r") as f:
-                    vanadiumBGRunNumbers = f["/entry/vanadium_background_run_numbers"][()]
+                vanadiumIPTS = readIntFromFile(runs[0], "/entry/vanadium_ipts")
+                self.setProperty("VanadiumIPTS", vanadiumIPTS)
+
+            return True
+
+        self.setPropertySettings("VanadiumIPTS", SetDefaultWhenProperty("Instrument", checkRunNumbersforVanadiumIPTS))
+        self.setPropertySettings("VanadiumIPTS", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforVanadiumIPTS))
+        self.setPropertySettings("VanadiumIPTS", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforVanadiumIPTS))
+
+        def checkRunNumbersforVanadiumBackgroundRunNumbers(algo, currentProp, watchedProp):
+            runs = getRuns()
+            if len(runs) == 0:
+                return False
+            else:
+                vanadiumBGRunNumbers = readArrayFromFile(runs[0], "/entry/vanadium_background_run_numbers")
                 self.setProperty("VanadiumBackgroundRunNumbers", vanadiumBGRunNumbers)
 
             return True
@@ -330,6 +307,22 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         )
         self.setPropertySettings(
             "VanadiumBackgroundRunNumbers", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforVanadiumBackgroundRunNumbers)
+        )
+
+        def checkRunNumbersforVanadiumBackgroundIPTS(algo, currentProp, watchedProp):
+            runs = getRuns()
+            if len(runs) == 0:
+                return False
+            else:
+                vanadiumBGIPTS = readIntFromFile(runs[0], "/entry/vanadium_background_ipts")
+                self.setProperty("VanadiumBackgroundIPTS", vanadiumBGIPTS)
+
+            return True
+
+        self.setPropertySettings("VanadiumBackgroundIPTS", SetDefaultWhenProperty("Instrument", checkRunNumbersforVanadiumBackgroundIPTS))
+        self.setPropertySettings("VanadiumBackgroundIPTS", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforVanadiumBackgroundIPTS))
+        self.setPropertySettings(
+            "VanadiumBackgroundIPTS", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforVanadiumBackgroundIPTS)
         )
 
     def validateInputs(self):
