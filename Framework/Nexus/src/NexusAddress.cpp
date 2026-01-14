@@ -84,7 +84,7 @@ NexusAddress NexusAddress::parent_path() const { return NexusAddress(m_path.pare
 
 NexusAddress NexusAddress::fromRoot() const { return NexusAddress(nxroot / m_path); }
 
-NexusAddress NexusAddress::stem() const { return NexusAddress(m_path.stem()); }
+NexusAddress NexusAddress::stem() const { return NexusAddress(m_path.filename()); }
 
 NexusAddress NexusAddress::root() { return NexusAddress(nxroot); }
 

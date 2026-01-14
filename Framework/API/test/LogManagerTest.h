@@ -586,7 +586,7 @@ public:
     // ---- Now re-load the same and compare ------
     th.reopenFile();
     LogManager run2;
-    run2.loadNexus(th.file.get(), "logs");
+    run2.loadNexus(th.file.get(), "logs", false);
     TS_ASSERT(run2.hasProperty("double_series"));
     TS_ASSERT(run2.hasProperty("int_val"));
     TS_ASSERT(run2.hasProperty("string_val"));
@@ -597,7 +597,7 @@ public:
     // files)
     LogManager run3;
     th.file.get()->openGroup("logs", "NXgroup");
-    run3.loadNexus(th.file.get(), "");
+    run3.loadNexus(th.file.get(), "", false);
     TS_ASSERT(run3.hasProperty("double_series"));
     TS_ASSERT(run3.hasProperty("int_val"));
     TS_ASSERT(run3.hasProperty("string_val"));
@@ -613,7 +613,7 @@ public:
     th.reopenFile();
     th.file->openGroup("sample", "NXsample");
     LogManager run3;
-    run3.loadNexus(th.file.get(), "");
+    run3.loadNexus(th.file.get(), "", false);
   }
 
   void test_operator_equals() {

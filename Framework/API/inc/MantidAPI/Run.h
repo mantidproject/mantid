@@ -108,9 +108,9 @@ public:
   void saveNexus(Nexus::File *file, const std::string &group, bool keepOpen = false) const override;
 
   /// Load the run from a NeXus file with a given group name.
-  /// Overload that uses NexusDescriptor for faster metadata lookup
-  void loadNexus(Nexus::File *file, const std::string &group, const Mantid::Nexus::NexusDescriptor &fileInfo,
-                 const std::string &prefix, bool keepOpen = false) override;
+  /// Overload that uses the file's NexusDescriptor for faster metadata lookup
+  void loadNexus(Nexus::File *file, const std::string &group, const std::string &prefix,
+                 bool keepOpen = false) override;
   /// Load the run from a NeXus file with a given group name
   void loadNexus(Nexus::File *file, const std::string &group, bool keepOpen = false) override;
 
