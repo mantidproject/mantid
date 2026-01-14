@@ -1807,7 +1807,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
       try {
         extended_ns = protonchargelog->nthTime(1).totalNanoseconds() - protonchargelog->nthTime(0).totalNanoseconds();
       } catch (std::runtime_error &) {
-        g_log.information() << "The log was filtered and no second pulse exists inside the ROI.\n";
+        g_log.warning() << "The log was filtered and no second pulse exists inside the ROI.\n";
       }
     }
   }
