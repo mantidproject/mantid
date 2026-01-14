@@ -159,15 +159,15 @@ class FullInstrumentViewModel:
 
     @property
     def picked_detector_ids(self) -> np.ndarray:
-        return self._detector_ids[self._detector_is_picked]
+        return self._detector_ids[self.is_pickable & self._detector_is_picked]
 
     @property
     def picked_spectrum_nos(self) -> np.ndarray:
-        return self._spectrum_nos[self._is_valid & self._detector_is_picked]
+        return self._spectrum_nos[self.is_pickable & self._detector_is_picked]
 
     @property
     def picked_workspace_indices(self) -> np.ndarray:
-        return self._workspace_indices[self._detector_is_picked]
+        return self._workspace_indices[self.is_pickable & self._detector_is_picked]
 
     @property
     def detector_counts(self) -> np.ndarray:
@@ -489,15 +489,11 @@ class FullInstrumentViewModel:
     def apply_detector_masks(self, mask_keys: list[str]) -> None:
         ws_masks = [ws.extractY().flatten() for ws in self.get_mask_workspaces_in_ads() if ws.name() in mask_keys]
         cached_masks = [self._cached_masks_map[key] for key in mask_keys if key in self._cached_masks_map.keys()]
-
         if not ws_masks and not cached_masks:
             self._is_masked = self._is_masked_in_ws
-            self._detector_is_picked[~self.is_pickable] = False
             return
-
         total_mask = np.logical_or.reduce(ws_masks + cached_masks)
         self._is_masked = total_mask
-        self._detector_is_picked[~self.is_pickable] = False
 
     def apply_detector_pick_selections(self, selection_keys: list[str]) -> None:
         cached_selections = [self._cached_rois_map[key] for key in selection_keys if key in self._cached_rois_map.keys()]
