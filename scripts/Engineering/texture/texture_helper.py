@@ -355,7 +355,8 @@ def plot_exp_pf(
     ax.text(-0.95, -0.8, ax_labels[0], fontsize=10)
 
     cbar = fig.colorbar(scat_plot, cax=cax)
-    cbar.set_label(column_label, rotation=0, labelpad=15)
+    label_rot = 0 if len(column_label) < 5 else -90
+    cbar.set_label(column_label, rotation=label_rot, labelpad=15)
 
     labels = debug_info if debug_info is not None else [f"Workspace Index: {i}" for i in range(len(xy))]
 
@@ -462,7 +463,8 @@ def plot_contour_pf(
     ax.set_label("Pole Figure Plot")
     contour_plot.set_label("pole figure data")
     cbar = fig.colorbar(contour_plot, cax=cax)
-    cbar.set_label(column_label, rotation=0, labelpad=15)
+    label_rot = 0 if len(column_label) < 5 else -90
+    cbar.set_label(column_label, rotation=label_rot, labelpad=15)
     return fig, ax
 
 
@@ -489,10 +491,11 @@ def get_pole_figure_data(ws: TableWorkspace, projection: str, readout_col: str =
         proj = ster_proj
     else:
         proj = azim_proj
+    i = np.asarray(ws.column(readout_col))
+    mask = np.isfinite(i)
     alphas = np.asarray(ws.column("Alpha"))
     betas = np.asarray(ws.column("Beta"))
-    i = np.asarray(ws.column(readout_col))
-    return proj(alphas, betas, i)
+    return proj(alphas[mask], betas[mask], i[mask])
 
 
 def ster_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarray:
