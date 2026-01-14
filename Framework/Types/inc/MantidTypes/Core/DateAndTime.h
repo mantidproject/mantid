@@ -59,6 +59,7 @@ public:
   std::string toSimpleString() const;
   std::string toFormattedString(const std::string &format = "%Y-%b-%d %H:%M:%S") const;
   std::string toISO8601String() const;
+  std::string toHttpFormat() const;
 
   /// Stream output operator
   friend MANTID_TYPES_DLL std::ostream &operator<<(std::ostream &stream, const DateAndTime &t);
