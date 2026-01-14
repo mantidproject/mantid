@@ -14,6 +14,7 @@
 #include "MantidKernel/MantidVersion.h"
 #include <chrono>
 #include <iostream>
+#include <regex>
 #include <sstream>
 
 namespace Mantid::Kernel {
@@ -61,24 +62,40 @@ Types::Core::DateAndTime create_releaseDateAndTime() {
     // something went wrong in VersionNumber.cmake so give the default constructor result
   } else {
     // pull apart string into year, month, and day objects
-    // WARNING if the format changes this will break
-    const auto day = std::chrono::day(std::stoi(REVISION_DATE.substr(4, 2)));
-    const auto month = to_month(REVISION_DATE.substr(7, 3));
-    const auto year = std::chrono::year(std::stoi(REVISION_DATE.substr(11, 4)));
-    std::string time = REVISION_DATE.substr(16);
-    if (time.empty()) {
-      time = "00:01"; // assume one minute past midnight
-    } else {
-      time.erase(find_if(time.begin(), time.end(), isspace));
-    }
+    // WARNING if the format changes this will break and default DateAndTime is returned
+    std::regex format(R"(^.+,\s+(\d{1,2})\s+(\w{3})\s+(\d{4})\s+(.+)\s*$)");
+    std::smatch matches;
+    if (std::regex_search(REVISION_DATE, matches, format)) {
+      constexpr size_t INDEX_DAY{1};
+      constexpr size_t INDEX_MONTH{2};
+      constexpr size_t INDEX_YEAR{3};
+      constexpr size_t INDEX_TIME{4};
 
-    // create a proper chrono from it
-    std::chrono::year_month_day ymd(year, month, day);
-    // convert to iso8601 string to get to DateAndTime
-    std::stringstream isostr;
-    isostr << ymd << "T" << time;
+      // day is the next element by whitespace
+      const auto day = std::chrono::day(std::stoi(matches[INDEX_DAY].str()));
+      // then comes 3 character month
+      const auto month = to_month(matches[INDEX_MONTH].str());
+      // then 4 digit year
+      const auto year = std::chrono::year(std::stoi(matches[INDEX_YEAR].str()));
+      // everything past that is time
+      std::string time = matches[INDEX_TIME].str();
+      if (time.empty()) {
+	time = "00:01"; // assume one minute past midnight
+      } else {
+	// remove whitespace that is internal to the time
+	time.erase(find_if(time.begin(), time.end(), isspace));
+      }
 
-    release. setFromISO8601(isostr.str());
+      // create a proper chrono from it
+      std::chrono::year_month_day ymd(year, month, day);
+
+      // convert to iso8601 string to get to DateAndTime
+      std::stringstream isostr;
+      isostr << ymd << "T" << time;
+
+      // convert to a proper object
+      release.setFromISO8601(isostr.str());
+    } // otherwise it will remain the default value
   }
   return release;
 }
