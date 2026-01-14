@@ -24,7 +24,7 @@ using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed2)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadNexusProcessed2)
 //----------------------------------------------------------------------------------------------
 
 namespace {
@@ -235,7 +235,7 @@ bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws, size_t entryNumb
   return false;
 }
 
-int LoadNexusProcessed2::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadNexusProcessed2::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   if (descriptor.isEntry("/mantid_workspace_1"))
     return LoadNexusProcessed::confidence(descriptor) + 1; // incrementally better than v1.
   else

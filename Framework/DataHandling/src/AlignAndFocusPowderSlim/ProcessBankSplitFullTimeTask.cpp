@@ -12,7 +12,6 @@
 #include "MantidKernel/ParallelMinMax.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
-#include "MantidKernel/Unit.h"
 #include "MantidNexus/H5Util.h"
 #include "tbb/parallel_for.h"
 #include "tbb/parallel_reduce.h"
@@ -23,41 +22,24 @@ namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
 namespace {
 
-const std::string MICROSEC("microseconds");
-
 // Logger for this class
 auto g_log = Kernel::Logger("ProcessBankSplitFullTimeTask");
 
 } // namespace
-ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
-    std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
-    std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
-    const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
-    const std::map<size_t, std::vector<detid_t>> &grouping, const std::set<detid_t> &masked,
-    const size_t events_per_chunk, const size_t grainsize_event, const std::vector<PulseROI> &pulse_indices,
-    const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap, std::shared_ptr<API::Progress> &progress)
-    : m_h5file(h5file), m_bankEntries(bankEntryNames),
-      m_loader(std::make_shared<NexusLoader>(is_time_filtered, pulse_indices)), m_workspaceIndices(workspaceIndices),
-      m_wksps(wksps), m_calibration(calibration), m_scale_at_sample(scale_at_sample), m_grouping(grouping),
-      m_masked(masked), m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap),
-      m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<std::string> &bankEntryNames, H5::H5File &h5file, std::shared_ptr<NexusLoader> loader,
     std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
-    const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
-    const std::map<size_t, std::vector<detid_t>> &grouping, const std::set<detid_t> &masked,
-    const size_t events_per_chunk, const size_t grainsize_event,
+    const BankCalibrationFactory &calibFactory, const size_t events_per_chunk, const size_t grainsize_event,
     const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap, std::shared_ptr<API::Progress> &progress)
-    : m_h5file(h5file), m_bankEntries(bankEntryNames), m_loader(std::move(loader)),
-      m_workspaceIndices(workspaceIndices), m_wksps(wksps), m_calibration(calibration),
-      m_scale_at_sample(scale_at_sample), m_grouping(grouping), m_masked(masked), m_events_per_chunk(events_per_chunk),
-      m_splitterMap(splitterMap), m_grainsize_event(grainsize_event), m_progress(progress) {}
+    : ProcessBankTaskBase(bankEntryNames, loader, calibFactory), m_h5file(h5file), m_workspaceIndices(workspaceIndices),
+      m_wksps(wksps), m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap),
+      m_grainsize_event(grainsize_event), m_progress(progress) {}
 
 void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
-  for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
-    const auto &bankName = m_bankEntries[wksp_index];
+  for (size_t bank_index = range.begin(); bank_index < range.end(); ++bank_index) {
+    const auto &bankName = this->bankName(bank_index);
     // empty bank names indicate spectra to skip; control should never get here, but just in case
     if (bankName.empty()) {
       continue;
@@ -77,28 +59,24 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
     }
 
     std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
-    auto eventRanges = m_loader->getEventIndexRanges(event_group, total_events, &event_index);
+    auto eventRanges = this->getEventIndexRanges(event_group, total_events, &event_index);
 
     // Get all spectra for this bank.
     // Create temporary y arrays for each workspace.
     std::vector<API::ISpectrum *> spectra;
     std::vector<std::vector<uint32_t>> y_temps;
     for (const auto &wksp : m_wksps) {
-      spectra.push_back(&wksp->getSpectrum(wksp_index));
+      spectra.push_back(&wksp->getSpectrum(bank_index));
       y_temps.emplace_back(spectra.back()->dataY().size());
     }
-
-    // create object so bank calibration can be re-used
-    std::unique_ptr<BankCalibration> calibration = nullptr;
-
-    // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
-    std::vector<int> detids_in_group;
 
     // get handle to the data
     auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
     std::string tof_unit;
     Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
-    const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
+    // now the calibration for the output group can be created
+    // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
+    const auto calibration = this->getCalibration(tof_unit, bank_index);
 
     const auto frequency_log =
         dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(m_wksps.at(0)->run().getProperty("frequency"));
@@ -149,31 +127,14 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
       }
 
       // log the event ranges being processed
-      std::ostringstream oss;
-      oss << "Processing " << bankName << " with " << total_events_to_read << " events in the ranges: ";
-      for (size_t i = 0; i < offsets.size(); ++i) {
-        oss << "[" << offsets[i] << ", " << (offsets[i] + slabsizes[i]) << "), ";
+      g_log.debug(toLogString(bankName, total_events_to_read, offsets, slabsizes));
+
+      if (total_events_to_read == 0) {
+        continue; // nothing to do
       }
-      oss << "\n";
-      g_log.debug() << oss.str();
 
       // load detid and tof at the same time
-      tbb::parallel_invoke(
-          [&] { // load detid
-            m_loader->loadData(detID_SDS, event_detid, offsets, slabsizes);
-            // immediately find min/max to allow for other things to read disk
-            const auto [minval, maxval] = Mantid::Kernel::parallel_minmax(event_detid, m_grainsize_event);
-            // only recreate calibration if it doesn't already have the useful information
-            if ((!calibration) || (calibration->idmin() > static_cast<detid_t>(minval)) ||
-                (calibration->idmax() < static_cast<detid_t>(maxval))) {
-              calibration = std::make_unique<BankCalibration>(
-                  static_cast<detid_t>(minval), static_cast<detid_t>(maxval), time_conversion, detids_in_group,
-                  m_calibration, m_scale_at_sample, m_masked);
-            }
-          },
-          [&] { // load time-of-flight
-            m_loader->loadData(tof_SDS, event_time_of_flight, offsets, slabsizes);
-          });
+      this->loadEvents(detID_SDS, tof_SDS, offsets, slabsizes, event_detid, event_time_of_flight);
 
       pulse_times_idx->resize(total_events_to_read);
       // get the pulsetime of every event, event_index maps the first event of each pulse
@@ -209,7 +170,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
                 // Calculate the full time at sample: full_time = pulse_time + (tof * correctionFactor), where
                 // correctionFactor is either scale_at_sample[detid] or 1.0
                 const double correctionFactor =
-                    calibration->value_scale_at_sample(static_cast<detid_t>((*event_detid)[k]));
+                    calibration.value_scale_at_sample(static_cast<detid_t>((*event_detid)[k]));
 
                 const auto tof_in_nanoseconds =
                     static_cast<int64_t>(static_cast<double>((*event_time_of_flight)[k]) * correctionFactor);
@@ -251,7 +212,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
                                                  return (*event_time_of_flight)[k];
                                                });
 
-              ProcessEventsTask task(&event_id_view_for_target, &event_tof_view_for_target, calibration.get(),
+              ProcessEventsTask task(&event_id_view_for_target, &event_tof_view_for_target, &calibration,
                                      &spectra[idx]->readX());
 
               const tbb::blocked_range<size_t> range_info(0, indices.size(), m_grainsize_event);
@@ -264,13 +225,7 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
     }
 
     // copy the data out into the correct spectrum and calculate errors
-    tbb::parallel_for(size_t(0), m_wksps.size(), [&](size_t i) {
-      auto &y_values = spectra[i]->dataY();
-      std::copy(y_temps[i].cbegin(), y_temps[i].cend(), y_values.begin());
-      auto &e_values = spectra[i]->dataE();
-      std::transform(y_temps[i].cbegin(), y_temps[i].cend(), e_values.begin(),
-                     [](uint32_t y) { return std::sqrt(static_cast<double>(y)); });
-    });
+    tbb::parallel_for(size_t(0), m_wksps.size(), [&](size_t i) { copyDataToSpectrum(y_temps[i], spectra[i]); });
 
     g_log.debug() << bankName << " stop" << timer << std::endl;
     m_progress->report();

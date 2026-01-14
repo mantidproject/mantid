@@ -18,6 +18,7 @@
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidNexus/NexusClasses_fwd.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 #include <map>
 #include <memory>
 #include <vector>
@@ -42,7 +43,7 @@ Required Properties:
 <LI> InputWorkspace - The name of the workspace to put the data </LI>
 </UL>
 */
-class MANTID_DATAHANDLING_DLL LoadNexusProcessed : public API::NexusFileLoader {
+class MANTID_DATAHANDLING_DLL LoadNexusProcessed : public API::IFileLoader<Mantid::Nexus::NexusDescriptorLazy> {
 
 public:
   /// Default constructor
@@ -66,7 +67,7 @@ public:
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
 protected:
   /// Read the spectra
@@ -80,7 +81,7 @@ private:
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
-  void execLoader() override;
+  void exec() override;
 
   void reinitSpecialWorkspace2D(std::shared_ptr<Mantid::DataObjects::SpecialWorkspace2D> specialLocalWorkspace);
 

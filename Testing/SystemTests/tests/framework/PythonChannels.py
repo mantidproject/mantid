@@ -65,9 +65,9 @@ def run_server():
             time.sleep(0.1)
             self._set_headers()
             if self.path == "/instruments":
-                self.wfile.write("[]".encode())
+                self.wfile.write(b"[]")
             else:
-                self.wfile.write('{"tag_name": "v6.8.0"}'.encode())
+                self.wfile.write(b'{"tag_name": "v6.8.0"}')
 
     HTTPServer(("", 18888), Handler).serve_forever()
 

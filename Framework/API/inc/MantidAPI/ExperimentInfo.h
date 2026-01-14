@@ -15,7 +15,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidNexus/NexusDescriptor.h"
 
 #include <mutex>
 
@@ -73,8 +72,7 @@ public:
   /// Returns the parameterized instrument
   Geometry::Instrument_const_sptr getInstrument() const;
 
-  /// Returns the set of parameters modifying the base instrument
-  /// (const-version)
+  /// Returns the set of parameters modifying the base instrument (const-version)
   const Geometry::ParameterMap &instrumentParameters() const;
   /// Returns a modifiable set of instrument parameters
   Geometry::ParameterMap &instrumentParameters();
@@ -124,8 +122,8 @@ public:
   /// Saves this experiment description to the open NeXus file
   void saveExperimentInfoNexus(Nexus::File *file, bool saveInstrument, bool saveSample, bool saveLogs) const;
 
-  void loadExperimentInfoNexus(const std::string &nxFilename, Nexus::File *file, std::string &parameterStr,
-                               const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &prefix);
+  void loadExperimentInfoNexus(std::string const &nxFilename, Nexus::File *file, std::string &parameterStr,
+                               std::string const &prefix);
 
   /// Loads an experiment description from the open NeXus file
   void loadExperimentInfoNexus(const std::string &nxFilename, Nexus::File *file, std::string &parameterStr);
@@ -133,21 +131,18 @@ public:
   void loadInstrumentInfoNexus(const std::string &nxFilename, Nexus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file without reading any parameters
   void loadInstrumentInfoNexus(const std::string &nxFilename, Nexus::File *file);
-  /// Load instrument parameters from an open Nexus file in Instument group if
-  /// found there
+  /// Load instrument parameters from an open Nexus file in Instrument group if found there
   void loadInstrumentParametersNexus(Nexus::File *file, std::string &parameterStr);
 
-  /// Load the sample and log info from an open NeXus file. Overload that uses NexusDescriptor for faster metadata
-  /// lookup
-  void loadSampleAndLogInfoNexus(Nexus::File *file, const Mantid::Nexus::NexusDescriptor &fileInfo,
-                                 const std::string &prefix);
+  /// Load the sample and log info from an open NeXus file.
+  /// Overload that uses the file's NexusDescriptor for faster metadata lookup
+  void loadSampleAndLogInfoNexus(Nexus::File *file, std::string const &prefix);
   /// Load the sample and log info from an open NeXus file.
   void loadSampleAndLogInfoNexus(Nexus::File *file);
   /// Populate the parameter map given a string
   void readParameterMap(const std::string &parameterStr);
 
-  /// Returns the start date for this experiment (or current time if no info
-  /// available)
+  /// Returns the start date for this experiment (or current time if no info available)
   std::string getWorkspaceStartDate() const;
 
   // run/experiment stat time if available, empty otherwise
@@ -186,12 +181,10 @@ private:
                              const std::string &name, const Geometry::XMLInstrumentParameter &paramInfo,
                              const Run &runData);
 
-  /// Attempt to load instrument embedded in Nexus file. *file must have
-  /// instrument group open.
+  /// Attempt to load instrument embedded in Nexus file. *file must have instrument group open.
   void loadEmbeddedInstrumentInfoNexus(Nexus::File *file, std::string &instrumentName, std::string &instrumentXml);
 
-  /// Set the instrument given the name and XML leading from IDF file if XML
-  /// string is empty
+  /// Set the instrument given the name and XML leading from IDF file if XML string is empty
   void setInstumentFromXML(const std::string &nxFilename, std::string &instrumentName, std::string &instrumentXml);
 
   // Loads the xml from an instrument file with some basic error handling
@@ -211,8 +204,7 @@ private:
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
   mutable std::mutex m_spectrumInfoMutex;
-  // This vector stores boolean flags but uses char to do so since
-  // std::vector<bool> is not thread-safe.
+  // This vector stores boolean flags but uses char to do so since std::vector<bool> is not thread-safe.
   mutable std::vector<char> m_spectrumDefinitionNeedsUpdate;
 };
 

@@ -16,7 +16,7 @@ Thinking of the orthonormal reciprocal basis :math:`(\vec{u^{*}}, \vec{v^{*}}, \
 resulting from transforming the reciprocal lattice vectors by the Busing matrix :math:`B`,
 the algorithm will try the following alignment:
 
-- align :math:`\vec{u^{*} \equiv \vec{a^{*}}` with the neutron beam ( :math:`Z` axis)
+- align :math:`\vec{u^{*}} \equiv \vec{a^{*}}` with the neutron beam ( :math:`Z` axis)
 - align :math:`\vec{v^{*}}` with the horizontal axis ( :math:`X` axis)
 - align :math:`\vec{w^{*}}` with the vertical axis ( :math:`Y` axis)
 

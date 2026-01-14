@@ -13,7 +13,7 @@ are not available in the model associated with the data table.
 from typing import Union
 
 from sans.common.enums import ReductionDimensionality, ReductionMode, RangeStepType, SaveType, DetectorType, FitModeForMerge
-from sans.common.general_functions import get_ranges_from_event_slice_setting, wav_ranges_to_str
+from sans.common.general_functions import get_ranges_from_event_slice_setting, wav_ranges_to_str, parse_simple_range_of_number_pairs
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.AllStates import AllStates
 from sans.gui_logic.gui_common import meter_2_millimeter, millimeter_2_meter, apply_selective_view_scaling, undo_selective_view_scaling
@@ -689,6 +689,7 @@ class StateGuiModel(ModelCommon):
 
     @phi_limit_min.setter
     def phi_limit_min(self, value):
+        self._all_states.mask.phi_range = [value, self._all_states.mask.phi_max]
         self._all_states.mask.phi_min = value
 
     @property
@@ -698,7 +699,17 @@ class StateGuiModel(ModelCommon):
 
     @phi_limit_max.setter
     def phi_limit_max(self, value):
+        self._all_states.mask.phi_range = [self._all_states.mask.phi_min, value]
         self._all_states.mask.phi_max = value
+
+    @property
+    def phi_range(self):
+        val = ",".join(map(str, self._all_states.mask.phi_range))
+        return self._get_val_or_default(val, "")
+
+    @phi_range.setter
+    def phi_range(self, value):
+        self._all_states.mask.phi_range = parse_simple_range_of_number_pairs(value)
 
     @property
     def phi_limit_use_mirror(self):

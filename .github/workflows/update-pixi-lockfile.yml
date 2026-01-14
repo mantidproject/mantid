@@ -26,14 +26,17 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.MANTID_BUILDER_TOKEN }}
+          author: mantid-builder <mantid-builder@users.noreply.github.com>
+          committer: mantid-builder <mantid-builder@users.noreply.github.com>
           commit-message: Update pixi lockfile
           title: Update pixi lockfile
           body-path: diff.md
           branch: update-pixi
-          base: main  # change this to the default branch of your repository
+          base: main
           labels: |
             pixi
-            Maintenanance
+            Maintenance
+            DevOps
           delete-branch: true
           add-paths: pixi.lock

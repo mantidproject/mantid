@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-import io
 import os.path
 import sys
 import traceback
@@ -102,7 +101,7 @@ class EditorIO(object):
             self.editor.setFileName(filename)
 
         try:
-            with io.open(filename, "w", encoding="utf8", newline="") as f:
+            with open(filename, "w", encoding="utf8", newline="") as f:
                 f.write(self.editor.text())
             self.editor.setModified(False)
         except IOError as exc:

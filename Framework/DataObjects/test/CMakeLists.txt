@@ -9,6 +9,16 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(DataObjectsTest ${TEST_FILES})
   target_link_libraries(DataObjectsTest PRIVATE Mantid::DataObjects Mantid::Kernel Mantid::Nexus)
 
+  target_precompile_headers(
+    DataObjectsTest
+    PRIVATE
+    <cxxtest/WrappedTestSuite.h>
+    <MantidAPI/MatrixWorkspace.h>
+    <set>
+    <string>
+    <vector>
+  )
+
   add_framework_test_helpers(DataObjectsTest)
 
   if(TARGET GTest::gmock AND TARGET GTest::gtest)

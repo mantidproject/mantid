@@ -18,7 +18,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -71,14 +71,14 @@ public:
     // clean up possible rubbish from the previous runs
     std::string fullName = alg.getPropertyValue("Filename");
     if (fullName != "")
-      if (Poco::File(fullName).exists())
-        Poco::File(fullName).remove();
+      if (std::filesystem::exists(fullName))
+        std::filesystem::remove(fullName);
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
     std::string this_filename = alg.getProperty("Filename");
-    TSM_ASSERT("File was indeed created", Poco::File(this_filename).exists());
+    TSM_ASSERT("File was indeed created", std::filesystem::exists(this_filename));
 
     if (MakeFileBacked) {
       TSM_ASSERT("Workspace was made file-backed", ws->isFileBacked());
@@ -91,8 +91,8 @@ public:
     else {
 
       ws->clearFileBacked(false);
-      if (Poco::File(this_filename).exists())
-        Poco::File(this_filename).remove();
+      if (std::filesystem::exists(this_filename))
+        std::filesystem::remove(this_filename);
     }
   }
 
@@ -130,8 +130,8 @@ public:
     // Clean up file
     ws->clearFileBacked(false);
     std::string fullPath = alg.getPropertyValue("Filename");
-    if (Poco::File(fullPath).exists())
-      Poco::File(fullPath).remove();
+    if (std::filesystem::exists(fullPath))
+      std::filesystem::remove(fullPath);
   }
 
   void test_saveExpInfo() {
@@ -171,8 +171,8 @@ public:
     TS_ASSERT(alg.isExecuted());
     std::string this_filename = alg.getProperty("Filename");
     ws->clearFileBacked(false);
-    if (Poco::File(this_filename).exists())
-      Poco::File(this_filename).remove();
+    if (std::filesystem::exists(this_filename))
+      std::filesystem::remove(this_filename);
   }
 
   void test_saveOptions() {
@@ -201,9 +201,9 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
     std::string this_filename = alg.getProperty("Filename");
-    const auto fileSize = Poco::File(this_filename).getSize();
-    if (Poco::File(this_filename).exists())
-      Poco::File(this_filename).remove();
+    const auto fileSize = std::filesystem::file_size(this_filename);
+    if (std::filesystem::exists(this_filename))
+      std::filesystem::remove(this_filename);
 
     // Only save data
     SaveMD2 alg2;
@@ -218,9 +218,9 @@ public:
     alg2.execute();
     TS_ASSERT(alg2.isExecuted());
     std::string this_filename2 = alg2.getProperty("Filename");
-    const auto fileSize2 = Poco::File(this_filename2).getSize();
-    if (Poco::File(this_filename2).exists())
-      Poco::File(this_filename2).remove();
+    const auto fileSize2 = std::filesystem::file_size(this_filename2);
+    if (std::filesystem::exists(this_filename2))
+      std::filesystem::remove(this_filename2);
 
     // The second file should be small since less is saved
     TS_ASSERT_LESS_THAN(fileSize2, fileSize);
@@ -253,8 +253,8 @@ public:
     TS_ASSERT(alg.isExecuted());
     std::string this_filename = alg.getProperty("Filename");
     ws->clearFileBacked(false);
-    if (Poco::File(this_filename).exists()) {
-      Poco::File(this_filename).remove();
+    if (std::filesystem::exists(this_filename)) {
+      std::filesystem::remove(this_filename);
     }
   }
 
@@ -303,8 +303,8 @@ public:
 
     // Clean up
     const std::string this_filename = saveAlg.getProperty("Filename");
-    if (Poco::File(this_filename).exists()) {
-      Poco::File(this_filename).remove();
+    if (std::filesystem::exists(this_filename)) {
+      std::filesystem::remove(this_filename);
     }
   }
 
@@ -321,9 +321,9 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     filename = alg.getPropertyValue("Filename");
-    TSM_ASSERT("File was indeed created", Poco::File(filename).exists());
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    TSM_ASSERT("File was indeed created", std::filesystem::exists(filename));
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void test_histo2() {

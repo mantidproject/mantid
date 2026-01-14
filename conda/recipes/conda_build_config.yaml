@@ -108,7 +108,7 @@ sphinx_bootstrap_theme:
   - '==0.8.1'
 
 scipy:
-  - '>=1.10.0'
+  - '>=1.16.0,<1.17'
 
 # This is not a primary dependency, but we pin it to avoid a memory allocator mismatch.
 # Pillow 12.0.0 compiles with zlib-ng, which causes problems with jemalloc.
@@ -165,9 +165,6 @@ quickbayes:
 
 tbb:
   - '2021.*'
-
-texlive_core:
-  - '>=20180414'
 
 toml:
   - '>=0.10.2'

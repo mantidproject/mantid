@@ -26,7 +26,7 @@
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometryUtilities.h"
 #include <H5Cpp.h>
-#include <Poco/File.h>
+
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
@@ -1113,7 +1113,7 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &f
   H5::Group parentGroup;
 
   // Create or overwrite the NXentry parent group.
-  if (Poco::File(filePath).exists() && append) {
+  if (std::filesystem::exists(filePath) && append) {
     file = H5::H5File(filePath, H5F_ACC_RDWR, Mantid::Nexus::H5Util::defaultFileAcc()); // open existing file
     H5::Group rootGroup = file.openGroup("/");
     std::optional<H5::Group> maybeParent = utilities::findGroupByName(rootGroup, parentGroupName, NX_ENTRY);
@@ -1182,7 +1182,7 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &f
   //   * Any non-NXentry groups, or NXentry groups with unexpected names are ignored.
   //
 
-  if (!Poco::File(filePath).exists() && append)
+  if (!std::filesystem::exists(filePath) && append)
     throw std::runtime_error(std::string("NexusGeometrySave::saveInstrument: append specified but file '") + filePath +
                              "' does not exist");
 

@@ -23,8 +23,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidReflectometry/SpecularReflectionAlgorithm.h"
 
-#include <Poco/Path.h>
 #include <boost/tuple/tuple.hpp>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -92,23 +92,21 @@ public:
     FrameworkManager::Instance();
 
     const std::string instDir = ConfigService::Instance().getInstrumentDirectory();
-    Poco::Path path(instDir);
-    path.append("INTER_Definition.xml");
+    std::filesystem::path path = std::filesystem::path(instDir) / "INTER_Definition.xml";
 
     auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loadAlg->initialize();
     loadAlg->setChild(true);
-    loadAlg->setProperty("Filename", path.toString());
+    loadAlg->setProperty("Filename", path.string());
     loadAlg->setPropertyValue("OutputWorkspace", "demo");
     loadAlg->execute();
     pointDetectorWS = loadAlg->getProperty("OutputWorkspace");
 
-    path = Poco::Path(instDir);
-    path.append("POLREF_Definition.xml");
+    path = std::filesystem::path(instDir) / "POLREF_Definition.xml";
     loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loadAlg->initialize();
     loadAlg->setChild(true);
-    loadAlg->setProperty("Filename", path.toString());
+    loadAlg->setProperty("Filename", path.string());
     loadAlg->setPropertyValue("OutputWorkspace", "demo");
     loadAlg->execute();
     linearDetectorWS = loadAlg->getProperty("OutputWorkspace");

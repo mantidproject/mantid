@@ -12,17 +12,15 @@
 // Poco
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
-// Visual Studio complains with the inclusion of Poco/FileStream
+// Visual Studio complains with the inclusion of Poco/NullStream
 // disabling this warning.
 #if defined(_WIN32) || defined(_WIN64)
 #pragma warning(push)
 #pragma warning(disable : 4250)
-#include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
 #include <Winhttp.h>
 #pragma warning(pop)
 #else
-#include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
 #include <cstdlib>
 #endif
@@ -205,7 +203,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   // Parse the server JSON response
   ::Json::CharReaderBuilder readerBuilder;
   Json::Value serverContents;
-  Poco::FileStream fileStream(gitHubJsonFile.string(), std::ios::in);
+  std::ifstream fileStream(gitHubJsonFile.string(), std::ios::in);
 
   std::string errors;
   Json::parseFromStream(readerBuilder, fileStream, &serverContents, &errors);

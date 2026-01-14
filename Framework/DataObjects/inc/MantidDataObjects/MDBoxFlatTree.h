@@ -11,7 +11,6 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidNexus/NexusDescriptor.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -114,10 +113,9 @@ public:
   static void saveExperimentInfos(Mantid::Nexus::File *const file, const API::IMDEventWorkspace_const_sptr &ws);
 
   // load experiment infos, previously saved through the saveExperimentInfo
-  // function. Overload version that uses NexusDescriptor for LoadMD
+  // function. Overload version that uses file's NexusDescriptor for LoadMD
   static void loadExperimentInfos(Mantid::Nexus::File *const file, const std::string &filename,
-                                  std::shared_ptr<API::MultipleExperimentInfos> mei,
-                                  const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &currentGroup,
+                                  std::shared_ptr<API::MultipleExperimentInfos> mei, const std::string &currentGroup,
                                   bool lazy = false);
 
   // load experiment infos, previously saved through the saveExperimentInfo

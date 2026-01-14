@@ -12,9 +12,9 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
-#include <Poco/File.h>
 
 #include <algorithm>
+#include <filesystem>
 #include <utility>
 
 using file_holder_type = std::unique_ptr<Mantid::Nexus::File>;
@@ -412,14 +412,10 @@ void MDBoxFlatTree::saveExperimentInfos(Mantid::Nexus::File *const file, const A
 
 void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const std::string &filename,
                                         std::shared_ptr<Mantid::API::MultipleExperimentInfos> mei,
-                                        const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &currentGroup,
-                                        bool lazy) {
+                                        const std::string &currentGroup, bool lazy) {
 
   // First, find how many experimentX blocks there are
-  const auto &allEntries = fileInfo.getAllEntries();
-  auto itNXgroup = allEntries.find("NXgroup");
-  const std::set<std::string> &nxGroupEntries =
-      (itNXgroup != allEntries.end()) ? itNXgroup->second : std::set<std::string>{};
+  std::set<std::string> nxGroupEntries = file->getEntriesByClass("NXgroup");
 
   std::list<uint16_t> experimentBlockNum;
   for (const std::string &entry : nxGroupEntries) {
@@ -451,7 +447,7 @@ void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const s
       std::string parameterStr;
       try {
         // Get the sample, logs, instrument
-        ei->loadExperimentInfoNexus(filename, file, parameterStr, fileInfo, file->getAddress());
+        ei->loadExperimentInfoNexus(filename, file, parameterStr, file->getAddress());
         // Now do the parameter map
         if (parameterStr.empty()) {
           ei->populateInstrumentParameters();
@@ -671,8 +667,8 @@ Mantid::Nexus::File *MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fil
                                                           const std::string &WSEventType, bool readOnly,
                                                           bool &alreadyExists) {
   alreadyExists = false;
-  Poco::File oldFile(fileName);
-  bool fileExists = oldFile.exists();
+  std::filesystem::path oldFile(fileName);
+  bool fileExists = std::filesystem::exists(oldFile);
   if (!fileExists && readOnly)
     throw Kernel::Exception::FileError("Attempt to open non-existing file in read-only mode", fileName);
 

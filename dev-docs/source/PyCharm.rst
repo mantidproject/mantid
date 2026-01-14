@@ -47,6 +47,7 @@ We use ``DebugWithRelRuntime`` for conda specific builds to allow debugging due 
     - ``{SOURCE}/qt/python/mantidqtinterfaces``
 
 - In the file tree select your build directory and mark as excluded by clicking the ``Excluded`` button whilst it's selected.
+- If the ``.pixi`` directory exists, mark it as excluded.
 - On Windows, select the ``{BUILD}/bin/DebugWithRelRuntime`` directory and mark as source by clicking the ``Sources`` button whilst it's selected.
 - On Linux or MacOS, select your ``{BUILD}/bin`` directory and mark as source by clicking the ``Sources`` button whilst it's selected.
 - Click Apply, and then OK to close the window.

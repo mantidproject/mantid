@@ -18,11 +18,12 @@
 #include "MantidKernel/UsageService.h"
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
+
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QToolButton>
+#include <filesystem>
+#include <fstream>
 
 #include <fstream>
 
@@ -250,11 +251,10 @@ bool QtMainWindowView::fileExists(std::string const &filepath) const {
     return false;
 
   try {
-    auto pocoPath = Poco::Path().parseDirectory(filepath);
-    auto pocoFile = Poco::File(pocoPath);
-    if (!pocoFile.exists())
+    std::filesystem::path fsPath(filepath);
+    if (!std::filesystem::exists(fsPath))
       return false;
-  } catch (Poco::PathSyntaxException &) {
+  } catch (std::filesystem::filesystem_error &) {
     return false;
   }
   return true;
@@ -263,10 +263,12 @@ bool QtMainWindowView::fileExists(std::string const &filepath) const {
 std::string QtMainWindowView::getFullFilePath(const std::string &filename) const {
   try {
     return FileFinder::Instance().getFullPath(filename);
-  } catch (const Poco::PathSyntaxException &) {
+  } catch (const std::exception &) {
     return "";
   }
 }
+
+int QtMainWindowView::getTabIndex() const { return m_ui.mainTabs->currentIndex(); };
 
 } // namespace CustomInterfaces::ISISReflectometry
 } // namespace MantidQt

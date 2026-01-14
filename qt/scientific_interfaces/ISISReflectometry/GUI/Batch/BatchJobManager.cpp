@@ -236,6 +236,10 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> BatchJobManager::rowProcess
   return RowProcessing::createAlgorithmRuntimeProps(m_batch);
 }
 
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> BatchJobManager::rowProcessingPropertiesDefault() const {
+  return RowProcessing::createAlgorithmRuntimePropsDefault(m_batch);
+}
+
 void BatchJobManager::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto item = getRunsTableItem(algorithm);
   assert(item);

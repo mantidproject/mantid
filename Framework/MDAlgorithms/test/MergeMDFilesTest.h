@@ -14,7 +14,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -34,8 +34,8 @@ public:
 
   void do_test_exec(const std::string &OutputFilename) {
     if (OutputFilename != "") {
-      if (Poco::File(OutputFilename).exists())
-        Poco::File(OutputFilename).remove();
+      if (std::filesystem::exists(OutputFilename))
+        std::filesystem::remove(OutputFilename);
     }
 
     // Create a bunch of input files
@@ -67,8 +67,8 @@ public:
     // clean up possible rubbish from previous runs
     std::string fullName = alg.getPropertyValue("OutputFilename");
     if (fullName != "")
-      if (Poco::File(fullName).exists())
-        Poco::File(fullName).remove();
+      if (std::filesystem::exists(fullName))
+        std::filesystem::remove(fullName);
 
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -94,9 +94,9 @@ public:
 
     if (!OutputFilename.empty()) {
       TS_ASSERT(ws->isFileBacked());
-      TS_ASSERT(Poco::File(actualOutputFilename).exists());
+      TS_ASSERT(std::filesystem::exists(actualOutputFilename));
       ws->clearFileBacked(false);
-      Poco::File(actualOutputFilename).remove();
+      std::filesystem::remove(actualOutputFilename);
     }
 
     // Cleanup generated input files
@@ -104,7 +104,7 @@ public:
       if (inWorkspace->getBoxController()->isFileBacked()) {
         std::string fileName = inWorkspace->getBoxController()->getFileIO()->getFileName();
         inWorkspace->clearFileBacked(false);
-        Poco::File(fileName).remove();
+        std::filesystem::remove(fileName);
       }
     }
 

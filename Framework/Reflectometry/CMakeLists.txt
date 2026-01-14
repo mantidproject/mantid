@@ -63,7 +63,7 @@ add_library(Reflectometry ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Reflectometry ALIAS Reflectometry)
 
 # Add a precompiled header
-target_precompile_headers(Reflectometry PRIVATE inc/MantidReflectometry/PrecompiledHeader.h)
+target_precompile_headers(Reflectometry PRIVATE <MantidAPI/Algorithm.h> <MantidKernel/Exception.h>)
 
 target_include_directories(
   Reflectometry PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

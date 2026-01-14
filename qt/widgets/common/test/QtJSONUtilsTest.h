@@ -44,6 +44,26 @@ public:
     testMaps(map, constructJSONMap());
   }
 
+  void test_outputJSONToStringQVariantMap() {
+    QVariantMap m{{"testkey", "testval"}, {"testkey1", "testval1"}, {"testkey2", "testval2"}};
+    QVariant v{m};
+    std::string output = MantidQt::API::outputJsonToString(v);
+    TS_ASSERT_EQUALS("{\"testkey\":\"testval\",\"testkey1\":\"testval1\",\"testkey2\":\"testval2\"}", output);
+  }
+
+  void test_outputJSONToStringQVariantList() {
+    QVariantList l{"teststr", "teststr1", "teststr2"};
+    QVariant v{l};
+    std::string output = MantidQt::API::outputJsonToString(v);
+    TS_ASSERT_EQUALS("[\"teststr\",\"teststr1\",\"teststr2\"]", output);
+  }
+
+  void test_outputJSONToStringQVariantString() {
+    QVariant v{"teststr"};
+    std::string output = MantidQt::API::outputJsonToString(v);
+    TS_ASSERT_EQUALS("teststr", output);
+  }
+
 private:
   QMap<QString, QVariant> constructJSONMap() {
     QMap<QString, QVariant> map;

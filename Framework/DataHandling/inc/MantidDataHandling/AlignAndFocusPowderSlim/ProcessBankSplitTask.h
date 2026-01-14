@@ -5,8 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
+#pragma once
+
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTaskBase.h"
 #include "MantidGeometry/IDTypes.h"
 #include <H5Cpp.h>
 #include <MantidAPI/Progress.h>
@@ -17,28 +21,20 @@
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
-class ProcessBankSplitTask {
+class ProcessBankSplitTask : public ProcessBankTaskBase {
 public:
-  ProcessBankSplitTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file, const bool is_time_filtered,
-                       std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
-                       const std::map<detid_t, double> &calibration, const std::map<detid_t, double> &scale_at_sample,
-                       const std::map<size_t, std::vector<detid_t>> &grouping, const std::set<detid_t> &masked,
+  ProcessBankSplitTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
+                       std::shared_ptr<NexusLoader> loader, std::vector<int> &workspaceIndices,
+                       std::vector<API::MatrixWorkspace_sptr> &wksps, const BankCalibrationFactory &calibFactory,
                        const size_t events_per_chunk, const size_t grainsize_event,
-                       std::vector<std::pair<int, PulseROI>> target_to_pulse_indices,
                        std::shared_ptr<API::Progress> &progress);
 
   void operator()(const tbb::blocked_range<size_t> &range) const;
 
 private:
   H5::H5File m_h5file;
-  const std::vector<std::string> m_bankEntries;
-  mutable NexusLoader m_loader;
   std::vector<int> m_workspaceIndices;
   std::vector<API::MatrixWorkspace_sptr> m_wksps;
-  const std::map<detid_t, double> m_calibration;           ///< detid: 1/difc
-  std::map<detid_t, double> m_scale_at_sample;             ///< multiplicative 0<value<1 to move neutron TOF at sample
-  const std::map<size_t, std::vector<detid_t>> m_grouping; ///< detector ids for output spectrum number
-  const std::set<detid_t> m_masked;
   /// number of events to read from disk at one time
   const size_t m_events_per_chunk;
   /// number of events to histogram in a single thread

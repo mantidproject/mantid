@@ -19,7 +19,7 @@ namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace API;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStasNexus)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadMcStasNexus)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -37,16 +37,11 @@ const std::string LoadMcStasNexus::category() const { return "DataHandling\\Nexu
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMcStasNexus::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadMcStasNexus::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   int confidence(0);
-  const auto &entries = descriptor.getAllEntries();
-  for (auto iter = entries.begin(); iter != entries.end(); ++iter) {
-    const auto grouped_entries = iter->second;
-    if (std::any_of(grouped_entries.cbegin(), grouped_entries.cend(),
-                    [](const auto &address) { return address.ends_with("information"); })) {
-      confidence = 40;
-      break;
-    }
+  std::string const firstEntry = descriptor.firstEntryNameType().first;
+  if (descriptor.isEntry("/" + firstEntry + "/instrument/information", "SDS")) {
+    confidence = 40;
   }
   return confidence;
 }

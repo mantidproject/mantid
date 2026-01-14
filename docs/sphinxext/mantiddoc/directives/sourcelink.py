@@ -125,7 +125,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                     + "."
                     + extension
                     + "\n"
-                    + "Possible matches"
+                    + "Possible matches "
                     + str(path_list)
                     + "\n"
                     + "Specify one using the "
@@ -166,6 +166,9 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         builddir = builddir.resolve()
 
         for dir_name, _, file_list in os.walk(self.source_root):
+            # Ignore files inside pixi environments that live within the source tree
+            if ".pixi" in dir_name:
+                continue
             if builddir in Path(dir_name).resolve().parents:
                 continue  # don't check or add to the cache
             for fname in file_list:

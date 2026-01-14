@@ -146,7 +146,7 @@ using namespace Nexus;
 using Mantid::Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
 /**
  * Return the confidence with this algorithm can load the file
@@ -154,7 +154,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILLReflectometry::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadILLReflectometry::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
 
   // fields existent only at the ILL
   if ((descriptor.isEntry("/entry0/wavelength") || // ILL D17

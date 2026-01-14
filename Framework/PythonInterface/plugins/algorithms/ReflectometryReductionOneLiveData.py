@@ -8,6 +8,33 @@ from mantid.api import AlgorithmFactory, AnalysisDataService, DataProcessorAlgor
 from mantid.kernel import config, Direction, Property, StringListValidator
 from mantid.simpleapi import AddSampleLogMultiple, CloneWorkspace, LoadInstrument, SetInstrumentParameter
 
+import json
+import re
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass
+class Field:
+    index: int
+    name: Optional[str] = None
+
+
+EXPERIMENT_SETTINGS_FIELDS = {
+    "ANGLE": Field(0),
+    "TITLE": Field(1),
+    "TRANS_RUN_1": Field(2, "FirstTransmissionRunList"),
+    "TRANS_RUN_2": Field(3, "SecondTransmissionRunList"),
+    "TRANS_SPECTRA": Field(4, "TransmissionProcessingInstructions"),
+    "Q_MIN": Field(5, "MomentumTransferMin"),
+    "Q_MAX": Field(6, "MomentumTransferMax"),
+    "Q_STEP": Field(7, "MomentumTransferStep"),
+    "SCALE": Field(8, "ScaleFactor"),
+    "ROI": Field(9, "ProcessingInstructions"),
+    "BACKGROUND": Field(10, "BackgroundProcessingInstructions"),
+    "ROI_DET_ID": Field(11, "ROIDetectorIDs"),
+}
+
 
 class LiveValue:
     """Hold the value and unit of a live instrument block value. Also hold an
@@ -19,12 +46,16 @@ class LiveValue:
     """
 
     LOG_TYPE_NUM_SERIES = "Number Series"
+    LOG_TYPE_STRING = "String"
+    PROP_TYPE_BLOCK = "Block"
+    PROP_TYPE_RUN = "Run"
 
-    def __init__(self, value, unit, alternative_name, log_type):
+    def __init__(self, value, unit, alternative_name, log_type, prop_type):
         self.value = value
         self.unit = unit
         self.alternative_name = alternative_name
         self.log_type = log_type
+        self.prop_type = prop_type
 
 
 class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
@@ -59,6 +90,12 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             defaultValue="GetLiveInstrumentValue",
             direction=Direction.Input,
             doc="The algorithm to use to get live values from the instrument",
+        )
+        self.declareProperty(
+            name="ExperimentSettingsState",
+            defaultValue="",
+            direction=Direction.Input,
+            doc="A JSON string representing the experiment settings table in the reflectometry GUI",
         )
 
         self._child_properties = [
@@ -119,8 +156,8 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         self.copyProperties("ReflectometryISISLoadAndProcess", self._child_properties)
 
     def PyExec(self):
-        self._setup_workspace_for_reduction()
-        alg = self._setup_reduction_algorithm()
+        live_values = self._setup_workspace_for_reduction()
+        alg = self._setup_reduction_algorithm(live_values)
         self._run_reduction_algorithm(alg)
 
     def _setup_workspace_for_reduction(self):
@@ -135,11 +172,37 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         # Set up the instrument after adding the sample logs in case the IDF uses any log values
         self._setup_instrument()
         self._setup_slits(liveValues)
+        return liveValues
 
-    def _setup_reduction_algorithm(self):
+    def _set_properties_from_experiment_settings(self, alg, live_values):
+        theta = live_values[self._theta_name()].value
+        title = live_values[self._title_name()].value
+        live_opts = self.getPropertyValue("ExperimentSettingsState")
+        opts = json.loads(live_opts) if live_opts else []
+        wildcard_row = None
+        selected_row = None
+        for row in opts:
+            if not row[EXPERIMENT_SETTINGS_FIELDS["ANGLE"].index] and not row[EXPERIMENT_SETTINGS_FIELDS["TITLE"].index]:
+                wildcard_row = row
+                continue
+            title_regex = row[EXPERIMENT_SETTINGS_FIELDS["TITLE"].index]
+            if float(row[EXPERIMENT_SETTINGS_FIELDS["ANGLE"].index]) == float(theta) and (not title_regex or re.search(title_regex, title)):
+                selected_row = row
+                break
+        selected_row = wildcard_row if not selected_row else selected_row
+        if selected_row:
+            self._set_properties_from_row(alg, selected_row)
+
+    def _set_properties_from_row(self, alg, row):
+        for field in EXPERIMENT_SETTINGS_FIELDS.values():
+            if field.name and row[field.index]:
+                alg.setProperty(field.name, row[field.index])
+
+    def _setup_reduction_algorithm(self, live_values):
         """Set up the reduction algorithm"""
         alg = self.createChildAlgorithm("ReflectometryISISLoadAndProcess")
         self._copy_property_values_to(alg)
+        self._set_properties_from_experiment_settings(alg, live_values)
         alg.setProperty("InputRunList", self._temp_ws_name)
         alg.setProperty("ThetaLogName", "Theta")
         alg.setProperty("GroupTOFWorkspaces", False)
@@ -196,10 +259,10 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         for name, liveValue in liveValues.items():
             if liveValue.value is None:
                 try:
-                    liveValue.value = self._get_block_value_from_instrument(name)
+                    liveValue.value = self._get_value_from_instrument(name, liveValue.prop_type)
                 except:
                     self.log().information("Failed to get value " + name + " from the instrument; trying " + liveValue.alternative_name)
-                    liveValue.value = self._get_block_value_from_instrument(liveValue.alternative_name)
+                    liveValue.value = self._get_value_from_instrument(liveValue.alternative_name, liveValue.prop_type)
         self._fixup_zero_theta(liveValues)
         # check we have all we need
         self._validate_live_values(liveValues)
@@ -208,11 +271,24 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
     def _live_value_list(self):
         """Get the list of required live value names and their unit type"""
         liveValues = {
-            self._theta_name(): LiveValue(None, "deg", self._alternative_theta_name(), LiveValue.LOG_TYPE_NUM_SERIES),
-            self._s1vg_name(): LiveValue(None, "m", self._alternative_s1vg_name(), LiveValue.LOG_TYPE_NUM_SERIES),
-            self._s2vg_name(): LiveValue(None, "m", self._alternative_s2vg_name(), LiveValue.LOG_TYPE_NUM_SERIES),
+            self._theta_name(): LiveValue(
+                None, "deg", self._alternative_theta_name(), LiveValue.LOG_TYPE_NUM_SERIES, LiveValue.PROP_TYPE_BLOCK
+            ),
+            self._s1vg_name(): LiveValue(
+                None, "m", self._alternative_s1vg_name(), LiveValue.LOG_TYPE_NUM_SERIES, LiveValue.PROP_TYPE_BLOCK
+            ),
+            self._s2vg_name(): LiveValue(
+                None, "m", self._alternative_s2vg_name(), LiveValue.LOG_TYPE_NUM_SERIES, LiveValue.PROP_TYPE_BLOCK
+            ),
+            self._title_name(): LiveValue(None, None, self._alternative_title_name(), LiveValue.LOG_TYPE_STRING, LiveValue.PROP_TYPE_RUN),
         }
         return liveValues
+
+    def _title_name(self):
+        return "TITLE"
+
+    def _alternative_title_name(self):
+        return "title"
 
     def _theta_name(self):
         return "THETA"
@@ -238,12 +314,12 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             return None
         return value.value
 
-    def _get_block_value_from_instrument(self, logName):
+    def _get_value_from_instrument(self, name, propType):
         algName = self.getProperty("GetLiveValueAlgorithm").value
         alg = self.createChildAlgorithm(algName)
         alg.setProperty("Instrument", self._instrument)
-        alg.setProperty("PropertyType", "Block")
-        alg.setProperty("PropertyName", logName)
+        alg.setProperty("PropertyType", propType)
+        alg.setProperty("PropertyName", name)
         alg.execute()
         return alg.getProperty("Value").value
 

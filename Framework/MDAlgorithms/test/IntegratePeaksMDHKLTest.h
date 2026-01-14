@@ -25,8 +25,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/File.h>
-
 using Mantid::Geometry::MDHistoDimension;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

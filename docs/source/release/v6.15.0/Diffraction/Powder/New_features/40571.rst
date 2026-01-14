@@ -1,0 +1,1 @@
+- A GroupingWorkspace can now be provided to :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` to define what detectors go to which output spectra.

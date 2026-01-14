@@ -54,6 +54,7 @@
 #include <cctype>
 #include <codecvt>
 #include <cstdlib>
+#include <cstring>
 #include <exception>
 #include <filesystem>
 #include <fstream>
@@ -859,7 +860,71 @@ void ConfigServiceImpl::remove(const std::string &rootName) {
 bool ConfigServiceImpl::hasProperty(const std::string &rootName) const { return m_pConf->hasProperty(rootName); }
 
 namespace {
-std::string expandEnvironmentInFilepath(const std::string &target) { return Poco::Path::expand(target); }
+/// Expands environment variables in a path string
+/// Supports $VAR, ${VAR} on Unix and %VAR% on Windows
+std::string expandEnvironmentInFilepath(const std::string &target) {
+  std::string result = target;
+  size_t pos = 0;
+
+#ifdef _WIN32
+  // Windows style: %VAR%
+  while ((pos = result.find('%', pos)) != std::string::npos) {
+    size_t end = result.find('%', pos + 1);
+    if (end == std::string::npos)
+      break;
+
+    std::string varName = result.substr(pos + 1, end - pos - 1);
+    const char *envValue = std::getenv(varName.c_str());
+
+    if (envValue) {
+      result.replace(pos, end - pos + 1, envValue);
+      pos += std::strlen(envValue);
+    } else {
+      pos = end + 1;
+    }
+  }
+#else
+  // Unix style: $VAR or ${VAR}
+  pos = 0;
+  while ((pos = result.find('$', pos)) != std::string::npos) {
+    size_t start = pos;
+    size_t end;
+    std::string varName;
+
+    if (pos + 1 < result.length() && result[pos + 1] == '{') {
+      // ${VAR} format
+      end = result.find('}', pos + 2);
+      if (end == std::string::npos) {
+        pos++;
+        continue;
+      }
+      varName = result.substr(pos + 2, end - pos - 2);
+      end++; // include the closing brace
+    } else {
+      // $VAR format - find end of variable name
+      end = pos + 1;
+      while (end < result.length() && (std::isalnum(result[end]) || result[end] == '_')) {
+        end++;
+      }
+      varName = result.substr(pos + 1, end - pos - 1);
+    }
+
+    if (!varName.empty()) {
+      const char *envValue = std::getenv(varName.c_str());
+      if (envValue) {
+        result.replace(start, end - start, envValue);
+        pos = start + std::strlen(envValue);
+      } else {
+        pos = end;
+      }
+    } else {
+      pos++;
+    }
+  }
+#endif
+
+  return result;
+}
 } // namespace
 
 /** Checks to see whether the given file target is an executable one and it

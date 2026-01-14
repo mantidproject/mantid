@@ -9,10 +9,9 @@
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidAPI/NexusFileLoader.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/DllConfig.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <optional>
@@ -25,7 +24,7 @@ namespace MDAlgorithms {
   @author Janik Zikovsky
   @date 2011-07-12
 */
-class MANTID_MDALGORITHMS_DLL LoadMD : public API::NexusFileLoader {
+class MANTID_MDALGORITHMS_DLL LoadMD : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   LoadMD();
 
@@ -41,13 +40,13 @@ public:
   const std::string category() const override { return "MDAlgorithms\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
 private:
   /// Initialise the properties
   void init() override;
   /// Run the algorithm
-  void execLoader() override;
+  void exec() override;
 
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string convention;

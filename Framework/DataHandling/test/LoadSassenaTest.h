@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadSassena.h"
 #include <cxxtest/TestSuite.h>
 
@@ -29,7 +30,7 @@ public:
     if (!m_alg.isInitialized())
       m_alg.initialize();
     m_alg.setPropertyValue("Filename", m_inputFile);
-    Mantid::Nexus::NexusDescriptor descr(m_alg.getPropertyValue("Filename"));
+    Mantid::Nexus::NexusDescriptorLazy descr(m_alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(m_alg.confidence(descr), 99);
   }
 
@@ -83,6 +84,14 @@ public:
     TS_ASSERT_DELTA(ws->y(4)[14], 656.82368, 1e-05);
 
   } // end of testExec
+
+  /// Test that this algorithm will be selected from Load algorithm
+  void test_load_from_Load() {
+    Mantid::DataHandling::Load load;
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", m_inputFile));
+    TS_ASSERT_EQUALS(load.getPropertyValue("LoaderName"), "LoadSassena");
+  }
 
 private:
   std::string m_inputFile;
