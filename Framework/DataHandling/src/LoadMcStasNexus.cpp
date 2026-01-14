@@ -23,7 +23,7 @@ DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadMcStasNexus)
 
 LoadMcStasNexus::LoadMcStasNexus() {
   useAlgorithm("LoadMcStas");
-  deprecatedDate("2026-01-14")
+  deprecatedDate("2026-01-14");
 }
 
 //----------------------------------------------------------------------------------------------
