@@ -1,0 +1,1 @@
+- Fix a bug where renaming a workspace with same name but different capitalization would erase the workspace from the ADS.
