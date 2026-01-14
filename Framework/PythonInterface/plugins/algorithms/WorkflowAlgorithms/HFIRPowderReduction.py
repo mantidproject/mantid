@@ -218,6 +218,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             "VanadiumBackgroundRunNumbers", SetDefaultWhenProperty("SampleFilename", checkFilenameforVanadiumBackgroundRunNumbers)
         )
 
+        # Helper function to get sample runs based on IPTS and run numbers
+        # Note: this should never be refactored to use FileFinder as we want to force the user to set the IPTS number when using run numbers
         def getRuns():
             runs = []
             sampleIPTS = self.getProperty("SampleIPTS").value
