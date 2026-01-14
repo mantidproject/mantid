@@ -62,13 +62,25 @@ Types::Core::DateAndTime create_releaseDateAndTime() {
   } else {
     // pull apart string into year, month, and day objects
     // WARNING if the format changes this will break
-    const auto day = std::chrono::day(std::stoi(REVISION_DATE.substr(4, 2)));
-    const auto month = to_month(REVISION_DATE.substr(7, 3));
-    const auto year = std::chrono::year(std::stoi(REVISION_DATE.substr(11, 4)));
-    std::string time = REVISION_DATE.substr(16);
+
+    // skip day of week
+    const auto start = REVISION_DATE.find(", ") + 2;
+    // find when month starts so we can get the right part of day
+    const auto month_start = REVISION_DATE.find(" ", start) + 1;
+    // day is the next element by whitespace
+    const auto day = std::chrono::day(std::stoi(REVISION_DATE.substr(start, month_start-1)));
+    // then comes 3 character month
+    const auto month = to_month(REVISION_DATE.substr(month_start, 3));
+    // then 4 digit year
+    const auto year_start = REVISION_DATE.find(" ", month_start) + 1;
+    const auto year = std::chrono::year(std::stoi(REVISION_DATE.substr(year_start, 4)));
+    // everything past that is time
+    const auto time_start = REVISION_DATE.find(" ", year_start) + 1;
+    std::string time = REVISION_DATE.substr(time_start);
     if (time.empty()) {
       time = "00:01"; // assume one minute past midnight
     } else {
+      // remove whitespace that is internal to the time
       time.erase(find_if(time.begin(), time.end(), isspace));
     }
 
@@ -78,7 +90,8 @@ Types::Core::DateAndTime create_releaseDateAndTime() {
     std::stringstream isostr;
     isostr << ymd << "T" << time;
 
-    release. setFromISO8601(isostr.str());
+    // convert to a proper object
+    release.setFromISO8601(isostr.str());
   }
   return release;
 }
