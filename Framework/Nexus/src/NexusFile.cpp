@@ -1370,9 +1370,11 @@ void File::getEntries(Entries &result) const {
   result.clear();
   NexusAddress const currentAddress = m_address;
   for (auto const &entry : m_descriptor.getAllEntries()) {
-    for (NexusAddress const addr : entry.second) { // cppcheck-suppress iterateByValue
-      if (addr.parent_path() == currentAddress) {
-        result.emplace(addr.stem(), entry.first);
+    for (std::string const &addr : entry.second) {
+      if (currentAddress.hasChild(addr)) {
+        int offset = (currentAddress.isRoot() ? 0 : 1);
+        std::string groupName = addr.substr(currentAddress.string().size() + offset);
+        result[groupName] = entry.first;
       }
     }
   }
