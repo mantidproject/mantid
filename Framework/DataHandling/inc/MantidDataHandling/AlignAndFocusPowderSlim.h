@@ -49,11 +49,9 @@ private:
   const API::ITableWorkspace_sptr loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
                                               DataObjects::GroupingWorkspace_sptr &groupingWS);
   void initScaleAtSample(const API::MatrixWorkspace_sptr &wksp);
-  std::vector<std::pair<size_t, size_t>> determinePulseIndices(const API::MatrixWorkspace_sptr &wksp,
-                                                               const Kernel::TimeROI &filterROI);
-  static std::vector<std::pair<int, std::pair<size_t, size_t>>>
-  determinePulseIndicesTargets(const API::MatrixWorkspace_sptr &wksp, const Kernel::TimeROI &filterROI,
-                               const DataObjects::TimeSplitter &timeSplitter);
+  std::vector<std::pair<size_t, size_t>> determinePulseIndices(const Kernel::TimeROI &filterROI);
+  std::vector<std::pair<int, std::pair<size_t, size_t>>>
+  determinePulseIndicesTargets(const Kernel::TimeROI &filterROI, const DataObjects::TimeSplitter &timeSplitter);
   Kernel::TimeROI getFilterROI(const API::MatrixWorkspace_sptr &wksp);
   DataObjects::TimeSplitter timeSplitterFromSplitterWorkspace(const Types::Core::DateAndTime &);
 
@@ -71,6 +69,8 @@ private:
   std::vector<int64_t> loadSize;
   // map of detectorID to output spectrum number
   std::map<detid_t, size_t> detIDToSpecNum;
+  // pulse times
+  std::shared_ptr<std::vector<Types::Core::DateAndTime>> m_pulse_times;
 };
 
 // these properties are public to simplify testing and calling from other code

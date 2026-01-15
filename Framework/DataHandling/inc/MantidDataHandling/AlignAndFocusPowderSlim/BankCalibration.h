@@ -59,7 +59,6 @@ public:
    * into microseconds. Applying it here is effectively the same as applying it to each event time-of-flight.
    * @param bank_index Output group for finding grouping information.
    */
-  BankCalibration getCalibration(const double time_conversion, const size_t bank_index) const;
   std::vector<BankCalibration> getCalibrations(const double time_conversion, const size_t bank_index) const;
 
 private:

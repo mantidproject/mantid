@@ -552,6 +552,7 @@ public:
 
   void test_splitter_table() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.relativeTime = true;
     configuration.splitterWS = create_splitter_table(configuration.relativeTime);
     for (bool processBankSplitTask : {false, true}) {
@@ -596,6 +597,7 @@ public:
 
   void test_splitter_table_absolute_time() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.relativeTime = false;
     configuration.splitterWS = create_splitter_table(configuration.relativeTime);
     for (bool processBankSplitTask : {false, true}) {
@@ -616,6 +618,7 @@ public:
 
   void test_splitter_table_multiple_targets() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.relativeTime = true;
     configuration.splitterWS = create_splitter_table(configuration.relativeTime, false);
     for (bool processBankSplitTask : {false, true}) {
@@ -682,6 +685,7 @@ public:
 
   void test_splitter_table_and_time_start_stop() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.timeMin = 15;
     configuration.timeMax = 300;
     configuration.relativeTime = true;
@@ -772,6 +776,7 @@ public:
         AnalysisDataService::Instance().retrieve("splitter"));
 
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.relativeTime = true;
     configuration.splitterWS = splitterWS;
 
@@ -839,6 +844,7 @@ public:
     createSplitter->execute();
 
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF");
+    configuration.groupingWS = bank_grouping_ws;
     configuration.useFullTime = true;
     configuration.relativeTime = true;
     configuration.splitterWS =
