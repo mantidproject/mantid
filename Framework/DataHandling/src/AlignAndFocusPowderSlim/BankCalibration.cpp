@@ -121,10 +121,6 @@ BankCalibrationFactory::BankCalibrationFactory(const std::map<detid_t, double> &
     : m_calibration_map(calibration_map), m_scale_at_sample(scale_at_sample), m_grouping(grouping), m_mask(mask),
       m_bank_detids(bank_detids) {}
 
-BankCalibration BankCalibrationFactory::getCalibration(const double time_conversion, const size_t bank_index) const {
-  return BankCalibration(time_conversion, m_bank_detids.at(bank_index), m_calibration_map, m_scale_at_sample, m_mask);
-}
-
 std::vector<BankCalibration> BankCalibrationFactory::getCalibrations(const double time_conversion,
                                                                      const size_t bank_index) const {
 

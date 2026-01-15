@@ -29,12 +29,13 @@ auto g_log = Kernel::Logger("ProcessBankSplitFullTimeTask");
 
 ProcessBankSplitFullTimeTask::ProcessBankSplitFullTimeTask(
     std::vector<std::string> &bankEntryNames, H5::H5File &h5file, std::shared_ptr<NexusLoader> loader,
-    std::vector<int> &workspaceIndices, std::vector<API::MatrixWorkspace_sptr> &wksps,
+    std::vector<int> &workspaceIndices, std::vector<SpectraProcessingData> &processingDatas,
     const BankCalibrationFactory &calibFactory, const size_t events_per_chunk, const size_t grainsize_event,
-    const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap, std::shared_ptr<API::Progress> &progress)
+    const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
+    std::shared_ptr<std::vector<Types::Core::DateAndTime>> pulse_times, std::shared_ptr<API::Progress> &progress)
     : ProcessBankTaskBase(bankEntryNames, loader, calibFactory), m_h5file(h5file), m_workspaceIndices(workspaceIndices),
-      m_wksps(wksps), m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap),
-      m_grainsize_event(grainsize_event), m_progress(progress) {}
+      m_processingDatas(processingDatas), m_events_per_chunk(events_per_chunk), m_splitterMap(splitterMap),
+      m_grainsize_event(grainsize_event), m_pulse_times(pulse_times), m_progress(progress) {}
 
 void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
@@ -61,30 +62,13 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
     std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
     auto eventRanges = this->getEventIndexRanges(event_group, total_events, &event_index);
 
-    // Get all spectra for this bank.
-    // Create temporary y arrays for each workspace.
-    std::vector<API::ISpectrum *> spectra;
-    std::vector<std::vector<uint32_t>> y_temps;
-    for (const auto &wksp : m_wksps) {
-      spectra.push_back(&wksp->getSpectrum(bank_index));
-      y_temps.emplace_back(spectra.back()->dataY().size());
-    }
-
     // get handle to the data
     auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
     std::string tof_unit;
     Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
     // now the calibration for the output group can be created
     // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
-    const auto calibration = this->getCalibration(tof_unit, bank_index);
-
-    const auto frequency_log =
-        dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(m_wksps.at(0)->run().getProperty("frequency"));
-    if (!frequency_log) {
-      throw std::runtime_error("Frequency log not found");
-    }
-    const auto pulse_times =
-        std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
+    const auto calibrations = this->getCalibrations(tof_unit, bank_index);
 
     // declare arrays once so memory can be reused
     auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file
@@ -157,76 +141,84 @@ void ProcessBankSplitFullTimeTask::operator()(const tbb::blocked_range<size_t> &
         }
       }
 
-      // loop over targets
+      // Loop over all output spectra / groups
       tbb::parallel_for(
-          tbb::blocked_range<size_t>(0, m_workspaceIndices.size()), [&](const tbb::blocked_range<size_t> &r) {
-            for (size_t idx = r.begin(); idx != r.end(); ++idx) {
-              int i = m_workspaceIndices[idx];
+          tbb::blocked_range<size_t>(0, m_processingDatas[0].counts.size()),
+          [&](const tbb::blocked_range<size_t> &output_range) {
+            for (size_t output_index = output_range.begin(); output_index < output_range.end();
+                 ++output_index) { // loop over targets
+              const auto calibration = calibrations.at(output_index);
+              tbb::parallel_for(
+                  tbb::blocked_range<size_t>(0, m_workspaceIndices.size()), [&](const tbb::blocked_range<size_t> &r) {
+                    for (size_t idx = r.begin(); idx != r.end(); ++idx) {
+                      int i = m_workspaceIndices[idx];
 
-              // Precompute indices for this target
-              std::vector<size_t> indices;
-              auto splitter_it = m_splitterMap.cbegin();
-              for (size_t k = 0; k < event_detid->size(); ++k) {
-                // Calculate the full time at sample: full_time = pulse_time + (tof * correctionFactor), where
-                // correctionFactor is either scale_at_sample[detid] or 1.0
-                const double correctionFactor =
-                    calibration.value_scale_at_sample(static_cast<detid_t>((*event_detid)[k]));
+                      // Precompute indices for this target
+                      std::vector<size_t> indices;
+                      auto splitter_it = m_splitterMap.cbegin();
+                      for (size_t k = 0; k < event_detid->size(); ++k) {
+                        // Calculate the full time at sample: full_time = pulse_time + (tof * correctionFactor), where
+                        // correctionFactor is either scale_at_sample[detid] or 1.0
+                        const double correctionFactor =
+                            calibration.value_scale_at_sample(static_cast<detid_t>((*event_detid)[k]));
 
-                const auto tof_in_nanoseconds =
-                    static_cast<int64_t>(static_cast<double>((*event_time_of_flight)[k]) * correctionFactor);
-                const auto pulsetime = (*pulse_times)[(*pulse_times_idx)[k]];
-                const Mantid::Types::Core::DateAndTime full_time = pulsetime + tof_in_nanoseconds;
-                // Linear search for pulsetime in splitter map, assume pulsetime and splitter map are both sorted. This
-                // is the starting point for the full_time search so we need to subtract some time (66.6ms) to ensure we
-                // don't skip it when adding the tof.
-                // Advance splitter_it until it points to the first element greater than (pulsetime - offset).
-                // This gives us a reasonable starting point for the full_time search.
-                while (splitter_it != m_splitterMap.end() &&
-                       splitter_it->first <= pulsetime - static_cast<int64_t>(PULSETIME_OFFSET)) {
-                  ++splitter_it;
-                }
+                        const auto tof_in_nanoseconds =
+                            static_cast<int64_t>(static_cast<double>((*event_time_of_flight)[k]) * correctionFactor);
+                        const auto pulsetime = (*m_pulse_times)[(*pulse_times_idx)[k]];
+                        const Mantid::Types::Core::DateAndTime full_time = pulsetime + tof_in_nanoseconds;
+                        // Linear search for pulsetime in splitter map, assume pulsetime and splitter map are both
+                        // sorted. This is the starting point for the full_time search so we need to subtract some time
+                        // (66.6ms) to ensure we don't skip it when adding the tof. Advance splitter_it until it points
+                        // to the first element greater than (pulsetime - offset). This gives us a reasonable starting
+                        // point for the full_time search.
+                        while (splitter_it != m_splitterMap.end() &&
+                               splitter_it->first <= pulsetime - static_cast<int64_t>(PULSETIME_OFFSET)) {
+                          ++splitter_it;
+                        }
 
-                // Now, starting at splitter_it, find full_time (TOFs will be unsorted)
-                // Advance until we find the first element > full_time, then step back to get the greatest key <=
-                // full_time.
-                auto full_time_it = splitter_it;
-                while (full_time_it != m_splitterMap.end() && full_time_it->first <= full_time) {
-                  ++full_time_it;
-                }
+                        // Now, starting at splitter_it, find full_time (TOFs will be unsorted)
+                        // Advance until we find the first element > full_time, then step back to get the greatest key
+                        // <= full_time.
+                        auto full_time_it = splitter_it;
+                        while (full_time_it != m_splitterMap.end() && full_time_it->first <= full_time) {
+                          ++full_time_it;
+                        }
 
-                // If there is no element <= full_time then full_time_it will be begin(); otherwise step back to the
-                // element that is <= full_time.
-                if (full_time_it == m_splitterMap.begin()) {
-                  // no splitter entry <= full_time; skip this event
-                } else {
-                  --full_time_it;
-                  if (full_time_it != m_splitterMap.end() && full_time_it->second == i) {
-                    indices.push_back(k);
-                  }
-                }
-              }
+                        // If there is no element <= full_time then full_time_it will be begin(); otherwise step back to
+                        // the element that is <= full_time.
+                        if (full_time_it == m_splitterMap.begin()) {
+                          // no splitter entry <= full_time; skip this event
+                        } else {
+                          --full_time_it;
+                          if (full_time_it != m_splitterMap.end() && full_time_it->second == i) {
+                            indices.push_back(k);
+                          }
+                        }
+                      }
 
-              auto event_id_view_for_target =
-                  indices | std::views::transform([&event_detid](const auto &k) { return (*event_detid)[k]; });
-              auto event_tof_view_for_target = indices | std::views::transform([&event_time_of_flight](const auto &k) {
-                                                 return (*event_time_of_flight)[k];
-                                               });
+                      auto event_id_view_for_target =
+                          indices | std::views::transform([&event_detid](const auto &k) { return (*event_detid)[k]; });
+                      auto event_tof_view_for_target =
+                          indices | std::views::transform(
+                                        [&event_time_of_flight](const auto &k) { return (*event_time_of_flight)[k]; });
 
-              ProcessEventsTask task(&event_id_view_for_target, &event_tof_view_for_target, &calibration,
-                                     &spectra[idx]->readX());
+                      ProcessEventsTask task(&event_id_view_for_target, &event_tof_view_for_target, &calibration,
+                                             m_processingDatas[i].binedges[output_index]);
 
-              const tbb::blocked_range<size_t> range_info(0, indices.size(), m_grainsize_event);
-              tbb::parallel_reduce(range_info, task);
+                      const tbb::blocked_range<size_t> range_info(0, indices.size(), m_grainsize_event);
+                      tbb::parallel_reduce(range_info, task);
 
-              std::transform(y_temps[idx].begin(), y_temps[idx].end(), task.y_temp.begin(), y_temps[idx].begin(),
-                             std::plus<uint32_t>());
+                      // Accumulate results into shared y_temp to combine local histograms
+                      // Use atomic fetch_add to accumulate results into shared vectors
+                      for (size_t j = 0; j < m_processingDatas[i].counts[output_index].size(); ++j) {
+                        m_processingDatas[i].counts[output_index][j].fetch_add(task.y_temp[j],
+                                                                               std::memory_order_relaxed);
+                      }
+                    }
+                  });
             }
           });
     }
-
-    // copy the data out into the correct spectrum and calculate errors
-    tbb::parallel_for(size_t(0), m_wksps.size(), [&](size_t i) { copyDataToSpectrum(y_temps[i], spectra[i]); });
-
     g_log.debug() << bankName << " stop" << timer << std::endl;
     m_progress->report();
   }
