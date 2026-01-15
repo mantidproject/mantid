@@ -1506,9 +1506,10 @@ public:
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
+    std::cout << "Time taken to load workspace history: " + std::to_string(elapsed.count()) + " seconds\n";
     // this test should run in less than 1s
     // but to account for runner differences, allow for 2s
-    TS_ASSERT_LESS_THAN(elapsed.count(), 2.0);
+    TS_ASSERT_LESS_THAN(elapsed.count(), 0.0);
   }
 
   // ##################################################################################################################

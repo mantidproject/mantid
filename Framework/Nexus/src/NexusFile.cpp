@@ -1368,15 +1368,24 @@ Entries File::getEntries() const {
 
 void File::getEntries(Entries &result) const {
   result.clear();
-  NexusAddress const currentAddress = m_address;
-  for (auto const &entry : m_descriptor.getAllEntries()) {
-    for (std::string const &addr : entry.second) {
-      if (currentAddress.hasChild(addr)) {
-        int offset = (currentAddress.isRoot() ? 0 : 1);
-        std::string groupName = addr.substr(currentAddress.string().size() + offset);
-        result.emplace(std::move(groupName), entry.first);
+  auto current = getCurrentObject();
+  for (size_t i = 0; i < current->getNumObjs(); i++) {
+    std::string name = current->getObjnameByIdx(i);
+    std::string className;
+    H5G_obj_t type = current->getObjTypeByIdx(i);
+    if (type == H5G_GROUP) {
+      H5::Group grp = current->openGroup(name);
+      if (grp.attrExists(GROUP_CLASS_SPEC)) {
+        H5::Attribute attr = grp.openAttribute(GROUP_CLASS_SPEC);
+        attr.read(attr.getDataType(), className);
+      } else {
+        className = UNKNOWN_GROUP_SPEC;
       }
+    } else if (type == H5G_DATASET) {
+      className = SCIENTIFIC_DATA_SET;
     }
+    if (!className.empty())
+      result[name] = std::move(className);
   }
 }
 

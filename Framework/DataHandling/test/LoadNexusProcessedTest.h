@@ -1339,7 +1339,7 @@ public:
     std::cout << "Time taken to load workspace history: " + std::to_string(elapsed.count()) + " seconds\n";
     // this test should run in less than 1s
     // but to allow for differences in test runners, allow up to 5s
-    TS_ASSERT_LESS_THAN(elapsed.count(), 5.0); // seconds
+    TS_ASSERT_LESS_THAN(elapsed.count(), 0.0); // seconds
   }
 
 private:
