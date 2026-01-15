@@ -26,7 +26,7 @@ public:
   const std::string summary() const override { return "Loads a McStas NeXus file into an workspace."; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override { return {"LoadMcStasNexus", "LoadNexus"}; }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   const std::string category() const override;
 
   /// Returns a confidence value that this algorithm can load a file

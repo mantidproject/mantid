@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidNexus/NexusDescriptorLazy.h"
@@ -15,8 +16,10 @@ namespace DataHandling {
 
 /** LoadMcStasNexus : TODO: DESCRIPTION
  */
-class MANTID_DATAHANDLING_DLL LoadMcStasNexus : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
+class MANTID_DATAHANDLING_DLL LoadMcStasNexus : public API::IFileLoader<Nexus::NexusDescriptorLazy>,
+                                                public API::DeprecatedAlgorithm {
 public:
+  LoadMcStasNexus();
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override { return "Loads an McStas NeXus file into a group workspace."; }

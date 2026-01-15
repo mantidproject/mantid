@@ -21,6 +21,11 @@ using namespace API;
 
 DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadMcStasNexus)
 
+LoadMcStasNexus::LoadMcStasNexus() {
+  useAlgorithm("LoadMcStas");
+  deprecatedDate("2026-01-14");
+}
+
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string LoadMcStasNexus::name() const { return "LoadMcStasNexus"; }
