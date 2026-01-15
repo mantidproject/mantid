@@ -9,6 +9,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
+#include <span>
+
 namespace Mantid {
 
 namespace Algorithms {
@@ -34,8 +36,8 @@ private:
   /// Execution code
   void exec() override;
   void execEvent();
-  double mean(const std::vector<double> &values);
-  double stddev(const std::vector<double> &values);
+  double mean(std::span<const double> values) const;
+  double stddev(const std::vector<double> &values) const;
   void scale(std::vector<double> &values, double factor);
   void maskByThreshold(std::vector<double> &values, double threshold);
 };

@@ -13,6 +13,7 @@
 
 #include <fstream>
 #include <limits>
+#include <span>
 #include <sstream>
 
 namespace Mantid::Algorithms {
@@ -41,13 +42,13 @@ void FlatCell::maskByThreshold(std::vector<double> &values, double threshold) {
 
 /** Computes the mean of the input vector
  */
-double FlatCell::mean(const std::vector<double> &values) {
+double FlatCell::mean(std::span<const double> values) const {
   return std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
 }
 
 /** Computes the standard deviation of the input vector
  */
-double FlatCell::stddev(const std::vector<double> &values) {
+double FlatCell::stddev(const std::vector<double> &values) const {
   double m = mean(values);
   double accum = std::accumulate(values.begin(), values.end(), 0.0, [m](double total, double x) {
     const double diff = x - m;
@@ -72,11 +73,9 @@ void FlatCell::exec() {
 
   // Validate the number of histograms in the Input WS
   const size_t nHist = inputWS->getNumberHistograms();
-  if (nHist == 0) {
-    throw std::runtime_error("Input workspace has no histograms. The input should have 17776 histograms.");
-  }
   if (nHist != 17776) {
-    throw std::runtime_error("Expecting the input workspace to have 17776 histograms.");
+    throw std::runtime_error(
+        "The expected number of histograms in the event workspace should be 17776 for SANS ISIS reduction of LOQ.");
   }
 
   // The output is expected to have 17784 values (nHist+nMonitorOffset)
@@ -86,21 +85,22 @@ void FlatCell::exec() {
       WorkspaceFactory::Instance().create("Workspace2D", 1, totalDetectorIDs, totalDetectorIDs);
   setProperty("OutputWorkspace", outputWS);
 
-  // Clone input before rebinning
-  EventWorkspace_sptr rebinnedWS = inputWS->clone();
+  // Integrate spectrums in input events workspace into one spectrum
+  auto integration = createChildAlgorithm("Integration");
+  integration->initialize();
+  integration->setProperty("InputWorkspace", inputWS);
+  integration->setProperty("OutputWorkspace", "processedWS");
+  integration->setProperty("StartWorkspaceIndex", 0);
+  integration->setProperty("EndWorkspaceIndex", 17775);
+  integration->execute();
 
-  // Rebin input to one spectrum
-  auto rebin = createChildAlgorithm("Rebin");
-  rebin->initialize();
-  rebin->setProperty("InputWorkspace", rebinnedWS);
-  rebin->setProperty("OutputWorkspace", rebinnedWS);
-  rebin->setProperty("Params", "43500");
-  rebin->execute();
+  // Retrieve the integrated workspace
+  MatrixWorkspace_sptr processedWS = integration->getProperty("OutputWorkspace");
 
   // Extract the spectrums into a vector
   std::vector<double> values;
   for (size_t i = 0; i < nHist; ++i) {
-    const auto &Y = rebinnedWS->readY(i);
+    const auto &Y = processedWS->readY(i);
     values.insert(values.end(), Y.begin(), Y.end());
   }
 
@@ -123,8 +123,8 @@ void FlatCell::exec() {
   std::vector<double> HAB(values.begin() + HABStart, values.begin() + HABStop);
 
   // Calculate the mean of the LAB and HAB
-  const double meanLAB = FlatCell::mean(std::vector<double>(LAB.begin(), LAB.end()));
-  const double meanHAB = FlatCell::mean(std::vector<double>(HAB.begin(), HAB.end()));
+  const double meanLAB = FlatCell::mean(LAB);
+  const double meanHAB = FlatCell::mean(HAB);
 
   // Normalize the values in the LAB and HAB vectors
   FlatCell::scale(LAB, 1 / meanLAB);
