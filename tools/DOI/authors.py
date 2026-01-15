@@ -462,7 +462,16 @@ def _authors_from_tag_info(tag_info):
     """Given some tag/commit information, will return the corresponding Git
     authors.
     """
-    args = ["git", "log", "--pretty=short", tag_info, '--format="%aN"', "--reverse"]
+    args = [
+        "git",
+        "log",
+        "--no-mailmap",  # use names in commits without mapping
+        "--no-merges",  # ignore merge commits
+        "--pretty=short",
+        tag_info,
+        '--format="%aN"',
+        "--reverse",
+    ]
     proc = subprocess.run(args, stdout=subprocess.PIPE, encoding="utf-8")
     authors = proc.stdout.replace('"', "").split("\n")
     return _clean_up_author_list(authors)
@@ -548,3 +557,26 @@ def authors_under_git_tag(tag):
     previous_tag = all_tags[all_tags.index(tag) - 1]
 
     return _authors_from_tag_info(previous_tag + ".." + tag)
+
+
+if __name__ == "__main__":
+    """This should normally be run as a library for doi.py, but for testing/development a command line was added."""
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Generate list of authors for a release", epilog="This requires having a .gitmailmap file from a TWG member"
+    )
+    parser.add_argument("version", type=str, help='Version of Mantid whose DOI is to be created/updated in the form "major.minor.patch"')
+    parser.add_argument("--full", action="store_true", help="Get full list of authors back to start of project")
+    # process inputs
+    args = parser.parse_args()
+    git_tag = find_tag(args.version)
+    # generate list of authors
+    if args.full:
+        authors = authors_up_to_git_tag(git_tag)
+    else:
+        authors = authors_under_git_tag(git_tag)
+    # print out the results
+    print("For", git_tag)
+    for author in authors:
+        print(author)
