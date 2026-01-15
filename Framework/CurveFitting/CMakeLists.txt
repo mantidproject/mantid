@@ -41,6 +41,7 @@ set(SRC_FILES
     src/FitMW.cpp
     src/EigenComplexMatrix.cpp
     src/EigenComplexVector.cpp
+    src/EigenFunctions.cpp
     src/EigenMatrix.cpp
     src/EigenMatrixView.cpp
     src/EigenVector.cpp
@@ -347,6 +348,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/VesuvioResolution.h
     inc/MantidCurveFitting/Functions/Voigt.h
     inc/MantidCurveFitting/Functions/ConvTempCorrection.h
+    inc/MantidCurveFitting/EigenFunctions.h
     inc/MantidCurveFitting/GSLFunctions.h
     inc/MantidCurveFitting/GeneralDomainCreator.h
     inc/MantidCurveFitting/HalfComplex.h
@@ -409,9 +411,9 @@ set(TEST_FILES
     EigenComplexVectorTest.h
     EigenFortranMatrixTest.h
     EigenFortranVectorTest.h
+    EigenFunctionsTest.h
     EigenJacobianTest.h
     EigenMatrixTest.h
-    EigenToGSLTest.h
     EigenVectorTest.h
     EigenViewTest.h
     FitMWTest.h

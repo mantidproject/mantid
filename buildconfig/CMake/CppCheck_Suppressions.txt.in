@@ -79,7 +79,6 @@ containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:606
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
 derefInvalidIteratorRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ExcludeRangeFinder.cpp:77
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/BSpline.cpp:146
-variableScope:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/ChebfunBase.cpp:832
 duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldFunction.cpp:120
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/DynamicKuboToyabe.cpp:69
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:432
@@ -137,7 +136,6 @@ nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelp
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:168
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:169
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:256
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/MantidVersion.cpp:100
 invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Strings.cpp:1033

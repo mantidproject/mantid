@@ -26,6 +26,9 @@ public:
         m_calibration(other.m_calibration), m_binedges(other.m_binedges) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) {
+    if (m_calibration->empty()) {
+      return;
+    }
     // Cache values to reduce number of function calls
     const auto &range_end = range.end();
     const auto &binedges_cbegin = m_binedges->cbegin();

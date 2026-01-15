@@ -412,14 +412,10 @@ void MDBoxFlatTree::saveExperimentInfos(Mantid::Nexus::File *const file, const A
 
 void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const std::string &filename,
                                         std::shared_ptr<Mantid::API::MultipleExperimentInfos> mei,
-                                        const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &currentGroup,
-                                        bool lazy) {
+                                        const std::string &currentGroup, bool lazy) {
 
   // First, find how many experimentX blocks there are
-  const auto &allEntries = fileInfo.getAllEntries();
-  auto itNXgroup = allEntries.find("NXgroup");
-  const std::set<std::string> &nxGroupEntries =
-      (itNXgroup != allEntries.end()) ? itNXgroup->second : std::set<std::string>{};
+  std::set<std::string> nxGroupEntries = file->getEntriesByClass("NXgroup");
 
   std::list<uint16_t> experimentBlockNum;
   for (const std::string &entry : nxGroupEntries) {
@@ -451,7 +447,7 @@ void MDBoxFlatTree::loadExperimentInfos(Mantid::Nexus::File *const file, const s
       std::string parameterStr;
       try {
         // Get the sample, logs, instrument
-        ei->loadExperimentInfoNexus(filename, file, parameterStr, fileInfo, file->getAddress());
+        ei->loadExperimentInfoNexus(filename, file, parameterStr, file->getAddress());
         // Now do the parameter map
         if (parameterStr.empty()) {
           ei->populateInstrumentParameters();

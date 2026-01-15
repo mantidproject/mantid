@@ -201,8 +201,7 @@ std::unique_ptr<Property> loadPropertyCommon(Nexus::File *file, const std::strin
 } // namespace
 //----------------------------------------------------------------------------------------------
 
-std::unique_ptr<Property> loadProperty(Nexus::File *file, const std::string &group,
-                                       const Mantid::Nexus::NexusDescriptor &fileInfo, const std::string &prefix) {
+std::unique_ptr<Property> loadProperty(Nexus::File *file, const std::string &group, const std::string &prefix) {
   file->openGroup(group, "NXlog");
 
   // Times in second offsets
@@ -210,7 +209,7 @@ std::unique_ptr<Property> loadProperty(Nexus::File *file, const std::string &gro
   std::string startStr;
 
   // Check if the "time" field is present
-  if (fileInfo.isEntry(prefix + "/" + group + "/time")) {
+  if (file->hasAddress(prefix + "/" + group + "/time")) {
     getTimeAndStart(file, timeSec, startStr);
   }
 
@@ -232,9 +231,10 @@ std::unique_ptr<Property> loadProperty(Nexus::File *file, const std::string &gro
   std::vector<double> timeSec;
   std::string startStr;
 
-  // Get the entries so that you can check if the "time" field is present
-  std::map<std::string, std::string> entries = file->getEntries();
-  if (entries.find("time") != entries.end()) {
+  // find the time entry
+  std::string const currentAddress = file->getAddress();
+  std::string timeAddress = currentAddress + "/time";
+  if (file->hasAddress(timeAddress)) {
     getTimeAndStart(file, timeSec, startStr);
   }
 

@@ -29,6 +29,13 @@ BankCalibration ProcessBankTaskBase::getCalibration(const std::string &tof_unit,
   return m_calibFactory.getCalibration(time_conversion, wksp_index);
 }
 
+std::vector<BankCalibration> ProcessBankTaskBase::getCalibrations(const std::string &tof_unit,
+                                                                  const size_t bank_index) const {
+  // when arbitrary grouping is used, we need all calibrations
+  const double time_conversion = Kernel::Units::timeConversionValue(tof_unit, MICROSEC);
+  return m_calibFactory.getCalibrations(time_conversion, bank_index);
+}
+
 void ProcessBankTaskBase::loadEvents(H5::DataSet &detID_SDS, H5::DataSet &tof_SDS, const std::vector<size_t> &offsets,
                                      const std::vector<size_t> &slabsizes,
                                      std::unique_ptr<std::vector<uint32_t>> &detId_vec,

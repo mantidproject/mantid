@@ -607,6 +607,17 @@ def parse_event_slice_setting(string_to_parse):
     return parser.parse_user_input_range()
 
 
+def parse_simple_range_of_number_pairs(string_to_parse):
+    try:
+        number_str_list = string_to_parse.split(",")
+        if (list_length := len(number_str_list)) == 0 or list_length % 2 != 0:
+            raise ValueError("At least one pair of numbers separated by comma should be entered: eg: '-15.0,15.0'")
+        pair_list = [float(el) for el in number_str_list]
+    except ValueError as e:
+        raise ValueError(f"The provided string: '{string_to_parse}' , could not be converted to a list of pair of floats\n" + str(e))
+    return pair_list
+
+
 def get_ranges_from_event_slice_setting(string_to_parse):
     parsed_elements = parse_event_slice_setting(string_to_parse)
     return parsed_elements

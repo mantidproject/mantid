@@ -41,9 +41,10 @@ public:
   MOCK_METHOD(std::string, getPlotContour, (), (const, override));
   MOCK_METHOD(IRunView *, getRunWidget, (), (const, override));
 
-  MOCK_METHOD(void, setupFitOptions, (), (override));
-  MOCK_METHOD(void, setupPropertyBrowser, (), (override));
-  MOCK_METHOD(void, setupPlotOptions, (), (override));
+  MOCK_METHOD(void, updateBackend, (bool useQuickBayes), (override));
+  MOCK_METHOD(void, setupFitOptions, (bool useQuickBayes), (override));
+  MOCK_METHOD(void, setupPropertyBrowser, (bool useQuickBayes), (override));
+  MOCK_METHOD(void, setupPlotOptions, (bool useQuickBayes), (override));
 
   MOCK_METHOD(void, setFileExtensionsByName, (bool filter), (override));
   MOCK_METHOD(void, setLoadHistory, (bool doLoadHistory), (override));
@@ -115,6 +116,7 @@ public:
   MOCK_METHOD(void, setFileExtensionsByName, (bool const filter), (override));
   MOCK_METHOD(void, setLoadHistory, (bool const loadHistory), (override));
   MOCK_METHOD(void, loadSettings, (const QSettings &settings), (override));
+  MOCK_METHOD(void, updateBackend, (bool useQuickBayes), (override));
 };
 
 class MockQuasiModel : public IQuasiModel {

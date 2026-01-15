@@ -279,12 +279,15 @@ public:
    */
   void rename(const std::string &oldName, const std::string &newName) {
     checkForEmptyName(newName);
+    bool caseInsensitiveMatch = false;
 
-    if (oldName == newName) {
-      g_log.warning("Rename: The existing name matches the new name");
-      return;
+    if (!strcasecmp(oldName.c_str(), newName.c_str())) {
+      if (oldName == newName) {
+        g_log.warning("Rename: The existing name matches the new name");
+        return;
+      }
+      caseInsensitiveMatch = true;
     }
-
     // Make DataService access thread-safe
     std::unique_lock<std::recursive_mutex> lock(m_mutex);
 
@@ -296,7 +299,7 @@ public:
     }
 
     auto existingNameObject = std::move(existingNameIter->second);
-    auto targetNameIter = datamap.find(newName);
+    auto targetNameIter = caseInsensitiveMatch ? datamap.end() : datamap.find(newName);
 
     // If we are overriding send a notification for observers
     if (targetNameIter != datamap.end()) {

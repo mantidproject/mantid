@@ -14,7 +14,15 @@ set(SRC_FILES
     StretchModel.cpp
 )
 
-set(INC_FILES ResNormPresenter.h ResNormModel.h QuasiModel.h QuasiPresenter.h StretchPresenter.h StretchModel.h)
+set(INC_FILES
+    BayesBackendType.h
+    ResNormPresenter.h
+    ResNormModel.h
+    QuasiModel.h
+    QuasiPresenter.h
+    StretchPresenter.h
+    StretchModel.h
+)
 
 set(MOC_FILES BayesFitting.h BayesFittingTab.h QuasiView.h ResNormView.h StretchView.h)
 

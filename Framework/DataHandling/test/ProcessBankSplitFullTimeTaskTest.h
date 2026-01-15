@@ -91,8 +91,10 @@ public:
     const std::map<Mantid::detid_t, double> calibration{{1, 1.}, {2, 2.}};
     const std::map<Mantid::detid_t, double> scale_at_sample{{1, 1000.0}, {2, 1000.0}};
     const std::set<Mantid::detid_t> masked;
-    BankCalibrationFactory calibFactory(calibration, scale_at_sample, std::map<size_t, std::vector<Mantid::detid_t>>(),
-                                        masked);
+    std::map<size_t, std::set<Mantid::detid_t>> bank_detids;
+    bank_detids[0] = {1, 2}; // bank 0 has detIDs 1 and 2
+    BankCalibrationFactory calibFactory(calibration, scale_at_sample, std::map<size_t, std::set<Mantid::detid_t>>(),
+                                        masked, bank_detids);
     std::map<Mantid::Types::Core::DateAndTime, int> splitterMap;
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00"), 0);
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00.005"), 1);
@@ -142,8 +144,8 @@ public:
 
     // now test with different correction to sample
     const std::map<Mantid::detid_t, double> scale_at_sample2{{1, 1000.}, {2, 500.}};
-    BankCalibrationFactory calibFactory2(calibration, scale_at_sample2,
-                                         std::map<size_t, std::vector<Mantid::detid_t>>(), masked);
+    BankCalibrationFactory calibFactory2(calibration, scale_at_sample2, std::map<size_t, std::set<Mantid::detid_t>>(),
+                                         masked, bank_detids);
     ProcessBankSplitFullTimeTask task2(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibFactory2, 1000,
                                        100, splitterMap, progress);
 

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.simpleapi import config
-import ISISCommandInterface as i
+import ISISCommandInterface as ici
 
 MASKFILE = "MaskSANS2D.txt"
 
@@ -14,8 +14,8 @@ MASKFILE = "MaskSANS2D.txt"
 class Sans2DIsisGuiSettings(unittest.TestCase):
     def setUp(self):
         config["default.instrument"] = "SANS2D"
-        i.SANS2D()
-        i.MaskFile(MASKFILE)
+        ici.SANS2D()
+        ici.MaskFile(MASKFILE)
 
     def checkFloat(self, f1, f2):
         self.assertAlmostEqual(f1, f2)
@@ -30,28 +30,28 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         pass
 
     def test_read_set_gravity(self):  # GUI: gravity_check
-        i.Gravity(True)
-        self.assertTrue(i.ReductionSingleton().to_Q.get_gravity())
-        i.Gravity(False)
-        self.assertTrue(not i.ReductionSingleton().to_Q.get_gravity())
+        ici.Gravity(True)
+        self.assertTrue(ici.ReductionSingleton().to_Q.get_gravity())
+        ici.Gravity(False)
+        self.assertTrue(not ici.ReductionSingleton().to_Q.get_gravity())
 
     def test_read_set_radius(self):  # GUI: rad_min, rad_max
         min_value, max_value = 1.2, 18.9
-        i.ReductionSingleton().user_settings.readLimitValues("L/R %f %f" % (min_value, max_value), i.ReductionSingleton())
-        self.checkFloat(i.ReductionSingleton().mask.min_radius, min_value / 1000)
-        self.checkFloat(i.ReductionSingleton().mask.max_radius, max_value / 1000)
+        ici.ReductionSingleton().user_settings.readLimitValues("L/R %f %f" % (min_value, max_value), ici.ReductionSingleton())
+        self.checkFloat(ici.ReductionSingleton().mask.min_radius, min_value / 1000)
+        self.checkFloat(ici.ReductionSingleton().mask.max_radius, max_value / 1000)
 
     def test_read_set_wav(self):  # GUI: wav_min, wav_max, wav_dw, wav_dw_opt
         min_value, max_value, step, option = 1.2, 4.5, 0.1, "LIN"
-        i.LimitsWav(min_value, max_value, step, option)
-        self.checkFloat(i.ReductionSingleton().to_wavelen.wav_low, min_value)
-        self.checkFloat(i.ReductionSingleton().to_wavelen.wav_high, max_value)
-        self.checkFloat(i.ReductionSingleton().to_wavelen.wav_step, step)
+        ici.LimitsWav(min_value, max_value, step, option)
+        self.checkFloat(ici.ReductionSingleton().to_wavelen.wav_low, min_value)
+        self.checkFloat(ici.ReductionSingleton().to_wavelen.wav_high, max_value)
+        self.checkFloat(ici.ReductionSingleton().to_wavelen.wav_step, step)
         min_value, max_value, step, option = 1.2, 4.5, 0.1, "LOG"
-        i.LimitsWav(min_value, max_value, step, option)
-        self.checkFloat(i.ReductionSingleton().to_wavelen.wav_low, min_value)
-        self.checkFloat(i.ReductionSingleton().to_wavelen.wav_high, max_value)
-        self.checkFloat(i.ReductionSingleton().to_wavelen.wav_step, -step)
+        ici.LimitsWav(min_value, max_value, step, option)
+        self.checkFloat(ici.ReductionSingleton().to_wavelen.wav_low, min_value)
+        self.checkFloat(ici.ReductionSingleton().to_wavelen.wav_high, max_value)
+        self.checkFloat(ici.ReductionSingleton().to_wavelen.wav_step, -step)
 
     def test_wavRanges(self):  # wavRanges, wav_stack, wav_dw_opt
         # it seems to be accessible only through gui, changing the reduction
@@ -76,39 +76,39 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         opt_pattern = "%f %f %f/%s"
         option = "LIN"
         min_max_step_option = opt_pattern % (min_value, max_value, step_value, option)
-        i.ReductionSingleton().user_settings.readLimitValues("L/Q " + min_max_step_option, i.ReductionSingleton())
-        checkvalues(min_value, max_value, step_value, i.ReductionSingleton().to_Q.binning)
+        ici.ReductionSingleton().user_settings.readLimitValues("L/Q " + min_max_step_option, ici.ReductionSingleton())
+        checkvalues(min_value, max_value, step_value, ici.ReductionSingleton().to_Q.binning)
 
         option = "LOG"
         min_max_step_option = opt_pattern % (min_value, max_value, step_value, option)
-        i.ReductionSingleton().user_settings.readLimitValues("L/Q " + min_max_step_option, i.ReductionSingleton())
-        checkvalues(min_value, max_value, -step_value, i.ReductionSingleton().to_Q.binning)
+        ici.ReductionSingleton().user_settings.readLimitValues("L/Q " + min_max_step_option, ici.ReductionSingleton())
+        checkvalues(min_value, max_value, -step_value, ici.ReductionSingleton().to_Q.binning)
 
         rebining_option = ".001,.001,.0126,-.08,.2"
-        i.ReductionSingleton().user_settings.readLimitValues("L/Q " + rebining_option, i.ReductionSingleton())
-        checklistvalues(rebining_option, i.ReductionSingleton().to_Q.binning)
+        ici.ReductionSingleton().user_settings.readLimitValues("L/Q " + rebining_option, ici.ReductionSingleton())
+        checklistvalues(rebining_option, ici.ReductionSingleton().to_Q.binning)
 
     def test_qy(self):  # qy_max, qy_dqy, qy_dqy_opt
         value_max, value_step = 0.06, 0.002
-        i.LimitsQXY(0.0, value_max, value_step)
-        self.checkFloat(i.ReductionSingleton().QXY2, value_max)
-        self.checkFloat(i.ReductionSingleton().DQXY, value_step)
+        ici.LimitsQXY(0.0, value_max, value_step)
+        self.checkFloat(ici.ReductionSingleton().QXY2, value_max)
+        self.checkFloat(ici.ReductionSingleton().DQXY, value_step)
 
     def test_fit(self):
         def checkEqualsOption(option, selector):
             if option[1] is not None:
-                self.checkFloat(i.ReductionSingleton().transmission_calculator.lambdaMin(selector), option[1])
+                self.checkFloat(ici.ReductionSingleton().transmission_calculator.lambdaMin(selector), option[1])
 
             if option[2] is not None:
-                self.checkFloat(i.ReductionSingleton().transmission_calculator.lambdaMax(selector), option[2])
-            self.checkObj(i.ReductionSingleton().transmission_calculator.fitMethod(selector), str(option[0]).upper())
+                self.checkFloat(ici.ReductionSingleton().transmission_calculator.lambdaMax(selector), option[2])
+            self.checkObj(ici.ReductionSingleton().transmission_calculator.fitMethod(selector), str(option[0]).upper())
 
         def checkNotEqualOption(option, selector):
-            self.assertTrue(not i.ReductionSingleton().transmission_calculator.fitMethod(selector) == str(option[0]).upper())
+            self.assertTrue(not ici.ReductionSingleton().transmission_calculator.fitMethod(selector) == str(option[0]).upper())
             if option[1] is not None:
-                self.assertTrue(not i.ReductionSingleton().transmission_calculator.lambdaMin(selector) == option[1])
+                self.assertTrue(not ici.ReductionSingleton().transmission_calculator.lambdaMin(selector) == option[1])
             if option[2] is not None:
-                self.assertTrue(not i.ReductionSingleton().transmission_calculator.lambdaMax(selector) == option[2])
+                self.assertTrue(not ici.ReductionSingleton().transmission_calculator.lambdaMax(selector) == option[2])
 
         def checkFitOption(option):
             if option[3] == "BOTH":
@@ -138,7 +138,7 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
 
         for option in options:
             print("Applying option ", str(option))
-            i.TransFit(mode=option[0], lambdamin=option[1], lambdamax=option[2], selector=option[3])
+            ici.TransFit(mode=option[0], lambdamin=option[1], lambdamax=option[2], selector=option[3])
             checkFitOption(option)
 
     def test_direct_files(self):  # direct_file, front_direct_file
@@ -146,31 +146,31 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         # It is changed only through the MaskFile
 
         ### THIS IS NOT DONE DIRECTLY THROUGH GHI ####
-        i.ReductionSingleton().instrument.getDetector("REAR").correction_file = "rear_file"
-        i.ReductionSingleton().instrument.getDetector("FRONT").correction_file = "front_file"
+        ici.ReductionSingleton().instrument.getDetector("REAR").correction_file = "rear_file"
+        ici.ReductionSingleton().instrument.getDetector("FRONT").correction_file = "front_file"
 
         ## This is done in the GUI ##
-        self.checkStr(i.ReductionSingleton().instrument.detector_file("rear"), "rear_file")
-        self.checkStr(i.ReductionSingleton().instrument.detector_file("front"), "front_file")
+        self.checkStr(ici.ReductionSingleton().instrument.detector_file("rear"), "rear_file")
+        self.checkStr(ici.ReductionSingleton().instrument.detector_file("front"), "front_file")
 
     def test_flood_files(self):  # floodRearFile, floolFrontFile
         options = [("REAR", "rear_file"), ("FRONT", "front_file"), ("REAR", ""), ("FRONT", "")]
 
         for option in options:
-            i.SetDetectorFloodFile(option[1], option[0])
-            self.checkStr(option[1], i.ReductionSingleton().prep_normalize.getPixelCorrFile(option[0]))
+            ici.SetDetectorFloodFile(option[1], option[0])
+            self.checkStr(option[1], ici.ReductionSingleton().prep_normalize.getPixelCorrFile(option[0]))
 
     def test_incident_monitors(self):  # monitor_spec, monitor_interp, trans_monitor, trans_interp
         options = [(2, True), (4, False), (3, True)]
 
         for option in options:
-            i.SetMonitorSpectrum(option[0], option[1])
-            self.checkFloat(i.ReductionSingleton().instrument.get_incident_mon(), option[0])
-            self.checkObj(i.ReductionSingleton().instrument.is_interpolating_norm(), option[1])
+            ici.SetMonitorSpectrum(option[0], option[1])
+            self.checkFloat(ici.ReductionSingleton().instrument.get_incident_mon(), option[0])
+            self.checkObj(ici.ReductionSingleton().instrument.is_interpolating_norm(), option[1])
 
-            i.SetTransSpectrum(option[0], option[1])
-            self.checkFloat(i.ReductionSingleton().instrument.incid_mon_4_trans_calc, option[0])
-            self.checkObj(i.ReductionSingleton().transmission_calculator.interpolate, option[1])
+            ici.SetTransSpectrum(option[0], option[1])
+            self.checkFloat(ici.ReductionSingleton().instrument.incid_mon_4_trans_calc, option[0])
+            self.checkObj(ici.ReductionSingleton().transmission_calculator.interpolate, option[1])
 
     def test_detector_selector(self):
         options = [
@@ -183,28 +183,28 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         ]
 
         for option in options:
-            i.ReductionSingleton().instrument.setDetector(option[0])
-            self.checkStr(i.ReductionSingleton().instrument.det_selection, option[0])
-            self.checkStr(i.ReductionSingleton().instrument.cur_detector().name(), option[1])
+            ici.ReductionSingleton().instrument.setDetector(option[0])
+            self.checkStr(ici.ReductionSingleton().instrument.det_selection, option[0])
+            self.checkStr(ici.ReductionSingleton().instrument.cur_detector().name(), option[1])
 
         # TODO: for LOQ
 
     def test_Phi(self):  # phi_min, phi_max, mirror_phi
         def checkPhiValues(option):
-            self.checkFloat(i.ReductionSingleton().mask.phi_min, option[0])
-            self.checkFloat(i.ReductionSingleton().mask.phi_max, option[1])
-            self.checkObj(i.ReductionSingleton().mask.phi_mirror, option[2])
+            self.checkFloat(ici.ReductionSingleton().mask.phi_min, option[0])
+            self.checkFloat(ici.ReductionSingleton().mask.phi_max, option[1])
+            self.checkObj(ici.ReductionSingleton().mask.phi_mirror, option[2])
 
         options = [(-88.0, 89.0, True), (-87.0, 88.5, False), (-90.0, 90.0, True)]
 
         for option in options:
-            i.SetPhiLimit(option[0], option[1], option[2])
+            ici.SetPhiLimit(option[0], option[1], option[2])
             checkPhiValues(option)
 
         for option in options:
             cmd = "L/PHI" if option[2] else "L/PHI/NOMIRROR"
             patter = "%s %f %f"
-            i.Mask(patter % (cmd, option[0], option[1]))
+            ici.Mask(patter % (cmd, option[0], option[1]))
             checkPhiValues(option)
 
     def test_scaling_options(self):
@@ -212,16 +212,16 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         # frontDetQmin, frontDetQmax, frontDetQrangeOnOff
 
         def testScalingValues(scale, shift, qMin=None, qMax=None, fitScale=False, fitShift=False):
-            self.checkFloat(i.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.scale, scale)
-            self.checkFloat(i.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.shift, shift)
-            self.checkObj(i.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.fitScale, fitScale)
-            self.checkObj(i.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.fitShift, fitShift)
+            self.checkFloat(ici.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.scale, scale)
+            self.checkFloat(ici.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.shift, shift)
+            self.checkObj(ici.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.fitScale, fitScale)
+            self.checkObj(ici.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.fitShift, fitShift)
             if qMin is not None:
-                self.assertTrue(i.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.qRangeUserSelected)
-                self.checkFloat(i.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.qMin, qMin)
-                self.checkFloat(i.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.qMax, qMax)
+                self.assertTrue(ici.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.qRangeUserSelected)
+                self.checkFloat(ici.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.qMin, qMin)
+                self.checkFloat(ici.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.qMax, qMax)
             else:
-                self.assertTrue(not i.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.qRangeUserSelected)
+                self.assertTrue(not ici.ReductionSingleton().instrument.getDetector("FRONT").rescaleAndShift.qRangeUserSelected)
 
         options = [
             {"scale": 1.2, "shift": 0.3},
@@ -232,14 +232,14 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         ]
 
         for option in options:
-            i.SetFrontDetRescaleShift(**option)
+            ici.SetFrontDetRescaleShift(**option)
             testScalingValues(**option)
 
     def test_BACK(self):
-        tofs = i.ReductionSingleton().instrument.get_TOFs(2)
+        tofs = ici.ReductionSingleton().instrument.get_TOFs(2)
         self.checkFloat(tofs[0], 85000)
         self.checkFloat(tofs[1], 98000)
-        tofs = i.ReductionSingleton().instrument.get_TOFs(1)
+        tofs = ici.ReductionSingleton().instrument.get_TOFs(1)
         self.checkFloat(tofs[0], 35000)
         self.checkFloat(tofs[1], 65000)
 
@@ -247,19 +247,19 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         # Check for correct input
         shifts = "12, 13, 14"
         num_files = 4
-        output = i.check_time_shifts_for_added_event_files(number_of_files=num_files, time_shifts=shifts)
+        output = ici.check_time_shifts_for_added_event_files(number_of_files=num_files, time_shifts=shifts)
         self.assertTrue(not output)
 
         # Check warning is produced for mismatch in number of shifts and files, ideally #shifts = N-1 and #files=N
         shifts2 = "12, 13"
         num_files2 = 4
-        output2 = i.check_time_shifts_for_added_event_files(number_of_files=num_files2, time_shifts=shifts2)
+        output2 = ici.check_time_shifts_for_added_event_files(number_of_files=num_files2, time_shifts=shifts2)
         self.assertTrue(output2.startswith("Error: Expected N-1 time shifts "))
 
         # Check error is produced for lexically incorrect shifts, ie shifts which cannot be converted to float
         shifts3 = "12, 13, a"
         num_files3 = 4
-        output3 = i.check_time_shifts_for_added_event_files(number_of_files=num_files3, time_shifts=shifts3)
+        output3 = ici.check_time_shifts_for_added_event_files(number_of_files=num_files3, time_shifts=shifts3)
         self.assertTrue(output3.startswith("Error: Elements of the time"))
 
 

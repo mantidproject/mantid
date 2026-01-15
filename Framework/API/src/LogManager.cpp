@@ -612,14 +612,12 @@ void LogManager::saveNexus(Nexus::File *file, const std::string &group, bool kee
  * @param file :: open NeXus file
  * @param group :: name of the group to open. Pass an empty string to NOT open a
  * group
- * @param fileInfo :: The corresponding Nexus HDF5 file descriptor
  * @param prefix :: The prefix of the provided file
  * @param keepOpen :: do not close group on exit to allow overloading and child
  * classes reading from the same group
  * load any NXlog in the current open group.
  */
-void LogManager::loadNexus(Nexus::File * /*file*/, const std::string & /*group*/,
-                           const Nexus::NexusDescriptor & /*fileInfo*/, const std::string & /*prefix*/,
+void LogManager::loadNexus(Nexus::File * /*file*/, std::string const & /*group*/, std::string const & /*prefix*/,
                            bool /*keepOpen*/) {
   throw std::runtime_error("LogManager::loadNexus should not be used");
 }
@@ -646,12 +644,10 @@ void LogManager::loadNexus(Nexus::File *file, const std::string &group, bool kee
   }
 }
 
-void LogManager::loadNexus(Nexus::File *file, const Nexus::NexusDescriptor &fileInfo, const std::string &prefix) {
+void LogManager::loadNexus(Nexus::File *file, std::string const &prefix) {
 
   // Only load from NXlog entries
-  const auto &allEntries = fileInfo.getAllEntries();
-  auto itNxLogEntries = allEntries.find("NXlog");
-  const auto nxLogEntries = (itNxLogEntries != allEntries.end()) ? itNxLogEntries->second : std::set<std::string>{};
+  auto const nxLogEntries = file->getEntriesByClass("NXlog");
 
   const auto levels = std::count(prefix.begin(), prefix.end(), '/');
 
@@ -672,7 +668,7 @@ void LogManager::loadNexus(Nexus::File *file, const Nexus::NexusDescriptor &file
     }
     const std::string nameClass = absoluteEntryName.substr(absoluteEntryName.find_last_of('/') + 1);
 
-    auto prop = PropertyNexus::loadProperty(file, nameClass, fileInfo, prefix);
+    auto prop = PropertyNexus::loadProperty(file, nameClass, prefix);
     if (prop) {
       // get TimeROI
       if (prop->name() == Kernel::TimeROI::NAME) {
@@ -691,8 +687,7 @@ void LogManager::loadNexus(Nexus::File *file, const Nexus::NexusDescriptor &file
 }
 
 //--------------------------------------------------------------------------------------------
-/** Load the object from an open NeXus file. Avoid multiple expensive calls to
- * getEntries().
+/** Load the object from an open NeXus file. Avoid multiple expensive calls to getEntries().
  * @param file :: open NeXus file
  * @param entries :: The entries available in the current place in the file.
  * load any NXlog in the current open group.

@@ -37,7 +37,7 @@ struct PlotType {
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-StretchView::StretchView(QWidget *parent)
+StretchView::StretchView(QWidget *parent, bool useQuickBayes)
     : m_dblManager(new QtDoublePropertyManager()), m_properties(), m_propTree(new QtTreePropertyBrowser()),
       m_dblEdFac(new DoubleEditorFactory()) {
   m_uiForm.setupUi(parent);
@@ -47,9 +47,7 @@ StretchView::StretchView(QWidget *parent)
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("StretchERange");
   connect(eRangeSelector, &MantidWidgets::RangeSelector::minValueChanged, this, &StretchView::minValueChanged);
   connect(eRangeSelector, &MantidWidgets::RangeSelector::maxValueChanged, this, &StretchView::maxValueChanged);
-  setupFitOptions();
-  setupPropertyBrowser();
-  setupPlotOptions();
+  updateBackend(useQuickBayes);
 
   connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &StretchView::handleSampleInputReady);
   connect(m_uiForm.chkSequentialFit, &QCheckBox::toggled, m_uiForm.cbPlot, &QComboBox::setEnabled);
@@ -75,9 +73,6 @@ void StretchView::loadSettings(const QSettings &settings) {
 }
 
 void StretchView::applySettings(std::map<std::string, QVariant> const &settings) {
-  setupFitOptions();
-  setupPropertyBrowser();
-  setupPlotOptions();
   setFileExtensionsByName(settings.at("RestrictInput").toBool());
   setLoadHistory(settings.at("LoadHistory").toBool());
 }
@@ -108,8 +103,13 @@ void StretchView::propertiesUpdated(QtProperty *prop, double val) {
   connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &StretchView::propertiesUpdated);
 }
 
-void StretchView::setupFitOptions() {
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+void StretchView::updateBackend(bool useQuickBayes) {
+  setupFitOptions(useQuickBayes);
+  setupPropertyBrowser(useQuickBayes);
+  setupPlotOptions(useQuickBayes);
+}
+
+void StretchView::setupFitOptions(bool useQuickBayes) {
   m_uiForm.cbBackground->clear();
   if (useQuickBayes) {
     m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::LINEAR));
@@ -124,9 +124,7 @@ void StretchView::setupFitOptions() {
   }
 }
 
-void StretchView::setupPropertyBrowser() {
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
-
+void StretchView::setupPropertyBrowser(bool useQuickBayes) {
   m_properties.clear();
   m_dblManager->clear();
   m_propTree->clear();
@@ -177,8 +175,7 @@ void StretchView::formatTreeWidget(QtTreePropertyBrowser *treeWidget,
     treeWidget->setBackgroundColor(treeWidget->topLevelItem(item), QColor(246, 246, 246));
 }
 
-void StretchView::setupPlotOptions() {
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+void StretchView::setupPlotOptions(bool useQuickBayes) {
   m_uiForm.cbPlot->clear();
   if (useQuickBayes) {
     m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
