@@ -1325,6 +1325,23 @@ public:
     doRaggedWorkspaceTest(raggedWS);
   }
 
+  void test_performance_workspace_history() {
+    LoadNexusProcessed loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setPropertyValue("Filename", "very_complicated_workspace_history.nxs");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+
+    auto start = std::chrono::high_resolution_clock::now();
+    TS_ASSERT(loader.execute());
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end - start;
+    std::cout << "Time taken to load workspace history: " + std::to_string(elapsed.count()) + " seconds\n";
+    // this test should run in less than 1s
+    // but to allow for differences in test runners, allow up to 5s
+    TS_ASSERT_LESS_THAN(elapsed.count(), 5.0); // seconds
+  }
+
 private:
   template <typename TYPE>
   void check_log(Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &logName, const int noOfEntries,
