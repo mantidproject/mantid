@@ -469,7 +469,7 @@ def _authors_from_tag_info(tag_info):
         "--no-merges",  # ignore merge commits
         "--pretty=short",
         tag_info,
-        '--format="%aN"',
+        '--format="%aN"',  # only author name, ignore committer
         "--reverse",
     ]
     proc = subprocess.run(args, stdout=subprocess.PIPE, encoding="utf-8")
