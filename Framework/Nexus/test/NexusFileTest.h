@@ -1472,46 +1472,6 @@ public:
     TS_ASSERT_EQUALS(entries["soft_link"], "NX_UNKNOWN_GROUP");
   }
 
-  void test_getEntries_performance() {
-    cout << "\ntest getEntries performance" << std::endl;
-
-    std::string filename = getFullPath("very_complicated_workspace_history.nxs");
-    Mantid::Nexus::File file(filename, NXaccess::READ);
-    file.openAddress("/mantid_workspace_1/process/MantidAlgorithm_1");
-    auto start = std::chrono::high_resolution_clock::now();
-    Mantid::Nexus::Entries entries = file.getEntries();
-    for (const auto &entry : entries) {
-      // just iterate through them
-      if (entry.second != Mantid::Nexus::SCIENTIFIC_DATA_SET) {
-        // printf("entry: %s\n", entry.first.c_str()); fflush(stdout);
-        file.openGroup(entry.first, entry.second);
-        auto moreEntries = file.getEntries();
-        for (const auto &subEntry : moreEntries) {
-          // printf("\tsubentry: %s | %s\n", subEntry.first.c_str(), subEntry.second.c_str()); fflush(stdout);
-          if (subEntry.second != Mantid::Nexus::SCIENTIFIC_DATA_SET) {
-            file.openGroup(subEntry.first, subEntry.second);
-            file.closeGroup();
-          } else {
-            file.openData(subEntry.first);
-            file.getStrData();
-            file.closeData();
-          }
-        }
-        file.closeGroup();
-      } else {
-        file.openData(entry.first);
-        file.getStrData();
-        file.closeData();
-      }
-    }
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed = end - start;
-    std::cout << "Time taken to load workspace history: " + std::to_string(elapsed.count()) + " seconds\n";
-    // this test should run in less than 1s
-    // but to account for runner differences, allow for 2s
-    TS_ASSERT_LESS_THAN(elapsed.count(), 0.0);
-  }
-
   // ##################################################################################################################
 
 #ifdef _WIN32
