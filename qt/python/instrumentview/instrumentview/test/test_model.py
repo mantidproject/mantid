@@ -2,6 +2,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from instrumentview.Globals import CurrentTab
 from mantid.simpleapi import CreateSampleWorkspace, CreatePeaksWorkspace, AddPeak
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.Projections.ProjectionType import ProjectionType
@@ -140,11 +141,13 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.update_point_picked_detectors(1)
         np.testing.assert_equal(model._detector_is_picked, [False, True, False])
 
-    def test_clear_all_picked_detectors(self):
+    def test_clear_point_picked_detectors(self):
         model, _ = self._setup_model([1, 2, 3])
-        model._detector_is_picked = np.array([False, True, True])
-        model.clear_all_picked_detectors()
-        np.testing.assert_equal(model._detector_is_picked, [False, False, False])
+        model._detector_is_picked = np.array([True, True, True])
+        model._point_picked_detectors = np.array([False, True, True])
+        model.clear_point_picked_detectors()
+        np.testing.assert_equal(model._point_picked_detectors, [False, False, False])
+        np.testing.assert_equal(model._detector_is_picked, [True, False, False])
 
     def test_detectors_with_no_spectra(self):
         self._setup_mocks([1, 20, 300, 400], monitors=np.array(["no", "no", "n/a", "yes"]))
@@ -609,7 +612,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._is_masked_in_ws = np.array([True, True, False])
         model._is_valid = np.array([True, True, True])
         model._is_masked = np.array([True, False, False])
-        model.add_new_detector_mask([True, True])
+        model.add_new_detector_key([True, True], CurrentTab.Masking)
         np.testing.assert_array_equal(list(model._cached_masks_map.values())[0], np.array([True, True, True]))
 
     def test_roi_mask(self):
@@ -617,7 +620,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._cached_rois_map = {}
         model._is_valid = np.array([True, True, True])
         model._detector_is_picked = np.array([True, False, False])
-        model.add_new_detector_picking_selection([True, True, False])
+        model.add_new_detector_key([True, True, False], CurrentTab.Grouping)
         np.testing.assert_array_equal(list(model._cached_rois_map.values())[0], np.array([True, True, False]))
 
     def test_apply_detector_mask(self):
@@ -625,21 +628,20 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         # All detectors picked, mask should unpick them
         model._detector_is_picked = np.array([True, True, True])
         model._cached_masks_map = {"Mask 1": np.array([True, False, False]), "Mask 2": np.array([False, True, False])}
-        model.apply_detector_masks(["Mask 1", "Mask 2"])
+        model.apply_detector_items(["Mask 1", "Mask 2"], CurrentTab.Masking)
         np.testing.assert_array_equal(model._is_masked, np.array([True, True, False]))
-        np.testing.assert_array_equal(model._detector_is_picked, np.array([False, False, True]))
 
     def test_apply_detector_roi(self):
         model, _ = self._setup_model([1, 2, 3])
         model._point_picked_detectors = np.array([True, False, False])
         model._cached_rois_map = {"1": np.array([False, False, True]), "2": np.array([False, True, False])}
-        model.apply_detector_pick_selections(["1", "2"])
+        model.apply_detector_items(["1", "2"], CurrentTab.Grouping)
         np.testing.assert_array_equal(model._detector_is_picked, np.array([True, True, True]))
 
     def test_apply_detector_mask_empty(self):
         model, _ = self._setup_model([1, 2, 3])
         model._is_masked_in_ws = np.array([True, False, False])
-        model.apply_detector_masks([])
+        model.apply_detector_items([], CurrentTab.Masking)
         np.testing.assert_array_equal(model._is_masked, np.array([True, False, False]))
         np.testing.assert_array_equal(model._detector_is_picked, np.array([False, False, False]))
 
@@ -648,14 +650,14 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._detector_is_picked = np.array([True, False, False])
         model._point_picked_detectors = np.array([False, True, False])
         model._cached_rois_map = {"1": np.array([False, False, True]), "2": np.array([False, True, False])}
-        model.apply_detector_pick_selections([])
+        model.apply_detector_items([], CurrentTab.Grouping)
         np.testing.assert_array_equal(model._detector_is_picked, np.array([False, True, False]))
 
     @mock.patch("instrumentview.FullInstrumentViewModel.CloneWorkspace")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractMaskToTable")
     def test_save_mask_workspace_to_ads(self, mock_extract_to_table, mock_clone):
         model, _ = self._setup_model([1, 2, 3])
-        model.save_mask_workspace_to_ads()
+        model.save_workspace_to_ads(CurrentTab.Masking)
         mock_extract_to_table.assert_called_once()
         mock_clone.assert_called_once()
 
@@ -663,32 +665,32 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractMaskToTable")
     def test_save_roi_workspace_to_ads(self, mock_extract_to_table, mock_clone):
         model, _ = self._setup_model([1, 2, 3])
-        model.save_roi_workspace_to_ads()
+        model.save_workspace_to_ads(CurrentTab.Grouping)
         mock_extract_to_table.assert_called_once()
         mock_clone.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.SaveMask")
     def test_save_xml_mask(self, mock_save_mask):
         model, _ = self._setup_model([1, 2, 3])
-        model.save_xml_mask("file")
+        model.save_to_xml("file", CurrentTab.Masking)
         mock_save_mask.assert_called_with(model._mask_ws, OutputFile="file.xml")
 
     @mock.patch("instrumentview.FullInstrumentViewModel.SaveMask")
     def test_save_xml_roi(self, mock_save_mask):
         model, _ = self._setup_model([1, 2, 3])
-        model.save_xml_roi("file")
+        model.save_to_xml("file", CurrentTab.Grouping)
         mock_save_mask.assert_called_with(model._roi_ws, OutputFile="file.xml")
 
     def test_clear_masks(self):
         model, _ = self._setup_model([1, 2, 3])
         model._cached_masks_map = {"1": 1, "2": 2}
-        model.clear_stored_masks()
+        model.clear_stored_keys(CurrentTab.Masking)
         self.assertEqual(model._cached_masks_map, {})
 
     def test_clear_rois(self):
         model, _ = self._setup_model([1, 2, 3])
         model._cached_rois_map = {"1": 1, "2": 2}
-        model.clear_stored_rois()
+        model.clear_stored_keys(CurrentTab.Grouping)
         self.assertEqual(model._cached_rois_map, {})
 
     def test_masked_spectrum_peak_not_included(self):

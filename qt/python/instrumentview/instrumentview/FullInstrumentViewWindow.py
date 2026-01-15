@@ -52,16 +52,11 @@ from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.Globals import CurrentTab
 
 import os
 from contextlib import suppress
 from typing import Callable
-from enum import Enum
-
-
-class WidgetType(str, Enum):
-    Cylinder = "Circle"
-    Box = "Rectangle"
 
 
 class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):
@@ -198,6 +193,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._reset_projection = QPushButton("Reset Projection")
         self._reset_projection.setToolTip("Resets the projection to default.")
         self._reset_projection.clicked.connect(self.reset_camera)
+        self._clear_point_picked_detectors = QPushButton("Clear Mouse Picking")
         self._aspect_ratio_check_box = QCheckBox()
         self._aspect_ratio_check_box.setText("Maintain Aspect Ratio")
         self._aspect_ratio_check_box.setToolTip(
@@ -210,6 +206,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._show_monitors_check_box.setText("Show Monitors?")
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
+        projection_layout.addWidget(self._clear_point_picked_detectors)
         projection_layout.addWidget(self._aspect_ratio_check_box)
         projection_layout.addWidget(self._show_monitors_check_box)
 
@@ -281,11 +278,11 @@ class FullInstrumentViewWindow(QMainWindow):
         masking_layout.addWidget(self._mask_list)
         masking_layout.addLayout(post_list_layout)
 
-        picking_masking_tab = QTabWidget()
-        picking_masking_tab.addTab(selection_tab, "Grouping")
-        picking_masking_tab.addTab(mask_tab, "Masking")
+        self._picking_masking_tab = QTabWidget()
+        self._picking_masking_tab.addTab(selection_tab, CurrentTab.Grouping.value)
+        self._picking_masking_tab.addTab(mask_tab, CurrentTab.Masking.value)
         grouping_masking_group_layout.addWidget(shapes_widget)
-        grouping_masking_group_layout.addWidget(picking_masking_tab)
+        grouping_masking_group_layout.addWidget(self._picking_masking_tab)
 
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
@@ -340,10 +337,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
         self._presenter.on_sum_spectra_checkbox_clicked()
-
-    def is_multi_picking_checkbox_checked(self) -> bool:
-        # return self._multi_select_check.isChecked()
-        return False
 
     def is_maintain_aspect_ratio_checkbox_checked(self) -> bool:
         return self._aspect_ratio_check_box.isChecked()
@@ -469,23 +462,23 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
-        # self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
+        self._clear_point_picked_detectors.clicked.connect((self._presenter.on_clear_point_picked_detectors_clicked))
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
         self._units_combo_box.currentIndexChanged.connect(self._presenter.on_unit_option_selected)
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
         self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
-        self._mask_list.itemChanged.connect(self._presenter.on_mask_item_selected)
-        self._selection_list.itemChanged.connect(self._presenter.on_roi_item_selected)
-        self._save_mask_to_ws.clicked.connect(self._presenter.on_save_mask_to_workspace_clicked)
-        self._save_selection_to_ws.clicked.connect(self._presenter.on_save_roi_to_workspace_clicked)
-        self._save_mask_to_file.clicked.connect(self._presenter.on_save_xml_mask_clicked)
-        self._save_selection_to_file.clicked.connect(self._presenter.on_save_xml_roi_clicked)
-        self._overwrite_mask.clicked.connect(self._presenter.on_overwrite_mask_clicked)
-        self._overwrite_selection.clicked.connect(self._presenter.on_overwrite_roi_clicked)
-        self._clear_masks.clicked.connect(self._presenter.on_clear_masks_clicked)
-        self._clear_selections.clicked.connect(self._presenter.on_clear_roi_clicked)
+        self._mask_list.itemChanged.connect(self._presenter.on_list_item_selected)
+        self._selection_list.itemChanged.connect(self._presenter.on_list_item_selected)
+        self._save_mask_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
+        self._save_selection_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
+        self._save_mask_to_file.clicked.connect(self._presenter.on_save_to_xml_clicked)
+        self._save_selection_to_file.clicked.connect(self._presenter.on_save_to_xml_clicked)
+        self._overwrite_mask.clicked.connect(self._presenter.on_apply_permanently_clicked)
+        self._overwrite_selection.clicked.connect(self._presenter.on_apply_permanently_clicked)
+        self._clear_masks.clicked.connect(self._presenter.on_clear_list_clicked)
+        self._clear_selections.clicked.connect(self._presenter.on_clear_list_clicked)
         self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
         self._add_peak_button.clicked.connect(self._presenter.on_add_peak_clicked)
         self._delete_peak_button.clicked.connect(self._presenter.on_delete_peak_clicked)
@@ -508,9 +501,9 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_circle.toggled.connect(self.on_toggle_add_circle)
         self._add_rectangle.toggled.connect(self.on_toggle_add_rectangle)
 
-        self._add_mask.clicked.connect(self._presenter.on_add_mask_clicked)
+        self._add_mask.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_mask.setDisabled(True)
-        self._add_selection.clicked.connect(self._presenter.on_add_selection_clicked)
+        self._add_selection.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_selection.setDisabled(True)
 
     def on_toggle_add_circle(self, checked):
@@ -960,29 +953,34 @@ class FullInstrumentViewWindow(QMainWindow):
         self._detector_spectrum_fig.tight_layout()
         self._detector_figure_canvas.draw()
 
-    def selected_masks(self) -> list[str]:
+    def get_current_selected_tab(self) -> CurrentTab:
+        index = self._picking_masking_tab.currentIndex()
+        tab_name = self._picking_masking_tab.tabText(index)
+        return CurrentTab(tab_name)
+
+    def get_current_selected_list_widget(self) -> QListWidget:
+        return self._mask_list if self.get_current_selected_tab() == CurrentTab.Masking else self._selection_list
+
+    def selected_items(self) -> list[str]:
+        list_to_read_from = self.get_current_selected_list_widget()
         return [
-            self._mask_list.item(row_index).text()
-            for row_index in range(self._mask_list.count())
-            if self._mask_list.item(row_index).checkState() > 0
+            list_to_read_from.item(row_index).text()
+            for row_index in range(list_to_read_from.count())
+            if list_to_read_from.item(row_index).checkState() > 0
         ]
 
-    def selected_pick_selections(self) -> list[str]:
-        return [
-            self._selection_list.item(row_index).text()
-            for row_index in range(self._selection_list.count())
-            if self._selection_list.item(row_index).checkState() > 0
-        ]
-
-    def set_new_mask_key(self, new_key: str) -> None:
-        list_item = QListWidgetItem(new_key, self._mask_list)
+    def set_new_item_key(self, new_key: str) -> None:
+        list_to_modify = self.get_current_selected_list_widget()
+        list_item = QListWidgetItem(new_key, list_to_modify)
         list_item.setCheckState(Qt.Checked)
 
-    def set_new_picking_selection_key(self, new_key: str) -> None:
-        list_item = QListWidgetItem(new_key, self._selection_list)
-        list_item.setCheckState(Qt.Checked)
+    def clear_current_list(self) -> None:
+        if self.get_current_selected_tab() is CurrentTab.Masking:
+            self.clear_masks_list()
+        else:
+            self.clear_rois_list()
 
-    def clear_mask_list(self) -> None:
+    def clear_masks_list(self) -> None:
         # Iterate backwards otherwise breaks indexing
         for i in range(self._mask_list.count() - 1, -1, -1):
             item = self._mask_list.item(i)
@@ -993,7 +991,7 @@ class FullInstrumentViewWindow(QMainWindow):
             del removed
         self.refresh_mask_ws_list()
 
-    def clear_roi_list(self) -> None:
+    def clear_rois_list(self) -> None:
         # Iterate backwards otherwise breaks indexing
         for i in range(self._selection_list.count() - 1, -1, -1):
             removed = self._selection_list.takeItem(i)

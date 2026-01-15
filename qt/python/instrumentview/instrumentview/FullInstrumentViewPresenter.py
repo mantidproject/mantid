@@ -9,6 +9,7 @@ import pyvista as pv
 from pyvista.plotting.opts import PickerType
 from qtpy.QtWidgets import QFileDialog
 from typing import Optional
+from instrumentview.Globals import CurrentTab
 from mantid import mtd
 from mantid.kernel import logger, ConfigService
 from mantid.simpleapi import AnalysisDataService
@@ -233,82 +234,60 @@ class FullInstrumentViewPresenter:
                 return
             point_index = picker.GetPointId()
             self._model.update_point_picked_detectors(point_index)
-            # Update to visibility shows up in real time
-            self._pickable_mesh[self._visible_label] = self._model.picked_visibility
-            self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
-            self._peak_interaction_status = PeakInteractionStatus.Disabled
-            self._view.remove_peak_cursor_from_lineplot()
-            self._update_peak_buttons()
+            self.update_picked_detectors_on_view()
 
         self._view.enable_point_picking(self._model.is_2d_projection, callback=point_picked)
 
-    def on_add_mask_clicked(self) -> None:
-        implicit_function = self._view.get_current_widget_implicit_function()
-        if not implicit_function:
-            return
-        mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points]
-        new_key = self._model.add_new_detector_mask(mask)
-        self._view.set_new_mask_key(new_key)
-
-    def on_add_selection_clicked(self) -> None:
-        implicit_function = self._view.get_current_widget_implicit_function()
-        if not implicit_function:
-            return
-        mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points]
-        new_key = self._model.add_new_detector_picking_selection(mask)
-        self._view.set_new_picking_selection_key(new_key)
-
-    def on_roi_item_selected(self) -> None:
-        self._model.apply_detector_pick_selections(self._view.selected_pick_selections())
+    def update_picked_detectors_on_view(self) -> None:
         # Update to visibility shows up in real time
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
-        self._view.enable_or_disable_mask_widgets()
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
         self._peak_interaction_status = PeakInteractionStatus.Disabled
         self._view.remove_peak_cursor_from_lineplot()
         self._update_peak_buttons()
 
-    def on_mask_item_selected(self) -> None:
-        self._model.apply_detector_masks(self._view.selected_masks())
-        self.update_plotter()
-        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
-        self._update_peak_buttons()
+    def on_clear_point_picked_detectors_clicked(self) -> None:
+        self._model.clear_point_picked_detectors()
+        self.update_picked_detectors_on_view()
 
-    def on_save_roi_to_workspace_clicked(self) -> None:
-        self._model.save_roi_workspace_to_ads()
+    def on_add_item_clicked(self) -> None:
+        implicit_function = self._view.get_current_widget_implicit_function()
+        if not implicit_function:
+            return
+        mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points]
+        new_key = self._model.add_new_detector_key(mask, self._view.get_current_selected_tab())
+        self._view.set_new_item_key(new_key)
 
-    def on_save_mask_to_workspace_clicked(self) -> None:
-        self._model.save_mask_workspace_to_ads()
+    def on_list_item_selected(self) -> None:
+        self._model.apply_detector_items(self._view.selected_items(), self._view.get_current_selected_tab())
 
-    def on_overwrite_mask_clicked(self) -> None:
-        self._model.overwrite_mask_to_current_workspace()
-        self._view.clear_mask_list()
+        if self._view.get_current_selected_tab() is CurrentTab.Masking:
+            self.update_plotter()
+            self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+            self._update_peak_buttons()
+        else:
+            self.update_picked_detectors_on_view()
+            # NOTE: This is required explicitly
+            self._view.enable_or_disable_mask_widgets()
 
-    def on_overwrite_roi_clicked(self) -> None:
-        self._model.overwrite_roi_to_current_workspace()
-        self._view.clear_roi_list()
+    def on_save_to_workspace_clicked(self) -> None:
+        self._model.save_workspace_to_ads(self._view.get_current_selected_tab())
 
-    def on_clear_masks_clicked(self) -> None:
-        self._view.clear_mask_list()
-        self._model.clear_stored_masks()
-        self.on_mask_item_selected()
+    def on_apply_permanently_clicked(self) -> None:
+        self._model.overwrite_to_current_workspace(self._view.get_current_selected_tab())
+        self._view.clear_masks_list()
+        self._view.clear_rois_list()
 
-    def on_clear_roi_clicked(self) -> None:
-        self._view.clear_roi_list()
-        self._model.clear_stored_rois()
-        self.on_roi_item_selected()
+    def on_clear_list_clicked(self) -> None:
+        self._view.clear_current_list()
+        self._model.clear_stored_keys(self._view.get_current_selected_tab())
+        self.on_list_item_selected()
 
-    def on_save_xml_mask_clicked(self):
+    def on_save_to_xml_clicked(self):
         filename = self._get_filename_from_dialog()
         if not filename:
             return
-        self._model.save_xml_mask(filename)
-
-    def on_save_xml_roi_clicked(self):
-        filename = self._get_filename_from_dialog()
-        if not filename:
-            return
-        self._model.save_xml_roi(filename)
+        self._model.save_to_xml(filename, self._view.get_current_selected_tab())
 
     def _get_filename_from_dialog(self):
         filename = open_a_file_dialog(
@@ -321,7 +300,7 @@ class FullInstrumentViewPresenter:
 
     def _reload_mask_workspaces(self) -> None:
         self._view.refresh_mask_ws_list()
-        self.on_mask_item_selected()
+        self.on_list_item_selected()
 
     def mask_workspaces_in_ads(self) -> list[str]:
         return [ws.name() for ws in self._model.get_mask_workspaces_in_ads()]

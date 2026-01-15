@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.Detectors import DetectorInfo
+from instrumentview.Globals import CurrentTab
 from instrumentview.Peaks.Peak import Peak
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Projections.SphericalProjection import SphericalProjection
@@ -232,8 +233,9 @@ class FullInstrumentViewModel:
         self._detector_is_picked[global_index] = ~self._detector_is_picked[global_index]
         self._point_picked_detectors[global_index] = self._detector_is_picked[global_index]
 
-    def clear_all_picked_detectors(self) -> None:
-        self._detector_is_picked.fill(False)
+    def clear_point_picked_detectors(self) -> None:
+        self._detector_is_picked[self._point_picked_detectors] = False
+        self._point_picked_detectors.fill(False)
 
     def picked_detectors_info_text(self) -> list[DetectorInfo]:
         """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
@@ -472,42 +474,43 @@ class FullInstrumentViewModel:
         q_lab = np.array([-np.sin(two_theta) * np.cos(phi), -np.sin(two_theta) * np.sin(phi), 1 - np.cos(two_theta)])
         return q_lab / np.linalg.norm(q_lab)
 
-    def add_new_detector_mask(self, new_mask: list[bool]) -> str:
-        new_key = f"Mask {len(self._cached_masks_map) + 1} (unsaved)"
-        mask_to_save = self._is_masked_in_ws.copy()
-        mask_to_save[self.is_pickable] = new_mask
-        self._cached_masks_map[new_key] = mask_to_save
-        return new_key
+    def add_new_detector_key(self, new_value: list[bool], kind: CurrentTab):
+        if kind is CurrentTab.Masking:
+            new_key = f"Mask {len(self._cached_masks_map) + 1} (unsaved)"
+            mask_to_save = self._is_masked_in_ws.copy()
+            mask_to_save[self.is_pickable] = new_value
+            self._cached_masks_map[new_key] = mask_to_save
+            return new_key
+        else:
+            new_key = f"Pick Selection {len(self._cached_rois_map) + 1} (unsaved)"
+            selection_to_save = np.zeros_like(self._workspace_indices, dtype=bool)
+            selection_to_save[self.is_pickable] = new_value
+            self._cached_rois_map[new_key] = selection_to_save
+            return new_key
 
-    def add_new_detector_picking_selection(self, new_selection: list[bool]) -> str:
-        new_key = f"Pick Selection {len(self._cached_rois_map) + 1} (unsaved)"
-        selection_to_save = np.zeros_like(self._workspace_indices)
-        selection_to_save[self.is_pickable] = new_selection
-        self._cached_rois_map[new_key] = selection_to_save
-        return new_key
+    def apply_detector_items(self, selected_keys: list[str], kind: CurrentTab):
+        if kind is CurrentTab.Masking:
+            ws_masks = [ws.extractY().flatten() for ws in self.get_mask_workspaces_in_ads() if ws.name() in selected_keys]
+            cached_masks = [self._cached_masks_map[key] for key in selected_keys if key in self._cached_masks_map.keys()]
+            total_items = ws_masks + cached_masks
+            if not total_items:
+                self._is_masked = self._is_masked_in_ws
+                return
+            self._is_masked = np.logical_or.reduce(total_items)
 
-    def apply_detector_masks(self, mask_keys: list[str]) -> None:
-        ws_masks = [ws.extractY().flatten() for ws in self.get_mask_workspaces_in_ads() if ws.name() in mask_keys]
-        cached_masks = [self._cached_masks_map[key] for key in mask_keys if key in self._cached_masks_map.keys()]
-        if not ws_masks and not cached_masks:
-            self._is_masked = self._is_masked_in_ws
-            return
-        total_mask = np.logical_or.reduce(ws_masks + cached_masks)
-        self._is_masked = total_mask
+        else:
+            cached_selections = [self._cached_rois_map[key] for key in selected_keys if key in self._cached_rois_map.keys()]
+            total_items = [self._point_picked_detectors, *cached_selections]
+            if not total_items:
+                self._detector_is_picked = self._point_picked_detectors
+                return
+            self._detector_is_picked = np.logical_or.reduce(total_items)
 
-    def apply_detector_pick_selections(self, selection_keys: list[str]) -> None:
-        cached_selections = [self._cached_rois_map[key] for key in selection_keys if key in self._cached_rois_map.keys()]
-        if not cached_selections:
-            self._detector_is_picked = self._point_picked_detectors
-            return
-        total_mask = np.logical_or.reduce([self._point_picked_detectors] + cached_selections)
-        self._detector_is_picked = total_mask
-
-    def clear_stored_masks(self) -> None:
-        self._cached_masks_map.clear()
-
-    def clear_stored_rois(self) -> None:
-        self._cached_rois_map.clear()
+    def clear_stored_keys(self, kind: CurrentTab) -> None:
+        if kind is CurrentTab.Masking:
+            self._cached_masks_map.clear()
+        else:
+            self._cached_rois_map.clear()
 
     @property
     def cached_masks_keys(self) -> list[str]:
@@ -517,42 +520,39 @@ class FullInstrumentViewModel:
     def cached_pick_selections_keys(self) -> list[str]:
         return list(self._cached_rois_map.keys())
 
-    def save_mask_workspace_to_ads(self) -> None:
-        self._save_mask_workspace_to_ads(self.mask_ws)
+    def save_workspace_to_ads(self, kind: CurrentTab):
+        if kind is CurrentTab.Masking:
+            ws_to_save = self.mask_ws
+        else:
+            ws_to_save = self.roi_ws
 
-    def save_roi_workspace_to_ads(self) -> None:
-        self._save_mask_workspace_to_ads(self.roi_ws)
-
-    def _save_mask_workspace_to_ads(self, ws) -> None:
         xmin, xmax = self._integration_limits
-        ExtractMaskToTable(ws, Xmin=xmin, Xmax=xmax, OutputWorkspace="MaskTable")
-        CloneWorkspace(ws, OutputWorkspace="MaskWorkspace")
+        ExtractMaskToTable(ws_to_save, Xmin=xmin, Xmax=xmax, OutputWorkspace="MaskTable")
+        CloneWorkspace(ws_to_save, OutputWorkspace="MaskWorkspace")
 
-    def save_xml_mask(self, filename) -> None:
-        self._save_xml_mask(self.mask_ws, filename)
+    def save_to_xml(self, filename, kind: CurrentTab):
+        if kind is CurrentTab.Masking:
+            ws_to_save = self.mask_ws
+        else:
+            ws_to_save = self.roi_ws
 
-    def save_xml_roi(self, filename) -> None:
-        self._save_xml_mask(self.roi_ws, filename)
-
-    def _save_xml_mask(self, ws, filename):
         if not filename:
             return
         if Path(filename).suffix != ".xml":
             filename += ".xml"
-        SaveMask(ws, OutputFile=filename)
+        SaveMask(ws_to_save, OutputFile=filename)
 
-    def overwrite_mask_to_current_workspace(self) -> None:
-        self._overwrite_mask_to_current_workspace(self.mask_ws)
+    def overwrite_to_current_workspace(self, kind: CurrentTab) -> None:
+        if kind is CurrentTab.Masking:
+            ws_to_save = self.mask_ws
+        else:
+            ws_to_save = self.roi_ws
 
-    def overwrite_roi_to_current_workspace(self) -> None:
-        self._overwrite_mask_to_current_workspace(self.roi_ws)
-
-    def _overwrite_mask_to_current_workspace(self, mask_ws) -> None:
         # TODO: Check if copies are expensive with big workspaces
         temp_ws = CloneWorkspace(self._workspace.name(), StoreInADS=False)
         temp_ws_name = f"__instrument_view_temp_{self._workspace.name()}"
         AnalysisDataService.addOrReplace(temp_ws_name, temp_ws)
-        MaskDetectors(temp_ws_name, MaskedWorkspace=mask_ws)
+        MaskDetectors(temp_ws_name, MaskedWorkspace=ws_to_save)
         AnalysisDataService.addOrReplace(self._workspace.name(), AnalysisDataService.retrieve(temp_ws_name))
 
     def get_mask_workspaces_in_ads(self) -> list[MaskWorkspace]:
