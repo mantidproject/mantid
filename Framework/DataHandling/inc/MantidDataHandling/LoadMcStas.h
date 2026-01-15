@@ -12,13 +12,14 @@
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 #include <H5Cpp.h>
 
 namespace Mantid {
 namespace DataHandling {
 
-class MANTID_DATAHANDLING_DLL LoadMcStas : public API::NexusFileLoader {
+class MANTID_DATAHANDLING_DLL LoadMcStas : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -29,11 +30,11 @@ public:
   const std::string category() const override;
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
 private:
   void init() override;
-  void execLoader() override;
+  void exec() override;
 
   API::WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaces) const;
 
