@@ -45,6 +45,8 @@ public:
   void notifyPlotCurrentPreviewClicked() override;
   void notifyPreviewSpecChanged(int specNum) override;
 
+  void notifyBackendChanged(const BayesBackendType &backend) override;
+
 protected:
   void runComplete(IAlgorithm_sptr const &algorithm, bool const error) override;
 

@@ -50,16 +50,13 @@ QColor toQColor(std::string const &colour) {
 namespace MantidQt::CustomInterfaces {
 using namespace InterfaceUtils;
 
-QuasiView::QuasiView(QWidget *parent)
+QuasiView::QuasiView(QWidget *parent, bool useQuickBayes)
     : QWidget(parent), m_dblManager(new QtDoublePropertyManager()), m_propTree(new QtTreePropertyBrowser()),
       m_properties(), m_dblEditorFactory(new DoubleEditorFactory()), m_presenter() {
   m_uiForm.setupUi(parent);
 
   m_propTree->setFactoryForManager(m_dblManager, m_dblEditorFactory);
-
-  setupFitOptions();
-  setupPropertyBrowser();
-  setupPlotOptions();
+  updateBackend(useQuickBayes);
 
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("QuasiERange");
   connect(eRangeSelector, &MantidWidgets::RangeSelector::minValueChanged, this, &QuasiView::minEValueChanged);
@@ -101,9 +98,13 @@ DataSelector *QuasiView::resNormSelector() const { return m_uiForm.dsResNorm; }
 
 FileFinderWidget *QuasiView::fixWidthFileFinder() const { return m_uiForm.mwFixWidthDat; }
 
-void QuasiView::setupFitOptions() {
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+void QuasiView::updateBackend(bool useQuickBayes) {
+  setupFitOptions(useQuickBayes);
+  setupPropertyBrowser(useQuickBayes);
+  setupPlotOptions(useQuickBayes);
+}
 
+void QuasiView::setupFitOptions(bool useQuickBayes) {
   m_uiForm.cbBackground->clear();
   if (useQuickBayes) {
     m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::LINEAR));
@@ -132,9 +133,7 @@ void QuasiView::setupFitOptions() {
   }
 }
 
-void QuasiView::setupPropertyBrowser() {
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
-
+void QuasiView::setupPropertyBrowser(bool useQuickBayes) {
   m_properties.clear();
   m_dblManager->clear();
   m_propTree->clear();
@@ -167,9 +166,7 @@ void QuasiView::setupPropertyBrowser() {
   InterfaceUtils::formatTreeWidget(m_propTree, m_properties);
 }
 
-void QuasiView::setupPlotOptions() {
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
-
+void QuasiView::setupPlotOptions(bool useQuickBayes) {
   m_uiForm.cbPlot->clear();
   if (useQuickBayes) {
     m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));

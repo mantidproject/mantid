@@ -53,9 +53,13 @@ void StretchPresenter::handleRun() {
   m_fitWorkspaceName = baseName + "_Stretch_Fit";
   m_contourWorkspaceName = baseName + "_Stretch_Contour";
 
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
-  auto stretch = m_model->stretchAlgorithm(algParams, m_fitWorkspaceName, m_contourWorkspaceName, useQuickBayes);
+  auto stretch = m_model->stretchAlgorithm(algParams, m_fitWorkspaceName, m_contourWorkspaceName, m_useQuickBayes);
   m_algorithmRunner->execute(stretch);
+}
+
+void StretchPresenter::notifyBackendChanged(const BayesBackendType &backend) {
+  m_useQuickBayes = (backend == BayesBackendType::QUICK_BAYES);
+  m_view->updateBackend(m_useQuickBayes);
 }
 
 void StretchPresenter::runComplete(IAlgorithm_sptr const &algorithm, bool const error) {
