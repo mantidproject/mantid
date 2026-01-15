@@ -226,7 +226,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
                 next_pos = max(self._nav_stack._pos - 1, 0)
             orig_next_entry = self._nav_stack._elements[next_pos].data
             orig_limits = list(orig_next_entry.items())[1][1][0]
-            if orig_limits[0] == 0:
+            if orig_limits[0] <= 0:
                 self._nav_stack._elements[next_pos].data = {
                     k: self._recursive_replace(v, find=orig_limits, replace=(0.0001, orig_limits[1])) for k, v in orig_next_entry.items()
                 }
