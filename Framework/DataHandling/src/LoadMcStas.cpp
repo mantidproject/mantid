@@ -21,9 +21,9 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/H5Util.h"
+#include "MantidNexus/NexusAddress.h"
 
 #include <H5Cpp.h>
-#include <boost/algorithm/string.hpp>
 
 namespace Mantid::DataHandling {
 using namespace Kernel;
@@ -32,7 +32,7 @@ using namespace DataObjects;
 using namespace Nexus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStas)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadMcStas)
 
 //----------------------------------------------------------------------------------------------
 // Algorithm's name for identification. @see Algorithm::name
@@ -72,14 +72,14 @@ void LoadMcStas::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void LoadMcStas::execLoader() {
+void LoadMcStas::exec() {
   std::string filename = getPropertyValue("Filename");
   H5::H5File file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
 
-  auto const &descriptor = getFileInfo();
-  auto const &allEntries = descriptor->getAllEntries();
+  Nexus::NexusDescriptor const descriptor(filename);
+  auto const &allEntries = descriptor.getAllEntries();
 
-  auto const iterSDS = allEntries.find("SDS");
+  auto const iterSDS = allEntries.find(Nexus::SCIENTIFIC_DATA_SET);
   if (iterSDS == allEntries.cend()) {
     throw std::runtime_error("Could not find any entries.");
   }
@@ -93,16 +93,14 @@ void LoadMcStas::execLoader() {
       continue;
     }
 
-    const auto parts = Strings::StrParts(entry, boost::regex("/"));
-    const auto groupAddress = "/" + Strings::join(parts.cbegin(), parts.cend() - 1, "/");
-    const auto groupName = *(parts.cend() - 2);
-    const auto datasetName = parts.back();
+    Nexus::NexusAddress const address(entry);
+    Nexus::NexusAddress const groupAddress = address.parent_path();
+    std::string const datasetName = address.stem();
 
-    if (groupName == "content_nxs")
+    if (groupAddress.stem() == "content_nxs")
       continue;
 
-    const H5::Group group = file.openGroup(groupAddress);
-    const H5::DataSet dataset = group.openDataSet(datasetName);
+    H5::DataSet const dataset = file.openDataSet(address);
 
     if (!H5Util::hasAttribute(dataset, attributeName)) {
       continue;
@@ -248,8 +246,8 @@ std::vector<std::string> LoadMcStas::readEventData(const std::vector<std::string
   const bool onlySummedEventWorkspace = getProperty("OutputOnlySummedEventWorkspace");
   if (!onlySummedEventWorkspace && numEventEntries > 1) {
     for (const auto &eventEntry : eventEntries) {
-      const auto parts = Strings::StrParts(eventEntry, boost::regex("/"));
-      const auto groupName = parts.back();
+      NexusAddress address(eventEntry);
+      std::string const groupName = address.stem();
       // create container to hold partial event data
       // plus the name users will see for it
       const auto ws_name = groupName + "_" + nameOfGroupWS;
@@ -521,16 +519,13 @@ LoadMcStas::readHistogramData(const std::map<std::string, std::vector<std::strin
  * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMcStas::confidence(Nexus::NexusDescriptor &descriptor) const {
-  if (!descriptor.isEntry("/entry1/simulation/name")) {
+int LoadMcStas::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
+  if (!descriptor.isEntry("/entry1/simulation/name", Nexus::SCIENTIFIC_DATA_SET)) {
     return 0;
   }
-  H5::H5File file(descriptor.filename(), H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
-  H5::Group group = file.openGroup("/entry1/simulation");
-  H5::DataSet dataset = group.openDataSet("name");
-
-  const auto value = H5Util::readString(dataset);
-  if (boost::iequals(value, "mccode")) {
+  std::string value = descriptor.getStrData("/entry1/simulation/name");
+  std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) { return std::toupper(c); });
+  if (value == "MCCODE") {
     return 98;
   }
   return 0;
