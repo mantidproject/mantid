@@ -11,6 +11,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <thread>
 
 #include <cxxtest/TestSuite.h>
 
@@ -133,5 +134,28 @@ public:
     TS_ASSERT_EQUALS(descriptor.classTypeExists("NXentry"), true);
     TS_ASSERT(descriptor.isEntry("/MDHistoWorkspace"));
     TS_ASSERT(descriptor.isEntry("/MDHistoWorkspace", "NXentry"));
+  }
+
+  void test_threadSafety() {
+    constexpr int NUM_THREAD{5}; // number of threads to spawn
+
+    const std::string filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+
+    std::vector<std::thread> threads(NUM_THREAD);
+    for (int i = 0; i < NUM_THREAD; ++i) {
+      threads[i] = std::thread([&descriptor]() {
+        TS_ASSERT_EQUALS(descriptor.hasRootAttr("file_name"), true);
+        TS_ASSERT_EQUALS(descriptor.hasRootAttr("file_time"), true);
+        TS_ASSERT(descriptor.isEntry("/entry", "NXentry"));
+        TS_ASSERT_EQUALS(descriptor.isEntry("/entry/instrument"), true);
+        TS_ASSERT_EQUALS(descriptor.isEntry("/entry/DASlogs"), true);
+        TS_ASSERT_EQUALS(descriptor.isEntry("/entry/DASlogs/LambdaRequest"), true);
+      });
+    }
+
+    for (int i = 0; i < NUM_THREAD; ++i) {
+      threads[i].join();
+    }
   }
 };
