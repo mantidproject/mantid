@@ -1374,7 +1374,7 @@ void File::getEntries(Entries &result) const {
       if (currentAddress.hasChild(addr)) {
         int offset = (currentAddress.isRoot() ? 0 : 1);
         std::string groupName = addr.substr(currentAddress.string().size() + offset);
-        result[groupName] = entry.first;
+        result.emplace(std::move(groupName), entry.first);
       }
     }
   }
