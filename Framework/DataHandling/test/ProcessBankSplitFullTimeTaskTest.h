@@ -4,8 +4,7 @@
 #include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitFullTimeTask.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/SpectraProcessingData.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -74,27 +73,28 @@ public:
     // create a two workspaces for output
     Mantid::HistogramData::BinEdges XValues(0);
     Mantid::Kernel::VectorHelper::createAxisFromRebinParams({0, 6000, 12000}, XValues.mutableRawData(), true, false);
-    Mantid::HistogramData::Histogram hist(XValues, Mantid::HistogramData::Counts(XValues.size() - 1, 0.0));
-    Mantid::API::MatrixWorkspace_sptr ws = Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(1, hist);
-    // create TimeSeriesProperty<double> for frequency log and add to workspace. 10ms pulses, 100Hz.
-    auto p = new Mantid::Kernel::TimeSeriesProperty<double>("frequency");
+    // create pulse_times vector. 10ms pulses, 100Hz.
+    std::shared_ptr<std::vector<Mantid::Types::Core::DateAndTime>> pulse_times =
+        std::make_shared<std::vector<Mantid::Types::Core::DateAndTime>>();
     for (const auto &time : std::views::iota(0, 3)) {
-      p->addValue(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00") + static_cast<uint64_t>(time * 10000000),
-                  100.0);
+      pulse_times->push_back(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00") +
+                             static_cast<uint64_t>(time * 10000000));
     }
-    ws->mutableRun().addProperty(p->clone());
-    wksps.push_back(ws);
-    Mantid::API::MatrixWorkspace_sptr ws2 = Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(1, hist);
-    ws2->mutableRun().addProperty(p->clone());
-    wksps.push_back(ws2);
+
+    std::vector<SpectraProcessingData> processingDatas;
+    processingDatas.push_back(SpectraProcessingData{});
+    processingDatas[0].binedges.push_back(&XValues.rawData());
+    processingDatas[0].counts.push_back(std::vector<std::atomic_uint32_t>(XValues.size() - 1));
+    processingDatas.push_back(SpectraProcessingData{});
+    processingDatas[1].binedges.push_back(&XValues.rawData());
+    processingDatas[1].counts.push_back(std::vector<std::atomic_uint32_t>(XValues.size() - 1));
 
     const std::map<Mantid::detid_t, double> calibration{{1, 1.}, {2, 2.}};
     const std::map<Mantid::detid_t, double> scale_at_sample{{1, 1000.0}, {2, 1000.0}};
     const std::set<Mantid::detid_t> masked;
     std::map<size_t, std::set<Mantid::detid_t>> bank_detids;
     bank_detids[0] = {1, 2}; // bank 0 has detIDs 1 and 2
-    BankCalibrationFactory calibFactory(calibration, scale_at_sample, std::map<size_t, std::set<Mantid::detid_t>>(),
-                                        masked, bank_detids);
+    BankCalibrationFactory calibFactory(calibration, scale_at_sample, bank_detids, masked, bank_detids);
     std::map<Mantid::Types::Core::DateAndTime, int> splitterMap;
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00"), 0);
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00.005"), 1);
@@ -103,9 +103,8 @@ public:
     splitterMap.emplace(Mantid::Types::Core::DateAndTime("2024-01-01T00:00:00.05"), -1);
 
     std::shared_ptr<Mantid::API::Progress> progress = std::make_shared<Mantid::API::Progress>();
-
-    ProcessBankSplitFullTimeTask task(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibFactory, 1000,
-                                      100, splitterMap, progress);
+    ProcessBankSplitFullTimeTask task(bankEntryNames, file, mockLoader, workspaceIndices, processingDatas, calibFactory,
+                                      1000, 100, splitterMap, pulse_times, progress);
 
     // Run the task
     task(tbb::blocked_range<size_t>(0, 1));
@@ -132,22 +131,20 @@ public:
         bin_count[x][y] += 1
     print(bin_count)
     */
-    TS_ASSERT_EQUALS(ws->readY(0)[0], 7.0);
-    TS_ASSERT_EQUALS(ws->readY(0)[1], 3.0);
-    TS_ASSERT_EQUALS(ws2->readY(0)[0], 3.0);
-    TS_ASSERT_EQUALS(ws2->readY(0)[1], 0.0);
-    // error will be sqrt of counts
-    TS_ASSERT_DELTA(ws->readE(0)[0], std::sqrt(7.0), 1e-10);
-    TS_ASSERT_DELTA(ws->readE(0)[1], std::sqrt(3.0), 1e-10);
-    TS_ASSERT_DELTA(ws2->readE(0)[0], std::sqrt(3.0), 1e-10);
-    TS_ASSERT_DELTA(ws2->readE(0)[1], 0.0, 1e-10);
+    TS_ASSERT_EQUALS(processingDatas[0].counts[0][0].load(), 7.0);
+    TS_ASSERT_EQUALS(processingDatas[0].counts[0][1].load(), 3.0);
+    TS_ASSERT_EQUALS(processingDatas[1].counts[0][0].load(), 3.0);
+    TS_ASSERT_EQUALS(processingDatas[1].counts[0][1].load(), 0.0);
 
     // now test with different correction to sample
+    processingDatas[0].counts.clear();
+    processingDatas[0].counts.push_back(std::vector<std::atomic_uint32_t>(XValues.size() - 1));
+    processingDatas[1].counts.clear();
+    processingDatas[1].counts.push_back(std::vector<std::atomic_uint32_t>(XValues.size() - 1));
     const std::map<Mantid::detid_t, double> scale_at_sample2{{1, 1000.}, {2, 500.}};
-    BankCalibrationFactory calibFactory2(calibration, scale_at_sample2, std::map<size_t, std::set<Mantid::detid_t>>(),
-                                         masked, bank_detids);
-    ProcessBankSplitFullTimeTask task2(bankEntryNames, file, mockLoader, workspaceIndices, wksps, calibFactory2, 1000,
-                                       100, splitterMap, progress);
+    BankCalibrationFactory calibFactory2(calibration, scale_at_sample2, bank_detids, masked, bank_detids);
+    ProcessBankSplitFullTimeTask task2(bankEntryNames, file, mockLoader, workspaceIndices, processingDatas,
+                                       calibFactory2, 1000, 100, splitterMap, pulse_times, progress);
 
     // Run the task
     task2(tbb::blocked_range<size_t>(0, 1));
@@ -177,14 +174,9 @@ public:
     print(bin_count)
     */
 
-    TS_ASSERT_EQUALS(ws->readY(0)[0], 7.0);
-    TS_ASSERT_EQUALS(ws->readY(0)[1], 2.0);
-    TS_ASSERT_EQUALS(ws2->readY(0)[0], 3.0);
-    TS_ASSERT_EQUALS(ws2->readY(0)[1], 2.0);
-    // error will be sqrt of counts
-    TS_ASSERT_DELTA(ws->readE(0)[0], std::sqrt(7.0), 1e-10);
-    TS_ASSERT_DELTA(ws->readE(0)[1], std::sqrt(2.0), 1e-10);
-    TS_ASSERT_DELTA(ws2->readE(0)[0], std::sqrt(3.0), 1e-10);
-    TS_ASSERT_DELTA(ws2->readE(0)[1], std::sqrt(2.0), 1e-10);
+    TS_ASSERT_EQUALS(processingDatas[0].counts[0][0].load(), 7.0);
+    TS_ASSERT_EQUALS(processingDatas[0].counts[0][1].load(), 2.0);
+    TS_ASSERT_EQUALS(processingDatas[1].counts[0][0].load(), 3.0);
+    TS_ASSERT_EQUALS(processingDatas[1].counts[0][1].load(), 2.0);
   }
 };

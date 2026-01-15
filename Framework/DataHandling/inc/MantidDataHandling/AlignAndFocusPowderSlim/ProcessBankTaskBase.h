@@ -18,7 +18,6 @@ public:
   ProcessBankTaskBase(std::vector<std::string> &bankEntryNames, std::shared_ptr<NexusLoader> loader,
                       const BankCalibrationFactory &calibFactory);
   const std::string &bankName(const size_t wksp_index) const;
-  BankCalibration getCalibration(const std::string &tof_unit, const size_t wksp_index) const;
   std::vector<BankCalibration> getCalibrations(const std::string &tof_unit, const size_t bank_index) const;
 
   /**
@@ -50,6 +49,4 @@ private:
 
 std::string toLogString(const std::string &bankName, const size_t total_events_to_read,
                         const std::vector<size_t> &offsets, const std::vector<size_t> &slabsizes);
-
-void copyDataToSpectrum(const std::vector<uint32_t> &y_temp, API::ISpectrum *spectrum);
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

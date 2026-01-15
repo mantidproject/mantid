@@ -26,12 +26,12 @@ auto g_log = Kernel::Logger("ProcessBankSplitTask");
 } // namespace
 ProcessBankSplitTask::ProcessBankSplitTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                                            std::shared_ptr<NexusLoader> loader, std::vector<int> &workspaceIndices,
-                                           std::vector<API::MatrixWorkspace_sptr> &wksps,
+                                           std::vector<SpectraProcessingData> &processingDatas,
                                            const BankCalibrationFactory &calibFactory, const size_t events_per_chunk,
                                            const size_t grainsize_event, std::shared_ptr<API::Progress> &progress)
     : ProcessBankTaskBase(bankEntryNames, loader, calibFactory), m_h5file(h5file), m_workspaceIndices(workspaceIndices),
-      m_wksps(wksps), m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event), m_progress(progress) {}
-
+      m_processingDatas(processingDatas), m_events_per_chunk(events_per_chunk), m_grainsize_event(grainsize_event),
+      m_progress(progress) {}
 void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) const {
   auto entry = m_h5file.openGroup("entry"); // type=NXentry
   for (size_t bank_index = range.begin(); bank_index < range.end(); ++bank_index) {
@@ -56,15 +56,6 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
 
     auto eventSplitRanges = this->getEventIndexSplitRanges(event_group, total_events);
 
-    // Get all spectra for this bank.
-    // Create temporary y arrays for each workspace.
-    std::vector<API::ISpectrum *> spectra;
-    std::vector<std::vector<uint32_t>> y_temps;
-    for (const auto &wksp : m_wksps) {
-      spectra.push_back(&wksp->getSpectrum(bank_index));
-      y_temps.emplace_back(spectra.back()->dataY().size());
-    }
-
     // get handle to the data
     auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
     // auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
@@ -73,7 +64,7 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
     Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
     // now the calibration for the output group can be created
     // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
-    const auto calibration = this->getCalibration(tof_unit, bank_index);
+    const auto calibrations = this->getCalibrations(tof_unit, bank_index);
 
     // declare arrays once so memory can be reused
     auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file
@@ -152,21 +143,29 @@ void ProcessBankSplitTask::operator()(const tbb::blocked_range<size_t> &range) c
                                                  return (*event_time_of_flight)[k];
                                                });
 
-              ProcessEventsTask task(&event_id_view_for_target, &event_tof_view_for_target, &calibration,
-                                     &spectra[idx]->readX());
+              // Loop over all output spectra / groups
+              tbb::parallel_for(tbb::blocked_range<size_t>(0, m_processingDatas[i].counts.size()),
+                                [&](const tbb::blocked_range<size_t> &output_range) {
+                                  for (size_t output_index = output_range.begin(); output_index < output_range.end();
+                                       ++output_index) {
+                                    ProcessEventsTask task(&event_id_view_for_target, &event_tof_view_for_target,
+                                                           &calibrations.at(output_index),
+                                                           m_processingDatas[i].binedges[output_index]);
 
-              const tbb::blocked_range<size_t> range_info(0, indices.size(), m_grainsize_event);
-              tbb::parallel_reduce(range_info, task);
+                                    const tbb::blocked_range<size_t> range_info(0, indices.size(), m_grainsize_event);
+                                    tbb::parallel_reduce(range_info, task);
 
-              std::transform(y_temps[idx].begin(), y_temps[idx].end(), task.y_temp.begin(), y_temps[idx].begin(),
-                             std::plus<uint32_t>());
+                                    // Accumulate results into shared y_temp to combine local histograms
+                                    // Use atomic fetch_add to accumulate results into shared vectors
+                                    for (size_t j = 0; j < m_processingDatas[i].counts[output_index].size(); ++j) {
+                                      m_processingDatas[i].counts[output_index][j].fetch_add(task.y_temp[j],
+                                                                                             std::memory_order_relaxed);
+                                    }
+                                  }
+                                });
             }
           });
     }
-
-    // copy the data out into the correct spectrum and calculate errors
-    tbb::parallel_for(size_t(0), m_wksps.size(), [&](size_t i) { copyDataToSpectrum(y_temps[i], spectra[i]); });
-
     g_log.debug() << bankName << " stop " << timer << std::endl;
     m_progress->report();
   }

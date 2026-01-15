@@ -261,14 +261,6 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
     errors[PropertyNames::EVENTS_PER_THREAD] = msg;
   }
 
-  // For now only support either grouping or splitter workspace, not both at the same time
-  if ((!isDefault(PropertyNames::GROUPING_WS)) && (!isDefault(PropertyNames::SPLITTER_WS))) {
-    const std::string limitationMsg =
-        "Both grouping and splitter workspaces cannot be used together (limitation to be addressed in a future update)";
-    errors[PropertyNames::GROUPING_WS] = limitationMsg;
-    errors[PropertyNames::SPLITTER_WS] = limitationMsg;
-  }
-
   // only specify allow or block list for logs
   if ((!isDefault(PropertyNames::ALLOW_LOGS)) && (!isDefault(PropertyNames::BLOCK_LOGS))) {
     errors[PropertyNames::ALLOW_LOGS] = "Cannot specify both allow and block lists";
@@ -362,12 +354,6 @@ void AlignAndFocusPowderSlim::exec() {
     num_hist = 1;
   }
 
-  // temparary until we update splitting workflow to support arbitrary grouping
-  API::Workspace_sptr splitter_ws = this->getProperty(PropertyNames::SPLITTER_WS);
-  if (splitter_ws != nullptr) {
-    num_hist = NUM_HIST;
-  }
-
   this->progress(.0, "Create output workspace");
   // create a histogram workspace with correct number of histograms and bins
   MatrixWorkspace_sptr wksp = createOutputWorkspace(inst_ws->getInstrument(), num_hist);
@@ -454,14 +440,6 @@ void AlignAndFocusPowderSlim::exec() {
         detIDToSpecNum[detid] = group.first;
       }
     }
-  } else if (splitter_ws) {
-    // this is temporary until we update splitting workflow to support arbitrary grouping
-    for (const auto &[i, detids] : bank_detids) {
-      grouping[i] = detids;
-      for (const auto &detid : detids) {
-        detIDToSpecNum[detid] = i;
-      }
-    }
   } else {
     // no grouping provided so evenything goes in the 1 output spectrum
     grouping[0] = std::set<detid_t>{};
@@ -502,11 +480,18 @@ void AlignAndFocusPowderSlim::exec() {
   const int GRAINSIZE_EVENTS = getProperty(PropertyNames::EVENTS_PER_THREAD);
   g_log.debug() << (DISK_CHUNK / GRAINSIZE_EVENTS) << " threads per chunk\n";
 
+  // get pulse times from frequency log on workspace. We use this in several places.
+  const auto frequency_log = dynamic_cast<const TimeSeriesProperty<double> *>(wksp->run().getProperty("frequency"));
+  if (!frequency_log) {
+    throw std::runtime_error("Frequency log not found in workspace run");
+  }
+  m_pulse_times = std::make_shared<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
+
   if (timeSplitter.empty()) {
     // create the nexus loader for handling combined calls to hdf5
 
     SpectraProcessingData processingData = initializeSpectraProcessingData(wksp);
-    const auto pulse_indices = this->determinePulseIndices(wksp, filterROI);
+    const auto pulse_indices = this->determinePulseIndices(filterROI);
     auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices);
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read);
@@ -536,11 +521,13 @@ void AlignAndFocusPowderSlim::exec() {
     std::vector<std::string> wsNames;
     std::vector<int> workspaceIndices;
     std::vector<MatrixWorkspace_sptr> workspaces;
+    std::vector<SpectraProcessingData> processingDatas;
     for (const int &splitter_target : timeSplitter.outputWorkspaceIndices()) {
       std::string ws_name = ws_basename + "_" + timeSplitter.getWorkspaceIndexName(splitter_target);
       wsNames.push_back(std::move(ws_name));
       workspaceIndices.push_back(splitter_target);
       workspaces.emplace_back(wksp->clone());
+      processingDatas.push_back(initializeSpectraProcessingData(workspaces.back()));
     }
 
     auto progress = std::make_shared<API::Progress>(this, .17, .9, num_banks_to_read * workspaceIndices.size());
@@ -555,14 +542,14 @@ void AlignAndFocusPowderSlim::exec() {
       }
 
       // create the nexus loader for handling combined calls to hdf5
-      const auto pulse_indices = this->determinePulseIndices(wksp, combined_time_roi);
+      const auto pulse_indices = this->determinePulseIndices(combined_time_roi);
       auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices);
 
       const auto &splitterMap = timeSplitter.getSplittersMap();
 
-      ProcessBankSplitFullTimeTask task(bankEntryNames, h5file, loader, workspaceIndices, workspaces, calibFactory,
+      ProcessBankSplitFullTimeTask task(bankEntryNames, h5file, loader, workspaceIndices, processingDatas, calibFactory,
                                         static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS),
-                                        splitterMap, progress);
+                                        splitterMap, m_pulse_times, progress);
 
       // generate threads only if appropriate
       if (num_banks_to_read > 1) {
@@ -575,12 +562,12 @@ void AlignAndFocusPowderSlim::exec() {
     } else if (this->getProperty(PropertyNames::PROCESS_BANK_SPLIT_TASK)) {
       g_log.information() << "Using ProcessBankSplitTask for splitter processing\n";
       // determine the pulse indices from the time and splitter workspace
-      const auto target_to_pulse_indices = this->determinePulseIndicesTargets(wksp, filterROI, timeSplitter);
+      const auto target_to_pulse_indices = this->determinePulseIndicesTargets(filterROI, timeSplitter);
       // create the nexus loader for handling combined calls to hdf5
       std::vector<PulseROI> pulse_indices; // intentionally empty to get around loader needing const reference
       auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices, target_to_pulse_indices);
 
-      ProcessBankSplitTask task(bankEntryNames, h5file, loader, workspaceIndices, workspaces, calibFactory,
+      ProcessBankSplitTask task(bankEntryNames, h5file, loader, workspaceIndices, processingDatas, calibFactory,
                                 static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), progress);
       // generate threads only if appropriate
       if (num_banks_to_read > 1) {
@@ -608,12 +595,11 @@ void AlignAndFocusPowderSlim::exec() {
 
               // clone wksp for this target
               MatrixWorkspace_sptr target_wksp = workspaces[target_index];
-              SpectraProcessingData processingData = initializeSpectraProcessingData(target_wksp);
 
-              const auto pulse_indices = this->determinePulseIndices(target_wksp, target_roi);
+              const auto pulse_indices = this->determinePulseIndices(target_roi);
               auto loader = std::make_shared<NexusLoader>(is_time_filtered, pulse_indices);
 
-              ProcessBankTask task(bankEntryNames, h5file, loader, processingData, calibFactory,
+              ProcessBankTask task(bankEntryNames, h5file, loader, processingDatas[target_index], calibFactory,
                                    static_cast<size_t>(DISK_CHUNK), static_cast<size_t>(GRAINSIZE_EVENTS), progress);
               // generate threads only if appropriate
               if (num_banks_to_read > 1) {
@@ -622,7 +608,6 @@ void AlignAndFocusPowderSlim::exec() {
                 // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
                 task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
               }
-              storeSpectraProcessingData(processingData, target_wksp);
             }
           });
     }
@@ -632,6 +617,9 @@ void AlignAndFocusPowderSlim::exec() {
 
     // add the workspaces to the ADS
     for (size_t idx = 0; idx < workspaceIndices.size(); ++idx) {
+      // copy data from processingData to wksp
+      storeSpectraProcessingData(processingDatas[idx], workspaces[idx]);
+
       // create the target time ROI combining the splitter and filter ROIs
       auto target_roi = timeSplitter.getTimeROI(workspaceIndices[idx]);
       if (target_roi.useAll())
@@ -924,28 +912,17 @@ Kernel::TimeROI AlignAndFocusPowderSlim::getFilterROI(const API::MatrixWorkspace
 /**
  * @brief Determine the pulse indices for a given workspace and time ROI.
  *
- * @param wksp The workspace to get the pulse times from.
  * @param filterROI The time ROI to use for filtering.
  * @return std::vector<PulseROI> A vector of PulseROI representing the pulse indices to include.
  */
-std::vector<PulseROI> AlignAndFocusPowderSlim::determinePulseIndices(const API::MatrixWorkspace_sptr &wksp,
-                                                                     const TimeROI &filterROI) {
+std::vector<PulseROI> AlignAndFocusPowderSlim::determinePulseIndices(const TimeROI &filterROI) {
 
   std::vector<PulseROI> pulse_indices;
   if (filterROI.useAll()) {
     pulse_indices.emplace_back(0, std::numeric_limits<size_t>::max());
   } else {
     is_time_filtered = true;
-
-    // get pulse times from frequency log on workspace
-    const auto frequency_log = dynamic_cast<const TimeSeriesProperty<double> *>(wksp->run().getProperty("frequency"));
-    if (!frequency_log) {
-      throw std::runtime_error("Frequency log not found in workspace run");
-    }
-    const auto pulse_times =
-        std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
-
-    pulse_indices = filterROI.calculate_indices(*pulse_times);
+    pulse_indices = filterROI.calculate_indices(*m_pulse_times);
     if (pulse_indices.empty())
       throw std::invalid_argument("No valid pulse time indices found for filtering");
   }
@@ -956,33 +933,23 @@ std::vector<PulseROI> AlignAndFocusPowderSlim::determinePulseIndices(const API::
 /**
  * @brief Determine the pulse indices for a given workspace, time ROI, and time splitter.
  *
- * @param wksp The workspace to get the pulse times from.
  * @param filterROI The time ROI to use for filtering.
  * @param timeSplitter The time splitter to use for determining target indices and additional time ROIs.
  * @return std::vector<std::pair<int, PulseROI>> A vector of pairs, where each pair contains a target index and a
  * PulseROI representing the pulse indices to include.
  */
 std::vector<std::pair<int, PulseROI>>
-AlignAndFocusPowderSlim::determinePulseIndicesTargets(const API::MatrixWorkspace_sptr &wksp, const TimeROI &filterROI,
-                                                      const TimeSplitter &timeSplitter) {
-  // get pulse times from frequency log on workspace
-  const auto frequency_log = dynamic_cast<const TimeSeriesProperty<double> *>(wksp->run().getProperty("frequency"));
-  if (!frequency_log) {
-    throw std::runtime_error("Frequency log not found in workspace run");
-  }
-  const auto pulse_times =
-      std::make_unique<std::vector<Mantid::Types::Core::DateAndTime>>(frequency_log->timesAsVector());
-
+AlignAndFocusPowderSlim::determinePulseIndicesTargets(const TimeROI &filterROI, const TimeSplitter &timeSplitter) {
   std::vector<PulseROI> pulse_indices;
   if (filterROI.useAll()) {
     pulse_indices.emplace_back(0, std::numeric_limits<size_t>::max());
   } else {
-    pulse_indices = filterROI.calculate_indices(*pulse_times);
+    pulse_indices = filterROI.calculate_indices(*m_pulse_times);
     if (pulse_indices.empty())
       throw std::invalid_argument("No valid pulse time indices found for filtering");
   }
 
-  const auto target_to_pulse_indices = timeSplitter.calculate_target_indices(*pulse_times);
+  const auto target_to_pulse_indices = timeSplitter.calculate_target_indices(*m_pulse_times);
 
   // calculate intersection of target pulse indices and time filter pulse indices (removes pulses outside filterROI)
   std::vector<std::pair<int, PulseROI>> intersected_target_pulse_indices;
