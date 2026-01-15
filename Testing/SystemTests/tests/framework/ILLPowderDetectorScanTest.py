@@ -33,16 +33,12 @@ class _DiffReductionTest(systemtesting.MantidSystemTest):
     def setUp(self):
         self._facility = config["default.facility"]
         self._instrument = config["default.instrument"]
-        self._directories = config["datasearch.directories"]
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D2B"
-        config.appendDataSearchSubDir("ILL/D2B/")
-        config.appendDataSearchSubDir("ILL/D20/")
 
     def cleanup(self):
         config["default.facility"] = self._facility
         config["default.instrument"] = self._instrument
-        config["datasearch.directories"] = self._directories
         mtd.clear()
 
     def runTest(self):
