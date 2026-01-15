@@ -7,6 +7,8 @@ set(DATA_DIRS "")
 set(SYSTEM_TEST_DATA_DIR ${ExternalData_BINARY_ROOT}/Testing/Data/SystemTest)
 list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR})
 list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/INTER)
+list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/ILL/D2B)
+list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/ILL/D20)
 # Reference results
 list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/SystemTests/tests/framework/reference)
 # Unit tests
