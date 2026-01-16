@@ -255,12 +255,38 @@ by providing either a series of fixed rotations around known axes (cradle) or by
 transformation (cybaman). The flag which controls this behaviour is ``orient_file_is_euler``.
 
 If this is ``True``, the orientation file is expect to be a text file with a row for each run and, within each row, a rotation angle for each axis.
+An example snippet is shown below:
+
+.. code::
+
+    45	0	0
+    45	30	180
+    45	45	0
+    45	45	180
+    45	45	270
+    45	55	100
+    45	90	0
+
 These axes are then defined by ``euler_scheme``, taking a string of lab directions for the initial
 axes of each goniometer axis. The sense of the rotation around these axes are then defined by ``euler_axes_sense``, where the string given should be comma separated +/-1,
 one for each axis, where rotations are counter-clockwise (1) or clockwise (-1).
 
 If ``orient_file_is_euler`` is ``False``, the orientation file is expected to be a text file with a row for each run and, within each row the first 9 values are expected to
-be a "C-style" (row-major) flattened 3x3 transformation matrix. It is anticipated that this matrix would be extracted from the `SscansS2` software [#sscanss]_, and a script is provided below for converted
+be a "C-style" (row-major) flattened 3x3 transformation matrix. An example is shown below for the equivalent if the above euler file
+(for ``euler_scheme = YXY`` and ``euler_axes_sense = "-1,-1,-1"``)
+
+.. code::
+
+    0.7071147,2.05e-05,-0.7070989,1.45e-05,1.0,4.35e-05,0.7070989,-4.1e-05,0.7071147
+    -0.707094,0.3535975,0.6123617,-1.39e-05,0.8659876,-0.5000654,-0.7071196,-0.3536017,-0.6123297
+    0.707098,0.4999857,-0.5000267,2.63e-05,0.7071172,0.7070964,0.7071155,-0.4999996,0.499988
+    -0.7071186,0.499997,0.4999862,-1.37e-05,0.7070894,-0.7071242,-0.7070949,-0.5000275,-0.4999892
+    0.4999937,0.4999759,0.7071283,-0.7070834,0.7071302,-1.52e-05,-0.5000394,-0.4999911,0.7070852
+    -0.5222607,0.5792695,-0.6258519,0.8067115,0.573551,-0.1423229,0.2765147,-0.5792116,-0.7668465
+    0.7071052,0.7071078,-0.0008898,-1.14e-05,0.0012697,0.9999992,0.7071084,-0.7071046,0.0009059
+
+
+It is anticipated that this matrix would be extracted from the `SscansS2` software [#sscanss]_, and a script is provided below for converted
 the transformation matrices from SscansS2 reference frame into mantid. In principle, a flattened matrix from any sample positioner could be given here instead.
 
 .. code:: python
@@ -447,63 +473,8 @@ Focusing
 Regardless of whether absorption correction has been applied (at the very least the absorption correction script should probably be run with ``include_abs_corr = False``,
 in order to apply the sample shape and orientations), some focusing of data is likely required for creating pole figures. In principle, unfocussed data could be used,
 but this would be rather slow due to the fitting of peaks on each spectra, and this would not necessarily provide meaningful improvement in spatial resolution. As far as
-ENGINX is concerned, grouping any more finely than the block level is mostly diminishing returns. The below script can be used to generate some custom groupings at
-the module or block level, and could be modified for more exotic groupings beyond this, but there are standard groupings available as well.
-
-.. code:: python
-
-   # import mantid algorithms, numpy and matplotlib
-   from mantid.simpleapi import *
-   import matplotlib.pyplot as plt
-   import numpy as np
-
-   def get_detector_grouping_string(ws, group_by):
-      info = ws.componentInfo()
-      detinfo = ws.detectorInfo()
-      dets = detinfo.detectorIDs()
-      instr_dets = info.detectorsInSubtree(info.root())
-
-      def get_det_id(comp_ind, dets, instr_dets):
-         return dets[np.where(instr_dets == comp_ind)][0]
-
-      nbi = info.indexOfAny("NorthBank")
-      sbi = info.indexOfAny("SouthBank")
-
-
-      nbmi = info.children(nbi)
-      sbmi = info.children(sbi)
-
-      nbmbi = [xx for x in [info.children(int(nbm)) for nbm in nbmi] for xx in x]
-      sbmbi = [xx for x in [info.children(int(sbm)) for sbm in sbmi] for xx in x]
-      if group_by == "module":
-         n_mods = ",".join(
-               ["+".join([str(get_det_id(x, dets, instr_dets)) for x in info.detectorsInSubtree(int(nbm))]) for nbm in
-               nbmi])
-         s_mods = ",".join(
-               ["+".join([str(get_det_id(x, dets, instr_dets)) for x in info.detectorsInSubtree(int(sbm))]) for sbm in
-               sbmi])
-         return ",".join([n_mods, s_mods])
-      if group_by == "block":
-         n_blocks = ",".join(
-               ["+".join([str(get_det_id(x, dets, instr_dets)) for x in info.detectorsInSubtree(int(nbm))]) for nbm in
-               nbmbi])
-         s_blocks = ",".join(
-               ["+".join([str(get_det_id(x, dets, instr_dets)) for x in info.detectorsInSubtree(int(sbm))]) for sbm in
-               sbmbi])
-         return ",".join([n_blocks, s_blocks])
-
-   ws = LoadEmptyInstrument(InstrumentName = "ENGINX")
-
-   block_string = get_detector_grouping_string(ws, "block")
-
-   det_group = CreateGroupingWorkspace(InputWorkspace = ws, CustomGroupingString = block_string, OutputWorkspace = "det_group")
-
-   CreateGroupingWorkspace(InstrumentName='ENGINX',
-                           ComponentName='ENGIN-X',
-                           CustomGroupingString=block_string,
-                           OutputWorkspace = "det_group")
-
-   SaveCalFile(r"path\to\cal\block.cal", GroupingWorkspace = "det_group")
+ENGINX is concerned, grouping any more finely than the block level is mostly diminishing returns. Groupings can be made using the :ref:`algm-CreateGroupingByComponent` algorithm
+(with examples given on that page, and an example usage is commented out in the snippet below)
 
 These cal files can be provided as a ``grouping_filepath`` if desired, or used to calibrate in the user interface and the resultant ``prm`` file can be used for focusing.
 
@@ -541,6 +512,17 @@ If using a standard grouping, no ``grouping_filepath`` or ``prm_filepath`` is re
    prm_path = None # fr"{root}\Calibration\ENGINX_305738_Texture30.prm"
    grouping = "Texture30" # use "Custom" if you want to provide custom grouping
    groupingfile_path = None # r"C:\Users\Name\block.cal" # if a custom cal/xml grouping file is desired
+
+   #example snippet for custom grouping:
+   #CreateGroupingByComponent(InstrumentName = "ENGINX",
+   #                       OutputWorkspace = "test_group",
+   #                       ComponentNameIncludes = "block",
+   #                       ComponentNameExcludes = "transmission",
+   #                       GroupSubdivision = 1)
+   #SaveCalFile(r"path\to\cal\block.cal", GroupingWorkspace = "test_group")
+   #grouping = "Custom"
+   #groupingfile_path = r"path\to\cal\block.cal"
+
 
    # Define some file paths, can be found in the interface settings
    full_instr_calib = r"C:\mantid\scripts\Engineering\calib\ENGINX_full_instrument_calibration_193749.nxs"

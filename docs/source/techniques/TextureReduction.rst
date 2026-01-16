@@ -358,6 +358,10 @@ By clicking on the ``Customize Plot`` button (second last icon in the toolbar: a
 
 *Note: When changing colourbar settings, do this via the "Pole Figure Plot" axes rather than the axes with the plot parameter title*
 
+Debugging the plot
+------------------
 
+Individual points in the pole figure can be inspected by holding the ``a`` key on the keyboard and then clicking on the desired point. This should annotate the point with the
+relevant information from the pole figure table.
 
 .. categories:: Techniques
