@@ -39,7 +39,7 @@ template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::Uniq
       Mantid::Nexus::UniqueID<&H5Tclose> atype(H5Aget_type(attrID));
       if (H5Tis_variable_str(atype)) {
         // variable length string
-        char *rdata;
+        char *rdata = nullptr;
         if (H5Aread(attrID, atype, &rdata) >= 0) {
           nxClass = std::string(rdata);
         }
