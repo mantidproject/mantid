@@ -72,7 +72,6 @@ class RunAStandardAbsorptionCorrectionWithAttenuationTable(systemtesting.MantidS
         self.assertAlmostEqual(self.attenuation_table.cell(0, 0), 0.2671205699443817, places=5)  # expected attenuation coefficient
         self.expected_files += [
             os.path.join(CWDIR, "AttenuationTables", "ENGIN-X_299080_attenuation_coefficient_2.00_dSpacing.nxs"),
-            os.path.join(CWDIR, "User", "Test", "AttenuationTables", "ENGIN-X_299080_attenuation_coefficient_2.00_dSpacing.nxs"),
         ]
         self.tolerance = 1e-6
         self.validate_expected_files()
