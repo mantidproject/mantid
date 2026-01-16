@@ -134,7 +134,7 @@ python_dateutil:
 
 # v0.45 and above addresses vtk compatibility issues by pinning in the pyvista feedstock.
 pyvista:
-  - '>=0.45'
+  - '>=0.46'
 
 pyyaml:
   - '>=5.4.1'
