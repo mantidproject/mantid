@@ -206,6 +206,26 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         self.setPropertySettings("VanadiumRunNumbers", SetDefaultWhenProperty("SampleFilename", checkFilenameforVanadiumRunNumbers))
 
+        def checkFilenameforVanadiumIPTS(algo, currentProp, watchedProp):
+            run = watchedProp.value
+            if not run:
+                return False
+            vanadiumIPTS = readIntFromFile(run[0], "/entry/vanadium_ipts")
+            self.setProperty("VanadiumIPTS", vanadiumIPTS)
+            return True
+
+        self.setPropertySettings("VanadiumIPTS", SetDefaultWhenProperty("SampleFilename", checkFilenameforVanadiumIPTS))
+
+        def checkFilenameforVanadiumBackgroundIPTS(algo, currentProp, watchedProp):
+            run = watchedProp.value
+            if not run:
+                return False
+            vanadiumBGIPTS = readIntFromFile(run[0], "/entry/vanadium_background_ipts")
+            self.setProperty("VanadiumBackgroundIPTS", vanadiumBGIPTS)
+            return True
+
+        self.setPropertySettings("VanadiumBackgroundIPTS", SetDefaultWhenProperty("SampleFilename", checkFilenameforVanadiumBackgroundIPTS))
+
         def checkFilenameforVanadiumBackgroundRunNumbers(algo, currentProp, watchedProp):
             run = watchedProp.value
             if not run:
