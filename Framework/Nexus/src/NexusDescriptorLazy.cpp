@@ -67,8 +67,9 @@ NexusDescriptorLazy::NexusDescriptorLazy(std::string const &filename)
 
 bool NexusDescriptorLazy::isEntry(std::string const &entryName) const {
 
-  auto it = m_allEntries.end();
-  { // wait for writes to end
+  std::map<std::string, std::string>::iterator it; // get it out of the lock scope
+  {
+    // wait for writes to end
     std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
     it = m_allEntries.find(entryName);
   }
