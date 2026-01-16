@@ -79,6 +79,14 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) const {
     // modifying m_allEntries, need write lock
     std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
 
+    // see if something with the name exists
+    if (H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT) <= 0) {
+      // register failure
+      m_allEntries[entryName] = NONEXISTENT;
+      return false;
+    }
+
+    // open the object to determine its type
     UniqueID<&H5Oclose> entryID(H5Oopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
     if (entryID.isValid()) {
       m_allEntries[entryName] = UNKNOWN_CLASS;
