@@ -255,9 +255,6 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
 
-    def get_debug_points(self):
-        return self.action_debug_points
-
     def get_plot_axis(self):
         return self.figure, self.canvas
 
