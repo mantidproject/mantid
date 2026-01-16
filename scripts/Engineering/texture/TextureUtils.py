@@ -544,7 +544,7 @@ def fit_all_peaks(
         bkg_is_tied = []
         if len(smooth_vals) > 0:
             for i, smooth_val in enumerate(smooth_vals):
-                fit_wss.append(Rebunch(InputWorkspace=ws_tof, OutputWorkspace=f"smooth_ws_{smooth_val}", NBunch=smooth_val))
+                fit_wss.append(_rebin_and_rebunch(ws_tof, smooth_val))
                 bkg_is_tied.append(tied_bkgs[i])
         else:
             # if no smoothing values are given, the initial fit should just be on the ws
@@ -660,6 +660,19 @@ def fit_all_peaks(
 
 
 # ~fitting utility functions~
+
+
+def _rebin_and_rebunch(ws, val):
+    if isinstance(ws, str):
+        ADS.retrieve(ws)
+    lower, upper, step = [], [], []
+    for ispec in range(ws.getNumberHistograms()):
+        xdat = ws.readX(ispec)
+        lower.append(xdat.min())
+        upper.append(xdat.max())
+        step.append(np.diff(xdat).max())
+    Rebin(InputWorkspace=ws, OutputWorkspace=f"rebin_{ws}", Params=f"{np.max(lower)}, {np.max(step)}, {np.min(upper)}")
+    return Rebunch(InputWorkspace=f"rebin_{ws}", OutputWorkspace=f"smooth_ws_{val}", NBunch=val)
 
 
 def _estimate_intensity_background_and_centre(
