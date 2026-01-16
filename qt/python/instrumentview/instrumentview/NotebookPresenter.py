@@ -8,8 +8,11 @@
 from instrumentview.NotebookView import NotebookView
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 
+from matplotlib.axes import Axes
 import numpy as np
 import pyvista as pv
+from typing import Optional
+import warnings
 
 
 class NotebookPresenter:
@@ -29,13 +32,13 @@ class NotebookPresenter:
         self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
         self._pickable_mesh = pv.PolyData(self._model.detector_positions)
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
-        self._view.add_pickable_mesh(self._pickable_mesh, scalars=self._visible_label)
+        self._view.add_selection_mesh(self._pickable_mesh, scalars=self._visible_label)
         self._view.reset_camera()
 
-    def pick_detectors(self, detector_ids: list[int] | np.ndarray, sum_spectra: bool) -> None:
+    def pick_detectors(self, detector_ids: list[int] | np.ndarray, sum_spectra: bool) -> Optional[Axes]:
         indices = np.where(np.isin(self._model.detector_ids, detector_ids))[0]
         if len(indices) == 0:
-            print("Detectors not found!")
+            warnings.warn(f"Detectors not found for IDs: {detector_ids}")
             return
         mask = np.full(self._model.detector_ids.shape, False)
         mask[indices] = True

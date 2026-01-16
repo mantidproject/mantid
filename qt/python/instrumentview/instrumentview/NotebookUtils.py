@@ -8,11 +8,10 @@ from instrumentview.NotebookPresenter import NotebookPresenter
 from mantid.dataobjects import Workspace2D
 from mantid.simpleapi import Load
 from pathlib import Path
-from typing import Optional
 import pyvista as pv
 
 
-def _load_file(file_path: Path) -> Optional[Workspace2D]:
+def _load_file(file_path: Path) -> Workspace2D:
     ws = Load(str(file_path))
     if (
         not ws.getInstrument()
@@ -24,15 +23,13 @@ def _load_file(file_path: Path) -> Optional[Workspace2D]:
     return ws
 
 
-def create_notebook_window(file_path_or_workspace: Path | Workspace2D) -> NotebookView:
+def create_notebook_window(file_path_or_workspace: Path | str | Workspace2D) -> NotebookView:
     if isinstance(file_path_or_workspace, Path) or isinstance(file_path_or_workspace, str):
         ws = _load_file(file_path_or_workspace)
-        if ws is None:
-            return
     elif isinstance(file_path_or_workspace, Workspace2D):
         ws = file_path_or_workspace
     else:
-        raise RuntimeError("Unknown type, must be a path to a workspace or a workspace object")
+        raise TypeError("Unknown type, must be a Path, str, or Workspace2D")
     pv.set_jupyter_backend("trame")
     model = FullInstrumentViewModel(ws)
     window = NotebookView()

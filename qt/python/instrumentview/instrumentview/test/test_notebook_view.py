@@ -16,11 +16,11 @@ class TestNotebookView(unittest.TestCase):
         with patch("instrumentview.NotebookView.pv"):
             self._view = NotebookView()
 
-    def test_add_pickable_mesh_calls_pyvista_with_expected_parameters(self):
+    def test_add_selection_mesh_calls_pyvista_with_expected_parameters(self):
         cloud = MagicMock(name="cloud")
         scalars = "my_scalars"
 
-        self._view.add_pickable_mesh(cloud, scalars)
+        self._view.add_selection_mesh(cloud, scalars)
         self._view._plotter.add_mesh.assert_called_once_with(
             cloud,
             scalars=scalars,
@@ -78,12 +78,12 @@ class TestNotebookView(unittest.TestCase):
                 call(ws, specNum=12, label=None),
             ]
             call_list = axes.plot.call_args_list
-            self.assertEquals(len(expected_calls), len(call_list))
+            self.assertEqual(len(expected_calls), len(call_list))
             for idx in range(len(expected_calls)):
-                self.assertEquals(call_list[idx], expected_calls[idx])
+                self.assertEqual(call_list[idx], expected_calls[idx])
             # No legend when summed
             axes.legend.assert_not_called()
-            self.assertEquals(axes, result_axes)
+            self.assertEqual(axes, result_axes)
 
     def test_plot_spectra_not_summed_sets_labels_and_draggable_legend(self):
         ws = self._make_fake_workspace(num_hists=2, spectra=[1, 2])
@@ -99,13 +99,13 @@ class TestNotebookView(unittest.TestCase):
                 call(ws, specNum=2, label="Spectrum 2"),
             ]
             call_list = axes.plot.call_args_list
-            self.assertEquals(len(expected_calls), len(call_list))
+            self.assertEqual(len(expected_calls), len(call_list))
             for idx in range(len(expected_calls)):
-                self.assertEquals(call_list[idx], expected_calls[idx])
+                self.assertEqual(call_list[idx], expected_calls[idx])
             # Legend created with fontsize=8.0 and made draggable
             axes.legend.assert_called_once_with(fontsize=8.0)
             legend.set_draggable.assert_called_once_with(True)
-            self.assertEquals(axes, result_axes)
+            self.assertEqual(axes, result_axes)
 
 
 if __name__ == "__main__":

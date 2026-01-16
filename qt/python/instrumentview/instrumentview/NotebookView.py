@@ -11,6 +11,7 @@ from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
+from typing import Optional
 
 
 class NotebookView:
@@ -38,7 +39,7 @@ class NotebookView:
         self._plotter.enable_parallel_projection()
         self._plotter.enable_zoom_style()
 
-    def add_pickable_mesh(self, point_cloud: pv.PolyData, scalars: np.ndarray | str) -> None:
+    def add_selection_mesh(self, point_cloud: pv.PolyData, scalars: np.ndarray | str) -> None:
         self._plotter.add_mesh(
             point_cloud,
             scalars=scalars,
@@ -56,8 +57,8 @@ class NotebookView:
     def show_axes(self) -> None:
         self._plotter.show_axes()
 
-    def pick_detectors(self, detector_ids: list[int] | np.ndarray, sum_spectra: bool = True) -> None:
-        self._presenter.pick_detectors(detector_ids, sum_spectra)
+    def pick_detectors(self, detector_ids: list[int] | np.ndarray, sum_spectra: bool = True) -> Optional[Axes]:
+        return self._presenter.pick_detectors(detector_ids, sum_spectra)
 
     def _plot_spectra(self, workspace: Workspace2D, sum_spectra: bool) -> Axes:
         if workspace is not None and workspace.getNumberHistograms() > 0:

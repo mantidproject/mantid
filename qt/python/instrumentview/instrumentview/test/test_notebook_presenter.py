@@ -39,7 +39,7 @@ class TestNotebookPresenter(unittest.TestCase):
         self.mock_view.add_detector_mesh.assert_called_once_with(
             detector_mesh, is_projection=self.mock_model.is_2d_projection, scalars="Integrated Counts"
         )
-        self.mock_view.add_pickable_mesh.assert_called_once_with(pickable_mesh, scalars="Visible Picked")
+        self.mock_view.add_selection_mesh.assert_called_once_with(pickable_mesh, scalars="Visible Picked")
         self.mock_view.reset_camera.assert_called_once()
 
     def test_pick_detectors_with_valid_ids_updates_visibility_and_calls_plot(self):
