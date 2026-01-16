@@ -26,8 +26,7 @@
 static unsigned int const INIT_DEPTH = 1;
 static unsigned int const ENTRY_DEPTH = 2;
 static unsigned int const INSTR_DEPTH = 5;
-static std::unordered_set<std::string> const SPECIAL_ADDRESS{"/entry", "/entry0", "/entry1", "/raw_data_1"};
-static std::string const NONEXISTENT = "NONEXISTENT"; // register failures as well
+static std::unordered_set<std::string> const SPECIAL_ADDRESS{"/entry", "/entry0", "/entry1"};
 static std::string const UNKNOWN_CLASS = "UNKNOWN_CLASS";
 
 namespace {
