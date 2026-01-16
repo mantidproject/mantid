@@ -266,7 +266,7 @@ def create_pole_figure_tables(
         CloneWorkspace(InputWorkspace=spec_workspaces[0], OutputWorkspace=combined_ws)
         for ws in spec_workspaces[1:]:
             RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=spec_workspaces[0], OutputWorkspace=ws)
-            ConjoinWorkspaces(InputWorkspace1=combined_ws, InputWorkspace2=ws, CheckOverlapping=False)
+            ConjoinWorkspaces(InputWorkspace1=combined_ws, InputWorkspace2=ws, CheckOverlapping=False, CheckMatchingBins=False)
     return ADS.retrieve(out_ws)
 
 

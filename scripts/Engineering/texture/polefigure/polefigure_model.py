@@ -107,7 +107,10 @@ class TextureProjection:
         for save_dir in save_dirs:
             SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
             if ascii:
-                SaveAscii(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")
+                try:
+                    SaveAscii(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")
+                except RuntimeError as e:
+                    logger.warning(f"Failed to save {ws} as a txt file: " + str(e) + "Try Rebinning and calling SaveAscii manually")
 
     def get_ws_info(self, ws_name: str, parameter_file: str, select: bool = True) -> dict:
         return {

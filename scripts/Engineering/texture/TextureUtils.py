@@ -599,20 +599,20 @@ def create_pf(
     include_spec_info = debug_info_level == 2
     include_debug_info = debug_info_level in (1, 2)
     model.make_pole_figure_tables(
-        wss,
-        params,
-        out_ws,
-        combined_ws,
-        pf_hkl,
-        include_scatt_power,
-        scat_vol_pos,
-        chi2_thresh,
-        peak_thresh,
-        save_dirs,
-        ax_transform,
-        readout_column,
-        include_spec_info,
-        save_ascii,
+        wss=wss,
+        peak_wss=params,
+        out_ws_name=out_ws,
+        combined_ws_name=combined_ws,
+        save_dirs=save_dirs,
+        hkl=pf_hkl,
+        inc_scatt_corr=include_scatt_power,
+        scat_vol_pos=scat_vol_pos,
+        chi2_thresh=chi2_thresh,
+        peak_thresh=peak_thresh,
+        ax_transform=ax_transform,
+        readout_col=readout_column,
+        include_spec_info=include_spec_info,
+        save_ascii=save_ascii,
     )
 
     fig, ax = plot_pole_figure(
@@ -662,7 +662,7 @@ def create_pf_loop(
     kernel: Optional[float] = None,
     chi2_thresh: Optional[float] = None,
     peak_thresh: Optional[float] = None,
-    create_combined_output: bool = True,
+    create_combined_output: bool = False,
     debug_info_level: int = 0,
     save_ascii: bool = True,
 ) -> None:
