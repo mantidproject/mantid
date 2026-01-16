@@ -414,6 +414,24 @@ class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.5325, places=3)
 
 
+class TotalScatteringForceSofQMinusOneToZeroTest(systemtesting.MantidSystemTest):
+    pdf_output = None
+
+    def runTest(self):
+        setup_mantid_paths()
+        # Load Focused ws
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace="98533-ResultTOF")
+        q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
+        self.pdf_output = run_total_scattering("98533", True, q_lims=q_lims, enforce_high_q_to_1=True, debug=True)
+
+    def validate(self):
+        s_of_q_minus_one_group = AnalysisDataService.retrieve("s_of_q_minus_one")
+        for ws in s_of_q_minus_one_group:
+            self.assertLessThan(abs(ws.readY(0)[-1]), 0.3)
+        self.assertAlmostEqual(ws.readY(0)[-1], 0, places=6)  # end of last ws should be zero
+        AnalysisDataService.remove("s_of_q_minus_one_group")
+
+
 class TotalScatteringMergedPerDetTest(systemtesting.MantidSystemTest):
     pdf_output = None
 

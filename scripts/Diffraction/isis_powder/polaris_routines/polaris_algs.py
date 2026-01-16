@@ -88,6 +88,7 @@ def generate_ts_pdf(
     pdf_output_name=None,
     wavelength_lims=None,
     r_lims=None,
+    enforce_high_q_to_1=False,
 ):
     if sample_details is None:
         raise RuntimeError(
@@ -112,8 +113,6 @@ def generate_ts_pdf(
     sample_coh_scatter_cross_section = sample.cohScatterXSection()
     focused_ws = focused_ws - sample_total_scatter_cross_section / (4 * math.pi)
     focused_ws = focused_ws * 4 * math.pi / sample_coh_scatter_cross_section
-    if debug:
-        s_of_q_minus_one = mantid.CloneWorkspace(InputWorkspace=focused_ws)
 
     if delta_q:
         focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
@@ -122,6 +121,19 @@ def generate_ts_pdf(
         focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="Wavelength", EMode="Elastic")
         focused_ws = mantid.CropWorkspaceRagged(InputWorkspace=focused_ws, XMin=wavelength_lims[0], XMax=wavelength_lims[1])
         focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode="Elastic")
+
+    if enforce_high_q_to_1:
+        constant_background = mantid.CreateSingleValuedWorkspace(
+            DataValue=focused_ws[-1].readY(0)[-1], OutputWorkspace=f"{run_number}_correction_offset_s_q_1"
+        )
+        print(
+            f"Forcing values of S(Q)-1 to zero by subtraction of a constant: {constant_background.dataY(0)}. "
+            "This is a workaround for normalisation issue #40566, check that it is appropriate for your data."
+        )
+        focused_ws = mantid.Minus(LHSWorkspace=focused_ws, RHSWorkspace=constant_background)
+
+    if debug:
+        s_of_q_minus_one = mantid.CloneWorkspace(InputWorkspace=focused_ws)
 
     pdf_kwargs = {
         "InputSofQType": "S(Q)-1",
