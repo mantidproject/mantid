@@ -259,7 +259,9 @@ class TestHelperPoleFigureTables(BaseTextureTestClass):
         mock_clone.assert_has_calls([call(**target_call) for target_call in clone_calls])
         mock_combine.assert_called_once_with(LHSWorkspace="out_ws", RHSWorkspace="_1_abi_table", OutputWorkspace="out_ws")
         mock_rebin.assert_called_once_with(WorkspaceToRebin="_1_spec_ws", WorkspaceToMatch="_0_spec_ws", OutputWorkspace="_1_spec_ws")
-        mock_conjoin.assert_called_once_with(InputWorkspace1="combined_ws", InputWorkspace2="_1_spec_ws", CheckOverlapping=False)
+        mock_conjoin.assert_called_once_with(
+            InputWorkspace1="combined_ws", InputWorkspace2="_1_spec_ws", CheckOverlapping=False, CheckMatchingBins=False
+        )
         mock_ads.retrieve.assert_called_once_with("out_ws")
         self.assertIsNotNone(out)
 
