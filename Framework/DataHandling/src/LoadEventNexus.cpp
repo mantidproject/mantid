@@ -49,7 +49,7 @@ using std::vector;
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEventNexus)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadEventNexus)
 
 using namespace Kernel;
 using namespace DateAndTimeHelpers;
@@ -89,11 +89,9 @@ LoadEventNexus::LoadEventNexus()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadEventNexus::confidence(Nexus::NexusDescriptor &descriptor) const {
-
+int LoadEventNexus::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   int confidence = 0;
-  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
-  if (allEntries.count("NXevent_data") == 1) {
+  if (descriptor.classTypeExists("NXevent_data")) {
     if (descriptor.isEntry("/entry", "NXentry") || descriptor.isEntry("/raw_data_1", "NXentry")) {
       confidence = 80;
     }
@@ -404,7 +402,7 @@ LoadEventNexus::filterEventsByTime<EventWorkspaceCollection_sptr>(EventWorkspace
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
  */
-void LoadEventNexus::execLoader() {
+void LoadEventNexus::exec() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 

@@ -23,6 +23,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -71,7 +72,7 @@ bool exists(const std::map<std::string, std::string> &entries, const std::string
 
   @date Sep 27, 2010
   */
-class MANTID_DATAHANDLING_DLL LoadEventNexus : public API::NexusFileLoader {
+class MANTID_DATAHANDLING_DLL LoadEventNexus : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 
 public:
   LoadEventNexus();
@@ -92,7 +93,7 @@ public:
   /// Category
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
   template <typename T>
   static std::shared_ptr<BankPulseTimes>
@@ -192,7 +193,7 @@ private:
   void init() override;
 
   /// Execution code
-  void execLoader() override;
+  void exec() override;
 
   std::map<std::string, std::string> validateInputs() override;
 
