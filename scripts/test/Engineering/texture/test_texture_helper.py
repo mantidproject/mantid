@@ -18,6 +18,8 @@ from Engineering.texture.texture_helper import (
     get_gauge_vol_str,
     create_pole_figure_tables,
     plot_pole_figure,
+    _retrieve_ws_object,
+    get_debug_info,
 )
 import numpy as np
 from os import path
@@ -90,6 +92,11 @@ class TestHelperFileHandling(BaseTextureTestClass):
         self.assertEqual(result, "<xml>test</xml>")
         mock_validate.assert_called_once_with("dummy.xml", ".xml")
         mock_file.assert_called_once_with("dummy.xml", "r")
+
+    @patch(texture_utils_path + "._validate_file", return_value=False)
+    def test_read_xml_returns_none_when_invalid(self, mock_validate):
+        self.assertIsNone(_read_xml("bad.xml"))
+        mock_validate.assert_called_once_with("bad.xml", ".xml")
 
     @patch(texture_utils_path + ".ShowSampleModel")
     def test_show_texture_sample_no_gauge_volume(self, mock_model_constructor):
@@ -308,18 +315,60 @@ class TestHelperPoleFigureTables(BaseTextureTestClass):
         result = get_pole_figure_data(mock_ws, "stereographic")
         self.assertEqual(result.shape[1], 3)
 
+    @patch(texture_utils_path + ".ADS")
+    @patch(texture_utils_path + ".CloneWorkspace")
+    @patch(texture_utils_path + ".CombineTableWorkspaces")
+    @patch(texture_utils_path + ".CreatePoleFigureTableWorkspace")
+    def test_include_spec_info_true_is_passed_through(self, mock_create, mock_combine, mock_clone, mock_ads):
+        mock_ads.retrieve.return_value = MagicMock()
+        create_pole_figure_tables(
+            wss=["ws1"],
+            peak_wss=["p1"],
+            out_ws="out_ws",
+            combined_ws=None,
+            include_spec_info=True,
+        )
+        # Ensure IncludeSpectrumInfo=True passed to algorithm
+        _, kwargs = mock_create.call_args
+        self.assertIn("IncludeSpectrumInfo", kwargs)
+        self.assertTrue(kwargs["IncludeSpectrumInfo"])
+
+    @patch(texture_utils_path + ".create_default_parameter_table_with_value")
+    @patch(texture_utils_path + ".ADS")
+    @patch(texture_utils_path + ".CloneWorkspace")
+    @patch(texture_utils_path + ".CombineTableWorkspaces")
+    @patch(texture_utils_path + ".CreatePoleFigureTableWorkspace")
+    def test_peak_wss_length_mismatch_falls_back_to_default_tables(self, mock_create, mock_combine, mock_clone, mock_ads, mock_default):
+        mock_ads.retrieve.return_value = MagicMock()
+        # if peak_wss provided but wrong length then the peak_ws should be ignored
+        create_pole_figure_tables(
+            wss=["ws1", "ws2"],
+            peak_wss=["p1"],  # mismatch
+            out_ws="out_ws",
+            combined_ws=None,
+        )
+        mock_default.assert_has_calls([call("ws1", 1, "_default_param_table"), call("ws2", 2, "_default_param_table")])
+        _, kwargs = mock_create.call_args
+        self.assertEqual(kwargs["PeakParameterWorkspace"], "_default_param_table")
+
 
 class TestHelperPoleFigurePlots(BaseTextureTestClass):
     @patch(texture_utils_path + "._retrieve_ws_object")
     @patch(texture_utils_path + ".get_pole_figure_data")
+    @patch(texture_utils_path + ".get_debug_info", return_value=["row0", "row1"])
     @patch(texture_utils_path + ".plot_exp_pf")
-    def test_plot_pole_figure_scatter_calls_plot_exp(self, mock_plot_exp, mock_get, mock_retrieve):
+    def test_plot_pole_figure_scatter_calls_plot_exp(self, mock_plot_exp, mock_get_debug, mock_get_data, mock_retrieve):
         test_pfi = np.ones((2, 3))
-        mock_get.return_value = test_pfi
-        mock_retrieve.return_value = MagicMock()
+        mock_get_data.return_value = test_pfi
+        ws_obj = MagicMock()
+        ws_obj.name.return_value = "wsname"
+        mock_retrieve.return_value = ws_obj
         mock_plot_exp.return_value = (MagicMock(), MagicMock())
-        plot_pole_figure("ws", "stereographic", plot_exp=True, save_dirs=None, fig=None)
-        mock_plot_exp.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None, [""])
+
+        plot_pole_figure("ws", "stereographic", plot_exp=True, save_dirs=None, fig=None, readout_col="I")
+
+        mock_get_debug.assert_called_once_with(ws_obj)
+        mock_plot_exp.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None, ["row0", "row1"])
 
     @patch(texture_utils_path + "._retrieve_ws_object")
     @patch(texture_utils_path + ".get_pole_figure_data")
@@ -327,10 +376,13 @@ class TestHelperPoleFigurePlots(BaseTextureTestClass):
     def test_plot_pole_figure_contour_calls_plot_contour(self, mock_plot_contour, mock_get, mock_retrieve):
         test_pfi = np.ones((2, 3))
         mock_get.return_value = test_pfi
-        mock_retrieve.return_value = MagicMock()
-        mock_plot_contour.return_value = (MagicMock(), MagicMock())
-        plot_pole_figure("ws", "stereographic", plot_exp=False, save_dirs=None)
+        mock_retrieve.return_value = self.mock_ws
+        fig = MagicMock()
+        ax = MagicMock()
+        mock_plot_contour.return_value = (fig, ax)
+        plot_pole_figure(self.mock_ws, "stereographic", plot_exp=False, save_dirs="outdir")
         mock_plot_contour.assert_called_once_with(test_pfi, ("Dir1", "Dir2"), "I", None, 2.0)
+        fig.savefig.assert_called_once_with(str(path.join("outdir", "test_ws_contour_2.0.png")))
 
     @patch(texture_utils_path + "._retrieve_ws_object")
     @patch(texture_utils_path + ".get_pole_figure_data", return_value=np.array([[0.0, 0.0, 1.0]]))
@@ -342,6 +394,56 @@ class TestHelperPoleFigurePlots(BaseTextureTestClass):
         mock_retrieve.return_value = self.mock_ws
         plot_pole_figure(self.mock_ws, "stereographic", plot_exp=True, save_dirs="outdir")
         fig.savefig.assert_called_once_with(str(path.join("outdir", "test_ws_scatter.png")))
+
+    @patch(texture_utils_path + "._retrieve_ws_object")
+    @patch(texture_utils_path + ".get_pole_figure_data", return_value=np.ones((1, 3)))
+    @patch(texture_utils_path + ".get_debug_info")
+    @patch(texture_utils_path + ".plot_exp_pf", return_value=(MagicMock(), MagicMock()))
+    def test_plot_pole_figure_display_debug_info_false_does_not_call_get_debug_info(
+        self, mock_plot_exp, mock_get_debug, mock_get_data, mock_retrieve
+    ):
+        ws_obj = MagicMock()
+        ws_obj.name.return_value = "wsname"
+        mock_retrieve.return_value = ws_obj
+
+        plot_pole_figure("ws", "stereographic", display_debug_info=False, plot_exp=True)
+
+        mock_get_debug.assert_not_called()
+        # debug_info arg should be None
+        args, kwargs = mock_plot_exp.call_args
+        self.assertIsNone(args[4])
+
+
+class TestRetrieveWSObject(BaseTextureTestClass):
+    @patch(texture_utils_path + ".ADS")
+    def test_retrieve_ws_object_str_uses_ads(self, mock_ads):
+        mock_ads.retrieve.return_value = self.mock_ws
+        out = _retrieve_ws_object(self.ws_name)
+        self.assertIs(out, self.mock_ws)
+        mock_ads.retrieve.assert_called_once_with(self.ws_name)
+
+    def test_retrieve_ws_object_non_str_returns_input(self):
+        self.assertIs(_retrieve_ws_object(self.mock_ws), self.mock_ws)
+
+
+class MockTable:
+    def __init__(self, rows):
+        self._rows = rows
+
+    def rowCount(self):
+        return len(self._rows)
+
+    def row(self, i):
+        return self._rows[i]
+
+
+class TestDebugInfo(unittest.TestCase):
+    def test_get_debug_info_formats_rows(self):
+        ws = MockTable([{"Alpha": 1.0, "Beta": 2.0, "I": 1.0}, {"Alpha": 1.0, "Beta": 0.0, "I": 2.0}])
+        labels = get_debug_info(ws)
+        self.assertEqual(len(labels), 2)
+        self.assertEqual("Alpha: 1.0, Beta: 2.0, I: 1.0", labels[0])
+        self.assertEqual("Alpha: 1.0, Beta: 0.0, I: 2.0", labels[1])
 
 
 if __name__ == "__main__":

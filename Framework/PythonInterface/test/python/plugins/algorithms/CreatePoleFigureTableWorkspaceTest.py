@@ -107,6 +107,39 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         # det 0 has 1.0, det 1 has 1.1
         self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
 
+    def test_include_spectrum_info_true_adds_columns_and_values_match_filtered_indices(self):
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws",
+            PeakParameterWorkspace="PeakParameterWS",
+            OutputWorkspace="outws",
+            IncludeSpectrumInfo=True,
+        )
+        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
+
+        data_ws = outws.column("DataWorkspace")
+        ws_index = outws.column("WorkspaceIndex")
+
+        # DataWorkspace should be the name of the input workspace used to create the table
+        self.assertEqual(data_ws, ["ws", "ws"])
+        # WorkspaceIndex should be spec inds in the input workspace
+        self.assertEqual(ws_index, [0, 1])
+
+    def test_include_spectrum_info_true_all_spectra_included_indices_0_to_3(self):
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws",
+            PeakParameterWorkspace="PeakParameterWS",
+            OutputWorkspace="outws",
+            Chi2Threshold=5,  # allow all chi2
+            IncludeSpectrumInfo=True,
+        )
+        self.assertEqual(outws.rowCount(), 4)
+
+        data_ws = outws.column("DataWorkspace")
+        ws_index = outws.column("WorkspaceIndex")
+
+        self.assertEqual(data_ws, ["ws", "ws", "ws", "ws"])
+        self.assertEqual(ws_index, [0, 1, 2, 3])
+
     def test_flipping_td_negates_alphas(self):
         # alpha is taken from rd, if td is inverted the q vectors are now at -alpha rather than alpha
         ax_transform = np.array(((1, 0, 0), (0, 1, 0), (0, 0, -1))).reshape(-1)
