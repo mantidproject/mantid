@@ -44,6 +44,16 @@ def initialize_matplotlib():
     mpl.rcParams["keymap.xscale"].remove("L")
     mpl.rcParams["keymap.yscale"].remove("l")
 
+    def remove_keys(shortcut_keys, rc_param_key):
+        [mpl.rcParams[rc_param_key].remove(k) for k in shortcut_keys if k in mpl.rcParams[rc_param_key]]
+
+    # Disabling to override default shortcuts to navigate backward and forward
+    remove_keys(["c", "left", "backspace", "MouseButton.BACK"], "keymap.back")
+    remove_keys(["v", "right", "MouseButton.FORWARD"], "keymap.forward")
+
+    # Disabling to override default shortcuts for home
+    remove_keys(["h", "r", "home"], "keymap.home")
+
 
 def init_mpl_gcf():
     """

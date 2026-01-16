@@ -840,6 +840,46 @@ class FigureInteractionTest(unittest.TestCase):
         key_press_event.inaxes.set_xlim.assert_called_once_with((0, 100))
         key_press_event.inaxes.set_ylim.assert_called_once_with((5, 10))
 
+    def test_keyboard_shortcut_navigate_backward(self):
+        for key in ["c", "left", "backspace", "MouseButton.BACK"]:
+            with self.subTest(key=key):
+                key_press_event = self._create_mock_key_press_event(key)
+                key_press_event.inaxes = MagicMock()
+                key_press_event.inaxes.get_lines.return_value = ["fake_line"]
+                fig_manager = MagicMock()
+                fig_manager.canvas = MagicMock()
+                interactor = FigureInteraction(fig_manager)
+                interactor.toolbar_manager = MagicMock()
+                interactor.on_key_press(key_press_event)
+                interactor.toolbar_manager.update_navigate_mpl_stack.assert_called_with(nav_forward=False)
+
+    def test_keyboard_shortcut_navigate_forward(self):
+        for key in ["v", "right", "MouseButton.FORWARD"]:
+            with self.subTest(key=key):
+                key_press_event = self._create_mock_key_press_event(key)
+                key_press_event.inaxes = MagicMock()
+                key_press_event.inaxes.get_lines.return_value = ["fake_line"]
+                fig_manager = MagicMock()
+                fig_manager.canvas = MagicMock()
+                interactor = FigureInteraction(fig_manager)
+                interactor.toolbar_manager = MagicMock()
+                interactor.on_key_press(key_press_event)
+                interactor.toolbar_manager.update_navigate_mpl_stack.assert_called_with(nav_forward=True)
+
+    def test_keyboard_shortcut_home_keys(self):
+        shortcut_keys = ["r", "home", "h"]
+        for key in shortcut_keys:
+            with self.subTest(key=key):
+                fig_manager = MagicMock()
+                fig_manager.canvas = MagicMock()
+                interactor = FigureInteraction(fig_manager)
+                interactor.toolbar_manager.emit_sig_home_clicked = MagicMock()
+                key_press_event = self._create_mock_key_press_event(key)
+                key_press_event.inaxes.get_lines.return_value = ["fake_line"]
+                interactor.on_key_press(key_press_event)
+
+                interactor.toolbar_manager.emit_sig_home_clicked.assert_called_once()
+
     def test_legend_not_picked_up_from_scroll_event(self):
         event = self._create_mock_scroll_event(button="up")
         type(event.inaxes).lines = PropertyMock(return_value=["fake_line"])
