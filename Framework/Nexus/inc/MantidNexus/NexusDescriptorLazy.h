@@ -10,7 +10,7 @@
 #include "MantidNexus/UniqueID.h"
 
 #include <map>
-#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -96,7 +96,8 @@ public:
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(std::string const &classType) const;
 
-  /// Query if a given type exists as a immediate child of the supplied parentPath
+  /// Query if a given type exists as a decendant of the supplied parentPath. It is expected to be used only to check
+  /// for direct children.
   bool classTypeExistsChild(const std::string &parentPath, const std::string &classType) const;
 
   /// @brief Get string data from a dataset at address
@@ -135,7 +136,7 @@ private:
   mutable std::map<std::string, std::string> m_allEntries;
 
   /// mutex to protect reading from file after initialization in const methods
-  mutable std::mutex m_readNexusMutex;
+  mutable std::shared_mutex m_readNexusMutex;
 };
 
 } // namespace Nexus

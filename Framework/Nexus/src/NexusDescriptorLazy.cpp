@@ -66,12 +66,17 @@ NexusDescriptorLazy::NexusDescriptorLazy(std::string const &filename)
       m_allEntries(initAllEntries()) {}
 
 bool NexusDescriptorLazy::isEntry(std::string const &entryName) const {
-  auto it = m_allEntries.find(entryName);
+
+  auto it = m_allEntries.end();
+  { // wait for writes to end
+    std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
+    it = m_allEntries.find(entryName);
+  }
   if (it != m_allEntries.end()) {
     return it->second != NONEXISTENT;
   } else {
-    // modifying m_allEntries, need lock
-    std::lock_guard<std::mutex> lock(m_readNexusMutex);
+    // modifying m_allEntries, need write lock
+    std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
 
     UniqueID<&H5Oclose> entryID(H5Oopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
     if (entryID.isValid()) {
@@ -106,6 +111,9 @@ bool NexusDescriptorLazy::classTypeExistsChild(const std::string &parentPath, co
   if (!this->isEntry(parentPath))
     return false;
 
+  // wait for writes to end
+  std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
+
   // linear search through all entries - stop at first match
   const auto delimitedEntryName = parentPath + '/';
   for (auto const &[name, cls] : m_allEntries) {
@@ -118,11 +126,16 @@ bool NexusDescriptorLazy::classTypeExistsChild(const std::string &parentPath, co
 }
 
 bool NexusDescriptorLazy::hasRootAttr(std::string const &name) const {
-  if (m_rootAttrs.count(name) == 1) {
-    return true;
-  } else {
+  { // wait for writes to end
+    std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
+    if (m_rootAttrs.count(name) == 1) {
+      return true;
+    }
+  }
+  // check the file since it wasn't in the cache
+  {
     // mutex has the wrong name, but it's what we have
-    std::lock_guard<std::mutex> lock(m_readNexusMutex);
+    std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
 
     if (H5Aexists(m_fileID, name.c_str()) > 0) {
       m_rootAttrs.emplace(name);
