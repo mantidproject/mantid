@@ -17,6 +17,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadNXcanSAS.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidKernel/Unit.h"
@@ -261,6 +262,27 @@ public:
 
     // Assert
     do_assert_polarized_groups(groupIn, groupOut);
+  }
+
+  void test_load_will_load() {
+    // create a file
+    m_parameters.detectors.emplace_back("front-detector");
+    m_parameters.detectors.emplace_back("rear-detector");
+    m_parameters.invalidDetectors = false;
+    m_parameters.is2dData = true;
+    m_parameters.hasDx = false;
+
+    const auto ws = provide2DWorkspace(m_parameters);
+    set2DValues(ws);
+    m_parameters.idf = getIDFfromWorkspace(ws);
+
+    save_file_no_issues(ws);
+
+    // now try to load it with NxcanSAS
+    Mantid::DataHandling::Load load;
+    load.initialize();
+    load.setPropertyValue("Filename", m_parameters.filePath());
+    TS_ASSERT_EQUALS(load.getPropertyValue("LoaderName"), "LoadNXcanSAS");
   }
 
 private:
