@@ -7,6 +7,9 @@
 
 #include "MantidNexus/NexusAddress.h"
 
+#include <filesystem>
+#include <string>
+
 namespace Mantid::Nexus {
 
 namespace {
@@ -101,6 +104,34 @@ std::vector<std::string> NexusAddress::parts() const {
   }
   return names;
 }
+
+bool NexusAddress::hasChild(std::string const &child) const {
+  // if child is empty
+  if (child.empty() || m_resolved_path == child)
+    return false;
+
+  // if at root, must check specially
+  if (isRoot()) {
+    // child must be "/something" and not contain another '/'
+    if (child.size() < 2 || child[0] != '/' || child.find('/', 1) != std::string::npos)
+      return false;
+    return true;
+  }
+
+  // parent must be a prefix, followed by a single '/'
+  std::size_t const parent_size = m_resolved_path.size();
+  if (child.size() <= parent_size + 1)
+    return false;
+  if (child.compare(0, parent_size, m_resolved_path) != 0)
+    return false;
+  if (child[parent_size] != '/')
+    return false;
+
+  // there must be no further '/' after the immediate child
+  auto next_slash = child.find('/', parent_size + 1);
+  return next_slash == std::string::npos;
+}
+
 } // namespace Mantid::Nexus
 
 bool operator==(std::string const &s, Mantid::Nexus::NexusAddress const &p) { return s == p.string(); }
