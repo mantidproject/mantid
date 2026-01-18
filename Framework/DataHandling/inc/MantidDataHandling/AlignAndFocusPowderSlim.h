@@ -33,7 +33,7 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  API::MatrixWorkspace_sptr createOutputWorkspace(const Geometry::Instrument_const_sptr inst, size_t num_hist);
+  void initializeOutputWorkspace(const API::MatrixWorkspace_sptr &wksp, size_t num_hist);
   SpectraProcessingData initializeSpectraProcessingData(const API::MatrixWorkspace_sptr &outputWS);
   void storeSpectraProcessingData(const SpectraProcessingData &processingData,
                                   const API::MatrixWorkspace_sptr &outputWS);

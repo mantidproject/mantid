@@ -12,7 +12,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitFullTimeTask.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankSplitTask.h"
@@ -25,7 +24,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/TimeSplitter.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
@@ -83,8 +81,6 @@ const std::vector<std::string> unitNames{"dSpacing", "TOF", "MomentumTransfer"};
 enum class BinUnit { DSPACE, TOF, Q, enum_count };
 typedef Mantid::Kernel::EnumeratedString<BinUnit, &unitNames> BINUNIT;
 
-const size_t NUM_HIST{6}; // TODO make this determined from groupin
-
 const std::string ENTRY_TOP_LEVEL("entry");
 
 // TODO refactor this to use the actual grouping
@@ -129,7 +125,7 @@ const std::string AlignAndFocusPowderSlim::category() const { return "Workflow\\
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string AlignAndFocusPowderSlim::summary() const {
-  return "VULCAN ONLY Algorithm to focus powder diffraction data into a number of histograms according to a grouping "
+  return "Algorithm to focus powder diffraction data into a number of histograms according to a grouping "
          "scheme defined in a CalFile.";
 }
 
@@ -312,13 +308,56 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
 void AlignAndFocusPowderSlim::exec() {
 
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
-  { // TODO TEMPORARY - this algorithm is hard coded for VULCAN
-    // it needs to be made more generic
-    if (filename.find("VULCAN") == std::string::npos) {
-      throw std::runtime_error("File does not appear to be for VULCAN");
+  const Nexus::NexusDescriptor descriptor(filename);
+
+  // Now we want to go through all the bankN_event entries
+  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
+  auto itClassEntries = allEntries.find("NXevent_data");
+
+  H5::H5File h5file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
+  if (itClassEntries == allEntries.end()) {
+    h5file.close();
+    throw std::runtime_error("No NXevent_data entries found in file");
+  }
+
+  const std::set<std::string> &classEntries = itClassEntries->second;
+  std::vector<std::string> bankEntryNames;
+  std::vector<std::string> bankNames;
+
+  {
+    const std::regex classRegex("(/entry/)([^/]*)");
+    std::smatch groups;
+    for (const std::string &classEntry : classEntries) {
+      if (std::regex_match(classEntry, groups, classRegex)) {
+        const std::string entry_name(groups[2].str());
+        if (classEntry.ends_with("bank_error_events")) {
+          // do nothing
+        } else if (classEntry.ends_with("bank_unmapped_events")) {
+          // do nothing
+        } else {
+          bankEntryNames.push_back(entry_name);
+          auto underscore_pos = entry_name.find_first_of('_');
+          if (underscore_pos != std::string::npos) {
+            bankNames.push_back(entry_name.substr(0, underscore_pos));
+          } else {
+            bankNames.push_back(entry_name);
+          }
+        }
+      }
     }
   }
-  const Nexus::NexusDescriptor descriptor(filename);
+  std::size_t num_banks_to_read = bankEntryNames.size();
+  g_log.debug() << "Total banks to read: " << num_banks_to_read << "\n";
+
+  int outputSpecNum = getProperty(PropertyNames::OUTPUT_SPEC_NUM);
+  if (outputSpecNum != EMPTY_INT()) {
+    // fill this vector with blanks -- this is for the ProcessBankTask to correctly access it
+    for (size_t bankNumber = 1; bankNumber <= num_banks_to_read; ++bankNumber) {
+      if (bankNumber == static_cast<size_t>(outputSpecNum))
+        continue;
+      bankEntryNames[bankNumber - 1] = "";
+    }
+  }
 
   // These give the limits in each file as to which events we actually load (when filtering by time).
   loadStart.resize(1, 0);
@@ -328,26 +367,39 @@ void AlignAndFocusPowderSlim::exec() {
   std::map<size_t, std::set<detid_t>> grouping;
   GroupingWorkspace_sptr groupingWS = this->getProperty(PropertyNames::GROUPING_WS);
 
-  // Create a temporary workspace to load the instrument. This is needed for LoadDiffCal but we cannot create the
+  // Create the output workspace. Load the instrument, this is needed for LoadDiffCal but we cannot create the
   // output workspace yet because we need grouping information from the cal file to know the correct number of
-  // spectra.
-  auto inst_ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
-  LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, inst_ws, ENTRY_TOP_LEVEL, this, &descriptor);
+  // spectra. We also need to load logs before instrument so we have the correct start time.
+  MatrixWorkspace_sptr wksp = std::make_shared<Workspace2D>();
+  try {
+    LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL);
+  } catch (std::exception &e) {
+    g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
+  }
+
+  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
+  const std::vector<std::string> &allow_logs = getProperty(PropertyNames::ALLOW_LOGS);
+  const std::vector<std::string> &block_logs = getProperty(PropertyNames::BLOCK_LOGS);
+  int nPeriods{1};
+  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog, allow_logs,
+                                                         block_logs);
+
+  LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
 
   // load calibration file if provided
   const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
   ITableWorkspace_sptr calibrationWS;
   if (!cal_filename.empty()) {
-    calibrationWS = this->loadCalFile(inst_ws, cal_filename, groupingWS);
+    calibrationWS = this->loadCalFile(wksp, cal_filename, groupingWS);
   }
 
   if (groupingWS) {
     const auto groupIds = groupingWS->getGroupIDs(false);
     num_hist = groupIds.size();
     g_log.information() << "Using grouping workspace with " << num_hist << " groups\n";
-    for (size_t outputSpecNum = 0; outputSpecNum < groupIds.size(); ++outputSpecNum) {
-      const auto detids = groupingWS->getDetectorIDsOfGroup(groupIds[outputSpecNum]);
-      grouping[outputSpecNum] = std::set<detid_t>(detids.begin(), detids.end());
+    for (size_t outputindex = 0; outputindex < groupIds.size(); ++outputindex) {
+      const auto detids = groupingWS->getDetectorIDsOfGroup(groupIds[outputindex]);
+      grouping[outputindex] = std::set<detid_t>(detids.begin(), detids.end());
     }
   } else {
     // if no grouping defined then everything goes to one spectrum
@@ -355,8 +407,8 @@ void AlignAndFocusPowderSlim::exec() {
   }
 
   this->progress(.0, "Create output workspace");
-  // create a histogram workspace with correct number of histograms and bins
-  MatrixWorkspace_sptr wksp = createOutputWorkspace(inst_ws->getInstrument(), num_hist);
+  // initialize the workspace with correct number of histograms and bins
+  initializeOutputWorkspace(wksp, num_hist);
 
   // TODO parameters should be input information
   const double l1 = getProperty(PropertyNames::L1);
@@ -371,66 +423,21 @@ void AlignAndFocusPowderSlim::exec() {
   const std::vector<specnum_t> specids;
   const auto difc_focused = calculate_difc_focused(l1, l2s, polars);
 
-  // load run metadata
-  this->progress(.01, "Loading metadata");
-  // prog->doReport("Loading metadata"); TODO add progress bar stuff
-  try {
-    LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL);
-  } catch (std::exception &e) {
-    g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
-  }
-
-  // load logs
-  this->progress(.02, "Loading logs");
-  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
-  const std::vector<std::string> &allow_logs = getProperty(PropertyNames::ALLOW_LOGS);
-  const std::vector<std::string> &block_logs = getProperty(PropertyNames::BLOCK_LOGS);
-  int nPeriods{1};
-  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog, allow_logs,
-                                                         block_logs);
-
   const auto timeSplitter = this->timeSplitterFromSplitterWorkspace(wksp->run().startTime());
   const auto filterROI = this->getFilterROI(wksp);
   // determine the pulse indices from the time and splitter workspace
   this->progress(.05, "Determining pulse indices");
 
-  // Now we want to go through all the bankN_event entries
-  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
-  auto itClassEntries = allEntries.find("NXevent_data");
-
-  // load the events
-  H5::H5File h5file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
-  if (itClassEntries == allEntries.end()) {
-    h5file.close();
-    throw std::runtime_error("No NXevent_data entries found in file");
-  }
-
   this->progress(.07, "Reading events");
-
-  // hard coded for VULCAN 6 banks
-  std::vector<std::string> bankEntryNames;
-  std::size_t num_banks_to_read;
-
-  int outputSpecNum = getProperty(PropertyNames::OUTPUT_SPEC_NUM);
-  if (outputSpecNum == EMPTY_INT()) {
-    for (size_t i = 1; i <= NUM_HIST; ++i) {
-      bankEntryNames.push_back("bank" + std::to_string(i) + "_events");
-    }
-    num_banks_to_read = NUM_HIST;
-  } else {
-    // fill this vector with blanks -- this is for the ProcessBankTask to correctly access it
-    for (size_t i = 1; i <= NUM_HIST; ++i) {
-      bankEntryNames.push_back("");
-    }
-    // the desired bank gets the correct entry name
-    bankEntryNames[outputSpecNum - 1] = "bank" + std::to_string(outputSpecNum) + "_events";
-    num_banks_to_read = 1;
-  }
 
   // get detector ids for each bank
   std::map<size_t, std::set<detid_t>> bank_detids;
-  for (size_t i = 1; i <= NUM_HIST; ++i) {
-    bank_detids[i - 1] = wksp->getInstrument()->getDetectorIDsInBank("bank" + std::to_string(i));
+  for (size_t bankIndex = 0; bankIndex < num_banks_to_read; ++bankIndex) {
+    try {
+      bank_detids[bankIndex] = wksp->getInstrument()->getDetectorIDsInBank(bankNames.at(bankIndex));
+    } catch (std::exception &e) {
+      g_log.warning() << "Error getting detector IDs for " << bankNames.at(bankIndex) << ": " << e.what() << "\n";
+    }
   }
 
   // create map of detid to output spectrum number to be used in focusing
@@ -441,7 +448,7 @@ void AlignAndFocusPowderSlim::exec() {
       }
     }
   } else {
-    // no grouping provided so evenything goes in the 1 output spectrum
+    // no grouping provided so everything goes in the 1 output spectrum
     grouping[0] = std::set<detid_t>{};
     for (const auto &[i, detids] : bank_detids) {
       grouping[0].insert(detids.begin(), detids.end());
@@ -650,8 +657,7 @@ void AlignAndFocusPowderSlim::exec() {
   }
 }
 
-MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(const Geometry::Instrument_const_sptr inst,
-                                                                    size_t num_hist) {
+void AlignAndFocusPowderSlim::initializeOutputWorkspace(const MatrixWorkspace_sptr &wksp, size_t num_hist) {
   // set up the output workspace binning
   const BINMODE binmode = getPropertyValue(PropertyNames::BINMODE);
   const bool linearBins = bool(binmode == BinningMode::LINEAR);
@@ -675,7 +681,7 @@ MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(const Geomet
     UNUSED_ARG(
         Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
   }
-  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(inst, num_hist, XValues);
+  wksp->initialize(num_hist, HistogramData::Histogram(XValues, HistogramData::Counts(XValues.size() - 1, 0.0)));
 
   if (raggedBins) {
     // if ragged bins, we need to resize the x-values for each histogram after the first one
@@ -698,15 +704,12 @@ MatrixWorkspace_sptr AlignAndFocusPowderSlim::createOutputWorkspace(const Geomet
         Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
                                                         full_bins_only);
       }
-      HistogramData::Histogram hist(XValues_new, HistogramData::Counts(XValues_new.size() - 1, 0.0));
-      wksp->setHistogram(i, hist);
+      wksp->setHistogram(i, HistogramData::Histogram(XValues_new, HistogramData::Counts(XValues_new.size() - 1, 0.0)));
     }
   }
 
   wksp->getAxis(0)->setUnit(binUnits);
   wksp->setYUnit("Counts");
-
-  return wksp;
 }
 
 SpectraProcessingData
