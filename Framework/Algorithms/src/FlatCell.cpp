@@ -125,7 +125,7 @@ void FlatCell::exec() {
   }
   std::span<double> values_span(values);
 
-  // Save the Low and High Angle Bank values into vectors
+  // Save the Low and High Angle Bank values into spans
   std::span<double> LAB = values_span.subspan(LoqMeta::LABIndexStart(), LoqMeta::LABTotalBanks());
   std::span<double> HAB = values_span.subspan(LoqMeta::HABIndexStart(), LoqMeta::HABTotalBanks());
 
@@ -142,7 +142,6 @@ void FlatCell::exec() {
   const double normStdHAB = FlatCell::stddev(HAB);
 
   // Create the Output Y and X
-  std::vector<double> outY(LoqMeta::histograms(), 0.0);
   std::vector<double> maskedOutY(LoqMeta::histograms(), 0.0);
   std::vector<detid_t> outX(LoqMeta::histograms());
 
@@ -157,7 +156,7 @@ void FlatCell::exec() {
   std::iota(outX.begin() + LoqMeta::HAB3IndexStop(),
             outX.begin() + LoqMeta::HAB3IndexStop() + LoqMeta::HABIndividualBanks(), LoqMeta::HAB4DetectorIdStart());
 
-  // Save the individual High Angle Bank values into vectors
+  // Save the individual High Angle Bank values into spans
   std::span<double> HAB1 = values_span.subspan(LoqMeta::HABIndexStart(), LoqMeta::HABIndividualBanks());
   std::span<double> HAB2 = values_span.subspan(LoqMeta::HAB1IndexStop(), LoqMeta::HABIndividualBanks());
   std::span<double> HAB3 = values_span.subspan(LoqMeta::HAB2IndexStop(), LoqMeta::HABIndividualBanks());
@@ -183,56 +182,58 @@ void FlatCell::exec() {
   auto &OX = outputWS->mutableX(0);
   std::copy(outX.begin(), outX.end(), OX.begin() + LoqMeta::nMonitorOffset());
 
-  // // Create the LAB and HAB vectors to mask
-  // std::vector<double> unmaskedLAB(outY.begin() + LoqMeta::LABIndexStart(), outY.begin() + LoqMeta::LABIndexStop());
-  // std::vector<double> unmaskedHAB(outY.begin() + LoqMeta::HABIndexStart(), outY.begin() + LoqMeta::HABIndexStop());
+  // Create the LAB and HAB vectors to mask
+  std::vector<double> unmaskedLAB(values_span.begin() + LoqMeta::LABIndexStart(),
+                                  values_span.begin() + LoqMeta::LABIndexStop());
+  std::vector<double> unmaskedHAB(values_span.begin() + LoqMeta::HABIndexStart(),
+                                  values_span.begin() + LoqMeta::HABIndexStop());
 
-  // // Calculate the thresholds
-  // const double maskingThresholdLAB = 1 + normStdLAB;
-  // const double maskingThresholdHAB = 1 + (0.5 * normStdHAB);
+  // Calculate the thresholds
+  const double maskingThresholdLAB = 1 + normStdLAB;
+  const double maskingThresholdHAB = 1 + (0.5 * normStdHAB);
 
-  // // Mask the LAB and HAB
-  // FlatCell::maskByThreshold(unmaskedLAB, maskingThresholdLAB);
-  // FlatCell::maskByThreshold(unmaskedHAB, maskingThresholdHAB);
+  // Mask the LAB and HAB
+  FlatCell::maskByThreshold(unmaskedLAB, maskingThresholdLAB);
+  FlatCell::maskByThreshold(unmaskedHAB, maskingThresholdHAB);
 
-  // // Copy each of the vectors to outY
-  // std::copy(unmaskedLAB.begin(), unmaskedLAB.end(), maskedOutY.begin() + LoqMeta::LABIndexStart());
-  // std::copy(unmaskedHAB.begin(), unmaskedHAB.end(), maskedOutY.begin() + LoqMeta::HABIndexStart());
+  // Copy each of the vectors to outY
+  std::copy(unmaskedLAB.begin(), unmaskedLAB.end(), maskedOutY.begin() + LoqMeta::LABIndexStart());
+  std::copy(unmaskedHAB.begin(), unmaskedHAB.end(), maskedOutY.begin() + LoqMeta::HABIndexStart());
 
-  // // Determine which detector IDs need to be masked
-  // std::vector<detid_t> detectorIDs;
-  // for (size_t i = 0; i < maskedOutY.size(); ++i) {
-  //   if (maskedOutY[i] == 0.0) {
-  //     detectorIDs.push_back(outX[i]);
-  //   }
-  // }
+  // Determine which detector IDs need to be masked
+  std::vector<detid_t> detectorIDs;
+  for (size_t i = 0; i < maskedOutY.size(); ++i) {
+    if (maskedOutY[i] == 0.0) {
+      detectorIDs.push_back(outX[i]);
+    }
+  }
 
-  // // Create the string stream for writing into the xml file
-  // std::ostringstream detids_stream;
-  // for (size_t i = 0; i < detectorIDs.size(); ++i) {
-  //   detids_stream << detectorIDs[i];
-  //   if (i + 1 < detectorIDs.size()) {
-  //     detids_stream << ",";
-  //   }
-  // }
+  // Create the string stream for writing into the xml file
+  std::ostringstream detids_stream;
+  for (size_t i = 0; i < detectorIDs.size(); ++i) {
+    detids_stream << detectorIDs[i];
+    if (i + 1 < detectorIDs.size()) {
+      detids_stream << ",";
+    }
+  }
 
-  // // Create the xml file
-  // std::string maskFileName = getProperty("MaskFileName");
-  // std::ofstream outFile(maskFileName);
-  // if (!outFile) {
-  //   throw std::runtime_error("Failed to open mask file for writing");
-  // }
+  // Create the xml file
+  std::string maskFileName = getProperty("MaskFileName");
+  std::ofstream outFile(maskFileName);
+  if (!outFile) {
+    throw std::runtime_error("Failed to open mask file for writing");
+  }
 
-  // // Write detector ids to the xml file
-  // outFile << "<?xml version=\"1.0\"?>\n";
-  // outFile << "<detector-masking>\n";
-  // outFile << "  <group>\n";
-  // outFile << "    <detids>" << detids_stream.str() << "</detids>\n";
-  // outFile << "  </group>\n";
-  // outFile << "</detector-masking>\n";
+  // Write detector ids to the xml file
+  outFile << "<?xml version=\"1.0\"?>\n";
+  outFile << "<detector-masking>\n";
+  outFile << "  <group>\n";
+  outFile << "    <detids>" << detids_stream.str() << "</detids>\n";
+  outFile << "  </group>\n";
+  outFile << "</detector-masking>\n";
 
   // Close the file
-  // outFile.close();
+  outFile.close();
 }
 
 /** Execution code for EventWorkspaces
