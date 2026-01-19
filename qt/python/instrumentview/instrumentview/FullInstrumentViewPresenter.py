@@ -274,12 +274,13 @@ class FullInstrumentViewPresenter:
         self._model.save_workspace_to_ads(self._view.get_current_selected_tab())
 
     def on_apply_permanently_clicked(self) -> None:
+        # Clear both lists before overwriting to workspace (reset of model)
+        self._view.clear_item_list(CurrentTab.Masking)
+        self._view.clear_item_list(CurrentTab.Grouping)
         self._model.overwrite_to_current_workspace(self._view.get_current_selected_tab())
-        self._view.clear_masks_list()
-        self._view.clear_rois_list()
 
     def on_clear_list_clicked(self) -> None:
-        self._view.clear_current_list()
+        self._view.clear_item_list(self._view.get_current_selected_tab())
         self._model.clear_stored_keys(self._view.get_current_selected_tab())
         self.on_list_item_selected()
 
@@ -299,14 +300,14 @@ class FullInstrumentViewPresenter:
         return filename
 
     def _reload_mask_workspaces(self) -> None:
-        self._view.refresh_mask_ws_list()
+        self._view.update_ws_in_mask_list()
         self.on_list_item_selected()
 
     def mask_workspaces_in_ads(self) -> list[str]:
         return [ws.name() for ws in self._model.get_mask_workspaces_in_ads()]
 
-    def cached_masks_keys(self) -> list[str]:
-        return self._model.cached_masks_keys
+    def cached_keys(self, kind: CurrentTab) -> list[str]:
+        return self._model.cached_keys(kind)
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())

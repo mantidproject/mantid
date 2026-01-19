@@ -237,46 +237,19 @@ class FullInstrumentViewWindow(QMainWindow):
         self._shape_buttons = [self._add_circle, self._add_rectangle]
 
         selection_tab = QWidget()
-        picking_layout = QVBoxLayout(selection_tab)
-        self._add_selection = QPushButton("Add Selection")
-        self._clear_selections = QPushButton("Clear Selections")
-        pre_list_layout = QHBoxLayout()
-        pre_list_layout.addWidget(self._add_selection)
-        pre_list_layout.addWidget(self._clear_selections)
-        self._selection_list = WorkspaceListWidget(self)
-        self._selection_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
-        self._selection_list.setSelectionMode(QAbstractItemView.NoSelection)
-        post_list_layout = QHBoxLayout()
-        self._save_selection_to_ws = QPushButton("Export ROI to ADS")
-        self._save_selection_to_file = QPushButton("Save ROI to XML")
-        self._overwrite_selection = QPushButton("Apply ROI Permanently")
-        post_list_layout.addWidget(self._save_selection_to_ws)
-        post_list_layout.addWidget(self._save_selection_to_file)
-        post_list_layout.addWidget(self._overwrite_selection)
-        picking_layout.addLayout(pre_list_layout)
-        picking_layout.addWidget(self._selection_list)
-        picking_layout.addLayout(post_list_layout)
+        (
+            self._add_selection,
+            self._clear_selections,
+            self._selection_list,
+            self._save_selection_to_ws,
+            self._save_selection_to_file,
+            self._overwrite_selection,
+        ) = self._add_tab(selection_tab, "ROI")
 
         mask_tab = QWidget()
-        masking_layout = QVBoxLayout(mask_tab)
-        self._add_mask = QPushButton("Add Mask")
-        self._clear_masks = QPushButton("Clear Masks")
-        pre_list_layout = QHBoxLayout()
-        pre_list_layout.addWidget(self._add_mask)
-        pre_list_layout.addWidget(self._clear_masks)
-        self._mask_list = WorkspaceListWidget(self)
-        self._mask_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
-        self._mask_list.setSelectionMode(QAbstractItemView.NoSelection)
-        post_list_layout = QHBoxLayout()
-        self._save_mask_to_ws = QPushButton("Export Mask to ADS")
-        self._save_mask_to_file = QPushButton("Save Mask to XML")
-        self._overwrite_mask = QPushButton("Apply Mask Permanently")
-        post_list_layout.addWidget(self._save_mask_to_ws)
-        post_list_layout.addWidget(self._save_mask_to_file)
-        post_list_layout.addWidget(self._overwrite_mask)
-        masking_layout.addLayout(pre_list_layout)
-        masking_layout.addWidget(self._mask_list)
-        masking_layout.addLayout(post_list_layout)
+        (self._add_mask, self._clear_masks, self._mask_list, self._save_mask_to_ws, self._save_mask_to_file, self._overwrite_mask) = (
+            self._add_tab(mask_tab, "Mask")
+        )
 
         self._picking_masking_tab = QTabWidget()
         self._picking_masking_tab.addTab(selection_tab, CurrentTab.Grouping.value)
@@ -451,6 +424,28 @@ class FullInstrumentViewWindow(QMainWindow):
         line_edit.setPalette(palette)
         return line_edit
 
+    def _add_tab(self, parent_tab: QWidget, label: str):
+        tab_layout = QVBoxLayout(parent_tab)
+        add_item_btn = QPushButton(f"Add {label}")
+        clear_items_btn = QPushButton("Clear All")
+        pre_list_layout = QHBoxLayout()
+        pre_list_layout.addWidget(add_item_btn)
+        pre_list_layout.addWidget(clear_items_btn)
+        item_list = WorkspaceListWidget(self)
+        item_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
+        item_list.setSelectionMode(QAbstractItemView.NoSelection)
+        post_list_layout = QHBoxLayout()
+        save_to_ws_btn = QPushButton(f"Export {label} to ADS")
+        save_to_file_btn = QPushButton(f"Save {label} to XML")
+        overwrite_btn = QPushButton(f"Apply {label} Permanently")
+        post_list_layout.addWidget(save_to_ws_btn)
+        post_list_layout.addWidget(save_to_file_btn)
+        post_list_layout.addWidget(overwrite_btn)
+        tab_layout.addLayout(pre_list_layout)
+        tab_layout.addWidget(item_list)
+        tab_layout.addLayout(post_list_layout)
+        return (add_item_btn, clear_items_btn, item_list, save_to_ws_btn, save_to_file_btn, overwrite_btn)
+
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
         for unit in self._presenter.available_unit_options():
@@ -458,7 +453,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
         self.main_plotter.set_color_cycler(self._presenter._COLOURS)
         self.refresh_peaks_ws_list()
-        self.refresh_mask_ws_list()
+        self.update_ws_in_mask_list()
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
@@ -515,18 +510,17 @@ class FullInstrumentViewWindow(QMainWindow):
     def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
         if checked:
             add_widget_function()
-            self._add_mask.setDisabled(False)
-            self._add_selection.setDisabled(False)
-            for btn in self._shape_buttons:
-                if btn != self.sender():
-                    btn.setDisabled(True)
         else:
             self.delete_current_widget()
-            self._add_mask.setDisabled(True)
-            self._add_selection.setDisabled(True)
-            for btn in self._shape_buttons:
-                if btn != self.sender():
-                    btn.setDisabled(False)
+
+        # Enable button for applying mask/group if widget is present, disable otherwise
+        self._add_mask.setEnabled(checked)
+        self._add_selection.setEnabled(checked)
+
+        # Disable buttons for adding more widgets if widget is already present, enable otherwise
+        for btn in self._shape_buttons:
+            if btn != self.sender():
+                btn.setDisabled(checked)
 
     def enable_or_disable_mask_widgets(self):
         for btn in self._shape_buttons:
@@ -582,10 +576,10 @@ class FullInstrumentViewWindow(QMainWindow):
         self._peak_ws_list.blockSignals(False)
         self._peak_ws_list.adjustSize()
 
-    def refresh_mask_ws_list(self) -> None:
+    def update_ws_in_mask_list(self) -> None:
         current_mask_in_ads = self._presenter.mask_workspaces_in_ads()
         current_mask_in_widget = [self._mask_list.item(i).text() for i in range(self._mask_list.count())]
-        cached_masks_keys = self._presenter.cached_masks_keys()
+        cached_masks_keys = self._presenter.cached_keys(CurrentTab.Masking)
 
         # Workspaces in ads but not yet in list
         for ws_name in current_mask_in_ads:
@@ -974,28 +968,19 @@ class FullInstrumentViewWindow(QMainWindow):
         list_item = QListWidgetItem(new_key, list_to_modify)
         list_item.setCheckState(Qt.Checked)
 
-    def clear_current_list(self) -> None:
-        if self.get_current_selected_tab() is CurrentTab.Masking:
-            self.clear_masks_list()
-        else:
-            self.clear_rois_list()
-
-    def clear_masks_list(self) -> None:
+    def clear_item_list(self, kind: CurrentTab):
+        list_to_clear = self._mask_list if kind is CurrentTab.Masking else self._selection_list
         # Iterate backwards otherwise breaks indexing
-        for i in range(self._mask_list.count() - 1, -1, -1):
-            item = self._mask_list.item(i)
-            if item.text() not in self._presenter.cached_masks_keys():
+        for i in range(list_to_clear.count() - 1, -1, -1):
+            item = list_to_clear.item(i)
+            if item.text() not in self._presenter.cached_keys(kind):
                 # Skip items that are workspaces
                 continue
-            removed = self._mask_list.takeItem(i)
+            removed = list_to_clear.takeItem(i)
             del removed
-        self.refresh_mask_ws_list()
 
-    def clear_rois_list(self) -> None:
-        # Iterate backwards otherwise breaks indexing
-        for i in range(self._selection_list.count() - 1, -1, -1):
-            removed = self._selection_list.takeItem(i)
-            del removed
+        if kind is CurrentTab.Masking:
+            self.update_ws_in_mask_list()
 
     def has_any_peak_overlays(self) -> bool:
         return len(self._lineplot_overlays) > 0

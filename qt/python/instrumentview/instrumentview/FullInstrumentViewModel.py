@@ -512,9 +512,11 @@ class FullInstrumentViewModel:
         else:
             self._cached_rois_map.clear()
 
-    @property
-    def cached_masks_keys(self) -> list[str]:
-        return list(self._cached_masks_map.keys())
+    def cached_keys(self, kind: CurrentTab) -> list[str]:
+        if kind is CurrentTab.Masking:
+            return list(self._cached_masks_map.keys())
+        else:
+            return list(self._cached_rois_map.keys())
 
     @property
     def cached_pick_selections_keys(self) -> list[str]:
