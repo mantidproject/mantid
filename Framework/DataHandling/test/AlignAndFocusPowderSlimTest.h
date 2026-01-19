@@ -1181,6 +1181,23 @@ public:
     TS_ASSERT_EQUALS(outputWS->readY(1).front(), 260);
   }
 
+  void test_PG3() {
+    TestConfig config;
+    config.l1 = 60.0;
+    config.l2s = {3.18};
+    config.twoTheta = {90.0};
+    config.phi = {0.0};
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm("PG3_4871_event.nxs", config));
+
+    TS_ASSERT_EQUALS(outputWS->getInstrument()->getName(), "POWGEN");
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1874);
+    TS_ASSERT_DELTA(outputWS->readX(0).front(), 2258.57547, 1e-5);
+    TS_ASSERT_DELTA(outputWS->readX(0).back(), 45171.50931, 1e-5);
+    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 0);
+    TS_ASSERT_EQUALS(outputWS->readY(0).back(), 60723);
+  }
+
   // ==================================
   // TODO things below this point are for benchmarking and will be removed later
   // ==================================
