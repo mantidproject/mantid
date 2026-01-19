@@ -31,7 +31,9 @@ struct LoqMeta {
   static constexpr int nMonitorOffset() { return 8; }
   static constexpr int LABIndexStart() { return 0; }
   static constexpr int LABIndexStop() { return 16384; }
-  static constexpr int HABReadings() { return 348; };
+  static constexpr int LABTotalBanks() { return 16384; }
+  static constexpr int HABTotalBanks() { return 1392; }
+  static constexpr int HABIndividualBanks() { return 348; };
   static constexpr int HABIndexStart() { return 16392 - nMonitorOffset(); };
   static constexpr int HAB1IndexStop() { return 16740 - nMonitorOffset(); };
   static constexpr int HAB2IndexStop() { return 17088 - nMonitorOffset(); };
@@ -49,6 +51,7 @@ void FlatCell::init() {
                   "An input event workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output event workspace.");
+  declareProperty("CreateMaskedWorkspace", true, "Determines if masked workspace needs to be created.");
   declareProperty("MaskFileName", "FlatCellMasked.xml", "Path to the detector mask XML file.");
 }
 
@@ -67,7 +70,7 @@ double FlatCell::mean(std::span<const double> values) const {
 
 /** Computes the standard deviation of the input vector
  */
-double FlatCell::stddev(std::span<const double> values) const {
+double FlatCell::stddev(std::span<double> values) const {
   double m = mean(values);
   double accum = std::accumulate(values.begin(), values.end(), 0.0, [m](double total, double x) {
     const double diff = x - m;
@@ -78,7 +81,7 @@ double FlatCell::stddev(std::span<const double> values) const {
 
 /** Scales each of the elements of the input vector
  */
-void FlatCell::scale(std::vector<double> &values, double factor) {
+void FlatCell::scale(std::span<double> values, double factor) {
   std::transform(values.begin(), values.end(), values.begin(), [factor](double x) { return x * factor; });
 }
 
@@ -120,22 +123,23 @@ void FlatCell::exec() {
     const auto &Y = processedWS->readY(i);
     values.insert(values.end(), Y.begin(), Y.end());
   }
+  std::span<double> values_span(values);
 
   // Save the Low and High Angle Bank values into vectors
-  std::vector<double> LAB(values.begin() + LoqMeta::LABIndexStart(), values.begin() + LoqMeta::LABIndexStop());
-  std::vector<double> HAB(values.begin() + LoqMeta::HABIndexStart(), values.begin() + LoqMeta::HABIndexStop());
+  std::span<double> LAB = values_span.subspan(LoqMeta::LABIndexStart(), LoqMeta::LABTotalBanks());
+  std::span<double> HAB = values_span.subspan(LoqMeta::HABIndexStart(), LoqMeta::HABTotalBanks());
 
   // Calculate the mean of the LAB and HAB
-  const double meanLAB = FlatCell::mean(std::span<const double>(LAB));
-  const double meanHAB = FlatCell::mean(std::span<const double>(HAB));
+  const double meanLAB = FlatCell::mean(LAB);
+  const double meanHAB = FlatCell::mean(HAB);
 
   // Normalize the values in the LAB and HAB vectors
-  FlatCell::scale(LAB, 1 / meanLAB);
-  FlatCell::scale(HAB, 1 / meanHAB);
+  FlatCell::scale(LAB, 1.0 / meanLAB);
+  FlatCell::scale(HAB, 1.0 / meanHAB);
 
   // Calculate the normalized std of the LAB and HAB
-  const double normStdLAB = FlatCell::stddev(std::span<const double>(LAB));
-  const double normStdHAB = FlatCell::stddev(std::span<const double>(HAB));
+  const double normStdLAB = FlatCell::stddev(LAB);
+  const double normStdHAB = FlatCell::stddev(HAB);
 
   // Create the Output Y and X
   std::vector<double> outY(LoqMeta::histograms(), 0.0);
@@ -144,22 +148,20 @@ void FlatCell::exec() {
 
   // Map the spectrum ids to the detector ids for the Low and High Angle Banks
   std::iota(outX.begin(), outX.begin() + LAB.size(), LoqMeta::LABDetectorIdStart());
-  std::iota(outX.begin() + LoqMeta::HABIndexStart(), outX.begin() + LoqMeta::HABIndexStart() + LoqMeta::HABReadings(),
-            LoqMeta::HAB1DetectorIdStart());
-  std::iota(outX.begin() + LoqMeta::HAB1IndexStop(), outX.begin() + LoqMeta::HAB1IndexStop() + LoqMeta::HABReadings(),
-            LoqMeta::HAB2DetectorIdStart());
-  std::iota(outX.begin() + LoqMeta::HAB2IndexStop(), outX.begin() + LoqMeta::HAB2IndexStop() + LoqMeta::HABReadings(),
-            LoqMeta::HAB3DetectorIdStart());
-  std::iota(outX.begin() + LoqMeta::HAB3IndexStop(), outX.begin() + LoqMeta::HAB3IndexStop() + LoqMeta::HABReadings(),
-            LoqMeta::HAB4DetectorIdStart());
+  std::iota(outX.begin() + LoqMeta::HABIndexStart(),
+            outX.begin() + LoqMeta::HABIndexStart() + LoqMeta::HABIndividualBanks(), LoqMeta::HAB1DetectorIdStart());
+  std::iota(outX.begin() + LoqMeta::HAB1IndexStop(),
+            outX.begin() + LoqMeta::HAB1IndexStop() + LoqMeta::HABIndividualBanks(), LoqMeta::HAB2DetectorIdStart());
+  std::iota(outX.begin() + LoqMeta::HAB2IndexStop(),
+            outX.begin() + LoqMeta::HAB2IndexStop() + LoqMeta::HABIndividualBanks(), LoqMeta::HAB3DetectorIdStart());
+  std::iota(outX.begin() + LoqMeta::HAB3IndexStop(),
+            outX.begin() + LoqMeta::HAB3IndexStop() + LoqMeta::HABIndividualBanks(), LoqMeta::HAB4DetectorIdStart());
 
-  std::copy(LAB.begin(), LAB.end(), outY.begin() + LoqMeta::LABIndexStart());
-  std::copy(HAB.begin(), HAB.end(), outY.begin() + LoqMeta::HABIndexStart());
-
-  std::vector<double> HAB1(outY.begin() + LoqMeta::HABIndexStart(), outY.begin() + LoqMeta::HAB1IndexStop());
-  std::vector<double> HAB2(outY.begin() + LoqMeta::HAB1IndexStop(), outY.begin() + LoqMeta::HAB2IndexStop());
-  std::vector<double> HAB3(outY.begin() + LoqMeta::HAB2IndexStop(), outY.begin() + LoqMeta::HAB3IndexStop());
-  std::vector<double> HAB4(outY.begin() + LoqMeta::HAB3IndexStop(), outY.begin() + LoqMeta::HABIndexStop());
+  // Save the individual High Angle Bank values into vectors
+  std::span<double> HAB1 = values_span.subspan(LoqMeta::HABIndexStart(), LoqMeta::HABIndividualBanks());
+  std::span<double> HAB2 = values_span.subspan(LoqMeta::HAB1IndexStop(), LoqMeta::HABIndividualBanks());
+  std::span<double> HAB3 = values_span.subspan(LoqMeta::HAB2IndexStop(), LoqMeta::HABIndividualBanks());
+  std::span<double> HAB4 = values_span.subspan(LoqMeta::HAB3IndexStop(), LoqMeta::HABIndividualBanks());
 
   // Calculate the rescale factor of each high angle bank
   double rescaleHAB1 = 1 / FlatCell::mean(HAB1);
@@ -173,70 +175,64 @@ void FlatCell::exec() {
   FlatCell::scale(HAB3, rescaleHAB3);
   FlatCell::scale(HAB4, rescaleHAB4);
 
-  // Copy the values in the output spectrum
-  std::copy(HAB1.begin(), HAB1.end(), outY.begin() + LoqMeta::HABIndexStart());
-  std::copy(HAB2.begin(), HAB2.end(), outY.begin() + LoqMeta::HAB1IndexStop());
-  std::copy(HAB3.begin(), HAB3.end(), outY.begin() + LoqMeta::HAB2IndexStop());
-  std::copy(HAB4.begin(), HAB4.end(), outY.begin() + LoqMeta::HAB3IndexStop());
-
   // Save the Y data into the output WS
   auto &OY = outputWS->mutableY(0);
-  std::copy(outY.begin(), outY.end(), OY.begin() + LoqMeta::nMonitorOffset());
+  std::copy(values_span.begin(), values_span.end(), OY.begin() + LoqMeta::nMonitorOffset());
 
   // Save the X data into the output WS
   auto &OX = outputWS->mutableX(0);
   std::copy(outX.begin(), outX.end(), OX.begin() + LoqMeta::nMonitorOffset());
 
-  // Create the LAB and HAB vectors to mask
-  std::vector<double> unmaskedLAB(outY.begin() + LoqMeta::LABIndexStart(), outY.begin() + LoqMeta::LABIndexStop());
-  std::vector<double> unmaskedHAB(outY.begin() + LoqMeta::HABIndexStart(), outY.begin() + LoqMeta::HABIndexStop());
+  // // Create the LAB and HAB vectors to mask
+  // std::vector<double> unmaskedLAB(outY.begin() + LoqMeta::LABIndexStart(), outY.begin() + LoqMeta::LABIndexStop());
+  // std::vector<double> unmaskedHAB(outY.begin() + LoqMeta::HABIndexStart(), outY.begin() + LoqMeta::HABIndexStop());
 
-  // Calculate the thresholds
-  const double maskingThresholdLAB = 1 + normStdLAB;
-  const double maskingThresholdHAB = 1 + (0.5 * normStdHAB);
+  // // Calculate the thresholds
+  // const double maskingThresholdLAB = 1 + normStdLAB;
+  // const double maskingThresholdHAB = 1 + (0.5 * normStdHAB);
 
-  // Mask the LAB and HAB
-  FlatCell::maskByThreshold(unmaskedLAB, maskingThresholdLAB);
-  FlatCell::maskByThreshold(unmaskedHAB, maskingThresholdHAB);
+  // // Mask the LAB and HAB
+  // FlatCell::maskByThreshold(unmaskedLAB, maskingThresholdLAB);
+  // FlatCell::maskByThreshold(unmaskedHAB, maskingThresholdHAB);
 
-  // Copy each of the vectors to outY
-  std::copy(unmaskedLAB.begin(), unmaskedLAB.end(), maskedOutY.begin() + LoqMeta::LABIndexStart());
-  std::copy(unmaskedHAB.begin(), unmaskedHAB.end(), maskedOutY.begin() + LoqMeta::HABIndexStart());
+  // // Copy each of the vectors to outY
+  // std::copy(unmaskedLAB.begin(), unmaskedLAB.end(), maskedOutY.begin() + LoqMeta::LABIndexStart());
+  // std::copy(unmaskedHAB.begin(), unmaskedHAB.end(), maskedOutY.begin() + LoqMeta::HABIndexStart());
 
-  // Determine which detector IDs need to be masked
-  std::vector<detid_t> detectorIDs;
-  for (size_t i = 0; i < maskedOutY.size(); ++i) {
-    if (maskedOutY[i] == 0.0) {
-      detectorIDs.push_back(outX[i]);
-    }
-  }
+  // // Determine which detector IDs need to be masked
+  // std::vector<detid_t> detectorIDs;
+  // for (size_t i = 0; i < maskedOutY.size(); ++i) {
+  //   if (maskedOutY[i] == 0.0) {
+  //     detectorIDs.push_back(outX[i]);
+  //   }
+  // }
 
-  // Create the string stream for writing into the xml file
-  std::ostringstream detids_stream;
-  for (size_t i = 0; i < detectorIDs.size(); ++i) {
-    detids_stream << detectorIDs[i];
-    if (i + 1 < detectorIDs.size()) {
-      detids_stream << ",";
-    }
-  }
+  // // Create the string stream for writing into the xml file
+  // std::ostringstream detids_stream;
+  // for (size_t i = 0; i < detectorIDs.size(); ++i) {
+  //   detids_stream << detectorIDs[i];
+  //   if (i + 1 < detectorIDs.size()) {
+  //     detids_stream << ",";
+  //   }
+  // }
 
-  // Create the xml file
-  std::string maskFileName = getProperty("MaskFileName");
-  std::ofstream outFile(maskFileName);
-  if (!outFile) {
-    throw std::runtime_error("Failed to open mask file for writing");
-  }
+  // // Create the xml file
+  // std::string maskFileName = getProperty("MaskFileName");
+  // std::ofstream outFile(maskFileName);
+  // if (!outFile) {
+  //   throw std::runtime_error("Failed to open mask file for writing");
+  // }
 
-  // Write detector ids to the xml file
-  outFile << "<?xml version=\"1.0\"?>\n";
-  outFile << "<detector-masking>\n";
-  outFile << "  <group>\n";
-  outFile << "    <detids>" << detids_stream.str() << "</detids>\n";
-  outFile << "  </group>\n";
-  outFile << "</detector-masking>\n";
+  // // Write detector ids to the xml file
+  // outFile << "<?xml version=\"1.0\"?>\n";
+  // outFile << "<detector-masking>\n";
+  // outFile << "  <group>\n";
+  // outFile << "    <detids>" << detids_stream.str() << "</detids>\n";
+  // outFile << "  </group>\n";
+  // outFile << "</detector-masking>\n";
 
   // Close the file
-  outFile.close();
+  // outFile.close();
 }
 
 /** Execution code for EventWorkspaces

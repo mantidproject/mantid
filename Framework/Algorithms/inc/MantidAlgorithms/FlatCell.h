@@ -37,8 +37,8 @@ private:
   void exec() override;
   void execEvent();
   double mean(std::span<const double> values) const;
-  double stddev(std::span<const double> values) const;
-  void scale(std::vector<double> &values, double factor);
+  double stddev(std::span<double> values) const;
+  void scale(std::span<double> values, double factor);
   void maskByThreshold(std::vector<double> &values, double threshold);
 };
 
