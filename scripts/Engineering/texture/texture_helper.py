@@ -96,7 +96,7 @@ def show_texture_sample_shape(
     wsname = ws if isinstance(ws, str) else ws.name()
     model.set_ws_name(wsname)
     model.set_fix_axes_to_sample(True)
-    ax_transform = ax_transform if ax_transform else np.eye(3)
+    ax_transform = ax_transform if np.any(ax_transform) else np.eye(3)
     if gauge_vol_preset:
         model.set_gauge_vol_str(get_gauge_vol_str(gauge_vol_preset, custom_file))
     model.show_shape_plot(ax_transform, ax_labels)
@@ -219,7 +219,7 @@ def create_pole_figure_tables(
     table_workspaces = []
     spec_workspaces = []
     user_provided_param = peak_wss and (len(peak_wss) == len(wss))
-    flat_ax_transform = np.reshape(ax_transform, (9,)) if ax_transform else np.reshape(np.eye(3), (9,))
+    flat_ax_transform = np.reshape(ax_transform, (9,)) if np.any(ax_transform) else np.reshape(np.eye(3), (9,))
     for iws, ws in enumerate(wss):
         ws_str = f"_{iws}_abi_table"
         spec_ws = f"_{iws}_spec_ws" if combined_ws else ""
