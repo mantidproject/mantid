@@ -55,13 +55,6 @@ void FlatCell::init() {
   declareProperty("MaskFileName", "FlatCellMasked.xml", "Path to the detector mask XML file.");
 }
 
-/** Masks the values in the vector if the are above a certain threshold
- */
-void FlatCell::maskByThreshold(std::vector<double> &values, double threshold) {
-  std::transform(values.begin(), values.end(), values.begin(),
-                 [threshold](double v) { return (v > threshold) ? 0.0 : v; });
-}
-
 /** Computes the mean of the input vector
  */
 double FlatCell::mean(std::span<const double> values) const {
@@ -188,13 +181,60 @@ void FlatCell::exec() {
   std::vector<double> unmaskedHAB(values_span.begin() + LoqMeta::HABIndexStart(),
                                   values_span.begin() + LoqMeta::HABIndexStop());
 
-  // Calculate the thresholds
-  const double maskingThresholdLAB = 1 + normStdLAB;
-  const double maskingThresholdHAB = 1 + (0.5 * normStdHAB);
+  bool CreateMaskedWorkspace = getProperty("CreateMaskedWorkspace");
 
-  // Mask the LAB and HAB
-  FlatCell::maskByThreshold(unmaskedLAB, maskingThresholdLAB);
-  FlatCell::maskByThreshold(unmaskedHAB, maskingThresholdHAB);
+  if (CreateMaskedWorkspace) {
+
+    // Calculate the thresholds
+    const double maskingThresholdLAB = 1 + normStdLAB;
+    const double maskingThresholdHAB = 1 + (0.5 * normStdHAB);
+
+    // Crop the workspaces
+    auto cropWorkspace = createChildAlgorithm("CropWorkspace");
+    cropWorkspace->initialize();
+
+    // Crop Workspace for low angle bank
+    cropWorkspace->setProperty("InputWorkspace", outputWS);
+    cropWorkspace->setProperty("OutputWorkspace", "labCroppedWS");
+    cropWorkspace->setProperty("XMin", static_cast<double>(LoqMeta::LABIndexStart()));
+    cropWorkspace->setProperty("XMax",
+                               static_cast<double>(LoqMeta::LABDetectorIdStart() + LoqMeta::LABTotalBanks() - 1));
+    cropWorkspace->execute();
+    MatrixWorkspace_sptr labCroppedWS = cropWorkspace->getProperty("OutputWorkspace");
+
+    // Crop Workspace for high angle bank
+    cropWorkspace->setProperty("InputWorkspace", outputWS);
+    cropWorkspace->setProperty("OutputWorkspace", "habCroppedWS");
+    cropWorkspace->setProperty("XMin", static_cast<double>(LoqMeta::HAB1DetectorIdStart()));
+    cropWorkspace->setProperty("XMax",
+                               static_cast<double>(LoqMeta::HAB4DetectorIdStart() + LoqMeta::HABIndividualBanks() - 1));
+    cropWorkspace->execute();
+    MatrixWorkspace_sptr habCroppedWS = cropWorkspace->getProperty("OutputWorkspace");
+
+    // Mask the values of the low angle bank
+    auto maskDetectorsIf = createChildAlgorithm("MaskDetectorsIf");
+    maskDetectorsIf->initialize();
+    maskDetectorsIf->setProperty("InputWorkspace", labCroppedWS);
+    maskDetectorsIf->setProperty("OutputWorkspace", labCroppedWS);
+    maskDetectorsIf->setProperty("Operator", "GreaterEqual");
+    maskDetectorsIf->setProperty("Value", maskingThresholdLAB);
+    maskDetectorsIf->execute();
+
+    maskDetectorsIf->setProperty("InputWorkspace", habCroppedWS);
+    maskDetectorsIf->setProperty("OutputWorkspace", habCroppedWS);
+    maskDetectorsIf->setProperty("Operator", "GreaterEqual");
+    maskDetectorsIf->setProperty("Value", maskingThresholdHAB);
+    maskDetectorsIf->execute();
+
+    // Coinjoin Workspaces
+    auto conjoinWorkspaces = createChildAlgorithm("ConjoinWorkspaces");
+    conjoinWorkspaces->initialize();
+    conjoinWorkspaces->setProperty("InputWorkspace1", labCroppedWS);
+    conjoinWorkspaces->setProperty("InputWorkspace2", habCroppedWS);
+    conjoinWorkspaces->setProperty("OutputWorkspace", "maskedWS");
+    conjoinWorkspaces->execute();
+    MatrixWorkspace_sptr maskedWS = conjoinWorkspaces->getProperty("OutputWorkspace");
+  };
 
   // Copy each of the vectors to outY
   std::copy(unmaskedLAB.begin(), unmaskedLAB.end(), maskedOutY.begin() + LoqMeta::LABIndexStart());
