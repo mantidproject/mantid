@@ -55,6 +55,7 @@ The following methods can be executed on a POLARIS object:
 - :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
 - :ref:`focus_polaris_isis-powder-diffraction-ref`
 - :ref:`set_sample_polaris_isis-powder-diffraction-ref`
+- :ref:`create_total_scattering_pdf_polaris-isis-powder-ref`
 
 For information on creating a POLARIS object see:
 :ref:`creating_polaris_object_isis-powder-diffraction-ref`
@@ -161,7 +162,6 @@ Example
   polaris_example.set_sample(sample=sample_obj)
 
 .. _create_total_scattering_pdf_polaris-isis-powder-ref:
-
 
 create_total_scattering_pdf
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -915,6 +915,14 @@ On POLARIS this is set to the following:
                               (800, 19995),  # Bank 4
                               (800, 19995),  # Bank 5
                              ]
+
+.. _enforce_high_q_to_1_polaris_isis-powder-diffraction-ref:
+
+enforce_high_q_to_1
+^^^^^^^^^^^^^^^^^^^
+This is a work around for a known issue in the normalisation of total scattering data. It will likely be removed once the issue is resolved. Check that it is appropriate to use for your data.
+
+S(Q) should tend to 1 at high Q if normalisation and conversion are done correctly. This option forces S(Q) to 1 by subtracting the final value of S(Q)-1 of the back-scattering bank (last focussed spectrum) from all values, i.e. subtracting a constant, before computing the pair distribution function (PDFFourierTransform).
 
 .. _vanadium_sample_details_polaris_isis-powder-diffraction-ref:
 
