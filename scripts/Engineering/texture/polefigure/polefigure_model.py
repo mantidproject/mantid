@@ -7,7 +7,6 @@
 from mantid.simpleapi import (
     logger,
     SaveNexus,
-    CreateEmptyTableWorkspace,
     SaveAscii,
 )
 import numpy as np
@@ -140,19 +139,7 @@ class TextureProjection:
             return has_chi2, has_x0
 
     @staticmethod
-    def create_default_parameter_table_with_value(ws_name: str, val: float, out_ws: str):
-        tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
-        tab.addColumn("float", "I")
-        ws = ADS.retrieve(ws_name)
-        for _ in range(ws.getNumberHistograms()):
-            tab.addRow(
-                [
-                    float(val),
-                ]
-            )
-
-    @staticmethod
-    def read_param_cols(ws_name: str, target_default: str = "I") -> Tuple[str, int]:
+    def read_param_cols(ws_name: str, target_default: str = "I") -> Tuple[Sequence[str], int]:
         ws = ADS.retrieve(ws_name)
         col_names = ws.getColumnNames()
         col_types = ws.columnTypes()

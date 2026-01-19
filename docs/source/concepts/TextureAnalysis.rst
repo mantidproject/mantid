@@ -386,7 +386,7 @@ the user interface while providing more repeatable processing.
    # next, specify the folder with the files you would like to apply the absorption correction to
    corr_dir = r"C:\Users\kcd17618\Documents\dev\TextureCommisioning\Day3\ZrRing\DataFiles\Point2"
 
-   # For texture, it is expected that you have a single ssmple shape, that is reorientated between runs.
+   # For texture, it is expected that you have a single sample shape, that is reorientated between runs.
    # this is handled by having a reference workspace with the shape in its neutral position
    # (position in the beamline when the goniometer is home)
    # This reference workspace probably requires you to do some interacting and validating, so should be setup in the UI

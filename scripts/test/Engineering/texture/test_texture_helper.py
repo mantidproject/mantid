@@ -412,7 +412,7 @@ class TestHelperPoleFigurePlots(BaseTextureTestClass):
 
         mock_get_debug.assert_not_called()
         # debug_info arg should be None
-        args, kwargs = mock_plot_exp.call_args
+        args, _ = mock_plot_exp.call_args
         self.assertIsNone(args[4])
 
 

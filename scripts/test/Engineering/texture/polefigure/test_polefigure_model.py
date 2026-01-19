@@ -70,7 +70,7 @@ class TextureProjectionTest(unittest.TestCase):
     @patch(correction_model_path + ".ADS")
     def test_get_pf_table_name_with_hkl(self, mock_ads):
         mock_ads.retrieve.return_value = self.mock_ws
-        table_name, spectra_ws, grouping = self.model.get_pf_output_names(["ws1", "ws2"], ["param_ws1", "param_ws2"], [1, 1, 1], "I")
+        table_name, spectra_ws, _ = self.model.get_pf_output_names(["ws1", "ws2"], ["param_ws1", "param_ws2"], [1, 1, 1], "I")
         self.assertEqual("111_instrument_123456-123456_Texture20_pf_table_I", table_name)
         self.assertEqual("111_instrument_123456-123456_Texture20_spectra", spectra_ws)
 

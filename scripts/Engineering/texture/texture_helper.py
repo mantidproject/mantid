@@ -63,7 +63,7 @@ def _read_xml(file: str) -> str:
 def _validate_file(file: str, ext: str) -> bool:
     valid = False
     if file:
-        root, f_ext = path.splitext(file)
+        _, f_ext = path.splitext(file)
         if f_ext == ext:
             valid = True
     return valid
@@ -77,7 +77,7 @@ def _validate_file(file: str, ext: str) -> bool:
 # wrapper around the show sample logic that is called from the interface
 def show_texture_sample_shape(
     ws: str | Workspace2D,
-    ax_transform: np.ndarray = np.eye(3),
+    ax_transform: Optional[np.ndarray] = None,
     ax_labels: Sequence[str] = ("d1", "d2", "d3"),
     gauge_vol_preset: Optional[str] = None,
     custom_file: Optional[str] = None,
@@ -96,6 +96,7 @@ def show_texture_sample_shape(
     wsname = ws if isinstance(ws, str) else ws.name()
     model.set_ws_name(wsname)
     model.set_fix_axes_to_sample(True)
+    ax_transform = ax_transform if ax_transform else np.eye(3)
     if gauge_vol_preset:
         model.set_gauge_vol_str(get_gauge_vol_str(gauge_vol_preset, custom_file))
     model.show_shape_plot(ax_transform, ax_labels)
@@ -153,7 +154,7 @@ def load_all_orientations(
                         sense = rotation_sense[iang]
                         kwargs[f"Axis{iang}"] = f"{angle},{axis_dict[(euler_scheme[iang]).lower()]},{sense}"
                     SetGoniometer(ws, **kwargs)
-        except BaseException as e:
+        except Exception as e:
             logger.error(f"{str(e)}. Failed to set goniometer, are your settings for `use_euler_angles` correct? Currently: {use_euler}")
 
 
@@ -191,7 +192,7 @@ def create_pole_figure_tables(
     scat_vol_pos: Sequence[float] = (0, 0, 0),
     chi2_thresh: Optional[float] = 0.0,
     peak_thresh: Optional[float] = 0.0,
-    ax_transform: Sequence[float] = np.eye(3),
+    ax_transform: Optional[Sequence[float]] = None,
     readout_col: str = "I",
     include_spec_info: bool = True,
 ) -> TableWorkspace:
@@ -215,50 +216,32 @@ def create_pole_figure_tables(
     readout_col: the parameter column which should be read and used to populate the table
     include_spec_info: if True will include columns with information on the spectra each point has been generated from
     """
-    flat_ax_transform = np.reshape(ax_transform, (9,))
     table_workspaces = []
     spec_workspaces = []
-    if peak_wss and (len(peak_wss) == len(wss)):
-        for iws, ws in enumerate(wss):
-            ws_str = f"_{iws}_abi_table"
-            spec_ws = f"_{iws}_spec_ws" if combined_ws else ""
-            CreatePoleFigureTableWorkspace(
-                InputWorkspace=ws,
-                PeakParameterWorkspace=peak_wss[iws],
-                OutputWorkspace=ws_str,
-                SpectraWorkspace=spec_ws,
-                Reflection=hkl,
-                Chi2Threshold=chi2_thresh,
-                PeakPositionThreshold=peak_thresh,
-                ApplyScatteringPowerCorrection=inc_scatt_corr,
-                ScatteringVolumePosition=scat_vol_pos,
-                AxesTransform=flat_ax_transform,
-                ReadoutColumn=readout_col,
-                IncludeSpectrumInfo=include_spec_info,
-            )
-            table_workspaces.append(ws_str)
-            spec_workspaces.append(spec_ws)
-    else:
-        for iws, ws in enumerate(wss):
-            default_param_vals = "_default_param_table"
-            create_default_parameter_table_with_value(ws, iws + 1, default_param_vals)
-            ws_str = f"_{iws}_abi_table"
-            spec_ws = f"_{iws}_spec_ws" if combined_ws else ""
-            CreatePoleFigureTableWorkspace(
-                InputWorkspace=ws,
-                PeakParameterWorkspace=default_param_vals,
-                OutputWorkspace=ws_str,
-                SpectraWorkspace=spec_ws,
-                Reflection=hkl,
-                Chi2Threshold=chi2_thresh,
-                PeakPositionThreshold=peak_thresh,
-                ApplyScatteringPowerCorrection=inc_scatt_corr,
-                ScatteringVolumePosition=scat_vol_pos,
-                AxesTransform=flat_ax_transform,
-                IncludeSpectrumInfo=include_spec_info,
-            )
-            table_workspaces.append(ws_str)
-            spec_workspaces.append(spec_ws)
+    user_provided_param = peak_wss and (len(peak_wss) == len(wss))
+    flat_ax_transform = np.reshape(ax_transform, (9,)) if ax_transform else np.reshape(np.eye(3), (9,))
+    for iws, ws in enumerate(wss):
+        ws_str = f"_{iws}_abi_table"
+        spec_ws = f"_{iws}_spec_ws" if combined_ws else ""
+        param_ws = peak_wss[iws] if user_provided_param else "_default_param_table"
+        if not user_provided_param:
+            create_default_parameter_table_with_value(ws, iws + 1, param_ws)
+        CreatePoleFigureTableWorkspace(
+            InputWorkspace=ws,
+            PeakParameterWorkspace=param_ws,
+            OutputWorkspace=ws_str,
+            SpectraWorkspace=spec_ws,
+            Reflection=hkl,
+            Chi2Threshold=chi2_thresh,
+            PeakPositionThreshold=peak_thresh,
+            ApplyScatteringPowerCorrection=inc_scatt_corr,
+            ScatteringVolumePosition=scat_vol_pos,
+            AxesTransform=flat_ax_transform,
+            ReadoutColumn=readout_col,
+            IncludeSpectrumInfo=include_spec_info,
+        )
+        table_workspaces.append(ws_str)
+        spec_workspaces.append(spec_ws)
     CloneWorkspace(InputWorkspace=table_workspaces[0], OutputWorkspace=out_ws)
     for tw in table_workspaces[1:]:
         CombineTableWorkspaces(LHSWorkspace=out_ws, RHSWorkspace=tw, OutputWorkspace=out_ws)
