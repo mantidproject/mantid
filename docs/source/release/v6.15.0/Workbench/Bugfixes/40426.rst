@@ -1,0 +1,1 @@
+- Added an additional guard clause to fix the bug that causes an IndexError while interacting with the plots in the ``FitPropertyBrowser`` widget.
