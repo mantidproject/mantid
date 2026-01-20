@@ -677,7 +677,7 @@ void AlignAndFocusPowderSlim::initializeOutputWorkspace(const MatrixWorkspace_sp
     UNUSED_ARG(
         Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
   } else {
-    const std::vector<double> params{x_min[0], -1. * x_delta[0], x_max[0]};
+    const std::vector<double> params{x_min[0], -1. * std::abs(x_delta[0]), x_max[0]};
     UNUSED_ARG(
         Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
   }
@@ -700,7 +700,7 @@ void AlignAndFocusPowderSlim::initializeOutputWorkspace(const MatrixWorkspace_sp
         Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
                                                         full_bins_only);
       } else {
-        const std::vector<double> params{x_min[i], -1. * x_delta[i], x_max[i]};
+        const std::vector<double> params{x_min[i], -1. * std::abs(x_delta[i]), x_max[i]};
         Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
                                                         full_bins_only);
       }
