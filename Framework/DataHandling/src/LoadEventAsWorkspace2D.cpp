@@ -180,7 +180,7 @@ void LoadEventAsWorkspace2D::exec() {
   // load run metadata
   prog->doReport("Loading metadata");
   try {
-    LoadEventNexus::loadEntryMetadata(filename, WS, "entry", descriptor);
+    LoadEventNexus::loadEntryMetadata(filename, WS, "entry");
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }
