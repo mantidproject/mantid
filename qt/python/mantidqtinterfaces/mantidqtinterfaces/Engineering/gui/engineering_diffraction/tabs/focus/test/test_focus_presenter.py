@@ -21,30 +21,25 @@ class FocusPresenterTest(unittest.TestCase):
         self.presenter = presenter.FocusPresenter(self.model, self.view)
         self.presenter.current_calibration = mock.create_autospec(CalibrationInfo, instance=True)
 
-    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
     @patch(tab_path + ".presenter.FocusPresenter._validate")
-    def test_worker_started_with_correct_params(self, mock_validate, mock_worker, mock_setting):
+    def test_worker_started_with_correct_params(self, mock_validate, mock_worker):
         self.view.get_focus_filenames.return_value = "305738"
-        self.view.get_vanadium_filename.return_value = "307521"
         self.view.get_plot_output.return_value = True
         mock_validate.return_value = True
 
         self.presenter.on_focus_clicked()
 
-        mock_worker.assert_called_with("305738", "307521", True, None, self.presenter.current_calibration)
-        self.assertEqual(1, mock_setting.call_count)
+        mock_worker.assert_called_with("305738", True, None, self.presenter.current_calibration)
 
-    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
     @patch(tab_path + ".presenter.FocusPresenter._validate")
-    def test_worker_not_started_when_validate_fails(self, mock_validate, mock_worker, mock_setting):
+    def test_worker_not_started_when_validate_fails(self, mock_validate, mock_worker):
         mock_validate.return_value = False
 
         self.presenter.on_focus_clicked()
 
         mock_worker.assert_not_called()
-        mock_setting.assert_not_called()
 
     def test_controls_disabled_disables_both(self):
         self.presenter.set_focus_controls_enabled(False)
