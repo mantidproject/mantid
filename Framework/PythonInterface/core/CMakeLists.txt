@@ -123,7 +123,8 @@ endif()
 
 # Auto-generate exports header
 target_include_directories(
-  ${_target_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/PythonInterface/core> $<INSTALL_INTERFACE:include/Mantid>
+  ${_target_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/PythonInterface/core>
+                         $<INSTALL_INTERFACE:include/Mantid>
 )
 generate_mantid_export_header(${_target_name} TRUE)
 

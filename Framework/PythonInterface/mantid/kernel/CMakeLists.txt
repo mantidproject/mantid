@@ -136,7 +136,8 @@ set_target_properties(PythonKernelModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL
 
 # Auto-generate exports header
 target_include_directories(
-  PythonKernelModule PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/PythonInterface/mantid/kernel> $<INSTALL_INTERFACE:include/Mantid>
+  PythonKernelModule PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/PythonInterface/mantid/kernel>
+                            $<INSTALL_INTERFACE:include/Mantid>
 )
 generate_mantid_export_header(PythonKernelModule TRUE)
 

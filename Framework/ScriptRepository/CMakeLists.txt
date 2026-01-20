@@ -40,7 +40,8 @@ target_link_libraries(
 
 # Auto-generate exports header
 target_include_directories(
-  ScriptRepository PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/ScriptRepository> $<INSTALL_INTERFACE:include/Mantid>
+  ScriptRepository PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/ScriptRepository>
+                          $<INSTALL_INTERFACE:include/Mantid>
 )
 generate_mantid_export_header(ScriptRepository TRUE)
 
