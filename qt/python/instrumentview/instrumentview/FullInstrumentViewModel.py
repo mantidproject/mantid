@@ -14,7 +14,7 @@ from instrumentview.Projections.SideBySide import SideBySide
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.ConvertUnitsCalculator import ConvertUnitsCalculator
 
-from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace
+from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace, GroupingWorkspace
 from mantid.simpleapi import (
     CreateDetectorTable,
     ExtractSpectra,
@@ -29,6 +29,7 @@ from mantid.simpleapi import (
     CloneWorkspace,
     CreatePeaksWorkspace,
     AddPeak,
+    CreateGroupingWorkspace,
 )
 from mantid.api import MatrixWorkspace
 from itertools import groupby
@@ -95,6 +96,7 @@ class FullInstrumentViewModel:
         self._counts = np.zeros_like(self._detector_ids)
         self._counts_limits = (0, 0)
         self._detector_is_picked = np.full(len(self._detector_ids), False)
+        self._current_detector_groupings = np.zeros_like(self._detector_ids)
         self._point_picked_detectors = np.full(len(self._detector_ids), False)
 
         self._projection_type = ProjectionType.THREE_D
@@ -499,12 +501,27 @@ class FullInstrumentViewModel:
             self._is_masked = np.logical_or.reduce(total_items)
 
         else:
+            grouping_ws_names_in_ads = [ws.name() for ws in self.get_grouping_workspaces_in_ads()]
+            grouping_data_y = [
+                AnalysisDataService.retrieve(ws_name[:-2]).extractY().flatten() == int(ws_name[-1])
+                for ws_name in selected_keys
+                if ws_name[:-2] in grouping_ws_names_in_ads
+            ]
+            # TODO: Fix this mess, required because monitors are silently cut out from CreateGroupingWorkspace yay
+            padded_groups = [np.zeros_like(self._current_detector_groupings) for _ in grouping_data_y]
+            for pad_group, bool_mask in zip(padded_groups, grouping_data_y):
+                pad_group[self._is_valid] = bool_mask
             cached_selections = [self._cached_rois_map[key] for key in selected_keys if key in self._cached_rois_map.keys()]
-            total_items = [self._point_picked_detectors, *cached_selections]
+            total_items = [self._point_picked_detectors, *padded_groups, *cached_selections]
             if not total_items:
                 self._detector_is_picked = self._point_picked_detectors
+                self._current_detector_groupings[self._point_picked_detectors] = 1
                 return
             self._detector_is_picked = np.logical_or.reduce(total_items)
+            self._current_detector_groupings.fill(0)
+            total_items = [item for item in total_items if np.any(item)]
+            for i, group in enumerate(total_items):
+                self._current_detector_groupings[group] = i + 1
 
     def clear_stored_keys(self, kind: CurrentTab) -> None:
         if kind is CurrentTab.Masking:
@@ -565,6 +582,23 @@ class FullInstrumentViewModel:
             for pws in workspaces_in_ads
             if "MaskWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
         ]
+
+    def get_grouping_workspaces_in_ads(self) -> list[GroupingWorkspace]:
+        ads = AnalysisDataService.Instance()
+        workspaces_in_ads = ads.retrieveWorkspaces(ads.getObjectNames())
+        return [
+            pws
+            for pws in workspaces_in_ads
+            if "GroupingWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
+        ]
+
+    def save_grouping_to_ads(self):
+        grouping_name = "GroupingWorkspace"
+        CreateGroupingWorkspace(InstrumentName=self._workspace.getInstrument().getFullName(), OutputWorkspace=grouping_name)
+        grouping_ws = AnalysisDataService.retrieve(grouping_name).clone(StoreInADS=False)
+        for i, g in enumerate(self._current_detector_groupings[self._is_valid]):
+            grouping_ws.dataY(i)[:] = g
+        AnalysisDataService.addOrReplace(grouping_name, grouping_ws)
 
     def convert_units(self, source_unit: str, target_unit: str, picked_detector_index: int, value: float) -> float:
         return self._unit_converter.convert(

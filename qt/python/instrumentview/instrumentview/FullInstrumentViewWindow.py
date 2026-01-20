@@ -47,6 +47,7 @@ import matplotlib.pyplot as plt
 from mantid.dataobjects import Workspace2D
 from mantid import UsageService, ConfigService
 from mantid.kernel import FeatureType
+from mantid.simpleapi import AnalysisDataService
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 
 from instrumentview.Detectors import DetectorInfo
@@ -241,15 +242,21 @@ class FullInstrumentViewWindow(QMainWindow):
             self._add_selection,
             self._clear_selections,
             self._selection_list,
-            self._save_selection_to_ws,
-            self._save_selection_to_file,
-            self._overwrite_selection,
+            self._save_roi_to_ws,
+            self._save_grouping_to_ws,
+            self._save_grouping_to_xml,
         ) = self._add_tab(selection_tab, "ROI")
+        self._save_roi_to_ws.setText("Export ROI to ADS")
+        self._save_grouping_to_ws.setText("Export Grouping to ADS")
+        self._save_grouping_to_xml.setText("Save Grouping to XML")
 
         mask_tab = QWidget()
         (self._add_mask, self._clear_masks, self._mask_list, self._save_mask_to_ws, self._save_mask_to_file, self._overwrite_mask) = (
             self._add_tab(mask_tab, "Mask")
         )
+        self._save_mask_to_ws.setText("Save Mask to ADS")
+        self._save_mask_to_file.setText("Save Mask to XML")
+        self._overwrite_mask.setText("Apply Mask Permanently")
 
         self._picking_masking_tab = QTabWidget()
         self._picking_masking_tab.addTab(selection_tab, CurrentTab.Grouping.value)
@@ -435,9 +442,9 @@ class FullInstrumentViewWindow(QMainWindow):
         item_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         item_list.setSelectionMode(QAbstractItemView.NoSelection)
         post_list_layout = QHBoxLayout()
-        save_to_ws_btn = QPushButton(f"Export {label} to ADS")
-        save_to_file_btn = QPushButton(f"Save {label} to XML")
-        overwrite_btn = QPushButton(f"Apply {label} Permanently")
+        save_to_ws_btn = QPushButton()
+        save_to_file_btn = QPushButton()
+        overwrite_btn = QPushButton()
         post_list_layout.addWidget(save_to_ws_btn)
         post_list_layout.addWidget(save_to_file_btn)
         post_list_layout.addWidget(overwrite_btn)
@@ -467,11 +474,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self._mask_list.itemChanged.connect(self._presenter.on_list_item_selected)
         self._selection_list.itemChanged.connect(self._presenter.on_list_item_selected)
         self._save_mask_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
-        self._save_selection_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
         self._save_mask_to_file.clicked.connect(self._presenter.on_save_to_xml_clicked)
-        self._save_selection_to_file.clicked.connect(self._presenter.on_save_to_xml_clicked)
         self._overwrite_mask.clicked.connect(self._presenter.on_apply_permanently_clicked)
-        self._overwrite_selection.clicked.connect(self._presenter.on_apply_permanently_clicked)
+        self._save_roi_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
+        self._save_grouping_to_ws.clicked.connect(self._presenter.on_save_grouping_to_ads_clicked)
+        # self._save_grouping_to_xml.clicked.connect(self._presenter.)
         self._clear_masks.clicked.connect(self._presenter.on_clear_list_clicked)
         self._clear_selections.clicked.connect(self._presenter.on_clear_list_clicked)
         self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
@@ -593,6 +600,28 @@ class FullInstrumentViewWindow(QMainWindow):
             if item.text() in cached_masks_keys:
                 continue
             if item.text() not in current_mask_in_ads:
+                removed = self._mask_list.takeItem(i)
+                del removed
+
+    def update_ws_in_roi_list(self) -> None:
+        current_grouping_in_ads = self._presenter.grouping_workspaces_in_ads()
+        # current_grouping_in_list = [self._selection_list.item(i).text() for i in range(self._selection_list.count())]
+        cached_grouping_keys = self._presenter.cached_keys(CurrentTab.Grouping)
+
+        # Workspaces in ads but not yet in list
+        for ws_name in current_grouping_in_ads:
+            # TODO: THis should not be in the view???
+            ws = AnalysisDataService.retrieve(ws_name)
+            for i in range(1, int(ws.extractY().max()) + 1):
+                item = QListWidgetItem(ws_name + f"_{i}", self._selection_list)
+                item.setCheckState(Qt.Unchecked)
+
+        # Workspaces in list but not in ads
+        for i in range(self._mask_list.count() - 1, -1, -1):
+            item = self._mask_list.item(i)
+            if item.text() in cached_grouping_keys:
+                continue
+            if item.text()[:-2] not in current_grouping_in_ads:
                 removed = self._mask_list.takeItem(i)
                 del removed
 
