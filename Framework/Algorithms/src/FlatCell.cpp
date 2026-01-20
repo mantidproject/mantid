@@ -92,7 +92,7 @@ void FlatCell::exec() {
   }
 
   // The output is expected to have 17784 values (nHist+nMonitorOffset)
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", LoqMeta::histograms(), 1, 1);
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS, LoqMeta::histograms(), 1, 1);
   setProperty("OutputWorkspace", outputWS);
 
   // Integrate spectrums in input events workspace into one spectrum
@@ -131,20 +131,6 @@ void FlatCell::exec() {
   const double normStdLAB = FlatCell::stddev(LAB);
   const double normStdHAB = FlatCell::stddev(HAB);
 
-  // Create the Output Y and X
-  std::vector<detid_t> outX(LoqMeta::histograms());
-
-  // Map the spectrum ids to the detector ids for the Low and High Angle Banks
-  std::iota(outX.begin(), outX.begin() + LAB.size(), LoqMeta::LABDetectorIdStart());
-  std::iota(outX.begin() + LoqMeta::HABIndexStart(),
-            outX.begin() + LoqMeta::HABIndexStart() + LoqMeta::HABIndividualBanks(), LoqMeta::HAB1DetectorIdStart());
-  std::iota(outX.begin() + LoqMeta::HAB1IndexStop(),
-            outX.begin() + LoqMeta::HAB1IndexStop() + LoqMeta::HABIndividualBanks(), LoqMeta::HAB2DetectorIdStart());
-  std::iota(outX.begin() + LoqMeta::HAB2IndexStop(),
-            outX.begin() + LoqMeta::HAB2IndexStop() + LoqMeta::HABIndividualBanks(), LoqMeta::HAB3DetectorIdStart());
-  std::iota(outX.begin() + LoqMeta::HAB3IndexStop(),
-            outX.begin() + LoqMeta::HAB3IndexStop() + LoqMeta::HABIndividualBanks(), LoqMeta::HAB4DetectorIdStart());
-
   // Save the individual High Angle Bank values into spans
   std::span<double> HAB1 = values_span.subspan(LoqMeta::HABIndexStart(), LoqMeta::HABIndividualBanks());
   std::span<double> HAB2 = values_span.subspan(LoqMeta::HAB1IndexStop(), LoqMeta::HABIndividualBanks());
@@ -167,7 +153,6 @@ void FlatCell::exec() {
   for (size_t i = 0; i < nHist; ++i) {
     auto &Y = outputWS->mutableY(i);
     Y[0] = values_span[i];
-    // outputWS->getSpectrum(i).setDetectorID(outX[i]);
   }
 
   bool CreateMaskedWorkspace = getProperty("CreateMaskedWorkspace");
@@ -179,49 +164,40 @@ void FlatCell::exec() {
     const double maskingThresholdHAB = 1 + (0.5 * normStdHAB);
 
     // Mask the values of the low angle bank
-    auto maskDetectorsIf = createChildAlgorithm("MaskDetectorsIf");
-    maskDetectorsIf->initialize();
-    maskDetectorsIf->setProperty("InputWorkspace", outputWS);
-    maskDetectorsIf->setProperty("OutputWorkspace", outputWS);
-    maskDetectorsIf->setProperty("StartWorkspaceIndex", LoqMeta::LABIndexStart());
-    maskDetectorsIf->setProperty("EndWorkspaceIndex", LoqMeta::LABTotalBanks() - 1);
-    maskDetectorsIf->setProperty("Operator", "GreaterEqual");
-    maskDetectorsIf->setProperty("Value", maskingThresholdLAB);
-    maskDetectorsIf->execute();
+    auto maskDetectorsLAB = createChildAlgorithm("MaskDetectorsIf");
+    maskDetectorsLAB->initialize();
+    maskDetectorsLAB->setProperty("InputWorkspace", outputWS);
+    maskDetectorsLAB->setProperty("OutputWorkspace", outputWS);
+    maskDetectorsLAB->setProperty("StartWorkspaceIndex", LoqMeta::LABIndexStart());
+    maskDetectorsLAB->setProperty("EndWorkspaceIndex", LoqMeta::LABTotalBanks() - 1);
+    maskDetectorsLAB->setProperty("Operator", "GreaterEqual");
+    maskDetectorsLAB->setProperty("Value", maskingThresholdLAB);
+    maskDetectorsLAB->execute();
 
-    maskDetectorsIf->setProperty("InputWorkspace", outputWS);
-    maskDetectorsIf->setProperty("OutputWorkspace", outputWS);
-    maskDetectorsIf->setProperty("StartWorkspaceIndex", LoqMeta::HABIndexStart());
-    maskDetectorsIf->setProperty("Operator", "GreaterEqual");
-    maskDetectorsIf->setProperty("Value", maskingThresholdHAB);
-    maskDetectorsIf->execute();
+    auto maskDetectorsHAB = createChildAlgorithm("MaskDetectorsIf");
+    maskDetectorsHAB->initialize();
+    maskDetectorsHAB->setProperty("InputWorkspace", outputWS);
+    maskDetectorsHAB->setProperty("OutputWorkspace", outputWS);
+    maskDetectorsHAB->setProperty("StartWorkspaceIndex", LoqMeta::HABIndexStart());
+    maskDetectorsHAB->setProperty("Operator", "GreaterEqual");
+    maskDetectorsHAB->setProperty("Value", maskingThresholdHAB);
+    maskDetectorsHAB->execute();
 
-    // // Append Spectrums
-    // auto stitch1D = createChildAlgorithm("Stitch1D");
-    // stitch1D->initialize();
-    // stitch1D->setProperty("LHSWorkspace", labCroppedWS);
-    // stitch1D->setProperty("RHSWorkspace", habCroppedWS);
-    // stitch1D->setProperty("OutputWorkspace", "appendedWS");
-    // stitch1D->setProperty("ScaleRHSWorkspace", false);
-    // stitch1D->execute();
-    // MatrixWorkspace_sptr appendedMaskedWS = stitch1D->getProperty("OutputWorkspace");
-    // AnalysisDataService::Instance().addOrReplace("appendedMaskedWS", appendedMaskedWS);
+    // Extract Mask
+    auto extractMask = createChildAlgorithm("ExtractMask");
+    extractMask->initialize();
+    extractMask->setProperty("InputWorkspace", outputWS);
+    extractMask->setProperty("OutputWorkspace", "extractedMaskWS");
+    extractMask->execute();
+    MatrixWorkspace_sptr extractedMaskWS = extractMask->getProperty("OutputWorkspace");
 
-    // // Extract Mask
-    // auto extractMask = createChildAlgorithm("ExtractMask");
-    // extractMask->initialize();
-    // extractMask->setProperty("InputWorkspace", maskedWS);
-    // extractMask->setProperty("OutputWorkspace", "extractedMaskWS");
-    // extractMask->execute();
-    // MatrixWorkspace_sptr extractedMaskWS = extractMask->getProperty("OutputWorkspace");
-
-    // // Save Mask
-    // std::string maskFileName = getProperty("MaskFileName");
-    // auto saveMask = createChildAlgorithm("SaveMask");
-    // saveMask->initialize();
-    // saveMask->setProperty("InputWorkspace", extractedMaskWS);
-    // saveMask->setProperty("OutputFile", maskFileName);
-    // saveMask->execute();
+    // Save Mask
+    std::string maskFileName = getProperty("MaskFileName");
+    auto saveMask = createChildAlgorithm("SaveMask");
+    saveMask->initialize();
+    saveMask->setProperty("InputWorkspace", extractedMaskWS);
+    saveMask->setProperty("OutputFile", maskFileName);
+    saveMask->execute();
   };
 }
 
