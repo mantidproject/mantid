@@ -9,6 +9,6 @@
 
   - Method to perform 'free' fit - i.e. do not constrain peak centres to predicted positions
   - Improvements to robustness of background estimation
-  - Method to fit background function to 1D data using one-sided 'robust' cost function that is biased to minimize negative residuals.
+  - Method to fit background function to 1D data using a cost function that is biased to be less sensitive to positive outliers.
 
 - Added class ``PawleyPattern2DNoConstraints`` in ``Engineering.pawley_utils`` to do a 'free' 2D refinement of POLDI data

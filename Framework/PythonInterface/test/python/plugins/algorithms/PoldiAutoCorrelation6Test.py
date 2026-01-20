@@ -52,7 +52,7 @@ class PoldiAutoCorrelation6Test(unittest.TestCase):
         si = ws_corr.spectrumInfo()
         tths = np.degrees([si.twoTheta(ispec) for ispec in range(ws_corr.getNumberHistograms())])
         assert_array_almost_equal(tths, np.array([79.19, 89.73, 100.26]), decimal=2)
-        # assert number fo detectors associated with each spectrum
+        # assert number of detectors associated with each spectrum
         ndets = [len(ws_corr.getSpectrum(ispec).getDetectorIDs()) for ispec in range(ws_corr.getNumberHistograms())]
         assert_array_equal(ndets, np.array([150, 149, 149]))
 

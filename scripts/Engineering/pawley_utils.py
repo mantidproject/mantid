@@ -11,7 +11,7 @@ from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
 from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFactory, PointGroup
 from mantid.kernel import V3D, logger, UnitConversion, DeltaEModeType
-from typing import Optional, Tuple, TYPE_CHECKING, Sequence, Union
+from typing import Optional, Tuple, TYPE_CHECKING, Sequence
 from scipy.optimize import least_squares
 from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
 from abc import ABC, abstractmethod
@@ -214,7 +214,7 @@ class MtdFuncMixin:
     PawleyPattern2DNoConstraints (although the getters may also be helpful for debugging PawleyPattern2D fits
     """
 
-    def get_peak_centers(self) -> np.ndarray[float]:
+    def get_peak_centres(self) -> np.ndarray[float]:
         cen_par_name = self.comp_func[0].function.getCentreParameterName()
         return self.get_peak_params(cen_par_name)
 
@@ -230,7 +230,7 @@ class MtdFuncMixin:
         bg_func_names = FunctionFactory.Instance().getBackgroundFunctionNames()
         return np.array([f.function.intensity() for f in self.comp_func if f.name not in bg_func_names])
 
-    def set_mantid_peak_param_isfree(self, param_names: Union[str, Sequence[str]], isfree: bool = False):
+    def set_mantid_peak_param_isfree(self, param_names: str | Sequence[str], isfree: bool = False):
         # relevant only for subsequent unconstrained fits - not used in Pawley fits
         bg_func_names = FunctionFactory.Instance().getBackgroundFunctionNames()
         if isinstance(param_names, str):
@@ -440,7 +440,7 @@ class PawleyPattern1D(PawleyPatternBase):
                 self.bg_params[ipar] = bg
         self.update_profile_function()
 
-    def fit_background(self, **kwargs):
+    def fit_background(self, **kwargs) -> OptimizeResult:
         if len(self.bg_params) == 0:
             return
         default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
@@ -451,17 +451,17 @@ class PawleyPattern1D(PawleyPatternBase):
         self.bg_params = res.x
         return res
 
-    def _eval_bg_func(self, p):
+    def _eval_bg_func(self, p: np.ndarray[float]) -> np.ndarray[float]:
         bg_func = self.comp_func[len(self.comp_func) - 1]
         self._set_func_params(bg_func, p)
         ws = EvaluateFunction(Function=bg_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, StoreInADS=False, EnableLogging=False)
         return ws.readY(1).copy()
 
     @staticmethod
-    def _set_func_params(func, p):
+    def _set_func_params(func: FunctionWrapper, p: np.ndarray[float]):
         [func.function.setParameter(ipar, param) for ipar, param in enumerate(p)]
 
-    def _calc_robust_bg_resids(self, p):
+    def _calc_robust_bg_resids(self, p: np.ndarray[float]) -> np.ndarray[float]:
         # quadratic for negative residuals, scaled cauchy loss for positive (turnover to logarithmic at ~ 2 sigma)
         # note at x=0 cauchy loss has second-deriv == 2 (i.e. is quadratic)
         bg_calc = self._eval_bg_func(p)
@@ -513,7 +513,7 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
         self.update_profile_function()
 
     @staticmethod
-    def make_1d_ws(ws):
+    def make_1d_ws(ws: Workspace2D):
         dspacs = get_dspac_array_from_ws(ws)
         return CreateWorkspace(
             DataX=dspacs,
@@ -568,7 +568,7 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
     def create_no_constriants_fit(self):
         return PawleyPattern2DNoConstraints(self.ws, self.comp_func, self.global_scale, self.lambda_max)
 
-    def fit(self, *args, **kwargs):
+    def fit(self, *args, **kwargs) -> OptimizeResult:
         res = super().fit(*args, **kwargs)
         self.eval_2d(res.x)  # ensure 2D simulated workspace up to date
         return res
@@ -592,7 +592,7 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
         pk_func.setIntensity(1.0)
         return next(pk_func.getParamName(ipar) for ipar in range(pk_func.nParams()) if pk_func.isExplicitlySet(ipar))
 
-    def get_npks(self):
+    def get_npks(self) -> int:
         return len(self.comp_func) - 1 if self.has_bg else len(self.comp_func)
 
     def set_global_scale(self, global_scale: bool):
@@ -620,7 +620,7 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
                 [bg_func.function.setParameter(ipar, 0) for ipar in range(bg_func.nParams())]
                 bg_func.function.fixAll()
 
-    def get_params(self):
+    def get_params(self) -> np.ndarray[float]:
         return np.asarray([self.comp_func.getParameterValue(ipar) for ipar in range(self.comp_func.nParams())])
 
     def get_free_params(self) -> np.ndarray[float]:

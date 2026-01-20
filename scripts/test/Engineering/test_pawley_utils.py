@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest.mock import patch, create_autospec
-from numpy import allclose, sqrt, log, linspace, zeros_like, ones, trapezoid, array
+from numpy import allclose, log, zeros_like, ones, trapezoid, array, linspace, sqrt
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from mantid.api import AnalysisDataService, FileFinder
-from mantid.simpleapi import CreateWorkspace, FlatBackground, EditInstrumentGeometry, ConvertUnits
+from mantid.simpleapi import CreateWorkspace, FlatBackground, EditInstrumentGeometry, ConvertUnits, LinearBackground
 from mantid.geometry import CrystalStructure
 from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D, BackToBackGauss
 from plugins.algorithms.poldi_utils import load_poldi
@@ -191,6 +191,20 @@ class PawleyPattern1DTest(unittest.TestCase):
         # assert initial parameters changed
         self.assertNotEqual(initial_comp_func, str(result.Function))
 
+    def test_fit_background(self):
+        # create data with positive outlier
+        x = linspace(0, 1, 4)
+        pars = {"A0": 10, "A1": 5}
+        func = LinearBackground(**pars)
+        y = func(x)
+        y[-1] *= 1000  # outlier
+        ws_bg_with_outlier = CreateWorkspace(x, y, sqrt(y))
+
+        pawley = PawleyPattern1D(ws_bg_with_outlier, [self.phase], profile=GaussianProfile(), bg_func=func)
+        res = pawley.fit_background()
+
+        assert_array_almost_equal(res.x, list(pars.values()), decimal=2)
+
     # MtdFuncMixin tests
 
 
@@ -213,7 +227,7 @@ class MtdFuncMixinTest(unittest.TestCase):
         self.pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile(), bg_func=FlatBackground(A0=2))
 
     def test_get_peak_centers(self):
-        assert_array_almost_equal(self.pawley.get_peak_centers(), array([3.14, 1.57]), decimal=2)
+        assert_array_almost_equal(self.pawley.get_peak_centres(), array([3.14, 1.57]), decimal=2)
 
     def test_get_peak_params(self):
         assert_array_almost_equal(self.pawley.get_peak_params("Height"), array([125.64, 242.43]), decimal=2)
