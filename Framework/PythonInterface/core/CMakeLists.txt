@@ -29,7 +29,6 @@ set(INC_FILES
     inc/MantidPythonInterface/core/CallMethod.h
     inc/MantidPythonInterface/core/Copyable.h
     inc/MantidPythonInterface/core/DataServiceExporter.h
-    inc/MantidPythonInterface/core/DllConfig.h
     inc/MantidPythonInterface/core/ErrorHandling.h
     inc/MantidPythonInterface/core/ExtractSharedPtr.h
     inc/MantidPythonInterface/core/GlobalInterpreterLock.h
@@ -121,6 +120,12 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(${_target_name} PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
+
+# Auto-generate exports header
+target_include_directories(
+  ${_target_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/PythonInterface/core> $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(${_target_name} TRUE)
 
 set(TARGET_EXPORT_NAME "MantidPythonInterfaceCoreTargets")
 mtd_install_framework_lib(TARGETS PythonInterfaceCore EXPORT_NAME ${TARGET_EXPORT_NAME})

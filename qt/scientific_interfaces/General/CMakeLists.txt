@@ -1,7 +1,7 @@
 set(SRC_FILES FitScriptGenerator.cpp StepScan.cpp)
 
 # Only include header files which do not contain Qt
-set(INC_FILES DllConfig.h)
+set(INC_FILES)
 
 # Only include header files which do contain Qt
 set(MOC_FILES FitScriptGenerator.h StepScan.h)
@@ -37,3 +37,9 @@ mtd_add_qt_library(
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
 )
+
+# Auto-generate exports header
+target_include_directories(
+  MantidScientificInterfacesGeneral-Qt5 PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/qt/scientific_interfaces/General> $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(MantidScientificInterfacesGeneral TRUE)

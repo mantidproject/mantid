@@ -1,7 +1,7 @@
 # Rules for matplotlib cpp library
 set(LIB_SRCS src/RegionSelector.cpp)
 
-set(NOMOC_HEADERS inc/MantidQtWidgets/RegionSelector/DllConfig.h inc/MantidQtWidgets/RegionSelector/IRegionSelector.h
+set(NOMOC_HEADERS inc/MantidQtWidgets/RegionSelector/IRegionSelector.h
                   inc/MantidQtWidgets/RegionSelector/RegionSelector.h
 )
 
@@ -19,3 +19,9 @@ mtd_add_qt_library(
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
 )
+
+# Auto-generate exports header
+target_include_directories(
+  MantidQtWidgetsRegionSelector-Qt5 PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/qt/widgets/regionselector> $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(MantidQtWidgetsRegionSelector TRUE)

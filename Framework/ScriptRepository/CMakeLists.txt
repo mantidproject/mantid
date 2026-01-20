@@ -1,7 +1,7 @@
 # Mantid source
 set(SRC_FILES src/ScriptRepositoryImpl.cpp)
 
-set(INC_FILES inc/MantidScriptRepository/DllConfig.h inc/MantidScriptRepository/ScriptRepositoryImpl.h)
+set(INC_FILES inc/MantidScriptRepository/ScriptRepositoryImpl.h)
 
 set(TEST_FILES ScriptRepositoryTestImpl.h)
 
@@ -37,5 +37,11 @@ target_link_libraries(
   PUBLIC Mantid::Kernel Mantid::API
   PRIVATE Mantid::Json
 )
+
+# Auto-generate exports header
+target_include_directories(
+  ScriptRepository PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/ScriptRepository> $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(ScriptRepository TRUE)
 
 mtd_install_framework_lib(TARGETS ScriptRepository PLUGIN_LIB)

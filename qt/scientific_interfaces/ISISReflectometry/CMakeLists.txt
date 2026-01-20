@@ -54,6 +54,12 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
 )
 
+# Auto-generate exports header
+target_include_directories(
+  MantidScientificInterfacesISISReflectometry-Qt5 PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/qt/scientific_interfaces/ISISReflectometry> $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(MantidScientificInterfacesISISReflectometry TRUE)
+
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   add_subdirectory(test)
 endif()
