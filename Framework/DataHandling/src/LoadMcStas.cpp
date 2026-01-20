@@ -85,7 +85,7 @@ void LoadMcStas::exec() {
   const char *attributeName = "long_name";
   std::vector<std::string> eventEntries;
   std::map<std::string, std::vector<std::string>> histogramEntries;
-  for (auto &entry : entries) {
+  for (std::string const &entry : entries) {
     if (entry.find("/entry1/data") == std::string::npos) {
       continue;
     }

@@ -350,7 +350,6 @@ void makeTimeOfFlightDataFuzzy(Nexus::File &file, T localWorkspace, const std::s
  *modified.
  * @param entry_name :: An NXentry tag in the file
  * @param classType :: The type of the events: either detector or monitor
- * @param descriptor :: input descriptor carrying metadata information
  */
 template <typename T>
 void adjustTimeOfFlightISISLegacy(Nexus::File &file, T localWorkspace, const std::string &entry_name,
