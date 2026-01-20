@@ -53,6 +53,8 @@ void MaskDetectorsIf::init() {
   declareProperty("Operator", "Equal", std::make_shared<StringListValidator>(select_operator),
                   "Operator to compare to given values.");
   declareProperty("Value", 0.0);
+  declareProperty("StartWorkspaceIndex", 0, "The start of the spectrum range on which to apply the mask");
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), "The end of the spectrum range on which to apply the mask.");
   declareProperty(std::make_unique<API::FileProperty>("InputCalFile", "", API::FileProperty::OptionalLoad, ".cal"),
                   "The name of the CalFile with grouping data.");
   declareProperty(std::make_unique<API::FileProperty>("OutputCalFile", "", API::FileProperty::OptionalSave, ".cal"),
@@ -87,8 +89,14 @@ void MaskDetectorsIf::exec() {
     g_log.error() << "No InputCalFle or OutputWorkspace specified; " << this->name() << " will do nothing.\n";
     return;
   }
-  const size_t nspec = m_inputW->getNumberHistograms();
-  for (size_t i = 0; i < nspec; ++i) {
+  const int nspec_start = getProperty("StartWorkspaceIndex");
+  int nspec_end;
+  if (isDefault("EndWorkspaceIndex")) {
+    nspec_end = static_cast<int>(m_inputW->getNumberHistograms()) - 1;
+  } else {
+    nspec_end = getProperty("EndWorkspaceIndex");
+  }
+  for (int i = nspec_start; i <= nspec_end; ++i) {
     // Get the list of udets contributing to this spectra
     const auto &dets = m_inputW->getSpectrum(i).getDetectorIDs();
 
@@ -107,7 +115,7 @@ void MaskDetectorsIf::exec() {
         }
       }
     }
-    const double p = static_cast<double>(i) / static_cast<double>(nspec);
+    const double p = static_cast<double>(i) / static_cast<double>(nspec_end - nspec_start);
     progress(p, "Generating detector map");
   }
 

@@ -30,7 +30,6 @@ struct LoqMeta {
   static constexpr int histograms() { return 17776; }
   static constexpr int nMonitorOffset() { return 8; }
   static constexpr int LABIndexStart() { return 0; }
-  static constexpr int LABIndexStop() { return 16384; }
   static constexpr int LABTotalBanks() { return 16384; }
   static constexpr int HABTotalBanks() { return 1392; }
   static constexpr int HABIndividualBanks() { return 348; };
@@ -38,7 +37,6 @@ struct LoqMeta {
   static constexpr int HAB1IndexStop() { return 16740 - nMonitorOffset(); };
   static constexpr int HAB2IndexStop() { return 17088 - nMonitorOffset(); };
   static constexpr int HAB3IndexStop() { return 17436 - nMonitorOffset(); };
-  static constexpr int HABIndexStop() { return 17784 - nMonitorOffset(); };
   static constexpr int LABDetectorIdStart() { return 100000; };
   static constexpr int HAB1DetectorIdStart() { return 200000; };
   static constexpr int HAB2DetectorIdStart() { return 210000; };
@@ -94,8 +92,7 @@ void FlatCell::exec() {
   }
 
   // The output is expected to have 17784 values (nHist+nMonitorOffset)
-  MatrixWorkspace_sptr outputWS =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, LoqMeta::totalDetectorIDs(), LoqMeta::totalDetectorIDs());
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", LoqMeta::histograms(), 1, 1);
   setProperty("OutputWorkspace", outputWS);
 
   // Integrate spectrums in input events workspace into one spectrum
@@ -168,18 +165,11 @@ void FlatCell::exec() {
   FlatCell::scale(HAB4, rescaleHAB4);
 
   // Save the Y data into the output WS
-  auto &OY = outputWS->mutableY(0);
-  std::copy(values_span.begin(), values_span.end(), OY.begin() + LoqMeta::nMonitorOffset());
-
-  // Save the X data into the output WS
-  auto &OX = outputWS->mutableX(0);
-  std::copy(outX.begin(), outX.end(), OX.begin() + LoqMeta::nMonitorOffset());
-
-  // Create the LAB and HAB vectors to mask
-  std::vector<double> unmaskedLAB(values_span.begin() + LoqMeta::LABIndexStart(),
-                                  values_span.begin() + LoqMeta::LABIndexStop());
-  std::vector<double> unmaskedHAB(values_span.begin() + LoqMeta::HABIndexStart(),
-                                  values_span.begin() + LoqMeta::HABIndexStop());
+  for (size_t i = 0; i < nHist; ++i) {
+    auto &Y = outputWS->mutableY(i);
+    Y[0] = values_span[i];
+    // outputWS->getSpectrum(i).setDetectorID(outX[i]);
+  }
 
   bool CreateMaskedWorkspace = getProperty("CreateMaskedWorkspace");
 
@@ -189,91 +179,50 @@ void FlatCell::exec() {
     const double maskingThresholdLAB = 1 + normStdLAB;
     const double maskingThresholdHAB = 1 + (0.5 * normStdHAB);
 
-    // Crop the workspaces
-    auto cropWorkspace = createChildAlgorithm("CropWorkspace");
-    cropWorkspace->initialize();
-
-    // Crop Workspace for low angle bank
-    cropWorkspace->setProperty("InputWorkspace", outputWS);
-    cropWorkspace->setProperty("OutputWorkspace", "labCroppedWS");
-    cropWorkspace->setProperty("XMin", static_cast<double>(LoqMeta::LABIndexStart()));
-    cropWorkspace->setProperty("XMax",
-                               static_cast<double>(LoqMeta::LABDetectorIdStart() + LoqMeta::LABTotalBanks() - 1));
-    cropWorkspace->execute();
-    MatrixWorkspace_sptr labCroppedWS = cropWorkspace->getProperty("OutputWorkspace");
-
-    // Crop Workspace for high angle bank
-    cropWorkspace->setProperty("InputWorkspace", outputWS);
-    cropWorkspace->setProperty("OutputWorkspace", "habCroppedWS");
-    cropWorkspace->setProperty("XMin", static_cast<double>(LoqMeta::HAB1DetectorIdStart()));
-    cropWorkspace->setProperty("XMax",
-                               static_cast<double>(LoqMeta::HAB4DetectorIdStart() + LoqMeta::HABIndividualBanks() - 1));
-    cropWorkspace->execute();
-    MatrixWorkspace_sptr habCroppedWS = cropWorkspace->getProperty("OutputWorkspace");
-
     // Mask the values of the low angle bank
     auto maskDetectorsIf = createChildAlgorithm("MaskDetectorsIf");
     maskDetectorsIf->initialize();
-    maskDetectorsIf->setProperty("InputWorkspace", labCroppedWS);
-    maskDetectorsIf->setProperty("OutputWorkspace", labCroppedWS);
+    maskDetectorsIf->setProperty("InputWorkspace", outputWS);
+    maskDetectorsIf->setProperty("OutputWorkspace", outputWS);
+    maskDetectorsIf->setProperty("StartSpectrumIndex", LoqMeta::LABIndexStart());
+    maskDetectorsIf->setProperty("EndSpectrumIndex", LoqMeta::LABTotalBanks() - 1);
     maskDetectorsIf->setProperty("Operator", "GreaterEqual");
     maskDetectorsIf->setProperty("Value", maskingThresholdLAB);
     maskDetectorsIf->execute();
 
-    maskDetectorsIf->setProperty("InputWorkspace", habCroppedWS);
-    maskDetectorsIf->setProperty("OutputWorkspace", habCroppedWS);
-    maskDetectorsIf->setProperty("Operator", "GreaterEqual");
-    maskDetectorsIf->setProperty("Value", maskingThresholdHAB);
-    maskDetectorsIf->execute();
+    // maskDetectorsIf->setProperty("InputWorkspace", habCroppedWS);
+    // maskDetectorsIf->setProperty("OutputWorkspace", habCroppedWS);
+    // maskDetectorsIf->setProperty("Operator", "GreaterEqual");
+    // maskDetectorsIf->setProperty("Value", maskingThresholdHAB);
+    // maskDetectorsIf->execute();
 
-    // Coinjoin Workspaces
-    auto conjoinWorkspaces = createChildAlgorithm("ConjoinWorkspaces");
-    conjoinWorkspaces->initialize();
-    conjoinWorkspaces->setProperty("InputWorkspace1", labCroppedWS);
-    conjoinWorkspaces->setProperty("InputWorkspace2", habCroppedWS);
-    conjoinWorkspaces->setProperty("OutputWorkspace", "maskedWS");
-    conjoinWorkspaces->execute();
-    MatrixWorkspace_sptr maskedWS = conjoinWorkspaces->getProperty("OutputWorkspace");
+    // // Append Spectrums
+    // auto stitch1D = createChildAlgorithm("Stitch1D");
+    // stitch1D->initialize();
+    // stitch1D->setProperty("LHSWorkspace", labCroppedWS);
+    // stitch1D->setProperty("RHSWorkspace", habCroppedWS);
+    // stitch1D->setProperty("OutputWorkspace", "appendedWS");
+    // stitch1D->setProperty("ScaleRHSWorkspace", false);
+    // stitch1D->execute();
+    // MatrixWorkspace_sptr appendedMaskedWS = stitch1D->getProperty("OutputWorkspace");
+    // AnalysisDataService::Instance().addOrReplace("appendedMaskedWS", appendedMaskedWS);
+
+    // // Extract Mask
+    // auto extractMask = createChildAlgorithm("ExtractMask");
+    // extractMask->initialize();
+    // extractMask->setProperty("InputWorkspace", maskedWS);
+    // extractMask->setProperty("OutputWorkspace", "extractedMaskWS");
+    // extractMask->execute();
+    // MatrixWorkspace_sptr extractedMaskWS = extractMask->getProperty("OutputWorkspace");
+
+    // // Save Mask
+    // std::string maskFileName = getProperty("MaskFileName");
+    // auto saveMask = createChildAlgorithm("SaveMask");
+    // saveMask->initialize();
+    // saveMask->setProperty("InputWorkspace", extractedMaskWS);
+    // saveMask->setProperty("OutputFile", maskFileName);
+    // saveMask->execute();
   };
-
-  // Copy each of the vectors to outY
-  std::copy(unmaskedLAB.begin(), unmaskedLAB.end(), maskedOutY.begin() + LoqMeta::LABIndexStart());
-  std::copy(unmaskedHAB.begin(), unmaskedHAB.end(), maskedOutY.begin() + LoqMeta::HABIndexStart());
-
-  // Determine which detector IDs need to be masked
-  std::vector<detid_t> detectorIDs;
-  for (size_t i = 0; i < maskedOutY.size(); ++i) {
-    if (maskedOutY[i] == 0.0) {
-      detectorIDs.push_back(outX[i]);
-    }
-  }
-
-  // Create the string stream for writing into the xml file
-  std::ostringstream detids_stream;
-  for (size_t i = 0; i < detectorIDs.size(); ++i) {
-    detids_stream << detectorIDs[i];
-    if (i + 1 < detectorIDs.size()) {
-      detids_stream << ",";
-    }
-  }
-
-  // Create the xml file
-  std::string maskFileName = getProperty("MaskFileName");
-  std::ofstream outFile(maskFileName);
-  if (!outFile) {
-    throw std::runtime_error("Failed to open mask file for writing");
-  }
-
-  // Write detector ids to the xml file
-  outFile << "<?xml version=\"1.0\"?>\n";
-  outFile << "<detector-masking>\n";
-  outFile << "  <group>\n";
-  outFile << "    <detids>" << detids_stream.str() << "</detids>\n";
-  outFile << "  </group>\n";
-  outFile << "</detector-masking>\n";
-
-  // Close the file
-  outFile.close();
 }
 
 /** Execution code for EventWorkspaces
