@@ -12,7 +12,6 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidHistogramData/BinEdges.h"
