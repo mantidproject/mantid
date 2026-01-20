@@ -665,6 +665,7 @@ def create_pf_loop(
     create_combined_output: bool = False,
     debug_info_level: int = 0,
     save_ascii: bool = True,
+    override_dir: bool = False,
 ) -> None:
     """
     Create a series of pole figures, for use in texture analysis workflow
@@ -696,6 +697,7 @@ def create_pf_loop(
     create_combined_output: flag which controls whether to create a combined workspace which contains every spectra in the pole figure
     debug_info_level: 0 - No debug info; 1 - will label with alpha, beta and value; 2 - will include spectra information in label
     save_ascii: whether to save files as txt as well as nxs
+    override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
     """
     # get ws paths
     for iparam, params in enumerate(param_wss):
@@ -725,6 +727,7 @@ def create_pf_loop(
                 "create_combined_output": create_combined_output,
                 "debug_info_level": debug_info_level,
                 "save_ascii": save_ascii,
+                "override_dir": override_dir,
             }
             if scatter == "both":
                 for scat in (True, False):
