@@ -26,7 +26,7 @@
 static unsigned int const INIT_DEPTH = 1;
 static unsigned int const ENTRY_DEPTH = 2;
 static unsigned int const INSTR_DEPTH = 5;
-static std::unordered_set<std::string> const SPECIAL_ADDRESS{"/entry", "/entry0", "/entry1"};
+static std::unordered_set<std::string> const SPECIAL_ADDRESS{"/entry", "/entry0", "/entry1", "/raw_data_1"};
 static std::string const NONEXISTENT = "NONEXISTENT"; // register failures as well
 static std::string const UNKNOWN_CLASS = "UNKNOWN_CLASS";
 
@@ -39,7 +39,7 @@ template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::Uniq
       Mantid::Nexus::UniqueID<&H5Tclose> atype(H5Aget_type(attrID));
       if (H5Tis_variable_str(atype)) {
         // variable length string
-        char *rdata;
+        char *rdata = nullptr;
         if (H5Aread(attrID, atype, &rdata) >= 0) {
           nxClass = std::string(rdata);
         }
