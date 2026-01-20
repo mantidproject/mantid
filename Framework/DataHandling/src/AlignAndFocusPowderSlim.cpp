@@ -375,7 +375,7 @@ void AlignAndFocusPowderSlim::exec() {
   this->progress(.01, "Loading metadata");
   // prog->doReport("Loading metadata"); TODO add progress bar stuff
   try {
-    LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL, descriptor);
+    LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL);
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }
