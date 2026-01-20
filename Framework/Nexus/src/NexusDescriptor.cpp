@@ -169,10 +169,6 @@ bool NexusDescriptor::isEntry(const std::string &entryName) const noexcept {
                      [&entryName](const auto &entry) { return entry.second.count(entryName) == 1; });
 }
 
-std::set<std::string> NexusDescriptor::allAddressesOfType(const std::string &type) const {
-  return m_allEntries.at(type);
-}
-
 std::map<std::string, std::string> NexusDescriptor::allAddressesAtLevel(const std::string &level) const {
   std::map<std::string, std::string> result;
   for (auto itClass = m_allEntries.cbegin(); itClass != m_allEntries.cend(); itClass++) {

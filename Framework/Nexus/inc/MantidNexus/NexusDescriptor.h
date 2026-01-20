@@ -94,7 +94,7 @@ public:
    * @return pataddressh A vector of strings giving address using UNIX-style address
    * separators (/), e.g. /raw_data_1, /entry/bank1
    */
-  std::set<std::string> allAddressesOfType(const std::string &type) const;
+  std::set<std::string> allAddressesOfType(const std::string &type) const {return m_allEntries.at(type)}
 
   /**
    * @param level A string specifying the parent address
