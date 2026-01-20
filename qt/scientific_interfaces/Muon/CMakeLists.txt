@@ -37,6 +37,7 @@ set(INC_FILES
     ALCPeakFittingModel.h
     ALCPeakFittingPresenter.h
     ALCPeakFittingView.h
+    DllConfig.h
     IALCBaselineModellingModel.h
     IALCBaselineModellingView.h
     IALCBaselineModellingPresenter.h
@@ -80,12 +81,6 @@ mtd_add_qt_library(
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
 )
-
-# Auto-generate exports header
-target_include_directories(
-  MantidScientificInterfacesMuon-Qt5 PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/qt/scientific_interfaces/Muon> $<INSTALL_INTERFACE:include/Mantid>
-)
-generate_mantid_export_header(MantidScientificInterfacesMuon TRUE)
 
 # Testing target
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")

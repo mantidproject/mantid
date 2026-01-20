@@ -20,6 +20,7 @@ set(INC_FILES
     ALFInstrumentModel.h
     ALFInstrumentPresenter.h
     DetectorTube.h
+    DllConfig.h
     IALFAlgorithmManagerSubscriber.h
 )
 
@@ -37,13 +38,6 @@ mtd_add_qt_library(
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
 )
-
-# Auto-generate exports header
-target_include_directories(
-  MantidScientificInterfacesDirect-Qt5 PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/qt/scientific_interfaces/Direct> $<INSTALL_INTERFACE:include/Mantid>
-)
-generate_mantid_export_header(MantidScientificInterfacesDirect TRUE)
-
 # Testing target We can currently only include the tests if we are building the framework. This is bceause we depend on
 # a non-exported library of frameworks in the tests.
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")

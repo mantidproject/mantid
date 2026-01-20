@@ -66,11 +66,5 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
 )
 
-# Auto-generate exports header
-target_include_directories(
-  MantidQtWidgetsMplCpp-Qt5 PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/qt/widgets/mplcpp> $<INSTALL_INTERFACE:include/Mantid>
-)
-generate_mantid_export_header(MantidQtWidgetsMplCpp TRUE)
-
 # Testing
 add_subdirectory(test)

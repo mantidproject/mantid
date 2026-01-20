@@ -89,12 +89,6 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
 
-# Auto-generate exports header
-target_include_directories(
-  MantidQtWidgetsSpectroscopy-Qt5 PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/qt/widgets/spectroscopy> $<INSTALL_INTERFACE:include/Mantid>
-)
-generate_mantid_export_header(MantidQtWidgetsSpectroscopy TRUE)
-
 # Testing target
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   add_subdirectory(test)

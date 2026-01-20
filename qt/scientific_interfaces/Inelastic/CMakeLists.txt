@@ -1,6 +1,6 @@
 set(ALL_SRC_FILES)
 set(ALL_MOC_FILES)
-set(ALL_INC_FILES)
+set(ALL_INC_FILES DllConfig.h)
 set(ALL_UI_FILES)
 
 add_subdirectory(BayesFitting)
@@ -50,12 +50,6 @@ mtd_add_qt_library(
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
 )
-
-# Auto-generate exports header
-target_include_directories(
-  MantidScientificInterfacesInelastic-Qt5 PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/qt/scientific_interfaces/Inelastic> $<INSTALL_INTERFACE:include/Mantid>
-)
-generate_mantid_export_header(MantidScientificInterfacesInelastic TRUE)
 
 # Testing target
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
