@@ -67,7 +67,7 @@ class FocusModelTest(unittest.TestCase):
         mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         # plotting focused runs
-        self.model.focus_run(["305761"], "fake/van/path", plot_output=True, rb_num=None, calibration=self.calibration)
+        self.model.focus_run(["305761"], plot_output=True, rb_num=None, calibration=self.calibration)
 
         mock_foc_run.assert_called_once()
         mock_plot.assert_called_once_with(["foc_name"])
@@ -82,7 +82,7 @@ class FocusModelTest(unittest.TestCase):
 
         # no plotting
         mock_plot.reset_mock()
-        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=None, calibration=self.calibration)
+        self.model.focus_run(["305761"], plot_output=False, rb_num=None, calibration=self.calibration)
 
         self.assertEqual(len(self.model._last_focused_files), 1)
         self.assertEqual(self.model._last_focused_files[0], "Nexus files")
@@ -120,12 +120,10 @@ class FocusModelTest(unittest.TestCase):
         self.calibration.group = GROUP.BOTH
         mock_enggutils_focus_run.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
-        self.model.focus_run(
-            ["305761"], "fake/van/path", plot_output=False, rb_num=None, calibration=self.calibration
-        )  # save_dir not given
+        self.model.focus_run(["305761"], plot_output=False, rb_num=None, calibration=self.calibration)  # save_dir not given
 
         mock_enggutils_focus_run.assert_called_once_with(
-            ["305761"], "fake/van/path", False, None, self.calibration, default_save_location, "full_calibration"
+            ["305761"], False, None, self.calibration, default_save_location, "full_calibration"
         )
         # sample_paths, vanadium_path, plot_output, rb_num, calibration, save_dir, full_calib
         QCoreApplication.setApplicationName(APPNAME)  # reset to 'mantidworkbench' in case required by other tests
@@ -163,7 +161,7 @@ class FocusModelTest(unittest.TestCase):
         mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         # plotting focused runs
-        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
+        self.model.focus_run(["305761"], plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
 
         self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
         save_calls = 2 * [
@@ -205,7 +203,7 @@ class FocusModelTest(unittest.TestCase):
         mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         # plotting focused runs
-        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
+        self.model.focus_run(["305761"], plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
 
         self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
         save_calls = 2 * [call([path.join("dir", "User", rb_num, "Focus", "Texture20")], sample_foc_ws, self.calibration, van_run, rb_num)]
@@ -245,7 +243,7 @@ class FocusModelTest(unittest.TestCase):
         mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
         # plotting focused runs
-        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
+        self.model.focus_run(["305761"], plot_output=False, rb_num=rb_num, calibration=self.calibration, save_dir="dir")
 
         self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
         save_calls = 2 * [call([path.join("dir", "User", rb_num, "Focus", "Texture30")], sample_foc_ws, self.calibration, van_run, rb_num)]
@@ -263,7 +261,7 @@ class FocusModelTest(unittest.TestCase):
         mock_proc_van.return_value = ("van_ws_foc", "123456")
         mock_load_run.return_value = None  # expected return when no proton charge
 
-        self.model.focus_run(["305761"], "fake/van/path", plot_output=True, rb_num=None, calibration=self.calibration, save_dir="dir")
+        self.model.focus_run(["305761"], plot_output=True, rb_num=None, calibration=self.calibration, save_dir="dir")
 
         mock_plot.assert_not_called()
         mock_save_out.assert_not_called()
