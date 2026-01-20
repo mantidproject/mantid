@@ -64,5 +64,6 @@ attr_mapping = [
     ParamMapEntry(ext_name="pdf_output_name", int_name="pdf_output_name", optional=True),
     ParamMapEntry(ext_name="wavelength_lims", int_name="wavelength_lims", optional=True),
     ParamMapEntry(ext_name="r_lims", int_name="r_lims", optional=True),
+    ParamMapEntry(ext_name="enforce_high_q_to_1", int_name="enforce_high_q_to_1", optional=True),
 ]
 attr_mapping.extend(COMMON_PARAM_MAPPING)
