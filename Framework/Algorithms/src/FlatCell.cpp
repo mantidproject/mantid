@@ -132,7 +132,6 @@ void FlatCell::exec() {
   const double normStdHAB = FlatCell::stddev(HAB);
 
   // Create the Output Y and X
-  std::vector<double> maskedOutY(LoqMeta::histograms(), 0.0);
   std::vector<detid_t> outX(LoqMeta::histograms());
 
   // Map the spectrum ids to the detector ids for the Low and High Angle Banks
@@ -184,17 +183,18 @@ void FlatCell::exec() {
     maskDetectorsIf->initialize();
     maskDetectorsIf->setProperty("InputWorkspace", outputWS);
     maskDetectorsIf->setProperty("OutputWorkspace", outputWS);
-    maskDetectorsIf->setProperty("StartSpectrumIndex", LoqMeta::LABIndexStart());
-    maskDetectorsIf->setProperty("EndSpectrumIndex", LoqMeta::LABTotalBanks() - 1);
+    maskDetectorsIf->setProperty("StartWorkspaceIndex", LoqMeta::LABIndexStart());
+    maskDetectorsIf->setProperty("EndWorkspaceIndex", LoqMeta::LABTotalBanks() - 1);
     maskDetectorsIf->setProperty("Operator", "GreaterEqual");
     maskDetectorsIf->setProperty("Value", maskingThresholdLAB);
     maskDetectorsIf->execute();
 
-    // maskDetectorsIf->setProperty("InputWorkspace", habCroppedWS);
-    // maskDetectorsIf->setProperty("OutputWorkspace", habCroppedWS);
-    // maskDetectorsIf->setProperty("Operator", "GreaterEqual");
-    // maskDetectorsIf->setProperty("Value", maskingThresholdHAB);
-    // maskDetectorsIf->execute();
+    maskDetectorsIf->setProperty("InputWorkspace", outputWS);
+    maskDetectorsIf->setProperty("OutputWorkspace", outputWS);
+    maskDetectorsIf->setProperty("StartWorkspaceIndex", LoqMeta::HABIndexStart());
+    maskDetectorsIf->setProperty("Operator", "GreaterEqual");
+    maskDetectorsIf->setProperty("Value", maskingThresholdHAB);
+    maskDetectorsIf->execute();
 
     // // Append Spectrums
     // auto stitch1D = createChildAlgorithm("Stitch1D");
