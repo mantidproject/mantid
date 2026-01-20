@@ -24,7 +24,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadTOFRawNexus)
 
 using namespace Kernel;
 using namespace API;
@@ -59,17 +59,29 @@ void LoadTOFRawNexus::init() {
                   "set.");
 }
 
+namespace {
+// constants for the strings to look for
+const std::string ENTRY_NAME("/entry");
+const std::string ENTRY_STATE_NAME("/entry-state0");
+const std::string NXENTRY("NXentry");
+const std::string NXEVENT_DATA("NXevent_data");
+const std::string NX_DATA("NXdata");
+} // namespace
+
 /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadTOFRawNexus::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadTOFRawNexus::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   int confidence(0);
-  if (descriptor.isEntry("/entry", "NXentry") || descriptor.isEntry("/entry-state0", "NXentry")) {
-    const bool hasEventData = descriptor.classTypeExists("NXevent_data");
-    const bool hasData = descriptor.classTypeExists("NXdata");
+  if (descriptor.isEntry(ENTRY_NAME, NXENTRY) || descriptor.isEntry(ENTRY_STATE_NAME, NXENTRY)) {
+    const bool hasEventData = descriptor.classTypeExistsChild(ENTRY_NAME, NXEVENT_DATA) ||
+                              descriptor.classTypeExistsChild(ENTRY_STATE_NAME, NXEVENT_DATA);
+    const bool hasData = descriptor.classTypeExistsChild(ENTRY_NAME, NX_DATA) ||
+                         descriptor.classTypeExistsChild(ENTRY_STATE_NAME, NX_DATA);
+
     if (hasData && hasEventData)
       // Event data = this is event NXS
       confidence = 20;
