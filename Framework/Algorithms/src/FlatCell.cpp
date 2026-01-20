@@ -109,7 +109,7 @@ void FlatCell::exec() {
   std::span<double> valuesSpan(values);
 
   // Normalize the banks
-  const auto stats = normalizeBanks(valuesSpan);
+  FlatCellStats stats = normalizeBanks(valuesSpan);
 
   // Save the Y data into the output WS
   for (size_t i = 0; i < nHist; ++i) {
