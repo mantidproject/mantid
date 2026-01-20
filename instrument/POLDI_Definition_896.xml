@@ -344,71 +344,8 @@
 
 <type name="detector-block">
   <component type="detector-pixel">
-  <location x="0.07875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel1" />
-  <location x="0.07625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel2" />
-  <location x="0.07375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel3" />
-  <location x="0.07125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel4" />
-  <location x="0.06875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel5" />
-  <location x="0.06625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel6" />
-  <location x="0.06375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel7" />
-  <location x="0.06125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel8" />
-  <location x="0.05875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel9" />
-  <location x="0.05625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel10" />
-  <location x="0.05375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel11" />
-  <location x="0.05125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel12" />
-  <location x="0.04875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel13" />
-  <location x="0.04625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel14" />
-  <location x="0.04375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel15" />
-  <location x="0.04125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel16" />
-  <location x="0.03875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel17" />
-  <location x="0.03625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel18" />
-  <location x="0.03375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel19" />
-  <location x="0.03125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel20" />
-  <location x="0.02875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel21" />
-  <location x="0.02625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel22" />
-  <location x="0.02375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel23" />
-  <location x="0.02125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel24" />
-  <location x="0.01875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel25" />
-  <location x="0.01625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel26" />
-  <location x="0.01375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel27" />
-  <location x="0.01125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel28" />
-  <location x="0.00875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel29" />
-  <location x="0.00625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel30" />
-  <location x="0.00375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel31" />
-  <location x="0.00125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel32" />
-
-  <location x="-0.00125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel33" />
-  <location x="-0.00375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel34" />
-  <location x="-0.00625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel35" />
-  <location x="-0.00875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel36" />
-  <location x="-0.01125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel37" />
-  <location x="-0.01375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel38" />
-  <location x="-0.01625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel39" />
-  <location x="-0.01875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel40" />
-  <location x="-0.02125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel41" />
-  <location x="-0.02375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel42" />
-  <location x="-0.02625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel43" />
-  <location x="-0.02875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel44" />
-  <location x="-0.03125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel45" />
-  <location x="-0.03375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel46" />
-  <location x="-0.03625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel47" />
-  <location x="-0.03875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel48" />
-  <location x="-0.04125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel49" />
-  <location x="-0.04375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel50" />
-  <location x="-0.04625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel51" />
-  <location x="-0.04875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel52" />
-  <location x="-0.05125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel53" />
-  <location x="-0.05375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel54" />
-  <location x="-0.05625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel55" />
-  <location x="-0.05875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel56" />
-  <location x="-0.06125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel57" />
-  <location x="-0.06375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel58" />
-  <location x="-0.06625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel59" />
-  <location x="-0.06875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel60" />
-  <location x="-0.07125" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel61" />
-  <location x="-0.07375" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel62" />
-  <location x="-0.07625" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel63" /> 
-  <location x="-0.07875" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel64" />
+  <locations x="0.07875" x-end="0.00125" n-elements="32" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel" name-count-start="1"/>
+  <locations x="-0.00125" x-end="-0.07875" n-elements="32" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel" name-count-start="33"/>
   </component>
 </type>
 
