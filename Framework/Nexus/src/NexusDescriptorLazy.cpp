@@ -65,7 +65,7 @@ NexusDescriptorLazy::NexusDescriptorLazy(std::string const &filename)
       m_allEntries(initAllEntries()), m_allMisses() {}
 
 // open the object to determine its type
-bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
+bool NexusDescriptorLazy::isEntry(std::string const &entryName) const {
   bool known_miss = false, known_hit = false;
   {
     // wait for any writes to m_allMisses to end
@@ -74,7 +74,7 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
     known_hit = m_allEntries.contains(entryName);
   }
   if (known_miss) {
-    // if we know this doesn't exist, return earliy
+    // if we know this doesn't exist, return early
     return false;
   } else if (known_hit) {
     // if we know it does exist, return
@@ -82,7 +82,7 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) {
   } else {
     if (H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT) > 0) {
       // if it is there, save the correct class type for it
-      std::string nxclass = UNKNOWN_CLASS;
+      std::string nxclass;
       H5O_info_t oinfo;
       // otherwise, try to open this group and see if it is there
       UniqueID<&H5Oclose> entryID(H5Oopen(m_fileID, entryName.c_str(), H5P_DEFAULT));

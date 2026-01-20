@@ -22,6 +22,7 @@
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NexusFile.h"
 #include <H5Cpp.h>
+#include <cstring>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -470,7 +471,7 @@ int LoadNXcanSAS::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
       std::string const definitionFromFile = descriptor.getStrData(dataAddress);
       // NOTE: for reasons I don't care to investigate, even if this has the correct definition,
       // comparing as strings can still lead to mismatch unless compared as C-strings
-      if (strcmp(definitionFromFile.c_str(), sasEntryDefinitionFormat.c_str()) == 0) {
+      if (std::strcmp(definitionFromFile.c_str(), sasEntryDefinitionFormat.c_str()) == 0) {
         confidence = 95;
         break;
       }
