@@ -351,6 +351,9 @@ void AlignAndFocusPowderSlim::exec() {
 
   int outputSpecNum = getProperty(PropertyNames::OUTPUT_SPEC_NUM);
   if (outputSpecNum != EMPTY_INT()) {
+    if (static_cast<size_t>(outputSpecNum) > num_banks_to_read || outputSpecNum < 1) {
+      throw std::runtime_error("OutputSpecNum is out of range");
+    }
     // fill this vector with blanks -- this is for the ProcessBankTask to correctly access it
     for (size_t bankNumber = 1; bankNumber <= num_banks_to_read; ++bankNumber) {
       if (bankNumber == static_cast<size_t>(outputSpecNum))
