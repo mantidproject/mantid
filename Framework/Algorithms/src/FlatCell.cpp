@@ -50,6 +50,12 @@ void FlatCell::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output event workspace.");
   declareProperty("CreateMaskedWorkspace", true, "Determines if masked workspace needs to be created.");
+  declareProperty("LABThresholdMultiplier", 1.0,
+                  "The parameter that is used to scale the standard deviation in order to set the masking threshold of "
+                  "the low angle bank.");
+  declareProperty("HABThresholdMultiplier", 0.5,
+                  "The parameter that is used to scale the standard deviation in order to set the masking threshold of "
+                  "the high angle bank.");
   declareProperty("ApplyMaskDirectlyToWorkspace", false, "Determines if mask is directly applied to workspace.");
   declareProperty("MaskFileName", "FlatCellMasked.xml", "Path to the detector mask XML file.");
 }
@@ -163,8 +169,10 @@ void FlatCell::exec() {
     MatrixWorkspace_sptr maskedWS = outputWS->clone();
 
     // Calculate the thresholds
-    const double maskingThresholdLAB = 1 + normStdLAB;
-    const double maskingThresholdHAB = 1 + (0.5 * normStdHAB);
+    double labThresholdMultiplier = getProperty("LABThresholdMultiplier");
+    double habThresholdMultiplier = getProperty("HABThresholdMultiplier");
+    const double maskingThresholdLAB = 1 + (labThresholdMultiplier * normStdLAB);
+    const double maskingThresholdHAB = 1 + (habThresholdMultiplier * normStdHAB);
 
     // Mask the values of the low angle bank
     auto maskDetectorsLAB = createChildAlgorithm("MaskDetectorsIf");
