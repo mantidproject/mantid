@@ -71,7 +71,7 @@ public:
    *          (e.g. /entry/log)
    * </pre>
    */
-  const std::map<std::string, std::set<std::string>> &getAllEntries() const noexcept;
+  const std::map<std::string, std::set<std::string>> &getAllEntries() const noexcept { return m_allEntries; }
 
   /**
    * Checks if a full-address entry exists for a particular groupClass in a Nexus

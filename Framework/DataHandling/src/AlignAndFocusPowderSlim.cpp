@@ -318,6 +318,11 @@ void AlignAndFocusPowderSlim::exec() {
   g_log.debug() << "Total banks to read: " << num_banks_to_read << "\n";
 
   H5::H5File h5file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
+  // Now we want to go through all the bankN_event entries
+  if (!descriptor.classTypeExists("NXevent_data")) {
+    h5file.close();
+    throw std::runtime_error("No NXevent_data entries found in file");
+  }
 
   // These give the limits in each file as to which events we actually load (when filtering by time).
   loadStart.resize(1, 0);
