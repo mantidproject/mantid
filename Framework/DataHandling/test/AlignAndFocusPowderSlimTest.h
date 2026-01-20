@@ -60,7 +60,7 @@ struct TestConfig {
   GroupingWorkspace_sptr groupingWS = nullptr;
   std::string logListBlock = "";
   std::string logListAllow = "";
-  int outputSpecNum = -10;
+  int bankNum = -10;
   bool processBankSplitTask = false;
   bool useFullTime = false;
   bool correctToSample = false;
@@ -181,8 +181,8 @@ public:
     if (configuration.groupingWS != nullptr) {
       TS_ASSERT_THROWS_NOTHING(alg.setProperty(GROUPING_WS, configuration.groupingWS));
     }
-    if (configuration.outputSpecNum != -10) {
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty(OUTPUT_SPEC_NUM, configuration.outputSpecNum));
+    if (configuration.bankNum != -10) {
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(BANK_NUMBER, configuration.bankNum));
     }
     // set focus positions
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(L1, configuration.l1));
@@ -1019,26 +1019,26 @@ public:
     TS_ASSERT_EQUALS(outputWS->readY(5).front(), 2729481);
   }
 
-  void test_output_specnum_validation() {
+  void test_bank_number_validation() {
     using namespace Mantid::DataHandling::AlignAndFocusPowderSlim::PropertyNames;
     AlignAndFocusPowderSlim alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS(alg.setProperty(OUTPUT_SPEC_NUM, -1), std::invalid_argument const &);
-    TS_ASSERT_THROWS(alg.setProperty(OUTPUT_SPEC_NUM, 0), std::invalid_argument const &);
+    TS_ASSERT_THROWS(alg.setProperty(BANK_NUMBER, -1), std::invalid_argument const &);
+    TS_ASSERT_THROWS(alg.setProperty(BANK_NUMBER, 0), std::invalid_argument const &);
     for (int i = 1; i <= 6; i++) {
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty(OUTPUT_SPEC_NUM, i));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(BANK_NUMBER, i));
     }
   }
 
-  void test_output_specnum() {
+  void test_bank_number() {
     TestConfig configuration({0.}, {50000.}, {50000.}, "Linear", "TOF"); // bins set for single bin
     configuration.groupingWS = bank_grouping_ws;
     constexpr int NUM_HIST{6};
     for (int i = 1; i <= NUM_HIST; i++) {
-      configuration.outputSpecNum = i;
+      configuration.bankNum = i;
       auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(run_algorithm(VULCAN_218062, configuration));
 
       // verify the output -- all spectra exist

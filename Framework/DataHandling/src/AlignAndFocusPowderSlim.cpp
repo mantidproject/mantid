@@ -213,9 +213,9 @@ void AlignAndFocusPowderSlim::init() {
       "Number of events to read in a single thread. Higher means less threads are created.");
   setPropertyGroup(PropertyNames::EVENTS_PER_THREAD, CHUNKING_PARAM_GROUP);
 
-  // load single spectrum
+  // load single bank
   declareProperty(
-      std::make_unique<PropertyWithValue<int>>(PropertyNames::OUTPUT_SPEC_NUM, EMPTY_INT(), positiveIntValidator),
+      std::make_unique<PropertyWithValue<int>>(PropertyNames::BANK_NUMBER, EMPTY_INT(), positiveIntValidator),
       "The bank for which to read data; if specified, others will be blank");
 
   // parameters for focus position
@@ -324,6 +324,7 @@ void AlignAndFocusPowderSlim::exec() {
   std::vector<std::string> bankEntryNames;
   std::vector<std::string> bankNames;
 
+  int bankNum = getProperty(PropertyNames::BANK_NUMBER);
   {
     const std::regex classRegex("(/entry/)([^/]*)");
     std::smatch groups;
@@ -335,32 +336,21 @@ void AlignAndFocusPowderSlim::exec() {
         } else if (classEntry.ends_with("bank_unmapped_events")) {
           // do nothing
         } else {
-          bankEntryNames.push_back(entry_name);
           auto underscore_pos = entry_name.find_first_of('_');
-          if (underscore_pos != std::string::npos) {
-            bankNames.push_back(entry_name.substr(0, underscore_pos));
-          } else {
-            bankNames.push_back(entry_name);
+          const auto bankName = entry_name.substr(0, underscore_pos);
+          if (bankNum != EMPTY_INT()) {
+            if (bankName != ("bank" + std::to_string(bankNum))) {
+              continue; // skip this bank
+            }
           }
+          bankEntryNames.push_back(entry_name);
+          bankNames.push_back(bankName);
         }
       }
     }
   }
-  std::size_t num_banks_to_read = bankEntryNames.size();
+  const std::size_t num_banks_to_read = bankEntryNames.size();
   g_log.debug() << "Total banks to read: " << num_banks_to_read << "\n";
-
-  int outputSpecNum = getProperty(PropertyNames::OUTPUT_SPEC_NUM);
-  if (outputSpecNum != EMPTY_INT()) {
-    if (static_cast<size_t>(outputSpecNum) > num_banks_to_read || outputSpecNum < 1) {
-      throw std::runtime_error("OutputSpecNum is out of range");
-    }
-    // fill this vector with blanks -- this is for the ProcessBankTask to correctly access it
-    for (size_t bankNumber = 1; bankNumber <= num_banks_to_read; ++bankNumber) {
-      if (bankNumber == static_cast<size_t>(outputSpecNum))
-        continue;
-      bankEntryNames[bankNumber - 1] = "";
-    }
-  }
 
   // These give the limits in each file as to which events we actually load (when filtering by time).
   loadStart.resize(1, 0);
@@ -511,8 +501,7 @@ void AlignAndFocusPowderSlim::exec() {
     if (num_banks_to_read > 1) {
       tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
     } else {
-      // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
-      task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
+      task(tbb::blocked_range<size_t>(0, 1));
     }
 
     // close the file so child algorithms can do their thing
@@ -565,8 +554,7 @@ void AlignAndFocusPowderSlim::exec() {
       if (num_banks_to_read > 1) {
         tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
       } else {
-        // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
-        task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
+        task(tbb::blocked_range<size_t>(0, 1));
       }
 
     } else if (this->getProperty(PropertyNames::PROCESS_BANK_SPLIT_TASK)) {
@@ -583,8 +571,7 @@ void AlignAndFocusPowderSlim::exec() {
       if (num_banks_to_read > 1) {
         tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
       } else {
-        // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
-        task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
+        task(tbb::blocked_range<size_t>(0, 1));
       }
     } else {
       g_log.information() << "Using ProcessBankTask for splitter processing\n";
@@ -615,8 +602,7 @@ void AlignAndFocusPowderSlim::exec() {
               if (num_banks_to_read > 1) {
                 tbb::parallel_for(tbb::blocked_range<size_t>(0, num_banks_to_read), task);
               } else {
-                // a "range" of 1; note -1 to match 0-indexed array with 1-indexed bank labels
-                task(tbb::blocked_range<size_t>(outputSpecNum - 1, outputSpecNum));
+                task(tbb::blocked_range<size_t>(0, 1));
               }
             }
           });

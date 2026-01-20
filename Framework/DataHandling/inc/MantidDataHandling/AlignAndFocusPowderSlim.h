@@ -97,7 +97,7 @@ const std::string READ_SIZE_FROM_DISK("ReadSizeFromDisk");
 const std::string EVENTS_PER_THREAD("EventsPerThread");
 const std::string ALLOW_LOGS("LogAllowList");
 const std::string BLOCK_LOGS("LogBlockList");
-const std::string OUTPUT_SPEC_NUM("OutputSpectrumNumber");
+const std::string BANK_NUMBER("BankNumber");
 // focus positions
 const std::string L1("L1");
 const std::string L2("L2");
