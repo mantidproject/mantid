@@ -12,10 +12,13 @@ from mantid.kernel import (
     FloatBoundedValidator,
     IntArrayProperty,
     SetDefaultWhenProperty,
+    Logger,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
 import h5py
 import numpy as np
+
+logger = Logger(__name__)
 
 
 class HFIRPowderReduction(DataProcessorAlgorithm):
@@ -170,6 +173,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 return False
             wavelength = 0.0
             wavelength = readFloatFromFile(run[0], "/entry/wavelength")
+            logger.information(f"Auto-populating Wavelength: {wavelength} from file: {run[0]}")
             currentProp.value = wavelength
             return True
 
@@ -181,6 +185,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 return False
             diameter = 0.0
             diameter = readFloatFromFile(run[0], "/entry/vanadium_diameter")
+            logger.information(f"Auto-populating VanadiumDiameter: {diameter} from file: {run[0]}")
             currentProp.value = diameter
             return True
 
@@ -201,6 +206,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             if not run:
                 return False
             vanadiumRunNumbers = readArrayFromFile(run[0], "/entry/vanadium_run_numbers")
+            logger.information(f"Auto-populating VanadiumRunNumbers: {vanadiumRunNumbers} from file: {run[0]}")
             self.setProperty("VanadiumRunNumbers", vanadiumRunNumbers)
             return True
 
@@ -211,6 +217,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             if not run:
                 return False
             vanadiumIPTS = readIntFromFile(run[0], "/entry/vanadium_ipts")
+            logger.information(f"Auto-populating VanadiumIPTS: {vanadiumIPTS} from file: {run[0]}")
             self.setProperty("VanadiumIPTS", vanadiumIPTS)
             return True
 
@@ -221,6 +228,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             if not run:
                 return False
             vanadiumBGIPTS = readIntFromFile(run[0], "/entry/vanadium_background_ipts")
+            logger.information(f"Auto-populating VanadiumBackgroundIPTS: {vanadiumBGIPTS} from file: {run[0]}")
             self.setProperty("VanadiumBackgroundIPTS", vanadiumBGIPTS)
             return True
 
@@ -231,6 +239,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             if not run:
                 return False
             vanadiumBGRunNumbers = readArrayFromFile(run[0], "/entry/vanadium_background_run_numbers")
+            logger.information(f"Auto-populating VanadiumBackgroundRunNumbers: {vanadiumBGRunNumbers} from file: {run[0]}")
             self.setProperty("VanadiumBackgroundRunNumbers", vanadiumBGRunNumbers)
             return True
 
@@ -261,6 +270,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             else:
                 wavelength = 0.0
                 wavelength = readFloatFromFile(runs[0], "/entry/wavelength")
+                logger.information(f"Auto-populating Wavelength: {wavelength} from run numbers: {runs[0]}")
                 currentProp.value = wavelength
             return True
 
@@ -275,6 +285,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             else:
                 diameter = 0.0
                 diameter = readFloatFromFile(runs[0], "/entry/vanadium_diameter")
+                logger.information(f"Auto-populating VanadiumDiameter: {diameter} from run numbers: {runs[0]}")
                 currentProp.value = diameter
 
             return True
@@ -289,6 +300,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 return False
             else:
                 vanadiumRunNumbers = readArrayFromFile(runs[0], "/entry/vanadium_run_numbers")
+                logger.information(f"Auto-populating VanadiumRunNumbers: {vanadiumRunNumbers} from run numbers: {runs[0]}")
                 self.setProperty("VanadiumRunNumbers", vanadiumRunNumbers)
 
             return True
@@ -303,6 +315,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 return False
             else:
                 vanadiumIPTS = readIntFromFile(runs[0], "/entry/vanadium_ipts")
+                logger.information(f"Auto-populating VanadiumIPTS: {vanadiumIPTS} from run numbers: {runs[0]}")
                 self.setProperty("VanadiumIPTS", vanadiumIPTS)
 
             return True
@@ -317,6 +330,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 return False
             else:
                 vanadiumBGRunNumbers = readArrayFromFile(runs[0], "/entry/vanadium_background_run_numbers")
+                logger.information(f"Auto-populating VanadiumBackgroundRunNumbers: {vanadiumBGRunNumbers} from run numbers: {runs[0]}")
                 self.setProperty("VanadiumBackgroundRunNumbers", vanadiumBGRunNumbers)
 
             return True
@@ -337,6 +351,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 return False
             else:
                 vanadiumBGIPTS = readIntFromFile(runs[0], "/entry/vanadium_background_ipts")
+                logger.information(f"Auto-populating VanadiumBackgroundIPTS: {vanadiumBGIPTS} from run numbers: {runs[0]}")
                 self.setProperty("VanadiumBackgroundIPTS", vanadiumBGIPTS)
 
             return True
@@ -347,7 +362,53 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             "VanadiumBackgroundIPTS", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforVanadiumBackgroundIPTS)
         )
 
-    def validateInputs(self):
+    def _checkMetadataConsistency(self, files, field_name):
+        """Check that metadata is consistent across multiple run files."""
+        if len(files) <= 1:
+            return None
+
+        metadata_fields = [
+            "/entry/wavelength",
+            "/entry/vanadium_diameter",
+            "/entry/vanadium_run_numbers",
+            "/entry/vanadium_ipts",
+            "/entry/vanadium_background_ipts",
+            "/entry/vanadium_background_run_numbers",
+        ]
+
+        inconsistencies = []
+        for metadata_field in metadata_fields:
+            reference_value = None
+            try:
+                with h5py.File(files[0], "r") as f:
+                    if metadata_field in f:
+                        reference_value = f[metadata_field][()]
+            except (OSError, KeyError):
+                continue
+
+            if reference_value is None:
+                continue
+
+            for i, file in enumerate(files[1:], start=1):
+                try:
+                    with h5py.File(file, "r") as f:
+                        if metadata_field in f:
+                            current_value = f[metadata_field][()]
+                            # Compare values, handling numpy arrays
+                            if isinstance(reference_value, np.ndarray) and isinstance(current_value, np.ndarray):
+                                if not np.array_equal(reference_value, current_value):
+                                    inconsistencies.append(f"{metadata_field}: file 0 has {reference_value}, file {i} has {current_value}")
+                            elif reference_value != current_value:
+                                inconsistencies.append(f"{metadata_field}: file 0 has {reference_value}, file {i} has {current_value}")
+                except (OSError, KeyError):
+                    continue
+
+        if inconsistencies:
+            error_msg = f"Metadata mismatch in {field_name}: " + "; ".join(inconsistencies)
+            logger.warning(error_msg)
+        return None
+
+    def validateInputs(self):  # noqa: C901
         issues = dict()
 
         fileNameBool = self.getProperty("SampleFilename").value
@@ -412,6 +473,25 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         vanadiumDiameter = self.getProperty("VanadiumDiameter").value
         if vanadiumDiameter == Property.EMPTY_DBL:
             issues["VanadiumDiameter"] = "VanadiumDiameter must be provided"
+
+        # Check metadata consistency for multiple sample runs
+        files = []
+        filenames = self.getProperty("SampleFilename").value
+        if filenames:
+            files = list(filenames)
+        else:
+            # Build file list from IPTS and run numbers
+            ipts = self.getProperty("SampleIPTS").value
+            run_numbers = self.getProperty("SampleRunNumbers").value
+            instrument = self.getProperty("Instrument").value
+            if ipts != Property.EMPTY_INT and len(run_numbers) > 0 and instrument:
+                if instrument == "WAND^2":
+                    files = [f"/HFIR/HB2C/IPTS-{ipts}/nexus/HB2C_{run}.nxs.h5" for run in run_numbers]
+                elif instrument == "MIDAS":
+                    files = [f"/HFIR/HB2A/IPTS-{ipts}/nexus/HB2A_{run}.nxs.h5" for run in run_numbers]
+
+        if len(files) > 1:
+            self._checkMetadataConsistency(files, "Sample")
 
         return issues
 
