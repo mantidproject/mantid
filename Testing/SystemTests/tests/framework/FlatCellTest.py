@@ -23,14 +23,11 @@ class FlatCellTest(systemtesting.MantidSystemTest):
         LoadNexus(Filename="FlatCellOutput.nxs", OutputWorkspace="FlatCellExpectedOutput")
         LoadNexus(Filename="FlatCellMasked.nxs", OutputWorkspace="FlatCellMaskedOutput")
 
+        # Compare the workspaces
         result, _ = CompareWorkspaces("FlatCellActualOutput", "FlatCellExpectedOutput")
         self.assertTrue(result)
-
         result, _ = CompareWorkspaces("maskedWS", "FlatCellMaskedOutput")
         self.assertTrue(result)
-
-    def validateMethod(self):
-        return "ValidateWorkspaceToWorkspace"
 
     def requiredFiles(self):
         return ["LOQ00113953.nxs", "FlatCellMasked.nxs", "FlatCellOutput.nxs"]

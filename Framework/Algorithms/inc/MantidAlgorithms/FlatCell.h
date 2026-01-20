@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 #include <span>
@@ -31,6 +32,11 @@ public:
   const std::string category() const override { return "SANS"; }
 
 private:
+  struct FlatCellStats {
+    double normStdLAB{0.0};
+    double normStdHAB{0.0};
+  };
+
   /// Initialisation code
   void init() override;
   /// Execution code
@@ -38,7 +44,11 @@ private:
   void execEvent();
   double mean(std::span<const double> values) const;
   double stddev(std::span<double> values) const;
-  void scale(std::span<double> values, double factor);
+  void scale(std::span<double> values, double factor) const;
+  void createAndSaveMaskedWorkspace(const API::MatrixWorkspace_sptr &ws, double normStdLAB, double normStdHAB);
+  API::MatrixWorkspace_sptr integrateInput(const API::Workspace_sptr &ws);
+  std::vector<double> extractIntegratedValues(const API::MatrixWorkspace_sptr &ws) const;
+  FlatCellStats normalizeBanks(std::span<double> values) const;
 };
 
 } // namespace Algorithms
