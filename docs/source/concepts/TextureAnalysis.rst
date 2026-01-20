@@ -381,10 +381,10 @@ the user interface while providing more repeatable processing.
    exp_name = "PostExp-ZrRingDiagScript"
 
    # otherwise set root directory here:
-   root_dir = fr"C:\Users\kcd17618\Engineering_Mantid\User\{exp_name}"
+   root_dir = fr"C:\Users\name\Engineering_Mantid\User\{exp_name}"
 
    # next, specify the folder with the files you would like to apply the absorption correction to
-   corr_dir = r"C:\Users\kcd17618\Documents\dev\TextureCommisioning\Day3\ZrRing\DataFiles\Point2"
+   corr_dir = r"C:\Users\name\Documents\dev\TextureCommisioning\Day3\ZrRing\DataFiles\Point2"
 
    # For texture, it is expected that you have a single sample shape, that is reorientated between runs.
    # this is handled by having a reference workspace with the shape in its neutral position
@@ -407,7 +407,7 @@ the user interface while providing more repeatable processing.
    # Matrix Orientation (orient_file_is_euler = False)
    # for this the first 9 values in each row of the files are assumed to be flattened rotation matrix.
    # These are used to directly reorientate the samples
-   orientation_file = r"C:\Users\kcd17618\Documents\dev\TextureCommisioning\Day3\ZrRing\Sscanss\Split\Zirc_ring_pose_matrices_mantid_point_1.txt"
+   orientation_file = r"C:\Users\name\Documents\dev\TextureCommisioning\Day3\ZrRing\Sscanss\Split\Zirc_ring_pose_matrices_mantid_point_1.txt"
    orient_file_is_euler = False
    euler_scheme = "YXY"
    euler_axes_sense = "1,-1,1"
@@ -650,7 +650,7 @@ of pole figures over a set of different peaks and parameters.
    exp_name = "PostExp-SteelCentre"
 
    # otherwise set root directory here:
-   save_root = r"C:\Users\kcd17618\Engineering_Mantid"
+   save_root = r"C:\Users\name\Engineering_Mantid"
    root_dir = fr"{save_root}\User\{exp_name}"
 
 

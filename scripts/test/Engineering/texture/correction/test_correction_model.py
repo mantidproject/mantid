@@ -190,16 +190,6 @@ class TextureCorrectionModelTest(unittest.TestCase):
         # bin centres are 1.5 and 2.5, so expect a value halfway between 2 and 4
         self.assertEqual(coefs[0], 3)
 
-    def test_validate_file_on_expected_inputs(self):
-        valid_file_paths = ["anything.txt", "C:/anything.txt", r"D:\any\thing.txt"]
-        ext = ".txt"
-
-        for file in valid_file_paths:
-            result = self.model._validate_file(file, ext)
-            null_result = self.model._validate_file(file, ".xml")
-            self.assertTrue(result)
-            self.assertFalse(null_result)
-
     @patch(texture_helper_path + ".get_cube_xml")
     @patch(correction_model_path + ".DefineGaugeVolume")
     def test_define_gauge_vol_for_preset(self, mock_def_gauge_vol, mock_get_xml):

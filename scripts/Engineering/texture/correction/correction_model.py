@@ -168,15 +168,6 @@ class TextureCorrectionModel:
     # ~~~~~ General Utility Functions ~~~~~~~~~~~~~
 
     @staticmethod
-    def _validate_file(file: str, ext: str) -> bool:
-        valid = False
-        if file:
-            root, f_ext = path.splitext(file)
-            if f_ext == ext:
-                valid = True
-        return valid
-
-    @staticmethod
     def _save_corrected_files(ws: str, root_dir: str, dir_name: str, rb_num: Optional[str], calibration_group: GROUP) -> str:
         filepath = ""
         save_dirs = [path.join(root_dir, dir_name)]

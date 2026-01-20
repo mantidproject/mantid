@@ -140,6 +140,30 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         self.assertEqual(data_ws, ["ws", "ws", "ws", "ws"])
         self.assertEqual(ws_index, [0, 1, 2, 3])
 
+    def test_spectra_workspace_when_no_omissions_outputs_all_spectra(self):
+        _, spec_ws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws",
+            PeakParameterWorkspace="PeakParameterWS",
+            OutputWorkspace="outws",
+            SpectraWorkspace="spec_ws",
+            Chi2Threshold=5,  # allow all chi2
+        )
+        self.assertEqual(spec_ws.getNumberHistograms(), 4)
+        for ispec in range(spec_ws.getNumberHistograms()):
+            self.assertEqual(spec_ws.readY(ispec), ispec + 1.0)  # each spectrum has one Y val: 1.0,2.0,3.0,4.0
+
+    def test_spectra_workspace_when_some_omissions_outputs_correct_spectra(self):
+        _, spec_ws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws",
+            PeakParameterWorkspace="PeakParameterWS",
+            OutputWorkspace="outws",
+            SpectraWorkspace="spec_ws",
+            Chi2Threshold=2,  # should only allow spec 1 and 2
+        )
+        self.assertEqual(spec_ws.getNumberHistograms(), 2)
+        for ispec in range(spec_ws.getNumberHistograms()):
+            self.assertEqual(spec_ws.readY(ispec), ispec + 1.0)  # allowed spectra have one Y val each: 1.0,2.0
+
     def test_flipping_td_negates_alphas(self):
         # alpha is taken from rd, if td is inverted the q vectors are now at -alpha rather than alpha
         ax_transform = np.array(((1, 0, 0), (0, 1, 0), (0, 0, -1))).reshape(-1)

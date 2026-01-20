@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -264,7 +264,7 @@ def plot_pole_figure(
     contour_kernel: Optional[float] = 2.0,
     display_debug_info: bool = True,
     **kwargs,
-) -> [Figure, Axes]:
+) -> (Figure, Axes):
     """
     Create a pole figure plot for a pole figure table
 
@@ -395,7 +395,7 @@ def plot_contour_pf(
     fig: Optional[Figure] = None,
     contour_kernel: float = 2.0,
     **kwargs,
-) -> [Figure, Axes]:
+) -> (Figure, Axes):
     """
     Create an interpolated contour plot pole figure plot for a pole figure table
 
