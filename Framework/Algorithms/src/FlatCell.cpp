@@ -37,11 +37,6 @@ struct LoqMeta {
   static constexpr int HAB3IndexStop() { return 17428; };
 };
 
-struct flatCellStats {
-  double normStdLAB;
-  double normStdHAB;
-};
-
 void FlatCell::init() {
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input event workspace.");
