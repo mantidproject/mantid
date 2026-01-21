@@ -16,10 +16,10 @@ namespace Mantid {
 
 namespace Algorithms {
 /** Generates the FlatCell workspace for ISIS SANS reduction of LOQ */
-class MANTID_ALGORITHMS_DLL FlatCell : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GenerateFlatCellWorkspaceLOQ : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override { return "FlatCell"; }
+  const std::string name() const override { return "GenerateFlatCellWorkspaceLOQ"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Generates the FlatCell workspace for ISIS SANS reduction of LOQ.";

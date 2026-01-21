@@ -9,7 +9,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FlatCell.h"
+#include "MantidAlgorithms/GenerateFlatCellWorkspaceLOQ.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -18,9 +18,9 @@ using Mantid::MantidVec;
 
 /// Upda
 
-class FlatCellTest : public CxxTest::TestSuite {
+class GenerateFlatCellWorkspaceLOQTest : public CxxTest::TestSuite {
 public:
-  void testName() { TS_ASSERT_EQUALS(masker.name(), "FlatCell"); }
+  void testName() { TS_ASSERT_EQUALS(masker.name(), "GenerateFlatCellWorkspaceLOQ"); }
 
   void testVersion() { TS_ASSERT_EQUALS(masker.version(), 1); }
 
@@ -32,5 +32,5 @@ public:
   }
 
 private:
-  Mantid::Algorithms::FlatCell masker;
+  Mantid::Algorithms::GenerateFlatCellWorkspaceLOQ masker;
 };

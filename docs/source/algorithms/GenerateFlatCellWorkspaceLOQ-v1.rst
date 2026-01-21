@@ -16,15 +16,15 @@ Outputs two Workspaces - The FlatCell and the MaskedBins Workspaces.
 Usage
 -----
 
-**Running the FlatCell Algorithm with a 2D Workspace**
+**Running the GenerateFlatCellWorkspaceLOQ Algorithm with an event Workspace**
 
-.. testcode:: exFlatCell
+.. testcode:: exGenerateFlatCellWorkspaceLOQ
 
     # Load event workspace
     LoadNexus(Filename="LOQ00113953.nxs", OutputWorkspace="FlatCellInput")
 
-    # Run the FlatCell Algorithm and save into output workspaces
-    FlatCell(InputWorkspace="FlatCellInput", OutputWorkspace="FlatCellOuput")
+    # Run the GenerateFlatCellWorkspaceLOQ Algorithm and save into output workspaces
+    GenerateFlatCellWorkspaceLOQ(InputWorkspace="FlatCellInput", OutputWorkspace="FlatCellOuput")
 
     # Verify the changes are correct
     print("The range of the output values is {}.".format(np.ptp(mtd['FlatCellOuput'].readY(0))))
@@ -32,7 +32,7 @@ Usage
 
 Output:
 
-.. testoutput:: exFlatCell
+.. testoutput:: exGenerateFlatCellWorkspaceLOQ
 
    The range of the output values is 1390.912709106737.
 

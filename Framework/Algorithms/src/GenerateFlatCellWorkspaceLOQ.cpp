@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/FlatCell.h"
+#include "MantidAlgorithms/GenerateFlatCellWorkspaceLOQ.h"
 #include "MantidAPI/Algorithm.hxx"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -19,7 +19,7 @@
 namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(FlatCell)
+DECLARE_ALGORITHM(GenerateFlatCellWorkspaceLOQ)
 
 using namespace Kernel;
 using namespace API;
@@ -37,7 +37,7 @@ struct LoqMeta {
   static constexpr int HAB3IndexStop() { return 17428; };
 };
 
-void FlatCell::init() {
+void GenerateFlatCellWorkspaceLOQ::init() {
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input event workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
@@ -55,13 +55,13 @@ void FlatCell::init() {
 
 /** Computes the mean of the input span
  */
-double FlatCell::mean(std::span<const double> values) const {
+double GenerateFlatCellWorkspaceLOQ::mean(std::span<const double> values) const {
   return std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
 }
 
 /** Computes the standard deviation of the input span
  */
-double FlatCell::stddev(std::span<double> values) const {
+double GenerateFlatCellWorkspaceLOQ::stddev(std::span<double> values) const {
   double m = mean(values);
   double accum = std::accumulate(values.begin(), values.end(), 0.0, [m](double total, double x) {
     const double diff = x - m;
@@ -72,14 +72,14 @@ double FlatCell::stddev(std::span<double> values) const {
 
 /** Scales each of the elements of the input vector
  */
-void FlatCell::scale(std::span<double> values, double factor) const {
+void GenerateFlatCellWorkspaceLOQ::scale(std::span<double> values, double factor) const {
   std::transform(values.begin(), values.end(), values.begin(), [factor](double x) { return x * factor; });
 }
 
 /** Execution code.
  *  @throw std::runtime_error If nHist not equal to 17776.
  */
-void FlatCell::exec() {
+void GenerateFlatCellWorkspaceLOQ::exec() {
 
   // Get the input WS
   EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
@@ -118,14 +118,15 @@ void FlatCell::exec() {
   };
 }
 
-FlatCell::FlatCellStats FlatCell::normalizeBanks(std::span<double> values) const {
+GenerateFlatCellWorkspaceLOQ::FlatCellStats
+GenerateFlatCellWorkspaceLOQ::normalizeBanks(std::span<double> values) const {
   // Save the Low and High Angle Bank values into spans
   std::span<double> LAB = values.subspan(LoqMeta::LABIndexStart(), LoqMeta::LABTotalBanks());
   std::span<double> HAB = values.subspan(LoqMeta::HABIndexStart(), LoqMeta::HABTotalBanks());
 
   // Normalize the values in the LAB and HAB vectors
-  FlatCell::scale(LAB, 1.0 / mean(LAB));
-  FlatCell::scale(HAB, 1.0 / mean(HAB));
+  scale(LAB, 1.0 / mean(LAB));
+  scale(HAB, 1.0 / mean(HAB));
 
   // Calculate the normalized std of the LAB and HAB
   const double normStdLAB = stddev(LAB);
@@ -138,15 +139,15 @@ FlatCell::FlatCellStats FlatCell::normalizeBanks(std::span<double> values) const
   std::span<double> HAB4 = values.subspan(LoqMeta::HAB3IndexStop(), LoqMeta::HABIndividualBanks());
 
   // Rescale the values in the HAB vectors
-  FlatCell::scale(HAB1, 1.0 / mean(HAB1));
-  FlatCell::scale(HAB2, 1.0 / mean(HAB2));
-  FlatCell::scale(HAB3, 1.0 / mean(HAB3));
-  FlatCell::scale(HAB4, 1.0 / mean(HAB4));
+  scale(HAB1, 1.0 / mean(HAB1));
+  scale(HAB2, 1.0 / mean(HAB2));
+  scale(HAB3, 1.0 / mean(HAB3));
+  scale(HAB4, 1.0 / mean(HAB4));
 
   return {normStdLAB, normStdHAB};
 }
 
-std::vector<double> FlatCell::extractIntegratedValues(const API::MatrixWorkspace_sptr &ws) const {
+std::vector<double> GenerateFlatCellWorkspaceLOQ::extractIntegratedValues(const API::MatrixWorkspace_sptr &ws) const {
   const size_t nHist = ws->getNumberHistograms();
   std::vector<double> values;
   values.reserve(nHist);
@@ -157,7 +158,7 @@ std::vector<double> FlatCell::extractIntegratedValues(const API::MatrixWorkspace
   return values;
 }
 
-MatrixWorkspace_sptr FlatCell::integrateInput(const Workspace_sptr &ws) {
+MatrixWorkspace_sptr GenerateFlatCellWorkspaceLOQ::integrateInput(const Workspace_sptr &ws) {
   auto integration = createChildAlgorithm("Integration");
   integration->initialize();
   integration->setProperty("InputWorkspace", ws);
@@ -168,7 +169,8 @@ MatrixWorkspace_sptr FlatCell::integrateInput(const Workspace_sptr &ws) {
   return integration->getProperty("OutputWorkspace");
 }
 
-void FlatCell::createAndSaveMaskedWorkspace(const MatrixWorkspace_sptr &ws, double normStdLAB, double normStdHAB) {
+void GenerateFlatCellWorkspaceLOQ::createAndSaveMaskedWorkspace(const MatrixWorkspace_sptr &ws, double normStdLAB,
+                                                                double normStdHAB) {
   MatrixWorkspace_sptr maskedWS = ws->clone();
 
   // Calculate the thresholds
@@ -223,6 +225,6 @@ void FlatCell::createAndSaveMaskedWorkspace(const MatrixWorkspace_sptr &ws, doub
 
 /** Execution code for EventWorkspaces
  */
-void FlatCell::execEvent() { exec(); }
+void GenerateFlatCellWorkspaceLOQ::execEvent() { exec(); }
 
 } // namespace Mantid::Algorithms

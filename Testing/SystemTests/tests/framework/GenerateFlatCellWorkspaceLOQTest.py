@@ -6,18 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.simpleapi import FlatCell, CompareWorkspaces, LoadNexus
+from mantid.simpleapi import GenerateFlatCellWorkspaceLOQ, CompareWorkspaces, LoadNexus
 
 
-class FlatCellTest(systemtesting.MantidSystemTest):
-    """Tests the FlatCell algorithm"""
+class GenerateFlatCellWorkspaceLOQTest(systemtesting.MantidSystemTest):
+    """Tests the GenerateFlatCellWorkspaceLOQ algorithm"""
 
     def runTest(self):
         # Load the input data and save into a workspace
         LoadNexus(Filename="LOQ00113953.nxs", OutputWorkspace="FlatCellEventInput")
 
         # Apply the algorithm to the input data
-        FlatCell(InputWorkspace="FlatCellEventInput", OutputWorkspace="FlatCellActualOutput")
+        GenerateFlatCellWorkspaceLOQ(InputWorkspace="FlatCellEventInput", OutputWorkspace="FlatCellActualOutput")
 
         # Load the output data and save into a workspace
         LoadNexus(Filename="FlatCellOutput.nxs", OutputWorkspace="FlatCellExpectedOutput")
