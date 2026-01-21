@@ -362,15 +362,6 @@ class FullInstrumentViewModel:
         name_exported_ws = f"instrument_view_selected_spectra_{self._workspace.name()}"
         AnalysisDataService.addOrReplace(name_exported_ws, self.line_plot_workspace)
 
-    def peaks_workspaces_in_ads(self) -> list[PeaksWorkspace]:
-        ads = AnalysisDataService.Instance()
-        workspaces_in_ads = ads.retrieveWorkspaces(ads.getObjectNames())
-        return [
-            pws
-            for pws in workspaces_in_ads
-            if "PeaksWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
-        ]
-
     def set_peaks_workspaces(self, peaks_workspace_names: list[str]) -> None:
         self._selected_peaks_workspaces = AnalysisDataService.Instance().retrieveWorkspaces(peaks_workspace_names)
 
@@ -492,7 +483,7 @@ class FullInstrumentViewModel:
 
     def apply_detector_items(self, selected_keys: list[str], kind: CurrentTab):
         if kind is CurrentTab.Masking:
-            ws_masks = [ws.extractY().flatten() for ws in self.get_mask_workspaces_in_ads() if ws.name() in selected_keys]
+            ws_masks = [ws.extractY().flatten() for ws in self.get_workspaces_in_ads_of_type(MaskWorkspace) if ws.name() in selected_keys]
             cached_masks = [self._cached_masks_map[key] for key in selected_keys if key in self._cached_masks_map.keys()]
             total_items = ws_masks + cached_masks
             if not total_items:
@@ -501,7 +492,7 @@ class FullInstrumentViewModel:
             self._is_masked = np.logical_or.reduce(total_items)
 
         else:
-            grouping_ws_names_in_ads = [ws.name() for ws in self.get_grouping_workspaces_in_ads()]
+            grouping_ws_names_in_ads = [ws.name() for ws in self.get_workspaces_in_ads_of_type(GroupingWorkspace)]
             grouping_data_y = [
                 AnalysisDataService.retrieve(ws_name[:-2]).extractY().flatten() == int(ws_name[-1])
                 for ws_name in selected_keys
@@ -549,24 +540,16 @@ class FullInstrumentViewModel:
         ExtractMaskToTable(ws_to_save, Xmin=xmin, Xmax=xmax, OutputWorkspace="MaskTable")
         CloneWorkspace(ws_to_save, OutputWorkspace="MaskWorkspace")
 
-    def save_to_xml(self, filename, kind: CurrentTab):
-        if kind is CurrentTab.Masking:
-            ws_to_save = self.mask_ws
-        else:
-            ws_to_save = self.roi_ws
-
+    def save_mask_to_xml(self, filename):
+        ws_to_save = self.mask_ws
         if not filename:
             return
         if Path(filename).suffix != ".xml":
             filename += ".xml"
         SaveMask(ws_to_save, OutputFile=filename)
 
-    def overwrite_to_current_workspace(self, kind: CurrentTab) -> None:
-        if kind is CurrentTab.Masking:
-            ws_to_save = self.mask_ws
-        else:
-            ws_to_save = self.roi_ws
-
+    def overwrite_mask_to_current_workspace(self) -> None:
+        ws_to_save = self.mask_ws
         # TODO: Check if copies are expensive with big workspaces
         temp_ws = CloneWorkspace(self._workspace.name(), StoreInADS=False)
         temp_ws_name = f"__instrument_view_temp_{self._workspace.name()}"
@@ -574,26 +557,18 @@ class FullInstrumentViewModel:
         MaskDetectors(temp_ws_name, MaskedWorkspace=ws_to_save)
         AnalysisDataService.addOrReplace(self._workspace.name(), AnalysisDataService.retrieve(temp_ws_name))
 
-    def get_mask_workspaces_in_ads(self) -> list[MaskWorkspace]:
+    def get_workspaces_in_ads_of_type(self, ws_type: MaskWorkspace | GroupingWorkspace | PeaksWorkspace):
         ads = AnalysisDataService.Instance()
         workspaces_in_ads = ads.retrieveWorkspaces(ads.getObjectNames())
         return [
             pws
             for pws in workspaces_in_ads
-            if "MaskWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
-        ]
-
-    def get_grouping_workspaces_in_ads(self) -> list[GroupingWorkspace]:
-        ads = AnalysisDataService.Instance()
-        workspaces_in_ads = ads.retrieveWorkspaces(ads.getObjectNames())
-        return [
-            pws
-            for pws in workspaces_in_ads
-            if "GroupingWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
+            if str(ws_type) in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
         ]
 
     def save_grouping_to_ads(self):
         grouping_name = "GroupingWorkspace"
+        # TODO: Ideally algorithm should use workspace when ADS hanging is fixed
         CreateGroupingWorkspace(InstrumentName=self._workspace.getInstrument().getFullName(), OutputWorkspace=grouping_name)
         grouping_ws = AnalysisDataService.retrieve(grouping_name).clone(StoreInADS=False)
         for i, g in enumerate(self._current_detector_groupings[self._is_valid]):

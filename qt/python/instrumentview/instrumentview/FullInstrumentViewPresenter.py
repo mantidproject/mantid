@@ -14,6 +14,7 @@ from mantid import mtd
 from mantid.kernel import logger, ConfigService
 from mantid.simpleapi import AnalysisDataService
 from mantidqt.io import open_a_file_dialog
+from mantid.dataobjects import MaskWorkspace, GroupingWorkspace, PeaksWorkspace
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
@@ -277,18 +278,18 @@ class FullInstrumentViewPresenter:
         # Clear both lists before overwriting to workspace (reset of model)
         self._view.clear_item_list(CurrentTab.Masking)
         self._view.clear_item_list(CurrentTab.Grouping)
-        self._model.overwrite_to_current_workspace(self._view.get_current_selected_tab())
+        self._model.overwrite_mask_to_current_workspace()
 
     def on_clear_list_clicked(self) -> None:
         self._view.clear_item_list(self._view.get_current_selected_tab())
         self._model.clear_stored_keys(self._view.get_current_selected_tab())
         self.on_list_item_selected()
 
-    def on_save_to_xml_clicked(self):
+    def on_save_mask_to_xml_clicked(self):
         filename = self._get_filename_from_dialog()
         if not filename:
             return
-        self._model.save_to_xml(filename, self._view.get_current_selected_tab())
+        self._model.save_mask_to_xml(filename)
 
     def on_save_grouping_to_ads_clicked(self):
         self._model.save_grouping_to_ads()
@@ -311,10 +312,10 @@ class FullInstrumentViewPresenter:
         self.on_list_item_selected()
 
     def mask_workspaces_in_ads(self) -> list[str]:
-        return [ws.name() for ws in self._model.get_mask_workspaces_in_ads()]
+        return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(MaskWorkspace)]
 
     def grouping_workspaces_in_ads(self) -> list[str]:
-        return [ws.name() for ws in self._model.get_grouping_workspaces_in_ads()]
+        return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(GroupingWorkspace)]
 
     def cached_keys(self, kind: CurrentTab) -> list[str]:
         return self._model.cached_keys(kind)
@@ -405,7 +406,7 @@ class FullInstrumentViewPresenter:
         self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
 
     def peaks_workspaces_in_ads(self) -> list[str]:
-        return [ws.name() for ws in self._model.peaks_workspaces_in_ads()]
+        return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(PeaksWorkspace)]
 
     def _update_peaks_workspaces(self) -> None:
         peaks_grouped_by_ws = []

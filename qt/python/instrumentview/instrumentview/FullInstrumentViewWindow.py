@@ -474,7 +474,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._mask_list.itemChanged.connect(self._presenter.on_list_item_selected)
         self._selection_list.itemChanged.connect(self._presenter.on_list_item_selected)
         self._save_mask_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
-        self._save_mask_to_file.clicked.connect(self._presenter.on_save_to_xml_clicked)
+        self._save_mask_to_file.clicked.connect(self._presenter.on_save_mask_to_xml_clicked)
         self._overwrite_mask.clicked.connect(self._presenter.on_apply_permanently_clicked)
         self._save_roi_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
         self._save_grouping_to_ws.clicked.connect(self._presenter.on_save_grouping_to_ads_clicked)
