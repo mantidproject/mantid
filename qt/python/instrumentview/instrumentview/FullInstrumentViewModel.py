@@ -30,6 +30,8 @@ from mantid.simpleapi import (
     CreatePeaksWorkspace,
     AddPeak,
     CreateGroupingWorkspace,
+    SaveDetectorsGrouping,
+    DeleteWorkspace,
 )
 from mantid.api import MatrixWorkspace
 from itertools import groupby
@@ -594,12 +596,27 @@ class FullInstrumentViewModel:
 
     def save_grouping_to_ads(self):
         grouping_name = "GroupingWorkspace"
+        grouping_ws = self._create_current_grouping_workspace(grouping_name)
+        AnalysisDataService.addOrReplace(grouping_name, grouping_ws)
+
+    def save_grouping_to_xml(self, filename):
+        if not filename:
+            return
+        if Path(filename).suffix != ".xml":
+            filename += ".xml"
+        grouping_name = "__temp_grouping_workspace_to_save"
+        grouping_ws = self._create_current_grouping_workspace(grouping_name)
+        SaveDetectorsGrouping(grouping_ws, filename)
+        DeleteWorkspace(grouping_name)
+        return
+
+    def _create_current_grouping_workspace(self, grouping_name):
         # TODO: Ideally algorithm should use workspace when ADS hanging is fixed
         CreateGroupingWorkspace(InstrumentName=self._workspace.getInstrument().getFullName(), OutputWorkspace=grouping_name)
         grouping_ws = AnalysisDataService.retrieve(grouping_name).clone(StoreInADS=False)
         for i, g in enumerate(self._current_detector_groupings[self._is_valid]):
             grouping_ws.dataY(i)[:] = g
-        AnalysisDataService.addOrReplace(grouping_name, grouping_ws)
+        return grouping_ws
 
     def convert_units(self, source_unit: str, target_unit: str, picked_detector_index: int, value: float) -> float:
         return self._unit_converter.convert(

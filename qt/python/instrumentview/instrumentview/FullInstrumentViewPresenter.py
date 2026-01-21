@@ -294,6 +294,12 @@ class FullInstrumentViewPresenter:
     def on_save_grouping_to_ads_clicked(self):
         self._model.save_grouping_to_ads()
 
+    def on_save_grouping_to_xml_clicked(self):
+        filename = self._get_filename_from_dialog()
+        if not filename:
+            return
+        self._model.save_grouping_to_xml(filename)
+
     def _get_filename_from_dialog(self):
         filename = open_a_file_dialog(
             accept_mode=QFileDialog.AcceptSave,
