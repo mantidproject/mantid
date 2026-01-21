@@ -430,6 +430,74 @@ public:
     }
   }
 
+  void test_output_range_limit_forwards() {
+    API::Workspace_sptr ws = createWS(20, 0.1, "RminLimit", "MomentumTransfer");
+
+    // 1. Run PDFFT
+    PDFFourierTransform2 pdfft;
+    pdfft.initialize();
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("Direction", "Forward");
+    pdfft.setProperty("OutputWorkspace", "PDFGofR");
+    pdfft.setProperty("SofQType", "S(Q)");
+    pdfft.setProperty("Rmin", 5.0);
+    pdfft.setProperty("Rmax", 15.0);
+    pdfft.setProperty("DeltaR", 0.1);
+    pdfft.setProperty("Qmin", 0.0);
+    pdfft.setProperty("Qmax", 30.0);
+    pdfft.setProperty("PDFType", "G(r)");
+
+    pdfft.execute();
+
+    DataObjects::Workspace2D_sptr pdfws =
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(API::AnalysisDataService::Instance().retrieve("PDFGofR"));
+    const auto &R = pdfws->x(0);
+    const size_t out_size = R.size();
+    const auto &GofR = pdfws->y(0);
+    const auto &pdfUnit = pdfws->getAxis(0)->unit();
+
+    TS_ASSERT_EQUALS(out_size, 101);
+    TS_ASSERT_DELTA(R.front(), 5.05, 0.0001);
+    TS_ASSERT_DELTA(R.back(), 15.05, 0.0001);
+    TS_ASSERT_DELTA(GofR.front(), 0.3436, 0.0001);
+    TS_ASSERT_DELTA(GofR.back(), 0.0813, 0.0001);
+    TS_ASSERT_EQUALS(pdfUnit->caption(), "Atomic Distance");
+  }
+
+  void test_output_range_limit_backwards() {
+    API::Workspace_sptr ws = createWS(20, 0.1, "QminLimit", "AtomicDistance");
+
+    // 1. Run PDFFT
+    PDFFourierTransform2 pdfft;
+    pdfft.initialize();
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("Direction", "Backward");
+    pdfft.setProperty("OutputWorkspace", "SofQ");
+    pdfft.setProperty("SofQType", "S(Q)");
+    pdfft.setProperty("Qmin", 10.0);
+    pdfft.setProperty("Qmax", 25.0);
+    pdfft.setProperty("DeltaQ", 0.1);
+    pdfft.setProperty("Rmin", 0.0);
+    pdfft.setProperty("Rmax", 30.0);
+    pdfft.setProperty("PDFType", "G(r)");
+
+    pdfft.execute();
+
+    DataObjects::Workspace2D_sptr sofqws =
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(API::AnalysisDataService::Instance().retrieve("SofQ"));
+    const auto &Q = sofqws->x(0);
+    const size_t out_size = Q.size();
+    const auto &SofQ = sofqws->y(0);
+    const auto &SofQUnit = sofqws->getAxis(0)->unit();
+
+    TS_ASSERT_EQUALS(out_size, 151);
+    TS_ASSERT_DELTA(Q.front(), 10.05, 0.0001);
+    TS_ASSERT_DELTA(Q.back(), 25.05, 0.0001);
+    TS_ASSERT_DELTA(SofQ.front(), 1.00050, 0.0001);
+    TS_ASSERT_DELTA(SofQ.back(), 1.00039, 0.0001);
+    TS_ASSERT_EQUALS(SofQUnit->caption(), "q");
+  }
+
 private:
   DataObjects::Workspace2D_sptr run_pdfft2_alg(API::MatrixWorkspace_sptr ws, std::string PDFType,
                                                std::string Direction) {
