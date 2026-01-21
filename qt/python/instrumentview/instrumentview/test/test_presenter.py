@@ -149,11 +149,11 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_implicit_return = np.linspace(-1, 1, self._ws.getNumberHistograms())
         mock_implicit_function = MagicMock(EvaluateFunction=MagicMock(side_effect=mock_implicit_return))
         self._mock_view.get_current_widget_implicit_function.return_value = mock_implicit_function
-        self._mock_view.get_current_tab.return_value = CurrentTab.Grouping
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
         self._model.add_new_detector_key = MagicMock(return_value="mock_key")
         self._presenter.on_add_item_clicked()
         np.testing.assert_allclose(self._model.add_new_detector_key.call_args.args[0], mock_implicit_return < 0)
-        self._mock_view.set_new_item_key.assert_called_once_with("mock_key")
+        self._mock_view.set_new_item_key.assert_called_once_with(CurrentTab.Grouping, "mock_key")
 
     def test_on_save_mask_to_workspace_clicked(self):
         self._mock_view.get_current_tab.return_value = CurrentTab.Masking
@@ -168,7 +168,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.refresh_peaks_ws_list.assert_called_once()
         mock_on_peaks_workspace_selected.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peaks_workspaces_in_ads")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_workspaces_in_ads_of_type")
     def test_peaks_workspaces_in_ads(self, mock_peaks_workspaces_in_ads):
         mock_peaks_workspaces_in_ads.return_value = [self._ws, self._ws]
         workspaces = self._presenter.peaks_workspaces_in_ads()
