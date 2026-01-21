@@ -21,6 +21,9 @@ MANTID_DEVELOPER_RECIPE_PATH = Path("conda/recipes/mantid-developer/recipe.yaml"
 PIXI_TOML = Path("pixi.toml")
 PIXI_LOCK = Path("pixi.lock")
 
+EXIT_CODE_SUCCESS = 0
+EXIT_CODE_ERROR = 1
+
 # package name: {'linux' : '>3.0', 'osx': '>3.1.0'}
 # package name: {'all': '==3.2.1'}
 # occt: {'all': '7.* novtk*'} (example for which uses a build number, just stores the version string from conda)
@@ -160,7 +163,9 @@ def remove_from_pixi_manifest(package: str, os_name: str):
 def _run_pixi_command(command: List[str]):
     print(f'Running "{" ".join(command)}" ...')
     process = run(command, text=True, stderr=subprocess.PIPE)
-    if process.returncode != 0:
+    if process.returncode == 127:
+        print(f'Tried to run "{" ".join(command)}" but pixi is not installed')
+    elif process.returncode != 0:
         print(f'Tried to run "{" ".join(command)}" but encountered a problem:')
         print(process.stderr)
 
@@ -264,21 +269,21 @@ def main(argv: Sequence[str] = None) -> int:
 
     if (BUILD_CONFIG_PATH in changed_files or MANTID_DEVELOPER_RECIPE_PATH in changed_files) and PIXI_TOML not in changed_files:
         if update_pixi_from_conda_changes(conda_env, pixi_env):
-            return 1
+            return EXIT_CODE_ERROR
 
     if warning_messages := compare_conda_and_pixi_envs(conda_env, pixi_env):
         print("Mismatch between conda and pixi environments found:")
         print("\n".join(warning_messages))
-        return 1
+        return EXIT_CODE_ERROR
 
     if PIXI_TOML in changed_files and PIXI_LOCK not in changed_files:
         # simple command to force pixi to update the lock file if the env definition has changed
         command = ["pixi", "install"]
         print("Invoking pixi environment to update pixi.lock")
         _run_pixi_command(command)
-        return 1
+        return EXIT_CODE_ERROR
 
-    return 0
+    return EXIT_CODE_SUCCESS
 
 
 if __name__ == "__main__":
