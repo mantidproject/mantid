@@ -272,7 +272,7 @@ def main(argv: Sequence[str] = None) -> int:
 
     if PIXI_TOML in changed_files and PIXI_LOCK not in changed_files:
         # simple command to force pixi to update the lock file if the env definition has changed
-        command = ["pixi", "run", "ls"]
+        command = ["pixi", "install"]
         print("Invoking pixi environment to update pixi.lock")
         _run_pixi_command(command)
         return 1
