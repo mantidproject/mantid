@@ -176,7 +176,8 @@ def update_pixi_from_conda_changes(conda_env: DependencyPins, pixi_env: Dependen
     made_change_to_pixi = False
     for package, pixi_versions in pixi_env.items():
         if package not in conda_env.keys():
-            remove_from_pixi_manifest(package, "all")
+            for os_name in pixi_versions.keys():
+                remove_from_pixi_manifest(package, os_name)
             made_change_to_pixi = True
         else:
             conda_versions = conda_env.get(package, {})
