@@ -99,6 +99,7 @@ def show_texture_sample_shape(
     ax_transform = ax_transform if np.any(ax_transform) else np.eye(3)
     if gauge_vol_preset:
         model.set_gauge_vol_str(get_gauge_vol_str(gauge_vol_preset, custom_file))
+        model.set_include_gauge_vol(gauge_vol_preset != "No Gauge Volume")
     model.show_shape_plot(ax_transform, ax_labels)
 
 
