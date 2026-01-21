@@ -27,7 +27,6 @@ static unsigned int const INIT_DEPTH = 1;
 static unsigned int const ENTRY_DEPTH = 2;
 static unsigned int const INSTR_DEPTH = 5;
 static std::unordered_set<std::string> const SPECIAL_ADDRESS{"/entry", "/entry0", "/entry1", "/raw_data_1"};
-static std::string const NONEXISTENT = "NONEXISTENT"; // register failures as well
 static std::string const UNKNOWN_CLASS = "UNKNOWN_CLASS";
 
 namespace {
@@ -63,45 +62,45 @@ namespace Mantid::Nexus {
 
 NexusDescriptorLazy::NexusDescriptorLazy(std::string const &filename)
     : m_filename(filename), m_extension(std::filesystem::path(m_filename).extension().string()), m_firstEntryNameType(),
-      m_allEntries(initAllEntries()) {}
+      m_allEntries(initAllEntries()), m_allMisses() {}
 
+// open the object to determine its type
 bool NexusDescriptorLazy::isEntry(std::string const &entryName) const {
-
-  std::map<std::string, std::string>::iterator it; // get it out of the lock scope
+  bool known_miss = false, known_hit = false;
   {
-    // wait for writes to end
+    // wait for any writes to m_allMisses to end
     std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
-    it = m_allEntries.find(entryName);
+    known_miss = m_allMisses.contains(entryName);
+    known_hit = m_allEntries.contains(entryName);
   }
-  if (it != m_allEntries.end()) {
-    return it->second != NONEXISTENT;
+  if (known_miss) {
+    // if we know this doesn't exist, return early
+    return false;
+  } else if (known_hit) {
+    // if we know it does exist, return
+    return true;
   } else {
-    // modifying m_allEntries, need write lock
-    std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
-
-    // see if something with the name exists
-    if (H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT) <= 0) {
-      // register failure
-      m_allEntries[entryName] = NONEXISTENT;
-      return false;
-    }
-
-    // open the object to determine its type
-    UniqueID<&H5Oclose> entryID(H5Oopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
-    if (entryID.isValid()) {
-      m_allEntries[entryName] = UNKNOWN_CLASS;
+    if (H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT) > 0) {
+      // if it is there, save the correct class type for it
+      std::string nxclass;
       H5O_info_t oinfo;
+      // otherwise, try to open this group and see if it is there
+      UniqueID<&H5Oclose> entryID(H5Oopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
       H5Oget_info(entryID, &oinfo, H5O_INFO_BASIC);
       if (oinfo.type == H5O_TYPE_DATASET) {
-        m_allEntries[entryName] = SCIENTIFIC_DATA_SET;
+        nxclass = SCIENTIFIC_DATA_SET;
       } else {
         // read NX_class attribute
-        m_allEntries[entryName] = readNXClass(entryID);
+        nxclass = readNXClass(entryID);
       }
+      // modifying m_allEntries, need write lock
+      std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
+      m_allEntries[entryName] = std::move(nxclass);
       return true;
     } else {
-      // register failure
-      m_allEntries[entryName] = NONEXISTENT;
+      // otherwise register failure, need write lock
+      std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
+      m_allMisses.insert(entryName);
       return false;
     }
   }
@@ -111,6 +110,8 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) const {
 /// @param classType the NX_class type to check for
 /// @return true if the class type exists anywhere in the file
 bool NexusDescriptorLazy::classTypeExists(std::string const &classType) const {
+  // wait for writes to end
+  std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
   return std::any_of(m_allEntries.begin(), m_allEntries.end(),
                      [&classType](auto const &entry) { return entry.second == classType; });
 }
@@ -135,18 +136,18 @@ bool NexusDescriptorLazy::classTypeExistsChild(const std::string &parentPath, co
 }
 
 bool NexusDescriptorLazy::hasRootAttr(std::string const &name) const {
+  bool known_hit = false;
   { // wait for writes to end
     std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
-    if (m_rootAttrs.count(name) == 1) {
-      return true;
-    }
+    known_hit = m_rootAttrs.contains(name);
   }
-  // check the file since it wasn't in the cache
-  {
-    // mutex has the wrong name, but it's what we have
-    std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
-
+  if (known_hit) {
+    return true;
+  } else {
+    // check the file since it wasn't in the cache
     if (H5Aexists(m_fileID, name.c_str()) > 0) {
+      // mutex has the wrong name, but it's what we have
+      std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
       m_rootAttrs.emplace(name);
       return true;
     } else {
