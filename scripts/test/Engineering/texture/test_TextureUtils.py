@@ -22,13 +22,12 @@ from Engineering.texture.TextureUtils import (
     _get_run_and_prefix_from_ws_log,
     _get_grouping_from_ws_log,
 )
-from numpy import ones
 import os
 
 texture_utils_path = "Engineering.texture.TextureUtils"
 
 
-class TextureUtilsTest(unittest.TestCase):
+class TextureUtilsFileHelperTests(unittest.TestCase):
     def test_find_all_files_returns_only_files(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             file_path = os.path.join(tmpdir, "file1.txt")
@@ -47,6 +46,8 @@ class TextureUtilsTest(unittest.TestCase):
             mk(test_path)
             self.assertTrue(os.path.exists(test_path))
 
+
+class TextureUtilsFocusTests(unittest.TestCase):
     @patch(f"{texture_utils_path}.mk")
     @patch(f"{texture_utils_path}.TextureInstrument")
     def test_run_focus_script_instantiates_model_and_calls_main(self, mock_instr, mock_mk):
@@ -57,6 +58,8 @@ class TextureUtilsTest(unittest.TestCase):
         mock_model.main.assert_called_once()
         mock_mk.assert_called_once_with("focus")
 
+
+class TextureUtilsAbsCorrTests(unittest.TestCase):
     @patch(f"{texture_utils_path}.logger")
     @patch(f"{texture_utils_path}.validate_abs_corr_inputs")
     @patch(f"{texture_utils_path}.TextureCorrectionModel")
@@ -150,6 +153,8 @@ class TextureUtilsTest(unittest.TestCase):
         mock_logger.error.assert_called_once()
         self.assertIn("must flag orient_file_is_euler", mock_logger.error.call_args[0][0])
 
+
+class TextureUtilsFittingUtilsTests(unittest.TestCase):
     def test_get_run_and_prefix_with_valid_log(self):
         run_number = "123456"
         prefix = "TEST"
@@ -182,6 +187,8 @@ class TextureUtilsTest(unittest.TestCase):
         out_group = _get_grouping_from_ws_log(mock_ws)
         self.assertEqual(out_group, "GROUP")
 
+
+class TextureUtilsFittingTests(unittest.TestCase):
     # --- helpers for current fitting flow ---
 
     def _make_param_table_mock(self, num_spec: int, params=("A", "B", "S", "X0")):
@@ -211,7 +218,8 @@ class TextureUtilsTest(unittest.TestCase):
     @patch(f"{texture_utils_path}.rerun_fit_with_new_ws")
     @patch(f"{texture_utils_path}.get_initial_fit_function_and_kwargs_from_specs")
     @patch(f"{texture_utils_path}.Fit")
-    @patch(f"{texture_utils_path}.Rebunch")
+    @patch(f"{texture_utils_path}._rebin_and_rebunch")
+    @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
     @patch(f"{texture_utils_path}.ConvertUnits")
     @patch(f"{texture_utils_path}._get_grouping_from_ws_log")
     @patch(f"{texture_utils_path}._get_run_and_prefix_from_ws_log")
@@ -222,6 +230,7 @@ class TextureUtilsTest(unittest.TestCase):
         mock_get_run_prefix,
         mock_get_group,
         mock_convert_units,
+        mock_fit_summed,
         mock_rebunch,
         mock_fit,
         mock_get_initial,
@@ -234,6 +243,9 @@ class TextureUtilsTest(unittest.TestCase):
     ):
         mock_unitconv.run.return_value = 1.2345
         mock_convert_toferr_to_derr.return_value = 0.01
+        mock_fit_summed.return_value = [
+            (0.95, 1.05),
+        ]
 
         wsname = "TEST123456_ws"
         prefix, run_number, group = "TEST", "123456", "TestGroup"
@@ -248,7 +260,7 @@ class TextureUtilsTest(unittest.TestCase):
         mock_rebunch.side_effect = ["smooth_ws_3", "smooth_ws_2"]
 
         md_fit_kwargs = {"InputWorkspace": "ws_tof", "StartX": 0.9, "EndX": 1.1, "WorkspaceIndex": 0}
-        mock_get_initial.return_value = ("FUNC", md_fit_kwargs, [10.0, 20.0], 0.1)
+        mock_get_initial.return_value = ("FUNC", md_fit_kwargs, [10.0, 20.0])
 
         fit_obj = MagicMock()
         fit_obj.Function.function = "md_function"
@@ -287,6 +299,7 @@ class TextureUtilsTest(unittest.TestCase):
             "smooth_ws_3",
             peak,
             (peak - 0.1, peak + 0.1),
+            (0.95, 1.05),
             ("A", "B"),
             "BackToBackExponential",
             "LinearBackground",
@@ -317,7 +330,8 @@ class TextureUtilsTest(unittest.TestCase):
     @patch(f"{texture_utils_path}.rerun_fit_with_new_ws")
     @patch(f"{texture_utils_path}.get_initial_fit_function_and_kwargs_from_specs")
     @patch(f"{texture_utils_path}.Fit")
-    @patch(f"{texture_utils_path}.Rebunch")
+    @patch(f"{texture_utils_path}._rebin_and_rebunch")
+    @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
     @patch(f"{texture_utils_path}.ConvertUnits")
     @patch(f"{texture_utils_path}._get_grouping_from_ws_log")
     @patch(f"{texture_utils_path}._get_run_and_prefix_from_ws_log")
@@ -328,6 +342,7 @@ class TextureUtilsTest(unittest.TestCase):
         mock_get_run_prefix,
         mock_get_group,
         mock_convert_units,
+        mock_fit_summed,
         mock_rebunch,
         mock_fit,
         mock_get_initial,
@@ -340,6 +355,7 @@ class TextureUtilsTest(unittest.TestCase):
     ):
         mock_unitconv.run.return_value = 1.2345
         mock_convert_toferr_to_derr.return_value = 0.01
+        mock_fit_summed.return_value = [(0.95, 1.05), (1.95, 2.05)]
 
         wss = ["TEST000101_ws", "TEST000102_ws"]
         runs = ["000101", "000102"]
@@ -356,7 +372,7 @@ class TextureUtilsTest(unittest.TestCase):
         mock_rebunch.side_effect = ["smooth_ws_3_1", "smooth_ws_2_1", "smooth_ws_3_2", "smooth_ws_2_2"]
 
         md_fit_kwargs = {"InputWorkspace": "ws_tof", "StartX": 0.9, "EndX": 1.1, "WorkspaceIndex": 0}
-        mock_get_initial.return_value = ("FUNC", md_fit_kwargs, [10.0, 20.0], 0.1)
+        mock_get_initial.return_value = ("FUNC", md_fit_kwargs, [10.0, 20.0])
 
         fit_obj = MagicMock()
         fit_obj.Function.function = "md_function"
@@ -420,6 +436,7 @@ class TextureUtilsTest(unittest.TestCase):
                 ws_tof=ws_tof,
                 peak=1.0,
                 x_window=(0.9, 1.1),
+                x0_window=(0.95, 1.05),
                 parameters_to_tie=["NotAParam"],
                 peak_func_name="BackToBackExponential",
                 bg_func_name="LinearBackground",
@@ -427,6 +444,8 @@ class TextureUtilsTest(unittest.TestCase):
             )
         self.assertIn("Invalid parameter(s) to tie", str(ctx.exception))
 
+
+class TextureUtilsPoleFigureTests(unittest.TestCase):
     def get_default_pf_kwargs(self):
         return {
             "wss": ["ws1"],

@@ -260,13 +260,14 @@ def validate_abs_corr_inputs(
 
 
 def fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs):
+    rebin_params = _get_rebin_params_for_workspaces(wss)
     for i, ws in enumerate(wss):
-        Rebin(ws, "0.7, 0.001, 2.4", OutputWorkspace=f"rebin_{i}")
+        Rebin(ws, rebin_params, OutputWorkspace=f"rebin_{i}")
         SumSpectra(f"rebin_{i}", OutputWorkspace=f"sum_{i}")
     CloneWorkspace("sum_0", OutputWorkspace="sum_runs_ws")
     for i in range(1, len(wss)):
         AppendSpectra("sum_runs_ws", f"sum_{i}", OutputWorkspace="sum_runs_ws")
-        SumSpectra("sum_runs_ws", OutputWorkspace="sum_ws")
+    SumSpectra("sum_runs_ws", OutputWorkspace="sum_ws")
 
     x0_lims = []
     for i, peak in enumerate(peaks):
@@ -662,16 +663,25 @@ def fit_all_peaks(
 # ~fitting utility functions~
 
 
-def _rebin_and_rebunch(ws, val):
-    if isinstance(ws, str):
-        ADS.retrieve(ws)
+def _get_rebin_params_for_workspaces(wss: Sequence[str] | Sequence[Workspace2D]):
+    if isinstance(wss, str) or isinstance(wss, Workspace2D):
+        # this func should take sequences of workspaces but if given just one we can handle that by wrapping up in a tuple
+        wss = (wss,)
     lower, upper, step = [], [], []
-    for ispec in range(ws.getNumberHistograms()):
-        xdat = ws.readX(ispec)
-        lower.append(xdat.min())
-        upper.append(xdat.max())
-        step.append(np.diff(xdat).max())
-    Rebin(InputWorkspace=ws, OutputWorkspace=f"rebin_{ws}", Params=f"{np.max(lower)}, {np.max(step)}, {np.min(upper)}")
+    for ws in wss:
+        if isinstance(ws, str):
+            ws = ADS.retrieve(ws)
+        for ispec in range(ws.getNumberHistograms()):
+            xdat = ws.readX(ispec)
+            lower.append(xdat.min())
+            upper.append(xdat.max())
+            step.append(np.diff(xdat).max())
+    return f"{np.max(lower)}, {np.max(step)}, {np.min(upper)}"
+
+
+def _rebin_and_rebunch(ws, val):
+    rebin_params = _get_rebin_params_for_workspaces((ws,))
+    Rebin(InputWorkspace=ws, OutputWorkspace=f"rebin_{ws}", Params=rebin_params)
     return Rebunch(InputWorkspace=f"rebin_{ws}", OutputWorkspace=f"smooth_ws_{val}", NBunch=val)
 
 
