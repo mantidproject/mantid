@@ -199,36 +199,36 @@ class PeakFitMixin(object):
         self.default_kwargs = {
             "wss": ["ENGINX_280625_focused_bank_1_dSpacing"],
             "peaks": self.peaks,
-            "peak_window": 0.03,
+            "peak_window": 0.05,
             "save_dir": self.fit_dir,
         }
         self.peak_1_vals = [
             0,
-            54.04933925,
-            58.52875482,
-            1.75884296,
-            130891.0,
+            59.68164413,
+            58.50160084,
+            1.00919012,
+            0.3424,
             0.0,
-            0.0117147,
+            0.210401,
             0.0,
-            1.79720022,
-            0.00016396,
-            103.64888962,
-            3.80138506,
+            1.80098428,
+            0.00011218,
+            125.935096,
+            2.20335581,
         ]
         self.peak_2_vals = [
             0,
-            44.85399793,
-            55.94547931,
-            2.75051451,
-            304147.0,
+            53.04503227,
+            58.28035277,
+            1.41772812,
+            219154.0,
             0.0,
-            0.0184249,
+            0.0158378,
             0.0,
-            1.43621627,
-            0.00028254,
-            160.00458428,
-            6.80774229,
+            1.43580288,
+            0.00019512,
+            162.3158048,
+            4.18935368,
         ]
 
     def validate_table(self, out_table, expected_dict):
@@ -253,7 +253,7 @@ class PeakFitMixin(object):
         [self.assertTrue(os.path.exists(ef)) for ef in expected_files]
 
 
-class TestFittingPeaksOfFocusedData(systemtesting.MantidSystemTest, PeakFitMixin):
+class TestFittingPeaksOfFocusedDataNoGroup(systemtesting.MantidSystemTest, PeakFitMixin):
     def runTest(self):
         self.setup_fit_peaks_inputs()
         fit_all_peaks(**self.default_kwargs)

@@ -478,7 +478,7 @@ def fit_all_peaks(
     no_fit_value_dict: Optional[dict] = None,
     smooth_vals: Sequence[int] = (3, 2),
     tied_bkgs: Sequence[bool] = (False, True),
-    final_fit_raw: bool = False,
+    final_fit_raw: bool = True,
     parameters_to_tie: Sequence[str] = ("A", "B"),
     subsequent_fit_param_fix: Sequence[str] = ("A", "B"),
 ) -> None:
