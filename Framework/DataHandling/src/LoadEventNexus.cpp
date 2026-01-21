@@ -73,25 +73,22 @@ const std::string BAD_PULSES_CUTOFF("FilterBadPulsesLowerCutoff");
 } // namespace
 
 bool doPerformISISEventShift(Nexus::File &file, std::string &topEntryName) {
-  std::string DETECTOR_EVENTS_ADDR = std::format("/{}/detector_1_events", topEntryName);
-  if (!file.hasAddress(DETECTOR_EVENTS_ADDR)) { // not an isis file
+  std::string detectorEventsAddr = std::format("/{}/detector_1_events", topEntryName);
+  if (!file.hasAddress(detectorEventsAddr)) { // not an isis file
     return false;
   }
 
-  const std::string EVENT_TIME_SHIFT_ADDR(DETECTOR_EVENTS_ADDR + "/event_time_offset_shift");
-  if (file.hasAddress(EVENT_TIME_SHIFT_ADDR)) { // almost certainly an isis file
+  const std::string eventTimeShiftAddr(detectorEventsAddr + "/event_time_offset_shift");
+  if (file.hasAddress(eventTimeShiftAddr)) { // almost certainly an isis file
     std::string eventShiftType;
-    file.readData(EVENT_TIME_SHIFT_ADDR, eventShiftType);
-    if (eventShiftType == "random") { // event correction already applied
-      return false;
-    }
-    return true;
+    file.readData(eventTimeShiftAddr, eventShiftType);
+    return !(eventShiftType == "random"); // event correction already applied
   }
 
-  const std::string PROGRAM_NAME_ADDR = std::format("/{}/program_name", topEntryName);
-  if (file.hasAddress(PROGRAM_NAME_ADDR)) { // check for ISIS control program
+  const std::string programNameAddr = std::format("/{}/program_name", topEntryName);
+  if (file.hasAddress(programNameAddr)) { // check for ISIS control program
     std::string program_name;
-    file.readData(PROGRAM_NAME_ADDR, program_name);
+    file.readData(programNameAddr, program_name);
     if (program_name == "ISISICP.EXE") {
       return true;
     }
