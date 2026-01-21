@@ -248,7 +248,7 @@ void LoadEventAsWorkspace2D::exec() {
   // Now we want to go through all the bankN_event entrie
   prog->doReport("Reading and integrating data");
 
-  std::set<std::string> const classEntries = h5file.getEntriesByClass("Nxevent_data");
+  std::set<std::string> const classEntries = h5file.getEntriesByClass("NXevent_data");
   if (!classEntries.empty()) {
     const std::regex classRegex("(/entry/)([^/]*)");
     std::smatch groups;
