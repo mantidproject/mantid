@@ -318,11 +318,6 @@ void AlignAndFocusPowderSlim::exec() {
   g_log.debug() << "Total banks to read: " << num_banks_to_read << "\n";
 
   H5::H5File h5file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
-  // Now we want to go through all the bankN_event entries
-  if (!descriptor.classTypeExists("NXevent_data")) {
-    h5file.close();
-    throw std::runtime_error("No NXevent_data entries found in file");
-  }
 
   // These give the limits in each file as to which events we actually load (when filtering by time).
   loadStart.resize(1, 0);
@@ -622,14 +617,11 @@ void AlignAndFocusPowderSlim::determineBanksToLoad(const Nexus::NexusDescriptor 
                                                    std::vector<std::string> &bankEntryNames,
                                                    std::vector<std::string> &bankNames) {
   // Now we want to go through all the bankN_event entries
-  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
-  auto itClassEntries = allEntries.find("NXevent_data");
 
-  if (itClassEntries == allEntries.end()) {
+  std::set<std::string> const classEntries = descriptor.allAddressesOfType("NXevent_data");
+  if (classEntries.empty()) {
     throw std::runtime_error("No NXevent_data entries found in file");
   }
-
-  const std::set<std::string> &classEntries = itClassEntries->second;
 
   const int bankNum = getProperty(PropertyNames::BANK_NUMBER);
 
