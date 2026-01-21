@@ -158,6 +158,7 @@ def remove_from_pixi_manifest(package: str, os_name: str):
 
 
 def _run_pixi_command(command: List[str]):
+    print(f'Running "{" ".join(command)}" ...')
     process = run(command, text=True, stderr=subprocess.PIPE)
     if process.returncode != 0:
         print(f'Tried to run "{" ".join(command)}" but encountered a problem:')
