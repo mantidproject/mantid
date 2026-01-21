@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from functools import partial
 from pyvista import PolyData
 from qtpy.QtWidgets import (
     QMainWindow,
@@ -47,7 +48,6 @@ import matplotlib.pyplot as plt
 from mantid.dataobjects import Workspace2D
 from mantid import UsageService, ConfigService
 from mantid.kernel import FeatureType
-from mantid.simpleapi import AnalysisDataService
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 
 from instrumentview.Detectors import DetectorInfo
@@ -460,7 +460,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
         self.main_plotter.set_color_cycler(self._presenter._COLOURS)
         self.refresh_peaks_ws_list()
-        self.update_ws_in_mask_list()
+        self.refresh_workspaces_in_list(CurrentTab.Masking)
+        self.refresh_workspaces_in_list(CurrentTab.Grouping)
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
@@ -471,8 +472,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
         self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
-        self._mask_list.itemChanged.connect(self._presenter.on_list_item_selected)
-        self._selection_list.itemChanged.connect(self._presenter.on_list_item_selected)
+        self._mask_list.itemChanged.connect(partial(self._presenter.on_list_item_selected, CurrentTab.Masking))
+        self._selection_list.itemChanged.connect(partial(self._presenter.on_list_item_selected, CurrentTab.Grouping))
         self._save_mask_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
         self._save_mask_to_file.clicked.connect(self._presenter.on_save_mask_to_xml_clicked)
         self._overwrite_mask.clicked.connect(self._presenter.on_apply_permanently_clicked)
@@ -583,46 +584,24 @@ class FullInstrumentViewWindow(QMainWindow):
         self._peak_ws_list.blockSignals(False)
         self._peak_ws_list.adjustSize()
 
-    def update_ws_in_mask_list(self) -> None:
-        current_mask_in_ads = self._presenter.mask_workspaces_in_ads()
-        current_mask_in_widget = [self._mask_list.item(i).text() for i in range(self._mask_list.count())]
-        cached_masks_keys = self._presenter.cached_keys(CurrentTab.Masking)
+    def refresh_workspaces_in_list(self, kind: CurrentTab) -> None:
+        list_to_refresh = self._mask_list if kind is CurrentTab.Masking else self._selection_list
 
-        # Workspaces in ads but not yet in list
-        for ws_name in current_mask_in_ads:
-            if ws_name not in current_mask_in_widget:
-                item = QListWidgetItem(ws_name, self._mask_list)
+        keys_from_workspaces_in_ads = self._presenter.get_list_keys_from_workspaces_in_ads(kind)
+        keys_in_current_list = [list_to_refresh.item(i).text() for i in range(list_to_refresh.count())]
+        keys_cached_in_model = self._presenter.cached_keys(kind)
+
+        # Keys from ads but not yet in list
+        for key in keys_from_workspaces_in_ads:
+            if key not in keys_in_current_list:
+                item = QListWidgetItem(key, list_to_refresh)
                 item.setCheckState(Qt.Unchecked)
 
-        # Workspaces in list but not in ads
-        for i in range(self._mask_list.count() - 1, -1, -1):
-            item = self._mask_list.item(i)
-            if item.text() in cached_masks_keys:
-                continue
-            if item.text() not in current_mask_in_ads:
-                removed = self._mask_list.takeItem(i)
-                del removed
-
-    def update_ws_in_roi_list(self) -> None:
-        current_grouping_in_ads = self._presenter.grouping_workspaces_in_ads()
-        # current_grouping_in_list = [self._selection_list.item(i).text() for i in range(self._selection_list.count())]
-        cached_grouping_keys = self._presenter.cached_keys(CurrentTab.Grouping)
-
-        # Workspaces in ads but not yet in list
-        for ws_name in current_grouping_in_ads:
-            # TODO: THis should not be in the view???
-            ws = AnalysisDataService.retrieve(ws_name)
-            for i in range(1, int(ws.extractY().max()) + 1):
-                item = QListWidgetItem(ws_name + f"_{i}", self._selection_list)
-                item.setCheckState(Qt.Unchecked)
-
-        # Workspaces in list but not in ads
-        for i in range(self._mask_list.count() - 1, -1, -1):
-            item = self._mask_list.item(i)
-            if item.text() in cached_grouping_keys:
-                continue
-            if item.text()[:-2] not in current_grouping_in_ads:
-                removed = self._mask_list.takeItem(i)
+        # Remove keys that are not cached in model and not in ads
+        for i in range(list_to_refresh.count() - 1, -1, -1):
+            item = list_to_refresh.item(i)
+            if item.text() not in keys_cached_in_model and item.text() not in keys_from_workspaces_in_ads:
+                removed = list_to_refresh.takeItem(i)
                 del removed
 
     def refresh_peaks_ws_list_colours(self) -> None:
@@ -984,16 +963,16 @@ class FullInstrumentViewWindow(QMainWindow):
     def get_current_selected_list_widget(self) -> QListWidget:
         return self._mask_list if self.get_current_selected_tab() == CurrentTab.Masking else self._selection_list
 
-    def selected_items(self) -> list[str]:
-        list_to_read_from = self.get_current_selected_list_widget()
+    def selected_items_in_list(self, kind: CurrentTab) -> list[str]:
+        list_to_read_from = self._mask_list if kind is CurrentTab.Masking else self._selection_list
         return [
             list_to_read_from.item(row_index).text()
             for row_index in range(list_to_read_from.count())
             if list_to_read_from.item(row_index).checkState() > 0
         ]
 
-    def set_new_item_key(self, new_key: str) -> None:
-        list_to_modify = self.get_current_selected_list_widget()
+    def set_new_item_key(self, kind: CurrentTab, new_key: str) -> None:
+        list_to_modify = self._mask_list if kind is CurrentTab.Masking else self._selection_list
         list_item = QListWidgetItem(new_key, list_to_modify)
         list_item.setCheckState(Qt.Checked)
 
@@ -1007,9 +986,6 @@ class FullInstrumentViewWindow(QMainWindow):
                 continue
             removed = list_to_clear.takeItem(i)
             del removed
-
-        if kind is CurrentTab.Masking:
-            self.update_ws_in_mask_list()
 
     def has_any_peak_overlays(self) -> bool:
         return len(self._lineplot_overlays) > 0

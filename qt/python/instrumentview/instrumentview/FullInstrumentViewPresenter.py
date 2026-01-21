@@ -257,12 +257,12 @@ class FullInstrumentViewPresenter:
             return
         mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points]
         new_key = self._model.add_new_detector_key(mask, self._view.get_current_selected_tab())
-        self._view.set_new_item_key(new_key)
+        self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
 
-    def on_list_item_selected(self) -> None:
-        self._model.apply_detector_items(self._view.selected_items(), self._view.get_current_selected_tab())
+    def on_list_item_selected(self, kind: CurrentTab) -> None:
+        self._model.apply_detector_items(self._view.selected_items_in_list(kind), kind)
 
-        if self._view.get_current_selected_tab() is CurrentTab.Masking:
+        if kind is CurrentTab.Masking:
             self.update_plotter()
             self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
             self._update_peak_buttons()
@@ -283,7 +283,7 @@ class FullInstrumentViewPresenter:
     def on_clear_list_clicked(self) -> None:
         self._view.clear_item_list(self._view.get_current_selected_tab())
         self._model.clear_stored_keys(self._view.get_current_selected_tab())
-        self.on_list_item_selected()
+        self.on_list_item_selected(self._view.get_current_selected_tab())
 
     def on_save_mask_to_xml_clicked(self):
         filename = self._get_filename_from_dialog()
@@ -304,18 +304,20 @@ class FullInstrumentViewPresenter:
         return filename
 
     def _reload_mask_workspaces(self) -> None:
-        self._view.update_ws_in_mask_list()
-        self.on_list_item_selected()
+        self._view.refresh_workspaces_in_list(CurrentTab.Masking)
+        self.on_list_item_selected(CurrentTab.Masking)
 
     def _reload_grouping_workspaces(self) -> None:
-        self._view.update_ws_in_roi_list()
-        self.on_list_item_selected()
+        self._view.refresh_workspaces_in_list(CurrentTab.Grouping)
+        self.on_list_item_selected(CurrentTab.Grouping)
 
-    def mask_workspaces_in_ads(self) -> list[str]:
-        return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(MaskWorkspace)]
-
-    def grouping_workspaces_in_ads(self) -> list[str]:
-        return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(GroupingWorkspace)]
+    def get_list_keys_from_workspaces_in_ads(self, kind: CurrentTab):
+        if kind is CurrentTab.Masking:
+            # Mask list shows workspace names
+            return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(MaskWorkspace)]
+        else:
+            # Grouping list shows an entry per group in grouping workspace
+            return self._model.get_grouping_keys_from_workspaces_in_ads()
 
     def cached_keys(self, kind: CurrentTab) -> list[str]:
         return self._model.cached_keys(kind)
@@ -374,11 +376,11 @@ class FullInstrumentViewPresenter:
         self._view.close()
 
     def replace_workspace_callback(self, ws_name, ws):
-        if ws_name in self.peaks_workspaces_in_ads():
+        if isinstance(ws, PeaksWorkspace):
             self._reload_peaks_workspaces()
-        elif ws_name in self.mask_workspaces_in_ads():
+        elif isinstance(ws, MaskWorkspace):
             self._reload_mask_workspaces()
-        elif ws_name in self.grouping_workspaces_in_ads():
+        elif isinstance(ws, GroupingWorkspace):
             self._reload_grouping_workspaces()
         elif ws_name == self._model.workspace.name():
             # This check is needed because observers are triggered

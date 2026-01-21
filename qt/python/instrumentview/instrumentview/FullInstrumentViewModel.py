@@ -481,38 +481,55 @@ class FullInstrumentViewModel:
             self._cached_rois_map[new_key] = selection_to_save
             return new_key
 
+    def _get_boolean_masks_from_workspaces_in_ads(self, selected_keys: list[str], kind: CurrentTab):
+        ws_in_ads = (
+            self.get_workspaces_in_ads_of_type(MaskWorkspace)
+            if kind is CurrentTab.Masking
+            else self.get_workspaces_in_ads_of_type(GroupingWorkspace)
+        )
+        booleans_from_ws = []
+        for key in selected_keys:
+            if not any([key.startswith(ws.name()) for ws in ws_in_ads]):
+                continue
+
+            if kind is CurrentTab.Masking:
+                boolean_mask = AnalysisDataService.retrieve(key).extractY().flatten()
+            else:
+                boolean_mask = AnalysisDataService.retrieve(key[:-2]).extractY().flatten() == int(key[-1])
+
+            if boolean_mask.size < self._detector_ids.size:
+                new_boolean_mask = np.zeros_like(self._detector_ids)
+                new_boolean_mask[self._is_valid] = boolean_mask
+                boolean_mask = new_boolean_mask
+
+            booleans_from_ws.append(boolean_mask)
+        return booleans_from_ws
+
     def apply_detector_items(self, selected_keys: list[str], kind: CurrentTab):
         if kind is CurrentTab.Masking:
-            ws_masks = [ws.extractY().flatten() for ws in self.get_workspaces_in_ads_of_type(MaskWorkspace) if ws.name() in selected_keys]
+            booleans_from_ws = self._get_boolean_masks_from_workspaces_in_ads(selected_keys, CurrentTab.Masking)
             cached_masks = [self._cached_masks_map[key] for key in selected_keys if key in self._cached_masks_map.keys()]
-            total_items = ws_masks + cached_masks
+            total_items = [*booleans_from_ws, *cached_masks]
             if not total_items:
                 self._is_masked = self._is_masked_in_ws
                 return
             self._is_masked = np.logical_or.reduce(total_items)
-
+            return
         else:
-            grouping_ws_names_in_ads = [ws.name() for ws in self.get_workspaces_in_ads_of_type(GroupingWorkspace)]
-            grouping_data_y = [
-                AnalysisDataService.retrieve(ws_name[:-2]).extractY().flatten() == int(ws_name[-1])
-                for ws_name in selected_keys
-                if ws_name[:-2] in grouping_ws_names_in_ads
-            ]
-            # TODO: Fix this mess, required because monitors are silently cut out from CreateGroupingWorkspace yay
-            padded_groups = [np.zeros_like(self._current_detector_groupings) for _ in grouping_data_y]
-            for pad_group, bool_mask in zip(padded_groups, grouping_data_y):
-                pad_group[self._is_valid] = bool_mask
+            booleans_from_ws = self._get_boolean_masks_from_workspaces_in_ads(selected_keys, CurrentTab.Grouping)
             cached_selections = [self._cached_rois_map[key] for key in selected_keys if key in self._cached_rois_map.keys()]
-            total_items = [self._point_picked_detectors, *padded_groups, *cached_selections]
+            total_items = [self._point_picked_detectors, *booleans_from_ws, *cached_selections]
+            # Filter out empty boolean masks
+            total_items = [item for item in total_items if np.any(item)]
             if not total_items:
                 self._detector_is_picked = self._point_picked_detectors
                 self._current_detector_groupings[self._point_picked_detectors] = 1
                 return
             self._detector_is_picked = np.logical_or.reduce(total_items)
             self._current_detector_groupings.fill(0)
-            total_items = [item for item in total_items if np.any(item)]
             for i, group in enumerate(total_items):
                 self._current_detector_groupings[group] = i + 1
+            return
 
     def clear_stored_keys(self, kind: CurrentTab) -> None:
         if kind is CurrentTab.Masking:
@@ -558,12 +575,21 @@ class FullInstrumentViewModel:
         AnalysisDataService.addOrReplace(self._workspace.name(), AnalysisDataService.retrieve(temp_ws_name))
 
     def get_workspaces_in_ads_of_type(self, ws_type: MaskWorkspace | GroupingWorkspace | PeaksWorkspace):
+        # TODO: Figure out how to avoid using a dictionary
+        str_types = {MaskWorkspace: "MaskWorkspace", GroupingWorkspace: "GroupingWorkspace", PeaksWorkspace: "PeaksWorkspace"}
         ads = AnalysisDataService.Instance()
         workspaces_in_ads = ads.retrieveWorkspaces(ads.getObjectNames())
         return [
             pws
             for pws in workspaces_in_ads
-            if str(ws_type) in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
+            if str_types[ws_type] in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
+        ]
+
+    def get_grouping_keys_from_workspaces_in_ads(self):
+        return [
+            gws.name() + f"_{i}"
+            for gws in self.get_workspaces_in_ads_of_type(GroupingWorkspace)
+            for i in range(1, int(gws.extractY().max()) + 1)
         ]
 
     def save_grouping_to_ads(self):
