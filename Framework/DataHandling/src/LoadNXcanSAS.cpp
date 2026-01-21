@@ -22,6 +22,7 @@
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NexusFile.h"
 #include <H5Cpp.h>
+#include <cstring>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -46,29 +47,6 @@ std::string getNameOfEntry(const H5::H5File &root) {
   }
 
   return root.getObjnameByIdx(0);
-}
-
-/**
- * Tries to find a nexus or sas entry definition on the loaded file to provide a confidence estimation for the loader.
- * @param file: Reference to loaded file
- */
-bool findDefinition(Mantid::Nexus::File &file) {
-  bool foundDefinition = false;
-  const auto entries = file.getEntries();
-  for (const auto &[sasEntry, nxEntry] : entries) {
-    if (nxEntry == sasEntryClassAttr || nxEntry == nxEntryClassAttr) {
-      file.openGroup(sasEntry, nxEntry);
-      file.openData(sasEntryDefinition);
-      const auto definitionFromFile = file.getStrData();
-      if (definitionFromFile == sasEntryDefinitionFormat) {
-        foundDefinition = true;
-        break;
-      }
-      file.closeData();
-      file.closeGroup();
-    }
-  }
-  return foundDefinition;
 }
 
 Mantid::API::MatrixWorkspace_sptr createWorkspace(const DataSpaceInformation &dimInfo, const bool asHistogram = false) {
@@ -486,15 +464,19 @@ int LoadNXcanSAS::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
     return 0;
   }
   int confidence = 0;
-  Mantid::Nexus::File file(descriptor.filename());
-  // Check if there is an entry root/SASentry/definition->NXcanSAS
-  try {
-    if (findDefinition(file)) {
-      confidence = 95;
+  auto const &entries = descriptor.getAllEntries();
+  for (auto const &[sasEntry, nxClass] : entries) {
+    if (nxClass == sasEntryClassAttr || nxClass == nxEntryClassAttr) {
+      std::string const dataAddress = sasEntry + "/" + sasEntryDefinition;
+      std::string const definitionFromFile = descriptor.getStrData(dataAddress);
+      // NOTE: for reasons I don't care to investigate, even if this has the correct definition,
+      // comparing as strings can still lead to mismatch unless compared as C-strings
+      if (std::strcmp(definitionFromFile.c_str(), sasEntryDefinitionFormat.c_str()) == 0) {
+        confidence = 95;
+        break;
+      }
     }
-  } catch (...) {
   }
-
   return confidence;
 }
 

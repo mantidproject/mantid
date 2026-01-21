@@ -137,6 +137,9 @@ private:
 
   /// mutex to protect reading from file after initialization in const methods
   mutable std::shared_mutex m_readNexusMutex;
+
+  /// the set of non-existent entries that have been checked
+  mutable std::unordered_set<std::string> m_allMisses;
 };
 
 } // namespace Nexus
