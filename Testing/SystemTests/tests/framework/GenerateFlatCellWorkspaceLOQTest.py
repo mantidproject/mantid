@@ -14,23 +14,23 @@ class GenerateFlatCellWorkspaceLOQTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         # Load the input data and save into a workspace
-        LoadNexus(Filename="LOQ00113953.nxs", OutputWorkspace="FlatCellEventInput")
+        LoadNexus(Filename="LOQ00113953.nxs", OutputWorkspace="input")
 
         # Apply the algorithm to the input data
-        GenerateFlatCellWorkspaceLOQ(InputWorkspace="FlatCellEventInput", OutputWorkspace="FlatCellActualOutput")
+        GenerateFlatCellWorkspaceLOQ(InputWorkspace="input", OutputWorkspace="output")
 
         # Load the output data and save into a workspace
-        LoadNexus(Filename="FlatCellOutput.nxs", OutputWorkspace="FlatCellExpectedOutput")
-        LoadNexus(Filename="FlatCellMasked.nxs", OutputWorkspace="FlatCellMaskedOutput")
+        LoadNexus(Filename="GenerateFlatCellWorkspaceLOQOutput.nxs", OutputWorkspace="expected_output")
+        LoadNexus(Filename="GenerateFlatCellWorkspaceLOQMASK.nxs", OutputWorkspace="expected_mask")
 
         # Compare the workspaces
-        result, _ = CompareWorkspaces("FlatCellActualOutput", "FlatCellExpectedOutput")
+        result, _ = CompareWorkspaces("output", "expected_output")
         self.assertTrue(result)
-        result, _ = CompareWorkspaces("FlatCellActualOutput_MASK", "FlatCellMaskedOutput")
+        result, _ = CompareWorkspaces("output_MASK", "expected_mask")
         self.assertTrue(result)
 
     def requiredFiles(self):
-        return ["LOQ00113953.nxs", "FlatCellMasked.nxs", "FlatCellOutput.nxs"]
+        return ["LOQ00113953.nxs", "GenerateFlatCellWorkspaceLOQOutput.nxs", "GenerateFlatCellWorkspaceLOQMASK.nxs"]
 
     def validate(self):
         return True
