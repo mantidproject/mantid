@@ -310,47 +310,14 @@ void AlignAndFocusPowderSlim::exec() {
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
   const Nexus::NexusDescriptor descriptor(filename);
 
-  // Now we want to go through all the bankN_event entries
-  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
-  auto itClassEntries = allEntries.find("NXevent_data");
-
-  H5::H5File h5file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
-  if (itClassEntries == allEntries.end()) {
-    h5file.close();
-    throw std::runtime_error("No NXevent_data entries found in file");
-  }
-
-  const std::set<std::string> &classEntries = itClassEntries->second;
   std::vector<std::string> bankEntryNames;
   std::vector<std::string> bankNames;
+  determineBanksToLoad(descriptor, bankEntryNames, bankNames);
 
-  int bankNum = getProperty(PropertyNames::BANK_NUMBER);
-  {
-    const std::regex classRegex("(/entry/)([^/]*)");
-    std::smatch groups;
-    for (const std::string &classEntry : classEntries) {
-      if (std::regex_match(classEntry, groups, classRegex)) {
-        const std::string entry_name(groups[2].str());
-        if (classEntry.ends_with("bank_error_events")) {
-          // do nothing
-        } else if (classEntry.ends_with("bank_unmapped_events")) {
-          // do nothing
-        } else {
-          auto underscore_pos = entry_name.find_first_of('_');
-          const auto bankName = entry_name.substr(0, underscore_pos);
-          if (bankNum != EMPTY_INT()) {
-            if (bankName != ("bank" + std::to_string(bankNum))) {
-              continue; // skip this bank
-            }
-          }
-          bankEntryNames.push_back(entry_name);
-          bankNames.push_back(bankName);
-        }
-      }
-    }
-  }
   const std::size_t num_banks_to_read = bankEntryNames.size();
   g_log.debug() << "Total banks to read: " << num_banks_to_read << "\n";
+
+  H5::H5File h5file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
 
   // These give the limits in each file as to which events we actually load (when filtering by time).
   loadStart.resize(1, 0);
@@ -643,6 +610,45 @@ void AlignAndFocusPowderSlim::exec() {
     API::Workspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<API::Workspace>(ws_basename);
 
     setProperty(PropertyNames::OUTPUT_WKSP, outputWorkspace);
+  }
+}
+
+void AlignAndFocusPowderSlim::determineBanksToLoad(const Nexus::NexusDescriptor &descriptor,
+                                                   std::vector<std::string> &bankEntryNames,
+                                                   std::vector<std::string> &bankNames) {
+  // Now we want to go through all the bankN_event entries
+  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
+  auto itClassEntries = allEntries.find("NXevent_data");
+
+  if (itClassEntries == allEntries.end()) {
+    throw std::runtime_error("No NXevent_data entries found in file");
+  }
+
+  const std::set<std::string> &classEntries = itClassEntries->second;
+
+  const int bankNum = getProperty(PropertyNames::BANK_NUMBER);
+
+  const std::regex classRegex("(/entry/)([^/]*)");
+  std::smatch groups;
+  for (const std::string &classEntry : classEntries) {
+    if (std::regex_match(classEntry, groups, classRegex)) {
+      const std::string entry_name(groups[2].str());
+      if (classEntry.ends_with("bank_error_events")) {
+        // do nothing
+      } else if (classEntry.ends_with("bank_unmapped_events")) {
+        // do nothing
+      } else {
+        auto underscore_pos = entry_name.find_first_of('_');
+        const auto bankName = entry_name.substr(0, underscore_pos);
+        if (bankNum != EMPTY_INT()) {
+          if (bankName != ("bank" + std::to_string(bankNum))) {
+            continue; // skip this bank
+          }
+        }
+        bankEntryNames.push_back(entry_name);
+        bankNames.push_back(bankName);
+      }
+    }
   }
 }
 

@@ -15,6 +15,7 @@
 #include "MantidDataObjects/TimeSplitter.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/TimeROI.h"
+#include "MantidNexus/NexusDescriptor.h"
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
@@ -33,6 +34,8 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
+  void determineBanksToLoad(const Mantid::Nexus::NexusDescriptor &descriptor, std::vector<std::string> &bankEntryNames,
+                            std::vector<std::string> &bankNames);
   void initializeOutputWorkspace(const API::MatrixWorkspace_sptr &wksp, size_t num_hist);
   SpectraProcessingData initializeSpectraProcessingData(const API::MatrixWorkspace_sptr &outputWS);
   void storeSpectraProcessingData(const SpectraProcessingData &processingData,
