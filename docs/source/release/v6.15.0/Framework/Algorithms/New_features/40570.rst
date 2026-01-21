@@ -1,1 +1,1 @@
-- The :ref:`algm-Load`.algorithm, and the file loader search process, now uses a lazy file descriptor to check for the correct loading algorithm, further reducing times for :ref:`algm-Load`.
+- The :ref:`algm-Load` algorithm, and the file loader search process, now uses a lazy file descriptor to check for the correct loading algorithm, further reducing times for :ref:`algm-Load`.
