@@ -34,16 +34,17 @@ class POLDIPawleyWorkflow(systemtesting.MantidSystemTest):
         # setup phase
         si = Phase.from_alatt(3 * [5.43105], "F d -3 m", "Si 3/4 3/4 1/4 1.0 0.08")
         si.set_hkls_from_dspac_limits(0.7, 3.5)
+        si.hkls = [hkl for ihkl, hkl in enumerate(si.hkls) if ihkl not in (3, 11, 14)]  # remove absent peaks
         si.merge_reflections()
 
         # run 1D Pawley refinement
-        pawley1d = PawleyPattern1D(self.ws_autocorr, [si], profile=GaussianProfile(), bg_func=FlatBackground())
-        pawley1d.ispec = 1  # optimise north bank only
+        pawley1d = PawleyPattern1D(self.ws_autocorr, [si], profile=GaussianProfile(), bg_func=FlatBackground(), ispec=self.ispec)
         pawley1d.estimate_initial_params()
         res = pawley1d.fit()
         # collect attributes to assert
         self.cost_1d = res.cost
         self.alatt_1d = pawley1d.alatt_params[0][0]
+        self.alatt_1d_err = pawley1d.get_parameter_errors(res)[0]
 
         # 2D Pawley refinement
         pawley2d = PawleyPattern2D(self.ws_crop, [si], profile=GaussianProfile(), global_scale=False)
@@ -62,20 +63,23 @@ class POLDIPawleyWorkflow(systemtesting.MantidSystemTest):
         # collect attributes to assert
         self.cost_2d_free = res.cost
         # get residual d-spacing
-        dspacs_free = pawley2d_free.get_peak_centers()
+        dspacs_free = pawley2d_free.get_peak_centres()
         dspacs_pawley = pawley2d.phases[0].calc_dspacings()
         self.residual_dspacs = dspacs_pawley - dspacs_free
 
     def validate(self):
         # 1D Pawley
-        self.assertAlmostEqual(self.alatt_1d, 5.43149, delta=1e-4)
-        self.assertAlmostEqual(self.cost_1d, 159.4, delta=1e-1)
+        self.assertAlmostEqual(self.alatt_1d, 5.43122, delta=1e-4)
+        self.assertAlmostEqual(self.cost_1d, 206.9, delta=1e-1)
+        self.assertAlmostEqual(self.alatt_1d_err, 1.1e-4, delta=1e-5)
+
         # 2D Pawley
-        self.assertAlmostEqual(self.alatt_2d, 5.43149, delta=1e-4)
-        self.assertAlmostEqual(self.cost_2d, 248110, delta=1)
+        self.assertAlmostEqual(self.alatt_2d, 5.43122, delta=1e-4)
+        self.assertAlmostEqual(self.cost_2d, 248117, delta=1)
         self.assertEqual(self.ws2d_sim_nspec, 224)
         self.assertEqual(self.ws2d_sim_detid, 211001)
+
         # 2D Pawley Free
         self.assertLessThan(self.cost_2d_free, self.cost_2d)
-        self.assertLessThan(np.median(abs(self.residual_dspacs)), 1e-04)
+        self.assertLessThan(np.mean(abs(self.residual_dspacs)), 2e-04)
         return True
