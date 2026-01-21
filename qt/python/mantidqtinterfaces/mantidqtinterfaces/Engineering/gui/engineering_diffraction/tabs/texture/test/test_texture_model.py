@@ -163,9 +163,9 @@ class TestProjectionModel_SettersGetters(unittest.TestCase):
         mock_parse.assert_not_called()
 
     def test_set_out_ws_and_grouping_calls_pf_table_name(self):
-        out_ws, grouping = "out_ws", "group"
-        mock_get_pf = MagicMock(return_value=(out_ws, grouping))
-        self.model.get_pf_table_name = mock_get_pf
+        out_ws, combined_ws, grouping = "out_ws", "combined_ws", "group"
+        mock_get_pf = MagicMock(return_value=(out_ws, combined_ws, grouping))
+        self.model.get_pf_output_names = mock_get_pf
 
         self.model.set_readout_col("I")
         self.model.hkl = [0, 0, 1]
@@ -176,6 +176,7 @@ class TestProjectionModel_SettersGetters(unittest.TestCase):
 
         mock_get_pf.assert_called_once_with(wss, params, self.model.hkl, "I")
         self.assertEqual(self.model.get_out_ws(), out_ws)
+        self.assertEqual(self.model.get_combined_ws(), combined_ws)
         self.assertEqual(self.model.get_grouping(), grouping)
 
     def test_simple_setters_and_getters(self):
@@ -226,6 +227,7 @@ class TestProjectionModel_ExecMakePFTables(unittest.TestCase):
     def test_exec_make_pf_tables_passes_through_values(self, mock_make_pf):
         # preset values read by getters
         self.model.out_ws = "out_ws"
+        self.model.combined_ws = "combined_ws"
         self.model.hkl = [1, 0, 0]
         self.model.set_inc_scatt(True)
         self.model.set_scat_vol_pos((0.0, 0.0, 0.0))
@@ -244,6 +246,7 @@ class TestProjectionModel_ExecMakePFTables(unittest.TestCase):
             wss,
             params,
             "out_ws",
+            "combined_ws",
             [1, 0, 0],
             True,
             (0.0, 0.0, 0.0),

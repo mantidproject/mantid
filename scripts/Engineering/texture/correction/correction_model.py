@@ -14,7 +14,6 @@ from mantid.simpleapi import (
     MonteCarloAbsorption,
     CloneWorkspace,
     SaveNexus,
-    SetGoniometer,
     logger,
     CreateEmptyTableWorkspace,
     LoadEmptyInstrument,
@@ -29,6 +28,7 @@ from Engineering.common.texture_sample_viewer import has_valid_shape
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from Engineering.common.calibration_info import CalibrationInfo
+from Engineering.texture.texture_helper import get_gauge_vol_str, load_all_orientations
 
 
 class TextureCorrectionModel:
@@ -168,15 +168,6 @@ class TextureCorrectionModel:
     # ~~~~~ General Utility Functions ~~~~~~~~~~~~~
 
     @staticmethod
-    def _validate_file(file: str, ext: str) -> bool:
-        valid = False
-        if file:
-            root, f_ext = path.splitext(file)
-            if f_ext == ext:
-                valid = True
-        return valid
-
-    @staticmethod
     def _save_corrected_files(ws: str, root_dir: str, dir_name: str, rb_num: Optional[str], calibration_group: GROUP) -> str:
         filepath = ""
         save_dirs = [path.join(root_dir, dir_name)]
@@ -230,39 +221,7 @@ class TextureCorrectionModel:
         euler_scheme: Optional[str] = None,
         euler_sense: Optional[str] = None,
     ) -> None:
-        if self._validate_file(txt_file, ".txt"):
-            with open(txt_file, "r") as f:
-                goniometer_strings = [line.strip().replace("\t", ",") for line in f]
-                goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
-            try:
-                n_ws, n_gonios = len(wss), len(goniometer_lists)
-                if n_ws == 0:
-                    logger.warning(
-                        "No workspaces have been provided - if you are using the UI, ensure you have selected all desired workspaces"
-                    )
-                if n_ws < n_gonios:
-                    logger.warning(
-                        f"Fewer Workspaces ({n_ws}) provided than lines of orientation data ({n_gonios}). "
-                        f"The last {n_gonios - n_ws} lines of the orientation file will be ignored"
-                    )
-                if not use_euler:
-                    # if use euler angles not selected then assumes it is a scans output matrix
-                    for iws, ws in enumerate(wss):
-                        SetGoniometer(ws, GoniometerMatrix=goniometer_lists[iws][:9])
-                else:
-                    axis_dict = {"x": "1,0,0", "y": "0,1,0", "z": "0,0,1"}
-                    rotation_sense = [int(x) for x in euler_sense.split(",")]
-                    for iws, ws in enumerate(wss):
-                        angles = goniometer_strings[iws].split(",")
-                        kwargs = {}
-                        for iang, angle in enumerate(angles):
-                            sense = rotation_sense[iang]
-                            kwargs[f"Axis{iang}"] = f"{angle},{axis_dict[(euler_scheme[iang]).lower()]},{sense}"
-                        SetGoniometer(ws, **kwargs)
-            except BaseException as e:
-                logger.error(
-                    f"{str(e)}. Failed to set goniometer, are your settings for `use_euler_angles` correct? Currently: {use_euler}"
-                )
+        load_all_orientations(wss, txt_file, use_euler, euler_scheme, euler_sense)
 
     @staticmethod
     def set_sample_info(ws: Workspace2D, shape: str, material: str) -> None:
@@ -320,36 +279,11 @@ class TextureCorrectionModel:
 
     # ~~~~~ Gauge Volume Functions ~~~~~~~~~~~~~
 
-    def define_gauge_volume(self, ws: Workspace2D, preset: str, custom: Optional[str]) -> None:
-        gauge_str = self.get_gauge_vol_str(preset, custom)
+    @staticmethod
+    def define_gauge_volume(ws: Workspace2D, preset: str, custom: Optional[str]) -> None:
+        gauge_str = get_gauge_vol_str(preset, custom)
         if gauge_str:
             DefineGaugeVolume(ws, gauge_str)
-
-    def get_gauge_vol_str(self, preset: str, custom: Optional[str]) -> str:
-        if preset == "4mmCube":
-            gauge_str = """
-        <cuboid id='some-gv'> \
-        <height val='0.004'  /> \
-        <width val='0.004' />  \
-        <depth  val='0.004' />  \
-        <centre x='0.0' y='0.0' z='0.0'  />  \
-        </cuboid>  \
-        <algebra val='some-gv' /> \\ """
-        elif preset == "No Gauge Volume":
-            gauge_str = None
-        else:
-            try:
-                gauge_str = self._read_xml(custom)
-            except RuntimeError:
-                gauge_str = None
-        return gauge_str
-
-    def _read_xml(self, file: str) -> str:
-        out = None
-        if self._validate_file(file, ".xml"):
-            with open(file, "r") as f:
-                out = f.read()
-        return out
 
     # ~~~~~ `Parameter Dictionary as String` Functions ~~~~~~~~~~~~~
 

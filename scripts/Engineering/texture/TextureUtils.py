@@ -7,8 +7,8 @@
 import numpy as np
 from os import path, scandir
 import sys
-from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
+from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
 from pathlib import Path
 from Engineering.EnggUtils import GROUP
@@ -19,6 +19,10 @@ from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator, calc_intens_and_sigma_arrays
 from Engineering.texture.xtal_helper import get_xtal_structure
+
+# import texture helper functions so they can be accessed by users through the TextureUtils namespace
+from Engineering.texture.texture_helper import plot_pole_figure
+
 # -------- Utility --------------------------------
 
 
@@ -112,7 +116,6 @@ def run_abs_corr(
     include_atten_table: bool = False,
     eval_point: Optional[Union[str, float]] = None,
     eval_units: Optional[str] = None,
-    exp_name: Optional[str] = None,
     root_dir: str = ".",
     include_div_corr: bool = False,
     div_hoz: Optional[float] = None,
@@ -136,7 +139,6 @@ def run_abs_corr(
     include_atten_table: flag for whether a table of attenuation values at a specified point should be created
     eval_point: point to calculate the attenuation coefficient at
     eval_units: units which the eval_point is given in
-    exp_name: Name of the experiment to act as main folder name
     root_dir: Directory path in which the experiment directory is constructed
     include_div_corr: Flag for whether to include a beam divergence correction
     div_hoz: Value of beam divergence in the horizontal plane
@@ -145,7 +147,7 @@ def run_abs_corr(
     clear_ads_after: Flag for whether the produced files should be removed from the ADS after they have been saved
     """
     model = TextureCorrectionModel()
-    model.set_reference_ws = ref_ws
+    model.set_reference_ws(ref_ws)
 
     valid_inputs, error_msg = validate_abs_corr_inputs(
         ref_ws,
@@ -180,7 +182,6 @@ def run_abs_corr(
     model.set_include_abs(include_abs_corr)
     model.set_include_atten(include_atten_table)
     model.set_include_div(include_div_corr)
-    model.set_rb_num(exp_name)
     model.set_remove_after_processing(clear_ads_after)
 
     abs_args = {"gauge_vol_preset": gauge_vol_preset, "gauge_vol_file": gauge_vol_shape_file, "mc_param_str": monte_carlo_args}
@@ -536,6 +537,9 @@ def create_pf(
     chi2_thresh: Optional[float] = None,
     peak_thresh: Optional[float] = None,
     override_dir: bool = False,
+    create_combined_output: bool = False,
+    debug_info_level: int = 0,
+    save_ascii: bool = True,
 ) -> None:
     """
     Create a single pole figure, for use in texture analysis workflow
@@ -564,6 +568,9 @@ def create_pf(
     peak_thresh: if X0 present in params, the maximum allowable difference between a spectra's X0 and the mean X0/
                  X0 corresponding to the provided HKL
     override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
+    create_combined_output: flag which controls whether to create a combined workspace which contains every spectra in the pole figure
+    debug_info_level: 0 - No debug info; 1 - will label with alpha, beta and value; 2 - will include spectra information in label
+    save_ascii: whether to save files as txt as well as nxs
     """
     model = TextureProjection()
     has_xtal = False
@@ -576,7 +583,9 @@ def create_pf(
     # only pass the HKL to CreatePoleFigureTable if crystal structure has been defined
     # otherwise `hkl` is just used for naming the output workspace
     pf_hkl = hkl if has_xtal else None
-    out_ws, grouping = model.get_pf_table_name(wss, params, hkl, readout_column)
+    out_ws, combined_ws, grouping = model.get_pf_output_names(wss, params, hkl, readout_column)
+    # if the flag
+    combined_ws = combined_ws if create_combined_output else None
 
     dir1, dir2, dir3 = np.asarray(dir1), np.asarray(dir2), np.asarray(dir3)
     ax_transform = np.concatenate((dir1[:, None], dir2[:, None], dir3[:, None]), axis=1)
@@ -587,11 +596,26 @@ def create_pf(
     )
     chi2_thresh = chi2_thresh if chi2_thresh else 0.0
     peak_thresh = peak_thresh if peak_thresh else 0.0
+    include_spec_info = debug_info_level == 2
+    include_debug_info = debug_info_level in (1, 2)
     model.make_pole_figure_tables(
-        wss, params, out_ws, pf_hkl, include_scatt_power, scat_vol_pos, chi2_thresh, peak_thresh, save_dirs, ax_transform, readout_column
+        wss=wss,
+        peak_wss=params,
+        out_ws_name=out_ws,
+        combined_ws_name=combined_ws,
+        save_dirs=save_dirs,
+        hkl=pf_hkl,
+        inc_scatt_corr=include_scatt_power,
+        scat_vol_pos=scat_vol_pos,
+        chi2_thresh=chi2_thresh,
+        peak_thresh=peak_thresh,
+        ax_transform=ax_transform,
+        readout_col=readout_column,
+        include_spec_info=include_spec_info,
+        save_ascii=save_ascii,
     )
 
-    fig, ax = model.plot_pole_figure(
+    fig, ax = plot_pole_figure(
         out_ws,
         projection_method,
         fig=None,
@@ -600,6 +624,7 @@ def create_pf(
         plot_exp=scatter,
         ax_labels=ax_labels,
         contour_kernel=kernel,
+        display_debug_info=include_debug_info,
     )
     ax.set_title(out_ws)
     try:
@@ -637,6 +662,10 @@ def create_pf_loop(
     kernel: Optional[float] = None,
     chi2_thresh: Optional[float] = None,
     peak_thresh: Optional[float] = None,
+    create_combined_output: bool = False,
+    debug_info_level: int = 0,
+    save_ascii: bool = True,
+    override_dir: bool = False,
 ) -> None:
     """
     Create a series of pole figures, for use in texture analysis workflow
@@ -665,6 +694,10 @@ def create_pf_loop(
     chi2_thresh: if chi2 column present in params, the maximum value which will still get added to the pole figure table
     peak_thresh: if X0 present in params, the maximum allowable difference between a spectra's X0 and the mean X0/
                  X0 corresponding to the provided HKL
+    create_combined_output: flag which controls whether to create a combined workspace which contains every spectra in the pole figure
+    debug_info_level: 0 - No debug info; 1 - will label with alpha, beta and value; 2 - will include spectra information in label
+    save_ascii: whether to save files as txt as well as nxs
+    override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
     """
     # get ws paths
     for iparam, params in enumerate(param_wss):
@@ -691,6 +724,10 @@ def create_pf_loop(
                 "root_dir": save_root,
                 "exp_name": exp_name,
                 "projection_method": projection_method,
+                "create_combined_output": create_combined_output,
+                "debug_info_level": debug_info_level,
+                "save_ascii": save_ascii,
+                "override_dir": override_dir,
             }
             if scatter == "both":
                 for scat in (True, False):

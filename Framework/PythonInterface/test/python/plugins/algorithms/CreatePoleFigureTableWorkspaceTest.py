@@ -107,6 +107,63 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         # det 0 has 1.0, det 1 has 1.1
         self.eval_arrays(outws.column("I"), np.array((1.0, 1.1)))
 
+    def test_include_spectrum_info_true_adds_columns_and_values_match_filtered_indices(self):
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws",
+            PeakParameterWorkspace="PeakParameterWS",
+            OutputWorkspace="outws",
+            IncludeSpectrumInfo=True,
+        )
+        self.assertEqual(outws.rowCount(), 2)  # default args should have only chi2 < 2 (det 0 and det 1)
+
+        data_ws = outws.column("DataWorkspace")
+        ws_index = outws.column("WorkspaceIndex")
+
+        # DataWorkspace should be the name of the input workspace used to create the table
+        self.assertEqual(data_ws, ["ws", "ws"])
+        # WorkspaceIndex should be spec inds in the input workspace
+        self.assertEqual(ws_index, [0, 1])
+
+    def test_include_spectrum_info_true_all_spectra_included_indices_0_to_3(self):
+        outws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws",
+            PeakParameterWorkspace="PeakParameterWS",
+            OutputWorkspace="outws",
+            Chi2Threshold=5,  # allow all chi2
+            IncludeSpectrumInfo=True,
+        )
+        self.assertEqual(outws.rowCount(), 4)
+
+        data_ws = outws.column("DataWorkspace")
+        ws_index = outws.column("WorkspaceIndex")
+
+        self.assertEqual(data_ws, ["ws", "ws", "ws", "ws"])
+        self.assertEqual(ws_index, [0, 1, 2, 3])
+
+    def test_spectra_workspace_when_no_omissions_outputs_all_spectra(self):
+        _, spec_ws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws",
+            PeakParameterWorkspace="PeakParameterWS",
+            OutputWorkspace="outws",
+            SpectraWorkspace="spec_ws",
+            Chi2Threshold=5,  # allow all chi2
+        )
+        self.assertEqual(spec_ws.getNumberHistograms(), 4)
+        for ispec in range(spec_ws.getNumberHistograms()):
+            self.assertEqual(spec_ws.readY(ispec), ispec + 1.0)  # each spectrum has one Y val: 1.0,2.0,3.0,4.0
+
+    def test_spectra_workspace_when_some_omissions_outputs_correct_spectra(self):
+        _, spec_ws = CreatePoleFigureTableWorkspace(
+            InputWorkspace="ws",
+            PeakParameterWorkspace="PeakParameterWS",
+            OutputWorkspace="outws",
+            SpectraWorkspace="spec_ws",
+            Chi2Threshold=2,  # should only allow spec 1 and 2
+        )
+        self.assertEqual(spec_ws.getNumberHistograms(), 2)
+        for ispec in range(spec_ws.getNumberHistograms()):
+            self.assertEqual(spec_ws.readY(ispec), ispec + 1.0)  # allowed spectra have one Y val each: 1.0,2.0
+
     def test_flipping_td_negates_alphas(self):
         # alpha is taken from rd, if td is inverted the q vectors are now at -alpha rather than alpha
         ax_transform = np.array(((1, 0, 0), (0, 1, 0), (0, 0, -1))).reshape(-1)

@@ -406,7 +406,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
                 current_ax_colour = col.get_edgecolor()
                 break
             elif isinstance(col, ContourSet):
-                current_ax_colour = col.get_edgecolor()[0]
+                current_ax_colour = col.get_edgecolor()[0] if len(col.get_edgecolor()) > 0 else col.get_facecolor()[0]
                 break
 
         # Current_ax_colour remains None and breaks the code
