@@ -45,7 +45,7 @@ private:
   double mean(std::span<const double> values) const;
   double stddev(std::span<double> values) const;
   void scale(std::span<double> values, double factor) const;
-  void createAndSaveMaskedWorkspace(const API::MatrixWorkspace_sptr &ws, double normStdLAB, double normStdHAB);
+  void createAndSaveMaskWorkspace(const API::MatrixWorkspace_sptr &ws, double normStdLAB, double normStdHAB);
   API::MatrixWorkspace_sptr integrateInput(const API::Workspace_sptr &ws);
   std::vector<double> extractIntegratedValues(const API::MatrixWorkspace_sptr &ws) const;
   FlatCellStats normalizeBanks(std::span<double> values) const;

@@ -26,7 +26,7 @@ class GenerateFlatCellWorkspaceLOQTest(systemtesting.MantidSystemTest):
         # Compare the workspaces
         result, _ = CompareWorkspaces("FlatCellActualOutput", "FlatCellExpectedOutput")
         self.assertTrue(result)
-        result, _ = CompareWorkspaces("maskedWS", "FlatCellMaskedOutput")
+        result, _ = CompareWorkspaces("FlatCellActualOutput_MASK", "FlatCellMaskedOutput")
         self.assertTrue(result)
 
     def requiredFiles(self):

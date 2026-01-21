@@ -42,7 +42,7 @@ void GenerateFlatCellWorkspaceLOQ::init() {
                   "An input event workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output event workspace.");
-  declareProperty("CreateMaskedWorkspace", true, "Determines if masked workspace needs to be created.");
+  declareProperty("CreateMaskWorkspace", true, "Determines if masked workspace needs to be created.");
   declareProperty("LABThresholdMultiplier", 1.0,
                   "The parameter that is used to scale the standard deviation in order to set the masking threshold of "
                   "the low angle bank.");
@@ -50,7 +50,7 @@ void GenerateFlatCellWorkspaceLOQ::init() {
                   "The parameter that is used to scale the standard deviation in order to set the masking threshold of "
                   "the high angle bank.");
   declareProperty("ApplyMaskDirectlyToWorkspace", false, "Determines if mask is directly applied to workspace.");
-  declareProperty("MaskFileName", "FlatCellMasked.xml", "Path to the detector mask XML file.");
+  declareProperty("OutputMaskFilePath", "FlatCellMasked.xml", "Path to the detector mask XML file.");
 }
 
 /** Computes the mean of the input span
@@ -112,9 +112,9 @@ void GenerateFlatCellWorkspaceLOQ::exec() {
     Y[0] = valuesSpan[i];
   }
 
-  bool createMaskedWorkspace = getProperty("CreateMaskedWorkspace");
-  if (createMaskedWorkspace) {
-    createAndSaveMaskedWorkspace(outputWS, stats.normStdLAB, stats.normStdHAB);
+  bool createMaskWorkspace = getProperty("CreateMaskWorkspace");
+  if (createMaskWorkspace) {
+    createAndSaveMaskWorkspace(outputWS, stats.normStdLAB, stats.normStdHAB);
   };
 }
 
@@ -169,9 +169,9 @@ MatrixWorkspace_sptr GenerateFlatCellWorkspaceLOQ::integrateInput(const Workspac
   return integration->getProperty("OutputWorkspace");
 }
 
-void GenerateFlatCellWorkspaceLOQ::createAndSaveMaskedWorkspace(const MatrixWorkspace_sptr &ws, double normStdLAB,
-                                                                double normStdHAB) {
-  MatrixWorkspace_sptr maskedWS = ws->clone();
+void GenerateFlatCellWorkspaceLOQ::createAndSaveMaskWorkspace(const MatrixWorkspace_sptr &ws, double normStdLAB,
+                                                              double normStdHAB) {
+  MatrixWorkspace_sptr maskWS = ws->clone();
 
   // Calculate the thresholds
   double labThresholdMultiplier = getProperty("LABThresholdMultiplier");
@@ -182,8 +182,8 @@ void GenerateFlatCellWorkspaceLOQ::createAndSaveMaskedWorkspace(const MatrixWork
   // Mask the values of the low angle bank
   auto maskDetectorsLAB = createChildAlgorithm("MaskDetectorsIf");
   maskDetectorsLAB->initialize();
-  maskDetectorsLAB->setProperty("InputWorkspace", maskedWS);
-  maskDetectorsLAB->setProperty("OutputWorkspace", maskedWS);
+  maskDetectorsLAB->setProperty("InputWorkspace", maskWS);
+  maskDetectorsLAB->setProperty("OutputWorkspace", maskWS);
   maskDetectorsLAB->setProperty("StartWorkspaceIndex", LoqMeta::LABIndexStart());
   maskDetectorsLAB->setProperty("EndWorkspaceIndex", LoqMeta::LABTotalBanks() - 1);
   maskDetectorsLAB->setProperty("Operator", "GreaterEqual");
@@ -193,33 +193,35 @@ void GenerateFlatCellWorkspaceLOQ::createAndSaveMaskedWorkspace(const MatrixWork
   // Mask the values of the high angle bank
   auto maskDetectorsHAB = createChildAlgorithm("MaskDetectorsIf");
   maskDetectorsHAB->initialize();
-  maskDetectorsHAB->setProperty("InputWorkspace", maskedWS);
-  maskDetectorsHAB->setProperty("OutputWorkspace", maskedWS);
+  maskDetectorsHAB->setProperty("InputWorkspace", maskWS);
+  maskDetectorsHAB->setProperty("OutputWorkspace", maskWS);
   maskDetectorsHAB->setProperty("StartWorkspaceIndex", LoqMeta::HABIndexStart());
   maskDetectorsHAB->setProperty("Operator", "GreaterEqual");
   maskDetectorsHAB->setProperty("Value", maskingThresholdHAB);
   maskDetectorsHAB->execute();
 
   // Extract Mask
+  const std::string maskName = getPropertyValue("OutputWorkspace") + "_MASK";
   auto extractMask = createChildAlgorithm("ExtractMask");
   extractMask->initialize();
-  extractMask->setProperty("InputWorkspace", maskedWS);
-  extractMask->setProperty("OutputWorkspace", maskedWS);
+  extractMask->setProperty("InputWorkspace", maskWS);
+  extractMask->setProperty("OutputWorkspace", maskName);
   extractMask->execute();
+  maskWS = extractMask->getProperty("OutputWorkspace");
 
   // Save Mask
-  std::string maskFileName = getProperty("MaskFileName");
+  std::string outputMaskFilePath = getProperty("OutputMaskFilePath");
   auto saveMask = createChildAlgorithm("SaveMask");
   saveMask->initialize();
-  saveMask->setProperty("InputWorkspace", maskedWS);
-  saveMask->setProperty("OutputFile", maskFileName);
+  saveMask->setProperty("InputWorkspace", maskWS);
+  saveMask->setProperty("OutputFile", outputMaskFilePath);
   saveMask->execute();
 
   bool applyMaskDirectlyToWorkspace = getProperty("ApplyMaskDirectlyToWorkspace");
   if (applyMaskDirectlyToWorkspace) {
-    setProperty("OutputWorkspace", maskedWS);
+    setProperty("OutputWorkspace", maskWS);
   } else {
-    AnalysisDataService::Instance().addOrReplace("maskedWS", maskedWS);
+    AnalysisDataService::Instance().addOrReplace(maskName, maskWS);
   }
 }
 
