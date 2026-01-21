@@ -19,6 +19,7 @@ from typing import Sequence, Dict, NewType, List
 BUILD_CONFIG_PATH = Path("conda/recipes/conda_build_config.yaml")
 MANTID_DEVELOPER_RECIPE_PATH = Path("conda/recipes/mantid-developer/recipe.yaml")
 PIXI_TOML = Path("pixi.toml")
+PIXI_LOCK = Path("pixi.lock")
 
 # package name: {'linux' : '>3.0', 'osx': '>3.1.0'}
 # package name: {'all': '==3.2.1'}
@@ -267,6 +268,14 @@ def main(argv: Sequence[str] = None) -> int:
         print("Mismatch between conda and pixi environments found:")
         print("\n".join(warning_messages))
         return 1
+
+    if PIXI_TOML in changed_files and PIXI_LOCK not in changed_files:
+        # simple command to force pixi to update the lock file if the env definition has changed
+        command = ["pixi", "run", "ls"]
+        print("Invoking pixi environment to update pixi.lock")
+        _run_pixi_command(command)
+        return 1
+
     return 0
 
 
