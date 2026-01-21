@@ -149,7 +149,7 @@ class CalibrationInfo:
     def set_calibration_table(self, cal_table: str) -> None:
         self.calibration_table = cal_table
 
-    def set_calibration_paths(self, instrument: str, ceria_path: str, vanadium_path: str) -> None:
+    def set_calibration_paths(self, instrument: str, ceria_path: str, vanadium_path: str = None) -> None:
         self.ceria_path = ceria_path
         self.vanadium_path = vanadium_path
         self.instrument = instrument
