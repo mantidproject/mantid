@@ -344,8 +344,8 @@
 
 <type name="detector-block">
   <component type="detector-pixel">
-  <locations x="0.07875" x-end="0.00125" n-elements="32" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel" name-count-start="1"/>
-  <locations x="-0.00125" x-end="-0.07875" n-elements="32" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0" name="pixel" name-count-start="33"/>
+  <locations x="0.07875" x-end="0.00125" n-elements="32" y="0" z="0" rot="-90" name="pixel" name-count-start="1"/>
+  <locations x="-0.00125" x-end="-0.07875" n-elements="32" y="0" z="0" name="pixel" name-count-start="33"/>
   </component>
 </type>
 
