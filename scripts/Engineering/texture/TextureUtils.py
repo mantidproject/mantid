@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from os import path, scandir
-from Engineering.texture.polefigure.polefigure_model import TextureProjection
-import sys
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
@@ -280,7 +278,7 @@ def fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs):
         peak_func = FunctionFactory.Instance().createPeakFunction("BackToBackExponential")
 
         # estimate starting params
-        intens, sigma, bg, x0 = _estimate_intensity_background_and_centre(window_ws, 0, 0, len(window_ws.readX(0)) - 1, peak)
+        intens, sigma, *_ = _estimate_intensity_background_and_centre(window_ws, 0, 0, len(window_ws.readX(0)) - 1, peak)
         peak_func.setCentre(peak)
         peak_func.setIntensity(intens)
         cen_par_name = peak_func.getCentreParameterName()
@@ -394,13 +392,9 @@ def get_initial_fit_function_and_kwargs_from_specs(
     # add parameter ties
     ties = []
 
-    # first background
+    # first tie background
     if tie_bkg:
-        function[0][1]["A0"] = np.mean(approx_bkgs)
-        for idom in range(1, function.nDomains()):
-            for ipar_bg in range(function[idom][1].nParams()):
-                par = function[idom][1].getParamName(ipar_bg)
-                ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
+        function, ties = _tie_bkg(function, approx_bkgs, ties)
 
     # then any other nominated parameters
     available_params = [base_peak_func.getParamName(i) for i in range(base_peak_func.nParams())]
@@ -661,6 +655,15 @@ def fit_all_peaks(
 
 
 # ~fitting utility functions~
+
+
+def _tie_bkg(function, approx_bkgs, ties):
+    function[0][1]["A0"] = np.mean(approx_bkgs)
+    for idom in range(1, function.nDomains()):
+        for ipar_bg in range(function[idom][1].nParams()):
+            par = function[idom][1].getParamName(ipar_bg)
+            ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
+    return function, ties
 
 
 def _get_rebin_params_for_workspaces(wss: Sequence[str] | Sequence[Workspace2D]):
