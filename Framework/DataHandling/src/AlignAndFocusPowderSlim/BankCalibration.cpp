@@ -124,11 +124,15 @@ BankCalibrationFactory::BankCalibrationFactory(const std::map<detid_t, double> &
 std::vector<BankCalibration> BankCalibrationFactory::getCalibrations(const double time_conversion,
                                                                      const size_t bank_index) const {
 
+  std::vector<BankCalibration> calibrations;
+
   // When arbitrary grouping is used, we need to calculate the intersection of each group with the bank detids. The
   // intersection may be empty which means that no detectors from that bank are in this group.
+  if (!m_bank_detids.contains(bank_index))
+    return calibrations; // empty
+
   const auto &bank_detids = m_bank_detids.at(bank_index);
 
-  std::vector<BankCalibration> calibrations;
   calibrations.reserve(m_grouping.size());
 
   std::transform(m_grouping.begin(), m_grouping.end(), std::back_inserter(calibrations),

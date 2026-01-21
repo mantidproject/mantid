@@ -21,7 +21,6 @@ As a result, there is a significantly smaller memory usage and the processing is
 
 Current limitations compared to ``AlignAndFocusPowderFromFiles``
 
-- only supports the VULCAN instrument
 - does not support copping data
 - does not support removing prompt pulse
 
