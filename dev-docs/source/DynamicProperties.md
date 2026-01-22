@@ -1,7 +1,8 @@
 # Dynamic dialog properties
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Overview
 

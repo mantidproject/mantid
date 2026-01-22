@@ -1,8 +1,8 @@
 # Libraries
 
-::: {.contents local=""}
-Contents
-:::
+```{contents}
+:local:
+```
 
 ## Summary
 

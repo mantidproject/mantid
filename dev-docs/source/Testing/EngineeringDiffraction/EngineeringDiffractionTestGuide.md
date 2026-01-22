@@ -1,8 +1,8 @@
 # Engineering Diffraction Testing
 
-::: {.contents local=""}
-Table of Contents
-:::
+```{contents}
+:local:
+```
 
 ## Preamble
 
@@ -245,11 +245,7 @@ width="600" alt="image" />
 This test covers the loading and plotting focused data in the fitting
 tab.
 
-::: {.note}
-::: {.title}
-Note
-:::
-
+```{note}
 Sometimes it will be tricky to load ENGINX files from the archive and
 the red `*` next to the `Browse` button won't disappear. Proceeding with
 the red `*` will raise an error saying
@@ -258,7 +254,7 @@ the red `*` will raise an error saying
 try re-entering the text and wait till the red `*` is cleared before
 proceeding. If the log level is set to Information, found path = 1 will
 be visible in the message log when the runs are found from the archive.
-:::
+```
 
 1.  Ensure you can access the ISIS data archive. In the `Calibration`
     tab, select `Create New Calibration` and enter `Calibration sample`

@@ -1,7 +1,8 @@
 # Unit Test Good Practice
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## General Guidance
 

@@ -1,7 +1,8 @@
 # Sample Transmission Calculator Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Introduction
 

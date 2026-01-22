@@ -1,7 +1,8 @@
 # Event Workspace Development
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 The following information will be useful to you if you want to write an
 `algorithm` that is `Event Workspace <EventWorkspace>` aware.
@@ -19,15 +20,11 @@ class holds information for each neutron detection event data:
 - tof: Time-of-flight of the neutron, in microseconds, as a double. Note
   that this field can be converted to other units, e.g. d-spacing.
 
-::: {.tip}
-::: {.title}
-Tip
-:::
-
+```{tip}
 There are in fact several variants of the Event type within Mantid. The
 common by far is the RAW TOF described above, but there are also
 `Weighted` events that offer better compression.
-:::
+```
 
 ## Lists of Events (EventList)
 

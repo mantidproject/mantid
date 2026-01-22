@@ -1,7 +1,8 @@
 # Conda Package Manager
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 Mantid uses [conda](https://docs.conda.io/en/latest/) as its package
 management system. This document gives a developer overview on how we

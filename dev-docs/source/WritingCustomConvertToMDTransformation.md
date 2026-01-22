@@ -1,7 +1,8 @@
 # Writing a Custom ConvertToMD Transformation
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Introduction
 

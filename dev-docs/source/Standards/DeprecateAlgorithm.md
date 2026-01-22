@@ -1,7 +1,8 @@
 # Deprecating an Algorithm
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 When the lifetime of an algorithm reaches its limit, it is good practice
 to signal developers and users of this fact. This signal gives them time
@@ -95,13 +96,9 @@ To prevent the previous error and instead print a log error message,
 <span class="title-ref">algorithms.deprecated</span> can be left unset
 or set to "`Log`".
 
-::: {.note}
-::: {.title}
-Note
-:::
-
+```{note}
 Debug builds set `algorithms.deprecated` to `Raise`, the purpose is
 twofold. First, prevent developers from introducing new source invoking
 deprecated algorithms. Second, encourage developers to refactor existing
 source that invokes deprecated algorithms.
-:::
+```

@@ -1,7 +1,8 @@
 # Python vs C++ Algorithms
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Overview
 

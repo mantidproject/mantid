@@ -1,7 +1,8 @@
 # Instrument Viewer Widget
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Overview
 

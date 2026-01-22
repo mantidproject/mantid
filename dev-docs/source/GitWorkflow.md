@@ -1,8 +1,8 @@
 # Mantid Git Workflow
 
-::: {.contents local=""}
-Contents
-:::
+```{contents}
+:local:
+```
 
 ## Summary
 

@@ -8,13 +8,12 @@ currently used to implement the tree component of the Batch Widget.
 It is written in C++ and exposed to python through SIP leading to
 similar APIs as shown by the examples below.
 
-::: {.literalinclude}
-CodeExamples/init.py
-:::
+```{literalinclude} CodeExamples/init.py
+```
 
-::: {.literalinclude language="c++"}
-CodeExamples/init.cpp
-:::
+```{literalinclude} CodeExamples/init.cpp
+:language: c++
+```
 
 ## API Concepts
 
@@ -88,9 +87,8 @@ order to update the cell or cells corresponding to a row, the methods
 `setCellAt` or `setCellsAt` should be used. This process is illustrated
 in the example code below.
 
-::: {.literalinclude}
-CodeExamples/change_color.py
-:::
+```{literalinclude} CodeExamples/change_color.py
+```
 
 ### Subtrees
 
@@ -121,9 +119,9 @@ representation of a subtree in this API.
 communicates events such as key presses to the presenter in an MVP
 setup.
 
-::: {.literalinclude language="c++"}
-CodeExamples/init_with_custom_subscriber.cpp
-:::
+```{literalinclude} CodeExamples/init_with_custom_subscriber.cpp
+:language: c++
+```
 
 This interface is also implemented by `JobTreeViewSignalAdapter` which
 makes it easy to use signals and slots instead when writing a GUI from
@@ -136,23 +134,18 @@ Therefore, if a presenter determines that said action is on-reflection
 invalid it will be required to call a method which updates the view and
 rolls back the action. This is illustrated in the example below.
 
-::: {.literalinclude}
-CodeExamples/depth_limit_example.py
-:::
+```{literalinclude} CodeExamples/depth_limit_example.py
+```
 
 Other events (those who's notification method name ends with
 `Requested`) require the presenter to update the view and/or model and
 so the notification happens before the view has been updated.
 
-::: {.warning}
-::: {.title}
-Warning
-:::
-
+```{warning}
 After creating a `JobTreeView` it is important to call the `subscribe`
 method passing in the subscriber prior to calling any other methods,
 failure to do so may result in undefined behavior.
-:::
+```
 
 ### Filtering
 
@@ -166,9 +159,8 @@ implemented by implementations of such predicates. The method
 `filterRowsBy` defined in `JobTreeView` can be used to set the currently
 active filter as demonstrated by the code below.
 
-::: {.literalinclude}
-CodeExamples/filtering.py
-:::
+```{literalinclude} CodeExamples/filtering.py
+```
 
 The method `resetFilter` is used to unset the filter so that all items
 are shown again and the `hasFilter` method is used to determine if the

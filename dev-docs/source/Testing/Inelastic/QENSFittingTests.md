@@ -1,7 +1,8 @@
 # Inelastic QENS Fitting Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 *Prerequisites*
 

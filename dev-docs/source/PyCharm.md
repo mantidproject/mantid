@@ -1,7 +1,8 @@
 # PyCharm
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Selecting PyCharm versions
 
@@ -115,11 +116,7 @@ the debugging using Workbench.
 - Alternatively you can click the green bug next to the green play
   button to start a debug session.
 
-::: {.note}
-::: {.title}
-Note
-:::
-
+```{note}
 On Windows, you may see the following error when launching workbench in
 debug mode:
 
@@ -142,13 +139,9 @@ ignoring the packages that depend on debugpy. Note that the Mamba
 implementation of `remove --force` did not skip dependency checking
 until version 1.5.2 (October 2023). If your version of Mamba is older
 than this, use the conda command.
-:::
+```
 
-::: {.note}
-::: {.title}
-Note
-:::
-
+```{note}
 macOS developers will see the warning from Qt in the terminal:
 
 `An OpenGL surfcace format was requested that is either not version 3.2 or higher or a not Core Profile.`
@@ -158,7 +151,7 @@ macOS developers will see the warning from Qt in the terminal:
 It can be safely ignored but is present as a reminder of some deprecated
 OpenGL functionality being used. It is only visible to developers and
 the spelling mistake is real.
-:::
+```
 
 ## Debug Python in unit tests
 

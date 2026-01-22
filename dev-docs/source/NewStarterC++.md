@@ -1,7 +1,8 @@
 # New Starter C++
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Prerequisites
 

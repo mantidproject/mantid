@@ -1,7 +1,8 @@
 # Error Reporter Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Error Reporter test
 

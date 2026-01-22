@@ -1,5 +1,8 @@
 # Muon Analysis Test Guides
 
-::: {.toctree glob="" maxdepth="1"}
-- 
-:::
+```{toctree}
+:maxdepth: 1
+:glob:
+
+*
+```

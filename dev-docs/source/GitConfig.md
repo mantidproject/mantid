@@ -1,8 +1,8 @@
 # Mantid Git Config
 
-::: {.contents local=""}
-Contents
-:::
+```{contents}
+:local:
+```
 
 ## Summary
 

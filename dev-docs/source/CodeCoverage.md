@@ -1,7 +1,8 @@
 # Generating code coverage
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## C++
 

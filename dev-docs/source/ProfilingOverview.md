@@ -1,7 +1,8 @@
 # Profiling Overview
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 Profiling can mean a few different things, so here are the current ways!
 Many of these work only on certain platforms and this document will note

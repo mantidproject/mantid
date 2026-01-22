@@ -1,7 +1,8 @@
 # Load Algorithm Hook
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## The Load Algorithm
 

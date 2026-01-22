@@ -1,7 +1,8 @@
 # DGS Reduction Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Set up
 

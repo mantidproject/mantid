@@ -1,7 +1,8 @@
 # Building with CMake
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 CMake is the build system for the entirety of Mantid (Framework,
 MantidQt and MantidWorkbench). It is used to generate native build files

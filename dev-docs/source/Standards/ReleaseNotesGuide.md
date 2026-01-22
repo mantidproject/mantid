@@ -1,7 +1,8 @@
 # Release Notes Guide
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 This page gives an overview of the release note process for Mantid.
 

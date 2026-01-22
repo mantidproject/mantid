@@ -1,8 +1,8 @@
 # The Automated Build Process
 
-::: {.contents local=""}
-Contents
-:::
+```{contents}
+:local:
+```
 
 ## Summary
 

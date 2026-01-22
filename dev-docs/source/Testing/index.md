@@ -16,17 +16,29 @@ all situations gracefully.
 When encountering issues during testing, please create issues. The
 procedure for issue creation is outlined in `issue_tracking`.
 
-::: {.toctree maxdepth="1"}
-Core/Core Direct/ALFViewTests Direct/DGSReductionTests
-Direct/MSliceTestGuide SliceViewer/SliceViewer
-MuonAnalysis_test_guides/index ElementalAnalysis/ElementalAnalysisTests
-Indirect/DiffractionTests Indirect/DataReductionTests
-Inelastic/CorrectionsTests Inelastic/DataProcessorTests
-Inelastic/QENSFittingTests Inelastic/BayesFittingTests
+```{toctree}
+:maxdepth: 1
+
+Core/Core
+Direct/ALFViewTests
+Direct/DGSReductionTests
+Direct/MSliceTestGuide
+SliceViewer/SliceViewer
+MuonAnalysis_test_guides/index
+ElementalAnalysis/ElementalAnalysisTests
+Indirect/DiffractionTests
+Indirect/DataReductionTests
+Inelastic/CorrectionsTests
+Inelastic/DataProcessorTests
+Inelastic/QENSFittingTests
+Inelastic/BayesFittingTests
 EngineeringDiffraction/EngineeringDiffractionTestGuide
 ErrorReporter-ProjectRecovery/ErrorReporterTesting
 ErrorReporter-ProjectRecovery/ProjectRecoveryTesting
-LiveData/LiveDataTests ReflectometryGUI/ReflectometryGUITests
-SANSGUI/ISISSANSGUITests General/SampleTransmissionCalculatorTestGuide
-Utility/FilterEventsInterfaceTest Documentation/DocumentationTest
-:::
+LiveData/LiveDataTests
+ReflectometryGUI/ReflectometryGUITests
+SANSGUI/ISISSANSGUITests
+General/SampleTransmissionCalculatorTestGuide
+Utility/FilterEventsInterfaceTest
+Documentation/DocumentationTest
+```

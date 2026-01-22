@@ -3,9 +3,9 @@
 These standards relate specifically to the implementation of the Mantid
 framework and the workbench application.
 
-::: {.contents local=""}
-Contents
-:::
+```{contents}
+:local:
+```
 
 ## General Notes on Naming
 
@@ -34,11 +34,9 @@ developers to use clear and concise names during the renaming process.
 Generally speaking, the name of a algorithm can contain up to **four**
 sections:
 
-::: {.admonition}
-Mantid Algorithm Naming Convention
-
+```{admonition} Mantid Algorithm Naming Convention
 \[Technique\] \[Instrument/Facility\] Action Target
-:::
+```
 
 - Technique
 
@@ -89,14 +87,10 @@ Mantid Algorithm Naming Convention
   </tbody>
   </table>
 
-  ::: {.note}
-  ::: {.title}
-  Note
-  :::
-
+  ```{note}
   The table above is a work in progress as more abbreviations will be
   added in the future.
-  :::
+  ```
 
 - Instrument/Facility
 
@@ -145,14 +139,10 @@ Mantid Algorithm Naming Convention
   </tbody>
   </table>
 
-  ::: {.note}
-  ::: {.title}
-  Note
-  :::
-
+  ```{note}
   The table above is a work in progress as more abbreviations will be
   added in the future.
-  :::
+  ```
 
   - Here are some commonly used abbreviations of instruments
 
@@ -184,14 +174,13 @@ Mantid Algorithm Naming Convention
   end, namely a target. Depending on the action, sometimes the target
   can be omitted if it is self evident (such as `LoadFiles` can be
   simplified into `Load`).
-
-::: {.admonition}
+``` {.admonition}
 Example
 
 `SCDCalibratePanels` indicates this is a algorithm designed for single
 crystal diffraction technique that is not tied to a specific instrument
 or facility. It performs calibration of panel type detectors.
-:::
+```
 
 Algorithm names start with a capital letter and have a capital letter
 for each new word, with no underscores. Use alphabet and numeric

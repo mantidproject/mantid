@@ -1,60 +1,20 @@
 # Writing An Algorithm
 
-::: {.contents local=""}
-:::
-
-## Introduction
-
-Mantid's `plugin <Plugin>` architecture has been engineered so that it
-is easy for a developer, or intrepid user, to write an algorithm. This
-page is a primer for the user about to write their first algorithm and
-assumes no great knowledge of C++. It covers the basics, with links to
-more advanced options where appropriate. There is special description
-for the case when you are looking to add a custom
-`MD conversion plugin <WritingCustomConvertToMDTransformation>`.
-
-Alternatively, you can implement your algorithm in
-`Python <emwp_intro>`. Prototyping your algorithm in Python can be
-faster with features like hot-reloading. See
-`Python Vs C++ Algorithms <PythonVSCppAlgorithms>` for a comparison of
-Mantid's two programming languages.
-
-All `algorithms <Algorithms List>` in Mantid
-[inherit](http://en.wikipedia.org/wiki/Inheritance_(computer_science))
-from a base `Algorithm` class, which provides the support and services
-required for running a specific algorithm and greatly simplifies the
-process of writing a new one.
-
-## Getting Started
-
-Creating a new algorithm is simplified using
-`class_maker.py <class_maker_py>`
-
-``` bash
-$ python buildconfig/class_maker.py --alg Algorithms MyAlg
-```
-
-which will give an amount of information about all that it did. The
-intentionally failing unit test, `MyAlgTest.h`, and user docs,
-`MyAlg-v1.rst`, will not be described here, but need to be updated
-before contributing. The excerpts below are the files created and
-formatted using the `pre-commit` hooks configured for c++ files. The
-exact contents of the generated code may change, the methods required do
-not.
-
-**Header file** `MyAlg_initial.h <cppalgexample/MyAlg_initial.h>` from
-`class_maker.py`
-
-::: {.literalinclude language="cpp" lines="7-" linenos=""}
+```{contents}
+:local:
+``` {.literalinclude language="cpp" lines="7-" linenos=""}
 cppalgexample/MyAlg_initial.h
 :::
 
 **Source file** `MyAlg_initial.cpp <cppalgexample/MyAlg_initial.cpp>`
 from `class_maker.py`
 
-::: {.literalinclude language="cpp" lineno-start="8" lines="8-" linenos=""}
-cppalgexample/MyAlg_initial.cpp
-:::
+```{literalinclude} cppalgexample/MyAlg_initial.cpp
+:language: cpp
+:lines: 8-
+:linenos:
+:lineno-start: 8
+```
 
 At this point you will already have something that will compile and run.
 If you then start MantidWorkbench your algorithm will appear in the list
@@ -72,9 +32,12 @@ The full files described below are `MyAlg.h <cppalgexample/MyAlg.h>` and
 detail, but both are functional code that can be viewed as "simple"
 examples.
 
-::: {.literalinclude language="cpp" lineno-start="28" lines="28-38" linenos=""}
-cppalgexample/MyAlg.cpp
-:::
+```{literalinclude} cppalgexample/MyAlg.cpp
+:language: cpp
+:lines: 28-38
+:linenos:
+:lineno-start: 28
+```
 
 The `name()` method should not be verified.
 
@@ -138,9 +101,12 @@ for further guidance on how to use them. There are many overloaded
 signatures for `declareProperty()` which are intended to make things
 easier, but can often be confusing due to the many options available.
 
-::: {.literalinclude language="cpp" lineno-start="43" lines="43-57" linenos=""}
-cppalgexample/MyAlg.cpp
-:::
+```{literalinclude} cppalgexample/MyAlg.cpp
+:language: cpp
+:lines: 43-57
+:linenos:
+:lineno-start: 43
+```
 
 This example shows a couple of different ways of declaring properites.
 They all have a couple of features in common:
@@ -192,9 +158,12 @@ bear in mind that the user could provide a `WorkspaceGroup` (or an
 unexpected type of workspace) - when retrieving the property, check that
 casting it to its intended type succeeded before attempting to use it.
 
-::: {.literalinclude language="cpp" lineno-start="58" lines="58-70" linenos=""}
-cppalgexample/MyAlg.cpp
-:::
+```{literalinclude} cppalgexample/MyAlg.cpp
+:language: cpp
+:lines: 58-70
+:linenos:
+:lineno-start: 58
+```
 
 ## Execution
 
@@ -223,9 +192,12 @@ Before the data can be processed, the first task is likely to be to
 fetch the values of the input properties. This uses the `getProperty()`
 method as follows
 
-::: {.literalinclude language="cpp" lineno-start="76" lines="76-79" linenos=""}
-cppalgexample/MyAlg.cpp
-:::
+```{literalinclude} cppalgexample/MyAlg.cpp
+:language: cpp
+:lines: 76-79
+:linenos:
+:lineno-start: 76
+```
 
 where the type in the left hand side is the type of the property (`int`,
 `double`, `std::string`, `std::vector`...) and must match what was
@@ -268,17 +240,23 @@ where `inputWS` is a shared pointer to the input workspace. However, in
 many instances, one can simply clone the input workspace and work on the
 clone directly.
 
-::: {.literalinclude language="cpp" lineno-start="81" lines="81-85" linenos=""}
-cppalgexample/MyAlg.cpp
-:::
+```{literalinclude} cppalgexample/MyAlg.cpp
+:language: cpp
+:lines: 81-85
+:linenos:
+:lineno-start: 81
+```
 
 It is also important to, at some point, set the output workspace
 property to point at this workspace. This is achieved through a call to
 the `setProperty` method as follows:
 
-::: {.literalinclude language="cpp" lineno-start="109" lines="109-110" linenos=""}
-cppalgexample/MyAlg.cpp
-:::
+```{literalinclude} cppalgexample/MyAlg.cpp
+:language: cpp
+:lines: 109-110
+:linenos:
+:lineno-start: 109
+```
 
 where `outputWorkspace` is a shared pointer to the created output
 workspace.

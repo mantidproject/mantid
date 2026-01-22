@@ -1,7 +1,8 @@
 # Patch Release Checklist
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 These are the steps involved in performing a Mantid patch release. To
 perform a full release see `ReleaseChecklist`.

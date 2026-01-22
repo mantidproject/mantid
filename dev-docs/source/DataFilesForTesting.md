@@ -1,7 +1,8 @@
 # Data Files for Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Summary
 

@@ -1,7 +1,8 @@
 # Matplotlib in C++
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Overview
 

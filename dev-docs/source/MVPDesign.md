@@ -1,7 +1,8 @@
 # MVP Design
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Summary
 

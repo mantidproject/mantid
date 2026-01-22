@@ -1,11 +1,7 @@
-::: {.note}
-::: {.title}
-Note
-:::
-
+```{note}
 These tools generally require `sudo` permissions to configure the system
 to allow them to get information.
-:::
+```
 
 # Profiling with perf
 
@@ -16,16 +12,12 @@ originally gained from [Nick Tompson's Performance Tuning
 Tutorail](https://github.com/NAThompson/performance_tuning_tutorial)
 held at Oak Ridge National Laboratory.
 
-::: {.note}
-::: {.title}
-Note
-:::
-
+```{note}
 perf is a sampling based performance tool. This means the results are
 percentages rather than absolute times. However, many visualizations
 will associate times as well. Disk access issues are almost completely
 invisible to perf-based tools.
-:::
+```
 
 ## Install and configure
 

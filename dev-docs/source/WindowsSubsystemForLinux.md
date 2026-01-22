@@ -1,7 +1,8 @@
 # Windows Subsystem for Linux (WSL2)
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 The Windows Subsystem for Linux lets developers run a Linux environment
 directly on Windows, unmodified, without the overhead of a traditional

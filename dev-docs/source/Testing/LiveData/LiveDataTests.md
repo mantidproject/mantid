@@ -1,7 +1,8 @@
 # Live Data Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Introduction
 

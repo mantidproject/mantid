@@ -1,7 +1,8 @@
 # Inelastic Data Processor Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 *Prerequisites*
 
