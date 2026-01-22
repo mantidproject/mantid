@@ -215,7 +215,7 @@ configuration list in `launch.json`.
 ```
 
 The `--single-process` flag is necessary for debugging. See the
-[Running Workbench](RunningWorkbench) documentation for more
+`RunningWorkbench` documentation for more
 information.
 
 If this fails, try adding the following environment variables:
@@ -227,7 +227,7 @@ If this fails, try adding the following environment variables:
 ],
 ```
 
-where the correct value for the [Ld Preload](LD_PRELOAD) environment variable can be
+where the correct value for the `LD_PRELOAD` environment variable can be
 found in Path/To/Build/Directory/bin/launch_mantidworkbench.sh.
 
 ```{note}

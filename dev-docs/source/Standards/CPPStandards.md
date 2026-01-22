@@ -126,7 +126,7 @@ characters). This is helped by sensible and consistent (across the
 project) use of abbreviations.
 
 - **Constants** (including static const members): All upper case.
-  Internal words separated by underscore eg: [Error No Data](ERROR_NO_DATA)
+  Internal words separated by underscore eg: `ERROR_NO_DATA`
 
 - **Classes, namespaces, structs, enums (and enum values) and
   typedefs**: PascalCase (First letter upper case, then lower case.
@@ -158,7 +158,7 @@ project) use of abbreviations.
     `#define`, and functions should be used in favour of macros.
 2.  `#include` statements should use quotes (`""`) for inclusion of
     Mantid code and angle brackets (`<>`) for system files (this
-    includes headers from [Third Party](Third_Party))
+    includes headers from `Third_Party`)
 3.  All header files should have guards against repeated inclusion, with
     the guard flags named consistently. (See
     [here](https://en.wikipedia.org/wiki/Include_guard) for an
@@ -260,8 +260,8 @@ readability and maintenance.
     `if (x != 0)` rather than `if(x)`
 2.  The new style type casting must be used in place of the old C style
     type casts. If casting up or down an inheritance hierarchy, use
-    [Dynamic Cast](dynamic_cast) (which performs a run-time type check) rather than
-    [Static Cast](static_cast).
+    `dynamic_cast` (which performs a run-time type check) rather than
+    `static_cast`.
 3.  Function calls with side effects, and the `++`/`--`/assignment
     operators, should only be called as a standalone statement rather
     than embedded inside an expression.
@@ -339,7 +339,7 @@ into account the use of the code.
 4.  All error status values returned from a function call must be
     checked or explicitly ignored. (To explicitly ignore a function
     call's return value cast it to void, e.g. `(void) f(a, b);`)
-5.  When using [Dynamic Cast](dynamic_cast) on a pointer, a check must be made that
+5.  When using `dynamic_cast` on a pointer, a check must be made that
     the result is not `null` (i.e. that the cast was successful).
 6.  Destructors must not throw any exceptions, directly or indirectly.
     (Exceptions encountered while calling destructors during stack
@@ -380,7 +380,7 @@ problems that Cppcheck found in the codebase. It has two functions:
 
 When modifying a `.cpp` file, it is likely that changes in line numbers
 will cause once-suppressed errors to trigger again. Similar to the rules
-in [Cpp Modernization](CppModernization), these issues should be fixed as part of the same
+in `CppModernization`, these issues should be fixed as part of the same
 unit of work that revealed them.
 
 ### Suppressing False Positives

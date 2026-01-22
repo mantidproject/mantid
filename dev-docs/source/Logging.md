@@ -37,7 +37,7 @@ For the logging to work you will need to have configured the logging
 service. This will occur when you do either of the following:
 
 - Call `FrameworkManager.initialise()`
-- Get a reference to the [Config Service](ConfigService) singleton
+- Get a reference to the `ConfigService` singleton
 
 When the framework is initialised, it attempts to read a file called
 `Mantid.properties` that it assumes will be available in the current
@@ -67,7 +67,7 @@ This specifies that the logging comments will go to the console as well
 as a file called `mantid.log`. In the example here the level is set to
 debug, so all the messages will be output. In production this will
 usually be set to information. One could also alter the logging level
-programmatically using [Config Service](ConfigService). For example, in `python`:
+programmatically using `ConfigService`. For example, in `python`:
 
 ``` python
 ConfigService.setLogLevel(7) # debug
@@ -133,7 +133,7 @@ log = logging.getLogger('Mantid')
 logger.information('This message is send to `log` defined above.')
 ```
 
-Note that [Log To Python](log_to_python) overwrites the existing setup. If you need
+Note that `log_to_python` overwrites the existing setup. If you need
 more control, you can use `'PythonLoggingChannel'` as a channel class in
 the config as described above.
 

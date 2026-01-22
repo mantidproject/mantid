@@ -57,7 +57,7 @@ python3 -m pip install yappi --user
 ```
 
 KCachegrind can be used to view profiling data, see
-[Profiling With Valgrind](ProfilingWithValgrind) for more details on usage.
+`ProfilingWithValgrind` for more details on usage.
 
 ## Profiling in C++
 
@@ -70,21 +70,21 @@ information. See [AlgorithmProfiler](AlgorithmProfiler) for details.
 
 #### Linux
 
-[Profiling With Perf](ProfilingWithPerf) for details on perf and intel's vtune
+`ProfilingWithPerf` for details on perf and intel's vtune
 
-[Profiling With Valgrind](ProfilingWithValgrind) for details on using this tool
+`ProfilingWithValgrind` for details on using this tool
 
 [Callgrind/KCachegrind](http://kcachegrind.sourceforge.net/cgi-bin/show.cgi/KcacheGrindIndex)
 
 - KCachegrind visualizes callgrind output.
-- See [Profiling With Valgrind](ProfilingWithValgrind) for help on
+- See `ProfilingWithValgrind` for help on
   running callgrind
 
 [gperftools](https://github.com/gperftools/gperftools)
 
 - Takes snapshot of run and prints percentage of calls in functions
 
-[Profiling With Jemalloc](ProfilingWithJemalloc) for details on using `jemalloc`'s built-in
+`ProfilingWithJemalloc` for details on using `jemalloc`'s built-in
 profiling hooks
 
 See here for a list of other tools:
