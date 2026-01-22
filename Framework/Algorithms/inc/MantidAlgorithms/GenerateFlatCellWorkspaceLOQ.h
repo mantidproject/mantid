@@ -30,6 +30,7 @@ public:
 
   /// Algorithm's category for identification
   const std::string category() const override { return "SANS"; }
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   struct FlatCellStats {

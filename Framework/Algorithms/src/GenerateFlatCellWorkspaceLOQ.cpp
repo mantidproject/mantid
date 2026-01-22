@@ -78,6 +78,18 @@ void GenerateFlatCellWorkspaceLOQ::scale(std::span<double> values, double factor
   std::transform(values.begin(), values.end(), values.begin(), [factor](double x) { return x * factor; });
 }
 
+std::map<std::string, std::string> GenerateFlatCellWorkspaceLOQ::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  const size_t nHist = inputWS->getNumberHistograms();
+  if (nHist != LoqMeta::histograms()) {
+    result["InputWorkspace"] = "Expected an EventWorkspace with exactly 17776 histograms "
+                               "for SANS ISIS reduction of LOQ.";
+  }
+  return result;
+}
+
 /** Execution code.
  *  @throw std::runtime_error If nHist not equal to 17776.
  */
@@ -85,13 +97,6 @@ void GenerateFlatCellWorkspaceLOQ::exec() {
 
   // Get the input WS
   EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
-
-  // Validate the number of histograms in the Input WS
-  const size_t nHist = inputWS->getNumberHistograms();
-  if (nHist != LoqMeta::histograms()) {
-    throw std::runtime_error(
-        "The expected number of histograms in the event workspace should be 17776 for SANS ISIS reduction of LOQ.");
-  }
 
   // Create output workspace
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS, LoqMeta::histograms(), 1, 1);
@@ -108,6 +113,7 @@ void GenerateFlatCellWorkspaceLOQ::exec() {
   FlatCellStats stats = normalizeBanks(valuesSpan);
 
   // Save the Y data into the output WS
+  const size_t nHist = inputWS->getNumberHistograms();
   for (size_t i = 0; i < nHist; ++i) {
     auto &Y = outputWS->mutableY(i);
     Y[0] = valuesSpan[i];
@@ -151,7 +157,7 @@ std::vector<double> GenerateFlatCellWorkspaceLOQ::extractIntegratedValues(const 
   values.reserve(nHist);
   for (size_t i = 0; i < nHist; ++i) {
     const auto &Y = ws->readY(i);
-    values.insert(values.end(), Y.begin(), Y.end());
+    values.insert(values.end(), Y.cbegin(), Y.cend());
   }
   return values;
 }

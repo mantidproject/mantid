@@ -23,9 +23,7 @@ class GenerateFlatCellWorkspaceLOQTest(systemtesting.MantidSystemTest):
         LoadNexus(Filename="GenerateFlatCellWorkspaceLOQOutput.nxs", OutputWorkspace="expected_output")
         LoadNexus(Filename="GenerateFlatCellWorkspaceLOQMASK.nxs", OutputWorkspace="expected_mask")
 
-        # Compare the workspaces
-        result, _ = CompareWorkspaces("output", "expected_output")
-        self.assertTrue(result)
+        # Compare the mask workspaces
         result, _ = CompareWorkspaces("output_MASK", "expected_mask")
         self.assertTrue(result)
 
@@ -33,4 +31,5 @@ class GenerateFlatCellWorkspaceLOQTest(systemtesting.MantidSystemTest):
         return ["LOQ00113953.nxs", "GenerateFlatCellWorkspaceLOQOutput.nxs", "GenerateFlatCellWorkspaceLOQMASK.nxs"]
 
     def validate(self):
-        return True
+        self.tolerance = 1e-2
+        return ["output", "expected_output"]

@@ -107,6 +107,11 @@ void MaskDetectorsIf::exec() {
       nspec_end = nspec;
     }
   }
+  if (nspec_end < nspec_start) {
+    g_log.error() << "Provided EndWorkspaceIndex (" << nspec_end << ") is smaller than StartWorkspaceIndex ("
+                  << nspec_start << "); " << this->name() << " will do nothing.\n";
+    return;
+  }
   for (int i = nspec_start; i <= nspec_end; ++i) {
     // Get the list of udets contributing to this spectra
     const auto &dets = m_inputW->getSpectrum(i).getDetectorIDs();
