@@ -60,12 +60,11 @@ class NotebookView:
     def pick_detectors(self, detector_ids: list[int] | np.ndarray, sum_spectra: bool = True) -> Optional[Axes]:
         return self._presenter.pick_detectors(detector_ids, sum_spectra)
 
-    def _plot_spectra(self, workspace: Workspace2D, sum_spectra: bool) -> Axes:
-        if workspace is not None and workspace.getNumberHistograms() > 0:
-            spectra = workspace.getSpectrumNumbers()
-            _, detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
-            for spec in spectra:
-                detector_spectrum_axes.plot(workspace, specNum=spec, label=f"Spectrum {spec}" if not sum_spectra else None)
-            if not sum_spectra:
-                detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
-            return detector_spectrum_axes
+    def plot_spectra(self, workspace: Workspace2D, sum_spectra: bool) -> Axes:
+        spectra = workspace.getSpectrumNumbers()
+        _, detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
+        for spec in spectra:
+            detector_spectrum_axes.plot(workspace, specNum=spec, label=f"Spectrum {spec}" if not sum_spectra else None)
+        if not sum_spectra:
+            detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
+        return detector_spectrum_axes
