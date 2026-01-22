@@ -8,7 +8,7 @@
 
 We use [CTest](https://cmake.org/cmake/help/latest/manual/ctest.1.html)
 for building and running our unit tests. This wraps the underlying
-[cxxtest](cxxtest) or other (e.g. pyunit) test code.
+[cxxtest](https://cxxtest.com/) or other (e.g. pyunit) test code.
 
 ## CMake/CTest: Command Line
 

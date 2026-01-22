@@ -153,11 +153,7 @@ sections:
   | **TOPAZ**     | Single-Crystal Diffractometer at BL-12, SNS          |
   | **WAND2**     | Wide-Angle Neutron Diffractometer at HB-2C, HFIR     |
 
-  ::: {.note}
-  ::: {.title}
-  Note
-  :::
-
+  ::: {note}
   The table above is a work in progress as more abbreviations will be
   added in the future.
   :::
@@ -174,9 +170,7 @@ sections:
   end, namely a target. Depending on the action, sometimes the target
   can be omitted if it is self evident (such as `LoadFiles` can be
   simplified into `Load`).
-``` {.admonition}
-Example
-
+```{admonition} Example
 `SCDCalibratePanels` indicates this is a algorithm designed for single
 crystal diffraction technique that is not tied to a specific instrument
 or facility. It performs calibration of panel type detectors.

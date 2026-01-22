@@ -58,11 +58,7 @@ Renaming a C++ algorithm can be achieved via the following steps:
 - \[Optional\] Inform the users about the name change once pull request
   is merged
 
-  ::: {.note}
-  ::: {.title}
-  Note
-  :::
-
+  ::: {note}
   Script `buildconfig/move_class.py` can help facilitate the file
   renaming process of an existing c++ algorithm. More specifically, this
   script will rename the header, source and unit test files, as well as
