@@ -41,16 +41,10 @@ add_subdirectory(Doxygen)
 add_subdirectory(ScriptRepository)
 
 # Build with MPI (Linux only)
-option(MPI_BUILD "Enable MPI options (Linux / RedHat only)" OFF)
-message(STATUS "CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}; MPI_BUILD=${MPI_BUILD}")
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  if(MPI_BUILD)
-    find_package(MPI REQUIRED)
-    find_package(Boost REQUIRED COMPONENTS mpi serialization)
-    message(STATUS "Boost_MPI_LIBRARY = ${Boost_MPI_LIBRARY}")
-
-    add_subdirectory(MPIAlgorithms)
-  endif()
+if(MPI_BUILD AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  message(STATUS "CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}; MPI_BUILD=${MPI_BUILD}")
+  message(STATUS "Boost_MPI_LIBRARY = ${Boost_MPI_LIBRARY}")
+  add_subdirectory(MPIAlgorithms)
 endif()
 
 # Add a custom target to build all of the Framework

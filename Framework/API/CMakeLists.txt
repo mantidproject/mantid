@@ -542,6 +542,10 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(API PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  if(MPI_BUILD)
+    target_compile_definitions(API PRIVATE MPI_BUILD)
+    target_link_libraries(API PRIVATE ${Boost_MPI_LIBRARY} ${MPI_CXX_LIBRARIES})
+  endif()
 endif()
 
 # Add to the 'Framework' group in VS

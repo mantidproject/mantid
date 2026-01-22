@@ -4,8 +4,6 @@ set(INC_FILES inc/MantidMPIAlgorithms/BroadcastWorkspace.h inc/MantidMPIAlgorith
               inc/MantidMPIAlgorithms/MPISerialization.h inc/MantidMPIAlgorithms/Chunking.h
 )
 
-set(TEST_FILES BroadcastWorkspaceTest.h GatherWorkspacesTest.h)
-
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")

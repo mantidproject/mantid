@@ -17,14 +17,15 @@ using namespace Mantid;
 
 class GatherWorkspacesTest : public CxxTest::TestSuite {
 public:
-  static GatherWorkspacesTest *createSuite() { return new GatherWorkspacesTest(); }
+  static GatherWorkspacesTest *createSuite() {
+    API::FrameworkManager::Instance();
+    return new GatherWorkspacesTest();
+  }
+
   static void destroySuite(GatherWorkspacesTest *suite) { delete suite; }
 
-private:
-  boost::mpi::environment env;
-
 public:
-  GatherWorkspacesTest() { API::FrameworkManager::Instance(); }
+  GatherWorkspacesTest() = default;
 
   void testTheBasics() {
     MPIAlgorithms::GatherWorkspaces gatherer;
