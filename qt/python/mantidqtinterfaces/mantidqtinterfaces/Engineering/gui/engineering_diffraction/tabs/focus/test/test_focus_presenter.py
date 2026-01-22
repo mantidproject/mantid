@@ -81,7 +81,10 @@ class FocusPresenterTest(unittest.TestCase):
         self.view.is_searching.return_value = False
 
         self.assertFalse(self.presenter._validate())
-        create_error.assert_called_with(self.presenter.view, "Create or Load a calibration via the Calibration tab before focusing.")
+        create_error.assert_called_with(
+            self.presenter.view,
+            "Create or Load a calibration via the Calibration tab before focusing. Ensure that a Vanadium run has been set.",
+        )
 
     @patch(tab_path + ".presenter.create_error_message")
     def test_validate_while_searching(self, create_error):
