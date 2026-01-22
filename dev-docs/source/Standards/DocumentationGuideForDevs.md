@@ -16,22 +16,22 @@ css.
 ## Configuration
 
 The documentation is configured using CMake and assumes the instructions
-in the [Getting Started](GettingStarted) section have been followed.
+in the `GettingStarted` section have been followed.
 
 The following settings, relating to the documentation, are available:
 
-- [Docs Dotdiagrams](DOCS_DOTDIAGRAMS): If enabled then the workflow diagrams are
+- `DOCS_DOTDIAGRAMS`: If enabled then the workflow diagrams are
   generated and included otherwise a placeholder image is included with
   a caption indicating the processing is disabled. Default=OFF.
-- [Docs Screenshots](DOCS_SCREENSHOTS): If enabled then the automatic screenshots of
+- `DOCS_SCREENSHOTS`: If enabled then the automatic screenshots of
   algorithm dialogs and interfaces are included otherwise a placeholder
   image is included with a caption indicating the processing is
   disabled. Default=OFF.
-- [Docs Math Ext](DOCS_MATH_EXT): Extension used to provide the `:math:` processing
+- `DOCS_MATH_EXT`: Extension used to provide the `:math:` processing
   ability. Default=`sphinx.ext.mathjax` in CMake but this can be set to
   `sphinx.ext.imgmath` for clean package builds to remove the javascript
   dependency.
-- [Docs Plotdirective](DOCS_PLOTDIRECTIVE): If enabled then the `:plot:` directive is
+- `DOCS_PLOTDIRECTIVE`: If enabled then the `:plot:` directive is
   processed and the code/plots are included. WARNING: This can add
   ~15mins to the build time. Default=OFF.
 

@@ -8,7 +8,7 @@
 
 This page deals with the specifics of how to document an algorithm. For
 a more general guide to the Mantid documentation system see
-[Documentation Guide For Devs](DocumentationGuideForDevs).
+`DocumentationGuideForDevs`.
 
 ## How to Document an Algorithm
 
