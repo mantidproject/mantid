@@ -317,10 +317,8 @@ The current set of reusable items are:
 Icons are a contentious subject as they can in some cases cause more
 confusion and hinder more than they help. The NHS came up with a good
 set of rules for what icons should be used and this could be useful to
-designers, check out this [article. \<https://digital.nhs.uk
-/blog/transformation-blog/2019/icons-avoid-temptation-and-start-with
--user-needs\>](). It may fit a situation more to have a text button
-instead of an icon.
+designers, check out this [article](https://digital.nhs.uk/blog/transformation-blog/2019/icons-avoid-temptation-and-start-with-user-needs).
+It may fit a situation more to have a text button instead of an icon.
 
 Whilst having too many icons will confuse the average user there are
 cases where many cases where it would help, for example if a button does

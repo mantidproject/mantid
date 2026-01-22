@@ -26,7 +26,7 @@ support</em></figcaption>
 
 1.  Users can report bugs via the [Mantid Help
     Forum](https://forum.mantidproject.org/) or the [Mantid Help
-    Email](mantid-help@mantidproject.org), or from collected **Error
+    Email](mailto:mantid-help@mantidproject.org), or from collected **Error
     Reports**. Currently this is a quick first contact with the team,
     but doesn't give much detail about the usage or unexpected error.
 2.  The bug is verified and reproduced by the support team.

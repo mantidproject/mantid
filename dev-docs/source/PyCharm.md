@@ -18,8 +18,8 @@ installed from [here](https://jetbrains.com/pycharm/download/).
 ## Setup Python development environment with conda
 
 The assumption has been made that you have setup and built Mantid
-already, if you have not, please do so before hand by following, [this
-guide](GettingStarted/GettingStarted.html).
+already, if you have not, please do so before hand by following [this
+guide](GettingStarted/GettingStarted.md).
 
 At any point in these instructions where `DebugWithRelRuntime` is used
 (including in file paths), you can replace it with any other build type
@@ -166,7 +166,7 @@ Python module.
     should be a green play button, click that and it will let you start
     a debug or normal run of the tests.
 
-2.  
+2.
 
     A little more involved, but is easier to expand and test many things at once.
 
