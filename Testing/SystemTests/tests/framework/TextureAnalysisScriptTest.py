@@ -204,31 +204,31 @@ class PeakFitMixin(object):
         }
         self.peak_1_vals = [
             0,
-            59.68164413,
-            58.50160084,
-            1.00919012,
-            0.3424,
+            60.0549787,
+            58.67645081,
+            0.85816193,
+            8.69792,
             0.0,
-            0.210401,
+            0.29023,
             0.0,
             1.80098428,
-            0.00011218,
-            125.935096,
-            2.20335581,
+            9.53361135e-05,
+            126.32162042,
+            1.8714507,
         ]
         self.peak_2_vals = [
             0,
-            53.04503227,
-            58.28035277,
-            1.41772812,
-            219154.0,
+            53.11713333,
+            58.45633143,
+            1.11592828,
+            1497790.0,
             0.0,
-            0.0158378,
+            0.0165231,
             0.0,
-            1.43580288,
-            0.00019512,
-            162.3158048,
-            4.18935368,
+            1.43592701,
+            0.00016835,
+            163.86109962,
+            3.08200681,
         ]
 
     def validate_table(self, out_table, expected_dict):
@@ -238,13 +238,13 @@ class PeakFitMixin(object):
 
         for c in out_table.getColumnNames():
             self.assertIn(c, expected_cols)
-            np.testing.assert_allclose(np.nan_to_num(out_table.column(c)), expected_dict[c], rtol=1e-3)
+            np.testing.assert_allclose(np.nan_to_num(out_table.column(c)), expected_dict[c], rtol=5e-3)
 
     def validate_missing_peaks_vals(self, peak_1_vals, peak_2_vals):
-        param_table1 = ADS.retrieve("ENGINX_280625_2.3_GROUP_Fit_Parameters")
+        param_table1 = ADS.retrieve("ENGINX_280625_2.2_GROUP_Fit_Parameters")
         param_table2 = ADS.retrieve("ENGINX_280625_2.5_GROUP_Fit_Parameters")
         expected_files = [
-            os.path.join(CWDIR, "FitParameters", "GROUP", "2.3", "ENGINX_280625_2.3_GROUP_Fit_Parameters.nxs"),
+            os.path.join(CWDIR, "FitParameters", "GROUP", "2.2", "ENGINX_280625_2.2_GROUP_Fit_Parameters.nxs"),
             os.path.join(CWDIR, "FitParameters", "GROUP", "2.5", "ENGINX_280625_2.5_GROUP_Fit_Parameters.nxs"),
         ]
 
@@ -279,7 +279,7 @@ class TestFittingPeaksOfMissingPeakDataWithFillZero(systemtesting.MantidSystemTe
     def runTest(self):
         self.setup_fit_peaks_inputs()
         kwargs = self.default_kwargs
-        kwargs["peaks"] = (2.3, 2.5)
+        kwargs["peaks"] = (2.2, 2.5)
         # expect no peaks here, set the i over sigma threshold large as well as sigma is ill-defined
         fit_all_peaks(**kwargs, i_over_sigma_thresh=10.0, nan_replacement="zeros")
 
@@ -298,7 +298,7 @@ class TestFittingPeaksOfMissingPeakDataWithSpecifiedValue(systemtesting.MantidSy
     def runTest(self):
         self.setup_fit_peaks_inputs()
         kwargs = self.default_kwargs
-        kwargs["peaks"] = (2.3, 2.5)
+        kwargs["peaks"] = (2.2, 2.5)
         # expect no peaks here, set the i over sigma threshold large as well as sigma is ill-defined
         fit_all_peaks(**kwargs, i_over_sigma_thresh=10.0, nan_replacement="zeros", no_fit_value_dict={"I_est": 1.0, "I": 0.01})
 

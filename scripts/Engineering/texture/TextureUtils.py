@@ -27,6 +27,7 @@ from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from plugins.algorithms.IntegratePeaks1DProfile import calc_intens_and_sigma_arrays
 from Engineering.texture.xtal_helper import get_xtal_structure
+from Engineering.EnggUtils import convert_TOFerror_to_derror
 
 # import texture helper functions so they can be accessed by users through the TextureUtils namespace
 from Engineering.texture.texture_helper import plot_pole_figure
@@ -257,21 +258,40 @@ def validate_abs_corr_inputs(
 # -------- Fitting Script Logic--------------------------------
 
 
-def fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs):
-    rebin_params = _get_rebin_params_for_workspaces(wss)
-    for i, ws in enumerate(wss):
-        Rebin(ws, rebin_params, OutputWorkspace=f"rebin_{i}")
-        SumSpectra(f"rebin_{i}", OutputWorkspace=f"sum_{i}")
-    CloneWorkspace("sum_0", OutputWorkspace="sum_runs_ws")
-    for i in range(1, len(wss)):
-        AppendSpectra("sum_runs_ws", f"sum_{i}", OutputWorkspace="sum_runs_ws")
-    SumSpectra("sum_runs_ws", OutputWorkspace="sum_ws")
+def crop_and_rebin(ws, out_ws, lower, upper, rebin_params):
+    CropWorkspace(ws, lower, upper, OutputWorkspace="__tmp_peak_window")
+    Rebin("__tmp_peak_window", rebin_params, OutputWorkspace=out_ws)
 
+
+def _get_max_bin(ws):
+    xdat = ws.extractX()
+    return np.diff(xdat, axis=1).max()
+
+
+def crop_wss_and_combine(wss, peak, lower, upper, output):
+    cropped_rebinned_wss = [f"rebin_ws_{peak}_0"]
+    peak_window_ws = CropWorkspace(wss[0], lower, upper, OutputWorkspace="__peak_window_crop")
+    rebin_params = (lower, _get_max_bin(peak_window_ws), upper)
+    Rebin("__peak_window_crop", rebin_params, OutputWorkspace=f"rebin_ws_{peak}_0")
+    CloneWorkspace(InputWorkspace=f"rebin_ws_{peak}_0", OutputWorkspace=f"rebin_ws_{peak}")
+    for iws, ws in enumerate(wss[1:]):
+        intermediate_ws = f"rebin_ws_{peak}_{iws + 1}"
+        cropped_rebinned_wss.append(intermediate_ws)
+        crop_and_rebin(ws, intermediate_ws, lower, upper, rebin_params)
+        AppendSpectra(f"rebin_ws_{peak}", intermediate_ws, OutputWorkspace=f"rebin_ws_{peak}")
+    return SumSpectra(f"rebin_ws_{peak}", OutputWorkspace=output), cropped_rebinned_wss
+
+
+def fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs):
     x0_lims = []
+    all_peak_crop_wss = []
     for i, peak in enumerate(peaks):
         # set the ws bounds based on the supplied peak window
         low_bound, hi_bound = peak - peak_window, peak + peak_window
-        window_ws = CropWorkspace("sum_ws", low_bound, hi_bound, OutputWorkspace=f"peak_window_{i}")
+        window_ws, peak_crop_wss = crop_wss_and_combine(wss, peak, low_bound, hi_bound, f"peak_window_{i}")
+
+        # the outer list is peak index and the inner list is each ws (str) in wss cropped and rebinned for that peak
+        all_peak_crop_wss.append(peak_crop_wss)
 
         # set up a function to fit
         bg_func = FunctionFactory.createFunction("LinearBackground")
@@ -298,7 +318,7 @@ def fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs):
         b2b_func = fit_object.Function.function.getFunction(0)
         x0 = b2b_func.getParameterValue("X0")
         x0_lims.append((x0 * (1 - 3e-3), x0 * (1 + 3e-3)))
-    return x0_lims
+    return x0_lims, all_peak_crop_wss
 
 
 def get_initial_fit_function_and_kwargs_from_specs(
@@ -422,6 +442,7 @@ def rerun_fit_with_new_ws(
     iters: int,
     parameters_to_fix: Sequence[str],
     tie_background: bool = False,
+    is_final: bool = False,
 ):
     # update the input workspace in the fitting kwargs
     for k in md_fit_kwargs.keys():
@@ -440,7 +461,9 @@ def rerun_fit_with_new_ws(
         # update constraints around new values
         intens = max(peak.getParameterValue("I"), 1)
         x0 = peak.getParameterValue("X0")
-        new_peak.addConstraints(f"{max(intens / 2, 1e-6)}<I<{intens * 2}")
+        if not is_final:
+            # don't constrain the intensity on the final fit
+            new_peak.addConstraints(f"{max(intens / 2, 1e-6)}<I<{intens * 2}")
         new_peak.addConstraints(f"{x0 * (1 - x0_frac_move)}<X0<{x0 * (1 + x0_frac_move)}")
         if tie_background and idom > 0:
             for ipar_bg in range(bg.nParams()):
@@ -520,7 +543,7 @@ def fit_all_peaks(
     # we are initially going to fit a summed spectra to get a good starting point for the peak centre
     # we will then fix the amount this can change in the individual fits
 
-    x0_lims = fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs.copy())
+    x0_lims, all_cropped_rebinned_wss = fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs.copy())
 
     for iws, wsname in enumerate(wss):
         # notice user how far through the fitting they are (useful if any fits fail)
@@ -531,27 +554,24 @@ def fit_all_peaks(
         run, prefix = _get_run_and_prefix_from_ws_log(ws, wsname)
         grouping = _get_grouping_from_ws_log(ws)
 
-        # perform fitting in TOF as the parameter magnitudes are better for fitting (A, B, and S)
-        ws_tof = ConvertUnits(InputWorkspace=ws, OutputWorkspace="ws_tof", Target="TOF")
-
-        # approach will be to use iterative fits and these iteration can have optionally 'rebunched' data to improve SNR
-        fit_wss = []
-        bkg_is_tied = []
-        if len(smooth_vals) > 0:
-            for i, smooth_val in enumerate(smooth_vals):
-                fit_wss.append(_rebin_and_rebunch(ws_tof, smooth_val))
-                bkg_is_tied.append(tied_bkgs[i])
-        else:
-            # if no smoothing values are given, the initial fit should just be on the ws
-            fit_wss.append(ws_tof)
-            bkg_is_tied.append(True)
-        # if flagged, there will be a final unbunched fit (with the background tied)
-        if final_fit_raw:
-            fit_wss.append(ws_tof)
-            bkg_is_tied.append(True)
-
         # loop over the peaks
         for ipeak, peak in enumerate(peaks):
+            # perform fitting in TOF as the parameter magnitudes are better for fitting (A, B, and S)
+            ws_tof = ConvertUnits(InputWorkspace=all_cropped_rebinned_wss[ipeak][iws], OutputWorkspace="ws_tof", Target="TOF")
+
+            # approach will be to use iterative fits and these iteration can have optionally 'rebunched' data to improve SNR
+            fit_wss = []
+            bkg_is_tied = []
+            if len(smooth_vals) > 0:
+                for i, smooth_val in enumerate(smooth_vals):
+                    fit_wss.append(Rebunch(InputWorkspace=ws_tof, OutputWorkspace=f"smooth_ws_{smooth_val}", NBunch=smooth_val))
+                    bkg_is_tied.append(tied_bkgs[i])
+            # if no smoothing values are given, the initial fit should just be on ws_tof
+            # if final_fit_raw flagged, ws_tof should be added to the end of the fit_wss stack
+            if final_fit_raw or len(smooth_vals) == 0:
+                fit_wss.append(ws_tof)
+                bkg_is_tied.append(True)
+
             # low level information
             logger.information(f"Workspace: {wsname}, Peak: {peak}")
 
@@ -593,6 +613,7 @@ def fit_all_peaks(
                     50,
                     subsequent_fit_param_fix,
                     bkg_is_tied[fit_num],
+                    fit_num == len(fit_wss) - 1,
                 )
 
             # establish which detectors have sufficient I over sigma
@@ -637,7 +658,7 @@ def fit_all_peaks(
                             # for x0, convert back to d spacing
                             diff_consts = si.diffractometerConstants(ispec)
                             d_peak = UnitConversion.run("TOF", "dSpacing", param_vals[pind], 0, DeltaEModeType.Elastic, diff_consts)
-                            d_err = _convert_TOFerror_to_derror(diff_consts, param_errs[pind], d_peak)
+                            d_err = convert_TOFerror_to_derror(diff_consts, param_errs[pind], d_peak)
                             row += [d_peak, d_err]
                 # logic for spectra which HAVE NOT been fit successfully
                 else:
@@ -666,28 +687,6 @@ def _tie_bkg(function, approx_bkgs, ties):
     return function, ties
 
 
-def _get_rebin_params_for_workspaces(wss: Sequence[str] | Sequence[Workspace2D]):
-    if isinstance(wss, str) or isinstance(wss, Workspace2D):
-        # this func should take sequences of workspaces but if given just one we can handle that by wrapping up in a tuple
-        wss = (wss,)
-    lower, upper, step = [], [], []
-    for ws in wss:
-        if isinstance(ws, str):
-            ws = ADS.retrieve(ws)
-        for ispec in range(ws.getNumberHistograms()):
-            xdat = ws.readX(ispec)
-            lower.append(xdat.min())
-            upper.append(xdat.max())
-            step.append(np.diff(xdat).max())
-    return f"{np.max(lower)}, {np.max(step)}, {np.min(upper)}"
-
-
-def _rebin_and_rebunch(ws, val):
-    rebin_params = _get_rebin_params_for_workspaces((ws,))
-    Rebin(InputWorkspace=ws, OutputWorkspace=f"rebin_{ws}", Params=rebin_params)
-    return Rebunch(InputWorkspace=f"rebin_{ws}", OutputWorkspace=f"smooth_ws_{val}", NBunch=val)
-
-
 def _estimate_intensity_background_and_centre(
     ws: Workspace2D, ispec: int, istart: int, iend: int, peak: float
 ) -> Tuple[float, float, float, float]:
@@ -700,7 +699,7 @@ def _estimate_intensity_background_and_centre(
     e = ws.readE(ispec)[istart:iend]
     ibg, _ = PeakData.find_bg_pts_seed_skew(y)
     bg = np.mean(y[ibg])
-    intensity = np.sum((y - bg) * bin_width)
+    intensity = np.trapezoid((y - bg), xdat)
     sigma = np.sqrt(np.sum((e * bin_width) ** 2))
     centre_arg = np.argmax(y)
     centre = xdat[centre_arg]
@@ -733,29 +732,17 @@ def get_default_values(params, no_fit_dict):
     return defaults
 
 
-def replace_nans(vals, method: Optional[str]):
-    new_vals = np.zeros_like(vals.T)  # want to iterate over table columns
-    # if no method leave nans as are
+def replace_nans(vals: np.ndarray, method: Optional[str] = None) -> np.ndarray:
     if not method:
         return vals
-    # if method is zero, replace all nans with zero
     if method == "zeros":
-        return np.nan_to_num(vals)
-    # otherwise, if there is at least 1 value per row that isn't nan, replace the nans with the min/max/mean of these
-    elif method == "mean":
-        func = np.mean
-    elif method == "max":
-        func = np.max
-    else:
-        func = np.min
-    for i, col in enumerate(vals.T):
-        non_nan = col[~np.isnan(col)]
-        if len(non_nan) > 0:
-            new_vals[i] = np.nan_to_num(col, nan=func(non_nan))
-        else:
-            # if the row is all nan, then we leave it as is
-            new_vals[i] = col
-    return new_vals.T
+        return np.nan_to_num(vals, nan=0)
+    func = {"mean": np.nanmean, "max": np.nanmax, "min": np.nanmin}[method]
+    out = vals.copy()
+    col_stat = func(out, axis=0)
+    nan_mask = np.isnan(out)
+    out[nan_mask] = col_stat[np.where(nan_mask)[1]]
+    return out
 
 
 def _convert_TOFerror_to_derror(diff_consts, tof_error, d):

@@ -24,8 +24,8 @@ from Engineering.texture.TextureUtils import (
     fit_initial_summed_spectra,
     rerun_fit_with_new_ws,
     _tie_bkg,
-    _get_rebin_params_for_workspaces,
-    _rebin_and_rebunch,
+    crop_and_rebin,
+    crop_wss_and_combine,
 )
 import os
 
@@ -219,64 +219,57 @@ class TextureUtilsFittingUtilsTests(unittest.TestCase):
         self.assertEqual(out_ties, ["f1.f1.A0=f0.f1.A0", "f1.f1.A1=f0.f1.A1"])
         self.assertEqual(bg0["A0"], 2.0)
 
-    @patch(f"{texture_utils_path}.ADS")
-    def test_get_rebin_params_for_workspaces(self, mock_ads):
-        ws1, ws2 = MagicMock(), MagicMock()
-        ws1.getNumberHistograms.return_value = 2
-        ws2.getNumberHistograms.return_value = 1
-
-        # ws1 spectra:
-        # spec0: min=0, max=18, step=2
-        # spec1: min=1, max=49, step=1
-        ws1.readX.side_effect = [
-            np.arange(0, 20, 2),
-            np.arange(1, 50, 1),
-        ]
-
-        # ws2 spec0: min=1, max=38, max step=2
-        ws2.readX.side_effect = [np.arange(1, 40, 2)]
-
-        mock_ads.retrieve.side_effect = (ws1, ws2)
-
-        out = _get_rebin_params_for_workspaces(["ws1", "ws2"])
-
-        # assert
-        mock_ads.retrieve.assert_has_calls([call("ws1"), call("ws2")])
-
-        self.assertEqual(out, "1, 2, 18")
-
-    @patch(f"{texture_utils_path}.Rebunch")
     @patch(f"{texture_utils_path}.Rebin")
-    @patch(f"{texture_utils_path}._get_rebin_params_for_workspaces")
-    def test__rebin_and_rebunch(self, mock_get_rebin, mock_rebin, mock_rebunch):
+    @patch(f"{texture_utils_path}.CropWorkspace")
+    def test_crop_and_rebin(self, mock_crop, mock_rebin):
         # inputs
         ws = "ws1"
-        val = 5
+        out = "out_ws"
+        lower = 1
+        upper = 2
+        rebin_params = (1, 0.1, 2)
+
+        crop_and_rebin(ws, out, lower, upper, rebin_params)
+
+        mock_crop.assert_called_once_with(ws, lower, upper, OutputWorkspace="__tmp_peak_window")
+        mock_rebin.assert_called_once_with("__tmp_peak_window", rebin_params, OutputWorkspace=out)
+
+    @patch(f"{texture_utils_path}.SumSpectra")
+    @patch(f"{texture_utils_path}.AppendSpectra")
+    @patch(f"{texture_utils_path}.CloneWorkspace")
+    @patch(f"{texture_utils_path}.Rebin")
+    @patch(f"{texture_utils_path}._get_max_bin")
+    @patch(f"{texture_utils_path}.CropWorkspace")
+    @patch(f"{texture_utils_path}.crop_and_rebin")
+    def test_crop_wss_and_combine(self, mock_crop_and_rebin, mock_crop, mock_max_bin, mock_rebin, mock_clone, mock_append, mock_sum):
+        # inputs
+        wss = ["ws1", "ws2"]
+        out = "out_ws"
+        lower = 1
+        upper = 2
+        peak = 1.5
+
+        mock_max_bin.return_value = 0.1
+
+        expected_rebin_params = (1, 0.1, 2)
+
+        mock_peak_window_ws = MagicMock()
+        mock_peak_window_ws.extractX.return_value = MagicMock()
+
+        _, output_list = crop_wss_and_combine(wss, peak, lower, upper, out)
 
         # mock returns
-        mock_get_rebin.return_value = "0.5,0.01,2.5"
-        rebunched = MagicMock()
-        mock_rebunch.return_value = rebunched
+        mock_crop.assert_called_once_with(wss[0], lower, upper, OutputWorkspace="__peak_window_crop")
+        mock_rebin.assert_called_once_with("__peak_window_crop", expected_rebin_params, OutputWorkspace=f"rebin_ws_{peak}_0")
+        mock_clone.assert_called_once_with(InputWorkspace=f"rebin_ws_{peak}_0", OutputWorkspace=f"rebin_ws_{peak}")
 
-        # exec
-        out = _rebin_and_rebunch(ws, val)
+        mock_crop_and_rebin.assert_called_once_with(wss[1], f"rebin_ws_{peak}_1", lower, upper, expected_rebin_params)
 
-        # assert
-        mock_get_rebin.assert_called_once_with((ws,))
+        mock_append.assert_called_once_with(f"rebin_ws_{peak}", f"rebin_ws_{peak}_1", OutputWorkspace=f"rebin_ws_{peak}")
 
-        mock_rebin.assert_called_once_with(
-            InputWorkspace=ws,
-            OutputWorkspace="rebin_ws1",
-            Params="0.5,0.01,2.5",
-        )
+        mock_sum.assert_called_once_with(f"rebin_ws_{peak}", OutputWorkspace=out)
 
-        mock_rebunch.assert_called_once_with(
-            InputWorkspace="rebin_ws1",
-            OutputWorkspace="smooth_ws_5",
-            NBunch=5,
-        )
-
-        self.assertIs(out, rebunched)
+        self.assertEqual(output_list, [f"rebin_ws_{peak}_0", f"rebin_ws_{peak}_1"])
 
 
 class TextureUtilsFittingStepsTests(unittest.TestCase):
@@ -284,20 +277,10 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
     @patch(f"{texture_utils_path}.CompositeFunctionWrapper")
     @patch(f"{texture_utils_path}._estimate_intensity_background_and_centre")
     @patch(f"{texture_utils_path}.FunctionFactory")
-    @patch(f"{texture_utils_path}.CropWorkspace")
-    @patch(f"{texture_utils_path}.SumSpectra")
-    @patch(f"{texture_utils_path}.AppendSpectra")
-    @patch(f"{texture_utils_path}.CloneWorkspace")
-    @patch(f"{texture_utils_path}.Rebin")
-    @patch(f"{texture_utils_path}._get_rebin_params_for_workspaces")
+    @patch(f"{texture_utils_path}.crop_wss_and_combine")
     def test_fit_initial_summed_spectra(
         self,
-        mock_get_rebin_params,
-        mock_rebin,
-        mock_clone,
-        mock_append,
-        mock_sum,
-        mock_crop,
+        mock_crop_and_combine,
         mock_func_factory,
         mock_estimate_intens,
         mock_comp,
@@ -311,13 +294,11 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
         fit_kwargs = {}
 
         # some mock intermediates
-        rebin_params = "0.5,0.01,2.5"
         x_vals = [1, 1.5, 2]
         intensities, sigmas = (2.0, 4.0), (1.0, 1.0)
 
         # some mock returns
         mock_fit.return_value = MagicMock()
-        mock_get_rebin_params.return_value = rebin_params
 
         peak1_window_ws, peak2_window_ws = MagicMock(), MagicMock()
         peak1_window_ws.readX.return_value = x_vals
@@ -329,7 +310,7 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
 
         comp_func1, comp_func2 = MagicMock(), MagicMock()
 
-        mock_crop.side_effect = (peak1_window_ws, peak2_window_ws)
+        mock_crop_and_combine.side_effect = ((peak1_window_ws, ["ws1_1.0", "ws2_1.0"]), (peak2_window_ws, ["ws1_2.0", "ws2_2.0"]))
         mock_func_factory.createFunction.return_value = MagicMock()
         mock_instance = MagicMock()
         mock_func_factory.Instance.return_value = mock_instance
@@ -344,26 +325,10 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
         peak2_kwargs = {"InputWorkspace": "peak_window_1", "StartX": 1.95, "EndX": 2.05}
 
         # exec
-        fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs)
+        _, all_wss = fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs)
 
         # assert
-        mock_get_rebin_params.assert_called_once_with(wss)
-        mock_rebin.assert_has_calls(
-            [call("ws1", rebin_params, OutputWorkspace="rebin_0"), call("ws2", rebin_params, OutputWorkspace="rebin_1")]
-        )
 
-        mock_sum.assert_has_calls(
-            [
-                call("rebin_0", OutputWorkspace="sum_0"),
-                call("rebin_1", OutputWorkspace="sum_1"),
-                call("sum_runs_ws", OutputWorkspace="sum_ws"),
-            ]
-        )
-        mock_clone.assert_called_once_with("sum_0", OutputWorkspace="sum_runs_ws")
-        mock_append.assert_called_once_with("sum_runs_ws", "sum_1", OutputWorkspace="sum_runs_ws")
-        mock_crop.assert_has_calls(
-            [call("sum_ws", 0.95, 1.05, OutputWorkspace="peak_window_0"), call("sum_ws", 1.95, 2.05, OutputWorkspace="peak_window_1")]
-        )
         mock_estimate_intens.assert_has_calls(
             [
                 call(peak1_window_ws, 0, 0, 2, peak1),  # 2 is len(x_val) -1
@@ -391,6 +356,7 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
             ],
             any_order=True,
         )
+        self.assertEqual(all_wss, [["ws1_1.0", "ws2_1.0"], ["ws1_2.0", "ws2_2.0"]])
 
     @patch(f"{texture_utils_path}._tie_bkg")
     @patch(f"{texture_utils_path}.CompositeFunctionWrapper")
@@ -688,7 +654,7 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
     @patch(f"{texture_utils_path}.rerun_fit_with_new_ws")
     @patch(f"{texture_utils_path}.get_initial_fit_function_and_kwargs_from_specs")
     @patch(f"{texture_utils_path}.Fit")
-    @patch(f"{texture_utils_path}._rebin_and_rebunch")
+    @patch(f"{texture_utils_path}.Rebunch")
     @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
     @patch(f"{texture_utils_path}.ConvertUnits")
     @patch(f"{texture_utils_path}._get_grouping_from_ws_log")
@@ -713,9 +679,7 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
     ):
         mock_unitconv.run.return_value = 1.2345
         mock_convert_toferr_to_derr.return_value = 0.01
-        mock_fit_summed.return_value = [
-            (0.95, 1.05),
-        ]
+        mock_fit_summed.return_value = ([(0.95, 1.05)], [["ws_crop_rebin_peak0_ws0"]])
 
         wsname = "TEST123456_ws"
         prefix, run_number, group = "TEST", "123456", "TestGroup"
@@ -782,9 +746,21 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
         self.assertEqual(fit_call_kwargs["MaxIterations"], 50)
         self.assertEqual(fit_call_kwargs["CostFunction"], "Unweighted least squares")
 
-        mock_rerun_with_new.assert_called_once()
-        rerun_args, _ = mock_rerun_with_new.call_args
-        self.assertEqual(rerun_args[3], "smooth_ws_2")
+        expected_kwargs = {
+            "StepSizeMethod": "Sqrt epsilon",
+            "IgnoreInvalidData": False,
+            "CreateOutput": True,
+            "OutputCompositeMembers": True,
+            "Minimizer": "Levenberg-Marquardt",
+            "CostFunction": "Unweighted least squares",
+        }
+
+        mock_rerun_with_new.assert_has_calls(
+            [
+                call("md_function", expected_kwargs, md_fit_kwargs, "smooth_ws_2", 0.01, 50, ("A", "B"), True, False),
+                call("md_function_final", expected_kwargs, md_fit_kwargs, "ws_tof", 0.01, 50, ("A", "B"), True, True),
+            ]
+        )
         self.assertEqual(tab_ws.addRow.call_count, num_spec)
 
     # -------- MULTIPLE wss & peaks --------
@@ -800,7 +776,7 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
     @patch(f"{texture_utils_path}.rerun_fit_with_new_ws")
     @patch(f"{texture_utils_path}.get_initial_fit_function_and_kwargs_from_specs")
     @patch(f"{texture_utils_path}.Fit")
-    @patch(f"{texture_utils_path}._rebin_and_rebunch")
+    @patch(f"{texture_utils_path}.Rebunch")
     @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
     @patch(f"{texture_utils_path}.ConvertUnits")
     @patch(f"{texture_utils_path}._get_grouping_from_ws_log")
@@ -825,7 +801,7 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
     ):
         mock_unitconv.run.return_value = 1.2345
         mock_convert_toferr_to_derr.return_value = 0.01
-        mock_fit_summed.return_value = [(0.95, 1.05), (1.95, 2.05)]
+        mock_fit_summed.return_value = ([(0.95, 1.05), (1.95, 2.05)], [["ws1_1.0", "ws2_1.0"], ["ws1_2.0", "ws2_2.0"]])
 
         wss = ["TEST000101_ws", "TEST000102_ws"]
         runs = ["000101", "000102"]
@@ -838,8 +814,17 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
         ws1.spectrumInfo.return_value = si1
         ws2.spectrumInfo.return_value = si2
 
-        mock_convert_units.side_effect = ["ws_tof_1", "ws_tof_2"]
-        mock_rebunch.side_effect = ["smooth_ws_3_1", "smooth_ws_2_1", "smooth_ws_3_2", "smooth_ws_2_2"]
+        mock_convert_units.side_effect = ["ws1_tof_1", "ws1_tof_2", "ws2_tof_1", "ws2_tof_2"]
+        mock_rebunch.side_effect = [
+            "smooth_ws_3_1",
+            "smooth_ws_2_1",
+            "smooth_ws_3_2",
+            "smooth_ws_2_2",
+            "smooth_ws_3_1",
+            "smooth_ws_2_1",
+            "smooth_ws_3_2",
+            "smooth_ws_2_2",
+        ]
 
         md_fit_kwargs = {"InputWorkspace": "ws_tof", "StartX": 0.9, "EndX": 1.1, "WorkspaceIndex": 0}
         mock_get_initial.return_value = ("FUNC", md_fit_kwargs, [10.0, 20.0])
@@ -867,7 +852,7 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
 
         expected_calls = len(wss) * len(peaks)
         self.assertEqual(mock_fit.call_count, expected_calls)
-        self.assertEqual(mock_rerun_with_new.call_count, expected_calls)
+        self.assertEqual(mock_rerun_with_new.call_count, expected_calls * 2)
         self.assertEqual(mock_create_tab_ws.call_count, expected_calls)
         self.assertEqual(mock_save_nexus.call_count, expected_calls)
 
