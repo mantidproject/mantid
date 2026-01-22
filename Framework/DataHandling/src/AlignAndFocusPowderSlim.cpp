@@ -194,10 +194,10 @@ void AlignAndFocusPowderSlim::init() {
                   "Specify binning behavior ('Logarithmic')");
   declareProperty(std::make_unique<ArrayProperty<std::string>>(PropertyNames::ALLOW_LOGS),
                   "If specified, only these logs will be loaded from the file");
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>(
-          PropertyNames::BLOCK_LOGS, std::vector<std::string>{"Phase*", "Speed*", "BL*:Chop:*", "chopper*TDC"}),
-      "If specified, these logs will not be loaded from the file");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
+                      PropertyNames::BLOCK_LOGS,
+                      std::vector<std::string>{"Phase\\*", "Speed\\*", "BL\\*:Chop:\\*", "chopper\\*TDC"}),
+                  "If specified, these logs will not be loaded from the file");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::Workspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
