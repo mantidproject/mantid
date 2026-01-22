@@ -327,7 +327,7 @@ def get_initial_fit_function_and_kwargs_from_specs(
     peak: float,
     x_window: tuple[float, float],
     x0_window: tuple[float, float],
-    parameters_to_tie: Sequence[str],
+    parameters_to_tie: Optional[Sequence[str]],
     peak_func_name: str,
     bg_func_name: str,
     tie_bkg: bool,
@@ -440,7 +440,8 @@ def rerun_fit_with_new_ws(
     new_ws: Workspace2D,
     x0_frac_move: float,
     iters: int,
-    parameters_to_fix: Sequence[str],
+    parameters_to_fix: Optional[Sequence[str]] = None,
+    parameters_to_tie: Optional[Sequence[str]] = None,
     tie_background: bool = False,
     is_final: bool = False,
 ):
@@ -449,7 +450,7 @@ def rerun_fit_with_new_ws(
         if "InputWorkspace" in k:
             md_fit_kwargs[k] = new_ws.name()
 
-    bg_ties = []
+    ties = []
     new_func = MultiDomainFunction()
     for idom in range(mdf.nFunctions()):
         comp = mdf[idom]
@@ -465,12 +466,19 @@ def rerun_fit_with_new_ws(
             # don't constrain the intensity on the final fit
             new_peak.addConstraints(f"{max(intens / 2, 1e-6)}<I<{intens * 2}")
         new_peak.addConstraints(f"{x0 * (1 - x0_frac_move)}<X0<{x0 * (1 + x0_frac_move)}")
-        if tie_background and idom > 0:
-            for ipar_bg in range(bg.nParams()):
-                par = bg.getParamName(ipar_bg)
-                bg_ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
-        for param in parameters_to_fix:
-            new_peak.fixParameter(param)
+        # apply ties to the first domain, if ties are required
+        if idom > 0:
+            if tie_background:
+                for ipar_bg in range(bg.nParams()):
+                    par = bg.getParamName(ipar_bg)
+                    ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
+            if parameters_to_tie:
+                for par in parameters_to_tie:
+                    ties.append(f"f{idom}.f0.{par}=f0.f0.{par}")
+        # fix parameters if required
+        if parameters_to_fix:
+            for param in parameters_to_fix:
+                new_peak.fixParameter(param)
 
         comp_func = CompositeFunctionWrapper(FunctionWrapper(new_peak), FunctionWrapper(bg), NumDeriv=True)
         new_func.add(comp_func.function)
@@ -478,8 +486,8 @@ def rerun_fit_with_new_ws(
         key_suffix = f"_{idom}" if idom > 0 else ""
         new_func.setMatrixWorkspace(new_ws, idom, md_fit_kwargs["StartX" + key_suffix], md_fit_kwargs["EndX" + key_suffix])
 
-    # if ties are required add them
-    func = f"{str(new_func)};ties=({','.join(bg_ties)})" if tie_background else new_func
+    # if ties are defined add them
+    func = f"{str(new_func)};ties=({','.join(ties)})" if len(ties) > 0 else new_func
 
     return Fit(
         Function=func,
@@ -502,8 +510,8 @@ def fit_all_peaks(
     smooth_vals: Sequence[int] = (3, 2),
     tied_bkgs: Sequence[bool] = (False, True),
     final_fit_raw: bool = True,
-    parameters_to_tie: Sequence[str] = ("A", "B"),
-    subsequent_fit_param_fix: Sequence[str] = ("A", "B"),
+    parameters_to_tie: Optional[Sequence[str]] = ("A", "B"),
+    subsequent_fit_param_fix: Optional[Sequence[str]] = None,
 ) -> None:
     """
 
@@ -522,8 +530,8 @@ def fit_all_peaks(
     smooth_vals: the number of bins which should be combined together to improve SNR stats
     tied_bkgs: a bool flag for each of the subsequent fits whether the background fits should be independent for spectra
     final_fit_raw: flag for whether the final fit should be done with no smoothing
-    parameters_to_tie: parameters which should be tied across spectra for the initial fit (Default is A and B)
-    subsequent_fit_param_fix: parameters which should be fixed after the initial fit (Default is A and B)
+    parameters_to_tie: parameters which should be tied across spectra (Default is A and B)
+    subsequent_fit_param_fix: parameters which should be fixed after the initial fit (Default is None)
     """
 
     # currently the only fit functions intended to be used - less flexibility here allows for less user input
@@ -612,6 +620,7 @@ def fit_all_peaks(
                     0.01,  # allow x0 to only vary by 1% from previous fit
                     50,
                     subsequent_fit_param_fix,
+                    parameters_to_tie,
                     bkg_is_tied[fit_num],
                     fit_num == len(fit_wss) - 1,
                 )
