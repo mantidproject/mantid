@@ -194,22 +194,24 @@ void MaskDetectorsIf::retrieveProperties() {
   validateAndSetIxProperties();
 }
 
+/** Execution code.
+ *  @throw std::invalid_argument If StartWorkspaceIndex is greater than or equal to number of histograms.
+ *  @throw std::invalid_argument If EndWorkspaceIndex is greater than or equal to number of histograms.
+ */
 void MaskDetectorsIf::validateAndSetIxProperties() {
   int nspec = static_cast<int>(m_inputW->getNumberHistograms());
   m_start_ix = getProperty("StartWorkspaceIndex");
   if (m_start_ix > nspec) {
-    g_log.warning() << "StartWorkspaceIndex should be less than " << nspec
-                    << ". Setting it to the minimum allowed value of zero.\n";
-    m_start_ix = 0;
+    throw std::invalid_argument("StartWorkspaceIndex should be greater than zero and less than " +
+                                std::to_string(nspec) + ". Value provided is invalid.");
   }
   if (isDefault("EndWorkspaceIndex")) {
     m_end_ix = nspec - 1;
   } else {
     int end_ix = getProperty("EndWorkspaceIndex");
     if (end_ix > nspec - 1) {
-      g_log.warning() << "EndWorkspaceIndex should be less than " << nspec
-                      << ". Setting it to the maximum allowed value of " << nspec - 1 << ".\n";
-      m_end_ix = nspec - 1;
+      throw std::invalid_argument("EndWorkspaceIndex should be greater than one and less than " +
+                                  std::to_string(nspec) + ". Value provided is invalid.");
     } else {
       m_end_ix = end_ix;
     }

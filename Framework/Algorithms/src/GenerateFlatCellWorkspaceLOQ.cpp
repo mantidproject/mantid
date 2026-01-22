@@ -91,7 +91,6 @@ std::map<std::string, std::string> GenerateFlatCellWorkspaceLOQ::validateInputs(
 }
 
 /** Execution code.
- *  @throw std::runtime_error If nHist not equal to 17776.
  */
 void GenerateFlatCellWorkspaceLOQ::exec() {
 

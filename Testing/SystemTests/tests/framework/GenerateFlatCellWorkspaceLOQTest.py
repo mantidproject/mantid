@@ -27,6 +27,9 @@ class GenerateFlatCellWorkspaceLOQTest(systemtesting.MantidSystemTest):
         result, _ = CompareWorkspaces("output_MASK", "expected_mask")
         self.assertTrue(result)
 
+    def validateMethod(self):
+        return "ValidateWorkspaceToWorkspace"
+
     def requiredFiles(self):
         return ["LOQ00113953.nxs", "GenerateFlatCellWorkspaceLOQOutput.nxs", "GenerateFlatCellWorkspaceLOQMASK.nxs"]
 
