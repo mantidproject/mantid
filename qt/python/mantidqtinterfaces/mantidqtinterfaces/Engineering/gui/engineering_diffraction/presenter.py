@@ -57,11 +57,11 @@ class EngineeringDiffractionPresenter(object):
 
     def setup_calibration(self, view):
         cal_model = CalibrationModel()
+        focus_model = FocusModel()
         cal_view = CalibrationView(parent=view.tabs)
         self.calibration_presenter = CalibrationPresenter(cal_model, cal_view)
-        view.tabs.addTab(cal_view, "Run Processing")
-        focus_model = FocusModel()
         self.focus_presenter = FocusPresenter(focus_model, cal_view)
+        view.tabs.addTab(cal_view, "Run Processing")
 
     def setup_calibration_notifier(self):
         self.calibration_presenter.calibration_notifier.add_subscriber(self.focus_presenter.calibration_observer)
@@ -121,7 +121,8 @@ class EngineeringDiffractionPresenter(object):
     def update_calibration(self, calibration):
         instrument = calibration.get_instrument()
         ceria_no = calibration.get_ceria_runno()
-        self.statusbar_observable.notify_subscribers(f"CeO2: {ceria_no}, Instrument: {instrument}")
+        vanadium_no = calibration.get_vanadium_runno()
+        self.statusbar_observable.notify_subscribers(f"CeO2: {ceria_no}, V: {vanadium_no}, Instrument: {instrument}")
 
     @staticmethod
     def get_saved_rb_number() -> str:

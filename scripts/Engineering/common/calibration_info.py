@@ -125,6 +125,10 @@ class CalibrationInfo:
     def get_vanadium_path(self) -> Optional[str]:
         return self.vanadium_path
 
+    def get_vanadium_runno(self) -> Optional[str]:
+        if self.vanadium_path and self.instrument:
+            return path_handling.get_run_number_from_path(self.vanadium_path, self.instrument)
+
     def get_instrument(self) -> Optional[str]:
         return self.instrument
 

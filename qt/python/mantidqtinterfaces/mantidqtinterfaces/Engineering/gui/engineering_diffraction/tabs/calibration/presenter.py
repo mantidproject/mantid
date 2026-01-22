@@ -50,14 +50,15 @@ class CalibrationPresenter(object):
         self.view.set_on_check_cropping_state_changed(self.show_cropping)
 
     def update_calibration_from_view(self):
+        van_file = self.view.get_vanadium_filename()
         self.current_calibration.clear()
         if self.view.get_load_checked():
             # loading calibration from path to .prm
             self.current_calibration.set_calibration_from_prm_fname(self.view.get_path_filename())
+            self.current_calibration.van_file = van_file
         else:
             # update current calibration with new data
             sample_file = self.view.get_sample_filename()
-            van_file = self.view.get_vanadium_filename()
             self.current_calibration.set_calibration_paths(self.instrument, sample_file, van_file)
             # set group and any additional parameters needed
             if self.view.get_crop_checked():

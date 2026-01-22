@@ -57,6 +57,8 @@ class FocusPresenter(object):
         self.focus_run_notifier_texture.add_subscriber(obs)
 
     def on_focus_clicked(self):
+        if not self.current_calibration.get_vanadium_path():
+            self.current_calibration.vanadium_path = self.view.get_vanadium_filename()
         if not self._validate():
             return
         focus_paths = self.view.get_focus_filenames()
@@ -109,7 +111,9 @@ class FocusPresenter(object):
             create_error_message(self.view, "Check run numbers/path is valid.")
             return False
         if not self.current_calibration.is_valid():
-            create_error_message(self.view, "Create or Load a calibration via the Calibration tab before focusing.")
+            create_error_message(
+                self.view, "Create or Load a calibration via the Calibration tab before focusing. Ensure that a Vanadium run has been set."
+            )
             return False
         if self.current_calibration.get_instrument() != self.instrument:
             create_error_message(
