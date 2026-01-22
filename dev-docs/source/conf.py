@@ -54,13 +54,6 @@ myst_enable_extensions = [
 # Allow heading anchors
 myst_heading_anchors = 3
 
-# Suppress warnings for documents not in toctree (sub-pages)
-# and intersphinx connection failures (no internet access in build environment)
-suppress_warnings = [
-    "toc.not_included",
-    "intersphinx.external",
-]
-
 # The root toctree document.
 root_doc = "index"
 
