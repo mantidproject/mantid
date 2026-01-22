@@ -27,7 +27,7 @@ where $\Delta$ is the time between the first and second pulse.
 
 - Load run `71799`
 
-- 
+-
 
   Go to the **Grouping** tab
 
@@ -35,14 +35,14 @@ where $\Delta$ is the time between the first and second pulse.
 
 - Load the next run
 
-- 
+-
 
   Go to the **Fitting** tab
 
   :   - Add a **StaticKuboToyabeTimesExpDecay** and **FlatBackground**
       - Click the **Fit** button
 
-- 
+-
 
   Expected Values are (similar):
 
@@ -66,7 +66,7 @@ pulse test
 
 - Set to **Double Pulse**
 
-- 
+-
 
   Go to the **Grouping** tab
 
@@ -74,14 +74,14 @@ pulse test
 
 - Load the next run
 
-- 
+-
 
   Go to the **Fitting** tab
 
   :   - Add a **StaticKuboToyabeTimesExpDecay** and **FlatBackground**
       - click the **Fit** button
 
-- 
+-
 
   Expected Values are (similar):
 
@@ -94,14 +94,14 @@ pulse test
 
 - Load run `71796`
 
-- 
+-
 
   Go to the **Home** tab
 
   :   - Change back to **Single Pulse**
       - Untick the **Time zero** and set the value to **0.493**
 
-- 
+-
 
   Go to the **Grouping** tab
 
@@ -109,13 +109,13 @@ pulse test
 
 - Load the next run
 
-- 
+-
 
   Go to the **Fitting** tab
 
   :   - Click the **Fit** button
 
-- 
+-
 
   Expected Values are (similar):
 

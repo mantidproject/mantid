@@ -174,7 +174,7 @@ from parameter descriptions. In these
 - *Do not* use things like `|Q|`. This yields sphinx error “Undefined
   substitution referenced”.
 
-- 
+-
 
   When using hyperlinks with a label, try to use anonymous hyperlinks (two underscores instead of one) to avoid name clashes.
 

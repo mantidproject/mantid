@@ -127,7 +127,7 @@ The *SANSState* is:
 
 - self-validating
 
-- 
+-
 
   immutable (currently this is not enforced on the object itself, but should be added in the future.
 

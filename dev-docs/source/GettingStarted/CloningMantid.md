@@ -6,7 +6,7 @@
   source and keep separate build directories to avoid any cmake
   configuration problems.
 
-- 
+-
 
   Obtain the mantid source code by either:
 

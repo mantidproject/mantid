@@ -37,7 +37,7 @@ exp decay), it is possible to remove the background from the data.
 
 - The plots will now average around 0
 
-- 
+-
 
   The values should be (approximatley):
 

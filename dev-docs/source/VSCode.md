@@ -39,13 +39,13 @@ icon.](https://code.visualstudio.com/docs/editor/extension-gallery#_browse-for-e
 
 ### Required
 
-- 
+-
 
   [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
 
   :   - Required for C++ linting, debugging etc
 
-- 
+-
 
   [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 
@@ -53,33 +53,33 @@ icon.](https://code.visualstudio.com/docs/editor/extension-gallery#_browse-for-e
 
 ### Recommended
 
-- 
+-
 
   [Clang-Format](https://marketplace.visualstudio.com/items?itemName=xaver.clang-format)
 
   :   - Allows auto formatting using the clang format version installed
         on your machine
 
-- 
+-
 
   [CMake](https://marketplace.visualstudio.com/items?itemName=twxs.cmake)
 
   :   - Allows language highlighting and auto fill for CMake
 
-- 
+-
 
   [Doxygen Document Generator](https://marketplace.visualstudio.com/items?itemName=cschlosser.doxdocgen)
 
   :   - Once a function is written with this extension it can generate
         parts of the doxygen comments itself
 
-- 
+-
 
   [GitLens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens)
 
   :   - Very powerful source control assistant
 
-- 
+-
 
   [Visual Studio Intellicode](https://marketplace.visualstudio.com/items?itemName=VisualStudioExptTeam.vscodeintellicode)
 

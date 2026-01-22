@@ -45,7 +45,7 @@ detector groups, arranged to form edges of a square.
 
 - There will now be one line on the plot
 
-- 
+-
 
   Go to the **grouping tab**
 
@@ -115,7 +115,7 @@ This test will look at transverse field data.
 - In the **grouping tab** you will see four groups and no pairs (you may
   need to press `Default`)
 
-- 
+-
 
   Go to the **fitting tab**
 
@@ -156,7 +156,7 @@ We can do a better fit by using simultaneous fitting
 
 - If you tick the `Plot raw` option the data will change
 
-- 
+-
 
   Go to the **fitting tab**
 
