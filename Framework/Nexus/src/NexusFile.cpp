@@ -1484,7 +1484,7 @@ template <typename NumT> void File::getAttr(const std::string &name, NumT &value
       throw NXEXCEPTION(e.getDetailMsg());
     }
   } else {
-    NXEXCEPTION("Attribute " + name + " does not exist");
+    throw NXEXCEPTION("Attribute " + name + " does not exist");
   }
 }
 

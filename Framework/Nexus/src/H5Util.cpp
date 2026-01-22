@@ -344,7 +344,7 @@ void readStringAttribute(const H5::H5Object &object, const std::string &attribut
     const auto attribute = object.openAttribute(attributeName);
     attribute.read(attribute.getDataType(), output);
   } else {
-    throw H5::Exception("H5Util::readStringAttribute: no attribute with name " + attributeName);
+    throw H5::Exception("H5Util::readStringAttribute", "no attribute with name " + attributeName);
   }
 }
 
