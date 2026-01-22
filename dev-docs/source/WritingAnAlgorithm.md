@@ -2,9 +2,55 @@
 
 ```{contents}
 :local:
-``` {.literalinclude language="cpp" lines="7-" linenos=""}
-cppalgexample/MyAlg_initial.h
-:::
+```
+
+## Introduction
+
+Mantid's `plugin <Plugin>` architecture has been engineered so that it
+is easy for a developer, or intrepid user, to write an algorithm. This
+page is a primer for the user about to write their first algorithm and
+assumes no great knowledge of C++. It covers the basics, with links to
+more advanced options where appropriate. There is special description
+for the case when you are looking to add a custom
+`MD conversion plugin <WritingCustomConvertToMDTransformation>`.
+
+Alternatively, you can implement your algorithm in
+`Python <emwp_intro>`. Prototyping your algorithm in Python can be
+faster with features like hot-reloading. See
+`Python Vs C++ Algorithms <PythonVSCppAlgorithms>` for a comparison of
+Mantid's two programming languages.
+
+All `algorithms <Algorithms List>` in Mantid
+[inherit](http://en.wikipedia.org/wiki/Inheritance_(computer_science))
+from a base `Algorithm` class, which provides the support and services
+required for running a specific algorithm and greatly simplifies the
+process of writing a new one.
+
+## Getting Started
+
+Creating a new algorithm is simplified using
+`class_maker.py <class_maker_py>`
+
+``` bash
+$ python buildconfig/class_maker.py --alg Algorithms MyAlg
+```
+
+which will give an amount of information about all that it did. The
+intentionally failing unit test, `MyAlgTest.h`, and user docs,
+`MyAlg-v1.rst`, will not be described here, but need to be updated
+before contributing. The excerpts below are the files created and
+formatted using the `pre-commit` hooks configured for c++ files. The
+exact contents of the generated code may change, the methods required do
+not.
+
+**Header file** `MyAlg_initial.h <cppalgexample/MyAlg_initial.h>` from
+`class_maker.py`
+
+```{literalinclude} cppalgexample/MyAlg_initial.h
+:language: cpp
+:lines: 7-
+:linenos:
+```
 
 **Source file** `MyAlg_initial.cpp <cppalgexample/MyAlg_initial.cpp>`
 from `class_maker.py`
