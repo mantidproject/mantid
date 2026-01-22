@@ -210,6 +210,13 @@ public:
     checkOutputWorkspace(alg, correctMasking);
   }
 
+  void testValidateInputsWithDefaultsPasses() {
+    Mantid::Algorithms::MaskDetectorsIf runner;
+    runner.initialize();
+    auto validationErrors = runner.validateInputs();
+    TS_ASSERT(validationErrors.empty());
+  }
+
 private:
   constexpr static int numBanks{1};
   constexpr static int numPixels{2};

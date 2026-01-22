@@ -196,7 +196,7 @@ void MaskDetectorsIf::retrieveProperties() {
 
 void MaskDetectorsIf::validateAndSetIxProperties() {
   int nspec = static_cast<int>(m_inputW->getNumberHistograms());
-  int m_start_ix = getProperty("StartWorkspaceIndex");
+  m_start_ix = getProperty("StartWorkspaceIndex");
   if (m_start_ix > nspec) {
     g_log.warning() << "StartWorkspaceIndex should be less than " << nspec
                     << ". Setting it to the minimum allowed value of zero.\n";
