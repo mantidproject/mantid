@@ -55,15 +55,15 @@ class TestNotebookPresenter(unittest.TestCase):
         self._presenter._pickable_mesh.__setitem__.assert_called_with("Visible Picked", self.mock_model.picked_visibility)
         self.mock_model.extract_spectra_for_line_plot.assert_called_once_with(self.mock_model.workspace_x_unit, True)
 
-        self.mock_view._plot_spectra.assert_called_once_with(self.mock_model.line_plot_workspace, True)
-        self.assertEqual(result, self.mock_view._plot_spectra.return_value)
+        self.mock_view.plot_spectra.assert_called_once_with(self.mock_model.line_plot_workspace, True)
+        self.assertEqual(result, self.mock_view.plot_spectra.return_value)
 
     def test_pick_detectors_with_invalid_ids_prints_message_and_returns_none(self):
         with patch("instrumentview.NotebookPresenter.np.where", return_value=(np.array([]), 0)):
             result = self._presenter.pick_detectors([999], sum_spectra=False)
 
         self.mock_model.negate_picked_visibility.assert_not_called()
-        self.mock_view._plot_spectra.assert_not_called()
+        self.mock_view.plot_spectra.assert_not_called()
         self.assertIsNone(result)
 
 

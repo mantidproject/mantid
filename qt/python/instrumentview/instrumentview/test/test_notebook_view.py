@@ -54,14 +54,8 @@ class TestNotebookView(unittest.TestCase):
         by _plot_spectra: getNumberHistograms() and getSpectrumNumbers().
         """
         ws = MagicMock()
-        ws.getNumberHistograms.return_value = num_hists
         ws.getSpectrumNumbers.return_value = spectra
         return ws
-
-    def test_plot_spectra_returns_none_for_empty_or_none_workspace(self):
-        self.assertIsNone(self._view._plot_spectra(None, sum_spectra=True))
-        ws = self._make_fake_workspace(num_hists=0, spectra=[])
-        self.assertIsNone(self._view._plot_spectra(ws, sum_spectra=False))
 
     def test_plot_spectra_summed_does_not_set_labels_or_legend(self):
         ws = self._make_fake_workspace(num_hists=3, spectra=[10, 11, 12])
@@ -69,7 +63,7 @@ class TestNotebookView(unittest.TestCase):
         with patch("instrumentview.NotebookView.plt.subplots") as subplots:
             axes = MagicMock()
             subplots.return_value = (MagicMock(name="fig"), axes)
-            result_axes = self._view._plot_spectra(ws, sum_spectra=True)
+            result_axes = self._view.plot_spectra(ws, sum_spectra=True)
             subplots.assert_called_once_with(subplot_kw={"projection": "mantid"})
             # Called once per spectrum, label should be None when sum_spectra=True
             expected_calls = [
@@ -93,7 +87,7 @@ class TestNotebookView(unittest.TestCase):
             legend = MagicMock()
             axes.legend.return_value = legend
             subplots.return_value = (MagicMock(name="fig"), axes)
-            result_axes = self._view._plot_spectra(ws, sum_spectra=False)
+            result_axes = self._view.plot_spectra(ws, sum_spectra=False)
             expected_calls = [
                 call(ws, specNum=1, label="Spectrum 1"),
                 call(ws, specNum=2, label="Spectrum 2"),
