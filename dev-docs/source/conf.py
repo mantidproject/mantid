@@ -19,7 +19,7 @@ def setup(app):
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.intersphinx",
+    # "sphinx.ext.intersphinx",  # Disabled temporarily - no internet access in build environment
     # use mathjax as we currently only publish the developer docs online
     # for viewing through a web browser.
     "sphinx.ext.mathjax",
@@ -53,6 +53,13 @@ myst_enable_extensions = [
 
 # Allow heading anchors
 myst_heading_anchors = 3
+
+# Suppress warnings for documents not in toctree (sub-pages)
+# and intersphinx connection failures (no internet access in build environment)
+suppress_warnings = [
+    "toc.not_included",
+    "intersphinx.external",
+]
 
 # The root toctree document.
 root_doc = "index"

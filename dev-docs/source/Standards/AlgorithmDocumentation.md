@@ -170,9 +170,11 @@ It is possible to add additional categories by passing the directive
 arguments, for example, the following would output the above categories,
 and also `Example`:
 
-::: {categories}
+```
+.. categories::
+
 Algorithms, Transforms, Rebin, Example
-:::
+```
 
 [.. sourcelink::](.. sourcelink::)
 :   This directive adds links to the algorithms source code.
