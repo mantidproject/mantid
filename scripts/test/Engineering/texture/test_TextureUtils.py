@@ -757,8 +757,8 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
 
         mock_rerun_with_new.assert_has_calls(
             [
-                call("md_function", expected_kwargs, md_fit_kwargs, "smooth_ws_2", 0.01, 50, ("A", "B"), True, False),
-                call("md_function_final", expected_kwargs, md_fit_kwargs, "ws_tof", 0.01, 50, ("A", "B"), True, True),
+                call("md_function", expected_kwargs, md_fit_kwargs, "smooth_ws_2", 0.01, 50, None, ("A", "B"), True, False),
+                call("md_function_final", expected_kwargs, md_fit_kwargs, "ws_tof", 0.01, 50, None, ("A", "B"), True, True),
             ]
         )
         self.assertEqual(tab_ws.addRow.call_count, num_spec)
