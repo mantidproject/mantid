@@ -1,7 +1,8 @@
 # ALFView GUI Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Introduction
 

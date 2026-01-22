@@ -1,7 +1,8 @@
 # User Support
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Introduction
 

@@ -1,7 +1,8 @@
 # Algorithm Usage Examples
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Introduction
 

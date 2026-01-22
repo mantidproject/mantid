@@ -1,7 +1,8 @@
 # Design Document Guidelines
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 A good design document minimises unexpected complications by addressing
 them before the code is written. A document will provide you, your

@@ -1,7 +1,8 @@
 # Using Local Mantid Build in Other Projects with Pixi
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Overview
 

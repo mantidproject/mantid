@@ -1,8 +1,3 @@
-::: {#Communication}
-::: {.toctree}
-:::
-:::
-
 # Communication
 
 ## How to contact people in the development team

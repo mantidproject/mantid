@@ -6,14 +6,20 @@ running and indicating the status of multiple (batch) reduction jobs.
 
 ## API Documentation
 
-::: {.toctree maxdepth="1"}
+```{toctree}
+:maxdepth: 1
+
 API/JobTreeView
-:::
+```
 
 ## Internals Documentation
 
-::: {.toctree maxdepth="1"}
-Internals/FindSubtreeRoots Internals/ExtractSubtrees
-Internals/StrictModelIndexing Internals/QtStandardItemTreeModelAdapter
+```{toctree}
+:maxdepth: 1
+
+Internals/FindSubtreeRoots
+Internals/ExtractSubtrees
+Internals/StrictModelIndexing
+Internals/QtStandardItemTreeModelAdapter
 Internals/CellBasedViewProperties
-:::
+```

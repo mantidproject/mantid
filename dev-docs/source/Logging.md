@@ -1,7 +1,8 @@
 # Logging
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Overview
 

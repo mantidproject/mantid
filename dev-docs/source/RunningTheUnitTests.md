@@ -1,7 +1,8 @@
 # Running the Unit Tests
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Overview
 

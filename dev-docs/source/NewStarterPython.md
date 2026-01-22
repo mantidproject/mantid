@@ -1,7 +1,8 @@
 # New Starter Python
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Prerequisites
 

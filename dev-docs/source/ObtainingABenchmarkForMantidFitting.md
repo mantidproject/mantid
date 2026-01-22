@@ -1,7 +1,8 @@
 # Obtaining a Benchmark for Mantid Fitting
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 There are several scenarios in which obtaining a benchmark for the
 accuracy and runtime of Mantid minimizers might be useful:

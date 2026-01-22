@@ -1,7 +1,8 @@
 # System Tests
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Overview
 

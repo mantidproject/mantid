@@ -1,8 +1,8 @@
 # Python Coding Standards
 
-::: {.contents local=""}
-Contents
-:::
+```{contents}
+:local:
+```
 
 ## Style
 

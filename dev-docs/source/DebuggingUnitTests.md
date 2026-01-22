@@ -1,7 +1,8 @@
 # Debugging Unit Tests
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Using gdb
 

@@ -1,8 +1,8 @@
 # GUI Standards
 
-::: {.contents local=""}
-Contents
-:::
+```{contents}
+:local:
+```
 
 ## Prerequisite Knowledge
 

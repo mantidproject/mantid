@@ -1,7 +1,8 @@
 # Interface Documentation
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Summary
 

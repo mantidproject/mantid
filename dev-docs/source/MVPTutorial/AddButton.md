@@ -81,11 +81,7 @@ if __name__ == "__main__" :
 Note that there needs to be a QApplication instance running in the
 background to allow you to show your QWidget.
 
-::: {.tip}
-::: {.title}
-Tip
-:::
-
+```{tip}
 Notice we used a plain <span class="title-ref">QWidget</span> instead of
 <span class="title-ref">QMainWindow</span> to build our widget. This has
 several advantanges, with the main one being:
@@ -99,4 +95,4 @@ several advantanges, with the main one being:
 
 Using <span class="title-ref">QWidget</span> therefore gives you more
 options for how to use the widget in the future.
-:::
+```

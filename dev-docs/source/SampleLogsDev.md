@@ -1,7 +1,8 @@
 # Sample Logs
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 The following information will be useful to you if you want to write an
 `algorithm` that manipulates sample log data.

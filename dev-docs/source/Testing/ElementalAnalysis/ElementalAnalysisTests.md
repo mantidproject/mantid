@@ -1,7 +1,8 @@
 # Elemental Analysis GUI Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Introduction
 

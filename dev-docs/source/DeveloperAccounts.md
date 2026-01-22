@@ -1,7 +1,8 @@
 # Developer Accounts
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Unique Profiles
 

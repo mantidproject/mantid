@@ -1,7 +1,8 @@
 # Algorithm Documentation
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Summary
 
@@ -46,15 +47,11 @@ Each property declaration in the init method of the .cpp file should
 include a description. This is used as a tooltip, and in the
 'properties' table on the algorithm's documentation web page.
 
-::: {.note}
-::: {.title}
-Note
-:::
-
+```{note}
 The tooltip may only show the description up to the first dot. Be sure
 that the first sentence in the description gives enough information to
 understand the purpose of the property.
-:::
+```
 
 For example:
 
@@ -116,8 +113,7 @@ A custom usage example.
 .. sourcelink::
 ```
 
-`.. algorithm ::`
-
+[.. algorithm ::](.. algorithm ::)
 :   This directive has several pieces of functionality, which includes:
 
 - A referable link is created for the algorithm. This allows other
@@ -127,8 +123,7 @@ A custom usage example.
 - Insertion of a screenshot of the algorithm's dialog.
 - Insertion of the Table Of Contents.
 
-`.. summary::`
-
+[.. summary::](.. summary::)
 :   The content of the summary method declared in your algorithm is
     output as HTML, for example, the following method is used in Rebin:
 
@@ -139,8 +134,7 @@ const std::string summary() const override {
 }
 ```
 
-`.. relatedalgorithms::`
-
+[.. relatedalgorithms::](.. relatedalgorithms::)
 :   This directive obtains a list of related algorithms from the
     `seeAlso` and `alias` methods in the algorithm, for example, the
     following `seeAlso` is used in Rebin:
@@ -153,15 +147,13 @@ const std::vector<std::string> seeAlso() const override {
 }
 ```
 
-`.. properties::`
-
+[.. properties::](.. properties::)
 :   As mentioned above, it is *critical* that you include a description
     for the properties of your algorithm. This directive obtains all of
     the algorithm's properties (set inside the algorithm's `init`
     method) and outputs in a table format.
 
-`.. categories::`
-
+[.. categories::](.. categories::)
 :   By default, this directive obtains the categories that were set in
     the `categories` method the algorithm. For example, in Rebin the
     category method is in the header and contains:
@@ -182,8 +174,7 @@ and also `Example`:
 > Algorithms, Transforms, Rebin, Example
 > :::
 
-`.. sourcelink::`
-
+[.. sourcelink::](.. sourcelink::)
 :   This directive adds links to the algorithms source code.
 
 ## Description

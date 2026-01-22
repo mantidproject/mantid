@@ -1,12 +1,14 @@
 # Tools Overview
 
-::: {.toctree hidden=""}
-AlgorithmProfiler
-:::
+```{toctree}
+:hidden:
 
-::: {.contents local=""}
-Contents
-:::
+AlgorithmProfiler
+```
+
+```{contents}
+:local:
+```
 
 ## Creating classes: class_maker.py
 
@@ -18,9 +20,8 @@ some code stubs. It can also flesh out more methods for new Algorithms,
 using the `--alg` option which also creates a stub user documentation
 page `.rst`.
 
-::: {.literalinclude}
-class_maker.txt
-:::
+```{literalinclude} class_maker.txt
+```
 
 ## Moving/Renaming classes: move_class.py
 

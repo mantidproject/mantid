@@ -1,7 +1,8 @@
 # Inelastic Corrections Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 *Prerequisites*
 

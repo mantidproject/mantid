@@ -1,7 +1,8 @@
 # Project Recovery Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Project Recovery test
 

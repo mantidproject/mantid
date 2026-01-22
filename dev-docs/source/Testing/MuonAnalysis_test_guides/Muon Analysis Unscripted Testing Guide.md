@@ -1,8 +1,8 @@
 # Muon Interfaces Unscripted Testing
 
-::: {.contents local=""}
-Table of Contents
-:::
+```{contents}
+:local:
+```
 
 ## Preamble
 
@@ -17,17 +17,13 @@ You may need to use the muon feature flags to turn on some additional
 features (like model analysis, raw plots and fit wizard features). Check
 the `Muon_Feature_Flags-ref` documentation for more information.
 
-::: {.note}
-::: {.title}
-Note
-:::
-
+```{note}
 The tests here are grouped into sections. The test groups can be done in
 any order.
 
 In Muon Interfaces, the embedded plot axis are reversed on the plot if
 `Xmax < Xmin` (idem with `Y` axis)
-:::
+```
 
 ## Common setup
 

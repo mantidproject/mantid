@@ -1,7 +1,8 @@
 # Index Property
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Why IndexProperty?
 

@@ -1,7 +1,8 @@
 # EnumeratedString
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Why EnumeratedString?
 

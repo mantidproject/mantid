@@ -1,8 +1,8 @@
 # Work flows algorithm profiling
 
-::: {.contents local=""}
-Contents
-:::
+```{contents}
+:local:
+```
 
 <figure>
 <img src="images/MantidProfiler.png" alt="images/MantidProfiler.png" />
@@ -14,13 +14,9 @@ Due to the need of investigation of algorithms performance issues, the
 proper method is introduced. It consists two to parts: special mantid
 build and analytical tool.
 
-::: {.note}
-::: {.title}
-Note
-:::
-
+```{note}
 Available for Linux only.
-:::
+```
 
 ## Mantid build
 

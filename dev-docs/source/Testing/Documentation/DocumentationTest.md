@@ -1,7 +1,8 @@
 # Documentation Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 *Prerequisites*
 

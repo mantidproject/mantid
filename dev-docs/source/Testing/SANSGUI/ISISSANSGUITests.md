@@ -1,7 +1,8 @@
 # SANS GUI Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Data reduction
 

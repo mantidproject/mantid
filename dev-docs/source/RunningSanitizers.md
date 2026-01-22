@@ -1,7 +1,8 @@
 # Running Sanitizers
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Overview
 

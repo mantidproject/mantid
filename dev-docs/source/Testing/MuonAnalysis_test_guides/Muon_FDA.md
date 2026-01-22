@@ -1,8 +1,8 @@
 # Muon Unscripted Testing: FDA (Frequency Domain Analysis)
 
-::: {.contents local=""}
-Table of Contents
-:::
+```{contents}
+:local:
+```
 
 ## Introduction
 

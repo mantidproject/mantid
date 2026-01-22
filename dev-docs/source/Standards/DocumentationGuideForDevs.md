@@ -1,7 +1,8 @@
 # Documentation Guide for Devs
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 This page gives an overview of the documentation process for mantid.
 

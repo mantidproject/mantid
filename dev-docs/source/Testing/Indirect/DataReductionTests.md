@@ -1,7 +1,8 @@
 # Indirect Data Reduction Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 *Prerequisites*
 

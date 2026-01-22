@@ -1,8 +1,8 @@
 # C++ Coding Standards
 
-::: {.contents local=""}
-Contents
-:::
+```{contents}
+:local:
+```
 
 ## References
 
@@ -400,15 +400,11 @@ the code around them changes.
 Reviewers and gatekeepers should give these comments additional
 attention.
 
-::: {.attention}
-::: {.title}
-Attention
-:::
-
+```{attention}
 Inline suppressions are a last resort. You should be sure that a
 suppression cannot be fixed by modifying the code before suppressing it
 using the techniques below.
-:::
+```
 
 **Suppressing a single line of code:**
 

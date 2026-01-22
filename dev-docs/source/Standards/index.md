@@ -10,20 +10,36 @@ Code produced by code generators is not covered directly by this
 procedure. Programmers must apply the underlying principles of this
 procedure in a sensible manner to code generated automatically.
 
-::: {.toctree maxdepth="1"}
-MantidStandards CPPModernization CPPStandards GUIStandards
-PythonStandards DeprecateAlgorithm RenameAlgorithm UnitTestStandards
-:::
+```{toctree}
+:maxdepth: 1
+
+MantidStandards
+CPPModernization
+CPPStandards
+GUIStandards
+PythonStandards
+DeprecateAlgorithm
+RenameAlgorithm
+UnitTestStandards
+```
 
 ## Documentation Standards
 
-::: {.toctree maxdepth="1"}
-DocumentationGuideForDevs AlgorithmDocumentation AlgorithmUsageExamples
-InterfaceDocumentation ReleaseNotesGuide
-:::
+```{toctree}
+:maxdepth: 1
+
+DocumentationGuideForDevs
+AlgorithmDocumentation
+AlgorithmUsageExamples
+InterfaceDocumentation
+ReleaseNotesGuide
+```
 
 ## Guidelines
 
-::: {.toctree maxdepth="1"}
-Libraries AdditionalPythonCode
-:::
+```{toctree}
+:maxdepth: 1
+
+Libraries
+AdditionalPythonCode
+```

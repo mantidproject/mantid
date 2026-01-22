@@ -1,7 +1,8 @@
 # Flowchart Creation
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 The flowchart diagrams are created by writing `graphviz` .dot files that
 describe the diagram in plain text, and placing them into

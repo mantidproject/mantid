@@ -1,7 +1,8 @@
 # Testing Utilities
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Summary
 

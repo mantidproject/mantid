@@ -1,7 +1,8 @@
 # Inelastic Bayes Fitting Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 *Prerequisites*
 

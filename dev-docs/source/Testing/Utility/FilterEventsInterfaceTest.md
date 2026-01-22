@@ -1,7 +1,8 @@
 # Filter Events Interface Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 *Prerequisites*
 

@@ -1,7 +1,8 @@
 # Architecture
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Summary
 

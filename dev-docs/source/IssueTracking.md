@@ -4,9 +4,9 @@ Mantid uses GitHub issues to track new feature and bugfix development.
 The issue tracker can be found at
 [GitHub](https://github.com/mantidproject/mantid/issues)
 
-::: {.contents local=""}
-Contents
-:::
+```{contents}
+:local:
+```
 
 ## Workflow
 

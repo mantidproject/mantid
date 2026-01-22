@@ -3,9 +3,9 @@
 This page provides an introduction to measuring execution time of the
 Mantid C++ code.
 
-::: {.contents local=""}
-Context
-:::
+```{contents}
+:local:
+```
 
 ## Wall-clock timers
 

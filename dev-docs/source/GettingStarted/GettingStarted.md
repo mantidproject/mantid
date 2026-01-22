@@ -1,12 +1,17 @@
 # Getting Started
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
-::: {.toctree hidden=""}
-GettingStartedCondaWindows GettingStartedCondaLinux
-GettingStartedCondaOSX GettingStartedNoneConda
-:::
+```{toctree}
+:hidden:
+
+GettingStartedCondaWindows
+GettingStartedCondaLinux
+GettingStartedCondaOSX
+GettingStartedNoneConda
+```
 
 ## Environment Setup
 

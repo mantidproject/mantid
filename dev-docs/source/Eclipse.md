@@ -1,7 +1,8 @@
 # Eclipse on Ubuntu
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Prerequisites
 

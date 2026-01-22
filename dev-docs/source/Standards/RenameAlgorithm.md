@@ -1,7 +1,8 @@
 # Renaming an Algorithm
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 Sometime developers will run into situations where the capability of the
 algorithm grows beyond its original designated name, therefore a

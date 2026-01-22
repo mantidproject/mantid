@@ -1,7 +1,8 @@
 # Jenkins Configuration
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Summary
 

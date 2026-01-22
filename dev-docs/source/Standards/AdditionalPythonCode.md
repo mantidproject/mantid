@@ -1,7 +1,8 @@
 # Additional Python code
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Overview
 

@@ -1,8 +1,8 @@
 # Muon Unscripted Testing: ALC
 
-::: {.contents local=""}
-Table of Contents
-:::
+```{contents}
+:local:
+```
 
 ## Introduction
 

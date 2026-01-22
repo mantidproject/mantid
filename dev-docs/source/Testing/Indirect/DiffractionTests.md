@@ -1,7 +1,8 @@
 # Indirect Diffraction Testing
 
-::: {.contents local=""}
-:::
+```{contents}
+:local:
+```
 
 ## Diffraction
 

@@ -61,11 +61,7 @@ be used to subscribe the presenter to the view. The second addition is
 that `_button_clicked` now calls a member function of the presenter to
 handle the response to the button being clicked.
 
-::: {.tip}
-::: {.title}
-Tip
-:::
-
+```{tip}
 Instead of connecting signals between the view and presenter, we have
 subscribed the presenter to the view.
 
@@ -81,7 +77,7 @@ Why is this useful?
 - You can reuse the presenter in non-Qt environments.
 
 This compartmentalization keeps the codebase cleaner and more modular.
-:::
+```
 
 ## The Presenter
 
