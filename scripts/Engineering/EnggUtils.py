@@ -332,7 +332,7 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
     focused_ceria = mantid.DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
     mantid.ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)  # DIFC of detector in middle of bank
 
-    ws_van_foc, van_run = process_vanadium(calibration, full_instrument_cal_ws)
+    ws_van_foc, van_run = process_vanadium(calibration, full_instrument_cal_ws, extra_suffix="CALIBRATION")
     focused_ceria = _apply_vanadium_norm(focused_ceria, ws_van_foc)
 
     focused_ceria = mantid.ConvertUnits(InputWorkspace=focused_ceria, Target="TOF")
@@ -534,9 +534,11 @@ def _check_ws_foc_and_ws_van_foc(ws_foc, ws_van_foc):
         raise AssertionError(error_msg)
 
 
-def process_vanadium(calibration, full_calib):
+def process_vanadium(calibration, full_calib, extra_suffix=None):
     van_run = path_handling.get_run_number_from_path(calibration.get_vanadium_path(), calibration.get_instrument())
     van_foc_name = CURVES_PREFIX + calibration.get_group_suffix()
+    if extra_suffix is not None:
+        van_foc_name += extra_suffix
     if ADS.doesExist(van_foc_name):
         if calibration.group == GROUP.CUSTOM or calibration.group == GROUP.CROPPED:
             logger.warning(
