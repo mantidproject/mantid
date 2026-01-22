@@ -28,7 +28,7 @@ create a development environment:
   project that brings together all of the above packages.
 - `mantid-developer`: The metapackage used to create a development
   environment. It contains all the required packages for building and
-  testing our software. See `GettingStarted` for more detail on how to
+  testing our software. See [Getting Started](GettingStarted/GettingStarted) for more detail on how to
   setup a development environment.
 
 Each package is built separately for `x64` Windows, Linux and macOS with
