@@ -86,7 +86,8 @@ repos:
           (?x)^(
           ^conda/recipes/mantid-developer/recipe.yaml$|
           ^conda/recipes/conda_build_config.yaml$|
-          ^pixi.toml$
+          ^pixi.toml$|
+          ^pixi.lock$
           )$
         additional_dependencies:
           - pyyaml
