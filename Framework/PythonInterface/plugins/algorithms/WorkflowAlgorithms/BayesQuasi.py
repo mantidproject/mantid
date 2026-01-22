@@ -160,7 +160,7 @@ class BayesQuasi(PythonAlgorithm):
         self._loop = self.getProperty("Loop").value
         self._output_fit_name = self.getPropertyValue("OutputWorkspaceFit")
         self._output_result_name = self.getPropertyValue("OutputWorkspaceResult")
-        self._output_prop_name = self.getPropertyValue("OutputWorkspaceProb")
+        self._output_prob_name = self.getPropertyValue("OutputWorkspaceProb")
 
     # pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
@@ -239,7 +239,7 @@ class BayesQuasi(PythonAlgorithm):
 
         setup_prog.report("Establishing output workspace name")
         fname = self._samWS[:-4] + "_" + prog
-        probWS = self._output_prop_name if self._output_prop_name else fname + "_Prob"
+        probWS = self._output_prob_name if self._output_prob_name else fname + "_Prob"
         fitWS = self._output_fit_name if self._output_result_name else fname + "_Fit"
         wrks = os.path.join(workdir, self._samWS[:-4])
         logger.information(" lptfile : " + wrks + "_" + prog + ".lpt")

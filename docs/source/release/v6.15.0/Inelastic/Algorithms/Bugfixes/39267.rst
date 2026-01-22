@@ -1,1 +1,1 @@
-- ref:`<algm-BayesQuasi>` now respects the ``OutputWorkspaceResult`` and ``OutputWorkspaceResult`` parameters.
+- ref:`<algm-BayesQuasi>` now respects the ``OutputWorkspaceProb`` and ``OutputWorkspaceResult`` parameters.
