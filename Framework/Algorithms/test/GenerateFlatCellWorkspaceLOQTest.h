@@ -16,8 +16,6 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using Mantid::MantidVec;
 
-/// Upda
-
 class GenerateFlatCellWorkspaceLOQTest : public CxxTest::TestSuite {
 public:
   void testName() { TS_ASSERT_EQUALS(masker.name(), "GenerateFlatCellWorkspaceLOQ"); }

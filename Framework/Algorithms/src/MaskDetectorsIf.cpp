@@ -10,6 +10,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <fstream>
@@ -53,8 +54,14 @@ void MaskDetectorsIf::init() {
   declareProperty("Operator", "Equal", std::make_shared<StringListValidator>(select_operator),
                   "Operator to compare to given values.");
   declareProperty("Value", 0.0);
-  declareProperty("StartWorkspaceIndex", 0, "The start of the spectrum range on which to apply the mask");
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), "The end of the spectrum range on which to apply the mask.");
+  auto positiveIntValidator = std::make_shared<BoundedValidator<int>>();
+  positiveIntValidator->setLower(0);
+  declareProperty(
+      std::make_unique<PropertyWithValue<int>>("StartWorkspaceIndex", 0, positiveIntValidator, Direction::Input),
+      "The start of the spectrum range on which to apply the mask");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("EndWorkspaceIndex", EMPTY_INT(), positiveIntValidator,
+                                                           Direction::Input),
+                  "The end of the spectrum range on which to apply the mask.");
   declareProperty(std::make_unique<API::FileProperty>("InputCalFile", "", API::FileProperty::OptionalLoad, ".cal"),
                   "The name of the CalFile with grouping data.");
   declareProperty(std::make_unique<API::FileProperty>("OutputCalFile", "", API::FileProperty::OptionalSave, ".cal"),
@@ -91,10 +98,14 @@ void MaskDetectorsIf::exec() {
   }
   const int nspec_start = getProperty("StartWorkspaceIndex");
   int nspec_end;
+  int nspec = static_cast<int>(m_inputW->getNumberHistograms());
   if (isDefault("EndWorkspaceIndex")) {
-    nspec_end = static_cast<int>(m_inputW->getNumberHistograms()) - 1;
+    nspec_end = nspec - 1;
   } else {
     nspec_end = getProperty("EndWorkspaceIndex");
+    if (nspec_end > nspec) {
+      nspec_end = nspec;
+    }
   }
   for (int i = nspec_start; i <= nspec_end; ++i) {
     // Get the list of udets contributing to this spectra

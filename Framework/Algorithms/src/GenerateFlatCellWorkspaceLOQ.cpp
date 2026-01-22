@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GenerateFlatCellWorkspaceLOQ.h"
 #include "MantidAPI/Algorithm.hxx"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
@@ -101,7 +102,6 @@ void GenerateFlatCellWorkspaceLOQ::exec() {
 
   // Extract the spectrums into a vector
   auto values = extractIntegratedValues(processedWS);
-  ;
   std::span<double> valuesSpan(values);
 
   // Normalize the banks
