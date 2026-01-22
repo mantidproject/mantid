@@ -87,7 +87,7 @@ setup.
     For MantidWorkbench to find these files, they must be in a directory
     listed under "Data Search Directories" in the "Manage User
     Directories" menu. Chunking for files can be determined by using the
-    [DetermineChunking](algm-DetermineChunking) algorithm.
+    [DetermineChunking](inv:mantid#algm-determinechunking-v1) algorithm.
 
 3.  Start MantidWorkbench
 

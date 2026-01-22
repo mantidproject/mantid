@@ -97,7 +97,7 @@ reset it with the previously entered values.
 ## Chemical Formula Validation
 
 The following should produce a warning at the bottom of the window and
-throw an error from [CalculateSampleTransmission](algm-CalculateSampleTransmission)
+throw an error from [CalculateSampleTransmission](inv:mantid#algm-calculatesampletransmission-v1)
 
 1.  Set `Chemical Formula = C2H4` (i.e. remove the space)
 2.  Set `Chemical Formula = Z`

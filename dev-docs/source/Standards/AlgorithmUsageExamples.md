@@ -112,9 +112,9 @@ Additional benefits of usage examples:
 ### Using CreateSampleWorkspace and CreateWorkspace
 
 There are many ways to create sample workspaces. For example
-[CreateMDHistoWorkspace](inv:#algm-createmdhistoworkspace-v1),
-[CreateSampleWorkspace](inv:#algm-createsampleworkspace-v1) and
-[CreateWorkspace](inv:#algm-createworkspace-v1). CreateSampleWorkspace creates
+[CreateMDHistoWorkspace](inv:#inv:mantid#algm-createmdhistoworkspace-v1),
+[CreateSampleWorkspace](inv:#inv:mantid#algm-createsampleworkspace-v1) and
+[CreateWorkspace](inv:#inv:mantid#algm-createworkspace-v1). CreateSampleWorkspace creates
 a fully defined workspace (either event or histogram) but for creating
 simple histogram workspace CreateWorkspace may be a better option. Above
 is shown an example where CreateWorkspace is used. Below is a more
@@ -235,7 +235,7 @@ Usage
 .. include:: ../usagedata-note.txt
 
 **Example - Load ISIS histogram Nexus file:**
-(see :ref:`LoadISISNexus <algm-LoadISISNexus>` for more options)
+(see :ref:`LoadISISNexus <inv:mantid#algm-loadisisnexus-v1>` for more options)
 
 .. testcode:: ExLoadISISnexusHist
 

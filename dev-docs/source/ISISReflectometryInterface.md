@@ -19,9 +19,9 @@ default settings can be specified on the tabs. A tab is also provided to
 make exporting the results for a set of workspaces easy.
 
 The reduction for each row is done via
-[Algm Reflectometry Isisload And Process](algm-ReflectometryISISLoadAndProcess) (which includes any
+[Algm Reflectometry Isisload And Process](inv:mantid#algm-reflectometryisisloadandprocess-v1) (which includes any
 pre-processing). Post-processing for a group is done via
-[Algm Stitch1dmany](algm-Stitch1DMany).
+[Algm Stitch1dmany](inv:mantid#algm-stitch1dmany-v1).
 
 The GUI provides a lot of other functionality as well. Because it is
 quite complex, it is important to keep to the established guidelines, in
@@ -97,8 +97,8 @@ tests are in `../test/ISISReflectometry/`.
 ## Reduction back-end
 
 The back-end is primarily a set of algorithms, with the entry points
-from the GUI being [Algm Reflectometry Isisload And Process](algm-ReflectometryISISLoadAndProcess) (for reducing
-a row) and [Algm Stitch1dmany](algm-Stitch1DMany) (for post-processing a group). Any
+from the GUI being [Algm Reflectometry Isisload And Process](inv:mantid#algm-reflectometryisisloadandprocess-v1) (for reducing
+a row) and [Algm Stitch1dmany](inv:mantid#algm-stitch1dmany-v1) (for post-processing a group). Any
 additional processing should be added to these algorithms, or a new
 wrapper algorithm could be added if appropriate (this might be necessary
 in future if post-processing will involve more than just stitching).
@@ -258,10 +258,10 @@ is that there is a single algorithm that will be run for each entry in
 the table (albeit a different algorithm for Rows and Groups).
 
 Consider adding new wrapper algorithms if appropriate.
-[Algm Reflectometry Isisload And Process](algm-ReflectometryISISLoadAndProcess) is an algorithm that has been
+[Algm Reflectometry Isisload And Process](inv:mantid#algm-reflectometryisisloadandprocess-v1) is an algorithm that has been
 added specifically for this purpose and can usually be extended or
 modified quite easily because it is designed for use with this GUI. The
-post-processing algorithm, [Algm Stitch1dmany](algm-Stitch1DMany), is more generic so it is
+post-processing algorithm, [Algm Stitch1dmany](inv:mantid#algm-stitch1dmany-v1), is more generic so it is
 likely in future that we would want to add a wrapper for this algorithm
 rather than changing it directly.
 

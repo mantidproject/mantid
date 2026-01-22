@@ -7,8 +7,8 @@
 ## The Load Algorithm
 
 This page describes how to register a new file loading algorithm so that
-it can be used through the general-purpose [Load](algm-Load) algorithm.
-The [Load](algm-Load) algorithm is a special algorithm as does very
+it can be used through the general-purpose [Load](inv:mantid#algm-load-v1) algorithm.
+The [Load](inv:mantid#algm-load-v1) algorithm is a special algorithm as does very
 little work itself. It instead tries to search for the most suitable
 algorithm for a given file and then uses this algorithm as a child to
 load the file. An algorithm wishing to be included as part of the search
