@@ -51,6 +51,10 @@ private:
   udet2valuem m_umap;
   /// Whether select is on or off
   bool m_select_on = false;
+  /// The start index parameter
+  int m_start_ix = 0;
+  /// The end index parameter
+  int m_end_ix;
   /// The Value parameter
   double m_value = 0.0;
   /// The input workspace

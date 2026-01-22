@@ -196,6 +196,7 @@ public:
   }
 
   void testStartEndWorkspaceIndex() {
+    // When the start ix > 0 and end ix < nHist
     auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) {
       if (wsIndex < 1 || wsIndex > 2)
         return false;

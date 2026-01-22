@@ -84,6 +84,26 @@ std::map<std::string, std::string> MaskDetectorsIf::validateInputs() {
   } else if (noInputFile && !noOutputFile) {
     issues["InputCalFile"] = "Input file name is missing.";
   }
+
+  // Validate StartWorkspaceIndex and EndWorkspaceIndex
+  API::MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
+  int nspec = static_cast<int>(inputW->getNumberHistograms());
+  const int nspec_start = getProperty("StartWorkspaceIndex");
+  if (nspec_start > nspec) {
+    issues["StartWorkspaceIndex"] = "StartWorkspaceIndex should be less than " + std::to_string(nspec) + ".\n";
+  }
+  if (!isDefault("EndWorkspaceIndex")) {
+    const int nspec_end = getProperty("EndWorkspaceIndex");
+    if (nspec_end < nspec_start) {
+      issues["EndWorkspaceIndex"] =
+          "EndWorkspaceIndex should be more than StartWorkspaceIndex. Specify a value greater than " +
+          std::to_string(nspec_start) + ".\n";
+    }
+    if (nspec_end > nspec - 1) {
+      issues["EndWorkspaceIndex"] = "EndWorkspaceIndex should be less than " + std::to_string(nspec - 1) + ".\n";
+    }
+  }
+
   return issues;
 }
 
@@ -96,23 +116,7 @@ void MaskDetectorsIf::exec() {
     g_log.error() << "No InputCalFle or OutputWorkspace specified; " << this->name() << " will do nothing.\n";
     return;
   }
-  const int nspec_start = getProperty("StartWorkspaceIndex");
-  int nspec_end;
-  int nspec = static_cast<int>(m_inputW->getNumberHistograms());
-  if (isDefault("EndWorkspaceIndex")) {
-    nspec_end = nspec - 1;
-  } else {
-    nspec_end = getProperty("EndWorkspaceIndex");
-    if (nspec_end > nspec) {
-      nspec_end = nspec;
-    }
-  }
-  if (nspec_end < nspec_start) {
-    g_log.error() << "Provided EndWorkspaceIndex (" << nspec_end << ") is smaller than StartWorkspaceIndex ("
-                  << nspec_start << "); " << this->name() << " will do nothing.\n";
-    return;
-  }
-  for (int i = nspec_start; i <= nspec_end; ++i) {
+  for (int i = m_start_ix; i <= m_end_ix; ++i) {
     // Get the list of udets contributing to this spectra
     const auto &dets = m_inputW->getSpectrum(i).getDetectorIDs();
 
@@ -131,7 +135,7 @@ void MaskDetectorsIf::exec() {
         }
       }
     }
-    const double p = static_cast<double>(i) / static_cast<double>(nspec_end - nspec_start);
+    const double p = static_cast<double>(i) / static_cast<double>(m_end_ix - m_start_ix);
     progress(p, "Generating detector map");
   }
 
@@ -197,6 +201,14 @@ void MaskDetectorsIf::retrieveProperties() {
     m_compar_f = std::not_equal_to<double>();
   else if (select_operator == "NotFinite")
     m_compar_f = not_finite<double>();
+
+  m_start_ix = getProperty("StartWorkspaceIndex");
+  int nspec = static_cast<int>(m_inputW->getNumberHistograms());
+  if (isDefault("EndWorkspaceIndex")) {
+    m_end_ix = nspec - 1;
+  } else {
+    m_end_ix = getProperty("EndWorkspaceIndex");
+  }
 }
 
 /**
