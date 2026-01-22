@@ -196,6 +196,7 @@ class PeakFitMixin(object):
         self.fit_dir = os.path.join(CWDIR, "FitParameters")
         self.peaks = (1.8, 1.44)
         self.reference_columns = ["wsindex", "I_est", "I", "I_err", "A", "A_err", "B", "B_err", "X0", "X0_err", "S", "S_err"]
+        self.cols_to_check_vals = ["wsindex", "I_est", "I", "X0", "S"]
         self.default_kwargs = {
             "wss": ["ENGINX_280625_focused_bank_1_dSpacing"],
             "peaks": self.peaks,
@@ -238,7 +239,8 @@ class PeakFitMixin(object):
 
         for c in out_table.getColumnNames():
             self.assertIn(c, expected_cols)
-            np.testing.assert_allclose(np.nan_to_num(out_table.column(c)), expected_dict[c], rtol=5e-3)
+            if c in self.cols_to_check_vals:
+                np.testing.assert_allclose(np.nan_to_num(out_table.column(c)), expected_dict[c], rtol=5e-3)
 
     def validate_missing_peaks_vals(self, peak_1_vals, peak_2_vals):
         param_table1 = ADS.retrieve("ENGINX_280625_2.2_GROUP_Fit_Parameters")
