@@ -340,8 +340,12 @@ bool hasAttribute(const H5::H5Object &object, const char *attributeName) {
 }
 
 void readStringAttribute(const H5::H5Object &object, const std::string &attributeName, std::string &output) {
-  const auto attribute = object.openAttribute(attributeName);
-  attribute.read(attribute.getDataType(), output);
+  if (object.attrExists(attributeName)) {
+    const auto attribute = object.openAttribute(attributeName);
+    attribute.read(attribute.getDataType(), output);
+  } else {
+    throw H5::Exception("H5Util::readStringAttribute: no attribute with name " + attributeName);
+  }
 }
 
 // This method avoids a copy on return so should be preferred to its sibling method

@@ -1482,10 +1482,14 @@ template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::st
 
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
   auto current = getCurrentObject();
-  try {
-    value = H5Util::readNumAttributeCoerce<NumT>(*current, name);
-  } catch (H5::Exception const &e) {
-    throw NXEXCEPTION(e.getDetailMsg());
+  if (current->attrExists(name)) {
+    try {
+      value = H5Util::readNumAttributeCoerce<NumT>(*current, name);
+    } catch (H5::Exception const &e) {
+      throw NXEXCEPTION(e.getDetailMsg());
+    }
+  } else {
+    NXEXCEPTION("Attribute " + name + " does not exist");
   }
 }
 
