@@ -1,0 +1,1 @@
+- Implement minimum range limit for :ref:`algm-PDFFourierTransform` algorithm, e.g. ``Rmin`` for ``Direction="Forward"``  and ``Qmin`` for ``Direction="Backward"``.
