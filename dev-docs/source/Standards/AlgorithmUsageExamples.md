@@ -30,6 +30,7 @@ Usage
 
 **Example - simple rebin of a histogram workspace:**
 
+
 .. testcode:: ExHistSimple
 
    # create histogram workspace
@@ -57,7 +58,7 @@ What is required is:
 - Short description explaining the example, formatted as shown above,
   i.e. using `**` to embolden the text.
 - A `.. testcode::` section, with a unique 'namespace' name, here
-  [Ex Hist Simple](ExHistSimple). This 'namespace' is not shown when converted to HTML,
+  `ExHistSimple`. This 'namespace' is not shown when converted to HTML,
   but is used in testing the code. This section contains the actual
   Python code demonstrating a usage of the algorithm. This code block
   contains commented code, finishing with one or more Python `print`
@@ -98,7 +99,7 @@ to replace unit testing* (or system testing). The purpose of usage
 testing (better described as demonstration examples), is to provide some
 happy-path examples, which, where this is possible, can assist the user
 understanding of the Python code. This is very different from the
-purposes of testing in general, see [here](UnitTestGoodPractice).
+purposes of testing in general, see [here](../UnitTestGoodPractice).
 
 Additional benefits of usage examples:
 
@@ -111,9 +112,9 @@ Additional benefits of usage examples:
 ### Using CreateSampleWorkspace and CreateWorkspace
 
 There are many ways to create sample workspaces. For example
-[CreateMDHistoWorkspace](algm-CreateMDHistoWorkspace),
-[CreateSampleWorkspace](algm-CreateSampleWorkspace) and
-[CreateWorkspace](algm-CreateWorkspace). CreateSampleWorkspace creates
+[CreateMDHistoWorkspace](inv:#algm-createmdhistoworkspace-v1),
+[CreateSampleWorkspace](inv:#algm-createsampleworkspace-v1) and
+[CreateWorkspace](inv:#algm-createworkspace-v1). CreateSampleWorkspace creates
 a fully defined workspace (either event or histogram) but for creating
 simple histogram workspace CreateWorkspace may be a better option. Above
 is shown an example where CreateWorkspace is used. Below is a more
@@ -212,8 +213,9 @@ Output:
 
 ### When needing to load a data file
 
+
 Instructions to add a new data file to the repository are available
-[here](DataFilesForTesting). Files from the repository will be bundled
+[here](../DataFilesForTesting). Files from the repository will be bundled
 up into a .zip file, and this .zip made available for download from the
 Mantid download page.
 
