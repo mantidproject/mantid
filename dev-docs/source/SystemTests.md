@@ -359,7 +359,7 @@ some tests were not cleanly exited.
 ### Adding New Data & References Files
 
 The data is managed by CMake's external data system that is described by
-`DataFilesForTesting`. Please see `DataFilesForTesting_AddingANewFile`
+[Data Files for Testing](DataFilesForTesting). Please see [Adding A New File(s)](DataFilesForTesting.md#adding-a-new-files)
 for how to add new files.
 
 ## Best Practice

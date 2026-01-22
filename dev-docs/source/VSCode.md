@@ -14,7 +14,7 @@ complicated IDE for C++ development on any platform that VSCode supports
 - An installed copy of VSCode -
   [download](https://code.visualstudio.com/).
 - A clone of the main Mantid repo
-- Follow the `GettingStarted` guide to get a:
+- Follow the [Getting Started](GettingStarted/GettingStarted) guide to get a:
 - Built copy of Mantid (In "Debug" mode for any debugging option not
   "Release")
 - GDB for Linux/OSX debugging (GDB can be switched out for LLDB at any

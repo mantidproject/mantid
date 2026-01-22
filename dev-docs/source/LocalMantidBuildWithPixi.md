@@ -91,7 +91,7 @@ print('Build dir:', os.environ.get('MANTID_BUILD_DIR'))
 
 ## Related Documentation
 
-- `BuildingWithCMake` - Building Mantid from source
-- `GettingStarted` - Initial setup for Mantid development
+- [Building with CMake](BuildingWithCMake) - Building Mantid from source
+- [Getting Started](GettingStarted/GettingStarted) - Initial setup for Mantid development
 - [Pixi Documentation](https://pixi.ws/latest/) - Complete pixi
   reference

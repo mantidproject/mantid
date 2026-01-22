@@ -16,7 +16,7 @@ Further documentation for implementing algorithms:
 
 - `User tutorial for writing a python algorithm <emwp_intro>`
 - `Developer docs for writing a C++ algorithm <WritingAnAlgorithm>`
-- `PythonAlgorithmsInExternalProjects`
+- [Python Algorithms in External Projects](PythonAlgorithmsInExternalProjects)
 
 ## Algorithm Language Comparison
 
