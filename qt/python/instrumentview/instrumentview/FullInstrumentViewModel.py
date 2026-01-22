@@ -612,11 +612,17 @@ class FullInstrumentViewModel:
 
     def _create_current_grouping_workspace(self, grouping_name):
         # TODO: Ideally algorithm should use workspace when ADS hanging is fixed
-        CreateGroupingWorkspace(InstrumentFilename=self._workspace.getInstrument().getFilename(), OutputWorkspace=grouping_name)
-        grouping_ws = AnalysisDataService.retrieve(grouping_name).clone(StoreInADS=False)
-        for i, g in enumerate(self._current_detector_groupings[self._is_valid]):
-            grouping_ws.dataY(i)[:] = g
-        return grouping_ws
+        individual_groups_strings = []
+        for i in range(1, self._current_detector_groupings.max() + 1):
+            individual_groups_strings.append("+".join([str(id) for id in self._detector_ids[self._current_detector_groupings == i]]))
+
+        CreateGroupingWorkspace(
+            InstrumentFilename=self._workspace.getInstrument().getFilename(),
+            ComponentName=self._workspace.getInstrument().getFullName(),
+            CustomGroupingString=",".join(individual_groups_strings),
+            OutputWorkspace=grouping_name,
+        )
+        return AnalysisDataService.retrieve(grouping_name)
 
     def convert_units(self, source_unit: str, target_unit: str, picked_detector_index: int, value: float) -> float:
         return self._unit_converter.convert(
