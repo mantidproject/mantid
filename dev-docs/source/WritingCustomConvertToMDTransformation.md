@@ -7,15 +7,15 @@
 ## Introduction
 
 This information is intended for a developer who needs to write a
-customized [ConvertToMD class](algm-ConvertToMD-v1) (plugin). The
+customized [ConvertToMD class](inv:mantid#algm-converttomd-v1) (plugin). The
 plugin then becomes automatically available to use in the
-[ConvertToMD](algm-ConvertToMD-v1) algorithm.
+[ConvertToMD](inv:mantid#algm-converttomd-v1) algorithm.
 
 As the MD transformation factory is similar to the
 [Dynamic Factory](Dynamic Factory) used for converting
 [units](Unit Factory), the procedure of writing a custom [Convert To Md](ConvertToMD)
 transformation is very similar to adding a new unit to use with
-[ConvertUnits](algm-ConvertUnits-v1) algorithm or writing a new
+[ConvertUnits](inv:mantid#algm-convertunits-v1) algorithm or writing a new
 algorithm to use with Mantid.
 
 The plugin interface deals with the task of converting a generic
@@ -166,18 +166,18 @@ for(i in array of detectors)
 Unit conversion uses the angular positions and sample-detector
 distances. This information is usually expensive to calculate so it is
 calculated separately by the
-[PreprocessDetectorsToMD](algm-PreprocessDetectorsToMD-v1) algorithm.
+[PreprocessDetectorsToMD](inv:mantid#algm-preprocessdetectorstomd-v1) algorithm.
 The detector information can be extracted directly from the input
 workspace, but consider checking the table workspace returned by
-[PreprocessDetectorsToMD](algm-PreprocessDetectorsToMD-v1) and check if
+[PreprocessDetectorsToMD](inv:mantid#algm-preprocessdetectorstomd-v1) and check if
 the information is already provided there.
 
-[PreprocessDetectorsToMD](algm-PreprocessDetectorsToMD-v1) can also be
+[PreprocessDetectorsToMD](inv:mantid#algm-preprocessdetectorstomd-v1) can also be
 modified to add some additional detector information. This information
 can then be added to the resulting table workspace and used in the
 custom plugin. All currently existing plugins use the information about
 the detector's positions calculated by
-[PreprocessDetectorsToMD](algm-PreprocessDetectorsToMD-v1).
+[PreprocessDetectorsToMD](inv:mantid#algm-preprocessdetectorstomd-v1).
 
 ## Complex Transformations
 

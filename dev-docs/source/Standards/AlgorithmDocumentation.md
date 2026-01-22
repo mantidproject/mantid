@@ -193,13 +193,13 @@ latest version of an algorithm, e.g. DiffractionFocussing, then in
 Sphinx you type would type
 
 ``` rest
-:ref:`DiffractionFocussing <algm-DiffractionFocussing>`
+:ref:`DiffractionFocussing <inv:mantid#algm-diffractionfocussing-v1>`
 ```
 
 If you need to reference a particular version then you would type
 
 ``` rest
-:ref:`DiffractionFocussing version 2 <algm-DiffractionFocussing-v2>`
+:ref:`DiffractionFocussing version 2 <inv:mantid#algm-diffractionfocussing-v2>`
 ```
 
 where the first part outside the angle brackets defines the link text

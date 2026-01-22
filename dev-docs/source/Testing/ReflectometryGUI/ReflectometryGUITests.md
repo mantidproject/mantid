@@ -8,8 +8,8 @@
 
 The ISIS Reflectometry interface is a graphical front end for the main
 ISIS reflectometry reduction algorithm
-[ReflectometryISISLoadAndProcess](algm-ReflectometryISISLoadAndProcess)
-and post-processing algorithm [Stitch1DMany](algm-Stitch1DMany). The
+[ReflectometryISISLoadAndProcess](inv:mantid#algm-reflectometryisisloadandprocess-v1)
+and post-processing algorithm [Stitch1DMany](inv:mantid#algm-stitch1dmany-v1). The
 purpose of the interface is to speed up the analysis of the
 Reflectometry spectra by providing batch-mode execution of these
 algorithms on groups of runs.
