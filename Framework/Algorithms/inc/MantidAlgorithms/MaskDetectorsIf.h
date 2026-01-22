@@ -63,6 +63,7 @@ private:
   boost::function<bool(double, double)> m_compar_f;
   void outputToWorkspace();
   void retrieveProperties();
+  void validateAndSetIxProperties();
   void createNewCalFile();
   void init() override;
   void exec() override;

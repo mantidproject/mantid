@@ -84,26 +84,15 @@ std::map<std::string, std::string> MaskDetectorsIf::validateInputs() {
   } else if (noInputFile && !noOutputFile) {
     issues["InputCalFile"] = "Input file name is missing.";
   }
-
-  // Validate StartWorkspaceIndex and EndWorkspaceIndex
-  API::MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
-  int nspec = static_cast<int>(inputW->getNumberHistograms());
-  const int nspec_start = getProperty("StartWorkspaceIndex");
-  if (nspec_start > nspec) {
-    issues["StartWorkspaceIndex"] = "StartWorkspaceIndex should be less than " + std::to_string(nspec) + ".\n";
-  }
   if (!isDefault("EndWorkspaceIndex")) {
+    const int nspec_start = getProperty("StartWorkspaceIndex");
     const int nspec_end = getProperty("EndWorkspaceIndex");
     if (nspec_end < nspec_start) {
       issues["EndWorkspaceIndex"] =
           "EndWorkspaceIndex should be more than StartWorkspaceIndex. Specify a value greater than " +
           std::to_string(nspec_start) + ".\n";
     }
-    if (nspec_end > nspec - 1) {
-      issues["EndWorkspaceIndex"] = "EndWorkspaceIndex should be less than " + std::to_string(nspec - 1) + ".\n";
-    }
   }
-
   return issues;
 }
 
@@ -202,12 +191,28 @@ void MaskDetectorsIf::retrieveProperties() {
   else if (select_operator == "NotFinite")
     m_compar_f = not_finite<double>();
 
-  m_start_ix = getProperty("StartWorkspaceIndex");
+  validateAndSetIxProperties();
+}
+
+void MaskDetectorsIf::validateAndSetIxProperties() {
   int nspec = static_cast<int>(m_inputW->getNumberHistograms());
+  int m_start_ix = getProperty("StartWorkspaceIndex");
+  if (m_start_ix > nspec) {
+    g_log.warning() << "StartWorkspaceIndex should be less than " << nspec
+                    << ". Setting it to the minimum allowed value of zero.\n";
+    m_start_ix = 0;
+  }
   if (isDefault("EndWorkspaceIndex")) {
     m_end_ix = nspec - 1;
   } else {
-    m_end_ix = getProperty("EndWorkspaceIndex");
+    int end_ix = getProperty("EndWorkspaceIndex");
+    if (end_ix > nspec - 1) {
+      g_log.warning() << "EndWorkspaceIndex should be less than " << nspec
+                      << ". Setting it to the maximum allowed value of " << nspec - 1 << ".\n";
+      m_end_ix = nspec - 1;
+    } else {
+      m_end_ix = end_ix;
+    }
   }
 }
 
