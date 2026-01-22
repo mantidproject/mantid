@@ -19,7 +19,7 @@ def setup(app):
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    # "sphinx.ext.intersphinx",  # Disabled temporarily - no internet access in build environment
+    "sphinx.ext.intersphinx",
     # use mathjax as we currently only publish the developer docs online
     # for viewing through a web browser.
     "sphinx.ext.mathjax",
