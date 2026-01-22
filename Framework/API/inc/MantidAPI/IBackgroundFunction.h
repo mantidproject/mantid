@@ -21,6 +21,12 @@ namespace API {
 */
 class MANTID_API_DLL IBackgroundFunction : public IFunctionWithLocation {
 public:
+  /// Default Constructor
+  IBackgroundFunction();
+
+  /// Virtual Destructor
+  ~IBackgroundFunction() override;
+
   /// Fits the function
   /// @param X :: a vector of x values
   /// @param Y :: a matching vector of Y values
