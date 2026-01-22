@@ -14,8 +14,8 @@ operations in C++, and **workflows** in python.
 
 Further documentation for implementing algorithms:
 
-- `User tutorial for writing a python algorithm <emwp_intro>`
-- `Developer docs for writing a C++ algorithm <WritingAnAlgorithm>`
+- [User tutorial for writing a python algorithm](emwp_intro)
+- [Developer docs for writing a C++ algorithm](WritingAnAlgorithm)
 - [Python Algorithms in External Projects](PythonAlgorithmsInExternalProjects)
 
 ## Algorithm Language Comparison
@@ -43,7 +43,7 @@ provides an overview of the possibilities offered for scripting,
 including automatic generation via the graphical user interface for
 Mantid.
 
-`Algorithms <Algorithm>` and `workspaces <Workspace>` are core concepts
+[Algorithms](Algorithm) and [workspaces](Workspace) are core concepts
 in Mantid. Generally, an Algorithm does something based on input
 workspaces, either to create a new one from the results, or to modify
 the input in-place. One reason to create an Algorithm, is because you

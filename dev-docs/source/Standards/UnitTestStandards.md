@@ -1,14 +1,14 @@
 # Unit Test Coding Standards
 
 The code for unit test classes should follow the standards as set out in
-`CppCodingStandards` with the following differences.
+[Cpp Coding Standards](CppCodingStandards) with the following differences.
 
-- The file and class name should be of the form `ClassNameTest`, for
-  example `WorkspaceTest`, `LoggerTest`
+- The file and class name should be of the form [Class Name Test](ClassNameTest), for
+  example [Workspace Test](WorkspaceTest), [Logger Test](LoggerTest)
 - Test classes do not need to be included in a namespace.
 - Test methods within the test classes must start with the word 'test'
-  and then describe the test. For example `test_readXValues`,
-  `test_invalidLogString`
+  and then describe the test. For example [Test Read Xvalues](test_readXValues),
+  [Test Invalid Log String](test_invalidLogString)
 - Other utility methods may be used in test classes but must not start
   with the word test
 - During debugging Test methods may be disabled by prefixing the method

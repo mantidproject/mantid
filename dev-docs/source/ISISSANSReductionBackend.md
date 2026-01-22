@@ -42,7 +42,7 @@ calculated for the instrument geometry at the time of the SANS
 experiment. $Cor(R,\lambda)$ optionally takes into account any
 corrections that cannot be described as only pixel dependent or only
 wavelength dependent. One such example is for the angle dependence of
-transmissions, `SANSWideAngleCorrection <algm-SANSWideAngleCorrection>`.
+transmissions, [SANSWideAngleCorrection](algm-SANSWideAngleCorrection).
 $T(\lambda)$ is the transmission, which measures the ratio of neutron
 counts after the sample, divided by the neutron counts before the
 sample. $T(\lambda)$ is calculated from a “transmission run” and a
@@ -1324,14 +1324,14 @@ current parser since only a single interface method (*parse_line* which
 takes a single line to parse) needs to be provided.
 
 For an overview of the user file commands, please see the
-`user file documentation <ISIS_SANS_User_File_QRes-ref>`.
+[user file documentation](ISIS_SANS_User_File_QRes-ref).
 
 ##### Director for *ISISCommandInterface* (CLI)
 
 The *ISISCommandInterface* is used by some of the power users among the
 instrument scientists. It is an efficient way to customize reductions
 which require small tweaks between different reductions. Please consult
-the `scripting documentation <ScriptingSANSReductions>` for the
+the [scripting documentation](ScriptingSANSReductions) for the
 *ISISCommandInterface* for more information.
 
 The principal component which sets up the state behind the scene is
@@ -1378,15 +1378,15 @@ The dedicated work-flow algorithms for the SANS reduction are:
 
 - *Calculate SANS Transmission*
 - *Create SANS Wavelength Pixel Adjustment*
-- `CropToComponent <algm-CropToComponent>`
-- `Divide <algm-Divide>` (by Sample Volume)
-- `Multiply <algm-Multiply>` (by Absolute Scale)
-- `MoveInstrumentComponent <algm-MoveInstrumentComponent>`
+- [CropToComponent](algm-CropToComponent)
+- [Divide](algm-Divide) (by Sample Volume)
+- [Multiply](algm-Multiply) (by Absolute Scale)
+- [MoveInstrumentComponent](algm-MoveInstrumentComponent)
 - *Normalize To SANS Monitor*
-- `Q1D <algm-Q1D>` or `Qxy <algm-Qxy>`
-- `RotateInstrumentComponent <algm-RotateInstrumentComponent>`
-- `SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
-- `SANSLoad <algm-SANSLoad>`
+- [Q1D](algm-Q1D) or [Qxy](algm-Qxy)
+- [RotateInstrumentComponent](algm-RotateInstrumentComponent)
+- [SANSConvertToWavelengthAndRebin](algm-SANSConvertToWavelengthAndRebin)
+- [SANSLoad](algm-SANSLoad)
 - *SANSSave*
 - *Slice SANS Event*
 - *Workspace Masking*
@@ -1416,34 +1416,34 @@ The following steps are performed:
 3.  Get the corrected transmission workspace. The sub-steps are:
     1.  Load the transmission workspace
     2.  Extract the transmission detector ids with
-        `ExtractSpectra <algm-ExtractSpectra>`
+        [ExtractSpectra](algm-ExtractSpectra)
     3.  Perform prompt peak correction
     4.  Perform flat background correction to monitors (if applicable)
-        using `CalculateFlatBackground <algm-CalculateFlatBackground>`
+        using [CalculateFlatBackground](algm-CalculateFlatBackground)
     5.  Perform flat background correction to other detectors (if
         applicable) using
-        `CalculateFlatBackground <algm-CalculateFlatBackground>`
+        [CalculateFlatBackground](algm-CalculateFlatBackground)
     6.  Convert to wavelength and rebin using
-        `SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
+        [SANSConvertToWavelengthAndRebin](algm-SANSConvertToWavelengthAndRebin)
 4.  Get the corrected direct workspace. The sub-steps are:
     1.  Load the direct workspace
     2.  Extract the transmission detector ids with
-        `ExtractSpectra <algm-ExtractSpectra>`
+        [ExtractSpectra](algm-ExtractSpectra)
     3.  Perform prompt peak correction (if applicable) using
-        `RemoveBins <algm-RemoveBins>`
+        [RemoveBins](algm-RemoveBins)
     4.  Perform flat background correction to monitors (if applicable)
-        using `CalculateFlatBackground <algm-CalculateFlatBackground>`
+        using [CalculateFlatBackground](algm-CalculateFlatBackground)
     5.  Perform flat background correction to other detectors (if
         applicable) using
-        `CalculateFlatBackground <algm-CalculateFlatBackground>`
+        [CalculateFlatBackground](algm-CalculateFlatBackground)
     6.  Convert to wavelength and rebin using
-        `SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
+        [SANSConvertToWavelengthAndRebin](algm-SANSConvertToWavelengthAndRebin)
 5.  Perform fitting for the transmission calculation. The sub-steps are:
     1.  Use incident monitor, wavelength settings, transmission detector
         ids, fit settings as well as the corrected transmission (step 3)
         and direct (step4) workspaces to initialize
-        `CalculateTransmission <algm-CalculateTransmission>`
-    2.  Execute `CalculateTransmission <algm-CalculateTransmission>`
+        [CalculateTransmission](algm-CalculateTransmission)
+    2.  Execute [CalculateTransmission](algm-CalculateTransmission)
     3.  Get the fitted and unfitted output workspaces
 6.  Set the fitted and unfitted workspaces on the output of the
     algorithm.
@@ -1454,13 +1454,13 @@ If a 1D reduction has been selected then the algorithm will perform the
 follow sub-steps:
 
 1.  Calculate the momentum transfer resolution workspace using
-    `TOFSANSResolutionByPixel <algm-TOFSANSResolutionByPixel>` (if
+    [TOFSANSResolutionByPixel](algm-TOFSANSResolutionByPixel) (if
     applicable)
 2.  Set data workspace, adjustment workspaces, momentum transfer
     resolution workspace (if applicable), radius and wavelength
     cut-offs, momentum transfer limits and the gravity correction on
-    `Q1D <algm-Q1D>`
-3.  Execute `Q1D <algm-Q1D>`
+    [Q1D](algm-Q1D)
+3.  Execute [Q1D](algm-Q1D)
 4.  Get reduced workspace, the sum-of-counts workspace and the
     sum-of-norm workspaces and set on the output of the algorithm
 
@@ -1470,24 +1470,24 @@ following sub-steps:
 1.  Set data workspace, adjustment workspaces, momentum transfer
     resolution workspace (if applicable), radius and wavelength
     cut-offs, momentum transfer limits and the gravity correction on
-    `Qxy <algm-Qxy>`
-2.  Execute `Qxy <algm-Qxy>`
+    [Qxy](algm-Qxy)
+2.  Execute [Qxy](algm-Qxy)
 3.  Get reduced workspace, the sum-of-counts workspace and the
     sum-of-norm workspaces and set on the output of the algorithm
 
 ### *SANSConvertToWavelengthAndRebin*
 
 The
-`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
+[SANSConvertToWavelengthAndRebin](algm-SANSConvertToWavelengthAndRebin)
 algorithm is one of the few which does not take a *SANSState* object as
 an input.
 
 The algorithm performs the following steps:
 
 1.  Unit conversion from time-of-flight units to wavelength units using
-    `ConvertUnits <algm-ConvertUnits>`
-2.  Performs a rebin operation using either `Rebin <algm-Rebin>` or
-    `InterpolatingRebin <algm-InterpolatingRebin>`
+    [ConvertUnits](algm-ConvertUnits)
+2.  Performs a rebin operation using either [Rebin](algm-Rebin) or
+    [InterpolatingRebin](algm-InterpolatingRebin)
 
 ### *Create SANS Wavelength and Pixel Adjustment*
 
@@ -1502,20 +1502,20 @@ The sub-steps of the algorithm are:
     1.  Get the calculate-transmission workspace from the input
     2.  Get the normalization-to-monitor workspace from the input
     3.  Load the wavelength-adjustment file using
-        `LoadRKH <algm-LoadRKH>`
+        [LoadRKH](algm-LoadRKH)
     4.  Provide all of the above workspaces with the same binning using
-        `Rebin <algm-Rebin>` and multiply them using
-        `Multiply <algm-Multiply>`
+        [Rebin](algm-Rebin) and multiply them using
+        [Multiply](algm-Multiply)
 2.  Create the pixel-adjustment workspace. The sub-states are:
-    1.  Load the pixel-adjustment file using `LoadRKH <algm-LoadRKH>`
+    1.  Load the pixel-adjustment file using [LoadRKH](algm-LoadRKH)
     2.  Crop the pixel-adjustment workspace to the desired detector
-        using `CropToComponent <algm-CropToComponent>`
+        using [CropToComponent](algm-CropToComponent)
 3.  Set the pixel-adjustment and wavelength-adjustment workspaces on the
     output of the algorithm
 
 ### *SANSLoad*
 
-The `SANSLoad <algm-SANSLoad>` algorithm is responsible for loading data
+The [SANSLoad](algm-SANSLoad) algorithm is responsible for loading data
 and applying the calibration where required. This algorithm loads SANS
 data sets. The loading can handle nexus and raw files which can be plain
 or multi-period data. In addition the algorithm has to be able to handle
@@ -1575,20 +1575,20 @@ are:
 
 1.  Select the correct masking strategy (currently only ISIS)
 2.  Apply time bin masking. The sub-steps are:
-    1.  Apply general time bin masks using `MaskBins <algm-MaskBins>`
+    1.  Apply general time bin masks using [MaskBins](algm-MaskBins)
     2.  Apply detector specific time bin masks using
-        `MaskBins <algm-MaskBins>`
+        [MaskBins](algm-MaskBins)
 3.  Apply cylinder masking. This generates a hollow cylinder which masks
     the beam stop (defined by an inner radius) and anything outside of
     an area of interest (defined by an outer radius). The sub-steps are:
     1.  Set up the inner and the outer radius of the cylinder mask.
     2.  Mask everything outside of the hollow cylinder using
-        `MaskDetectorsInShape <algm-MaskDetectorsInShape>`
+        [MaskDetectorsInShape](algm-MaskDetectorsInShape)
 4.  Apply a list of mask files. For each mask file the sub-steps are:
     1.  Load the mask file into a workspace using
-        `LoadMask <algm-LoadMask>`
+        [LoadMask](algm-LoadMask)
     2.  Apply the mask workspace to the scatter workspace using
-        `MaskDetectors <algm-MaskDetectors>`
+        [MaskDetectors](algm-MaskDetectors)
 5.  Apply spectrum masks. The sub-steps are:
     1.  Get the spectra masks for single spectra, spectrum ranges,
         single horizontal spectrum strips, single vertical spectrum
@@ -1596,19 +1596,19 @@ are:
         other), vertical spectrum range (several strips next to each
         other), block masks and block cross masks
     2.  Mask the selected spectra using
-        `MaskDetectors <algm-MaskDetectors>`
+        [MaskDetectors](algm-MaskDetectors)
 6.  Apply angle masking. This is used for pizza-slice masking and uses
-    `MaskDetectorsInShape <algm-MaskDetectorsInShape>`
+    [MaskDetectorsInShape](algm-MaskDetectorsInShape)
 7.  Apply beam stop masking. The beam stop consists of a disc where the
     beam is located and a connection arm (rod) which holds the disc. The
     disc has at this point already been masked by a cylinder mask. This
     step masks the connection arm using
-    `MaskDetectorsInShape <algm-MaskDetectorsInShape>`
+    [MaskDetectorsInShape](algm-MaskDetectorsInShape)
 
 ### *MoveInstrumentComponent* and *RotateInstrumentComponent*
 
-The `MoveInstrumentComponent <algm-MoveInstrumentComponent>` algorithm
-and `RotateInstrumentComponent <algm-RotateInstrumentComponent>` are
+The [MoveInstrumentComponent](algm-MoveInstrumentComponent) algorithm
+and [RotateInstrumentComponent](algm-RotateInstrumentComponent) are
 used in one of three ways, depending on how the state of the script. It
 can be used to move an individual component, reset positions, or specify
 the beam centre. Note that if the beam centre is also specified in the
@@ -1617,27 +1617,27 @@ state object, then the manual selection takes precedence.
 ### *Normalize To SANS Monitor*
 
 This step provides a monitor normalization workspace for subsequent
-wavelength correction in `algm-Q1D` or `algm-Qxy`. The user can provide
+wavelength correction in [Q1D](algm-Q1D) or [Qxy](algm-Qxy). The user can provide
 a *ScaleFactor* which is normally obtained during event slicing.
 
 The sub-steps of this step are:
 
 1.  Get the incident monitor spectrum number and the scale factor
 2.  Extract the monitor spectrum using
-    `ExtractSingleSpectrum <algm-ExtractSingleSpectrum>` into a monitor
+    [ExtractSingleSpectrum](algm-ExtractSingleSpectrum) into a monitor
     workspace
 3.  Apply the scale factor to the monitor workspace using
-    `Scale <algm-Scale>`
+    [Scale](algm-Scale)
 4.  Perform a prompt peak correction (if applicable) using
-    `RemoveBins <algm-RemoveBins>`
+    [RemoveBins](algm-RemoveBins)
 5.  Perform a flat background correction (if applicable) using
-    `CalculateFlatBackground <algm-CalculateFlatBackground>`
+    [CalculateFlatBackground](algm-CalculateFlatBackground)
 6.  Convert to wavelength units and rebin using
-    `SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
+    [SANSConvertToWavelengthAndRebin](algm-SANSConvertToWavelengthAndRebin)
 
 ### *SANSSave*
 
-The `SANSSave <algm-SANSSave>` algorithm performs two steps:
+The [SANSSave](algm-SANSSave) algorithm performs two steps:
 
 1.  Create a cloned workspace where the zero-error values are inflated
     (if this is requested)
@@ -1665,7 +1665,7 @@ The sub-states of this algorithm are:
 2.  If the data set is from a *Can* measurement, then don't perform a
     slice
 3.  Slice the scatter workspace using the start and end time and
-    `FilterByTime <algm-FilterByTime>`
+    [FilterByTime](algm-FilterByTime)
 4.  Get the partial charge for the sliced data and calculate the slice
     factor which is *(partial charge) / (total charge)*
 5.  Multiply the monitor workspace with the scale factor
@@ -1736,7 +1736,7 @@ of a data set, i.e. it will run the reduction for the *Sample* and *Can*
 and perform the subtraction of these results if the reduction has been
 set up to do this. In particular this algorithm stitches the reduced
 workspaces of the different detectors using
-`SANSStitch <algm-SANSStitch>`, again only if the reduction has been set
+[SANSStitch](algm-SANSStitch), again only if the reduction has been set
 up to do this.
 
 ### *SANSReductionCore*
@@ -1754,7 +1754,7 @@ The sub-steps of this algorithm are:
 
 1.  Get the cropped input *ScatterWorkspace*. The cropping is defined by
     the selected detector type. The underlying algorithm is
-    `CropToComponent <algm-CropToComponent>`.
+    [CropToComponent](algm-CropToComponent).
 2.  Create an event slice of the input workspace. Note that event
     slicing is only applied to event-mode workspaces and only when it
     has been specified by the user. During this step the scatter
@@ -1763,24 +1763,24 @@ The sub-steps of this algorithm are:
     and the charge of the entire data set.
 3.  If we are dealing with an even-mode workspace and the compatibility
     mode has been chosen then either a custom binning or the monitor
-    binning is applied using `Rebin <algm-Rebin>` or
-    `RebinToWorkspace <algm-RebinToWorkspace>`, respectively.
+    binning is applied using [Rebin](algm-Rebin) or
+    [RebinToWorkspace](algm-RebinToWorkspace), respectively.
 4.  Both the data and the monitor workspace perform an initial move
     operation. The first step sets the instrument positions back to the
     IDF, in case the algorithm had been loaded and moved already
     previously. The second time the move algorithm is operated in
     *InitialMove* mode to apply and offset.
 5.  The data workspace is masked using various modes. Note that using
-    `MoveInstrumentComponent <algm-MoveInstrumentComponent>`. The
+    [MoveInstrumentComponent](algm-MoveInstrumentComponent). The
     algorithm is applied twice. The first time using the *SetToZero*
     mode to reset the components to known positions from the IDF. The
     second time the components are moved and rotated to the requested
     positions. Note that all steps up until now were performed in the
     time-of-flight domain.
 6.  Convert the data from time-of-flight to wavelength.
-7.  Scale the data set using `Multiply <algm-Multiply>`. This will
+7.  Scale the data set using [Multiply](algm-Multiply). This will
     multiply the data set with the absolute scale and divide
-    `Divide <algm-Divide>` by the sample volume.
+    [Divide](algm-Divide) by the sample volume.
 8.  This step creates the adjustment workspaces by *Create SANS
     Adjustment Workspaces*. This uses the input *TransmissionWorkspace*
     and *DirectWorkspace* workspaces. Note that the instrument's
@@ -1789,13 +1789,13 @@ The sub-steps of this algorithm are:
     workspace, a pixel-adjustment workspace and a wavelength-and-pixel
     adjustment workspace. Note that their creation is optional.
 9.  Convert the data workspace into histogram-mode using
-    `RebinToWorkspace <algm-RebinToWorkspace>`. This is only relevant
+    [RebinToWorkspace](algm-RebinToWorkspace). This is only relevant
     for event-mode workspaces where the compatibility mode has not been
     used. Up until now the event-mode workspace could be used as an
     event workspace, but the momentum transfer conversion (the next
     step) requires a histogram-mode workspace.
 10. The final step, the conversion to momentum transfer units, either
-    uses `Q1D <algm-Q1D>` or `Qxy <algm-Qxy>` depending on the setting
+    uses [Q1D](algm-Q1D) or [Qxy](algm-Qxy) depending on the setting
     of the reduction dimensionality. This step uses the data workspace
     as well as all of the adjustment workspaces which have been provided
     earlier on. The resulting *OutputWorkspace* and the *SumOfCounts* as

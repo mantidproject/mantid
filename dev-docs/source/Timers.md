@@ -69,13 +69,13 @@ each code block separately. Note, when a code block is executed multiple
 times, <span class="title-ref">CodeBlockTimer</span> will output the
 elapsed time for each execution. If you don't want to have multiple
 lines of output and are interested in the total elapsed time, use
-`CodeBlockMultipleTimer <CodeBlockMultipleTimer>`.
+[CodeBlockMultipleTimer](CodeBlockMultipleTimer).
 
 ### Class CodeBlockMultipleTimer
 
 [MantidKernel/CodeBlockMultipleTimer](https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h)
 is designed for timing a block of code that is called multiple times.
-Similar to `CodeBlockTimer <CodeBlockTimer>`, it needs to be
+Similar to [CodeBlockTimer](CodeBlockTimer), it needs to be
 instantiated on the stack at the start of the scope. The constructor
 takes in a
 [MantidKernel/CodeBlockMultipleTimer::TimeAccumulator](https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h)
@@ -135,7 +135,7 @@ spent waiting for disk, network or other resources, e.g. I/O operations.
 measures both CPU time and wall-clock time. The CPU time measurement
 utilizes
 [std::clock()](https://en.cppreference.com/w/cpp/chrono/c/clock)
-function. The wall-clock time measurement uses `Timer <Timer>` class.
+function. The wall-clock time measurement uses [Timer](Timer) class.
 The output includes the wall-clock time and the ratio of the CPU time to
 the wall-clock time. Note, since CPU time and wall-clock time are
 measured with different accuracy, it is possible to have a ratio greater

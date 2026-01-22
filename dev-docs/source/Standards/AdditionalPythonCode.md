@@ -40,8 +40,7 @@ directives such as `.. automodule::` or `.. autoclass::`, see
 ### Unit testing
 
 Unit tests for each module should be added to `scripts/test/modulename`.
-The tests follow the `standard Mantid unit testing practices
-<UnitTestGoodPractice>`.
+The tests follow the [standard Mantid unit testing practices](UnitTestGoodPractice).
 
 ## The `qt` directory
 

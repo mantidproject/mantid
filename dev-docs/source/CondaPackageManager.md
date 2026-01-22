@@ -117,5 +117,5 @@ downstream within our DAaaS workspace configuration repository. We
 decided against this because it feels like bad practise to have a
 formalised way of installing dependencies of a software in a way which
 is completely detached. The prevailing message is this: please only use
-conda packages. We provide `pip install instructions <pip-install-ref>`
+conda packages. We provide [pip install instructions](pip-install-ref)
 for users if they would like to take the risk.

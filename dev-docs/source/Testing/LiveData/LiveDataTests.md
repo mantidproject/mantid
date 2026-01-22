@@ -11,7 +11,7 @@ data reduction can be seen [here](../../_static/videos/LiveData.htm).
 
 The rest of this document describes some examples you can run yourself
 using a fake instrument which simulates the arrival of new data. For all
-of these tests you will need to change your Facility to `TEST_LIVE`, as
+of these tests you will need to change your Facility to [Test Live](TEST_LIVE), as
 described below. You can use MantidWorkbench.
 
 **Time required 20 - 30 minutes**
@@ -21,7 +21,7 @@ described below. You can use MantidWorkbench.
 In MantidWorkbench:
 
 1.  Open the `File` menu and select `Settings`
-2.  Change the facility to `TEST_LIVE`
+2.  Change the facility to [Test Live](TEST_LIVE)
 
 You can follow the same approach to set your facility back afterwards.
 
@@ -29,7 +29,7 @@ You can follow the same approach to set your facility back afterwards.
 
 ### ISIS Event
 
-1.  Run the `FakeISISEventDAE` algorithm from the Algorithms toolbox
+1.  Run the [Fake Isisevent Dae](FakeISISEventDAE) algorithm from the Algorithms toolbox
 2.  The following settings will create an instrument with 100 spectra,
     transmitting 2000 events every 20 milliseconds in 1 period. The data
     is between 10,000 and 20,000 microseconds TOF:
@@ -40,14 +40,14 @@ You can follow the same approach to set your facility back afterwards.
 3.  To stop the fake instrument, open the Algorithm Details window, by
     clicking on the `Details` button (MantidWorkbench) at the bottom of
     the Algorithms Toolbox. Then click `Cancel` next to
-    `FakeISISEventDAE`.
+    [Fake Isisevent Dae](FakeISISEventDAE).
 
 Running this algorithm will produce "`FakeISISEventDAE started`" in the
 Messages panel, but will not make any other data appear yet.
 
 ### ISIS Histogram
 
-1.  Run the `FakeISISHistoDAE` Algorithm from the Algorithms toolbox
+1.  Run the [Fake Isishisto Dae](FakeISISHistoDAE) Algorithm from the Algorithms toolbox
 2.  The following settings will create an instrument with 100 spectra,
     with 100 bins in 1 period:
     - NPeriods = 1
@@ -55,7 +55,7 @@ Messages panel, but will not make any other data appear yet.
     - NBins = 100
 3.  To stop the fake instrument, open the Algorithm Details window, by
     clicking on the `Details` button at the bottom of the Algorithms
-    Toolbox. Then click `Cancel` next to `FakeISISHistoDAE`.
+    Toolbox. Then click `Cancel` next to [Fake Isishisto Dae](FakeISISHistoDAE).
 
 Running this algorithm will produce "`FakeISISHistoDAE started`" in the
 Messages panel, but will not make any other data appear yet.
@@ -73,7 +73,7 @@ setup.
       your home directory)
 
 2.  To use a pre-nexus file, use the `REF_L_32035_neutron_event.dat`
-    file (located in the `TrainingCourseData` folder), open the
+    file (located in the [Training Course Data](TrainingCourseData) folder), open the
     `Mantid.user.properties` file in your favorite text editor and add
     the following lines:
 
@@ -87,11 +87,11 @@ setup.
     For MantidWorkbench to find these files, they must be in a directory
     listed under "Data Search Directories" in the "Manage User
     Directories" menu. Chunking for files can be determined by using the
-    `DetermineChunking <algm-DetermineChunking>` algorithm.
+    [DetermineChunking](algm-DetermineChunking) algorithm.
 
 3.  Start MantidWorkbench
 
-4.  Use the instrument `ADARA_FileReader` in the `TEST_LIVE` facility in
+4.  Use the instrument [Adara File Reader](ADARA_FileReader) in the [Test Live](TEST_LIVE) facility in
     the Settings dialog (MantidWorkbench). There is no need to stop this
     fake instrument.
 
@@ -100,12 +100,12 @@ histograms, with TOF values between 6,000 and 23,000 microseconds.
 
 ## Starting a live data session
 
-1.  Ensure that `FakeISISHistoDAE` and `FakeISISEventDAE` are running in
+1.  Ensure that [Fake Isishisto Dae](FakeISISHistoDAE) and [Fake Isisevent Dae](FakeISISEventDAE) are running in
     the background to complete this example
-2.  To open the `StartLiveData` interface you can either
+2.  To open the [Start Live Data](StartLiveData) interface you can either
     - Click the drop down `Load` button in the Workspaces toolbox and
       select `Live Data`
-    - Run the `StartLiveData` algorithm from the Algorithms toolbox
+    - Run the [Start Live Data](StartLiveData) algorithm from the Algorithms toolbox
 
 ### Live Event Data
 
@@ -160,7 +160,7 @@ Enter the following settings in the StartLiveData interface:
 - Processing: Algorthim
   - Within the Processing step tab select the `Rebin` algorthm
   - In the algorithm properties set `Params` to `40e3,1000,60e3`
-  - `PreserveEvents` should be unticked
+  - [Preserve Events](PreserveEvents) should be unticked
 - Accumulation Method: Add
 - OutputWorkspace: live
 
@@ -190,10 +190,10 @@ Enter the following settings in the StartLiveData interface:
 - Processing: Algorithm
   - Within the Processing step tab select the `Rebin` algorthm
   - In the algorthim properties set `Params` to `40e3,500,60e3`
-  - `PreserveEvents` should be unticked
+  - [Preserve Events](PreserveEvents) should be unticked
 - Accumulation Method: Add
 - Post Processing: Algorithm
-  - Within the Post Processing step tab select the `SumSpectra` algorthm
+  - Within the Post Processing step tab select the [Sum Spectra](SumSpectra) algorthm
   - The options can be left as their defaults
 - AccumulationWorkspace: accumulation
 - OutputWorkspace: live

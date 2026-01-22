@@ -28,7 +28,7 @@ The methods that need to be overridden are `runTest(self)`, where the
 Python code that runs the test should be placed, and `validate(self)`,
 which should simply return a pair of strings: the name of the final
 workspace that results from the `runTest` method and the name of a nexus
-file that should be saved in the `ReferenceResults` sub-directory in the
+file that should be saved in the [Reference Results](ReferenceResults) sub-directory in the
 repository. The test code itself is likely to be the output of a *Save
 History* command, though it can be any Python code. In the unlikely case
 of files being used during a system test, implement the method
@@ -113,7 +113,7 @@ files 'a.nxs' & 'b.nxs'
 
 ### Set the Tolerance
 
-You may specialise the tolerance used by `CompareWorkspace` in your
+You may specialise the tolerance used by [Compare Workspace](CompareWorkspace) in your
 system test.
 
 ``` python
@@ -129,7 +129,7 @@ self.tolerance_rel_err = True
 
 ### Disable Some Checks
 
-You may disable some checks performed by the `CompareWorkspaces`
+You may disable some checks performed by the [Compare Workspaces](CompareWorkspaces)
 algorithm by appending them to the disableChecking list, which, by
 default, is empty.
 
@@ -170,8 +170,8 @@ multi-configuration generator such as Visual Studio or Xcode.
 
 The `systemtest` script will automatically attempt to download any
 missing data files but will time-out after 2 minutes. The time out limit
-can be set in two variables `ExternalData_TIMEOUT_INACTIVITY` and
-`ExternalData_TIMEOUT_ABSOLUTE`. If using CMake these will need to be
+can be set in two variables [External Data Timeout Inactivity](ExternalData_TIMEOUT_INACTIVITY) and
+[External Data Timeout Absolute](ExternalData_TIMEOUT_ABSOLUTE). If using CMake these will need to be
 added as new string entries (value is in seconds).
 
 ### Visual Studio/Xcode
@@ -200,12 +200,12 @@ systemtest
 
 ### Selecting Tests to Run From IDE
 
-System tests can be run from the MSVC IDE using the `SystemTests`
+System tests can be run from the MSVC IDE using the [System Tests](SystemTests)
 target, which behaves in a similar way to unit test targets. One key
 advantage is that it allows you to start Mantid in a debug environment
 rather than attach to one midway through.
 
-To select an individual test, or range of tests, go to the `SystemTests`
+To select an individual test, or range of tests, go to the [System Tests](SystemTests)
 properties, go to `` `Command Arguments ``` and append flags as
 appropriate.
 
@@ -225,7 +225,7 @@ and add a new Python configuration with the script path set to
 The parameters for the configuration can be set just like the command
 line args when running the tests from the `systemtest.bat`/`systemtest`
 script, e.g pass `-R="EnginX"` to run all tests containing the string
-`EnginX` in their name.
+[Engin X](EnginX) in their name.
 
 Note that running the system tests this way will not update the system
 test data, so if your data need to be updated, the system tests should

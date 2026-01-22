@@ -6,21 +6,21 @@
 
 ## Introduction
 
-Mantid's `plugin <Plugin>` architecture has been engineered so that it
+Mantid's [plugin](Plugin) architecture has been engineered so that it
 is easy for a developer, or intrepid user, to write an algorithm. This
 page is a primer for the user about to write their first algorithm and
 assumes no great knowledge of C++. It covers the basics, with links to
 more advanced options where appropriate. There is special description
 for the case when you are looking to add a custom
-`MD conversion plugin <WritingCustomConvertToMDTransformation>`.
+[MD conversion plugin](WritingCustomConvertToMDTransformation).
 
 Alternatively, you can implement your algorithm in
-`Python <emwp_intro>`. Prototyping your algorithm in Python can be
+[Python](emwp_intro). Prototyping your algorithm in Python can be
 faster with features like hot-reloading. See
-`Python Vs C++ Algorithms <PythonVSCppAlgorithms>` for a comparison of
+[Python Vs C++ Algorithms](PythonVSCppAlgorithms) for a comparison of
 Mantid's two programming languages.
 
-All `algorithms <Algorithms List>` in Mantid
+All [algorithms](Algorithms List) in Mantid
 [inherit](http://en.wikipedia.org/wiki/Inheritance_(computer_science))
 from a base `Algorithm` class, which provides the support and services
 required for running a specific algorithm and greatly simplifies the
@@ -29,7 +29,7 @@ process of writing a new one.
 ## Getting Started
 
 Creating a new algorithm is simplified using
-`class_maker.py <class_maker_py>`
+[class_maker.py](class_maker_py)
 
 ``` bash
 $ python buildconfig/class_maker.py --alg Algorithms MyAlg
@@ -43,7 +43,7 @@ formatted using the `pre-commit` hooks configured for c++ files. The
 exact contents of the generated code may change, the methods required do
 not.
 
-**Header file** `MyAlg_initial.h <cppalgexample/MyAlg_initial.h>` from
+**Header file** [MyAlg_initial.h](cppalgexample/MyAlg_initial.h) from
 `class_maker.py`
 
 ```{literalinclude} cppalgexample/MyAlg_initial.h
@@ -52,7 +52,7 @@ not.
 :linenos:
 ```
 
-**Source file** `MyAlg_initial.cpp <cppalgexample/MyAlg_initial.cpp>`
+**Source file** [MyAlg_initial.cpp](cppalgexample/MyAlg_initial.cpp)
 from `class_maker.py`
 
 ```{literalinclude} cppalgexample/MyAlg_initial.cpp
@@ -73,8 +73,8 @@ You will see that the algorithm has a variety of methods that need to be
 filled in. The example linked here is used throughout the majority of
 this document. The first few do not normally change very often
 
-The full files described below are `MyAlg.h <cppalgexample/MyAlg.h>` and
-`MyAlg.cpp <cppalgexample/MyAlg.cpp>`. Only `MyAlg.cpp` will be shown in
+The full files described below are [MyAlg.h](cppalgexample/MyAlg.h) and
+[MyAlg.cpp](cppalgexample/MyAlg.cpp). Only `MyAlg.cpp` will be shown in
 detail, but both are functional code that can be viewed as "simple"
 examples.
 
@@ -96,7 +96,7 @@ algorithms have more than one "version."
 The `category()` method aids users in finding the algorithm. The return
 can be a semilcolon (`;`) delimited string of categors/subcategories.
 You are highly encouraged to stay to the list of
-`existing categories <Algorithms List>`.
+[existing categories](Algorithms List).
 
 The `summary()` method is a brief description of the algorithms
 functionality. It is automatically re-used in the python docstring, and
@@ -109,8 +109,8 @@ in sections below.
 
 ### Logging
 
-The algorithm base class defines an object, `g_log`. The `g_log` object
-enables access to the `logging <Logging>` facilities of Mantid, and is
+The algorithm base class defines an object, [G Log](g_log). The [G Log](g_log) object
+enables access to the [logging](Logging) facilities of Mantid, and is
 an invaluable tool in understanding the running of your algorithms. When
 writing information to the logs, be aware of the various levels
 available and that the default level for users is set to `notice`.
@@ -129,7 +129,7 @@ method for the desired effect. For details, look at the source of the
 [API::Algorithm::initialize()](https://github.com/mantidproject/mantid/blob/main/Framework/API/src/Algorithm.cpp#L281)
 .
 
-The initialization (init) method is executed by the `FrameworkManager`
+The initialization (init) method is executed by the [Framework Manager](FrameworkManager)
 when an algorithm is requested and must contain the declaration of the
 properties required by the algorithm. Atypically, it can also contain
 other initialization code such as the calculation of constants used by
@@ -139,7 +139,7 @@ properties.
 Calls to the inherited `declareProperty()` method are used to add a
 property to this algorithm. See the properties page for more information
 on the types of properties supported and the example algorithms in
-`UserAlgorithms` (especially
+[User Algorithms](UserAlgorithms) (especially
 [PropertyAlgorithm](https://github.com/mantidproject/mantid/blob/main/Framework/Examples/PropertyAlgorithm.cpp)
 and
 [WorkspaceAlgorithm](https://github.com/mantidproject/mantid/blob/main/Framework/Examples/WorkspaceAlgorithm.cpp))
@@ -157,23 +157,23 @@ easier, but can often be confusing due to the many options available.
 This example shows a couple of different ways of declaring properites.
 They all have a couple of features in common:
 
-- Every property has a name. Here they are `InputWorkspace`,
-  `NumberToApply`, `WayToApply`, and `OutputWorkspace`
+- Every property has a name. Here they are [Input Workspace](InputWorkspace),
+  [Number To Apply](NumberToApply), [Way To Apply](WayToApply), and [Output Workspace](OutputWorkspace)
 - Every property has a default value, many of which are effectively
   empty. Here they are empty workspace name, `EMPTY_DBL()` (special
   float value), `"Y"`, and empty name. It is extremely unusual to
   specify a default workspace name
 - Every property has documentation. Most of the ones here are very
-  uniformative, but the document on `NumberToApply` was written to
+  uniformative, but the document on [Number To Apply](NumberToApply) was written to
   demonstrate a particular point. Everything up to the first period
   (`.`) appears in the mouseover in the generated algorithm dialogs. The
   whole string appears in the user docs and python help.
 
-An optional `validator <Properties Validators>` or
-`directional argument <Properties Directions>` (input, output or both)
+An optional [validator](Properties Validators) or
+[directional argument](Properties Directions) (input, output or both)
 can also be appended. The syntax for other property types
-(`WorkspaceProperty` and `ArrayProperty`) is more complex - see the
-`properties <Properties>` page.
+([Workspace Property](WorkspaceProperty) and [Array Property](ArrayProperty)) is more complex - see the
+[properties](Properties) page.
 
 ### Validation of inputs
 
@@ -200,7 +200,7 @@ This will set a "star" `*` label next to each property that is reporting
 an error. This makes it easier for users to find where they went wrong.
 
 If your `validateInputs()` method validates an input workspace property,
-bear in mind that the user could provide a `WorkspaceGroup` (or an
+bear in mind that the user could provide a [Workspace Group](WorkspaceGroup) (or an
 unexpected type of workspace) - when retrieving the property, check that
 casting it to its intended type succeeded before attempting to use it.
 
@@ -230,7 +230,7 @@ which does the following
 
 Additionally, the algorithm framework also handles things like
 sync/async calling, exception handling, and interaction with
-`AnalysisDataService <Analysis Data Service>`.
+[AnalysisDataService](Analysis Data Service).
 
 ### Fetching properties
 
@@ -247,10 +247,10 @@ method as follows
 
 where the type in the left hand side is the type of the property (`int`,
 `double`, `std::string`, `std::vector`...) and must match what was
-defined in the `init()`. Note that the value of a `WorkspaceProperty` is
-a `shared pointer <Shared Pointer>` to the workspace, which is referred
-to as `Mantid::API::Workspace_sptr` or
-`Mantid::API::Workspace_const_sptr`. The latter should be used for input
+defined in the `init()`. Note that the value of a [Workspace Property](WorkspaceProperty) is
+a [shared pointer](Shared Pointer) to the workspace, which is referred
+to as [Mantid::api::workspace Sptr](Mantid::API::Workspace_sptr) or
+[Mantid::api::workspace Const Sptr](Mantid::API::Workspace_const_sptr). The latter should be used for input
 workspaces that will not need to be changed in the course of the
 algorithm. The output workspace is retrieved here to be used to detect
 if the algorithm is being performed in-place which will be discussed
@@ -274,7 +274,7 @@ as well.
 
 Usually, the result of an algorithm will be stored in another new
 workspace and the algorithm will need to create that new workspace
-through a call to the `WorkspaceFactory`. For the (common) example where
+through a call to the [Workspace Factory](WorkspaceFactory). For the (common) example where
 the output workspace should be of the same type and size as the input
 one, the code would read as follows:
 
@@ -311,7 +311,7 @@ workspace.
 
 The bulk of most algorithms will involve the manipulation of the data
 contained in workspaces and information on how to interact with these is
-given `here <WorkingWithWorkspaces>`. The more advanced user may also
+given [here](WorkingWithWorkspaces). The more advanced user may also
 want to refer to the full [workspace
 documentation](http://doxygen.mantidproject.org/nightly/d3/de9/classMantid_1_1API_1_1Workspace.html).
 
@@ -331,9 +331,9 @@ below.
 
 Algorithms may wish to make use of the functionality of other algorithms
 as part of their execution. For example, if a units change is required
-the `ConvertUnits` algorithm could be used. Mantid therefore has the
+the [Convert Units](ConvertUnits) algorithm could be used. Mantid therefore has the
 concept of a child algorithm and this is accessed through a call to the
-`createChildAlgorithm` method as follows:
+[Create Child Algorithm](createChildAlgorithm) method as follows:
 
 ``` cpp
 Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("AlgorithmName");
@@ -369,25 +369,25 @@ which will report the failure of the algorithm.
 ### Properties access within workbench dialogs
 
 Once your algorithm is working from a script, and provided it is
-registered with `AlgorithmFactory`, it will also be possible to execute
-the algorithm from `mantidworkbench` using the built-in `GenericDialog`
+registered with [Algorithm Factory](AlgorithmFactory), it will also be possible to execute
+the algorithm from `mantidworkbench` using the built-in [Generic Dialog](GenericDialog)
 feature. To this end there are several *optional* features available
-through the use of `IPropertySettings`-derived classes, to enhance the
+through the use of [Iproperty Settings](IPropertySettings)-derived classes, to enhance the
 interaction between your algorithm's properties and the GUI dialog.
 
-`EnableWhenProperty`, `VisibleWhenProperty`, and `InvisibleProperty` can
+[Enable When Property](EnableWhenProperty), [Visible When Property](VisibleWhenProperty), and [Invisible Property](InvisibleProperty) can
 be used to hide or disable a property in the GUI dialog panel based on
 various conditions.
 
-`SetValueWhenProperty`, and `SetDefaultWhenProperty` can be used to set
+[Set Value When Property](SetValueWhenProperty), and [Set Default When Property](SetDefaultWhenProperty) can be used to set
 the value of a property based on the value of another upstream property,
 or to emulate the effect of having a property's *default* value depend
 on the value of another property. See
-`Dynamic dialog properties <DynamicProperties>` for example code showing
+[Dynamic dialog properties](DynamicProperties) for example code showing
 how to use this feature.
 
-Multiple `IPropertySettings` can be attached to a single property, by
-applying either the `IPropertyManager::setPropertySettings` method of
+Multiple [Iproperty Settings](IPropertySettings) can be attached to a single property, by
+applying either the [Iproperty Manager::set Property Settings](IPropertyManager::setPropertySettings) method of
 the algorithm, or the `Property::setSettings` method of the property
 itself, multiple times. For this reason the property's `getSettings`
 method returns a *vector* of settings, which will be *empty* in the
@@ -397,7 +397,7 @@ With respect to the property's enabled and visibility states (on its
 owner widget), any setting in the vector of settings returning
 `isEnabled` or `isVisible` values of `false`, results in disabling or
 hiding the property's widget. In general, it is expected that only one
-instance of each of the `EnabledWhenProperty` and `VisibleWhenProperty`
+instance of each of the [Enabled When Property](EnabledWhenProperty) and [Visible When Property](VisibleWhenProperty)
 settings would be attached to a given property, in combination with any
-number of instances of other `IPropertySettings`-derived types, although
+number of instances of other [Iproperty Settings](IPropertySettings)-derived types, although
 this behavior is not strictly enforced.

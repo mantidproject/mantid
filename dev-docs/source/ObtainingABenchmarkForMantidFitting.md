@@ -35,7 +35,7 @@ changes to the code to see how they affect the fit accuracy.
     [FitBenchmarking installation
     instructions](https://fitbenchmarking.readthedocs.io/en/stable/users/install_instructions/fitbenchmarking.html).
 4.  Follow the instructions in the
-    `Running a Benchmark <running-a-benchmark-ref>` section below. Note
+    [Running a Benchmark](running-a-benchmark-ref) section below. Note
     that you *must* specify the `PYTHONPATH` in the last command, where
     the `<config>` is only required on Windows:
 

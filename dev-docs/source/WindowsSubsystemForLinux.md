@@ -89,7 +89,7 @@ or <span class="title-ref">Centos7</span>.
 ## Cloning Mantid
 
 Before you clone Mantid code, follow the
-`getting started <GettingStarted>` instructions to install all of the
+[getting started](GettingStarted) instructions to install all of the
 required dependencies for your linux environment.
 
 The Mantid code can then be retrieved in the usual way using

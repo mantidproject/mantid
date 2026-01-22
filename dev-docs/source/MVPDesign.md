@@ -22,7 +22,7 @@ to swap out components. A description of each component is given below.
 
 To illustrate MVP, a simple example of a calculator GUI has been created
 using Python (the concepts of MVP can be applied to any programming
-language). This example can be found in `MVPCalculatorGUIExample`, and
+language). This example can be found in [Mvpcalculator Guiexample](MVPCalculatorGUIExample), and
 you can run it with `python Calculator.py`.
 
 It is good practice to have model, view or presenter (as appropriate) at
@@ -68,7 +68,7 @@ a widget may emit **signals**. For example QPushButton emits the signal
 clicked, the view will implement a **slot** method. This method does
 whatever we need for a button click. To ensure that this method is
 called whenever the button is clicked, we connect the `clicked` signal
-of our button to the `handleButtonClick` slot of our view.
+of our button to the [Handle Button Click](handleButtonClick) slot of our view.
 
 The view should have a parent - this will be the widget containing it.
 An example of a parent would be a main window containing tabs -the
@@ -96,7 +96,7 @@ ways of doing it:
   view. You may choose to define custom signals in your view, such as a
   `plotRequested` signal to announce that the user has asked to plot
   some data, probably by clicking a button. The presenter will need to
-  implement a slot (let's call it `handlePlotRequested`) to handle this,
+  implement a slot (let's call it [Handle Plot Requested](handlePlotRequested)) to handle this,
   which gets the relevant data from the model and passes it to the view.
   We then need to connect the signal to the slot in the presenter's
   constructor. It is also possible for a signal emitted by a view to be
@@ -112,7 +112,7 @@ ways of doing it:
 - **Notify** - the presenter may instead allow the view to 'notify' it.
   This can be achieved by implementing a set of possible notifications
   (in C++ an enum class works well) and a method `notify(notification)`
-  on the presenter. In the above example, `handlePlotRequested` is still
+  on the presenter. In the above example, [Handle Plot Requested](handlePlotRequested) is still
   needed, but now `notify` invokes it whenever it is passed a
   `plotRequested` notification. This method requires the view to have a
   pointer to the presenter, which introduces a circular dependency and
@@ -324,7 +324,7 @@ Whilst having too many icons will confuse the average user there are
 cases where many cases where it would help, for example if a button does
 a similar thing to another button somewhere else in the program then it
 should have the same icon. Have a look to see if the need you has an
-icon in Mantid by look at this handy `MantidUsedIconsTable`.
+icon in Mantid by look at this handy [Mantid Used Icons Table](MantidUsedIconsTable).
 
 ## Python
 
@@ -350,9 +350,9 @@ app = FooGUI()
 app.show()
 ```
 
-where `FooGUI` is the `MainWindow` for the interface. Some more detailed
+where [Foo Gui](FooGUI) is the [Main Window](MainWindow) for the interface. Some more detailed
 documentation on creating GUIs in Python can be found at
-`QtDesignerForPython`.
+[Qt Designer For Python](QtDesignerForPython).
 
 ### Designer
 

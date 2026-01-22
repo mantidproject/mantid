@@ -12,7 +12,7 @@
   `File > Settings > General > Project Recovery` and set `Enabled` to
   true, `Time between recovery checkpoints` to 2 seconds and
   `Total number of checkpoints` to 5. Further instructions can be found
-  on the `Project Recovery concepts page <Project Recovery>`.
+  on the [Project Recovery concepts page](Project Recovery).
 - Download the ISIS sample dataset from the [Downloads
   page](http://download.mantidproject.org/).
 - The files `INTER000*` and `SXD23767.raw` are in the ISIS sample data.
@@ -20,7 +20,7 @@
   Directories.
 - Set your facility to ISIS.
 - Set up a save directory to store output for comparison, referred to as
-  `testing_directory` below.
+  [Testing Directory](testing_directory) below.
 - Note that if you have error reporting enabled, simply select
   `Do not share information` in the Error Reporter dialog.
 - Restart Workbench to ensure all changes are applied.
@@ -76,7 +76,7 @@ RenameWorkspace(InputWorkspace='Rename1_fit_Workspace_1_Workspace', OutputWorksp
 ```
 
 - Wait a few seconds, then provoke a crash by executing the
-  <span class="title-ref">Segfault</span> algorithm with `DryRun` set to
+  <span class="title-ref">Segfault</span> algorithm with [Dry Run](DryRun) set to
   False.
 - Restart MantidWorkbench
 - You should be presented with the Project Recovery dialog

@@ -15,7 +15,7 @@ the interface and features added, anything for which it is not possible
 to write an automated test should have a manual test added to this list.
 You may need to use the muon feature flags to turn on some additional
 features (like model analysis, raw plots and fit wizard features). Check
-the `Muon_Feature_Flags-ref` documentation for more information.
+the [Muon Feature Flags Ref](Muon_Feature_Flags-ref) documentation for more information.
 
 ```{note}
 The tests here are grouped into sections. The test groups can be done in
@@ -35,7 +35,7 @@ In Muon Interfaces, the embedded plot axis are reversed on the plot if
 This group tests data from the MUSR instrument and provides an
 introduction to the data these tests will be working with (groups and
 pairs). The testing instructions can be found at
-`Muon_Analysis_MUSR-ref`.
+[Muon Analysis Musr Ref](Muon_Analysis_MUSR-ref).
 
 You will need the following runs:
 
@@ -46,7 +46,7 @@ You will need the following runs:
 
 This group tests bin data from the PSI facility and introduces
 background corrections. Test instructions can be found at
-`Muon_Analysis_PSI-ref`. You will need the following file from the unit
+[Muon Analysis Psi Ref](Muon_Analysis_PSI-ref). You will need the following file from the unit
 test data:
 
 - deltat_tdc_dolly_1529.bin
@@ -54,7 +54,7 @@ test data:
 ## Group 3: HIFI data
 
 This group looks at HIFI data and introduces multiple period data. Test
-instructions can be found at `Muon_Analysis_HIFI-ref`. You will need the
+instructions can be found at [Muon Analysis Hifi Ref](Muon_Analysis_HIFI-ref). You will need the
 following runs:
 
 - HIFI 134028-39
@@ -64,7 +64,7 @@ following runs:
 
 This group looks at EMU data, it uses some advance fitting and plotting
 features. Test instructions for this group can be found at
-`Muon_Analysis_EMU-ref`. You will need the following runs:
+[Muon Analysis Emu Ref](Muon_Analysis_EMU-ref). You will need the following runs:
 
 - EMU 51341-3
 - EMU 20889-20900
@@ -73,7 +73,7 @@ features. Test instructions for this group can be found at
 
 This group looks at ARGUS data, it explores the difference between
 single and double pulse data. Testing instructions are
-`Muon_Analysis_ARGUS-ref`. You will need the following runs:
+[Muon Analysis Argus Ref](Muon_Analysis_ARGUS-ref). You will need the following runs:
 
 - ARGUS 71799-800
 - ARGUS 71796-7
@@ -81,7 +81,7 @@ single and double pulse data. Testing instructions are
 ## Group 6: Frequency Domain Analysis
 
 This group tests the Frequency domain analysis GUI. Test instructions
-for group 6 can be found at `Muon_Analysis_FDA-ref`. You will need the
+for group 6 can be found at [Muon Analysis Fda Ref](Muon_Analysis_FDA-ref). You will need the
 following run:
 
 - MUSR 62260
@@ -89,6 +89,6 @@ following run:
 ## Group 7: Avoided Level Crossing (ALC)
 
 This group tests the Avoided Level Crossing (ALC) GUI. Test instructions
-fcan be found at `Muon_ALC-ref`. This requires a large number or runs
+fcan be found at [Muon Alc Ref](Muon_ALC-ref). This requires a large number or runs
 (close to 100). Therefore, its best to do these test while connected to
 the data archive.

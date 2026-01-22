@@ -5,11 +5,11 @@ bring it all together in our presenter. In this exercise you will need
 to create three presenters.
 
 1.  A presenter to interact with `View`, setting the allowed colour
-    options from the `ColourConverter` model and getting the values from
+    options from the [Colour Converter](ColourConverter) model and getting the values from
     your table.
-2.  A presenter to interact with `PlotView`, passing x and y values from
-    the `PlotModel` model to be plotted.
-3.  A presenter to interact with `MainView` and `Model` directly and
+2.  A presenter to interact with [Plot View](PlotView), passing x and y values from
+    the [Plot Model](PlotModel) model to be plotted.
+3.  A presenter to interact with [Main View](MainView) and `Model` directly and
     calling functions in your other presenters.
 
-See `here <CompleteGUI>` for the solution and complete functioning GUI.
+See [here](CompleteGUI) for the solution and complete functioning GUI.

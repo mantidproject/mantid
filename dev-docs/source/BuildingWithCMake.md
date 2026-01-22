@@ -15,7 +15,7 @@ used on the build servers.
 
 ## Environment
 
-The `getting started <GettingStarted>` page describes how to set up your
+The [getting started](GettingStarted) page describes how to set up your
 environment to build Mantid. Follow those instructions and install the
 Mantid dependencies first.
 
@@ -46,7 +46,7 @@ Linux/macOS, and `$HOME/AppData/Roaming/ccache` on Windows. If your home
 directory is on a network-mounted drive, the location of this cache can
 be moved to provide the best performance. On newer versions of `ccache`
 run `ccache --set-config=cache_dir=PATH_TO_CACHE`. Older versions
-(\<3.2) do not allow this and must fall back to setting the `CCACHE_DIR`
+(\<3.2) do not allow this and must fall back to setting the [Ccache Dir](CCACHE_DIR)
 environment variable in your shell profile.
 
 ## Configuring your build
@@ -123,7 +123,7 @@ will, for example, configure qtcreator files with
 ### Data Files Location
 
 Mantid used the CMake ExternalData system for managing testing data. See
-`DataFilesForTesting` for further instructions.
+[Data Files For Testing](DataFilesForTesting) for further instructions.
 
 ### With Qt Creator
 
@@ -159,7 +159,7 @@ Working with CMake:
   file, e.g. if you add a file to Kernel, edit
   `Mantid/Framework/Kernel/CMakeLists.txt` to add the source, header and
   test files to the long lists of filepaths at the top of the file.
-- The class maker utility (`ToolsOverview`) can edit the `CMakeList.txt`
+- The class maker utility ([Tools Overview](ToolsOverview)) can edit the `CMakeList.txt`
   for you automatically
 - There are similar places in the Qt projects for ui files and files
   that need moc-ing.
@@ -173,7 +173,7 @@ Working with CMake:
   `Mantid/bin/Release`, `Debug`, etc.
 - There is a known issue with using source control with Eclipse on an
   out of source build. Set the cache variable
-  `ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT` to true and CMake will generate
+  [Eclipse Cdt4 Generate Source Project](ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT) to true and CMake will generate
   a set of 'dummy' project files within the source tree so that you can
   import that project and use it for source control actions.
 

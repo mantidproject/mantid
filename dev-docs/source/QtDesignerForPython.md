@@ -14,7 +14,7 @@ Qt Creator was not originally designed to work with Python, and it is
 therefore not possible to directly save or export the layout as a Python
 script. Instead you must first save the layout in a `.ui` file and use a
 separate package to to convert it to a python class. Including this at
-the start of your view script will import a class `Ui_MyWidget` that you
+the start of your view script will import a class [Ui My Widget](Ui_MyWidget) that you
 can use with your view.
 
 ``` python
@@ -25,8 +25,8 @@ Ui_MyWidget, _ = load_ui(__file__, "my_widget.ui")
 
 ## Using the Generated Class
 
-When following the MVP design pattern as described at `MVPDesignIntro`,
-the generated class alone is not sufficient as a `MVPDesignView`. The
+When following the MVP design pattern as described at [Mvpdesign Intro](MVPDesignIntro),
+the generated class alone is not sufficient as a [Mvpdesign View](MVPDesignView). The
 generated class lacks any method for sending signals or changing data in
 its own widgets. Directly accessing the widgets and the signals defined
 on the view from the presenter moves the view implementation details
@@ -92,7 +92,7 @@ widget.show()
 This script call this script `my_widget.py` saved in the `scripts`
 folder of your source directory.
 
-Finally we have to add `my_widget` to the list of interfaces. to do this
+Finally we have to add [My Widget](my_widget) to the list of interfaces. to do this
 open
 `[Mantid Source Directory]/Framework/Properties/Mandtid.properties.template`
 and find the line starting `mantidqt.python_interfaces =`. At the end of
@@ -114,8 +114,8 @@ move and separate out individual sections.
 Instead when building a GUI it is sometimes better to separate parts of
 the interface into smaller views and presenters which form a hierarchy
 of widgets. For example the new SANS Run Summation page is in it's own
-UI file and uses two separate widgets - a `RunSelectorWidget` and a
-`SummationSettingsWidget`. Although these widgets are not currently used
+UI file and uses two separate widgets - a [Run Selector Widget](RunSelectorWidget) and a
+[Summation Settings Widget](SummationSettingsWidget). Although these widgets are not currently used
 in any other interface, they are still isolated from the Run Summation
 tab and could easily be used in another interface should the need arise.
 The code is also better organised and more modular as a result of this
@@ -147,8 +147,8 @@ called a method in the original with `self.view.getColours()`, when
 using a promoted widget you call it using
 `self.view.widget.getColours()`. Good practice would be to write a
 method in the master view script that returns the sub view object like
-in the script for `the plotting widget <CompleteGUI>`.
+in the script for [the plotting widget](CompleteGUI).
 
 It may help to get some practice with Qt Creator by recreating
-`the plotting widget <CompleteGUI>`. you should be able to use the same
+[the plotting widget](CompleteGUI). you should be able to use the same
 model and presenter scripts with the `.ui` based view scripts.

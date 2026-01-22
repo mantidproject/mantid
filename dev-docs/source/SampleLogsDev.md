@@ -5,7 +5,7 @@
 ```
 
 The following information will be useful to you if you want to write an
-`algorithm` that manipulates sample log data.
+[Algorithm](algorithm) that manipulates sample log data.
 
 ## Sample logs
 
@@ -33,8 +33,8 @@ Log data can be added and removed from the run object using the
 
 ## Multiperiod workspace sample logs
 
-When you load multiperiod data using `algm-LoadISISNexus-v2` or
-`algm-LoadEventNexus` a set of periods logs, describing the period
+When you load multiperiod data using [Algm Load Isisnexus V2](algm-LoadISISNexus-v2) or
+[Algm Load Event Nexus](algm-LoadEventNexus) a set of periods logs, describing the period
 information for each workspace are created using the
 <span class="title-ref">ISISRunLogs</span> class. This class adds three
 logs, which are summarised as:

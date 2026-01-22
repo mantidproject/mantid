@@ -21,7 +21,7 @@ Available for Linux only.
 ## Mantid build
 
 On linux the profiler is built by default but to enable profiling, the
-`properties <mantid:Algorithm_Profiling>` must be set. Enabling the
+[properties](mantid:Algorithm_Profiling) must be set. Enabling the
 profiler will create a file that contains the time stamps for start and
 finish of executed algorithms with ~nanosecond precision in a very
 simple text format.
@@ -43,7 +43,7 @@ output
 addTimer("createOutputWorkspacesSplitters", startTime, std::chrono::high_resolution_clock::now());
 ```
 
-where `createOutputWorkspacesSplitters` is the name that will appear,
+where [Create Output Workspaces Splitters](createOutputWorkspacesSplitters) is the name that will appear,
 similar to a child algorithm. The names in the report will be suffixed
 with `1` because the tool thinks they are the "default version" of a
 child algorithm.

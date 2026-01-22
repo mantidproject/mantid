@@ -84,7 +84,7 @@ below:
   mamba update -c mantid/label/nightly -c neutrons --all
   ```
 
-See `packaging <Packaging>` for more information on this topic.
+See [packaging](Packaging) for more information on this topic.
 
 ## Setup the mantid pixi environment
 
@@ -171,7 +171,7 @@ path.
 
 ## Building and debugging with CLion
 
-Please follow the Linux related instructions on `this page <clion-ref>`.
+Please follow the Linux related instructions on [this page](clion-ref).
 
 ## CMake conda variables
 

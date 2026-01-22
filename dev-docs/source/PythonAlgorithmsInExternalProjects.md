@@ -4,19 +4,19 @@ It can be useful to create mantid algorithms that are kept in an
 external project. This is especially the case for processing that is
 specific to a single instrument or novel technique. To use algorithms
 distributed this way, one needs to register them with the
-`mantid.api.AlgorithmFactory <mantid:mantid.api.AlgorithmFactoryImpl>`
+[mantid.api.AlgorithmFactory](mantid:mantid.api.AlgorithmFactoryImpl)
 and create wrappers so they can be called as python functions. There are
 two techniques to accomplish this
 
 ## Modify Mantid.user.properties
 
-Inside the user's `properties file <mantid:Properties File>`, one can
-set a `directory property <mantid:Directory Properties>` to add the
+Inside the user's [properties file](mantid:Properties File), one can
+set a [directory property](mantid:Directory Properties) to add the
 location of the additional python algorithms to the
 `framework.plugins.directory` variable. During initialization of the
 mantid framework, all files that are within this directory or a
 subdirectory will be parsed and algorithms will be added to the
-`AlgorithmFactory`. *This is the preferred method.*
+[Algorithm Factory](AlgorithmFactory). *This is the preferred method.*
 
 ## Create function wrapper at runtime
 

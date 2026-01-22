@@ -6,7 +6,7 @@
 
 ## Prerequisite Knowledge
 
-- MVP Design Pattern `MVPDesign`
+- MVP Design Pattern [Mvpdesign](MVPDesign)
 - [Dependency Injection and Basic
   Mocking](https://vladris.com/blog/2016/07/06/dependency-injection-in-c.html)
 
@@ -555,7 +555,7 @@ constructor since it will hide the code smell of feature creep
 - Keep Qt/Plotting API calls and types in the view
 - Convert your types within the view
 
-Covered in `cant_test_in_view` from the other perspective.
+Covered in [Cant Test In View](cant_test_in_view) from the other perspective.
 
 Assume that anything in the view is difficult to test internally, but is
 tested elsewhere. For example, it doesn't make sense to check if
@@ -594,7 +594,7 @@ iterate through that instead.
 
 For certain lines such as calling Qt there would be no possible way to
 tell if a test passed or not, or if they use view only types (see
-`keep_qt_in_view` ) then they can stay.
+[Keep Qt In View](keep_qt_in_view) ) then they can stay.
 
 If a line would have an expected output it might need moving to the
 model instead. Consider using mocks if the input types it expects are
@@ -619,9 +619,9 @@ since the side effects are invisible to the presenter unless more
 signals are then chained up.
 
 In addition it can lead to logic ending up in the view which goes
-against `logic_goes_into_the_model` . This should be combined with
-`notifications_through_single_point` in your presenter which should then
-switch to a non-Qt notification method `use_non_qt_comms_presenter`.
+against [Logic Goes Into The Model](logic_goes_into_the_model) . This should be combined with
+[Notifications Through Single Point](notifications_through_single_point) in your presenter which should then
+switch to a non-Qt notification method [Use Non Qt Comms Presenter](use_non_qt_comms_presenter).
 Combining all of these patterns ensures that everything can be tested in
 an automated fashion.
 

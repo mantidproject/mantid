@@ -14,7 +14,7 @@ use cases for multi-dimensional diffraction data are important to test,
 it is also worth checking more basic uses, for example opening a
 Workspace2D and examining the subplots and dynamic cursor data.
 
-See here for a brief overview of the `sliceviewer`.
+See here for a brief overview of the [Sliceviewer](sliceviewer).
 
 ## Basic Usage
 
@@ -28,9 +28,9 @@ Do the following tests with an EventWorkspace (e.g.
     workspace in the ADS \> Show Slice Viewer).
 
 2.  Confirm that for MatrixWorkspaces the
-    `Peak overlay<mantid:sliceviewer_roi>`,
-    `Nonorthogonal view<mantid:sliceviewer_nonortho>` and
-    `Non-axis aligned cutting tool <mantid:sliceviewer_nonaxiscuts>`
+    [Peak overlay](mantid:sliceviewer_roi),
+    [Nonorthogonal view](mantid:sliceviewer_nonortho) and
+    [Non-axis aligned cutting tool](mantid:sliceviewer_nonaxiscuts)
     buttons should be disabled (greyed out).
 
 3.  Check the other toolbar buttons.
@@ -60,7 +60,7 @@ Do the following tests with an EventWorkspace (e.g.
     >     >   plots
     >
     > 5.  Disable line plots and Enable
-    >     `ROI tool<mantid:sliceviewer_roi>`
+    >     [ROI tool](mantid:sliceviewer_roi)
     >
     >     > <figure>
     >     > <img src="../../../../docs/source/images/wb-sliceviewer51-roibutton.png"
@@ -120,7 +120,7 @@ Do the following tests with an EventWorkspace (e.g.
     Time-of-flight label (top left corner) - the image should be
     transposed and the axes labels updated.
 
-7.  Test the `Cursor Information Widget<mantid:sliceviewer_cursor>`
+7.  Test the [Cursor Information Widget](mantid:sliceviewer_cursor)
     (table at top of sliceviewer window with TOF, spectrum, DetID etc.)
 
     > 1.  Confirm it tracks with the cursor when Track Cursor is checked
@@ -137,19 +137,19 @@ Do the following tests with an EventWorkspace (e.g.
 ### MD Workspaces
 
 MD workspaces hold multi-dimensional data (typically 2-4D) and come in
-two forms: `MDEventWorkspace <MDWorkspace>`,
-`MDHistoWorkspace <MDHistoWorkspace>`. In terms of sliceviewer
+two forms: [MDEventWorkspace](MDWorkspace),
+[MDHistoWorkspace](MDHistoWorkspace). In terms of sliceviewer
 functionality, the key difference is that MDHistoWorkspace have binned
 the events onto a regular grid and cannot be dynamically rebinned unless
 the original MDWorkspace (that holds the events) exists in the ADS (and
 the MDHistoWorkspace has not been altered by a binary operation e.g.
-`MinusMD`).
+[Minus Md](MinusMD)).
 
 #### MDWorkspace (with events)
 
 1.  Create a 3D and 4D MDWorkspaces with some data - repeat the
-    following tests with both `md_4D` and `md_3D`. Note this will throw
-    a warning relating to the `SlicingAlgorithm`.
+    following tests with both [Md 4d](md_4D) and [Md 3d](md_3D). Note this will throw
+    a warning relating to the [Slicing Algorithm](SlicingAlgorithm).
 
 ``` python
 from mantid.simpleapi import *
@@ -174,7 +174,7 @@ AddPeakHKL(Workspace='peaks', HKL='1,0,0')
 ```
 
 2.  Test the toolbar buttons pan, zoom, line plots, ROI as in step 3 of
-    the `toolbar-checklist` instructions.
+    the [Toolbar Checklist](toolbar-checklist) instructions.
 
     > - This workspace should be dynamically rebinned - i.e. the number
     >   of bins within the view limits along each axis should be
@@ -200,7 +200,7 @@ AddPeakHKL(Workspace='peaks', HKL='1,0,0')
     >     if Track Cursor is checked you will need to click on the
     >     colorfill plot again).
 
-Test the `Nonorthogonal view<mantid:sliceviewer_nonortho>`
+Test the [Nonorthogonal view](mantid:sliceviewer_nonortho)
 
 <figure>
 <img
@@ -253,7 +253,7 @@ alt="../../../../docs/source/images/wb-sliceviewer51-nonorthobutton.png" />
 
     > - Gridlines should now appear to be orthogonal
 
-6.  For `md_4D` only change one of the viewing axes to be
+6.  For [Md 4d](md_4D) only change one of the viewing axes to be
     <span class="title-ref">E</span> (e.g. click
     <span class="title-ref">Y</span> button next to
     <span class="title-ref">E</span> in top left of window)
@@ -269,7 +269,7 @@ alt="../../../../docs/source/images/wb-sliceviewer51-nonorthobutton.png" />
     >
     >   > - The nonorthogonal view should be automatically re-enabled.
 
-Test the `Peak Overlay<mantid:sliceviewer_peaks_overlay>`
+Test the [Peak Overlay](mantid:sliceviewer_peaks_overlay)
 
 <figure>
 <img
@@ -294,7 +294,7 @@ alt="../../../../docs/source/images/wb-sliceviewer51-peaksbutton.png" />
     >   row with HKL = (1,0,1) or HKL = (1,0,0) the slicepoint along L
     >   will be set to 1 or 0 respectively, and there will be a cross at
     >   (X,Y) = (H,K) = (1,0) in both cases.
-    > - Note for `md_4D` a peak will not be plotted if a non-Q axis is
+    > - Note for [Md 4d](md_4D) a peak will not be plotted if a non-Q axis is
     >   viewed, if both axes are Q-dimensions then the cross should be
     >   plotted at all E (obviously a Bragg peak will only be on the
     >   elastic line but the peak object has no elastic/inelastic logic
@@ -335,29 +335,29 @@ alt="../../../../docs/source/images/wb-sliceviewer51-peaksbutton.png" />
 md_3D_histo = BinMD(InputWorkspace='md_4D', AlignedDim0='H,-2,2,100', AlignedDim1='K,-1,1,100', AlignedDim2='L,-1.5,1.5,100')
 ```
 
-2.  Open `md_3D_histo` in sliceviewer it should not support dynamic
+2.  Open [Md 3d Histo](md_3D_histo) in sliceviewer it should not support dynamic
     rebinning (can't change number of bins).
 
 3.  Test the toolbar buttons pan, zoom, line plots, ROI as in step 3 of
-    the `toolbar-checklist` instructions.
+    the [Toolbar Checklist](toolbar-checklist) instructions.
 
 4.  Test changing/swapping viewing axes
 
-5.  Test the `Nonorthogonal view<mantid:sliceviewer_nonortho>` as above
+5.  Test the [Nonorthogonal view](mantid:sliceviewer_nonortho) as above
 
-6.  Open `md_4D_svrebinned` in sliceviewer (should be in the ADS after
+6.  Open [Md 4d Svrebinned](md_4D_svrebinned) in sliceviewer (should be in the ADS after
     preceding tests).
 
     > - It should support dynamic rebinning (i.e. will be able to change
     >   number of bins along each axis).
 
-7.  With `md_4D_svrebinned` open in the sliceviewer, delete `md_4D` in
+7.  With [Md 4d Svrebinned](md_4D_svrebinned) open in the sliceviewer, delete [Md 4d](md_4D) in
     the ADS.
 
     > - It should close sliceviewer because the support for dynamic
     >   rebinning has changed
 
-8.  Open `md_4D_svrebinned` in sliceviewer again
+8.  Open [Md 4d Svrebinned](md_4D_svrebinned) in sliceviewer again
 
     > - It should no longer support dynamic rebinning
     > - Confirm transposing axes works
@@ -365,7 +365,7 @@ md_3D_histo = BinMD(InputWorkspace='md_4D', AlignedDim0='H,-2,2,100', AlignedDim
 ## CutViewer Tool
 
 1\. Check the
-`Non-axis aligned cutting tool <mantid:sliceviewer_nonaxiscuts>` button
+[Non-axis aligned cutting tool](mantid:sliceviewer_nonaxiscuts) button
 is only enabled for 3D MD workspaces where all dimensions are Q by
 opening the following workspaces in sliceviewer. It should only be
 enabled for the <span class="title-ref">ws_3D</span> and
@@ -512,7 +512,7 @@ alt="../../images/SliceViewer/CutViewer_nonAxisAlignedCut.png" />
 ### 1. Representation of integrated peaks
 
 1.  Run the code below to generate fake data and integrate peaks in the
-    3D MDWorkspace `md_3D` from `md_event_tests`
+    3D MDWorkspace [Md 3d](md_3D) from [Md Event Tests](md_event_tests)
 
 ``` python
 # Fake data in 3D MD and integrate
@@ -526,11 +526,11 @@ IntegratePeaksMD(InputWorkspace='md_3D', PeakRadius='0.25', BackgroundInnerRadiu
 # This is because the simulated ws don't have a real instrument but the integration will be executed
 ```
 
-2.  Open `md_3D` in sliceviewer
+2.  Open [Md 3d](md_3D) in sliceviewer
 
 3.  Click the peak overlay button in the toolbar
 
-4.  Overlay `peaks_int_ellip` and `peaks_int_sphere`
+4.  Overlay [Peaks Int Ellip](peaks_int_ellip) and [Peaks Int Sphere](peaks_int_sphere)
 
 5.  Click the first row in the first table
 
@@ -563,50 +563,50 @@ IntegratePeaksMD(InputWorkspace='md_3D', PeakRadius='0.25', BackgroundInnerRadiu
 
 10. Click the Peak overlay button in the toolbar
 
-11. Overlay the `peaks_int_no_bg` workspace and remove
-    `peaks_int_sphere`
+11. Overlay the [Peaks Int No Bg](peaks_int_no_bg) workspace and remove
+    [Peaks Int Sphere](peaks_int_sphere)
 
 12. Zoom in on a peak (click a row in the table)
 
     - There should be a dashed line but no background shell for peaks in
-      `peaks_int_no_bg`
+      [Peaks Int No Bg](peaks_int_no_bg)
 
 Keep the three peak workspaces overlain for the next test.
 
 ### 2. ADS observer for peak overlay
 
-1.  Rename `peaks_int_ellip` in the ADS to e.g. `peaks_int_ellipse`
+1.  Rename [Peaks Int Ellip](peaks_int_ellip) in the ADS to e.g. [Peaks Int Ellipse](peaks_int_ellipse)
 
     > 1.  Confirm the name changes in the peak viewer table
     > 2.  Click on a peak, the ellipse should still be drawn on the
     >     colofill plot
 
-2.  Remove a row from `peaks_int_no_bg` table (open table from ADS \>
+2.  Remove a row from [Peaks Int No Bg](peaks_int_no_bg) table (open table from ADS \>
     Right-click on a row \> Delete)
 
     > 1.  Confirm the correct row is removed from the corresponding row
     >     in the peak viewer table
     >
-    > 2.  Click on the peak in the `peaks_int_ellipse` table that has
-    >     been removed from `peaks_int_no_bg`
+    > 2.  Click on the peak in the [Peaks Int Ellipse](peaks_int_ellipse) table that has
+    >     been removed from [Peaks Int No Bg](peaks_int_no_bg)
     >
     >     > - Only the ellipse should be plotted.
 
-3.  Delete `peaks_int_no_bg` from the ADS
+3.  Delete [Peaks Int No Bg](peaks_int_no_bg) from the ADS
 
     > - The table should be removed from the peaks viewer
     > - Confirm the Peak actions combo box is updated to only contain
-    >   `peaks_int_ellipse`
+    >   [Peaks Int Ellipse](peaks_int_ellipse)
 
-4.  Delete `peaks_int_ellipse` from the ADS
+4.  Delete [Peaks Int Ellipse](peaks_int_ellipse) from the ADS
 
     > - The peak overlay should be turned off and the table hidden
 
 ### 3. ADS observer for workspace
 
-With `md_3D` open in sliceviewer
+With [Md 3d](md_3D) open in sliceviewer
 
-1.  Rename `md_3D` to e.g. `md_3Dim`
+1.  Rename [Md 3d](md_3D) to e.g. [Md 3dim](md_3Dim)
 
     > - The workspace name in the title of the sliceviewer window should
     >   have updated
@@ -630,15 +630,15 @@ With `md_3D` open in sliceviewer
 CloneWorkspace(InputWorkspace='md_3Dim', OutputWorkspace='md_3D')
 ```
 
-5.  Delete `md_3Dim` in the ADS
+5.  Delete [Md 3dim](md_3Dim) in the ADS
 
     > - The sliceviewer window should close
 
 ### 4. ADS observer for support for nonorthogonal view
 
-1.  Open `md_3D` in sliceviewer
+1.  Open [Md 3d](md_3D) in sliceviewer
 
-2.  Run `ClearUB` algorithm on `md_3D`
+2.  Run [Clear Ub](ClearUB) algorithm on [Md 3d](md_3D)
 
     > - Sliceviewer window should close with message
     >   `Closing Sliceviewer as the underlying workspace was changed: The property supports_nonorthogonal_axes is different on the new workspace.`
@@ -669,7 +669,7 @@ BinMD(InputWorkspace=ws, AxisAligned=False,
     OutputBins='101,101,1', OutputWorkspace='BinMD_out', NormalizeBasisVectors=False)
 ```
 
-2.  Open `BinMD_out` in sliceviewer.
+2.  Open [Bin Md Out](BinMD_out) in sliceviewer.
 
     > - There should be peaks at integer HKL
 
@@ -701,7 +701,7 @@ BinMD(InputWorkspace=ws, AxisAligned=False,
     OutputBins='101,101,1', OutputWorkspace='ws_slice', NormalizeBasisVectors=False)
 ```
 
-2.  Open `ws_slice` in the sliceviewer.
+2.  Open [Ws Slice](ws_slice) in the sliceviewer.
 
     > - The non-orthogonal view should be enabled (not greyed out).
 
@@ -725,7 +725,7 @@ ws_4D.addExperimentInfo(expt_info_4D)
 SetUB(ws_4D, 1, 1, 2, 90, 90, 120)
 ```
 
-2.  Open `ws_4D` in sliceviewer.
+2.  Open [Ws 4d](ws_4D) in sliceviewer.
 3.  Confirm that when the Energy axis is viewed (as X or Y) the
     non-orthogonal view is disabled.
 4.  The button should be re-enabled when you view two Q-axes e.g. H and

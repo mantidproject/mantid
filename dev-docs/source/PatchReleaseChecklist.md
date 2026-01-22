@@ -34,12 +34,12 @@ into the release branch by either of the following methods:
 
 - If changes have already been merged into `main`, the commits should be
   cherry-picked into the release branch (see
-  `Cherry Picking <cherry_picking>`)
+  [Cherry Picking](cherry_picking))
 - Any changes that have not yet been merged into `main` can be rebased
   so that the pull request targets `release-next`. When they are merged,
   the changes will be automatically merged into `main`.
 
-Issues and pull requests should then have the `PatchCandidate` label
+Issues and pull requests should then have the [Patch Candidate](PatchCandidate) label
 applied to them.
 
 ### Release Notes
@@ -68,7 +68,7 @@ This will need to be resolved manually.
 ### Cherry Picking & Code Review
 
 It is the job of the main reviewer of the release to review each
-issue/pull request marked `PatchCandidate` and decide if the risks of
+issue/pull request marked [Patch Candidate](PatchCandidate) and decide if the risks of
 the changes are low enough to include in a release that will not undergo
 full beta testing by scientists. New pull requests that target
 `release-next` can simply be merged provided that they add the
@@ -77,7 +77,7 @@ merged into `main` should have their commits cherry-picked into the
 `release-next` branch, either directly or via a new pull request branch.
 One advantage of creating a new pull request branch is that you can ask
 the commit authors to verify that all of the relevant commits have been
-added. For each of the `PatchCandidate` pull requests that were not
+added. For each of the [Patch Candidate](PatchCandidate) pull requests that were not
 merged directly into `release-next`:
 
 - find the list of commit `SHA1` values in that pull request
@@ -117,13 +117,13 @@ release notes are complete, it is time to release the patch by
 performing the following tasks:
 
 - Build the release candidates by following the instructions to
-  `technical-release-manager-release-candidates`.
+  [Technical Release Manager Release Candidates](technical-release-manager-release-candidates).
 - After the release candidates have built successfully, ask the
   development team perform unscripted testing, with a focus on the areas
   that were modified for the patch release.
 - When you are happy with the quality of the release candidates, follow
-  all of the `technical-release-manager-release-day` instructions to
+  all of the [Technical Release Manager Release Day](technical-release-manager-release-day) instructions to
   publish the packages.
 - Once packages are published, the Project Manager must announce the
-  patch release by following the `release-manager-announcements`
+  patch release by following the [Release Manager Announcements](release-manager-announcements)
   instructions.

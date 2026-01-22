@@ -87,7 +87,7 @@ workbench
 ## Standalone
 
 Mantid also provides a set of bundled packages that provide a complete
-install of `MantidWorkbench` and all of its dependencies without a user
+install of [Mantid Workbench](MantidWorkbench) and all of its dependencies without a user
 having to first setup conda and then install the relevant conda
 packages. The standalone packages are available to users through
 Mantid's [download page](https://download.mantidproject.org).
@@ -115,7 +115,7 @@ using a
 to encapsulate the build steps.
 
 To build an installer locally first build a set of conda packages using
-the `instructions above <building-conda-packages>`. Once you have the
+the [instructions above](building-conda-packages). Once you have the
 `conda-bld` directory run the following from the same working directory:
 
 ``` sh
@@ -131,7 +131,7 @@ the standard process.
 
 ## Build packages from branch using Jenkins
 
-Developers can build packages to test branches using the `build_branch`
+Developers can build packages to test branches using the [Build Branch](build_branch)
 [Jenkins job](https://builds.mantidproject.org/job/build_branch/). This
 job provides the ability to,
 
@@ -148,29 +148,29 @@ repo or from a remote.
 
 - `DESCRIPTION`: A description to help catalogue the build. Please make
   use of this!
-- `BUILD_DEVEL` \[`none`, `all`, `linux-64`, `win-64`, `osx-arm64`\]:
+- [Build Devel](BUILD_DEVEL) \[`none`, `all`, `linux-64`, `win-64`, `osx-arm64`\]:
   Run the system tests for this OS.
-- `BUILD_PACKAGE` \[`none`, `all`, `linux-64`, `win-64`, `osx-arm64`\]:
+- [Build Package](BUILD_PACKAGE) \[`none`, `all`, `linux-64`, `win-64`, `osx-arm64`\]:
   Build a package on this OS.
-- `PACKAGE_SUFFIX`: String to append onto the standalone package name,
+- [Package Suffix](PACKAGE_SUFFIX): String to append onto the standalone package name,
   useful for distinguishing builds. By default this is `Unstable`.
-- `PUBLISH_TO_ANACONDA`: Set true to publish to the given Anaconda
+- [Publish To Anaconda](PUBLISH_TO_ANACONDA): Set true to publish to the given Anaconda
   channel and label.
-- `PUBLISH_TO_GITHUB`: Set true to publish to the Github repository
+- [Publish To Github](PUBLISH_TO_GITHUB): Set true to publish to the Github repository
   using the specified tag.
-- `ANACONDA_CHANNEL`: Anaconda channel to upload the package to. For
+- [Anaconda Channel](ANACONDA_CHANNEL): Anaconda channel to upload the package to. For
   this job the only option is `mantid-test`.
-- `ANACONDA_CHANNEL_LABEL`: Label attached to the uploaded package. By
+- [Anaconda Channel Label](ANACONDA_CHANNEL_LABEL): Label attached to the uploaded package. By
   default this is `unstable`. Please give it a meaningful label.
-- `GITHUB_RELEASES_REPO`: Repository to store the release. By Default
+- [Github Releases Repo](GITHUB_RELEASES_REPO): Repository to store the release. By Default
   this is `mantidproject/mantid`.
-- `GITHUB_RELEASES_TAG`: Name of the tag for the release; only to be
+- [Github Releases Tag](GITHUB_RELEASES_TAG): Name of the tag for the release; only to be
   used for release candidate builds.
-- `GH_ORGANIZATION_OR_USERNAME`: Name of the organisation or Github user
+- [Gh Organization Or Username](GH_ORGANIZATION_OR_USERNAME): Name of the organisation or Github user
   name who owns the repository with the code to build. By default this
   is `mantidproject`, if you are building from a fork this will need to
   change to your username.
-- `BRANCH_NAME`: Name of the branch to build the packages from.
+- [Branch Name](BRANCH_NAME): Name of the branch to build the packages from.
 
 ### Example
 
@@ -179,18 +179,18 @@ Say I've implemented a new file searching method on a branch
 easiest ways to do this would be to build the packages and upload them
 to Anaconda using the pipeline. These are the steps I'd take to do this:
 
-1.  Go to the `build_branch` [Jenkins
+1.  Go to the [Build Branch](build_branch) [Jenkins
     job](https://builds.mantidproject.org/job/build_branch/).
 2.  If needed click `login` in the top right of the window.
 3.  Go to `Build with parameters` in the side bar.
 4.  Fill out the following options:
     - `DESCRIPTION` =
       `Upload Linux test packages for new file searching method`
-    - `BUILD_DEVEL` = `none`
-    - `BUILD_PACKAGE` = `linux-64`
-    - `PUBLISH_TO_ANACONDA` = true
-    - `ANACONDA_CHANNEL_LABEL` = `new_file_search_test`
-    - `BRANCH_NAME` = `1234_new_file_search`
+    - [Build Devel](BUILD_DEVEL) = `none`
+    - [Build Package](BUILD_PACKAGE) = `linux-64`
+    - [Publish To Anaconda](PUBLISH_TO_ANACONDA) = true
+    - [Anaconda Channel Label](ANACONDA_CHANNEL_LABEL) = [New File Search Test](new_file_search_test)
+    - [Branch Name](BRANCH_NAME) = `1234_new_file_search`
 5.  Click `Build`. This will take you back to the main job page, the
     build just set off will be the most recent (highest number) build on
     the left hand side. It is a good idea to make note of the build
@@ -222,7 +222,7 @@ dependencies and test the change locally.
 
 3.  Change directory to `mantid/conda/recipes`
 
-4.  With `mantid_dev_builder` active, run
+4.  With [Mantid Dev Builder](mantid_dev_builder) active, run
 
     ``` sh
     MANTID_VERSION=$(versioningit ../../) rattler-build build -r ./mantid-developer -m ./conda_build_config.yaml --output-dir=/home/me/tmp/rattler

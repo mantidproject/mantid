@@ -7,7 +7,7 @@ In this task a GUI is created containing a single button.
 The below code creates a QWidget containing a single button. When the
 button is pressed it will print a message to the terminal screen. It
 should be noted that in practice this should be avoided and will be
-discussed in `this section <CreatingThePresenter>`.
+discussed in [this section](CreatingThePresenter).
 
 First we need to import the relevant components from PyQt and other
 modules.
@@ -45,7 +45,7 @@ self.setLayout(grid)
 ```
 
 The above connect statement means that when the button is pressed, the
-function `_button_clicked` is called:
+function [Button Clicked](_button_clicked) is called:
 
 ``` python
 def _button_clicked(self) -> None:

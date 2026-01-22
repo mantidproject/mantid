@@ -24,29 +24,29 @@
 3.  Go to the `ISIS calibration`
 4.  Enter `Input Runs` 26173
 5.  Click `Run`
-6.  This should generate a workspace with `_calib` at the end, delete
+6.  This should generate a workspace with [Calib](_calib) at the end, delete
     this workspace
 7.  Check the `Scale by factor` checkbox and change the value of the
     scale to 0.5.
 8.  Click `Run`
-9.  This should generate a workspace with `_calib` at the end
-10. Make sure to keep the `_calib` workspace, it is needed for the
-    `ISIS Diagnostics<isis_diagnostic_test>` test
+9.  This should generate a workspace with [Calib](_calib) at the end
+10. Make sure to keep the [Calib](_calib) workspace, it is needed for the
+    [ISIS Diagnostics](isis_diagnostic_test) test
 11. Check the `Create RES` box
 12. Click `Run`
-13. This should generate a workspace with `_res` at the end
-14. In the `Output` options, select the `_res` workspace and click
+13. This should generate a workspace with [Res](_res) at the end
+14. In the `Output` options, select the [Res](_res) workspace and click
     `Plot Spectra`. This should produce a spectrum plot.
-15. Then select the `_calib` workspace and use the down arrow to click
+15. Then select the [Calib](_calib) workspace and use the down arrow to click
     `Plot Bins`. This should produce a bin plot.
 16. Enter `Input Runs` 55878-55879 and check `Sum Files`
-17. Click `Run`, this should produce a `_calib` workspace
-18. Make sure to also keep this `_calib` workspace, it is needed for the
+17. Click `Run`, this should produce a [Calib](_calib) workspace
+18. Make sure to also keep this [Calib](_calib) workspace, it is needed for the
     next test
 19. Enter `Input Runs` 59057-59059 and check `Sum Files`
 20. Set `Reflection` to 004
 21. Click `Run`
-22. This should produce a new `_calib` workspace, with `004` in the
+22. This should produce a new [Calib](_calib) workspace, with `004` in the
     name.
 23. Before moving on, set `Reflection` to 002
 
@@ -63,11 +63,11 @@
 5.  In the `Input Runs` box enter `26184-26185`
 6.  Click `Run`
 7.  Check the `Use Calib File` box
-8.  Change `File` to `Workspace` and choose the `_calib` workspace
+8.  Change `File` to `Workspace` and choose the [Calib](_calib) workspace
     previously created (55878 from the previous test)
 9.  Click `Run`
 10. In the main GUI right-click on the
-    `iris26184-26185_multi_graphite002_red` workspace
+    [Iris26184 26185 Multi Graphite002 Red](iris26184-26185_multi_graphite002_red) workspace
 11. Choose `Plot spectrum`, note the number of spectra, should be 51.
     The spectra numbering should start from 0.
 12. Click `Cancel`
@@ -76,19 +76,19 @@
 14. Set `Groups` to 5
 15. Click `Run`
 16. In the main GUI right-click on the
-    `iris26184-26185_multi_graphite002_red` workspace
+    [Iris26184 26185 Multi Graphite002 Red](iris26184-26185_multi_graphite002_red) workspace
 17. Choose `Plot spectrum`, note the number of spectra, should be 6. The
     spectra numbering should start from 0.
 18. Choose `Plot All`, this should result in a plot of all 6 spectra
 19. Open `Interfaces` \> `Inelastic` \> `Data Processor` and go to the
     `S(Q, W)` tab
-20. Change `File` to `Workspace` and load the `_red` workspace just
+20. Change `File` to `Workspace` and load the [Red](_red) workspace just
     created
 21. `Q-Low` and `Q-High` should be automatically updated to the y axis
     range of the contour plot.
 22. `E-Low` and `E-High` should be automatically updated to the x axis
     range of the contour plot.
-23. Click `Run`. An `_sqw` workspace should be created.
+23. Click `Run`. An [Sqw](_sqw) workspace should be created.
 24. Check `Rebin in energy`
 25. Click `Run`
 26. Within the `Output` section, click the down arrow on the
@@ -120,13 +120,13 @@
 7.  Change the values of `Start` and `End` on the property browser and
     check that the slider position is updated on the plot
 8.  Tick the `Use Calibration` checkbox and select the workspace
-    previously generated, `irs26173_graphite002_calib`, on the data
+    previously generated, [Irs26173 Graphite002 Calib](irs26173_graphite002_calib), on the data
     selector
 9.  Change the `Spectra Min` property to 3
 10. Click `Run`
 11. A preview spectra should be rendered, plotting the integrated counts
     versus the spectrum number.
-12. A new workspace with suffix `_slice` should be generated on the ADS
+12. A new workspace with suffix [Slice](_slice) should be generated on the ADS
 13. On Output, clicking the button `Plot Spectra` should open a new plot
     window with the same data as the preview plot.
 14. Tick on the `Use Two Ranges` property. Two green sliders should
@@ -135,7 +135,7 @@
     properties under the `Background` property are updated accordingly
 16. Selecting a non-overlapping background range, click on the `Run`
     button
-17. The preview plot and the workspace ending in `_slice` should update
+17. The preview plot and the workspace ending in [Slice](_slice) should update
     with the new integrated time slice
 
 ## Transmission

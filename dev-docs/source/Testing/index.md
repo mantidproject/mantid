@@ -14,7 +14,7 @@ values where they should not be possible. Make sure that Mantid handles
 all situations gracefully.
 
 When encountering issues during testing, please create issues. The
-procedure for issue creation is outlined in `issue_tracking`.
+procedure for issue creation is outlined in [Issue Tracking](issue_tracking).
 
 ```{toctree}
 :maxdepth: 1

@@ -52,7 +52,7 @@ performance. See `ProfilingOverview` for more details.
 - Keeps track of allocs/deallocs and reports anything missing at exit.
 - Slow but thorough
 - Useful options to run with
-- See `valgrind <ProfilingWithValgrind>` for details on how to install
+- See [valgrind](ProfilingWithValgrind) for details on how to install
 
 `valgrind --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --track-origins=yes --freelist-vol=500000000``[args...]`
 

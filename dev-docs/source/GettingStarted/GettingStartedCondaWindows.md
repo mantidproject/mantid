@@ -105,7 +105,7 @@ below:
   mamba update -c mantid/label/nightly -c neutrons --all
   ```
 
-See `packaging <Packaging>` for more information on this topic.
+See [packaging](Packaging) for more information on this topic.
 
 ## Setup the mantid pixi environment
 
@@ -209,7 +209,7 @@ path.
   however Release, RelWithDebInfo, and DebugWithRelRuntime for Debugging
   will compile fine.
 - Once in visual studio, the correct target to use as a startup project
-  in visual studio is `workbench`, not `MantidWorkbench`. You can then
+  in visual studio is `workbench`, not [Mantid Workbench](MantidWorkbench). You can then
   press F5 to start workbench.
 - If you want to use your computer while Mantid is compiling, you can
   enable the following option:
@@ -245,7 +245,7 @@ path.
 ## Building and debugging with CLion
 
 Please follow the Windows related instructions on
-`this page <clion-ref>`.
+[this page](clion-ref).
 
 ## CMake conda variables
 

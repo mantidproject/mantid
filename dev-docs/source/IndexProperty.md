@@ -7,7 +7,7 @@
 ## Why IndexProperty?
 
 In many cases, indices are captured from the user with the
-`ArrayProperty<int>` property type. However, this lacks a few key
+[ArrayProperty](int) property type. However, this lacks a few key
 behaviours which a property collecting workspace index information
 should have. Firstly, there is no automatic validation of the indices
 with respect to the workspace itself. Therefore users could enter

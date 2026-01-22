@@ -151,7 +151,7 @@ run the test using the Coverage module.
 Your IDE may already have an option to run the test with coverage
 enabled if it can already run the test directly.
 
-To setup unit tests for Pycharm see the `pycharm-ref` page.
+To setup unit tests for Pycharm see the [Pycharm Ref](pycharm-ref) page.
 
 ### CLI
 

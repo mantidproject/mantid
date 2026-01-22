@@ -25,4 +25,4 @@ ProjectSaveInterfaces
 :   This document details Project Save on workbench and gives details on
     how to allow the saving and loading of interfaces in workbench.
 
-`Debugging workbench with Pycharm <debug-workbench-in-pycharm-ref>`.
+[Debugging workbench with Pycharm](debug-workbench-in-pycharm-ref).

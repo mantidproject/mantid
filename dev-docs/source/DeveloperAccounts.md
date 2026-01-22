@@ -36,7 +36,7 @@ pet, cartoon or something they're obsessed with, such as tea!
       - Set up Git on your workstation; see [this
         guide](https://help.github.com/articles/set-up-git/).
 
-      - The Git workflow is described on the `GitWorkflow` page.
+      - The Git workflow is described on the [Git Workflow](GitWorkflow) page.
 
 - If based at ISIS, please sign up for a [User Facilities
   account](https://users.facilities.rl.ac.uk/) that among other things,

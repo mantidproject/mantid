@@ -12,7 +12,7 @@ This page gives an overview of how data files are managed within Mantid.
 
 Some unit tests use a small amount of data that is created by the test
 harness and others load data from a file. Take the example of
-`ApplyCalibrationTest`. In its first test, testSimple, it creates a
+[Apply Calibration Test](ApplyCalibrationTest). In its first test, testSimple, it creates a
 workspace with 10 detectors using
 `WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument()`. In the
 second test, testComplex, it reads a file
@@ -73,7 +73,7 @@ href="http://www.kitware.com/source/home/post/107">http://www.kitware.com/source
 
 CMake does not download content directly but stores the content in a
 *Local Object Store*, whose location is defined by the
-`ExternalData_OBJECT_STORES` CMake variable. This allows it to share
+[External Data Object Stores](ExternalData_OBJECT_STORES) CMake variable. This allows it to share
 content between build trees, especially useful for continuous
 integration servers.
 
@@ -81,7 +81,7 @@ integration servers.
 
 The final step is to create the *real* filename and symbolic link (copy
 on windows) it to the object in the local object store. The location of
-the *real* filenames is controlled by the `ExternalData_BINARY_ROOT`
+the *real* filenames is controlled by the [External Data Binary Root](ExternalData_BINARY_ROOT)
 CMake variable and defaults to `build/ExternalData`.
 
 ## Using Existing Data
@@ -89,11 +89,11 @@ CMake variable and defaults to `build/ExternalData`.
 For unit testings, there are two places files may be found:
 
 - [.../Testing/Data/](https://github.com/mantidproject/mantid/tree/main/Testing/Data)
-  for `unit test <RunningTheUnitTests>`,
-  `doc test <DocumentationGuideForDevs>`, and
-  `system test <SystemTests>` data
+  for [unit test](RunningTheUnitTests),
+  [doc test](DocumentationGuideForDevs), and
+  [system test](SystemTests) data
 - [.../instrument/unit_testing](https://github.com/mantidproject/mantid/tree/main/instrument/unit_testing)
-  for test `IDF <InstrumentDefinitionFile>` files
+  for test [IDF](InstrumentDefinitionFile) files
 
 For system testings, there is one more location developers use to dump
 reference data files:
@@ -122,7 +122,7 @@ your team to learn the preferred location for storing testing data.
 
 A helper git command is defined called `add-test-data`. Before first
 use, the command must be aliased using the procedure outlined
-`below <DataFilesForTesting_DeveloperSetup>`. Once setup, it would be
+[below](DataFilesForTesting_DeveloperSetup). Once setup, it would be
 called like this:
 
 ``` sh
@@ -156,7 +156,7 @@ This does the following:
 ## Updating File(s)
 
 The workflow is the same as
-`adding new files <DataFilesForTesting_AddingANewFile>` except that the
+[adding new files](DataFilesForTesting_AddingANewFile) except that the
 developer must first put the new version of the file in the right place.
 For the example above, it would be
 `Testing/Data/UnitTest/INST12345.nxs`. Then the new `.md5` file and
@@ -181,11 +181,11 @@ It is advised that CMake is told where to put the "real" data as the
 default is `$HOME/MantidExternalData` on Linux/Mac or
 `C:/MantidExternalData` on Windows. Over time the store will grow so it
 is recommended that it be placed on a disk with a large amount of space.
-CMake uses the `MANTID_DATA_STORE` variable to define where the data is
+CMake uses the [Mantid Data Store](MANTID_DATA_STORE) variable to define where the data is
 stored.
 
 The data itself can be downloaded from a local mirror as well to
-decrease build times. This is controlled by the `DATA_STORE_MIRROR`
+decrease build times. This is controlled by the [Data Store Mirror](DATA_STORE_MIRROR)
 variable which can be "all" (default), "none", "ornl", or "ral". The
 variable will insert additional data mirrors that facilities have
 created. If the data is not found in a local mirror, it will be
@@ -213,7 +213,7 @@ This is for people in the ORNL dropbox share and has the effect of
 reducing external network traffic. There is a
 [gist](http://gist.github.com/peterfpeterson/638490530e37c3d8dba5) for
 getting dropbox running on linux. Instead of defining the
-`MANTID_DATA_STORE` in cmake, it is simplest to create a symbolic link
+[Mantid Data Store](MANTID_DATA_STORE) in cmake, it is simplest to create a symbolic link
 
 ``` sh
 ln -s ~/Dropbox\ \(ORNL\)/MantidExternalData ~

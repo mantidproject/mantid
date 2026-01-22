@@ -1,6 +1,6 @@
 # Creating a Presenter class
 
-In the `Add Button <AddButton>` section we had the response to a button
+In the [Add Button](AddButton) section we had the response to a button
 press within the view. In practice this is not a good implementation. If
 the response was more complicated then it would be difficult to maintain
 the view as it would become extremely long. Furthermore creating the
@@ -58,7 +58,7 @@ class View(QWidget):
 
 The above code has two new additions. The first is a function which can
 be used to subscribe the presenter to the view. The second addition is
-that `_button_clicked` now calls a member function of the presenter to
+that [Button Clicked](_button_clicked) now calls a member function of the presenter to
 handle the response to the button being clicked.
 
 ```{tip}

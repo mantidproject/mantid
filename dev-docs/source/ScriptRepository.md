@@ -1,7 +1,7 @@
 # Script Repository
 
 This page describes the implementation of the
-`script repository <WorkbenchScriptRepository>` from a developer
+[script repository](WorkbenchScriptRepository) from a developer
 perspective.
 
 ## Purpose
@@ -31,7 +31,7 @@ alt="/images/scriptrepository-architecture.png" />
 </figure>
 
 1.  **Frontend** - the GUI accessed by users through Workbench and
-    described in `script repository <WorkbenchScriptRepository>`.
+    described in [script repository](WorkbenchScriptRepository).
 2.  **Backend** - the server component that acts as an intermediary to
     the Git repository
 3.  **GitHub repository** - final storage location of the uploaded
@@ -47,7 +47,7 @@ The frontend seen by users is implemented by the
 It implements a Qt-table-based view, with accompanying models, of the
 content within the [GitHub
 repository](https://github.com/mantidproject/scriptrepository). Please
-see the `script repository <WorkbenchScriptRepository>` for a
+see the [script repository](WorkbenchScriptRepository) for a
 description of the features.
 
 ## Backend

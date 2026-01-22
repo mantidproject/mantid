@@ -5,7 +5,7 @@
 ```
 
 The following information will be useful to you if you want to write an
-`algorithm` that is `Event Workspace <EventWorkspace>` aware.
+[Algorithm](algorithm) that is [Event Workspace](EventWorkspace) aware.
 
 ## Individual Neutron Event Data (TofEvent)
 
@@ -33,7 +33,7 @@ common by far is the RAW TOF described above, but there are also
   time of flight or pulse time, as needed.
 - Also contained in the EventList is a std::set of detector ID's. This
   tracks which detector(s) were hit by the events in the list.
-  `EventList` is a subtype of `ISpectrum`, which provides the interface
+  [Event List](EventList) is a subtype of `ISpectrum`, which provides the interface
   to many of the spectrum level access methods.
 - The histogram bins (X axis) are also stored in EventList. The Y and E
   histogram data are not, however, as they are calculated on demand by
@@ -65,11 +65,11 @@ makeSpectraMap() method generates the usual SpectraDetectorMap object.
 ## Workspace2D compatibility
 
 Event Workspace is designed to be able to be read (but not written to)
-like a `MatrixWorkspace <MatrixWorkspace>`. By default, if an algorithm
+like a [MatrixWorkspace](MatrixWorkspace). By default, if an algorithm
 performs an operation and outputs a new workspace, the WorkspaceFactory
-will create a `Workspace2D` *copy* of your Event Workspace's histogram
+will create a [Workspace2d](Workspace2D) *copy* of your Event Workspace's histogram
 representation. If you attempt to change an Event Workspace's Y or E
-data in place, you will get an `NotImplementedError` raised, since that
+data in place, you will get an [Not Implemented Error](NotImplementedError) raised, since that
 is not possible.
 
 ## A Note about Thread Safety

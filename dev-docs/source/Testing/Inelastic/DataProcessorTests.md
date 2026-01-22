@@ -29,7 +29,7 @@
 8.  Click on the `Preview` button. The symmetrised plot should be
     rendered on the preview graph.
 9.  Click the `Run` button.
-10. A Workspace named `irs26176_graphite002_sym_pn_red` should be
+10. A Workspace named [Irs26176 Graphite002 Sym Pn Red](irs26176_graphite002_sym_pn_red) should be
     created on the ADS.
 11. On the Output widget, click on `Plot Spectra` button. A new plot
     window should appear with the same plot as the preview.
@@ -42,7 +42,7 @@
     range.
 13. Change the value of `Spectrum No` property to 5 and see that the
     spectra on the plot is updated.
-14. Change the `ReflectType` property from `Positive to Negative` to
+14. Change the [Reflect Type](ReflectType) property from `Positive to Negative` to
     `Negative to Positive`, the sliders should move to the negative
     range of the spectra.
 15. Now `Ehigh` should be closer to 0 than `Elow`. Repeat checks of step
@@ -51,9 +51,9 @@
     button. The symmetrise plot should be rendered on the preview graph.
     The axis data range must go from -0.3 to 0.3.
 17. Click on the `Run` button.
-18. A Workspace named `irs26176_graphite002_sym_np_red` should be
+18. A Workspace named [Irs26176 Graphite002 Sym Np Red](irs26176_graphite002_sym_np_red) should be
     created on the ADS.
-19. On the ADS, select `irs26176_graphite002_sym_np_red` and right-click
+19. On the ADS, select [Irs26176 Graphite002 Sym Np Red](irs26176_graphite002_sym_np_red) and right-click
     to select `Plot -> Spectrum...`. On `Spectrum Numbers` select 5.
     Check that the spectrum is the same as the one in the `Preview` plot
     of the symmetrise interface.
@@ -77,7 +77,7 @@
     0.05 and 1, respectively.
 7.  Click <span class="title-ref">Run</span> button.
 8.  There should be two new workspaces in the ADS with the prefixes
-    `_sqw` and `_rqw`.
+    [Sqw](_sqw) and [Rqw](_rqw).
 9.  On <span class="title-ref">Output</span> options of the interface.
     Select from the drop-down menu on the right of the `Plot Spectra`
     button the option to `Open Slice Viewer` and click.
@@ -93,7 +93,7 @@
     button the option to `Plot 3D Surface` and click.
 14. The resulting 3D plot should range in the Energy Transfer axis from
     -0.2 to 0.2 $meV$.
-15. Don't remove yet the workspace with suffix `_sqw` from the ADS as
+15. Don't remove yet the workspace with suffix [Sqw](_sqw) from the ADS as
     you will use it for the Moments interface test.
 16. Repeat instructions 4 to 10, but loading instead the
     `MAR27691_red.nxs` file from the ISIS Sample Data set.
@@ -114,7 +114,7 @@
     automatically set to 0.2, 0.05 and 2.25 respectively.
 8.  Click <span class="title-ref">Run</span> button.
 9.  There should be two new workspaces in the ADS with the prefixes
-    `_sqw` and `_rqw`.
+    [Sqw](_sqw) and [Rqw](_rqw).
 10. Open the Settings widget from the bottom left of the interface, and
     tick <span class="title-ref">Restrict allowed input files by name
     (recommended)</span>
@@ -131,7 +131,7 @@
 2.  Go to the `Moments` tab
 3.  On the File Input, change the drop-down selector from `File` to
     `Workspace`.
-4.  Select the previously generated workspace `irs26176_graphite002_sqw`
+4.  Select the previously generated workspace [Irs26176 Graphite002 Sqw](irs26176_graphite002_sqw)
     from the selector.
 5.  First spectrum should be rendered on the plot widget, with two
     vertical sliders placed on the integration limits, the limits on the
@@ -173,11 +173,11 @@
 2.  Go to the `Elwin` tab
 3.  Click on `Add Workspaces`, a dialog window should prompt.
 4.  Enter `MAR27691_red.nxs` in `Input file`. The table of the dialog
-    should be populated with the `MAR2791_red` workspace.
+    should be populated with the [Mar2791 Red](MAR2791_red) workspace.
 5.  Select the workspace from the table and click on `Add Data`. Close
     the dialog.
 6.  Back on `Elwin` tab, click `Run` - this should produce 3 new
-    workspaces `_elf`, `_eq` and `_eq2`
+    workspaces [Elf](_elf), [Eq](_eq) and [Eq2](_eq2)
 7.  Open the `Add Workspaces` dialog again, and in `Input file` choose
     `browse`. Navigate to the ISIS-Sample data and select the two files,
     `MAR27691_red.nxs` and `MAR27698_red.nxs` using shift key.
@@ -185,7 +185,7 @@
 9.  Click `Run`
 10. This should result in three new workspaces again, this time with
     file ranges as their name
-11. In the main GUI right-click on `MAR27691-27698_red_elwin_eq2` and
+11. In the main GUI right-click on [Mar27691 27698 Red Elwin Eq2](MAR27691-27698_red_elwin_eq2) and
     choose `Plot Spectrum`, choose `Plot All`
 12. This should plot two lines of $ln(Counts(microAmp.hour))^{-1}$ vs
     $Q2$
@@ -195,24 +195,24 @@
 1.  Go to `Interfaces` \> `Inelastic` \> `Data Processor`
 2.  Click on `Add Workspaces`, a dialog window should prompt
 3.  Enter `irs26174_graphite002_red.nxs` in `Input file`. The table of
-    the dialog should be populated with the `irs26174_graphite002_red`
+    the dialog should be populated with the [Irs26174 Graphite002 Red](irs26174_graphite002_red)
     workspace.
 4.  Select the workspace from the table and click on `Add Data`. Close
     the dialog.
 5.  Back on `Elwin` tab, click `Run` - this should produce 3 new
-    workspaces `_elf`, `_eq` and `_eq2`
-6.  Right-click on the `irs26174_graphite002_red_elwin_eq` workspace and
+    workspaces [Elf](_elf), [Eq](_eq) and [Eq2](_eq2)
+6.  Right-click on the [Irs26174 Graphite002 Red Elwin Eq](irs26174_graphite002_red_elwin_eq) workspace and
     `Save Nexus`; save to a location of your choice. **NB** keep this
     workspace if you are doing the
-    `QENS Fitting Manual Test <inelastic_qens_fitting_testing>`
+    [QENS Fitting Manual Test](inelastic_qens_fitting_testing)
 7.  Remove the Workspace from the interface by clicking on the
     `Select All` button and then the `Remove Selected` button.
 8.  Open the `Add Workspaces` dialog again, there should be a
-    `irs26174_graphite002_red` workspace on the table with `Ws Index`
+    [Irs26174 Graphite002 Red](irs26174_graphite002_red) workspace on the table with `Ws Index`
     equal to `0-50`.
 9.  In `Input file` choose `Browse`. Navigate to the ISIS-Sample data
     folder and select the file `irs26176_graphite002_red.nxs`. A new
-    entry, `irs26176_graphite002_red`, should be added to the data
+    entry, [Irs26176 Graphite002 Red](irs26176_graphite002_red), should be added to the data
     table, with `Ws Index` equal to `0-50`. (beware that there is a
     `irs26176_graphite002_red.nxs` file on the `Usage Data` set. This is
     NOT the correct file for this test, it should be loaded from the
@@ -225,7 +225,7 @@
 13. This should result in three new workspaces again, this time with
     file ranges as their name.
 14. In the main GUI right-click on
-    `irs26174-26176_graphite002_red_elwin_eq2` and choose
+    [Irs26174 26176 Graphite002 Red Elwin Eq2](irs26174-26176_graphite002_red_elwin_eq2) and choose
     `Plot Spectrum`, choose `Plot All`
 15. This should plot two lines of $ln((meV))^{-1}$ vs $Q2$
 
@@ -242,7 +242,7 @@
 3.  Load the `MARI27691_sqw.nxs` file from the sample data
 4.  Load the resolution file `MARI27698_sqw.nxs` from the sample data
 5.  Click `Run`
-6.  A new workspace with the suffix `_iqt` should appear in the main
+6.  A new workspace with the suffix [Iqt](_iqt) should appear in the main
     GUI, it should be a workspace with 17 histograms and 3 bins.
 7.  Click `Plot Current preview` this should plot the same data as the
     preview window
@@ -261,10 +261,10 @@
 4.  Load the resolution file `irs26173_graphite002_res.nxs` from the
     sample data
 5.  Click `Run`
-6.  A new workspace with the suffix `_iqt` should appear in the main
+6.  A new workspace with the suffix [Iqt](_iqt) should appear in the main
     GUI, it should be a workspace with 51 histograms and 86 bins. **NB**
     keep this workspace if you are doing the
-    `QENS Fitting Manual Test <inelastic_qens_fitting_testing>`
+    [QENS Fitting Manual Test](inelastic_qens_fitting_testing)
 7.  Click `Plot Current preview` this should plot the same data as the
     preview window
 8.  Choose some workspace indices (e.g. 0-2) in the `Output` section and

@@ -8,8 +8,8 @@
 
 The ISIS Reflectometry interface is a graphical front end for the main
 ISIS reflectometry reduction algorithm
-`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>`
-and post-processing algorithm `Stitch1DMany <algm-Stitch1DMany>`. The
+[ReflectometryISISLoadAndProcess](algm-ReflectometryISISLoadAndProcess)
+and post-processing algorithm [Stitch1DMany](algm-Stitch1DMany). The
 purpose of the interface is to speed up the analysis of the
 Reflectometry spectra by providing batch-mode execution of these
 algorithms on groups of runs.
@@ -124,11 +124,11 @@ tab in the interface. These should only work with `CRISP`, `POLREF` or
     The `Fredrikze Input Spin State Order` and
     `Polarization Efficiencies` combo boxes should become enabled. The
     latter should show a list of all loaded workspaces.
-7.  Switch to `FilePath` from the `Polarisation Corrections` combo box.
+7.  Switch to [File Path](FilePath) from the `Polarisation Corrections` combo box.
     `Polarization Efficiencies` should now appear as a line edit. It
     should appear red for invalid paths and white for valid paths on
     your system.
-8.  Switch back to the `ParameterFile` setting from the
+8.  Switch back to the [Parameter File](ParameterFile) setting from the
     `Polarisation Corrections` combo box.
 9.  Back on the `Runs` tab, delete all rows in the table (this can be
     done by pressing `Ctrl-A` and then `Delete`).
@@ -226,7 +226,7 @@ These will give an error:
 5.  In the main Runs table, click to process the row.
 6.  Go to the Save tab and hit Refresh. The workspaces list will contain
     all of the workspaces in the ADS.
-7.  Select a workspace in the list that starts with `IvsQ`.
+7.  Select a workspace in the list that starts with [Ivs Q](IvsQ).
 8.  Type a valid path into the Save path textbox.
 9.  Type something in the prefix field you'd like to use to identify the
     file. *The files are saved in the form
@@ -241,10 +241,10 @@ These will give an error:
 13. Tick `Q resolution` and re-save. It should now contain 4 columns of
     numbers.
 14. Double-click on a workspace name in the left list, e.g.
-    `IvsQ_binned_11934`. The right list should be populated with
+    [Ivs Q Binned 11934](IvsQ_binned_11934). The right list should be populated with
     parameters but be disabled.
 15. Tick `Header` and the parameters list should be enabled. Select a
-    couple of them, e.g. `nperiods` and `run_start`, and re-save.
+    couple of them, e.g. `nperiods` and [Run Start](run_start), and re-save.
     - The file should now contain some header text starting with `MFT`.
     - Amongst other things this text should contain the logs you
       selected, e.g. `nperiods : 1` and `run_end : 2011-10-21T13:32:03`.
@@ -254,8 +254,8 @@ These will give an error:
     separators and parameter settings are not applicable so they should
     be greyed out. The `Additional columns (includes Q resolution)`
     checkbox should be enabled.
-18. Select a single `IvsQ_binned` workspace from the left list, e.g.
-    `IvsQ_binned_11934`, and click Save. Open the `.ort` file that
+18. Select a single [Ivs Q Binned](IvsQ_binned) workspace from the left list, e.g.
+    [Ivs Q Binned 11934](IvsQ_binned_11934), and click Save. Open the `.ort` file that
     should have been created in your specified save directory. You
     should get a header at the top starting with
     `ORSO reflectivity data file`. There should be 8 columns of numbers
@@ -311,7 +311,7 @@ These will give an error:
     detector with four banks. Note, with this dataset, we expect an
     error "Detector with ID..." to be thrown at this stage.
 3.  Go to the drop-down underneath the color scale next to the second
-    (slice viewer) plot and select `SymmetricLog10`. This should allow
+    (slice viewer) plot and select [Symmetric Log10](SymmetricLog10). This should allow
     you to see the counts on the slice viewer plot more clearly. You
     should see what appear as roughly four horizontal lines of data on
     the plot.
@@ -336,7 +336,7 @@ These will give an error:
     plot. Then, in the same way, add one or more `Background` regions.
     The reduction should be re-run each time a region is added:
     - You should see the tab quickly disable and re-enable.
-    - Another run of `ReflectometryISISLoadAndProcess` will be logged in
+    - Another run of [Reflectometry Isisload And Process](ReflectometryISISLoadAndProcess) will be logged in
       the Messages bar.
     - The 1D plot should update (although this is usually only
       noticeable when changes are made to the Signal region).
@@ -358,22 +358,22 @@ These will give an error:
     shouldn't be cleared).
 14. Back on the Reduction Preview tab, click the export button above the
     top left of the 1D plot. This should export a workspace called
-    `preview_reduced_ws` to the ADS.
+    [Preview Reduced Ws](preview_reduced_ws) to the ADS.
 15. Right-click the workspace and select `Show History`:
-    - In the Algorithms list, expand `ReflectometryISISLoadAndProcess`.
-    - Click on `ReflectometryReductionOneAuto` and check in the right
-      hand pane that the inputs for `ProcessingInstructions`,
-      `BackgroundProcessingInstructions` and
-      `TransmissionProcessingInstructions` correspond to the ranges of
+    - In the Algorithms list, expand [Reflectometry Isisload And Process](ReflectometryISISLoadAndProcess).
+    - Click on [Reflectometry Reduction One Auto](ReflectometryReductionOneAuto) and check in the right
+      hand pane that the inputs for [Processing Instructions](ProcessingInstructions),
+      [Background Processing Instructions](BackgroundProcessingInstructions) and
+      [Transmission Processing Instructions](TransmissionProcessingInstructions) correspond to the ranges of
       spectra you selected.
-    - Expand `ReflectometryReductionOneAuto`.
-    - Click on `ReflectometryISISSumBanks` and check that the input for
-      `ROIDetectorIDs` matches the range of detector IDs you selected.
+    - Expand [Reflectometry Reduction One Auto](ReflectometryReductionOneAuto).
+    - Click on [Reflectometry Isissum Banks](ReflectometryISISSumBanks) and check that the input for
+      [Roidetector Ids](ROIDetectorIDs) matches the range of detector IDs you selected.
 16. Back in the Reflectometry interface, go to the Runs tab. In the
     Process Runs table on the right-hand panel of the tab, enter Run
     `INTER45455` and Angle `1` into the first child row. Click Process.
-17. Compare plots of the `preview_reduced_ws` (from the Preview
-    reduction) with `IvsQ_binned_45455` (from the batch reduction). They
+17. Compare plots of the [Preview Reduced Ws](preview_reduced_ws) (from the Preview
+    reduction) with [Ivs Q Binned 45455](IvsQ_binned_45455) (from the batch reduction). They
     should be the same.
 18. The plots on the Reduction Preview tab are located within three
     dockable widgets. Check that the widgets can be undocked, re-docked,
