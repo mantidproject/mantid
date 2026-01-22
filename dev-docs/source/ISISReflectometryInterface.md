@@ -46,7 +46,7 @@ Briefly the structure is as follows:
   - The `Runs` tab is where the user specifies which runs to process.
     The actual runs list is specified in the embedded `RunsTable`
     component, which comprises of the generic
-    [JobTreeView](../BatchWidget/API/JobTreeView.md) table along with a
+    [JobTreeView](../BatchWidget/API/JobTreeView) table along with a
     reflectometry-specific toolbar. The `Runs` tab also contains various
     other operations to do with finding and processing runs, such as
     searching and autoprocessing by investigation ID and a live data
