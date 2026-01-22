@@ -42,6 +42,7 @@ class FocusPresenter(object):
         self.rb_num = None
 
         self.set_default_directories()
+        self.view.set_focus_button_enabled(False)
 
     def set_default_files(self, filepaths):
         directory = self.model.get_last_directory(filepaths)
@@ -58,7 +59,8 @@ class FocusPresenter(object):
 
     def on_focus_clicked(self):
         if not self.current_calibration.get_vanadium_path():
-            self.current_calibration.vanadium_path = self.view.get_vanadium_filename()
+            van_file = self.view.get_vanadium_filename()
+            self.current_calibration.vanadium_path = van_file if van_file else None
         if not self._validate():
             return
         focus_paths = self.view.get_focus_filenames()
@@ -155,3 +157,4 @@ class FocusPresenter(object):
         self.current_calibration = calibration
         region_text = calibration.get_group_description()
         self.view.set_region_display_text(region_text)
+        self.view.set_focus_button_enabled(True)
