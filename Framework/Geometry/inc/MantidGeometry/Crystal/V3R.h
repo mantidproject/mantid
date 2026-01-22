@@ -12,9 +12,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 
-#pragma GCC visibility push(default)
 #include <boost/rational.hpp>
-#pragma GCC visibility pop
 
 namespace Mantid {
 namespace Geometry {
