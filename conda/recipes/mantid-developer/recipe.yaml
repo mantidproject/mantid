@@ -30,6 +30,7 @@ requirements:
     - librdkafka ${{ librdkafka }}
     - matplotlib ${{ matplotlib }}
     - muparser ${{ muparser }}
+    - myst-parser ${{ mystparser }}
     - ninja ${{ ninja }}
     - numpy ${{ numpy }}
     - occt ${{ occt }}
