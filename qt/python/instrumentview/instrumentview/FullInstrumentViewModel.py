@@ -612,7 +612,7 @@ class FullInstrumentViewModel:
 
     def _create_current_grouping_workspace(self, grouping_name):
         # TODO: Ideally algorithm should use workspace when ADS hanging is fixed
-        CreateGroupingWorkspace(InstrumentName=self._workspace.getInstrument().getFullName(), OutputWorkspace=grouping_name)
+        CreateGroupingWorkspace(InstrumentFilename=self._workspace.getInstrument().getFilename(), OutputWorkspace=grouping_name)
         grouping_ws = AnalysisDataService.retrieve(grouping_name).clone(StoreInADS=False)
         for i, g in enumerate(self._current_detector_groupings[self._is_valid]):
             grouping_ws.dataY(i)[:] = g
