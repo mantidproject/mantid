@@ -20,10 +20,10 @@ different methods of Getting Started with mantid development. Therefore
 you can choose which method to setup with (We recommend conda as it will
 be the only supported method eventually).
 
-- `GettingStartedCondaWindows`
-- `GettingStartedCondaLinux`
-- `GettingStartedCondaOSX`
-- `GettingStartedNoneConda`
+- [Develop with conda on Windows](GettingStartedCondaWindows)
+- [Develop with conda on Linux](GettingStartedCondaLinux)
+- [Develop with conda on MacOSX](GettingStartedCondaOSX)
+- [Develop without conda](GettingStartedNoneConda)
 
 ### Custom git setup for inside the ORNL firewall:
 
