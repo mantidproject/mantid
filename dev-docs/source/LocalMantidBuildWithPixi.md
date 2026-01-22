@@ -14,7 +14,7 @@ across both Mantid and dependent applications simultaneously.
 ## Prerequisites
 
 - A successfully built local Mantid installation (see
-  `BuildingWithCMake`)
+  [Building With Cmake](BuildingWithCMake))
 - [Pixi](https://pixi.ws/latest/) installed
 - Your dependent project with pixi configuration
 
@@ -72,8 +72,8 @@ Replace the paths with your actual Mantid build and source directories.
 **Import errors**: Verify `PYTHONPATH` includes
 `${MANTID_BUILD_DIR}/bin` and your Mantid build completed successfully.
 
-**Library loading errors**: Check that `LD_LIBRARY_PATH` (Linux) or
-`DYLD_LIBRARY_PATH` (macOS) includes `${MANTID_BUILD_DIR}/bin`.
+**Library loading errors**: Check that [Ld Library Path](LD_LIBRARY_PATH) (Linux) or
+[Dyld Library Path](DYLD_LIBRARY_PATH) (macOS) includes `${MANTID_BUILD_DIR}/bin`.
 
 **Path issues**: Ensure all paths are absolute. Use `realpath` to
 resolve symbolic links if needed.

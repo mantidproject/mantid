@@ -8,7 +8,7 @@
 
 This page deals with the specifics of how to document Custom Interfaces.
 For a more general guide to the Mantid documentation system see
-`Documentation Guide For Devs <DocumentationGuideForDevs>`.
+[Documentation Guide For Devs](DocumentationGuideForDevs).
 
 ## Python Interface File Naming
 

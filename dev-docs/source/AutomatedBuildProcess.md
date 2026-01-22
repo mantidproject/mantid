@@ -11,7 +11,7 @@ then it is your responsibility to fix the error immediately!
 
 ## The Details
 
-You should follow the `GitWorkflow`. When you open a pull request (or
+You should follow the [Git Workflow](GitWorkflow). When you open a pull request (or
 commit to an already open pull request) the automated build process will
 start. There will be a different build for each platform/job. A status
 will appear for each job in the pull request.

@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This is a manual testing guide for the `sample_transmission_calculator`
+This is a manual testing guide for the [Sample Transmission Calculator](sample_transmission_calculator)
 (Interfaces \> General \> Sample Transmission Calculator).
 
 ## Basic Usage
@@ -85,20 +85,19 @@ reset it with the previously entered values.
 1.  For the Input Wavelength Range at the top of the window select
     `Multiple` from `Type` dropdown box
 2.  In the `Multiple` edit box enter `1,1,3` and click `Calculate`
-3.  Right-click on the `transmission_ws` workspace in the main workbench
+3.  Right-click on the [Transmission Ws](transmission_ws) workspace in the main workbench
     window and `Show Data` - you should see that there are 2 bins at
     wavelengths `1.5 Ang` and `2.5 Ang`
 4.  In the `Multiple` edit box enter `1,1,3,0.5,4` and click
     `Calculate` - in the workspace data table you should see additional
     bins at `3.25 Ang` and `3.75 Ang`
 5.  Repeat the validation tests in
-    `sample_transmission_wavelength_validation`
+    [Sample Transmission Wavelength Validation](sample_transmission_wavelength_validation)
 
 ## Chemical Formula Validation
 
 The following should produce a warning at the bottom of the window and
-throw an error from `CalculateSampleTransmission
-<algm-CalculateSampleTransmission>`
+throw an error from [CalculateSampleTransmission](algm-CalculateSampleTransmission)
 
 1.  Set `Chemical Formula = C2H4` (i.e. remove the space)
 2.  Set `Chemical Formula = Z`

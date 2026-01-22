@@ -22,7 +22,7 @@ ability to embed a matplotlib figure within them. Mantid contains a
 library, `mplcpp`, to allow this interaction to occur without every
 developer having to be concerned with the Python/C++ translation.
 
-The main work is done by the `FigureCanvasQt` class and the `Axes`
+The main work is done by the [Figure Canvas Qt](FigureCanvasQt) class and the `Axes`
 class. These are designed to closely mimic the matplotlib classes in the
 methods that they offer.
 
@@ -92,9 +92,9 @@ data alive while it is displayed.
 
 ### Plotting from Workspace Data
 
-A common case will be plotting data from a `MatrixWorkspace`. In this
+A common case will be plotting data from a [Matrix Workspace](MatrixWorkspace). In this
 case we leverage the `mantid` projection in a similar manner to a
-`standard script <plotting>`:
+[standard script](plotting):
 
 ``` cpp
 // ------------- .h file ------------------

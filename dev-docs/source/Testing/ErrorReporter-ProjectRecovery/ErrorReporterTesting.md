@@ -15,12 +15,12 @@
   without also closing Mantid, by Loading `Training_Exercise3a_SNS.nxs`
   available from the [Training Course
   Data](https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download)
-  and running the `NormaliseToMonitor` Algorithm. If one or both of
+  and running the [Normalise To Monitor](NormaliseToMonitor) Algorithm. If one or both of
   these methods to crash Mantid no longer works, then ask other
   developers for a suitable method and update these instructions.
 - Make sure the location of this file is included in your search
   directories. Full instructions
-  `are available online <mantid:getting started>`.
+  [are available online](mantid:getting started).
 - These tests should be run with someone who has access to the error
   reports database. Please contact the developer managing support before
   you run these tests.
@@ -81,7 +81,7 @@
 3.  Open MantidWorkbench
 
 - Load the file `Training_Exercise3a_SNS.nxs`
-- Run the `NormaliseToMonitor` algorithm
+- Run the [Normalise To Monitor](NormaliseToMonitor) algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an
   unexpected exception
 - The shared contact details from test 2 should be displayed and the
@@ -101,7 +101,7 @@
 4.  MantidWorkbench is still open
 
 - Load the file `Training_Exercise3a_SNS.nxs`
-- Run the `NormaliseToMonitor` algorithm
+- Run the [Normalise To Monitor](NormaliseToMonitor) algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an
   unexpected exception
 - The shared contact details from test 2 should be displayed and the
@@ -124,7 +124,7 @@
 5.  MantidWorkbench is still open
 
 - Load the file `Training_Exercise3a_SNS.nxs`
-- Run the `NormaliseToMonitor` algorithm
+- Run the [Normalise To Monitor](NormaliseToMonitor) algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an
   unexpected exception
 - Only the `public2@public.com` email from test 4 should be displayed in
@@ -145,7 +145,7 @@
 6.  Open MantidWorkbench
 
 - Load the file `Training_Exercise3a_SNS.nxs`
-- Run the `NormaliseToMonitor` algorithm
+- Run the [Normalise To Monitor](NormaliseToMonitor) algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an
   unexpected exception
 - The shared contact details from test 5 should be displayed and the

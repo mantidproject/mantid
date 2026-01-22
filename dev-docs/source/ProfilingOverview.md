@@ -57,34 +57,34 @@ python3 -m pip install yappi --user
 ```
 
 KCachegrind can be used to view profiling data, see
-`ProfilingWithValgrind` for more details on usage.
+[Profiling With Valgrind](ProfilingWithValgrind) for more details on usage.
 
 ## Profiling in C++
 
 ### Mantid's Algorithm Profiler
 
 On Linux, the build can be configured to generate algorithm profiling
-information. See `AlgorithmProfiler <AlgorithmProfiler>` for details.
+information. See [AlgorithmProfiler](AlgorithmProfiler) for details.
 
 ### Other Profiling Tools
 
 #### Linux
 
-`ProfilingWithPerf` for details on perf and intel's vtune
+[Profiling With Perf](ProfilingWithPerf) for details on perf and intel's vtune
 
-`ProfilingWithValgrind` for details on using this tool
+[Profiling With Valgrind](ProfilingWithValgrind) for details on using this tool
 
 [Callgrind/KCachegrind](http://kcachegrind.sourceforge.net/cgi-bin/show.cgi/KcacheGrindIndex)
 
 - KCachegrind visualizes callgrind output.
-- See `Profiling With Valgrind <ProfilingWithValgrind>` for help on
+- See [Profiling With Valgrind](ProfilingWithValgrind) for help on
   running callgrind
 
 [gperftools](https://github.com/gperftools/gperftools)
 
 - Takes snapshot of run and prints percentage of calls in functions
 
-`ProfilingWithJemalloc` for details on using `jemalloc`'s built-in
+[Profiling With Jemalloc](ProfilingWithJemalloc) for details on using `jemalloc`'s built-in
 profiling hooks
 
 See here for a list of other tools:
@@ -99,5 +99,5 @@ See here for a list of other tools:
 
 ### Timing in C++
 
-Please refer to `Mantid Timers <Timers>` for an introduction to
+Please refer to [Mantid Timers](Timers) for an introduction to
 measuring execution time of the Mantid C++ code.

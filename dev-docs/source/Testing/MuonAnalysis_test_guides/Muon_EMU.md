@@ -71,7 +71,7 @@ alt="../../images/MuonAnalysisTests/MATestingIDF.png" />
 
   Go to the **Fitting** tab
 
-  :   - Remove the `DynamicKuboToyabe` function
+  :   - Remove the [Dynamic Kubo Toyabe](DynamicKuboToyabe) function
       - Uncheck the **Simultaneous fit over** checkbox
       - Press fit
       - Tick the `Exclude Range` option in the table
@@ -84,7 +84,7 @@ alt="../../images/MuonAnalysisTests/MATestingIDF.png" />
 
 **Time required 5 - 10 minutes**
 
-To use the **Model Fitting** tab see the `Muon_Feature_Flags-ref`
+To use the **Model Fitting** tab see the [Muon Feature Flags Ref](Muon_Feature_Flags-ref)
 documentation. You will need to set
 <span class="title-ref">model_analysis:2</span> before opening Workbench
 and starting this test.

@@ -19,7 +19,7 @@ These are guidelines and do not form a set of rules. It is sometimes
 open to interpretation if some files are classed as a view or a model
 (this will be discussed in detail later).
 
-A more thorough explanation of MVP can be found at `MVPDesignIntro`.
+A more thorough explanation of MVP can be found at [Mvpdesign Intro](MVPDesignIntro).
 
 This tutorial requires the packages `qtpy`, `pyqt5`, `numpy` and
 `matplotlib` to be installed in your python environment.

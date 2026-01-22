@@ -3,7 +3,7 @@
 Sometimes it is necessary for the user to input some information. The
 most versatile way of allowing this is to use a line edit, which allows
 a user to enter arbitrary text. Adding the following code to the
-`__init__` function of the view will add a line edit:
+[Init](__init__) function of the view will add a line edit:
 
 ``` python
 from qtpy.QWidgets import QLineEdit
@@ -18,5 +18,5 @@ possible to make it impossible for the user to modify the line edit
 
 Care should be taken before using a line edit as it can give a user too
 much freedom. If you know that the input is an integer then a
-`spin box <AddSpinBox>` is better. If there is a finite list of possible
-options then a `combo box <AddComboBox>` would be a better choice.
+[spin box](AddSpinBox) is better. If there is a finite list of possible
+options then a [combo box](AddComboBox) would be a better choice.

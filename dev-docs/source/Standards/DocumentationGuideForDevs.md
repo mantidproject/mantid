@@ -16,22 +16,22 @@ css.
 ## Configuration
 
 The documentation is configured using CMake and assumes the instructions
-in the `Getting Started <GettingStarted>` section have been followed.
+in the [Getting Started](GettingStarted) section have been followed.
 
 The following settings, relating to the documentation, are available:
 
-- `DOCS_DOTDIAGRAMS`: If enabled then the workflow diagrams are
+- [Docs Dotdiagrams](DOCS_DOTDIAGRAMS): If enabled then the workflow diagrams are
   generated and included otherwise a placeholder image is included with
   a caption indicating the processing is disabled. Default=OFF.
-- `DOCS_SCREENSHOTS`: If enabled then the automatic screenshots of
+- [Docs Screenshots](DOCS_SCREENSHOTS): If enabled then the automatic screenshots of
   algorithm dialogs and interfaces are included otherwise a placeholder
   image is included with a caption indicating the processing is
   disabled. Default=OFF.
-- `DOCS_MATH_EXT`: Extension used to provide the `:math:` processing
+- [Docs Math Ext](DOCS_MATH_EXT): Extension used to provide the `:math:` processing
   ability. Default=`sphinx.ext.mathjax` in CMake but this can be set to
   `sphinx.ext.imgmath` for clean package builds to remove the javascript
   dependency.
-- `DOCS_PLOTDIRECTIVE`: If enabled then the `:plot:` directive is
+- [Docs Plotdirective](DOCS_PLOTDIRECTIVE): If enabled then the `:plot:` directive is
   processed and the code/plots are included. WARNING: This can add
   ~15mins to the build time. Default=OFF.
 
@@ -103,13 +103,13 @@ anywhere then start the line/block with `..`. See
 ### Algorithms
 
 The algorithm documentation has a slightly more rigid structure and is
-described in more detail `here <AlgorithmDocumentation>` and
-`here <AlgorithmUsageExamples>`.
+described in more detail [here](AlgorithmDocumentation) and
+[here](AlgorithmUsageExamples).
 
 ### Interfaces
 
 For documenting custom interfaces, it is recommended that you consult
-`this <InterfaceDocumentation>` page, which explains how to document
+[this](InterfaceDocumentation) page, which explains how to document
 them, and which directives may be used in more detail.
 
 ### How to define titles, sections etc.
@@ -178,10 +178,10 @@ from parameter descriptions. In these
 
   When using hyperlinks with a label, try to use anonymous hyperlinks (two underscores instead of one) to avoid name clashes.
 
-  :   - `` `MD <http://mysite.com/MD1.html>`__ `` and
-        `` `MD <http://mysite.com/MD2.html>`__ `` instead of
-        `` `MD <http://mysite.com/MD1.html>`_ `` and
-        `` `MD <http://mysite.com/MD2.html>`_ ``. The second on will
+  :   - `` [MD](http://mysite.com/MD1.html)__ `` and
+        `` [MD](http://mysite.com/MD2.html)__ `` instead of
+        `` [MD](http://mysite.com/MD1.html)_ `` and
+        `` [MD](http://mysite.com/MD2.html)_ ``. The second on will
         result in a warning.
 
 While building the final output, Sphinx will emit warning messages if it

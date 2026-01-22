@@ -14,7 +14,7 @@
 *Preparation*
 
 - The `_eq.nxs` file from the
-  `Elwin Indirect Inelastic <elwin_inelastic_test>` test
+  [Elwin Indirect Inelastic](elwin_inelastic_test) test
 
 **Time required 3 - 5 minutes**
 
@@ -40,8 +40,8 @@
 
 *Preparation*
 
-- The `_iqt` workspace from the
-  `I(Q, T) Indirect Inelastic <iqt_inelastic_test>` test
+- The [Iqt](_iqt) workspace from the
+  [I(Q, T) Indirect Inelastic](iqt_inelastic_test) test
 
 **Time required 3 - 5 minutes**
 
@@ -50,14 +50,14 @@
 1.  Go to `Interfaces` \> `Inelastic` \> `QENS fitting`
 2.  Go to the `I(Q, T)` tab
 3.  Click `Add Workspace`
-4.  With the combo box set to `Workspace` select the `_iqt` workspace
+4.  With the combo box set to `Workspace` select the [Iqt](_iqt) workspace
     from the previous test
 5.  Check `All Spectra`
 6.  Click `Add` and close the dialogue.
 7.  Set `Exponential` to 1
-8.  In the data table set `EndX` for WS Index 0 to 0.14
-9.  Using shift select the `EndX` for all spectra and click unify range,
-    this should set the `EndX` for all spectra to 0.14
+8.  In the data table set [End X](EndX) for WS Index 0 to 0.14
+9.  Using shift select the [End X](EndX) for all spectra and click unify range,
+    this should set the [End X](EndX) for all spectra to 0.14
 10. Click `Run`
 11. This should produce a fit and a difference plot in the window
 12. Click `Plot current preview` this should open a plot with three
@@ -113,8 +113,8 @@
 
 *Preparation*
 
-- The `_Result` workspace output from the
-  `Convolution tab <convolution_inelastic_test>` test
+- The [Result](_Result) workspace output from the
+  [Convolution tab](convolution_inelastic_test) test
 
 **Time required 3 - 5 minutes**
 
@@ -127,7 +127,7 @@
     workspace from the previous test
 5.  In Parameter Name select `f1.f0.FWHM`
 6.  Click `Add` and close the dialogue.
-7.  Under `Fit Type` select `TeixeiraWater`
+7.  Under `Fit Type` select [Teixeira Water](TeixeiraWater)
 8.  Click `Run`
 9.  Three new workspaces should be created in the main GUI -
     `Parameters`, `Result` and `Workspaces`

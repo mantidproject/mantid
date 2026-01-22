@@ -13,4 +13,4 @@ this you will need to add:
 3.  In the constructor of the presenter get the allowed colours from the
     model and pass them to the view.
 
-See `here <ModelExerciseSolution>` for the solution.
+See [here](ModelExerciseSolution) for the solution.

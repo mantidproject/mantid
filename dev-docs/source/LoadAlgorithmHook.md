@@ -7,13 +7,13 @@
 ## The Load Algorithm
 
 This page describes how to register a new file loading algorithm so that
-it can be used through the general-purpose `Load <algm-Load>` algorithm.
-The `Load <algm-Load>` algorithm is a special algorithm as does very
+it can be used through the general-purpose [Load](algm-Load) algorithm.
+The [Load](algm-Load) algorithm is a special algorithm as does very
 little work itself. It instead tries to search for the most suitable
 algorithm for a given file and then uses this algorithm as a child to
 load the file. An algorithm wishing to be included as part of the search
 must register itself slightly differently and not use
-`DECLARE_ALGORITHM` macro.
+[Declare Algorithm](DECLARE_ALGORITHM) macro.
 
 The process of searching for the correct loader needs to be fairly quick
 as it will be especially noticeable in the GUI if the process takes a
@@ -39,8 +39,8 @@ on whether the file is a HDF file or not.
 To register an algorithm as a HDF loader use the IHDFLoader interface as
 a base class for your algorithm. In your cpp file include the
 `MantidAPI/RegisterFileLoader.h` header and use the
-`DECLARE_HDF_FILELOADER` macro *instead* of the standard
-`DECLARE_ALGORITHM` macro.
+[Declare Hdf Fileloader](DECLARE_HDF_FILELOADER) macro *instead* of the standard
+[Declare Algorithm](DECLARE_ALGORITHM) macro.
 
 The interface requires that the method
 `virtual int confidence(Kernel::HDFDescriptor & descriptor) const = 0;`
@@ -55,10 +55,10 @@ avoid repeated accessing of the tree.
 
 ### Non-HDF
 
-To register an algorithm as a Non-HDF loader use the `IFileLoader`
+To register an algorithm as a Non-HDF loader use the [Ifile Loader](IFileLoader)
 interface as a base class for your algorithm. In your cpp file include
 the `MantidAPI/RegisterFileLoader.h` header and use the
-`DECLARE_FILELOADER` macro *instead* of the standard `DECLARE_ALGORITHM`
+[Declare Fileloader](DECLARE_FILELOADER) macro *instead* of the standard [Declare Algorithm](DECLARE_ALGORITHM)
 macro.
 
 The interface requires that the method

@@ -80,7 +80,7 @@ To set up CMake:
 
     ::: {.hlist columns="1"}
     - On Linux: `Debug`
-    - On Windows: `DebugWithRelRuntime`
+    - On Windows: [Debug With Rel Runtime](DebugWithRelRuntime)
     :::
 
 3.  Set your Toolchain to be the `Default` toolchain that you just
@@ -112,7 +112,7 @@ conda environment in the terminal. This is useful when you're working on
 both Mantid and other projects in CLion simultaneously.
 
 1.  Navigate to `File > Settings > Build, Execution, Deployment > CMake`
-2.  Under `environment`, add new environment variable `CONDA_PREFIX`
+2.  Under `environment`, add new environment variable [Conda Prefix](CONDA_PREFIX)
     with value `/path/to/miniforge/envs/mantid-developer`.
 3.  Navigate to
     `File > Settings > Build, Execution, Deployment > Python Interpreter > Add Interpreter > Add Local Interpreter > Conda Environment > Use existing environment`,
@@ -179,7 +179,7 @@ Application configuration.
     :::
 
 The `--single-process` flag is necessary for debugging. See the
-`Running Workbench <RunningWorkbench>` documentation for more
+[Running Workbench](RunningWorkbench) documentation for more
 information.
 
 You should now be able to set breakpoints and start debugging by

@@ -21,9 +21,9 @@ The assumption has been made that you have setup and built Mantid
 already, if you have not, please do so before hand by following [this
 guide](GettingStarted/GettingStarted.md).
 
-At any point in these instructions where `DebugWithRelRuntime` is used
+At any point in these instructions where [Debug With Rel Runtime](DebugWithRelRuntime) is used
 (including in file paths), you can replace it with any other build type
-such as `Debug` or `Release`. We use `DebugWithRelRuntime` for conda
+such as `Debug` or `Release`. We use [Debug With Rel Runtime](DebugWithRelRuntime) for conda
 specific builds to allow debugging due to `Debug` not being functional
 with the `Release ABIs`.
 
@@ -98,12 +98,12 @@ the debugging using Workbench.
   Opening `Run->Edit Configurations...`.
 - Click the `+` icon top left
 - Select Python
-- Name it something to do with `Workbench`
+- Name it something to do with [Workbench](Workbench)
 - Click the down arrow next to `Script path:` and change the selection
   to `Module name`. Set the `Module name` to `workbench`.
 - In the `Parameters` box add `--single-process` so that the
   multiprocess startup is disabled and breakpoints can be attached to
-  the primary process. See the `Running Workbench <RunningWorkbench>`
+  the primary process. See the [Running Workbench](RunningWorkbench)
   documentation for more information.
 - In the `Working directory:` box, on Linux/MacOS enter the
   `{BUILD}/bin` directory, on Windows enter
@@ -348,23 +348,23 @@ run configuration correctly.
 4.  Install the EnvFile plugin by Borys Pierov. The plugin can be
     installed in multiple ways:
     1)  Open Settings(CTRL + SHIFT + S), to go Plugins and search for
-        `EnvFile`. Install and restart PyCharm.
+        [Env File](EnvFile). Install and restart PyCharm.
     2)  Go to the plugin's
         [webpage](https://plugins.jetbrains.com/plugin/7861-envfile),
         download and install it.
 5.  To edit the configurations go to Run-\>Run... and select Edit
-    Configurations. Notice that there is now a `EnvFile` tab under the
+    Configurations. Notice that there is now a [Env File](EnvFile) tab under the
     configuration's name.
     - Note that you have to do that for each configuration, or you can
       change the template configuration, and all configuration that use
       that template will have the EnvFile setup.
-6.  Open the `EnvFile` tab, check `Enable EnvFile` and
+6.  Open the [Env File](EnvFile) tab, check `Enable EnvFile` and
     `Substitute Environmental Variables (...)` - this allows setting up
     the third-party paths dynamically.
 7.  Click the `+` (plus) on the right side, select the `pycharm.env`
     file in the root of the **build** directory.
 
-For running the Workbench continue onto `Workbench`, and follow the
+For running the Workbench continue onto [Workbench](Workbench), and follow the
 instructions to set up the *Script Path* and *Working Directory*.
 
 Advantages of this approach:
@@ -385,9 +385,9 @@ Advantages of this approach:
 Disadvantages:
 
 - Additional setup for each configuration necessary. Thankfully, if the
-  template is edited to have the correct `EnvFile` setup, all copies of
+  template is edited to have the correct [Env File](EnvFile) setup, all copies of
   it will have it too. Copying an already existing configuration also
-  copies the `EnvFile` setup.
+  copies the [Env File](EnvFile) setup.
 
 ## Running Files in the Debugger without EnvFile extension
 
@@ -469,7 +469,7 @@ but requires additional setup for running unit tests.
     Debug build, or `<Mantid Build Dir>/bin/Release` for a Release
     build.
 4.  Add the EnvFile to the Unittests configuration, instructions in
-    `pycharm-debugging-env-file`.
+    [Pycharm Debugging Env File](pycharm-debugging-env-file).
 5.  You should now be able to click the Run/Debug icons next to each
     unit test method or class to run/debug them.
 

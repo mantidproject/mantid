@@ -166,7 +166,7 @@ the process goes as follows:
 5.  Once the comments are incorporated, in absence of outstanding
     conflicts, the gatekeepers will approve and merge the PR of the
     design, which gives a green light to start the implementation.
-6.  If there is still a debate between gatekeepers, the `TSC` will set
+6.  If there is still a debate between gatekeepers, the [Tsc](TSC) will set
     up a dedicated meeting, where the author will be invited to present
     and defend the design, and all the conflicts must be settled ideally
     via consensus, or in the absence thereof, via majority vote.
@@ -217,7 +217,7 @@ You should provide logical reasons why you are choosing to adopt
 solution A over solution B, C, D ... As the project grows in size, we
 may need to be able to understand in the future the reasons why certain
 designs have been adopted. If you are unsure which solution would be
-best, you may submit the partially complete design document to the `TSC`
+best, you may submit the partially complete design document to the [Tsc](TSC)
 for help. Design is itself an iterative process and documents are
 frequently not accepted first time around, so be prepared to make
 amendments, and don't take it personally if corrections are required.
@@ -249,4 +249,4 @@ following are necessary:
     implementation details in a traceable manner?
 3.  Can someone else implement this?
 4.  What use cases verify that this design works?
-5.  Has the `TSC` approved it?
+5.  Has the [Tsc](TSC) approved it?

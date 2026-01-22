@@ -8,7 +8,7 @@
 
 These are unscripted tests for the `Frequency Domain Analysis`
 interface. The master testing guide is located at
-`Muon_Analysis_TestGuide-ref`.
+[Muon Analysis Test Guide Ref](Muon_Analysis_TestGuide-ref).
 
 ------------------------------------------------------------------------
 
@@ -108,12 +108,12 @@ to compare with the time domain data.
 - You will now see 5 plots (1 frequency and 4 time domain)
 - In the ADS expand the `MUSR62260` group
 - It will contain several workspaces
-- The workspace that ends with `phase_convergence` will show a plot that
+- The workspace that ends with [Phase Convergence](phase_convergence) will show a plot that
   tends to a single y value as x gets larger (just check a spectrum or
   two)
-- The table that ends with `dead_times` will have two columns: spectrum
+- The table that ends with [Dead Times](dead_times) will have two columns: spectrum
   number and dead time
-- The table that ends with `phase_table` will have three columns:
+- The table that ends with [Phase Table](phase_table) will have three columns:
   spectrum number, asymmetry, and phase
-- The workspace that ends with `reconstructed_spectra` will look like
+- The workspace that ends with [Reconstructed Spectra](reconstructed_spectra) will look like
   the original data

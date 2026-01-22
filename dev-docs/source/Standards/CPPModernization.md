@@ -15,8 +15,8 @@ particular, pay attention to the following:
 - Where it makes sense, replace boolean or integer flags by `enum` or
   preferably `enum class`. Even better: Avoid them entirely, e.g., by
   moving code into two separate free functions.
-- Use `auto` to capture complex return types such as `std::vector<...>`
-  or `std::map<...>`.
+- Use `auto` to capture complex return types such as [std::vector](...)
+  or [std::map](...).
 - If you encounter unit tests that look incomplete, such as not
   verifying that algorithm output, either fix it (if possible in
   reasonable time), or add a note to

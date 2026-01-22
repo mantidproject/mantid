@@ -49,13 +49,13 @@ it out of the box and the following steps are required to make this link
 
 - open regedit
 - add a new key `[HKEY_LOCAL_MACHINE\SOFTWARE\ATT\Graphviz]`
-- create a new string value named `InstallPath` within this key and set
+- create a new string value named [Install Path](InstallPath) within this key and set
   the value to point to the install directory of Graphviz.
 
 #### Windows Subsystem for Linux (WSL2)
 
 It is also possible to install a Linux subsystem within Windows by
-following `these <WindowsSubsystemForLinux>` instructions. This step is
+following [these](WindowsSubsystemForLinux) instructions. This step is
 optional.
 
 ### Linux
@@ -99,7 +99,7 @@ scl enable devtoolset-7 "cmake3 [mantid source]"
 cmake3 --build .
 ```
 
-See the instructions on `this <RunningTheUnitTests>` page to run the
+See the instructions on [this](RunningTheUnitTests) page to run the
 Mantid unit tests.
 
 #### Ubuntu 18.04
@@ -127,9 +127,9 @@ pip install pre-commit --user
 ```
 
 if you wish to setup eclipse for use developing mantid, then
-instructions can be found `here <Eclipse>`.
+instructions can be found [here](Eclipse).
 
-Now you can `Clone Mantid <wsl-cloning-mantid-ref>`, and build as
+Now you can [Clone Mantid](wsl-cloning-mantid-ref), and build as
 follows:
 
 ``` sh
@@ -139,7 +139,7 @@ cmake -G Ninja [mantid source]
 cmake --build .
 ```
 
-See the instructions on `this <RunningTheUnitTests>` page to run the
+See the instructions on [this](RunningTheUnitTests) page to run the
 Mantid unit tests.
 
 #### Ubuntu 20.04
@@ -163,7 +163,7 @@ pip install pre-commit --user
 
 ### OSX
 
-The build environment on OS X is described here `BuildingOnOSX`.
+The build environment on OS X is described here [Building On Osx](BuildingOnOSX).
 
 Install pre-commit for use in our current developer workflow
 

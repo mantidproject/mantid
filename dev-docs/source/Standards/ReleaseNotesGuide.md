@@ -12,7 +12,7 @@ processed using [Sphinx](http://www.sphinx-doc.org/en/master/) along
 with [Sphinx bootstrap
 theme](https://pypi.python.org/pypi/sphinx-bootstrap-theme/) and custom
 css. For the basics of how to format your release notes please see the
-`Documentation Guide For Devs <DocumentationGuideForDevs>` .
+[Documentation Guide For Devs](DocumentationGuideForDevs) .
 
 ## When to add release notes
 
@@ -98,12 +98,12 @@ represents their position within the release notes. First identify which
 release version your note relates to e.g. `v6.3.0` . Navigate to this
 directory and then navigate through the sub-directories until you reach
 a suitable sub heading. All notes need to be placed within a
-`New_features` or `Bugfixes` directory. For example a Bugfix release
+[New Features](New_features) or `Bugfixes` directory. For example a Bugfix release
 note for Engineering Diffraction should sit within
 `/Diffraction/Engineering/Bugfixes` .
 
 Release notes should not be placed in any directory outside of
-`New_features` or `Bugfixes` e.g. do not place release notes in
+[New Features](New_features) or `Bugfixes` e.g. do not place release notes in
 `/Diffraction/Engineering`. You should also not save release notes in
 any directory titled `Used` as this is for notes that have already been
 collated into the release notes. The only exception to this is for
@@ -111,7 +111,7 @@ Algorithms and Fit Functions in the Framework Directory that
 additionally have `Deprecated` and `Removed`.
 
 If you are uncertain where your release note should be see the
-`Standard File Structure <ReleaseNoteFileStructure>`.
+[Standard File Structure](ReleaseNoteFileStructure).
 
 ## Adding sub-headings
 
@@ -124,7 +124,7 @@ Powder Diffraction, Algorithms, MSlice), you need to do the following:-
   to add Algorithms to Workbench create the directory
   `/Workbench/Algorithm`. The directory name should not contain any
   spaces.
-- Add `New_features` and `Bugfixes` directories within your new
+- Add [New Features](New_features) and `Bugfixes` directories within your new
   directory. The automated script only works with these directories.
 - Update the top level release note file with your new heading and
   sub-headings. For each subheading you need to add an `amalgamate`
@@ -149,7 +149,7 @@ separate file as outlined above.
 
 You can add sub-headings to a sub-heading if you would like (e.g.
 `/Workbench/Algorithm/Fitting`) that is fine to do, so long as your new
-branch ends with the `New_features` and `Bugfixes` folders.
+branch ends with the [New Features](New_features) and `Bugfixes` folders.
 
 ## Adding images to release notes
 
@@ -171,7 +171,7 @@ start of the image link.
 For the image to display correctly when collated please only link to
 `../../images` folder. This will mean that the individual release note
 will not look correct on building, however the upper level file will
-(see `Previewing release notes <ReleaseNotePreview>` below).
+(see [Previewing release notes](ReleaseNotePreview) below).
 
 If you would like to add a walkthrough `.gif` file then you need to use
 the `.. figure::` directive instead of `.. image::`. Your file should be

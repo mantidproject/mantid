@@ -1,12 +1,12 @@
 # Reviewing a Pull Request
 
-An important step in our `development workflow <GitWorkflow>` is the
+An important step in our [development workflow](GitWorkflow) is the
 testing of individual issues/tickets after the development on them is
 complete, and before the code is merges into the main branch. Developers
 pick one from [the list](https://github.com/mantidproject/mantid/pulls)
 of completed issues and perform a number of verification steps on it.
 The mechanics of testing a pull request (e.g. the git commands to use)
-are described `here <GitWorkflow>`. This page is concerned with the
+are described [here](GitWorkflow). This page is concerned with the
 aspects that should be considered in deciding whether a pull request
 should be recommended to merge or sent back to the developer for further
 work. *There should be very little reluctance to reopen a ticket even
@@ -28,11 +28,11 @@ and
 - Part of this is that:
   - There should be are no compiler (or doxygen) warnings coming from
     any modified classes
-  - The code conforms to our `coding standards <MantidStandards>`.
+  - The code conforms to our [coding standards](MantidStandards).
 - Unit tests (or system tests if more appropriate) should be checked
   that they:
   - Exist and give adequate coverage (see
-    `unit testing practices <UnitTestGoodPractice>`).
+    [unit testing practices](UnitTestGoodPractice)).
   - If the ticket is fixing a bug there should be a test that makes sure
     we don't have to fix the same bug again!
   - Do not load real data (data loading algorithms get a free pass on
@@ -82,4 +82,4 @@ requests into `main`. This is done by social contract. A gatekeeper can
 - Adequate tests, both success and failure cases have been performed
 - There is comment on the code being reviewed
 
-See the `guidance for gatekeepers <Gatekeeping>` for more information.
+See the [guidance for gatekeepers](Gatekeeping) for more information.

@@ -15,7 +15,7 @@ Each release is divided, roughly, into:
 - a 3 month development period where new features and bugfixes are
   developed
 - a 3 week code freeze where the code is tested and prepared for the
-  next release (details in the `release checklist <ReleaseChecklist>`)
+  next release (details in the [release checklist](ReleaseChecklist))
   - during the freeze a 2 week beta-test period is given to users to
     test the upcoming release candidate (deployed in the form of a
     nightly build).

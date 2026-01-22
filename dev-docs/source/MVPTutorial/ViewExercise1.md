@@ -16,4 +16,4 @@ plot. The table should include options for:
 The previous sections are not an exhaustive list of possible widgets.
 Functionality for the update plot button will be added later.
 
-The solution can be found `here <ViewExercise1Solution>`.
+The solution can be found [here](ViewExercise1Solution).

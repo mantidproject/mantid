@@ -11,11 +11,11 @@ The issue tracker can be found at
 ## Workflow
 
 Every piece of work starts with an open issue. To find issues that are
-assigned to you see the section `IssueTrackingYourIssues`. How an issue
+assigned to you see the section [Issue Tracking Your Issues](IssueTrackingYourIssues). How an issue
 is closed is then dependent on its requirements:
 
 - Code changes required: generate a **pull request**
-  (`GitWorkflowPullRequests`)
+  ([Git Workflow Pull Requests](GitWorkflowPullRequests))
   - Make sure the issue is referenced with `#issue-number`. It will then
     be closed when the pull request is merged
 - No code changes required: Close the issue, with a comment explaining
@@ -37,7 +37,7 @@ is closed is then dependent on its requirements:
 
 Go [here](https://github.com/mantidproject/mantid/issues/new) to create
 a new issue. Make sure you assign the appropriate labels (see
-`IssueTrackingLabels`) and milestone.
+[Issue Tracking Labels](IssueTrackingLabels)) and milestone.
 
 ## Labels
 

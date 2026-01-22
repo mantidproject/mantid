@@ -13,4 +13,4 @@ pressed the following should be output:
 
 The `main` module will also need updating to handle these changes.
 
-See `here <PresenterExerciseSolution>` for the solution.
+See [here](PresenterExerciseSolution) for the solution.

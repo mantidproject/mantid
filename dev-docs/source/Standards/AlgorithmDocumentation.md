@@ -8,7 +8,7 @@
 
 This page deals with the specifics of how to document an algorithm. For
 a more general guide to the Mantid documentation system see
-`Documentation Guide For Devs <DocumentationGuideForDevs>`.
+[Documentation Guide For Devs](DocumentationGuideForDevs).
 
 ## How to Document an Algorithm
 
@@ -17,7 +17,7 @@ Algorithm documentation is stored in two places.
 - The code (.cpp / .h / .py) files: For strings that are needed in the
   GUI for tooltips etc.
 - The .rst file: For all other documentation, including the algorithm
-  description and `usage examples <AlgorithmUsageExamples>`.
+  description and [usage examples](AlgorithmUsageExamples).
 
 ### The Code Files
 
@@ -75,7 +75,7 @@ new ArrayProperty<double>("Params", std::make_shared<RebinParamsValidator>()),
 ## Workflow algorithms
 
 There should be a flow chart for workflow algorithms. See
-`here <FlowchartCreation>` on how to make one.
+[here](FlowchartCreation) on how to make one.
 
 ## Algorithm Directives
 
@@ -210,7 +210,7 @@ and the part inside the angle brackets references the tag name.
 This section *must* be manually entered. The usage is a 'code' example
 of the algorithm in use. The `.. testcode::` directive must be used to
 verify the usage code you entered works correctly. See
-`here <AlgorithmUsageExamples>` for more information on how to write
+[here](AlgorithmUsageExamples) for more information on how to write
 usage examples.
 
 ## Building the Documentation

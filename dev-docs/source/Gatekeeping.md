@@ -1,7 +1,7 @@
 # Gatekeeping a Pull Request
 
-The final step in our `development workflow <GitWorkflow>` after a
-`pull request has been reviewed <ReviewingAPullRequest>` is gatekeeping.
+The final step in our [development workflow](GitWorkflow) after a
+[pull request has been reviewed](ReviewingAPullRequest) is gatekeeping.
 This is second review stage where a senior developer / code owner does a
 final check of the work before merging it to the `main` or
 `release-next` branch.
@@ -45,7 +45,7 @@ have missed. There are 3 main purposes to gatekeeping:
   would be pretty catastrophic if done to `main`. You should have solid
   working practices with Git that ensure you are never likely to do
   this. Working on a fork is recommended, and some of the
-  `recommended config <GitConfig>` regarding default behaviour for
+  [recommended config](GitConfig) regarding default behaviour for
   `git push` will also help (although recent versions of Git are much
   safer by default in this regard so in reality you are unlikely to have
   problems).

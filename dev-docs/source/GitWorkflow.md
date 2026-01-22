@@ -6,7 +6,7 @@
 
 ## Summary
 
-Go to the `GitConfig` page to ensure that Git is set up correctly before
+Go to the [Git Config](GitConfig) page to ensure that Git is set up correctly before
 starting.
 
 This page describes the workflow used in conjunction with
@@ -31,7 +31,7 @@ The steps for a new piece of work can be summarised as follows:
 1.  Push up or [create](https://guides.github.com/features/issues) an
     issue [here](https://github.com/mantidproject/mantid/issues)
 2.  Create a branch from `main` using the naming convention described at
-    `GitWorkflowNamingBranches`
+    [Git Workflow Naming Branches](GitWorkflowNamingBranches)
 3.  Do the work and commit changes to the branch. On commit, the
     [pre-commit](https://pre-commit.com/) framework will run, it will
     check all your changes for formatting, linting, and perform static
@@ -40,7 +40,7 @@ The steps for a new piece of work can be summarised as follows:
 4.  When you are finished with the work, ensure that all of the unit
     tests, documentation tests and system tests if necessary pass on
     your own machine
-5.  Open a pull request (`GitWorkflowPullRequests`) from the [GitHub
+5.  Open a pull request ([Git Workflow Pull Requests](GitWorkflowPullRequests)) from the [GitHub
     branches](https://github.com/mantidproject/mantid/branches/) page
     - This will check with the buildservers for cross-platform
       compatibility
@@ -52,7 +52,7 @@ The steps for a new piece of work can be summarised as follows:
 When naming [public
 branches](http://github.com/mantidproject/mantid/branches) that will be
 pushed to GitHub, please follow the convention of
-`issuenumber_short_description`. This will allow others to discover what
+[Issuenumber Short Description](issuenumber_short_description). This will allow others to discover what
 the branch is for (issue number) and quickly know what is being done
 there (short description).
 
@@ -109,12 +109,12 @@ Recommended reading: [How to Write the Perfect Pull
 Request](https://github.com/blog/1943-how-to-write-the-perfect-pull-request)
 
 For further information about the review process see
-`reviewing a pull request <ReviewingAPullRequest>`.
+[reviewing a pull request](ReviewingAPullRequest).
 
 ### Checkout a Pull Request
 
 To check out a particular pull request for functional testing use the
-`test-pr` alias that was set up in the `GitConfig` instructions.
+`test-pr` alias that was set up in the [Git Config](GitConfig) instructions.
 
 ``` sh
 git test-pr <remote-name> <ID>
@@ -131,7 +131,7 @@ Note that these commands will checkout a temporary branch that has the
 development branch merged with `main` and not just the development
 branch on its own.
 
-The `GitConfig` page also provides the follow alias to delete all `pr/`
+The [Git Config](GitConfig) page also provides the follow alias to delete all `pr/`
 prefixed branches, which is useful if you have several:
 
 ``` sh
@@ -226,6 +226,6 @@ git rebase --onto origin/release-next $(git merge-base origin/main origin/topic)
 ### Fixing a merge conflict between protected branches
 
 A Gatekeeper should follow
-`these instructions <FixProtectedBranchMergeConflict>` if there is a
+[these instructions](FixProtectedBranchMergeConflict) if there is a
 merge conflict between two protected branches e.g. `main` and
 `release-next`.

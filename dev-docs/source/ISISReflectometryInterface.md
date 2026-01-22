@@ -19,9 +19,9 @@ default settings can be specified on the tabs. A tab is also provided to
 make exporting the results for a set of workspaces easy.
 
 The reduction for each row is done via
-`algm-ReflectometryISISLoadAndProcess` (which includes any
+[Algm Reflectometry Isisload And Process](algm-ReflectometryISISLoadAndProcess) (which includes any
 pre-processing). Post-processing for a group is done via
-`algm-Stitch1DMany`.
+[Algm Stitch1dmany](algm-Stitch1DMany).
 
 The GUI provides a lot of other functionality as well. Because it is
 quite complex, it is important to keep to the established guidelines, in
@@ -36,15 +36,15 @@ This directory contains all of the GUI code for the interface. Each
 separate component e.g. the Experiment tab, has its own subdirectory.
 Each of these components has its own view and presenter. There is also a
 `Common` subdirectory for GUI components/interfaces common to more than
-one widget (e.g. the `IReflMessageHandler` interface).
+one widget (e.g. the [Irefl Message Handler](IReflMessageHandler) interface).
 
 Briefly the structure is as follows:
 
-- The top level is the `MainWindow`.
+- The top level is the [Main Window](MainWindow).
 - This can have one or more vertical `Batch` tabs.
 - Each `Batch` has several horizontal tabs:
   - The `Runs` tab is where the user specifies which runs to process.
-    The actual runs list is specified in the embedded `RunsTable`
+    The actual runs list is specified in the embedded [Runs Table](RunsTable)
     component, which comprises of the generic
     [JobTreeView](../BatchWidget/API/JobTreeView) table along with a
     reflectometry-specific toolbar. The `Runs` tab also contains various
@@ -89,7 +89,7 @@ functions that are specific for parsing reflectometry input strings such
 as lists of run numbers. More generic utilities should be put elsewhere,
 e.g. generic string handling functions might go in `Framework/Kernel`.
 
-### `TestHelpers`
+### [Test Helpers](TestHelpers)
 
 This directory contains components specific for unit testing. The actual
 tests are in `../test/ISISReflectometry/`.
@@ -97,17 +97,17 @@ tests are in `../test/ISISReflectometry/`.
 ## Reduction back-end
 
 The back-end is primarily a set of algorithms, with the entry points
-from the GUI being `algm-ReflectometryISISLoadAndProcess` (for reducing
-a row) and `algm-Stitch1DMany` (for post-processing a group). Any
+from the GUI being [Algm Reflectometry Isisload And Process](algm-ReflectometryISISLoadAndProcess) (for reducing
+a row) and [Algm Stitch1dmany](algm-Stitch1DMany) (for post-processing a group). Any
 additional processing should be added to these algorithms, or a new
 wrapper algorithm could be added if appropriate (this might be necessary
 in future if post-processing will involve more than just stitching).
 
-The `BatchPresenter` is the main coordinator for executing a reduction.
-It uses the `BatchJobManager`, which converts the reduction
+The [Batch Presenter](BatchPresenter) is the main coordinator for executing a reduction.
+It uses the [Batch Job Manager](BatchJobManager), which converts the reduction
 configuration to a format appropriate for the algorithms. The conversion
-functions are in files called `RowProcessingAlgorithm` and
-`GroupProcessingAlgorithm`, and any algorithm-specific code should be
+functions are in files called [Row Processing Algorithm](RowProcessingAlgorithm) and
+[Group Processing Algorithm](GroupProcessingAlgorithm), and any algorithm-specific code should be
 kept to these files.
 
 Unfortunately the whole batch cannot be farmed off to a single algorithm
@@ -115,8 +115,8 @@ because we need to update the GUI after each row completes, and we must
 be able to interrupt processing so that we can cancel a large batch
 operation. We also need to know whether rows completed successfully
 before we can set up the group post-processing algorithms. Some queue
-management is therefore done by the `BatchPresenter`, with the help of
-the `BatchAlgorithmRunner`.
+management is therefore done by the [Batch Presenter](BatchPresenter), with the help of
+the [Batch Algorithm Runner](BatchAlgorithmRunner).
 
 ## Development guidelines
 
@@ -128,7 +128,7 @@ best way forward rather than proceeding in a non-optimal way.
 ### Adhere to MVP
 
 To ensure the GUI can be easily tested we follow the MVP design pattern.
-There is general guidance on this `here <MVPDesign>`.
+There is general guidance on this [here](MVPDesign).
 
 The view cannot easily be tested, so the aim of MVP is to keep the view
 as simple as possible so that testing it is not necessary. Typically any
@@ -149,7 +149,7 @@ write the unit tests first.
 Note that the views should not have a direct pointer to their
 presenters, so the notification is done via a subscriber interface (see
 [Subscriber pattern](#subscriber-pattern) for an example). The only
-exception is the `QtMainWindowView` (see [Dependency
+exception is the [Qt Main Window View](QtMainWindowView) (see [Dependency
 inversion](#dependency-inversion)), but notifications should still be
 done via the subscriber interface. This helps to avoid accidentally
 introducing logic into the view about what should happen on an event and
@@ -165,16 +165,16 @@ class depends on are "injected", rather than being created directly
 within the class that requires them. This makes testing easier, because
 the real objects can easily be replaced with mocks. Most injection is
 currently performed using constructors and takes place at the
-'entry-point' for the Reflectometry GUI, in `QtMainWindowView`. See the
+'entry-point' for the Reflectometry GUI, in [Qt Main Window View](QtMainWindowView). See the
 [Dependency injection](#dependency-injection) example below.
 
 It is not normal in MVP for a view to have ownership of its presenter.
 However since the whole of mantid does not use Dependency Injection, and
 due to the way interfaces get instantiated this is currently necessary
-for `QtMainWindowView`. This pointer should only be used for ownership
+for [Qt Main Window View](QtMainWindowView). This pointer should only be used for ownership
 and all other usage should be avoided, so ensure you use the
-`MainWindowSubscriber` interface to send notifications to the
-presenter - i.e. use `m_notifyee` instead of `m_presenter`.
+[Main Window Subscriber](MainWindowSubscriber) interface to send notifications to the
+presenter - i.e. use [M Notifyee](m_notifyee) instead of [M Presenter](m_presenter).
 
 ### Coordinate via presenters
 
@@ -189,35 +189,35 @@ Although enabling/disabling inputs in this example affects the views,
 coordination between components is done via the presenters. This is to
 ensure that all of these interactions can be unit tested. Each presenter
 owns its child presenters, and also has a pointer to its parent
-presenter (which is set by its parent calling `acceptMainPresenter` on
+presenter (which is set by its parent calling [Accept Main Presenter](acceptMainPresenter) on
 the child and passing a pointer to itself).
 
 In the example mentioned, processing is initiated from e.g. the button
-on the `RunsView`. This sends a notification to the `RunsPresenter` via
-the subscriber interface. However, the `RunsPresenter` cannot initiate
+on the [Runs View](RunsView). This sends a notification to the [Runs Presenter](RunsPresenter) via
+the subscriber interface. However, the [Runs Presenter](RunsPresenter) cannot initiate
 processing because information is needed from the other tabs, and the
 other tabs need to be updated after it starts. Processing therefore
-needs to be coordinated at the Batch level. The `RunsPresenter`
-therefore simply notifies its parent `BatchPresenter` that the user
-requested to start processing. The `BatchPresenter` then does the work
+needs to be coordinated at the Batch level. The [Runs Presenter](RunsPresenter)
+therefore simply notifies its parent [Batch Presenter](BatchPresenter) that the user
+requested to start processing. The [Batch Presenter](BatchPresenter) then does the work
 to initiate processing. Once it has started (assuming it started
 successfully) it then notifies all of its child presenters (including
-the `RunsPresenter`) that processing is in progress.
+the [Runs Presenter](RunsPresenter)) that processing is in progress.
 
 Communication between different Batch components is also occasionally
 required. For example, for usability reasons, only one autoprocessing
 operation is allowed to be running at any one time. This means that when
-autoprocessing is running, we need to disable the `AutoProcess` button
+autoprocessing is running, we need to disable the [Auto Process](AutoProcess) button
 on all of the other Batch tabs as well. This must be coordinated via the
 MainWindow component, which is the only component that has access to all
 of the Batch tabs. The user initiates autoprocessing using the
-`AutoProcess` button on the `BatchView`, which notifies the
-`BatchPresenter` via the subscriber interface. Since the
-`BatchPresenter` knows everything it needs to start autoprocessing for
+[Auto Process](AutoProcess) button on the [Batch View](BatchView), which notifies the
+[Batch Presenter](BatchPresenter) via the subscriber interface. Since the
+[Batch Presenter](BatchPresenter) knows everything it needs to start autoprocessing for
 that batch, it does the work to initiate autoprocessing itself. It then
-simply notifies its parent `MainWindowPresneter` that autoprocessing is
+simply notifies its parent [Main Window Presneter](MainWindowPresneter) that autoprocessing is
 in progress (again, assuming that it started successfully). The
-`MainWindowPresenter` then notifies all of its child presenters that
+[Main Window Presenter](MainWindowPresenter) then notifies all of its child presenters that
 autoprocessing is in progress so that they can enable/disable any
 buttons/widgets as required.
 
@@ -258,10 +258,10 @@ is that there is a single algorithm that will be run for each entry in
 the table (albeit a different algorithm for Rows and Groups).
 
 Consider adding new wrapper algorithms if appropriate.
-`algm-ReflectometryISISLoadAndProcess` is an algorithm that has been
+[Algm Reflectometry Isisload And Process](algm-ReflectometryISISLoadAndProcess) is an algorithm that has been
 added specifically for this purpose and can usually be extended or
 modified quite easily because it is designed for use with this GUI. The
-post-processing algorithm, `algm-Stitch1DMany`, is more generic so it is
+post-processing algorithm, [Algm Stitch1dmany](algm-Stitch1DMany), is more generic so it is
 likely in future that we would want to add a wrapper for this algorithm
 rather than changing it directly.
 
@@ -301,7 +301,7 @@ Let's take the `Event` component as an example.
   };
   ```
 
-  Note that `MANTIDQT_ISISREFLECTOMETRY_DLL` is used to expose
+  Note that [Mantidqt Isisreflectometry Dll](MANTIDQT_ISISREFLECTOMETRY_DLL) is used to expose
   classes/functions so they can be used in different modules. In this
   case, it is needed in order for this class to be used in the tests,
   because the tests are not part of the ISISReflectometry library. If
@@ -342,14 +342,14 @@ Let's take the `Event` component as an example.
 ### Dependency injection
 
 A simple example of [Dependency inversion](#dependency-inversion) is in
-the use of an `IReflMessageHandler` interface to provide a service to
+the use of an [Irefl Message Handler](IReflMessageHandler) interface to provide a service to
 display messages to the user. These messages must be displayed by a Qt
 view. Rather than each view having to implement this, we use one object
-(in this case the `QtMainWindowView`) to implement this functionality
-and inject it as an `IReflMessageHandler` to all of the presenters that
+(in this case the [Qt Main Window View](QtMainWindowView)) to implement this functionality
+and inject it as an [Irefl Message Handler](IReflMessageHandler) to all of the presenters that
 need it.
 
-- The `IReflMessageHandler` interface defines the functions for
+- The [Irefl Message Handler](IReflMessageHandler) interface defines the functions for
   displaying messages:
 
   ``` c++
@@ -361,7 +361,7 @@ need it.
   };
   ```
 
-- The `QtMainWindowView` implements these:
+- The [Qt Main Window View](QtMainWindowView) implements these:
 
   ``` c++
   void QtMainWindowView::giveUserCritical(const std::string &prompt,
@@ -372,9 +372,9 @@ need it.
   }
   ```
 
-- The `QtMainWindowView` creates a concrete instance of the interface
+- The [Qt Main Window View](QtMainWindowView) creates a concrete instance of the interface
   (actually just a pointer to itself) and passes it in the construction
-  of anything that needs it, e.g. the `RunsPresenter` (in this case
+  of anything that needs it, e.g. the [Runs Presenter](RunsPresenter) (in this case
   using a factory to perform the construction - more about the [Factory
   pattern](#factory-pattern) below):
 
@@ -383,16 +383,16 @@ need it.
   auto makeRunsPresenter = RunsPresenterFactory(..., messageHandler);
   ```
 
-- The `RunsPresenter` then has a simple service it can use to display
+- The [Runs Presenter](RunsPresenter) then has a simple service it can use to display
   messages without needing to know anything about the
-  `QtMainWindowView`:
+  [Qt Main Window View](QtMainWindowView):
 
   ``` c++
   m_messageHandler->giveUserCritical("Catalog login failed", "Error");
   ```
 
 - Our unit tests can then ensure that a notification is sent to Qt in a
-  known critical situation, e.g. in `RunsPresenterTest`:
+  known critical situation, e.g. in [Runs Presenter Test](RunsPresenterTest):
 
   ``` c++
   void testSearchCatalogLoginFails() {
@@ -406,40 +406,40 @@ need it.
 
 ### Factory pattern
 
-The `MainWindowPresenter` constructs the child Batch presenters on
+The [Main Window Presenter](MainWindowPresenter) constructs the child Batch presenters on
 demand. This prevents us injecting them in its constructor. In order to
 follow [Dependency inversion](#dependency-inversion), we therefore need
 to use factories to create the child presenters. Let's use the
-`MainWindow` -\> `Batch` -\> `Event` components as an example.
+[Main Window](MainWindow) -\> `Batch` -\> `Event` components as an example.
 
-- As mentioned, the `QtMainWindowView` is our entry point. This creates
-  (and owns) the `MainWindowPresenter`. It:
-  - creates an `EventPresenterFactory`;
-  - passes this to the `BatchPresenterFactory` constructor so it can
-    create the child `EventPresenter` when needed;
-  - passes this to the `MainWindowPresenter` constructor, which accepts
-    a `BatchPresenterFactory`, ready for making a Batch when needed.
+- As mentioned, the [Qt Main Window View](QtMainWindowView) is our entry point. This creates
+  (and owns) the [Main Window Presenter](MainWindowPresenter). It:
+  - creates an [Event Presenter Factory](EventPresenterFactory);
+  - passes this to the [Batch Presenter Factory](BatchPresenterFactory) constructor so it can
+    create the child [Event Presenter](EventPresenter) when needed;
+  - passes this to the [Main Window Presenter](MainWindowPresenter) constructor, which accepts
+    a [Batch Presenter Factory](BatchPresenterFactory), ready for making a Batch when needed.
 - When required, we then create a Batch:
-  - The `QtMainWindowView` notifies the presenter that a new batch was
+  - The [Qt Main Window View](QtMainWindowView) notifies the presenter that a new batch was
     requested.
-  - The presenter instructs the view to create a child `QtBatchView`
-    (which will also construct its child `QtEventView`).
-  - The `QtBatchView` is passed to the `BatchPresenterFactory` to create
-    the `BatchPresenter`:
-    - the `BatchPresenterFactory` extracts the `QtEventView` from the
-      `QtBatchView`;
-    - this is passed to the `EventPresenterFactory` to create the child
-      `EventPresenter`; it receives an `IEventPresenter` back;
-    - the batch factory injects the `IEventPresenter` into the
-      `BatchPresenter` constructor;
-    - it returns the result as an `IBatchPresenter`.
-  - The `IBatchPresenter` is then added to the `MainWindowPresenter`'s
+  - The presenter instructs the view to create a child [Qt Batch View](QtBatchView)
+    (which will also construct its child [Qt Event View](QtEventView)).
+  - The [Qt Batch View](QtBatchView) is passed to the [Batch Presenter Factory](BatchPresenterFactory) to create
+    the [Batch Presenter](BatchPresenter):
+    - the [Batch Presenter Factory](BatchPresenterFactory) extracts the [Qt Event View](QtEventView) from the
+      [Qt Batch View](QtBatchView);
+    - this is passed to the [Event Presenter Factory](EventPresenterFactory) to create the child
+      [Event Presenter](EventPresenter); it receives an [Ievent Presenter](IEventPresenter) back;
+    - the batch factory injects the [Ievent Presenter](IEventPresenter) into the
+      [Batch Presenter](BatchPresenter) constructor;
+    - it returns the result as an [Ibatch Presenter](IBatchPresenter).
+  - The [Ibatch Presenter](IBatchPresenter) is then added to the [Main Window Presenter](MainWindowPresenter)'s
     list of child presenters.
 
-The `MainWindowPresenter` therefore creates, and owns, the
-`BatchPresenter`, but does not need to know its concrete type. In turn,
-the `BatchPresenterFactory` creates the child `EventPresenter` and
-injects this into the `BatchPresenter`, also without knowing the child's
+The [Main Window Presenter](MainWindowPresenter) therefore creates, and owns, the
+[Batch Presenter](BatchPresenter), but does not need to know its concrete type. In turn,
+the [Batch Presenter Factory](BatchPresenterFactory) creates the child [Event Presenter](EventPresenter) and
+injects this into the [Batch Presenter](BatchPresenter), also without knowing the child's
 concrete type. As mentioned in the [Dependency
 inversion](#dependency-inversion) section, this helps testability by
 allowing us to replace the real dependencies with mock objects.
@@ -449,7 +449,7 @@ allowing us to replace the real dependencies with mock objects.
 Let's look at the presenter-view interactions in the `Event` component
 as an example.
 
-- The `EventPresenterTest` class sets up a mock view to use for testing:
+- The [Event Presenter Test](EventPresenterTest) class sets up a mock view to use for testing:
 
   ``` c++
   NiceMock<MockEventView> m_view;
@@ -470,7 +470,7 @@ as an example.
     MOCK_METHOD1(subscribe, void(EventViewSubscriber *));
   ```
 
-- The presenter then uses `EXPECT_CALL` to check that the method was
+- The presenter then uses [Expect Call](EXPECT_CALL) to check that the method was
   called. Note that for `subscribe` it is difficult to check that the
   correct presenter pointer is passed because of the two-way dependency
   in the construction, so we just check that it is called with any
@@ -494,7 +494,7 @@ as an example.
   exercise all possible code paths that can result.
 
 - Note that it's likely we need multiple tests for each notification,
-  for example `notifyUniformSliceCountChanged` has a test to check that
+  for example [Notify Uniform Slice Count Changed](notifyUniformSliceCountChanged) has a test to check that
   the model is updated as well as one to check that the main presenter
   is notified:
 
@@ -527,6 +527,6 @@ as an example.
   checks the model should not be affected (and if it is, we know we've
   broken something!).
 
-- Note that although the `EventPresenter` tests currently check the
+- Note that although the [Event Presenter](EventPresenter) tests currently check the
   model directly, the model could (and should) be mocked out and tested
   separately if it was more complex.
