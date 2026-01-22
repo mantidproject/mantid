@@ -428,7 +428,7 @@ void LoadNexusLogs::init() {
  *  @throw std::invalid_argument If the optional properties are set to invalid
  *values
  */
-void LoadNexusLogs::execLoader() {
+void LoadNexusLogs::exec() {
   std::string filename = getPropertyValue("Filename");
   MatrixWorkspace_sptr workspace = getProperty("Workspace");
 
@@ -494,14 +494,8 @@ void LoadNexusLogs::execLoader() {
                              "Please only enter values for one of these fields.");
   }
 
-  const std::map<std::string, std::set<std::string>> &allEntries = getFileInfo()->getAllEntries();
-
   auto lf_LoadLogsByClass = [&](const std::string &group_class, const bool isLog) {
-    auto itGroupClass = allEntries.find(group_class);
-    if (itGroupClass == allEntries.end()) {
-      return;
-    }
-    const std::set<std::string> &entries = itGroupClass->second;
+    const std::set<std::string> &entries = file.getEntriesByClass(group_class);
     // still a linear search
     for (const std::string &entry : entries) {
       // match for 2nd level entry /a/b
@@ -519,17 +513,9 @@ void LoadNexusLogs::execLoader() {
   lf_LoadLogsByClass("IXperiods", false);
 
   auto lf_LoadLogsByName = [&](const std::string &group_name) {
-    for (auto itGroupClass = allEntries.begin(); itGroupClass != allEntries.end(); ++itGroupClass) {
-
-      const std::string &group_class = itGroupClass->first;
-      const std::set<std::string> &entries = itGroupClass->second;
-
-      const std::string absoluteGroupName = "/" + entry_name + "/" + group_name;
-      auto itGroupName = entries.find(absoluteGroupName);
-      if (itGroupName == entries.end()) {
-        continue;
-      }
-      // here we must search only in NxLogs and NXpositioner sets
+    std::string const absoluteGroupName = "/" + entry_name + "/" + group_name;
+    if (file.hasAddress(absoluteGroupName)) {
+      std::string const &group_class = file.classForEntry(absoluteGroupName);
       loadLogs(file, absoluteGroupName, group_class, workspace, allow_list, block_list);
     }
   };
@@ -559,18 +545,15 @@ void LoadNexusLogs::execLoader() {
       // Find the bank/name corresponding to the first event data entry, i.e.
       // one with type NXevent_data.
       file.openAddress("/" + entry_name);
-      auto itEventData = allEntries.find("NXevent_data");
-      if (itEventData != allEntries.end()) {
-        const std::set<std::string> &events = itEventData->second;
-        for (const std::string &event : events) {
-          const std::string eventEntry = event.substr(event.find_last_of("/") + 1);
+      std::set<std::string> const &events = file.getEntriesByClass("NXevent_data");
+      for (std::string const &event : events) {
+        std::string const eventEntry = event.substr(event.find_last_of("/") + 1);
 
-          this->getLogger().debug() << "Opening"
-                                    << " /" + entry_name + "/" + eventEntry + "/event_frame_number"
-                                    << " to find the event_frame_number\n";
-          file.openAddress("/" + entry_name + "/" + eventEntry + "/event_frame_number");
-          file.getData(event_frame_number);
-        }
+        this->getLogger().debug() << "Opening"
+                                  << " /" + entry_name + "/" + eventEntry + "/event_frame_number"
+                                  << " to find the event_frame_number\n";
+        file.openAddress("/" + entry_name + "/" + eventEntry + "/event_frame_number");
+        file.getData(event_frame_number);
       }
     } catch (Nexus::Exception const &) {
       this->getLogger().warning() << "Unable to load event_frame_number - "
@@ -770,14 +753,11 @@ void LoadNexusLogs::loadLogs(Nexus::File &file, const std::string &absolute_entr
                              const std::vector<std::string> &allow_list,
                              const std::vector<std::string> &block_list) const {
 
-  const std::map<std::string, std::set<std::string>> &allEntries = getFileInfo()->getAllEntries();
-
-  auto lf_LoadByLogClass = [&](const std::string &logClass, const bool isNxLog) {
-    auto itLogClass = allEntries.find(logClass);
-    if (itLogClass == allEntries.end()) {
+  auto lf_LoadByLogClass = [&](std::string const &logClass, const bool isNxLog) {
+    std::set<std::string> const &logsSet = file.getEntriesByClass(logClass);
+    if (logsSet.empty()) {
       return;
     }
-    const std::set<std::string> &logsSet = itLogClass->second;
     auto itPrefixBegin = logsSet.lower_bound(absolute_entry_name);
 
     if (allow_list.empty()) {
@@ -860,30 +840,12 @@ void LoadNexusLogs::loadNXLog(Nexus::File &file, const std::string &absolute_ent
   file.openGroup(entry_name, entry_class);
   // Validate the NX log class.
   // Just verify that time and value entries exist
-  const std::string timeEntry = absolute_entry_name + "/time";
-  const std::string valueEntry = absolute_entry_name + "/value";
-  const std::string validatorEntry = absolute_entry_name + "/value_valid";
-  bool foundValue = false;
-  bool foundTime = false;
-  bool foundValidator = false;
-
-  const std::map<std::string, std::set<std::string>> &allEntries = getFileInfo()->getAllEntries();
-  // reverse search to take advantage of the fact that these are located in SDS
-  for (auto it = allEntries.rbegin(); it != allEntries.rend(); ++it) {
-    const std::set<std::string> &entriesSet = it->second;
-    if (entriesSet.count(timeEntry) == 1) {
-      foundTime = true;
-    }
-    if (entriesSet.count(valueEntry) == 1) {
-      foundValue = true;
-    }
-    if (entriesSet.count(validatorEntry) == 1) {
-      foundValidator = true;
-    }
-    if (foundTime && foundValue && foundValidator) {
-      break;
-    }
-  }
+  std::string const timeEntry = absolute_entry_name + "/time";
+  std::string const valueEntry = absolute_entry_name + "/value";
+  std::string const validatorEntry = absolute_entry_name + "/value_valid";
+  bool const foundValue = file.hasAddress(valueEntry);
+  bool const foundTime = file.hasAddress(timeEntry);
+  bool const foundValidator = file.hasAddress(validatorEntry);
 
   if (!foundTime || !foundValue) {
     g_log.warning() << "Invalid NXlog entry " << entry_name << " found. Did not contain 'value' and 'time'.\n";
@@ -931,24 +893,10 @@ void LoadNexusLogs::loadSELog(Nexus::File &file, const std::string &absolute_ent
   //   value_log - A time series entry. This can contain a corrupt value entry
   //   so if it does use the value one
   //   value - A single value float entry
-  const std::string valueEntry = absolute_entry_name + "/value";
-  const std::string valueLogEntry = absolute_entry_name + "/value_log";
-  bool foundValue = false;
-  bool foundValueLog = false;
-
-  const std::map<std::string, std::set<std::string>> &allEntries = getFileInfo()->getAllEntries();
-
-  for (auto it = allEntries.rbegin(); it != allEntries.rend(); ++it) {
-    const std::set<std::string> &entriesSet = it->second;
-    if (entriesSet.count(valueEntry) == 1) {
-      foundValue = true;
-    }
-    if (entriesSet.count(valueLogEntry) == 1) {
-      foundValueLog = true;
-      // takes precedence
-      break;
-    }
-  }
+  std::string const valueEntry = absolute_entry_name + "/value";
+  std::string const valueLogEntry = absolute_entry_name + "/value_log";
+  bool const foundValue = file.hasAddress(valueEntry);
+  bool const foundValueLog = file.hasAddress(valueLogEntry);
 
   std::unique_ptr<Kernel::Property> logValue;
   if (foundValueLog) {

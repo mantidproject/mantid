@@ -582,6 +582,8 @@ public:
    */
   std::set<std::string> getEntriesByClass(std::string const &class_type) const;
 
+  std::string classForEntry(std::string const &entry) const { return m_descriptor.classTypeForName(entry); }
+
   NexusDescriptor const &getFileDescriptor() const { return m_descriptor; }
 
   //------------------------------------------------------------------------------------------------------------------

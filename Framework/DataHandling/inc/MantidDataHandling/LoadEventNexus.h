@@ -8,7 +8,6 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/InstrumentFileFinder.h"
-#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataHandling/DllConfig.h"
@@ -351,22 +350,18 @@ void makeTimeOfFlightDataFuzzy(Nexus::File &file, T localWorkspace, const std::s
  *modified.
  * @param entry_name :: An NXentry tag in the file
  * @param classType :: The type of the events: either detector or monitor
- * @param descriptor :: input descriptor carrying metadata information
  */
 template <typename T>
 void adjustTimeOfFlightISISLegacy(Nexus::File &file, T localWorkspace, const std::string &entry_name,
-                                  const std::string &classType, const Nexus::NexusDescriptor *descriptor = nullptr) {
+                                  const std::string &classType) {
   bool done = false;
   // Go to the root, and then top entry
   file.openAddress("/");
   file.openGroup(entry_name, "NXentry");
 
-  // NexusDescriptor
-  if (descriptor != nullptr) {
-    // not an ISIS file
-    if (!file.hasAddress("/" + entry_name + "/detector_1_events")) {
-      return;
-    }
+  // not an ISIS file
+  if (!file.hasAddress("/" + entry_name + "/detector_1_events")) {
+    return;
   }
 
   using string_map_t = std::map<std::string, std::string>;
