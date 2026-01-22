@@ -18,11 +18,11 @@ pet, cartoon or something they're obsessed with, such as tea!
 - Sign up for the **Mantid Slack** channel; follow [this
   link](https://mantid.slack.com/).
 
-- 
+-
 
   If you don't already have one, sign up for a **Github** account; follow [this link](https://github.com/).
 
-  :   - 
+  :   -
 
         Remember that your username should be easily identifiable.
 
@@ -55,7 +55,7 @@ pet, cartoon or something they're obsessed with, such as tea!
 
 These are notes for account admins on how to add new users.
 
-- 
+-
 
   **Github**
 

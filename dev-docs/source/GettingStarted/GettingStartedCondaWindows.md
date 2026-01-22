@@ -5,7 +5,7 @@
 - When asked about installation workloads choose
   `Desktop development with C++`
 
-- 
+-
 
   Under the "Installation details" section verify that the following are checked (they should already be checked by default):
 
@@ -43,7 +43,7 @@
   source and keep separate build directories to avoid any cmake
   configuration problems.
 
-- 
+-
 
   Obtain the mantid source code by either:
 
@@ -167,7 +167,7 @@ path.
 
 ## Configure CMake and generate build files
 
-- 
+-
 
   You can configure CMake using an MS Visual Studio or Ninja generator. Choose one of the following:
 
@@ -183,7 +183,7 @@ path.
 - If not already activated in the previous step, run
   `conda activate mantid-developer` to activate your conda environment.
 
-- 
+-
 
   If you want your build directory inside your source directory, run either:
 
@@ -193,7 +193,7 @@ path.
         2019, or
       - `cmake --preset=win-ninja` for configuring with Ninja.
 
-- 
+-
 
   Alternatively, if you want to specify a different build directory, run either:
 
@@ -217,7 +217,7 @@ path.
 
 ## Compile and Build using Ninja
 
-- 
+-
 
   From the command line:
 
@@ -228,7 +228,7 @@ path.
       - To build Mantid Workbench use: `ninja`
       - To build the unit tests use: `ninja AllTests`
 
-- 
+-
 
   In Visual Studio:
 

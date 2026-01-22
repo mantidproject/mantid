@@ -140,7 +140,7 @@ project) use of abbreviations.
   Mantid are usually camelCase (starting with a lower case character and
   capital for each later word).
 
-- 
+-
 
   **Scope Prefixes**
 

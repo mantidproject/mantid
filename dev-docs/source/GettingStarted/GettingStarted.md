@@ -45,7 +45,7 @@ configure ssh.
 ## Building Mantid
 
 From this point, you can proceed to build Mantid. See
-`BuildingWithCMake` for information.  
+`BuildingWithCMake` for information.
 For developers at ISIS, continue reading for information on accessing
 the archive.
 

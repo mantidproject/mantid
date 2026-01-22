@@ -13,7 +13,7 @@
   source and keep separate build directories to avoid any cmake
   configuration problems.
 
-- 
+-
 
   Obtain the mantid source code by either:
 
@@ -142,7 +142,7 @@ path.
 - Navigate back to your mantid source directory using `cd mantid` if you
   used the default name during cloning from git.
 
-- 
+-
 
   Inside of your mantid source directory run `cmake --preset=osx`
 

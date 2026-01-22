@@ -46,7 +46,7 @@ can be found in the `testhelpers`-package.
   [NamedTemporaryFile](https://docs.python.org/2/library/tempfile.html)
   from the tempfile package.
 
-- 
+-
 
   `mtd.unique_name` and `mtd.unique_hidden_name` - functions that allow you to create a workspace name that will be
 

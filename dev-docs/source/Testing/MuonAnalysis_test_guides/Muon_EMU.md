@@ -24,7 +24,7 @@ results table.
 
 - Load runs `51341-3`
 
-- 
+-
 
   Go to the **Fitting** tab
 
@@ -47,7 +47,7 @@ results table.
       - Do the same but this time choose **Fix all**, then click **Ok**
       - Click Fit
 
-- 
+-
 
   Expected Values are (similar to within 50%):
 
@@ -67,7 +67,7 @@ results table.
 alt="../../images/MuonAnalysisTests/MATestingIDF.png" />
 </figure>
 
-- 
+-
 
   Go to the **Fitting** tab
 
@@ -95,20 +95,20 @@ and starting this test.
 
 - Load run `20889-20900`
 
-- 
+-
 
   Go to the **Fitting** tab
 
   :   - Right click the empty table area; Select **Add Function**
       - Add **ExpDecayMuon** (*Muon* \> *MuonGeneric* \> *ExpDecMuon*)
 
-- 
+-
 
   Go to the **Sequential Fitting** tab
 
   :   - Click **Sequentially Fit All**
 
-- 
+-
 
   Go to the **Results** tab
 
@@ -120,7 +120,7 @@ and starting this test.
       - Add the "run_number" and "Field_Danfysik" logs by ticking them
       - Click **Output Results**
 
-- 
+-
 
   Go to the **Model Fitting** tab
 

@@ -21,7 +21,7 @@ interface. The master testing guide is located at
 
 - In the loading bar enter `62260`
 
-- 
+-
 
   Go to the **Transform** tab
 
@@ -34,7 +34,7 @@ interface. The master testing guide is located at
   <span class="title-ref">Im_unit_MHz</span> (imaginary) and
   <span class="title-ref">mod_unit_MHz</span> (modulus)
 
-- 
+-
 
   Go to the **Transform** tab
 

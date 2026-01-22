@@ -84,14 +84,14 @@ std::getline(std::cin, s);
 ```
 
 2\. Run ctest with the appropriate arguments to run the test you are
-investigating.  
+investigating.
 3. When the test pauses for input within visual studio select
 DebugAttach to Process...
-![AttachToProcess.png](images/AttachToProcess.png)  
+![AttachToProcess.png](images/AttachToProcess.png)
 4. Select the test executable (e.g. DataHandlingTest.exe) from the list
-and click attach. Visual studio will change to debug mode.  
+and click attach. Visual studio will change to debug mode.
 5. Set any breakpoints you want, go back to the runner.exe window and
 hit enter to stop the pause. This should then ctach on any breakpoints
-you have set.  
+you have set.
 6. VERY IMPORTANT - Clean up when you have done, and do not check in
 with any paused tests!

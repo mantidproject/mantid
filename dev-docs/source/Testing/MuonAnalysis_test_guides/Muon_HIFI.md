@@ -30,14 +30,14 @@ different time intervals.
 
 - Some new data will appear in the plot
 
-- 
+-
 
   Go to the **grouping tab**
 
   :   - In the group table, tick the `Analyse` option for `fwd`
       - In the pair table below, untick the `Analyse` option for `long`
 
-- 
+-
 
   Go to the **Corrections** tab
 
@@ -47,7 +47,7 @@ different time intervals.
         counts at small times decreases
       - Change the dead time correction back to `From Data File`
 
-- 
+-
 
   Go to the **Grouping** tab
 
@@ -56,7 +56,7 @@ different time intervals.
         used for the calculation
       - A value close to `1.3` should appear
 
-- 
+-
 
   Go to the **Fitting** tab
 
@@ -72,7 +72,7 @@ different time intervals.
 - The fit might work but with a large **Chi-squared** Squared value
   (`>100`)
 
-- 
+-
 
   Now to try the fit a different way.
 
@@ -109,14 +109,14 @@ alt="../../images/MuonAnalysisTests/HIFI-TF-Result.png" />
 
 - Go to the **Grouping** tab and press `Default`
 
-- 
+-
 
   Go to the **Fitting** tab
 
   :   - Untick `Tiled plot by` in the plotting window
       - Untick `Simultaneous over`
 
-- 
+-
 
   Go to the **Sequential Fitting** tab
 
@@ -128,7 +128,7 @@ alt="../../images/MuonAnalysisTests/HIFI-TF-Result.png" />
         that the fits are still reasonably good.
       - Selecting rows will show you the data and fit for those rows
 
-- 
+-
 
   Go to the **Grouping** tab
 
