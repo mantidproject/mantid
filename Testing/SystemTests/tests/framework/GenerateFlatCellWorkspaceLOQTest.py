@@ -32,4 +32,4 @@ class GenerateFlatCellWorkspaceLOQTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-2
-        return ["output", "expected_output"]
+        return ("output", "expected_output")
