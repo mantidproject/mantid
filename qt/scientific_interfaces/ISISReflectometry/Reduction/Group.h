@@ -94,6 +94,7 @@ private:
   friend class CoderCommonTester;
 
   bool allChildRowsSucceeded() const;
+  void setAllRowParentsImpl();
 };
 
 template <typename ModificationListener>
