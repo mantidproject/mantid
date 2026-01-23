@@ -3,12 +3,12 @@
 {% extends "layout.html" %}
 
 {% macro split_to_three_columns(item_list) -%}
-{# Split list into 3 columns #}
-{# Uses bootstrap col-md-4 for each column along with slice(3) to divide input list #}
+{# Split list into 2 columns #}
+{# Uses bootstrap col-md-6 for each column along with slice(2) to divide input list #}
 {# It currently assumes the items in the list are mantiddoc.directives.categories.PageRef classes #}
     <div class="row">
-    {% for column in item_list|slice(3) %}
-      <div class="col-md-4">
+    {% for column in item_list|slice(2) %}
+      <div class="col-md-6">
       {% set first = [True] %}
       {% set section = [0] %}
       {% for item in column %}
