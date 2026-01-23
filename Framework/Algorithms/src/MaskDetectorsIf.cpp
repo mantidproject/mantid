@@ -201,9 +201,9 @@ void MaskDetectorsIf::retrieveProperties() {
 void MaskDetectorsIf::validateAndSetIxProperties() {
   int nspec = static_cast<int>(m_inputW->getNumberHistograms());
   m_start_ix = getProperty("StartWorkspaceIndex");
-  if (m_start_ix > nspec) {
+  if (m_start_ix > nspec - 2) {
     throw std::invalid_argument("StartWorkspaceIndex should be greater than or equal to 0 and less than " +
-                                std::to_string(nspec) + ". Value provided is invalid.");
+                                std::to_string(nspec - 1) + ". Value provided is invalid.");
   }
   if (isDefault("EndWorkspaceIndex")) {
     m_end_ix = nspec - 1;

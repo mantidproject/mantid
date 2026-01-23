@@ -6,42 +6,46 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.simpleapi import MaskDetectorsIf, CreateWorkspace
-import tempfile
-
-# tests run x10 slower with this on, but it may be useful to track down issues refactoring
-CHECK_CONSISTENCY = False
 
 
 class MaskDetectorsIfInputTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.temp_dir = tempfile.TemporaryDirectory()
-
-    def tearDown(self) -> None:
-        self.temp_dir.cleanup()
-
     def testValidateStartWorkspaceIndexInputs(self):
         # StartWorkspaceIndex > Number of Histograms
         ws = CreateWorkspace(DataX=[0, 1], DataY=[1] * 10, NSpec=10)
-        self.assertRaises(
-            RuntimeError,
-            MaskDetectorsIf,
-            InputWorkspace=ws,
-            OutputWorkspace=ws,
-            StartWorkspaceIndex=80,
-            EndWorkspaceIndex=5,
+        with self.assertRaises(ValueError) as context:
+            MaskDetectorsIf(
+                InputWorkspace=ws,
+                OutputWorkspace=ws,
+                StartWorkspaceIndex=80,
+                EndWorkspaceIndex=5,
+            )
+        assert "StartWorkspaceIndex should be greater than or equal to 0 and less than 9. Value provided is invalid." in str(
+            context.exception
         )
+
+    def testValidateEndWorkspaceIndexInputs(self):
+        # EndWorkspaceIndex > Number of Histograms
+        ws = CreateWorkspace(DataX=[0, 1], DataY=[1] * 10, NSpec=10)
+        with self.assertRaises(ValueError) as context:
+            MaskDetectorsIf(
+                InputWorkspace=ws,
+                OutputWorkspace=ws,
+                StartWorkspaceIndex=8,
+                EndWorkspaceIndex=50,
+            )
+        assert "EndWorkspaceIndex should be greater than 0 and less than 10. Value provided is invalid." in str(context.exception)
 
     def testValidateInputs(self):
         # EndWorkspaceIndex < StartWorkspaceIndex
         ws = CreateWorkspace(DataX=[0, 1], DataY=[1] * 10, NSpec=10)
-        self.assertRaises(
-            RuntimeError,
-            MaskDetectorsIf,
-            InputWorkspace=ws,
-            OutputWorkspace=ws,
-            StartWorkspaceIndex=8,
-            EndWorkspaceIndex=5,
-        )
+        with self.assertRaises(RuntimeError) as context:
+            MaskDetectorsIf(
+                InputWorkspace=ws,
+                OutputWorkspace=ws,
+                StartWorkspaceIndex=8,
+                EndWorkspaceIndex=5,
+            )
+        assert "EndWorkspaceIndex should be more than StartWorkspaceIndex. Specify a value greater than 8." in str(context.exception)
 
 
 if __name__ == "__main__":
