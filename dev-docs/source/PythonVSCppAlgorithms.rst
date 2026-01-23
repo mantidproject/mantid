@@ -81,6 +81,22 @@ Python algorithms also benefit from automatic GUI creation when they are registe
 
 Python algorithms are great for editing and re-registering. Users can tweak existing Python algorithms or generate their own, without the complication of setting up a build environment. They can also more easily be re-issued to fix particular issues than C++ algorithms.
 
+Hot Reloading
+~~~~~~~~~~~~~
+While not directly supported via the framework, it is possible to hot-reload a python algorithm through MantidWorkbench.
+
+This is especially beneficial when prototyping because it means you do not have to restart or rebuild Workbench between edits to your file.
+
+To accomplish this, perform the following steps:
+
+1. Open MantidWorkbench
+2. Select File -> Open Script
+3. Navigate to and select the source file of your python algorithm
+4. Run as you would a script in the workbench code editor
+5. Test your prototype code
+6. Edit your code and re-run Step 4 to update your algorithm
+7. Repeat steps 4-7 till satisfied.
+
 Note for Mantid Developers
 --------------------------
 Developers creating new algorithms in python must still generate unit tests for them. When an algorithm breaks, users do not care what language they are written in. The developer test suites allow you to create the same level of test coverage in python as you would in C++. Developers should also take care to ensure that the test exercises all of the code, as Python provides no compile-time type checking.

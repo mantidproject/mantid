@@ -25,12 +25,14 @@ class EnggUtilsTest(unittest.TestCase):
         self.calibration.get_instrument.return_value = "ENGINX"
         self.calibration.get_group_suffix.return_value = "all_banks"
         self.calibration.get_foc_ws_suffix.return_value = "bank"
+        self.calibration.get_vanadium_path.return_value = "van_path"
 
         self.custom_calibration = create_autospec(CalibrationInfo(), instance=True)
         self.custom_calibration.is_valid.return_value = True
         self.custom_calibration.get_instrument.return_value = "ENGINX"
         self.custom_calibration.get_group_suffix.return_value = "Custom_test"
         self.custom_calibration.get_foc_ws_suffix.return_value = "Custom_test"
+        self.custom_calibration.get_vanadium_path.return_value = "van_path"
         self.custom_calibration.group = GROUP.CUSTOM
 
         self.cropped_calibration = create_autospec(CalibrationInfo(), instance=True)
@@ -38,6 +40,8 @@ class EnggUtilsTest(unittest.TestCase):
         self.cropped_calibration.get_instrument.return_value = "ENGINX"
         self.cropped_calibration.get_group_suffix.return_value = "Cropped_test"
         self.cropped_calibration.get_foc_ws_suffix.return_value = "Cropped_test"
+        self.cropped_calibration.get_vanadium_path.return_value = "van_path"
+
         self.cropped_calibration.group = GROUP.CROPPED
 
     # tests for code used in calibration tab of UI
@@ -114,7 +118,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_ads.doesExist.return_value = True  # foc vanadium exist
         mock_ads.retrieve.return_value = "van_ws_foc"
 
-        ws_van_foc, van_run = process_vanadium("van_path", self.calibration, "full_calib")
+        ws_van_foc, van_run = process_vanadium(self.calibration, "full_calib")
 
         self.assertEqual(ws_van_foc, "van_ws_foc")
         self.assertEqual(van_run, "123456")
@@ -126,7 +130,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_ads.doesExist.return_value = True
         mock_ads.retrieve.return_value = "van_ws_foc"  # if we just retrieves the ws in the ADS, we would get this
 
-        ws_van_foc, van_run = process_vanadium("van_path", self.custom_calibration, "full_calib")
+        ws_van_foc, van_run = process_vanadium(self.custom_calibration, "full_calib")
 
         mock_ads.retrieve.assert_called_once_with("engggui_curves_Custom_test")
         self.assertEqual(ws_van_foc, "van_ws_foc")  # we want this to be recalculated
@@ -143,7 +147,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_ads.retrieve.return_value = "van_ws_foc_old"  # if we just retrieves the ws in the ADS, we would get this
         mock_smooth_van.return_value = "van_ws_foc_new"  # if we actually run a calibration we should get this
 
-        ws_van_foc, van_run = process_vanadium("van_path", self.custom_calibration, "full_calib")
+        ws_van_foc, van_run = process_vanadium(self.custom_calibration, "full_calib")
 
         mock_ads.retrieve.assert_called_once_with("123456")
         mock_load_run.assert_not_called()
@@ -159,7 +163,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_ads.doesExist.return_value = True
         mock_ads.retrieve.return_value = "van_ws_foc"  # if we just retrieves the ws in the ADS, we would get this
 
-        ws_van_foc, van_run = process_vanadium("van_path", self.cropped_calibration, "full_calib")
+        ws_van_foc, van_run = process_vanadium(self.cropped_calibration, "full_calib")
 
         mock_ads.retrieve.assert_called_once_with("engggui_curves_Cropped_test")
         self.assertEqual(ws_van_foc, "van_ws_foc")  # we want this to be recalculated
@@ -176,7 +180,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_ads.retrieve.return_value = "van_ws_foc_old"  # if we just retrieves the ws in the ADS, we would get this
         mock_smooth_van.return_value = "van_ws_foc_new"  # if we actually run a calibration we should get this
 
-        ws_van_foc, van_run = process_vanadium("van_path", self.cropped_calibration, "full_calib")
+        ws_van_foc, van_run = process_vanadium(self.cropped_calibration, "full_calib")
 
         mock_ads.retrieve.assert_called_once_with("123456")
         mock_load_run.assert_not_called()
@@ -195,7 +199,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_ads.doesExist.side_effect = [False, True]  # foc vanadium not exist but original van ws does
         mock_smooth_van.return_value = "van_ws_foc"  # last alg called before return
 
-        ws_van_foc, van_run = process_vanadium("van_path", self.calibration, "full_calib")
+        ws_van_foc, van_run = process_vanadium(self.calibration, "full_calib")
 
         mock_ads.retrieve.assert_called_once_with("123456")
         mock_load_run.assert_not_called()
@@ -214,7 +218,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_ads.doesExist.side_effect = [False, False]  # vanadium run not loaded
         mock_smooth_van.return_value = "van_ws_foc"  # last alg called before return
 
-        ws_van_foc, van_run = process_vanadium("van_path", self.calibration, "full_calib")
+        ws_van_foc, van_run = process_vanadium(self.calibration, "full_calib")
 
         mock_ads.retrieve.assert_not_called()
         mock_load_run.assert_called_once()
@@ -316,6 +320,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         calib.get_instrument.return_value = "ENGINX"
         calib.get_group_suffix.return_value = calibration_group.value
         calib.get_foc_ws_suffix.return_value = calibration_group.value
+        calib.get_vanadium_path.return_value = "van.nxs"
         calib.group = calibration_group
         calib.get_group_ws.return_value = "grp"
         calib.get_calibration_table.return_value = "cal_table"
@@ -354,7 +359,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         calib, ws = self._setup_focus_run_test(GROUP.NORTH, None, mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save)
         mock_save.return_value = (["TOF/path.nxs"], ["gss/path.nxs"], ["combined/path.nxs"])
 
-        focus_run(["sample.nxs"], "van.nxs", plot_output=False, rb_num=None, calibration=calib, save_dir="/mock", full_calib="full")
+        focus_run(["sample.nxs"], plot_output=False, rb_num=None, calibration=calib, save_dir="/mock", full_calib="full")
 
         expected_dirs = [path.join("/mock", "Focus")]
         mock_save.assert_called_with(expected_dirs, ws, calib, "123456", None)
@@ -374,7 +379,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         calib, ws = self._setup_focus_run_test(GROUP.SOUTH, "RB123", mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save)
         mock_save.return_value = (["TOF/path.nxs"], ["gss/path.nxs"], ["combined/path.nxs"])
 
-        focus_run(["sample.nxs"], "van.nxs", plot_output=False, rb_num="RB123", calibration=calib, save_dir="/mock", full_calib="full")
+        focus_run(["sample.nxs"], plot_output=False, rb_num="RB123", calibration=calib, save_dir="/mock", full_calib="full")
 
         expected_dirs = [path.join("/mock", "Focus"), path.join("/mock", "User", "RB123", "Focus")]
         mock_save.assert_called_with(expected_dirs, ws, calib, "123456", "RB123")
@@ -396,7 +401,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         )
         mock_save.return_value = (["TOF/path.nxs"], ["gss/path.nxs"], ["combined/path.nxs"])
 
-        focus_run(["sample.nxs"], "van.nxs", plot_output=False, rb_num="RB123", calibration=calib, save_dir="/mock", full_calib="full")
+        focus_run(["sample.nxs"], plot_output=False, rb_num="RB123", calibration=calib, save_dir="/mock", full_calib="full")
 
         expected_dirs = [path.join("/mock", "User", "RB123", "Focus", "Texture20")]
         mock_save.assert_called_with(expected_dirs, ws, calib, "123456", "RB123")

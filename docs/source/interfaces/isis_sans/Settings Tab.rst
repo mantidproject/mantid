@@ -227,6 +227,9 @@ Transmission targets
 | **Mask files**           | A comma-separated list of paths to Mask files. The detectors specified in the Mask files       |
 |                          | are excluded from the transmission data.                                                       |
 +--------------------------+------------------------------------------------------------------------------------------------+
+| **Wide Angle Correction**| Check to perform wide angle correction to the transmission spectra to account for the larger   |
+|                          | neutron path at larger detection angles.                                                       |
++--------------------------+------------------------------------------------------------------------------------------------+
 
 Additional information:
 
@@ -328,8 +331,10 @@ Phi limit
 """""""""
 .. _Phi_Limit:
 
-This group allows the user to specify an angle (pizza-slice) mask. The angles
-are in degree.
+This group allows the user to  specify either an angle (pizza-slice) mask or a series of angles. The angles
+are in degree. The method of slicing the angle is selected with the ``PhiSlicing type`` combo box. If ``MinMax`` is selected,
+a start and stop angle cut the slice. If ``Pairs`` is selected, a series of phi values can be introduced in pairs, separating
+each angle by a comma.
 
 +-----------------+---------------------------------------+
 | **Start angle** | The starting angle.                   |
@@ -337,6 +342,10 @@ are in degree.
 | **Stop angle**  | The stop angle.                       |
 +-----------------+---------------------------------------+
 | **Use mirror**  | If the mirror sector should be used.  |
++-----------------+---------------------------------------+
+| **Ranges**      | A set of phi ranges. This option only |
+|                 | appears if a ``Pairs`` is selected    |
+|                 | in ``PhiSlicing type`` combobox.      |
 +-----------------+---------------------------------------+
 
 

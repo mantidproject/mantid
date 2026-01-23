@@ -1,0 +1,2 @@
+- In the ISIS SANS workflow, the default number of cylindrical slices used in the calculation of the solid angle correction performed by the :ref:`Q1D <algm-Q1D>` and :ref:`Qxy <algm-Qxy>` algorithms has been changed from 10 to 11.
+  This resolves a `bug <https://github.com/mantidproject/mantid/issues/36493>`__ where unexpected results were seen for certain detector orientations and geometries. The number of cylindrical slices used in the ISIS SANS workflow can be changed from the user file.

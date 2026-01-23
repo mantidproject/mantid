@@ -85,7 +85,9 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory='<path-to-test>'
+   from pathlib import Path
+
+   testing_directory=Path('<path-to-test>')
    # <path-to-test> is the location of a directory for saving workspaces for comparison later
    # e.g. C:\Users\abc1234\Desktop\test_proj_rec\
    CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='0Rebinned')
@@ -93,7 +95,7 @@ Project Recovery test
        RenameWorkspace(InputWorkspace='%sRebinned'%str(i), OutputWorkspace='%sRebinned'%str(i+1))
    for i in range(300):
        CloneWorkspace(InputWorkspace='100Rebinned', OutputWorkspace='%sClone'%str(i))
-   SaveCSV(InputWorkspace='299Clone', Filename=testing_directory + 'Clone.csv')
+   SaveCSV(InputWorkspace='299Clone', Filename=str(testing_directory / 'Clone.csv'))
 
 - Wait a few seconds, then provoke a crash by executing the `Segfault` algorithm
 - Restart MantidWorkbench
@@ -104,8 +106,10 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory='<path-to-test>'
-   SaveCSV(InputWorkspace='299Clone', Filename=testing_directory +'Clone_r.csv')
+   from pathlib import Path
+
+   testing_directory=Path('<path-to-test>')
+   SaveCSV(InputWorkspace='299Clone', Filename=str(testing_directory / 'Clone_r.csv'))
 
 - Compare the contents of `Clone.csv` and `Clone_r.csv`, they should be the same
 
@@ -118,7 +122,9 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory='<path-to-test>'
+   from pathlib import Path
+
+   testing_directory=Path('<path-to-test>')
    Load(Filename=r'SXD23767.raw', OutputWorkspace='SXD23767')
    ConvertToDiffractionMDWorkspace(InputWorkspace='SXD23767', OutputWorkspace='SXD23767_MD', OneEventPerBin=False, SplitThreshold=30)
    DeleteWorkspace("SXD23767")
@@ -139,7 +145,7 @@ Project Recovery test
    DeleteWorkspace("long3")
    CloneWorkspace(InputWorkspace='long4', OutputWorkspace='Clone')
    ConvertMDHistoToMatrixWorkspace(InputWorkspace='Clone', OutputWorkspace='Clone_matrix')
-   SaveCSV('Clone_matrix' , testing_directory + '/method_test.csv')
+   SaveCSV('Clone_matrix' , str(testing_directory / 'method_test.csv'))
 
    DgsReduction(SampleInputFile='MAR11001.raw', IncidentEnergyGuess=12, OutputWorkspace='ws')
    Rebin(InputWorkspace='ws', OutputWorkspace='rebin', Params='0.5')
@@ -147,13 +153,13 @@ Project Recovery test
    Rebin(InputWorkspace='rebin', OutputWorkspace='rebin', Params='0.7')
    Rebin(InputWorkspace='rebin', OutputWorkspace='rebin', Params='0.8')
    RenameWorkspace(InputWorkspace='rebin', OutputWorkspace='renamed')
-   SaveCSV('renamed', testing_directory + '/rebin_test.csv')
+   SaveCSV('renamed', str(testing_directory / 'rebin_test.csv'))
 
 
    long4 *= 4
    long4 += 3.00
    ConvertMDHistoToMatrixWorkspace(InputWorkspace='long4', OutputWorkspace='long4_matrix')
-   SaveCSV('long4_matrix', testing_directory + '/test_binary_operators.csv')
+   SaveCSV('long4_matrix', str(testing_directory / 'test_binary_operators.csv'))
 
 - Force a crash by executing the `Segfault` algorithm
 - Restart MantidWorkbench
@@ -162,9 +168,11 @@ Project Recovery test
 
 .. code-block:: python
 
-    testing_directory='<path-to-test>'
-    SaveCSV('Clone_matrix' , testing_directory + '/method_test_r.csv')
-    SaveCSV('long4_matrix', testing_directory + '/test_binary_operators_r.csv')
+   from pathlib import Path
+
+   testing_directory=Path('<path-to-test>')
+   SaveCSV('Clone_matrix', str(testing_directory / 'method_test_r.csv'))
+   SaveCSV('long4_matrix', str(testing_directory / 'test_binary_operators_r.csv'))
 
 - Compare the contents of ``/test_binary_operators.csv`` and ``/test_binary_operators_r.csv``, they should be the same
 - Compare the contents of ``/method_test.csv`` and ``/method_test_r.csv``, they should be the same
@@ -238,7 +246,7 @@ Project Recovery test
 7. Not attempting recovery
 
 - Open MantidWorkbench
-- Run the second script from test 1
+- Run the large script from test 1
 - In the workspace window right-click the ``Sequential3`` workspace and choose `Plot spectrum`
 - Choose `Plot All`
 - Force a crash by executing the `Segfault` algorithm

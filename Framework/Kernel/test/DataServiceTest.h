@@ -163,6 +163,14 @@ public:
     TSM_ASSERT_EQUALS("The observers should have been called once", notificationFlag, 1);
 
     notificationFlag = 0;
+    svc.rename("Two", "two");
+    TS_ASSERT_EQUALS(svc.size(), 2);
+    // as ads is case insensitive, this query does not change the result
+    TSM_ASSERT_EQUALS("Two should have been renamed to two", svc.retrieve("two"), svc.retrieve("Two"));
+    // There is just the rename notification, as it would appear as the key would be renamed as two
+    TSM_ASSERT_EQUALS("The observers should have been called 1 times in total", notificationFlag, 1);
+
+    notificationFlag = 0;
     svc.rename("Two", "anotherOne");
     TS_ASSERT_EQUALS(svc.size(), 1);
     TSM_ASSERT_THROWS("Two should have been renamed to anotherOne", svc.retrieve("two"),

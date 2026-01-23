@@ -68,6 +68,20 @@ class FigureManagerWorkbenchTest(unittest.TestCase):
             fig_mgr.show()
             ax.title.add_callback.assert_called_once_with(callback_mock)
 
+    @patch("workbench.plotting.figuremanager.FigureManagerWorkbench._set_up_axes_title_change_callbacks")
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_canvas_flush_event_on_show(self, mock_qappthread, mock_set_up_axes_title_change_cb):
+        mock_qappthread.return_value = mock_qappthread
+        fig = MagicMock()
+        fig.bbox.max = [1, 1]
+        canvas = MantidFigureCanvas(fig)
+        canvas.flush_events = MagicMock()
+        fig_mgr = FigureManagerWorkbench(canvas, 1)
+
+        fig_mgr.show()
+
+        canvas.flush_events.assert_called_once()
+
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_ax_callback_will_set_window_title_with_new_title(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread

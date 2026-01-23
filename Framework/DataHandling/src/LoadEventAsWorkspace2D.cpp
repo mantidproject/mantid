@@ -245,14 +245,11 @@ void LoadEventAsWorkspace2D::exec() {
   h5file.openAddress("/");
   h5file.openGroup("entry", "NXentry");
 
-  // Now we want to go through all the bankN_event entries
-  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
-
+  // Now we want to go through all the bankN_event entrie
   prog->doReport("Reading and integrating data");
-  auto itClassEntries = allEntries.find("NXevent_data");
-  if (itClassEntries != allEntries.end()) {
 
-    const std::set<std::string> &classEntries = itClassEntries->second;
+  std::set<std::string> const classEntries = h5file.getEntriesByClass("NXevent_data");
+  if (!classEntries.empty()) {
     const std::regex classRegex("(/entry/)([^/]*)");
     std::smatch groups;
     for (const std::string &classEntry : classEntries) {

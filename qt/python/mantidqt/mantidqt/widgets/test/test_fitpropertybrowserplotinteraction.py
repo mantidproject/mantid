@@ -170,6 +170,14 @@ class FitPropertyBrowserPlotInteractionTest(unittest.TestCase):
 
         self.assertEqual(list(self.browser_plot_interaction.guess_lines.keys()), ["f0.FlatBackground", "f1.GausOsc"])
 
+    def test_shift_stored_prefixes_returns_when_prefix_len_is_less_than_two(self):
+        self.create_mock_guess_lines()
+        self.setup_mock_fit_browser(
+            workspace_creator=self.create_workspace2D, workspace_name="test_workspace", function=FULL_FUNCTION, function_prefix="f"
+        )
+        self.browser_plot_interaction.slot_for_function_removed()
+        self.assertEqual(list(self.browser_plot_interaction.guess_lines.keys()), ["f0.FlatBackground", "f1.LinearBackground", "f2.GausOsc"])
+
     def test_remove_function_correctly_removes_line(self):
         workspace_name = "test_workspace"
         prefix = "f1"

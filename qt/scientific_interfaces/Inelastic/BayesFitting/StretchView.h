@@ -43,9 +43,10 @@ public:
   virtual std::string getPlotContour() const = 0;
   virtual IRunView *getRunWidget() const = 0;
 
-  virtual void setupFitOptions() = 0;
-  virtual void setupPropertyBrowser() = 0;
-  virtual void setupPlotOptions() = 0;
+  virtual void updateBackend(bool useQuickBayes) = 0;
+  virtual void setupFitOptions(bool useQuickBayes) = 0;
+  virtual void setupPropertyBrowser(bool useQuickBayes) = 0;
+  virtual void setupPlotOptions(bool useQuickBayes) = 0;
 
   virtual void setFileExtensionsByName(bool filter) = 0;
   virtual void setLoadHistory(bool doLoadHistory) = 0;
@@ -65,7 +66,7 @@ public:
 class MANTIDQT_INELASTIC_DLL StretchView : public QWidget, public IStretchView {
   Q_OBJECT
 public:
-  explicit StretchView(QWidget *parent = nullptr);
+  explicit StretchView(QWidget *parent = nullptr, bool useQuickBayes = false);
   ~StretchView() override = default;
 
   void subscribePresenter(IStretchViewSubscriber *presenter) override;
@@ -79,9 +80,10 @@ public:
   std::string getPlotContour() const override;
   IRunView *getRunWidget() const override;
 
-  void setupFitOptions() override;
-  void setupPropertyBrowser() override;
-  void setupPlotOptions() override;
+  void updateBackend(bool useQuickBayes) override;
+  void setupFitOptions(bool useQuickBayes) override;
+  void setupPropertyBrowser(bool useQuickBayes) override;
+  void setupPlotOptions(bool useQuickBayes) override;
 
   void setFileExtensionsByName(bool filter) override;
   void setLoadHistory(bool doLoadHistory) override;

@@ -112,6 +112,7 @@ class TomlV1ParserImpl(TomlParserImplBase):
         self._parse_transmission()
         self._parse_transmission_roi()
         self._parse_transmission_fitting()
+        self._parse_transmission_wide_angle()
 
     @property
     def instrument(self):
@@ -364,6 +365,9 @@ class TomlV1ParserImpl(TomlParserImplBase):
 
         self.calculate_transmission.transmission_roi_files = [file]
 
+    def _parse_transmission_wide_angle(self):
+        self.adjustment.wide_angle_correction = self.get_val(["transmission", "wide_angle_correction"], default=False)
+
     def _parse_transmission_fitting(self):
         fit_dict = self.get_val(["transmission", "fitting"])
         can_fitting = self.calculate_transmission.fit[DataType.CAN.value]
@@ -512,6 +516,8 @@ class TomlV1ParserImpl(TomlParserImplBase):
                 self.mask.phi_min = phi_mask["start"]
             if "stop" in phi_mask:
                 self.mask.phi_max = phi_mask["stop"]
+            if "range" in phi_mask:
+                self.mask.phi_range = phi_mask["range"]
 
     @staticmethod
     def _get_1d_min_max(one_d_binning: str):

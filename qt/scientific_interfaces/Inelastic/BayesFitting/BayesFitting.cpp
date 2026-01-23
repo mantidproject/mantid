@@ -18,7 +18,8 @@ namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(BayesFitting)
 
 BayesFitting::BayesFitting(QWidget *parent)
-    : InelasticInterface(parent), m_changeObserver(*this, &BayesFitting::handleDirectoryChange) {
+    : InelasticInterface(parent), m_changeObserver(*this, &BayesFitting::handleDirectoryChange),
+      m_backend(BayesBackendType::QUASI_ELASTIC_BAYES) {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
@@ -53,9 +54,8 @@ std::unique_ptr<MantidQt::API::AlgorithmRunner> BayesFitting::createAlgorithmRun
 
 void BayesFitting::initLayout() {
   // Connect each tab to the actions available in this GUI
-  std::map<unsigned int, BayesFittingTab *>::iterator iter;
-  for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter) {
-    connect(iter->second, &BayesFittingTab::showMessageBox, this, &BayesFitting::showMessageBox);
+  for (const auto &tab : m_bayesTabs) {
+    connect(tab.second, &BayesFittingTab::showMessageBox, this, &BayesFitting::showMessageBox);
   }
 
   loadSettings();
@@ -63,6 +63,7 @@ void BayesFitting::initLayout() {
   connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &BayesFitting::settings);
   connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &BayesFitting::help);
   connect(m_uiForm.pbManageDirs, &QPushButton::clicked, this, &BayesFitting::manageUserDirectories);
+  connect(m_uiForm.backendChoice, &QComboBox::currentTextChanged, this, &BayesFitting::setBackend);
 
   InelasticInterface::initLayout();
 }
@@ -116,6 +117,25 @@ void BayesFitting::applySettings(std::map<std::string, QVariant> const &settings
 }
 
 std::string BayesFitting::documentationPage() const { return "Inelastic Bayes Fitting"; }
+
+void BayesFitting::setBackend(const QString &text) {
+  BayesBackendType newBackend = m_backend;
+  if (text == "quasielasticbayes") {
+    newBackend = BayesBackendType::QUASI_ELASTIC_BAYES;
+    m_uiForm.warningLabel->setHidden(false);
+    m_uiForm.backendChoice->setToolTip("Old Fortran library");
+  } else if (text == "quickbayes") {
+    newBackend = BayesBackendType::QUICK_BAYES;
+    m_uiForm.warningLabel->setHidden(true);
+    m_uiForm.backendChoice->setToolTip("New Python library");
+  }
+  if (newBackend != m_backend) {
+    m_backend = newBackend;
+    for (const auto &tab : m_bayesTabs) {
+      tab.second->notifyBackendChanged(m_backend);
+    }
+  }
+}
 
 BayesFitting::~BayesFitting() = default;
 

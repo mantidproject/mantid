@@ -18,6 +18,7 @@ from enum import Enum
 from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
+from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 from mantidqt.widgets import jobtreeview, manageuserdirectories
 from reduction_gui.reduction.scripter import execute_script
 from sans.common.enums import ReductionDimensionality, OutputMode, SANSInstrument, RangeStepType, ReductionMode, FitType
@@ -321,6 +322,7 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.background_subtraction_checkbox.stateChanged.connect(self._on_background_subtraction_selection)
 
         self.wavelength_step_type_combo_box.currentIndexChanged.connect(self._on_wavelength_step_type_changed)
+        self.phi_range_step_type_combo_box.currentIndexChanged.connect(self._on_phi_range_step_type_changed)
 
         self.process_selected_button.clicked.connect(self._process_selected_clicked)
         self.process_all_button.clicked.connect(self._process_all_clicked)
@@ -366,6 +368,10 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.fit_selection_combo_box.currentIndexChanged.connect(self._on_fit_selection_has_changed)
         self._on_fit_selection_has_changed()
 
+        # Set the transmission fit checkbox enabled
+        self.fit_sample_wavelength_combo_box.stateChanged.connect(self._on_fit_custom_range_checkbox_selected)
+        self.fit_can_wavelength_combo_box.stateChanged.connect(self._on_fit_custom_range_checkbox_selected)
+
         # Set the transmission polynomial order
         self.fit_sample_fit_type_combo_box.currentIndexChanged.connect(self._on_transmission_fit_type_has_changed)
         self.fit_can_fit_type_combo_box.currentIndexChanged.connect(self._on_transmission_fit_type_has_changed)
@@ -406,6 +412,12 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         elif self.wavelength_step_type == RangeStepType.LIN:
             self.wavelength_stacked_widget.setCurrentIndex(0)
             self.wavelength_step_label.setText("Step [\u00c5]")
+
+    def _on_phi_range_step_type_changed(self):
+        if self.phi_range_step_type == "MinMax":
+            self.phi_range_stacked_widget.setCurrentIndex(0)
+        elif self.phi_range_step_type == "Pairs":
+            self.phi_range_stacked_widget.setCurrentIndex(1)
 
     def create_data_table(self):
         # Delete an already existing table
@@ -546,11 +558,13 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
 
     def _on_field_edit(self):
         sender = self.sender()
-        if isinstance(sender, QLineEdit) and not sender.isModified():
+        if (is_line_edit := isinstance(sender, QLineEdit)) and not sender.isModified():
             # We only want editingFinished to fire if a user has modified. This
             # prevents a warning appearing after the first one - commonly when
             # clicking another line edit with invalid input or attempting to close the interface
             return
+        elif is_line_edit and sender.isModified():
+            sender.setModified(False)
 
         self._call_settings_listeners(lambda listener: listener.on_field_edit())
 
@@ -830,6 +844,16 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         index = 1 if is_rectangular else 0
         self.q_resolution_shape_combo_box.setCurrentIndex(index)
 
+    def _on_fit_custom_range_checkbox_selected(self):
+        if (name := self.sender().objectName()) in ["fit_sample_wavelength_combo_box", "fit_can_wavelength_combo_box"]:
+            checked = self.sender().isChecked()
+            if "sample" in name:
+                self.fit_sample_wavelength_min_line_edit.setEnabled(checked)
+                self.fit_sample_wavelength_max_line_edit.setEnabled(checked)
+            else:
+                self.fit_can_wavelength_min_line_edit.setEnabled(checked)
+                self.fit_can_wavelength_max_line_edit.setEnabled(checked)
+
     def _on_fit_selection_has_changed(self):
         fit_selection = self.fit_selection_combo_box.currentIndex()
         use_settings_for_sample_and_can = fit_selection == 0
@@ -846,6 +870,8 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.fit_can_fit_type_combo_box.setVisible(show_can)
         self.fit_can_wavelength_combo_box.setVisible(show_can)
         self.fit_can_polynomial_order_spin_box.setVisible(show_can)
+        self.fit_can_wavelength_min_line_edit.setVisible(show_can)
+        self.fit_can_wavelength_max_line_edit.setVisible(show_can)
 
     def set_fit_selection(self, use_separate):
         index = 1 if use_separate else 0
@@ -1464,6 +1490,14 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
     def transmission_mn_5_shift(self, value):
         self.update_simple_line_edit_field(line_edit="transmission_mn_5_shift_line_edit", value=value)
 
+    @property
+    def wide_angle_correction(self):
+        return self.wide_angle_check_box.isChecked()
+
+    @wide_angle_correction.setter
+    def wide_angle_correction(self, value):
+        self.wide_angle_check_box.setChecked(value)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission fit
     # ------------------------------------------------------------------------------------------------------------------
@@ -1852,6 +1886,23 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.update_simple_line_edit_field(line_edit="phi_limit_max_line_edit", value=value)
 
     @property
+    def phi_range(self):
+        return str(self.phi_range_line_edit.text())
+
+    @phi_range.setter
+    def phi_range(self, value):
+        self.phi_range_line_edit.setText(value)
+
+    @property
+    def phi_range_step_type(self):
+        step_type_as_string = self.phi_range_step_type_combo_box.currentText()
+        return step_type_as_string
+
+    @phi_range_step_type.setter
+    def phi_range_step_type(self, value):
+        self.update_gui_combo_box(value=value, expected_type="MinMax", combo_box="phi_range_step_type_combo_box")
+
+    @property
     def phi_limit_use_mirror(self):
         return self.phi_limit_use_mirror_check_box.isChecked()
 
@@ -1885,29 +1936,33 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
     def _attach_validators(self):
-        # Setup the list of validators
-        double_validator = QDoubleValidator()
-        positive_double_validator = QDoubleValidator()
-        positive_double_validator.setBottom(0.0)
+        def create_line_edit_validator(line_edit, initial_value="", is_positive=False):
+            # Helper to create line edit double validator, more sturdy against wrong double values(e.g. `1e`)
+            dv = LineEditDoubleValidator(line_edit, initial_value)
+            if is_positive:
+                dv.setBottom(0.0)
+            line_edit.setValidator(dv)
+
+        # Setup the integer validator
         positive_integer_validator = QIntValidator()
         positive_integer_validator.setBottom(1)
 
         # -------------------------------
         # General tab
         # -------------------------------
-        self.merged_shift_line_edit.setValidator(double_validator)
-        self.merged_scale_line_edit.setValidator(double_validator)
-        self.merged_q_range_start_line_edit.setValidator(double_validator)
-        self.merged_q_range_stop_line_edit.setValidator(double_validator)
-        self.merged_max_line_edit.setValidator(double_validator)
-        self.merged_min_line_edit.setValidator(double_validator)
+        create_line_edit_validator(self.merged_shift_line_edit)
+        create_line_edit_validator(self.merged_scale_line_edit)
+        create_line_edit_validator(self.merged_q_range_start_line_edit)
+        create_line_edit_validator(self.merged_q_range_stop_line_edit)
+        create_line_edit_validator(self.merged_max_line_edit)
+        create_line_edit_validator(self.merged_min_line_edit)
 
-        self.wavelength_min_line_edit.setValidator(positive_double_validator)
-        self.wavelength_max_line_edit.setValidator(positive_double_validator)
-        self.wavelength_step_line_edit.setValidator(positive_double_validator)
+        create_line_edit_validator(self.wavelength_min_line_edit, is_positive=True)
+        create_line_edit_validator(self.wavelength_max_line_edit, is_positive=True)
+        create_line_edit_validator(self.wavelength_step_line_edit, is_positive=True)
 
-        self.absolute_scale_line_edit.setValidator(double_validator)
-        self.z_offset_line_edit.setValidator(double_validator)
+        create_line_edit_validator(self.z_offset_line_edit)
+        create_line_edit_validator(self.absolute_scale_line_edit)
 
         # --------------------------------
         # Adjustment tab
@@ -1915,37 +1970,41 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.monitor_normalization_line_edit.setValidator(positive_integer_validator)
         self.transmission_line_edit.setValidator(positive_integer_validator)
         self.transmission_monitor_line_edit.setValidator(positive_integer_validator)
-        self.transmission_radius_line_edit.setValidator(positive_double_validator)
-        self.transmission_mn_4_shift_line_edit.setValidator(double_validator)
-        self.transmission_mn_5_shift_line_edit.setValidator(double_validator)
+        create_line_edit_validator(self.transmission_radius_line_edit, "", is_positive=True)
+        create_line_edit_validator(self.transmission_mn_4_shift_line_edit, "")
+        create_line_edit_validator(self.transmission_mn_5_shift_line_edit, "")
 
-        self.fit_sample_wavelength_min_line_edit.setValidator(positive_double_validator)
-        self.fit_sample_wavelength_max_line_edit.setValidator(positive_double_validator)
-        self.fit_can_wavelength_min_line_edit.setValidator(positive_double_validator)
-        self.fit_can_wavelength_max_line_edit.setValidator(positive_double_validator)
+        create_line_edit_validator(self.fit_sample_wavelength_min_line_edit, is_positive=True)
+        create_line_edit_validator(self.fit_sample_wavelength_max_line_edit, is_positive=True)
+        create_line_edit_validator(self.fit_can_wavelength_min_line_edit, is_positive=True)
+        create_line_edit_validator(self.fit_can_wavelength_max_line_edit, is_positive=True)
 
         # --------------------------------
         # Q tab
         # --------------------------------
-        self.q_1d_min_line_edit.setValidator(double_validator)
-        self.q_1d_max_line_edit.setValidator(double_validator)
-        self.q_1d_step_line_edit.setValidator(positive_double_validator)
-        self.q_xy_max_line_edit.setValidator(positive_double_validator)  # Yes, this should be positive!
-        self.q_xy_step_line_edit.setValidator(positive_double_validator)
+        create_line_edit_validator(self.radius_limit_min_line_edit)
+        create_line_edit_validator(self.radius_limit_max_line_edit)
+        create_line_edit_validator(self.phi_limit_min_line_edit, "-90.0")
+        create_line_edit_validator(self.phi_limit_max_line_edit, "90.0")
+        create_line_edit_validator(self.q_1d_min_line_edit)
+        create_line_edit_validator(self.q_1d_max_line_edit)
 
-        self.r_cut_line_edit.setValidator(positive_double_validator)
-        self.w_cut_line_edit.setValidator(positive_double_validator)
+        create_line_edit_validator(self.q_1d_step_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_xy_max_line_edit, is_positive=True)  # Yes, this should be positive!
+        create_line_edit_validator(self.q_xy_step_line_edit, is_positive=True)
 
-        self.gravity_extra_length_line_edit.setValidator(double_validator)
+        create_line_edit_validator(self.r_cut_line_edit, is_positive=True)
+        create_line_edit_validator(self.w_cut_line_edit, is_positive=True)
 
-        self.q_resolution_source_a_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_sample_a_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_source_h_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_sample_h_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_source_w_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_sample_w_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_delta_r_line_edit.setValidator(positive_double_validator)
-        self.q_resolution_collimation_length_line_edit.setValidator(double_validator)
+        create_line_edit_validator(self.gravity_extra_length_line_edit)
+
+        create_line_edit_validator(self.q_resolution_source_a_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_resolution_sample_a_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_resolution_source_w_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_resolution_sample_w_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_resolution_source_h_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_resolution_sample_w_line_edit, is_positive=True)
+        create_line_edit_validator(self.q_resolution_collimation_length_line_edit)
 
     def reset_all_fields_to_default(self):
         # ------------------------------
@@ -2021,6 +2080,8 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
 
         self.phi_limit_min_line_edit.setText("-90")
         self.phi_limit_max_line_edit.setText("90")
+        self.phi_range_line_edit.setText("")
+        self.phi_range_step_type_combo_box.setCurrentIndex(0)
         self.phi_limit_use_mirror_check_box.setChecked(True)
 
         self.wavelength_min_line_edit.setText("")

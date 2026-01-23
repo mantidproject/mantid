@@ -24,7 +24,7 @@ namespace Algorithms {
 struct InputSpectraToFit {
   /// Constructor
   InputSpectraToFit(const std::string &nam, int ix, double isp, double iv, int p, API::MatrixWorkspace_sptr mws)
-      : name(nam), wsIdx(ix), spectrumNum(isp), numericValue(iv), period(p), ws(mws) {}
+      : name(nam), wsIdx(ix), spectrumNum(isp), numericValue(iv), period(p), ws(std::move(mws)) {}
   /// Copy constructor
   InputSpectraToFit(const InputSpectraToFit &data) = default;
 

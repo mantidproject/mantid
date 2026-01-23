@@ -1804,7 +1804,11 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
     Kernel::TimeSeriesProperty<double> const *protonchargelog =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_dataWS->run().getProperty("proton_charge"));
     if (protonchargelog->size() > 1) {
-      extended_ns = protonchargelog->nthTime(1).totalNanoseconds() - protonchargelog->nthTime(0).totalNanoseconds();
+      try {
+        extended_ns = protonchargelog->nthTime(1).totalNanoseconds() - protonchargelog->nthTime(0).totalNanoseconds();
+      } catch (std::runtime_error &) {
+        g_log.warning() << "The log was filtered and no second pulse exists inside the ROI.\n";
+      }
     }
   }
 

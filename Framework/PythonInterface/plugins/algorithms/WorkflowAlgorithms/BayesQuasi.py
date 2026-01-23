@@ -159,6 +159,8 @@ class BayesQuasi(PythonAlgorithm):
         self._wfile = self.getPropertyValue("WidthFile")
         self._loop = self.getProperty("Loop").value
         self._output_fit_name = self.getPropertyValue("OutputWorkspaceFit")
+        self._output_result_name = self.getPropertyValue("OutputWorkspaceResult")
+        self._output_prob_name = self.getPropertyValue("OutputWorkspaceProb")
 
     # pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
@@ -237,8 +239,8 @@ class BayesQuasi(PythonAlgorithm):
 
         setup_prog.report("Establishing output workspace name")
         fname = self._samWS[:-4] + "_" + prog
-        probWS = fname + "_Prob"
-        fitWS = fname + "_Fit"
+        probWS = self._output_prob_name if self._output_prob_name else fname + "_Prob"
+        fitWS = self._output_fit_name if self._output_result_name else fname + "_Fit"
         wrks = os.path.join(workdir, self._samWS[:-4])
         logger.information(" lptfile : " + wrks + "_" + prog + ".lpt")
         lwrk = len(wrks)
@@ -351,7 +353,6 @@ class BayesQuasi(PythonAlgorithm):
                 prob3.append(yprob[3])
 
             # create result workspace
-            fitWS = self._output_fit_name
             fout = fname + "_Workspace_" + str(spectrum)
 
             workflow_prog.report("Creating OutputWorkspace")
@@ -472,7 +473,7 @@ class BayesQuasi(PythonAlgorithm):
         log_alg.execute()
 
     def C2Se(self, sname):
-        outWS = sname + "_Result"
+        outWS = self._output_result_name if self._output_result_name else sname + "_Result"
         asc = self._read_ascii_file(sname + ".qse")
         var = asc[3].split()  # split line on spaces
         nspec = var[0]
@@ -647,7 +648,7 @@ class BayesQuasi(PythonAlgorithm):
         return widthY, widthE
 
     def C2Fw(self, sname):
-        output_workspace = sname + "_Result"
+        output_workspace = self._output_result_name if self._output_result_name else sname + "_Result"
         num_spectra = 0
         axis_names = []
         x, y, e = [], [], []

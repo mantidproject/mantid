@@ -279,7 +279,11 @@ void LoadNexusMonitors2::exec() {
 
     // a certain generation of ISIS files modify the time-of-flight
     const std::string currentAddress = file.getAddress();
-    adjustTimeOfFlightISISLegacy(file, eventWS, m_top_entry_name, "NXmonitor");
+
+    if (doPerformISISEventShift(file, m_top_entry_name)) {
+      adjustTimeOfFlightISISLegacy(file, eventWS, m_top_entry_name, "NXmonitor");
+    }
+
     file.openAddress(currentAddress); // reset to where it was earlier
   }
 
@@ -494,7 +498,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(const size_t numPeriods) 
     monLogCreator.addStatusLog(wsPeriod->mutableRun());
     monLogCreator.addPeriodLogs(static_cast<int>(i + 1), wsPeriod->mutableRun());
 
-    outputWorkspaces.push_back(wsPeriod);
+    outputWorkspaces.push_back(std::move(wsPeriod));
   }
 
   // set output workspace to either single period ws, or group ws.

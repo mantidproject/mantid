@@ -8,7 +8,6 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/InstrumentFileFinder.h"
-#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataHandling/DllConfig.h"
@@ -59,6 +58,8 @@ public:
 bool exists(Nexus::File &file, const std::string &name);
 
 bool exists(const std::map<std::string, std::string> &entries, const std::string &name);
+
+MANTID_DATAHANDLING_DLL bool doPerformISISEventShift(Nexus::File &file, std::string &topEntryName);
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
@@ -267,17 +268,6 @@ private:
 template <typename T>
 void makeTimeOfFlightDataFuzzy(Nexus::File &file, T localWorkspace, const std::string &binsName, size_t start_wi = 0,
                                size_t end_wi = 0) {
-  const std::string EVENT_TIME_SHIFT_TAG("event_time_offset_shift");
-  // first check if the data is already randomized
-  const auto entries = file.getEntries();
-  if (entries.find(EVENT_TIME_SHIFT_TAG) != entries.end()) {
-    std::string event_shift_type;
-    file.readData(EVENT_TIME_SHIFT_TAG, event_shift_type);
-    if (event_shift_type == "random") {
-      return;
-    }
-  }
-
   // if the data is not randomized randomize it uniformly within each bin
   file.openData(binsName);
   // time of flights of events
@@ -351,31 +341,17 @@ void makeTimeOfFlightDataFuzzy(Nexus::File &file, T localWorkspace, const std::s
  *modified.
  * @param entry_name :: An NXentry tag in the file
  * @param classType :: The type of the events: either detector or monitor
- * @param descriptor :: input descriptor carrying metadata information
  */
 template <typename T>
 void adjustTimeOfFlightISISLegacy(Nexus::File &file, T localWorkspace, const std::string &entry_name,
-                                  const std::string &classType, const Nexus::NexusDescriptor *descriptor = nullptr) {
+                                  const std::string &classType) {
   bool done = false;
   // Go to the root, and then top entry
   file.openAddress("/");
   file.openGroup(entry_name, "NXentry");
 
-  // NexusDescriptor
-  if (descriptor != nullptr) {
-    // not an ISIS file
-    if (!file.hasAddress("/" + entry_name + "/detector_1_events")) {
-      return;
-    }
-  }
-
   using string_map_t = std::map<std::string, std::string>;
   string_map_t entries = file.getEntries();
-
-  if (entries.find("detector_1_events") == entries.end()) { // not an ISIS file
-    return;
-  }
-
   // try if monitors have their own bins
   if (classType == "NXmonitor") {
     std::vector<std::string> bankNames;
@@ -734,7 +710,7 @@ bool LoadEventNexus::loadInstrument(const std::string &nexusfilename, T localWor
   if (loadNexusInstrumentXML)
     foundInstrument = runLoadIDFFromNexus<T>(nexusfilename, localWorkspace, top_entry_name, alg);
   if (!foundInstrument)
-    foundInstrument = runLoadInstrument<T>(nexusfilename, localWorkspace, top_entry_name, alg, descriptor);
+    foundInstrument = runLoadInstrument<T>(nexusfilename, std::move(localWorkspace), top_entry_name, alg, descriptor);
   return foundInstrument;
 }
 

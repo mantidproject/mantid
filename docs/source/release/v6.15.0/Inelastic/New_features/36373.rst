@@ -1,0 +1,1 @@
+- Added a combo box to the :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` to swap between using the ``quasielasticbayes`` backend and the ``quickbayes`` backend. Changing this box won't effect the functionality of the ResNorm tab, which already uses ``quickbayes``.

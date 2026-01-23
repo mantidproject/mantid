@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest.mock import patch, create_autospec
-from numpy import allclose, sqrt, log, linspace, zeros_like, ones, trapezoid, array
+from numpy import allclose, log, zeros_like, ones, trapezoid, array, linspace, sqrt
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from mantid.api import AnalysisDataService, FileFinder
-from mantid.simpleapi import CreateWorkspace, FlatBackground, EditInstrumentGeometry, ConvertUnits
+from mantid.simpleapi import CreateWorkspace, FlatBackground, EditInstrumentGeometry, ConvertUnits, LinearBackground
 from mantid.geometry import CrystalStructure
 from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D, BackToBackGauss
 from plugins.algorithms.poldi_utils import load_poldi
@@ -184,6 +184,67 @@ class PawleyPattern1DTest(unittest.TestCase):
         pawley = PawleyPattern1D(ws_tof, [self.phase], profile=GaussianProfile())
         self.assertAlmostEqual(pawley.comp_func[0]["PeakCentre"], 57166, delta=1)
 
+    def test_fit_no_constraints(self):
+        pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile())
+        initial_comp_func = str(pawley.comp_func)
+        result = pawley.fit_no_constraints(IgnoreInvalidData=False, MaxIterations=2)
+        # assert initial parameters changed
+        self.assertNotEqual(initial_comp_func, str(result.Function))
+
+    def test_fit_background(self):
+        # create data with positive outlier
+        x = linspace(0, 1, 4)
+        pars = {"A0": 10, "A1": 5}
+        func = LinearBackground(**pars)
+        y = func(x)
+        y[-1] *= 1000  # outlier
+        ws_bg_with_outlier = CreateWorkspace(x, y, sqrt(y))
+
+        pawley = PawleyPattern1D(ws_bg_with_outlier, [self.phase], profile=GaussianProfile(), bg_func=func)
+        res = pawley.fit_background()
+
+        assert_array_almost_equal(res.x, list(pars.values()), decimal=2)
+
+    # MtdFuncMixin tests
+
+
+class MtdFuncMixinTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        dspacs = linspace(0.69, 4.15, 2460)
+        cls.ws = CreateWorkspace(
+            DataX=dspacs, DataY=zeros_like(dspacs), UnitX="dSpacing", YUnitLabel="Intensity (a.u.)", OutputWorkspace="ws"
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def setUp(self):
+        # can init a mixing so init class that inherits from it
+        self.phase = Phase.from_alatt(3 * [5.43094], "F d -3 m")  # can be changed by the class
+        self.phase.set_hkls([[1, 1, 1], [2, 2, 2]])
+        self.pawley = PawleyPattern1D(self.ws, [self.phase], profile=GaussianProfile(), bg_func=FlatBackground(A0=2))
+
+    def test_get_peak_centers(self):
+        assert_array_almost_equal(self.pawley.get_peak_centres(), array([3.14, 1.57]), decimal=2)
+
+    def test_get_peak_params(self):
+        assert_array_almost_equal(self.pawley.get_peak_params("Height"), array([125.64, 242.43]), decimal=2)
+
+    def test_get_peak_fwhm(self):
+        assert_array_almost_equal(self.pawley.get_peak_fwhm(), array([0.007, 0.004]), decimal=3)
+
+    def test_get_peak_intensities(self):
+        assert_array_almost_equal(self.pawley.get_peak_intensities(), ones(2), decimal=3)
+
+    def test_set_mantid_peak_param_isfree(self):
+        self.pawley.set_mantid_peak_param_isfree(["Height", "PeakCentre"])
+        self.assertEqual(
+            str(self.pawley.comp_func),
+            "composite=CompositeFunction,NumDeriv=true;name=Gaussian,Height=125.644,PeakCentre=3.13555,Sigma=0.00317517,ties=(Height=125.644,PeakCentre=3.13555);name=Gaussian,Height=242.433,PeakCentre=1.56778,Sigma=0.00164558,ties=(Height=242.433,PeakCentre=1.56778);name=FlatBackground,A0=2",
+        )
+
 
 class PawleyPattern2DTest(unittest.TestCase):
     @classmethod
@@ -289,6 +350,51 @@ class PawleyPattern2DTest(unittest.TestCase):
         mock_pawley1d.phases[0].nhkls.return_value = 1
         mock_pawley1d.intens = [ones(1)]
         return mock_pawley1d
+
+
+class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        fpath_data = FileFinder.getFullPath("poldi_448x500_chopper5k_silicon.txt")  # for np.loadtxt so need full path
+        cls.ws = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def setUp(self):
+        self.phase = Phase.from_alatt(3 * [5.43094], "F d -3 m")  # can be changed by the class
+        self.phase.set_hkls_from_dspac_limits(1.9, 3.5)  # 2 peaks
+        self.init_kwargs = {"ws": self.ws, "phases": [self.phase], "profile": GaussianProfile()}
+
+    def test_global_scale_false_no_bg(self):
+        pawley = PawleyPattern2D(**self.init_kwargs, global_scale=False).create_no_constriants_fit()
+        # note intensity on first peak fixed
+        assert_array_equal(pawley.get_isfree(), array([False, True, True, True, True, True]))
+
+    def test_global_scale_true_no_bg(self):
+        pawley = PawleyPattern2D(**self.init_kwargs, global_scale=True).create_no_constriants_fit()
+        # no intensities fixed
+        assert_array_equal(pawley.get_isfree(), ones(6, dtype=bool))
+
+    def test_global_scale_true_with_bg(self):
+        pawley = PawleyPattern2D(**self.init_kwargs, global_scale=True, bg_func=FlatBackground(A0=2)).create_no_constriants_fit()
+        # no intensities or bg fixed
+        assert_array_equal(pawley.get_isfree(), ones(7, dtype=bool))
+
+    def test_global_scale_false_with_bg(self):
+        pawley = PawleyPattern2D(**self.init_kwargs, global_scale=False, bg_func=FlatBackground(A0=2)).create_no_constriants_fit()
+        # note intensity on first peak fixed and bg fixed
+        assert_array_equal(pawley.get_isfree(), array([False, True, True, True, True, True, False]))
+
+    def test_fit(self):
+        # run fit with 2 func eval to check no error, result returned and params changed
+        pawley = PawleyPattern2D(**self.init_kwargs, global_scale=True).create_no_constriants_fit()
+        result = pawley.fit(max_nfev=2)
+
+        self.assertEqual(result.nfev, 2)
+        # assert parameters changed
+        self.assertFalse(allclose(pawley.initial_params, pawley.get_free_params()))
 
 
 if __name__ == "__main__":

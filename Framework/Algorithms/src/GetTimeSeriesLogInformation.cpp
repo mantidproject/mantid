@@ -33,8 +33,11 @@ DECLARE_ALGORITHM(GetTimeSeriesLogInformation)
 /** Constructor
  */
 GetTimeSeriesLogInformation::GetTimeSeriesLogInformation()
-    : API::Algorithm(), m_dataWS(), mRunStartTime(), mFilterT0(), mFilterTf(), m_intInfoMap(), m_dblInfoMap(),
-      m_log(nullptr), m_timeVec(), m_valueVec(), m_starttime(), m_endtime(), m_ignoreNegativeTime(false) {}
+    : API::Algorithm(), API::DeprecatedAlgorithm(), m_dataWS(), mRunStartTime(), mFilterT0(), mFilterTf(),
+      m_intInfoMap(), m_dblInfoMap(), m_log(nullptr), m_timeVec(), m_valueVec(), m_starttime(), m_endtime(),
+      m_ignoreNegativeTime(false) {
+  this->deprecatedDate("2025-11-21");
+}
 
 /** Definition of all input arguments
  */

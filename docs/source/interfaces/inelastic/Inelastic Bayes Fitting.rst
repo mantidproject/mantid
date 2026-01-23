@@ -25,6 +25,10 @@ Settings
 ?
   Opens this help page.
 
+Backend selection box
+  This drop down selects whether to use the ``quasielasticbayes`` or ``quickbayes``
+  package as the underlying model for the Quasi and Stretch tabs.
+
 Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.

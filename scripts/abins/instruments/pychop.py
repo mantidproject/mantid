@@ -1,10 +1,12 @@
-from typing import Optional, Tuple, Union
+from typing import Literal, Optional, Tuple, Union
 
 import numpy as np
 from pychop import Instruments as pychop_instruments
+from pydantic import validate_call
 
 from abins.constants import MILLI_EV_TO_WAVENUMBER
 from abins.logging import get_logger, Logger
+import abins.parameters
 from .directinstrument import DirectInstrument
 
 
@@ -68,3 +70,62 @@ class PyChopInstrument(DirectInstrument):
         fit = np.polyfit(frequencies_invcm, resolution_sigma * MILLI_EV_TO_WAVENUMBER, order)
 
         self._polyfits[self._e_init] = fit
+
+
+@validate_call
+def validate_pychop_params(
+    name: str, chopper: str, chopper_frequency: str, e_i: str, energy_units: Literal["meV", "cm-1"]
+) -> dict[str, str]:
+    """Check chopper parameters are in valid range
+
+    If the chopper speed is too high relative to incident this can lead to zero transmission
+
+    Input parameters are in string form, corresponding to Abins2D algorithm inputs
+
+    :param name: Instrument name e.g. "MARI"
+    :param name: Chopper setting e.g. "A"
+    :param name: Chopper frequency e.g. "350"
+    :param e_i: Incident energy in energy_units
+    :param energy_units: "meV" or "cm-1"
+
+    :return: issues dict for Algorithm validation, of form {"ParamName": "Error message"}
+
+    """
+    EPSILON = 1e-8  # Small reduction to energy range, used to avoid considering stationary neutrons
+
+    allowed_frequencies = abins.parameters.instruments[name]["chopper_allowed_frequencies"]
+    default_frequency = abins.parameters.instruments[name].get("chopper_frequency_default", None)
+
+    if chopper_frequency == "":
+        if default_frequency is None:
+            return {"ChopperFrequency": "This instrument does not have a default chopper frequency"}
+
+        chopper_frequency = default_frequency
+
+    try:
+        int(chopper_frequency)
+    except ValueError:
+        return {"ChopperFrequency": "Invalid chopper frequency, could not cast to integer"}
+
+    if int(chopper_frequency) not in allowed_frequencies:
+        return {
+            "ChopperFrequency": f"This chopper frequency is not valid for the instrument {name}. "
+            "Valid frequencies: " + ", ".join([str(freq) for freq in allowed_frequencies])
+        }
+
+    # At this stage, we have a complete set of input to pychop. Check if they allow neutron transmission.
+    energy = float(e_i)
+    if energy_units == "cm-1":
+        energy = energy / MILLI_EV_TO_WAVENUMBER
+    pychop_instrument = pychop_instruments.Instrument(name, chopper=chopper, freq=int(chopper_frequency))
+
+    widths = pychop_instrument.getResolution(Ei_in=energy, Etrans=[0, energy - EPSILON])
+
+    if np.any(np.isnan(widths)):
+        return {
+            "ChopperFrequency": (
+                "Cannot use this combination of chopper, frequency and incident energy. Use PyChop to identify a valid setting."
+            )
+        }
+
+    return {}

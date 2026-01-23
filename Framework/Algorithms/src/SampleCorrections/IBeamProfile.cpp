@@ -96,7 +96,7 @@ Geometry::IObject_sptr IBeamProfile::getIntersectionWithSample(const Geometry::I
   double zExtent = intersectionBox.zMax() - intersectionBox.zMin();
 
   std::string shapeXML = cuboidXML(xExtent, yExtent, zExtent, intersectionBox.centrePoint());
-  return Geometry::ShapeFactory().createShape(shapeXML);
+  return Geometry::ShapeFactory().createShape(std::move(shapeXML));
 }
 
 } // namespace Algorithms

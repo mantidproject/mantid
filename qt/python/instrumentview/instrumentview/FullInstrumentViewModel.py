@@ -11,8 +11,9 @@ from instrumentview.Projections.SphericalProjection import SphericalProjection
 from instrumentview.Projections.CylindricalProjection import CylindricalProjection
 from instrumentview.Projections.SideBySide import SideBySide
 from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.ConvertUnitsCalculator import ConvertUnitsCalculator
 
-from mantid.dataobjects import Workspace2D, PeaksWorkspace
+from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace
 from mantid.simpleapi import (
     CreateDetectorTable,
     ExtractSpectra,
@@ -26,6 +27,8 @@ from mantid.simpleapi import (
     MaskDetectors,
     RenameWorkspace,
     CloneWorkspace,
+    CreatePeaksWorkspace,
+    AddPeak,
 )
 from mantid.api import MatrixWorkspace
 from itertools import groupby
@@ -56,6 +59,8 @@ class FullInstrumentViewModel:
         self._workspace_x_unit = x_unit.unitID()
         self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
         self._selected_peaks_workspaces = []
+        self._instrument_view_peaks_ws_name = f"instrument_view_peaks_{self._workspace.name()}"
+        self._unit_converter = ConvertUnitsCalculator(self._workspace)
 
         component_info = self._workspace.componentInfo()
         self._sample_position = np.array(component_info.samplePosition()) if component_info.hasSample() else np.zeros(3)
@@ -75,6 +80,7 @@ class FullInstrumentViewModel:
         self._spherical_positions = np.transpose(np.vstack([r, theta, phi]))
         self._detector_positions_3d = detector_info_table.columnArray("Position")
         self._workspace_indices = detector_info_table.columnArray("Index")
+        self._spectrum_nos = detector_info_table.columnArray("Spectrum No")
         # Array of strings 'yes', 'no' and 'n/a'
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
@@ -134,6 +140,10 @@ class FullInstrumentViewModel:
         return self._detector_ids[self.is_pickable]
 
     @property
+    def spectrum_nos(self) -> np.ndarray:
+        return self._spectrum_nos[self.is_pickable]
+
+    @property
     def monitor_positions(self) -> np.ndarray:
         return self._monitor_positions
 
@@ -148,6 +158,10 @@ class FullInstrumentViewModel:
     @property
     def picked_detector_ids(self) -> np.ndarray:
         return self._detector_ids[self._detector_is_picked]
+
+    @property
+    def picked_spectrum_nos(self) -> np.ndarray:
+        return self._spectrum_nos[self._is_valid & self._detector_is_picked]
 
     @property
     def picked_workspace_indices(self) -> np.ndarray:
@@ -346,31 +360,91 @@ class FullInstrumentViewModel:
     def set_peaks_workspaces(self, peaks_workspace_names: list[str]) -> None:
         self._selected_peaks_workspaces = AnalysisDataService.Instance().retrieveWorkspaces(peaks_workspace_names)
 
-    def peak_overlay_points(self) -> list[list[DetectorPeaks]]:
+    def peak_overlay_points(self) -> dict[str : list[DetectorPeaks]]:
         detector_info = self._workspace.detectorInfo()
-        peaks_grouped_by_ws = []
+        peaks_grouped_by_ws = {}
         for pws in self._selected_peaks_workspaces:
             peaks = []
             peaks_dict = pws.toDict()
             detector_ids = peaks_dict["DetID"]
-            hkls = zip(peaks_dict["h"], peaks_dict["k"], peaks_dict["l"])
+            workspace_indices = self.workspace.getIndicesFromDetectorIDs(detector_ids)
+            spectrum_nos = self._spectrum_nos[workspace_indices]
+            hkls = zip(peaks_dict["h"], peaks_dict["k"], peaks_dict["l"], strict=True)
             positions = [np.array(detector_info.position(detector_info.indexOf(id))) for id in detector_ids]
             tofs = peaks_dict["TOF"]
             dspacings = peaks_dict["DSpacing"]
             wavelengths = peaks_dict["Wavelength"]
             peaks += [
-                Peak(det_id, v, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
-                for (det_id, v, hkl, tof, dspacing, wavelength) in zip(detector_ids, positions, hkls, tofs, dspacings, wavelengths)
+                Peak(det_id, spec_no, v, peak_idx, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
+                for (det_id, spec_no, v, peak_idx, hkl, tof, dspacing, wavelength) in zip(
+                    detector_ids, spectrum_nos, positions, range(len(tofs)), hkls, tofs, dspacings, wavelengths, strict=True
+                )
             ]
             # Combine peaks on the same detector
             detector_peaks = []
             # groupby groups consecutive matches, so must be sorted
-            peaks.sort(key=lambda x: x.detector_id)
-            for det_id, peaks_for_id in groupby(peaks, lambda x: x.detector_id):
-                if det_id in self.detector_ids:
-                    detector_peaks.append(DetectorPeaks(list(peaks_for_id)))
-            peaks_grouped_by_ws.append(detector_peaks)
+            peaks.sort(key=lambda x: x.spectrum_no)
+            for spec_no, peaks_for_spec in groupby(peaks, lambda x: x.spectrum_no):
+                if spec_no in self.spectrum_nos:
+                    detector_peaks.append(DetectorPeaks(list(peaks_for_spec)))
+
+            peaks_grouped_by_ws[pws.name()] = detector_peaks
         return peaks_grouped_by_ws
+
+    def _peaks_workspace_for_adding_new_peak(self, selected_peaks_workspaces: list[str]) -> PeaksWorkspace:
+        # If exactly one Peaks workspace in selected, add the peak to that workspace, otherwise
+        # use a special workspace, which we create if it doesn't exist already.
+        ads = AnalysisDataService.Instance()
+        if len(selected_peaks_workspaces) == 1:
+            return ads.retrieveWorkspaces(selected_peaks_workspaces)[0]
+        if ads.doesExist(self._instrument_view_peaks_ws_name):
+            return ads.retrieveWorkspaces([self._instrument_view_peaks_ws_name])[0]
+        peaks_ws = CreatePeaksWorkspace(self._workspace, 0, OutputWorkspace=self._instrument_view_peaks_ws_name, StoreInADS=False)
+        ads.addOrReplace(self._instrument_view_peaks_ws_name, peaks_ws)
+        return peaks_ws
+
+    def add_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> str:
+        peaks_ws = self._peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)
+        detector_id = self.picked_detector_ids[0]
+        AddPeak(peaks_ws, self._workspace, x_in_workspace_unit, int(detector_id))
+        return peaks_ws.name()
+
+    def delete_peak(self, x_in_workspace_unit: float) -> None:
+        detector_ids = self.picked_detector_ids
+        peaks_grouped_by_ws = self.peak_overlay_points()
+        closest_peak_by_ws = []
+        for peaks_ws in self._selected_peaks_workspaces:
+            if peaks_ws.name() not in peaks_grouped_by_ws:
+                continue
+            peaks_by_detector = peaks_grouped_by_ws[peaks_ws.name()]
+            picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in detector_ids]
+            if len(picked_detector_peaks) == 0:
+                continue
+            peaks = sum([p.peaks for p in picked_detector_peaks], [])
+            # Now we have all the peaks on the selected detector, so we need to find the
+            # closest peak to where the mouse was clicked
+            distance_to_click = np.abs([p.location_in_unit(self.workspace_x_unit) - x_in_workspace_unit for p in peaks])
+            index_of_closest = np.argmin(distance_to_click)
+            closest_peak = peaks[index_of_closest]
+            closest_peak_by_ws.append((peaks_ws, closest_peak.peak_index, distance_to_click[index_of_closest]))
+
+        if len(closest_peak_by_ws) == 0:
+            return
+
+        closest_over_all_workspaces = min(closest_peak_by_ws, key=lambda x: x[2])
+        closest_over_all_workspaces[0].removePeak(closest_over_all_workspaces[1])
+
+    def delete_peaks_on_all_selected_detectors(self) -> None:
+        peaks_grouped_by_ws = self.peak_overlay_points()
+        for peaks_ws in self._selected_peaks_workspaces:
+            if peaks_ws.name() not in peaks_grouped_by_ws:
+                continue
+            peaks_by_detector = peaks_grouped_by_ws[peaks_ws.name()]
+            picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in self.picked_detector_ids]
+            if len(picked_detector_peaks) == 0:
+                continue
+            peaks_to_remove = sum([[p.peak_index for p in detector.peaks] for detector in picked_detector_peaks], [])
+            peaks_ws.removePeaks(peaks_to_remove)
 
     def relative_detector_angle(self) -> float:
         picked_ids = self.picked_detector_ids
@@ -388,31 +462,41 @@ class FullInstrumentViewModel:
         q_lab = np.array([-np.sin(two_theta) * np.cos(phi), -np.sin(two_theta) * np.sin(phi), 1 - np.cos(two_theta)])
         return q_lab / np.linalg.norm(q_lab)
 
-    def clear_stored_masks(self) -> None:
-        self._cached_masks_map.clear()
-
     def add_new_detector_mask(self, new_mask: list[bool]) -> str:
-        new_key = f"Mask {len(self._cached_masks_map) + 1}"
+        new_key = f"Mask {len(self._cached_masks_map) + 1} (unsaved)"
         mask_to_save = self._is_masked_in_ws.copy()
         mask_to_save[self.is_pickable] = new_mask
         self._cached_masks_map[new_key] = mask_to_save
         return new_key
 
     def apply_detector_masks(self, mask_keys: list[str]) -> None:
-        if not mask_keys:
-            mask_total = self._is_masked_in_ws
-        else:
-            mask_total = np.logical_or.reduce([self._cached_masks_map[key] for key in mask_keys])
-        self._is_masked = mask_total
+        ws_masks = [ws.extractY().flatten() for ws in self.get_mask_workspaces_in_ads() if ws.name() in mask_keys]
+        cached_masks = [self._cached_masks_map[key] for key in mask_keys if key in self._cached_masks_map.keys()]
+
+        if not ws_masks and not cached_masks:
+            self._is_masked = self._is_masked_in_ws
+            self._detector_is_picked[~self.is_pickable] = False
+            return
+
+        total_mask = np.logical_or.reduce(ws_masks + cached_masks)
+        self._is_masked = total_mask
         self._detector_is_picked[~self.is_pickable] = False
 
+    def clear_stored_masks(self) -> None:
+        self._cached_masks_map.clear()
+
+    @property
+    def cached_masks_keys(self) -> list[str]:
+        return list(self._cached_masks_map.keys())
+
     def save_mask_workspace_to_ads(self) -> None:
-        name_exported_ws = f"instrument_view_mask_{self._workspace.name()}"
         for i, v in enumerate(self._is_masked):
             self._mask_ws.dataY(i)[:] = v
 
         xmin, xmax = self._integration_limits
-        ExtractMaskToTable(self._mask_ws, Xmin=xmin, Xmax=xmax, OutputWorkspace=name_exported_ws)
+        # TODO: Figure out naming convention
+        ExtractMaskToTable(self._mask_ws, Xmin=xmin, Xmax=xmax, OutputWorkspace="MaskTable")
+        CloneWorkspace(self._mask_ws, OutputWorkspace="MaskWorkspace")
 
     def save_xml_mask(self, filename) -> None:
         if not filename:
@@ -423,7 +507,26 @@ class FullInstrumentViewModel:
 
     def overwrite_mask_to_current_workspace(self) -> None:
         # TODO: Check if copies are expensive with big workspaces
+        temp_ws = CloneWorkspace(self._workspace.name(), StoreInADS=False)
         temp_ws_name = f"__instrument_view_temp_{self._workspace.name()}"
-        CloneWorkspace(self._workspace.name(), OutputWorkspace=temp_ws_name)
+        AnalysisDataService.addOrReplace(temp_ws_name, temp_ws)
         MaskDetectors(temp_ws_name, MaskedWorkspace=self.mask_ws)
         RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._workspace.name())
+
+    def get_mask_workspaces_in_ads(self) -> list[MaskWorkspace]:
+        ads = AnalysisDataService.Instance()
+        workspaces_in_ads = ads.retrieveWorkspaces(ads.getObjectNames())
+        return [
+            pws
+            for pws in workspaces_in_ads
+            if "MaskWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
+        ]
+
+    def convert_units(self, source_unit: str, target_unit: str, picked_detector_index: int, value: float) -> float:
+        return self._unit_converter.convert(
+            source_unit,
+            target_unit,
+            self.picked_spectrum_nos[picked_detector_index],
+            self.picked_detector_ids[picked_detector_index],
+            value,
+        )

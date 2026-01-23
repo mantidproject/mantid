@@ -77,18 +77,15 @@ void LoadMcStas::exec() {
   H5::H5File file(filename, H5F_ACC_RDONLY, Nexus::H5Util::defaultFileAcc());
 
   Nexus::NexusDescriptor const descriptor(filename);
-  auto const &allEntries = descriptor.getAllEntries();
-
-  auto const iterSDS = allEntries.find(Nexus::SCIENTIFIC_DATA_SET);
-  if (iterSDS == allEntries.cend()) {
+  std::set<std::string> const entries = descriptor.allAddressesOfType(Nexus::SCIENTIFIC_DATA_SET);
+  if (entries.empty()) {
     throw std::runtime_error("Could not find any entries.");
   }
-  auto const &entries = iterSDS->second;
 
   const char *attributeName = "long_name";
   std::vector<std::string> eventEntries;
   std::map<std::string, std::vector<std::string>> histogramEntries;
-  for (auto &entry : entries) {
+  for (std::string const &entry : entries) {
     if (entry.find("/entry1/data") == std::string::npos) {
       continue;
     }

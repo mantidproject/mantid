@@ -30,6 +30,11 @@ dynamic susceptibility. The temperature is either extracted as the average of th
 values stored in the appropriate entry of the log attached to the workspace
 (user supplies the name of the entry) or user can pass a number for the temperature.
 
+One can use this formula to calculate the scattering at different temperature:
+
+:math:`\left(1-e^{-\frac{E}{k_B T_1}}\right) S(\mathbf{q}, E, T_1)=\left(1-e^{-\frac{E}{k_B T_2}}\right) S(\mathbf{q}, E, T_2)`
+
+
 [1] S. W. Lovesey - Theory of Neutron Scattering from Condensed Matter,
 vol 1
 

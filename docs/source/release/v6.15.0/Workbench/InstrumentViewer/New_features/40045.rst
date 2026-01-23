@@ -1,0 +1,1 @@
+- In the new Instrument View, one can now add and remove peaks. Peaks can either be added/removed individually, or all peaks on all selected detectors can be removed at once.

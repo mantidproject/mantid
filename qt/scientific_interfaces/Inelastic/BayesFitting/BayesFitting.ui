@@ -85,6 +85,40 @@
        </spacer>
       </item>
       <item>
+       <widget class="QLabel" name="warningLabel">
+        <property name="styleSheet">
+         <string notr="true">QLabel { color : red; }</string>
+        </property>
+        <property name="text">
+         <string>Warning: quasielasticbayes (old Fortran library) is deprecated
+and will be removed in a future release</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::AutoText</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="backendChoice">
+        <property name="toolTip">
+         <string>Old Fortran library</string>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>quasielasticbayes</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>quickbayes</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pbManageDirs">
         <property name="text">
          <string>Manage Directories</string>
@@ -97,7 +131,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="../../../MantidPlot/icons/icons.qrc"/>
+  <include location="../../../icons/resources/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

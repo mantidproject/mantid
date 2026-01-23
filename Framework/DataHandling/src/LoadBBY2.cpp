@@ -498,7 +498,7 @@ void LoadBBY2::loadInstrumentParameters(const Nexus::NXEntry &entry, uint64_t st
     try {
       pDoc = pParser.parse(parameterFilename);
     } catch (...) {
-      throw Kernel::Exception::FileError("Unable to parse File:", parameterFilename);
+      throw Kernel::Exception::FileError("Unable to parse File:", std::move(parameterFilename));
     }
     NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
     Node *pNode = it.nextNode();
@@ -512,7 +512,7 @@ void LoadBBY2::loadInstrumentParameters(const Nexus::NXEntry &entry, uint64_t st
           if (cNode->nodeName() == "value") {
             auto cElem = dynamic_cast<Poco::XML::Element *>(cNode);
             std::string value = cElem->getAttribute("val");
-            allParams[paramName] = value;
+            allParams[paramName] = std::move(value);
           }
         }
       }
@@ -583,7 +583,7 @@ void LoadBBY2::loadInstrumentParameters(const Nexus::NXEntry &entry, uint64_t st
               if (isNumeric(defValue))
                 logParams[logTag] = std::stod(defValue);
               else
-                logStrings[logTag] = defValue;
+                logStrings[logTag] = std::move(defValue);
               if (!hdfTag.empty())
                 g_log.warning() << "Cannot find hdf parameter " << hdfTag << ", using default.\n";
             }

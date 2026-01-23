@@ -9,7 +9,7 @@
 namespace MantidQt::CustomInterfaces {
 
 BayesFittingTab::BayesFittingTab(QWidget *parent, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner)
-    : InelasticTab(parent), m_propTree(new QtTreePropertyBrowser()) {
+    : InelasticTab(parent), m_propTree(new QtTreePropertyBrowser()), m_useQuickBayes(false) {
 
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
   // Temporary until all Bayes Fitting tabs are refactored as MVP

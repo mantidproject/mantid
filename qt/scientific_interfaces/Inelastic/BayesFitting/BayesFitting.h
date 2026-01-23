@@ -7,6 +7,7 @@
 #pragma once
 #include "ui_BayesFitting.h"
 
+#include "BayesBackendType.h"
 #include "BayesFittingTab.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
@@ -64,6 +65,10 @@ private:
   Poco::NObserver<BayesFitting, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
   /// Main interface window
   Ui::BayesFitting m_uiForm;
+  BayesBackendType m_backend;
+
+private slots:
+  void setBackend(const QString &text);
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

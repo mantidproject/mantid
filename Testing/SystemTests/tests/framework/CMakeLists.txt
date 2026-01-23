@@ -162,6 +162,7 @@ set(SYSTEST_NAMES
     POLDIFitPeaks2DTest.py
     POLDILoadRunsTest.py
     POLDIMergeTest.py
+    POLDIPawleyTest.py
     POLDIPeakSearchTest.py
     POLDITruncateDataTest.py
     PolrefExample.py

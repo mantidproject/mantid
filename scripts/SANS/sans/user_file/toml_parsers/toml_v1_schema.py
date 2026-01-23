@@ -95,6 +95,7 @@ class TomlSchemaV1Validator(TomlSchemaValidator):
             },
             "ROI": {"file"},
             "fitting": {"enabled": None, "function": None, "polynomial_order": None, "parameters": {"lambda_min", "lambda_max"}},
+            "wide_angle_correction": None,
         }
 
         normalisation_keys = {"monitor": {"*": {"spectrum_number", "background"}}, "all_monitors": {"background", "enabled"}}
@@ -102,7 +103,7 @@ class TomlSchemaV1Validator(TomlSchemaValidator):
         mask_keys = {
             "prompt_peak": {"start", "stop"},
             "mask_files": None,
-            "phi": {"mirror", "start", "stop"},
+            "phi": {"mirror", "start", "stop", "range"},
             "time": {"tof"},
             "spatial": {
                 "rear": {"detector_columns", "detector_rows", "detector_column_ranges", "detector_row_ranges"},
