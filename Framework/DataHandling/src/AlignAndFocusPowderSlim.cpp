@@ -207,7 +207,7 @@ void AlignAndFocusPowderSlim::init() {
   auto positiveIntValidator = std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
   positiveIntValidator->setLower(1);
   declareProperty(
-      std::make_unique<PropertyWithValue<int>>(PropertyNames::READ_SIZE_FROM_DISK, 1E7, positiveIntValidator),
+      std::make_unique<PropertyWithValue<int>>(PropertyNames::READ_SIZE_FROM_DISK, 10000000, positiveIntValidator),
       "Number of elements of time-of-flight or detector-id to read at a time. This is a maximum");
   setPropertyGroup(PropertyNames::READ_SIZE_FROM_DISK, CHUNKING_PARAM_GROUP);
   declareProperty(
