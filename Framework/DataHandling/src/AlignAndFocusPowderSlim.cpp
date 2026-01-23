@@ -192,12 +192,14 @@ void AlignAndFocusPowderSlim::init() {
                   "The units of the input X min, max and delta values. Output will always be TOF");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
                   "Specify binning behavior ('Logarithmic')");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(PropertyNames::ALLOW_LOGS),
-                  "If specified, only these logs will be loaded from the file");
+  declareProperty(
+      std::make_unique<ArrayProperty<std::string>>(PropertyNames::ALLOW_LOGS),
+      "If specified, only these logs will be loaded from the file. Setting this will automatically override the "
+      "default LogBlockList");
   declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       PropertyNames::BLOCK_LOGS,
                       std::vector<std::string>{"Phase\\*", "Speed\\*", "BL\\*:Chop:\\*", "chopper\\*TDC"}),
-                  "If specified, these logs will not be loaded from the file");
+                  "If specified, these logs will not be loaded from the file. Set as empty list ``[]`` to disable");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::Workspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
@@ -260,9 +262,7 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
   }
 
   // only specify allow or block list for logs
-  std::vector<std::string> allow_list = getProperty(PropertyNames::ALLOW_LOGS);
-  std::vector<std::string> block_list = getProperty(PropertyNames::BLOCK_LOGS);
-  if (!allow_list.empty() && !block_list.empty()) {
+  if ((!isDefault(PropertyNames::ALLOW_LOGS)) && (!isDefault(PropertyNames::BLOCK_LOGS))) {
     errors[PropertyNames::ALLOW_LOGS] = "Cannot specify both allow and block lists";
     errors[PropertyNames::BLOCK_LOGS] = "Cannot specify both allow and block lists";
   }
@@ -343,7 +343,10 @@ void AlignAndFocusPowderSlim::exec() {
 
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
   const std::vector<std::string> &allow_logs = getProperty(PropertyNames::ALLOW_LOGS);
-  const std::vector<std::string> &block_logs = getProperty(PropertyNames::BLOCK_LOGS);
+  std::vector<std::string> block_logs = getProperty(PropertyNames::BLOCK_LOGS);
+  if ((isDefault(PropertyNames::BLOCK_LOGS)) && (!isDefault(PropertyNames::ALLOW_LOGS))) {
+    block_logs.clear();
+  }
   int nPeriods{1};
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog, allow_logs,
                                                          block_logs);
