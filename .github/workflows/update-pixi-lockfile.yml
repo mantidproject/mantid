@@ -33,7 +33,7 @@ jobs:
           title: Update pixi lockfile
           body-path: diff.md
           branch: update-pixi
-          base: main
+          base: release-next
           labels: |
             pixi
             Maintenance
