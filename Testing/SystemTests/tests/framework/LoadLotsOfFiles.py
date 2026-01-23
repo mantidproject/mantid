@@ -331,6 +331,3 @@ class LoadLotsOfFiles(systemtesting.MantidSystemTest):
             raise RuntimeError("Failed to load %d of %d files" % (len(failed), len(files)))
         else:
             print("Successfully loaded %d files" % len(files))
-
-    def excludeInPullRequests(self):
-        return True
