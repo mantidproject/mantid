@@ -80,6 +80,12 @@ public:
   static unsigned short constexpr BINARY = 0xF1u;  // 11 0001 = 0xF1
   static unsigned short constexpr BAD = 0xFFu;     // 11 1111 = 0xFF
 
+  // for &'ing with a type to check what it is:
+  // type & FLOAT_TYPE will return 0 if it is not a float
+  // type & SPECIAL_TYPE will return 0 of it is not a special (char, binary, or bad)
+  static unsigned short constexpr FLOAT_TYPE = 0x20u;
+  static unsigned short constexpr SPECIAL_TYPE = 0x80u;
+
 private:
   int m_val;
   static int validate_val(int const x);

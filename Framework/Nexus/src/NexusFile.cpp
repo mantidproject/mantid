@@ -1132,7 +1132,7 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
 void File::getDataCoerce(vector<int> &data) {
   Info info = this->getInfo();
   // if it is not a float or special
-  if (!(info.type & 0x20u) && !(info.type & 0x80u)) {
+  if (!(info.type & NXnumtype::FLOAT_TYPE) && !(info.type & NXnumtype::SPECIAL_TYPE)) {
     if (H5Iis_valid(m_current_data_id) <= 0) {
       throw NXEXCEPTION("No dataset open");
     }
@@ -1164,7 +1164,7 @@ void File::getDataCoerce(vector<int> &data) {
 void File::getDataCoerce(vector<double> &data) {
   Info info = this->getInfo();
   // if it is not a special
-  if (!(info.type & 0x80)) {
+  if (!(info.type & NXnumtype::SPECIAL_TYPE)) {
     if (H5Iis_valid(m_current_data_id) <= 0) {
       throw NXEXCEPTION("No dataset open");
     }
