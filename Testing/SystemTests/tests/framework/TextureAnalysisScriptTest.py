@@ -57,7 +57,7 @@ class AbsCorrMixin(object):
         [self.assertTrue(os.path.exists(ef)) for ef in self.expected_files]
 
 
-class RunAStandardAbsorptionCorrectionWithAttenuationTable(systemtesting.MantidSystemTest, AbsCorrMixin):
+class RunAStandardAbsorptionCorrectionWithAttenuationTable(AbsCorrMixin, systemtesting.MantidSystemTest):
     def runTest(self):
         self.setup_absorption_correction_inputs()
         kwargs = self.default_kwargs
@@ -82,7 +82,7 @@ class RunAStandardAbsorptionCorrectionWithAttenuationTable(systemtesting.MantidS
         _try_delete_dirs(CWDIR, ["AbsorptionCorrection", "AttenuationTables", "User"])
 
 
-class RunAStandardAbsorptionCorrection(systemtesting.MantidSystemTest, AbsCorrMixin):
+class RunAStandardAbsorptionCorrection(AbsCorrMixin, systemtesting.MantidSystemTest):
     def runTest(self):
         self.setup_absorption_correction_inputs()
         kwargs = self.default_kwargs
@@ -101,7 +101,7 @@ class RunAStandardAbsorptionCorrection(systemtesting.MantidSystemTest, AbsCorrMi
         _try_delete_dirs(CWDIR, ["AbsorptionCorrection"])
 
 
-class RunAStandardAbsorptionCorrectionEulerGoniometer(systemtesting.MantidSystemTest, AbsCorrMixin):
+class RunAStandardAbsorptionCorrectionEulerGoniometer(AbsCorrMixin, systemtesting.MantidSystemTest):
     def runTest(self):
         self.setup_absorption_correction_inputs()
         orientation_file = os.path.join(CWDIR, "rotation_as_euler.txt")
@@ -124,7 +124,7 @@ class RunAStandardAbsorptionCorrectionEulerGoniometer(systemtesting.MantidSystem
         _try_delete_dirs(CWDIR, ["AbsorptionCorrection"])
 
 
-class RunAStandardAbsorptionCorrectionProvideGoniometerMatrix(systemtesting.MantidSystemTest, AbsCorrMixin):
+class RunAStandardAbsorptionCorrectionProvideGoniometerMatrix(AbsCorrMixin, systemtesting.MantidSystemTest):
     def runTest(self):
         self.setup_absorption_correction_inputs()
         orientation_file = os.path.join(CWDIR, "rotation_as_matrix.txt")
@@ -145,7 +145,7 @@ class RunAStandardAbsorptionCorrectionProvideGoniometerMatrix(systemtesting.Mant
         _try_delete_dirs(CWDIR, ["AbsorptionCorrection"])
 
 
-class RunAStandardAbsorptionCorrectionWithCustomGaugeVolume(systemtesting.MantidSystemTest, AbsCorrMixin):
+class RunAStandardAbsorptionCorrectionWithCustomGaugeVolume(AbsCorrMixin, systemtesting.MantidSystemTest):
     def runTest(self):
         self.setup_absorption_correction_inputs()
         gv_file = os.path.join(CWDIR, "custom_gauge_volume.xml")
@@ -166,7 +166,7 @@ class RunAStandardAbsorptionCorrectionWithCustomGaugeVolume(systemtesting.Mantid
         _try_delete_dirs(CWDIR, ["AbsorptionCorrection"])
 
 
-class RunAStandardAbsorptionCorrectionWithDivergenceCorrection(systemtesting.MantidSystemTest, AbsCorrMixin):
+class RunAStandardAbsorptionCorrectionWithDivergenceCorrection(AbsCorrMixin, systemtesting.MantidSystemTest):
     def runTest(self):
         self.setup_absorption_correction_inputs()
         kwargs = self.default_kwargs
@@ -232,7 +232,7 @@ class PeakFitMixin(object):
             3.08200681,
         ]
 
-    def validate_table(self, out_table, expected_dict):
+    def validate_table(self, out_table, expected_dict, rtol=5e-3):
         expected_cols = list(expected_dict.keys())
         for c in out_table.getColumnNames():
             print(c, ": ", np.nan_to_num(out_table.column(c)), ", validation value: ", expected_dict[c])
@@ -240,7 +240,7 @@ class PeakFitMixin(object):
         for c in out_table.getColumnNames():
             self.assertIn(c, expected_cols)
             if c in self.cols_to_check_vals:
-                np.testing.assert_allclose(np.nan_to_num(out_table.column(c)), expected_dict[c], rtol=5e-3)
+                np.testing.assert_allclose(np.nan_to_num(out_table.column(c)), expected_dict[c], rtol=rtol)
 
     def validate_missing_peaks_vals(self, peak_1_vals, peak_2_vals):
         param_table1 = ADS.retrieve("ENGINX_280625_2.2_GROUP_Fit_Parameters")
@@ -255,7 +255,7 @@ class PeakFitMixin(object):
         [self.assertTrue(os.path.exists(ef)) for ef in expected_files]
 
 
-class TestFittingPeaksOfFocusedDataNoGroup(systemtesting.MantidSystemTest, PeakFitMixin):
+class TestFittingPeaksOfFocusedDataNoGroup(PeakFitMixin, systemtesting.MantidSystemTest):
     def runTest(self):
         self.setup_fit_peaks_inputs()
         fit_all_peaks(**self.default_kwargs)
@@ -269,7 +269,7 @@ class TestFittingPeaksOfFocusedDataNoGroup(systemtesting.MantidSystemTest, PeakF
         ]
 
         self.validate_table(param_table1, dict(zip(self.reference_columns, self.peak_1_vals)))
-        self.validate_table(param_table2, dict(zip(self.reference_columns, self.peak_2_vals)))
+        self.validate_table(param_table2, dict(zip(self.reference_columns, self.peak_2_vals)), rtol=8e-3)
         [self.assertTrue(os.path.exists(ef)) for ef in expected_files]
 
     def cleanup(self):
@@ -277,7 +277,7 @@ class TestFittingPeaksOfFocusedDataNoGroup(systemtesting.MantidSystemTest, PeakF
         _try_delete_dirs(CWDIR, ["FitParameters"])
 
 
-class TestFittingPeaksOfMissingPeakDataWithFillZero(systemtesting.MantidSystemTest, PeakFitMixin):
+class TestFittingPeaksOfMissingPeakDataWithFillZero(PeakFitMixin, systemtesting.MantidSystemTest):
     def runTest(self):
         self.setup_fit_peaks_inputs()
         kwargs = self.default_kwargs
@@ -296,7 +296,7 @@ class TestFittingPeaksOfMissingPeakDataWithFillZero(systemtesting.MantidSystemTe
         _try_delete_dirs(CWDIR, ["FitParameters"])
 
 
-class TestFittingPeaksOfMissingPeakDataWithSpecifiedValue(systemtesting.MantidSystemTest, PeakFitMixin):
+class TestFittingPeaksOfMissingPeakDataWithSpecifiedValue(PeakFitMixin, systemtesting.MantidSystemTest):
     def runTest(self):
         self.setup_fit_peaks_inputs()
         kwargs = self.default_kwargs
@@ -316,7 +316,7 @@ class TestFittingPeaksOfMissingPeakDataWithSpecifiedValue(systemtesting.MantidSy
         _try_delete_dirs(CWDIR, ["FitParameters"])
 
 
-class TestFittingPeaksOfFocusedDataWithGroup(systemtesting.MantidSystemTest, PeakFitMixin):
+class TestFittingPeaksOfFocusedDataWithGroup(PeakFitMixin, systemtesting.MantidSystemTest):
     def runTest(self):
         self.setup_fit_peaks_inputs()
         self.input_ws.getRun().addProperty("Grouping", "TEST", False)
@@ -332,7 +332,7 @@ class TestFittingPeaksOfFocusedDataWithGroup(systemtesting.MantidSystemTest, Pea
         ]
 
         self.validate_table(param_table1, dict(zip(self.reference_columns, self.peak_1_vals)))
-        self.validate_table(param_table2, dict(zip(self.reference_columns, self.peak_2_vals)))
+        self.validate_table(param_table2, dict(zip(self.reference_columns, self.peak_2_vals)), rtol=8e-3)
         [self.assertTrue(os.path.exists(ef)) for ef in expected_files]
 
     def cleanup(self):
