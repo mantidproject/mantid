@@ -25,12 +25,7 @@ namespace DataObjects {
  * @author Janik Zikovsky
  * @date 2011-04-25 18:06:32.952258
  */
-// Apply visibility attribute for non-MSVC builds (needed for clang/OSX).
-#if defined(_MSC_VER)
-template <class T> class PeakColumn : public Mantid::API::Column {
-#else
 template <class T> class MANTID_DATAOBJECTS_DLL PeakColumn : public Mantid::API::Column {
-#endif
 
 public:
   /// Construct a column with a reference to the peaks list, a name & type
