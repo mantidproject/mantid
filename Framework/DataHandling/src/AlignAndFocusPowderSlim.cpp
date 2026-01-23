@@ -346,6 +346,7 @@ void AlignAndFocusPowderSlim::exec() {
   std::vector<std::string> block_logs = getProperty(PropertyNames::BLOCK_LOGS);
   if ((isDefault(PropertyNames::BLOCK_LOGS)) && (!isDefault(PropertyNames::ALLOW_LOGS))) {
     block_logs.clear();
+    g_log.notice() << "User provided LogAllowList, LogBlockList being ignored\n";
   }
   int nPeriods{1};
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog, allow_logs,
