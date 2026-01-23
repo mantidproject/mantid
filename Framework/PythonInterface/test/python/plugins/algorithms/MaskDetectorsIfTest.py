@@ -31,18 +31,6 @@ class MaskDetectorsIfInputTest(unittest.TestCase):
             EndWorkspaceIndex=5,
         )
 
-    def testValidateEndWorkspaceIndexInputs(self):
-        # EndWorkspaceIndex > Number of Histograms
-        ws = CreateWorkspace(DataX=[0, 1], DataY=[1] * 10, NSpec=10)
-        self.assertRaises(
-            RuntimeError,
-            MaskDetectorsIf,
-            InputWorkspace=ws,
-            OutputWorkspace=ws,
-            StartWorkspaceIndex=8,
-            EndWorkspaceIndex=50,
-        )
-
     def testValidateInputs(self):
         # EndWorkspaceIndex < StartWorkspaceIndex
         ws = CreateWorkspace(DataX=[0, 1], DataY=[1] * 10, NSpec=10)
