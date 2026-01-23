@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import MaskDetectorsIf, LoadNexus
+from mantid.simpleapi import MaskDetectorsIf, CreateWorkspace
 import tempfile
 
 # tests run x10 slower with this on, but it may be useful to track down issues refactoring
@@ -21,38 +21,38 @@ class MaskDetectorsIfInputTest(unittest.TestCase):
 
     def testValidateStartWorkspaceIndexInputs(self):
         # StartWorkspaceIndex > Number of Histograms
-        ws = LoadNexus("GenerateFlatCellWorkspaceLOQOutput.nxs")
+        ws = CreateWorkspace(DataX=[0, 1], DataY=[1] * 10, NSpec=10)
         self.assertRaises(
             RuntimeError,
             MaskDetectorsIf,
             InputWorkspace=ws,
             OutputWorkspace="TestWs",
-            StartWorkspaceIndex=80000000,
+            StartWorkspaceIndex=80,
             EndWorkspaceIndex=5,
         )
 
     def testValidateEndWorkspaceIndexInputs(self):
         # EndWorkspaceIndex > Number of Histograms
-        ws = LoadNexus("GenerateFlatCellWorkspaceLOQOutput.nxs")
+        ws = CreateWorkspace(DataX=[0, 1], DataY=[1] * 10, NSpec=10)
         self.assertRaises(
             RuntimeError,
             MaskDetectorsIf,
             InputWorkspace=ws,
             OutputWorkspace="TestWs",
-            StartWorkspaceIndex=80,
-            EndWorkspaceIndex=500000000,
+            StartWorkspaceIndex=8,
+            EndWorkspaceIndex=50,
         )
 
     def testValidateInputs(self):
         # EndWorkspaceIndex < StartWorkspaceIndex
-        ws = LoadNexus("GenerateFlatCellWorkspaceLOQOutput.nxs")
+        ws = CreateWorkspace(DataX=[0, 1], DataY=[1] * 10, NSpec=10)
         self.assertRaises(
             RuntimeError,
             MaskDetectorsIf,
             InputWorkspace=ws,
             OutputWorkspace="TestWs",
-            StartWorkspaceIndex=80,
-            EndWorkspaceIndex=50,
+            StartWorkspaceIndex=8,
+            EndWorkspaceIndex=5,
         )
 
 
