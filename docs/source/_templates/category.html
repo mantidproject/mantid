@@ -3,6 +3,9 @@
 {% extends "layout.html" %}
 
 {% macro split_to_three_columns(item_list) -%}
+{# Split a list into three columns #}
+{# Uses bootstrap grid system along with slice() to divide input list #}
+{# It currently assumes the items in the list are mantiddoc.directives.categories.PageRef classes #}
     <div id="category-grid" class="row">
     {% set sections_seen = [] %}
     {% for column in item_list|slice(3) %}
