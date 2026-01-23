@@ -262,7 +262,8 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
   }
 
   // only specify allow or block list for logs
-  if ((!isDefault(PropertyNames::ALLOW_LOGS)) && (!isDefault(PropertyNames::BLOCK_LOGS))) {
+  std::vector<std::string> block_logs = getProperty(PropertyNames::BLOCK_LOGS);
+  if ((!isDefault(PropertyNames::ALLOW_LOGS)) && (!isDefault(PropertyNames::BLOCK_LOGS) && !block_logs.empty())) {
     errors[PropertyNames::ALLOW_LOGS] = "Cannot specify both allow and block lists";
     errors[PropertyNames::BLOCK_LOGS] = "Cannot specify both allow and block lists";
   }
