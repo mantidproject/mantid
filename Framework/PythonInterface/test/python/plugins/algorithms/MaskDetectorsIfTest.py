@@ -26,7 +26,7 @@ class MaskDetectorsIfInputTest(unittest.TestCase):
             RuntimeError,
             MaskDetectorsIf,
             InputWorkspace=ws,
-            OutputWorkspace="TestWs",
+            OutputWorkspace=ws,
             StartWorkspaceIndex=80,
             EndWorkspaceIndex=5,
         )
@@ -38,7 +38,7 @@ class MaskDetectorsIfInputTest(unittest.TestCase):
             RuntimeError,
             MaskDetectorsIf,
             InputWorkspace=ws,
-            OutputWorkspace="TestWs",
+            OutputWorkspace=ws,
             StartWorkspaceIndex=8,
             EndWorkspaceIndex=50,
         )
@@ -50,7 +50,7 @@ class MaskDetectorsIfInputTest(unittest.TestCase):
             RuntimeError,
             MaskDetectorsIf,
             InputWorkspace=ws,
-            OutputWorkspace="TestWs",
+            OutputWorkspace=ws,
             StartWorkspaceIndex=8,
             EndWorkspaceIndex=5,
         )
