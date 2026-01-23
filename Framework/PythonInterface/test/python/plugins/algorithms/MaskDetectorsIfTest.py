@@ -17,10 +17,9 @@ class MaskDetectorsIfInputTest(unittest.TestCase):
                 InputWorkspace=ws,
                 OutputWorkspace=ws,
                 StartWorkspaceIndex=80,
-                EndWorkspaceIndex=5,
             )
-        assert "StartWorkspaceIndex should be greater than or equal to 0 and less than 9. Value provided is invalid." in str(
-            context.exception
+        self.assertIn(
+            "StartWorkspaceIndex should be greater than or equal to 0 and less than 9. Value provided is invalid.", str(context.exception)
         )
 
     def testValidateEndWorkspaceIndexInputs(self):
@@ -33,7 +32,7 @@ class MaskDetectorsIfInputTest(unittest.TestCase):
                 StartWorkspaceIndex=8,
                 EndWorkspaceIndex=50,
             )
-        assert "EndWorkspaceIndex should be greater than 0 and less than 10. Value provided is invalid." in str(context.exception)
+        self.assertIn("EndWorkspaceIndex should be greater than 0 and less than 10. Value provided is invalid.", str(context.exception))
 
     def testValidateInputs(self):
         # EndWorkspaceIndex < StartWorkspaceIndex
@@ -45,7 +44,10 @@ class MaskDetectorsIfInputTest(unittest.TestCase):
                 StartWorkspaceIndex=8,
                 EndWorkspaceIndex=5,
             )
-        assert "EndWorkspaceIndex should be more than StartWorkspaceIndex. Specify a value greater than 8." in str(context.exception)
+        self.assertIn(
+            "EndWorkspaceIndex: EndWorkspaceIndex should be more than StartWorkspaceIndex. Specify a value greater than 8.",
+            str(context.exception),
+        )
 
 
 if __name__ == "__main__":
