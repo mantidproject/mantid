@@ -3,7 +3,6 @@
 #table-of-contents {
   border: none;
 }
-
 /*-------------------- $NAV --------------------*/
 
 .navbar-version {
@@ -26,7 +25,8 @@ a:hover {
 
 body {
   font-size: 1.6em; /* 16px */
-  padding: 90px 0 0 0; /* leave room for navbar */
+  width: 100%;
+  padding: 90px max(2%, calc((100% - 1400px) / 2)) 0; /* leave room for navbar */
 }
 
 h1 {
@@ -102,6 +102,16 @@ th {
 
 .warning {
   overflow: hidden;
+}
+
+div.body {
+  width: 100%;
+  min-width: none;
+  max-width: none;
+}
+
+.row {
+  margin: 0;
 }
 
 /*-------------------- $MEDIA-QUERIES --------------------*/

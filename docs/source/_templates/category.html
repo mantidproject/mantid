@@ -1,14 +1,17 @@
+<!--
+  TODO: Center h3 headings when split into columns
+  TODO:
+-->
+
 {# Generates a better view for category pages #}
 
 {% extends "layout.html" %}
 
 {% macro split_to_three_columns(item_list) -%}
-{# Split list into 2 columns #}
-{# Uses bootstrap col-md-6 for each column along with slice(2) to divide input list #}
-{# It currently assumes the items in the list are mantiddoc.directives.categories.PageRef classes #}
-    <div class="row">
-    {% for column in item_list|slice(2) %}
-      <div class="col-md-6">
+    <div id="category-grid" class="row">
+    {% set sections_seen = [] %}
+    {% for column in item_list|slice(3) %}
+      <div class="col-lg-4 col-md-6 col-sm-12">
       {% set first = [True] %}
       {% set section = [0] %}
       {% for item in column %}
@@ -18,7 +21,13 @@
           {% if first[0] != True %}
             </ul>
           {% endif %}
-          <h3 style="font-weight:bold">{{ section[0] }}</h3>
+          <h3 style="font-weight:bold; text-align: center;">
+            {{ section[0] }}
+            {% if section[0] in sections_seen %} (cont.){% endif %}
+          </h3>
+          {% if section[0] not in sections_seen %}
+            {% set _ = sections_seen.append(section[0]) %}
+          {% endif %}
           <ul>
         {% endif %}
         <li><a href="{{ item.link(outpath) }}">{{ item.name }}</a></li>
