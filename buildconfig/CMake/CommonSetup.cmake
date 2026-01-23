@@ -75,11 +75,7 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   endif()
 
   set(Boost_VERBOSE "ON")
-  if(MPI_BUILD AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    find_package(Boost CONFIG REQUIRED COMPONENTS date_time regex mpi serialization filesystem system)
-  else()
-    find_package(Boost CONFIG REQUIRED COMPONENTS date_time regex serialization filesystem system)
-  endif()
+  find_package(Boost CONFIG REQUIRED COMPONENTS date_time regex serialization filesystem system)
   add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
   # Need this defined globally for our log time values
   add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
@@ -265,6 +261,7 @@ endif()
 # ######################################################################################################################
 if(MPI_BUILD AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
   find_package(MPI REQUIRED)
+  find_package(Boost CONFIG REQUIRED COMPONENTS mpi)
 endif()
 
 # ######################################################################################################################
