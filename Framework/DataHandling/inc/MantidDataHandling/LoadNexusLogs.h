@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/NexusFileLoader.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidNexus/NexusFile.h"
 #include <vector>
@@ -34,7 +34,7 @@ data.</LI>
 
 @author Martyn Gigg, Tessella plc
 */
-class MANTID_DATAHANDLING_DLL LoadNexusLogs : public API::NexusFileLoader {
+class MANTID_DATAHANDLING_DLL LoadNexusLogs : public API::Algorithm {
 public:
   /// Default constructor
   LoadNexusLogs();
@@ -52,13 +52,11 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Logs;DataHandling\\Nexus"; }
 
-  int confidence(Nexus::NexusDescriptor & /*descriptor*/) const override { return 0; }
-
 private:
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
-  void execLoader() override;
+  void exec() override;
 
   /// Load log data from a group
   void loadLogs(Nexus::File &file, const std::string &absolute_entry_name, const std::string &entry_class,

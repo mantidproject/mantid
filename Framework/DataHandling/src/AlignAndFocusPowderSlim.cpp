@@ -617,14 +617,11 @@ void AlignAndFocusPowderSlim::determineBanksToLoad(const Nexus::NexusDescriptor 
                                                    std::vector<std::string> &bankEntryNames,
                                                    std::vector<std::string> &bankNames) {
   // Now we want to go through all the bankN_event entries
-  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
-  auto itClassEntries = allEntries.find("NXevent_data");
 
-  if (itClassEntries == allEntries.end()) {
+  std::set<std::string> const classEntries = descriptor.allAddressesOfType("NXevent_data");
+  if (classEntries.empty()) {
     throw std::runtime_error("No NXevent_data entries found in file");
   }
-
-  const std::set<std::string> &classEntries = itClassEntries->second;
 
   const int bankNum = getProperty(PropertyNames::BANK_NUMBER);
 
