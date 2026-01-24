@@ -350,6 +350,11 @@ void adjustTimeOfFlightISISLegacy(Nexus::File &file, T localWorkspace, const std
   file.openAddress("/");
   file.openGroup(entry_name, "NXentry");
 
+  // not an ISIS file
+  if (!file.hasAddress("/" + entry_name + "/detector_1_events")) {
+    return;
+  }
+
   using string_map_t = std::map<std::string, std::string>;
   string_map_t entries = file.getEntries();
   // try if monitors have their own bins
