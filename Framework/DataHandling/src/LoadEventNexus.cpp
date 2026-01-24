@@ -1225,7 +1225,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     m_ws->setAllX(HistogramData::BinEdges{0.0, 1.0});
 
   // if there is time_of_flight load it
-  adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType);
+  if (doPerformISISEventShift(*m_file, m_top_entry_name)) {
+    adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType);
+  }
 
   if (m_is_time_filtered) {
     // events were filtered during read
