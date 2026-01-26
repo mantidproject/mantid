@@ -508,6 +508,7 @@ class FullInstrumentViewPresenter:
         x_in_workspace_unit = self._model.convert_units(self._view.current_selected_unit(), self._model.workspace_x_unit, 0, x)
         if self._peak_interaction_status == PeakInteractionStatus.Adding:
             peaks_ws = self._model.add_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
+            QAppThreadCall(self._view.refresh_peaks_ws_list)()
             QAppThreadCall(self._view.select_peaks_workspace)(peaks_ws)
         elif self._peak_interaction_status == PeakInteractionStatus.Deleting:
             self._model.delete_peak(x_in_workspace_unit)
