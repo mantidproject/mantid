@@ -13,13 +13,13 @@ plugin then becomes automatically available to use in the
 
 As the MD transformation factory is similar to the
 [Dynamic Factory](Dynamic Factory) used for converting
-[units](Unit Factory), the procedure of writing a custom [Convert To Md](ConvertToMD)
+[units](Unit Factory), the procedure of writing a custom `ConvertToMD`
 transformation is very similar to adding a new unit to use with
 [ConvertUnits](inv:mantid#algm-convertunits-v1) algorithm or writing a new
 algorithm to use with Mantid.
 
 The plugin interface deals with the task of converting a generic
-n-dimensional point of a [Matrix Workspace](MatrixWorkspace) into a generic m-dimensional
+n-dimensional point of a `MatrixWorkspace` into a generic m-dimensional
 point of an `MDWorkspace` using the necessary parameters.
 
 Examples of such transformations could be a conversion of signal and
@@ -34,7 +34,7 @@ of momentum transfer).
 
 ### Summary
 
-If a single point of a [Matrix Workspace](MatrixWorkspace) together with correspondent log
+If a single point of a `MatrixWorkspace together with correspondent log
 files can be converted into a single `MDEvent` (multidimensional point
 of MD workspace), a simple custom plugin can be written to do this
 transformation. The existing framework in this case deals with all other
@@ -43,14 +43,14 @@ workspace units into the units of the conversion formula, defining the
 target workspace, constructing `MDEvent` instances and adding these
 events to the `MDWorkspace`.
 
-A [Convert To Md](ConvertToMD) plugin implements [Mdtransf Interface](MDTransfInterface), so to write a
+A `ConvertToMD` plugin implements `MDTransfInterface`, so to write a
 plugin you must write a class which inherits from this interface and
-register this class with [Mdtransf Factory](MDTransfFactory). The macro to register the
+register this class with `Mdtransf Factory`. The macro to register the
 class with the factory is similar to the macro used to register an
 algorithm with Mantid or a `Unit` class with the Unit conversion
 factory. The macro is located in `MDTransfFactory.h`.
 
-The class inheriting from [Mdtransf Interface](MDTransfInterface) performs two tasks:
+The class inheriting from `MDTransfInterface` performs two tasks:
 
 - Define the target `MDWorkspace` and its dimensions (both the number of
   dimensions and the dimension units).
@@ -63,25 +63,25 @@ functions which define the target MDWorkspace are called before the
 MDTransfFactory initialize function.** The `initialize` function accepts
 the `MDWorkspace` description and is expected to fully define all class
 variables used during the transformation from a point of a
-[Matrix Workspace](MatrixWorkspace) into an MD point of a target `MDWorkspace`.
+`MatrixWorkspace` into an MD point of a target `MDWorkspace`.
 
 ### Workflow
 
-This workflow is implemented in the [Convert To Md](ConvertToMD) algorithm's `exec()`
+This workflow is implemented in the `ConvertToMD` algorithm's `exec()`
 function.
 
 1.  Select a conversion and obtain additional algorithm parameters from
     the algorithm interface.
-2.  Build `MDWorkspace` description (call [Mdtransf Factory](MDTransfFactory) and ask for
+2.  Build `MDWorkspace` description (call `MDTransfFactory` and ask for
     the conversion plugin parameters).
 3.  Build new `MDWorkspace` on the basis of its description (if new
     workspace is requested or check if existing workspace is suitable).
 4.  Initialize the conversion plugin (using `MDWSDescription`).
 5.  Run the conversion itself by looping over detectors and their values
-    (use [Mdtransf Factory](MDTransfFactory) and selected conversion plugin to convert
+    (use `MDTransfFactory` and selected conversion plugin to convert
     each input point into output MD point).
 
-The [Mdtransformation Factory](MDTransformationFactory) is deployed twice during the conversion.
+The `MDTransformationFactory` is deployed twice during the conversion.
 The methods used during each conversion stage are clearly specified in
 `MDTransformationInterface.h`.
 
@@ -182,7 +182,7 @@ the detector's positions calculated by
 ## Complex Transformations
 
 It is possible that the approach of converting a single point of a
-[Matrix Workspace](MatrixWorkspace) into a single `MDEvent` is incorrect or inefficient
+`MatrixWorkspace` into a single `MDEvent` is incorrect or inefficient
 for what is required. In this situation, more complex changes to the
 conversion framework have to be implemented. To make the changes one
 needs to understand the interaction between different classes involved
@@ -196,21 +196,21 @@ presented below:
 alt="images/ConvertToMDClassDiagram.gif" />
 </figure>
 
-Two factories are involved into the conversion. [Mdtransf Factory](MDTransfFactory) deals
+Two factories are involved into the conversion. `MDTransfFactory` deals
 with different formulae to transform a single matrix point into an MD
-point. The other factory ([Conv To Mdselector](ConvToMDSelector) and the algorithm
-inheriting from [Conv To Mdbase](ConvToMDBase)) deal with different kinds of workspaces.
+point. The other factory (`ConvToMDSelector` and the algorithm
+inheriting from `ConvToMDBase`) deal with different kinds of workspaces.
 There are currently two workspaces that can be transformed into an
-`MDWorkspace`, namely [Event Workspace](EventWorkspace) and [Matrix Workspace](MatrixWorkspace).
-[Conv To Mdselector](ConvToMDSelector) identifies which algorithm to deploy based on the
+`MDWorkspace`, namely `EventWorkspace` and `MatrixWorkspace`.
+`ConvToMDSelector` identifies which algorithm to deploy based on the
 input workspace.
 
 If the input workspace has some special properties (e.g. a workspace
 obtained for an experiment with a rotating crystal, which has special
 units of time of flight with a special time series attached which
-describe a crystal position), the [Conv To Mdselector](ConvToMDSelector) should be modified
+describe a crystal position), the `ConvToMDSelector` should be modified
 to identify such a workspace and an additional class inheriting from
-[Conv To Mdbase](ConvToMDBase) to deal with such workspaces has to be written.
+`ConvToMDBase` to deal with such workspaces has to be written.
 
 There are two other important classes in the diagram. The first one is
 `MDWSDescription`, briefly mentioned above. The purpose of this class is
@@ -220,11 +220,11 @@ convenient for a plugin to use. The user who is writing his own plugin
 is expected to add all the information necessary for the plugin to work
 to this class.
 
-Another is the [Mdevent Wswrapper](MDEventWSWrapper). This class interfaces
-[Mdevent Workspace](MDEventWorkspace). The [Mdevent Workspace](MDEventWorkspace) is templated by number of
-dimensions and the purpose of [Mdevent Wswrapper](MDEventWSWrapper) is to provide a unified
+Another is the `MDEventWSWrapper`. This class interfaces
+`MDEventWorkspace`. The `MDEventWorkspace` is templated by number of
+dimensions and the purpose of `MDEventWSWrapper` is to provide a unified
 interface to this workspace regardless of the number of workspace
-dimensions calculated during the run. It uses [Mdevent Workspace](MDEventWorkspace) methods
-for which the `IMDWorkspace` interface to the [Mdevent Workspace](MDEventWorkspace) is not
+dimensions calculated during the run. It uses `MDEventWorkspace` methods
+for which the `IMDWorkspace` interface to the `MDEventWorkspace` is not
 efficient. You do not usually need to modify this class unless you are
-modifying [Mdevent Workspace](MDEventWorkspace) code.
+modifying `MDEventWorkspace` code.
