@@ -140,14 +140,22 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_has_unit.assert_called_once()
         self.assertEqual(self._presenter._UNIT_OPTIONS, units)
 
-    def test_model_refresh_on_correct_ws_replace(self):
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_model_refresh_on_correct_ws_replace(self, mock_update_plotter, mock_ads):
+        mock_ads_retrieve = MagicMock()
+        mock_ads.retrieve.return_value = mock_ads_retrieve
         self._model.setup = MagicMock()
         ws_name = self._model.workspace.name()
-        self._presenter.replace_workspace_callback(ws_name, None)
+        mock_ads_retrieve.name.return_value = ws_name
+        self._presenter._replace_workspace_callback(ws_name, None)
         self._model.setup.assert_called_once()
+        mock_update_plotter.assert_called_once()
         self._mock_view.setup.reset_mock()
-        self._presenter.replace_workspace_callback("not_my_workspace", None)
+        mock_update_plotter.reset_mock()
+        self._presenter._replace_workspace_callback("not_my_workspace", None)
         self._mock_view.setup.assert_not_called()
+        mock_update_plotter.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_peaks_workspace_selected")
     def test_reload_peaks_workspaces(self, mock_on_peaks_workspace_selected):
