@@ -1,0 +1,1 @@
+- :ref:`LoadEventNexus <algm-LoadEventNexus>` will no longer error when loading files originating outside of ISIS that contain the ``detector_1_events`` group.

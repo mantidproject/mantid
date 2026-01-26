@@ -279,7 +279,11 @@ void LoadNexusMonitors2::exec() {
 
     // a certain generation of ISIS files modify the time-of-flight
     const std::string currentAddress = file.getAddress();
-    adjustTimeOfFlightISISLegacy(file, eventWS, m_top_entry_name, "NXmonitor");
+
+    if (doPerformISISEventShift(file, m_top_entry_name)) {
+      adjustTimeOfFlightISISLegacy(file, eventWS, m_top_entry_name, "NXmonitor");
+    }
+
     file.openAddress(currentAddress); // reset to where it was earlier
   }
 

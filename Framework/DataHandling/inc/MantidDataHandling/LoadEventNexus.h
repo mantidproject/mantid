@@ -59,6 +59,8 @@ bool exists(Nexus::File &file, const std::string &name);
 
 bool exists(const std::map<std::string, std::string> &entries, const std::string &name);
 
+MANTID_DATAHANDLING_DLL bool doPerformISISEventShift(Nexus::File &file, std::string &topEntryName);
+
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
   Load Event Nexus files.
@@ -266,17 +268,6 @@ private:
 template <typename T>
 void makeTimeOfFlightDataFuzzy(Nexus::File &file, T localWorkspace, const std::string &binsName, size_t start_wi = 0,
                                size_t end_wi = 0) {
-  const std::string EVENT_TIME_SHIFT_TAG("event_time_offset_shift");
-  // first check if the data is already randomized
-  const auto entries = file.getEntries();
-  if (entries.find(EVENT_TIME_SHIFT_TAG) != entries.end()) {
-    std::string event_shift_type;
-    file.readData(EVENT_TIME_SHIFT_TAG, event_shift_type);
-    if (event_shift_type == "random") {
-      return;
-    }
-  }
-
   // if the data is not randomized randomize it uniformly within each bin
   file.openData(binsName);
   // time of flights of events
@@ -359,18 +350,8 @@ void adjustTimeOfFlightISISLegacy(Nexus::File &file, T localWorkspace, const std
   file.openAddress("/");
   file.openGroup(entry_name, "NXentry");
 
-  // not an ISIS file
-  if (!file.hasAddress("/" + entry_name + "/detector_1_events")) {
-    return;
-  }
-
   using string_map_t = std::map<std::string, std::string>;
   string_map_t entries = file.getEntries();
-
-  if (entries.find("detector_1_events") == entries.end()) { // not an ISIS file
-    return;
-  }
-
   // try if monitors have their own bins
   if (classType == "NXmonitor") {
     std::vector<std::string> bankNames;

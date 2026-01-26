@@ -72,6 +72,30 @@ const std::string BAD_PULSES_CUTOFF("FilterBadPulsesLowerCutoff");
 } // namespace PropertyNames
 } // namespace
 
+bool doPerformISISEventShift(Nexus::File &file, std::string &topEntryName) {
+  std::string detectorEventsAddr = std::format("/{}/detector_1_events", topEntryName);
+  if (!file.hasAddress(detectorEventsAddr)) { // not an isis file
+    return false;
+  }
+
+  const std::string eventTimeShiftAddr(detectorEventsAddr + "/event_time_offset_shift");
+  if (file.hasAddress(eventTimeShiftAddr)) { // almost certainly an isis file
+    std::string eventShiftType;
+    file.readData(eventTimeShiftAddr, eventShiftType);
+    return !(eventShiftType == "random"); // event correction already applied
+  }
+
+  const std::string programNameAddr = std::format("/{}/program_name", topEntryName);
+  if (file.hasAddress(programNameAddr)) { // check for ISIS control program
+    std::string program_name;
+    file.readData(programNameAddr, program_name);
+    if (program_name == "ISISICP.EXE") {
+      return true;
+    }
+  }
+  return false;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Empty default constructor
  */
@@ -1201,7 +1225,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     m_ws->setAllX(HistogramData::BinEdges{0.0, 1.0});
 
   // if there is time_of_flight load it
-  adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType);
+  if (doPerformISISEventShift(*m_file, m_top_entry_name)) {
+    adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType);
+  }
 
   if (m_is_time_filtered) {
     // events were filtered during read
