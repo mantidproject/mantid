@@ -491,20 +491,16 @@ class FullInstrumentViewModel:
         )
         booleans_from_ws = []
         for key in selected_keys:
-            if not any([key.startswith(ws.name()) for ws in ws_in_ads]):
-                continue
+            for ws in ws_in_ads:
+                if not key.startswith(ws.name()):
+                    continue
 
-            if kind is CurrentTab.Masking:
-                boolean_mask = AnalysisDataService.retrieve(key).extractY().flatten()
-            else:
-                boolean_mask = AnalysisDataService.retrieve(key[:-2]).extractY().flatten() == int(key[-1])
+                if kind is CurrentTab.Masking:
+                    boolean_mask = ws.extractY().flatten()
+                else:
+                    boolean_mask = np.isin(self._detector_ids, ws.getDetectorIDsOfGroup(int(key[-1])))
 
-            if boolean_mask.size < self._detector_ids.size:
-                new_boolean_mask = np.zeros_like(self._detector_ids)
-                new_boolean_mask[self._is_valid] = boolean_mask
-                boolean_mask = new_boolean_mask
-
-            booleans_from_ws.append(boolean_mask)
+                booleans_from_ws.append(boolean_mask)
         return booleans_from_ws
 
     def apply_detector_items(self, selected_keys: list[str], kind: CurrentTab):
@@ -591,7 +587,7 @@ class FullInstrumentViewModel:
         return [
             gws.name() + f"_{i}"
             for gws in self.get_workspaces_in_ads_of_type(GroupingWorkspace)
-            for i in range(1, int(gws.extractY().max()) + 1)
+            for i in range(1, gws.getGroupIDs().max() + 1)
         ]
 
     def save_grouping_to_ads(self):

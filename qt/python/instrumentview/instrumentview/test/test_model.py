@@ -624,6 +624,21 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.add_new_detector_key([True, True, False], CurrentTab.Grouping)
         np.testing.assert_array_equal(list(model._cached_rois_map.values())[0], np.array([True, True, False]))
 
+    def test_get_boolean_masks_from_workspaces_in_ads_grouping(self):
+        det_ids = [1, 2, 3, 4, 5]
+        model, _ = self._setup_model(det_ids)
+        # Mock mask ws with one column of zeros and ones
+        mock_data_y = np.array([0, 0, 1, 2, 2])
+        mock_ws = MagicMock(
+            extractY=MagicMock(return_value=mock_data_y),
+            getDetectorIDsOfGroup=MagicMock(side_effect=lambda i: np.array(det_ids)[mock_data_y == i]),
+        )
+        # name() is used internally in the mock object
+        mock_ws.configure_mock(**{"name.return_value": "mock_ws"})
+        model.get_workspaces_in_ads_of_type = MagicMock(return_value=[mock_ws])
+        boolean_mask = model._get_boolean_masks_from_workspaces_in_ads(["mock_ws_1", "mock_ws_2", "other_key"], CurrentTab.Grouping)
+        np.testing.assert_allclose(boolean_mask, [[False, False, True, False, False], [False, False, False, True, True]])
+
     def test_apply_detector_mask(self):
         model, _ = self._setup_model([1, 2, 3])
         # All detectors picked, mask should unpick them
@@ -675,12 +690,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, _ = self._setup_model([1, 2, 3])
         model.save_mask_to_xml("file")
         mock_save_mask.assert_called_with(model._mask_ws, OutputFile="file.xml")
-
-    # @mock.patch("instrumentview.FullInstrumentViewModel.SaveMask")
-    # def test_save_xml_roi(self, mock_save_mask):
-    #     model, _ = self._setup_model([1, 2, 3])
-    #     model.save_mask_to_xml("file", CurrentTab.Grouping)
-    #     mock_save_mask.assert_called_with(model._roi_ws, OutputFile="file.xml")
 
     def test_clear_masks(self):
         model, _ = self._setup_model([1, 2, 3])
