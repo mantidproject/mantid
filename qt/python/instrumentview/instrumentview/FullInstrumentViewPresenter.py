@@ -153,7 +153,7 @@ class FullInstrumentViewPresenter:
 
     def update_plotter(self) -> None:
         """Update the projection based on the selected option."""
-        self._model.projection_type = self._view.current_selected_projection()
+        self._model.projection_type = QAppThreadCall(self._view.current_selected_projection)()
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter()
             self.update_detector_picker()
@@ -287,20 +287,20 @@ class FullInstrumentViewPresenter:
         self._update_peak_buttons()
 
     def _on_add_mask_clicked(self) -> None:
-        implicit_function = self._view.get_current_widget_implicit_function()
+        implicit_function = QAppThreadCall(self._view.get_current_widget_implicit_function)()
         if not implicit_function:
             return
         mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points]
         new_key = self._model.add_new_detector_mask(mask)
-        self._view.set_new_mask_key(new_key)
+        QAppThreadCall(self._view.set_new_mask_key)(new_key)
 
     def on_add_mask_clicked(self) -> None:
         self._callback_queue.put((self._on_add_mask_clicked, ()))
 
     def _on_mask_item_selected(self) -> None:
-        self._model.apply_detector_masks(self._view.selected_masks())
+        self._model.apply_detector_masks(QAppThreadCall(self._view.selected_masks)())
         self.update_plotter()
-        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+        self._update_line_plot_ws_and_draw(QAppThreadCall(self._view.current_selected_unit)())
         self._update_peak_buttons()
 
     def on_mask_item_selected(self) -> None:
@@ -339,7 +339,7 @@ class FullInstrumentViewPresenter:
         return self._model.cached_masks_keys
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
-        self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
+        self._model.extract_spectra_for_line_plot(unit, QAppThreadCall(self._view.sum_spectra_selected)())
         QAppThreadCall(self._view.show_plot_for_detectors)(self._model.line_plot_workspace)
         QAppThreadCall(self._view.set_selected_detector_info)(self._model.picked_detectors_info_text())
         self._update_relative_detector_angle()
@@ -449,7 +449,7 @@ class FullInstrumentViewPresenter:
         self._peaks_grouped_by_ws = peaks_grouped_by_ws
 
     def on_peaks_workspace_selected(self) -> None:
-        self._model.set_peaks_workspaces(self._view.selected_peaks_workspaces())
+        self._model.set_peaks_workspaces(QAppThreadCall(self._view.selected_peaks_workspaces)())
         QAppThreadCall(self._view.clear_overlay_meshes)()
         self._update_peaks_workspaces()
         self.refresh_lineplot_peaks()
