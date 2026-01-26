@@ -1260,14 +1260,12 @@ void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
 
   // configure and add each bank
   for (auto bankName : AllBankNames) {
+    // Prepare data for node
+    if (instrument->getName().compare("CORELLI") == 0)
+      bankName.append("/sixteenpack");
+
     std::shared_ptr<const IComponent> bank = instrument->getComponentByName(bankName);
     auto bankFullName = bank->getFullName();
-
-    // Prepare data for node
-    if (instrument->getName().compare("CORELLI") == 0) {
-      bankName.append("/sixteenpack");
-      bankFullName.append("/sixteenpack");
-    }
 
     Quat relRot = bank->getRelativeRot();
     std::vector<double> relRotAngles = relRot.getEulerAngles("XYZ");

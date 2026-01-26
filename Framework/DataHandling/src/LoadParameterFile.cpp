@@ -20,7 +20,9 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
+#include <chrono>
 #include <filesystem>
+
 using Mantid::Geometry::InstrumentDefinitionParser;
 using Poco::XML::AutoPtr;
 using Poco::XML::Document;
