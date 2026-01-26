@@ -141,16 +141,7 @@ until version 1.5.2 (October 2023). If your version of Mamba is older
 than this, use the conda command.
 ```
 
-```{note}
-macOS developers will see the warning from Qt in the terminal:
-
-`An OpenGL surfcace format was requested that is either not version 3.2 or higher or a not Core Profile.`
-`Chromium on macOS will fall back to software rendering in this case.`
-`Hardware acceleration and features such as WebGL will not be available.`
-
-It can be safely ignored but is present as a reminder of some deprecated
-OpenGL functionality being used. It is only visible to developers and
-the spelling mistake is real.
+```{include} macos-opengl-version-warning.md
 ```
 
 ## Debug Python in unit tests
