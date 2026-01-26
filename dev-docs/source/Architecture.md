@@ -117,7 +117,7 @@ reusable set of widgets that can be used across multiple interfaces to
 give a consistent user experience when presenting given `mantid`
 functionality to users. One example of such a widget is the
 `mantidqt.widgets.filefinder`, which sits on top of the framework
-[File Finder](FileFinder), and presents GUI elements to pass through and run the the
+`FileFinder`, and presents GUI elements to pass through and run the
 framework logic. Providing a reusable widget gives a consistent user
 experience across multiple interfaces/applications when displaying
 `mantid` features to users.
@@ -133,7 +133,7 @@ the `qt/python/mantidqt` directory of the source tree. Widgets written
 in C++ use the
 [sip](https://www.riverbankcomputing.com/static/Docs/sip/) system to
 export the C++ classes to a Python module. The raw exported modules are
-all prefixed with an underscore, e.g. [Common](_common), and classes are pulled
+all prefixed with an underscore, e.g. `_common`, and classes are pulled
 into a pure-python module to decouple the C++ implementations from
 users. This allows for flexibility with the layout of the C++
 classes/libraries without impacting users in the future. Clients of
@@ -152,7 +152,7 @@ alt="/images/architecture-workbench.png" />
 to be a library imported by others and as such offers no guarantees of
 API stability. It makes heavy use of the `mantidqt` widgets collection
 and puts them together to build the application shipped to users as
-[Mantid Workbench](MantidWorkbench). It is intended to be the main graphical interface
+`MantidWorkbench`. It is intended to be the main graphical interface
 provided by the project and allows access to the customized interfaces
 as described in [container](#container).
 

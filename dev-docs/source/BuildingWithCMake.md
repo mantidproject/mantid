@@ -15,7 +15,7 @@ used on the build servers.
 
 ## Environment
 
-The [getting started](GettingStarted) page describes how to set up your
+The [getting started](GettingStarted/GettingStarted) page describes how to set up your
 environment to build Mantid. Follow those instructions and install the
 Mantid dependencies first.
 
@@ -46,7 +46,7 @@ Linux/macOS, and `$HOME/AppData/Roaming/ccache` on Windows. If your home
 directory is on a network-mounted drive, the location of this cache can
 be moved to provide the best performance. On newer versions of `ccache`
 run `ccache --set-config=cache_dir=PATH_TO_CACHE`. Older versions
-(\<3.2) do not allow this and must fall back to setting the [Ccache Dir](CCACHE_DIR)
+(\<3.2) do not allow this and must fall back to setting the `CCACHE_DIR`
 environment variable in your shell profile.
 
 ## Configuring your build
@@ -173,7 +173,7 @@ Working with CMake:
   `Mantid/bin/Release`, `Debug`, etc.
 - There is a known issue with using source control with Eclipse on an
   out of source build. Set the cache variable
-  [Eclipse Cdt4 Generate Source Project](ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT) to true and CMake will generate
+  `ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT` to true and CMake will generate
   a set of 'dummy' project files within the source tree so that you can
   import that project and use it for source control actions.
 
