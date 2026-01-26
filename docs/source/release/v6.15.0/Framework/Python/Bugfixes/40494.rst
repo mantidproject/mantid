@@ -1,0 +1,1 @@
+- Added additional checks in CurvesTabWidgetPresenter to verify the types before indexing the list to fix the error.
