@@ -17,11 +17,11 @@ Preamble
 Overview
 ^^^^^^^^
 The Engineering Diffraction interface allows scientists using the EnginX instrument to interactively
-process their data. There are 6 tabs in total. These are:
+process their data. There are 5 tabs in total. These are:
 
-- ``Calibration`` - This is where a cerium oxide run is entered to calibrate the subsequent data.
+- ``Run Processing`` - This is where a cerium oxide run is entered to calibrate the subsequent data, which can also be
+  focussed into a single spectrum.
 - ``Absorption Correction`` - This is where the experimental can be corrected for beam attenuation
-- ``Focus`` - Where are the data across multiple spectra are normalised and summed into a single spectrum for later steps.
 - ``Fitting`` - Where peaks can be fitted on focused data
 - ``Texture`` - Where pole figure's can be generated for experimental runs and their fitted peaks
 - ``GSAS II`` - Run a basic refinement on the `GSASIIscriptable API <https://gsas-ii.readthedocs.io/en/latest/GSASIIscriptable.html>`_
@@ -44,7 +44,7 @@ Calibration
 
 2. Open the Engineering Diffraction gui: ``Interfaces`` -> ``Diffraction`` -> ``Engineering Diffraction``
 
-3. On opening the gui the `Create New Calibration` option should be selected.
+3. On opening the gui the ``Create New Calibration`` option should be selected.
 
 4. Open the settings dialog from the cog in the bottom left of the gui.
 
@@ -54,36 +54,38 @@ Calibration
 
 7. Close the settings window
 
-8. For the ``Calibration Sample #`` enter ``305738``.
+8. For the ``Vanadium #`` enter ``307521``.
 
-9. Tick the ``Plot Calibrated Workspace`` option.
+9. For the ``Calibration Sample #`` enter ``305738``.
 
-10. Click ``Calibrate``, after completing calibration it should produce the following plot.
+10. Tick the ``Plot Calibrated Workspace`` option.
+
+11. Click ``Calibrate``, after completing calibration it should produce the following plot.
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffExpectedLinear.png
     :width: 900px
 
-11. Check that in your save location there is a Calibration folder containing three `.prm` files
+12. Check that in your save location there is a Calibration folder containing three `.prm` files
     `ENGINX_305738` with the suffixes `_all_banks`, `_bank_1`, `_bank_2`.
 
-12. Close the Engineering Diffraction gui and reopen it. The ``Load Existing Calibration`` radio
+13. Close the Engineering Diffraction gui and reopen it. The ``Load Existing Calibration`` radio
     button should be checked on the ``Calibration`` tab and the path should be populated with the
     `_all_banks.prm` file generated earlier in this test.
 
-13. In the ``Load Existing Calibration`` box browse to the `_bank_2.prm` file and click the ``Load`` button.
+14. In the ``Load Existing Calibration`` box browse to the `_bank_2.prm` file and click the ``Load`` button.
 
 Focus
 -----
 
-1. Change to the ``Focus`` tab.
+1. Now let's look at the ``Focus`` group.
 
-2. For the ``Sample Run #`` use ``305761`` and for the ``Vanadium #`` enter ``307521``.
+2. For the ``Sample Run #`` use ``305761`` and leave ``Vanadium #`` set to ``307521``.
 
 3. Tick the ``Plot Focused Workspace`` option and click ``Focus``. It should produce a plot of a single spectrum for bank 2.
 
-4. Go back to the ``Calibration`` tab and load in an existing calibration for both banks e.g. `ENGINX_305738_all_banks.prm`
+4. In the ``Calibration`` group and load in an existing calibration for both banks e.g. `ENGINX_305738_all_banks.prm`
 
-5. Go back to the ``Focus`` tab and click ``Focus``, after completing calibration it should produce a plot.
+5. Click the ``Focus`` button, after completing calibration it should produce a plot.
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffExampleFocusOutput.png
     :width: 900px
@@ -123,11 +125,11 @@ This test covers the RB number.
 Test 3
 ^^^^^^
 
-This test covers the Cropping functionality in the ``Calibration`` tab.
+This test covers the Cropping functionality in the ``Run Processing`` tab.
 
 1. Change the ``RB Number`` to ``North``, this is purely to separate the cropped output files into their own space.
 
-2. Go to the ``Calibration`` tab, select ``Create New Calibration`` and tick the ``Set Calibration Region of Interest`` option. In the drop down ``Region of Interest`` select ``1 (North)``.
+2. Go to the ``Run Processing`` tab, select ``Create New Calibration`` and tick the ``Set Calibration Region of Interest`` option. In the drop down ``Region of Interest`` select ``1 (North)``.
 
 3. Check the ``Plot Calibrated Workspace`` checkbox and click ``Calibrate``.
 
@@ -135,7 +137,7 @@ This test covers the Cropping functionality in the ``Calibration`` tab.
 
 5. Check that only one `.prm` and one `.nxs` output file was generated.
 
-6. Go to ``Focus`` tab and click ``Focus``.
+6. Click the ``Focus`` button.
 
 7. Change the ``RB number`` to `Custom`.
 
@@ -225,10 +227,10 @@ This test covers the loading and plotting focused data in the fitting tab.
 
 .. note:: Sometimes it will be tricky to load ENGINX files from the archive and the red ``*`` next to the ``Browse`` button won't disappear. Proceeding with the red ``*`` will raise an error saying ``Check run numbers/path is valid.`` or ``Mantid is searching for data files. Please wait``. In such cases, please try re-entering the text and wait till the red ``*`` is cleared before proceeding. If the log level is set to Information, found path = 1 will be visible in the message log when the runs are found from the archive.
 
-1. Ensure you can access the ISIS data archive. In the ``Calibration`` tab, select ``Create New Calibration`` and enter ``Calibration sample`` # ``305738``. Before proceeding, make sure the red ``*`` next to the ``Browse`` button is disappeared when clicked somewhere outside that text box.
+1. Ensure you can access the ISIS data archive. In the ``Run Processing`` tab, select ``Create New Calibration`` and enter ``Calibration sample`` # ``305738`` and ``Vanadium #`` to ``307521``. Before proceeding, make sure the red ``*`` next to the ``Browse`` button is disappeared when clicked somewhere outside that text box.
    Untick ``Set Calibration Region of Interest`` option and click on ``Calibrate`` button.
 
-2.  On the ``Focus`` tab, set ``Sample Run #`` to ``305793-305795`` and ``Vanadium #`` to ``307521``. These sample runs have different stress and strain log values. Make sure the red ``*`` s next to the two ``Browse`` buttons are cleared when clicked outside the text boxes or wait otherwise. Then click ``Focus``.
+2.  Set ``Sample Run #`` to ``305793-305795``. These sample runs have different stress and strain log values. Make sure the red ``*`` s next to the two ``Browse`` buttons are cleared when clicked outside the text boxes or wait otherwise. Then click ``Focus``.
 
 3. In the ``Fitting`` tab, load multiple of these newly focused TOF `.nxs` files in the ``Load Focused Data`` section. The path to the focused files should be auto populated.
 
@@ -261,7 +263,7 @@ Test 7
 
 This tests the removal of focused runs from the ``Fitting`` tab.
 
-1. Load multiple runs using the ``Browse`` button. This should take you to a folder called "Focus" containing `.nxs` files that have been previously generated from the ``Focus`` tab. Select multiple files and click on ``Open``
+1. Load multiple runs using the ``Browse`` button. This should take you to a folder called "`Focus`" containing `.nxs` files that have been previously generated from the ``Focus`` group of the ``Run Processing`` tab. Select multiple files and click on ``Open``
 
 2. Having loaded multiple runs, select a row in the UI table and then click the ``Remove Selected`` button below the table.
    The row should be removed, if the run was plotted it will disappear from the plot and there should be one less row in each of the table workspaces inside the "_logs" workspace group with each row corresponding to the run in the same row of the UI table.
@@ -420,18 +422,18 @@ Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightl
 
 1. Close and re-open the Engineering Diffraction interface.
 
-2. Go to the ``Calibration`` tab, select ``Create New Calibration`` and un-tick the ``Set Calibration Region of Interest`` option.
+2. Go to the ``Run Processing`` tab, select ``Create New Calibration`` and un-tick the ``Set Calibration Region of Interest`` option.
 
-3. For the ``Calibration Sample #`` enter ``305738`` and click the ``Calibrate`` button.
+3. For the ``Calibration Sample #`` enter ``305738`` and ``Vanadium #`` ``307521`` and click the ``Calibrate`` button.
 
-4. On the ``Focus`` tab, enter ``Sample Run #`` ``305761`` and ``Vanadium #`` ``307521`` and click the ``Focus`` button.
+4. In the ``Focus`` group, enter ``Sample Run #`` ``305761`` and click the ``Focus`` button.
 
 .. image:: figure:: /../../../../../docs/source/images/6_5_release/Diffraction/GSASII_tab.png
     :align: center
     :width: 600px
 
 5. Change to the ``GSASII`` tab. The ``Instrument Group`` path should be pre-filled to a `.prm` file output by the calibration
-   and the ``Focused Data`` path should be pre-filled to the `.gss` file output from the ``Focus`` tab.
+   and the ``Focused Data`` path should be pre-filled to the `.gss` file output from the ``Focus`` group.
 
 6. For the ``Phase`` filepath, browse to ``MANTID_INSTALL_DIRECTORY/scripts/Engineering/ENGINX/phase_info/FE_GAMMA.cif``. For the ``Project Name`` at the top, enter a string of your choice.
 
@@ -450,26 +452,26 @@ Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightl
 
 Test 12
 ^^^^^^^
-This test covers the multiple data files functionality with multiple banks per file in the ``GSASII`` tab.
+This test covers the multiple data files functionality with multiple banks per file in the ``GSAS II`` tab.
 
 Note this test will only work if ``GSASII`` is also installed.
-Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightly and ``GSASII`` installed in the expected location.
+Please test this on IDAaaS: an ENGINX instance should have ``MantidWorkbenchNightly`` and ``GSASII`` installed in the expected location.
 
 1. Close and re-open the Engineering Diffraction interface.
 
-2. Go to the ``Calibration`` tab, select ``Create New Calibration`` and un-tick the ``Set Calibration Region of Interest`` option.
+2. Go to the ``Run Processing`` tab, select ``Create New Calibration`` and un-tick the ``Set Calibration Region of Interest`` option.
 
-3. For the ``Calibration Sample`` # enter ``305738`` and click the ``Calibrate`` button.
+3. For the ``Calibration Sample`` # enter ``305738`` and ``Vanadium #`` enter ``307521`` and click the ``Calibrate`` button.
 
-4. On the ``Focus`` tab, enter Sample Run # ``305793-305795`` and Vanadium # ``307521`` and click the Focus button. This will generate multiple focused data files.
-Change to the GSASII tab. Clear any pre-filled paths.
+4. Enter Sample Run # ``305793-305795`` and click the ``Focus`` button. This will generate multiple focused data files.
+Change to the ``GSAS II`` tab. Clear any pre-filled paths.
 
-5. For the ``Instrument Group`` filepath, browse and select the single .prm file output by the calibration (should be ENGINX_305738_all_banks.prm).
+5. For the ``Instrument Group`` filepath, browse and select the single `.prm` file output by the calibration (should be `ENGINX_305738_all_banks.prm`).
 
-6. For the ``Focused Data`` filepath, browse and select multiple .gss files that each contain multiple banks. Ensure all selected files have the same number of banks (e.g., select the all_banks files: ENGINX_305738_305793_all_banks_dSpacing.gss, ENGINX_305738_305794_all_banks_dSpacing.gss, ENGINX_305738_305795_all_banks_dSpacing.gss).
+6. For the ``Focused Data`` filepath, browse and select multiple `.gss` files that each contain multiple banks. Ensure all selected files have the same number of banks (e.g., select the all_banks files: E`NGINX_305738_305793_all_banks_dSpacing.gss`, `ENGINX_305738_305794_all_banks_dSpacing.gss`, `ENGINX_305738_305795_all_banks_dSpacing.gss`).
 
-7. For the ``Phase`` filepath, browse to MANTID_INSTALL_DIRECTORY/scripts/Engineering/ENGINX/phase_info/FE_GAMMA.cif. For the ``Project Name`` at the top, enter a string of your choice.
+7. For the ``Phase`` filepath, browse to `MANTID_INSTALL_DIRECTORY/scripts/Engineering/ENGINX/phase_info/FE_GAMMA.cif`. For the ``Project Name`` at the top, enter a string of your choice.
 
 8. Click Refine in ``GSAS II``. After a few seconds, the output fit should be plotted. In the top right of the plot widget, verify that the refined spectrum combobox shows entries for the banks of the last refined data file.
 
-9. Test Error Cases: Try selecting multiple instrument .prm files (should show error message about requiring exactly one instrument file). Try selecting .gss files with different numbers of banks (should show error about inconsistent bank counts). Try selecting single-bank .gss files (should show error about requiring multiple banks per file).
+9. Test Error Cases: Try selecting multiple instrument `.prm` files (should show error message about requiring exactly one instrument file). Try selecting `.gss` files with different numbers of banks (should show error about inconsistent bank counts). Try selecting single-bank `.gss` files (should show error about requiring multiple banks per file).
