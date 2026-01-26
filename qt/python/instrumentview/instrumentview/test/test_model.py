@@ -639,6 +639,21 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         boolean_mask = model._get_boolean_masks_from_workspaces_in_ads(["mock_ws_1", "mock_ws_2", "other_key"], CurrentTab.Grouping)
         np.testing.assert_allclose(boolean_mask, [[False, False, True, False, False], [False, False, False, True, True]])
 
+    def test_get_boolean_masks_from_workspaces_in_ads_masking(self):
+        det_ids = [1, 2, 3, 4, 5]
+        model, _ = self._setup_model(det_ids)
+        # Mock mask ws with one column of zeros and ones
+        mock_data_y = np.array([0, 0, 1, 1, 1])
+        mock_ws = MagicMock(
+            extractY=MagicMock(return_value=mock_data_y),
+            getMaskedDetectors=MagicMock(return_value=np.array(det_ids)[mock_data_y == 1]),
+        )
+        # name() is used internally in the mock object
+        mock_ws.configure_mock(**{"name.return_value": "mock_ws"})
+        model.get_workspaces_in_ads_of_type = MagicMock(return_value=[mock_ws])
+        boolean_mask = model._get_boolean_masks_from_workspaces_in_ads(["mock_ws", "other_key"], CurrentTab.Masking)
+        np.testing.assert_allclose(boolean_mask, [[False, False, True, True, True]])
+
     def test_apply_detector_mask(self):
         model, _ = self._setup_model([1, 2, 3])
         # All detectors picked, mask should unpick them

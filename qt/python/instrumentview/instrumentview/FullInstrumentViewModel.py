@@ -193,6 +193,7 @@ class FullInstrumentViewModel:
 
     @property
     def mask_ws(self) -> MatrixWorkspace:
+        # Don't need to check detector IDs because ExtractMask outputs same order of det ids
         for i, v in enumerate(self._is_masked):
             self._mask_ws.dataY(i)[:] = v
         return self._mask_ws
@@ -496,7 +497,9 @@ class FullInstrumentViewModel:
                     continue
 
                 if kind is CurrentTab.Masking:
-                    boolean_mask = ws.extractY().flatten()
+                    # TODO: Figure out if can get away with just extracting dataY, as it's much faster
+                    # boolean_mask = ws.extractY().flatten()
+                    boolean_mask = np.isin(self._detector_ids, ws.getMaskedDetectors())
                 else:
                     boolean_mask = np.isin(self._detector_ids, ws.getDetectorIDsOfGroup(int(key[-1])))
 
