@@ -125,6 +125,8 @@ class CurvesTabWidgetPresenter:
             curve_index = ax.get_lines().index(curve)
             errorbar = False
         elif isinstance(curve, ErrorbarContainer):
+            if not isinstance(curve, list):
+                return
             curve_index = ax.get_lines().index(curve[0])
             errorbar = True
         else:
