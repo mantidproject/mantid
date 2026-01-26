@@ -143,6 +143,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("in1", in1);
     AnalysisDataService::Instance().addOrReplace("in2", in2);
 
+    // conjoin
     ConjoinWorkspaces conj;
     conj.initialize();
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace1", "in1"));
@@ -152,10 +153,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(conj.execute());
     TS_ASSERT(conj.isExecuted());
 
+    // verify
     MatrixWorkspace_sptr out = getWSFromADS("in1");
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(out->getSpectrum(0).getSpectrumNo(), 1);
     TS_ASSERT_EQUALS(out->getSpectrum(1).getSpectrumNo(), 2);
+
+    // cleanup
+    AnalysisDataService::Instance().remove("in1");
+    AnalysisDataService::Instance().remove("in2");
   }
 
   //----------------------------------------------------------------------------------------------
