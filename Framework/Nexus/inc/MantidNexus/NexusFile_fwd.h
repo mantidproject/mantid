@@ -80,6 +80,11 @@ public:
   static unsigned short constexpr BINARY = 0xF1u;  // 11 0001 = 0xF1
   static unsigned short constexpr BAD = 0xFFu;     // 11 1111 = 0xFF
 
+  // for &'ing with a type to check what it is:
+  // & will be true (nonzero) if it is of type indicated; false (zero) else
+  static unsigned short constexpr FLOAT_TYPE = 0x20u;
+  static unsigned short constexpr SPECIAL_TYPE = 0x80u;
+
 private:
   int m_val;
   static int validate_val(int const x);
@@ -90,6 +95,11 @@ public:
   NXnumtype &operator=(int const);
   operator int() const;
   operator std::string() const;
+
+  // Will return true if the type is a float
+  bool isFloat() { return m_val & FLOAT_TYPE; }
+  // Will return true if the type is a special (char, binary, or bad)
+  bool isSpecial() { return m_val & SPECIAL_TYPE; }
 };
 
 MANTID_NEXUS_DLL std::ostream &operator<<(std::ostream &os, const NXnumtype &value);
