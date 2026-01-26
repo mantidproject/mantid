@@ -69,7 +69,8 @@ class FullInstrumentViewPresenter:
         self.setup()
         self._callback_queue = Queue()
         self._callback_stop_sentinel = object()
-        Thread(None, self._callback_worker, daemon=True).start()
+        self._callback_thread = Thread(None, self._callback_worker, daemon=True)
+        self._callback_thread.start()
 
     def _callback_worker(self):
         while True:
@@ -426,6 +427,8 @@ class FullInstrumentViewPresenter:
     def handle_close(self):
         if hasattr(self, "_callback_queue"):
             self._callback_queue.put(self._callback_stop_sentinel)
+            if hasattr(self, "_callback_thread"):
+                self._callback_thread.join(timeout=1)
         # The observers are unsubscribed on object deletion, it's safer to manually
         # delete the observer rather than wait for the garbage collector, because
         # we don't want stale workspace references hanging around.
