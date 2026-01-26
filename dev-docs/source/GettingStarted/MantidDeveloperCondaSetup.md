@@ -28,4 +28,4 @@ below:
   mamba update -c mantid/label/nightly -c neutrons --all
   ```
 
-See [packaging](Packaging) for more information on this topic.
+See [packaging](../Packaging) for more information on this topic.
