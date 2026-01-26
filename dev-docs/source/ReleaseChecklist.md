@@ -14,21 +14,21 @@ The roles are defined in terms of the people responsible. Those in the
 role do not need to carry out all duties themselves, but they are
 responsible for ensuring that the work gets done.
 
-- [Local Project Manager(s)](local-project-managers-checklist) - People
+- [Local Project Manager(s)](#local-project-managers-checklist) - People
   in charge of communicating with local development teams, facility
   management, and other people at their sponsoring facility.
-- [Quality Assurance Manager](quality-assurance-manager-checklist) -
+- [Quality Assurance Manager](#quality-assurance-managers-checklist) -
   People responsible for making sure that manual testing has been
   performed. They will ensure Mantid meets quality requirements before
   delivery in consultation with the *Release Manager*.
-- [Release Editor](release-editor-checklist) - People responsible for
+- [Release Editor](#release-editors-checklist) - People responsible for
   ensuring the release notes are edited to give them a common language,
   layout, and illustrative images.
-- [Release Manager](release-manager-checklist) - Person in charge of
+- [Release Manager](#release-manager-checklist) - Person in charge of
   the go/no go decision of the release. The main task is to reiterate
   the timeline and be the collection point for information between all
   of the *Local Project Managers*.
-- [Technical Release Manager](technical-release-manager-checklist) -
+- [Technical Release Manager](#technical-release-manager-checklist) -
   People responsible for technical tasks such as renaming branches,
   creating tags, configuring build servers, and ensuring problems on the
   Release Pipeline get fixed (by themselves or others).
@@ -57,7 +57,7 @@ This is final part of the
 <tr class="odd">
 <td>2-3 weeks before Feature Freeze</td>
 <td>Development, Testing & Documentation</td>
-<td><div class="line-block">[Release Manager](release-manager-checklist)</div></td>
+<td><div class="line-block">[Release Manager](#release-manager-checklist)</div></td>
 <td><blockquote>
 <p>4-6+ weeks</p>
 </blockquote></td>
@@ -66,8 +66,8 @@ This is final part of the
 <td><div class="line-block">1 week before Feature<br />
 Freeze</div></td>
 <td>Development, Testing & Documentation</td>
-<td><div class="line-block">[Local Project Manager(s)](local-project-managers-checklist)<br />
-[Release Manager](release-manager-checklist)</div></td>
+<td><div class="line-block">[Local Project Manager(s)](#local-project-managers-checklist)<br />
+[Release Manager](#release-manager-checklist)</div></td>
 <td><blockquote>
 <p>4+ weeks</p>
 </blockquote></td>
@@ -75,9 +75,9 @@ Freeze</div></td>
 <tr class="odd">
 <td><strong>Feature Freeze Begins</strong></td>
 <td>Final Development, Testing & Documentation</td>
-<td><div class="line-block">[Local Project Manager(s)](local-project-managers-checklist)<br />
-[Release Manager](release-manager-checklist)<br />
-[Technical Release Manager](technical-release-manager-checklist)</div></td>
+<td><div class="line-block">[Local Project Manager(s)](#local-project-managers-checklist)<br />
+[Release Manager](#release-manager-checklist)<br />
+[Technical Release Manager](#technical-release-manager-checklist)</div></td>
 <td><blockquote>
 <p>3 weeks + 1 working day</p>
 </blockquote></td>
@@ -85,8 +85,8 @@ Freeze</div></td>
 <tr class="even">
 <td><strong>Manual Testing</strong></td>
 <td>Blocker bug fixes, Testing & Release Notes</td>
-<td><div class="line-block">[Quality Assurance Manager](quality-assurance-manager-checklist)<br />
-[Release Manager](release-manager-checklist)</div></td>
+<td><div class="line-block">[Quality Assurance Manager](#quality-assurance-manager-checklist)<br />
+[Release Manager](#release-manager-checklist)</div></td>
 <td><blockquote>
 <p>3 weeks</p>
 </blockquote></td>
@@ -95,9 +95,9 @@ Freeze</div></td>
 <td><strong>Beta Testing Begins</strong></td>
 <td>Blocker bug fixes, Testing, Release Notes, Maintenance Tasks &
 Next release development</td>
-<td><div class="line-block">[Local Project Manager(s)](local-project-managers-checklist)<br />
-[Release Editor](release-editor-checklist)<br />
-[Release Manager](release-manager-checklist)</div></td>
+<td><div class="line-block">[Local Project Manager(s)](#local-project-managers-checklist)<br />
+[Release Editor](#release-editor-checklist)<br />
+[Release Manager](#release-manager-checklist)</div></td>
 <td><blockquote>
 <p>2.5 weeks</p>
 </blockquote></td>
@@ -106,7 +106,7 @@ Next release development</td>
 <td>Reminder Email for Beta</td>
 <td>Blocker bug fixes, Testing, Release Notes, Maintenance Tasks &
 Next release development</td>
-<td><div class="line-block">[Release Manager](release-manager-checklist)</div></td>
+<td><div class="line-block">[Release Manager](#release-manager-checklist)</div></td>
 <td><blockquote>
 <p>1.5 weeks</p>
 </blockquote></td>
@@ -115,9 +115,9 @@ Next release development</td>
 <td><strong>Beta Testing Ends</strong></td>
 <td>Blocker bug fixes, Testing, Release Notes, Maintenance Tasks &
 Next release development</td>
-<td><div class="line-block">[Release Editor](release-editor-checklist)<br />
-[Release Manager](release-manager-checklist)<br />
-[Quality Assurance Manager](quality-assurance-manager-checklist)</div></td>
+<td><div class="line-block">[Release Editor](#release-editor-checklist)<br />
+[Release Manager](#release-manager-checklist)<br />
+[Quality Assurance Manager](#quality-assurance-manager-checklist)</div></td>
 <td><blockquote>
 <p>~ 4 working days</p>
 </blockquote></td>
@@ -125,9 +125,9 @@ Next release development</td>
 <tr class="even">
 <td><strong>Smoke Testing</strong></td>
 <td>Blocker bug fixes, Testing & Packaging</td>
-<td><div class="line-block">[Quality Assurance Manager](quality-assurance-manager-checklist)<br />
-[Release Manager](release-manager-checklist)<br />
-[Technical Release Manager](technical-release-manager-checklist)</div></td>
+<td><div class="line-block">[Quality Assurance Manager](#quality-assurance-manager-checklist)<br />
+[Release Manager](#release-manager-checklist)<br />
+[Technical Release Manager](#technical-release-manager-checklist)</div></td>
 <td><blockquote>
 <p>1 working day</p>
 </blockquote></td>
@@ -135,8 +135,8 @@ Next release development</td>
 <tr class="odd">
 <td><strong>Release Day</strong></td>
 <td>Blocker bug fixes, Testing & Release Announcements</td>
-<td><div class="line-block">[Release Manager](release-manager-checklist)<br />
-[Technical Release Manager](technical-release-manager-checklist)</div></td>
+<td><div class="line-block">[Release Manager](#release-manager-checklist)<br />
+[Technical Release Manager](#technical-release-manager-checklist)</div></td>
 <td><blockquote>
 <p>0</p>
 </blockquote></td>
@@ -144,6 +144,7 @@ Next release development</td>
 </tbody>
 </table>
 
+{#local-project-managers-checklist}
 ## Local Project Managers Checklist
 
 **Role**: People in charge of communicating with local development
@@ -166,6 +167,7 @@ facility.
 - Ensure that developers arrange to meet with their beta testers.
 - Triage when necessary the issues discovered during beta testing.
 
+{#quality-assurance-managers-checklist}
 ## Quality Assurance Managers Checklist
 
 **Role**: People responsible for making sure that manual testing has
@@ -176,7 +178,7 @@ before delivery in consultation with the Release Manager.
 
 - Ensure that Manual testing begins by creating the testing tasks as
   GitHub issues, assigning them and posting on Slack. Most of our Manual
-  testing instructions are [here](Testing). Generate the Manual testing
+  testing instructions are [here](Testing/index). Generate the Manual testing
   issues by following the instructions in the [README
   file](https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate).
   Please raise the issues from the ISIS and Non-ISIS manual testing
@@ -223,6 +225,7 @@ before delivery in consultation with the Release Manager.
   co-ordinate testing (especially when an arising issue needs testing on
   other OS) and ensure all testing is covered.
 
+{#release-editors-checklist}
 ## Release Editors Checklist
 
 **Role**: People responsible for editing the release notes and giving
@@ -306,6 +309,7 @@ them a common language, layout, and collecting images.
     the release notes.
   - Remove all the "Used" release note files and their sub-structure.
 
+{#release-manager-checklist}
 ## Release Manager Checklist
 
 **Role**: Person in charge of the go/no go decision of the release. The
@@ -526,6 +530,7 @@ tasks:
 
 - Close the release milestone on GitHub.
 
+{#technical-release-manager-checklist}
 ## Technical Release Managers Checklist
 
 **Role**: People responsible for technical tasks such as renaming
@@ -556,7 +561,7 @@ git push origin release-next --force
 - Click `Build Now` on
   [open-release-testing](https://builds.mantidproject.org/view/All/job/open-release-testing/).
   This will set the value of the Jenkins global property
-  [Branch To Publish](BRANCH_TO_PUBLISH) to `release-next`, which will re-enable package
+  `BRANCH_TO_PUBLISH` to `release-next`, which will re-enable package
   publishing for the `release-next` nightly pipeline.
 - Check the state of all open pull requests for this milestone and
   decide which should be kept for the release, liaise with the Release
@@ -628,17 +633,17 @@ We are now ready to create the release candidates for Smoke testing.
   with the following parameters (most are already defaulted to the
   correct values):
   - set `DESCRIPTION` to `Smoke testing candidates vX.Y.ZrcN`
-  - set [Build Devel](BUILD_DEVEL) to `all`
-  - set [Build Package](BUILD_PACKAGE) to `all`
-  - set [Package Suffix](PACKAGE_SUFFIX) to an **empty string**
-  - tick the [Publish To Anaconda](PUBLISH_TO_ANACONDA) checkbox
-  - tick the [Publish To Github](PUBLISH_TO_GITHUB) checkbox
-  - set the [Anaconda Channel](ANACONDA_CHANNEL) to `mantid-test`
-  - set the [Anaconda Channel Label](ANACONDA_CHANNEL_LABEL) to `vX.Y.ZrcN` where `X.Y.Z` is the
+  - set `BUILD_DEVEL` to `all`
+  - set `BUILD_PACKAGE` to `all`
+  - set `PACKAGE_SUFFIX` to an **empty string**
+  - tick the `PUBLISH_TO_ANACONDA` checkbox
+  - tick the `PUBLISH_TO_GITHUB` checkbox
+  - set the `ANACONDA_CHANNEL` to `mantid-test`
+  - set the `ANACONDA_CHANNEL_LABEL` to `vX.Y.ZrcN` where `X.Y.Z` is the
     release number, and `N` is an incremental build number for release
     candidates, starting at `1` (e.g. `v6.7.0rc1`)
-  - set [Github Releases Repo](GITHUB_RELEASES_REPO) to `mantidproject/mantid`
-  - set [Github Releases Tag](GITHUB_RELEASES_TAG) to `vX.Y.ZrcN`, where `X.Y.Z` is the
+  - set `GITHUB_RELEASES_REPO` to `mantidproject/mantid`
+  - set `GITHUB_RELEASES_TAG` to `vX.Y.ZrcN`, where `X.Y.Z` is the
     release number, and `N` is an incremental build number for release
     candidates, starting at `1`.
 - Once the packages have been published to GitHub and Anaconda, ask
@@ -663,16 +668,16 @@ with the following parameters (most are already defaulted to the correct
 values):
 
 - set `DESCRIPTION` to `Release build for vX.Y.Z`
-- set [Build Devel](BUILD_DEVEL) to `all`
-- set [Build Package](BUILD_PACKAGE) to `all`
-- set [Package Suffix](PACKAGE_SUFFIX) to an **empty string**
-- tick the [Publish To Anaconda](PUBLISH_TO_ANACONDA) checkbox
-- tick the [Publish To Github](PUBLISH_TO_GITHUB) checkbox
-- set the [Anaconda Channel](ANACONDA_CHANNEL) to `mantid`
-- set the [Anaconda Channel Label](ANACONDA_CHANNEL_LABEL) to `draft-vX.Y.Z` where `X.Y.Z` is
+- set `BUILD_DEVEL` to `all`
+- set `BUILD_PACKAGE` to `all`
+- set `PACKAGE_SUFFIX` to an **empty string**
+- tick the `PUBLISH_TO_ANACONDA` checkbox
+- tick the `PUBLISH_TO_GITHUB` checkbox
+- set the `ANACONDA_CHANNEL` to `mantid`
+- set the `ANACONDA_CHANNEL_LABEL` to `draft-vX.Y.Z` where `X.Y.Z` is
   the release number
-- set [Github Releases Repo](GITHUB_RELEASES_REPO) to `mantidproject/mantid`
-- set [Github Releases Tag](GITHUB_RELEASES_TAG) to `vX.Y.Z`, where `X.Y.Z` is the release
+- set `GITHUB_RELEASES_REPO` to `mantidproject/mantid`
+- set `GITHUB_RELEASES_TAG` to `vX.Y.Z`, where `X.Y.Z` is the release
   number.
 
 ### Release Day
@@ -709,13 +714,13 @@ release will be available on GitHub and our Anaconda channel.
   `preprod` branch, adding the new release version to the list of
   versions installed on IDAaaS
   [here](https://github.com/ral-facilities/daaas-ansible-workspace/blob/main/roles/software/analysis/mantid/defaults/main.yml).
-  Make sure that there are only three [Mantid Versions](mantid_versions) in the list
+  Make sure that there are only three `mantid_versions` in the list
   (delete the oldest one if applicable). The changes need to be verified
   on an IDAaaS test instance before the PR can be accepted.
 - Run the
   [close-release-testing](https://builds.mantidproject.org/view/All/job/close-release-testing)
   Jenkins job. This will set the value of the Jenkins global property
-  [Branch To Publish](BRANCH_TO_PUBLISH) to `main`, which will re-enable package publishing
+  `BRANCH_TO_PUBLISH` to `main`, which will re-enable package publishing
   for the `main` nightly pipeline.
 
 **Generate DOI**

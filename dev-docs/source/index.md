@@ -2,7 +2,7 @@
 
 These pages contain the developer documentation for mantid. They are
 aimed at those who are modifying the source code of the project. For
-user documentation please see [here](mantid:contents).
+user documentation please see [here](inv:mantid#contents).
 
 # Guides
 
@@ -135,7 +135,7 @@ CondaPackageManager
 ```
 
 [ToolsOverview](ToolsOverview)
-:   Describes [Class Maker](class_maker), `valgrind` and related tools.
+:   Describes [Class Maker](class_maker.txt), `valgrind` and related tools.
 
 [ProfilingOverview](ProfilingOverview)
 :   There are a few different ways to profile Mantid code.
