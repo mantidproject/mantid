@@ -411,6 +411,7 @@ class FullInstrumentViewPresenter:
                 return
             self._model._workspace = AnalysisDataService.retrieve(ws_name)
             self._model.setup()
+            self.update_plotter()
 
     def replace_workspace_callback(self, ws_name, ws):
         self._callback_queue.put((self._replace_workspace_callback, (ws_name, ws)))
