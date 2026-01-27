@@ -33,7 +33,6 @@ from Engineering.EnggUtils import convert_TOFerror_to_derror
 from Engineering.texture.texture_helper import plot_pole_figure
 
 from mantid.kernel import DeltaEModeType, UnitConversion
-from mantid.kernel import UnitParams
 from plugins.algorithms.peakdata_utils import PeakData
 # -------- Utility --------------------------------
 
@@ -752,12 +751,6 @@ def replace_nans(vals: np.ndarray, method: Optional[str] = None) -> np.ndarray:
     nan_mask = np.isnan(out)
     out[nan_mask] = col_stat[np.where(nan_mask)[1]]
     return out
-
-
-def _convert_TOFerror_to_derror(diff_consts, tof_error, d):
-    difc = diff_consts[UnitParams.difc]
-    difa = diff_consts[UnitParams.difa] if UnitParams.difa in diff_consts else 0
-    return tof_error / (2 * difa * d + difc)
 
 
 # -------- Pole Figure Script Logic--------------------------------
