@@ -649,7 +649,7 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
         f"{texture_utils_path}.calc_intens_and_sigma_arrays",
         return_value=(None, None, np.array([3.5, 5.0]), None),
     )
-    @patch(f"{texture_utils_path}._convert_TOFerror_to_derror")
+    @patch(f"{texture_utils_path}.convert_TOFerror_to_derror")
     @patch(f"{texture_utils_path}.UnitConversion")
     @patch(f"{texture_utils_path}.rerun_fit_with_new_ws")
     @patch(f"{texture_utils_path}.get_initial_fit_function_and_kwargs_from_specs")
@@ -771,7 +771,7 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
         f"{texture_utils_path}.calc_intens_and_sigma_arrays",
         return_value=(None, None, np.array([3.0, 3.0]), None),
     )
-    @patch(f"{texture_utils_path}._convert_TOFerror_to_derror")
+    @patch(f"{texture_utils_path}.convert_TOFerror_to_derror")
     @patch(f"{texture_utils_path}.UnitConversion")
     @patch(f"{texture_utils_path}.rerun_fit_with_new_ws")
     @patch(f"{texture_utils_path}.get_initial_fit_function_and_kwargs_from_specs")
