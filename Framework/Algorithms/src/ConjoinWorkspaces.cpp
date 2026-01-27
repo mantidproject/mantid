@@ -225,12 +225,13 @@ void ConjoinWorkspaces::fixSpectrumNumbers(const MatrixWorkspace &ws1, const Mat
     return;
   }
 
-  // Because we were told not to check overlapping, fix up any errors we might
-  // run into
+  // Because we were told not to check overlapping, fix up any errors we might run into
+  // check that the number of spectra in the span from min to max (and avoiding fencepost errors)
+  // is equal to the total number of histograms
   specnum_t min = -1;
   specnum_t max = -1;
   getMinMax(output, min, max);
-  if (max - min >= static_cast<specnum_t>(output.getNumberHistograms())) // nothing to do then
+  if (max - min + 1 >= static_cast<specnum_t>(output.getNumberHistograms())) // nothing to do then
     return;
 
   // information for remapping the spectra numbers
@@ -238,8 +239,7 @@ void ConjoinWorkspaces::fixSpectrumNumbers(const MatrixWorkspace &ws1, const Mat
   specnum_t ws1max = -1;
   getMinMax(ws1, ws1min, ws1max);
 
-  // change the axis by adding the maximum existing spectrum number to the
-  // current value
+  // change the axis by adding the maximum existing spectrum number to the current value
   for (size_t i = ws1.getNumberHistograms(); i < output.getNumberHistograms(); i++) {
     specnum_t origid = output.getSpectrum(i).getSpectrumNo();
     output.getSpectrum(i).setSpectrumNo(origid + ws1max);
