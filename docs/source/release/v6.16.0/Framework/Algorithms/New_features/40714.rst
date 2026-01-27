@@ -1,1 +1,1 @@
-- :ref:`SCDCalibratePanels2 <algm-SCDCalibratePanels2>` now writes the full name for bank components.
+- :ref:`algm-SCDCalibratePanels-v2` now writes the full name for bank components.
