@@ -1007,6 +1007,12 @@ def convert_to_TOF(parent, ws):
     return alg.getProperty("OutputWorkspace").value
 
 
+def convert_TOFerror_to_derror(diff_consts, tof_error, d):
+    difc = diff_consts[UnitParams.difc]
+    difa = diff_consts[UnitParams.difa] if UnitParams.difa in diff_consts else 0
+    return tof_error / (2 * difa * d + difc)
+
+
 def crop_data(parent, ws, indices):
     """
     DEPRECATED: not used in UI, only in deprecated functions (EnggVanadiumCorrections and EnggFocus)

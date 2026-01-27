@@ -13,7 +13,9 @@ from Engineering.EnggUtils import (
     process_vanadium,
     GROUP,
     focus_run,
+    convert_TOFerror_to_derror,
 )
+from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
 
 enggutils_path = "Engineering.EnggUtils"
 
@@ -405,6 +407,17 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
 
         expected_dirs = [path.join("/mock", "User", "RB123", "Focus", "Texture20")]
         mock_save.assert_called_with(expected_dirs, ws, calib, "123456", "RB123")
+
+    def test_convert_centres_and_error_from_TOF_to_d(self):
+        params = UnitParametersMap()
+        params[UnitParams.difc] = 18000
+        tof = 40000
+        tof_error = 5
+        d = UnitConversion.run("TOF", "dSpacing", tof, 0, DeltaEModeType.Elastic, params)
+        d_error = convert_TOFerror_to_derror(params, tof_error, d)
+
+        self.assertAlmostEqual(tof / d, 18000, delta=1e-10)
+        self.assertAlmostEqual(d_error / d, tof_error / tof, delta=1e-10)
 
 
 if __name__ == "__main__":
