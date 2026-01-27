@@ -192,10 +192,14 @@ void AlignAndFocusPowderSlim::init() {
                   "The units of the input X min, max and delta values. Output will always be TOF");
   declareProperty(std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
                   "Specify binning behavior ('Logarithmic')");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(PropertyNames::ALLOW_LOGS),
-                  "If specified, only these logs will be loaded from the file");
-  declareProperty(std::make_unique<ArrayProperty<std::string>>(PropertyNames::BLOCK_LOGS),
-                  "If specified, these logs will not be loaded from the file");
+  declareProperty(
+      std::make_unique<ArrayProperty<std::string>>(PropertyNames::ALLOW_LOGS),
+      "If specified, only these logs will be loaded from the file. Setting this will automatically override the "
+      "default LogBlockList");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
+                      PropertyNames::BLOCK_LOGS,
+                      std::vector<std::string>{"Phase\\*", "Speed\\*", "BL\\*:Chop:\\*", "chopper\\*TDC"}),
+                  "If specified, these logs will not be loaded from the file. Set as empty list ``[]`` to disable");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::Workspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
@@ -205,11 +209,11 @@ void AlignAndFocusPowderSlim::init() {
   auto positiveIntValidator = std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
   positiveIntValidator->setLower(1);
   declareProperty(
-      std::make_unique<PropertyWithValue<int>>(PropertyNames::READ_SIZE_FROM_DISK, 2000 * 50000, positiveIntValidator),
+      std::make_unique<PropertyWithValue<int>>(PropertyNames::READ_SIZE_FROM_DISK, 10000000, positiveIntValidator),
       "Number of elements of time-of-flight or detector-id to read at a time. This is a maximum");
   setPropertyGroup(PropertyNames::READ_SIZE_FROM_DISK, CHUNKING_PARAM_GROUP);
   declareProperty(
-      std::make_unique<PropertyWithValue<int>>(PropertyNames::EVENTS_PER_THREAD, 1000000, positiveIntValidator),
+      std::make_unique<PropertyWithValue<int>>(PropertyNames::EVENTS_PER_THREAD, 1000, positiveIntValidator),
       "Number of events to read in a single thread. Higher means less threads are created.");
   setPropertyGroup(PropertyNames::EVENTS_PER_THREAD, CHUNKING_PARAM_GROUP);
 
@@ -258,7 +262,8 @@ std::map<std::string, std::string> AlignAndFocusPowderSlim::validateInputs() {
   }
 
   // only specify allow or block list for logs
-  if ((!isDefault(PropertyNames::ALLOW_LOGS)) && (!isDefault(PropertyNames::BLOCK_LOGS))) {
+  std::vector<std::string> block_logs = getProperty(PropertyNames::BLOCK_LOGS);
+  if ((!isDefault(PropertyNames::ALLOW_LOGS)) && (!isDefault(PropertyNames::BLOCK_LOGS) && !block_logs.empty())) {
     errors[PropertyNames::ALLOW_LOGS] = "Cannot specify both allow and block lists";
     errors[PropertyNames::BLOCK_LOGS] = "Cannot specify both allow and block lists";
   }
@@ -339,7 +344,11 @@ void AlignAndFocusPowderSlim::exec() {
 
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
   const std::vector<std::string> &allow_logs = getProperty(PropertyNames::ALLOW_LOGS);
-  const std::vector<std::string> &block_logs = getProperty(PropertyNames::BLOCK_LOGS);
+  std::vector<std::string> block_logs = getProperty(PropertyNames::BLOCK_LOGS);
+  if ((isDefault(PropertyNames::BLOCK_LOGS)) && (!isDefault(PropertyNames::ALLOW_LOGS))) {
+    block_logs.clear();
+    g_log.information() << "User provided LogAllowList, default LogBlockList being ignored\n";
+  }
   int nPeriods{1};
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog, allow_logs,
                                                          block_logs);

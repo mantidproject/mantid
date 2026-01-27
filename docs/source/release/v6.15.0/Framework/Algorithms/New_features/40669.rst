@@ -1,0 +1,1 @@
+- Updated default parameters ``ReadSizeFromDisk``, ``EventsPerThread``, and ``LogBlockList`` for :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` to give faster execution.
