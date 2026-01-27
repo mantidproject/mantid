@@ -1131,30 +1131,31 @@ template <typename NumT> void File::getSlab(NumT *data, DimVector const &start, 
 
 void File::getDataCoerce(vector<int> &data) {
   Info info = this->getInfo();
-  if (info.type == NXnumtype::INT8) {
-    vector<int8_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT8) {
-    vector<uint8_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::INT16) {
-    vector<int16_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT16) {
-    vector<uint16_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::INT32) {
-    vector<int32_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT32) {
-    vector<uint32_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
+  // if it is not a float or special
+  if (!info.type.isFloat() && !info.type.isSpecial()) {
+    if (H5Iis_valid(m_current_data_id) <= 0) {
+      throw NXEXCEPTION("No dataset open");
+    }
+
+    size_t length =
+        std::accumulate(info.dims.cbegin(), info.dims.cend(), static_cast<size_t>(1),
+                        [](auto const subtotal, auto const &value) { return subtotal * static_cast<size_t>(value); });
+    data.resize(length);
+
+    hsize_t ndims = H5Sget_simple_extent_ndims(m_current_space_id);
+    DataTypeID datatype = H5Tcopy(H5T_NATIVE_INT);
+    herr_t ret = -1;
+    if (ndims == 0) {
+      DataSpaceID filespace = H5Dget_space(m_current_data_id);
+      DataSpaceID memspace = H5Screate(H5S_SCALAR);
+      H5Sselect_all(filespace);
+      ret = H5Dread(m_current_data_id, datatype, memspace, filespace, H5P_DEFAULT, data.data());
+    } else {
+      ret = H5Dread(m_current_data_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data.data());
+    }
+    if (ret < 0) {
+      throw NXEXCEPTION("Failed to read dataset");
+    }
   } else {
     throw NXEXCEPTION("NexusFile::getDataCoerce(): Could not coerce to int.");
   }
@@ -1162,36 +1163,30 @@ void File::getDataCoerce(vector<int> &data) {
 
 void File::getDataCoerce(vector<double> &data) {
   Info info = this->getInfo();
-  if (info.type == NXnumtype::INT8) {
-    vector<int8_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT8) {
-    vector<uint8_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::INT16) {
-    vector<int16_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT16) {
-    vector<uint16_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::INT32) {
-    vector<int32_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::UINT32) {
-    vector<uint32_t> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::FLOAT32) {
-    vector<float> result;
-    this->getData(result);
-    data.assign(result.begin(), result.end());
-  } else if (info.type == NXnumtype::FLOAT64) {
-    this->getData(data);
+  // if it is not a special
+  if (!info.type.isSpecial()) {
+    if (H5Iis_valid(m_current_data_id) <= 0) {
+      throw NXEXCEPTION("No dataset open");
+    }
+    size_t length =
+        std::accumulate(info.dims.cbegin(), info.dims.cend(), static_cast<size_t>(1),
+                        [](auto const subtotal, auto const &value) { return subtotal * static_cast<size_t>(value); });
+    data.resize(length);
+
+    hsize_t ndims = H5Sget_simple_extent_ndims(m_current_space_id);
+    DataTypeID datatype = H5Tcopy(H5T_NATIVE_DOUBLE);
+    herr_t ret = -1;
+    if (ndims == 0) {
+      DataSpaceID filespace = H5Dget_space(m_current_data_id);
+      DataSpaceID memspace = H5Screate(H5S_SCALAR);
+      H5Sselect_all(filespace);
+      ret = H5Dread(m_current_data_id, datatype, memspace, filespace, H5P_DEFAULT, data.data());
+    } else {
+      ret = H5Dread(m_current_data_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data.data());
+    }
+    if (ret < 0) {
+      throw NXEXCEPTION("Failed to read dataset");
+    }
   } else {
     throw NXEXCEPTION("NexusFile::getDataCoerce(): Could not coerce to double.");
   }
@@ -1482,10 +1477,14 @@ template <> MANTID_NEXUS_DLL void File::getAttr(const std::string &name, std::st
 
 template <typename NumT> void File::getAttr(const std::string &name, NumT &value) {
   auto current = getCurrentObject();
-  try {
-    value = H5Util::readNumAttributeCoerce<NumT>(*current, name);
-  } catch (H5::Exception const &e) {
-    throw NXEXCEPTION(e.getDetailMsg());
+  if (current->attrExists(name)) {
+    try {
+      value = H5Util::readNumAttributeCoerce<NumT>(*current, name);
+    } catch (H5::Exception const &e) {
+      throw NXEXCEPTION(e.getDetailMsg());
+    }
+  } else {
+    throw NXEXCEPTION("Attribute " + name + " does not exist");
   }
 }
 
