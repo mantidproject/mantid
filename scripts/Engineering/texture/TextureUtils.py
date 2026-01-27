@@ -6,10 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from os import path, scandir
-import sys
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
+from mantid.simpleapi import (
+    ConvertUnits,
+    Rebunch,
+    Rebin,
+    SumSpectra,
+    AppendSpectra,
+    CloneWorkspace,
+    CropWorkspace,
+)
 from pathlib import Path
 from Engineering.EnggUtils import GROUP
 from Engineering.EnginX import EnginX
@@ -17,12 +25,15 @@ from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, Function
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
-from plugins.algorithms.IntegratePeaks1DProfile import PeakFunctionGenerator, calc_intens_and_sigma_arrays
+from plugins.algorithms.IntegratePeaks1DProfile import calc_intens_and_sigma_arrays
 from Engineering.texture.xtal_helper import get_xtal_structure
+from Engineering.EnggUtils import convert_TOFerror_to_derror
 
 # import texture helper functions so they can be accessed by users through the TextureUtils namespace
 from Engineering.texture.texture_helper import plot_pole_figure
 
+from mantid.kernel import DeltaEModeType, UnitConversion
+from plugins.algorithms.peakdata_utils import PeakData
 # -------- Utility --------------------------------
 
 
@@ -246,90 +257,461 @@ def validate_abs_corr_inputs(
 # -------- Fitting Script Logic--------------------------------
 
 
-class TexturePeakFunctionGenerator(PeakFunctionGenerator):
-    def __init__(self, peak_params_to_fix: Sequence[str], min_width: float = 1e-3):
-        super().__init__(peak_params_to_fix)
-        self.min_width = min_width
+def crop_and_rebin(ws, out_ws, lower, upper, rebin_params):
+    CropWorkspace(ws, lower, upper, OutputWorkspace="__tmp_peak_window")
+    Rebin("__tmp_peak_window", rebin_params, OutputWorkspace=out_ws)
 
-    def get_initial_fit_function_and_kwargs_from_specs(
-        self,
-        ws: Workspace2D,
-        peak: float,
-        x_window: tuple[float, float],
-        parameters_to_tie: Sequence[str],
-        peak_func_name: str,
-        bg_func_name: str,
-    ) -> Tuple[str, dict, Sequence[float]]:
-        # modification of get_initial_fit_function_and_kwargs to just fit a peak within the x_window
-        si = ws.spectrumInfo()
-        ispecs = list(range(si.size()))
-        x_start, x_end = x_window
-        function = MultiDomainFunction()
-        fit_kwargs = {}
-        # estimate background
-        istart = ws.yIndexOfX(x_start)
-        iend = ws.yIndexOfX(x_end)
-        # init bg func (global)
-        bg_func = FunctionFactory.createFunction(bg_func_name)
-        # init peak func
+
+def _get_max_bin(ws):
+    xdat = ws.extractX()
+    return np.diff(xdat, axis=1).max()
+
+
+def crop_wss_and_combine(wss, peak, lower, upper, output):
+    cropped_rebinned_wss = [f"rebin_ws_{peak}_0"]
+    peak_window_ws = CropWorkspace(wss[0], lower, upper, OutputWorkspace="__peak_window_crop")
+    rebin_params = (lower, _get_max_bin(peak_window_ws), upper)
+    Rebin("__peak_window_crop", rebin_params, OutputWorkspace=f"rebin_ws_{peak}_0")
+    CloneWorkspace(InputWorkspace=f"rebin_ws_{peak}_0", OutputWorkspace=f"rebin_ws_{peak}")
+    for iws, ws in enumerate(wss[1:]):
+        intermediate_ws = f"rebin_ws_{peak}_{iws + 1}"
+        cropped_rebinned_wss.append(intermediate_ws)
+        crop_and_rebin(ws, intermediate_ws, lower, upper, rebin_params)
+        AppendSpectra(f"rebin_ws_{peak}", intermediate_ws, OutputWorkspace=f"rebin_ws_{peak}")
+    return SumSpectra(f"rebin_ws_{peak}", OutputWorkspace=output), cropped_rebinned_wss
+
+
+def fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs):
+    x0_lims = []
+    all_peak_crop_wss = []
+    for i, peak in enumerate(peaks):
+        # set the ws bounds based on the supplied peak window
+        low_bound, hi_bound = peak - peak_window, peak + peak_window
+        window_ws, peak_crop_wss = crop_wss_and_combine(wss, peak, low_bound, hi_bound, f"peak_window_{i}")
+
+        # the outer list is peak index and the inner list is each ws (str) in wss cropped and rebinned for that peak
+        all_peak_crop_wss.append(peak_crop_wss)
+
+        # set up a function to fit
+        bg_func = FunctionFactory.createFunction("LinearBackground")
+        peak_func = FunctionFactory.Instance().createPeakFunction("BackToBackExponential")
+
+        # estimate starting params
+        intens, sigma, *_ = _estimate_intensity_background_and_centre(window_ws, 0, 0, len(window_ws.readX(0)) - 1, peak)
+        peak_func.setCentre(peak)
+        peak_func.setIntensity(intens)
+        cen_par_name = peak_func.getCentreParameterName()
+        peak_func.addConstraints(f"{low_bound} < {cen_par_name} < {hi_bound}")
+        peak_func.addConstraints("I > 0")
+        comp_func = CompositeFunctionWrapper(FunctionWrapper(peak_func), FunctionWrapper(bg_func), NumDeriv=True)
+        fit_kwargs["InputWorkspace"] = window_ws.name()
+        fit_kwargs["StartX"] = low_bound
+        fit_kwargs["EndX"] = hi_bound
+
+        fit_object = Fit(
+            Function=comp_func,
+            Output=f"composite_fit_{peak}",
+            MaxIterations=50,  # if it hasn't fit in 50 it is likely because the texture has the peak missing
+            **fit_kwargs,
+        )
+        b2b_func = fit_object.Function.function.getFunction(0)
+        x0 = b2b_func.getParameterValue("X0")
+        x0_lims.append((x0 * (1 - 3e-3), x0 * (1 + 3e-3)))
+    return x0_lims, all_peak_crop_wss
+
+
+def get_initial_fit_function_and_kwargs_from_specs(
+    ws: Workspace2D,
+    ws_tof: Workspace2D,
+    peak: float,
+    x_window: tuple[float, float],
+    x0_window: tuple[float, float],
+    parameters_to_tie: Optional[Sequence[str]],
+    peak_func_name: str,
+    bg_func_name: str,
+    tie_bkg: bool,
+) -> Tuple[str, dict, Sequence[float]]:
+    # modification of get_initial_fit_function_and_kwargs to just fit a peak within the x_window
+
+    # get the number of spectra
+    si = ws.spectrumInfo()
+    ispecs = list(range(si.size()))
+
+    # set up the fit window and data structures
+    x_start, x_end = x_window
+    fit_kwargs = {}
+    approx_bkgs = []
+    intensity_estimates = []
+
+    # set up the overall fit wrapper function and base versions of the individual peak and background
+    function = MultiDomainFunction()
+    bg_func = FunctionFactory.createFunction(bg_func_name)
+    base_peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
+    base_peak_func.setIntensity(1.0)
+
+    # save parameter names for future ties/constraints
+    intens_par_name = next(
+        base_peak_func.getParamName(ipar) for ipar in range(base_peak_func.nParams()) if base_peak_func.isExplicitlySet(ipar)
+    )
+    cen_par_name = base_peak_func.getCentreParameterName()
+    width_par_name = base_peak_func.getWidthParameterName()
+
+    # for each of the spectra
+    for ispec in ispecs:
+        # convert d spacing to tof - better step size for A, B and S refinement
+        diff_consts = si.diffractometerConstants(ispec)
+        tof_peak = UnitConversion.run("dSpacing", "TOF", peak, 0, DeltaEModeType.Elastic, diff_consts)
+        tof_start = UnitConversion.run("dSpacing", "TOF", x_start, 0, DeltaEModeType.Elastic, diff_consts)
+        tof_end = UnitConversion.run("dSpacing", "TOF", x_end, 0, DeltaEModeType.Elastic, diff_consts)
+
+        # get the window indices for the spectra
+        istart = ws_tof.yIndexOfX(tof_start, ispec)
+        iend = ws_tof.yIndexOfX(tof_end, ispec)
+
+        # get param estimates
+        intens, sigma, bg, centre = _estimate_intensity_background_and_centre(ws_tof, ispec, istart, iend, tof_peak)
+        intensity_estimates.append(intens)
+        approx_bkgs.append(bg)
+
+        # create an individual peak, using estimated values as initial guess
         peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
-        # save parameter names for future ties/constraints
-        peak_func.setIntensity(1.0)
-        self.intens_par_name = next(peak_func.getParamName(ipar) for ipar in range(peak_func.nParams()) if peak_func.isExplicitlySet(ipar))
-        self.cen_par_name = peak_func.getCentreParameterName()
-        self.width_par_name = peak_func.getWidthParameterName()
-        avg_bg = 0
-        intensity_estimates = []
-        for ispec in ispecs:
-            # get param estimates
-            intens, sigma, bg = self._estimate_intensity_and_background(ws, ispec, istart, iend)
-            intensity_estimates.append(intens)
-            avg_bg += bg
-            # add peak, using provided value as guess for centre
-            peak_func.setCentre(peak)
-            peak_func.setIntensity(intens)
-            # add constraints
-            peak_func.addConstraints(f"{self.cen_par_name} > {x_start}")
-            peak_func.addConstraints(f"{self.cen_par_name} < {x_end}")
-            peak_func.addConstraints(f"{self.intens_par_name} > 0")
-            comp_func = CompositeFunctionWrapper(FunctionWrapper(peak_func), FunctionWrapper(bg_func), NumDeriv=True)
-            function.add(comp_func.function)
-            function.setDomainIndex(ispec, ispec)
-            key_suffix = f"_{ispec}" if ispec > 0 else ""
-            fit_kwargs["InputWorkspace" + key_suffix] = ws.name()
-            fit_kwargs["StartX" + key_suffix] = x_start
-            fit_kwargs["EndX" + key_suffix] = x_end
-            fit_kwargs["WorkspaceIndex" + key_suffix] = int(ispec)
-        # set background (background global tied to first domain function)
-        function[0][1]["A0"] = avg_bg / len(ispecs)
-        function[0][0].setMatrixWorkspace(ws, 0, x_start, x_end)
-        available_params = [peak_func.getParamName(i) for i in range(peak_func.nParams())]
-        if parameters_to_tie is not None:
-            invalid = [p for p in parameters_to_tie if p not in available_params]
-            if invalid:
-                raise ValueError(f"Invalid parameter(s) to tie: {invalid}. Available: {available_params}")
+        peak_func.setCentre(centre)
+        peak_func.setIntensity(intens)
 
-        # set constraint on FWHM (to avoid peak fitting to noise or background)
-        self._add_fwhm_constraints(function, peak_func, fit_range=x_end - x_start, nbins=iend - istart)
-        return self._add_parameter_ties(function, parameters_to_tie), fit_kwargs, intensity_estimates
+        # calculate constraint values
+        # convert x0 bounds to TOF
+        x0_lower = UnitConversion.run("dSpacing", "TOF", x0_window[0], 0, DeltaEModeType.Elastic, diff_consts)
+        x0_upper = UnitConversion.run("dSpacing", "TOF", x0_window[1], 0, DeltaEModeType.Elastic, diff_consts)
+        # constrain the values of S to be at least half bin width and no more than half the window size
+        scale_factor = 2 * np.sqrt(2 * np.log(2))
+        width_min = 0.5 * ((tof_end - tof_start) / (iend - istart)) * scale_factor
+        width_max = max(width_min + 1e-10, ((tof_end - tof_start) / 2) * scale_factor)
 
-    def _add_parameter_ties(self, function: MultiDomainFunction, pars_to_tie: Sequence[str]) -> str:
-        # fix peak params requested
-        [function[0][0].fixParameter(par) for par in self.peak_params_to_fix]
-        additional_pars_to_fix = set(self.peak_params_to_fix) - set(pars_to_tie)
-        ties = []
-        for idom in range(1, function.nDomains()):
-            # tie global params to first
-            for par in pars_to_tie:
-                ties.append(f"f{idom}.f0.{par}=f0.f0.{par}")  # global peak pars
-            for ipar_bg in range(function[idom][1].nParams()):
-                par = function[idom][1].getParamName(ipar_bg)
-                ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
-            for par in additional_pars_to_fix:
-                # pars to be fixed but not global/already tied
-                function[idom][0].fixParameter(par)
-        # add ties as string (orders of magnitude quicker than self.function.tie)
-        return f"{str(function)};ties=({','.join(ties)})"
+        # add these constraints
+        peak_func.addConstraints(f"{x0_lower} < {cen_par_name} < {x0_upper}")
+        peak_func.addConstraints(f"{intens / 5} < {intens_par_name} < {intens * 5}")
+        peak_func.addConstraints(f"{width_min}<{width_par_name}<{width_max}")
+
+        if not tie_bkg:
+            bg_func.setParameter("A0", bg)
+
+        # package up the spectra fit functions (peak + background) into a composite function
+        comp_func = CompositeFunctionWrapper(FunctionWrapper(peak_func), FunctionWrapper(bg_func), NumDeriv=True)
+        function.add(comp_func.function)
+        function.setDomainIndex(ispec, ispec)
+        function.setMatrixWorkspace(ws_tof, ispec, tof_start, tof_end)
+
+        # set the fit kwargs for this spectra
+        key_suffix = f"_{ispec}" if ispec > 0 else ""
+        fit_kwargs["InputWorkspace" + key_suffix] = ws_tof.name()
+        fit_kwargs["StartX" + key_suffix] = tof_start
+        fit_kwargs["EndX" + key_suffix] = tof_end
+        fit_kwargs["WorkspaceIndex" + key_suffix] = int(ispec)
+
+    # add parameter ties
+    ties = []
+
+    # first tie background
+    if tie_bkg:
+        function, ties = _tie_bkg(function, approx_bkgs, ties)
+
+    # then any other nominated parameters
+    available_params = [base_peak_func.getParamName(i) for i in range(base_peak_func.nParams())]
+    if parameters_to_tie is not None:
+        invalid = [p for p in parameters_to_tie if p not in available_params]
+        if invalid:
+            raise ValueError(f"Invalid parameter(s) to tie: {invalid}. Available: {available_params}")
+        else:
+            for idom in range(1, function.nDomains()):
+                # tie global params to first
+                for par in parameters_to_tie:
+                    ties.append(f"f{idom}.f0.{par}=f0.f0.{par}")  # global peak pars
+
+    # if ties are to be added, do so as a string as it is faster
+    func = f"{str(function)};ties=({','.join(ties)})" if ties else function
+    return func, fit_kwargs, intensity_estimates
+
+
+def rerun_fit_with_new_ws(
+    mdf: MultiDomainFunction,
+    fit_kwargs: dict,
+    md_fit_kwargs: dict,
+    new_ws: Workspace2D,
+    x0_frac_move: float,
+    iters: int,
+    parameters_to_fix: Optional[Sequence[str]] = None,
+    parameters_to_tie: Optional[Sequence[str]] = None,
+    tie_background: bool = False,
+    is_final: bool = False,
+):
+    # update the input workspace in the fitting kwargs
+    for k in md_fit_kwargs.keys():
+        if "InputWorkspace" in k:
+            md_fit_kwargs[k] = new_ws.name()
+
+    ties = []
+    new_func = MultiDomainFunction()
+    for idom in range(mdf.nFunctions()):
+        comp = mdf[idom]
+        peak = comp[0]
+        bg = comp[1]
+        # create fresh peak as ties are causing problems
+        new_peak = FunctionFactory.Instance().createPeakFunction(peak.name())
+        [new_peak.setParameter(param, peak.getParameterValue(param)) for param in ("I", "X0", "A", "B", "S")]
+        # update constraints around new values
+        intens = max(peak.getParameterValue("I"), 1)
+        x0 = peak.getParameterValue("X0")
+        if not is_final:
+            # don't constrain the intensity on the final fit
+            new_peak.addConstraints(f"{max(intens / 2, 1e-6)}<I<{intens * 2}")
+        new_peak.addConstraints(f"{x0 * (1 - x0_frac_move)}<X0<{x0 * (1 + x0_frac_move)}")
+        # apply ties to the first domain, if ties are required
+        if idom > 0:
+            if tie_background:
+                for ipar_bg in range(bg.nParams()):
+                    par = bg.getParamName(ipar_bg)
+                    ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
+            if parameters_to_tie:
+                for par in parameters_to_tie:
+                    ties.append(f"f{idom}.f0.{par}=f0.f0.{par}")
+        # fix parameters if required
+        if parameters_to_fix:
+            for param in parameters_to_fix:
+                new_peak.fixParameter(param)
+
+        comp_func = CompositeFunctionWrapper(FunctionWrapper(new_peak), FunctionWrapper(bg), NumDeriv=True)
+        new_func.add(comp_func.function)
+        new_func.setDomainIndex(idom, idom)
+        key_suffix = f"_{idom}" if idom > 0 else ""
+        new_func.setMatrixWorkspace(new_ws, idom, md_fit_kwargs["StartX" + key_suffix], md_fit_kwargs["EndX" + key_suffix])
+
+    # if ties are defined add them
+    func = f"{str(new_func)};ties=({','.join(ties)})" if len(ties) > 0 else new_func
+
+    return Fit(
+        Function=func,
+        Output=f"fit_{new_ws.name()}",
+        MaxIterations=iters,
+        **fit_kwargs,
+        **md_fit_kwargs,
+    ), md_fit_kwargs
+
+
+def fit_all_peaks(
+    wss: Sequence[str],
+    peaks: Sequence[float],
+    peak_window: float,
+    save_dir: str,
+    override_dir: bool = False,
+    i_over_sigma_thresh: float = 2.0,
+    nan_replacement: Optional[str] = "zeros",
+    no_fit_value_dict: Optional[dict] = None,
+    smooth_vals: Sequence[int] = (3, 2),
+    tied_bkgs: Sequence[bool] = (False, True),
+    final_fit_raw: bool = True,
+    parameters_to_tie: Optional[Sequence[str]] = ("A", "B"),
+    subsequent_fit_param_fix: Optional[Sequence[str]] = None,
+) -> None:
+    """
+
+    Fit all the peaks given in all the spectra of all the workspaces, for use in a texture analysis workflow
+
+    wss: Workspace names of all the workspaces to fit
+    peaks: Sequence of peak positions in d-spacing
+    peak_window: size of the window to create around the desired peak for purpose of fitting
+    save_dir: directory to save the results in
+    override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
+    i_over_sigma_thresh: I/sig less than this value will be deemed as no peak and parameter values will be nan or specified value
+    nan_replacement: method options are ("zero", "min", "max", "mean") will try to replace the nan values in columns
+                     zero - will replace all nans with 0.0
+                     min/max/mean - will replace all nans in a column with the min/max/mean non-nan value (otherwise will remain nan)
+    no_fit_value_dict: allows the user to specify the unfit default value of parameters as a dict of key:value pairs
+    smooth_vals: the number of bins which should be combined together to improve SNR stats
+    tied_bkgs: a bool flag for each of the subsequent fits whether the background fits should be independent for spectra
+    final_fit_raw: flag for whether the final fit should be done with no smoothing
+    parameters_to_tie: parameters which should be tied across spectra (Default is A and B)
+    subsequent_fit_param_fix: parameters which should be fixed after the initial fit (Default is None)
+    """
+
+    # currently the only fit functions intended to be used - less flexibility here allows for less user input
+    peak_func_name = "BackToBackExponential"
+    bg_func_name = "LinearBackground"
+
+    # define some parameters for the fit
+    fit_kwargs = {
+        "StepSizeMethod": "Sqrt epsilon",
+        "IgnoreInvalidData": False,
+        "CreateOutput": True,
+        "OutputCompositeMembers": True,
+        "Minimizer": "Levenberg-Marquardt",
+        "CostFunction": "Unweighted least squares",
+    }
+
+    # we are initially going to fit a summed spectra to get a good starting point for the peak centre
+    # we will then fix the amount this can change in the individual fits
+
+    x0_lims, all_cropped_rebinned_wss = fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs.copy())
+
+    for iws, wsname in enumerate(wss):
+        # notice user how far through the fitting they are (useful if any fits fail)
+        logger.notice(f"Fitting Workspace: {wsname} ({iws + 1}/{len(wss)})")
+
+        # obtain the ws and metadata about ws
+        ws = ADS.retrieve(wsname)
+        run, prefix = _get_run_and_prefix_from_ws_log(ws, wsname)
+        grouping = _get_grouping_from_ws_log(ws)
+
+        # loop over the peaks
+        for ipeak, peak in enumerate(peaks):
+            # perform fitting in TOF as the parameter magnitudes are better for fitting (A, B, and S)
+            ws_tof = ConvertUnits(InputWorkspace=all_cropped_rebinned_wss[ipeak][iws], OutputWorkspace="ws_tof", Target="TOF")
+
+            # approach will be to use iterative fits and these iteration can have optionally 'rebunched' data to improve SNR
+            fit_wss = []
+            bkg_is_tied = []
+            if len(smooth_vals) > 0:
+                for i, smooth_val in enumerate(smooth_vals):
+                    fit_wss.append(Rebunch(InputWorkspace=ws_tof, OutputWorkspace=f"smooth_ws_{smooth_val}", NBunch=smooth_val))
+                    bkg_is_tied.append(tied_bkgs[i])
+            # if no smoothing values are given, the initial fit should just be on ws_tof
+            # if final_fit_raw flagged, ws_tof should be added to the end of the fit_wss stack
+            if final_fit_raw or len(smooth_vals) == 0:
+                fit_wss.append(ws_tof)
+                bkg_is_tied.append(True)
+
+            # low level information
+            logger.information(f"Workspace: {wsname}, Peak: {peak}")
+
+            # set up an index of which of the fit iterations we are on
+            fit_num = 0
+            # set up final ws and file paths
+            out_ws = f"{prefix}{run}_{peak}_{grouping}_Fit_Parameters"
+            out_file = out_ws + ".nxs"
+            out_path = path.join(save_dir, out_file) if override_dir else path.join(save_dir, grouping, str(peak), out_file)
+            out_tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
+
+            # get window bounds
+            xmin, xmax = peak - peak_window, peak + peak_window
+
+            # perform initial fit set up and fit
+            fit_ws = fit_wss[fit_num]
+            initial_function, md_fit_kwargs, intensity_estimates = get_initial_fit_function_and_kwargs_from_specs(
+                ws, fit_ws, peak, (xmin, xmax), x0_lims[ipeak], parameters_to_tie, peak_func_name, bg_func_name, bkg_is_tied[fit_num]
+            )
+            fit_object = Fit(
+                Function=initial_function,
+                Output=f"fit_{fit_ws}",
+                MaxIterations=50,  # if it hasn't fit in 50 it is likely because the texture has the peak missing
+                **fit_kwargs,
+                **md_fit_kwargs,
+            )
+
+            # perform subsequent fits
+            while len(fit_wss) - 1 > fit_num:
+                fit_num += 1
+                mdf = fit_object.Function.function
+                fit_ws = fit_wss[fit_num]
+                fit_object, md_fit_kwargs = rerun_fit_with_new_ws(
+                    mdf,
+                    fit_kwargs,
+                    md_fit_kwargs,
+                    fit_ws,
+                    0.01,  # allow x0 to only vary by 1% from previous fit
+                    50,
+                    subsequent_fit_param_fix,
+                    parameters_to_tie,
+                    bkg_is_tied[fit_num],
+                    fit_num == len(fit_wss) - 1,
+                )
+
+            # establish which detectors have sufficient I over sigma
+            mdf = fit_object.Function.function
+            fit_result = {"Function": mdf, "OutputWorkspace": fit_object.OutputWorkspace.name()}
+            # update peak mask based on I/sig from fit
+            *_, i_over_sigma, _ = calc_intens_and_sigma_arrays(fit_result, "Summation")
+            fit_mask = i_over_sigma > i_over_sigma_thresh
+
+            # setup output table columns
+            spec_fit = ADS.retrieve(f"fit_{fit_ws}_Parameters")
+            si = ws.spectrumInfo()
+            out_tab.addColumn("int", "wsindex")
+            out_tab.addColumn("double", "I_est")
+            all_params = spec_fit.column("Name")[:-1]  # last row is cost function
+            param_vals = spec_fit.column("Value")[:-1]
+            param_errs = spec_fit.column("Error")[:-1]
+            u_params = []
+            for col in all_params:  # last col is cost of whole fit
+                spec_num, func_num, param = col.split(".")
+                # assume first function is the peak
+                if func_num == "f0" and param not in u_params:
+                    u_params.append(param)
+                    out_tab.addColumn("double", param)
+                    out_tab.addColumn("double", f"{param}_err")
+
+            # get user defined default vals for unsuccessful fit parameters
+            default_vals = get_default_values(u_params, no_fit_value_dict)
+
+            # populate the rows of the table
+            table_vals = np.zeros((si.size(), 2 * len(u_params) + 1))  # intensity_est + param_1_val, param_1_err, +...
+            for ispec in range(si.size()):
+                # logic for spectra which HAVE been fit successfully
+                if fit_mask[ispec]:
+                    row = [intensity_estimates[ispec]]
+                    for p in u_params:
+                        param_name = f"f{ispec}.f0.{p}"
+                        pind = all_params.index(param_name)
+                        if p != "X0":
+                            row += [param_vals[pind], param_errs[pind]]
+                        else:
+                            # for x0, convert back to d spacing
+                            diff_consts = si.diffractometerConstants(ispec)
+                            d_peak = UnitConversion.run("TOF", "dSpacing", param_vals[pind], 0, DeltaEModeType.Elastic, diff_consts)
+                            d_err = convert_TOFerror_to_derror(diff_consts, param_errs[pind], d_peak)
+                            row += [d_peak, d_err]
+                # logic for spectra which HAVE NOT been fit successfully
+                else:
+                    row = [default_vals.get("I_est", np.nan)]
+                    for p in u_params:
+                        row += [default_vals[p], np.nan]
+                table_vals[ispec] = row
+            if nan_replacement:
+                table_vals = replace_nans(table_vals, nan_replacement)
+            for i, row in enumerate(table_vals):
+                out_tab.addRow([i] + list(row))
+
+            # save the final table
+            SaveNexus(InputWorkspace=out_ws, Filename=out_path)
+
+
+# ~fitting utility functions~
+
+
+def _tie_bkg(function, approx_bkgs, ties):
+    function[0][1]["A0"] = np.mean(approx_bkgs)
+    for idom in range(1, function.nDomains()):
+        for ipar_bg in range(function[idom][1].nParams()):
+            par = function[idom][1].getParamName(ipar_bg)
+            ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
+    return function, ties
+
+
+def _estimate_intensity_background_and_centre(
+    ws: Workspace2D, ispec: int, istart: int, iend: int, peak: float
+) -> Tuple[float, float, float, float]:
+    xdat = ws.readX(ispec)[istart:iend]
+    bin_width = np.diff(xdat)
+    bin_width = np.hstack((bin_width, bin_width[-1]))  # easier than checking iend and istart not out of bounds
+    y = ws.readY(ispec)[istart:iend]
+    if not np.any(y > 0):
+        return 0.0, 0.0, 0.0, peak
+    e = ws.readE(ispec)[istart:iend]
+    ibg, _ = PeakData.find_bg_pts_seed_skew(y)
+    bg = np.mean(y[ibg])
+    intensity = np.trapezoid((y - bg), xdat)
+    sigma = np.sqrt(np.sum((e * bin_width) ** 2))
+    centre_arg = np.argmax(y)
+    centre = xdat[centre_arg]
+    return intensity, sigma, bg, centre
 
 
 def _get_run_and_prefix_from_ws_log(ws: Workspace2D, wsname: str) -> Tuple[str, str]:
@@ -358,159 +740,17 @@ def get_default_values(params, no_fit_dict):
     return defaults
 
 
-def replace_nans(vals, method: str):
-    new_vals = np.zeros_like(vals.T)  # want to iterate over table columns
-    # if method is zero, replace all nans with zero
+def replace_nans(vals: np.ndarray, method: Optional[str] = None) -> np.ndarray:
+    if not method:
+        return vals
     if method == "zeros":
-        return np.nan_to_num(vals)
-    # otherwise, if there is at least 1 value per row that isn't nan, replace the nans with the min/max/mean of these
-    elif method == "mean":
-        func = np.mean
-    elif method == "max":
-        func = np.max
-    else:
-        func = np.min
-    for i, col in enumerate(vals.T):
-        non_nan = col[~np.isnan(col)]
-        if len(non_nan) > 0:
-            new_vals[i] = np.nan_to_num(col, nan=func(non_nan))
-        else:
-            # if the row is all nan, then we leave it as is
-            new_vals[i] = col
-    return new_vals.T
-
-
-def is_macOS():
-    return sys.platform == "darwin"
-
-
-def fit_all_peaks(
-    wss: Sequence[str],
-    peaks: Sequence[float],
-    peak_window: float,
-    save_dir: str,
-    parameters_to_tie: Optional[Sequence[str]] = ("A", "B"),
-    override_dir: bool = False,
-    i_over_sigma_thresh: float = 2.0,
-    nan_replacement: Optional[str] = "zeros",
-    no_fit_value_dict: Optional[dict] = None,
-) -> None:
-    """
-
-    Fit all the peaks given in all the spectra of all the workspaces, for use in a texture analysis workflow
-
-    wss: Workspace names of all the workspaces to fit
-    peaks: Sequence of peak positions in d-spacing
-    peak_window: size of the window to create around the desired peak for purpose of fitting
-    save_dir: directory to save the results in
-    parameters_to_tie: Sequence of parameters which should be tied across spectra
-    override_dir: flag which, if True, will save files directly into save_dir rather than creating a folder structure
-    i_over_sigma_thresh: I/sig less than this value will be deemed as no peak and parameter values will be nan or specified value
-    nan_replacement: method options are ("zero", "min", "max", "mean") will try to replace the nan values in columns
-                     zero - will replace all nans with 0.0
-                     min/max/mean - will replace all nans in a column with the min/max/mean non-nan value (otherwise will remain nan)
-    no_fit_value_dict: allows the user to specify the unfit default value of parameters as a dict of key:value pairs
-    """
-
-    if is_macOS():
-        logger.warning("Fitting can be unreliable on MacOS, this is being worked on")
-
-    fit_kwargs = {
-        "Minimizer": "Levenberg-Marquardt",
-        "StepSizeMethod": "Sqrt epsilon",
-        "IgnoreInvalidData": True,
-        "CreateOutput": True,
-        "OutputCompositeMembers": True,
-    }
-
-    for wsname in wss:
-        ws = ADS.retrieve(wsname)
-        run, prefix = _get_run_and_prefix_from_ws_log(ws, wsname)
-        grouping = _get_grouping_from_ws_log(ws)
-
-        for peak in peaks:
-            logger.information(f"Workspace: {wsname}, Peak: {peak}")
-            # change peak window to fraction
-            out_ws = f"{prefix}{run}_{peak}_{grouping}_Fit_Parameters"
-            out_file = out_ws + ".nxs"
-            out_path = path.join(save_dir, out_file) if override_dir else path.join(save_dir, grouping, str(peak), out_file)
-
-            xmin, xmax = peak - peak_window, peak + peak_window
-
-            out_tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
-
-            peak_func_name = "BackToBackExponential"
-            bg_func_name = "LinearBackground"
-
-            func_generator = TexturePeakFunctionGenerator([])  # don't fix any parameters
-            parameters_to_tie = () if not parameters_to_tie else parameters_to_tie
-            initial_function, md_fit_kwargs, intensity_estimates = func_generator.get_initial_fit_function_and_kwargs_from_specs(
-                ws, peak, (xmin, xmax), parameters_to_tie, peak_func_name, bg_func_name
-            )
-
-            fit_object = Fit(
-                Function=initial_function,
-                CostFunction="Least squares",
-                Output="first_fit",
-                MaxIterations=50,  # if it hasn't fit in 50 it is likely because the texture has the peak missing
-                **fit_kwargs,
-                **md_fit_kwargs,
-            )
-
-            fit_result = {"Function": fit_object.Function.function, "OutputWorkspace": fit_object.OutputWorkspace.name()}
-
-            # update peak mask based on I/sig from fit
-            *_, i_over_sigma, _ = calc_intens_and_sigma_arrays(fit_result, "Summation")
-            fit_mask = i_over_sigma > i_over_sigma_thresh
-
-            # fit only peak pixels and let peak centers vary independently of DIFC ratio
-            final_function = func_generator.get_final_fit_function(fit_result["Function"], fit_mask, 0.02)
-            Fit(
-                Function=final_function,
-                CostFunction="Least squares",
-                Output="fit",
-                MaxIterations=50,  # if it hasn't fit in 50 it is likely because the texture has the peak missing
-                **fit_kwargs,
-                **md_fit_kwargs,
-            )
-
-            spec_fit = ADS.retrieve("fit_Parameters")
-            si = ws.spectrumInfo()
-
-            out_tab.addColumn("int", "wsindex")
-            out_tab.addColumn("double", "I_est")
-            all_params = spec_fit.column("Name")[:-1]  # last row is cost function
-            param_vals = spec_fit.column("Value")[:-1]
-            param_errs = spec_fit.column("Error")[:-1]
-            u_params = []
-            for col in all_params:  # last col is cost of whole fit
-                spec_num, func_num, param = col.split(".")
-                # assume first function is the peak
-                if func_num == "f0" and param not in u_params:
-                    u_params.append(param)
-                    out_tab.addColumn("double", param)
-                    out_tab.addColumn("double", f"{param}_err")
-
-            default_vals = get_default_values(u_params, no_fit_value_dict)
-
-            table_vals = np.zeros((si.size(), 2 * len(u_params) + 1))  # intensity_est + param_1_val, param_1_err, +...
-            for ispec in range(si.size()):
-                if fit_mask[ispec]:
-                    row = [intensity_estimates[ispec]]
-                    for p in u_params:
-                        param_name = f"f{ispec}.f0.{p}"
-                        pind = all_params.index(param_name)
-                        row += [param_vals[pind], param_errs[pind]]
-                else:
-                    row = [default_vals.get("I_est", np.nan)]
-                    for p in u_params:
-                        row += [default_vals[p], np.nan]
-                table_vals[ispec] = row
-            if nan_replacement:
-                table_vals = replace_nans(table_vals, nan_replacement)
-            for i, row in enumerate(table_vals):
-                out_tab.addRow([i] + list(row))
-            SaveNexus(InputWorkspace=out_ws, Filename=out_path)
+        return np.nan_to_num(vals, nan=0)
+    func = {"mean": np.nanmean, "max": np.nanmax, "min": np.nanmin}[method]
+    out = vals.copy()
+    col_stat = func(out, axis=0)
+    nan_mask = np.isnan(out)
+    out[nan_mask] = col_stat[np.where(nan_mask)[1]]
+    return out
 
 
 # -------- Pole Figure Script Logic--------------------------------
