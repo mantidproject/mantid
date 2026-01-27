@@ -13,6 +13,10 @@
 #include "MantidKernel/SingletonHolder.h"
 #include <memory>
 
+#ifdef MPI_BUILD
+#include <boost/mpi/environment.hpp>
+#endif
+
 namespace Mantid {
 
 namespace API {
@@ -84,6 +88,17 @@ private:
   void updateInstrumentDefinitions();
   /// check if a newer version of Mantid is available
   void checkIfNewerVersionIsAvailable();
+
+#ifdef MPI_BUILD
+  /** Member variable that initialises the MPI environment on construction (in the
+   *  FrameworkManager constructor) and finalises it on destruction.
+   *  The class has no non-static member functions, so is not exposed in the
+   * class interface.
+   */
+  std::unique_ptr<boost::mpi::environment> m_mpi_environment;
+  int argc = 0;
+  char **argv;
+#endif
 };
 
 using FrameworkManager = Mantid::Kernel::SingletonHolder<FrameworkManagerImpl>;
