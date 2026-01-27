@@ -1,10 +1,14 @@
 /*-------------------- $GENERAL --------------------*/
 
-#table-of-contents { border: none; }
+#table-of-contents {
+  border: none;
+}
 
 /*-------------------- $NAV --------------------*/
 
-.navbar-version { display: none; }
+.navbar-version {
+  display: none;
+}
 
 /*-------------------- $LINKS --------------------*/
 
@@ -20,24 +24,26 @@ a:hover {
 
 /*-------------------- $SPACING --------------------*/
 
-body { font-size: 1.6em; } /* 16px */
+body {
+  font-size: 1.6em;
+} /* 16px */
 
-h1{
+h1 {
   margin-top: 0;
 }
 
 /*-------------------- $MATH ----------------------*/
 
 img.math {
-    vertical-align: middle;
+  vertical-align: middle;
 }
 
 div.math p {
-    text-align: center;
+  text-align: center;
 }
 
 span.eqno {
-    float: right;
+  float: right;
 }
 
 /*-------------------- $IMAGES --------------------*/
@@ -58,7 +64,7 @@ span.eqno {
   padding: 4px 15px 0px 15px;
 }
 
-.navbar-brand > img{
+.navbar-brand > img {
   width: 85px;
 }
 
@@ -71,24 +77,41 @@ table {
 }
 
 /* Zebra striping */
-tr:nth-of-type(odd) { background: white; }
+tr:nth-of-type(odd) {
+  background: white;
+}
 
-tr:hover { background-color: whiteSmoke; }
+tr:hover {
+  background-color: whiteSmoke;
+}
 
 th {
-  background: #E0DFDE;
+  background: #e0dfde;
   font-size: 1.3em;
 }
 
-td, th {
-  padding: .75em;
-  border: 1px solid #CCC;
+td,
+th {
+  padding: 0.75em;
+  border: 1px solid #ccc;
   text-align: left;
 }
 
 /*-------------------- $SPHINX-OVERRIDES --------------------*/
 
-.warning { overflow: hidden; }
+.warning {
+  overflow: hidden;
+}
+
+div.body {
+  width: 100%;
+  min-width: none;
+  max-width: none;
+}
+
+.row {
+  margin: 0;
+}
 
 /*-------------------- $MEDIA-QUERIES --------------------*/
 
@@ -101,28 +124,28 @@ td, th {
 /*---------------------Coloured_text-------------------------*/
 
 .red {
-    color:red;
+  color: red;
 }
 .blue {
-    color:blue;
+  color: blue;
 }
 .green {
-    color:green;
+  color: green;
 }
 
 /*-------Introduced here for colors in table cells, for the comparisons of minimizers-----*/
 .ranking-top-1 {
-    background-color: #fef0d9;
+  background-color: #fef0d9;
 }
 .ranking-top-2 {
-    background-color: #fdcc8a;
+  background-color: #fdcc8a;
 }
 .ranking-med-3 {
-    background-color: #fc8d59;
+  background-color: #fc8d59;
 }
 .ranking-low-4 {
-    background-color: #e34a33;
+  background-color: #e34a33;
 }
 .ranking-low-5 {
-    background-color: #b30000;
+  background-color: #b30000;
 }
