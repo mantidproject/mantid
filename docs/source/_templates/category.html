@@ -2,13 +2,14 @@
 
 {% extends "layout.html" %}
 
-{% macro split_to_three_columns(item_list) -%}
-{# Split list into 3 columns #}
-{# Uses bootstrap col-md-4 for each column along with slice(3) to divide input list #}
+{% macro split_to_two_columns(item_list) -%}
+{# Split a list into two columns #}
+{# Uses bootstrap grid system along with slice() to divide input list #}
 {# It currently assumes the items in the list are mantiddoc.directives.categories.PageRef classes #}
-    <div class="row">
-    {% for column in item_list|slice(3) %}
-      <div class="col-md-4">
+    <div id="category-grid" class="row">
+    {% set sections_seen = [] %}
+    {% for column in item_list|slice(2) %}
+      <div class="col-lg-6 col-md-6 col-sm-12">
       {% set first = [True] %}
       {% set section = [0] %}
       {% for item in column %}
@@ -18,7 +19,13 @@
           {% if first[0] != True %}
             </ul>
           {% endif %}
-          <h3 style="font-weight:bold">{{ section[0] }}</h3>
+          <h3 style="font-weight:bold;">
+            &emsp;{{ section[0] }}
+            {% if section[0] in sections_seen %} (cont.){% endif %}
+          </h3>
+          {% if section[0] not in sections_seen %}
+            {% set _ = sections_seen.append(section[0]) %}
+          {% endif %}
           <ul>
         {% endif %}
         <li><a href="{{ item.link(outpath) }}">{{ item.name }}</a></li>
@@ -47,7 +54,7 @@
     <br>
     <h2> Subcategories </h2>
     {% if subcategories|length > 10 %}
-      {{ split_to_three_columns(subcategories) }}
+      {{ split_to_two_columns(subcategories) }}
     {% else %}
       {{ list_to_single_column(subcategories) }}
     {% endif %}
@@ -57,7 +64,7 @@
     {% if pages %}
     <h2>  Pages  </h2>
       {% if pages|length > 10 %}
-        {{ split_to_three_columns(pages) }}
+        {{ split_to_two_columns(pages) }}
       {% else %}
         {{ list_to_single_column(pages) }}
       {% endif %}
