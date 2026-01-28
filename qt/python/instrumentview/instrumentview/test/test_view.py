@@ -53,6 +53,12 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self.assertEqual(2, mock_close_event.call_count)
         self._view.main_plotter.close.assert_called_once()
 
+    @mock.patch("qtpy.QtWidgets.QMainWindow.closeEvent")
+    def test_close_no_presenter(self, mock_close_event):
+        self._view._presenter = None
+        self._view.closeEvent(MagicMock())
+        self._view.main_plotter.close.assert_called_once()
+
     def test_add_simple_shape(self):
         self._view.main_plotter.reset_mock()
         mock_mesh = MagicMock()
