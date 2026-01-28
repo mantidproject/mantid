@@ -1,0 +1,1 @@
+- Fixed error on closing the new Instrument View due to a missing presenter.
