@@ -643,7 +643,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.close()
         if self._detector_spectrum_fig is not None:
             plt.close(self._detector_spectrum_fig.get_label())
-        self._presenter.handle_close()
+        if hasattr(self, "_presenter") and self._presenter is not None:
+            self._presenter.handle_close()
 
     def set_projection_combo_options(self, default_index: int, options: list[str]) -> None:
         self._projection_combo_box.addItems(options)
