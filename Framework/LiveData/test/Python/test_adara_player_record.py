@@ -5,8 +5,8 @@ Test suite for Player.record method from adara_player module.
 
 import signal
 import socket
-import tempfile
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch, MagicMock, mock_open
 import unittest
 
@@ -27,11 +27,14 @@ class Test_Player_record(unittest.TestCase):
     """Test cases for Player.record method."""
 
     def setUp(self):
+        super().setUp()
+        self.temp_dir = self.enterContext(TemporaryDirectory(prefix=f"{__name__}_"))
+
         # Base configuration shared by all tests; individual tests can mutate
         # `self.Config` *before* applying the patch.
         self.Config = {
             "server": {
-                "address": "/tmp/sock-test",
+                "address": f"{self.temp_dir}/sock-test",
                 "socket_timeout": 1.0,
                 "buffer_MB": 64,
                 "name": "adara_player",
@@ -64,7 +67,7 @@ class Test_Player_record(unittest.TestCase):
             player = Player()
 
             # Create temporary directory for output
-            with tempfile.TemporaryDirectory() as tmpdir:
+            with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
@@ -130,7 +133,7 @@ class Test_Player_record(unittest.TestCase):
                 payload=payload,
             )
 
-            with tempfile.TemporaryDirectory() as tmpdir:
+            with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
@@ -203,7 +206,7 @@ class Test_Player_record(unittest.TestCase):
                 payload=payload,
             )
 
-            with tempfile.TemporaryDirectory() as tmpdir:
+            with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
@@ -267,7 +270,7 @@ class Test_Player_record(unittest.TestCase):
         ):
             player = Player()
 
-            with tempfile.TemporaryDirectory() as tmpdir:
+            with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
@@ -325,7 +328,7 @@ class Test_Player_record(unittest.TestCase):
                 payload=payload,
             )
 
-            with tempfile.TemporaryDirectory() as tmpdir:
+            with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
@@ -388,7 +391,7 @@ class Test_Player_record(unittest.TestCase):
                 payload=payload,
             )
 
-            with tempfile.TemporaryDirectory() as tmpdir:
+            with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets
@@ -478,7 +481,7 @@ class Test_Player_record(unittest.TestCase):
                 payload=payload,
             )
 
-            with tempfile.TemporaryDirectory() as tmpdir:
+            with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
                 output_path = Path(tmpdir) / "output"
 
                 first_path = player._packet_file_path(output_path, packet, sequence_number=1)
@@ -510,7 +513,7 @@ class Test_Player_record(unittest.TestCase):
                 payload=payload,
             )
 
-            with tempfile.TemporaryDirectory() as tmpdir:
+            with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
                 output_path = Path(tmpdir) / "output"
 
                 first_path = player._packet_file_path(output_path, packet, sequence_number=1)
@@ -541,7 +544,7 @@ class Test_Player_record(unittest.TestCase):
                 payload=payload,
             )
 
-            with tempfile.TemporaryDirectory() as tmpdir:
+            with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
                 output_path = Path(tmpdir) / "output"
 
                 with patch("builtins.open", mock_open()) as mock_file:
@@ -598,7 +601,7 @@ class Test_Player_record(unittest.TestCase):
                 payload=payload2,
             )
 
-            with tempfile.TemporaryDirectory() as tmpdir:
+            with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
                 output_path = Path(tmpdir) / "output"
 
                 mock_client_socket = MagicMock(spec=socket.socket)
@@ -666,7 +669,7 @@ class Test_Player_record(unittest.TestCase):
         ):
             player = Player()
 
-            with tempfile.TemporaryDirectory() as tmpdir:
+            with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
                 output_path = Path(tmpdir) / "output"
 
                 # Mock sockets

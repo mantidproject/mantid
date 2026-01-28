@@ -7,6 +7,7 @@ import numpy as np
 from pathlib import Path
 import signal
 import socket
+from tempfile import TemporaryDirectory
 
 from packet_player import Player, Packet, ClientHelloPacket
 
@@ -28,11 +29,14 @@ class Test_Player_play(unittest.TestCase):
     """Test cases for Player.play method."""
 
     def setUp(self):
+        super().setUp()
+        self.temp_dir = self.enterContext(TemporaryDirectory(prefix=f"{__name__}_"))
+
         # Base configuration shared by all tests; individual tests can mutate
         # `self.Config` *before* applying the patch.
         self.Config = {
             "server": {
-                "address": "/tmp/sock-test",
+                "address": f"{self.temp_dir}/sock-test",
                 "socket_timeout": 1.0,
                 "buffer_MB": 64,
                 "name": "adara_player",
