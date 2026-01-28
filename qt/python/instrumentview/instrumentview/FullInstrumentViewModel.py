@@ -497,10 +497,15 @@ class FullInstrumentViewModel:
                     continue
 
                 if kind is CurrentTab.Masking:
-                    # TODO: Figure out if can get away with just extracting dataY, as it's much faster
-                    # boolean_mask = ws.extractY().flatten()
-                    boolean_mask = np.isin(self._detector_ids, ws.getMaskedDetectors())
+                    # NOTE: This is a roundabout way of getting masked detector ids because ws.getMaskedDetectors() is much slower
+                    det_table = CreateDetectorTable(ws, PickOneDetectorID=True, StoreInADS=False, EnableLogging=False)
+                    det_ids = det_table.columnArray("Detector ID(s)")
+                    is_mask = ws.extractY().flatten().astype(bool)
+                    boolean_mask = np.isin(self._detector_ids, det_ids[is_mask])
                 else:
+                    # TODO: Figure out if using numpy arrays is faster than getDetectorIDsOfGroup
+                    # groups = ws.extractY().flatten()
+                    # boolean_mask = np.isin(self._detector_ids, det_ids[groups == int(key[-1])])
                     boolean_mask = np.isin(self._detector_ids, ws.getDetectorIDsOfGroup(int(key[-1])))
 
                 booleans_from_ws.append(boolean_mask)
