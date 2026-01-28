@@ -85,7 +85,7 @@ std::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const Kernel::Liv
       if (!info.address().empty()) {
         address = Poco::Net::SocketAddress(info.address());
       }
-      
+
       // If we can't connect, throw an exception to be handled below
       if (!listener->connect(address)) {
         throw Poco::Exception("Connection attempt failed.");
@@ -101,13 +101,12 @@ std::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const Kernel::Liv
 
       g_log.debug(ss.str());
       throw std::runtime_error(ss.str());
-    }
-    catch (const std::exception &e) {
+    } catch (const std::exception &e) {
       std::stringstream ss;
       ss << "Unable to connect listener [" << info.listener() << "] to [" << info.address() << "]: " << e.what();
 
       g_log.debug(ss.str());
-      throw std::runtime_error(ss.str());         
+      throw std::runtime_error(ss.str());
     }
   }
 
