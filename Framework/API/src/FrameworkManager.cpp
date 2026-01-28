@@ -37,6 +37,10 @@
 #include <execinfo.h>
 #endif
 
+#ifdef MPI_BUILD
+#include <boost/mpi.hpp>
+#endif
+
 namespace {
 // We use a raw pointer over a unique_ptr to avoid problems with static deallocation order of static
 // variables. In certain circumstances, e.g. unit testing, the shutdown method on FrameworkManager is
@@ -129,6 +133,12 @@ FrameworkManagerImpl::FrameworkManagerImpl() {
   g_log.debug() << "FrameworkManager created.\n";
 
   asynchronousStartupTasks();
+#ifdef MPI_BUILD
+  int initialized = 0;
+  MPI_Initialized(&initialized);
+  if (!initialized)
+    m_mpi_environment = std::make_unique<boost::mpi::environment>(argc, argv);
+#endif
 }
 
 /**
