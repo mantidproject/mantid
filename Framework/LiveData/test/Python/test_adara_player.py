@@ -11,7 +11,7 @@ import os
 import signal
 import socket
 import struct
-import tempfile
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 import time
 
 from packet_player import Player, Packet, EPICS_EPOCH_OFFSET
@@ -24,11 +24,14 @@ class Test_Player(unittest.TestCase):
     """Test cases for Player class (general methods)."""
 
     def setUp(self):
+        super().setUp()
+        self.temp_dir = self.enterContext(TemporaryDirectory(prefix=f"{__name__}_"))
+
         # Base configuration shared by all tests; individual tests can mutate
         # `self.Config` *before* applying the patch.
         self.Config = {
             "server": {
-                "address": "/tmp/sock-test",
+                "address": f"{self.temp_dir}/sock-test",
                 "socket_timeout": 1.0,
                 "buffer_MB": 64,
                 "name": "adara_player",
@@ -56,7 +59,10 @@ class Test_Player(unittest.TestCase):
     def test_init_defaults_and_overrides(self):
         """Tests initialization with default configuration values and with explicit overrides."""
         # Test with defaults (using Config values)
-        with patch("packet_player.Config", self.Config), patch("packet_player.Player.get_server_address", return_value="/tmp/sock-test"):
+        with (
+            patch("packet_player.Config", self.Config),
+            patch("packet_player.Player.get_server_address", return_value=f"{self.temp_dir}/sock-test"),
+        ):
             player = Player()
 
             # Check defaults
@@ -78,7 +84,10 @@ class Test_Player(unittest.TestCase):
             self.assertEqual(player._source_address, ("192.168.1.1", 8888))
 
     def test_getratefilter_normal_unlimited(self):
-        """Verifies valid creation and function of rate filters for NORMAL and UNLIMITED, and fails on unknown values."""
+        """
+        Verifies valid creation and function of rate filters for NORMAL and UNLIMITED,
+          and fails on unknown values.
+        """
         import numpy as np
 
         # Test NORMAL rate filter
@@ -168,9 +177,9 @@ class Test_Player(unittest.TestCase):
                 self.assertEqual(address, "/run/user/1000/sock-default_player")
 
             # Test fallback to TMPDIR on macOS
-            with patch.dict(os.environ, {"TMPDIR": "/tmp"}, clear=True):
+            with patch.dict(os.environ, {"TMPDIR": f"{self.temp_dir}"}, clear=True):
                 address = Player.get_server_address()
-                self.assertEqual(address, "/tmp/sock-default_player")
+                self.assertEqual(address, f"{self.temp_dir}/sock-default_player")
 
     def test_iter_file_single_file(self):
         """Validates packet iteration from a single file stream (including edge cases)."""
@@ -244,7 +253,7 @@ class Test_Player(unittest.TestCase):
 
     def test_iter_files_multi_file_ordering(self):
         """Tests that packets from multiple files are sorted by file modification time."""
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
             tmppath = Path(tmpdir)
 
             # Create file 3 with MIDDLE timestamp (THIRD sequence number): (FIRST mtime)
@@ -343,7 +352,7 @@ class Test_Player(unittest.TestCase):
     def test__file_timestamp_empty_malformed(self):
         """Verifies behavior when the file is empty or contains corrupt packet headers."""
         # Test 1: Empty file should return epoch timestamp
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".adara") as f:
+        with NamedTemporaryFile(delete=False, suffix=".adara") as f:
             empty_filepath = Path(f.name)
 
         try:
@@ -354,7 +363,7 @@ class Test_Player(unittest.TestCase):
             empty_filepath.unlink()
 
         # Test 2: File with corrupt/invalid packet type (complete header)
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".adara") as f:
+        with NamedTemporaryFile(delete=False, suffix=".adara") as f:
             # Write complete header (16 bytes) with invalid packet type
             corrupt_header = struct.pack("<I", 0)  # payload_len = 0
             corrupt_header += struct.pack("<I", 0xFFFFFFFF)  # Invalid type field
@@ -376,7 +385,7 @@ class Test_Player(unittest.TestCase):
 
     def test__file_timestamp_incomplete_header(self):
         """Test _file_timestamp behavior with incomplete header in file."""
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".adara") as f:
+        with NamedTemporaryFile(delete=False, suffix=".adara") as f:
             # Write incomplete header (only 10 bytes, need 16)
             f.write(b"\x00" * 10)
             incomplete_filepath = Path(f.name)
@@ -391,7 +400,7 @@ class Test_Player(unittest.TestCase):
 
     def test__file_timestamp_valid_file(self):
         """Test _file_timestamp returns correct timestamp from valid file."""
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".adara") as f:
+        with NamedTemporaryFile(delete=False, suffix=".adara") as f:
             # Create valid packet with known timestamp
             test_tv_sec = 1234567890
             test_tv_nsec = 123456789
@@ -423,7 +432,7 @@ class Test_Player(unittest.TestCase):
 
     def test_cleanup_all_sockets_closed(self):
         """Verifies closure and cleanup logic for all held sockets."""
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
             test_socket_path = Path(tmpdir) / "test_adara_socket"
 
             with patch("packet_player.Config", self.Config):

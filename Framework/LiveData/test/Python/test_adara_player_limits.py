@@ -1,3 +1,5 @@
+from tempfile import TemporaryDirectory
+
 from packet_player import Player, Packet
 
 import unittest
@@ -5,6 +7,10 @@ from unittest.mock import patch, MagicMock
 
 
 class TestPlayerLimits(unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+        self.temp_dir = self.enterContext(TemporaryDirectory(prefix=f"{__name__}_"))
+
     def test_impose_transfer_limit_stops_at_limit(self):
         """
         Checks that _impose_transfer_limit will set the appropriate state
@@ -14,7 +20,7 @@ class TestPlayerLimits(unittest.TestCase):
         dummy_packet = MagicMock(spec=Packet)
         dummy_packet.size = 10 * 1024**2  # 10 MB
 
-        with patch("packet_player.Player.get_server_address", return_value="/tmp/sock-test"):
+        with patch("packet_player.Player.get_server_address", return_value=f"{self.temp_dir}/sock-test"):
             player = Player()
             player.TRANSFER_LIMIT_MB = 1  # set limit to 1 MB for test
             player._running = True
@@ -34,7 +40,7 @@ class TestPlayerLimits(unittest.TestCase):
         dummy_packet = MagicMock(spec=Packet)
         dummy_packet.size = 512 * 1024  # 0.5 MB
 
-        with patch("packet_player.Player.get_server_address", return_value="/tmp/sock-test"):
+        with patch("packet_player.Player.get_server_address", return_value=f"{self.temp_dir}/sock-test"):
             player = Player()
             player.TRANSFER_LIMIT_MB = 1  # set limit to 1 MB for test
             player._running = True

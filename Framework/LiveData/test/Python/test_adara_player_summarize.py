@@ -4,6 +4,7 @@ Test suite for Player.summarize method from adara_player module.
 
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch, MagicMock
 
 import numpy as np
@@ -26,11 +27,14 @@ class Test_Player_summarize(unittest.TestCase):
     """Test cases for Player.summarize method."""
 
     def setUp(self):
+        super().setUp()
+        self.temp_dir = self.enterContext(TemporaryDirectory(prefix=f"{__name__}_"))
+
         # Base configuration shared by all tests; individual tests can mutate
         # `self.Config` *before* applying the patch.
         self.Config = {
             "server": {
-                "address": "/tmp/sock-test",
+                "address": f"{self.temp_dir}/sock-test",
                 "socket_timeout": 1.0,
                 "buffer_MB": 64,
                 "name": "adara_player",

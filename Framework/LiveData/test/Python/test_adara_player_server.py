@@ -2,7 +2,7 @@ import argparse
 import inspect
 from pathlib import Path
 import signal
-import tempfile
+from tempfile import TemporaryDirectory
 
 from session_server import SessionServer, SessionHandler, SessionTCPServer, SessionUDSServer, main
 
@@ -22,10 +22,13 @@ class _SessionServer(SessionServer, _DummyBase):
 
 class TestSessionServer(unittest.TestCase):
     def setUp(self):
+        super().setUp()
+        self.temp_dir = self.enterContext(TemporaryDirectory(prefix=f"{__name__}_"))
+
         # Patch UnixGlob.parse and multi_glob used by _parse_file_args
         self._parse_patcher = mock.patch(
             "session_server.UnixGlob.parse",
-            return_value=(Path("/tmp/sessions"), ["*.adara"]),
+            return_value=(Path(f"{self.temp_dir}/sessions"), ["*.adara"]),
         )
         self._multiglob_patcher = mock.patch(
             "session_server.UnixGlob.multi_glob",
@@ -40,7 +43,7 @@ class TestSessionServer(unittest.TestCase):
             record=False,
             source_address=None,
             dry_run=False,
-            glob="/tmp/sessions",
+            glob=f"{self.temp_dir}/sessions",
             files=None,
             summarize=False,
         )
@@ -53,8 +56,8 @@ class TestSessionServer(unittest.TestCase):
             record=True,
             source_address=None,
             dry_run=False,
-            glob="/tmp/sessions",
-            files="/tmp/list.yml",
+            glob=f"{self.temp_dir}/sessions",
+            files=f"{self.temp_dir}/list.yml",
             summarize=False,
         )
 
@@ -85,8 +88,8 @@ class TestSessionServer(unittest.TestCase):
             record=False,
             source_address=None,
             dry_run=False,
-            glob="/tmp/sessions",
-            files="/tmp/list.yml",
+            glob=f"{self.temp_dir}/sessions",
+            files=f"{self.temp_dir}/list.yml",
             summarize=False,
         )
 
@@ -102,7 +105,7 @@ class TestSessionServer(unittest.TestCase):
             source_address=None,
             dry_run=False,
             glob=None,
-            files="/tmp/list.yml",
+            files=f"{self.temp_dir}/list.yml",
             summarize=False,
         )
 
@@ -122,7 +125,7 @@ class TestSessionServer(unittest.TestCase):
             source_address=None,
             dry_run=False,
             glob=None,
-            files="/tmp/list.yml",
+            files=f"{self.temp_dir}/list.yml",
             summarize=False,
         )
 
@@ -146,7 +149,7 @@ class TestSessionServer(unittest.TestCase):
             source_address=None,
             dry_run=False,
             glob=None,
-            files="/tmp/list.yml",
+            files=f"{self.temp_dir}/list.yml",
             summarize=False,
         )
 
@@ -168,7 +171,7 @@ class TestSessionServer(unittest.TestCase):
             source_address=None,
             dry_run=False,
             glob=None,
-            files="/tmp/list.yml",
+            files=f"{self.temp_dir}/list.yml",
             summarize=False,
         )
 
@@ -190,7 +193,7 @@ class TestSessionServer(unittest.TestCase):
             source_address=None,
             dry_run=False,
             glob=None,
-            files="/tmp/list.yml",
+            files=f"{self.temp_dir}/list.yml",
             summarize=False,
         )
 
@@ -220,7 +223,7 @@ class TestSessionServer(unittest.TestCase):
             source_address=None,
             dry_run=False,
             glob=None,
-            files="/tmp/list.yml",
+            files=f"{self.temp_dir}/list.yml",
             summarize=False,
         )
 
@@ -253,7 +256,7 @@ class TestSessionServer(unittest.TestCase):
             source_address=None,
             dry_run=False,
             glob=None,
-            files="/tmp/list.yml",
+            files=f"{self.temp_dir}/list.yml",
             summarize=False,
         )
 
@@ -277,7 +280,7 @@ class TestSessionServer(unittest.TestCase):
             record=False,
             source_address=None,
             dry_run=False,
-            glob="/tmp/sessions",
+            glob=f"{self.temp_dir}/sessions",
             files=None,
             summarize=False,
         )
@@ -302,57 +305,56 @@ class TestSessionServer(unittest.TestCase):
 
         self.assertIn("glob argument is required when `--files` is not specified", str(context.exception))
 
+    def test_parse_file_args_uses_multisession_root_when_patterns_empty(self):
+        """Test that _parse_file_args treats an empty-pattern glob as a multi-session root and builds per-directory session iterators."""
+        with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
+            base = Path(tmpdir)
 
-def test_parse_file_args_uses_multisession_root_when_patterns_empty(self):
-    """Test that _parse_file_args treats an empty-pattern glob as a multi-session root and builds per-directory session iterators."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        base = Path(tmpdir)
+            # Create real session directories that match the 4-digit pattern
+            (base / "0001").mkdir()
+            (base / "0002").mkdir()
+            # A directory that should be ignored by the \d{4} filter
+            (base / "abcd").mkdir()
 
-        # Create real session directories that match the 4-digit pattern
-        (base / "0001").mkdir()
-        (base / "0002").mkdir()
-        # A directory that should be ignored by the \d{4} filter
-        (base / "abcd").mkdir()
+            args = argparse.Namespace(
+                record=False,
+                source_address=None,
+                dry_run=False,
+                glob=str(base),
+                files=None,
+                summarize=False,
+            )
 
-        args = argparse.Namespace(
-            record=False,
-            source_address=None,
-            dry_run=False,
-            glob=str(base),
-            files=None,
-            summarize=False,
-        )
+            with (
+                # Force patterns == [""] so we enter the multi-session root branch
+                mock.patch("session_server.UnixGlob.parse", return_value=(base, [""])),
+                mock.patch("session_server.Player.PACKET_GLOB", "*.adara"),
+                # Have multi_glob yield something per directory so we can see it is called
+                mock.patch(
+                    "session_server.UnixGlob.multi_glob",
+                    side_effect=lambda sp, patterns: iter([sp / "dummy.adara"]),
+                ) as mock_multi,
+            ):
+                SessionServer._parse_file_args(self.server, args)
 
-        with (
-            # Force patterns == [""] so we enter the multi-session root branch
-            mock.patch("session_server.UnixGlob.parse", return_value=(base, [""])),
-            mock.patch("session_server.Player.PACKET_GLOB", "*.adara"),
-            # Have multi_glob yield something per directory so we can see it is called
-            mock.patch(
-                "session_server.UnixGlob.multi_glob",
-                side_effect=lambda sp, patterns: iter([sp / "dummy.adara"]),
-            ) as mock_multi,
-        ):
-            SessionServer._parse_file_args(self.server, args)
+                # _glob encodes the base-only multi-session root.
+                self.assertEqual(self.server.glob, (base, [""]))
 
-        # _glob encodes the base-only multi-session root.
-        self.assertEqual(self.server.glob, (base, [""]))
+                # There should be one inner iterator per valid 4-digit directory: 0001 and 0002.
+                outer = list(self.server._sessions)
+                self.assertEqual(len(outer), 2)
 
-        # There should be one inner iterator per valid 4-digit directory: 0001 and 0002.
-        outer = list(self.server._sessions)
-        self.assertEqual(len(outer), 2)
+                # Force consumption of inner iterators just to prove they are iterators over paths
+                all_files = [list(it) for it in outer]
+                self.assertEqual(
+                    all_files,
+                    [[base / "0001" / "dummy.adara"], [base / "0002" / "dummy.adara"]],
+                )
 
-        # Force consumption of inner iterators just to prove they are iterators over paths
-        all_files = [list(it) for it in outer]
-        self.assertEqual(
-            all_files,
-            [[base / "0001" / "dummy.adara"], [base / "0002" / "dummy.adara"]],
-        )
-
-        # multi_glob is invoked once per session directory with PACKET_GLOB.
-        self.assertEqual(mock_multi.call_count, 2)
-        mock_multi.assert_any_call(base / "0001", ["*.adara"])
-        mock_multi.assert_any_call(base / "0002", ["*.adara"])
+            # multi_glob is invoked once per session directory with PACKET_GLOB.
+            self.assertEqual(mock_multi.call_count, 2)
+            mock_multi.assert_any_call(base / "0001", ["*.adara"])
+            mock_multi.assert_any_call(base / "0002", ["*.adara"])
 
     def test_parse_file_args_uses_single_session_when_patterns_nonempty(self):
         """Test that _parse_file_args creates a single logical session iterator when glob patterns are non-empty."""
@@ -360,7 +362,7 @@ def test_parse_file_args_uses_multisession_root_when_patterns_empty(self):
             record=False,
             source_address=None,
             dry_run=False,
-            glob="/tmp/sessions",
+            glob=f"{self.temp_dir}/sessions",
             files=None,
             summarize=False,
         )
@@ -368,7 +370,7 @@ def test_parse_file_args_uses_multisession_root_when_patterns_empty(self):
         with (
             mock.patch(
                 "session_server.UnixGlob.parse",
-                return_value=(Path("/tmp/sessions"), ["*.adara"]),
+                return_value=(Path(f"{self.temp_dir}/sessions"), ["*.adara"]),
             ) as mock_parse,
             mock.patch(
                 "session_server.UnixGlob.multi_glob",
@@ -377,11 +379,11 @@ def test_parse_file_args_uses_multisession_root_when_patterns_empty(self):
         ):
             SessionServer._parse_file_args(self.server, args)
 
-        mock_parse.assert_called_once_with("/tmp/sessions")
-        self.assertEqual(self.server.glob, (Path("/tmp/sessions"), ["*.adara"]))
+        mock_parse.assert_called_once_with(f"{self.temp_dir}/sessions")
+        self.assertEqual(self.server.glob, (Path(f"{self.temp_dir}/sessions"), ["*.adara"]))
         outer = list(self.server._sessions)
         self.assertEqual(len(outer), 1)
-        mock_multi.assert_called_once_with(Path("/tmp/sessions"), ["*.adara"])
+        mock_multi.assert_called_once_with(Path(f"{self.temp_dir}/sessions"), ["*.adara"])
 
     def test_init_initializes_server(self):
         """Test that SessionServer.__init__ properly initializes the server with given arguments."""
@@ -414,20 +416,20 @@ def test_parse_file_args_uses_multisession_root_when_patterns_empty(self):
 
     def test_property_glob(self):
         """Test that the glob property returns the correct parsed glob tuple."""
-        self.assertEqual(self.server.glob, (Path("/tmp/sessions"), ["*.adara"]))
+        self.assertEqual(self.server.glob, (Path(f"{self.temp_dir}/sessions"), ["*.adara"]))
 
     def test_property_basepath(self):
         """Test that the basepath property returns the expected base directory."""
-        self.assertEqual(self.server.base_path, Path("/tmp/sessions"))
+        self.assertEqual(self.server.base_path, Path(f"{self.temp_dir}/sessions"))
 
     def test_property_ismultisession(self):
         """Test that ismultisession property correctly indicates multi-session mode."""
         # Single-session glob is identified correctly.
-        self.server._glob = (Path("/tmp/sessions"), ["*.pkt"])
+        self.server._glob = (Path(f"{self.temp_dir}/sessions"), ["*.pkt"])
         self.assertFalse(self.server.is_multi_session)
 
         # Multi-session glob is identified correctly.
-        self.server._glob = (Path("/tmp/sessions"), [""])
+        self.server._glob = (Path(f"{self.temp_dir}/sessions"), [""])
         self.assertTrue(self.server.is_multi_session)
 
     def test_property_sessionnumber(self):
@@ -438,7 +440,7 @@ def test_parse_file_args_uses_multisession_root_when_patterns_empty(self):
 
     def test_session_path_record_mode(self):
         """Test that session_path validates record-mode session directories."""
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
             base = Path(tmpdir)
             self.server._glob = (base, [""])  # base_path for record mode
             self.server._record = True
@@ -451,7 +453,7 @@ def test_parse_file_args_uses_multisession_root_when_patterns_empty(self):
             result = self.server.session_path
             self.assertEqual(result, expected)
 
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
             base = Path(tmpdir)
             self.server._glob = (base, [""])
             self.server._record = True
@@ -520,6 +522,10 @@ def test_parse_file_args_uses_multisession_root_when_patterns_empty(self):
 
 
 class TestSessionHandler(unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+        self.temp_dir = self.enterContext(TemporaryDirectory(prefix=f"{__name__}_"))
+
     def test_handle_calls_player_play_or_record(self):
         """Test that SessionHandler.handle invokes Player.play or Player.record as needed."""
         mock_request = mock.Mock()
@@ -563,12 +569,16 @@ class TestSessionHandler(unittest.TestCase):
 
 
 class TestSessionTCPServer(unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+        self.temp_dir = self.enterContext(TemporaryDirectory(prefix=f"{__name__}_"))
+
     def test_init_sets_up_tcp_server(self):
         """Test that SessionTCPServer is initialized with correct arguments and handler."""
-        args = argparse.Namespace(record=False, summarize=False, source_address=None, dry_run=False, glob="/tmp/sessions")
+        args = argparse.Namespace(record=False, summarize=False, source_address=None, dry_run=False, glob=f"{self.temp_dir}/sessions")
 
         with (
-            mock.patch("session_server.UnixGlob.parse", return_value=(Path("/tmp/sessions"), ["*.pkt"])),
+            mock.patch("session_server.UnixGlob.parse", return_value=(Path(f"{self.temp_dir}/sessions"), ["*.pkt"])),
             mock.patch("session_server.UnixGlob.multi_glob", return_value=iter([])),
         ):
             server = SessionTCPServer(("localhost", 9999), args)
@@ -577,13 +587,17 @@ class TestSessionTCPServer(unittest.TestCase):
 
 
 class TestSessionUDSServer(unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+        self.temp_dir = self.enterContext(TemporaryDirectory(prefix=f"{__name__}_"))
+
     def test_init_sets_up_uds_server(self):
         """Test that SessionUDSServer is initialized with correct arguments and handler."""
-        args = argparse.Namespace(record=False, summarize=False, source_address=None, dry_run=False, glob="/tmp/sessions")
+        args = argparse.Namespace(record=False, summarize=False, source_address=None, dry_run=False, glob=f"{self.temp_dir}/sessions")
 
         with (
-            tempfile.TemporaryDirectory() as tmpdir,
-            mock.patch("session_server.UnixGlob.parse", return_value=(Path("/tmp/sessions"), ["*.pkt"])),
+            TemporaryDirectory(prefix=f"{__name__}_") as tmpdir,
+            mock.patch("session_server.UnixGlob.parse", return_value=(Path(f"{self.temp_dir}/sessions"), ["*.pkt"])),
             mock.patch("session_server.UnixGlob.multi_glob", return_value=iter([])),
         ):
             UDS_path = Path(tmpdir) / "sock"
@@ -592,6 +606,10 @@ class TestSessionUDSServer(unittest.TestCase):
 
 
 class TestMainFunction(unittest.TestCase):
+    def setUp(self):
+        super().setUp()
+        self.temp_dir = self.enterContext(TemporaryDirectory(prefix=f"{__name__}_"))
+
     @mock.patch("session_server.SessionTCPServer")
     @mock.patch("session_server.SessionUDSServer")
     @mock.patch("session_server.SessionServer.parse_args")
@@ -600,7 +618,7 @@ class TestMainFunction(unittest.TestCase):
     def test_main_starts_correct_server_based_on_args(self, Player, SocketAddress, parse_args, UDSServer, TCPServer):
         """Test that main() chooses UDS/TCP server based on arguments and calls serve_forever."""
         args = argparse.Namespace(
-            server_address=None, record=False, summarize=False, source_address=None, dry_run=False, glob="/tmp/sessions"
+            server_address=None, record=False, summarize=False, source_address=None, dry_run=False, glob=f"{self.temp_dir}/sessions"
         )
         parse_args.return_value = args
 
@@ -627,7 +645,7 @@ class TestMainFunction(unittest.TestCase):
     def test_main_signal_handlers_registered(self, SocketAddress, parse_args, TCPServer, sig_signal):
         """Test that main() sets up signal handlers for SIGINT and SIGTERM."""
         args = argparse.Namespace(
-            server_address=None, record=False, summarize=False, source_address=None, dry_run=False, glob="/tmp/sessions"
+            server_address=None, record=False, summarize=False, source_address=None, dry_run=False, glob=f"{self.temp_dir}/sessions"
         )
         parse_args.return_value = args
         SocketAddress.isUDSSocket.return_value = False

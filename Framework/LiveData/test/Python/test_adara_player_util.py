@@ -4,12 +4,17 @@ Test suite for UnixGlob and SocketAddress classes from adara_player module.
 
 from pathlib import Path
 from packet_player import UnixGlob, SocketAddress
+from tempfile import TemporaryDirectory
 
 import unittest
 
 
 class Test_UnixGlob(unittest.TestCase):
     """Test cases for UnixGlob class."""
+
+    def setUp(self):
+        super().setUp()
+        self.temp_dir = self.enterContext(TemporaryDirectory(prefix=f"{__name__}_"))
 
     def test_parse_valid_patterns(self):
         """Verifies that valid Unix glob patterns are correctly parsed into base directory and glob string list."""
@@ -101,6 +106,10 @@ class Test_UnixGlob(unittest.TestCase):
 class Test_SocketAddress(unittest.TestCase):
     """Test cases for SocketAddress class."""
 
+    def setUp(self):
+        super().setUp()
+        self.temp_dir = self.enterContext(TemporaryDirectory(prefix=f"{__name__}_"))
+
     def test_parse_hostname(self):
         """Checks that hostnames and DNS names parse as (host, port) tuples."""
 
@@ -191,9 +200,9 @@ class Test_SocketAddress(unittest.TestCase):
     def test_parse_unix_socket(self):
         """Tests parsing of Unix domain socket paths to Path objects."""
         # Absolute path starting with /
-        result = SocketAddress.parse("/tmp/my_socket.sock")
+        result = SocketAddress.parse(f"{self.temp_dir}/my_socket.sock")
         self.assertIsInstance(result, Path)
-        self.assertEqual(result, Path("/tmp/my_socket.sock"))
+        self.assertEqual(result, Path(f"{self.temp_dir}/my_socket.sock"))
 
         # Another Unix socket path
         result = SocketAddress.parse("/var/run/adara.sock")
@@ -235,7 +244,7 @@ class Test_SocketAddress(unittest.TestCase):
     def test_is_uds_socket_true(self):
         """Verifies that Unix socket paths are identified as UDS by `isUDSSocket`."""
         # Test with Path object (Unix socket)
-        uds_path = Path("/tmp/socket.sock")
+        uds_path = Path(f"{self.temp_dir}/socket.sock")
         self.assertTrue(SocketAddress.isUDSSocket(uds_path))
 
         # Parse a Unix socket and verify
