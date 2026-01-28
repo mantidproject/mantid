@@ -9,12 +9,18 @@ on:
   schedule:
     - cron: 0 6 * * *
 
+env:
+  # change this between main and release-next
+  UPDATE_BRANCH: release-next
+
 jobs:
   pixi-update-lockfile:
     if: ${{ github.repository_owner == 'mantidproject' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.UPDATE_BRANCH }}  # start from this branch
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@v0.9.3
         with:
@@ -33,7 +39,7 @@ jobs:
           title: Update pixi lockfile
           body-path: diff.md
           branch: update-pixi
-          base: release-next
+          base:  ${{ env.UPDATE_BRANCH }}  # merge into this branch
           labels: |
             pixi
             Maintenance
