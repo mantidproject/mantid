@@ -22,20 +22,20 @@ class TestShowSamplePresenter(unittest.TestCase):
     def test_init_connects_signal(self):
         self.view.set_on_view_shape_requested.assert_called_once_with(self.presenter._on_view_shape_clicked)
 
-    @patch(dir_path + ".ShowSamplePresenter._view_shape")
+    @patch(dir_path + ".ShowSamplePresenter._view_shape", autospec=True)
     def test_on_view_shape_clicked(self, mock_view_shape):
         ws_name = "test"
         self.presenter._on_view_shape_clicked(ws_name)
-        mock_view_shape.assert_called_with(ws_name, True)
+        mock_view_shape.assert_called_with(self.presenter, ws_name, True)
 
-    @patch(dir_path + ".ShowSamplePresenter._view_shape")
+    @patch(dir_path + ".ShowSamplePresenter._view_shape", autospec=True)
     def test_on_view_reference_shape_clicked(self, mock_view_shape):
         self.model.get_reference_ws.return_value = "ref_ws"
         self.presenter.on_view_reference_shape_clicked()
-        mock_view_shape.assert_called_with("ref_ws", False)
+        mock_view_shape.assert_called_with(self.presenter, "ref_ws", False)
 
-    @patch(dir_path + ".output_settings")
-    @patch(dir_path + ".ShowSamplePresenter._set_gauge_vol_str")
+    @patch(dir_path + ".output_settings", autospec=True)
+    @patch(dir_path + ".ShowSamplePresenter._set_gauge_vol_str", autospec=True)
     def test_view_shape(self, mock_set_gv, mock_settings):
         ws_name, fix_axes = "ws", True
         mock_settings.get_texture_axes_transform.return_value = None, ("a", "b", "c")
@@ -47,7 +47,7 @@ class TestShowSamplePresenter(unittest.TestCase):
         mock_set_gv.assert_called_once()
         self.presenter.sample_model.show_shape_plot.assert_called_with(None, ("a", "b", "c"))
 
-    @patch(dir_path + ".get_gauge_vol_str")
+    @patch(dir_path + ".get_gauge_vol_str", autospec=True)
     def test_set_gauge_vol_str(self, mock_get_gv_str):
         self.presenter.include_gauge_volume = True
         gv_string = "gv"
