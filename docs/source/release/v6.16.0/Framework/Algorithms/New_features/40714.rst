@@ -1,0 +1,1 @@
+- :ref:`algm-SCDCalibratePanels-v2` now writes the full name for bank components.

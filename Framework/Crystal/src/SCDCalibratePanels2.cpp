@@ -1265,6 +1265,7 @@ void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
       bankName.append("/sixteenpack");
 
     std::shared_ptr<const IComponent> bank = instrument->getComponentByName(bankName);
+    auto bankFullName = bank->getFullName();
 
     Quat relRot = bank->getRelativeRot();
     std::vector<double> relRotAngles = relRot.getEulerAngles("XYZ");
@@ -1300,7 +1301,7 @@ void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
     bank_sx.put("<xmlattr>.name", "scalex");
     bank_sy.put("<xmlattr>.name", "scaley");
 
-    bank_root.put("<xmlattr>.name", bankName);
+    bank_root.put("<xmlattr>.name", bankFullName); // avoid future expensive search in the instrument's tree
 
     // configure structure
     bank_dx.add_child("value", bank_dx_val);
