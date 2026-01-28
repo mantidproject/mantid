@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MultipleFileProperty, FileAction, PropertyMode
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MultipleFileProperty, FileAction, PropertyMode, IEventWorkspace
 from mantid.kernel import (
     StringListValidator,
     Direction,
@@ -13,8 +13,32 @@ from mantid.kernel import (
     IntArrayProperty,
     SetDefaultWhenProperty,
     Logger,
+    Elastic,
+    UnitConversion,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
+from mantid.simpleapi import (
+    ConvertSpectrumAxis,
+    ConjoinWorkspaces,
+    Transpose,
+    ResampleX,
+    CopyInstrumentParameters,
+    Divide,
+    DeleteWorkspace,
+    Scale,
+    MaskAngle,
+    ExtractMask,
+    Minus,
+    SumSpectra,
+    ExtractUnmaskedSpectra,
+    mtd,
+    BinaryOperateMasks,
+    Integration,
+    GroupWorkspaces,
+    RenameWorkspace,
+    GroupDetectors,
+    LoadWAND,
+)
 import h5py
 import numpy as np
 
@@ -496,7 +520,677 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
-        raise NotImplementedError("HFIRPowderReduction algorithm is not yet implemented.")
+        """
+        Main execution method following these steps:
+        1. Workspace Expansion
+        2. Load data files if needed
+        3. Axis Conversion & Masking
+        4. Resampling
+        5. Calibration & Normalization (vanadium processing with absorption correction)
+        6. Background Subtraction (sample background)
+        7. Absorption Correction (sample)
+        8. Summing
+        9. Cleanup
+        """
+        # Initialize temp workspace list for cleanup
+        self.temp_workspace_list = []
+
+        outWS = "OUTPUT"  # self.getPropertyValue("OutputWorkspace")
+        summing = self.getProperty("Sum").value
+        self.instrument = self.getProperty("Instrument").value
+        numberBins = self.getProperty("XBinWidth").value
+
+        # Step 1: Workspace Expansion or Load Data
+        logger.information("Step 1: Loading and expanding workspaces")
+        sample_workspaces = self._load_sample_data()
+
+        # Step 2: Load vanadium and background data if provided
+        logger.information("Step 2: Loading vanadium and background data")
+        vanadium_ws = self._load_vanadium_data()
+        vanadium_background_ws = self._load_vanadium_background_data()
+        sample_background_ws = self._load_sample_background_data()
+
+        # Step 3: Axis Conversion & Masking
+        logger.information("Step 3: Converting axes and applying masks")
+        print(sample_workspaces)
+        print("++++++++++++++++++++++++++++")
+        sample_workspaces, sample_masks = self._convert_data(sample_workspaces)
+
+        # Step 4: Resampling - determine common x-range
+        logger.information("Step 4: Resampling all data to common binning")
+        xMin, xMax = self._locate_global_xlimit(sample_workspaces)
+
+        # Resample all sample workspaces
+        for ws_name in sample_workspaces:
+            ResampleX(
+                InputWorkspace=ws_name,
+                OutputWorkspace=ws_name,
+                XMin=xMin,
+                XMax=xMax,
+                NumberBins=numberBins if numberBins > 0 else 1000,
+                EnableLogging=False,
+            )
+
+        # Step 5: Calibration & Normalization (vanadium correction)
+        logger.information("Step 5: Processing calibration (vanadium) data")
+        vanadium_corrected = self._process_vanadium_calibration(
+            vanadium_ws, vanadium_background_ws, sample_workspaces[0], sample_masks[0], xMin, xMax
+        )
+
+        # Step 6 & 7: Process each sample workspace - background subtraction and absorption correction
+        logger.information("Steps 6-7: Applying background subtraction and absorption corrections")
+        for n, (ws_name, mask_name) in enumerate(zip(sample_workspaces, sample_masks)):
+            # Step 6: Background Subtraction
+            if sample_background_ws is not None:
+                ws_name = self._subtract_sample_background(ws_name, sample_background_ws, mask_name, xMin, xMax, vanadium_corrected)
+
+        else:
+            # Mark metadata to indicate vanadium was not included
+            mtd[ws_name].mutableRun().addProperty("VanadiumNormalization", "Not Applied", True)
+            logger.warning(f"Vanadium normalization not applied to {ws_name} - no vanadium data provided")
+
+        # Apply scale factor
+        scale_factor = self.getProperty("Scale").value
+        if scale_factor != 1.0:
+            Scale(
+                InputWorkspace=ws_name,
+                OutputWorkspace=ws_name,
+                Factor=scale_factor,
+                EnableLogging=False,
+            )
+
+        # Step 7: Sample Absorption Correction
+        muR = self.getProperty("AttenuationmuR").value
+        if muR != Property.EMPTY_DBL:
+            ws_name = self._apply_sample_absorption_correction(ws_name, muR)
+
+        # Normalize by monitor or time
+        self._normalize_workspace(ws_name)
+
+        # Update the list with potentially renamed workspace
+        sample_workspaces[n] = ws_name
+        # Step 8: Summing or Grouping
+        logger.information("Step 8: Creating output workspace")
+        if summing:
+            # Conjoin all workspaces
+            if len(sample_workspaces) > 1:
+                RenameWorkspace(
+                    InputWorkspace=sample_workspaces[0],
+                    OutputWorkspace="__ws_conjoined",
+                    EnableLogging=False,
+                )
+                self.temp_workspace_list.append("__ws_conjoined")
+
+                for ws_name in sample_workspaces[1:]:
+                    ConjoinWorkspaces(
+                        InputWorkspace1="__ws_conjoined",
+                        InputWorkspace2=ws_name,
+                        CheckOverlapping=False,
+                        EnableLogging=False,
+                    )
+
+                # Sum all spectra
+                outWS = SumSpectra(
+                    InputWorkspace="__ws_conjoined",
+                    OutputWorkspace=outWS,
+                    WeightedSum=True,
+                    MultiplyBySpectra=vanadium_corrected is None,
+                    EnableLogging=False,
+                )
+            else:
+                # Single workspace - just sum spectra
+                outWS = SumSpectra(
+                    InputWorkspace=sample_workspaces[0],
+                    OutputWorkspace=outWS,
+                    WeightedSum=True,
+                    MultiplyBySpectra=vanadium_corrected is None,
+                    EnableLogging=False,
+                )
+        else:
+            # Group workspaces
+            if len(sample_workspaces) == 1:
+                outWS = RenameWorkspace(
+                    InputWorkspace=sample_workspaces[0],
+                    OutputWorkspace=outWS,
+                    EnableLogging=False,
+                )
+            else:
+                outWS = GroupWorkspaces(
+                    InputWorkspaces=sample_workspaces,
+                    OutputWorkspace=outWS,
+                    EnableLogging=False,
+                )
+
+        # self.setProperty("OutputWorkspace", outWS)
+
+        # Step 9: Cleanup
+        logger.information("Step 9: Cleaning up temporary workspaces")
+        for ws in self.temp_workspace_list:
+            if mtd.doesExist(ws):
+                DeleteWorkspace(ws, EnableLogging=False)
+
+    def _load_data(self, data_type):
+        """
+        Generic function to load data from files or IPTS/run numbers.
+
+        Args:
+            data_type: String specifying the type of data to load.
+                       One of: "Sample", "Vanadium", "VanadiumBackground", "SampleBackground"
+
+        Returns:
+            Loaded workspace name or None if no data to load
+        """
+        from mantid.simpleapi import Load, Plus
+
+        # Get properties based on data type
+        filenames = self.getProperty(f"{data_type}Filename").value
+        ipts = self.getProperty(f"{data_type}IPTS").value
+        run_numbers = self.getProperty(f"{data_type}RunNumbers").value
+        instrument = self.getProperty("Instrument").value
+
+        if instrument == "WAND^2":
+            return LoadWAND(Filename=filenames[0], IPTS=ipts, RunNumbers=run_numbers)
+
+        # Check if there's data to load
+        if not filenames and (ipts == Property.EMPTY_INT or len(run_numbers) == 0):
+            return None
+
+        # Build file list
+        files_to_load = []
+        if filenames:
+            files_to_load = list(filenames)
+        elif ipts != Property.EMPTY_INT and len(run_numbers) > 0:
+            if instrument == "WAND^2":
+                files_to_load = [f"/HFIR/HB2C/IPTS-{ipts}/nexus/HB2C_{run}.nxs.h5" for run in run_numbers]
+            elif instrument == "MIDAS":
+                files_to_load = [f"/HFIR/HB2A/IPTS-{ipts}/nexus/HB2A_{run}.nxs.h5" for run in run_numbers]
+
+        if not files_to_load:
+            return None
+
+        # Create workspace name based on data type
+        ws_name = f"__{data_type.lower()}"
+        self.temp_workspace_list.append(ws_name)
+
+        # Load and sum all runs
+        for i, filename in enumerate(files_to_load):
+            temp_ws = f"__{data_type.lower()}_temp_{i}"
+            self.temp_workspace_list.append(temp_ws)
+            Load(Filename=filename, OutputWorkspace=temp_ws, EnableLogging=False)
+
+            if i == 0:
+                RenameWorkspace(InputWorkspace=temp_ws, OutputWorkspace=ws_name, EnableLogging=False)
+            else:
+                Plus(LHSWorkspace=ws_name, RHSWorkspace=temp_ws, OutputWorkspace=ws_name, EnableLogging=False)
+
+        # Apply grouping if requested (only for non-Sample data types or if implemented for Sample)
+        grouping = self.getProperty("Grouping").value
+        if grouping != "None":
+            ws_name = self._apply_grouping(ws_name, grouping)
+
+        logger.information(f"Loaded {data_type} data into workspace: {ws_name}")
+        return ws_name
+
+    def _load_sample_data(self):
+        """Load sample data - wrapper for backward compatibility and special handling."""
+        from mantid.simpleapi import Load
+
+        filenames = self.getProperty("SampleFilename").value
+        ipts = self.getProperty("SampleIPTS").value
+        run_numbers = self.getProperty("SampleRunNumbers").value
+        instrument = self.getProperty("Instrument").value
+
+        if instrument == "WAND^2":
+            return LoadWAND(Filename=filenames[0], IPTS=ipts, RunNumbers=run_numbers)
+            # return loaded_workspaces
+
+        files_to_load = []
+
+        if filenames:
+            files_to_load = list(filenames)
+        elif ipts != Property.EMPTY_INT and len(run_numbers) > 0:
+            if instrument == "WAND^2":
+                files_to_load = [f"/HFIR/HB2C/IPTS-{ipts}/nexus/HB2C_{run}.nxs.h5" for run in run_numbers]
+            elif instrument == "MIDAS":
+                files_to_load = [f"/HFIR/HB2A/IPTS-{ipts}/nexus/HB2A_{run}.nxs.h5" for run in run_numbers]
+
+        # Load workspaces - sample data may need individual workspace handling
+        loaded_workspaces = []
+        grouping = self.getProperty("Grouping").value
+
+        for i, filename in enumerate(files_to_load):
+            ws_name = f"__sample_{i}"
+            self.temp_workspace_list.append(ws_name)
+            Load(Filename=filename, OutputWorkspace=ws_name, EnableLogging=False)
+
+            # Apply grouping if requested
+            if grouping != "None":
+                ws_name = self._apply_grouping(ws_name, grouping)
+
+            loaded_workspaces.append(ws_name)
+
+        logger.information(f"Loaded {len(loaded_workspaces)} sample workspace(s)")
+        return loaded_workspaces
+
+    def _load_vanadium_data(self):
+        """Load vanadium calibration data."""
+        return self._load_data("Vanadium")
+
+    def _load_vanadium_background_data(self):
+        """Load vanadium background data."""
+        return self._load_data("VanadiumBackground")
+
+    def _load_sample_background_data(self):
+        """Load sample background data."""
+        return self._load_data("SampleBackground")
+
+    def _apply_grouping(self, ws_name, grouping):
+        """Apply 2x2 or 4x4 pixel grouping."""
+        # Implementation depends on specific requirements for WAND/MIDAS
+        # This is a placeholder - actual grouping logic would need to be instrument-specific
+        logger.information(f"Applying {grouping} grouping to {ws_name}")
+        return ws_name
+
+    def _process_vanadium_calibration(self, vanadium_ws, vanadium_bg_ws, reference_ws, reference_mask, xMin, xMax):
+        """
+        Process vanadium calibration with background subtraction and absorption correction.
+        VCORR = (V - V_B)/(T_0*sigma_inc + sigma_mult)
+        """
+        if vanadium_ws is None:
+            return None
+
+        # Convert axis and resample vanadium
+        vanadium_converted = "__vanadium_converted"
+        self.temp_workspace_list.append(vanadium_converted)
+        self._to_spectrum_axis_resample(vanadium_ws, vanadium_converted, reference_mask, reference_ws, xMin, xMax)
+
+        # Subtract vanadium background if provided
+        if vanadium_bg_ws is not None:
+            vanadium_bg_converted = "__vanadium_bg_converted"
+            self.temp_workspace_list.append(vanadium_bg_converted)
+            self._to_spectrum_axis_resample(vanadium_bg_ws, vanadium_bg_converted, reference_mask, reference_ws, xMin, xMax)
+
+            # Normalize vanadium background
+            self._normalize_workspace(vanadium_bg_converted)
+
+            # Subtract: V - V_B
+            Minus(
+                LHSWorkspace=vanadium_converted,
+                RHSWorkspace=vanadium_bg_converted,
+                OutputWorkspace=vanadium_converted,
+                EnableLogging=False,
+            )
+
+        # Normalize vanadium by monitor or time
+        self._normalize_workspace(vanadium_converted)
+
+        # Apply absorption correction to vanadium
+        # VCORR = (V - V_B)/(T_0*sigma_inc + sigma_mult)
+        # vanadium_corrected = self._apply_vanadium_absorption_correction(vanadium_converted)
+
+        return vanadium_converted
+
+    def _apply_vanadium_absorption_correction(self, vanadium_ws):
+        """
+        Apply absorption correction to vanadium workspace.
+        Formula: VCORR = V/(T_0*sigma_inc + sigma_mult)
+
+        This uses CylinderAbsorption to calculate transmission T_0.
+        """
+        vanadium_diameter = self.getProperty("VanadiumDiameter").value
+        vanadium_radius = vanadium_diameter / 2.0  # Convert diameter to radius
+
+        # Vanadium cross-sections (in barns)
+        # Incoherent scattering cross-section for vanadium
+        sigma_inc = 5.08  # barns
+
+        # Number density for vanadium (atoms/Angstrom^3)
+        number_density = 0.0722  # typical value for vanadium
+
+        # Create absorption correction workspace
+        from mantid.simpleapi import ConvertUnits, CylinderAbsorption, SetSample
+
+        absorption_ws = "__vanadium_absorption"
+        self.temp_workspace_list.append(absorption_ws)
+
+        # Clone workspace for absorption calculation
+        from mantid.simpleapi import CloneWorkspace
+
+        CloneWorkspace(InputWorkspace=vanadium_ws, OutputWorkspace=absorption_ws, EnableLogging=False)
+
+        # Convert to wavelength for absorption calculation
+        original_unit = mtd[absorption_ws].getAxis(0).getUnit().unitID()
+        if original_unit != "Wavelength":
+            ConvertUnits(
+                InputWorkspace=absorption_ws,
+                OutputWorkspace=absorption_ws,
+                Target="Wavelength",
+                EMode="Elastic",
+                EnableLogging=False,
+            )
+
+        # Set sample geometry and material
+        SetSample(
+            InputWorkspace=absorption_ws,
+            Geometry={
+                "Shape": "Cylinder",
+                "Height": 10.0,  # Assume 10 cm height - can be made a property
+                "Radius": vanadium_radius,
+                "Center": [0.0, 0.0, 0.0],
+            },
+            Material={
+                "ChemicalFormula": "V",
+                "SampleNumberDensity": number_density,
+            },
+            EnableLogging=False,
+        )
+
+        # Calculate absorption correction (transmission)
+        CylinderAbsorption(
+            InputWorkspace=absorption_ws,
+            OutputWorkspace=absorption_ws,
+            CylinderSampleHeight=10.0,
+            CylinderSampleRadius=vanadium_radius,
+            AttenuationXSection=sigma_inc,  # Using incoherent as attenuation
+            ScatteringXSection=5.1,  # Vanadium scattering cross-section
+            SampleNumberDensity=number_density,
+            NumberOfSlices=10,
+            NumberOfAnnuli=10,
+            NumberOfWavelengthPoints=25,
+            EnableLogging=False,
+        )
+
+        # Convert back to original units
+        if original_unit != "Wavelength":
+            ConvertUnits(
+                InputWorkspace=absorption_ws,
+                OutputWorkspace=absorption_ws,
+                Target=original_unit,
+                EMode="Elastic",
+                EnableLogging=False,
+            )
+
+        # Divide vanadium by absorption correction: VCORR = V/(T_0*sigma_inc + sigma_mult)
+        # Note: The CylinderAbsorption already accounts for transmission
+        vanadium_corrected = "__vanadium_corrected"
+        self.temp_workspace_list.append(vanadium_corrected)
+
+        Divide(
+            LHSWorkspace=vanadium_ws,
+            RHSWorkspace=absorption_ws,
+            OutputWorkspace=vanadium_corrected,
+            EnableLogging=False,
+        )
+
+        return vanadium_corrected
+
+    def _subtract_sample_background(self, sample_ws, background_ws, mask_name, xMin, xMax, vanadium_corrected):
+        """
+        Subtract sample background: SF = S - S_B
+        """
+        # Convert and resample background to match sample
+        background_converted = f"__{sample_ws}_background"
+        self.temp_workspace_list.append(background_converted)
+        self._to_spectrum_axis_resample(background_ws, background_converted, mask_name, sample_ws, xMin, xMax)
+
+        # Normalize background
+        self._normalize_workspace(background_converted)
+
+        # Subtract background from sample
+        Minus(
+            LHSWorkspace=sample_ws,
+            RHSWorkspace=background_converted,
+            OutputWorkspace=sample_ws,
+            EnableLogging=False,
+        )
+
+        # Scale background if requested
+        scale = self.getProperty("Scale").value
+        if scale != 1.0:
+            Scale(
+                InputWorkspace=background_converted,
+                OutputWorkspace=background_converted,
+                Factor=scale,
+                EnableLogging=False,
+            )
+
+        # Apply vanadium normalization to background if available
+        if vanadium_corrected is not None:
+            Divide(
+                LHSWorkspace=background_converted,
+                RHSWorkspace=vanadium_corrected,
+                OutputWorkspace=background_converted,
+                EnableLogging=False,
+            )
+
+        return sample_ws
+
+    def _apply_sample_absorption_correction(self, sample_ws, muR):
+        """
+        Apply absorption correction to sample using muR value.
+        Simple exponential correction: exp(-muR)
+        """
+        from mantid.simpleapi import CreateSingleValuedWorkspace, Multiply
+        import math
+
+        correction_factor = math.exp(-muR)
+        correction_ws = "__absorption_correction"
+        self.temp_workspace_list.append(correction_ws)
+
+        CreateSingleValuedWorkspace(
+            DataValue=correction_factor,
+            OutputWorkspace=correction_ws,
+            EnableLogging=False,
+        )
+
+        Multiply(
+            LHSWorkspace=sample_ws,
+            RHSWorkspace=correction_ws,
+            OutputWorkspace=sample_ws,
+            EnableLogging=False,
+        )
+
+        return sample_ws
+
+    def _normalize_workspace(self, ws_name):
+        """Normalize workspace by monitor or time."""
+        normaliseBy = self.getProperty("NormaliseBy").value
+
+        if normaliseBy.lower() == "none":
+            return
+        elif normaliseBy.lower() == "monitor":
+            norm_factor = mtd[ws_name].run().getProtonCharge()
+        elif normaliseBy.lower() == "time":
+            norm_factor = mtd[ws_name].run().getLogData("duration").value
+        else:
+            logger.warning(f"Unknown normalization type: {normaliseBy}")
+            return
+
+        if norm_factor > 0:
+            Scale(
+                InputWorkspace=ws_name,
+                OutputWorkspace=ws_name,
+                Factor=1.0 / norm_factor,
+                EnableLogging=False,
+            )
+            # raise NotImplementedError("HFIRPowderReduction algorithm is not yet implemented.")
+
+    def _convert_data(self, input_workspaces):
+        mask = self.getProperty("MaskWorkspace").value
+        mask_angle = self.getProperty("MaskAngle").value
+        outname = "OUTPUT"  # self.getProperty("OutputWorkspace").valueAsStr
+
+        # NOTE:
+        # Due to range difference among incoming spectra, a common bin para is needed
+        # such that all data can be binned exactly the same way.
+
+        # BEGIN_FOR: located_global_xMin&xMax
+        output_workspaces = list()
+        for n, in_wksp in enumerate(input_workspaces):
+            try:
+                temp_val = 0.0
+                if self.instrument == "WAND^2":
+                    temp_val = 300.0
+                    # temp_val = mtd[in_wksp].run().getTimeAveragedValue("HB2C:SE:SampleTemp")
+                elif self.instrument == "MIDAS":
+                    temp_val = 300.0
+                    # temp_val = mtd[in_wksp].run().getTimeAveragedValue("HB2A:SE:SampleTemp")
+            except RuntimeError:
+                temp_val = 300.0
+
+            if temp_val == 0.0:
+                temp_val = 300.0
+            temp_val = "{:.1F}".format(temp_val).replace(".", "p")
+            out_tmp = f"{outname}{n + 1}_T{temp_val}K"
+            output_workspaces.append(out_tmp)
+        mask_workspaces = []
+        for n, (_wksp_in, _wksp_out) in enumerate(zip(input_workspaces, output_workspaces)):
+            _wksp_in = str(_wksp_in)
+            if mask_angle == Property.EMPTY_DBL:
+                self._to_spectrum_axis(_wksp_in, _wksp_out, mask)
+                mask_workspaces.append(mask)
+            else:
+                _mask_n = f"__mask_{n}"  # mask for n-th
+                self.temp_workspace_list.append(_mask_n)  # cleanup later
+
+                ExtractMask(InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False)
+                if mask_angle != Property.EMPTY_DBL:
+                    MaskAngle(
+                        Workspace=_mask_n,
+                        MinAngle=mask_angle,
+                        Angle="Phi",
+                        EnableLogging=False,
+                    )
+                if mask is not None:
+                    # might be a bug if the mask angle isn't set
+                    BinaryOperateMasks(
+                        InputWorkspace1=_mask_n,
+                        InputWorkspace2=mask,
+                        OperationType="OR",
+                        OutputWorkspace=_mask_n,
+                        EnableLogging=False,
+                    )
+
+                self._to_spectrum_axis(_wksp_in, _wksp_out, _mask_n)
+
+                # append to the list of processed workspaces
+                mask_workspaces.append(_mask_n)
+
+        return output_workspaces, mask_workspaces
+
+    def _to_spectrum_axis(self, workspace_in, workspace_out, mask, instrument_donor=None):
+        target = self.getProperty("XUnits").value
+        wavelength = self.getProperty("Wavelength").value
+        e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, 0, 0, Elastic, 0)
+        # filtered_eve = self.getProperty("FilteredInput").value
+        if target == "dSpacing":
+            target = "ElasticDSpacing"
+        elif target == "2Theta":
+            target = "InPlaneTwoTheta"
+        elif target == "Q":
+            target = "ElasticQ"
+
+        ExtractUnmaskedSpectra(
+            InputWorkspace=workspace_in,
+            OutputWorkspace=workspace_out,
+            MaskWorkspace=mask,
+            EnableLogging=False,
+        )
+
+        if instrument_donor:
+            wksp_tmp = workspace_out
+        else:
+            wksp_tmp = workspace_in
+
+        if isinstance(mtd[wksp_tmp], IEventWorkspace):
+            Integration(
+                InputWorkspace=wksp_tmp,
+                OutputWorkspace=workspace_out,
+                EnableLogging=False,
+            )
+
+        if instrument_donor:
+            CopyInstrumentParameters(
+                InputWorkspace=instrument_donor,
+                OutputWorkspace=workspace_out,
+                EnableLogging=False,
+            )
+
+        ConvertSpectrumAxis(
+            InputWorkspace=workspace_out,
+            OutputWorkspace=workspace_out,
+            Target=target,
+            EFixed=e_fixed,
+            EnableLogging=False,
+        )
+
+        # this checks for any duplicated values in target axis, if
+        # so then group them together
+        axis_values = mtd[workspace_out].getAxis(1).extractValues()
+        equal_values = axis_values == np.roll(axis_values, -1)
+        if np.any(equal_values):
+            operator = np.full_like(equal_values, ",", dtype="<U1")
+            operator[equal_values] = "+"
+            grouping_pattern = "".join(str(n) + op for n, op in enumerate(operator))
+            GroupDetectors(
+                InputWorkspace=workspace_out, OutputWorkspace=workspace_out, GroupingPattern=grouping_pattern, EnableLogging=False
+            )
+            ConvertSpectrumAxis(
+                InputWorkspace=workspace_out,
+                OutputWorkspace=workspace_out,
+                Target=target,
+                EFixed=e_fixed,
+                EnableLogging=False,
+            )
+
+        Transpose(
+            InputWorkspace=workspace_out,
+            OutputWorkspace=workspace_out,
+            EnableLogging=False,
+        )
+
+        return workspace_out
+
+    def _locate_global_xlimit(self, workspaces):
+        """Find the global bin from all spectrum"""
+        # Due to range difference among incoming spectra, a common bin para is needed
+        # such that all data can be binned exactly the same way.
+
+        # use the supplied start value
+        if self.getProperty("xMin").isDefault:
+            _xMin = 1e16
+        else:
+            _xMin = self.getProperty("XMin").value
+        if self.getProperty("xMax").isDefault:
+            _xMax = -1e16
+        else:
+            _xMax = self.getProperty("XMax").value
+        # if both were set there is nothing to do
+        if _xMin < _xMax and _xMin < 1e16 and _xMax > -1e16:
+            return _xMin, _xMax
+
+        # update values based on all workspaces
+        for name in workspaces:
+            _ws_tmp = mtd[name]
+            _xMin = min(_xMin, _ws_tmp.readX(0).min())
+            _xMax = max(_xMax, _ws_tmp.readX(0).max())
+
+        return _xMin, _xMax
+
+    def _to_spectrum_axis_resample(self, workspace_in, workspace_out, mask, instrument_donor, x_min, x_max):
+        # common part of converting axis
+        self._to_spectrum_axis(workspace_in, workspace_out, mask, instrument_donor)
+
+        # rebin the data
+        number_bins = self.getProperty("NumberBins").value
+        return ResampleX(
+            InputWorkspace=workspace_out,
+            OutputWorkspace=workspace_out,
+            XMin=x_min,
+            XMax=x_max,
+            NumberBins=number_bins,
+            EnableLogging=False,
+        )
 
 
 AlgorithmFactory.subscribe(HFIRPowderReduction)
