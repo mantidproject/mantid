@@ -653,7 +653,9 @@ class Player:
         MULTI_PACKET = "multi_packet"
 
     def __init__(self, *, source_address=None, packet_ordering_scheme=None):
-        self._source_address: Path | str = SocketAddress.parse(source_address if source_address else Config["source"]["address"])
+        self._source_address: Path | tuple[str, int] = SocketAddress.parse(
+            source_address if source_address else Config["source"]["address"]
+        )
 
         # Initialize control callbacks
         self._rate_filter = Player._get_rate_filter(Config["playback"]["rate"])
@@ -1080,7 +1082,7 @@ class Player:
             else:
                 source = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             source.settimeout(self.SOCKET_TIMEOUT)
-            source.connect(str(self._source_address))
+            source.connect(str(self._source_address) if isinstance(self._source_address, Path) else self._source_address)
             _logger.info(f"Successfully connected to ADARA packet server at {self._source_address}.")
 
             # Start a new session for each connection to the packet server:
