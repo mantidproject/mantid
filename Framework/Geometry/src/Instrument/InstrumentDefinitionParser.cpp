@@ -2375,9 +2375,7 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Apply parameters that may be specified in \<component-link\> XML elements.
- *  Input variable pRootElem may e.g. be the root element of an XML parameter
- *file or
- *  the root element of a IDF
+ *  Input variable pRootElem may e.g. be the root element of an XML parameter file or the root element of a IDF
  *
  *  @param instrument :: Instrument
  *  @param pRootElem ::  Associated Poco::XML element that may contain
@@ -2439,9 +2437,7 @@ void InstrumentDefinitionParser::setComponentLinks(std::shared_ptr<Geometry::Ins
 
         sharedIComp.emplace_back(detector);
 
-        // If the user also supplied a name, make sure it's consistent with
-        // the
-        // detector id.
+        // If the user also supplied a name, make sure it's consistent with the detector id.
         if (name.length() > 0) {
           auto comp = std::dynamic_pointer_cast<const IComponent>(detector);
           if (comp) {
@@ -2456,10 +2452,7 @@ void InstrumentDefinitionParser::setComponentLinks(std::shared_ptr<Geometry::Ins
         }
       } else {
         // No detector id given, fall back to using the name
-
-        if (name.find('/', 0) == std::string::npos) { // Simple name, look for
-          // all components of that
-          // name.
+        if (name.find('/', 0) == std::string::npos) { // Simple name, look for all components of that name.
           sharedIComp = instrument->getAllComponentsWithName(name);
         } else { // Pathname given. Assume it is unique.
           std::shared_ptr<const Geometry::IComponent> shared = instrument->getComponentByName(name);
@@ -2470,8 +2463,7 @@ void InstrumentDefinitionParser::setComponentLinks(std::shared_ptr<Geometry::Ins
       for (auto &ptr : sharedIComp) {
         std::shared_ptr<const Geometry::Component> sharedComp =
             std::dynamic_pointer_cast<const Geometry::Component>(ptr);
-        if (sharedComp) {
-          // Not empty Component
+        if (sharedComp) { // Not empty Component
           if (sharedComp->isParametrized()) {
             setLogfile(sharedComp->base(), curElem, instrument->getLogfileCache(), requestedDate);
           } else {

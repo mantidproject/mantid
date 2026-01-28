@@ -136,7 +136,7 @@ Usage
         Workspace='cws',
         ComponentName='moderator',
         X=0, Y=0, Z=dL1,
-        RelativePosition=true,
+        RelativePosition=True,
     )
 
     # Generate predicted peak workspace
@@ -147,7 +147,7 @@ Usage
     CreatePeaksWorkspace(OutputWorkspace='pws')
     omegas = range(0, 180, 3)
 
-    for omega in tqdm(omegas):
+    for omega in omegas:
         SetGoniometer(
             Workspace="cws",
             Axis0=f"{omega},0,1,0,1",
@@ -176,7 +176,7 @@ Usage
         Workspace='pws',
         ComponentName='moderator',
         X=0, Y=0, Z=-dL1,
-        RelativePosition=true,
+        RelativePosition=True,
     )
 
     # run the calibration on pws
