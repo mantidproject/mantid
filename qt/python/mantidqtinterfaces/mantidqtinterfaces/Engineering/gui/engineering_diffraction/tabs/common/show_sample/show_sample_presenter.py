@@ -7,6 +7,7 @@
 #
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_model import ShowSampleModel
+from Engineering.texture.texture_helper import get_gauge_vol_str
 
 
 class ShowSamplePresenter(object):
@@ -32,6 +33,4 @@ class ShowSamplePresenter(object):
 
     def _set_gauge_vol_str(self):
         if self.include_gauge_volume:
-            self.sample_model.set_gauge_vol_str(
-                self.tab_model.get_gauge_vol_str(self.view.get_shape_method(), self.view.get_custom_shape())
-            )
+            self.sample_model.set_gauge_vol_str(get_gauge_vol_str(self.view.get_shape_method(), self.view.get_custom_shape()))

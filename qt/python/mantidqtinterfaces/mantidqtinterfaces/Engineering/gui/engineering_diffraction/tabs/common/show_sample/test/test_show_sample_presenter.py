@@ -47,7 +47,8 @@ class TestShowSamplePresenter(unittest.TestCase):
         mock_set_gv.assert_called_once()
         self.presenter.sample_model.show_shape_plot.assert_called_with(None, ("a", "b", "c"))
 
-    def test_set_gauge_vol_str(self):
+    @patch(dir_path + ".get_gauge_vol_str")
+    def test_set_gauge_vol_str(self, mock_get_gv_str):
         self.presenter.include_gauge_volume = True
         gv_string = "gv"
         # set up mocks
@@ -55,12 +56,12 @@ class TestShowSamplePresenter(unittest.TestCase):
         shape_method, custom_shape = MagicMock(), MagicMock()
         self.view.get_shape_method.return_value = shape_method
         self.view.get_custom_shape.return_value = custom_shape
-        self.model.get_gauge_vol_str.return_value = gv_string
+        mock_get_gv_str.return_value = gv_string
 
         # run
         self.presenter._set_gauge_vol_str()
 
-        self.model.get_gauge_vol_str.assert_called_with(shape_method, custom_shape)
+        mock_get_gv_str.assert_called_with(shape_method, custom_shape)
         self.presenter.sample_model.set_gauge_vol_str.assert_called_with(gv_string)
 
 
