@@ -111,7 +111,7 @@ class TestSessionServer(unittest.TestCase):
 
         with (
             mock.patch("builtins.open", mock.mock_open(read_data="dummy")),
-            mock.patch("session_server.yaml.safe_load", return_value=["not", "a", "dict"]),
+            mock.patch("session_server.yaml_load", return_value=["not", "a", "dict"]),
         ):
             with self.assertRaises(RuntimeError) as context:
                 SessionServer._parse_file_args(self.server, args)
@@ -134,7 +134,7 @@ class TestSessionServer(unittest.TestCase):
 
         with (
             mock.patch("builtins.open", mock.mock_open(read_data="dummy")),
-            mock.patch("session_server.yaml.safe_load", return_value=yaml_data),
+            mock.patch("session_server.yaml_load", return_value=yaml_data),
         ):
             with self.assertRaises(RuntimeError) as context:
                 SessionServer._parse_file_args(self.server, args)
@@ -157,7 +157,7 @@ class TestSessionServer(unittest.TestCase):
 
         with (
             mock.patch("builtins.open", mock.mock_open(read_data="dummy")),
-            mock.patch("session_server.yaml.safe_load", return_value=yaml_data),
+            mock.patch("session_server.yaml_load", return_value=yaml_data),
         ):
             with self.assertRaises(RuntimeError) as context:
                 SessionServer._parse_file_args(self.server, args)
@@ -179,7 +179,7 @@ class TestSessionServer(unittest.TestCase):
 
         with (
             mock.patch("builtins.open", mock.mock_open(read_data="dummy")),
-            mock.patch("session_server.yaml.safe_load", return_value=yaml_data),
+            mock.patch("session_server.yaml_load", return_value=yaml_data),
         ):
             with self.assertRaises(RuntimeError) as context:
                 SessionServer._parse_file_args(self.server, args)
@@ -207,7 +207,7 @@ class TestSessionServer(unittest.TestCase):
 
         with (
             mock.patch("builtins.open", mock.mock_open(read_data="dummy")),
-            mock.patch("session_server.yaml.safe_load", return_value=yaml_data),
+            mock.patch("session_server.yaml_load", return_value=yaml_data),
             mock.patch("session_server.Player.PACKET_ORDERING_SCHEME", "none"),
         ):
             SessionServer._parse_file_args(self.server, args)
@@ -236,7 +236,7 @@ class TestSessionServer(unittest.TestCase):
 
         with (
             mock.patch("builtins.open", mock.mock_open(read_data="dummy")),
-            mock.patch("session_server.yaml.safe_load", return_value=yaml_data),
+            mock.patch("session_server.yaml_load", return_value=yaml_data),
             mock.patch("session_server.Player.PACKET_ORDERING_SCHEME", "none"),
         ):
             SessionServer._parse_file_args(self.server, args)
@@ -264,7 +264,7 @@ class TestSessionServer(unittest.TestCase):
 
         with (
             mock.patch("builtins.open", mock.mock_open(read_data="dummy")),
-            mock.patch("session_server.yaml.safe_load", return_value=yaml_data),
+            mock.patch("session_server.yaml_load", return_value=yaml_data),
         ):
             SessionServer._parse_file_args(self.server, args)
 

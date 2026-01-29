@@ -45,7 +45,7 @@ def env_constructor(loader, node):
         # Replace with environment variable or *exit* if not found
         group_value = os.environ.get(group)
         if group_value is None:
-            _error_exit(f"config file requires '${{{group}}}': which is not defined in the environment.")
+            raise RuntimeError(f"load from YAML requires '${{{group}}}': which is not defined in the environment")
         value = value.replace(f"${{{group}}}", group_value)
     return value
 
@@ -56,13 +56,16 @@ yaml.SafeLoader.add_constructor("!env", env_constructor)
 
 
 # Allow other modules to load YAML with substitutions.
-def yaml_loader(file_path: Path) -> dict[Any]:
+def yaml_load(file_path: Path) -> dict[Any]:
     with open(file_path, "rt") as f:
         # Load the YAML, with environment substitutions
         return yaml.safe_load(f)
 
 
-Config = yaml_loader(_config_path)
+try:
+    Config = yaml_load(_config_path)
+except Exception as e:
+    _error_exit(f"error when loading {_config_path}: {str(e)}.")
 
 # Initialize logging:
 
