@@ -6,11 +6,12 @@ Test suite for Player class (excluding play and record methods) from adara_playe
 
 from io import BytesIO
 import numpy as np
-from pathlib import Path
 import os
+from pathlib import Path
 import signal
 import socket
 import struct
+import sys
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 import time
 
@@ -20,6 +21,7 @@ import unittest
 from unittest.mock import Mock, patch, MagicMock
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class Test_Player(unittest.TestCase):
     """Test cases for Player class (general methods)."""
 
@@ -461,7 +463,6 @@ class Test_Player(unittest.TestCase):
                 if test_socket_path.exists():
                     test_socket_path.unlink()
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_signalhandler_sets_running_false(self):
         """Tests the handler response: sets flag and prepares for shutdown."""
 

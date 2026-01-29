@@ -4,11 +4,13 @@ Test suite for UnixGlob and SocketAddress classes from adara_player module.
 
 from pathlib import Path
 from packet_player import UnixGlob, SocketAddress
+import sys
 from tempfile import TemporaryDirectory
 
 import unittest
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class Test_UnixGlob(unittest.TestCase):
     """Test cases for UnixGlob class."""
 
@@ -103,6 +105,7 @@ class Test_UnixGlob(unittest.TestCase):
         self.assertEqual(len(globs), 4)
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class Test_SocketAddress(unittest.TestCase):
     """Test cases for SocketAddress class."""
 

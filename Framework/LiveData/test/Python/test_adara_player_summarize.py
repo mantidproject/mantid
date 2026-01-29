@@ -5,6 +5,7 @@ Test suite for Player.summarize method from adara_player module.
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+import sys
 from unittest.mock import patch, MagicMock
 
 import numpy as np
@@ -23,6 +24,7 @@ def timeout_handler(signum, frame):
     raise TimeoutException("Test timed out - likely infinite loop")
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class Test_Player_summarize(unittest.TestCase):
     """Test cases for Player.summarize method."""
 

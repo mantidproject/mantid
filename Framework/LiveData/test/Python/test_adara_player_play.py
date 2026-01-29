@@ -4,10 +4,10 @@ Test suite for Player.play method from adara_player module.
 # ruff: noqa: F841
 
 import numpy as np
-import os
 from pathlib import Path
 import signal
 import socket
+import sys
 from tempfile import TemporaryDirectory
 
 from packet_player import Player, Packet, ClientHelloPacket
@@ -26,6 +26,7 @@ def timeout_handler(signum, frame):
     raise TimeoutException("Test timed out - likely infinite loop")
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class Test_Player_play(unittest.TestCase):
     """Test cases for Player.play method."""
 
@@ -207,7 +208,6 @@ class Test_Player_play(unittest.TestCase):
             # The second arg must be the same iterator object we passed in.
             mock_stream.assert_called_once_with(mock_client_socket, files_iter, dry_run=False)
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_buffer_prefill_and_stream(self):
         """
         Validates buffer is filled before actual streaming starts.
@@ -267,7 +267,6 @@ class Test_Player_play(unittest.TestCase):
                 signal.alarm(0)
                 signal.signal(signal.SIGALRM, old_handler)
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_handles_no_packets(self):
         """Checks for proper handling when source files are empty."""
 
@@ -313,7 +312,6 @@ class Test_Player_play(unittest.TestCase):
                 signal.alarm(0)
                 signal.signal(signal.SIGALRM, old_handler)
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_unexpected_client_packet(self):
         """Ensures warnings are logged for any packet received from the client unexpectedly."""
         with (
@@ -367,7 +365,6 @@ class Test_Player_play(unittest.TestCase):
                 signal.alarm(0)
                 signal.signal(signal.SIGALRM, old_handler)
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_socket_not_writable_retry(self):
         """Verifies retries if the client socket isn't writable."""
         with (

@@ -2,6 +2,7 @@ import argparse
 import inspect
 from pathlib import Path
 import signal
+import sys
 from tempfile import TemporaryDirectory
 
 from session_server import SessionServer, SessionHandler, SessionTCPServer, SessionUDSServer, main
@@ -20,6 +21,7 @@ class _SessionServer(SessionServer, _DummyBase):
         super().__init__(*args, commandline_args=commandline_args)
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class TestSessionServer(unittest.TestCase):
     def setUp(self):
         super().setUp()
@@ -521,6 +523,7 @@ class TestSessionServer(unittest.TestCase):
             self.server.shutdown.assert_called_once()
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class TestSessionHandler(unittest.TestCase):
     def setUp(self):
         super().setUp()
@@ -568,6 +571,7 @@ class TestSessionHandler(unittest.TestCase):
             mock_server.increment_session_number.assert_called_once()
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class TestSessionTCPServer(unittest.TestCase):
     def setUp(self):
         super().setUp()
@@ -586,6 +590,7 @@ class TestSessionTCPServer(unittest.TestCase):
         self.assertIsInstance(server, SessionTCPServer)
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class TestSessionUDSServer(unittest.TestCase):
     def setUp(self):
         super().setUp()
@@ -605,6 +610,7 @@ class TestSessionUDSServer(unittest.TestCase):
             self.assertIsInstance(server, SessionUDSServer)
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class TestMainFunction(unittest.TestCase):
     def setUp(self):
         super().setUp()

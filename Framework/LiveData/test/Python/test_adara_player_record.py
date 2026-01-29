@@ -3,9 +3,9 @@ Test suite for Player.record method from adara_player module.
 """
 # ruff: noqa: F841
 
-import os
 import signal
 import socket
+import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch, MagicMock, mock_open
@@ -24,6 +24,7 @@ def timeout_handler(signum, frame):
     raise TimeoutException("Test timed out - likely infinite loop")
 
 
+@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class Test_Player_record(unittest.TestCase):
     """Test cases for Player.record method."""
 
@@ -60,7 +61,6 @@ class Test_Player_record(unittest.TestCase):
             "summarize": {"timestamp_per_type": False},
         }
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_connects_to_source_and_target_dir(self):
         """Ensures connection to packet source and existence/creation of target output directory."""
         with (
@@ -119,7 +119,6 @@ class Test_Player_record(unittest.TestCase):
             with self.assertRaises(AttributeError):
                 player.record(None, mock_client_socket)
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_file_and_socket_forwarding(self):
         """Tests packet forwarding to file and socket."""
         with (
@@ -185,7 +184,6 @@ class Test_Player_record(unittest.TestCase):
                     signal.alarm(0)
                     signal.signal(signal.SIGALRM, old_handler)
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_bidirectional_forwarding(self):
         """Checks handling of data in both directions between client and server."""
         with (
@@ -267,7 +265,6 @@ class Test_Player_record(unittest.TestCase):
                     signal.alarm(0)
                     signal.signal(signal.SIGALRM, old_handler)
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_socket_timeout_or_error(self):
         """Confirms resilience against timeouts and errors during socket operations."""
         with (
@@ -317,7 +314,6 @@ class Test_Player_record(unittest.TestCase):
                     signal.alarm(0)
                     signal.signal(signal.SIGALRM, old_handler)
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_control_packet_forwarding(self):
         """Tests that control packets are forwarded appropriately."""
         with (
@@ -378,7 +374,6 @@ class Test_Player_record(unittest.TestCase):
                     signal.alarm(0)
                     signal.signal(signal.SIGALRM, old_handler)
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_packet_file_naming(self):
         """Ensures output files are named based on packet metadata as expected."""
         with (
@@ -573,7 +568,6 @@ class Test_Player_record(unittest.TestCase):
                 self.assertEqual(first_call[0][1], "ab")
                 self.assertEqual(second_call[0][1], "ab")
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_multi_packet_mode_integrates_with_record_loop(self):
         """
         Checks that in MULTI_PACKET mode, packets received from the server during record()
@@ -670,7 +664,6 @@ class Test_Player_record(unittest.TestCase):
                     signal.alarm(0)
                     signal.signal(signal.SIGALRM, old_handler)
 
-    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_cleanup_sockets_post_record(self):
         """Verifies all sockets are closed and cleaned up after recording finishes."""
         with (
