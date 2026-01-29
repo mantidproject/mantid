@@ -35,7 +35,7 @@ public:
   MOCK_METHOD(void, applySettings, ((std::map<std::string, QVariant> const &settings)), (override));
   MOCK_METHOD(void, validateUserInput, (IUserInputValidator * validator), (const, override));
 
-  MOCK_METHOD(StretchRunData, getRunData, (), (const, override));
+  MOCK_METHOD(StretchRunData, getRunData, (bool useQuickBayes), (const, override));
   MOCK_METHOD(CurrentPreviewData, getCurrentPreviewData, (), (const, override));
   MOCK_METHOD(std::string, getPlotType, (), (const, override));
   MOCK_METHOD(std::string, getPlotContour, (), (const, override));
