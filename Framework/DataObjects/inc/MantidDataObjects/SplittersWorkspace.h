@@ -31,6 +31,8 @@ class MANTID_DATAOBJECTS_DLL SplittersWorkspace : public DataObjects::TableWorks
 public:
   SplittersWorkspace();
 
+  const std::string id() const override { return "SplittersWorkspace"; }
+
   /// Returns a clone of the workspace
   std::unique_ptr<SplittersWorkspace> clone() const { return std::unique_ptr<SplittersWorkspace>(doClone()); }
 
