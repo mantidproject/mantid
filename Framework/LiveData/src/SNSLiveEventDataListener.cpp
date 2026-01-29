@@ -1077,12 +1077,12 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
               // Note: it's possible for us receive device descriptor packets
               // in the middle of a run (after the call to initWorkspacePart2),
               // so we really do need to the lock the mutex here.
+              std::lock_guard<std::mutex> scopedLock(m_mutex);
               if (m_eventBuffer->run().hasProperty(pvName)) {
                 g_log.error() << "Ignoring duplicate process variable " << pvName << " for devId=" << pkt.devId()
                               << ", pvId=" << pvIdNum << "; skipping.\n";
                 delete prop;
               } else {
-                std::lock_guard<std::mutex> scopedLock(m_mutex);
                 m_eventBuffer->mutableRun().addLogData(prop);
               }
             }
