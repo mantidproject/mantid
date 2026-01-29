@@ -391,7 +391,8 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
           vertices.emplace_back(flatVertices[3 * i + 0], flatVertices[3 * i + 1], flatVertices[3 * i + 2]);
         }
 
-        m_shape = std::make_shared<Mantid::Geometry::MeshObject>(faces, vertices, material);
+        m_shape =
+            std::make_shared<Mantid::Geometry::MeshObject>(std::move(faces), std::move(vertices), std::move(material));
       }
     }
     // CSGObject expected, if so, set its material
