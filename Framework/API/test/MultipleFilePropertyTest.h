@@ -339,6 +339,19 @@ public:
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][4]), dummyFile("TSC00005.raw"));
   }
 
+  void test_multipleFiles_shortForm_plusList_different_instrument_and_space() {
+    MultipleFileProperty p("Filename");
+    p.setValue("IRS1+2+3+4+ 5.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
+    TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("IRS00001.raw"));
+    TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("IRS00002.raw"));
+    TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("IRS00003.raw"));
+    TS_ASSERT_EQUALS(normalizePath(fileNames[0][3]), dummyFile("IRS00004.raw"));
+    TS_ASSERT_EQUALS(normalizePath(fileNames[0][4]), dummyFile("IRS00005.raw"));
+  }
+
   void test_multipleFiles_shortForm_range() {
     MultipleFileProperty p("Filename");
     p.setValue("TSC1:5.raw");
@@ -702,6 +715,26 @@ public:
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][4]), dummyFile("TSC00005.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00003.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][1]), dummyFile("TSC00004.nxs"));
+  }
+
+  void test_multipleFiles_ranges_instrument_consistent_with_spaces() {
+    g_config.setString("default.facility", "ISIS");
+    g_config.setString("default.instrument", "IRS");
+    for (auto &file_string : {"TSC1-3,3-4", "TSC1-3, 3-4"}) {
+      MultipleFileProperty p("Filename");
+      p.setValue(file_string);
+      std::vector<std::vector<std::string>> fileNames = p();
+
+      TS_ASSERT_EQUALS(fileNames.size(), 2);
+      TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.nxs"));
+      TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00002.nxs"));
+      TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00003.nxs"));
+      TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00003.nxs"));
+      TS_ASSERT_EQUALS(normalizePath(fileNames[1][1]), dummyFile("TSC00004.nxs"));
+    }
+
+    g_config.setString("default.facility", "ISIS");
+    g_config.setString("default.instrument", "TOSCA");
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////
