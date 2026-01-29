@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -9,17 +9,24 @@
 #include "MantidGeometry/Crystal/MatrixVectorPair.h"
 #include "MantidGeometry/Crystal/V3R.h"
 #include "MantidGeometry/DllConfig.h"
-
 #include "MantidKernel/Exception.h"
-#include <boost/spirit/include/qi.hpp>
-#include <functional>
+
+#include <boost/parser/parser.hpp>
+
 #include <map>
+#include <optional>
+#include <string>
+#include <tuple>
 
 namespace Mantid {
 namespace Geometry {
 
-// TODO moving from boost::optional to std::optoinal in this file is non-trivial
-using ParsedRationalNumber = boost::fusion::vector<int, boost::optional<int>>;
+namespace bp = boost::parser;
+
+using ParsedRationalNumber = std::tuple<int, std::optional<int>>;
+using bp::int_;
+using bp::lit;
+using bp::parse;
 
 class MatrixVectorPairBuilder {
 public:
@@ -54,15 +61,15 @@ public:
   /// Set the current factor, which is a rational number. Depending on whether a
   /// direction definition follows, it's processed differently later on.
   void setCurrentFactor(const ParsedRationalNumber &rationalNumberComponents) {
-    int numerator = boost::fusion::at_c<0>(rationalNumberComponents);
-    boost::optional<int> denominator = boost::fusion::at_c<1>(rationalNumberComponents);
+    int numerator = std::get<0>(rationalNumberComponents);
+    std::optional<int> denominator = std::get<1>(rationalNumberComponents);
 
-    if (denominator.is_initialized()) {
-      if (denominator.get() == 0) {
+    if (denominator.has_value()) {
+      if (denominator.value() == 0) {
         throw std::runtime_error("Zero denominator is not allowed in MatrixVectorPair-strings.");
       }
 
-      m_currentFactor = RationalNumber(numerator, denominator.get());
+      m_currentFactor = RationalNumber(numerator, denominator.value());
     } else {
       m_currentFactor = RationalNumber(numerator);
     }
@@ -149,12 +156,8 @@ private:
   size_t m_currentRow;
 };
 
-using boost::spirit::qi::grammar;
-using boost::spirit::qi::rule;
-
-/** MatrixVectorPairParser
-
-  MatrixVectorPairParser can parse matrix/vector pairs in
+/**
+  The MatrixVectorPair parser can parse matrix/vector pairs in
   Jones faithful notation of the form:
 
     a/b-x, cy, -z
@@ -162,95 +165,56 @@ using boost::spirit::qi::rule;
   The resulting matrix/vector pair can be retrieved through a
   templated method that lets the caller decide on the numeric
   type stored in the matrix. The vector is currently always V3R.
-
-  To reuse the internally constructed boost::spirit-based parser,
-  simply instantiate MatrixVectorPairParser once and use the
-  parse-method.
-
-      @author Michael Wedel, ESS
-      @date 02/11/2015
 */
-template <typename Iterator> class MatrixVectorPairParser : public grammar<Iterator, boost::spirit::qi::space_type> {
-public:
-  MatrixVectorPairParser(MatrixVectorPairBuilder &builder) : MatrixVectorPairParser::base_type(m_parser) {
-
-    using boost::spirit::unused_type;
-
-    namespace qi = boost::spirit::qi;
-
-    using qi::int_;
-    using qi::lit;
-    using qi::uint_;
-
-    /* MSVC currently has some problems using std::bind in connection
-     * with boost::spirit in some circumstances, but they can be circumvented
-     * using lambda-expressions as a sort of call proxy. For consistency,
-     * all semantic parse actions are formulated like that.
-     */
-    auto positiveSignAction = [&builder](unused_type, unused_type, unused_type) { builder.setCurrentSignPositive(); };
-
-    auto negativeSignAction = [&builder](unused_type, unused_type, unused_type) { builder.setCurrentSignNegative(); };
-
-    auto currentFactorAction = [&builder](const ParsedRationalNumber &rationalNumberComponents, unused_type,
-                                          unused_type) { builder.setCurrentFactor(rationalNumberComponents); };
-
-    auto currentDirectionAction = [&builder](const std::string &s, unused_type, unused_type) {
-      builder.setCurrentDirection(s);
-    };
-
-    auto addCurrentStateToResultAction = [&builder](unused_type, unused_type, unused_type) {
-      builder.addCurrentStateToResult();
-    };
-
-    auto advanceRowAction = [&builder](unused_type, unused_type, unused_type) { builder.advanceRow(); };
-
-    // Switch sign in the builder
-    m_sign = lit('+')[positiveSignAction] | lit('-')[negativeSignAction];
-
-    // This matches a rational number (also things like -1/-2 -> 1/2)
-    m_rational = (int_ >> -('/' >> int_))[currentFactorAction];
-
-    // Matches x, y or z.
-    m_direction = (qi::string("x") | qi::string("y") | qi::string("z"))[currentDirectionAction];
-
-    /* A "component", which is either a rational number possibly followed by a
-     * vector definition. Examples:
-     *    2/3, -2/3, -2/-3, -4, 2, -2x, 3y, 4/5z, ...
-     * Or a vector possibly preceded by a sign:
-     *    z, -y, +x
-     */
-    m_component = (m_rational >> -m_direction) | (-m_sign >> m_direction);
-
-    // One row of the matrix/vector pair can have many such "components".
-    m_componentSeries = m_component[addCurrentStateToResultAction] >> *(m_component[addCurrentStateToResultAction]);
-
-    // The entire matrix/vector pair is defined by three comma separated of
-    // those component strings.
-    m_parser = (m_componentSeries >> lit(',')[advanceRowAction] >> m_componentSeries >> lit(',')[advanceRowAction] >>
-                m_componentSeries);
-  }
-
-  rule<Iterator, boost::spirit::qi::space_type> m_sign, m_rational, m_direction, m_component, m_componentSeries,
-      m_parser;
-};
 
 /// Tries to parse the given string. Throws a ParseError-exception if there is
 /// unparsable string left at the end.
 template <typename T> MatrixVectorPair<T, V3R> parseMatrixVectorPair(const std::string &matrixVectorString) {
 
-  namespace qi = boost::spirit::qi;
-
-  auto strIterator = matrixVectorString.cbegin();
-  auto strEnd = matrixVectorString.cend();
-
   MatrixVectorPairBuilder builder;
-  MatrixVectorPairParser<std::string::const_iterator> parser(builder);
+
+  auto positiveSignAction = [&builder](auto const &) { builder.setCurrentSignPositive(); };
+
+  auto negativeSignAction = [&builder](auto const &) { builder.setCurrentSignNegative(); };
+
+  auto currentFactorAction = [&builder](auto const &ctx) { builder.setCurrentFactor(_attr(ctx)); };
+
+  auto currentDirectionAction = [&builder](auto const &ctx) { builder.setCurrentDirection(_attr(ctx)); };
+
+  auto addCurrentStateToResultAction = [&builder](auto const &) { builder.addCurrentStateToResult(); };
+
+  auto advanceRowAction = [&builder](auto const &) { builder.advanceRow(); };
+
+  // Switch sign in the builder
+  auto m_sign = lit('+')[positiveSignAction] | lit('-')[negativeSignAction];
+
+  // This matches a rational number (also things like -1/-2 -> 1/2)
+  auto m_rational = (int_ >> -('/' >> int_))[currentFactorAction];
+
+  // Matches x, y or z.
+  auto m_direction = (bp::string("x") | bp::string("y") | bp::string("z"))[currentDirectionAction];
+
+  /* A "component", which is either a rational number possibly followed by a
+   * vector definition. Examples:
+   *    2/3, -2/3, -2/-3, -4, 2, -2x, 3y, 4/5z, ...
+   * Or a vector possibly preceded by a sign:
+   *    z, -y, +x
+   */
+  auto m_component = (m_rational >> -m_direction) | (-m_sign >> m_direction);
+
+  // One row of the matrix/vector pair can have many such "components".
+  auto m_componentSeries = m_component[addCurrentStateToResultAction] >> *(m_component[addCurrentStateToResultAction]);
+
+  // The entire matrix/vector pair is defined by three comma separated of
+  // those component strings.
+  auto m_parser = (m_componentSeries >> lit(',')[advanceRowAction] >> m_componentSeries >> lit(',')[advanceRowAction] >>
+                   m_componentSeries);
 
   try {
-    qi::phrase_parse(strIterator, strEnd, parser, qi::space);
+    auto success = parse(matrixVectorString, m_parser, bp::ws);
 
-    if (std::distance(strIterator, strEnd) > 0) {
-      throw std::runtime_error("Additional characters at end of string: '" + std::string(strIterator, strEnd) + "'.");
+    if (!success) {
+      throw std::runtime_error("Parse error in '" + matrixVectorString + "'.");
     }
   } catch (std::runtime_error &builderError) {
     throw Kernel::Exception::ParseError("Parse error: " + std::string(builderError.what()), matrixVectorString, 0);
