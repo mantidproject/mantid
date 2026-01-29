@@ -374,38 +374,36 @@ This test will check the Pole Figure plotting in the Texture Tab
 
 4. You should see seven rows populate the table
 
-5. Click on any of the ``View Sample`` buttons and verify it displays the sample and the sample axes + labels
+5. Click ``Select All Files``
 
-6. Click ``Select All Files``
+6. In settings, ensure the texture directions are set to  ``D1  1  0  0``, ``D2  0  1  0``, and ``D3  0  0  1``, and the ``Scatter Plot Experimental Pole Figure`` is checked, then click ``OK``
 
-7. In settings, ensure the texture directions are set to  ``D1  1  0  0``, ``D2  0  1  0``, and ``D3  0  0  1``, and the ``Scatter Plot Experimental Pole Figure`` is checked, then click ``OK``
-
-8. Click ``Calculate Pole Figure``, you should get a plot like the one below
+7. Click ``Calculate Pole Figure``, you should get a plot like the one below (the colours may be different, they should correspond to the order of the files in the table, for this example the files are in ascending run number order)
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffPF1.png
     :width: 600px
 
-9. Now click ``Browse`` next to ``Load Parameter Files`` and navigate to ``<mantidBuildDir>/ExternalData/Testing/Data/SystemTest/Texture/ValidationFiles/FitParameters``
+8. Now click ``Browse`` next to ``Load Parameter Files`` and navigate to ``<mantidBuildDir>/ExternalData/Testing/Data/SystemTest/Texture/ValidationFiles/FitParameters``
 
-10. Select all the files within that folder and click ``Load Parameter Files``
+9. Select all the files within that folder and click ``Load Parameter Files``
 
-11. The ``Fit Parameters`` column should now be populated in the table, as well as a readout column option having appeared above ``Calculate Pole Figure``
+10. The ``Fit Parameters`` column should now be populated in the table, as well as a readout column option having appeared above ``Calculate Pole Figure``
 
-12. Click ``Calculate Pole Figure``, you should get a plot like the one below
+11. Click ``Calculate Pole Figure``, you should get a plot like the one below
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffPF2.png
     :width: 600px
 
-13. Open the settings menu and set ``Scatter Plot Experimental Pole Figure`` to unchecked
+12. Open the settings menu and set ``Scatter Plot Experimental Pole Figure`` to unchecked
 
-14. This should enable ``Contour Kernel Size``, set this to ``6.0`` and click ``OK``
+13. This should enable ``Contour Kernel Size``, set this to ``6.0`` and click ``OK``
 
-15. Click ``Calculate Pole Figure``, you should get a plot like the one below
+14. Click ``Calculate Pole Figure``, you should get a plot like the one below
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffPF3.png
     :width: 600px
 
-16. Try changing options around in the interface, see if you can break it (some things you can try if you are short ideas):
+15. Try changing options around in the interface, see if you can break it (some things you can try if you are short ideas):
 
    - Try different sample axes
    - Try changing the projection
