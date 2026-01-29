@@ -1210,9 +1210,11 @@ public:
     LoadEmptyInstrument alg;
     alg.initialize();
     alg.setChild(true);
+    alg.setRethrows(true);
     alg.setPropertyValue("Filename", filename1);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
   }
 
 private:

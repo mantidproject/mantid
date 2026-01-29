@@ -241,7 +241,7 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument(const std::stri
 // Call LoadIDFFromNexus as a child algorithm
 API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadIDFFromNexus(const std::string &filename) {
   const std::string instrumentEntryName{"/instrument/instrument_xml"};
-  // get the top=level entry name
+  // get the top-level entry name
   bool foundIDF{false};
   std::string instrumentParentEntryName;
   {
