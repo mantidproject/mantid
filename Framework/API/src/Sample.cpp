@@ -9,6 +9,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Strings.h"
@@ -295,6 +296,13 @@ void Sample::saveNexus(Nexus::File *file, const std::string &group) const {
   }
   file->putAttr("shape_xml", shapeXML);
 
+  if (auto meshObject = std::dynamic_pointer_cast<Mantid::Geometry::MeshObject>(m_shape)) {
+    const int hasMesh = 1;
+    file->writeData("vertices", meshObject->getVertices());
+    file->writeData("faces", meshObject->getTriangles());
+    file->putAttr("shape_mesh", hasMesh);
+  }
+
   m_shape->material().saveNexus(file, "material");
   // Write out the other (indexes 1+) samples
   file->writeData("num_other_samples", int(m_samples.size()));
@@ -353,7 +361,9 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
         m_name.clear();
       }
     }
-
+    // exctract the material if there is one
+    Kernel::Material material;
+    material.loadNexus(file, "material");
     // Shape (from XML)
     std::string shape_xml;
     file->getAttr("shape_xml", shape_xml);
@@ -361,9 +371,29 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
     if (!shape_xml.empty()) {
       ShapeFactory shapeMaker;
       m_shape = shapeMaker.createShape(std::move(shape_xml), false /*Don't wrap with <type> tag*/);
+    } else {
+      int hasMesh = 0;
+      if (file->hasAttr("shape_mesh")) {
+        file->getAttr("shape_mesh", hasMesh);
+      }
+
+      if (hasMesh == 1) {
+        std::vector<double> flatVertices;
+        std::vector<uint32_t> faces;
+
+        file->readData("vertices", flatVertices);
+        file->readData("faces", faces);
+
+        const size_t nverts = flatVertices.size() / 3;
+        std::vector<Mantid::Kernel::V3D> vertices;
+        vertices.reserve(nverts);
+        for (size_t i = 0; i < nverts; ++i) {
+          vertices.emplace_back(flatVertices[3 * i + 0], flatVertices[3 * i + 1], flatVertices[3 * i + 2]);
+        }
+
+        m_shape = std::make_shared<Mantid::Geometry::MeshObject>(faces, vertices, material);
+      }
     }
-    Kernel::Material material;
-    material.loadNexus(file, "material");
     // CSGObject expected, if so, set its material
     if (auto csgObj = std::dynamic_pointer_cast<Geometry::CSGObject>(m_shape)) {
       csgObj->setMaterial(material);
