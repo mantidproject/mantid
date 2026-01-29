@@ -1204,6 +1204,19 @@ public:
     }
   }
 
+  void test_load_from_nxs() {
+    // this file has top-level name "entry" where instrument is stored
+    std::string const filename1 = "EQSANS_89157.nxs.h5";
+    LoadEmptyInstrument alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setPropertyValue("Filename", filename1);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+  }
+
 private:
   std::string inputFile;
   std::string wsName;
