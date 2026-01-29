@@ -128,7 +128,7 @@ void CreateDetectorTable::setup() {
   calcQ = true;
   if (spectrumInfo->hasDetectors(0)) {
     try {
-      std::shared_ptr<const IDetector> detector(&spectrumInfo->detector(0), [](auto *) {});
+      const IDetector *detector = &spectrumInfo->detector(0);
       ws->getEFixed(detector);
     } catch (std::invalid_argument &) {
       calcQ = false;
@@ -281,7 +281,7 @@ void CreateDetectorTable::populateTable() {
           try {
 
             // Get unsigned theta and efixed value
-            IDetector_const_sptr det{&spectrumInfo->detector(wsIndex), [](auto *) {}};
+            const IDetector *det = &spectrumInfo->detector(wsIndex);
             double efixed = ws->getEFixed(det);
             double usignTheta = spectrumInfo->twoTheta(wsIndex) * 0.5;
 
