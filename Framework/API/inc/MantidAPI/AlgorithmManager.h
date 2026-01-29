@@ -24,7 +24,7 @@ namespace API {
 
 //----------------------------------------------------------------------------
 /// Class for when an algorithm is starting asynchronously
-class AlgorithmStartingNotification : public Poco::Notification {
+class MANTID_API_DLL AlgorithmStartingNotification : public Poco::Notification {
 public:
   AlgorithmStartingNotification(IAlgorithm_sptr alg) : Poco::Notification(), m_alg(std::move(alg)) {}
   /// Returns the algorithm that is starting

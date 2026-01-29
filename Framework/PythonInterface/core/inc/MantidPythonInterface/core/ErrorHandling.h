@@ -24,6 +24,7 @@ namespace PythonInterface {
 class MANTID_PYTHONINTERFACE_CORE_DLL PythonException : public std::runtime_error {
 public:
   PythonException(bool withTrace = true);
+  ~PythonException() override;
 };
 
 } // namespace PythonInterface

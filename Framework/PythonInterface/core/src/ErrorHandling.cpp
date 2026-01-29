@@ -94,4 +94,6 @@ std::string exceptionToString(bool withTrace) {
  */
 PythonException::PythonException(bool withTrace) : std::runtime_error(exceptionToString(withTrace)) {}
 
+PythonException::~PythonException() = default;
+
 } // namespace Mantid::PythonInterface
