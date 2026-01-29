@@ -141,7 +141,7 @@ public:
 
     // Check that a missing efixed value throws a runtime error
     const auto &spectrumInfo = inputWS->spectrumInfo();
-    std::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0), Mantid::NoDeleting());
+    std::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0), [](auto*){});
     TS_ASSERT_THROWS(inputWS->getEFixed(detector), const std::runtime_error &);
     // Check that an invalid efixed value throws an invalid argument error
     auto &run = inputWS->mutableRun();

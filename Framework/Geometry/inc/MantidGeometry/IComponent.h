@@ -168,13 +168,4 @@ using IComponent_const_sptr = std::shared_ptr<const IComponent>;
 
 } // Namespace Geometry
 
-/// An object for constructing a shared_ptr that won't ever delete its pointee
-class NoDeleting {
-public:
-  /// Does nothing
-  void operator()(void *) {}
-  /// Does nothing
-  void operator()(const void *) {}
-};
-
 } // Namespace Mantid

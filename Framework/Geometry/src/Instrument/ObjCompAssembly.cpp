@@ -27,13 +27,6 @@ using Kernel::DblMatrix;
 using Kernel::Quat;
 using Kernel::V3D;
 
-/// Void deleter for shared pointers
-class NoDeleting {
-public:
-  /// deleting operator. Does nothing
-  void operator()(void *p) { (void)p; }
-};
-
 /** Constructor for a parametrized ObjComponent
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap
@@ -211,7 +204,7 @@ std::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const {
     return ParComponentFactory::create(child_base->operator[](i), m_map);
   } else {
     // Unparamterized - return the normal one
-    return std::shared_ptr<IComponent>(m_group[i], NoDeleting());
+    return std::shared_ptr<IComponent>(m_group[i], [](auto *) {});
   }
 }
 

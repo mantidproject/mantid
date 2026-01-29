@@ -208,7 +208,7 @@ std::shared_ptr<IComponent> CompAssembly::getChild(const int i) const {
     if (i < 0 || i > static_cast<int>(m_children.size() - 1)) {
       throw std::runtime_error("CompAssembly::getChild() range not valid");
     }
-    return std::shared_ptr<IComponent>(m_children[i], NoDeleting());
+    return std::shared_ptr<IComponent>(m_children[i], [](auto*){});
   }
 }
 
@@ -260,7 +260,7 @@ void CompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector, bo
  * @returns A shared pointer to the component
  */
 std::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
-  std::shared_ptr<const ICompAssembly> thisNode = std::shared_ptr<const ICompAssembly>(this, NoDeleting());
+  std::shared_ptr<const ICompAssembly> thisNode = std::shared_ptr<const ICompAssembly>(this, [](auto*){});
 
   // If name has '/' in it, it is taken as part of a path name of the component.
   // Steps may be skipped at a '/' from the path name,
