@@ -204,7 +204,7 @@ std::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const {
     return ParComponentFactory::create(child_base->operator[](i), m_map);
   } else {
     // Unparamterized - return the normal one
-    return std::shared_ptr<IComponent>(m_group[i], [](auto *) {});
+    return std::shared_ptr<IComponent>(m_group[i], [](auto*){});
   }
 }
 
