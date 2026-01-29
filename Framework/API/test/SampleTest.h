@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
@@ -324,6 +325,36 @@ public:
                      dynamic_cast<const CSGObject &>(sample.getShape()).getShapeXML());
     // Geometry values
     TS_ASSERT_DELTA(loaded.getWidth(), sample.getWidth(), 1e-6);
+  }
+
+  void test_nexus_with_mesh_shape() {
+    NexusTestHelper th(true);
+    th.createFile("SampleTestMesh.nxs");
+
+    // create single face mesh
+    const std::vector<V3D> vertices{V3D(0.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0), V3D(0.0, 1.0, 0.0)};
+    const std::vector<uint32_t> faces{0, 1, 2};
+
+    const Material material;
+    IObject_sptr meshShape = std::make_shared<MeshObject>(faces, vertices, material);
+
+    Sample sample;
+    sample.setName("MeshSample");
+    sample.setShape(meshShape);
+
+    sample.saveNexus(th.file.get(), "sample");
+    th.reopenFile();
+
+    Sample loaded;
+    loaded.loadNexus(th.file.get(), "sample");
+
+    TS_ASSERT_EQUALS(loaded.getName(), sample.getName());
+
+    const auto &loadedMesh = dynamic_cast<const MeshObject &>(loaded.getShape());
+    const auto &originalMesh = dynamic_cast<const MeshObject &>(sample.getShape());
+
+    TS_ASSERT_EQUALS(loadedMesh.getVertices(), originalMesh.getVertices());
+    TS_ASSERT_EQUALS(loadedMesh.getTriangles(), originalMesh.getTriangles());
   }
 
   void test_nexus_empty_name() {
