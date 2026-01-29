@@ -1,3 +1,5 @@
+add_subdirectory(Python)
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(-Wno-uninitialized)
 endif()

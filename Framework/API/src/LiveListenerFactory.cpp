@@ -82,8 +82,9 @@ std::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const Kernel::Liv
       Poco::Net::SocketAddress address;
 
       // To allow listener::connect to be called even when no address is given
-      if (!info.address().empty())
+      if (!info.address().empty()) {
         address = Poco::Net::SocketAddress(info.address());
+      }
 
       // If we can't connect, throw an exception to be handled below
       if (!listener->connect(address)) {
@@ -94,9 +95,16 @@ std::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const Kernel::Liv
     // string it gets is badly formed, or it can't successfully look up the
     // server given, or .......
     // Just catch the base class exception
-    catch (Poco::Exception &pocoEx) {
+    catch (const Poco::Exception &e) {
       std::stringstream ss;
-      ss << "Unable to connect listener [" << info.listener() << "] to [" << info.address() << "]: " << pocoEx.what();
+      ss << "Unable to connect listener [" << info.listener() << "] to [" << info.address() << "]: " << e.what();
+
+      g_log.debug(ss.str());
+      throw std::runtime_error(ss.str());
+    } catch (const std::exception &e) {
+      std::stringstream ss;
+      ss << "Unable to connect listener [" << info.listener() << "] to [" << info.address() << "]: " << e.what();
+
       g_log.debug(ss.str());
       throw std::runtime_error(ss.str());
     }
