@@ -505,8 +505,8 @@ class FullInstrumentViewModel:
                 else:
                     # TODO: Figure out if using numpy arrays is faster than getDetectorIDsOfGroup
                     # groups = ws.extractY().flatten()
-                    # boolean_mask = np.isin(self._detector_ids, det_ids[groups == int(key[-1])])
-                    boolean_mask = np.isin(self._detector_ids, ws.getDetectorIDsOfGroup(int(key[-1])))
+                    # boolean_mask = np.isin(self._detector_ids, det_ids[groups == int(key.split("_")[-1])])
+                    boolean_mask = np.isin(self._detector_ids, ws.getDetectorIDsOfGroup(int(key.split("_")[-1])))
 
                 booleans_from_ws.append(boolean_mask)
         return booleans_from_ws
