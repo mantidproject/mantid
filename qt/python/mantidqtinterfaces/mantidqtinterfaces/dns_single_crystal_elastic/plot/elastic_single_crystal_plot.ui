@@ -30,7 +30,7 @@
        <item>
         <widget class="QToolButton" name="tB_up">
          <property name="toolTip">
-          <string/>
+          <string>Navigate up to the next workspace</string>
          </property>
          <property name="text">
           <string>previous dataset</string>
@@ -39,6 +39,9 @@
        </item>
        <item>
         <widget class="QToolButton" name="tB_down">
+         <property name="toolTip">
+          <string>Navigate down to the next workspace</string>
+         </property>
          <property name="text">
           <string>next dataset</string>
          </property>
@@ -87,7 +90,7 @@
        <item>
         <widget class="QToolButton" name="tB_grid">
          <property name="toolTip">
-          <string>Toggle grid lines</string>
+          <string>Switch between different grid sizes</string>
          </property>
          <property name="text">
           <string>grid</string>
@@ -97,7 +100,7 @@
        <item>
         <widget class="QToolButton" name="tB_crystal_axes">
          <property name="toolTip">
-          <string>Select the grid on unit cell principal axes</string>
+          <string>Switch between orthogonal and crystallographic planes</string>
          </property>
          <property name="text">
           <string>crystal_axes</string>
@@ -145,67 +148,133 @@
      <item>
       <layout class="QHBoxLayout" name="plot_footer_layout">
        <item>
-        <widget class="QLabel" name="l_x_range">
+        <widget class="QLabel" name="l_x_min">
          <property name="text">
-          <string>X</string>
+          <string>X&lt;sub&gt;min&lt;sub&gt;</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lE_x_range">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="QDoubleSpinBox" name="sB_x_min">
+         <property name="minimum">
+          <double>-99.989999999999995</double>
          </property>
-         <property name="text">
-          <string/>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="l_y_range">
-         <property name="text">
-          <string>Y</string>
+         <property name="value">
+          <double>-2.000000000000000</double>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lE_y_range">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+        <widget class="QLabel" name="l_x_max">
          <property name="text">
-          <string/>
+          <string>X&lt;sub&gt;max&lt;sub&gt;</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="l_z_range">
-         <property name="text">
-          <string>Z</string>
+        <widget class="QDoubleSpinBox" name="sB_x_max">
+         <property name="minimum">
+          <double>-99.989999999999995</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="value">
+          <double>2.000000000000000</double>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lE_z_range">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+        <widget class="QLabel" name="l_y_min">
          <property name="text">
-          <string/>
+          <string>Y&lt;sub&gt;min&lt;sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="sB_y_min">
+         <property name="minimum">
+          <double>-99.989999999999995</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="value">
+          <double>-2.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="l_y_max">
+         <property name="text">
+          <string>Y&lt;sub&gt;max&lt;sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="sB_y_max">
+         <property name="minimum">
+          <double>-99.989999999999995</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="value">
+          <double>2.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="l_z_min">
+         <property name="text">
+          <string>I&lt;sub&gt;min&lt;sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="sB_z_min">
+         <property name="minimum">
+          <double>-999.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>100000.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>1.000000000000000</double>
+         </property>
+         <property name="stepType">
+          <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="l_z_max">
+         <property name="text">
+          <string>I&lt;sub&gt;max&lt;sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="sB_z_max">
+         <property name="maximum">
+          <double>100000.000000000000000</double>
+         </property>
+         <property name="stepType">
+          <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+         </property>
+         <property name="value">
+          <double>100.000000000000000</double>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QToolButton" name="tB_log">
+         <property name="toolTip">
+          <string>Turn on/off logarithmic scale</string>
+         </property>
          <property name="text">
           <string>log</string>
          </property>
@@ -216,6 +285,9 @@
        </item>
        <item>
         <widget class="QComboBox" name="combB_colormap">
+         <property name="toolTip">
+          <string>Select colorbar style</string>
+         </property>
          <property name="iconSize">
           <size>
            <width>100</width>
@@ -226,6 +298,9 @@
        </item>
        <item>
         <widget class="QToolButton" name="tB_invert_cb">
+         <property name="toolTip">
+          <string>Invert selected colormap</string>
+         </property>
          <property name="text">
           <string>invert</string>
          </property>
@@ -236,6 +311,9 @@
        </item>
        <item>
         <widget class="QLabel" name="l_fontsize">
+         <property name="toolTip">
+          <string>Change font size of the plot legend</string>
+         </property>
          <property name="text">
           <string>FontSize:</string>
          </property>
