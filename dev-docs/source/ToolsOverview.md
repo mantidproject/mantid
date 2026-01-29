@@ -10,6 +10,7 @@ AlgorithmProfiler
 :local:
 ```
 
+(_class_maker_py)=
 ## Creating classes: class_maker.py
 
 To make it faster to create a new cpp class. This is a small python
