@@ -117,7 +117,7 @@ std::shared_ptr<const IComponent> Component::getParent() const {
     std::shared_ptr<const IComponent> parent = m_base->getParent();
     return ParComponentFactory::create(parent, m_map);
   } else
-    return std::shared_ptr<const IComponent>(m_parent, [](auto*){});
+    return std::shared_ptr<const IComponent>(m_parent, [](auto *) {});
 }
 
 //--------------------------------------------------------------------------------------------

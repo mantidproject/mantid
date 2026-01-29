@@ -238,7 +238,7 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit, const Kernel
       g_log.warning(e.what());
     }
     if (emode != Kernel::DeltaEMode::Elastic && pmap.find(UnitParams::efixed) == pmap.end()) {
-      std::shared_ptr<const Geometry::IDetector> det(&detector(wsIndex), [](auto*){});
+      std::shared_ptr<const Geometry::IDetector> det(&detector(wsIndex), [](auto *) {});
       try {
         pmap[UnitParams::efixed] = m_experimentInfo.getEFixedGivenEMode(det, emode);
         g_log.debug() << "Detector: " << det->getID() << " EFixed: " << pmap[UnitParams::efixed] << "\n";

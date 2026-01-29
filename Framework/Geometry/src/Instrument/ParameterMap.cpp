@@ -832,7 +832,7 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp, const std::string
  * @returns the first matching parameter.
  */
 Parameter_sptr ParameterMap::getRecursiveByType(const IComponent *comp, const std::string &type) const {
-  std::shared_ptr<const IComponent> compInFocus(comp, [](auto*){});
+  std::shared_ptr<const IComponent> compInFocus(comp, [](auto *) {});
   while (compInFocus != nullptr) {
     Parameter_sptr param = getByType(compInFocus.get(), type);
     if (param) {

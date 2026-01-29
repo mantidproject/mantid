@@ -398,9 +398,9 @@ std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 InstrumentVisitor::makeWrappers(const Instrument &instrument, ParameterMap *pmap) {
   // Visitee instrument is base instrument if no ParameterMap
   const auto visiteeInstrument =
-      pmap ? ParComponentFactory::createInstrument(std::shared_ptr<const Instrument>(&instrument, [](auto*){}),
-                                                   std::shared_ptr<ParameterMap>(pmap, [](auto*){}))
-           : std::shared_ptr<const Instrument>(&instrument, [](auto*){});
+      pmap ? ParComponentFactory::createInstrument(std::shared_ptr<const Instrument>(&instrument, [](auto *) {}),
+                                                   std::shared_ptr<ParameterMap>(pmap, [](auto *) {}))
+           : std::shared_ptr<const Instrument>(&instrument, [](auto *) {});
   InstrumentVisitor visitor(visiteeInstrument);
   visitor.walkInstrument();
   return visitor.makeWrappers();

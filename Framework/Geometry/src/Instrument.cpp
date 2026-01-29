@@ -330,7 +330,7 @@ bool Instrument::hasSample() const { return m_sampleCache; }
 IComponent_const_sptr Instrument::getSource() const {
   if (!m_sourceCache) {
     g_log.warning("In Instrument::getSource(). No source has been set.");
-    return IComponent_const_sptr(m_sourceCache, [](auto*){});
+    return IComponent_const_sptr(m_sourceCache, [](auto *) {});
   } else if (m_map) {
     auto sourceCache = static_cast<const Instrument *>(m_base)->m_sourceCache;
     if (dynamic_cast<const ObjComponent *>(sourceCache))
@@ -346,7 +346,7 @@ IComponent_const_sptr Instrument::getSource() const {
       return IComponent_const_sptr(new ObjComponent(sourceCache, m_map));
     }
   } else {
-    return IComponent_const_sptr(m_sourceCache, [](auto*){});
+    return IComponent_const_sptr(m_sourceCache, [](auto *) {});
   }
 }
 
@@ -356,7 +356,7 @@ IComponent_const_sptr Instrument::getSource() const {
 IComponent_const_sptr Instrument::getSample() const {
   if (!m_sampleCache) {
     g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
-    return IComponent_const_sptr(m_sampleCache, [](auto*){});
+    return IComponent_const_sptr(m_sampleCache, [](auto *) {});
   } else if (m_map) {
     auto sampleCache = static_cast<const Instrument *>(m_base)->m_sampleCache;
     if (dynamic_cast<const ObjComponent *>(sampleCache))
@@ -372,7 +372,7 @@ IComponent_const_sptr Instrument::getSample() const {
       return IComponent_const_sptr(new ObjComponent(sampleCache, m_map));
     }
   } else {
-    return IComponent_const_sptr(m_sampleCache, [](auto*){});
+    return IComponent_const_sptr(m_sampleCache, [](auto *) {});
   }
 }
 
@@ -390,9 +390,9 @@ Kernel::V3D Instrument::getBeamDirection() const { return normalize(getSample()-
 std::shared_ptr<const IComponent> Instrument::getComponentByID(const IComponent *id) const {
   const auto *base = static_cast<const IComponent *>(id);
   if (m_map)
-    return ParComponentFactory::create(std::shared_ptr<const IComponent>(base, [](auto*){}), m_map);
+    return ParComponentFactory::create(std::shared_ptr<const IComponent>(base, [](auto *) {}), m_map);
   else
-    return std::shared_ptr<const IComponent>(base, [](auto*){});
+    return std::shared_ptr<const IComponent>(base, [](auto *) {});
 }
 
 /** Find all components in an Instrument Definition File (IDF) with a given
@@ -405,7 +405,7 @@ std::shared_ptr<const IComponent> Instrument::getComponentByID(const IComponent 
  *  @returns Pointers to components
  */
 std::vector<std::shared_ptr<const IComponent>> Instrument::getAllComponentsWithName(const std::string &cname) const {
-  std::shared_ptr<const IComponent> node = std::shared_ptr<const IComponent>(this, [](auto*){});
+  std::shared_ptr<const IComponent> node = std::shared_ptr<const IComponent>(this, [](auto *) {});
   std::vector<std::shared_ptr<const IComponent>> retVec;
   // Check the instrument name first
   if (this->getName() == cname) {
@@ -631,7 +631,7 @@ void Instrument::markAsDetector(const IDetector *det) {
                              "parametrized Instrument object.");
 
   // Create a (non-deleting) shared pointer to it
-  IDetector_const_sptr det_sptr = IDetector_const_sptr(det, [](auto*){});
+  IDetector_const_sptr det_sptr = IDetector_const_sptr(det, [](auto *) {});
   auto it = lower_bound(m_detectorCache, det->getID());
   // Duplicate detector ids are forbidden
   if ((it != m_detectorCache.end()) && (std::get<0>(*it) == det->getID())) {
@@ -649,7 +649,7 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
                              "parametrized Instrument object.");
 
   // Create a (non-deleting) shared pointer to it
-  IDetector_const_sptr det_sptr = IDetector_const_sptr(det, [](auto*){});
+  IDetector_const_sptr det_sptr = IDetector_const_sptr(det, [](auto *) {});
   bool isMonitorFlag = false;
   m_detectorCache.emplace_back(det->getID(), det_sptr, isMonitorFlag);
 }
@@ -811,9 +811,9 @@ void Instrument::appendPlottable(const CompAssembly &ca, std::vector<IObjCompone
       auto *d = dynamic_cast<Detector *>(c);
       auto *o = dynamic_cast<ObjComponent *>(c);
       if (d)
-        lst.emplace_back(IObjComponent_const_sptr(d, [](auto*){}));
+        lst.emplace_back(IObjComponent_const_sptr(d, [](auto *) {}));
       else if (o)
-        lst.emplace_back(IObjComponent_const_sptr(o, [](auto*){}));
+        lst.emplace_back(IObjComponent_const_sptr(o, [](auto *) {}));
       else
         g_log.error() << "Unknown comp type\n";
     }
@@ -1286,7 +1286,7 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   auto detInfo = std::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
   const auto parInstrument = ParComponentFactory::createInstrument(
-      std::shared_ptr<const Instrument>(this, [](auto*){}), std::shared_ptr<ParameterMap>(&pmap, [](auto*){}));
+      std::shared_ptr<const Instrument>(this, [](auto *) {}), std::shared_ptr<ParameterMap>(&pmap, [](auto *) {}));
   detInfo->m_instrument = parInstrument;
   return {std::move(compInfo), std::move(detInfo)};
 }

@@ -66,7 +66,7 @@ IComponent_sptr ParComponentFactory::create(const std::shared_ptr<const ICompone
   // pointers around
   if (inst_sptr) {
     return createInstrument(std::const_pointer_cast<Instrument>(inst_sptr),
-                            std::shared_ptr<ParameterMap>(const_cast<ParameterMap *>(map), [](auto*){}));
+                            std::shared_ptr<ParameterMap>(const_cast<ParameterMap *>(map), [](auto *) {}));
   }
 
   // Everything gets created on the fly. Note that the order matters here
