@@ -20,7 +20,7 @@ from pathlib import Path
 # Make ADARA-packet player utilities importable
 SCRIPT_DIR = Path(__file__).resolve().parent
 ADARA_UTILS_DIR = (
-    SCRIPT_DIR.parents[2]  # /home/ux0/workspaces/mantid-PRs/Framework/LiveData
+    SCRIPT_DIR.parents[2]  # ${REPO_BASE}/Framework/LiveData
     / "src"
     / "ADARA"
     / "utils"

@@ -22,4 +22,9 @@ foreach(test_file ${TEST_PY_FILES})
     APPEND
     PROPERTY ENVIRONMENT "adara_player_conf=${LIVEDATA_SOURCE_DIR}/ADARA/utils/packet_playback/adara_player_conf.yml"
   )
+  set_property(
+    TEST ${_test_name}
+    APPEND
+    PROPERTY ENVIRONMENT "LOGS='.'"
+  )
 endforeach()

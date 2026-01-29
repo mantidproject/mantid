@@ -1,8 +1,14 @@
 # live-data playback configuration
 
+##
+## Values from the environment, expressed as `${KEY}`, will be replaced during load.
+##
+
 server:
   name: 'adara_player' # will be overridden by `${adara_player_name}` (in environment)
 
+  # WARNING: this replacement is special:
+  #   in order to work on all systems, don't use `${XDG_RUNTIME_DIR}` here!
   address: '{XDG_RUNTIME_DIR}/sock-{name}' # Unix domain socket
   # address: '127.0.0.1:31415'  # IP socket as 'IP:port'
 
@@ -55,7 +61,7 @@ logging:
               # WARNING: use DEBUG sparingly: it generates a lot of logging, and will slow down playback!
 
   # The ``{PID}`` will be automatically be substituted when present -- it's highly recommended to use this!
-  filename: /home/ux0/workspaces/mantid-PRs/design_notes/live_data_playback/01.2026_tests/logs/session.{PID}.log
+  filename: ${LOGS}/session.{PID}.log
 
   # `Packet` summary format.
   packet_summary: "type: {type:#06x}: {timestamp}, size: {size:>7}, CRC: {CRC:#010x}"

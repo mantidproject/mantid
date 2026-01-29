@@ -10,9 +10,8 @@ import socketserver
 import signal
 import threading
 from typing import Iterator
-import yaml
 
-from packet_player import Player, SocketAddress, UnixGlob, get_log_file_path_for_PID
+from packet_player import Player, SocketAddress, UnixGlob, get_log_file_path_for_PID, yaml_loader
 
 ##################################################################################################
 ## WARNING: if at all possible `Config` should be used only from the `packet_player.py` module. ##
@@ -171,8 +170,7 @@ class SessionServer:
             server._yaml_input_mode = True
 
             list_path = Path(files_arg)
-            with open(list_path, "rt") as f:
-                data = yaml.safe_load(f)
+            data = yaml_loader(list_path)
 
             if not isinstance(data, dict):
                 raise RuntimeError(f"`--files` YAML must be a mapping with keys 'base_path' and 'sessions', got {type(data)}")

@@ -25,6 +25,53 @@ from zlib import crc32
 # =========================================================
 # ====== INITIALIZE the application's `Config` dict. ======
 # =========================================================
+def _error_exit(msg: str):
+    print(f"Error during load of module '{__file__}' (as '{__name__}'):\n    {msg}")
+    sys.exit(1)
+
+
+_source_path = Path(__file__).resolve().parent
+_config_path = Path(os.environ.get("adara_player_conf", _source_path / "adara_player_conf.yml")).resolve()
+if not _config_path.exists():
+    _error_exit(f"config file '{_config_path}' not found on filesystem.")
+
+# Match patterns like ${ENV_VAR}
+env_pattern = re.compile(r".*?\${(.*?)}.*?")
+
+
+def env_constructor(loader, node):
+    value = loader.construct_scalar(node)
+    for group in env_pattern.findall(value):
+        # Replace with environment variable or *exit* if not found
+        group_value = os.environ.get(group)
+        if group_value is None:
+            _error_exit(f"config file requires '${{{group}}}': which is not defined in the environment.")
+        value = value.replace(f"${{{group}}}", group_value)
+    return value
+
+
+# Register the constructor to handle environment variables
+yaml.SafeLoader.add_implicit_resolver("!env", env_pattern, None)
+yaml.SafeLoader.add_constructor("!env", env_constructor)
+
+
+# Allow other modules to load YAML with substitutions.
+def yaml_loader(file_path: Path) -> dict[Any]:
+    with open(file_path, "rt") as f:
+        # Load the YAML, with environment substitutions
+        return yaml.safe_load(f)
+
+
+Config = yaml_loader(_config_path)
+
+# Initialize logging:
+
+#######################################################################################
+## WARNING: in general, only file-based logging should originate from these classes. ##
+##   Each client session runs in its own process, and at present the implemented     ##
+##   multi-process logging is only rudimentary.                                      ##
+#######################################################################################
+
 TRACE_LEVEL = 5
 logging.addLevelName(TRACE_LEVEL, "TRACE")
 
@@ -35,25 +82,6 @@ def trace(self, message, *args, **kws):
 
 
 logging.Logger.trace = trace
-
-_source_path = Path(__file__).resolve().parent
-_config_path = Path(os.environ.get("adara_player_conf", _source_path / "adara_player_conf.yml")).resolve()
-if not _config_path.exists():
-    print(f"Error during load of module '{__file__}' (as '{__name__}'):\n    config file '{_config_path}' not found on filesystem.")
-    sys.exit(1)
-
-Config = {}
-with open(_config_path, "rt") as f:
-    # Load the `Config` `dict`.
-    Config = yaml.safe_load(f)
-
-# Initialize logging:
-
-#######################################################################################
-## WARNING: in general, only file-based logging should originate from these classes. ##
-##   Each client session runs in its own process, and at present the implemented     ##
-##   multi-process logging is only rudimentary.                                      ##
-#######################################################################################
 
 formatter = logging.Formatter(Config["logging"]["format"])
 
