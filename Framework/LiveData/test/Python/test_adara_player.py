@@ -461,6 +461,7 @@ class Test_Player(unittest.TestCase):
                 if test_socket_path.exists():
                     test_socket_path.unlink()
 
+    @unittest.skipIf(os.name == "nt", "SIGALRM not available on Windows")
     def test_signalhandler_sets_running_false(self):
         """Tests the handler response: sets flag and prepares for shutdown."""
 

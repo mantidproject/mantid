@@ -1430,5 +1430,7 @@ class Player:
             print("*** Shutdown timeout exceeded, forcing exit ***")
             os._exit(1)
 
-        signal.signal(signal.SIGALRM, _timeout_handler)
-        signal.alarm(10)  # 10-second timeout
+        if hasattr(signal, "SIGALRM"):
+            # SIGALRM not available on Windows
+            signal.signal(signal.SIGALRM, _timeout_handler)
+            signal.alarm(10)  # 10-second timeout

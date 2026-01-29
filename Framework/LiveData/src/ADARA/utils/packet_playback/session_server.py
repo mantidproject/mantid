@@ -341,8 +341,10 @@ class SessionServer:
             print("*** Shutdown timeout exceeded, forcing exit ***")
             os._exit(1)
 
-        signal.signal(signal.SIGALRM, _timeout_handler)
-        signal.alarm(20)  # 20-second timeout
+        if hasattr(signal, "SIGALRM"):
+            # SIGALRM not available on Windows
+            signal.signal(signal.SIGALRM, _timeout_handler)
+            signal.alarm(20)  # 20-second timeout
 
 
 class SessionHandler(socketserver.BaseRequestHandler):
