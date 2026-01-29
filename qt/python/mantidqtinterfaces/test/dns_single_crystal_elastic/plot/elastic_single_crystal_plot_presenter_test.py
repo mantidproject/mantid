@@ -28,14 +28,23 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         cls.view.single_crystal_plot = mock.create_autospec(DNSScPlot)
         cls.view.datalist = mock.create_autospec(DNSDatalist)
         cls.view.sig_plot.connect = mock.Mock()
-        cls.view.sig_restore_default_omega_offset = mock.Mock()
-        cls.view.sig_restore_default_dxdy = mock.Mock()
         cls.view.sig_update_omega_offset.connect = mock.Mock()
+        cls.view.sig_restore_default_omega_offset = mock.Mock()
         cls.view.sig_update_dxdy.connect = mock.Mock()
+        cls.view.sig_restore_default_dxdy = mock.Mock()
+        cls.view.sig_calculate_projection = mock.Mock()
+        cls.view.sig_save_data = mock.Mock()
         cls.view.sig_change_colormap.connect = mock.Mock()
+        cls.view.sig_change_log.connect = mock.Mock()
+        cls.view.sig_change_linestyle.connect = mock.Mock()
+        cls.view.sig_change_cb_range_on_zoom.connect = mock.Mock()
+        cls.view.sig_change_cb_range_on_zoom.disconnect = mock.Mock()
+        cls.view.sig_manual_lim_changed.connect = mock.Mock()
         cls.view.sig_change_grid.connect = mock.Mock()
         cls.view.sig_change_crystal_axes.connect = mock.Mock()
         cls.view.sig_change_font_size.connect = mock.Mock()
+        cls.view.sig_home_button_clicked.connect = mock.Mock()
+        cls.view.sig_plot_zoom_updated.connect = mock.Mock()
 
         cls.model = mock.create_autospec(DNSElasticSCPlotModel)
         cls.presenter = DNSElasticSCPlotPresenter(view=cls.view, model=cls.model, parent=parent)
@@ -69,6 +78,10 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         self.presenter._plot_param.colormap_name = "jet"
         self.presenter._plot_param.font_size = 1
         self.presenter._plot_param.lines = 0
+        self.presenter._plot_param.xlim = None
+        self.presenter._plot_param.ylim = None
+        self.presenter._plot_param.zlim = None
+        self.presenter._plot_param.projections = False
 
     def test___init__(self):
         self.assertIsInstance(self.presenter, DNSElasticSCPlotPresenter)
@@ -80,6 +93,48 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         self.assertTrue(hasattr(self.presenter._plot_param, "colormap_name"))
         self.assertTrue(hasattr(self.presenter._plot_param, "font_size"))
         self.assertTrue(hasattr(self.presenter._plot_param, "lines"))
+        self.assertTrue(hasattr(self.presenter._plot_param, "xlim"))
+        self.assertTrue(hasattr(self.presenter._plot_param, "ylim"))
+        self.assertTrue(hasattr(self.presenter._plot_param, "zlim"))
+        self.assertTrue(hasattr(self.presenter._plot_param, "projections"))
+
+    @patch("mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_presenter.DNSElasticSCPlotPresenter._plot")
+    @patch(
+        "mantidqtinterfaces.dns_single_crystal_elastic.plot."
+        "elastic_single_crystal_plot_presenter."
+        "DNSElasticSCPlotPresenter._calculate_projections"
+    )
+    def test__toggle_projections(self, mock_calculate_proj, mock_plot):
+        mock_calculate_proj.return_value = (1, 2)
+        # self.view.get_axis_type.return_value = {'switch': False}
+        self.presenter._toggle_projections(False)
+        self.view.get_axis_type.assert_called_once()
+        self.view.single_crystal_plot.remove_projections.assert_called_once()
+        mock_plot.assert_called_once()
+
+        self.view.reset_mock()
+        mock_plot.reset_mock()
+        self.presenter._toggle_projections(True)
+        mock_calculate_proj.assert_called_once()
+        self.view.draw.assert_called_once()
+        self.view.single_crystal_plot.set_projections.assert_called_once_with(1, 2)
+
+        self.view.get_axis_type.return_value = {"switch": True}
+        self.view.reset_mock()
+        self.presenter._toggle_projections(True)
+        self.view.single_crystal_plot.set_projections.assert_called_once_with(2, 1)
+        self.view.draw.assert_called_once()
+        mock_plot.assert_not_called()
+
+    def test__calculate_projections(self):
+        self.view.single_crystal_plot.get_active_limits.return_value = (1, 2)
+        self.model.get_projections.return_value = (3, 4)
+        test_v = self.presenter._calculate_projections(False)
+        self.model.get_projections.assert_called_once_with(1, 2)
+        self.assertEqual(test_v, (3, 4))
+        self.model.get_projections.reset_mock()
+        self.presenter._calculate_projections(True)
+        self.model.get_projections.assert_called_once_with(2, 1)
 
     def test__datalist_updated(self):
         self.view.datalist.get_datalist.return_value = None
@@ -108,6 +163,7 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         self.presenter._crystallographical_axes = mock.Mock(return_value="grid_axes")
         self.presenter._set_axis_labels = mock.Mock()
         self.presenter._set_initial_omega_offset_dx_dy = mock.Mock()
+        self.presenter._change_displayed_plot_limits = mock.Mock()
 
         self.view.single_crystal_plot.create_colorbar = mock.Mock()
         self.view.single_crystal_plot.on_resize = mock.Mock()
@@ -316,6 +372,19 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         self.view.single_crystal_plot.set_cmap.assert_called_once_with("jet")
         self.view.draw.assert_called_once()
 
+    @patch("mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_presenter.mpl_helpers.get_log_norm")
+    @patch(
+        "mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_presenter.DNSElasticSCPlotPresenter._get_current_limits"
+    )
+    def test__set_log(self, mock_get_current_limits, mock_get_log_norm):
+        mock_get_log_norm.return_value = 1
+        mock_get_current_limits.return_value = 1, 2, 3, 4
+        self.presenter._set_log()
+        self.assertEqual(self.view.get_state.call_count, 1)
+        self.view.single_crystal_plot.set_norm.assert_called_once_with(1)
+        self.view.draw.assert_called_once()
+        mock_get_log_norm.assert_called_once_with(False, 3)
+
     @patch("mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_presenter.DNSElasticSCPlotPresenter._plot")
     def test__change_font_size(self, mock_plot):
         self.presenter._plot_param.font_size = 0
@@ -333,6 +402,149 @@ class DNSElasticSCPlotPresenterTest(unittest.TestCase):
         self.presenter._plot_param.font_size = 0
         self.presenter._change_font_size(draw=False)
         mock_plot.assert_not_called()
+
+    def test__set_ax_formatter(self):
+        self.model.get_format_coord.return_value = 123
+        self.presenter._set_ax_formatter()
+        self.view.get_axis_type.assert_called_once()
+        self.model.get_format_coord.assert_called_once()
+        self.view.single_crystal_plot.set_format_coord.assert_called_once_with(123)
+
+    @patch(
+        "mantidqtinterfaces.dns_single_crystal_elastic.plot."
+        "elastic_single_crystal_plot_presenter."
+        "DNSElasticSCPlotPresenter._change_color_bar_range"
+    )
+    @patch(
+        "mantidqtinterfaces.dns_single_crystal_elastic.plot."
+        "elastic_single_crystal_plot_presenter."
+        "DNSElasticSCPlotPresenter._get_current_limits"
+    )
+    def test__manual_lim_changed(self, mock_get_current_limits, mock_change_cb_range):
+        mock_get_current_limits.return_value = [1, 2], [3, 4], 1, 1
+        self.presenter._manual_lim_changed()
+        self.view.single_crystal_plot.set_xlim.assert_called_once_with([1, 2])
+        self.view.single_crystal_plot.set_ylim.assert_called_once_with([3, 4])
+        mock_change_cb_range.assert_called_once_with(zoom=False)
+
+    @patch(
+        "mantidqtinterfaces.dns_single_crystal_elastic.plot."
+        "elastic_single_crystal_plot_presenter."
+        "DNSElasticSCPlotPresenter._toggle_projections"
+    )
+    @patch(
+        "mantidqtinterfaces.dns_single_crystal_elastic.plot."
+        "elastic_single_crystal_plot_presenter."
+        "DNSElasticSCPlotPresenter._get_current_limits"
+    )
+    def test__change_cb_range(self, mock_get_current_limits, mock_tg_proj):
+        self.view.datalist.get_checked_plots.return_value = 3
+        self.presenter._plot_param.projections = False
+
+        self.presenter._plot_param.xlim = None
+        self.presenter._plot_param.ylim = None
+        self.presenter._plot_param.zlim = None
+        self.presenter._plot_param.sny_zoom_in = None
+        mock_get_current_limits.return_value = [1, 2], [3, 4], 5, 6
+        self.presenter._change_color_bar_range(zoom=True)
+        mock_get_current_limits.assert_called_once_with(True)
+        self.view.single_crystal_plot.set_zlim.assert_called_once_with(5)
+        self.assertEqual(self.presenter._plot_param.xlim, [1, 2])
+        self.assertEqual(self.presenter._plot_param.ylim, [3, 4])
+        self.assertEqual(self.presenter._plot_param.zlim, 5)
+        self.assertEqual(self.presenter._plot_param.sny_zoom_in, 3)
+        self.view.datalist.get_checked_plots.assert_called_once()
+        mock_tg_proj.assert_not_called()
+        self.view.draw.assert_called_once()
+        self.view.reset_mock()
+        self.presenter._plot_param.projections = True
+        self.presenter._change_color_bar_range(zoom=False)
+        mock_tg_proj.assert_called_once()
+        self.view.draw.assert_not_called()
+
+    def test__home_button_clicked(self):
+        self.model.get_data_xy_lim.return_value = [[1, 2], [3, 4]]
+        self.model.get_data_z_min_max.return_value = 10, 20, 30
+        self.view._map = {
+            "x_min": mock.Mock(),
+            "x_max": mock.Mock(),
+            "y_min": mock.Mock(),
+            "y_max": mock.Mock(),
+            "z_min": mock.Mock(),
+            "z_max": mock.Mock(),
+        }
+        self.presenter._home_button_clicked()
+        self.view._map["x_min"].setValue.assert_called_once_with(1)
+        self.view._map["x_max"].setValue.assert_called_once_with(2)
+        self.view._map["y_min"].setValue.assert_called_once_with(3)
+        self.view._map["y_max"].setValue.assert_called_once_with(4)
+        self.view._map["z_min"].setValue.assert_called_once_with(10)
+        self.view._map["z_max"].setValue.assert_called_once_with(20)
+
+    def test__get_current_xy_lim(self):
+        self.model.get_data_xy_lim.return_value = [5, 6], [7, 8]
+        self.view.get_state.return_value["log_scale"] = True
+        self.view.get_state.return_value["x_min"] = 10
+        self.view.get_state.return_value["x_max"] = 11
+        self.view.get_state.return_value["y_min"] = 12
+        self.view.get_state.return_value["y_max"] = 13
+        test_v = self.presenter._get_current_xy_lim(zoom=False)
+        self.view.get_state.assert_called_once()
+        self.view.get_axis_type.assert_called_once()
+        self.model.get_data_xy_lim.assert_called_once_with(False)
+        self.assertEqual(test_v, ([10, 11], [12, 13]))
+
+        self.view.get_state.return_value["x_min"] = None
+        self.view.get_state.return_value["x_max"] = None
+        self.view.get_state.return_value["y_min"] = None
+        self.view.get_state.return_value["y_max"] = None
+        test_v = self.presenter._get_current_xy_lim(zoom=False)
+        self.assertEqual(test_v, ([5, 6], [7, 8]))
+
+        self.view.single_crystal_plot.get_active_limits.return_value = [22, 23], [24, 25]
+        self.view.get_state.return_value["x_min"] = None
+        self.view.get_state.return_value["x_max"] = None
+        self.view.get_state.return_value["y_min"] = 1
+        self.view.get_state.return_value["y_max"] = 2
+        test_v = self.presenter._get_current_xy_lim(zoom=True)
+        self.view.single_crystal_plot.get_active_limits.assert_called_once()
+        self.assertEqual(test_v, ([22, 23], [1, 2]))
+
+    def test__get_current_z_lim(self):
+        self.model.get_data_z_min_max.return_value = 11, 12, 13
+        self.view.get_state.return_value["z_min"] = 4
+        self.view.get_state.return_value["z_max"] = 5
+        test_v = self.presenter._get_current_z_lim([0, 1], [2, 3], False)
+        self.view.get_state.assert_called_once()
+        self.view.get_axis_type.assert_called_once()
+        self.model.get_data_z_min_max.assert_called_once_with([0, 1], [2, 3])
+        self.assertEqual(test_v, ([4, 5], True))
+
+        self.model.reset_mock()
+        self.view.get_axis_type.return_value["switch"] = True
+        self.view.get_state.return_value["z_min"] = None
+        self.view.get_state.return_value["z_max"] = 5
+        test_v = self.presenter._get_current_z_lim([0, 1], [2, 3], False)
+        self.model.get_data_z_min_max.assert_called_once_with([2, 3], [0, 1])
+        self.assertEqual(test_v, ([11, 12], False))
+
+    @patch(
+        "mantidqtinterfaces.dns_single_crystal_elastic.plot."
+        "elastic_single_crystal_plot_presenter."
+        "DNSElasticSCPlotPresenter._get_current_z_lim"
+    )
+    @patch(
+        "mantidqtinterfaces.dns_single_crystal_elastic.plot."
+        "elastic_single_crystal_plot_presenter."
+        "DNSElasticSCPlotPresenter._get_current_xy_lim"
+    )
+    def test__get_current_limits(self, mock_get_current_xy_lim, mock_get_current_z_lim):
+        mock_get_current_xy_lim.return_value = 1, 2
+        mock_get_current_z_lim.return_value = 3, True
+        test_v = self.presenter._get_current_limits(False)
+        mock_get_current_xy_lim.assert_called_once_with(False)
+        mock_get_current_z_lim.assert_called_once_with(1, 2, False)
+        self.assertEqual(test_v, (1, 2, 3, True))
 
 
 if __name__ == "__main__":
