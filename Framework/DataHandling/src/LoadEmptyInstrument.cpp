@@ -18,9 +18,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidNexus/NexusException.h"
-#include "MantidNexus/NexusFile.h"
-#include "MantidNexusGeometry/NexusGeometryParser.h"
 
 #include <filesystem>
 
@@ -245,9 +242,10 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadIDFFromNexus(const std::st
   bool foundIDF{false};
   std::string instrumentParentEntryName;
   {
-    Nexus::File nxsfile(filename);
-    instrumentParentEntryName = nxsfile.getTopLevelEntryName();
-    foundIDF = nxsfile.hasAddress(instrumentParentEntryName + instrumentEntryName);
+    // since we only need to evaluate if a single entry is present, use a lazy descriptor
+    Nexus::NexusDescriptorLazy nxsfile(filename);
+    instrumentParentEntryName = "/" + nxsfile.firstEntryNameType().first;
+    foundIDF = nxsfile.isEntry(instrumentParentEntryName + instrumentEntryName);
   }
 
   if (!foundIDF) {
