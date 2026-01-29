@@ -1084,12 +1084,12 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
                 delete prop;
               } else {
                 m_eventBuffer->mutableRun().addLogData(prop);
+
+                // Add the pv id, device id and pv name to the name map so we can
+                // find the name when we process the variable value packets
+                m_nameMap[std::make_pair(pkt.devId(), pvIdNum)] = pvName;
               }
             }
-
-            // Add the pv id, device id and pv name to the name map so we can
-            // find the name when we process the variable value packets
-            m_nameMap[std::make_pair(pkt.devId(), pvIdNum)] = pvName;
           }
         }
       }
