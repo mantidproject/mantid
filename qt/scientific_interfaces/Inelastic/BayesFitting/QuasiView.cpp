@@ -134,6 +134,9 @@ void QuasiView::setupFitOptions(bool useQuickBayes) {
 }
 
 void QuasiView::setupPropertyBrowser(bool useQuickBayes) {
+  auto const EMin = m_properties.contains("EMin") ? m_properties["EMin"]->valueText().toDouble() : 0.0;
+  auto const EMax = m_properties.contains("EMax") ? m_properties["EMax"]->valueText().toDouble() : 0.0;
+
   m_properties.clear();
   m_dblManager->clear();
   m_propTree->clear();
@@ -144,6 +147,8 @@ void QuasiView::setupPropertyBrowser(bool useQuickBayes) {
 
   m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
   m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
+  m_dblManager->setValue(m_properties["EMin"], EMin);
+  m_dblManager->setValue(m_properties["EMax"], EMax);
 
   m_propTree->addProperty(m_properties["EMin"]);
   m_propTree->addProperty(m_properties["EMax"]);
