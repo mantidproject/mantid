@@ -99,7 +99,11 @@ psutil:
   - '>=5.8.0'
 
 pydantic:
- - '>=2.11.4,<3'
+  - '>=2.11.4,<3'
+
+# Version 3.3.0 introduces dependency warnings which are being triggered by matplotlib
+pyparsing:
+  - '<3.3.0'
 
 sphinx:
   - '>=9.0,<10'

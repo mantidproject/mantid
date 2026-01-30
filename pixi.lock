@@ -4,8 +4,6 @@ environments:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
     - url: https://conda.anaconda.org/neutrons/
-    options:
-      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -293,7 +291,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.12.5-pyhcf101f3_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pydantic-core-2.41.5-py311h902ca64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.19.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.2.5-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pyqt-5.15.9-py311hf0fb5b6_5.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pyqt5-sip-12.12.2-py311hb755f60_5.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pyqtwebengine-5.15.9-py311hd529140_5.conda
@@ -645,7 +643,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.12.5-pyhcf101f3_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pydantic-core-2.41.5-py311h71babbd_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.19.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.2.5-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyqt-5.15.9-py311hc49b008_5.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyqt5-sip-12.12.2-py311ha891d26_5.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyqtwebengine-5.15.9-py311h14ede98_5.conda
@@ -953,7 +951,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.12.5-pyhcf101f3_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/pydantic-core-2.41.5-py311hf51aa87_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.19.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.2.5-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/pyqt-5.15.9-py311h125bc19_5.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/pyqt5-sip-12.12.2-py311h12c1d0e_5.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/pyqtwebengine-5.15.9-py311h5a77453_5.conda
@@ -1064,8 +1062,6 @@ environments:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
     - url: https://conda.anaconda.org/neutrons/
-    options:
-      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -1095,8 +1091,6 @@ environments:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
     - url: https://conda.anaconda.org/neutrons/
-    options:
-      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -1159,8 +1153,6 @@ environments:
     - url: https://conda.anaconda.org/mantid/label/nightly/
     - url: https://conda.anaconda.org/conda-forge/
     - url: https://conda.anaconda.org/neutrons/
-    options:
-      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -1451,7 +1443,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.12.5-pyhcf101f3_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pydantic-core-2.41.5-py311h902ca64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.19.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.2.5-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pyqt-5.15.9-py311hf0fb5b6_5.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pyqt5-sip-12.12.2-py311hb755f60_5.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pyqtwebengine-5.15.9-py311hd529140_5.conda
@@ -1804,7 +1796,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.12.5-pyhcf101f3_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pydantic-core-2.41.5-py311h71babbd_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.19.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.2.5-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyqt-5.15.9-py311hc49b008_5.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyqt5-sip-12.12.2-py311ha891d26_5.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyqtwebengine-5.15.9-py311h14ede98_5.conda
@@ -2112,7 +2104,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.12.5-pyhcf101f3_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/pydantic-core-2.41.5-py311hf51aa87_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.19.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.2.5-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/pyqt-5.15.9-py311h125bc19_5.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/pyqt5-sip-12.12.2-py311h12c1d0e_5.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/pyqtwebengine-5.15.9-py311h5a77453_5.conda
@@ -2223,8 +2215,6 @@ environments:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
     - url: https://conda.anaconda.org/neutrons/
-    options:
-      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -2467,8 +2457,6 @@ environments:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
     - url: https://conda.anaconda.org/neutrons/
-    options:
-      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -2595,8 +2583,6 @@ environments:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
     - url: https://conda.anaconda.org/neutrons/
-    options:
-      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/gh-2.86.0-h76a2195_0.conda
@@ -2604,8 +2590,6 @@ environments:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
     - url: https://conda.anaconda.org/neutrons/
-    options:
-      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -11900,16 +11884,16 @@ packages:
   license_family: MIT
   size: 25093
   timestamp: 1732782523102
-- conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.3.2-pyhcf101f3_0.conda
-  sha256: 417fba4783e528ee732afa82999300859b065dc59927344b4859c64aae7182de
-  md5: 3687cc0b82a8b4c17e1f0eb7e47163d5
+- conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.2.5-pyhcf101f3_0.conda
+  sha256: 6814b61b94e95ffc45ec539a6424d8447895fef75b0fec7e1be31f5beee883fb
+  md5: 6c8979be6d7a17692793114fa26916e8
   depends:
   - python >=3.10
   - python
   license: MIT
   license_family: MIT
-  size: 110893
-  timestamp: 1769003998136
+  size: 104044
+  timestamp: 1758436411254
 - conda: https://conda.anaconda.org/conda-forge/linux-64/pyqt-5.15.9-py311hf0fb5b6_5.conda
   sha256: 74fcdb8772c7eaf654b32922f77d9a8a1350b3446111c69a32ba4d15be74905a
   md5: ec7e45bc76d9d0b69a74a2075932b8e8
