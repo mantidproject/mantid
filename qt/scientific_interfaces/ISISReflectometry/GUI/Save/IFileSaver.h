@@ -40,9 +40,10 @@ private:
   bool m_saveToSingleFile;
 };
 
-class InvalidSavePath : public std::runtime_error {
+class MANTIDQT_ISISREFLECTOMETRY_DLL InvalidSavePath : public std::runtime_error {
 public:
   explicit InvalidSavePath(std::string const &path);
+  ~InvalidSavePath() override;
   std::string const &path() const;
 
 private:
@@ -57,9 +58,10 @@ inline bool operator==(const FileFormatOptions &lhs, const FileFormatOptions &rh
 
 inline bool operator!=(const FileFormatOptions &lhs, const FileFormatOptions &rhs) { return !(lhs == rhs); }
 
-class InvalidWorkspaceName : public std::runtime_error {
+class MANTIDQT_ISISREFLECTOMETRY_DLL InvalidWorkspaceName : public std::runtime_error {
 public:
   explicit InvalidWorkspaceName(std::string const &path);
+  ~InvalidWorkspaceName() override;
   std::string const &name() const;
 
 private:
