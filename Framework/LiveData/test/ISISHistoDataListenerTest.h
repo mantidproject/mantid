@@ -22,7 +22,12 @@
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
+
 #include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <memory>
+#include <thread>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -45,6 +50,8 @@ public:
 
 class ISISHistoDataListenerTest : public CxxTest::TestSuite {
 public:
+  static constexpr std::chrono::seconds WATCHDOG_TIMEOUT{10};
+
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ISISHistoDataListenerTest *createSuite() { return new ISISHistoDataListenerTest(); }
@@ -52,15 +59,33 @@ public:
 
   ISISHistoDataListenerTest() { Mantid::API::FrameworkManager::Instance(); }
 
+  void setUp() override {
+    m_dae.reset(); // no DAE yet
+    m_timedOut = false;
+    m_watchdog = std::thread([this] {
+      std::this_thread::sleep_for(WATCHDOG_TIMEOUT);
+      auto *dae = m_dae.get();
+      if (dae && dae->isRunning()) { // optional guard
+        dae->cancel();               // safe, non-signal context
+        m_timedOut = true;
+      }
+    });
+  }
+
+  void tearDown() override {
+    if (m_watchdog.joinable())
+      m_watchdog.join();
+    m_dae.reset();
+  }
+
   void test_Receiving_data() {
-// cannot make it work for linux
-#ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
-    FakeISISHistoDAE dae;
-    dae.initialize();
-    dae.setProperty("NPeriods", 1);
-    auto res = dae.executeAsync();
+    m_dae = std::make_unique<FakeISISHistoDAE>();
+    m_dae->initialize();
+    m_dae->setProperty("NPeriods", 1);
+    auto res = m_dae->executeAsync();
+    Poco::Thread::sleep(100); // IMPORTANT: wait for the DAE to come up, before trying to connect to it!
 
     FakeAlgorithm alg;
     alg.declareProperty(std::make_unique<Kernel::ArrayProperty<specnum_t>>("SpectraList", ""));
@@ -69,7 +94,8 @@ public:
     specs.assign(s, s + 11);
     alg.setProperty("SpectraList", specs);
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg);
+    Mantid::API::ILiveListener_sptr listener;
+    TS_ASSERT_THROWS_NOTHING(listener = LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg));
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -80,8 +106,6 @@ public:
     // TS_ASSERT( ws );
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 11);
     TS_ASSERT_EQUALS(ws->blocksize(), 30);
-
-    dae.cancel();
 
     TS_ASSERT_EQUALS(ws->x(0).size(), 31);
     TS_ASSERT_EQUALS(ws->x(0)[0], 10000);
@@ -129,22 +153,22 @@ public:
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 4);
 
+    m_dae->cancel();
     res.wait();
-#else
-    TS_ASSERT(true);
-#endif
+    TS_ASSERT(!m_timedOut); // fail explicitly if we only finished via watchdog
   }
 
   void test_Receiving_multiperiod_data() {
-#ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
-    FakeISISHistoDAE dae;
-    dae.initialize();
-    dae.setProperty("NPeriods", 2);
-    auto res = dae.executeAsync();
+    m_dae = std::make_unique<FakeISISHistoDAE>();
+    m_dae->initialize();
+    m_dae->setProperty("NPeriods", 2);
+    auto res = m_dae->executeAsync();
+    Poco::Thread::sleep(100); // IMPORTANT: wait for the DAE to come up, before trying to connect to it!
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true);
+    Mantid::API::ILiveListener_sptr listener;
+    TS_ASSERT_THROWS_NOTHING(listener = LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true));
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -233,22 +257,20 @@ public:
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 4);
 
-    dae.cancel();
+    m_dae->cancel();
     res.wait();
-#else
-    TS_ASSERT(true);
-#endif
+    TS_ASSERT(!m_timedOut); // fail explicitly if we only finished via watchdog
   }
 
   void test_Receiving_selected_periods() {
-#ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
-    FakeISISHistoDAE dae;
-    dae.initialize();
-    dae.setProperty("NSpectra", 30);
-    dae.setProperty("NPeriods", 4);
-    auto res = dae.executeAsync();
+    m_dae = std::make_unique<FakeISISHistoDAE>();
+    m_dae->initialize();
+    m_dae->setProperty("NSpectra", 30);
+    m_dae->setProperty("NPeriods", 4);
+    auto res = m_dae->executeAsync();
+    Poco::Thread::sleep(100); // IMPORTANT: wait for the DAE to come up, before trying to connect to it!
 
     FakeAlgorithm alg;
     alg.declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
@@ -257,7 +279,8 @@ public:
     periods[1] = 3;
     alg.setProperty("PeriodList", periods);
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg);
+    Mantid::API::ILiveListener_sptr listener;
+    TS_ASSERT_THROWS_NOTHING(listener = LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg));
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -280,23 +303,21 @@ public:
     TS_ASSERT_EQUALS(ws->y(2)[5], 2003);
     TS_ASSERT_EQUALS(ws->y(2)[29], 2003);
 
-    dae.cancel();
+    m_dae->cancel();
     res.wait();
-#else
-    TS_ASSERT(true);
-#endif
+    TS_ASSERT(!m_timedOut); // fail explicitly if we only finished via watchdog
   }
 
   void test_Receiving_selected_monitors() {
-#ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
-    FakeISISHistoDAE dae;
-    dae.initialize();
-    dae.setProperty("NSpectra", 10);
-    dae.setProperty("NPeriods", 4);
-    dae.setProperty("NBins", 20);
-    auto res = dae.executeAsync();
+    m_dae = std::make_unique<FakeISISHistoDAE>();
+    m_dae->initialize();
+    m_dae->setProperty("NSpectra", 10);
+    m_dae->setProperty("NPeriods", 4);
+    m_dae->setProperty("NBins", 20);
+    auto res = m_dae->executeAsync();
+    Poco::Thread::sleep(100); // IMPORTANT: wait for the DAE to come up, before trying to connect to it!
 
     FakeAlgorithm alg;
     alg.declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
@@ -306,7 +327,8 @@ public:
     // NSpectra+2, NSpectra+2
     alg.setProperty("SpectraList", "11-13");
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg);
+    Mantid::API::ILiveListener_sptr listener;
+    TS_ASSERT_THROWS_NOTHING(listener = LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg));
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -333,23 +355,21 @@ public:
     TS_ASSERT_EQUALS(ws->y(2)[5], 2013);
     TS_ASSERT_EQUALS(ws->y(2)[29], 2013);
 
-    dae.cancel();
+    m_dae->cancel();
     res.wait();
-#else
-    TS_ASSERT(true);
-#endif
+    TS_ASSERT(!m_timedOut); // fail explicitly if we only finished via watchdog
   }
 
   void test_invalid_spectra_numbers() {
-#ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
-    FakeISISHistoDAE dae;
-    dae.initialize();
-    dae.setProperty("NSpectra", 10);
-    dae.setProperty("NPeriods", 4);
-    dae.setProperty("NBins", 20);
-    auto res = dae.executeAsync();
+    m_dae = std::make_unique<FakeISISHistoDAE>();
+    m_dae->initialize();
+    m_dae->setProperty("NSpectra", 10);
+    m_dae->setProperty("NPeriods", 4);
+    m_dae->setProperty("NBins", 20);
+    auto res = m_dae->executeAsync();
+    Poco::Thread::sleep(100); // IMPORTANT: wait for the DAE to come up, before trying to connect to it!
 
     FakeAlgorithm alg;
     alg.declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
@@ -359,7 +379,8 @@ public:
     // NSpectra+2, NSpectra+2
     alg.setProperty("SpectraList", "14-17");
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg);
+    Mantid::API::ILiveListener_sptr listener;
+    TS_ASSERT_THROWS_NOTHING(listener = LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg));
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -367,21 +388,19 @@ public:
 
     TS_ASSERT_THROWS(auto outWS = listener->extractData(), const std::invalid_argument &);
 
-    dae.cancel();
+    m_dae->cancel();
     res.wait();
-#else
-    TS_ASSERT(true);
-#endif
+    TS_ASSERT(!m_timedOut); // fail explicitly if we only finished via watchdog
   }
 
   void test_no_period() {
-#ifdef _WIN32
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
-    FakeISISHistoDAE dae;
-    dae.initialize();
-    dae.setProperty("NPeriods", 4);
-    auto res = dae.executeAsync();
+    m_dae = std::make_unique<FakeISISHistoDAE>();
+    m_dae->initialize();
+    m_dae->setProperty("NPeriods", 4);
+    auto res = m_dae->executeAsync();
+    Poco::Thread::sleep(100); // IMPORTANT: wait for the DAE to come up, before trying to connect to it!
 
     FakeAlgorithm alg;
     alg.declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
@@ -394,10 +413,13 @@ public:
                          Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg),
                      const std::invalid_argument &);
 
-    dae.cancel();
+    m_dae->cancel();
     res.wait();
-#else
-    TS_ASSERT(true);
-#endif
+    TS_ASSERT(!m_timedOut); // fail explicitly if we only finished via watchdog
   }
+
+private:
+  std::unique_ptr<FakeISISHistoDAE> m_dae;
+  std::thread m_watchdog;
+  std::atomic<bool> m_timedOut{false};
 };

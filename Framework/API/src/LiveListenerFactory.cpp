@@ -95,18 +95,19 @@ std::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const Kernel::Liv
     // string it gets is badly formed, or it can't successfully look up the
     // server given, or .......
     // Just catch the base class exception
-    catch (const Poco::Exception &e) {
+    catch (Poco::Exception &pocoEx) {
+      // log the `Poco::Exception`, then re-wrap it as a `std::runtime_error`
       std::stringstream ss;
-      ss << "Unable to connect listener [" << info.listener() << "] to [" << info.address() << "]: " << e.what();
-
+      ss << "Unable to connect listener [" << info.listener() << "] to [" << info.address()
+         << "]: " << pocoEx.displayText();
       g_log.debug(ss.str());
       throw std::runtime_error(ss.str());
     } catch (const std::exception &e) {
+      // log the `std::exception`-based exception, but do NOT re-wrap it
       std::stringstream ss;
       ss << "Unable to connect listener [" << info.listener() << "] to [" << info.address() << "]: " << e.what();
-
       g_log.debug(ss.str());
-      throw std::runtime_error(ss.str());
+      throw;
     }
   }
 
