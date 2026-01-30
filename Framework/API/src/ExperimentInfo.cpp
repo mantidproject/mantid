@@ -640,11 +640,22 @@ double ExperimentInfo::getEFixed(const std::shared_ptr<const Geometry::IDetector
   return getEFixedGivenEMode(detector, emode);
 }
 
+double ExperimentInfo::getEFixed(const Geometry::IDetector *detector) const {
+  populateIfNotLoaded();
+  Kernel::DeltaEMode::Type emode = getEMode();
+  return getEFixedGivenEMode(detector, emode);
+}
+
 double ExperimentInfo::getEFixedForIndirect(const std::shared_ptr<const Geometry::IDetector> &detector,
+                                            const std::vector<std::string> &parameterNames) const {
+  return getEFixedForIndirect(detector.get(), parameterNames);
+}
+
+double ExperimentInfo::getEFixedForIndirect(const Geometry::IDetector *detector,
                                             const std::vector<std::string> &parameterNames) const {
   double efixed = 0.;
   for (auto &parameterName : parameterNames) {
-    Parameter_sptr par = constInstrumentParameters().getRecursive(detector.get(), parameterName);
+    Parameter_sptr par = constInstrumentParameters().getRecursive(detector, parameterName);
     if (par) {
       efixed = par->value<double>();
     } else {
@@ -677,6 +688,11 @@ double ExperimentInfo::getEFixedForIndirect(const std::shared_ptr<const Geometry
  * @return The current efixed value
  */
 double ExperimentInfo::getEFixedGivenEMode(const std::shared_ptr<const Geometry::IDetector> &detector,
+                                           const Kernel::DeltaEMode::Type emode) const {
+  return getEFixedGivenEMode(detector.get(), emode);
+}
+
+double ExperimentInfo::getEFixedGivenEMode(const Geometry::IDetector *detector,
                                            const Kernel::DeltaEMode::Type emode) const {
   if (emode == Kernel::DeltaEMode::Direct) {
     double efixed = 0.;
