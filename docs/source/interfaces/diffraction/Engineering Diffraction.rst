@@ -115,16 +115,16 @@ in the base directory:
 
 `<CHOSEN_OUTPUT_DIRECTORY>/User/<RB_NUMBER>/Calibration/`
 
-In the case the ROI being Texture20 or Texture30 the files are saved to only one directory (the latter if an RB number
-is specified, otherwise the former) - this is to limit the number of files being written.
+In the case the ROI being ``Texture20`` or ``Texture30`` the files are saved to only one directory (the latter if an RB
+number is specified, otherwise the former) - this is to limit the number of files being written.
 
 Cropping
 ++++++++
 
 The interface also provides the ability to restrict a new calibration to a particular region of interest:
 one of the two banks on ENGIN-X, a custom grouping file (``.cal`` or ``.xml`` files), a list of spectra (referred to as
-cropped), Texture20 grouping (consists of 10 groupings per detector bank - 20 in total) and Texture30 (15 groupings per
-detector bank - 30 in total).
+cropped), ``Texture20`` grouping (consists of 10 groupings per detector bank - 20 in total) and ``Texture30`` (15
+groupings per detector bank - 30 in total).
 
 Parameters
 ++++++++++
