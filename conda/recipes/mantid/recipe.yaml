@@ -61,7 +61,6 @@ requirements:
         - lib3mf
     - if: osx or linux
       then:
-        - jemalloc  ${{ jemalloc }}
         - libopenblas ${{ libopenblas }}
   run:
     - ${{ pin_compatible("gsl", upper_bound="x.x") }}
@@ -94,9 +93,6 @@ requirements:
     - if: win
       then:
         - lib3mf
-    - if: osx or linux
-      then:
-        - jemalloc ${{ jemalloc }}
   run_exports:
     - ${{ pin_subpackage('mantid', upper_bound='x.x.x') }}
   run_constraints:
