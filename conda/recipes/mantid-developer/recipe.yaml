@@ -74,7 +74,6 @@ requirements:
     - pre-commit>=4.0
     - if: linux
       then:
-        - jemalloc ${{ jemalloc }}
         - lz4
         - pystack
         - qt-gtk-platformtheme

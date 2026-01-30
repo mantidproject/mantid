@@ -126,7 +126,6 @@ joblib = ">=1.5.2,<2"
 pyparsing = "<3.3.0"
 
 [target.linux-64.dependencies]
-jemalloc = "==5.2.0"
 gxx_linux-64 = "13.*"
 xorg-libxcomposite = ">=0.4.5"
 xorg-libxcursor = ">=1.2.0"
