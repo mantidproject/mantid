@@ -7,6 +7,7 @@
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/IPropertyManager.h"
 
 using namespace Mantid::Kernel;
@@ -17,6 +18,9 @@ namespace {
 /// static logger
 Kernel::Logger g_log("SplittersWorkspace");
 } // namespace
+
+DECLARE_WORKSPACE(SplittersWorkspace)
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
