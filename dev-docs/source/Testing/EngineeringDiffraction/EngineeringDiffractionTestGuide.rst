@@ -98,12 +98,9 @@ Focus
     - ENGINX_305738_305721_all_banks_TOF.gss
     - ENGINX_305738_305721_bank_1_dSpacing.nxs
     - ENGINX_305738_305721_bank_1_TOF.nxs
-    - ENGINX_305738_305721_bank_2_dSpacing.abc
-    - ENGINX_305738_305721_bank_2_dSpacing.gss
     - ENGINX_305738_305721_bank_2_dSpacing.nxs
-    - ENGINX_305738_305721_bank_2_TOF.abc
-    - ENGINX_305738_305721_bank_2_TOF.gss
     - ENGINX_305738_305721_bank_2_TOF.nxs
+    - CombinedFiles/ENGINX_305761_236516_bank_dSpacing.nxs
 
 7. There should also be a ``CombinedFiles`` folder which should contain:
 
@@ -266,10 +263,10 @@ This tests the removal of focused runs from the ``Fitting`` tab.
 1. Load multiple runs using the ``Browse`` button. This should take you to a folder called "`Focus`" containing `.nxs` files that have been previously generated from the ``Focus`` group of the ``Run Processing`` tab. Select multiple files and click on ``Open``
 
 2. Having loaded multiple runs, select a row in the UI table and then click the ``Remove Selected`` button below the table.
-   The row should be removed, if the run was plotted it will disappear from the plot and there should be one less row in each of the table workspaces inside the "_logs" workspace group with each row corresponding to the run in the same row of the UI table.
+   The row should be removed, if the run was plotted it will disappear from the plot and there should be one less row in each of the table workspaces inside the "_logs_Fitting" workspace group with each row corresponding to the run in the same row of the UI table.
    The workspaces called "ENGINX\_...._TOF" and "ENGINX\_...._TOG_bgsub" will be deleted from the ADS
 
-3. Try clicking the ``Remove All`` button, the UI table should be empty and the workspace group with name ending "_logs" should no longer be present.
+3. Try clicking the ``Remove All`` button, the UI table should be empty and the workspace group with name ending "_logs_Fitting" should no longer be present.
 
 4. Try loading in a run again, the UI should still be able to access the workspace and remember the log values - check there are no calls to ``AverageLogData`` in the log (should be visible when log level is ``Notice``).
 
