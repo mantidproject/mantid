@@ -47,6 +47,7 @@ from mantid.dataobjects import Workspace2D
 from mantid import UsageService, ConfigService
 from mantid.kernel import FeatureType
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
+from mantidqt.utils.qt.qappthreadcall import run_on_qapp_thread
 
 from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
@@ -109,6 +110,7 @@ class WorkspaceListWidget(QListWidget):
         event.acceptProposedAction()
 
 
+@run_on_qapp_thread()
 class FullInstrumentViewWindow(QMainWindow):
     """View for the Instrument View window. Contains the 3D view, the projection view, boxes showing information about the selected
     detector, and a line plot of selected detector(s)"""

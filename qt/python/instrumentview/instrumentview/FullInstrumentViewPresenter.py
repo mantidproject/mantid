@@ -17,7 +17,6 @@ from mantid import mtd
 from mantid.kernel import logger, ConfigService
 from mantid.simpleapi import AnalysisDataService
 from mantidqt.io import open_a_file_dialog
-from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
@@ -149,31 +148,29 @@ class FullInstrumentViewPresenter:
         self.set_view_contour_limits()
 
     def set_view_contour_limits(self) -> None:
-        QAppThreadCall(self._view.set_plotter_scalar_bar_range)(self._model.counts_limits, self._counts_label)
+        self._view.set_plotter_scalar_bar_range(self._model.counts_limits, self._counts_label)
 
     def update_plotter(self) -> None:
         """Update the projection based on the selected option."""
-        self._model.projection_type = QAppThreadCall(self._view.current_selected_projection)()
+        self._model.projection_type = self._view.current_selected_projection()
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter()
             self.update_detector_picker()
             self.on_peaks_workspace_selected()
 
     def _update_view_main_plotter(self):
-        QAppThreadCall(self._view.clear_main_plotter)()
+        self._view.clear_main_plotter()
 
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._detector_mesh[self._counts_label] = self._model.detector_counts
-        QAppThreadCall(self._view.add_detector_mesh)(
-            self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label
-        )
+        self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
 
         self._pickable_mesh = self.create_poly_data_mesh(self._model.detector_positions)
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
-        QAppThreadCall(self._view.add_pickable_mesh)(self._pickable_mesh, scalars=self._visible_label)
+        self._view.add_pickable_mesh(self._pickable_mesh, scalars=self._visible_label)
 
         self._masked_mesh = self.create_poly_data_mesh(self._model.masked_positions)
-        QAppThreadCall(self._view.add_masked_mesh)(self._masked_mesh)
+        self._view.add_masked_mesh(self._masked_mesh)
 
         monitor_mesh = self._create_and_add_monitor_mesh()
 
@@ -186,13 +183,13 @@ class FullInstrumentViewPresenter:
         if monitor_mesh is not None:
             monitor_mesh.transform(self._transform, inplace=True)
 
-        QAppThreadCall(self._view.enable_or_disable_mask_widgets)()
-        QAppThreadCall(self._view.enable_or_disable_aspect_ratio_box)()
+        self._view.enable_or_disable_mask_widgets()
+        self._view.enable_or_disable_aspect_ratio_box()
         self.set_view_contour_limits()
         self.set_view_integration_limits()
 
-        QAppThreadCall(self._view.cache_camera_position)()
-        QAppThreadCall(self._view.reset_camera)()
+        self._view.cache_camera_position()
+        self._view.reset_camera()
 
     def _update_transform(self) -> None:
         if not self._model.is_2d_projection or self._view.is_maintain_aspect_ratio_checkbox_checked():
@@ -259,7 +256,7 @@ class FullInstrumentViewPresenter:
                 selected_mask = selected_mesh.point_data["SelectedPoints"].view(bool)
                 self.update_picked_detectors(selected_mask)
 
-            QAppThreadCall(self._view.enable_rectangle_picking)(self._model.is_2d_projection, callback=rectangle_picked)
+            self._view.enable_rectangle_picking(self._model.is_2d_projection, callback=rectangle_picked)
             self._peak_interaction_status = PeakInteractionStatus.Disabled
             self._update_peak_buttons()
         else:
@@ -272,7 +269,7 @@ class FullInstrumentViewPresenter:
                 picked_mask[point_index] = True
                 self.update_picked_detectors(picked_mask)
 
-            QAppThreadCall(self._view.enable_point_picking)(self._model.is_2d_projection, callback=point_picked)
+            self._view.enable_point_picking(self._model.is_2d_projection, callback=point_picked)
 
     def update_picked_detectors(self, picked_mask: np.ndarray) -> None:
         if not np.any(picked_mask):
@@ -283,24 +280,24 @@ class FullInstrumentViewPresenter:
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
         self._peak_interaction_status = PeakInteractionStatus.Disabled
-        QAppThreadCall(self._view.remove_peak_cursor_from_lineplot)()
+        self._view.remove_peak_cursor_from_lineplot()
         self._update_peak_buttons()
 
     def _on_add_mask_clicked(self) -> None:
-        implicit_function = QAppThreadCall(self._view.get_current_widget_implicit_function)()
+        implicit_function = self._view.get_current_widget_implicit_function()
         if not implicit_function:
             return
         mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points]
         new_key = self._model.add_new_detector_mask(mask)
-        QAppThreadCall(self._view.set_new_mask_key)(new_key)
+        self._view.set_new_mask_key(new_key)
 
     def on_add_mask_clicked(self) -> None:
         self._callback_queue.put((self._on_add_mask_clicked, ()))
 
     def _on_mask_item_selected(self) -> None:
-        self._model.apply_detector_masks(QAppThreadCall(self._view.selected_masks)())
+        self._model.apply_detector_masks(self._view.selected_masks())
         self.update_plotter()
-        self._update_line_plot_ws_and_draw(QAppThreadCall(self._view.current_selected_unit)())
+        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
         self._update_peak_buttons()
 
     def on_mask_item_selected(self) -> None:
@@ -321,7 +318,7 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_overwrite_mask_clicked, ()))
 
     def _on_clear_masks_clicked(self) -> None:
-        QAppThreadCall(self._view.clear_mask_list)()
+        self._view.clear_mask_list()
         self._model.clear_stored_masks()
         self._on_mask_item_selected()
 
@@ -329,7 +326,7 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_clear_masks_clicked, ()))
 
     def _reload_mask_workspaces(self) -> None:
-        QAppThreadCall(self._view.refresh_mask_ws_list)()
+        self._view.refresh_mask_ws_list()
         self.on_mask_item_selected()
 
     def mask_workspaces_in_ads(self) -> list[str]:
@@ -339,18 +336,18 @@ class FullInstrumentViewPresenter:
         return self._model.cached_masks_keys
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
-        self._model.extract_spectra_for_line_plot(unit, QAppThreadCall(self._view.sum_spectra_selected)())
-        QAppThreadCall(self._view.show_plot_for_detectors)(self._model.line_plot_workspace)
-        QAppThreadCall(self._view.set_selected_detector_info)(self._model.picked_detectors_info_text())
+        self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
+        self._view.show_plot_for_detectors(self._model.line_plot_workspace)
+        self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
         self._update_relative_detector_angle()
         self._update_peaks_workspaces()
         self.refresh_lineplot_peaks()
 
     def _update_relative_detector_angle(self) -> None:
         if len(self._model.picked_detector_ids) != 2:
-            QAppThreadCall(self._view.set_relative_detector_angle)(None)
+            self._view.set_relative_detector_angle(None)
         else:
-            QAppThreadCall(self._view.set_relative_detector_angle)(self._model.relative_detector_angle())
+            self._view.set_relative_detector_angle(self._model.relative_detector_angle())
 
     def on_clear_selected_detectors_clicked(self) -> None:
         self.update_picked_detectors(np.array([]))
@@ -370,12 +367,12 @@ class FullInstrumentViewPresenter:
         return rgba
 
     def _reload_peaks_workspaces(self):
-        QAppThreadCall(self._view.refresh_peaks_ws_list)()
+        self._view.refresh_peaks_ws_list()
         self.on_peaks_workspace_selected()
 
     def _delete_workspace_callback(self, ws_name):
         if self._model.workspace.name() == ws_name:
-            QAppThreadCall(self._view.close)()
+            self._view.close()
             logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
         else:
             self._reload_peaks_workspaces()
@@ -397,7 +394,7 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._rename_workspace_callback, (ws_old_name, ws_new_name)))
 
     def clear_workspace_callback(self):
-        QAppThreadCall(self._view.close)()
+        self._view.close()
 
     def _replace_workspace_callback(self, ws_name, ws):
         if ws_name in self.peaks_workspaces_in_ads():
@@ -449,11 +446,11 @@ class FullInstrumentViewPresenter:
         self._peaks_grouped_by_ws = peaks_grouped_by_ws
 
     def on_peaks_workspace_selected(self) -> None:
-        self._model.set_peaks_workspaces(QAppThreadCall(self._view.selected_peaks_workspaces)())
-        QAppThreadCall(self._view.clear_overlay_meshes)()
+        self._model.set_peaks_workspaces(self._view.selected_peaks_workspaces())
+        self._view.clear_overlay_meshes()
         self._update_peaks_workspaces()
         self.refresh_lineplot_peaks()
-        QAppThreadCall(self._view.refresh_peaks_ws_list_colours)()
+        self._view.refresh_peaks_ws_list_colours()
         if len(self._peaks_grouped_by_ws) == 0:
             return
         # Keeping the points from each workspace separate so we can colour them differently
@@ -475,22 +472,22 @@ class FullInstrumentViewPresenter:
             # Plot the peaks and their labels on the projection
             if len(projected_points) > 0:
                 transformed_points = self._transform_vectors_with_matrix(projected_points, self._transform)
-                QAppThreadCall(self._view.plot_overlay_mesh)(transformed_points, labels, ws_peaks.colour)
+                self._view.plot_overlay_mesh(transformed_points, labels, ws_peaks.colour)
 
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
-        QAppThreadCall(self._view.clear_lineplot_overlays)()
+        self._view.clear_lineplot_overlays()
 
         for ws_peaks in self._peaks_grouped_by_ws:
             x_values = []
             labels = []
             for peak in ws_peaks.detector_peaks:
                 if peak.spectrum_no in self._model.picked_spectrum_nos:
-                    x_values += [p.location_in_unit(QAppThreadCall(self._view.current_selected_unit)()) for p in peak.peaks]
+                    x_values += [p.location_in_unit(self._view.current_selected_unit()) for p in peak.peaks]
                     labels += [p.label for p in peak.peaks]
             if len(x_values) > 0:
-                QAppThreadCall(self._view.plot_lineplot_overlay)(x_values, labels, ws_peaks.colour)
-        QAppThreadCall(self._view.redraw_lineplot)()
+                self._view.plot_lineplot_overlay(x_values, labels, ws_peaks.colour)
+        self._view.redraw_lineplot()
 
     def on_save_xml_mask_clicked(self):
         filename = open_a_file_dialog(
@@ -511,30 +508,30 @@ class FullInstrumentViewPresenter:
         x_in_workspace_unit = self._model.convert_units(self._view.current_selected_unit(), self._model.workspace_x_unit, 0, x)
         if self._peak_interaction_status == PeakInteractionStatus.Adding:
             peaks_ws = self._model.add_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
-            QAppThreadCall(self._view.refresh_peaks_ws_list)()
-            QAppThreadCall(self._view.select_peaks_workspace)(peaks_ws)
+            self._view.refresh_peaks_ws_list()
+            self._view.select_peaks_workspace(peaks_ws)
         elif self._peak_interaction_status == PeakInteractionStatus.Deleting:
             self._model.delete_peak(x_in_workspace_unit)
         else:
             raise RuntimeError("Unknown peak operation")
         self._peak_interaction_status = PeakInteractionStatus.Disabled
-        QAppThreadCall(self._view.remove_peak_cursor_from_lineplot)()
+        self._view.remove_peak_cursor_from_lineplot()
         self._update_peak_buttons()
 
     def _update_peak_buttons(self) -> None:
-        QAppThreadCall(self._view.set_add_peak_button_enabled)(
+        self._view.set_add_peak_button_enabled(
             len(self._model.picked_detector_ids) == 1 and self._peak_interaction_status != PeakInteractionStatus.Adding
         )
-        QAppThreadCall(self._view.set_delete_peak_button_enabled)(
+        self._view.set_delete_peak_button_enabled(
             self._view.has_any_peak_overlays() and self._peak_interaction_status != PeakInteractionStatus.Adding
         )
-        QAppThreadCall(self._view.set_delete_all_selected_peaks_button_enabled)(
+        self._view.set_delete_all_selected_peaks_button_enabled(
             len(self._model.picked_detector_ids) > 0 and self._peak_interaction_status != PeakInteractionStatus.Adding
         )
 
     def _on_peak_clicked_in_lineplot(self, status: PeakInteractionStatus) -> None:
         self._peak_interaction_status = status
-        QAppThreadCall(self._view.add_peak_cursor_to_lineplot)()
+        self._view.add_peak_cursor_to_lineplot()
         self._update_peak_buttons()
 
     def on_delete_peak_clicked(self) -> None:
