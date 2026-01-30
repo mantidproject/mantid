@@ -102,6 +102,7 @@ requirements:
   run_constraints:
     - matplotlib-base ${{ matplotlib }}
     - pillow ${{ pillow }}
+    - pyparsing ${{ pyparsing }}
     - pystog ${{ pystog }}
 
 tests:
