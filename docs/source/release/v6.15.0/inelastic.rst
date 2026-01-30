@@ -12,7 +12,7 @@ New Features
 
 Bugfixes
 --------
-
+- (`#40764 <https://github.com/mantidproject/mantid/pull/40764>`_) Fix a bug in the ``Stretch`` tab of  :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` that caused Mantid to crash when trying to run the algorithm from the interface using the ``quickbayes`` option.
 
 Algorithms
 ----------
