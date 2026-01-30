@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.Detectors import DetectorInfo
+from instrumentview.Globals import CurrentTab
 from instrumentview.Peaks.Peak import Peak
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Projections.SphericalProjection import SphericalProjection
@@ -13,7 +14,7 @@ from instrumentview.Projections.SideBySide import SideBySide
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.ConvertUnitsCalculator import ConvertUnitsCalculator
 
-from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace
+from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace, GroupingWorkspace
 from mantid.simpleapi import (
     CreateDetectorTable,
     ExtractSpectra,
@@ -25,10 +26,12 @@ from mantid.simpleapi import (
     ExtractMaskToTable,
     SaveMask,
     MaskDetectors,
-    RenameWorkspace,
     CloneWorkspace,
     CreatePeaksWorkspace,
     AddPeak,
+    CreateGroupingWorkspace,
+    SaveDetectorsGrouping,
+    DeleteWorkspace,
 )
 from mantid.api import MatrixWorkspace
 from itertools import groupby
@@ -85,6 +88,7 @@ class FullInstrumentViewModel:
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
         self._mask_ws, _ = ExtractMask(self._workspace, StoreInADS=False)
+        self._roi_ws = self._mask_ws.clone(StoreInADS=False)
         self._is_masked_in_ws = self._mask_ws.extractY().flatten().astype(bool)
         # For computing current mask, detached from the permanent mask in ws
         self._is_masked = self._is_masked_in_ws
@@ -94,11 +98,14 @@ class FullInstrumentViewModel:
         self._counts = np.zeros_like(self._detector_ids)
         self._counts_limits = (0, 0)
         self._detector_is_picked = np.full(len(self._detector_ids), False)
+        self._current_detector_groupings = np.zeros_like(self._detector_ids)
+        self._point_picked_detectors = np.full(len(self._detector_ids), False)
 
         self._projection_type = ProjectionType.THREE_D
         self._cached_projections_map = {}
 
         self._cached_masks_map = {}
+        self._cached_rois_map = {}
 
         # Get min and max integration values
         if self._workspace.isRaggedWorkspace():
@@ -157,15 +164,15 @@ class FullInstrumentViewModel:
 
     @property
     def picked_detector_ids(self) -> np.ndarray:
-        return self._detector_ids[self._detector_is_picked]
+        return self._detector_ids[self.is_pickable & self._detector_is_picked]
 
     @property
     def picked_spectrum_nos(self) -> np.ndarray:
-        return self._spectrum_nos[self._is_valid & self._detector_is_picked]
+        return self._spectrum_nos[self.is_pickable & self._detector_is_picked]
 
     @property
     def picked_workspace_indices(self) -> np.ndarray:
-        return self._workspace_indices[self._detector_is_picked]
+        return self._workspace_indices[self.is_pickable & self._detector_is_picked]
 
     @property
     def detector_counts(self) -> np.ndarray:
@@ -186,9 +193,16 @@ class FullInstrumentViewModel:
 
     @property
     def mask_ws(self) -> MatrixWorkspace:
+        # Don't need to check detector IDs because ExtractMask outputs same order of det ids
         for i, v in enumerate(self._is_masked):
             self._mask_ws.dataY(i)[:] = v
         return self._mask_ws
+
+    @property
+    def roi_ws(self) -> MatrixWorkspace:
+        for i, v in enumerate(~self._detector_is_picked):
+            self._roi_ws.dataY(i)[:] = v
+        return self._roi_ws
 
     @property
     def integration_limits(self) -> tuple[float, float]:
@@ -217,13 +231,16 @@ class FullInstrumentViewModel:
         self._counts_limits = (np.min(new_detector_counts), np.max(new_detector_counts))
         self._counts[self.is_pickable] = new_detector_counts
 
-    def negate_picked_visibility(self, mask: np.ndarray) -> None:
+    def update_point_picked_detectors(self, index: int) -> None:
         # TODO: Check which selection is quicker, mask or indices
         # NOTE: This is slightly awkard because cannot do chained mask selections
-        self._detector_is_picked[self.is_pickable] = mask ^ self._detector_is_picked[self.is_pickable]
+        global_index = np.argwhere(self.is_pickable)[index]
+        self._detector_is_picked[global_index] = ~self._detector_is_picked[global_index]
+        self._point_picked_detectors[global_index] = self._detector_is_picked[global_index]
 
-    def clear_all_picked_detectors(self) -> None:
-        self._detector_is_picked.fill(False)
+    def clear_point_picked_detectors(self) -> None:
+        self._detector_is_picked[self._point_picked_detectors] = False
+        self._point_picked_detectors.fill(False)
 
     def picked_detectors_info_text(self) -> list[DetectorInfo]:
         """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
@@ -348,15 +365,6 @@ class FullInstrumentViewModel:
         name_exported_ws = f"instrument_view_selected_spectra_{self._workspace.name()}"
         AnalysisDataService.addOrReplace(name_exported_ws, self.line_plot_workspace)
 
-    def peaks_workspaces_in_ads(self) -> list[PeaksWorkspace]:
-        ads = AnalysisDataService.Instance()
-        workspaces_in_ads = ads.retrieveWorkspaces(ads.getObjectNames())
-        return [
-            pws
-            for pws in workspaces_in_ads
-            if "PeaksWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
-        ]
-
     def set_peaks_workspaces(self, peaks_workspace_names: list[str]) -> None:
         self._selected_peaks_workspaces = AnalysisDataService.Instance().retrieveWorkspaces(peaks_workspace_names)
 
@@ -462,65 +470,163 @@ class FullInstrumentViewModel:
         q_lab = np.array([-np.sin(two_theta) * np.cos(phi), -np.sin(two_theta) * np.sin(phi), 1 - np.cos(two_theta)])
         return q_lab / np.linalg.norm(q_lab)
 
-    def add_new_detector_mask(self, new_mask: list[bool]) -> str:
-        new_key = f"Mask {len(self._cached_masks_map) + 1} (unsaved)"
-        mask_to_save = self._is_masked_in_ws.copy()
-        mask_to_save[self.is_pickable] = new_mask
-        self._cached_masks_map[new_key] = mask_to_save
-        return new_key
+    def add_new_detector_key(self, new_value: list[bool], kind: CurrentTab):
+        if kind is CurrentTab.Masking:
+            new_key = f"Mask {len(self._cached_masks_map) + 1} (unsaved)"
+            mask_to_save = self._is_masked_in_ws.copy()
+            mask_to_save[self.is_pickable] = new_value
+            self._cached_masks_map[new_key] = mask_to_save
+            return new_key
+        else:
+            new_key = f"Pick Selection {len(self._cached_rois_map) + 1} (unsaved)"
+            selection_to_save = np.zeros_like(self._workspace_indices, dtype=bool)
+            selection_to_save[self.is_pickable] = new_value
+            self._cached_rois_map[new_key] = selection_to_save
+            return new_key
 
-    def apply_detector_masks(self, mask_keys: list[str]) -> None:
-        ws_masks = [ws.extractY().flatten() for ws in self.get_mask_workspaces_in_ads() if ws.name() in mask_keys]
-        cached_masks = [self._cached_masks_map[key] for key in mask_keys if key in self._cached_masks_map.keys()]
+    def _get_boolean_masks_from_workspaces_in_ads(self, selected_keys: list[str], kind: CurrentTab):
+        ws_in_ads = (
+            self.get_workspaces_in_ads_of_type(MaskWorkspace)
+            if kind is CurrentTab.Masking
+            else self.get_workspaces_in_ads_of_type(GroupingWorkspace)
+        )
+        booleans_from_ws = []
+        for key in selected_keys:
+            for ws in ws_in_ads:
+                if not key.startswith(ws.name()):
+                    continue
 
-        if not ws_masks and not cached_masks:
-            self._is_masked = self._is_masked_in_ws
-            self._detector_is_picked[~self.is_pickable] = False
+                if kind is CurrentTab.Masking:
+                    # NOTE: This is a roundabout way of getting masked detector ids because ws.getMaskedDetectors() is much slower
+                    det_table = CreateDetectorTable(ws, PickOneDetectorID=True, StoreInADS=False, EnableLogging=False)
+                    det_ids = det_table.columnArray("Detector ID(s)")
+                    is_mask = ws.extractY().flatten().astype(bool)
+                    boolean_mask = np.isin(self._detector_ids, det_ids[is_mask])
+                else:
+                    # TODO: Figure out if using numpy arrays is faster than getDetectorIDsOfGroup
+                    # groups = ws.extractY().flatten()
+                    # boolean_mask = np.isin(self._detector_ids, det_ids[groups == int(key.split("_")[-1])])
+                    boolean_mask = np.isin(self._detector_ids, ws.getDetectorIDsOfGroup(int(key.split("_")[-1])))
+
+                booleans_from_ws.append(boolean_mask)
+        return booleans_from_ws
+
+    def apply_detector_items(self, selected_keys: list[str], kind: CurrentTab):
+        if kind is CurrentTab.Masking:
+            booleans_from_ws = self._get_boolean_masks_from_workspaces_in_ads(selected_keys, CurrentTab.Masking)
+            cached_masks = [self._cached_masks_map[key] for key in selected_keys if key in self._cached_masks_map.keys()]
+            total_items = [*booleans_from_ws, *cached_masks]
+            if not total_items:
+                self._is_masked = self._is_masked_in_ws
+                return
+            self._is_masked = np.logical_or.reduce(total_items)
+            return
+        else:
+            booleans_from_ws = self._get_boolean_masks_from_workspaces_in_ads(selected_keys, CurrentTab.Grouping)
+            cached_selections = [self._cached_rois_map[key] for key in selected_keys if key in self._cached_rois_map.keys()]
+            total_items = [self._point_picked_detectors, *booleans_from_ws, *cached_selections]
+            # Filter out empty boolean masks
+            total_items = [item for item in total_items if np.any(item)]
+            if not total_items:
+                self._detector_is_picked = self._point_picked_detectors
+                self._current_detector_groupings[self._point_picked_detectors] = 1
+                return
+            self._detector_is_picked = np.logical_or.reduce(total_items)
+            self._current_detector_groupings.fill(0)
+            for i, group in enumerate(total_items):
+                self._current_detector_groupings[group] = i + 1
             return
 
-        total_mask = np.logical_or.reduce(ws_masks + cached_masks)
-        self._is_masked = total_mask
-        self._detector_is_picked[~self.is_pickable] = False
+    def clear_stored_keys(self, kind: CurrentTab) -> None:
+        if kind is CurrentTab.Masking:
+            self._cached_masks_map.clear()
+        else:
+            self._cached_rois_map.clear()
 
-    def clear_stored_masks(self) -> None:
-        self._cached_masks_map.clear()
+    def cached_keys(self, kind: CurrentTab) -> list[str]:
+        if kind is CurrentTab.Masking:
+            return list(self._cached_masks_map.keys())
+        else:
+            return list(self._cached_rois_map.keys())
 
     @property
-    def cached_masks_keys(self) -> list[str]:
-        return list(self._cached_masks_map.keys())
+    def cached_pick_selections_keys(self) -> list[str]:
+        return list(self._cached_rois_map.keys())
 
-    def save_mask_workspace_to_ads(self) -> None:
-        for i, v in enumerate(self._is_masked):
-            self._mask_ws.dataY(i)[:] = v
+    def save_workspace_to_ads(self, kind: CurrentTab):
+        if kind is CurrentTab.Masking:
+            ws_to_save = self.mask_ws
+        else:
+            ws_to_save = self.roi_ws
 
         xmin, xmax = self._integration_limits
-        # TODO: Figure out naming convention
-        ExtractMaskToTable(self._mask_ws, Xmin=xmin, Xmax=xmax, OutputWorkspace="MaskTable")
-        CloneWorkspace(self._mask_ws, OutputWorkspace="MaskWorkspace")
+        ExtractMaskToTable(ws_to_save, Xmin=xmin, Xmax=xmax, OutputWorkspace="MaskTable")
+        CloneWorkspace(ws_to_save, OutputWorkspace="MaskWorkspace")
 
-    def save_xml_mask(self, filename) -> None:
+    def save_mask_to_xml(self, filename):
+        ws_to_save = self.mask_ws
         if not filename:
             return
         if Path(filename).suffix != ".xml":
             filename += ".xml"
-        SaveMask(self.mask_ws, OutputFile=filename)
+        SaveMask(ws_to_save, OutputFile=filename)
 
     def overwrite_mask_to_current_workspace(self) -> None:
+        ws_to_save = self.mask_ws
         # TODO: Check if copies are expensive with big workspaces
         temp_ws = CloneWorkspace(self._workspace.name(), StoreInADS=False)
         temp_ws_name = f"__instrument_view_temp_{self._workspace.name()}"
         AnalysisDataService.addOrReplace(temp_ws_name, temp_ws)
-        MaskDetectors(temp_ws_name, MaskedWorkspace=self.mask_ws)
-        RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._workspace.name())
+        MaskDetectors(temp_ws_name, MaskedWorkspace=ws_to_save)
+        AnalysisDataService.addOrReplace(self._workspace.name(), AnalysisDataService.retrieve(temp_ws_name))
 
-    def get_mask_workspaces_in_ads(self) -> list[MaskWorkspace]:
+    def get_workspaces_in_ads_of_type(self, ws_type: MaskWorkspace | GroupingWorkspace | PeaksWorkspace):
+        # TODO: Figure out how to avoid using a dictionary
+        str_types = {MaskWorkspace: "MaskWorkspace", GroupingWorkspace: "GroupingWorkspace", PeaksWorkspace: "PeaksWorkspace"}
         ads = AnalysisDataService.Instance()
         workspaces_in_ads = ads.retrieveWorkspaces(ads.getObjectNames())
         return [
             pws
             for pws in workspaces_in_ads
-            if "MaskWorkspace" in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
+            if str_types[ws_type] in str(type(pws)) and pws.getInstrument().getFullName() == self._workspace.getInstrument().getFullName()
         ]
+
+    def get_grouping_keys_from_workspaces_in_ads(self):
+        return [
+            gws.name() + f"_{i}"
+            for gws in self.get_workspaces_in_ads_of_type(GroupingWorkspace)
+            for i in range(1, gws.getGroupIDs().max() + 1)
+        ]
+
+    def save_grouping_to_ads(self):
+        grouping_name = "GroupingWorkspace"
+        grouping_ws = self._create_current_grouping_workspace(grouping_name)
+        AnalysisDataService.addOrReplace(grouping_name, grouping_ws)
+
+    def save_grouping_to_xml(self, filename):
+        if not filename:
+            return
+        if Path(filename).suffix != ".xml":
+            filename += ".xml"
+        grouping_name = "__temp_grouping_workspace_to_save"
+        grouping_ws = self._create_current_grouping_workspace(grouping_name)
+        SaveDetectorsGrouping(grouping_ws, filename)
+        DeleteWorkspace(grouping_name)
+        return
+
+    def _create_current_grouping_workspace(self, grouping_name):
+        # TODO: Ideally algorithm should use workspace when ADS hanging is fixed
+        individual_groups_strings = []
+        for i in range(1, self._current_detector_groupings.max() + 1):
+            individual_groups_strings.append("+".join([str(id) for id in self._detector_ids[self._current_detector_groupings == i]]))
+
+        CreateGroupingWorkspace(
+            InstrumentFilename=self._workspace.getInstrument().getFilename(),
+            ComponentName=self._workspace.getInstrument().getFullName(),
+            CustomGroupingString=",".join(individual_groups_strings),
+            OutputWorkspace=grouping_name,
+        )
+        return AnalysisDataService.retrieve(grouping_name)
 
     def convert_units(self, source_unit: str, target_unit: str, picked_detector_index: int, value: float) -> float:
         return self._unit_converter.convert(
