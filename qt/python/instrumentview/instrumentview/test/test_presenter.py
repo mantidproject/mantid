@@ -116,15 +116,22 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_has_unit.assert_called_once()
         self.assertEqual(self._presenter._UNIT_OPTIONS, units)
 
-    def test_model_refresh_on_correct_ws_replace(self):
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_model_refresh_on_correct_ws_replace(self, mock_update_plotter, mock_ads):
+        mock_ads_retrieve = MagicMock()
+        mock_ads.retrieve.return_value = mock_ads_retrieve
         self._model.setup = MagicMock()
-        self._presenter.update_plotter = MagicMock()
         ws_name = self._model.workspace.name()
-        self._presenter.replace_workspace_callback(ws_name, None)
+        mock_ads_retrieve.name.return_value = ws_name
+        self._presenter._replace_workspace_callback(ws_name, None)
         self._model.setup.assert_called_once()
+        mock_update_plotter.assert_called_once()
         self._mock_view.setup.reset_mock()
-        self._presenter.replace_workspace_callback("not_my_workspace", None)
+        mock_update_plotter.reset_mock()
+        self._presenter._replace_workspace_callback("not_my_workspace", None)
         self._mock_view.setup.assert_not_called()
+        mock_update_plotter.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_relative_detector_angle")
     def test_update_picked_detectors(self, mock_update_det_angle):
@@ -151,14 +158,14 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.get_current_widget_implicit_function.return_value = mock_implicit_function
         self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
         self._model.add_new_detector_key = MagicMock(return_value="mock_key")
-        self._presenter.on_add_item_clicked()
+        self._presenter._on_add_item_clicked()
         np.testing.assert_allclose(self._model.add_new_detector_key.call_args.args[0], mock_implicit_return < 0)
         self._mock_view.set_new_item_key.assert_called_once_with(CurrentTab.Grouping, "mock_key")
 
     def test_on_save_mask_to_workspace_clicked(self):
         self._mock_view.get_current_tab.return_value = CurrentTab.Masking
         self._model.save_workspace_to_ads = MagicMock()
-        self._presenter.on_save_to_workspace_clicked()
+        self._presenter._on_save_to_workspace_clicked()
         self._model.save_workspace_to_ads.assert_called_once()
         self._mock_view.on_mask_item_selected.assert_not_called()
 

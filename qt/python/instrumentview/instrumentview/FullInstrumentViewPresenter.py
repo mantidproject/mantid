@@ -8,8 +8,10 @@ import numpy as np
 import pyvista as pv
 from pyvista.plotting.opts import PickerType
 from qtpy.QtWidgets import QFileDialog
+from queue import Queue
 from typing import Optional
 from instrumentview.Globals import CurrentTab
+from threading import Thread
 from mantid import mtd
 from mantid.kernel import logger, ConfigService
 from mantid.simpleapi import AnalysisDataService
@@ -66,6 +68,24 @@ class FullInstrumentViewPresenter:
         self._visible_label = "Visible Picked"
         self._model.setup()
         self.setup()
+        self._callback_queue = Queue()
+        self._callback_stop_sentinel = object()
+        self._callback_thread = Thread(None, self._callback_worker, daemon=True)
+        self._callback_thread.start()
+
+    def _callback_worker(self):
+        while True:
+            item = self._callback_queue.get()
+            if item is self._callback_stop_sentinel:
+                self._callback_queue.task_done()
+                break
+            func, args = item
+            try:
+                func(*args)
+            except Exception as e:
+                logger.error(f"Error in callback worker: {e}")
+            finally:
+                self._callback_queue.task_done()
 
     def setup(self):
         self._view.subscribe_presenter(self)
@@ -247,11 +267,14 @@ class FullInstrumentViewPresenter:
         self._view.remove_peak_cursor_from_lineplot()
         self._update_peak_buttons()
 
-    def on_clear_point_picked_detectors_clicked(self) -> None:
+    def _on_clear_point_picked_detectors_clicked(self) -> None:
         self._model.clear_point_picked_detectors()
         self.update_picked_detectors_on_view()
 
-    def on_add_item_clicked(self) -> None:
+    def on_clear_point_picked_detectors_clicked(self) -> None:
+        self._callback_queue.put((self._on_clear_point_picked_detectors_clicked, ()))
+
+    def _on_add_item_clicked(self) -> None:
         implicit_function = self._view.get_current_widget_implicit_function()
         if not implicit_function:
             return
@@ -259,7 +282,10 @@ class FullInstrumentViewPresenter:
         new_key = self._model.add_new_detector_key(mask, self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
 
-    def on_list_item_selected(self, kind: CurrentTab) -> None:
+    def on_add_item_clicked(self) -> None:
+        self._callback_queue.put((self._on_add_item_clicked, ()))
+
+    def _on_list_item_selected(self, kind: CurrentTab) -> None:
         self._model.apply_detector_items(self._view.selected_items_in_list(kind), kind)
 
         if kind is CurrentTab.Masking:
@@ -271,34 +297,55 @@ class FullInstrumentViewPresenter:
             # NOTE: This is required explicitly
             self._view.enable_or_disable_mask_widgets()
 
-    def on_save_to_workspace_clicked(self) -> None:
+    def on_list_item_selected(self, kind: CurrentTab) -> None:
+        self._callback_queue.put((self._on_list_item_selected, (kind,)))
+
+    def _on_save_to_workspace_clicked(self) -> None:
         self._model.save_workspace_to_ads(self._view.get_current_selected_tab())
 
-    def on_apply_permanently_clicked(self) -> None:
+    def on_save_to_workspace_clicked(self) -> None:
+        self._callback_queue.put((self._on_save_to_workspace_clicked, ()))
+
+    def _on_apply_permanently_clicked(self) -> None:
         # Clear both lists before overwriting to workspace (reset of model)
         self._view.clear_item_list(CurrentTab.Masking)
         self._view.clear_item_list(CurrentTab.Grouping)
         self._model.overwrite_mask_to_current_workspace()
 
-    def on_clear_list_clicked(self) -> None:
+    def on_apply_permanently_clicked(self) -> None:
+        self._callback_queue.put((self._on_apply_permanently_clicked, ()))
+
+    def _on_clear_list_clicked(self) -> None:
         self._view.clear_item_list(self._view.get_current_selected_tab())
         self._model.clear_stored_keys(self._view.get_current_selected_tab())
         self.on_list_item_selected(self._view.get_current_selected_tab())
 
-    def on_save_mask_to_xml_clicked(self):
+    def on_clear_list_clicked(self) -> None:
+        self._callback_queue.put((self._on_clear_list_clicked, ()))
+
+    def _on_save_mask_to_xml_clicked(self):
         filename = self._get_filename_from_dialog()
         if not filename:
             return
         self._model.save_mask_to_xml(filename)
 
-    def on_save_grouping_to_ads_clicked(self):
+    def on_save_mask_to_xml_clicked(self):
+        self._callback_queue.put((self._on_save_mask_to_xml_clicked, ()))
+
+    def _on_save_grouping_to_ads_clicked(self):
         self._model.save_grouping_to_ads()
 
-    def on_save_grouping_to_xml_clicked(self):
+    def on_save_grouping_to_ads_clicked(self):
+        self._callback_queue.put((self._on_save_grouping_to_ads_clicked, ()))
+
+    def _on_save_grouping_to_xml_clicked(self):
         filename = self._get_filename_from_dialog()
         if not filename:
             return
         self._model.save_grouping_to_xml(filename)
+
+    def on_save_grouping_to_xml_clicked(self):
+        self._callback_queue.put((self._on_save_grouping_to_xml_clicked, ()))
 
     def _get_filename_from_dialog(self):
         filename = open_a_file_dialog(
@@ -360,8 +407,8 @@ class FullInstrumentViewPresenter:
         self._view.refresh_peaks_ws_list()
         self.on_peaks_workspace_selected()
 
-    def delete_workspace_callback(self, ws_name):
-        if self._model._workspace.name() == ws_name:
+    def _delete_workspace_callback(self, ws_name):
+        if self._model.workspace.name() == ws_name:
             self._view.close()
             logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
         else:
@@ -369,19 +416,26 @@ class FullInstrumentViewPresenter:
             self._reload_mask_workspaces()
             self._reload_grouping_workspaces()
 
-    def rename_workspace_callback(self, ws_old_name, ws_new_name):
+    def delete_workspace_callback(self, ws_name):
+        self._callback_queue.put((self._delete_workspace_callback, (ws_name,)))
+
+    def _rename_workspace_callback(self, ws_old_name, ws_new_name):
         if self._model._workspace.name() == ws_old_name:
             self._model._workspace = mtd[ws_new_name]
             self._model.setup()
             logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
+
         self._reload_peaks_workspaces()
         self._reload_mask_workspaces()
         self._reload_grouping_workspaces()
 
+    def rename_workspace_callback(self, ws_old_name, ws_new_name):
+        self._callback_queue.put((self._rename_workspace_callback, (ws_old_name, ws_new_name)))
+
     def clear_workspace_callback(self):
         self._view.close()
 
-    def replace_workspace_callback(self, ws_name, ws):
+    def _replace_workspace_callback(self, ws_name, ws):
         if isinstance(ws, PeaksWorkspace):
             self._reload_peaks_workspaces()
         elif isinstance(ws, MaskWorkspace):
@@ -398,12 +452,22 @@ class FullInstrumentViewPresenter:
             self._model.setup()
             self.update_plotter()
 
-    def add_workspace_callback(self, ws_name, ws):
+    def replace_workspace_callback(self, ws_name, ws):
+        self._callback_queue.put((self._replace_workspace_callback, (ws_name, ws)))
+
+    def _add_workspace_callback(self, ws_name, ws):
         self._reload_peaks_workspaces()
         self._reload_mask_workspaces()
         self._reload_grouping_workspaces()
 
+    def add_workspace_callback(self, ws_name, ws):
+        self._callback_queue.put((self._add_workspace_callback, (ws_name, ws)))
+
     def handle_close(self):
+        if hasattr(self, "_callback_queue"):
+            self._callback_queue.put(self._callback_stop_sentinel)
+            if hasattr(self, "_callback_thread"):
+                self._callback_thread.join(timeout=1)
         # The observers are unsubscribed on object deletion, it's safer to manually
         # delete the observer rather than wait for the garbage collector, because
         # we don't want stale workspace references hanging around.
@@ -475,6 +539,7 @@ class FullInstrumentViewPresenter:
         x_in_workspace_unit = self._model.convert_units(self._view.current_selected_unit(), self._model.workspace_x_unit, 0, x)
         if self._peak_interaction_status == PeakInteractionStatus.Adding:
             peaks_ws = self._model.add_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
+            self._view.refresh_peaks_ws_list()
             self._view.select_peaks_workspace(peaks_ws)
         elif self._peak_interaction_status == PeakInteractionStatus.Deleting:
             self._model.delete_peak(x_in_workspace_unit)
