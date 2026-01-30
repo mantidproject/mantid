@@ -9,23 +9,25 @@
     {%- block rootrellink %}
     <li class="nav-item nav-item-0">
       <a href="{{ pathto(root_doc) }}">{{ "Documentation" }}</a>
-      {{ reldelim1 }}
+        {{ reldelim1 }}
     </li>
     {%- endblock %}
     {% if root_doc != pagename %}
-      {%- for parent in parents %}
-        <li class="nav-item nav-item-{{ loop.index }}">
-          <a href="{{ parent.link|e }}" {% if loop.last %}{{ accesskey("U") }}{% endif %}>{{ parent.title }}</a>
-          {{ reldelim1 }}
-        </li>
-      {% endfor %}
+    {%- for parent in parents %}
+    <li class="nav-item nav-item-{{ loop.index }}">
+      <a href="{{ parent.link|e }}" {% if loop.last %}{{ accesskey("U") }}{% endif %}>
+        {{ parent.title }}
+      </a>
+      {{ reldelim1 }}
+    </li>
+    {% endfor %}
     {% endif %}
     {% if title != "Mantid" %}
-      {% block relbaritems %}
-        <li class="nav-item nav-item-this">
-          <a href="{{ link|e }}">{{ title }}</a>
-        </li>
-      {% endblock %}
+    {% block relbaritems %}
+    <li class="nav-item nav-item-this">
+      <a href="{{ link|e }}">{{ title }}</a>
+    </li>
+    {% endblock %}
     {% endif %}
   </ul>
 </div>
@@ -46,11 +48,11 @@
       {%- else -%}
       <li>
         <a class="navbar-brand" href="{{ pathto(root_doc) }}">
-        {%- endif -%}
-          {%- block sidebarlogo %}
-            {%- if logo %}<img src="{{ pathto('_static/' + logo, 1) }}">{%- endif %}
-          {%- endblock %}
-          {% if theme_navbar_title -%}{{ theme_navbar_title|e }}{%- else -%}{{ project|e }}{%- endif -%}
+      {%- endif -%}
+        {%- block sidebarlogo %}
+          {%- if logo %}<img src="{{ pathto('_static/' + logo, 1) }}">{%- endif %}
+        {%- endblock %}
+        {% if theme_navbar_title -%}{{ theme_navbar_title|e }}{%- else -%}{{ project|e }}{%- endif -%}
         </a>
       </li>
       <span class="navbar-text navbar-version pull-left"><b>{{ version|e }}</b></span>
@@ -65,7 +67,9 @@
         <li class="divider-vertical"></li>
         {% if theme_navbar_links %}
           {%- for link in theme_navbar_links %}
-          <li><a href="{{ pathto(*link[1:]) }}">{{ link[0] }}</a></li>
+          <li>
+            <a href="{{ pathto(*link[1:]) }}">{{ link[0] }}</a>
+          </li>
           {%- endfor %}
         {% endif %}
         {% block navbartoc %}

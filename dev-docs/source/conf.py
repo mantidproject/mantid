@@ -116,10 +116,10 @@ html_theme_options = {
     "navbar_pagenav": False,
     # Hide the next/previous in the nav bar.
     "navbar_sidebarrel": True,
-    # Use the latest version.
+    # Use bootstrap 3 for now, updating requires changes to our custom CSS.
     "bootstrap_version": "3",
     # Ensure the nav bar always stays on top of page.
-    "navbar_fixed_top": "false",
+    "navbar_fixed_top": "true",
     # Don't limit the width
     "body_max_width": "none",
 }
