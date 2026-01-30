@@ -1,0 +1,1 @@
+- :ref:`DNS_Reduction<dns_reduction-ref>` GUI now includes functionality for data reduction of single crystal elastic data.
