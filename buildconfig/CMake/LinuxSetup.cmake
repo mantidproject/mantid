@@ -9,7 +9,12 @@ include(DetermineLinuxDistro)
 option(USE_TBBMALLOC "If true, use LD_PRELOAD=libtbbmalloc_proxy.so in startup scripts" ON)
 # If not wanted, just carry on without it
 if(USE_TBBMALLOC)
-  find_package(TBB REQUIRED)
+  find_package(TBB)
+  if(NOT TBB_FOUND)
+    message(STATUS "TBB not found, skipping TBB malloc proxy setup.")
+    set(USE_TBBMALLOC OFF)
+    return()
+  endif()
   # The launch scripts use TBBMALLOC_LIBRARIES to set LD_PRELOAD.
   if(TARGET TBB::tbbmalloc_proxy)
     set(TBBMALLOC_LIBRARIES TBB::tbbmalloc_proxy)
