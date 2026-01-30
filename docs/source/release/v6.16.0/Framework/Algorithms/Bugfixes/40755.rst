@@ -1,0 +1,1 @@
+- :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` will now load instruments from a wider class of NeXus files.
