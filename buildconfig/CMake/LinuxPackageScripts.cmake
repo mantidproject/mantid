@@ -18,7 +18,7 @@ set(WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR})
 # ######################################################################################################################
 # Launcher scripts. We provide a wrapper script to launch workbench to:
 #
-# * enable a custom memory allocator (jemalloc)
+# * enable a custom memory allocator (tbbmalloc)
 # * enable VirtualGL configuration if required for remote access
 # * adds debug flags to start gdb for developers
 # ######################################################################################################################
@@ -55,27 +55,19 @@ elif [ -n \"\${TLSESSIONDATA}\" ]; then  # running in thin-linc
 fi"
 )
 
-# The scripts need jemalloc to be resolved to the runtime library as the plain .so symlink is only present when a
-# -dev/-devel package is present
-if(JEMALLOCLIB_FOUND)
-  get_filename_component(JEMALLOC_RUNTIME_LIB ${JEMALLOC_LIBRARIES} REALPATH)
-  # We only want to use the major version number
-  string(REGEX REPLACE "([0-9]+)\.[0-9]+\.[0-9]+$" "\\1" JEMALLOC_RUNTIME_LIB ${JEMALLOC_RUNTIME_LIB})
-endif()
-
-# definitions to preload jemalloc but not if we are using address sanitizer as this confuses things
+# definitions to preload tbbmalloc but not if we are using address sanitizer as this confuses things
 string(TOLOWER "${USE_SANITIZER}" USE_SANITIZERS_LOWER)
 if(${USE_SANITIZERS_LOWER} MATCHES "address")
-  set(JEMALLOC_DEFINITIONS
+  set(TBBMALLOC_DEFINITIONS
       "
 LOCAL_PRELOAD=${ASAN_LIB}
 "
   )
 else()
   # Do not indent the string below as it messes up the formatting in the final script
-  set(JEMALLOC_DEFINITIONS
-      "# Define parameters for jemalloc
-LOCAL_PRELOAD=${JEMALLOC_RUNTIME_LIB}
+  set(TBBMALLOC_DEFINITIONS
+      "# Define parameters for oneTBB malloc
+LOCAL_PRELOAD=${TBBMALLOC_RUNTIME_LIB}
 if [ -n \"\${LD_PRELOAD}\" ]; then
     LOCAL_PRELOAD=\${LOCAL_PRELOAD}:\${LD_PRELOAD}
 fi
@@ -153,7 +145,7 @@ if [ -z \"\${GSETTINGS_SCHEMA_DIR}\" ]; then
 fi"
     )
 
-    # workbench launcher for jemalloc
+    # workbench launcher for tbbmalloc
     configure_file(
       ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
       ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install${DEST_FILENAME_SUFFIX} @ONLY

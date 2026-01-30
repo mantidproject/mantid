@@ -55,10 +55,6 @@ gmock:
 gtest:
   - '==1.17.0'
 
-jemalloc:
-  - '==5.2.0'   # [linux]
-  - '5.2.*'     # [osx]
-
 jsoncpp:
   - '>=1.9.4,<2'
 
