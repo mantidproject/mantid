@@ -109,6 +109,7 @@ public:
     // roi->addROI("2000-11-30T01:01:04", "2000-11-30T01:01:08");
     // const double secondFilteredValue = logFile->createParamValue(&series, secondRoi);
     // TSM_ASSERT_EQUALS("Filtering by Maximum is not performed correctly", secondExpectedValue, secondFilteredValue);
+    delete roi;
   }
 
   void test_filter_by_minimum_value() {
@@ -132,6 +133,7 @@ public:
     // roi->addROI("2000-11-30T01:01:02", "2000-11-30T01:01:08");
     // const double secondFilteredValue = logFile->createParamValue(&series, secondRoi);
     // TSM_ASSERT_EQUALS("Filtering by Minimum is not performed correctly", secondExpectedValue, secondFilteredValue);
+    delete roi;
   }
 
   void test_filter_by_mean_value() {
@@ -168,6 +170,7 @@ public:
     const double median = logFile->createParamValue(&series, roi);
     const double expected = 1.5; // middle of sequence 0, 1, 2, 4. Value 5 is excluded by the ROI
     TSM_ASSERT_DELTA("Filtering by Median is not performed correctly", median, expected, 0.1);
+    delete roi;
   }
 
   // This functionality will soon be legacy, since filtering by nth-position is
