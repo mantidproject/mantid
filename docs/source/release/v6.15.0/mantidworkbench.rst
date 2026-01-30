@@ -32,12 +32,12 @@ New features
 - (`#40410 <https://github.com/mantidproject/mantid/pull/40410>`_) New option to either maintain (or not) the aspect ratio of a 2D projection of an instrument. This can result in a more efficient use of screen space, and clearer projections.
 - (`#40508 <https://github.com/mantidproject/mantid/pull/40508>`_) In the new Instrument View, one can now add and remove peaks. Peaks can either be added/removed individually, or all peaks on all selected detectors can be removed at once.
 - (`#40578 <https://github.com/mantidproject/mantid/pull/40578>`_) In the new Instrument View interface, add an option to show monitors.
--  New Python interface to use the new Instrument View in a Jupyter Notebook
+- (`#40623 <https://github.com/mantidproject/mantid/pull/40623>`_) New Python interface to use the new Instrument View in a Jupyter Notebook
 
 Bugfixes
 ############
 - (`#40415 <https://github.com/mantidproject/mantid/pull/40415>`_) Peak overlays in the new Instrument View now work when an instrument has multiple detector IDs per spectrum.
--  Fixed error on closing the new Instrument View due to a missing presenter.
+- (`#40743 <https://github.com/mantidproject/mantid/pull/40743>`_) Fixed error on closing the new Instrument View due to a missing presenter.
 - (`#40198 <https://github.com/mantidproject/mantid/pull/40198>`_) Fixed crash that could occur when erasing peaks in the Instrument View, especially when deleting lots of peaks in a short space of time.
 
 

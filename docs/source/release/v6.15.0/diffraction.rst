@@ -32,12 +32,12 @@ Engineering Diffraction
 
 New features
 ############
--  Vanadium normalisation can now be performed during calibration in the :ref:`Engineering_Diffraction-ref` interface.
+- (`#40668 <https://github.com/mantidproject/mantid/pull/40668>`_) Vanadium normalisation can now be performed during calibration in the :ref:`Engineering_Diffraction-ref` interface.
 - (`#39922 <https://github.com/mantidproject/mantid/pull/39922>`_) Update to the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`, adding two tabs, ``Absorption Correction`` and ``Texture``.
 - (`#39922 <https://github.com/mantidproject/mantid/pull/39922>`_) The new ``Absorption Correction`` tab allows the user to correct workspaces for the beam attenuation through the sample.
 - (`#39922 <https://github.com/mantidproject/mantid/pull/39922>`_) The new ``Texture`` tab allows the user to combine data from focused workspaces and peak fitting, to plot pole figures for their experimental data
 - (`#39922 <https://github.com/mantidproject/mantid/pull/39922>`_) Basic usage of these tabs as part of a texture analysis reduction pipeline has been documented in the Texture Technique Documentation
--  The automated peak fitting routine ``fit_all_peaks`` in ``Engineering.texture.TextureUtils`` has been updated to improve robustness, particularly in terms of fitting peak positions.
+- (`#39931 <https://github.com/mantidproject/mantid/pull/39931>`_) The automated peak fitting routine ``fit_all_peaks`` in ``Engineering.texture.TextureUtils`` has been updated to improve robustness, particularly in terms of fitting peak positions.
 - (`#40326 <https://github.com/mantidproject/mantid/pull/40326>`_) In :ref:`algm-CreatePoleFigureTableWorkspace`, two new options have been added to the inputs. ``SpectraWorkspace`` allows the user to provide a name for a new output workspace which contains spectra corresponding to rows in the standard ``OutputWorkspace`` table. ``IncludeSpectrumInfo`` is a flag which adds information columns to the final ``OutputWorkspace`` about where each spectra has come from.
 - (`#40326 <https://github.com/mantidproject/mantid/pull/40326>`_) ``texture_helper.py`` has been created to hold stand alone texture functionality which is independent of specific instrument workflows or workflow classes.
 - (`#40326 <https://github.com/mantidproject/mantid/pull/40326>`_) ``show_texture_sample_shape`` in ``texture_helper.py`` is a new standalone function which allows the user to show the sample present on a workspace along with the texture sample directions, and optionally a gauge volume.

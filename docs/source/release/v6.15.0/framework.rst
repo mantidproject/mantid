@@ -30,7 +30,7 @@ New features
 - (`#40450 <https://github.com/mantidproject/mantid/pull/40450>`_) New algorithm :ref:`AddLogInterpolated <algm-AddLogInterpolated>` for interpolating time series sample logs.
 - (`#40493 <https://github.com/mantidproject/mantid/pull/40493>`_) :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` will now set the uncertainty values on the output workspace.
 - (`#40656 <https://github.com/mantidproject/mantid/pull/40656>`_) The :ref:`algm-Load` algorithm, and the file loader search process, now use a lazy file descriptor to check for the correct loading algorithm, further reducing time for :ref:`algm-Load`.
--  Updated default parameters ``ReadSizeFromDisk``, ``EventsPerThread``, and ``LogBlockList`` for :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` to give faster execution.
+- (`#40669 <https://github.com/mantidproject/mantid/pull/40669>`_) Updated default parameters ``ReadSizeFromDisk``, ``EventsPerThread``, and ``LogBlockList`` for :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` to give faster execution.
 - (`#40444 <https://github.com/mantidproject/mantid/pull/40444>`_) New property in :ref:`ApplyDetailedBalanceMD <algm-ApplyDetailedBalanceMD>` allows scaling data from one temperature to another.
 
 Bugfixes
