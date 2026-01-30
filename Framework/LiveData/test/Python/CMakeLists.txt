@@ -1,3 +1,9 @@
+# Skip these tests entirely on Windows
+if(WIN32)
+  message(STATUS "Skipping LiveData Python ADARA tests on Windows (no fork support)")
+  return()
+endif()
+
 set(TEST_PY_FILES
     test_adara_player.py
     test_adara_player_play.py
