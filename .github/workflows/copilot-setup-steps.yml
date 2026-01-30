@@ -36,3 +36,4 @@ jobs:
         with:
           manifest-path: pixi.toml
           frozen: true
+          activate-environment: true
