@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter, PeakInteractionStatus
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
+from instrumentview.Globals import CurrentTab
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Peaks.Peak import Peak
 from instrumentview.Projections.ProjectionType import ProjectionType
@@ -72,39 +73,14 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.set_view_integration_limits()
         np.testing.assert_allclose(self._presenter._detector_mesh[self._presenter._counts_label], self._model.detector_counts)
 
-    def test_update_picked_detectors(self):
-        self._model._workspace_indices = np.array([0, 1, 2])
-        self._model._is_valid = np.array([True, True, True])
-        self._model._is_masked = np.array([False, False, False])
-        self._model._detector_is_picked = np.array([True, True, False])
-        self._model._detector_ids = np.array([1, 2, 3])
-        self._model.picked_detectors_info_text = MagicMock(return_value=["a", "a"])
-        self._model.extract_spectra_for_line_plot = MagicMock()
-        self._presenter._pickable_mesh = {}
-        self._presenter._pickable_projection_mesh = {}
-        self._mock_view.current_selected_unit.return_value = "TOF"
-        self._mock_view.sum_spectra_selected.return_value = True
-        self._presenter.update_picked_detectors([])
-        np.testing.assert_allclose(self._presenter._pickable_mesh[self._presenter._visible_label], self._model._detector_is_picked)
-        self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace)
-        self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
-        self._model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
-
     def test_generate_single_colour(self):
         green_vector = self._presenter.generate_single_colour(2, 0, 1, 0, 0)
         self.assertEqual(len(green_vector), 2)
         self.assertTrue(green_vector.all(where=[0, 1, 0, 0]))
 
-    def test_set_multi_select_enabled(self):
-        self._mock_view.is_multi_picking_checkbox_checked.return_value = True
-        self._presenter.update_detector_picker()
-        self._mock_view.enable_rectangle_picking.assert_called_once()
-        self._mock_view.enable_point_picking.assert_not_called()
-
-    def test_set_multi_select_disabled(self):
+    def test_update_detector_picker(self):
         self._mock_view.is_multi_picking_checkbox_checked.return_value = False
         self._presenter.update_detector_picker()
-        self._mock_view.enable_rectangle_picking.assert_not_called()
         self._mock_view.enable_point_picking.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
@@ -146,6 +122,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_ads_retrieve = MagicMock()
         mock_ads.retrieve.return_value = mock_ads_retrieve
         self._model.setup = MagicMock()
+        self._presenter.update_plotter = MagicMock()
         ws_name = self._model.workspace.name()
         mock_ads_retrieve.name.return_value = ws_name
         self._presenter._replace_workspace_callback(ws_name, None)
@@ -157,13 +134,49 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.setup.assert_not_called()
         mock_update_plotter.assert_not_called()
 
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_relative_detector_angle")
+    def test_update_picked_detectors(self, mock_update_det_angle):
+        self._model._workspace_indices = np.array([0, 1, 2])
+        self._model._is_valid = np.array([True, True, True])
+        self._model._is_masked = np.array([False, False, False])
+        self._model._detector_is_picked = np.array([True, True, False])
+        self._model._detector_ids = np.array([1, 2, 3])
+        self._model.picked_detectors_info_text = MagicMock(return_value=["a", "a"])
+        self._model.extract_spectra_for_line_plot = MagicMock()
+        self._presenter._pickable_mesh = {}
+        self._presenter._pickable_projection_mesh = {}
+        self._mock_view.current_selected_unit.return_value = "TOF"
+        self._mock_view.sum_spectra_selected.return_value = True
+        self._presenter.update_picked_detectors_on_view()
+        np.testing.assert_allclose(self._presenter._pickable_mesh[self._presenter._visible_label], self._model._detector_is_picked)
+        self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace)
+        self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
+        self._model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
+
+    def test_on_add_selection_clicked(self):
+        mock_implicit_return = np.linspace(-1, 1, self._ws.getNumberHistograms())
+        mock_implicit_function = MagicMock(EvaluateFunction=MagicMock(side_effect=mock_implicit_return))
+        self._mock_view.get_current_widget_implicit_function.return_value = mock_implicit_function
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
+        self._model.add_new_detector_key = MagicMock(return_value="mock_key")
+        self._presenter.on_add_item_clicked()
+        np.testing.assert_allclose(self._model.add_new_detector_key.call_args.args[0], mock_implicit_return < 0)
+        self._mock_view.set_new_item_key.assert_called_once_with(CurrentTab.Grouping, "mock_key")
+
+    def test_on_save_mask_to_workspace_clicked(self):
+        self._mock_view.get_current_tab.return_value = CurrentTab.Masking
+        self._model.save_workspace_to_ads = MagicMock()
+        self._presenter.on_save_to_workspace_clicked()
+        self._model.save_workspace_to_ads.assert_called_once()
+        self._mock_view.on_mask_item_selected.assert_not_called()
+
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_peaks_workspace_selected")
     def test_reload_peaks_workspaces(self, mock_on_peaks_workspace_selected):
         self._presenter._reload_peaks_workspaces()
         self._mock_view.refresh_peaks_ws_list.assert_called_once()
         mock_on_peaks_workspace_selected.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peaks_workspaces_in_ads")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_workspaces_in_ads_of_type")
     def test_peaks_workspaces_in_ads(self, mock_peaks_workspaces_in_ads):
         mock_peaks_workspaces_in_ads.return_value = [self._ws, self._ws]
         workspaces = self._presenter.peaks_workspaces_in_ads()

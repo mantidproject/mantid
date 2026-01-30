@@ -6,17 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import pyvista as pv
-from enum import Enum
-from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 from qtpy.QtWidgets import QFileDialog
 from queue import Queue
 from typing import Optional
+from instrumentview.Globals import CurrentTab
 from threading import Thread
 from mantid import mtd
 from mantid.kernel import logger, ConfigService
 from mantid.simpleapi import AnalysisDataService
 from mantidqt.io import open_a_file_dialog
+from mantid.dataobjects import MaskWorkspace, GroupingWorkspace, PeaksWorkspace
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
@@ -24,6 +24,8 @@ from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
 from vtkmodules.vtkRenderingCore import vtkCoordinate
+
+from enum import Enum
 
 
 class SuppressRendering:
@@ -247,35 +249,17 @@ class FullInstrumentViewPresenter:
 
     def update_detector_picker(self) -> None:
         """Change between single and multi point picking"""
-        if self._view.is_multi_picking_checkbox_checked():
-            self._view.check_sum_spectra_checkbox()
 
-            def rectangle_picked(rectangle: RectangleSelection) -> None:
-                """Get points within the selection rectangle and display information for those detectors"""
-                selected_mesh = self._detector_mesh.select_enclosed_points(rectangle.frustum_mesh)
-                selected_mask = selected_mesh.point_data["SelectedPoints"].view(bool)
-                self.update_picked_detectors(selected_mask)
+        def point_picked(point_position: np.ndarray | None, picker: PickerType.POINT.value) -> None:
+            if point_position is None:
+                return
+            point_index = picker.GetPointId()
+            self._model.update_point_picked_detectors(point_index)
+            self.update_picked_detectors_on_view()
 
-            self._view.enable_rectangle_picking(self._model.is_2d_projection, callback=rectangle_picked)
-            self._peak_interaction_status = PeakInteractionStatus.Disabled
-            self._update_peak_buttons()
-        else:
+        self._view.enable_point_picking(self._model.is_2d_projection, callback=point_picked)
 
-            def point_picked(point_position: np.ndarray | None, picker: PickerType.POINT.value) -> None:
-                if point_position is None:
-                    return
-                point_index = picker.GetPointId()
-                picked_mask = np.full(self._detector_mesh.GetNumberOfPoints(), False)
-                picked_mask[point_index] = True
-                self.update_picked_detectors(picked_mask)
-
-            self._view.enable_point_picking(self._model.is_2d_projection, callback=point_picked)
-
-    def update_picked_detectors(self, picked_mask: np.ndarray) -> None:
-        if not np.any(picked_mask):
-            self._model.clear_all_picked_detectors()
-        else:
-            self._model.negate_picked_visibility(picked_mask)
+    def update_picked_detectors_on_view(self) -> None:
         # Update to visibility shows up in real time
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
@@ -283,57 +267,113 @@ class FullInstrumentViewPresenter:
         self._view.remove_peak_cursor_from_lineplot()
         self._update_peak_buttons()
 
-    def _on_add_mask_clicked(self) -> None:
+    def _on_clear_point_picked_detectors_clicked(self) -> None:
+        self._model.clear_point_picked_detectors()
+        self.update_picked_detectors_on_view()
+
+    def on_clear_point_picked_detectors_clicked(self) -> None:
+        self._callback_queue.put((self._on_clear_point_picked_detectors_clicked, ()))
+
+    def _on_add_item_clicked(self) -> None:
         implicit_function = self._view.get_current_widget_implicit_function()
         if not implicit_function:
             return
         mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points]
-        new_key = self._model.add_new_detector_mask(mask)
-        self._view.set_new_mask_key(new_key)
+        new_key = self._model.add_new_detector_key(mask, self._view.get_current_selected_tab())
+        self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
 
-    def on_add_mask_clicked(self) -> None:
-        self._callback_queue.put((self._on_add_mask_clicked, ()))
+    def on_add_item_clicked(self) -> None:
+        self._callback_queue.put((self._on_add_item_clicked, ()))
 
-    def _on_mask_item_selected(self) -> None:
-        self._model.apply_detector_masks(self._view.selected_masks())
-        self.update_plotter()
-        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
-        self._update_peak_buttons()
+    def _on_list_item_selected(self, kind: CurrentTab) -> None:
+        self._model.apply_detector_items(self._view.selected_items_in_list(kind), kind)
 
-    def on_mask_item_selected(self) -> None:
-        self._callback_queue.put((self._on_mask_item_selected, ()))
+        if kind is CurrentTab.Masking:
+            self.update_plotter()
+            self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+            self._update_peak_buttons()
+        else:
+            self.update_picked_detectors_on_view()
+            # NOTE: This is required explicitly
+            self._view.enable_or_disable_mask_widgets()
 
-    def _on_save_mask_to_workspace_clicked(self) -> None:
-        self._model.save_mask_workspace_to_ads()
-        self._on_mask_item_selected()
+    def on_list_item_selected(self, kind: CurrentTab) -> None:
+        self._callback_queue.put((self._on_list_item_selected, (kind,)))
 
-    def on_save_mask_to_workspace_clicked(self) -> None:
-        self._callback_queue.put((self._on_save_mask_to_workspace_clicked, ()))
+    def _on_save_to_workspace_clicked(self) -> None:
+        self._model.save_workspace_to_ads(self._view.get_current_selected_tab())
 
-    def _on_overwrite_mask_clicked(self) -> None:
+    def on_save_to_workspace_clicked(self) -> None:
+        self._callback_queue.put((self._on_save_to_workspace_clicked, ()))
+
+    def _on_apply_permanently_clicked(self) -> None:
+        # Clear both lists before overwriting to workspace (reset of model)
+        self._view.clear_item_list(CurrentTab.Masking)
+        self._view.clear_item_list(CurrentTab.Grouping)
         self._model.overwrite_mask_to_current_workspace()
-        self._on_clear_masks_clicked()
 
-    def on_overwrite_mask_clicked(self) -> None:
-        self._callback_queue.put((self._on_overwrite_mask_clicked, ()))
+    def on_apply_permanently_clicked(self) -> None:
+        self._callback_queue.put((self._on_apply_permanently_clicked, ()))
 
-    def _on_clear_masks_clicked(self) -> None:
-        self._view.clear_mask_list()
-        self._model.clear_stored_masks()
-        self._on_mask_item_selected()
+    def _on_clear_list_clicked(self) -> None:
+        self._view.clear_item_list(self._view.get_current_selected_tab())
+        self._model.clear_stored_keys(self._view.get_current_selected_tab())
+        self.on_list_item_selected(self._view.get_current_selected_tab())
 
-    def on_clear_masks_clicked(self) -> None:
-        self._callback_queue.put((self._on_clear_masks_clicked, ()))
+    def on_clear_list_clicked(self) -> None:
+        self._callback_queue.put((self._on_clear_list_clicked, ()))
+
+    def _on_save_mask_to_xml_clicked(self):
+        filename = self._get_filename_from_dialog()
+        if not filename:
+            return
+        self._model.save_mask_to_xml(filename)
+
+    def on_save_mask_to_xml_clicked(self):
+        self._callback_queue.put((self._on_save_mask_to_xml_clicked, ()))
+
+    def _on_save_grouping_to_ads_clicked(self):
+        self._model.save_grouping_to_ads()
+
+    def on_save_grouping_to_ads_clicked(self):
+        self._callback_queue.put((self._on_save_grouping_to_ads_clicked, ()))
+
+    def _on_save_grouping_to_xml_clicked(self):
+        filename = self._get_filename_from_dialog()
+        if not filename:
+            return
+        self._model.save_grouping_to_xml(filename)
+
+    def on_save_grouping_to_xml_clicked(self):
+        self._callback_queue.put((self._on_save_grouping_to_xml_clicked, ()))
+
+    def _get_filename_from_dialog(self):
+        filename = open_a_file_dialog(
+            accept_mode=QFileDialog.AcceptSave,
+            file_mode=QFileDialog.AnyFile,
+            file_filter="XML files (*xml)",
+            directory=ConfigService["defaultsave.directory"],
+        )
+        return filename
 
     def _reload_mask_workspaces(self) -> None:
-        self._view.refresh_mask_ws_list()
-        self.on_mask_item_selected()
+        self._view.refresh_workspaces_in_list(CurrentTab.Masking)
+        self.on_list_item_selected(CurrentTab.Masking)
 
-    def mask_workspaces_in_ads(self) -> list[str]:
-        return [ws.name() for ws in self._model.get_mask_workspaces_in_ads()]
+    def _reload_grouping_workspaces(self) -> None:
+        self._view.refresh_workspaces_in_list(CurrentTab.Grouping)
+        self.on_list_item_selected(CurrentTab.Grouping)
 
-    def cached_masks_keys(self) -> list[str]:
-        return self._model.cached_masks_keys
+    def get_list_keys_from_workspaces_in_ads(self, kind: CurrentTab):
+        if kind is CurrentTab.Masking:
+            # Mask list shows workspace names
+            return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(MaskWorkspace)]
+        else:
+            # Grouping list shows an entry per group in grouping workspace
+            return self._model.get_grouping_keys_from_workspaces_in_ads()
+
+    def cached_keys(self, kind: CurrentTab) -> list[str]:
+        return self._model.cached_keys(kind)
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
@@ -348,9 +388,6 @@ class FullInstrumentViewPresenter:
             self._view.set_relative_detector_angle(None)
         else:
             self._view.set_relative_detector_angle(self._model.relative_detector_angle())
-
-    def on_clear_selected_detectors_clicked(self) -> None:
-        self.update_picked_detectors(np.array([]))
 
     def create_poly_data_mesh(self, points: np.ndarray, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""
@@ -377,6 +414,7 @@ class FullInstrumentViewPresenter:
         else:
             self._reload_peaks_workspaces()
             self._reload_mask_workspaces()
+            self._reload_grouping_workspaces()
 
     def delete_workspace_callback(self, ws_name):
         self._callback_queue.put((self._delete_workspace_callback, (ws_name,)))
@@ -389,6 +427,7 @@ class FullInstrumentViewPresenter:
 
         self._reload_peaks_workspaces()
         self._reload_mask_workspaces()
+        self._reload_grouping_workspaces()
 
     def rename_workspace_callback(self, ws_old_name, ws_new_name):
         self._callback_queue.put((self._rename_workspace_callback, (ws_old_name, ws_new_name)))
@@ -397,10 +436,12 @@ class FullInstrumentViewPresenter:
         self._view.close()
 
     def _replace_workspace_callback(self, ws_name, ws):
-        if ws_name in self.peaks_workspaces_in_ads():
+        if isinstance(ws, PeaksWorkspace):
             self._reload_peaks_workspaces()
-        elif ws_name in self.mask_workspaces_in_ads():
+        elif isinstance(ws, MaskWorkspace):
             self._reload_mask_workspaces()
+        elif isinstance(ws, GroupingWorkspace):
+            self._reload_grouping_workspaces()
         elif ws_name == self._model.workspace.name():
             # This check is needed because observers are triggered
             # before the RenameWorkspace is completed.
@@ -417,6 +458,7 @@ class FullInstrumentViewPresenter:
     def _add_workspace_callback(self, ws_name, ws):
         self._reload_peaks_workspaces()
         self._reload_mask_workspaces()
+        self._reload_grouping_workspaces()
 
     def add_workspace_callback(self, ws_name, ws):
         self._callback_queue.put((self._add_workspace_callback, (ws_name, ws)))
@@ -436,7 +478,7 @@ class FullInstrumentViewPresenter:
         self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
 
     def peaks_workspaces_in_ads(self) -> list[str]:
-        return [ws.name() for ws in self._model.peaks_workspaces_in_ads()]
+        return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(PeaksWorkspace)]
 
     def _update_peaks_workspaces(self) -> None:
         peaks_grouped_by_ws = []
@@ -488,17 +530,6 @@ class FullInstrumentViewPresenter:
             if len(x_values) > 0:
                 self._view.plot_lineplot_overlay(x_values, labels, ws_peaks.colour)
         self._view.redraw_lineplot()
-
-    def on_save_xml_mask_clicked(self):
-        filename = open_a_file_dialog(
-            accept_mode=QFileDialog.AcceptSave,
-            file_mode=QFileDialog.AnyFile,
-            file_filter="XML files (*xml)",
-            directory=ConfigService["defaultsave.directory"],
-        )
-        if not filename:
-            return
-        self._model.save_xml_mask(filename)
 
     def on_add_peak_clicked(self) -> None:
         self._on_peak_clicked_in_lineplot(PeakInteractionStatus.Adding)

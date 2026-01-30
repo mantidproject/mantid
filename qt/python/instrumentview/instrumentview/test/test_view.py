@@ -90,6 +90,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
             mock_mesh,
             scalars=mock_scalars,
             opacity=[0.0, 0.3],
+            clim=[0, 1],
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",

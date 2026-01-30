@@ -62,6 +62,7 @@ void WorkspaceIcons::initInternalLookup() {
 
   // Table workspace types
   m_idToPixmapName["TableWorkspace"] = "worksheet_xpm";
+  m_idToPixmapName["SplittersWorkspace"] = "worksheet_xpm";
   m_idToPixmapName["PeaksWorkspace"] = "worksheet_xpm";
   m_idToPixmapName["LeanElasticPeaksWorkspace"] = "worksheet_xpm";
 
