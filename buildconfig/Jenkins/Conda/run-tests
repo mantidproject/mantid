@@ -24,7 +24,9 @@ XVFB_SERVER_NUM=101
 if [[ -z "$BUILD_THREADS_SYSTEM_TESTS" ]]; then
     # Default to a 3/16 fraction of the build threads, e.g. 8 for a 32-core machine,
     # to allow enough RAM for concurrently running system tests.
-    BUILD_THREADS_SYSTEM_TESTS=$((BUILD_THREADS * 3 / 16))
+    BUILD_THREADS_SYSTEM_TESTS=$(( BUILD_THREADS * 3 / 16 ))
+    # Ensure at least 1 thread
+    (( BUILD_THREADS_SYSTEM_TESTS < 1 )) && BUILD_THREADS_SYSTEM_TESTS=1
 fi
 
 # Jenkins nodes may specify the maximum number of unit tests to run in parallel.
