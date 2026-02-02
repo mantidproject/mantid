@@ -32,7 +32,7 @@ jobs:
     # which includes pre-commit and other dependencies.
     steps:
       - uses: actions/checkout@v6
-      - uses: prefix-dev/setup-pixi@v0.9.3
+      - uses: prefix-dev/setup-pixi@v0.9.4
         with:
           manifest-path: pixi.toml
           frozen: true
