@@ -101,6 +101,8 @@ fi
 
 # Build dev-docs
 if [[ $ENABLE_DEV_DOCS == true ]]; then
+    # TODO DEBUG PRINT
+    python -c "from myst_parser import __version__;print('myst version', __version__)"
     rm -fr $BUILD_DIR/dev-docs/doctree/*
     rm -f $BUILD_DIR/dev-docs/dev_docs_warnings.txt
     cmake --build . --target dev-docs-html $BUILD_OPTIONS
