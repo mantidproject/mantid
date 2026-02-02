@@ -435,28 +435,23 @@ V3D GridDetector::getRelativePosAtXYZ(int x, int y, int z) const {
 }
 
 void GridDetector::createLayer(const std::string &name, CompAssembly *parent, int iz, int &minDetID, int &maxDetID) {
-  // Loop and create all detectors in this layer.
+  const double z = m_zstart + iz * m_zstep;
+  const std::string z_pixel_str = (m_zpixels > 0) ? "," + std::to_string(iz) + ")" : ")";
+  const std::string z_layer_str = (m_zpixels > 0) ? name + "(z=" + std::to_string(iz) + ",x=" : name + "(x=";
   for (int ix = 0; ix < m_xpixels; ++ix) {
+    const std::string x_pixel_str = name + "(" + std::to_string(ix) + ",";
+    const std::string name_layer = z_layer_str + std::to_string(ix) + ")";
+
     // Create an ICompAssembly for each x-column
-    std::ostringstream oss_col;
-    if (m_zpixels > 0)
-      oss_col << name << "(z=" << iz << ","
-              << "x=" << ix << ")";
-    else
-      oss_col << name << "(x=" << ix << ")";
+    auto *xColumn = new CompAssembly(name_layer, parent);
 
-    auto *xColumn = new CompAssembly(oss_col.str(), parent);
-
+    const double x = m_xstart + ix * m_xstep;
     for (int iy = 0; iy < m_ypixels; ++iy) {
       // Make the name
-      std::ostringstream oss;
-      if (m_zpixels > 0)
-        oss << name << "(" << ix << "," << iy << "," << iz << ")";
-      else
-        oss << name << "(" << ix << "," << iy << ")";
+      const std::string name_pixel = x_pixel_str + std::to_string(iy) + z_pixel_str;
 
       // Calculate its id and set it.
-      auto id = this->getDetectorIDAtXYZ(ix, iy, iz);
+      const auto id = this->getDetectorIDAtXYZ(ix, iy, iz);
 
       // minimum grid detector id
       if (id < minDetID) {
@@ -466,18 +461,13 @@ void GridDetector::createLayer(const std::string &name, CompAssembly *parent, in
       if (id > maxDetID) {
         maxDetID = id;
       }
-      // Create the detector from the given id & shape and with xColumn as the
-      // parent.
-      auto *detector = new GridDetectorPixel(oss.str(), id, m_shape, xColumn, this, size_t(ix), size_t(iy), size_t(iz));
+      // Create the detector from the given id & shape and with xColumn as the parent
+      auto *detector =
+          new GridDetectorPixel(name_pixel, id, m_shape, xColumn, this, size_t(ix), size_t(iy), size_t(iz));
 
-      // Calculate the x,y,z position
-      double x = m_xstart + ix * m_xstep;
-      double y = m_ystart + iy * m_ystep;
-      double z = m_zstart + iz * m_zstep;
-      V3D pos(x, y, z);
-      // Translate (relative to parent). This gives the un-parametrized
-      // position.
-      detector->translate(pos);
+      const double y = m_ystart + iy * m_ystep;
+      // Translate (relative to parent). This gives the un-parametrized position
+      detector->translate(x, y, z);
 
       // Add it to the x-column
       xColumn->add(detector);
