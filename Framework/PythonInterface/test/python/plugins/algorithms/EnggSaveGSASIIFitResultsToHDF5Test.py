@@ -19,9 +19,10 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
     FIT_RESULTS_TABLE_NAME = "FitResults"
     LATTICE_PARAMS_TABLE_NAME = "LatticeParams"
     LATTICE_PARAMS = ["a", "b", "c", "alpha", "beta", "gamma", "volume"]
-    TEMP_FILE_NAME = os.path.join(tempfile.gettempdir(), "EnggSaveGSASIIFitResultsToHDF5Test.hdf5")
 
     def setUp(self):
+        self.TEMP_DIR = tempfile.TemporaryDirectory()
+        self.TEMP_FILE_NAME = os.path.join(self.TEMP_DIR.name, "EnggSaveGSASIIFitResultsToHDF5Test.hdf5")
         self.defaultAlgParams = {
             "LatticeParamWorkspaces": [self._create_lattice_params_table()],
             "BankIDs": [1],
@@ -30,10 +31,7 @@ class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
         }
 
     def tearDown(self):
-        try:
-            os.remove(self.TEMP_FILE_NAME)
-        except OSError:
-            pass
+        self.TEMP_DIR.cleanup()
 
     def test_saveLatticeParams(self):
         lattice_params = self._create_lattice_params_table()
