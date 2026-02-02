@@ -22,18 +22,25 @@ import yaml
 from zlib import crc32
 
 
+##
+## ADARA-packet player is not implemented on Windows, due to lack of `SIGALRM` signal.
+##
+if sys.platform.startswith("win"):
+    raise SystemExit("ADARA-packet player is not implemented for the Windows OS.")
+##
+
+
 # =========================================================
 # ====== INITIALIZE the application's `Config` dict. ======
 # =========================================================
 def _error_exit(msg: str):
-    print(f"Error during load of module '{__file__}' (as '{__name__}'):\n    {msg}")
-    sys.exit(1)
+    raise SystemExit(f"Error during load of module '{__file__}' (as '{__name__}'):\n    {msg}.")
 
 
 _source_path = Path(__file__).resolve().parent
 _config_path = Path(os.environ.get("adara_player_conf", _source_path / "adara_player_conf.yml")).resolve()
 if not _config_path.exists():
-    _error_exit(f"config file '{_config_path}' not found on filesystem.")
+    _error_exit(f"config file '{_config_path}' not found on filesystem")
 
 # Match patterns like ${ENV_VAR}
 env_pattern = re.compile(r".*?\${(.*?)}.*?")
@@ -65,7 +72,7 @@ def yaml_load(file_path: Path) -> dict[Any]:
 try:
     Config = yaml_load(_config_path)
 except Exception as e:
-    _error_exit(f"error when loading {_config_path}: {str(e)}.")
+    _error_exit(f"error when loading {_config_path}: {str(e)}")
 
 # Initialize logging:
 
@@ -109,7 +116,7 @@ def _configure_logger_for_pid(pid: int) -> None:
         try:
             h.close()
         except Exception:
-            pass
+            _logger.debug("Failed to close log handler %r", h, exc_info=True)
 
     log_path = get_log_file_path_for_PID(pid)
     if log_path is not None:
@@ -368,7 +375,7 @@ class Packet:
         return self.STR_FORMAT.format(type=self.packet_type, timestamp=self.timestamp, size=size_str, CRC=self.CRC)
 
     @classmethod
-    def create_header(self, *, payload_len, packet_type, tv_sec, tv_nsec):
+    def create_header(cls, *, payload_len, packet_type, tv_sec, tv_nsec):
         """Helper method to create packet headers for testing."""
         header = struct.pack("<I", payload_len)
         header += struct.pack("<I", packet_type.asPacketField())
@@ -1410,15 +1417,17 @@ class Player:
         for sock in sockets:
             try:
                 sock.close()
-            except:
-                pass
+            except Exception as exc:
+                # Best-effort cleanup: log and ignore errors while closing sockets
+                _logger.debug("Ignoring exception while closing socket %r: %s", sock, exc)
         for address in addresses:
             try:
                 # Remove any UDS path from filesystem
                 if SocketAddress.isUDSSocket(address) and address.exists():
                     address.unlink()
-            except:
-                pass
+            except Exception as exc:
+                # Best-effort cleanup: log and ignore errors while removing UDS path
+                _logger.debug("Ignoring exception while cleaning up address %r: %s", address, exc)
 
     def signal_handler(self, signum, frame):
         """Handle shutdown signals"""

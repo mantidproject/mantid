@@ -8,10 +8,18 @@ import os
 import re
 import socketserver
 import signal
+import sys
 import threading
 from typing import Iterator
 
 from packet_player import Player, SocketAddress, UnixGlob, get_log_file_path_for_PID, yaml_load
+
+##
+## ADARA-packet player is not implemented on Windows, due to lack of `fork` system call.
+##
+if sys.platform.startswith("win"):
+    raise SystemExit("ADARA-packet player is not implemented for the Windows OS.")
+##
 
 ##################################################################################################
 ## WARNING: if at all possible `Config` should be used only from the `packet_player.py` module. ##
@@ -69,7 +77,7 @@ class SessionServer:
                     f"When using record mode, the positional argument should be the target directory, not '{commandline_args.glob}'."
                 )
             if base_path.exists():
-                if any(p.is_dir() and re.fullmatch(r"\\d{4}", p.name) for p in base_path.iterdir()):
+                if any(p.is_dir() and re.fullmatch(r"\d{4}", p.name) for p in base_path.iterdir()):
                     raise RuntimeError(f"in record mode: session directory '{base_path}' must not contain existing sessions")
             if self._dry_run:
                 raise RuntimeError("`dry_run` flag cannot be used with record mode.")

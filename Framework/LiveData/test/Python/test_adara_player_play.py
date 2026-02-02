@@ -7,7 +7,6 @@ import numpy as np
 from pathlib import Path
 import signal
 import socket
-import sys
 from tempfile import TemporaryDirectory
 
 from packet_player import Player, Packet, ClientHelloPacket
@@ -26,7 +25,6 @@ def timeout_handler(signum, frame):
     raise TimeoutException("Test timed out - likely infinite loop")
 
 
-@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class Test_Player_play(unittest.TestCase):
     """Test cases for Player.play method."""
 

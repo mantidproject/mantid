@@ -5,7 +5,6 @@ Test suite for Player.record method from adara_player module.
 
 import signal
 import socket
-import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch, MagicMock, mock_open
@@ -24,7 +23,6 @@ def timeout_handler(signum, frame):
     raise TimeoutException("Test timed out - likely infinite loop")
 
 
-@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class Test_Player_record(unittest.TestCase):
     """Test cases for Player.record method."""
 

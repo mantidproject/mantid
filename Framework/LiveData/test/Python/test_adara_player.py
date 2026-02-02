@@ -11,7 +11,6 @@ from pathlib import Path
 import signal
 import socket
 import struct
-import sys
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 import time
 
@@ -21,7 +20,6 @@ import unittest
 from unittest.mock import Mock, patch, MagicMock
 
 
-@unittest.skipIf(sys.platform.startswith("win"), "`adara_player` not implemented on Windows OS")
 class Test_Player(unittest.TestCase):
     """Test cases for Player class (general methods)."""
 
@@ -308,9 +306,9 @@ class Test_Player(unittest.TestCase):
             self.assertEqual(packets[2].payload, payload1)  # LATER (2000000000)
 
             # Verify source is set correctly (file path)
-            self.assertTrue(str(file2) in packets[0].source)
-            self.assertTrue(str(file3) in packets[1].source)
-            self.assertTrue(str(file1) in packets[2].source)
+            self.assertIn(str(file2), packets[0].source)
+            self.assertIn(str(file3), packets[1].source)
+            self.assertIn(str(file1), packets[2].source)
 
             # iter_files should yield packets in order of the sequence numbers
             # regardless of timestamp order, or modification-time order
@@ -324,9 +322,9 @@ class Test_Player(unittest.TestCase):
             self.assertEqual(packets[2].payload, payload3)  # Sequence number: 3
 
             # Verify source is set correctly (file path)
-            self.assertTrue(str(file1) in packets[0].source)
-            self.assertTrue(str(file2) in packets[1].source)
-            self.assertTrue(str(file3) in packets[2].source)
+            self.assertIn(str(file1), packets[0].source)
+            self.assertIn(str(file2), packets[1].source)
+            self.assertIn(str(file3), packets[2].source)
 
             # iter_files should yield packets in order of the modification times
             # regardless of timestamp order, or sequence-number order
@@ -340,9 +338,9 @@ class Test_Player(unittest.TestCase):
             self.assertEqual(packets[2].payload, payload1)  # modification time: 3
 
             # Verify source is set correctly (file path)
-            self.assertTrue(str(file3) in packets[0].source)
-            self.assertTrue(str(file2) in packets[1].source)
-            self.assertTrue(str(file1) in packets[2].source)
+            self.assertIn(str(file3), packets[0].source)
+            self.assertIn(str(file2), packets[1].source)
+            self.assertIn(str(file1), packets[2].source)
 
     def test__file_timestamp_file_not_found(self):
         """Confirms proper error on missing file passed to `_file_timestamp`."""
