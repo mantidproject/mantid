@@ -9,7 +9,7 @@ from mantid.simpleapi import config, mtd, CloneWorkspace, D7YIGPositionCalibrati
 from mantid.api import ITableWorkspace, WorkspaceGroup
 import os.path
 from os import path
-import tempfile
+from tempfile import TemporaryDirectory
 
 
 class D7YIGPositionCalibrationTest(unittest.TestCase):
@@ -17,13 +17,13 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
     def setUpClass(cls):
         config.appendDataSearchSubDir("ILL/D7/")
         Load("402652_403041.nxs", OutputWorkspace="shortWavelengthScan")
+        cls.TEMP_DIR = TemporaryDirectory()
+        cls.TEMP_FILE_NAME = os.path.join(cls.TEMP_DIR.name, "D7YIGPositionCalibrationTest.xml")
 
     @classmethod
     def tearDownClass(cls):
         mtd.clear()
-        output_path = os.path.join(tempfile.gettempdir(), "test_shortWavelength.xml")
-        if path.exists(output_path):
-            os.remove(output_path)
+        cls.TEMP_DIR.cleanup()
 
     def test_algorithm_with_no_input_workspace_raises_exception(self):
         with self.assertRaisesRegex(
@@ -51,7 +51,7 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
         approximate_wavelength = "3.14"  # Angstrom
         self.assertTrue(mtd["shortWavelengthScan"])
         CloneWorkspace(InputWorkspace="shortWavelengthScan", OutputWorkspace="shortWavelengthScan_clone")
-        output_filename = os.path.join(tempfile.gettempdir(), "test_shortWavelength.xml")
+        output_filename = self.TEMP_FILE_NAME
         D7YIGPositionCalibration(
             InputWorkspace="shortWavelengthScan_clone",
             ApproximateWavelength=approximate_wavelength,
