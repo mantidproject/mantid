@@ -92,6 +92,7 @@ class FullInstrumentViewModel:
         self._is_masked_in_ws = self._mask_ws.extractY().flatten().astype(bool)
         # For computing current mask, detached from the permanent mask in ws
         self._is_masked = self._is_masked_in_ws
+        self._is_selected_in_tree = np.ones_like(self._is_masked).astype(bool)
         self._monitor_positions = self._detector_positions_3d[self._is_monitor == "yes"]
 
         # Initialise with zeros
@@ -156,7 +157,7 @@ class FullInstrumentViewModel:
 
     @property
     def is_pickable(self) -> np.ndarray:
-        return ~self._is_masked & self._is_valid
+        return ~self._is_masked & self._is_valid & self._is_selected_in_tree
 
     @property
     def picked_visibility(self) -> np.ndarray:
@@ -299,8 +300,8 @@ class FullInstrumentViewModel:
     @property
     def masked_positions(self) -> np.ndarray:
         if self._projection_type == ProjectionType.THREE_D:
-            return self._detector_positions_3d[self._is_masked & self._is_valid]
-        return self._calculate_projection()[self._is_masked & self._is_valid]
+            return self._detector_positions_3d[(self._is_masked | ~self._is_selected_in_tree) & self._is_valid]
+        return self._calculate_projection()[(self._is_masked | ~self._is_selected_in_tree) & self._is_valid]
 
     def _calculate_projection(self) -> np.ndarray:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
@@ -636,3 +637,17 @@ class FullInstrumentViewModel:
             self.picked_detector_ids[picked_detector_index],
             value,
         )
+
+    def component_tree_indices_selected(self, component_indices: np.ndarray) -> None:
+        # The first components in the tree are the detectors, but the order of the detectors
+        # is different when you access CreateDetectorTable compared to their order in the
+        # component tree
+        detector_ids = self._workspace.detectorInfo().detectorIDs()
+        detector_ids = detector_ids[component_indices[component_indices < len(detector_ids)]]
+        detector_table_indices = np.nonzero(np.isin(self._detector_ids, detector_ids))[0]
+        if len(detector_table_indices) == 0:
+            self._is_selected_in_tree.fill(True)
+            return
+        self._is_selected_in_tree.fill(False)
+        self._is_selected_in_tree[detector_table_indices] = True
+        return

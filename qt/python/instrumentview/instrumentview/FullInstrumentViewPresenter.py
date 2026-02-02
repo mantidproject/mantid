@@ -22,6 +22,8 @@ from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
+from instrumentview.ComponentTreeModel import ComponentTreeModel
+from instrumentview.ComponentTreePresenter import ComponentTreePresenter
 
 from vtkmodules.vtkRenderingCore import vtkCoordinate
 
@@ -93,6 +95,12 @@ class FullInstrumentViewPresenter:
         self._view.setup_connections_to_presenter()
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_integration_range_limits(self._model.integration_limits)
+
+        component_tree_model = ComponentTreeModel(self._model.workspace)
+        self._component_tree_presenter = ComponentTreePresenter(
+            self._view.component_tree, component_tree_model, self.on_component_tree_item_selected
+        )
+        self._view.component_tree.subscribe_presenter(self._component_tree_presenter)
 
         self._view.show_axes()
         self.update_plotter()
@@ -573,4 +581,8 @@ class FullInstrumentViewPresenter:
         self._update_peak_buttons()
 
     def on_show_monitors_check_box_clicked(self) -> None:
+        self.update_plotter()
+
+    def on_component_tree_item_selected(self, component_indices: np.ndarray) -> None:
+        self._model.component_tree_indices_selected(component_indices)
         self.update_plotter()
