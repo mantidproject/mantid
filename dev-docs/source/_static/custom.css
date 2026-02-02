@@ -25,8 +25,10 @@ a:hover {
 /*-------------------- $SPACING --------------------*/
 
 body {
-  font-size: 1.6em;
-} /* 16px */
+  font-size: 1.6em; /* 16px */
+  width: 100%;
+  padding: 90px max(2%, calc((100% - 1400px) / 2)) 0; /* leave room for navbar */
+}
 
 h1 {
   margin-top: 0;
