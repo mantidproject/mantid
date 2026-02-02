@@ -78,7 +78,7 @@ Simply use "`errorbar <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplo
 
 .. code-block:: python
 
-    axes.errorbar(exp_decay,specNum=3, capsize=2.0, label='spec 3', linewidth=1.0)
+    axes.errorbar(ws, specNum=3, capsize=2.0, label='spec 3', linewidth=1.0)
 
 
 Tick Marks and Grid lines
@@ -115,14 +115,15 @@ Notice how `gridlines are linked to the axis ticks <https://matplotlib.org/3.1.1
 Fonts
 =====
 
-Alter the `font <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.text.html#matplotlib.pyplot.text>`_ on labels, axes, titles:
+Alter the `font <https://matplotlib.org/3.10.8/users/explain/text/usetex.html>`_ on labels, axes, titles:
 
 .. code-block:: python
 
-    from matplotlib import rc
-    rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+    plt.rcParams.update({"font.family": "sans-serif", "font.sans-serif": "Helvetica"})
 
-    axes.ylabel(fontsize = 12, fontstyle = 'italic')
+    axes.yaxis.label.set(fontsize = 12, fontstyle = 'italic')
+
+Note that the fonts available is system dependent, and the ``'Helvetica'`` example above will only work on Mac OSX.
 
 Alternatively, you can set a title or label to have certain `font properties <https://matplotlib.org/3.1.1/api/text_api.html#matplotlib.text.Text>`_:
 
@@ -142,10 +143,10 @@ Create a `tiled plot <https://matplotlib.org/devdocs/gallery/subplots_axes_and_f
 
     fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
     # You've created 2x2 arrangement of plots, now plot in them:
-    axes[0][0].plot(exp_decay,specNum=1)
-    axes[0][1].plot(exp_decay,specNum=2)
-    axes[1][0].plot(exp_decay,specNum=3)
-    axes[1][1].plot(exp_decay,specNum=5)
+    axes[0][0].plot(ws, specNum=1)
+    axes[0][1].plot(ws, specNum=2)
+    axes[1][0].plot(ws, specNum=3)
+    axes[1][1].plot(ws, specNum=5)
     #for subplots it is useful to include the following line
     plt.tight_layout()
 
@@ -154,7 +155,7 @@ Add an `inset plot using the mantid projection <https://matplotlib.org/3.2.1/api
 .. code-block:: python
 
     ax_sub = fig.add_axes([0.50, 0.50, 0.3, 0.25],projection='mantid') #[left, bottom, width, height]
-    ax_sub.plot(exp_decay, specNum=5)
+    ax_sub.plot(ws, specNum=5)
 
 
 Generate a Script
