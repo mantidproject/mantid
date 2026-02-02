@@ -3,11 +3,14 @@
 # Download and install pixi (if it isn't installed)
 install_pixi() {
   # check if pixi is not installed
-  if ! command -v pixi >/dev/null 2>&1
-  then
+  if [ "$(command -v pixi)" ]; then
+      echo "using previously installed pixi"
+  else
+    set +x # don't care about details of pixi install
     curl -fsSL https://pixi.sh/install.sh | sh
+    set -x # turn logging back on
     # Verify pixi was installed successfully
-    if ! command -v $HOME/.pixi/bin/pixi >/dev/null 2>&1; then
+    if [ ! -f "$HOME/.pixi/bin/pixi" ]; then
       echo "ERROR: pixi installation failed"
       exit 1
     fi
@@ -17,4 +20,5 @@ install_pixi() {
       export PATH="$PATH:$HOME/.pixi/bin"
     fi
   fi
+  pixi --version
 }
