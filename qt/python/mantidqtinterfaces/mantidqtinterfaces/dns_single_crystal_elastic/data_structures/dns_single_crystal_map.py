@@ -32,7 +32,10 @@ def _is_rectangular_mesh(omega, two_theta, z_mesh):
     return z_mesh.size == len(omega) * len(two_theta)
 
 
-def _correct_rect_grid(omega_mesh, two_theta_mesh, z_mesh, z_error_mesh, omega, two_theta):
+def _refine_mesh(omega_mesh, two_theta_mesh, z_mesh, z_error_mesh, omega, two_theta):
+    """
+    Refines the mesh depending on the grid used.
+    """
     rectangular_grid = _is_rectangular_mesh(omega, two_theta, z_mesh)
     if rectangular_grid:
         omega_mesh, two_theta_mesh = np.meshgrid(omega, two_theta)
@@ -82,7 +85,7 @@ class DNSScMap(ObjectDict):
         omega_corrected = _correct_omega_offset(omega, parameter["omega_offset"])
         omega_mesh, two_theta_mesh, z_mesh, z_error_mesh = _get_mesh(omega_corrected, two_theta, z_mesh, error_mesh)
         omega_unique, two_theta_unique = _get_unique(omega_mesh, two_theta_mesh)
-        omega_mesh, two_theta_mesh, z_mesh, z_error_mesh, rectangular_grid = _correct_rect_grid(
+        omega_mesh, two_theta_mesh, z_mesh, z_error_mesh, rectangular_grid = _refine_mesh(
             omega_mesh, two_theta_mesh, z_mesh, z_error_mesh, omega_corrected, two_theta_unique
         )
         qx_mesh, qy_mesh = _get_q_mesh(omega_mesh, two_theta_mesh, parameter["wavelength"])

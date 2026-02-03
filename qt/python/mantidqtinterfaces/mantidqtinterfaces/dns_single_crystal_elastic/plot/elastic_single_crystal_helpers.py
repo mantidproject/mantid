@@ -119,20 +119,40 @@ def closest_mesh_point(x_mesh, y_mesh, x, y):
 
 
 def hkl_to_hklx(hkl, q=None, d=None, x=None):
+    """
+    Calculates a projection vector value hklx/hkly for the provided
+    the basis vector tau_1/tau_2 and projection x/y. When x/y is
+    not explicitly provided, it is calculated from the given set of
+    (qx, dx)/(qy, dy).
+    """
     if d is None:
         return [x * float(a) for a in hkl]
     return [q_to_hkl_xy(q, d) * float(a) for a in hkl]
 
 
 def hkl_xy_to_hkl(hklx, hkly):
+    """
+    Obtains hkl from knowledge of its projection vector values
+    hklx and hkly along specified basis vectors tau_1 and tau_2.
+    hklx = x * tau_1, hkly = y * tau_2, hkl = hklx + hkly.
+    hklx, hkly, hkl, tau_1, and tau_2 - represent vectors.
+    """
     return [hklx[0] + hkly[0], hklx[1] + hkly[1], hklx[2] + hkly[2]]
 
 
 def hkl_xy_to_q(hkl, d):
+    """
+    Converts x/y projection of hkl on a reciprocal basis vector
+    tau_1/tau_2 to q_x/q_y.
+    """
     return hkl / d * 2.0 * np.pi
 
 
 def q_to_hkl_xy(q, d):
+    """
+    Calculates x/y projection of hkl on a reciprocal basis
+    vector tau_1/tau_2 using (qx, dx)/(qy, dy) as an input.
+    """
     return q * d / 2.0 / np.pi
 
 
