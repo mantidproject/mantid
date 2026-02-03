@@ -87,6 +87,15 @@ public:
                                "      <technique>Reflectometer</technique>"
                                "    </instrument>"
                                "  </facility>"
+                               "  <facility name=\"HFIR\" delimiter=\"_\" "
+                               "FileExtensions=\"_event.nxs,.nxs,.dat\">"
+                               "    <archive>"
+                               "      <archiveSearch plugin=\"ORNLDataSearch\" />"
+                               "    </archive>"
+                               "    <instrument name=\"GPSANS\" shortname=\"CG2\">"
+                               "      <technique>Small Angle Scattering</technique>"
+                               "    </instrument>"
+                               "  </facility>"
                                "  <facility name=\"ILL\" delimiter=\"_\" FileExtensions=\".nxs,.dat\">"
                                "    <instrument name=\"IN5\" shortname=\"IN5\">"
                                "      <technique>Inelastic Spectroscopy</technique>"
@@ -232,6 +241,9 @@ public:
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG3_").name(), "POWGEN");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ").name(), "LOQ");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("SANS2D").name(), "SANS2D");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("CG2").name(), "GPSANS");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("CG21234").name(), "GPSANS");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("CG2_1234").name(), "GPSANS");
   }
 
   void testGetExtension() {
