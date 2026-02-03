@@ -138,7 +138,7 @@ class AxesMenu(QMenu):
         self.parent = parent
         action_two_theta_omega = self.addAction("(2\u03b8, \u03c9)")
         action_qxqy = self.addAction("(q_x, q_y)")
-        action_hkl = self.addAction("(n_x, n_y)")
+        action_hkl = self.addAction("(hkl_x, hkl_y)")
         self.addSeparator()
         action_fix_aspect = self.addAction("Fix Aspect Ratio")
         action_switch_axis = self.addAction("Switch Axes")

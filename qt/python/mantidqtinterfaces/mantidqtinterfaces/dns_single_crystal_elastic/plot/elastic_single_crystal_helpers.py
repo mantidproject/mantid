@@ -63,8 +63,8 @@ def get_z_min_max(z, xlim=None, ylim=None, plot_x=None, plot_y=None):
 
 
 def get_hkl_intensity_from_cursor(single_crystal_map, plot_settings, x, y):
-    hkl1 = single_crystal_map.hkl1.split(",")
-    hkl2 = single_crystal_map.hkl2.split(",")
+    tau1 = single_crystal_map.hkl1.split(",")
+    tau2 = single_crystal_map.hkl2.split(",")
     dx = single_crystal_map.dx
     dy = single_crystal_map.dy
     interpolation_on = bool(plot_settings["interpolate"])
@@ -72,15 +72,15 @@ def get_hkl_intensity_from_cursor(single_crystal_map, plot_settings, x, y):
 
     if plot_settings["type"] == "angular":  # two_theta omega
         qx, qy = angle_to_q(two_theta=x, omega=y, wavelength=single_crystal_map.wavelength)
-        hklx = hkl_to_hklx(hkl1, qx, dx)
-        hkly = hkl_to_hklx(hkl2, qy, dy)
+        hklx = tau_to_hkl_proj_vect(tau1, qx, dx)
+        hkly = tau_to_hkl_proj_vect(tau2, qy, dy)
     elif plot_settings["type"] == "qxqy":  # qx qy
         qx, qy = x, y
-        hklx = hkl_to_hklx(hkl1, qx, dx)
-        hkly = hkl_to_hklx(hkl2, qy, dy)
+        hklx = tau_to_hkl_proj_vect(tau1, qx, dx)
+        hkly = tau_to_hkl_proj_vect(tau2, qy, dy)
     elif plot_settings["type"] == "hkl":  # hkl
-        hklx = hkl_to_hklx(hkl1, x=x)
-        hkly = hkl_to_hklx(hkl2, x=y)
+        hklx = tau_to_hkl_proj_vect(tau1, x=x)
+        hkly = tau_to_hkl_proj_vect(tau2, x=y)
     hkl = hkl_xy_to_hkl(hklx, hkly)
 
     if plot_type == "triangulation":
@@ -118,16 +118,16 @@ def closest_mesh_point(x_mesh, y_mesh, x, y):
     return closest_point
 
 
-def hkl_to_hklx(hkl, q=None, d=None, x=None):
+def tau_to_hkl_proj_vect(tau, q=None, d=None, x=None):
     """
     Calculates a projection vector value hklx/hkly for the provided
-    the basis vector tau_1/tau_2 and projection x/y. When x/y is
-    not explicitly provided, it is calculated from the given set of
-    (qx, dx)/(qy, dy).
+    basis vector tau_1/tau_2 and corresponding projection x/y.
+    When x/y is not explicitly provided, it is calculated from the
+    given set of (qx, dx)/(qy, dy).
     """
     if d is None:
-        return [x * float(a) for a in hkl]
-    return [q_to_hkl_xy(q, d) * float(a) for a in hkl]
+        return [x * float(a) for a in tau]
+    return [q_xy_to_xy(q, d) * float(a) for a in tau]
 
 
 def hkl_xy_to_hkl(hklx, hkly):
@@ -140,15 +140,7 @@ def hkl_xy_to_hkl(hklx, hkly):
     return [hklx[0] + hkly[0], hklx[1] + hkly[1], hklx[2] + hkly[2]]
 
 
-def hkl_xy_to_q(hkl, d):
-    """
-    Converts x/y projection of hkl on a reciprocal basis vector
-    tau_1/tau_2 to q_x/q_y.
-    """
-    return hkl / d * 2.0 * np.pi
-
-
-def q_to_hkl_xy(q, d):
+def q_xy_to_xy(q, d):
     """
     Calculates x/y projection of hkl on a reciprocal basis
     vector tau_1/tau_2 using (qx, dx)/(qy, dy) as an input.
