@@ -12,8 +12,8 @@ from vtkmodules.vtkInteractionWidgets import vtkBoxRepresentation
 import numpy as np
 
 from mantidqt.utils.qt.testing import start_qapplication
-from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from mantid.simpleapi import CreateSampleWorkspace
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 
 
 @start_qapplication
@@ -28,7 +28,8 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     @mock.patch("qtpy.QtWidgets.QSplitter.addWidget")
     @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
     def setUp(self, mock_plotter, mock_splitter_add_widget, mock_v_add_widget, mock_h_add_widget, mock_figure_canvas) -> None:
-        self._view = FullInstrumentViewWindow()
+        with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
+            self._view = FullInstrumentViewWindow()
         self._mock_plotter = mock_plotter
         self._mock_splitter_add_widget = mock_splitter_add_widget
         self._mock_v_add_widget = mock_v_add_widget
