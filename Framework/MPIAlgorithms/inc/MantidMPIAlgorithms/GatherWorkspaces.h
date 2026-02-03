@@ -13,9 +13,12 @@
 #include "MantidAPI/Progress.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidMPIAlgorithms/DllConfig.h"
+
+#ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 
 namespace mpi = boost::mpi;
+#endif
 
 namespace Mantid {
 namespace MPIAlgorithms {
@@ -78,7 +81,9 @@ private:
   std::size_t m_sumSpec{0};
   int m_hist{0};
   std::size_t m_numBins{0};
+#ifdef MPI_BUILD
   mpi::communicator m_included;
+#endif
 };
 
 } // namespace MPIAlgorithms
