@@ -70,7 +70,42 @@ Your note should summarise your work to a non-developer audience without contain
 Most release notes are one or two sentences. If your new feature/bugfix requires lengthy explanations for users you probably need to add or update other documentation. You can then summarise the work in the release note and include
 a link to the documentation you created. Also consider using images or a gif walkthrough (see https://docs.mantidproject.org/nightly/release/v6.2.0/indirect_geometry.html for example) to help convey the information.
 
-Developers are asked to check their spelling, punctuation and grammar.
+How to phrase a release note
+----------------------------
+
+The phrasing of a release note is subjective, but here's our recomendations:-
+
+- Start with the Algorithm or Interface where the change has ocurred.
+- Use active voice: what is the Algorithm or Interface now doing?
+
+Here is a good template that will be aplicable in most cases:
+
+.. figure:: ../images/release-note-template.png
+   :class: screenshot
+   :width: 800px
+   :align: center
+
+And here are some examples of release notes that follow this structure:
+
+- ``Elwin tab of Inelastic Data Processor interface now plots the correct spectrum for the selected index when changing the preview spectrum above the plot widget combo box.``
+- ``AlignAndFocusPowder algorithm now runs compression when logarithmic is selected.``
+- ``ResNorm tab of Bayes Fitting interface no longer crashes when the `Run` button is clicked and no data is loaded.``
+
+The main advantage of this model is that in the final version of the release notes, all algorithms and interfaces get positioned in the same line of vision.
+This is important because it makes skimming the release notes much easier for our busy users:
+
+.. figure:: ../images/release-notes-same-line-of-vision.png
+   :class: screenshot
+   :width: 700px
+   :align: center
+
+What if your change was not in an interface or an algorithm? For example, what if you fixed a bug in plotting or framework?
+
+In these cases, try to ask yourself **where** the change happens, although admittedly in some cases it will not make sense.
+Let's say for example you fixed a bug that caused a plot script to unhide all previously hidden plots.
+You can rephrase it as:
+
+- ``Hidden plots are no longer unhidden by some plot scripts where ...``
 
 Amending release notes
 ----------------------
