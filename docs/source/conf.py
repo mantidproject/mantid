@@ -58,7 +58,9 @@ extensions = [
 mathext = os.environ.get("MATH_EXT", "sphinx.ext.mathjax")
 extensions.append(mathext)
 
-# MathJax configuration to define Angstrom symbol macro
+# MathJax configuration to:
+# - define Angstrom symbol macro
+# - enable polyfill for hasOwn (needed for some older browsers)
 mathjax3_config = {"tex": {"macros": {"AA": r"\unicode{x212B}"}}, "startup": {"polyfillHasOwn": True}}
 
 # Add any paths that contain templates here, relative to this directory.
