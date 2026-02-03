@@ -150,6 +150,7 @@ private:
   void validateInput() const;
   /// Pointer to the base GridDetector, for parametrized instruments
   const GridDetector *m_gridBase;
+  bool isParametrized() const { return m_map && m_gridBase; }
   /// Private copy assignment operator
   GridDetector &operator=(const ICompAssembly &);
 

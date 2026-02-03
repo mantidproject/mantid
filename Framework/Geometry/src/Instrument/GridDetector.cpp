@@ -155,7 +155,7 @@ detid_t getFillFirstX(const GridDetector *me, int x, int y, int z) {
  */
 detid_t GridDetector::getDetectorIDAtXYZ(const int x, const int y, const int z) const {
   const GridDetector *me = this;
-  if (m_map)
+  if (isParametrized())
     me = this->m_gridBase;
 
   if (me->m_idFillOrder[0] == 'z')
@@ -210,7 +210,7 @@ std::tuple<int, int, int> getXYZFillFirstX(const GridDetector *me, int col, int 
  */
 std::tuple<int, int, int> GridDetector::getXYZForDetectorID(const detid_t detectorID) const {
   const GridDetector *me = this;
-  if (m_map)
+  if (isParametrized())
     me = this->m_gridBase;
 
   int id = detectorID - me->m_idstart;
@@ -230,7 +230,7 @@ std::tuple<int, int, int> GridDetector::getXYZForDetectorID(const detid_t detect
 /// Returns the number of pixels in the X direction.
 /// @return number of X pixels
 int GridDetector::xpixels() const {
-  if (m_map)
+  if (isParametrized())
     return m_gridBase->m_xpixels;
   else
     return this->m_xpixels;
@@ -240,7 +240,7 @@ int GridDetector::xpixels() const {
 /// Returns the number of pixels in the Y direction.
 /// @return number of y pixels
 int GridDetector::ypixels() const {
-  if (m_map)
+  if (isParametrized())
     return m_gridBase->m_ypixels;
   else
     return this->m_ypixels;
@@ -250,7 +250,7 @@ int GridDetector::ypixels() const {
 /// Returns the number of pixels in the Z direction.
 /// @return number of z pixels
 int GridDetector::zpixels() const {
-  if (m_map)
+  if (isParametrized())
     return m_gridBase->m_zpixels;
   else
     return this->m_zpixels;
@@ -259,7 +259,7 @@ int GridDetector::zpixels() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the step size in the X direction
 double GridDetector::xstep() const {
-  if (m_map) {
+  if (isParametrized()) {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalex"))
       scaling = m_map->get(m_gridBase, "scalex")->value<double>();
@@ -271,7 +271,7 @@ double GridDetector::xstep() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the step size in the Y direction
 double GridDetector::ystep() const {
-  if (m_map) {
+  if (isParametrized()) {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scaley"))
       scaling = m_map->get(m_gridBase, "scaley")->value<double>();
@@ -283,7 +283,7 @@ double GridDetector::ystep() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the step size in the Z direction
 double GridDetector::zstep() const {
-  if (m_map) {
+  if (isParametrized()) {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalez"))
       scaling = m_map->get(m_gridBase, "scalez")->value<double>();
@@ -295,7 +295,7 @@ double GridDetector::zstep() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the start position in the X direction
 double GridDetector::xstart() const {
-  if (m_map) {
+  if (isParametrized()) {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalex"))
       scaling = m_map->get(m_gridBase, "scalex")->value<double>();
@@ -307,7 +307,7 @@ double GridDetector::xstart() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the start position in the Y direction
 double GridDetector::ystart() const {
-  if (m_map) {
+  if (isParametrized()) {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scaley"))
       scaling = m_map->get(m_gridBase, "scaley")->value<double>();
@@ -319,7 +319,7 @@ double GridDetector::ystart() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the start position in the Z direction
 double GridDetector::zstart() const {
-  if (m_map) {
+  if (isParametrized()) {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalez"))
       scaling = m_map->get(m_gridBase, "scalez")->value<double>();
@@ -331,7 +331,7 @@ double GridDetector::zstart() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the size in the X direction
 double GridDetector::xsize() const {
-  if (m_map) {
+  if (isParametrized()) {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalex"))
       scaling = m_map->get(m_gridBase, "scalex")->value<double>();
@@ -343,7 +343,7 @@ double GridDetector::xsize() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the size in the Y direction
 double GridDetector::ysize() const {
-  if (m_map) {
+  if (isParametrized()) {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scaley"))
       scaling = m_map->get(m_gridBase, "scaley")->value<double>();
@@ -355,7 +355,7 @@ double GridDetector::ysize() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the size in the Z direction
 double GridDetector::zsize() const {
-  if (m_map) {
+  if (isParametrized()) {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalez"))
       scaling = m_map->get(m_gridBase, "scalez")->value<double>();
@@ -367,7 +367,7 @@ double GridDetector::zsize() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the idstart
 int GridDetector::idstart() const {
-  if (m_map)
+  if (isParametrized())
     return m_gridBase->m_idstart;
   else
     return this->m_idstart;
@@ -376,7 +376,7 @@ int GridDetector::idstart() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the idfillbyfirst_y
 bool GridDetector::idfillbyfirst_y() const {
-  if (m_map)
+  if (isParametrized())
     return m_gridBase->m_idfillbyfirst_y;
   else
     return this->m_idfillbyfirst_y;
@@ -384,7 +384,7 @@ bool GridDetector::idfillbyfirst_y() const {
 
 /// Returns the id fill order
 std::string GridDetector::idFillOrder() const {
-  if (m_map)
+  if (isParametrized())
     return m_gridBase->m_idFillOrder;
   else
     return this->m_idFillOrder;
@@ -393,7 +393,7 @@ std::string GridDetector::idFillOrder() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the idstepbyrow
 int GridDetector::idstepbyrow() const {
-  if (m_map)
+  if (isParametrized())
     return m_gridBase->m_idstepbyrow;
   else
     return this->m_idstepbyrow;
@@ -402,7 +402,7 @@ int GridDetector::idstepbyrow() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the idstep
 int GridDetector::idstep() const {
-  if (m_map)
+  if (isParametrized())
     return m_gridBase->m_idstep;
   else
     return this->m_idstep;
@@ -419,7 +419,7 @@ int GridDetector::idstep() const {
  * @return a V3D vector of the relative position
  */
 V3D GridDetector::getRelativePosAtXYZ(int x, int y, int z) const {
-  if (m_map) {
+  if (isParametrized()) {
     double scalex = 1.0;
     if (m_map->contains(m_gridBase, "scalex"))
       scalex = m_map->get(m_gridBase, "scalex")->value<double>();
@@ -563,7 +563,7 @@ void GridDetector::initialize(std::shared_ptr<IObject> shape, int xpixels, doubl
                               double ystart, double ystep, int zpixels, double zstart, double zstep, int idstart,
                               const std::string &idFillOrder, int idstepbyrow, int idstep) {
 
-  if (m_map)
+  if (isParametrized())
     throw std::runtime_error("GridDetector::initialize() called for a "
                              "parametrized GridDetector");
 
@@ -592,7 +592,7 @@ void GridDetector::initialize(std::shared_ptr<IObject> shape, int xpixels, doubl
  * @return minimum detector id
  */
 detid_t GridDetector::minDetectorID() {
-  if (m_map)
+  if (isParametrized())
     return m_gridBase->m_minDetId;
   return m_minDetId;
 }
@@ -602,7 +602,7 @@ detid_t GridDetector::minDetectorID() {
  * @return maximum detector id
  */
 detid_t GridDetector::maxDetectorID() {
-  if (m_map)
+  if (isParametrized())
     return m_gridBase->m_maxDetId;
   return m_maxDetId;
 }
@@ -745,7 +745,7 @@ int GridDetector::getPointInObject(V3D & /*point*/) const {
  * @param assemblyBox :: A BoundingBox object that will be overwritten
  */
 void GridDetector::getBoundingBox(BoundingBox &assemblyBox) const {
-  if (m_map) {
+  if (isParametrized()) {
     if (hasComponentInfo()) {
       assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
       return;
