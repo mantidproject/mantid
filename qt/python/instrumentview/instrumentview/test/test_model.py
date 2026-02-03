@@ -100,11 +100,12 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         spectrum_no: np.ndarray = np.array([]),
         monitors: np.ndarray = np.array([]),
         det_mask: np.ndarray = np.array([]),
-    ):
+    ) -> tuple[FullInstrumentViewModel, MagicMock]:
         mock_ws = self._create_mock_workspace(detector_ids)
         self._setup_mocks(detector_ids, spectrum_no, monitors, det_mask)
         model = FullInstrumentViewModel(mock_ws)
         model.setup()
+        model._is_selected_in_tree = np.ones(len(model._detector_ids), dtype=bool)
         model._workspace_x_unit = "dSpacing"
         return model, mock_ws
 
@@ -422,6 +423,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._spectrum_nos = np.array([2])
         model._is_valid = np.array([True])
         model._is_masked = np.array([False])
+        model._is_selected_in_tree = np.array([True])
         peaks = model.peak_overlay_points()
         self.assertEqual(1, len(peaks))
         detector_peak = peaks["peaks_ws"][0]
@@ -463,6 +465,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._spectrum_nos = np.array([test_spectrum_no, test_spectrum_no, test_spectrum_no])
         model._is_valid = np.array([True, True, True])
         model._is_masked = np.array([False, False, False])
+        model._is_selected_in_tree = np.array([True, True, True])
         peaks = model.peak_overlay_points()
         # Should get one peak with detector ID 4 and spectrum
         # number 1
@@ -726,6 +729,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._spectrum_nos = np.array([2])
         model._is_valid = np.array([True])
         model._is_masked = np.array([True])
+        model._is_selected_in_tree = np.array([True])
         peaks = model.peak_overlay_points()
         self.assertEqual(0, len(peaks[peaks_ws.name()]))
 
@@ -947,6 +951,55 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws = model.add_peak(peak_x, MagicMock())
         mock_add_peak.assert_called_once_with(peaks_ws, model._workspace, peak_x, 3)
         self.assertEqual("my_peaks_ws", ws)
+
+    def test_component_tree_no_matching_detector_ids(self):
+        """If no detector_table_indices match, all values become True."""
+        component_indices = np.array([1, 2])  # detectorIDs selected: 200, 300 (not in _detector_ids)
+        model, mock_ws = self._setup_model([100, 101, 102, 103])
+        mock_ws.detectorInfo().detectorIDs.return_value = np.array([100, 200, 300])
+        model.component_tree_indices_selected(component_indices)
+
+        np.testing.assert_array_equal(model._is_selected_in_tree, np.array([True, True, True, True]))
+
+    def test_component_tree_some_matching_detector_ids(self):
+        """Only matching detector IDs should be set True."""
+        component_indices = np.array([0])  # selects detectorID 100 (index 0)
+        model, mock_ws = self._setup_model([100, 101, 102, 103])
+        mock_ws.detectorInfo().detectorIDs.return_value = np.array([100, 200, 300])
+        model.component_tree_indices_selected(component_indices)
+
+        expected = np.array([True, False, False, False])
+        np.testing.assert_array_equal(model._is_selected_in_tree, expected)
+
+    def test_component_tree_component_indices_out_of_range(self):
+        """Indices >= len(detector_ids) should be ignored."""
+        component_indices = np.array([0, 5, 10])  # 5 and 10 ignored
+        model, mock_ws = self._setup_model([100, 101, 102, 103])
+        mock_ws.detectorInfo().detectorIDs.return_value = np.array([100, 200, 300])
+        model.component_tree_indices_selected(component_indices)
+
+        expected = np.array([True, False, False, False])
+        np.testing.assert_array_equal(model._is_selected_in_tree, expected)
+
+    def test_component_tree_empty_component_indices(self):
+        """Empty input should cause no matches -> all True."""
+        component_indices = np.array([])
+        model, mock_ws = self._setup_model([100, 101, 102, 103])
+        mock_ws.detectorInfo().detectorIDs.return_value = np.array([100, 200, 300])
+        model.component_tree_indices_selected(component_indices)
+
+        expected = np.array([True, True, True, True])
+        np.testing.assert_array_equal(model._is_selected_in_tree, expected)
+
+    def test_component_tree_all_components_matching(self):
+        """Multiple matching IDs should mark multiple positions True."""
+        component_indices = np.array([0, 0])  # duplicates fine
+        model, mock_ws = self._setup_model([100, 101, 102, 103])
+        mock_ws.detectorInfo().detectorIDs.return_value = np.array([100, 200, 300])
+        model.component_tree_indices_selected(component_indices)
+
+        expected = np.array([True, False, False, False])
+        np.testing.assert_array_equal(model._is_selected_in_tree, expected)
 
 
 if __name__ == "__main__":

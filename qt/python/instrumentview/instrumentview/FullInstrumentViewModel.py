@@ -92,7 +92,7 @@ class FullInstrumentViewModel:
         self._is_masked_in_ws = self._mask_ws.extractY().flatten().astype(bool)
         # For computing current mask, detached from the permanent mask in ws
         self._is_masked = self._is_masked_in_ws
-        self._is_selected_in_tree = np.ones_like(self._is_masked).astype(bool)
+        self._is_selected_in_tree = np.ones_like(self._is_masked, dtype=bool)
         self._monitor_positions = self._detector_positions_3d[self._is_monitor == "yes"]
 
         # Initialise with zeros
@@ -639,6 +639,9 @@ class FullInstrumentViewModel:
         )
 
     def component_tree_indices_selected(self, component_indices: np.ndarray) -> None:
+        if len(component_indices) == 0:
+            self._is_selected_in_tree.fill(True)
+            return
         # The first components in the tree are the detectors, but the order of the detectors
         # is different when you access CreateDetectorTable compared to their order in the
         # component tree
