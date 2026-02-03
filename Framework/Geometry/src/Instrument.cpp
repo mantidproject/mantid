@@ -1233,9 +1233,8 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
     if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
       if (isDetFixedInBank) {
-        throw std::runtime_error("Cannot create legacy ParameterMap: Position "
-                                 "parameters for GridDetectorPixel are "
-                                 "not supported");
+        throw std::runtime_error(
+            "Cannot create legacy ParameterMap: Position parameters for GridDetectorPixel are not supported");
       }
       pmap->addV3D(componentId, ParameterMap::pos(), Kernel::toV3D(relPos));
     }
@@ -1255,9 +1254,8 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
  * instrument are loaded. */
 void Instrument::parseTreeAndCacheBeamline() {
   if (isParametrized())
-    throw std::logic_error("Instrument::parseTreeAndCacheBeamline must be "
-                           "called with the base instrument, not a "
-                           "parametrized instrument");
+    throw std::logic_error(
+        "Instrument::parseTreeAndCacheBeamline must be called with the base instrument, not a parametrized instrument");
   std::tie(m_componentInfo, m_detectorInfo) = InstrumentVisitor::makeWrappers(*this);
 }
 
