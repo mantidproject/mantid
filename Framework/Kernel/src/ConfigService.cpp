@@ -1837,6 +1837,30 @@ const InstrumentInfo &ConfigServiceImpl::getInstrument(const std::string &instru
   throw Exception::NotFoundError(errMsg, instrumentName);
 }
 
+const std::vector<std::string> ConfigServiceImpl::getInstrumentNames() const {
+  std::vector<std::string> names;
+  for (const auto &facility : m_facilities) {
+    const auto &insts = facility->instruments();
+    for (const auto &inst : insts) {
+      names.emplace_back(inst.name());
+    }
+  }
+
+  return names;
+}
+
+const std::vector<std::string> ConfigServiceImpl::getInstrumentShortNames() const {
+  std::vector<std::string> names;
+  for (const auto &facility : m_facilities) {
+    const auto &insts = facility->instruments();
+    for (const auto &inst : insts) {
+      names.emplace_back(inst.shortName());
+    }
+  }
+
+  return names;
+}
+
 /** Gets a vector of the facility Information objects
  * @return A vector of FacilityInfo objects
  */

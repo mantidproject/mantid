@@ -213,6 +213,9 @@ public:
   /// Look for an instrument
   const InstrumentInfo &getInstrument(const std::string &instrumentName = "") const;
 
+  const std::vector<std::string> getInstrumentNames() const;
+  const std::vector<std::string> getInstrumentShortNames() const;
+
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver &observer) const;
 

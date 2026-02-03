@@ -139,42 +139,36 @@ std::string FileFinderImpl::extractAllowedSuffix(std::string &userString) const 
 const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint,
                                                            const bool returnDefaultIfNotFound) const {
   if ((!hint.empty()) && (!isdigit(hint[0]))) {
-    string instrName(hint);
-    std::filesystem::path path(instrName);
-    instrName = path.filename().string();
-    if (instrName.starts_with("PG3") || instrName.starts_with("pg3")) {
-      instrName = "PG3";
-    }
-    // We're extending this nasty hack to accomodate data archive searching for
-    // SANS2D.
-    // While this certainly shouldn't be considered good practice, #7515 exists
-    // to
-    // completely redesign FileFinder -- this quick fix will have to do until
-    // all this
-    // code gets an overhaul as part of that ticket.  Please think twice before
-    // adding
-    // any more instruments to this list.
-    else if (instrName.starts_with("SANS2D") || instrName.starts_with("sans2d")) {
-      instrName = "SANS2D";
-    } else {
-      // go forwards looking for the run number to start
-      {
-        const auto it = std::find_if(instrName.begin(), instrName.end(), isdigit);
-        const auto nChars = std::distance(instrName.begin(), it);
-        instrName.resize(nChars);
+    // If hint contains path components, use only the filename part for instrument detection
+    std::string filename = toUpper(std::filesystem::path(hint).filename());
+
+    try {
+      std::string instrName;
+
+      // try short name first
+      for (const auto &shortName : Kernel::ConfigService::Instance().getInstrumentShortNames()) {
+        if (filename.starts_with(shortName)) {
+          instrName = shortName;
+          break;
+        }
       }
 
-      // go backwards looking for the instrument name to end - gets around
-      // delimiters
-      if (!instrName.empty()) {
-        const auto it = std::find_if(instrName.rbegin(), instrName.rend(), isalpha);
-        const auto nChars = std::distance(it, instrName.rend());
-        instrName.resize(nChars);
+      // try full name next
+      if (instrName.empty()) {
+        for (const auto &shortName : Kernel::ConfigService::Instance().getInstrumentNames()) {
+          if (filename.starts_with(shortName)) {
+            instrName = shortName;
+            break;
+          }
+        }
       }
-    }
-    try {
-      const Kernel::InstrumentInfo instrument = Kernel::ConfigService::Instance().getInstrument(instrName);
-      return instrument;
+
+      // if still empty, throw not found
+      if (instrName.empty()) {
+        throw Kernel::Exception::NotFoundError("Instrument not found", hint);
+      }
+
+      return Kernel::ConfigService::Instance().getInstrument(instrName);
     } catch (Kernel::Exception::NotFoundError &e) {
       g_log.debug() << e.what() << "\n";
       if (!returnDefaultIfNotFound) {
