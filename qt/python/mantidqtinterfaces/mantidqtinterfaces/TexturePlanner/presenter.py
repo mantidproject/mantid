@@ -54,6 +54,9 @@ class TexturePlannerPresenter(object):
         self.view.set_on_save_file_changed(self.enable_outputs)
         self.view.set_on_show_mu_toggled(self.set_show_mu)
         self.view.set_on_material_changed(self.set_material)
+        self.view.set_on_gauge_vol_state_changed(self.update_gauge_volume_state)
+        self.view.set_on_gauge_vol_file_changed(self.update_set_gauge_vol_enabled)
+        self.view.set_on_set_gauge_volume_clicked(self.set_gauge_volume)
 
     def set_view_texture_directions(self, names, vecs):
         self.view.set_rd_name(names[0])
@@ -236,6 +239,8 @@ class TexturePlannerPresenter(object):
         self.model.output_as_matrix(self.view.get_save_dir(), self.view.get_save_filename())
 
     def set_show_mu(self):
+        self.update_custom_shape_finder_enabled()
+        self.update_set_gauge_vol_enabled()
         self.view.set_material_visible(self.view.get_show_mu())
         self.model.set_plot_attenuation(self.view.get_show_mu())
         self.model.update_all_projected_data()
@@ -257,3 +262,20 @@ class TexturePlannerPresenter(object):
         )
         self.model.update_all_projected_data()
         self.update_plots()
+
+    def set_gauge_volume(self):
+        self.model.set_gauge_volume_str(self.view.get_shape_method(), self.view.get_custom_shape())
+        self.model.update_all_projected_data()
+        self.update_plots()
+
+    def update_gauge_volume_state(self):
+        self.update_custom_shape_finder_enabled()
+        self.update_set_gauge_vol_enabled()
+
+    def update_custom_shape_finder_enabled(self):
+        self.view.set_finder_gauge_vol_enabled(self.view.get_shape_method() == "Custom Shape")
+
+    def update_set_gauge_vol_enabled(self):
+        self.view.set_set_gauge_vol_enabled(True)
+        if self.view.get_shape_method() == "Custom Shape":
+            self.view.set_set_gauge_vol_enabled(self.view.get_custom_shape() is not None)
