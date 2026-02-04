@@ -336,7 +336,7 @@ class Test_ClientHelloPacket(unittest.TestCase):
         packet = ClientHelloPacket(header=self.header, payload=self.payload)
 
         # Verify start_time is correctly extracted
-        expected_start_time = np.datetime64(self.start_time_value, "s")
+        expected_start_time = np.datetime64(self.start_time_value + EPICS_EPOCH_OFFSET, "s")
         self.assertEqual(packet.start_time, expected_start_time)
 
         # Verify it's accessible via property
@@ -350,7 +350,7 @@ class Test_ClientHelloPacket(unittest.TestCase):
         self.assertTrue(packet.is_StartOfRun_packet)
 
         # Verify the calculation is consistent
-        self.assertEqual(packet.start_time, np.datetime64(1, "s"))
+        self.assertEqual(packet.start_time, np.datetime64(1 + EPICS_EPOCH_OFFSET, "s"))
 
 
 if __name__ == "__main__":

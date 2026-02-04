@@ -432,25 +432,30 @@ class TestSessionServer(unittest.TestCase):
         self.server._glob = (Path(f"{self.temp_dir}/sessions"), [""])
         self.assertTrue(self.server.is_multi_session)
 
-    def test_property_sessionnumber(self):
-        """Test that sessionnumber property correctly tracks the current session number."""
+    def test_claim_session_index(self):
+        """Test that _claim_session_index increments and returns the session index."""
         self.server._session_number = mock.MagicMock()
-        self.server._session_number.value = 2
-        self.assertEqual(self.server.session_number, 2)
+        self.server._session_number.value = 1
 
-    def test_session_path_record_mode(self):
-        """Test that session_path validates record-mode session directories."""
+        # We need to simulate the lock context manager
+        self.server._session_number.get_lock.return_value.__enter__.return_value = None
+
+        idx1 = self.server._claim_session_index()
+        self.assertEqual(idx1, 1)
+        self.assertEqual(self.server._session_number.value, 2)
+        self.server._session_number.get_lock.assert_called_once()
+
+    def test_session_path_for_record_mode(self):
+        """Test that _session_path_for validates record-mode session directories."""
         with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
             base = Path(tmpdir)
             self.server._glob = (base, [""])  # base_path for record mode
             self.server._record = True
 
             # Positive: directory does not exist or is empty
-            session_number = 26
-            self.server._session_number = mock.MagicMock()
-            self.server._session_number.value = session_number
-            expected = base / f"{session_number:04d}"
-            result = self.server.session_path
+            session_idx = 26
+            expected = base / f"{session_idx:04d}"
+            result = self.server._session_path_for(session_idx)
             self.assertEqual(result, expected)
 
         with TemporaryDirectory(prefix=f"{__name__}_") as tmpdir:
@@ -459,24 +464,41 @@ class TestSessionServer(unittest.TestCase):
             self.server._record = True
 
             # Negative: directory exists and is non-empty
-            session_number = 42
-            bad_path = base / f"{session_number:04d}"
+            session_idx = 42
+            bad_path = base / f"{session_idx:04d}"
             bad_path.mkdir(parents=True, exist_ok=True)
             (bad_path / "something_in_the_directory.adara").touch()
 
-            self.server._session_number = mock.MagicMock()
-            self.server._session_number.value = session_number
-
             with self.assertRaises(RuntimeError) as context:
-                _ = self.server.session_path
+                _ = self.server._session_path_for(session_idx)
             self.assertIn("is not empty", str(context.exception))
 
-    def test_session_path_raises_when_not_record(self):
-        """session_path is only valid in record mode."""
+    def test_session_files_for_play_mode(self):
+        """Test that _session_files_for returns correct file iterator for play mode."""
+        # Create a server with mocked sessions
         self.server._record = False
         with self.assertRaises(RuntimeError) as context:
-            _ = self.server.session_path
+            _ = self.server._session_path_for(1)
         self.assertIn("`session_path` is only used in 'record' mode", str(context.exception))
+
+        # Create dummy session iterators
+        session1_files = [Path("s1f1")]
+        session2_files = [Path("s2f1"), Path("s2f2")]
+
+        # We need _sessions to be an iterator that yields iterators
+        self.server._sessions = iter([iter(session1_files), iter(session2_files)])
+
+        # Retrieve session 1
+        # Note: _session_files_for uses islice, which consumes the main iterator
+        result1 = list(self.server._session_files_for(1))
+        self.assertEqual(result1, session1_files)
+
+        # Re-create server sessions iterator for next test since it was partially consumed
+        self.server._sessions = iter([iter(session1_files), iter(session2_files)])
+
+        # Retrieve session 2
+        result2 = list(self.server._session_files_for(2))
+        self.assertEqual(result2, session2_files)
 
     def test_processrequest_accepts_and_logs_session(self):
         """Test that processrequest handles client requests and logs each new session."""
@@ -534,8 +556,9 @@ class TestSessionHandler(unittest.TestCase):
         mock_server = mock.Mock()
         mock_server.record = False
         mock_server.source_address = None
-        mock_server.session_files = mock.sentinel.session_files
-        mock_server.increment_session_number = mock.Mock()
+        mock_server._claim_session_index.return_value = 1
+        mock_server._session_files_for.return_value = mock.sentinel.session_files
+
         mock_server.dry_run = False
 
         with mock.patch("session_server.Player") as PlayerMock:
@@ -547,14 +570,15 @@ class TestSessionHandler(unittest.TestCase):
 
             player_inst.play.assert_called_once_with(mock_request, mock.sentinel.session_files, dry_run=False)
             player_inst.record.assert_not_called()
-            mock_server.increment_session_number.assert_called_once()
+            mock_server._claim_session_index.assert_called_once()
+            mock_server._session_files_for.assert_called_once_with(1)
 
         # Record mode
         mock_server = mock.Mock()
         mock_server.record = True
         mock_server.source_address = None
-        mock_server.session_path = mock.sentinel.session_path
-        mock_server.increment_session_number = mock.Mock()
+        mock_server._claim_session_index.return_value = 2
+        mock_server._session_path_for.return_value = mock.sentinel.session_path
 
         with mock.patch("session_server.Player") as PlayerMock:
             player_inst = PlayerMock.return_value
@@ -565,7 +589,8 @@ class TestSessionHandler(unittest.TestCase):
 
             player_inst.record.assert_called_once_with(mock.sentinel.session_path, mock_request)
             player_inst.play.assert_not_called()
-            mock_server.increment_session_number.assert_called_once()
+            mock_server._claim_session_index.assert_called_once()
+            mock_server._session_path_for.assert_called_once_with(2)
 
 
 class TestSessionTCPServer(unittest.TestCase):
