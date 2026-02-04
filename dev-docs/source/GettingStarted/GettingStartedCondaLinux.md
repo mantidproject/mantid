@@ -6,6 +6,7 @@
 - On CentOS based systems (RHEL) install using yum with the following command: `sudo yum install git`
 
 ```{include} CloningMantid.md
+:heading-offset: 1
 ```
 
 ## Install [Miniforge](https://github.com/conda-forge/miniforge/releases)

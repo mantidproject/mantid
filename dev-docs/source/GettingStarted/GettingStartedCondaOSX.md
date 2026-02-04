@@ -5,6 +5,7 @@
 - On MacOS install using brew with the following command: `brew install git`
 
 ```{include} CloningMantid.md
+:heading-offset: 1
 ```
 
 ## Install [Miniforge](https://github.com/conda-forge/miniforge/releases)
