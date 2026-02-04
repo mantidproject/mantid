@@ -18,6 +18,7 @@ from mantid.simpleapi import (
     CloneWorkspace,
     RotateSampleShape,
     TranslateSampleShape,
+    DefineGaugeVolume,
 )
 from mantid.api import AnalysisDataService as ADS
 from Engineering.EnggUtils import GROUP, CALIB_DIR
@@ -32,6 +33,9 @@ import matplotlib.pyplot as plt
 from mantid.kernel import logger
 from Engineering.texture.TextureUtils import convert_to_sscanss_frame
 from Engineering.texture.correction.correction_model import read_attenuation_coefficient_at_value
+from Engineering.texture.texture_helper import get_gauge_vol_str
+from mantid.dataobjects import Workspace2D
+from typing import Optional
 
 
 class TexturePlannerModel(object):
@@ -65,6 +69,7 @@ class TexturePlannerModel(object):
         self.orientation_index = 0
         self.n_output_points = 1
         self.plot_attenuation = False
+        self.gauge_volume_str = None
 
         # stl_settings
         self.stl_kwargs = {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": "0", "TranslationVector": "0,0,0"}
@@ -75,10 +80,10 @@ class TexturePlannerModel(object):
         self.mc_kwargs = {
             "InputWorkspace": "__mc_ws",
             "OutputWorkspace": "__abs_ws",
-            "EventsPerPoint": 100,
-            "MaxScatterPtAttempts": 1000,
+            "EventsPerPoint": 50,
+            "MaxScatterPtAttempts": int(1e4),
             "SimulateScatteringPointIn": "SampleOnly",
-            "ResimulateTracksForDifferentWavelengths": True,
+            "ResimulateTracksForDifferentWavelengths": False,
         }
 
         self.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing", "material": "Fe"}
@@ -92,7 +97,7 @@ class TexturePlannerModel(object):
     def update_ws(self):
         if not self.ws:
             self.instr_ws = LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=self.instr_wsname)
-            self.ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0.1,0.5,2", OutputWorkspace=self.wsname, UnitX="dSpacing")
+            self.ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="1,0.5,2", OutputWorkspace=self.wsname, UnitX="dSpacing")
             for ispec in range(self.ws.getNumberHistograms()):
                 self.ws.setY(ispec, np.ones_like(self.ws.readY(ispec)))
             self.mesh_ws = CloneWorkspace(InputWorkspace=self.wsname, OutputWorkspace="__texture_planning_raw_sample_mesh")
@@ -440,9 +445,14 @@ class TexturePlannerModel(object):
             vec = rotvec / ang
             RotateSampleShape("__mc_ws", f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
 
-        MonteCarloAbsorption(**self.mc_kwargs)
-        # first entry is null group so we can ignore it
-        mu = read_attenuation_coefficient_at_value("__abs_ws", self.attenuation_kwargs["point"], self.attenuation_kwargs["unit"])[1:]
+        define_gauge_volume(mc_ws, self.gauge_volume_str)
+        try:
+            MonteCarloAbsorption(**self.mc_kwargs)
+            # first entry is null group so we can ignore it
+            mu = read_attenuation_coefficient_at_value("__abs_ws", self.attenuation_kwargs["point"], self.attenuation_kwargs["unit"])[1:]
+        except RuntimeError:
+            logger.warning("MonteCarloAbsorption has failed, sample is assumed to be outside the gauge volume ")
+            mu = np.zeros(mc_ws.getNumberHistograms() - 1)
         self.saved_orientations[index]["mu"] = mu
 
     def calc_all_monte_carlo_absorption_vals(self):
@@ -504,9 +514,11 @@ class TexturePlannerModel(object):
         sample_model = ShowSampleModel()
         sample_model.fig = fig
         sample_model.ws_name = self.wsname
+        sample_model.gauge_vol_str = self.gauge_volume_str
         fig.sca(lab_ax)
         plot_sample_only(fig, rot_mesh * 0.5, 0.5, "grey")
         sample_model.plot_sample_directions(ax_transform, self.dir_names)
+        sample_model.plot_gauge_vol()
         lab_ax.set_xlim([-extent * nGon / 1.5, extent * nGon / 1.5])
         lab_ax.set_ylim([-extent * nGon / 1.5, extent * nGon / 1.5])
         lab_ax.set_zlim([-extent * nGon / 1.5, extent * nGon / 1.5])
@@ -618,6 +630,9 @@ class TexturePlannerModel(object):
             f"Scheme ({self.orientation_kwargs['Axes']}) and Senses ({self.orientation_kwargs['Senses']})"
         )
 
+    def set_gauge_volume_str(self, preset, custom):
+        self.gauge_volume_str = get_gauge_vol_str(preset, custom)
+
 
 def ring(axis, r=1, res=100, offset=(0, 0, 0)):
     u = np.linspace(0, 2 * np.pi, res)
@@ -683,3 +698,8 @@ def vec_string_to_norm_array(vec_string):
         # from the auto plot updates
         return np.array((1, 0, 0))
     return vec / np.linalg.norm(vec)
+
+
+def define_gauge_volume(ws: Workspace2D, gauge_str: Optional[str]) -> None:
+    if gauge_str:
+        DefineGaugeVolume(ws, gauge_str)

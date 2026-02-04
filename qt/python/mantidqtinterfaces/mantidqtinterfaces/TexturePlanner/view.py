@@ -48,6 +48,10 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.finder_save_dir.isForDirectory(True)
         self.finder_save_dir.setFileExtensions([".txt"])
 
+        self.finder_gauge_vol.setLabelText("Custom Gauge Volume File")
+        self.finder_gauge_vol.allowMultipleFiles(False)
+        self.finder_gauge_vol.setFileExtensions([".xml"])
+
         self.gonio_axes = (self.axis0, self.axis1, self.axis2, self.axis3, self.axis4, self.axis5)
         self.gonio_angles = (self.spnAngle0, self.spnAngle1, self.spnAngle2, self.spnAngle3, self.spnAngle4, self.spnAngle5)
         self.gonio_senses = (self.cmbSense0, self.cmbSense1, self.cmbSense2, self.cmbSense3, self.cmbSense4, self.cmbSense5)
@@ -143,6 +147,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_on_load_orient_clicked(self, slot):
         self.btnOrient.clicked.connect(slot)
+
+    def set_on_set_gauge_volume_clicked(self, slot):
+        self.setGV.clicked.connect(slot)
 
     def set_on_select_all_clicked(self, slot):
         self.selectAll.clicked.connect(slot)
@@ -291,6 +298,13 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def get_init_pz(self):
         return self.spnInitPZ.value()
+
+    def get_shape_method(self):
+        return self.combo_shapeMethod.currentText()
+
+    def get_custom_shape(self):
+        fnames = self.finder_gauge_vol.getFilenames()
+        return fnames[0] if len(fnames) > 0 else None
 
     # setters
 
@@ -479,3 +493,18 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_material_visible(self, vis):
         self.edtMaterial.setVisible(vis)
         self.lblMaterial.setVisible(vis)
+        self.combo_shapeMethod.setVisible(vis)
+        self.finder_gauge_vol.setVisible(vis)
+        self.setGV.setVisible(vis)
+
+    def set_finder_gauge_vol_enabled(self, enabled):
+        self.finder_gauge_vol.setEnabled(enabled)
+
+    def set_set_gauge_vol_enabled(self, enabled):
+        self.setGV.setEnabled(enabled)
+
+    def set_on_gauge_vol_state_changed(self, slot):
+        self.combo_shapeMethod.currentIndexChanged.connect(slot)
+
+    def set_on_gauge_vol_file_changed(self, slot):
+        self.finder_gauge_vol.filesFoundChanged.connect(slot)
