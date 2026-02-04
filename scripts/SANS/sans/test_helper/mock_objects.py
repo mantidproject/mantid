@@ -7,15 +7,15 @@
 from functools import partial
 
 from unittest import mock
-from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
+from mantidqtinterfaces.sans_isis.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import RangeStepType, OutputMode, SANSFacility, SANSInstrument
 from sans.state.JsonSerializable import JsonSerializable
 from sans.test_helper.test_director import TestDirector
-from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
-from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
-from ui.sans_isis.diagnostics_page import DiagnosticsPage
-from ui.sans_isis.masking_table import MaskingTable
-from ui.sans_isis.beam_centre import BeamCentre
+from mantidqtinterfaces.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
+from mantidqtinterfaces.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
+from mantidqtinterfaces.sans_isis.diagnostics_page import DiagnosticsPage
+from mantidqtinterfaces.sans_isis.masking_table import MaskingTable
+from mantidqtinterfaces.sans_isis.beam_centre import BeamCentre
 
 
 def create_mock_settings_diagnostic_tab():

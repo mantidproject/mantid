@@ -37,7 +37,7 @@ from sans.common.constants import (
     SCALED_BGSUB_SUFFIX,
 )
 from sans.common.file_information import get_extension_for_file_type, SANSFileInformationFactory
-from sans.gui_logic.plotting import get_plotting_module
+from mantidqtinterfaces.sans_isis.gui_logic.plotting import get_plotting_module
 from sans.state.Serializer import Serializer
 from sans.state.StateObjects.StateData import StateData
 
