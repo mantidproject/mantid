@@ -1,4 +1,4 @@
-# Clone the mantid source code
+## Clone the mantid source code
 
 - **Important**: If you have any existing non-conda mantid development environments,
   do not re-use the source and build directories for your conda environment.
