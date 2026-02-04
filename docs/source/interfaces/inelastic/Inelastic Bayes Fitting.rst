@@ -26,8 +26,16 @@ Settings
   Opens this help page.
 
 Backend selection box
-  This drop down selects whether to use the ``quasielasticbayes`` or ``quickbayes``
-  package as the underlying model for the Quasi and Stretch tabs.
+  This drop down selects whether to use the ``quasielasticbayes`` or ``quickbayes`` package as the underlying model for
+  the Quasi and Stretch tabs.
+
+  +------------------------+-----------------------------------------------------------------------------------+
+  | Backend selected       | Underlying algorithms                                                             |
+  +========================+===================================================================================+
+  | ``quasielasticbayes``  | :ref:`BayesQuasi <algm-BayesQuasi>`   & :ref:`BayesStretch <algm-BayesStretch>`   |
+  +------------------------+-----------------------------------------------------------------------------------+
+  | ``quickbayes``         | :ref:`BayesQuasi2 <algm-BayesQuasi2>` & :ref:`BayesStretch2 <algm-BayesStretch2>` |
+  +------------------------+-----------------------------------------------------------------------------------+
 
 Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
@@ -55,30 +63,25 @@ algorithm.
 Options
 ~~~~~~~
 
-Vanadium File
-  Either a reduced file created using the Energy Transfer tab or an
-  :math:`S(Q, \omega)` file.
-
-Resolution File
-  A resolution file created using the Calibrtion tab.
-
-EMin & EMax
-  The energy range to perform fitting within.
-
-Preview Spectrum
-  Changes the spectrum displayed in the preview plot.
-
-Plot Current Preview
-  Plots the currently selected preview plot in a separate external window
-
-Run
-  Runs the processing configured on the current tab.
-
-Plot
-  Plots the selected parameter stored in the result workspaces.
-
-Save Result
-  Saves the result in the default save directory.
++----------------------+--------------------------------------------------------------------------------------------+
+| Parameter            | Description                                                                                |
++======================+============================================================================================+
+| Vanadium File        | Either a reduced file created using the Energy Transfer tab or a :math:`S(Q, \omega)` file |
++----------------------+--------------------------------------------------------------------------------------------+
+| Resolution File      | A resolution file created using the Calibration Tab                                        |
++----------------------+--------------------------------------------------------------------------------------------+
+| Plot Current Preview | Plots the currently selected preview plot in a separate external window                    |
++----------------------+--------------------------------------------------------------------------------------------+
+| EMin & EMax          | The energy range to perform fitting within                                                 |
++----------------------+--------------------------------------------------------------------------------------------+
+| Preview Spectrum     | Changes the spectrum displayed in the preview plot                                         |
++----------------------+--------------------------------------------------------------------------------------------+
+| Run                  | Runs the processing configured on the current tab                                          |
++----------------------+--------------------------------------------------------------------------------------------+
+| Plot                 | Plots the selected parameter stored in the result workspaces                               |
++----------------------+--------------------------------------------------------------------------------------------+
+| Save Result          | Saves the result in the default save directory                                             |
++----------------------+--------------------------------------------------------------------------------------------+
 
 Quasi
 -----
@@ -113,61 +116,49 @@ of spectra.
 Options
 ~~~~~~~
 
-Sample
-  Either a reduced file created using the Energy Transfer tab or an
-  :math:`S(Q, \omega)` file.
-
-Resolution
-  A resolution file created using the Calibration tab.
-
-Program
-  The curve fitting program to use.
-
-Background
-  The background fitting program to use.
-
-Elastic Peak
-  If an elastic peak should be used.
-
-Sequential Fit
-  Enables multiple fitting iterations.
-
-Fix Width
-  Allows selection of a width file.
-
-Use ResNorm
-  Allows selection of a ResNorm output file or workspace to use with fitting.
-
-EMin & EMax
-  The energy range to perform fitting within.
-
-Sample Binning
-  Sample binning to use.
-
-Resolution Binning
-  Resolution binning to use.
-
-Preview Spectrum
-  Changes the spectrum displayed in the preview plot.
-
-Plot Current Preview
-  Plots the currently selected preview plot in a separate external window
-
-Run
-  Runs the processing configured on the current tab.
-
-Plot
-  Plots the selected parameter stored in the result workspaces.
-
-Save Result
-  Saves the result in the default save directory.
++----------------------+--------------------------------------------------------------------------------------------+
+| Parameter            | Description                                                                                |
++======================+============================================================================================+
+| Sample               | Either a reduced file created using the Energy tab or a :math:`S(Q, \omega)` file.         |
++----------------------+--------------------------------------------------------------------------------------------+
+| Resolution           | A resolution file created using the Calibration Tab                                        |
++----------------------+--------------------------------------------------------------------------------------------+
+| Program              | The curve fitting program to use                                                           |
++----------------------+--------------------------------------------------------------------------------------------+
+| Background           | The background fitting program to use                                                      |
++----------------------+--------------------------------------------------------------------------------------------+
+| Elastic Peak         | If an elastic peak should be used                                                          |
++----------------------+--------------------------------------------------------------------------------------------+
+| Sequential Fit       | Enabled multiple fitting iterations                                                        |
++----------------------+--------------------------------------------------------------------------------------------+
+| Plot Current Preview | Plots the currently selected preview plot in a separate external window                    |
++----------------------+--------------------------------------------------------------------------------------------+
+| Fix Width            | Allows selection of a width file                                                           |
++----------------------+--------------------------------------------------------------------------------------------+
+| Use ResNorm          | Allows selection of a ResNorm output file or workspace to use with fitting                 |
++----------------------+--------------------------------------------------------------------------------------------+
+| EMin & EMax          | The energy range to perform fitting within                                                 |
++----------------------+--------------------------------------------------------------------------------------------+
+| Sample Binning       | Sample binning to use                                                                      |
++----------------------+--------------------------------------------------------------------------------------------+
+| Resolution Binning   | Resolution binning to use                                                                  |
++----------------------+--------------------------------------------------------------------------------------------+
+| Preview Spectrum     | Changes the spectrum displayed in the preview plot                                         |
++----------------------+--------------------------------------------------------------------------------------------+
+| Run                  | Runs the processing configured on the current tab                                          |
++----------------------+--------------------------------------------------------------------------------------------+
+| Plot                 | Plots the selected parameter stored in the result workspaces                               |
++----------------------+--------------------------------------------------------------------------------------------+
+| Save Result          | Saves the result in the default save directory                                             |
++----------------------+--------------------------------------------------------------------------------------------+
 
 Stretch
 -------
 
 This is a variation of the stretched exponential option of Quasi. For each
 spectrum, a fit is performed for a grid of β and σ values. The distribution of
-goodness of fit values is plotted.
+goodness of fit values is plotted. Some of the options change depending on the underlying
+model selected.
 
 .. interface:: Bayes Fitting
   :widget: Stretch
@@ -175,50 +166,58 @@ goodness of fit values is plotted.
 Options
 ~~~~~~~
 
-Sample
-  Either a reduced file created using the Energy Transfer tab or an
-  :math:`S(Q, \omega)` file.
+There are some parameters exclusive of either ``quasielasticbayes`` or ``quickbayes`` model that change automatically
+depending on the backend selection.
+For both models:
 
-Resolution
-  A resolution file created using the Calibration tab.
++----------------------+--------------------------------------------------------------------------------------------+
+| Parameter            | Description                                                                                |
++======================+============================================================================================+
+| Sample               | Either a reduced file created using the Energy tab or a :math:`S(Q, \omega)` file.         |
++----------------------+--------------------------------------------------------------------------------------------+
+| Resolution           | A resolution file created using the Calibration Tab                                        |
++----------------------+--------------------------------------------------------------------------------------------+
+| Background           | The background fitting program to use                                                      |
++----------------------+--------------------------------------------------------------------------------------------+
+| Elastic Peak         | If an elastic peak should be used                                                          |
++----------------------+--------------------------------------------------------------------------------------------+
+| EMin & EMax          | The energy range to perform fitting within                                                 |
++----------------------+--------------------------------------------------------------------------------------------+
+| Sigma                | Number of Sigma(FWHM) values                                                               |
++----------------------+--------------------------------------------------------------------------------------------+
+| Beta                 | Number of Beta values                                                                      |
++----------------------+--------------------------------------------------------------------------------------------+
+| Plot Current Preview | Plots the currently selected preview plot in a separate external window                    |
++----------------------+--------------------------------------------------------------------------------------------+
+| Preview Spectrum     | Changes the spectrum displayed in the preview plot                                         |
++----------------------+--------------------------------------------------------------------------------------------+
+| Run                  | Runs the processing configured on the current tab                                          |
++----------------------+--------------------------------------------------------------------------------------------+
+| Plot                 | Plots the selected parameter stored in the result workspaces                               |
++----------------------+--------------------------------------------------------------------------------------------+
+| Plot Contour         | Produces a contour plot of the selected workspaces                                         |
++----------------------+--------------------------------------------------------------------------------------------+
+| Save Result          | Saves the result in the default save directory                                             |
++----------------------+--------------------------------------------------------------------------------------------+
 
-Background
-  The background fitting program to use.
+For ``quasielastic`` model there are also the following parameters:
 
-Elastic Peak
-  If an elastic peak should be used.
++----------------------+--------------------------------------------------------------------------------------------+
+| Sequential Fit       | Enabled multiple fitting iterations                                                        |
++----------------------+--------------------------------------------------------------------------------------------+
+| Sample Binning       | Sample binning to use                                                                      |
++----------------------+--------------------------------------------------------------------------------------------+
 
-Sequential Fit
-  Enables multiple fitting iterations.
+While for ``quickbayes`` the additional parameters are:
 
-EMin & EMax
-  The energy range to perform fitting within.
-
-Sample Binning
-  Sample binning to use.
-
-Sigma
-  Value of Sigma to use.
-
-Beta
-  Value of Beta to use.
-
-Preview Spectrum
-  Changes the spectrum displayed in the preview plot.
-
-Plot Current Preview
-  Plots the currently selected preview plot in a separate external window
-
-Run
-  Runs the processing configured on the current tab.
-
-Plot
-  Plots the selected parameter stored in the result workspaces.
-
-Plot Contour
-  Produces a contour plot of the selected workspace.
-
-Save Result
-  Saves the result in the default save directory.
++----------------------+--------------------------------------------------------------------------------------------+
+| Start Beta           | Initial value of Beta                                                                      |
++----------------------+--------------------------------------------------------------------------------------------+
+| End Beta             | Final value of Beta                                                                        |
++----------------------+--------------------------------------------------------------------------------------------+
+| Start Sigma          | Initial value of Sigma(FWHM)                                                               |
++----------------------+--------------------------------------------------------------------------------------------+
+| End Sigma            | Final value of Sigma(FWHM)                                                                 |
++----------------------+--------------------------------------------------------------------------------------------+
 
 .. categories:: Interfaces Inelastic
