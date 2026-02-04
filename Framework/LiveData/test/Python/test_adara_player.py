@@ -267,7 +267,8 @@ class Test_Player(unittest.TestCase):
             payload3 = b"MIDDLE--"
             with open(file3, "wb") as f:
                 f.write(header3 + payload3)
-            time.sleep(0.001)  # force mtime to change
+            t0 = time.time()
+            os.utime(file3, (t0, t0))  # set `mtime == t0`
 
             # Create file 2 with EARLIER timestamp (SECOND sequence number): (SECOND mtime)
             file2 = tmppath / "data-000002.adara"
@@ -280,7 +281,7 @@ class Test_Player(unittest.TestCase):
             payload2 = b"EARLIER-"
             with open(file2, "wb") as f:
                 f.write(header2 + payload2)
-            time.sleep(0.001)  # force mtime to change
+            os.utime(file2, (t0 + 1, t0 + 1))  # set `mtime == t0 + 1`
 
             # Create file 1 with LATER timestamp (FIRST sequence number): (LAST mtime)
             file1 = tmppath / "data-000001.adara"
@@ -293,6 +294,7 @@ class Test_Player(unittest.TestCase):
             payload1 = b"LATER---"
             with open(file1, "wb") as f:
                 f.write(header1 + payload1)
+            os.utime(file1, (t0 + 2, t0 + 2))  # set `mtime == t0 + 2`
 
             # iter_files should yield packets in chronological order
             # regardless of filename order

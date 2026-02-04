@@ -31,6 +31,6 @@ foreach(test_file ${TEST_PY_FILES})
   set_property(
     TEST ${_test_name}
     APPEND
-    PROPERTY ENVIRONMENT "LOGS='.'"
+    PROPERTY ENVIRONMENT "LOGS=."
   )
 endforeach()

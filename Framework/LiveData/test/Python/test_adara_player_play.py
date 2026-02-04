@@ -396,7 +396,8 @@ class Test_Player_play(unittest.TestCase):
                     patch("time.sleep") as mock_sleep,
                 ):
                     player._running = True
-                    player.stream_packets(mock_socket, Path("/fake"), ["*.adara"])
+                    files_iter = iter([Path("/fake/file1.adara")])
+                    player.stream_packets(mock_socket, files_iter)
 
                     # Verify sleep was called (retry logic)
                     mock_sleep.assert_called()

@@ -70,7 +70,10 @@ if run.hasProperty('proton_charge'):
         pulse_ts = (min(proton_charge.times), max(proton_charge.times))
 
 print(f"Loaded chunk: {input.getNumberEvents()} events")
-print(f"  pulse-times: {pulse_ts[0]} -- {pulse_ts[1]}")
+if pulse_ts:
+    print(f"  pulse-times: {pulse_ts[0]} -- {pulse_ts[1]}")
+else:
+    print("  pulse-times: N/A")
 print(f"  event-times: {event_ts[0]} -- {event_ts[1]}")
 
 output = input

@@ -59,7 +59,7 @@ def parse_args() -> argparse.Namespace:
         "--keep-fraction",
         type=float,
         default=0.1,
-        help=("Fraction of event packets to keep (0.0–1.0). For example, 0.1 keeps ~10%% of events. Default: 0.1."),
+        help=("Fraction of event packets to keep (0.0 - 1.0). For example, 0.1 keeps ~10%% of events. Default: 0.1."),
     )
     parser.add_argument(
         "--seed",

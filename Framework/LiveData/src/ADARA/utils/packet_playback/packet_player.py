@@ -141,6 +141,7 @@ init_process_logger()
 # =========================================================
 
 
+# EPICS offset from the Unix epoch (seconds).
 EPICS_EPOCH_OFFSET = 631152000
 
 
@@ -475,7 +476,8 @@ class ClientHelloPacket(Packet):
         super().__init__(header, payload)
         if self.packet_type != Packet.Type.CLIENT_HELLO_TYPE:
             raise ValueError(f"Expecting 'CLIENT_HELLO_TYPE' not '{self._packet_type}'.")
-        self._start_time = np.datetime64(struct.unpack("<I", self.payload[0:4])[0], "s")
+        tv_sec = struct.unpack("<I", self.payload[0:4])[0]
+        self._start_time = np.datetime64(tv_sec + EPICS_EPOCH_OFFSET, "s")
 
     @property
     def start_time(self) -> np.datetime64:
@@ -484,7 +486,7 @@ class ClientHelloPacket(Packet):
     @property
     def is_StartOfRun_packet(self) -> bool:
         # `start_time` == 1000000000 ns from the EPICs epoch => replay all historical data
-        return self.start_time == np.datetime64(1, "s")
+        return self.start_time - np.timedelta64(EPICS_EPOCH_OFFSET, "s") == np.datetime64(1, "s")
 
 
 @dataclass(frozen=True)
@@ -974,11 +976,12 @@ class Player:
                     if not self._running:
                         break
                     pkt = packet_buffer.popleft()
+                    current_buffer_bytes -= pkt.size  # always track `popleft` or `append`
 
                     if not dry_run:
                         readable, writable, exceptional = select.select([dest], [dest], [dest], 0)
 
-                        if socket in exceptional:
+                        if dest in exceptional:
                             _logger.error("Socket error detected")
                             return
 
@@ -997,7 +1000,7 @@ class Player:
                                 stall_start = time.monotonic()  # mark start of stall
                             _logger.debug("Client socket not ready for writing, retrying...")
                             packet_buffer.appendleft(pkt)  # Put packet back
-                            current_buffer_bytes += pkt.size
+                            current_buffer_bytes += pkt.size  # restore the bytes count
                             time.sleep(0.01)  # packet rate is 60 Hz: 0.017 seconds
                             continue
 
@@ -1019,11 +1022,9 @@ class Player:
                         except (socket.error, socket.timeout) as e:
                             _logger.error(f"Failed to send packet: {e}")
                             return
-                        current_buffer_bytes -= pkt.size
                     else:
                         # dry run: log the packet that would have been sent
                         _logger.debug(f"[{Path(pkt.source).name if pkt.source else '<unknown>'}]: SEND: {pkt}")
-                        current_buffer_bytes -= pkt.size
 
                 # Fill buffer if room available
                 if current_buffer_bytes < buffer_bytes and next_packet:

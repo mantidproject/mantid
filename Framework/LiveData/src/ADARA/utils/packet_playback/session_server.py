@@ -280,48 +280,33 @@ class SessionServer:
         # glob includes only the base_path => multi-session
         return self._glob[1] == [""]
 
-    @property
-    def session_number(self) -> int:
-        return self._session_number.value
-
-    def increment_session_number(self):
+    def _claim_session_index(self) -> int:
         with self._session_number.get_lock():
+            idx = self._session_number.value
             self._session_number.value += 1
+        return idx
 
-    @property
-    def session_path(self) -> Path:
-        if not self.record:
-            raise RuntimeError("Usage error: `session_path` is only used in 'record' mode.")
-
-        session_path = self.base_path / f"{self.session_number:04d}"
-        if session_path.exists() and any(session_path.iterdir()):
-            raise RuntimeError(f"in record mode: session directory '{session_path}' is not empty")
-        return session_path
-
-    @property
-    def session_files(self) -> Iterator[Path]:
-        """
-        Return the Iterator[Path] for the current logical session.
-
-        WARNING: relies on `_sessions` being an iterator-of-iterators that is
-        never consumed in the parent process, and is only accessed once per
-        forked child. Each child recomputes its session iterator using
-        `islice` from the beginning.
-        """
+    def _session_files_for(self, idx: int) -> Iterator[Path]:
         if self.record:
             raise RuntimeError("Usage error: in 'record' mode, `session_files` is not used.")
         if self._sessions is None:
             raise RuntimeError("no sessions defined for play/summarize")
-
-        idx = self.session_number  # 1-based
         try:
             return next(islice(self._sessions, idx - 1, idx))
         except StopIteration:
             raise RuntimeError(f"session index {idx} is out of range")
 
+    def _session_path_for(self, idx: int) -> Path:
+        if not self.record:
+            raise RuntimeError("Usage error: `session_path` is only used in 'record' mode.")
+        session_path = self.base_path / f"{idx:04d}"
+        if session_path.exists() and any(session_path.iterdir()):
+            raise RuntimeError(f"in record mode: session directory '{session_path}' is not empty")
+        return session_path
+
     # Override: `ForkingMixIn` method.
     def process_request(self, request, client_address):
-        console_logger.info(f"Accepting client connection for session {self.session_number}.")
+        console_logger.info(f"Accepting client connection for session {self._session_number.value}.")
         super().process_request(request, client_address)
 
     def signal_handler(self, signum, frame):
@@ -375,12 +360,12 @@ class SessionHandler(socketserver.BaseRequestHandler):
         try:
             if not self.server.record:
                 # Each client gets one logical session's files.
-                session_files = self.server.session_files
-                self.server.increment_session_number()
+                session_idx = self.server._claim_session_index()
+                session_files = self.server._session_files_for(session_idx)
                 player.play(self.request, session_files, dry_run=self.server.dry_run)
             else:
-                path = self.server.session_path
-                self.server.increment_session_number()
+                session_idx = self.server._claim_session_index()
+                path = self.server._session_path_for(session_idx)
                 player.record(path, self.request)
         except RuntimeError as e:
             console_logger.error(str(e))
