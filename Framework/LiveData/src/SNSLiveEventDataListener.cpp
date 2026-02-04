@@ -93,8 +93,6 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
   initWorkspacePart1();
 
   // Initialize m_keepPausedEvents from the config file.
-  // NOTE: To the best of my knowledge, the existence of this property is not
-  // documented anywhere and this lack of documentation is deliberate.
   auto keepPausedEvents = ConfigService::Instance().getValue<bool>("SNSLiveEventDataListener.keepPausedEvents");
 
   // If the property hasn't been set, assume false
@@ -160,16 +158,14 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     try {
       m_socket.connect(address); // BLOCKING connect
     } catch (const Poco::Exception &e) {
-      g_log.error() << "POCO Exception in connect(): " << e.name() << ": " << e.what() << " code: " << e.code()
-                    << " type: " << typeid(e).name();
+      g_log.error() << "POCO Exception in connect(): " << e.displayText();
       return false;
     } catch (const std::exception &e) {
       g_log.error() << "STD Exception in connect(): " << e.what() << ": "
                     << " type: " << typeid(e).name();
       return false;
     } catch (...) {
-      g_log.error() << "Unknown exception in connect(): "
-                    << " type: " << typeid(*this).name();
+      g_log.error() << "Unknown exception in connect()";
       return false;
     }
   }

@@ -205,6 +205,11 @@ def main():
         logger.warning("No input files matched glob: %s", args.input_glob)
         return
 
+    output_dir = args.output_dir.resolve()
+    for src in input_files:
+        if (output_dir / src.name).resolve() == src.resolve():
+            raise SystemExit(f"output_dir '{output_dir}' would overwrite input file '{src}'. Choose a different directory.")
+
     logger.info("Found %d input files.", len(input_files))
 
     metadata_files, event_files = classify_files(player, input_files)
@@ -216,14 +221,14 @@ def main():
 
     # Ensure output directory exists (or simulate in dry-run).
     if not args.dry_run:
-        args.output_dir.mkdir(parents=True, exist_ok=True)
+        output_dir.mkdir(parents=True, exist_ok=True)
 
     # 1) Copy metadata-only files unchanged.
-    copy_metadata_files(metadata_files, args.output_dir, args.dry_run)
+    copy_metadata_files(metadata_files, output_dir, args.dry_run)
 
     # 2) Down-sample event-bearing files.
     for src in event_files:
-        dst = args.output_dir / src.name
+        dst = output_dir / src.name
         downsample_event_file(
             src=src,
             dst=dst,

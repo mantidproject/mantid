@@ -2,6 +2,7 @@ import argparse
 import inspect
 from pathlib import Path
 import signal
+import sys
 from tempfile import TemporaryDirectory
 
 from session_server import SessionServer, SessionHandler, SessionTCPServer, SessionUDSServer, main
@@ -393,7 +394,9 @@ class TestSessionServer(unittest.TestCase):
 
     def test_parseargs_returns_namespace(self):
         """Test that SessionServer.parseargs returns an argparse.Namespace with expected attributes."""
-        args = SessionServer.parse_args()
+        with mock.patch.object(sys, "argv", ["adara_player"]):
+            args = SessionServer.parse_args()
+
         self.assertIsInstance(args, argparse.Namespace)
         self.assertTrue(hasattr(args, "record"))
         self.assertTrue(hasattr(args, "source_address"))

@@ -116,10 +116,10 @@ try:
     captureLive()
 except Exception as e:
     logger.error(f"Error occurred starting live data: {str(e)}")
-
-# put back the facility
-ConfigService.setFacility(oldFacility)
-
-# get the output workspace
-wsOut = mtd["wsOut"]
-logger.info("The 'wsOut' workspace contains %i events" % wsOut.getNumberEvents())
+else:
+    # get the output workspace
+    wsOut = mtd["wsOut"]
+    logger.info("The 'wsOut' workspace contains %i events" % wsOut.getNumberEvents())
+finally:
+    # put back the facility
+    ConfigService.setFacility(oldFacility)

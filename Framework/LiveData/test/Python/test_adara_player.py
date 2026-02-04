@@ -428,7 +428,7 @@ class Test_Player(unittest.TestCase):
         dummy_packet.packet_type = Packet.Type.BANKED_EVENT_TYPE
         dummy_packet.timestamp = 123456
         expected_names = ["0x4000-123456-000001.adara", "0x4000-123456-000002.adara", "0x4000-123456-000003.adara"]
-        for i, expected in zip([1, 2, 3], expected_names):
+        for i, expected in zip([1, 2, 3], expected_names, strict=True):
             fname = Player._packet_filename(dummy_packet, i)
             self.assertEqual(fname, expected)
 

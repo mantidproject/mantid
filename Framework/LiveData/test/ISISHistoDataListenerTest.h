@@ -23,7 +23,6 @@
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
 
-#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
