@@ -24,7 +24,7 @@ using namespace Mantid::DataObjects;
 
 namespace {
 // Mock class for LoadMuonNexusV2 which is in the DataHandling Library
-class LoadMuonNexusV2 : public IFileLoader<Nexus::NexusDescriptorLazy> {
+class LoadMuonNexusV2 : public IFileLoader<Mantid::Nexus::NexusDescriptorLazy> {
   const std::string name() const override { return "LoadMuonNexusV2"; }
   int version() const override { return 1; }
   int confidence(Mantid::Nexus::NexusDescriptorLazy &) const override { return 100; }
