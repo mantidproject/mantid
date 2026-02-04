@@ -46,15 +46,18 @@ public:
   bool getCaseSensitive() const;
   static std::vector<IArchiveSearch_sptr> getArchiveSearch(const Kernel::FacilityInfo &facility);
   const API::Result<std::string> findRun(const std::string &hintstr, const std::vector<std::string> &exts = {},
-                                         const bool useExtsOnly = false) const;
+                                         const bool useExtsOnly = false,
+                                         const std::string &defaultInstrument = "") const;
   std::vector<std::string> findRuns(const std::string &hintstr, const std::vector<std::string> &exts = {},
                                     const bool useExtsOnly = false) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
-  const Kernel::InstrumentInfo getInstrument(const std::string &hint, const bool returnDefaultIfNotFound = true) const;
+  const Kernel::InstrumentInfo getInstrument(const std::string &hint, const bool returnDefaultIfNotFound = true,
+                                             const std::string &defaultInstrument = "") const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string getExtension(const std::string &filename, const std::vector<std::string> &exts) const;
   void getUniqueExtensions(const std::vector<std::string> &extensionsToAdd, std::vector<std::string> &uniqueExts) const;
-  std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hint) const;
+  std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hint,
+                                                            const std::string &defaultInstrument = "") const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;

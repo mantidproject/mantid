@@ -134,10 +134,11 @@ std::string FileFinderImpl::extractAllowedSuffix(std::string &userString) const 
  *
  * @param hint :: The name hint.
  * @param returnDefaultIfNotFound :: Flag to control return. May throw exception if set to false.
- * @return This will return the default instrument if it cannot be determined.
+ * @param defaultInstrument :: The default instrument to return if not found. If empty, the system default is used.
+ * @return The InstrumentInfo object.
  */
-const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint,
-                                                           const bool returnDefaultIfNotFound) const {
+const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint, const bool returnDefaultIfNotFound,
+                                                           const std::string &defaultInstrument) const {
   if ((!hint.empty()) && (!isdigit(hint[0]))) {
     // If hint contains path components, use only the filename part for instrument detection
     std::string filename = toUpper(std::filesystem::path(hint).filename());
@@ -176,7 +177,7 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint,
       }
     }
   }
-  return Kernel::ConfigService::Instance().getInstrument();
+  return Kernel::ConfigService::Instance().getInstrument(defaultInstrument);
 }
 
 /**
@@ -184,10 +185,11 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint,
  * @param hint :: The name hint
  * @return A pair of instrument name and run number
  */
-std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string &hint) const {
+std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string &hint,
+                                                                          const std::string &defaultInstrument) const {
   g_log.debug() << "toInstrumentAndNumber(" << hint << ")\n";
   std::string runPart;
-  Kernel::InstrumentInfo instr = this->getInstrument(hint);
+  Kernel::InstrumentInfo instr = this->getInstrument(hint, true, defaultInstrument);
   std::string instrPart = instr.shortName();
 
   if (isdigit(hint[0])) {
@@ -232,6 +234,7 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
  * name is absent the default one is used.
  * @param hint :: The name hint
  * @param instrument :: The current instrument object
+ * @param defaultInstrument :: The default instrument to use if not found. If empty, the system default is used.
  * @return The file name
  * @throw NotFoundError if a required default is not set
  * @throw std::invalid_argument if the argument is malformed or run number is
@@ -255,7 +258,7 @@ std::string FileFinderImpl::makeFileName(const std::string &hint, const Kernel::
     filename = shortName + filename;
   }
 
-  auto [instrumentName, runNumber] = toInstrumentAndNumber(filename);
+  auto [instrumentName, runNumber] = toInstrumentAndNumber(filename, instrument.shortName());
 
   // delimiter and suffix might be empty strings
   filename = instrumentName + delimiter + runNumber + suffix;
@@ -347,11 +350,13 @@ std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::
  *                  If it's true (and extensionsProvided is not empty),
  *                  search for the file using extensionsProvided only.
  *                  If it's false, use extensionsProvided AND facility extensions.
- * @return A vector of full paths or empty vector
+ * @param defaultInstrument :: The default instrument to use if not found. Optional otherwise system default is used.
+ * @return The full path to the file if found, or an empty string otherwise.
  */
 const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintstr,
                                                        const std::vector<std::string> &extensionsProvided,
-                                                       const bool useOnlyExtensionsProvided) const {
+                                                       const bool useOnlyExtensionsProvided,
+                                                       const std::string &defaultInstrument) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << extensionsProvided.size() << "])\n";
 
@@ -382,7 +387,7 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
   }
 
   // get instrument and facility
-  const Kernel::InstrumentInfo instrument = this->getInstrument(hint);
+  const Kernel::InstrumentInfo instrument = this->getInstrument(hint, true, defaultInstrument);
   const Kernel::FacilityInfo &facility = instrument.facility();
   // get facility extensions
   const std::vector<std::string> facilityExtensions = facility.extensions();
@@ -537,7 +542,7 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
   static const boost::regex digits("[0-9]+");
   auto h = hints.begin();
 
-  std::string instrSName;
+  std::string instrSName; // cache the name to reuse for additional files
   for (; h != hints.end(); ++h) {
     // Quick check for a filename
     bool fileSuspected = false;
@@ -557,7 +562,10 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
     if ((range.count() > 2) && (!fileSuspected)) {
       throw std::invalid_argument("Malformed range of runs: " + *h);
     } else if ((range.count() == 2) && (!fileSuspected)) {
-      std::pair<std::string, std::string> p1 = toInstrumentAndNumber(range[0]);
+      std::pair<std::string, std::string> p1 = toInstrumentAndNumber(range[0], instrSName);
+
+      // cache instrument short name for later use
+      instrSName = p1.first;
 
       std::string run = p1.second;
       size_t nZero = run.size(); // zero padding
@@ -601,7 +609,7 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
           }
         }
 
-        std::string path = findRun(p1.first + run, extensionsProvided, useOnlyExtensionsProvided).result();
+        std::string path = findRun(p1.first + run, extensionsProvided, useOnlyExtensionsProvided, instrSName).result();
 
         if (!path.empty()) {
           // Cache successfully found path and extension
@@ -615,7 +623,10 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
         }
       }
     } else {
-      std::string path = findRun(*h, extensionsProvided, useOnlyExtensionsProvided).result();
+      std::string path = findRun(*h, extensionsProvided, useOnlyExtensionsProvided, instrSName).result();
+
+      // udpate instrument short name for later use
+      instrSName = this->getInstrument(*h, true, instrSName).shortName();
 
       if (!path.empty()) {
         res.emplace_back(path);
