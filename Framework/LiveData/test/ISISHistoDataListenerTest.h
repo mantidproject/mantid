@@ -26,7 +26,9 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <memory>
+#include <mutex>
 #include <thread>
 
 using namespace Mantid;
@@ -61,20 +63,33 @@ public:
 
   void setUp() override {
     m_dae.reset(); // no DAE yet
+    m_daePtr.store(nullptr, std::memory_order_release);
     m_timedOut = false;
+    m_stopWatchdog = false;
     m_watchdog = std::thread([this] {
-      std::this_thread::sleep_for(WATCHDOG_TIMEOUT);
-      auto *dae = m_dae.get();
-      if (dae && dae->isRunning()) { // optional guard
-        dae->cancel();               // safe, non-signal context
-        m_timedOut = true;
+      std::unique_lock<std::mutex> lock(m_watchdogMutex);
+      // Wait for timeout or notification to stop
+      if (!m_watchdogCv.wait_for(lock, WATCHDOG_TIMEOUT, [this] { return m_stopWatchdog; })) {
+        // Timeout occurred
+        auto *dae = m_daePtr.load(std::memory_order_acquire);
+        if (dae && dae->isRunning()) {
+          dae->cancel();
+          m_timedOut = true;
+        }
       }
     });
   }
 
   void tearDown() override {
+    {
+      std::lock_guard<std::mutex> lock(m_watchdogMutex);
+      m_stopWatchdog = true;
+    }
+    m_watchdogCv.notify_one();
+
     if (m_watchdog.joinable())
       m_watchdog.join();
+    m_daePtr.store(nullptr, std::memory_order_release);
     m_dae.reset();
   }
 
@@ -82,6 +97,7 @@ public:
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     m_dae = std::make_unique<FakeISISHistoDAE>();
+    m_daePtr.store(m_dae.get(), std::memory_order_release);
     m_dae->initialize();
     m_dae->setProperty("NPeriods", 1);
     auto res = m_dae->executeAsync();
@@ -162,6 +178,7 @@ public:
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     m_dae = std::make_unique<FakeISISHistoDAE>();
+    m_daePtr.store(m_dae.get(), std::memory_order_release);
     m_dae->initialize();
     m_dae->setProperty("NPeriods", 2);
     auto res = m_dae->executeAsync();
@@ -266,6 +283,7 @@ public:
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     m_dae = std::make_unique<FakeISISHistoDAE>();
+    m_daePtr.store(m_dae.get(), std::memory_order_release);
     m_dae->initialize();
     m_dae->setProperty("NSpectra", 30);
     m_dae->setProperty("NPeriods", 4);
@@ -312,6 +330,7 @@ public:
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     m_dae = std::make_unique<FakeISISHistoDAE>();
+    m_daePtr.store(m_dae.get(), std::memory_order_release);
     m_dae->initialize();
     m_dae->setProperty("NSpectra", 10);
     m_dae->setProperty("NPeriods", 4);
@@ -364,6 +383,7 @@ public:
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     m_dae = std::make_unique<FakeISISHistoDAE>();
+    m_daePtr.store(m_dae.get(), std::memory_order_release);
     m_dae->initialize();
     m_dae->setProperty("NSpectra", 10);
     m_dae->setProperty("NPeriods", 4);
@@ -397,6 +417,7 @@ public:
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     m_dae = std::make_unique<FakeISISHistoDAE>();
+    m_daePtr.store(m_dae.get(), std::memory_order_release);
     m_dae->initialize();
     m_dae->setProperty("NPeriods", 4);
     auto res = m_dae->executeAsync();
@@ -420,6 +441,10 @@ public:
 
 private:
   std::unique_ptr<FakeISISHistoDAE> m_dae;
+  std::atomic<FakeISISHistoDAE *> m_daePtr{nullptr};
   std::thread m_watchdog;
+  std::condition_variable m_watchdogCv;
+  std::mutex m_watchdogMutex;
+  bool m_stopWatchdog{false};
   std::atomic<bool> m_timedOut{false};
 };
