@@ -1,13 +1,9 @@
 # Develop with conda on Linux
 
-## Install Git
+## Install [Git](https://git-scm.com/)
 
--
-
-  [Git](https://git-scm.com/)
-
-  :   - On Debian based systems (Ubuntu) install using apt with the following command: `sudo apt install git`
-      - On CentOS based systems (RHEL) install using yum with the following command: `sudo yum install git`
+- On Debian based systems (Ubuntu) install using apt with the following command: `sudo apt install git`
+- On CentOS based systems (RHEL) install using yum with the following command: `sudo yum install git`
 
 ```{include} CloningMantid.md
 ```
