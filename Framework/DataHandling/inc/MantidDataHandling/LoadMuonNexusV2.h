@@ -5,11 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "MantidAPI/NexusFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/LoadMuonNexusV2NexusHelper.h"
 #include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -17,8 +18,8 @@ namespace DataHandling {
 
 Loads a file in the Nexus Muon format V2 and stores it in a 2D workspace
 (Workspace2D class). LoadMuonNexus is an algorithm that loads
-an HDF5 file and as such inherits from API::NexusFileLoader and
-the init() & execLoader() methods.
+an HDF5 file and as such inherits from API::IFileLoader<NexusDescriptorLazy> and
+the init() & exec() methods.
 Required Properties:
 <UL>
 <LI> Filename - The name of and path to the input NeXus file </LI>
@@ -35,7 +36,7 @@ OutputWorkspace_PeriodNo)
 @author Stephen Smith, ISIS
 */
 
-class MANTID_DATAHANDLING_DLL LoadMuonNexusV2 : public API::NexusFileLoader {
+class MANTID_DATAHANDLING_DLL LoadMuonNexusV2 : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 public:
   // Default constructor
   LoadMuonNexusV2();
@@ -49,7 +50,7 @@ public:
            "given a NeXus file of this type.";
   }
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
   // Version
   int version() const override { return 1; }
 
