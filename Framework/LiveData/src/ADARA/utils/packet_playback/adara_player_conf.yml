@@ -14,7 +14,7 @@ server:
 
   buffer_MB: 64
 
-  socket_timeout: 1.0 # affects all socket types`
+  socket_timeout: 1.0 # affects all socket types
 source:
   address: '127.0.0.1:31415'
 

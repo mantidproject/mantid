@@ -233,7 +233,8 @@ void SNSLiveEventDataListener::run() {
     // to update the StartLiveListener GUI, though.
 
     Poco::Timestamp now;
-    auto now_usec = static_cast<uint32_t>(now.epochMicroseconds() - now.epochTime());
+    uint32_t now_usec = static_cast<uint32_t>(now.epochMicroseconds() % 1000000);
+
     helloPkt[2] = static_cast<uint32_t>(now.epochTime() - ADARA::EPICS_EPOCH_OFFSET);
     helloPkt[3] = now_usec * 1000;
     helloPkt[4] = static_cast<uint32_t>(m_startTime.totalNanoseconds() /
