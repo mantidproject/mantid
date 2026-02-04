@@ -17,6 +17,7 @@ from mantid.simpleapi import (
     CopySample,
     CloneWorkspace,
     RotateSampleShape,
+    TranslateSampleShape,
 )
 from mantid.api import AnalysisDataService as ADS
 from Engineering.EnggUtils import GROUP, CALIB_DIR
@@ -55,6 +56,8 @@ class TexturePlannerModel(object):
         self.dir_names = ["D1", "D2", "D3"]
         self.gRs = []
         self.R = Rotation.identity()
+        self.init_R = Rotation.identity()
+        self.offset = (0, 0, 0)
         self.detQs_lab = None
         self.projection = projection
         self.gonio_index = 0
@@ -72,7 +75,7 @@ class TexturePlannerModel(object):
         self.mc_kwargs = {
             "InputWorkspace": "__mc_ws",
             "OutputWorkspace": "__abs_ws",
-            "EventsPerPoint": 50,
+            "EventsPerPoint": 100,
             "MaxScatterPtAttempts": 1000,
             "SimulateScatteringPointIn": "SampleOnly",
             "ResimulateTracksForDifferentWavelengths": True,
@@ -89,7 +92,9 @@ class TexturePlannerModel(object):
     def update_ws(self):
         if not self.ws:
             self.instr_ws = LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=self.instr_wsname)
-            self.ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="1,0.5,2", OutputWorkspace=self.wsname, UnitX="dSpacing")
+            self.ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0.1,0.5,2", OutputWorkspace=self.wsname, UnitX="dSpacing")
+            for ispec in range(self.ws.getNumberHistograms()):
+                self.ws.setY(ispec, np.ones_like(self.ws.readY(ispec)))
             self.mesh_ws = CloneWorkspace(InputWorkspace=self.wsname, OutputWorkspace="__texture_planning_raw_sample_mesh")
             self.updated_mesh_ws = CloneWorkspace(InputWorkspace=self.wsname, OutputWorkspace="__texture_planning_neutral_sample_mesh")
             SetSampleShape(self.ws, get_cube_xml("default_cube", 0.01))
@@ -215,16 +220,20 @@ class TexturePlannerModel(object):
 
     def update_initial_shape(self, x_rot, y_rot, z_rot, x_pos, y_pos, z_pos):
         _tmp_ws = CloneWorkspace(self.mesh_ws, OutputWorkspace="__tmp_ws")
-        self.translate_shape(_tmp_ws, x_pos, y_pos, z_pos)
+        self.offset = (x_pos, y_pos, z_pos)
+        self.translate_shape(_tmp_ws, *self.offset)
 
         if x_rot == 0.0 and y_rot == 0.0 and z_rot == 0.0:
             CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
             CopySample(
                 InputWorkspace=_tmp_ws, OutputWorkspace=self.updated_mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False
             )
+            self.init_R = Rotation.identity()
             return None
 
-        rotvec = Rotation.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=True).as_rotvec(degrees=True)
+        self.init_R = Rotation.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=True)
+
+        rotvec = self.init_R.as_rotvec(degrees=True)
 
         ang = np.linalg.norm(rotvec)
         vec = rotvec / ang
@@ -409,18 +418,28 @@ class TexturePlannerModel(object):
         return table_info
 
     def calc_monte_carlo_absorption_val_for_index(self, index):
-        R = self.saved_orientations[index]["R"]
         mc_ws = ConvertUnits(InputWorkspace=self.wsname, Target="Wavelength", OutputWorkspace="__mc_ws")
-        mc_ws.run().getGoniometer().setR(R.as_matrix())
-        self.ws.run().getGoniometer().setR(np.eye(3))
+        mc_ws.run().getGoniometer().setR(np.eye(3))
         CopySample(
-            InputWorkspace=self.wsname,
+            InputWorkspace=self.mesh_ws,
             OutputWorkspace="__mc_ws",
             CopyShape=True,
             CopyMaterial=True,
             CopyEnvironment=False,
             CopyLattice=False,
         )
+
+        self.translate_shape(mc_ws, *self.offset)
+
+        R = self.saved_orientations[index]["R"]
+
+        shapeR = R * self.init_R
+        rotvec = shapeR.as_rotvec(degrees=True)
+        ang = np.linalg.norm(rotvec)
+        if ang != 0:
+            vec = rotvec / ang
+            RotateSampleShape("__mc_ws", f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
+
         MonteCarloAbsorption(**self.mc_kwargs)
         # first entry is null group so we can ignore it
         mu = read_attenuation_coefficient_at_value("__abs_ws", self.attenuation_kwargs["point"], self.attenuation_kwargs["unit"])[1:]
@@ -445,7 +464,7 @@ class TexturePlannerModel(object):
 
         self.ws.run().getGoniometer().setR(R.as_matrix())
 
-        shape_mesh = self.updated_mesh_ws.sample().getShape().getMesh()
+        shape_mesh = self.updated_mesh_ws.sample().getShape().getMesh().copy()
         extent = (np.linalg.norm(shape_mesh, axis=(1, 2)).max() / 2) * 1.2
 
         rot_mesh = R.apply(shape_mesh.reshape((-1, 3))).reshape(shape_mesh.shape)
@@ -664,9 +683,3 @@ def vec_string_to_norm_array(vec_string):
         # from the auto plot updates
         return np.array((1, 0, 0))
     return vec / np.linalg.norm(vec)
-
-
-# place holder for Alg until it gets merged in
-def TranslateSampleShape(InputWorkspace="ws", TranslationVector="0,0,0"):
-    print(f"Shape Translated from initial position to: {TranslationVector}")
-    return None
