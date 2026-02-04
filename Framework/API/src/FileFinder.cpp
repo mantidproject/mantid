@@ -186,34 +186,19 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint,
  */
 std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string &hint) const {
   g_log.debug() << "toInstrumentAndNumber(" << hint << ")\n";
-  std::string instrPart;
   std::string runPart;
+  Kernel::InstrumentInfo instr = this->getInstrument(hint);
+  std::string instrPart = instr.shortName();
 
   if (isdigit(hint[0])) {
-    instrPart = Kernel::ConfigService::Instance().getInstrument().shortName();
     runPart = hint;
   } else {
-    /// Find the last non-digit as the instrument name can contain numbers
-    std::string::const_reverse_iterator it = std::find_if(hint.rbegin(), hint.rend(), std::not_fn(isdigit));
-    // No non-digit or all non-digits
-    if (it == hint.rend() || it == hint.rbegin()) {
-      throw std::invalid_argument("Malformed hint to FileFinderImpl::makeFileName: " + hint);
-    }
-    std::string::size_type nChars = std::distance(it, hint.rend());
-
-    // Add in special test for PG3
-    if (boost::algorithm::istarts_with(hint, "PG3")) {
-      instrPart = "PG3";
-      nChars = instrPart.length();
-    }
-    // Another nasty check for SANS2D.  Will do until FileFinder redesign.
-    else if (boost::algorithm::istarts_with(hint, "SANS2D")) {
-      instrPart = "SANS2D";
-      nChars = instrPart.length();
-    } else {
-      instrPart = hint.substr(0, nChars);
-    }
-
+    // need to advance to the first digit after the instrument name to handle underscores, etc.
+    size_t nChars = instrPart.length();
+    while (nChars < hint.size() && !std::isdigit(static_cast<unsigned char>(hint[nChars])))
+      ++nChars;
+    if (nChars == hint.size())
+      throw std::invalid_argument("Malformed hint: no run number found");
     runPart = hint.substr(nChars);
   }
 
@@ -225,7 +210,6 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
     os << "Cannot convert '" << runPart << "' to run number.";
     throw std::invalid_argument(os.str());
   }
-  Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().getInstrument(instrPart);
   size_t nZero = instr.zeroPadding(irunPart);
   // remove any leading zeros in case there are too many of them
   std::string::size_type i = runPart.find_first_not_of('0');

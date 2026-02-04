@@ -299,7 +299,7 @@ public:
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189n-15193"), const std::invalid_argument &);
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-15193n"), const std::invalid_argument &);
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-151n93"), const std::invalid_argument &);
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15n189-151n93"), const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15n189-151n93"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(files = FileFinder::Instance().findRuns("MUSR15189-15193"));
     TS_ASSERT_EQUALS(files.size(), 5);
     std::vector<std::string>::iterator it = files.begin();
