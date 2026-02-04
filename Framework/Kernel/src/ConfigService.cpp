@@ -1841,11 +1841,9 @@ const std::vector<std::string> ConfigServiceImpl::getInstrumentNames() const {
   std::vector<std::string> names;
   for (const auto &facility : m_facilities) {
     const auto &insts = facility->instruments();
-    for (const auto &inst : insts) {
-      names.emplace_back(inst.name());
-    }
+    std::transform(insts.cbegin(), insts.cend(), std::back_inserter(names),
+                   [](const auto &inst) { return inst.name(); });
   }
-
   return names;
 }
 
@@ -1853,9 +1851,8 @@ const std::vector<std::string> ConfigServiceImpl::getInstrumentShortNames() cons
   std::vector<std::string> names;
   for (const auto &facility : m_facilities) {
     const auto &insts = facility->instruments();
-    for (const auto &inst : insts) {
-      names.emplace_back(inst.shortName());
-    }
+    std::transform(insts.cbegin(), insts.cend(), std::back_inserter(names),
+                   [](const auto &inst) { return inst.shortName(); });
   }
 
   return names;
