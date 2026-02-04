@@ -3,14 +3,14 @@ bootstrap theme for Sphinx and both are required to build the documentation.
 
 To install Sphinx and the bootstrap theme use `easy_install`:
 
-```
+```sh
 easy_install -U Sphinx
 easy_install -U sphinx-bootstrap-theme
 ```
 
 or `pip`:
 
-```
+```sh
 pip install Sphinx
 pip install sphinx-bootstrap-theme
 ```
