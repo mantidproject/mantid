@@ -116,9 +116,10 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_has_unit.assert_called_once()
         self.assertEqual(self._presenter._UNIT_OPTIONS, units)
 
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._setup_component_tree")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.AnalysisDataService")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
-    def test_model_refresh_on_correct_ws_replace(self, mock_update_plotter, mock_ads):
+    def test_model_refresh_on_correct_ws_replace(self, mock_update_plotter, mock_ads, mock_setup_component_tree):
         mock_ads_retrieve = MagicMock()
         mock_ads.retrieve.return_value = mock_ads_retrieve
         self._model.setup = MagicMock()
@@ -126,6 +127,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_ads_retrieve.name.return_value = ws_name
         self._presenter._replace_workspace_callback(ws_name, None)
         self._model.setup.assert_called_once()
+        mock_setup_component_tree.assert_called_once()
         mock_update_plotter.assert_called_once()
         self._mock_view.setup.reset_mock()
         mock_update_plotter.reset_mock()

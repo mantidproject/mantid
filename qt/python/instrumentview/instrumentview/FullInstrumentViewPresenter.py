@@ -95,14 +95,8 @@ class FullInstrumentViewPresenter:
         self._view.setup_connections_to_presenter()
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_integration_range_limits(self._model.integration_limits)
-
-        component_tree_model = ComponentTreeModel(self._model.workspace)
-        self._component_tree_presenter = ComponentTreePresenter(
-            self._view.component_tree, component_tree_model, self.on_component_tree_item_selected
-        )
-        self._view.component_tree.subscribe_presenter(self._component_tree_presenter)
-
         self._view.show_axes()
+        self._setup_component_tree()
         self.update_plotter()
 
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
@@ -118,6 +112,13 @@ class FullInstrumentViewPresenter:
         self._view.hide_status_box()
         self._peak_interaction_status = PeakInteractionStatus.Disabled
         self._update_peak_buttons()
+
+    def _setup_component_tree(self) -> None:
+        component_tree_model = ComponentTreeModel(self._model.workspace)
+        self._component_tree_presenter = ComponentTreePresenter(
+            self._view.component_tree, component_tree_model, self.on_component_tree_item_selected
+        )
+        self._view.component_tree.subscribe_presenter(self._component_tree_presenter)
 
     def _create_and_add_monitor_mesh(self) -> Optional[pv.PolyData]:
         if len(self._model.monitor_positions) == 0 or not self._view.is_show_monitors_checkbox_checked():
@@ -431,6 +432,7 @@ class FullInstrumentViewPresenter:
         if self._model._workspace.name() == ws_old_name:
             self._model._workspace = mtd[ws_new_name]
             self._model.setup()
+            self._setup_component_tree()
             logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
 
         self._reload_peaks_workspaces()
@@ -458,6 +460,7 @@ class FullInstrumentViewPresenter:
                 return
             self._model._workspace = AnalysisDataService.retrieve(ws_name)
             self._model.setup()
+            self._setup_component_tree()
             self.update_plotter()
 
     def replace_workspace_callback(self, ws_name, ws):
