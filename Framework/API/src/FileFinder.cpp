@@ -558,9 +558,7 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
       throw std::invalid_argument("Malformed range of runs: " + *h);
     } else if ((range.count() == 2) && (!fileSuspected)) {
       std::pair<std::string, std::string> p1 = toInstrumentAndNumber(range[0]);
-      if (boost::algorithm::istarts_with(hint, "PG3")) {
-        instrSName = "PG3";
-      }
+
       std::string run = p1.second;
       size_t nZero = run.size(); // zero padding
       if (range[1].size() > nZero) {
@@ -603,12 +601,7 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
           }
         }
 
-        std::string path;
-        if (boost::algorithm::istarts_with(hint, "PG3")) {
-          path = findRun(instrSName + run, extensionsProvided, useOnlyExtensionsProvided).result();
-        } else {
-          path = findRun(p1.first + run, extensionsProvided, useOnlyExtensionsProvided).result();
-        }
+        std::string path = findRun(p1.first + run, extensionsProvided, useOnlyExtensionsProvided).result();
 
         if (!path.empty()) {
           // Cache successfully found path and extension
@@ -622,18 +615,8 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
         }
       }
     } else {
-      std::string path;
-      // Special check for "PG3", to cope with situation like '48314,48316'.
-      if (boost::algorithm::istarts_with(hint, "PG3")) {
-        if (h == hints.begin()) {
-          instrSName = "PG3";
-          path = findRun(*h, extensionsProvided, useOnlyExtensionsProvided).result();
-        } else {
-          path = findRun(instrSName + *h, extensionsProvided, useOnlyExtensionsProvided).result();
-        }
-      } else {
-        path = findRun(*h, extensionsProvided, useOnlyExtensionsProvided).result();
-      }
+      std::string path = findRun(*h, extensionsProvided, useOnlyExtensionsProvided).result();
+
       if (!path.empty()) {
         res.emplace_back(path);
       } else {
