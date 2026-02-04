@@ -91,14 +91,14 @@ std::pair<IAlgorithm_sptr, int> searchForLoader(const std::string &filename,
 /// @return true if it is HDF4 according to signature
 bool isHDF(std::string const &filename) {
   // the HDF4 file signature, as per HDF's documentation
-  std::array<char, 4> constexpr hdf5_sig{0x0E, 0x03, 0x13, 0x01};
+  std::array<char, 4> constexpr hdf4_sig{0x0E, 0x03, 0x13, 0x01};
   // read the signature in the first four bytes of this file
   std::array<char, 4> signature;
   std::ifstream file(filename, std::ios::binary);
   if (!file.read(signature.data(), 4)) {
     return false;
   }
-  return signature == hdf5_sig;
+  return signature == hdf4_sig;
 }
 } // namespace
 
