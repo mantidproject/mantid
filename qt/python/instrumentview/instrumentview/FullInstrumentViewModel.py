@@ -121,6 +121,8 @@ class FullInstrumentViewModel:
 
         # Update counts with default total range
         self.update_integration_range(self._integration_limits, True)
+        self.full_integration_limits = self._integration_limits
+        self.full_counts_limits = self._counts_limits
 
     @property
     def workspace(self) -> Workspace2D:

@@ -141,12 +141,24 @@ class FullInstrumentViewPresenter:
         self._model.integration_limits = self._view.get_integration_limits()
         self.set_view_integration_limits()
 
+    def on_integration_limits_reset_clicked(self) -> None:
+        self._model.update_integration_range(self._model.full_integration_limits, entire_range=True)
+        self._view.set_integration_range_limits(self._model.full_integration_limits)
+        self._view.set_integration_min_max_boxes(self._model.full_integration_limits)
+        self.set_view_integration_limits()
+
     def set_view_integration_limits(self) -> None:
         self._detector_mesh[self._counts_label] = self._model.detector_counts
 
     def on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         self._model.counts_limits = self._view.get_contour_limits()
+        self.set_view_contour_limits()
+
+    def on_contour_range_reset_clicked(self) -> None:
+        self._model.counts_limits = self._model.full_counts_limits
+        self._view.set_contour_range_limits(self._model.full_counts_limits)
+        self._view.set_contour_min_max_boxes(self._model.full_counts_limits)
         self.set_view_contour_limits()
 
     def set_view_contour_limits(self) -> None:
