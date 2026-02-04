@@ -47,7 +47,7 @@ This option can be passed to CMake on the command line using `-DCONDA_BUILD=True
 
 To run workbench from the commandline, ensure you conda environment is activated, and bin (in the build directory) is added to the python paths.
 
-``` sh
+```sh
 export PYTHONPATH="${PYTHONPATH}:replace-with-full-file-path-to-bin"
 workbench
 ```

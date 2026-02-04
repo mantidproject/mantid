@@ -1,16 +1,21 @@
 ```{contents}
-:local:
+---
+local:
+---
 ```
 
 ```{toctree}
-:hidden:
-
+---
+hidden:
+---
 GettingStartedCondaWindows
 GettingStartedCondaLinux
 GettingStartedCondaOSX
 GettingStartedNoneConda
 ```
+
 (gettingstarted)=
+
 # Environment Setup
 
 With the addition of conda to our workflow we at present have two different methods of Getting Started with mantid development.
@@ -29,7 +34,7 @@ One option is to use the `https` protocol listed above.
 The alternative is to access github through ssh.github.com.
 Add the following lines to `~/.ssh/config`:
 
-``` bash
+```bash
 Host github.com
     Hostname ssh.github.com
     Port 443
@@ -57,39 +62,39 @@ require some extra setup.
 - After completing this the drive is now mounted
 - It can be found at `/Volumes/inst\$`
 
-**NB** the address in step 2 sometimes changes - if it does not work, replace `80` with 55` or `3`.
+**NB** the address in step 2 sometimes changes - if it does not work, replace `80` with 55`or`3\`.
 
 ## Linux
 
-1.  Install packages:
+1. Install packages:
 
 `sudo apt-get install -y autofs cifs-utils keyutils`
 
-2.  Create an `/archive.creds` file in the root directory containing this, filling in the relevant details:
+2. Create an `/archive.creds` file in the root directory containing this, filling in the relevant details:
 
 This should only be done if full disk encryption is enabled or if the `archive.creds` file is stored in a secure (encrypted) location; to ensure passwords are kept safe.
 
-``` text
+```text
 username=FEDERAL_ID_HERE
 password=FED_PASSWD_HERE
 domain=CLRC
 ```
 
-3.  Edit `/etc/auto.master` and add the line:
+3. Edit `/etc/auto.master` and add the line:
 
-``` text
+```text
 /archive      /etc/auto.archive
 ```
 
-4.  Create `/etc/auto.archive` and add the single line:
+4. Create `/etc/auto.archive` and add the single line:
 
-``` text
+```text
 *     -fstype=cifs,ro,credentials=/archive.creds,file_mode=0444,dir_mode=0555,vers=3.0,noserverino,nounix    ://isis.cclrc.ac.uk/inst\$/&
 ```
 
-5.  Enter the following commands:
+5. Enter the following commands:
 
-``` bash
+```bash
 sudo chmod 400 /archive.creds
 sudo mkdir /archive
 service autofs restart
@@ -97,7 +102,7 @@ service autofs restart
 
 Done. You can now access directories in the archive. Test it by doing:
 
-``` bash
+```bash
 ls /archive/ndxalf
 ```
 

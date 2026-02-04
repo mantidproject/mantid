@@ -9,10 +9,10 @@
 
   - Using git in a terminal and cloning the codebase by calling
     `git clone git@github.com:mantidproject/mantid.git` in the
-     directory you want the code to clone to.
-     You will need to follow this
-     [Github guide](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
-     to configure SSH access.
-     You may want to follow this [Git setup guide](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
-     to configure your git environment.
+    directory you want the code to clone to.
+    You will need to follow this
+    [Github guide](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
+    to configure SSH access.
+    You may want to follow this [Git setup guide](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
+    to configure your git environment.
   - Or using [GitKraken](https://www.gitkraken.com/).

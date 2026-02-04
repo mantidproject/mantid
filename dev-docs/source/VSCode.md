@@ -1,7 +1,9 @@
 # VSCode
 
 ```{contents}
-:local:
+---
+local:
+---
 ```
 
 ## Introduction
@@ -20,7 +22,7 @@ for C++ development on any platform that VSCode supports
 ## How to get Started
 
 - Run VSCode
-- Click File-\>Open Folder
+- Click File->Open Folder
 - Navigate to your Mantid source directory and select it
 - Install the required extensions (see below)
 - For code editing you are good to go!
@@ -43,15 +45,23 @@ clicking [the Extension Marketplace icon.](https://code.visualstudio.com/docs/ed
 ### Recommended
 
 - [Clang-Format](https://marketplace.visualstudio.com/items?itemName=xaver.clang-format)
+
   - Allows auto formatting using the clang format version installed on your machine
 
 - [CMake](https://marketplace.visualstudio.com/items?itemName=twxs.cmake)
+
   - Allows language highlighting and auto fill for CMake
+
 - [Doxygen Document Generator](https://marketplace.visualstudio.com/items?itemName=cschlosser.doxdocgen)
+
   - Once a function is written with this extension it can generate parts of the doxygen comments itself
+
 - [GitLens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens)
+
   - Very powerful source control assistant
+
 - [Visual Studio Intellicode](https://marketplace.visualstudio.com/items?itemName=VisualStudioExptTeam.vscodeintellicode)
+
   - This improves your code suggestions in certain languages
 
 ## Features
@@ -63,7 +73,8 @@ in multiple ways but VSCode makes it easier. With a formatter installed as an ex
 it is possible to format any open file in VSCode. It is recommended to use this [Clang-Format](https://marketplace.visualstudio.com/items?itemName=xaver.clang-format) extension.
 It is possible to format your code using on save, type, paste and save timeout. To set
 when you want to format:
-- Open the File-\>Preferences-\>Settings menu
+
+- Open the File->Preferences->Settings menu
 - Search for "Format On"
 - Then tick the times at which formatting should occur. (recommend save only)
 
@@ -71,7 +82,8 @@ when you want to format:
 
 This is a built in feature for VSCode much like with formatting however no extension
 is required. You can save on window change, on focus change, and on delay.
-- Open the File-\>Preferences-\>Settings menu
+
+- Open the File->Preferences->Settings menu
 - Search for "Auto Save"
 - Select the auto save type that is wanted (recommend `onFocusChange`)
 
@@ -93,7 +105,7 @@ attempt to make a useful task for you. However it may be better to use this exam
 The commands can be switched out with the command and various args for the generator
 used to generate your CMake with.
 
-``` javascript
+```javascript
 {
     "version": "2.0.0",
     "tasks": [
@@ -136,11 +148,13 @@ defined. For Debugging and Launching all of these 'Tasks' are stored in the
 is not covered here.**
 
 To get to this file:
+
 - Open commandline line (Ctrl+Shift+P or ⌘+Shift+P)
 - Type "Debug: Open launch.json"
 - Hit Enter.
 
 If this fails
+
 - Click on [the debug icon](https://code.visualstudio.com/docs/editor/debugging#_start-debugging) on the left hand side of VSCode.
 - Click [the cog icon at the top](https://code.visualstudio.com/docs/editor/debugging#_launch-configurations) of this newly opened side window
 - Select "(GDB) Launch" or "(msvc) Launch"
@@ -154,7 +168,7 @@ Inside the launch.json you will want to make your file look something a little l
 
 To debug C++ and start directly into the Workbench, add this to the configuration list in `launch.json`.
 
-``` javascript
+```javascript
 {
     "name": "(gdb) Workbench C++ Only",
     "type": "cppdbg",
@@ -179,7 +193,7 @@ The `--single-process` flag is necessary for debugging. See the `RunningWorkbenc
 
 If this fails, try adding the following environment variables:
 
-``` javascript
+```javascript
 "environment": [
   {"name":"LD_PRELOAD", "value": "/usr/lib/x86_64-linux-gnu/libjemalloc.so.1"},
   {"name":"PYTHONPATH", "value": "Path/To/Build/Directory/bin:${env:PYTHONPATH}"}
@@ -197,7 +211,7 @@ For this section of the guide it will discuss use of the MSVC debugger. Please
 follow on with the [guide](https://code.visualstudio.com/docs/cpp/config-msvc).
 The launch.json should end up looking a little like this:
 
-``` javascript
+```javascript
 {
    "version": "0.2.0",
     "configurations": [
@@ -233,7 +247,7 @@ from the Debug terminal window.
 In your launch.json we will need a new launch task for this, this new task should look
 like this:
 
-``` javascript
+```javascript
 {
     "name": "(gdb) Launch Workbench",
     "type": "cppdbg",
@@ -255,7 +269,7 @@ like this:
 ```
 
 - Place this json in the "configurations" list in launch.json
-- Then launch the debug session like any other, note it may be slow to   get started.
+- Then launch the debug session like any other, note it may be slow to get started.
 
 ### Debugging C++ Tests
 
@@ -264,7 +278,7 @@ like this:
 First thing to do is make sure that the test you are testing is built. You can do this
 by building via one of the test targets. An example Task for AlgorithmsTest:
 
-``` javascript
+```javascript
 {
     "label": "Build Mantid AlgorithmsTest",
     "type": "shell",
@@ -285,7 +299,7 @@ To debug the individual tests you won't want to be running all tests, so you wil
 select the executable for your tests i.e. "bin/AlgorithmsTest" in your build directory.
 Then pass as an argument the specific test you want to be debugging. As an example:
 
-``` javascript
+```javascript
 {
     "name": "(gdb) Launch Ctest",
     "type": "cppdbg",
@@ -324,7 +338,7 @@ PyQt listeners, as the debugger must be attached to the main thread.
 
 Install `debugpy` using pip within the terminal
 
-``` bash
+```bash
 python3 -m pip install --user debugpy
 ```
 
@@ -336,11 +350,12 @@ python3 -m pip install --user debugpy
 - Run the following: `python -m pip install --user debugpy`
 
 **Setting up VS Code**
+
 - Ensure the Python extension is installed
 - Open `launch.json` through either the debug tab or the file finder
 - Add the following target
 
-``` javascript
+```javascript
 {
     "name": "Python Attach",
     "type": "python"
@@ -351,10 +366,11 @@ python3 -m pip install --user debugpy
 ```
 
 **Attaching the debugger**
+
 - Go to the location where you would like Mantid to first trigger a breakpoint
 - Insert the following code:
 
-``` python
+```python
 import debugpy
 debugpy.listen(('127.0.0.1', 5678))
 debugpy.wait_for_client()
@@ -376,7 +392,7 @@ Reference" and hit Enter.
 **Very commonly used keybindings:**
 
 | Function          | Linux        | MacOS        | Windows      |
-|-------------------|--------------|--------------|--------------|
+| ----------------- | ------------ | ------------ | ------------ |
 | Search in File    | Ctrl+F       | ⌘+F          | Ctrl+F       |
 | Command Line      | Ctrl+Shift+P | ⌘+Shift+P    | Ctrl+Shift+P |
 | Fuzzy File Search | Ctrl+P       | ⌘+P          | Ctrl+P       |

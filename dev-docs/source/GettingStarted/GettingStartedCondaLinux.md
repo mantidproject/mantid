@@ -20,7 +20,7 @@
 - Open ~/.condarc.
 - Add the following lines :
 
-``` text
+```text
 proxy_servers:
   http: http://proxy.ill.fr:8888
   https: http://proxy.ill.fr:8888
@@ -39,10 +39,13 @@ proxy_servers:
 ## Configure CMake and generate build files
 
 - Still using the terminal.
+
 - If not already activated in the previous step, run `conda activate mantid-developer` to activate your conda environment.
+
 - Navigate back to your mantid source directory using `cd mantid` if you used the default name during cloning from git.
 
 - Inside of your mantid source directory run `cmake --preset=linux`
+
   - Alternatively if you don't want to have your build folder in your mantid source then pass the `-B` argument, overriding the preset, to cmake: `cmake {PATH_TO_SOURCE} --preset=linux -B {BUILD_DIR}`
 
 ## How to build
