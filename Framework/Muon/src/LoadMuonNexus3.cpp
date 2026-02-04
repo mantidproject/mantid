@@ -19,7 +19,7 @@ namespace {
 const int CONFIDENCE_THRESHOLD{80};
 
 int calculateConfidenceHDF5(const std::string &filePath, const std::shared_ptr<Mantid::API::Algorithm> &alg) {
-  const auto nexusLoader = std::dynamic_pointer_cast<Mantid::API::IFileLoader<Nexus::NexusDescriptorLazy>>(alg);
+  const auto nexusLoader = std::dynamic_pointer_cast<Mantid::API::IFileLoader<Mantid::Nexus::NexusDescriptorLazy>>(alg);
   int confidence{0};
   if (H5::H5File::isHdf5(filePath)) {
     try {

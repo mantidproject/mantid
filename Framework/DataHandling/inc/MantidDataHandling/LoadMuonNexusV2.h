@@ -61,7 +61,7 @@ private:
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
-  void execLoader() override;
+  void exec() override;
   // Determines whether entry contains multi period data
   void isEntryMultiPeriod();
   // Run child algorithm LoadISISNexus2
