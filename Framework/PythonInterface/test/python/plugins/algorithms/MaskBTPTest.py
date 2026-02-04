@@ -322,7 +322,7 @@ class MaskBTPTest(unittest.TestCase):
         DeleteWorkspace(ws_name)
 
     def testIMAGINEMaskBTP(self):
-        ws_name = "cg4d"
+        ws_name = mtd.unique_hidden_name()
         LoadEmptyInstrument(InstrumentName="IMAGINE", OutputWorkspace=ws_name)
         wksp = mtd[ws_name]
 
