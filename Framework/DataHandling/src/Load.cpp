@@ -13,7 +13,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
-#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -201,24 +200,18 @@ API::IAlgorithm_sptr Load::getFileLoader(const std::string &filePath) {
 }
 
 void Load::findFilenameProperty(const API::IAlgorithm_sptr &loader) {
-  const auto nxsLoader = std::dynamic_pointer_cast<NexusFileLoader>(loader);
-  if (nxsLoader) {
-    // NexusFileLoader has a method for giving back the name directly
-    m_filenamePropName = nxsLoader->getFilenamePropertyName();
-  } else {
-    // Use the first file property as the main Filename
-    const auto &props = loader->getProperties();
-    for (auto const &prop : props) {
-      auto const *multiprop = dynamic_cast<API::MultipleFileProperty *>(prop);
-      auto const *singleprop = dynamic_cast<API::FileProperty *>(prop);
-      if (multiprop) {
-        m_filenamePropName = multiprop->name();
-        break;
-      }
-      if (singleprop) {
-        m_filenamePropName = singleprop->name();
-        break;
-      }
+  // Use the first file property as the main Filename
+  const auto &props = loader->getProperties();
+  for (auto const &prop : props) {
+    auto const *multiprop = dynamic_cast<API::MultipleFileProperty *>(prop);
+    auto const *singleprop = dynamic_cast<API::FileProperty *>(prop);
+    if (multiprop) {
+      m_filenamePropName = multiprop->name();
+      break;
+    }
+    if (singleprop) {
+      m_filenamePropName = singleprop->name();
+      break;
     }
   }
 

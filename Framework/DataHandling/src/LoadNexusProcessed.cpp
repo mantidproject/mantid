@@ -52,7 +52,7 @@
 namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadNexusProcessed)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed)
 
 using namespace Mantid::Nexus;
 using namespace DataObjects;

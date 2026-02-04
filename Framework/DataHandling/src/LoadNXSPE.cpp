@@ -32,7 +32,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadNXSPE)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
