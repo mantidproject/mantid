@@ -174,7 +174,8 @@ This section assumes you have followed all previous instructions for debugging P
 
   ```python
   import pydevd_pycharm
-  pydevd_pycharm.settrace('localhost', port=8080, stdoutToServer=True, stderrToServer=True)
+
+  pydevd_pycharm.settrace("localhost", port=8080, stdoutToServer=True, stderrToServer=True)
   ```
 
 - Paste this code where you want to start debugging from, this will act like a breakpoint during normal debugging.
@@ -311,19 +312,22 @@ To test that the above instructions have worked, you can simply create a new Pyt
 ```python
 # Check that PyQt imports
 from qtpy import QtCore, QtGui, QtWidgets
+
 # Check that the Mantid Python API imports
 import mantid.simpleapi
 
-class DummyView(QtWidgets.QWidget):
 
+class DummyView(QtWidgets.QWidget):
     def __init__(self, name, parent=None):
         super(DummyView, self).__init__(parent)
         self.grid = QtWidgets.QGridLayout(self)
         btn = QtWidgets.QPushButton(name, self)
         self.grid.addWidget(btn)
 
+
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     ui = DummyView("Hello")
     ui.show()

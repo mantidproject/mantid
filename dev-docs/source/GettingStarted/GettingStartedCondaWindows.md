@@ -24,7 +24,9 @@
 - Navigate to your Settings -> Manage App Execution Aliases, and turn off all Python Aliases.
 
 ```{include} CloningMantid.md
-:heading-offset: 1
+---
+heading-offset: 1
+---
 ```
 
 ## Install [Miniforge](https://github.com/conda-forge/miniforge/releases)
