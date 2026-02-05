@@ -9,12 +9,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/NexusFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidMuon/LoadMuonNexus1.h"
 #include "MantidMuon/LoadMuonNexus2.h"
 #include "MantidMuon/LoadMuonNexus3.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -23,11 +24,11 @@ using namespace Mantid::DataObjects;
 
 namespace {
 // Mock class for LoadMuonNexusV2 which is in the DataHandling Library
-class LoadMuonNexusV2 : public NexusFileLoader {
+class LoadMuonNexusV2 : public IFileLoader<Mantid::Nexus::NexusDescriptorLazy> {
   const std::string name() const override { return "LoadMuonNexusV2"; }
   int version() const override { return 1; }
-  int confidence(Mantid::Nexus::NexusDescriptor &) const override { return 100; }
-  void execLoader() override {}
+  int confidence(Mantid::Nexus::NexusDescriptorLazy &) const override { return 100; }
+  void exec() override {}
   const std::string summary() const override { return "mock class"; }
   void init() override {}
 };
