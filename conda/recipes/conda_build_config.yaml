@@ -69,6 +69,9 @@ libglu:
 muparser:
   - '>=2.3.2, <2.3.5'
 
+mystparser:
+  - '>=5.0.0,<6'
+
 # Aim to build using the latest minor version, and rely on numpy's generous backward compatibility.
 numpy:
   - '2.1.*'
