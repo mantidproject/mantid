@@ -1001,6 +1001,16 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         expected = np.array([True, False, False, False])
         np.testing.assert_array_equal(model._is_selected_in_tree, expected)
 
+    def test_component_tree_all_not_valid(self):
+        """All selected detectors invalid should result in whole tree shown"""
+        component_indices = np.array([0, 1])  # duplicates fine
+        model, mock_ws = self._setup_model([100, 101, 102, 103])
+        mock_ws.detectorInfo().detectorIDs.return_value = np.array([100, 101, 300])
+        model._is_valid = np.array([False, False, True, True])
+        model.component_tree_indices_selected(component_indices)
+        expected = np.array([True] * 4)
+        np.testing.assert_array_equal(model._is_selected_in_tree, expected)
+
 
 if __name__ == "__main__":
     unittest.main()

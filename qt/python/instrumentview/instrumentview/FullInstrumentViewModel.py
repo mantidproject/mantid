@@ -648,7 +648,7 @@ class FullInstrumentViewModel:
         detector_ids = self._workspace.detectorInfo().detectorIDs()
         detector_ids = detector_ids[component_indices[component_indices < len(detector_ids)]]
         detector_table_indices = np.nonzero(np.isin(self._detector_ids, detector_ids))[0]
-        if len(detector_table_indices) == 0:
+        if len(detector_table_indices) == 0 or np.all(~self._is_valid[detector_table_indices]):
             self._is_selected_in_tree.fill(True)
             return
         self._is_selected_in_tree.fill(False)
