@@ -548,7 +548,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         logger.information("Step 2: Loading vanadium and background data")
         vanadium_ws = self._load_vanadium_data()
         vanadium_background_ws = self._load_vanadium_background_data()
-        sample_background_ws = self._load_sample_background_data()
+        # sample_background_ws = self._load_sample_background_data()
 
         # Step 3: Axis Conversion & Masking
         logger.information("Step 3: Converting axes and applying masks")
@@ -561,7 +561,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         xMin, xMax = self._locate_global_xlimit(sample_workspaces)
 
         # Resample all sample workspaces
-        for ws_name in sample_workspaces:
+        for n, (ws_name, mask_name) in enumerate(zip(sample_workspaces, sample_masks)):
             ResampleX(
                 InputWorkspace=ws_name,
                 OutputWorkspace=ws_name,
@@ -570,24 +570,32 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 NumberBins=numberBins if numberBins > 0 else 1000,
                 EnableLogging=False,
             )
+            Scale(
+                InputWorkspace=ws_name,
+                OutputWorkspace=ws_name,
+                Factor=(1),
+                EnableLogging=False,
+            )
 
         # Step 5: Calibration & Normalization (vanadium correction)
         logger.information("Step 5: Processing calibration (vanadium) data")
         vanadium_corrected = self._process_vanadium_calibration(
-            vanadium_ws, vanadium_background_ws, sample_workspaces[0], sample_masks[0], xMin, xMax
+            vanadium_ws,
+            vanadium_background_ws,
         )
 
-        # Step 6 & 7: Process each sample workspace - background subtraction and absorption correction
-        logger.information("Steps 6-7: Applying background subtraction and absorption corrections")
-        for n, (ws_name, mask_name) in enumerate(zip(sample_workspaces, sample_masks)):
-            # Step 6: Background Subtraction
-            if sample_background_ws is not None:
-                ws_name = self._subtract_sample_background(ws_name, sample_background_ws, mask_name, xMin, xMax, vanadium_corrected)
+        # # Step 6 & 7: Process each sample workspace - background subtraction and absorption correction
+        # logger.information("Steps 6-7: Applying background subtraction and absorption corrections")
+        # for n, (ws_name, mask_name) in enumerate(zip(sample_workspaces, sample_masks)):
+        #     # Step 6: Background Subtraction
+        #     if sample_background_ws is not None:
+        #         # ws_name = self._subtract_sample_background(ws_name, sample_background_ws, mask_name, xMin, xMax, vanadium_corrected)
+        #         ws_name = self._apply_vanadium_absorption_correction(ws_name)
 
-        else:
-            # Mark metadata to indicate vanadium was not included
-            mtd[ws_name].mutableRun().addProperty("VanadiumNormalization", "Not Applied", True)
-            logger.warning(f"Vanadium normalization not applied to {ws_name} - no vanadium data provided")
+        #     else:
+        #         # Mark metadata to indicate vanadium was not included
+        #         mtd[ws_name].mutableRun().addProperty("VanadiumNormalization", "Not Applied", True)
+        #         logger.warning(f"Vanadium normalization not applied to {ws_name} - no vanadium data provided")
 
         # Apply scale factor
         scale_factor = self.getProperty("Scale").value
@@ -600,9 +608,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             )
 
         # Step 7: Sample Absorption Correction
-        muR = self.getProperty("AttenuationmuR").value
-        if muR != Property.EMPTY_DBL:
-            ws_name = self._apply_sample_absorption_correction(ws_name, muR)
+        ws_name = self._apply_sample_absorption_correction(ws_name, vanadium_corrected)
 
         # Normalize by monitor or time
         self._normalize_workspace(ws_name)
@@ -791,138 +797,76 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         logger.information(f"Applying {grouping} grouping to {ws_name}")
         return ws_name
 
-    def _process_vanadium_calibration(self, vanadium_ws, vanadium_bg_ws, reference_ws, reference_mask, xMin, xMax):
+    def _process_vanadium_calibration(self, vanadium_ws, vanadium_bg_ws):
         """
         Process vanadium calibration with background subtraction and absorption correction.
         VCORR = (V - V_B)/(T_0*sigma_inc + sigma_mult)
         """
-        if vanadium_ws is None:
-            return None
+        T_0 = 1.0  # Placeholder for transmission factor
+        sigma_inc = 1  # Placeholder for incoherent scattering cross-section
+        sigma_mult = 1  # Placeholder for multiple scattering cross-section
 
-        # Convert axis and resample vanadium
-        vanadium_converted = "__vanadium_converted"
-        self.temp_workspace_list.append(vanadium_converted)
-        self._to_spectrum_axis_resample(vanadium_ws, vanadium_converted, reference_mask, reference_ws, xMin, xMax)
-
-        # Subtract vanadium background if provided
         if vanadium_bg_ws is not None:
-            vanadium_bg_converted = "__vanadium_bg_converted"
-            self.temp_workspace_list.append(vanadium_bg_converted)
-            self._to_spectrum_axis_resample(vanadium_bg_ws, vanadium_bg_converted, reference_mask, reference_ws, xMin, xMax)
-
-            # Normalize vanadium background
-            self._normalize_workspace(vanadium_bg_converted)
-
-            # Subtract: V - V_B
             Minus(
-                LHSWorkspace=vanadium_converted,
-                RHSWorkspace=vanadium_bg_converted,
-                OutputWorkspace=vanadium_converted,
+                LHSWorkspace=vanadium_ws,
+                RHSWorkspace=vanadium_bg_ws,
+                OutputWorkspace=vanadium_ws,
                 EnableLogging=False,
             )
-
-        # Normalize vanadium by monitor or time
-        self._normalize_workspace(vanadium_converted)
-
-        # Apply absorption correction to vanadium
-        # VCORR = (V - V_B)/(T_0*sigma_inc + sigma_mult)
-        # vanadium_corrected = self._apply_vanadium_absorption_correction(vanadium_converted)
-
-        return vanadium_converted
-
-    def _apply_vanadium_absorption_correction(self, vanadium_ws):
-        """
-        Apply absorption correction to vanadium workspace.
-        Formula: VCORR = V/(T_0*sigma_inc + sigma_mult)
-
-        This uses CylinderAbsorption to calculate transmission T_0.
-        """
-        vanadium_diameter = self.getProperty("VanadiumDiameter").value
-        vanadium_radius = vanadium_diameter / 2.0  # Convert diameter to radius
-
-        # Vanadium cross-sections (in barns)
-        # Incoherent scattering cross-section for vanadium
-        sigma_inc = 5.08  # barns
-
-        # Number density for vanadium (atoms/Angstrom^3)
-        number_density = 0.0722  # typical value for vanadium
-
-        # Create absorption correction workspace
-        from mantid.simpleapi import ConvertUnits, CylinderAbsorption, SetSample
-
-        absorption_ws = "__vanadium_absorption"
-        self.temp_workspace_list.append(absorption_ws)
-
-        # Clone workspace for absorption calculation
-        from mantid.simpleapi import CloneWorkspace
-
-        CloneWorkspace(InputWorkspace=vanadium_ws, OutputWorkspace=absorption_ws, EnableLogging=False)
-
-        # Convert to wavelength for absorption calculation
-        original_unit = mtd[absorption_ws].getAxis(0).getUnit().unitID()
-        if original_unit != "Wavelength":
-            ConvertUnits(
-                InputWorkspace=absorption_ws,
-                OutputWorkspace=absorption_ws,
-                Target="Wavelength",
-                EMode="Elastic",
-                EnableLogging=False,
-            )
-
-        # Set sample geometry and material
-        SetSample(
-            InputWorkspace=absorption_ws,
-            Geometry={
-                "Shape": "Cylinder",
-                "Height": 10.0,  # Assume 10 cm height - can be made a property
-                "Radius": vanadium_radius,
-                "Center": [0.0, 0.0, 0.0],
-            },
-            Material={
-                "ChemicalFormula": "V",
-                "SampleNumberDensity": number_density,
-            },
-            EnableLogging=False,
-        )
-
-        # Calculate absorption correction (transmission)
-        CylinderAbsorption(
-            InputWorkspace=absorption_ws,
-            OutputWorkspace=absorption_ws,
-            CylinderSampleHeight=10.0,
-            CylinderSampleRadius=vanadium_radius,
-            AttenuationXSection=sigma_inc,  # Using incoherent as attenuation
-            ScatteringXSection=5.1,  # Vanadium scattering cross-section
-            SampleNumberDensity=number_density,
-            NumberOfSlices=10,
-            NumberOfAnnuli=10,
-            NumberOfWavelengthPoints=25,
-            EnableLogging=False,
-        )
-
-        # Convert back to original units
-        if original_unit != "Wavelength":
-            ConvertUnits(
-                InputWorkspace=absorption_ws,
-                OutputWorkspace=absorption_ws,
-                Target=original_unit,
-                EMode="Elastic",
-                EnableLogging=False,
-            )
-
-        # Divide vanadium by absorption correction: VCORR = V/(T_0*sigma_inc + sigma_mult)
-        # Note: The CylinderAbsorption already accounts for transmission
-        vanadium_corrected = "__vanadium_corrected"
-        self.temp_workspace_list.append(vanadium_corrected)
+        denominator = (T_0 * sigma_inc) + sigma_mult
 
         Divide(
             LHSWorkspace=vanadium_ws,
-            RHSWorkspace=absorption_ws,
-            OutputWorkspace=vanadium_corrected,
+            RHSWorkspace=denominator,
+            OutputWorkspace=vanadium_ws,
             EnableLogging=False,
         )
 
-        return vanadium_corrected
+        # Might use this instead of divide
+        # Scale(
+        #     InputWorkspace=vanadium_ws,
+        #     OutputWorkspace=vanadium_ws,
+        #     Factor=1.0 / denominator,
+        #     EnableLogging=False,
+        # )
+
+        return vanadium_ws
+
+    def _apply_vanadium_absorption_correction(self, vanadium_ws, vandium_background_ws):
+        """
+        Apply absorption correction to vanadium workspace.
+        Formula: VCORR = (V - V_B)/(T_0*sigma_inc + sigma_mult)
+
+        """
+        T_0 = 1.0  # Placeholder for transmission factor
+        sigma_inc = 1  # Placeholder for incoherent scattering cross-section
+        sigma_mult = 1  # Placeholder for multiple scattering cross-section
+
+        if vandium_background_ws is not None:
+            Minus(
+                LHSWorkspace=vanadium_ws,
+                RHSWorkspace=vandium_background_ws,
+                OutputWorkspace=vanadium_ws,
+                EnableLogging=False,
+            )
+        denominator = (T_0 * sigma_inc) + sigma_mult
+
+        Divide(
+            LHSWorkspace=vanadium_ws,
+            RHSWorkspace=denominator,
+            OutputWorkspace=vanadium_ws,
+            EnableLogging=False,
+        )
+
+        # Might use this instead of divide
+        # Scale(
+        #     InputWorkspace=vanadium_ws,
+        #     OutputWorkspace=vanadium_ws,
+        #     Factor=1.0 / denominator,
+        #     EnableLogging=False,
+        # )
+
+        return vanadium_ws
 
     def _subtract_sample_background(self, sample_ws, background_ws, mask_name, xMin, xMax, vanadium_corrected):
         """
@@ -965,30 +909,40 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         return sample_ws
 
-    def _apply_sample_absorption_correction(self, sample_ws, muR):
+    def _apply_sample_absorption_correction(self, sample_ws, vanadium_corrected):
         """
-        Apply absorption correction to sample using muR value.
-        Simple exponential correction: exp(-muR)
+        Apply absorption correction.
+        CORR = F*(SF)/(T*VCORR)
         """
-        from mantid.simpleapi import CreateSingleValuedWorkspace, Multiply
-        import math
+        F = self.getProperty("Scale").value
+        T = 1.0  # Placeholder for transmission factor
 
-        correction_factor = math.exp(-muR)
-        correction_ws = "__absorption_correction"
-        self.temp_workspace_list.append(correction_ws)
-
-        CreateSingleValuedWorkspace(
-            DataValue=correction_factor,
-            OutputWorkspace=correction_ws,
-            EnableLogging=False,
-        )
-
-        Multiply(
-            LHSWorkspace=sample_ws,
-            RHSWorkspace=correction_ws,
+        Scale(
+            InputWorkspace=sample_ws,
             OutputWorkspace=sample_ws,
+            Factor=F,
             EnableLogging=False,
         )
+        if vanadium_corrected is not None:
+            Scale(
+                InputWorkspace=vanadium_corrected,
+                OutputWorkspace=vanadium_corrected,
+                Factor=T,
+                EnableLogging=False,
+            )
+            Divide(
+                LHSWorkspace=sample_ws,
+                RHSWorkspace=vanadium_corrected,
+                OutputWorkspace=sample_ws,
+                EnableLogging=False,
+            )
+        else:
+            Divide(
+                LHSWorkspace=sample_ws,
+                RHSWorkspace=T,
+                OutputWorkspace=sample_ws,
+                EnableLogging=False,
+            )
 
         return sample_ws
 
@@ -1086,7 +1040,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         if target == "dSpacing":
             target = "ElasticDSpacing"
         elif target == "2Theta":
-            target = "InPlaneTwoTheta"
+            target = "Theta"
         elif target == "Q":
             target = "ElasticQ"
 
