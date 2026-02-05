@@ -44,6 +44,7 @@ jq = "*"
 
 [feature.devsite.target.linux-64.dependencies]
 sphinx = "*"
+myst-parser = "*"
 sphinx_bootstrap_theme = "*"
 
 [feature.publish-gh.target.linux-64.dependencies]
@@ -123,6 +124,7 @@ superqt = ">=0.7.6,<0.8"
 setuptools = ">=80.9.0,<81"
 zlib = ">=1.3.1,<2"
 joblib = ">=1.5.2,<2"
+myst-parser = ">=5.0.0,<6"
 pyparsing = "<3.3.0"
 
 [target.linux-64.dependencies]
