@@ -48,6 +48,9 @@ public:
   const API::Result<std::string> findRun(const std::string &hintstr, const std::vector<std::string> &exts = {},
                                          const bool useExtsOnly = false,
                                          const std::string &defaultInstrument = "") const;
+  const API::Result<std::string> findRun(const std::string &hintstr, const Kernel::InstrumentInfo &instrument,
+                                         const std::vector<std::string> &exts = {},
+                                         const bool useExtsOnly = false) const;
   std::vector<std::string> findRuns(const std::string &hintstr, const std::vector<std::string> &exts = {},
                                     const bool useExtsOnly = false) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
@@ -58,6 +61,8 @@ public:
   void getUniqueExtensions(const std::vector<std::string> &extensionsToAdd, std::vector<std::string> &uniqueExts) const;
   std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hint,
                                                             const std::string &defaultInstrument = "") const;
+  std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hint,
+                                                            const Kernel::InstrumentInfo &instrument) const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;
