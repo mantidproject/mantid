@@ -141,7 +141,7 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint, c
                                                            const std::string &defaultInstrument) const {
   if ((!hint.empty()) && (!isdigit(hint[0]))) {
     // If hint contains path components, use only the filename part for instrument detection
-    std::string filename = toUpper(std::filesystem::path(hint).filename());
+    std::string filename = toUpper(std::filesystem::path(hint).filename().string());
 
     try {
       std::string instrName;
@@ -183,6 +183,8 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint, c
 /**
  * Extracts the instrument name and run number from a hint
  * @param hint :: The name hint
+ * @param defaultInstrument :: The default instrument to use if the hint does not contain an instrument name. If empty,
+ * the system default is used.
  * @return A pair of instrument name and run number
  */
 std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string &hint,
