@@ -16,7 +16,7 @@ from mantid.simpleapi import CreateSampleWorkspace
 
 import unittest
 from unittest import mock
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock
 from enum import Enum
 
 
@@ -469,6 +469,28 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._monitor_positions = [np.zeros(3)]
         self._presenter._create_and_add_monitor_mesh()
         self._mock_view.add_rgba_mesh.assert_called_once()
+
+    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
+    def test_on_integration_limits_reset_clicked(self, mock_integration_limits):
+        """Test on_integration_limits_reset_clicked resets to full range."""
+        self._model.full_integration_limits = (0.0, 1000.0)
+        self._model._integration_limits = (200, 300)
+        self._presenter.on_integration_limits_reset_clicked()
+        mock_integration_limits.assert_called_once_with((0.0, 1000.0))
+        self._mock_view.set_integration_range_limits.assert_called_once_with((0.0, 1000.0))
+        self._mock_view.set_integration_min_max_boxes.assert_called_once_with((0.0, 1000.0))
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_contour_limits")
+    @mock.patch.object(FullInstrumentViewModel, "counts_limits", new_callable=PropertyMock)
+    def test_on_contour_range_reset_clicked(self, mock_counts_limits, mock_set_view_contour):
+        """Test on_contour_range_reset_clicked resets to full range."""
+        self._model.full_counts_limits = (0, 100)
+        self._model._counts_limits = (1, 2)
+        self._presenter.on_contour_range_reset_clicked()
+        mock_counts_limits.assert_called_once_with((0, 100))
+        mock_set_view_contour.assert_called_once()
+        self._mock_view.set_contour_range_limits.assert_called_once_with((0, 100))
+        self._mock_view.set_contour_min_max_boxes.assert_called_once_with((0, 100))
 
 
 if __name__ == "__main__":
