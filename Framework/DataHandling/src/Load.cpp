@@ -201,6 +201,7 @@ API::IAlgorithm_sptr Load::getFileLoader(const std::string &filePath) {
 
 void Load::findFilenameProperty(const API::IAlgorithm_sptr &loader) {
   // Use the first file property as the main Filename
+  m_filenamePropName.clear();
   const auto &props = loader->getProperties();
   for (auto const &prop : props) {
     auto const *multiprop = dynamic_cast<API::MultipleFileProperty *>(prop);

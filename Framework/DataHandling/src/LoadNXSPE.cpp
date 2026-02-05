@@ -99,7 +99,7 @@ void LoadNXSPE::init() {
  */
 void LoadNXSPE::exec() {
   std::string filename = getProperty("Filename");
-  // quicly check if it's really nxspe
+  // quickly check if it's really nxspe
   try {
     Nexus::File file(filename);
     std::string mainEntry = (*(file.getEntries().begin())).first;

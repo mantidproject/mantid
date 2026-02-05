@@ -11,7 +11,6 @@
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/LegacyNexusDescriptor.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidNexus/NexusDescriptor.h"
 #include "MantidNexus/NexusDescriptorLazy.h"
 
 #ifndef Q_MOC_RUN

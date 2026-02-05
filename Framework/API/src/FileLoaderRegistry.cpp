@@ -89,7 +89,7 @@ std::pair<IAlgorithm_sptr, int> searchForLoader(const std::string &filename,
 /// @brief Check if a file is HDF4 by examining its four signature bytes
 /// @param filename name of file to check
 /// @return true if it is HDF4 according to signature
-bool isHDF(std::string const &filename) {
+bool isHDF4(std::string const &filename) {
   // the HDF4 file signature, as per HDF's documentation
   std::array<char, 4> constexpr hdf4_sig{0x0E, 0x03, 0x13, 0x01};
   // read the signature in the first four bytes of this file
@@ -137,10 +137,9 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
 
   if (H5::H5File::isHdf5(filename)) {
 
-    // first, try search with lazy descriptor
+    // first, try search with Nexus loaders
     std::pair<IAlgorithm_sptr, int> NexusResult =
-        searchForLoader<Nexus::NexusDescriptorLazy, IFileLoader<Nexus::NexusDescriptorLazy>>(filename, m_names[Nexus],
-                                                                                             m_log);
+        searchForLoader<NexusDescriptorLazy, IFileLoader<NexusDescriptorLazy>>(filename, m_names[Nexus], m_log);
     if (NexusResult.second < 80) {
       // must also try LegacyNexusDescriptor algorithms because LoadMuonNexus can load both HDF4 and HDF5 files
       // but only need to do this if confidence is less than 80, i.e. not loaded by LoadEventNexus,
@@ -155,7 +154,7 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
     } else {
       bestLoader = NexusResult.first;
     }
-  } else if (isHDF(filename)) {
+  } else if (isHDF4(filename)) {
     // If the file is HDF4, then it can only be loaded by the legacy nexus loaders
     try {
       bestLoader = searchForLoader<LegacyNexusDescriptor, IFileLoader<LegacyNexusDescriptor>>(
