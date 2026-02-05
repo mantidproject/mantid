@@ -146,21 +146,21 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint, c
     try {
       std::string instrName;
 
-      // try short name first
+      // try full name first
       {
-        const auto &shortNames = Kernel::ConfigService::Instance().getInstrumentShortNames();
-        auto it = std::find_if(shortNames.begin(), shortNames.end(),
-                               [&](const std::string &shortName) { return filename.starts_with(shortName); });
-        if (it != shortNames.end())
-          instrName = *it;
-      }
-
-      // try full name next
-      if (instrName.empty()) {
         const auto &names = Kernel::ConfigService::Instance().getInstrumentNames();
         auto it = std::find_if(names.begin(), names.end(),
                                [&](const std::string &name) { return filename.starts_with(name); });
         if (it != names.end())
+          instrName = *it;
+      }
+
+      // try short name next
+      if (instrName.empty()) {
+        const auto &shortNames = Kernel::ConfigService::Instance().getInstrumentShortNames();
+        auto it = std::find_if(shortNames.begin(), shortNames.end(),
+                               [&](const std::string &shortName) { return filename.starts_with(shortName); });
+        if (it != shortNames.end())
           instrName = *it;
       }
 
@@ -234,7 +234,6 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
  * name is absent the default one is used.
  * @param hint :: The name hint
  * @param instrument :: The current instrument object
- * @param defaultInstrument :: The default instrument to use if not found. If empty, the system default is used.
  * @return The file name
  * @throw NotFoundError if a required default is not set
  * @throw std::invalid_argument if the argument is malformed or run number is
