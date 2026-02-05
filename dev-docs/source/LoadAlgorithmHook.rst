@@ -16,7 +16,7 @@ must register itself slightly differently and not use ``DECLARE_ALGORITHM`` macr
 
 The process of searching for the correct loader needs to be fairly quick as it will be especially
 noticeable in the GUI if the process takes a long time. To speed up the process the loaders are
-currently split into 2 categories:
+currently split into 3 categories:
 
 - Nexus (HDF5)
 - Legacy Nexus (HDF4/5 -- for ISIS muon scattering only)
@@ -31,11 +31,11 @@ If the file is neither HDF5 nor HDF4, then the non-HDF group of loaders are chec
 Descriptors
 ###########
 To avoid the file being opened/closed by each ``confidence`` method, a ``Descriptor`` object is provided.
-The actual ``Descriptor`` class depends on whether the file is a HDF file or not.
+The actual ``Descriptor`` class depends on whether the file is an HDF5 file, an HDF4 file, or neither.
 
 Nexus
 -----
-To register an algorithm as a Nexus loader use the IFileLoader<NexusDescriptorLazy> interface as a base class for your algorithm.
+To register an algorithm as a Nexus loader use the ``IFileLoader<NexusDescriptorLazy>`` interface as a base class for your algorithm.
 In your cpp file include the ``MantidAPI/RegisterFileLoader.h`` header and use the ``DECLARE_NEXUS_FILELOADER_ALGORITHM``
 macro *instead* of the standard ``DECLARE_ALGORITHM`` macro.
 
@@ -50,6 +50,7 @@ as loaders query them.  It owns a handle to an HDF5 file.  This is also able to 
 Avoid calling the ``getAllEntries()`` method; doing so may lead to unexpected or inefficient results.
 
 Do **NOT** open a ``Nexus::File`` object using the descriptor's filename; doing so defeats efficiency gains of using a shallow loader.
+If you need to check a data string, use ``NexusDescriptorLazy::getStrData()``, passing the absolute dataset address within the file (e.g. `/entry/instrument/definition`).
 
 All new algorithms for loading HDF5 data should use the lazy descriptor.
 
@@ -60,17 +61,11 @@ Use the lazy descriptor instead.
 
 LegacyNexus
 -----------
-These loaders preserve the state of ``Mantid::Nexus`` prior to the Nexus refactor.  They still rely on ``napi`` for loading HDF4 files,
-and do not include many of the performance efficiency gains from the refactor.  This type of loader should only be used for algorithms
-meant to load ISIS muon files, many of which still use HDF4.
+These loaders preserve the state of ``Mantid::Nexus`` prior to the Nexus refactor.  They still rely on ``napi`` for loading HDF files,
+and do not include many of the improvements in efficiency and memory use from the refactor.  This type of loader should only be used for algorithms
+meant to load ISIS muon files, many of which still use HDF4.  These are the only loaders in Mantid capable of loading HDF4 files.
 
-No new loaders should be written to use the legacy Nexus subpackage.
-
-LegacyNexus
------------
-These loading algorithms are based on the old ``napi`` framework, and do not include improvements in efficiency and memory use made
-during the Nexus refactor.  They remain in this state only for use by muon scattering scientists at ISIS.  These are the only algorithms
-in Mantid capable of loading HDF4 files.  No new algorithms should be registered in this state.
+LegacyNexus is deprecated.  No new loaders should be written to work in LegacyNexus.
 
 LegacyNexusDescriptor
 ^^^^^^^^^^^^^^^^^^^^^
