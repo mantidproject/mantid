@@ -10,6 +10,8 @@ GIT_USER_EMAIL="mantid-buildserver@mantidproject.org"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_MIRROR="$("${SCRIPT_DIR}/data_mirrors")"
 REPO_ROOT_DIR=$SCRIPT_DIR/../..
+SHA1=$(git rev-parse HEAD) # full sha for this source repository
+SHA1_SHORT=$(git rev-parse --short HEAD) # full sha for this source repository
 
 # source util functions
 . source/buildconfig/Jenkins/Conda/pixi-utils
@@ -47,9 +49,6 @@ echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/DocTest/' >> $WORKSPACE
 # Build the html docs
 export LC_ALL=C
 QT_QPA_PLATFORM=offscreen pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e docs-build cmake --build . --target docs-html
-
-SHA1=$(git rev-parse HEAD) # full sha for this source repository
-SHA1_SHORT=$(git rev-parse --short HEAD) # full sha for this source repository
 
 # Publish. Clone current docs to publish directory
 # and rsync between built html in html directory and current
