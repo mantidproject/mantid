@@ -28,7 +28,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexusV2)
+DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadMuonNexusV2)
 
 using namespace Kernel;
 using namespace API;
@@ -53,7 +53,7 @@ LoadMuonNexusV2::LoadMuonNexusV2()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMuonNexusV2::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadMuonNexusV2::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   // Without this entry we cannot use LoadISISNexus
   if (!descriptor.isEntry(NeXusEntry::RAWDATA, "NXentry")) {
     return 0;
@@ -68,9 +68,7 @@ int LoadMuonNexusV2::confidence(Nexus::NexusDescriptor &descriptor) const {
   if (!descriptor.isEntry(NeXusEntry::DEFINITION))
     return 0;
 
-  Nexus::File file(descriptor.filename());
-  file.openAddress(NeXusEntry::DEFINITION);
-  std::string def = file.getStrData();
+  std::string def = descriptor.getStrData(NeXusEntry::DEFINITION);
   if (def == "muonTD" || def == "pulsedTD") {
     return 82; // have to return 82 to "beat" the LoadMuonNexus2 algorithm,
                // which returns 81 for this file as well
@@ -133,7 +131,7 @@ void LoadMuonNexusV2::init() {
                   "Table or a group of tables with information about the "
                   "detector grouping.");
 }
-void LoadMuonNexusV2::execLoader() {
+void LoadMuonNexusV2::exec() {
   // prepare nexus entry
   m_entrynumber = getProperty("EntryNumber");
   m_filename = getPropertyValue("Filename");

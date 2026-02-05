@@ -85,6 +85,21 @@ std::pair<IAlgorithm_sptr, int> searchForLoader(const std::string &filename,
 
   return {bestLoader, maxConfidence};
 }
+
+/// @brief Check if a file is HDF4 by examining its four signature bytes
+/// @param filename name of file to check
+/// @return true if it is HDF4 according to signature
+bool isHDF(std::string const &filename) {
+  // the HDF4 file signature, as per HDF's documentation
+  std::array<char, 4> constexpr hdf4_sig{0x0E, 0x03, 0x13, 0x01};
+  // read the signature in the first four bytes of this file
+  std::array<char, 4> signature;
+  std::ifstream file(filename, std::ios::binary);
+  if (!file.read(signature.data(), 4)) {
+    return false;
+  }
+  return signature == hdf4_sig;
+}
 } // namespace
 
 //----------------------------------------------------------------------------------------------
@@ -151,7 +166,8 @@ const std::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std
     } else {
       bestLoader = NexusLazyResult.first;
     }
-  } else {
+  } else if (isHDF(filename)) {
+    // If the file is HDF4, then it can only be loaded by the legacy nexus loaders
     try {
       bestLoader = searchForLoader<LegacyNexusDescriptor, IFileLoader<LegacyNexusDescriptor>>(
                        filename, m_names[LegacyNexus], m_log)
