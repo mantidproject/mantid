@@ -11,7 +11,7 @@ from isis_sans_system_test import ISISSansSystemTest
 from mantid.api import mtd, FileFinder
 from mantid.kernel import config
 from mantid.simpleapi import DeleteWorkspace, Load
-from ISISCommandInterface import Detector, Gravity, MaskFile, SANS2D, SANS2DTUBES, Set1D
+from ISISCommandInterface import Detector, Gravity, MaskFile, SANS2D, SANS2DTUBES, Set1D, Clean
 from SANSBatchMode import BatchReduce
 import os.path
 
@@ -22,6 +22,7 @@ from sans.common.enums import SANSInstrument
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DBatch(systemtesting.MantidSystemTest):
     def runTest(self):
+        Clean()
         SANS2D()
         Set1D()
         Detector("rear-detector")
@@ -56,6 +57,7 @@ class SANS2DNewSettingsCarriedAcrossInBatchMode(systemtesting.MantidSystemTest):
     """
 
     def runTest(self):
+        Clean()
         config["default.instrument"] = "SANS2D"
         SANS2D()
         Set1D()
@@ -83,6 +85,7 @@ class SANS2DTUBESBatchWithZeroErrorCorrection(systemtesting.MantidSystemTest):
     """
 
     def runTest(self):
+        Clean()
         config["default.instrument"] = "SANS2D"
         SANS2DTUBES()
         Set1D()
