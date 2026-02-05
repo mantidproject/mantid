@@ -82,17 +82,17 @@
          </item>
          <item>
           <layout class="QHBoxLayout" name="laySampleGroupRow">
-           <item>
-            <widget class="QLabel" name="lblGroup">
+              <item>
+            <widget class="QLabel" name="lblInstr">
              <property name="text">
-              <string>Group:</string>
+              <string>Instrument: </string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="cmbGroup"/>
+            <widget class="QComboBox" name="cmbInstr"/>
            </item>
-           <item>
+              <item>
             <spacer name="spGroupStretch">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -104,6 +104,16 @@
               </size>
              </property>
             </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblGroup">
+             <property name="text">
+              <string>Group:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cmbGroup"/>
            </item>
           </layout>
          </item>
