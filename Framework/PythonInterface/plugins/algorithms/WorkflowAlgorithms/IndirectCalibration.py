@@ -19,6 +19,7 @@ from mantid.kernel import (
 from mantid.simpleapi import (
     CalculateFlatBackground,
     DeleteWorkspace,
+    Divide,
     FindDetectorsOutsideLimits,
     Integration,
     Load,
@@ -35,6 +36,8 @@ import os.path
 class IndirectCalibration(DataProcessorAlgorithm):
     _input_files = None
     _out_ws = None
+    _instrument_name = None
+    _analyser = None
     _peak_range = None
     _back_range = None
     _spec_range = None
@@ -124,6 +127,9 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self._run_numbers = []
         load_prog = Progress(self, start=0.0, end=0.30, nreports=len(self._input_files))
         i = 0
+        print("detector range")
+        print(self._spec_range[0])
+        print(self._spec_range[1])
         for in_file in self._input_files:
             (_, filename) = os.path.split(in_file)
             (root, _) = os.path.splitext(filename)
@@ -162,26 +168,46 @@ class IndirectCalibration(DataProcessorAlgorithm):
         )
 
         workflow_prog.report("Masking detectors")
-        number_historgrams = mtd[calib_ws_name].getNumberHistograms()
+        number_histograms = mtd[calib_ws_name].getNumberHistograms()
         ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=calib_ws_name, OutputWorkspace="__temp_ws_mask")
         DeleteWorkspace(ws_mask)
 
-        if self._instrument_name == "OSIRIS" and self._analyser == "silicon":
-            # do something for silicon...
-            print("Osiris with silicon analyser")
+        num_valid_spectra = number_histograms - num_zero_spectra
+        if num_valid_spectra <= 0:
+            raise RuntimeError("No valid (non-zero) spectra found")
+
+        if False:  # self._instrument_name == "OSIRIS" and self._analyser == "silicon":
+            # workflow_prog.report("Converting to energy transfer")
+            # ConvertUnits(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name, Target="DeltaE", EMode="Indirect")
+
+            if self._intensity_scale is None:
+                workflow_prog.report("Summing spectra")
+                temp_sum = SumSpectra(InputWorkspace=calib_ws_name, OutputWorkspace="__temp_sum")
+
+                Scale(InputWorkspace=temp_sum, OutputWorkspace="__temp_mean", Factor=1.0 / num_valid_spectra)
+                DeleteWorkspace(temp_sum)
+
+                workflow_prog.report("Normalising by mean energy spectrum")
+                Divide(LHSWorkspace=calib_ws_name, RHSWorkspace="__temp_mean", OutputWorkspace=self._out_ws)
+                DeleteWorkspace("__temp_mean")
+
+            else:
+                workflow_prog.report("Scaling calibration")
+                Scale(InputWorkspace=calib_ws_name, OutputWorkspace=self._out_ws, Factor=self._intensity_scale, Operation="Multiply")
+
         else:
             workflow_prog.report("Integrating calibration file")
             Integration(
                 InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name, RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1]
             )
 
-            workflow_prog.report("Summing Spectra")
-            temp_sum = SumSpectra(InputWorkspace=calib_ws_name, OutputWorkspace="__temp_sum")
-            total = temp_sum.readY(0)[0]
-            DeleteWorkspace(temp_sum)
-
             if self._intensity_scale is None:
-                self._intensity_scale = 1 / (total / (number_historgrams - num_zero_spectra))
+                workflow_prog.report("Summing Spectra")
+                temp_sum = SumSpectra(InputWorkspace=calib_ws_name, OutputWorkspace="__temp_sum")
+                total = temp_sum.readY(0)[0]
+                DeleteWorkspace(temp_sum)
+
+                self._intensity_scale = 1 / (total / num_valid_spectra)
 
             workflow_prog.report("Scaling calibration")
             Scale(InputWorkspace=calib_ws_name, OutputWorkspace=self._out_ws, Factor=self._intensity_scale, Operation="Multiply")
