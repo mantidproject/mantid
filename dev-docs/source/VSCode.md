@@ -372,7 +372,8 @@ python3 -m pip install --user debugpy
 
 ```python
 import debugpy
-debugpy.listen(('127.0.0.1', 5678))
+
+debugpy.listen(("127.0.0.1", 5678))
 debugpy.wait_for_client()
 debugpy.breakpoint()
 ```
