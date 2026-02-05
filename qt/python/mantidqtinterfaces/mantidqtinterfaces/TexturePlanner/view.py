@@ -56,6 +56,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.gonio_angles = (self.spnAngle0, self.spnAngle1, self.spnAngle2, self.spnAngle3, self.spnAngle4, self.spnAngle5)
         self.gonio_senses = (self.cmbSense0, self.cmbSense1, self.cmbSense2, self.cmbSense3, self.cmbSense4, self.cmbSense5)
         self.gonio_vecs = (self.edtVec0, self.edtVec1, self.edtVec2, self.edtVec3, self.edtVec4, self.edtVec5)
+        self.init_angles = (self.spnInitX, self.spnInitY, self.spnInitZ)
 
         self._setup_pf_plot()
         self._setup_lab_plot()
@@ -398,6 +399,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_angle_limits(self):
         for angs in self.gonio_angles:
+            angs.setMinimum(-360)
+            angs.setMaximum(360)
+        for angs in self.init_angles:
             angs.setMinimum(-360)
             angs.setMaximum(360)
 

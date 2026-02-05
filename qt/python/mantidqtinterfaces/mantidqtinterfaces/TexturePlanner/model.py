@@ -518,11 +518,12 @@ class TexturePlannerModel(object):
         fig.sca(lab_ax)
         plot_sample_only(fig, rot_mesh * 0.5, 0.5, "grey")
         sample_model.plot_sample_directions(ax_transform, self.dir_names)
-        sample_model.plot_gauge_vol()
         lab_ax.set_xlim([-extent * nGon / 1.5, extent * nGon / 1.5])
         lab_ax.set_ylim([-extent * nGon / 1.5, extent * nGon / 1.5])
         lab_ax.set_zlim([-extent * nGon / 1.5, extent * nGon / 1.5])
         lab_ax.set_aspect("equal")
+        if self.plot_attenuation:
+            sample_model.plot_gauge_vol()
 
         # plot incident beam
         comp_info = self.ws.componentInfo()
@@ -632,6 +633,17 @@ class TexturePlannerModel(object):
 
     def set_gauge_volume_str(self, preset, custom):
         self.gauge_volume_str = get_gauge_vol_str(preset, custom)
+
+    def update_instrument(self, instrument):
+        self.instr = instrument
+        self.update_supported_groups()
+
+    def update_supported_groups(self):
+        match self.instr:
+            case "ENGINX":
+                self.supported_groups = ("Texture20", "Texture30", "banks")
+            case "IMAT":
+                self.supported_groups = "banks"
 
 
 def ring(axis, r=1, res=100, offset=(0, 0, 0)):
