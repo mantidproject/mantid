@@ -33,7 +33,6 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D11/")
 
     def cleanup(self):
         mtd.clear()
@@ -89,7 +88,6 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D11/")
 
     def cleanup(self):
         mtd.clear()
@@ -155,7 +153,6 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D11/")
 
     def cleanup(self):
         mtd.clear()
@@ -199,7 +196,6 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D11/")
 
         # prepare mask for instrument edges first:
         MaskBTP(Instrument="D11", Tube="1-3,253-256")
@@ -266,7 +262,6 @@ class D11_AutoProcess_Solvent_Test(systemtesting.MantidSystemTest):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D11/")
         # prepare mask for instrument edges first:
         MaskBTP(Instrument="D11", Tube="0-6,250-256")
         RenameWorkspace(InputWorkspace="D11MaskBTP", OutputWorkspace="mask_vertical")
@@ -365,7 +360,6 @@ class D11_AutoProcess_CustomStitching_Test(systemtesting.MantidSystemTest):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D11/")
 
     def cleanup(self):
         mtd.clear()
@@ -423,8 +417,6 @@ class D11B_AutoProcess_DirectBeamResolution_Test(systemtesting.MantidSystemTest)
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D11/")
-        config.appendDataSearchSubDir("ILL/D11B/")
 
     def cleanup(self):
         mtd.clear()
@@ -477,7 +469,6 @@ class D33_AutoProcess_Panels_Test(systemtesting.MantidSystemTest):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D33"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D33/")
 
     def cleanup(self):
         mtd.clear()
@@ -538,7 +529,6 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D33"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D33/")
 
     def cleanup(self):
         mtd.clear()
@@ -588,7 +578,6 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D16"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D16/")
         config["algorithms.retained"] = "0"
 
     def cleanup(self):
@@ -675,7 +664,6 @@ class D16_AutoProcess_Test_cycle213(systemtesting.MantidSystemTest):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D16"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D16/")
         config["algorithms.retained"] = "0"
 
     def cleanup(self):
@@ -728,7 +716,6 @@ class D22_AutoProcess_Single_Sensitivity(systemtesting.MantidSystemTest):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D22"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D22/")
 
         MaskBTP(Instrument="D22", Pixel="0-12,245-255")
         MaskBTP(Workspace="D22MaskBTP", Tube="54-75", Pixel="108-150")
@@ -774,7 +761,6 @@ class D22_AutoProcess_Multi_Sensitivity(systemtesting.MantidSystemTest):
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D22"
         config["logging.loggers.root.level"] = "Warning"
-        config.appendDataSearchSubDir("ILL/D22/")
 
         MaskBTP(Instrument="D22", Pixel="0-12,245-255")
         RenameWorkspace(InputWorkspace="D22MaskBTP", OutputWorkspace="top_bottom")
