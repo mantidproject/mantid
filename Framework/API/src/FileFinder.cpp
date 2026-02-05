@@ -205,6 +205,10 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
   std::string runPart;
   std::string instrPart = instr.shortName();
 
+  if (hint.empty()) {
+    throw std::invalid_argument("Malformed hint: empty hint");
+  }
+
   if (isdigit(hint[0])) {
     runPart = hint;
   } else {
@@ -265,7 +269,11 @@ std::string FileFinderImpl::makeFileName(const std::string &hint, const Kernel::
       if (hintUpper.rfind(shortName, 0) != 0 && hintUpper.rfind(name, 0) != 0) {
         instrToUse = getInstrument(hint, false);
       }
+    } catch (const std::exception &ex) {
+      g_log.debug() << "Failed to resolve instrument from hint '" << hint << "' in makeFileName: " << ex.what();
     } catch (...) {
+      g_log.debug() << "Failed to resolve instrument from hint '" << hint
+                    << "' in makeFileName due to an unknown exception.";
     }
   }
 
@@ -673,7 +681,7 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
       }
     } else {
       Kernel::InstrumentInfo instr = this->getInstrument(*h, true, instrSName);
-      // udpate instrument short name for later use
+      // update instrument short name for later use
       instrSName = instr.shortName();
 
       std::string path = findRun(*h, instr, extensionsProvided, useOnlyExtensionsProvided).result();
