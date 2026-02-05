@@ -142,7 +142,7 @@ class FullInstrumentViewPresenter:
         self.set_view_integration_limits()
 
     def on_integration_limits_reset_clicked(self) -> None:
-        self._model.update_integration_range(self._model.full_integration_limits, entire_range=True)
+        self._model.integration_limits = self._model.full_integration_limits
         self._view.set_integration_range_limits(self._model.full_integration_limits)
         self._view.set_integration_min_max_boxes(self._model.full_integration_limits)
         self.set_view_integration_limits()
