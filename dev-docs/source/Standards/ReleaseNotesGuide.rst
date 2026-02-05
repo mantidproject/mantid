@@ -68,7 +68,7 @@ Release notes are intended for our non-developer scientific users and should be 
 Your note should summarise your work to a non-developer audience without containing lengthy details of the implementation in the code base.
 
 Most release notes are one or two sentences. If your new feature/bugfix requires lengthy explanations for users you probably need to add or update other documentation. You can then summarise the work in the release note and include
-a link to the documentation you created. Also consider using images or a gif walkthrough (see https://docs.mantidproject.org/nightly/release/v6.2.0/indirect_geometry.html for example) to help convey the information.
+a link to the documentation you created. Also consider using images or a gif walkthrough (see :ref:`TextureAnalysis` for really nice gifs) to help convey the information.
 
 How to phrase a release note
 ----------------------------
@@ -85,11 +85,11 @@ Here is a good template that will be aplicable in most cases:
    :width: 800px
    :align: center
 
-And here are some examples of release notes that follow this structure:
+And here are some real-world examples (with links to pages) of release notes that follow this structure:
 
-- ``Elwin tab of Inelastic Data Processor interface now plots the correct spectrum for the selected index when changing the preview spectrum above the plot widget combo box.``
-- ``AlignAndFocusPowder algorithm now runs compression when logarithmic is selected.``
-- ``ResNorm tab of Bayes Fitting interface no longer crashes when the `Run` button is clicked and no data is loaded.``
+- ``:ref:`Elwin Tab <elwin>` of the :ref:`Data Processor Interface <interface-inelastic-data-processor>` now plots the correct spectrum for the selected index when changing the preview spectrum above the plot widget combo box.``
+- ``:ref:`algm-AlignAndFocusPowder` algorithm now runs compression when logarithmic is selected.``
+- ``:ref:`resnorm` tab of :ref:`interface-inelastic-bayes-fitting` interface no longer crashes when the `Run` button is clicked and no data is loaded.``
 
 The main advantage of this model is that in the final version of the release notes, all algorithms and interfaces get positioned in the same line of vision.
 This is important because it makes skimming the release notes much easier for our busy users:
