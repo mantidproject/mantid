@@ -68,6 +68,7 @@ class FullInstrumentViewPresenter:
         self._transform = np.eye(4)
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
+        self._count_scale_mode = "Linear"
         self._model.setup()
         self.setup()
         self._callback_queue = Queue()
@@ -151,15 +152,38 @@ class FullInstrumentViewPresenter:
         self.set_view_integration_limits()
 
     def set_view_integration_limits(self) -> None:
-        self._detector_mesh[self._counts_label] = self._model.detector_counts
+        display_counts = self._transform_counts(self._model.detector_counts)
+        self._detector_mesh[self._counts_label] = display_counts
 
     def on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
-        self._model.counts_limits = self._view.get_contour_limits()
+        # Read limits from view (these are in the current display scale).
+        lower, upper = self._view.get_contour_limits()
+        # Convert back to model's linear counts if we're in Logarithmic display mode
+        if self._count_scale_mode == "Linear":
+            self._model.counts_limits = (lower, upper)
+        else:
+            # Inverse of log10(counts + 1): counts = 10**value - 1
+            with np.errstate(over="ignore", invalid="ignore"):
+                lin_lower = 10**lower - 1
+                lin_upper = 10**upper - 1
+            self._model.counts_limits = (lin_lower, lin_upper)
         self.set_view_contour_limits()
 
     def set_view_contour_limits(self) -> None:
-        self._view.set_plotter_scalar_bar_range(self._model.counts_limits, self._counts_label)
+        # Transform contour limits for display scale
+        lower, upper = self._model.counts_limits
+        if self._count_scale_mode == "Linear":
+            clim = (lower, upper)
+            display_title = self._counts_label
+        else:
+            # Use log10(counts + 1) to avoid -inf for zero counts
+            clim = (np.log10(lower + 1), np.log10(upper + 1))
+            display_title = f"log10({self._counts_label})"
+        # Update the plotter scalar bar range (plotter expects the scalar name used when adding the mesh)
+        # Also pass a human-readable title for the scalar bar if available.
+        self._view.set_plotter_scalar_bar_range(clim, self._counts_label, display_title=display_title)
+        self._view.set_contour_range_limits(clim)
 
     def update_plotter(self) -> None:
         """Update the projection based on the selected option."""
@@ -169,11 +193,39 @@ class FullInstrumentViewPresenter:
             self.update_detector_picker()
             self.on_peaks_workspace_selected()
 
+    def on_count_scale_selected(self, index_or_text) -> None:
+        """Handler for count scale combo box changes."""
+        # Determine text value
+        if isinstance(index_or_text, int):
+            try:
+                text = self._view._count_scale_combo_box.itemText(index_or_text)
+            except Exception:
+                text = self._view.current_selected_count_scale()
+        else:
+            text = str(index_or_text)
+        if text in ("Linear", "Logarithmic"):
+            self._count_scale_mode = text
+            self.update_plotter()
+
+    def _transform_counts(self, counts: np.ndarray) -> np.ndarray:
+        """Return counts transformed for display according to selected scale."""
+        if self._count_scale_mode == "Linear":
+            return counts
+        # Logarithmic: use base-10 log with +1 offset to avoid -inf at zero
+        # Preserve NaNs/infs if present
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return np.log10(counts + 1)
+
     def _update_view_main_plotter(self):
         self._view.clear_main_plotter()
 
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
-        self._detector_mesh[self._counts_label] = self._model.detector_counts
+        # Apply display transform to detector counts before assigning as scalars
+        try:
+            display_counts = self._transform_counts(self._model.detector_counts)
+        except Exception:
+            display_counts = self._model.detector_counts
+        self._detector_mesh[self._counts_label] = display_counts
         self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
 
         self._pickable_mesh = self.create_poly_data_mesh(self._model.detector_positions)

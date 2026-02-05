@@ -65,7 +65,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_set_view_contour_limits(self):
         self._model._counts_limits = (0, 100)
         self._presenter.set_view_contour_limits()
-        self._mock_view.set_plotter_scalar_bar_range.assert_called_once_with((0, 100), self._presenter._counts_label)
+        self._mock_view.set_plotter_scalar_bar_range.assert_called_once_with(
+            (0, 100), self._presenter._counts_label, display_title=self._presenter._counts_label
+        )
 
     def test_set_view_integration_limits(self):
         self._model._counts = np.zeros(200)
@@ -473,6 +475,29 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._monitor_positions = [np.zeros(3)]
         self._presenter._create_and_add_monitor_mesh()
         self._mock_view.add_rgba_mesh.assert_called_once()
+
+    def test_count_scale_selection_changes_mode_and_updates(self):
+        # Ensure selecting via text updates mode and triggers a plot refresh
+        self._presenter.update_plotter = MagicMock()
+        self._presenter.on_count_scale_selected("Logarithmic")
+        self.assertEqual(self._presenter._count_scale_mode, "Logarithmic")
+        self._presenter.update_plotter.assert_called_once()
+
+    def test_count_scale_selection_by_index_uses_view_item_text(self):
+        # Ensure selecting by index queries the view combo box when available
+        self._mock_view._count_scale_combo_box = MagicMock()
+        self._mock_view._count_scale_combo_box.itemText.return_value = "Logarithmic"
+        self._presenter.update_plotter = MagicMock()
+        self._presenter.on_count_scale_selected(1)
+        self.assertEqual(self._presenter._count_scale_mode, "Logarithmic")
+        self._presenter.update_plotter.assert_called_once()
+
+    def test_transform_counts_logarithmic(self):
+        # Verify internal transform uses log10(counts + 1) for Logarithmic mode
+        counts = np.array([0.0, 1.0, 9.0, 99.0])
+        self._presenter._count_scale_mode = "Logarithmic"
+        transformed = self._presenter._transform_counts(counts)
+        np.testing.assert_allclose(transformed, np.log10(counts + 1))
 
 
 if __name__ == "__main__":
