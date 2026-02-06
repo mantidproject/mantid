@@ -12,7 +12,7 @@ from mantidqtinterfaces.sans_isis.gui_logic.models.file_loading import FileLoadi
 class FileLoadingTest(unittest.TestCase):
     def test_can_parse_toml_file(self):
         mock_path = mock.NonCallableMock()
-        with mock.patch("sans.gui_logic.models.file_loading.TomlParser") as mocked_module:
+        with mock.patch("mantidqtinterfaces.sans_isis.gui_logic.models.file_loading.TomlParser") as mocked_module:
             mocked_parser = mock.Mock()
             mocked_module.return_value = mocked_parser
 
@@ -25,7 +25,7 @@ class FileLoadingTest(unittest.TestCase):
         expected_wrapped = [KeyError(), NotImplementedError(), ValueError(), PermissionError()]
 
         for known_exception in expected_wrapped:
-            with mock.patch("sans.gui_logic.models.file_loading.TomlParser") as mocked_module:
+            with mock.patch("mantidqtinterfaces.sans_isis.gui_logic.models.file_loading.TomlParser") as mocked_module:
                 mocked_parser = mock.Mock()
                 mocked_module.return_value = mocked_parser
 
@@ -35,7 +35,7 @@ class FileLoadingTest(unittest.TestCase):
 
         not_wrapped = [KeyboardInterrupt(), SystemExit(), RuntimeError()]
         for unexpected_exception in not_wrapped:
-            with mock.patch("sans.gui_logic.models.file_loading.TomlParser") as mocked_module:
+            with mock.patch("mantidqtinterfaces.sans_isis.gui_logic.models.file_loading.TomlParser") as mocked_module:
                 mocked_parser = mock.Mock()
                 mocked_module.return_value = mocked_parser
                 mocked_parser.parse_toml_file.side_effect = unexpected_exception
@@ -46,7 +46,7 @@ class FileLoadingTest(unittest.TestCase):
         expected_wrapped = [RuntimeError(), ValueError(), IsADirectoryError(), PermissionError()]
 
         for known_exception in expected_wrapped:
-            with mock.patch("sans.gui_logic.models.file_loading.UserFileReaderAdapter") as mocked_module:
+            with mock.patch("mantidqtinterfaces.sans_isis.gui_logic.models.file_loading.UserFileReaderAdapter") as mocked_module:
                 mocked_parser = mock.Mock()
                 mocked_module.return_value = mocked_parser
 
@@ -56,7 +56,7 @@ class FileLoadingTest(unittest.TestCase):
 
         not_wrapped = [KeyboardInterrupt(), SystemExit()]
         for unexpected_exception in not_wrapped:
-            with mock.patch("sans.gui_logic.models.file_loading.UserFileReaderAdapter") as mocked_module:
+            with mock.patch("mantidqtinterfaces.sans_isis.gui_logic.models.file_loading.UserFileReaderAdapter") as mocked_module:
                 mocked_parser = mock.Mock()
                 mocked_module.return_value = mocked_parser
                 mocked_parser.get_all_states.side_effect = unexpected_exception

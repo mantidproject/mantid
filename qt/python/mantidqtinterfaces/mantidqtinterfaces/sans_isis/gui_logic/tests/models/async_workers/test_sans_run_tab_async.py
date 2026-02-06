@@ -116,7 +116,7 @@ class SansRunTabAsyncTest(unittest.TestCase):
             self.assertEqual(RowState.ERROR, row.state)
             self.assertEqual("failure", row.tool_tip)
 
-    @mock.patch("sans.gui_logic.models.async_workers.sans_run_tab_async.load_workspaces_from_states")
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.sans_run_tab_async.load_workspaces_from_states")
     def test_that_load_workspaces_sets_row_to_processed(self, mocked_loader):
         states = {0: mock.MagicMock()}
         errors = {}
@@ -130,7 +130,7 @@ class SansRunTabAsyncTest(unittest.TestCase):
             self.assertEqual(RowState.PROCESSED, row.state)
             self.assertIsNone(row.tool_tip)
 
-    @mock.patch("sans.gui_logic.models.async_workers.sans_run_tab_async.load_workspaces_from_states")
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.sans_run_tab_async.load_workspaces_from_states")
     def test_that_load_workspaces_sets_rows_to_error(self, mocked_loader):
         mocked_loader.side_effect = Exception("failure")
 
