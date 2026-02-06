@@ -8,7 +8,6 @@ from functools import partial
 from pyvista import PolyData
 from qtpy.QtWidgets import (
     QMainWindow,
-    QTabWidget,
     QVBoxLayout,
     QHBoxLayout,
     QWidget,
@@ -25,6 +24,8 @@ from qtpy.QtWidgets import (
     QListWidgetItem,
     QAbstractItemView,
     QScrollArea,
+    QTabWidget,
+    QFrame,
 )
 from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
 from qtpy.QtCore import Qt, QEvent, QSize
@@ -55,6 +56,7 @@ from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.Globals import CurrentTab
+from instrumentview.ComponentTreeView import ComponentTreeView
 
 import os
 from contextlib import suppress
@@ -124,21 +126,23 @@ class FullInstrumentViewWindow(QMainWindow):
 
         super(FullInstrumentViewWindow, self).__init__(parent)
         self.setWindowTitle("Instrument View")
-
         self._off_screen = off_screen
 
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
+        tab_widget = QTabWidget()
         parent_horizontal_layout = QHBoxLayout(central_widget)
 
         pyvista_vertical_widget = QWidget()
         left_column_widget = QWidget()
+        tab_widget.addTab(left_column_widget, "Home")
         pyvista_vertical_layout = QVBoxLayout(pyvista_vertical_widget)
         left_column_layout = QVBoxLayout(left_column_widget)
 
         left_column_scroll = QScrollArea()
         left_column_scroll.setWidgetResizable(True)
-        left_column_scroll.setWidget(left_column_widget)
+        left_column_scroll.setWidget(tab_widget)
+        left_column_scroll.setFrameShape(QFrame.NoFrame)
 
         hsplitter = QSplitter(Qt.Horizontal)
         hsplitter.addWidget(left_column_scroll)
@@ -298,6 +302,13 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_layout.addWidget(self.status_group_box)
         left_column_layout.addWidget(options_vertical_widget)
         left_column_layout.addStretch()
+
+        component_tree_tab = QWidget()
+        component_layout = QVBoxLayout(component_tree_tab)
+        self.component_tree = ComponentTreeView()
+        self.component_tree.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        component_layout.addWidget(self.component_tree)
+        tab_widget.addTab(component_tree_tab, "Component Tree")
 
         self.interactor_style = CustomInteractorStyleZoomAndSelect()
         self._overlay_meshes = []

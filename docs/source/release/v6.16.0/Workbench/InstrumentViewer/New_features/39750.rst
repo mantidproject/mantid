@@ -1,0 +1,1 @@
+- New Instrument View now displays the component tree from the IDF, and allows you to select one or more components in that tree.
