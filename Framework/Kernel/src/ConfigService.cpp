@@ -1798,6 +1798,10 @@ void ConfigServiceImpl::clearFacilities() {
     delete facility;
   }
   m_facilities.clear();
+  m_instrumentNamesCache.clear();
+  m_isInstrumentNamesCached = false;
+  m_instrumentShortNamesCache.clear();
+  m_isInstrumentShortNamesCached = false;
 }
 
 /**
@@ -1838,16 +1842,24 @@ const InstrumentInfo &ConfigServiceImpl::getInstrument(const std::string &instru
 }
 
 const std::vector<std::string> ConfigServiceImpl::getInstrumentNames() const {
+  if (m_isInstrumentNamesCached) {
+    return m_instrumentNamesCache;
+  }
   std::vector<std::string> names;
   for (const auto &facility : m_facilities) {
     const auto &insts = facility->instruments();
     std::transform(insts.cbegin(), insts.cend(), std::back_inserter(names),
                    [](const auto &inst) { return inst.name(); });
   }
-  return names;
+  m_instrumentNamesCache = names;
+  m_isInstrumentNamesCached = true;
+  return m_instrumentNamesCache;
 }
 
 const std::vector<std::string> ConfigServiceImpl::getInstrumentShortNames() const {
+  if (m_isInstrumentShortNamesCached) {
+    return m_instrumentShortNamesCache;
+  }
   std::vector<std::string> names;
   for (const auto &facility : m_facilities) {
     const auto &insts = facility->instruments();
@@ -1855,7 +1867,9 @@ const std::vector<std::string> ConfigServiceImpl::getInstrumentShortNames() cons
                    [](const auto &inst) { return inst.shortName(); });
   }
 
-  return names;
+  m_instrumentShortNamesCache = names;
+  m_isInstrumentShortNamesCached = true;
+  return m_instrumentShortNamesCache;
 }
 
 /** Gets a vector of the facility Information objects

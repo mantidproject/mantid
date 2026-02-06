@@ -299,6 +299,13 @@ private:
   Kernel::ProxyInfo m_proxyInfo;
   /// whether the proxy has been populated yet
   bool m_isProxySet;
+
+  /// Cache for instrument names
+  mutable std::vector<std::string> m_instrumentNamesCache;
+  mutable bool m_isInstrumentNamesCached = false;
+  /// Cache for instrument short names
+  mutable std::vector<std::string> m_instrumentShortNamesCache;
+  mutable bool m_isInstrumentShortNamesCached = false;
 };
 
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
