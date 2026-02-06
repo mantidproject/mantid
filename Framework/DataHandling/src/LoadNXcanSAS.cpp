@@ -453,7 +453,7 @@ void loadTransmissionData(const H5::Group &transmission, const Mantid::API::Matr
 
 namespace Mantid::DataHandling::NXcanSAS {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadNXcanSAS)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXcanSAS)
 
 /// constructor
 LoadNXcanSAS::LoadNXcanSAS() = default;
