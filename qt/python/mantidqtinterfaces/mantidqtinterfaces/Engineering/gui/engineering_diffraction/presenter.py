@@ -119,10 +119,13 @@ class EngineeringDiffractionPresenter(object):
         self.settings_presenter.show()
 
     def update_calibration(self, calibration):
-        instrument = calibration.get_instrument()
-        ceria_no = calibration.get_ceria_runno()
-        vanadium_no = calibration.get_vanadium_runno()
-        self.statusbar_observable.notify_subscribers(f"CeO2: {ceria_no}, V: {vanadium_no}, Instrument: {instrument}")
+        if calibration:
+            instrument = calibration.get_instrument()
+            ceria_no = calibration.get_ceria_runno()
+            vanadium_no = calibration.get_vanadium_runno()
+            self.statusbar_observable.notify_subscribers(f"CeO2: {ceria_no}, V: {vanadium_no}, Instrument: {instrument}")
+        else:
+            self.statusbar_observable.notify_subscribers("No Calibration Loaded")
 
     @staticmethod
     def get_saved_rb_number() -> str:

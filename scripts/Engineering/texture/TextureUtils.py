@@ -19,14 +19,15 @@ from mantid.simpleapi import (
     CropWorkspace,
 )
 from pathlib import Path
-from Engineering.EnggUtils import GROUP
 from Engineering.EnginX import EnginX
+from Engineering.IMAT import IMAT
 from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from plugins.algorithms.IntegratePeaks1DProfile import get_eval_ws, calc_sigma_from_summation
 from Engineering.texture.xtal_helper import get_xtal_structure
 from Engineering.EnggUtils import convert_TOFerror_to_derror
+from Engineering.common.instrument_config import get_instr_config
 
 # import texture helper functions so they can be accessed by users through the TextureUtils namespace
 from Engineering.texture.texture_helper import plot_pole_figure
@@ -72,11 +73,6 @@ def mk(dir_path: str):
         p.mkdir()
 
 
-class TextureInstrument(EnginX):
-    # for now, just a wrapper to set up for inheriting from different instruments
-    pass
-
-
 # -------- Focus Script Logic--------------------------------
 
 
@@ -90,6 +86,7 @@ def run_focus_script(
     prm_path: Optional[str] = None,
     spectrum_num: Optional[str] = None,
     groupingfile_path: Optional[str] = None,
+    instrument: str = "ENGINX",
 ) -> None:
     """
     Focus data for use in a texture analysis pipeline. Currently only ENGIN-X is supported,
@@ -106,7 +103,14 @@ def run_focus_script(
     spectrum_num: optional string of spectra numbers if desired to define custom grouping by specifying the spectra
     groupingfile_path: optional path to a grouping ".cal" or ".xml" file, alternative to prm_path
     """
-    group = GROUP(grouping) if grouping else None
+    config = get_instr_config(instrument)
+    group = config.group(grouping) if grouping else None
+    match instrument:
+        case "IMAT":
+            TextureInstrument = IMAT
+        case _:
+            # default to ENGINX
+            TextureInstrument = EnginX
     model = TextureInstrument(
         vanadium_run=van_run,
         ceria_run=ceria_run,

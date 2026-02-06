@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
-from Engineering.EnggUtils import GROUP
+from Engineering.common.instrument_config import ENGINX_GROUP
 from Engineering.common.calibration_info import CalibrationInfo
 from mantid.api import AnalysisDataService as ADS
 import numpy as np
@@ -20,7 +20,7 @@ eng_common = "Engineering.common.calibration_info"
 class SetCalibrationMixin(object):
     def setup_set_calibration_from_prm(self, test_file, group):
         calibration = CalibrationInfo()
-        calibration.set_calibration_from_prm_fname(test_file)
+        calibration.set_calibration_from_prm_fname(test_file, "ENGINX")
 
         # check the instrument and ceria path are correctly set
         self.assertEqual(calibration.get_instrument(), "ENGINX")
@@ -28,13 +28,13 @@ class SetCalibrationMixin(object):
         self.assertEqual(calibration.group, group)
 
     def setup_get_group_ws(self, group, filepath=None):
-        calibration = CalibrationInfo()
+        calibration = CalibrationInfo(instrument="ENGINX")
         calibration.group = group
         calibration.grouping_filepath = filepath
         calibration.get_group_ws()
 
     def setup_load_relevant_calibration_files(self, group, suffix):
-        calibration = CalibrationInfo()
+        calibration = CalibrationInfo(instrument="ENGINX")
         calibration.group = group
         calibration.prm_filepath = f"ENGINX_123456_{suffix}.prm"
 
@@ -44,13 +44,13 @@ class SetCalibrationMixin(object):
 class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
     def test_set_calibration_from_prm(self):
         test_cases = [
-            ("ENGINX_123456_all_banks.prm", GROUP.BOTH),
-            ("ENGINX_123456_bank_1.prm", GROUP.NORTH),
-            ("ENGINX_123456_bank_2.prm", GROUP.SOUTH),
-            ("ENGINX_123456_Texture20.prm", GROUP.TEXTURE20),
-            ("ENGINX_123456_Texture30.prm", GROUP.TEXTURE30),
-            ("ENGINX_123456_Custom.prm", GROUP.CUSTOM),
-            ("ENGINX_123456_Cropped_1-1200.prm", GROUP.CROPPED),
+            ("ENGINX_123456_all_banks.prm", ENGINX_GROUP.BOTH),
+            ("ENGINX_123456_bank_1.prm", ENGINX_GROUP.NORTH),
+            ("ENGINX_123456_bank_2.prm", ENGINX_GROUP.SOUTH),
+            ("ENGINX_123456_Texture20.prm", ENGINX_GROUP.TEXTURE20),
+            ("ENGINX_123456_Texture30.prm", ENGINX_GROUP.TEXTURE30),
+            ("ENGINX_123456_Custom.prm", ENGINX_GROUP.CUSTOM),
+            ("ENGINX_123456_Cropped_1-1200.prm", ENGINX_GROUP.CROPPED),
         ]
 
         for filename, group in test_cases:
@@ -63,7 +63,7 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
 
     @patch.object(CalibrationInfo, "create_bank_grouping_workspace")
     def test_setup_get_group_ws(self, mock_create_bank_grouping_workspace):
-        test_cases = [GROUP.BOTH, GROUP.NORTH, GROUP.SOUTH, GROUP.TEXTURE20, GROUP.TEXTURE30]
+        test_cases = [ENGINX_GROUP.BOTH, ENGINX_GROUP.NORTH, ENGINX_GROUP.SOUTH, ENGINX_GROUP.TEXTURE20, ENGINX_GROUP.TEXTURE30]
 
         for group in test_cases:
             with self.subTest(group=group):
@@ -73,14 +73,14 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
 
     @patch.object(CalibrationInfo, "create_grouping_workspace_from_file")
     def test_get_group_ws_custom_cal(self, mock_create_grouping_workspace_from_file):
-        self.setup_get_group_ws(GROUP.CUSTOM, "3x5_group.cal")
+        self.setup_get_group_ws(ENGINX_GROUP.CUSTOM, "3x5_group.cal")
 
         mock_create_grouping_workspace_from_file.assert_called_once()
         mock_create_grouping_workspace_from_file.reset_mock()
 
     @patch(eng_common + ".LoadDetectorsGroupingFile")
     def test_get_group_ws_custom_xml(self, mock_LoadDetectorsGroupingFile):
-        self.setup_get_group_ws(GROUP.CUSTOM, "3x5_group.xml")
+        self.setup_get_group_ws(ENGINX_GROUP.CUSTOM, "3x5_group.xml")
 
         mock_LoadDetectorsGroupingFile.assert_called_once()
         mock_LoadDetectorsGroupingFile.reset_mock()
@@ -88,7 +88,7 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
     def test_get_group_ws_cropped(self):
         # This grouping doesn't require an input file, so we don't need to mock the response
         calibration = CalibrationInfo(instrument="ENGINX")
-        calibration.group = GROUP.CROPPED
+        calibration.group = ENGINX_GROUP.CROPPED
         calibration.set_spectra_list("1-1200")
         calibration.get_group_ws()
 
@@ -107,11 +107,11 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
     @patch(eng_common + ".Load")
     def test_setup_load_relevant_calibration_files_get_group_ws(self, mock_load, mock_get_group_ws):
         test_cases = [
-            (GROUP.BOTH, "banks"),
-            (GROUP.NORTH, "bank_1"),
-            (GROUP.SOUTH, "bank_2"),
-            (GROUP.TEXTURE20, "Texture20"),
-            (GROUP.TEXTURE30, "Texture30"),
+            (ENGINX_GROUP.BOTH, "banks"),
+            (ENGINX_GROUP.NORTH, "bank_1"),
+            (ENGINX_GROUP.SOUTH, "bank_2"),
+            (ENGINX_GROUP.TEXTURE20, "Texture20"),
+            (ENGINX_GROUP.TEXTURE30, "Texture30"),
         ]
 
         for group, suffix in test_cases:
@@ -127,8 +127,8 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
     @patch(eng_common + ".Load")
     def test_setup_load_relevant_calibration_files_custom_grouping(self, mock_load, mock_load_custom_grouping_workspace):
         test_cases = [
-            (GROUP.CUSTOM, "Custom"),
-            (GROUP.CROPPED, "Cropped"),
+            (ENGINX_GROUP.CUSTOM, "Custom"),
+            (ENGINX_GROUP.CROPPED, "Cropped"),
         ]
 
         for group, suffix in test_cases:
@@ -145,8 +145,8 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
 
         for fp, target in test_cases:
             with self.subTest(fp=fp, target=target):
-                calibration = CalibrationInfo()
-                calibration.group = GROUP.CUSTOM
+                calibration = CalibrationInfo(instrument="ENGINX")
+                calibration.group = ENGINX_GROUP.CUSTOM
                 calibration.grouping_filepath = fp
 
                 calibration.set_extra_group_suffix()
@@ -155,15 +155,15 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
 
     def test_get_group_suffix(self):
         test_cases = [
-            (GROUP.CUSTOM, "test.xml", "Custom_test"),
-            (GROUP.CUSTOM, None, "Custom"),  # if no grouping fp can be found still should work
-            (GROUP.BOTH, None, "all_banks"),
-            (GROUP.BOTH, "NorthAndSouthBanks.xml", "all_banks"),
+            ("ENGINX", ENGINX_GROUP.CUSTOM, "test.xml", "Custom_test"),
+            ("ENGINX", ENGINX_GROUP.CUSTOM, None, "Custom"),  # if no grouping fp can be found still should work
+            ("ENGINX", ENGINX_GROUP.BOTH, None, "all_banks"),
+            ("ENGINX", ENGINX_GROUP.BOTH, "NorthAndSouthBanks.xml", "all_banks"),
         ]
 
-        for group, fp, target in test_cases:
-            with self.subTest(group=group, fp=fp, target=target):
-                calibration = CalibrationInfo()
+        for instr, group, fp, target in test_cases:
+            with self.subTest(instr=instr, group=group, fp=fp, target=target):
+                calibration = CalibrationInfo(instrument=instr)
                 calibration.group = group
                 calibration.grouping_filepath = fp
 
@@ -171,13 +171,13 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
 
     def test_get_group_suffix_cropped(self):
         test_cases = [
-            (GROUP.CROPPED, "1-100", "Cropped_1-100"),
-            (GROUP.CROPPED, None, "Cropped"),  # if no grouping fp can be found still should work
+            ("ENGINX", ENGINX_GROUP.CROPPED, "1-100", "Cropped_1-100"),
+            ("ENGINX", ENGINX_GROUP.CROPPED, None, "Cropped"),  # if no grouping fp can be found still should work
         ]
 
-        for group, spec_list_str, target in test_cases:
-            with self.subTest(group=group, spec_list_str=spec_list_str, target=target):
-                calibration = CalibrationInfo()
+        for instr, group, spec_list_str, target in test_cases:
+            with self.subTest(instr=instr, group=group, spec_list_str=spec_list_str, target=target):
+                calibration = CalibrationInfo(instrument=instr)
                 calibration.group = group
                 calibration.set_spectra_list(spec_list_str)
 

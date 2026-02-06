@@ -4,8 +4,9 @@ see http://www.mantidproject.org/IDF -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
-            name="IMAT" valid-from="2026-02-05 23:59:59"
-            last-modified="2026-02-06 09:06:01">
+            name="IMAT" valid-from="2017-02-24 23:59:59"
+            valid-to="2018-08-25 23:59:59"
+            last-modified="2017-08-01 18:46:01">
   <defaults>
     <length unit="meter"/>
     <angle unit="degree"/>
@@ -17,7 +18,6 @@ see http://www.mantidproject.org/IDF -->
       <handedness val="right"/>
     </reference-frame>
     <default-view axis-view="z"/>
-<!--    <components-are-facing x="0.0" y="0.0" z="0.0" />-->
   </defaults>
   <!-- BRIEF DESCRIPTION OF IMAT INSTRUMENT:
        IMAT (Imaging and Materials Science & Engineering)
@@ -43,6 +43,19 @@ see http://www.mantidproject.org/IDF -->
     <location />
   </component>
 
+<!--
+Place both banks. We fill along the X axis first (the rows).
+-->
+  <!-- This places a prototype bank with 200 elements on the right of the sample -->
+  <component type="prototype-bank" idstart="15" idfillbyfirst="x" idstep="1" idstepbyrow="100">
+  	<location x="+1.915" rot="-90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="North Bank"/>
+  </component>
+
+  <!-- This places a prototype bank with 200 elements on the left of the sample -->
+  <component type="prototype-bank" idstart="250" idfillbyfirst="x" idstep="1" idstepbyrow="100">
+  	<location x="-1.915" rot="-90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="South Bank"/>
+  </component>
+
   <!-- A cuboid sample holder -->
   <!-- <type name="default-sample-holder" is="SamplePos" /> -->
   <type name="default-sample-holder" is="SamplePos">
@@ -55,65 +68,41 @@ see http://www.mantidproject.org/IDF -->
     <algebra val="shape" />
   </type>
 
-  <component name="NorthBank" type="detector-bank-north" idlist="NorthBank">
-    <location x="0" y="0" z="0" rot="180" axis-x="0" axis-y="1" axis-z="0"/>
-  </component>
-
-  <component name="SouthBank" type="detector-bank-south" idlist="SouthBank">
-    <location x="-0.12" y="0" z="0"/>
-  </component>
-
-  <type name="detector-bank-north">
-    <properties />
-    <component type="detector-module">
-	  <location  x="0" y="0" z="0" rot="24" axis-x="0" axis-y="0" axis-z="1"></location>
-	  <location  x="0" y="0" z="0" rot="16" axis-x="0" axis-y="0" axis-z="1"></location>
-      <location  x="0" y="0" z="0" rot="8" axis-x="0" axis-y="0" axis-z="1"></location>
-      <location  x="0" y="0" z="0" rot="0" axis-x="0" axis-y="0" axis-z="1"></location>
-      <location  x="0" y="0" z="0" rot="-8" axis-x="0" axis-y="0" axis-z="1"></location>
-	  <location  x="0" y="0" z="0" rot="-16" axis-x="0" axis-y="0" axis-z="1"></location>
-	  <location  x="0" y="0" z="0" rot="-24" axis-x="0" axis-y="0" axis-z="1"></location>
-    </component>
-  </type>
-  
-  <type name="detector-bank-south">
-    <properties />
-    <component type="detector-module">
-	  <location  x="0" y="0" z="0" rot="24" axis-x="0" axis-y="0" axis-z="1"></location>
-	  <location  x="0" y="0" z="0" rot="16" axis-x="0" axis-y="0" axis-z="1"></location>
-      <location  x="0" y="0" z="0" rot="8" axis-x="0" axis-y="0" axis-z="1"></location>
-      <location  x="0" y="0" z="0" rot="0" axis-x="0" axis-y="0" axis-z="1"></location>
-      <location  x="0" y="0" z="0" rot="-8" axis-x="0" axis-y="0" axis-z="1"></location>
-	  <location  x="0" y="0" z="0" rot="-16" axis-x="0" axis-y="0" axis-z="1"></location>
-	  <location  x="0" y="0" z="0" rot="-24" axis-x="0" axis-y="0" axis-z="1"></location>
-    </component>
+  <!-- Matrix structure of the "200 elements" detector
+  We start off the Y axis (ystart) at 0.05 so that the centre of the detector bank intersects
+  the line in the instrument view. This means the sample would be directly in front of the middle
+  of the detector, which is the case in IMAT
+   -->
+  <type name="prototype-bank" is="RectangularDetector" type="pixel-200-elements"
+  xpixels="100" xstart="-0.2" xstep="+0.004"
+  ypixels="2" ystart="+0.05" ystep="-0.1" >
   </type>
 
-  <type name="detector-module">
-    <component type="detector-row">
-      <!-- 2 rows translated +/- 0.5*(gap + pixel height) where gap=12mm and pixel height=92.1 mm-->
-      <location  x="0" y="0.05205" z="0"> </location>
-      <location  x="0" y="-0.05205" z="0"> </location>
-    </component>
-  </type>
+  <!--
+    Prototype pixel types, we seem to need those or Mantid crashes while parsing.
+    Pixel shape of current detectors is 
+    100mm height: from y=-0.05 on the bottom to y=0.05 on the top
+    4mm width: the x=0.004
+    Depth is 0.001, if we set it to 0.0 Mantid will crash
+  -->
+  <!-- <type name="pixel-200-elements" is="detector">
+   <cuboid id="pixel-shape">
+     <left-front-bottom-point x="0.0" y="-0.05" z="0.0" />
+     <left-front-top-point   x="0.0" y="0.05" z="0.0" />
+     <right-front-bottom-point  x="0.004" y="-0.05" z="0.001" />
+   </cuboid>
+  <algebra val="pixel-shape"/>
+  </type> -->
 
-  <type name="detector-row">
-    <component type="detector-pixel">
-      <locations n-elements="256" r="2.0" t="75" t-end="105" name="det"/>
-    </component>
-  </type>
-
-  <type name="detector-pixel" is="detector">
-    <!-- 4 mm x 92.1 mm-->
-    <cuboid id="shape">
-      <left-front-bottom-point x="-0.002" y="-0.04604" z="0.0"  />
-      <left-front-top-point  x="-0.002" y="0.04604" z="0.0"  />
-      <left-back-bottom-point  x="-0.002" y="-0.04604" z="0.001"  />
-      <right-front-bottom-point  x="0.002" y="-0.04604" z="0.0"  />
-    </cuboid>
-    <algebra val="shape" />
-  </type>
-
+  <type name="pixel-200-elements" is="detector">
+  <cuboid id="shape">
+    <left-front-bottom-point x="-0.002" y="-0.05" z="0.0"  />
+    <left-front-top-point  x="-0.002" y="0.05" z="0.0"  />
+    <left-back-bottom-point  x="-0.002" y="-0.05" z="0.001"  />
+    <right-front-bottom-point  x="0.002" y="-0.05" z="0.0"  />
+  </cuboid>
+  <algebra val="shape" />
+</type>
 
   <!-- DEFINITION OF MONITOR TYPES -->
   <type name="monitors">
@@ -132,9 +121,7 @@ see http://www.mantidproject.org/IDF -->
       <location z="0.0" name="CalMon"/> <!-- 56 - 56 -->
       <location z="4.0" name="He_in"/>  <!-- 60 - 56-->
       <location z="4.0" name="He_out"/>
-      <location z="0"/> <!-- dummy monitor (off) -->
-      <location z="0"/> <!-- dummy monitor (off) -->
-      <location z="0"/> <!-- dummy monitor (off) -->
+	  <location z="0"/> <!-- dummy monitor (off) -->
     </component>
   </type>
 
@@ -160,31 +147,11 @@ see http://www.mantidproject.org/IDF -->
     </cylinder>
   </type>
 
-
   <!-- DETECTOR and MONITOR ID LISTS -->
   <idlist idname="monitors">
-    <id start="0" end="15" />
-  </idlist>
-	
-  <idlist idname="NorthBank">
-<id start="1000" end="1511"/>
-<id start="2000" end="2511"/>
-<id start="3000" end="3511"/>
-<id start="4000" end="4511"/>
-<id start="5000" end="5511"/>
-<id start="6000" end="6511"/>
-<id start="7000" end="7511"/>
+    <id start="0" end="13" />
   </idlist>
 
-  <idlist idname="SouthBank">
-<id start="8000" end="8511"/>
-<id start="9000" end="9511"/>
-<id start="10000" end="10511"/>
-<id start="11000" end="11511"/>
-<id start="12000" end="12511"/>
-<id start="13000" end="13511"/>
-<id start="14000" end="14511"/>
-  </idlist>
-
+  <!-- do not use idlist for the rectangular detectors, they're ignored! -->
 
 </instrument>
