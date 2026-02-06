@@ -11,7 +11,11 @@ from unittest import mock
 
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
 from sans.state.Serializer import Serializer
-from sans.test_helper.mock_objects import create_run_tab_presenter_mock, FakeState, create_mock_settings_diagnostic_tab
+from mantidqtinterfaces.sans_isis.gui_logic.test_helpers.mock_objects import (
+    create_run_tab_presenter_mock,
+    FakeState,
+    create_mock_settings_diagnostic_tab,
+)
 
 
 class SettingsDiagnosticPresenterTest(unittest.TestCase):

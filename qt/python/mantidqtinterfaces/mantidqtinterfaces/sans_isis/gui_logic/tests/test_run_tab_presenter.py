@@ -12,15 +12,15 @@ from mantid.kernel import config
 from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.enums import SANSFacility, ReductionDimensionality, SaveType, RowState, OutputMode
 from sans.common.enums import SANSInstrument
-from mantidqtinterfaces.sans_isis.gui_logic.models.RowEntries import RowEntries
+from sans.data_objects.row_entries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.file_loading import UserFileLoadException
 from mantidqtinterfaces.sans_isis.gui_logic.models.run_tab_model import RunTabModel
 from mantidqtinterfaces.sans_isis.gui_logic.models.state_gui_model import StateGuiModel
 from mantidqtinterfaces.sans_isis.gui_logic.models.table_model import TableModel
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.state.AllStates import AllStates
-from sans.test_helper.common import remove_file
-from sans.test_helper.mock_objects import create_mock_view
+from mantidqtinterfaces.sans_isis.gui_logic.test_helpers.common import remove_file
+from mantidqtinterfaces.sans_isis.gui_logic.test_helpers.mock_objects import create_mock_view
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 from mantidqtinterfaces.sans_isis.sans_gui_observable import SansGuiObservable
 from sans.user_file.toml_parsers.toml_base_schema import TomlValidationError

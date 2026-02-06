@@ -14,7 +14,7 @@ from mantidqt.utils.async_qt_adaptor import qt_async_task, IQtAsync
 from mantidqt.utils.asynchronous import AsyncTaskSuccess, AsyncTaskFailure
 from sans.algorithm_detail.batch_execution import load_workspaces_from_states
 from sans.common.enums import ReductionMode, RowState
-from mantidqtinterfaces.sans_isis.gui_logic.models.RowEntries import RowEntries
+from sans.data_objects.row_entries import RowEntries
 from sans.sans_batch import SANSBatchReduction
 
 

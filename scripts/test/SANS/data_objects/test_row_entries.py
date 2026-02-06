@@ -8,7 +8,7 @@ import copy
 import unittest
 
 from sans.common.enums import RowState
-from mantidqtinterfaces.sans_isis.gui_logic.models.RowEntries import RowEntries, _UserEntries
+from sans.data_objects.row_entries import RowEntries, _UserEntries
 
 
 class RowEntriesTest(unittest.TestCase):

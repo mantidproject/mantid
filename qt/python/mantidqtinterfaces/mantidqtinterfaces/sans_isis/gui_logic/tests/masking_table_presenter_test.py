@@ -8,7 +8,11 @@ import unittest
 
 from unittest import mock
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.masking_table_presenter import MaskingTablePresenter, masking_information
-from sans.test_helper.mock_objects import FakeState, create_mock_masking_table, create_run_tab_presenter_mock
+from mantidqtinterfaces.sans_isis.gui_logic.test_helpers.mock_objects import (
+    FakeState,
+    create_mock_masking_table,
+    create_run_tab_presenter_mock,
+)
 
 
 class MaskingTablePresenterTest(unittest.TestCase):

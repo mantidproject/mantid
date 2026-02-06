@@ -11,7 +11,7 @@ from enum import Enum
 
 from sans.common.constants import ALL_PERIODS
 from sans.common.file_information import find_full_file_path
-from mantidqtinterfaces.sans_isis.gui_logic.models.RowEntries import RowEntries
+from sans.data_objects.row_entries import RowEntries
 
 
 class BatchFileKeywords(Enum):
