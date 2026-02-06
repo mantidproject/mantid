@@ -163,8 +163,16 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   add_custom_target(SystemTests)
   add_dependencies(SystemTests Framework)
   add_dependencies(SystemTests StandardTestData SystemTestData)
+
+  # create a launchable VS project purely for Debugging properties
+  set(_stub "${CMAKE_CURRENT_BINARY_DIR}/systemtests_stub.cpp")
+  file(WRITE "${_stub}" "int main(){return 0;}\n")
+
+  add_executable(SystemTestsDebug EXCLUDE_FROM_ALL "${_stub}")
+  add_dependencies(SystemTestsDebug SystemTests)
+
   set_target_properties(
-    SystemTests
+    SystemTestsDebug
     PROPERTIES VS_DEBUGGER_COMMAND "${Python_EXECUTABLE}"
                VS_DEBUGGER_COMMAND_ARGUMENTS
                "${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/runSystemTests.py --executable python3"
