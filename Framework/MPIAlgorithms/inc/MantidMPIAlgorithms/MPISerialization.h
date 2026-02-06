@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#ifdef MPI_BUILD
 #include "MantidDataObjects/EventList.h"
 #include "MantidTypes/Event/TofEvent.h"
 #include <boost/serialization/split_free.hpp>
@@ -138,3 +139,4 @@ inline void load_construct_data(Archive & /*ar*/, Mantid::DataObjects::EventList
 
 } // namespace serialization
 } // namespace boost
+#endif
