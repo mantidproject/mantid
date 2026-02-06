@@ -12,7 +12,7 @@ from mantid import config
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import UnitParams
 from Engineering.EnginX import EnginX
-from Engineering.EnggUtils import GROUP
+from Engineering.common.instrument_config import ENGINX_GROUP
 
 CWDIR = os.path.join(config["datasearch.directories"].split(";")[0], "ENGINX")
 FULL_CALIB = os.path.join(CWDIR, "ENGINX_whole_inst_calib.nxs")
@@ -31,7 +31,7 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX193749",
-            group=GROUP.BOTH,
+            group=ENGINX_GROUP.BOTH,
         )
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
@@ -66,7 +66,7 @@ class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX193749",
-            group=GROUP.CROPPED,
+            group=ENGINX_GROUP.CROPPED,
             spectrum_num="1-1200",
         )  # North
         enginx.main(plot_cal=False, plot_foc=False)
@@ -93,7 +93,7 @@ class TestSwappingCustomCroppingChangesFocussing(systemtesting.MantidSystemTest)
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX305738",
-            group=GROUP.CROPPED,
+            group=ENGINX_GROUP.CROPPED,
             spectrum_num="1-1200",
         )
         enginx.main()
@@ -123,7 +123,7 @@ class TestCustomGroupWithDifferentNumHistogramsThrowsError(systemtesting.MantidS
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX305738",
-            group=GROUP.CUSTOM,
+            group=ENGINX_GROUP.CUSTOM,
             groupingfile_path=grouping_path_1,
         )
         enginx.main()
@@ -135,7 +135,7 @@ class TestCustomGroupWithDifferentNumHistogramsThrowsError(systemtesting.MantidS
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX305738",
-            group=GROUP.CUSTOM,
+            group=ENGINX_GROUP.CUSTOM,
             groupingfile_path=grouping_path_2,
         )
         self.assertRaises(AssertionError, enginx.main)
@@ -158,7 +158,7 @@ class TestCustomGroupWithSameNumHistogramDifferentDetGroupsThrowsError(systemtes
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX305738",
-            group=GROUP.CUSTOM,
+            group=ENGINX_GROUP.CUSTOM,
             groupingfile_path=grouping_path_1,
         )
         enginx.main()
@@ -170,7 +170,7 @@ class TestCustomGroupWithSameNumHistogramDifferentDetGroupsThrowsError(systemtes
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX305738",
-            group=GROUP.CUSTOM,
+            group=ENGINX_GROUP.CUSTOM,
             groupingfile_path=grouping_path_2,
         )
         self.assertRaises(AssertionError, enginx.main)
@@ -191,7 +191,7 @@ class FocusTexture(systemtesting.MantidSystemTest):
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX193749",
-            group=GROUP.TEXTURE20,
+            group=ENGINX_GROUP.TEXTURE20,
         )
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
@@ -219,7 +219,7 @@ class FocusTexture30(systemtesting.MantidSystemTest):
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX193749",
-            group=GROUP.TEXTURE30,
+            group=ENGINX_GROUP.TEXTURE30,
         )
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
