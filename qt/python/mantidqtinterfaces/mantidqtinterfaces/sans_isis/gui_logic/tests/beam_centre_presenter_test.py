@@ -10,8 +10,8 @@ from unittest import mock
 
 from sans.common.enums import SANSInstrument
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
-from sans.test_helper.mock_objects import create_mock_beam_centre_tab
-from sans.test_helper.mock_objects import create_run_tab_presenter_mock
+from mantidqtinterfaces.sans_isis.gui_logic.test_helpers.mock_objects import create_mock_beam_centre_tab
+from mantidqtinterfaces.sans_isis.gui_logic.test_helpers.mock_objects import create_run_tab_presenter_mock
 
 
 class BeamCentrePresenterTest(unittest.TestCase):

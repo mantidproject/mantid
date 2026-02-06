@@ -8,7 +8,7 @@ import unittest
 
 from unittest import mock
 from sans.common.enums import SANSFacility
-from mantidqtinterfaces.sans_isis.gui_logic.models.RowEntries import RowEntries
+from sans.data_objects.row_entries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.create_state import create_states
 from mantidqtinterfaces.sans_isis.gui_logic.models.state_gui_model import StateGuiModel
 from sans.state.AllStates import AllStates

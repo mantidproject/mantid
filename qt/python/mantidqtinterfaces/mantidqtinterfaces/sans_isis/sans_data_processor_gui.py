@@ -33,7 +33,7 @@ from mantidqtinterfaces.sans_isis.gui_logic.gui_common import (
     get_instrument_from_gui_selection,
 )
 from mantidqtinterfaces.sans_isis.gui_logic.models.POD.save_options import SaveOptions
-from mantidqtinterfaces.sans_isis.gui_logic.models.RowEntries import RowEntries
+from sans.data_objects.row_entries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.sum_runs_model import SumRunsModel
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from mantidqtinterfaces.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog

@@ -9,7 +9,7 @@ import unittest
 from unittest import mock
 
 from sans.common.enums import SANSFacility
-from mantidqtinterfaces.sans_isis.gui_logic.models.RowEntries import RowEntries
+from sans.data_objects.row_entries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.state_gui_model import StateGuiModel
 from sans.state.StateObjects.StateSave import StateSave
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.gui_state_director import GuiStateDirector

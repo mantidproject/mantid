@@ -15,7 +15,7 @@ from typing import List
 
 from mantid.kernel import Logger
 from sans.common.enums import RowState
-from mantidqtinterfaces.sans_isis.gui_logic.models.RowEntries import RowEntries
+from sans.data_objects.row_entries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 
 

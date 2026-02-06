@@ -45,7 +45,7 @@ from mantidqtinterfaces.sans_isis.gui_logic.gui_common import (
     get_string_for_gui_from_instrument,
     SANSGuiPropertiesHandler,
 )
-from mantidqtinterfaces.sans_isis.gui_logic.models.RowEntries import RowEntries
+from sans.data_objects.row_entries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.sans_run_tab_async import SansRunTabAsync
 from mantidqtinterfaces.sans_isis.gui_logic.models.create_state import create_states
 from mantidqtinterfaces.sans_isis.gui_logic.models.file_loading import FileLoading, UserFileLoadException
