@@ -41,7 +41,7 @@
 /**
  * DECLARE_NEXUS_FILELOADER_ALGORITHM should be used in place of the
  * standard DECLARE_ALGORITHM macro when writing a file loading algorithm that
- * loads data using the Nexus API
+ * loads data using the Nexus API with a lazy descriptor
  * It both registers the algorithm as usual and subscribes it to the
  * registry.
  */
@@ -50,19 +50,4 @@
   Mantid::Kernel::RegistrationHelper reg_hdf_loader_##classname(                                                       \
       (Mantid::API::FileLoaderRegistry::Instance().subscribe<classname>(Mantid::API::FileLoaderRegistryImpl::Nexus),   \
        0));                                                                                                            \
-  }
-
-/**
- * DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM should be used in place of the
- * standard DECLARE_ALGORITHM macro when writing a file loading algorithm that
- * loads data using the Nexus API with a lazy descriptor
- * It both registers the algorithm as usual and subscribes it to the
- * registry.
- */
-#define DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(classname)                                                             \
-  namespace {                                                                                                          \
-  Mantid::Kernel::RegistrationHelper                                                                                   \
-      reg_hdf_loader_##classname((Mantid::API::FileLoaderRegistry::Instance().subscribe<classname>(                    \
-                                      Mantid::API::FileLoaderRegistryImpl::NexusLazy),                                 \
-                                  0));                                                                                 \
   }
