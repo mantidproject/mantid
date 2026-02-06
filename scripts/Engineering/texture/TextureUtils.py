@@ -78,6 +78,7 @@ def run_focus_script(
     prm_path: Optional[str] = None,
     spectrum_num: Optional[str] = None,
     groupingfile_path: Optional[str] = None,
+    instrument: str = "ENGINX",
 ) -> None:
     """
     Focus data for use in a texture analysis pipeline. Currently only ENGIN-X is supported,
