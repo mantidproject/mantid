@@ -298,7 +298,7 @@ private:
   /// local cache of proxy details
   Kernel::ProxyInfo m_proxyInfo;
   /// whether the proxy has been populated yet
-  bool m_isProxySet;
+  bool m_isProxySet = false;
 
   /// Cache for instrument names
   mutable std::vector<std::string> m_instrumentNamesCache;
