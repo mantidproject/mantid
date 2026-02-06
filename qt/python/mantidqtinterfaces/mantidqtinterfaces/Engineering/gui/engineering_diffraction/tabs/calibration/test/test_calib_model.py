@@ -7,8 +7,8 @@
 import unittest
 from unittest import mock
 from unittest.mock import call, patch, create_autospec, MagicMock
+from Engineering.common.instrument_config import ENGINX_GROUP
 from os import path
-from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_presenter
@@ -70,7 +70,7 @@ class CalibrationModelTest(unittest.TestCase):
         presenter._validate_settings()  # save_location now set to the default value at runtime
         self.assertEqual(presenter.settings["save_location"], default_save_location)
 
-        self.calibration_info.group = GROUP.BOTH
+        self.calibration_info.group = ENGINX_GROUP.BOTH
         mock_run_cal.return_value = ("foc_ceria_ws", None, None)  # focused_ceria, cal_table, diag_ws
         mock_load_cal.return_value = "full_calibration"
 
@@ -94,7 +94,10 @@ class CalibrationModelTest(unittest.TestCase):
         self, mock_load_ws, mock_load_cal, mock_run_cal, mock_make_diff_table, mock_create_out, mock_del
     ):
         rb_num = "1"
-        self.calibration_info.group = GROUP.BOTH
+        self.calibration_info.config = MagicMock()
+        self.calibration_info.config.texture_groups = (ENGINX_GROUP.TEXTURE20,)
+        # setup group TO NOT BE in config.texture_groups
+        self.calibration_info.group = ENGINX_GROUP.BOTH
         mock_run_cal.return_value = ("foc_ceria_ws", None, None)  # focused_ceria, cal_table, diag_ws
 
         self.model.create_new_calibration(self.calibration_info, rb_num, plot_output=False, save_dir="dir")
@@ -116,24 +119,10 @@ class CalibrationModelTest(unittest.TestCase):
         self, mock_load_ws, mock_load_cal, mock_run_cal, mock_make_diff_table, mock_create_out, mock_del
     ):
         rb_num = "1"
-        self.calibration_info.group = GROUP.TEXTURE20
-        mock_run_cal.return_value = ("foc_ceria_ws", None, None)  # focused_ceria, cal_table, diag_ws
-
-        self.model.create_new_calibration(self.calibration_info, rb_num, plot_output=False, save_dir="dir")
-
-        mock_create_out.assert_called_once_with(path.join("dir", "User", "1", "Calibration", ""), self.calibration_info, "foc_ceria_ws")
-
-    @patch(enggutils_path + ".mantid.DeleteWorkspace")
-    @patch(enggutils_path + ".create_output_files")
-    @patch(enggutils_path + ".make_diff_consts_table")
-    @patch(enggutils_path + ".run_calibration")
-    @patch(file_path + ".load_full_instrument_calibration")
-    @patch(enggutils_path + ".path_handling.load_workspace")
-    def test_texture30_output_files_saved_to_one_directories_when_rb_num(
-        self, mock_load_ws, mock_load_cal, mock_run_cal, mock_make_diff_table, mock_create_out, mock_del
-    ):
-        rb_num = "1"
-        self.calibration_info.group = GROUP.TEXTURE30
+        self.calibration_info.config = MagicMock()
+        self.calibration_info.config.texture_groups = (ENGINX_GROUP.TEXTURE20,)
+        # setup group TO BE in config.texture_groups
+        self.calibration_info.group = ENGINX_GROUP.TEXTURE20
         mock_run_cal.return_value = ("foc_ceria_ws", None, None)  # focused_ceria, cal_table, diag_ws
 
         self.model.create_new_calibration(self.calibration_info, rb_num, plot_output=False, save_dir="dir")
