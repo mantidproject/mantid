@@ -151,10 +151,14 @@ class FocusPresenter(object):
 
     def update_calibration(self, calibration):
         """
-        Update the current calibration following an call from a CalibrationNotifier
+        Update the current calibration following a call from a CalibrationNotifier
         :param calibration: The new current calibration.
         """
         self.current_calibration = calibration
-        region_text = calibration.get_group_description()
-        self.view.set_region_display_text(region_text)
-        self.view.set_focus_button_enabled(True)
+        if calibration:
+            region_text = calibration.get_group_description()
+            self.view.set_region_display_text(region_text)
+            self.view.set_focus_button_enabled(True)
+        else:
+            self.view.set_region_display_text("Calibration not loaded")
+            self.view.set_focus_button_enabled(False)

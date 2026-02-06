@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<detector-grouping idf-date="2026-02-05T23:59:59" instrument="IMAT">
+	<group ID="0">
+		<detids>1000-1511,2000-2511,3000-3511,4000-4511,5000-5511,6000-6511,7000-7511</detids>
+	</group>
+	<group ID="1">
+		<detids>8000-8511,9000-9511,10000-10511,11000-11511,12000-12511,13000-13511,14000-14511</detids>
+	</group>
+</detector-grouping>
