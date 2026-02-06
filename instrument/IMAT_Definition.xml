@@ -92,8 +92,8 @@ see http://www.mantidproject.org/IDF -->
   <type name="detector-module">
     <component type="detector-row">
       <!-- 2 rows translated +/- 0.5*(gap + pixel height) where gap=12mm and pixel height=92.1 mm-->
-      <location  x="0" y="0.05205" z="0"> </location>
       <location  x="0" y="-0.05205" z="0"> </location>
+      <location  x="0" y="0.05205" z="0"> </location>
     </component>
   </type>
 
