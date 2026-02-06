@@ -584,7 +584,7 @@ class FullInstrumentViewPresenter:
     def on_show_monitors_check_box_clicked(self) -> None:
         self.update_plotter()
 
-    def on_show_shapes_toggled(self, checked: bool) -> None:
+    def _on_show_shapes_toggled(self, checked: bool) -> None:
         """Toggle between point-cloud and shape-based rendering."""
         if checked:
             if self._shape_renderer is None:
@@ -594,3 +594,6 @@ class FullInstrumentViewPresenter:
         else:
             self._renderer = PointCloudRenderer()
         self.update_plotter()
+
+    def on_show_shapes_toggled(self, checked: bool) -> None:
+        self._callback_queue.put((self._on_show_shapes_toggled, (checked,)))
