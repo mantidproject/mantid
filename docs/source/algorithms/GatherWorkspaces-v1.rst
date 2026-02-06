@@ -9,18 +9,16 @@
 Description
 -----------
 
-GatherWorkspaces collects workspaces from all MPI processes and combines them
-on the root process (rank 0). The algorithm supports two accumulation methods:
-"Add" mode sums corresponding spectra across all processes (adding Y values and
-combining errors in quadrature), while "Append" mode concatenates all spectra to
-create a larger workspace. Only processes with input workspaces participate in
-the gather operation, and only the root process produces an output workspace.
-The algorithm uses chunked processing to handle large workspaces efficiently,
-balancing memory usage with communication overhead. All input workspaces must
-have the same number of bins and must all be either histogram or point data. For
-EventWorkspaces, the algorithm can preserve event-level data if requested,
-otherwise it converts to histogram format to reduce memory usage. This is a
-collective MPI operation requiring all participating processes to call the algorithm simultaneously.
+GatherWorkspaces collects workspaces from all MPI processes and combines them on the root process (rank 0).
+The algorithm supports two accumulation methods:
+"Add" mode sums corresponding spectra across all processes (adding Y values and combining errors in quadrature),
+while "Append" mode concatenates all spectra to create a larger workspace.
+Only processes with input workspaces participate in the gather operation, and only the root process produces an output workspace.
+The algorithm uses chunked processing to handle large workspaces efficiently, balancing memory usage with communication overhead.
+All input workspaces must have the same number of bins and must all be either histogram or point data.
+For EventWorkspaces, the algorithm can preserve event-level data if requested,
+otherwise it converts to histogram format to reduce memory usage.
+This is a collective MPI operation requiring all participating processes to call the algorithm simultaneously.
 
 
 Usage

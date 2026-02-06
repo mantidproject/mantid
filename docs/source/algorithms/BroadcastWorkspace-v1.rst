@@ -9,14 +9,13 @@
 Description
 -----------
 
-BroadcastWorkspace distributes a workspace from one MPI process (the broadcaster) to all other processes
-in the MPI job. Only the broadcaster rank needs to provide an input workspace; all other ranks will
-receive an identical copy as their output. The algorithm is optimized for large workspaces through
-chunked broadcasting, which processes the data in manageable pieces to balance memory usage and performance.
-When spectra share identical X data, the algorithm broadcasts the X array only once and shares it
-across all spectra in the output workspace, reducing both transmission time and memory footprint.
-This is a collective MPI operation, meaning all processes in the communicator must call the algorithm
-simultaneously or the job will hang.
+BroadcastWorkspace distributes a workspace from one MPI process (the broadcaster) to all other processes in the MPI job.
+Only the broadcaster rank needs to provide an input workspace; all other ranks will receive an identical copy as their output.
+The algorithm is optimized for large workspaces through chunked broadcasting,
+which processes the data in manageable pieces to balance memory usage and performance.
+When spectra share identical X data, the algorithm broadcasts the X array only once and shares it across all spectra in the output workspace,
+reducing both transmission time and memory footprint.
+This is a collective MPI operation, meaning all processes in the communicator must call the algorithm simultaneously or the job will hang.
 
 
 Usage

@@ -39,7 +39,7 @@ void BroadcastWorkspace::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The OutputWorkspace will be a copy of the InputWorkspace. Some workspace metadata may be lost.");
 #ifdef MPI_BUILD
-  auto maxRank = mpi::communicator().size() - 1;
+  int maxRank = mpi::communicator().size() - 1;
 #else
   int maxRank = 0;
 #endif
