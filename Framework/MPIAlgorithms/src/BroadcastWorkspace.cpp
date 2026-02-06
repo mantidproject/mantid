@@ -16,10 +16,13 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidMPIAlgorithms/Chunking.h"
 #include <algorithm>
+
+#ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 #include <boost/serialization/vector.hpp>
 
 namespace mpi = boost::mpi;
+#endif
 
 namespace Mantid::MPIAlgorithms {
 
@@ -30,13 +33,18 @@ using namespace API;
 DECLARE_ALGORITHM(BroadcastWorkspace)
 
 void BroadcastWorkspace::init() {
-  // Input is optional - only the 'BroadcasterRank' process should provide an
-  // input workspace
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional));
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
+                  "The workspace to be shared to other MPI processes. Input is optional - only the 'BroadcasterRank' "
+                  "process should provide an InputWorkspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The OutputWorkspace will be a copy of the InputWorkspace. Some workspace metadata may be lost.");
+#ifdef MPI_BUILD
+  int maxRank = mpi::communicator().size() - 1;
+#else
+  int maxRank = 0;
+#endif
 
-  declareProperty("BroadcasterRank", 0, std::make_shared<BoundedValidator<int>>(0, mpi::communicator().size() - 1),
+  declareProperty("BroadcasterRank", 0, std::make_shared<BoundedValidator<int>>(0, maxRank),
                   "The rank of the process holding the workspace to broadcast (default: 0).");
 
   declareProperty("ChunkSize", 0, std::make_shared<BoundedValidator<int>>(-1, INT_MAX),
@@ -46,6 +54,7 @@ void BroadcastWorkspace::init() {
 }
 
 void BroadcastWorkspace::exec() {
+#ifdef MPI_BUILD
   // Every process in an MPI job must hit this next line or everything hangs!
   mpi::communicator world;
 
@@ -177,6 +186,11 @@ void BroadcastWorkspace::exec() {
   }
 
   setProperty("OutputWorkspace", outputWorkspace);
+#else
+  API::MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+  setProperty("OutputWorkspace", inputWorkspace);
+  g_log.warning() << this->name() << " is only available in builds with MPI enabled (MPI_BUILD=ON)\n";
+#endif
 }
 
 } // namespace Mantid::MPIAlgorithms

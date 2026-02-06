@@ -25,12 +25,20 @@ set_property(TARGET Algorithms PROPERTY FOLDER "MantidFramework")
 
 target_link_libraries(
   MPIAlgorithms
-  PUBLIC Mantid::API Mantid::DataObjects ${Boost_MPI_LIBRARY} ${Boost_SERIALIZATION_LIBRARY}
-  PRIVATE Mantid::Kernel ${MPI_CXX_LIBRARIES}
+  PUBLIC Mantid::API Mantid::DataObjects
+  PRIVATE Mantid::Kernel
 )
-
-# Add the unit tests directory
-add_subdirectory(test)
+if(MPI_BUILD)
+  message(STATUS "Boost_MPI_LIBRARY = ${Boost_MPI_LIBRARY}")
+  target_compile_definitions(MPIAlgorithms PRIVATE MPI_BUILD)
+  target_link_libraries(
+    MPIAlgorithms
+    PUBLIC ${Boost_MPI_LIBRARY} ${Boost_SERIALIZATION_LIBRARY}
+    PRIVATE ${MPI_CXX_LIBRARIES}
+  )
+  # Add the unit tests directory
+  add_subdirectory(test)
+endif()
 
 target_include_directories(
   MPIAlgorithms
