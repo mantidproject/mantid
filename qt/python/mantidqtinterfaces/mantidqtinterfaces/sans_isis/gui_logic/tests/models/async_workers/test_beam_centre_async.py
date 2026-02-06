@@ -14,7 +14,7 @@ from mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.beam_centre_asy
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 
 
-@mock.patch("sans.gui_logic.models.async_workers.beam_centre_async.SANSCentreFinder")
+@mock.patch("mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.beam_centre_async.SANSCentreFinder")
 class BeamCentreAsyncTest(unittest.TestCase):
     def setUp(self) -> None:
         self.mocked_presenter = mock.create_autospec(BeamCentrePresenter, instance=True)

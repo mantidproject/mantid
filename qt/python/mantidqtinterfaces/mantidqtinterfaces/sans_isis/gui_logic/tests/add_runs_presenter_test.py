@@ -66,8 +66,8 @@ class InitializationTest(AddRunsPagePresenterTestCase):
     def setUp(self):
         self.setUpFakeChildViews()
 
-    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
-    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectorPresenter", autospec=True)
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter.RunSelectorPresenter", autospec=True)
     def test_creates_run_selector_with_child_view(self, patched_presenter, patched_model):
         view = self._make_mock_view()
         parent_view = self._make_mock_parent_view()
@@ -77,8 +77,8 @@ class InitializationTest(AddRunsPagePresenterTestCase):
         patched_model.assert_called_once_with(mock.ANY)
         patched_presenter.assert_called_once_with(mock.ANY, patched_model.return_value, mock.ANY, mock.ANY, view)
 
-    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.SummationSettingsModel", autospec=True)
-    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.SummationSettingsPresenter", autospec=True)
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter.SummationSettingsModel", autospec=True)
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter.SummationSettingsPresenter", autospec=True)
     def test_creates_run_selector_summation_model_with_child_view(self, patched_presenter, patched_model):
         view = self._make_mock_view()
         parent_view = self._make_mock_parent_view()
@@ -109,8 +109,10 @@ class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
         presenter._get_filename_manager = mock.Mock(return_value=MockedOutAddRunsFilenameManager())
         return presenter
 
-    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.AddRunsPagePresenter._handle_custom_outfile_check_changed")
-    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
+    @mock.patch(
+        "mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter.AddRunsPagePresenter._handle_custom_outfile_check_changed"
+    )
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
     def test_enables_summation_settings_when_event_data(self, _patched_init_run_selector, _):
         histogram_run = self._make_fake_histogram_run()
         runs = mock.MagicMock()
@@ -121,8 +123,10 @@ class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
         presenter._handle_selection_changed(run_selection=runs)
         self.view.enable_summation_settings.assert_called_once()
 
-    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.AddRunsPagePresenter._handle_custom_outfile_check_changed")
-    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
+    @mock.patch(
+        "mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter.AddRunsPagePresenter._handle_custom_outfile_check_changed"
+    )
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
     def test_enables_summation_settings_when_event_and_histogram_data(self, _, _handle_check):
         histogram_run = self._make_fake_histogram_run()
         event_run = self._make_fake_event_run()
@@ -141,8 +145,10 @@ class SummationConfigurationTest(AddRunsPagePresenterTestCase):
         self.view = self._make_mock_view()
         self.parent_view = self._make_mock_parent_view()
 
-    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.AddRunsPagePresenter._handle_custom_outfile_check_changed")
-    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectorPresenter", autospec=True)
+    @mock.patch(
+        "mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter.AddRunsPagePresenter._handle_custom_outfile_check_changed"
+    )
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter.RunSelectorPresenter", autospec=True)
     def test_passes_correct_config_when_summation_requested(self, patched_run_selector, _):
         # Ensure we know the type that was returned by the constructor
         run_selector_mock = mock.Mock()
@@ -164,8 +170,10 @@ class SummationConfigurationTest(AddRunsPagePresenterTestCase):
         self.view.sum.emit()
         run_summation.assert_called_with(mock.ANY, mock.ANY, "LOQ00003-add")
 
-    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.AddRunsPagePresenter._handle_custom_outfile_check_changed")
-    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
+    @mock.patch(
+        "mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter.AddRunsPagePresenter._handle_custom_outfile_check_changed"
+    )
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
     def test_shows_error_when_empty_default_directory(self, _, _handle_check):
         view = self._make_mock_view()
         presenter = AddRunsPagePresenter(mock.MagicMock(), view, mock.Mock())

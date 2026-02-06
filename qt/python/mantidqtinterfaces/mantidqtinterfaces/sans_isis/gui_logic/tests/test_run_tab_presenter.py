@@ -137,7 +137,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter.update_view_from_model = mock.Mock()
         self.presenter._workspace_diagnostic_presenter = mock.Mock()
 
-        with mock.patch("sans.gui_logic.presenter.run_tab_presenter.FileLoading") as mocked_loader:
+        with mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.run_tab_presenter.FileLoading") as mocked_loader:
             mocked_loader.load_user_file.return_value = AllStates()
             self.presenter.on_user_file_load()
             mocked_loader.load_user_file.assert_called_once_with(file_path=user_file_path, file_information=mock.ANY)
@@ -155,8 +155,8 @@ class RunTabPresenterTest(unittest.TestCase):
         # clean up
         remove_file(user_file_path)
 
-    @mock.patch("sans.gui_logic.presenter.run_tab_presenter.FileLoading")
-    @mock.patch("sans.gui_logic.presenter.run_tab_presenter.FileFinder")
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.run_tab_presenter.FileLoading")
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.run_tab_presenter.FileFinder")
     def test_user_file_loading_handles_exceptions(self, _, mocked_loader):
         for e in [UserFileLoadException("e"), TomlValidationError("e")]:
             self._mock_view.display_message_box.reset_mock()
@@ -252,7 +252,7 @@ class RunTabPresenterTest(unittest.TestCase):
             self.presenter.display_warning_box = mock.Mock()
 
             with mock.patch.multiple(
-                "sans.gui_logic.presenter.run_tab_presenter",
+                "mantidqtinterfaces.sans_isis.gui_logic.presenter.run_tab_presenter",
                 add_dir_to_datasearch=mock.DEFAULT,
                 ConfigService=mock.DEFAULT,
                 os=mock.DEFAULT,

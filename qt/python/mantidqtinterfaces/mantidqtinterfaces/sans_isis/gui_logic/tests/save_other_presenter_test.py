@@ -76,15 +76,15 @@ class SaveOtherPresenterTest(unittest.TestCase):
 
         self.assertEqual(expected_list, returned_list)
 
-    @mock.patch("sans.gui_logic.presenter.save_other_presenter.AnalysisDataService")
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.save_other_presenter.AnalysisDataService")
     def test_on_save_clicked_calls_save_workspace_to_file(self, mock_ads):
         # This test is to make sure that any positional argument changes are caught.
         self.mock_view.get_selected_workspaces.return_value = ["a"]
         self.mock_view.get_filenames.return_value = ["a.nxs"]
         self.presenter.on_save_clicked()
 
-    @mock.patch("sans.gui_logic.presenter.save_other_presenter.save_workspace_to_file")
-    @mock.patch("sans.gui_logic.presenter.save_other_presenter.AnalysisDataService")
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.save_other_presenter.save_workspace_to_file")
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.presenter.save_other_presenter.AnalysisDataService")
     def test_on_save_clicked_calls_save_workspace_to_file_with_correct_params(self, _, mock_save):
         # This one is to ensure on_save is passing the correct params. Split, else the mocking hides bugs.
         workspace_names = ["aworkspace"]

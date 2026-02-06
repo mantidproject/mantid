@@ -22,7 +22,7 @@ class GuiCommonTest(unittest.TestCase):
 
         self.gui_state_director_instance = mock.MagicMock()
         self.gui_state_director_instance.create_state.return_value = self.state_gui_model
-        self.patcher = mock.patch("sans.gui_logic.models.create_state.GuiStateDirector")
+        self.patcher = mock.patch("mantidqtinterfaces.sans_isis.gui_logic.models.create_state.GuiStateDirector")
         self.addCleanup(self.patcher.stop)
         self.gui_state_director = self.patcher.start()
         self.gui_state_director.return_value = self.gui_state_director_instance
@@ -38,7 +38,7 @@ class GuiCommonTest(unittest.TestCase):
         states, errors = create_states(self.state_gui_model, SANSFacility.ISIS, row_entries=rows)
         self.assertEqual(2, len(states))
 
-    @mock.patch("sans.gui_logic.models.create_state._get_thickness_for_row")
+    @mock.patch("mantidqtinterfaces.sans_isis.gui_logic.models.create_state._get_thickness_for_row")
     def test_create_state_from_user_file_if_specified(self, thickness_mock):
         expected_user_file = "MaskLOQData.txt"
 
