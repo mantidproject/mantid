@@ -223,7 +223,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_detector_ids(self):
         expected_ids = [1, 2, 3]
         model, _ = self._setup_model(expected_ids)
-        np.testing.assert_array_equal(model.detector_ids, expected_ids)
+        np.testing.assert_array_equal(model.pickable_detector_ids, expected_ids)
 
     def test_counts_limits(self):
         model, mock_workspace = self._setup_model([1, 2, 3])

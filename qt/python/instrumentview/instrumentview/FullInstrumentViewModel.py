@@ -143,8 +143,19 @@ class FullInstrumentViewModel:
         return self._sample_position
 
     @property
-    def detector_ids(self) -> np.ndarray:
+    def all_detector_ids(self) -> np.ndarray:
+        """All detector IDs (unfiltered), in the same order as CreateDetectorTable."""
+        return self._detector_ids
+
+    @property
+    def pickable_detector_ids(self) -> np.ndarray:
+        """Detector IDs for unmasked, non-monitor detectors."""
         return self._detector_ids[self.is_pickable]
+
+    @property
+    def masked_detector_ids(self) -> np.ndarray:
+        """Detector IDs for masked (but valid, non-monitor) detectors."""
+        return self._detector_ids[self._is_masked & self._is_valid]
 
     @property
     def spectrum_nos(self) -> np.ndarray:
