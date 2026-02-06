@@ -166,9 +166,9 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   set_target_properties(
     SystemTests
     PROPERTIES VS_DEBUGGER_COMMAND "${Python_EXECUTABLE}"
-               VS_DEBUGGER_COMMAND_ARGUMENTS VS_DEBUGGER_ENVIRONMENT
+               VS_DEBUGGER_COMMAND_ARGUMENTS
                "${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/runSystemTests.py --executable python3"
-               "${MSVC_IDE_ENV}"
+               VS_DEBUGGER_ENVIRONMENT "${MSVC_IDE_ENV}"
   )
 endif()
 
