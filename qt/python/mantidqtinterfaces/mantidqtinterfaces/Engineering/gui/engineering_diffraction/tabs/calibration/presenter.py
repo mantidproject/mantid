@@ -15,6 +15,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
 from mantidqt.utils.observer_pattern import Observable, GenericObservable
+from Engineering.common.instrument_config import get_instr_config
 
 
 class CalibrationPresenter(object):
@@ -48,6 +49,7 @@ class CalibrationPresenter(object):
 
     def update_calibration_from_view(self):
         van_file = self.view.get_vanadium_filename()
+        config = get_instr_config(self.instrument)
         self.current_calibration.clear()
         if self.view.get_load_checked():
             # loading calibration from path to .prm
@@ -60,13 +62,13 @@ class CalibrationPresenter(object):
             # set group and any additional parameters needed
             if self.view.get_crop_checked():
                 self.current_calibration.set_group(self.cropping_widget.get_group())
-                if self.current_calibration.group == self.current_calibration.group.CUSTOM:
+                if self.current_calibration.group == config.group.CUSTOM:
                     self.current_calibration.set_grouping_file(self.cropping_widget.get_custom_groupingfile())
-                elif self.current_calibration.group == self.current_calibration.group.CROPPED:
+                elif self.current_calibration.group == config.group.CROPPED:
                     self.current_calibration.set_spectra_list(self.cropping_widget.get_custom_spectra())
             else:
                 # default if no cropping
-                self.current_calibration.set_group(self.current_calibration.group.BOTH)
+                self.current_calibration.set_group(config.group.BOTH)
             # ensure the updated group is translated to an updated group_ws
             self.current_calibration.update_group_ws_from_group()
 
