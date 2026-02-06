@@ -11,10 +11,10 @@ from Engineering.EnggUtils import (
     _save_output_files,
     _load_run_and_convert_to_dSpacing,
     process_vanadium,
-    GROUP,
     focus_run,
     convert_TOFerror_to_derror,
 )
+from Engineering.common.instrument_config import ENGINX_GROUP
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
 
 enggutils_path = "Engineering.EnggUtils"
@@ -28,6 +28,8 @@ class EnggUtilsTest(unittest.TestCase):
         self.calibration.get_group_suffix.return_value = "all_banks"
         self.calibration.get_foc_ws_suffix.return_value = "bank"
         self.calibration.get_vanadium_path.return_value = "van_path"
+        self.calibration.config = MagicMock()
+        self.calibration.config.texture_groups = (ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.TEXTURE20)
 
         self.custom_calibration = create_autospec(CalibrationInfo(), instance=True)
         self.custom_calibration.is_valid.return_value = True
@@ -35,7 +37,9 @@ class EnggUtilsTest(unittest.TestCase):
         self.custom_calibration.get_group_suffix.return_value = "Custom_test"
         self.custom_calibration.get_foc_ws_suffix.return_value = "Custom_test"
         self.custom_calibration.get_vanadium_path.return_value = "van_path"
-        self.custom_calibration.group = GROUP.CUSTOM
+        self.custom_calibration.group = ENGINX_GROUP.CUSTOM
+        self.custom_calibration.config = MagicMock()
+        self.custom_calibration.config.texture_groups = (ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.TEXTURE20)
 
         self.cropped_calibration = create_autospec(CalibrationInfo(), instance=True)
         self.cropped_calibration.is_valid.return_value = True
@@ -44,7 +48,9 @@ class EnggUtilsTest(unittest.TestCase):
         self.cropped_calibration.get_foc_ws_suffix.return_value = "Cropped_test"
         self.cropped_calibration.get_vanadium_path.return_value = "van_path"
 
-        self.cropped_calibration.group = GROUP.CROPPED
+        self.cropped_calibration.group = ENGINX_GROUP.CROPPED
+        self.cropped_calibration.config = MagicMock()
+        self.cropped_calibration.config.texture_groups = (ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.TEXTURE20)
 
     # tests for code used in calibration tab of UI
 
@@ -65,7 +71,7 @@ class EnggUtilsTest(unittest.TestCase):
         create_output_files(save_dir, self.calibration, "ws")
 
         self.calibration.save_grouping_workspace.assert_called_once_with(save_dir)
-        mock_write_prm.assert_called_once_with("ws", prm_fname)
+        mock_write_prm.assert_called_once_with("ws", prm_fname, self.calibration)
         mock_save_nxs.assert_called_once_with(InputWorkspace="cal_table", Filename=prm_fname.replace(".prm", ".nxs"))
         mock_copy.assert_not_called()
 
@@ -78,7 +84,7 @@ class EnggUtilsTest(unittest.TestCase):
         mock_exists.return_value = False  # make new directory
         calibration = CalibrationInfo()  # easier to work with real calibration info object here
         prm_name = "ENGINX_193749_all_banks.prm"
-        calibration.set_calibration_from_prm_fname(prm_name)
+        calibration.set_calibration_from_prm_fname(prm_name, "ENGINX")
         calibration.set_calibration_table("cal_table")
         save_dir = "savedir"
 
@@ -88,9 +94,9 @@ class EnggUtilsTest(unittest.TestCase):
         self.calibration.save_grouping_workspace.assert_not_called()  # only called if not bank data
         prm_fpath = path.join(save_dir, prm_name)
         write_prm_calls = [
-            call("ws", prm_fpath),
-            call("ws", prm_fpath.replace("all_banks", "bank_1"), spec_nums=[0]),
-            call("ws", prm_fpath.replace("all_banks", "bank_2"), spec_nums=[1]),
+            call("ws", prm_fpath, calibration),
+            call("ws", prm_fpath.replace("all_banks", "bank_1"), calibration, spec_nums=[0]),
+            call("ws", prm_fpath.replace("all_banks", "bank_2"), calibration, spec_nums=[1]),
         ]
         mock_write_prm.assert_has_calls(write_prm_calls)
         nxs_fpath = prm_fpath.replace(".prm", ".nxs")
@@ -326,6 +332,8 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         calib.group = calibration_group
         calib.get_group_ws.return_value = "grp"
         calib.get_calibration_table.return_value = "cal_table"
+        calib.config = MagicMock()
+        calib.config.texture_groups = (ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.TEXTURE20)
 
         # Setup focused sample workspace mock
         ws = MagicMock()
@@ -358,7 +366,9 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
     def test_focus_run_non_texture_no_rb(
         self, mock_delete, mock_ads, mock_convert, mock_check, mock_apply, mock_focus, mock_load, mock_process, mock_save
     ):
-        calib, ws = self._setup_focus_run_test(GROUP.NORTH, None, mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save)
+        calib, ws = self._setup_focus_run_test(
+            ENGINX_GROUP.NORTH, None, mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save
+        )
         mock_save.return_value = (["TOF/path.nxs"], ["gss/path.nxs"], ["combined/path.nxs"])
 
         focus_run(["sample.nxs"], plot_output=False, rb_num=None, calibration=calib, save_dir="/mock", full_calib="full")
@@ -378,7 +388,9 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
     def test_focus_run_non_texture_with_rb(
         self, mock_delete, mock_ads, mock_convert, mock_check, mock_apply, mock_focus, mock_load, mock_process, mock_save
     ):
-        calib, ws = self._setup_focus_run_test(GROUP.SOUTH, "RB123", mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save)
+        calib, ws = self._setup_focus_run_test(
+            ENGINX_GROUP.SOUTH, "RB123", mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save
+        )
         mock_save.return_value = (["TOF/path.nxs"], ["gss/path.nxs"], ["combined/path.nxs"])
 
         focus_run(["sample.nxs"], plot_output=False, rb_num="RB123", calibration=calib, save_dir="/mock", full_calib="full")
@@ -399,7 +411,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         self, mock_delete, mock_ads, mock_convert, mock_check, mock_apply, mock_focus, mock_load, mock_process, mock_save
     ):
         calib, ws = self._setup_focus_run_test(
-            GROUP.TEXTURE20, "RB123", mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save
+            ENGINX_GROUP.TEXTURE20, "RB123", mock_load, mock_focus, mock_check, mock_apply, mock_convert, mock_save
         )
         mock_save.return_value = (["TOF/path.nxs"], ["gss/path.nxs"], ["combined/path.nxs"])
 

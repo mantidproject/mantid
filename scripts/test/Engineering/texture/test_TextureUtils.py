@@ -54,13 +54,23 @@ class TextureUtilsFileHelperTests(unittest.TestCase):
 
 class TextureUtilsFocusTests(unittest.TestCase):
     @patch(f"{texture_utils_path}.mk")
-    @patch(f"{texture_utils_path}.TextureInstrument")
-    def test_run_focus_script_instantiates_model_and_calls_main(self, mock_instr, mock_mk):
-        mock_model = MagicMock()
-        mock_instr.return_value = mock_model
+    @patch(f"{texture_utils_path}.IMAT")
+    @patch(f"{texture_utils_path}.EnginX")
+    def test_run_focus_script_instantiates_ENGINX_model_and_calls_main(self, mock_enginx, mock_imat, mock_mk):
         run_focus_script(wss=["1", "2"], focus_dir="focus", van_run="v", ceria_run="c", full_instr_calib="f", grouping="1")
-        mock_instr.assert_called_once()
-        mock_model.main.assert_called_once()
+        mock_enginx.return_value.main.assert_called_once()
+        mock_imat.return_value.main.assert_not_called()
+        mock_mk.assert_called_once_with("focus")
+
+    @patch(f"{texture_utils_path}.mk")
+    @patch(f"{texture_utils_path}.IMAT")
+    @patch(f"{texture_utils_path}.EnginX")
+    def test_run_focus_script_instantiates_IMAT_model_and_calls_main(self, mock_enginx, mock_imat, mock_mk):
+        run_focus_script(
+            wss=["1", "2"], focus_dir="focus", van_run="v", ceria_run="c", full_instr_calib="f", grouping="1", instrument="IMAT"
+        )
+        mock_enginx.return_value.main.assert_not_called()
+        mock_imat.return_value.main.assert_called_once()
         mock_mk.assert_called_once_with("focus")
 
 
