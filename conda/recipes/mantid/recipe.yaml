@@ -25,6 +25,8 @@ requirements:
       then:
         - ${{ stdlib("c") }}
         - libgomp
+        - mpi
+        - mpich
     - if: osx
       then:
         - llvm-openmp ${{ llvm_openmp }}
@@ -56,6 +58,10 @@ requirements:
         - xorg-libxxf86vm
         - xorg-libx11
         - xorg-xorgproto
+        - mpi
+        - mpi4py
+        - libboost-mpi ${{ libboost }}
+        - mpich
     - if: win
       then:
         - lib3mf
@@ -91,6 +97,8 @@ requirements:
     - if: linux
       then:
         - libglu ${{ libglu }}
+        - mpi4py
+        - ${{ pin_compatible('libboost-mpi', upper_bound='x.x') }}
     - if: win
       then:
         - lib3mf

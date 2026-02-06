@@ -16,13 +16,16 @@
 #include "MantidMPIAlgorithms/Chunking.h"
 #include "MantidMPIAlgorithms/MPISerialization.h"
 #include <algorithm>
-#include <boost/mpi.hpp>
-#include <boost/serialization/vector.hpp>
 #include <cmath>
 #include <functional>
 #include <numeric>
 
+#ifdef MPI_BUILD
+#include <boost/mpi.hpp>
+#include <boost/serialization/vector.hpp>
+
 namespace mpi = boost::mpi;
+#endif
 
 namespace Mantid::MPIAlgorithms {
 
@@ -34,17 +37,19 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(GatherWorkspaces)
 
 void GatherWorkspaces::init() {
-  // Input workspace is optional, except for the root process
+#ifdef MPI_BUILD
   if (mpi::communicator().rank())
     declareProperty(
         std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional));
   else
+#endif
     declareProperty(
-        std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Mandatory));
+        std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
+        "The InputWorkspace to be gathered. Input workspace is optional, except for the root process.");
 
-  // Output is optional - only the root process will output a workspace
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "Output is optional - only the root process will output a workspace");
 
   declareProperty("PreserveEvents", false,
                   "Keep the output workspace as an EventWorkspace, if the "
@@ -66,6 +71,7 @@ void GatherWorkspaces::init() {
 }
 
 void GatherWorkspaces::exec() {
+#ifdef MPI_BUILD
   // Every process in an MPI job must hit this next line or everything hangs!
   mpi::communicator world;
 
@@ -136,9 +142,18 @@ void GatherWorkspaces::exec() {
   } else {
     execAppendChunked(outputWorkspace, chunkSize);
   }
+#else
+  m_inputWorkspace = getProperty("InputWorkspace");
+  setProperty("OutputWorkspace", m_inputWorkspace);
+  g_log.warning() << this->name() << " is only available in builds with MPI enabled (MPI_BUILD=ON)\n";
+#endif
 }
 
 void GatherWorkspaces::execAddChunked(MatrixWorkspace_sptr &outputWorkspace, std::size_t chunkSize) {
+#ifndef MPI_BUILD
+  (void)outputWorkspace;
+  (void)chunkSize;
+#else
   // In Add mode, sum Y values and add errors in quadrature from all processes
 
   for (std::size_t chunkStart = 0; chunkStart < m_totalSpec; chunkStart += chunkSize) {
@@ -188,9 +203,14 @@ void GatherWorkspaces::execAddChunked(MatrixWorkspace_sptr &outputWorkspace, std
       reduce(m_included, localE, [](double a, double b) { return std::sqrt(a * a + b * b); }, 0);
     }
   }
+#endif
 }
 
 void GatherWorkspaces::execAppendChunked(MatrixWorkspace_sptr &outputWorkspace, std::size_t chunkSize) {
+#ifndef MPI_BUILD
+  (void)outputWorkspace;
+  (void)chunkSize;
+#else
   // In Append mode, concatenate spectra from all processes
 
   for (std::size_t chunkStart = 0; chunkStart < m_totalSpec; chunkStart += chunkSize) {
@@ -248,10 +268,11 @@ void GatherWorkspaces::execAppendChunked(MatrixWorkspace_sptr &outputWorkspace, 
       gather(m_included, localE, 0);
     }
   }
+#endif
 }
 
 void GatherWorkspaces::execEvent() {
-
+#ifdef MPI_BUILD
   // Every process in an MPI job must hit this next line or everything hangs!
   mpi::communicator included; // The communicator containing all processes
   // The root process needs to create a workspace of the appropriate size
@@ -289,6 +310,11 @@ void GatherWorkspaces::execEvent() {
       gather(included, m_eventW->getSpectrum(wi), 0);
     }
   }
+#else
+  ExperimentInfo_sptr inputWorkspace = getProperty("InputWorkspace");
+  setProperty("OutputWorkspace", inputWorkspace);
+  g_log.warning() << this->name() << " is only available in builds with MPI enabled (MPI_BUILD=ON)\n";
+#endif
 }
 
 } // namespace Mantid::MPIAlgorithms

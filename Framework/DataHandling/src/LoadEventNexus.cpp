@@ -49,7 +49,7 @@ using std::vector;
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadEventNexus)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEventNexus)
 
 using namespace Kernel;
 using namespace DateAndTimeHelpers;
