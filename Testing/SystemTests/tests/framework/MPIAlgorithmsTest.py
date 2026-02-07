@@ -428,7 +428,6 @@ def main():
     # Gather failure counts from all ranks
     all_failed_counts = comm.gather(failed_tests, root=0)
 
-    # logger.information summary on rank 0
     if rank == 0:
         logger.information("=" * 60)
         logger.information("TEST SUMMARY")
@@ -474,7 +473,6 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     data_search_dirs = str(sys.argv[1]).split(",")
-    logger.information(str(data_search_dirs))
     temp_config = {"logging.channels.consoleChannel.class": "StdoutChannel"}
     with amend_config(data_dir=data_search_dirs, **temp_config):
         exit_code = main()

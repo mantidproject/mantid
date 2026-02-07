@@ -10,6 +10,7 @@ import subprocess
 import sys
 import os
 import pathlib
+import signal
 from mantid.kernel import ConfigService, Logger
 
 log = Logger("MPIEXEC")
@@ -30,7 +31,20 @@ class ExecuteMPITest(systemtesting.MantidSystemTest):
         test_file = current_dir / "MPIAlgorithmsTest.py"
 
         cmd = ["mpiexec", "-n", "4", sys.executable, test_file, ",".join(dsd)]
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        try:
+            result = subprocess.run(cmd, timeout=120, capture_output=True, text=True, start_new_session=True)
 
-        log.information(f"TEST OUTPUT:\n{result.stdout}")
-        assert result.returncode == 0, f"{result.returncode} MPI tests failed"
+            log.information(f"TEST OUTPUT:\n{result.stdout}")
+            assert result.returncode == 0, f"{result.returncode} MPI tests failed"
+        except subprocess.TimeoutExpired as err:
+            try:
+                os.killpg(err.pid, signal.SIGKILL)
+            except:
+                pass
+
+            stdout = err.stdout.decode("utf-8", errors="replace") if isinstance(err.stdout, bytes) else err.stdout
+            stderr = err.stderr.decode("utf-8", errors="replace") if isinstance(err.stderr, bytes) else err.stderr
+
+            log.information(f"STDOUT:\n{stdout}")
+            log.information(f"STDERR:\n{stderr}")
+            raise RuntimeError("MPI Command took too long to execute.This usually indicates deadlock or hung MPI process.") from err
