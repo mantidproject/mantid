@@ -1,0 +1,1 @@
+- Include IMAGINE instrument in :ref:`algm-MaskBTP`.
