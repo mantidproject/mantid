@@ -37,7 +37,6 @@ from mantid.simpleapi import (
     GroupWorkspaces,
     RenameWorkspace,
     GroupDetectors,
-    LoadWAND,
 )
 import h5py
 import numpy as np
@@ -538,7 +537,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         outWS = "OUTPUT"  # self.getPropertyValue("OutputWorkspace")
         summing = self.getProperty("Sum").value
         self.instrument = self.getProperty("Instrument").value
-        numberBins = self.getProperty("XBinWidth").value
+        # numberBins = self.getProperty("XBinWidth").value
 
         # Step 1: Workspace Expansion or Load Data
         logger.information("Step 1: Loading and expanding workspaces")
@@ -567,9 +566,15 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 OutputWorkspace=ws_name,
                 XMin=xMin,
                 XMax=xMax,
-                NumberBins=numberBins if numberBins > 0 else 1000,
+                NumberBins=1000,
                 EnableLogging=False,
             )
+
+            if vanadium_ws is not None:
+                vanadium_ws = self._resample_vanadium(ws_name, mask_name, xMin, xMax)
+            if vanadium_background_ws is not None:
+                vanadium_background_ws = self._resample_vanadium_background(ws_name, mask_name, xMin, xMax)
+
             Scale(
                 InputWorkspace=ws_name,
                 OutputWorkspace=ws_name,
@@ -577,12 +582,13 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 EnableLogging=False,
             )
 
-        # Step 5: Calibration & Normalization (vanadium correction)
-        logger.information("Step 5: Processing calibration (vanadium) data")
-        vanadium_corrected = self._process_vanadium_calibration(
-            vanadium_ws,
-            vanadium_background_ws,
-        )
+            # Step 5: Calibration & Normalization (vanadium correction)
+            logger.information("Step 5: Processing calibration (vanadium) data")
+            vanadium_corrected = self._process_vanadium_calibration(
+                vanadium_ws,
+                vanadium_background_ws,
+            )
+            print("completed step 5")
 
         # # Step 6 & 7: Process each sample workspace - background subtraction and absorption correction
         # logger.information("Steps 6-7: Applying background subtraction and absorption corrections")
@@ -694,8 +700,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         run_numbers = self.getProperty(f"{data_type}RunNumbers").value
         instrument = self.getProperty("Instrument").value
 
-        if instrument == "WAND^2":
-            return LoadWAND(Filename=filenames[0], IPTS=ipts, RunNumbers=run_numbers)
+        # if instrument == "WAND^2":
+        #     return LoadWAND(Filename=filenames[0], IPTS=ipts, RunNumbers=run_numbers)
 
         # Check if there's data to load
         if not filenames and (ipts == Property.EMPTY_INT or len(run_numbers) == 0):
@@ -746,9 +752,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         run_numbers = self.getProperty("SampleRunNumbers").value
         instrument = self.getProperty("Instrument").value
 
-        if instrument == "WAND^2":
-            return LoadWAND(Filename=filenames[0], IPTS=ipts, RunNumbers=run_numbers)
-            # return loaded_workspaces
+        # if instrument == "WAND^2":
+        #     return LoadWAND(Filename=filenames[0], IPTS=ipts, RunNumbers=run_numbers)
+        #     # return loaded_workspaces
 
         files_to_load = []
 
@@ -802,25 +808,27 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         Process vanadium calibration with background subtraction and absorption correction.
         VCORR = (V - V_B)/(T_0*sigma_inc + sigma_mult)
         """
-        T_0 = 1.0  # Placeholder for transmission factor
-        sigma_inc = 1  # Placeholder for incoherent scattering cross-section
-        sigma_mult = 1  # Placeholder for multiple scattering cross-section
+        # T_0 = 1.0  # Placeholder for transmission factor
+        # sigma_inc = 1  # Placeholder for incoherent scattering cross-section
+        # sigma_mult = 1  # Placeholder for multiple scattering cross-section
 
         if vanadium_bg_ws is not None:
+            print(vanadium_bg_ws)
+            print(vanadium_ws)
             Minus(
                 LHSWorkspace=vanadium_ws,
                 RHSWorkspace=vanadium_bg_ws,
                 OutputWorkspace=vanadium_ws,
                 EnableLogging=False,
             )
-        denominator = (T_0 * sigma_inc) + sigma_mult
+        # denominator = (T_0 * sigma_inc) + sigma_mult
 
-        Divide(
-            LHSWorkspace=vanadium_ws,
-            RHSWorkspace=denominator,
-            OutputWorkspace=vanadium_ws,
-            EnableLogging=False,
-        )
+        # Divide(
+        #     LHSWorkspace=vanadium_ws,
+        #     RHSWorkspace=denominator,
+        #     OutputWorkspace=vanadium_ws,
+        #     EnableLogging=False,
+        # )
 
         # Might use this instead of divide
         # Scale(
@@ -1136,15 +1144,41 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         self._to_spectrum_axis(workspace_in, workspace_out, mask, instrument_donor)
 
         # rebin the data
-        number_bins = self.getProperty("NumberBins").value
+        # number_bins = int(self.getProperty("XBinWidth").value)
         return ResampleX(
             InputWorkspace=workspace_out,
             OutputWorkspace=workspace_out,
             XMin=x_min,
             XMax=x_max,
-            NumberBins=number_bins,
+            NumberBins=1000,
             EnableLogging=False,
         )
+
+    def _resample_vanadium(
+        self,
+        current_workspace,
+        mask_name,
+        x_min,
+        x_max,
+    ):
+        """Perform resample on Vanadium"""
+        ws_name = "__vanadium"
+        # cal = self.getProperty("CalibrationWorkspace").valueAsStr
+
+        return self._to_spectrum_axis_resample(ws_name, "_ws_cal", mask_name, current_workspace, x_min, x_max)
+
+    def _resample_vanadium_background(
+        self,
+        current_workspace,
+        mask_name,
+        x_min,
+        x_max,
+    ):
+        """Perform resample on Vanadium"""
+        ws_name = "__vanadiumbackground"
+        # cal = self.getProperty("CalibrationWorkspace").valueAsStr
+
+        return self._to_spectrum_axis_resample(ws_name, "_ws_cal_background", mask_name, current_workspace, x_min, x_max)
 
 
 AlgorithmFactory.subscribe(HFIRPowderReduction)
