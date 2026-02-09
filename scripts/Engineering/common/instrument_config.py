@@ -1,3 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+
 from dataclasses import dataclass
 from typing import Dict, Tuple, Optional, Sequence, Type
 from enum import Enum
@@ -41,6 +48,12 @@ class IMAT_GROUP(Enum):
     MODULE4 = "Module4", [1, 2]
     ROW1 = "Row1", [1, 2]
     ROW4 = "Row4", [1, 2]
+
+
+###### ~~~~~~~~~~~~~~~~~~~~ IMPORTANT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# if a new instrument is added, add its config key to this list and group to groups (used for tests)
+SUPPORTED_INSTRUMENTS = ("ENGINX", "IMAT")
+GROUPS = (ENGINX_GROUP, IMAT_GROUP)
 
 
 @dataclass(frozen=True)
