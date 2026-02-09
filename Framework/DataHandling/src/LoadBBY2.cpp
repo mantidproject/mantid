@@ -50,7 +50,7 @@ using namespace API;
 using namespace Nexus;
 
 // register the algorithm
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadBBY2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadBBY2)
 
 // consts
 static const int LAST_INDEX = -1;

@@ -32,7 +32,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadNXSPE)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -99,7 +99,7 @@ void LoadNXSPE::init() {
  */
 void LoadNXSPE::exec() {
   std::string filename = getProperty("Filename");
-  // quicly check if it's really nxspe
+  // quickly check if it's really nxspe
   try {
     Nexus::File file(filename);
     std::string mainEntry = (*(file.getEntries().begin())).first;
