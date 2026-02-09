@@ -21,6 +21,7 @@ from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
+from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.Renderers.point_cloud_renderer import PointCloudRenderer
 from instrumentview.Renderers.shape_renderer import ShapeRenderer
 
@@ -67,8 +68,9 @@ class FullInstrumentViewPresenter:
         self._transform = np.eye(4)
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
-        self._renderer = PointCloudRenderer()
+        self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = None  # lazily created
+        self._renderer = self._point_cloud_renderer  # Start with point cloud
         self._model.setup()
         self.setup()
         self._callback_queue = Queue()
@@ -98,7 +100,8 @@ class FullInstrumentViewPresenter:
         self._view.set_integration_range_limits(self._model.integration_limits)
 
         self._view.show_axes()
-        self.update_plotter()
+        # Sync projection type and renderer with the view's default selection
+        self._on_projection_option_changed()
 
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
             self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_x_unit))
@@ -155,9 +158,16 @@ class FullInstrumentViewPresenter:
     def set_view_contour_limits(self) -> None:
         self._view.set_plotter_scalar_bar_range(self._model.counts_limits, self._counts_label)
 
-    def update_plotter(self) -> None:
+    def _on_projection_option_changed(self) -> None:
         """Update the projection based on the selected option."""
         self._model.projection_type = self._view.current_selected_projection()
+        self._view.set_show_shapes_checkbox_enabled(self._model.projection_type != ProjectionType.SIDE_BY_SIDE)
+        self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
+
+    def on_projection_option_changed(self) -> None:
+        self._callback_queue.put((self._on_projection_option_changed, ()))
+
+    def update_plotter(self) -> None:
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter()
             self.update_detector_picker()
@@ -188,6 +198,7 @@ class FullInstrumentViewPresenter:
         self._detector_mesh.transform(self._transform, inplace=True)
         self._pickable_mesh.transform(self._transform, inplace=True)
         self._masked_mesh.transform(self._transform, inplace=True)
+        self._renderer.transform_internal_meshes(self._transform)
         if monitor_mesh is not None:
             monitor_mesh.transform(self._transform, inplace=True)
 
@@ -421,9 +432,7 @@ class FullInstrumentViewPresenter:
             self._view.close()
             logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
         else:
-            self._reload_peaks_workspaces()
-            self._reload_mask_workspaces()
-            self._reload_grouping_workspaces()
+            self._reload_everything()
 
     def delete_workspace_callback(self, ws_name):
         self._callback_queue.put((self._delete_workspace_callback, (ws_name,)))
@@ -434,9 +443,7 @@ class FullInstrumentViewPresenter:
             self._model.setup()
             logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
 
-        self._reload_peaks_workspaces()
-        self._reload_mask_workspaces()
-        self._reload_grouping_workspaces()
+        self._reload_everything()
 
     def rename_workspace_callback(self, ws_old_name, ws_new_name):
         self._callback_queue.put((self._rename_workspace_callback, (ws_old_name, ws_new_name)))
@@ -459,6 +466,7 @@ class FullInstrumentViewPresenter:
                 return
             self._model._workspace = AnalysisDataService.retrieve(ws_name)
             self._model.setup()
+            self._clear_renderers()  # Clear cached renderers before rendering
             self.update_plotter()
 
     def replace_workspace_callback(self, ws_name, ws):
@@ -584,16 +592,36 @@ class FullInstrumentViewPresenter:
     def on_show_monitors_check_box_clicked(self) -> None:
         self.update_plotter()
 
+    def _get_point_cloud_renderer(self) -> PointCloudRenderer:
+        if self._point_cloud_renderer is None:
+            self._point_cloud_renderer = PointCloudRenderer()
+        return self._point_cloud_renderer
+
+    def _get_shape_renderer(self) -> ShapeRenderer:
+        if self._shape_renderer is None:
+            self._shape_renderer = ShapeRenderer()
+            self._shape_renderer.precompute(self._model.workspace)
+        return self._shape_renderer
+
     def _on_show_shapes_toggled(self, checked: bool) -> None:
         """Toggle between point-cloud and shape-based rendering."""
-        if checked:
-            if self._shape_renderer is None:
-                self._shape_renderer = ShapeRenderer()
-                self._shape_renderer.precompute(self._model.workspace)
-            self._renderer = self._shape_renderer
-        else:
-            self._renderer = PointCloudRenderer()
+        # Side-by-side always uses point cloud
+        if self._model.projection_type == ProjectionType.SIDE_BY_SIDE or not checked:
+            self._renderer = self._get_point_cloud_renderer()
+        elif checked:
+            self._renderer = self._get_shape_renderer()
+
         self.update_plotter()
 
     def on_show_shapes_toggled(self, checked: bool) -> None:
         self._callback_queue.put((self._on_show_shapes_toggled, (checked,)))
+
+    def _clear_renderers(self) -> None:
+        self._shape_renderer = None
+        self._point_cloud_renderer = None
+
+    def _reload_everything(self) -> None:
+        self._clear_renderers()  # Clear cached renderers before reloading
+        self._reload_peaks_workspaces()
+        self._reload_mask_workspaces()
+        self._reload_grouping_workspaces()

@@ -84,7 +84,7 @@ class PointCloudRenderer(InstrumentRenderer):
         )
 
     # --------------------------------------------------------------- picking
-    def enable_picking(self, plotter: BackgroundPlotter, is_2d: bool, callback: Callable) -> None:
+    def enable_picking(self, plotter: BackgroundPlotter, is_2d: bool, callback: Callable[[int], None]) -> None:
         """Set up point picking.  *callback* receives ``(detector_index: int)``."""
         plotter.disable_picking()
 

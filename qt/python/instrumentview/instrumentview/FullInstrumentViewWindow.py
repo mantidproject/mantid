@@ -343,6 +343,17 @@ class FullInstrumentViewWindow(QMainWindow):
     def is_show_shapes_checkbox_checked(self) -> bool:
         return self._show_shapes_check_box.isChecked()
 
+    def set_show_shapes_checkbox_enabled(self, enabled: bool) -> None:
+        """Enable or disable the 'Draw Shapes' checkbox."""
+        self._show_shapes_check_box.setEnabled(enabled)
+        if not enabled:
+            self._show_shapes_check_box.setToolTip("Shape rendering is not available for side-by-side projection.")
+        else:
+            self._show_shapes_check_box.setToolTip(
+                "If checked, detectors are drawn using their actual geometric shapes "
+                "(cuboids, cylinders, etc.) instead of points. May be slower for large instruments."
+            )
+
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
 
@@ -476,7 +487,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self.refresh_workspaces_in_list(CurrentTab.Grouping)
 
     def setup_connections_to_presenter(self) -> None:
-        self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
+        self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_changed)
         self._clear_point_picked_detectors.clicked.connect((self._presenter.on_clear_point_picked_detectors_clicked))
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)

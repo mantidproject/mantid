@@ -53,6 +53,12 @@ class ShapeRenderer(InstrumentRenderer):
         # Built during ``build_detector_mesh``:
         self._cell_to_detector: np.ndarray | None = None  # (total_cells,) → detector idx
         self._faces_per_detector: np.ndarray | None = None  # (N,)
+        # Surface highlight overlay for picked detectors
+        self._detector_mesh_ref: pv.PolyData | None = None
+        self._highlight_mesh: pv.PolyData | None = None
+        # Cache visibility data to restore after plotter is cleared
+        self._cached_visibility: np.ndarray | None = None
+        self._cached_visibility_label: str | None = None
 
     # -----------------------------------------------------------------
     # Pre-computation: fetch shape meshes and detector transforms once
@@ -137,6 +143,7 @@ class ShapeRenderer(InstrumentRenderer):
         mesh, c2d, fpd = self._assemble_mesh(indices, positions, flatten_2d=flatten_2d)
         self._cell_to_detector = c2d
         self._faces_per_detector = fpd
+        self._detector_mesh_ref = mesh
         return mesh
 
     def build_pickable_mesh(self, positions: np.ndarray, model=None) -> pv.PolyData:
@@ -184,10 +191,44 @@ class ShapeRenderer(InstrumentRenderer):
     def add_pickable_mesh_to_plotter(self, plotter: BackgroundPlotter, mesh: pv.PolyData, scalars) -> None:
         if mesh.number_of_points == 0:
             return
+
+        # --- Surface highlight overlay (shows full shape for picked detectors) ---
+        if self._detector_mesh_ref is not None and self._detector_mesh_ref.number_of_cells > 0:
+            self._highlight_mesh = self._detector_mesh_ref.copy(deep=True)
+
+            # Apply cached visibility if available, otherwise initialize to zero
+            if self._cached_visibility is not None and self._cached_visibility_label == scalars and self._cell_to_detector is not None:
+                self._highlight_mesh.cell_data[scalars] = self._cached_visibility[self._cell_to_detector]
+            else:
+                self._highlight_mesh.cell_data[scalars] = np.zeros(self._highlight_mesh.number_of_cells, dtype=np.float64)
+
+            # Use a custom colormap that's white at all scalar values
+            import matplotlib.colors as mcolors
+
+            cmap_white = mcolors.LinearSegmentedColormap.from_list("white", ["white", "white"])
+
+            actor = plotter.add_mesh(
+                self._highlight_mesh,
+                scalars=scalars,
+                opacity=[0.0, 1.0],
+                clim=[0, 1],
+                show_scalar_bar=False,
+                pickable=False,
+                cmap=cmap_white,
+                show_edges=True,
+                edge_color="cyan",
+                line_width=2,
+            )
+            # Polygon offset so highlight renders in front of the detector surface
+            mapper = actor.mapper
+            mapper.SetResolveCoincidentTopologyToPolygonOffset()
+            mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-1, -1)
+
+        # --- Invisible point cloud used only for picking ---
         plotter.add_mesh(
             mesh,
             scalars=scalars,
-            opacity=[0.0, 0.3],
+            opacity=[0.0, 0.0],
             clim=[0, 1],
             show_scalar_bar=False,
             pickable=True,
@@ -206,10 +247,7 @@ class ShapeRenderer(InstrumentRenderer):
             show_edges=False,
         )
 
-    # -----------------------------------------------------------------
-    # Picking
-    # -----------------------------------------------------------------
-    def enable_picking(self, plotter: BackgroundPlotter, is_2d: bool, callback: Callable) -> None:
+    def enable_picking(self, plotter: BackgroundPlotter, is_2d: bool, callback: Callable[[int], None]) -> None:
         """Set up point picking on the pickable overlay.  *callback* receives ``(detector_index: int)``."""
         plotter.disable_picking()
 
@@ -232,22 +270,30 @@ class ShapeRenderer(InstrumentRenderer):
             tolerance=0.01,
         )
 
-    # -----------------------------------------------------------------
-    # Scalars
-    # -----------------------------------------------------------------
     def set_detector_scalars(self, mesh: pv.PolyData, counts: np.ndarray, label: str) -> None:
-        if self._faces_per_detector is not None and len(counts) == len(self._faces_per_detector):
-            mesh.cell_data[label] = np.repeat(counts, self._faces_per_detector)
+        if self._cell_to_detector is not None and len(counts) > 0:
+            # _cell_to_detector[c] gives the detector index for cell c,
+            # accounting for the fact that cells are grouped by shape key
+            # rather than following detector index order.
+            mesh.cell_data[label] = counts[self._cell_to_detector]
         else:
             # Fallback: try assigning directly
             mesh.cell_data[label] = counts
 
     def set_pickable_scalars(self, mesh: pv.PolyData, visibility: np.ndarray, label: str) -> None:
         mesh.point_data[label] = visibility
+        # Cache visibility for when highlight mesh is recreated
+        self._cached_visibility = visibility
+        self._cached_visibility_label = label
+        # Propagate per-detector visibility to the surface highlight overlay
+        if self._highlight_mesh is not None and self._cell_to_detector is not None and len(visibility) > 0:
+            self._highlight_mesh.cell_data[label] = visibility[self._cell_to_detector]
 
-    # =================================================================
-    #  PRIVATE HELPERS
-    # =================================================================
+    def transform_internal_meshes(self, transform: np.ndarray) -> None:
+        """Apply *transform* to the highlight overlay so it stays aligned
+        with the detector surface after the presenter stretches meshes."""
+        if self._highlight_mesh is not None:
+            self._highlight_mesh.transform(transform, inplace=True)
 
     def _resolve_detector_indices(self, positions: np.ndarray, model, masked: bool) -> np.ndarray:
         """Return indices into ``self._all_positions_3d`` for the detectors

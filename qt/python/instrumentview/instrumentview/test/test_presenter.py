@@ -24,6 +24,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def setUp(self):
         self._mock_view = MagicMock()
         self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
+        self._mock_view.is_show_shapes_checkbox_checked.return_value = False
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter", EnableLogging=False)
         self._model = FullInstrumentViewModel(self._ws)
         with mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"):
@@ -39,9 +40,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
     def test_update_plotter(self, mock_set_peaks_ws):
-        self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_X
         self._presenter.update_plotter()
-        self.assertEqual(self._model.projection_type, ProjectionType.CYLINDRICAL_X)
+        self.assertEqual(self._model.projection_type, ProjectionType.CYLINDRICAL_Y)
         self._mock_view.clear_main_plotter.assert_called()
         mock_set_peaks_ws.assert_called_once()
 
@@ -473,6 +473,118 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._monitor_positions = [np.zeros(3)]
         self._presenter._create_and_add_monitor_mesh()
         self._mock_view.add_rgba_mesh.assert_called_once()
+
+    def test_get_point_cloud_renderer_lazy_initialization(self):
+        """Test that point cloud renderer is lazily initialized and cached."""
+        # Should already be initialized from __init__
+        renderer1 = self._presenter._get_point_cloud_renderer()
+        self.assertIsNotNone(renderer1)
+        # Second call should return the same cached instance
+        renderer2 = self._presenter._get_point_cloud_renderer()
+        self.assertIs(renderer1, renderer2)
+
+    def test_get_point_cloud_renderer_after_clear(self):
+        """Test that point cloud renderer is recreated after clearing."""
+        renderer1 = self._presenter._get_point_cloud_renderer()
+        self._presenter._clear_renderers()
+        renderer2 = self._presenter._get_point_cloud_renderer()
+        self.assertIsNot(renderer1, renderer2)
+
+    def test_get_shape_renderer_lazy_initialization(self):
+        """Test that shape renderer is lazily initialized with precomputation."""
+        self.assertIsNone(self._presenter._shape_renderer)
+        renderer1 = self._presenter._get_shape_renderer()
+        self.assertIsNotNone(renderer1)
+        self.assertIsNotNone(self._presenter._shape_renderer)
+        # Second call should return the same cached instance
+        renderer2 = self._presenter._get_shape_renderer()
+        self.assertIs(renderer1, renderer2)
+
+    def test_get_shape_renderer_after_clear(self):
+        """Test that shape renderer is recreated after clearing."""
+        renderer1 = self._presenter._get_shape_renderer()
+        self._presenter._clear_renderers()
+        renderer2 = self._presenter._get_shape_renderer()
+        self.assertIsNot(renderer1, renderer2)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_show_shapes_toggled_enable_shapes(self, mock_update_plotter):
+        """Test that enabling shapes switches to ShapeRenderer."""
+        self._model.projection_type = ProjectionType.CYLINDRICAL_Y
+        initial_renderer = self._presenter._renderer
+        self._presenter._on_show_shapes_toggled(checked=True)
+        # Should switch to shape renderer
+        self.assertIsNot(self._presenter._renderer, initial_renderer)
+        self.assertIsInstance(self._presenter._renderer, object)  # ShapeRenderer
+        mock_update_plotter.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_show_shapes_toggled_disable_shapes(self, mock_update_plotter):
+        """Test that disabling shapes switches to PointCloudRenderer."""
+        self._model.projection_type = ProjectionType.CYLINDRICAL_Y
+        self._presenter._on_show_shapes_toggled(checked=True)
+        shape_renderer = self._presenter._renderer
+        mock_update_plotter.reset_mock()
+        self._presenter._on_show_shapes_toggled(checked=False)
+        # Should switch back to point cloud renderer
+        self.assertIsNot(self._presenter._renderer, shape_renderer)
+        mock_update_plotter.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_show_shapes_toggled_side_by_side_forces_point_cloud(self, mock_update_plotter):
+        """Test that side-by-side projection always uses point cloud regardless of checkbox."""
+        self._model.projection_type = ProjectionType.SIDE_BY_SIDE
+        point_cloud_renderer = self._presenter._renderer
+        self._presenter._on_show_shapes_toggled(checked=True)
+        self.assertIs(self._presenter._renderer, point_cloud_renderer)
+        mock_update_plotter.assert_called_once()
+
+    def test_clear_renderers(self):
+        """Test that _clear_renderers nulls both cached renderers."""
+        # Initialize both renderers
+        self._presenter._get_point_cloud_renderer()
+        self._presenter._get_shape_renderer()
+        self.assertIsNotNone(self._presenter._point_cloud_renderer)
+        self.assertIsNotNone(self._presenter._shape_renderer)
+        self._presenter._clear_renderers()
+        self.assertIsNone(self._presenter._point_cloud_renderer)
+        self.assertIsNone(self._presenter._shape_renderer)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_projection_option_changed_syncs_model(self, mock_update_plotter):
+        """Test that changing projection updates model and enables/disables shapes checkbox."""
+        self._mock_view.current_selected_projection.return_value = ProjectionType.SPHERICAL_X
+        self._mock_view.is_show_shapes_checkbox_checked.return_value = False
+        self._presenter._on_projection_option_changed()
+        self.assertEqual(self._model.projection_type, ProjectionType.SPHERICAL_X)
+        self._mock_view.set_show_shapes_checkbox_enabled.assert_called_once_with(True)
+        mock_update_plotter.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_projection_option_changed_side_by_side_disables_checkbox(self, mock_update_plotter):
+        """Test that side-by-side projection disables the shapes checkbox."""
+        self._mock_view.current_selected_projection.return_value = ProjectionType.SIDE_BY_SIDE
+        self._mock_view.is_show_shapes_checkbox_checked.return_value = False
+        self._presenter._on_projection_option_changed()
+        self.assertEqual(self._model.projection_type, ProjectionType.SIDE_BY_SIDE)
+        self._mock_view.set_show_shapes_checkbox_enabled.assert_called_once_with(False)
+        self.assertIs(self._presenter._renderer, self._presenter._point_cloud_renderer)
+        mock_update_plotter.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_renderer_reuse_on_toggle(self, mock_update_plotter):
+        """Test that renderers are reused when toggling shapes on and off."""
+        self._model.projection_type = ProjectionType.CYLINDRICAL_Y
+        pc_renderer1 = self._presenter._renderer
+        self._presenter._on_show_shapes_toggled(checked=True)
+        shape_renderer1 = self._presenter._renderer
+        self._presenter._on_show_shapes_toggled(checked=False)
+        pc_renderer2 = self._presenter._renderer
+        self._presenter._on_show_shapes_toggled(checked=True)
+        shape_renderer2 = self._presenter._renderer
+        # Should reuse cached instances
+        self.assertIs(pc_renderer1, pc_renderer2)
+        self.assertIs(shape_renderer1, shape_renderer2)
 
 
 if __name__ == "__main__":
