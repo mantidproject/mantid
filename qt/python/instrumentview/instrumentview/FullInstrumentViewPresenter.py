@@ -159,7 +159,11 @@ class FullInstrumentViewPresenter:
         self._view.set_plotter_scalar_bar_range(self._model.counts_limits, self._counts_label)
 
     def _on_projection_option_changed(self) -> None:
-        """Update the projection based on the selected option."""
+        """Update the projection, enable/disable shapes checkbox, and select appropriate renderer.
+
+        Side-by-side projection always disables the shapes checkbox and forces point cloud rendering.
+        Other projections allow the user to toggle between renderers.
+        """
         self._model.projection_type = self._view.current_selected_projection()
         self._view.set_show_shapes_checkbox_enabled(self._model.projection_type != ProjectionType.SIDE_BY_SIDE)
         self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
@@ -593,14 +597,30 @@ class FullInstrumentViewPresenter:
         self.update_plotter()
 
     def _get_point_cloud_renderer(self) -> PointCloudRenderer:
+        """Get or create the cached point cloud renderer instance.
+
+        Returns
+        -------
+        PointCloudRenderer
+            The cached renderer, creating it if necessary.
+        """
         if self._point_cloud_renderer is None:
             self._point_cloud_renderer = PointCloudRenderer()
         return self._point_cloud_renderer
 
     def _get_shape_renderer(self) -> ShapeRenderer:
-        if self._shape_renderer is None:
-            self._shape_renderer = ShapeRenderer()
-            self._shape_renderer.precompute(self._model.workspace)
+        """Get or create the cached shape renderer instance.
+
+        On first call, precomputes geometry from the workspace which may be expensive.
+        Subsequent calls return the cached instance.
+
+        Returns
+        -------
+        ShapeRenderer
+            The cached renderer, creating and precomputing it if necessary.
+        """
+        self._shape_renderer = ShapeRenderer()
+        self._shape_renderer.precompute(self._model.workspace)
         return self._shape_renderer
 
     def _on_show_shapes_toggled(self, checked: bool) -> None:
@@ -617,10 +637,19 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_show_shapes_toggled, (checked,)))
 
     def _clear_renderers(self) -> None:
+        """Clear cached renderer instances, forcing recreation on next use.
+
+        Called when the workspace changes to ensure renderers recompute geometry
+        from the new workspace data.
+        """
         self._shape_renderer = None
         self._point_cloud_renderer = None
 
     def _reload_everything(self) -> None:
+        """Reload all workspace-dependent data (peaks, masks, groupings) and clear renderer cache.
+
+        Called when workspaces are added to or removed from the ADS.
+        """
         self._clear_renderers()  # Clear cached renderers before reloading
         self._reload_peaks_workspaces()
         self._reload_mask_workspaces()
