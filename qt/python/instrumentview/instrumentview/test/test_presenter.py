@@ -118,9 +118,10 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_has_unit.assert_called_once()
         self.assertEqual(self._presenter._UNIT_OPTIONS, units)
 
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._setup_component_tree")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.AnalysisDataService")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
-    def test_model_refresh_on_correct_ws_replace(self, mock_update_plotter, mock_ads):
+    def test_model_refresh_on_correct_ws_replace(self, mock_update_plotter, mock_ads, mock_setup_component_tree):
         mock_ads_retrieve = MagicMock()
         mock_ads.retrieve.return_value = mock_ads_retrieve
         self._model.setup = MagicMock()
@@ -128,6 +129,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_ads_retrieve.name.return_value = ws_name
         self._presenter._replace_workspace_callback(ws_name, None)
         self._model.setup.assert_called_once()
+        mock_setup_component_tree.assert_called_once()
         mock_update_plotter.assert_called_once()
         self._mock_view.setup.reset_mock()
         mock_update_plotter.reset_mock()
@@ -140,6 +142,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._workspace_indices = np.array([0, 1, 2])
         self._model._is_valid = np.array([True, True, True])
         self._model._is_masked = np.array([False, False, False])
+        self._model._is_selected_in_tree = np.array([True, True, True])
         self._model._detector_is_picked = np.array([True, True, False])
         self._model._detector_ids = np.array([1, 2, 3])
         self._model.picked_detectors_info_text = MagicMock(return_value=["a", "a"])
@@ -203,6 +206,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._spectrum_nos = np.array([50, 52])
         self._model._is_valid = np.array([True, True])
         self._model._is_masked = np.array([False, False])
+        self._model._is_selected_in_tree = np.array([True, True])
         self._presenter.on_peaks_workspace_selected()
         mock_refresh_lineplot_peaks.assert_called_once()
         self._mock_view.clear_overlay_meshes.assert_called_once()

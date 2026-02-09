@@ -92,6 +92,11 @@ requirements:
         # Development tooling:
         - gcovr>=4.2
         - mantidprofiler>=1.4,<2
+        # MPI Support
+        - mpi
+        - mpi4py
+        - libboost-mpi
+        - mpich
     - if: win
       then:
         - conda-wrappers

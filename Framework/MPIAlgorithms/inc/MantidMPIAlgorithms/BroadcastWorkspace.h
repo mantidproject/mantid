@@ -38,7 +38,7 @@ public:
   /// Algorithm's version
   int version() const override { return 1; }
   /// @copydoc Algorithm::summary
-  const std::string summary() const override { return "Copy a workspace from one process to all the others."; }
+  const std::string summary() const override { return "Copy a workspace from one MPI process to all the others."; }
   /// Algorithm's category for identification
   const std::string category() const override { return "MPI"; }
 

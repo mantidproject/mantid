@@ -19,7 +19,7 @@ namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace API;
 
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadMcStasNexus)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStasNexus)
 
 LoadMcStasNexus::LoadMcStasNexus() {
   useAlgorithm("LoadMcStas");
