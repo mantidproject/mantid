@@ -185,7 +185,6 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
                                                                           const Kernel::InstrumentInfo &instr) const {
   g_log.debug() << "toInstrumentAndNumber(" << hint << ")\n";
   std::string runPart;
-  std::string instrPart = instr.shortName();
 
   if (hint.empty()) {
     throw std::invalid_argument("Malformed hint: empty hint");
@@ -194,6 +193,15 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
   if (isdigit(hint[0])) {
     runPart = hint;
   } else {
+    const auto hintUpper = toUpper(hint);
+    std::string instrPart = instr.name();
+    if (!hintUpper.starts_with(instrPart)) {
+      instrPart = instr.shortName();
+      if (!hintUpper.starts_with(instrPart)) {
+        throw std::invalid_argument("Malformed hint: does not start with instrument name or short name");
+      }
+    }
+
     // need to advance to the first digit after the instrument name to handle underscores, etc.
     size_t nChars = instrPart.length();
     while (nChars < hint.size() && !std::isdigit(static_cast<unsigned char>(hint[nChars])))
@@ -221,9 +229,7 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
     throw std::invalid_argument("Run number does not match instrument's zero padding");
   }
 
-  instrPart = instr.filePrefix(irunPart);
-
-  return std::make_pair(instrPart, runPart);
+  return std::make_pair(instr.filePrefix(irunPart), runPart);
 }
 
 /**
