@@ -201,6 +201,28 @@ public:
     TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument().name(), "OSIRIS");
   }
 
+  void testFindLongestInstrumentPrefix() {
+    // Set a default facility
+    ConfigService::Instance().setFacility("SNS");
+
+    // Check that we can find the longest matching prefix for some hints
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("BASIS"), "BASIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("BASIS123"), "BASIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("BSS"), "BSS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("BSS123"), "BSS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("MAR"), "MAR");
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("MAR123"), "MAR");
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("PG3"), "PG3");
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("PG3123"), "PG3");
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("OSI"), "OSI");
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("OSI123"), "OSI");
+
+    // Check that we return an empty string if there is no match
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("BS"), "");
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("AAA"), "");
+    TS_ASSERT_EQUALS(ConfigService::Instance().findLongestInstrumentPrefix("XYZ"), "");
+  }
+
   void testSystemValues() {
     // we cannot test the return values here as they will differ based on the
     // environment.
