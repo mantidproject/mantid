@@ -109,6 +109,13 @@ class WorkspaceListWidget(QListWidget):
         event.acceptProposedAction()
 
 
+class NoWheelComboBox(QComboBox):
+    """QComboBox that ignores mouse wheel events unless it has focus."""
+
+    def wheelEvent(self, event):
+        event.ignore()
+
+
 @run_on_qapp_thread()
 class FullInstrumentViewWindow(QMainWindow):
     """View for the Instrument View window. Contains the 3D view, the projection view, boxes showing information about the selected
@@ -196,7 +203,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         projection_group_box = QGroupBox("Projection")
         projection_layout = QHBoxLayout(projection_group_box)
-        self._projection_combo_box = QComboBox(self)
+        self._projection_combo_box = NoWheelComboBox(self)
         self._reset_projection = QPushButton("Reset Projection")
         self._reset_projection.setToolTip("Resets the projection to default.")
         self._reset_projection.clicked.connect(self.reset_camera)
@@ -561,7 +568,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def _setup_units_options(self, parent: QVBoxLayout):
         """Add widgets for the units options"""
-        self._units_combo_box = QComboBox(self)
+        self._units_combo_box = NoWheelComboBox(self)
         self._units_combo_box.setToolTip("Select the units for the spectra line plot")
         parent.addWidget(self._units_combo_box)
         hBox = QHBoxLayout()
