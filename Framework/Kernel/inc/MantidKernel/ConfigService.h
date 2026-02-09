@@ -213,8 +213,8 @@ public:
   /// Look for an instrument
   const InstrumentInfo &getInstrument(const std::string &instrumentName = "") const;
 
-  const std::vector<std::string> getInstrumentNames() const;
-  const std::vector<std::string> getInstrumentShortNames() const;
+  // Find the longest matching instrument prefix for the given hint.
+  const std::string findLongestInstrumentPrefix(const std::string &hint) const;
 
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver &observer) const;
@@ -300,12 +300,9 @@ private:
   /// whether the proxy has been populated yet
   bool m_isProxySet = false;
 
-  /// Cache for instrument names
-  mutable std::vector<std::string> m_instrumentNamesCache;
-  mutable bool m_isInstrumentNamesCached = false;
-  /// Cache for instrument short names
-  mutable std::vector<std::string> m_instrumentShortNamesCache;
-  mutable bool m_isInstrumentShortNamesCached = false;
+  // cache for longest matching instrument prefix
+  mutable std::vector<std::string> m_instrumentPrefixesCache;
+  mutable bool m_isInstrumentPrefixesCached = false;
 };
 
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;

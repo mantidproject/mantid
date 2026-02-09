@@ -144,25 +144,7 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint, c
     std::string filename = toUpper(std::filesystem::path(hint).filename().string());
 
     try {
-      std::string instrName;
-
-      // try full name first
-      {
-        const auto &names = Kernel::ConfigService::Instance().getInstrumentNames();
-        auto it = std::find_if(names.begin(), names.end(),
-                               [&](const std::string &name) { return filename.starts_with(name); });
-        if (it != names.end())
-          instrName = *it;
-      }
-
-      // try short name next
-      if (instrName.empty()) {
-        const auto &shortNames = Kernel::ConfigService::Instance().getInstrumentShortNames();
-        auto it = std::find_if(shortNames.begin(), shortNames.end(),
-                               [&](const std::string &shortName) { return filename.starts_with(shortName); });
-        if (it != shortNames.end())
-          instrName = *it;
-      }
+      std::string instrName = Kernel::ConfigService::Instance().findLongestInstrumentPrefix(filename);
 
       // if still empty, throw not found
       if (instrName.empty()) {

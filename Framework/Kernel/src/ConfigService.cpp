@@ -1797,10 +1797,8 @@ void ConfigServiceImpl::clearFacilities() {
     delete facility;
   }
   m_facilities.clear();
-  m_instrumentNamesCache.clear();
-  m_isInstrumentNamesCached = false;
-  m_instrumentShortNamesCache.clear();
-  m_isInstrumentShortNamesCached = false;
+  m_instrumentPrefixesCache.clear();
+  m_isInstrumentPrefixesCached = false;
 }
 
 /**
@@ -1840,35 +1838,47 @@ const InstrumentInfo &ConfigServiceImpl::getInstrument(const std::string &instru
   throw Exception::NotFoundError(errMsg, instrumentName);
 }
 
-const std::vector<std::string> ConfigServiceImpl::getInstrumentNames() const {
-  if (m_isInstrumentNamesCached) {
-    return m_instrumentNamesCache;
-  }
-  std::vector<std::string> names;
-  for (const auto &facility : m_facilities) {
-    const auto &insts = facility->instruments();
-    std::transform(insts.cbegin(), insts.cend(), std::back_inserter(names),
-                   [](const auto &inst) { return inst.name(); });
-  }
-  m_instrumentNamesCache = names;
-  m_isInstrumentNamesCached = true;
-  return m_instrumentNamesCache;
-}
+const std::string ConfigServiceImpl::findLongestInstrumentPrefix(const std::string &hint) const {
+  if (!m_isInstrumentPrefixesCached) {
+    std::vector<std::string> names;
 
-const std::vector<std::string> ConfigServiceImpl::getInstrumentShortNames() const {
-  if (m_isInstrumentShortNamesCached) {
-    return m_instrumentShortNamesCache;
-  }
-  std::vector<std::string> names;
-  for (const auto &facility : m_facilities) {
-    const auto &insts = facility->instruments();
-    std::transform(insts.cbegin(), insts.cend(), std::back_inserter(names),
-                   [](const auto &inst) { return inst.shortName(); });
+    for (const auto &facility : m_facilities) {
+      const auto &insts = facility->instruments();
+      for (const auto &inst : insts) {
+        names.emplace_back(inst.shortName());
+        names.emplace_back(inst.name());
+      }
+    }
+
+    std::sort(names.begin(), names.end());
+    const auto last = std::unique(names.begin(), names.end());
+    names.erase(last, names.end());
+    m_instrumentPrefixesCache = std::move(names);
+    m_isInstrumentPrefixesCached = true;
   }
 
-  m_instrumentShortNamesCache = names;
-  m_isInstrumentShortNamesCached = true;
-  return m_instrumentShortNamesCache;
+  std::string longestPrefix;
+  // Binary search for the hint in the list of instrument prefixes. Since this is a sorted list the longest prefix will
+  // be found by searching backwards from the insertion point.
+  const auto match = std::upper_bound(m_instrumentPrefixesCache.cbegin(), m_instrumentPrefixesCache.cend(), hint);
+  if (match != m_instrumentPrefixesCache.cbegin()) {
+    auto it = std::prev(match);
+    while (true) {
+      if (hint.starts_with(*it)) {
+        longestPrefix = *it;
+        break;
+      }
+      if ((*it)[0] != hint[0]) {
+        break;
+      }
+      if (it == m_instrumentPrefixesCache.cbegin()) {
+        break;
+      }
+      it = std::prev(it);
+    }
+  }
+
+  return longestPrefix;
 }
 
 /** Gets a vector of the facility Information objects
