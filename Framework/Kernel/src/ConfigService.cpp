@@ -125,8 +125,7 @@ const std::string LOG_LEVEL_KEY("logging.loggers.root.level");
 ConfigServiceImpl::ConfigServiceImpl()
     : m_pConf(nullptr), m_pSysConfig(new Poco::Util::SystemConfiguration()), m_changed_keys(), m_strBaseDir(""),
       m_propertyString(""), m_properties_file_name("Mantid.properties"),
-      m_user_properties_file_name("Mantid.user.properties"), m_dataSearchDirs(), m_instrumentDirs(), m_proxyInfo(),
-      m_isProxySet(false) {
+      m_user_properties_file_name("Mantid.user.properties"), m_dataSearchDirs(), m_instrumentDirs(), m_proxyInfo() {
   // Register StdChannel with Poco
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
       "StdoutChannel", new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
@@ -1798,6 +1797,8 @@ void ConfigServiceImpl::clearFacilities() {
     delete facility;
   }
   m_facilities.clear();
+  m_instrumentPrefixesCache.clear();
+  m_isInstrumentPrefixesCached = false;
 }
 
 /**
@@ -1835,6 +1836,49 @@ const InstrumentInfo &ConfigServiceImpl::getInstrument(const std::string &instru
   const std::string errMsg = "Failed to find an instrument with this name in any facility: '" + instrumentName + "' -";
   g_log.debug("Instrument " + instrumentName + " not found");
   throw Exception::NotFoundError(errMsg, instrumentName);
+}
+
+const std::string ConfigServiceImpl::findLongestInstrumentPrefix(const std::string &hint) const {
+  if (!m_isInstrumentPrefixesCached) {
+    std::vector<std::string> names;
+
+    for (const auto &facility : m_facilities) {
+      const auto &insts = facility->instruments();
+      for (const auto &inst : insts) {
+        names.emplace_back(inst.shortName());
+        names.emplace_back(inst.name());
+      }
+    }
+
+    std::sort(names.begin(), names.end());
+    const auto last = std::unique(names.begin(), names.end());
+    names.erase(last, names.end());
+    m_instrumentPrefixesCache = std::move(names);
+    m_isInstrumentPrefixesCached = true;
+  }
+
+  std::string longestPrefix;
+  // Binary search for the hint in the list of instrument prefixes. Since this is a sorted list the longest prefix will
+  // be found by searching backwards from the insertion point.
+  const auto match = std::upper_bound(m_instrumentPrefixesCache.cbegin(), m_instrumentPrefixesCache.cend(), hint);
+  if (match != m_instrumentPrefixesCache.cbegin()) {
+    auto it = std::prev(match);
+    while (true) {
+      if (hint.starts_with(*it)) {
+        longestPrefix = *it;
+        break;
+      }
+      if ((*it)[0] != hint[0]) {
+        break;
+      }
+      if (it == m_instrumentPrefixesCache.cbegin()) {
+        break;
+      }
+      it = std::prev(it);
+    }
+  }
+
+  return longestPrefix;
 }
 
 /** Gets a vector of the facility Information objects
