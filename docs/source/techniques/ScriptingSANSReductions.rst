@@ -183,7 +183,7 @@ SetPhiLimit
     SetPhiLimit(phimin, phimax, use_mirror=True)
 
 Call this function to restrict the analysis to sectors of the detector.
-``Phimin`` and ``phimax`` define the limits of the sector where ``phi=0`` is the x-axis and ``phi=90`` is the y-axis.
+``phimin`` and ``phimax`` define the limits of the sector where ``phi=0`` is the x-axis and ``phi=90`` is the y-axis.
 Setting ``use_mirror`` to true causes the mirror sector to be included.
 
 .. _SANSScriptingWavRangeReduction:
@@ -267,5 +267,17 @@ The ``isOverlay`` flag determines if the times of the events and sample logs sho
 This is only applied if ``saveAsEvent`` was selected.
 The ``time_shifts`` variable is a list of additional time shifts which will be applied if ``isOverlay`` is selected.
 *Note that there has to be exactly one less time time shift than files to be added.*
+
+
+PhiRanges
+^^^^^^^^^
+
+.. code-block :: python
+
+    PhiRanges(phis, use_mirror=True, plot=False):
+
+Takes a list of phi ranges (``phis``) either as a list [a, b, c, d] or comma-separated string of number "a,b,c,d".
+It reduces in the phi ranges a-b and c-d. This is equivalent to combining ``setPhiLimit`` and then calling ``WavRangeReduction`` for
+multiple phi limits. ``use_mirror`` selects whether to use the mirror for each phi mask, and ``plot`` is not yet implemented.
 
 .. categories:: Techniques
