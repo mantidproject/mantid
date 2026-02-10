@@ -554,13 +554,13 @@ void AnvredCorrection::scale_init(const Instrument_const_sptr &inst, const Compo
                                   const double L2, const double depth, double &pathlength,
                                   const std::string &bankName) {
   // Distance to center of detector
-  std::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
+  const IComponent *det0 = inst->getComponentByName(bankName).get();
   if ("CORELLI" == inst->getName()) // for Corelli with sixteenpack under bank
   {
     const size_t bankIndex = componentInfo.indexOfAny(bankName);
     const auto children = componentInfo.children(bankIndex);
     if (!children.empty()) {
-      det0 = componentInfo.componentID(children[0])->shared_from_this();
+      det0 = componentInfo.componentID(children[0]);
     }
   }
   IComponent_const_sptr sample = inst->getSample();
