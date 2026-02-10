@@ -19,6 +19,7 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidIndexing/IndexInfo.h"
@@ -1376,18 +1377,14 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
     }
     if (!keep) {
       std::shared_ptr<const IComponent> parent = inst->getComponentByName(det_name);
-      std::vector<Geometry::IComponent_const_sptr> children;
-      std::shared_ptr<const Geometry::ICompAssembly> asmb =
-          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-      asmb->getChildren(children, false);
-      for (auto &col : children) {
-        std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-            std::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
-        std::vector<Geometry::IComponent_const_sptr> grandchildren;
-        asmb2->getChildren(grandchildren, false);
+      const auto &componentInfo = workspace->componentInfo();
+      const size_t parentIndex = componentInfo.indexOfAny(det_name);
+      const auto children = componentInfo.children(parentIndex);
+      for (const auto &colIndex : children) {
+        const auto grandchildren = componentInfo.children(colIndex);
 
-        for (auto &row : grandchildren) {
-          auto *d = dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
+        for (const auto &rowIndex : grandchildren) {
+          auto *d = dynamic_cast<Detector *>(const_cast<IComponent *>(componentInfo.componentID(rowIndex)));
           if (d)
             inst->removeDetector(d);
         }
