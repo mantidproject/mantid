@@ -32,6 +32,8 @@
 
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include "MantidAPI/AlgoTimeRegister.h"
+
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
@@ -1116,9 +1118,13 @@ bool MatrixWorkspace::isHistogramDataByIndex(const std::size_t index) const {
  *  @return whether the workspace contains common X bins
  */
 bool MatrixWorkspace::isCommonBins() const {
+  auto begin = std::chrono::high_resolution_clock::now();
+  Instrumentation::AlgoTimeRegister::Instance();
   std::lock_guard<std::mutex> lock{m_isCommonBinsMutex};
   const bool isFlagValid{m_isCommonBinsFlagValid.exchange(true)};
   if (isFlagValid) {
+    auto end = std::chrono::high_resolution_clock::now();
+    Instrumentation::AlgoTimeRegister::Instance().addTime("isCommonBinsCache", begin, end);
     return m_isCommonBinsFlag;
   }
   m_isCommonBinsFlag = true;
@@ -1139,6 +1145,8 @@ bool MatrixWorkspace::isCommonBins() const {
 
   // If true, we may return here.
   if (m_isCommonBinsFlag) {
+    auto end = std::chrono::high_resolution_clock::now();
+    Instrumentation::AlgoTimeRegister::Instance().addTime("isCommonBinsComPtr", begin, end);
     return m_isCommonBinsFlag;
   }
 
@@ -1148,6 +1156,8 @@ bool MatrixWorkspace::isCommonBins() const {
   for (size_t i = 1; i < numHist; ++i) {
     if (x(i).size() != numBins) {
       m_isCommonBinsFlag = false;
+      auto end = std::chrono::high_resolution_clock::now();
+      Instrumentation::AlgoTimeRegister::Instance().addTime("isCommonBinsSize", begin, end);
       return m_isCommonBinsFlag;
     }
   }
@@ -1176,6 +1186,8 @@ bool MatrixWorkspace::isCommonBins() const {
       }
     }
   }
+  auto end = std::chrono::high_resolution_clock::now();
+  Instrumentation::AlgoTimeRegister::Instance().addTime("isCommonBinsValues", begin, end);
   return m_isCommonBinsFlag;
 }
 
