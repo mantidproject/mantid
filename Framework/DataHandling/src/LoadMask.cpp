@@ -374,7 +374,6 @@ void LoadMask::processMaskOnDetectors(const detid2index_map &indexmap, bool toma
  *provided as input.
  */
 void LoadMask::componentToDetectors(const std::vector<std::string> &componentnames, std::vector<detid_t> &detectors) {
-  Geometry::Instrument_const_sptr minstrument = m_maskWS->getInstrument();
   const auto &componentInfo = m_maskWS->componentInfo();
   const auto &detectorInfo = m_maskWS->detectorInfo();
 
@@ -430,12 +429,12 @@ void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks, std:
   }
   g_log.debug(infoss.str());
 
-  Geometry::Instrument_const_sptr minstrument = m_maskWS->getInstrument();
+  Geometry::Instrument_const_sptr instrument = m_maskWS->getInstrument();
 
   for (auto &singlebank : singlebanks) {
     std::vector<Geometry::IDetector_const_sptr> idetectors;
 
-    minstrument->getDetectorsInBank(idetectors, singlebank);
+    instrument->getDetectorsInBank(idetectors, singlebank);
     g_log.debug() << "Bank: " << singlebank << " has " << idetectors.size() << " detectors\n";
 
     // a) get information
