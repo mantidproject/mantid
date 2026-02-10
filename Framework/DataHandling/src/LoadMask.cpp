@@ -12,6 +12,8 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
@@ -373,45 +375,40 @@ void LoadMask::processMaskOnDetectors(const detid2index_map &indexmap, bool toma
  */
 void LoadMask::componentToDetectors(const std::vector<std::string> &componentnames, std::vector<detid_t> &detectors) {
   Geometry::Instrument_const_sptr minstrument = m_maskWS->getInstrument();
+  const auto &componentInfo = m_maskWS->componentInfo();
+  const auto &detectorInfo = m_maskWS->detectorInfo();
 
   for (auto &componentname : componentnames) {
     g_log.debug() << "Component name = " << componentname << '\n';
 
-    // a) get component
-    Geometry::IComponent_const_sptr component = minstrument->getComponentByName(componentname);
-    if (component)
-      g_log.debug() << "Component ID = " << component->getComponentID() << '\n';
-    else {
+    // a) get component index
+    size_t componentIndex;
+    try {
+      componentIndex = componentInfo.indexOfAny(componentname);
+      g_log.debug() << "Component ID = " << componentInfo.componentID(componentIndex) << '\n';
+    } catch (const std::exception &) {
       // A non-exiting component.  Ignore
       g_log.warning() << "Component " << componentname << " does not exist!\n";
       continue;
     }
 
-    // b) component -> component assembly --> children (more than detectors)
-    std::shared_ptr<const Geometry::ICompAssembly> asmb =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
-    std::vector<Geometry::IComponent_const_sptr> children;
-    asmb->getChildren(children, true);
+    // b) get all detectors in the subtree of this component
+    const auto detectorIndices = componentInfo.detectorsInSubtree(componentIndex);
 
-    g_log.debug() << "Number of Children = " << children.size() << '\n';
+    g_log.debug() << "Number of Children = " << detectorIndices.size() << '\n';
 
     size_t numdets(0);
     detid_t id_min(std::numeric_limits<Mantid::detid_t>::max());
     detid_t id_max(0);
 
-    for (const auto &child : children) {
-      // c) convert component to detector
-      Geometry::IDetector_const_sptr det = std::dynamic_pointer_cast<const Geometry::IDetector>(child);
-
-      if (det) {
-        detid_t detid = det->getID();
-        detectors.emplace_back(detid);
-        numdets++;
-        if (detid < id_min)
-          id_min = detid;
-        if (detid > id_max)
-          id_max = detid;
-      }
+    for (const auto &detIndex : detectorIndices) {
+      detid_t detid = detectorInfo.detectorIDs()[detIndex];
+      detectors.emplace_back(detid);
+      numdets++;
+      if (detid < id_min)
+        id_min = detid;
+      if (detid > id_max)
+        id_max = detid;
     }
 
     g_log.debug() << "Number of Detectors in Children = " << numdets << "  Range = " << id_min << ", " << id_max

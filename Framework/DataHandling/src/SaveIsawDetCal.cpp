@@ -11,6 +11,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 
@@ -80,12 +81,10 @@ void SaveIsawDetCal::exec() {
 
   std::set<int> uniqueBanks;
   if (bankNames.empty()) {
-    // Get all children
-    std::vector<IComponent_const_sptr> comps;
-    inst->getChildren(comps, true);
-
-    for (auto &comp : comps) {
-      std::string bankName = comp->getName();
+    // Get all components using ComponentInfo
+    const auto &componentInfo = ws->componentInfo();
+    for (size_t i = 0; i < componentInfo.size(); ++i) {
+      std::string bankName = componentInfo.name(i);
       boost::trim(bankName);
       boost::erase_all(bankName, bankPart);
       int bank = 0;
