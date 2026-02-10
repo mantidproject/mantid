@@ -11,7 +11,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_MIRROR="$("${SCRIPT_DIR}/data_mirrors")"
 REPO_ROOT_DIR=$SCRIPT_DIR/../..
 SHA1=$(git -C "$REPO_ROOT_DIR" rev-parse HEAD) # full sha for this source repository
-SHA1_SHORT=$(git -C "$REPO_ROOT_DIR" rev-parse --short HEAD) # full sha for this source repository
 
 # source util functions
 . source/buildconfig/Jenkins/Conda/pixi-utils
