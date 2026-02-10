@@ -276,8 +276,8 @@ PhiRanges
 
     PhiRanges(phis, use_mirror=True, plot=False):
 
-Takes a list of phi ranges (``phis``) either as a list [a, b, c, d] or comma-separated string of number "a,b,c,d".
-It reduces in the phi ranges a-b and c-d. This is equivalent to combining ``setPhiLimit`` and then calling ``WavRangeReduction`` for
-multiple phi limits. ``use_mirror`` selects whether to use the mirror for each phi mask, and ``plot`` is not yet implemented.
+Takes a list of phi ranges (``phis``) either as a list [a, b, c, d] or comma-separated string of numbers "a,b,c,d".
+It reduces in the phi ranges a-b and c-d. This is equivalent to combining ``SetPhiLimit`` and then calling ``WavRangeReduction`` for
+multiple phi limits. ``use_mirror`` selects whether to use the mirror for each phi mask. ``plot`` is not yet implemented.
 
 .. categories:: Techniques
