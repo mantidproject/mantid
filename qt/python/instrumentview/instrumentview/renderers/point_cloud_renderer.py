@@ -28,7 +28,7 @@ class PointCloudRenderer(InstrumentRenderer):
     def build_detector_mesh(self, positions: np.ndarray, model=None) -> pv.PolyData:
         return pv.PolyData(positions)
 
-    def build_pickable_mesh(self, positions: np.ndarray, model=None) -> pv.PolyData:
+    def build_pickable_mesh(self, positions: np.ndarray) -> pv.PolyData:
         return pv.PolyData(positions)
 
     def build_masked_mesh(self, positions: np.ndarray, model=None) -> pv.PolyData:
@@ -84,7 +84,7 @@ class PointCloudRenderer(InstrumentRenderer):
         )
 
     # --------------------------------------------------------------- picking
-    def enable_picking(self, plotter: BackgroundPlotter, is_2d: bool, callback: Callable[[int], None]) -> None:
+    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None]) -> None:
         """Set up point picking.  *callback* receives ``(detector_index: int)``."""
         plotter.disable_picking()
 

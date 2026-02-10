@@ -196,7 +196,7 @@ class FullInstrumentViewPresenter:
             self._view.main_plotter, self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label
         )
 
-        self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions, self._model)
+        self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions)
         renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
         renderer.add_pickable_mesh_to_plotter(self._view.main_plotter, self._pickable_mesh, scalars=self._visible_label)
 
@@ -287,7 +287,7 @@ class FullInstrumentViewPresenter:
             self._model.update_point_picked_detectors(detector_index)
             self.update_picked_detectors_on_view()
 
-        self._renderer.enable_picking(self._view.main_plotter, self._model.is_2d_projection, callback=detector_picked)
+        self._renderer.enable_picking(self._view.main_plotter, callback=detector_picked)
 
     def update_picked_detectors_on_view(self) -> None:
         # Update to visibility shows up in real time

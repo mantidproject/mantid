@@ -146,7 +146,7 @@ class ShapeRenderer(InstrumentRenderer):
         self._detector_mesh_ref = mesh
         return mesh
 
-    def build_pickable_mesh(self, positions: np.ndarray, model=None) -> pv.PolyData:
+    def build_pickable_mesh(self, positions: np.ndarray) -> pv.PolyData:
         # Use a simple point cloud for the pickable overlay — point-based
         # picking is reliable in both 2D and 3D, unlike cell picking on
         # coplanar shape surfaces.
@@ -202,22 +202,15 @@ class ShapeRenderer(InstrumentRenderer):
             else:
                 self._highlight_mesh.cell_data[scalars] = np.zeros(self._highlight_mesh.number_of_cells, dtype=np.float64)
 
-            # Use a custom colormap that's white at all scalar values
-            import matplotlib.colors as mcolors
-
-            cmap_white = mcolors.LinearSegmentedColormap.from_list("white", ["white", "white"])
-
             actor = plotter.add_mesh(
                 self._highlight_mesh,
                 scalars=scalars,
-                opacity=[0.0, 1.0],
+                opacity=[0.0, 0.3],
                 clim=[0, 1],
                 show_scalar_bar=False,
                 pickable=False,
-                cmap=cmap_white,
-                show_edges=True,
-                edge_color="cyan",
-                line_width=2,
+                cmap="Oranges",
+                show_edges=False,
             )
             # Polygon offset so highlight renders in front of the detector surface
             mapper = actor.mapper
@@ -247,7 +240,7 @@ class ShapeRenderer(InstrumentRenderer):
             show_edges=False,
         )
 
-    def enable_picking(self, plotter: BackgroundPlotter, is_2d: bool, callback: Callable[[int], None]) -> None:
+    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None]) -> None:
         """Set up point picking on the pickable overlay.  *callback* receives ``(detector_index: int)``."""
         plotter.disable_picking()
 

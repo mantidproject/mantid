@@ -37,15 +37,13 @@ class InstrumentRenderer(ABC):
         """
 
     @abstractmethod
-    def build_pickable_mesh(self, positions: np.ndarray, model) -> pv.PolyData:
+    def build_pickable_mesh(self, positions: np.ndarray) -> pv.PolyData:
         """Build the mesh used for interactive picking / selection highlighting.
 
         Parameters
         ----------
         positions : np.ndarray
             (N, 3) detector centre positions.
-        model :
-            The FullInstrumentViewModel.
 
         Returns
         -------
@@ -85,15 +83,13 @@ class InstrumentRenderer(ABC):
         """Add the masked detector mesh to the plotter."""
 
     @abstractmethod
-    def enable_picking(self, plotter: BackgroundPlotter, is_2d: bool, callback: Callable[[int], None]) -> None:
+    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None]) -> None:
         """Set up picking interaction on the plotter.
 
         Parameters
         ----------
         plotter : BackgroundPlotter
             The PyVista plotter.
-        is_2d : bool
-            Whether the current view is a 2D projection.
         callback : Callable
             Function to call when a detector is picked; receives (detector_index: int).
         """
