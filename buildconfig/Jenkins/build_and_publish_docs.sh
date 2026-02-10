@@ -62,5 +62,5 @@ pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e docs-build rsync --archive 
 git config user.name ${GIT_USER_NAME}
 git config user.email ${GIT_USER_EMAIL}
 git add .
-git commit -m "Publish nightly documentation from [${SHA1_SHORT}](https://github.com/mantidproject/mantid/commit/${SHA1})" || exit 0
+git commit -m "Publish nightly documentation from https://github.com/mantidproject/mantid/commit/${SHA1}" || exit 0
 git push https://${GITHUB_ACCESS_TOKEN}@github.com/mantidproject/docs-nightly main
