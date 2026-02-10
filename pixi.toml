@@ -23,6 +23,7 @@ package-standalone = { features = [
   "package-standalone",
 ], no-default-feature = true }
 docs-build = { features = ["docs-build"] }
+docs-migration = { features = ["docs-migration"], no-default-feature = true }
 
 [feature.rattler-builder.dependencies]
 rattler-build = "==0.51.0"
@@ -58,6 +59,16 @@ anaconda-client = "*"
 conda = "24.7.*"
 rattler-index = "*"
 mamba = "<2"
+
+[feature.docs-migration.dependencies]
+# rst-to-myst doesn't play nice with dependencies in the default environment
+rst-to-myst = "*"
+sphinx = "*"
+
+[feature.docs-migration.tasks.rst2md]
+args = [{ "arg" = "filename" }]
+cmd = "rst2myst convert {{filename}}"
+description = "Migrate a rst file to myst flavored markdown"
 
 [feature.docs-build]
 channels = ["mantid/label/nightly"]
