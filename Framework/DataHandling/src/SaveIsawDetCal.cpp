@@ -144,6 +144,7 @@ void SaveIsawDetCal::exec() {
            "     UpZ\n";
   }
   // Here would save each detector...
+  const auto &componentInfo = ws->componentInfo();
   std::set<int>::iterator it;
   for (it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it) {
     // Build up the bank name
@@ -159,11 +160,11 @@ void SaveIsawDetCal::exec() {
     std::shared_ptr<const IComponent> det = inst->getComponentByName(bankName);
     if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
     {
-      std::vector<Geometry::IComponent_const_sptr> children;
-      std::shared_ptr<const Geometry::ICompAssembly> asmb =
-          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
-      asmb->getChildren(children, false);
-      det = children[0];
+      const size_t bankIndex = componentInfo.indexOfAny(bankName);
+      const auto children = componentInfo.children(bankIndex);
+      if (!children.empty()) {
+        det = componentInfo.componentID(children[0])->shared_from_this();
+      }
     }
     if (det) {
       // Center of the detector
@@ -173,16 +174,16 @@ void SaveIsawDetCal::exec() {
       double detd = (center - inst->getSample()->getPos()).norm();
       int NCOLS, NROWS;
       double xsize, ysize;
-      sizeBanks(bankName, NCOLS, NROWS, xsize, ysize);
+      sizeBanks(bankName, NCOLS, NROWS, xsize, ysize, componentInfo);
       // Base unit vector (along the horizontal, X axis)
       // Since WISH banks are curved use center and increment 2 for tubedown
       int midX = NCOLS / 2;
       int midY = NROWS / 2;
-      V3D base = findPixelPos(bankName, midX + 2, midY) - findPixelPos(bankName, midX, midY);
+      V3D base = findPixelPos(bankName, midX + 2, midY, componentInfo) - findPixelPos(bankName, midX, midY, componentInfo);
       base.normalize();
 
       // Up unit vector (along the vertical, Y axis)
-      V3D up = findPixelPos(bankName, midX, midY + 1) - findPixelPos(bankName, midX, midY);
+      V3D up = findPixelPos(bankName, midX, midY + 1, componentInfo) - findPixelPos(bankName, midX, midY, componentInfo);
       up.normalize();
 
       // Write the line
@@ -207,7 +208,7 @@ void SaveIsawDetCal::exec() {
   out.close();
 }
 
-V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col, int row) {
+V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col, int row, const ComponentInfo &componentInfo) {
   std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
     std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
@@ -215,29 +216,22 @@ V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col, int row) 
     std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
     return pixel->getPos();
   } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    std::shared_ptr<const Geometry::ICompAssembly> asmb =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    if (children[0]->getName() == "sixteenpack") {
-      asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-      children.clear();
-      asmb->getChildren(children, false);
+    const size_t parentIndex = componentInfo.indexOfAny(bankName);
+    auto children = componentInfo.children(parentIndex);
+    if (!children.empty() && componentInfo.name(children[0]) == "sixteenpack") {
+      children = componentInfo.children(children[0]);
     }
     int col0 = col - 1;
     // WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
-    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[col0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
-    Geometry::IComponent_const_sptr first = grandchildren[row - 1];
-    return first->getPos();
+    const auto grandchildren = componentInfo.children(children[col0]);
+    return componentInfo.position(grandchildren[row - 1]);
   }
 }
 
-void SaveIsawDetCal::sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS, double &xsize, double &ysize) {
+void SaveIsawDetCal::sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS, double &xsize, double &ysize,
+                               const ComponentInfo &componentInfo) {
   if (bankName == "None")
     return;
   std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
@@ -249,27 +243,20 @@ void SaveIsawDetCal::sizeBanks(const std::string &bankName, int &NCOLS, int &NRO
     xsize = RDet->xsize();
     ysize = RDet->ysize();
   } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    std::shared_ptr<const Geometry::ICompAssembly> asmb =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    if (children[0]->getName() == "sixteenpack") {
-      asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-      children.clear();
-      asmb->getChildren(children, false);
+    const size_t parentIndex = componentInfo.indexOfAny(bankName);
+    auto children = componentInfo.children(parentIndex);
+    if (!children.empty() && componentInfo.name(children[0]) == "sixteenpack") {
+      children = componentInfo.children(children[0]);
     }
-    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
+    const auto grandchildren = componentInfo.children(children[0]);
     NROWS = static_cast<int>(grandchildren.size());
     NCOLS = static_cast<int>(children.size());
-    Geometry::IComponent_const_sptr first = children[0];
-    Geometry::IComponent_const_sptr last = children[NCOLS - 1];
+    const auto &first = componentInfo.componentID(children[0]);
+    const auto &last = componentInfo.componentID(children[NCOLS - 1]);
     xsize = first->getDistance(*last);
-    first = grandchildren[0];
-    last = grandchildren[NROWS - 1];
-    ysize = first->getDistance(*last);
+    const auto &firstGrand = componentInfo.componentID(grandchildren[0]);
+    const auto &lastGrand = componentInfo.componentID(grandchildren[NROWS - 1]);
+    ysize = firstGrand->getDistance(*lastGrand);
   }
 }
 } // namespace Mantid::DataHandling
