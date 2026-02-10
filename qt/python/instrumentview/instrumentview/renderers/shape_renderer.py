@@ -140,6 +140,7 @@ class ShapeRenderer(InstrumentRenderer):
 
         flatten_2d = model is not None and model.is_2d_projection
         indices = self._resolve_detector_indices(positions, model, masked=False)
+
         mesh, c2d, fpd = self._assemble_mesh(indices, positions, flatten_2d=flatten_2d)
         self._cell_to_detector = c2d
         self._faces_per_detector = fpd
@@ -157,6 +158,7 @@ class ShapeRenderer(InstrumentRenderer):
             return pv.PolyData()
         flatten_2d = model is not None and model.is_2d_projection
         indices = self._resolve_detector_indices(positions, model, masked=True)
+
         mesh, _, _ = self._assemble_mesh(indices, positions, flatten_2d=flatten_2d)
         return mesh
 
@@ -357,7 +359,12 @@ class ShapeRenderer(InstrumentRenderer):
         return med_2d / med_3d
 
     def _assemble_mesh(
-        self, det_indices: np.ndarray, display_positions: np.ndarray, flatten_2d: bool = False
+        self,
+        det_indices: np.ndarray,
+        display_positions: np.ndarray,
+        flatten_2d: bool = False,
+        per_detector_scales: np.ndarray | None = None,
+        per_detector_rotate: np.ndarray | None = None,
     ) -> tuple[pv.PolyData, np.ndarray, np.ndarray]:
         """Vectorised mesh assembly.
 
@@ -382,6 +389,14 @@ class ShapeRenderer(InstrumentRenderer):
         flatten_2d : bool
             If True, skip 3D rotations and rescale shapes so they are
             proportional to the projected inter-detector spacing.
+        per_detector_scales : np.ndarray or None
+            If provided, (N,) per-detector scale factors to use instead of
+            a single uniform projection_scale.  Only used when *flatten_2d*
+            is True.
+        per_detector_rotate : np.ndarray or None
+            If provided, (N,) boolean array.  Detectors marked True have
+            their 3D rotation applied before flattening (tube banks);
+            False detectors stay axis-aligned (grid banks).
 
         Returns
         -------
@@ -399,7 +414,7 @@ class ShapeRenderer(InstrumentRenderer):
         # In 2D projection mode, compute a scale factor so that shapes
         # are proportional to the projected inter-detector spacing.
         projection_scale = 1.0
-        if flatten_2d and len(det_indices) > 1:
+        if flatten_2d and per_detector_scales is None and len(det_indices) > 1:
             projection_scale = self._compute_projection_scale(det_indices, display_positions)
 
         # Use display_positions as centres (they might be projected)
@@ -437,9 +452,20 @@ class ShapeRenderer(InstrumentRenderer):
             tiled = tiled * group_scales
 
             if flatten_2d:
-                # In 2D projections, skip the 3D rotation (keep shapes
-                # facing the viewer) and rescale to projected spacing.
-                tiled = tiled * projection_scale
+                if per_detector_scales is not None:
+                    group_rotate = per_detector_rotate[group_indices] if per_detector_rotate is not None else np.zeros(n_group, dtype=bool)
+                    if np.all(group_rotate):
+                        group_rots = rotations[group_indices]
+                        tiled = np.einsum("nij,nvj->nvi", group_rots, tiled)
+                    elif np.any(group_rotate):
+                        rot_mask = group_rotate
+                        group_rots = rotations[group_indices[rot_mask]]
+                        tiled[rot_mask] = np.einsum("nij,nvj->nvi", group_rots, tiled[rot_mask])
+                    # else: no rotation for this entire shape group
+                    group_proj_scales = per_detector_scales[group_indices][:, np.newaxis, np.newaxis]
+                    tiled = tiled * group_proj_scales
+                else:
+                    tiled = tiled * projection_scale
                 # Flatten z so shapes lie in the XY plane.
                 tiled[:, :, 2] = 0.0
             else:

@@ -565,13 +565,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_update_plotter.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
-    def test_on_projection_option_changed_side_by_side_disables_checkbox(self, mock_update_plotter):
-        """Test that side-by-side projection disables the shapes checkbox."""
+    def test_on_projection_option_changed_side_by_side_enables_checkbox(self, mock_update_plotter):
+        """Test that side-by-side projection enables the shapes checkbox."""
         self._mock_view.current_selected_projection.return_value = ProjectionType.SIDE_BY_SIDE
         self._mock_view.is_show_shapes_checkbox_checked.return_value = False
         self._presenter._on_projection_option_changed()
         self.assertEqual(self._model.projection_type, ProjectionType.SIDE_BY_SIDE)
-        self._mock_view.set_show_shapes_checkbox_enabled.assert_called_once_with(False)
+        self._mock_view.set_show_shapes_checkbox_enabled.assert_called_once_with(True)
         self.assertIs(self._presenter._renderer, self._presenter._point_cloud_renderer)
         mock_update_plotter.assert_called_once()
 

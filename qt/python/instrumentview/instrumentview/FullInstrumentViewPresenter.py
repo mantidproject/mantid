@@ -26,6 +26,7 @@ from instrumentview.ComponentTreePresenter import ComponentTreePresenter
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
 from instrumentview.renderers.shape_renderer import ShapeRenderer
+from instrumentview.renderers.side_by_side_shape_renderer import SideBySideShapeRenderer
 
 from vtkmodules.vtkRenderingCore import vtkCoordinate
 
@@ -72,6 +73,7 @@ class FullInstrumentViewPresenter:
         self._visible_label = "Visible Picked"
         self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = None  # lazily created
+        self._sbs_shape_renderer = None  # lazily created
         self._renderer = self._point_cloud_renderer  # Start with point cloud
         self._model.setup()
         self.setup()
@@ -168,13 +170,9 @@ class FullInstrumentViewPresenter:
         self._view.set_plotter_scalar_bar_range(self._model.counts_limits, self._counts_label)
 
     def _on_projection_option_changed(self) -> None:
-        """Update the projection, enable/disable shapes checkbox, and select appropriate renderer.
-
-        Side-by-side projection always disables the shapes checkbox and forces point cloud rendering.
-        Other projections allow the user to toggle between renderers.
-        """
+        """Update the projection, enable/disable shapes checkbox, and select appropriate renderer."""
         self._model.projection_type = self._view.current_selected_projection()
-        self._view.set_show_shapes_checkbox_enabled(self._model.projection_type != ProjectionType.SIDE_BY_SIDE)
+        self._view.set_show_shapes_checkbox_enabled(True)
         self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
 
     def on_projection_option_changed(self) -> None:
@@ -624,28 +622,36 @@ class FullInstrumentViewPresenter:
         return self._point_cloud_renderer
 
     def _get_shape_renderer(self) -> ShapeRenderer:
-        """Get or create the cached shape renderer instance.
+        """Get or create a cached shape renderer instance.
 
-        On first call, precomputes geometry from the workspace which may be expensive.
-        Subsequent calls return the cached instance.
+        Returns a :class:`SideBySideShapeRenderer` when the current
+        projection is side-by-side, otherwise a plain :class:`ShapeRenderer`.
+        On first call for each type, precomputes geometry from the workspace
+        which may be expensive.  Subsequent calls return the cached instance.
 
         Returns
         -------
         ShapeRenderer
             The cached renderer, creating and precomputing it if necessary.
         """
-        if self._shape_renderer is None:
-            self._shape_renderer = ShapeRenderer()
-            self._shape_renderer.precompute(self._model.workspace)
-        return self._shape_renderer
+        is_sbs = self._model.projection_type == ProjectionType.SIDE_BY_SIDE
+        if is_sbs:
+            if self._sbs_shape_renderer is None:
+                self._sbs_shape_renderer = SideBySideShapeRenderer()
+                self._sbs_shape_renderer.precompute(self._model.workspace, self._model.bank_groups_by_detector_id)
+            return self._sbs_shape_renderer
+        else:
+            if self._shape_renderer is None:
+                self._shape_renderer = ShapeRenderer()
+                self._shape_renderer.precompute(self._model.workspace)
+            return self._shape_renderer
 
     def _on_show_shapes_toggled(self, checked: bool) -> None:
         """Toggle between point-cloud and shape-based rendering."""
-        # Side-by-side always uses point cloud
-        if self._model.projection_type == ProjectionType.SIDE_BY_SIDE or not checked:
-            self._renderer = self._get_point_cloud_renderer()
-        elif checked:
+        if checked:
             self._renderer = self._get_shape_renderer()
+        else:
+            self._renderer = self._get_point_cloud_renderer()
 
         self.update_plotter()
 
@@ -659,6 +665,7 @@ class FullInstrumentViewPresenter:
         from the new workspace data.
         """
         self._shape_renderer = None
+        self._sbs_shape_renderer = None
         self._point_cloud_renderer = None
 
     def _reload_everything(self) -> None:

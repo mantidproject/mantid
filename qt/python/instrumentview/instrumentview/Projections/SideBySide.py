@@ -28,6 +28,7 @@ class FlatBankInfo:
     pixels: List[int] = field(default_factory=list)
     relative_projected_positions: np.ndarray = field(default_factory=lambda: np.empty((0, 3)))
     has_position_in_idf: bool = False
+    bank_type: str = "other"
 
     def translate(self, shift: np.ndarray):
         self.reference_position += shift
@@ -139,6 +140,7 @@ class SideBySide(Projection):
             if len(valid_detector_ids) == 0:
                 continue
             flat_bank = FlatBankInfo()
+            flat_bank.bank_type = "grid"
             flat_bank.detector_id_position_map.clear()
             flat_bank.reference_position = np.array(bank.getPos())
             rotation = bank.getRotation()
@@ -169,6 +171,7 @@ class SideBySide(Projection):
                 self._component_index_detector_id_map[i] for i in detector_component_indices if i in self._component_index_detector_id_map
             ]
             flat_bank = FlatBankInfo()
+            flat_bank.bank_type = "tube"
             flat_bank.detector_id_position_map.clear()
             flat_bank.reference_position = np.array(component_info.position(int(detector_component_indices[0])))
             normal = np.array(self._calculator.calculateBankNormal(component_info, group))
@@ -264,6 +267,17 @@ class SideBySide(Projection):
                 position[1] += max_dims[1] * space_factor
             else:
                 position[0] += bank.dimensions[0] * space_factor
+
+    def get_bank_groups_by_detector_id(self) -> list[tuple[list[int], str]]:
+        """Return detector IDs grouped by bank, with bank type.
+
+        Returns
+        -------
+        list[tuple[list[int], str]]
+            Each element is ``(detector_ids, bank_type)`` where *bank_type*
+            is ``"grid"``, ``"tube"``, or ``"other"``.
+        """
+        return [(list(bank.detector_ids), bank.bank_type) for bank in self._flat_banks]
 
     def _calculate_2d_coordinates(self) -> tuple[np.ndarray, np.ndarray]:
         self._construct_flat_panels(self._workspace)
