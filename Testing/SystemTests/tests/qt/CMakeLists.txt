@@ -1,7 +1,7 @@
 # System Tests for the mantid qt package
 
 set(SYSTEST_NAMES CppInterfacesStartupTest.py FitScriptGeneratorStartupTest.py PythonInterfacesStartupTest.py
-                  SliceViewerIntegrationTest.py WorkbenchStartupTest.py
+                  SANSDiagnosticPageTest.py SliceViewerIntegrationTest.py WorkbenchStartupTest.py
 )
 
 if(ENABLE_WORKBENCH)
