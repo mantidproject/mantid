@@ -576,6 +576,8 @@ private:
   std::string m_marker;
   float m_marker_size;
 
+  bool setCommonBinsFlag(const bool value) const;
+
 protected:
   /// Getter for the dimension id based on the axis.
   std::string getDimensionIdFromAxis(const int &axisIndex) const;
