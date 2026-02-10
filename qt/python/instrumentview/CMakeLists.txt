@@ -22,7 +22,7 @@ set(PYTHON_TEST_FILES
     instrumentview/Projections/test/test_cylindrical_projection.py
     instrumentview/Projections/test/test_SideBySide.py
     instrumentview/Projections/test/test_spherical_projection.py
-    instrumentview/Renderers/test/test_renderers.py
+    instrumentview/renderers/test/test_renderers.py
 )
 
 # Tests
