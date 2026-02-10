@@ -535,7 +535,8 @@ class CommandInterfaceStateDirector(object):
         phi_min = command.values[0]
         phi_max = command.values[1]
         use_phi_mirror = command.values[2]
-        new_state_entries = {LimitsId.ANGLE: mask_angle_entry(min=phi_min, max=phi_max, use_mirror=use_phi_mirror)}
+        phi_range = command.values[3]
+        new_state_entries = {LimitsId.ANGLE: mask_angle_entry(min=phi_min, max=phi_max, use_mirror=use_phi_mirror, phi_range=phi_range)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_wavelength_correction_file(self, command):
