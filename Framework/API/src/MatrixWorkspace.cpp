@@ -1114,9 +1114,15 @@ bool MatrixWorkspace::isHistogramDataByIndex(const std::size_t index) const {
 }
 
 bool MatrixWorkspace::setCommonBinsFlag(const bool value) const {
+  // check valid flag before acquiring lock
   if (m_isCommonBinsFlagValid.load(std::memory_order_acquire))
     return m_isCommonBinsFlag.load(std::memory_order_relaxed);
   std::lock_guard<std::mutex> lock{m_isCommonBinsMutex};
+
+  // after acquiring lock, check valid flag again
+  if (m_isCommonBinsFlagValid.load(std::memory_order_acquire))
+    return m_isCommonBinsFlag.load(std::memory_order_relaxed);
+
   m_isCommonBinsFlag.store(value, std::memory_order_relaxed);
   m_isCommonBinsFlagValid.store(true, std::memory_order_release);
   return value;
