@@ -1201,7 +1201,7 @@ bool MatrixWorkspace::isCommonBins() const {
   }
   auto end = std::chrono::high_resolution_clock::now();
   Instrumentation::AlgoTimeRegister::Instance().addTime("isCommonBinsValues", begin, end);
-  return setCommonBinsFlag(commonValues);
+  return setCommonBinsFlag(commonValues.load(std::memory_order_relaxed));
 }
 
 /**
