@@ -46,10 +46,12 @@ void GenerateFlatCellWorkspaceLOQ::init() {
   declareProperty("CreateMaskWorkspace", true, "Determines if masked workspace needs to be created.");
   declareProperty("LABThresholdMultiplier", 1.0,
                   "The parameter that is used to scale the standard deviation in order to set the masking threshold of "
-                  "the low angle bank.");
+                  "the low angle bank. The masking threshold is calculated by the equation "
+                  "maskingThreshold = 1.0 + (LABThresholdMultiplier x standard deviation of the normalized LAB data);");
   declareProperty("HABThresholdMultiplier", 0.5,
                   "The parameter that is used to scale the standard deviation in order to set the masking threshold of "
-                  "the high angle bank.");
+                  "the high angle bank. The masking threshold is calculated by the equation "
+                  "maskingThreshold = 1.0 + (HABThresholdMultiplier x standard deviation of the normalized HAB data);");
   declareProperty("ApplyMaskDirectlyToWorkspace", false, "Determines if mask is directly applied to workspace.");
   declareProperty("ApplyCorrectionsDirectlyToWorkspace", true,
                   "Determines if the input data should be divided by the output of GenerateFlatCellWorkspaceLOQ.");
