@@ -603,6 +603,8 @@ class ParsedDictConverter(IStateParser):
             state_builder.set_phi_min(angle.min)
             state_builder.set_phi_max(angle.max)
             state_builder.set_use_mask_phi_mirror(angle.use_mirror)
+            state_builder.set_phi_range(angle.phi_range)
+            state_builder.set_use_phi_range(len(angle.phi_range) != 0)
 
         # ------------------------------------------------------------
         # 15. Maskfiles
