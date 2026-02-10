@@ -128,11 +128,11 @@ std::map<int, RectangularDetector_const_sptr> ConvertToDetectorFaceMD::getBanks(
     // --- Find all rectangular detectors ----
     const auto &componentInfo = in_ws->componentInfo();
     for (size_t i = 0; i < componentInfo.size(); ++i) {
-      // Get the component and check if it's a RectangularDetector
-      const auto *comp = componentInfo.componentID(i);
-      RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const RectangularDetector>(comp->shared_from_this());
+      // Check if the component is a RectangularDetector by getting it by name
+      std::string name = componentInfo.name(i);
+      auto comp = inst->getComponentByName(name);
+      RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const RectangularDetector>(comp);
       if (det) {
-        std::string name = componentInfo.name(i);
         if (name.size() < 5)
           continue;
         std::string bank = name.substr(4, name.size() - 4);

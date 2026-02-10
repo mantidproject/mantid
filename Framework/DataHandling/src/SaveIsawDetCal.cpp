@@ -163,7 +163,8 @@ void SaveIsawDetCal::exec() {
       const size_t bankIndex = componentInfo.indexOfAny(bankName);
       const auto children = componentInfo.children(bankIndex);
       if (!children.empty()) {
-        det = componentInfo.componentID(children[0])->shared_from_this();
+        // Get the first child component by name
+        det = inst->getComponentByName(componentInfo.name(children[0]));
       }
     }
     if (det) {
@@ -179,11 +180,13 @@ void SaveIsawDetCal::exec() {
       // Since WISH banks are curved use center and increment 2 for tubedown
       int midX = NCOLS / 2;
       int midY = NROWS / 2;
-      V3D base = findPixelPos(bankName, midX + 2, midY, componentInfo) - findPixelPos(bankName, midX, midY, componentInfo);
+      V3D base =
+          findPixelPos(bankName, midX + 2, midY, componentInfo) - findPixelPos(bankName, midX, midY, componentInfo);
       base.normalize();
 
       // Up unit vector (along the vertical, Y axis)
-      V3D up = findPixelPos(bankName, midX, midY + 1, componentInfo) - findPixelPos(bankName, midX, midY, componentInfo);
+      V3D up =
+          findPixelPos(bankName, midX, midY + 1, componentInfo) - findPixelPos(bankName, midX, midY, componentInfo);
       up.normalize();
 
       // Write the line
