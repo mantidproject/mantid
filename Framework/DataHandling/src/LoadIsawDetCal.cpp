@@ -177,7 +177,7 @@ void LoadIsawDetCal::exec() {
     // Get all components using ComponentInfo
     auto expInfoWS = std::dynamic_pointer_cast<ExperimentInfo>(ws);
     const auto &componentInfo = expInfoWS->componentInfo();
-    
+
     for (size_t i = 0; i < componentInfo.size(); ++i) {
       std::string bankName = componentInfo.name(i);
       boost::trim(bankName);
@@ -309,7 +309,8 @@ void LoadIsawDetCal::exec() {
       const size_t bankIndex = componentInfo.indexOfAny(bankName);
       const auto children = componentInfo.children(bankIndex);
       if (!children.empty()) {
-        comp = componentInfo.componentID(children[0])->shared_from_this();
+        // Get the first child component by name
+        comp = inst->getComponentByName(componentInfo.name(children[0]));
       }
     }
     if (comp) {

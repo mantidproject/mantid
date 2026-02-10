@@ -1377,7 +1377,9 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
     }
     if (!keep) {
       std::shared_ptr<const IComponent> parent = inst->getComponentByName(det_name);
-      const auto &componentInfo = workspace->componentInfo();
+      // Get ComponentInfo from the first workspace in the collection
+      auto ws = workspace->getSingleHeldWorkspace();
+      const auto &componentInfo = ws->componentInfo();
       const size_t parentIndex = componentInfo.indexOfAny(det_name);
       const auto children = componentInfo.children(parentIndex);
       for (const auto &colIndex : children) {
