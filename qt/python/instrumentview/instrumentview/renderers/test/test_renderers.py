@@ -12,9 +12,9 @@ from unittest.mock import MagicMock
 import numpy as np
 import pyvista as pv
 
-from instrumentview.Renderers.base_renderer import InstrumentRenderer
-from instrumentview.Renderers.point_cloud_renderer import PointCloudRenderer
-from instrumentview.Renderers.shape_renderer import ShapeRenderer, _triangles_to_verts_faces, _make_fallback_shape
+from instrumentview.renderers.base_renderer import InstrumentRenderer
+from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
+from instrumentview.renderers.shape_renderer import ShapeRenderer, _triangles_to_verts_faces, _make_fallback_shape
 
 
 class TestPointCloudRenderer(unittest.TestCase):

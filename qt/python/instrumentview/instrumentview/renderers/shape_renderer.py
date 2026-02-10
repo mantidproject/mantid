@@ -25,7 +25,7 @@ from pyvistaqt import BackgroundPlotter
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation
 
-from instrumentview.Renderers.base_renderer import InstrumentRenderer
+from instrumentview.renderers.base_renderer import InstrumentRenderer
 from mantid.kernel import logger
 
 

@@ -24,8 +24,8 @@ from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 from instrumentview.ComponentTreeModel import ComponentTreeModel
 from instrumentview.ComponentTreePresenter import ComponentTreePresenter
 from instrumentview.Projections.ProjectionType import ProjectionType
-from instrumentview.Renderers.point_cloud_renderer import PointCloudRenderer
-from instrumentview.Renderers.shape_renderer import ShapeRenderer
+from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
+from instrumentview.renderers.shape_renderer import ShapeRenderer
 
 from vtkmodules.vtkRenderingCore import vtkCoordinate
 
@@ -634,8 +634,9 @@ class FullInstrumentViewPresenter:
         ShapeRenderer
             The cached renderer, creating and precomputing it if necessary.
         """
-        self._shape_renderer = ShapeRenderer()
-        self._shape_renderer.precompute(self._model.workspace)
+        if self._shape_renderer is None:
+            self._shape_renderer = ShapeRenderer()
+            self._shape_renderer.precompute(self._model.workspace)
         return self._shape_renderer
 
     def _on_show_shapes_toggled(self, checked: bool) -> None:

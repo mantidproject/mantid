@@ -10,7 +10,7 @@ import numpy as np
 import pyvista as pv
 from pyvistaqt import BackgroundPlotter
 
-from instrumentview.Renderers.base_renderer import InstrumentRenderer
+from instrumentview.renderers.base_renderer import InstrumentRenderer
 
 
 class PointCloudRenderer(InstrumentRenderer):
