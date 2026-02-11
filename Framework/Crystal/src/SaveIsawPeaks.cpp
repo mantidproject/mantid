@@ -231,13 +231,13 @@ void SaveIsawPeaks::exec() {
 
       std::string bankName = mess.str();
       // Retrieve it
-      const IComponent *det = inst->getComponentByName(bankName).get();
+      std::shared_ptr<const IComponent> det = inst->getComponentByName(bankName);
       if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
       {
         const size_t bankIndex = componentInfo.indexOfAny(bankName);
         const auto children = componentInfo.children(bankIndex);
         if (!children.empty()) {
-          det = componentInfo.componentID(children[0]);
+          det.reset(componentInfo.componentID(children[0]));
         }
       }
       if (det) {
