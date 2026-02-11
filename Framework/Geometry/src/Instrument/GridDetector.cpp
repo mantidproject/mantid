@@ -235,7 +235,7 @@ std::tuple<int, int, int> GridDetector::getXYZForDetectorID(const detid_t detect
 /// @return number of X pixels
 int GridDetector::xpixels() const {
   if (isParametrized())
-    return m_gridBase->m_xpixels;
+    return m_gridBase->xpixels();
   else
     return this->m_xpixels;
 }
@@ -245,7 +245,7 @@ int GridDetector::xpixels() const {
 /// @return number of y pixels
 int GridDetector::ypixels() const {
   if (isParametrized())
-    return m_gridBase->m_ypixels;
+    return m_gridBase->ypixels();
   else
     return this->m_ypixels;
 }
@@ -255,7 +255,7 @@ int GridDetector::ypixels() const {
 /// @return number of z pixels
 int GridDetector::zpixels() const {
   if (isParametrized())
-    return m_gridBase->m_zpixels;
+    return m_gridBase->zpixels();
   else
     return this->m_zpixels;
 }
@@ -267,7 +267,7 @@ double GridDetector::xstep() const {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalex"))
       scaling = m_map->get(m_gridBase, "scalex")->value<double>();
-    return m_gridBase->m_xstep * scaling;
+    return m_gridBase->xstep() * scaling;
   } else
     return this->m_xstep;
 }
@@ -279,7 +279,7 @@ double GridDetector::ystep() const {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scaley"))
       scaling = m_map->get(m_gridBase, "scaley")->value<double>();
-    return m_gridBase->m_ystep * scaling;
+    return m_gridBase->ystep() * scaling;
   } else
     return this->m_ystep;
 }
@@ -291,7 +291,7 @@ double GridDetector::zstep() const {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalez"))
       scaling = m_map->get(m_gridBase, "scalez")->value<double>();
-    return m_gridBase->m_zstep * scaling;
+    return m_gridBase->zstep() * scaling;
   } else
     return this->m_zstep;
 }
@@ -303,7 +303,7 @@ double GridDetector::xstart() const {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalex"))
       scaling = m_map->get(m_gridBase, "scalex")->value<double>();
-    return m_gridBase->m_xstart * scaling;
+    return m_gridBase->xstart() * scaling;
   } else
     return this->m_xstart;
 }
@@ -315,7 +315,7 @@ double GridDetector::ystart() const {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scaley"))
       scaling = m_map->get(m_gridBase, "scaley")->value<double>();
-    return m_gridBase->m_ystart * scaling;
+    return m_gridBase->ystart() * scaling;
   } else
     return this->m_ystart;
 }
@@ -327,7 +327,7 @@ double GridDetector::zstart() const {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalez"))
       scaling = m_map->get(m_gridBase, "scalez")->value<double>();
-    return m_gridBase->m_zstart * scaling;
+    return m_gridBase->zstart() * scaling;
   } else
     return this->m_zstart;
 }
@@ -339,7 +339,7 @@ double GridDetector::xsize() const {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalex"))
       scaling = m_map->get(m_gridBase, "scalex")->value<double>();
-    return m_gridBase->m_xsize * scaling;
+    return m_gridBase->xsize() * scaling;
   } else
     return this->m_xsize;
 }
@@ -351,7 +351,7 @@ double GridDetector::ysize() const {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scaley"))
       scaling = m_map->get(m_gridBase, "scaley")->value<double>();
-    return m_gridBase->m_ysize * scaling;
+    return m_gridBase->ysize() * scaling;
   } else
     return this->m_ysize;
 }
@@ -363,7 +363,7 @@ double GridDetector::zsize() const {
     double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalez"))
       scaling = m_map->get(m_gridBase, "scalez")->value<double>();
-    return m_gridBase->m_zsize * scaling;
+    return m_gridBase->zsize() * scaling;
   } else
     return this->m_zsize;
 }
@@ -372,7 +372,7 @@ double GridDetector::zsize() const {
 /// Returns the idstart
 int GridDetector::idstart() const {
   if (isParametrized())
-    return m_gridBase->m_idstart;
+    return m_gridBase->idstart();
   else
     return this->m_idstart;
 }
@@ -381,7 +381,7 @@ int GridDetector::idstart() const {
 /// Returns the idfillbyfirst_y
 bool GridDetector::idfillbyfirst_y() const {
   if (isParametrized())
-    return m_gridBase->m_idfillbyfirst_y;
+    return m_gridBase->idfillbyfirst_y();
   else
     return this->m_idfillbyfirst_y;
 }
@@ -389,7 +389,7 @@ bool GridDetector::idfillbyfirst_y() const {
 /// Returns the id fill order
 std::string GridDetector::idFillOrder() const {
   if (isParametrized())
-    return m_gridBase->m_idFillOrder;
+    return m_gridBase->idFillOrder();
   else
     return this->m_idFillOrder;
 }
@@ -398,7 +398,7 @@ std::string GridDetector::idFillOrder() const {
 /// Returns the idstepbyrow
 int GridDetector::idstepbyrow() const {
   if (isParametrized())
-    return m_gridBase->m_idstepbyrow;
+    return m_gridBase->idstepbyrow();
   else
     return this->m_idstepbyrow;
 }
@@ -407,7 +407,7 @@ int GridDetector::idstepbyrow() const {
 /// Returns the idstep
 int GridDetector::idstep() const {
   if (isParametrized())
-    return m_gridBase->m_idstep;
+    return m_gridBase->idstep();
   else
     return this->m_idstep;
 }
@@ -487,10 +487,9 @@ bool checkValidOrderString(const std::string &order) {
 
 void GridDetector::validateInput() const {
   // Some safety checks
-  if (!checkValidOrderString(m_idFillOrder) || m_idFillOrder.size() != 3)
-    throw std::invalid_argument("GridDetector::initialize(): order string "
-                                "should only comprise exactly 3 letters x, y, "
-                                "and z in any order.");
+  if (!checkValidOrderString(m_idFillOrder))
+    throw std::invalid_argument(
+        "GridDetector::initialize(): order string should only comprise exactly 3 letters x, y, and z in any order.");
   if (m_xpixels <= 0)
     throw std::invalid_argument("GridDetector::initialize(): xpixels should be > 0");
   if (m_ypixels <= 0)
@@ -568,8 +567,7 @@ void GridDetector::initialize(std::shared_ptr<IObject> shape, int xpixels, doubl
                               const std::string &idFillOrder, int idstepbyrow, int idstep) {
 
   if (isParametrized())
-    throw std::runtime_error("GridDetector::initialize() called for a "
-                             "parametrized GridDetector");
+    throw std::runtime_error("GridDetector::initialize() called for a parametrized GridDetector");
 
   initializeValues(std::move(shape), xpixels, xstart, xstep, ypixels, ystart, ystep, zpixels, zstart, zstep, idstart,
                    idFillOrder, idstepbyrow, idstep);
@@ -595,9 +593,9 @@ void GridDetector::initialize(std::shared_ptr<IObject> shape, int xpixels, doubl
 /** Returns the minimum detector id
  * @return minimum detector id
  */
-detid_t GridDetector::minDetectorID() {
+detid_t GridDetector::minDetectorID() const {
   if (isParametrized())
-    return m_gridBase->m_minDetId;
+    return m_gridBase->minDetectorID();
   return m_minDetId;
 }
 
@@ -605,9 +603,9 @@ detid_t GridDetector::minDetectorID() {
 /** Returns the maximum detector id
  * @return maximum detector id
  */
-detid_t GridDetector::maxDetectorID() {
+detid_t GridDetector::maxDetectorID() const {
   if (isParametrized())
-    return m_gridBase->m_maxDetId;
+    return m_gridBase->maxDetectorID();
   return m_maxDetId;
 }
 
@@ -645,37 +643,32 @@ std::shared_ptr<const IComponent> GridDetector::getComponentByName(const std::st
 void GridDetector::testIntersectionWithChildren(Track &testRay,
                                                 std::deque<IComponent_const_sptr> & /*searchQueue*/) const {
   /// Base point (x,y,z) = position of pixel 0,0
-  V3D basePoint;
+  V3D const basePoint = getRelativePosAtXYZ(0, 0, 0);
 
   /// Vertical (y-axis) basis vector of the detector
-  V3D vertical;
+  V3D const vertical = getRelativePosAtXYZ(0, ypixels() - 1, 0) - basePoint;
 
   /// Horizontal (x-axis) basis vector of the detector
-  V3D horizontal;
-
-  basePoint = getAtXYZ(0, 0, 0)->getPos();
-  horizontal = getAtXYZ(xpixels() - 1, 0, 0)->getPos() - basePoint;
-  vertical = getAtXYZ(0, ypixels() - 1, 0)->getPos() - basePoint;
+  V3D horizontal = getRelativePosAtXYZ(xpixels() - 1, 0, 0) - basePoint;
 
   // The beam direction
-  V3D beam = testRay.direction();
+  V3D const beam = testRay.direction() * (-1.0);
 
   // From: http://en.wikipedia.org/wiki/Line-plane_intersection (taken on May 4,
   // 2011),
   // We build a matrix to solve the linear equation:
   Matrix<double> mat(3, 3);
-  mat.setColumn(0, beam * -1.0);
+  mat.setColumn(0, beam);
   mat.setColumn(1, horizontal);
   mat.setColumn(2, vertical);
   mat.Invert();
 
   // Multiply by the inverted matrix to find t,u,v
-  V3D tuv = mat * (testRay.startPoint() - basePoint);
+  V3D const tuv = mat * (testRay.startPoint() - basePoint);
   //  std::cout << tuv << "\n";
 
   // Intersection point
-  V3D intersec = beam;
-  intersec *= tuv[0];
+  V3D const intersec = beam * (tuv[0] * -1.0);
 
   // t = coordinate along the line
   // u,v = coordinates along horizontal, vertical
