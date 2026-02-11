@@ -834,8 +834,8 @@ def create_pf(
     save_dirs = (
         [path.join(root_dir, "PoleFigureTables")] if override_dir else model.get_save_dirs(root_dir, "PoleFigureTables", exp_name, grouping)
     )
-    chi2_thresh = chi2_thresh if chi2_thresh else 0.0
-    peak_thresh = peak_thresh if peak_thresh else 0.0
+    chi2_thresh = chi2_thresh or 0.0
+    peak_thresh = peak_thresh or 0.0
     include_spec_info = debug_info_level == 2
     include_debug_info = debug_info_level in (1, 2)
     model.make_pole_figure_tables(

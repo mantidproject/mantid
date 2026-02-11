@@ -14,7 +14,7 @@ class AddFunctionDialog(object):
     """
 
     def __init__(self, parent=None, function_names=None, view=None, default_function_name=None, default_checkbox=False):
-        self.view = view if view else AddFunctionDialogView(parent, function_names, default_function_name, default_checkbox)
+        self.view = view or AddFunctionDialogView(parent, function_names, default_function_name, default_checkbox)
         self.view.ui.buttonBox.accepted.connect(lambda: self.action_add_function())
         self.view.ui.helpButton.clicked.connect(self.function_help_dialog)
 

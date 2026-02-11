@@ -14,7 +14,7 @@ from workbench.projectrecovery.recoverygui.recoveryfailureview import RecoveryFa
 
 class ProjectRecoveryPresenter(object):
     def __init__(self, project_recovery, model=None):
-        self.model = model if model else ProjectRecoveryModel(project_recovery, self)
+        self.model = model or ProjectRecoveryModel(project_recovery, self)
         self.current_view = None
 
         self.project_recovery = project_recovery
