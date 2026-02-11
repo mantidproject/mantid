@@ -121,7 +121,7 @@ Dependencies
 
 Bugfixes
 ############
-- (`#40246 <https://github.com/mantidproject/mantid/pull/40246>`_) Pin `occt` to 7.9.2 to avoid conda/rattler version
+- (`#40246 <https://github.com/mantidproject/mantid/pull/40246>`_) Pin ``occt`` to 7.9.2 to avoid conda/rattler version
   number parsing issue with 7.9.1 (See `here <https://github.com/conda-forge/occt-feedstock/pull/124>`_).
 
 Kernel
