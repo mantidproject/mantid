@@ -38,8 +38,8 @@ constexpr std::string_view URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unix
  * @param exts :: A vector of file extensions to search over.
  * @returns The full path to the first found
  */
-const API::Result<std::string> ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
-                                                               const std::vector<std::string> &exts) const {
+const API::Result<std::filesystem::path> ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
+                                                                         const std::vector<std::string> &exts) const {
   if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
     for (const auto &filename : filenames) {
       g_log.debug() << filename << ")\n";
@@ -61,7 +61,7 @@ const API::Result<std::string> ISISDataArchive::getArchivePath(const std::set<st
 #endif
       std::string fullPath = getCorrectExtension(path_without_extension, exts);
       if (!fullPath.empty())
-        return API::Result<std::string>(fullPath);
+        return API::Result<std::filesystem::path>(fullPath);
       errors += "No file found. ";
 #ifdef __linux__
       errors +=
@@ -70,7 +70,7 @@ const API::Result<std::string> ISISDataArchive::getArchivePath(const std::set<st
 #endif // __linux__
     }
   }
-  return API::Result<std::string>("", errors);
+  return API::Result<std::filesystem::path>("", errors);
 }
 
 /**

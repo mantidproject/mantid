@@ -294,7 +294,7 @@ public:
 
   void testFindFiles() {
     ConfigService::Instance().setString("default.facility", "ISIS");
-    std::vector<std::string> files;
+    std::vector<std::filesystem::path> files;
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-n15193"), const std::invalid_argument &);
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189n-15193"), const std::invalid_argument &);
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-15193n"), const std::invalid_argument &);
@@ -302,7 +302,7 @@ public:
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15n189-151n93"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(files = FileFinder::Instance().findRuns("MUSR15189-15193"));
     TS_ASSERT_EQUALS(files.size(), 5);
-    std::vector<std::string>::iterator it = files.begin();
+    std::vector<std::filesystem::path>::iterator it = files.begin();
 
     for (; it != files.end(); ++it) {
       if (it != files.begin()) {
@@ -408,7 +408,7 @@ public:
     fil.close();
 
     ConfigService::Instance().setString("default.facility", "ISIS");
-    std::vector<std::string> files = FileFinder::Instance().findRuns("LOQ111-add");
+    std::vector<std::filesystem::path> files = FileFinder::Instance().findRuns("LOQ111-add");
     TS_ASSERT_EQUALS(files.size(), 1);
 
     std::filesystem::remove(file);
@@ -438,7 +438,7 @@ public:
 
   void testFindRunsDefaultInst() {
     ConfigService::Instance().setString("default.instrument", "MUSR");
-    std::vector<std::string> paths = FileFinder::Instance().findRuns("15189-15190");
+    auto paths = FileFinder::Instance().findRuns("15189-15190");
     TS_ASSERT(paths.size() == 2);
   }
 
@@ -562,7 +562,7 @@ public:
     // By default case sensitive is on
     fileFinder.setCaseSensitive(false);
 
-    std::vector<std::string> files;
+    std::vector<std::filesystem::path> files;
     std::stringstream range;
     range << (m_filesInDir - m_filesToFind) << "-" << (m_filesInDir - 1);
     TS_ASSERT_THROWS_NOTHING(files = fileFinder.findRuns(range.str().c_str()));
@@ -583,7 +583,7 @@ public:
     // punished by either having to wait or just
     // restart Mantid.  Here, we guard against any change in FileFinder that
     // could reintroduce this problem.
-    std::vector<std::string> files;
+    std::vector<std::filesystem::path> files;
     std::stringstream range;
     std::string startOfRange = boost::lexical_cast<std::string>(m_filesInDir - 10);
     std::string accidentalEndOfRange = "99999";

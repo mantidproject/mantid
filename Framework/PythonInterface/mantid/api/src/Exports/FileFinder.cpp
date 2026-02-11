@@ -50,12 +50,23 @@ std::vector<std::string> runFinderProxy(const FileFinderImpl &self, const std::s
   //   via PyEval_SetTrace while we execute the C++ code -
   //   ReleaseGlobalInterpreter does this for us
   Mantid::PythonInterface::ReleaseGlobalInterpreterLock releaseGlobalInterpreterLock;
-  return self.findRuns(hintstr, exts, useExtsOnly);
+  auto paths = self.findRuns(hintstr, exts, useExtsOnly);
+  std::vector<std::string> results;
+  results.reserve(paths.size());
+  std::transform(paths.begin(), paths.end(), std::back_inserter(results), [](const auto &p) { return p.string(); });
+  return results;
+}
+
+// Wrapper to convert std::filesystem::path to std::string for Boost.Python
+static std::string getFullPathProxy(const FileFinderImpl &self, const std::string &path,
+                                    const bool ignoreDirs = false) {
+  auto p = self.getFullPath(path, ignoreDirs);
+  return p.string();
 }
 
 void export_FileFinder() {
   class_<FileFinderImpl, boost::noncopyable>("FileFinderImpl", no_init)
-      .def("getFullPath", &FileFinderImpl::getFullPath,
+      .def("getFullPath", &getFullPathProxy,
            getFullPathOverloader((arg("self"), arg("path"), arg("ignoreDirs") = false),
                                  "Return a full path to the given file if it can be found within "
                                  "datasearch.directories paths. Directories can be ignored with "
