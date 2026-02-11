@@ -38,7 +38,7 @@ FileEventDataListener::FileEventDataListener()
   } else {
     // If passed a filename with no path, find it. Otherwise, same file
     // will be found.
-    m_filename = FileFinder::Instance().getFullPath(tfilename);
+    m_filename = FileFinder::Instance().getFullPath(tfilename).string();
     if (m_filename.empty()) {
       g_log.error("Cannot find " + tfilename + ". The algorithm will fail.");
     } else {
