@@ -5,28 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FileFinder.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
-#include <boost/python/overloads.hpp>
 #include <boost/python/reference_existing_object.hpp>
 
 using Mantid::API::FileFinder;
 using Mantid::API::FileFinderImpl;
 using namespace boost::python;
-
-namespace {
-GNU_DIAG_OFF("unused-local-typedef")
-// Ignore -Wconversion warnings coming from boost::python
-// Seen with GCC 7.1.1 and Boost 1.63.0
-GNU_DIAG_OFF("conversion")
-
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getFullPathOverloader, getFullPath, 1, 2)
-
-GNU_DIAG_ON("conversion")
-GNU_DIAG_ON("unused-local-typedef")
-} // namespace
 
 /**
  * Runs FileFinder.findRuns after releasing the python GIL.
@@ -60,17 +46,15 @@ std::vector<std::string> runFinderProxy(const FileFinderImpl &self, const std::s
 // Wrapper to convert std::filesystem::path to std::string for Boost.Python
 static std::string getFullPathProxy(const FileFinderImpl &self, const std::string &path,
                                     const bool ignoreDirs = false) {
-  auto p = self.getFullPath(path, ignoreDirs);
-  return p.string();
+  return self.getFullPath(path, ignoreDirs).string();
 }
 
 void export_FileFinder() {
   class_<FileFinderImpl, boost::noncopyable>("FileFinderImpl", no_init)
-      .def("getFullPath", &getFullPathProxy,
-           getFullPathOverloader((arg("self"), arg("path"), arg("ignoreDirs") = false),
-                                 "Return a full path to the given file if it can be found within "
-                                 "datasearch.directories paths. Directories can be ignored with "
-                                 "ignoreDirs=True. An empty string is returned otherwise."))
+      .def("getFullPath", &getFullPathProxy, (arg("self"), arg("path"), arg("ignoreDirs") = false),
+           "Return a full path to the given file if it can be found within "
+           "datasearch.directories paths. Directories can be ignored with "
+           "ignoreDirs=True. An empty string is returned otherwise.")
       .def("findRuns", &runFinderProxy,
            (arg("self"), arg("hintstr"), arg("exts_list") = list(), arg("useExtsOnly") = false),
            "Find a list of files file given a hint. "

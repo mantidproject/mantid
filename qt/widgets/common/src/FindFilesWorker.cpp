@@ -94,7 +94,7 @@ void FindFilesWorker::run() {
       auto it = filestext.begin();
       for (; it != filestext.end(); ++it) {
         boost::algorithm::trim(*it);
-        std::string result = fileSearcher.getFullPath(*it);
+        auto result = fileSearcher.getFullPath(*it);
         if ((!result.empty()) && std::filesystem::exists(result)) {
           filenames.emplace_back(*it);
           valueForProperty += QString::fromStdString(*it) + ",";
