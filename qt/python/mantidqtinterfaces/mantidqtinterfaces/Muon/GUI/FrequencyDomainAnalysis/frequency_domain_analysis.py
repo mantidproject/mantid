@@ -241,7 +241,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             plot_mode = self.plot_widget.data_index
         elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting", "Transform"]:  # Plot the displayed workspace
             plot_mode = self.plot_widget.fit_index
-        elif TAB_ORDER[index] in ["Model Fitting"]:
+        elif TAB_ORDER[index] == "Model Fitting":
             plot_mode = self.plot_widget.model_fit_index
         else:
             return

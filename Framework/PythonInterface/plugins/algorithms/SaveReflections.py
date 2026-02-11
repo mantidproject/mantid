@@ -146,7 +146,7 @@ class SaveReflections(PythonAlgorithm):
             StoreInADS=False,
         )
         # set title of workspace (written to header in fullprof format)
-        filtered_workspace.setTitle(workspace.getTitle() if workspace.getTitle() else workspace.name())
+        filtered_workspace.setTitle(workspace.getTitle() or workspace.name())
 
         # find the max intensity so fits in column with format 12.2f in Fullprof and Jana, 8.2f in SaveHKL (SHELX, GSAS)
         scale = 1
@@ -208,7 +208,7 @@ class FullprofFormat(object):
         :param workspace: the PeaksWorkspace to save to file.
         """
         num_hkl = 3 + has_modulated_indexing(workspace)  # add a column if mod vectors
-        title = workspace.getTitle() if workspace.getTitle() else workspace.name()
+        title = workspace.getTitle() or workspace.name()
         f_handle.write(title + "\n")
         f_handle.write("({}i4,2f12.2,i5,4f10.4)\n".format(num_hkl))
         wavelength = "0"  # if TOF Laue this is ignored

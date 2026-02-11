@@ -366,14 +366,14 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
 
     def is_colormap(self, fig):
         """Identify as a single colour map if it has a axes, one with the plot and the other the colorbar"""
-        if figure_type(fig) in [FigureType.Image] and len(fig.get_axes()) == 2:
+        if figure_type(fig) == FigureType.Image and len(fig.get_axes()) == 2:
             if isinstance(fig.get_axes()[0], MantidAxes) and self._is_colorbar(fig.get_axes()[1]):
                 return True
         return False
 
     def _colorbar_is_log_scale(self, fig):
         """Identify if a colorbar is logscale"""
-        if figure_type(fig) in [FigureType.Image] and len(fig.get_axes()) == 2:
+        if figure_type(fig) == FigureType.Image and len(fig.get_axes()) == 2:
             if self._is_colorbar(fig.get_axes()[1]) and isinstance(fig.get_axes()[1]._colorbar.norm, LogNorm):
                 return True
         return False
