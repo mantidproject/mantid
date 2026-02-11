@@ -374,14 +374,14 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
         if (!defaultExt.empty()) {
           auto run = FileFinder::Instance().findRun(unresolvedFileName, std::vector<std::string>(1, defaultExt));
           if (run)
-            fullyResolvedFile = run.result();
+            fullyResolvedFile = run.result().string();
           else
             errors += run.errors();
 
         } else {
           auto run = FileFinder::Instance().findRun(unresolvedFileName, m_exts);
           if (run)
-            fullyResolvedFile = run.result();
+            fullyResolvedFile = run.result().string();
           else
             errors += run.errors();
         }

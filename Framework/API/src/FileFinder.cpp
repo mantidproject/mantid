@@ -655,14 +655,13 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
           }
         }
 
-        std::string path = findRun(p1.first + run, cachedInstr, extensionsProvided, useOnlyExtensionsProvided).result();
+        auto path = findRun(p1.first + run, cachedInstr, extensionsProvided, useOnlyExtensionsProvided).result();
 
         if (!path.empty()) {
           // Cache successfully found path and extension
-          std::filesystem::path tempPath(path);
-          previousExt = tempPath.extension().string();
+          previousExt = path.extension().string();
           // Append separator for string concatenation later
-          previousPath = tempPath.parent_path().string() + std::string(1, std::filesystem::path::preferred_separator);
+          previousPath = path.parent_path().string() + std::string(1, std::filesystem::path::preferred_separator);
           res.emplace_back(path);
         } else {
           throw Kernel::Exception::NotFoundError("Unable to find file:", run);
@@ -673,7 +672,7 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
       // update instrument short name for later use
       instrSName = instr.shortName();
 
-      std::string path = findRun(*h, instr, extensionsProvided, useOnlyExtensionsProvided).result();
+      auto path = findRun(*h, instr, extensionsProvided, useOnlyExtensionsProvided).result();
 
       if (!path.empty()) {
         res.emplace_back(path);
