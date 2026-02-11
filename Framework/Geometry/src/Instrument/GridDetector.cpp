@@ -141,6 +141,7 @@ detid_t getFillFirstX(const GridDetector *me, int x, int y, int z) {
   else
     return me->idstart() + x * me->idstep() + z * me->idstepbyrow() + y * (me->zpixels() * me->idstepbyrow());
 }
+} // end namespace
 
 //-------------------------------------------------------------------------------------------------
 /** Return the detector ID corresponding to the component in the assembly at the
