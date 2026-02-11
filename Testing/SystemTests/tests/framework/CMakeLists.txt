@@ -35,7 +35,9 @@ set(SYSTEST_NAMES
     D7AbsoluteCrossSectionsTest.py
     D7YIGPositionCalibrationTest.py
     Diffraction_Workflow_Test.py
-    DirectILLAutoProcessTest.py
+    DirectILLAutoPANTHERPowderTest.py
+    DirectILLAutoPANTHERSingleCrystalTest.py
+    DirectILLAutoSHARPPowderTest.py
     DirectInelasticDiagnostic.py
     DirectInelasticDiagnostic2.py
     DistributeProtonChargeTest.py
