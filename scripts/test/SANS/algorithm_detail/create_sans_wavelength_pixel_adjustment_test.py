@@ -7,11 +7,13 @@
 import numpy as np
 import os
 import unittest
+from unittest import MagicMock, patch, call
 
 from mantid.kernel import config
 from mantid.simpleapi import CreateSampleWorkspace
 from sans.algorithm_detail.CreateSANSWavelengthPixelAdjustment import CreateSANSWavelengthPixelAdjustment
 from sans.common.enums import RangeStepType, DetectorType
+from sans.common.constants import EMPTY_NAME
 from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavelength_and_pixel_adjustment_builder
 from sans.test_helper.test_director import TestDirector
 
@@ -163,6 +165,72 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
 
         # Clean up
         CreateSANSWavelengthPixelAdjustmentTest._remove_test_file(direct_file_name)
+
+    @patch("sans.algorithm_detail.CreateSANSWavelengthPixelAdjustment.DetectorType")
+    @patch("sans.algorithm_detail.CreateSANSWavelengthPixelAdjustment.get_component_name")
+    @patch("sans.algorithm_detail.CreateSANSWavelengthPixelAdjustment.create_unmanaged_algorithm")
+    def test_get_pixel_adjustment_workspace_input_arguments(
+        self, mock_create_unmanaged_algorithm, mock_get_component_name, mock_detector_type
+    ):
+        # Setup the Mock helper function
+        def mock_alg(output_ws=None):
+            """Creates the mock algorithm"""
+            alg = MagicMock()
+            alg.execute = MagicMock()
+            if output_ws is not None:
+                prop = MagicMock()
+                prop.value = output_ws
+                alg.getProperty.return_value = prop
+            return alg
+
+        # Setup the mock algorithms
+        load_alg = mock_alg(output_ws=MagicMock(name="loaded_ws"))
+        instrument_alg = mock_alg()
+        crop_alg = mock_alg(output_ws=MagicMock(name="cropped_ws"))
+        mock_create_unmanaged_algorithm.side_effect = [load_alg, instrument_alg, crop_alg]
+
+        # Setup the dectector type and get_component_name mocks
+        mock_detector_type.return_value = MagicMock(name="det_type_obj")
+        mock_get_component_name.return_value = "component"
+
+        # Setup the inputs to _get_pixel_adjustment_workspace
+        pixel_adjustment_file = "pixel_adjustment_file"
+        component = "component"
+        idf_path = "idf/path"
+
+        # Call the _get_pixel_adjustment_workspace method
+        _ = CreateSANSWavelengthPixelAdjustment._get_pixel_adjustment_workspace(pixel_adjustment_file, component, idf_path)
+
+        # Ensure create_unmanaged_algorithm called with correct inputs
+        assert mock_create_unmanaged_algorithm.call_args_list == [
+            call(
+                "LoadRKH",
+                Filename=pixel_adjustment_file,
+                OutputWorkspace=EMPTY_NAME,
+                FirstColumnValue="SpectrumNumber",
+            ),
+            call(
+                "LoadInstrument",
+                Workspace=MagicMock(name="loaded_ws"),
+                Filename=idf_path,
+                RewriteSpectraMap=True,
+            ),
+            call(
+                "CropToComponent",
+                InputWorkspace=MagicMock(name="loaded_ws"),
+                OutputWorkspace=EMPTY_NAME,
+                ComponentNames="component",
+            ),
+        ]
+
+        # Ensure each mocks called
+        load_alg.execute.assert_called_once()
+        instrument_alg.execute.assert_called_once()
+        crop_alg.execute.assert_called_once()
+        DetectorType.assert_called_once_with(component)
+
+    def test_get_pixel_adjustment_workspace_returns_none_when_no_file():
+        assert CreateSANSWavelengthPixelAdjustment._get_pixel_adjustment_workspace(None, "component", "idf/path") is None
 
 
 if __name__ == "__main__":
