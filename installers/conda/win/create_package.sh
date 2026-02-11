@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 # Constructs a standalone windows MantidWorkbench installer using NSIS.
 # The package is created from a pre-packaged version of Mantid from conda
@@ -6,6 +6,8 @@
 # package
 
 # Print usage and exit
+START_TIME=$(date +%s)
+
 function usage() {
   local exitcode=$1
   echo "Usage: $0 [options] package_name"
@@ -80,6 +82,9 @@ if [[ "$SUFFIX" == "Unstable" ]] || [[ "$SUFFIX" == "Nightly" ]]; then
   MANTID_CHANNEL=mantid/label/nightly
 fi
 
+
+T1=$(date +%s)
+
 echo "Creating conda env from mantidworkbench and jq"
 "$CONDA_EXE" create --prefix $CONDA_ENV_PATH \
   --copy --channel $CONDA_CHANNEL --channel conda-forge --channel $MANTID_CHANNEL -y \
@@ -89,12 +94,23 @@ echo "Creating conda env from mantidworkbench and jq"
   m2w64-jq
 echo "Conda env created"
 
+
+T2=$(date +%s)
+ET=$((T2 - T1))
+echo "Conda env creation time: ${ET} seconds"
+
+
 # Determine version information
 VERSION=$("$CONDA_EXE" list --prefix "$CONDA_ENV_PATH" '^mantid$' --json | $CONDA_ENV_PATH/Library/mingw-w64/bin/jq.exe --raw-output '.[0].version')
 echo "Version number: $VERSION"
 echo "Removing jq from conda env"
 "$CONDA_EXE" remove --prefix $CONDA_ENV_PATH --yes m2w64-jq
 echo "jq removed from conda env"
+
+
+T1=$(date +%s)
+
+
 
 echo "Copying root packages of env files (Python, DLLs, Lib, Scripts, ucrt, and msvc files) to package/bin"
 mkdir $COPY_DIR/bin
@@ -168,6 +184,12 @@ find $COPY_DIR -name *.pyc -delete
 rm -rf $COPY_DIR/bin/api-ms-win*.dll
 rm -rf $COPY_DIR/bin/libclang.dll
 
+
+T2=$(date +%s)
+ET=$((T2 - T1))
+echo "File moving time: ${ET} seconds"
+
+
 # Now package using NSIS
 echo "Packaging package via NSIS"
 
@@ -194,7 +216,11 @@ COPY_DIR="$SCRIPT_DRIVE_LETTER:${COPY_DIR:2}"
 NSIS_SCRIPT=${NSIS_SCRIPT////\\}
 NSIS_SCRIPT="$SCRIPT_DRIVE_LETTER:${NSIS_SCRIPT:2}"
 
-NSIS_OUTPUT_LOG=$PWD/nsis_log.txt
+LOG_DIR="$PWD/env_logs/nsislog"
+mkdir -p "$LOG_DIR"
+
+# NSIS_OUTPUT_LOG=$PWD/nsis_log.txt
+NSIS_OUTPUT_LOG="$LOG_DIR/nsis_log.txt"
 NSIS_OUTPUT_LOG=${NSIS_OUTPUT_LOG////\\}
 NSIS_OUTPUT_LOG="$SCRIPT_DRIVE_LETTER:${NSIS_OUTPUT_LOG:2}"
 
@@ -222,9 +248,12 @@ OUTFILE_NAME=$PWD/$VERSION_NAME
 OUTFILE_NAME=${OUTFILE_NAME////\\}
 OUTFILE_NAME="$SCRIPT_DRIVE_LETTER:${OUTFILE_NAME:2}"
 
+
+T1=$(date +%s)
+
 # Run the makensis command from our nsis conda environment
-echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
-cmd.exe //C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$VERSION /O"$NSIS_OUTPUT_LOG" /DPACKAGE_DIR="$COPY_DIR" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH "$NSIS_SCRIPT""
+echo makensis /V1 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
+cmd.exe //C "START /wait "" $MAKENSIS_COMMAND /V1 /DVERSION=$VERSION /O"$NSIS_OUTPUT_LOG" /DPACKAGE_DIR="$COPY_DIR" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH "$NSIS_SCRIPT""
 
 if [ ! -f "$OUTFILE_NAME" ]; then
   echo "Error creating package, no file found at $OUTFILE_NAME"
@@ -234,3 +263,11 @@ fi
 echo "Package packaged, find it here: $OUTFILE_NAME"
 
 echo "Done"
+
+T2=$(date +%s)
+ET=$((T2 - T1))
+echo "NSIS only time: ${ET} seconds"
+
+END_TIME=$(date +%s)
+ELAPSED=$((END_TIME - START_TIME))
+echo "Total build time: ${ELAPSED} seconds"

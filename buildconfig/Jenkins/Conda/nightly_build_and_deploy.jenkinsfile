@@ -14,7 +14,7 @@ def publishPackages = (gitBranch == "${BRANCH_TO_PUBLISH}")
 def defaults = [
   anacondaChannelChoices : ['mantid-test'],
   githubReleasesRepo: 'mantidproject/mantid',
-  platformChoices : ['none', 'all', 'linux-64', 'win-64', 'osx-arm64'],
+  platformChoices : ['none', 'all', 'linux-64', 'isis-win-1', 'osx-arm64'],
   publishToAnaconda : publishPackages,
   publishToGithub   : publishPackages,
   packageSuffix     : 'Unstable',
@@ -175,16 +175,16 @@ pipeline {
             }
           }
         }
-        stage('build and test: win-64') {
+        stage('build and test: isis-win-1') {
           when {
             beforeAgent true
             beforeOptions true
             anyOf {
               expression { params.BUILD_DEVEL == 'all' }
-              expression { params.BUILD_DEVEL == 'win-64' }
+              expression { params.BUILD_DEVEL == 'isis-win-1' }
             }
           }
-          agent { label 'win-64' }
+          agent { label 'isis-win-1' }
           options { timestamps() }
           steps {
             checkoutSource("${GIT_SHA}")
@@ -253,16 +253,16 @@ pipeline {
             }
           }
         }
-        stage('package conda: win-64') {
+        stage('package conda: isis-win-1') {
           when {
             beforeAgent true
             beforeOptions true
             anyOf {
-              expression { params.BUILD_PACKAGE == 'win-64' }
+              expression { params.BUILD_PACKAGE == 'isis-win-1' }
               expression { params.BUILD_PACKAGE == 'all' }
             }
           }
-          agent { label 'win-64' }
+          agent { label 'isis-win-1' }
           options {
               timestamps()
               retry(3)
@@ -324,7 +324,7 @@ pipeline {
         axes {
           axis {
             name 'PLATFORM'
-            values 'linux-64', 'win-64', 'osx-arm64'
+            values 'linux-64', 'isis-win-1', 'osx-arm64'
           }
         }
         stages {
