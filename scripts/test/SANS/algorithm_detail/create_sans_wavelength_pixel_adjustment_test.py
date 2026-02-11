@@ -7,7 +7,7 @@
 import numpy as np
 import os
 import unittest
-from unittest import MagicMock, patch, call
+from unittest.mock import MagicMock, patch, call
 
 from mantid.kernel import config
 from mantid.simpleapi import CreateSampleWorkspace
