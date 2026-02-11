@@ -121,6 +121,7 @@ std::shared_ptr<Detector> GridDetector::getAtXYZ(const int x, const int y, const
   return std::dynamic_pointer_cast<Detector>(xCol->getChild(y));
 }
 
+namespace {
 detid_t getFillFirstZ(const GridDetector *me, int x, int y, int z) {
   if (me->idFillOrder()[1] == 'y')
     return me->idstart() + z * me->idstep() + y * me->idstepbyrow() + x * (me->ypixels() * me->idstepbyrow());
@@ -167,6 +168,7 @@ detid_t GridDetector::getDetectorIDAtXYZ(const int x, const int y, const int z) 
     return getFillFirstX(me, x, y, z);
 }
 
+namespace {
 std::tuple<int, int, int> getXYZFillFirstZ(const GridDetector *me, int col, int id) {
   if (me->idFillOrder()[1] == 'y') {
     int row = (id / me->idstepbyrow()) % me->ypixels();
@@ -202,6 +204,7 @@ std::tuple<int, int, int> getXYZFillFirstX(const GridDetector *me, int col, int 
     return std::tuple<int, int, int>(col, layer, row);
   }
 }
+} // end namespace
 
 //-------------------------------------------------------------------------------------------------
 /** Given a detector ID, return the X,Y,Z coords into the grid detector
