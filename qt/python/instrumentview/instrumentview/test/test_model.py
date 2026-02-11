@@ -530,23 +530,22 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_allclose(q_lab_direction, iv_qlab, rtol=1e-5)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
-    def test_cached_projections_map_empty(self, mock_projection_constructor):
+    def test_cached_projection_objects_empty(self, mock_projection_constructor):
         model, _ = self._setup_model([1, 2, 3])
         model.projection_type = ProjectionType.CYLINDRICAL_X
         mock_projection = MagicMock(positions=MagicMock(return_value=np.array([[1, 2], [1, 2], [1, 2]])))
         mock_projection_constructor.return_value = mock_projection
-        model._cached_projections_map = {}
+        model._cached_projection_objects = {}
         positions = model._calculate_projection()
         np.testing.assert_almost_equal(positions, np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]]))
-        np.testing.assert_almost_equal(
-            model._cached_projections_map[ProjectionType.CYLINDRICAL_X.name], np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]])
-        )
+        self.assertEqual(mock_projection, model._cached_projection_objects[ProjectionType.CYLINDRICAL_X.name])
 
     @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
-    def test_cached_projections_map_already_cached(self, mock_projection_constructor):
+    def test_cached_projection_objects_already_cached(self, mock_projection_constructor):
         model, _ = self._setup_model([1, 2, 3])
         model.projection_type = ProjectionType.CYLINDRICAL_X
-        model._cached_projections_map = {ProjectionType.CYLINDRICAL_X.name: np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]])}
+        mock_projection = MagicMock(positions=MagicMock(return_value=np.array([[1, 2], [1, 2], [1, 2]])))
+        model._cached_projection_objects = {ProjectionType.CYLINDRICAL_X.name: mock_projection}
         positions = model._calculate_projection()
         np.testing.assert_almost_equal(positions, np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]]))
         mock_projection_constructor.assert_not_called()

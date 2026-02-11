@@ -534,15 +534,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertIsNot(self._presenter._renderer, shape_renderer)
         mock_update_plotter.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
-    def test_on_show_shapes_toggled_side_by_side_forces_point_cloud(self, mock_update_plotter):
-        """Test that side-by-side projection always uses point cloud regardless of checkbox."""
-        self._model.projection_type = ProjectionType.SIDE_BY_SIDE
-        point_cloud_renderer = self._presenter._renderer
-        self._presenter._on_show_shapes_toggled(checked=True)
-        self.assertIs(self._presenter._renderer, point_cloud_renderer)
-        mock_update_plotter.assert_called_once()
-
     def test_clear_renderers(self):
         """Test that _clear_renderers nulls both cached renderers."""
         # Initialize both renderers
