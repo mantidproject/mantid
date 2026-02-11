@@ -324,7 +324,7 @@ pipeline {
         axes {
           axis {
             name 'PLATFORM'
-            values 'linux-64', 'isis-win-1', 'osx-arm64'
+            values 'win-64'
           }
         }
         stages {
@@ -333,11 +333,11 @@ pipeline {
               beforeAgent true
               beforeOptions true
               anyOf {
-                  expression { params.BUILD_PACKAGE == "${PLATFORM}" }
+                  expression { params.BUILD_PACKAGE == "isis-win-1" }
                   expression { params.BUILD_PACKAGE == 'all' }
               }
             }
-            agent { label "${PLATFORM}" }
+            agent { label "isis-win-1" }
             options {
                 timestamps()
                 retry(3)

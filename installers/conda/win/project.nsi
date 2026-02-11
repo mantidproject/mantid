@@ -258,22 +258,22 @@ Section "-Core installation"
     # Add all files to be written to the output path. Use the long path prefix ""\\?\" to avoid problems
     # with files that have long path lengths.
 
-    ; File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.*"
+    File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.*"
 
-    SetCompress auto
-    File /r /x "*.dll" /x "*.exe" /x "*.pyd" /x "*.lib" /x "*.pyi" /x "*.sip" /x "*.gif" /x "*.png" \
-          "\\?\${PACKAGE_DIR_BACKSLASHES}\*.*"
+    ; SetCompress auto
+    ; File /r /x "*.dll" /x "*.exe" /x "*.pyd" /x "*.lib" /x "*.pyi" /x "*.sip" /x "*.gif" /x "*.png" \
+    ;       "\\?\${PACKAGE_DIR_BACKSLASHES}\*.*"
 
-    SetCompress off
-    File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.dll"
-    File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.exe"
-    File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.pyd"
-    File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.lib"
-    File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.pyi"
-    File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.sip"
-    File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.gif"
-    File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.png"
-    SetCompress auto
+    ; SetCompress off
+    ; File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.dll"
+    ; File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.exe"
+    ; File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.pyd"
+    ; File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.lib"
+    ; File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.pyi"
+    ; File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.sip"
+    ; File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.gif"
+    ; File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.png"
+    ; SetCompress auto
 
     # Add MantidWorkbench-script.pyw file to the install directory
     FileOpen $0 "$INSTDIR\bin\MantidWorkbench-script.pyw" w # This w is intentional and opens it in write mode
