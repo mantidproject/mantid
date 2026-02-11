@@ -184,7 +184,8 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
             return alg
 
         # Setup the mock algorithms
-        load_alg = mock_alg(output_ws=MagicMock(name="loaded_ws"))
+        loaded_ws = MagicMock(name="loaded_ws")
+        load_alg = mock_alg(output_ws=loaded_ws)
         instrument_alg = mock_alg()
         crop_alg = mock_alg(output_ws=MagicMock(name="cropped_ws"))
         mock_create_unmanaged_algorithm.side_effect = [load_alg, instrument_alg, crop_alg]
@@ -202,6 +203,8 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
         _ = CreateSANSWavelengthPixelAdjustment._get_pixel_adjustment_workspace(pixel_adjustment_file, component, idf_path)
 
         # Ensure create_unmanaged_algorithm called with correct inputs
+        print(mock_create_unmanaged_algorithm.call_args_list[0][0][0])
+        assert mock_create_unmanaged_algorithm.call_args_list[0][0][0] == "LoadRKH"
         assert mock_create_unmanaged_algorithm.call_args_list == [
             call(
                 "LoadRKH",
@@ -211,13 +214,13 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
             ),
             call(
                 "LoadInstrument",
-                Workspace=MagicMock(name="loaded_ws"),
+                Workspace=loaded_ws,
                 Filename=idf_path,
                 RewriteSpectraMap=True,
             ),
             call(
                 "CropToComponent",
-                InputWorkspace=MagicMock(name="loaded_ws"),
+                InputWorkspace=loaded_ws,
                 OutputWorkspace=EMPTY_NAME,
                 ComponentNames="component",
             ),
@@ -227,9 +230,9 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
         load_alg.execute.assert_called_once()
         instrument_alg.execute.assert_called_once()
         crop_alg.execute.assert_called_once()
-        DetectorType.assert_called_once_with(component)
+        mock_detector_type.assert_called_once_with(component)
 
-    def test_get_pixel_adjustment_workspace_returns_none_when_no_file():
+    def test_get_pixel_adjustment_workspace_returns_none_when_no_file(self):
         assert CreateSANSWavelengthPixelAdjustment._get_pixel_adjustment_workspace(None, "component", "idf/path") is None
 
 
