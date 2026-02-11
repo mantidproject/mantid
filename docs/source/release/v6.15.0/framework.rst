@@ -64,8 +64,8 @@ New features
 
 Bugfixes
 ########
-- (`#40029 <https://github.com/mantidproject/mantid/pull/40029>`_) ``MatrixWorkspace::getNumberBins()`` has been
-  replaced by ``MatrixWorkspace::blocksize()``, as the former is deprecated.
+- (`#40029 <https://github.com/mantidproject/mantid/pull/40029>`_) :py:meth:`mantid.api.MatrixWorkspace.getNumberBins()` has been
+  replaced by :py:meth:`mantid.api.MatrixWorkspace.blocksize()`, as the former is deprecated.
 - (`#40606 <https://github.com/mantidproject/mantid/pull/40606>`_) :ref:`algm-GenerateEventsFilter`
   will now be able to handle cases where there is no second pulse in the ROI.
 - (`#40336 <https://github.com/mantidproject/mantid/pull/40336>`_) :ref:`algm-CreateDetectorTable` will now return the
