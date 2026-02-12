@@ -1158,7 +1158,7 @@ bool MatrixWorkspace::isCommonBins() const {
     }
   }
 
-  // locb before expensive action
+  // lock before expensive action
   std::lock_guard<std::mutex> lock{m_isCommonBinsMutex};
   // check valid flag after lock
   if (m_isCommonBinsFlagValid.load(std::memory_order_acquire))
