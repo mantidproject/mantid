@@ -505,6 +505,48 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.set_contour_range_limits.assert_called_once_with((0, 100))
         self._mock_view.set_contour_min_max_boxes.assert_called_once_with((0, 100))
 
+    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "workspace_x_unit", new_callable=PropertyMock)
+    def test_integration_limits_in_current_unit_converts_from_workspace_to_view_unit(self, mock_workspace_x_unit, mock_integration_limits):
+        """Test that integration_limits_in_current_unit converts limits from workspace unit to view unit."""
+        mock_workspace_x_unit.return_value = "TOF"
+        mock_integration_limits.return_value = (1000.0, 5000.0)
+        self._mock_view.current_selected_unit.return_value = "dSpacing"
+        self._presenter._model.convert_units = MagicMock(side_effect=[2.0, 10.0])
+        result = self._presenter.integration_limits_in_current_unit()
+        self.assertEqual(self._presenter._model.convert_units.call_count, 2)
+        self._presenter._model.convert_units.assert_any_call("TOF", "dSpacing", 0, 1000.0)
+        self._presenter._model.convert_units.assert_any_call("TOF", "dSpacing", 0, 5000.0)
+        self.assertEqual(result, (2.0, 10.0))
+
+    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "workspace_x_unit", new_callable=PropertyMock)
+    def test_integration_limits_in_current_unit_with_same_units(self, mock_workspace_x_unit, mock_integration_limits):
+        """Test that integration_limits_in_current_unit works when workspace and view units are the same."""
+        mock_workspace_x_unit.return_value = "TOF"
+        mock_integration_limits.return_value = (1000.0, 5000.0)
+        self._mock_view.current_selected_unit.return_value = "TOF"
+        self._presenter._model.convert_units = MagicMock(side_effect=[1000.0, 5000.0])
+        result = self._presenter.integration_limits_in_current_unit()
+        self.assertEqual(self._presenter._model.convert_units.call_count, 2)
+        self._presenter._model.convert_units.assert_any_call("TOF", "TOF", 0, 1000.0)
+        self._presenter._model.convert_units.assert_any_call("TOF", "TOF", 0, 5000.0)
+        self.assertEqual(result, (1000.0, 5000.0))
+
+    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "workspace_x_unit", new_callable=PropertyMock)
+    def test_integration_limits_in_current_unit_wavelength_conversion(self, mock_workspace_x_unit, mock_integration_limits):
+        """Test that integration_limits_in_current_unit correctly converts TOF to Wavelength."""
+        mock_workspace_x_unit.return_value = "TOF"
+        mock_integration_limits.return_value = (2000.0, 8000.0)
+        self._mock_view.current_selected_unit.return_value = "Wavelength"
+        self._presenter._model.convert_units = MagicMock(side_effect=[1.5, 6.0])
+        result = self._presenter.integration_limits_in_current_unit()
+        self.assertEqual(self._presenter._model.convert_units.call_count, 2)
+        self._presenter._model.convert_units.assert_any_call("TOF", "Wavelength", 0, 2000.0)
+        self._presenter._model.convert_units.assert_any_call("TOF", "Wavelength", 0, 8000.0)
+        self.assertEqual(result, (1.5, 6.0))
+
 
 if __name__ == "__main__":
     unittest.main()

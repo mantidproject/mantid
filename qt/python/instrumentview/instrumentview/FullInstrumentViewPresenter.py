@@ -145,6 +145,12 @@ class FullInstrumentViewPresenter:
             return self._model.workspace_x_unit_display
         return ""
 
+    def integration_limits_in_current_unit(self) -> tuple[float, float]:
+        limits = self._model.integration_limits
+        min_in_workspace_unit = self._model.convert_units(self._model.workspace_x_unit, self._view.current_selected_unit(), 0, limits[0])
+        max_in_workspace_unit = self._model.convert_units(self._model.workspace_x_unit, self._view.current_selected_unit(), 0, limits[1])
+        return min_in_workspace_unit, max_in_workspace_unit
+
     def on_integration_limits_updated(self) -> None:
         """When integration limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         self._model.integration_limits = self._view.get_integration_limits()
