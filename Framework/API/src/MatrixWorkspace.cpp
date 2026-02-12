@@ -32,8 +32,6 @@
 
 #include "MantidTypes/SpectrumDefinition.h"
 
-#include "MantidAPI/AlgoTimeRegister.h"
-
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
@@ -1114,15 +1112,9 @@ bool MatrixWorkspace::isHistogramDataByIndex(const std::size_t index) const {
 }
 
 bool MatrixWorkspace::setCommonBinsFlag(const bool value) const {
-  // check valid flag before acquiring lock
+  // check valid flag - other threads may have updated flags
   if (m_isCommonBinsFlagValid.load(std::memory_order_acquire))
     return m_isCommonBinsFlag.load(std::memory_order_relaxed);
-  std::lock_guard<std::mutex> lock{m_isCommonBinsMutex};
-
-  // after acquiring lock, check valid flag again
-  if (m_isCommonBinsFlagValid.load(std::memory_order_acquire))
-    return m_isCommonBinsFlag.load(std::memory_order_relaxed);
-
   m_isCommonBinsFlag.store(value, std::memory_order_relaxed);
   m_isCommonBinsFlagValid.store(true, std::memory_order_release);
   return value;
@@ -1133,11 +1125,7 @@ bool MatrixWorkspace::setCommonBinsFlag(const bool value) const {
  *  @return whether the workspace contains common X bins
  */
 bool MatrixWorkspace::isCommonBins() const {
-  auto begin = std::chrono::high_resolution_clock::now();
-  Instrumentation::AlgoTimeRegister::Instance();
   if (m_isCommonBinsFlagValid.load(std::memory_order_acquire)) {
-    auto end = std::chrono::high_resolution_clock::now();
-    Instrumentation::AlgoTimeRegister::Instance().addTime("isCommonBinsCache", begin, end);
     return m_isCommonBinsFlag.load(std::memory_order_relaxed);
   }
 
@@ -1159,8 +1147,6 @@ bool MatrixWorkspace::isCommonBins() const {
 
   // If true, we may return here.
   if (commonPtr) {
-    auto end = std::chrono::high_resolution_clock::now();
-    Instrumentation::AlgoTimeRegister::Instance().addTime("isCommonBinsComPtr", begin, end);
     return setCommonBinsFlag(true);
   }
 
@@ -1168,39 +1154,56 @@ bool MatrixWorkspace::isCommonBins() const {
   const size_t numBins = x(0).size();
   for (size_t i = 1; i < numHist; ++i) {
     if (x(i).size() != numBins) {
-      auto end = std::chrono::high_resolution_clock::now();
-      Instrumentation::AlgoTimeRegister::Instance().addTime("isCommonBinsSize", begin, end);
       return setCommonBinsFlag(false);
     }
   }
 
+  // locb before expensive action
+  std::lock_guard<std::mutex> lock{m_isCommonBinsMutex};
+  // check valid flag after lock
+  if (m_isCommonBinsFlagValid.load(std::memory_order_acquire))
+    return m_isCommonBinsFlag.load(std::memory_order_relaxed);
+
   const auto &x0 = x(0);
   // Check that the values of each histogram are identical.
   std::atomic<bool> commonValues{true};
+  bool threadSafe = this->threadSafe();
   PARALLEL_FOR_IF(this->threadSafe())
   for (int i = 1; i < static_cast<int>(numHist); ++i) {
-    if (commonValues) {
+    if (commonValues.load(std::memory_order_relaxed)) {
       const auto specIndex = static_cast<std::size_t>(i);
       const auto &xi = x(specIndex);
+      // Early exits same X storage.
+      if (&xi == &x0) {
+        continue;
+      }
       for (size_t j = 0; j < numBins; ++j) {
         const double a = x0[j];
         const double b = xi[j];
-        // Check for NaN and infinity before comparing for equality
-        if (std::isfinite(a) && std::isfinite(b)) {
-          if (std::abs(a - b) > EPSILON) {
-            commonValues = false;
-            break;
-          }
-          // Otherwise we check that both are NaN or both are infinity
-        } else if ((std::isnan(a) != std::isnan(b)) || (std::isinf(a) != std::isinf(b))) {
-          commonValues = false;
+        // Early exit for exact equality
+        if (a == b) {
+          continue;
+        }
+        // Early exit for nan/if scenarios
+        bool aIsNan = std::isnan(a);
+        bool bIsNan = std::isnan(b);
+        bool aIsInf = std::isinf(a);
+        bool bIsInf = std::isinf(b);
+        if ((aIsNan && bIsNan) || (aIsInf && bIsInf)) {
+          continue;
+        }
+        if ((aIsNan != bIsNan) || (aIsInf != bIsInf)) {
+          commonValues.store(false, std::memory_order_relaxed);
+          break;
+        }
+        // check for equality within tolerance
+        if (std::abs(a - b) > EPSILON) {
+          commonValues.store(false, std::memory_order_relaxed);
           break;
         }
       }
     }
   }
-  auto end = std::chrono::high_resolution_clock::now();
-  Instrumentation::AlgoTimeRegister::Instance().addTime("isCommonBinsValues", begin, end);
   return setCommonBinsFlag(commonValues.load(std::memory_order_relaxed));
 }
 
