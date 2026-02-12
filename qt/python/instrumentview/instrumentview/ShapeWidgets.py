@@ -357,7 +357,7 @@ class EllipseWidgetNoRotation(vtkBoxWidget2):
             logger.debug("Failed to update ellipse from widget bounds - visuals may be out of sync with parameters.", exc_info=True)
 
     def _create_ellipse_mesh(self, cx, cy, rx, ry, z, num_points=64, angle=0.0):
-        theta = np.linspace(0, 2 * np.pi, num_points, endpoint=False)
+        theta = np.linspace(0, 2 * np.pi, num_points)
         x = rx * np.cos(theta)
         y = ry * np.sin(theta)
         ca = np.cos(angle)
@@ -388,7 +388,7 @@ class EllipseWidgetNoRotation(vtkBoxWidget2):
                 )
             else:
                 num_points = int(self._ellipse_mesh.n_points)
-                theta = np.linspace(0, 2 * np.pi, num_points, endpoint=False)
+                theta = np.linspace(0, 2 * np.pi, num_points)
                 x = rx * np.cos(theta)
                 y = ry * np.sin(theta)
                 ca = np.cos(self._angle)
