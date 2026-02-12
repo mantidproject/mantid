@@ -62,10 +62,7 @@ class ImplicitEllipse:
 
     def EvaluateFunction(self, x):
         """Evaluate the implicit function. Returns negative inside, positive outside."""
-        if isinstance(x, (list, tuple)):
-            px, py = x[0], x[1]
-        else:
-            px, py = x[0], x[1]
+        px, py = x[0], x[1]
 
         dx = px - self.cx
         dy = py - self.cy
