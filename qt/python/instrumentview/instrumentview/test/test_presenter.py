@@ -47,13 +47,17 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.add_masked_mesh.assert_called()
         mock_set_peaks_ws.assert_called_once()
 
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_contour_range_reset_clicked")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_integration_range")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_integration_limits")
-    def test_on_integration_limits_updated_true(self, mock_set_view_integration_limits, mock_update_integration_range):
+    def test_on_integration_limits_updated_true(
+        self, mock_set_view_integration_limits, mock_update_integration_range, mock_on_contour_range_reset_clicked
+    ):
         self._mock_view.get_integration_limits.return_value = (0, 100)
         self._presenter.on_integration_limits_updated()
         mock_update_integration_range.assert_called_with((0, 100))
         mock_set_view_integration_limits.assert_called_once()
+        mock_on_contour_range_reset_clicked.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_contour_limits")
     def test_on_contour_limits_updated_true(self, mock_set_view_contour_limits):

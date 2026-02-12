@@ -232,6 +232,7 @@ class FullInstrumentViewModel:
             dtype=int,
         )
         self._counts_limits = (np.min(new_detector_counts), np.max(new_detector_counts))
+        self.full_counts_limits = self._counts_limits
         self._counts[self.is_pickable] = new_detector_counts
 
     def update_point_picked_detectors(self, index: int) -> None:
