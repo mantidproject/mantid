@@ -163,8 +163,7 @@ void SaveIsawDetCal::exec() {
       const size_t bankIndex = componentInfo.indexOfAny(bankName);
       const auto children = componentInfo.children(bankIndex);
       if (!children.empty()) {
-        // Get the first child component by name
-        det = inst->getComponentByName(componentInfo.name(children[0]));
+        det = IComponent_const_sptr(componentInfo.componentID(children[0]), NoDeleting());
       }
     }
     if (det) {
