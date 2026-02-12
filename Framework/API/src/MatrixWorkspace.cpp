@@ -1167,7 +1167,6 @@ bool MatrixWorkspace::isCommonBins() const {
   const auto &x0 = x(0);
   // Check that the values of each histogram are identical.
   std::atomic<bool> commonValues{true};
-  bool threadSafe = this->threadSafe();
   PARALLEL_FOR_IF(this->threadSafe())
   for (int i = 1; i < static_cast<int>(numHist); ++i) {
     if (commonValues.load(std::memory_order_relaxed)) {
