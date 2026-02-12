@@ -22,7 +22,7 @@ public:
   static void destroySuite(MeshFileIOTest *suite) { delete suite; }
 
   void testTranslate() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     auto loader = LoadBinaryStl(path, unit);
     std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     loader.translate(environmentMesh, {5, 5, 15});
@@ -34,14 +34,14 @@ public:
   }
 
   void testTranslateFailWrongSize() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     auto loader = LoadBinaryStl(path, unit);
     std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     TS_ASSERT_THROWS(loader.translate(environmentMesh, {-1, 0, 1, 0, 0, 0, 0, 1}), const std::invalid_argument &);
   }
 
   void testXRotation() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     auto loader = LoadBinaryStl(path, unit);
     std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     loader.rotate(environmentMesh, 45 * M_PI / 180, 0, 0);
@@ -54,7 +54,7 @@ public:
     }
   }
   void testYRotation() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     auto loader = LoadBinaryStl(path, unit);
     std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     loader.rotate(environmentMesh, 0, 90 * M_PI / 180, 0);
@@ -67,7 +67,7 @@ public:
   }
 
   void testZRotation() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     auto loader = LoadBinaryStl(path, unit);
     std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     loader.rotate(environmentMesh, 0, 0, 180 * M_PI / 180);
@@ -80,7 +80,7 @@ public:
   }
 
   void testMultiRotation() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     auto loader = LoadBinaryStl(path, unit);
     std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     loader.rotate(environmentMesh, 70 * M_PI / 180, 20 * M_PI / 180, 35 * M_PI / 180);
@@ -95,7 +95,7 @@ public:
   }
 
   void testTranslateAndRotate() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     auto loader = LoadBinaryStl(path, unit);
     std::shared_ptr<MeshObject> environmentMesh = loader.readShape();
     loader.rotate(environmentMesh, 0, 90 * M_PI / 180, 0);

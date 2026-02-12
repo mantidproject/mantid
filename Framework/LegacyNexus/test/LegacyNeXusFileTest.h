@@ -46,7 +46,7 @@ public:
   void impl_test_open_group(NexusFormat fmt) {
     cout << "\ntest openGroup\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_grp");
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
     File file(filename, NXACC_READ);
 
     // create a group, to be opened
@@ -72,7 +72,7 @@ public:
   void impl_test_open_group_bad(NexusFormat fmt) {
     cout << "\ntest openGroup bad\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_grp");
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
     File file(filename, NXACC_READ);
 
     string grp("abc"), notgrp("clothes"), cls("NXclass"), notcls("NXpants");
@@ -90,7 +90,7 @@ public:
   void impl_test_open_group_layers(NexusFormat fmt) {
     cout << "\ntest openGroup layers\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_grp_layers");
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
     string grp1("layer1"), grp2("layer2"), cls1("NXpants1"), cls2("NXshorts");
 
     File file(filename, NXACC_READ);
@@ -107,7 +107,7 @@ public:
   void impl_test_closeGroup(NexusFormat fmt) {
     cout << "\ntest closeGroup\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_grp");
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
     File file(filename, NXACC_READ);
 
     // check error at root
@@ -134,7 +134,7 @@ public:
   void impl_test_open_dataset(NexusFormat fmt) {
     cout << "\ntest openData\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_data");
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
 
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
@@ -155,7 +155,7 @@ public:
   void impl_test_closeData(NexusFormat fmt) {
     cout << "\ntest closeData\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_dataclose");
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
 
     File file(filename, NXACC_READ);
 
@@ -185,7 +185,7 @@ public:
     cout << "\ntest dataset read\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_dataR_basic");
     // open a file
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
 
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
@@ -220,7 +220,7 @@ public:
     cout << "\ntest dataset read -- arrays\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_dataR_array");
     // open a file
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
 
     File file(filename, NXACC_READ);
 
@@ -278,7 +278,7 @@ public:
     cout << "\ntest dataset read -- vector\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_dataR_vec");
     // open a file
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
 
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
@@ -328,7 +328,7 @@ public:
   void impl_test_getPath_groups(NexusFormat fmt) {
     cout << "\ntest get_path -- groups only\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_grp");
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
     File file(filename, NXACC_READ);
 
     // at root, path should be "/"
@@ -360,7 +360,7 @@ public:
   void impl_test_getPath_data(NexusFormat fmt) {
     cout << "\ntest get_path -- groups and data!\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_grpdata");
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
     File file(filename, NXACC_READ);
 
     // at root, path should be "/"
@@ -385,7 +385,7 @@ public:
     fflush(stdout);
 
     // open a file
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
     File file(filename, NXACC_READ);
 
     // tests invalid cases
@@ -422,7 +422,7 @@ public:
     cout << "\ntest getInfo -- good\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_dataR");
     // open a file
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
     file.openData("int_data");
@@ -452,7 +452,7 @@ public:
     cout << "\ntest getInfo -- bad\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_file_dataR");
     // open a file
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
 
     File file(filename, NXACC_READ);
     file.openGroup("entry", "NXentry");
@@ -484,7 +484,7 @@ public:
     cout << "\ntest attribute read\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_attr");
     // open a file
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
     File file(filename, NXACC_READ);
 
     // get an int attribute
@@ -501,7 +501,7 @@ public:
     cout << "\ntest getEntries\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "test_nexus_entries");
     // open a file
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
     File file(filename, NXACC_READ);
 
     file.openPath("/");
