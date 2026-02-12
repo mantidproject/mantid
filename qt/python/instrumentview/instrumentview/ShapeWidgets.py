@@ -274,7 +274,7 @@ class EllipseWidgetNoRotation(vtkBoxWidget2):
         dist_sq = dx * dx + dy * dy
 
         # Fallback: allow a generous grab radius, scaled for HiDPI.
-        grab_px = 20.0
+        grab_px = 10.0
         try:
             if self._plotter is not None and hasattr(self._plotter, "app_window"):
                 grab_px *= float(self._plotter.app_window.devicePixelRatioF())
