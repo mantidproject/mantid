@@ -28,9 +28,16 @@ MantidQt::API::IConfiguredAlgorithm_sptr StretchModel::stretchAlgorithm(const St
   properties->setProperty("OutputWorkspaceFit", fitWorkspaceName);
   properties->setProperty("OutputWorkspaceContour", contourWorkspaceName);
   properties->setProperty("Background", algParams.backgroundName);
-  if (!useQuickBayes) {
-    properties->setProperty("SampleBins", algParams.sampleBinning);
+
+  if (useQuickBayes) {
+    properties->setProperty("NumberFWHM", algParams.sigma);
+    properties->setProperty("StartBeta", algParams.startBeta);
+    properties->setProperty("EndBeta", algParams.endBeta);
+    properties->setProperty("StartFWHM", algParams.startFWHM);
+    properties->setProperty("EndFWHM", algParams.endFWHM);
+  } else {
     properties->setProperty("NumberSigma", algParams.sigma);
+    properties->setProperty("SampleBins", algParams.sampleBinning);
     properties->setProperty("Loop", algParams.sequentialFit);
   }
 

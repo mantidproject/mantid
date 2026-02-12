@@ -689,7 +689,6 @@ class StateGuiModel(ModelCommon):
 
     @phi_limit_min.setter
     def phi_limit_min(self, value):
-        self._all_states.mask.phi_range = [value, self._all_states.mask.phi_max]
         self._all_states.mask.phi_min = value
 
     @property
@@ -699,8 +698,15 @@ class StateGuiModel(ModelCommon):
 
     @phi_limit_max.setter
     def phi_limit_max(self, value):
-        self._all_states.mask.phi_range = [self._all_states.mask.phi_min, value]
         self._all_states.mask.phi_max = value
+
+    @property
+    def phi_limit_use_range(self):
+        return self._all_states.mask.use_phi_range
+
+    @phi_limit_use_range.setter
+    def phi_limit_use_range(self, value):
+        self._all_states.mask.use_phi_range = value
 
     @property
     def phi_range(self):

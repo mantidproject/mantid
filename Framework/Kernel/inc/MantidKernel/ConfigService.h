@@ -213,6 +213,9 @@ public:
   /// Look for an instrument
   const InstrumentInfo &getInstrument(const std::string &instrumentName = "") const;
 
+  // Find the longest matching instrument prefix for the given hint.
+  const std::string findLongestInstrumentPrefix(const std::string &hint) const;
+
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver &observer) const;
 
@@ -295,7 +298,11 @@ private:
   /// local cache of proxy details
   Kernel::ProxyInfo m_proxyInfo;
   /// whether the proxy has been populated yet
-  bool m_isProxySet;
+  bool m_isProxySet = false;
+
+  // cache for longest matching instrument prefix
+  mutable std::vector<std::string> m_instrumentPrefixesCache;
+  mutable bool m_isInstrumentPrefixesCached = false;
 };
 
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;

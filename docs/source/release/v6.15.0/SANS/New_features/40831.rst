@@ -1,0 +1,1 @@
+- Function ``PhiRanges`` in the :ref:`ISIS Command Interface<ScriptingSANSReductions>` uses the new TOML field for phi range in the reduction and accepts `use_mirror` as a keyword argument.

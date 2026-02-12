@@ -326,3 +326,14 @@ class BinningType(Enum):
     CUSTOM = "Custom"
     FROM_MONITORS = "FromMonitors"
     SAVE_AS_EVENT_DATA = "SaveAsEventData"
+
+
+class PhiLimitType(Enum):
+    """
+    Defines the limit type of slicing phi
+    MinMax: Traditional Minimum and Maximum (or start/stop) of a phi slice
+    Pairs: A range of Min,Max pairs for multiple phi slices.
+    """
+
+    MINMAX = "MinMax"
+    PAIRS = "Pairs"

@@ -10,6 +10,7 @@ GIT_USER_EMAIL="mantid-buildserver@mantidproject.org"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_MIRROR="$("${SCRIPT_DIR}/data_mirrors")"
 REPO_ROOT_DIR=$SCRIPT_DIR/../..
+SHA1=$(git -C "$REPO_ROOT_DIR" rev-parse HEAD) # full sha for this source repository
 
 # source util functions
 . source/buildconfig/Jenkins/Conda/pixi-utils
@@ -48,9 +49,6 @@ echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/DocTest/' >> $WORKSPACE
 export LC_ALL=C
 QT_QPA_PLATFORM=offscreen pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e docs-build cmake --build . --target docs-html
 
-SHA1=$(git rev-parse HEAD) # full sha for this source repository
-SHA1_SHORT=$(git rev-parse --short HEAD) # full sha for this source repository
-
 # Publish. Clone current docs to publish directory
 # and rsync between built html in html directory and current
 # docs in publish. This will ensure documents are deleted in the
@@ -63,5 +61,5 @@ pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml -e docs-build rsync --archive 
 git config user.name ${GIT_USER_NAME}
 git config user.email ${GIT_USER_EMAIL}
 git add .
-git commit -m "Publish nightly documentation from [${SHA1_SHORT}](https://github.com/mantidproject/mantid/commit/${SHA1})" || exit 0
+git commit -m "Publish nightly documentation from https://github.com/mantidproject/mantid/commit/${SHA1}" || exit 0
 git push https://${GITHUB_ACCESS_TOKEN}@github.com/mantidproject/docs-nightly main

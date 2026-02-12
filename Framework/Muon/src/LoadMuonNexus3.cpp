@@ -7,7 +7,7 @@
 #include "MantidMuon/LoadMuonNexus3.h"
 
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/NexusFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/Logger.h"
@@ -19,11 +19,11 @@ namespace {
 const int CONFIDENCE_THRESHOLD{80};
 
 int calculateConfidenceHDF5(const std::string &filePath, const std::shared_ptr<Mantid::API::Algorithm> &alg) {
-  const auto nexusLoader = std::dynamic_pointer_cast<Mantid::API::NexusFileLoader>(alg);
+  const auto nexusLoader = std::dynamic_pointer_cast<Mantid::API::IFileLoader<Mantid::Nexus::NexusDescriptorLazy>>(alg);
   int confidence{0};
   if (H5::H5File::isHdf5(filePath)) {
     try {
-      Mantid::Nexus::NexusDescriptor descriptorHDF5(filePath);
+      Mantid::Nexus::NexusDescriptorLazy descriptorHDF5(filePath);
       confidence = nexusLoader->confidence(descriptorHDF5);
     } catch (std::exception const &e) {
       Mantid::Kernel::Logger("LoadMuonNexus3").debug()

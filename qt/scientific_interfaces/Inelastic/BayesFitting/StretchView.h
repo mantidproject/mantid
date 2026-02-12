@@ -112,6 +112,21 @@ private slots:
   void plotCurrentPreviewClicked();
 
 private:
+  template <typename T>
+  void addPropToTree(const QString &propName, T initialValue, int precision = 6,
+                     std::optional<T> minValue = std::nullopt, std::optional<T> maxValue = std::nullopt) {
+    m_properties[propName] = m_dblManager->addProperty(propName);
+    const auto prop = m_properties[propName];
+    m_dblManager->setDecimals(prop, precision);
+    m_dblManager->setValue(prop, initialValue);
+    if (minValue.has_value()) {
+      m_dblManager->setMinimum(prop, *minValue);
+    }
+    if (maxValue.has_value()) {
+      m_dblManager->setMaximum(prop, *maxValue);
+    }
+    m_propTree->addProperty(prop);
+  }
   void formatTreeWidget(QtTreePropertyBrowser *treeWidget, QMap<QString, QtProperty *> const &properties) const;
 
   Ui::Stretch m_uiForm;

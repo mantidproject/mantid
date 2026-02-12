@@ -14,18 +14,23 @@ struct StretchRunData {
   const std::string sampleName;
   const std::string resolutionName;
   const std::string backgroundName;
-  const double eMin;
-  const double eMax;
-  const int beta;
-  const bool elasticPeak;
-  const int sigma;
-  const int sampleBinning;
-  const bool sequentialFit;
+  const double eMin{-0.2};
+  const double eMax{0.2};
+  double startBeta{0.5};
+  double endBeta{1.0};
+  double startFWHM{0.01};
+  double endFWHM{0.1};
+  const int beta{3};
+  const int sigma{3};
+  int sampleBinning{1};
+  const bool elasticPeak{false};
+  bool sequentialFit{false};
 
-  StretchRunData(const std::string &sample, const std::string &resolution, double min, double max, int b, bool elastic,
-                 const std::string &bg, int sig, int binning, bool sequential)
-      : sampleName(sample), resolutionName(resolution), backgroundName(bg), eMin(min), eMax(max), beta(b),
-        elasticPeak(elastic), sigma(sig), sampleBinning(binning), sequentialFit(sequential) {}
+  StretchRunData() = default;
+  StretchRunData(const std::string &sample, const std::string &resolution, const std::string &bg, double min,
+                 double max, int beta, int sigma, bool elastic)
+      : sampleName(sample), resolutionName(resolution), backgroundName(bg), eMin(min), eMax(max), beta(beta),
+        sigma(sigma), elasticPeak(elastic) {}
 };
 
 struct CurrentPreviewData {

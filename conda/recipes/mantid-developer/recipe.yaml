@@ -30,6 +30,7 @@ requirements:
     - librdkafka ${{ librdkafka }}
     - matplotlib ${{ matplotlib }}
     - muparser ${{ muparser }}
+    - myst-parser ${{ mystparser }}
     - ninja ${{ ninja }}
     - numpy ${{ numpy }}
     - occt ${{ occt }}
@@ -90,6 +91,12 @@ requirements:
         - xorg-libxtst>=1.2.3
         # Development tooling:
         - gcovr>=4.2
+        - mantidprofiler>=1.4,<2
+        # MPI Support
+        - mpi
+        - mpi4py
+        - libboost-mpi
+        - mpich
     - if: win
       then:
         - conda-wrappers

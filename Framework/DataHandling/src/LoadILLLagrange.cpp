@@ -29,7 +29,7 @@ using namespace Nexus;
 using Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadILLLagrange)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLLagrange)
 
 /// Returns confidence. @see IFileLoader::confidence
 int LoadILLLagrange::confidence(Nexus::NexusDescriptorLazy &descriptor) const {

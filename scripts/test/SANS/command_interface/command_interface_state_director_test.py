@@ -98,7 +98,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Phi limits
-        command = NParameterCommand(command_id=NParameterCommandId.PHI_LIMIT, values=[12.5, 123.6, False])
+        command = NParameterCommand(command_id=NParameterCommandId.PHI_LIMIT, values=[12.5, 123.6, False, [11, 66, 33, 88]])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Wavelength correction file
@@ -168,6 +168,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.mask.phi_min, 12.5)
         self.assertEqual(state.mask.phi_max, 123.6)
         self.assertFalse(state.mask.use_mask_phi_mirror)
+        self.assertEqual(state.mask.phi_range, [11, 66, 33, 88])
         self.assertTrue(
             state.adjustment.wavelength_and_pixel_adjustment.adjustment_files[DetectorType.HAB.value].wavelength_adjustment_file == "test"
         )

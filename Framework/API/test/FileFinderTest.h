@@ -87,6 +87,15 @@ public:
                                "      <technique>Reflectometer</technique>"
                                "    </instrument>"
                                "  </facility>"
+                               "  <facility name=\"HFIR\" delimiter=\"_\" "
+                               "FileExtensions=\"_event.nxs,.nxs,.dat\">"
+                               "    <archive>"
+                               "      <archiveSearch plugin=\"ORNLDataSearch\" />"
+                               "    </archive>"
+                               "    <instrument name=\"GPSANS\" shortname=\"CG2\">"
+                               "      <technique>Small Angle Scattering</technique>"
+                               "    </instrument>"
+                               "  </facility>"
                                "  <facility name=\"ILL\" delimiter=\"_\" FileExtensions=\".nxs,.dat\">"
                                "    <instrument name=\"IN5\" shortname=\"IN5\">"
                                "      <technique>Inelastic Spectroscopy</technique>"
@@ -220,18 +229,23 @@ public:
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG31234").name(), "POWGEN");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG3_1234").name(), "POWGEN");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG3_1234_event.nxs").name(), "POWGEN");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("pg3_1234_event.nxs").name(), "POWGEN");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("/home/user123/CNCS_234_neutron_event.dat").name(), "CNCS");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L1234").name(), "REF_L");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L_1234").name(), "REF_L");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L_1234.nxs.h5").name(), "REF_L");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ16613.n001").name(), "LOQ");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ16613.s01").name(), "LOQ");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("loq16613.n001").name(), "LOQ");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("SANS2D00032676.nxs").name(), "SANS2D");
     TS_ASSERT_THROWS(FileFinder::Instance().getInstrument("BADINSTR12354.nxs", false),
                      const Mantid::Kernel::Exception::NotFoundError &);
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG3_").name(), "POWGEN");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ").name(), "LOQ");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("SANS2D").name(), "SANS2D");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("CG2").name(), "GPSANS");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("CG21234").name(), "GPSANS");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("CG2_1234").name(), "GPSANS");
   }
 
   void testGetExtension() {
@@ -285,7 +299,7 @@ public:
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189n-15193"), const std::invalid_argument &);
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-15193n"), const std::invalid_argument &);
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-151n93"), const std::invalid_argument &);
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15n189-151n93"), const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15n189-151n93"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(files = FileFinder::Instance().findRuns("MUSR15189-15193"));
     TS_ASSERT_EQUALS(files.size(), 5);
     std::vector<std::string>::iterator it = files.begin();
