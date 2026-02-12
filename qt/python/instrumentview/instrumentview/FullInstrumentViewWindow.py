@@ -906,6 +906,8 @@ class FullInstrumentViewWindow(QMainWindow):
                 self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
             for line in self._lineplot_overlays:
                 self._detector_spectrum_axes.add_line(line)
+            integration_limits = self.get_integration_limits()
+            self._detector_spectrum_axes.set_xlim(integration_limits[0], integration_limits[1])
 
         self.redraw_lineplot()
 

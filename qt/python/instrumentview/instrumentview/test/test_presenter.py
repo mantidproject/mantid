@@ -71,11 +71,16 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.set_view_contour_limits()
         self._mock_view.set_plotter_scalar_bar_range.assert_called_once_with((0, 100), self._presenter._counts_label)
 
-    def test_set_view_integration_limits(self):
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_contour_range_reset_clicked")
+    def test_set_view_integration_limits(self, mock_on_contour_range_reset_clicked, mock_update_line_plot):
+        self._mock_view.current_selected_unit.return_value = "MyUnit"
         self._model._counts = np.zeros(200)
         self._presenter._detector_mesh = {}
         self._presenter.set_view_integration_limits()
         np.testing.assert_allclose(self._presenter._detector_mesh[self._presenter._counts_label], self._model.detector_counts)
+        mock_on_contour_range_reset_clicked.assert_called_once()
+        mock_update_line_plot.assert_called_once_with("MyUnit")
 
     def test_generate_single_colour(self):
         green_vector = self._presenter.generate_single_colour(2, 0, 1, 0, 0)

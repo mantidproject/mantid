@@ -160,6 +160,7 @@ class FullInstrumentViewPresenter:
     def set_view_integration_limits(self) -> None:
         self._detector_mesh[self._counts_label] = self._model.detector_counts
         self.on_contour_range_reset_clicked()
+        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
     def on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
