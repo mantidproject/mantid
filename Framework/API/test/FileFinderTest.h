@@ -419,11 +419,11 @@ public:
     ConfigService::Instance().setString("default.facility", "ISIS");
 
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
-    std::string path = FileFinder::Instance().findRun("CSP78173.raw").result();
+    std::string path = FileFinder::Instance().findRun("CSP78173.raw").result().string();
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     TS_ASSERT(std::filesystem::exists(path));
 
-    path = FileFinder::Instance().findRun("OFFSPEC4622.log").result();
+    path = FileFinder::Instance().findRun("OFFSPEC4622.log").result().string();
     // Per discussion with Martyn on Dec 6, 2012: we decided to update this test
     // case.
     // *.log is not a valid extension for ISIS instruments. Since we modified
