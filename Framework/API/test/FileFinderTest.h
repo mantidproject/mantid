@@ -278,12 +278,12 @@ public:
     ConfigService::Instance().setString("default.facility", "ISIS");
 
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
-    std::string path = FileFinder::Instance().findRun("CSP78173").result();
-    TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
+    auto path = FileFinder::Instance().findRun("CSP78173").result();
+    TS_ASSERT_EQUALS(path.filename().string(), "CSP78173.raw");
     TS_ASSERT(std::filesystem::exists(path));
     path = FileFinder::Instance().findRun("CSP74683", std::vector<std::string>(1, ".s02")).result();
-    TS_ASSERT(path.size() > 3);
-    TS_ASSERT_EQUALS(path.substr(path.size() - 3), "s02");
+    TS_ASSERT(path.string().size() > 3);
+    TS_ASSERT_EQUALS(path.filename().string().substr(path.filename().string().size() - 3), "s02");
 
     // ConfigService::Instance().setString("datasearch.searcharchive","On");
     // path = FileFinder::Instance().findRun("CSP77374");
@@ -364,12 +364,12 @@ public:
   void testFindRunWithOverwriteExtensionsAndCorrectExtensionInFilename() {
     // This file is .nxs or .RAW
     const std::vector<std::string> incorrect_extension = {".txt"};
-    std::string path = FileFinder::Instance().findRun("MUSR15189.nxs", incorrect_extension, true).result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189.nxs", incorrect_extension, true).result().string();
     TS_ASSERT_EQUALS(path, "");
   }
 
   void testFindRunWithNoOverwriteExtensionsAndCorrectExtensionInFilename() {
-    std::string path = FileFinder::Instance().findRun("MUSR15189.nxs").result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189.nxs").result().string();
     std::string actualExtension = path.substr(path.size() - 4, 4);
     TS_ASSERT_EQUALS(actualExtension, ".nxs");
   }
@@ -377,13 +377,13 @@ public:
   void testFindRunWithOverwriteExtensionsAndIncorrectExtensions() {
     // This file is .nxs or .RAW
     const std::vector<std::string> incorrect_extension = {".txt"};
-    std::string path = FileFinder::Instance().findRun("MUSR15189", incorrect_extension, true).result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189", incorrect_extension, true).result().string();
     TS_ASSERT_EQUALS(path, "");
   }
 
   void testFindRunWithNoOverwriteAndIncorrectExtensionInFilename() {
     // Displays warning to user but still finds path using facility extensions
-    std::string path = FileFinder::Instance().findRun("MUSR15189.txt").result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189.txt").result().string();
     std::string actualExtension = path.substr(path.size() - 4, 4);
     TS_ASSERT_EQUALS(actualExtension, ".nxs");
   }
@@ -392,7 +392,7 @@ public:
     // This file is .nxs or .RAW
     // returns a .nxs if no extensions passed in
     const std::vector<std::string> extensions = {".a", ".txt", ".nxs"};
-    std::string path = FileFinder::Instance().findRun("MUSR15189", extensions, true).result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189", extensions, true).result().string();
     std::string actualExtension = "";
     if (!path.empty()) {
       actualExtension = path.substr(path.size() - 4, 4);
