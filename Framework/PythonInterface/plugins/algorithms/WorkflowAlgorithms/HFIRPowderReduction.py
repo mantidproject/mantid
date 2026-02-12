@@ -532,7 +532,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         9. Cleanup
         """
         # Initialize temp workspace list for cleanup
-        self.temp_workspace_list = []
+        self.temp_workspace_list = ["_ws_cal", "_ws_cal_background"]
 
         outWS = "OUTPUT"  # self.getPropertyValue("OutputWorkspace")
         summing = self.getProperty("Sum").value
@@ -547,12 +547,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         logger.information("Step 2: Loading vanadium and background data")
         vanadium_ws = self._load_vanadium_data()
         vanadium_background_ws = self._load_vanadium_background_data()
-        # sample_background_ws = self._load_sample_background_data()
 
         # Step 3: Axis Conversion & Masking
         logger.information("Step 3: Converting axes and applying masks")
-        print(sample_workspaces)
-        print("++++++++++++++++++++++++++++")
         sample_workspaces, sample_masks = self._convert_data(sample_workspaces)
 
         # Step 4: Resampling - determine common x-range
@@ -584,24 +581,13 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
             # Step 5: Calibration & Normalization (vanadium correction)
             logger.information("Step 5: Processing calibration (vanadium) data")
-            vanadium_corrected = self._process_vanadium_calibration(
-                vanadium_ws,
-                vanadium_background_ws,
-            )
+            if vanadium_ws is not None:
+                vanadium_corrected = self._process_vanadium_calibration(
+                    vanadium_ws,
+                    vanadium_background_ws,
+                )
+                ws_name = self._apply_sample_absorption_correction(ws_name, vanadium_corrected)
             print("completed step 5")
-
-        # # Step 6 & 7: Process each sample workspace - background subtraction and absorption correction
-        # logger.information("Steps 6-7: Applying background subtraction and absorption corrections")
-        # for n, (ws_name, mask_name) in enumerate(zip(sample_workspaces, sample_masks)):
-        #     # Step 6: Background Subtraction
-        #     if sample_background_ws is not None:
-        #         # ws_name = self._subtract_sample_background(ws_name, sample_background_ws, mask_name, xMin, xMax, vanadium_corrected)
-        #         ws_name = self._apply_vanadium_absorption_correction(ws_name)
-
-        #     else:
-        #         # Mark metadata to indicate vanadium was not included
-        #         mtd[ws_name].mutableRun().addProperty("VanadiumNormalization", "Not Applied", True)
-        #         logger.warning(f"Vanadium normalization not applied to {ws_name} - no vanadium data provided")
 
         # Apply scale factor
         scale_factor = self.getProperty("Scale").value
@@ -612,9 +598,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 Factor=scale_factor,
                 EnableLogging=False,
             )
-
-        # Step 7: Sample Absorption Correction
-        ws_name = self._apply_sample_absorption_correction(ws_name, vanadium_corrected)
 
         # Normalize by monitor or time
         self._normalize_workspace(ws_name)
@@ -729,6 +712,12 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             temp_ws = f"__{data_type.lower()}_temp_{i}"
             self.temp_workspace_list.append(temp_ws)
             Load(Filename=filename, OutputWorkspace=temp_ws, EnableLogging=False)
+            # if instrument == "MIDAS":
+            # CropWorkspace(InputWorkspace=temp_ws, OutputWorkspace='1spectrum', EndWorkspaceIndex=0)
+            # AppendSpectra(InputWorkspace1='1spectrum', InputWorkspace2=temp_ws, OutputWorkspace=temp_ws)
+            # LoadInstrument(temp_ws, InstrumentName = "MIDAS", RewriteSpectraMap=True)
+            # CropWorkspace(InputWorkspace=temp_ws, OutputWorkspace=temp_ws, StartWorkspaceIndex=1)
+            # self.temp_workspace_list.append('1spectrum')
 
             if i == 0:
                 RenameWorkspace(InputWorkspace=temp_ws, OutputWorkspace=ws_name, EnableLogging=False)
@@ -745,7 +734,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
     def _load_sample_data(self):
         """Load sample data - wrapper for backward compatibility and special handling."""
-        from mantid.simpleapi import Load
+        from mantid.simpleapi import Load, LoadInstrument, CropWorkspace, AppendSpectra
 
         filenames = self.getProperty("SampleFilename").value
         ipts = self.getProperty("SampleIPTS").value
@@ -774,6 +763,12 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             ws_name = f"__sample_{i}"
             self.temp_workspace_list.append(ws_name)
             Load(Filename=filename, OutputWorkspace=ws_name, EnableLogging=False)
+            if instrument == "MIDAS":
+                CropWorkspace(InputWorkspace=ws_name, OutputWorkspace="1spectrum", EndWorkspaceIndex=0)
+                AppendSpectra(InputWorkspace1="1spectrum", InputWorkspace2=ws_name, OutputWorkspace=ws_name)
+                LoadInstrument(ws_name, InstrumentName="MIDAS", RewriteSpectraMap=True)
+                CropWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name, StartWorkspaceIndex=1)
+                self.temp_workspace_list.append("1spectrum")
 
             # Apply grouping if requested
             if grouping != "None":
@@ -808,114 +803,27 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         Process vanadium calibration with background subtraction and absorption correction.
         VCORR = (V - V_B)/(T_0*sigma_inc + sigma_mult)
         """
-        # T_0 = 1.0  # Placeholder for transmission factor
-        # sigma_inc = 1  # Placeholder for incoherent scattering cross-section
-        # sigma_mult = 1  # Placeholder for multiple scattering cross-section
+        T_0 = 1.0  # Placeholder for transmission factor
+        sigma_inc = 1  # Placeholder for incoherent scattering cross-section
+        sigma_mult = 1  # Placeholder for multiple scattering cross-section
 
         if vanadium_bg_ws is not None:
-            print(vanadium_bg_ws)
-            print(vanadium_ws)
             Minus(
                 LHSWorkspace=vanadium_ws,
                 RHSWorkspace=vanadium_bg_ws,
                 OutputWorkspace=vanadium_ws,
                 EnableLogging=False,
             )
-        # denominator = (T_0 * sigma_inc) + sigma_mult
-
-        # Divide(
-        #     LHSWorkspace=vanadium_ws,
-        #     RHSWorkspace=denominator,
-        #     OutputWorkspace=vanadium_ws,
-        #     EnableLogging=False,
-        # )
-
-        # Might use this instead of divide
-        # Scale(
-        #     InputWorkspace=vanadium_ws,
-        #     OutputWorkspace=vanadium_ws,
-        #     Factor=1.0 / denominator,
-        #     EnableLogging=False,
-        # )
-
-        return vanadium_ws
-
-    def _apply_vanadium_absorption_correction(self, vanadium_ws, vandium_background_ws):
-        """
-        Apply absorption correction to vanadium workspace.
-        Formula: VCORR = (V - V_B)/(T_0*sigma_inc + sigma_mult)
-
-        """
-        T_0 = 1.0  # Placeholder for transmission factor
-        sigma_inc = 1  # Placeholder for incoherent scattering cross-section
-        sigma_mult = 1  # Placeholder for multiple scattering cross-section
-
-        if vandium_background_ws is not None:
-            Minus(
-                LHSWorkspace=vanadium_ws,
-                RHSWorkspace=vandium_background_ws,
-                OutputWorkspace=vanadium_ws,
-                EnableLogging=False,
-            )
         denominator = (T_0 * sigma_inc) + sigma_mult
 
-        Divide(
-            LHSWorkspace=vanadium_ws,
-            RHSWorkspace=denominator,
+        Scale(
+            InputWorkspace=vanadium_ws,
             OutputWorkspace=vanadium_ws,
+            Factor=1.0 / denominator,
             EnableLogging=False,
         )
-
-        # Might use this instead of divide
-        # Scale(
-        #     InputWorkspace=vanadium_ws,
-        #     OutputWorkspace=vanadium_ws,
-        #     Factor=1.0 / denominator,
-        #     EnableLogging=False,
-        # )
 
         return vanadium_ws
-
-    def _subtract_sample_background(self, sample_ws, background_ws, mask_name, xMin, xMax, vanadium_corrected):
-        """
-        Subtract sample background: SF = S - S_B
-        """
-        # Convert and resample background to match sample
-        background_converted = f"__{sample_ws}_background"
-        self.temp_workspace_list.append(background_converted)
-        self._to_spectrum_axis_resample(background_ws, background_converted, mask_name, sample_ws, xMin, xMax)
-
-        # Normalize background
-        self._normalize_workspace(background_converted)
-
-        # Subtract background from sample
-        Minus(
-            LHSWorkspace=sample_ws,
-            RHSWorkspace=background_converted,
-            OutputWorkspace=sample_ws,
-            EnableLogging=False,
-        )
-
-        # Scale background if requested
-        scale = self.getProperty("Scale").value
-        if scale != 1.0:
-            Scale(
-                InputWorkspace=background_converted,
-                OutputWorkspace=background_converted,
-                Factor=scale,
-                EnableLogging=False,
-            )
-
-        # Apply vanadium normalization to background if available
-        if vanadium_corrected is not None:
-            Divide(
-                LHSWorkspace=background_converted,
-                RHSWorkspace=vanadium_corrected,
-                OutputWorkspace=background_converted,
-                EnableLogging=False,
-            )
-
-        return sample_ws
 
     def _apply_sample_absorption_correction(self, sample_ws, vanadium_corrected):
         """
@@ -963,6 +871,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         elif normaliseBy.lower() == "monitor":
             norm_factor = mtd[ws_name].run().getProtonCharge()
         elif normaliseBy.lower() == "time":
+            from mantid.simpleapi import AddSampleLog
+
+            AddSampleLog(Workspace=ws_name, LogName="duration", LogText="123456", LogType="Number")
             norm_factor = mtd[ws_name].run().getLogData("duration").value
         else:
             logger.warning(f"Unknown normalization type: {normaliseBy}")
@@ -975,7 +886,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 Factor=1.0 / norm_factor,
                 EnableLogging=False,
             )
-            # raise NotImplementedError("HFIRPowderReduction algorithm is not yet implemented.")
 
     def _convert_data(self, input_workspaces):
         mask = self.getProperty("MaskWorkspace").value
@@ -1044,7 +954,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         target = self.getProperty("XUnits").value
         wavelength = self.getProperty("Wavelength").value
         e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, 0, 0, Elastic, 0)
-        # filtered_eve = self.getProperty("FilteredInput").value
         if target == "dSpacing":
             target = "ElasticDSpacing"
         elif target == "2Theta":
