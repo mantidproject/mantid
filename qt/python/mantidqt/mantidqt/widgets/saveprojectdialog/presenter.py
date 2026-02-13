@@ -23,7 +23,7 @@ class ProjectSaveDialogPresenter:
         :param conf: An optional UserConfig to which the user's selection will be saved.
         :param view: A view to display the dialog. If None uses ProjectSaveDialogView.
         """
-        self.view = view if view else ProjectSaveDialogView()
+        self.view = view or ProjectSaveDialogView()
 
         self.project = project
         self.conf = conf

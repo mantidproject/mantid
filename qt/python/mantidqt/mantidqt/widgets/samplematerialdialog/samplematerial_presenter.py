@@ -21,7 +21,7 @@ class SampleMaterialDialogPresenter(AlgorithmObserver):
     def __init__(self, workspace, parent=None, view=None):
         super(SampleMaterialDialogPresenter, self).__init__()
         # Optional view argument allows mocking of the view.
-        self.view = view if view else SampleMaterialDialogView(self, parent)
+        self.view = view or SampleMaterialDialogView(self, parent)
 
         self.parent = parent
         self.workspace = workspace

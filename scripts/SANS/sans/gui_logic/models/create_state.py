@@ -83,6 +83,6 @@ def _create_row_state(row_entry, file_lookup, gui_state_director):
 
 def __is_empty_row(row, table):
     for key, value in table._table_entries[row].__dict__.items():
-        if value and key in ["sample_scatter"]:
+        if value and key in ["sample_scatter"]:  # noqa: FURB171
             return False
     return True

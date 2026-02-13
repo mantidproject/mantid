@@ -60,7 +60,7 @@ class FocusPresenter(object):
     def on_focus_clicked(self):
         if not self.current_calibration.get_vanadium_path():
             van_file = self.view.get_vanadium_filename()
-            self.current_calibration.vanadium_path = van_file if van_file else None
+            self.current_calibration.vanadium_path = van_file or None
         if not self._validate():
             return
         focus_paths = self.view.get_focus_filenames()

@@ -20,8 +20,8 @@ class BasePanePresenter:
         self.context = context
         self._figure_presenter = figure_presenter
         self._x_data_range = context.plot_panes_context[self._name].default_xlims
-        self._external_plotting_view = external_plotting_view if external_plotting_view else ExternalPlottingView()
-        self._external_plotting_model = external_plotting_model if external_plotting_model else ExternalPlottingModel()
+        self._external_plotting_view = external_plotting_view or ExternalPlottingView()
+        self._external_plotting_model = external_plotting_model or ExternalPlottingModel()
         self.add_or_remove_plot_observer = GenericObserverWithArgPassing(self.handle_added_or_removed_plot)
         self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
         self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)

@@ -120,7 +120,7 @@ def create_van_per_detector(instrument, run_details, absorb):
     # this is unfocused data so the calibration is still valid
 
     run_number = str(run_details.output_run_string)
-    ext = run_details.file_extension if run_details.file_extension else ""
+    ext = run_details.file_extension or ""
     d_spacing_out_name = run_number + ext + "-ResultD"
     tof_out_name = run_number + ext + "-ResultTOF"
 

@@ -54,26 +54,22 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.hasDx = any([ws.hasDx(i) for i in range(ws.getNumberHistograms())])
 
         # Create model and view, or accept mocked versions
-        self.model = model if model else MatrixWorkspaceDisplayModel(ws)
-        self.view = view if view else MatrixWorkspaceDisplayView(self, parent, window_flags)
-        self.container = (
-            container
-            if container
-            else StatusBarView(
-                parent,
-                self.view,
-                self.model.get_name(),
-                window_width=window_width,
-                window_height=window_height,
-                presenter=self,
-                window_flags=window_flags,
-            )
+        self.model = model or MatrixWorkspaceDisplayModel(ws)
+        self.view = view or MatrixWorkspaceDisplayView(self, parent, window_flags)
+        self.container = container or StatusBarView(
+            parent,
+            self.view,
+            self.model.get_name(),
+            window_width=window_width,
+            window_height=window_height,
+            presenter=self,
+            window_flags=window_flags,
         )
 
         super(MatrixWorkspaceDisplay, self).__init__(self.container.status_bar)
         self.plot = plot
 
-        self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
+        self.ads_observer = ads_observer or WorkspaceDisplayADSObserver(self)
 
         self.setup_tables()
 
