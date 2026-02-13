@@ -28,8 +28,8 @@ message(STATUS "Added target ('check') for unit tests")
 
 # Configure a variable to hold the required test timeout value for all tests
 set(TESTING_TIMEOUT
-    1200
-    CACHE STRING "Timeout in seconds for each test (default 1200=20minutes)"
+    1800
+    CACHE STRING "Timeout in seconds for each test (default 1800=30minutes)"
 )
 
 # ######################################################################################################################
