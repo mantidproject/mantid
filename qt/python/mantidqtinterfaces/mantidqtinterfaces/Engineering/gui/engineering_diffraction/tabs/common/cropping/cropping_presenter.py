@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_view import CroppingView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_model import CroppingModel
-from Engineering.EnggUtils import GROUP
+from enum import Enum
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
 
 
 class CroppingPresenter(object):
@@ -15,6 +16,7 @@ class CroppingPresenter(object):
         self.model = model if model else CroppingModel()
         self.view = view if view else CroppingView(parent)
 
+        self.instrument = "ENGINX"
         self.group = None  # default if no cropping requested
         self.custom_spectra_enabled = False
         self.custom_spectra = None
@@ -35,14 +37,12 @@ class CroppingPresenter(object):
     def on_combo_changed(self, index: int) -> None:
         """
         Handles the event when the combo box selection is changed.
-        GROUP.TEXTURE30 is the default group if no cropping is requested.
 
         :param index: The index of the selected item in the combo box.
         """
-        group_mapping = {0: GROUP.CUSTOM, 1: GROUP.NORTH, 2: GROUP.SOUTH, 3: GROUP.CROPPED, 4: GROUP.TEXTURE20, 5: GROUP.TEXTURE30}
-        self.group = group_mapping.get(index, GROUP.TEXTURE30)
-        self.custom_groupingfile_enabled = index == 0
-        self.custom_spectra_enabled = index == 3
+        # cropping options is given as a tuple of (GROUP, description, file input?, spectra input?)
+        grouping_options = self.model.get_cropping_options(self.instrument)[index]
+        self.group, _, self.custom_groupingfile_enabled, self.custom_spectra_enabled = grouping_options
         self.set_custom_widgets_visibility(self.custom_groupingfile_enabled, self.custom_spectra_enabled)
 
     def on_groupingfile_changed(self) -> None:
@@ -68,7 +68,7 @@ class CroppingPresenter(object):
     def get_custom_spectra_enabled(self) -> bool:
         return self.custom_spectra_enabled
 
-    def get_group(self) -> GROUP:
+    def get_group(self) -> Enum:
         return self.group
 
     def is_groupingfile_valid(self) -> bool:
@@ -103,3 +103,16 @@ class CroppingPresenter(object):
         else:
             self.view.set_crop_invalid_indicator_hidden()
             self.spectra_valid = True
+
+    def set_cropping_options(self):
+        # cropping options is given as a tuple of (GROUP, description, file input?, spectra input?)
+        options = [option[1] for option in self.model.get_cropping_options(self.instrument)]
+        self.view.set_combo_options(options)
+
+    def set_instrument_override(self, instrument):
+        instrument = INSTRUMENT_DICT[instrument]
+        # self.view.set_instrument_override(instrument) # don't think this is needed as it is just a subsection
+        self.instrument = instrument
+        # update the cropping option combo box
+        self.set_cropping_options()
+        self.on_combo_changed(0)

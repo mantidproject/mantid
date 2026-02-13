@@ -8,8 +8,10 @@
 from os import path
 from mantidqt.utils.observer_pattern import Observable
 from Engineering.EnggUtils import CALIB_DIR
+from Engineering.common.instrument_config import get_instr_config
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
 
-DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
+DEFAULT_FULL_INST_CALIB = get_instr_config("ENGINX").full_instr_calib
 GSAS2_PATH_ON_IDAAAS = "/opt/gsas2"
 SETTINGS_DICT = {
     "save_location": str,
@@ -148,6 +150,7 @@ class SettingsPresenter(object):
         self.view = view
         self.settings = {}
         self.savedir_notifier = self.SavedirNotifier(self)
+        self.instrument = "ENGINX"
 
         # populate lists in view
         self.view.add_log_checkboxs(ALL_LOGS)
@@ -249,6 +252,12 @@ class SettingsPresenter(object):
         self.view.set_auto_populate_texture(self.settings["auto_pop_texture"])
         self._find_files()
 
+    def update_full_calib_with_instrument(self):
+        full_calib = path.join(CALIB_DIR, get_instr_config(self.instrument).full_instr_calib)
+        self.settings["full_calibration"] = full_calib
+        self.model.set_setting("full_calibration", full_calib)
+        self.view.set_full_calibration(full_calib)
+
     def _find_files(self):
         self.view.find_full_calibration()
         self.view.find_save()
@@ -292,6 +301,11 @@ class SettingsPresenter(object):
 
     def set_contour_option_enabled(self):
         self.view.contourKernel_lineedit.setEnabled(not self.view.get_plot_exp_pf())
+
+    def set_instrument_override(self, instrument):
+        instrument = INSTRUMENT_DICT[instrument]
+        self.instrument = instrument
+        self.update_full_calib_with_instrument()
 
     # -----------------------
     # Observers / Observables

@@ -150,6 +150,33 @@ class SettingsPresenterTest(unittest.TestCase):
     def test_default_calib_file_correct_location(self):
         self.assertTrue(path.exists(settings_presenter.DEFAULT_SETTINGS["full_calibration"]))
 
+    @patch(dir_path + ".get_instr_config")
+    def test_set_instrument_override_updates_full_calibration(self, mock_config):
+        self.presenter.model.set_setting = MagicMock()
+
+        class MockConfig:
+            def __init__(self, calib):
+                self.full_instr_calib = calib
+
+        def get_config(config):
+            match config:
+                case "ENGINX":
+                    return MockConfig("enginx_calib.nxs")
+                case "IMAT":
+                    return MockConfig("imat_calib.nxs")
+
+        mock_config.side_effect = get_config
+
+        self.presenter.set_instrument_override(0)
+
+        self.assertIn("enginx_calib.nxs", self.presenter.settings["full_calibration"])
+
+        self.presenter.set_instrument_override(1)
+
+        self.assertEqual(self.presenter.instrument, "IMAT")
+        self.assertIn("imat_calib.nxs", self.presenter.settings["full_calibration"])
+        self.presenter.model.set_setting.assert_called_with("full_calibration", self.presenter.settings["full_calibration"])
+
 
 if __name__ == "__main__":
     unittest.main()
