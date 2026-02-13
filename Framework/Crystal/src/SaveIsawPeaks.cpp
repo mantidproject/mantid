@@ -425,9 +425,9 @@ bool SaveIsawPeaks::bankMasked(size_t componentIndex, const Geometry::DetectorIn
     children = componentInfo.children(children[0]);
   }
 
-  for (const auto &colIndex : children) {
+  for (const auto &colIndex : children) { // cppcheck-suppress useStlAlgorithm
     auto grandchildren = componentInfo.children(colIndex);
-    for (const auto &rowIndex : grandchildren) {
+    for (const auto &rowIndex : grandchildren) { // cppcheck-suppress useStlAlgorithm
       if (componentInfo.isDetector(rowIndex)) {
         const auto detID = detectorInfo.detid(rowIndex);
         if (detID < 0)
