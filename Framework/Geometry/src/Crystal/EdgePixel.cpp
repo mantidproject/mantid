@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/EdgePixel.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
 namespace Mantid::Geometry {
@@ -30,22 +32,22 @@ bool edgePixel(const Mantid::Geometry::Instrument_const_sptr &inst, const std::s
 
     return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge || row >= (RDet->ypixels() - Edge);
   } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    std::shared_ptr<const Geometry::ICompAssembly> asmb =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-    asmb->getChildren(children, false);
+    // get the component info
+    auto const &pmap = inst->getParameterMap();
+    auto const &wrappers = inst->makeBeamline(*pmap);
+    auto const &compInfo = wrappers.first;
+
+    // get the children and grandchildren from the component info
+    size_t parentIndex = compInfo->indexOfAny(bankName);
+    auto children = compInfo->children(parentIndex);
     int startI = 1;
-    if (children[0]->getName() == "sixteenpack") {
+    if (!children.empty() && compInfo->name(children[0]) == "sixteenpack") {
       startI = 0;
-      parent = children[0];
-      children.clear();
-      asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-      asmb->getChildren(children, false);
+      children = compInfo->children(children[0]);
     }
-    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
+    auto grandchildren = compInfo->children(children[0]);
+
+    // calculate if the pixel is on the edge of the bank
     auto NROWS = static_cast<int>(grandchildren.size());
     auto NCOLS = static_cast<int>(children.size());
     // Wish pixels and tubes start at 1 not 0

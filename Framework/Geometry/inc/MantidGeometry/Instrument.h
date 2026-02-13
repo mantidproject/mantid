@@ -32,6 +32,7 @@ class DetectorInfo;
 class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
+class InstrumentVisitor;
 /// Convenience typedef
 using InstrumentParameterCache =
     std::map<std::pair<std::string, const IComponent *>, std::shared_ptr<XMLInstrumentParameter>>;
@@ -220,6 +221,8 @@ public:
   void parseTreeAndCacheBeamline();
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
+
+  friend InstrumentVisitor;
 
 private:
   /// Save information about a set of detectors to Nexus
