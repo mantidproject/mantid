@@ -59,7 +59,6 @@ Changes
 - :doc:`Framework <framework>`
 - :doc:`Mantid Workbench <mantidworkbench>`
 - :doc:`Diffraction <diffraction>`
-- :doc:`Muon Analysis <muon>`
 - Low Q
 
   - :doc:`Reflectometry <reflectometry>`
