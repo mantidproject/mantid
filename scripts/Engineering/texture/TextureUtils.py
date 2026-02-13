@@ -657,7 +657,10 @@ def fit_all_peaks(
             for ispec in range(si.size()):
                 # logic for spectra which HAVE been fit successfully
                 if fit_mask[ispec]:
-                    row = [intensity_estimates[ispec], i_over_sigma[ispec]]
+                    # add estimate of I and I over sigma
+                    # I over sigma seems to sometimes come out negative (presumably error in the I integration versus bkg)
+                    # In such a case treat I as 0, so I/sig = 0
+                    row = [intensity_estimates[ispec], max(i_over_sigma[ispec], 0.0)]
                     for p in u_params:
                         param_name = f"f{ispec}.f0.{p}"
                         pind = all_params.index(param_name)
@@ -671,7 +674,7 @@ def fit_all_peaks(
                             row += [d_peak, d_err]
                 # logic for spectra which HAVE NOT been fit successfully
                 else:
-                    row = [default_vals.get("I_est", np.nan), i_over_sigma[ispec]]
+                    row = [default_vals.get("I_est", np.nan), max(i_over_sigma[ispec], 0.0)]
                     for p in u_params:
                         row += [default_vals[p], np.nan]
                 table_vals[ispec] = row
