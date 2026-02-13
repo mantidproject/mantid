@@ -64,8 +64,6 @@ public:
   //! Get a pointer to the ith component within the assembly. Easier to use than
   //[] when you have a pointer
   std::shared_ptr<IComponent> getChild(const int i) const override;
-  //! Returns a vector of all children contained.
-  void getChildren(std::vector<IComponent_const_sptr> &outVector, bool recursive) const override;
   //! Get a pointer to the ith component in the assembly
   std::shared_ptr<IComponent> operator[](int i) const override;
   /// Returns a pointer to the first component of assembly encountered with the
@@ -94,6 +92,8 @@ private:
   CompAssembly &operator=(const ICompAssembly &);
 
 protected:
+  //! Returns a vector of all children contained.
+  void getChildren(std::vector<IComponent_const_sptr> &outVector, bool recursive) const override;
   /// the group of child components
   std::vector<IComponent *> m_children;
 
