@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1449</width>
+    <width>1159</width>
     <height>862</height>
    </rect>
   </property>
@@ -705,7 +705,7 @@
            </size>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;n&lt;span style=&quot; vertical-align:sub;&quot;&gt;x&lt;/span&gt;, [h,k,l]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;b&gt;τ&lt;sub&gt;1&lt;/sub&gt;&lt;/b&gt;, [h,k,l]</string>
           </property>
          </widget>
         </item>
@@ -744,7 +744,7 @@
            </size>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;n&lt;span style=&quot; vertical-align:sub;&quot;&gt;y&lt;/span&gt;, [h,k,l]&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;b&gt;τ&lt;sub&gt;2&lt;/sub&gt;&lt;/b&gt;, [h,k,l]</string>
           </property>
          </widget>
         </item>
