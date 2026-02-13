@@ -4,7 +4,7 @@
 install_pixi() {
   # configure the path to where pixi will end up
   if [[ "$OSTYPE" != darwin* && -f ~/.bashrc ]]; then
-    source ~/.bashrc
+    . ~/.bashrc
   else
     export PATH="$PATH:$HOME/.pixi/bin"
   fi
@@ -18,11 +18,18 @@ install_pixi() {
     set +x # don't care about details of pixi install
     curl -fsSL https://pixi.sh/install.sh | sh
     set -x # turn logging back on
+    # source bashrc for updated PATH
+    . ~/.bashrc
     # Verify pixi was installed successfully
     if [ ! -f "$HOME/.pixi/bin/pixi" ]; then
       echo "ERROR: pixi installation failed"
       exit 1
     fi
   fi
-  echo "using $(pixi --version)"
+  if which pixi ; then
+    echo "using $(pixi --version)"
+  else
+    echo "ERROR: pixi command not found"
+    exit 1
+  fi
 }
