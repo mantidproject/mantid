@@ -88,8 +88,7 @@ Instrument::Instrument(const Instrument &instr)
   getChildren(children, true);
   std::vector<IComponent_const_sptr>::const_iterator it;
   for (it = children.begin(); it != children.end(); ++it) {
-    // First check if the current component is a detector and add to cache if it
-    // is
+    // First check if the current component is a detector and add to cache if it is
     if (const IDetector *det = dynamic_cast<const Detector *>(it->get())) {
       if (instr.isMonitor(det->getID()))
         markAsMonitor(det);
@@ -98,8 +97,7 @@ Instrument::Instrument(const Instrument &instr)
       continue;
     }
     // Now check whether the current component is the source or sample.
-    // As the majority of components will be detectors, we will rarely get to
-    // here
+    // As the majority of components will be detectors, we will rarely get to here
     if (const auto *obj = dynamic_cast<const Component *>(it->get())) {
       const std::string objName = obj->getName();
       // This relies on the source and sample having a unique name.
