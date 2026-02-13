@@ -307,13 +307,14 @@ class TestEllipseWidgetNoRotation(unittest.TestCase):
     def test_create_ellipse_mesh_with_rotation(self):
         widget = EllipseWidgetNoRotation()
 
-        mesh1 = widget._create_ellipse_mesh(0.0, 0.0, 2.0, 1.0, 0.0, num_points=64, angle=0.0)
+        mesh1 = widget._create_ellipse_mesh(0.0, 0.0, 2.0, 1.0, 0.0, num_points=256, angle=0.0)
         points1 = mesh1.points.copy()
+        points1.sort(axis=0)
 
-        mesh2 = widget._create_ellipse_mesh(0.0, 0.0, 2.0, 1.0, 0.0, num_points=64, angle=np.pi / 2.0)
+        mesh2 = widget._create_ellipse_mesh(0.0, 0.0, 1.0, 2.0, 0.0, num_points=256, angle=-np.pi / 2.0)
         points2 = mesh2.points.copy()
-
-        self.assertFalse(np.allclose(points1, points2))
+        points2.sort(axis=0)
+        np.testing.assert_allclose(points1, points2, rtol=1e-4, atol=0.1)
 
     def test_cleanup(self):
         widget = EllipseWidgetNoRotation()
