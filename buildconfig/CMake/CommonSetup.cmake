@@ -83,6 +83,9 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
   # The new interface is not available in Clang yet so we haven't migrated
   add_definitions(-D_SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING)
+  if(APPLE)
+    add_definitions(-DBOOST_PARSER_USE_CONCEPTS=0)
+  endif()
 
   function(strip_unicode_definitions target_name)
     get_target_property(defs ${target_name} INTERFACE_COMPILE_DEFINITIONS)
@@ -146,7 +149,7 @@ endif()
 # ######################################################################################################################
 # Set the c++ standard to 20 - cmake should do the right thing with msvc
 # ######################################################################################################################
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -211,7 +214,7 @@ endif()
 set(AUTO_GENERATE_WARNING "/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/")
 
 # ######################################################################################################################
-# Enable CXX17_REMOVED_UNARY_BINARY_FUNCTION for boost on osx
+# Enable CXX17_REMOVED_UNARY_BINARY_FUNCTION for boost on osx Use GCC12 range adaptor closure for boost parser on osx
 # ######################################################################################################################
 if(APPLE)
   add_definitions(-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
