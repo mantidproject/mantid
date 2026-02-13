@@ -379,7 +379,7 @@ class EllipseWidgetNoRotation(vtkBoxWidget2):
                 self._ellipse_mesh = self._create_ellipse_mesh(cx, cy, rx, ry, z, angle=self._angle)
                 self._ellipse_actor = self._plotter.add_mesh(
                     self._ellipse_mesh,
-                    color="yellow",
+                    color="white",
                     line_width=3,
                     render_lines_as_tubes=False,
                     pickable=False,
