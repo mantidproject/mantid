@@ -13,7 +13,7 @@ Bugfixes
 - (`#40027 <https://github.com/mantidproject/mantid/pull/40027>`_) The :ref:`Filter_Events_Interface` no longer has a
   ``Split Sample Logs`` checkbox - since that option is deprecated and all logs will be split.
 - (`#40473 <https://github.com/mantidproject/mantid/pull/40473>`_) :ref:`colorfill plots <Colorfill_Plots>` with log
-  colorscale will not longer cause errors when the below keys are pressed.
+  colorscale will no longer cause errors when the below keys are pressed.
 
   - `c`, `left`, `backspace`, `MouseButton.BACK` - The behaviour is similar to pressing "Back" button on the plot's toolbar.
   - `v`, `right`, `MouseButton.FORWARD` - The behaviour is similar to pressing "Forward" button on plot the toolbar.
