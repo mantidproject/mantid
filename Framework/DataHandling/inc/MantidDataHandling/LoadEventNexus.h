@@ -50,7 +50,7 @@ namespace DataHandling {
  * Custom exception so we can re-propagate this error and
  * handle all other errors.
  */
-class InvalidLogPeriods : public std::invalid_argument {
+class MANTID_DATAHANDLING_DLL InvalidLogPeriods : public std::invalid_argument {
 public:
   InvalidLogPeriods(const std::string &msg) : std::invalid_argument(msg) {}
 };

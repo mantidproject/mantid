@@ -29,14 +29,10 @@
 #define DLLExport __declspec(dllexport)
 #define DLLImport __declspec(dllimport)
 #define EXTERN_IMPORT extern
-#elif defined(__GNUC__) && !defined(__clang__)
+#else
 #define DLLExport __attribute__((visibility("default")))
 #define DLLImport
 #define EXTERN_IMPORT extern
-#else
-#define DLLExport
-#define DLLImport
-#define EXTERN_IMPORT
 #endif
 
 /**

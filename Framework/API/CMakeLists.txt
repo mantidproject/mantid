@@ -62,6 +62,8 @@ set(SRC_FILES
     src/HistogramValidator.cpp
     src/HistoryItem.cpp
     src/HistoryView.cpp
+    src/IBackgroundFunction.cpp
+    src/ICatalogInfoService.cpp
     src/IDomainCreator.cpp
     src/IEventList.cpp
     src/IEventWorkspace.cpp
