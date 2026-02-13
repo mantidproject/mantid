@@ -106,8 +106,6 @@ void SaveIsawDetCal::exec() {
       uniqueBanks.insert(bank);
     }
   }
-  if (!inst)
-    throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
 
   double l1;
   V3D beamline;

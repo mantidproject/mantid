@@ -221,7 +221,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
 
       g_log.debug() << "Component Name = " << componentName
                     << "  Component ID = " << componentInfo.componentID(componentIndex)
-                    << "Number of Children = " << detectorIndices.size() << '\n';
+                    << "  Number of Children = " << detectorIndices.size() << '\n';
 
       for (const auto &detIndex : detectorIndices) {
         // c) get detector ID

@@ -8,10 +8,12 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
 namespace Mantid {
+namespace Geometry {
+class ComponentInfo;
+}
 namespace Kernel {
 class V3D;
 }

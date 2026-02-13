@@ -237,7 +237,7 @@ void SaveIsawPeaks::exec() {
         const size_t bankIndex = componentInfo.indexOfAny(bankName);
         const auto children = componentInfo.children(bankIndex);
         if (!children.empty()) {
-          det.reset(componentInfo.componentID(children[0]));
+          det.reset(componentInfo.componentID(children[0]), NoDeleting());
         }
       }
       if (det) {
@@ -428,14 +428,14 @@ bool SaveIsawPeaks::bankMasked(size_t componentIndex, const Geometry::DetectorIn
   for (const auto &colIndex : children) {
     auto grandchildren = componentInfo.children(colIndex);
     for (const auto &rowIndex : grandchildren) {
-      auto *d = dynamic_cast<Detector *>(const_cast<IComponent *>(componentInfo.componentID(rowIndex)));
-      if (d) {
-        auto detID = d->getID();
+      if (componentInfo.isDetector(rowIndex)) {
+        const auto detID = detectorInfo.detid(rowIndex);
         if (detID < 0)
           continue;
-        const auto index = detectorInfo.indexOf(detID);
-        if (!detectorInfo.isMasked(index))
+        const auto detIndex = detectorInfo.indexOf(detID);
+        if (!detectorInfo.isMasked(detIndex)) {
           return false;
+        }
       }
     }
   }

@@ -188,6 +188,7 @@ void AnvredCorrection::exec() {
 
   // If sample not at origin, shift cached positions.
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const auto &componentInfo = m_inputWS->componentInfo();
   double L1 = spectrumInfo.l1();
 
   Progress prog(this, 0.0, 1.0, numHists);
@@ -215,7 +216,6 @@ void AnvredCorrection::exec() {
     std::string bankName;
     if (m_useScaleFactors) {
       const auto &det = spectrumInfo.detector(i);
-      const auto &componentInfo = m_inputWS->componentInfo();
       bankName = det.getParent()->getParent()->getName();
       scale_init(inst, componentInfo, L2, depth, pathlength, bankName);
     }
@@ -290,6 +290,7 @@ void AnvredCorrection::execEvent() {
   Instrument_const_sptr inst = m_inputWS->getInstrument();
 
   const auto &spectrumInfo = eventW->spectrumInfo();
+  const auto &componentInfo = eventW->componentInfo();
   double L1 = spectrumInfo.l1();
 
   Progress prog(this, 0.0, 1.0, numHists);
@@ -321,7 +322,6 @@ void AnvredCorrection::execEvent() {
     std::string bankName;
     if (m_useScaleFactors) {
       const auto &det = spectrumInfo.detector(i);
-      const auto &componentInfo = eventW->componentInfo();
       bankName = det.getParent()->getParent()->getName();
       scale_init(inst, componentInfo, L2, depth, pathlength, bankName);
     }
