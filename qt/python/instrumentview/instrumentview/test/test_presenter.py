@@ -16,7 +16,7 @@ from mantid.simpleapi import CreateSampleWorkspace
 
 import unittest
 from unittest import mock
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock
 from enum import Enum
 
 
@@ -47,13 +47,17 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.add_masked_mesh.assert_called()
         mock_set_peaks_ws.assert_called_once()
 
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_contour_range_reset_clicked")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_integration_range")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_integration_limits")
-    def test_on_integration_limits_updated_true(self, mock_set_view_integration_limits, mock_update_integration_range):
+    def test_on_integration_limits_updated_true(
+        self, mock_set_view_integration_limits, mock_update_integration_range, mock_on_contour_range_reset_clicked
+    ):
         self._mock_view.get_integration_limits.return_value = (0, 100)
         self._presenter.on_integration_limits_updated()
         mock_update_integration_range.assert_called_with((0, 100))
         mock_set_view_integration_limits.assert_called_once()
+        mock_on_contour_range_reset_clicked.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_contour_limits")
     def test_on_contour_limits_updated_true(self, mock_set_view_contour_limits):
@@ -67,11 +71,16 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.set_view_contour_limits()
         self._mock_view.set_plotter_scalar_bar_range.assert_called_once_with((0, 100), self._presenter._counts_label)
 
-    def test_set_view_integration_limits(self):
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_contour_range_reset_clicked")
+    def test_set_view_integration_limits(self, mock_on_contour_range_reset_clicked, mock_update_line_plot):
+        self._mock_view.current_selected_unit.return_value = "MyUnit"
         self._model._counts = np.zeros(200)
         self._presenter._detector_mesh = {}
         self._presenter.set_view_integration_limits()
         np.testing.assert_allclose(self._presenter._detector_mesh[self._presenter._counts_label], self._model.detector_counts)
+        mock_on_contour_range_reset_clicked.assert_called_once()
+        mock_update_line_plot.assert_called_once_with("MyUnit")
 
     def test_generate_single_colour(self):
         green_vector = self._presenter.generate_single_colour(2, 0, 1, 0, 0)
@@ -473,6 +482,70 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._monitor_positions = [np.zeros(3)]
         self._presenter._create_and_add_monitor_mesh()
         self._mock_view.add_rgba_mesh.assert_called_once()
+
+    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
+    def test_on_integration_limits_reset_clicked(self, mock_integration_limits):
+        """Test on_integration_limits_reset_clicked resets to full range."""
+        self._model.full_integration_limits = (0.0, 1000.0)
+        self._model._integration_limits = (200, 300)
+        self._presenter.on_integration_limits_reset_clicked()
+        mock_integration_limits.assert_called_once_with((0.0, 1000.0))
+        self._mock_view.set_integration_range_limits.assert_called_once_with((0.0, 1000.0))
+        self._mock_view.set_integration_min_max_boxes.assert_called_once_with((0.0, 1000.0))
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_contour_limits")
+    @mock.patch.object(FullInstrumentViewModel, "counts_limits", new_callable=PropertyMock)
+    def test_on_contour_range_reset_clicked(self, mock_counts_limits, mock_set_view_contour):
+        """Test on_contour_range_reset_clicked resets to full range."""
+        self._model.full_counts_limits = (0, 100)
+        self._model._counts_limits = (1, 2)
+        self._presenter.on_contour_range_reset_clicked()
+        mock_counts_limits.assert_called_once_with((0, 100))
+        mock_set_view_contour.assert_called_once()
+        self._mock_view.set_contour_range_limits.assert_called_once_with((0, 100))
+        self._mock_view.set_contour_min_max_boxes.assert_called_once_with((0, 100))
+
+    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "workspace_x_unit", new_callable=PropertyMock)
+    def test_integration_limits_in_current_unit_converts_from_workspace_to_view_unit(self, mock_workspace_x_unit, mock_integration_limits):
+        """Test that integration_limits_in_current_unit converts limits from workspace unit to view unit."""
+        mock_workspace_x_unit.return_value = "TOF"
+        mock_integration_limits.return_value = (1000.0, 5000.0)
+        self._mock_view.current_selected_unit.return_value = "dSpacing"
+        self._presenter._model.convert_units = MagicMock(side_effect=[2.0, 10.0])
+        result = self._presenter.integration_limits_in_current_unit()
+        self.assertEqual(self._presenter._model.convert_units.call_count, 2)
+        self._presenter._model.convert_units.assert_any_call("TOF", "dSpacing", 0, 1000.0)
+        self._presenter._model.convert_units.assert_any_call("TOF", "dSpacing", 0, 5000.0)
+        self.assertEqual(result, (2.0, 10.0))
+
+    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "workspace_x_unit", new_callable=PropertyMock)
+    def test_integration_limits_in_current_unit_with_same_units(self, mock_workspace_x_unit, mock_integration_limits):
+        """Test that integration_limits_in_current_unit works when workspace and view units are the same."""
+        mock_workspace_x_unit.return_value = "TOF"
+        mock_integration_limits.return_value = (1000.0, 5000.0)
+        self._mock_view.current_selected_unit.return_value = "TOF"
+        self._presenter._model.convert_units = MagicMock(side_effect=[1000.0, 5000.0])
+        result = self._presenter.integration_limits_in_current_unit()
+        self.assertEqual(self._presenter._model.convert_units.call_count, 2)
+        self._presenter._model.convert_units.assert_any_call("TOF", "TOF", 0, 1000.0)
+        self._presenter._model.convert_units.assert_any_call("TOF", "TOF", 0, 5000.0)
+        self.assertEqual(result, (1000.0, 5000.0))
+
+    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "workspace_x_unit", new_callable=PropertyMock)
+    def test_integration_limits_in_current_unit_wavelength_conversion(self, mock_workspace_x_unit, mock_integration_limits):
+        """Test that integration_limits_in_current_unit correctly converts TOF to Wavelength."""
+        mock_workspace_x_unit.return_value = "TOF"
+        mock_integration_limits.return_value = (2000.0, 8000.0)
+        self._mock_view.current_selected_unit.return_value = "Wavelength"
+        self._presenter._model.convert_units = MagicMock(side_effect=[1.5, 6.0])
+        result = self._presenter.integration_limits_in_current_unit()
+        self.assertEqual(self._presenter._model.convert_units.call_count, 2)
+        self._presenter._model.convert_units.assert_any_call("TOF", "Wavelength", 0, 2000.0)
+        self._presenter._model.convert_units.assert_any_call("TOF", "Wavelength", 0, 8000.0)
+        self.assertEqual(result, (1.5, 6.0))
 
 
 if __name__ == "__main__":

@@ -122,6 +122,8 @@ class FullInstrumentViewModel:
 
         # Update counts with default total range
         self.update_integration_range(self._integration_limits, True)
+        self.full_integration_limits = self._integration_limits
+        self.full_counts_limits = self._counts_limits
 
     @property
     def workspace(self) -> Workspace2D:
@@ -230,6 +232,7 @@ class FullInstrumentViewModel:
             dtype=int,
         )
         self._counts_limits = (np.min(new_detector_counts), np.max(new_detector_counts))
+        self.full_counts_limits = self._counts_limits
         self._counts[self.is_pickable] = new_detector_counts
 
     def update_point_picked_detectors(self, index: int) -> None:

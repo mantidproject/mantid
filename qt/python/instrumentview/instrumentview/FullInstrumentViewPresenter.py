@@ -145,17 +145,38 @@ class FullInstrumentViewPresenter:
             return self._model.workspace_x_unit_display
         return ""
 
+    def integration_limits_in_current_unit(self) -> tuple[float, float]:
+        limits = self._model.integration_limits
+        min_in_workspace_unit = self._model.convert_units(self._model.workspace_x_unit, self._view.current_selected_unit(), 0, limits[0])
+        max_in_workspace_unit = self._model.convert_units(self._model.workspace_x_unit, self._view.current_selected_unit(), 0, limits[1])
+        return min_in_workspace_unit, max_in_workspace_unit
+
     def on_integration_limits_updated(self) -> None:
         """When integration limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         self._model.integration_limits = self._view.get_integration_limits()
         self.set_view_integration_limits()
+        self.on_contour_range_reset_clicked()
+
+    def on_integration_limits_reset_clicked(self) -> None:
+        self._model.integration_limits = self._model.full_integration_limits
+        self._view.set_integration_range_limits(self._model.full_integration_limits)
+        self._view.set_integration_min_max_boxes(self._model.full_integration_limits)
+        self.set_view_integration_limits()
 
     def set_view_integration_limits(self) -> None:
         self._detector_mesh[self._counts_label] = self._model.detector_counts
+        self.on_contour_range_reset_clicked()
+        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
     def on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         self._model.counts_limits = self._view.get_contour_limits()
+        self.set_view_contour_limits()
+
+    def on_contour_range_reset_clicked(self) -> None:
+        self._model.counts_limits = self._model.full_counts_limits
+        self._view.set_contour_range_limits(self._model.full_counts_limits)
+        self._view.set_contour_min_max_boxes(self._model.full_counts_limits)
         self.set_view_contour_limits()
 
     def set_view_contour_limits(self) -> None:
