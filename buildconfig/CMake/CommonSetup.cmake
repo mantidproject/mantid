@@ -260,6 +260,7 @@ endif()
 # Look for MPI
 # ######################################################################################################################
 if(MPI_BUILD AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(MPI_ENABLED TRUE)
   find_package(MPI REQUIRED)
   find_package(Boost CONFIG REQUIRED COMPONENTS mpi)
 endif()
