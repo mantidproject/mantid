@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayLengthValidator.h"
@@ -125,15 +126,13 @@ std::map<int, RectangularDetector_const_sptr> ConvertToDetectorFaceMD::getBanks(
 
   if (bankNums.empty()) {
     // --- Find all rectangular detectors ----
-    // Get all children
-    std::vector<IComponent_const_sptr> comps;
-    inst->getChildren(comps, true);
-
-    for (auto &comp : comps) {
-      // Retrieve it
+    const auto &componentInfo = in_ws->componentInfo();
+    for (size_t i = 0; i < componentInfo.size(); ++i) {
+      // Check if the component is a RectangularDetector by getting it by name
+      std::string name = componentInfo.name(i);
+      auto comp = inst->getComponentByName(name);
       RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const RectangularDetector>(comp);
       if (det) {
-        std::string name = det->getName();
         if (name.size() < 5)
           continue;
         std::string bank = name.substr(4, name.size() - 4);

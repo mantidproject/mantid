@@ -60,7 +60,7 @@ private:
   DataObjects::Peak readPeak(const DataObjects::PeaksWorkspace_sptr &outWS, std::string &lastStr, std::ifstream &in,
                              int &seqNum, const std::string &bankName, double qSign);
 
-  int findPixelID(const Geometry::Instrument_const_sptr &inst, const std::string &bankName, int col, int row);
+  int findPixelID(const DataObjects::PeaksWorkspace_sptr &ws, const std::string &bankName, int col, int row);
 
   /// Read the header of a peak block section, returns first word of next line
   std::string readPeakBlockHeader(std::string lastStr, std::ifstream &in, int &run, int &detName, double &chi,

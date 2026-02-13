@@ -75,7 +75,7 @@ containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrecti
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/ClearUB.h:25
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/PeaksIntersection.h:33
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:239
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:606
+containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:608
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
 derefInvalidIteratorRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ExcludeRangeFinder.cpp:77
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/BSpline.cpp:146
