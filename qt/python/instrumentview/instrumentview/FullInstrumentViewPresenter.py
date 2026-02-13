@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import pyvista as pv
-from pyvista.plotting.opts import PickerType
 from qtpy.QtWidgets import QFileDialog
 from queue import Queue
 from typing import Optional
@@ -24,6 +23,10 @@ from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 from instrumentview.ComponentTreeModel import ComponentTreeModel
 from instrumentview.ComponentTreePresenter import ComponentTreePresenter
+from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
+from instrumentview.renderers.shape_renderer import ShapeRenderer
+from instrumentview.renderers.side_by_side_shape_renderer import SideBySideShapeRenderer
 
 from vtkmodules.vtkRenderingCore import vtkCoordinate
 
@@ -68,6 +71,10 @@ class FullInstrumentViewPresenter:
         self._transform = np.eye(4)
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
+        self._point_cloud_renderer = PointCloudRenderer()
+        self._shape_renderer = None  # lazily created
+        self._sbs_shape_renderer = None  # lazily created
+        self._renderer = self._point_cloud_renderer  # Start with point cloud
         self._model.setup()
         self.setup()
         self._callback_queue = Queue()
@@ -97,7 +104,8 @@ class FullInstrumentViewPresenter:
         self._view.set_integration_range_limits(self._model.integration_limits)
         self._view.show_axes()
         self._setup_component_tree()
-        self.update_plotter()
+        # Sync projection type and renderer with the view's default selection
+        self._on_projection_option_changed()
 
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
             self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_x_unit))
@@ -151,7 +159,7 @@ class FullInstrumentViewPresenter:
         self.set_view_integration_limits()
 
     def set_view_integration_limits(self) -> None:
-        self._detector_mesh[self._counts_label] = self._model.detector_counts
+        self._renderer.set_detector_scalars(self._detector_mesh, self._model.detector_counts, self._counts_label)
 
     def on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
@@ -161,9 +169,16 @@ class FullInstrumentViewPresenter:
     def set_view_contour_limits(self) -> None:
         self._view.set_plotter_scalar_bar_range(self._model.counts_limits, self._counts_label)
 
-    def update_plotter(self) -> None:
-        """Update the projection based on the selected option."""
+    def _on_projection_option_changed(self) -> None:
+        """Update the projection, enable/disable shapes checkbox, and select appropriate renderer."""
         self._model.projection_type = self._view.current_selected_projection()
+        self._view.set_show_shapes_checkbox_enabled(True)
+        self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
+
+    def on_projection_option_changed(self) -> None:
+        self._callback_queue.put((self._on_projection_option_changed, ()))
+
+    def update_plotter(self) -> None:
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter()
             self.update_detector_picker()
@@ -171,17 +186,20 @@ class FullInstrumentViewPresenter:
 
     def _update_view_main_plotter(self):
         self._view.clear_main_plotter()
+        renderer = self._renderer
 
-        self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
-        self._detector_mesh[self._counts_label] = self._model.detector_counts
-        self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
+        self._detector_mesh = renderer.build_detector_mesh(self._model.detector_positions, self._model)
+        renderer.set_detector_scalars(self._detector_mesh, self._model.detector_counts, self._counts_label)
+        renderer.add_detector_mesh_to_plotter(
+            self._view.main_plotter, self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label
+        )
 
-        self._pickable_mesh = self.create_poly_data_mesh(self._model.detector_positions)
-        self._pickable_mesh[self._visible_label] = self._model.picked_visibility
-        self._view.add_pickable_mesh(self._pickable_mesh, scalars=self._visible_label)
+        self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions)
+        renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
+        renderer.add_pickable_mesh_to_plotter(self._view.main_plotter, self._pickable_mesh, scalars=self._visible_label)
 
-        self._masked_mesh = self.create_poly_data_mesh(self._model.masked_positions)
-        self._view.add_masked_mesh(self._masked_mesh)
+        self._masked_mesh = renderer.build_masked_mesh(self._model.masked_positions, self._model)
+        renderer.add_masked_mesh_to_plotter(self._view.main_plotter, self._masked_mesh)
 
         monitor_mesh = self._create_and_add_monitor_mesh()
 
@@ -191,6 +209,7 @@ class FullInstrumentViewPresenter:
         self._detector_mesh.transform(self._transform, inplace=True)
         self._pickable_mesh.transform(self._transform, inplace=True)
         self._masked_mesh.transform(self._transform, inplace=True)
+        self._renderer.transform_internal_meshes(self._transform)
         if monitor_mesh is not None:
             monitor_mesh.transform(self._transform, inplace=True)
 
@@ -258,19 +277,19 @@ class FullInstrumentViewPresenter:
 
     def update_detector_picker(self) -> None:
         """Change between single and multi point picking"""
+        # Remove any custom interactor to avoid artifacts in 2D or 3D
+        if hasattr(self._view, "interactor_style"):
+            self._view.interactor_style.remove_interactor()
 
-        def point_picked(point_position: np.ndarray | None, picker: PickerType.POINT.value) -> None:
-            if point_position is None:
-                return
-            point_index = picker.GetPointId()
-            self._model.update_point_picked_detectors(point_index)
+        def detector_picked(detector_index: int) -> None:
+            self._model.update_point_picked_detectors(detector_index)
             self.update_picked_detectors_on_view()
 
-        self._view.enable_point_picking(self._model.is_2d_projection, callback=point_picked)
+        self._renderer.enable_picking(self._view.main_plotter, callback=detector_picked)
 
     def update_picked_detectors_on_view(self) -> None:
         # Update to visibility shows up in real time
-        self._pickable_mesh[self._visible_label] = self._model.picked_visibility
+        self._renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
         self._peak_interaction_status = PeakInteractionStatus.Disabled
         self._view.remove_peak_cursor_from_lineplot()
@@ -287,7 +306,10 @@ class FullInstrumentViewPresenter:
         implicit_function = self._view.get_current_widget_implicit_function()
         if not implicit_function:
             return
-        mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points]
+        # Evaluate against transformed detector positions (one per detector),
+        # not mesh vertices — shape meshes have many vertices per detector.
+        detector_positions = self._transform_vectors_with_matrix(self._model.detector_positions, self._transform)
+        mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in detector_positions]
         new_key = self._model.add_new_detector_key(mask, self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
 
@@ -421,9 +443,7 @@ class FullInstrumentViewPresenter:
             self._view.close()
             logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
         else:
-            self._reload_peaks_workspaces()
-            self._reload_mask_workspaces()
-            self._reload_grouping_workspaces()
+            self._reload_everything()
 
     def delete_workspace_callback(self, ws_name):
         self._callback_queue.put((self._delete_workspace_callback, (ws_name,)))
@@ -435,9 +455,7 @@ class FullInstrumentViewPresenter:
             self._setup_component_tree()
             logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
 
-        self._reload_peaks_workspaces()
-        self._reload_mask_workspaces()
-        self._reload_grouping_workspaces()
+        self._reload_everything()
 
     def rename_workspace_callback(self, ws_old_name, ws_new_name):
         self._callback_queue.put((self._rename_workspace_callback, (ws_old_name, ws_new_name)))
@@ -461,6 +479,7 @@ class FullInstrumentViewPresenter:
             self._model._workspace = AnalysisDataService.retrieve(ws_name)
             self._model.setup()
             self._setup_component_tree()
+            self._clear_renderers()  # Clear cached renderers before rendering
             self.update_plotter()
 
     def replace_workspace_callback(self, ws_name, ws):
@@ -589,3 +608,72 @@ class FullInstrumentViewPresenter:
     def on_component_tree_item_selected(self, component_indices: np.ndarray) -> None:
         self._model.component_tree_indices_selected(component_indices)
         self.update_plotter()
+
+    def _get_point_cloud_renderer(self) -> PointCloudRenderer:
+        """Get or create the cached point cloud renderer instance.
+
+        Returns
+        -------
+        PointCloudRenderer
+            The cached renderer, creating it if necessary.
+        """
+        if self._point_cloud_renderer is None:
+            self._point_cloud_renderer = PointCloudRenderer()
+        return self._point_cloud_renderer
+
+    def _get_shape_renderer(self) -> ShapeRenderer:
+        """Get or create a cached shape renderer instance.
+
+        Returns a :class:`SideBySideShapeRenderer` when the current
+        projection is side-by-side, otherwise a plain :class:`ShapeRenderer`.
+        On first call for each type, precomputes geometry from the workspace
+        which may be expensive.  Subsequent calls return the cached instance.
+
+        Returns
+        -------
+        ShapeRenderer
+            The cached renderer, creating and precomputing it if necessary.
+        """
+        is_sbs = self._model.projection_type == ProjectionType.SIDE_BY_SIDE
+        if is_sbs:
+            if self._sbs_shape_renderer is None:
+                self._sbs_shape_renderer = SideBySideShapeRenderer()
+                self._sbs_shape_renderer.precompute(self._model.workspace, self._model.bank_groups_by_detector_id)
+            return self._sbs_shape_renderer
+        else:
+            if self._shape_renderer is None:
+                self._shape_renderer = ShapeRenderer()
+                self._shape_renderer.precompute(self._model.workspace)
+            return self._shape_renderer
+
+    def _on_show_shapes_toggled(self, checked: bool) -> None:
+        """Toggle between point-cloud and shape-based rendering."""
+        if checked:
+            self._renderer = self._get_shape_renderer()
+        else:
+            self._renderer = self._get_point_cloud_renderer()
+
+        self.update_plotter()
+
+    def on_show_shapes_toggled(self, checked: bool) -> None:
+        self._callback_queue.put((self._on_show_shapes_toggled, (checked,)))
+
+    def _clear_renderers(self) -> None:
+        """Clear cached renderer instances, forcing recreation on next use.
+
+        Called when the workspace changes to ensure renderers recompute geometry
+        from the new workspace data.
+        """
+        self._shape_renderer = None
+        self._sbs_shape_renderer = None
+        self._point_cloud_renderer = None
+
+    def _reload_everything(self) -> None:
+        """Reload all workspace-dependent data (peaks, masks, groupings) and clear renderer cache.
+
+        Called when workspaces are added to or removed from the ADS.
+        """
+        self._clear_renderers()  # Clear cached renderers before reloading
+        self._reload_peaks_workspaces()
+        self._reload_mask_workspaces()
+        self._reload_grouping_workspaces()
