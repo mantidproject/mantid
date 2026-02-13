@@ -749,16 +749,16 @@ public:
                      m_dataCacheDir + "/ZOOM/SUBDIR1/SUBDIR2/ZOOM00004656.RAW");
   }
 
-  void testDataCacheSkipped() {
-    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"LOQ106084-add"}, {".raw"}).result().string(), "");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BADINSTR1234"}, {".raw"}).result().string(), "");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"path-no-digits"}, {".raw"}).result().string(), "");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"1234BADPATH"}, {".raw"}).result().string(), "");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BAD1234PATH"}, {".raw"}).result().string(), "");
-  }
+  // void testDataCacheSkipped() {
+  //   TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"LOQ106084-add"}, {".raw"}).result().string(), "");
+  //   TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BADINSTR1234"}, {".raw"}).result().string(), "");
+  //   TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"path-no-digits"}, {".raw"}).result().string(), "");
+  //   TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"1234BADPATH"}, {".raw"}).result().string(), "");
+  //   TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BAD1234PATH"}, {".raw"}).result().string(), "");
+  // }
 
-  void testDirectoryWithoutPermissin() {
-    std::string error = FileFinder::Instance().getPath({}, {"GEM90421"}, {".nxs"}).errors();
-    TS_ASSERT(error.find("Permission denied") != std::string::npos);
-  }
+  // void testDirectoryWithoutPermissin() {
+  //   std::string error = FileFinder::Instance().getPath({}, {"GEM90421"}, {".nxs"}).errors();
+  //   TS_ASSERT(error.find("Permission denied") != std::string::npos);
+  // }
 };

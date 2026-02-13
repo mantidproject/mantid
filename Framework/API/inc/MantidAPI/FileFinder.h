@@ -38,23 +38,18 @@ class MANTID_API_DLL FileFinderImpl {
 public:
   std::filesystem::path getFullPath(const std::string &filename, const bool ignoreDirs = false) const;
   std::string extractAllowedSuffix(std::string &userString) const;
-  const API::Result<std::filesystem::path> getPath(const std::vector<IArchiveSearch_sptr> &archs,
-                                                   const std::set<std::string> &hintstrs,
-                                                   const std::vector<std::string> &exts) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string makeFileName(const std::string &hintstr, const Kernel::InstrumentInfo &instrument) const;
   void setCaseSensitive(const bool cs);
   bool getCaseSensitive() const;
   static std::vector<IArchiveSearch_sptr> getArchiveSearch(const Kernel::FacilityInfo &facility);
-  const API::Result<std::filesystem::path> findRun(const std::string &hintstr,
-                                                   const std::vector<std::string> &exts = {},
-                                                   const bool useExtsOnly = false,
-                                                   const std::string &defaultInstrument = "") const;
-  const API::Result<std::filesystem::path> findRun(const std::string &hintstr, const Kernel::InstrumentInfo &instrument,
-                                                   const std::vector<std::string> &exts = {},
-                                                   const bool useExtsOnly = false) const;
+  const API::Result<std::filesystem::path>
+  findRun(const std::string &hintstr, const std::vector<std::string> &exts = {}, const bool useExtsOnly = false) const;
   std::vector<std::filesystem::path> findRuns(const std::string &hintstr, const std::vector<std::string> &exts = {},
-                                              const bool useExtsOnly = false) const;
+                                              const bool useExtsOnly = false, const bool singleRun = false,
+                                              const bool throwIfNotFound = true) const;
+
+  std::filesystem::path checkFilename(const std::string &filename) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   const Kernel::InstrumentInfo getInstrument(const std::string &hintstr, const bool returnDefaultIfNotFound = true,
                                              const std::string &defaultInstrument = "") const;
