@@ -19,7 +19,7 @@ struct StretchRunData {
   double startBeta{0.5};
   double endBeta{1.0};
   double startFWHM{0.01};
-  double endFWHM{0.1};
+  double endFWHM{0.2};
   const int beta{3};
   const int sigma{3};
   int sampleBinning{1};
