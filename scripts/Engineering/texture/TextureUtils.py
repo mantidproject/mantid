@@ -636,6 +636,7 @@ def fit_all_peaks(
             si = ws.spectrumInfo()
             out_tab.addColumn("int", "wsindex")
             out_tab.addColumn("double", "I_est")
+            out_tab.addColumn("double", "I_over_sig")
             all_params = spec_fit.column("Name")[:-1]  # last row is cost function
             param_vals = spec_fit.column("Value")[:-1]
             param_errs = spec_fit.column("Error")[:-1]
@@ -652,11 +653,11 @@ def fit_all_peaks(
             default_vals = get_default_values(u_params, no_fit_value_dict)
 
             # populate the rows of the table
-            table_vals = np.zeros((si.size(), 2 * len(u_params) + 1))  # intensity_est + param_1_val, param_1_err, +...
+            table_vals = np.zeros((si.size(), 2 * len(u_params) + 2))  # intensity_est + i/sig + param_1_val, param_1_err, +...
             for ispec in range(si.size()):
                 # logic for spectra which HAVE been fit successfully
                 if fit_mask[ispec]:
-                    row = [intensity_estimates[ispec]]
+                    row = [intensity_estimates[ispec], i_over_sigma[ispec]]
                     for p in u_params:
                         param_name = f"f{ispec}.f0.{p}"
                         pind = all_params.index(param_name)
@@ -670,7 +671,7 @@ def fit_all_peaks(
                             row += [d_peak, d_err]
                 # logic for spectra which HAVE NOT been fit successfully
                 else:
-                    row = [default_vals.get("I_est", np.nan)]
+                    row = [default_vals.get("I_est", np.nan), i_over_sigma[ispec]]
                     for p in u_params:
                         row += [default_vals[p], np.nan]
                 table_vals[ispec] = row
