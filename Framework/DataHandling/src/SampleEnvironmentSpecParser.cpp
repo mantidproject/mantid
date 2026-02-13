@@ -350,10 +350,8 @@ std::string SampleEnvironmentSpecParser::findFile(const std::string &filename) c
 
     if (useSearchDirectories) {
       // ... and if that doesn't work look in the search directories
-      std::string foundFile = Mantid::API::FileFinder::Instance().getFullPath(filename);
-      if (!foundFile.empty()) {
-        stlFileName = std::filesystem::path(foundFile);
-      } else {
+      stlFileName = Mantid::API::FileFinder::Instance().getFullPath(filename);
+      if (stlFileName.empty()) {
         stlFileName = suppliedStlFileName;
       }
     }

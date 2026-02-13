@@ -274,7 +274,7 @@ public:
   }
 
   void test_LoadNexus() {
-    std::string filename = FileFinder::Instance().getFullPath("GEM38370_Focussed_Legacy.nxs");
+    std::string filename = FileFinder::Instance().getFullPath("GEM38370_Focussed_Legacy.nxs").string();
     auto loadhandle = std::make_shared<Mantid::Nexus::File>(filename);
     loadhandle->openAddress("/mantid_workspace_1");
 
@@ -294,7 +294,7 @@ public:
   }
 
   void test_LoadNexus_NestedHistory() {
-    std::string filename = FileFinder::Instance().getFullPath("HistoryTest_CreateTransmissionAuto.nxs");
+    std::string filename = FileFinder::Instance().getFullPath("HistoryTest_CreateTransmissionAuto.nxs").string();
     auto loadhandle = std::make_shared<Mantid::Nexus::File>(filename);
     loadhandle->openAddress("/mantid_workspace_1");
 

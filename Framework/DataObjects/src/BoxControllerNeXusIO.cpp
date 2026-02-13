@@ -127,7 +127,7 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName, const std::stri
   }
 
   // open file if it exists or create it if not in the mode requested
-  m_fileName = API::FileFinder::Instance().getFullPath(fileName);
+  m_fileName = API::FileFinder::Instance().getFullPath(fileName).string();
   if (m_fileName.empty()) {
     if (!m_ReadOnly) {
       std::string filePath = Kernel::ConfigService::Instance().getString("defaultsave.directory");

@@ -13,6 +13,7 @@
 #include "MantidAPI/IArchiveSearch.h"
 #include "MantidKernel/SingletonHolder.h"
 
+#include <filesystem>
 #include <set>
 #include <vector>
 
@@ -35,33 +36,34 @@ number
 */
 class MANTID_API_DLL FileFinderImpl {
 public:
-  std::string getFullPath(const std::string &filename, const bool ignoreDirs = false) const;
+  std::filesystem::path getFullPath(const std::string &filename, const bool ignoreDirs = false) const;
   std::string extractAllowedSuffix(std::string &userString) const;
-  const API::Result<std::string> getPath(const std::vector<IArchiveSearch_sptr> &archs,
-                                         const std::set<std::string> &filenames,
-                                         const std::vector<std::string> &exts) const;
+  const API::Result<std::filesystem::path> getPath(const std::vector<IArchiveSearch_sptr> &archs,
+                                                   const std::set<std::string> &hintstrs,
+                                                   const std::vector<std::string> &exts) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
-  std::string makeFileName(const std::string &hint, const Kernel::InstrumentInfo &instrument) const;
+  std::string makeFileName(const std::string &hintstr, const Kernel::InstrumentInfo &instrument) const;
   void setCaseSensitive(const bool cs);
   bool getCaseSensitive() const;
   static std::vector<IArchiveSearch_sptr> getArchiveSearch(const Kernel::FacilityInfo &facility);
-  const API::Result<std::string> findRun(const std::string &hintstr, const std::vector<std::string> &exts = {},
-                                         const bool useExtsOnly = false,
-                                         const std::string &defaultInstrument = "") const;
-  const API::Result<std::string> findRun(const std::string &hintstr, const Kernel::InstrumentInfo &instrument,
-                                         const std::vector<std::string> &exts = {},
-                                         const bool useExtsOnly = false) const;
-  std::vector<std::string> findRuns(const std::string &hintstr, const std::vector<std::string> &exts = {},
-                                    const bool useExtsOnly = false) const;
+  const API::Result<std::filesystem::path> findRun(const std::string &hintstr,
+                                                   const std::vector<std::string> &exts = {},
+                                                   const bool useExtsOnly = false,
+                                                   const std::string &defaultInstrument = "") const;
+  const API::Result<std::filesystem::path> findRun(const std::string &hintstr, const Kernel::InstrumentInfo &instrument,
+                                                   const std::vector<std::string> &exts = {},
+                                                   const bool useExtsOnly = false) const;
+  std::vector<std::filesystem::path> findRuns(const std::string &hintstr, const std::vector<std::string> &exts = {},
+                                              const bool useExtsOnly = false) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
-  const Kernel::InstrumentInfo getInstrument(const std::string &hint, const bool returnDefaultIfNotFound = true,
+  const Kernel::InstrumentInfo getInstrument(const std::string &hintstr, const bool returnDefaultIfNotFound = true,
                                              const std::string &defaultInstrument = "") const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string getExtension(const std::string &filename, const std::vector<std::string> &exts) const;
   void getUniqueExtensions(const std::vector<std::string> &extensionsToAdd, std::vector<std::string> &uniqueExts) const;
-  std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hint,
+  std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hintstr,
                                                             const std::string &defaultInstrument = "") const;
-  std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hint,
+  std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hintstr,
                                                             const Kernel::InstrumentInfo &instrument) const;
 
 private:
@@ -77,12 +79,12 @@ private:
   FileFinderImpl &operator=(const FileFinderImpl &);
   /// A method that returns error messages if the provided runs are invalid
   std::string validateRuns(const std::string &searchText) const;
-  const API::Result<std::string> getISISInstrumentDataCachePath(const std::string &cachePathToSearch,
-                                                                const std::set<std::string> &filenames,
-                                                                const std::vector<std::string> &exts) const;
-  const API::Result<std::string> getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
-                                                const std::set<std::string> &filenames,
-                                                const std::vector<std::string> &exts) const;
+  const API::Result<std::filesystem::path> getISISInstrumentDataCachePath(const std::string &cachePathToSearch,
+                                                                          const std::set<std::string> &hintstrs,
+                                                                          const std::vector<std::string> &exts) const;
+  const API::Result<std::filesystem::path> getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
+                                                          const std::set<std::string> &hintstrs,
+                                                          const std::vector<std::string> &exts) const;
   std::string toUpper(const std::string &src) const;
   /// glob option - set to case sensitive or insensitive
   int m_globOption;

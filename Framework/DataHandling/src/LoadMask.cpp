@@ -675,7 +675,7 @@ void LoadMask::intializeMaskWorkspace() {
   } else {
     MatrixWorkspace_sptr tempWs(new DataObjects::Workspace2D());
     const bool ignoreDirs(true);
-    const std::string idfPath = API::FileFinder::Instance().getFullPath(m_instrumentPropValue, ignoreDirs);
+    const auto idfPath = API::FileFinder::Instance().getFullPath(m_instrumentPropValue, ignoreDirs);
 
     auto loadInst = createChildAlgorithm("LoadInstrument");
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", tempWs);
