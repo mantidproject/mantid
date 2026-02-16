@@ -636,7 +636,6 @@ def fit_all_peaks(
             si = ws.spectrumInfo()
             out_tab.addColumn("int", "wsindex")
             out_tab.addColumn("double", "I_est")
-            out_tab.addColumn("double", "I_over_sig")
             all_params = spec_fit.column("Name")[:-1]  # last row is cost function
             param_vals = spec_fit.column("Value")[:-1]
             param_errs = spec_fit.column("Error")[:-1]
@@ -648,35 +647,34 @@ def fit_all_peaks(
                     u_params.append(param)
                     out_tab.addColumn("double", param)
                     out_tab.addColumn("double", f"{param}_err")
+                    out_tab.addColumn("double", f"{param}/{param}_err")
 
             # get user defined default vals for unsuccessful fit parameters
             default_vals = get_default_values(u_params, no_fit_value_dict)
 
             # populate the rows of the table
-            table_vals = np.zeros((si.size(), 2 * len(u_params) + 2))  # intensity_est + i/sig + param_1_val, param_1_err, +...
+            table_vals = np.zeros((si.size(), 3 * len(u_params) + 1))  # intens_est + p_1_val, p_1_err, pm_1_val/err +...
             for ispec in range(si.size()):
                 # logic for spectra which HAVE been fit successfully
                 if fit_mask[ispec]:
-                    # add estimate of I and I over sigma
-                    # I over sigma seems to sometimes come out negative (presumably error in the I integration versus bkg)
-                    # In such a case treat I as 0, so I/sig = 0
-                    row = [intensity_estimates[ispec], max(i_over_sigma[ispec], 0.0)]
+                    # add estimate of I
+                    row = [intensity_estimates[ispec]]
                     for p in u_params:
                         param_name = f"f{ispec}.f0.{p}"
                         pind = all_params.index(param_name)
                         if p != "X0":
-                            row += [param_vals[pind], param_errs[pind]]
+                            row += [param_vals[pind], param_errs[pind], np.divide(param_vals[pind], param_errs[pind])]
                         else:
                             # for x0, convert back to d spacing
                             diff_consts = si.diffractometerConstants(ispec)
                             d_peak = UnitConversion.run("TOF", "dSpacing", param_vals[pind], 0, DeltaEModeType.Elastic, diff_consts)
                             d_err = convert_TOFerror_to_derror(diff_consts, param_errs[pind], d_peak)
-                            row += [d_peak, d_err]
+                            row += [d_peak, d_err, np.divide(d_peak, d_err)]
                 # logic for spectra which HAVE NOT been fit successfully
                 else:
-                    row = [default_vals.get("I_est", np.nan), max(i_over_sigma[ispec], 0.0)]
+                    row = [default_vals.get("I_est", np.nan)]
                     for p in u_params:
-                        row += [default_vals[p], np.nan]
+                        row += [default_vals[p], np.inf, 0.0]
                 table_vals[ispec] = row
             if nan_replacement:
                 table_vals = replace_nans(table_vals, nan_replacement)
