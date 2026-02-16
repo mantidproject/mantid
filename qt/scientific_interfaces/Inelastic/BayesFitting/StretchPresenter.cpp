@@ -130,14 +130,22 @@ void StretchPresenter::notifyPlotClicked() {
   auto const fitWorkspace = getADSWorkspace<WorkspaceGroup>(m_fitWorkspaceName);
   for (auto it = fitWorkspace->begin(); it < fitWorkspace->end(); ++it) {
     auto const name = (*it)->getName();
+    auto const specNum = std::static_pointer_cast<Mantid::API::MatrixWorkspace>(*it)->getNumberHistograms();
     if (plotSigma &&
         (name.substr(name.length() - 5) == PlotType::SIGMA || name.substr(name.length() - 4) == PlotType::FWHM)) {
-      m_plotter->plotSpectra(name, "0", plotErrors);
+      if (specNum > 1) {
+        m_plotter->plotContour(name);
+      } else {
+        m_plotter->plotSpectra(name, "0", plotErrors);
+      }
     } else if (plotBeta && name.substr(name.length() - 4) == PlotType::BETA) {
-      m_plotter->plotSpectra(name, "0", plotErrors);
+      if (specNum > 1) {
+        m_plotter->plotContour(name);
+      } else {
+        m_plotter->plotSpectra(name, "0", plotErrors);
+      }
     }
   }
-
   setPlotResultIsPlotting(false);
 }
 
