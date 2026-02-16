@@ -36,6 +36,7 @@ from sans.common.enums import (
     SANSInstrument,
     ReductionDimensionality,
     OutputMode,
+    PhiLimitType,
 )
 from sans.gui_logic.gui_common import (
     add_dir_to_datasearch,
@@ -286,8 +287,7 @@ class RunTabPresenter(PresenterCommon):
         sample_shape = ["Read from file", SampleShape.CYLINDER, SampleShape.FLAT_PLATE, SampleShape.DISC]
         self._view.sample_shape = sample_shape
 
-        phi_step_types = ["MinMax", "Pairs"]
-        self._view.phi_range_step_type = phi_step_types
+        self._view.phi_limit_use_range = [PhiLimitType.MINMAX, PhiLimitType.PAIRS]
 
         # Set the q range
         self._view.q_1d_step_type = [RangeStepType.LIN.value, RangeStepType.LOG.value]
@@ -1043,6 +1043,7 @@ class RunTabPresenter(PresenterCommon):
         self._set_on_view("phi_limit_min")
         self._set_on_view("phi_limit_max")
         self._set_on_view("phi_range")
+        self._set_on_view("phi_limit_use_range")
         self._set_on_view("phi_limit_use_mirror")
         self._set_on_view("radius_limit_min", self.DEFAULT_DECIMAL_PLACES_MM)
         self._set_on_view("radius_limit_max", self.DEFAULT_DECIMAL_PLACES_MM)
@@ -1158,7 +1159,15 @@ class RunTabPresenter(PresenterCommon):
                 "w_cut",
                 "q_1d",
             ],
-            "mask": ["phi_limit_min", "phi_limit_max", "phi_limit_use_mirror", "phi_range", "radius_limit_min", "radius_limit_max"],
+            "mask": [
+                "phi_limit_min",
+                "phi_limit_max",
+                "phi_limit_use_mirror",
+                "phi_range",
+                "phi_limit_use_range",
+                "radius_limit_min",
+                "radius_limit_max",
+            ],
             "user_file": ["user_file", "batch_file"],
             "beam_centre": ["rear_pos_1", "rear_pos_2", "front_pos_1", "front_pos_2"],
         }

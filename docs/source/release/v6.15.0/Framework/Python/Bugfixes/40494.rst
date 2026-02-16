@@ -1,0 +1,1 @@
+- The Figure Options in the :ref:`Workbench Plot Window <WorkbenchPlotWindow>` should no longer throw an error due to missing list entries.

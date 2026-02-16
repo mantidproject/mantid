@@ -239,7 +239,7 @@ void Component::setRot(const Quat &q) {
  *   @param y :: translation on the y-axis
  *  @param z :: translation on the z-axis
  */
-void Component::translate(double x, double y, double z) {
+void Component::translate(const double x, const double y, const double z) {
   if (!m_map) {
     m_pos[0] += x;
     m_pos[1] += y;

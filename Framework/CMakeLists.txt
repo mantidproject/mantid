@@ -41,9 +41,8 @@ add_subdirectory(Doxygen)
 add_subdirectory(ScriptRepository)
 
 # Build with MPI (Linux only)
-if(MPI_BUILD AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   message(STATUS "CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}; MPI_BUILD=${MPI_BUILD}")
-  message(STATUS "Boost_MPI_LIBRARY = ${Boost_MPI_LIBRARY}")
   add_subdirectory(MPIAlgorithms)
 endif()
 

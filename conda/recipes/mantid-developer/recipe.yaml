@@ -30,6 +30,7 @@ requirements:
     - librdkafka ${{ librdkafka }}
     - matplotlib ${{ matplotlib }}
     - muparser ${{ muparser }}
+    - myst-parser ${{ mystparser }}
     - ninja ${{ ninja }}
     - numpy ${{ numpy }}
     - occt ${{ occt }}
@@ -39,6 +40,7 @@ requirements:
     - psutil ${{ psutil }}
     - pycifrw
     - pydantic ${{ pydantic }}
+    - pyparsing ${{ pyparsing }}
     - pyqt ${{ pyqt }}
     - pyqt5-sip ${{ pyqt5_sip }}
     - pyqtwebengine
@@ -73,7 +75,6 @@ requirements:
     - pre-commit>=4.0
     - if: linux
       then:
-        - jemalloc ${{ jemalloc }}
         - lz4
         - pystack
         - qt-gtk-platformtheme
@@ -89,6 +90,12 @@ requirements:
         - xorg-libxtst>=1.2.3
         # Development tooling:
         - gcovr>=4.2
+        - mantidprofiler>=1.4,<2
+        # MPI Support
+        - mpi
+        - mpi4py
+        - libboost-mpi
+        - mpich
     - if: win
       then:
         - conda-wrappers

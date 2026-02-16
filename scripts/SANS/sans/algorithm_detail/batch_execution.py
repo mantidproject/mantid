@@ -743,7 +743,7 @@ def create_initial_reduction_packages(state, workspaces, monitors):
             monitors_for_package.update({workspace_type: workspace})
 
         # if we require multiple phi slicing
-        phi_range = state.mask.phi_range if state.mask.phi_range else [state.mask.phi_min, state.mask.phi_max]
+        phi_range = state.mask.phi_range if state.mask.use_phi_range and state.mask.phi_range else [state.mask.phi_min, state.mask.phi_max]
         if len(phi_range) > 2 and state.reduction.reduction_dimensionality is not ReductionDimensionality.ONE_DIM:
             # We select min and max of the whole range
             phi_range = [min(phi_range), max(phi_range)]

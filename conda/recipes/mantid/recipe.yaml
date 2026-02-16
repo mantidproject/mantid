@@ -25,6 +25,8 @@ requirements:
       then:
         - ${{ stdlib("c") }}
         - libgomp
+        - mpi
+        - mpich
     - if: osx
       then:
         - llvm-openmp ${{ llvm_openmp }}
@@ -56,12 +58,15 @@ requirements:
         - xorg-libxxf86vm
         - xorg-libx11
         - xorg-xorgproto
+        - mpi
+        - mpi4py
+        - libboost-mpi ${{ libboost }}
+        - mpich
     - if: win
       then:
         - lib3mf
     - if: osx or linux
       then:
-        - jemalloc  ${{ jemalloc }}
         - libopenblas ${{ libopenblas }}
   run:
     - ${{ pin_compatible("gsl", upper_bound="x.x") }}
@@ -91,17 +96,17 @@ requirements:
     - if: linux
       then:
         - libglu ${{ libglu }}
+        - mpi4py
+        - ${{ pin_compatible('libboost-mpi', upper_bound='x.x') }}
     - if: win
       then:
         - lib3mf
-    - if: osx or linux
-      then:
-        - jemalloc ${{ jemalloc }}
   run_exports:
     - ${{ pin_subpackage('mantid', upper_bound='x.x.x') }}
   run_constraints:
     - matplotlib-base ${{ matplotlib }}
     - pillow ${{ pillow }}
+    - pyparsing ${{ pyparsing }}
     - pystog ${{ pystog }}
 
 tests:

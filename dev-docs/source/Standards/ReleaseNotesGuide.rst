@@ -14,7 +14,8 @@ and processed using `Sphinx <http://www.sphinx-doc.org/en/master/>`__ along with
 `Sphinx bootstrap theme <https://pypi.python.org/pypi/sphinx-bootstrap-theme/>`__ and custom css. For the basics of how to format your release notes please see the :ref:`Documentation Guide For Devs <DocumentationGuideForDevs>` .
 
 When to add release notes
--------------------------
+=========================
+
 Release notes are an important part of communicating with users about the new features and bugfixes in the next release of Mantid. This means that any piece of work that impacts on user experience or that has been requested by users will normally require a release note.
 Examples of the type of work normally requiring notes:-
 
@@ -34,48 +35,83 @@ The following are examples of when release notes are not required:-
 If in doubt check with your team lead/manager for guidance.
 
 
-How to write a release note
----------------------------
-Release notes are intended for users and should be written with that audience in mind. Your note should contain enough information to convey the changes to a non-developer audience without containing lengthy details of exactly how the solution
-was implemented in the code base.
+How to add a release note
+=========================
 
-Avoid writing essays. If your new feature/bugfix requires lengthy explanations for users you should consider whether you need to add or update other documentation. You can then summarise the work in a couple of sentences in the release note and include
-a link to the more detailed information. Also consider using images or a gif walkthrough (see https://docs.mantidproject.org/nightly/release/v6.2.0/indirect_geometry.html for example) to help convey the information.
+Creating a file with the release note
+-------------------------------------
 
-Developers are asked to check their spelling, punctuation and grammar.
-
-Always start your release note with ``-`` so that it will be formatted as a bullet point in the collated list, e.g. `` - A new release note.``.
-
-Adding release notes
---------------------
-Release notes are added as new files in a pull request to avoid merge conflicts. Automated scripts then amalgamate these into the release notes available for users. If your work requires more than one note for the same subheading then it is fine to put them all in the same file. However,
-**new release notes should not be added to any existing files**.
-
-Amending release notes
-----------------------
-If you need to amend a release note from a previous Pull Request (PR) during sprint it is fine to do this as the automated script will update the release note. Provided developers use the naming conventions for files outlined below it should be easy to find the release note you wish to amend.
-If the release note you wish to amend is within a ``Used`` directory you will need to contact the Release Editor to discuss how to get the release note amended.
-
-File naming conventions
------------------------
-Release note files need to be named in one of the following ways:-
-
+To add a new release note on your PR, you need to create a new ``.rst`` file and give it the name it in one of the following ways:
 - Using the Pull Request (PR) number (preferred method)
 - Using the Issue number (to be used if multiple PRs stem from the same issue)
 
-Files need to have unique names. By using either the Issue number or PR number this makes them easier to find if they need to be updated at a later date.
+A good way to memorise why the PR number is preferred over issue number the is to think about which number is closer to your changes: The PR number directly identifies your work, whilst the issue number is more indirect (someone looking for your changes will need to scavenge issue number -> PR number -> merged changes).
 
-Files should always be in .rst format.
+As an example, if the your PR number is ``1234`` then the release notes file you create should be called ``1234.rst``.
 
-File location
--------------
-Release note files need to be saved in the directory that best represents their position within the release notes. First identify which release version your note relates to e.g. ``v6.3.0`` . Navigate to this directory and then navigate through the sub-directories until you reach a suitable sub heading. All notes need to be placed within a ``New_features``
+Where to create your file with the release note
+-----------------------------------------------
+
+Release note files need to be created in the directory relating to the next release version e.g. ``v6.15.0``. Navigate to this directory and then navigate through the sub-directories until you reach a suitable sub heading. All notes need to be placed within a ``New_features``
 or ``Bugfixes`` directory. For example a Bugfix release note for Engineering Diffraction should sit within ``/Diffraction/Engineering/Bugfixes`` .
 
 Release notes should not be placed in any directory outside of ``New_features`` or ``Bugfixes`` e.g. do not place release notes in ``/Diffraction/Engineering``. You should also not save release notes in any directory titled ``Used`` as this is for notes that have already been collated into the release notes.
 The only exception to this is for Algorithms and Fit Functions in the Framework Directory that additionally have ``Deprecated`` and ``Removed``.
 
 If you are uncertain where your release note should be see the :ref:`Standard File Structure <ReleaseNoteFileStructure>`.
+
+How to write a release note
+---------------------------
+
+In the release note file,  Always start your release note with ``-`` so that it will be formatted as a bullet point in the collated list, e.g. ``- A new release note.``.
+Release notes are intended for our non-developer scientific users and should be direct, clear and concise.
+Your note should summarise your work to a non-developer audience without containing lengthy details of the implementation in the code base.
+
+Most release notes are one or two sentences. If your new feature/bugfix requires lengthy explanations for users you probably need to add or update other documentation. You can then summarise the work in the release note and include
+a link to the documentation you created. Also consider using images or a gif walkthrough (see :ref:`TextureAnalysis` for really nice gifs) to help convey the information.
+
+How to phrase a release note
+----------------------------
+
+The phrasing of a release note is subjective, but here's our recomendations:
+
+- Start with the Algorithm or Interface where the change has ocurred.
+- Use active voice: what is the Algorithm or Interface now doing?
+
+Here is a good template that will be applicable in most cases:
+
+.. figure:: ../images/release-note-template.png
+   :class: screenshot
+   :width: 800px
+   :align: center
+
+And here are some real-world examples (with links to pages) of release notes that follow this structure:
+
+- ``:ref:`Elwin Tab <elwin>` of the :ref:`Data Processor Interface <interface-inelastic-data-processor>` now plots the correct spectrum for the selected index when changing the preview spectrum above the plot widget combo box.``
+- ``:ref:`algm-AlignAndFocusPowder` algorithm now runs compression when logarithmic is selected.``
+- ``:ref:`resnorm` tab of :ref:`interface-inelastic-bayes-fitting` interface no longer crashes when the `Run` button is clicked and no data is loaded.``
+
+The main advantage of this model is that in the final version of the release notes, all algorithms and interfaces get positioned in the same line of vision.
+This is important because it makes skimming the release notes much easier for our busy users:
+
+.. figure:: ../images/release-notes-same-line-of-vision.png
+   :class: screenshot
+   :width: 700px
+   :align: center
+
+What if your change was not in an interface or an algorithm? For example, what if you fixed a bug in plotting or framework?
+
+In these cases, try to ask yourself **where** the change happens, although admittedly in some cases it will not make sense.
+Let's say for example you fixed a bug that caused a plot script to unhide all previously hidden plots.
+You can rephrase it as:
+
+- ``Hidden plots are no longer unhidden by some plot scripts where ...``
+
+Amending release notes
+----------------------
+If you need to amend a release note from a previous Pull Request (PR) during sprint it is fine to do this as the automated script will update the release note. Provided developers use the naming conventions for files outlined below it should be easy to find the release note you wish to amend.
+If the release note you wish to amend is within a ``Used`` directory you will need to contact the Release Editor to discuss how to get the release note amended.
+
 
 Adding sub-headings
 -------------------

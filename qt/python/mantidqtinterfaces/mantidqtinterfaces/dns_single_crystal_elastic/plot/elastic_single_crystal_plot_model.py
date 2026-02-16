@@ -1,3 +1,4 @@
+# ruff: noqa: E741  # Ambiguous variable name
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
@@ -9,9 +10,12 @@
 DNS single crystal elastic plot tab model of DNS reduction GUI.
 """
 
+import numpy as np
+import mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers as helper
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSObsModel
 from mantidqtinterfaces.dns_single_crystal_elastic.data_structures.dns_single_crystal_map import DNSScMap
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers import get_hkl_intensity_from_cursor
 
 
 class DNSElasticSCPlotModel(DNSObsModel):
@@ -51,6 +55,16 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._single_crystal_map = DNSScMap(parameter=parameter, two_theta=two_theta, omega=omega, z_mesh=z_mesh, error_mesh=error)
         return self._single_crystal_map
 
+    def has_data(self):
+        return self._data.x is not None
+
+    def get_projections(self, xlim, ylim):
+        limits = np.append(xlim, ylim)
+        x, y, z = helper.filter_flattened_meshes(self._data.x, self._data.y, self._data.z, limits)
+        x_projection = helper.get_projection(x, z)
+        y_projection = helper.get_projection(y, z)
+        return x_projection, y_projection
+
     def get_interpolated_triangulation(self, interpolate, axis_type, switch):
         mesh_name = axis_type + "_mesh"
         self._single_crystal_map.triangulate(mesh_name=mesh_name, switch=switch)
@@ -75,8 +89,41 @@ class DNSElasticSCPlotModel(DNSObsModel):
     def get_changing_hkl_components(self):
         return self._single_crystal_map.get_changing_hkl_components()
 
+    def get_format_coord(self, axis_type):
+        # adds z and hkl label to cursor position
+        def format_coord(x, y):
+            h, k, l, z, error = get_hkl_intensity_from_cursor(self._single_crystal_map, axis_type, x, y)
+            return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f}), Intensity={z:6.4f}±{error:6.4f}"
+
+        return format_coord
+
+    def get_data_z_min_max(self, xlim=None, ylim=None):
+        return helper.get_z_min_max(self._data.z, xlim, ylim, self._data.x, self._data.y)
+
+    def get_data_xy_lim(self, switch):
+        limits = [[min(self._data.x.flatten()), max(self._data.x.flatten())], [min(self._data.y.flatten()), max(self._data.y.flatten())]]
+        if switch:
+            limits.reverse()
+        return limits
+
+    @staticmethod
+    def switch_axis(x, y, z, switch):
+        if switch:  # switch x and y axes
+            nx = np.transpose(y)
+            ny = np.transpose(x)
+            nz = np.transpose(z)
+            return nx, ny, nz
+        return x, y, z
+
     def get_omega_offset(self):
         return self._single_crystal_map["omega_offset"]
 
     def get_dx_dy(self):
         return self._single_crystal_map["dx"], self._single_crystal_map["dy"]
+
+    def prepare_data_for_saving(self):
+        x = self._data.x.flatten()
+        y = self._data.y.flatten()
+        z = self._data.z.flatten()
+        data_combined = np.array(list(zip(x, y, z)))
+        return data_combined

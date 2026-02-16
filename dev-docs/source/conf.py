@@ -23,13 +23,36 @@ extensions = [
     # use mathjax as we currently only publish the developer docs online
     # for viewing through a web browser.
     "sphinx.ext.mathjax",
+    # myst_parser enables markdown support
+    "myst_parser",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = ".rst"
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
+
+# MyST parser configuration
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "substitution",
+    "tasklist",
+]
+
+# Allow heading anchors
+myst_heading_anchors = 3
 
 # The root toctree document.
 root_doc = "index"
@@ -116,10 +139,10 @@ html_theme_options = {
     "navbar_pagenav": False,
     # Hide the next/previous in the nav bar.
     "navbar_sidebarrel": True,
-    # Use the latest version.
+    # Use bootstrap 3 for now, updating requires changes to our custom CSS.
     "bootstrap_version": "3",
     # Ensure the nav bar always stays on top of page.
-    "navbar_fixed_top": "false",
+    "navbar_fixed_top": "true",
     # Don't limit the width
     "body_max_width": "none",
 }

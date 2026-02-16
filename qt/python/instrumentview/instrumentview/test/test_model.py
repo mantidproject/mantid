@@ -2,7 +2,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from instrumentview.Globals import CurrentTab
 from mantid.simpleapi import CreateSampleWorkspace, CreatePeaksWorkspace, AddPeak
+from mantid.dataobjects import PeaksWorkspace
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
@@ -85,6 +87,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.isCommonBins.return_value = False
         mock_workspace.detectorInfo.return_value = MagicMock()
         mock_workspace.componentInfo.return_value = MagicMock()
+        mock_workspace.dataY.return_value = MagicMock()
         mock_workspace.getNumberHistograms.return_value = len(detector_ids)
         mock_workspace.extractX.return_value = np.tile(np.arange(len(detector_ids)), (len(detector_ids), 1))
         mock_workspace.readX.return_value = np.arange(len(detector_ids))
@@ -97,11 +100,12 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         spectrum_no: np.ndarray = np.array([]),
         monitors: np.ndarray = np.array([]),
         det_mask: np.ndarray = np.array([]),
-    ):
+    ) -> tuple[FullInstrumentViewModel, MagicMock]:
         mock_ws = self._create_mock_workspace(detector_ids)
         self._setup_mocks(detector_ids, spectrum_no, monitors, det_mask)
         model = FullInstrumentViewModel(mock_ws)
         model.setup()
+        model._is_selected_in_tree = np.ones(len(model._detector_ids), dtype=bool)
         model._workspace_x_unit = "dSpacing"
         return model, mock_ws
 
@@ -136,14 +140,16 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_negate_picked_visibility(self):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([False, False, False])
-        model.negate_picked_visibility(np.array([False, True, True]))
-        np.testing.assert_equal(model._detector_is_picked, [False, True, True])
+        model.update_point_picked_detectors(1)
+        np.testing.assert_equal(model._detector_is_picked, [False, True, False])
 
-    def test_clear_all_picked_detectors(self):
+    def test_clear_point_picked_detectors(self):
         model, _ = self._setup_model([1, 2, 3])
-        model._detector_is_picked = np.array([False, True, True])
-        model.clear_all_picked_detectors()
-        np.testing.assert_equal(model._detector_is_picked, [False, False, False])
+        model._detector_is_picked = np.array([True, True, True])
+        model._point_picked_detectors = np.array([False, True, True])
+        model.clear_point_picked_detectors()
+        np.testing.assert_equal(model._point_picked_detectors, [False, False, False])
+        np.testing.assert_equal(model._detector_is_picked, [True, False, False])
 
     def test_detectors_with_no_spectra(self):
         self._setup_mocks([1, 20, 300, 400], monitors=np.array(["no", "no", "n/a", "yes"]))
@@ -394,7 +400,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.getInstrument().getFullName.return_value = instrument
         mock_peaks_workspace.getInstrument().getFullName.return_value = instrument
         mock_ads_instance.retrieveWorkspaces.return_value = [mock_peaks_workspace, mock_workspace]
-        peaks_workspaces = model.peaks_workspaces_in_ads()
+        peaks_workspaces = model.get_workspaces_in_ads_of_type(PeaksWorkspace)
         self.assertEqual(1, len(peaks_workspaces))
         self.assertEqual(mock_peaks_workspace, peaks_workspaces[0])
 
@@ -417,6 +423,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._spectrum_nos = np.array([2])
         model._is_valid = np.array([True])
         model._is_masked = np.array([False])
+        model._is_selected_in_tree = np.array([True])
         peaks = model.peak_overlay_points()
         self.assertEqual(1, len(peaks))
         detector_peak = peaks["peaks_ws"][0]
@@ -458,6 +465,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._spectrum_nos = np.array([test_spectrum_no, test_spectrum_no, test_spectrum_no])
         model._is_valid = np.array([True, True, True])
         model._is_masked = np.array([False, False, False])
+        model._is_selected_in_tree = np.array([True, True, True])
         peaks = model.peak_overlay_points()
         # Should get one peak with detector ID 4 and spectrum
         # number 1
@@ -590,44 +598,128 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._is_masked = np.array([True, False, False])
         np.testing.assert_array_equal(model.detector_positions, expected_positions[1:])
 
+    def test_mask_ws(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._mask_ws = MagicMock()
+        _ = model.mask_ws
+        model._mask_ws.dataY.assert_called()
+
+    def test_roi_ws(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._roi_ws = MagicMock()
+        _ = model.roi_ws
+        model._roi_ws.dataY.assert_called()
+
     def test_add_mask(self):
         model, _ = self._setup_model([1, 2, 3])
         model._cached_masks_map = {}
         model._is_masked_in_ws = np.array([True, True, False])
         model._is_valid = np.array([True, True, True])
         model._is_masked = np.array([True, False, False])
-        model.add_new_detector_mask([True, True])
+        model.add_new_detector_key([True, True], CurrentTab.Masking)
         np.testing.assert_array_equal(list(model._cached_masks_map.values())[0], np.array([True, True, True]))
+
+    def test_roi_mask(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._cached_rois_map = {}
+        model._is_valid = np.array([True, True, True])
+        model._detector_is_picked = np.array([True, False, False])
+        model.add_new_detector_key([True, True, False], CurrentTab.Grouping)
+        np.testing.assert_array_equal(list(model._cached_rois_map.values())[0], np.array([True, True, False]))
+
+    def test_get_boolean_masks_from_workspaces_in_ads_grouping(self):
+        det_ids = [1, 2, 3, 4, 5]
+        model, _ = self._setup_model(det_ids)
+        # Mock mask ws with one column of zeros and ones
+        mock_data_y = np.array([0, 0, 1, 2, 2])
+        mock_ws = MagicMock(
+            extractY=MagicMock(return_value=mock_data_y),
+            getDetectorIDsOfGroup=MagicMock(side_effect=lambda i: np.array(det_ids)[mock_data_y == i]),
+        )
+        # name() is used internally in the mock object
+        mock_ws.configure_mock(**{"name.return_value": "mock_ws"})
+        model.get_workspaces_in_ads_of_type = MagicMock(return_value=[mock_ws])
+        boolean_mask = model._get_boolean_masks_from_workspaces_in_ads(["mock_ws_1", "mock_ws_2", "other_key"], CurrentTab.Grouping)
+        np.testing.assert_allclose(boolean_mask, [[False, False, True, False, False], [False, False, False, True, True]])
+
+    def test_get_boolean_masks_from_workspaces_in_ads_masking(self):
+        det_ids = [1, 2, 3, 4, 5]
+        model, _ = self._setup_model(det_ids)
+        # Mock mask ws with one column of zeros and ones
+        mock_data_y = np.array([0, 0, 1, 1, 1])
+        mock_ws = MagicMock(
+            extractY=MagicMock(return_value=mock_data_y),
+            getMaskedDetectors=MagicMock(return_value=np.array(det_ids)[mock_data_y == 1]),
+        )
+        # name() is used internally in the mock object
+        mock_ws.configure_mock(**{"name.return_value": "mock_ws"})
+        model.get_workspaces_in_ads_of_type = MagicMock(return_value=[mock_ws])
+        boolean_mask = model._get_boolean_masks_from_workspaces_in_ads(["mock_ws", "other_key"], CurrentTab.Masking)
+        np.testing.assert_allclose(boolean_mask, [[False, False, True, True, True]])
 
     def test_apply_detector_mask(self):
         model, _ = self._setup_model([1, 2, 3])
         # All detectors picked, mask should unpick them
         model._detector_is_picked = np.array([True, True, True])
         model._cached_masks_map = {"Mask 1": np.array([True, False, False]), "Mask 2": np.array([False, True, False])}
-        model.apply_detector_masks(["Mask 1", "Mask 2"])
+        model.apply_detector_items(["Mask 1", "Mask 2"], CurrentTab.Masking)
         np.testing.assert_array_equal(model._is_masked, np.array([True, True, False]))
-        np.testing.assert_array_equal(model._detector_is_picked, np.array([False, False, True]))
+
+    def test_apply_detector_roi(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._point_picked_detectors = np.array([True, False, False])
+        model._cached_rois_map = {"1": np.array([False, False, True]), "2": np.array([False, True, False])}
+        model.apply_detector_items(["1", "2"], CurrentTab.Grouping)
+        np.testing.assert_array_equal(model._detector_is_picked, np.array([True, True, True]))
 
     def test_apply_detector_mask_empty(self):
         model, _ = self._setup_model([1, 2, 3])
         model._is_masked_in_ws = np.array([True, False, False])
-        model.apply_detector_masks([])
+        model.apply_detector_items([], CurrentTab.Masking)
         np.testing.assert_array_equal(model._is_masked, np.array([True, False, False]))
         np.testing.assert_array_equal(model._detector_is_picked, np.array([False, False, False]))
+
+    def test_apply_detector_roi_empty(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._detector_is_picked = np.array([True, False, False])
+        model._point_picked_detectors = np.array([False, True, False])
+        model._cached_rois_map = {"1": np.array([False, False, True]), "2": np.array([False, True, False])}
+        model.apply_detector_items([], CurrentTab.Grouping)
+        np.testing.assert_array_equal(model._detector_is_picked, np.array([False, True, False]))
 
     @mock.patch("instrumentview.FullInstrumentViewModel.CloneWorkspace")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractMaskToTable")
     def test_save_mask_workspace_to_ads(self, mock_extract_to_table, mock_clone):
         model, _ = self._setup_model([1, 2, 3])
-        model.save_mask_workspace_to_ads()
+        model.save_workspace_to_ads(CurrentTab.Masking)
+        mock_extract_to_table.assert_called_once()
+        mock_clone.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.CloneWorkspace")
+    @mock.patch("instrumentview.FullInstrumentViewModel.ExtractMaskToTable")
+    def test_save_roi_workspace_to_ads(self, mock_extract_to_table, mock_clone):
+        model, _ = self._setup_model([1, 2, 3])
+        model.save_workspace_to_ads(CurrentTab.Grouping)
         mock_extract_to_table.assert_called_once()
         mock_clone.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.SaveMask")
     def test_save_xml_mask(self, mock_save_mask):
         model, _ = self._setup_model([1, 2, 3])
-        model.save_xml_mask("file")
+        model.save_mask_to_xml("file")
         mock_save_mask.assert_called_with(model._mask_ws, OutputFile="file.xml")
+
+    def test_clear_masks(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._cached_masks_map = {"1": 1, "2": 2}
+        model.clear_stored_keys(CurrentTab.Masking)
+        self.assertEqual(model._cached_masks_map, {})
+
+    def test_clear_rois(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._cached_rois_map = {"1": 1, "2": 2}
+        model.clear_stored_keys(CurrentTab.Grouping)
+        self.assertEqual(model._cached_rois_map, {})
 
     def test_masked_spectrum_peak_not_included(self):
         model = FullInstrumentViewModel(self._ws)
@@ -637,6 +729,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._spectrum_nos = np.array([2])
         model._is_valid = np.array([True])
         model._is_masked = np.array([True])
+        model._is_selected_in_tree = np.array([True])
         peaks = model.peak_overlay_points()
         self.assertEqual(0, len(peaks[peaks_ws.name()]))
 
@@ -858,6 +951,65 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws = model.add_peak(peak_x, MagicMock())
         mock_add_peak.assert_called_once_with(peaks_ws, model._workspace, peak_x, 3)
         self.assertEqual("my_peaks_ws", ws)
+
+    def test_component_tree_no_matching_detector_ids(self):
+        """If no detector_table_indices match, all values become True."""
+        component_indices = np.array([1, 2])  # detectorIDs selected: 200, 300 (not in _detector_ids)
+        model, mock_ws = self._setup_model([100, 101, 102, 103])
+        mock_ws.detectorInfo().detectorIDs.return_value = np.array([100, 200, 300])
+        model.component_tree_indices_selected(component_indices)
+
+        np.testing.assert_array_equal(model._is_selected_in_tree, np.array([True, True, True, True]))
+
+    def test_component_tree_some_matching_detector_ids(self):
+        """Only matching detector IDs should be set True."""
+        component_indices = np.array([0])  # selects detectorID 100 (index 0)
+        model, mock_ws = self._setup_model([100, 101, 102, 103])
+        mock_ws.detectorInfo().detectorIDs.return_value = np.array([100, 200, 300])
+        model.component_tree_indices_selected(component_indices)
+
+        expected = np.array([True, False, False, False])
+        np.testing.assert_array_equal(model._is_selected_in_tree, expected)
+
+    def test_component_tree_component_indices_out_of_range(self):
+        """Indices >= len(detector_ids) should be ignored."""
+        component_indices = np.array([0, 5, 10])  # 5 and 10 ignored
+        model, mock_ws = self._setup_model([100, 101, 102, 103])
+        mock_ws.detectorInfo().detectorIDs.return_value = np.array([100, 200, 300])
+        model.component_tree_indices_selected(component_indices)
+
+        expected = np.array([True, False, False, False])
+        np.testing.assert_array_equal(model._is_selected_in_tree, expected)
+
+    def test_component_tree_empty_component_indices(self):
+        """Empty input should cause no matches -> all True."""
+        component_indices = np.array([])
+        model, mock_ws = self._setup_model([100, 101, 102, 103])
+        mock_ws.detectorInfo().detectorIDs.return_value = np.array([100, 200, 300])
+        model.component_tree_indices_selected(component_indices)
+
+        expected = np.array([True, True, True, True])
+        np.testing.assert_array_equal(model._is_selected_in_tree, expected)
+
+    def test_component_tree_all_components_matching(self):
+        """Multiple matching IDs should mark multiple positions True."""
+        component_indices = np.array([0, 0])  # duplicates fine
+        model, mock_ws = self._setup_model([100, 101, 102, 103])
+        mock_ws.detectorInfo().detectorIDs.return_value = np.array([100, 200, 300])
+        model.component_tree_indices_selected(component_indices)
+
+        expected = np.array([True, False, False, False])
+        np.testing.assert_array_equal(model._is_selected_in_tree, expected)
+
+    def test_component_tree_all_not_valid(self):
+        """All selected detectors invalid should result in whole tree shown"""
+        component_indices = np.array([0, 1])  # duplicates fine
+        model, mock_ws = self._setup_model([100, 101, 102, 103])
+        mock_ws.detectorInfo().detectorIDs.return_value = np.array([100, 101, 300])
+        model._is_valid = np.array([False, False, True, True])
+        model.component_tree_indices_selected(component_indices)
+        expected = np.array([True] * 4)
+        np.testing.assert_array_equal(model._is_selected_in_tree, expected)
 
 
 if __name__ == "__main__":

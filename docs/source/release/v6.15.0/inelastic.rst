@@ -7,23 +7,21 @@ Inelastic Changes
 
 New Features
 ------------
-.. amalgamate:: Inelastic/New_features
+- (`#40595 <https://github.com/mantidproject/mantid/pull/40595>`_) :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` has a new combo box to swap between using the ``quasielasticbayes`` (old Fortran library) backend and the ``quickbayes`` (new python library) backend. Changing this box won't effect the functionality of the ResNorm tab, which already uses ``quickbayes``.
 
 
 Bugfixes
 --------
-.. amalgamate:: Inelastic/Bugfixes
-
 
 Algorithms
 ----------
 
 New features
 ############
-.. amalgamate:: Inelastic/Algorithms/New_features
+- (`#40323 <https://github.com/mantidproject/mantid/pull/40323>`_) A new algorithm :ref:`SpectralMomentMD <algm-SpectralMomentMD>` can now be used to calculate sum rules for inelastic multi-dimensional event workspaces.
 
 Bugfixes
 ############
-.. amalgamate:: Inelastic/Algorithms/Bugfixes
+- (`#40650 <https://github.com/mantidproject/mantid/pull/40650>`_) :ref:`BayesQuasi <algm-BayesQuasi>` now respects the ``OutputWorkspaceProb`` and ``OutputWorkspaceResult`` parameters.
 
 :ref:`Release 6.15.0 <v6.15.0>`

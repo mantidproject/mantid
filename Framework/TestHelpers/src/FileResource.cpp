@@ -5,15 +5,19 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidFrameworkTestHelpers/FileResource.h"
+#include "MantidKernel/Strings.h"
 #include <filesystem>
 #include <string>
 
-FileResource::FileResource(const std::string &fileName, bool debugMode) : m_debugMode(debugMode) {
+FileResource::FileResource(const std::string &fileName, const bool debugMode, const bool randomize)
+    : m_debugMode(debugMode) {
 
   const auto temp_dir = std::filesystem::temp_directory_path();
   auto temp_full_path = temp_dir;
+
+  // add a random prefix to filename to avoid collision
   // append full path to temp directory to user input file name
-  temp_full_path /= fileName;
+  temp_full_path /= (randomize) ? (Mantid::Kernel::Strings::randomString(12) + "_" + fileName) : fileName;
 
   // Check proposed location and throw std::invalid argument if file does
   // not exist. otherwise set m_full_path to location.

@@ -1,0 +1,1 @@
+- Additional logging has been added to :ref:`BayesQuasi2 <algm-BayesQuasi2>` to inform users of the algorithm's progress.

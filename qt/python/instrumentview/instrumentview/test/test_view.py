@@ -12,8 +12,8 @@ from vtkmodules.vtkInteractionWidgets import vtkBoxRepresentation
 import numpy as np
 
 from mantidqt.utils.qt.testing import start_qapplication
-from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from mantid.simpleapi import CreateSampleWorkspace
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 
 
 @start_qapplication
@@ -28,7 +28,8 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     @mock.patch("qtpy.QtWidgets.QSplitter.addWidget")
     @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
     def setUp(self, mock_plotter, mock_splitter_add_widget, mock_v_add_widget, mock_h_add_widget, mock_figure_canvas) -> None:
-        self._view = FullInstrumentViewWindow()
+        with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
+            self._view = FullInstrumentViewWindow()
         self._mock_plotter = mock_plotter
         self._mock_splitter_add_widget = mock_splitter_add_widget
         self._mock_v_add_widget = mock_v_add_widget
@@ -51,6 +52,12 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_close_event(self, mock_close_event):
         self._view.closeEvent(MagicMock())
         self.assertEqual(2, mock_close_event.call_count)
+        self._view.main_plotter.close.assert_called_once()
+
+    @mock.patch("qtpy.QtWidgets.QMainWindow.closeEvent")
+    def test_close_no_presenter(self, mock_close_event):
+        self._view._presenter = None
+        self._view.closeEvent(MagicMock())
         self._view.main_plotter.close.assert_called_once()
 
     def test_add_simple_shape(self):
@@ -83,6 +90,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
             mock_mesh,
             scalars=mock_scalars,
             opacity=[0.0, 0.3],
+            clim=[0, 1],
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",

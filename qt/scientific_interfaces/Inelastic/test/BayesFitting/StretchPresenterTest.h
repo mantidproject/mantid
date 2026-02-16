@@ -91,9 +91,9 @@ public:
     configSvc.setString("defaultsave.directory", "/test/test");
     ON_CALL(*m_view, displaySaveDirectoryMessage()).WillByDefault(Return(false));
 
-    StretchRunData runData("sample_ws", "res_ws", -0.5, 0.5, 50, true, "flat", 30, 1, true);
+    StretchRunData runData("sample_ws", "res_ws", "flat", -0.5, 0.5, 50, 30, true);
 
-    ON_CALL(*m_view, getRunData()).WillByDefault(Return(runData));
+    ON_CALL(*m_view, getRunData(false)).WillByDefault(Return(runData));
 
     EXPECT_CALL(*m_view, setPlotADSEnabled(false)).Times(1);
 
@@ -103,9 +103,9 @@ public:
   }
 
   void test_handleRun_with_valid_input_and_savedir() {
-    StretchRunData runData("sample_ws", "res_ws", -0.5, 0.5, 50, true, "flat", 30, 1, true);
+    StretchRunData runData("sample_ws", "res_ws", "flat", -0.5, 0.5, 50, 30, true);
 
-    ON_CALL(*m_view, getRunData()).WillByDefault(Return(runData));
+    ON_CALL(*m_view, getRunData(false)).WillByDefault(Return(runData));
     EXPECT_CALL(*m_view, setPlotADSEnabled(false)).Times(1);
 
     EXPECT_CALL(*m_model, stretchAlgorithm(_, _, _, _)).Times(1);
@@ -114,7 +114,7 @@ public:
   }
 
   void test_notifySaveClicked_with_output_workspaces() {
-    StretchRunData runData("sample_ws", "res_ws", -0.5, 0.5, 50, true, "flat", 30, 1, true);
+    StretchRunData runData("sample_ws", "res_ws", "flat", -0.5, 0.5, 50, 30, true);
 
     auto const cutIndex = runData.sampleName.find_last_of("_");
     auto const baseName = runData.sampleName.substr(0, cutIndex);
@@ -124,7 +124,7 @@ public:
     ads.addOrReplace(fitWorkspaceName, m_workspace);
     ads.addOrReplace(contourWorkspaceName, m_workspace);
 
-    ON_CALL(*m_view, getRunData()).WillByDefault(Return(runData));
+    ON_CALL(*m_view, getRunData(false)).WillByDefault(Return(runData));
     EXPECT_CALL(*m_view, setPlotADSEnabled(false)).Times(1);
 
     EXPECT_CALL(*m_model, stretchAlgorithm(_, _, _, _)).Times(1);
@@ -151,15 +151,18 @@ public:
   }
 
   void test_notifyBackendChanged_changes_stretchAlgorithm_call() {
-    StretchRunData runData("sample_ws", "res_ws", -0.5, 0.5, 50, true, "flat", 30, 1, true);
+    StretchRunData runData("sample_ws", "res_ws", "flat", -0.5, 0.5, 50, 30, true);
 
-    ON_CALL(*m_view, getRunData()).WillByDefault(Return(runData));
+    EXPECT_CALL(*m_view, getRunData(true)).Times(1);
+    ON_CALL(*m_view, getRunData(true)).WillByDefault(Return(runData));
     EXPECT_CALL(*m_model, stretchAlgorithm(_, _, _, true)).Times(1);
 
     m_presenter->notifyBackendChanged(BayesBackendType::QUICK_BAYES);
     m_presenter->handleRun();
 
+    EXPECT_CALL(*m_view, getRunData(false)).Times(1);
     EXPECT_CALL(*m_model, stretchAlgorithm(_, _, _, false)).Times(1);
+    ON_CALL(*m_view, getRunData(false)).WillByDefault(Return(runData));
 
     m_presenter->notifyBackendChanged(BayesBackendType::QUASI_ELASTIC_BAYES);
     m_presenter->handleRun();

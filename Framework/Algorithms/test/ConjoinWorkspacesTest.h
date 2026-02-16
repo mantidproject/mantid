@@ -134,6 +134,36 @@ public:
     TS_ASSERT_EQUALS(output->getHistory().size(), 3);
   }
 
+  void testExecTwoSpectra() {
+    // Create two workspaces, with spectra numbers 1, 2 respectively
+    Workspace2D_sptr in1 = WorkspaceCreationHelper::create2DWorkspace(1, 2);
+    Workspace2D_sptr in2 = WorkspaceCreationHelper::create2DWorkspace(1, 2);
+    in1->getSpectrum(0).setSpectrumNo(1);
+    in2->getSpectrum(0).setSpectrumNo(2);
+    AnalysisDataService::Instance().addOrReplace("in1", in1);
+    AnalysisDataService::Instance().addOrReplace("in2", in2);
+
+    // conjoin
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace1", "in1"));
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace2", "in2"));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckMatchingBins", false));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckOverlapping", false));
+    TS_ASSERT_THROWS_NOTHING(conj.execute());
+    TS_ASSERT(conj.isExecuted());
+
+    // verify
+    MatrixWorkspace_sptr out = getWSFromADS("in1");
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(out->getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(out->getSpectrum(1).getSpectrumNo(), 2);
+
+    // cleanup
+    AnalysisDataService::Instance().remove("in1");
+    AnalysisDataService::Instance().remove("in2");
+  }
+
   //----------------------------------------------------------------------------------------------
   void testExecMismatchedWorkspaces() {
     MatrixWorkspace_sptr ews = WorkspaceCreationHelper::createEventWorkspace(10, 10);

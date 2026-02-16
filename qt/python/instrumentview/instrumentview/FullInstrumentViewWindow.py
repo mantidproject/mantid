@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from functools import partial
 from pyvista import PolyData
 from qtpy.QtWidgets import (
     QMainWindow,
@@ -23,6 +24,8 @@ from qtpy.QtWidgets import (
     QListWidgetItem,
     QAbstractItemView,
     QScrollArea,
+    QTabWidget,
+    QFrame,
 )
 from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
 from qtpy.QtCore import Qt, QEvent, QSize
@@ -47,20 +50,17 @@ from mantid.dataobjects import Workspace2D
 from mantid import UsageService, ConfigService
 from mantid.kernel import FeatureType
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
+from mantidqt.utils.qt.qappthreadcall import run_on_qapp_thread
 
 from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.Globals import CurrentTab
+from instrumentview.ComponentTreeView import ComponentTreeView
 
 import os
 from contextlib import suppress
 from typing import Callable
-from enum import Enum
-
-
-class WidgetType(str, Enum):
-    Cylinder = "Circle"
-    Box = "Rectangle"
 
 
 class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):
@@ -109,6 +109,14 @@ class WorkspaceListWidget(QListWidget):
         event.acceptProposedAction()
 
 
+class NoWheelComboBox(QComboBox):
+    """QComboBox that ignores mouse wheel events unless it has focus."""
+
+    def wheelEvent(self, event):
+        event.ignore()
+
+
+@run_on_qapp_thread()
 class FullInstrumentViewWindow(QMainWindow):
     """View for the Instrument View window. Contains the 3D view, the projection view, boxes showing information about the selected
     detector, and a line plot of selected detector(s)"""
@@ -125,21 +133,23 @@ class FullInstrumentViewWindow(QMainWindow):
 
         super(FullInstrumentViewWindow, self).__init__(parent)
         self.setWindowTitle("Instrument View")
-
         self._off_screen = off_screen
 
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
+        tab_widget = QTabWidget()
         parent_horizontal_layout = QHBoxLayout(central_widget)
 
         pyvista_vertical_widget = QWidget()
         left_column_widget = QWidget()
+        tab_widget.addTab(left_column_widget, "Home")
         pyvista_vertical_layout = QVBoxLayout(pyvista_vertical_widget)
         left_column_layout = QVBoxLayout(left_column_widget)
 
         left_column_scroll = QScrollArea()
         left_column_scroll.setWidgetResizable(True)
-        left_column_scroll.setWidget(left_column_widget)
+        left_column_scroll.setWidget(tab_widget)
+        left_column_scroll.setFrameShape(QFrame.NoFrame)
 
         hsplitter = QSplitter(Qt.Horizontal)
         hsplitter.addWidget(left_column_scroll)
@@ -191,22 +201,13 @@ class FullInstrumentViewWindow(QMainWindow):
             self._contour_range_group_box
         )
 
-        multi_select_group_box = QGroupBox("Multi-Select")
-        multi_select_layout = QHBoxLayout(multi_select_group_box)
-        self._multi_select_check = QCheckBox()
-        self._multi_select_check.setText("Rectangular Select")
-        self._multi_select_check.setToolTip("Currently only working on 3D view.")
-        self._clear_selection_button = QPushButton("Clear Selection")
-        self._clear_selection_button.setToolTip("Clear the current selection of detectors")
-        multi_select_layout.addWidget(self._multi_select_check)
-        multi_select_layout.addWidget(self._clear_selection_button)
-
         projection_group_box = QGroupBox("Projection")
         projection_layout = QHBoxLayout(projection_group_box)
-        self._projection_combo_box = QComboBox(self)
+        self._projection_combo_box = NoWheelComboBox(self)
         self._reset_projection = QPushButton("Reset Projection")
         self._reset_projection.setToolTip("Resets the projection to default.")
         self._reset_projection.clicked.connect(self.reset_camera)
+        self._clear_point_picked_detectors = QPushButton("Clear Mouse Picking")
         self._aspect_ratio_check_box = QCheckBox()
         self._aspect_ratio_check_box.setText("Maintain Aspect Ratio")
         self._aspect_ratio_check_box.setToolTip(
@@ -219,6 +220,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._show_monitors_check_box.setText("Show Monitors?")
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
+        projection_layout.addWidget(self._clear_point_picked_detectors)
         projection_layout.addWidget(self._aspect_ratio_check_box)
         projection_layout.addWidget(self._show_monitors_check_box)
 
@@ -236,35 +238,44 @@ class FullInstrumentViewWindow(QMainWindow):
         peak_v_layout.addLayout(peak_buttons_h_layout)
         peak_v_layout.addWidget(self._peak_ws_list)
 
-        masking_group_box = QGroupBox("Masking")
-        masking_layout = QVBoxLayout(masking_group_box)
-        shape_label = QLabel("Shape:")
-        shape_label.setFixedWidth(50)
-        pre_list_layout = QHBoxLayout()
-        self._shape_options = QComboBox()
-        self._shape_options.addItems([w.value for w in WidgetType])
-        self._add_widget = QPushButton("Add Shape")
-        self._add_widget.setCheckable(True)
-        self._add_mask = QPushButton("Add Mask")
-        self._clear_masks = QPushButton("Clear Masks")
-        pre_list_layout.addWidget(shape_label)
-        pre_list_layout.addWidget(self._shape_options)
-        pre_list_layout.addWidget(self._add_widget)
-        pre_list_layout.addWidget(self._add_mask)
-        pre_list_layout.addWidget(self._clear_masks)
-        self._mask_list = WorkspaceListWidget(self)
-        self._mask_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
-        self._mask_list.setSelectionMode(QAbstractItemView.NoSelection)
-        post_list_layout = QHBoxLayout()
-        self._save_mask_to_ws = QPushButton("Export to ADS")
-        self._save_mask_to_file = QPushButton("Save to XML")
-        self._overwrite_mask = QPushButton("Apply Permanently")
-        post_list_layout.addWidget(self._save_mask_to_ws)
-        post_list_layout.addWidget(self._save_mask_to_file)
-        post_list_layout.addWidget(self._overwrite_mask)
-        masking_layout.addLayout(pre_list_layout)
-        masking_layout.addWidget(self._mask_list)
-        masking_layout.addLayout(post_list_layout)
+        grouping_masking_group_box = QGroupBox("Grouping and Masking")
+        grouping_masking_group_layout = QVBoxLayout(grouping_masking_group_box)
+        shapes_widget = QWidget()
+        shapes_layout = QHBoxLayout(shapes_widget)
+        self._add_circle = QPushButton("Add Circle")
+        self._add_circle.setCheckable(True)
+        self._add_rectangle = QPushButton("Add Rectangle")
+        self._add_rectangle.setCheckable(True)
+        shapes_layout.addWidget(self._add_circle)
+        shapes_layout.addWidget(self._add_rectangle)
+        self._shape_buttons = [self._add_circle, self._add_rectangle]
+
+        selection_tab = QWidget()
+        (
+            self._add_selection,
+            self._clear_selections,
+            self._selection_list,
+            self._save_roi_to_ws,
+            self._save_grouping_to_ws,
+            self._save_grouping_to_xml,
+        ) = self._add_tab(selection_tab, "ROI")
+        self._save_roi_to_ws.setText("Export ROI to ADS")
+        self._save_grouping_to_ws.setText("Export Grouping to ADS")
+        self._save_grouping_to_xml.setText("Save Grouping to XML")
+
+        mask_tab = QWidget()
+        (self._add_mask, self._clear_masks, self._mask_list, self._save_mask_to_ws, self._save_mask_to_file, self._overwrite_mask) = (
+            self._add_tab(mask_tab, "Mask")
+        )
+        self._save_mask_to_ws.setText("Save Mask to ADS")
+        self._save_mask_to_file.setText("Save Mask to XML")
+        self._overwrite_mask.setText("Apply Mask Permanently")
+
+        self._picking_masking_tab = QTabWidget()
+        self._picking_masking_tab.addTab(selection_tab, CurrentTab.Grouping.value)
+        self._picking_masking_tab.addTab(mask_tab, CurrentTab.Masking.value)
+        grouping_masking_group_layout.addWidget(shapes_widget)
+        grouping_masking_group_layout.addWidget(self._picking_masking_tab)
 
         self.status_group_box = QGroupBox("Status")
         status_layout = QHBoxLayout(self.status_group_box)
@@ -285,7 +296,6 @@ class FullInstrumentViewWindow(QMainWindow):
         options_vertical_layout.addWidget(detector_group_box)
         options_vertical_layout.addWidget(self._integration_limit_group_box)
         options_vertical_layout.addWidget(self._contour_range_group_box)
-        options_vertical_layout.addWidget(multi_select_group_box)
         options_vertical_layout.addWidget(projection_group_box)
         units_group_box = QGroupBox("Units")
         units_vbox = QVBoxLayout()
@@ -293,12 +303,19 @@ class FullInstrumentViewWindow(QMainWindow):
         units_group_box.setLayout(units_vbox)
         options_vertical_layout.addWidget(units_group_box)
         options_vertical_layout.addWidget(peak_ws_group_box)
-        options_vertical_layout.addWidget(masking_group_box)
+        options_vertical_layout.addWidget(grouping_masking_group_box)
         options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
 
         options_vertical_layout.addWidget(self.status_group_box)
         left_column_layout.addWidget(options_vertical_widget)
         left_column_layout.addStretch()
+
+        component_tree_tab = QWidget()
+        component_layout = QVBoxLayout(component_tree_tab)
+        self.component_tree = ComponentTreeView()
+        self.component_tree.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        component_layout.addWidget(self.component_tree)
+        tab_widget.addTab(component_tree_tab, "Component Tree")
 
         self.interactor_style = CustomInteractorStyleZoomAndSelect()
         self._overlay_meshes = []
@@ -320,9 +337,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
         self._presenter.on_sum_spectra_checkbox_clicked()
-
-    def is_multi_picking_checkbox_checked(self) -> bool:
-        return self._multi_select_check.isChecked()
 
     def is_maintain_aspect_ratio_checkbox_checked(self) -> bool:
         return self._aspect_ratio_check_box.isChecked()
@@ -437,6 +451,28 @@ class FullInstrumentViewWindow(QMainWindow):
         line_edit.setPalette(palette)
         return line_edit
 
+    def _add_tab(self, parent_tab: QWidget, label: str):
+        tab_layout = QVBoxLayout(parent_tab)
+        add_item_btn = QPushButton(f"Add {label}")
+        clear_items_btn = QPushButton("Clear All")
+        pre_list_layout = QHBoxLayout()
+        pre_list_layout.addWidget(add_item_btn)
+        pre_list_layout.addWidget(clear_items_btn)
+        item_list = WorkspaceListWidget(self)
+        item_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
+        item_list.setSelectionMode(QAbstractItemView.NoSelection)
+        post_list_layout = QHBoxLayout()
+        save_to_ws_btn = QPushButton()
+        save_to_file_btn = QPushButton()
+        overwrite_btn = QPushButton()
+        post_list_layout.addWidget(save_to_ws_btn)
+        post_list_layout.addWidget(save_to_file_btn)
+        post_list_layout.addWidget(overwrite_btn)
+        tab_layout.addLayout(pre_list_layout)
+        tab_layout.addWidget(item_list)
+        tab_layout.addLayout(post_list_layout)
+        return (add_item_btn, clear_items_btn, item_list, save_to_ws_btn, save_to_file_btn, overwrite_btn)
+
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
         for unit in self._presenter.available_unit_options():
@@ -444,23 +480,28 @@ class FullInstrumentViewWindow(QMainWindow):
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
         self.main_plotter.set_color_cycler(self._presenter._COLOURS)
         self.refresh_peaks_ws_list()
-        self.refresh_mask_ws_list()
+        self.refresh_workspaces_in_list(CurrentTab.Masking)
+        self.refresh_workspaces_in_list(CurrentTab.Grouping)
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
-        self._multi_select_check.stateChanged.connect(self._presenter.update_detector_picker)
-        self._clear_selection_button.clicked.connect(self._presenter.on_clear_selected_detectors_clicked)
+        self._clear_point_picked_detectors.clicked.connect((self._presenter.on_clear_point_picked_detectors_clicked))
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
         self._units_combo_box.currentIndexChanged.connect(self._presenter.on_unit_option_selected)
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
         self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
-        self._mask_list.itemChanged.connect(self._presenter.on_mask_item_selected)
-        self._save_mask_to_ws.clicked.connect(self._presenter.on_save_mask_to_workspace_clicked)
-        self._save_mask_to_file.clicked.connect(self._presenter.on_save_xml_mask_clicked)
-        self._overwrite_mask.clicked.connect(self._presenter.on_overwrite_mask_clicked)
-        self._clear_masks.clicked.connect(self._presenter.on_clear_masks_clicked)
+        self._mask_list.itemChanged.connect(partial(self._presenter.on_list_item_selected, CurrentTab.Masking))
+        self._selection_list.itemChanged.connect(partial(self._presenter.on_list_item_selected, CurrentTab.Grouping))
+        self._save_mask_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
+        self._save_mask_to_file.clicked.connect(self._presenter.on_save_mask_to_xml_clicked)
+        self._overwrite_mask.clicked.connect(self._presenter.on_apply_permanently_clicked)
+        self._save_roi_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
+        self._save_grouping_to_ws.clicked.connect(self._presenter.on_save_grouping_to_ads_clicked)
+        self._save_grouping_to_xml.clicked.connect(self._presenter.on_save_grouping_to_xml_clicked)
+        self._clear_masks.clicked.connect(self._presenter.on_clear_list_clicked)
+        self._clear_selections.clicked.connect(self._presenter.on_clear_list_clicked)
         self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
         self._add_peak_button.clicked.connect(self._presenter.on_add_peak_clicked)
         self._delete_peak_button.clicked.connect(self._presenter.on_delete_peak_clicked)
@@ -480,25 +521,40 @@ class FullInstrumentViewWindow(QMainWindow):
             self._presenter.on_integration_limits_updated,
         )
 
-        self._add_widget.toggled.connect(self.on_toggle_add_mask)
-        self._add_mask.clicked.connect(self._presenter.on_add_mask_clicked)
-        self._add_mask.setDisabled(True)
+        self._add_circle.toggled.connect(self.on_toggle_add_circle)
+        self._add_rectangle.toggled.connect(self.on_toggle_add_rectangle)
 
-    def on_toggle_add_mask(self, checked):
+        self._add_mask.clicked.connect(self._presenter.on_add_item_clicked)
+        self._add_mask.setDisabled(True)
+        self._add_selection.clicked.connect(self._presenter.on_add_item_clicked)
+        self._add_selection.setDisabled(True)
+
+    def on_toggle_add_circle(self, checked):
+        self._on_toggle_add_shape(checked, self.add_cylinder_widget)
+
+    def on_toggle_add_rectangle(self, checked):
+        self._on_toggle_add_shape(checked, self.add_rectangular_widget)
+
+    def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
         if checked:
-            if self._shape_options.currentText() == WidgetType.Cylinder.value:
-                self.add_cylinder_widget()
-            else:
-                self.add_rectangular_widget()
-            self._add_mask.setDisabled(False)
+            add_widget_function()
         else:
             self.delete_current_widget()
-            self._add_mask.setDisabled(True)
+
+        # Enable button for applying mask/group if widget is present, disable otherwise
+        self._add_mask.setEnabled(checked)
+        self._add_selection.setEnabled(checked)
+
+        # Disable buttons for adding more widgets if widget is already present, enable otherwise
+        for btn in self._shape_buttons:
+            if btn != self.sender():
+                btn.setDisabled(checked)
 
     def enable_or_disable_mask_widgets(self):
-        if self._add_widget.isChecked():
-            self._add_widget.toggle()
-        self._add_widget.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+        for btn in self._shape_buttons:
+            if btn.isChecked():
+                btn.toggle()
+            btn.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
     def delete_current_widget(self):
         # Should delete widgets explicitly, otherwise not garbage collected
@@ -512,7 +568,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def _setup_units_options(self, parent: QVBoxLayout):
         """Add widgets for the units options"""
-        self._units_combo_box = QComboBox(self)
+        self._units_combo_box = NoWheelComboBox(self)
         self._units_combo_box.setToolTip("Select the units for the spectra line plot")
         parent.addWidget(self._units_combo_box)
         hBox = QHBoxLayout()
@@ -548,24 +604,24 @@ class FullInstrumentViewWindow(QMainWindow):
         self._peak_ws_list.blockSignals(False)
         self._peak_ws_list.adjustSize()
 
-    def refresh_mask_ws_list(self) -> None:
-        current_mask_in_ads = self._presenter.mask_workspaces_in_ads()
-        current_mask_in_widget = [self._mask_list.item(i).text() for i in range(self._mask_list.count())]
-        cached_masks_keys = self._presenter.cached_masks_keys()
+    def refresh_workspaces_in_list(self, kind: CurrentTab) -> None:
+        list_to_refresh = self._mask_list if kind is CurrentTab.Masking else self._selection_list
 
-        # Workspaces in ads but not yet in list
-        for ws_name in current_mask_in_ads:
-            if ws_name not in current_mask_in_widget:
-                item = QListWidgetItem(ws_name, self._mask_list)
+        keys_from_workspaces_in_ads = self._presenter.get_list_keys_from_workspaces_in_ads(kind)
+        keys_in_current_list = [list_to_refresh.item(i).text() for i in range(list_to_refresh.count())]
+        keys_cached_in_model = self._presenter.cached_keys(kind)
+
+        # Keys from ads but not yet in list
+        for key in keys_from_workspaces_in_ads:
+            if key not in keys_in_current_list:
+                item = QListWidgetItem(key, list_to_refresh)
                 item.setCheckState(Qt.Unchecked)
 
-        # Workspaces in list but not in ads
-        for i in range(self._mask_list.count() - 1, -1, -1):
-            item = self._mask_list.item(i)
-            if item.text() in cached_masks_keys:
-                continue
-            if item.text() not in current_mask_in_ads:
-                removed = self._mask_list.takeItem(i)
+        # Remove keys that are not cached in model and not in ads
+        for i in range(list_to_refresh.count() - 1, -1, -1):
+            item = list_to_refresh.item(i)
+            if item.text() not in keys_cached_in_model and item.text() not in keys_from_workspaces_in_ads:
+                removed = list_to_refresh.takeItem(i)
                 del removed
 
     def refresh_peaks_ws_list_colours(self) -> None:
@@ -643,7 +699,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.close()
         if self._detector_spectrum_fig is not None:
             plt.close(self._detector_spectrum_fig.get_label())
-        self._presenter.handle_close()
+        if hasattr(self, "_presenter") and self._presenter is not None:
+            self._presenter.handle_close()
 
     def set_projection_combo_options(self, default_index: int, options: list[str]) -> None:
         self._projection_combo_box.addItems(options)
@@ -683,6 +740,7 @@ class FullInstrumentViewWindow(QMainWindow):
             point_cloud,
             scalars=scalars,
             opacity=[0.0, 0.3],
+            clim=[0, 1],
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",
@@ -918,27 +976,37 @@ class FullInstrumentViewWindow(QMainWindow):
         self._detector_spectrum_fig.tight_layout()
         self._detector_figure_canvas.draw()
 
-    def selected_masks(self) -> list[str]:
+    def get_current_selected_tab(self) -> CurrentTab:
+        index = self._picking_masking_tab.currentIndex()
+        tab_name = self._picking_masking_tab.tabText(index)
+        return CurrentTab(tab_name)
+
+    def get_current_selected_list_widget(self) -> QListWidget:
+        return self._mask_list if self.get_current_selected_tab() == CurrentTab.Masking else self._selection_list
+
+    def selected_items_in_list(self, kind: CurrentTab) -> list[str]:
+        list_to_read_from = self._mask_list if kind is CurrentTab.Masking else self._selection_list
         return [
-            self._mask_list.item(row_index).text()
-            for row_index in range(self._mask_list.count())
-            if self._mask_list.item(row_index).checkState() > 0
+            list_to_read_from.item(row_index).text()
+            for row_index in range(list_to_read_from.count())
+            if list_to_read_from.item(row_index).checkState() > 0
         ]
 
-    def set_new_mask_key(self, new_key: str) -> None:
-        list_item = QListWidgetItem(new_key, self._mask_list)
+    def set_new_item_key(self, kind: CurrentTab, new_key: str) -> None:
+        list_to_modify = self._mask_list if kind is CurrentTab.Masking else self._selection_list
+        list_item = QListWidgetItem(new_key, list_to_modify)
         list_item.setCheckState(Qt.Checked)
 
-    def clear_mask_list(self) -> None:
+    def clear_item_list(self, kind: CurrentTab):
+        list_to_clear = self._mask_list if kind is CurrentTab.Masking else self._selection_list
         # Iterate backwards otherwise breaks indexing
-        for i in range(self._mask_list.count() - 1, -1, -1):
-            item = self._mask_list.item(i)
-            if item.text() not in self._presenter.cached_masks_keys():
+        for i in range(list_to_clear.count() - 1, -1, -1):
+            item = list_to_clear.item(i)
+            if item.text() not in self._presenter.cached_keys(kind):
                 # Skip items that are workspaces
                 continue
-            removed = self._mask_list.takeItem(i)
+            removed = list_to_clear.takeItem(i)
             del removed
-        self.refresh_mask_ws_list()
 
     def has_any_peak_overlays(self) -> bool:
         return len(self._lineplot_overlays) > 0

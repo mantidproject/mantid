@@ -13,7 +13,6 @@ import sys
 import qtpy.QtCore  # noqa: F401
 
 import os
-import runpy
 
 import mantid
 from mantid.kernel import ConfigService
@@ -58,6 +57,11 @@ extensions = [
 # Deal with math extension. Can be overridden with MATH_EXT environment variable
 mathext = os.environ.get("MATH_EXT", "sphinx.ext.mathjax")
 extensions.append(mathext)
+
+# MathJax configuration to:
+# - define Angstrom symbol macro
+# - enable polyfill for hasOwn (needed for some older browsers)
+mathjax3_config = {"tex": {"macros": {"AA": r"\unicode{x212B}"}}, "startup": {"polyfillHasOwn": True}}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -146,8 +150,7 @@ html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 # and used in the navigation bar as the "topmost" element.
 html_title = ""
 
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
+# The name of an image file (relative to this directory) to place at the top of the sidebar.
 html_logo = os.path.relpath(os.path.join("..", "..", "images", "Mantid_Logo_Transparent.png"))
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -175,6 +178,35 @@ html_last_updated_fmt = None
 
 # Hide the navigation sidebar, we use a table of contents instead.
 html_sidebars = {"**": []}
+
+# Theme-specific options to customize the look and feel of a theme.
+# We config the bootstrap settings here, and apply CSS changes in
+# custom.css rather than here.
+html_theme_options = {
+    # Navigation bar title.
+    "navbar_title": " ",  # deliberate single space so it's not visible
+    # Tab name for entire site.
+    "navbar_site_name": "Mantid",
+    # Add links to the nav bar. Third param of tuple is true to create absolute url.
+    "navbar_links": [
+        ("Home", "https://www.mantidproject.org", True),
+        ("Download", "https://download.mantidproject.org", True),
+        ("Documentation", "https://docs.mantidproject.org", True),
+        ("Contact Us", "https://www.mantidproject.org/contact", True),
+    ],
+    # Do not show the "Show source" button.
+    "source_link_position": "no",
+    # Remove the local TOC from the nav bar
+    "navbar_pagenav": False,
+    # Hide the next/previous in the nav bar.
+    "navbar_sidebarrel": True,
+    # Use bootstrap 3 for now, updating requires changes to our custom CSS.
+    "bootstrap_version": "3",
+    # Ensure the nav bar always stays on top of page.
+    "navbar_fixed_top": "true",
+    # Don't limit the width
+    "body_max_width": "none",
+}
 
 # -- Options for Epub output ---------------------------------------------------
 # This flag determines if a toc entry is inserted again at the beginning of its nested toc listing.
@@ -204,12 +236,6 @@ epub_scheme = "URL"
 # A unique identifier for the document. This is put in the Dublin Core metadata. You may use a random string.
 # The default value is 'unknown'.
 epub_uid = "Mantid Reference: " + version
-
-# -- Options for selected builder output ---------------------------------------
-# Default is to use standard HTML theme unless the qthelp tag is specified
-# 'tags' is a special object available in config files, which exposes the project tags
-html_theme_cfg = "conf-qthelp.py" if "qthelp" in [k.strip() for k in tags] else "conf-html.py"  # noqa: F821
-runpy.run_path(html_theme_cfg)
 
 # -- Link to other projects ----------------------------------------------------
 

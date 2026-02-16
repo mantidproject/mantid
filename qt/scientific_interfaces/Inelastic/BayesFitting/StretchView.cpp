@@ -125,45 +125,32 @@ void StretchView::setupFitOptions(bool useQuickBayes) {
 }
 
 void StretchView::setupPropertyBrowser(bool useQuickBayes) {
+  auto const EMin = m_properties.contains("EMin") ? m_properties["EMin"]->valueText().toDouble() : 0.0;
+  auto const EMax = m_properties.contains("EMax") ? m_properties["EMax"]->valueText().toDouble() : 0.0;
+  auto const beta = m_properties.contains("Beta") ? m_properties["Beta"]->valueText().toInt() : 50;
+  auto const sigma = m_properties.contains("Sigma") ? m_properties["Sigma"]->valueText().toInt() : 3;
+
   m_properties.clear();
   m_dblManager->clear();
   m_propTree->clear();
 
   m_uiForm.treeSpace->addWidget(m_propTree);
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &StretchView::propertiesUpdated);
+  addPropToTree<double>("EMin", EMin);
+  addPropToTree<double>("EMax", EMax);
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &StretchView::propertiesUpdated);
 
-  m_properties["EMin"] = m_dblManager->addProperty("EMin");
-  m_properties["EMax"] = m_dblManager->addProperty("EMax");
-  m_properties["Beta"] = m_dblManager->addProperty("Beta");
+  addPropToTree<int>("Beta", beta, INT_DECIMALS, 1, 200);
+  addPropToTree<int>("Sigma", sigma, INT_DECIMALS, 1, 200);
 
-  m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties["Beta"], INT_DECIMALS);
-
-  m_propTree->addProperty(m_properties["EMin"]);
-  m_propTree->addProperty(m_properties["EMax"]);
-  m_propTree->addProperty(m_properties["Beta"]);
-
-  m_dblManager->setValue(m_properties["Beta"], 50);
-  m_dblManager->setMinimum(m_properties["Beta"], 1);
-  m_dblManager->setMaximum(m_properties["Beta"], 200);
-
-  if (!useQuickBayes) {
-    m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
-    m_properties["Sigma"] = m_dblManager->addProperty("Sigma");
-
-    m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
-    m_dblManager->setDecimals(m_properties["Sigma"], INT_DECIMALS);
-
-    m_propTree->addProperty(m_properties["SampleBinning"]);
-    m_propTree->addProperty(m_properties["Sigma"]);
-
-    m_dblManager->setValue(m_properties["Sigma"], 50);
-    m_dblManager->setMinimum(m_properties["Sigma"], 1);
-    m_dblManager->setMaximum(m_properties["Sigma"], 200);
-    m_dblManager->setValue(m_properties["SampleBinning"], 1);
-    m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
+  if (useQuickBayes) {
+    addPropToTree<double>("startBeta", 0.5, NUM_DECIMALS, 0.5, 1.0);
+    addPropToTree<double>("endBeta", 1.0, NUM_DECIMALS, 0.5, 1.001);
+    addPropToTree<double>("startSigma(FWHM)", 0.01, NUM_DECIMALS, 0.0, 1.0);
+    addPropToTree<double>("endSigma(FWHM)", 0.1, NUM_DECIMALS, 0.0, 1.0);
+  } else {
+    addPropToTree<int>("SampleBinning", 1, INT_DECIMALS, 1);
   }
-
   formatTreeWidget(m_propTree, m_properties);
 }
 
@@ -252,25 +239,29 @@ void StretchView::validateUserInput(IUserInputValidator *validator) const {
   validator->checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 }
 
-StretchRunData StretchView::getRunData() const {
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
-
+StretchRunData StretchView::getRunData(bool useQuickBayes) const {
   auto const sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
   auto const resName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
-
   auto const background = m_uiForm.cbBackground->currentText().toStdString();
 
   auto const eMin = m_properties["EMin"]->valueText().toDouble();
   auto const eMax = m_properties["EMax"]->valueText().toDouble();
   auto const beta = m_properties["Beta"]->valueText().toInt();
-
+  auto const sigma = m_properties["Sigma"]->valueText().toInt();
   auto const elasticPeak = m_uiForm.chkElasticPeak->isChecked();
 
-  auto const sigma = !useQuickBayes ? m_properties["Sigma"]->valueText().toInt() : 0;
-  auto const nBins = !useQuickBayes ? m_properties["SampleBinning"]->valueText().toInt() : 0;
-  auto const sequence = !useQuickBayes ? m_uiForm.chkSequentialFit->isChecked() : false;
+  auto stretchData = StretchRunData(sampleName, resName, background, eMin, eMax, beta, sigma, elasticPeak);
 
-  return StretchRunData(sampleName, resName, eMin, eMax, beta, elasticPeak, background, sigma, nBins, sequence);
+  if (useQuickBayes) {
+    stretchData.startBeta = m_properties["startBeta"]->valueText().toDouble();
+    stretchData.endBeta = m_properties["endBeta"]->valueText().toDouble();
+    stretchData.startFWHM = m_properties["startSigma(FWHM)"]->valueText().toDouble();
+    stretchData.endFWHM = m_properties["endSigma(FWHM)"]->valueText().toDouble();
+  } else {
+    stretchData.sampleBinning = m_properties["SampleBinning"]->valueText().toInt();
+    stretchData.sequentialFit = m_uiForm.chkSequentialFit->isChecked();
+  }
+  return stretchData;
 }
 
 CurrentPreviewData StretchView::getCurrentPreviewData() const {

@@ -21,7 +21,7 @@ from mantidqt.utils.qt import load_ui
 from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 from mantidqt.widgets import jobtreeview, manageuserdirectories
 from reduction_gui.reduction.scripter import execute_script
-from sans.common.enums import ReductionDimensionality, OutputMode, SANSInstrument, RangeStepType, ReductionMode, FitType
+from sans.common.enums import ReductionDimensionality, OutputMode, SANSInstrument, RangeStepType, ReductionMode, FitType, PhiLimitType
 from sans.gui_logic.gui_common import (
     get_reduction_mode_from_gui_selection,
     get_reduction_mode_strings_for_gui,
@@ -322,7 +322,7 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.background_subtraction_checkbox.stateChanged.connect(self._on_background_subtraction_selection)
 
         self.wavelength_step_type_combo_box.currentIndexChanged.connect(self._on_wavelength_step_type_changed)
-        self.phi_range_step_type_combo_box.currentIndexChanged.connect(self._on_phi_range_step_type_changed)
+        self.phi_limit_type_combo_box.currentIndexChanged.connect(self._on_phi_limit_type_changed)
 
         self.process_selected_button.clicked.connect(self._process_selected_clicked)
         self.process_all_button.clicked.connect(self._process_all_clicked)
@@ -413,11 +413,8 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
             self.wavelength_stacked_widget.setCurrentIndex(0)
             self.wavelength_step_label.setText("Step [\u00c5]")
 
-    def _on_phi_range_step_type_changed(self):
-        if self.phi_range_step_type == "MinMax":
-            self.phi_range_stacked_widget.setCurrentIndex(0)
-        elif self.phi_range_step_type == "Pairs":
-            self.phi_range_stacked_widget.setCurrentIndex(1)
+    def _on_phi_limit_type_changed(self):
+        self.phi_range_stacked_widget.setCurrentIndex(int(self.phi_limit_use_range))  # 0:MinMax , 1:Pairs (range)
 
     def create_data_table(self):
         # Delete an already existing table
@@ -1894,13 +1891,14 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.phi_range_line_edit.setText(value)
 
     @property
-    def phi_range_step_type(self):
-        step_type_as_string = self.phi_range_step_type_combo_box.currentText()
-        return step_type_as_string
+    def phi_limit_use_range(self):
+        return self.phi_limit_type_combo_box.currentText() == PhiLimitType.PAIRS.value
 
-    @phi_range_step_type.setter
-    def phi_range_step_type(self, value):
-        self.update_gui_combo_box(value=value, expected_type="MinMax", combo_box="phi_range_step_type_combo_box")
+    @phi_limit_use_range.setter
+    def phi_limit_use_range(self, value):
+        if not isinstance(value, list):
+            value = PhiLimitType.PAIRS if value else PhiLimitType.MINMAX
+        self.update_gui_combo_box(value=value, expected_type=PhiLimitType, combo_box="phi_limit_type_combo_box")
 
     @property
     def phi_limit_use_mirror(self):
@@ -2081,7 +2079,7 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.phi_limit_min_line_edit.setText("-90")
         self.phi_limit_max_line_edit.setText("90")
         self.phi_range_line_edit.setText("")
-        self.phi_range_step_type_combo_box.setCurrentIndex(0)
+        self.phi_limit_type_combo_box.setCurrentIndex(0)
         self.phi_limit_use_mirror_check_box.setChecked(True)
 
         self.wavelength_min_line_edit.setText("")

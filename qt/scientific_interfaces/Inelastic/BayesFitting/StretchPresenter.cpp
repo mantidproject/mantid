@@ -46,7 +46,7 @@ void StretchPresenter::handleRun() {
 
   m_view->setPlotADSEnabled(false);
 
-  StretchRunData algParams = m_view->getRunData();
+  StretchRunData algParams = m_view->getRunData(m_useQuickBayes);
 
   auto const cutIndex = algParams.sampleName.find_last_of("_");
   auto const baseName = algParams.sampleName.substr(0, cutIndex);

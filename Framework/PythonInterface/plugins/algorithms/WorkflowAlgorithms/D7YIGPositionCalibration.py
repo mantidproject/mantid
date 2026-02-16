@@ -405,8 +405,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             CreateOutput=True,
             IgnoreInvalidData=True,
             Output="out",
+            EnableLogging=False,
         )
-        RenameWorkspace(InputWorkspace="out_Workspace", OutputWorkspace=out_name)
+        RenameWorkspace(InputWorkspace="out_Workspace", OutputWorkspace=out_name, EnableLogging=False)
         param_table = fit_output.OutputParameters
         peak_id = initial_peak_no
         if param_table:
@@ -485,7 +486,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                         ws, ws_name, fit_function, fit_constraints, 0, pixel_no, single_spectrum_peaks, results_x, results_y, results_e
                     )
             if fitting_method != "None":
-                CreateWorkspace(OutputWorkspace="ws", DataX=results_x, DataY=results_y, DataE=results_e, UnitX="degrees", NSpec=1)
+                CreateWorkspace(
+                    OutputWorkspace="ws", DataX=results_x, DataY=results_y, DataE=results_e, UnitX="degrees", NSpec=1, EnableLogging=False
+                )
                 try:
                     ConjoinWorkspaces(
                         InputWorkspace1=conjoined_peak_fit_name,
@@ -494,15 +497,18 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                         YAxisLabel="TwoTheta_fit",
                         YAxisUnit="degrees",
                         CheckMatchingBins=False,
+                        EnableLogging=False,
                     )
                 except ValueError:
-                    RenameWorkspace(InputWorkspace="ws", OutputWorkspace=conjoined_peak_fit_name)
+                    RenameWorkspace(InputWorkspace="ws", OutputWorkspace=conjoined_peak_fit_name, EnableLogging=False)
             else:
                 ws_names.append(ws_name)
                 single_spectrum_name = "{}_single_spectrum".format(ws_name)
-                ExtractSpectra(InputWorkspace=ws, OutputWorkspace=single_spectrum_name, WorkspaceIndexList=[pixel_no])
-                EvaluateFunction(Function=";".join(fit_function), InputWorkspace=single_spectrum_name, OutputWorkspace=ws_name)
-                DeleteWorkspace(Workspace=single_spectrum_name)
+                ExtractSpectra(InputWorkspace=ws, OutputWorkspace=single_spectrum_name, WorkspaceIndexList=[pixel_no], EnableLogging=False)
+                EvaluateFunction(
+                    Function=";".join(fit_function), InputWorkspace=single_spectrum_name, OutputWorkspace=ws_name, EnableLogging=False
+                )
+                DeleteWorkspace(Workspace=single_spectrum_name, EnableLogging=False)
 
         if fitting_method in ["Individual", "Global"]:
             y_axis = NumericAxis.create(self._D7NumberPixels)
@@ -510,7 +516,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                 y_axis.setValue(pixel_no, pixel_no + 1)
             mtd[conjoined_peak_fit_name].replaceAxis(1, y_axis)
             # clean up after fitting:
-            DeleteWorkspaces(["out_Parameters", "out_NormalisedCovarianceMatrix"])
+            DeleteWorkspaces(["out_Parameters", "out_NormalisedCovarianceMatrix"], EnableLogging=False)
 
         single_peak_fit_results_name = "peak_fits_{}".format(self.getPropertyValue("FitOutputWorkspace"))
         GroupWorkspaces(InputWorkspaces=ws_names, OutputWorkspace=single_peak_fit_results_name)
@@ -585,6 +591,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                 IgnoreInvalidData=True,
                 CreateOutput=True,
                 Output="det_fit_out_{}".format(fit_output_name),
+                EnableLogging=False,
                 **fit_kwargs,
             )
         except RuntimeError as e:

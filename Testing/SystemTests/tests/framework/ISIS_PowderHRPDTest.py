@@ -211,10 +211,6 @@ class VanadiumAndFocusWithSolidAngleTest(systemtesting.MantidSystemTest):
         [Error] Group::getObjTypeByIdx: H5Gget_objtype_by_idx failed
     This error is being raised inside the splined vanadium file, VanSplined_66031_hrpd_new_072_01_corr.cal.nxs
     when trying to access the object type at the address "/mantid_workspace_1/instrument/author".
-    The error is raised inside NexusDescriptor during initialization, as called from the NexusFileLoader algorithm.
-    The cause of the error is very difficult to track down, but occurs due to some
-    conflict with Load, LoadNexus, LoadNexusProcessed1 and LoadNexusProcessed2.
-    Efforts to reproduce the error more directly have failed.
     """
 
     focus_results = None

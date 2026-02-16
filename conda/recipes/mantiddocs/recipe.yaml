@@ -29,6 +29,7 @@ requirements:
   host:
     - mantid == ${{ version }}
     - mantidqt == ${{ version }}
+    - myst-parser ${{ mystparser }}
     - python ${{ python }}
     - setuptools
     - sphinx ${{ sphinx }}
