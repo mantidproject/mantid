@@ -107,7 +107,7 @@ const std::string FindPeaksMD::numberOfEventsNormalization = "NumberOfEventsNorm
  */
 FindPeaksMD::FindPeaksMD()
     : peakWS(), peakRadiusSquared(), DensityThresholdFactor(0.0), m_maxPeaks(0), m_addDetectors(true),
-      m_densityScaleFactor(1e-6), prog(nullptr), inst(), m_runNumber(-1), dimType(), m_goniometer() {}
+      m_densityScaleFactor(1e-6), prog(nullptr), m_inst(), m_runNumber(-1), dimType(), m_goniometer() {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -216,7 +216,7 @@ void FindPeaksMD::init() {
 /** Extract needed data from the workspace's experiment info */
 void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei) {
   // Instrument associated with workspace
-  inst = ei->getInstrument();
+  m_inst = ei->getInstrument();
   // Find the run number
   m_runNumber = ei->getRunNumber();
 
@@ -272,7 +272,7 @@ void FindPeaksMD::addPeak(const V3D &Q, const double binCount, const Geometry::I
   try {
     auto p = this->createPeak(Q, binCount, tracer);
     if (m_edge > 0) {
-      if (edgePixel(inst, p->getBankName(), p->getCol(), p->getRow(), m_edge))
+      if (edgePixel(m_inst, p->getBankName(), p->getCol(), p->getRow(), m_edge))
         return;
     }
     if (p->getDetectorID() != -1)
@@ -303,7 +303,7 @@ std::shared_ptr<DataObjects::Peak> FindPeaksMD::createPeak(const Mantid::Kernel:
   std::shared_ptr<DataObjects::Peak> p;
   if (dimType == QLAB) {
     // Build using the Q-lab-frame constructor
-    p = std::make_shared<Peak>(inst, Q);
+    p = std::make_shared<Peak>(m_inst, Q);
     // Save gonio matrix for later
     p->setGoniometerMatrix(m_goniometer);
   } else if (dimType == QSAMPLE) {
@@ -314,8 +314,8 @@ std::shared_ptr<DataObjects::Peak> FindPeaksMD::createPeak(const Mantid::Kernel:
       // Calculate Q lab from Q sample and wavelength
       double wavelength = getProperty("Wavelength");
       if (wavelength == DBL_MAX) {
-        if (inst->hasParameter("wavelength")) {
-          wavelength = inst->getNumberParameter("wavelength").at(0);
+        if (m_inst->hasParameter("wavelength")) {
+          wavelength = m_inst->getNumberParameter("wavelength").at(0);
         } else {
           throw std::runtime_error("Could not get wavelength, neither "
                                    "Wavelength algorithm property "
@@ -328,10 +328,10 @@ std::shared_ptr<DataObjects::Peak> FindPeaksMD::createPeak(const Mantid::Kernel:
       std::vector<double> angles = goniometer.getEulerAngles("YZY");
       g_log.information() << "Found goniometer rotation to be in YZY convention [" << angles[0] << ", " << angles[1]
                           << ". " << angles[2] << "] degrees for Q sample = " << Q << "\n";
-      p = std::make_shared<Peak>(inst, Q, goniometer.getR());
+      p = std::make_shared<Peak>(m_inst, Q, goniometer.getR());
 
     } else {
-      p = std::make_shared<Peak>(inst, Q, m_goniometer);
+      p = std::make_shared<Peak>(m_inst, Q, m_goniometer);
     }
   } else {
     throw std::invalid_argument("Cannot Integrate peaks unless the dimension is QLAB or QSAMPLE");
@@ -535,7 +535,7 @@ template <typename MDE, size_t nd> void FindPeaksMD::findPeaks(typename MDEventW
       ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
       this->readExperimentInfo(ei);
 
-      Geometry::InstrumentRayTracer tracer(inst);
+      Geometry::InstrumentRayTracer tracer(m_inst);
       // Copy the instrument, sample, run to the peaks workspace.
       peakWS->copyExperimentInfoFrom(ei.get());
 
@@ -598,7 +598,7 @@ template <typename MDE, size_t nd> void FindPeaksMD::findPeaks(typename MDEventW
             }
             if (p->getDetectorID() != -1) {
               if (m_edge > 0) {
-                if (!edgePixel(inst, p->getBankName(), p->getCol(), p->getRow(), m_edge))
+                if (!edgePixel(m_inst, p->getBankName(), p->getCol(), p->getRow(), m_edge))
                   peakWS->addPeak(*p);
                 ;
               } else {
@@ -741,7 +741,7 @@ void FindPeaksMD::findPeaksHisto(const Mantid::DataObjects::MDHistoWorkspace_spt
     for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
       ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
       this->readExperimentInfo(ei);
-      Geometry::InstrumentRayTracer tracer(inst);
+      Geometry::InstrumentRayTracer tracer(m_inst);
 
       // Copy the instrument, sample, run to the peaks workspace.
       peakWS->copyExperimentInfoFrom(ei.get());

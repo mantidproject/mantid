@@ -108,7 +108,7 @@ private:
   enum eDimensionType { HKL, QLAB, QSAMPLE };
 
   /// Instrument
-  Mantid::Geometry::Instrument_const_sptr inst;
+  Mantid::Geometry::Instrument_const_sptr m_inst;
   /// Run number of the peaks
   int m_runNumber;
   /// Dimension type
