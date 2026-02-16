@@ -11,6 +11,7 @@ from unittest.mock import patch
 from SANS import SANSadd2
 from SANS.sans.common.enums import SampleShape
 from mantid.simpleapi import Load
+from SANSUtility import WorkspaceType
 
 
 class TestSANSAddSampleMetadata(unittest.TestCase):
@@ -50,3 +51,9 @@ class TestSANSAddSampleMetadata(unittest.TestCase):
             mocked_get_geo_info.return_value = (8.0, 8.0, 2.0, SampleShape.DISC)
             SANSadd2.add_runs(("74014", "74014"), "LOQ", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False)
             self.assertEqual(1, mocked_get_geo_info.call_count)
+
+    @patch("SANS.SANSadd2.get_workspace_type")
+    def test_is_not_allowed_instrument_branch(self, mocked_get_workspace_type):
+        mocked_get_workspace_type.return_value = WorkspaceType.Event
+        result = SANSadd2.add_runs(("LOQ54432", "LOQ54432"), "LOQ", ".raw")
+        self.assertEqual(result, "")
