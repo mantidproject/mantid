@@ -23,10 +23,8 @@ class AboutPresenter(object):
     INSTRUMENT = "default.instrument"
 
     def __init__(self, parent, view=None, usage_reporting_verification_view=None):
-        self.view = view if view else AboutView(parent, self, str(version()), release_date().strip())
-        self.usage_reporting_verification_view = (
-            usage_reporting_verification_view if usage_reporting_verification_view else UsageReportingVerificationView(parent, self)
-        )
+        self.view = view or AboutView(parent, self, str(version()), release_date().strip())
+        self.usage_reporting_verification_view = usage_reporting_verification_view or UsageReportingVerificationView(parent, self)
         self.parent = parent
 
         about_widget = self.view.about_widget

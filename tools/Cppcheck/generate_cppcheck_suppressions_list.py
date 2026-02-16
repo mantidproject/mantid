@@ -44,7 +44,7 @@ def main() -> int:
     Main entry point for the program.
     """
     args = parse_arguments()
-    old_source_root = args.path_to_source if args.path_to_source else OLD_SOURCE_ROOT
+    old_source_root = args.path_to_source or OLD_SOURCE_ROOT
     tree = ET.parse(args.cppcheck_xml)
     suppressions = generate_suppressions(tree, old_source_root)
 

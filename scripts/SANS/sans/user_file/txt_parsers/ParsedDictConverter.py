@@ -59,7 +59,7 @@ class ParsedDictConverter(IStateParser):
         if not self._cached_result:
             self._cached_result = self._get_input_dict()
             # Ensure we always have a dict
-            self._cached_result = self._cached_result if self._cached_result else {}
+            self._cached_result = self._cached_result or {}
         return self._cached_result
 
     @abc.abstractmethod

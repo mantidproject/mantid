@@ -268,7 +268,7 @@ def _get_value_from_dict(input_dict: dict[str, Any], keys: list[str], default_va
     except KeyError as key_err:
         if mandatory:
             raise KeyError(key_err)
-    return val if val else default_value
+    return val or default_value
 
 
 def _user_file_reader(file_path: str, names_dict: dict[str, WsInfo]) -> InstrumentConfig:

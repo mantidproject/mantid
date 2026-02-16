@@ -51,7 +51,7 @@ class DataContext(object):
         if self.current_runs:
             loaded_data = self._loaded_data.get_data(run=self.current_runs[0])
 
-        return loaded_data if loaded_data else {"workspace": load_utils.empty_loaded_data(), "run": []}
+        return loaded_data or {"workspace": load_utils.empty_loaded_data(), "run": []}
 
     @property
     def current_data(self):

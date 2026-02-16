@@ -650,7 +650,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         [empty_beam1_ws, empty_beam1_flux] = self.process_empty_beam(d, dark_current_ws)
         [empty_beam2_ws, empty_beam2_flux] = self.process_flux(d, dark_current_ws)
         empty_can_ws = self.process_container(d, dark_current_ws, empty_beam1_ws, transmissions)
-        actual_flux_ws = empty_beam2_flux if empty_beam2_flux else empty_beam1_flux
+        actual_flux_ws = empty_beam2_flux or empty_beam1_flux
         return self.process_sample(d, dark_current_ws, empty_beam1_ws, empty_can_ws, actual_flux_ws, transmissions)
 
     # ================================LOAD PROCESSED CALIBRANTS================================#

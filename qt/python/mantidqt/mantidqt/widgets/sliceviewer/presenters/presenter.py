@@ -44,11 +44,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         :param model: A model to define slicing operations. If None uses SliceViewerModel
         :param view: A view to display the operations. If None uses SliceViewerView
         """
-        model: SliceViewerModel = model if model else SliceViewerModel(ws)
-        self.view = (
-            view
-            if view
-            else SliceViewerView(self, Dimensions.get_dimensions_info(ws), model.can_normalize_workspace(), parent, window_flags, conf)
+        model: SliceViewerModel = model or SliceViewerModel(ws)
+        self.view = view or SliceViewerView(
+            self, Dimensions.get_dimensions_info(ws), model.can_normalize_workspace(), parent, window_flags, conf
         )
         super().__init__(ws, self.view.data_view, model)
         self._logger = Logger("SliceViewer")

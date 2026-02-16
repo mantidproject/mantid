@@ -37,14 +37,12 @@ class SettingsPresenter(object):
         fitting_model = FittingSettingsModel()
         general_model = GeneralSettingsModel()
         plots_model = PlotsSettingsModel()
-        self.view = view if view else SettingsView(parent, self)
-        self.model = model if model else SettingsModel([categories_model, fitting_model, general_model, plots_model])
-        self.general_settings = (
-            general_settings if general_settings else GeneralSettings(parent, settings_presenter=self, model=general_model)
-        )
-        self.categories_settings = categories_settings if categories_settings else CategoriesSettings(parent, model=categories_model)
-        self.plot_settings = plot_settings if plot_settings else PlotSettings(parent, model=plots_model)
-        self.fitting_settings = fitting_settings if fitting_settings else FittingSettings(parent, model=fitting_model)
+        self.view = view or SettingsView(parent, self)
+        self.model = model or SettingsModel([categories_model, fitting_model, general_model, plots_model])
+        self.general_settings = general_settings or GeneralSettings(parent, settings_presenter=self, model=general_model)
+        self.categories_settings = categories_settings or CategoriesSettings(parent, model=categories_model)
+        self.plot_settings = plot_settings or PlotSettings(parent, model=plots_model)
+        self.fitting_settings = fitting_settings or FittingSettings(parent, model=fitting_model)
         self.parent = parent
         self.all_properties = []
         for properties in [CategoryProperties, FittingProperties, GeneralProperties, GeneralUserConfigProperties, PlotProperties]:
