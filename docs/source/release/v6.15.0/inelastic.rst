@@ -11,10 +11,6 @@ New Features
 - (`#40897 <https://github.com/mantidproject/mantid/pull/40897>`_) The :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` will now plot result workspaces as a contour plot if the workspaces contain multiple spectra.
 - (`#40897 <https://github.com/mantidproject/mantid/pull/40897>`_) The :ref`algm-BayesStretch` algorithm now outputs contour and fit workspace groups with the name provided in the ``OutputWorkspaceContour`` and ``OutputWorkspaceFit`` input properties.
 
-
-Bugfixes
---------
-
 Algorithms
 ----------
 

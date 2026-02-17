@@ -5,31 +5,8 @@ Direct Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-General
--------
-
-New features
-############
-
-Bugfixes
-############
-
-
-CrystalField
--------------
-
-New features
-############
-
-Bugfixes
-############
-
-
 MSlice
 ------
-
-New features
-############
 
 Bugfixes
 ############
