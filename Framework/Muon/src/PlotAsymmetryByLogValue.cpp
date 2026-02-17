@@ -224,10 +224,9 @@ const std::string PlotAsymmetryByLogValue::getLogUnits(const std::string &fileNa
  */
 std::string PlotAsymmetryByLogValue::getDirectoryFromFileName(const std::string &fileName) const {
   const auto path = FileFinder::Instance().getFullPath(fileName);
-  std::filesystem::path fileBase(path);
 
-  if (fileBase.has_parent_path()) {
-    return fileBase.parent_path().string() + "/";
+  if (path.has_parent_path()) {
+    return path.parent_path().string() + "/";
   }
 
   return ""; // Empty string if file name could not be found so directory could not be determined
@@ -575,12 +574,12 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN, std::string &l
     // First run number with last base name
     std::ostringstream tempFirst;
     tempFirst << lastBase << firstFN << firstExt << '\n';
-    std::string pathFirst = FileFinder::Instance().getFullPath(tempFirst.str());
+    auto pathFirst = FileFinder::Instance().getFullPath(tempFirst.str());
     // Last run number with first base name
     std::ostringstream tempLast;
     tempLast << firstBase << lastFN << lastExt << '\n';
-    std::string pathLast = FileFinder::Instance().getFullPath(tempLast.str());
 
+    auto pathLast = FileFinder::Instance().getFullPath(tempLast.str());
     // Try to correct this on the fly by
     // checking if the last run can be found in the first directory...
     if (std::filesystem::exists(pathLast)) {

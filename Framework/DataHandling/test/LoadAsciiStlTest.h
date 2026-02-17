@@ -23,21 +23,21 @@ public:
   static void destroySuite(LoadAsciiStlTest *suite) { delete suite; }
 
   void test_cube() {
-    std::string path = FileFinder::Instance().getFullPath("cube.stl");
+    std::string path = FileFinder::Instance().getFullPath("cube.stl").string();
     auto Loader = LoadAsciiStl(path, units);
     auto cube = Loader.readShape();
     assert_shape_matches(cube, 8, 12, 3000, 0.001);
   }
 
   void test_cylinder() {
-    std::string path = FileFinder::Instance().getFullPath("cylinder.stl");
+    std::string path = FileFinder::Instance().getFullPath("cylinder.stl").string();
     auto Loader = LoadAsciiStl(path, units);
     auto cylinder = Loader.readShape();
     assert_shape_matches(cylinder, 722, 1440, 589, 1);
   }
 
   void test_tube() {
-    std::string path = FileFinder::Instance().getFullPath("tube.stl");
+    std::string path = FileFinder::Instance().getFullPath("tube.stl").string();
     auto Loader = LoadAsciiStl(path, units);
     auto tube = Loader.readShape();
     assert_shape_matches(tube, 1080, 2160, 7068, 1);
@@ -50,19 +50,19 @@ public:
   void test_fail_invalid_stl_triangle() { loadFailureTest("invalid_triangle.stl"); }
 
   void loadFailureTest(const std::string &filename) {
-    std::string path = FileFinder::Instance().getFullPath(filename);
+    std::string path = FileFinder::Instance().getFullPath(filename).string();
     auto Loader = LoadAsciiStl(path, units);
     TS_ASSERT_THROWS_ANYTHING(Loader.readShape());
   }
 
   void test_return_false_on_binary_stl() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     auto Loader = LoadAsciiStl(path, units);
     TS_ASSERT(!(Loader.isAsciiSTL(path)));
   }
 
   void test_return_false_on_invalid_solid() {
-    std::string path = FileFinder::Instance().getFullPath("invalid_solid.stl");
+    std::string path = FileFinder::Instance().getFullPath("invalid_solid.stl").string();
     auto Loader = LoadAsciiStl(path, units);
     TS_ASSERT(!(Loader.isAsciiSTL(path)));
   }

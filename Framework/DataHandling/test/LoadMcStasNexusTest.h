@@ -36,7 +36,7 @@ public:
   }
 
   void testConfidence() {
-    std::string filepath = FileFinder::Instance().getFullPath("mcstas.h5");
+    std::string filepath = FileFinder::Instance().getFullPath("mcstas.h5").string();
     Mantid::Nexus::NexusDescriptorLazy descriptor(filepath);
     int confidence = algToBeTested.confidence(descriptor);
     TS_ASSERT_EQUALS(confidence, 40);

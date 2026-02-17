@@ -37,7 +37,7 @@ public:
     // Create test input if necessary
     LoadMD loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", Mantid::API::FileFinder::Instance().getFullPath("HB3A_data.nxs"));
+    loader.setPropertyValue("Filename", Mantid::API::FileFinder::Instance().getFullPath("HB3A_data.nxs").string());
     loader.setPropertyValue("OutputWorkspace", "ConvertHFIRSCDtoMDETest_data");
     loader.setProperty("FileBackEnd", false);
     loader.execute();
