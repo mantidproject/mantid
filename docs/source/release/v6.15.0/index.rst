@@ -4,7 +4,7 @@
 Mantid 6.15.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/6_15_release/mantid_6_15.png
    :class: screenshot
    :width: 385px
    :align: right
