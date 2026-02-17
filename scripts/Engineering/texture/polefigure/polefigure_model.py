@@ -63,6 +63,7 @@ class TextureProjection:
         wss: Sequence[str], fit_params: Sequence[str], hkl: Optional[Sequence[int]], readout_column: str
     ) -> Tuple[str, str, str]:
         fws, lws = ADS.retrieve(wss[0]), ADS.retrieve(wss[-1])
+        readout_column = readout_column.replace("/", "_over_")
         try:
             run_range = f"{fws.getRun().getLogData('run_number').value}-{lws.getRun().getLogData('run_number').value}"
             instr = fws.getInstrument().getName()
