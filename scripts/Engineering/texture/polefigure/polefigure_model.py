@@ -76,7 +76,11 @@ class TextureProjection:
             grouping = "GROUP"
         try:
             # try and get a peak reference either from hkl or from the X0 column of param
-            peak = "".join([str(ind) for ind in hkl]) if hkl else str(np.round(np.mean(ADS.retrieve(fit_params[0]).column("X0")), 2))
+            if hkl:
+                peak = "".join([str(ind) for ind in hkl])
+            else:
+                x0s = np.asarray(ADS.retrieve(fit_params[0]).column("X0"))
+                peak = str(np.round(np.mean(x0s[np.isfinite(x0s)]), 2))  # only use non nan x0s
             table_name = f"{peak}_{instr}_{run_range}_{grouping}_pf_table_{readout_column}"
             combined_wsname = f"{peak}_{instr}_{run_range}_{grouping}_spectra"
         except Exception:
