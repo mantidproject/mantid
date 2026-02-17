@@ -80,7 +80,7 @@ class TextureProjection:
                 peak = "".join([str(ind) for ind in hkl])
             else:
                 x0s = np.asarray(ADS.retrieve(fit_params[0]).column("X0"))
-                peak = str(np.round(np.mean(x0s[np.isfinite(x0s)]), 2))  # only use non nan x0s
+                peak = str(np.round(np.nanmean(x0s), 2))  # only use non nan x0s
             table_name = f"{peak}_{instr}_{run_range}_{grouping}_pf_table_{readout_column}"
             combined_wsname = f"{peak}_{instr}_{run_range}_{grouping}_spectra"
         except Exception:
