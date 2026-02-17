@@ -1,0 +1,1 @@
+- Updated IDF for MANDI with latest detector positions calibrated with garnet

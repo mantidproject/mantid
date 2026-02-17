@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<parameter-file instrument = "MANDI" valid-from   ="2021-02-01 00:00:00" valid-to     ="2026-01-31 23:59:59">
+<parameter-file instrument = "MANDI" valid-from   ="2026-02-01 00:00:00" valid-to     ="2100-12-31 23:59:59">
 
 <component-link name = "MANDI">
 <!-- Specify that any banks not in NeXus file are to be removed -->
 <parameter name="T0">
- <value val="-6.711"/>
+ <value val="0.0"/>
 </parameter>
 
 <!-- Need to fill in gaps for peak profile fitting -->
