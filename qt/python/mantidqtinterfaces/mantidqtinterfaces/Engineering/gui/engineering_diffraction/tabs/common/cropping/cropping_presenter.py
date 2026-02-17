@@ -12,8 +12,8 @@ from Engineering.EnggUtils import GROUP
 class CroppingPresenter(object):
     def __init__(self, parent, view=None, model=None):
         self.parent = parent
-        self.model = model if model else CroppingModel()
-        self.view = view if view else CroppingView(parent)
+        self.model = model or CroppingModel()
+        self.view = view or CroppingView(parent)
 
         self.group = None  # default if no cropping requested
         self.custom_spectra_enabled = False

@@ -39,7 +39,7 @@ class PlotFitPaneModel(BasePaneModel):
         label = ""
         fit_function_name = get_fit_function_name_from_workspace(workspace_name)
         if fit_function_name:
-            if index in [1]:
+            if index == 1:
                 workspace_type = "Calc"
             elif index == 2:
                 workspace_type = "Diff"

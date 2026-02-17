@@ -137,7 +137,7 @@ class FigureWindow(QMainWindow, ObservingView):
         x, y = self._canvas.mouseEventCoords(event.pos())
 
         location_event = LocationEvent("AxesGetterEvent", self._canvas, x, y)
-        ax = location_event.inaxes if location_event.inaxes else self._canvas.figure.axes[0]
+        ax = location_event.inaxes or self._canvas.figure.axes[0]
 
         self._plot_on_here(workspace_names, ax)
         QMainWindow.dropEvent(self, event)

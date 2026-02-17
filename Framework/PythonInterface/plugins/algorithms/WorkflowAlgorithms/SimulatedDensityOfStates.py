@@ -366,7 +366,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             # Sort workspaces
             if calc_ion_index:
                 # Sort by index after '_'
-                partial_ws_names.sort(key=lambda item: (int(item[(item.rfind("_") + 1) :])))
+                partial_ws_names.sort(key=lambda item: int(item[(item.rfind("_") + 1) :]))
             group = ",".join(partial_ws_names)
             s_api.GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
 

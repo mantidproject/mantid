@@ -449,14 +449,14 @@ class PointCharge(object):
         return [entries[i][1:] for i in idx]
 
     def _getIon(self):
-        ion = self._ion if self._ion else self._ionlabel
+        ion = self._ion or self._ionlabel
         try:
             return ion[0].upper() + ion[1].lower()
         except (TypeError, IndexError):
             raise ValueError("Invalid value of IonLabel or Ion %s." % (ion))
 
     def _getDist(self):
-        return self._maxdistance if self._maxdistance else -self._neighbour
+        return self._maxdistance or -self._neighbour
 
     def calculate(self):
         """Calculates the crystal field parameters in the point charge model for the defined structure"""

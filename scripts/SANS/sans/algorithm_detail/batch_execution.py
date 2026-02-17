@@ -572,7 +572,7 @@ def check_for_background_workspace_in_ads(state, reduction_package):
     full_name = (
         background_ws_name
         + reduced_name.split(
-            state.save.user_specified_output_name if state.save.user_specified_output_name else str(state.data.sample_scatter_run_number),
+            state.save.user_specified_output_name or str(state.data.sample_scatter_run_number),
             1,
         )[-1]
     )

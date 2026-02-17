@@ -731,7 +731,7 @@ def get_standard_output_workspace_name(state, reduction_data_type, wav_range, in
     short_run_number = data.sample_scatter_run_number
 
     # If the user has specified a custom run name we should prepend that instead
-    short_run_number_as_string = custom_run_name if custom_run_name else str(short_run_number)
+    short_run_number_as_string = custom_run_name or str(short_run_number)
     if short_run_number_as_string[-1] != "_":
         short_run_number_as_string = short_run_number_as_string + "_"
 

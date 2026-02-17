@@ -160,7 +160,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.enable_widget()
 
         for widget in self.view.children():
-            if str(widget.objectName()) in ["cancel_calculate_phase_table_button"]:
+            if str(widget.objectName()) == "cancel_calculate_phase_table_button":
                 continue
             self.assertTrue(widget.isEnabled())
 
@@ -169,7 +169,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         disable_notifier.notify_subscribers()
         for widget in self.view.children():
-            if str(widget.objectName()) in ["cancel_calculate_phase_table_button"]:
+            if str(widget.objectName()) == "cancel_calculate_phase_table_button":
                 continue
             self.assertFalse(widget.isEnabled())
 
@@ -178,7 +178,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.disable_widget()
 
         for widget in self.view.children():
-            if str(widget.objectName()) in ["cancel_calculate_phase_table_button"]:
+            if str(widget.objectName()) == "cancel_calculate_phase_table_button":
                 continue
             self.assertFalse(widget.isEnabled())
 
@@ -187,7 +187,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         enable_notifier.notify_subscribers()
         for widget in self.view.children():
-            if str(widget.objectName()) in ["cancel_calculate_phase_table_button"]:
+            if str(widget.objectName()) == "cancel_calculate_phase_table_button":
                 continue
             self.assertTrue(widget.isEnabled())
 

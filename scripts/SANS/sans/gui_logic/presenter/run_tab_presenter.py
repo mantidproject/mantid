@@ -216,9 +216,9 @@ class RunTabPresenter(PresenterCommon):
         self.progress = 0
 
         # Models that are being used by the presenter
-        self._model = model if model else StateGuiModel(all_states=AllStates())
+        self._model = model or StateGuiModel(all_states=AllStates())
         self._run_tab_model: RunTabModel = run_tab_model
-        self._table_model = table_model if table_model else TableModel()
+        self._table_model = table_model or TableModel()
         self._table_model.subscribe_to_model_changes(self)
 
         self._processing = False
@@ -928,7 +928,7 @@ class RunTabPresenter(PresenterCommon):
     # ------------------------------------------------------------------------------------------------------------------
     def _get_selected_rows(self):
         selected_rows = self._view.get_selected_rows()
-        selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
+        selected_rows = selected_rows or range(self._table_model.get_number_of_rows())
         return selected_rows
 
     @log_times

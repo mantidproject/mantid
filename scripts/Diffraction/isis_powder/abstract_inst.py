@@ -440,7 +440,7 @@ class AbstractInst(object):
             "runno": run_details.output_run_string,
             "fileext": file_type,
             "_fileext": "_" + file_type if file_type else "",
-            "suffix": run_details.output_suffix if run_details.output_suffix else "",
+            "suffix": run_details.output_suffix or "",
         }
         format_options = self._add_formatting_options(format_options)
 

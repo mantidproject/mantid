@@ -11,7 +11,7 @@ from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_p
 
 class SeqFittingTabWidget(object):
     def __init__(self, context, model, parent, view=None):
-        self.seq_fitting_tab_view = view if view else SeqFittingTabView(parent)
+        self.seq_fitting_tab_view = view or SeqFittingTabView(parent)
         self.seq_fitting_tab_model = model
 
         self.seq_fitting_tab_presenter = SeqFittingTabPresenter(self.seq_fitting_tab_view, self.seq_fitting_tab_model, context)
