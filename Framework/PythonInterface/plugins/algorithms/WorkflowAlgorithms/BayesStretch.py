@@ -213,10 +213,13 @@ class BayesStretch(PythonAlgorithm):
         self._create_workspace(fname + "_Beta", [xBet, yBet, eBet], nsam, Qaxis)
 
         group = fname + "_Sigma," + fname + "_Beta"
-        fit_ws = fname + "_Fit"
-        s_api.GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=self.getPropertyValue("OutputWorkspaceFit"))
-        contour_ws = fname + "_Contour"
-        s_api.GroupWorkspaces(InputWorkspaces=groupZ, OutputWorkspace=self.getPropertyValue("OutputWorkspaceContour"))
+        fit_ws = fname + "_Fit" if self.getProperty("OutputWorkspaceFit").isDefault else self.getPropertyValue("OutputWorkspaceFit")
+        contour_ws = (
+            fname + "_Contour" if self.getProperty("OutputWorkspaceContour").isDefault else self.getPropertyValue("OutputWorkspaceContour")
+        )
+
+        s_api.GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=fit_ws)
+        s_api.GroupWorkspaces(InputWorkspaces=groupZ, OutputWorkspace=contour_ws)
 
         # Add some sample logs to the output workspaces
         log_prog = Progress(self, start=0.8, end=1.0, nreports=6)
