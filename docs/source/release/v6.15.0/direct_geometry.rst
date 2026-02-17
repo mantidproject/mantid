@@ -31,8 +31,6 @@ MSlice
 New features
 ############
 
-- The
-
 Bugfixes
 ############
 
