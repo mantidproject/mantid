@@ -103,7 +103,7 @@ bool FileFinderImpl::getCaseSensitive() const { return (m_globOption == Kernel::
  *  or an empty string otherwise.
  */
 
-std::string FileFinderImpl::getFullPath(const std::string &filename, const bool ignoreDirs) const {
+std::filesystem::path FileFinderImpl::getFullPath(const std::string &filename, const bool ignoreDirs) const {
   return Kernel::ConfigService::Instance().getFullPath(filename, ignoreDirs, m_globOption);
 }
 
@@ -132,23 +132,24 @@ std::string FileFinderImpl::extractAllowedSuffix(std::string &userString) const 
 /**
  * Return the InstrumentInfo as determined from the hint.
  *
- * @param hint :: The name hint.
+ * @param hintstr :: The name hint.
  * @param returnDefaultIfNotFound :: Flag to control return. May throw exception if set to false.
  * @param defaultInstrument :: The default instrument to return if not found. If empty, the system default is used.
  * @return The InstrumentInfo object.
  */
-const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint, const bool returnDefaultIfNotFound,
+const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const std::string &hintstr,
+                                                           const bool returnDefaultIfNotFound,
                                                            const std::string &defaultInstrument) const {
-  if ((!hint.empty()) && (!isdigit(hint[0]))) {
+  if ((!hintstr.empty()) && (!isdigit(hintstr[0]))) {
     // If hint contains path components, use only the filename part for instrument detection
-    std::string filename = toUpper(std::filesystem::path(hint).filename().string());
+    std::string filename = toUpper(std::filesystem::path(hintstr).filename().string());
 
     try {
       std::string instrName = Kernel::ConfigService::Instance().findLongestInstrumentPrefix(filename);
 
       // if still empty, throw not found
       if (instrName.empty()) {
-        throw Kernel::Exception::NotFoundError("Instrument not found", hint);
+        throw Kernel::Exception::NotFoundError("Instrument not found", hintstr);
       }
 
       return Kernel::ConfigService::Instance().getInstrument(instrName);
@@ -164,36 +165,36 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string &hint, c
 
 /**
  * Extracts the instrument name and run number from a hint
- * @param hint :: The name hint
+ * @param hintstr :: The name hint
  * @param defaultInstrument :: The default instrument to use if the hint does not contain an instrument name. If empty,
  * the system default is used.
  * @return A pair of instrument name and run number
  */
-std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string &hint,
+std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string &hintstr,
                                                                           const std::string &defaultInstrument) const {
-  Kernel::InstrumentInfo instr = this->getInstrument(hint, true, defaultInstrument);
-  return toInstrumentAndNumber(hint, instr);
+  Kernel::InstrumentInfo instr = this->getInstrument(hintstr, true, defaultInstrument);
+  return toInstrumentAndNumber(hintstr, instr);
 }
 
 /**
  * Extracts the instrument name and run number from a hint
- * @param hint :: The name hint
+ * @param hintstr :: The name hint
  * @param instr :: The instrument for the file
  * @return A pair of instrument name and run number
  */
-std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string &hint,
+std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string &hintstr,
                                                                           const Kernel::InstrumentInfo &instr) const {
-  g_log.debug() << "toInstrumentAndNumber(" << hint << ")\n";
+  g_log.debug() << "toInstrumentAndNumber(" << hintstr << ")\n";
   std::string runPart;
 
-  if (hint.empty()) {
+  if (hintstr.empty()) {
     throw std::invalid_argument("Malformed hint: empty hint");
   }
 
-  if (isdigit(hint[0])) {
-    runPart = hint;
+  if (isdigit(hintstr[0])) {
+    runPart = hintstr;
   } else {
-    const auto hintUpper = toUpper(hint);
+    const auto hintUpper = toUpper(hintstr);
     std::string instrPart = instr.name();
     if (!hintUpper.starts_with(instrPart)) {
       instrPart = instr.shortName();
@@ -204,11 +205,11 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
 
     // need to advance to the first digit after the instrument name to handle underscores, etc.
     size_t nChars = instrPart.length();
-    while (nChars < hint.size() && !std::isdigit(static_cast<unsigned char>(hint[nChars])))
+    while (nChars < hintstr.size() && !std::isdigit(static_cast<unsigned char>(hintstr[nChars])))
       ++nChars;
-    if (nChars == hint.size())
+    if (nChars == hintstr.size())
       throw std::invalid_argument("Malformed hint: no run number found");
-    runPart = hint.substr(nChars);
+    runPart = hintstr.substr(nChars);
   }
 
   unsigned int irunPart(0);
@@ -237,35 +238,35 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
  * a run number or
  * a run number prefixed with an instrument name/short name. If the instrument
  * name is absent the default one is used.
- * @param hint :: The name hint
+ * @param hintstr :: The name hint
  * @param instrument :: The current instrument object
  * @return The file name
  * @throw NotFoundError if a required default is not set
  * @throw std::invalid_argument if the argument is malformed or run number is
  * too long
  */
-std::string FileFinderImpl::makeFileName(const std::string &hint, const Kernel::InstrumentInfo &instrument) const {
-  if (hint.empty())
+std::string FileFinderImpl::makeFileName(const std::string &hintstr, const Kernel::InstrumentInfo &instrument) const {
+  if (hintstr.empty())
     return "";
 
   Kernel::InstrumentInfo instrToUse = instrument;
-  if (!isdigit(hint[0])) {
+  if (!isdigit(hintstr[0])) {
     try {
-      std::string hintUpper = toUpper(hint);
+      std::string hintUpper = toUpper(hintstr);
       std::string shortName = toUpper(instrument.shortName());
       std::string name = toUpper(instrument.name());
       if (hintUpper.rfind(shortName, 0) != 0 && hintUpper.rfind(name, 0) != 0) {
-        instrToUse = getInstrument(hint, false);
+        instrToUse = getInstrument(hintstr, false);
       }
     } catch (const std::exception &ex) {
-      g_log.debug() << "Failed to resolve instrument from hint '" << hint << "' in makeFileName: " << ex.what();
+      g_log.debug() << "Failed to resolve instrument from hint '" << hintstr << "' in makeFileName: " << ex.what();
     } catch (...) {
-      g_log.debug() << "Failed to resolve instrument from hint '" << hint
+      g_log.debug() << "Failed to resolve instrument from hint '" << hintstr
                     << "' in makeFileName due to an unknown exception.";
     }
   }
 
-  std::string filename(hint);
+  std::string filename(hintstr);
   const std::string suffix = extractAllowedSuffix(filename);
   const std::string shortName = instrToUse.shortName();
   std::string delimiter = instrToUse.delimiter();
@@ -374,13 +375,13 @@ std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::
  * @param defaultInstrument :: The default instrument to use if not found. Optional otherwise system default is used.
  * @return The full path to the file if found, or an empty string otherwise.
  */
-const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintstr,
-                                                       const std::vector<std::string> &extensionsProvided,
-                                                       const bool useOnlyExtensionsProvided,
-                                                       const std::string &defaultInstrument) const {
+const API::Result<std::filesystem::path> FileFinderImpl::findRun(const std::string &hintstr,
+                                                                 const std::vector<std::string> &extensionsProvided,
+                                                                 const bool useOnlyExtensionsProvided,
+                                                                 const std::string &defaultInstrument) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   if (hint.empty())
-    return API::Result<std::string>("", "File not found.");
+    return API::Result<std::filesystem::path>("", "File not found.");
 
   const Kernel::InstrumentInfo instrument = this->getInstrument(hint, true, defaultInstrument);
 
@@ -399,16 +400,16 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
  *                  If it's false, use extensionsProvided AND facility extensions.
  * @return The full path to the file if found, or an empty string otherwise.
  */
-const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintstr,
-                                                       const Kernel::InstrumentInfo &instrument,
-                                                       const std::vector<std::string> &extensionsProvided,
-                                                       const bool useOnlyExtensionsProvided) const {
+const API::Result<std::filesystem::path> FileFinderImpl::findRun(const std::string &hintstr,
+                                                                 const Kernel::InstrumentInfo &instrument,
+                                                                 const std::vector<std::string> &extensionsProvided,
+                                                                 const bool useOnlyExtensionsProvided) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << extensionsProvided.size() << "])\n";
 
   // if partial filename or run number is not supplied, return here
   if (hint.empty())
-    return API::Result<std::string>("", "File not found.");
+    return API::Result<std::filesystem::path>("", "File not found.");
 
   // if it looks like a full filename just do a quick search for it
   std::filesystem::path hintPath(hint);
@@ -416,12 +417,12 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
     // check in normal search locations
     g_log.debug() << "hintPath is not empty, check in normal search locations"
                   << "\n";
-    std::string path = getFullPath(hint);
+    auto path = getFullPath(hint);
     if (!path.empty()) {
       try {
         if (std::filesystem::exists(path)) {
           g_log.information() << "found path = " << path << '\n';
-          return API::Result<std::string>(path);
+          return path;
         }
       } catch (const std::exception &) {
       }
@@ -454,7 +455,7 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
   }
 
   if (filename.empty())
-    return API::Result<std::string>("", "File not found");
+    return API::Result<std::filesystem::path>("", "File not found");
 
   // Look first at the original filename then for case variations. This is
   // important
@@ -518,7 +519,7 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
     }
   }
   g_log.information() << "Unable to find run with hint " << hint << "\n";
-  return API::Result<std::string>("", path.errors());
+  return API::Result<std::filesystem::path>("", path.errors());
 }
 
 /**
@@ -571,16 +572,16 @@ std::string FileFinderImpl::validateRuns(const std::string &searchText) const {
  * @throw std::invalid_argument if the argument is malformed
  * @throw Exception::NotFoundError if a file could not be found
  */
-std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
-                                                  const std::vector<std::string> &extensionsProvided,
-                                                  const bool useOnlyExtensionsProvided) const {
+std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &hintstr,
+                                                            const std::vector<std::string> &extensionsProvided,
+                                                            const bool useOnlyExtensionsProvided) const {
   auto const error = validateRuns(hintstr);
   if (!error.empty())
     throw std::invalid_argument(error);
 
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "findRuns hint = " << hint << "\n";
-  std::vector<std::string> res;
+  std::vector<std::filesystem::path> res;
   Mantid::Kernel::StringTokenizer hints(
       hint, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   static const boost::regex digits("[0-9]+");
@@ -654,14 +655,13 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
           }
         }
 
-        std::string path = findRun(p1.first + run, cachedInstr, extensionsProvided, useOnlyExtensionsProvided).result();
+        auto path = findRun(p1.first + run, cachedInstr, extensionsProvided, useOnlyExtensionsProvided).result();
 
         if (!path.empty()) {
           // Cache successfully found path and extension
-          std::filesystem::path tempPath(path);
-          previousExt = tempPath.extension().string();
+          previousExt = path.extension().string();
           // Append separator for string concatenation later
-          previousPath = tempPath.parent_path().string() + std::string(1, std::filesystem::path::preferred_separator);
+          previousPath = path.parent_path().string() + std::string(1, std::filesystem::path::preferred_separator);
           res.emplace_back(path);
         } else {
           throw Kernel::Exception::NotFoundError("Unable to find file:", run);
@@ -672,7 +672,7 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
       // update instrument short name for later use
       instrSName = instr.shortName();
 
-      std::string path = findRun(*h, instr, extensionsProvided, useOnlyExtensionsProvided).result();
+      auto path = findRun(*h, instr, extensionsProvided, useOnlyExtensionsProvided).result();
 
       if (!path.empty()) {
         res.emplace_back(path);
@@ -685,67 +685,67 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
   return res;
 }
 
-const API::Result<std::string>
+const API::Result<std::filesystem::path>
 FileFinderImpl::getISISInstrumentDataCachePath(const std::string &cachePathToSearch,
-                                               const std::set<std::string> &filenames,
+                                               const std::set<std::string> &hintstrs,
                                                const std::vector<std::string> &exts) const {
   std::string errors;
   auto dataCache = API::ISISInstrumentDataCache(cachePathToSearch);
 
-  for (const auto &filename : filenames) {
+  for (const auto &hint : hintstrs) {
 
     std::string parentDirPath;
 
     try {
-      parentDirPath = dataCache.getFileParentDirectoryPath(filename);
+      parentDirPath = dataCache.getFileParentDirectoryPath(hint);
 
     } catch (const std::invalid_argument &e) {
       errors += "Data cache: " + std::string(e.what());
-      return API::Result<std::string>("", errors);
+      return API::Result<std::filesystem::path>("", errors);
 
     } catch (const Json::Exception &e) {
       errors += "Data cache: Failed parsing to JSON: " + std::string(e.what()) +
                 "Error likely due to accessing instrument index file while it was being updated on IDAaaS.";
-      return API::Result<std::string>("", errors);
+      return API::Result<std::filesystem::path>("", errors);
     }
 
     if (!std::filesystem::exists(parentDirPath)) {
       errors += "Data cache: Directory not found: " + parentDirPath;
-      return API::Result<std::string>("", errors);
+      return API::Result<std::filesystem::path>("", errors);
     }
 
     for (const auto &ext : exts) {
-      std::filesystem::path filePath(parentDirPath + '/' + filename + ext);
+      std::filesystem::path filePath(parentDirPath + '/' + hint + ext);
 
       try { // Catches error for permission denied
         if (std::filesystem::exists(filePath)) {
-          return API::Result<std::string>(filePath.string());
+          return API::Result<std::filesystem::path>(filePath);
         }
       } catch (const std::filesystem::filesystem_error &e) {
         errors += "Data cache: " + std::string(e.what());
-        return API::Result<std::string>("", errors);
+        return API::Result<std::filesystem::path>("", errors);
       }
     }
-    errors += "Data cache: " + filename + " not found in " + parentDirPath;
+    errors += "Data cache: " + hint + " not found in " + parentDirPath;
   }
-  return API::Result<std::string>("", errors);
+  return API::Result<std::filesystem::path>("", errors);
 }
 
 /**
  * Return the path to the file found in archive
  * @param archs :: A list of archives to search
- * @param filenames :: A list of filenames (without extensions) to pass to the
+ * @param hintstrs :: A list of hints (without extensions) to pass to the
  * archive
  * @param exts :: A list of extensions to check for in turn against each file
  * @return The full path if the file exists and can be found in one of the
  * search locations
  *  or an empty string otherwise.
  */
-const API::Result<std::string> FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
-                                                              const std::set<std::string> &filenames,
-                                                              const std::vector<std::string> &exts) const {
+const API::Result<std::filesystem::path> FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
+                                                                        const std::set<std::string> &hintstrs,
+                                                                        const std::vector<std::string> &exts) const {
   g_log.debug() << "getArchivePath([IArchiveSearch_sptr], [ ";
-  for (const auto &iter : filenames)
+  for (const auto &iter : hintstrs)
     g_log.debug() << iter << " ";
   g_log.debug() << "], [ ";
   for (const auto &iter : exts)
@@ -756,7 +756,7 @@ const API::Result<std::string> FileFinderImpl::getArchivePath(const std::vector<
   for (const auto &arch : archs) {
     try {
       g_log.debug() << "Getting archive path for requested files\n";
-      auto path = arch->getArchivePath(filenames, exts);
+      auto path = arch->getArchivePath(hintstrs, exts);
       if (path)
         return path;
       else
@@ -764,24 +764,24 @@ const API::Result<std::string> FileFinderImpl::getArchivePath(const std::vector<
     } catch (...) {
     }
   }
-  return API::Result<std::string>("", errors);
+  return API::Result<std::filesystem::path>("", errors);
 }
 
 /**
  * Return the full path to the file given its name, checking local directories
  * first.
  * @param archs :: A list of archives to search
- * @param filenames :: A list of filenames (without extensions) to pass to the
+ * @param hintstrs :: A list of hints (without extensions) to pass to the
  * archive
  * @param exts :: A list of extensions to check for in turn against each file
  * @return The full path if the file exists and can be found in one of the
  * search locations
  *  or an empty string otherwise.
  */
-const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
-                                                       const std::set<std::string> &filenames,
-                                                       const std::vector<std::string> &exts) const {
-  std::string path;
+const API::Result<std::filesystem::path> FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
+                                                                 const std::set<std::string> &hintstrs,
+                                                                 const std::vector<std::string> &exts) const {
+  std::filesystem::path path;
 
   std::vector<std::string> extensions;
   extensions.assign(exts.begin(), exts.end());
@@ -798,12 +798,12 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
   // with a large range of files, especially when searchPaths consists of
   // folders containing a large number of runs.
   for (const auto &extension : extensions) {
-    for (const auto &filename : filenames) {
+    for (const auto &hint : hintstrs) {
       for (const auto &searchPath : searchPaths) {
         try {
-          const std::filesystem::path filePath = std::filesystem::path(searchPath) / (filename + extension);
+          const auto filePath = std::filesystem::path(searchPath) / (hint + extension);
           if (std::filesystem::exists(filePath))
-            return API::Result<std::string>(filePath.string());
+            return filePath;
 
         } catch (const std::exception &) { /* File does not exist, just carry on. */
         }
@@ -812,16 +812,16 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
   }
 
   for (const auto &extension : extensions) {
-    for (const auto &filename : filenames) {
-      path = getFullPath(filename + extension);
+    for (const auto &hint : hintstrs) {
+      path = getFullPath(hint + extension);
       try {
         if (!path.empty() && std::filesystem::exists(path)) {
           g_log.debug() << "path returned from getFullPath() = " << path << '\n';
-          return API::Result<std::string>(path);
+          return API::Result<std::filesystem::path>(path);
         }
       } catch (std::exception &e) {
         g_log.error() << "Cannot open file " << path << ": " << e.what() << '\n';
-        return API::Result<std::string>("", "Cannot open file.");
+        return API::Result<std::filesystem::path>("", "Cannot open file.");
       }
     }
   }
@@ -832,8 +832,7 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
   // Only expect to find path to data cache on IDAaaS
   if (std::filesystem::exists(cachePathToSearch)) {
 
-    API::Result<std::string> cacheFilePath =
-        getISISInstrumentDataCachePath(cachePathToSearch.string(), filenames, exts);
+    auto cacheFilePath = getISISInstrumentDataCachePath(cachePathToSearch.string(), hintstrs, exts);
 
     if (cacheFilePath) {
       return cacheFilePath;
@@ -848,20 +847,20 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
   // Search the archive
   if (!archs.empty()) {
     g_log.debug() << "Search the archives\n";
-    const auto archivePath = getArchivePath(archs, filenames, exts);
+    const auto archivePath = getArchivePath(archs, hintstrs, exts);
     if (archivePath) {
       try {
         if (std::filesystem::exists(archivePath.result()))
           return archivePath;
       } catch (std::exception &e) {
         g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';
-        return API::Result<std::string>("", "Cannot open file.");
+        return API::Result<std::filesystem::path>("", "Cannot open file.");
       }
     } else
       errors += archivePath.errors();
 
   } // archs
-  return API::Result<std::string>("", errors);
+  return API::Result<std::filesystem::path>("", errors);
 }
 
 std::string FileFinderImpl::toUpper(const std::string &src) const {

@@ -27,7 +27,7 @@ public:
     using Mantid::API::ExperimentInfo;
     using Mantid::API::FileFinder;
     // Cache in-memory experiment info for comparison
-    m_filename = FileFinder::Instance().getFullPath("HRP38692a.nxs");
+    m_filename = FileFinder::Instance().getFullPath("HRP38692a.nxs").string();
     if (m_filename.empty()) {
       throw std::runtime_error("Cannot find test file HRP38692a.nxs");
     }

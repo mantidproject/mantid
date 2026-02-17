@@ -439,7 +439,7 @@ public:
 
     // Create the root Nexus class
     std::string testFile = "LOQinstrument.h5";
-    std::string path = FileFinder::Instance().getFullPath(testFile);
+    std::string path = FileFinder::Instance().getFullPath(testFile).string();
 
     // Get nexus file for this.
     Mantid::Nexus::File nxFile(path, NXaccess::READ);
@@ -461,7 +461,7 @@ public:
 
     // Create the root Nexus class
     std::string testFile = "LOQinstrument.h5";
-    std::string path = FileFinder::Instance().getFullPath(testFile);
+    std::string path = FileFinder::Instance().getFullPath(testFile).string();
 
     // Get nexus file for this.
     Mantid::Nexus::File nxFile(path, NXaccess::READ);

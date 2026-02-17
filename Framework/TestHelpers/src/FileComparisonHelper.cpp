@@ -187,7 +187,7 @@ bool areFileStreamsEqual(std::ifstream &referenceFileStream, std::ifstream &file
  *false.
  */
 bool isEqualToReferenceFile(const std::string &referenceFileName, const std::string &outFileFullPath) {
-  const std::string referenceFilePath = Mantid::API::FileFinder::Instance().getFullPath(referenceFileName);
+  const std::string referenceFilePath = Mantid::API::FileFinder::Instance().getFullPath(referenceFileName).string();
 
   if (referenceFilePath.empty()) {
     throw std::invalid_argument("No reference file with the name: " + referenceFileName +

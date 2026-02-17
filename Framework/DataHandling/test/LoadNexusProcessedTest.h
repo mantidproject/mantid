@@ -739,7 +739,7 @@ public:
     auto peaksTestWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
     // Loading a peaks workspace without a instrument from an IDF doesn't work
     // ...
-    const std::string filename = FileFinder::Instance().getFullPath("unit_testing/MINITOPAZ_Definition.xml");
+    const std::string filename = FileFinder::Instance().getFullPath("unit_testing/MINITOPAZ_Definition.xml").string();
     InstrumentDefinitionParser parser(filename, "MINITOPAZ", Strings::loadFile(filename));
     auto instrument = parser.parseXML(nullptr);
     peaksTestWS->populateInstrumentParameters();
@@ -777,7 +777,7 @@ public:
     auto peaksTestWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
     // Loading a peaks workspace without a instrument from an IDF doesn't work
     // ...
-    const std::string filename = FileFinder::Instance().getFullPath("unit_testing/MINITOPAZ_Definition.xml");
+    const std::string filename = FileFinder::Instance().getFullPath("unit_testing/MINITOPAZ_Definition.xml").string();
     InstrumentDefinitionParser parser(filename, "MINITOPAZ", Strings::loadFile(filename));
     auto instrument = parser.parseXML(nullptr);
     peaksTestWS->populateInstrumentParameters();
