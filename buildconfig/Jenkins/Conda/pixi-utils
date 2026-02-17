@@ -3,8 +3,8 @@
 # Download and install pixi (if it isn't installed)
 install_pixi() {
   # configure the path to where pixi will end up
-  if [[ "$OSTYPE" != darwin* && -f ~/.bashrc ]]; then
-    . ~/.bashrc
+  if [[ "$OSTYPE" != darwin* && -f "$HOME/.bashrc" ]]; then
+    . "$HOME/.bashrc"
   else
     export PATH="$PATH:$HOME/.pixi/bin"
   fi
@@ -15,11 +15,11 @@ install_pixi() {
       pixi self-update --no-progress --quiet
   else
     echo "install pixi"
-    set +x # don't care about details of pixi install
+    set +x # disable xtrace - don't care about details of pixi install
     curl -fsSL https://pixi.sh/install.sh | sh
-    set -x # turn logging back on
+    set -x # turn logging back on (enable xtrace)
     # source bashrc for updated PATH
-    . ~/.bashrc
+    . "$HOME/.bashrc"
     # Verify pixi was installed successfully
     if [ ! -f "$HOME/.pixi/bin/pixi" ]; then
       echo "ERROR: pixi installation failed"
