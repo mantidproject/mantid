@@ -48,6 +48,10 @@ New features
   - (`#40101 <https://github.com/mantidproject/mantid/pull/40101>`_) Added a peak overlay. Peaks workspaces can be
     selected within the interface and those peaks will be plotted on both the projection and the 1D plot.
 
+  .. figure:: ../../images/6_15_release/new-iv-features.gif
+   :class: screenshot
+   :width: 987px
+
 
 Bugfixes
 ############
