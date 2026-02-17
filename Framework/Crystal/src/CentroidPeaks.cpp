@@ -67,6 +67,8 @@ void CentroidPeaks::integrate() {
   /// Radius to use around peaks
   int PeakRadius = getProperty("PeakRadius");
 
+  ComponentInfo const &compInfo = m_inWS->componentInfo();
+
   int MinPeaks = -1;
   int MaxPeaks = -1;
   size_t Numberwi = m_inWS->getNumberHistograms();
@@ -122,8 +124,9 @@ void CentroidPeaks::integrate() {
     for (int ichan = chanstart; ichan <= chanend; ++ichan) {
       for (int irow = rowstart; irow <= rowend; ++irow) {
         for (int icol = colstart; icol <= colend; ++icol) {
-          if (edgePixel(m_inst, bankName, icol, irow, Edge))
+          if (edgePixel(compInfo, bankName, icol, irow, Edge)) {
             continue;
+          }
           const auto it = m_wi_to_detid_map.find(findPixelID(bankName, icol, irow));
           if (it == m_wi_to_detid_map.end())
             continue;
@@ -146,7 +149,7 @@ void CentroidPeaks::integrate() {
     boost::algorithm::clamp(chan, 0, inBlocksize);
 
     // Set wavelength to change tof for peak object
-    if (!edgePixel(m_inst, bankName, col, row, Edge)) {
+    if (!edgePixel(compInfo, bankName, col, row, Edge)) {
       peak.setDetectorID(findPixelID(bankName, col, row));
       detidIterator = m_wi_to_detid_map.find(findPixelID(bankName, col, row));
       workspaceIndex = (detidIterator->second);
@@ -186,6 +189,8 @@ void CentroidPeaks::integrateEvent() {
   if (peakWS != inPeakWS)
     peakWS = inPeakWS->clone();
 
+  ComponentInfo const &compInfo = m_inWS->componentInfo();
+
   /// Radius to use around peaks
   int PeakRadius = getProperty("PeakRadius");
 
@@ -224,8 +229,9 @@ void CentroidPeaks::integrateEvent() {
 
     double intensity = 0.0;
     double tofcentroid = 0.0;
-    if (edgePixel(m_inst, bankName, col, row, Edge))
+    if (edgePixel(compInfo, bankName, col, row, Edge)) {
       continue;
+    }
 
     double tofstart = TOFPeakd * std::pow(1.004, -PeakRadius);
     double tofend = TOFPeakd * std::pow(1.004, PeakRadius);
@@ -237,8 +243,9 @@ void CentroidPeaks::integrateEvent() {
     int colend = std::min(nCols - 1, col + PeakRadius);
     for (int irow = rowstart; irow <= rowend; ++irow) {
       for (int icol = colstart; icol <= colend; ++icol) {
-        if (edgePixel(m_inst, bankName, icol, irow, Edge))
+        if (edgePixel(compInfo, bankName, icol, irow, Edge)) {
           continue;
+        }
         auto it1 = m_wi_to_detid_map.find(findPixelID(bankName, icol, irow));
         size_t workspaceIndex = (it1->second);
         EventList el = m_eventW->getSpectrum(workspaceIndex);
@@ -263,7 +270,7 @@ void CentroidPeaks::integrateEvent() {
     boost::algorithm::clamp(row, 0, nRows - 1);
     col = int(colcentroid / intensity);
     boost::algorithm::clamp(col, 0, nCols - 1);
-    if (!edgePixel(m_inst, bankName, col, row, Edge)) {
+    if (!edgePixel(compInfo, bankName, col, row, Edge)) {
       peak.setDetectorID(findPixelID(bankName, col, row));
 
       // Set wavelength to change tof for peak object
@@ -332,6 +339,7 @@ void CentroidPeaks::removeEdgePeaks(Mantid::DataObjects::PeaksWorkspace &peakWS)
   int Edge = getProperty("EdgePixels");
   std::vector<int> badPeaks;
   size_t numPeaks = peakWS.getNumberPeaks();
+  ComponentInfo const &compInfo = m_inWS->componentInfo();
   for (int i = 0; i < static_cast<int>(numPeaks); i++) {
     // Get a direct ref to that peak.
     const auto &peak = peakWS.getPeak(i);
@@ -339,7 +347,7 @@ void CentroidPeaks::removeEdgePeaks(Mantid::DataObjects::PeaksWorkspace &peakWS)
     int row = peak.getRow();
     const std::string &bankName = peak.getBankName();
 
-    if (edgePixel(m_inst, bankName, col, row, Edge)) {
+    if (edgePixel(compInfo, bankName, col, row, Edge)) {
       badPeaks.emplace_back(i);
     }
   }

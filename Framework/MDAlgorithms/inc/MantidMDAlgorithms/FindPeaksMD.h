@@ -21,8 +21,9 @@
 
 namespace Mantid {
 namespace Geometry {
+class ComponentInfo;
 class InstrumentRayTracer;
-}
+} // namespace Geometry
 namespace MDAlgorithms {
 
 /** FindPeaksMD : TODO: DESCRIPTION
@@ -61,7 +62,8 @@ private:
   void determineOutputType(const std::string &peakType, const uint16_t numExperimentInfo);
 
   /// Adds a peak based on Q, bin count & a set of detector IDs
-  void addPeak(const Mantid::Kernel::V3D &Q, const double binCount, const Geometry::InstrumentRayTracer &tracer);
+  void addPeak(const Geometry::ComponentInfo &compInfo, const Mantid::Kernel::V3D &Q, const double binCount,
+               const Geometry::InstrumentRayTracer &tracer);
 
   /// Adds a peak based on Q, bin count
   void addLeanElasticPeak(const Mantid::Kernel::V3D &Q, const double binCount, const bool useGoniometer = false);

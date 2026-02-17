@@ -9,6 +9,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -268,11 +269,12 @@ void FindPeaksMD::determineOutputType(const std::string &peakType, const uint16_
  * @param binCount :: bin count to give to the peak.
  * @param tracer :: Ray tracer to use for detector finding
  */
-void FindPeaksMD::addPeak(const V3D &Q, const double binCount, const Geometry::InstrumentRayTracer &tracer) {
+void FindPeaksMD::addPeak(const Geometry::ComponentInfo &compInfo, const V3D &Q, const double binCount,
+                          const Geometry::InstrumentRayTracer &tracer) {
   try {
     auto p = this->createPeak(Q, binCount, tracer);
     if (m_edge > 0) {
-      if (edgePixel(m_inst, p->getBankName(), p->getCol(), p->getRow(), m_edge))
+      if (edgePixel(compInfo, p->getBankName(), p->getCol(), p->getRow(), m_edge))
         return;
     }
     if (p->getDetectorID() != -1)
@@ -536,6 +538,7 @@ template <typename MDE, size_t nd> void FindPeaksMD::findPeaks(typename MDEventW
       this->readExperimentInfo(ei);
 
       Geometry::InstrumentRayTracer tracer(m_inst);
+      Geometry::ComponentInfo const &compInfo = ei->componentInfo();
       // Copy the instrument, sample, run to the peaks workspace.
       peakWS->copyExperimentInfoFrom(ei.get());
 
@@ -598,7 +601,7 @@ template <typename MDE, size_t nd> void FindPeaksMD::findPeaks(typename MDEventW
             }
             if (p->getDetectorID() != -1) {
               if (m_edge > 0) {
-                if (!edgePixel(m_inst, p->getBankName(), p->getCol(), p->getRow(), m_edge))
+                if (!edgePixel(compInfo, p->getBankName(), p->getCol(), p->getRow(), m_edge))
                   peakWS->addPeak(*p);
                 ;
               } else {
@@ -742,6 +745,7 @@ void FindPeaksMD::findPeaksHisto(const Mantid::DataObjects::MDHistoWorkspace_spt
       ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
       this->readExperimentInfo(ei);
       Geometry::InstrumentRayTracer tracer(m_inst);
+      Geometry::ComponentInfo const &compInfo = ei->componentInfo();
 
       // Copy the instrument, sample, run to the peaks workspace.
       peakWS->copyExperimentInfoFrom(ei.get());
@@ -761,7 +765,7 @@ void FindPeaksMD::findPeaksHisto(const Mantid::DataObjects::MDHistoWorkspace_spt
         if (m_leanElasticPeak)
           addLeanElasticPeak(Q, binCount, true);
         else
-          addPeak(Q, binCount, tracer);
+          addPeak(compInfo, Q, binCount, tracer);
 
         // Report progres for each box found.
         prog->report("Adding Peaks");
