@@ -53,6 +53,11 @@ New features
 - (`#40599 <https://github.com/mantidproject/mantid/pull/40599>`_) New features in :ref:`algm-PoldiAutoCorrelation-v6`:
 
   - Added parameter ``NGroups``  to split POLDI detectors into groups and produce an autocorrelation spectrum per grouping.
+
+  .. image:: ../../images/6_15_release/poldi-ngroups.png
+     :class: screenshot
+     :width: 500px
+
   - Detector IDs are now associated with autocorrelation spectra in the output workspace.
 
 - (`#40599 <https://github.com/mantidproject/mantid/pull/40599>`_) New features in the ``PawleyPattern1D`` class from ``Engineering.pawley_utils``:
