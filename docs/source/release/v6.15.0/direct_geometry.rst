@@ -35,7 +35,7 @@ Bugfixes
 ############
 
 - The temperature setter is now more robust for Slices and Cuts.
-- MSlice does no longer crash when saving MDEventWorkspace2D as matlab.
+- MSlice no longer crashes when saving an MDEventWorkspace2D as a MATLAB file.
 - Plot windows are now closed when the corresponding workspace is deleted.
 - MSlice does no longer crash when saving a script from a Cut plot.
 - Residual hidden workspaces are now removed from the ADS and can no longer cause a memory leak.
