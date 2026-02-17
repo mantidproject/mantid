@@ -62,7 +62,7 @@ public:
   /// Assignment operator
   MeshObject &operator=(const MeshObject &) = delete;
   /// Destructor
-  virtual ~MeshObject() = default;
+  virtual ~MeshObject() = default; // cppcheck-suppress missingOverride
   /// Clone
   IObject *clone() const override { return new MeshObject(m_triangles, m_vertices, m_material); }
   IObject *cloneWithMaterial(const Kernel::Material &material) const override {
