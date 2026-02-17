@@ -20,7 +20,6 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::Types::Event::TofEvent;
 
@@ -126,20 +125,22 @@ std::map<int, RectangularDetector_const_sptr> ConvertToDetectorFaceMD::getBanks(
 
   if (bankNums.empty()) {
     // --- Find all rectangular detectors ----
-    const auto &componentInfo = in_ws->componentInfo();
-    for (size_t i = 0; i < componentInfo.size(); ++i) {
-      // Get the component and check if it's a RectangularDetector
-      auto det = RectangularDetector_const_sptr(dynamic_cast<const RectangularDetector *>(componentInfo.componentID(i)),
-                                                NoDeleting());
-      if (det) {
-        std::string name = componentInfo.name(i);
-        if (name.size() < 5)
-          continue;
-        std::string bank = name.substr(4, name.size() - 4);
-        int bankNum;
-        if (Mantid::Kernel::Strings::convert(bank, bankNum))
-          banks[bankNum] = det;
-        g_log.debug() << "Found bank " << bank << ".\n";
+    auto const &componentInfo = in_ws->componentInfo();
+    size_t const root = componentInfo.root();
+    auto const topChildren = componentInfo.children(root);
+    for (size_t const panel : topChildren) {
+      size_t parentIndex = componentInfo.findBankParent(panel, "bank");
+      auto const children = componentInfo.children(parentIndex);
+      for (size_t const child : children) {
+        if (componentInfo.componentType(child) == Beamline::ComponentType::Rectangular) {
+          std::string name = componentInfo.name(child);
+          std::string bankNumStr = name.substr(4, name.size() - 4);
+          int bankNum = -1;
+          if (Mantid::Kernel::Strings::convert(bankNumStr, bankNum)) {
+            banks[bankNum] = RectangularDetector_const_sptr(
+                dynamic_cast<const RectangularDetector *>(componentInfo.componentID(child)), NoDeleting());
+          }
+        }
       }
     }
   } else {

@@ -48,6 +48,5 @@ bool edgePixel(ComponentInfo const &compInfo, const std::string &bankName, int c
     return col - startI < Edge || col - startI >= (NCOLS - Edge) || row - startI < Edge ||
            row - startI >= (NROWS - Edge);
   }
-  return false;
 }
 } // namespace Mantid::Geometry

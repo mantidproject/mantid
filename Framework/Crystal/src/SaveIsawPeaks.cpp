@@ -87,18 +87,25 @@ void SaveIsawPeaks::exec() {
 
   // Get all children
   const auto &componentInfo = m_ws->componentInfo();
-  for (size_t i = 0; i < componentInfo.size(); ++i) {
-    std::string bankName = componentInfo.name(i);
-    boost::trim(bankName);
-    boost::erase_all(bankName, bankPart);
-    int bank = 0;
-    Strings::convert(bankName, bank);
-    if (bank == 0)
-      continue;
-    if (bankMasked(i, detectorInfo))
-      continue;
-    // Track unique bank numbers
-    uniqueBanks.insert(bank);
+  // iterate over the top level components, which contain the banks
+  size_t const rootIndex = componentInfo.root();
+  auto const topChildren = componentInfo.children(rootIndex);
+  for (size_t const i : topChildren) {
+    size_t bankParent = componentInfo.findBankParent(i, bankPart);
+    auto const children = componentInfo.children(bankParent);
+    for (size_t const child : children) {
+      std::string bankName = componentInfo.name(child);
+      boost::trim(bankName);
+      boost::erase_all(bankName, bankPart);
+      int bank = 0;
+      Strings::convert(bankName, bank);
+      if (bank == 0)
+        continue;
+      if (bankMasked(child, detectorInfo))
+        continue;
+      // Track unique bank numbers
+      uniqueBanks.insert(bank);
+    }
   }
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {

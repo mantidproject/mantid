@@ -206,22 +206,22 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
     bankPart = "WISHpanel";
   // Get all children
   const auto &componentInfo = outWS->componentInfo();
-  for (size_t i = 0; i < componentInfo.size(); ++i) {
-    std::string bankName = componentInfo.name(i);
-    boost::trim(bankName);
-    boost::erase_all(bankName, bankPart);
+  // iterate over the top level components, which contain the banks
+  size_t const rootIndex = componentInfo.root();
+  auto const topChildren = componentInfo.children(rootIndex);
+  for (size_t const i : topChildren) {
     int bank = 0;
-    Strings::convert(bankName, bank);
-    for (int j : det) {
-      if (bank == j) {
-        bank = 0;
-        continue;
+    size_t bankParent = componentInfo.findBankParent(i, bankPart);
+    auto const children = componentInfo.children(bankParent);
+    for (size_t const child : children) {
+      std::string bankName = componentInfo.name(child);
+      boost::trim(bankName);
+      boost::erase_all(bankName, bankPart);
+      Strings::convert(bankName, bank);
+      if (bank != 0) {
+        maskBanks += bankName + ",";
       }
     }
-    if (bank == 0)
-      continue;
-    // Track unique bank numbers
-    maskBanks += bankName + ",";
   }
 
   if (!maskBanks.empty()) {
@@ -373,6 +373,9 @@ int LoadIsawPeaks::findPixelID(const PeaksWorkspace_sptr &ws, const std::string 
     auto grandchildren = componentInfo.children(children[col0]);
     const auto *first = componentInfo.componentID(grandchildren[row - 1]);
     const auto *det = dynamic_cast<const Geometry::IDetector *>(first);
+    if (!det) {
+      return -1; // peak not in any detector.
+    }
     return det->getID();
   }
 }

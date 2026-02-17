@@ -178,16 +178,22 @@ void LoadIsawDetCal::exec() {
     auto expInfoWS = std::dynamic_pointer_cast<ExperimentInfo>(ws);
     const auto &componentInfo = expInfoWS->componentInfo();
 
-    for (size_t i = 0; i < componentInfo.size(); ++i) {
-      std::string bankName = componentInfo.name(i);
-      boost::trim(bankName);
-      boost::erase_all(bankName, bankPart);
+    // iterate over the top level components, which contain the banks
+    size_t const rootIndex = componentInfo.root();
+    auto const topChildren = componentInfo.children(rootIndex);
+    for (size_t const i : topChildren) {
       int bank = 0;
-      Strings::convert(bankName, bank);
-      if (bank == 0)
-        continue;
-      // Track unique bank numbers
-      uniqueBanks.insert(bank);
+      size_t bankParent = componentInfo.findBankParent(i, bankPart);
+      auto const children = componentInfo.children(bankParent);
+      for (size_t const child : children) {
+        std::string bankName = componentInfo.name(child);
+        boost::trim(bankName);
+        boost::erase_all(bankName, bankPart);
+        Strings::convert(bankName, bank);
+        if (bank != 0) {
+          uniqueBanks.insert(bank);
+        }
+      }
     }
   }
 

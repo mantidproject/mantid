@@ -8,11 +8,15 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidCrystal/DllConfig.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
 namespace Mantid {
+
+namespace DataObjects {
+class PeaksWorkspace;
+using PeaksWorkspace_sptr = std::shared_ptr<PeaksWorkspace>;
+} // namespace DataObjects
 
 namespace Crystal {
 

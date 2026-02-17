@@ -160,9 +160,9 @@ detid_t GridDetector::getDetectorIDAtXYZ(const int x, const int y, const int z) 
   if (isParametrized())
     me = this->m_gridBase;
 
-  if (me->m_idFillOrder[0] == 'z')
+  if (me->idFillOrder()[0] == 'z')
     return getFillFirstZ(me, x, y, z);
-  else if (me->m_idFillOrder[0] == 'y')
+  else if (me->idFillOrder()[0] == 'y')
     return getFillFirstY(me, x, y, z);
   else
     return getFillFirstX(me, x, y, z);
@@ -799,9 +799,9 @@ void GridDetector::initDraw() const {
 /// Returns the shape of the Object
 const std::shared_ptr<const IObject> GridDetector::shape() const {
   // --- Create a cuboid shape for your pixels ----
-  double szX = m_xpixels;
-  double szY = m_ypixels;
-  double szZ = m_zpixels == 0 ? 0.5 : m_zpixels;
+  double szX = xpixels();
+  double szY = ypixels();
+  double szZ = zpixels() == 0 ? 0.5 : zpixels();
   std::ostringstream xmlShapeStream;
   xmlShapeStream << " <cuboid id=\"detector-shape\"> "
                  << "<left-front-bottom-point x=\"" << szX << "\" y=\"" << -szY << "\" z=\"" << -szZ << "\"  /> "

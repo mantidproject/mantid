@@ -14,6 +14,10 @@
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
+namespace Geometry {
+class ComponentInfo;
+}
+
 namespace Crystal {
 
 // fit to ln(1/A*) = sum_{icoef=0}^{N=7} pc[7-icoef][ith]*(muR)^icoef
