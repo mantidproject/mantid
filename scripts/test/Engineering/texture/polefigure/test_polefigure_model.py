@@ -84,8 +84,8 @@ class TextureProjectionTest(unittest.TestCase):
     @patch(correction_model_path + ".ADS")
     def test_get_pf_table_name_with_no_hkl_and_params(self, mock_ads):
         mock_param1, mock_param2 = MagicMock(), MagicMock()
-        mock_param1.column.return_value = np.array((1, 2, 3))
-        mock_param2.column.return_value = np.array((2, 2, 2))
+        mock_param1.column.return_value = np.array((1, 2, 3, np.nan))  # nan should be ignored
+        mock_param2.column.return_value = np.array((2, 2, 2, np.nan))
         ads_wss = {"ws1": self.mock_ws, "ws2": self.mock_ws, "param_ws1": mock_param1, "param_ws2": mock_param2}
 
         def get_ads_ws(key):
@@ -95,6 +95,21 @@ class TextureProjectionTest(unittest.TestCase):
         table_name, spectra_ws, grouping = self.model.get_pf_output_names(["ws1", "ws2"], ["param_ws1", "param_ws2"], None, "I")
         self.assertEqual("2.0_instrument_123456-123456_Texture20_pf_table_I", table_name)
         self.assertEqual("2.0_instrument_123456-123456_Texture20_spectra", spectra_ws)
+
+    @patch(correction_model_path + ".ADS")
+    def test_get_pf_table_name_with_no_hkl_and_params_all_x0_nan(self, mock_ads):
+        mock_param1, mock_param2 = MagicMock(), MagicMock()
+        mock_param1.column.return_value = np.array((np.nan, np.nan))  # nan should be ignored
+        mock_param2.column.return_value = np.array((np.nan, np.nan))
+        ads_wss = {"ws1": self.mock_ws, "ws2": self.mock_ws, "param_ws1": mock_param1, "param_ws2": mock_param2}
+
+        def get_ads_ws(key):
+            return ads_wss.get(key)
+
+        mock_ads.retrieve.side_effect = get_ads_ws
+        table_name, spectra_ws, grouping = self.model.get_pf_output_names(["ws1", "ws2"], ["param_ws1", "param_ws2"], None, "I")
+        self.assertEqual("nan_instrument_123456-123456_Texture20_pf_table_I", table_name)
+        self.assertEqual("nan_instrument_123456-123456_Texture20_spectra", spectra_ws)
 
     def test_parse_hkl_valid(self):
         hkl = self.model.parse_hkl("1", "2", "3")
