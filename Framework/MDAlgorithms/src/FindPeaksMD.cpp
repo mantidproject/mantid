@@ -265,6 +265,7 @@ void FindPeaksMD::determineOutputType(const std::string &peakType, const uint16_
 //----------------------------------------------------------------------------------------------
 /** Create and add a Peak to the output workspace
  *
+ * @param compInfo :: ComponentInfo object to use for edge pixel checking
  * @param Q :: Q_lab or Q_sample, depending on workspace
  * @param binCount :: bin count to give to the peak.
  * @param tracer :: Ray tracer to use for detector finding
