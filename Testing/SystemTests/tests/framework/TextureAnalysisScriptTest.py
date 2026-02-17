@@ -195,7 +195,25 @@ class PeakFitMixin(object):
         self.input_ws = ConvertUnits(InputWorkspace=raw_ws, OutputWorkspace="ENGINX_280625_focused_bank_1_dSpacing", Target="dSpacing")
         self.fit_dir = os.path.join(CWDIR, "FitParameters")
         self.peaks = (1.8, 1.44)
-        self.reference_columns = ["wsindex", "I_est", "I", "I_err", "A", "A_err", "B", "B_err", "X0", "X0_err", "S", "S_err"]
+        self.reference_columns = [
+            "wsindex",
+            "I_est",
+            "I",
+            "I_err",
+            "I/I_err",
+            "A",
+            "A_err",
+            "A/A_err",
+            "B",
+            "B_err",
+            "B/B_err",
+            "X0",
+            "X0_err",
+            "X0/X0_err",
+            "S",
+            "S_err",
+            "S/S_err",
+        ]
         self.cols_to_check_vals = ["wsindex", "I_est", "I", "X0", "S"]
         self.default_kwargs = {
             "wss": ["ENGINX_280625_focused_bank_1_dSpacing"],
@@ -207,29 +225,39 @@ class PeakFitMixin(object):
             0,
             60.0549787,
             58.67645081,
-            0.85816193,
-            8.69792,
-            0.0,
-            0.29023,
-            0.0,
+            1.04571439,
+            56.16293865,
+            0.89151393,
+            27494.3852306,
+            3.24253088e-05,
+            0.34567429,
+            4302.77717622,
+            8.03374843e-05,
             1.80098428,
             9.53361135e-05,
+            23.32343495,
             126.32162042,
             1.8714507,
+            0.13360738,
         ]
         self.peak_2_vals = [
             0,
             53.11713333,
             58.45633143,
-            1.11592828,
+            1.3094412,
+            44.58148771,
             1497790.0,
-            0.0,
+            65944.88745238,
+            23.61714729,
             0.0165231,
-            0.0,
+            0.00706728,
+            2.34043859,
             1.43592701,
             0.00016835,
+            1188.44085471,
             163.86109962,
-            3.08200681,
+            5.30600298,
+            30.82858543,
         ]
 
     def validate_table(self, out_table, expected_dict, rtol=5e-3):
@@ -286,9 +314,10 @@ class TestFittingPeaksOfMissingPeakDataWithFillZero(PeakFitMixin, systemtesting.
         fit_all_peaks(**kwargs, i_over_sigma_thresh=10.0, nan_replacement="zeros")
 
     def validate(self):
-        # expect all params to be zeros (coincidentally including val[0] as this is the wsindex)
-        expected_vals1 = [0.0 for _ in self.peak_1_vals]
-        expected_vals2 = [0.0 for _ in self.peak_2_vals]
+        # expect all params vals to be zeros (coincidentally including val[0] as this is the wsindex)
+        # expect errs to be inf as they haven't been fit
+        expected_vals1 = [0.0, 0.0, 0.0, np.inf, 0.0] + [0.0, np.inf, 0.0] * int(len(self.peak_1_vals[5:]) // 3)
+        expected_vals2 = [0.0, 0.0, 0.0, np.inf, 0.0] + [0.0, np.inf, 0.0] * int(len(self.peak_2_vals[5:]) // 3)
         self.validate_missing_peaks_vals(expected_vals1, expected_vals2)
 
     def cleanup(self):
@@ -307,8 +336,8 @@ class TestFittingPeaksOfMissingPeakDataWithSpecifiedValue(PeakFitMixin, systemte
     def validate(self):
         # expect all params to be zeros (coincidentally including val[0] as this is the wsindex)
         # except I_est which is val[1] and has been set to 1.0 and I which is val[2] and is set as 0.01
-        expected_vals1 = [0.0, 1.0, 0.01] + [0.0 for _ in self.peak_1_vals[3:]]
-        expected_vals2 = [0.0, 1.0, 0.01] + [0.0 for _ in self.peak_2_vals[3:]]
+        expected_vals1 = [0.0, 1.0, 0.01, np.inf, 0.0] + [0.0, np.inf, 0.0] * int(len(self.peak_1_vals[5:]) // 3)
+        expected_vals2 = [0.0, 1.0, 0.01, np.inf, 0.0] + [0.0, np.inf, 0.0] * int(len(self.peak_2_vals[5:]) // 3)
         self.validate_missing_peaks_vals(expected_vals1, expected_vals2)
 
     def cleanup(self):

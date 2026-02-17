@@ -1,0 +1,1 @@
+- (`#40891 <https://github.com/mantidproject/mantid/pull/40891>`_) The peak fitting routine ``Engineering.texture.TextureUtils.fit_all_peaks`` now outputs a column for each parameter giving the ratio of value to error.
