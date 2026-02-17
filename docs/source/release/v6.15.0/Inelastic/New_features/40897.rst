@@ -1,0 +1,2 @@
+- The :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` will now plot result workspaces as a contour plot if the workspaces contain multiple spectra.
+- The ``BayesStretch`` algorithm now outputs contour and fit workspace groups with the name provided in the ``OutputWorkspaceContour`` and ``OutputWorkspaceFit`` input properties.
