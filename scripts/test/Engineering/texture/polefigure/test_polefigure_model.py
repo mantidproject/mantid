@@ -84,8 +84,8 @@ class TextureProjectionTest(unittest.TestCase):
     @patch(correction_model_path + ".ADS")
     def test_get_pf_table_name_with_no_hkl_and_params(self, mock_ads):
         mock_param1, mock_param2 = MagicMock(), MagicMock()
-        mock_param1.column.return_value = np.array((1, 2, 3))
-        mock_param2.column.return_value = np.array((2, 2, 2))
+        mock_param1.column.return_value = np.array((1, 2, 3, np.nan))  # nan should be ignored
+        mock_param2.column.return_value = np.array((2, 2, 2, np.nan))
         ads_wss = {"ws1": self.mock_ws, "ws2": self.mock_ws, "param_ws1": mock_param1, "param_ws2": mock_param2}
 
         def get_ads_ws(key):
