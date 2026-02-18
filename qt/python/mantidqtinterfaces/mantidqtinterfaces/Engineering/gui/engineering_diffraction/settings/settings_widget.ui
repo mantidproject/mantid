@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>630</width>
+    <width>950</width>
     <height>586</height>
    </rect>
   </property>
@@ -29,7 +29,20 @@ QGroupBox:title {
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="group_general">
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <layout class="QVBoxLayout" name="verticalLayout_scrollArea">
+       <item>
+        <widget class="QGroupBox" name="group_general">
      <property name="title">
       <string>General</string>
      </property>
@@ -683,6 +696,10 @@ QGroupBox:title {
       </size>
      </property>
     </spacer>
+   </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
    <item>
     <widget class="QFrame" name="frame">
