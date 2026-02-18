@@ -100,7 +100,7 @@ requirements:
   run_exports:
     - if: "'rc' in version"
       then:
-        - mantid ${{ version }}
+        - ${{ pin_subpackage('mantid', exact=True) }}
       else:
         - ${{ pin_subpackage('mantid', upper_bound='x.x.x') }}
   run_constraints:

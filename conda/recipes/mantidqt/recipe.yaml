@@ -62,7 +62,7 @@ requirements:
   run_exports:
     - if: "'rc' in version"
       then:
-        - mantidqt ${{ version }}
+        - ${{ pin_subpackage('mantidqt', exact=True) }}
       else:
         - ${{ pin_subpackage('mantidqt', upper_bound='x.x.x') }}
 
