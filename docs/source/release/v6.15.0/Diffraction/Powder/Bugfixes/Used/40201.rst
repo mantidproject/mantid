@@ -1,1 +1,0 @@
-- Solve the crash issue in ref:`SNSPowderReduction <algm-SNSPowderReduction>` regarding the definition of non-standard sample and container geometries for the absorption correction purpose.

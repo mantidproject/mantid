@@ -1,1 +1,0 @@
-- Now when using the spliiter workspace with :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` it will output multiple workspaces, one for each target. The ``SplitterTarget`` property has been removed.

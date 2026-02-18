@@ -1,4 +1,0 @@
-- Fixed a bug in :ref:`colorfill plots <Colorfill_Plots>` with log colorscale where it was giving errors when the below keys are pressed. The behaviour of the colorfill plot after the fix is given below.
-- `c`, `left`, `backspace`, `MouseButton.BACK` - The behaviour is similar to pressing Back button on plot the toolbar
-- `v`, `right`, `MouseButton.FORWARD` - The behaviour is similar to pressing Forward button on plot the toolbar
-- `r`, `h`, `home` - The plot would be reset to Home view, i.e similar to pressing Home button of the plot

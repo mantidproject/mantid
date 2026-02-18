@@ -1,1 +1,0 @@
-- :ref:`LoadMcStasNexus <algm-LoadMcStasNexus>` has been deprecated. Use :ref:`LoadMcStas <algm-LoadMcStas>` instead as it is more up to date.

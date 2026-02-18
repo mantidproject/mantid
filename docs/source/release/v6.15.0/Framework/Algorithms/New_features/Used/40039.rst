@@ -1,1 +1,0 @@
-- `UnaryOperation <https://github.com/mantidproject/mantid/blob/main/Framework/Algorithms/src/UnaryOperation.cpp>`_ algorithms like :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>`, :ref:`Logarithm <algm-Logarithm>` now support ragged workspaces.

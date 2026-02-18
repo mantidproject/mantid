@@ -1,1 +1,0 @@
-- New Python interface to use the new Instrument View in a Jupyter Notebook

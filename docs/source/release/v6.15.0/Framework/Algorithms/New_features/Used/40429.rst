@@ -1,1 +1,0 @@
-- Updated the :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` algorithm to allow the user to input the start and end index of the range to apply the mask on.
