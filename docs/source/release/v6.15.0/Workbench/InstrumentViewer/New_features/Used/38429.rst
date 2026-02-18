@@ -1,1 +1,0 @@
-- Added the side-by-side projection to the new Instrument View. On instruments with no side-by-side panel positions defined in the IDF, this projection will try to optimise the arrangement of panels. For any detectors not in panels, they will appear in a grid, an abstract representation of the detectors.

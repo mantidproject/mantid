@@ -1,1 +1,0 @@
-- Add the ability to select mirrors for test data in builds using the ``DATA_STORE_MIRROR`` cmake variable. See :doc:`data files for testing <mantid-dev:DataFilesForTesting>`

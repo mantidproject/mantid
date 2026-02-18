@@ -1,1 +1,0 @@
-- A memory leak in ``Nexus::File`` has been patched when loading slab data; this impacted memory erformance in several loading algorithms, including :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>`.

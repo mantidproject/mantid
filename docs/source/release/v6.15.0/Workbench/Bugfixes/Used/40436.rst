@@ -1,1 +1,0 @@
-- Calling ``fig.savefig()`` immediately after ``fig.show()`` will no longer cause a deadlock in Qt event loop. This has been fixed by ensuring that all queued GUI events are safely processed before moving on to the next operation.

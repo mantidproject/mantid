@@ -1,1 +1,0 @@
-- Added peak overlay to the new Instrument View. Peaks workspaces can be selected within the interface and those peaks will be plotted on both the projection and the 1D plot.
