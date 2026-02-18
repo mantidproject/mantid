@@ -48,6 +48,9 @@ public:
    */
   virtual const Result<std::filesystem::path> getArchivePath(const std::set<std::string> &hintstrs,
                                                              const std::vector<std::string> &exts) const = 0;
+  virtual bool supportsMultipleHints() const = 0;
+  virtual const Result<std::vector<std::filesystem::path>>
+  getArchivePaths(const std::vector<std::string> &hintstrs, const std::vector<std::string> &exts) const = 0;
 };
 
 /// Typedef for a shared pointer to an IArchiveSearch

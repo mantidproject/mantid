@@ -27,6 +27,11 @@ class MANTID_DATAHANDLING_DLL ORNLDataArchive : public API::IArchiveSearch {
 public:
   const API::Result<std::filesystem::path> getArchivePath(const std::set<std::string> &hintstrs,
                                                           const std::vector<std::string> &suffixes) const override;
+  bool supportsMultipleHints() const override { return false; }
+  const API::Result<std::vector<std::filesystem::path>>
+  getArchivePaths(const std::vector<std::string> &hintstrs, const std::vector<std::string> &exts) const override {
+    throw std::runtime_error("ISISDataArchive::getArchivePaths not implemented");
+  };
 
   //////////////////////////////////////////////////////////////////////
   // Exposed publicly for testing purposes only.

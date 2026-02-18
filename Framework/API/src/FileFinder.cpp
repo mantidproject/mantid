@@ -695,23 +695,94 @@ void FileFinderImpl::performCacheSearch(std::vector<FileInfo> &fileInfos) const 
 }
 
 void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) const {
-  // Search the archive
-  for (auto &fileInfo : fileInfos) {
-    if (fileInfo.found || fileInfo.error)
-      continue;
-    if (!fileInfo.archs.empty()) {
-      g_log.debug() << "Search the archives for file: " << fileInfo.hint << "\n";
-      const auto archivePath = getArchivePath(fileInfo.archs, fileInfo.filenames, fileInfo.extensionsToSearch);
-      if (archivePath) {
-        try {
-          if (std::filesystem::exists(archivePath.result())) {
-            fileInfo.found = true;
-            fileInfo.path = archivePath.result();
+  if (fileInfos.empty())
+    return;
+  bool allHaveSingleArch = true;
+  IArchiveSearch_sptr firstArch;
+  if (fileInfos[0].archs.empty()) {
+    allHaveSingleArch = false;
+  } else {
+    firstArch = fileInfos[0].archs[0];
+    Kernel::InstrumentInfo firstInstr = *fileInfos[0].instr;
+
+    for (const auto &fileInfo : fileInfos) {
+      if (fileInfo.found || fileInfo.error)
+        continue;
+      if (fileInfo.archs.size() != 1) {
+        allHaveSingleArch = false;
+        break;
+      }
+      if (fileInfo.archs[0] != firstArch) {
+        allHaveSingleArch = false;
+        break;
+      }
+      // Also check if the same instrument
+      if (*fileInfo.instr != firstInstr) {
+        allHaveSingleArch = false;
+        break;
+      }
+    }
+  }
+
+  if (allHaveSingleArch && firstArch && firstArch->supportsMultipleHints()) {
+    // All files share the same single archive to search with the same instrument, so we can search them together in one
+    // call to getArchivePaths. Make a vector of sets of hints to pass to the archive, one set for each file, as they
+    // may have different hints.
+    std::vector<std::string> hintSets;
+    for (const auto &fileInfo : fileInfos) {
+      if (fileInfo.found || fileInfo.error)
+        continue;
+      hintSets.push_back(*fileInfo.filenames.cbegin()); // take only the first filename as a hint, as the archive search
+                                                        // will be case insensitive
+    }
+    const auto archivePaths = firstArch->getArchivePaths(hintSets, fileInfos[0].extensionsToSearch);
+    if (!archivePaths) {
+      g_log.error() << "Archive search failed: " << archivePaths.errors() << "\n";
+      return;
+    }
+
+    if (archivePaths.result().size() != hintSets.size()) {
+      g_log.error() << "Archive search returned a different number of paths than hints. Expected " << hintSets.size()
+                    << " but got " << archivePaths.result().size() << ".\n";
+      return;
+    }
+
+    const auto paths = archivePaths.result();
+    size_t index = 0;
+    for (auto &fileInfo : fileInfos) {
+      if (fileInfo.found || fileInfo.error)
+        continue;
+      const auto &archivePath = paths[index++];
+      try {
+        if (std::filesystem::exists(archivePath)) {
+          fileInfo.found = true;
+          fileInfo.path = archivePath;
+        }
+      } catch (std::exception &e) {
+        g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';
+        fileInfo.error = true;
+        fileInfo.errorMsg = "Cannot open file from archive: " + std::string(e.what());
+      }
+    }
+  } else {
+    // Search the archive separately for each file, as they don't all share the same single archive to search
+    for (auto &fileInfo : fileInfos) {
+      if (fileInfo.found || fileInfo.error)
+        continue;
+      if (!fileInfo.archs.empty()) {
+        g_log.debug() << "Search the archives for file: " << fileInfo.hint << "\n";
+        const auto archivePath = getArchivePath(fileInfo.archs, fileInfo.filenames, fileInfo.extensionsToSearch);
+        if (archivePath) {
+          try {
+            if (std::filesystem::exists(archivePath.result())) {
+              fileInfo.found = true;
+              fileInfo.path = archivePath.result();
+            }
+          } catch (std::exception &e) {
+            g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';
+            fileInfo.error = true;
+            fileInfo.errorMsg = "Cannot open file from archive: " + std::string(e.what());
           }
-        } catch (std::exception &e) {
-          g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';
-          fileInfo.error = true;
-          fileInfo.errorMsg = "Cannot open file from archive: " + std::string(e.what());
         }
       }
     }

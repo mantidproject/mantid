@@ -29,6 +29,11 @@ public:
   /// Returns the path to a filename given the list of extensions to try
   const API::Result<std::filesystem::path> getArchivePath(const std::set<std::string> &hintstrs,
                                                           const std::vector<std::string> &exts) const override;
+  bool supportsMultipleHints() const override { return false; }
+  const API::Result<std::vector<std::filesystem::path>>
+  getArchivePaths(const std::vector<std::string> &, const std::vector<std::string> &) const override {
+    throw std::runtime_error("ISISDataArchive::getArchivePaths not implemented");
+  };
 
   /// Public and virtual for testing purposes
   virtual std::string getCorrectExtension(const std::string &path, const std::vector<std::string> &exts) const;
