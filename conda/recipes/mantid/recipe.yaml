@@ -98,7 +98,11 @@ requirements:
       then:
         - jemalloc ${{ jemalloc }}
   run_exports:
-    - ${{ pin_subpackage('mantid', upper_bound='x.x.x') }}
+    - if: "'rc' in version"
+      then:
+        - mantid ${{ version }}
+      else:
+        - ${{ pin_subpackage('mantid', upper_bound='x.x.x') }}
   run_constraints:
     - matplotlib-base ${{ matplotlib }}
     - pillow ${{ pillow }}

@@ -60,7 +60,11 @@ requirements:
       then:
         - qt-gtk-platformtheme
   run_exports:
-    - ${{ pin_subpackage('mantidqt', upper_bound='x.x.x') }}
+    - if: "'rc' in version"
+      then:
+        - mantidqt ${{ version }}
+      else:
+        - ${{ pin_subpackage('mantidqt', upper_bound='x.x.x') }}
 
 tests:
   - python:
