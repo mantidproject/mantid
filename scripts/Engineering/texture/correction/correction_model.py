@@ -62,10 +62,14 @@ class TextureCorrectionModel:
         div = scale * (np.sin(thetas) ** 2)
         div = np.nan_to_num(div, nan=1.0)
 
-        _div_corr = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="_div_corr")
-        y_shape = ws.readY(0).shape
+        temp_ws = ConvertUnits(ws, Target="dSpacing", StoreInADS=False)
+        # divergence correction will be applied to ws in dspacing so need to match the units
+        _div_corr = CloneWorkspace(InputWorkspace=temp_ws, OutputWorkspace="_div_corr")
+        y_shape = _div_corr.readY(0).shape
         for i in range(num_spec):
             _div_corr.setY(i, np.full(y_shape, div[i]))
+            _div_corr.setE(i, np.zeros(y_shape))
+        _div_corr.setYUnit("")
 
     @staticmethod
     def get_thetas(ws):
@@ -133,7 +137,7 @@ class TextureCorrectionModel:
         if isinstance(abs_corr, str):
             abs_ws = ConvertUnits(ADS.retrieve(abs_corr), Target="dSpacing", StoreInADS=False)
             temp_ws = temp_ws / abs_ws
-            ADS.remove("abs_ws")
+            ADS.remove(abs_ws.name())
         else:
             temp_ws = temp_ws / abs_corr
 
@@ -141,12 +145,8 @@ class TextureCorrectionModel:
         # otherwise it will just be 1.0
         if isinstance(div_corr, str):
             div_ws = ADS.retrieve(div_corr)
-            # modify the intensity counts directly as the units of div_ws are arbitrary
-            for i in range(temp_ws.getNumberHistograms()):
-                temp_ws.setY(i, temp_ws.readY(i) / div_ws.readY(i))
-                # scale errors as well
-                temp_ws.setE(i, temp_ws.readE(i) / div_ws.readY(i))
-            ADS.remove("div_ws")
+            temp_ws = temp_ws / div_ws
+            ADS.remove(div_ws.name())
         else:
             temp_ws = temp_ws / div_corr
 
