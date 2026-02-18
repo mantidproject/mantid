@@ -144,6 +144,8 @@ class TextureCorrectionModel:
             # modify the intensity counts directly as the units of div_ws are arbitrary
             for i in range(temp_ws.getNumberHistograms()):
                 temp_ws.setY(i, temp_ws.readY(i) / div_ws.readY(i))
+                # scale errors as well
+                temp_ws.setE(i, temp_ws.readE(i) / div_ws.readY(i))
             ADS.remove("div_ws")
         else:
             temp_ws = temp_ws / div_corr
