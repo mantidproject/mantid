@@ -16,11 +16,16 @@ We are proud to announce version 6.15.0 of Mantid.
 
 Key features of this release include:
 
-- The new Instrument View has had several updates; read about them in the :doc:`Mantid Workbench <mantidworkbench>` release notes. This feature is still being developed and new features will be coming to the nightly.
-- The :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` has two new tabs, ``Absorption Correction`` and ``Texture``. Read more about the work on texture in the :doc:`Diffraction <diffraction>` release notes.
-- Lots up updates have been made to the :ref:`algm-AlignAndFocusPowderSlim`; see the :doc:`Diffraction <diffraction>` and :doc:`Framework <framework>` release notes for details.
-- The :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` has a new combo box to swap between using the ``quasielasticbayes`` (old Fortran library) backend and the ``quickbayes`` (new python library) backend.
-- The :ref:`ISIS_Sans_interface_contents` Interface has a new option for selecting a range of phi values in the masking tab to generate multiple phi slices from a single 1D reduction.
+- The new Instrument View has had several updates; read about them in the :doc:`Mantid Workbench <mantidworkbench>`
+  release notes. This feature is still being developed and new features will be coming to the nightly.
+- The :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` has two new tabs, ``Absorption Correction``
+  and ``Texture``. Read more about the work on texture in the :doc:`Diffraction <diffraction>` release notes.
+- Several updates have been made to the :ref:`algm-AlignAndFocusPowderSlim`; see the :doc:`Diffraction <diffraction>`
+  and :doc:`Framework <framework>` release notes for details.
+- The :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` has a new combo box to swap between using the
+  ``quasielasticbayes`` (old Fortran library) backend and the ``quickbayes`` (new python library) backend.
+- The :ref:`ISIS_Sans_interface_contents` Interface has a new option for selecting a range of phi values in the masking
+  tab to generate multiple phi slices from a single 1D reduction - as well as a new checkbox to enable wide-angle corrections.
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
