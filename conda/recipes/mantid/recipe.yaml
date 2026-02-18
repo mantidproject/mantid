@@ -98,7 +98,7 @@ requirements:
       then:
         - jemalloc ${{ jemalloc }}
   run_exports:
-    - ${{ pin_subpackage('mantid', upper_bound='x.x.x') }}
+    - ${{ pin_subpackage('mantid', exact=True) }}
   run_constraints:
     - matplotlib-base ${{ matplotlib }}
     - pillow ${{ pillow }}
