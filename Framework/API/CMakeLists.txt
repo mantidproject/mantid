@@ -412,6 +412,7 @@ set(TEST_FILES
     ExpressionTest.h
     FileBackedExperimentInfoTest.h
     FileFinderTest.h
+    FileFinderISISInstrumentDataCacheTest.h
     FileLoaderRegistryTest.h
     FilePropertyTest.h
     FrameworkManagerTest.h
