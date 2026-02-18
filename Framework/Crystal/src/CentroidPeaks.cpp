@@ -146,7 +146,7 @@ void CentroidPeaks::integrate() {
     col = (int)std::lround(colcentroid / intensity);
     boost::algorithm::clamp(col, 0, nCols - 1);
     chan = (int)std::lround(chancentroid / intensity);
-    boost::algorithm::clamp(chan, 0, inBlocksize);
+    boost::algorithm::clamp(chan, 0, static_cast<int>(inBlocksize));
 
     // Set wavelength to change tof for peak object
     if (!edgePixel(compInfo, bankName, col, row, Edge)) {
