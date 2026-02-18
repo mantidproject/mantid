@@ -7,8 +7,8 @@
 import unittest
 
 from unittest.mock import patch, MagicMock
+from Engineering.common.instrument_config import ENGINX_GROUP
 from unittest import mock
-from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration import model, view, presenter
 from Engineering.common.calibration_info import CalibrationInfo
 
@@ -34,14 +34,14 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.update_calibration_from_view()
 
         self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749", "307521")
-        self.presenter.current_calibration.set_group.assert_called_once_with(GROUP.BOTH)
+        self.presenter.current_calibration.set_group.assert_called_once_with(ENGINX_GROUP.BOTH)
         self.presenter.current_calibration.set_grouping_file.assert_not_called()
         self.presenter.current_calibration.set_spectra_list.assert_not_called()
 
     def test_update_calibration_from_view_cropped_to_bank(self):
         self.view.get_load_checked.return_value = False
         self.view.get_crop_checked.return_value = True
-        self.presenter.cropping_widget.get_group.return_value = GROUP.NORTH
+        self.presenter.cropping_widget.get_group.return_value = ENGINX_GROUP.NORTH
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
         self.view.get_vanadium_filename.return_value = "307521"
@@ -57,7 +57,7 @@ class CalibrationPresenterTest(unittest.TestCase):
     def test_update_calibration_from_view_cropped_to_texture30(self):
         self.view.get_load_checked.return_value = False
         self.view.get_crop_checked.return_value = True
-        self.presenter.cropping_widget.get_group.return_value = GROUP.TEXTURE30
+        self.presenter.cropping_widget.get_group.return_value = ENGINX_GROUP.TEXTURE30
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
         self.view.get_vanadium_filename.return_value = "307521"
@@ -73,7 +73,7 @@ class CalibrationPresenterTest(unittest.TestCase):
     def test_update_calibration_from_view_cropped_to_spectra(self):
         self.view.get_load_checked.return_value = False
         self.view.get_crop_checked.return_value = True
-        self.presenter.cropping_widget.get_group.return_value = GROUP.CROPPED
+        self.presenter.cropping_widget.get_group.return_value = ENGINX_GROUP.CROPPED
         self.presenter.cropping_widget.get_custom_spectra.return_value = "1"
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
@@ -91,7 +91,7 @@ class CalibrationPresenterTest(unittest.TestCase):
     def test_update_calibration_from_view_custom_calfile(self):
         self.view.get_load_checked.return_value = False
         self.view.get_crop_checked.return_value = True
-        self.presenter.cropping_widget.get_group.return_value = GROUP.CUSTOM
+        self.presenter.cropping_widget.get_group.return_value = ENGINX_GROUP.CUSTOM
         self.presenter.cropping_widget.get_custom_groupingfile.return_value = "cal"
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
@@ -199,7 +199,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.on_calibrate_clicked()
 
         self.model.load_existing_calibration_files.assert_called_with(self.presenter.current_calibration)
-        self.presenter.current_calibration.set_calibration_from_prm_fname.assert_called_with(prm_filepath)
+        self.presenter.current_calibration.set_calibration_from_prm_fname.assert_called_with(prm_filepath, self.presenter.instrument)
         self.presenter.calibration_notifier.notify_subscribers.assert_called_once()
         self.assertEqual(2, mock_setting.call_count)
 
