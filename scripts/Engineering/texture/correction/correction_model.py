@@ -18,6 +18,7 @@ from mantid.simpleapi import (
     CreateEmptyTableWorkspace,
     LoadEmptyInstrument,
     CreateDetectorTable,
+    CreateWorkspace,
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
@@ -62,14 +63,8 @@ class TextureCorrectionModel:
         div = scale * (np.sin(thetas) ** 2)
         div = np.nan_to_num(div, nan=1.0)
 
-        temp_ws = ConvertUnits(ws, Target="dSpacing", StoreInADS=False)
-        # divergence correction will be applied to ws in dspacing so need to match the units
-        _div_corr = CloneWorkspace(InputWorkspace=temp_ws, OutputWorkspace="_div_corr")
-        y_shape = _div_corr.readY(0).shape
-        for i in range(num_spec):
-            _div_corr.setY(i, np.full(y_shape, div[i]))
-            _div_corr.setE(i, np.zeros(y_shape))
-        _div_corr.setYUnit("")
+        # package correction into a workspace with arbitrary xbins
+        CreateWorkspace(np.zeros(num_spec * 2), div, NSpec=num_spec, OutputWorkspace="_div_corr")
 
     @staticmethod
     def get_thetas(ws):
