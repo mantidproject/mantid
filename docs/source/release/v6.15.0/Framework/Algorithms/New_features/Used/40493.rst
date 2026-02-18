@@ -1,1 +1,0 @@
-- :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` will now set the uncertainty values on the output workspace.

@@ -1,1 +1,0 @@
-- New option to either maintain (or not) the aspect ratio of a 2D projection of an instrument. This can result in a more efficient use of screen space, and clearer projections.

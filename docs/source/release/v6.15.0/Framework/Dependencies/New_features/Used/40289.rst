@@ -1,1 +1,0 @@
-- Add `AGENTS.md <https://github.com/mantidproject/mantid/blob/main/AGENTS.md>`_ which gives instructions to coding agents in a way consistent with the https://agents.md standard

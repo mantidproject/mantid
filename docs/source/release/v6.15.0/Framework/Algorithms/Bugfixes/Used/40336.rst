@@ -1,1 +1,0 @@
-- ``CreateDetectorTable`` will now return the workspace index as an integer, not a floating point number.

@@ -33,7 +33,8 @@ InstrumentViewer
 
 New features
 ############
-- The new Instrument View has some new features:
+- The modernised Instrument View has some new features. This new interface is still being developed but can be accessed,
+  in its experimental form, by selecting ``(Experimental) Show Instrument`` after right-clicking on a workspace:
 
   - (`#39949 <https://github.com/mantidproject/mantid/pull/39949>`_) Added the side-by-side projection. On instruments
     with no side-by-side panel positions defined in the IDF, this projection will try to optimise the arrangement of
@@ -47,6 +48,10 @@ New features
     View in a Jupyter Notebook.
   - (`#40101 <https://github.com/mantidproject/mantid/pull/40101>`_) Added a peak overlay. Peaks workspaces can be
     selected within the interface and those peaks will be plotted on both the projection and the 1D plot.
+
+  .. figure:: ../../images/6_15_release/new-iv-features.gif
+   :class: screenshot
+   :width: 987px
 
 
 Bugfixes

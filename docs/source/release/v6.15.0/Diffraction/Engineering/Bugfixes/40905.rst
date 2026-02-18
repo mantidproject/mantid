@@ -1,1 +1,0 @@
-- (`#40905 <https://github.com/mantidproject/mantid/pull/40905>`_) In ``Engineering.texture.correction.correction_model.TextureCorrectionModel.apply_corrections``  the divergence correction calculation now scales the errors rather than just the intensities.

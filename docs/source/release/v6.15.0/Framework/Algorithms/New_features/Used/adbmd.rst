@@ -1,1 +1,0 @@
-- New property in :ref:`ApplyDetailedBalanceMD <algm-ApplyDetailedBalanceMD>` allows scaling data from one temperature to another.

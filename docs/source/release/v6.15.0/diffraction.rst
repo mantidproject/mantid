@@ -47,12 +47,18 @@ New features
   - ``plot_pole_figure`` creates a pole figure plot for a pole figure table.
   - Pole figure plots created by ``create_pole_figure_tables`` and ``plot_pole_figure`` have flags to add interactive annotation of points in the pole figure (``include_spec_info`` and ``display_debug_info`` respectively). You can also access this information bt holding the "a" key on the keyboard clicking.
 
+- (`#40891 <https://github.com/mantidproject/mantid/pull/40891>`_) The peak fitting routine ``Engineering.texture.TextureUtils.fit_all_peaks`` now outputs a column for each parameter giving the ratio of value to error.
 - (`#40441 <https://github.com/mantidproject/mantid/pull/40441>`_) :ref:`algm-EnggEstimateFocussedBackground` now uses multi-threading to speed up execution time by factor ~2-3.
 - (`#40599 <https://github.com/mantidproject/mantid/pull/40599>`_) Added calibrated IDF for POLDI (PSI) post upgrade in December 2025.
 - (`#40599 <https://github.com/mantidproject/mantid/pull/40599>`_) New loader ``load_poldi_h5f`` for h5f file produced by POLDI post instrument upgrade available in ``plugins.algorithms.poldi_utils``.
 - (`#40599 <https://github.com/mantidproject/mantid/pull/40599>`_) New features in :ref:`algm-PoldiAutoCorrelation-v6`:
 
   - Added parameter ``NGroups``  to split POLDI detectors into groups and produce an autocorrelation spectrum per grouping.
+
+  .. image:: ../../images/6_15_release/poldi-ngroups.png
+     :class: screenshot
+     :width: 500px
+
   - Detector IDs are now associated with autocorrelation spectra in the output workspace.
 
 - (`#40599 <https://github.com/mantidproject/mantid/pull/40599>`_) New features in the ``PawleyPattern1D`` class from ``Engineering.pawley_utils``:
@@ -67,6 +73,7 @@ Bugfixes
 ############
 - (`#40367 <https://github.com/mantidproject/mantid/pull/40367>`_) Updated the ``Focus`` tab processing in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` to remove zeros outside the data limits.
 - (`#40833 <https://github.com/mantidproject/mantid/pull/40833>`_) A bug in :ref:`create_total_scattering_pdf <create_total_scattering_pdf_polaris-isis-powder-ref>` where loading non-consecutive runs was causing an error has been fixed.
+- (`#40905 <https://github.com/mantidproject/mantid/pull/40905>`_) When making use of the :ref:`TextureCorrectionModel<ReferenceWorkspaceSection>`, the divergence correction calculation now scales the errors as well as the intensities.
 
 
 Single Crystal Diffraction
