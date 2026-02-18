@@ -73,6 +73,7 @@ Bugfixes
 ############
 - (`#40367 <https://github.com/mantidproject/mantid/pull/40367>`_) Updated the ``Focus`` tab processing in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` to remove zeros outside the data limits.
 - (`#40833 <https://github.com/mantidproject/mantid/pull/40833>`_) A bug in :ref:`create_total_scattering_pdf <create_total_scattering_pdf_polaris-isis-powder-ref>` where loading non-consecutive runs was causing an error has been fixed.
+- (`#40905 <https://github.com/mantidproject/mantid/pull/40905>`_) When making use of the :ref:`TextureCorrectionModel<ReferenceWorkspaceSection>`, the divergence correction calculation now scales the errors as well as the intensities.
 
 
 Single Crystal Diffraction
