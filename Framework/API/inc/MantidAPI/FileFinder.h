@@ -36,6 +36,18 @@ number
 */
 class MANTID_API_DLL FileFinderImpl {
 public:
+  struct FileInfo {
+    std::string hint;
+    bool found{false};
+    std::filesystem::path path;
+    std::shared_ptr<Mantid::Kernel::InstrumentInfo> instr;
+    bool error{false};
+    std::string errorMsg;
+    std::set<std::string> filenames;
+    std::vector<std::string> extensionsToSearch;
+    std::vector<Mantid::API::IArchiveSearch_sptr> archs;
+  };
+
   std::filesystem::path getFullPath(const std::string &filename, const bool ignoreDirs = false) const;
   std::string extractAllowedSuffix(std::string &userString) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
@@ -74,6 +86,9 @@ private:
   FileFinderImpl &operator=(const FileFinderImpl &);
   /// A method that returns error messages if the provided runs are invalid
   std::string validateRuns(const std::string &searchText) const;
+  void performFileSearch(std::vector<FileInfo> &fileInfos) const;
+  void performCacheSearch(std::vector<FileInfo> &fileInfos) const;
+  void performArchiveSearch(std::vector<FileInfo> &fileInfos) const;
   const API::Result<std::filesystem::path> getISISInstrumentDataCachePath(const std::string &cachePathToSearch,
                                                                           const std::set<std::string> &hintstrs,
                                                                           const std::vector<std::string> &exts) const;

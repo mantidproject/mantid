@@ -49,18 +49,6 @@ bool isASCII(const std::string &str) {
   return !std::any_of(str.cbegin(), str.cend(), [](char c) { return static_cast<unsigned char>(c) > 127; });
 }
 
-struct FileInfo {
-  std::string hint;
-  bool found{false};
-  std::filesystem::path path;
-  std::shared_ptr<Mantid::Kernel::InstrumentInfo> instr;
-  bool error{false};
-  std::string errorMsg;
-  std::set<std::string> filenames;
-  std::vector<std::string> extensionsToSearch;
-  std::vector<Mantid::API::IArchiveSearch_sptr> archs;
-};
-
 } // namespace
 
 namespace Mantid::API {
@@ -610,14 +598,35 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
     fileInfo.archs = getArchiveSearch(facility);
   }
 
-  const std::vector<std::string> &searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
+  performFileSearch(fileInfos);
+  performCacheSearch(fileInfos);
+  performArchiveSearch(fileInfos);
 
+  // Now gather the results and log any failures
+  std::vector<std::filesystem::path> res;
+  for (const auto &fileInfo : fileInfos) {
+    if (throwIfNotFound && !fileInfo.found) {
+      g_log.warning() << "Failed to find file for hint '" << fileInfo.hint << "'\n";
+      throw std::invalid_argument("Unable to find file: search object " + fileInfo.hint);
+    }
+    if (fileInfo.error) {
+      g_log.error() << "Error finding file for hint '" << fileInfo.hint << "': " << fileInfo.errorMsg << "\n";
+    }
+    res.emplace_back(fileInfo.path);
+  }
+  return res;
+};
+
+void FileFinderImpl::performFileSearch(std::vector<FileInfo> &fileInfos) const {
   // Before we try any globbing, make sure we exhaust all reasonable attempts at
   // constructing the possible filename.
   // Avoiding the globbing of getFullPath() for as long as possible will help
   // performance when calling findRuns()
   // with a large range of files, especially when searchPaths consists of
   // folders containing a large number of runs.
+
+  const std::vector<std::string> &searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
+
   for (auto &fileInfo : fileInfos) {
     if (fileInfo.found || fileInfo.error)
       continue;
@@ -660,7 +669,9 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
           break;
       }
   }
+}
 
+void FileFinderImpl::performCacheSearch(std::vector<FileInfo> &fileInfos) const {
   // Search data cache
   std::filesystem::path cachePathToSearch(Kernel::ConfigService::Instance().getString("datacachesearch.directory"));
   // Only expect to find path to data cache on IDAaaS
@@ -681,7 +692,9 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
   } else {
     g_log.debug() << "Data cache directory not found, proceeding with the search." << std::endl;
   }
+}
 
+void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) const {
   // Search the archive
   for (auto &fileInfo : fileInfos) {
     if (fileInfo.found || fileInfo.error)
@@ -703,21 +716,7 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
       }
     }
   }
-
-  // Now gather the results and log any failures
-  std::vector<std::filesystem::path> res;
-  for (const auto &fileInfo : fileInfos) {
-    if (throwIfNotFound && !fileInfo.found) {
-      g_log.warning() << "Failed to find file for hint '" << fileInfo.hint << "'\n";
-      throw std::invalid_argument("Unable to find file: search object " + fileInfo.hint);
-    }
-    if (fileInfo.error) {
-      g_log.error() << "Error finding file for hint '" << fileInfo.hint << "': " << fileInfo.errorMsg << "\n";
-    }
-    res.emplace_back(fileInfo.path);
-  }
-  return res;
-};
+}
 
 const API::Result<std::filesystem::path>
 FileFinderImpl::getISISInstrumentDataCachePath(const std::string &cachePathToSearch,
