@@ -668,7 +668,7 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
   for (const auto &file : files) {
     if (throwIfNotFound && !file.found) {
       g_log.warning() << "Failed to find file for hint '" << file.hint << "'\n";
-      throw std::invalid_argument("File not found for hint: " + file.hint);
+      throw std::invalid_argument("Unable to find file: search object " + file.hint);
     }
     if (file.error) {
       g_log.error() << "Error finding file for hint '" << file.hint << "': " << file.errorMsg << "\n";

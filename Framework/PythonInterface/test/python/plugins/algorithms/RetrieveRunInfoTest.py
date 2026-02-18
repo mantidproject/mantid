@@ -50,7 +50,7 @@ class RetrieveRunInfoTest(unittest.TestCase):
         """Check that ALL files are present before proceeding."""
         self.assertRaisesRegex(
             RuntimeError,
-            "Unable to find file: search object '99999'",
+            "Unable to find file: search object IRIS00099999",
             run_algorithm,
             "RetrieveRunInfo",
             Runs=self.__nonexistant_run_file,
