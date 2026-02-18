@@ -639,7 +639,26 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
       }
   }
 
-  // TODO search data cache and archive for files not found in directory search
+  // Search data cache
+  std::filesystem::path cachePathToSearch(Kernel::ConfigService::Instance().getString("datacachesearch.directory"));
+  // Only expect to find path to data cache on IDAaaS
+  if (std::filesystem::exists(cachePathToSearch)) {
+    for (auto &file : files) {
+      if (file.found || file.error)
+        continue;
+
+      auto cacheFilePath =
+          getISISInstrumentDataCachePath(cachePathToSearch.string(), {file.hint}, file.extensionsToSearch);
+
+      if (cacheFilePath) {
+        g_log.debug() << "Found file in data cache: " << cacheFilePath.result() << std::endl;
+        file.found = true;
+        file.path = cacheFilePath.result();
+      }
+    }
+  } else {
+    g_log.debug() << "Data cache directory not found, proceeding with the search." << std::endl;
+  }
 
   // Search the archive
   for (auto &file : files) {
