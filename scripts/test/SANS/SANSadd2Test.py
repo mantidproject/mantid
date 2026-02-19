@@ -50,3 +50,7 @@ class TestSANSAddSampleMetadata(unittest.TestCase):
             mocked_get_geo_info.return_value = (8.0, 8.0, 2.0, SampleShape.DISC)
             SANSadd2.add_runs(("74014", "74014"), "LOQ", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False)
             self.assertEqual(1, mocked_get_geo_info.call_count)
+
+    def test_is_not_allowed_instrument_branch(self):
+        result = SANSadd2.add_runs(["LOQ00113953"], "LOQ", ".nxs")
+        self.assertEqual(result, "")
