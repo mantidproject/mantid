@@ -42,27 +42,38 @@ public:
 
   void setUp() override { ads.clear(); }
 
-  void test_IsValid_Returns_An_Empty_String_For_A_Valid_Name_When_All_CharsAre_Allowed() {
-    TS_ASSERT_EQUALS(ads.isValid("CamelCase"), "");
-    TS_ASSERT_EQUALS(ads.isValid("_Has_Underscore"), "");
-    TS_ASSERT_EQUALS(ads.isValid("alllowercase"), "");
-    TS_ASSERT_EQUALS(ads.isValid("ALLUPPERCASE"), "");
+  void testValidateNameReturnsEmptyStringForValidPythonNames() {
+    TS_ASSERT_EQUALS(ads.validateName("a"), "");
+    TS_ASSERT_EQUALS(ads.validateName("Z"), "");
+    TS_ASSERT_EQUALS(ads.validateName("camelCase"), "");
+    TS_ASSERT_EQUALS(ads.validateName("PascalCase"), "");
+    TS_ASSERT_EQUALS(ads.validateName("has_Underscore"), "");
+    TS_ASSERT_EQUALS(ads.validateName("_starts_with_underscore"), "");
+    TS_ASSERT_EQUALS(ads.validateName("ends_with_underscore_"), "");
+    TS_ASSERT_EQUALS(ads.validateName("__l_o_t_s__o_f__u_n_d_e_r_s_c_o_r_e_s__"), "");
+    TS_ASSERT_EQUALS(ads.validateName("alllowercase"), "");
+    TS_ASSERT_EQUALS(ads.validateName("ALLUPPERCASE"), "");
+    TS_ASSERT_EQUALS(ads.validateName("Numb3rs"), "");
+    TS_ASSERT_EQUALS(ads.validateName("_m0r3_numb3r5"), "");
+    TS_ASSERT_EQUALS(ads.validateName("_"), "");
+    TS_ASSERT_EQUALS(ads.validateName("___"), "");
   }
 
-  void test_IsValid_Returns_An_Error_String_For_A_Invalid_Name() {
+  void testValidateNameReturnsErrorStringForNamesContainingIllegalCharacters() {
     const std::string illegalChars = " +-/*\\%<>&|^~=!@()[]{},:.`$'\"?";
-    ads.setIllegalCharacterList(illegalChars);
-    const size_t nchars(illegalChars.size());
-    for (size_t i = 0; i < nchars; ++i) {
-      std::ostringstream name;
-      name << "NotAllowed" << illegalChars[i];
-      std::ostringstream expectedError;
-      expectedError << "Invalid object name '" << name.str()
-                    << "'. Names cannot contain any of the following characters: " << illegalChars;
-      TS_ASSERT_EQUALS(ads.isValid(name.str()), expectedError.str());
+    for (const char &illegalChar : illegalChars) {
+      const std::string illegalName = std::string("variable_name") + illegalChar;
+      std::string expectedError =
+          "Invalid object name '" + illegalName +
+          "'. Names must start with a letter or underscore and contain only alpha-numeric characters and underscores.";
+      TS_ASSERT_EQUALS(ads.validateName(illegalName), expectedError);
     }
-    // Clean up
-    ads.setIllegalCharacterList("");
+  }
+
+  void testValidateNameReturnsErrorStringForNamesStartingWithNumbers() {
+    TS_ASSERT_EQUALS(ads.validateName("7dodgy_name"),
+                     "Invalid object name '7dodgy_name'. Names must start with a letter or underscore and contain only "
+                     "alpha-numeric characters and underscores.");
   }
 
   void test_Retrieve_Case_Insensitive() {
@@ -140,29 +151,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(ads.remove(name));
   }
 
-  void test_Add_With_Name_Containing_Special_Chars_Throws_Invalid_Argument() {
-    this->doAddingOnInvalidNameTests(false /*Don't use replace*/);
-  }
+  void testAddWithInvalidName() { this->doAddingOnInvalidNameTests(false /*Don't use replace*/); }
 
-  void test_AddOrReplace_With_Name_Containing_Special_Chars_Throws_Invalid_Argument() {
-    this->doAddingOnInvalidNameTests(true /*Use replace*/);
-  }
-
-  void test_Add_Then_Changing_Illegal_Char_List_Only_Affects_Future_Additions() {
-    // The ADS shouldcurrently accept anything
-    const std::string illegalChar(".");
-    std::string name = "ContainsIllegal" + illegalChar;
-    TS_ASSERT_THROWS_NOTHING(addToADS(name));
-    // Ban period characters
-    ads.setIllegalCharacterList(illegalChar);
-    // Check we still have the original one
-    TS_ASSERT_EQUALS(ads.doesExist(name), true);
-    std::string banned = "Also.Contains.Illegal";
-    // This should not be allowed now.
-    TS_ASSERT_THROWS(addToADS(banned), const std::invalid_argument &);
-    // Clear up
-    ads.setIllegalCharacterList("");
-  }
+  void testAddOrReplaceWithInvalidName() { this->doAddingOnInvalidNameTests(true /*Use replace*/); }
 
   void test_AddOrReplace_Does_Not_Throw_When_Adding_Object_That_Has_A_Name_That_Already_Exists() {
     const std::string name("MySpaceAddOrReplace");
@@ -541,30 +532,35 @@ private:
   /// If replace=true then usea addOrReplace
   void doAddingOnInvalidNameTests(bool replace) {
     const std::string illegalChars = " +-/*\\%<>&|^~=!@()[]{},:.`$'\"?";
-    ads.setIllegalCharacterList(illegalChars);
-    const size_t nchars(illegalChars.size());
     const std::string allowed("WsName");
 
-    for (size_t i = 0; i < nchars; ++i) {
+    for (const char &illegalChar : illegalChars) {
       // Build illegal name
-      std::ostringstream name;
-      name << allowed << illegalChars[i] << allowed << illegalChars[i] << allowed;
-      // Add it
-      std::ostringstream errorMsg;
-      errorMsg << "Name containing illegal character " << illegalChars[i] << " is not allowed but ADS did not throw.";
+      std::string name = std::string("ws") + illegalChar + "name";
+
+#ifndef NDEBUG
+      // In debug mode, illegal workspace names throw exceptions.
+      std::string errorMsg =
+          std::string("Expected ADS to throw with illegal character ") + illegalChar + " in workspace name.";
       if (replace) {
-        TSM_ASSERT_THROWS(errorMsg.str(), addToADS(name.str()), const std::invalid_argument &);
+        TSM_ASSERT_THROWS(errorMsg, addToADS(name), const std::invalid_argument &);
       } else {
-        TSM_ASSERT_THROWS(errorMsg.str(), addOrReplaceToADS(name.str()), const std::invalid_argument &);
+        TSM_ASSERT_THROWS(errorMsg, addOrReplaceToADS(name), const std::invalid_argument &);
       }
-      bool stored = ads.doesExist(name.str());
-      TS_ASSERT_EQUALS(stored, false);
-      if (stored)
-        ads.remove(name.str()); // Clear up if the test fails so that it dones't
-                                // impact on others.
+      TS_ASSERT(!ads.doesExist(name));
+#else
+      // In release mode, a warning is printed but no exception is thrown.
+      std::string errorMsg =
+          std::string("Expected ADS not to throw with illegal character ") + illegalChar + " in workspace name.";
+      if (replace) {
+        TSM_ASSERT_THROWS_NOTHING(errorMsg, addToADS(name));
+      } else {
+        TSM_ASSERT_THROWS_NOTHING(errorMsg, addOrReplaceToADS(name));
+      }
+      TS_ASSERT(ads.doesExist(name));
+#endif
+      ads.remove(name); // Clear up if the test fails so that it dones't impact on others.
     }
-    // Clean up
-    ads.setIllegalCharacterList("");
   }
 
   /// Add a ptr to the ADS with the given name
