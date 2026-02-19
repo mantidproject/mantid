@@ -33,7 +33,7 @@ public:
   /// Constructor
   CatalogInfo(const Poco::XML::Element *element);
   /// Copy constructor
-  CatalogInfo(const CatalogInfo &other);
+  CatalogInfo(const CatalogInfo &other) = default;
   /// Obtain catalog name from the facility file.
   const std::string catalogName() const override;
   /// Obtain soap end point from the facility file.

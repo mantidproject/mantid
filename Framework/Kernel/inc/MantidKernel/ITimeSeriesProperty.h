@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
+
 #include <vector>
 
 namespace Mantid {
@@ -28,7 +30,7 @@ class Property;
 class TimeROI;
 /** A non-templated interface to a TimeSeriesProperty.
  */
-class ITimeSeriesProperty {
+class MANTID_KERNEL_DLL ITimeSeriesProperty {
 public:
   /// Fill a SplittingIntervalVec that will filter the events by matching
   virtual TimeROI makeFilterByValue(double min, double max, bool expand = false,

@@ -30,11 +30,6 @@ CatalogInfo::CatalogInfo(const Poco::XML::Element *element) {
   m_linuxPrefix = getAttribute(element, "linux", "replacement");
 }
 
-CatalogInfo::CatalogInfo(const CatalogInfo &other)
-    : m_catalogName(other.m_catalogName), m_soapEndPoint(other.m_soapEndPoint),
-      m_externalDownloadURL(other.m_externalDownloadURL), m_catalogPrefix(other.m_catalogPrefix),
-      m_windowsPrefix(other.m_windowsPrefix), m_macPrefix(other.m_macPrefix), m_linuxPrefix(other.m_linuxPrefix) {}
-
 /**
  * Obtain catalog name from the facility file.
  */
