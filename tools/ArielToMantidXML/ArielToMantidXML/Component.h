@@ -35,13 +35,15 @@ public:
   const std::string printPos() const;
   // Returns the parent of this component
   const Component* const parent() const;
-  // Returns a vector of the children of this component
-  std::vector<Component*> getChildren() const;
   // Flag indicating whether this component has any children
   const bool hasChildren() const;
 
   // Static variable to count the total number of detectors found (just for checking)
   static int counter;
+
+protected:
+  // Returns a vector of the children of this component
+  std::vector<Component*> getChildren() const { return m_children; }
 
 private:
   Component(const Component&);

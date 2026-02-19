@@ -14,7 +14,7 @@ There are three layers to access instrument information, :py:obj:`~mantid.api.Sp
 
 A spectrum corresponds to (a group of) one or more detectors. Most algorithms work with spectra and thus :py:obj:`~mantid.api.SpectrumInfo` would be used. Some algorithms work on a lower level (with individual detectors) and thus :py:obj:`~mantid.geometry.DetectorInfo` would be used.
 
-The legacy :ref:`Instrument` largely consists of ``Detectors`` and ``Components`` - all detectors are also components. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` are the respective replacements for these. :py:obj:`~mantid.geometry.ComponentInfo` introduces a **component index** for access, and :py:obj:`~mantid.geometry:DetectorInfo` introduces a **detector index**, these will be discussed further below. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` share in-memory data. The difference between the two is best thought about in terms of their interfaces. The interface for :py:obj:`~mantid.geometry.DetectorInfo` is designed for working with detectors, and the interface for :py:obj:`~mantid.geometry.ComponentInfo` is designed for working with generic components.
+The legacy :ref:`Instrument` largely consists of ``Detectors`` and ``Components`` - all detectors are also components. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` are the respective replacements for these. :py:obj:`~mantid.geometry.ComponentInfo` introduces a **component index** for access, and :py:obj:`~mantid.geometry.DetectorInfo` introduces a **detector index**, these will be discussed further below. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` share in-memory data. The difference between the two is best thought about in terms of their interfaces. The interface for :py:obj:`~mantid.geometry.DetectorInfo` is designed for working with detectors, and the interface for :py:obj:`~mantid.geometry.ComponentInfo` is designed for working with generic components.
 
 In many cases direct access to legacy :ref:`Instrument` can be removed by using these layers. This will also help in moving to using indexes for enumeration, and only working with IDs for user-facing input.
 
@@ -82,6 +82,8 @@ The conversion is similar to that for ``DetectorInfo``, which is already largely
 * ``sourcePosition()``
 * ``samplePosition()``
 * ``l1()``
+
+Use of ``Instrument::getChildren()`` has been removed, and this method should not be used in any further.  Instead, use ``ComponentInfo::componentsInSubtree()`` to get the component indices for all components in a subtree, and then loop over these indices to perform the required operations.
 
 The following methods are useful helpers on ``ComponentInfo`` that allow the extraction of the **component index** for key components
 
@@ -185,11 +187,5 @@ ___________
 * ``ComponentInfo`` is widely forward declared. Ensure that you import - ``#include "MantidGeometry/Instrument/ComponentInfo.h"``
 * As explained above, a detector index is the same thing as a component index. No translation necessary. The fact that the first 0-n component indexes are for detectors is a feature that can be leveraged.
 * A bank always has a higher component index than any of its nested components. The root is the highest component index of all. This feature can be leveraged. Consider reverse iterating through component indexes when performing operations that involve higher-level components.
-
-Dealing with problems
----------------------
-
-Join #instrument-2_0 on Slack if you need help or have questions. Please also feel free to get in touch with Owen Arnold, Simon Heybrock or Lamar Moore directly for any questions about the ``ComponentInfo`` rollout.
-
 
 .. categories:: Concepts
