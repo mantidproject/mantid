@@ -74,6 +74,9 @@ class ProgressWatcher {
 public:
   /// Constructor
   ProgressWatcher() : m_loadedCount(0), m_foundCount(0), m_observer(*this, &ProgressWatcher::handleProgress) {}
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  ProgressWatcher(const ProgressWatcher &) = delete;
+  ProgressWatcher &operator=(const ProgressWatcher &) = delete;
   /// Add a notification to the count
   void handleProgress(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &notification) {
     const auto &message = notification->message;

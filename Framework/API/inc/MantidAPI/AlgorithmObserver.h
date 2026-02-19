@@ -26,6 +26,10 @@ public:
   AlgorithmObserver(const IAlgorithm_const_sptr &alg);
   virtual ~AlgorithmObserver();
 
+  // must delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  AlgorithmObserver(const AlgorithmObserver &) = delete;
+  AlgorithmObserver &operator=(const AlgorithmObserver &) = delete;
+
   void observeAll(const IAlgorithm_const_sptr &alg);
   void observeProgress(const IAlgorithm_const_sptr &alg);
   void observeStarting();
