@@ -10,8 +10,10 @@ Class which loads and stores a single DNS datafile in a dictionary.
 """
 
 import numpy as np
+import scipy
 from matplotlib import path
 from matplotlib import tri
+from matplotlib.tri import LinearTriInterpolator, UniformTriRefiner
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
 from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers import angle_to_q, get_hkl_float_array
 
@@ -30,7 +32,10 @@ def _is_rectangular_mesh(omega, two_theta, z_mesh):
     return z_mesh.size == len(omega) * len(two_theta)
 
 
-def _correct_rect_grid(omega_mesh, two_theta_mesh, z_mesh, z_error_mesh, omega, two_theta):
+def _refine_mesh(omega_mesh, two_theta_mesh, z_mesh, z_error_mesh, omega, two_theta):
+    """
+    Refines the mesh depending on the grid used.
+    """
     rectangular_grid = _is_rectangular_mesh(omega, two_theta, z_mesh)
     if rectangular_grid:
         omega_mesh, two_theta_mesh = np.meshgrid(omega, two_theta)
@@ -60,6 +65,15 @@ def _get_hkl_mesh(qx_mesh, qy_mesh, dx, dy):
     return hklx_mesh, hkly_mesh
 
 
+def _get_interpolated(value, interpolation_order):
+    # interpolation_order = 0: no interpolation
+    # interpolation_order = 1 (2, or 3): the amount of datapoints is
+    # doubled (tripled or quadrupled), the datapoints are uniformly
+    # spaced between min and max values
+    interpolated_values = np.linspace(value.min(), value.max(), value.size * (interpolation_order + 1))
+    return interpolated_values
+
+
 class DNSScMap(ObjectDict):
     """
     Class for storing data of a single DNS single crystal plot.
@@ -71,7 +85,7 @@ class DNSScMap(ObjectDict):
         omega_corrected = _correct_omega_offset(omega, parameter["omega_offset"])
         omega_mesh, two_theta_mesh, z_mesh, z_error_mesh = _get_mesh(omega_corrected, two_theta, z_mesh, error_mesh)
         omega_unique, two_theta_unique = _get_unique(omega_mesh, two_theta_mesh)
-        omega_mesh, two_theta_mesh, z_mesh, z_error_mesh, rectangular_grid = _correct_rect_grid(
+        omega_mesh, two_theta_mesh, z_mesh, z_error_mesh, rectangular_grid = _refine_mesh(
             omega_mesh, two_theta_mesh, z_mesh, z_error_mesh, omega_corrected, two_theta_unique
         )
         qx_mesh, qy_mesh = _get_q_mesh(omega_mesh, two_theta_mesh, parameter["wavelength"])
@@ -96,47 +110,107 @@ class DNSScMap(ObjectDict):
         self.hkl2 = parameter["hkl2"]
         self.wavelength = parameter["wavelength"]
         self.hkl_mesh = [self.hklx_mesh, self.hkly_mesh, self.z_mesh]
+        self.qxqy_mesh = [self.qx_mesh, self.qy_mesh, self.z_mesh]
+        self.angular_mesh = [self.two_theta_mesh, self.omega_mesh, self.z_mesh]
+        self.triangulation = None
+        self.x_tri = None  # shape (n_triangles, 3)
+        self.x_face = None  # shape (n_triangles,)
+        self.y_tri = None
+        self.y_face = None
+        self.z_tri = None
+        self.z_face = None
+
+    def _get_z_mesh_interpolation(self, two_theta_interp, omega_interp):
+        f = scipy.interpolate.RectBivariateSpline(self.two_theta, self.omega, self.z_mesh, kx=1, ky=1)
+        return f(two_theta_interp, omega_interp)
 
     def triangulate(self, mesh_name, switch=False):
         plot_x, plot_y, _z = getattr(self, mesh_name)
+        if switch:
+            plot_x, plot_y = plot_y, plot_x
         self.triangulation = tri.Triangulation(plot_x.flatten(), plot_y.flatten())
-        return self.triangulation
 
     def interpolate_triangulation(self, interpolation=0):
         if self.triangulation is None:
-            return None
-        z = self.z_mesh
-        triangulator = self.triangulation
-        return [triangulator, z.flatten()]
+            return
+        z = self.z_mesh.flatten()
+        triangulation = self.triangulation
+        interpolator = LinearTriInterpolator(triangulation, z)
+        refiner = UniformTriRefiner(triangulation)
+        triangulation_refined, z_refined = refiner.refine_field(z, subdiv=interpolation, triinterpolator=interpolator)
+        triangles = triangulation_refined.triangles
+        self.triangulation = triangulation_refined
+        self.z_mesh = z_refined
+        self.z_tri = z_refined[triangles]
+        self.z_face = self.z_tri.mean(axis=1)
+        # record x,y locations of the centers of interpolated triangles
+        x = triangulation_refined.x
+        y = triangulation_refined.y
+        self.x_tri = x[triangles]
+        self.y_tri = y[triangles]
+        self.x_face = self.x_tri.mean(axis=1)
+        self.y_face = self.y_tri.mean(axis=1)
 
-    def get_dns_map_border(self, mesh_name):
+    def interpolate_quad_mesh(self, interpolation=3):
+        if not self.rectangular_grid:
+            return
+        two_theta_interpolated = _get_interpolated(self.two_theta, interpolation)
+        omega_interpolated = _get_interpolated(self.omega, interpolation)
+        omega_mesh_interpolated, two_theta_mesh_interpolated = np.meshgrid(omega_interpolated, two_theta_interpolated)
+        qx_mesh_interpolated, qy_mesh_interpolated = _get_q_mesh(omega_mesh_interpolated, two_theta_mesh_interpolated, self.wavelength)
+        hklx_mesh_interpolated, hkly_mesh_interpolated = _get_hkl_mesh(qx_mesh_interpolated, qy_mesh_interpolated, self.dx, self.dy)
+        z_mesh_interpolated = self._get_z_mesh_interpolation(two_theta_interpolated, omega_interpolated)
+        self.angular_mesh = [two_theta_mesh_interpolated, omega_mesh_interpolated, z_mesh_interpolated]
+        self.hkl_mesh = [hklx_mesh_interpolated, hkly_mesh_interpolated, z_mesh_interpolated]
+        self.qxqy_mesh = [qx_mesh_interpolated, qy_mesh_interpolated, z_mesh_interpolated]
+
+    def get_dns_map_border(self, mesh_name, switch):
         two_theta = self.two_theta
         omega = self.omega
         dns_path = np.zeros((2 * two_theta.size + 2 * omega.size, 2))
-        hkl_path = np.zeros((2 * two_theta.size + 2 * omega.size, 2))
-        dns_path[:, 0] = np.concatenate(
+        angular_border = np.zeros((2 * two_theta.size + 2 * omega.size, 2))
+        hkl_border = np.zeros((2 * two_theta.size + 2 * omega.size, 2))
+        qxqy_border = np.zeros((2 * two_theta.size + 2 * omega.size, 2))
+        # In two_theta-omega plane we set borders of the rectangle, specifying edge sides of the rectangle.
+        # For a typical measurement at the DNS (two theta: 5...124, omega: 135...304 deg) it would be:
+        # a) left side two_theta=5; omega=135, 136, ... ,304
+        # b) bottom side two_theta=5, 6, ..., 124; omega=135
+        # c) right side two_theta=124, omega=135, 136, ... ,304
+        # d) upper side two_theta=5, 6, ..., 124; omega=304
+        # set first column values (two theta)
+        angular_border[:, 0] = np.concatenate(
             (two_theta[0] * np.ones(omega.size), two_theta, two_theta[-1] * np.ones(omega.size), np.flip(two_theta))
+        )  # [5,5,..,5(170), 5,6,7,...,124(120), 124,124,..,124(170), 124,123,...,5(120)]
+        # set second column values (omega)
+        angular_border[:, 1] = np.concatenate(
+            (np.flip(omega), omega[0] * np.ones(two_theta.size), omega, omega[-1] * np.ones(two_theta.size))
         )
-        dns_path[:, 1] = np.concatenate((np.flip(omega), omega[0] * np.ones(two_theta.size), omega, omega[-1] * np.ones(two_theta.size)))
-        dns_path[:, 0], dns_path[:, 1] = angle_to_q(dns_path[:, 0], dns_path[:, 1], self.wavelength)
-        if "hkl" in mesh_name:
-            hkl_path[:, 0] = dns_path[:, 0] * self.dx / 2.0 / np.pi
-            hkl_path[:, 1] = dns_path[:, 1] * self.dy / 2.0 / np.pi
-            return path.Path(hkl_path)
+        # [304,303,...,135(170), 135,135,...,135(120), 135,136,...,304(170), 304,304,..,304(120)]
+        qxqy_border[:, 0], qxqy_border[:, 1] = angle_to_q(angular_border[:, 0], angular_border[:, 1], self.wavelength)
+        hkl_border[:, 0], hkl_border[:, 1] = qxqy_border[:, 0] * self.dx / 2.0 / np.pi, qxqy_border[:, 1] * self.dy / 2.0 / np.pi
+        if "angular" in mesh_name:
+            dns_path = angular_border
+        elif "qxqy" in mesh_name:
+            dns_path = qxqy_border
+        elif "hkl" in mesh_name:
+            dns_path = hkl_border
+        if switch:
+            dns_path = dns_path[::-1, ::-1]
         return path.Path(dns_path)
 
-    def mask_triangles(self, mesh_name):
+    def mask_triangles(self, mesh_name, switch):
         x, y, _z = getattr(self, mesh_name)
+        if switch:
+            x, y = y, x
         x = x.flatten()
         y = y.flatten()
-        dns_path = self.get_dns_map_border(mesh_name)
+        dns_path = self.get_dns_map_border(mesh_name, switch)
         triangles = self.triangulation.triangles
         x_y_triangles = np.zeros((len(x[triangles]), 2))
         x_y_triangles[:, 0] = np.mean(x[triangles], axis=1)
         x_y_triangles[:, 1] = np.mean(y[triangles], axis=1)
         maxi = dns_path.contains_points(x_y_triangles)
         self.triangulation.set_mask(np.invert(maxi))
-        return self.triangulation
 
     def get_changing_indexes(self):
         """
@@ -151,6 +225,11 @@ class DNSScMap(ObjectDict):
         basis_indexes = list(range(len(projection_dims)))
         del basis_indexes[projection_dims.index(min(projection_dims))]
         return basis_indexes
+
+    def get_crystal_axis_names(self):
+        changing_index = self.get_changing_indexes()
+        name_dict = {0: "h (r.l.u)", 1: "k (r.l.u)", 2: "l (r.l.u)"}
+        return name_dict[changing_index[0]], name_dict[changing_index[1]]
 
     def get_changing_hkl_components(self):
         index = self.get_changing_indexes()

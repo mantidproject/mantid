@@ -54,7 +54,7 @@ def get_z_min_max(z, xlim=None, ylim=None, plot_x=None, plot_y=None):
     if flatten_z.size != 0:
         z_max = flatten_z.max()
         z_min = flatten_z.min()
-        pz_min = min(i for i in flatten_z if i > 0)
+        pz_min = min((i for i in flatten_z if i > 0), default=0)
     else:
         z_max = 0
         z_min = 0
@@ -62,30 +62,53 @@ def get_z_min_max(z, xlim=None, ylim=None, plot_x=None, plot_y=None):
     return z_min, z_max, pz_min
 
 
-def get_hkl_intensity_from_cursor(single_crystal_map, axis_type, x, y):
-    if axis_type["switch"]:  # switch axes
-        x, y = y, x
-    hkl1 = single_crystal_map.hkl1.split(",")
-    hkl2 = single_crystal_map.hkl2.split(",")
+def get_hkl_intensity_from_cursor(single_crystal_map, plot_settings, x, y):
+    tau1 = single_crystal_map.hkl1.split(",")
+    tau2 = single_crystal_map.hkl2.split(",")
     dx = single_crystal_map.dx
     dy = single_crystal_map.dy
-    if axis_type["type"] == "angular":  # two_theta omega
+    interpolation_on = bool(plot_settings["interpolate"])
+    plot_type = plot_settings["plot_type"]
+
+    if plot_settings["type"] == "angular":  # two_theta omega
         qx, qy = angle_to_q(two_theta=x, omega=y, wavelength=single_crystal_map.wavelength)
-        hklx = hkl_to_hklx(hkl1, qx, dx)
-        hkly = hkl_to_hklx(hkl2, qy, dy)
-        pos_q = closest_mesh_point(single_crystal_map.two_theta_mesh, single_crystal_map.omega_mesh, x, y)
-    elif axis_type["type"] == "qxqy":  # qx qy
+        hklx = tau_to_hkl_proj_vect(tau1, qx, dx)
+        hkly = tau_to_hkl_proj_vect(tau2, qy, dy)
+    elif plot_settings["type"] == "qxqy":  # qx qy
         qx, qy = x, y
-        hklx = hkl_to_hklx(hkl1, qx, dx)
-        hkly = hkl_to_hklx(hkl2, qy, dy)
-        pos_q = closest_mesh_point(single_crystal_map.qx_mesh, single_crystal_map.qy_mesh, qx, qy)
-    elif axis_type["type"] == "hkl":  # hkl
-        hklx = hkl_to_hklx(hkl1, x=x)
-        hkly = hkl_to_hklx(hkl2, x=y)
-        pos_q = closest_mesh_point(single_crystal_map.hklx_mesh, single_crystal_map.hkly_mesh, x, y)
-    z = single_crystal_map.z_mesh.flatten()[pos_q]
-    error = single_crystal_map.error_mesh.flatten()[pos_q]
+        hklx = tau_to_hkl_proj_vect(tau1, qx, dx)
+        hkly = tau_to_hkl_proj_vect(tau2, qy, dy)
+    elif plot_settings["type"] == "hkl":  # hkl
+        hklx = tau_to_hkl_proj_vect(tau1, x=x)
+        hkly = tau_to_hkl_proj_vect(tau2, x=y)
     hkl = hkl_xy_to_hkl(hklx, hkly)
+
+    if plot_type == "triangulation":
+        z_per_triangle = single_crystal_map.z_face
+        trifinder = single_crystal_map.triangulation.get_trifinder()
+        pos_q = trifinder(x, y)
+        z = z_per_triangle.flatten()[pos_q]
+    else:  # quadmesh or scatterplot
+        # in case of triangulation, axis switch is already included when mesh is created
+        if plot_settings["switch"]:
+            x, y = y, x
+        if plot_settings["type"] == "angular":  # two_theta omega
+            pos_q = closest_mesh_point(single_crystal_map.angular_mesh[0], single_crystal_map.angular_mesh[1], x, y)
+            z = single_crystal_map.angular_mesh[2].flatten()[pos_q]
+        elif plot_settings["type"] == "qxqy":  # qx qy
+            pos_q = closest_mesh_point(single_crystal_map.qxqy_mesh[0], single_crystal_map.qxqy_mesh[1], x, y)
+            z = single_crystal_map.qxqy_mesh[2].flatten()[pos_q]
+        elif plot_settings["type"] == "hkl":  # hkl
+            pos_q = closest_mesh_point(single_crystal_map.hkl_mesh[0], single_crystal_map.hkl_mesh[1], x, y)
+            z = single_crystal_map.hkl_mesh[2].flatten()[pos_q]
+
+    if interpolation_on or plot_type == "triangulation":
+        # Errors are undefined on interpolated points. In addition, when triangulation is on
+        # then the original points are not used and the errors cannot be assigned.
+        error = None
+    else:
+        error = single_crystal_map.error_mesh.flatten()[pos_q]
+
     return [hkl[0], hkl[1], hkl[2], z, error]
 
 
@@ -95,28 +118,41 @@ def closest_mesh_point(x_mesh, y_mesh, x, y):
     return closest_point
 
 
-def hkl_to_hklx(hkl, q=None, d=None, x=None):
+def tau_to_hkl_proj_vect(tau, q=None, d=None, x=None):
+    """
+    Calculates a projection vector value hklx/hkly for the provided
+    basis vector tau_1/tau_2 and corresponding projection x/y.
+    When x/y is not explicitly provided, it is calculated from the
+    given set of (qx, dx)/(qy, dy).
+    """
     if d is None:
-        return [x * float(a) for a in hkl]
-    return [q_to_hkl_xy(q, d) * float(a) for a in hkl]
+        return [x * float(a) for a in tau]
+    return [q_xy_to_xy(q, d) * float(a) for a in tau]
 
 
 def hkl_xy_to_hkl(hklx, hkly):
+    """
+    Obtains hkl from knowledge of its projection vector values
+    hklx and hkly along specified basis vectors tau_1 and tau_2.
+    hklx = x * tau_1, hkly = y * tau_2, hkl = hklx + hkly.
+    hklx, hkly, hkl, tau_1, and tau_2 - represent vectors.
+    """
     return [hklx[0] + hkly[0], hklx[1] + hkly[1], hklx[2] + hkly[2]]
 
 
-def hkl_xy_to_q(hkl, d):
-    return hkl / d * 2.0 * np.pi
-
-
-def q_to_hkl_xy(q, d):
+def q_xy_to_xy(q, d):
+    """
+    Calculates x/y projection of hkl on a reciprocal basis
+    vector tau_1/tau_2 using (qx, dx)/(qy, dy) as an input.
+    """
     return q * d / 2.0 / np.pi
 
 
 def get_projection(x, z):
-    numpoints = min(int(np.sqrt(len(x))) + 1, len(np.unique(x)) + 1)
-    projection, _dummy = np.histogram(x, numpoints, weights=z)
-    counts, px = np.histogram(x, numpoints)
-    px = (px[:-1] + px[1:]) / 2.0
-    py = projection / counts
-    return px, py
+    # use numpy's implementation of the optimal bin width calculation
+    bin_edges = np.histogram_bin_edges(x, bins="auto")
+    numpoints = bin_edges.size - 1
+    # use weights to sum up intensity values corresponding to the same bin
+    i_projection, x_bin_edges = np.histogram(x, numpoints, weights=z)
+    x_bin_centers = (x_bin_edges[:-1] + x_bin_edges[1:]) / 2.0
+    return x_bin_centers, i_projection

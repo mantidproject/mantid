@@ -9,6 +9,7 @@
 DNS single crystal elastic plot tab of DNS reduction GUI.
 """
 
+import numpy as np
 import matplotlib
 from matplotlib.ticker import AutoMinorLocator, NullLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -28,25 +29,10 @@ class DNSScPlot:
         self._plot = None
         self._colorbar = None
         self._ax_hist = [None, None]
-        self._cid = None
-
-    def disconnect_ylim_change(self):
-        if self._cid is not None:
-            self._ax.callbacks.disconnect(self._cid)
-
-    def connect_ylim_change(self):
-        self._cid = self._ax.callbacks.connect("ylim_changed", self._parent.change_cb_range_on_zoom)
-
-    def on_resize(self, _dummy=None):  # connected to canvas resize
-        self._fig.tight_layout(pad=0.3)
 
     @staticmethod
     def set_fontsize(fontsize):
         matplotlib.rcParams.update({"font.size": fontsize})
-
-    def redraw_colorbar(self):
-        # called by home button clicked
-        self._colorbar._draw_all()
 
     def create_colorbar(self):
         self._colorbar = self._fig.colorbar(self._plot, ax=self._ax, extend="max", pad=0.01)
@@ -57,7 +43,13 @@ class DNSScPlot:
     def set_linecolor(self, lines):
         lines = ["face", "white", "black"][lines]
         if self._plot is not None:
-            self._plot.set_edgecolors(lines)
+            self._plot.set_edgecolor(lines)
+
+    def set_pointsize(self, lines):
+        if self._plot is not None:
+            a = np.ones(len(self._plot.get_sizes()))
+            size = a * [10, 50, 100, 500, 1000][lines]
+            self._plot.set_sizes(size)
 
     def set_shading(self, shading):
         if self._plot is not None:
@@ -101,12 +93,17 @@ class DNSScPlot:
         else:
             self._ax.grid(0)
 
+    def set_aspect_ratio(self, aspect_ratio):
+        self._ax.set_aspect(aspect_ratio, anchor="NW")
+
     # projections
-    def set_projections(self, x_proj, y_proj):
+    def set_projections(self, x_proj, y_proj, xlim, ylim):
         self.remove_projections()
         divider = make_axes_locatable(self._ax)
         self._ax_hist[0] = divider.append_axes("top", 1.2, pad=0.1, sharex=self._ax)
         self._ax_hist[1] = divider.append_axes("right", 1.2, pad=0.1, sharey=self._ax)
+        self._ax.set_xlim(xlim[0], xlim[1])
+        self._ax.set_ylim(ylim[0], ylim[1])
         self._ax.set_xmargin(0)
         self._ax.set_ymargin(0)
         self._ax_hist[0].set_xmargin(0)
@@ -130,8 +127,25 @@ class DNSScPlot:
         ylim = self._ax.get_ylim()
         return xlim, ylim
 
-    def plot_triangulation(self, triang, z, cmap, edge_colors, shading):
+    # plotting
+    def clear_plot(self):
+        if self._ax:
+            self._ax.figure.clear()
+
+    def plot_triangulation(self, triang, z, z_face, cmap, edge_colors, shading):
         self._ax.set_visible(True)
-        self._plot = self._ax.tripcolor(triang, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
+        if shading == "flat":
+            self._plot = self._ax.tripcolor(triang, facecolors=z_face, cmap=cmap, edgecolors=edge_colors, shading=shading)
+        else:  # "gouraud" shading
+            self._plot = self._ax.tripcolor(triang, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
         self._ax.set_xmargin(0)
         self._ax.set_ymargin(0)
+
+    def plot_quadmesh(self, x, y, z, cmap, edge_colors, shading):
+        # pylint: disable=too-many-arguments
+        self._ax.set_visible(True)
+        self._plot = self._ax.pcolormesh(x, y, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
+
+    def plot_scatter(self, x, y, z, cmap):
+        self._ax.set_visible(True)
+        self._plot = self._ax.scatter(x, y, c=z, s=100, cmap=cmap, zorder=100)

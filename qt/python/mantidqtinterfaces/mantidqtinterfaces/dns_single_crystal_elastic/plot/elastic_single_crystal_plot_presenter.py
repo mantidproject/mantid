@@ -14,6 +14,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSOb
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
 from mantidqtinterfaces.dns_single_crystal_elastic.plot import mpl_helpers
 from mantidqtinterfaces.dns_single_crystal_elastic.plot.grid_locator import get_grid_helper
+from mantid.simpleapi import logger
 
 
 class DNSElasticSCPlotPresenter(DNSObserver):
@@ -28,30 +29,27 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._plot_param.colormap_name = "jet"
         self._plot_param.font_size = 1
         self._plot_param.lines = 0
+        self._plot_param.pointsize = 2
         self._plot_param.xlim = [None, None]
         self._plot_param.ylim = [None, None]
         self._plot_param.zlim = [None, None]
         self._plot_param.projections = False
+        self._plot_param.use_default_lims = True
+        self._plot_param.set_zlims = True
 
-    def _toggle_projections(self, set_proj):
-        self.view.sig_change_cb_range_on_zoom.disconnect()
-        self._plot_param.projections = set_proj
-        axis_type = self.view.get_axis_type()
-        if set_proj and self.model.has_data():
-            x_proj, y_proj = self._calculate_projections(axis_type["switch"])
-            if axis_type["switch"]:
-                x_proj, y_proj = y_proj, x_proj
-            self.view.single_crystal_plot.set_projections(x_proj, y_proj)
+    def _toggle_projections(self, proj_on):
+        self._plot_param.projections = proj_on
+        if proj_on and self.model.has_data():
+            x_proj, y_proj = self._calculate_projections()
+            xlim, ylim, dummy_z = self._get_current_spinners_lims()
+            self.view.single_crystal_plot.set_projections(x_proj, y_proj, xlim, ylim)
             self.view.draw()
         else:
             self.view.single_crystal_plot.remove_projections()
-            self._plot()
-        self.view.sig_change_cb_range_on_zoom.connect(self._change_color_bar_range)
+            self._plot(self.view.initial_values)
 
-    def _calculate_projections(self, switch=False):
+    def _calculate_projections(self):
         xlim, ylim = self.view.single_crystal_plot.get_active_limits()
-        if switch:
-            xlim, ylim = ylim, xlim
         x_proj, y_proj = self.model.get_projections(xlim, ylim)
         return x_proj, y_proj
 
@@ -63,7 +61,10 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         )  # check is necessary for simulation
 
     def _plot(self, initial_values=None):
-        axis_type = self.view.get_axis_type()
+        """
+        It is called every time any of the plot view options is changed
+        or another polarization channel is selected for plotting.
+        """
         plot_list = self.view.datalist.get_checked_plots()
         if not plot_list:
             return
@@ -72,19 +73,58 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         generated_dict = self.param_dict["elastic_single_crystal_script_generator"]
         data_array = generated_dict["data_arrays"][self._plot_param.plot_name]
         options = self.param_dict["elastic_single_crystal_options"]
-        self.model.create_single_crystal_map(data_array, options, initial_values)
+        single_crystal_map = self.model.create_single_crystal_map(data_array, options, initial_values)
+        self._determine_plot_type_options(single_crystal_map)
         self._change_grid_state(draw=False, change=False)
         self.view.create_subfigure(self._plot_param.grid_helper)
-        self._want_plot(axis_type["plot_type"])
+        plot_type = self.view.get_plotting_setting("plot_type")
+        self._want_plot(plot_type)
         self._set_plotting_grid(self._crystallographical_axes())
+        self._set_aspect_ratio()
         self._set_ax_formatter()
         self._set_axis_labels()
         self.view.single_crystal_plot.create_colorbar()
-        self.view.single_crystal_plot.on_resize()
         self._set_initial_omega_offset_dx_dy()
-        self._change_displayed_plot_limits(include_zlim=True)
+        def_xlim, def_ylim, def_zlim = self.model.get_default_data_lims()
+        xlim, ylim, zlim = self._get_current_spinners_lims()
+        if self._plot_param.use_default_lims:
+            self._set_plot_param_lims(def_xlim, def_ylim, def_zlim, include_zlim=self._plot_param.set_zlims)
+        else:
+            if self._plot_param.set_zlims:
+                # use default value for zlim in case of xy-zooming sync
+                self._set_plot_param_lims(xlim, ylim, def_zlim, include_zlim=self._plot_param.set_zlims)
+            else:
+                self._set_plot_param_lims(xlim, ylim, zlim, include_zlim=self._plot_param.set_zlims)
+        self._set_spinners_lims(include_zlim=self._plot_param.set_zlims)
+        self._set_plotting_lims(include_zlim=self._plot_param.set_zlims)
+        if self._plot_param.projections:
+            self._toggle_projections(proj_on=True)
+        self._set_log()
         self.view.canvas.figure.tight_layout()
         self.view.draw()
+
+    def _set_plot_param_lims(self, xlim, ylim, zlim, include_zlim=True):
+        self._plot_param.xlim = xlim
+        self._plot_param.ylim = ylim
+        if include_zlim:
+            self._plot_param.zlim = zlim
+
+    def _update_plot_param_lims(self, include_zlim=True):
+        xlim, ylim = self.view.single_crystal_plot.get_active_limits()
+        self._plot_param.xlim = xlim
+        self._plot_param.ylim = ylim
+        if include_zlim:
+            zlim = self.model.get_data_z_min_max(xlim, ylim)
+            self._plot_param.zlim = zlim
+
+    def _set_plotting_lims(self, include_zlim=True):
+        self.view.single_crystal_plot.set_xlim(self._plot_param.xlim)
+        self.view.single_crystal_plot.set_ylim(self._plot_param.ylim)
+        if include_zlim:
+            self.view.single_crystal_plot.set_zlim(self._plot_param.zlim)
+
+    def process_auto_reduction_request(self):
+        self.view.single_crystal_plot.clear_plot()
 
     def tab_got_focus(self):
         workspaces = sorted(self.param_dict["elastic_single_crystal_script_generator"]["plot_list"])
@@ -93,6 +133,15 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self._plotted_script_number = self.param_dict["elastic_single_crystal_script_generator"]["script_number"]
             self.view.process_events()
             self.view.datalist.check_first()
+
+    def _set_zooming_data(self, include_zlim=False):
+        self._update_plot_param_lims(include_zlim)
+        self._set_spinners_lims(include_zlim)
+        self._set_plotting_lims(include_zlim)
+        if self._plot_param.projections:
+            self._toggle_projections(proj_on=True)
+        # set this flag to false, not to update plot lims on a subsequent call of _plot()
+        self._plot_param.use_default_lims = False
 
     def _set_initial_omega_offset_dx_dy(self):
         omega_offset = self.model.get_omega_offset()
@@ -122,27 +171,58 @@ class DNSElasticSCPlotPresenter(DNSObserver):
 
     def _plot_triangulation(self, interpolate, axis_type, switch):
         color_map, edge_colors, shading = self._get_plot_styles()
-        triangulation, z = self.model.get_interpolated_triangulation(interpolate, axis_type, switch)
-        self.view.single_crystal_plot.plot_triangulation(triangulation, z, color_map, edge_colors, shading)
+        triangulation, z, z_face = self.model.generate_triangulation_mesh(interpolate, axis_type, switch)
+        self.view.single_crystal_plot.plot_triangulation(triangulation, z, z_face, color_map, edge_colors, shading)
+
+    def _plot_quadmesh(self, interpolate, axis_type, switch):
+        color_map, edge_colors, shading = self._get_plot_styles()
+        if shading == "flat":  # prevents dropping of line
+            shading = "nearest"
+        x, y, z = self.model.generate_quad_mesh(interpolate, axis_type, switch)
+        self.view.single_crystal_plot.plot_quadmesh(x, y, z, color_map, edge_colors, shading)
+
+    def _plot_scatter(self, axis_type, switch):
+        color_map = self._get_plot_styles()[0]
+        x, y, z = self.model.generate_scatter_mesh(axis_type, switch)
+        self.view.single_crystal_plot.plot_scatter(x, y, z, color_map)
 
     def _want_plot(self, plot_type):
-        axis_type = self.view.get_axis_type()
-        self._plot_triangulation(axis_type["interpolate"], axis_type["type"], axis_type["switch"])
+        plot_settings = self.view.get_plotting_settings_dict()
+        if plot_type == "triangulation":
+            self._plot_triangulation(plot_settings["interpolate"], plot_settings["type"], plot_settings["switch"])
+        if plot_type == "quadmesh":
+            self._plot_quadmesh(plot_settings["interpolate"], plot_settings["type"], plot_settings["switch"])
+        if plot_type == "scatter":
+            self._plot_scatter(plot_settings["type"], plot_settings["switch"])
 
     def _get_plot_styles(self):
         own_dict = self.view.get_state()
-        shading = "flat"
+        shading = self.view.get_plotting_setting("shading")
         edge_colors = ["face", "white", "black"][self._plot_param.lines]
         colormap_name = own_dict["colormap"]
         if own_dict["invert_cb"]:
             colormap_name += "_r"
-        cmap = mpl_helpers.get_cmap(colormap_name)
-        return cmap, edge_colors, shading
+        color_map = mpl_helpers.get_cmap(colormap_name)
+        return color_map, edge_colors, shading
 
     def _set_axis_labels(self):
-        axis_type = self.view.get_axis_type()
-        x_label, y_label = self.model.get_axis_labels(axis_type["type"], self._crystallographical_axes())
+        axis_type = self.view.get_plotting_setting("type")
+        switch = self.view.get_plotting_setting("switch")
+        x_label, y_label = self.model.get_axis_labels(axis_type, self._crystallographical_axes())
+        if switch:
+            x_label, y_label = y_label, x_label
         self.view.single_crystal_plot.set_axis_labels(x_label, y_label)
+
+    def _set_aspect_ratio(self):
+        """
+        If aspect ratio tick mark is selected:
+        a) sets aspect ratio to 1 for two_theta-omega and qx-qy planes;
+        b) sets aspect ratio to dx/dy for n_x-n_y plane. Useful when
+        the crystallographic plane is additionally activated.
+        """
+        plot_settings = self.view.get_plotting_settings_dict()
+        ratio = self.model.get_aspect_ratio(plot_settings)
+        self.view.single_crystal_plot.set_aspect_ratio(ratio)
 
     def _change_crystal_axes_grid(self):
         current_state = self._plot_param.grid_state % 4
@@ -179,82 +259,36 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self._plot_param.grid_state = 1
         else:
             self._plot_param.grid_state = 0
-        self._plot()
+        self._plot(self.view.initial_values)
 
     def _change_line_style(self):
-        self._plot_param.lines = (self._plot_param.lines + 1) % 3
-        self.view.single_crystal_plot.set_linecolor(self._plot_param.lines)
+        plot_type = self.view.get_plotting_setting("plot_type")
+        if plot_type == "scatter":
+            self._plot_param.pointsize = (self._plot_param.pointsize + 1) % 5
+            self.view.single_crystal_plot.set_pointsize(self._plot_param.pointsize)
+        else:
+            self._plot_param.lines = (self._plot_param.lines + 1) % 3
+            self.view.single_crystal_plot.set_linecolor(self._plot_param.lines)
         self.view.draw()
 
     def _set_ax_formatter(self):
-        axis_type = self.view.get_axis_type()
-        format_coord = self.model.get_format_coord(axis_type)
+        switch = self.view.get_plotting_setting("switch")
+        plot_settings = self.view.get_plotting_settings_dict()
+        format_coord = self.model.get_format_coord(plot_settings, switch)
         self.view.single_crystal_plot.set_format_coord(format_coord)
 
     def _manual_lim_changed(self):
-        xlim, ylim, _dummy, _dummy = self._get_current_limits(zoom=False)
-        self.view.single_crystal_plot.set_xlim(xlim)
-        self.view.single_crystal_plot.set_ylim(ylim)
-        self._change_color_bar_range(zoom=False)
+        xlim, ylim, zlim = self._get_current_spinners_lims()
+        self._set_plot_param_lims(xlim, ylim, zlim)
+        self._set_plotting_lims()
         self.view.draw()
-
-    def _change_color_bar_range(self, zoom=True):
-        xlim, ylim, zlim, _dummy = self._get_current_limits(zoom)
-        self.view.single_crystal_plot.set_zlim(zlim)
-        if zoom:  # saving zoom state to apply to all plots
-            self._plot_param.xlim = xlim
-            self._plot_param.ylim = ylim
-            self._plot_param.zlim = zlim
-            self._plot_param.sny_zoom_in = self.view.datalist.get_checked_plots()
-        if self._plot_param.projections:
-            self._toggle_projections(True)
-        if zoom:
-            self.view.draw()
+        # set this flag to false, not to update plot lims on a subsequent call of _plot()
+        self._plot_param.use_default_lims = False
 
     def _home_button_clicked(self):
-        axis_type = self.view.get_axis_type()
-        x_lim, y_lim = self.model.get_data_xy_lim(axis_type["switch"])
-        z_min, z_max, _dummy = self.model.get_data_z_min_max(x_lim, y_lim)
-        self.view._map["x_min"].setValue(x_lim[0])
-        self.view._map["x_max"].setValue(x_lim[1])
-        self.view._map["y_min"].setValue(y_lim[0])
-        self.view._map["y_max"].setValue(y_lim[1])
-        self.view._map["z_min"].setValue(z_min)
-        self.view._map["z_max"].setValue(z_max)
-
-    def _get_current_xy_lim(self, zoom=False):
-        own_dict = self.view.get_state()
-        axis_type = self.view.get_axis_type()
-        xlim, ylim = [[own_dict["x_min"], own_dict["x_max"]], [own_dict["y_min"], own_dict["y_max"]]]
-        if zoom:
-            dx_lim, dy_lim = self.view.single_crystal_plot.get_active_limits()
-        else:
-            dx_lim, dy_lim = self.model.get_data_xy_lim(axis_type["switch"])
-        if xlim[0] is None:
-            xlim = dx_lim
-        if ylim[0] is None:
-            ylim = dy_lim
-        return xlim, ylim
-
-    def _get_current_z_lim(self, xlim, ylim, zoom):
-        manual_z = True
-        own_dict = self.view.get_state()
-        axis_type = self.view.get_axis_type()
-        if axis_type["switch"]:
-            xlim, ylim = ylim, xlim
-        dz_min, dz_max, dpz_min = self.model.get_data_z_min_max(xlim, ylim)
-        zlim = [own_dict["z_min"], own_dict["z_max"]]
-        if zlim[0] is None:
-            zlim = [dz_min, dz_max]
-            manual_z = False
-        if own_dict["log_scale"] and zlim[0] < 0:
-            zlim[0] = dpz_min
-        return zlim, manual_z
-
-    def _get_current_limits(self, zoom=True):
-        x_lim, y_lim = self._get_current_xy_lim(zoom)
-        z_lim, manual_z = self._get_current_z_lim(x_lim, y_lim, zoom)
-        return x_lim, y_lim, z_lim, manual_z
+        self._plot_param.use_default_lims = True
+        self._plot_param.set_zlims = True
+        self._plot()
 
     def _save_data(self):
         export_dir = self.param_dict["paths"]["export_dir"]
@@ -267,13 +301,19 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.show_status_message(f"Displayed data have been saved to: {export_file_name}", 10, clear=True)
 
     def _get_column_headers(self):
-        column_headers = np.array([["n_x", "n_y", "Intensity"]])
+        axis_labels = self.view.get_plotting_settings_dict()["type"]
+        if axis_labels == "qxqy":
+            column_headers = np.array([["q_x (1/A)", "q_y (1/A)", "Intensity"]])
+        elif axis_labels == "hkl":
+            column_headers = np.array([["n_x", "n_y", "Intensity"]])
+        elif axis_labels == "angular":
+            column_headers = np.array([["2\u03b8 (deg)", "\u03c9 (deg)", "Intensity"]])
         return column_headers
 
     def _create_grid_helper(self):
-        axis_type = self.view.get_axis_type()
+        switch = self.view.get_plotting_setting("switch")
         a, b, c, d = self.model.get_changing_hkl_components()
-        return get_grid_helper(self._plot_param.grid_helper, self._plot_param.grid_state, a, b, c, d, axis_type["switch"])
+        return get_grid_helper(self._plot_param.grid_helper, self._plot_param.grid_state, a, b, c, d, switch)
 
     def _set_colormap(self):
         cmap = self._get_plot_styles()[0]
@@ -282,7 +322,10 @@ class DNSElasticSCPlotPresenter(DNSObserver):
 
     def _set_log(self):
         log = self.view.get_state()["log_scale"]
-        _dummy, _dummy, zlim, _dummy = self._get_current_limits(zoom=True)
+        xlim, ylim, zlim = self._get_current_spinners_lims()
+        dz_min, dz_max, dpz_min = self.model.get_data_z_min_max(xlim, ylim)
+        if log and zlim[0] < 0:
+            zlim[0] = dpz_min
         norm = mpl_helpers.get_log_norm(log, zlim)
         self.view.single_crystal_plot.set_norm(norm)
         self.view.draw()
@@ -294,23 +337,85 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self._plot_param.font_size = font_size
             self.view.single_crystal_plot.set_fontsize(font_size)
             if draw:
-                self._plot()
+                self._plot(self.view.initial_values)
 
     def _crystallographical_axes(self):
         own_dict = self.view.get_state()
         return own_dict["crystal_axes"]
 
-    def _change_displayed_plot_limits(self, include_zlim=False):
-        xlim, ylim = self.view.single_crystal_plot.get_active_limits()
-        self.view._map["x_min"].setValue(xlim[0])
-        self.view._map["x_max"].setValue(xlim[1])
-        self.view._map["y_min"].setValue(ylim[0])
-        self.view._map["y_max"].setValue(ylim[1])
+    def _determine_plot_type_options(self, sc_map):
+        if not sc_map.rectangular_grid:
+            self.view.views_menu.menus[0].action_quad_mesh.setEnabled(False)
+            if self.view.views_menu.menus[0].action_quad_mesh.isChecked():
+                logger.warning(
+                    "Warning: quadmesh only possible on a rectangular grid. Selected data do not compose "
+                    "a rectangular grid. The selected plot type is changed to triangulation."
+                )
+                self.view.views_menu.menus[0].action_triangulation_mesh.setChecked(True)
+        else:
+            self.view.views_menu.menus[0].action_quad_mesh.setEnabled(True)
+        axes_type = self.view.get_plotting_setting("type")
+        if axes_type == "angular":
+            self.view._map["crystal_axes"].setChecked(False)
+            self.view._map["crystal_axes"].setEnabled(False)
+            self.view.views_menu.menus[1].action_fix_aspect.setChecked(False)
+            self.view.views_menu.menus[1].action_fix_aspect.setEnabled(False)
+        else:
+            self.view._map["crystal_axes"].setEnabled(True)
+            self.view.views_menu.menus[1].action_fix_aspect.setEnabled(True)
+
+    def _get_current_spinners_lims(self):
+        own_dict = self.view.get_state()
+        xlim = [own_dict["x_min"], own_dict["x_max"]]
+        ylim = [own_dict["y_min"], own_dict["y_max"]]
+        zlim = [own_dict["z_min"], own_dict["z_max"]]
+        return xlim, ylim, zlim
+
+    def _set_spinners_lims(self, include_zlim=True):
+        self.view.sig_manual_lim_changed.disconnect()
+        self.view._map["x_min"].setValue(self._plot_param.xlim[0])
+        self.view._map["x_max"].setValue(self._plot_param.xlim[1])
+        self.view._map["y_min"].setValue(self._plot_param.ylim[0])
+        self.view._map["y_max"].setValue(self._plot_param.ylim[1])
         if include_zlim:
-            zlim = self.model.get_data_z_min_max(xlim, ylim)
-            self.view._map["z_min"].setValue(zlim[0])
-            self.view._map["z_max"].setValue(zlim[1])
-            self._change_color_bar_range(zoom=False)
+            self.view._map["z_min"].setValue(self._plot_param.zlim[0])
+            self.view._map["z_max"].setValue(self._plot_param.zlim[1])
+        self.view.sig_manual_lim_changed.connect(self._manual_lim_changed)
+
+    def _switch_spinners_lims(self):
+        xlim, ylim, dummy = self._get_current_spinners_lims()
+        self.view._map["x_min"].setValue(ylim[0])
+        self.view._map["x_max"].setValue(ylim[1])
+        self.view._map["y_min"].setValue(xlim[0])
+        self.view._map["y_max"].setValue(xlim[1])
+        self._plot()
+        if self._plot_param.projections:
+            self._toggle_projections(proj_on=True)
+
+    def _change_axes(self):
+        self._plot_param.use_default_lims = True
+        self._plot()
+        if self._plot_param.projections:
+            self._toggle_projections(proj_on=True)
+
+    def _change_ws(self):
+        zoom_state_dict = self.view.get_plotting_setting("zoom")
+        z_sync = zoom_state_dict["fix_z"]
+        xy_sync = zoom_state_dict["fix_xy"]
+        no_sync = (not z_sync) and (not xy_sync)
+        if no_sync:
+            self._plot_param.use_default_lims = True
+            self._plot_param.set_zlims = True
+        elif xy_sync and z_sync:
+            self._plot_param.use_default_lims = False
+            self._plot_param.set_zlims = False
+        elif z_sync:
+            self._plot_param.use_default_lims = True
+            self._plot_param.set_zlims = False
+        else:  # xy_sync
+            self._plot_param.use_default_lims = False
+            self._plot_param.set_zlims = True
+        self._plot()
 
     def _attach_signal_slots(self):
         self.view.sig_plot.connect(self._plot)
@@ -323,11 +428,13 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.sig_change_colormap.connect(self._set_colormap)
         self.view.sig_change_log.connect(self._set_log)
         self.view.sig_change_linestyle.connect(self._change_line_style)
-        self.view.sig_change_cb_range_on_zoom.connect(self._change_color_bar_range)
         self.view.sig_manual_lim_changed.connect(self._manual_lim_changed)
         self._plotted_script_number = 0
         self.view.sig_change_grid.connect(self._change_grid_state)
         self.view.sig_change_crystal_axes.connect(self._change_crystal_axes)
         self.view.sig_change_font_size.connect(self._change_font_size)
         self.view.sig_home_button_clicked.connect(self._home_button_clicked)
-        self.view.sig_plot_zoom_updated.connect(self._change_displayed_plot_limits)
+        self.view.sig_plot_zoom_updated.connect(self._set_zooming_data)
+        self.view.sig_switch_changed.connect(self._switch_spinners_lims)
+        self.view.sig_axes_changed.connect(self._change_axes)
+        self.view.sig_change_data_ws.connect(self._change_ws)

@@ -23,10 +23,6 @@ class DNSScPlotTest(unittest.TestCase):
         patcher_subplot.start()
         self.plot = DNSScPlot(parent=None, figure=self.mock_fig, grid_helper=None)
 
-    def test_on_resize(self):
-        self.plot.on_resize()
-        self.mock_fig.tight_layout.assert_called_once_with(pad=0.3)
-
     @staticmethod
     def test_set_fontsize():
         with patch.object(matplotlib.rcParams, "update") as mock_update:
@@ -76,11 +72,18 @@ class DNSScPlotTest(unittest.TestCase):
         self.plot._ax.set_xlabel.assert_called_once_with("x")
         self.plot._ax.set_ylabel.assert_called_once_with("y")
 
-    def test_plot_triangulation(self):
+    def test_plot_triangulation_non_flat(self):
         self.plot._ax.tripcolor.return_value = "plotobj"
-        self.plot.plot_triangulation("triang", "z", "cmap", "edges", "shade")
+        self.plot.plot_triangulation("triang", [0, 1, 2], [1, 2, 3], "cmap", "edges", "shade")
         self.plot._ax.set_visible.assert_called_with(True)
-        self.plot._ax.tripcolor.assert_called_once_with("triang", "z", cmap="cmap", edgecolors="edges", shading="shade")
+        self.plot._ax.tripcolor.assert_called_once_with("triang", [0, 1, 2], cmap="cmap", edgecolors="edges", shading="shade")
+        self.assertEqual(self.plot._plot, "plotobj")
+
+    def test_plot_triangulation_flat(self):
+        self.plot._ax.tripcolor.return_value = "plotobj"
+        self.plot.plot_triangulation("triang", [0, 1, 2], [1, 2, 3], "cmap", "edges", "flat")
+        self.plot._ax.set_visible.assert_called_with(True)
+        self.plot._ax.tripcolor.assert_called_once_with("triang", facecolors=[1, 2, 3], cmap="cmap", edgecolors="edges", shading="flat")
         self.assertEqual(self.plot._plot, "plotobj")
 
 
