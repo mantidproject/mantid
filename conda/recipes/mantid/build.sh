@@ -4,6 +4,12 @@ set -ex
 parent_dir="$(dirname "$RECIPE_DIR")"
 bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantid'
 
+# Determine if this is an MPI build based on the package name
+MPI_BUILD_FLAG="OFF"
+if [[ "${PKG_NAME}" == "mantidmpi" ]]; then
+  MPI_BUILD_FLAG="ON"
+fi
+
 mkdir -p build
 cd build
 
@@ -19,6 +25,7 @@ cmake \
   -DCMAKE_FIND_FRAMEWORK=LAST \
   -DCMAKE_CXX_SCAN_FOR_MODULES=OFF \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
+  -DMPI_BUILD=${MPI_BUILD_FLAG} \
   -GNinja \
   ../
 
