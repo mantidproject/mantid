@@ -445,8 +445,9 @@ the user interface while providing more repeatable processing.
       if not ADS.doesExist(ws):
          Load(Filename = corr_wss[iws], OutputWorkspace= ws)
 
-   # on some operating systems, this file retrieval will not give files in a sensible order
-   # the below line can be adjusted as needed to get them in the correct order to match
+   # on some operating systems (e.g Linux), this file retrieval will not necessarily give files in numerical run order.
+   # the below line assumes that your filename is in the form INSTR00123456 (where 123456 is the run number) and will sort the files into ascending run order.
+   # If your file is not in this format the key lambda function will need to be adjusted to retrieve the run number to then sort them into the correct order to match
    # the order of rows in orientation file
 
    #wss = sorted(wss, key = lambda x: int(x.split("_")[0].strip(string.ascii_letters)))
@@ -754,9 +755,11 @@ of pole figures over a set of different peaks and parameters.
    mk(pf_root)
    mk(pf_dir)
 
-   # As in the absorption correction, on some operating systems, the file retrieval will not give files in a sensible order
-   # the below lines can be adjusted as needed to get them in the correct order to match
+   # As in the absorption correction, on some operating systems (e.g Linux), this file retrieval will not necessarily give files in numerical run order.
+   # the below line assumes that your filename is in the form INSTR00123456 (where 123456 is the run number) and will sort the files into ascending run order.
+   # If your file is not in this format the key lambda functions will need to be adjusted to retrieve the run number to then sort them into the correct order to match
    # the order of rows in orientation file
+
 
    focus_wss = sorted(focus_wss, key = lambda x: int(x.split("_")[1]))
    fit_param_wss = [sorted(param_wss, key = lambda x: int(x.split("_")[1])) for param_wss in fit_param_wss]
