@@ -760,32 +760,372 @@
   <algebra val="app-shape" />
 </type>
 
-  <component type="silicon" idlist="silicon">
-    <properties />
-    <location  />
+<component type="silicon" idlist="silicon">
+  <properties />
+  <location />
+</component>
+
+<type name="silicon">
+  <component type="silicon_upper_bank">
+    <location name="si_upper_bank" />
   </component>
+  <component type="silicon_lower_bank">
+    <location name="si_lower_bank" />
+  </component>
+</type>
 
-  <type name="silicon">
-    <component type="pix2">
-      <location r="1.582" t="-11."    p="0" name="g1005" />
-      <location r="1.582" t="-14.82"  p="0" name="g1006" />
-      <location r="1.582" t="-18.15"  p="0" name="g1007" />
-      <location r="1.582" t="-21.48"  p="0" name="g1008" />
-      <location r="1.582" t="-24.81"  p="0" name="g1009" />
-      <location r="1.582" t="-28.14"  p="0" name="g1010" />
-    </component>
-  </type>
+<type name="silicon_upper_bank">
+  <!-- 56 tubes with positions calculated from pixel centroids -->
+  <component type="si_tube">
+    <location r="1.479822" t="8.79937" p="20.39763" name="upper_tube_00" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479822" t="11.37914" p="20.39763" name="upper_tube_01" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479827" t="13.96027" p="20.39763" name="upper_tube_02" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479826" t="16.53935" p="20.39763" name="upper_tube_03" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479821" t="19.11958" p="20.39763" name="upper_tube_04" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479821" t="21.70054" p="20.39763" name="upper_tube_05" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479819" t="24.28054" p="20.39763" name="upper_tube_06" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479825" t="26.85941" p="20.39763" name="upper_tube_07" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479823" t="29.44069" p="20.39763" name="upper_tube_08" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479826" t="32.01988" p="20.39763" name="upper_tube_09" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479819" t="34.60011" p="20.39763" name="upper_tube_10" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479821" t="37.17997" p="20.39763" name="upper_tube_11" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479823" t="39.76090" p="20.39763" name="upper_tube_12" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479821" t="42.33970" p="20.39763" name="upper_tube_13" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479821" t="44.92009" p="20.39763" name="upper_tube_14" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479823" t="47.49893" p="20.39763" name="upper_tube_15" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479818" t="50.07995" p="20.39763" name="upper_tube_16" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479824" t="52.66023" p="20.39763" name="upper_tube_17" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479821" t="55.24040" p="20.39763" name="upper_tube_18" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479824" t="57.81893" p="20.39763" name="upper_tube_19" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479826" t="60.39947" p="20.39763" name="upper_tube_20" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479820" t="62.98100" p="20.39763" name="upper_tube_21" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479827" t="65.55982" p="20.39763" name="upper_tube_22" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479822" t="68.13932" p="20.39763" name="upper_tube_23" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479826" t="70.72053" p="20.39763" name="upper_tube_24" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479823" t="73.29943" p="20.39763" name="upper_tube_25" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479822" t="75.88057" p="20.39763" name="upper_tube_26" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479820" t="78.45912" p="20.39763" name="upper_tube_27" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479827" t="81.03995" p="20.39763" name="upper_tube_28" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479824" t="83.62084" p="20.39763" name="upper_tube_29" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479828" t="86.20056" p="20.39763" name="upper_tube_30" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479828" t="88.78062" p="20.39763" name="upper_tube_31" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479822" t="91.36015" p="20.39763" name="upper_tube_32" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479820" t="93.94041" p="20.39763" name="upper_tube_33" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479824" t="96.52081" p="20.39763" name="upper_tube_34" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479825" t="99.10054" p="20.39763" name="upper_tube_35" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479819" t="101.68047" p="20.39763" name="upper_tube_36" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479818" t="104.26031" p="20.39763" name="upper_tube_37" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479821" t="106.83920" p="20.39763" name="upper_tube_38" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479821" t="109.41991" p="20.39763" name="upper_tube_39" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479820" t="111.99947" p="20.39763" name="upper_tube_40" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479826" t="114.57948" p="20.39763" name="upper_tube_41" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479827" t="117.16000" p="20.39763" name="upper_tube_42" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479828" t="119.73996" p="20.39763" name="upper_tube_43" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479822" t="122.31914" p="20.39763" name="upper_tube_44" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479826" t="124.90042" p="20.39763" name="upper_tube_45" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479825" t="127.47975" p="20.39763" name="upper_tube_46" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479823" t="130.06068" p="20.39763" name="upper_tube_47" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479817" t="132.64003" p="20.39763" name="upper_tube_48" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479820" t="135.22009" p="20.39763" name="upper_tube_49" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479823" t="137.79926" p="20.39763" name="upper_tube_50" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479828" t="140.37999" p="20.39763" name="upper_tube_51" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479824" t="142.95881" p="20.39763" name="upper_tube_52" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479818" t="145.53957" p="20.39763" name="upper_tube_53" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479822" t="148.12092" p="20.39763" name="upper_tube_54" />
+  </component>
+  <component type="si_tube">
+    <location r="1.479822" t="150.70046" p="20.39763" name="upper_tube_55" />
+  </component>
+</type>
 
-  <type name="pix2" is="detector">
-    <cuboid id="app-shape">
-      <left-front-bottom-point  x="0.004"   y="-0.12"  z="0.01"     />
-      <left-front-top-point     x="0.004"   y="-0.12"  z="0.0003"  />
-      <left-back-bottom-point   x="-0.004"  y="-0.12"  z="0.01"     />
-      <right-front-bottom-point x="0.004"   y="0.12"   z="0.01"     />
-    </cuboid>
-    <algebra val="app-shape" />
-  </type>
-  
+<type name="silicon_lower_bank">
+  <!-- 48 tubes with positions calculated from pixel centroids -->
+  <component type="si_tube">
+    <location r="1.545156" t="9.401278" p="-19.617504" name="lower_tube_00" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545153" t="12.668568" p="-19.617504" name="lower_tube_01" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545155" t="15.932560" p="-19.617504" name="lower_tube_02" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545157" t="19.198598" p="-19.617504" name="lower_tube_03" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545159" t="22.461727" p="-19.617504" name="lower_tube_04" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545159" t="25.727022" p="-19.617504" name="lower_tube_05" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545158" t="28.991787" p="-19.617504" name="lower_tube_06" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545153" t="32.257699" p="-19.617504" name="lower_tube_07" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545151" t="35.522242" p="-19.617504" name="lower_tube_08" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545153" t="38.787308" p="-19.617504" name="lower_tube_09" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545152" t="42.053195" p="-19.617504" name="lower_tube_10" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545153" t="45.318200" p="-19.617504" name="lower_tube_11" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545154" t="48.582517" p="-19.617504" name="lower_tube_12" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545157" t="51.846364" p="-19.617504" name="lower_tube_13" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545158" t="55.111528" p="-19.617504" name="lower_tube_14" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545157" t="58.376227" p="-19.617504" name="lower_tube_15" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545155" t="61.642119" p="-19.617504" name="lower_tube_16" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545156" t="64.907640" p="-19.617504" name="lower_tube_17" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545152" t="68.173476" p="-19.617504" name="lower_tube_18" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545155" t="71.438299" p="-19.617504" name="lower_tube_19" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545160" t="74.702824" p="-19.617504" name="lower_tube_20" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545156" t="77.968103" p="-19.617504" name="lower_tube_21" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545152" t="81.231403" p="-19.617504" name="lower_tube_22" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545152" t="84.498120" p="-19.617504" name="lower_tube_23" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545157" t="87.761677" p="-19.617504" name="lower_tube_24" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545158" t="91.027948" p="-19.617504" name="lower_tube_25" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545152" t="94.292525" p="-19.617504" name="lower_tube_26" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545152" t="97.556294" p="-19.617504" name="lower_tube_27" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545151" t="100.822372" p="-19.617504" name="lower_tube_28" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545158" t="104.086939" p="-19.617504" name="lower_tube_29" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545152" t="107.134028" p="-19.617504" name="lower_tube_30" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545151" t="110.618211" p="-19.617504" name="lower_tube_31" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545156" t="113.881842" p="-19.617504" name="lower_tube_32" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545158" t="117.146820" p="-19.617504" name="lower_tube_33" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545155" t="120.412556" p="-19.617504" name="lower_tube_34" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545153" t="123.676427" p="-19.617504" name="lower_tube_35" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545155" t="126.943669" p="-19.617504" name="lower_tube_36" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545162" t="130.207333" p="-19.617504" name="lower_tube_37" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545152" t="133.473170" p="-19.617504" name="lower_tube_38" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545155" t="136.739075" p="-19.617504" name="lower_tube_39" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545160" t="140.002052" p="-19.617504" name="lower_tube_40" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545160" t="143.267320" p="-19.617504" name="lower_tube_41" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545154" t="146.532952" p="-19.617504" name="lower_tube_42" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545157" t="149.797904" p="-19.617504" name="lower_tube_43" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545156" t="153.063239" p="-19.617504" name="lower_tube_44" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545159" t="156.327394" p="-19.617504" name="lower_tube_45" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545150" t="159.591886" p="-19.617504" name="lower_tube_46" />
+  </component>
+  <component type="si_tube">
+    <location r="1.545153" t="162.856774" p="-19.617504" name="lower_tube_47" />
+  </component>
+</type>
+
+<type name="si_tube" is="DetectorComponent">
+  <!-- Tube definition with 15 pixels at relative positions to the tube centre -->
+  <component type="si_pixel">
+    <location r="-0.015864" t="-0.000000" p="13.871319" name="pixel_00" />
+    <location r="-0.011888" t="-0.000000" p="12.143431" name="pixel_01" />
+    <location r="-0.008268" t="-0.000000" p="10.301894" name="pixel_02" />
+    <location r="-0.005020" t="-0.000000" p="8.454354" name="pixel_03" />
+    <location r="-0.002157" t="-0.000000" p="6.491398" name="pixel_04" />
+    <location r="0.000305" t="-0.000000" p="4.521307" name="pixel_05" />
+    <location r="0.002356" t="-0.000000" p="2.543876" name="pixel_06" />
+    <location r="0.003984" t="-0.000000" p="0.448402" name="pixel_07" />
+    <location r="0.005181" t="-0.000000" p="-1.766697" name="pixel_08" />
+    <location r="0.005937" t="-0.000000" p="-3.880150" name="pixel_09" />
+    <location r="0.006249" t="-0.000000" p="-6.114677" name="pixel_10" />
+    <location r="0.006115" t="-0.000000" p="-8.359546" name="pixel_11" />
+    <location r="0.005532" t="-0.000000" p="-10.615003" name="pixel_12" />
+    <location r="0.004504" t="-0.000000" p="-12.881286" name="pixel_13" />
+    <location r="0.003034" t="-0.000000" p="-15.158622" name="pixel_14" />
+  </component>
+</type>
+
+<type name="si_pixel" is="detector">
+  <!-- Pixel dimensions: 12.7mm (width) x 10.87333mm (height) -->
+  <cuboid id="si-pixel-shape">
+    <left-front-bottom-point  x="0.006350"  y="-0.0054367" z="0.0" />
+    <left-front-top-point     x="0.006350"  y="0.0054367"  z="0.0" />
+    <left-back-bottom-point   x="-0.006350" y="-0.0054367" z="0.0" />
+    <right-front-bottom-point x="0.006350"  y="-0.0054367" z="0.001" />
+  </cuboid>
+  <algebra val="si-pixel-shape" />
+</type>
+
 <!-- DETECTOR/MONITOR IDs -->
 
 <idlist idname="monitors">
@@ -797,7 +1137,7 @@
 <idlist idname="graphite">
   <id start="963" end="1004" />
 </idlist>
-  <idlist idname="silicon">
-    <id start="1005" end="1010" />
+<idlist idname="silicon">
+    <id start="1005" end="2564" />
 </idlist>
 </instrument>
