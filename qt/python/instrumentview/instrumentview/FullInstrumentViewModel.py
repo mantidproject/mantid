@@ -103,7 +103,7 @@ class FullInstrumentViewModel:
         self._point_picked_detectors = np.full(len(self._detector_ids), False)
 
         self._projection_type = ProjectionType.THREE_D
-        self._cached_projections_map = {}
+        self._cached_projection_objects = {}
 
         self._cached_masks_map = {}
         self._cached_rois_map = {}
@@ -144,8 +144,19 @@ class FullInstrumentViewModel:
         return self._sample_position
 
     @property
-    def detector_ids(self) -> np.ndarray:
+    def all_detector_ids(self) -> np.ndarray:
+        """All detector IDs (unfiltered), in the same order as CreateDetectorTable."""
+        return self._detector_ids
+
+    @property
+    def pickable_detector_ids(self) -> np.ndarray:
+        """Detector IDs for unmasked, non-monitor detectors."""
         return self._detector_ids[self.is_pickable]
+
+    @property
+    def masked_detector_ids(self) -> np.ndarray:
+        """Detector IDs for masked (but valid, non-monitor) detectors."""
+        return self._detector_ids[self._is_masked & self._is_valid]
 
     @property
     def spectrum_nos(self) -> np.ndarray:
@@ -306,28 +317,31 @@ class FullInstrumentViewModel:
     def _calculate_projection(self) -> np.ndarray:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
 
-        if self._projection_type.name in self._cached_projections_map.keys():
-            return self._cached_projections_map[self._projection_type.name]
+        if self._projection_type.name not in self._cached_projection_objects.keys():
+            axis = [1, 0, 0]
+            if self._projection_type in (ProjectionType.SPHERICAL_Y, ProjectionType.CYLINDRICAL_Y):
+                axis = [0, 1, 0]
+            elif self._projection_type in (ProjectionType.SPHERICAL_Z, ProjectionType.CYLINDRICAL_Z):
+                axis = [0, 0, 1]
 
-        axis = [1, 0, 0]
-        if self._projection_type in (ProjectionType.SPHERICAL_Y, ProjectionType.CYLINDRICAL_Y):
-            axis = [0, 1, 0]
-        elif self._projection_type in (ProjectionType.SPHERICAL_Z, ProjectionType.CYLINDRICAL_Z):
-            axis = [0, 0, 1]
+            if self._projection_type in (ProjectionType.SPHERICAL_X, ProjectionType.SPHERICAL_Y, ProjectionType.SPHERICAL_Z):
+                projection = SphericalProjection(self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis))
+            elif self._projection_type in (ProjectionType.CYLINDRICAL_X, ProjectionType.CYLINDRICAL_Y, ProjectionType.CYLINDRICAL_Z):
+                projection = CylindricalProjection(self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis))
+            else:
+                projection = SideBySide(
+                    self._workspace,
+                    self._detector_ids,
+                    self._sample_position,
+                    self._root_position,
+                    self._detector_positions_3d,
+                    np.array(axis),
+                )
+            self._cached_projection_objects[self._projection_type.name] = projection
 
-        if self._projection_type in (ProjectionType.SPHERICAL_X, ProjectionType.SPHERICAL_Y, ProjectionType.SPHERICAL_Z):
-            projection = SphericalProjection(self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis))
-        elif self._projection_type in (ProjectionType.CYLINDRICAL_X, ProjectionType.CYLINDRICAL_Y, ProjectionType.CYLINDRICAL_Z):
-            projection = CylindricalProjection(self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis))
-        else:
-            projection = SideBySide(
-                self._workspace, self._detector_ids, self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis)
-            )
-
+        projection = self._cached_projection_objects[self._projection_type.name]
         projected_positions = np.zeros_like(self._detector_positions_3d)
         projected_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
-
-        self._cached_projections_map[self._projection_type.name] = projected_positions
         return projected_positions
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
@@ -637,6 +651,21 @@ class FullInstrumentViewModel:
             self.picked_detector_ids[picked_detector_index],
             value,
         )
+
+    @property
+    def bank_groups_by_detector_id(self) -> list[tuple[list[int], str]] | None:
+        """Return detector IDs grouped by bank for side-by-side projection.
+
+        Returns None if not in side-by-side projection or if the projection
+        doesn't support bank grouping.  Each element is
+        ``(detector_ids, bank_type)``.
+        """
+        if self._projection_type != ProjectionType.SIDE_BY_SIDE:
+            return None
+        projection = self._cached_projection_objects.get(self._projection_type.name)
+        if projection is None:
+            return None
+        return projection.get_bank_groups_by_detector_id()
 
     def component_tree_indices_selected(self, component_indices: np.ndarray) -> None:
         if len(component_indices) == 0:
