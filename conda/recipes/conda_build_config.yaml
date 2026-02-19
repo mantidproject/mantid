@@ -92,7 +92,7 @@ orsopy:
 
 # An API change to HTTPSClientSession was introduced in 1.14.0
 poco:
-  - '>=1.14'
+  - '>=1.15'
 
 psutil:
   - '>=5.8.0'
