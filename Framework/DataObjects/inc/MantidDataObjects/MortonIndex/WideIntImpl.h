@@ -29,6 +29,10 @@ public:
   static constexpr bool has_infinity = false;
   static constexpr bool has_quiet_NaN = false;
   static constexpr bool has_signaling_NaN = true;
+#if defined(_WIN32)
+// disable warning about std::float_denorm_style has_denorm
+#pragma warning(disable : 4996)
+#endif
   static constexpr std::float_denorm_style has_denorm = std::denorm_absent;
   static constexpr bool has_denorm_loss = false;
   static constexpr std::float_round_style round_style = std::round_toward_zero;
