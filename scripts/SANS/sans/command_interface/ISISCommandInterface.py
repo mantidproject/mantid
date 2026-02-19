@@ -43,7 +43,7 @@ from sans.common.general_functions import (
     is_part_of_reduced_output_workspace_group,
     parse_simple_range_of_number_pairs,
 )
-from sans.gui_logic.models.RowEntries import RowEntries
+from sans.data_objects.row_entries import RowEntries
 from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
 
 # ----------------------------------------------------------------------------------------------------------------------
