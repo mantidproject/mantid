@@ -117,6 +117,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._workspace.getIntegratedCountsForWorkspaceIndices.assert_called()
         self.assertEqual(min(integrated_spectra), model._counts_limits[0])
         self.assertEqual(max(integrated_spectra), model._counts_limits[1])
+        self.assertEqual(model._counts_limits, model.full_counts_limits)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.DetectorInfo")
     def test_picked_detectors_info_text(self, det_info_mock):
