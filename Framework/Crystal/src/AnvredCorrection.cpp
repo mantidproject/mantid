@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/Material.h"
@@ -187,6 +188,7 @@ void AnvredCorrection::exec() {
 
   // If sample not at origin, shift cached positions.
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const auto &componentInfo = m_inputWS->componentInfo();
   double L1 = spectrumInfo.l1();
 
   Progress prog(this, 0.0, 1.0, numHists);
@@ -215,7 +217,7 @@ void AnvredCorrection::exec() {
     if (m_useScaleFactors) {
       const auto &det = spectrumInfo.detector(i);
       bankName = det.getParent()->getParent()->getName();
-      scale_init(inst, L2, depth, pathlength, bankName);
+      scale_init(inst, componentInfo, L2, depth, pathlength, bankName);
     }
 
     auto points = m_inputWS->points(i);
@@ -288,6 +290,7 @@ void AnvredCorrection::execEvent() {
   Instrument_const_sptr inst = m_inputWS->getInstrument();
 
   const auto &spectrumInfo = eventW->spectrumInfo();
+  const auto &componentInfo = eventW->componentInfo();
   double L1 = spectrumInfo.l1();
 
   Progress prog(this, 0.0, 1.0, numHists);
@@ -320,7 +323,7 @@ void AnvredCorrection::execEvent() {
     if (m_useScaleFactors) {
       const auto &det = spectrumInfo.detector(i);
       bankName = det.getParent()->getParent()->getName();
-      scale_init(inst, L2, depth, pathlength, bankName);
+      scale_init(inst, componentInfo, L2, depth, pathlength, bankName);
     }
 
     // multiplying an event list by a scalar value
@@ -547,16 +550,18 @@ void AnvredCorrection::BuildLamdaWeights() {
   }
 }
 
-void AnvredCorrection::scale_init(const Instrument_const_sptr &inst, const double L2, const double depth,
-                                  double &pathlength, const std::string &bankName) {
+void AnvredCorrection::scale_init(const Instrument_const_sptr &inst, const ComponentInfo &componentInfo,
+                                  const double L2, const double depth, double &pathlength,
+                                  const std::string &bankName) {
   // Distance to center of detector
-  std::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
+  const IComponent *det0 = inst->getComponentByName(bankName).get();
   if ("CORELLI" == inst->getName()) // for Corelli with sixteenpack under bank
   {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
-    asmb->getChildren(children, false);
-    det0 = children[0];
+    const size_t bankIndex = componentInfo.indexOfAny(bankName);
+    const auto children = componentInfo.children(bankIndex);
+    if (!children.empty()) {
+      det0 = componentInfo.componentID(children[0]);
+    }
   }
   IComponent_const_sptr sample = inst->getSample();
   double cosA = det0->getDistance(*sample) / L2;

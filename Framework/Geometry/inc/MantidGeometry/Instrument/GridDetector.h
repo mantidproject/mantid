@@ -86,9 +86,9 @@ public:
 
   Kernel::V3D getRelativePosAtXYZ(int x, int y, int z) const;
   /// minimum detector id
-  detid_t minDetectorID();
+  detid_t minDetectorID() const;
   /// maximum detector id
-  detid_t maxDetectorID();
+  detid_t maxDetectorID() const;
   std::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const override;
 
   // This should inherit the getBoundingBox implementation from  CompAssembly
@@ -150,6 +150,7 @@ private:
   void validateInput() const;
   /// Pointer to the base GridDetector, for parametrized instruments
   const GridDetector *m_gridBase;
+  bool isParametrized() const override { return m_map && m_gridBase; }
   /// Private copy assignment operator
   GridDetector &operator=(const ICompAssembly &);
 

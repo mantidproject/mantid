@@ -18,7 +18,6 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 
 #include <memory>

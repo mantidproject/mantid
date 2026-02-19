@@ -57,8 +57,6 @@ public:
   //! Get a pointer to the ith component within the assembly. Easier to use than
   //[] when you have a pointer
   std::shared_ptr<IComponent> getChild(const int i) const override { return (*this)[i]; }
-  //! Get all children
-  void getChildren(std::vector<IComponent_const_sptr> &outVector, bool recursive) const override;
   //! Returns a pointer to the first component of assembly encountered with the
   // given name
   std::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const override;
@@ -81,6 +79,10 @@ public:
                                     std::deque<IComponent_const_sptr> & /*searchQueue*/) const override;
 
   size_t registerContents(class Mantid::Geometry::ComponentVisitor &visitor) const override;
+
+protected:
+  //! Get all children
+  void getChildren(std::vector<IComponent_const_sptr> &outVector, bool recursive) const override;
 
 private:
   /// Private copy assignment operator

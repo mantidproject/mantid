@@ -11,6 +11,9 @@
 #include "MantidGeometry/Instrument_fwd.h"
 
 namespace Mantid {
+namespace Geometry {
+class ComponentInfo;
+}
 namespace Kernel {
 class V3D;
 }
@@ -43,8 +46,9 @@ private:
   /// Run the algorithm
   void exec() override;
   /// find position for rectangular and non-rectangular
-  Kernel::V3D findPixelPos(const std::string &bankName, int col, int row);
-  void sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS, double &xsize, double &ysize);
+  Kernel::V3D findPixelPos(const std::string &bankName, int col, int row, const Geometry::ComponentInfo &componentInfo);
+  void sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS, double &xsize, double &ysize,
+                 const Geometry::ComponentInfo &componentInfo);
   Geometry::Instrument_const_sptr inst;
 };
 
