@@ -1112,72 +1112,99 @@ bool MatrixWorkspace::isHistogramDataByIndex(const std::size_t index) const {
   return isHist;
 }
 
+bool MatrixWorkspace::setCommonBinsFlag(const bool value) const {
+  // check valid flag - other threads may have updated flags
+  if (m_isCommonBinsFlagValid.load(std::memory_order_acquire))
+    return m_isCommonBinsFlag.load(std::memory_order_relaxed);
+  m_isCommonBinsFlag.store(value, std::memory_order_relaxed);
+  m_isCommonBinsFlagValid.store(true, std::memory_order_release);
+  return value;
+}
+
 /**
  *  Whether the workspace contains common X bins
  *  @return whether the workspace contains common X bins
  */
 bool MatrixWorkspace::isCommonBins() const {
-  std::lock_guard<std::mutex> lock{m_isCommonBinsMutex};
-  const bool isFlagValid{m_isCommonBinsFlagValid.exchange(true)};
-  if (isFlagValid) {
-    return m_isCommonBinsFlag;
+  if (m_isCommonBinsFlagValid.load(std::memory_order_acquire)) {
+    return m_isCommonBinsFlag.load(std::memory_order_relaxed);
   }
-  m_isCommonBinsFlag = true;
+
   const size_t numHist = this->getNumberHistograms();
   // there being only one or zero histograms is accepted as not being an error
   if (numHist <= 1) {
-    return m_isCommonBinsFlag;
+    return setCommonBinsFlag(true);
   }
 
   // First check if the x-axis shares a common ptr.
+  bool commonPtr{true};
   const HistogramData::HistogramX *first = &x(0);
   for (size_t i = 1; i < numHist; ++i) {
     if (&x(i) != first) {
-      m_isCommonBinsFlag = false;
+      commonPtr = false;
       break;
     }
   }
 
   // If true, we may return here.
-  if (m_isCommonBinsFlag) {
-    return m_isCommonBinsFlag;
+  if (commonPtr) {
+    return setCommonBinsFlag(true);
   }
 
-  m_isCommonBinsFlag = true;
   // Check that that size of each histogram is identical.
   const size_t numBins = x(0).size();
   for (size_t i = 1; i < numHist; ++i) {
     if (x(i).size() != numBins) {
-      m_isCommonBinsFlag = false;
-      return m_isCommonBinsFlag;
+      return setCommonBinsFlag(false);
     }
   }
 
+  // lock before expensive action
+  std::lock_guard<std::mutex> lock{m_isCommonBinsMutex};
+  // check valid flag after lock
+  if (m_isCommonBinsFlagValid.load(std::memory_order_acquire))
+    return m_isCommonBinsFlag.load(std::memory_order_relaxed);
+
   const auto &x0 = x(0);
   // Check that the values of each histogram are identical.
+  std::atomic<bool> commonValues{true};
   PARALLEL_FOR_IF(this->threadSafe())
   for (int i = 1; i < static_cast<int>(numHist); ++i) {
-    if (m_isCommonBinsFlag) {
+    if (commonValues.load(std::memory_order_relaxed)) {
       const auto specIndex = static_cast<std::size_t>(i);
       const auto &xi = x(specIndex);
+      // Early exits same X storage.
+      if (&xi == &x0) {
+        continue;
+      }
       for (size_t j = 0; j < numBins; ++j) {
         const double a = x0[j];
         const double b = xi[j];
-        // Check for NaN and infinity before comparing for equality
-        if (std::isfinite(a) && std::isfinite(b)) {
-          if (std::abs(a - b) > EPSILON) {
-            m_isCommonBinsFlag = false;
-            break;
-          }
-          // Otherwise we check that both are NaN or both are infinity
-        } else if ((std::isnan(a) != std::isnan(b)) || (std::isinf(a) != std::isinf(b))) {
-          m_isCommonBinsFlag = false;
+        // Early exit for exact equality
+        if (a == b) {
+          continue;
+        }
+        // Early exit for nan/if scenarios
+        bool aIsNan = std::isnan(a);
+        bool bIsNan = std::isnan(b);
+        bool aIsInf = std::isinf(a);
+        bool bIsInf = std::isinf(b);
+        if ((aIsNan && bIsNan) || (aIsInf && bIsInf)) {
+          continue;
+        }
+        if ((aIsNan != bIsNan) || (aIsInf != bIsInf)) {
+          commonValues.store(false, std::memory_order_relaxed);
+          break;
+        }
+        // check for equality within tolerance
+        if (std::abs(a - b) > EPSILON) {
+          commonValues.store(false, std::memory_order_relaxed);
           break;
         }
       }
     }
   }
-  return m_isCommonBinsFlag;
+  return setCommonBinsFlag(commonValues.load(std::memory_order_relaxed));
 }
 
 /**
