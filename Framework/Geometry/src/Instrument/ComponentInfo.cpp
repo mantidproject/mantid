@@ -449,4 +449,29 @@ const ComponentInfoConstIt ComponentInfo::cbegin() { return ComponentInfoConstIt
 
 const ComponentInfoConstIt ComponentInfo::cend() { return ComponentInfoConstIt(*this, size(), size()); }
 
+size_t ComponentInfo::findBankParent(size_t index, const std::string &bankPart) const {
+  constexpr size_t invalidIndex{0}; // index 0 will always be a dectector and never a bank
+  // if this component is a bank, return the parent
+  if (name(index).starts_with(bankPart)) {
+    return parent(index);
+  }
+  // check if the children components begin with bankPart
+  auto indexChildren = children(index);
+  if (indexChildren.empty()) {
+    return invalidIndex;
+  }
+  // if they do, we found the bank parent
+  if (name(indexChildren[0]).starts_with(bankPart)) {
+    return index;
+  }
+  // if not, check the grandchildren
+  for (size_t const child : indexChildren) {
+    size_t j = findBankParent(child, bankPart);
+    if (j != invalidIndex) {
+      return j;
+    }
+  }
+  return invalidIndex;
+}
+
 } // namespace Mantid::Geometry

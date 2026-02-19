@@ -168,7 +168,8 @@ using IComponent_const_sptr = std::shared_ptr<const IComponent>;
 
 } // Namespace Geometry
 
-/// An object for constructing a shared_ptr that won't ever delete its pointee
+/// This functor is used as the deleter object of a shared_ptr to effectively erase ownership
+/// Raw pointers can be passed out as non-owning shared_ptrs that don't delete
 class NoDeleting {
 public:
   /// Does nothing

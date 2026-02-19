@@ -174,20 +174,26 @@ void LoadIsawDetCal::exec() {
   if (instname == "WISH")
     bankPart = "WISHpanel";
   if (detList.empty()) {
-    // Get all children
-    std::vector<IComponent_const_sptr> comps;
-    inst->getChildren(comps, true);
+    // Get all components using ComponentInfo
+    auto expInfoWS = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+    const auto &componentInfo = expInfoWS->componentInfo();
 
-    for (auto &comp : comps) {
-      std::string bankName = comp->getName();
-      boost::trim(bankName);
-      boost::erase_all(bankName, bankPart);
+    // iterate over the top level components, which contain the banks
+    size_t const rootIndex = componentInfo.root();
+    auto const topChildren = componentInfo.children(rootIndex);
+    for (size_t const i : topChildren) {
       int bank = 0;
-      Strings::convert(bankName, bank);
-      if (bank == 0)
-        continue;
-      // Track unique bank numbers
-      uniqueBanks.insert(bank);
+      size_t bankParent = componentInfo.findBankParent(i, bankPart);
+      auto const children = componentInfo.children(bankParent);
+      for (size_t const child : children) {
+        std::string bankName = componentInfo.name(child);
+        boost::trim(bankName);
+        boost::erase_all(bankName, bankPart);
+        Strings::convert(bankName, bank);
+        if (bank != 0) {
+          uniqueBanks.insert(bank);
+        }
+      }
     }
   }
 
@@ -306,11 +312,11 @@ void LoadIsawDetCal::exec() {
     auto comp = inst->getComponentByName(bankName);
     // for Corelli with sixteenpack under bank
     if (instname == "CORELLI") {
-      std::vector<Geometry::IComponent_const_sptr> children;
-      std::shared_ptr<const Geometry::ICompAssembly> asmb =
-          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
-      asmb->getChildren(children, false);
-      comp = children[0];
+      const size_t bankIndex = componentInfo.indexOfAny(bankName);
+      const auto children = componentInfo.children(bankIndex);
+      if (!children.empty()) {
+        comp = IComponent_const_sptr(componentInfo.componentID(children[0]), NoDeleting());
+      }
     }
     if (comp) {
       // Omitted scaling tubes

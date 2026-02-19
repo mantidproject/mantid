@@ -13,6 +13,11 @@
 
 namespace Mantid {
 
+namespace DataObjects {
+class PeaksWorkspace;
+using PeaksWorkspace_sptr = std::shared_ptr<PeaksWorkspace>;
+} // namespace DataObjects
+
 namespace Crystal {
 
 /** Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.
@@ -44,9 +49,10 @@ private:
   /// find position for rectangular and non-rectangular
   Kernel::V3D findPixelPos(const std::string &bankName, int col, int row);
   void sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS, double &xsize, double &ysize);
-  bool bankMasked(const Geometry::IComponent_const_sptr &parent, const Geometry::DetectorInfo &detectorInfo);
+  bool bankMasked(size_t componentIndex, const Geometry::DetectorInfo &detectorInfo);
   void writeOffsets(std::ofstream &out, double qSign, const std::vector<double> &offset);
   Geometry::Instrument_const_sptr inst;
+  DataObjects::PeaksWorkspace_sptr m_ws;
 };
 
 } // namespace Crystal
