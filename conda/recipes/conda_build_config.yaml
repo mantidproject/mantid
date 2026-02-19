@@ -92,8 +92,10 @@ orsopy:
   - '==1.2.1'
 
 # An API change to HTTPSClientSession was introduced in 1.14.0
+# v1.15 was introduced while release candidates were being produced
+# moving the pin will happen during the mantid v6.16 dev cycle
 poco:
-  - '>=1.14'
+  - '>=1.14,<1.15'
 
 psutil:
   - '>=5.8.0'
