@@ -21,7 +21,7 @@ target_include_directories(
 # Set the name of the generated library
 set_target_properties(MPIAlgorithms PROPERTIES OUTPUT_NAME MantidMPIAlgorithms)
 # Add to the 'Framework' group in VS
-set_property(TARGET Algorithms PROPERTY FOLDER "MantidFramework")
+set_property(TARGET MPIAlgorithms PROPERTY FOLDER "MantidFramework")
 
 target_link_libraries(
   MPIAlgorithms
