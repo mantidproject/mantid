@@ -14,7 +14,7 @@ currently available inside the systemtests.
 import os
 import unittest
 import systemtesting
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import config
 from mantid.simpleapi import Load
 import isis_reduction_steps as steps

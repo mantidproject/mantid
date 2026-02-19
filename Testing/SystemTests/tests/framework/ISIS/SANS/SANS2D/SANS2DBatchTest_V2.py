@@ -7,7 +7,7 @@
 # pylint: disable=no-init,attribute-defined-outside-init
 
 import systemtesting
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 
 from mantid import config
 from mantid.api import FileFinder
@@ -21,6 +21,7 @@ from sans.command_interface.ISISCommandInterface import (
     Gravity,
     BatchReduce,
     UseCompatibilityMode,
+    Clean,
 )
 import os.path
 
@@ -30,6 +31,7 @@ from sans.common.enums import SANSInstrument
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DBatchTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
+        Clean()
         UseCompatibilityMode()
         SANS2D()
         Set1D()
@@ -60,6 +62,7 @@ class SANS2DNewSettingsCarriedAcrossInBatchModeTest_V2(systemtesting.MantidSyste
     """
 
     def runTest(self):
+        Clean()
         UseCompatibilityMode()
         config["default.instrument"] = "SANS2D"
         SANS2D()
@@ -95,6 +98,7 @@ class SANS2DTUBESBatchWithZeroErrorCorrectionTest_V2(systemtesting.MantidSystemT
     """
 
     def runTest(self):
+        Clean()
         UseCompatibilityMode()
         config["default.instrument"] = "SANS2D"
         SANS2DTUBES()
