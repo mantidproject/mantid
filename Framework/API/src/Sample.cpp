@@ -9,6 +9,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Strings.h"
@@ -295,6 +296,10 @@ void Sample::saveNexus(Nexus::File *file, const std::string &group) const {
   }
   file->putAttr("shape_xml", shapeXML);
 
+  if (auto meshObject = std::dynamic_pointer_cast<Mantid::Geometry::MeshObject>(m_shape)) {
+    meshObject->saveNexus(file, "shape_mesh");
+  }
+
   m_shape->material().saveNexus(file, "material");
   // Write out the other (indexes 1+) samples
   file->writeData("num_other_samples", int(m_samples.size()));
@@ -353,7 +358,9 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
         m_name.clear();
       }
     }
-
+    // exctract the material if there is one
+    Kernel::Material material;
+    material.loadNexus(file, "material");
     // Shape (from XML)
     std::string shape_xml;
     file->getAttr("shape_xml", shape_xml);
@@ -361,9 +368,9 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
     if (!shape_xml.empty()) {
       ShapeFactory shapeMaker;
       m_shape = shapeMaker.createShape(std::move(shape_xml), false /*Don't wrap with <type> tag*/);
+    } else if (file->hasGroup("shape_mesh", "NXoff_geometry")) {
+      m_shape = Mantid::Geometry::MeshObject::loadNexus(file, "shape_mesh", material);
     }
-    Kernel::Material material;
-    material.loadNexus(file, "material");
     // CSGObject expected, if so, set its material
     if (auto csgObj = std::dynamic_pointer_cast<Geometry::CSGObject>(m_shape)) {
       csgObj->setMaterial(material);

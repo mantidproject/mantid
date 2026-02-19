@@ -118,7 +118,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/MDGeom
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/MDGeometry/MDImplicitFunction.h:112
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/MDGeometry/MDImplicitFunction.h:128
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/MDGeometry/MDImplicitFunction.h:169
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Objects/MeshObject.h:62
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rendering/GeometryHandler.h:43
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Surfaces/Cone.h:80
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Surfaces/Plane.h:75
