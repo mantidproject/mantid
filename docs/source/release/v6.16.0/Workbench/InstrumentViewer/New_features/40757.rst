@@ -1,0 +1,1 @@
+- In the new Instrument View, a new ellipse widget is available for selecting detectors.

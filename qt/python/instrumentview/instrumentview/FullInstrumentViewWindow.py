@@ -37,12 +37,9 @@ from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 from vtkmodules.vtkCommonDataModel import vtkBox, vtkCylinder, vtkImplicitFunction
 from vtkmodules.vtkInteractionWidgets import (
-    vtkImplicitCylinderWidget,
     vtkImplicitCylinderRepresentation,
-    vtkBoxWidget2,
     vtkBoxRepresentation,
 )
-from vtkmodules.vtkCommonCore import vtkCommand
 import numpy as np
 import pyvista as pv
 import matplotlib.pyplot as plt
@@ -57,34 +54,15 @@ from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, 
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.Globals import CurrentTab
 from instrumentview.ComponentTreeView import ComponentTreeView
+from instrumentview.ShapeWidgets import (
+    CylinderWidgetNoRotation,
+    RectangleWidgetNoRotation,
+    EllipseWidgetNoRotation,
+)
 
 import os
 from contextlib import suppress
 from typing import Callable
-
-
-class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):
-    def __init__(self):
-        super().__init__()
-        self.AddObserver(vtkCommand.StartInteractionEvent, lambda *_: self._on_interaction())
-
-    def _on_interaction(self):
-        # Replace rotation state (integer 4) with translation state (integer 3)
-        if self.GetCylinderRepresentation().GetInteractionState() == 4:
-            self.GetCylinderRepresentation().SetInteractionState(3)
-            return
-
-
-class RectangleWidgetNoRotation(vtkBoxWidget2):
-    def __init__(self):
-        super().__init__()
-        self.AddObserver(vtkCommand.StartInteractionEvent, lambda *_: self._on_interaction())
-
-    def _on_interaction(self):
-        # Replace rotation state (integer 8) with translation state (integer 7)
-        if self.GetRepresentation().GetInteractionState() == 8:
-            self.GetRepresentation().SetInteractionState(7)
-            return
 
 
 class WorkspaceListWidget(QListWidget):
@@ -246,9 +224,12 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_circle.setCheckable(True)
         self._add_rectangle = QPushButton("Add Rectangle")
         self._add_rectangle.setCheckable(True)
+        self._add_ellipse = QPushButton("Add Ellipse")
+        self._add_ellipse.setCheckable(True)
         shapes_layout.addWidget(self._add_circle)
         shapes_layout.addWidget(self._add_rectangle)
-        self._shape_buttons = [self._add_circle, self._add_rectangle]
+        shapes_layout.addWidget(self._add_ellipse)
+        self._shape_buttons = [self._add_circle, self._add_rectangle, self._add_ellipse]
 
         selection_tab = QWidget()
         (
@@ -523,6 +504,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self._add_circle.toggled.connect(self.on_toggle_add_circle)
         self._add_rectangle.toggled.connect(self.on_toggle_add_rectangle)
+        self._add_ellipse.toggled.connect(self.on_toggle_add_ellipse)
 
         self._add_mask.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_mask.setDisabled(True)
@@ -534,6 +516,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def on_toggle_add_rectangle(self, checked):
         self._on_toggle_add_shape(checked, self.add_rectangular_widget)
+
+    def on_toggle_add_ellipse(self, checked):
+        self._on_toggle_add_shape(checked, self.add_ellipse_widget)
 
     def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
         if checked:
@@ -560,6 +545,9 @@ class FullInstrumentViewWindow(QMainWindow):
         # Should delete widgets explicitly, otherwise not garbage collected
         if not self._current_widget:
             return
+        # Clean up ellipse visual representation if it's an ellipse widget
+        if isinstance(self._current_widget, EllipseWidgetNoRotation):
+            self._current_widget.cleanup()
         self._current_widget.EnabledOff()
         self._current_widget.SetInteractor(None)
         self._current_widget.RemoveAllObservers()
@@ -806,6 +794,45 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.camera_position = self.main_plotter.camera_position
         return
 
+    def add_ellipse_widget(self) -> None:
+        """Add an interactive ellipse widget for detector selection.
+        The ellipse is initialized at the center of the viewport with default semi-axes.
+        Uses a box widget representation but evaluates points as an ellipse.
+        """
+        ellipse_repr = vtkBoxRepresentation()
+
+        # Make the box outline very faint so it doesn't dominate visually
+        # but still allows interaction (translation and scaling)
+        ellipse_repr.GetOutlineProperty().SetOpacity(0.15)
+        ellipse_repr.GetOutlineProperty().SetColor(0.5, 0.5, 0.5)  # Dark gray
+        ellipse_repr.GetOutlineProperty().SetLineWidth(0.5)
+
+        width, height = self.main_plotter.renderer.GetSize()
+        x0, y0, _z0 = self.display_to_world_coords(width / 3, height / 3, 0)
+        x1, y1, _z1 = self.display_to_world_coords(2 * width / 3, 2 * height / 3, 0)
+        ellipse_repr.SetPlaceFactor(1.0)
+        ellipse_repr.PlaceWidget([x0, x1, y0, y1, -0.1, 1])
+        ellipse_repr.SetUseBounds(True)
+
+        ellipse_widget = EllipseWidgetNoRotation(plotter=self.main_plotter)
+        ellipse_widget.SetRepresentation(ellipse_repr)
+        ellipse_widget.SetCurrentRenderer(self.main_plotter.renderer)
+        ellipse_widget.SetInteractor(self.main_plotter.iren.interactor)
+        ellipse_widget.On()
+
+        # Initialize visual ellipse
+        cx = (x0 + x1) / 2.0
+        cy = (y0 + y1) / 2.0
+        rx = abs(x1 - x0) / 2.0
+        ry = abs(y1 - y0) / 2.0
+        ellipse_widget.set_ellipse_parameters(cx, cy, rx, ry)
+        ellipse_widget._update_visual_ellipse(cx, cy, rx, ry, 0.5)
+
+        self._current_widget = ellipse_widget
+        # The command below is a hacky way of making the widget appear on top of detectors
+        # No idea why it works
+        self.main_plotter.camera_position = self.main_plotter.camera_position
+
     def display_to_world_coords(self, x, y, z):
         # Convert from display coordinates to world coordinates
         renderer = self.main_plotter.renderer
@@ -823,6 +850,8 @@ class FullInstrumentViewWindow(QMainWindow):
             box = vtkBox()
             box.SetBounds(self._current_widget.GetRepresentation().GetBounds())
             return box
+        elif isinstance(self._current_widget, EllipseWidgetNoRotation):
+            return self._current_widget.get_implicit_ellipse()
         else:
             return None
 
