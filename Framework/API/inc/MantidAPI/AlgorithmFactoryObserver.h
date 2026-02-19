@@ -35,6 +35,10 @@ public:
   AlgorithmFactoryObserver();
   virtual ~AlgorithmFactoryObserver();
 
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  AlgorithmFactoryObserver(const AlgorithmFactoryObserver &) = delete;
+  AlgorithmFactoryObserver &operator=(const AlgorithmFactoryObserver &) = delete;
+
   void observeUpdate(bool turnOn = true);
 
   virtual void updateHandle();
