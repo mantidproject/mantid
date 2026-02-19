@@ -449,10 +449,10 @@ the user interface while providing more repeatable processing.
    # the below line can be adjusted as needed to get them in the correct order to match
    # the order of rows in orientation file
 
-   #raw_wss = sorted(raw_wss, key = lambda x: int(x.split("_")[0].strip(string.ascii_letters)))
+   #wss = sorted(wss, key = lambda x: int(x.split("_")[0].strip(string.ascii_letters)))
 
    # run script
-   run_abs_corr(wss = raw_wss,
+   run_abs_corr(wss = wss,
                ref_ws = ref_ws_str,
                orientation_file = orientation_file,
                orient_file_is_euler = orient_file_is_euler,
