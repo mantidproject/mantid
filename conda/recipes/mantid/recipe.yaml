@@ -105,7 +105,6 @@ requirements:
     - ${{ pin_subpackage('mantid', exact=True) }}
   run_constraints:
     - matplotlib-base ${{ matplotlib }}
-    - pillow ${{ pillow }}
     - pyparsing ${{ pyparsing }}
     - pystog ${{ pystog }}
 
