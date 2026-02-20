@@ -152,6 +152,7 @@ BANNED_REGEXP = [
     r".*\.h5",
     r".*\.p2d",
     r".*\.cfg",
+    r".*\.tar",
 ]
 
 BANNED_DIRS = ["DocTest", "UnitTest", "reference"]
