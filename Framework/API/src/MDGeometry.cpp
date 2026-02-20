@@ -38,6 +38,10 @@ public:
     }
   }
 
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  MDGeometryNotificationHelper(const MDGeometryNotificationHelper &) = delete;
+  MDGeometryNotificationHelper &operator=(const MDGeometryNotificationHelper &) = delete;
+
   void watchForWorkspaceDeletions() {
     if (!m_observingDelete) {
       API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);

@@ -30,6 +30,10 @@ public:
   static AsynchronousTest *createSuite() { return new AsynchronousTest(); }
   static void destroySuite(AsynchronousTest *suite) { delete suite; }
 
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  AsynchronousTest(const AsynchronousTest &) = delete;
+  AsynchronousTest &operator=(const AsynchronousTest &) = delete;
+
   class AsyncAlgorithm : public Algorithm {
   public:
     AsyncAlgorithm() : Algorithm(), result(0), throw_exception(false) {}

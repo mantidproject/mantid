@@ -12,7 +12,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include <Poco/NObserver.h>
 
 namespace Mantid {
 namespace Algorithms {

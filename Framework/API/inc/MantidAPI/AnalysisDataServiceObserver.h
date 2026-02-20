@@ -40,6 +40,10 @@ public:
   AnalysisDataServiceObserver();
   virtual ~AnalysisDataServiceObserver();
 
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  AnalysisDataServiceObserver(const AnalysisDataServiceObserver &) = delete;
+  AnalysisDataServiceObserver &operator=(const AnalysisDataServiceObserver &) = delete;
+
   void observeAll(bool turnOn = true);
   void observeAdd(bool turnOn = true);
   void observeReplace(bool turnOn = true);

@@ -40,6 +40,10 @@ public:
 
   ~DynamicFactoryTest() override { factory.notificationCenter.removeObserver(m_notificationObserver); }
 
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  DynamicFactoryTest(const DynamicFactoryTest &) = delete;
+  DynamicFactoryTest &operator=(const DynamicFactoryTest &) = delete;
+
   void testCreate() {
     TS_ASSERT_THROWS(factory.create("testEntry"), const std::runtime_error &)
     factory.subscribe<int>("testEntry");
