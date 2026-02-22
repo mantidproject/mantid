@@ -712,7 +712,7 @@ void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) cons
         allHaveSingleArch = false;
         break;
       }
-      if (fileInfo.archs[0] != firstArch) {
+      if (!fileInfo.archs[0] || !firstArch || typeid(*fileInfo.archs[0]) != typeid(*firstArch)) {
         allHaveSingleArch = false;
         break;
       }
@@ -724,7 +724,9 @@ void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) cons
     }
   }
 
-  if (allHaveSingleArch && firstArch && firstArch->supportsMultipleHints()) {
+  if (allHaveSingleArch && firstArch->supportsMultipleHints()) {
+    g_log.debug() << "performArchiveSearch: all files share the same single archive to search and it supports multiple "
+                     "hints, all the same instrument, so searching together\n";
     // All files share the same single archive to search with the same instrument, so we can search them together in one
     // call to getArchivePaths. Make a vector of sets of hints to pass to the archive, one set for each file, as they
     // may have different hints.
@@ -735,7 +737,7 @@ void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) cons
       hintSets.push_back(*fileInfo.filenames.cbegin()); // take only the first filename as a hint, as the archive search
                                                         // will be case insensitive
     }
-    const auto archivePaths = firstArch->getArchivePaths(hintSets, fileInfos[0].extensionsToSearch);
+    const auto archivePaths = firstArch->getArchivePaths(hintSets);
     if (!archivePaths) {
       g_log.error() << "Archive search failed: " << archivePaths.errors() << "\n";
       return;

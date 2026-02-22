@@ -31,7 +31,7 @@ public:
                                                           const std::vector<std::string> &exts) const override;
   bool supportsMultipleHints() const override { return false; }
   const API::Result<std::vector<std::filesystem::path>>
-  getArchivePaths(const std::vector<std::string> &, const std::vector<std::string> &) const override {
+  getArchivePaths(const std::vector<std::string> &) const override {
     throw std::runtime_error("ISISDataArchive::getArchivePaths not implemented");
   };
 
