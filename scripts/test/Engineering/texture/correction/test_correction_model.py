@@ -327,7 +327,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(mock_convert.call_count, 2)
-        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, mock_calib.group)
+        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, False)
         mock_ads.remove.assert_any_call(abs_ws.name())
         mock_ads.remove.assert_any_call(div_ws.name())
 
