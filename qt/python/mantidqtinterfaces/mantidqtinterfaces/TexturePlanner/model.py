@@ -92,6 +92,8 @@ class TexturePlannerModel(object):
 
         self.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing", "material": "Fe"}
 
+        self.settings = (self.stl_kwargs, self.orientation_kwargs, self.mc_kwargs, self.attenuation_kwargs)
+
         # data structure
         self.saved_orientations = {0: self.get_default_info_dict()}
 
@@ -102,31 +104,20 @@ class TexturePlannerModel(object):
         self.instr_ws = LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=self.instr_wsname)
         if self.ws:
             # clone the relevant workspaces to prevent them being overwritten and the samples lost
-            tmp_ws = CloneWorkspace(InputWorkspace=self.ws, OutputWorkspace="__tmp_ws")
-            tmp_mesh_ws = CloneWorkspace(InputWorkspace=self.mesh_ws, OutputWorkspace="__tmp_texture_planning_raw_sample_mesh")
-            tmp_updated_mesh_ws = CloneWorkspace(
-                InputWorkspace=self.updated_mesh_ws, OutputWorkspace="__tmp_texture_planning_neutral_sample_mesh"
+            ws = self._create_new_ws_with_copied_sample(self.wsname, self.ws, clone=True)
+            mesh_ws = self._create_new_ws_with_copied_sample("__texture_planning_raw_sample_mesh", self.mesh_ws, clone=True)
+            updated_mesh_ws = self._create_new_ws_with_copied_sample(
+                "__texture_planning_neutral_sample_mesh", self.updated_mesh_ws, clone=True
             )
-        ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="1,0.5,2", OutputWorkspace=self.wsname, UnitX="dSpacing")
-        for ispec in range(ws.getNumberHistograms()):
-            ws.setY(ispec, np.ones_like(ws.readY(ispec)))
-        mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="__texture_planning_raw_sample_mesh")
-        updated_mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="__texture_planning_neutral_sample_mesh")
-        if not self.ws:
+        else:
+            ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="1,0.5,2", OutputWorkspace=self.wsname, UnitX="dSpacing")
+            for ispec in range(ws.getNumberHistograms()):
+                ws.setY(ispec, np.ones_like(ws.readY(ispec)))
+            mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="__texture_planning_raw_sample_mesh")
+            updated_mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="__texture_planning_neutral_sample_mesh")
             SetSampleShape(ws, get_cube_xml("default_cube", 0.01))
             SetSampleShape(mesh_ws, get_cube_xml("default_cube", 0.01))
             SetSampleShape(updated_mesh_ws, get_cube_xml("default_cube", 0.01))
-        # add handling here for copying over sample shape if the instrument is changed
-        else:
-            CopySample(InputWorkspace=tmp_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
-            CopySample(InputWorkspace=tmp_mesh_ws, OutputWorkspace=mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
-            CopySample(
-                InputWorkspace=tmp_updated_mesh_ws,
-                OutputWorkspace=updated_mesh_ws,
-                CopyName=False,
-                CopyEnvironment=False,
-                CopyLattice=False,
-            )
         self.ws = ws
         self.mesh_ws = mesh_ws
         self.updated_mesh_ws = updated_mesh_ws
@@ -259,7 +250,7 @@ class TexturePlannerModel(object):
             TranslateSampleShape(InputWorkspace=ws, TranslationVector=f"{x_pos},{y_pos},{z_pos}")
 
     def update_initial_shape(self, x_rot, y_rot, z_rot, x_pos, y_pos, z_pos):
-        _tmp_ws = CloneWorkspace(self.mesh_ws, OutputWorkspace="__tmp_ws")
+        _tmp_ws = self._create_new_ws_with_copied_sample("__tmp_ws", self.mesh_ws)
         self.offset = (x_pos, y_pos, z_pos)
         self.translate_shape(_tmp_ws, *self.offset)
 
@@ -675,6 +666,16 @@ class TexturePlannerModel(object):
                 self.supported_groups = ("Texture20", "Texture30", "banks")
             case "IMAT":
                 self.supported_groups = ("Module1", "Module4", "Row1", "Row4", "banks")
+
+    def _create_new_ws_with_copied_sample(self, new_wsname, sample_to_copy, clone=False):
+        # if the new_wsname is the same as the existing sample_to_copy name, need to clone the shape ws first
+        if clone:
+            shape_ws = CloneWorkspace(InputWorkspace=sample_to_copy, OutputWorkspace="__shape_ws")
+        else:
+            shape_ws = sample_to_copy
+        new_ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="1,0.5,2", OutputWorkspace=new_wsname, UnitX="dSpacing")
+        CopySample(InputWorkspace=shape_ws, OutputWorkspace=new_wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+        return new_ws
 
 
 def ring(axis, r=1, res=100, offset=(0, 0, 0)):
