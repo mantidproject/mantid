@@ -19,6 +19,7 @@ from mantid.simpleapi import (
     RotateSampleShape,
     TranslateSampleShape,
     DefineGaugeVolume,
+    LoadDetectorsGroupingFile,
 )
 from mantid.api import AnalysisDataService as ADS
 from Engineering.EnggUtils import CALIB_DIR
@@ -396,21 +397,28 @@ class TexturePlannerModel(object):
         return vecs, senses, angles
 
     def get_detQ_lab(self):
+        grouping_path = os.path.join(CALIB_DIR, self.calib_info.get_group_file())
         group_ws = GroupDetectors(
             InputWorkspace=self.instr_ws,
-            MapFile=os.path.join(CALIB_DIR, self.calib_info.get_group_file()),
+            MapFile=grouping_path,
             OutputWorkspace="group_ws",
             StoreInADS=False,
         )
         self.ws = GroupDetectors(
             InputWorkspace=self.ws,
-            MapFile=os.path.join(CALIB_DIR, self.calib_info.get_group_file()),
+            MapFile=grouping_path,
             OutputWorkspace=self.wsname,
         )
+        tmp_grp = LoadDetectorsGroupingFile(InputFile=grouping_path, OutputWorkspace="tmp_grp", StoreInADS=False)
+        ydat = tmp_grp.extractY()
+        # if the group_ws contains group label 0, this is the null group
+        # we want to ignore it when we iterate through the spectra, so we will start our iteration at 1
+        starting_ind = int(ydat.min() == 0)
+
         spec_info = group_ws.spectrumInfo()
         comp_info = group_ws.componentInfo()
         det_pos = np.asarray(
-            [spec_info.position(i) / np.linalg.norm(spec_info.position(i)) for i in range(1, group_ws.getNumberHistograms())]
+            [spec_info.position(i) / np.linalg.norm(spec_info.position(i)) for i in range(starting_ind, group_ws.getNumberHistograms())]
         )
         ki = np.zeros(3) - np.array(comp_info.sourcePosition())
         ki_norm = ki / np.linalg.norm(ki)
