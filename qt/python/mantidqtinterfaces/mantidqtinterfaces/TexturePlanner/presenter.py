@@ -11,6 +11,7 @@ class TexturePlannerPresenter(object):
         self.model = model
         self.view = view
 
+        self.set_instrument_options()
         self.set_view_with_default_texture_directions()
         self.update_enabled_gonios(self.view.get_num_gonios())
         self.set_max_orientation_index()
@@ -57,6 +58,7 @@ class TexturePlannerPresenter(object):
         self.view.set_on_gauge_vol_state_changed(self.update_gauge_volume_state)
         self.view.set_on_gauge_vol_file_changed(self.update_set_gauge_vol_enabled)
         self.view.set_on_set_gauge_volume_clicked(self.set_gauge_volume)
+        self.view.set_on_instrument_changed(self.on_instrument_changed)
 
     def set_view_texture_directions(self, names, vecs):
         self.view.set_rd_name(names[0])
@@ -73,6 +75,9 @@ class TexturePlannerPresenter(object):
     def set_model_group(self):
         self.model.set_group(self.view.get_group())
         self.model.get_detQ_lab()
+
+    def set_instrument_options(self):
+        self.view.set_instrument_options(self.model.get_supported_instruments())
 
     def set_view_with_default_texture_directions(self):
         names, vecs = self.model.get_default_texture_directions()
@@ -123,6 +128,12 @@ class TexturePlannerPresenter(object):
     def on_group_changed(self):
         self.set_model_group()
         self.model.update_all_projected_data()
+        self.update_plots()
+
+    def on_instrument_changed(self):
+        self.model.update_instrument(self.view.get_instrument())
+        self.setup_group_options()
+        self.on_group_changed()
         self.update_plots()
 
     def update_plots(self):
