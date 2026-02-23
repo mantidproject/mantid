@@ -76,6 +76,9 @@ class TexturePlannerModel(object):
         self.plot_attenuation = False
         self.gauge_volume_str = None
 
+        # visualisation settings
+        self.vis_settings = {"directions": True, "goniometers": True, "incident": True, "ks": True, "scattered": False}
+
         # stl_settings
         self.stl_kwargs = {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": "0", "TranslationVector": "0,0,0"}
 
@@ -513,32 +516,38 @@ class TexturePlannerModel(object):
 
         rot_mesh = R.apply(shape_mesh.reshape((-1, 3))).reshape(shape_mesh.shape)
 
-        for i, vec in enumerate(vecs):
-            gR = gRs[i]
-            gVec = gR.apply(vec)
-            gVecs.append(gVec)
+        if self.vis_settings["goniometers"]:
+            # code to add goniometers to plot
+            for i, vec in enumerate(vecs):
+                gR = gRs[i]
+                gVec = gR.apply(vec)
+                gVecs.append(gVec)
 
-            gon_scale = (1 + ((nGon - i) / 2)) * extent
+                gon_scale = (1 + ((nGon - i) / 2)) * extent
 
-            gon_ring = gR.apply(ring(vec, gon_scale, res=360).T).T
+                gon_ring = gR.apply(ring(vec, gon_scale, res=360).T).T
 
-            sense = -senses[i]  # mantid convention is that ccw = 1, we need cw = 1
-            angle = angles[i] * sense
+                sense = -senses[i]  # mantid convention is that ccw = 1, we need cw = 1
+                angle = angles[i] * sense
 
-            if angle <= 0:
-                gon_ring = np.flip(gon_ring, axis=1)  # reverse the ring if the angle is negative
+                if angle <= 0:
+                    gon_ring = np.flip(gon_ring, axis=1)  # reverse the ring if the angle is negative
 
-            pos_ind = int(np.abs(angle))
+                pos_ind = int(np.abs(angle))
 
-            # 3D goniometer plot
+                # 3D goniometer plot
 
-            lab_ax.plot(*gon_ring[:, : pos_ind + 1], color=self.gon_colors[i])
-            lab_ax.plot(*gon_ring[:, pos_ind:], color="grey")
-            lab_ax.quiver(
-                *np.zeros(3), *gVec * extent * 2, color=self.gon_colors[i], ls=("-", "--")[int(i != self.gonio_index)], label=f"Axis {i}"
-            )
+                lab_ax.plot(*gon_ring[:, : pos_ind + 1], color=self.gon_colors[i])
+                lab_ax.plot(*gon_ring[:, pos_ind:], color="grey")
+                lab_ax.quiver(
+                    *np.zeros(3),
+                    *gVec * extent * 2,
+                    color=self.gon_colors[i],
+                    ls=("-", "--")[int(i != self.gonio_index)],
+                    label=f"Axis {i}",
+                )
 
-        lab_ax.legend()
+            lab_ax.legend()
 
         gPole = R.inv().apply(np.array(gVecs)) @ ax_transform
         cart_gPole = get_alpha_beta_from_cart(gPole.T)
@@ -551,7 +560,8 @@ class TexturePlannerModel(object):
         sample_model.gauge_vol_str = self.gauge_volume_str
         fig.sca(lab_ax)
         plot_sample_only(fig, rot_mesh * 0.5, 0.5, "grey")
-        sample_model.plot_sample_directions(ax_transform, self.dir_names)
+        if self.vis_settings["directions"]:
+            sample_model.plot_sample_directions(ax_transform, self.dir_names)
         lab_ax.set_xlim([-extent * nGon / 1.5, extent * nGon / 1.5])
         lab_ax.set_ylim([-extent * nGon / 1.5, extent * nGon / 1.5])
         lab_ax.set_zlim([-extent * nGon / 1.5, extent * nGon / 1.5])
@@ -565,18 +575,20 @@ class TexturePlannerModel(object):
         ki_norm = ki / np.linalg.norm(ki)
         ki = ki_norm * extent * nGon / 0.75
         beam = -ki
-        lab_ax.quiver(*beam, *ki, arrow_length_ratio=0.05, color="black", alpha=0.25)
+        if self.vis_settings["incident"]:
+            lab_ax.quiver(*beam, *ki, arrow_length_ratio=0.05, color="black", alpha=0.25)
 
         # plot detector Qs
-        [lab_ax.quiver(*np.zeros(3), *dQ * 1.25 * extent, arrow_length_ratio=0.05, color="grey", alpha=0.25) for dQ in detQs_lab]
-        [
-            lab_ax.scatter(
-                *dQ * 1.25 * extent,
-                color="dodgerblue",
-                s=2,
-            )
-            for i, dQ in enumerate(detQs_lab)
-        ]
+        if self.vis_settings["ks"]:
+            [lab_ax.quiver(*np.zeros(3), *dQ * 1.25 * extent, arrow_length_ratio=0.05, color="grey", alpha=0.25) for dQ in detQs_lab]
+            [
+                lab_ax.scatter(
+                    *dQ * 1.25 * extent,
+                    color="dodgerblue",
+                    s=2,
+                )
+                for i, dQ in enumerate(detQs_lab)
+            ]
         lab_ax.set_axis_off()
 
         # 2D plot

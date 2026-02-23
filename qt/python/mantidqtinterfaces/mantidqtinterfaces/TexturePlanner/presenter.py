@@ -16,6 +16,7 @@ class TexturePlannerPresenter(object):
 
         self.settings_presenter = TexturePlannerSettingsPresenter(model, TexturePlannerSettingsView(parent=view))
         self.settings_presenter.load_settings_from_file_or_default()
+        self.settings_presenter.set_on_settings_applied(self.update_plots)
         self.view.set_on_settings_clicked(self.open_settings)
 
         self.set_instrument_options()

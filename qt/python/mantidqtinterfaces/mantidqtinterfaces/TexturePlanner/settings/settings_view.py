@@ -49,6 +49,7 @@ class TexturePlannerSettingsView(QDialog):
         scroll_layout = QVBoxLayout(scroll_widget)
         scroll_layout.setSpacing(8)
 
+        scroll_layout.addWidget(self._build_vis_group())
         scroll_layout.addWidget(self._build_stl_group())
         scroll_layout.addWidget(self._build_orientation_group())
         scroll_layout.addWidget(self._build_mc_group())
@@ -68,6 +69,28 @@ class TexturePlannerSettingsView(QDialog):
     # ================
     # Group Builders
     # ================
+
+    def _build_vis_group(self):
+        group = QGroupBox("Visualisation Settings")
+        form = QFormLayout()
+
+        self.show_directions = QCheckBox()
+        form.addRow("Show Sample Directions:", self.show_directions)
+
+        self.show_goniometers = QCheckBox()
+        form.addRow("Show Goniometers:", self.show_goniometers)
+
+        self.show_incident_beam = QCheckBox()
+        form.addRow("Show Incident Beam:", self.show_incident_beam)
+
+        self.show_ks = QCheckBox()
+        form.addRow("Show Ks:", self.show_ks)
+
+        self.show_scattered_beam = QCheckBox()
+        form.addRow("Show Scattered Beams:", self.show_scattered_beam)
+
+        group.setLayout(form)
+        return group
 
     def _build_stl_group(self):
         group = QGroupBox("STL Loading Settings")
@@ -217,6 +240,21 @@ class TexturePlannerSettingsView(QDialog):
     # Getters
     # ================
 
+    def get_show_directions(self):
+        return self.show_directions.isChecked()
+
+    def get_show_goniometers(self):
+        return self.show_goniometers.isChecked()
+
+    def get_show_incident_beam(self):
+        return self.show_incident_beam.isChecked()
+
+    def get_show_ks(self):
+        return self.show_ks.isChecked()
+
+    def get_show_scattered_beam(self):
+        return self.show_scattered_beam.isChecked()
+
     def get_stl_scale(self):
         return self.stl_scale_combo.currentText()
 
@@ -262,6 +300,21 @@ class TexturePlannerSettingsView(QDialog):
     # ================
     # Setters
     # ================
+
+    def set_show_directions(self, val):
+        self.show_directions.setChecked(bool(val))
+
+    def set_show_goniometers(self, val):
+        return self.show_goniometers.setChecked(bool(val))
+
+    def set_show_incident_beam(self, val):
+        return self.show_incident_beam.setChecked(bool(val))
+
+    def set_show_ks(self, val):
+        return self.show_ks.setChecked(bool(val))
+
+    def set_show_scattered_beam(self, val):
+        return self.show_scattered_beam.setChecked(bool(val))
 
     def set_stl_scale(self, text):
         self.stl_scale_combo.setCurrentText(str(text))
