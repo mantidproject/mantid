@@ -5,9 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QMainWindow, QHeaderView, QTableWidgetItem, QCheckBox, QWidget, QHBoxLayout
+from qtpy.QtWidgets import QMainWindow, QHeaderView, QTableWidgetItem, QCheckBox, QWidget, QHBoxLayout, QPushButton, QToolBar
 from qtpy import QtCore
 from mantidqt.utils.qt import load_ui
+from mantidqt.icons import get_icon
 from mantid.kernel import FeatureType
 from mantid import UsageService
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -78,8 +79,21 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.make_box_toggleable(self.grpDirectionWidgets, self.set_sample_directions_visible)
         self.make_box_toggleable(self.grpOrientationFile)  # finder widget has some hidden features that toggling messes with
 
+        self._setup_settings_toolbar()
+
         # register startup
         UsageService.registerFeatureUsage(FeatureType.Interface, "TexturePlanner", False)
+
+    def _setup_settings_toolbar(self):
+        toolbar = QToolBar("Main Toolbar", self)
+        self.btn_settings = QPushButton()
+        self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
+        self.btn_settings.setToolTip("Settings")
+        toolbar.addWidget(self.btn_settings)
+        self.addToolBar(QtCore.Qt.BottomToolBarArea, toolbar)
+
+    def set_on_settings_clicked(self, slot):
+        self.btn_settings.clicked.connect(slot)
 
     def init_tool_tips(self):
         self.lineedit_RD.setToolTip("Label for the first (PF: in-plane) intrinsic sample direction")
