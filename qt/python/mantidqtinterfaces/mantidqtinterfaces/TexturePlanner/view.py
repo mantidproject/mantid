@@ -194,6 +194,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_init_pz_changed(self, slot):
         self.spnInitPZ.valueChanged.connect(slot)
 
+    def set_on_instrument_changed(self, slot):
+        self.cmbInstr.currentTextChanged.connect(slot)
+
     @QtCore.Slot(bool)
     def _on_any_include_toggled(self):
         self.sig_include_state_changed.emit()
@@ -266,6 +269,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def get_group(self):
         return self.cmbGroup.currentText()
+
+    def get_instrument(self):
+        return self.cmbInstr.currentText()
 
     def get_current_index(self):
         return int(self.spnIndex.value()) - 1
@@ -389,6 +395,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.labCanvas.setLayout(layout)
         layout.addWidget(self.lab_canvas)
 
+    def set_instrument_options(self, instrs):
+        self.cmbInstr.insertItems(0, instrs)
+
     @staticmethod
     def set_gonio_axis_enabled(gonio, val):
         gonio.setEnabled(val)
@@ -411,7 +420,12 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.spnInitPZ.setSingleStep(step_size)
 
     def setup_group_options(self, groups):
-        self.cmbGroup.addItems(groups)
+        self.cmbGroup.blockSignals(True)
+        try:
+            self.cmbGroup.clear()
+            self.cmbGroup.addItems(groups)
+        finally:
+            self.cmbGroup.blockSignals(False)
 
     def create_workspace_table(self):
         table_column_headers = ("Axis0", "Axis1", "Axis2", "Axis3", "Axis4", "Axis5", "Include", "Select")

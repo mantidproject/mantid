@@ -21,7 +21,7 @@ from mantid.simpleapi import (
     DefineGaugeVolume,
 )
 from mantid.api import AnalysisDataService as ADS
-from Engineering.EnggUtils import GROUP, CALIB_DIR
+from Engineering.EnggUtils import CALIB_DIR
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_model import ShowSampleModel
 from Engineering.common.xml_shapes import get_cube_xml
@@ -36,6 +36,7 @@ from Engineering.texture.correction.correction_model import read_attenuation_coe
 from Engineering.texture.texture_helper import get_gauge_vol_str
 from mantid.dataobjects import Workspace2D
 from typing import Optional
+from Engineering.common.instrument_config import get_instr_config, SUPPORTED_INSTRUMENTS
 
 
 class TexturePlannerModel(object):
@@ -52,9 +53,12 @@ class TexturePlannerModel(object):
 
         # properties which will be updated
         self.ws = None
+        self.mesh_ws = None
+        self.updated_mesh_ws = None
         self.instr_ws = None
         self.instr = instrument
         self.calib_info = None
+        self.config = None
         self.group = None
         self.ax_transform = np.eye(3)
         self.dir_names = ["D1", "D2", "D3"]
@@ -92,21 +96,52 @@ class TexturePlannerModel(object):
         self.saved_orientations = {0: self.get_default_info_dict()}
 
         # init func calls
-        self.update_ws()
+        self.update_instrument(self.instr)
 
     def update_ws(self):
+        self.instr_ws = LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=self.instr_wsname)
+        if self.ws:
+            # clone the relevant workspaces to prevent them being overwritten and the samples lost
+            tmp_ws = CloneWorkspace(InputWorkspace=self.ws, OutputWorkspace="__tmp_ws")
+            tmp_mesh_ws = CloneWorkspace(InputWorkspace=self.mesh_ws, OutputWorkspace="__tmp_texture_planning_raw_sample_mesh")
+            tmp_updated_mesh_ws = CloneWorkspace(
+                InputWorkspace=self.updated_mesh_ws, OutputWorkspace="__tmp_texture_planning_neutral_sample_mesh"
+            )
+        ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="1,0.5,2", OutputWorkspace=self.wsname, UnitX="dSpacing")
+        for ispec in range(ws.getNumberHistograms()):
+            ws.setY(ispec, np.ones_like(ws.readY(ispec)))
+        mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="__texture_planning_raw_sample_mesh")
+        updated_mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="__texture_planning_neutral_sample_mesh")
         if not self.ws:
-            self.instr_ws = LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=self.instr_wsname)
-            self.ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="1,0.5,2", OutputWorkspace=self.wsname, UnitX="dSpacing")
-            for ispec in range(self.ws.getNumberHistograms()):
-                self.ws.setY(ispec, np.ones_like(self.ws.readY(ispec)))
-            self.mesh_ws = CloneWorkspace(InputWorkspace=self.wsname, OutputWorkspace="__texture_planning_raw_sample_mesh")
-            self.updated_mesh_ws = CloneWorkspace(InputWorkspace=self.wsname, OutputWorkspace="__texture_planning_neutral_sample_mesh")
-            SetSampleShape(self.ws, get_cube_xml("default_cube", 0.01))
-            SetSampleShape(self.mesh_ws, get_cube_xml("default_cube", 0.01))
-            SetSampleShape(self.updated_mesh_ws, get_cube_xml("default_cube", 0.01))
-            self.set_material()
+            SetSampleShape(ws, get_cube_xml("default_cube", 0.01))
+            SetSampleShape(mesh_ws, get_cube_xml("default_cube", 0.01))
+            SetSampleShape(updated_mesh_ws, get_cube_xml("default_cube", 0.01))
         # add handling here for copying over sample shape if the instrument is changed
+        else:
+            CopySample(InputWorkspace=tmp_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+            CopySample(InputWorkspace=tmp_mesh_ws, OutputWorkspace=mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+            CopySample(
+                InputWorkspace=tmp_updated_mesh_ws,
+                OutputWorkspace=updated_mesh_ws,
+                CopyName=False,
+                CopyEnvironment=False,
+                CopyLattice=False,
+            )
+        self.ws = ws
+        self.mesh_ws = mesh_ws
+        self.updated_mesh_ws = updated_mesh_ws
+        self.set_material()
+
+    def update_instrument(self, instrument):
+        self.instr = instrument
+        self.config = get_instr_config(self.instr)
+        self.update_ws()
+        self.update_calib_info()
+        self.update_supported_groups()
+
+    @staticmethod
+    def get_supported_instruments():
+        return SUPPORTED_INSTRUMENTS
 
     def set_material(self):
         SetSampleMaterial(self.ws, self.attenuation_kwargs["material"])
@@ -178,7 +213,7 @@ class TexturePlannerModel(object):
         self.n_gonio = val
 
     def set_group(self, group_str):
-        self.group = GROUP(group_str)
+        self.group = self.config.group(group_str)
         self.update_calib_info()
 
     def set_ax_transform(self, vec1, vec2, vec3):
@@ -195,7 +230,7 @@ class TexturePlannerModel(object):
         self.plot_attenuation = val
 
     def update_calib_info(self):
-        self.calib_info = CalibrationInfo(group=self.group)
+        self.calib_info = CalibrationInfo(instrument=self.instr, group=self.group)
 
     @staticmethod
     def get_default_texture_directions():
@@ -634,16 +669,12 @@ class TexturePlannerModel(object):
     def set_gauge_volume_str(self, preset, custom):
         self.gauge_volume_str = get_gauge_vol_str(preset, custom)
 
-    def update_instrument(self, instrument):
-        self.instr = instrument
-        self.update_supported_groups()
-
     def update_supported_groups(self):
         match self.instr:
             case "ENGINX":
                 self.supported_groups = ("Texture20", "Texture30", "banks")
             case "IMAT":
-                self.supported_groups = "banks"
+                self.supported_groups = ("Module1", "Module4", "Row1", "Row4", "banks")
 
 
 def ring(axis, r=1, res=100, offset=(0, 0, 0)):
