@@ -60,8 +60,6 @@ def mk(dir_path: str):
         p.mkdir()
 
 
-
-
 def convert_to_sscanss_frame(rot_mat):
     # Define M: matrix to convert vectors from XYZ to ZXY
     M = np.array(
