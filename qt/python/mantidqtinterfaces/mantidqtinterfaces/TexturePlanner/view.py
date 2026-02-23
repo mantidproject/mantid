@@ -357,6 +357,10 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_max_ind(self, ind):
         self.spnIndex.setMaximum(ind)
 
+    def set_step_size(self, val):
+        self.spnStepSize.setValue(val)
+        self.set_angle_steps()
+
     def set_angle_steps(self):
         step_size = self.get_step_size()
         for ang in self.gonio_angles:

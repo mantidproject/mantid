@@ -55,7 +55,7 @@ class TexturePlannerSettingsPresenter(object):
             "goniometers": self.view.get_show_goniometers(),
             "incident": self.view.get_show_incident_beam(),
             "ks": self.view.get_show_ks(),
-            "scattered": self.view.get_scattered_beam(),
+            "scattered": self.view.get_show_scattered_beam(),
             "stl_scale": self.view.get_stl_scale(),
             "stl_x_degrees": self.view.get_stl_x_deg(),
             "stl_y_degrees": self.view.get_stl_y_deg(),
@@ -100,11 +100,11 @@ class TexturePlannerSettingsPresenter(object):
     def _populate_view_from_texture_model(self):
         """Populate the settings dialog fields from the current state of the texture model."""
         vis = self.texture_model.vis_settings
-        self.view.set_stl_scale(vis["directions"])
-        self.view.set_stl_x_deg(vis["goniometers"])
-        self.view.set_stl_y_deg(vis["incident"])
-        self.view.set_stl_z_deg(vis["ks"])
-        self.view.set_stl_translation(vis["scattered"])
+        self.view.set_show_directions(vis["directions"])
+        self.view.set_show_goniometers(vis["goniometers"])
+        self.view.set_show_incident_beam(vis["incident"])
+        self.view.set_show_ks(vis["ks"])
+        self.view.set_show_scattered_beam(vis["scattered"])
 
         stl = self.texture_model.stl_kwargs
         self.view.set_stl_scale(stl["Scale"])

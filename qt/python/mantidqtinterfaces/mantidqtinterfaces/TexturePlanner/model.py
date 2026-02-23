@@ -20,6 +20,7 @@ from mantid.simpleapi import (
     TranslateSampleShape,
     DefineGaugeVolume,
     LoadDetectorsGroupingFile,
+    EstimateScatteringVolumeCentreOfMass,
 )
 from mantid.api import AnalysisDataService as ADS
 from Engineering.EnggUtils import CALIB_DIR
@@ -68,6 +69,7 @@ class TexturePlannerModel(object):
         self.init_R = Rotation.identity()
         self.offset = (0, 0, 0)
         self.detQs_lab = None
+        self.starting_ind = 1  # offset to skip null group; updated by get_detQ_lab
         self.projection = projection
         self.gonio_index = 0
         self.n_gonio = 2
@@ -126,6 +128,8 @@ class TexturePlannerModel(object):
         self.mesh_ws = mesh_ws
         self.updated_mesh_ws = updated_mesh_ws
         self.set_material()
+        if self.gauge_volume_str:
+            define_gauge_volume(self.ws, self.gauge_volume_str)
 
     def update_instrument(self, instrument):
         self.instr = instrument
@@ -412,20 +416,33 @@ class TexturePlannerModel(object):
             MapFile=grouping_path,
             OutputWorkspace=self.wsname,
         )
+        if self.gauge_volume_str:
+            define_gauge_volume(self.ws, self.gauge_volume_str)
+
         tmp_grp = LoadDetectorsGroupingFile(InputFile=grouping_path, OutputWorkspace="tmp_grp", StoreInADS=False)
         ydat = tmp_grp.extractY()
         # if the group_ws contains group label 0, this is the null group
         # we want to ignore it when we iterate through the spectra, so we will start our iteration at 1
-        starting_ind = int(ydat.min() == 0)
+        self.starting_ind = int(ydat.min() == 0)
+        starting_ind = self.starting_ind
 
         spec_info = group_ws.spectrumInfo()
         comp_info = group_ws.componentInfo()
-        det_pos = np.asarray(
-            [spec_info.position(i) / np.linalg.norm(spec_info.position(i)) for i in range(starting_ind, group_ws.getNumberHistograms())]
+
+        # if the sample is partially illuminated the scattering vectors should be taken from the centre of mass of the
+        # illuminated region
+
+        scattering_centre = np.asarray(EstimateScatteringVolumeCentreOfMass(InputWorkspace=self.ws))
+
+        self.det_k = np.asarray(
+            [
+                (spec_info.position(i) - scattering_centre) / np.linalg.norm(spec_info.position(i) - scattering_centre)
+                for i in range(starting_ind, group_ws.getNumberHistograms())
+            ]
         )
-        ki = np.zeros(3) - np.array(comp_info.sourcePosition())
+        ki = scattering_centre - np.array(comp_info.sourcePosition())
         ki_norm = ki / np.linalg.norm(ki)
-        detQs_lab = det_pos - ki_norm
+        detQs_lab = self.det_k - ki_norm
         self.detQs_lab = detQs_lab / np.linalg.norm(detQs_lab, axis=1)[:, None]
 
     def update_all_projected_data(self):
@@ -485,11 +502,12 @@ class TexturePlannerModel(object):
         define_gauge_volume(mc_ws, self.gauge_volume_str)
         try:
             MonteCarloAbsorption(**self.mc_kwargs)
-            # first entry is null group so we can ignore it
-            mu = read_attenuation_coefficient_at_value("__abs_ws", self.attenuation_kwargs["point"], self.attenuation_kwargs["unit"])[1:]
+            mu = read_attenuation_coefficient_at_value("__abs_ws", self.attenuation_kwargs["point"], self.attenuation_kwargs["unit"])[
+                self.starting_ind :
+            ]
         except RuntimeError:
             logger.warning("MonteCarloAbsorption has failed, sample is assumed to be outside the gauge volume ")
-            mu = np.zeros(mc_ws.getNumberHistograms() - 1)
+            mu = np.zeros(mc_ws.getNumberHistograms() - self.starting_ind)
         self.saved_orientations[index]["mu"] = mu
 
     def calc_all_monte_carlo_absorption_vals(self):
@@ -516,27 +534,30 @@ class TexturePlannerModel(object):
 
         rot_mesh = R.apply(shape_mesh.reshape((-1, 3))).reshape(shape_mesh.shape)
 
-        if self.vis_settings["goniometers"]:
-            # code to add goniometers to plot
-            for i, vec in enumerate(vecs):
-                gR = gRs[i]
-                gVec = gR.apply(vec)
-                gVecs.append(gVec)
+        scat_centre = np.asarray(EstimateScatteringVolumeCentreOfMass(InputWorkspace=self.ws))
 
-                gon_scale = (1 + ((nGon - i) / 2)) * extent
+        # code to add goniometers to plot
+        for i, vec in enumerate(vecs):
+            gR = gRs[i]
+            gVec = gR.apply(vec)
+            gVecs.append(gVec)
 
-                gon_ring = gR.apply(ring(vec, gon_scale, res=360).T).T
+            gon_scale = (1 + ((nGon - i) / 2)) * extent
 
-                sense = -senses[i]  # mantid convention is that ccw = 1, we need cw = 1
-                angle = angles[i] * sense
+            _ring_res = 360
+            gon_ring = gR.apply(ring(vec, gon_scale, res=_ring_res).T).T
 
-                if angle <= 0:
-                    gon_ring = np.flip(gon_ring, axis=1)  # reverse the ring if the angle is negative
+            sense = -senses[i]  # mantid convention is that ccw = 1, we need cw = 1
+            angle = angles[i] * sense
 
-                pos_ind = int(np.abs(angle))
+            if angle <= 0:
+                gon_ring = np.flip(gon_ring, axis=1)  # reverse the ring if the angle is negative
 
-                # 3D goniometer plot
+            pos_ind = int(np.abs(angle) / 360 * _ring_res)
 
+            # 3D goniometer plot
+
+            if self.vis_settings["goniometers"]:
                 lab_ax.plot(*gon_ring[:, : pos_ind + 1], color=self.gon_colors[i])
                 lab_ax.plot(*gon_ring[:, pos_ind:], color="grey")
                 lab_ax.quiver(
@@ -546,7 +567,7 @@ class TexturePlannerModel(object):
                     ls=("-", "--")[int(i != self.gonio_index)],
                     label=f"Axis {i}",
                 )
-
+        if self.vis_settings["goniometers"]:
             lab_ax.legend()
 
         gPole = R.inv().apply(np.array(gVecs)) @ ax_transform
@@ -559,7 +580,7 @@ class TexturePlannerModel(object):
         sample_model.ws_name = self.wsname
         sample_model.gauge_vol_str = self.gauge_volume_str
         fig.sca(lab_ax)
-        plot_sample_only(fig, rot_mesh * 0.5, 0.5, "grey")
+        plot_sample_only(fig, rot_mesh, 0.5, "grey")
         if self.vis_settings["directions"]:
             sample_model.plot_sample_directions(ax_transform, self.dir_names)
         lab_ax.set_xlim([-extent * nGon / 1.5, extent * nGon / 1.5])
@@ -571,7 +592,7 @@ class TexturePlannerModel(object):
 
         # plot incident beam
         comp_info = self.ws.componentInfo()
-        ki = -np.array(comp_info.sourcePosition())
+        ki = scat_centre - np.array(comp_info.sourcePosition())
         ki_norm = ki / np.linalg.norm(ki)
         ki = ki_norm * extent * nGon / 0.75
         beam = -ki
@@ -580,15 +601,39 @@ class TexturePlannerModel(object):
 
         # plot detector Qs
         if self.vis_settings["ks"]:
-            [lab_ax.quiver(*np.zeros(3), *dQ * 1.25 * extent, arrow_length_ratio=0.05, color="grey", alpha=0.25) for dQ in detQs_lab]
-            [
-                lab_ax.scatter(
-                    *dQ * 1.25 * extent,
-                    color="dodgerblue",
-                    s=2,
-                )
-                for i, dQ in enumerate(detQs_lab)
-            ]
+            ks_scaled = detQs_lab * (1.25 * extent)
+            ks_point = ks_scaled + scat_centre[None, :]
+            n = len(ks_scaled)
+            lab_ax.quiver(
+                np.ones(n) * scat_centre[0],
+                np.ones(n) * scat_centre[1],
+                np.ones(n) * scat_centre[2],
+                ks_scaled[:, 0],
+                ks_scaled[:, 1],
+                ks_scaled[:, 2],
+                arrow_length_ratio=0.05,
+                color="grey",
+                alpha=0.25,
+                linestyle="--",
+            )
+            lab_ax.scatter(ks_point[:, 0], ks_point[:, 1], ks_point[:, 2], color="dodgerblue", s=2)
+
+        if self.vis_settings["scattered"]:
+            scat_scaled = np.asarray(self.det_k) * (1.25 * extent)
+            scat_tips = scat_scaled + scat_centre[None, :]
+            n = len(scat_scaled)
+            lab_ax.quiver(
+                np.ones(n) * scat_centre[0],
+                np.ones(n) * scat_centre[1],
+                np.ones(n) * scat_centre[2],
+                scat_scaled[:, 0],
+                scat_scaled[:, 1],
+                scat_scaled[:, 2],
+                arrow_length_ratio=0.05,
+                color="grey",
+                alpha=0.25,
+            )
+            lab_ax.scatter(scat_tips[:, 0], scat_tips[:, 1], scat_tips[:, 2], color="grey", s=2)
         lab_ax.set_axis_off()
 
         # 2D plot
@@ -679,6 +724,8 @@ class TexturePlannerModel(object):
 
     def set_gauge_volume_str(self, preset, custom):
         self.gauge_volume_str = get_gauge_vol_str(preset, custom)
+        if self.gauge_volume_str:
+            define_gauge_volume(self.ws, self.gauge_volume_str)
 
     def update_supported_groups(self):
         match self.instr:

@@ -24,6 +24,7 @@ class TexturePlannerPresenter(object):
         self.update_enabled_gonios(self.view.get_num_gonios())
         self.set_max_orientation_index()
         self.setup_group_options()
+        self.view.set_step_size(15)
 
         self.set_model_texture_directions()
         self.set_model_group()
