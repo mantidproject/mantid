@@ -70,6 +70,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
         self.set_angle_limits()
         self.set_translation_step(0.001)  # setup 1mm translational steps
+        self.set_translation_limits(-1e4, 1e4)
 
         self.create_workspace_table()
         self.hide_axis_columns()
@@ -432,6 +433,14 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.spnInitPX.setSingleStep(step_size)
         self.spnInitPY.setSingleStep(step_size)
         self.spnInitPZ.setSingleStep(step_size)
+
+    def set_translation_limits(self, min, max):
+        self.spnInitPX.setMinimum(min)
+        self.spnInitPX.setMaximum(max)
+        self.spnInitPY.setMinimum(min)
+        self.spnInitPY.setMaximum(max)
+        self.spnInitPZ.setMinimum(min)
+        self.spnInitPZ.setMaximum(max)
 
     def setup_group_options(self, groups):
         self.cmbGroup.blockSignals(True)

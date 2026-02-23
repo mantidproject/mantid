@@ -13,10 +13,14 @@ class TexturePlannerSettingsPresenter(object):
         self.texture_model = texture_model
         self.settings_model = TexturePlannerSettingsModel()
         self.view = view
+        self._on_settings_applied = None
 
         self.view.set_on_ok_clicked(self.save_and_close)
         self.view.set_on_cancel_clicked(self.close)
         self.view.set_on_apply_clicked(self.save_settings)
+
+    def set_on_settings_applied(self, slot):
+        self._on_settings_applied = slot
 
     def load_settings_from_file_or_default(self):
         """Called on interface startup to restore previously saved settings into the model."""
@@ -38,6 +42,8 @@ class TexturePlannerSettingsPresenter(object):
         settings = self._collect_settings_from_view()
         self.settings_model.set_settings_dict(settings)
         self._apply_settings_to_texture_model(settings)
+        if self._on_settings_applied is not None:
+            self._on_settings_applied()
 
     # ========================
     # Internal helpers
@@ -45,6 +51,11 @@ class TexturePlannerSettingsPresenter(object):
 
     def _collect_settings_from_view(self):
         return {
+            "directions": self.view.get_show_directions(),
+            "goniometers": self.view.get_show_goniometers(),
+            "incident": self.view.get_show_incident_beam(),
+            "ks": self.view.get_show_ks(),
+            "scattered": self.view.get_scattered_beam(),
             "stl_scale": self.view.get_stl_scale(),
             "stl_x_degrees": self.view.get_stl_x_deg(),
             "stl_y_degrees": self.view.get_stl_y_deg(),
@@ -62,6 +73,12 @@ class TexturePlannerSettingsPresenter(object):
         }
 
     def _apply_settings_to_texture_model(self, settings):
+        self.texture_model.vis_settings["directions"] = settings["directions"]
+        self.texture_model.vis_settings["goniometers"] = settings["goniometers"]
+        self.texture_model.vis_settings["incident"] = settings["incident"]
+        self.texture_model.vis_settings["ks"] = settings["ks"]
+        self.texture_model.vis_settings["scattered"] = settings["scattered"]
+
         self.texture_model.stl_kwargs["Scale"] = settings["stl_scale"]
         self.texture_model.stl_kwargs["XDegrees"] = settings["stl_x_degrees"]
         self.texture_model.stl_kwargs["YDegrees"] = settings["stl_y_degrees"]
@@ -82,6 +99,13 @@ class TexturePlannerSettingsPresenter(object):
 
     def _populate_view_from_texture_model(self):
         """Populate the settings dialog fields from the current state of the texture model."""
+        vis = self.texture_model.vis_settings
+        self.view.set_stl_scale(vis["directions"])
+        self.view.set_stl_x_deg(vis["goniometers"])
+        self.view.set_stl_y_deg(vis["incident"])
+        self.view.set_stl_z_deg(vis["ks"])
+        self.view.set_stl_translation(vis["scattered"])
+
         stl = self.texture_model.stl_kwargs
         self.view.set_stl_scale(stl["Scale"])
         self.view.set_stl_x_deg(stl["XDegrees"])
