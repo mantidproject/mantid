@@ -18,6 +18,10 @@ log = Logger("MPIEXEC")
 
 class ExecuteMPITest(systemtesting.MantidSystemTest):
     def skipTests(self):
+        try:
+            from mantid.simpleapi import GatherWorkspaces, BroadcastWorkspace  # noqa F401
+        except ImportError:
+            return True
         return os.environ.get("MPI_ENABLED") != "TRUE"
 
     def requiredFiles(self):
