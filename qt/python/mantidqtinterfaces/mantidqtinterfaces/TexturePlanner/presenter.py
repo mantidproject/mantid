@@ -5,11 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from mantidqtinterfaces.TexturePlanner.settings.settings_view import TexturePlannerSettingsView
+from mantidqtinterfaces.TexturePlanner.settings.settings_presenter import TexturePlannerSettingsPresenter
+
 
 class TexturePlannerPresenter(object):
     def __init__(self, model, view):
         self.model = model
         self.view = view
+
+        self.settings_presenter = TexturePlannerSettingsPresenter(model, TexturePlannerSettingsView(parent=view))
+        self.settings_presenter.load_settings_from_file_or_default()
+        self.view.set_on_settings_clicked(self.open_settings)
 
         self.set_instrument_options()
         self.set_view_with_default_texture_directions()
@@ -59,6 +66,9 @@ class TexturePlannerPresenter(object):
         self.view.set_on_gauge_vol_file_changed(self.update_set_gauge_vol_enabled)
         self.view.set_on_set_gauge_volume_clicked(self.set_gauge_volume)
         self.view.set_on_instrument_changed(self.on_instrument_changed)
+
+    def open_settings(self):
+        self.settings_presenter.show()
 
     def set_view_texture_directions(self, names, vecs):
         self.view.set_rd_name(names[0])
