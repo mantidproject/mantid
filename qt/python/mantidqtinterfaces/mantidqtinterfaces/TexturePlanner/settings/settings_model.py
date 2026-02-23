@@ -11,6 +11,11 @@ INTERFACES_SETTINGS_GROUP = "CustomInterfaces"
 TEXTURE_PLANNER_PREFIX = "TexturePlanner/"
 
 SETTINGS_DICT = {
+    "directions": bool,
+    "goniometers": bool,
+    "incident": bool,
+    "ks": bool,
+    "scattered": bool,
     "stl_scale": str,
     "stl_x_degrees": float,
     "stl_y_degrees": float,
@@ -28,6 +33,11 @@ SETTINGS_DICT = {
 }
 
 DEFAULT_SETTINGS = {
+    "directions": True,
+    "goniometers": True,
+    "incident": True,
+    "ks": True,
+    "scattered": False,
     "stl_scale": "cm",
     "stl_x_degrees": 0.0,
     "stl_y_degrees": 0.0,
