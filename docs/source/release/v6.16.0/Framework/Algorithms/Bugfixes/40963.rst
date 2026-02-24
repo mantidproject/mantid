@@ -1,0 +1,3 @@
+- Algorithm :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` now updates the run duration log when using
+  parameters ``FilterByTimeStart`` and/or ``FilterByTimeStop``. The behaviour is now consistent with
+  :ref:`LoadEventNexus <algm-LoadEventNexus>` when using the same parameters.
