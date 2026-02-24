@@ -11,7 +11,7 @@ if(COVERAGE)
 endif()
 
 # Add the target for this directory
-add_library(MPIAlgorithms ${SRC_FILES} ${INC_FILES})
+add_library(MPIAlgorithms SHARED ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::MPIAlgorithms ALIAS MPIAlgorithms)
 
 target_include_directories(
@@ -29,6 +29,7 @@ target_link_libraries(
   PRIVATE Mantid::Kernel
 )
 if(MPI_BUILD)
+  target_sources(MPIAlgorithms PRIVATE src/MPILifetime.cpp)
   message(STATUS "Boost_MPI_LIBRARY = ${Boost_MPI_LIBRARY}")
   target_compile_definitions(MPIAlgorithms PRIVATE MPI_BUILD)
   target_link_libraries(
@@ -38,6 +39,8 @@ if(MPI_BUILD)
   )
   # Add the unit tests directory
   add_subdirectory(test)
+  # Installation settings - only install when MPI_BUILD is ON
+  mtd_install_targets(TARGETS MPIAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
 endif()
 
 target_include_directories(
@@ -47,6 +50,3 @@ target_include_directories(
 )
 
 generate_mantid_export_header(MPIAlgorithms TRUE)
-
-# Installation settings
-mtd_install_targets(TARGETS MPIAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

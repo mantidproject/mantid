@@ -20,12 +20,9 @@ cmake \
   -DCMAKE_CXX_SCAN_FOR_MODULES=OFF \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
   -DMPI_BUILD=ON \
+  -DBUILD_SHARED_LIBS=on \
   -GNinja \
   ../
 
 cmake --build . --target MPIAlgorithms
-cmake --build . --target install
-
-# # Copy the .so to the plugins directory in $PREFIX
-# # Verify path with: find . -name "libMantidMPIAlgorithms.so" on first build
-# find . -name "libMantidMPIAlgorithms.so" -exec cp {} $PREFIX/plugins/ \;
+cp ./bin/libMantidMPIAlgorithms.so $PREFIX/plugins/
