@@ -10,17 +10,22 @@ Standalone MPI tests for BroadcastWorkspace and GatherWorkspaces algorithms.
 Run with: mpiexec -n 4 -l python mpitest.py
 """
 
-from mantid.simpleapi import CreateWorkspace, GatherWorkspaces, BroadcastWorkspace, AppendSpectra, DeleteWorkspace, Scale, Load
+from mantid.simpleapi import CreateWorkspace, AppendSpectra, DeleteWorkspace, Scale, Load
 from mantid.kernel import amend_config, Logger
-from mpi4py import MPI
 import numpy as np
 import sys
 
 logger = Logger("MPISystemTest")
 
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
-size = comm.Get_size()
+try:
+    from mantid.simpleapi import BroadcastWorkspace, GatherWorkspaces
+    from mpi4py import MPI
+
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+except ImportError:
+    MPI = None
 
 # Test result tracking
 passed_tests = 0
@@ -463,6 +468,9 @@ def main():
 
 
 if __name__ == "__main__":
+    if MPI is None:
+        sys.exit(-1)
+
     if size < 2:
         if rank == 0:
             logger.information("Error: These tests require at least 2 MPI processes")
