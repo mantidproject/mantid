@@ -93,6 +93,11 @@ public:
   WorkspaceObserver();
   /// Destructor
   virtual ~WorkspaceObserver();
+
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  WorkspaceObserver(const WorkspaceObserver &) = delete;
+  WorkspaceObserver &operator=(const WorkspaceObserver &) = delete;
+
   /// Observe workspace deletes
   void observePreDelete(bool on = true);
   /// Observe workspace deletes

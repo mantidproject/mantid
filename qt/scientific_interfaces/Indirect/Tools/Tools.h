@@ -36,6 +36,11 @@ public: // public constructor, destructor and functions
   Tools(QWidget *parent = nullptr);
   /// Destructor
   ~Tools() override;
+
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  Tools(const Tools &) = delete;
+  Tools &operator=(const Tools &) = delete;
+
   /// Interface name
   static std::string name() { return "Tools"; }
   // This interface's categories.
