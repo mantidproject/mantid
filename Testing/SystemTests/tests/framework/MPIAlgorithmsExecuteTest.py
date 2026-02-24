@@ -32,7 +32,7 @@ class ExecuteMPITest(systemtesting.MantidSystemTest):
         dsd = config.getDataSearchDirs()
 
         current_dir = pathlib.Path(__file__).resolve().parent
-        test_file = current_dir / "MPIAlgorithmsTest.py"
+        test_file = current_dir / "MPIAlgorithmsTest.py.skip"
 
         cmd = ["mpiexec", "-n", "4", sys.executable, test_file, ",".join(dsd)]
         try:

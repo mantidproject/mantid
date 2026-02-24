@@ -1159,8 +1159,6 @@ class TestManager(object):
         loaded, tests = [], []
         for filepath in entries:
             if filepath.endswith(".py"):
-                if filepath.endswith("MPIAlgorithmsTest.py"):
-                    continue
                 module_loaded, module_tests = self.loadTestsFromModule(os.path.join(test_dir, filepath))
                 loaded.append(module_loaded)
                 tests.extend(module_tests)
