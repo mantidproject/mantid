@@ -384,6 +384,7 @@ class EllipseWidgetNoRotation(vtkBoxWidget2):
                     render_lines_as_tubes=False,
                     pickable=False,
                     show_edges=False,
+                    point_size=0,
                     name=f"ellipse_widget_{id(self)}",
                 )
             else:
