@@ -1012,6 +1012,103 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         expected = np.array([True] * 4)
         np.testing.assert_array_equal(model._is_selected_in_tree, expected)
 
+    def test_calculate_and_set_full_integration_range_common_bins(self):
+        """Test that _calculate_and_set_full_integration_range uses the first valid workspace index for common bins."""
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.isRaggedWorkspace.return_value = False
+        mock_workspace.isCommonBins.return_value = True
+        mock_workspace.dataX.return_value = np.array([10.0, 20.0, 30.0])
+        # Only include detectors 1 and 2 (indices 0, 1)
+        valid_mask = np.array([True, True, False])
+        model._calculate_and_set_full_integration_range(valid_mask)
+        self.assertEqual(model.integration_limits, (10.0, 30.0))
+        self.assertEqual(model.full_integration_limits, (10.0, 30.0))
+        # Should call dataX with the first workspace index from valid_mask
+        mock_workspace.dataX.assert_called_with(0)
+
+    def test_calculate_and_set_full_integration_range_ragged(self):
+        """Test that _calculate_and_set_full_integration_range returns min/max across valid spectra for ragged workspaces."""
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.isRaggedWorkspace.return_value = True
+        data_x = {0: np.array([5.0, 10.0, 15.0]), 1: np.array([1.0, 20.0, 50.0]), 2: np.array([100.0, 200.0])}
+        mock_workspace.readX.side_effect = lambda i: data_x[i]
+        # Only include detectors 0 and 2 (skip detector 1 which has range 1-50)
+        valid_mask = np.array([True, False, True])
+        model._calculate_and_set_full_integration_range(valid_mask)
+        self.assertEqual(model.integration_limits, (5.0, 200.0))
+        self.assertEqual(model.full_integration_limits, (5.0, 200.0))
+
+    def test_calculate_and_set_full_integration_range_non_ragged_non_common(self):
+        """Test that _calculate_and_set_full_integration_range uses extractX for non-ragged, non-common bins."""
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.isRaggedWorkspace.return_value = False
+        mock_workspace.isCommonBins.return_value = False
+        mock_workspace.extractX.return_value = np.array([[1.0, 2.0, 3.0], [10.0, 20.0, 30.0], [5.0, 15.0, 50.0]])
+        valid_mask = np.array([True, True, True])
+        model._calculate_and_set_full_integration_range(valid_mask)
+        self.assertEqual(model.integration_limits, (1.0, 50.0))
+        self.assertEqual(model.full_integration_limits, (1.0, 50.0))
+
+    def test_calculate_and_set_full_integration_range_excludes_masked_detectors_ragged(self):
+        """Test that masking detectors with a wider x range narrows the integration range on a ragged workspace."""
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.isRaggedWorkspace.return_value = True
+        # Detector 1 has range 1-500, detectors 0 and 2 have range 10-100
+        data_x = {0: np.array([10.0, 50.0, 100.0]), 1: np.array([1.0, 250.0, 500.0]), 2: np.array([20.0, 60.0, 90.0])}
+        mock_workspace.readX.side_effect = lambda i: data_x[i]
+        all_valid = np.array([True, True, True])
+        model._calculate_and_set_full_integration_range(all_valid)
+        self.assertEqual(model.integration_limits, (1.0, 500.0))
+        # Now exclude detector 1 (simulating it being masked)
+        exclude_det_1 = np.array([True, False, True])
+        model._calculate_and_set_full_integration_range(exclude_det_1)
+        self.assertEqual(model.integration_limits, (10.0, 100.0))
+        self.assertEqual(model.full_integration_limits, (10.0, 100.0))
+
+    def test_calculate_and_set_full_integration_range_excludes_masked_detectors_non_ragged(self):
+        """Test that masking detectors with a wider x range narrows the integration range on a non-ragged workspace."""
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.isRaggedWorkspace.return_value = False
+        mock_workspace.isCommonBins.return_value = False
+        # Detector 0 has range 1-500, detector 2 has range 5-50
+        mock_workspace.extractX.return_value = np.array([[1.0, 250.0, 500.0], [10.0, 50.0, 100.0], [5.0, 25.0, 50.0]])
+        all_valid = np.array([True, True, True])
+        model._calculate_and_set_full_integration_range(all_valid)
+        self.assertEqual(model.integration_limits, (1.0, 500.0))
+        # Now exclude detector 0
+        exclude_det_0 = np.array([False, True, True])
+        model._calculate_and_set_full_integration_range(exclude_det_0)
+        self.assertEqual(model.integration_limits, (5.0, 100.0))
+        self.assertEqual(model.full_integration_limits, (5.0, 100.0))
+
+    def test_public_calculate_and_set_full_integration_range_uses_is_pickable(self):
+        """Test that calculate_and_set_full_integration_range uses is_pickable (excluding masked detectors)."""
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.isRaggedWorkspace.return_value = True
+        # Detector 0: 1-500, Detector 1: 10-100, Detector 2: 20-90
+        data_x = {0: np.array([1.0, 250.0, 500.0]), 1: np.array([10.0, 50.0, 100.0]), 2: np.array([20.0, 60.0, 90.0])}
+        mock_workspace.readX.side_effect = lambda i: data_x[i]
+        mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100, 200]
+        # Mask detector 0 so only detectors 1 and 2 are pickable
+        model._is_masked = np.array([True, False, False])
+        model._is_valid = np.array([True, True, True])
+        model._is_selected_in_tree = np.ones(3, dtype=bool)
+        model.calculate_and_set_full_integration_range()
+        # Should only consider workspace indices 1 and 2
+        self.assertEqual(model.full_integration_limits, (10.0, 100.0))
+        self.assertEqual(model.integration_limits, (10.0, 100.0))
+
+    def test_public_calculate_and_set_full_integration_range_updates_counts(self):
+        """Test that calculate_and_set_full_integration_range triggers an integration range update (via integration_limits setter)."""
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.isRaggedWorkspace.return_value = False
+        mock_workspace.isCommonBins.return_value = True
+        mock_workspace.dataX.return_value = np.array([10.0, 20.0, 30.0])
+        mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [50, 150, 250]
+        model.calculate_and_set_full_integration_range()
+        # The setter calls update_integration_range which calls getIntegratedCountsForWorkspaceIndices
+        mock_workspace.getIntegratedCountsForWorkspaceIndices.assert_called()
+
 
 if __name__ == "__main__":
     unittest.main()

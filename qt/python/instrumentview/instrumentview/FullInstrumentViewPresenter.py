@@ -158,7 +158,7 @@ class FullInstrumentViewPresenter:
         self.on_contour_range_reset_clicked()
 
     def on_integration_limits_reset_clicked(self) -> None:
-        self._model.integration_limits = self._model.full_integration_limits
+        self._model.calculate_and_set_full_integration_range()
         self._view.set_integration_range_limits(self._model.full_integration_limits)
         self._view.set_integration_min_max_boxes(self._model.full_integration_limits)
         self.set_view_integration_limits()
@@ -320,6 +320,7 @@ class FullInstrumentViewPresenter:
 
         if kind is CurrentTab.Masking:
             self.update_plotter()
+            self.on_integration_limits_reset_clicked()
             self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
             self._update_peak_buttons()
         else:

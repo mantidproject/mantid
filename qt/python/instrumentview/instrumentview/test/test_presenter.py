@@ -483,15 +483,17 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._create_and_add_monitor_mesh()
         self._mock_view.add_rgba_mesh.assert_called_once()
 
-    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
-    def test_on_integration_limits_reset_clicked(self, mock_integration_limits):
-        """Test on_integration_limits_reset_clicked resets to full range."""
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_integration_limits")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.calculate_and_set_full_integration_range")
+    def test_on_integration_limits_reset_clicked(self, mock_calculate_range, mock_set_view_integration_limits):
+        """Test on_integration_limits_reset_clicked recalculates integration range from model."""
         self._model.full_integration_limits = (0.0, 1000.0)
         self._model._integration_limits = (200, 300)
         self._presenter.on_integration_limits_reset_clicked()
-        mock_integration_limits.assert_called_once_with((0.0, 1000.0))
+        mock_calculate_range.assert_called_once()
         self._mock_view.set_integration_range_limits.assert_called_once_with((0.0, 1000.0))
         self._mock_view.set_integration_min_max_boxes.assert_called_once_with((0.0, 1000.0))
+        mock_set_view_integration_limits.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_contour_limits")
     @mock.patch.object(FullInstrumentViewModel, "counts_limits", new_callable=PropertyMock)
@@ -504,6 +506,19 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_set_view_contour.assert_called_once()
         self._mock_view.set_contour_range_limits.assert_called_once_with((0, 100))
         self._mock_view.set_contour_min_max_boxes.assert_called_once_with((0, 100))
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_integration_limits_reset_clicked")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.apply_detector_items")
+    def test_on_list_item_selected_masking_resets_integration_limits(self, mock_apply, mock_update_plotter, mock_reset_integration):
+        """Test that selecting a mask list item triggers an integration range reset."""
+        self._mock_view.selected_items_in_list.return_value = ["Mask 1"]
+        self._mock_view.current_selected_unit.return_value = "TOF"
+        self._mock_view.sum_spectra_selected.return_value = False
+        self._presenter._on_list_item_selected(CurrentTab.Masking)
+        mock_apply.assert_called_once_with(["Mask 1"], CurrentTab.Masking)
+        mock_update_plotter.assert_called_once()
+        mock_reset_integration.assert_called_once()
 
     @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
     @mock.patch.object(FullInstrumentViewModel, "workspace_x_unit", new_callable=PropertyMock)
