@@ -33,6 +33,13 @@ requirements:
     - libboost-devel ${{ libboost }}
     - libboost-python-devel ${{ libboost }}
     - libboost-mpi ${{ libboost }}
+    - eigen ${{ eigen }}
+    - gsl ${{ gsl }}
+    - hdf5 ${{ hdf5 }}
+    - jsoncpp ${{ jsoncpp }}
+    - muparser ${{ muparser }}
+    - poco ${{ poco }}
+    - tbb-devel ${{ tbb }}
     - mpi
     - mpi4py
     - mpich
