@@ -439,7 +439,7 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIn
     std::stringstream x;
     x << intensities[j];
     std::stringstream dx_str;
-    dx_str << intensityDeltas[j];
+    dx_str << formatDouble(intensityDeltas[j]);
     sasData += "\n\t\t\t<Idata><Q unit=\"1/A\">";
     sasData += x.str();
     sasData += "</Q>";
@@ -449,13 +449,13 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIn
     sasData += "\">";
     //// workspace Y data is the I data in the xml file
     std::stringstream y;
-    y << (ydata[j]);
+    y << formatDouble(ydata[j]);
     sasData += y.str();
     sasData += "</I>";
 
     // workspace error data is the Idev data in the xml file
     std::stringstream e;
-    e << edata[j];
+    e << formatDouble(edata[j]);
 
     sasData += "<Idev unit=";
     sasData += "\"";
@@ -492,7 +492,7 @@ void SaveCanSAS1D::createSASSampleElement(std::string &sasSample) {
   double thickness = getProperty("SampleThickness");
   if (thickness > 0) {
     std::string thicknessTag = "\n\t\t\t<thickness unit=\"mm\">";
-    thicknessTag += std::to_string(thickness);
+    thicknessTag += formatDouble(thickness);
     thicknessTag += "</thickness>";
     sasSample += thicknessTag;
   }
@@ -549,7 +549,7 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
 
       std::stringstream sdd;
       double distance = comp->getDistance(*m_workspace->getInstrument()->getSample());
-      sdd << distance;
+      sdd << formatDouble(distance);
 
       sasDetUnit += sdd.str();
       sasDetUnit += "</SDD>";
@@ -672,9 +672,9 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
     sasCollimation += "\n\t\t\t\t\t<size>";
 
     // Width
-    sasCollimation += "\n\t\t\t\t\t\t<x unit=\"mm\">" + std::to_string(collimationWidth) + "</x>";
+    sasCollimation += "\n\t\t\t\t\t\t<x unit=\"mm\">" + formatDouble(collimationWidth) + "</x>";
     // Height
-    sasCollimation += "\n\t\t\t\t\t\t<y unit=\"mm\">" + std::to_string(collimationHeight) + "</y>";
+    sasCollimation += "\n\t\t\t\t\t\t<y unit=\"mm\">" + formatDouble(collimationHeight) + "</y>";
 
     sasCollimation += "\n\t\t\t\t\t</size>";
     sasCollimation += "\n\t\t\t\t</aperture>";
@@ -688,4 +688,15 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   sasInstrument += sasDet;
   sasInstrument += "\n\t\t</SASinstrument>";
 }
+
+std::string SaveCanSAS1D::formatDouble(const double &value) const {
+  std::ostringstream oss;
+  if (std::floor(value) == value) {
+    oss << std::fixed << std::setprecision(1) << value;
+  } else {
+    oss << value;
+  }
+  return oss.str();
+}
+
 } // namespace Mantid::DataHandling
