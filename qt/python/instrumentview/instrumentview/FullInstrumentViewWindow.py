@@ -755,7 +755,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         x, y, _z = self.display_to_world_coords(width / 2 + 0.15 * width, height / 2, 0)
         cylinder_repr.SetRadius(np.sqrt((x - cx) ** 2 + (y - cy) ** 2))
-
+        cylinder_repr.SetEdgeColor(1, 1, 1)
         # Arbritary border factor for bounding box
         xmin, xmax, ymin, ymax, _zmin, _zmax = self.main_plotter.bounds
         border = (np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2)) / 2
