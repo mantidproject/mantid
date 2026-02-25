@@ -293,13 +293,23 @@ class FFTPresenterTest(unittest.TestCase):
 
         self.presenter.calculate_FFT()
 
-        apodization_mock.has_calls(
-            mock.call(
-                {"Padding": 1, "ApodizationFunction": "Lorentz", "NegativePadding": True, "InputWorkspace": Im_name, "DecayConstant": 4.4}
-            ),
-            mock.call(
-                {"Padding": 1, "ApodizationFunction": "Lorentz", "NegativePadding": True, "InputWorkspace": name, "DecayConstant": 4.4}
-            ),
+        apodization_mock.assert_has_calls(
+            [
+                mock.call(
+                    {"Padding": 1, "ApodizationFunction": "Lorentz", "NegativePadding": True, "InputWorkspace": name, "DecayConstant": 4.4},
+                    "__real",
+                ),
+                mock.call(
+                    {
+                        "Padding": 1,
+                        "ApodizationFunction": "Lorentz",
+                        "NegativePadding": True,
+                        "InputWorkspace": Im_name,
+                        "DecayConstant": 4.4,
+                    },
+                    "__Imag",
+                ),
+            ]
         )
 
         fft_mock.assert_called_once_with(
