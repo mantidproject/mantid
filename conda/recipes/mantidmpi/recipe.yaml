@@ -31,6 +31,7 @@ requirements:
   host:
     - mantid ==${{ version }}
     - libboost-devel ${{ libboost }}
+    - libboost-python-devel ${{ libboost }}
     - libboost-mpi ${{ libboost }}
     - mpi
     - mpi4py
@@ -46,10 +47,9 @@ requirements:
     - ${{ pin_subpackage('mantidmpi', upper_bound='x.x.x') }}
 
 tests:
-  - python:
-      imports:
-        - mantid
-        - mantid.kernel
+  - script:
+      - test -f $PREFIX/plugins/libMantidMPIAlgorithms.so
+      - python -c "import mantid.simpleapi as s; assert hasattr(s, 'BroadcastWorkspace'), 'BroadcastWorkspace not found!'"
 
 about:
   license: GPL-3.0-or-later

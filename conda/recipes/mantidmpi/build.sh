@@ -19,10 +19,12 @@ cmake \
   -DCMAKE_FIND_FRAMEWORK=LAST \
   -DCMAKE_CXX_SCAN_FOR_MODULES=OFF \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
+  -DPLUGINS_DIR=$PREFIX/plugins \
+  -DWORKBENCH_PLUGINS_DIR=$PREFIX/plugins \
   -DMPI_BUILD=ON \
   -DBUILD_SHARED_LIBS=on \
   -GNinja \
   ../
 
 cmake --build . --target MPIAlgorithms
-cp ./bin/libMantidMPIAlgorithms.so $PREFIX/plugins/
+cmake --build . --target install
