@@ -30,32 +30,12 @@ requirements:
     - mpich
   host:
     - mantid ==${{ version }}
-    - eigen ${{ eigen }}
-    - gsl ${{ gsl }}
-    - hdf4 ${{ hdf4 }}
-    - hdf5 ${{ hdf5 }}
-    - jsoncpp ${{ jsoncpp }}
     - libboost-devel ${{ libboost }}
-    - libboost-python-devel ${{ libboost }}
     - libboost-mpi ${{ libboost }}
-    - muparser ${{ muparser }}
-    - numpy ${{ numpy }}
-    - occt ${{ occt }}
-    - python ${{ python }}
-    - poco ${{ poco }}
-    - pip ${{ pip }}
-    - setuptools
-    - tbb-devel ${{ tbb }}
-    - zlib
-    - libglu ${{ libglu }}
-    - libgl-devel
-    - xorg-libxxf86vm
-    - xorg-libx11
-    - xorg-xorgproto
-    - libopenblas ${{ libopenblas }}
     - mpi
     - mpi4py
     - mpich
+    - python ${{ python }}
   run:
     - mantid ==${{ version }}
     - mpi
