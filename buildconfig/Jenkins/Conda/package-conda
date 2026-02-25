@@ -68,7 +68,10 @@ do
         --build-mantidmpi) ENABLE_BUILD_MANTIDMPI=true ;;
         --build-qt) ENABLE_BUILD_QT=true ;;
         --build-workbench) ENABLE_BUILD_WORKBENCH=true ;;
-        --build-docs) ENABLE_BUILD_DOCS=true ;;
+        --build-docs)
+            ENABLE_BUILD_DOCS=true
+            ENABLE_BUILD_MANTIDMPI=true
+            ;;
         --build-workbench-without-docs)
             ENABLE_BUILD_WORKBENCH=true
             BUILD_WORKBENCH_WITH_DOCS=false
