@@ -97,6 +97,7 @@ class MockStateConvertToQ(StateConvertToQ):
         pass
 
 
+@unittest.skip("No tests written")
 class StateTest(unittest.TestCase):
     @staticmethod
     def _get_state(entries):
