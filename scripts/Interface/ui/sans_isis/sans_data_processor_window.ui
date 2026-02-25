@@ -1856,7 +1856,7 @@ QGroupBox::title {
                 </widget>
                </item>
                <item row="1" column="2">
-                <widget class="QComboBox" name="phi_range_step_type_combo_box">
+                <widget class="QComboBox" name="phi_limit_type_combo_box">
                  <property name="toolTip">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;PhiLimit type: if it is MinMax, the phi slice will be cut from a minimum (From) to a maximum (To). If pairs type is selected, the range can be input as pairs of numbers, each separated by comma (If input is: -15.0, 15.0, 45.0,90.0 two phi slices will be reduced: -15.0,15.0 and 45.0,90.0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>

@@ -228,7 +228,7 @@ Finally to run the correction for all selected workspaces:
 Step 2: Setting Calibration Info
 ================================
 
-#. Click on the ``Calibration`` tab
+#. Click on the ``Run Processing`` tab
 #. Select ``Create New Calibration``
 #. Click ``Browse`` next to ``Calibration Sample #`` box (Note: here sample number is that of the instruments latest ceria run, see :ref:`interface documentation<Engineering_Diffraction-ref>` for more information)
 #. Navigate to ``ENGINX00305738`` in tutorial data ``CalibrationData`` folder (alternatively typing ``305738`` should work if your search directories have been correctly set up)
@@ -242,7 +242,7 @@ Step 3: Focusing Data
 Before starting this section it is worth making a mental note of your file save directory displayed at the bottom of the interface, and configurable in the settings tab (gear icon). It is also worth mentioning that if
 absorption correction has already been performed within this session, the ``Sample Run #`` box should already be populated with the correct file paths
 
-#. Click on the ``Focus`` tab
+#. While still on the ``Run Processing`` tab
 #. If the ``Sample Run #`` box is empty, or different files are desired: Click ``Browse`` next to the ``Sample Run #`` box (Note: here sample run number are the experimental data to be focused)
 #. Navigate to your save directory and under ``User/TextureTutorial/AbsorptionCorrection`` select all of the seven corrected data files
 #. Click ``Browse`` next to ``Vanadium #`` box
@@ -320,7 +320,7 @@ Adding Crystal Structure Information
 ------------------------------------
 
 In the Workspace list (:ref:`ADS <Analysis Data Service>`), in the main Mantid window, you might notice some pole figure Table Workspaces have been created. These are named with the convention:
-``{Instrument}_{StartRun}-{EndRun}_{Peak}_{Grouping}_pf_table_{parameter}`` provided a parameter file is loaded to get ``Peak`` and ``parameter`` metadata. ``Peak`` will be the average peak centre value of all
+``{Peak}_{Instrument}_{StartRun}-{EndRun}_{Grouping}_pf_table_{parameter}`` provided a parameter file is loaded to get ``Peak`` and ``parameter`` metadata. ``Peak`` will be the average peak centre value of all
 the parameter files. If, instead, you would like peak to be the HKL indices, you must provide crystal structure information, either as a ``CIF`` file or by input
 
 * *CIF*:

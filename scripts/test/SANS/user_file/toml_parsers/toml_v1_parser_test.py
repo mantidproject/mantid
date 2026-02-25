@@ -665,6 +665,8 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(False, masks.use_mask_phi_mirror)
         self.assertEqual(-50, masks.phi_min)
         self.assertEqual(50, masks.phi_max)
+        # By default phi range is not set
+        self.assertFalse(masks.phi_range)
 
         # TODO split below into own test
         transmission_state = parser_result.get_state_calculate_transmission()

@@ -1,1 +1,0 @@
-- :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` is no longer hard-coded for the VULCAN instrument.

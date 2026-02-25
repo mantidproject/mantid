@@ -37,7 +37,7 @@ def wrap_attributes(obj, inval, allowed_var_names):
 
 
 def argparser(args, kwargs, argnames, defaults=None):
-    argdict = {key: val for key, val in zip(argnames, defaults if defaults else [None] * len(argnames))}
+    argdict = {key: val for key, val in zip(argnames, defaults or [None] * len(argnames))}
     for key in kwargs:
         argdict[key] = kwargs[key]
     for idx in range(len(args)):
@@ -87,7 +87,7 @@ class FermiChopper(object):
         wrap_attributes(self, inval, self.__allowed_var_names)
 
     def __repr__(self):
-        return self.name if self.name else "Undefined Fermi chopper package"
+        return self.name or "Undefined Fermi chopper package"
 
     def getWidthSquared(self, Ei, freq):
         return Chop.tchop(freq, Ei, self.pslit / 1000.0, self.radius / 1000.0, self.rho / 1000.0)
@@ -153,7 +153,7 @@ class ChopperSystem(object):
         self.frequency = self.default_frequencies
 
     def __repr__(self):
-        return self.name if self.name else "Undefined disk chopper system"
+        return self.name or "Undefined disk chopper system"
 
     def _parse_choppers(self):
         """Parses the choppers list to determine how to handle resolution and flux calculations"""
@@ -400,7 +400,7 @@ class ChopperSystem(object):
         self._instpar[9] = [self.source_rep, value]
 
     def _get_state(self, Ei_in=None):
-        return hash((self.variant, self.package, tuple(self.frequency), tuple(self.phase), Ei_in if Ei_in else self.ei, self.n_frame))
+        return hash((self.variant, self.package, tuple(self.frequency), tuple(self.phase), Ei_in or self.ei, self.n_frame))
 
     def _removeLowIntensityReps(self, Eis, lines, Ei=None):
         # Removes reps with Ei where there are no neutrons
@@ -591,7 +591,7 @@ class Moderator(object):
                 self.measured_width["isSigma"] = False
 
     def __repr__(self):
-        return self.name if self.name else "Undefined neutron moderator"
+        return self.name or "Undefined neutron moderator"
 
     def getAnalyticWidthsSquared(self, Ei):
         if self.imod == 0:
@@ -674,7 +674,7 @@ class Sample(object):
         wrap_attributes(self, inval, self.__allowed_var_names)
 
     def __repr__(self):
-        return self.name if self.name else "Undefined sample"
+        return self.name or "Undefined sample"
 
     def getWidthSquared(self):
         """Returns the squared time FWHM due to the sample in s^2"""
@@ -700,7 +700,7 @@ class Detector(object):
         wrap_attributes(self, inval, self.__allowed_var_names)
 
     def __repr__(self):
-        return self.name if self.name else "Undefined detector"
+        return self.name or "Undefined detector"
 
     def getWidthSquared(self, Ei, en=0):
         """Returns the squared time FWHM due to the detector in s^2"""
@@ -786,7 +786,7 @@ class Instrument(object):
             )
         # Now reset default chopper/variant and frequency
         if chopper or freq:
-            self.setChopper(chopper if chopper else self.getChopper(), freq if freq else self.frequency)
+            self.setChopper(chopper or self.getChopper(), freq or self.frequency)
 
     def setInstrument(self, instrument):
         self.__dict__.clear()
@@ -1017,4 +1017,4 @@ class Instrument(object):
         return res, flux
 
     def __repr__(self):
-        return self.name if self.name else "Undefined instrument"
+        return self.name or "Undefined instrument"

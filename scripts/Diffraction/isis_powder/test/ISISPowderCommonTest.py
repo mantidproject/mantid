@@ -267,6 +267,18 @@ class ISISPowderCommonTest(unittest.TestCase):
         returned_values = common.generate_run_numbers(run_number_string=input_string)
         self.assertEqual(expected_values, returned_values)
 
+        # Check plus operator
+        input_string = "40+45+50"
+        expected_values = [40, 45, 50]
+        returned_values = common.generate_run_numbers(run_number_string=input_string)
+        self.assertEqual(expected_values, returned_values)
+
+        # Check plus operator with range
+        input_string = "40+45-50"
+        expected_values = [40, 45, 46, 47, 48, 49, 50]
+        returned_values = common.generate_run_numbers(run_number_string=input_string)
+        self.assertEqual(expected_values, returned_values)
+
     def test_generate_spline_vanadium_name(self):
         reference_vanadium_name = "foo_123"
         sample_arg_one = "arg1"

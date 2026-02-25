@@ -81,14 +81,13 @@ public:
     TS_ASSERT_EQUALS(ws2D->getNumberHistograms(), 2584);
 
     const auto &fileFinder = Mantid::API::FileFinder::Instance();
-    const std::string originalFilePath = fileFinder.getFullPath("HET_Definition.xml");
+    const auto originalFilePath = fileFinder.getFullPath("HET_Definition.xml");
 
     const std::filesystem::path tmpDir = std::filesystem::temp_directory_path();
     auto generateFiles = [&tmpDir, &originalFilePath](const std::string &name) {
       std::filesystem::path tmpFilePath = tmpDir / name;
-      std::filesystem::path originalFile(originalFilePath);
 
-      std::filesystem::copy_file(originalFile, tmpFilePath);
+      std::filesystem::copy_file(originalFilePath, tmpFilePath);
 
       return tmpFilePath;
     };

@@ -1,1 +1,0 @@
-- Add ``force_high_q_to_1`` option to POLARIS ``create_total_scattering_pdf`` to work around a `normalisation bug <https://github.com/mantidproject/mantid/issues/40566>`__

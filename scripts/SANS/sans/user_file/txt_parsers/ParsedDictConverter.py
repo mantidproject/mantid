@@ -59,7 +59,7 @@ class ParsedDictConverter(IStateParser):
         if not self._cached_result:
             self._cached_result = self._get_input_dict()
             # Ensure we always have a dict
-            self._cached_result = self._cached_result if self._cached_result else {}
+            self._cached_result = self._cached_result or {}
         return self._cached_result
 
     @abc.abstractmethod
@@ -603,6 +603,8 @@ class ParsedDictConverter(IStateParser):
             state_builder.set_phi_min(angle.min)
             state_builder.set_phi_max(angle.max)
             state_builder.set_use_mask_phi_mirror(angle.use_mirror)
+            state_builder.set_phi_range(angle.phi_range)
+            state_builder.set_use_phi_range(len(angle.phi_range) != 0)
 
         # ------------------------------------------------------------
         # 15. Maskfiles

@@ -336,9 +336,9 @@ def getXTOF(box, peak):
     QX, QY, QZ = ICCFT.getQXQYQZ(box)
     origQS = peak.getQSampleFrame()
     tList = np.zeros_like(QX)
-    for i in np.xrange(QX.shape[0]):
-        for j in np.xrange(QX.shape[1]):
-            for k in np.xrange(QX.shape[2]):
+    for i in range(QX.shape[0]):
+        for j in range(QX.shape[1]):
+            for k in range(QX.shape[2]):
                 newQ = V3D(QX[i, j, k], QY[i, j, k], QZ[i, j, k])
                 peak.setQSampleFrame(newQ)
                 flightPath = peak.getL1() + peak.getL2()

@@ -41,6 +41,7 @@ from sans.common.general_functions import (
     convert_bank_name_to_detector_type_isis,
     get_output_name,
     is_part_of_reduced_output_workspace_group,
+    parse_simple_range_of_number_pairs,
 )
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
@@ -498,8 +499,8 @@ def SetPhiLimit(phimin, phimax, use_mirror=True):
     # a beam centre of [0,0,0] makes sense if the detector has been moved such that beam centre is at [0,0,0]
     phimin = float(phimin)
     phimax = float(phimax)
-    centre_command = NParameterCommand(command_id=NParameterCommandId.PHI_LIMIT, values=[phimin, phimax, use_mirror])
-    director.add_command(centre_command)
+    phi_limit_command = NParameterCommand(command_id=NParameterCommandId.PHI_LIMIT, values=[phimin, phimax, use_mirror, []])
+    director.add_command(phi_limit_command)
 
 
 def set_save(
@@ -1071,31 +1072,32 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
     return reduced_workspace_names[0]
 
 
-def PhiRanges(phis, plot=True):
+def PhiRanges(phis, use_mirror=True, plot=False):
     """
-    Given a list of phi ranges [a, b, c, d] it reduces in the phi ranges a-b and c-d
+    Given a list of phi ranges as lists [a, b, c, d] or string "a,b,c,d", it reduces in the phi ranges a-b and c-d
     @param phis: the list of phi ranges
+    @param use_mirror: whether to use mirror for each phi mask
     @param plot: set this to true to plot the result (must be run in Mantid), default is true
     """
 
     print_message("PhiRanges( %s,plot=%s)" % (str(phis), plot))
 
-    # todo covert their string into Python array
+    if isinstance(phis, str):
+        phis = parse_simple_range_of_number_pairs(phis)
 
     if len(phis) % 2 != 0:
         raise RuntimeError("Phi ranges must be given as pairs")
 
-    reduced_workspace_names = []
-    for i in range(0, len(phis), 2):
-        SetPhiLimit(phis[i], phis[i + 1])
-        reduced_workspace_name = WavRangeReduction()
-        reduced_workspace_names.append(reduced_workspace_name)
+    phi_limit_command = NParameterCommand(command_id=NParameterCommandId.PHI_LIMIT, values=[0.0, 0.0, use_mirror, phis])
+    director.add_command(phi_limit_command)
+
+    reduced_workspace_name = WavRangeReduction()
 
     if plot:
         raise NotImplementedError(_plot_missing_str)
 
     # Return just the workspace name of the full range
-    return reduced_workspace_names[0]
+    return reduced_workspace_name
 
 
 def FindBeamCentre(

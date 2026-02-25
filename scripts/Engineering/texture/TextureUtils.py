@@ -647,32 +647,34 @@ def fit_all_peaks(
                     u_params.append(param)
                     out_tab.addColumn("double", param)
                     out_tab.addColumn("double", f"{param}_err")
+                    out_tab.addColumn("double", f"{param}/{param}_err")
 
             # get user defined default vals for unsuccessful fit parameters
             default_vals = get_default_values(u_params, no_fit_value_dict)
 
             # populate the rows of the table
-            table_vals = np.zeros((si.size(), 2 * len(u_params) + 1))  # intensity_est + param_1_val, param_1_err, +...
+            table_vals = np.zeros((si.size(), 3 * len(u_params) + 1))  # intens_est + p_1_val, p_1_err, pm_1_val/err +...
             for ispec in range(si.size()):
                 # logic for spectra which HAVE been fit successfully
                 if fit_mask[ispec]:
+                    # add estimate of I
                     row = [intensity_estimates[ispec]]
                     for p in u_params:
                         param_name = f"f{ispec}.f0.{p}"
                         pind = all_params.index(param_name)
                         if p != "X0":
-                            row += [param_vals[pind], param_errs[pind]]
+                            row += [param_vals[pind], param_errs[pind], np.divide(param_vals[pind], param_errs[pind])]
                         else:
                             # for x0, convert back to d spacing
                             diff_consts = si.diffractometerConstants(ispec)
                             d_peak = UnitConversion.run("TOF", "dSpacing", param_vals[pind], 0, DeltaEModeType.Elastic, diff_consts)
                             d_err = convert_TOFerror_to_derror(diff_consts, param_errs[pind], d_peak)
-                            row += [d_peak, d_err]
+                            row += [d_peak, d_err, np.divide(d_peak, d_err)]
                 # logic for spectra which HAVE NOT been fit successfully
                 else:
                     row = [default_vals.get("I_est", np.nan)]
                     for p in u_params:
-                        row += [default_vals[p], np.nan]
+                        row += [default_vals[p], np.inf, 0.0]
                 table_vals[ispec] = row
             if nan_replacement:
                 table_vals = replace_nans(table_vals, nan_replacement)
@@ -834,8 +836,8 @@ def create_pf(
     save_dirs = (
         [path.join(root_dir, "PoleFigureTables")] if override_dir else model.get_save_dirs(root_dir, "PoleFigureTables", exp_name, grouping)
     )
-    chi2_thresh = chi2_thresh if chi2_thresh else 0.0
-    peak_thresh = peak_thresh if peak_thresh else 0.0
+    chi2_thresh = chi2_thresh or 0.0
+    peak_thresh = peak_thresh or 0.0
     include_spec_info = debug_info_level == 2
     include_debug_info = debug_info_level in (1, 2)
     model.make_pole_figure_tables(

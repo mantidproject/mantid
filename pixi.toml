@@ -23,6 +23,7 @@ package-standalone = { features = [
   "package-standalone",
 ], no-default-feature = true }
 docs-build = { features = ["docs-build"] }
+docs-migration = { features = ["docs-migration"], no-default-feature = true }
 
 [feature.rattler-builder.dependencies]
 rattler-build = "==0.51.0"
@@ -59,6 +60,16 @@ conda = "24.7.*"
 rattler-index = "*"
 mamba = "<2"
 
+[feature.docs-migration.dependencies]
+# rst-to-myst doesn't play nice with dependencies in the default environment
+rst-to-myst = "*"
+sphinx = "*"
+
+[feature.docs-migration.tasks.rst2md]
+args = [{ "arg" = "filename" }]
+cmd = "rst2myst convert {{filename}}"
+description = "Migrate a rst file to myst flavored markdown"
+
 [feature.docs-build]
 channels = ["mantid/label/nightly"]
 
@@ -87,7 +98,7 @@ numpy = "2.1.*"
 occt = { version = "7.*", build = "novtk*" }
 pillow = "<12.0.0"
 pip = ">=21.0.1"
-poco = ">=1.14"
+poco = ">=1.14,<1.15"
 psutil = ">=5.8.0"
 pydantic = ">=2.11.4,<3"
 pyqt = ">=5.15,<6"
@@ -128,7 +139,6 @@ myst-parser = ">=5.0.0,<6"
 pyparsing = "<3.3.0"
 
 [target.linux-64.dependencies]
-jemalloc = "==5.2.0"
 gxx_linux-64 = "13.*"
 xorg-libxcomposite = ">=0.4.5"
 xorg-libxcursor = ">=1.2.0"

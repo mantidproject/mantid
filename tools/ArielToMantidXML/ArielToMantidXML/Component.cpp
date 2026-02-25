@@ -50,11 +50,6 @@ void Component::findChildren()
   }
 }
 
-std::vector<Component*> Component::getChildren() const
-{
-	return m_children;
-}
-
 void Component::setSpherical(const double &r, const double &theta, const double &phi)
 {
   m_r = r;

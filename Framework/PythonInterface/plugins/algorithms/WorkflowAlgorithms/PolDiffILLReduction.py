@@ -1283,7 +1283,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     },
                     ContainerMaterial=container_material_info,
                 )
-            if sample_geometry_type in ["Cylinder"]:
+            if sample_geometry_type == "Cylinder":
                 SetSample(
                     InputWorkspace=mock_geometry_ws,
                     Geometry={"Shape": "Cylinder", "Height": kwargs["Height"], "Radius": kwargs["SampleRadius"]},
@@ -1296,7 +1296,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     },
                     ContainerMaterial=container_material_info,
                 )
-            elif sample_geometry_type in ["Annulus"]:
+            elif sample_geometry_type == "Annulus":
                 SetSample(
                     InputWorkspace=mock_geometry_ws,
                     Geometry={
@@ -1580,7 +1580,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_transmission_ws, OutputWorkspace=ws)
             monID = 100001  # monitor 2
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=ws)
-            if process in ["Transmission"]:
+            if process == "Transmission":
                 beam_ws = self.getPropertyValue("EmptyBeamWorkspace")
                 progress.report("Calculating transmission")
                 self._calculate_transmission(ws, beam_ws)

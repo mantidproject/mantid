@@ -20,14 +20,14 @@ public:
   static void destroySuite(LoadBinaryStlTest *suite) { delete suite; }
 
   void test_loading_cube_stl() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     auto loader = LoadBinaryStl(path, units);
     auto cube = loader.readShape();
     assert_shape_matches(cube, 8, 12, 3000, 0.001);
   }
 
   void test_loading_cube_stl_cm() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     const ScaleUnits cm = ScaleUnits::centimetres;
     auto loader = LoadBinaryStl(path, cm);
     auto cube = loader.readShape();
@@ -35,14 +35,14 @@ public:
   }
 
   void test_loading_cylinder_stl() {
-    std::string path = FileFinder::Instance().getFullPath("cylinderBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cylinderBin.stl").string();
     auto loader = LoadBinaryStl(path, units);
     auto cylinder = loader.readShape();
     assert_shape_matches(cylinder, 722, 1440, 589, 1);
   }
 
   void test_loading_tube_stl() {
-    std::string path = FileFinder::Instance().getFullPath("tubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("tubeBin.stl").string();
     auto loader = LoadBinaryStl(path, units);
     auto tube = loader.readShape();
     assert_shape_matches(tube, 1080, 2160, 7068, 1);
@@ -50,26 +50,26 @@ public:
   // check that isBinaryStl returns false if the file contains an incomplete
   // vertex
   void test_fail_invalid_vertex() {
-    std::string path = FileFinder::Instance().getFullPath("invalid_vertexBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("invalid_vertexBin.stl").string();
     auto loader = LoadBinaryStl(path, units);
     TS_ASSERT(!(loader.isBinarySTL(path)));
   }
   // check that isBinaryStl returns false if the file contains an incomplete
   // triangle
   void test_fail_invalid_triangle() {
-    std::string path = FileFinder::Instance().getFullPath("invalid_triangleBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("invalid_triangleBin.stl").string();
     auto loader = LoadBinaryStl(path, units);
     TS_ASSERT(!(loader.isBinarySTL(path)));
   }
 
   void test_fail_ascii_stl() {
-    std::string path = FileFinder::Instance().getFullPath("cube.stl");
+    std::string path = FileFinder::Instance().getFullPath("cube.stl").string();
     auto loader = LoadBinaryStl(path, units);
     TS_ASSERT(!(loader.isBinarySTL(path)));
   }
 
   void test_loading_large_stl() {
-    std::string path = FileFinder::Instance().getFullPath("SI-4200-610.stl");
+    std::string path = FileFinder::Instance().getFullPath("SI-4200-610.stl").string();
     auto loader = LoadBinaryStl(path, units);
     auto LargeFile = loader.readShape();
     assert_shape_matches(LargeFile, 174388, 424694, 21218, 1);

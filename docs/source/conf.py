@@ -40,6 +40,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.doctest",
+    # our custom directives
     "mantiddoc.directives.algorithm",
     "mantiddoc.directives.attributes",
     "mantiddoc.directives.categories",
@@ -53,6 +54,8 @@ extensions = [
     "mantiddoc.directives.summary",
     "mantiddoc.autodoc",
     "mantiddoc.doctest",
+    # myst_parser enables markdown support
+    "myst_parser",
 ]
 # Deal with math extension. Can be overridden with MATH_EXT environment variable
 mathext = os.environ.get("MATH_EXT", "sphinx.ext.mathjax")
@@ -67,7 +70,28 @@ mathjax3_config = {"tex": {"macros": {"AA": r"\unicode{x212B}"}}, "startup": {"p
 templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = ".rst"
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
+
+# MyST parser configuration
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "substitution",
+    "tasklist",
+]
+
+# Allow heading anchors
+myst_heading_anchors = 3
 
 # The root toctree document.
 root_doc = "index"
@@ -254,6 +278,7 @@ intersphinx_mapping = {
 # "WARNING: document isn't included in any toctree"
 # for individual release notes files.
 exclude_patterns = [
+    "images/README.md",
     "release/templates/*.rst",
     "release/**/Bugfixes/*.rst",
     "release/**/New_features/*.rst",

@@ -525,13 +525,14 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.phi_range = "-15.0,15.0,75.0,90.0"
         self.assertEqual(state_gui_model.phi_range, "-15.0,15.0,75.0,90.0")
 
-    def test_that_phi_range_is_set_when_updating_phi_min_or_phi_max(self):
+    def test_use_phi_range_default_value(self):
         state_gui_model = StateGuiModel(AllStates())
-        state_gui_model.phi_limit_min = 12.0
+        self.assertFalse(state_gui_model.phi_limit_use_range)
 
-        self.assertEqual(state_gui_model.phi_range, "12.0,90.0")
-        state_gui_model.phi_limit_max = 30.0
-        self.assertEqual(state_gui_model.phi_range, "12.0,30.0")
+    def test_use_phi_range_setter(self):
+        state_gui_model = StateGuiModel(AllStates())
+        state_gui_model.phi_limit_use_range = True
+        self.assertTrue(state_gui_model.phi_limit_use_range)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Radius mask

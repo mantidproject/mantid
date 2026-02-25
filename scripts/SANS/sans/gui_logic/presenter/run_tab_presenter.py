@@ -36,6 +36,7 @@ from sans.common.enums import (
     SANSInstrument,
     ReductionDimensionality,
     OutputMode,
+    PhiLimitType,
 )
 from sans.gui_logic.gui_common import (
     add_dir_to_datasearch,
@@ -215,9 +216,9 @@ class RunTabPresenter(PresenterCommon):
         self.progress = 0
 
         # Models that are being used by the presenter
-        self._model = model if model else StateGuiModel(all_states=AllStates())
+        self._model = model or StateGuiModel(all_states=AllStates())
         self._run_tab_model: RunTabModel = run_tab_model
-        self._table_model = table_model if table_model else TableModel()
+        self._table_model = table_model or TableModel()
         self._table_model.subscribe_to_model_changes(self)
 
         self._processing = False
@@ -286,8 +287,7 @@ class RunTabPresenter(PresenterCommon):
         sample_shape = ["Read from file", SampleShape.CYLINDER, SampleShape.FLAT_PLATE, SampleShape.DISC]
         self._view.sample_shape = sample_shape
 
-        phi_step_types = ["MinMax", "Pairs"]
-        self._view.phi_range_step_type = phi_step_types
+        self._view.phi_limit_use_range = [PhiLimitType.MINMAX, PhiLimitType.PAIRS]
 
         # Set the q range
         self._view.q_1d_step_type = [RangeStepType.LIN.value, RangeStepType.LOG.value]
@@ -928,7 +928,7 @@ class RunTabPresenter(PresenterCommon):
     # ------------------------------------------------------------------------------------------------------------------
     def _get_selected_rows(self):
         selected_rows = self._view.get_selected_rows()
-        selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
+        selected_rows = selected_rows or range(self._table_model.get_number_of_rows())
         return selected_rows
 
     @log_times
@@ -1043,6 +1043,7 @@ class RunTabPresenter(PresenterCommon):
         self._set_on_view("phi_limit_min")
         self._set_on_view("phi_limit_max")
         self._set_on_view("phi_range")
+        self._set_on_view("phi_limit_use_range")
         self._set_on_view("phi_limit_use_mirror")
         self._set_on_view("radius_limit_min", self.DEFAULT_DECIMAL_PLACES_MM)
         self._set_on_view("radius_limit_max", self.DEFAULT_DECIMAL_PLACES_MM)
@@ -1158,7 +1159,15 @@ class RunTabPresenter(PresenterCommon):
                 "w_cut",
                 "q_1d",
             ],
-            "mask": ["phi_limit_min", "phi_limit_max", "phi_limit_use_mirror", "phi_range", "radius_limit_min", "radius_limit_max"],
+            "mask": [
+                "phi_limit_min",
+                "phi_limit_max",
+                "phi_limit_use_mirror",
+                "phi_range",
+                "phi_limit_use_range",
+                "radius_limit_min",
+                "radius_limit_max",
+            ],
             "user_file": ["user_file", "batch_file"],
             "beam_centre": ["rear_pos_1", "rear_pos_2", "front_pos_1", "front_pos_2"],
         }

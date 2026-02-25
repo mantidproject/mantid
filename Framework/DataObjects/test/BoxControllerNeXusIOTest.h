@@ -30,7 +30,7 @@ public:
   }
 
   void setUp() override {
-    std::string FullPathFile = Mantid::API::FileFinder::Instance().getFullPath(this->xxfFileName);
+    auto FullPathFile = Mantid::API::FileFinder::Instance().getFullPath(this->xxfFileName);
     if (!FullPathFile.empty())
       std::filesystem::remove(FullPathFile);
   }

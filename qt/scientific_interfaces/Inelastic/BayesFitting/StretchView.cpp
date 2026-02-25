@@ -147,7 +147,7 @@ void StretchView::setupPropertyBrowser(bool useQuickBayes) {
     addPropToTree<double>("startBeta", 0.5, NUM_DECIMALS, 0.5, 1.0);
     addPropToTree<double>("endBeta", 1.0, NUM_DECIMALS, 0.5, 1.001);
     addPropToTree<double>("startSigma(FWHM)", 0.01, NUM_DECIMALS, 0.0, 1.0);
-    addPropToTree<double>("endSigma(FWHM)", 0.1, NUM_DECIMALS, 0.0, 1.0);
+    addPropToTree<double>("endSigma(FWHM)", 0.2, NUM_DECIMALS, 0.0, 1.0);
   } else {
     addPropToTree<int>("SampleBinning", 1, INT_DECIMALS, 1);
   }

@@ -215,6 +215,9 @@ def apply_placzek_correction_per_bank(
     sample_temp,
 ):
     raw_ws = mantid.Load(Filename="POLARIS" + str(run_number))
+    if raw_ws.isGroup():
+        raise ValueError("Placzek correction does not support group workspaces")
+
     sample_geometry_json = sample_details.generate_sample_geometry()
     sample_material_json = sample_details.generate_sample_material()
 

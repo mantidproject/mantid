@@ -41,7 +41,7 @@ public:
 
   TabulatedFunctionTest()
       : m_asciiFileName("TabulatedFunctionTest_testAsciiFile.txt"),
-        m_nexusFileName(Mantid::API::FileFinder::Instance().getFullPath("argus0026287.nxs")) {
+        m_nexusFileName(Mantid::API::FileFinder::Instance().getFullPath("argus0026287.nxs").string()) {
     FunctionDomain1DVector x(-5.0, 5.0, 100);
     FunctionValues y(x);
     UserFunction fun;

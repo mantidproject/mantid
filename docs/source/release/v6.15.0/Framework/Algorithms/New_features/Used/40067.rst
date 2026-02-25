@@ -1,1 +1,0 @@
-- :ref:`AlignAndFocusPowderSlim <algm-AlignAndFocusPowderSlim>` now has the parameter ``OutputSpectrumNumber`` for selecting to load only a single bank of data.

@@ -22,6 +22,7 @@ BayesFitting::BayesFitting(QWidget *parent)
       m_backend(BayesBackendType::QUASI_ELASTIC_BAYES) {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
+  setBackend(backendToQStr.at(m_backend));
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
@@ -120,13 +121,17 @@ std::string BayesFitting::documentationPage() const { return "Inelastic Bayes Fi
 
 void BayesFitting::setBackend(const QString &text) {
   BayesBackendType newBackend = m_backend;
-  if (text == "quasielasticbayes") {
+  if (text == backendToQStr.at(BayesBackendType::QUASI_ELASTIC_BAYES)) {
     newBackend = BayesBackendType::QUASI_ELASTIC_BAYES;
-    m_uiForm.warningLabel->setHidden(false);
+    m_uiForm.warningLabel->setText(
+        "Warning: quasielasticbayes (old Fortran library) is deprecated. This library will be\n"
+        "removed once confidence in quickbayes (new Python library) has been established.");
     m_uiForm.backendChoice->setToolTip("Old Fortran library");
-  } else if (text == "quickbayes") {
+  } else if (text == backendToQStr.at(BayesBackendType::QUICK_BAYES)) {
     newBackend = BayesBackendType::QUICK_BAYES;
-    m_uiForm.warningLabel->setHidden(true);
+    m_uiForm.warningLabel->setText(
+        "Warning: the process to establish confidence in quickbayes (new Python library)\n"
+        "is ongoing. Please feedback any issues you encounter to the Mantid development team.");
     m_uiForm.backendChoice->setToolTip("New Python library");
   }
   if (newBackend != m_backend) {

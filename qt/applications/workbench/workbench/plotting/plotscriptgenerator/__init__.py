@@ -80,7 +80,7 @@ def generate_script(fig, exclude_headers=False):
         if not isinstance(ax, MantidAxes):
             continue
         ax_object_var = get_axes_object_variable(ax)
-        if axes_type(ax) in [FigureType.Image]:
+        if axes_type(ax) == FigureType.Image:
             colormap_lines, colormap_headers = get_plot_2d_cmd(ax, ax_object_var)  # ax.imshow or pcolormesh
             plot_commands.extend(colormap_lines)
             plot_headers.extend(colormap_headers)
