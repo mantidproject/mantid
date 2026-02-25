@@ -1,1 +1,0 @@
-- Created function ``strmakef``, which allows developers to create ``std::string`` objects using C-style formatting strings.

@@ -12,6 +12,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/VectorHelper.h"
@@ -205,15 +206,11 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, cons
     }
     return wiEntry->second;
   } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    std::shared_ptr<const Geometry::ICompAssembly> asmb =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(comp);
-    asmb->getChildren(children, false);
+    const auto &componentInfo = m_inputW->componentInfo();
+    const size_t compIndex = componentInfo.indexOfAny(comp->getName());
+    auto children = componentInfo.children(compIndex);
 
-    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
+    auto grandchildren = componentInfo.children(children[0]);
 
     auto NROWS = static_cast<int>(grandchildren.size());
     auto NCOLS = static_cast<int>(children.size());
@@ -222,10 +219,7 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, cons
     if (Iptr->getName().compare("CORELLI") == 0) {
       msg << "Instrument is CORELLI\n";
       // CORELLI has one extra layer than WISH
-      std::shared_ptr<const Geometry::ICompAssembly> asmb3 =
-          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(grandchildren[0]);
-      std::vector<Geometry::IComponent_const_sptr> greatgrandchildren;
-      asmb3->getChildren(greatgrandchildren, false);
+      auto greatgrandchildren = componentInfo.children(grandchildren[0]);
       // update for CORELLI
       NCOLS = static_cast<int>(grandchildren.size());
       NROWS = static_cast<int>(greatgrandchildren.size());

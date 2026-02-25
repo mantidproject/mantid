@@ -27,13 +27,6 @@ using Kernel::DblMatrix;
 using Kernel::Quat;
 using Kernel::V3D;
 
-/// Void deleter for shared pointers
-class NoDeleting {
-public:
-  /// deleting operator. Does nothing
-  void operator()(void *p) { (void)p; }
-};
-
 /** Constructor for a parametrized ObjComponent
  * @param base: the base (un-parametrized) IComponent
  * @param map: pointer to the ParameterMap

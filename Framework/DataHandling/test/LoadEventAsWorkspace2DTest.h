@@ -200,7 +200,7 @@ public:
   }
 
   void test_CGE_small_empty_entries() {
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("CG3_960.nxs.h5");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("CG3_960.nxs.h5").string();
     // Run the algorithm
     LoadEventAsWorkspace2D alg;
     alg.setChild(true);

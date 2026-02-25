@@ -124,8 +124,7 @@ public:
   /// Check that the .log file is added to the list of log files when loading a raw file.
   /// </summary>
   void testLogFileSearch() {
-    std::string rawFileName = FileFinder::Instance().getFullPath("NIMROD00001097.raw");
-    std::filesystem::path rawFilePath(rawFileName);
+    std::filesystem::path rawFilePath = FileFinder::Instance().getFullPath("NIMROD00001097.raw");
 
     std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFilePath);
 

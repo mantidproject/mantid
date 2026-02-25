@@ -8,10 +8,8 @@ Inelastic Changes
 New Features
 ------------
 - (`#40595 <https://github.com/mantidproject/mantid/pull/40595>`_) :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` has a new combo box to swap between using the ``quasielasticbayes`` (old Fortran library) backend and the ``quickbayes`` (new python library) backend. Changing this box won't effect the functionality of the ResNorm tab, which already uses ``quickbayes``.
-
-
-Bugfixes
---------
+- (`#40897 <https://github.com/mantidproject/mantid/pull/40897>`_) The :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` will now plot result workspaces as a contour plot if the workspaces contain multiple spectra.
+- (`#40897 <https://github.com/mantidproject/mantid/pull/40897>`_) The :ref`algm-BayesStretch` algorithm now outputs contour and fit workspace groups with the name provided in the ``OutputWorkspaceContour`` and ``OutputWorkspaceFit`` input properties.
 
 Algorithms
 ----------

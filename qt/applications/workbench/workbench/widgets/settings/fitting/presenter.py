@@ -16,7 +16,7 @@ class FittingSettings(SettingsPresenterBase):
     def __init__(self, parent, model: FittingSettingsModel, view=None):
         super().__init__(model)
         self.parent = parent
-        self._view = view if view else FittingSettingsView(parent, self)
+        self._view = view or FittingSettingsView(parent, self)
         self._model = model
         self.add_filters()
         self.add_items_to_combo_boxes()

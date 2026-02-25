@@ -52,7 +52,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             raise NotImplementedError("Only Matrix Workspaces are currently supported by the region selector.")
 
         self.notifyee = None
-        self.view = view if view else RegionSelectorView(self, parent, image_info_widget=image_info_widget)
+        self.view = view or RegionSelectorView(self, parent, image_info_widget=image_info_widget)
         super().__init__(ws, self.view.data_view, disable_masking_override=True)
         self._selectors: list[Selector] = []
         self._drawing_region = False

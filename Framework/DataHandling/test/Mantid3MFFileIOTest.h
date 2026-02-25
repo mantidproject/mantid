@@ -23,7 +23,7 @@ public:
   // perform some tests using 3mf file samples from the lib3mf consortium repo:
   // https://github.com/3MFConsortium/3mf-samples
   void testLoad() {
-    std::string path = FileFinder::Instance().getFullPath("box.3mf");
+    std::string path = FileFinder::Instance().getFullPath("box.3mf").string();
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
     std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
@@ -38,7 +38,7 @@ public:
   }
 
   void testLoadSample() {
-    std::string path = FileFinder::Instance().getFullPath("box_sample.3mf");
+    std::string path = FileFinder::Instance().getFullPath("box_sample.3mf").string();
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
     std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
@@ -52,7 +52,7 @@ public:
   }
 
   void testLoadWithMaterial() {
-    std::string path = FileFinder::Instance().getFullPath("box_withMaterial.3mf");
+    std::string path = FileFinder::Instance().getFullPath("box_withMaterial.3mf").string();
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
     std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
@@ -65,7 +65,7 @@ public:
   }
 
   void testLoadWithInvalidMaterial() {
-    std::string path = FileFinder::Instance().getFullPath("box_withInvalidMaterial.3mf");
+    std::string path = FileFinder::Instance().getFullPath("box_withInvalidMaterial.3mf").string();
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
     std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
@@ -76,7 +76,7 @@ public:
   }
 
   void testLoadWithInvalidUnits() {
-    std::string path = FileFinder::Instance().getFullPath("box_withInvalidUnits.3mf");
+    std::string path = FileFinder::Instance().getFullPath("box_withInvalidUnits.3mf").string();
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
     std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
@@ -87,7 +87,7 @@ public:
   }
 
   void testLoadMultipleObjects() {
-    std::string path = FileFinder::Instance().getFullPath("multiple_cylinders.3mf");
+    std::string path = FileFinder::Instance().getFullPath("multiple_cylinders.3mf").string();
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
     std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
@@ -105,7 +105,7 @@ public:
   }
 
   void testLoadBigFile() {
-    std::string path = FileFinder::Instance().getFullPath("T-Rex.3mf");
+    std::string path = FileFinder::Instance().getFullPath("T-Rex.3mf").string();
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
     std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;

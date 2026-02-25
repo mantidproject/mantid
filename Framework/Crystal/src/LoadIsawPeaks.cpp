@@ -14,6 +14,7 @@
 #include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -204,24 +205,23 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
   if (instr->getName() == "WISH")
     bankPart = "WISHpanel";
   // Get all children
-  std::vector<IComponent_const_sptr> comps;
-  instr->getChildren(comps, true);
-  for (auto &comp : comps) {
-    std::string bankName = comp->getName();
-    boost::trim(bankName);
-    boost::erase_all(bankName, bankPart);
+  const auto &componentInfo = outWS->componentInfo();
+  // iterate over the top level components, which contain the banks
+  size_t const rootIndex = componentInfo.root();
+  auto const topChildren = componentInfo.children(rootIndex);
+  for (size_t const i : topChildren) {
     int bank = 0;
-    Strings::convert(bankName, bank);
-    for (int j : det) {
-      if (bank == j) {
-        bank = 0;
-        continue;
+    size_t bankParent = componentInfo.findBankParent(i, bankPart);
+    auto const children = componentInfo.children(bankParent);
+    for (size_t const child : children) {
+      std::string bankName = componentInfo.name(child);
+      boost::trim(bankName);
+      boost::erase_all(bankName, bankPart);
+      Strings::convert(bankName, bank);
+      if (bank != 0) {
+        maskBanks += bankName + ",";
       }
     }
-    if (bank == 0)
-      continue;
-    // Track unique bank numbers
-    maskBanks += bankName + ",";
   }
 
   if (!maskBanks.empty()) {
@@ -329,7 +329,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS, std:
   if (!inst)
     throw std::runtime_error("No instrument in PeaksWorkspace!");
 
-  int pixelID = findPixelID(inst, bankName, static_cast<int>(col), static_cast<int>(row));
+  int pixelID = findPixelID(outWS, bankName, static_cast<int>(col), static_cast<int>(row));
 
   // Create the peak object
   Peak peak(outWS->getInstrument(), pixelID, wl);
@@ -345,7 +345,8 @@ DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS, std:
 }
 
 //----------------------------------------------------------------------------------------------
-int LoadIsawPeaks::findPixelID(const Instrument_const_sptr &inst, const std::string &bankName, int col, int row) {
+int LoadIsawPeaks::findPixelID(const PeaksWorkspace_sptr &ws, const std::string &bankName, int col, int row) {
+  const auto inst = ws->getInstrument();
   std::shared_ptr<const IComponent> parent = getCachedBankByName(bankName, inst);
 
   if (!parent)
@@ -357,25 +358,24 @@ int LoadIsawPeaks::findPixelID(const Instrument_const_sptr &inst, const std::str
     std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
     return pixel->getID();
   } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    std::shared_ptr<const Geometry::ICompAssembly> asmb =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    if (children[0]->getName() == "sixteenpack") {
-      asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-      children.clear();
-      asmb->getChildren(children, false);
+    const auto &componentInfo = ws->componentInfo();
+    const size_t parentIndex = componentInfo.indexOfAny(bankName);
+    auto children = componentInfo.children(parentIndex);
+
+    if (!children.empty() && componentInfo.name(children[0]) == "sixteenpack") {
+      children = componentInfo.children(children[0]);
     }
     int col0 = col - 1;
     // WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
-    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[col0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
-    Geometry::IComponent_const_sptr first = grandchildren[row - 1];
-    Geometry::IDetector_const_sptr det = std::dynamic_pointer_cast<const Geometry::IDetector>(first);
+
+    auto grandchildren = componentInfo.children(children[col0]);
+    const auto *first = componentInfo.componentID(grandchildren[row - 1]);
+    const auto *det = dynamic_cast<const Geometry::IDetector *>(first);
+    if (!det) {
+      return -1; // peak not in any detector.
+    }
     return det->getID();
   }
 }

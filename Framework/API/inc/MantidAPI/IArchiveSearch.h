@@ -15,6 +15,7 @@
 #ifndef Q_MOC_RUN
 #include <memory>
 #endif
+#include <filesystem>
 #include <set>
 #include <string>
 #include <vector>
@@ -41,12 +42,12 @@ public:
   /**
    * Return the full path to a data file in an archive. The first match is
    * returned
-   * @param filenames :: A list of filenames (without extensions) to pass to
+   * @param hintstrs :: A list of filenames (without extensions) to pass to
    * the archive
    * @param exts :: A list of extensions to check for in turn against each file
    */
-  virtual const Result<std::string> getArchivePath(const std::set<std::string> &filenames,
-                                                   const std::vector<std::string> &exts) const = 0;
+  virtual const Result<std::filesystem::path> getArchivePath(const std::set<std::string> &hintstrs,
+                                                             const std::vector<std::string> &exts) const = 0;
 };
 
 /// Typedef for a shared pointer to an IArchiveSearch

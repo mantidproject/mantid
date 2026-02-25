@@ -612,7 +612,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl, const DblMatrix &ori
     peak = std::make_unique<Peak>(m_inst, q, std::optional<double>(magnitude));
   }
 
-  if (m_edge > 0 && edgePixel(m_inst, peak->getBankName(), peak->getCol(), peak->getRow(), m_edge))
+  if (m_edge > 0 && edgePixel(m_pw->componentInfo(), peak->getBankName(), peak->getCol(), peak->getRow(), m_edge))
     return;
 
   // Only add peaks that hit the detector

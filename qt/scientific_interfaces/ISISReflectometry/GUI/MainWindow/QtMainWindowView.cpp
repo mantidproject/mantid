@@ -262,7 +262,7 @@ bool QtMainWindowView::fileExists(std::string const &filepath) const {
 
 std::string QtMainWindowView::getFullFilePath(const std::string &filename) const {
   try {
-    return FileFinder::Instance().getFullPath(filename);
+    return FileFinder::Instance().getFullPath(filename).string();
   } catch (const std::exception &) {
     return "";
   }

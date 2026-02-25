@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayLengthValidator.h"
@@ -18,7 +19,6 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::Types::Event::TofEvent;
@@ -125,22 +125,22 @@ std::map<int, RectangularDetector_const_sptr> ConvertToDetectorFaceMD::getBanks(
 
   if (bankNums.empty()) {
     // --- Find all rectangular detectors ----
-    // Get all children
-    std::vector<IComponent_const_sptr> comps;
-    inst->getChildren(comps, true);
-
-    for (auto &comp : comps) {
-      // Retrieve it
-      RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const RectangularDetector>(comp);
-      if (det) {
-        std::string name = det->getName();
-        if (name.size() < 5)
-          continue;
-        std::string bank = name.substr(4, name.size() - 4);
-        int bankNum;
-        if (Mantid::Kernel::Strings::convert(bank, bankNum))
-          banks[bankNum] = det;
-        g_log.debug() << "Found bank " << bank << ".\n";
+    auto const &componentInfo = in_ws->componentInfo();
+    size_t const root = componentInfo.root();
+    auto const topChildren = componentInfo.children(root);
+    for (size_t const panel : topChildren) {
+      size_t parentIndex = componentInfo.findBankParent(panel, "bank");
+      auto const children = componentInfo.children(parentIndex);
+      for (size_t const child : children) {
+        if (componentInfo.componentType(child) == Beamline::ComponentType::Rectangular) {
+          std::string name = componentInfo.name(child);
+          std::string bankNumStr = name.substr(4, name.size() - 4);
+          int bankNum = -1;
+          if (Mantid::Kernel::Strings::convert(bankNumStr, bankNum)) {
+            banks[bankNum] = RectangularDetector_const_sptr(
+                dynamic_cast<const RectangularDetector *>(componentInfo.componentID(child)), NoDeleting());
+          }
+        }
       }
     }
   } else {
