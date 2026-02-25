@@ -64,6 +64,7 @@ private:
                                               const HistogramData::Points &wavelength) const;
   Mantid::MantidVec calculateError(const HistogramData::HistogramE &eValues, const HistogramData::HistogramY &yValues,
                                    const HistogramData::Points &wavelength) const;
+  std::string formatDouble(const double &value) const;
 };
 
 } // namespace DataHandling

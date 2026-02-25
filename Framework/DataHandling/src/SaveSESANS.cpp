@@ -138,10 +138,10 @@ void SaveSESANS::exec() {
   outfile << "SpinEchoLength Depolarisation Depolarisation_error Wavelength\n";
 
   for (size_t i = 0; i < spinEchoLength.size(); ++i) {
-    outfile << spinEchoLength[i] << " ";
-    outfile << depolarisation[i] << " ";
-    outfile << error[i] << " ";
-    outfile << wavelength[i] << "\n";
+    outfile << formatDouble(spinEchoLength[i]) << " ";
+    outfile << formatDouble(depolarisation[i]) << " ";
+    outfile << formatDouble(error[i]) << " ";
+    outfile << formatDouble(wavelength[i]) << "\n";
   }
 
   outfile.close();
@@ -236,6 +236,16 @@ Mantid::MantidVec SaveSESANS::calculateError(const HistogramData::HistogramE &eV
     error.emplace_back(eValues[i] / (yValues[i] * wavelength[i] * wavelength[i]) / thickness);
   }
   return error;
+}
+
+std::string SaveSESANS::formatDouble(const double &value) const {
+  std::ostringstream oss;
+  if (std::floor(value) == value) {
+    oss << std::fixed << std::setprecision(1) << value;
+  } else {
+    oss << value;
+  }
+  return oss.str();
 }
 
 } // namespace Mantid::DataHandling
