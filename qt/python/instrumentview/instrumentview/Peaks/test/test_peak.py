@@ -19,10 +19,10 @@ class TestPeak(unittest.TestCase):
         dspacing = 20
         q = 25
         peak = Peak(0, 0, None, 0, (1.233333, 4.0, 36), tof, dspacing, wavelength, q)
-        self.assertEquals(tof, peak.location_in_unit("TOF"))
-        self.assertEquals(wavelength, peak.location_in_unit("WAVELENGTH"))
-        self.assertEquals(dspacing, peak.location_in_unit("dspacing"))
-        self.assertEquals(q, peak.location_in_unit("Q"))
+        self.assertEqual(tof, peak.location_in_unit("TOF"))
+        self.assertEqual(wavelength, peak.location_in_unit("WAVELENGTH"))
+        self.assertEqual(dspacing, peak.location_in_unit("dspacing"))
+        self.assertEqual(q, peak.location_in_unit("Q"))
 
     def test_location_in_unit_wrong_unit(self):
         peak = Peak(0, 0, None, 0, (1.233333, 4.0, 36), 0, 0, 0, 0)

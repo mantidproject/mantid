@@ -348,7 +348,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
             self._presenter._masked_mesh = mock_mask_mesh
             self._presenter._transform_mesh_to_fill_window()
             mock_vtk.assert_called_once()
-            self.assertEquals(2, mock_vtk_instance.GetComputedDisplayValueCount)
+            self.assertEqual(2, mock_vtk_instance.GetComputedDisplayValueCount)
 
         # The mesh width and height in pixels are 8 each, the window is width 10,
         # hence the scale factor should be 10 / 8 = 1.25

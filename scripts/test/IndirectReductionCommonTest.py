@@ -55,23 +55,23 @@ class IndirectReductionCommonTest(unittest.TestCase):
         grouping_workspace = create_grouping_workspace(self._workspace, "osiris_041_RES10.cal")
 
         self.assertTrue(isinstance(grouping_workspace, GroupingWorkspace))
-        self.assertEquals(1008, grouping_workspace.getNumberHistograms())
+        self.assertEqual(1008, grouping_workspace.getNumberHistograms())
 
     def test_excluded_detector_ids_returns_the_expected_detector_ids(self):
         grouping_workspace = create_grouping_workspace(self._workspace, "osiris_041_RES10.cal")
 
         excluded_ids = _excluded_detector_ids(grouping_workspace)
 
-        self.assertEquals(904, len(excluded_ids))
-        self.assertEquals([i for i in range(16, 116)], excluded_ids[:100])
+        self.assertEqual(904, len(excluded_ids))
+        self.assertEqual([i for i in range(16, 116)], excluded_ids[:100])
 
     def test_get_x_range_when_bins_vary_returns_the_expected_min_and_max_x(self):
         grouping_workspace = create_grouping_workspace(self._workspace, "osiris_041_RES10.cal")
 
         x_min, x_max = _get_x_range_when_bins_vary(self._workspace, grouping_workspace)
 
-        self.assertEquals(50100.00, x_min)
-        self.assertEquals(70100.00, x_max)
+        self.assertEqual(50100.00, x_min)
+        self.assertEqual(70100.00, x_max)
 
 
 if __name__ == "__main__":
