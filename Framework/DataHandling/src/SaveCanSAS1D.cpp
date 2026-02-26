@@ -441,7 +441,7 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIn
     std::stringstream dx_str;
     dx_str << formatDouble(intensityDeltas[j]);
     sasData += "\n\t\t\t<Idata><Q unit=\"1/A\">";
-    sasData += x;
+    sasData += x.str();
     sasData += "</Q>";
     sasData += "<I unit=";
     sasData += "\"";
@@ -450,7 +450,7 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIn
     //// workspace Y data is the I data in the xml file
     std::stringstream y;
     y << formatDouble(ydata[j]);
-    sasData += y;
+    sasData += y.str();
     sasData += "</I>";
 
     // workspace error data is the Idev data in the xml file
@@ -462,7 +462,7 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIn
     sasData += dataUnit;
     sasData += "\">";
 
-    sasData += e;
+    sasData += e.str();
     sasData += "</Idev>";
 
     sasData += "<Qdev unit=\"1/A\">";
@@ -690,13 +690,13 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
 }
 
 std::string SaveCanSAS1D::formatDouble(const double &value) const {
-  std::ostringstream oss;
+  std::stringstream ss;
   if (std::floor(value) == value) {
-    oss << std::fixed << std::setprecision(1) << value;
+    ss << std::fixed << std::setprecision(1) << value;
   } else {
-    oss << value;
+    ss << value;
   }
-  return oss.str();
+  return ss.str();
 }
 
 } // namespace Mantid::DataHandling

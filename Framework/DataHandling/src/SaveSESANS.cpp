@@ -239,13 +239,13 @@ Mantid::MantidVec SaveSESANS::calculateError(const HistogramData::HistogramE &eV
 }
 
 std::string SaveSESANS::formatDouble(const double &value) const {
-  std::ostringstream oss;
+  std::stringstream ss;
   if (std::floor(value) == value) {
-    oss << std::fixed << std::setprecision(1) << value;
+    ss << std::fixed << std::setprecision(1) << value;
   } else {
-    oss << value;
+    ss << value;
   }
-  return oss.str();
+  return ss.str();
 }
 
 } // namespace Mantid::DataHandling
