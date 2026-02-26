@@ -103,6 +103,7 @@ class FullInstrumentViewModel:
         self._point_picked_detectors = np.full(len(self._detector_ids), False)
 
         self._projection_type = ProjectionType.THREE_D
+        self._flip_z = False
         self._cached_projections_map = {}
 
         self._cached_masks_map = {}
@@ -313,11 +314,25 @@ class FullInstrumentViewModel:
             return self._detector_positions_3d[(self._is_masked | ~self._is_selected_in_tree) & self._is_valid]
         return self._calculate_projection()[(self._is_masked | ~self._is_selected_in_tree) & self._is_valid]
 
+    @property
+    def flip_z(self) -> bool:
+        return self._flip_z
+
+    @flip_z.setter
+    def flip_z(self, value: bool) -> None:
+        if self._flip_z != value:
+            self._flip_z = value
+            self._cached_projections_map.clear()
+
+    def _cache_key_for_projection(self, projection_type: ProjectionType) -> str:
+        return f"{projection_type.name}_flip_{self._flip_z}"
+
     def _calculate_projection(self) -> np.ndarray:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
 
-        if self._projection_type.name in self._cached_projections_map.keys():
-            return self._cached_projections_map[self._projection_type.name]
+        cache_key = self._cache_key_for_projection(self._projection_type)
+        if cache_key in self._cached_projections_map.keys():
+            return self._cached_projections_map[cache_key]
 
         axis = [1, 0, 0]
         if self._projection_type in (ProjectionType.SPHERICAL_Y, ProjectionType.CYLINDRICAL_Y):
@@ -325,19 +340,24 @@ class FullInstrumentViewModel:
         elif self._projection_type in (ProjectionType.SPHERICAL_Z, ProjectionType.CYLINDRICAL_Z):
             axis = [0, 0, 1]
 
+        detector_positions = self._detector_positions_3d
+        if self._flip_z:
+            detector_positions = detector_positions.copy()
+            detector_positions[:, 2] *= -1
+
         if self._projection_type in (ProjectionType.SPHERICAL_X, ProjectionType.SPHERICAL_Y, ProjectionType.SPHERICAL_Z):
-            projection = SphericalProjection(self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis))
+            projection = SphericalProjection(self._sample_position, self._root_position, detector_positions, np.array(axis))
         elif self._projection_type in (ProjectionType.CYLINDRICAL_X, ProjectionType.CYLINDRICAL_Y, ProjectionType.CYLINDRICAL_Z):
-            projection = CylindricalProjection(self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis))
+            projection = CylindricalProjection(self._sample_position, self._root_position, detector_positions, np.array(axis))
         else:
             projection = SideBySide(
-                self._workspace, self._detector_ids, self._sample_position, self._root_position, self._detector_positions_3d, np.array(axis)
+                self._workspace, self._detector_ids, self._sample_position, self._root_position, detector_positions, np.array(axis)
             )
 
         projected_positions = np.zeros_like(self._detector_positions_3d)
         projected_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
 
-        self._cached_projections_map[self._projection_type.name] = projected_positions
+        self._cached_projections_map[cache_key] = projected_positions
         return projected_positions
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:

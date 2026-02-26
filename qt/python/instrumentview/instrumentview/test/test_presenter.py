@@ -303,6 +303,32 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.enable_or_disable_aspect_ratio_box.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
+    def test_flip_z_axis_box_enabled_disabled(self, mock_set_peaks):
+        self._model.projection_type = ProjectionType.THREE_D
+        self._presenter.update_plotter()
+        self._mock_view.enable_or_disable_flip_z_axis_box.assert_called_once()
+        self._mock_view.enable_or_disable_flip_z_axis_box.reset_mock()
+        self._model.projection_type = ProjectionType.SPHERICAL_X
+        self._presenter.update_plotter()
+        self._mock_view.enable_or_disable_flip_z_axis_box.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
+    def test_on_flip_z_axis_calls_update_plotter(self, mock_set_peaks):
+        self._mock_view.is_flip_z_axis_checkbox_checked.return_value = True
+        self._presenter.on_flip_z_axis_check_box_clicked()
+        self._mock_view.add_detector_mesh.assert_called()
+        self.assertTrue(self._model.flip_z)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
+    def test_flip_z_state_propagated_to_model(self, mock_set_peaks):
+        self._mock_view.is_flip_z_axis_checkbox_checked.return_value = False
+        self._presenter.update_plotter()
+        self.assertFalse(self._model.flip_z)
+        self._mock_view.is_flip_z_axis_checkbox_checked.return_value = True
+        self._presenter.update_plotter()
+        self.assertTrue(self._model.flip_z)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_transform")
     def test_transform_updated_on_redraw(self, mock_update_transform, mock_set_peaks):
         # Anything apart from 3D
