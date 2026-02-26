@@ -771,7 +771,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         x, y, _z = self.display_to_world_coords(width / 2 + 0.15 * width, height / 2, 0)
         cylinder_repr.SetRadius(np.sqrt((x - cx) ** 2 + (y - cy) ** 2))
-        cylinder_repr.SetEdgeColor(1, 1, 1)
         # Arbritary border factor for bounding box
         xmin, xmax, ymin, ymax, _zmin, _zmax = self.main_plotter.bounds
         border = (np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2)) / 2
@@ -822,6 +821,7 @@ class FullInstrumentViewWindow(QMainWindow):
         ellipse_repr.GetOutlineProperty().SetOpacity(0.15)
         ellipse_repr.GetOutlineProperty().SetColor(0.5, 0.5, 0.5)  # Dark gray
         ellipse_repr.GetOutlineProperty().SetLineWidth(0.5)
+        ellipse_repr.GetOutlineProperty().SetEdgeColor(1, 1, 1)
 
         width, height = self.main_plotter.renderer.GetSize()
         x0, y0, _z0 = self.display_to_world_coords(width / 3, height / 3, 0)
