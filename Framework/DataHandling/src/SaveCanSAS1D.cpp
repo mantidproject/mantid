@@ -441,7 +441,7 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIn
     std::stringstream dx_str;
     dx_str << formatDouble(intensityDeltas[j]);
     sasData += "\n\t\t\t<Idata><Q unit=\"1/A\">";
-    sasData += x.str();
+    sasData += x;
     sasData += "</Q>";
     sasData += "<I unit=";
     sasData += "\"";
@@ -450,7 +450,7 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIn
     //// workspace Y data is the I data in the xml file
     std::stringstream y;
     y << formatDouble(ydata[j]);
-    sasData += y.str();
+    sasData += y;
     sasData += "</I>";
 
     // workspace error data is the Idev data in the xml file
@@ -462,7 +462,7 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIn
     sasData += dataUnit;
     sasData += "\">";
 
-    sasData += e.str();
+    sasData += e;
     sasData += "</Idev>";
 
     sasData += "<Qdev unit=\"1/A\">";
