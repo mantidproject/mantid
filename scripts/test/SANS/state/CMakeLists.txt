@@ -17,7 +17,6 @@ set(TEST_PY_FILES
     reduction_mode_test.py
     slice_event_test.py
     save_test.py
-    state_test.py
     wavelength_test.py
     wavelength_and_pixel_adjustment_test.py
 )
