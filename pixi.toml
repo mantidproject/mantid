@@ -72,6 +72,7 @@ description = "Migrate a rst file to myst flavored markdown"
 [feature.docs-build.target.linux-64.dependencies]
 rsync = "*"
 mamba = "<2"
+rattler-index = "*"
 
 [dependencies]
 cmake = ">=3.21.0"
