@@ -115,13 +115,6 @@ sphinx_bootstrap_theme:
 scipy:
   - '>=1.16.0,<1.17'
 
-# This is not a primary dependency, but we pin it to avoid a memory allocator mismatch.
-# Pillow 12.0.0 compiles with zlib-ng, which causes problems with jemalloc.
-# Once we move away from jemalloc, this pin and the instances of pillow in our recipe files
-# can be removed.
-pillow:
-  - '<12.0.0'
-
 pip:
   - '>=21.0.1'
 

@@ -34,7 +34,6 @@ requirements:
     - ninja ${{ ninja }}
     - numpy ${{ numpy }}
     - occt ${{ occt }}
-    - pillow ${{ pillow }}
     - pip ${{ pip }}
     - poco ${{ poco }}
     - psutil ${{ psutil }}
