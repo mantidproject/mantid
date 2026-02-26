@@ -37,6 +37,11 @@ public: // public constructor, destructor and functions
   Simulation(QWidget *parent = nullptr);
   /// Destructor
   ~Simulation() override;
+
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  Simulation(const Simulation &) = delete;
+  Simulation &operator=(const Simulation &) = delete;
+
   /// Interface name
   static std::string name() { return "Simulation"; }
   /// This interface's categories.

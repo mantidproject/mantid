@@ -73,6 +73,11 @@ public:
   FitPropertyBrowser(QWidget *parent = nullptr, QObject *mantidui = nullptr);
   /// Destructor
   ~FitPropertyBrowser() override;
+
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  FitPropertyBrowser(const FitPropertyBrowser &) = delete;
+  FitPropertyBrowser &operator=(const FitPropertyBrowser &) = delete;
+
   /// Get handler to the root composite function
   PropertyHandler *getHandler() const;
   /// Initialise layout

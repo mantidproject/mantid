@@ -23,6 +23,11 @@ class EXPORT_OPT_MANTIDQT_COMMON ADSAdapter : public WorkspaceProvider {
 public:
   explicit ADSAdapter();
   ~ADSAdapter() override;
+
+  // delete copy constructors and assignment operators -- Poco::NObserver is not copyable
+  ADSAdapter(const ADSAdapter &) = delete;
+  ADSAdapter &operator=(const ADSAdapter &) = delete;
+
   void registerPresenter(Presenter_wptr presenter) override;
   bool doesWorkspaceExist(const std::string &wsname) const override;
 

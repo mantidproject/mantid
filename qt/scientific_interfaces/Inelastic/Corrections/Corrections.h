@@ -48,6 +48,10 @@ public:
   /// Default Constructor
   explicit Corrections(QWidget *parent = nullptr);
 
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  Corrections(const Corrections &) = delete;
+  Corrections &operator=(const Corrections &) = delete;
+
 private:
   /// Initialize the layout
   void initLayout() override;
