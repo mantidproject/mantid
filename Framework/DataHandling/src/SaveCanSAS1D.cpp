@@ -437,7 +437,7 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIn
   for (size_t j = 0; j < ydata.size(); ++j) {
     // x data is the QData in xml.If histogramdata take the mean
     std::stringstream x;
-    x << intensities[j];
+    x << formatDouble(intensities[j]);
     std::stringstream dx_str;
     dx_str << formatDouble(intensityDeltas[j]);
     sasData += "\n\t\t\t<Idata><Q unit=\"1/A\">";
