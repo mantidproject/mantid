@@ -157,7 +157,7 @@ public:
     vector *= 2;
     TS_ASSERT_EQUALS(vector, originalVector);
 
-    TS_ASSERT_THROWS(vector / 0, const boost::bad_rational &);
+    TS_ASSERT_THROWS(vector / 0, const std::domain_error &);
   }
 
   void testRationalAddition() {

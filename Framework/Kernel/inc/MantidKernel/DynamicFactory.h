@@ -35,6 +35,23 @@ class Logger;
 
 using CaseSensitiveStringComparator = std::less<std::string>;
 
+/**
+ * Base class for dynamic factory notifications
+ */
+class MANTID_KERNEL_DLL DynamicFactoryNotification : public Poco::Notification {
+public:
+  ~DynamicFactoryNotification() override;
+};
+
+/**
+ * A notification that the factory has been updated. This is
+ * blind to the details.
+ */
+class MANTID_KERNEL_DLL DynamicFactoryUpdateNotification : public DynamicFactoryNotification {
+public:
+  ~DynamicFactoryUpdateNotification() override;
+};
+
 /** @class DynamicFactory DynamicFactory.h Kernel/DynamicFactory.h
 
     The dynamic factory is a base dynamic factory for serving up objects in
@@ -54,15 +71,8 @@ public:
   DynamicFactory(const DynamicFactory &) = delete;
   DynamicFactory &operator=(const DynamicFactory &) = delete;
 
-  /**
-   * Base class for dynamic factory notifications
-   */
-  class DynamicFactoryNotification : public Poco::Notification {};
-  /**
-   * A notification that the factory has been updated. This is
-   * blind to the details.
-   */
-  class UpdateNotification : public DynamicFactoryNotification {};
+  using DynamicFactoryNotification = Mantid::Kernel::DynamicFactoryNotification;
+  using UpdateNotification = Mantid::Kernel::DynamicFactoryUpdateNotification;
 
   /**
    * Enable notifications

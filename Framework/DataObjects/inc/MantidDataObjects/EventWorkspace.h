@@ -173,3 +173,12 @@ using EventWorkspace_const_sptr = std::shared_ptr<const EventWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid
+
+#ifndef DataObjects_EXPORTS
+#include "MantidAPI/WorkspaceProperty.h"
+namespace Mantid::API {
+/// @cond
+extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::EventWorkspace>;
+/// @endcond
+} // namespace Mantid::API
+#endif

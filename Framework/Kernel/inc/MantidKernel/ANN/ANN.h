@@ -95,14 +95,12 @@
 #else
 #define DLL_API __declspec(dllimport)
 #endif
-#elif defined(__GNUC__) && !defined(__clang__)
+#else
 #ifdef IN_MANTID_KERNEL
 #define DLL_API __attribute__((visibility("default")))
 #else
 #define DLL_API
 #endif
-#else
-#define DLL_API
 #endif
 
 //----------------------------------------------------------------------
