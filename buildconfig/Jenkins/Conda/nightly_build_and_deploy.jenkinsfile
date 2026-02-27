@@ -482,7 +482,7 @@ pipeline {
         beforeOptions true
         allOf {
           expression { params.PUBLISH_TO_ANACONDA }
-          expression { params.ANACONDA_CHANNEL.trim() == 'mantid' }
+          expression { params.ANACONDA_CHANNEL.trim() == 'mantid-nightly' }
           expression { params.ANACONDA_CHANNEL_LABEL.trim() == 'nightly' }
         }
       }
