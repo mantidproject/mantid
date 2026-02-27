@@ -294,11 +294,11 @@ void LoadEventAsWorkspace2D::exec() {
         const auto event_index =
             std::make_shared<std::vector<uint64_t>>(Nexus::IOHelper::readNexusVector<uint64_t>(h5file, "event_index"));
 
-        // Use filter_time_start time as starting reference in time and create a TimeROI using bankPulseTimes
-        const auto TimeROI = bankPulseTimes->getPulseIndices(filter_time_start, filter_time_stop);
+        // Use filter_time_start time as starting reference in time and create a pulseROI using bankPulseTimes
+        const auto pulseROI = bankPulseTimes->getPulseIndices(filter_time_start, filter_time_stop);
 
-        // set up PulseIndexer and give previous TimeROI to pulseIndexer
-        const PulseIndexer pulseIndexer(event_index, event_index->at(0), event_ids.size(), entry_name, TimeROI);
+        // set up PulseIndexer and give previous pulseROI to pulseIndexer
+        const PulseIndexer pulseIndexer(event_index, event_index->at(0), event_ids.size(), entry_name, pulseROI);
 
         std::vector<float> event_times;
         if (tof_filtering) {
