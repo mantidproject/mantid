@@ -132,10 +132,8 @@ outputs:
             - mantid.kernel
 
     about:
-      license: GPL-3.0-or-later
       summary: Mantid provides a framework that supports high-performance computing and visualisation of materials science data.
       description: Mantid provides a framework that supports high-performance computing and visualisation of materials science data. To use the optional plotting sub package you must conda install matplotlib.
-      homepage: https://github.com/mantidproject/mantid
 
   - package:
       name: mantidmpi
@@ -168,10 +166,12 @@ outputs:
           - python -c "import mantid.simpleapi as s; assert hasattr(s, 'BroadcastWorkspace'); assert hasattr(s, 'GatherWorkspaces')"
 
     about:
-      license: GPL-3.0-or-later
       summary: Mantid with MPI support for distributed high-performance computing of materials science data.
       description: Mantid with MPI support enabled. Provides distributed computing capabilities on top of the base Mantid framework.
-      homepage: https://github.com/mantidproject/mantid
+
+about:
+    license: GPL-3.0-or-later
+    homepage: https://github.com/mantidproject/mantid
 
 extra:
   recipe-maintainers:
