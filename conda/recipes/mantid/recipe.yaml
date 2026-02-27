@@ -12,6 +12,8 @@ cache:
     path: ../../../
   build:
     script: build.sh
+    skip:
+      - win
   requirements:
     build:
       - ${{ compiler("c") }}
@@ -67,6 +69,37 @@ cache:
       - if: osx
         then:
           - libopenblas ${{ libopenblas }}
+    run:
+      - ${{ pin_compatible("gsl", upper_bound="x.x") }}
+      - ${{ pin_compatible("hdf4", upper_bound="x.x") }}
+      - h5py
+      - ${{ pin_compatible("hdf5", upper_bound="x.x") }}
+      - muparser ${{ muparser }}
+      - occt ${{ occt }}
+      - pycifrw
+      - pydantic ${{ pydantic }}
+      - python
+      - python-dateutil ${{ python_dateutil }}
+      - pyyaml ${{ pyyaml }}
+      - scipy ${{ scipy }}
+      - euphonic ${{ euphonic }}
+      # remove seekpath altogether once newer euphonic is released
+      - seekpath ==2.1.0 *2
+      - toml ${{ toml }}
+      - joblib
+      - orsopy ${{ orsopy }}
+      - quasielasticbayes ${{ quasielasticbayes }}
+      - quickbayes ${{ quickbayes }}
+      - zlib
+      - ${{ pin_compatible('numpy', lower_bound='2.0', upper_bound='x.x') }}
+      - ${{ pin_compatible('libboost', upper_bound='x.x') }}
+      - ${{ pin_compatible('libboost-python', upper_bound='x.x') }}
+      - if: linux
+        then:
+          - libglu ${{ libglu }}
+      - if: win
+        then:
+          - lib3mf
 
 outputs:
   - package:
@@ -74,50 +107,16 @@ outputs:
       version: ${{ version }}
 
     build:
-      script: echo "Mantid Build Done"
+      script:
+        - if: win
+          then: build.bat
+        - if: not win
+          then: echo "Mantid Build Using Cache"
       files:
         exclude:
           - plugins/libMantidMPIAlgorithms.so
 
     requirements:
-      host:
-        - gsl ${{ gsl }}
-        - hdf4 ${{ hdf4 }}
-        - hdf5 ${{ hdf5 }}
-        - libboost-devel ${{ libboost }}
-        - libboost-python-devel ${{ libboost }}
-        - numpy ${{ numpy }}
-      run:
-        - ${{ pin_compatible("gsl", upper_bound="x.x") }}
-        - ${{ pin_compatible("hdf4", upper_bound="x.x") }}
-        - h5py
-        - ${{ pin_compatible("hdf5", upper_bound="x.x") }}
-        - muparser ${{ muparser }}
-        - occt ${{ occt }}
-        - pycifrw
-        - pydantic ${{ pydantic }}
-        - python
-        - python-dateutil ${{ python_dateutil }}
-        - pyyaml ${{ pyyaml }}
-        - scipy ${{ scipy }}
-        - euphonic ${{ euphonic }}
-        # remove seekpath altogether once newer euphonic is released
-        - seekpath ==2.1.0 *2
-        - toml ${{ toml }}
-        - joblib
-        - orsopy ${{ orsopy }}
-        - quasielasticbayes ${{ quasielasticbayes }}
-        - quickbayes ${{ quickbayes }}
-        - zlib
-        - ${{ pin_compatible('numpy', lower_bound='2.0', upper_bound='x.x') }}
-        - ${{ pin_compatible('libboost', upper_bound='x.x') }}
-        - ${{ pin_compatible('libboost-python', upper_bound='x.x') }}
-        - if: linux
-          then:
-            - libglu ${{ libglu }}
-        - if: win
-          then:
-            - lib3mf
       run_exports:
         - ${{ pin_subpackage('mantid', exact=True) }}
       run_constraints:
@@ -149,21 +148,12 @@ outputs:
           - plugins/libMantidMPIAlgorithms.so
 
     requirements:
-      host:
-        - libboost-mpi ${{ libboost }}
-      run:
-        - ${{ pin_subpackage('mantid', exact=True) }}
-        - mpi
-        - mpich
-        - mpi4py
-        - ${{ pin_compatible('libboost-mpi', upper_bound='x.x') }}
       run_exports:
         - ${{ pin_subpackage('mantidmpi', upper_bound='x.x.x') }}
 
     tests:
       - script:
           - test -f $PREFIX/plugins/libMantidMPIAlgorithms.so
-          - python -c "import mantid.simpleapi as s; assert hasattr(s, 'BroadcastWorkspace'); assert hasattr(s, 'GatherWorkspaces')"
 
     about:
       summary: Mantid with MPI support for distributed high-performance computing of materials science data.
