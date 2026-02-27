@@ -32,6 +32,7 @@ if(USE_TBBMALLOC)
 
       if(_tbbmalloc_proxy_location)
         set(TBBMALLOC_RUNTIME_LIB "${_tbbmalloc_proxy_location}")
+        string(REGEX REPLACE "(\\.so\\.[0-9]+)\\..*$" "\\1" TBBMALLOC_RUNTIME_LIB "${TBBMALLOC_RUNTIME_LIB}")
         message(STATUS "Determined location of TBB malloc proxy library: ${TBBMALLOC_RUNTIME_LIB}")
       else()
         message(WARNING "Could not determine location of TBB malloc proxy library")
