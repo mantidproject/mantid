@@ -11,9 +11,11 @@ cache:
   source:
     path: ../../../
   build:
-    script: build.sh
-    skip:
-      - win
+    script:
+      - if: win
+        then: build.bat
+      - if: not win
+        then: build.sh
   requirements:
     build:
       - ${{ compiler("c") }}
@@ -106,11 +108,7 @@ outputs:
       version: ${{ version }}
 
     build:
-      script:
-        - if: win
-          then: build.bat
-        - if: not win
-          then: echo "Mantid Build Using Cache"
+      script: echo "Mantid Build Using Cache"
       files:
         exclude:
           - plugins/libMantidMPIAlgorithms.so
