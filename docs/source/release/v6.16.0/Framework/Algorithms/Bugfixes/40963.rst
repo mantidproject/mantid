@@ -1,3 +1,6 @@
 - Algorithm :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` now updates the run duration log when using
   parameters ``FilterByTimeStart`` and/or ``FilterByTimeStop``. The behaviour is now consistent with
   :ref:`LoadEventNexus <algm-LoadEventNexus>` when using the same parameters.
+- Loading with :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` and
+  :ref:`LoadEventNexus <algm-LoadEventNexus>` with time filtering when there are banks with no events in that time
+  range no longer causes the loading to hang due to an infinite loop.
