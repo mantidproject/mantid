@@ -9,9 +9,6 @@ Mantid 4.1.0 Release Notes
    :width: 500px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 OS Support Changes:
 
 - **Due to support ending for Windows 7 and 8 this is the last release to support Windows 7 or 8.

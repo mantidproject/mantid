@@ -2,9 +2,6 @@
 Indirect Geometry Changes
 =========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Add option for negative reflection to the indirect data manipulation :ref:`Symmetrise tab <inelastic-symmetrise>`.

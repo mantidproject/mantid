@@ -2,9 +2,6 @@
 Mantid Workbench Changes
 ========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - ``mantidworkbench`` is now an additional entry point for launching the ``mantidworkbench`` Conda package.

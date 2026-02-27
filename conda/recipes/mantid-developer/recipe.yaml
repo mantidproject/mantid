@@ -62,7 +62,6 @@ requirements:
     - scipy ${{ scipy }}
     - setuptools
     - sphinx ${{ sphinx }}
-    - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
     - tbb-devel ${{ tbb }}
     - toml ${{ toml }}
     - versioningit ${{ versioningit }}

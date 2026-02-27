@@ -33,8 +33,8 @@ requirements:
     - myst-parser ${{ mystparser }}
     - python ${{ python }}
     - setuptools
+    - pip ${{ pip }}
     - sphinx ${{ sphinx }}
-    - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
     - graphviz ${{ graphviz }}
     - gtest ${{ gtest }}
     - pystog ${{ pystog }}

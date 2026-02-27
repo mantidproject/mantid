@@ -106,9 +106,6 @@ pyparsing:
 sphinx:
   - '>=9.0,<10'
 
-sphinx_bootstrap_theme:
-  - '==0.8.1'
-
 scipy:
   - '>=1.16.0,<1.17'
 

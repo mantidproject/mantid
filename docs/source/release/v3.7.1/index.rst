@@ -10,9 +10,6 @@ Mantid 3.7.1 Release Notes
 
    Splatter plot views using translucent spheres and clearer sphere and ellipse wireframes
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 3.7 of Mantid, this release contains
 several improvements to the advanced visualisation and the CLI for multidimensional data.
 

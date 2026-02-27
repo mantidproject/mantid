@@ -16,7 +16,6 @@ import os
 
 import mantid
 from mantid.kernel import ConfigService
-import sphinx_bootstrap_theme
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -29,6 +28,19 @@ sys.path.insert(0, os.path.abspath(os.path.join("..", "sphinxext")))
 def setup(app):
     """Called automatically by Sphinx when starting the build process"""
     app.add_css_file("custom.css")
+
+
+# General information about the project.
+project = "MantidProject"
+copyright = "2015, Mantid"
+
+# The full version, including alpha/beta/rc tags.
+release = mantid.__version__
+# The short X.Y version.
+version = ".".join(release.split(".")[:2])
+
+# The root toctree document.
+root_doc = "index"
 
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -93,18 +105,6 @@ myst_enable_extensions = [
 # Allow heading anchors
 myst_heading_anchors = 3
 
-# The root toctree document.
-root_doc = "index"
-
-# General information about the project.
-project = "MantidProject"
-copyright = "2015, Mantid"
-
-# The full version, including alpha/beta/rc tags.
-release = mantid.__version__
-# The short X.Y version.
-version = ".".join(release.split(".")[:2])
-
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
 
@@ -161,76 +161,11 @@ pngmath_latex_preamble = r"\usepackage[active]{preview}"
 pngmath_use_preview = True
 
 # -- HTML output ----------------------------------------------------
+# Options for HTML output. For a full list and more details see the documentation:
+# http://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-qthelp_theme = "bootstrap"
-html_theme = "bootstrap"
-
-# Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-
-# The "title" for HTML documentation generated with Sphinx' templates. This is appended to the <title> tag of individual pages
-# and used in the navigation bar as the "topmost" element.
-html_title = ""
-
-# The name of an image file (relative to this directory) to place at the top of the sidebar.
-html_logo = os.path.relpath(os.path.join("..", "..", "images", "Mantid_Logo_Transparent.png"))
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
-
-# Add any extra paths that contain custom files (such as robots.txt or
-# .htaccess) here, relative to this directory. These files are copied
-# directly to the root of the documentation.
-# html_extra_path = []
-
-# If true, Smart Quotes will be used to convert quotes and dashes to
-# typographically correct entities.
-smartquotes = True
-
-# Hide the Sphinx usage as we reference it on github instead.
-html_show_sphinx = False
-
-# If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
-html_show_copyright = False
-
-# Do not show last updated information in the HTML footer.
-html_last_updated_fmt = None
-
-# Hide the navigation sidebar, we use a table of contents instead.
-html_sidebars = {"**": []}
-
-# Theme-specific options to customize the look and feel of a theme.
-# We config the bootstrap settings here, and apply CSS changes in
-# custom.css rather than here.
-html_theme_options = {
-    # Navigation bar title.
-    "navbar_title": " ",  # deliberate single space so it's not visible
-    # Tab name for entire site.
-    "navbar_site_name": "Mantid",
-    # Add links to the nav bar. Third param of tuple is true to create absolute url.
-    "navbar_links": [
-        ("Home", "https://www.mantidproject.org", True),
-        ("Download", "https://download.mantidproject.org", True),
-        ("Documentation", "https://docs.mantidproject.org", True),
-        ("Contact Us", "https://www.mantidproject.org/contact", True),
-    ],
-    # Do not show the "Show source" button.
-    "source_link_position": "no",
-    # Remove the local TOC from the nav bar
-    "navbar_pagenav": False,
-    # Hide the next/previous in the nav bar.
-    "navbar_sidebarrel": True,
-    # Use bootstrap 3 for now, updating requires changes to our custom CSS.
-    "bootstrap_version": "3",
-    # Ensure the nav bar always stays on top of page.
-    "navbar_fixed_top": "true",
-    # Don't limit the width
-    "body_max_width": "none",
-}
+# Use our custom Mantid Sphinx theme (extends https://pydata-sphinx-theme.readthedocs.io)
+html_theme = "mantid_sphinx_theme"
 
 # -- Options for Epub output ---------------------------------------------------
 # This flag determines if a toc entry is inserted again at the beginning of its nested toc listing.

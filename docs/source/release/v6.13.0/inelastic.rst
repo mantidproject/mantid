@@ -2,9 +2,6 @@
 Inelastic Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Added a new ``TeixeiraWaterIqtFT`` fitting function, which is the Fourier Transform of the ``TeixeiraWaterIqt``

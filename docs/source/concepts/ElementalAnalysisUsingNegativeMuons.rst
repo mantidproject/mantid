@@ -4,9 +4,6 @@ Elemental analysis using negative muons
 =======================================
 
 
-.. contents::
-  :local:
-
 Overview
 --------
 Elemental analysis is a non-destructive, depth selective method of determining the elemental composition of a sample by using negative muons.

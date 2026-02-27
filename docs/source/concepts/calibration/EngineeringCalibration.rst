@@ -3,9 +3,6 @@
 Engineering Calibration
 =======================
 
-.. contents::
-  :local:
-
 
 Calculating Calibration
 -----------------------

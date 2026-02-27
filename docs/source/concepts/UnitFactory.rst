@@ -4,9 +4,6 @@
 Units
 =====
 
-.. contents::
-  :local:
-
 What are units?
 ---------------
 

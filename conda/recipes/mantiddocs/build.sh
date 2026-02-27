@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -ex
 
+# Install mantid-sphinx-theme from git (not yet on conda-forge)
+pip install git+https://github.com/mantidproject/mantid-sphinx-theme@6f3a25f
+
 if [ -z "${MANTID_DATA_STORE}" ]; then
     MANTID_DATA_STORE="${HOME}"/MantidExternalData
 fi
