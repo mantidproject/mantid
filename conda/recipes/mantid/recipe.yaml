@@ -1,116 +1,177 @@
 schema_version: 1
 
 context:
-  # Version is injected via an environment variable
   version: ${{ env.get('MANTID_VERSION', default='0.0.0') }}
 
-package:
+recipe:
   name: mantid
   version: ${{ version }}
 
-source:
-  path: ../../../
-
-build:
-  number: 0
-
-requirements:
+cache:
+  source:
+    path: ../../../
   build:
-    - ${{ compiler("c") }}
-    - ${{ compiler("cxx") }}
-    - ninja ${{ ninja }}
-    - cmake ${{ cmake }}
-    - git
-    - if: linux
-      then:
-        - ${{ stdlib("c") }}
-        - libgomp
-    - if: osx
-      then:
-        - llvm-openmp ${{ llvm_openmp }}
-  host:
-    - eigen ${{ eigen }}
-    - gsl ${{ gsl }}
-    - gtest ${{ gtest }}
-    - gmock ${{ gmock }}
-    - hdf4 ${{ hdf4 }}
-    - h5py
-    - hdf5 ${{ hdf5 }}
-    - jsoncpp ${{ jsoncpp }}
-    - libboost-devel ${{ libboost }}
-    - libboost-python-devel ${{ libboost }}
-    - librdkafka ${{ librdkafka }}
-    - muparser ${{ muparser }}
-    - numpy ${{ numpy }}
-    - occt ${{ occt }}
-    - python ${{ python }}
-    - poco ${{ poco }}
-    - setuptools
-    - tbb-devel ${{ tbb }}
-    - pip ${{ pip }}
-    - zlib
-    - if: linux
-      then:
-        - libglu ${{ libglu }}
-        - libgl-devel
-        - xorg-libxxf86vm
-        - xorg-libx11
-        - xorg-xorgproto
-    - if: win
-      then:
-        - lib3mf
-    - if: osx or linux
-      then:
-        - libopenblas ${{ libopenblas }}
-  run:
-    - ${{ pin_compatible("gsl", upper_bound="x.x") }}
-    - ${{ pin_compatible("hdf4", upper_bound="x.x") }}
-    - h5py
-    - ${{ pin_compatible("hdf5", upper_bound="x.x") }}
-    - muparser ${{ muparser }}
-    - occt ${{ occt }}
-    - pycifrw
-    - pydantic ${{ pydantic }}
-    - python
-    - python-dateutil ${{ python_dateutil }}
-    - pyyaml ${{ pyyaml }}
-    - scipy ${{ scipy }}
-    - euphonic ${{ euphonic }}
-    # remove seekpath altogether once newer euphonic is released
-    - seekpath ==2.1.0 *2
-    - toml ${{ toml }}
-    - joblib
-    - orsopy ${{ orsopy }}
-    - quasielasticbayes ${{ quasielasticbayes }}
-    - quickbayes ${{ quickbayes }}
-    - zlib
-    - ${{ pin_compatible('numpy', lower_bound='2.0', upper_bound='x.x') }}
-    - ${{ pin_compatible('libboost', upper_bound='x.x') }}
-    - ${{ pin_compatible('libboost-python', upper_bound='x.x') }}
-    - if: linux
-      then:
-        - libglu ${{ libglu }}
-    - if: win
-      then:
-        - lib3mf
-  run_exports:
-    - ${{ pin_subpackage('mantid', exact=True) }}
-  run_constraints:
-    - matplotlib-base ${{ matplotlib }}
-    - pyparsing ${{ pyparsing }}
-    - pystog ${{ pystog }}
+    script: build.sh
+  requirements:
+    build:
+      - ${{ compiler("c") }}
+      - ${{ compiler("cxx") }}
+      - ninja ${{ ninja }}
+      - cmake ${{ cmake }}
+      - git
+      - if: linux
+        then:
+          - ${{ stdlib("c") }}
+          - libgomp
+          - mpi
+          - mpich
+      - if: osx
+        then:
+          - llvm-openmp ${{ llvm_openmp }}
+    host:
+      - eigen ${{ eigen }}
+      - gsl ${{ gsl }}
+      - gtest ${{ gtest }}
+      - gmock ${{ gmock }}
+      - hdf4 ${{ hdf4 }}
+      - h5py
+      - hdf5 ${{ hdf5 }}
+      - jsoncpp ${{ jsoncpp }}
+      - libboost-devel ${{ libboost }}
+      - libboost-python-devel ${{ libboost }}
+      - librdkafka ${{ librdkafka }}
+      - muparser ${{ muparser }}
+      - numpy ${{ numpy }}
+      - occt ${{ occt }}
+      - python ${{ python }}
+      - poco ${{ poco }}
+      - setuptools
+      - tbb-devel ${{ tbb }}
+      - pip ${{ pip }}
+      - zlib
+      - if: linux
+        then:
+          - libglu ${{ libglu }}
+          - libgl-devel
+          - xorg-libxxf86vm
+          - xorg-libx11
+          - xorg-xorgproto
+          - libopenblas ${{ libopenblas }}
+          - libboost-mpi ${{ libboost }}
+          - mpi
+          - mpi4py
+          - mpich
+      - if: win
+        then:
+          - lib3mf
+      - if: osx
+        then:
+          - libopenblas ${{ libopenblas }}
 
-tests:
-  - python:
-      imports:
-        - mantid
-        - mantid.kernel
+outputs:
+  - package:
+      name: mantid
+      version: ${{ version }}
 
-about:
-  license: GPL-3.0-or-later
-  summary: Mantid provides a framework that supports high-performance computing and visualisation of materials science data.
-  description: Mantid provides a framework that supports high-performance computing and visualisation of materials science data. To use the optional plotting sub package you must conda install matplotlib.
-  homepage: https://github.com/mantidproject/mantid
+    build:
+      script: echo "Mantid Build Done"
+      files:
+        exclude:
+          - plugins/libMantidMPIAlgorithms.so
+
+    requirements:
+      host:
+        - gsl ${{ gsl }}
+        - hdf4 ${{ hdf4 }}
+        - hdf5 ${{ hdf5 }}
+        - libboost-devel ${{ libboost }}
+        - libboost-python-devel ${{ libboost }}
+        - numpy ${{ numpy }}
+      run:
+        - ${{ pin_compatible("gsl", upper_bound="x.x") }}
+        - ${{ pin_compatible("hdf4", upper_bound="x.x") }}
+        - h5py
+        - ${{ pin_compatible("hdf5", upper_bound="x.x") }}
+        - muparser ${{ muparser }}
+        - occt ${{ occt }}
+        - pycifrw
+        - pydantic ${{ pydantic }}
+        - python
+        - python-dateutil ${{ python_dateutil }}
+        - pyyaml ${{ pyyaml }}
+        - scipy ${{ scipy }}
+        - euphonic ${{ euphonic }}
+        # remove seekpath altogether once newer euphonic is released
+        - seekpath ==2.1.0 *2
+        - toml ${{ toml }}
+        - joblib
+        - orsopy ${{ orsopy }}
+        - quasielasticbayes ${{ quasielasticbayes }}
+        - quickbayes ${{ quickbayes }}
+        - zlib
+        - ${{ pin_compatible('numpy', lower_bound='2.0', upper_bound='x.x') }}
+        - ${{ pin_compatible('libboost', upper_bound='x.x') }}
+        - ${{ pin_compatible('libboost-python', upper_bound='x.x') }}
+        - if: linux
+          then:
+            - libglu ${{ libglu }}
+        - if: win
+          then:
+            - lib3mf
+      run_exports:
+        - ${{ pin_subpackage('mantid', exact=True) }}
+      run_constraints:
+        - matplotlib-base ${{ matplotlib }}
+        - pyparsing ${{ pyparsing }}
+        - pystog ${{ pystog }}
+
+    tests:
+      - python:
+          imports:
+            - mantid
+            - mantid.kernel
+
+    about:
+      license: GPL-3.0-or-later
+      summary: Mantid provides a framework that supports high-performance computing and visualisation of materials science data.
+      description: Mantid provides a framework that supports high-performance computing and visualisation of materials science data. To use the optional plotting sub package you must conda install matplotlib.
+      homepage: https://github.com/mantidproject/mantid
+
+  - package:
+      name: mantidmpi
+      version: ${{ version }}
+
+    build:
+      script: echo "Using Cache"
+      skip:
+        - win
+        - osx
+      files:
+        include:
+          - plugins/libMantidMPIAlgorithms.so
+
+    requirements:
+      host:
+        - libboost-mpi ${{ libboost }}
+      run:
+        - ${{ pin_subpackage('mantid', exact=True) }}
+        - mpi
+        - mpich
+        - mpi4py
+        - ${{ pin_compatible('libboost-mpi', upper_bound='x.x') }}
+      run_exports:
+        - ${{ pin_subpackage('mantidmpi', upper_bound='x.x.x') }}
+
+    tests:
+      - script:
+          - test -f $PREFIX/plugins/libMantidMPIAlgorithms.so
+          - python -c "import mantid.simpleapi as s; assert hasattr(s, 'BroadcastWorkspace'); assert hasattr(s, 'GatherWorkspaces')"
+
+    about:
+      license: GPL-3.0-or-later
+      summary: Mantid with MPI support for distributed high-performance computing of materials science data.
+      description: Mantid with MPI support enabled. Provides distributed computing capabilities on top of the base Mantid framework.
+      homepage: https://github.com/mantidproject/mantid
 
 extra:
   recipe-maintainers:
