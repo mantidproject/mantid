@@ -67,7 +67,7 @@ class DNSElasticSCPlotView(DNSView):
         self.datalist = DNSDatalist(self, self._map["datalist"])
         self._map["down"].clicked.connect(self.datalist.down)
         self._map["up"].clicked.connect(self.datalist.up)
-        self.datalist.sig_datalist_changed.connect(self._plot)
+        self.datalist.sig_datalist_changed.connect(self._change_ws)
 
         # connecting signals
         self._attach_signal_slots()
@@ -80,6 +80,8 @@ class DNSElasticSCPlotView(DNSView):
         self.menus = []
         self.menus.append(self.views_menu)
         self.menus.append(self.options_menu)
+        self.views_menu.sig_switch_state_changed.connect(self._switch_changed)
+        self.views_menu.sig_axes_changed.connect(self._axes_changed)
         self.views_menu.sig_replot.connect(self._plot)
         self.canvas = FigureCanvas(Figure())
         self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -106,17 +108,21 @@ class DNSElasticSCPlotView(DNSView):
     sig_change_font_size = Signal()
     sig_change_linestyle = Signal()
     sig_manual_lim_changed = Signal()
-    sig_change_cb_range_on_zoom = Signal()
     sig_home_button_clicked = Signal()
     sig_plot_zoom_updated = Signal()
+    sig_switch_changed = Signal()
+    sig_axes_changed = Signal()
+    sig_change_data_ws = Signal()
 
     # emitting custom signals for presenter
+    def _switch_changed(self):
+        self.sig_switch_changed.emit()
+
+    def _axes_changed(self):
+        self.sig_axes_changed.emit()
+
     def _home_button_clicked(self):
         self.sig_home_button_clicked.emit()
-
-    def change_cb_range_on_zoom(self, _dummy):
-        # connected to ylim_changed of ax callback
-        self.sig_change_cb_range_on_zoom.emit()
 
     def _manual_lim_changed(self):
         self.sig_manual_lim_changed.emit()
@@ -141,6 +147,9 @@ class DNSElasticSCPlotView(DNSView):
 
     def _plot(self):
         self.sig_plot.emit()
+
+    def _change_ws(self):
+        self.sig_change_data_ws.emit()
 
     def _change_grid(self):
         self.sig_change_grid.emit()
@@ -174,8 +183,11 @@ class DNSElasticSCPlotView(DNSView):
     def create_subfigure(self, grid_helper=None):
         self.single_crystal_plot = DNSScPlot(self, self.canvas.figure, grid_helper)
 
-    def get_axis_type(self):
-        return self.views_menu.get_value()
+    def get_plotting_settings_dict(self):
+        return self.views_menu.get_plot_view_settings()
+
+    def get_plotting_setting(self, setting_key):
+        return self.views_menu.get_plot_view_settings()[setting_key]
 
     def set_initial_omega_offset_dx_dy(self, off, dx, dy):
         self.initial_values = {"omega_offset": off, "dx": dx, "dy": dy}
