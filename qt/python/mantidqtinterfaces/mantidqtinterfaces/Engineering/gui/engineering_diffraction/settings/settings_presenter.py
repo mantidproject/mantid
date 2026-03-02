@@ -11,7 +11,6 @@ from Engineering.EnggUtils import CALIB_DIR
 from Engineering.common.instrument_config import get_instr_config
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
 
-DEFAULT_FULL_INST_CALIB = get_instr_config("ENGINX").full_instr_calib
 GSAS2_PATH_ON_IDAAAS = "/opt/gsas2"
 SETTINGS_DICT = {
     "save_location": str,
@@ -21,7 +20,6 @@ SETTINGS_DICT = {
     "rd_dir": str,
     "nd_dir": str,
     "td_dir": str,
-    "full_calibration": str,
     "logs": str,
     "primary_log": str,
     "sort_ascending": bool,
@@ -41,8 +39,8 @@ SETTINGS_DICT = {
     "auto_pop_texture": bool,
 }
 
+
 DEFAULT_SETTINGS = {
-    "full_calibration": path.join(CALIB_DIR, DEFAULT_FULL_INST_CALIB),
     "rd_name": "RD",
     "nd_name": "ND",
     "td_name": "TD",
@@ -68,6 +66,10 @@ DEFAULT_SETTINGS = {
     "contour_kernel": "2.0",
     "auto_pop_texture": False,
 }
+
+for instr in INSTRUMENT_DICT.values():
+    SETTINGS_DICT[f"full_calibration_{instr}"] = str
+    DEFAULT_SETTINGS[f"full_calibration_{instr}"] = path.join(CALIB_DIR, get_instr_config(instr).full_instr_calib)
 
 ALL_LOGS = ",".join(
     [
@@ -203,7 +205,7 @@ class SettingsPresenter(object):
         self.settings["rd_dir"] = self.view.get_rd_dir()
         self.settings["nd_dir"] = self.view.get_nd_dir()
         self.settings["td_dir"] = self.view.get_td_dir()
-        self.settings["full_calibration"] = self.view.get_full_calibration()
+        self.settings[f"full_calibration_{self.instrument}"] = self.view.get_full_calibration()
         self.settings["logs"] = self.view.get_checked_logs()
         self.settings["primary_log"] = self.view.get_primary_log()
         self.settings["sort_ascending"] = self.view.get_ascending_checked()
@@ -232,7 +234,7 @@ class SettingsPresenter(object):
         self.view.set_rd_dir(self.settings["rd_dir"])
         self.view.set_nd_dir(self.settings["nd_dir"])
         self.view.set_td_dir(self.settings["td_dir"])
-        self.view.set_full_calibration(self.settings["full_calibration"])
+        self.view.set_full_calibration(self.settings[f"full_calibration_{self.instrument}"])
         self.view.set_checked_logs(self.settings["logs"])
         self.view.set_primary_log_combobox(self.settings["primary_log"])
         self.view.set_ascending_checked(self.settings["sort_ascending"])
@@ -253,9 +255,7 @@ class SettingsPresenter(object):
         self._find_files()
 
     def update_full_calib_with_instrument(self):
-        full_calib = path.join(CALIB_DIR, get_instr_config(self.instrument).full_instr_calib)
-        self.settings["full_calibration"] = full_calib
-        self.model.set_setting("full_calibration", full_calib)
+        full_calib = self.settings[f"full_calibration_{self.instrument}"]
         self.view.set_full_calibration(full_calib)
 
     def _find_files(self):
@@ -292,7 +292,7 @@ class SettingsPresenter(object):
         self.model.validate_euler_settings(self.settings, self.view.get_use_euler_angles())
 
     def _validate_settings(self, set_nullables_to_default=True):
-        self.settings = self.model.validate_settings(self.settings, DEFAULT_SETTINGS, ALL_PEAKS, set_nullables_to_default)
+        self.settings = self.model.validate_settings(self.settings, DEFAULT_SETTINGS, ALL_PEAKS, set_nullables_to_default, self.instrument)
         self.validate_euler_settings()
 
     def set_euler_options_enabled(self):
@@ -305,6 +305,7 @@ class SettingsPresenter(object):
     def set_instrument_override(self, instrument):
         instrument = INSTRUMENT_DICT[instrument]
         self.instrument = instrument
+        self._validate_settings()
         self.update_full_calib_with_instrument()
 
     # -----------------------

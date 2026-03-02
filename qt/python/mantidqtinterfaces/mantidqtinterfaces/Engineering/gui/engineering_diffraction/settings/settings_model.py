@@ -110,7 +110,7 @@ class SettingsModel(object):
             settings[name] = default_settings[name]
         return settings
 
-    def validate_settings(self, settings, default_settings, all_peaks, set_nullables_to_default=True):
+    def validate_settings(self, settings, default_settings, all_peaks, set_nullables_to_default=True, instrument="ENGINX"):
         # set to class attributes to save duplicating arguments and passing settings dict around too much
 
         for key in list(settings):
@@ -128,8 +128,8 @@ class SettingsModel(object):
         self.validate_reference_frame(settings)
         if settings["default_peak"] not in all_peaks:
             settings["default_peak"] = default_settings["default_peak"]
-        if not path.isfile(settings["full_calibration"]):
-            settings["full_calibration"] = default_settings["full_calibration"]
+        if not path.isfile(settings[f"full_calibration_{instrument}"]):
+            settings[f"full_calibration_{instrument}"] = default_settings[f"full_calibration_{instrument}"]
         self._validate_convert_to_float(settings, "timeout")
         self._validate_convert_to_float(settings, "dSpacing_min")
         self._validate_convert_to_float(settings, "cost_func_thresh")
