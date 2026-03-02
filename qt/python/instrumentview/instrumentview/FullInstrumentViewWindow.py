@@ -35,11 +35,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.widgets import Cursor
 from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
-from vtkmodules.vtkCommonDataModel import vtkBox, vtkCylinder, vtkImplicitFunction
-from vtkmodules.vtkInteractionWidgets import (
-    vtkImplicitCylinderRepresentation,
-    vtkBoxRepresentation,
-)
+
 import numpy as np
 import pyvista as pv
 import matplotlib.pyplot as plt
@@ -55,9 +51,10 @@ from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.Globals import CurrentTab
 from instrumentview.ComponentTreeView import ComponentTreeView
 from instrumentview.ShapeWidgets import (
-    CylinderWidgetNoRotation,
-    RectangleWidgetNoRotation,
-    EllipseWidgetNoRotation,
+    CircleSelectionShape,
+    RectangleSelectionShape,
+    EllipseSelectionShape,
+    ShapeOverlayManager,
 )
 
 import os
@@ -310,6 +307,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self.move(window_geometry.topLeft())
 
         self._current_widget = None
+        self._shape_overlay_manager = None
         self._projection_camera_map = {}
         self._parallel_scales = {}
 
@@ -512,7 +510,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_selection.setDisabled(True)
 
     def on_toggle_add_circle(self, checked):
-        self._on_toggle_add_shape(checked, self.add_cylinder_widget)
+        self._on_toggle_add_shape(checked, self.add_circle_widget)
 
     def on_toggle_add_rectangle(self, checked):
         self._on_toggle_add_shape(checked, self.add_rectangular_widget)
@@ -542,16 +540,9 @@ class FullInstrumentViewWindow(QMainWindow):
             btn.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
     def delete_current_widget(self):
-        # Should delete widgets explicitly, otherwise not garbage collected
-        if not self._current_widget:
-            return
-        # Clean up ellipse visual representation if it's an ellipse widget
-        if isinstance(self._current_widget, EllipseWidgetNoRotation):
-            self._current_widget.cleanup()
-        self._current_widget.EnabledOff()
-        self._current_widget.SetInteractor(None)
-        self._current_widget.RemoveAllObservers()
-        del self._current_widget
+        if self._shape_overlay_manager is not None:
+            self._shape_overlay_manager.remove_shape()
+            self._shape_overlay_manager = None
         self._current_widget = None
 
     def _setup_units_options(self, parent: QVBoxLayout):
@@ -742,96 +733,31 @@ class FullInstrumentViewWindow(QMainWindow):
         # RGB for dark grey is (64, 64, 64), normalised is (0.25, 0.25, 0.25)
         self.main_plotter.add_mesh(mesh, color=(0.25, 0.25, 0.25), pickable=False, render_points_as_spheres=True, point_size=15)
 
-    def add_cylinder_widget(self) -> None:
-        cylinder_repr = vtkImplicitCylinderRepresentation()
-        cylinder_repr.SetOutlineTranslation(False)
-        # Set bounding box line to invisible
-        cylinder_repr.GetOutlineProperty().SetOpacity(0)
-        cylinder_repr.SetMinRadius(0.001)
+    def _ensure_overlay_manager(self):
+        """Create the shape overlay manager if it does not already exist."""
+        if self._shape_overlay_manager is None:
+            self._shape_overlay_manager = ShapeOverlayManager(self.main_plotter)
 
-        width, height = self.main_plotter.renderer.GetSize()
-        cx, cy, _cz = self.display_to_world_coords(width / 2, height / 2, 0)
-        cylinder_repr.SetCenter([cx, cy, 0.5])
-
-        x, y, _z = self.display_to_world_coords(width / 2 + 0.15 * width, height / 2, 0)
-        cylinder_repr.SetRadius(np.sqrt((x - cx) ** 2 + (y - cy) ** 2))
-        cylinder_repr.SetEdgeColor(1, 1, 1)
-        # Arbritary border factor for bounding box
-        xmin, xmax, ymin, ymax, _zmin, _zmax = self.main_plotter.bounds
-        border = (np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2)) / 2
-        cylinder_repr.SetWidgetBounds([xmin - border, xmax + border, ymin - border, ymax + border, 0, 1])
-
-        # For 2D projections, camera view is always perpendicular to Z axis
-        cylinder_repr.SetAxis([0, 0, 1])
-        cylinder_widget = CylinderWidgetNoRotation()
-        cylinder_widget.SetRepresentation(cylinder_repr)
-        cylinder_widget.SetCurrentRenderer(self.main_plotter.renderer)
-        cylinder_widget.SetInteractor(self.main_plotter.iren.interactor)
-        cylinder_widget.On()
-        self._current_widget = cylinder_widget
-        # The command below is a hacky way of making the widget appear on top of detectors
-        # No idea why it works
-        self.main_plotter.camera_position = self.main_plotter.camera_position
+    def add_circle_widget(self) -> None:
+        """Add a circle selection shape centred on the viewport."""
+        self._ensure_overlay_manager()
+        shape = CircleSelectionShape(cx=0.5, cy=0.5, radius=0.15)
+        self._shape_overlay_manager.set_shape(shape)
+        self._current_widget = shape
 
     def add_rectangular_widget(self) -> None:
-        rect_repr = vtkBoxRepresentation()
-
-        width, height = self.main_plotter.renderer.GetSize()
-        x0, y0, _z0 = self.display_to_world_coords(width / 3, height / 3, 0)
-        x1, y1, _z1 = self.display_to_world_coords(2 * width / 3, 2 * height / 3, 0)
-        rect_repr.SetPlaceFactor(1.0)
-        rect_repr.PlaceWidget([x0, x1, y0, y1, -0.1, 1])
-        rect_repr.SetUseBounds(True)
-
-        rect_widget = RectangleWidgetNoRotation()
-        rect_widget.SetRepresentation(rect_repr)
-        rect_widget.SetCurrentRenderer(self.main_plotter.renderer)
-        rect_widget.SetInteractor(self.main_plotter.iren.interactor)
-        rect_widget.On()
-        self._current_widget = rect_widget
-        # The command below is a hacky way of making the widget appear on top of detectors
-        # No idea why it works
-        self.main_plotter.camera_position = self.main_plotter.camera_position
-        return
+        """Add a rectangle selection shape in the middle third of the viewport."""
+        self._ensure_overlay_manager()
+        shape = RectangleSelectionShape(cx=0.5, cy=0.5, half_w=1.0 / 6.0, half_h=1.0 / 6.0)
+        self._shape_overlay_manager.set_shape(shape)
+        self._current_widget = shape
 
     def add_ellipse_widget(self) -> None:
-        """Add an interactive ellipse widget for detector selection.
-        The ellipse is initialized at the center of the viewport with default semi-axes.
-        Uses a box widget representation but evaluates points as an ellipse.
-        """
-        ellipse_repr = vtkBoxRepresentation()
-
-        # Make the box outline very faint so it doesn't dominate visually
-        # but still allows interaction (translation and scaling)
-        ellipse_repr.GetOutlineProperty().SetOpacity(0.15)
-        ellipse_repr.GetOutlineProperty().SetColor(0.5, 0.5, 0.5)  # Dark gray
-        ellipse_repr.GetOutlineProperty().SetLineWidth(0.5)
-
-        width, height = self.main_plotter.renderer.GetSize()
-        x0, y0, _z0 = self.display_to_world_coords(width / 3, height / 3, 0)
-        x1, y1, _z1 = self.display_to_world_coords(2 * width / 3, 2 * height / 3, 0)
-        ellipse_repr.SetPlaceFactor(1.0)
-        ellipse_repr.PlaceWidget([x0, x1, y0, y1, -0.1, 1])
-        ellipse_repr.SetUseBounds(True)
-
-        ellipse_widget = EllipseWidgetNoRotation(plotter=self.main_plotter)
-        ellipse_widget.SetRepresentation(ellipse_repr)
-        ellipse_widget.SetCurrentRenderer(self.main_plotter.renderer)
-        ellipse_widget.SetInteractor(self.main_plotter.iren.interactor)
-        ellipse_widget.On()
-
-        # Initialize visual ellipse
-        cx = (x0 + x1) / 2.0
-        cy = (y0 + y1) / 2.0
-        rx = abs(x1 - x0) / 2.0
-        ry = abs(y1 - y0) / 2.0
-        ellipse_widget.set_ellipse_parameters(cx, cy, rx, ry)
-        ellipse_widget._update_visual_ellipse(cx, cy, rx, ry, 0.5)
-
-        self._current_widget = ellipse_widget
-        # The command below is a hacky way of making the widget appear on top of detectors
-        # No idea why it works
-        self.main_plotter.camera_position = self.main_plotter.camera_position
+        """Add an ellipse selection shape centred on the viewport."""
+        self._ensure_overlay_manager()
+        shape = EllipseSelectionShape(cx=0.5, cy=0.5, half_a=1.0 / 6.0, half_b=1.0 / 6.0)
+        self._shape_overlay_manager.set_shape(shape)
+        self._current_widget = shape
 
     def display_to_world_coords(self, x, y, z):
         # Convert from display coordinates to world coordinates
@@ -841,19 +767,35 @@ class FullInstrumentViewWindow(QMainWindow):
         world_x, world_y, world_z, world_w = renderer.GetWorldPoint()
         return world_x / world_w, world_y / world_w, world_z / world_w
 
-    def get_current_widget_implicit_function(self) -> vtkImplicitFunction | None:
-        if isinstance(self._current_widget, CylinderWidgetNoRotation):
-            cylinder = vtkCylinder()
-            self._current_widget.GetCylinderRepresentation().GetCylinder(cylinder)
-            return cylinder
-        elif isinstance(self._current_widget, RectangleWidgetNoRotation):
-            box = vtkBox()
-            box.SetBounds(self._current_widget.GetRepresentation().GetBounds())
-            return box
-        elif isinstance(self._current_widget, EllipseWidgetNoRotation):
-            return self._current_widget.get_implicit_ellipse()
-        else:
-            return None
+    def get_shape_mask(self, points: np.ndarray) -> np.ndarray:
+        """Return a boolean mask of which 3D points are inside the current selection shape.
+
+        Points are projected to normalised viewport coordinates and tested
+        against the active Chart2D overlay shape.  Returns an array of False
+        if no shape is active.
+        """
+        if self._shape_overlay_manager is None:
+            return np.zeros(len(points), dtype=bool)
+        return self._shape_overlay_manager.get_shape_mask(points)
+
+    def project_and_cache_detector_points(self, points: np.ndarray):
+        """Project *points* to chart-data coords on the main thread and cache.
+
+        Uses VTK's own ``WorldToDisplay`` for guaranteed accuracy.  Must be
+        called on the main/Qt thread **before** queuing background work that
+        calls ``get_shape_mask``.
+        """
+        if self._shape_overlay_manager is not None:
+            self._shape_overlay_manager.project_and_cache_points(points)
+
+    def update_shape_projection_cache(self):
+        """Refresh the cached projection matrices used by get_shape_mask.
+
+        Must be called on the main/Qt thread **before** queuing background
+        work that calls get_shape_mask.
+        """
+        if self._shape_overlay_manager is not None:
+            self._shape_overlay_manager.update_projection_cache()
 
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
