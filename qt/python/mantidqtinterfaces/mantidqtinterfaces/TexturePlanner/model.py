@@ -293,7 +293,7 @@ class TexturePlannerModel(object):
         gRs = [Rotation.identity()]
         R = Rotation.identity()
         for i, vec in enumerate(vecs):
-            sense = -senses[i]  # mantid convention is that ccw = 1, we need cw = 1
+            sense = senses[i]
             r_step = Rotation.from_davenport(vec, "extrinsic", sense * angles[i], degrees=True)
             R = R * r_step
             gRs.append(R)
@@ -431,8 +431,10 @@ class TexturePlannerModel(object):
 
         # if the sample is partially illuminated the scattering vectors should be taken from the centre of mass of the
         # illuminated region
-
-        scattering_centre = np.asarray(EstimateScatteringVolumeCentreOfMass(InputWorkspace=self.ws))
+        try:
+            scattering_centre = np.asarray(EstimateScatteringVolumeCentreOfMass(InputWorkspace=self.ws))
+        except:
+            scattering_centre = np.array((0.0, 0.0, 0.0))  # if the estimate scattering centre fails, assume origin
 
         self.det_k = np.asarray(
             [
@@ -534,7 +536,10 @@ class TexturePlannerModel(object):
 
         rot_mesh = R.apply(shape_mesh.reshape((-1, 3))).reshape(shape_mesh.shape)
 
-        scat_centre = np.asarray(EstimateScatteringVolumeCentreOfMass(InputWorkspace=self.ws))
+        try:
+            scat_centre = np.asarray(EstimateScatteringVolumeCentreOfMass(InputWorkspace=self.ws))
+        except:
+            scat_centre = np.array((0.0, 0.0, 0.0))  # if the estimate scattering centre fails, assume origin
 
         # code to add goniometers to plot
         for i, vec in enumerate(vecs):
@@ -547,7 +552,7 @@ class TexturePlannerModel(object):
             _ring_res = 360
             gon_ring = gR.apply(ring(vec, gon_scale, res=_ring_res).T).T
 
-            sense = -senses[i]  # mantid convention is that ccw = 1, we need cw = 1
+            sense = senses[i]
             angle = angles[i] * sense
 
             if angle <= 0:
