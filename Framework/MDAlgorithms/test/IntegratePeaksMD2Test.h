@@ -637,7 +637,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Dimensions", "3"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Extents", "-0.5,0.5,-0.5,0.5,-0.5,0.5"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "h,k,l"));
-    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", "U,U,U"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", "r.l.u.,r.l.u.,r.l.u."));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", "HKL,HKL,HKL"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("SplitInto", "2"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("MaxRecursionDepth", "5"));

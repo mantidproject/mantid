@@ -265,6 +265,7 @@ std::map<std::string, std::string> IntegratePeaksMD2::validateInputs() {
   std::vector<double> BackgroundOuterRadius = getProperty("BackgroundOuterRadius");
   bool ellipsoid = getProperty("Ellipsoid");
   bool cylinder = getProperty("Cylinder");
+  std::shared_ptr<IMDEventWorkspace> inputWS = getProperty("InputWorkspace");
 
   if (PeakRadius.size() != 1 && PeakRadius.size() != 3) {
     std::stringstream errmsg;
@@ -307,6 +308,10 @@ std::map<std::string, std::string> IntegratePeaksMD2::validateInputs() {
     errmsg << "Ellipsoid and Cylinder cannot both be true";
     result["Ellipsoid"] = errmsg.str();
     result["Cylinder"] = errmsg.str();
+  }
+
+  if (inputWS->getSpecialCoordinateSystem() == Mantid::Kernel::None) {
+    result["InputWorkspace"] = "Must have Special Coordinate System of QLab, QSample or HKL";
   }
 
   return result;
@@ -477,6 +482,8 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
       pos = p.getQSampleFrame();
     else if (CoordinatesToUse == Mantid::Kernel::HKL) //"HKL"
       pos = p.getHKL();
+    else
+      throw std::runtime_error("Workspace does not have a coordinate system set");
 
     // Do not integrate if sphere is off edge of detector
 
