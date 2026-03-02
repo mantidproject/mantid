@@ -26,8 +26,9 @@ The following settings, relating to the documentation, are available:
 * ``DOCS_SCREENSHOTS``: If enabled then the automatic screenshots of algorithm dialogs and interfaces are included
   otherwise a placeholder image is included with a caption indicating the processing is disabled. Default=OFF.
 * ``DOCS_MATH_EXT``: Extension used to provide the ``:math:`` processing ability.
-  Default=``sphinx.ext.mathjax`` in CMake but this can be set to ``sphinx.ext.imgmath``
-  for clean package builds to remove the javascript dependency.
+  Default=``sphinx.ext.imgmath`` which pre-renders LaTeX equations as images for local documentation.
+  Online/published documentation uses ``sphinx.ext.mathjax`` for JavaScript-based rendering in web browsers.
+  Note: QTextBrowser (used in the embedded help window) does not support JavaScript, so imgmath is required for local docs.
 * ``DOCS_PLOTDIRECTIVE``: If enabled then the ``:plot:`` directive is processed and
   the code/plots are included. WARNING: This can add ~15mins to the build time. Default=OFF.
 

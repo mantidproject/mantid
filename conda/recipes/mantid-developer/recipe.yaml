@@ -43,7 +43,6 @@ requirements:
     - pyparsing ${{ pyparsing }}
     - pyqt ${{ pyqt }}
     - pyqt5-sip ${{ pyqt5_sip }}
-    - pyqtwebengine
     - pystog ${{ pystog }}
     - python ${{ python }}
     - pyvista ${{ pyvista }}
