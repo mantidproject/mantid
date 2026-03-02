@@ -465,8 +465,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
   // Initialize progress reporting
   int nPeaks = peakWS->getNumberPeaks();
   Progress progress(this, 0., 1., nPeaks);
+  int zeroHKLCount = 0;
   bool doParallel = cylinderBool ? false : Kernel::threadSafe(*ws, *peakWS);
-  PARALLEL_FOR_IF(doParallel)
+  PARALLEL_SET_CONFIG_THREADS PRAGMA_OMP(parallel for if(doParallel) reduction(+:zeroHKLCount))
   for (int i = 0; i < nPeaks; ++i) {
     PARALLEL_START_INTERRUPT_REGION
     progress.report();
@@ -480,11 +481,14 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
       pos = p.getQLabFrame();
     else if (CoordinatesToUse == Mantid::Kernel::QSample) //"Q (sample frame)"
       pos = p.getQSampleFrame();
-    else if (CoordinatesToUse == Mantid::Kernel::HKL) //"HKL"
+    else if (CoordinatesToUse == Mantid::Kernel::HKL) { //"HKL"
       pos = p.getHKL();
-    else
+      if (pos.X() == 0 && pos.Y() == 0 && pos.Z() == 0) {
+        ++zeroHKLCount;
+      }
+    } else {
       throw std::runtime_error("Workspace does not have a coordinate system set");
-
+    }
     // Do not integrate if sphere is off edge of detector
 
     const double edgeDist = calculateDistanceToEdge(p.getQLabFrame());
@@ -892,6 +896,15 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
     PARALLEL_END_INTERRUPT_REGION
   }
   PARALLEL_CHECK_INTERRUPT_REGION
+
+  if (CoordinatesToUse == Kernel::HKL && zeroHKLCount > 0) {
+    if (zeroHKLCount == nPeaks) {
+      g_log.error() << "No peaks are indexed, integrated at HKL=0,0,0. You might need to run IndexPeaks.\n";
+    } else {
+      g_log.warning() << zeroHKLCount << " of " << nPeaks << " peaks are not indexed, integrated at HKL=0,0,0\n";
+    }
+  }
+
   // This flag is used by the PeaksWorkspace to evaluate whether it has
   // been integrated.
   peakWS->mutableRun().addProperty("PeaksIntegrated", 1, true);
