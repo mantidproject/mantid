@@ -42,7 +42,6 @@ requirements:
     - pyparsing ${{ pyparsing }}
     - pyqt ${{ pyqt }}
     - pyqt5-sip ${{ pyqt5_sip }}
-    - pyqtwebengine
     - pystog ${{ pystog }}
     - python-dateutil ${{ python_dateutil }}
     - python ${{ python }}

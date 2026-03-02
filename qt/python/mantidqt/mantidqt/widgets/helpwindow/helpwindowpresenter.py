@@ -59,11 +59,17 @@ class HelpWindowPresenter:
         if self._view is None and self.model is not None:
             log.debug("Creating HelpWindowView instance.")
             try:
-                interceptor = self.model.create_request_interceptor()
                 modeString = self.model.get_mode_string()
                 isLocal = self.model.is_local_docs_mode()
 
-                self._view = HelpWindowView(self, interceptor=interceptor)
+                # QTextBrowser doesn't need request interceptors
+                # Try to get the active window as parent for proper z-ordering
+                parent = None
+                if self.parentApp:
+                    from qtpy.QtWidgets import QApplication
+
+                    parent = QApplication.activeWindow()
+                self._view = HelpWindowView(self, interceptor=None, parent=parent)
                 self._view.set_status_indicator(modeString, isLocal)
                 log.debug("HelpWindowView instance created.")
             except Exception as e:
@@ -76,7 +82,8 @@ class HelpWindowPresenter:
         """
         Build the doc URL from the Model and tell the View to load it.
         Handles FileNotFoundError from the model for local files.
-        Ensures the View is created and visible.
+        Ensures the View is created and visible (only for local docs).
+        For online docs, just opens the browser without showing the help window.
         """
         self._ensure_view_created()
         if not self._view:
@@ -87,7 +94,11 @@ class HelpWindowPresenter:
         try:
             docUrl = self.model.build_help_url(relativeUrl)
             self._view.set_page_url(docUrl)
-            self.show_help_window()
+            # Only show the help window for local docs, not for online docs
+            if self.model.is_local_docs_mode():
+                self.show_help_window()
+            else:
+                log.debug("Online docs mode - browser opened, not showing help window")
         except FileNotFoundError as e:
             log.error(f"File not found for help page '{relativeUrl}': {e}")
             self._view.show_file_not_found_error(str(e), relativeUrl)
@@ -100,7 +111,7 @@ class HelpWindowPresenter:
     def show_home_page(self):
         """
         Presenter logic to load the 'Home' page. Handles FileNotFoundError.
-        Ensures View exists.
+        Ensures View exists. Only shows window for local docs.
         """
         self._ensure_view_created()
         if not self._view:
@@ -111,6 +122,11 @@ class HelpWindowPresenter:
         try:
             homeUrl = self.model.get_home_url()
             self._view.set_page_url(homeUrl)
+            # Only show window for local docs
+            if self.model.is_local_docs_mode():
+                self.show_help_window()
+            else:
+                log.debug("Online docs mode - browser opened, not showing help window")
         except FileNotFoundError as e:
             log.error(f"File not found for home page: {e}")
             self._view.show_file_not_found_error(str(e), "index.html")
