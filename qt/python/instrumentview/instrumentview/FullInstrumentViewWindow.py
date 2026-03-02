@@ -51,6 +51,7 @@ from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.Globals import CurrentTab
 from instrumentview.ComponentTreeView import ComponentTreeView
 from instrumentview.ShapeWidgets import (
+    AnnulusSelectionShape,
     CircleSelectionShape,
     RectangleSelectionShape,
     EllipseSelectionShape,
@@ -223,10 +224,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_rectangle.setCheckable(True)
         self._add_ellipse = QPushButton("Add Ellipse")
         self._add_ellipse.setCheckable(True)
+        self._add_annulus = QPushButton("Add Annulus")
+        self._add_annulus.setCheckable(True)
         shapes_layout.addWidget(self._add_circle)
         shapes_layout.addWidget(self._add_rectangle)
         shapes_layout.addWidget(self._add_ellipse)
-        self._shape_buttons = [self._add_circle, self._add_rectangle, self._add_ellipse]
+        shapes_layout.addWidget(self._add_annulus)
+        self._shape_buttons = [self._add_circle, self._add_rectangle, self._add_ellipse, self._add_annulus]
 
         selection_tab = QWidget()
         (
@@ -503,6 +507,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_circle.toggled.connect(self.on_toggle_add_circle)
         self._add_rectangle.toggled.connect(self.on_toggle_add_rectangle)
         self._add_ellipse.toggled.connect(self.on_toggle_add_ellipse)
+        self._add_annulus.toggled.connect(self.on_toggle_add_annulus)
 
         self._add_mask.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_mask.setDisabled(True)
@@ -517,6 +522,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def on_toggle_add_ellipse(self, checked):
         self._on_toggle_add_shape(checked, self.add_ellipse_widget)
+
+    def on_toggle_add_annulus(self, checked):
+        self._on_toggle_add_shape(checked, self.add_annulus_widget)
 
     def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
         if checked:
@@ -756,6 +764,13 @@ class FullInstrumentViewWindow(QMainWindow):
         """Add an ellipse selection shape centred on the viewport."""
         self._ensure_overlay_manager()
         shape = EllipseSelectionShape(cx=0.5, cy=0.5, half_a=1.0 / 6.0, half_b=1.0 / 6.0)
+        self._shape_overlay_manager.set_shape(shape)
+        self._current_widget = shape
+
+    def add_annulus_widget(self) -> None:
+        """Add an annulus (ring) selection shape centred on the viewport."""
+        self._ensure_overlay_manager()
+        shape = AnnulusSelectionShape(cx=0.5, cy=0.5, inner_radius=0.06, outer_radius=0.15)
         self._shape_overlay_manager.set_shape(shape)
         self._current_widget = shape
 

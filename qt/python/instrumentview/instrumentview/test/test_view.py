@@ -13,6 +13,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.ShapeWidgets import (
+    AnnulusSelectionShape,
     CircleSelectionShape,
     RectangleSelectionShape,
     EllipseSelectionShape,
@@ -231,6 +232,12 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_add_ellipse_widget(self) -> None:
         self._view.add_ellipse_widget()
         self.assertIsInstance(self._view._current_widget, EllipseSelectionShape)
+        self.assertIsNotNone(self._view._shape_overlay_manager)
+        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+
+    def test_add_annulus_widget(self) -> None:
+        self._view.add_annulus_widget()
+        self.assertIsInstance(self._view._current_widget, AnnulusSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
         self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
 

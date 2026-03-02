@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 import numpy as np
 
 from instrumentview.ShapeWidgets import (
+    AnnulusSelectionShape,
     CircleSelectionShape,
     RectangleSelectionShape,
     EllipseSelectionShape,
@@ -419,6 +420,129 @@ class TestShapeOverlayManager(unittest.TestCase):
         # (100/800, 500/600)
         self.assertAlmostEqual(mgr._cached_projected_points[1, 0], 0.125)
         self.assertAlmostEqual(mgr._cached_projected_points[1, 1], 500.0 / 600.0)
+
+
+class TestAnnulusSelectionShape(unittest.TestCase):
+    def setUp(self):
+        self.shape = AnnulusSelectionShape(cx=0.5, cy=0.5, inner_radius=0.06, outer_radius=0.15)
+
+    def test_init(self):
+        self.assertEqual(self.shape.cx, 0.5)
+        self.assertEqual(self.shape.cy, 0.5)
+        self.assertEqual(self.shape.inner_radius, 0.06)
+        self.assertEqual(self.shape.outer_radius, 0.15)
+
+    def test_hit_test_inside_ring(self):
+        # Point halfway between inner and outer radius
+        self.assertEqual(self.shape.hit_test(0.5 + 0.10, 0.5), "inside")
+
+    def test_hit_test_outer_edge(self):
+        self.assertEqual(self.shape.hit_test(0.5 + 0.15, 0.5), "edge")
+
+    def test_hit_test_inner_edge(self):
+        self.assertEqual(self.shape.hit_test(0.5 + 0.06, 0.5), "inner_edge")
+
+    def test_hit_test_inside_hole(self):
+        # Inside the inner circle (the hole) — not part of the annulus
+        self.assertIsNone(self.shape.hit_test(0.5, 0.5))
+
+    def test_hit_test_outside(self):
+        self.assertIsNone(self.shape.hit_test(0.0, 0.0))
+
+    def test_indices_in_shape_in_ring(self):
+        proj = np.array([[0.5 + 0.10, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
+
+    def test_indices_in_shape_in_hole(self):
+        proj = np.array([[0.5, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
+
+    def test_indices_in_shape_outside(self):
+        proj = np.array([[0.0, 0.0]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
+
+    def test_indices_in_shape_multiple(self):
+        proj = np.array(
+            [
+                [0.5 + 0.10, 0.5],  # in ring
+                [0.5, 0.5],  # in hole
+                [0.0, 0.0],  # outside
+                [0.5, 0.5 + 0.07],  # in ring
+            ]
+        )
+        mask = self.shape.indices_in_shape(proj)
+        np.testing.assert_array_equal(mask, [True, False, False, True])
+
+    def test_save_size(self):
+        s = self.shape.save_size()
+        self.assertEqual(s["inner_radius"], 0.06)
+        self.assertEqual(s["outer_radius"], 0.15)
+
+    def test_apply_resize_delta_outer(self):
+        saved = self.shape.save_size()
+        # Start near outer edge, drag outward
+        self.shape.apply_resize_delta(
+            0.5 + 0.20,
+            0.5,  # current
+            0.5 + 0.15,
+            0.5,  # start (on outer edge)
+            saved,
+        )
+        self.assertAlmostEqual(self.shape.outer_radius, 0.20, places=5)
+        # Inner should be unchanged
+        self.assertAlmostEqual(self.shape.inner_radius, 0.06, places=5)
+
+    def test_apply_resize_delta_inner(self):
+        saved = self.shape.save_size()
+        # Start near inner edge, drag inward
+        self.shape.apply_resize_delta(
+            0.5 + 0.04,
+            0.5,  # current
+            0.5 + 0.06,
+            0.5,  # start (on inner edge)
+            saved,
+        )
+        self.assertAlmostEqual(self.shape.inner_radius, 0.04, places=5)
+        # Outer should be unchanged
+        self.assertAlmostEqual(self.shape.outer_radius, 0.15, places=5)
+
+    def test_apply_resize_delta_inner_clamps_to_min(self):
+        saved = self.shape.save_size()
+        # Drag inner edge inward past minimum
+        self.shape.apply_resize_delta(
+            0.5,
+            0.5,  # current (at center)
+            0.5 + 0.06,
+            0.5,  # start (on inner edge)
+            saved,
+        )
+        self.assertEqual(self.shape.inner_radius, 0.01)
+
+    def test_apply_resize_delta_outer_clamps_above_inner(self):
+        saved = self.shape.save_size()
+        # Drag outer edge inward past inner
+        self.shape.apply_resize_delta(
+            0.5 + 0.05,
+            0.5,  # current
+            0.5 + 0.15,
+            0.5,  # start (on outer edge)
+            saved,
+        )
+        self.assertEqual(self.shape.outer_radius, self.shape.inner_radius + 0.01)
+
+    def test_outline_xy_has_nan_separator(self):
+        ox, oy = self.shape.outline_xy()
+        # Should have a NaN separator between outer and inner circles
+        self.assertTrue(np.any(np.isnan(ox)))
+        self.assertTrue(np.any(np.isnan(oy)))
+
+    def test_fill_coords_returns_arrays(self):
+        fx, fy_bot, fy_top = self.shape.fill_coords()
+        self.assertGreater(len(fx), 0)
+        self.assertTrue(np.all(fy_top >= fy_bot))
 
 
 if __name__ == "__main__":

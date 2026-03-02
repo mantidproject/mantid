@@ -13,6 +13,7 @@ Shape types:
 - CircleSelectionShape: Circle (replaces CylinderWidgetNoRotation)
 - RectangleSelectionShape: Rectangle with rotation handle (replaces RectangleWidgetNoRotation)
 - EllipseSelectionShape: Ellipse with rotation handle (replaces EllipseWidgetNoRotation)
+- AnnulusSelectionShape: Annulus (ring) with independent inner/outer radii
 """
 
 from abc import ABC, abstractmethod
@@ -383,6 +384,145 @@ class EllipseSelectionShape(SelectionShape):
         self._handle_line_plot.update(sx, sy)
         hx, hy = self._handle_circle_xy()
         self._handle_circle_plot.update(hx, hy)
+
+
+class AnnulusSelectionShape(SelectionShape):
+    """Annulus (ring) selection shape — a circle with a concentric hole.
+
+    The outer edge can be resized by dragging the outer boundary;
+    the inner edge by dragging the inner boundary.  The shape can
+    be dragged by clicking in the ring area between the two circles.
+    """
+
+    N_OUTLINE = 256
+    N_FILL = 256
+
+    def __init__(self, cx: float, cy: float, inner_radius: float, outer_radius: float):
+        super().__init__(cx, cy)
+        self.inner_radius = inner_radius
+        self.outer_radius = outer_radius
+        self._theta = np.linspace(0, 2 * np.pi, self.N_OUTLINE)
+        self._fill_plot_bot = None  # second area plot for lower band
+
+    # ── outline: outer circle + inner circle ──────────────────────
+    def outline_xy(self):
+        t = self._theta
+        ox = np.concatenate(
+            [
+                self.cx + self.outer_radius * np.cos(t),
+                [np.nan],
+                self.cx + self.inner_radius * np.cos(t),
+            ]
+        )
+        oy = np.concatenate(
+            [
+                self.cy + self.outer_radius * np.sin(t),
+                [np.nan],
+                self.cy + self.inner_radius * np.sin(t),
+            ]
+        )
+        return ox, oy
+
+    # ── fill: top band between inner and outer circles ───────────
+    def fill_coords(self):
+        n = self.N_FILL
+        fx_o = np.linspace(-1.0, 1.0, n)
+        outer_y = np.sqrt(np.clip(1.0 - fx_o**2, 0, None))
+        ratio = self.inner_radius / max(self.outer_radius, 1e-12)
+        inner_y = np.sqrt(np.clip(ratio**2 - fx_o**2, 0, None))
+        fx = self.cx + self.outer_radius * fx_o
+        has_inner = np.abs(fx_o) <= ratio
+        fy_top = self.cy + self.outer_radius * outer_y
+        fy_bot = np.where(
+            has_inner,
+            self.cy + self.outer_radius * inner_y,
+            self.cy + self.outer_radius * (-outer_y),
+        )
+        return fx, fy_bot, fy_top
+
+    def _bottom_fill_coords(self):
+        """Lower band of the annulus ring for the second area plot."""
+        n = self.N_FILL
+        fx_o = np.linspace(-1.0, 1.0, n)
+        outer_y = np.sqrt(np.clip(1.0 - fx_o**2, 0, None))
+        ratio = self.inner_radius / max(self.outer_radius, 1e-12)
+        inner_y = np.sqrt(np.clip(ratio**2 - fx_o**2, 0, None))
+        has_inner = np.abs(fx_o) <= ratio
+        fx = self.cx + self.outer_radius * fx_o
+        fy_top = np.where(
+            has_inner,
+            self.cy - self.outer_radius * inner_y,
+            self.cy + self.outer_radius * outer_y,
+        )
+        fy_bot = self.cy - self.outer_radius * outer_y
+        return fx[has_inner], fy_bot[has_inner], fy_top[has_inner]
+
+    # ── hit-testing ──────────────────────────────────────────────
+    def hit_test(self, nx, ny):
+        dist = np.hypot(nx - self.cx, ny - self.cy)
+        if abs(dist - self.outer_radius) < EDGE_TOL:
+            return "edge"
+        if abs(dist - self.inner_radius) < EDGE_TOL:
+            return "inner_edge"
+        if self.inner_radius < dist < self.outer_radius:
+            return "inside"
+        return None
+
+    # ── resize ───────────────────────────────────────────────────
+    def save_size(self):
+        return dict(inner_radius=self.inner_radius, outer_radius=self.outer_radius)
+
+    def apply_resize_delta(self, nx, ny, start_nx, start_ny, saved_size):
+        start_dist = np.hypot(start_nx - self.cx, start_ny - self.cy)
+        curr_dist = np.hypot(nx - self.cx, ny - self.cy)
+        delta = curr_dist - start_dist
+        # ShapeOverlayManager stores '_resize_which' in its state dict;
+        # however the shape itself doesn't see it.  We determine which
+        # radius to change based on whether the start point was closer
+        # to the inner or outer radius.
+        inner_diff = abs(start_dist - saved_size["inner_radius"])
+        outer_diff = abs(start_dist - saved_size["outer_radius"])
+        if inner_diff < outer_diff:
+            self.inner_radius = max(
+                0.01,
+                min(
+                    saved_size["inner_radius"] + delta,
+                    self.outer_radius - 0.01,
+                ),
+            )
+        else:
+            self.outer_radius = max(
+                self.inner_radius + 0.01,
+                saved_size["outer_radius"] + delta,
+            )
+
+    def indices_in_shape(self, proj):
+        dist = np.hypot(proj[:, 0] - self.cx, proj[:, 1] - self.cy)
+        return (dist >= self.inner_radius) & (dist <= self.outer_radius)
+
+    # ── drawing (two fill bands) ─────────────────────────────────
+    def create_plots(self, chart):
+        # Top band fill
+        fx, fy_bot, fy_top = self.fill_coords()
+        self._fill_plot = chart.area(fx, fy_bot, fy_top, color=(128, 128, 128, 80))
+        self._fill_plot.brush.color = (128, 128, 128, 80)
+        self._fill_plot.pen.style = ""
+        # Bottom band fill
+        bfx, bfy_bot, bfy_top = self._bottom_fill_coords()
+        self._fill_plot_bot = chart.area(bfx, bfy_bot, bfy_top, color=(128, 128, 128, 80))
+        self._fill_plot_bot.brush.color = (128, 128, 128, 80)
+        self._fill_plot_bot.pen.style = ""
+        # Outlines
+        ox, oy = self.outline_xy()
+        self._line_plot = chart.line(ox, oy, color="red", width=3.0)
+
+    def update_plots(self):
+        ox, oy = self.outline_xy()
+        self._line_plot.update(ox, oy)
+        fx, fy_bot, fy_top = self.fill_coords()
+        self._fill_plot.update(fx, fy_bot, fy_top)
+        bfx, bfy_bot, bfy_top = self._bottom_fill_coords()
+        self._fill_plot_bot.update(bfx, bfy_bot, bfy_top)
 
 
 class ShapeOverlayManager:
