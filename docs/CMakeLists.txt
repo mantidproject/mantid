@@ -4,8 +4,10 @@
 option(DOCS_DOTDIAGRAMS "If enabled include workflow diagrams generated with dot" OFF)
 option(DOCS_SCREENSHOTS "If enabled include automatically generated screenshots of interfaces" OFF)
 set(DOCS_MATH_EXT
-    "sphinx.ext.mathjax"
-    CACHE STRING "Sphinx extension to be used for rendering math equations in qtassistant. mathjax is used in html."
+    "sphinx.ext.imgmath"
+    CACHE
+      STRING
+      "Sphinx extension for math equations. imgmath (default) for local docs in QTextBrowser. Online/published docs use mathjax."
 )
 set_property(CACHE DOCS_MATH_EXT PROPERTY STRINGS "sphinx.ext.imgmath" "sphinx.ext.mathjax")
 option(DOCS_PLOTDIRECTIVE "If enabled include plots generated with the plot directive. " OFF)
@@ -107,9 +109,9 @@ function(add_sphinx_build_target builder math_renderer)
 endfunction()
 
 # Documentation types
-add_sphinx_build_target(html "sphinx.ext.mathjax")
+add_sphinx_build_target(html ${DOCS_MATH_EXT})
 add_dependencies(docs-html DocTestData)
-add_sphinx_build_target(doctest "sphinx.ext.mathjax")
+add_sphinx_build_target(doctest ${DOCS_MATH_EXT})
 add_dependencies(docs-doctest DocTestData)
 
 # add target for checking external links

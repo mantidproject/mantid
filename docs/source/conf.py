@@ -49,8 +49,8 @@ root_doc = "index"
 # ones.
 extensions = [
     "mantid_sphinx_theme",
-    # we use pngmath over mathjax so that the offline help isn't reliant on
-    # anything external and we don't need to include the large mathjax package
+    # We use imgmath (LaTeX-rendered images) instead of mathjax (JavaScript)
+    # to support QTextBrowser which doesn't support JavaScript
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.doctest",
@@ -71,7 +71,8 @@ extensions = [
     # myst_parser enables markdown support
     "myst_parser",
 ]
-# Deal with math extension. Can be overridden with MATH_EXT environment variable
+# Math extension: mathjax (JavaScript, for online docs) or imgmath (LaTeX images, for local QTextBrowser)
+# Local builds default to imgmath via CMake. Online/published docs explicitly use mathjax.
 mathext = os.environ.get("MATH_EXT", "sphinx.ext.mathjax")
 extensions.append(mathext)
 

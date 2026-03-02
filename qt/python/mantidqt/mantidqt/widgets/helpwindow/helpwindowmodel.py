@@ -44,7 +44,6 @@ log = Logger("HelpWindowModel")
 
 # Imports moved below logger/config setup to ensure log is defined
 from qtpy.QtCore import QUrl  # noqa: E402
-from qtpy.QtWebEngineCore import QWebEngineUrlRequestInterceptor, QWebEngineUrlRequestInfo  # noqa: E402
 
 
 def getMantidVersionString():
@@ -60,22 +59,6 @@ def getMantidVersionString():
         pass  # Mantid might not be available
     log.warning("Could not determine Mantid version for documentation URL.")
     return None
-
-
-class NoOpRequestInterceptor(QWebEngineUrlRequestInterceptor):
-    """A no-op interceptor used when loading online docs."""
-
-    def interceptRequest(self, info: QWebEngineUrlRequestInfo):
-        pass
-
-
-class LocalRequestInterceptor(QWebEngineUrlRequestInterceptor):
-    """Intercepts requests for local docs (e.g., handle CORS)."""
-
-    def interceptRequest(self, info: QWebEngineUrlRequestInfo):
-        url = info.requestUrl()
-        if url.host() == "cdn.jsdelivr.net":  # Allow MathJax CDN
-            info.setHttpHeader(b"Access-Control-Allow-Origin", b"*")
 
 
 class HelpWindowModel:
@@ -291,15 +274,3 @@ class HelpWindowModel:
         """
         # This call now incorporates the existence check from build_help_url
         return self.build_help_url("index.html")
-
-    # --- Interceptor creation uses the state set during init ---
-    def create_request_interceptor(self):
-        """
-        Return an appropriate request interceptor based on the determined mode (_is_local).
-        """
-        if self._is_local:
-            log.debug("Using LocalRequestInterceptor.")
-            return LocalRequestInterceptor()
-        else:
-            log.debug("Using NoOpRequestInterceptor.")
-            return NoOpRequestInterceptor()
