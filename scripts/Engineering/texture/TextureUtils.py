@@ -9,15 +9,7 @@ from os import path, scandir
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
-from mantid.simpleapi import (
-    ConvertUnits,
-    Rebunch,
-    Rebin,
-    SumSpectra,
-    AppendSpectra,
-    CloneWorkspace,
-    CropWorkspace,
-)
+from mantid.simpleapi import ConvertUnits, Rebunch, Rebin, SumSpectra, AppendSpectra, CloneWorkspace, CropWorkspace, Load
 from pathlib import Path
 from Engineering.EnginX import EnginX
 from Engineering.IMAT import IMAT
@@ -72,7 +64,6 @@ def run_focus_script(
     prm_path: Optional[str] = None,
     spectrum_num: Optional[str] = None,
     groupingfile_path: Optional[str] = None,
-    instrument: str = "ENGINX",
 ) -> None:
     """
     Focus data for use in a texture analysis pipeline. Currently only ENGIN-X is supported,
@@ -89,6 +80,7 @@ def run_focus_script(
     spectrum_num: optional string of spectra numbers if desired to define custom grouping by specifying the spectra
     groupingfile_path: optional path to a grouping ".cal" or ".xml" file, alternative to prm_path
     """
+    instrument = _get_instrument_from_ws_list(wss)
     config = get_instr_config(instrument)
     group = config.group(grouping) if grouping else None
     match instrument:
@@ -111,6 +103,26 @@ def run_focus_script(
 
     mk(focus_dir)
     model.main()
+
+
+def _get_instrument_from_ws_list(wss):
+    instruments = set()
+    for ws_str in wss:
+        if ADS.doesExist(ws_str):
+            ws = ADS.retrieve(ws_str)
+        else:
+            try:
+                ws = Load(Filename=ws_str)
+            except:
+                logger.error(f"Could not find or load '{ws_str}'")
+                return None
+        instruments.add(ws.getInstrument().getName())
+    instruments = list(instruments)
+    if len(instruments) == 1:
+        return instruments[0]
+    else:
+        logger.error("Workspaces provided have multiple different instruments attached: " + ", ".join(instruments))
+        return None
 
 
 # -------- Absorption Script Logic--------------------------------
