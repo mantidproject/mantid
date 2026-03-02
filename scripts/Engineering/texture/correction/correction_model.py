@@ -344,7 +344,11 @@ class TextureCorrectionModel:
                     vals[r],
                 ]
             )
-        is_texture = self.calibration.get_group() in self.calibration.config.texture_groups if self.calibration else False
+        is_texture = (
+            self.calibration.get_group() in self.calibration.config.texture_groups
+            if (self.calibration and self.calibration.config)
+            else False
+        )
         self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, is_texture)
 
     # ~~~~~ Reference Workspace Functions ~~~~~~~~~~~~~
