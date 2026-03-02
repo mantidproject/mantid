@@ -14,6 +14,7 @@ Shape types:
 - RectangleSelectionShape: Rectangle with rotation handle (replaces RectangleWidgetNoRotation)
 - EllipseSelectionShape: Ellipse with rotation handle (replaces EllipseWidgetNoRotation)
 - AnnulusSelectionShape: Annulus (ring) with independent inner/outer radii
+- HollowRectangleSelectionShape: Rectangular frame with rotation handle
 """
 
 from abc import ABC, abstractmethod
@@ -523,6 +524,237 @@ class AnnulusSelectionShape(SelectionShape):
         self._fill_plot.update(fx, fy_bot, fy_top)
         bfx, bfy_bot, bfy_top = self._bottom_fill_coords()
         self._fill_plot_bot.update(bfx, bfy_bot, bfy_top)
+
+
+class HollowRectangleSelectionShape(SelectionShape):
+    """Rectangular frame — outer rectangle with a hollow inner rectangle.
+
+    Both rectangles share the same centre and rotation angle.  The outer
+    edge can be resized by dragging the outer boundary; the inner edge by
+    dragging the inner boundary.  A rotation handle extends above the
+    outer rectangle.
+    """
+
+    N_HANDLE = 32
+
+    def __init__(self, cx, cy, outer_half_width, outer_half_height, inner_half_width, inner_half_height, angle=0.0):
+        super().__init__(cx, cy)
+        self.outer_half_width = outer_half_width
+        self.outer_half_height = outer_half_height
+        self.inner_half_width = inner_half_width
+        self.inner_half_height = inner_half_height
+        self.angle = angle
+        self._handle_line_plot = None
+        self._handle_circle_plot = None
+        self._fill_plot_right = None
+        self._fill_plot_top = None
+        self._fill_plot_bot = None
+
+    # ── coordinate helpers ───────────────────────────────────────
+    def _rot(self, lx, ly):
+        c, s = np.cos(self.angle), np.sin(self.angle)
+        return self.cx + lx * c - ly * s, self.cy + lx * s + ly * c
+
+    def _inv_rot(self, gx, gy):
+        dx, dy = gx - self.cx, gy - self.cy
+        c, s = np.cos(self.angle), np.sin(self.angle)
+        return dx * c + dy * s, -dx * s + dy * c
+
+    def _rect_corners(self, hw, hh):
+        local = [(-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh)]
+        return [self._rot(lx, ly) for lx, ly in local]
+
+    # ── rotation handle ──────────────────────────────────────────
+    def _handle_pos(self):
+        return self._rot(0, self.outer_half_height + HANDLE_OFFSET)
+
+    def _handle_stem_xy(self):
+        tx, ty = self._rot(0, self.outer_half_height)
+        hx, hy = self._handle_pos()
+        return np.array([tx, hx]), np.array([ty, hy])
+
+    def _handle_circle_xy(self):
+        theta = np.linspace(0, 2 * np.pi, self.N_HANDLE)
+        hx, hy = self._handle_pos()
+        return hx + HANDLE_RADIUS * np.cos(theta), hy + HANDLE_RADIUS * np.sin(theta)
+
+    # ── outline ──────────────────────────────────────────────────
+    def _rect_outline(self, hw, hh):
+        corners = self._rect_corners(hw, hh)
+        xs = [c[0] for c in corners] + [corners[0][0]]
+        ys = [c[1] for c in corners] + [corners[0][1]]
+        return np.array(xs), np.array(ys)
+
+    def outline_xy(self):
+        ox, oy = self._rect_outline(self.outer_half_width, self.outer_half_height)
+        ix, iy = self._rect_outline(self.inner_half_width, self.inner_half_height)
+        return (
+            np.concatenate([ox, [np.nan], ix]),
+            np.concatenate([oy, [np.nan], iy]),
+        )
+
+    # ── fill: 4 strips between outer and inner rects ─────────────
+    @staticmethod
+    def _scanline_fill(corners, n=30):
+        """Compute area-fill arrays for an arbitrary rotated quad."""
+        xs_c = np.array([c[0] for c in corners])
+        x_min, x_max = xs_c.min(), xs_c.max()
+        fx = np.linspace(x_min, x_max, n)
+        fy_bot = np.full(n, np.nan)
+        fy_top = np.full(n, np.nan)
+        edges = [(corners[i], corners[(i + 1) % 4]) for i in range(4)]
+        for i, x in enumerate(fx):
+            y_vals = []
+            for (x1, y1), (x2, y2) in edges:
+                ddx = x2 - x1
+                if abs(ddx) < 1e-12:
+                    if abs(x - x1) < 1e-12:
+                        y_vals.extend([y1, y2])
+                else:
+                    t = (x - x1) / ddx
+                    if -1e-9 <= t <= 1 + 1e-9:
+                        y_vals.append(y1 + t * (y2 - y1))
+            if y_vals:
+                fy_bot[i] = min(y_vals)
+                fy_top[i] = max(y_vals)
+        valid = ~np.isnan(fy_bot)
+        return fx[valid], fy_bot[valid], fy_top[valid]
+
+    def _strip_corners(self, which):
+        """Return 4 corners (global coords) for one of the 4 fill strips."""
+        ohw, ohh = self.outer_half_width, self.outer_half_height
+        ihw, ihh = self.inner_half_width, self.inner_half_height
+        if which == "left":
+            local = [(-ohw, -ohh), (-ihw, -ohh), (-ihw, ohh), (-ohw, ohh)]
+        elif which == "right":
+            local = [(ihw, -ohh), (ohw, -ohh), (ohw, ohh), (ihw, ohh)]
+        elif which == "top":
+            local = [(-ihw, ihh), (ihw, ihh), (ihw, ohh), (-ihw, ohh)]
+        else:  # bottom
+            local = [(-ihw, -ohh), (ihw, -ohh), (ihw, -ihh), (-ihw, -ihh)]
+        return [self._rot(lx, ly) for lx, ly in local]
+
+    def fill_coords(self):
+        # Use the left strip as the "primary" fill for the base class
+        return self._scanline_fill(self._strip_corners("left"))
+
+    def _extra_fill_coords(self, which):
+        return self._scanline_fill(self._strip_corners(which))
+
+    # ── hit-testing ──────────────────────────────────────────────
+    def hit_test(self, nx, ny):
+        hx, hy = self._handle_pos()
+        if np.hypot(nx - hx, ny - hy) < HANDLE_RADIUS + EDGE_TOL:
+            return "handle"
+        lx, ly = self._inv_rot(nx, ny)
+        ohw, ohh = self.outer_half_width, self.outer_half_height
+        ihw, ihh = self.inner_half_width, self.inner_half_height
+        # Inner edge check
+        in_inner_x = -ihw - EDGE_TOL <= lx <= ihw + EDGE_TOL
+        in_inner_y = -ihh - EDGE_TOL <= ly <= ihh + EDGE_TOL
+        if (abs(lx + ihw) < EDGE_TOL and in_inner_y) or (abs(lx - ihw) < EDGE_TOL and in_inner_y):
+            return "inner_edge"
+        if (abs(ly + ihh) < EDGE_TOL and in_inner_x) or (abs(ly - ihh) < EDGE_TOL and in_inner_x):
+            return "inner_edge"
+        # Outer edge check
+        in_outer_x = -ohw - EDGE_TOL <= lx <= ohw + EDGE_TOL
+        in_outer_y = -ohh - EDGE_TOL <= ly <= ohh + EDGE_TOL
+        if (abs(lx + ohw) < EDGE_TOL and in_outer_y) or (abs(lx - ohw) < EDGE_TOL and in_outer_y):
+            return "edge"
+        if (abs(ly + ohh) < EDGE_TOL and in_outer_x) or (abs(ly - ohh) < EDGE_TOL and in_outer_x):
+            return "edge"
+        # Inside the frame (between outer and inner)?
+        in_outer = -ohw < lx < ohw and -ohh < ly < ohh
+        in_inner = -ihw < lx < ihw and -ihh < ly < ihh
+        if in_outer and not in_inner:
+            return "inside"
+        return None
+
+    # ── resize ───────────────────────────────────────────────────
+    def save_size(self):
+        return dict(
+            outer_half_width=self.outer_half_width,
+            outer_half_height=self.outer_half_height,
+            inner_half_width=self.inner_half_width,
+            inner_half_height=self.inner_half_height,
+        )
+
+    def apply_resize_delta(self, nx, ny, start_nx, start_ny, saved_size):
+        lx, ly = self._inv_rot(nx, ny)
+        slx, sly = self._inv_rot(start_nx, start_ny)
+        dw = abs(lx) - abs(slx)
+        dh = abs(ly) - abs(sly)
+        # Determine whether to resize inner or outer based on which
+        # edge the drag started closest to.
+        outer_dist = min(
+            abs(abs(slx) - saved_size["outer_half_width"]),
+            abs(abs(sly) - saved_size["outer_half_height"]),
+        )
+        inner_dist = min(
+            abs(abs(slx) - saved_size["inner_half_width"]),
+            abs(abs(sly) - saved_size["inner_half_height"]),
+        )
+        if inner_dist < outer_dist:
+            self.inner_half_width = max(0.01, min(saved_size["inner_half_width"] + dw, self.outer_half_width - 0.01))
+            self.inner_half_height = max(0.01, min(saved_size["inner_half_height"] + dh, self.outer_half_height - 0.01))
+        else:
+            self.outer_half_width = max(self.inner_half_width + 0.01, saved_size["outer_half_width"] + dw)
+            self.outer_half_height = max(self.inner_half_height + 0.01, saved_size["outer_half_height"] + dh)
+
+    def indices_in_shape(self, proj):
+        dx = proj[:, 0] - self.cx
+        dy = proj[:, 1] - self.cy
+        c, s = np.cos(self.angle), np.sin(self.angle)
+        lx = dx * c + dy * s
+        ly = -dx * s + dy * c
+        in_outer = (np.abs(lx) <= self.outer_half_width) & (np.abs(ly) <= self.outer_half_height)
+        in_inner = (np.abs(lx) <= self.inner_half_width) & (np.abs(ly) <= self.inner_half_height)
+        return in_outer & ~in_inner
+
+    # ── drawing (4 fill strips + handle) ─────────────────────────
+    def create_plots(self, chart):
+        # 4 fill strips
+        fx, fy_bot, fy_top = self.fill_coords()
+        self._fill_plot = chart.area(fx, fy_bot, fy_top, color=(128, 128, 128, 80))
+        self._fill_plot.brush.color = (128, 128, 128, 80)
+        self._fill_plot.pen.style = ""
+        for which, attr in [
+            ("right", "_fill_plot_right"),
+            ("top", "_fill_plot_top"),
+            ("bottom", "_fill_plot_bot"),
+        ]:
+            sfx, sfb, sft = self._extra_fill_coords(which)
+            p = chart.area(sfx, sfb, sft, color=(128, 128, 128, 80))
+            p.brush.color = (128, 128, 128, 80)
+            p.pen.style = ""
+            setattr(self, attr, p)
+        # Outlines (outer + inner via NaN separator)
+        ox, oy = self.outline_xy()
+        self._line_plot = chart.line(ox, oy, color="red", width=3.0)
+        # Handle
+        sx, sy = self._handle_stem_xy()
+        self._handle_line_plot = chart.line(sx, sy, color="red", width=2.0)
+        hx, hy = self._handle_circle_xy()
+        self._handle_circle_plot = chart.line(hx, hy, color="red", width=2.0)
+
+    def update_plots(self):
+        ox, oy = self.outline_xy()
+        self._line_plot.update(ox, oy)
+        # Fill strips
+        fx, fy_bot, fy_top = self.fill_coords()
+        self._fill_plot.update(fx, fy_bot, fy_top)
+        for which, attr in [
+            ("right", "_fill_plot_right"),
+            ("top", "_fill_plot_top"),
+            ("bottom", "_fill_plot_bot"),
+        ]:
+            sfx, sfb, sft = self._extra_fill_coords(which)
+            getattr(self, attr).update(sfx, sfb, sft)
+        # Handle
+        sx, sy = self._handle_stem_xy()
+        self._handle_line_plot.update(sx, sy)
+        hx, hy = self._handle_circle_xy()
+        self._handle_circle_plot.update(hx, hy)
 
 
 class ShapeOverlayManager:

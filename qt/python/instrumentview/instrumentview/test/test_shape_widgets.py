@@ -12,6 +12,7 @@ import numpy as np
 from instrumentview.ShapeWidgets import (
     AnnulusSelectionShape,
     CircleSelectionShape,
+    HollowRectangleSelectionShape,
     RectangleSelectionShape,
     EllipseSelectionShape,
     ShapeOverlayManager,
@@ -536,6 +537,139 @@ class TestAnnulusSelectionShape(unittest.TestCase):
     def test_outline_xy_has_nan_separator(self):
         ox, oy = self.shape.outline_xy()
         # Should have a NaN separator between outer and inner circles
+        self.assertTrue(np.any(np.isnan(ox)))
+        self.assertTrue(np.any(np.isnan(oy)))
+
+    def test_fill_coords_returns_arrays(self):
+        fx, fy_bot, fy_top = self.shape.fill_coords()
+        self.assertGreater(len(fx), 0)
+        self.assertTrue(np.all(fy_top >= fy_bot))
+
+
+class TestHollowRectangleSelectionShape(unittest.TestCase):
+    def setUp(self):
+        self.shape = HollowRectangleSelectionShape(
+            cx=0.5, cy=0.5, outer_half_width=0.12, outer_half_height=0.08, inner_half_width=0.06, inner_half_height=0.04
+        )
+
+    def test_init(self):
+        self.assertEqual(self.shape.cx, 0.5)
+        self.assertEqual(self.shape.cy, 0.5)
+        self.assertEqual(self.shape.outer_half_width, 0.12)
+        self.assertEqual(self.shape.outer_half_height, 0.08)
+        self.assertEqual(self.shape.inner_half_width, 0.06)
+        self.assertEqual(self.shape.inner_half_height, 0.04)
+        self.assertEqual(self.shape.angle, 0.0)
+
+    def test_hit_test_inside_frame(self):
+        # Point between inner and outer rect (in the frame area)
+        self.assertEqual(self.shape.hit_test(0.5 + 0.09, 0.5), "inside")
+
+    def test_hit_test_outer_edge(self):
+        self.assertEqual(self.shape.hit_test(0.5 + 0.12, 0.5), "edge")
+
+    def test_hit_test_inner_edge(self):
+        self.assertEqual(self.shape.hit_test(0.5 + 0.06, 0.5), "inner_edge")
+
+    def test_hit_test_in_hole(self):
+        # Inside the inner rectangle (the hole)
+        self.assertIsNone(self.shape.hit_test(0.5, 0.5))
+
+    def test_hit_test_outside(self):
+        self.assertIsNone(self.shape.hit_test(0.0, 0.0))
+
+    def test_hit_test_handle(self):
+        hx, hy = self.shape._handle_pos()
+        self.assertEqual(self.shape.hit_test(hx, hy), "handle")
+
+    def test_indices_in_shape_in_frame(self):
+        # Point in the frame area
+        proj = np.array([[0.5 + 0.09, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
+
+    def test_indices_in_shape_in_hole(self):
+        proj = np.array([[0.5, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
+
+    def test_indices_in_shape_outside(self):
+        proj = np.array([[0.0, 0.0]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
+
+    def test_indices_in_shape_multiple(self):
+        proj = np.array(
+            [
+                [0.5 + 0.09, 0.5],  # in frame
+                [0.5, 0.5],  # in hole
+                [0.0, 0.0],  # outside
+                [0.5, 0.5 + 0.06],  # in frame (between inner_half_height and outer_half_height)
+            ]
+        )
+        mask = self.shape.indices_in_shape(proj)
+        np.testing.assert_array_equal(mask, [True, False, False, True])
+
+    def test_indices_in_shape_with_rotation(self):
+        self.shape.angle = np.pi / 2.0
+        # After 90-degree rotation, outer_half_width (0.12) extends along y, outer_half_height (0.08) along x
+        # Point at (0.5+0.07, 0.5) — in local coords: lx≈0, ly≈-0.07
+        # |ly|=0.07 > inner_half_height=0.04, |ly|=0.07 < outer_half_height=0.08 → in frame
+        proj = np.array([[0.5 + 0.07, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
+
+    def test_save_size(self):
+        s = self.shape.save_size()
+        self.assertEqual(s["outer_half_width"], 0.12)
+        self.assertEqual(s["outer_half_height"], 0.08)
+        self.assertEqual(s["inner_half_width"], 0.06)
+        self.assertEqual(s["inner_half_height"], 0.04)
+
+    def test_apply_resize_delta_outer(self):
+        saved = self.shape.save_size()
+        # Start near outer edge, drag outward
+        self.shape.apply_resize_delta(
+            0.5 + 0.15,
+            0.5 + 0.12,  # current
+            0.5 + 0.12,
+            0.5 + 0.08,  # start (on outer edge)
+            saved,
+        )
+        self.assertAlmostEqual(self.shape.outer_half_width, 0.15, places=5)
+        self.assertAlmostEqual(self.shape.outer_half_height, 0.12, places=5)
+        # Inner unchanged
+        self.assertAlmostEqual(self.shape.inner_half_width, 0.06, places=5)
+        self.assertAlmostEqual(self.shape.inner_half_height, 0.04, places=5)
+
+    def test_apply_resize_delta_inner(self):
+        saved = self.shape.save_size()
+        # Start near inner edge, drag inward
+        self.shape.apply_resize_delta(
+            0.5 + 0.04,
+            0.5 + 0.02,  # current
+            0.5 + 0.06,
+            0.5 + 0.04,  # start (on inner edge)
+            saved,
+        )
+        self.assertAlmostEqual(self.shape.inner_half_width, 0.04, places=5)
+        self.assertAlmostEqual(self.shape.inner_half_height, 0.02, places=5)
+
+    def test_apply_resize_delta_inner_clamps(self):
+        saved = self.shape.save_size()
+        # Drag inner edge way outward past outer
+        self.shape.apply_resize_delta(
+            0.5 + 0.20,
+            0.5 + 0.20,  # current
+            0.5 + 0.06,
+            0.5 + 0.04,  # start (on inner edge)
+            saved,
+        )
+        self.assertEqual(self.shape.inner_half_width, self.shape.outer_half_width - 0.01)
+        self.assertEqual(self.shape.inner_half_height, self.shape.outer_half_height - 0.01)
+
+    def test_outline_xy_has_nan_separator(self):
+        ox, oy = self.shape.outline_xy()
         self.assertTrue(np.any(np.isnan(ox)))
         self.assertTrue(np.any(np.isnan(oy)))
 

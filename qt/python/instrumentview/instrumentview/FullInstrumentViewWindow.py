@@ -53,6 +53,7 @@ from instrumentview.ComponentTreeView import ComponentTreeView
 from instrumentview.ShapeWidgets import (
     AnnulusSelectionShape,
     CircleSelectionShape,
+    HollowRectangleSelectionShape,
     RectangleSelectionShape,
     EllipseSelectionShape,
     ShapeOverlayManager,
@@ -226,11 +227,14 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_ellipse.setCheckable(True)
         self._add_annulus = QPushButton("Add Annulus")
         self._add_annulus.setCheckable(True)
+        self._add_hollow_rectangle = QPushButton("Add Hollow Rectangle")
+        self._add_hollow_rectangle.setCheckable(True)
         shapes_layout.addWidget(self._add_circle)
         shapes_layout.addWidget(self._add_rectangle)
         shapes_layout.addWidget(self._add_ellipse)
         shapes_layout.addWidget(self._add_annulus)
-        self._shape_buttons = [self._add_circle, self._add_rectangle, self._add_ellipse, self._add_annulus]
+        shapes_layout.addWidget(self._add_hollow_rectangle)
+        self._shape_buttons = [self._add_circle, self._add_rectangle, self._add_ellipse, self._add_annulus, self._add_hollow_rectangle]
 
         selection_tab = QWidget()
         (
@@ -508,6 +512,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_rectangle.toggled.connect(self.on_toggle_add_rectangle)
         self._add_ellipse.toggled.connect(self.on_toggle_add_ellipse)
         self._add_annulus.toggled.connect(self.on_toggle_add_annulus)
+        self._add_hollow_rectangle.toggled.connect(self.on_toggle_add_hollow_rectangle)
 
         self._add_mask.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_mask.setDisabled(True)
@@ -525,6 +530,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def on_toggle_add_annulus(self, checked):
         self._on_toggle_add_shape(checked, self.add_annulus_widget)
+
+    def on_toggle_add_hollow_rectangle(self, checked):
+        self._on_toggle_add_shape(checked, self.add_hollow_rectangle_widget)
 
     def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
         if checked:
@@ -771,6 +779,15 @@ class FullInstrumentViewWindow(QMainWindow):
         """Add an annulus (ring) selection shape centred on the viewport."""
         self._ensure_overlay_manager()
         shape = AnnulusSelectionShape(cx=0.5, cy=0.5, inner_radius=0.06, outer_radius=0.15)
+        self._shape_overlay_manager.set_shape(shape)
+        self._current_widget = shape
+
+    def add_hollow_rectangle_widget(self) -> None:
+        """Add a hollow rectangle (frame) selection shape centred on the viewport."""
+        self._ensure_overlay_manager()
+        shape = HollowRectangleSelectionShape(
+            cx=0.5, cy=0.5, outer_half_width=0.12, outer_half_height=0.08, inner_half_width=0.06, inner_half_height=0.04
+        )
         self._shape_overlay_manager.set_shape(shape)
         self._current_widget = shape
 

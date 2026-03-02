@@ -15,6 +15,7 @@ from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.ShapeWidgets import (
     AnnulusSelectionShape,
     CircleSelectionShape,
+    HollowRectangleSelectionShape,
     RectangleSelectionShape,
     EllipseSelectionShape,
 )
@@ -238,6 +239,12 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_add_annulus_widget(self) -> None:
         self._view.add_annulus_widget()
         self.assertIsInstance(self._view._current_widget, AnnulusSelectionShape)
+        self.assertIsNotNone(self._view._shape_overlay_manager)
+        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+
+    def test_add_hollow_rectangle_widget(self) -> None:
+        self._view.add_hollow_rectangle_widget()
+        self.assertIsInstance(self._view._current_widget, HollowRectangleSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
         self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
 
