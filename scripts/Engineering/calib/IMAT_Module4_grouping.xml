@@ -1,171 +1,171 @@
 <?xml version="1.0"?>
 <detector-grouping idf-date="2026-02-05T23:59:59" instrument="IMAT">
 	<group ID="1">
-		<detids>14000-14127</detids>
+		<detids>14256-14319,14000-14063</detids>
 	</group>
 	<group ID="2">
-		<detids>14128-14255</detids>
+		<detids>14320-14383,14064-14127</detids>
 	</group>
 	<group ID="3">
-		<detids>14256-14383</detids>
+		<detids>14384-14447,14128-14191</detids>
 	</group>
 	<group ID="4">
-		<detids>14384-14511</detids>
+		<detids>14448-14511,14192-14255</detids>
 	</group>
 	<group ID="5">
-		<detids>13000-13127</detids>
+		<detids>13256-13319,13000-13063</detids>
 	</group>
 	<group ID="6">
-		<detids>13128-13255</detids>
+		<detids>13320-13383,13064-13127</detids>
 	</group>
 	<group ID="7">
-		<detids>13256-13383</detids>
+		<detids>13384-13447,13128-13191</detids>
 	</group>
 	<group ID="8">
-		<detids>13384-13511</detids>
+		<detids>13448-13511,13192-13255</detids>
 	</group>
 	<group ID="9">
-		<detids>12000-12127</detids>
+		<detids>12256-12319,12000-12063</detids>
 	</group>
 	<group ID="10">
-		<detids>12128-12255</detids>
+		<detids>12320-12383,12064-12127</detids>
 	</group>
 	<group ID="11">
-		<detids>12256-12383</detids>
+		<detids>12384-12447,12128-12191</detids>
 	</group>
 	<group ID="12">
-		<detids>12384-12511</detids>
+		<detids>12448-12511,12192-12255</detids>
 	</group>
 	<group ID="13">
-		<detids>11000-11127</detids>
+		<detids>11256-11319,11000-11063</detids>
 	</group>
 	<group ID="14">
-		<detids>11128-11255</detids>
+		<detids>11320-11383,11064-11127</detids>
 	</group>
 	<group ID="15">
-		<detids>11256-11383</detids>
+		<detids>11384-11447,11128-11191</detids>
 	</group>
 	<group ID="16">
-		<detids>11384-11511</detids>
+		<detids>11448-11511,11192-11255</detids>
 	</group>
 	<group ID="17">
-		<detids>10000-10127</detids>
+		<detids>10256-10319,10000-10063</detids>
 	</group>
 	<group ID="18">
-		<detids>10128-10255</detids>
+		<detids>10320-10383,10064-10127</detids>
 	</group>
 	<group ID="19">
-		<detids>10256-10383</detids>
+		<detids>10384-10447,10128-10191</detids>
 	</group>
 	<group ID="20">
-		<detids>10384-10511</detids>
+		<detids>10448-10511,10192-10255</detids>
 	</group>
 	<group ID="21">
-		<detids>9000-9127</detids>
+		<detids>9256-9319,9000-9063</detids>
 	</group>
 	<group ID="22">
-		<detids>9128-9255</detids>
+		<detids>9320-9383,9064-9127</detids>
 	</group>
 	<group ID="23">
-		<detids>9256-9383</detids>
+		<detids>9384-9447,9128-9191</detids>
 	</group>
 	<group ID="24">
-		<detids>9384-9511</detids>
+		<detids>9448-9511,9192-9255</detids>
 	</group>
 	<group ID="25">
-		<detids>8000-8127</detids>
+		<detids>8256-8319,8000-8063</detids>
 	</group>
 	<group ID="26">
-		<detids>8128-8255</detids>
+		<detids>8320-8383,8064-8127</detids>
 	</group>
 	<group ID="27">
-		<detids>8256-8383</detids>
+		<detids>8384-8447,8128-8191</detids>
 	</group>
 	<group ID="28">
-		<detids>8384-8511</detids>
+		<detids>8448-8511,8192-8255</detids>
 	</group>
 	<group ID="29">
-		<detids>7000-7127</detids>
+		<detids>7256-7319,7000-7063</detids>
 	</group>
 	<group ID="30">
-		<detids>7128-7255</detids>
+		<detids>7320-7383,7064-7127</detids>
 	</group>
 	<group ID="31">
-		<detids>7256-7383</detids>
+		<detids>7384-7447,7128-7191</detids>
 	</group>
 	<group ID="32">
-		<detids>7384-7511</detids>
+		<detids>7448-7511,7192-7255</detids>
 	</group>
 	<group ID="33">
-		<detids>6000-6127</detids>
+		<detids>6256-6319,6000-6063</detids>
 	</group>
 	<group ID="34">
-		<detids>6128-6255</detids>
+		<detids>6320-6383,6064-6127</detids>
 	</group>
 	<group ID="35">
-		<detids>6256-6383</detids>
+		<detids>6384-6447,6128-6191</detids>
 	</group>
 	<group ID="36">
-		<detids>6384-6511</detids>
+		<detids>6448-6511,6192-6255</detids>
 	</group>
 	<group ID="37">
-		<detids>5000-5127</detids>
+		<detids>5256-5319,5000-5063</detids>
 	</group>
 	<group ID="38">
-		<detids>5128-5255</detids>
+		<detids>5320-5383,5064-5127</detids>
 	</group>
 	<group ID="39">
-		<detids>5256-5383</detids>
+		<detids>5384-5447,5128-5191</detids>
 	</group>
 	<group ID="40">
-		<detids>5384-5511</detids>
+		<detids>5448-5511,5192-5255</detids>
 	</group>
 	<group ID="41">
-		<detids>4000-4127</detids>
+		<detids>4256-4319,4000-4063</detids>
 	</group>
 	<group ID="42">
-		<detids>4128-4255</detids>
+		<detids>4320-4383,4064-4127</detids>
 	</group>
 	<group ID="43">
-		<detids>4256-4383</detids>
+		<detids>4384-4447,4128-4191</detids>
 	</group>
 	<group ID="44">
-		<detids>4384-4511</detids>
+		<detids>4448-4511,4192-4255</detids>
 	</group>
 	<group ID="45">
-		<detids>3000-3127</detids>
+		<detids>3256-3319,3000-3063</detids>
 	</group>
 	<group ID="46">
-		<detids>3128-3255</detids>
+		<detids>3320-3383,3064-3127</detids>
 	</group>
 	<group ID="47">
-		<detids>3256-3383</detids>
+		<detids>3384-3447,3128-3191</detids>
 	</group>
 	<group ID="48">
-		<detids>3384-3511</detids>
+		<detids>3448-3511,3192-3255</detids>
 	</group>
 	<group ID="49">
-		<detids>2000-2127</detids>
+		<detids>2256-2319,2000-2063</detids>
 	</group>
 	<group ID="50">
-		<detids>2128-2255</detids>
+		<detids>2320-2383,2064-2127</detids>
 	</group>
 	<group ID="51">
-		<detids>2256-2383</detids>
+		<detids>2384-2447,2128-2191</detids>
 	</group>
 	<group ID="52">
-		<detids>2384-2511</detids>
+		<detids>2448-2511,2192-2255</detids>
 	</group>
 	<group ID="53">
-		<detids>1000-1127</detids>
+		<detids>1256-1319,1000-1063</detids>
 	</group>
 	<group ID="54">
-		<detids>1128-1255</detids>
+		<detids>1320-1383,1064-1127</detids>
 	</group>
 	<group ID="55">
-		<detids>1256-1383</detids>
+		<detids>1384-1447,1128-1191</detids>
 	</group>
 	<group ID="56">
-		<detids>1384-1511</detids>
+		<detids>1448-1511,1192-1255</detids>
 	</group>
 </detector-grouping>
