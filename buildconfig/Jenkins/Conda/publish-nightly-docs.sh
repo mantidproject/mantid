@@ -41,8 +41,8 @@ pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml --frozen -e docs-build rsync -
 # Push
 git config user.name ${GIT_USER_NAME}
 git config user.email ${GIT_USER_EMAIL}
-git add .
 git diff --quiet && exit 0
+git add .
 git commit -m "Publish nightly documentation from https://github.com/mantidproject/mantid/commit/${GIT_SHA}"
 set +x
 git push https://${GITHUB_TOKEN}@github.com/mantidproject/docs-nightly main
