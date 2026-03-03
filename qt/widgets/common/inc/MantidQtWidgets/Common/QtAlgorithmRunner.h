@@ -36,6 +36,10 @@ public:
   explicit QtAlgorithmRunner(QObject *parent = nullptr);
   ~QtAlgorithmRunner() override;
 
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  QtAlgorithmRunner(const QtAlgorithmRunner &) = delete;
+  QtAlgorithmRunner &operator=(const QtAlgorithmRunner &) = delete;
+
   void cancelRunningAlgorithm();
 
   virtual void startAlgorithm(Mantid::API::IAlgorithm_sptr alg);

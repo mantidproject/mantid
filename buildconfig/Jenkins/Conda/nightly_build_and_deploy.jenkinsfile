@@ -591,7 +591,7 @@ def package_conda_options(platform, base_or_workbench) {
     if(platform.startsWith('linux') && buildMantiddocs) {
       docs_flags = "--build-docs"
     }
-    package_flags = "--build-mantid-developer --build-mantid --build-qt ${docs_flags}"
+    package_flags = "--build-mantid-developer --build-mantid --build-mantidmpi --build-qt ${docs_flags}"
   }
   else if(base_or_workbench == 'workbench') {
     if(buildMantiddocs) {

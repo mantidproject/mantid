@@ -171,12 +171,15 @@ class FullInstrumentViewWindow(QMainWindow):
         self.set_relative_detector_angle(None)
 
         self._integration_limit_group_box = QGroupBox("Time of Flight")
-        self._integration_limit_min_edit, self._integration_limit_max_edit, self._integration_limit_slider = self._add_min_max_group_box(
-            self._integration_limit_group_box
-        )
+        (
+            self._integration_limit_min_edit,
+            self._integration_limit_max_edit,
+            self._integration_limit_slider,
+            self._integration_limit_reset,
+        ) = self._add_min_max_group_box(self._integration_limit_group_box)
         self._contour_range_group_box = QGroupBox("Contour Range")
-        self._contour_range_min_edit, self._contour_range_max_edit, self._contour_range_slider = self._add_min_max_group_box(
-            self._contour_range_group_box
+        self._contour_range_min_edit, self._contour_range_max_edit, self._contour_range_slider, self._contour_range_reset = (
+            self._add_min_max_group_box(self._contour_range_group_box)
         )
 
         projection_group_box = QGroupBox("Projection")
@@ -359,7 +362,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._projection_camera_map[self.current_selected_projection()] = self.main_plotter.camera_position
         self._parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
 
-    def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider]:
+    def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider, QPushButton]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
         signal of the boxes"""
         min_hbox = QHBoxLayout()
@@ -373,6 +376,9 @@ class FullInstrumentViewWindow(QMainWindow):
         max_edit = QLineEdit()
         max_edit.setValidator(QDoubleValidator(0, max_float_64, 4, self))
         max_hbox.addWidget(max_edit)
+        reset_hbox = QHBoxLayout()
+        reset_button = QPushButton("Reset")
+        reset_hbox.addWidget(reset_button)
 
         slider = QDoubleRangeSlider(Qt.Orientation.Horizontal, parent=parent_box)
         slider.setRange(0, 1)
@@ -382,23 +388,31 @@ class FullInstrumentViewWindow(QMainWindow):
         root_hbox = QHBoxLayout()
         root_hbox.addLayout(min_hbox)
         root_hbox.addLayout(max_hbox)
+        root_hbox.addLayout(reset_hbox)
 
         root_vbox = QVBoxLayout()
         root_vbox.addLayout(slider_hbox)
         root_vbox.addLayout(root_hbox)
         parent_box.setLayout(root_vbox)
 
-        return (min_edit, max_edit, slider)
+        return (min_edit, max_edit, slider, reset_button)
 
-    def _add_connections_to_edits_and_slider(self, min_edit: QLineEdit, max_edit: QLineEdit, slider, presenter_callback: Callable):
+    def set_contour_min_max_boxes(self, limits: tuple[float, float]) -> None:
+        self._set_min_max_edit_boxes(self._contour_range_min_edit, self._contour_range_max_edit, limits)
+
+    def set_integration_min_max_boxes(self, limits: tuple[float, float]) -> None:
+        self._set_min_max_edit_boxes(self._integration_limit_min_edit, self._integration_limit_max_edit, limits)
+
+    def _set_min_max_edit_boxes(self, min_edit: QLineEdit, max_edit: QLineEdit, limits: tuple[float, float]) -> None:
+        min, max = limits
+
         def format_float(value):
             return f"{value:.4f}".rstrip("0").rstrip(".")
 
-        def set_edits(limits):
-            min, max = limits
-            min_edit.setText(format_float(min))
-            max_edit.setText(format_float(max))
+        min_edit.setText(format_float(min))
+        max_edit.setText(format_float(max))
 
+    def _add_connections_to_edits_and_slider(self, min_edit: QLineEdit, max_edit: QLineEdit, slider, presenter_callback: Callable):
         def set_slider(callled_from_min):
             def wrapped():
                 try:
@@ -416,7 +430,7 @@ class FullInstrumentViewWindow(QMainWindow):
             return wrapped
 
         # Connections to sync sliders and edits
-        slider.valueChanged.connect(set_edits)
+        slider.valueChanged.connect(lambda lims: self._set_min_max_edit_boxes(min_edit, max_edit, lims))
         min_edit.editingFinished.connect(set_slider(callled_from_min=True))
         max_edit.editingFinished.connect(set_slider(callled_from_min=False))
 
@@ -470,9 +484,11 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
-        self._clear_point_picked_detectors.clicked.connect((self._presenter.on_clear_point_picked_detectors_clicked))
+        self._clear_point_picked_detectors.clicked.connect(self._presenter.on_clear_point_picked_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
+        self._contour_range_reset.clicked.connect(self._presenter.on_contour_range_reset_clicked)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
+        self._integration_limit_reset.clicked.connect(self._presenter.on_integration_limits_reset_clicked)
         self._units_combo_box.currentIndexChanged.connect(self._presenter.on_unit_option_selected)
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
@@ -768,7 +784,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         x, y, _z = self.display_to_world_coords(width / 2 + 0.15 * width, height / 2, 0)
         cylinder_repr.SetRadius(np.sqrt((x - cx) ** 2 + (y - cy) ** 2))
-        cylinder_repr.SetEdgeColor(1, 1, 1)
         # Arbritary border factor for bounding box
         xmin, xmax, ymin, ymax, _zmin, _zmax = self.main_plotter.bounds
         border = (np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2)) / 2
@@ -819,6 +834,7 @@ class FullInstrumentViewWindow(QMainWindow):
         ellipse_repr.GetOutlineProperty().SetOpacity(0.15)
         ellipse_repr.GetOutlineProperty().SetColor(0.5, 0.5, 0.5)  # Dark gray
         ellipse_repr.GetOutlineProperty().SetLineWidth(0.5)
+        ellipse_repr.GetOutlineProperty().SetEdgeColor(1, 1, 1)
 
         width, height = self.main_plotter.renderer.GetSize()
         x0, y0, _z0 = self.display_to_world_coords(width / 3, height / 3, 0)
@@ -932,6 +948,8 @@ class FullInstrumentViewWindow(QMainWindow):
                 self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
             for line in self._lineplot_overlays:
                 self._detector_spectrum_axes.add_line(line)
+            integration_limits = self._presenter.integration_limits_in_current_unit()
+            self._detector_spectrum_axes.set_xlim(integration_limits[0], integration_limits[1])
 
         self.redraw_lineplot()
 

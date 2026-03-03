@@ -260,7 +260,7 @@ public:
 Records the object being looked for
 and the range required.
 */
-template <typename T> class MisMatch : public std::runtime_error {
+template <typename T> class MANTID_KERNEL_DLL MisMatch : public std::runtime_error {
 private:
   const T Aval;          ///< Number A
   const T Bval;          ///< container size

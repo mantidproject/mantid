@@ -478,6 +478,12 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     if len(sys.argv) != 2:
+        print(
+            "Usage: mpiexec -n <num_procs> -l python mpitest.py <data_search_dirs>\n\n"
+            "  <data_search_dirs>  Comma-separated list of directories to search for data\n\n"
+            "Example:\n"
+            "  mpiexec -n 4 -l python mpitest.py /data/dir1,/data/dir2"
+        )
         sys.exit(-1)
 
     data_search_dirs = str(sys.argv[1]).split(",")

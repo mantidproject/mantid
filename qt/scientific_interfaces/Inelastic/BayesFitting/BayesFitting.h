@@ -39,6 +39,11 @@ public: // public constructor, destructor and functions
   BayesFitting(QWidget *parent = nullptr);
   /// Destructor
   ~BayesFitting() override;
+
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  BayesFitting(const BayesFitting &) = delete;
+  BayesFitting &operator=(const BayesFitting &) = delete;
+
   /// Interface name
   static std::string name() { return "Bayes Fitting"; }
   // This interface's categories.

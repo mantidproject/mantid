@@ -25,6 +25,7 @@ set(SRC_FILES
     src/DirectoryValidator.cpp
     src/DiskBuffer.cpp
     src/DllOpen.cpp
+    src/DynamicFactory.cpp
     src/EnabledWhenProperty.cpp
     src/EnvironmentHistory.cpp
     src/EqualBinsChecker.cpp
