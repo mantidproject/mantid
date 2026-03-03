@@ -53,10 +53,12 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t> const> const &e
 
   // determine if should trim the back end to remove empty pulses
   auto lastPulseIndex = m_roi.back();
-  eventRange = this->getEventIndexRange(lastPulseIndex - 1);
-  while (eventRange.first == eventRange.second && eventRange.second > 0) {
-    --lastPulseIndex;
+  if (lastPulseIndex > 0) {
     eventRange = this->getEventIndexRange(lastPulseIndex - 1);
+    while (eventRange.first == eventRange.second && eventRange.second > 0 && lastPulseIndex > 1) {
+      --lastPulseIndex;
+      eventRange = this->getEventIndexRange(lastPulseIndex - 1);
+    }
   }
 
   // update the value if it has changed
