@@ -691,7 +691,7 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
 
 std::string SaveCanSAS1D::formatDouble(const double &value) const {
   std::stringstream ss;
-  if (std::floor(value) == value) {
+  if (std::fabs(value - std::round(value)) < 1e-12) {
     ss << std::fixed << std::setprecision(1) << value;
   } else {
     ss << value;
