@@ -108,20 +108,11 @@ class FullInstrumentViewModel:
         self._cached_masks_map = {}
         self._cached_rois_map = {}
 
-        # Get min and max integration values
-        if self._workspace.isRaggedWorkspace():
-            first_last = np.array([self._workspace.readX(i)[[0, -1]] for i in self._workspace_indices[self._is_valid]])
-            self._integration_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
-
-        elif self._workspace.isCommonBins():
-            self._integration_limits = tuple(self._workspace.dataX(0)[[0, -1]])
-
-        else:
-            data_x = self._workspace.extractX()[self._is_valid]
-            self._integration_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
+        self._calculate_and_set_full_integration_range(self._is_valid)
 
         # Update counts with default total range
         self.update_integration_range(self._integration_limits, True)
+        self.full_counts_limits = self._counts_limits
 
     @property
     def workspace(self) -> Workspace2D:
@@ -230,7 +221,26 @@ class FullInstrumentViewModel:
             dtype=int,
         )
         self._counts_limits = (np.min(new_detector_counts), np.max(new_detector_counts))
+        self.full_counts_limits = self._counts_limits
         self._counts[self.is_pickable] = new_detector_counts
+
+    def calculate_and_set_full_integration_range(self) -> None:
+        self._calculate_and_set_full_integration_range(self.is_pickable)
+        self.integration_limits = self.full_integration_limits
+
+    def _calculate_and_set_full_integration_range(self, valid_indices: np.ndarray) -> None:
+        workspace_indices = self._workspace_indices[valid_indices]
+        if self._workspace.isRaggedWorkspace():
+            first_last = np.array([self._workspace.readX(i)[[0, -1]] for i in workspace_indices])
+            self._integration_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
+
+        elif self._workspace.isCommonBins():
+            self._integration_limits = tuple(self._workspace.dataX(int(workspace_indices[0]))[[0, -1]])
+
+        else:
+            data_x = self._workspace.extractX()[valid_indices]
+            self._integration_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
+        self.full_integration_limits = self._integration_limits
 
     def update_point_picked_detectors(self, index: int) -> None:
         # TODO: Check which selection is quicker, mask or indices
