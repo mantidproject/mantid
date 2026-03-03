@@ -35,6 +35,7 @@ pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml --frozen -e docs-build mamba c
 # docs in publish. This will ensure documents are deleted in the
 # published version if they are deleted in the build.
 HTML_PATH=$CONDA_PREFIX/share/doc/html
+rm -rf publish
 git clone --depth 1 ${DOCS_GIT_REPOSITORY} publish
 cd publish
 pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml --frozen -e docs-build rsync --archive --recursive --delete $HTML_PATH/* .
