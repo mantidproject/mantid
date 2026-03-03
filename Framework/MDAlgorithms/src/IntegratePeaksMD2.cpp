@@ -476,6 +476,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
     IPeak &p = peakWS->getPeak(i);
 
     // Get the peak center as a position in the dimensions of the workspace
+    bool missingIndex = false; // True if in HKL mode and pos is 0,0,0
     V3D pos;
     if (CoordinatesToUse == Mantid::Kernel::QLab) //"Q (lab frame)"
       pos = p.getQLabFrame();
@@ -485,6 +486,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
       pos = p.getHKL();
       if (pos.X() == 0 && pos.Y() == 0 && pos.Z() == 0) {
         ++zeroHKLCount;
+        missingIndex = true;
       }
     } else {
       throw std::runtime_error("Workspace does not have a coordinate system set");
@@ -565,7 +567,13 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
       }
       // if ellipsoid find covariance and centroid in spherical region
       // using one-pass algorithm from https://doi.org/10.1145/359146.359153
-      if (isEllipse) {
+      bool integrateAsEllipse = isEllipse;
+      if (isEllipse && missingIndex) {
+        integrateAsEllipse = false;
+        g_log.warning() << "Integrating un-indexed peak. Falling back to sphere peak shape to avoid numeric issues\n";
+      }
+
+      if (integrateAsEllipse) {
         // flat bg to subtract
         const auto bgDensity = bgSignal / (4 * M_PI * pow(PeakRadiusVector[i], 3) / 3);
         std::array<V3D, 3> eigenvects;
