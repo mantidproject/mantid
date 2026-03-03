@@ -59,13 +59,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_set_view_integration_limits.assert_called_once()
         mock_on_contour_range_reset_clicked.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_contour_limits")
-    def test_on_contour_limits_updated_true(self, mock_set_view_contour_limits):
-        self._mock_view.get_contour_limits.return_value = (0, 100)
-        self._presenter.on_contour_limits_updated()
-        self.assertEqual(self._model._counts_limits, (0, 100))
-        mock_set_view_contour_limits.assert_called_once()
-
     def test_set_view_contour_limits(self):
         self._model._counts_limits = (0, 100)
         self._presenter.set_view_contour_limits()
@@ -564,17 +557,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._model.convert_units.assert_any_call("TOF", "Wavelength", 0, 8000.0)
         self.assertEqual(result, (1.5, 6.0))
 
-    def test_count_scale_selection_changes_mode_and_updates(self):
-        # Ensure selecting via text updates mode and triggers a plot refresh
-        self._presenter.update_plotter = MagicMock()
-        self._presenter.on_count_scale_selected("Logarithmic")
-        self.assertEqual(self._presenter._count_scale_mode, "Logarithmic")
-        self._presenter.update_plotter.assert_called_once()
-
     def test_count_scale_selection_by_index_uses_view_item_text(self):
         # Ensure selecting by index queries the view combo box when available
-        self._mock_view._count_scale_combo_box = MagicMock()
-        self._mock_view._count_scale_combo_box.itemText.return_value = "Logarithmic"
+        self._mock_view.current_selected_count_scale.return_value = "Logarithmic"
         self._presenter.update_plotter = MagicMock()
         self._presenter.on_count_scale_selected(1)
         self.assertEqual(self._presenter._count_scale_mode, "Logarithmic")

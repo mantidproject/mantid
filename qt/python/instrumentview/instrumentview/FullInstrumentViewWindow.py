@@ -201,7 +201,6 @@ class FullInstrumentViewWindow(QMainWindow):
         self._show_monitors_check_box.setText("Show Monitors?")
         self._count_scale_combo_box = QComboBox(self)
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
-        self._count_scale_combo_box.addItems(["Linear", "Logarithmic"])
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
         projection_layout.addWidget(self._clear_point_picked_detectors)
@@ -477,6 +476,7 @@ class FullInstrumentViewWindow(QMainWindow):
         for unit in self._presenter.available_unit_options():
             self._units_combo_box.addItem(unit)
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
+        self._count_scale_combo_box.addItems(self._presenter.count_scale_combo_options())
         self.main_plotter.set_color_cycler(self._presenter._COLOURS)
         self.refresh_peaks_ws_list()
         self.refresh_workspaces_in_list(CurrentTab.Masking)

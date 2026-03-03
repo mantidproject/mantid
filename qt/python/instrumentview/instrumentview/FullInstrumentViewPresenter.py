@@ -58,6 +58,9 @@ class FullInstrumentViewPresenter:
     _MOMENTUM_TRANSFER = "MomentumTransfer"
     _UNIT_OPTIONS = [_TIME_OF_FLIGHT, _D_SPACING, _WAVELENGTH, _MOMENTUM_TRANSFER]
 
+    _LINEAR = "Linear"
+    _LOGARITHMIC = "Logarithmic"
+
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
@@ -68,7 +71,7 @@ class FullInstrumentViewPresenter:
         self._transform = np.eye(4)
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
-        self._count_scale_mode = "Linear"
+        self._count_scale_mode = self._LINEAR
         self._model.setup()
         self.setup()
         self._callback_queue = Queue()
@@ -175,7 +178,7 @@ class FullInstrumentViewPresenter:
         # Read limits from view (these are in the current display scale).
         lower, upper = self._view.get_contour_limits()
         # Convert back to model's linear counts if we're in Logarithmic display mode
-        if self._count_scale_mode == "Linear":
+        if self._count_scale_mode == self._LINEAR:
             self._model.counts_limits = (lower, upper)
         else:
             # Inverse of log10(counts + 1): counts = 10**value - 1
@@ -183,7 +186,7 @@ class FullInstrumentViewPresenter:
                 lin_lower = 10**lower - 1
                 lin_upper = 10**upper - 1
             self._model.counts_limits = (lin_lower, lin_upper)
-        self.set_view_contour_limits()
+        self._view.set_plotter_scalar_bar_range((lower, upper), self._counts_label)
 
     def on_contour_range_reset_clicked(self) -> None:
         self._model.counts_limits = self._model.full_counts_limits
@@ -194,7 +197,7 @@ class FullInstrumentViewPresenter:
     def set_view_contour_limits(self) -> None:
         # Transform contour limits for display scale
         lower, upper = self._model.counts_limits
-        if self._count_scale_mode == "Linear":
+        if self._count_scale_mode == self._LINEAR:
             clim = (lower, upper)
             display_title = self._counts_label
         else:
@@ -214,23 +217,19 @@ class FullInstrumentViewPresenter:
             self.update_detector_picker()
             self.on_peaks_workspace_selected()
 
-    def on_count_scale_selected(self, index_or_text) -> None:
+    def count_scale_combo_options(self) -> list[str]:
+        return [self._LINEAR, self._LOGARITHMIC]
+
+    def on_count_scale_selected(self, _index) -> None:
         """Handler for count scale combo box changes."""
-        # Determine text value
-        if isinstance(index_or_text, int):
-            try:
-                text = self._view._count_scale_combo_box.itemText(index_or_text)
-            except Exception:
-                text = self._view.current_selected_count_scale()
-        else:
-            text = str(index_or_text)
-        if text in ("Linear", "Logarithmic"):
+        text = self._view.current_selected_count_scale()
+        if text in (self._LINEAR, self._LOGARITHMIC):
             self._count_scale_mode = text
             self.update_plotter()
 
     def _transform_counts(self, counts: np.ndarray) -> np.ndarray:
         """Return counts transformed for display according to selected scale."""
-        if self._count_scale_mode == "Linear":
+        if self._count_scale_mode == self._LINEAR:
             return counts
         # Logarithmic: use base-10 log with +1 offset to avoid -inf at zero
         # Preserve NaNs/infs if present
@@ -269,9 +268,7 @@ class FullInstrumentViewPresenter:
 
         self._view.enable_or_disable_mask_widgets()
         self._view.enable_or_disable_aspect_ratio_box()
-        self.set_view_contour_limits()
-        self.set_view_integration_limits()
-
+        self.on_integration_limits_reset_clicked()
         self._view.cache_camera_position()
         self._view.reset_camera()
 
