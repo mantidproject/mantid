@@ -190,8 +190,6 @@ class FullInstrumentViewPresenter:
 
     def on_contour_range_reset_clicked(self) -> None:
         self._model.counts_limits = self._model.full_counts_limits
-        self._view.set_contour_range_limits(self._model.full_counts_limits)
-        self._view.set_contour_min_max_boxes(self._model.full_counts_limits)
         self.set_view_contour_limits()
 
     def set_view_contour_limits(self) -> None:
@@ -200,6 +198,7 @@ class FullInstrumentViewPresenter:
         display_title = self._counts_label if self._count_scale_mode == self._LINEAR else f"log10({self._counts_label})"
         self._view.set_plotter_scalar_bar_range(clim, self._counts_label, display_title=display_title)
         self._view.set_contour_range_limits(clim)
+        self._view.set_contour_min_max_boxes(clim)
 
     def update_plotter(self) -> None:
         """Update the projection based on the selected option."""
@@ -217,7 +216,7 @@ class FullInstrumentViewPresenter:
         text = self._view.current_selected_count_scale()
         if text in (self._LINEAR, self._LOGARITHMIC):
             self._count_scale_mode = text
-            self.update_plotter()
+            self.set_view_integration_limits()
 
     def _transform_counts(self, counts: np.ndarray) -> np.ndarray:
         """Return counts transformed for display according to selected scale."""
