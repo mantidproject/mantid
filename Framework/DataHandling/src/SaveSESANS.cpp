@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveSESANS.h"
+#include "MantidDataHandling/FormattingHelpers.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -236,16 +237,6 @@ Mantid::MantidVec SaveSESANS::calculateError(const HistogramData::HistogramE &eV
     error.emplace_back(eValues[i] / (yValues[i] * wavelength[i] * wavelength[i]) / thickness);
   }
   return error;
-}
-
-std::string SaveSESANS::formatDouble(const double &value) const {
-  std::stringstream ss;
-  if (std::floor(value) == value) {
-    ss << std::fixed << std::setprecision(1) << value;
-  } else {
-    ss << value;
-  }
-  return ss.str();
 }
 
 } // namespace Mantid::DataHandling

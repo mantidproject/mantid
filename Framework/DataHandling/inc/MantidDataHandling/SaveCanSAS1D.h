@@ -140,9 +140,6 @@ protected:
   /// this method creates a sasInstrument element
   void createSASInstrument(std::string &sasInstrument);
 
-  /// Helper method to format the string before saving it into the xml file
-  std::string formatDouble(const double &value) const;
-
   /// points to the workspace that will be written to file
   API::MatrixWorkspace_const_sptr m_workspace;
   /// an fstream object is used to write the xml manually as the user requires a

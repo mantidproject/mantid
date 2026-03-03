@@ -10,6 +10,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataHandling/FormattingHelpers.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
@@ -399,16 +400,6 @@ void SaveCanSAS1D2::writeHeader(const std::string &fileName) {
   } catch (std::fstream::failure &) {
     throw Exception::FileError("Error opening the output file for writing", fileName);
   }
-}
-
-std::string SaveCanSAS1D2::formatDouble(const double &value) const {
-  std::stringstream ss;
-  if (std::floor(value) == value) {
-    ss << std::fixed << std::setprecision(1) << value;
-  } else {
-    ss << value;
-  }
-  return ss.str();
 }
 
 } // namespace Mantid::DataHandling

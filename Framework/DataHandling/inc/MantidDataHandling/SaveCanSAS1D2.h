@@ -84,9 +84,6 @@ protected:
   /// Overwrites writeHeader method
   void writeHeader(const std::string &fileName) override;
 
-  /// Helper method to format the string before saving it into the xml file
-  std::string formatDouble(const double &value) const;
-
   /// points to the workspace that will be written to file
   API::MatrixWorkspace_const_sptr m_trans_ws, m_transcan_ws;
 };

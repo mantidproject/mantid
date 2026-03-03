@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveCanSAS1D.h"
+#include "MantidDataHandling/FormattingHelpers.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
@@ -687,16 +688,6 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   createSASDetectorElement(sasDet);
   sasInstrument += sasDet;
   sasInstrument += "\n\t\t</SASinstrument>";
-}
-
-std::string SaveCanSAS1D::formatDouble(const double &value) const {
-  std::stringstream ss;
-  if (std::fabs(value - std::round(value)) < 1e-12) {
-    ss << std::fixed << std::setprecision(1) << value;
-  } else {
-    ss << value;
-  }
-  return ss.str();
 }
 
 } // namespace Mantid::DataHandling
