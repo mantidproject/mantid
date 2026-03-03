@@ -18,7 +18,7 @@ on:
 
 jobs:
   linux-build-and-test:
-    runs-on: [self-hosted, linux, x64, ${{ inputs.RUNNER_SELECTION }}]
+    runs-on: [self-hosted, linux, x64, "${{ inputs.RUNNER_SELECTION }}"]
     steps:
       - name: debug
         run: |
