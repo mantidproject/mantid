@@ -145,7 +145,7 @@ CONFIGS: Dict[str, InstrumentConfig] = {
     "IMAT": InstrumentConfig(
         name="IMAT",
         group=IMAT_GROUP,
-        full_instr_calib="IMAT_full_instrument_calibration_33701.nxs",
+        full_instr_calib="IMAT_full_instrument_calibration_36792.nxs",
         grouping_files={
             IMAT_GROUP.BOTH: "IMAT_NorthAndSouth_grouping.xml",
             IMAT_GROUP.NORTH: "IMAT_North_grouping.xml",
