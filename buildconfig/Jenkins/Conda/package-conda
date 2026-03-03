@@ -52,6 +52,7 @@ RECIPES_DIR=$REPO_ROOT_DIR/conda/recipes/
 # Parse flags
 ENABLE_BUILD_MANTID_DEVELOPER=false
 ENABLE_BUILD_MANTID=false
+ENABLE_BUILD_MANTIDMPI=false
 ENABLE_BUILD_QT=false
 ENABLE_BUILD_WORKBENCH=false
 ENABLE_BUILD_DOCS=false
@@ -64,9 +65,13 @@ do
     case "$1" in
         --build-mantid-developer) ENABLE_BUILD_MANTID_DEVELOPER=true ;;
         --build-mantid) ENABLE_BUILD_MANTID=true ;;
+        --build-mantidmpi) ENABLE_BUILD_MANTIDMPI=true ;;
         --build-qt) ENABLE_BUILD_QT=true ;;
         --build-workbench) ENABLE_BUILD_WORKBENCH=true ;;
-        --build-docs) ENABLE_BUILD_DOCS=true ;;
+        --build-docs)
+            ENABLE_BUILD_DOCS=true
+            ENABLE_BUILD_MANTIDMPI=true
+            ;;
         --build-workbench-without-docs)
             ENABLE_BUILD_WORKBENCH=true
             BUILD_WORKBENCH_WITH_DOCS=false
@@ -141,6 +146,9 @@ if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
     pixi run -e rattler-builder --frozen rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+fi
+if [[ $ENABLE_BUILD_MANTIDMPI == true ]]; then
+    pixi run -e rattler-builder --frozen rattler-build build -r ./mantidmpi/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_QT == true ]]; then
     pixi run -e rattler-builder --frozen rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
