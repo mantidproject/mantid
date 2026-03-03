@@ -2,6 +2,9 @@ name: Linux unit tests and system tests
 
 on:
   workflow_dispatch:
+    inputs:
+      BUILD_THREADS:                 { required: false, type: string, default: 4 }
+      BUILD_THREADS_SYSTEM_TESTS:    { required: false, type: string, default: 1 }
   pull_request:
     types: [opened, synchronize, reopened]
 
