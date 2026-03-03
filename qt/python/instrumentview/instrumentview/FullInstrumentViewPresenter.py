@@ -195,17 +195,9 @@ class FullInstrumentViewPresenter:
         self.set_view_contour_limits()
 
     def set_view_contour_limits(self) -> None:
-        # Transform contour limits for display scale
-        lower, upper = self._model.counts_limits
-        if self._count_scale_mode == self._LINEAR:
-            clim = (lower, upper)
-            display_title = self._counts_label
-        else:
-            # Use log10(counts + 1) to avoid -inf for zero counts
-            clim = (np.log10(lower + 1), np.log10(upper + 1))
-            display_title = f"log10({self._counts_label})"
-        # Update the plotter scalar bar range (plotter expects the scalar name used when adding the mesh)
-        # Also pass a human-readable title for the scalar bar if available.
+        transformed_limits = self._transform_counts(np.array(self._model.counts_limits))
+        clim = (float(transformed_limits[0]), float(transformed_limits[1]))
+        display_title = self._counts_label if self._count_scale_mode == self._LINEAR else f"log10({self._counts_label})"
         self._view.set_plotter_scalar_bar_range(clim, self._counts_label, display_title=display_title)
         self._view.set_contour_range_limits(clim)
 
@@ -240,11 +232,7 @@ class FullInstrumentViewPresenter:
         self._view.clear_main_plotter()
 
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
-        # Apply display transform to detector counts before assigning as scalars
-        try:
-            display_counts = self._transform_counts(self._model.detector_counts)
-        except Exception:
-            display_counts = self._model.detector_counts
+        display_counts = self._transform_counts(self._model.detector_counts)
         self._detector_mesh[self._counts_label] = display_counts
         self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
 
