@@ -44,10 +44,9 @@ jq = "*"
 
 [feature.devsite.target.linux-64.dependencies]
 sphinx = "*"
+mantid-sphinx-theme = "*"
 myst-parser = "*"
 
-[feature.devsite.target.linux-64.pypi-dependencies]
-mantid-sphinx-theme = { git = "https://github.com/mantidproject/mantid-sphinx-theme.git" }
 
 [feature.publish-gh.target.linux-64.dependencies]
 gh = "*"
@@ -135,12 +134,12 @@ zlib = ">=1.3.1,<2"
 # Documentation dependencies
 doxygen = "1.9.*"
 graphviz = ">=2.47.0"
+mantid-sphinx-theme = ">=0.1.0,<1"
 myst-parser = ">=5.0.0,<6"
 sphinx = ">=9.0,<10"
 
 [pypi-dependencies]
 # Documentation dependencies
-mantid-sphinx-theme = { git = "https://github.com/mantidproject/mantid-sphinx-theme.git" }
 
 [target.linux-64.dependencies]
 gxx_linux-64 = "13.*"

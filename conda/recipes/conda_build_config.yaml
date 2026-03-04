@@ -61,6 +61,9 @@ jsoncpp:
 libglu:
   - '>=9.0'
 
+mantid_sphinx_theme:
+  - '>=0.1.0,<1'
+
 #v2.3.5 caused seg faults on Mantid conda versions and large numbers of tests failing
 muparser:
   - '>=2.3.2, <2.3.5'

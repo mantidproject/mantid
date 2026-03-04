@@ -30,10 +30,10 @@ requirements:
     - mantid == ${{ version }}
     - mantidmpi == ${{ version }}
     - mantidqt == ${{ version }}
+    - mantid-sphinx-theme ${{ mantid_sphinx_theme }}
     - myst-parser ${{ mystparser }}
     - python ${{ python }}
     - setuptools
-    - pip ${{ pip }}
     - sphinx ${{ sphinx }}
     - graphviz ${{ graphviz }}
     - gtest ${{ gtest }}
