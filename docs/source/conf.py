@@ -47,6 +47,7 @@ root_doc = "index"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "mantid_sphinx_theme",
     # we use pngmath over mathjax so that the offline help isn't reliant on
     # anything external and we don't need to include the large mathjax package
     "sphinx.ext.autodoc",
