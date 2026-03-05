@@ -3,6 +3,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from datetime import datetime
+
 # -- General configuration ------------------------------------------------
 
 # The root toctree document.
@@ -10,7 +12,7 @@ root_doc = "index"
 
 # General information about the project.
 project = "MantidProject"
-copyright = "2007-2020, Mantid"
+copyright = f"2007-{datetime.now().year}, Mantid"
 
 # The full version, including alpha/beta/rc tags.
 release = "main"

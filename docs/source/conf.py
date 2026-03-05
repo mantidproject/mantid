@@ -4,6 +4,7 @@
 # serve to show the default.
 
 import sys
+from datetime import datetime
 
 # Workaround module destruction order issues. If Qt is imported after
 # mantid then any active Qt widgets are deleted before the mantid
@@ -32,7 +33,7 @@ def setup(app):
 
 # General information about the project.
 project = "MantidProject"
-copyright = "2015, Mantid"
+copyright = f"{datetime.now().year}, Mantid"
 
 # The full version, including alpha/beta/rc tags.
 release = mantid.__version__
