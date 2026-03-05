@@ -95,7 +95,7 @@ Output:
 
 .. testoutput:: ReorientUnitCellExample
 
-    (before) u = (-9.2, 0.0, 0.0)
+    (before) u = (-9.2, 0.0, -0.0)
     (after ) u = (9.2, 0.0, 0.0)
 
 .. categories::

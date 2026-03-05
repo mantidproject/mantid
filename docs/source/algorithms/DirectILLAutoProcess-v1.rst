@@ -235,7 +235,7 @@ Output:
                  "container_087306_Ei9meV_T1.5K.nxs",
                  "container_087311_Ei9meV_T100.0K.nxs"]
     for ftr in to_remove:
-        os.remove(ftr)
+        os.remove(os.path.join(config.getString('defaultsave.directory'), ftr))
 
 .. categories::
 

@@ -45,7 +45,7 @@ Output:
 
 .. testoutput:: StitchExample
 
-  Stitched workspace has 475 bins.
+   Stitched workspace has 475 bins.
 
 .. categories::
 
