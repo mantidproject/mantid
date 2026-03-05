@@ -227,6 +227,34 @@ class TestShapeRenderer(unittest.TestCase):
         # Shape renderer should NOT use render_points_as_spheres
         self.assertNotIn("render_points_as_spheres", call_kwargs)
 
+    def test_set_pickable_scalars_after_rebuild_with_fewer_detectors(self):
+        """Rebuilding the detector mesh with fewer detectors should not cause
+        an array shape mismatch in set_pickable_scalars.
+        """
+        workspace = self._create_mock_workspace(n_detectors=6, same_shape=True)
+        self.renderer.precompute(workspace)
+
+        # First render: 6 detectors → builds _highlight_mesh with N_old cells
+        model_6 = self._create_mock_model(workspace, n_pickable=6)
+        positions_6 = np.array([[i, 0, 0] for i in range(6)], dtype=np.float64)
+        mesh_6 = self.renderer.build_detector_mesh(positions_6, model_6)
+        pickable_6 = self.renderer.build_pickable_mesh(positions_6)
+        vis_6 = np.zeros(6)
+        self.renderer.set_pickable_scalars(pickable_6, vis_6, "Visible Picked")
+        # Simulate add_pickable_mesh_to_plotter creating the highlight mesh
+        self.renderer._highlight_mesh = mesh_6.copy(deep=True)
+        self.renderer._highlight_mesh.cell_data["Visible Picked"] = vis_6[self.renderer._cell_to_detector]
+
+        # Second render: only 4 pickable detectors (e.g. 2 were masked)
+        model_4 = self._create_mock_model(workspace, n_pickable=4)
+        positions_4 = np.array([[i, 0, 0] for i in range(4)], dtype=np.float64)
+        self.renderer.build_detector_mesh(positions_4, model_4)
+
+        # This is the call that previously raised "Invalid array shape"
+        vis_4 = np.zeros(4)
+        pickable_4 = self.renderer.build_pickable_mesh(positions_4)
+        self.renderer.set_pickable_scalars(pickable_4, vis_4, "Visible Picked")
+
     # ------------------------------------------------------------------
     # Helper methods to create mock objects
     # ------------------------------------------------------------------

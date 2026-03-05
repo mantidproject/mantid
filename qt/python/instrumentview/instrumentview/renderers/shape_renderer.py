@@ -145,6 +145,10 @@ class ShapeRenderer(InstrumentRenderer):
         self._cell_to_detector = c2d
         self._faces_per_detector = fpd
         self._detector_mesh_ref = mesh
+        # Invalidate the highlight mesh so set_pickable_scalars (called before
+        # add_pickable_mesh_to_plotter rebuilds it) doesn't try to write the
+        # new visibility array into a stale mesh with a different cell count.
+        self._highlight_mesh = None
         return mesh
 
     def build_pickable_mesh(self, positions: np.ndarray) -> pv.PolyData:
