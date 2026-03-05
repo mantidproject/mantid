@@ -111,15 +111,20 @@ class HelpWindowModel:
             # On Windows the second parent of the bin dir will be the conda env dir
             # because there is additional /Library/ in windows conda envs path structure
             env_dir = os.path.dirname(os.path.dirname(bin_dir))
-            # On Windows the second parent of the bin dir will be the debuig build dir
-            # becaue tehre is additional level for the configuration (i.e. /DebugWithRelRuntime)
+            # On Windows (with Visual Studio) the second parent of the bin dir will be the debug build dir
+            # because there is additional level for the configuration (i.e. /DebugWithRelRuntime)
             build_dir = os.path.dirname(os.path.dirname(bin_dir))
+            # On Windows with ninja the first parent of the bin dir will be the build dir
+            # because ninja does not have additional configuration level
+            build_dir_ninja = os.path.dirname(bin_dir)
 
             doc_paths_to_try = [
                 # Standard Windows installation path
                 os.path.join(installation_dir, "share", "doc", "html"),
                 # Windows debug build
                 os.path.join(build_dir, "docs", "html"),
+                # Windows ninja build
+                os.path.join(build_dir_ninja, "docs", "html"),
                 # Windows conda installation
                 os.path.join(env_dir, "share", "doc", "html"),
             ]
