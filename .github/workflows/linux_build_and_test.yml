@@ -75,7 +75,6 @@ jobs:
       - if: false
         name: Upload build and test log artifacts
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           path: |
             ${{ github.workspace }}/build/test_logs/*.log
@@ -84,7 +83,6 @@ jobs:
       - if: false
         name: Unit Test Report
         uses: dorny/test-reporter@v2
-        if: always()
         with:
           name: Linux Unit Tests
           path: build/Testing/*unittest.xml
@@ -94,7 +92,6 @@ jobs:
       - if: false
         name: System Test Report
         uses: dorny/test-reporter@v2
-        if: always()
         with:
           name: Linux System Tests
           path: build/Testing/SystemTests/**/TEST-systemtests*.xml
