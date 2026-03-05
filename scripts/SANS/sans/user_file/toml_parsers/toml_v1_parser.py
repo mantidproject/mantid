@@ -30,7 +30,7 @@ from sans.user_file.toml_parsers.toml_base_parser import TomlParserBase
 
 class TomlV1Parser(TomlParserBase):
     def __init__(self, dict_to_parse, file_information, schema_validator=None):
-        validator = schema_validator if schema_validator else TomlSchemaV1Validator(dict_to_parse)
+        validator = schema_validator or TomlSchemaV1Validator(dict_to_parse)
         super(TomlV1Parser, self).__init__(dict_to_parse, file_information, validator)
 
     @staticmethod
@@ -518,6 +518,7 @@ class TomlV1ParserImpl(TomlParserImplBase):
                 self.mask.phi_max = phi_mask["stop"]
             if "range" in phi_mask:
                 self.mask.phi_range = phi_mask["range"]
+                self.mask.use_phi_range = True
 
     @staticmethod
     def _get_1d_min_max(one_d_binning: str):

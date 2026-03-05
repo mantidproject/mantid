@@ -155,10 +155,9 @@ size_t InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembl
   const size_t componentStop = m_assemblySortedComponentIndices->size();
 
   m_detectorRanges->emplace_back(detectorStart, detectorStop);
-  m_componentRanges->emplace_back(std::make_pair(componentStart, componentStop));
+  m_componentRanges->emplace_back(componentStart, componentStop);
 
-  // Now that we know what the index of the parent is we can apply it to the
-  // children
+  // Now that we know what the index of the parent is we can apply it to the children
   for (const auto &child : children) {
     (*m_parentComponentIndices)[child] = componentIndex;
   }

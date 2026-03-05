@@ -1,1 +1,0 @@
-- The automated peak fitting routine ``fit_all_peaks`` in ``Engineering.texture.TextureUtils`` has been updated to improve robustness, particularly in terms of fitting peak positions.

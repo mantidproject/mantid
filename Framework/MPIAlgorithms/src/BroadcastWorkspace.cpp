@@ -187,9 +187,7 @@ void BroadcastWorkspace::exec() {
 
   setProperty("OutputWorkspace", outputWorkspace);
 #else
-  API::MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
-  setProperty("OutputWorkspace", inputWorkspace);
-  g_log.warning() << this->name() << " is only available in builds with MPI enabled (MPI_BUILD=ON)\n";
+  throw std::runtime_error("BroadcastWorkspace is only available in builds with MPI enabled (MPI_BUILD=ON)\n");
 #endif
 }
 

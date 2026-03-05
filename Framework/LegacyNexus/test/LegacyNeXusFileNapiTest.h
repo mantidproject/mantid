@@ -134,7 +134,7 @@ public:
   void impl_test_read(NexusFormat fmt) {
     cout << " Nexus File Tests\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "nexus_file_napi_test_cpp");
-    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
 
     // try reading a file
     do_test_read(filepath);

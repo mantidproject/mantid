@@ -27,7 +27,7 @@ public:
   ~FileLoaderRegistryTest() override {}
 
   void runCheck(const std::string &filename, const std::string &alg_expected, const int version_expected) {
-    std::string path = FileFinder::Instance().getFullPath(filename);
+    std::string path = FileFinder::Instance().getFullPath(filename).string();
 
     TSM_ASSERT("File not found: " + filename, !path.empty());
 

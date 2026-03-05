@@ -28,6 +28,7 @@ requirements:
         - ninja ${{ ninja }}
   host:
     - mantid == ${{ version }}
+    - mantidmpi == ${{ version }}
     - mantidqt == ${{ version }}
     - myst-parser ${{ mystparser }}
     - python ${{ python }}

@@ -149,9 +149,9 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
     return mapping;
 
   // Try to get it from the data directories
-  string dataversion = Mantid::API::FileFinder::Instance().getFullPath(mapping);
+  auto dataversion = Mantid::API::FileFinder::Instance().getFullPath(mapping);
   if (!dataversion.empty())
-    return dataversion;
+    return dataversion.string();
 
   // get a list of all proposal directories
   string instrument = wksp->getInstrument()->getName();

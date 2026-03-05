@@ -107,26 +107,49 @@ class DNSScMapTest(unittest.TestCase):
     @patch("mantidqtinterfaces.dns_single_crystal_elastic.data_structures.dns_single_crystal_map.tri")
     def test_triangulate(self, mock_tri):
         self.map.hkl_mesh = [np.asarray([0, 1]), np.asarray([2, 3]), np.asarray([4, 5])]
-        test_v = self.map.triangulate("hkl_mesh", switch=False)
+        self.map.triangulate("hkl_mesh", switch=False)
         mock_tri.Triangulation.assert_called_once()
         self.assertTrue((mock_tri.Triangulation.call_args_list[0][0][0] == np.asarray([0, 1])).all())
         self.assertTrue((mock_tri.Triangulation.call_args_list[0][0][1] == np.asarray([2, 3])).all())
-        self.assertEqual(test_v, mock_tri.Triangulation.return_value)
+        self.assertEqual(self.map.triangulation, mock_tri.Triangulation.return_value)
         mock_tri.reset_mock()
 
-    def test_interpolate_triangulation(self):
-        z_mock = mock.Mock()
-        self.map.triangulation = None
-        self.map.z_mesh = z_mock
-        self.assertIsNone(self.map.interpolate_triangulation())
-        self.map.triangulation = 1
-        test_v = self.map.interpolate_triangulation()
-        self.assertEqual(test_v[0], 1)
-        self.assertEqual(test_v[1], z_mock.flatten.return_value)
+    @patch("mantidqtinterfaces.dns_single_crystal_elastic.data_structures.dns_single_crystal_map.LinearTriInterpolator")
+    @patch("mantidqtinterfaces.dns_single_crystal_elastic.data_structures.dns_single_crystal_map.UniformTriRefiner")
+    def test_interpolate_triangulation(self, mock_refiner, mock_interpolator):
+        triangulation = mock.Mock()
+        self.map.triangulation = triangulation
+        z_mesh = np.array([1.0, 2.0, 3.0])
+        self.map.z_mesh = z_mesh
+        refined_x = np.array([0.0, 0.5, 0.25])
+        refined_y = np.array([0.0, 0.0, 0.5])
+        refined_z = np.array([1.0, 1.5, 2.0])
+        refined_triangles = np.array([[0, 1, 2]])
+        mock_refined_triang = mock.Mock()
+        mock_refined_triang.x = refined_x
+        mock_refined_triang.y = refined_y
+        mock_refined_triang.triangles = refined_triangles
+        mock_refiner_instance = mock.Mock()
+        mock_refiner_instance.refine_field.return_value = (mock_refined_triang, refined_z)
+        mock_refiner.return_value = mock_refiner_instance
+        self.map.interpolate_triangulation(interpolation=2)
+
+        actual_args, _ = mock_interpolator.call_args
+        self.assertEqual(actual_args[0], triangulation)
+        self.assertTrue((actual_args[1] == z_mesh.flatten()).all())
+        mock_refiner.assert_called_once_with(triangulation)
+        self.assertTrue(self.map.triangulation == mock_refined_triang)
+        self.assertTrue((self.map.z_mesh == refined_z).all())
+        self.assertTrue((self.map.z_tri == refined_z[refined_triangles]).all())
+        self.assertTrue((self.map.z_face == refined_z[refined_triangles].mean(axis=1)).all())
+        self.assertTrue((self.map.x_tri == refined_x[refined_triangles]).all())
+        self.assertTrue((self.map.y_tri == refined_y[refined_triangles]).all())
+        self.assertTrue((self.map.x_face == refined_x[refined_triangles].mean(axis=1)).all())
+        self.assertTrue((self.map.y_face == refined_y[refined_triangles].mean(axis=1)).all())
 
     @patch("mantidqtinterfaces.dns_single_crystal_elastic.data_structures.dns_single_crystal_map.path")
     def test_get_dns_map_border(self, mock_path):
-        test_v = self.map.get_dns_map_border("qxqy")
+        test_v = self.map.get_dns_map_border("qxqy", False)
         self.assertEqual(test_v, mock_path.Path.return_value)
         test_array = np.array(
             [
@@ -144,7 +167,7 @@ class DNSScMapTest(unittest.TestCase):
         )
         self.assertTrue(np.allclose(mock_path.Path.call_args_list[0][0][0], test_array))
         mock_path.reset_mock()
-        self.map.get_dns_map_border("hkl")
+        self.map.get_dns_map_border("hkl", False)
         test_array = np.array(
             [
                 [0.0, 0.0],
@@ -165,8 +188,7 @@ class DNSScMapTest(unittest.TestCase):
         mock_triang = mock.Mock()
         self.map.triangulation = mock_triang
         self.map.triangulation.triangles = np.array([[5, 4, 2], [2, 4, 0], [5, 2, 3], [3, 2, 0]])
-        test_v = self.map.mask_triangles("hkl_mesh")
-        self.assertEqual(test_v, mock_triang)
+        self.map.mask_triangles("hkl_mesh", False)
         mock_triang.set_mask.assert_called_once()
         carg = mock_triang.set_mask.call_args_list[0][0][0]
         self.assertTrue((carg == np.array([False, True, False, False])).all())

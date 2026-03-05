@@ -31,7 +31,7 @@ class ErrorReporterPresenter(object):
         self._view = view
         self._exit_code = exit_code
         self._application = application
-        self._traceback = traceback if traceback else ""
+        self._traceback = traceback or ""
         self._cpp_traces = b""
         self._view.set_report_callback(self.error_handler)
         self._view.moreDetailsButton.clicked.connect(self.show_more_details)

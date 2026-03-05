@@ -111,7 +111,7 @@ class QuestTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-1
         self.disableChecking.append("SpectraMap")
-        return "irs26176_graphite002_Stretch_Fit", "ISISIndirectBayes_QuestTest.nxs"
+        return "fit_group", "ISISIndirectBayes_QuestTest.nxs"
 
     def cleanup(self):
         filenames = ["irs26176_graphite002_Qst.lpt", "irs26176_graphite002_Qss.ql2", "irs26176_graphite002_Qsb.ql1"]

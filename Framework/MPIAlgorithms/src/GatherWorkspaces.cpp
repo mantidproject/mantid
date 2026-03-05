@@ -143,9 +143,7 @@ void GatherWorkspaces::exec() {
     execAppendChunked(outputWorkspace, chunkSize);
   }
 #else
-  m_inputWorkspace = getProperty("InputWorkspace");
-  setProperty("OutputWorkspace", m_inputWorkspace);
-  g_log.warning() << this->name() << " is only available in builds with MPI enabled (MPI_BUILD=ON)\n";
+  throw std::runtime_error("GatherWorkspaces is only available in builds with MPI enabled (MPI_BUILD=ON)\n");
 #endif
 }
 
@@ -311,9 +309,7 @@ void GatherWorkspaces::execEvent() {
     }
   }
 #else
-  ExperimentInfo_sptr inputWorkspace = getProperty("InputWorkspace");
-  setProperty("OutputWorkspace", inputWorkspace);
-  g_log.warning() << this->name() << " is only available in builds with MPI enabled (MPI_BUILD=ON)\n";
+  throw std::runtime_error("GatherWorkspaces is only available in builds with MPI enabled (MPI_BUILD=ON)\n");
 #endif
 }
 

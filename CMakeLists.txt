@@ -54,7 +54,8 @@ if(NOT
    (ENABLE_WORKBENCH
     OR MANTID_QT_LIB STREQUAL "BUILD"
     OR MANTID_FRAMEWORK_LIB STREQUAL "BUILD"
-    OR ENABLE_DOCS)
+    OR ENABLE_DOCS
+    OR MPI_BUILD)
 )
   message(FATAL_ERROR "Must select at least one component to build")
 endif()
@@ -154,6 +155,10 @@ include(TargetFunctions)
 if(MANTID_FRAMEWORK_LIB STREQUAL "SYSTEM")
   if(BUILD_MANTIDQT)
     find_package(MantidFramework REQUIRED)
+  endif()
+  if(MPI_BUILD)
+    find_package(MantidFramework REQUIRED)
+    add_subdirectory(Framework/MPIAlgorithms)
   endif()
 else()
   add_subdirectory(Framework)

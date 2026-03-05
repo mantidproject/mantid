@@ -14,6 +14,10 @@
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
+namespace Geometry {
+class ComponentInfo;
+}
+
 namespace Crystal {
 
 // fit to ln(1/A*) = sum_{icoef=0}^{N=7} pc[7-icoef][ith]*(muR)^icoef
@@ -125,8 +129,8 @@ private:
   double getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge);
   void BuildLamdaWeights();
   double absor_sphere(const double twoth, const double wl, bool &muRTooLarge);
-  void scale_init(const Geometry::Instrument_const_sptr &inst, const double L2, const double depth, double &pathlength,
-                  const std::string &bankName);
+  void scale_init(const Geometry::Instrument_const_sptr &inst, const Geometry::ComponentInfo &componentInfo,
+                  const double L2, const double depth, double &pathlength, const std::string &bankName);
   double scale_exec(std::string &bankName, const double lambda, const double depth,
                     const Geometry::Instrument_const_sptr &inst, const double pathlength, double eventWeight);
 

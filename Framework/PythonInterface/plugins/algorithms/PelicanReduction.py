@@ -558,7 +558,7 @@ class PelicanReduction(PythonAlgorithm):
             ConvertUnits(
                 InputWorkspace=output_ws, OutputWorkspace=output_ws, Target="DeltaE", EMode="Direct", EFixed=self._efixed, AlignBins=True
             )
-            use_energy_bins = energy_bins if energy_bins else self._ev_range
+            use_energy_bins = energy_bins or self._ev_range
             Rebin(InputWorkspace=output_ws, OutputWorkspace=output_ws, Params=use_energy_bins, PreserveEvents=False)
         else:
             Rebin(InputWorkspace=output_ws, OutputWorkspace=output_ws, Params="0, 1, 6000", PreserveEvents=True)

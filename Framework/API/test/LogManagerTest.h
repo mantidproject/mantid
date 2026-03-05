@@ -10,7 +10,6 @@
 #include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeROI.h"
@@ -669,34 +668,6 @@ public:
     addTestTimeSeriesFilter(runInfo, filterName);
 
     TS_ASSERT_EQUALS(runInfo.hasInvalidValuesFilter(name), true);
-  }
-
-  void test_get_invalid_values_filter() {
-    LogManager runInfo;
-    const std::string name = "test_get_invalid_values_filter";
-    const std::string filterName = runInfo.getInvalidValuesFilterLogName(name);
-    addTestTimeSeries<double>(runInfo, name);
-    auto *filterfail = runInfo.getInvalidValuesFilter(name);
-    TSM_ASSERT("The filter was returned correrctly as NULL", filterfail == nullptr);
-    addTestTimeSeriesFilter(runInfo, filterName);
-
-    auto *filter = runInfo.getInvalidValuesFilter(name);
-    TSM_ASSERT("The filter was returned incorrectly as NULL", filter);
-    TS_ASSERT_THROWS_NOTHING(filter->firstTime());
-
-    // check it can be used to filter the log
-    auto *log = runInfo.getProperty(name);
-    auto *tsLog = dynamic_cast<TimeSeriesProperty<double> *>(log);
-    TS_ASSERT(tsLog);
-    if (tsLog) {
-      auto filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(tsLog, *filter);
-      TS_ASSERT_DELTA(filtered->nthValue(0), 2, 1e-5);
-      TS_ASSERT_DELTA(filtered->nthValue(1), 3, 1e-5);
-      TS_ASSERT_DELTA(filtered->nthValue(2), 4, 1e-5);
-      TS_ASSERT_DELTA(filtered->nthValue(3), 5, 1e-5);
-      TS_ASSERT_DELTA(filtered->nthValue(4), 21, 1e-5);
-      TS_ASSERT_DELTA(filtered->nthValue(5), 22, 1e-5);
-    }
   }
 
   void test_removeDataOutsideTimeROI() {

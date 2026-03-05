@@ -140,6 +140,7 @@ set(SYSTEST_NAMES
     MDNormHYSPECTest.py
     MDWorkspaceTests.py
     MonteCarloAbsorptionCorrTest.py
+    MPIAlgorithmsExecuteTest.py
     MRFilterCrossSectionsTest.py
     MultiThreadedLoadNeXusTest.py
     MuonFFTTest.py

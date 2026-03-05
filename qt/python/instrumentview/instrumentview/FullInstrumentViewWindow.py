@@ -37,12 +37,9 @@ from pyvista.plotting.picking import RectangleSelection
 from pyvista.plotting.opts import PickerType
 from vtkmodules.vtkCommonDataModel import vtkBox, vtkCylinder, vtkImplicitFunction
 from vtkmodules.vtkInteractionWidgets import (
-    vtkImplicitCylinderWidget,
     vtkImplicitCylinderRepresentation,
-    vtkBoxWidget2,
     vtkBoxRepresentation,
 )
-from vtkmodules.vtkCommonCore import vtkCommand
 import numpy as np
 import pyvista as pv
 import matplotlib.pyplot as plt
@@ -57,34 +54,15 @@ from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, 
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.Globals import CurrentTab
 from instrumentview.ComponentTreeView import ComponentTreeView
+from instrumentview.ShapeWidgets import (
+    CylinderWidgetNoRotation,
+    RectangleWidgetNoRotation,
+    EllipseWidgetNoRotation,
+)
 
 import os
 from contextlib import suppress
 from typing import Callable
-
-
-class CylinderWidgetNoRotation(vtkImplicitCylinderWidget):
-    def __init__(self):
-        super().__init__()
-        self.AddObserver(vtkCommand.StartInteractionEvent, lambda *_: self._on_interaction())
-
-    def _on_interaction(self):
-        # Replace rotation state (integer 4) with translation state (integer 3)
-        if self.GetCylinderRepresentation().GetInteractionState() == 4:
-            self.GetCylinderRepresentation().SetInteractionState(3)
-            return
-
-
-class RectangleWidgetNoRotation(vtkBoxWidget2):
-    def __init__(self):
-        super().__init__()
-        self.AddObserver(vtkCommand.StartInteractionEvent, lambda *_: self._on_interaction())
-
-    def _on_interaction(self):
-        # Replace rotation state (integer 8) with translation state (integer 7)
-        if self.GetRepresentation().GetInteractionState() == 8:
-            self.GetRepresentation().SetInteractionState(7)
-            return
 
 
 class WorkspaceListWidget(QListWidget):
@@ -193,12 +171,15 @@ class FullInstrumentViewWindow(QMainWindow):
         self.set_relative_detector_angle(None)
 
         self._integration_limit_group_box = QGroupBox("Time of Flight")
-        self._integration_limit_min_edit, self._integration_limit_max_edit, self._integration_limit_slider = self._add_min_max_group_box(
-            self._integration_limit_group_box
-        )
+        (
+            self._integration_limit_min_edit,
+            self._integration_limit_max_edit,
+            self._integration_limit_slider,
+            self._integration_limit_reset,
+        ) = self._add_min_max_group_box(self._integration_limit_group_box)
         self._contour_range_group_box = QGroupBox("Contour Range")
-        self._contour_range_min_edit, self._contour_range_max_edit, self._contour_range_slider = self._add_min_max_group_box(
-            self._contour_range_group_box
+        self._contour_range_min_edit, self._contour_range_max_edit, self._contour_range_slider, self._contour_range_reset = (
+            self._add_min_max_group_box(self._contour_range_group_box)
         )
 
         projection_group_box = QGroupBox("Projection")
@@ -253,9 +234,12 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_circle.setCheckable(True)
         self._add_rectangle = QPushButton("Add Rectangle")
         self._add_rectangle.setCheckable(True)
+        self._add_ellipse = QPushButton("Add Ellipse")
+        self._add_ellipse.setCheckable(True)
         shapes_layout.addWidget(self._add_circle)
         shapes_layout.addWidget(self._add_rectangle)
-        self._shape_buttons = [self._add_circle, self._add_rectangle]
+        shapes_layout.addWidget(self._add_ellipse)
+        self._shape_buttons = [self._add_circle, self._add_rectangle, self._add_ellipse]
 
         selection_tab = QWidget()
         (
@@ -395,7 +379,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._projection_camera_map[self.current_selected_projection()] = self.main_plotter.camera_position
         self._parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
 
-    def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider]:
+    def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider, QPushButton]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
         signal of the boxes"""
         min_hbox = QHBoxLayout()
@@ -409,6 +393,9 @@ class FullInstrumentViewWindow(QMainWindow):
         max_edit = QLineEdit()
         max_edit.setValidator(QDoubleValidator(0, max_float_64, 4, self))
         max_hbox.addWidget(max_edit)
+        reset_hbox = QHBoxLayout()
+        reset_button = QPushButton("Reset")
+        reset_hbox.addWidget(reset_button)
 
         slider = QDoubleRangeSlider(Qt.Orientation.Horizontal, parent=parent_box)
         slider.setRange(0, 1)
@@ -418,23 +405,31 @@ class FullInstrumentViewWindow(QMainWindow):
         root_hbox = QHBoxLayout()
         root_hbox.addLayout(min_hbox)
         root_hbox.addLayout(max_hbox)
+        root_hbox.addLayout(reset_hbox)
 
         root_vbox = QVBoxLayout()
         root_vbox.addLayout(slider_hbox)
         root_vbox.addLayout(root_hbox)
         parent_box.setLayout(root_vbox)
 
-        return (min_edit, max_edit, slider)
+        return (min_edit, max_edit, slider, reset_button)
 
-    def _add_connections_to_edits_and_slider(self, min_edit: QLineEdit, max_edit: QLineEdit, slider, presenter_callback: Callable):
+    def set_contour_min_max_boxes(self, limits: tuple[float, float]) -> None:
+        self._set_min_max_edit_boxes(self._contour_range_min_edit, self._contour_range_max_edit, limits)
+
+    def set_integration_min_max_boxes(self, limits: tuple[float, float]) -> None:
+        self._set_min_max_edit_boxes(self._integration_limit_min_edit, self._integration_limit_max_edit, limits)
+
+    def _set_min_max_edit_boxes(self, min_edit: QLineEdit, max_edit: QLineEdit, limits: tuple[float, float]) -> None:
+        min, max = limits
+
         def format_float(value):
             return f"{value:.4f}".rstrip("0").rstrip(".")
 
-        def set_edits(limits):
-            min, max = limits
-            min_edit.setText(format_float(min))
-            max_edit.setText(format_float(max))
+        min_edit.setText(format_float(min))
+        max_edit.setText(format_float(max))
 
+    def _add_connections_to_edits_and_slider(self, min_edit: QLineEdit, max_edit: QLineEdit, slider, presenter_callback: Callable):
         def set_slider(callled_from_min):
             def wrapped():
                 try:
@@ -452,7 +447,7 @@ class FullInstrumentViewWindow(QMainWindow):
             return wrapped
 
         # Connections to sync sliders and edits
-        slider.valueChanged.connect(set_edits)
+        slider.valueChanged.connect(lambda lims: self._set_min_max_edit_boxes(min_edit, max_edit, lims))
         min_edit.editingFinished.connect(set_slider(callled_from_min=True))
         max_edit.editingFinished.connect(set_slider(callled_from_min=False))
 
@@ -506,9 +501,11 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_changed)
-        self._clear_point_picked_detectors.clicked.connect((self._presenter.on_clear_point_picked_detectors_clicked))
+        self._clear_point_picked_detectors.clicked.connect(self._presenter.on_clear_point_picked_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
+        self._contour_range_reset.clicked.connect(self._presenter.on_contour_range_reset_clicked)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
+        self._integration_limit_reset.clicked.connect(self._presenter.on_integration_limits_reset_clicked)
         self._units_combo_box.currentIndexChanged.connect(self._presenter.on_unit_option_selected)
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
@@ -545,6 +542,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self._add_circle.toggled.connect(self.on_toggle_add_circle)
         self._add_rectangle.toggled.connect(self.on_toggle_add_rectangle)
+        self._add_ellipse.toggled.connect(self.on_toggle_add_ellipse)
 
         self._add_mask.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_mask.setDisabled(True)
@@ -556,6 +554,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def on_toggle_add_rectangle(self, checked):
         self._on_toggle_add_shape(checked, self.add_rectangular_widget)
+
+    def on_toggle_add_ellipse(self, checked):
+        self._on_toggle_add_shape(checked, self.add_ellipse_widget)
 
     def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
         if checked:
@@ -582,6 +583,9 @@ class FullInstrumentViewWindow(QMainWindow):
         # Should delete widgets explicitly, otherwise not garbage collected
         if not self._current_widget:
             return
+        # Clean up ellipse visual representation if it's an ellipse widget
+        if isinstance(self._current_widget, EllipseWidgetNoRotation):
+            self._current_widget.cleanup()
         self._current_widget.EnabledOff()
         self._current_widget.SetInteractor(None)
         self._current_widget.RemoveAllObservers()
@@ -789,7 +793,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         x, y, _z = self.display_to_world_coords(width / 2 + 0.15 * width, height / 2, 0)
         cylinder_repr.SetRadius(np.sqrt((x - cx) ** 2 + (y - cy) ** 2))
-
         # Arbritary border factor for bounding box
         xmin, xmax, ymin, ymax, _zmin, _zmax = self.main_plotter.bounds
         border = (np.sqrt((xmax - xmin) ** 2 + (ymax - ymin) ** 2)) / 2
@@ -828,6 +831,46 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.camera_position = self.main_plotter.camera_position
         return
 
+    def add_ellipse_widget(self) -> None:
+        """Add an interactive ellipse widget for detector selection.
+        The ellipse is initialized at the center of the viewport with default semi-axes.
+        Uses a box widget representation but evaluates points as an ellipse.
+        """
+        ellipse_repr = vtkBoxRepresentation()
+
+        # Make the box outline very faint so it doesn't dominate visually
+        # but still allows interaction (translation and scaling)
+        ellipse_repr.GetOutlineProperty().SetOpacity(0.15)
+        ellipse_repr.GetOutlineProperty().SetColor(0.5, 0.5, 0.5)  # Dark gray
+        ellipse_repr.GetOutlineProperty().SetLineWidth(0.5)
+        ellipse_repr.GetOutlineProperty().SetEdgeColor(1, 1, 1)
+
+        width, height = self.main_plotter.renderer.GetSize()
+        x0, y0, _z0 = self.display_to_world_coords(width / 3, height / 3, 0)
+        x1, y1, _z1 = self.display_to_world_coords(2 * width / 3, 2 * height / 3, 0)
+        ellipse_repr.SetPlaceFactor(1.0)
+        ellipse_repr.PlaceWidget([x0, x1, y0, y1, -0.1, 1])
+        ellipse_repr.SetUseBounds(True)
+
+        ellipse_widget = EllipseWidgetNoRotation(plotter=self.main_plotter)
+        ellipse_widget.SetRepresentation(ellipse_repr)
+        ellipse_widget.SetCurrentRenderer(self.main_plotter.renderer)
+        ellipse_widget.SetInteractor(self.main_plotter.iren.interactor)
+        ellipse_widget.On()
+
+        # Initialize visual ellipse
+        cx = (x0 + x1) / 2.0
+        cy = (y0 + y1) / 2.0
+        rx = abs(x1 - x0) / 2.0
+        ry = abs(y1 - y0) / 2.0
+        ellipse_widget.set_ellipse_parameters(cx, cy, rx, ry)
+        ellipse_widget._update_visual_ellipse(cx, cy, rx, ry, 0.5)
+
+        self._current_widget = ellipse_widget
+        # The command below is a hacky way of making the widget appear on top of detectors
+        # No idea why it works
+        self.main_plotter.camera_position = self.main_plotter.camera_position
+
     def display_to_world_coords(self, x, y, z):
         # Convert from display coordinates to world coordinates
         renderer = self.main_plotter.renderer
@@ -845,6 +888,8 @@ class FullInstrumentViewWindow(QMainWindow):
             box = vtkBox()
             box.SetBounds(self._current_widget.GetRepresentation().GetBounds())
             return box
+        elif isinstance(self._current_widget, EllipseWidgetNoRotation):
+            return self._current_widget.get_implicit_ellipse()
         else:
             return None
 
@@ -912,6 +957,8 @@ class FullInstrumentViewWindow(QMainWindow):
                 self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
             for line in self._lineplot_overlays:
                 self._detector_spectrum_axes.add_line(line)
+            integration_limits = self._presenter.integration_limits_in_current_unit()
+            self._detector_spectrum_axes.set_xlim(integration_limits[0], integration_limits[1])
 
         self.redraw_lineplot()
 

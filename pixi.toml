@@ -5,7 +5,6 @@ name = "mantid"
 # when editing local copy of mantid-developer, will need to temporarily remove
 # the platforms that you aren't working on
 platforms = ["linux-64", "win-64", "osx-arm64"]
-version = "6.14"
 
 [tasks]
 
@@ -22,7 +21,8 @@ publish-anaconda = { features = [
 package-standalone = { features = [
   "package-standalone",
 ], no-default-feature = true }
-docs-build = { features = ["docs-build"] }
+docs-build = { features = ["docs-build"], no-default-feature = true }
+docs-migration = { features = ["docs-migration"], no-default-feature = true }
 
 [feature.rattler-builder.dependencies]
 rattler-build = "==0.51.0"
@@ -59,12 +59,20 @@ conda = "24.7.*"
 rattler-index = "*"
 mamba = "<2"
 
-[feature.docs-build]
-channels = ["mantid/label/nightly"]
+[feature.docs-migration.dependencies]
+# rst-to-myst doesn't play nice with dependencies in the default environment
+rst-to-myst = "*"
+sphinx = "*"
+
+[feature.docs-migration.tasks.rst2md]
+args = [{ "arg" = "filename" }]
+cmd = "rst2myst convert {{filename}}"
+description = "Migrate a rst file to myst flavored markdown"
 
 [feature.docs-build.target.linux-64.dependencies]
 rsync = "*"
-mantidqt = "*"
+mamba = "<2"
+rattler-index = "*"
 
 [dependencies]
 cmake = ">=3.21.0"
@@ -85,7 +93,6 @@ muparser = ">=2.3.2,<2.3.5"
 ninja = ">=1.10.2"
 numpy = "2.1.*"
 occt = { version = "7.*", build = "novtk*" }
-pillow = "<12.0.0"
 pip = ">=21.0.1"
 poco = ">=1.14"
 psutil = ">=5.8.0"
@@ -128,7 +135,6 @@ myst-parser = ">=5.0.0,<6"
 pyparsing = "<3.3.0"
 
 [target.linux-64.dependencies]
-jemalloc = "==5.2.0"
 gxx_linux-64 = "13.*"
 xorg-libxcomposite = ">=0.4.5"
 xorg-libxcursor = ">=1.2.0"

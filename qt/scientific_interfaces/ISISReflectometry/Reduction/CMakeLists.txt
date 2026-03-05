@@ -5,6 +5,7 @@ set(REDUCTION_SRC_FILES
     RangeInQ.cpp
     ReductionWorkspaces.cpp
     Row.cpp
+    RowExceptions.cpp
     RowLocation.cpp
     ReductionJobs.cpp
     ValidateRow.cpp

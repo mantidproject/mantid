@@ -23,7 +23,7 @@ def split_into_tof_d_spacing_groups(run_details, processed_spectra, include_q_sq
     tof_output = []
     q_squared_output = []
     run_number = str(run_details.output_run_string)
-    ext = run_details.file_extension if run_details.file_extension else ""
+    ext = run_details.file_extension or ""
 
     for name_index, ws in enumerate(processed_spectra, start=1):
         d_spacing_out_name = run_number + ext + "-ResultD_" + str(name_index)

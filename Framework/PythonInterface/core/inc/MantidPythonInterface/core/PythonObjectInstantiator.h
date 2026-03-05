@@ -83,7 +83,9 @@ template <typename Base> std::shared_ptr<Base> PythonObjectInstantiator<Base>::c
   // versions of Python 2.7
   auto instancePtr = extract<std::shared_ptr<Base>>(instance)();
   auto *deleter = std::get_deleter<converter::shared_ptr_deleter, Base>(instancePtr);
-  instancePtr.reset(instancePtr.get(), GILSharedPtrDeleter(*deleter));
+  if (deleter) {
+    instancePtr.reset(instancePtr.get(), GILSharedPtrDeleter(*deleter));
+  }
   return instancePtr;
 }
 

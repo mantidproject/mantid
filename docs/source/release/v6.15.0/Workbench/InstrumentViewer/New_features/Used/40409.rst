@@ -1,1 +1,0 @@
-- In the new Instrument View interface, add an option to show monitors.
