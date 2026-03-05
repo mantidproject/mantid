@@ -15,6 +15,12 @@ processes live data.
 The background algorithm started is :ref:`algm-MonitorLiveData`, which
 simply calls :ref:`algm-LoadLiveData` at a fixed interval.
 
+.. figure:: /images/LoadLiveData_flow.png
+   :alt: Live data processing workflow
+   :align: center
+
+   Live data processing workflow showing how data flows through processing and accumulation steps
+
 .. note::
 
    For details on the way to specify the data processing steps, see
@@ -76,6 +82,366 @@ open a live plot. For example:
       ProcessingAlgorithm='Rebin',ProcessingProperties='Params=10e3,1000,60e3;PreserveEvents=1',
       OutputWorkspace='live')
     plotSpectrum('live', [0,1])
+
+Interactive Usage Guide
+########################
+
+This section provides practical guidance for using StartLiveData interactively in Mantid Workbench
+to monitor experiments in real-time.
+
+Getting Started
+***************
+
+**Prerequisites:**
+
+- Mantid Workbench installed
+- Network access to the instrument's Data Acquisition System (DAS)
+- Facility and instrument configured in Mantid settings
+
+**Quick Start Steps:**
+
+1. **Configure Mantid settings** - Open Workbench: File → Settings. Set Facility (e.g., "SNS" or "ISIS")
+   and Default Instrument (e.g., "POWGEN", "REF_M")
+
+2. **Open StartLiveData** - Click the algorithm search or press Ctrl+F, type "StartLiveData" and open it
+
+3. **Configure basic properties:**
+
+   .. code-block:: text
+
+       Instrument: (auto-filled from settings)
+       UpdateEvery: 30  # seconds between updates
+       OutputWorkspace: live_data
+
+4. **Set timing options** - Choose from:
+
+   - **From Start of Run**: Collect all data since run began (recommended)
+   - **From Now**: Only collect data from this moment forward
+   - **From Time**: Start from specific timestamp
+
+5. **Configure processing** (optional) - Processing tab: Add algorithms to run on each chunk.
+   Example: Use "Rebin" with Params="1000,100,20000"
+
+6. **Configure post-processing** (optional) - Post-Processing Step tab: Select "Python Script"
+   and load your post-processing script, or choose an algorithm to run on accumulated data
+
+7. **Click "Run"** to start live data collection
+
+8. **Monitor the data** - Right-click the ``live_data`` workspace → Plot Spectrum.
+   The plot updates automatically as data arrives. Check the Messages panel for errors
+
+9. **Stop collection** - Click the "Details" button (bottom right of Workbench),
+   then click "Cancel" next to MonitorLiveData
+
+Simple Monitoring Examples
+***************************
+
+Basic Monitoring
+++++++++++++++++
+
+For quick visualization without custom processing:
+
+.. code-block:: python
+
+    # In Workbench's script window or Python interface
+    from mantid.simpleapi import StartLiveData
+
+    StartLiveData(
+        Instrument='POWGEN',
+        OutputWorkspace='monitor',
+        UpdateEvery=30,
+        FromStartOfRun=True,
+        AccumulationMethod='Add'
+    )
+
+    # Now plot it
+    plotSpectrum('monitor', [0, 1, 2])
+
+The plot updates automatically as new data arrives.
+
+**Use cases:**
+
+- Checking if the instrument is collecting data
+- Monitoring detector health
+- Quick visualization during alignment
+- Verifying event rates
+- Sanity checking during setup
+
+With Processing Algorithm
+++++++++++++++++++++++++++
+
+Apply reduction during acquisition:
+
+.. code-block:: python
+
+    from mantid.simpleapi import StartLiveData
+
+    StartLiveData(
+        Instrument='NOMAD',
+        UpdateEvery=60,
+        AccumulationMethod='Add',
+        ProcessingAlgorithm='AlignAndFocusPowder',
+        ProcessingProperties='CalFilename=/SNS/NOM/shared/CALIBRATION.cal;'
+                            'GroupFilename=/SNS/NOM/shared/GROUP.xml',
+        AccumulationWorkspace='accumulated',
+        OutputWorkspace='live_nomad'
+    )
+
+**What happens:**
+
+1. Every 60s, new chunk arrives
+2. ``AlignAndFocusPowder`` processes it
+3. Result added to ``accumulated``
+4. ``live_nomad`` shows current accumulated state
+
+Starting from Specific Time
+++++++++++++++++++++++++++++
+
+Resume monitoring from earlier in the run:
+
+.. code-block:: python
+
+    from mantid.simpleapi import StartLiveData
+    from datetime import datetime, timedelta
+
+    # Start from 5 minutes ago
+    start_time = datetime.now() - timedelta(minutes=5)
+
+    StartLiveData(
+        Instrument='CORELLI',
+        FromTime=start_time.strftime('%Y-%m-%dT%H:%M:%S'),
+        UpdateEvery=30,
+        OutputWorkspace='live_corelli'
+    )
+
+**Use cases:**
+
+- Catch up after Workbench restart
+- Review recent data while run continues
+- Compare different time windows
+
+Custom Processing with Python Script
++++++++++++++++++++++++++++++++++++++
+
+Use external processing script for complex workflows.
+
+**Create** ``my_reduction.py``:
+
+.. code-block:: python
+
+    from mantid.simpleapi import (
+        ConvertUnits,
+        Rebin,
+        SumSpectra,
+        SaveNexus
+    )
+
+    # Process chunk
+    ConvertUnits(
+        InputWorkspace=input,
+        OutputWorkspace=output,
+        Target='dSpacing'
+    )
+
+    Rebin(
+        InputWorkspace=output,
+        OutputWorkspace=output,
+        Params='0.5,0.01,3.5',
+        PreserveEvents=False
+    )
+
+    # Sum for quick view
+    SumSpectra(
+        InputWorkspace=output,
+        OutputWorkspace='summed',
+        RemoveSpecialValues=True
+    )
+
+    # Optional: Save each chunk
+    run_number = output.getRun().getProperty('run_number').value
+    SaveNexus(
+        InputWorkspace=output,
+        Filename=f'/SNS/POWGEN/IPTS-12345/shared/live_chunk_{run_number}.nxs'
+    )
+
+**Run with script:**
+
+.. code-block:: python
+
+    StartLiveData(
+        Instrument='POWGEN',
+        UpdateEvery=45,
+        ProcessingScriptFilename='/path/to/my_reduction.py',
+        AccumulationMethod='Add',
+        OutputWorkspace='live_reduced'
+    )
+
+Understanding Timing Options
+*****************************
+
+The timing options control what data you receive when connecting:
+
+FromStartOfRun (Recommended)
++++++++++++++++++++++++++++++
+
+**What it does**: Collects all data since the current run began
+
+**When to use**: Starting monitoring mid-run, want complete picture
+
+**How it works**:
+
+- DAS buffers all events/histograms since run start
+- You receive everything collected so far
+- Then continues with new data as it arrives
+
+FromNow
++++++++
+
+**What it does**: Only collects data from the moment you connect
+
+**When to use**: Only interested in future data, memory constrained
+
+**Trade-offs**:
+
+- Misses anything collected before connection
+- Lower memory usage
+- Simpler for quick checks
+
+FromTime
+++++++++
+
+**What it does**: Starts collecting from a specific timestamp
+
+**Format**: UTC, ISO8601 format (e.g., "2026-01-21T14:30:00")
+
+**When to use**: Replaying or analyzing specific time windows
+
+UpdateEvery
++++++++++++
+
+**What it does**: How often (in seconds) post-processing runs
+
+**Default**: 30 seconds
+
+**Trade-offs**:
+
+- Shorter = more responsive but more CPU usage
+- Longer = less overhead but slower updates
+- Does not affect how often chunks arrive (DAS controls that)
+
+Practical Example Scenarios
+****************************
+
+Monitoring Detector Health
++++++++++++++++++++++++++++
+
+.. code-block:: python
+
+    StartLiveData(
+        Instrument='NOMAD',
+        OutputWorkspace='detector_check',
+        UpdateEvery=10,
+        FromNow=True,
+        AccumulationMethod='Replace'
+    )
+    # Plot updates every 10 seconds with latest data only
+
+Accumulating Full Run Data
++++++++++++++++++++++++++++
+
+.. code-block:: python
+
+    StartLiveData(
+        Instrument='POWGEN',
+        OutputWorkspace='full_run',
+        UpdateEvery=30,
+        FromStartOfRun=True,
+        AccumulationMethod='Add',
+        PreserveEvents=False  # Convert to histogram to save memory
+    )
+
+Time-Series Analysis
+++++++++++++++++++++
+
+.. code-block:: python
+
+    StartLiveData(
+        Instrument='CORELLI',
+        OutputWorkspace='timeseries',
+        UpdateEvery=60,
+        FromStartOfRun=True,
+        AccumulationMethod='Append'  # Each chunk becomes separate spectrum
+    )
+
+Common Issues and Troubleshooting
+**********************************
+
+Connection Fails
+++++++++++++++++
+
+**Symptoms**: Cannot connect to live data stream
+
+**Check**:
+
+- Network access to DAS
+- Facility/instrument settings correct
+- Instrument is actually running
+- Firewall settings allow connection
+
+Memory Fills Up
++++++++++++++++
+
+**Symptoms**: Mantid becomes slow or crashes during live monitoring
+
+**Solutions**:
+
+- Set ``PreserveEvents=False`` to convert to histograms
+- Use ``AccumulationMethod='Replace'`` instead of 'Add'
+- Increase ``UpdateEvery`` to reduce frequency
+- Close other memory-intensive applications
+- Use ``CompressEvents`` in post-processing for event data
+
+Plot Doesn't Update
++++++++++++++++++++
+
+**Symptoms**: Workspace exists but plot is static
+
+**Check**:
+
+- MonitorLiveData is still running (check Details button)
+- Log messages for errors
+- DAS is sending data (ask instrument scientist)
+- Plot window is set to auto-refresh
+
+Data Processing Errors
++++++++++++++++++++++++
+
+**Symptoms**: Errors in processing or post-processing steps
+
+**Debug steps**:
+
+- Test processing algorithm separately with static data
+- Check algorithm property syntax in ``ProcessingProperties``
+- Review python script for syntax errors
+- Verify file paths and calibration files exist
+- Check log messages for specific error details
+
+Tips for Interactive Use
++++++++++++++++++++++++++
+
+- Start with ``FromStartOfRun=True`` to get all existing data
+- Use ``UpdateEvery=10`` for faster updates during testing
+- Watch memory usage in system monitor when preserving events
+- Test scripts with fake data servers (see :ref:`live_data_testing`)
+- Use the algorithm dialog to build property strings, then copy to scripts
+
+Related Resources
++++++++++++++++++
+
+- :ref:`algm-LoadLiveData` - Details on data processing steps
+- :ref:`algm-MonitorLiveData` - Background monitoring algorithm
+- :ref:`live_data_testing` - Setting up fake data streams for testing
+- `livereduce documentation <https://github.com/mantidproject/livereduce>`_ - Automated daemon-based live reduction
 
 Run Transition Behavior
 #######################
