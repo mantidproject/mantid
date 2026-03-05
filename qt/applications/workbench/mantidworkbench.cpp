@@ -74,12 +74,6 @@ void appendArguments(ExeArgs *exeArgs, int argc, char **argv) {
  */
 decltype(boost::this_process::environment()) childEnvironment([[maybe_unused]] const fs::path &dirOfExe) {
   auto env = boost::this_process::environment();
-
-  // It was observed on Qt >= 5.12 that the QtWebEngineProcess would fail to
-  // load the icudtl.dat resources due to Chromium sandboxing restrictions. It
-  // would appear there is no more fine-grained way to control the restrictions:
-  // https://doc.qt.io/qt-5/qtwebengine-platform-notes.html
-  env["QTWEBENGINE_DISABLE_SANDBOX"] = "1";
   return env;
 }
 
