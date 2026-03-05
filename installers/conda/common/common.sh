@@ -30,9 +30,7 @@ function trim_conda() {
 
   # Heavily cut down translations
   mv "$bundle_conda_prefix"/translations "$bundle_conda_prefix"/translations_tmp
-  mkdir -p "$bundle_conda_prefix"/translations/qtwebengine_locales
-  mv "$bundle_conda_prefix"/translations_tmp/qtwebengine_locales/en*.pak \
-    "$bundle_conda_prefix"/translations/qtwebengine_locales/
+  mkdir -p "$bundle_conda_prefix"/translations
 
   # Removals
   rm -rf "$bundle_conda_prefix"/bin_tmp \
