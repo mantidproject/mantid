@@ -57,9 +57,9 @@ extensions = [
     # myst_parser enables markdown support
     "myst_parser",
 ]
-# Math extension: mathjax (JavaScript, for online docs) or imgmath (LaTeX images, for local QTextBrowser)
+# Math extension: imgmath (LaTeX images, for local QTextBrowser)
 # Local builds default to imgmath via CMake. Online/published docs explicitly use mathjax.
-mathext = os.environ.get("MATH_EXT", "sphinx.ext.mathjax")
+mathext = os.environ.get("MATH_EXT", "sphinx.ext.imgmath")
 extensions.append(mathext)
 
 # MathJax configuration to:
