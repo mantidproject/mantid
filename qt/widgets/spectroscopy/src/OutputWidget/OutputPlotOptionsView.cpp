@@ -85,7 +85,7 @@ void OutputPlotOptionsView::setupView() {
               &OutputPlotOptionsView::notifySelectedIndicesChanged));
 
   connect(m_plotOptions->pbPlotSpectra, &QPushButton::clicked, this, &OutputPlotOptionsView::notifyPlotSpectraClicked);
-  setIndicesErrorLabelVisible(false);
+  setIndicesErrorLabelVisibleImpl(false);
 
   // Setup the spectra auto-completer
   m_completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
@@ -268,7 +268,9 @@ void OutputPlotOptionsView::setIndices(QString const &indices) {
   m_plotOptions->leIndices->setText(indices);
 }
 
-void OutputPlotOptionsView::setIndicesErrorLabelVisible(bool visible) {
+void OutputPlotOptionsView::setIndicesErrorLabelVisible(bool visible) { setIndicesErrorLabelVisibleImpl(visible); }
+
+void OutputPlotOptionsView::setIndicesErrorLabelVisibleImpl(bool visible) {
   m_plotOptions->lbIndicesError->setText(visible ? "*" : "");
   m_plotOptions->lbIndicesError->setVisible(visible);
 }

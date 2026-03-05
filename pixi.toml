@@ -21,7 +21,7 @@ publish-anaconda = { features = [
 package-standalone = { features = [
   "package-standalone",
 ], no-default-feature = true }
-docs-build = { features = ["docs-build"] }
+docs-build = { features = ["docs-build"], no-default-feature = true }
 docs-migration = { features = ["docs-migration"], no-default-feature = true }
 
 [feature.rattler-builder.dependencies]
@@ -69,12 +69,10 @@ args = [{ "arg" = "filename" }]
 cmd = "rst2myst convert {{filename}}"
 description = "Migrate a rst file to myst flavored markdown"
 
-[feature.docs-build]
-channels = ["mantid/label/nightly"]
-
 [feature.docs-build.target.linux-64.dependencies]
 rsync = "*"
-mantidqt = "*"
+mamba = "<2"
+rattler-index = "*"
 
 [dependencies]
 cmake = ">=3.21.0"
@@ -96,7 +94,7 @@ ninja = ">=1.10.2"
 numpy = "2.1.*"
 occt = { version = "7.*", build = "novtk*" }
 pip = ">=21.0.1"
-poco = ">=1.14,<1.15"
+poco = ">=1.14"
 psutil = ">=5.8.0"
 pydantic = ">=2.11.4,<3"
 pyqt = ">=5.15,<6"

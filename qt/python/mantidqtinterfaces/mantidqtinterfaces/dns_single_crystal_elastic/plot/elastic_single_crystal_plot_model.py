@@ -20,7 +20,9 @@ from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_h
 
 class DNSElasticSCPlotModel(DNSObsModel):
     """
-    Model for DNS plot calculations.
+    Model for DNS plot calculations. It converts data from (omega, 2theta)
+    space into (q_x, q_y) and (n_x, n_y). Also, creates hull of DNS data
+    to filter points.
     """
 
     def __init__(self, parent):
@@ -31,11 +33,13 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._data.x = None
         self._data.y = None
         self._data.z = None
+        # x_, y_, and z_lims are used for storing full data (default) lims for plotting
+        self._data.x_lims = None
+        self._data.y_lims = None
+        self._data.z_lims = None
         self._data.z_min = None
         self._data.z_max = None
         self._data.pz_min = None
-        self._data.triang = None
-        self._data.z_triang = None
 
     def create_single_crystal_map(self, data_array, options, initial_values=None):
         two_theta = data_array["two_theta_array"]
@@ -65,35 +69,74 @@ class DNSElasticSCPlotModel(DNSObsModel):
         y_projection = helper.get_projection(y, z)
         return x_projection, y_projection
 
-    def get_interpolated_triangulation(self, interpolate, axis_type, switch):
+    def generate_triangulation_mesh(self, interpolate, axis_type, switch):
         mesh_name = axis_type + "_mesh"
         self._single_crystal_map.triangulate(mesh_name=mesh_name, switch=switch)
-        self._single_crystal_map.mask_triangles(mesh_name=mesh_name)
-        triangulator_refiner, z_refiner = self._single_crystal_map.interpolate_triangulation(interpolate)
-        self._data.triang = triangulator_refiner
-        self._data.z_triang = z_refiner
-        # this is important to get the limits
-        x, y, z = getattr(self._single_crystal_map, mesh_name)
-        self._data.x = x
-        self._data.y = y
-        self._data.z = z
-        return triangulator_refiner, z_refiner
+        self._single_crystal_map.mask_triangles(mesh_name=mesh_name, switch=switch)
+        self._single_crystal_map.interpolate_triangulation(interpolate)
+        triangulation_refined = self._single_crystal_map.triangulation
+        z_refined = self._single_crystal_map.z_mesh
+        z_face = self._single_crystal_map.z_face
+        x_face = self._single_crystal_map.x_face
+        y_face = self._single_crystal_map.y_face
+        self.set_mesh_data(x_face.flatten(), y_face.flatten(), z_face.flatten())
+        return triangulation_refined, z_refined, z_face
+
+    def generate_quad_mesh(self, interpolate, axis_type, switch):
+        if interpolate:
+            self._single_crystal_map.interpolate_quad_mesh(interpolate)
+        x, y, z = getattr(self._single_crystal_map, axis_type + "_mesh")
+        x, y, z = self.switch_axis(x, y, z, switch)
+        self.set_mesh_data(x.flatten(), y.flatten(), z.flatten())
+        return x, y, z
+
+    def generate_scatter_mesh(self, axis_type, switch):
+        x, y, z = getattr(self._single_crystal_map, axis_type + "_mesh")
+        x, y, z = self.switch_axis(x, y, z, switch)
+        self.set_mesh_data(x.flatten(), y.flatten(), z.flatten())
+        return x, y, z
+
+    def get_dx_dy_ratio(self):
+        return self._single_crystal_map.dx / self._single_crystal_map.dy
+
+    def get_aspect_ratio(self, plot_settings_dict):
+        if plot_settings_dict["fix_aspect"]:
+            if plot_settings_dict["type"] == "hkl":
+                ratio = self.get_dx_dy_ratio()
+                return ratio
+            return 1
+        return "auto"
 
     def get_axis_labels(self, axis_type, crystal_axes, switch=False):
+        if crystal_axes:
+            return self._single_crystal_map.get_crystal_axis_names()
         hkl1 = self._single_crystal_map.hkl1
         hkl2 = self._single_crystal_map.hkl2
-        axis_labels = {"hkl": [f"[{hkl1}] (r.l.u.)", f"[{hkl2}] (r.l.u.)"]}
+        axis_labels = {
+            "angular": ["2\u03b8 (deg)", "\u03c9 (deg)"],
+            "qxqy": [r"$q_{x} \ (\AA^{-1})$", r"$q_{y} \ (\AA^{-1})$"],
+            "hkl": [f"[{hkl1}] (r.l.u.)", f"[{hkl2}] (r.l.u.)"],
+        }
         labels = axis_labels[axis_type]
+        if switch:
+            labels.reverse()
         return labels
 
     def get_changing_hkl_components(self):
         return self._single_crystal_map.get_changing_hkl_components()
 
-    def get_format_coord(self, axis_type):
+    def get_format_coord(self, plot_settings_dict, switch=False):
         # adds z and hkl label to cursor position
         def format_coord(x, y):
-            h, k, l, z, error = get_hkl_intensity_from_cursor(self._single_crystal_map, axis_type, x, y)
-            return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f}), Intensity={z:6.4f}±{error:6.4f}"
+            mesh_name = plot_settings_dict["type"] + "_mesh"
+            border_path = self._single_crystal_map.get_dns_map_border(mesh_name, switch)
+            h, k, l, z, error = get_hkl_intensity_from_cursor(self._single_crystal_map, plot_settings_dict, x, y)
+            # ensures empty hover in the region outside the data boundary
+            if border_path.contains_point((x, y)):
+                if error is None:
+                    return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f}), Intensity={z:6.4f}"
+                return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f}), Intensity={z:6.4f}±{error:6.4f}"
+            return f"x={x:2.3f}, y={y:2.3f}, hkl=({h:2.2f}, {k:2.2f}, {l:2.2f})"
 
         return format_coord
 
@@ -127,3 +170,19 @@ class DNSElasticSCPlotModel(DNSObsModel):
         z = self._data.z.flatten()
         data_combined = np.array(list(zip(x, y, z)))
         return data_combined
+
+    def set_mesh_data(self, x, y, z):
+        self._data.x = x
+        self._data.y = y
+        self._data.z = z
+        self.save_default_data_lims()
+
+    def save_default_data_lims(self):
+        x_lims, y_lims = self.get_data_xy_lim(switch=False)
+        z_min, z_max, pos_z_min = self.get_data_z_min_max()
+        self._data.x_lims = x_lims
+        self._data.y_lims = y_lims
+        self._data.z_lims = [z_min, z_max]
+
+    def get_default_data_lims(self):
+        return self._data.x_lims, self._data.y_lims, self._data.z_lims
