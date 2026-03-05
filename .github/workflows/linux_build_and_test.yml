@@ -91,7 +91,8 @@ jobs:
           reporter: java-junit
           fail-on-error: false
 
-      - name: System Test Report
+      - if: false
+        name: System Test Report
         uses: dorny/test-reporter@v2
         if: always()
         with:
