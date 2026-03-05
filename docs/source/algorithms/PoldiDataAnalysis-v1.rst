@@ -67,7 +67,7 @@ This will print the following output:
 
 .. testoutput::
 
-    Refined lattice parameter a = 5.43126 +/- 5e-05
+    Refined lattice parameter a = 5.43129 +/- 5e-05
 
 If PlotResult is changed to True, a plot of the spectrum and the residuals is created as described above.
 

@@ -37,7 +37,7 @@ Output:
 
 .. testoutput:: CreateDetectorTableExample
 
-   Index: 0.0, Spectrum No: 1, Detector ID: 100, R: 5.0, Theta: 0.0, Phi: 0.0, Monitor: no
+   Index: 0, Spectrum No: 1, Detector ID: 100, R: 5.0, Theta: 0.0, Phi: 0.0, Monitor: no
 .. categories::
 
 .. sourcelink::
