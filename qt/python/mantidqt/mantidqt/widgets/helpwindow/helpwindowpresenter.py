@@ -82,8 +82,7 @@ class HelpWindowPresenter:
         """
         Build the doc URL from the Model and tell the View to load it.
         Handles FileNotFoundError from the model for local files.
-        Ensures the View is created and visible (only for local docs).
-        For online docs, just opens the browser without showing the help window.
+        Ensures the View is created and visible for both local and online docs.
         """
         self._ensure_view_created()
         if not self._view:
@@ -94,11 +93,8 @@ class HelpWindowPresenter:
         try:
             docUrl = self.model.build_help_url(relativeUrl)
             self._view.set_page_url(docUrl)
-            # Only show the help window for local docs, not for online docs
-            if self.model.is_local_docs_mode():
-                self.show_help_window()
-            else:
-                log.debug("Online docs mode - browser opened, not showing help window")
+            # Show the help window for both local and online docs
+            self.show_help_window()
         except FileNotFoundError as e:
             log.error(f"File not found for help page '{relativeUrl}': {e}")
             self._view.show_file_not_found_error(str(e), relativeUrl)
@@ -111,7 +107,7 @@ class HelpWindowPresenter:
     def show_home_page(self):
         """
         Presenter logic to load the 'Home' page. Handles FileNotFoundError.
-        Ensures View exists. Only shows window for local docs.
+        Ensures View exists. Shows window for both local and online docs.
         """
         self._ensure_view_created()
         if not self._view:
@@ -122,11 +118,8 @@ class HelpWindowPresenter:
         try:
             homeUrl = self.model.get_home_url()
             self._view.set_page_url(homeUrl)
-            # Only show window for local docs
-            if self.model.is_local_docs_mode():
-                self.show_help_window()
-            else:
-                log.debug("Online docs mode - browser opened, not showing help window")
+            # Show window for both local and online docs
+            self.show_help_window()
         except FileNotFoundError as e:
             log.error(f"File not found for home page: {e}")
             self._view.show_file_not_found_error(str(e), "index.html")
