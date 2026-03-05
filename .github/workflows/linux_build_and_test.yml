@@ -42,21 +42,24 @@ jobs:
           read -r cores  <<<    $(grep -c '^processor' /proc/cpuinfo)
           read -r mem  <<<  $(( $(grep    '^MemTotal'  /proc/meminfo | awk '{print $2}') / 1024 / 1024 ))
           
-          echo cores   : ${cores}
-          echo memory  : ${mem} GB
-          
           echo "${{ toJSON(github.event.inputs) }}"
-
+          
           c=${cores}
           m=${mem}
-
+          
           read -r BUILD_THREADS               <<< ${{ inputs.RELATE_THREADS_BUILD }}
           read -r BUILD_THREADS_SYSTEM_TESTS  <<< ${{ inputs.RELATE_THREADS_SYSTEM_TESTS }}
           read -r UNIT_TEST_THREADS           <<< ${{ inputs.RELATE_THREADS_UNIT_TESTS }}
-
+          
+          echo
+          echo "   cores   : ${cores}"
+          echo "   memory  : ${mem} GB"
+          echo
           echo "BUILD_THREADS               : $BUILD_THREADS"
           echo "BUILD_THREADS_SYSTEM_TESTS  : $BUILD_THREADS_SYSTEM_TESTS"
           echo "UNIT_TEST_THREADS           : $UNIT_TEST_THREADS"
+          echo
+          
 
       - name: debug
         run: |
