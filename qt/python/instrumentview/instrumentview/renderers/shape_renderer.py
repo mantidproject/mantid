@@ -53,12 +53,8 @@ class ShapeRenderer(InstrumentRenderer):
         # Built during ``build_detector_mesh``:
         self._cell_to_detector: np.ndarray | None = None  # (total_cells,) → detector idx
         self._faces_per_detector: np.ndarray | None = None  # (N,)
-        # Surface highlight overlay for picked detectors
+        # Reference to the most recently built detector surface mesh
         self._detector_mesh_ref: pv.PolyData | None = None
-        self._highlight_mesh: pv.PolyData | None = None
-        # Cache visibility data to restore after plotter is cleared
-        self._cached_visibility: np.ndarray | None = None
-        self._cached_visibility_label: str | None = None
 
     # -----------------------------------------------------------------
     # Pre-computation: fetch shape meshes and detector transforms once
@@ -145,16 +141,17 @@ class ShapeRenderer(InstrumentRenderer):
         self._cell_to_detector = c2d
         self._faces_per_detector = fpd
         self._detector_mesh_ref = mesh
-        # Invalidate the highlight mesh so set_pickable_scalars (called before
-        # add_pickable_mesh_to_plotter rebuilds it) doesn't try to write the
-        # new visibility array into a stale mesh with a different cell count.
-        self._highlight_mesh = None
         return mesh
 
     def build_pickable_mesh(self, positions: np.ndarray) -> pv.PolyData:
-        # Use a simple point cloud for the pickable overlay — point-based
-        # picking is reliable in both 2D and 3D, unlike cell picking on
-        # coplanar shape surfaces.
+        """Return a copy of the detector shape mesh for picking and highlighting.
+
+        Cell-based picking on this mesh lets the user click anywhere on
+        a detector's surface to select it, using ``_cell_to_detector``
+        to map the picked cell back to a detector index.
+        """
+        if self._detector_mesh_ref is not None and self._detector_mesh_ref.number_of_cells > 0:
+            return self._detector_mesh_ref.copy(deep=True)
         return pv.PolyData(positions)
 
     def build_masked_mesh(self, positions: np.ndarray, model=None) -> pv.PolyData:
@@ -192,45 +189,23 @@ class ShapeRenderer(InstrumentRenderer):
         plotter.enable_zoom_style()
 
     def add_pickable_mesh_to_plotter(self, plotter: BackgroundPlotter, mesh: pv.PolyData, scalars) -> None:
-        if mesh.number_of_points == 0:
+        if mesh.number_of_cells == 0:
             return
 
-        # --- Surface highlight overlay (shows full shape for picked detectors) ---
-        if self._detector_mesh_ref is not None and self._detector_mesh_ref.number_of_cells > 0:
-            self._highlight_mesh = self._detector_mesh_ref.copy(deep=True)
-
-            if self._cached_visibility is not None and self._cached_visibility_label == scalars and self._cell_to_detector is not None:
-                self._highlight_mesh.cell_data[scalars] = self._cached_visibility[self._cell_to_detector]
-            else:
-                self._highlight_mesh.cell_data[scalars] = np.zeros(self._highlight_mesh.number_of_cells, dtype=np.float64)
-
-            actor = plotter.add_mesh(
-                self._highlight_mesh,
-                scalars=scalars,
-                opacity=[0.0, 0.3],
-                clim=[0, 1],
-                show_scalar_bar=False,
-                pickable=False,
-                cmap="Oranges",
-                show_edges=False,
-            )
-            # Polygon offset so highlight renders in front of the detector surface
-            mapper = actor.mapper
-            mapper.SetResolveCoincidentTopologyToPolygonOffset()
-            mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-1, -1)
-
-        # --- Invisible point cloud used only for picking ---
-        plotter.add_mesh(
+        actor = plotter.add_mesh(
             mesh,
             scalars=scalars,
-            opacity=[0.0, 0.0],
+            opacity=[0.0, 0.3],
             clim=[0, 1],
             show_scalar_bar=False,
             pickable=True,
             cmap="Oranges",
-            point_size=30,
-            render_points_as_spheres=True,
+            show_edges=False,
         )
+        # Polygon offset so highlight renders in front of the detector surface
+        mapper = actor.mapper
+        mapper.SetResolveCoincidentTopologyToPolygonOffset()
+        mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-1, -1)
 
     def add_masked_mesh_to_plotter(self, plotter: BackgroundPlotter, mesh: pv.PolyData) -> None:
         if mesh.number_of_cells == 0:
@@ -243,26 +218,30 @@ class ShapeRenderer(InstrumentRenderer):
         )
 
     def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None]) -> None:
-        """Set up point picking on the pickable overlay.  *callback* receives ``(detector_index: int)``."""
+        """Set up cell picking on the shape surface.  *callback* receives ``(detector_index: int)``."""
         plotter.disable_picking()
 
         if plotter.off_screen:
             return
 
-        def _point_picked(point_position, picker):
+        c2d = self._cell_to_detector
+
+        def _cell_picked(point_position, picker):
             if point_position is None:
                 return
-            point_index = picker.GetPointId()
-            callback(point_index)
+            cell_id = picker.GetCellId()
+            if cell_id < 0 or c2d is None:
+                return
+            callback(int(c2d[cell_id]))
 
         plotter.enable_surface_point_picking(
             show_message=False,
             use_picker=True,
-            callback=_point_picked,
+            callback=_cell_picked,
             show_point=False,
             pickable_window=False,
-            picker="point",
-            tolerance=0.01,
+            picker="cell",
+            tolerance=0.005,
         )
 
     def set_detector_scalars(self, mesh: pv.PolyData, counts: np.ndarray, label: str) -> None:
@@ -276,19 +255,11 @@ class ShapeRenderer(InstrumentRenderer):
             mesh.cell_data[label] = counts
 
     def set_pickable_scalars(self, mesh: pv.PolyData, visibility: np.ndarray, label: str) -> None:
-        mesh.point_data[label] = visibility
-        # Cache visibility for when highlight mesh is recreated
-        self._cached_visibility = visibility
-        self._cached_visibility_label = label
-        # Propagate per-detector visibility to the surface highlight overlay
-        if self._highlight_mesh is not None and self._cell_to_detector is not None and len(visibility) > 0:
-            self._highlight_mesh.cell_data[label] = visibility[self._cell_to_detector]
-
-    def transform_internal_meshes(self, transform: np.ndarray) -> None:
-        """Apply *transform* to the highlight overlay so it stays aligned
-        with the detector surface after the presenter stretches meshes."""
-        if self._highlight_mesh is not None:
-            self._highlight_mesh.transform(transform, inplace=True)
+        if self._cell_to_detector is not None and len(visibility) > 0:
+            mesh.cell_data[label] = visibility[self._cell_to_detector]
+        else:
+            # No shape mesh available — fall back to point data
+            mesh.point_data[label] = visibility
 
     def _resolve_detector_indices(self, positions: np.ndarray, model, masked: bool) -> np.ndarray:
         """Return indices into ``self._all_positions_3d`` for the detectors

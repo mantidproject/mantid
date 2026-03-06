@@ -165,6 +165,42 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertGreater(mesh.number_of_points, 0)
         self.assertGreater(mesh.number_of_cells, 0)
 
+    def test_build_pickable_mesh_returns_shape_copy(self):
+        """build_pickable_mesh should return a shape mesh copy (not a point cloud)
+        so that cell picking works on the full detector surface."""
+        workspace = self._create_mock_workspace(n_detectors=4)
+        self.renderer.precompute(workspace)
+
+        model = self._create_mock_model(workspace, n_pickable=4)
+        positions = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]], dtype=np.float64)
+        self.renderer.build_detector_mesh(positions, model)
+
+        pickable = self.renderer.build_pickable_mesh(positions)
+        self.assertIsInstance(pickable, pv.PolyData)
+        # Must have cells (shape faces), not just points
+        self.assertGreater(pickable.number_of_cells, 0)
+        # Same cell count as the detector mesh
+        self.assertEqual(pickable.number_of_cells, self.renderer._detector_mesh_ref.number_of_cells)
+
+    def test_set_pickable_scalars_sets_cell_data(self):
+        """Visibility should be set as cell data via _cell_to_detector."""
+        workspace = self._create_mock_workspace(n_detectors=2)
+        self.renderer.precompute(workspace)
+
+        model = self._create_mock_model(workspace, n_pickable=2)
+        positions = np.array([[0, 0, 0], [1, 0, 0]], dtype=np.float64)
+        self.renderer.build_detector_mesh(positions, model)
+        pickable = self.renderer.build_pickable_mesh(positions)
+
+        vis = np.array([0, 1])
+        self.renderer.set_pickable_scalars(pickable, vis, "Visible")
+
+        cell_vis = pickable.cell_data["Visible"]
+        c2d = self.renderer._cell_to_detector
+        # Cells for detector 0 should have value 0, detector 1 should have value 1
+        for det_idx, expected in enumerate(vis):
+            np.testing.assert_array_equal(cell_vis[c2d == det_idx], expected)
+
     def test_cell_to_detector_mapping(self):
         """Verify that each cell in the assembled mesh maps to a valid detector index."""
         workspace = self._create_mock_workspace(n_detectors=3)
@@ -234,26 +270,25 @@ class TestShapeRenderer(unittest.TestCase):
         workspace = self._create_mock_workspace(n_detectors=6, same_shape=True)
         self.renderer.precompute(workspace)
 
-        # First render: 6 detectors → builds _highlight_mesh with N_old cells
+        # First render: 6 detectors
         model_6 = self._create_mock_model(workspace, n_pickable=6)
         positions_6 = np.array([[i, 0, 0] for i in range(6)], dtype=np.float64)
-        mesh_6 = self.renderer.build_detector_mesh(positions_6, model_6)
+        self.renderer.build_detector_mesh(positions_6, model_6)
         pickable_6 = self.renderer.build_pickable_mesh(positions_6)
         vis_6 = np.zeros(6)
         self.renderer.set_pickable_scalars(pickable_6, vis_6, "Visible Picked")
-        # Simulate add_pickable_mesh_to_plotter creating the highlight mesh
-        self.renderer._highlight_mesh = mesh_6.copy(deep=True)
-        self.renderer._highlight_mesh.cell_data["Visible Picked"] = vis_6[self.renderer._cell_to_detector]
 
         # Second render: only 4 pickable detectors (e.g. 2 were masked)
         model_4 = self._create_mock_model(workspace, n_pickable=4)
         positions_4 = np.array([[i, 0, 0] for i in range(4)], dtype=np.float64)
         self.renderer.build_detector_mesh(positions_4, model_4)
 
-        # This is the call that previously raised "Invalid array shape"
-        vis_4 = np.zeros(4)
+        # build_pickable_mesh returns a shape copy matching the 4-detector mesh
         pickable_4 = self.renderer.build_pickable_mesh(positions_4)
+        vis_4 = np.zeros(4)
+        # This must not raise despite the mesh having fewer cells than before
         self.renderer.set_pickable_scalars(pickable_4, vis_4, "Visible Picked")
+        self.assertEqual(len(pickable_4.cell_data["Visible Picked"]), pickable_4.number_of_cells)
 
     # ------------------------------------------------------------------
     # Helper methods to create mock objects

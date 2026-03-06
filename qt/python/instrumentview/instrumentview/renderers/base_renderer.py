@@ -121,10 +121,3 @@ class InstrumentRenderer(ABC):
         label : str
             Scalar array name.
         """
-
-    def transform_internal_meshes(self, transform: np.ndarray) -> None:
-        """Apply a 4×4 affine transform to any renderer-internal meshes.
-
-        Override in subclasses that maintain additional meshes (e.g. the
-        surface highlight overlay in ShapeRenderer).  The default is a no-op.
-        """

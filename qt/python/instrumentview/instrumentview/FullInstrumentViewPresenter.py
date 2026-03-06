@@ -230,7 +230,6 @@ class FullInstrumentViewPresenter:
         self._detector_mesh.transform(self._transform, inplace=True)
         self._pickable_mesh.transform(self._transform, inplace=True)
         self._masked_mesh.transform(self._transform, inplace=True)
-        self._renderer.transform_internal_meshes(self._transform)
         if monitor_mesh is not None:
             monitor_mesh.transform(self._transform, inplace=True)
 
