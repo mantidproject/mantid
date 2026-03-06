@@ -689,13 +689,14 @@ class FullInstrumentViewPresenter:
         self._shape_renderer = None
         self._sbs_shape_renderer = None
         self._point_cloud_renderer = None
+        self._renderer = self._get_shape_renderer() if self._view.is_show_shapes_checkbox_checked() else self._get_point_cloud_renderer()
 
     def _reload_everything(self) -> None:
         """Reload all workspace-dependent data (peaks, masks, groupings) and clear renderer cache.
 
         Called when workspaces are added to or removed from the ADS.
         """
-        self._clear_renderers()  # Clear cached renderers before reloading
+        self._clear_renderers()
         self._reload_peaks_workspaces()
         self._reload_mask_workspaces()
         self._reload_grouping_workspaces()
