@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from zoneinfo import ZoneInfo
 from mantid.kernel import FacilityInfo, InstrumentInfo, ConfigService
-import pytz
 
 
 class FacilityInfoTest(unittest.TestCase):
@@ -31,13 +31,13 @@ class FacilityInfoTest(unittest.TestCase):
         self.assertEqual(test_facility.timezone(), "Europe/London")
 
     def test_timezones(self):
-        # verify that all of the timezones can get converted by pytz
+        # verify that all of the timezones can get converted by zoneinfo
         for facility in ConfigService.getFacilities():
             if len(facility.timezone()) == 0:
                 continue  # don't test empty strings
-            tz = pytz.timezone(facility.timezone())
+            tz = ZoneInfo(facility.timezone())
             print(facility.name(), tz)
-            self.assertEqual(str(tz), facility.timezone())
+            self.assertEqual(tz.key, facility.timezone())
 
 
 if __name__ == "__main__":
