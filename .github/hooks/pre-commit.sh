@@ -11,11 +11,14 @@ if [ "${#changed_files[@]}" -ne 0 ]; then
   if [ ${rc} -ne 0 ]; then
     # this if is intentionally backwards
     if ! git diff --quiet; then
-      # return zero if files were changed - copilot will see those changes
-      exit 0
-    else
-      # return pre-commit's result if no files were changed
-      exit ${rc}
+      # run pre-commit a second time to allow for pre-commit fixing things
+      # on the first pass
+      pre-commit run --files "${changed_files[@]}"; rc=$?
     fi
   fi
+  # return pre-commit's result
+  exit ${rc}
 fi
+
+# exit that it is fine since it got this far
+exit 0
