@@ -674,7 +674,10 @@ class FullInstrumentViewModel:
             return None
         projection = self._cached_projection_objects.get(self._projection_type.name)
         if projection is None:
-            return None
+            self._calculate_projection()
+            projection = self._cached_projection_objects.get(self._projection_type.name)
+            if projection is None:
+                return None
         return projection.get_bank_groups_by_detector_id()
 
     def component_tree_indices_selected(self, component_indices: np.ndarray) -> None:
