@@ -398,6 +398,65 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(prefix + "_mask");
   }
 
+  void test_CopyLastGoodPeakParametersDefaultIsTrue() {
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+
+    bool defaultVal = alg.getProperty("CopyLastGoodPeakParameters");
+    TS_ASSERT_EQUALS(defaultVal, true);
+  }
+
+  void test_exec_difc_noCopyLastGoodPeakParameters() {
+
+    // Test that PDCalibration produces correct DIFC calibration when
+    // CopyLastGoodPeakParameters=false, verifying that the property does
+    // not impact calibration accuracy for well-defined peaks.
+
+    std::vector<double> dValues = convertPosToD(DIFC_155);
+
+    const std::string prefix{"PDCalibration_difc_noCopyPeakParams"};
+
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaskWorkspace", prefix + "_mask"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CopyLastGoodPeakParameters", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(prefix + "cal");
+    TS_ASSERT(calTable);
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    // DIFC values must match the default (CopyLastGoodPeakParameters=true) results.
+    size_t index = std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    MatrixWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(prefix + "_mask");
+    TS_ASSERT_EQUALS(mask->y(WKSPINDEX_155)[0], 0);
+    TS_ASSERT_EQUALS(mask->y(WKSPINDEX_195)[0], 0);
+
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal");
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "_mask");
+  }
+
   // Crop workspace so that final peak is evaluated over a range that includes
   // the last bin (stop regression out of range bug for histo workspaces)
   void test_exec_difc_histo() {
