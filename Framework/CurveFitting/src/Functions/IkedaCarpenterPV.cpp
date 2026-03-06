@@ -382,22 +382,36 @@ double IkedaCarpenterPV::intensity() const {
 
 void IkedaCarpenterPV::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
                                           double startX, double endX) {
+  IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
+
   if (workspace) {
-    // convert inital parameters that depend on x axis to correct units so
-    // inital guess is reasonable
-    auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    // Scale all time-dependent IC parameters so the function evaluates
+    // correctly in non-TOF workspaces (e.g. d-spacing, wavelength).
+    //
+    // scaleFactor = X0_workspace / X0_tof  (approx d/tof = 1/DIFC for d-spacing)
+    //
+    // Only scale when the workspace is not already in TOF and X0 has been set.
     const auto peakCentre = getParameter("X0");
-    const auto scaleFactor = peakCentre / convertValue(peakCentre, tof, workspace, wi);
-    if (scaleFactor != 0) {
-      if (isActive(parameterIndex("Alpha0")))
-        setParameter("Alpha0", getParameter("Alpha0") * scaleFactor);
-      if (isActive(parameterIndex("Alpha1")))
-        setParameter("Alpha1", getParameter("Alpha1") * scaleFactor);
-      if (isActive(parameterIndex("Beta0")))
-        setParameter("Beta0", getParameter("Beta0") * scaleFactor);
+    if (peakCentre != 0.0) {
+      auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+      const auto tofCentre = convertValue(peakCentre, tof, workspace, wi);
+      if (tofCentre != 0.0) {
+        const double scaleFactor = peakCentre / tofCentre;
+        if (std::abs(scaleFactor - 1.0) > 1e-6) {
+          const auto scaleIfDefault = [&](const std::string &name, const double factor) {
+            const size_t idx = parameterIndex(name);
+            if (!isExplicitlySet(idx))
+              setParameter(idx, getParameter(idx) * factor, false);
+          };
+          scaleIfDefault("Alpha0", scaleFactor);
+          scaleIfDefault("Alpha1", scaleFactor);
+          scaleIfDefault("Beta0", scaleFactor);
+          scaleIfDefault("SigmaSquared", scaleFactor * scaleFactor);
+          scaleIfDefault("Gamma", scaleFactor);
+        }
+      }
     }
   }
-  IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
 }
 
 } // namespace Mantid::CurveFitting::Functions
