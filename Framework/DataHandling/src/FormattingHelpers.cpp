@@ -12,7 +12,7 @@
 
 namespace Mantid::DataHandling {
 
-std::string formatDouble(double value) {
+std::string formatDouble(double const value) {
   std::stringstream ss;
   if (std::fabs(value - std::round(value)) < 1e-12) {
     ss << std::fixed << std::setprecision(1) << value;
