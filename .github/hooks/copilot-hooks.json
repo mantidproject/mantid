@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "pre-commit run --all-files",
+        "comment": "Format code",
+        "timeoutSec": 60
+      }
+    ]
+  }
+}
