@@ -77,6 +77,9 @@ def generate_ts_pdf(
     sample_temp,
     merge_banks=False,
     q_lims=None,
+    stitch_points=None,
+    overlap_width=None,
+    stitch_lims=None,
     cal_file_name=None,
     delta_r=None,
     delta_q=None,
@@ -145,8 +148,17 @@ def generate_ts_pdf(
     if r_lims is not None:
         pdf_kwargs.update({"RMin": r_lims[0], "RMax": r_lims[-1]})
     if merge_banks:
-        q_min, q_max = _load_qlims(q_lims)
-        merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max, CalculateScale=False)
+        if stitch_points:
+            merged_ws = mantid.StitchByBackground(
+                InputWorkspaces=focused_ws.getNames(),
+                StitchPoints=stitch_points,
+                OverlapWidth=overlap_width,
+                CropLowerBound=stitch_lims[0],
+                CropUpperBound=stitch_lims[1],
+            )
+        else:
+            q_min, q_max = _load_qlims(q_lims)
+            merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max, CalculateScale=False)
         mantid.CloneWorkspace(
             InputWorkspace=merged_ws, OutputWorkspace="merged_S_of_Q_minus_one"
         )  # merged S(Q)-1 before applying Fourier filter
