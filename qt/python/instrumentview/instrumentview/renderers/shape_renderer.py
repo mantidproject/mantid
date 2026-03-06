@@ -116,6 +116,7 @@ class ShapeRenderer(InstrumentRenderer):
                         shape_cache[key] = (verts, faces)
                 except Exception:
                     shape_cache[key] = _make_fallback_shape()
+                    logger.information(f"ShapeRenderer: failed to get mesh for shape for detector {i}, using fallback")
 
         self._shape_cache = shape_cache
         self._det_shape_keys = det_shape_keys
