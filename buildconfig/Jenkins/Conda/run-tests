@@ -22,6 +22,7 @@ XVFB_SERVER_NUM=101
 
 # Speed up for now.
 BUILD_THREADS_SYSTEM_TESTS=12
+UNIT_TEST_THREADS=10
 
 # If this isn't specified for a machine, revert to default value
 if [[ -z "$BUILD_THREADS_SYSTEM_TESTS" ]]; then
