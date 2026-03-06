@@ -1,8 +1,12 @@
-# changed files that aren't deleted
-changed_files=$(git diff --diff-filter=d --name-only)
-if [ -n "${changed_files}" ]; then
+#!/usr/bin/bash
+
+# changed files that aren't deleted as a bash array
+changed_files=( $(git diff --diff-filter=d --name-only) )
+
+# only if there are files changed
+if [ "${#changed_files[@]}" -ne 0 ]; then
   # run pre-commit and capture the return
-  pre-commit run --files -- "${changed_files[@]}"; rc=$?
+  pre-commit run --files "${changed_files[@]}"; rc=$?
   # do something special if nonzero return
   if [ ${rc} -ne 0 ]; then
     # this if is intentionally backwards
