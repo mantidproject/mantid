@@ -90,7 +90,6 @@ class ShapeRenderer(InstrumentRenderer):
             rot = Rotation.from_quat([q.imagI(), q.imagJ(), q.imagK(), q.real()])
             det_rotations[i] = rot.as_matrix()
 
-            # Scale
             sc = comp_info.scaleFactor(i)
             det_scales[i] = [sc.X(), sc.Y(), sc.Z()]
 
@@ -167,9 +166,6 @@ class ShapeRenderer(InstrumentRenderer):
         mesh, _, _ = self._assemble_mesh(indices, positions, flatten_2d=flatten_2d)
         return mesh
 
-    # -----------------------------------------------------------------
-    # Add to plotter
-    # -----------------------------------------------------------------
     def add_detector_mesh_to_plotter(
         self, plotter: BackgroundPlotter, mesh: pv.PolyData, is_projection: bool, scalars: Optional[str] = None
     ) -> None:
@@ -203,7 +199,6 @@ class ShapeRenderer(InstrumentRenderer):
         if self._detector_mesh_ref is not None and self._detector_mesh_ref.number_of_cells > 0:
             self._highlight_mesh = self._detector_mesh_ref.copy(deep=True)
 
-            # Apply cached visibility if available, otherwise initialize to zero
             if self._cached_visibility is not None and self._cached_visibility_label == scalars and self._cell_to_detector is not None:
                 self._highlight_mesh.cell_data[scalars] = self._cached_visibility[self._cell_to_detector]
             else:
@@ -517,11 +512,6 @@ class ShapeRenderer(InstrumentRenderer):
         return mesh, cell_to_det, faces_per_det
 
 
-# =====================================================================
-# Module-level helpers
-# =====================================================================
-
-
 def _triangles_to_verts_faces(raw_mesh: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Convert the (N_tri, 3, 3) array from ``CSGObject.getMesh()`` to
     deduplicated vertices ``(V, 3)`` and face indices ``(F, 3)``.
@@ -551,7 +541,7 @@ def _triangles_to_verts_faces(raw_mesh: np.ndarray) -> tuple[np.ndarray, np.ndar
 
 def _make_fallback_shape() -> tuple[np.ndarray, np.ndarray]:
     """A tiny tetrahedron used when a detector has no valid shape."""
-    s = 0.002  # 2 mm
+    s = 0.002
     verts = np.array(
         [
             [s, 0, -s / np.sqrt(2)],

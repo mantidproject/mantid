@@ -563,7 +563,6 @@ class FullInstrumentViewPresenter:
             ordered_indices = ordered_indices[valid]
             labels = [p.label for i, p in enumerate(ws_peaks.detector_peaks) if valid[i]]
             projected_points = self._model.detector_positions[ordered_indices]
-            # Plot the peaks and their labels on the projection
             if len(projected_points) > 0:
                 transformed_points = self._transform_vectors_with_matrix(projected_points, self._transform)
                 self._view.plot_overlay_mesh(transformed_points, labels, ws_peaks.colour)
@@ -632,13 +631,6 @@ class FullInstrumentViewPresenter:
         self.update_plotter()
 
     def _get_point_cloud_renderer(self) -> PointCloudRenderer:
-        """Get or create the cached point cloud renderer instance.
-
-        Returns
-        -------
-        PointCloudRenderer
-            The cached renderer, creating it if necessary.
-        """
         if self._point_cloud_renderer is None:
             self._point_cloud_renderer = PointCloudRenderer()
         return self._point_cloud_renderer
@@ -650,11 +642,6 @@ class FullInstrumentViewPresenter:
         projection is side-by-side, otherwise a plain :class:`ShapeRenderer`.
         On first call for each type, precomputes geometry from the workspace
         which may be expensive.  Subsequent calls return the cached instance.
-
-        Returns
-        -------
-        ShapeRenderer
-            The cached renderer, creating and precomputing it if necessary.
         """
         is_sbs = self._model.projection_type == ProjectionType.SIDE_BY_SIDE
         if is_sbs:
@@ -669,7 +656,6 @@ class FullInstrumentViewPresenter:
             return self._shape_renderer
 
     def _on_show_shapes_toggled(self, checked: bool) -> None:
-        """Toggle between point-cloud and shape-based rendering."""
         if checked:
             self._renderer = self._get_shape_renderer()
         else:

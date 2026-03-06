@@ -82,10 +82,6 @@ class SideBySideShapeRenderer(ShapeRenderer):
         )
         return mesh
 
-    # ------------------------------------------------------------------
-    # Bank-aware scaling
-    # ------------------------------------------------------------------
-
     def _compute_bank_projection_scales(
         self,
         det_indices: np.ndarray,
