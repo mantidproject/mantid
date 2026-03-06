@@ -116,6 +116,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
         ws = model.workspace
         det_info = ws.detectorInfo()
         all_det_ids = np.array(det_info.detectorIDs())
+        det_id_to_global = {int(did): idx for idx, did in enumerate(all_det_ids)}
 
         # Build mapping: global_det_index -> local_index in `det_indices`
         global_to_local = {int(gi): li for li, gi in enumerate(det_indices)}
@@ -125,11 +126,12 @@ class SideBySideShapeRenderer(ShapeRenderer):
         for bank_det_ids, bank_type in self._bank_groups_by_detector_id:
             local_indices = []
             for did in bank_det_ids:
-                matches = np.where(all_det_ids == did)[0]
-                if len(matches) > 0:
-                    global_idx = int(matches[0])
-                    if global_idx in global_to_local:
-                        local_indices.append(global_to_local[global_idx])
+                global_idx = det_id_to_global.get(int(did))
+                if global_idx is None:
+                    continue
+                local_idx = global_to_local.get(global_idx)
+                if local_idx is not None:
+                    local_indices.append(local_idx)
             if local_indices:
                 bank_local_groups.append((local_indices, bank_type))
 
