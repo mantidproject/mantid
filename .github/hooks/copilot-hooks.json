@@ -4,8 +4,8 @@
     "postToolUse": [
       {
         "type": "command",
-        "bash": "pre-commit run --all-files",
-        "comment": "Format code",
+        "bash": "./.github/hooks/pre-commit.sh",
+        "comment": "Run all pre-commit hooks",
         "timeoutSec": 60
       }
     ]
