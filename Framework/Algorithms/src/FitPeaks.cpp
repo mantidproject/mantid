@@ -1286,7 +1286,11 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       // parameters will be used if present and the width will not be estimated
       // (note this will overwrite parameter values caluclated from
       // Parameters.xml)
-      auto useUserSpecifedIfGiven = !(samePeakCrossSpectrum || neighborPeakSameSpectrum);
+      // When CopyLastGoodPeakParameters is disabled, treat each peak as if it
+      // has no fitted neighbour so that user-specified initial values are
+      // re-applied as the baseline rather than falling back to function defaults.
+      auto useUserSpecifedIfGiven =
+          !(samePeakCrossSpectrum || (neighborPeakSameSpectrum && m_copyLastGoodPeakParameters));
       bool observe_peak_width = decideToEstimatePeakParams(useUserSpecifedIfGiven, peakfunction);
 
       if (observe_peak_width && m_peakWidthEstimateApproach == EstimatePeakWidth::NoEstimation) {

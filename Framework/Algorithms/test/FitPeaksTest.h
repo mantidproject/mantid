@@ -1551,7 +1551,7 @@ public:
    * With this option disabled, each peak must be independently initialized from
    * data observation rather than inheriting potentially position-inappropriate
    * parameters from a neighbour at a different d-spacing or TOF. Fitted positions
-   * must match those obtained with the default (true) setting.
+   * should still match those obtained with the default (true) setting.
    */
   void test_multiPeaksMultiSpectra_noCopyLastGoodPeakParameters() {
     g_log.notice() << "TEST MULTIPLE PEAKS MULTI SPECTRA NO COPY LAST GOOD PEAK PARAMS";
@@ -1578,9 +1578,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
     // No PeakParameterNames/Values: each peak observes its own shape from data.
-    // This is the primary use case for CopyLastGoodPeakParameters=false, where
-    // each peak must be initialized independently without inheriting parameters
-    // from a potentially shape-incompatible neighbour.
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("CopyLastGoodPeakParameters", false));
 
