@@ -94,10 +94,13 @@ void SavePresenter::updateWidgetStateBasedOnFileFormat() const {
     m_view->disableQResolutionCheckBox();
 
   // Enable/disable the additional columns checkbox for formats that can optionally include these
-  if (isORSOFormat(fileFormat))
+  if (isORSOFormat(fileFormat)) {
     m_view->enableAdditionalColumnsCheckBox();
-  else
+    m_view->showModelEditTextBox();
+  } else {
     m_view->disableAdditionalColumnsCheckBox();
+    m_view->hideModelEditTextBox();
+  }
 
   // Enable/disable the save to single file checkbox for formats that support this
   if (shouldAutosave() && isORSOFormat(fileFormat))
@@ -277,7 +280,8 @@ FileFormatOptions SavePresenter::getSaveParametersFromView(bool const isAutoSave
       /*separator=*/m_view->getSeparator(),
       /*includeQResolution=*/m_view->getQResolutionCheck(),
       /*includeAdditionalColumns=*/m_view->getAdditionalColumnsCheck(),
-      /*shouldSaveToSingleFile=*/isAutoSave && m_view->getSaveToSingleFileCheck());
+      /*shouldSaveToSingleFile=*/isAutoSave && m_view->getSaveToSingleFileCheck(),
+      /*model=*/m_view->getModel());
 }
 
 void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames,
