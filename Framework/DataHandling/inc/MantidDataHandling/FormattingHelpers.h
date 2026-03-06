@@ -5,12 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "MantidDataHandling/DllConfig.h"
 #include <string>
 
 namespace Mantid {
 namespace DataHandling {
 
-std::string formatDouble(double const value);
+MANTID_DATAHANDLING_DLL std::string formatDouble(double const value);
 
 } // namespace DataHandling
 } // namespace Mantid
