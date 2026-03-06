@@ -12,7 +12,17 @@
 #include <set>
 
 namespace Mantid {
+
+namespace API { // forward declare
+class ISpectrum;
+}
+
 namespace Algorithms {
+
+namespace {
+struct WorkspaceLikeVector;
+}
+
 /** Takes a workspace as input and sums all of the spectra within it maintaining
    the existing bin structure and units.
     The result is stored as a new workspace containing a single spectra.
@@ -60,9 +70,9 @@ private:
   /// Handle logic for RebinnedOutput workspaces
   void doFractionalSum(const API::MatrixWorkspace_sptr &outputWorkspace, API::Progress &progress, size_t &numSpectra,
                        size_t &numMasked, size_t &numZeros);
-  /// Handle logic for Workspace2D workspaces
-  void doSimpleSum(const API::MatrixWorkspace_sptr &outputWorkspace, API::Progress &progress, size_t &numSpectra,
-                   size_t &numMasked, size_t &numZeros);
+  /// Handle logic for summing standard workspaces
+  void doSimpleSum(API::ISpectrum &, WorkspaceLikeVector const &, API::Progress &, size_t &);
+  void doSimpleWeightedSum(API::ISpectrum &, WorkspaceLikeVector const &, API::Progress &, size_t &);
 
   // Overridden Algorithm methods
   void init() override;

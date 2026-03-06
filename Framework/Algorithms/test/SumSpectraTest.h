@@ -362,6 +362,7 @@ public:
     alg2.setPropertyValue("OutputWorkspace", outputSpace2);
     alg2.setProperty("IncludeMonitors", false);
     alg2.setProperty("WeightedSum", true);
+    // NOTE "MultiplyBySpectra" set to True by default
 
     TS_ASSERT_THROWS_NOTHING(alg2.execute());
     TS_ASSERT(alg2.isExecuted());
@@ -398,6 +399,8 @@ public:
     TS_ASSERT_DELTA(y[7], double(nSignals) * y0[7], 1.e-6);
     TS_ASSERT_DELTA(y[38], double(nSignals - 1) * y0[38], 1.e-6);
     TS_ASSERT_DELTA(y[72], double(nSignals) * y0[72], 1.e-6);
+    // NOTE: since all errors are the same and we are multiplying by num spectra, then
+    // error = Nspec * sqrt( 1. / sum( 1. / e0^2)) = Nspec * e0 / sqrt(Nspec) = sqrt(Nspec) * e0
     TS_ASSERT_DELTA(e[28], std::sqrt(double(nSignals)) * e0[28], 0.00001);
     TS_ASSERT_DELTA(e[38], std::sqrt(double(nSignals - 1)) * e0[38], 0.00001);
     TS_ASSERT_DELTA(e[47], std::sqrt(double(nSignals)) * e0[47], 0.00001);
@@ -467,10 +470,10 @@ public:
     TS_ASSERT_DELTA(y[7], y0[7], 1.e-6);
     TS_ASSERT_DELTA(y[38], y0[38], 1.e-6);
     TS_ASSERT_DELTA(y[72], y0[72], 1.e-6);
-    TS_ASSERT_DELTA(e[28], std::sqrt(double(nSignals)) * e0[28], 0.00001);
-    TS_ASSERT_DELTA(e[38], std::sqrt(double(nSignals - 1)) * e0[38], 0.00001);
-    TS_ASSERT_DELTA(e[47], std::sqrt(double(nSignals)) * e0[47], 0.00001);
-    TS_ASSERT_DELTA(e[99], std::sqrt(double(nSignals)) * e0[99], 0.00001);
+    TS_ASSERT_DELTA(e[28], e0[28] / std::sqrt(double(nSignals)), 0.00001);
+    TS_ASSERT_DELTA(e[38], e0[38] / std::sqrt(double(nSignals - 1)), 0.00001);
+    TS_ASSERT_DELTA(e[47], e0[47] / std::sqrt(double(nSignals)), 0.00001);
+    TS_ASSERT_DELTA(e[99], e0[99] / std::sqrt(double(nSignals)), 0.00001);
 
     // Check the detectors mapped to the single spectra
     const auto &spec = output2D->getSpectrum(0);
