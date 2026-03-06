@@ -346,15 +346,7 @@ class FullInstrumentViewWindow(QMainWindow):
         return self._show_shapes_check_box.isChecked()
 
     def set_show_shapes_checkbox_enabled(self, enabled: bool) -> None:
-        """Enable or disable the 'Draw Shapes' checkbox."""
         self._show_shapes_check_box.setEnabled(enabled)
-        if not enabled:
-            self._show_shapes_check_box.setToolTip("Shape rendering is not available for side-by-side projection.")
-        else:
-            self._show_shapes_check_box.setToolTip(
-                "If checked, detectors are drawn using their actual geometric shapes "
-                "(cuboids, cylinders, etc.) instead of points. May be slower for large instruments."
-            )
 
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
