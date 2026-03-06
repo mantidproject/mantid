@@ -136,6 +136,16 @@ void QtSaveView::enableAdditionalColumnsCheckBox() { m_ui.extraColumnsCheckBox->
 
 void QtSaveView::disableAdditionalColumnsCheckBox() { m_ui.extraColumnsCheckBox->setEnabled(false); }
 
+void QtSaveView::showModelEditTextBox() {
+  m_ui.modelEditLabel->setVisible(true);
+  m_ui.modelEdit->setVisible(true);
+}
+
+void QtSaveView::hideModelEditTextBox() {
+  m_ui.modelEditLabel->setVisible(false);
+  m_ui.modelEdit->setVisible(false);
+}
+
 void QtSaveView::enableSeparatorButtonGroup() {
   m_ui.commaRadioButton->setEnabled(true);
   m_ui.spaceRadioButton->setEnabled(true);
@@ -175,6 +185,11 @@ std::string QtSaveView::getPrefix() const { return m_ui.prefixEdit->text().toStd
  * @return :: The filter
  */
 std::string QtSaveView::getFilter() const { return m_ui.filterEdit->text().toStdString(); }
+
+/** Returns the custom model defination
+ * @return :: The model
+ */
+std::string QtSaveView::getModel() const { return m_ui.modelEdit->text().toStdString(); }
 
 /** Returns the regular expression check value
  * @return :: The regex check

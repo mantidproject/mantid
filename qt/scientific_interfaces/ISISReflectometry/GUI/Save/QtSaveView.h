@@ -39,6 +39,8 @@ public:
   std::string getPrefix() const override;
   /// Returns the filter
   std::string getFilter() const override;
+  /// Returns the model
+  std::string getModel() const override;
   /// Returns the regex check
   bool getRegexCheck() const override;
   /// Get name of the currently selected workspace name
@@ -93,6 +95,8 @@ public:
   void disableSaveToSingleFileCheckBox() override;
   void enableSaveIndividualRowsCheckbox() override;
   void disableSaveIndividualRowsCheckbox() override;
+  void showModelEditTextBox() override;
+  void hideModelEditTextBox() override;
 
   void error(const std::string &title, const std::string &prompt);
   void warning(const std::string &title, const std::string &prompt);
