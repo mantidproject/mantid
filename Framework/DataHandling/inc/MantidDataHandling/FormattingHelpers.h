@@ -10,7 +10,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-std::string formatDouble(double value);
+std::string formatDouble(double const value);
 
 } // namespace DataHandling
 } // namespace Mantid

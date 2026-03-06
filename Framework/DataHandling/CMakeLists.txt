@@ -474,6 +474,7 @@ set(TEST_FILES
     ExtractPolarizationEfficienciesTest.h
     FindDetectorsInShapeTest.h
     FindDetectorsParTest.h
+    FormattingHelpersTest.h
     GenerateGroupingPowder2Test.h
     GenerateGroupingPowderTest.h
     GroupDetectors2Test.h
