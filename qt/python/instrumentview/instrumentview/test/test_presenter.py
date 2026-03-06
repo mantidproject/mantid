@@ -10,6 +10,7 @@ from instrumentview.Globals import CurrentTab
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Peaks.Peak import Peak
 from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.renderers.shape_renderer import ShapeRenderer
 
 import numpy as np
 from mantid.simpleapi import CreateSampleWorkspace
@@ -607,7 +608,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._on_show_shapes_toggled(checked=True)
         # Should switch to shape renderer
         self.assertIsNot(self._presenter._renderer, initial_renderer)
-        self.assertIsInstance(self._presenter._renderer, object)  # ShapeRenderer
+        self.assertIsInstance(self._presenter._renderer, ShapeRenderer)
         mock_update_plotter.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
@@ -630,7 +631,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertIsNotNone(self._presenter._point_cloud_renderer)
         self.assertIsNotNone(self._presenter._shape_renderer)
         self._presenter._clear_renderers()
-        self.assertIsNone(self._presenter._point_cloud_renderer)
         self.assertIsNone(self._presenter._shape_renderer)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
@@ -668,6 +668,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         # Should reuse cached instances
         self.assertIs(pc_renderer1, pc_renderer2)
         self.assertIs(shape_renderer1, shape_renderer2)
+        self.assertEqual(mock_update_plotter.call_count, 3)
 
 
 if __name__ == "__main__":

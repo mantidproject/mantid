@@ -265,12 +265,20 @@ class TestShapeRenderer(unittest.TestCase):
         det_info = MagicMock()
         det_info.size.return_value = n_detectors
         # Each detector has a unique position
+
+        def position(i):
+            pos = MagicMock()
+            pos.X.return_value = float(i)
+            pos.Y.return_value = 0.0
+            pos.Z.return_value = 0.0
+            return pos
+
         for i in range(n_detectors):
             pos = MagicMock()
             pos.X.return_value = float(i)
             pos.Y.return_value = 0.0
             pos.Z.return_value = 0.0
-            det_info.position.side_effect = self._make_position_side_effect(n_detectors)
+            det_info.position.side_effect = lambda idx: position(idx)
             det_info.indexOf.side_effect = lambda did: int(did)
         det_info.detectorIDs.return_value = list(range(n_detectors))
 
@@ -316,16 +324,6 @@ class TestShapeRenderer(unittest.TestCase):
         workspace.detectorInfo.return_value = det_info
 
         return workspace
-
-    def _make_position_side_effect(self, n_detectors):
-        def position(i):
-            pos = MagicMock()
-            pos.X.return_value = float(i)
-            pos.Y.return_value = 0.0
-            pos.Z.return_value = 0.0
-            return pos
-
-        return position
 
     def _create_mock_model(self, workspace, n_pickable=4):
         model = MagicMock()

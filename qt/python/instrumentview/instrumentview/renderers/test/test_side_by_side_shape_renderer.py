@@ -166,7 +166,7 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         model = MagicMock()
         model.workspace = ws
 
-        scales, rotate = self.renderer._compute_bank_projection_scales(det_indices, positions, model)
+        _, rotate = self.renderer._compute_bank_projection_scales(det_indices, positions, model)
 
         # Grid detectors (0,1,2) should not rotate
         self.assertFalse(np.any(rotate[:3]))
