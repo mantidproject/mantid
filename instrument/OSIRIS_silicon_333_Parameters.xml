@@ -7,6 +7,14 @@
       <value val="spectroscopy" />
     </parameter>
 
+    <parameter name="spectra-min">
+      <value val="1005" />
+    </parameter>
+
+    <parameter name="spectra-max">
+      <value val="2564" />
+    </parameter>
+
     <parameter name="analyser" type="string">
       <value val="silicon" />
     </parameter>
