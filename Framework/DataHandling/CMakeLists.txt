@@ -24,6 +24,7 @@ set(SRC_FILES
     src/ExtractPolarizationEfficiencies.cpp
     src/FindDetectorsInShape.cpp
     src/FindDetectorsPar.cpp
+    src/FormattingHelpers.cpp
     src/GenerateGroupingPowder.cpp
     src/GenerateGroupingPowder2.cpp
     src/GroupDetectors.cpp
@@ -247,6 +248,7 @@ set(INC_FILES
     inc/MantidDataHandling/ExtractPolarizationEfficiencies.h
     inc/MantidDataHandling/FindDetectorsInShape.h
     inc/MantidDataHandling/FindDetectorsPar.h
+    inc/MantidDataHandling/FormattingHelpers.h
     inc/MantidDataHandling/GenerateGroupingPowder.h
     inc/MantidDataHandling/GenerateGroupingPowder2.h
     inc/MantidDataHandling/GroupDetectors.h
@@ -472,6 +474,7 @@ set(TEST_FILES
     ExtractPolarizationEfficienciesTest.h
     FindDetectorsInShapeTest.h
     FindDetectorsParTest.h
+    FormattingHelpersTest.h
     GenerateGroupingPowder2Test.h
     GenerateGroupingPowderTest.h
     GroupDetectors2Test.h
