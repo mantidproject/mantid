@@ -24,7 +24,6 @@ import numpy as np
 from mantid.api import AnalysisDataService as ADS
 from os import path, makedirs
 from scipy import interpolate
-from Engineering.EnggUtils import GROUP
 from Engineering.common.texture_sample_viewer import has_valid_shape
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
@@ -147,8 +146,8 @@ class TextureCorrectionModel:
 
         # save files
         CloneWorkspace(temp_ws, OutputWorkspace=out_ws, StoreInADS=True)
-        group = self.calibration.group if self.calibration else None
-        save_filepath = self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", self.rb_num, group)
+        is_texture = self.calibration.get_group() in self.calibration.config.texture_groups if self.calibration else False
+        save_filepath = self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", self.rb_num, is_texture)
 
         # optionally remove extra files
         if self.remove_ws_after_processing:
@@ -165,12 +164,12 @@ class TextureCorrectionModel:
     # ~~~~~ General Utility Functions ~~~~~~~~~~~~~
 
     @staticmethod
-    def _save_corrected_files(ws: str, root_dir: str, dir_name: str, rb_num: Optional[str], calibration_group: GROUP) -> str:
+    def _save_corrected_files(ws: str, root_dir: str, dir_name: str, rb_num: Optional[str], is_texture: bool) -> str:
         filepath = ""
         save_dirs = [path.join(root_dir, dir_name)]
         if rb_num:
             save_dirs.append(path.join(root_dir, "User", rb_num, dir_name))
-            if calibration_group == GROUP.TEXTURE20 or calibration_group == GROUP.TEXTURE30:
+            if is_texture:
                 save_dirs.pop(0)  # only save to RB directory to limit number files saved
         for save_dir in save_dirs:
             if not path.exists(save_dir):
@@ -307,17 +306,7 @@ class TextureCorrectionModel:
 
     @staticmethod
     def read_attenuation_coefficient_at_value(ws: str, val: float, unit: str) -> Sequence[float]:
-        conv_ws = ConvertUnits(ADS.retrieve(ws), Target=unit)
-        coefs = []
-        xbins = conv_ws.readX(0)
-        xdat = np.convolve(xbins, np.ones(2), "valid") / 2  # this gets the bin centres
-        for r in range(conv_ws.getNumberHistograms()):
-            ydat = conv_ws.readY(r)
-            f = interpolate.interp1d(xdat, ydat)
-            interp_val = f([val])[0]
-            coefs.append(interp_val)
-        ADS.remove("conv_ws")
-        return coefs
+        return read_attenuation_coefficient_at_value(ws, val, unit)
 
     @staticmethod
     def get_atten_table_name(ws_str: str, eval_val: float, unit: str) -> str:
@@ -345,8 +334,8 @@ class TextureCorrectionModel:
                     vals[r],
                 ]
             )
-        group = calibration.group if calibration else None
-        self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, group)
+        is_texture = self.calibration.get_group() in self.calibration.config.texture_groups if self.calibration else False
+        self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, is_texture)
 
     # ~~~~~ Reference Workspace Functions ~~~~~~~~~~~~~
 
@@ -354,9 +343,10 @@ class TextureCorrectionModel:
         self.set_reference_ws(f"{rb_num}_reference_workspace")
         LoadEmptyInstrument(InstrumentName=instr, OutputWorkspace=self.reference_ws)
 
-    def save_reference_file(self, rb_num: str, group: Optional[GROUP], root_dir: Optional[str]) -> None:
+    def save_reference_file(self, rb_num: str, current_calib: Optional[CalibrationInfo], root_dir: Optional[str]) -> None:
+        is_texture = current_calib.get_group() in current_calib.config.texture_groups if current_calib else False
         if self.reference_ws and ADS.doesExist(self.reference_ws):
-            self._save_corrected_files(self.reference_ws, root_dir, "ReferenceWorkspaces", rb_num, group)
+            self._save_corrected_files(self.reference_ws, root_dir, "ReferenceWorkspaces", rb_num, is_texture)
 
     def set_reference_ws(self, ws_name: str) -> None:
         self.reference_ws = ws_name
@@ -377,3 +367,17 @@ class TextureCorrectionModel:
     @staticmethod
     def _has_no_valid_shape(ws_name: str) -> bool:
         return not has_valid_shape(ws_name)
+
+
+def read_attenuation_coefficient_at_value(ws: str, val: float, unit: str) -> Sequence[float]:
+    conv_ws = ConvertUnits(ADS.retrieve(ws), Target=unit)
+    coefs = []
+    xbins = conv_ws.readX(0)
+    xdat = np.convolve(xbins, np.ones(2), "valid") / 2  # this gets the bin centres
+    for r in range(conv_ws.getNumberHistograms()):
+        ydat = conv_ws.readY(r)
+        f = interpolate.interp1d(xdat, ydat)
+        interp_val = f([val])[0]
+        coefs.append(interp_val)
+    ADS.remove("conv_ws")
+    return coefs

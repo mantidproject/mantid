@@ -11,11 +11,11 @@ from Engineering.EnggUtils import focus_run, create_new_calibration
 from Engineering.common.calibration_info import CalibrationInfo
 from Engineering.common.instrument_config import get_instr_config
 
-CONFIG = get_instr_config("ENGINX")
+CONFIG = get_instr_config("IMAT")
 GROUP = CONFIG.group
 
 
-class EnginX:
+class IMAT:
     def __init__(
         self,
         vanadium_run: str,
@@ -40,11 +40,11 @@ class EnginX:
 
         # setup CalibrationInfo object
         if prm_path:
-            self.calibration.set_calibration_from_prm_fname(prm_path, "ENGINX")  # to load existing calibration
+            self.calibration.set_calibration_from_prm_fname(prm_path, "IMAT")  # to load existing calibration
         elif ceria_run and group:
             # make new calibration
             self.calibration.set_group(group)
-            self.calibration.set_calibration_paths("ENGINX", ceria_run, vanadium_run)
+            self.calibration.set_calibration_paths("IMAT", ceria_run, vanadium_run)
             if group == GROUP.CUSTOM and groupingfile_path:
                 self.calibration.set_grouping_file(groupingfile_path)
             elif group == GROUP.CROPPED and spectrum_num:
