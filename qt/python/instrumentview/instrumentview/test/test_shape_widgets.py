@@ -6,325 +6,677 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
+from unittest.mock import MagicMock
 import numpy as np
 
 from instrumentview.ShapeWidgets import (
-    ImplicitEllipse,
-    CylinderWidgetNoRotation,
-    RectangleWidgetNoRotation,
-    EllipseWidgetNoRotation,
+    AnnulusSelectionShape,
+    CircleSelectionShape,
+    HollowRectangleSelectionShape,
+    RectangleSelectionShape,
+    EllipseSelectionShape,
+    ShapeOverlayManager,
 )
 
 
-class TestImplicitEllipse(unittest.TestCase):
+class TestCircleSelectionShape(unittest.TestCase):
     def setUp(self):
-        self.ellipse = ImplicitEllipse()
+        self.shape = CircleSelectionShape(cx=0.5, cy=0.5, radius=0.15)
 
     def test_init(self):
-        self.assertEqual(self.ellipse.cx, 0.0)
-        self.assertEqual(self.ellipse.cy, 0.0)
-        self.assertEqual(self.ellipse.rx, 1.0)
-        self.assertEqual(self.ellipse.ry, 1.0)
-        self.assertEqual(self.ellipse.angle, 0.0)
+        self.assertEqual(self.shape.cx, 0.5)
+        self.assertEqual(self.shape.cy, 0.5)
+        self.assertEqual(self.shape.radius, 0.15)
 
-    def test_set_center(self):
-        self.ellipse.set_center(5.0, 3.0)
-        self.assertEqual(self.ellipse.cx, 5.0)
-        self.assertEqual(self.ellipse.cy, 3.0)
+    def test_hit_test_inside(self):
+        self.assertEqual(self.shape.hit_test(0.5, 0.5), "inside")
 
-    def test_set_radii(self):
-        self.ellipse.set_radii(2.0, 1.5)
-        self.assertEqual(self.ellipse.rx, 2.0)
-        self.assertEqual(self.ellipse.ry, 1.5)
+    def test_hit_test_edge(self):
+        # On the edge of the circle
+        hit = self.shape.hit_test(0.5 + 0.15, 0.5)
+        self.assertEqual(hit, "edge")
 
-    def test_set_radii_clamps_to_minimum(self):
-        self.ellipse.set_radii(0.0, -1.0)
-        self.assertEqual(self.ellipse.rx, 0.001)
-        self.assertEqual(self.ellipse.ry, 0.001)
+    def test_hit_test_outside(self):
+        self.assertIsNone(self.shape.hit_test(0.0, 0.0))
 
-    def test_set_angle(self):
-        angle_rad = np.pi / 4.0
-        self.ellipse.set_angle(angle_rad)
-        self.assertAlmostEqual(self.ellipse.angle, angle_rad)
+    def test_indices_in_shape_center(self):
+        proj = np.array([[0.5, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
 
-    def test_set_angle_none(self):
-        self.ellipse.set_angle(None)
-        self.assertEqual(self.ellipse.angle, 0.0)
+    def test_indices_in_shape_outside(self):
+        proj = np.array([[0.0, 0.0]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
 
-    def test_evaluate_function_at_center(self):
-        self.ellipse.set_center(0.0, 0.0)
-        self.ellipse.set_radii(2.0, 1.0)
-        result = self.ellipse.EvaluateFunction([0.0, 0.0])
-        self.assertLess(result, 0.0)
+    def test_indices_in_shape_boundary(self):
+        # Point just inside the boundary
+        proj = np.array([[0.5 + 0.15 - 1e-9, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
 
-    def test_evaluate_function_outside(self):
-        self.ellipse.set_center(0.0, 0.0)
-        self.ellipse.set_radii(1.0, 1.0)
-        result = self.ellipse.EvaluateFunction([10.0, 10.0])
-        self.assertGreater(result, 0.0)
+    def test_indices_in_shape_multiple(self):
+        proj = np.array([[0.5, 0.5], [0.0, 0.0], [0.55, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        np.testing.assert_array_equal(mask, [True, False, True])
 
-    def test_evaluate_function_on_boundary(self):
-        self.ellipse.set_center(0.0, 0.0)
-        self.ellipse.set_radii(2.0, 1.0)
-        result = self.ellipse.EvaluateFunction([2.0, 0.0])
-        self.assertAlmostEqual(result, 0.0, places=5)
+    def test_save_size(self):
+        s = self.shape.save_size()
+        self.assertEqual(s["radius"], 0.15)
 
-    def test_evaluate_function_with_rotation(self):
-        self.ellipse.set_center(0.0, 0.0)
-        self.ellipse.set_radii(2.0, 1.0)
-        self.ellipse.set_angle(0.0)
+    def test_apply_resize_delta(self):
+        saved = self.shape.save_size()
+        # Move cursor outward from just at the radius to further out
+        self.shape.apply_resize_delta(0.5 + 0.25, 0.5, 0.5 + 0.15, 0.5, saved)
+        self.assertAlmostEqual(self.shape.radius, 0.25, places=5)
 
-        result_no_rot = self.ellipse.EvaluateFunction([2.0, 0.0])
+    def test_apply_resize_delta_clamps_minimum(self):
+        saved = self.shape.save_size()
+        # Move cursor inward past center
+        self.shape.apply_resize_delta(0.5, 0.5, 0.5 + 0.15, 0.5, saved)
+        self.assertEqual(self.shape.radius, 0.01)
 
-        self.ellipse.set_angle(np.pi / 2.0)
-        result_rotated = self.ellipse.EvaluateFunction([2.0, 0.0])
+    def test_outline_xy_returns_arrays(self):
+        ox, oy = self.shape.outline_xy()
+        self.assertEqual(len(ox), CircleSelectionShape.N_OUTLINE)
+        self.assertEqual(len(oy), CircleSelectionShape.N_OUTLINE)
 
-        self.assertNotAlmostEqual(result_no_rot, result_rotated, places=3)
-
-    def test_evaluate_function_tuple_input(self):
-        self.ellipse.set_center(0.0, 0.0)
-        result = self.ellipse.EvaluateFunction((1.0, 0.0))
-        self.assertIsInstance(result, (int, float, np.number))
-
-    def test_evaluate_function_list_input(self):
-        self.ellipse.set_center(0.0, 0.0)
-        result = self.ellipse.EvaluateFunction([1.0, 0.0])
-        self.assertIsInstance(result, (int, float, np.number))
-
-    def test_evaluate_gradient_at_center(self):
-        self.ellipse.set_center(0.0, 0.0)
-        self.ellipse.set_radii(2.0, 1.0)
-        gradient = [0.0, 0.0, 0.0]
-        self.ellipse.EvaluateGradient([0.0, 0.0], gradient)
-        self.assertAlmostEqual(gradient[0], 0.0, places=5)
-        self.assertAlmostEqual(gradient[1], 0.0, places=5)
-        self.assertAlmostEqual(gradient[2], 0.0, places=5)
-
-    def test_evaluate_gradient_outside_ellipse(self):
-        self.ellipse.set_center(0.0, 0.0)
-        self.ellipse.set_radii(1.0, 1.0)
-        gradient = [0.0, 0.0, 0.0]
-        self.ellipse.EvaluateGradient([1.0, 1.0], gradient)
-        self.assertGreater(gradient[0] ** 2 + gradient[1] ** 2, 0.0)
-        self.assertAlmostEqual(gradient[2], 0.0, places=5)
-
-    def test_evaluate_gradient_with_rotation(self):
-        self.ellipse.set_center(0.0, 0.0)
-        self.ellipse.set_radii(2.0, 1.0)
-
-        self.ellipse.set_angle(0.0)
-        grad1 = [0.0, 0.0, 0.0]
-        self.ellipse.EvaluateGradient([1.0, 0.0], grad1)
-
-        self.ellipse.set_angle(np.pi / 4.0)
-        grad2 = [0.0, 0.0, 0.0]
-        self.ellipse.EvaluateGradient([1.0, 0.0], grad2)
-
-        self.assertNotAlmostEqual(grad1[0], grad2[0], places=3)
-
-    def test_evaluate_gradient_zero_radii(self):
-        self.ellipse.rx = 0.0
-        self.ellipse.ry = 0.0
-        gradient = [0.0, 0.0, 0.0]
-        self.ellipse.EvaluateGradient([1.0, 1.0], gradient)
-        self.assertEqual(gradient[0], 0.0)
-        self.assertEqual(gradient[1], 0.0)
-        self.assertEqual(gradient[2], 0.0)
+    def test_fill_coords_returns_arrays(self):
+        fx, fy_bot, fy_top = self.shape.fill_coords()
+        self.assertEqual(len(fx), CircleSelectionShape.N_FILL)
+        self.assertTrue(np.all(fy_top >= fy_bot))
 
 
-class TestCylinderWidgetNoRotation(unittest.TestCase):
-    def test_init(self):
-        widget = CylinderWidgetNoRotation()
-        self.assertIsNotNone(widget)
-
-    def test_on_interaction_rotates_state_4_to_3(self):
-        widget = CylinderWidgetNoRotation()
-
-        mock_representation = mock.MagicMock()
-        mock_representation.GetInteractionState.return_value = 4
-        widget.GetCylinderRepresentation = mock.MagicMock(return_value=mock_representation)
-
-        widget._on_interaction()
-
-        mock_representation.SetInteractionState.assert_called_with(3)
-
-    def test_on_interaction_preserves_other_states(self):
-        widget = CylinderWidgetNoRotation()
-
-        mock_representation = mock.MagicMock()
-        mock_representation.GetInteractionState.return_value = 0
-        widget.GetCylinderRepresentation = mock.MagicMock(return_value=mock_representation)
-
-        widget._on_interaction()
-
-        mock_representation.SetInteractionState.assert_not_called()
-
-
-class TestRectangleWidgetNoRotation(unittest.TestCase):
-    def test_init(self):
-        widget = RectangleWidgetNoRotation()
-        self.assertIsNotNone(widget)
-
-    def test_on_interaction_rotates_state_8_to_7(self):
-        widget = RectangleWidgetNoRotation()
-
-        mock_representation = mock.MagicMock()
-        mock_representation.GetInteractionState.return_value = 8
-        widget.GetRepresentation = mock.MagicMock(return_value=mock_representation)
-
-        widget._on_interaction()
-
-        mock_representation.SetInteractionState.assert_called_with(7)
-
-    def test_on_interaction_preserves_other_states(self):
-        widget = RectangleWidgetNoRotation()
-
-        mock_representation = mock.MagicMock()
-        mock_representation.GetInteractionState.return_value = 0
-        widget.GetRepresentation = mock.MagicMock(return_value=mock_representation)
-
-        widget._on_interaction()
-
-        mock_representation.SetInteractionState.assert_not_called()
-
-
-class TestEllipseWidgetNoRotation(unittest.TestCase):
+class TestRectangleSelectionShape(unittest.TestCase):
     def setUp(self):
-        self.widget = EllipseWidgetNoRotation(plotter=None)
+        self.shape = RectangleSelectionShape(cx=0.5, cy=0.5, half_w=0.1, half_h=0.08)
 
     def test_init(self):
-        self.assertIsNotNone(self.widget._ellipse)
-        self.assertIsNone(self.widget._plotter)
-        self.assertEqual(self.widget._angle, 0.0)
-        self.assertFalse(self.widget._rotating)
-        self.assertIsNone(self.widget._center_display)
-        self.assertIsNone(self.widget._handle_display)
+        self.assertEqual(self.shape.cx, 0.5)
+        self.assertEqual(self.shape.cy, 0.5)
+        self.assertEqual(self.shape.half_w, 0.1)
+        self.assertEqual(self.shape.half_h, 0.08)
+        self.assertEqual(self.shape.angle, 0.0)
 
-    def test_set_ellipse_parameters(self):
-        self.widget.set_ellipse_parameters(5.0, 3.0, 2.0, 1.5, angle=np.pi / 4.0)
-        self.assertEqual(self.widget._ellipse.cx, 5.0)
-        self.assertEqual(self.widget._ellipse.cy, 3.0)
-        self.assertEqual(self.widget._ellipse.rx, 2.0)
-        self.assertEqual(self.widget._ellipse.ry, 1.5)
-        self.assertAlmostEqual(self.widget._angle, np.pi / 4)
+    def test_hit_test_inside(self):
+        self.assertEqual(self.shape.hit_test(0.5, 0.5), "inside")
 
-    def test_set_ellipse_parameters_without_angle(self):
-        self.widget._angle = np.pi / 2.0
-        self.widget.set_ellipse_parameters(5.0, 3.0, 2.0, 1.5)
-        self.assertEqual(self.widget._ellipse.cx, 5.0)
-        self.assertAlmostEqual(self.widget._angle, np.pi / 2.0)
+    def test_hit_test_edge(self):
+        hit = self.shape.hit_test(0.5 + 0.1, 0.5)
+        self.assertEqual(hit, "edge")
 
-    def test_get_implicit_ellipse(self):
-        self.widget._ellipse.set_center(1.0, 2.0)
-        self.widget._ellipse.set_radii(2.0, 1.5)
-        ellipse = self.widget.get_implicit_ellipse()
-        self.assertIs(ellipse, self.widget._ellipse)
+    def test_hit_test_handle(self):
+        hx, hy = self.shape._handle_pos()
+        self.assertEqual(self.shape.hit_test(hx, hy), "handle")
 
-    def test_cancel_rotation_sets_flag(self):
-        widget = EllipseWidgetNoRotation()
-        widget._rotating = True
-        widget._saved_interactor_style = None
-        widget._cancel_rotation(None)
-        self.assertFalse(widget._rotating)
+    def test_hit_test_outside(self):
+        self.assertIsNone(self.shape.hit_test(0.0, 0.0))
 
-    def test_disable_interactor_style(self):
-        widget = EllipseWidgetNoRotation()
-        mock_interactor = mock.MagicMock()
-        mock_style = mock.MagicMock()
-        mock_interactor.GetInteractorStyle.return_value = mock_style
+    def test_indices_in_shape_no_rotation(self):
+        proj = np.array([[0.5, 0.5], [0.0, 0.0], [0.55, 0.55]])
+        mask = self.shape.indices_in_shape(proj)
+        np.testing.assert_array_equal(mask, [True, False, True])
 
-        widget._disable_interactor_style(mock_interactor)
+    def test_indices_in_shape_with_rotation(self):
+        self.shape.angle = np.pi / 4.0
+        # After 45 degree rotation, a point at (0.6, 0.5) is rotated to local coords
+        proj = np.array([[0.6, 0.5]])  # offset 0.1 in x, should still be inside
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
 
-        self.assertEqual(widget._saved_interactor_style, mock_style)
-        mock_interactor.SetInteractorStyle.assert_called_with(None)
+    def test_save_size(self):
+        s = self.shape.save_size()
+        self.assertEqual(s["half_w"], 0.1)
+        self.assertEqual(s["half_h"], 0.08)
 
-    def test_disable_interactor_style_none_interactor(self):
-        widget = EllipseWidgetNoRotation()
-        widget._disable_interactor_style(None)
+    def test_apply_resize_delta(self):
+        saved = self.shape.save_size()
+        # Expand to larger rectangle by moving local x boundary outward
+        self.shape.apply_resize_delta(0.5 + 0.15, 0.5 + 0.12, 0.5 + 0.1, 0.5 + 0.08, saved)
+        self.assertAlmostEqual(self.shape.half_w, 0.15, places=5)
+        self.assertAlmostEqual(self.shape.half_h, 0.12, places=5)
 
-    def test_restore_interactor_style(self):
-        widget = EllipseWidgetNoRotation()
-        mock_interactor = mock.MagicMock()
-        mock_style = mock.MagicMock()
-        widget._saved_interactor_style = mock_style
+    def test_corners_no_rotation(self):
+        corners = self.shape._corners()
+        self.assertEqual(len(corners), 4)
+        # Bottom-left and top-right
+        np.testing.assert_almost_equal(corners[0], (0.4, 0.42))
+        np.testing.assert_almost_equal(corners[2], (0.6, 0.58))
 
-        widget._restore_interactor_style(mock_interactor)
+    def test_outline_xy_closed(self):
+        ox, oy = self.shape.outline_xy()
+        # Outline polyline should be closed (first == last)
+        self.assertAlmostEqual(ox[0], ox[-1])
+        self.assertAlmostEqual(oy[0], oy[-1])
 
-        mock_interactor.SetInteractorStyle.assert_called_with(mock_style)
-        self.assertIsNone(widget._saved_interactor_style)
+    def test_fill_coords_returns_arrays(self):
+        fx, fy_bot, fy_top = self.shape.fill_coords()
+        self.assertGreater(len(fx), 0)
+        self.assertTrue(np.all(fy_top >= fy_bot))
 
-    def test_restore_interactor_style_none_saved(self):
-        widget = EllipseWidgetNoRotation()
-        mock_interactor = mock.MagicMock()
-        widget._saved_interactor_style = None
 
-        widget._restore_interactor_style(mock_interactor)
+class TestEllipseSelectionShape(unittest.TestCase):
+    def setUp(self):
+        self.shape = EllipseSelectionShape(cx=0.5, cy=0.5, half_a=0.15, half_b=0.1)
 
-        mock_interactor.SetInteractorStyle.assert_not_called()
+    def test_init(self):
+        self.assertEqual(self.shape.cx, 0.5)
+        self.assertEqual(self.shape.cy, 0.5)
+        self.assertEqual(self.shape.half_a, 0.15)
+        self.assertEqual(self.shape.half_b, 0.1)
+        self.assertEqual(self.shape.angle, 0.0)
 
-    def test_on_vtk_cancel_rotation_from_obj(self):
-        widget = EllipseWidgetNoRotation()
-        widget._rotating = True
-        widget._saved_interactor_style = None
+    def test_hit_test_inside(self):
+        self.assertEqual(self.shape.hit_test(0.5, 0.5), "inside")
 
-        mock_obj = mock.MagicMock()
-        mock_obj.AbortFlagOn = mock.MagicMock()
+    def test_hit_test_edge(self):
+        # On the semi-major axis boundary
+        hit = self.shape.hit_test(0.5 + 0.15, 0.5)
+        self.assertEqual(hit, "edge")
 
-        widget._on_vtk_cancel_rotation(mock_obj, None)
+    def test_hit_test_handle(self):
+        hx, hy = self.shape._handle_pos()
+        self.assertEqual(self.shape.hit_test(hx, hy), "handle")
 
-        self.assertFalse(widget._rotating)
+    def test_hit_test_outside(self):
+        self.assertIsNone(self.shape.hit_test(0.0, 0.0))
 
-    def test_on_vtk_end_interaction(self):
-        widget = EllipseWidgetNoRotation()
-        widget._rotating = True
-        widget._saved_interactor_style = None
+    def test_indices_in_shape_center(self):
+        proj = np.array([[0.5, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
 
-        mock_obj = mock.MagicMock()
-        mock_obj.AbortFlagOn = mock.MagicMock()
+    def test_indices_in_shape_outside(self):
+        proj = np.array([[0.0, 0.0]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
 
-        widget._on_vtk_end_interaction(mock_obj, None)
+    def test_indices_in_shape_on_boundary(self):
+        # Point just inside the semi-major axis boundary
+        proj = np.array([[0.5 + 0.15 - 1e-9, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
 
-        self.assertFalse(widget._rotating)
+    def test_indices_in_shape_with_rotation(self):
+        self.shape.angle = np.pi / 2.0
+        # After 90 degree rotation, half_a (0.15) now extends along y, half_b (0.1) along x
+        proj = np.array([[0.5, 0.5 + 0.14]])  # inside along rotated major axis
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
 
-    def test_on_interaction_state_8_to_7(self):
-        widget = EllipseWidgetNoRotation()
+    def test_indices_in_shape_with_rotation_outside(self):
+        self.shape.angle = np.pi / 2.0
+        # After 90 degree rotation, x extent is only half_b=0.1
+        proj = np.array([[0.5 + 0.12, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
 
-        mock_representation = mock.MagicMock()
-        mock_representation.GetInteractionState.return_value = 8
-        widget.GetRepresentation = mock.MagicMock(return_value=mock_representation)
+    def test_save_size(self):
+        s = self.shape.save_size()
+        self.assertEqual(s["half_a"], 0.15)
+        self.assertEqual(s["half_b"], 0.1)
 
-        widget._on_interaction()
+    def test_apply_resize_delta(self):
+        saved = self.shape.save_size()
+        self.shape.apply_resize_delta(0.5 + 0.2, 0.5, 0.5 + 0.15, 0.5, saved)
+        self.assertAlmostEqual(self.shape.half_a, 0.2, places=5)
 
-        mock_representation.SetInteractionState.assert_called_with(7)
+    def test_outline_xy_returns_arrays(self):
+        ox, oy = self.shape.outline_xy()
+        self.assertEqual(len(ox), EllipseSelectionShape.N_OUTLINE)
 
-    def test_create_ellipse_mesh(self):
-        widget = EllipseWidgetNoRotation()
-        mesh = widget._create_ellipse_mesh(0.0, 0.0, 2.0, 1.0, 0.0, num_points=64, angle=0.0)
+    def test_fill_coords_returns_arrays(self):
+        fx, fy_bot, fy_top = self.shape.fill_coords()
+        self.assertGreater(len(fx), 0)
+        self.assertTrue(np.all(fy_top >= fy_bot))
 
-        self.assertIsNotNone(mesh)
-        self.assertEqual(mesh.n_points, 64)
+    def test_evaluate_function_equivalence_no_rotation(self):
+        """Verify that indices_in_shape matches the old ImplicitEllipse.EvaluateFunction approach."""
+        # Set up the ellipse in normalised coords
+        self.shape.half_a = 0.2
+        self.shape.half_b = 0.1
+        self.shape.angle = 0.0
 
-    def test_create_ellipse_mesh_with_rotation(self):
-        widget = EllipseWidgetNoRotation()
+        # Interior point
+        proj = np.array([[0.5, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
 
-        mesh1 = widget._create_ellipse_mesh(0.0, 0.0, 2.0, 1.0, 0.0, num_points=256, angle=0.0)
-        points1 = mesh1.points.copy()
-        points1.sort(axis=0)
+        # Boundary point (semi-major axis end)
+        proj = np.array([[0.5 + 0.2, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
 
-        mesh2 = widget._create_ellipse_mesh(0.0, 0.0, 1.0, 2.0, 0.0, num_points=256, angle=-np.pi / 2.0)
-        points2 = mesh2.points.copy()
-        points2.sort(axis=0)
-        np.testing.assert_allclose(points1, points2, rtol=1e-4, atol=0.1)
+        # Exterior point
+        proj = np.array([[0.5 + 0.3, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
 
-    def test_cleanup(self):
-        widget = EllipseWidgetNoRotation()
-        widget._vtk_interactor = mock.MagicMock()
-        widget._ellipse_actor = mock.MagicMock()
-        widget._rotation_handle_actor = mock.MagicMock()
+    def test_evaluate_function_equivalence_with_rotation(self):
+        """Verify rotation transforms work correctly for containment."""
+        self.shape.half_a = 0.2  # semi-major
+        self.shape.half_b = 0.1  # semi-minor
+        self.shape.angle = np.pi / 2.0  # 90 deg rotation
 
-        result = widget.cleanup()
+        # After 90 degree rotation, semi-major (0.2) extends along y, semi-minor (0.1) along x
+        # Point at +0.15 along y: should be inside (0.15 < 0.2)
+        proj = np.array([[0.5, 0.5 + 0.15]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
 
-        self.assertIs(result, widget._ellipse)
+        # Point at +0.15 along x: should be outside (0.15 > 0.1)
+        proj = np.array([[0.5 + 0.15, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
+
+
+class TestShapeOverlayManager(unittest.TestCase):
+    def _make_mock_plotter(self):
+        plotter = mock.MagicMock()
+        plotter.window_size = (800, 600)
+        plotter.mouse_position = (400, 300)
+        plotter.iren = mock.MagicMock()
+        plotter.iren.interactor = mock.MagicMock()
+        plotter.renderer = mock.MagicMock()
+        return plotter
+
+    def test_init(self):
+        plotter = self._make_mock_plotter()
+        mgr = ShapeOverlayManager(plotter)
+        self.assertIsNone(mgr.current_shape)
+        self.assertIsNone(mgr._cached_transform)
+
+    def test_set_shape(self):
+        plotter = self._make_mock_plotter()
+        mgr = ShapeOverlayManager(plotter)
+        shape = CircleSelectionShape(0.5, 0.5, 0.1)
+        mgr.set_shape(shape)
+        self.assertIs(mgr.current_shape, shape)
+
+    def test_remove_shape(self):
+        plotter = self._make_mock_plotter()
+        mgr = ShapeOverlayManager(plotter)
+        shape = CircleSelectionShape(0.5, 0.5, 0.1)
+        mgr.set_shape(shape)
+        mgr.remove_shape()
+        self.assertIsNone(mgr.current_shape)
+
+    def test_get_shape_mask_no_shape(self):
+        plotter = self._make_mock_plotter()
+        mgr = ShapeOverlayManager(plotter)
+        points = np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]])
+        mask = mgr.get_shape_mask(points)
+        np.testing.assert_array_equal(mask, [False, False])
+
+    def test_pixel_to_data_uses_cached_transform(self):
+        """_pixel_to_data should use cached transform parameters."""
+        plotter = self._make_mock_plotter()
+        mgr = ShapeOverlayManager(plotter)
+        # Simulate a cached PlotTransform: sx=760, sy=560, tx=20, ty=20
+        # (data range [0,1] maps to pixels [20, 780] x [20, 580])
+        mgr._cached_transform = (760.0, 560.0, 20.0, 20.0)
+        # Pixel (400, 300) should map to data ((400-20)/760, (300-20)/560)
+        result = mgr._pixel_to_data(400, 300)
+        self.assertIsNotNone(result)
+        self.assertAlmostEqual(result[0], 380.0 / 760.0, places=6)
+        self.assertAlmostEqual(result[1], 280.0 / 560.0, places=6)
+
+    def test_pixel_to_data_fallback_without_cache(self):
+        """Without cache or chart, _pixel_to_data falls back to renderer size."""
+        plotter = self._make_mock_plotter()
+        plotter.renderer.GetSize.return_value = (800, 600)
+        mgr = ShapeOverlayManager(plotter)
+        result = mgr._pixel_to_data(400, 300)
+        self.assertIsNotNone(result)
+        self.assertAlmostEqual(result[0], 0.5)
+        self.assertAlmostEqual(result[1], 0.5)
+
+    def test_project_points_uses_cached_projection(self):
+        """project_points_to_screen uses VTK WorldToDisplay + PlotTransform inverse."""
+        plotter = self._make_mock_plotter()
+        renderer = plotter.renderer
+
+        # Mock VTK renderer to return a predictable display point.
+        renderer.GetDisplayPoint.return_value = (400.0, 300.0, 0.0)
+        renderer.SetWorldPoint = MagicMock()
+        renderer.WorldToDisplay = MagicMock()
+
+        mgr = ShapeOverlayManager(plotter)
+        # PlotTransform maps [0,1] → [0, 800] / [0, 600] — no borders.
+        mgr._cached_transform = (800.0, 600.0, 0.0, 0.0)
+
+        # Display (400, 300) → data ((400-0)/800, (300-0)/600) = (0.5, 0.5)
+        points = np.array([[0.0, 0.0, 0.0]])
+        proj = mgr.project_points_to_screen(points)
+        self.assertAlmostEqual(proj[0, 0], 0.5, places=4)
+        self.assertAlmostEqual(proj[0, 1], 0.5, places=4)
+
+    def test_project_points_accounts_for_chart_borders(self):
+        """PlotTransform offset should shift projected data coords."""
+        plotter = self._make_mock_plotter()
+        renderer = plotter.renderer
+
+        # Mock VTK renderer to return a predictable display point.
+        renderer.GetDisplayPoint.return_value = (400.0, 300.0, 0.0)
+        renderer.SetWorldPoint = MagicMock()
+        renderer.WorldToDisplay = MagicMock()
+
+        mgr = ShapeOverlayManager(plotter)
+        # PlotTransform: data [0,1] maps to pixels [20, 780] × [20, 580]
+        # so sx=760, tx=20, sy=560, ty=20
+        mgr._cached_transform = (760.0, 560.0, 20.0, 20.0)
+
+        # Display (400, 300) → data ((400-20)/760, (300-20)/560)
+        points = np.array([[0.0, 0.0, 0.0]])
+        proj = mgr.project_points_to_screen(points)
+        self.assertAlmostEqual(proj[0, 0], 380.0 / 760.0, places=4)
+        self.assertAlmostEqual(proj[0, 1], 280.0 / 560.0, places=4)
+
+    def test_get_shape_mask_uses_cached_projected_points(self):
+        """get_shape_mask prefers pre-projected VTK cache when available."""
+        plotter = self._make_mock_plotter()
+        mgr = ShapeOverlayManager(plotter)
+
+        # Install a simple circle shape at (0.5, 0.5) with radius 0.2
+        shape = CircleSelectionShape(0.5, 0.5, 0.1)
+        mgr._shape = shape
+
+        # Provide pre-projected points (simulating project_and_cache_points)
+        # Point at (0.5, 0.5) is at centre → inside
+        # Point at (0.9, 0.9) is far from centre → outside
+        mgr._cached_projected_points = np.array([[0.5, 0.5], [0.9, 0.9]])
+
+        world_pts = np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]])
+        mask = mgr.get_shape_mask(world_pts)
+        np.testing.assert_array_equal(mask, [True, False])
+
+        # Cache should be consumed (cleared after single use)
+        self.assertIsNone(mgr._cached_projected_points)
+
+    def test_project_and_cache_points_stores_projected_data(self):
+        """project_and_cache_points populates _cached_projected_points."""
+        plotter = self._make_mock_plotter()
+        renderer = plotter.renderer
+
+        # Make WorldToDisplay return predictable display coords.
+        # We'll track what SetWorldPoint receives and return fixed values.
+        display_returns = iter([(400.0, 300.0, 0.0), (100.0, 500.0, 0.0)])
+        renderer.GetDisplayPoint = MagicMock(side_effect=display_returns)
+        renderer.SetWorldPoint = MagicMock()
+        renderer.WorldToDisplay = MagicMock()
+        renderer.GetSize.return_value = (800, 600)
+
+        mgr = ShapeOverlayManager(plotter)
+        # No PlotTransform → falls back to dividing by renderer size
+        mgr._cached_transform = None
+
+        world_pts = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+        mgr.project_and_cache_points(world_pts)
+
+        self.assertIsNotNone(mgr._cached_projected_points)
+        self.assertEqual(mgr._cached_projected_points.shape, (2, 2))
+        # (400/800, 300/600) = (0.5, 0.5)
+        self.assertAlmostEqual(mgr._cached_projected_points[0, 0], 0.5)
+        self.assertAlmostEqual(mgr._cached_projected_points[0, 1], 0.5)
+        # (100/800, 500/600)
+        self.assertAlmostEqual(mgr._cached_projected_points[1, 0], 0.125)
+        self.assertAlmostEqual(mgr._cached_projected_points[1, 1], 500.0 / 600.0)
+
+
+class TestAnnulusSelectionShape(unittest.TestCase):
+    def setUp(self):
+        self.shape = AnnulusSelectionShape(cx=0.5, cy=0.5, inner_radius=0.06, outer_radius=0.15)
+
+    def test_init(self):
+        self.assertEqual(self.shape.cx, 0.5)
+        self.assertEqual(self.shape.cy, 0.5)
+        self.assertEqual(self.shape.inner_radius, 0.06)
+        self.assertEqual(self.shape.outer_radius, 0.15)
+
+    def test_hit_test_inside_ring(self):
+        # Point halfway between inner and outer radius
+        self.assertEqual(self.shape.hit_test(0.5 + 0.10, 0.5), "inside")
+
+    def test_hit_test_outer_edge(self):
+        self.assertEqual(self.shape.hit_test(0.5 + 0.15, 0.5), "edge")
+
+    def test_hit_test_inner_edge(self):
+        self.assertEqual(self.shape.hit_test(0.5 + 0.06, 0.5), "inner_edge")
+
+    def test_hit_test_inside_hole(self):
+        # Inside the inner circle (the hole) — not part of the annulus
+        self.assertIsNone(self.shape.hit_test(0.5, 0.5))
+
+    def test_hit_test_outside(self):
+        self.assertIsNone(self.shape.hit_test(0.0, 0.0))
+
+    def test_indices_in_shape_in_ring(self):
+        proj = np.array([[0.5 + 0.10, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
+
+    def test_indices_in_shape_in_hole(self):
+        proj = np.array([[0.5, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
+
+    def test_indices_in_shape_outside(self):
+        proj = np.array([[0.0, 0.0]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
+
+    def test_indices_in_shape_multiple(self):
+        proj = np.array(
+            [
+                [0.5 + 0.10, 0.5],  # in ring
+                [0.5, 0.5],  # in hole
+                [0.0, 0.0],  # outside
+                [0.5, 0.5 + 0.07],  # in ring
+            ]
+        )
+        mask = self.shape.indices_in_shape(proj)
+        np.testing.assert_array_equal(mask, [True, False, False, True])
+
+    def test_save_size(self):
+        s = self.shape.save_size()
+        self.assertEqual(s["inner_radius"], 0.06)
+        self.assertEqual(s["outer_radius"], 0.15)
+
+    def test_apply_resize_delta_outer(self):
+        saved = self.shape.save_size()
+        # Start near outer edge, drag outward
+        self.shape.apply_resize_delta(
+            0.5 + 0.20,
+            0.5,  # current
+            0.5 + 0.15,
+            0.5,  # start (on outer edge)
+            saved,
+        )
+        self.assertAlmostEqual(self.shape.outer_radius, 0.20, places=5)
+        # Inner should be unchanged
+        self.assertAlmostEqual(self.shape.inner_radius, 0.06, places=5)
+
+    def test_apply_resize_delta_inner(self):
+        saved = self.shape.save_size()
+        # Start near inner edge, drag inward
+        self.shape.apply_resize_delta(
+            0.5 + 0.04,
+            0.5,  # current
+            0.5 + 0.06,
+            0.5,  # start (on inner edge)
+            saved,
+        )
+        self.assertAlmostEqual(self.shape.inner_radius, 0.04, places=5)
+        # Outer should be unchanged
+        self.assertAlmostEqual(self.shape.outer_radius, 0.15, places=5)
+
+    def test_apply_resize_delta_inner_clamps_to_min(self):
+        saved = self.shape.save_size()
+        # Drag inner edge inward past minimum
+        self.shape.apply_resize_delta(
+            0.5,
+            0.5,  # current (at center)
+            0.5 + 0.06,
+            0.5,  # start (on inner edge)
+            saved,
+        )
+        self.assertEqual(self.shape.inner_radius, 0.01)
+
+    def test_apply_resize_delta_outer_clamps_above_inner(self):
+        saved = self.shape.save_size()
+        # Drag outer edge inward past inner
+        self.shape.apply_resize_delta(
+            0.5 + 0.05,
+            0.5,  # current
+            0.5 + 0.15,
+            0.5,  # start (on outer edge)
+            saved,
+        )
+        self.assertEqual(self.shape.outer_radius, self.shape.inner_radius + 0.01)
+
+    def test_outline_xy_has_nan_separator(self):
+        ox, oy = self.shape.outline_xy()
+        # Should have a NaN separator between outer and inner circles
+        self.assertTrue(np.any(np.isnan(ox)))
+        self.assertTrue(np.any(np.isnan(oy)))
+
+    def test_fill_coords_returns_arrays(self):
+        fx, fy_bot, fy_top = self.shape.fill_coords()
+        self.assertGreater(len(fx), 0)
+        self.assertTrue(np.all(fy_top >= fy_bot))
+
+
+class TestHollowRectangleSelectionShape(unittest.TestCase):
+    def setUp(self):
+        self.shape = HollowRectangleSelectionShape(
+            cx=0.5, cy=0.5, outer_half_width=0.12, outer_half_height=0.08, inner_half_width=0.06, inner_half_height=0.04
+        )
+
+    def test_init(self):
+        self.assertEqual(self.shape.cx, 0.5)
+        self.assertEqual(self.shape.cy, 0.5)
+        self.assertEqual(self.shape.outer_half_width, 0.12)
+        self.assertEqual(self.shape.outer_half_height, 0.08)
+        self.assertEqual(self.shape.inner_half_width, 0.06)
+        self.assertEqual(self.shape.inner_half_height, 0.04)
+        self.assertEqual(self.shape.angle, 0.0)
+
+    def test_hit_test_inside_frame(self):
+        # Point between inner and outer rect (in the frame area)
+        self.assertEqual(self.shape.hit_test(0.5 + 0.09, 0.5), "inside")
+
+    def test_hit_test_outer_edge(self):
+        self.assertEqual(self.shape.hit_test(0.5 + 0.12, 0.5), "edge")
+
+    def test_hit_test_inner_edge(self):
+        self.assertEqual(self.shape.hit_test(0.5 + 0.06, 0.5), "inner_edge")
+
+    def test_hit_test_in_hole(self):
+        # Inside the inner rectangle (the hole)
+        self.assertIsNone(self.shape.hit_test(0.5, 0.5))
+
+    def test_hit_test_outside(self):
+        self.assertIsNone(self.shape.hit_test(0.0, 0.0))
+
+    def test_hit_test_handle(self):
+        hx, hy = self.shape._handle_pos()
+        self.assertEqual(self.shape.hit_test(hx, hy), "handle")
+
+    def test_indices_in_shape_in_frame(self):
+        # Point in the frame area
+        proj = np.array([[0.5 + 0.09, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
+
+    def test_indices_in_shape_in_hole(self):
+        proj = np.array([[0.5, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
+
+    def test_indices_in_shape_outside(self):
+        proj = np.array([[0.0, 0.0]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertFalse(mask[0])
+
+    def test_indices_in_shape_multiple(self):
+        proj = np.array(
+            [
+                [0.5 + 0.09, 0.5],  # in frame
+                [0.5, 0.5],  # in hole
+                [0.0, 0.0],  # outside
+                [0.5, 0.5 + 0.06],  # in frame (between inner_half_height and outer_half_height)
+            ]
+        )
+        mask = self.shape.indices_in_shape(proj)
+        np.testing.assert_array_equal(mask, [True, False, False, True])
+
+    def test_indices_in_shape_with_rotation(self):
+        self.shape.angle = np.pi / 2.0
+        # After 90-degree rotation, outer_half_width (0.12) extends along y, outer_half_height (0.08) along x
+        # Point at (0.5+0.07, 0.5) — in local coords: lx≈0, ly≈-0.07
+        # |ly|=0.07 > inner_half_height=0.04, |ly|=0.07 < outer_half_height=0.08 → in frame
+        proj = np.array([[0.5 + 0.07, 0.5]])
+        mask = self.shape.indices_in_shape(proj)
+        self.assertTrue(mask[0])
+
+    def test_save_size(self):
+        s = self.shape.save_size()
+        self.assertEqual(s["outer_half_width"], 0.12)
+        self.assertEqual(s["outer_half_height"], 0.08)
+        self.assertEqual(s["inner_half_width"], 0.06)
+        self.assertEqual(s["inner_half_height"], 0.04)
+
+    def test_apply_resize_delta_outer(self):
+        saved = self.shape.save_size()
+        # Start near outer edge, drag outward
+        self.shape.apply_resize_delta(
+            0.5 + 0.15,
+            0.5 + 0.12,  # current
+            0.5 + 0.12,
+            0.5 + 0.08,  # start (on outer edge)
+            saved,
+        )
+        self.assertAlmostEqual(self.shape.outer_half_width, 0.15, places=5)
+        self.assertAlmostEqual(self.shape.outer_half_height, 0.12, places=5)
+        # Inner unchanged
+        self.assertAlmostEqual(self.shape.inner_half_width, 0.06, places=5)
+        self.assertAlmostEqual(self.shape.inner_half_height, 0.04, places=5)
+
+    def test_apply_resize_delta_inner(self):
+        saved = self.shape.save_size()
+        # Start near inner edge, drag inward
+        self.shape.apply_resize_delta(
+            0.5 + 0.04,
+            0.5 + 0.02,  # current
+            0.5 + 0.06,
+            0.5 + 0.04,  # start (on inner edge)
+            saved,
+        )
+        self.assertAlmostEqual(self.shape.inner_half_width, 0.04, places=5)
+        self.assertAlmostEqual(self.shape.inner_half_height, 0.02, places=5)
+
+    def test_apply_resize_delta_inner_clamps(self):
+        saved = self.shape.save_size()
+        # Drag inner edge way outward past outer
+        self.shape.apply_resize_delta(
+            0.5 + 0.20,
+            0.5 + 0.20,  # current
+            0.5 + 0.06,
+            0.5 + 0.04,  # start (on inner edge)
+            saved,
+        )
+        self.assertEqual(self.shape.inner_half_width, self.shape.outer_half_width - 0.01)
+        self.assertEqual(self.shape.inner_half_height, self.shape.outer_half_height - 0.01)
+
+    def test_outline_xy_has_nan_separator(self):
+        ox, oy = self.shape.outline_xy()
+        self.assertTrue(np.any(np.isnan(ox)))
+        self.assertTrue(np.any(np.isnan(oy)))
+
+    def test_fill_coords_returns_arrays(self):
+        fx, fy_bot, fy_top = self.shape.fill_coords()
+        self.assertGreater(len(fx), 0)
+        self.assertTrue(np.all(fy_top >= fy_bot))
 
 
 if __name__ == "__main__":

@@ -305,14 +305,15 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_clear_point_picked_detectors_clicked, ()))
 
     def _on_add_item_clicked(self) -> None:
-        implicit_function = self._view.get_current_widget_implicit_function()
-        if not implicit_function:
+        mask = self._view.get_shape_mask(np.array(self._detector_mesh.points))
+        if not np.any(mask):
             return
-        mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points]
-        new_key = self._model.add_new_detector_key(mask, self._view.get_current_selected_tab())
+        new_key = self._model.add_new_detector_key(mask.tolist(), self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
 
     def on_add_item_clicked(self) -> None:
+        points = np.array(self._detector_mesh.points)
+        self._view.project_and_cache_detector_points(points)
         self._callback_queue.put((self._on_add_item_clicked, ()))
 
     def _on_list_item_selected(self, kind: CurrentTab) -> None:
