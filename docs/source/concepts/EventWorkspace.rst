@@ -4,9 +4,6 @@
 Event Workspace
 ===============
 
-.. contents::
-  :local:
-
 What is it for?
 ______________________
 

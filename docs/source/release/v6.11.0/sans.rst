@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - The :ref:`compatibility_mode` feature in the :ref:`ISIS SANS GUI <ISIS_Sans_interface_contents>` is no longer selected by default.

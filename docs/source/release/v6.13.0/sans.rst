@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 .. _6_13_sans:
 
 New Features

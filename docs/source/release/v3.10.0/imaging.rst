@@ -2,9 +2,6 @@
 Imaging
 =======
 
-.. contents:: Table of Contents
-   :local:
-
 Reconstruction Scripts
 ----------------------
 

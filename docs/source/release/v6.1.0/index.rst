@@ -9,9 +9,6 @@ Mantid 6.1.0 Release Notes
    :width: 440px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 
 We are proud to announce version 6.1.0 of Mantid.
 

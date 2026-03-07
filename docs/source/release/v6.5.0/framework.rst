@@ -2,9 +2,6 @@
 Framework Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - GSL has been updated to v2.7.

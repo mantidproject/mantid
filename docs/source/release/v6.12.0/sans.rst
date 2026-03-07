@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - :ref:`algm-SaveNXcanSAS` has been extended to support the saving of multiple file formats. This functionality will be exposed via the ISIS SANS Command Interface in a following release.

@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - ``Background Workspace`` and ``Scale Factor`` can now be given on the ISIS SANS Interface by checking the ``Scaled Background Subtraction`` checkbox.

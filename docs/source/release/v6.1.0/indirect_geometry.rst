@@ -2,9 +2,6 @@
 Indirect Geometry Changes
 =========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ############
 - A new algorithm :ref:`IndirectILLReductionDIFF <algm-IndirectILLReductionDIFF>` added for treatment of diffraction detector data from the indirect geometry beamline IN16B at the ILL.

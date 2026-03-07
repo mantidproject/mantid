@@ -2,9 +2,6 @@
 Mantid Workbench Changes
 ========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Added extra tooltip for ISIS Linux users to help out anybody on IDAaaS who has not mounted the archive. This is due to a change in early 2024 that will require users to mount the archive on IDAaaS themselves using their federal ID.

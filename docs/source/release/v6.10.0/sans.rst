@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - New algorithm :ref:`algm-FlipperEfficiency` for the Polarised SANS workflow.

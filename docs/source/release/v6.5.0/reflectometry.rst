@@ -2,9 +2,6 @@
 Reflectometry Changes
 =====================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - When running the :ref:`live data monitor<refl_live_data>` from the :ref:`ISIS Reflectometry interface<interface-isis-refl>`, it will now be automatically restarted if it stops unexpectedly.
