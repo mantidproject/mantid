@@ -104,7 +104,7 @@ if [[ $ENABLE_UNIT_TESTS == true ]]; then
       --schedule-random --output-on-failure \
       --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS \
       --output-junit Testing/junit-unittest.xml \
-      -R MPIAlgorithmsTest
+      -E MPIAlgorithmsTest
 fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
