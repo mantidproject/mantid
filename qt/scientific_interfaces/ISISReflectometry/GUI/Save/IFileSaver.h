@@ -20,19 +20,21 @@ enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos, ORSOAscii, ORSON
 class MANTIDQT_ISISREFLECTOMETRY_DLL FileFormatOptions {
 public:
   FileFormatOptions(NamedFormat format, std::string prefix, bool includeHeader, std::string separator,
-                    bool includeQResolution, bool includeAdditionalColumns, bool saveToSingleFile);
+                    bool includeQResolution, bool includeAdditionalColumns, bool saveToSingleFile, std::string model);
   bool shouldIncludeHeader() const;
   bool shouldIncludeQResolution() const;
   bool shouldIncludeAdditionalColumns() const;
   bool shouldSaveToSingleFile() const;
   std::string const &separator() const;
   std::string const &prefix() const;
+  std::string const &model() const;
   NamedFormat format() const;
   bool isORSOFormat() const;
 
 private:
   NamedFormat m_format;
   std::string m_prefix;
+  std::string m_model;
   bool m_includeHeader;
   std::string m_separator;
   bool m_includeQResolution;
