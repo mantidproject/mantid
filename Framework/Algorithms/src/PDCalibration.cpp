@@ -273,6 +273,11 @@ void PDCalibration::init() {
                   "Flag whether the input data has high background compared to peaks' heights. "
                   "This option is recommended for data with peak-to-background ratios under ~5.");
 
+  declareProperty(
+      "CopyLastGoodPeakParameters", true,
+      "If true, for a given peak in a spectrum the initial peak parameters (with the exception of peak centre) "
+      "will be copied from the last succesfully fit peak in that spectrum.");
+
   declareProperty("MinimumSignalToNoiseRatio", 0.,
                   "Used for validating peaks before fitting. If the signal-to-noise ratio is under this value, "
                   "the peak will be excluded from fitting and calibration. This check does not apply to peaks for "
@@ -344,6 +349,7 @@ void PDCalibration::init() {
   setPropertyGroup("HighBackground", fitPeaksGroup);
   setPropertyGroup("MaxChiSq", fitPeaksGroup);
   setPropertyGroup("ConstrainPeakPositions", fitPeaksGroup);
+  setPropertyGroup("CopyLastGoodPeakParameters", fitPeaksGroup);
 
   // make group for type of calibration
   std::string calGroup("Calibration Type");
@@ -496,6 +502,7 @@ void PDCalibration::exec() {
   const double minSignalToNoiseRatio = getProperty("MinimumSignalToNoiseRatio");
   const double minSignalToSigmaRatio = getProperty("MinimumSignalToSigmaRatio");
   const double maxChiSquared = getProperty("MaxChiSq");
+  const bool copyLastGoodPeakParameters = getProperty("CopyLastGoodPeakParameters");
 
   const std::string calParams = getPropertyValue("CalibrationParameters");
   if (calParams == std::string("DIFC"))
@@ -619,6 +626,10 @@ void PDCalibration::exec() {
   if (useChiSq) {
     algFitPeaks->setPropertyValue("OutputParameterFitErrorsWorkspace", diagnostic_prefix + "_fiterrors");
   }
+
+  // whether, for a given peak in each spectrum, the initial peak parameters (with the exception of peak centre)
+  // will be copied from the last succesfully fit peak in that spectrum.
+  algFitPeaks->setProperty("CopyLastGoodPeakParameters", copyLastGoodPeakParameters);
 
   // run and get the result
   algFitPeaks->executeAsChildAlg();
