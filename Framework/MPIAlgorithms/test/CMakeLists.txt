@@ -30,5 +30,6 @@ if(MPIEXEC_EXECUTABLE)
   )
 
   set_tests_properties(MPIAlgorithmsTest PROPERTIES LABELS "UnitTest;MPI")
+  set_tests_properties(MPIAlgorithmsTest PROPERTIES RUN_SERIAL TRUE)
 
 endif()
