@@ -27,6 +27,9 @@ namespace Kernel {
 class PseudoRandomNumberGenerator;
 class V3D;
 } // namespace Kernel
+namespace Nexus {
+class File;
+} // namespace Nexus
 
 namespace Geometry {
 class CompGrp;
@@ -59,7 +62,7 @@ public:
   /// Assignment operator
   MeshObject &operator=(const MeshObject &) = delete;
   /// Destructor
-  virtual ~MeshObject() = default;
+  virtual ~MeshObject() = default; // cppcheck-suppress missingOverride
   /// Clone
   IObject *clone() const override { return new MeshObject(m_triangles, m_vertices, m_material); }
   IObject *cloneWithMaterial(const Kernel::Material &material) const override {
@@ -137,6 +140,12 @@ public:
   void multiply(const Kernel::Matrix<double> &);
   void scale(const double scaleFactor);
   void updateGeometryHandler();
+
+  /// Save mesh to an NXoff_geometry group in a NeXus file
+  void saveNexus(Nexus::File *file, const std::string &group) const;
+  /// Load mesh from an NXoff_geometry group in a NeXus file
+  static std::shared_ptr<MeshObject> loadNexus(Nexus::File *file, const std::string &group,
+                                               const Kernel::Material &material);
 
 private:
   void initialize();
