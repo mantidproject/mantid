@@ -32,7 +32,7 @@ class SettingsPresenterTest(unittest.TestCase):
             "default_peak": "BackToBackExponential",
             "euler_angles_scheme": "YZY",
             "euler_angles_sense": "1,-1,1",
-            "full_calibration": "cal",
+            "full_calibration_ENGINX": "cal",
             "logs": "some,logs",
             "monte_carlo_params": "SparseInstrument:True",
             "nd_dir": "0,1,0",
@@ -60,7 +60,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view.get_rd_dir.return_value = self.settings["rd_dir"]
         self.view.get_nd_dir.return_value = self.settings["nd_dir"]
         self.view.get_td_dir.return_value = self.settings["td_dir"]
-        self.view.get_full_calibration.return_value = self.settings["full_calibration"][:]
+        self.view.get_full_calibration.return_value = self.settings[f"full_calibration_{self.presenter.instrument}"][:]
         self.view.get_checked_logs.return_value = self.settings["logs"][:]
         self.view.get_primary_log.return_value = self.settings["primary_log"] if not blank_log else ""
         self.view.get_ascending_checked.return_value = self.settings["sort_ascending"]
@@ -123,7 +123,7 @@ class SettingsPresenterTest(unittest.TestCase):
 
         # check that view is updated before being shown
         self.view.set_save_location.assert_called_with(self.settings["save_location"])
-        self.view.set_full_calibration.assert_called_with(self.settings["full_calibration"])
+        self.view.set_full_calibration.assert_called_with(self.settings[f"full_calibration_{self.presenter.instrument}"])
         self.view.set_checked_logs.assert_called_with(self.settings["logs"])
         self.view.set_primary_log_combobox.assert_called_with(self.settings["primary_log"])
         self.view.set_ascending_checked.assert_called_with(self.settings["sort_ascending"])
@@ -148,7 +148,22 @@ class SettingsPresenterTest(unittest.TestCase):
         self.model.set_settings_dict.assert_not_called()
 
     def test_default_calib_file_correct_location(self):
-        self.assertTrue(path.exists(settings_presenter.DEFAULT_SETTINGS["full_calibration"]))
+        self.assertTrue(path.exists(settings_presenter.DEFAULT_SETTINGS[f"full_calibration_{self.presenter.instrument}"]))
+
+    def test_set_instrument_override_updates_full_calibration(self):
+        self.presenter.model.validate_settings.return_value = {
+            "full_calibration_ENGINX": "enginx_calib.nxs",
+            "full_calibration_IMAT": "imat_calib.nxs",
+        }
+
+        self.presenter.set_instrument_override(0)
+
+        self.assertIn("enginx_calib.nxs", self.presenter.settings["full_calibration_ENGINX"])
+
+        self.presenter.set_instrument_override(1)
+
+        self.assertEqual(self.presenter.instrument, "IMAT")
+        self.assertIn("imat_calib.nxs", self.presenter.settings["full_calibration_IMAT"])
 
 
 if __name__ == "__main__":

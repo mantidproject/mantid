@@ -59,6 +59,11 @@ class CroppingView(QtWidgets.QWidget, Ui_cropping):
         self.label_cropValid.setToolTip(string)
         self.label_cropValid.show()
 
+    def set_combo_options(self, options):
+        while self.combo_bank.count() > 0:
+            self.combo_bank.removeItem(0)
+        self.combo_bank.addItems(options)
+
     # =================
     # Component Getters
     # =================

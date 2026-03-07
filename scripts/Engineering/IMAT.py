@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -10,7 +10,7 @@ from enum import Enum
 from Engineering.BaseEngInstrument import BaseEngInstrument
 
 
-class EnginX(BaseEngInstrument):
+class IMAT(BaseEngInstrument):
     def __init__(
         self,
         vanadium_run: str,
@@ -33,5 +33,5 @@ class EnginX(BaseEngInstrument):
             group=group,
             groupingfile_path=groupingfile_path,
             spectrum_num=spectrum_num,
-            instrument="ENGINX",
+            instrument="IMAT",
         )
