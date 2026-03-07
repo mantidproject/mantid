@@ -7,7 +7,7 @@
 # pylint: disable=no-init
 import systemtesting
 import mantid  # noqa
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from sans.command_interface.ISISCommandInterface import (
     LOQ,
     Set1D,
@@ -23,6 +23,7 @@ from sans.command_interface.ISISCommandInterface import (
     SetCentre,
     UseCompatibilityMode,
     FindBeamCentre,
+    Clean,
 )
 from sans.common.enums import SANSInstrument
 
@@ -34,6 +35,7 @@ class SANSLOQCentreNoGrav_V2(systemtesting.MantidSystemTest):
         self.tolerance = 1e-6
 
     def runTest(self):
+        Clean()
         UseCompatibilityMode()
         LOQ()
 
@@ -59,6 +61,7 @@ class SANSLOQCentreNoGrav_V2(systemtesting.MantidSystemTest):
 @ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQCentreNoGravDefineCentreTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
+        Clean()
         UseCompatibilityMode()
         LOQ()
         Set1D()

@@ -9,7 +9,7 @@
 import systemtesting
 import os
 
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import config
 from sans.command_interface.ISISCommandInterface import (
     SANS2D,
