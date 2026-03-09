@@ -55,6 +55,7 @@ private:
   void plotInPreview(const QString &curveName, Mantid::API::MatrixWorkspace_sptr &ws, const QColor &curveColor);
 
   void setSaveResultEnabled(bool enabled);
+  std::string createOutputName();
 
   Ui::ApplyAbsorptionCorrections m_uiForm;
 

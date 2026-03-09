@@ -154,31 +154,10 @@ void ContainerSubtraction::handleRun() {
 }
 
 std::string ContainerSubtraction::createOutputName() {
-  QString QStrContainerWs = QString::fromStdString(m_csContainerWS->getName());
-  auto QStrSampleWs = QString::fromStdString(m_csSampleWS->getName());
-  int sampleNameCutIndex = QStrSampleWs.lastIndexOf("_");
-  if (sampleNameCutIndex == -1)
-    sampleNameCutIndex = QStrSampleWs.length();
-
-  std::string runNum = "";
-  int containerNameCutIndex = 0;
-  if (m_csContainerWS->run().hasProperty("run_number")) {
-    runNum = m_csContainerWS->run().getProperty("run_number")->value();
-  } else {
-    containerNameCutIndex = QStrContainerWs.indexOf("_");
-    if (containerNameCutIndex == -1)
-      containerNameCutIndex = QStrContainerWs.length();
-  }
-
-  QString outputWsName = QStrSampleWs.left(sampleNameCutIndex) + "_Subtract_";
-  if (runNum.compare("") != 0) {
-    outputWsName += QString::fromStdString(runNum);
-  } else {
-    outputWsName += QStrContainerWs.left(containerNameCutIndex);
-  }
-
-  outputWsName += "_red";
-  return outputWsName.toStdString();
+  const auto &sampleName = m_csSampleWS->getName();
+  const auto containerName = prepareContainerName(m_csContainerWS->getName());
+  return sampleName.substr(0, sampleName.find_last_of("_")) + "_Subtract_" + containerName + "_red";
+  ;
 }
 
 void ContainerSubtraction::loadSettings(const QSettings &settings) {
