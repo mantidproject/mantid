@@ -4,9 +4,6 @@
 Workspace2D
 ===========
 
-.. contents::
-  :local:
-
 The Workspace2D is a Mantid data type for a
 :ref:`MatrixWorkspace <MatrixWorkspace>`.
 

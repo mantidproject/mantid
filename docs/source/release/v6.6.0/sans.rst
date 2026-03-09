@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Mantid now supports loading D16 old scan data in their new format with the entire scan in one file.

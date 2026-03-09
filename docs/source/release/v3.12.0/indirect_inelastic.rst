@@ -2,9 +2,6 @@
 Indirect Inelastic Changes
 ==========================
 
-.. contents:: Table of Contents
-   :local:
-
 Vesuvio
 -------
 

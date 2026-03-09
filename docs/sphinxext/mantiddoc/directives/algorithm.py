@@ -35,7 +35,6 @@ class AlgorithmDirective(AlgorithmBaseDirective):
         Called by Sphinx when the ..algorithm:: directive is encountered
         """
         self._insert_pagetitle()
-        self._insert_toc()
         self._insert_deprecation_warning()
 
         return []
@@ -67,12 +66,6 @@ class AlgorithmDirective(AlgorithmBaseDirective):
         title = "%s v%d" % (alg_name, version)
         self.add_rst(self.make_header(title, True))
         self.add_rst("\n.. index:: %s-v%d\n\n" % (alg_name, version))
-
-    def _insert_toc(self):
-        """
-        Outputs a title for the page
-        """
-        self.add_rst(".. contents:: Table of Contents\n    :local:\n")
 
     def _insert_deprecation_warning(self):
         """

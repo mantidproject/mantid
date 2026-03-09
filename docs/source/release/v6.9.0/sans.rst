@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Metadata indicating the subtracted workspace and the scale factor is now saved to CanSAS1D and NXcanSAS subtracted

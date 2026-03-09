@@ -4,9 +4,6 @@
 Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo
 ================================================================
 
-.. contents::
-  :local:
-
 Introduction
 ------------
 
