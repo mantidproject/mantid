@@ -68,8 +68,9 @@ public:
 
 private:
   /// Handle logic for RebinnedOutput workspaces
-  void doFractionalSum(const API::MatrixWorkspace_sptr &outputWorkspace, API::Progress &progress, size_t &numSpectra,
-                       size_t &numMasked, size_t &numZeros);
+  void doFractionalSum(API::MatrixWorkspace_sptr const &, WorkspaceLikeVector const &, API::Progress &, size_t &);
+  void doFractionalWeightedSum(API::MatrixWorkspace_sptr const &, WorkspaceLikeVector const &, API::Progress &,
+                               size_t &);
   /// Handle logic for summing standard workspaces
   void doSimpleSum(API::ISpectrum &, WorkspaceLikeVector const &, API::Progress &, size_t &);
   void doSimpleWeightedSum(API::ISpectrum &, WorkspaceLikeVector const &, API::Progress &, size_t &);
