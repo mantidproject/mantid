@@ -1,0 +1,3 @@
+- The :ref:`POLARIS ISIS Powder Scripts <isis-powder-diffraction-polaris-ref>` have a new option in
+  ``create_total_scattering_pdf``. Entering values for the ``stitch_points``, ``overlap_width``, and ``stitch_lims``
+  parameters will allow the output workspace to be stitched without rebinning when ``merge_banks`` is set.
