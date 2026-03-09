@@ -79,7 +79,7 @@ extensions.append(mathext)
 # imgmath configuration for LaTeX rendering
 # Use png format with dvipng for rendering math as images
 imgmath_image_format = "png"
-imgmath_use_preview = True
+imgmath_use_preview = False  # Don't use preview.sty (not available in all LaTeX installations)
 imgmath_latex_preamble = r"\usepackage{amssymb}"
 
 # Suppress imgmath warnings when LaTeX is not available (expected in some dev environments)
