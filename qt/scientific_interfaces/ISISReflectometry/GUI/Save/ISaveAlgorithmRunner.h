@@ -22,6 +22,7 @@ public:
                                      std::string const &separator) const = 0;
 
   virtual void runSaveORSOAlgorithm(std::vector<std::string> const &workspaceNames, std::string const &savePath,
-                                    const bool &includeQResolution, const bool &includeAdditionalColumns) const = 0;
+                                    const bool &includeQResolution, const bool &includeAdditionalColumns,
+                                    const std::string &modelDescription) const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

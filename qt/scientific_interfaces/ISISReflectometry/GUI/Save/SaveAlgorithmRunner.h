@@ -23,6 +23,7 @@ public:
                              std::string const &separator) const override;
 
   void runSaveORSOAlgorithm(std::vector<std::string> const &workspaceNames, std::string const &savePath,
-                            const bool &includeQResolution, const bool &includeAdditionalColumns) const override;
+                            const bool &includeQResolution, const bool &includeAdditionalColumns,
+                            const std::string &modelDescription) const override;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
