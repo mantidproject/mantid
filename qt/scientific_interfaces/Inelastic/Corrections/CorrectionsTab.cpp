@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
+#include <MantidAPI/Run.h>
 #include <QSettings>
 
 using namespace Mantid::API;
@@ -141,6 +142,20 @@ void CorrectionsTab::displayInvalidWorkspaceTypeError(const std::string &workspa
     log.error() << "Workspace " << workspaceName << " is not a MatrixWorkspace.\n";
   }
   emit showMessageBox(errorMessage);
+}
+
+std::string CorrectionsTab::prepareContainerName(const std::string &containerName) {
+  std::string runNum;
+  const auto containerWs = getADSWorkspace(containerName);
+  if (const auto &logs = containerWs->run(); logs.hasProperty("run_number")) {
+    runNum = logs.getProperty("run_number")->value();
+    if (const auto pos = runNum.find_first_of(","); pos != std::string::npos) {
+      runNum = runNum.substr(0, pos) + "-" + runNum.substr(runNum.find_last_of(",") + 1);
+    }
+  } else {
+    runNum = containerName.substr(0, containerName.find_first_of("_"));
+  }
+  return runNum;
 }
 
 } // namespace MantidQt::CustomInterfaces

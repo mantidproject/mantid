@@ -89,6 +89,7 @@ protected:
                                                  double eFixed = 0.0);
   /// Displays and logs the error for a workspace with an invalid type
   void displayInvalidWorkspaceTypeError(const std::string &workspaceName, Mantid::Kernel::Logger &log);
+  static std::string prepareContainerName(const std::string &containerName);
 
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
