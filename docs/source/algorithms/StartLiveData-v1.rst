@@ -435,14 +435,6 @@ Tips for Interactive Use
 - Test scripts with fake data servers (see :ref:`live_data_testing`)
 - Use the algorithm dialog to build property strings, then copy to scripts
 
-Related Resources
-+++++++++++++++++
-
-- :ref:`algm-LoadLiveData` - Details on data processing steps
-- :ref:`algm-MonitorLiveData` - Background monitoring algorithm
-- :ref:`live_data_testing` - Setting up fake data streams for testing
-- `livereduce documentation <https://github.com/mantidproject/livereduce>`_ - Automated daemon-based live reduction
-
 Run Transition Behavior
 #######################
 
@@ -611,6 +603,11 @@ Output:
     The workspace contains ... periods
     Each period   contains ... spectra
 
+Related Resources
+-----------------
+
+- :ref:`live_data_testing` - Setting up fake data streams for testing
+- `livereduce documentation <https://github.com/mantidproject/livereduce>`_ - Automated daemon-based live reduction
 
 .. categories::
 
