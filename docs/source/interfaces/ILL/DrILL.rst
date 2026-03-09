@@ -3,9 +3,6 @@
 DrILL interface
 ===============
 
-.. contents:: Table of Contents
-   :local:
-
 DrILL stands for Data Reduction at ILL. It provides an easy to use interface for
 the reduction of data measured on different ILL instruments. Here are the
 currently supported instruments:

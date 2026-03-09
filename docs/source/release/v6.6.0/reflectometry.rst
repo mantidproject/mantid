@@ -2,9 +2,6 @@
 Reflectometry Changes
 =====================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` can now take a polarization efficiencies workspace to make polarization corrections. This workspace can be set via the ``Polarization Efficiencies`` combo box on the :ref:`Experiment Settings tab <refl_exp_instrument_settings>`.

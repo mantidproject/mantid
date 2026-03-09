@@ -4,9 +4,6 @@
 ComponentInfo
 =============
 
-.. contents::
-  :local:
-
 Introduction
 ------------
 :py:obj:`~mantid.geometry.ComponentInfo` provides faster and simpler access to instrument/beamline geometry as required by Mantid :ref:`Algorithms <Algorithm>` than was possible using :ref:`Instrument`. :py:obj:`~mantid.geometry.ComponentInfo` and :ref:`DetectorInfo` are designed as full replacements to :ref:`Instrument`.

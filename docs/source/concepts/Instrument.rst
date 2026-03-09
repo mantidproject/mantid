@@ -3,9 +3,6 @@
 Instrument
 ==========
 
-.. contents::
-  :local:
-
 What are Instruments?
 ---------------------
 

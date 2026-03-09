@@ -9,9 +9,6 @@ Mantid 6.10.0 Release Notes
    :width: 500px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 6.10.0 of Mantid.
 
 In this release, we changed the way files are loaded into Mantid:

@@ -11,9 +11,6 @@ Mantid 3.8.0 Release Notes
 
    Mantid project saving now includes all features of the visualization windows in Mantid.
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 3.8 of Mantid. This release contains major improvements to project saving, so now all of the state of your graphs, tables, matrices, instrumentview, sliceviewer, and VSI will reload just as you saved it.
 
 This is just one of many improvements in this release, so please take a

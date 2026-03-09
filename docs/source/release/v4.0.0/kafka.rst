@@ -2,9 +2,6 @@
 Kafka Live Listeners
 ====================
 
-.. contents:: Table of Contents
-   :local:
-
 Event and Histogram Listeners
 -----------------------------
 There are two new mechanisms for listening to live data in Mantid using the Apache Kafka distributed streaming platform. The **KafkaEventListener** and the **KafkaHistoListener** allow users to

@@ -10,9 +10,6 @@ Mantid 3.13.0 Release Notes
 
    Mantid introduces project recovery for Mantidplot.
 
-.. contents:: Table of Contents
-   :local:
-
 
 We are proud to announce version 3.13.0 of Mantid.
 

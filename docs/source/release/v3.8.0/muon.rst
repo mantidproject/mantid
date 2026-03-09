@@ -2,9 +2,6 @@
 Muon Analysis
 =============
 
-.. contents:: Table of Contents
-   :local:
-
 Interfaces
 ----------
 

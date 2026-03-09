@@ -1,9 +1,3 @@
-```{contents}
----
-local:
----
-```
-
 ```{toctree}
 ---
 hidden:

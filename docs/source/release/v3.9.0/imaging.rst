@@ -2,9 +2,6 @@
 Imaging Changes
 =====================
 
-.. contents:: Table of Contents
-   :local:
-
 Tomographic reconstruction graphical user interface
 ###################################################
 

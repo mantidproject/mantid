@@ -2,9 +2,6 @@
 Inelastic Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Indirect/Inelastic interfaces have a new ``Load Workspace History`` option in the settings dialog.

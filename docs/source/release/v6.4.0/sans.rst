@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 
