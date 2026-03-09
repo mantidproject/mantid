@@ -6,8 +6,6 @@ channels = ["conda-forge", "neutrons", "mantid"]
 # the platforms that you aren't working on
 platforms = ["linux-64", "win-64", "osx-arm64"]
 
-[tasks]
-
 [environments]
 rattler-builder = { features = ["rattler-builder"], no-default-feature = true }
 delete-old-packages = { features = [
@@ -135,9 +133,6 @@ graphviz = ">=2.47.0"
 mantid-sphinx-theme = ">=0.1.0,<1"
 myst-parser = ">=5.0.0,<6"
 sphinx = ">=9.0,<10"
-
-[pypi-dependencies]
-# Documentation dependencies
 
 [target.linux-64.dependencies]
 gxx_linux-64 = "13.*"
