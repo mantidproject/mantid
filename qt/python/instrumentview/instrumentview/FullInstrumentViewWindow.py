@@ -199,11 +199,14 @@ class FullInstrumentViewWindow(QMainWindow):
         self._aspect_ratio_check_box.setChecked(aspect_ratio_option.casefold() == "yes")
         self._show_monitors_check_box = QCheckBox()
         self._show_monitors_check_box.setText("Show Monitors?")
+        self._select_bank_tube = QPushButton("Select Bank/Tube")
+        self._select_bank_tube.setCheckable(True)
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
         projection_layout.addWidget(self._clear_point_picked_detectors)
         projection_layout.addWidget(self._aspect_ratio_check_box)
         projection_layout.addWidget(self._show_monitors_check_box)
+        projection_layout.addWidget(self._select_bank_tube)
 
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
@@ -504,6 +507,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._delete_peak_button.clicked.connect(self._presenter.on_delete_peak_clicked)
         self._delete_all_selected_peaks_button.clicked.connect(self._presenter.on_delete_all_selected_peaks_clicked)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
+        self._select_bank_tube.toggled.connect(self._presenter.on_select_bank_tube_toggled)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -535,6 +539,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def on_toggle_add_ellipse(self, checked):
         self._on_toggle_add_shape(checked, self.add_ellipse_widget)
+
+    def is_select_bank_tube_checked(self) -> bool:
+        return self._select_bank_tube.isChecked()
 
     def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
         if checked:

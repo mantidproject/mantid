@@ -68,6 +68,7 @@ class FullInstrumentViewPresenter:
         self._transform = np.eye(4)
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
+        self._select_bank_tube = False
         self._model.setup()
         self.setup()
         self._callback_queue = Queue()
@@ -110,6 +111,7 @@ class FullInstrumentViewPresenter:
             add_callback=self.add_workspace_callback,
         )
         self._view.hide_status_box()
+        self._select_bank_tube = self._view.is_select_bank_tube_checked()
         self._peak_interaction_status = PeakInteractionStatus.Disabled
         self._update_peak_buttons()
 
@@ -284,7 +286,7 @@ class FullInstrumentViewPresenter:
             if point_position is None:
                 return
             point_index = picker.GetPointId()
-            self._model.update_point_picked_detectors(point_index)
+            self._model.update_point_picked_detectors(point_index, self._select_bank_tube)
             self.update_picked_detectors_on_view()
 
         self._view.enable_point_picking(self._model.is_2d_projection, callback=point_picked)
@@ -308,9 +310,14 @@ class FullInstrumentViewPresenter:
         implicit_function = self._view.get_current_widget_implicit_function()
         if not implicit_function:
             return
-        mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points]
+        mask = np.array([(implicit_function.EvaluateFunction(pt) < 0) for pt in self._detector_mesh.points], dtype=bool)
+        if self._select_bank_tube:
+            mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
         new_key = self._model.add_new_detector_key(mask, self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
+
+    def on_select_bank_tube_toggled(self, checked: bool) -> None:
+        self._select_bank_tube = checked
 
     def on_add_item_clicked(self) -> None:
         self._callback_queue.put((self._on_add_item_clicked, ()))
