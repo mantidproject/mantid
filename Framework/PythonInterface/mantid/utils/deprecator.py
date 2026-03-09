@@ -8,9 +8,6 @@
 # package imports
 from mantid.kernel import ConfigService, logger
 
-# third-party imports
-from dateutil.parser import parse as parse_date
-
 # standard imports
 import functools
 
@@ -24,7 +21,7 @@ def deprecated_alias(deprecation_date):  # decorator factory
     :param str deprecation_date: date of deprecation for the alias, in ISO8601 format
     """
     try:
-        parse_date(deprecation_date)
+        datetime.datetime.fromisoformat(deprecation_date)
     except ValueError:
         logger.error(f"Alias deprecation date {deprecation_date} must be in ISO8601 format")
 
@@ -50,7 +47,7 @@ def deprecated_algorithm(new_name, deprecation_date):  # decorator factory
     :param str deprecation_date:  date of deprecation for this algorithm, in ISO8601 format
     """
     try:
-        parse_date(deprecation_date)
+        datetime.datetime.fromisoformat(deprecation_date)
     except ValueError:
         logger.error(f"Algorithm deprecation date {deprecation_date} must be in ISO8601 format")
 

@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 import re
-from dateutil.parser import parse
 
 
 class DNSdata(object):
@@ -203,8 +202,8 @@ class DNSdata(object):
             # start_time and end_time (if specified)
             outfmt = "%Y-%m-%dT%H:%M:%S"
             try:
-                self.start_time = parse(b7splitted[5][10:].strip()).strftime(outfmt)
-                self.end_time = parse(b7splitted[6][10:].strip()).strftime(outfmt)
+                self.start_time = datetime.fromisoformat(b7splitted[5][10:].strip()).strftime(outfmt)
+                self.end_time = datetime.fromisoformat(b7splitted[6][10:].strip()).strftime(outfmt)
             except ValueError:
                 # if start and end time are not given, let them empty
                 pass
