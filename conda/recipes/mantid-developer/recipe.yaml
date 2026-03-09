@@ -45,7 +45,6 @@ requirements:
     - pyqt5-sip ${{ pyqt5_sip }}
     - pyqtwebengine
     - pystog ${{ pystog }}
-    - python-dateutil ${{ python_dateutil }}
     - python ${{ python }}
     - pyvista ${{ pyvista }}
     - pyvistaqt
