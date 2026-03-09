@@ -1,0 +1,1 @@
+- Fix a bug in :ref:`Container Subtraction <container-subtraction>`  and :ref:`Apply Absorbtion corrections <apply_absorp_correct>` tabs of the :ref:`Corrections <interface-inelastic-corrections>` interface where the output name of the corrected workspace when a container with multiple runs is used contains commas.
