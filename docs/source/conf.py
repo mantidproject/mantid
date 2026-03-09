@@ -76,6 +76,15 @@ extensions = [
 mathext = os.environ.get("MATH_EXT", "sphinx.ext.imgmath")
 extensions.append(mathext)
 
+# imgmath configuration for LaTeX rendering
+# Use png format with dvipng for rendering math as images
+imgmath_image_format = "png"
+imgmath_use_preview = True
+imgmath_latex_preamble = r"\usepackage{amssymb}"
+
+# Suppress imgmath warnings when LaTeX is not available (expected in some dev environments)
+suppress_warnings = ["image.nonlocal_uri"]
+
 # MathJax configuration to:
 # - define Angstrom symbol macro
 # - enable polyfill for hasOwn (needed for some older browsers)
