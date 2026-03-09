@@ -45,6 +45,11 @@ if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     EXTRA_CMAKE_FLAGS+=" -DMPI_BUILD=ON"
 fi
 
+# If building docs, use imgmath (LaTeX) instead of mathjax (requires QtWebEngine)
+if [[ $ENABLE_DOCS == true ]]; then
+    EXTRA_CMAKE_FLAGS+=" -DDOCS_MATH_EXT=sphinx.ext.imgmath"
+fi
+
 # Run CMake using preset and variables
 cmake --preset=${CMAKE_PRESET} \
       ${MANTID_DATA_STORE_CMAKE} -DDATA_STORE_MIRROR=${DATA_MIRROR} \
