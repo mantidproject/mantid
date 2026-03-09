@@ -29,6 +29,7 @@ class Prop:
     WRITE_RESOLUTION = "WriteResolution"
     INCLUDE_EXTRA_COLS = "IncludeAdditionalColumns"
     FILENAME = "Filename"
+    MODEL = "ModelDescription"
 
 
 class ReflectometryDataset:
@@ -230,6 +231,13 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             "save into the Nexus format",
         )
 
+        self.declareProperty(
+            name=Prop.MODEL,
+            defaultValue="",
+            direction=Direction.Input,
+            doc="The model description of the sample.",
+        )
+
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
@@ -414,6 +422,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             creator_name=self.name(),
             creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
             enable_instrument_settings=refl_dataset.is_polarized,  # instrument settings only for polarization data
+            model=self.getProperty(Prop.MODEL).value,
         )
 
     def _add_optional_header_info(self, dataset: MantidORSODataset, refl_dataset: ReflectometryDataset) -> None:

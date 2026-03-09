@@ -90,7 +90,7 @@ void FileSaver::runSaveAsciiAlgorithm(std::string const &savePath, std::string c
 void FileSaver::runSaveORSOAlgorithm(std::string const &savePath, std::vector<std::string> const &workspaceNames,
                                      FileFormatOptions const &fileFormat) const {
   m_saveAlgRunner->runSaveORSOAlgorithm(workspaceNames, savePath, fileFormat.shouldIncludeQResolution(),
-                                        fileFormat.shouldIncludeAdditionalColumns());
+                                        fileFormat.shouldIncludeAdditionalColumns(), fileFormat.model());
 }
 
 void FileSaver::save(Mantid::API::Workspace_sptr const &workspace, std::string const &saveDirectory,
