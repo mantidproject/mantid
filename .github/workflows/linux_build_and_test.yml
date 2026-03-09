@@ -7,20 +7,20 @@ on:
   workflow_dispatch:
     inputs:
       RELATE_THREADS_BUILD:           # Relate build threads to CPU cores and memory
-        description: 'BUILD_THREADS='
-        default: '$(( (c - (m/c)) * 15/16 ))'
+        description: 'BUILD_THREADS'
+        default: '$(( cores ))'
         required: false
         type: string
 
       RELATE_THREADS_SYSTEM_TESTS:    # Relate number of system test threads to CPU cores and memory
-        description: 'BUILD_THREADS_SYSTEM_TESTS='
-        default: '$(( (c - (m/c)) * 15/16 ))'
+        description: 'BUILD_THREADS_SYSTEM_TESTS'
+        default: '$(( ram_gb / 10 ))'
         required: false
         type: string
 
       RELATE_THREADS_UNIT_TESTS:      # Relate number of unit test threads to CPU cores and memory
-        description: 'UNIT_TEST_THREADS='
-        default: '$(( (c - (m/c)) * 15/16 ))'
+        description: 'UNIT_TEST_THREADS'
+        default: '$(( (cores - (ram_gb / cores)) * 15/16 ))'
         required: false
         type: string
 
@@ -39,13 +39,10 @@ jobs:
 
       - name: evaluate thread ratios
         run: |
-          read -r cores  <<<    $(grep -c '^processor' /proc/cpuinfo)
-          read -r mem  <<<  $(( $(grep    '^MemTotal'  /proc/meminfo | awk '{print $2}') / 1024 / 1024 ))
+          read -r cores   <<<      $(grep -c '^processor' /proc/cpuinfo)
+          read -r ram_gb  <<<  $(( $(grep    '^MemTotal'  /proc/meminfo | awk '{print $2}') / 1024 / 1024 ))
           
           echo "${{ toJSON(github.event.inputs) }}"
-          
-          c=${cores}
-          m=${mem}
           
           read -r BUILD_THREADS               <<< ${{ inputs.RELATE_THREADS_BUILD }}
           read -r BUILD_THREADS_SYSTEM_TESTS  <<< ${{ inputs.RELATE_THREADS_SYSTEM_TESTS }}
@@ -53,12 +50,16 @@ jobs:
           
           echo
           echo "   cores   : ${cores}"
-          echo "   memory  : ${mem} GB"
+          echo "   memory  : ${ram_gb} GB"
           echo
           echo "BUILD_THREADS               : $BUILD_THREADS"
           echo "BUILD_THREADS_SYSTEM_TESTS  : $BUILD_THREADS_SYSTEM_TESTS"
           echo "UNIT_TEST_THREADS           : $UNIT_TEST_THREADS"
           echo
+          
+          echo "BUILD_THREADS=$BUILD_THREADS"                            >> $GITHUB_ENV
+          echo "BUILD_THREADS_SYSTEM_TESTS=$BUILD_THREADS_SYSTEM_TESTS"  >> $GITHUB_ENV
+          echo "UNIT_TEST_THREADS=$UNIT_TEST_THREADS"                    >> $GITHUB_ENV
           
 
       - name: debug
