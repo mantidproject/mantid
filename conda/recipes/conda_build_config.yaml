@@ -124,9 +124,6 @@ pyqt:
 pyqt5_sip:
   - '<12.13'
 
-python_dateutil:
-  - '>=2.8.1'
-
 # v0.45 and above addresses vtk compatibility issues by pinning in the pyvista feedstock.
 pyvista:
   - '>=0.46'
