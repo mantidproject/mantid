@@ -32,8 +32,7 @@ Importing this module starts the FrameworkManager instance.
 from collections import OrderedDict, namedtuple
 from contextlib import contextmanager
 from datetime import datetime
-
-dt_fromisoformat = datetime.fromisoformat
+from datetime.datetime import fromisoformat as dt_fromisoformat
 import os
 import sys
 

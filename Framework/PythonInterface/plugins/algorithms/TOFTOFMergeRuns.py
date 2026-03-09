@@ -7,11 +7,9 @@
 from mantid.kernel import Direction, StringArrayProperty, StringArrayLengthValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, WorkspaceGroup
 import mantid.simpleapi as api
-from datetime import datetime
+from datetime.datetime import fromisoformat as dt_fromisoformat
 import numpy as np
 import warnings
-
-dt_fromisoformat = datetime.fromisoformat
 
 
 class TOFTOFMergeRuns(PythonAlgorithm):

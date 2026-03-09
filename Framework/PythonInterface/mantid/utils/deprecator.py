@@ -9,10 +9,8 @@
 from mantid.kernel import ConfigService, logger
 
 # standard imports
-from datetime import datetime
+from datetime.datetime import fromisoformat as dt_fromisoformat
 import functools
-
-dt_fromisoformat = datetime.fromisoformat
 
 
 def deprecated_alias(deprecation_date):  # decorator factory
