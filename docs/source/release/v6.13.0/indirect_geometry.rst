@@ -2,9 +2,6 @@
 Indirect Geometry Changes
 =========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - :ref:`algm-VesuvioPeakPrediction` now supports a ``Classical`` option. It is used to estimate the lower bounds of the

@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Added new ANSTO Bilby loader :ref:`LoadBBY2 <algm-LoadBBY2>` for the new Bilby file format that supports time stamped events.
