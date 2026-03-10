@@ -178,7 +178,7 @@ private:
 
   const FileFormatOptions createFileFormatOptions(NamedFormat format, const bool saveAsSingleFile = false) {
     return FileFormatOptions(format, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
-                             m_includeAdditionalColumns, saveAsSingleFile);
+                             m_includeAdditionalColumns, saveAsSingleFile, "");
   }
 
   const std::string expectedExtension(NamedFormat format) {
@@ -230,7 +230,7 @@ private:
     auto extension = expectedExtension(format);
     auto savePath = expectedSavePath(wsName, format);
     EXPECT_CALL(mockSaveAlgorithmRunner,
-                runSaveORSOAlgorithm(_, savePath, m_includeQResolution, m_includeAdditionalColumns))
+                runSaveORSOAlgorithm(_, savePath, m_includeQResolution, m_includeAdditionalColumns, ""))
         .Times(1);
   }
 

@@ -24,6 +24,7 @@ public:
   MOCK_CONST_METHOD1(setSavePath, void(const std::string &));
   MOCK_CONST_METHOD0(getPrefix, std::string());
   MOCK_CONST_METHOD0(getFilter, std::string());
+  MOCK_CONST_METHOD0(getModel, std::string());
   MOCK_CONST_METHOD0(getRegexCheck, bool());
   MOCK_CONST_METHOD0(getCurrentWorkspaceName, std::string());
   MOCK_CONST_METHOD0(getSelectedWorkspaces, std::vector<std::string>());
@@ -63,6 +64,8 @@ public:
   MOCK_METHOD0(disableSaveToSingleFileCheckBox, void());
   MOCK_METHOD0(enableSaveIndividualRowsCheckbox, void());
   MOCK_METHOD0(disableSaveIndividualRowsCheckbox, void());
+  MOCK_METHOD0(showModelEditTextBox, void());
+  MOCK_METHOD0(hideModelEditTextBox, void());
 
   MOCK_METHOD0(showFilterEditValid, void());
   MOCK_METHOD0(showFilterEditInvalid, void());

@@ -619,7 +619,7 @@ private:
     expectGetValidSaveDirectory();
     expectGetSaveParametersFromView(false, false);
     auto fileFormatOptions = FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator,
-                                               m_includeQResolution, m_includeAdditionalColumns, false);
+                                               m_includeQResolution, m_includeAdditionalColumns, false, "");
     EXPECT_CALL(*m_fileSaver, save(m_savePath, workspaceNames, logs, fileFormatOptions)).Times(1);
   }
 
@@ -629,7 +629,7 @@ private:
     expectGetSaveParametersFromView(isSingleFileRequested, isAutoSave);
     auto fileFormatOptions =
         FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
-                          m_includeAdditionalColumns, expectedSingleFileOption);
+                          m_includeAdditionalColumns, expectedSingleFileOption, "");
     EXPECT_CALL(*m_fileSaver, save(m_savePath, workspaceNames, _, fileFormatOptions)).Times(1);
   }
 
