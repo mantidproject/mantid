@@ -475,9 +475,6 @@ class TotalScatteringStitchedPerDetTest(systemtesting.MantidSystemTest):
         self.pdf_output = run_total_scattering(
             "98533", True, stitch_lims=[0.156, 42.1], stitch_points=[1, 2, 3, 4], per_detector_vanadium=True
         )
-        mantid.SaveNexus(
-            InputWorkspace=self.pdf_output, Filename=os.path.expanduser("/Users/caila.finn/mantid-datafiles/new_saved/file.nxs")
-        )
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
