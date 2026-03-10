@@ -560,9 +560,9 @@ void SumSpectra::doFractionalWeightedSum(MatrixWorkspace_sptr const &outputWorks
     const auto &e = summingWorkspace.e(j);
     for (size_t i = 0; i < e.size(); i++) {
       double fracVal = (isFinalized ? inWS->readF(specNum[i])[j] : 1.0);
-      double weight = 0.;
-      if (std::isnormal(e[i])) { // is non-zero, nan, or infinity
-        weight = 1. / (e[i] * e[i] * fracVal * fracVal);
+      double weight = e[i] * fracVal;
+      if (std::isnormal(weight)) { // is non-zero, nan, or infinity
+        weight = 1. / (weight * weight);
       } else {
         weight = 0.;
         nZeroes[j]++;
