@@ -210,7 +210,7 @@ The output PDF can be customized with the following parameters:
 - By calling with ``merge_banks=True`` a PDF will be generated based on the weighted sum of the detector banks performed
   using supplied Q limits ``q_lims=q_limits``, q_limits can be in the form of an array or with shape (2, x) where x is
   the number of banks, or a string containing the directory of an appropriately formatted ``.lim`` file. To exclude any
-  of the banks use -1 as the value for that bank in each list. By default or specifically called with``merge_banks=False``
+  of the banks use -1 as the value for that bank in each list. By default or specifically called with ``merge_banks=False``
   a PDF will be generated for each bank within the focused_workspace.
 
   - If ``merge_banks`` *and* ``stitch_points`` are set, then the PDF will be stitched using :ref:`algm-StitchByBackground`.
@@ -225,7 +225,7 @@ The output PDF can be customized with the following parameters:
 - By calling with ``lorch_filter`` will calculate the PDF with a Lorth Filter if set to ``True``
 - By calling with ``freq_params`` a fourier filter will be performed on the focused signal removing any
   components from atomic distances outside of the parameters. The parameters must be given as list:
-  [lower], or [lower, upper]. The upper bound serves to remove noise from the spectrum density, by default
+  ``[lower]``, or ``[lower, upper]``. The upper bound serves to remove noise from the spectrum density, by default
   when a fourier filter is performed this is set to 1000 to minimise loss of detail while still being computationally
   efficient.
 - By calling with ``debug=True`` which will retain the intermediate self scattering correction workspace.
