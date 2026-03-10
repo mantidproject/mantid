@@ -16,7 +16,7 @@ Release Notes
 * v6.16.0 - in progress - :doc:`release notes <v6.16.0/index>`
 * v6.15.0 - 2026-02-23 - :doc:`release notes <v6.15.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v6.15.0>`__
 * v6.14.0 - 2025-10-23 - :doc:`release notes <v6.14.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v6.14.0>`__
-* v6.14.0 - 2025-07-24 - :doc:`release notes <v6.13.1/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v6.13.1>`__
+* v6.13.1 - 2025-07-24 - :doc:`release notes <v6.13.1/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v6.13.1>`__
 * v6.13.0 - 2025-07-07 - :doc:`release notes <v6.13.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v6.13.0>`__
 * v6.12.0 - 2025-02-26 - :doc:`release notes <v6.12.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v6.12.0>`__
 * v6.11.0 - 2024-10-24 - :doc:`release notes <v6.11.0/index>` - `github tag <https://github.com/mantidproject/mantid/releases/tag/v6.11.0>`__
