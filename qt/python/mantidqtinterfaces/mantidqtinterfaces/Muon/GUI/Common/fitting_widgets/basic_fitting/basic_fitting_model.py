@@ -261,7 +261,17 @@ class BasicFittingModel:
         """Returns the currently selected fit function for single fitting."""
         current_dataset_index = self.fitting_context.current_dataset_index
         if current_dataset_index is not None:
-            return self.fitting_context.single_fit_functions[current_dataset_index]
+            if current_dataset_index > len(self.fitting_context.single_fit_functions) - 1:
+                if (
+                    len(self.fitting_context.single_fit_functions) == 1
+                    and isinstance(self.fitting_context.single_fit_functions[0], CompositeFunction)
+                    and self.fitting_context.single_fit_functions[0].nFunctions() - 1 >= current_dataset_index
+                ):
+                    return self.fitting_context.single_fit_functions[0].getFunction(current_dataset_index)
+                else:
+                    return DEFAULT_SINGLE_FIT_FUNCTION
+            else:
+                return self.fitting_context.single_fit_functions[current_dataset_index]
         else:
             return DEFAULT_SINGLE_FIT_FUNCTION
 
@@ -292,9 +302,20 @@ class BasicFittingModel:
             undo_fit_status = self.fitting_context.fit_statuses_for_undo.pop()
             undo_chi_squared = self.fitting_context.chi_squared_for_undo.pop()
 
-            self.fitting_context.single_fit_functions[undo_dataset_index] = undo_fit_function
+            self._undo_single_fit_functions(undo_dataset_index, undo_fit_function)
             self.fitting_context.fit_statuses[undo_dataset_index] = undo_fit_status
             self.fitting_context.chi_squared[undo_dataset_index] = undo_chi_squared
+
+    def _undo_single_fit_functions(self, undo_dataset_index, undo_fit_function):
+        """Undo single fit functions using saved undo data"""
+        if (
+            len(self.fitting_context.single_fit_functions) == 1
+            and isinstance(self.fitting_context.single_fit_functions[0], CompositeFunction)
+            and 1 <= undo_dataset_index <= self.fitting_context.single_fit_functions[0].nFunctions() - 1
+        ):
+            self.fitting_context.single_fit_functions[0][undo_dataset_index] = undo_fit_function
+        else:
+            self.fitting_context.single_fit_functions[undo_dataset_index] = undo_fit_function
 
     def save_current_fit_function_to_undo_data(self) -> None:
         """Saves the current single fit function and other data before performing a fit."""
