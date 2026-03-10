@@ -376,7 +376,8 @@ API::MatrixWorkspace_sptr SumSpectra::replaceSpecialValues() {
 /**
  * Perform a simple sum of the spectra in the input workspace, where values for each bin are added together without
  * weighting. The error is propagated as sum-square error.
- * @param outputWorkspace the workspace to hold the summed input
+ * @param outSpec the workspace to hold the summed input
+ * @param summingWorkspace the workspace-like vector containing the spectra to be summed
  * @param progress the progress indicator
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
@@ -402,11 +403,9 @@ void SumSpectra::doSimpleSum(ISpectrum &outSpec, WorkspaceLikeVector const &summ
 /**
  * Perform a weighted sum of the spectra in the input workspace, where values in each bin are weighted by inverse-square
  * error. Simple error propagation leads to error as the square root of the inverse of the sum of the weights.
- * @param outputWorkspace the workspace to hold the summed input
+ * @param outSpec the workspace to hold the summed input
+ * @param summingWorkspace the workspace containing the spectra to be summed
  * @param progress the progress indicator
- * @param numSpectra The number of spectra contributed to the sum.
- * @param numMasked The spectra dropped from the summations because they are
- * masked.
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
@@ -458,10 +457,8 @@ void SumSpectra::doSimpleWeightedSum(ISpectrum &outSpec, WorkspaceLikeVector con
 /**
  * This function handles the logic for summing RebinnedOutput workspaces.
  * @param outputWorkspace the workspace to hold the summed input
+ * @param summingWorkspace the workspace containing the spectra to be summed
  * @param progress the progress indicator
- * @param numSpectra The number of spectra contributed to the sum.
- * @param numMasked The spectra dropped from the summations because they are
- * masked.
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
@@ -517,10 +514,8 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr const &outputWorkspace,
 /**
  * This function handles the logic for summing RebinnedOutput workspaces.
  * @param outputWorkspace the workspace to hold the summed input
+ * @param summingWorkspace the workspace containing the spectra to be summed
  * @param progress the progress indicator
- * @param numSpectra The number of spectra contributed to the sum.
- * @param numMasked The spectra dropped from the summations because they are
- * masked.
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
