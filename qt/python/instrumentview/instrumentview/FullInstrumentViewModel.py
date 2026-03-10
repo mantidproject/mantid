@@ -13,6 +13,7 @@ from instrumentview.Projections.CylindricalProjection import CylindricalProjecti
 from instrumentview.Projections.SideBySide import SideBySide
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.ConvertUnitsCalculator import ConvertUnitsCalculator
+from instrumentview.ComponentSelectionUtils import detector_table_indices_for_parent_subtrees
 
 from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace, GroupingWorkspace
 from mantid.simpleapi import (
@@ -245,32 +246,16 @@ class FullInstrumentViewModel:
         self.full_integration_limits = self._integration_limits
 
     def _detector_table_indices_for_parent_subtree(self, detector_table_indices: np.ndarray, pickable_only: bool) -> np.ndarray:
-        if detector_table_indices.size == 0:
-            return detector_table_indices
-
-        detector_info = self._workspace.detectorInfo()
-        component_info = self._workspace.componentInfo()
-        expanded_indices: set[int] = set()
-
-        for table_index in detector_table_indices:
-            detector_id = int(self._detector_ids[table_index])
-            detector_info_index = detector_info.indexOf(detector_id)
-            if not component_info.hasParent(detector_info_index):
-                expanded_indices.add(int(table_index))
-                continue
-
-            parent_index = component_info.parent(detector_info_index)
-            subtree_detector_indices = component_info.detectorsInSubtree(parent_index)
-            subtree_detector_ids = self._detector_ids_by_info_index[subtree_detector_indices]
-            for subtree_detector_id in subtree_detector_ids:
-                mapped_index = self._detector_id_to_table_index.get(int(subtree_detector_id))
-                if mapped_index is not None:
-                    expanded_indices.add(mapped_index)
-
-        expanded_array = np.array(sorted(expanded_indices), dtype=int)
-        if pickable_only:
-            return expanded_array[self.is_pickable[expanded_array]]
-        return expanded_array
+        pickable_mask = self.is_pickable if pickable_only else None
+        return detector_table_indices_for_parent_subtrees(
+            detector_table_indices=np.asarray(detector_table_indices, dtype=int),
+            detector_ids=self._detector_ids,
+            detector_ids_by_info_index=self._detector_ids_by_info_index,
+            detector_id_to_table_index=self._detector_id_to_table_index,
+            detector_info=self._workspace.detectorInfo(),
+            component_info=self._workspace.componentInfo(),
+            pickable_mask=pickable_mask,
+        )
 
     def expand_pickable_mask_to_parent_subtrees(self, pickable_mask: list[bool] | np.ndarray) -> np.ndarray:
         pickable_mask = np.array(pickable_mask, dtype=bool)
