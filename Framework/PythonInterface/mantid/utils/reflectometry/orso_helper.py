@@ -69,7 +69,7 @@ class MantidORSODataset:
         self._header = None
 
         self._create_mandatory_header(
-            ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation, enable_instrument_settings, model
+            ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation, model, enable_instrument_settings
         )
 
     @property
@@ -111,8 +111,8 @@ class MantidORSODataset:
         reduction_timestamp: datetime,
         creator_name: str,
         creator_affiliation: str,
+        model: str,
         enable_instrument_settings: Optional[bool] = None,
-        model: str = "",
     ) -> None:
         owner = Person(name=None, affiliation=None)
 
