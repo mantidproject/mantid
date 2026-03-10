@@ -148,22 +148,7 @@ def generate_ts_pdf(
     if r_lims is not None:
         pdf_kwargs.update({"RMin": r_lims[0], "RMax": r_lims[-1]})
     if merge_banks:
-        if stitch_points:
-            merged_ws = mantid.StitchByBackground(
-                InputWorkspaces=focused_ws.getNames(),
-                StitchPoints=stitch_points,
-                OverlapWidth=overlap_width,
-                CropLowerBound=stitch_lims[0],
-                CropUpperBound=stitch_lims[1],
-            )
-        else:
-            q_min, q_max = _load_qlims(q_lims)
-            merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max, CalculateScale=False)
-        mantid.CloneWorkspace(
-            InputWorkspace=merged_ws, OutputWorkspace="merged_S_of_Q_minus_one"
-        )  # merged S(Q)-1 before applying Fourier filter
-        fast_fourier_filter(merged_ws, rho0=pdf_kwargs["rho0"], freq_params=freq_params)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", **pdf_kwargs)
+        pdf_output = _merge_banks(focused_ws, pdf_kwargs, freq_params, q_lims, stitch_points, stitch_lims, overlap_width)
     else:
         for ws in focused_ws:
             fast_fourier_filter(ws, rho0=sample_details.material_object.number_density, freq_params=freq_params)
@@ -188,6 +173,30 @@ def generate_ts_pdf(
         for i in range(len(pdf_output)):
             if str(pdf_output[i]) != (target_pdf_ws_name + str(i + 1)):
                 mantid.RenameWorkspace(InputWorkspace=pdf_output[i], OutputWorkspace=f"{target_pdf_ws_name}_{str(i + 1)}")
+    return pdf_output
+
+
+def _merge_banks(focused_ws, pdf_kwargs, freq_params, q_lims, stitch_points, stitch_lims, overlap_width):
+    if any((stitch_points, stitch_lims, overlap_width)):
+        if not all((stitch_points, stitch_lims, overlap_width)):
+            raise ValueError(
+                "All three of 'stitch_points', 'stitch_lims', and 'overlap_width' must be provided in order to stitch banks by background."
+            )
+        merged_ws = mantid.StitchByBackground(
+            InputWorkspaces=focused_ws.getNames(),
+            StitchPoints=stitch_points,
+            OverlapWidth=overlap_width,
+            CropLowerBound=stitch_lims[0],
+            CropUpperBound=stitch_lims[1],
+        )
+    else:
+        q_min, q_max = _load_qlims(q_lims)
+        merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max, CalculateScale=False)
+    mantid.CloneWorkspace(
+        InputWorkspace=merged_ws, OutputWorkspace="merged_S_of_Q_minus_one"
+    )  # merged S(Q)-1 before applying Fourier filter
+    fast_fourier_filter(merged_ws, rho0=pdf_kwargs["rho0"], freq_params=freq_params)
+    pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", **pdf_kwargs)
     return pdf_output
 
 

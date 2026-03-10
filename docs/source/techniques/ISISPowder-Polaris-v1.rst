@@ -208,7 +208,7 @@ The output PDF can be customized with the following parameters:
 - By calling with ``pdf_type`` the type of PDF output can be specified, with the option of ``G(r)``,
   ``g(r)``, ``RDF(r)`` (defaults to ``G(r)``).
 - By calling with ``merge_banks=True`` a PDF will be generated based on the weighted sum of the detector banks performed
-  using supplied Q limits ``q_lims=q_limits``, q_limits can be in the form of an array or with shape (2, x) where x is
+  using supplied Q limits ``q_lims=q_limits``, ``q_limits`` can be in the form of an array or with shape (2, x) where x is
   the number of banks, or a string containing the directory of an appropriately formatted ``.lim`` file. To exclude any
   of the banks use -1 as the value for that bank in each list. By default or specifically called with ``merge_banks=False``
   a PDF will be generated for each bank within the focused_workspace.
@@ -220,8 +220,8 @@ The output PDF can be customized with the following parameters:
     - ``overlap_width``: The length of the linear background that should be fitted to "line up" the stitch.
     - ``stitch_lims``: A tuple representing the lower and upper bounds of the stitched workspace. E.g. ``stitch_lims=(0.34, 6.01)``
 
-- By calling with ``delta_q`` which will calculate the PDF after rebinning the Q workspace to have bin width ``delta_r``.
-- By calling with ``delta_r`` which will calculate the PDF with bin width of ``delta_q``.
+- By calling with ``delta_q`` which will calculate the PDF after rebinning the Q workspace to have bin width ``delta_q``.
+- By calling with ``delta_r`` which will calculate the PDF with bin width of ``delta_r``.
 - By calling with ``lorch_filter`` will calculate the PDF with a Lorth Filter if set to ``True``
 - By calling with ``freq_params`` a fourier filter will be performed on the focused signal removing any
   components from atomic distances outside of the parameters. The parameters must be given as list:
