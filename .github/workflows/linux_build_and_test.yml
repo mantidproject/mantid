@@ -6,7 +6,7 @@ on:
 
 jobs:
   linux-build-and-test:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: [self-hosted, linux, x64, isis]
     steps:
       - uses: actions/checkout@v4
         with:
