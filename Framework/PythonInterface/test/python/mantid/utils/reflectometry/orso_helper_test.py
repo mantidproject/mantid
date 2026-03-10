@@ -234,7 +234,7 @@ class MantidORSODatasetTest(unittest.TestCase):
             creator_name,
             creator_affiliation,
             enable_instrument_settings=False,
-            model="",
+            model="air | Ni 100 | SiO2 0.5 | Si",
         )
 
         orso_dataset = dataset.dataset
@@ -389,7 +389,9 @@ class MantidORSODatasetTest(unittest.TestCase):
             "    start_date: 2010-01-01T00:00:00\n"
             "    probe: neutron\n"
             "  sample:\n"
-            f"    name: {ws.getTitle()}\n"
+            f"   name: {ws.getTitle()}\n"
+            "    model:"
+            "      stack: air | Ni 100 | SiO2 0.5 | Si"
             "  measurement:\n"
             "    instrument_settings: null\n"
             "    data_files: []\n"
