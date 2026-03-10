@@ -15,13 +15,9 @@ namespace Mantid {
 
 namespace API { // forward declare
 class ISpectrum;
-}
+} // namespace API
 
 namespace Algorithms {
-
-namespace {
-struct WorkspaceLikeVector;
-}
 
 /** Takes a workspace as input and sums all of the spectra within it maintaining
    the existing bin structure and units.
@@ -67,6 +63,26 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 private:
+  struct WorkspaceLikeVector : public std::vector<std::pair<std::vector<double>, std::vector<double>>> {
+    WorkspaceLikeVector(size_t yL, size_t numspec)
+        : std::vector<std::pair<std::vector<double>, std::vector<double>>>(yL) {
+      for (size_t j = 0; j < yL; j++) {
+        this->operator[](j).first.reserve(numspec);
+        this->operator[](j).second.reserve(numspec);
+      }
+      m_specNums.reserve(numspec);
+    }
+    std::vector<size_t> const &specNums() const { return m_specNums; }
+    std::vector<double> const &y(size_t j) const { return this->operator[](j).first; }
+    std::vector<double> const &e(size_t j) const { return this->operator[](j).second; }
+    void insertSpecNum(size_t specNum) { m_specNums.push_back(specNum); }
+    void insertY(size_t j, double const y) { this->operator[](j).first.push_back(y); }
+    void insertE(size_t j, double const e) { this->operator[](j).second.push_back(e); }
+
+  private:
+    std::vector<size_t> m_specNums;
+  };
+
   /// Handle logic for RebinnedOutput workspaces
   void doFractionalSum(API::MatrixWorkspace_sptr const &, WorkspaceLikeVector const &, API::Progress &, size_t &);
   void doFractionalWeightedSum(API::MatrixWorkspace_sptr const &, WorkspaceLikeVector const &, API::Progress &,

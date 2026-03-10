@@ -197,20 +197,6 @@ bool useSpectrum(const SpectrumInfo &spectrumInfo, const size_t wsIndex, const b
   }
   return true;
 }
-
-struct WorkspaceLikeVector : public std::vector<std::pair<std::vector<double>, std::vector<double>>> {
-  WorkspaceLikeVector(size_t yL, size_t numspec)
-      : std::vector<std::pair<std::vector<double>, std::vector<double>>>(yL) {
-    for (size_t j = 0; j < yL; j++) {
-      this->operator[](j).first.reserve(numspec);
-      this->operator[](j).second.reserve(numspec);
-    }
-  }
-  std::vector<double> const &y(size_t j) const { return this->operator[](j).first; }
-  std::vector<double> const &e(size_t j) const { return this->operator[](j).second; }
-  void insertY(size_t j, double const y) { this->operator[](j).first.push_back(y); }
-  void insertE(size_t j, double const e) { this->operator[](j).second.push_back(e); }
-};
 } // anonymous namespace
 
 /** Executes the algorithm
@@ -276,6 +262,7 @@ void SumSpectra::exec() {
       if (useSpectrum(spectrumInfo, i, m_keepMonitors, numMasked)) {
         numSpectra++;
         outSpec.addDetectorIDs(localworkspace->getSpectrum(i).getDetectorIDs());
+        pivot.insertSpecNum(i);
         // loop over bins
         for (size_t j = 0; j < m_yLength; j++) {
           pivot.insertY(j, localworkspace->y(i)[j]);
@@ -438,6 +425,7 @@ void SumSpectra::doSimpleWeightedSum(ISpectrum &outSpec, WorkspaceLikeVector con
     // loop over spectra
     double normalization = 0.;
     YSum[j] = 0.;
+    YErrorSum[j] = 0.;
     for (size_t i = 0; i < e.size(); i++) {
       double weight = 0.;
       if (std::isnormal(e[i])) {
@@ -450,10 +438,12 @@ void SumSpectra::doSimpleWeightedSum(ISpectrum &outSpec, WorkspaceLikeVector con
       YSum[j] += weight * y[i];
     }
     // apply the normalization factor
-    normalization = 1. / normalization;
-    YSum[j] *= normalization;
-    // NOTE: the total error ends up being the root of the normalization factor
-    YErrorSum[j] = sqrt(normalization);
+    if (normalization != 0.) {
+      normalization = 1. / normalization;
+      YSum[j] *= normalization;
+      // NOTE: the total error ends up being the root of the normalization factor
+      YErrorSum[j] = sqrt(normalization);
+    }
     if (m_multiplyByNumSpec) {
       // NOTE: do not include the zero-weighted values in the number of spectra
       YSum[j] *= double(e.size() - nZeroes[j]);
@@ -497,6 +487,7 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr const &outputWorkspace,
   auto &FracSum = outWS->dataF(0);
 
   // loop over bins
+  const auto &specNum = summingWorkspace.specNums();
   for (size_t j = 0; j < m_yLength; j++) {
     YSum[j] = 0.;
     YErrorSum[j] = 0.;
@@ -506,10 +497,10 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr const &outputWorkspace,
     const auto &e = summingWorkspace.e(j);
     for (size_t i = 0; i < e.size(); i++) {
       // add the values for this bin together using simple summation
-      double fracVal = (isFinalized ? inWS->readF(i)[j] : 1.0);
+      double fracVal = (isFinalized ? inWS->readF(specNum[i])[j] : 1.0);
       YSum[j] += fracVal * y[i];
       YErrorSum[j] += e[i] * e[i] * fracVal * fracVal;
-      FracSum[j] += inWS->readF(i)[j];
+      FracSum[j] += inWS->readF(specNum[i])[j];
     }
     progress.report();
   }
@@ -558,6 +549,7 @@ void SumSpectra::doFractionalWeightedSum(MatrixWorkspace_sptr const &outputWorks
   std::vector<size_t> nZeroes(YSum.size(), 0);
 
   // Loop over bins
+  const auto &specNum = summingWorkspace.specNums();
   for (size_t j = 0; j < m_yLength; j++) {
     YSum[j] = 0.;
     YErrorSum[j] = 0.;
@@ -567,7 +559,7 @@ void SumSpectra::doFractionalWeightedSum(MatrixWorkspace_sptr const &outputWorks
     const auto &y = summingWorkspace.y(j);
     const auto &e = summingWorkspace.e(j);
     for (size_t i = 0; i < e.size(); i++) {
-      double fracVal = (isFinalized ? inWS->readF(i)[j] : 1.0);
+      double fracVal = (isFinalized ? inWS->readF(specNum[i])[j] : 1.0);
       double weight = 0.;
       if (std::isnormal(e[i])) { // is non-zero, nan, or infinity
         weight = 1. / (e[i] * e[i] * fracVal * fracVal);
@@ -577,13 +569,15 @@ void SumSpectra::doFractionalWeightedSum(MatrixWorkspace_sptr const &outputWorks
       }
       normalization += weight;
       YSum[j] += weight * y[i] * fracVal;
-      FracSum[j] += inWS->readF(i)[j];
+      FracSum[j] += inWS->readF(specNum[i])[j];
     }
     // apply the normalization factor
-    normalization = 1. / normalization;
-    YSum[j] *= normalization;
-    // NOTE: the total error ends up being the root of the normalization factor
-    YErrorSum[j] = sqrt(normalization);
+    if (normalization != 0.) {
+      normalization = 1. / normalization;
+      YSum[j] *= normalization;
+      // NOTE: the total error ends up being the root of the normalization factor
+      YErrorSum[j] = sqrt(normalization);
+    }
     if (m_multiplyByNumSpec) {
       // NOTE: do not include the zero-weighted values in the number of spectra
       YSum[j] *= double(e.size() - nZeroes[j]);
