@@ -458,7 +458,8 @@ void SumSpectra::doSimpleWeightedSum(ISpectrum &outSpec, WorkspaceLikeVector con
 
 /**
  * This function handles the logic for summing RebinnedOutput workspaces.
- * @param outputWorkspace the workspace to hold the summed input
+ * @param inWS the input workspace containing the fractional area information
+ * @param outWS the workspace to hold the summed input
  * @param summingWorkspace the workspace containing the spectra to be summed
  * @param progress the progress indicator
  * @param numZeros The number of zero bins in histogram workspace or empty
@@ -507,7 +508,8 @@ void SumSpectra::doFractionalSum(RebinnedOutput_const_sptr const &inWS, Rebinned
 
 /**
  * This function handles the logic for summing RebinnedOutput workspaces.
- * @param outputWorkspace the workspace to hold the summed input
+ * @param inWS the input workspace containing the fractional area information
+ * @param outWS the workspace to hold the summed input
  * @param summingWorkspace the workspace containing the spectra to be summed
  * @param progress the progress indicator
  * @param numZeros The number of zero bins in histogram workspace or empty
