@@ -218,6 +218,7 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_projection_option_changed, ()))
 
     def update_plotter(self) -> None:
+        self._model.projection_type = self._view.current_selected_projection()
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter()
             self.update_detector_picker()
