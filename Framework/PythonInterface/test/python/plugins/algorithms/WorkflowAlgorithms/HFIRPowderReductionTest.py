@@ -15,6 +15,7 @@ from mantid.simpleapi import (
     AddSampleLog,
     GroupWorkspaces,
     SaveNexusESS,
+    Load,
 )
 from mantid.api import AlgorithmManager, MatrixWorkspace, WorkspaceGroup
 from mantid.kernel import Logger, V3D
@@ -621,11 +622,11 @@ class ReductionExecutionTests(unittest.TestCase):
         x = pd_out.extractX()
         y = pd_out.extractY()
 
-        self.assertAlmostEqual(x.min(), 0.05)
-        self.assertAlmostEqual(x.max(), 179.95)
-        self.assertAlmostEqual(y.min(), 0.0)
-        self.assertAlmostEqual(y.max(), 9.67542399)
-        self.assertAlmostEqual(x[0, y.argmax()], 44.85)
+        self.assertAlmostEqual(x.min(), 8.09946893)
+        self.assertAlmostEqual(x.max(), 50.80113407)
+        self.assertAlmostEqual(y.min(), 0.00784728)
+        self.assertAlmostEqual(y.max(), 9.94421639)
+        self.assertAlmostEqual(x[0, y.argmax()], 45.10091179)
 
         # data normalised by monitor <- duplicate input as two
         # NOTE:
@@ -644,11 +645,11 @@ class ReductionExecutionTests(unittest.TestCase):
         x = pd_out_multi.extractX()
         y = pd_out_multi.extractY()
 
-        self.assertAlmostEqual(x.min(), 0.05)
-        self.assertAlmostEqual(x.max(), 179.95)
-        self.assertAlmostEqual(y.min(), 0.0)
-        self.assertAlmostEqual(y.max(), 19.35084798)
-        self.assertAlmostEqual(x[0, y.argmax()], 44.85)
+        self.assertAlmostEqual(x.min(), 8.09946893)
+        self.assertAlmostEqual(x.max(), 50.80113407)
+        self.assertAlmostEqual(y.min(), 0.01569456)
+        self.assertAlmostEqual(y.max(), 19.88843277)
+        self.assertAlmostEqual(x[0, y.argmax()], 45.10091179)
 
         # data and calibration, limited range
         pd_out2 = HFIRPowderReduction(
@@ -713,11 +714,11 @@ class ReductionExecutionTests(unittest.TestCase):
         x = pd_out3.extractX()
         y = pd_out3.extractY()
 
-        self.assertAlmostEqual(x.min(), 0.05)
-        self.assertAlmostEqual(x.max(), 179.95)
-        self.assertAlmostEqual(y.min(), 0)
-        self.assertAlmostEqual(y.max(), 33.90460737)
-        self.assertAlmostEqual(x[0, y.argmax()], 44.95)
+        self.assertAlmostEqual(x.min(), 8.09946893)
+        self.assertAlmostEqual(x.max(), 50.80113407)
+        self.assertAlmostEqual(y.min(), -42.8104874)
+        self.assertAlmostEqual(y.max(), -3.0)
+        self.assertAlmostEqual(x[0, y.argmax()], 36.40057252)
 
         # data, cal and background, normalised by time
         # NOTE:
@@ -739,11 +740,11 @@ class ReductionExecutionTests(unittest.TestCase):
         x = pd_out3_multi.extractX()
         y = pd_out3_multi.extractY()
 
-        self.assertAlmostEqual(x.min(), 0.05)
-        self.assertAlmostEqual(x.max(), 179.95)
-        self.assertAlmostEqual(y.min(), 0)
-        self.assertAlmostEqual(y.max(), 33.90460737)
-        self.assertAlmostEqual(x[0, y.argmax()], 44.95)
+        self.assertAlmostEqual(x.min(), 8.09946893)
+        self.assertAlmostEqual(x.max(), 50.80113407)
+        self.assertAlmostEqual(y.min(), -42.8104874)
+        self.assertAlmostEqual(y.max(), -3.0)
+        self.assertAlmostEqual(x[0, y.argmax()], 36.40057252)
 
         # data, cal and background. To d spacing
         pd_out4 = HFIRPowderReduction(
@@ -763,9 +764,9 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 2.05)
         self.assertAlmostEqual(x.max(), 9.95)
-        self.assertAlmostEqual(y.min(), 2.4)
-        self.assertAlmostEqual(y.max(), 16.67794542)
-        self.assertAlmostEqual(x[0, y.argmax()], 3.15)
+        self.assertAlmostEqual(y.min(), -20.84743178)
+        self.assertAlmostEqual(y.max(), -3.0)
+        self.assertAlmostEqual(x[0, y.argmax()], 2.55)
 
         pd_out4_multi = HFIRPowderReduction(
             SampleFileName=(f"{data},{data}"),
@@ -785,9 +786,9 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 2.05)
         self.assertAlmostEqual(x.max(), 9.95)
-        self.assertAlmostEqual(y.min(), 2.4)
-        self.assertAlmostEqual(y.max(), 16.67794542)
-        self.assertAlmostEqual(x[0, y.argmax()], 3.15)
+        self.assertAlmostEqual(y.min(), -20.84743178)
+        self.assertAlmostEqual(y.max(), -3.0)
+        self.assertAlmostEqual(x[0, y.argmax()], 2.55)
 
         # data, cal and background with mask angle, to Q.
         pd_out4 = HFIRPowderReduction(
@@ -809,9 +810,9 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 1.0006, places=4)
         self.assertAlmostEqual(x.max(), 3.1994, places=4)
-        self.assertAlmostEqual(y.min(), 2.4, places=4)
-        self.assertAlmostEqual(y.max(), 34.3902, places=4)
-        self.assertAlmostEqual(x[0, y.argmax()], 2.9125, places=4)
+        self.assertAlmostEqual(y.min(), -42.98771, places=4)
+        self.assertAlmostEqual(y.max(), -3.0, places=4)
+        self.assertAlmostEqual(x[0, y.argmax()], 1.07258, places=4)
 
         # NOTE:
         # Need to check the physics
@@ -835,9 +836,9 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 1.0006, places=4)
         self.assertAlmostEqual(x.max(), 3.1994, places=4)
-        self.assertAlmostEqual(y.min(), 2.4, places=4)
-        self.assertAlmostEqual(y.max(), 34.3902, places=4)
-        self.assertAlmostEqual(x[0, y.argmax()], 2.9125, places=4)
+        self.assertAlmostEqual(y.min(), -42.98771, places=4)
+        self.assertAlmostEqual(y.max(), -3.0, places=4)
+        self.assertAlmostEqual(x[0, y.argmax()], 1.07258, places=4)
 
         # data, cal and background, scale background
         pd_out4 = HFIRPowderReduction(
@@ -857,11 +858,11 @@ class ReductionExecutionTests(unittest.TestCase):
         x = pd_out4.extractX()
         y = pd_out4.extractY()
 
-        self.assertAlmostEqual(x.min(), 8.05)
-        self.assertAlmostEqual(x.max(), 49.95)
-        self.assertAlmostEqual(y.min(), 1.2)
-        self.assertAlmostEqual(y.max(), 16.95230369)
-        self.assertAlmostEqual(x[0, y.argmax()], 44.95)
+        self.assertAlmostEqual(x.min(), 8.09952728)
+        self.assertAlmostEqual(x.max(), 49.94993970)
+        self.assertAlmostEqual(y.min(), -21.21099623)
+        self.assertAlmostEqual(y.max(), -1.5)
+        self.assertAlmostEqual(x[0, y.argmax()], 36.53377878)
 
         pd_out4_multi = HFIRPowderReduction(
             SampleFileName=(f"{data},{data}"),
@@ -881,11 +882,11 @@ class ReductionExecutionTests(unittest.TestCase):
         x = pd_out4_multi.extractX()
         y = pd_out4_multi.extractY()
 
-        self.assertAlmostEqual(x.min(), 8.05)
-        self.assertAlmostEqual(x.max(), 49.95)
-        self.assertAlmostEqual(y.min(), 1.2)
-        self.assertAlmostEqual(y.max(), 16.95230369)
-        self.assertAlmostEqual(x[0, y.argmax()], 44.95)
+        self.assertAlmostEqual(x.min(), 8.09952728)
+        self.assertAlmostEqual(x.max(), 49.94993970)
+        self.assertAlmostEqual(y.min(), -21.21099623)
+        self.assertAlmostEqual(y.max(), -1.5)
+        self.assertAlmostEqual(x[0, y.argmax()], 36.53377878)
 
     def test_event(self):
         # check that the workflow runs with event workspaces as input, junk data
@@ -1059,6 +1060,34 @@ class ReductionExecutionTests(unittest.TestCase):
 
         assert isinstance(pd_out, WorkspaceGroup)
         assert len(pd_out) == 2
+
+    def test_save(self):
+        # check that the workflow can save output to a file, with event workspace input
+
+        data, cal, bkg = self._create_workspaces()
+
+        output_file_name = os.path.join(self._test_dir, "output_workspace.nxs")
+
+        HFIRPowderReduction(
+            SampleFilename=data,
+            XUnits="2Theta",
+            NormaliseBy="None",
+            Sum=False,
+            XMin=0,
+            XMax=70,
+            Instrument="WAND^2",
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+            OutputWorkspace="output_ws",
+            OutputDirectory=output_file_name,
+        )
+
+        # Check that the output file was created
+        self.assertTrue(os.path.isfile(output_file_name))
+
+        # Load the output file and check it contains a workspace
+        output_ws = Load(output_file_name)
+        self.assertIsInstance(output_ws, MatrixWorkspace)
 
 
 if __name__ == "__main__":

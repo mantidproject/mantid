@@ -14,6 +14,7 @@ from mantid.api import (
     WorkspaceProperty,
     AnalysisDataService,
     WorkspaceGroup,
+    FileProperty,
 )
 
 from mantid.kernel import (
@@ -48,9 +49,12 @@ from mantid.simpleapi import (
     GroupWorkspaces,
     RenameWorkspace,
     GroupDetectors,
+    SaveAscii,
+    SaveNexus,
 )
 import h5py
 import numpy as np
+import os
 
 logger = Logger(__name__)
 
@@ -170,9 +174,12 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             doc="Output Workspace",
         )
         self.getProperty("OutputWorkspace").setDisableReplaceWSButton(True)
-        # self.declareProperty(
-        #     FileProperty(name="OutputFilename", defaultValue="default_output.txt", action=FileAction.Save, extensions=["txt"])
-        # )
+        self.declareProperty(
+            FileProperty(
+                name="OutputDirectory", defaultValue="~/HFIRPowderReductionOutput", action=FileAction.OptionalSave, extensions=[".dat"]
+            )
+        )
+        self.declareProperty("Overwrite", True, "If True previous file will be overwritten")
 
         def readIntFromFile(filename, dataset):
             intValue = 0
@@ -536,6 +543,11 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         if len(files) > 1:
             self._checkMetadataConsistency(files, "Sample")
 
+        if not self.getProperty("Overwrite").value and not self.getProperty("OutputDirectory").isDefault:
+            output_dir = self.getProperty("OutputDirectory").value
+            if os.path.exists(output_dir):
+                issues["OutputDirectory"] = f"Output directory {output_dir} already exists and overwrite is set to False"
+
         return issues
 
     def PyExec(self):
@@ -567,6 +579,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         logger.information("Step 2: Loading vanadium and background data")
         vanadium_ws = self._load_vanadium_data()
         vanadium_background_ws = self._load_vanadium_background_data()
+        sample_background_ws = self._load_sample_background_data()
 
         # Step 3: Axis Conversion & Masking
         logger.information("Step 3: Converting axes and applying masks")
@@ -590,14 +603,18 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             if vanadium_ws is not None:
                 vanadium_ws = self._resample_vanadium(ws_name, mask_name, xMin, xMax)
 
+            if vanadium_background_ws is not None:
+                vanadium_background_ws = self._resample_background(vanadium_background_ws, ws_name, mask_name, xMin, xMax, vanadium_ws)
+
             Scale(
                 InputWorkspace=ws_name,
                 OutputWorkspace=ws_name,
                 Factor=self._get_scale(vanadium_ws) / self._get_scale(ws_name),
                 EnableLogging=False,
             )
-            if vanadium_background_ws is not None:
-                vanadium_background_ws = self._resample_vanadium_background(ws_name, mask_name, xMin, xMax)
+
+            if sample_background_ws is not None:
+                sample_background_ws = self._resample_background(sample_background_ws, ws_name, mask_name, xMin, xMax, vanadium_ws)
 
             # Step 5: Calibration & Normalization (vanadium correction)
             logger.information("Step 5: Processing calibration (vanadium) data")
@@ -606,7 +623,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                     vanadium_ws,
                     vanadium_background_ws,
                 )
-                ws_name = self._apply_sample_absorption_correction(ws_name, vanadium_corrected)
+                ws_name = self._apply_sample_absorption_correction(ws_name, vanadium_corrected, sample_background_ws)
 
             if summing:
                 # conjoin
@@ -654,24 +671,32 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         self.setProperty("OutputWorkspace", outWS)
 
+        if not self.getProperty("OutputDirectory").isDefault:
+            logger.information("Saving output to file")
+            SaveAscii(InputWorkspace=outWS, Filename=self.getPropertyValue("OutputDirectory"), EnableLogging=False)
+            SaveNexus(InputWorkspace=outWS, Filename=self.getPropertyValue("OutputDirectory").replace(".dat", ".nxs"))
+
         # Step 9: Cleanup
         logger.information("Step 9: Cleaning up temporary workspaces")
         for ws in self.temp_workspace_list:
             if mtd.doesExist(ws):
                 DeleteWorkspace(ws, EnableLogging=False)
 
-    def _load_data(self, data_type):
+    def _load_data(self, data_type, sum_runs=True):
         """
         Generic function to load data from files or IPTS/run numbers.
 
         Args:
             data_type: String specifying the type of data to load.
                        One of: "Sample", "Vanadium", "VanadiumBackground", "SampleBackground"
+            sum_runs: If True, sum all runs into a single workspace and return its name.
+                      If False, keep each run as a separate workspace and return a list of names.
 
         Returns:
-            Loaded workspace name or None if no data to load
+            If sum_runs: single workspace name (str) or None
+            If not sum_runs: list of workspace names or empty list
         """
-        from mantid.simpleapi import Load, Plus
+        from mantid.simpleapi import Load, Plus, LoadWAND, LoadInstrument, CropWorkspace, AppendSpectra
 
         # Get properties based on data type
         filenames = self.getProperty(f"{data_type}Filename").value
@@ -679,12 +704,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         run_numbers = self.getProperty(f"{data_type}RunNumbers").value
         instrument = self.getProperty("Instrument").value
 
-        # if instrument == "WAND^2":
-        #     return LoadWAND(Filename=filenames[0], IPTS=ipts, RunNumbers=run_numbers)
-
         # Check if there's data to load
         if not filenames and (ipts == Property.EMPTY_INT or len(run_numbers) == 0):
-            return None
+            return None if sum_runs else []
 
         # Build file list
         files_to_load = []
@@ -697,91 +719,69 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 files_to_load = [f"/HFIR/HB2A/IPTS-{ipts}/nexus/HB2A_{run}.nxs.h5" for run in run_numbers]
 
         if not files_to_load:
-            return None
+            return None if sum_runs else []
 
-        # Create workspace name based on data type
-        ws_name = f"{data_type.lower()}"
-        self.temp_workspace_list.append(ws_name)
+        grouping = self.getProperty("Grouping").value
 
-        # Load and sum all runs
+        if sum_runs:
+            ws_name = f"{data_type.lower()}"
+            self.temp_workspace_list.append(ws_name)
+
+        loaded_workspaces = []
+
         for i, filename in enumerate(files_to_load):
-            temp_ws = f"{data_type.lower()}_temp_{i}"
+            temp_ws = f"{data_type.lower()}_temp_{i}" if sum_runs else f"{data_type.lower()}_{i}"
             self.temp_workspace_list.append(temp_ws)
-            Load(Filename=filename, OutputWorkspace=temp_ws, EnableLogging=False)
-            # if instrument == "MIDAS":
-            # CropWorkspace(InputWorkspace=temp_ws, OutputWorkspace='1spectrum', EndWorkspaceIndex=0)
-            # AppendSpectra(InputWorkspace1='1spectrum', InputWorkspace2=temp_ws, OutputWorkspace=temp_ws)
-            # LoadInstrument(temp_ws, InstrumentName = "MIDAS", RewriteSpectraMap=True)
-            # CropWorkspace(InputWorkspace=temp_ws, OutputWorkspace=temp_ws, StartWorkspaceIndex=1)
-            # self.temp_workspace_list.append('1spectrum')
+            if instrument == "WAND^2":
+                try:
+                    LoadWAND(Filename=filename, OutputWorkspace=temp_ws, EnableLogging=False)
+                except RuntimeError:
+                    logger.warning(f"LoadWAND failed for {filename}, falling back to generic Load")
+                    Load(Filename=filename, OutputWorkspace=temp_ws, EnableLogging=False)
+            else:
+                Load(Filename=filename, OutputWorkspace=temp_ws, EnableLogging=False)
+
             wks = AnalysisDataService.retrieve(temp_ws)
             if isinstance(wks, WorkspaceGroup):
                 self.temp_workspace_list.extend(wks.getNames())
+                if not sum_runs:
+                    loaded_workspaces.extend(wks.getNames())
+                    AnalysisDataService.remove(temp_ws)
+                    continue
             else:
                 self.temp_workspace_list.append(temp_ws)
 
-            if i == 0:
-                RenameWorkspace(InputWorkspace=temp_ws, OutputWorkspace=ws_name, EnableLogging=False)
-            else:
-                Plus(LHSWorkspace=ws_name, RHSWorkspace=temp_ws, OutputWorkspace=ws_name, EnableLogging=False)
-
-        # Apply grouping if requested (only for non-Sample data types or if implemented for Sample)
-        grouping = self.getProperty("Grouping").value
-        if grouping != "None":
-            ws_name = self._apply_grouping(ws_name, grouping)
-
-        logger.information(f"Loaded {data_type} data into workspace: {ws_name}")
-        return ws_name
-
-    def _load_sample_data(self):
-        """Load sample data - wrapper for backward compatibility and special handling."""
-        from mantid.simpleapi import Load, LoadInstrument, CropWorkspace, AppendSpectra
-
-        filenames = self.getProperty("SampleFilename").value
-        ipts = self.getProperty("SampleIPTS").value
-        run_numbers = self.getProperty("SampleRunNumbers").value
-        instrument = self.getProperty("Instrument").value
-
-        # if instrument == "WAND^2":
-        #     return LoadWAND(Filename=filenames[0], IPTS=ipts, RunNumbers=run_numbers)
-        #     # return loaded_workspaces
-
-        files_to_load = []
-
-        if filenames:
-            files_to_load = list(filenames)
-        elif ipts != Property.EMPTY_INT and len(run_numbers) > 0:
-            if instrument == "WAND^2":
-                files_to_load = [f"/HFIR/HB2C/IPTS-{ipts}/nexus/HB2C_{run}.nxs.h5" for run in run_numbers]
-            elif instrument == "MIDAS":
-                files_to_load = [f"/HFIR/HB2A/IPTS-{ipts}/nexus/HB2A_{run}.nxs.h5" for run in run_numbers]
-
-        # Load workspaces - sample data may need individual workspace handling
-        loaded_workspaces = []
-        grouping = self.getProperty("Grouping").value
-
-        for i, filename in enumerate(files_to_load):
-            ws_name = f"sample_{i}"
-            loaded_workspaces.append(ws_name)
-            Load(Filename=filename, OutputWorkspace=ws_name, EnableLogging=False)
-            wks = AnalysisDataService.retrieve(ws_name)
-            if isinstance(wks, WorkspaceGroup):
-                loaded_workspaces.extend(wks.getNames())
-                loaded_workspaces.remove(ws_name)
-                AnalysisDataService.remove(ws_name)
-            if instrument == "MIDAS":
-                CropWorkspace(InputWorkspace=ws_name, OutputWorkspace="1spectrum", EndWorkspaceIndex=0)
-                AppendSpectra(InputWorkspace1="1spectrum", InputWorkspace2=ws_name, OutputWorkspace=ws_name)
-                LoadInstrument(ws_name, InstrumentName="MIDAS", RewriteSpectraMap=True)
-                CropWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name, StartWorkspaceIndex=1)
+            if not sum_runs and instrument == "MIDAS":
+                CropWorkspace(InputWorkspace=temp_ws, OutputWorkspace="1spectrum", EndWorkspaceIndex=0)
+                AppendSpectra(InputWorkspace1="1spectrum", InputWorkspace2=temp_ws, OutputWorkspace=temp_ws)
+                LoadInstrument(temp_ws, InstrumentName="MIDAS", RewriteSpectraMap=True)
+                CropWorkspace(InputWorkspace=temp_ws, OutputWorkspace=temp_ws, StartWorkspaceIndex=1)
                 self.temp_workspace_list.append("1spectrum")
 
-            # Apply grouping if requested
-            if grouping != "None":
-                ws_name = self._apply_grouping(ws_name, grouping)
+            if sum_runs:
+                if i == 0:
+                    RenameWorkspace(InputWorkspace=temp_ws, OutputWorkspace=ws_name, EnableLogging=False)
+                else:
+                    Plus(LHSWorkspace=ws_name, RHSWorkspace=temp_ws, OutputWorkspace=ws_name, EnableLogging=False)
+            else:
+                loaded_workspaces.append(temp_ws)
 
-        logger.information(f"Loaded {len(loaded_workspaces)} sample workspace(s)")
-        return loaded_workspaces
+            if grouping != "None":
+                if sum_runs:
+                    ws_name = self._apply_grouping(ws_name, grouping)
+                else:
+                    self._apply_grouping(temp_ws, grouping)
+
+        if sum_runs:
+            logger.information(f"Loaded {data_type} data into workspace: {ws_name}")
+            return ws_name
+        else:
+            logger.information(f"Loaded {len(loaded_workspaces)} {data_type.lower()} workspace(s)")
+            return loaded_workspaces
+
+    def _load_sample_data(self):
+        """Load sample data as individual workspaces."""
+        return self._load_data("Sample", sum_runs=False)
 
     def _load_vanadium_data(self):
         """Load vanadium calibration data."""
@@ -812,6 +812,12 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         sigma_mult = 0  # Placeholder for multiple scattering cross-section
 
         if vanadium_bg_ws is not None:
+            Scale(
+                InputWorkspace=vanadium_bg_ws,
+                OutputWorkspace=vanadium_bg_ws,
+                Factor=self._get_scale(vanadium_ws) / self._get_scale(vanadium_bg_ws),
+                EnableLogging=False,
+            )
             Minus(
                 LHSWorkspace=vanadium_ws,
                 RHSWorkspace=vanadium_bg_ws,
@@ -829,13 +835,21 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         return vanadium_ws
 
-    def _apply_sample_absorption_correction(self, sample_ws, vanadium_corrected):
+    def _apply_sample_absorption_correction(self, sample_ws, vanadium_corrected, sample_bg_ws):
         """
         Apply absorption correction.
         CORR = F*(SF)/(T*VCORR)
         """
         F = self.getProperty("Scale").value
         T = 1.0  # Placeholder for transmission factor
+
+        if sample_bg_ws is not None:
+            Minus(
+                LHSWorkspace=sample_ws,
+                RHSWorkspace=sample_bg_ws,
+                OutputWorkspace=sample_ws,
+                EnableLogging=False,
+            )
 
         Scale(
             InputWorkspace=sample_ws,
@@ -885,7 +899,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
     def _convert_data(self, input_workspaces):
         mask = self.getProperty("MaskWorkspace").value
         mask_angle = self.getProperty("MaskAngle").value
-        outname = "OUTPUT"  # self.getProperty("OutputWorkspace").valueAsStr
+        outname = self.getProperty("OutputWorkspace").valueAsStr
 
         # NOTE:
         # Due to range difference among incoming spectra, a common bin para is needed
@@ -1031,15 +1045,12 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             _xMax = -1e16
         else:
             _xMax = self.getProperty("XMax").value
-        # if both were set there is nothing to do
-        if _xMin < _xMax and _xMin < 1e16 and _xMax > -1e16:
-            return _xMin, _xMax
 
         # update values based on all workspaces
         for name in workspaces:
             _ws_tmp = mtd[name]
-            _xMin = min(_xMin, _ws_tmp.readX(0).min())
-            _xMax = max(_xMax, _ws_tmp.readX(0).max())
+            _xMin = max(_xMin, _ws_tmp.readX(0).min())
+            _xMax = min(_xMax, _ws_tmp.readX(0).max())
 
         return _xMin, _xMax
 
@@ -1069,17 +1080,23 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         return self._to_spectrum_axis_resample(ws_name, "_ws_cal", mask_name, current_workspace, x_min, x_max)
 
-    def _resample_vanadium_background(
+    def _resample_background(
         self,
+        current_background,
         current_workspace,
         mask_name,
         x_min,
         x_max,
+        resampled_calibration,
     ):
-        """Perform resample on Vanadium"""
+        """Perform resample on background"""
         ws_name = "vanadiumbackground"
+        outname = str(current_background) + str(current_workspace)
+        self.temp_workspace_list.append(outname)
 
-        return self._to_spectrum_axis_resample(ws_name, "_ws_cal_background", mask_name, current_workspace, x_min, x_max)
+        self._to_spectrum_axis_resample(ws_name, outname, mask_name, current_workspace, x_min, x_max)
+
+        return outname
 
 
 AlgorithmFactory.subscribe(HFIRPowderReduction)
