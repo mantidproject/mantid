@@ -84,7 +84,7 @@ imgmath_latex_preamble = r"\usepackage{amssymb}"
 imgmath_font_size = 12  # Match base document font size
 
 # Suppress imgmath warnings when LaTeX is not available (expected in some dev environments)
-suppress_warnings = ["image.nonlocal_uri"]
+suppress_warnings = ["image.nonlocal_uri", "imgmath"]
 
 # MathJax configuration to:
 # - define Angstrom symbol macro
