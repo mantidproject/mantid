@@ -1,0 +1,1 @@
+- New Instrument View no longer crashes when a `LOQ` workspace is open and side-by-side projection is selected.
