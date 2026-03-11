@@ -273,12 +273,14 @@ void SumSpectra::exec() {
 
     if (localworkspace->id() == "RebinnedOutput") {
       // this version is for a special workspace that has fractional overlap information
+      // Transform to real workspace types
+      RebinnedOutput_const_sptr inWS = std::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
+      RebinnedOutput_sptr outWS = std::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
       if (m_calculateWeightedSum) {
-        doFractionalWeightedSum(outputWorkspace, pivot, progress, numZeros);
+        doFractionalWeightedSum(inWS, outWS, pivot, progress, numZeros);
       } else {
-        doFractionalSum(outputWorkspace, pivot, progress, numZeros);
+        doFractionalSum(inWS, outWS, pivot, progress, numZeros);
       }
-
     } else {
       // for things where all the bins are lined up
       if (m_calculateWeightedSum) {
@@ -462,23 +464,14 @@ void SumSpectra::doSimpleWeightedSum(ISpectrum &outSpec, WorkspaceLikeVector con
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::doFractionalSum(MatrixWorkspace_sptr const &outputWorkspace,
+void SumSpectra::doFractionalSum(RebinnedOutput_const_sptr const &inWS, RebinnedOutput_sptr const &outWS,
                                  WorkspaceLikeVector const &summingWorkspace, Progress &progress, size_t &numZeros) {
-  // First, we need to clean the input workspace for nan's and inf's in order
-  // to treat the data correctly later. This will create a new private
-  // workspace that will be retrieved as mutable.
-  auto localworkspace = replaceSpecialValues();
-
-  // Transform to real workspace types
-  RebinnedOutput_sptr inWS = std::dynamic_pointer_cast<RebinnedOutput>(localworkspace);
-  RebinnedOutput_sptr outWS = std::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
-
   // Check finalize state prior to the sum process, at the completion
   // the output is unfinalized
   auto isFinalized = inWS->isFinalized();
 
   // Get references to the output workspaces's data vectors
-  auto &outSpec = outputWorkspace->getSpectrum(0);
+  auto &outSpec = outWS->getSpectrum(0);
   auto &YSum = outSpec.mutableY();
   auto &YErrorSum = outSpec.mutableE();
   auto &FracSum = outWS->dataF(0);
@@ -499,6 +492,7 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr const &outputWorkspace,
       YErrorSum[j] += e[i] * e[i] * fracVal * fracVal;
       FracSum[j] += inWS->readF(specNum[i])[j];
     }
+    YErrorSum[j] = sqrt(YErrorSum[j]);
     progress.report();
   }
 
@@ -507,7 +501,7 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr const &outputWorkspace,
   // Create the correct representation if using fractional area
   auto useFractionalArea = getProperty("UseFractionalArea");
   if (useFractionalArea) {
-    outWS->finalize();
+    outWS->finalize(/*hasSqrdErrs =*/false);
   }
 }
 
@@ -519,24 +513,15 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr const &outputWorkspace,
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::doFractionalWeightedSum(MatrixWorkspace_sptr const &outputWorkspace,
+void SumSpectra::doFractionalWeightedSum(RebinnedOutput_const_sptr const &inWS, RebinnedOutput_sptr const &outWS,
                                          WorkspaceLikeVector const &summingWorkspace, Progress &progress,
                                          size_t &numZeros) {
-  // First, we need to clean the input workspace for nan's and inf's in order
-  // to treat the data correctly later. This will create a new private
-  // workspace that will be retrieved as mutable.
-  auto localworkspace = replaceSpecialValues();
-
-  // Transform to real workspace types
-  RebinnedOutput_sptr inWS = std::dynamic_pointer_cast<RebinnedOutput>(localworkspace);
-  RebinnedOutput_sptr outWS = std::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
-
   // Check finalize state prior to the sum process, at the completion
   // the output is unfinalized
   auto isFinalized = inWS->isFinalized();
 
   // Get references to the output workspaces's data vectors
-  auto &outSpec = outputWorkspace->getSpectrum(0);
+  auto &outSpec = outWS->getSpectrum(0);
   auto &YSum = outSpec.mutableY();
   auto &YErrorSum = outSpec.mutableE();
   auto &FracSum = outWS->dataF(0);
@@ -570,7 +555,7 @@ void SumSpectra::doFractionalWeightedSum(MatrixWorkspace_sptr const &outputWorks
     if (normalization != 0.) {
       normalization = 1. / normalization;
       YSum[j] *= normalization;
-      // NOTE: the total error ends up being the root of the normalization factor
+      // NOTE: the total error is the sqrt of the normalization factor
       YErrorSum[j] = sqrt(normalization);
     }
     if (m_multiplyByNumSpec) {
@@ -585,7 +570,7 @@ void SumSpectra::doFractionalWeightedSum(MatrixWorkspace_sptr const &outputWorks
   // Create the correct representation if using fractional area
   auto useFractionalArea = getProperty("UseFractionalArea");
   if (useFractionalArea) {
-    outWS->finalize();
+    outWS->finalize(/*hasSqrdErrs =*/false);
   }
 }
 

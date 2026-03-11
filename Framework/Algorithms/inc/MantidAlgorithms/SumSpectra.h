@@ -17,7 +17,16 @@ namespace API { // forward declare
 class ISpectrum;
 } // namespace API
 
+namespace DataObjects { // forward declare
+class RebinnedOutput;
+using RebinnedOutput_sptr = std::shared_ptr<RebinnedOutput>;
+using RebinnedOutput_const_sptr = std::shared_ptr<const RebinnedOutput>;
+} // namespace DataObjects
+
 namespace Algorithms {
+
+using DataObjects::RebinnedOutput_const_sptr;
+using DataObjects::RebinnedOutput_sptr;
 
 /** Takes a workspace as input and sums all of the spectra within it maintaining
    the existing bin structure and units.
@@ -84,9 +93,10 @@ private:
   };
 
   /// Handle logic for RebinnedOutput workspaces
-  void doFractionalSum(API::MatrixWorkspace_sptr const &, WorkspaceLikeVector const &, API::Progress &, size_t &);
-  void doFractionalWeightedSum(API::MatrixWorkspace_sptr const &, WorkspaceLikeVector const &, API::Progress &,
-                               size_t &);
+  void doFractionalSum(RebinnedOutput_const_sptr const &, RebinnedOutput_sptr const &, WorkspaceLikeVector const &,
+                       API::Progress &, size_t &);
+  void doFractionalWeightedSum(RebinnedOutput_const_sptr const &, RebinnedOutput_sptr const &,
+                               WorkspaceLikeVector const &, API::Progress &, size_t &);
   /// Handle logic for summing standard workspaces
   void doSimpleSum(API::ISpectrum &, WorkspaceLikeVector const &, API::Progress &, size_t &);
   void doSimpleWeightedSum(API::ISpectrum &, WorkspaceLikeVector const &, API::Progress &, size_t &);

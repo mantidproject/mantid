@@ -313,11 +313,11 @@ public:
       TS_ASSERT_EQUALS(output->blocksize(), 6);
       // Row with full acceptance
       TS_ASSERT_EQUALS(output->y(0)[1], 1.);
-      TS_ASSERT_DELTA(output->e(0)[1], 0.1666666666, 1.e-5);
+      TS_ASSERT_DELTA(output->e(0)[1], 0.40824829046386296, 1.e-5);
       TS_ASSERT_EQUALS(output->dataF(0)[1], 6.);
       // Row with limited, but non-zero acceptance, shouldn't have nans!
       TS_ASSERT_DELTA(output->y(0)[5], 0.66666, 1.e-5);
-      TS_ASSERT_DELTA(output->e(0)[5], 0.2222222222, 1.e-5);
+      TS_ASSERT_DELTA(output->e(0)[5], 0.47140452079103173, 1.e-5);
       TS_ASSERT_EQUALS(output->dataF(0)[5], 3.);
 
       TS_ASSERT(output->run().hasProperty("NumAllSpectra"))
