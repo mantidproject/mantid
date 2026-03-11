@@ -179,7 +179,7 @@ void SaveDiffCal::writeIntFieldFromSVWS(H5::Group &group, const std::string &nam
   std::vector<int32_t> values(m_numValues, 1);
 
   if (bool(ws)) {
-    for (size_t i = 0; i < m_numValues; ++i) {
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       auto &ids = ws->getSpectrum(i).getDetectorIDs(); // set of detector ID's
       // check if the first detector ID in the set is in the calibration table
       auto found = m_detidToIndex.find(*(ids.begin())); // (detID, row_index)
@@ -192,7 +192,9 @@ void SaveDiffCal::writeIntFieldFromSVWS(H5::Group &group, const std::string &nam
           else
             value = 0;
         }
-        values[found->second] = value;
+        for (const auto &indexes : found->second) {
+          values[indexes] = value;
+        }
       }
     }
   }
@@ -208,7 +210,9 @@ void SaveDiffCal::generateDetidToIndex() {
 
   const size_t numDets = detids.size();
   for (size_t i = 0; i < numDets; ++i) {
-    m_detidToIndex[static_cast<detid_t>(detids[i])] = i;
+    if (i < m_numValues) {
+      m_detidToIndex[static_cast<detid_t>(detids[i])].push_back(i);
+    }
   }
 }
 
@@ -223,7 +227,7 @@ void SaveDiffCal::generateDetidToIndex(const DataObjects::SpecialWorkspace2D_con
   for (size_t i = 0; i < m_numValues; ++i) {
     const auto &detids = ws->getSpectrum(i).getDetectorIDs();
     for (const auto &detid : detids) {
-      m_detidToIndex[static_cast<detid_t>(detid)] = index;
+      m_detidToIndex[static_cast<detid_t>(detid)].push_back(index);
       index++;
     }
   }
@@ -249,22 +253,19 @@ void SaveDiffCal::exec() {
   // Get a starting number of values to work with that will be refined below
   // THE ORDER OF THE IF/ELSE TREE MATTERS
   m_numValues = std::numeric_limits<std::size_t>::max();
-  if (m_calibrationWS)
+  if (m_calibrationWS) {
     m_numValues = std::min(m_numValues, m_calibrationWS->rowCount());
-  if (groupingWS)
+    this->generateDetidToIndex();
+  } else if (groupingWS) {
     m_numValues = std::min(m_numValues, groupingWS->getNumberHistograms());
-  if (maskWS)
+    this->generateDetidToIndex(groupingWS);
+  } else if (maskWS) {
     m_numValues = std::min(m_numValues, maskWS->getNumberHistograms());
+    this->generateDetidToIndex(maskWS);
+  }
 
   // Initialize the mapping of detid to row number to make getting information
   // from the table faster. ORDER MATTERS
-  if (m_calibrationWS) {
-    this->generateDetidToIndex();
-  } else if (groupingWS) {
-    this->generateDetidToIndex(groupingWS);
-  } else if (maskWS) {
-    this->generateDetidToIndex(maskWS);
-  }
 
   if (groupingWS && groupingWS->isDetectorIDMappingEmpty())
     groupingWS->buildDetectorIDMapping();
