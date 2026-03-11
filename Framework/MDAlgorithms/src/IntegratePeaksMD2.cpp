@@ -265,6 +265,7 @@ std::map<std::string, std::string> IntegratePeaksMD2::validateInputs() {
   std::vector<double> BackgroundOuterRadius = getProperty("BackgroundOuterRadius");
   bool ellipsoid = getProperty("Ellipsoid");
   bool cylinder = getProperty("Cylinder");
+  std::shared_ptr<IMDEventWorkspace> inputWS = getProperty("InputWorkspace");
 
   if (PeakRadius.size() != 1 && PeakRadius.size() != 3) {
     std::stringstream errmsg;
@@ -307,6 +308,10 @@ std::map<std::string, std::string> IntegratePeaksMD2::validateInputs() {
     errmsg << "Ellipsoid and Cylinder cannot both be true";
     result["Ellipsoid"] = errmsg.str();
     result["Cylinder"] = errmsg.str();
+  }
+
+  if (inputWS->getSpecialCoordinateSystem() == Mantid::Kernel::None) {
+    result["InputWorkspace"] = "Must have Special Coordinate System of QLab, QSample or HKL";
   }
 
   return result;
@@ -460,8 +465,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
   // Initialize progress reporting
   int nPeaks = peakWS->getNumberPeaks();
   Progress progress(this, 0., 1., nPeaks);
+  int zeroHKLCount = 0;
   bool doParallel = cylinderBool ? false : Kernel::threadSafe(*ws, *peakWS);
-  PARALLEL_FOR_IF(doParallel)
+  PARALLEL_SET_CONFIG_THREADS PRAGMA_OMP(parallel for if(doParallel) reduction(+:zeroHKLCount))
   for (int i = 0; i < nPeaks; ++i) {
     PARALLEL_START_INTERRUPT_REGION
     progress.report();
@@ -470,14 +476,21 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
     IPeak &p = peakWS->getPeak(i);
 
     // Get the peak center as a position in the dimensions of the workspace
+    bool missingIndex = false; // True if in HKL mode and pos is 0,0,0
     V3D pos;
     if (CoordinatesToUse == Mantid::Kernel::QLab) //"Q (lab frame)"
       pos = p.getQLabFrame();
     else if (CoordinatesToUse == Mantid::Kernel::QSample) //"Q (sample frame)"
       pos = p.getQSampleFrame();
-    else if (CoordinatesToUse == Mantid::Kernel::HKL) //"HKL"
+    else if (CoordinatesToUse == Mantid::Kernel::HKL) { //"HKL"
       pos = p.getHKL();
-
+      if (pos.X() == 0 && pos.Y() == 0 && pos.Z() == 0) {
+        ++zeroHKLCount;
+        missingIndex = true;
+      }
+    } else {
+      throw std::runtime_error("Workspace does not have a coordinate system set");
+    }
     // Do not integrate if sphere is off edge of detector
 
     const double edgeDist = calculateDistanceToEdge(p.getQLabFrame());
@@ -554,7 +567,13 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
       }
       // if ellipsoid find covariance and centroid in spherical region
       // using one-pass algorithm from https://doi.org/10.1145/359146.359153
-      if (isEllipse) {
+      bool integrateAsEllipse = isEllipse;
+      if (isEllipse && missingIndex) {
+        integrateAsEllipse = false;
+        g_log.warning() << "Integrating un-indexed peak. Falling back to sphere peak shape to avoid numeric issues\n";
+      }
+
+      if (integrateAsEllipse) {
         // flat bg to subtract
         const auto bgDensity = bgSignal / (4 * M_PI * pow(PeakRadiusVector[i], 3) / 3);
         std::array<V3D, 3> eigenvects;
@@ -885,6 +904,15 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
     PARALLEL_END_INTERRUPT_REGION
   }
   PARALLEL_CHECK_INTERRUPT_REGION
+
+  if (CoordinatesToUse == Kernel::HKL && zeroHKLCount > 0) {
+    if (zeroHKLCount == nPeaks) {
+      g_log.error() << "No peaks are indexed, integrated at HKL=0,0,0. You might need to run IndexPeaks.\n";
+    } else {
+      g_log.warning() << zeroHKLCount << " of " << nPeaks << " peaks are not indexed, integrated at HKL=0,0,0\n";
+    }
+  }
+
   // This flag is used by the PeaksWorkspace to evaluate whether it has
   // been integrated.
   peakWS->mutableRun().addProperty("PeaksIntegrated", 1, true);

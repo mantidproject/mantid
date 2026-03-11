@@ -2,9 +2,6 @@
 Mantid Workbench Changes
 ========================
 
-.. contents:: Table of Contents
-   :local:
-
 .. figure:: ../../images/Ticks_gridlines_settings.png
    :class: screenshot
    :width: 350px

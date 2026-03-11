@@ -4,9 +4,6 @@
 MD Workspace
 ============
 
-.. contents::
-  :local:
-
 The MD Workspace [MDWorkspace] (short for "Multi-Dimensional" Workspace) is a generic
 data structure holdings points (MDEvents) that are defined by their
 position in several dimensions.

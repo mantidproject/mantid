@@ -2,9 +2,6 @@
 Mantid Workbench Changes
 ========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - In an algorithm's Algorithm Dialogue, if an input workspace is named ``LHSWorkspace``, this workspace name will be used when auto-filling the ``OutputWorkspace`` property.

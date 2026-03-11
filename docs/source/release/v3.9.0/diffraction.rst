@@ -2,9 +2,6 @@
 Diffraction Changes
 ===================
 
-.. contents:: Table of Contents
-   :local:
-
 Crystal Improvements
 --------------------
 :ref:`algm-FindUBUsingLatticeParameters` will now return an oriented lattice even when the number of peaks used is very low.

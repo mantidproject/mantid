@@ -29,11 +29,11 @@ For converting `numpy.datetime64 <https://docs.scipy.org/doc/numpy/reference/arr
 
 .. code-block:: python
 
-   import pytz
-   tz = pytz.timezone(ConfigService.getFacility().timezone())
+   from zoneinfo import ZoneInfo
+   tz = ZoneInfo(ConfigService.getFacility().timezone())
    times = numpy.datetime_as_string(times, timezone=tz)
 
-This is how numpy internally converts `numpy.datetime64 <https://docs.scipy.org/doc/numpy/reference/arrays.datetime.html>`_ to strings for printing, but the selection of timezone is explicit (using `pytz <https://pythonhosted.org/pytz/>`_) to allow for matching where the data was recorded rather than the system's timezone.
+This is how numpy internally converts `numpy.datetime64 <https://docs.scipy.org/doc/numpy/reference/arrays.datetime.html>`_ to strings for printing, but the selection of timezone is explicit (using `zoneinfo <https://docs.python.org/3/library/zoneinfo.html>`_) to allow for matching where the data was recorded rather than the system's timezone.
 
 Converting strings to ``datetime64``
 ------------------------------------

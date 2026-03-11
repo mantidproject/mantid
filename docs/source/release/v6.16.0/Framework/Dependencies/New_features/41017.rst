@@ -1,0 +1,1 @@
+- Remove dependency ``pytz`` to prefer using python's built-in ``zoneinfo`` for time zone information

@@ -2,9 +2,6 @@
 Reflectometry Changes
 =====================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - ``Polarization Efficiencies`` and ``Flood Workspaces`` can now be selected using a file path in the :ref:`Reflectometry GUI <interface-isis-refl>`.

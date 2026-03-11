@@ -2,9 +2,6 @@
 Mantid Workbench Changes
 ========================
 
-.. contents:: Table of Contents
-   :local:
-
 Bugfixes
 --------
 - Log-scaling has been fixed in waterfall plots.

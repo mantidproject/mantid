@@ -5,9 +5,6 @@ Sample
 ======
 
 
-.. contents::
-  :local:
-
 What is the Sample object?
 --------------------------
 

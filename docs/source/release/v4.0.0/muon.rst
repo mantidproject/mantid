@@ -13,9 +13,6 @@ Muon Changes
    :align: right
    :height: 300px
 
-.. contents:: Table of Contents
-   :local:
-
 Interface
 ---------
 

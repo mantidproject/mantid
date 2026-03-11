@@ -2,9 +2,6 @@
 Indirect Geometry Changes
 =========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - A few unused options such as ``Scale factor by`` have been removed from the :ref:`ISIS Energy Transfer tab <ISISEnergyTransfer>`.

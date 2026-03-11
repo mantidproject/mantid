@@ -2,9 +2,6 @@
 Indirect Geometry Changes
 =========================
 
-.. contents:: Table of Contents
-   :local:
-
 Bugfixes
 --------
 - (`#40243 <https://github.com/mantidproject/mantid/pull/40243>`_) :ref:`FilterEvents <algm-FilterEvents>` had a bug when ``CorrectionToSample="Indirect"``. The code now matches the equations in the documentation.

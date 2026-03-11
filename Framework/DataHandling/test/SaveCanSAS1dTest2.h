@@ -179,9 +179,9 @@ public:
 
     std::getline(testFile, fileLine);
     std::string idataline = "\t\t\t<Idata><Q unit=\"1/A\">3543.75</Q><I "
-                            "unit=\"Counts\">111430</I><Idev "
+                            "unit=\"Counts\">111430.0</I><Idev "
                             "unit=\"Counts\">333.811</Idev><Qdev "
-                            "unit=\"1/A\">0</Qdev></Idata>";
+                            "unit=\"1/A\">0.0</Qdev></Idata>";
     TS_ASSERT_EQUALS(fileLine, idataline);
 
     for (int i = 0; i < 101; i++) {
@@ -194,7 +194,7 @@ public:
     TS_ASSERT_EQUALS(fileLine, "\t\t<SAStransmission_spectrum name=\"sample\">");
 
     idataline = "\t\t\t<Tdata><Lambda unit=\"A\">3543.75</Lambda><T "
-                "unit=\"Counts\">111430</T><Tdev "
+                "unit=\"Counts\">111430.0</T><Tdev "
                 "unit=\"none\">333.811</Tdev></Tdata>";
     std::getline(testFile, fileLine); // transmission spectrum data
     TS_ASSERT_EQUALS(fileLine, idataline);
