@@ -9,9 +9,6 @@ Mantid 6.16.0 Release Notes
    :width: 385px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 .. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
 
 We are proud to announce version 6.16.0 of Mantid.

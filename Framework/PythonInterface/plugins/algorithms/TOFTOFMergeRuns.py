@@ -7,8 +7,8 @@
 from mantid.kernel import Direction, StringArrayProperty, StringArrayLengthValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, WorkspaceGroup
 import mantid.simpleapi as api
+from datetime import datetime
 import numpy as np
-from dateutil.parser import parse
 import warnings
 
 
@@ -177,10 +177,10 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         api.AddSampleLog(Workspace=wsOutput, LogName="duration", LogText=str(sum(durations)), LogType="Number", LogUnit="s")
         # get minimal run_start
         fmt = "%Y-%m-%dT%H:%M:%S%z"
-        run_start = [parse(entry) for entry in pdict["run_start"]]
+        run_start = [datetime.fromisoformat(entry) for entry in pdict["run_start"]]
         api.AddSampleLog(Workspace=wsOutput, LogName="run_start", LogText=min(run_start).strftime(fmt), LogType="String")
         # get maximal run_end
-        run_end = [parse(entry) for entry in pdict["run_end"]]
+        run_end = [datetime.fromisoformat(entry) for entry in pdict["run_end"]]
         api.AddSampleLog(Workspace=wsOutput, LogName="run_end", LogText=max(run_end).strftime(fmt), LogType="String")
         # list of run_numbers
         api.AddSampleLog(Workspace=wsOutput, LogName="run_number", LogText=str(pdict["run_number"]), LogType="String")

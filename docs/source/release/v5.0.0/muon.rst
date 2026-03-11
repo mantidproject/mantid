@@ -2,9 +2,6 @@
 MuSR Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 .. figure::  ../../images/MuonTabPlots.png
    :height: 400px
    :align: center

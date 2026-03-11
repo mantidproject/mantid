@@ -2,9 +2,6 @@
 MantidPlot Changes
 ==================
 
-.. contents:: Table of Contents
-   :local:
-
 .. figure:: ../../images/mantid_amber.jpeg
    :class: screenshot
    :width: 500px

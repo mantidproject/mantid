@@ -8,9 +8,6 @@ MantidWorkbench Changes
    :width: 750px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 
 Improvements
 ############

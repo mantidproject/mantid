@@ -12,9 +12,6 @@ Mantid 3.6.0 Release Notes
    Screenshot of slice viewer displaying the same data in inelastic
    (left) and crystallographic conventions (right)
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 3.6 of Mantid, this release contains
 the long awaited support to handle the differing Crystallography
 convention (:math:`k_f-k_i`) and inelastic convention (:math:`k_i-k_f`) for representing HKL

@@ -13,9 +13,6 @@ ISIS Reflectometry Interface
 
   *Usability improvements in the ISIS Reflectometry Interface*
 
-.. contents:: Table of Contents
-   :local:
-
 Workbench Support
 #################
 

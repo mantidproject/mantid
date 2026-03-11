@@ -1,11 +1,5 @@
 # CLion
 
-```{contents}
----
-local:
----
-```
-
 ## Installing CLion
 
 Please note that these instructions only work when using a Ninja

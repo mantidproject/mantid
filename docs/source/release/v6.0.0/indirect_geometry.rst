@@ -2,9 +2,6 @@
 Indirect Geometry Changes
 =========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ############
 - **A Custom Grouping String in Indirect Data Reduction can now be saved to an XML file.**

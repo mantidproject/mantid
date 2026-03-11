@@ -29,6 +29,7 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
 from qtpy.QtCore import Qt, QEvent, QSize
+from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -48,6 +49,7 @@ from mantid import UsageService, ConfigService
 from mantid.kernel import FeatureType
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 from mantidqt.utils.qt.qappthreadcall import run_on_qapp_thread
+from mantidqt.io import open_a_file_dialog
 
 from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
@@ -199,11 +201,14 @@ class FullInstrumentViewWindow(QMainWindow):
         self._aspect_ratio_check_box.setChecked(aspect_ratio_option.casefold() == "yes")
         self._show_monitors_check_box = QCheckBox()
         self._show_monitors_check_box.setText("Show Monitors?")
+        self._count_scale_combo_box = NoWheelComboBox(self)
+        self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
         projection_layout.addWidget(self._clear_point_picked_detectors)
         projection_layout.addWidget(self._aspect_ratio_check_box)
         projection_layout.addWidget(self._show_monitors_check_box)
+        projection_layout.addWidget(self._count_scale_combo_box)
 
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
@@ -473,6 +478,7 @@ class FullInstrumentViewWindow(QMainWindow):
         for unit in self._presenter.available_unit_options():
             self._units_combo_box.addItem(unit)
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
+        self._count_scale_combo_box.addItems(self._presenter.count_scale_combo_options())
         self.main_plotter.set_color_cycler(self._presenter._COLOURS)
         self.refresh_peaks_ws_list()
         self.refresh_workspaces_in_list(CurrentTab.Masking)
@@ -504,6 +510,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._delete_peak_button.clicked.connect(self._presenter.on_delete_peak_clicked)
         self._delete_all_selected_peaks_button.clicked.connect(self._presenter.on_delete_all_selected_peaks_clicked)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
+        self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -661,6 +668,10 @@ class FullInstrumentViewWindow(QMainWindow):
         """Get the currently selected unit from the combo box"""
         return self._units_combo_box.currentText()
 
+    def current_selected_count_scale(self) -> str:
+        """Get the currently selected display scale for integrated counts"""
+        return self._count_scale_combo_box.currentText()
+
     def sum_spectra_selected(self) -> bool:
         return self._sum_spectra_checkbox.isChecked()
 
@@ -690,9 +701,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self._contour_range_slider.setValue(contour_limits)
         return
 
-    def set_plotter_scalar_bar_range(self, clim: tuple[int, int], label: str) -> None:
+    def set_plotter_scalar_bar_range(self, clim: tuple[int, int], label: str, display_title: str | None = None) -> None:
         """Set the range of the colours displayed, i.e. the legend"""
         self.main_plotter.update_scalar_bar_range(clim, label)
+        if display_title is None:
+            return
+
+        self.main_plotter.scalar_bars[self._presenter._counts_label].SetTitle(display_title)
 
     def closeEvent(self, QCloseEvent: QEvent) -> None:
         """When closing, make sure to close the plotters and figure correctly to prevent errors"""
@@ -1076,3 +1091,15 @@ class FullInstrumentViewWindow(QMainWindow):
             self._lineplot_peak_cursor.linev.remove()
             self._lineplot_peak_cursor = None
             self._detector_figure_canvas.draw_idle()
+
+    def get_filename_from_dialog(self):
+        """
+        Open file dialog for saving xml files.
+        Needs to be in view to run in QThread.
+        """
+        return open_a_file_dialog(
+            accept_mode=QFileDialog.AcceptSave,
+            file_mode=QFileDialog.AnyFile,
+            file_filter="XML files (*xml)",
+            directory=ConfigService["defaultsave.directory"],
+        )
