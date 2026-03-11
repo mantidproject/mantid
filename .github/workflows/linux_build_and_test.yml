@@ -51,7 +51,7 @@ jobs:
           
           echo "${{ toJSON(github.event.inputs) }}"
           
-          read -r BUILD_THREADS               <<< ${{ inputs.RELATE_THREADS_BUILD }}
+          #read -r BUILD_THREADS               <<< ${{ inputs.RELATE_THREADS_BUILD }}
           read -r BUILD_THREADS_SYSTEM_TESTS  <<< ${{ inputs.RELATE_THREADS_SYSTEM_TESTS }}
           read -r UNIT_TEST_THREADS           <<< ${{ inputs.RELATE_THREADS_UNIT_TESTS }}
           
@@ -59,12 +59,12 @@ jobs:
           echo "   cores   : ${cores}"
           echo "   memory  : ${ram_gb} GB"
           echo
-          echo "BUILD_THREADS               : $BUILD_THREADS"
+          #echo "BUILD_THREADS               : $BUILD_THREADS"
           echo "BUILD_THREADS_SYSTEM_TESTS  : $BUILD_THREADS_SYSTEM_TESTS"
           echo "UNIT_TEST_THREADS           : $UNIT_TEST_THREADS"
           echo
           
-          echo "BUILD_THREADS=$BUILD_THREADS"                            >> $GITHUB_ENV
+          #echo "BUILD_THREADS=$BUILD_THREADS"                            >> $GITHUB_ENV
           echo "BUILD_THREADS_SYSTEM_TESTS=$BUILD_THREADS_SYSTEM_TESTS"  >> $GITHUB_ENV
           echo "UNIT_TEST_THREADS=$UNIT_TEST_THREADS"                    >> $GITHUB_ENV
           
