@@ -141,9 +141,10 @@ class BasicFittingContext(FittingContext):
     @single_fit_functions.setter
     def single_fit_functions(self, fit_functions: list) -> None:
         """Sets all of the single fit functions stored in the model."""
-        if len(fit_functions) == 1 and isinstance(fit_functions[0], CompositeFunction):
+        if len(fit_functions) == 1 and type(fit_functions[0]) is CompositeFunction:
             assert fit_functions[0].nFunctions() == self.number_of_datasets, (
-                "The number of functions inside CompositeFunction is not equal to the number of datasets."
+                f"The number of functions inside CompositeFunction={fit_functions[0].nFunctions()} "
+                f"is not equal to the number of datasets={self.number_of_datasets}."
             )
         else:
             assert len(fit_functions) == self.number_of_datasets, "The number of functions is not equal to the number of datasets."
