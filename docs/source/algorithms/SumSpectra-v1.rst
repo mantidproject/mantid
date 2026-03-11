@@ -22,8 +22,9 @@ and the corresponding error is correctly propagated as
 
 .. math:: Error[j] = \sqrt{\sum_{i \in spectra} Error_i^2[j]}.
 
-The weighted sum (``WeightedSum=True`` and ``MultiplyBySpectra=False``, ignored for event workspaces)
-is defined (skipping :math:`Signal_i[j]` when :math:`Error_i[j] == 0`),
+In the case of using ``WeightedSum=True`` and ``MultiplyBySpectra=False`` (both ignored for event workspaces),
+what is calculated is the weighted mean of the spectra,
+defined as (skipping :math:`Signal_i[j]` when :math:`Error_i[j] == 0`),
 
 .. math:: Signal[j] = \frac{
         \sum_{i \in spectra} \left(\frac{Signal_i[j]}{Error_i^2[j]}\right)
