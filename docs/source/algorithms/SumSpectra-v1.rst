@@ -57,7 +57,7 @@ then multiplying by the number of spectra contributing to the bin is incorrect,
 use ``WeightedSum=True`` and ``MultiplyBySpectra=False``.
 
 If a workspace contains fractional bins, it is useful to consider an "effective" signal and error
-given by :math:`\overline{Signal}_i[j] = Signal_i[j] \timex fracVal_i[j]`
+given by :math:`\overline{Signal}_i[j] = Signal_i[j] \times fracVal_i[j]`
 and :math:`\overline{Error}_i[j] = Error_i[j] \times fracVal_i[j]`,
 where :math:`fracVal_i[j]` is the fractional value for the bin.
 Then the unweighted sum with fractional bins is defined as
