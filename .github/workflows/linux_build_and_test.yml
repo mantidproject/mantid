@@ -12,17 +12,17 @@ on:
       #  required: false
       #  type: string
 
-      #RELATE_THREADS_SYSTEM_TESTS:    # Relate number of system test threads to CPU cores and memory
-      #  description: 'BUILD_THREADS_SYSTEM_TESTS'
-      #  default: '$(( ram_gb / 10 ))'
-      #  required: false
-      #  type: string
+      RELATE_THREADS_SYSTEM_TESTS:    # Relate number of system test threads to CPU cores and memory
+        description: 'BUILD_THREADS_SYSTEM_TESTS'
+        default: '$(( ram_gb / 10 ))'
+        required: false
+        type: string
 
-      #RELATE_THREADS_UNIT_TESTS:      # Relate number of unit test threads to CPU cores and memory
-      #  description: 'UNIT_TEST_THREADS'
-      #  default: '$(( (cores - (ram_gb / cores)) * 15/16 ))'
-      #  required: false
-      #  type: string
+      RELATE_THREADS_UNIT_TESTS:      # Relate number of unit test threads to CPU cores and memory
+        description: 'UNIT_TEST_THREADS'
+        default: '$(( (cores - (ram_gb / cores)) * 15/16 ))'
+        required: false
+        type: string
 
       RUNNER_SELECTION:
         type: choice
