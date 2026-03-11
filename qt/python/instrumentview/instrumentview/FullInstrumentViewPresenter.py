@@ -7,15 +7,13 @@
 import numpy as np
 import pyvista as pv
 from pyvista.plotting.opts import PickerType
-from qtpy.QtWidgets import QFileDialog
 from queue import Queue
 from typing import Optional
 from instrumentview.Globals import CurrentTab
 from threading import Thread
 from mantid import mtd
-from mantid.kernel import logger, ConfigService
+from mantid.kernel import logger
 from mantid.simpleapi import AnalysisDataService
-from mantidqt.io import open_a_file_dialog
 from mantid.dataobjects import MaskWorkspace, GroupingWorkspace, PeaksWorkspace
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
@@ -391,7 +389,7 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_clear_list_clicked, ()))
 
     def _on_save_mask_to_xml_clicked(self):
-        filename = self._get_filename_from_dialog()
+        filename = self._view.get_filename_from_dialog()
         if not filename:
             return
         self._model.save_mask_to_xml(filename)
@@ -406,22 +404,13 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_save_grouping_to_ads_clicked, ()))
 
     def _on_save_grouping_to_xml_clicked(self):
-        filename = self._get_filename_from_dialog()
+        filename = self._view.get_filename_from_dialog()
         if not filename:
             return
         self._model.save_grouping_to_xml(filename)
 
     def on_save_grouping_to_xml_clicked(self):
         self._callback_queue.put((self._on_save_grouping_to_xml_clicked, ()))
-
-    def _get_filename_from_dialog(self):
-        filename = open_a_file_dialog(
-            accept_mode=QFileDialog.AcceptSave,
-            file_mode=QFileDialog.AnyFile,
-            file_filter="XML files (*xml)",
-            directory=ConfigService["defaultsave.directory"],
-        )
-        return filename
 
     def _reload_mask_workspaces(self) -> None:
         self._view.refresh_workspaces_in_list(CurrentTab.Masking)
