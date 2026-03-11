@@ -11,7 +11,7 @@ on:
 
 env:
   # change this between main and release-next
-  UPDATE_BRANCH: release-next
+  UPDATE_BRANCH: main
 
 jobs:
   pixi-update-lockfile:

@@ -1,1 +1,0 @@
-- A bug in :ref`create_total_scattering_pdf <create_total_scattering_pdf_polaris-isis-powder-ref>` where loading non-consecutive runs was cauing an error has been fixed.

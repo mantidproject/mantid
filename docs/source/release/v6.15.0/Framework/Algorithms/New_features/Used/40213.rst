@@ -1,1 +1,0 @@
-- Added UI elements for the reduction part of :ref:`HFIRPowderReduction <algm-HFIRPowderReduction>`

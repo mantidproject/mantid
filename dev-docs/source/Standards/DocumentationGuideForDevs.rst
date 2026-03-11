@@ -9,8 +9,7 @@ Documentation Guide for Devs
 
 This page gives an overview of the documentation process for mantid.
 
-The documentation is written in `reStructuredText <https://docutils.sourceforge.io/rst.html>`__
-and processed using `Sphinx <http://www.sphinx-doc.org/en/master/>`__ along with
+The documentation is written in `reStructuredText <https://docutils.sourceforge.io/rst.html>`__ and `Markedly Structured Text <https://myst-parser.readthedocs.io/en/latest/>`__ which is processed using `Sphinx <http://www.sphinx-doc.org/en/master/>`__ along with
 `Sphinx bootstrap theme <https://pypi.python.org/pypi/sphinx-bootstrap-theme/>`__ and custom css.
 
 
@@ -34,8 +33,11 @@ The following settings, relating to the documentation, are available:
 
 The defaults are set to produce a reasonable build time for developers but set to build everything on clean package builds.
 
+reStructuredText
+----------------
+
 reST editors/IDE plugins
-------------------------
+========================
 
 Several free & proprietary editors support syntax-highlighting reST.
 A list of the most notable ones can be found `here <https://stackoverflow.com/questions/2746692/restructuredtext-tool-support>`__.
@@ -50,7 +52,7 @@ Other tools:
 * VSCode with `reStructuredText <https://marketplace.visualstudio.com/items?itemName=lextudio.restructuredtext>`__ and `esbonio <https://marketplace.visualstudio.com/items?itemName=swyddfa.esbonio>`__ enables previews of documents inside VSCode. The preview does not support the mantid directives but is useful for a general idea of structure.
 
 The reStructuredText File
--------------------------
+=========================
 
 `reStructuredText <http://docutils.sourceforge.net/rst.html>`__ is a markup format and is converted into themed html pages using Sphinx.
 A primer on reStructuredText can be found here along with a single-page cheat sheet.
@@ -128,7 +130,7 @@ Sub-sub-sections
    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Common Warnings and Fixes
--------------------------
+=========================
 
 If you have weird messages about sphinx warnings that happen on “Console output”,
 those are coming either from summary functions in algorithms or from parameter descriptions.
@@ -209,10 +211,40 @@ Sphinx has encountered a line starting with ``.. foo::``, where ``foo`` is expec
 
 The fix is to correct the name of the directive.
 
+Markedly Structured Text
+------------------------
+
+`Markedly Structured Text <https://myst-parser.readthedocs.io/en/latest/>`__, frequently abbreviated to MyST, is also configured for the user and developer docs.
+We leave it to the MyST docs for the details of the format.
+
+.. warning::
+   At the time of this writing, none of our custom sphinx extensions have been tested with MyST files.
+   This is especially true of release notes.
+
+Converting from rst to md
+=========================
+
+A pixi task exists for converting individual files run
+
+.. code:: sh
+
+   $ pixi run rst2md path/to/doc.rst
+
+which will create a file ``path/to/doc.md``.
+It is recommended that you use a diff-tool (e.g. ``diff`` or ``meld``) to review the changes.
+The new docs will not build until the ``.rst`` version is removed.
+
+.. code:: sh
+
+   $ git rm path/to/doc.rst
+   $ git add path/to/doc.md
+
+When converting a file, it is also a good time to update the text and reformat for `semantic line breaks <https://sembr.org/>`__.
+
 Building the HTML Development Documentation
 -------------------------------------------
 
-The developer documentation is written as ``.rst`` files in the mantid source folder under ``dev-docs/``,
+The developer documentation is written as ``.md`` and ``.rst`` files in the mantid source folder under ``dev-docs/``,
 the html files can be built using the `dev-docs-html` target.
 This will build all the development documentation into the mantid build folder under ``dev-docs/html/``.
 

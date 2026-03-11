@@ -64,7 +64,7 @@ public:
     std::vector<std::string> bankEntryNames = {"bank1_events"};
 
     // we need a real file but we don't actually read any data from it because we mock the loader
-    std::string filePath = Mantid::API::FileFinder::Instance().getFullPath("VULCAN_218062.nxs.h5");
+    std::string filePath = Mantid::API::FileFinder::Instance().getFullPath("VULCAN_218062.nxs.h5").string();
     H5::H5File file(filePath, H5F_ACC_RDONLY, Mantid::Nexus::H5Util::defaultFileAcc());
 
     std::vector<int> workspaceIndices{0, 1};

@@ -120,13 +120,13 @@ public:
   }
 
   void testGetFullPathWithFilename() {
-    std::string path = FileFinder::Instance().getFullPath("CSP78173.raw");
+    auto path = FileFinder::Instance().getFullPath("CSP78173.raw");
     TS_ASSERT(!path.empty());
   }
 
   void testGetFullPathWithDirectoryFindsDirectoryPath() {
     // Use the Schema directory under instrument
-    std::string path = FileFinder::Instance().getFullPath("Schema");
+    auto path = FileFinder::Instance().getFullPath("Schema");
     TS_ASSERT(!path.empty());
 
     // Code has separate path for path relative to working directory so check
@@ -144,10 +144,10 @@ public:
   void testGetFullPathSkipsDirectoriesOnRequest() {
     // Use the Schema directory under instrument
     const bool ignoreDirs(true);
-    std::string path = FileFinder::Instance().getFullPath("Schema", ignoreDirs);
+    auto path = FileFinder::Instance().getFullPath("Schema", ignoreDirs);
     TSM_ASSERT("Expected an empty path when looking for a directory, instead I "
                "found " +
-                   path,
+                   path.string(),
                path.empty());
 
     // Code has separate path for path relative to working directory so check
@@ -159,7 +159,7 @@ public:
     path = FileFinder::Instance().getFullPath(tempTestName, ignoreDirs);
     TSM_ASSERT("Expected an empty path when looking for a directory relative "
                "to current, instead I found " +
-                   path,
+                   path.string(),
                path.empty());
 
     std::filesystem::remove(tempTestDir);
@@ -268,8 +268,8 @@ public:
     // Turn off the archive searching
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
 
-    std::string path = FileFinder::Instance().findRun("CNCS7860").result();
-    TS_ASSERT(path.find("CNCS_7860_event.nxs") != std::string::npos);
+    auto path = FileFinder::Instance().findRun("CNCS7860").result();
+    TS_ASSERT_EQUALS(path.filename().string(), "CNCS_7860_event.nxs");
     TS_ASSERT(std::filesystem::exists(path));
   }
 
@@ -278,12 +278,12 @@ public:
     ConfigService::Instance().setString("default.facility", "ISIS");
 
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
-    std::string path = FileFinder::Instance().findRun("CSP78173").result();
-    TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
+    auto path = FileFinder::Instance().findRun("CSP78173").result();
+    TS_ASSERT_EQUALS(path.filename().string(), "CSP78173.raw");
     TS_ASSERT(std::filesystem::exists(path));
     path = FileFinder::Instance().findRun("CSP74683", std::vector<std::string>(1, ".s02")).result();
-    TS_ASSERT(path.size() > 3);
-    TS_ASSERT_EQUALS(path.substr(path.size() - 3), "s02");
+    TS_ASSERT(path.string().size() > 3);
+    TS_ASSERT_EQUALS(path.filename().string().substr(path.filename().string().size() - 3), "s02");
 
     // ConfigService::Instance().setString("datasearch.searcharchive","On");
     // path = FileFinder::Instance().findRun("CSP77374");
@@ -294,7 +294,7 @@ public:
 
   void testFindFiles() {
     ConfigService::Instance().setString("default.facility", "ISIS");
-    std::vector<std::string> files;
+    std::vector<std::filesystem::path> files;
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-n15193"), const std::invalid_argument &);
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189n-15193"), const std::invalid_argument &);
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-15193n"), const std::invalid_argument &);
@@ -302,7 +302,7 @@ public:
     TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15n189-151n93"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(files = FileFinder::Instance().findRuns("MUSR15189-15193"));
     TS_ASSERT_EQUALS(files.size(), 5);
-    std::vector<std::string>::iterator it = files.begin();
+    std::vector<std::filesystem::path>::iterator it = files.begin();
 
     for (; it != files.end(); ++it) {
       if (it != files.begin()) {
@@ -364,12 +364,12 @@ public:
   void testFindRunWithOverwriteExtensionsAndCorrectExtensionInFilename() {
     // This file is .nxs or .RAW
     const std::vector<std::string> incorrect_extension = {".txt"};
-    std::string path = FileFinder::Instance().findRun("MUSR15189.nxs", incorrect_extension, true).result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189.nxs", incorrect_extension, true).result().string();
     TS_ASSERT_EQUALS(path, "");
   }
 
   void testFindRunWithNoOverwriteExtensionsAndCorrectExtensionInFilename() {
-    std::string path = FileFinder::Instance().findRun("MUSR15189.nxs").result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189.nxs").result().string();
     std::string actualExtension = path.substr(path.size() - 4, 4);
     TS_ASSERT_EQUALS(actualExtension, ".nxs");
   }
@@ -377,13 +377,13 @@ public:
   void testFindRunWithOverwriteExtensionsAndIncorrectExtensions() {
     // This file is .nxs or .RAW
     const std::vector<std::string> incorrect_extension = {".txt"};
-    std::string path = FileFinder::Instance().findRun("MUSR15189", incorrect_extension, true).result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189", incorrect_extension, true).result().string();
     TS_ASSERT_EQUALS(path, "");
   }
 
   void testFindRunWithNoOverwriteAndIncorrectExtensionInFilename() {
     // Displays warning to user but still finds path using facility extensions
-    std::string path = FileFinder::Instance().findRun("MUSR15189.txt").result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189.txt").result().string();
     std::string actualExtension = path.substr(path.size() - 4, 4);
     TS_ASSERT_EQUALS(actualExtension, ".nxs");
   }
@@ -392,7 +392,7 @@ public:
     // This file is .nxs or .RAW
     // returns a .nxs if no extensions passed in
     const std::vector<std::string> extensions = {".a", ".txt", ".nxs"};
-    std::string path = FileFinder::Instance().findRun("MUSR15189", extensions, true).result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189", extensions, true).result().string();
     std::string actualExtension = "";
     if (!path.empty()) {
       actualExtension = path.substr(path.size() - 4, 4);
@@ -408,7 +408,7 @@ public:
     fil.close();
 
     ConfigService::Instance().setString("default.facility", "ISIS");
-    std::vector<std::string> files = FileFinder::Instance().findRuns("LOQ111-add");
+    std::vector<std::filesystem::path> files = FileFinder::Instance().findRuns("LOQ111-add");
     TS_ASSERT_EQUALS(files.size(), 1);
 
     std::filesystem::remove(file);
@@ -419,11 +419,11 @@ public:
     ConfigService::Instance().setString("default.facility", "ISIS");
 
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
-    std::string path = FileFinder::Instance().findRun("CSP78173.raw").result();
+    std::string path = FileFinder::Instance().findRun("CSP78173.raw").result().string();
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     TS_ASSERT(std::filesystem::exists(path));
 
-    path = FileFinder::Instance().findRun("OFFSPEC4622.log").result();
+    path = FileFinder::Instance().findRun("OFFSPEC4622.log").result().string();
     // Per discussion with Martyn on Dec 6, 2012: we decided to update this test
     // case.
     // *.log is not a valid extension for ISIS instruments. Since we modified
@@ -438,7 +438,7 @@ public:
 
   void testFindRunsDefaultInst() {
     ConfigService::Instance().setString("default.instrument", "MUSR");
-    std::vector<std::string> paths = FileFinder::Instance().findRuns("15189-15190");
+    auto paths = FileFinder::Instance().findRuns("15189-15190");
     TS_ASSERT(paths.size() == 2);
   }
 
@@ -450,25 +450,25 @@ public:
     // By default case sensitive is on
     fileFinder.setCaseSensitive(false);
 
-    std::string path = fileFinder.findRun("CSp78173.Raw").result();
+    auto path = fileFinder.findRun("CSp78173.Raw").result();
 #ifdef _WIN32
-    TS_ASSERT(path.find("CSp78173.Raw") != std::string::npos);
+    TS_ASSERT_EQUALS(path.filename().string(), "CSp78173.Raw");
 #else
-    TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
+    TS_ASSERT_EQUALS(path.filename().string(), "CSP78173.raw");
 #endif
     TS_ASSERT(std::filesystem::exists(path));
-    std::string path2 = fileFinder.getFullPath("UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
+    auto path2 = fileFinder.getFullPath("UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
     TS_ASSERT(std::filesystem::exists(path2));
 
     // turn on case sensitive - this one should fail on none windows
     FileFinder::Instance().setCaseSensitive(true);
-    std::string pathOn = fileFinder.findRun("CSp78173.Raw").result();
+    auto pathOn = fileFinder.findRun("CSp78173.Raw").result();
 
-    std::string pathOn2 = FileFinder::Instance().getFullPath("unit_TeSTinG/IDF_for_UNiT_TESTiNG.xMl");
+    auto pathOn2 = FileFinder::Instance().getFullPath("unit_TeSTinG/IDF_for_UNiT_TESTiNG.xMl");
 
-    std::string pathOn3 = FileFinder::Instance().getFullPath("unit_testing/IDF_for_UNiT_TESTiNG.xMl");
+    auto pathOn3 = FileFinder::Instance().getFullPath("unit_testing/IDF_for_UNiT_TESTiNG.xMl");
 
-    std::string pathOn4 = FileFinder::Instance().getFullPath("CSp78173.Raw");
+    auto pathOn4 = FileFinder::Instance().getFullPath("CSp78173.Raw");
 
     // Refs #4916 -- The FileFinder findRun() method is revised to continue
     // search using the facility supplied extensions
@@ -562,7 +562,7 @@ public:
     // By default case sensitive is on
     fileFinder.setCaseSensitive(false);
 
-    std::vector<std::string> files;
+    std::vector<std::filesystem::path> files;
     std::stringstream range;
     range << (m_filesInDir - m_filesToFind) << "-" << (m_filesInDir - 1);
     TS_ASSERT_THROWS_NOTHING(files = fileFinder.findRuns(range.str().c_str()));
@@ -583,7 +583,7 @@ public:
     // punished by either having to wait or just
     // restart Mantid.  Here, we guard against any change in FileFinder that
     // could reintroduce this problem.
-    std::vector<std::string> files;
+    std::vector<std::filesystem::path> files;
     std::stringstream range;
     std::string startOfRange = boost::lexical_cast<std::string>(m_filesInDir - 10);
     std::string accidentalEndOfRange = "99999";
@@ -715,46 +715,46 @@ public:
 
 public:
   void testNormalInput() {
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"MAR26045"}, {".raw", ".nxs", ".s01"}).result(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"MAR26045"}, {".raw", ".nxs", ".s01"}).result().string(),
                      m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"MER40871"}, {".raw", ".nxs", ".s01"}).result(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"MER40871"}, {".raw", ".nxs", ".s01"}).result().string(),
                      m_dataCacheDir + "/MERLIN/SUBDIR1/SUBDIR2/MER40871.nxs");
   }
 
   void testInstrWithLowercase() {
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"mar26045"}, {".raw", ".nxs", ".s01"}).result(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"mar26045"}, {".raw", ".nxs", ".s01"}).result().string(),
                      m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"mAr26045"}, {".raw", ".nxs", ".s01"}).result(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"mAr26045"}, {".raw", ".nxs", ".s01"}).result().string(),
                      m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"Mer40871"}, {".raw", ".nxs", ".s01"}).result(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"Mer40871"}, {".raw", ".nxs", ".s01"}).result().string(),
                      m_dataCacheDir + "/MERLIN/SUBDIR1/SUBDIR2/MER40871.nxs");
   }
 
   void testMissingInstr() {
     ConfigService::Instance().setString("default.instrument", "MAR");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"26045"}, {".raw", ".nxs", ".s01"}).result(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"26045"}, {".raw", ".nxs", ".s01"}).result().string(),
                      m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
 
     ConfigService::Instance().setString("default.instrument", "MER");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"40871"}, {".raw", ".nxs", ".s01"}).result(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"40871"}, {".raw", ".nxs", ".s01"}).result().string(),
                      m_dataCacheDir + "/MERLIN/SUBDIR1/SUBDIR2/MER40871.nxs");
   }
 
   void testZeroPadding() {
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"WISH39495"}, {".raw", ".nxs", ".s01"}).result(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"WISH39495"}, {".raw", ".nxs", ".s01"}).result().string(),
                      m_dataCacheDir + "/WISH/SUBDIR1/SUBDIR2/WISH00039495.s01");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"LOQ106084"}, {".raw", ".nxs"}).result(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"LOQ106084"}, {".raw", ".nxs"}).result().string(),
                      m_dataCacheDir + "/LOQ/SUBDIR1/SUBDIR2/LOQ00106084.nxs");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"ZOOM4656"}, {".RAW"}).result(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"ZOOM4656"}, {".RAW"}).result().string(),
                      m_dataCacheDir + "/ZOOM/SUBDIR1/SUBDIR2/ZOOM00004656.RAW");
   }
 
   void testDataCacheSkipped() {
-    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"LOQ106084-add"}, {".raw"}).result(), "");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BADINSTR1234"}, {".raw"}).result(), "");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"path-no-digits"}, {".raw"}).result(), "");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"1234BADPATH"}, {".raw"}).result(), "");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BAD1234PATH"}, {".raw"}).result(), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"LOQ106084-add"}, {".raw"}).result().string(), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BADINSTR1234"}, {".raw"}).result().string(), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"path-no-digits"}, {".raw"}).result().string(), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"1234BADPATH"}, {".raw"}).result().string(), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BAD1234PATH"}, {".raw"}).result().string(), "");
   }
 
   void testDirectoryWithoutPermissin() {

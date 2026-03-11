@@ -11,6 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadEventAsWorkspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -200,7 +201,7 @@ public:
   }
 
   void test_CGE_small_empty_entries() {
-    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("CG3_960.nxs.h5");
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("CG3_960.nxs.h5").string();
     // Run the algorithm
     LoadEventAsWorkspace2D alg;
     alg.setChild(true);
@@ -269,6 +270,13 @@ public:
     compare->setProperty("Workspace2", outputWS3);
     compare->execute();
     TS_ASSERT(compare->getProperty("Result"));
+
+    // compare the duration, which should have been filtered to 5s
+    constexpr auto expected_duration = 5.0;
+    const auto duration1 = outputWS->run().getPropertyValueAsType<double>("duration");
+    const auto duration2 = outputWS3->run().getPropertyValueAsType<double>("duration");
+    TS_ASSERT_DELTA(duration1, expected_duration, 1e-6);
+    TS_ASSERT_DELTA(duration2, expected_duration, 1e-6);
   }
 
   void test_BSS_filterbytimeStart() {

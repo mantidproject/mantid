@@ -57,7 +57,12 @@ template <size_t nd> void swap(MDLeanEvent<nd> &first, MDLeanEvent<nd> &second);
  */
 struct EventAccessor {};
 
+// Apply visibility attribute for non-MSVC builds (needed for clang/OSX).
+#if defined(_MSC_VER)
+template <size_t nd> class MDLeanEvent {
+#else
 template <size_t nd> class MANTID_DATAOBJECTS_DLL MDLeanEvent {
+#endif
 public:
   /**
    * Additional index type defenitions

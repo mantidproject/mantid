@@ -171,7 +171,7 @@ def add_runs(  # noqa: C901
 
         lastFile = os.path.splitext(lastFile)[0]
         # Now save the added file
-        prefix = save_directory if save_directory else ""
+        prefix = save_directory or ""
         if outFile is None:
             outFile = prefix + lastFile + "-add." + "nxs"
         if outFile_monitors is None:
@@ -213,7 +213,7 @@ def add_runs(  # noqa: C901
     path, base = os.path.split(outFile)
     if path == "" or base not in os.listdir(path):
         # Try the default save directory
-        path_prefix = save_directory if save_directory else config["defaultsave.directory"]
+        path_prefix = save_directory or config["defaultsave.directory"]
         path = path_prefix + path
         # If the path is still an empty string check in the current working directory
         if path == "":
@@ -304,7 +304,7 @@ def _make_filename(entry, ext, inst):
     except ValueError:  # We don't have a run number, assume it's a valid filename
         filename = entry
         _, filename_ext = os.path.splitext(filename)
-        ext = filename_ext if filename_ext else ext
+        ext = filename_ext or ext
 
     return filename, ext
 

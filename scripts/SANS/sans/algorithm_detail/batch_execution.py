@@ -37,9 +37,16 @@ from sans.common.constants import (
     SCALED_BGSUB_SUFFIX,
 )
 from sans.common.file_information import get_extension_for_file_type, SANSFileInformationFactory
-from sans.gui_logic.plotting import get_plotting_module
 from sans.state.Serializer import Serializer
 from sans.state.StateObjects.StateData import StateData
+import sys
+
+plotting_module = None
+if "workbench.app" in sys.modules:
+    try:
+        import mantidqt.plotting.functions as plotting_module
+    except ImportError:
+        pass
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -267,8 +274,9 @@ def plot_workspace(reduction_package, output_graph):
     :param reduction_package: An object containing the reduced workspaces
     :param output_graph: Name to the plot window
     """
-    plotting_module = get_plotting_module()
-    plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
+    if plotting_module:
+        plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
+    # else: plotting not available in script context
 
 
 def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
@@ -572,7 +580,7 @@ def check_for_background_workspace_in_ads(state, reduction_package):
     full_name = (
         background_ws_name
         + reduced_name.split(
-            state.save.user_specified_output_name if state.save.user_specified_output_name else str(state.data.sample_scatter_run_number),
+            state.save.user_specified_output_name or str(state.data.sample_scatter_run_number),
             1,
         )[-1]
     )

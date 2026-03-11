@@ -1,0 +1,1 @@
+- Add information for writing docs using MyST flavored markdown

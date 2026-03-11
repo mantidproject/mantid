@@ -1,1 +1,0 @@
-- Vanadium normalisation can now be performed during calibration in the :ref:`Engineering_Diffraction-ref` interface.

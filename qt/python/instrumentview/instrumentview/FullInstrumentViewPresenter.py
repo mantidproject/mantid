@@ -7,15 +7,13 @@
 import numpy as np
 import pyvista as pv
 from pyvista.plotting.opts import PickerType
-from qtpy.QtWidgets import QFileDialog
 from queue import Queue
 from typing import Optional
 from instrumentview.Globals import CurrentTab
 from threading import Thread
 from mantid import mtd
-from mantid.kernel import logger, ConfigService
+from mantid.kernel import logger
 from mantid.simpleapi import AnalysisDataService
-from mantidqt.io import open_a_file_dialog
 from mantid.dataobjects import MaskWorkspace, GroupingWorkspace, PeaksWorkspace
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
@@ -58,6 +56,9 @@ class FullInstrumentViewPresenter:
     _MOMENTUM_TRANSFER = "MomentumTransfer"
     _UNIT_OPTIONS = [_TIME_OF_FLIGHT, _D_SPACING, _WAVELENGTH, _MOMENTUM_TRANSFER]
 
+    _LINEAR = "Linear"
+    _LOGARITHMIC = "Logarithmic"
+
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
@@ -68,6 +69,7 @@ class FullInstrumentViewPresenter:
         self._transform = np.eye(4)
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
+        self._count_scale_mode = self._LINEAR
         self._model.setup()
         self.setup()
         self._callback_queue = Queue()
@@ -145,21 +147,56 @@ class FullInstrumentViewPresenter:
             return self._model.workspace_x_unit_display
         return ""
 
+    def integration_limits_in_current_unit(self) -> tuple[float, float]:
+        limits = self._model.integration_limits
+        min_in_workspace_unit = self._model.convert_units(self._model.workspace_x_unit, self._view.current_selected_unit(), 0, limits[0])
+        max_in_workspace_unit = self._model.convert_units(self._model.workspace_x_unit, self._view.current_selected_unit(), 0, limits[1])
+        return min_in_workspace_unit, max_in_workspace_unit
+
     def on_integration_limits_updated(self) -> None:
         """When integration limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         self._model.integration_limits = self._view.get_integration_limits()
         self.set_view_integration_limits()
+        self.on_contour_range_reset_clicked()
+
+    def on_integration_limits_reset_clicked(self) -> None:
+        self._model.calculate_and_set_full_integration_range()
+        self._view.set_integration_range_limits(self._model.full_integration_limits)
+        self._view.set_integration_min_max_boxes(self._model.full_integration_limits)
+        self.set_view_integration_limits()
 
     def set_view_integration_limits(self) -> None:
-        self._detector_mesh[self._counts_label] = self._model.detector_counts
+        display_counts = self._transform_counts(self._model.detector_counts)
+        self._detector_mesh[self._counts_label] = display_counts
+        self.on_contour_range_reset_clicked()
+        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
     def on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
-        self._model.counts_limits = self._view.get_contour_limits()
+        # Read limits from view (these are in the current display scale).
+        lower, upper = self._view.get_contour_limits()
+        # Convert back to model's linear counts if we're in Logarithmic display mode
+        if self._count_scale_mode == self._LINEAR:
+            self._model.counts_limits = (lower, upper)
+        else:
+            # Inverse of log10(counts + 1): counts = 10**value - 1
+            with np.errstate(over="ignore", invalid="ignore"):
+                lin_lower = 10**lower - 1
+                lin_upper = 10**upper - 1
+            self._model.counts_limits = (lin_lower, lin_upper)
+        self._view.set_plotter_scalar_bar_range((lower, upper), self._counts_label)
+
+    def on_contour_range_reset_clicked(self) -> None:
+        self._model.counts_limits = self._model.full_counts_limits
         self.set_view_contour_limits()
 
     def set_view_contour_limits(self) -> None:
-        self._view.set_plotter_scalar_bar_range(self._model.counts_limits, self._counts_label)
+        transformed_limits = self._transform_counts(np.array(self._model.counts_limits))
+        clim = (float(transformed_limits[0]), float(transformed_limits[1]))
+        display_title = self._counts_label if self._count_scale_mode == self._LINEAR else f"log10({self._counts_label})"
+        self._view.set_plotter_scalar_bar_range(clim, self._counts_label, display_title=display_title)
+        self._view.set_contour_range_limits(clim)
+        self._view.set_contour_min_max_boxes(clim)
 
     def update_plotter(self) -> None:
         """Update the projection based on the selected option."""
@@ -169,11 +206,31 @@ class FullInstrumentViewPresenter:
             self.update_detector_picker()
             self.on_peaks_workspace_selected()
 
+    def count_scale_combo_options(self) -> list[str]:
+        return [self._LINEAR, self._LOGARITHMIC]
+
+    def on_count_scale_selected(self, _index) -> None:
+        """Handler for count scale combo box changes."""
+        text = self._view.current_selected_count_scale()
+        if text in (self._LINEAR, self._LOGARITHMIC):
+            self._count_scale_mode = text
+            self.set_view_integration_limits()
+
+    def _transform_counts(self, counts: np.ndarray) -> np.ndarray:
+        """Return counts transformed for display according to selected scale."""
+        if self._count_scale_mode == self._LINEAR:
+            return counts
+        # Logarithmic: use base-10 log with +1 offset to avoid -inf at zero
+        # Preserve NaNs/infs if present
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return np.log10(counts + 1)
+
     def _update_view_main_plotter(self):
         self._view.clear_main_plotter()
 
         self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
-        self._detector_mesh[self._counts_label] = self._model.detector_counts
+        display_counts = self._transform_counts(self._model.detector_counts)
+        self._detector_mesh[self._counts_label] = display_counts
         self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
 
         self._pickable_mesh = self.create_poly_data_mesh(self._model.detector_positions)
@@ -196,9 +253,7 @@ class FullInstrumentViewPresenter:
 
         self._view.enable_or_disable_mask_widgets()
         self._view.enable_or_disable_aspect_ratio_box()
-        self.set_view_contour_limits()
-        self.set_view_integration_limits()
-
+        self.on_integration_limits_reset_clicked()
         self._view.cache_camera_position()
         self._view.reset_camera()
 
@@ -299,6 +354,7 @@ class FullInstrumentViewPresenter:
 
         if kind is CurrentTab.Masking:
             self.update_plotter()
+            self.on_integration_limits_reset_clicked()
             self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
             self._update_peak_buttons()
         else:
@@ -333,7 +389,7 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_clear_list_clicked, ()))
 
     def _on_save_mask_to_xml_clicked(self):
-        filename = self._get_filename_from_dialog()
+        filename = self._view.get_filename_from_dialog()
         if not filename:
             return
         self._model.save_mask_to_xml(filename)
@@ -348,22 +404,13 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_save_grouping_to_ads_clicked, ()))
 
     def _on_save_grouping_to_xml_clicked(self):
-        filename = self._get_filename_from_dialog()
+        filename = self._view.get_filename_from_dialog()
         if not filename:
             return
         self._model.save_grouping_to_xml(filename)
 
     def on_save_grouping_to_xml_clicked(self):
         self._callback_queue.put((self._on_save_grouping_to_xml_clicked, ()))
-
-    def _get_filename_from_dialog(self):
-        filename = open_a_file_dialog(
-            accept_mode=QFileDialog.AcceptSave,
-            file_mode=QFileDialog.AnyFile,
-            file_filter="XML files (*xml)",
-            directory=ConfigService["defaultsave.directory"],
-        )
-        return filename
 
     def _reload_mask_workspaces(self) -> None:
         self._view.refresh_workspaces_in_list(CurrentTab.Masking)

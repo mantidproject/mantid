@@ -95,3 +95,12 @@ using SpecialWorkspace2D_const_sptr = std::shared_ptr<const SpecialWorkspace2D>;
 
 } // namespace DataObjects
 } // namespace Mantid
+
+#ifndef DataObjects_EXPORTS
+#include "MantidAPI/WorkspaceProperty.h"
+namespace Mantid::API {
+/// @cond
+extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::SpecialWorkspace2D>;
+/// @endcond
+} // namespace Mantid::API
+#endif

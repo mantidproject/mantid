@@ -1,1 +1,0 @@
-- Added :ref:`GenerateFlatCellWorkspaceLOQ <algm-GenerateFlatCellWorkspaceLOQ>` for creating a flatcell workspace for ISIS SANS reduction of LOQ. The algorithm also generates an xml file with the detector ids to mask.

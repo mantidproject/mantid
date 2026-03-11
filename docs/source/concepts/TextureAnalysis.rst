@@ -371,6 +371,7 @@ the user interface while providing more repeatable processing.
    from mantid.api import AnalysisDataService as ADS
    from os import path, makedirs, scandir
    from Engineering.texture.TextureUtils import find_all_files, run_abs_corr
+   import string
 
    ############### ENGINEERING DIFFRACTION INTERFACE ABSORPTION CORRECTION ANALOGUE #######################
 
@@ -444,6 +445,13 @@ the user interface while providing more repeatable processing.
       if not ADS.doesExist(ws):
          Load(Filename = corr_wss[iws], OutputWorkspace= ws)
 
+   # on some operating systems (e.g Linux), this file retrieval will not necessarily give files in numerical run order.
+   # the below line assumes that your filename is in the form INSTR00123456 (where 123456 is the run number) and will sort the files into ascending run order.
+   # If your file is not in this format the key lambda function will need to be adjusted to retrieve the run number to then sort them into the correct order to match
+   # the order of rows in orientation file
+
+   #wss = sorted(wss, key = lambda x: int(x.split("_")[0].strip(string.ascii_letters)))
+
    # run script
    run_abs_corr(wss = wss,
                ref_ws = ref_ws_str,
@@ -486,7 +494,12 @@ If using a standard grouping, no ``grouping_filepath`` or ``prm_filepath`` is re
    from mantid.simpleapi import *
    from mantid.api import AnalysisDataService as ADS
    import numpy as np
-   from Engineering.texture.TextureUtils import find_all_files, run_focus_script
+   from Engineering.texture.TextureUtils import find_all_files, run_focus_script, mk
+   from Engineering.common.calibration_info import CalibrationInfo
+   from Engineering.EnggUtils import GROUP
+   import os
+   import shutil
+   import string
 
    ############### ENGINEERING DIFFRACTION INTERFACE FOCUS ANALOGUE #######################
 
@@ -540,6 +553,28 @@ If using a standard grouping, no ``grouping_filepath`` or ``prm_filepath`` is re
                   prm_path = prm_path,
                   groupingfile_path = groupingfile_path)
 
+   # Currently the bank-wise grouping is not treated as a texture grouping so doesn't create a
+   # separate grouping directory automatically. While this can be ignored, it will work better with the
+   # other scripts if the file structures are the same
+
+   if grouping == "banks":
+      bank_focus_dir = os.path.join(root_dir, "Focus", "CombinedFiles")
+
+      # get grouping directory name
+      calib_info = CalibrationInfo(group = GROUP(grouping))
+      if groupingfile_path:
+         calib_info.set_grouping_file(groupingfile_path)
+      elif prm_path:
+         calib_info.set_prm_filepath(prm_path)
+      group_folder = calib_info.get_group_suffix()
+      focussed_data_dir = os.path.join(root_dir, file_folder, group_folder)
+
+      # create output directory
+      mk(os.path.join(root_dir, file_folder, group_folder))
+      mk(focussed_data_dir)
+
+      shutil.move(bank_focus_dir, focussed_data_dir)
+
 
 Fitting
 #######
@@ -592,9 +627,9 @@ Additionally to fitting the peak, the table will also contain a numerical integr
    # nan_replacement then happens after this, if a nan_replacement method is given any parameters without an unfit_value provided will have nans replaced
    # either with "zeros", or with the min/max/mean value of that parameter (Note: if all the values are nan, the value will remain nan)
 
-   i_over_sigma_thresh = 3.0
-   no_fit_value_dict = {"I": 0.0, "I_est": 0.0}
-   nan_replacement = "mean"
+   i_over_sigma_thresh = 5.0
+   no_fit_value_dict = {"I": 0.0, "I_est": 0.0, "I_err": 0.0}
+   nan_replacement = None
 
    ######################### RUN SCRIPT ########################################
 
@@ -620,7 +655,7 @@ Additionally to fitting the peak, the table will also contain a numerical integr
 
 
    # execute the fitting
-   fit_all_peaks(focus_wss, peaks, 0.02, fit_save_dir, i_over_sigma_thresh = i_over_sigma_thresh, nan_replacement = nan_replacement, no_fit_value_dict = no_fit_value_dict)
+   fit_all_peaks(focus_wss, peaks, 0.05, fit_save_dir, i_over_sigma_thresh = i_over_sigma_thresh, nan_replacement = nan_replacement, no_fit_value_dict = no_fit_value_dict)
 
 
 
@@ -637,7 +672,7 @@ of pole figures over a set of different peaks and parameters.
    import matplotlib.pyplot as plt
    import numpy as np
    from mantid.api import AnalysisDataService as ADS
-   from Engineering.texture.TextureUtils import find_all_files, create_pf_loop, get_xtal_structure
+   from Engineering.texture.TextureUtils import find_all_files, create_pf_loop, get_xtal_structure, mk
    from Engineering.common.calibration_info import CalibrationInfo
    from Engineering.EnggUtils import GROUP
    import os
@@ -655,7 +690,7 @@ of pole figures over a set of different peaks and parameters.
 
 
    ws_folder = "Focus"
-   fit_save_folder = "ScriptFitParameters-New"
+   fit_save_folder = "ScriptFitParameters"
    # define the peaks of interest, NOTE these must correspond to sub folders in the fit directory
    peaks = [2.03,1.44, 1.17]
    # define the columns you would like to create pole figures for
@@ -700,21 +735,7 @@ of pole figures over a set of different peaks and parameters.
    ######################### RUN SCRIPT ########################################
 
 
-   # get grouping directory name
-   calib_info = CalibrationInfo(group = GROUP(grouping))
-   if groupingfile_path:
-      calib_info.set_grouping_file(groupingfile_path)
-   elif prm_path:
-      calib_info.set_prm_filepath(prm_path)
-   group_folder = calib_info.get_group_suffix()
-   focussed_data_dir = os.path.join(root_dir, ws_folder, group_folder, "CombinedFiles")
-   focus_ws_paths = find_all_files(focussed_data_dir)
-   focus_wss = [os.path.splitext(os.path.basename(fp))[0] for fp in focus_ws_paths]
-   for iws, ws in enumerate(focus_wss):
-      if not ADS.doesExist(ws):
-         Load(Filename = focus_ws_paths[iws], OutputWorkspace= ws)
-
-   fit_load_dirs = [os.path.join(root_dir, fit_save_folder, group_folder, str(peak)) for peak in peaks]
+   fit_load_dirs = [os.path.join(root_dir, fit_save_folder, calib_info.get_foc_ws_suffix(), str(peak)) for peak in peaks]
 
    hkls = [hkl_peaks[peak] for peak in peaks]
 
@@ -728,6 +749,22 @@ of pole figures over a set of different peaks and parameters.
       for iparam, param in enumerate(param_wss):
          if not ADS.doesExist(param):
                Load(Filename=fit_wss[iparam], OutputWorkspace=param)
+
+   pf_root = os.path.join(root_dir, "TextureResults")
+   pf_dir = os.path.join(pf_root, grouping)
+   mk(pf_root)
+   mk(pf_dir)
+
+   # As in the absorption correction, on some operating systems (e.g Linux), this file retrieval will not necessarily give files in numerical run order.
+   # the below line assumes that your filename is in the form INSTR00123456 (where 123456 is the run number) and will sort the files into ascending run order.
+   # If your file is not in this format the key lambda functions will need to be adjusted to retrieve the run number to then sort them into the correct order to match
+   # the order of rows in orientation file
+
+
+   focus_wss = sorted(focus_wss, key = lambda x: int(x.split("_")[1]))
+   fit_param_wss = [sorted(param_wss, key = lambda x: int(x.split("_")[1])) for param_wss in fit_param_wss]
+
+   print(focus_wss, fit_param_wss)
 
    create_pf_loop(wss = focus_wss,
                   param_wss = fit_param_wss,
@@ -745,9 +782,13 @@ of pole figures over a set of different peaks and parameters.
                   scat_vol_pos = scat_vol_pos,
                   chi2_thresh = chi2_thresh,
                   peak_thresh = peak_thresh,
-                  save_root = save_root,
+                  save_root = pf_dir,
                   exp_name = exp_name,
-                  projection_method = projection_method)
+                  projection_method = projection_method,
+                  create_combined_output = False,
+                  debug_info_level = 2,
+                  override_dir = True)
+
 
 
 

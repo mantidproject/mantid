@@ -29,7 +29,7 @@ class GeneralSettings(SettingsPresenterBase):
     def __init__(self, parent, model: GeneralSettingsModel, view=None, settings_presenter=None):
         super().__init__(model)
         self.parent = parent
-        self._view = view if view else GeneralSettingsView(parent, self)
+        self._view = view or GeneralSettingsView(parent, self)
         self.settings_presenter = settings_presenter
         self.load_current_setting_values()
 

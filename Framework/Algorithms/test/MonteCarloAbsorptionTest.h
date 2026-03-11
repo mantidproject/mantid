@@ -62,7 +62,7 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws, const Environment en
   namespace PhysicalConstants = Mantid::PhysicalConstants;
 
   if (environment == Environment::MeshSamplePlusContainer) {
-    std::string samplePath = Mantid::API::FileFinder::Instance().getFullPath("PearlSample.stl");
+    std::string samplePath = Mantid::API::FileFinder::Instance().getFullPath("PearlSample.stl").string();
     ScaleUnits scaleType = ScaleUnits::millimetres;
     ReadMaterial::MaterialParameters params;
     params.chemicalSymbol = "V";
@@ -70,7 +70,7 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws, const Environment en
     std::shared_ptr<MeshObject> shape = binaryStlReader.readShape();
     ws->mutableSample().setShape(shape);
 
-    std::string envPath = Mantid::API::FileFinder::Instance().getFullPath("PearlEnvironment.stl");
+    std::string envPath = Mantid::API::FileFinder::Instance().getFullPath("PearlEnvironment.stl").string();
     // set up a uniform material for whole environment here to give simple case
     params.chemicalSymbol = "Ti-Zr";
     params.massDensity = 5.23;

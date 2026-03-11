@@ -46,12 +46,12 @@ private:
   int findPixelID(const std::string &bankName, int col, int row);
   void removeEdgePeaks(Mantid::DataObjects::PeaksWorkspace &peakWS);
   void sizeBanks(const std::string &bankName, int &nCols, int &nRows);
-  Geometry::Instrument_const_sptr inst;
+  Geometry::Instrument_const_sptr m_inst;
 
   /// Input 2D Workspace
-  API::MatrixWorkspace_sptr inWS;
-  DataObjects::EventWorkspace_const_sptr eventW;
-  Mantid::detid2index_map wi_to_detid_map;
+  API::MatrixWorkspace_sptr m_inWS;
+  DataObjects::EventWorkspace_const_sptr m_eventW;
+  Mantid::detid2index_map m_wi_to_detid_map;
 };
 
 } // namespace Crystal

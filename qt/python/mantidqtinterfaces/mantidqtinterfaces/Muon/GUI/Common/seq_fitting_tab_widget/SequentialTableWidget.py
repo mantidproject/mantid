@@ -22,8 +22,8 @@ class SequentialTableWidget(object):
     Based on the model-view pattern https://doc.qt.io/qt-5/model-view-programming.html"""
 
     def __init__(self, parent, view=None, model=None):
-        self._view = view if view else QSequentialTableView(parent)
-        self._model = model if model else QSequentialTableModel()
+        self._view = view or QSequentialTableView(parent)
+        self._model = model or QSequentialTableModel()
         self._view.setModel(self._model)
 
     @property

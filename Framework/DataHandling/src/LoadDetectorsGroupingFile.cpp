@@ -15,6 +15,8 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 
@@ -202,6 +204,8 @@ void LoadDetectorsGroupingFile::setByComponents() {
 
   // 1. Prepare
   const detid2index_map indexmap = m_groupWS->getDetectorIDToWorkspaceIndexMap(true);
+  const auto &componentInfo = m_groupWS->componentInfo();
+  const auto &detectorInfo = m_groupWS->detectorInfo();
 
   // 2. Set
   for (auto &componentMap : m_groupComponentsMap) {
@@ -209,33 +213,26 @@ void LoadDetectorsGroupingFile::setByComponents() {
 
     for (auto &componentName : componentMap.second) {
 
-      // a) get component
-      Geometry::IComponent_const_sptr component = m_instrument->getComponentByName(componentName);
+      // a) get component by name and find its index
+      const size_t componentIndex = componentInfo.indexOfAny(componentName);
 
-      // b) component -> component assembly --> children (more than detectors)
-      std::shared_ptr<const Geometry::ICompAssembly> asmb =
-          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
-      std::vector<Geometry::IComponent_const_sptr> children;
-      asmb->getChildren(children, true);
+      // b) get all detectors in the subtree of this component
+      const auto detectorIndices = componentInfo.detectorsInSubtree(componentIndex);
 
-      g_log.debug() << "Component Name = " << componentName << "  Component ID = " << component->getComponentID()
-                    << "Number of Children = " << children.size() << '\n';
+      g_log.debug() << "Component Name = " << componentName
+                    << "  Component ID = " << componentInfo.componentID(componentIndex)
+                    << "  Number of Children = " << detectorIndices.size() << '\n';
 
-      for (const auto &child : children) {
-        // c) convert component to detector
-        Geometry::IDetector_const_sptr det = std::dynamic_pointer_cast<const Geometry::IDetector>(child);
-
-        if (det) {
-          // Component is DETECTOR:
-          int32_t detid = det->getID();
-          auto itx = indexmap.find(detid);
-          if (itx != indexmap.end()) {
-            size_t wsindex = itx->second;
-            m_groupWS->mutableY(wsindex)[0] = componentMap.first;
-          } else {
-            g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located\n";
-          }
-        } // ENDIF Detector
+      for (const auto &detIndex : detectorIndices) {
+        // c) get detector ID
+        const auto detid = detectorInfo.detectorIDs()[detIndex];
+        auto itx = indexmap.find(detid);
+        if (itx != indexmap.end()) {
+          size_t wsindex = itx->second;
+          m_groupWS->mutableY(wsindex)[0] = componentMap.first;
+        } else {
+          g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located\n";
+        }
 
       } // ENDFOR (children of component)
     } // ENDFOR (component)

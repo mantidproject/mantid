@@ -366,6 +366,7 @@ _blocklist = [
     "Yao, Marie",
     "Utkarsh Ayachit",
     "Chris Kerr",
+    "Copilot",
     "Thomas Brooks",
     "mantid-builder",
     "mantidbuilder",
@@ -378,6 +379,8 @@ _blocklist = [
     "davidvoneshen",
     "dependabot[bot]",
     "pre-commit-ci[bot]",
+    "github-actions[bot]",
+    "kobeduge",
 ]
 
 # The allowlist is used for sponsors / contributors who should be included,

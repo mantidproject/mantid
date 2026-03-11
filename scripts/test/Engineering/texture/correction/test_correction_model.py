@@ -266,8 +266,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
 
     @patch(correction_model_path + ".TextureCorrectionModel.get_thetas")
     @patch(correction_model_path + ".ADS")
-    @patch(correction_model_path + ".CloneWorkspace")
-    def test_calc_divergence(self, mock_clone_ws, mock_ads, mock_get_thetas):
+    def test_calc_divergence(self, mock_ads, mock_get_thetas):
         self.mock_ws.getNumberHistograms.return_value = 2
         self.mock_ws.readY.return_value = np.array([1.0, 2.0])
         mock_get_thetas.return_value = np.array([0, 0.5])  # radians
@@ -277,22 +276,14 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_si = MagicMock()
         self.mock_ws.spectrumInfo.return_value = mock_si
 
-        # Mock output_ws
-        mock_out_ws = MagicMock()
-        mock_clone_ws.return_value = mock_out_ws
-
         self.model.calc_divergence(self.ws_name, horz=1.0, vert=2.0, det_horz=3.0)
 
         expected_thetas = [0, 0.5]
         expected_divs = 2.0 * np.sqrt(1.0**2 + 3.0**2) * np.sin(expected_thetas) ** 2
 
-        calls = mock_out_ws.setY.call_args_list
-        self.assertEqual(len(calls), 2)
+        out_ws = ADS.retrieve("_div_corr")
 
-        for i, call_args in enumerate(calls):
-            index_arg, array_arg = call_args[0]
-            self.assertEqual(index_arg, i)
-            np.testing.assert_array_almost_equal(array_arg, np.ones_like(self.mock_ws.readY.return_value) * expected_divs[i])
+        np.testing.assert_array_almost_equal(out_ws.extractY().reshape(-1), expected_divs)
 
     @patch(correction_model_path + ".TextureCorrectionModel._save_corrected_files")
     @patch(correction_model_path + ".ConvertUnits")
@@ -333,8 +324,8 @@ class TextureCorrectionModelTest(unittest.TestCase):
         # Assert
         self.assertEqual(mock_convert.call_count, 2)
         mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, mock_calib.group)
-        mock_ads.remove.assert_any_call("abs_ws")
-        mock_ads.remove.assert_any_call("div_ws")
+        mock_ads.remove.assert_any_call(abs_ws.name())
+        mock_ads.remove.assert_any_call(div_ws.name())
 
     @patch(correction_model_path + ".TextureCorrectionModel._save_corrected_files")
     @patch(correction_model_path + ".ConvertUnits")

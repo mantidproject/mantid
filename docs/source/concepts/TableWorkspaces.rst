@@ -4,9 +4,6 @@
 Table Workspaces
 ================
 
-.. contents::
-  :local:
-
 Overview
 --------
 

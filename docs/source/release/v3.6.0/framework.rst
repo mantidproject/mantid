@@ -2,9 +2,6 @@
 Framework Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 Load Instrument Breaking Change
 -------------------------------
 

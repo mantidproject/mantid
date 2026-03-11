@@ -2,9 +2,6 @@
 Muon Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 
 
 Muon Analysis

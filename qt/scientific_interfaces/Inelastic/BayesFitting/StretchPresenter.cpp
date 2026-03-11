@@ -20,6 +20,7 @@ struct PlotType {
   inline static const std::string ALL = "All";
   inline static const std::string SIGMA = "Sigma";
   inline static const std::string BETA = "Beta";
+  inline static const std::string FWHM = "FWHM";
 };
 } // namespace
 
@@ -50,8 +51,9 @@ void StretchPresenter::handleRun() {
 
   auto const cutIndex = algParams.sampleName.find_last_of("_");
   auto const baseName = algParams.sampleName.substr(0, cutIndex);
-  m_fitWorkspaceName = baseName + "_Stretch_Fit";
-  m_contourWorkspaceName = baseName + "_Stretch_Contour";
+  auto const fitSuffix = m_useQuickBayes ? "_QuickBayes" : "_QuasiElasticBayes";
+  m_fitWorkspaceName = baseName + "_Stretch_Fit" + fitSuffix;
+  m_contourWorkspaceName = baseName + "_Stretch_Contour" + fitSuffix;
 
   auto stretch = m_model->stretchAlgorithm(algParams, m_fitWorkspaceName, m_contourWorkspaceName, m_useQuickBayes);
   m_algorithmRunner->execute(stretch);
@@ -123,19 +125,23 @@ void StretchPresenter::notifyPlotClicked() {
 
   std::string const plotType = m_view->getPlotType();
   auto const plotErrors = SettingsHelper::externalPlotErrorBars();
-  auto const plotSigma = (plotType == PlotType::ALL || plotType == PlotType::SIGMA);
+  auto const plotSigma = (plotType == PlotType::ALL || (plotType == PlotType::SIGMA || plotType == PlotType::FWHM));
   auto const plotBeta = (plotType == PlotType::ALL || plotType == PlotType::BETA);
 
   auto const fitWorkspace = getADSWorkspace<WorkspaceGroup>(m_fitWorkspaceName);
   for (auto it = fitWorkspace->begin(); it < fitWorkspace->end(); ++it) {
     auto const name = (*it)->getName();
-    if (plotSigma && name.substr(name.length() - 5) == PlotType::SIGMA) {
-      m_plotter->plotSpectra(name, "0", plotErrors);
-    } else if (plotBeta && name.substr(name.length() - 4) == PlotType::BETA) {
-      m_plotter->plotSpectra(name, "0", plotErrors);
+    auto const specNum = std::static_pointer_cast<Mantid::API::MatrixWorkspace>(*it)->getNumberHistograms();
+    if ((plotSigma &&
+         (name.substr(name.length() - 5) == PlotType::SIGMA || name.substr(name.length() - 4) == PlotType::FWHM)) ||
+        (plotBeta && name.substr(name.length() - 4) == PlotType::BETA)) {
+      if (specNum > 1) {
+        m_plotter->plotContour(name);
+      } else {
+        m_plotter->plotSpectra(name, "0", plotErrors);
+      }
     }
   }
-
   setPlotResultIsPlotting(false);
 }
 

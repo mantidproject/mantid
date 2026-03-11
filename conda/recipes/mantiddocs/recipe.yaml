@@ -28,12 +28,13 @@ requirements:
         - ninja ${{ ninja }}
   host:
     - mantid == ${{ version }}
+    - mantidmpi == ${{ version }}
     - mantidqt == ${{ version }}
+    - mantid-sphinx-theme ${{ mantid_sphinx_theme }}
     - myst-parser ${{ mystparser }}
     - python ${{ python }}
     - setuptools
     - sphinx ${{ sphinx }}
-    - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
     - graphviz ${{ graphviz }}
     - gtest ${{ gtest }}
     - pystog ${{ pystog }}

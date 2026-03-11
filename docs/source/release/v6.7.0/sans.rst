@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Minimum and maximum thresholds for calculated efficiency are now exposed to the users of :ref:`SANSILLReduction <algm-SANSILLReduction>` algorithms (version 1 and 2), as well as the higher-level algorithms calling them: :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, :ref:`SANSILLMultiProcess <algm-SANSILLMultiProcess>`, and :ref:`SANSILLParameterScan <algm-SANSILLParameterScan>`. This avoids the issue of calculated efficiency surpassing the default limit (0 and 2, respectively) and being set to :math:`-infinity`.

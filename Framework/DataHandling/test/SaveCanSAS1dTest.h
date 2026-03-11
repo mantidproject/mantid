@@ -158,9 +158,9 @@ public:
 
     std::getline(testFile, fileLine);
     std::string idataline = "\t\t\t<Idata><Q unit=\"1/A\">3543.75</Q><I "
-                            "unit=\"Counts\">111430</I><Idev "
+                            "unit=\"Counts\">111430.0</I><Idev "
                             "unit=\"Counts\">333.811</Idev><Qdev "
-                            "unit=\"1/A\">0</Qdev></Idata>";
+                            "unit=\"1/A\">0.0</Qdev></Idata>";
     TS_ASSERT_EQUALS(fileLine, idataline);
 
     testFile.close();

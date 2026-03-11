@@ -25,8 +25,6 @@ requirements:
       then:
         - ${{ stdlib("c") }}
         - libgomp
-        - mpi
-        - mpich
     - if: osx
       then:
         - llvm-openmp ${{ llvm_openmp }}
@@ -58,10 +56,6 @@ requirements:
         - xorg-libxxf86vm
         - xorg-libx11
         - xorg-xorgproto
-        - mpi
-        - mpi4py
-        - libboost-mpi ${{ libboost }}
-        - mpich
     - if: win
       then:
         - lib3mf
@@ -78,7 +72,6 @@ requirements:
     - pycifrw
     - pydantic ${{ pydantic }}
     - python
-    - python-dateutil ${{ python_dateutil }}
     - pyyaml ${{ pyyaml }}
     - scipy ${{ scipy }}
     - euphonic ${{ euphonic }}
@@ -96,16 +89,13 @@ requirements:
     - if: linux
       then:
         - libglu ${{ libglu }}
-        - mpi4py
-        - ${{ pin_compatible('libboost-mpi', upper_bound='x.x') }}
     - if: win
       then:
         - lib3mf
   run_exports:
-    - ${{ pin_subpackage('mantid', upper_bound='x.x.x') }}
+    - ${{ pin_subpackage('mantid', exact=True) }}
   run_constraints:
     - matplotlib-base ${{ matplotlib }}
-    - pillow ${{ pillow }}
     - pyparsing ${{ pyparsing }}
     - pystog ${{ pystog }}
 

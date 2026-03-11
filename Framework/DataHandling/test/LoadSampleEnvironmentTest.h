@@ -38,7 +38,7 @@ public:
   void testWithoutSetMaterial() {
     LoadSampleEnvironment alg;
     alg.initialize();
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     alg.setProperty("Filename", path);
     alg.setPropertyValue("EnvironmentName", "testName");
     alg.setProperty("SetMaterial", false);
@@ -61,7 +61,7 @@ public:
   void testSetMaterial() {
     LoadSampleEnvironment alg;
     alg.initialize();
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     alg.setProperty("Filename", path);
     alg.setPropertyValue("EnvironmentName", "testName");
     alg.setProperty("SetMaterial", true);
@@ -92,7 +92,7 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setRethrows(true);
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl").string();
     constexpr int nvectors{2}, nbins{10};
     MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors, nbins);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
@@ -114,7 +114,7 @@ public:
 #ifdef ENABLE_LIB3MF
     LoadSampleEnvironment alg;
     alg.initialize();
-    std::string path = FileFinder::Instance().getFullPath("box.3mf");
+    std::string path = FileFinder::Instance().getFullPath("box.3mf").string();
     alg.setProperty("Filename", path);
     alg.setPropertyValue("EnvironmentName", "testName");
     alg.setProperty("SetMaterial", false);

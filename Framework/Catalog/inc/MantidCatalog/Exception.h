@@ -6,43 +6,44 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidCatalog/DllConfig.h"
 #include <stdexcept>
 
 namespace Mantid {
 namespace Catalog {
 namespace Exception {
 
-class CatalogError : public std::runtime_error {
+class MANTID_CATALOG_DLL CatalogError : public std::runtime_error {
 public:
   explicit CatalogError(const std::string &message) : std::runtime_error(message) {}
 };
 
-class InvalidCredentialsError final : public CatalogError {
+class MANTID_CATALOG_DLL InvalidCredentialsError final : public CatalogError {
 public:
   explicit InvalidCredentialsError(const std::string &message) : CatalogError(message) {}
 };
 
-class TokenRejectedError final : public CatalogError {
+class MANTID_CATALOG_DLL TokenRejectedError final : public CatalogError {
 public:
   explicit TokenRejectedError(const std::string &message) : CatalogError(message) {}
 };
 
-class TokenParsingError final : public CatalogError {
+class MANTID_CATALOG_DLL TokenParsingError final : public CatalogError {
 public:
   explicit TokenParsingError(const std::string &message) : CatalogError(message) {}
 };
 
-class InvalidRefreshTokenError final : public CatalogError {
+class MANTID_CATALOG_DLL InvalidRefreshTokenError final : public CatalogError {
 public:
   explicit InvalidRefreshTokenError(const std::string &message) : CatalogError(message) {}
 };
 
-class MalformedRepresentationError final : public CatalogError {
+class MANTID_CATALOG_DLL MalformedRepresentationError final : public CatalogError {
 public:
   explicit MalformedRepresentationError(const std::string &message) : CatalogError(message) {}
 };
 
-class ContentError : public CatalogError {
+class MANTID_CATALOG_DLL ContentError : public CatalogError {
 public:
   explicit ContentError(const std::string &message) : CatalogError(message) {}
 };

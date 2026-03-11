@@ -2,9 +2,6 @@
 Reflectometry Changes
 =====================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - :ref:`algm-SaveISISReflectometryORSO` now saves the spin state for group workspaces that are subject to polarisation efficiency correction algorithms.

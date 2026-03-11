@@ -49,20 +49,25 @@ void ProcessBankTask::operator()(const tbb::blocked_range<size_t> &range) const 
     const int64_t total_events = static_cast<size_t>(tof_SDS.getSpace().getSelectNpoints());
     if (total_events == 0) {
       m_progress->report();
+      g_log.debug() << bankName << " empty\n";
       continue;
     }
-
-    auto eventRanges = this->getEventIndexRanges(event_group, total_events);
-
-    // get handle to the data
-    auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
-    // auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
     // and the units
     std::string tof_unit;
     Nexus::H5Util::readStringAttribute(tof_SDS, "units", tof_unit);
     // now the calibration for the output group can be created
     // which detectors go into the current group - assumes ouput spectrum number is one more than workspace index
     const auto calibrations = this->getCalibrations(tof_unit, bank_index);
+    if (calibrations.empty()) {
+      m_progress->report();
+      g_log.debug() << "skipping " << bankName << " because calibration is empty\n";
+      continue;
+    }
+
+    auto eventRanges = this->getEventIndexRanges(event_group, total_events);
+
+    // get handle to the detector IDs
+    auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
 
     // declare arrays once so memory can be reused
     auto event_detid = std::make_unique<std::vector<uint32_t>>();       // uint32 for ORNL nexus file

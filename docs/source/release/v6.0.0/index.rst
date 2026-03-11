@@ -9,9 +9,6 @@
 Mantid 6.0.0 Release Notes
 ===========================
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 6.0.0 of Mantid.
 
 **This is the first release only featuring** :doc:`MantidWorkbench <mantidworkbench>`

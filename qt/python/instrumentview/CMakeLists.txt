@@ -16,6 +16,7 @@ set(PYTHON_TEST_FILES
     instrumentview/test/test_interactor_styles.py
     instrumentview/test/test_notebook_view.py
     instrumentview/test/test_notebook_presenter.py
+    instrumentview/test/test_shape_widgets.py
     instrumentview/Peaks/test/test_peak.py
     instrumentview/Peaks/test/test_detector_peaks.py
     instrumentview/Projections/test/test_projection.py

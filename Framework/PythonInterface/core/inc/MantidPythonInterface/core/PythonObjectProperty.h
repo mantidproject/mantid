@@ -35,6 +35,8 @@ using PythonObject = boost::python::object;
  */
 // Instantiate a copy of the class with our template type so we generate the symbols for the methods in the hxx header.
 template class MANTID_PYTHONINTERFACE_CORE_DLL PropertyWithValue<PythonObject>;
+#else
+extern template class MANTID_PYTHONINTERFACE_CORE_DLL PropertyWithValue<PythonObject>;
 #endif
 } // namespace Mantid::Kernel
 

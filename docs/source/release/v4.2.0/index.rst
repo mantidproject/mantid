@@ -9,9 +9,6 @@ Mantid 4.2.0 Release Notes
    :width: 500px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 4.2.0 of Mantid.
 
 **THIS IS THE LAST RELEASE THAT WILL SUPPORT Python 2**
