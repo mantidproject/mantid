@@ -363,6 +363,6 @@ Additional Resources
 
 - MPI Tutorial: https://mpitutorial.com/
 - mpi4py Documentation: https://mpi4py.readthedocs.io/
-- Mantid MPI Algorithms: See :ref:`BroadcastWorkspace <algm-broadcastworkspace>` and :ref:`GatherWorkspaces <algm-gatherworkspaces>`
+- Mantid MPI Algorithms: ``BroadcastWorkspace`` and ``GatherWorkspaces``
 
 .. categories:: Concepts
