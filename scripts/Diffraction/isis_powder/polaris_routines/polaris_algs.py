@@ -182,6 +182,10 @@ def _merge_banks(focused_ws, pdf_kwargs, freq_params, q_lims, stitch_points, sti
             raise ValueError(
                 "All three of 'stitch_points', 'stitch_lims', and 'overlap_width' must be provided in order to stitch banks by background."
             )
+        if not len(stitch_lims) == 2:
+            raise ValueError(
+                f"{str(stitch_lims)} is not a valid value for 'stitch_lims'. A lower and upper bound must be provided. E.g. '(0.15, 4.56)')"
+            )
         merged_ws = mantid.StitchByBackground(
             InputWorkspaces=focused_ws.getNames(),
             StitchPoints=stitch_points,
