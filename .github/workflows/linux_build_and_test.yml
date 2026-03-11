@@ -27,10 +27,12 @@ on:
       RUNNER_SELECTION:
         type: choice
         options:
-          - mantid07
-          - mantid08
-        default: mantid07
-        required: true
+          - isis
+          - sns
+          - sns-github-runner-7
+          - sns-github-runner-8
+        #default: sns
+        required: false
 
 jobs:
   linux-build-and-test:
