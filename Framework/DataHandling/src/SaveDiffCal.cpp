@@ -210,9 +210,7 @@ void SaveDiffCal::generateDetidToIndex() {
 
   const size_t numDets = detids.size();
   for (size_t i = 0; i < numDets; ++i) {
-    if (i < m_numValues) {
-      m_detidToIndex[static_cast<detid_t>(detids[i])].push_back(i);
-    }
+    m_detidToIndex[static_cast<detid_t>(detids[i])].push_back(i);
   }
 }
 
@@ -252,20 +250,16 @@ void SaveDiffCal::exec() {
 
   // Get a starting number of values to work with that will be refined below
   // THE ORDER OF THE IF/ELSE TREE MATTERS
-  m_numValues = std::numeric_limits<std::size_t>::max();
   if (m_calibrationWS) {
-    m_numValues = std::min(m_numValues, m_calibrationWS->rowCount());
+    m_numValues = m_calibrationWS->rowCount();
     this->generateDetidToIndex();
   } else if (groupingWS) {
-    m_numValues = std::min(m_numValues, groupingWS->getNumberHistograms());
+    m_numValues = groupingWS->getNumberHistograms();
     this->generateDetidToIndex(groupingWS);
   } else if (maskWS) {
-    m_numValues = std::min(m_numValues, maskWS->getNumberHistograms());
+    m_numValues = maskWS->getNumberHistograms();
     this->generateDetidToIndex(maskWS);
   }
-
-  // Initialize the mapping of detid to row number to make getting information
-  // from the table faster. ORDER MATTERS
 
   if (groupingWS && groupingWS->isDetectorIDMappingEmpty())
     groupingWS->buildDetectorIDMapping();
