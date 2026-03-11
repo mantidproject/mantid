@@ -3,9 +3,6 @@
 Single Crystal Diffraction Panel Calibration
 ============================================
 
-.. contents::
-  :local:
-
 
 Calculating Calibration
 -----------------------

@@ -2,9 +2,6 @@
 Direct Geometry Changes
 =======================
 
-.. contents:: Table of Contents
-   :local:
-
 Algorithms
 ----------
 New Features

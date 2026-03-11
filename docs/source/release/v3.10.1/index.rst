@@ -4,9 +4,6 @@
 Mantid 3.10.1 Release Notes
 ===========================
 
-.. contents:: Table of Contents
-   :local:
-
 This is a patch release that corrects some significant issues since :ref:`version 3.10.0 <v3.10.0>`.
 
 There is no common theme to the fixes contained in this patch, rather

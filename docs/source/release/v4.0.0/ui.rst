@@ -2,9 +2,6 @@
 UI & Usability Changes
 ======================
 
-.. contents:: Table of Contents
-   :local:
-
 
 Installation
 ------------

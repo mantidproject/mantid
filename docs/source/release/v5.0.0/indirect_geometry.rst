@@ -2,9 +2,6 @@
 Indirect Geometry Changes
 =========================
 
-.. contents:: Table of Contents
-   :local:
-
 .. figure::  ../../images/ConvFitFull.png
    :height: 400px
    :align: center

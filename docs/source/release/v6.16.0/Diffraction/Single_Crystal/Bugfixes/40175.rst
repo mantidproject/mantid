@@ -1,0 +1,1 @@
+- Algorithm :ref:`algm-IntegratePeaksMD` better handles un-indexed peaks in HKL mode, warnings are given and numeric issues with ellipse finding are avoided by falling back to spherical integration.

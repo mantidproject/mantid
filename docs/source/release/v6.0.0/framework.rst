@@ -2,9 +2,6 @@
 Framework Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 .. figure:: ../../../../images/mantid_workbenchnightly.png
    :class: screenshot
    :width: 200px

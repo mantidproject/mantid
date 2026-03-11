@@ -2,9 +2,6 @@
 The Final Release of MantidPlot
 ===============================
 
-.. contents:: Table of Contents
-   :local:
-
 .. figure:: ../../images/MantidPlotSplashScreen-Deprecated.png
    :class: screenshot
    :width: 385px

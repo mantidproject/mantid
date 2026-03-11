@@ -3,9 +3,6 @@
 Crystal Field Python Interface
 ==============================
 
-.. contents::
-  :local:
-
 The python facilities for Crystal Field calculations are available in Mantid from module `CrystalField`.
 The module provides two main classes: `CrystalField` defines various properties of a crystal field and
 `CrystalFieldFit` manages the fitting process.

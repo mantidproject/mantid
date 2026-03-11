@@ -2,9 +2,6 @@
 Listening on Kafka Live Streams
 ===============================
 
-.. contents:: Table of Contents
-   :local:
-
 Kafka Listeners
 ---------------
 The basic use of all listeners in Mantid is described in the documentation for :ref:`StartLiveData <algm-StartLiveData>`. Mantid provides two listener types for live streaming

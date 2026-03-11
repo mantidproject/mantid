@@ -2,9 +2,6 @@
 Inelastic Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - The :ref:`Interface Settings <inelastic-interface-settings>` has a new advanced option called ``Developer Feature Flags``. When developing a large new feature, developers will create a flag that can be used by advanced software users for purposes of rapid prototyping and allowing a faster feedback loop.

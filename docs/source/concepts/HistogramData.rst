@@ -4,9 +4,6 @@
 Transition to the HistogramData module
 ======================================
 
-.. contents::
-  :local:
-
 HistogramData is a new Mantid module dealing with histograms.
 This is **not** a replacement for ``Histogram1D`` or ``ISpectrum``, but rather deals with the **histogram** part of the data stored in those classes.
 This document is intended for Mantid developers.

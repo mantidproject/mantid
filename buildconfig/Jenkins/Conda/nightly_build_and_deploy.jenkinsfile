@@ -475,6 +475,44 @@ pipeline {
           "${WORKSPACE}/standalone-packages/* ${WORKSPACE}/conda-packages.tar"
       }
     }
+
+    stage ('Publish nightly docs') {
+      when {
+        beforeAgent true
+        beforeOptions true
+        allOf {
+          expression { params.PUBLISH_TO_ANACONDA }
+          expression { params.ANACONDA_CHANNEL.trim() == 'mantid' }
+          expression { params.ANACONDA_CHANNEL_LABEL.trim() == 'nightly' }
+        }
+      }
+      agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      options {
+        timestamps()
+        retry(3)
+      }
+      environment {
+        GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
+      }
+      steps {
+        // Clean up conda-bld before we start to avoid any
+        // confusion with old packages
+        dir('conda-bld') {
+          deleteDir()
+        }
+        checkoutSource("${GIT_SHA}")
+        // Copy the mantiddocs conda package so we can use it to deploy the docs.
+        copyArtifacts filter: '**/conda-bld/noarch/mantiddocs*.conda',
+          fingerprintArtifacts: true,
+          projectName: '${JOB_NAME}',
+          selector: specific('${BUILD_NUMBER}'),
+          target: './',
+          flatten: false
+        // Publish night docs to github. Single quotes are required for token variables to avoid them leaking
+        sh "${CISCRIPT_DIR}/publish-nightly-docs.sh ${WORKSPACE}/conda-bld ${GIT_SHA}" + ' ${GITHUB_TOKEN} '
+      }
+    }
+
     stage ('Keep latest successful build') {
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
