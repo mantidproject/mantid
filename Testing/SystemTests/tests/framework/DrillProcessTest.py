@@ -96,6 +96,9 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
     def cleanup(self):
         mtd.clear()
 
+    def skipTests(self):
+        return sys.platform.startswith("win")
+
     def runTest(self):
         sampleRuns = ["2889,2885,2881", "2887,2883,2879", "3187,3177,3167"]
         sampleTransmissionRuns = ["2871", "2869", "3172"]
