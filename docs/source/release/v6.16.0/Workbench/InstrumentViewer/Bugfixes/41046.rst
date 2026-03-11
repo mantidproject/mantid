@@ -1,1 +1,0 @@
-- The new Instrument View no longer hangs or crashes when saving an xml file.

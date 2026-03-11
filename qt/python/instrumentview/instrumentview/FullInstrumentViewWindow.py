@@ -1084,10 +1084,9 @@ class FullInstrumentViewWindow(QMainWindow):
         Open file dialog for saving xml files.
         Needs to be in view to run in QThread.
         """
-        filename = open_a_file_dialog(
+        return open_a_file_dialog(
             accept_mode=QFileDialog.AcceptSave,
             file_mode=QFileDialog.AnyFile,
             file_filter="XML files (*xml)",
             directory=ConfigService["defaultsave.directory"],
         )
-        return filename
