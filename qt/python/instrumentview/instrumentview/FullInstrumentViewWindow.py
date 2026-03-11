@@ -247,17 +247,26 @@ class FullInstrumentViewWindow(QMainWindow):
             self._save_roi_to_ws,
             self._save_grouping_to_ws,
             self._save_grouping_to_xml,
+            self._save_grouping_to_cal,
         ) = self._add_tab(selection_tab, "ROI")
         self._save_roi_to_ws.setText("Export ROI to ADS")
         self._save_grouping_to_ws.setText("Export Grouping to ADS")
         self._save_grouping_to_xml.setText("Save Grouping to XML")
+        self._save_grouping_to_cal.setText("Save Grouping to CAL")
 
         mask_tab = QWidget()
-        (self._add_mask, self._clear_masks, self._mask_list, self._save_mask_to_ws, self._save_mask_to_file, self._overwrite_mask) = (
-            self._add_tab(mask_tab, "Mask")
-        )
+        (
+            self._add_mask,
+            self._clear_masks,
+            self._mask_list,
+            self._save_mask_to_ws,
+            self._save_mask_to_xml,
+            self._save_mask_to_cal,
+            self._overwrite_mask,
+        ) = self._add_tab(mask_tab, "Mask")
         self._save_mask_to_ws.setText("Save Mask to ADS")
-        self._save_mask_to_file.setText("Save Mask to XML")
+        self._save_mask_to_xml.setText("Save Mask to XML")
+        self._save_mask_to_cal.setText("Save Mask to CAL")
         self._overwrite_mask.setText("Apply Mask Permanently")
 
         self._picking_masking_tab = QTabWidget()
@@ -463,15 +472,17 @@ class FullInstrumentViewWindow(QMainWindow):
         item_list.setSelectionMode(QAbstractItemView.NoSelection)
         post_list_layout = QHBoxLayout()
         save_to_ws_btn = QPushButton()
-        save_to_file_btn = QPushButton()
+        save_to_xml_btn = QPushButton()
+        save_to_cal_btn = QPushButton()
         overwrite_btn = QPushButton()
         post_list_layout.addWidget(save_to_ws_btn)
-        post_list_layout.addWidget(save_to_file_btn)
+        post_list_layout.addWidget(save_to_xml_btn)
+        post_list_layout.addWidget(save_to_cal_btn)
         post_list_layout.addWidget(overwrite_btn)
         tab_layout.addLayout(pre_list_layout)
         tab_layout.addWidget(item_list)
         tab_layout.addLayout(post_list_layout)
-        return (add_item_btn, clear_items_btn, item_list, save_to_ws_btn, save_to_file_btn, overwrite_btn)
+        return (add_item_btn, clear_items_btn, item_list, save_to_ws_btn, save_to_xml_btn, save_to_cal_btn, overwrite_btn)
 
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
@@ -498,11 +509,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self._mask_list.itemChanged.connect(partial(self._presenter.on_list_item_selected, CurrentTab.Masking))
         self._selection_list.itemChanged.connect(partial(self._presenter.on_list_item_selected, CurrentTab.Grouping))
         self._save_mask_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
-        self._save_mask_to_file.clicked.connect(self._presenter.on_save_mask_to_xml_clicked)
+        self._save_mask_to_xml.clicked.connect(self._presenter.on_save_mask_to_xml_clicked)
+        self._save_mask_to_cal.clicked.connect(self._presenter.on_save_mask_to_cal_clicked)
         self._overwrite_mask.clicked.connect(self._presenter.on_apply_permanently_clicked)
         self._save_roi_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
         self._save_grouping_to_ws.clicked.connect(self._presenter.on_save_grouping_to_ads_clicked)
         self._save_grouping_to_xml.clicked.connect(self._presenter.on_save_grouping_to_xml_clicked)
+        self._save_grouping_to_cal.clicked.connect(self._presenter.on_save_grouping_to_cal_clicked)
         self._clear_masks.clicked.connect(self._presenter.on_clear_list_clicked)
         self._clear_selections.clicked.connect(self._presenter.on_clear_list_clicked)
         self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
@@ -1092,14 +1105,20 @@ class FullInstrumentViewWindow(QMainWindow):
             self._lineplot_peak_cursor = None
             self._detector_figure_canvas.draw_idle()
 
-    def get_filename_from_dialog(self):
-        """
-        Open file dialog for saving xml files.
-        Needs to be in view to run in QThread.
-        """
+    def get_xml_filename_from_dialog(self):
+        # NOTE: Needs to be in view to run in main thread
         return open_a_file_dialog(
             accept_mode=QFileDialog.AcceptSave,
             file_mode=QFileDialog.AnyFile,
             file_filter="XML files (*xml)",
+            directory=ConfigService["defaultsave.directory"],
+        )
+
+    def get_cal_filename_from_dialog(self):
+        # NOTE: Needs to be in view to run in main thread
+        return open_a_file_dialog(
+            accept_mode=QFileDialog.AcceptSave,
+            file_mode=QFileDialog.AnyFile,
+            file_filter="CAL files (*cal)",
             directory=ConfigService["defaultsave.directory"],
         )
