@@ -81,6 +81,7 @@ extensions.append(mathext)
 imgmath_image_format = "png"
 imgmath_use_preview = False  # Don't use preview.sty (not available in all LaTeX installations)
 imgmath_latex_preamble = r"\usepackage{amssymb}"
+imgmath_font_size = 12  # Match base document font size
 
 # Suppress imgmath warnings when LaTeX is not available (expected in some dev environments)
 suppress_warnings = ["image.nonlocal_uri"]
@@ -178,6 +179,12 @@ pngmath_use_preview = True
 
 # Use our custom Mantid Sphinx theme (extends https://pydata-sphinx-theme.readthedocs.io)
 html_theme = "mantid_sphinx_theme"
+
+# Path to static files (like custom CSS)
+html_static_path = ["_static"]
+
+# Custom CSS files to include
+html_css_files = ["custom.css"]
 
 # -- Options for Epub output ---------------------------------------------------
 # This flag determines if a toc entry is inserted again at the beginning of its nested toc listing.
