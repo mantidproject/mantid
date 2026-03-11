@@ -29,6 +29,7 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
 from qtpy.QtCore import Qt, QEvent, QSize
+from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -48,6 +49,7 @@ from mantid import UsageService, ConfigService
 from mantid.kernel import FeatureType
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 from mantidqt.utils.qt.qappthreadcall import run_on_qapp_thread
+from mantidqt.io import open_a_file_dialog
 
 from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
@@ -1089,3 +1091,15 @@ class FullInstrumentViewWindow(QMainWindow):
             self._lineplot_peak_cursor.linev.remove()
             self._lineplot_peak_cursor = None
             self._detector_figure_canvas.draw_idle()
+
+    def get_filename_from_dialog(self):
+        """
+        Open file dialog for saving xml files.
+        Needs to be in view to run in QThread.
+        """
+        return open_a_file_dialog(
+            accept_mode=QFileDialog.AcceptSave,
+            file_mode=QFileDialog.AnyFile,
+            file_filter="XML files (*xml)",
+            directory=ConfigService["defaultsave.directory"],
+        )
