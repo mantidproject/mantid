@@ -6,11 +6,6 @@ on:
 
   workflow_dispatch:
     inputs:
-      #RELATE_THREADS_BUILD:           # Relate build threads to CPU cores and memory
-      #  description: 'BUILD_THREADS'
-      #  default: '$(( cores ))'
-      #  required: false
-      #  type: string
 
       RELATE_THREADS_SYSTEM_TESTS:    # Relate number of system test threads to CPU cores and memory
         description: 'BUILD_THREADS_SYSTEM_TESTS'
@@ -41,8 +36,10 @@ on:
 
 jobs:
   linux-build-and-test:
-    runs-on: [self-hosted, linux, x64, ""]
-    #runs-on: [self-hosted, linux, x64, "${{ inputs.RUNNER_SELECTION }}"]
+    runs-on: |-
+      ${{ case(
+        inputs.RUNNER_SELECTION == 'any', '["self-hosted", "linux", "x64"]', '["self-hosted", "linux", "x64", inputs.RUNNER_SELECTION ]'
+      ) }}
     steps:
 
       - name: evaluate thread ratios
@@ -52,7 +49,6 @@ jobs:
           
           echo "${{ toJSON(github.event.inputs) }}"
           
-          #read -r BUILD_THREADS               <<< ${{ inputs.RELATE_THREADS_BUILD }}
           read -r BUILD_THREADS_SYSTEM_TESTS  <<< ${{ inputs.RELATE_THREADS_SYSTEM_TESTS }}
           read -r UNIT_TEST_THREADS           <<< ${{ inputs.RELATE_THREADS_UNIT_TESTS }}
           
@@ -60,12 +56,10 @@ jobs:
           echo "   cores   : ${cores}"
           echo "   memory  : ${ram_gb} GB"
           echo
-          #echo "BUILD_THREADS               : $BUILD_THREADS"
           echo "BUILD_THREADS_SYSTEM_TESTS  : $BUILD_THREADS_SYSTEM_TESTS"
           echo "UNIT_TEST_THREADS           : $UNIT_TEST_THREADS"
           echo
           
-          #echo "BUILD_THREADS=$BUILD_THREADS"                            >> $GITHUB_ENV
           echo "BUILD_THREADS_SYSTEM_TESTS=$BUILD_THREADS_SYSTEM_TESTS"  >> $GITHUB_ENV
           echo "UNIT_TEST_THREADS=$UNIT_TEST_THREADS"                    >> $GITHUB_ENV
           
