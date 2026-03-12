@@ -77,6 +77,29 @@ public:
     TS_ASSERT_DIFFERS(cloned->getValue(1), 1.1);
   }
 
+  void test_constructor_from_detids() {
+    const std::vector<detid_t> detids = {10, 20, 30, 40, 50};
+    SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D(detids));
+
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), detids.size());
+    TS_ASSERT_EQUALS(ws->blocksize(), 1);
+    for (size_t wi = 0; wi < detids.size(); ++wi) {
+      auto ids = ws->getSpectrum(wi).getDetectorIDs();
+      TS_ASSERT_EQUALS(ids.size(), 1);
+      TS_ASSERT_EQUALS(*ids.begin(), detids[wi]);
+    }
+
+    // Verify detID_to_WI mapping is populated via getValue (uses the map internally)
+    for (size_t wi = 0; wi < detids.size(); ++wi) {
+      TS_ASSERT_EQUALS(ws->getValue(detids[wi]), 0);
+    }
+  }
+
+  void test_constructor_from_detids_empty() {
+    SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D(std::vector<detid_t>{}));
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 0);
+  }
+
   void test_constructor_from_Instrument() {
     // Fake instrument with 5*9 pixels with ID starting at 1
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
