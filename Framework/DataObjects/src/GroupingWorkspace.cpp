@@ -28,6 +28,22 @@ DECLARE_WORKSPACE(GroupingWorkspace)
  */
 GroupingWorkspace::GroupingWorkspace(size_t numvectors) { this->init(numvectors, 1, 1); }
 
+/** Constructor, building from a list of detector IDs.
+ * Creates one spectrum per detector ID and associates each spectrum with its
+ * corresponding detector ID.
+ * @param detids :: vector of detector IDs, one per spectrum
+ */
+GroupingWorkspace::GroupingWorkspace(const std::vector<detid_t> &detids) {
+  this->init(detids.size(), 1, 1);
+  // set the detector ids
+  for (size_t wi = 0; wi < detids.size(); ++wi) {
+    this->getSpectrum(wi).setDetectorID(detids[wi]);
+  }
+  // set up the rest of the mapping information
+  this->MatrixWorkspace::rebuildSpectraMapping(false);
+  buildDetectorIDMapping();
+}
+
 //----------------------------------------------------------------------------------------------
 /** Constructor, building from an instrument
  *

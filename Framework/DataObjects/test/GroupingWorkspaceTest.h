@@ -66,6 +66,29 @@ public:
     TS_ASSERT_EQUALS(map[45], 5);
   }
 
+  void test_constructor_from_detids() {
+    const std::vector<detid_t> detids = {10, 20, 30, 40, 50};
+    GroupingWorkspace_sptr ws(new GroupingWorkspace(detids));
+
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), detids.size());
+    TS_ASSERT_EQUALS(ws->blocksize(), 1);
+    for (size_t wi = 0; wi < detids.size(); ++wi) {
+      auto ids = ws->getSpectrum(wi).getDetectorIDs();
+      TS_ASSERT_EQUALS(ids.size(), 1);
+      TS_ASSERT_EQUALS(*ids.begin(), detids[wi]);
+    }
+
+    // Verify detID_to_WI mapping is populated via getValue (uses the map internally)
+    for (size_t wi = 0; wi < detids.size(); ++wi) {
+      TS_ASSERT_EQUALS(ws->getValue(detids[wi]), 0);
+    }
+  }
+
+  void test_constructor_from_detids_empty() {
+    GroupingWorkspace_sptr ws(new GroupingWorkspace(std::vector<detid_t>{}));
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 0);
+  }
+
   void testClone() {
     // As test_constructor_from_Instrument(), set on ws, get on clone.
     // Fake instrument with 5*9 pixels with ID starting at 1
