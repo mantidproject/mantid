@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Optional, Tuple, Union, List
 import re
 from collections import OrderedDict
+from datetime import datetime
 import numpy as np
 
 
@@ -47,6 +48,7 @@ class ReflectometryDataset:
         self._ws = ws
         self._is_ws_grp_member: bool = is_ws_grp_member
         self._reduction_history = None
+        self._reduction_timestamp: datetime = None
         self._reduction_workflow_histories = []
         self._stitch_history = None
         self._q_conversion_history = None
@@ -55,6 +57,7 @@ class ReflectometryDataset:
 
         self._populate_histories()
         self._populate_q_conversion_info()
+        self._set_reduction_timestamp_from_history()
         self._set_spin_state_from_logs()
         self._set_name()
 
@@ -81,6 +84,10 @@ class ReflectometryDataset:
     @property
     def reduction_history(self):
         return self._reduction_history
+
+    @property
+    def reduction_timestamp(self) -> datetime:
+        return self._reduction_timestamp
 
     @property
     def reduction_workflow_histories(self):
@@ -169,6 +176,20 @@ class ReflectometryDataset:
     def _set_spin_state_from_logs(self) -> None:
         if self._ws.getRun().hasProperty(SpinStatesORSO.LOG_NAME):
             self._spin_state = self._ws.getRun().getLogData(SpinStatesORSO.LOG_NAME).value
+
+    def _set_reduction_timestamp_from_history(self):
+        """
+        Get the reduction algorithm execution date, which is in UTC, and convert it to a
+        datetime object expressed in local time
+        """
+        if not self._reduction_history:
+            return
+        try:
+            self._reduction_timestamp = MantidORSODataset.create_local_datetime_from_utc_string(
+                self._reduction_history.executionDate().toISO8601String()
+            )
+        except ValueError:
+            self.log().debug("Could not parse reduction timestamp into required format - this information will be excluded from the file.")
 
 
 class SaveISISReflectometryORSO(PythonAlgorithm):
@@ -432,7 +453,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             refl_dataset.name,
             data_columns,
             refl_dataset.ws,
-            reduction_timestamp=self._get_reduction_timestamp(refl_dataset.reduction_history),
+            refl_dataset.reduction_timestamp,
             creator_name=self.name(),
             creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
             enable_instrument_settings=refl_dataset.is_polarized,  # instrument settings only for polarization data
@@ -511,20 +532,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         self.log().debug("Unable to find resolution from workspace history.")
         return None
-
-    def _get_reduction_timestamp(self, reduction_history):
-        """
-        Get the reduction algorithm execution date, which is in UTC, and convert it to a
-        datetime object expressed in local time
-        """
-        if not reduction_history:
-            return None
-
-        try:
-            return MantidORSODataset.create_local_datetime_from_utc_string(reduction_history.executionDate().toISO8601String())
-        except ValueError:
-            self.log().debug("Could not parse reduction timestamp into required format - this information will be excluded from the file.")
-            return None
 
     def _get_individual_angle_files(self, instrument_name, reduction_workflow_histories) -> List[Tuple[str, str]]:
         """
