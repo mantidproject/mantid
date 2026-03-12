@@ -1105,20 +1105,11 @@ class FullInstrumentViewWindow(QMainWindow):
             self._lineplot_peak_cursor = None
             self._detector_figure_canvas.draw_idle()
 
-    def get_xml_filename_from_dialog(self):
+    def get_filename_from_dialog(self, file_filter: str):
         # NOTE: Needs to be in view to run in main thread
         return open_a_file_dialog(
             accept_mode=QFileDialog.AcceptSave,
             file_mode=QFileDialog.AnyFile,
-            file_filter="XML files (*xml)",
-            directory=ConfigService["defaultsave.directory"],
-        )
-
-    def get_cal_filename_from_dialog(self):
-        # NOTE: Needs to be in view to run in main thread
-        return open_a_file_dialog(
-            accept_mode=QFileDialog.AcceptSave,
-            file_mode=QFileDialog.AnyFile,
-            file_filter="CAL files (*cal)",
+            file_filter=file_filter,
             directory=ConfigService["defaultsave.directory"],
         )
