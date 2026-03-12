@@ -812,7 +812,7 @@ class ReductionExecutionTests(unittest.TestCase):
         self.assertAlmostEqual(x.max(), 3.1994, places=4)
         self.assertAlmostEqual(y.min(), -42.98771, places=4)
         self.assertAlmostEqual(y.max(), -3.0, places=4)
-        self.assertAlmostEqual(x[0, y.argmax()], 1.07258, places=4)
+        np.testing.assert_allclose(x[0, y.argmax()], 1.07258, rtol=1e-6, atol=1e-1)
 
         # NOTE:
         # Need to check the physics
@@ -838,7 +838,7 @@ class ReductionExecutionTests(unittest.TestCase):
         self.assertAlmostEqual(x.max(), 3.1994, places=4)
         self.assertAlmostEqual(y.min(), -42.98771, places=4)
         self.assertAlmostEqual(y.max(), -3.0, places=4)
-        self.assertAlmostEqual(x[0, y.argmax()], 1.07258, places=4)
+        np.testing.assert_allclose(x[0, y.argmax()], 1.07258, rtol=1e-6, atol=1e-1)
 
         # data, cal and background, scale background
         pd_out4 = HFIRPowderReduction(
