@@ -9,7 +9,7 @@ import shutil
 import unittest
 from unittest.mock import patch
 
-from mantidqt.widgets.helpwindow.helpwindowmodel import HelpWindowModel, LocalRequestInterceptor, NoOpRequestInterceptor
+from mantidqt.widgets.helpwindow.helpwindowmodel import HelpWindowModel
 
 # --- Define Constants ---
 CONFIG_SERVICE_LOOKUP_PATH = "mantidqt.widgets.helpwindow.helpwindowmodel.ConfigService"
@@ -112,26 +112,6 @@ class TestHelpWindowModelConfigService(unittest.TestCase):
         self.assertFalse(model.is_local_docs_mode(), "Expected is_local_docs_mode() False")
         self.assertEqual(model.MODE_ONLINE, model.get_mode_string(), "Expected mode string 'Online Docs' on fallback")
 
-        mock_ConfigService.getPropertiesDir.assert_called_once_with()
-
-    @patch(CONFIG_SERVICE_LOOKUP_PATH)
-    def test_create_request_interceptor_based_on_mode(self, mock_ConfigService):
-        """Test that the correct interceptor is created based on the mode determined from ConfigService."""
-        mantid_root = os.path.dirname(os.path.dirname(self.props_dir))
-        docs_path = os.path.join(mantid_root, "share", "doc", "html")
-        os.makedirs(docs_path)
-
-        mock_ConfigService.getPropertiesDir.return_value = self.props_dir
-        local_model = HelpWindowModel(online_base=ONLINE_BASE_EXAMPLE)
-        local_interceptor = local_model.create_request_interceptor()
-        self.assertIsInstance(local_interceptor, LocalRequestInterceptor, "Expected LocalRequestInterceptor for local mode")
-        mock_ConfigService.getPropertiesDir.assert_called_once_with()
-        mock_ConfigService.reset_mock()
-
-        mock_ConfigService.getPropertiesDir.return_value = ""
-        online_model = HelpWindowModel(online_base=ONLINE_BASE_EXAMPLE)
-        online_interceptor = online_model.create_request_interceptor()
-        self.assertIsInstance(online_interceptor, NoOpRequestInterceptor, "Expected NoOpRequestInterceptor for online mode")
         mock_ConfigService.getPropertiesDir.assert_called_once_with()
 
     @patch(CONFIG_SERVICE_LOOKUP_PATH)

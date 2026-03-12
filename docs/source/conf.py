@@ -49,8 +49,8 @@ root_doc = "index"
 # ones.
 extensions = [
     "mantid_sphinx_theme",
-    # we use pngmath over mathjax so that the offline help isn't reliant on
-    # anything external and we don't need to include the large mathjax package
+    # We use imgmath (LaTeX-rendered images) instead of mathjax (JavaScript)
+    # to support QTextBrowser which doesn't support JavaScript
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.doctest",
@@ -71,9 +71,20 @@ extensions = [
     # myst_parser enables markdown support
     "myst_parser",
 ]
-# Deal with math extension. Can be overridden with MATH_EXT environment variable
-mathext = os.environ.get("MATH_EXT", "sphinx.ext.mathjax")
+# Math extension: imgmath (LaTeX images, for local QTextBrowser)
+# Local builds default to imgmath via CMake. Online/published docs explicitly use mathjax.
+mathext = os.environ.get("MATH_EXT", "sphinx.ext.imgmath")
 extensions.append(mathext)
+
+# imgmath configuration for LaTeX rendering
+# Use png format with dvipng for rendering math as images
+imgmath_image_format = "png"
+imgmath_use_preview = False  # Don't use preview.sty (not available in all LaTeX installations)
+imgmath_latex_preamble = r"\usepackage{amssymb}"
+imgmath_font_size = 12  # Match base document font size
+
+# Suppress imgmath warnings when LaTeX is not available (expected in some dev environments)
+suppress_warnings = ["image.nonlocal_uri", "imgmath"]
 
 # MathJax configuration to:
 # - define Angstrom symbol macro
@@ -168,6 +179,12 @@ pngmath_use_preview = True
 
 # Use our custom Mantid Sphinx theme (extends https://pydata-sphinx-theme.readthedocs.io)
 html_theme = "mantid_sphinx_theme"
+
+# Path to static files (like custom CSS)
+html_static_path = ["_static"]
+
+# Custom CSS files to include
+html_css_files = ["custom.css"]
 
 # -- Options for Epub output ---------------------------------------------------
 # This flag determines if a toc entry is inserted again at the beginning of its nested toc listing.

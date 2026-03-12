@@ -3,6 +3,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import logging
+import os
 from html import escape
 from qtpy.QtWidgets import (
     QMainWindow,
@@ -19,30 +20,13 @@ from qtpy.QtWidgets import (
     QApplication,
     QStyle,
 )
-from qtpy.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
+from qtpy.QtWidgets import QTextBrowser
 from qtpy.QtCore import QUrl, Qt, QEvent
-from qtpy.QtGui import QIcon, QKeySequence
-
-# Attempt to import QWebEnginePage in a way that works across different Qt bindings/versions
-try:
-    # Preferred: QtWebEngineWidgets provides QWebEnginePage (PyQt5, PyQt6 ≤6.5)
-    from qtpy.QtWebEngineWidgets import QWebEnginePage  # type: ignore
-except ImportError:  # pragma: no cover  – fall back to QtWebEngineCore (Qt ≥6.5)
-    try:
-        from qtpy.QtWebEngineCore import QWebEnginePage  # type: ignore
-    except ImportError:
-        # As a last resort, define a minimal stub exposing only the enum used (FindBackward = 1)
-        class QWebEnginePage:  # type: ignore
-            """Fallback stub when QWebEnginePage is unavailable – limits search functionality."""
-
-            FindBackward = 1
-
-            def __init__(self, *args, **kwargs):
-                raise RuntimeError("QWebEnginePage is not available in this Qt binding; help window search will be limited.")
+from qtpy.QtGui import QIcon, QKeySequence, QDesktopServices
 
 
-class NavigationWebEngineView(QWebEngineView):
-    """QWebEngineView that intercepts extra mouse buttons for navigation."""
+class NavigationTextBrowser(QTextBrowser):
+    """QTextBrowser that intercepts extra mouse buttons for navigation."""
 
     def __init__(self, *args, **kwargs):
         self._logger = logging.getLogger(__name__)
@@ -51,14 +35,14 @@ class NavigationWebEngineView(QWebEngineView):
     def mousePressEvent(self, event):
         btn = event.button()
         if btn in (Qt.BackButton, Qt.XButton1):
-            self._logger.debug("NavigationWebEngineView: Back mouse button pressed")
-            if self.history().canGoBack():
-                self.back()
+            self._logger.debug("NavigationTextBrowser: Back mouse button pressed")
+            if self.isBackwardAvailable():
+                self.backward()
                 event.accept()
                 return  # Consume event
         elif btn in (Qt.ForwardButton, Qt.XButton2):
-            self._logger.debug("NavigationWebEngineView: Forward mouse button pressed")
-            if self.history().canGoForward():
+            self._logger.debug("NavigationTextBrowser: Forward mouse button pressed")
+            if self.isForwardAvailable():
                 self.forward()
                 event.accept()
                 return  # Consume event
@@ -69,11 +53,13 @@ class NavigationWebEngineView(QWebEngineView):
 class HelpWindowView(QMainWindow):
     _logger = logging.getLogger(__name__)
 
-    def __init__(self, presenter, interceptor=None):
-        super().__init__()
+    def __init__(self, presenter, interceptor=None, parent=None):
+        super().__init__(parent)
         self.presenter = presenter
         self._logger.debug("Initializing HelpWindowView.")
         self.setWindowTitle("Python Help Window")
+        # Use Tool window flag to allow floating above modal dialogs
+        self.setWindowFlags(Qt.Window | Qt.Tool)
         self.resize(1024, 768)
 
         # Central Widget and Layout
@@ -82,21 +68,17 @@ class HelpWindowView(QMainWindow):
         layout.setContentsMargins(0, 0, 0, 0)
         self.setCentralWidget(container)
 
-        # Create the custom QWebEngineView (will be added to layout later)
-        self.browser = NavigationWebEngineView()
+        # Create the custom QTextBrowser (will be added to layout later)
+        self.browser = NavigationTextBrowser()
 
-        # Configure Web Engine Settings
-        settings = self.browser.settings()
-        settings.setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
-        settings.setAttribute(QWebEngineSettings.WebAttribute.ScrollAnimatorEnabled, True)
-        settings.setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, False)
-        # settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True) # JS is enabled by default!
+        # Configure QTextBrowser settings
+        self.browser.setReadOnly(True)
+        self.browser.setOpenExternalLinks(True)  # Open external links in system browser
+        self.browser.setOpenLinks(True)  # Enable automatic link navigation for local files
 
-        # If the interceptor is not None, apply it to the current profile
+        # Note: interceptor parameter is ignored for QTextBrowser (no request interception needed)
         if interceptor is not None:
-            profile = self.browser.page().profile()
-            profile.setUrlRequestInterceptor(interceptor)
-            self._logger.debug(f"HelpWindow: Applied URL interceptor: {type(interceptor).__name__}")
+            self._logger.debug(f"HelpWindow: Interceptor {type(interceptor).__name__} not needed for QTextBrowser")
 
         # Toolbar with navigation buttons
         self.toolbar = QToolBar("Navigation")
@@ -113,7 +95,7 @@ class HelpWindowView(QMainWindow):
         # Back
         self.backButton.setIcon(self.style().standardIcon(QStyle.SP_ArrowBack))
         self.backButton.setToolTip("Go Back")
-        self.backButton.clicked.connect(self.browser.back)
+        self.backButton.clicked.connect(self.browser.backward)
         self.toolbar.addWidget(self.backButton)
 
         # Forward
@@ -162,9 +144,10 @@ class HelpWindowView(QMainWindow):
         self.setup_shortcuts()
 
         # Connect signals for enabling/disabling buttons
-        self.browser.urlChanged.connect(self.update_navigation_buttons)
-        # Connect loadFinished to the new handler
-        self.browser.loadFinished.connect(self.handle_load_finished)
+        self.browser.sourceChanged.connect(self.update_navigation_buttons)
+        # Connect backwardAvailable and forwardAvailable signals
+        self.browser.backwardAvailable.connect(self.backButton.setEnabled)
+        self.browser.forwardAvailable.connect(self.forwardButton.setEnabled)
         self.update_navigation_buttons()
 
         QApplication.instance().installEventFilter(self)
@@ -261,7 +244,7 @@ class HelpWindowView(QMainWindow):
         """Hide the find toolbar and clear any search highlights."""
         self.find_frame.setVisible(False)
         # Clear search by searching for empty string
-        self.browser.page().findText("")
+        self.browser.find("")
         self.browser.setFocus()
         self._logger.debug("Find toolbar hidden")
 
@@ -269,39 +252,38 @@ class HelpWindowView(QMainWindow):
         """Called when find text changes - performs live search."""
         search_text = self.find_input.text()
         if search_text:
-            self.browser.page().findText(search_text)
+            self.browser.find(search_text)
         else:
             # Clear highlights when text is empty
-            self.browser.page().findText("")
+            self.browser.find("")
 
     def find_next(self):
         """Find next occurrence of the search text."""
         search_text = self.find_input.text()
         if search_text:
-            self.browser.page().findText(search_text)
+            self.browser.find(search_text)
             self._logger.debug(f"Finding next: {search_text}")
 
     def find_previous(self):
         """Find previous occurrence of the search text."""
         search_text = self.find_input.text()
         if search_text:
-            # Use QWebEnginePage.FindBackward flag for previous search
-            self.browser.page().findText(search_text, QWebEnginePage.FindBackward)
+            # Use QTextDocument.FindBackward flag for previous search
+            self.browser.find(search_text, QTextBrowser.FindBackward)
             self._logger.debug(f"Finding previous: {search_text}")
 
     def handle_load_finished(self, ok: bool):
-        """Slot handling the loadFinished signal. Shows generic error on failure."""
-        self._logger.debug(f"Load finished signal received. Success: {ok}")
+        """Slot handling resource load completion. Shows generic error on failure."""
+        self._logger.debug(f"Resource load finished. Success: {ok}")
         self.update_navigation_buttons()  # Update nav state regardless
 
         if not ok:
-            # Load failed for reasons OTHER than local file not found
-            failed_url = self.browser.url()
+            # Load failed
+            failed_url = self.browser.source()
             failed_url_str = escape(failed_url.toString())
-            # Use self._logger consistently
-            self._logger.error(f"Failed to load page (WebEngine signal): {failed_url_str}")
+            self._logger.error(f"Failed to load page: {failed_url_str}")
 
-            # Display a more generic error page now
+            # Display a generic error page
             error_html = f"""<!DOCTYPE html>
             <html><head><title>Error Loading Page</title>
             <style>
@@ -318,7 +300,7 @@ class HelpWindowView(QMainWindow):
                 <h2>Page Load Error</h2>
                 <p>Sorry, the help page could not be loaded:</p>
                 <p><code>{failed_url_str}</code></p>
-                <p>This could be due to network issues, online server errors, local file permission problems, or other loading errors.</p>
+                <p>This could be due to network issues, server errors, or local file permission problems.</p>
             </body></html>
             """
 
@@ -417,15 +399,12 @@ class HelpWindowView(QMainWindow):
         self.statusLabel.setToolTip(tooltip)
         self._logger.debug(f"HelpWindow View: Status set to '{modeText}' (Local: {isLocal})")
 
-    def update_navigation_buttons(self, ok: bool = True):
+    def update_navigation_buttons(self, src: QUrl = None):
         """
         Enable/disable back/forward buttons based on browser history.
         """
-        history = self.browser.history() if hasattr(self.browser, "history") else None
-        canGoBack = history.canGoBack() if history else False
-        canGoForward = history.canGoForward() if history else False
-        self.backButton.setEnabled(canGoBack)
-        self.forwardButton.setEnabled(canGoForward)
+        self.backButton.setEnabled(self.browser.isBackwardAvailable())
+        self.forwardButton.setEnabled(self.browser.isForwardAvailable())
         self.reloadButton.setEnabled(True)
 
     def on_home_clicked(self):
@@ -439,21 +418,49 @@ class HelpWindowView(QMainWindow):
     def set_page_url(self, url: QUrl):
         """
         The Presenter calls this to load the desired doc page.
+        For local files, loads in QTextBrowser. For online URLs, opens in system browser.
         """
-        if url.isValid() and url != self.browser.url():
+        if url.isValid():
             self._logger.debug(f"Loading URL: {url.toString()}")
-            self.browser.setUrl(url)
-        elif not url.isValid():
-            self._logger.warning(f"Attempted to load invalid URL: {url.toString()}")
+
+            # Handle local files directly in QTextBrowser
+            if url.isLocalFile():
+                if url != self.browser.source():
+                    doc_dir = url.toLocalFile()
+                    if os.path.isfile(doc_dir):
+                        doc_dir = os.path.dirname(doc_dir)
+                    # Set the search paths so QTextBrowser can find relative resources
+                    self.browser.setSearchPaths([doc_dir])
+                    self._logger.debug(f"Set search path to: {doc_dir}")
+                    self.browser.setSource(url)
+                else:
+                    self._logger.debug(f"URL already loaded: {url.toString()}")
+            # Handle online URLs by opening in system browser
+            elif url.scheme() in ("http", "https"):
+                self._logger.debug(f"Opening online documentation in system browser: {url.toString()}")
+                QDesktopServices.openUrl(url)
+                # Show a message in the help window
+                self.browser.setHtml(
+                    f"<html><body style='padding: 20px; font-family: sans-serif;'>"
+                    f"<h2>Online Documentation</h2>"
+                    f"<p>Online documentation has been opened in your default web browser.</p>"
+                    f"<p>If the browser did not open automatically, please visit:</p>"
+                    f"<p><a href='{escape(url.toString())}'>{escape(url.toString())}</a></p>"
+                    f"</body></html>"
+                )
+            else:
+                self._logger.warning(f"Unsupported URL scheme: {url.scheme()}")
         else:
-            self._logger.debug(f"URL already loaded: {url.toString()}")
+            self._logger.warning(f"Attempted to load invalid URL: {url.toString()}")
 
     def display(self):
         """
-        Show the window on screen.
+        Show the window on screen and bring it to front.
         """
         self._logger.debug("Displaying window.")
         self.show()
+        self.raise_()
+        self.activateWindow()
 
     def closeEvent(self, event):
         """
@@ -468,12 +475,12 @@ class HelpWindowView(QMainWindow):
             btn = event.button()
             if btn in (Qt.BackButton, Qt.XButton1):
                 self._logger.debug("Global eventFilter: Back mouse button detected (non-browser widget)")
-                if self.browser.history().canGoBack():
-                    self.browser.back()
+                if self.browser.isBackwardAvailable():
+                    self.browser.backward()
                     return True
             elif btn in (Qt.ForwardButton, Qt.XButton2):
                 self._logger.debug("Global eventFilter: Forward mouse button detected (non-browser widget)")
-                if self.browser.history().canGoForward():
+                if self.browser.isForwardAvailable():
                     self.browser.forward()
                     return True
         return super().eventFilter(obj, event)
