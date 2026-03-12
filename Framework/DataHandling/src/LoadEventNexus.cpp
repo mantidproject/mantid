@@ -1366,10 +1366,6 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
   if (detList.empty())
     return;
 
-  // Get ComponentInfo from the first workspace in the collection
-  auto ws = workspace->getSingleHeldWorkspace();
-  const auto &componentInfo = ws->componentInfo();
-
   for (auto &det : detList) {
     std::string det_name = det->getName() + "_events";
     bool keep =
