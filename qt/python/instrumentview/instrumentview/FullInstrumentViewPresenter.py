@@ -282,6 +282,10 @@ class FullInstrumentViewPresenter:
 
         window_width, window_height = plotter.window_size
 
+        # Safeguard against division by zero
+        mesh_width = mesh_width if mesh_width > 0 else window_width
+        mesh_height = mesh_height if mesh_height > 0 else window_height
+
         return self._scale_matrix_relative_to_centre((min_point + max_point) / 2, window_width / mesh_width, window_height / mesh_height)
 
     def _scale_matrix_relative_to_centre(self, centre, scale_x=1.0, scale_y=1.0) -> np.ndarray:
