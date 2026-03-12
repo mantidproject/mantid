@@ -200,30 +200,32 @@ It is advised to ensure nothing is running and pause the build queue.
       }
     }
 
-Remove directories from single node
-----------------------------------------
+Remove pull request build directories from specific nodes
+---------------------------------------------------------
 
-It is advised to take the target node offline.
+Take the target nodes offline and edit the list of agentNames.
 
 .. code-block:: groovy
 
     import hudson.model.*
 
-    // Example: "isis-ndw1597"
-    String agentName = <agent/node name>
+    // Example: ["isis-win-1", "isis-win-2", "isis-win-3", "isis-linux-1", "isis-linux-5", "isis-linux-9", "isis-ndw2996mac"]
+    agentNames = ["agent-name-1", "agent-name-2", ...]
 
-    // Example: "pull_requests-conda-windows" , "build_branch"
-    jobs = [<job 1 string> , <job 2 string>, ...]
+    JOB_PREFIX = "pull_requests-"
+    suffixes = ["conda-linux", "conda-osx", "conda-windows", "doc-tests"];
 
     nodes = Jenkins.instance.slaves
     for (node in nodes) {
-      if(node.toString() == "hudson.slaves.DumbSlave[$agentName]") {
-        for (job in jobs) {
-          FilePath fp = node.createPath(node.getRootPath().toString() + File.separator + "workspace" + File.separator + job)
-          if(fp!=null && fp.exists()) {
-            println(node.toString())
-            println(fp.toString())
-            fp.deleteRecursive()
+      for(agentName in agentNames) {
+        if(node.toString() == "hudson.slaves.DumbSlave[$agentName]") {
+          for (suffix in suffixes) {
+            FilePath fp = node.createPath(node.getRootPath().toString() + File.separator + "workspace" + File.separator + JOB_PREFIX + suffix + File.separator +  "build");
+            if(fp!=null && fp.exists()) {
+              println(node.toString())
+              println(fp.toString())
+              fp.deleteRecursive()
+            }
           }
         }
       }
