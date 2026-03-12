@@ -504,11 +504,6 @@ class FullInstrumentViewPresenter:
         elif isinstance(ws, GroupingWorkspace):
             self._reload_grouping_workspaces()
         elif ws_name == self._model.workspace.name():
-            # This check is needed because observers are triggered
-            # before the RenameWorkspace is completed.
-            # Prevents strange behaviour from workspace not being fully replaced yet
-            if AnalysisDataService.retrieve(ws_name).name() != ws_name:
-                return
             self._model._workspace = AnalysisDataService.retrieve(ws_name)
             self._model.setup()
             self._setup_component_tree()
