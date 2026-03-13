@@ -1,0 +1,1 @@
+- :ref:`algm-LoadDiffCal` no longer requires the instrument to be resolvable. If the instrument definition file cannot be found or loaded, the grouping and mask workspaces are created directly from the detector IDs stored in the calibration file.
