@@ -191,10 +191,10 @@ private:
       for (const auto &[taskName, outputs] : m_dependantTasks) {
         if (outputs.empty()) {
           // If no specific outputs are listed, populate with the whole task output
-          if (!m_parent->m_algorithmTasks.contains(taskName))
+          if (!m_parent->m_stagedAlgorithmTasks.contains(taskName))
             throw std::runtime_error("Dependant task " + taskName + " not found for task " + m_name +
                                      "could not populate expected outputs.");
-          m_dependantTasks[taskName] = m_parent->m_algorithmTasks[taskName]->getExpectedOutputs();
+          m_dependantTasks[taskName] = m_parent->m_stagedAlgorithmTasks[taskName]->getExpectedOutputs();
         }
       }
     }
@@ -291,13 +291,17 @@ private:
   };
 
   // map of task name: task
-  std::map<std::string, std::shared_ptr<AlgorithmTask>> m_algorithmTasks;
+  std::vector<std::string> m_defaultTaskExecutionOrder{"TaskA", "TaskB", "TaskC", "TaskD"};
+  std::vector<std::shared_ptr<AlgorithmTask>> m_AlgorithmTasks{
+      std::make_shared<TaskA>(this), std::make_shared<TaskB>(this), std::make_shared<TaskC>(this),
+      std::make_shared<TaskD>(this)};
+  std::map<std::string, std::shared_ptr<AlgorithmTask>> m_stagedAlgorithmTasks;
   // map of task name: (map of output name: outputs)
   std::map<std::string, std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>> m_algorithmTaskOutputs;
-  void addAlgorithmTask(std::shared_ptr<AlgorithmTask> task) { m_algorithmTasks[task->name()] = task; }
-  void addAlgorithmTasks(std::vector<std::shared_ptr<AlgorithmTask>> tasks) {
+  void stageAlgorithmTask(std::shared_ptr<AlgorithmTask> task) { m_stagedAlgorithmTasks[task->name()] = task; }
+  void stageAlgorithmTasks(std::vector<std::shared_ptr<AlgorithmTask>> tasks) {
     for (const auto &task : tasks) {
-      addAlgorithmTask(task);
+      stageAlgorithmTask(task);
     }
   }
 };

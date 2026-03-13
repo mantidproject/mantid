@@ -121,8 +121,16 @@ DECLARE_ALGORITHM(ReflectometryReductionOne3)
 /** Initialize the algorithm's properties.
  */
 void ReflectometryReductionOne3::init() {
-  addAlgorithmTasks({std::make_shared<TaskA>(this), std::make_shared<TaskB>(this), std::make_shared<TaskC>(this),
-                     std::make_shared<TaskD>(this)});
+  std::vector<std::shared_ptr<AlgorithmTask>> tasksToStage;
+  tasksToStage.reserve(m_defaultTaskExecutionOrder.size());
+  for (auto &task : m_AlgorithmTasks) {
+    auto it = std::find(m_defaultTaskExecutionOrder.begin(), m_defaultTaskExecutionOrder.end(), task->name());
+    if (it != m_defaultTaskExecutionOrder.end()) {
+      std::size_t index = std::distance(m_defaultTaskExecutionOrder.begin(), it);
+      tasksToStage[index] = task;
+    }
+  }
+  stageAlgorithmTasks(tasksToStage);
 
   // Input workspace
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
@@ -214,7 +222,7 @@ void ReflectometryReductionOne3::setDefaultOutputWorkspaceNames() {
 /** Execute the algorithm.
  */
 void ReflectometryReductionOne3::exec() {
-  for (const auto &[name, task] : m_algorithmTasks) {
+  for (const auto &[name, task] : m_stagedAlgorithmTasks) {
     task->execute();
   }
 
