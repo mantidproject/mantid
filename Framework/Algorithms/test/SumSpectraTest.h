@@ -235,6 +235,41 @@ public:
     TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0), output2D->run().getLogData("NumZeroSpectra")->value())
   }
 
+  void testSumErrorIsNotWeightedSumError() {
+    if (!alg.isInitialized()) {
+      alg.initialize();
+      alg.setRethrows(true);
+    }
+
+    // Run once simply summing the workspaces
+    const std::string outputSpace1 = "SumSpectraOut1";
+    alg.setProperty("InputWorkspace", inputSpace);
+    alg.setPropertyValue("OutputWorkspace", outputSpace1);
+    alg.execute();
+    alg.isExecuted();
+
+    // Run again woth weighted sum
+    const std::string outputSpace2 = "SumSpectraOut2";
+    alg.setProperty("InputWorkspace", inputSpace);
+    alg.setPropertyValue("OutputWorkspace", outputSpace2);
+    alg.setProperty("WeightedSum", true);
+    alg.setProperty("MultiplyBySpectra", false);
+    alg.execute();
+    alg.isExecuted();
+
+    auto const wsSum =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace1));
+    auto const wsWeightedSum =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace2));
+
+    const auto &eSum = wsSum->e(0);
+    const auto &eWeightedSum = wsWeightedSum->e(0);
+    for (size_t j = 0; j < eSum.size(); ++j) {
+      TS_ASSERT_DIFFERS(eSum[j], eWeightedSum[j]);
+      TS_ASSERT_LESS_THAN(eWeightedSum[j], eSum[j]);
+    }
+  }
+
   void testExecEvent_inplace() { dotestExecEvent("testEvent", "testEvent", "5,10-15"); }
 
   void testExecEvent_copy() { dotestExecEvent("testEvent", "testEvent2", "5,10-15"); }
