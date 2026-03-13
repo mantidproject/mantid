@@ -163,7 +163,7 @@ private:
       if (!missingTasks.empty()) {
         throw std::runtime_error(
             "Cannot execute task " + m_name + " as the following dependent tasks outputs are not available: " +
-            std::accumulate(missingTasks.begin(), missingTasks.end(), std::string(""),
+            std::accumulate(std::next(missingTasks.begin()), missingTasks.end(), missingTasks.front(),
                             [](const std::string &a, const std::string &b) { return a + ", " + b; }));
       }
       executeImpl();
