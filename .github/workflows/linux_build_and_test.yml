@@ -43,12 +43,12 @@ jobs:
       - name: Run unit tests and system tests on Linux
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/conda-buildscript ${GITHUB_WORKSPACE} linux-64-ci --enable-systemtests
 
-      - name: Upload build and test log artifacts
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: test_logs
-          path: ${{ github.workspace }}/build/test_logs/*.log
+      #- name: Upload build and test log artifacts
+      #  uses: actions/upload-artifact@v7
+      #  if: always()
+      #  with:
+      #    name: test_logs
+      #    path: ${{ github.workspace }}/build/test_logs/*.log
 
       - name: Upload system test mismatch files
         uses: actions/upload-artifact@v7
