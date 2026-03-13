@@ -36,7 +36,7 @@ on:
 
 jobs:
   linux-build-and-test:
-    runs-on: ${{ fromJson('[self-hosted]') }}
+    runs-on: ${{ fromJson('["self-hosted"]') }}
 
     steps:
       - name: evaluate thread ratios
