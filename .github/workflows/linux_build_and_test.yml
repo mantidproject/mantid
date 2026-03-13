@@ -36,7 +36,10 @@ on:
 
 jobs:
   linux-build-and-test:
-    runs-on: ${{ fromJson('["self-hosted"]') }}
+    runs-on:
+      - ${{ (inputs.RUNNER_SELECTION == 'ANY' && 'self-hosted') || inputs.RUNNER_SELECTION }}
+      - Linux
+      - X64
 
     steps:
       - name: evaluate thread ratios
