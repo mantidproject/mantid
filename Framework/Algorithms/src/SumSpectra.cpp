@@ -259,7 +259,7 @@ void SumSpectra::exec() {
       outSpec.addDetectorIDs(localworkspace->getSpectrum(i).getDetectorIDs());
     }
 
-    Progress progress(this, 0.0, 1.0, m_yLenth.size());
+    Progress progress(this, 0.0, 1.0, m_yLength);
     if (localworkspace->id() == "RebinnedOutput") {
       // this version is for a special workspace that has fractional overlap information
       // Transform to real workspace types
