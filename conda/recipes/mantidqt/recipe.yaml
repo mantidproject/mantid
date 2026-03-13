@@ -35,7 +35,7 @@ requirements:
     - pyqt ${{ pyqt }}
     - pyqt5-sip ${{ pyqt5_sip }}
     - pyqtwebengine
-    - qscintilla2
+    - qscintilla2 ${{ qscintilla2 }}
     - qt-main ${{ qt_main }}
     - qt-webengine
     - setuptools
