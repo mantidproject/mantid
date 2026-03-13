@@ -183,7 +183,7 @@ declareProperty("Method", "Option1",
 
 // Numeric with validation
 declareProperty("Parameter", 1.0,
-    std::make_shared<FloatBoundedValidator>(0.0, 100.0)),
+    std::make_shared<FloatBoundedValidator>(0.0, 100.0),
     "Description");
 
 // Required property

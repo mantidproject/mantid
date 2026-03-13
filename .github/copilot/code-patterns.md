@@ -10,7 +10,7 @@
 // Copyright © 2024 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
@@ -72,7 +72,7 @@ private:
 // Copyright © 2024 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #include "MantidAlgorithms/MyAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
@@ -231,7 +231,7 @@ public:
 # Copyright © 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+# SPDX-License-Identifier: GPL-3.0+
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator
@@ -310,7 +310,7 @@ AlgorithmFactory.subscribe(MyPyAlgorithm)
 # Copyright © 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+# SPDX-License-Identifier: GPL-3.0+
 
 import unittest
 from mantid.api import AnalysisDataService, AlgorithmFactory
