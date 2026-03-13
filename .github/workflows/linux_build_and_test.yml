@@ -1,0 +1,51 @@
+name: Linux unit tests and system tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# cancel previous job if a new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-build-and-test:
+    runs-on: [self-hosted, linux, x64, isis]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Needed to fetch the tags for versioningit
+          fetch-depth: "0"
+
+      - name: Run unit tests and system tests on Linux
+        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/conda-buildscript ${GITHUB_WORKSPACE} linux-64-ci --enable-systemtests
+
+      - name: Upload build and test log artifacts
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test_logs
+          path: ${{ github.workspace }}/build/test_logs/*.log
+
+      - name: Upload system test mismatch files
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: system_test_mismatches
+          if-no-files-found: ignore
+          path: ${{ github.workspace }}/build/**/*-mismatch.nxs
+
+      - name: Unit test report
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: (!cancelled())
+        with:
+          check_name: "Unit test results"
+          files: build/Testing/*unittest.xml
+
+      - name: System test report
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: (!cancelled())
+        with:
+          check_name: "System test results"
+          files: build/Testing/SystemTests/**/TEST-systemtests*.xml

@@ -609,13 +609,7 @@ class FullInstrumentViewModel:
         SaveMask(ws_to_save, OutputFile=filename)
 
     def overwrite_mask_to_current_workspace(self) -> None:
-        ws_to_save = self.mask_ws
-        # TODO: Check if copies are expensive with big workspaces
-        temp_ws = CloneWorkspace(self._workspace.name(), StoreInADS=False)
-        temp_ws_name = f"__instrument_view_temp_{self._workspace.name()}"
-        AnalysisDataService.addOrReplace(temp_ws_name, temp_ws)
-        MaskDetectors(temp_ws_name, MaskedWorkspace=ws_to_save)
-        AnalysisDataService.addOrReplace(self._workspace.name(), AnalysisDataService.retrieve(temp_ws_name))
+        MaskDetectors(self._workspace.name(), MaskedWorkspace=self.mask_ws)
 
     def get_workspaces_in_ads_of_type(self, ws_type: MaskWorkspace | GroupingWorkspace | PeaksWorkspace):
         # TODO: Figure out how to avoid using a dictionary
