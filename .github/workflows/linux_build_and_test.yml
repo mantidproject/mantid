@@ -50,24 +50,24 @@ jobs:
       #    name: test_logs
       #    path: ${{ github.workspace }}/build/test_logs/*.log
 
-      - name: Upload system test mismatch files
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: system_test_mismatches
-          if-no-files-found: ignore
-          path: ${{ github.workspace }}/build/**/*-mismatch.nxs
+      #- name: Upload system test mismatch files
+      #  uses: actions/upload-artifact@v7
+      #  if: always()
+      #  with:
+      #    name: system_test_mismatches
+      #    if-no-files-found: ignore
+      #    path: ${{ github.workspace }}/build/**/*-mismatch.nxs
 
-      - name: Unit test report
-        uses: EnricoMi/publish-unit-test-result-action/linux@v2
-        if: (!cancelled())
-        with:
-          check_name: "Unit test results"
-          files: build/Testing/*unittest.xml
+      #- name: Unit test report
+      #  uses: EnricoMi/publish-unit-test-result-action/linux@v2
+      #  if: (!cancelled())
+      #  with:
+      #    check_name: "Unit test results"
+      #    files: build/Testing/*unittest.xml
 
-      - name: System test report
-        uses: EnricoMi/publish-unit-test-result-action/linux@v2
-        if: (!cancelled())
-        with:
-          check_name: "System test results"
-          files: build/Testing/SystemTests/**/TEST-systemtests*.xml
+      #- name: System test report
+      #  uses: EnricoMi/publish-unit-test-result-action/linux@v2
+      #  if: (!cancelled())
+      #  with:
+      #    check_name: "System test results"
+      #    files: build/Testing/SystemTests/**/TEST-systemtests*.xml
