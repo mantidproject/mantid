@@ -201,6 +201,7 @@ class FullInstrumentViewPresenter:
     def update_plotter(self) -> None:
         """Update the projection based on the selected option."""
         self._model.projection_type = self._view.current_selected_projection()
+        self._model.flip_z = self._view.is_flip_z_axis_checkbox_checked()
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter()
             self.update_detector_picker()
@@ -253,6 +254,7 @@ class FullInstrumentViewPresenter:
 
         self._view.enable_or_disable_mask_widgets()
         self._view.enable_or_disable_aspect_ratio_box()
+        self._view.enable_or_disable_flip_z_axis_box()
         self.on_integration_limits_reset_clicked()
         self._view.cache_camera_position()
         self._view.reset_camera()
@@ -304,6 +306,9 @@ class FullInstrumentViewPresenter:
 
     def on_aspect_ratio_check_box_clicked(self) -> None:
         self._view.store_maintain_aspect_ratio_option()
+        self.update_plotter()
+
+    def on_flip_z_axis_check_box_clicked(self) -> None:
         self.update_plotter()
 
     @property
