@@ -160,14 +160,22 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
 
     def test_on_add_selection_clicked(self):
-        mock_implicit_return = np.linspace(-1, 1, self._ws.getNumberHistograms())
-        mock_implicit_function = MagicMock(EvaluateFunction=MagicMock(side_effect=mock_implicit_return))
-        self._mock_view.get_current_widget_implicit_function.return_value = mock_implicit_function
+        n_hist = self._ws.getNumberHistograms()
+        mock_mask = np.array([i < n_hist // 2 for i in range(n_hist)])
+        self._mock_view.get_shape_mask.return_value = mock_mask
         self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
         self._model.add_new_detector_key = MagicMock(return_value="mock_key")
         self._presenter._on_add_item_clicked()
-        np.testing.assert_allclose(self._model.add_new_detector_key.call_args.args[0], mock_implicit_return < 0)
+        np.testing.assert_array_equal(self._model.add_new_detector_key.call_args.args[0], mock_mask.tolist())
         self._mock_view.set_new_item_key.assert_called_once_with(CurrentTab.Grouping, "mock_key")
+
+    def test_on_add_item_projects_points_before_queueing(self):
+        """on_add_item_clicked projects detector points on the main thread
+        before dispatching work to the background queue."""
+        self._presenter._callback_queue = MagicMock()
+        self._presenter.on_add_item_clicked()
+        self._mock_view.project_and_cache_detector_points.assert_called_once()
+        self._presenter._callback_queue.put.assert_called_once()
 
     def test_on_save_mask_to_workspace_clicked(self):
         self._mock_view.get_current_tab.return_value = CurrentTab.Masking
