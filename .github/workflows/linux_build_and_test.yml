@@ -1,0 +1,107 @@
+name: Linux unit tests and system tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+  workflow_dispatch:
+    inputs:
+
+#      RELATE_THREADS_SYSTEM_TESTS:    # Relate number of system test threads to CPU cores and memory
+#        description: 'BUILD_THREADS_SYSTEM_TESTS'
+#        default: '$(( ram_gb / 10 ))'
+#        required: false
+#        type: string
+
+#      RELATE_THREADS_UNIT_TESTS:      # Relate number of unit test threads to CPU cores and memory
+#        description: 'UNIT_TEST_THREADS'
+#        default: '$(( (cores - (ram_gb / cores)) * 15/16 ))'
+#        required: false
+#        type: string
+
+      RUNNER_GROUP:
+        type: choice
+        options:
+          - ANY
+          - isis
+          - sns
+        default: ANY
+        required: false
+
+      ADDITIONAL_LABEL:
+        description: 'ADDITIONAL_LABEL'
+        required: false
+        type: string
+
+jobs:
+  linux-build-and-test:
+    runs-on:
+      - ${{ (inputs.ADDITIONAL_LABEL == '' && 'self-hosted') || inputs.ADDITIONAL_LABEL }}
+      - ${{ (inputs.RUNNER_GROUP == 'ANY' && 'self-hosted') || inputs.RUNNER_GROUP }}
+      - self-hosted
+      - Linux
+      - X64
+
+    steps:
+      - if: false
+        name: evaluate thread ratios
+        run: |
+          read -r cores   <<<      $(grep -c '^processor' /proc/cpuinfo)
+          read -r ram_gb  <<<  $(( $(grep    '^MemTotal'  /proc/meminfo | awk '{print $2}') / 1024 / 1024 ))
+          
+          echo "${{ toJSON(github.event.inputs) }}"
+          
+          read -r BUILD_THREADS_SYSTEM_TESTS  <<< ${{ inputs.RELATE_THREADS_SYSTEM_TESTS }}
+          read -r UNIT_TEST_THREADS           <<< ${{ inputs.RELATE_THREADS_UNIT_TESTS }}
+          
+          echo
+          echo "   cores   : ${cores}"
+          echo "   memory  : ${ram_gb} GB"
+          echo
+          echo "BUILD_THREADS_SYSTEM_TESTS  : $BUILD_THREADS_SYSTEM_TESTS"
+          echo "UNIT_TEST_THREADS           : $UNIT_TEST_THREADS"
+          echo
+          
+          echo "BUILD_THREADS_SYSTEM_TESTS=$BUILD_THREADS_SYSTEM_TESTS"  >> $GITHUB_ENV
+          echo "UNIT_TEST_THREADS=$UNIT_TEST_THREADS"                    >> $GITHUB_ENV
+          
+
+      - name: debug
+        run: |
+          env -0 | while IFS='' read -d '' line ; do printf '%s\t: %s\n' "${line%%=*}" "${line#*=}" | expand -t 30 | sed ':a;N;$!ba;s/\n/ /g'; done | LC_COLLATE=C sort -b
+
+      - uses: actions/checkout@v4
+        with:
+          # Needed to fetch the tags for versioningit
+          fetch-depth: "0"
+      
+      - if: false
+        name: Run unit tests and system tests on Linux
+        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/conda-buildscript ${GITHUB_WORKSPACE} linux-64-ci --enable-systemtests
+
+      - if: false
+        name: Upload build and test log artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: |
+            ${{ github.workspace }}/build/test_logs/*.log
+            ${{ github.workspace }}/build/**/*-mismatch.nxs
+
+      - if: false
+        name: Unit Test Report
+        uses: dorny/test-reporter@v2
+        with:
+          name: Linux Unit Tests
+          path: build/Testing/*unittest.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      - if: false
+        name: System Test Report
+        uses: dorny/test-reporter@v2
+        with:
+          name: Linux System Tests
+          path: build/Testing/SystemTests/**/TEST-systemtests*.xml
+          reporter: java-junit
+          fail-on-error: false
+
