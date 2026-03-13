@@ -22,7 +22,7 @@ on:
       RUNNER_SELECTION:
         type: choice
         options:
-          - any
+          - ANY
           - isis
           - isis-github-runner-1
           - isis-github-runner-2
@@ -36,11 +36,9 @@ on:
 
 jobs:
   linux-build-and-test:
-    runs-on:
-      - self-hosted
-      - Linux
-      - X64
-      - ${{ inputs.RUNNER_SELECTION }}
+    runs-on: |-
+      format('[ self-hosted, Linux, X64{0}]', inputs.RUNNER_SELECTION)
+
     steps:
 
       - name: evaluate thread ratios
