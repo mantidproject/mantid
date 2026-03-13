@@ -121,16 +121,7 @@ DECLARE_ALGORITHM(ReflectometryReductionOne3)
 /** Initialize the algorithm's properties.
  */
 void ReflectometryReductionOne3::init() {
-  std::vector<std::shared_ptr<AlgorithmTask>> tasksToStage;
-  tasksToStage.reserve(m_defaultTaskExecutionOrder.size());
-  for (auto &task : m_AlgorithmTasks) {
-    auto it = std::find(m_defaultTaskExecutionOrder.begin(), m_defaultTaskExecutionOrder.end(), task->name());
-    if (it != m_defaultTaskExecutionOrder.end()) {
-      std::size_t index = std::distance(m_defaultTaskExecutionOrder.begin(), it);
-      tasksToStage[index] = task;
-    }
-  }
-  stageAlgorithmTasks(tasksToStage);
+  declareProperty("TaskExecutionOrder", m_defaultTaskExecutionOrder, "The tasks to execute, in execution order.");
 
   // Input workspace
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
@@ -222,6 +213,18 @@ void ReflectometryReductionOne3::setDefaultOutputWorkspaceNames() {
 /** Execute the algorithm.
  */
 void ReflectometryReductionOne3::exec() {
+  std::vector<std::string> taskExecutionOrder = getProperty("TaskExecutionOrder");
+  std::vector<std::shared_ptr<AlgorithmTask>> tasksToStage;
+  tasksToStage.reserve(taskExecutionOrder.size());
+  for (auto &task : m_AlgorithmTasks) {
+    auto it = std::find(taskExecutionOrder.begin(), taskExecutionOrder.end(), task->name());
+    if (it != taskExecutionOrder.end()) {
+      std::size_t index = std::distance(taskExecutionOrder.begin(), it);
+      tasksToStage[index] = task;
+    }
+  }
+  stageAlgorithmTasks(tasksToStage);
+
   for (const auto &[name, task] : m_stagedAlgorithmTasks) {
     task->execute();
   }
