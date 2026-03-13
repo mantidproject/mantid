@@ -38,6 +38,7 @@ jobs:
   linux-build-and-test:
     runs-on:
       - ${{ (inputs.RUNNER_SELECTION == 'ANY' && 'self-hosted') || inputs.RUNNER_SELECTION }}
+      - self-hosted
       - Linux
       - X64
 
