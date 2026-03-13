@@ -1366,32 +1366,11 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
   if (detList.empty())
     return;
 
-  // Get ComponentInfo from the first workspace in the collection
-  auto ws = workspace->getSingleHeldWorkspace();
-  const auto &componentInfo = ws->componentInfo();
-
   for (auto &det : detList) {
-    bool keep = false;
-    std::string det_name = det->getName();
-    for (const auto &bankName : bankNames) {
-      size_t pos = bankName.find("_events");
-      if (det_name == bankName.substr(0, pos))
-        keep = true;
-      if (keep)
-        break;
-    }
+    std::string det_name = det->getName() + "_events";
+    bool keep =
+        std::any_of(bankNames.cbegin(), bankNames.cend(), [&det_name](std::string const &s) { return s == det_name; });
     if (!keep) {
-      const size_t parentIndex = componentInfo.indexOfAny(det_name);
-      const auto children = componentInfo.children(parentIndex);
-      for (const auto &colIndex : children) {
-        const auto grandchildren = componentInfo.children(colIndex);
-
-        for (const auto &rowIndex : grandchildren) {
-          auto *d = dynamic_cast<Detector *>(const_cast<IComponent *>(componentInfo.componentID(rowIndex)));
-          if (d)
-            inst->removeDetector(d);
-        }
-      }
       auto *comp = dynamic_cast<IComponent *>(det.get());
       inst->remove(comp);
     }
