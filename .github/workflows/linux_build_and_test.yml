@@ -37,7 +37,7 @@ on:
 jobs:
   linux-build-and-test:
     runs-on: |-
-      ${{ format('[ self-hosted, Linux, X64{0}]', inputs.RUNNER_SELECTION) }}
+      ${{ format('[ self-hosted, Linux, X64, {0}]', inputs.RUNNER_SELECTION) }}
 
     steps:
 
