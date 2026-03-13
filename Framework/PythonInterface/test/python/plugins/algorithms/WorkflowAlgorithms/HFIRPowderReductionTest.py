@@ -6,9 +6,19 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import unittest
-from mantid.simpleapi import HFIRPowderReduction
-from mantid.api import AlgorithmManager
-from mantid.kernel import Logger
+from mantid.simpleapi import (
+    HFIRPowderReduction,
+    CreateSampleWorkspace,
+    RotateInstrumentComponent,
+    MoveInstrumentComponent,
+    CloneWorkspace,
+    AddSampleLog,
+    GroupWorkspaces,
+    SaveNexusESS,
+    Load,
+)
+from mantid.api import AlgorithmManager, MatrixWorkspace, WorkspaceGroup
+from mantid.kernel import Logger, V3D
 import h5py
 import os
 import numpy as np
@@ -21,7 +31,7 @@ class LoadInputErrorMessages(unittest.TestCase):
     def test_validate_sample_inputs_too_many_fields(self):
         # Test that providing both filename and IPTS/RunNumbers raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", SampleIPTS=123, SampleRunNumbers=[456], Instrument="WAND^2")
+            res = HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", SampleIPTS=123, SampleRunNumbers=[456], Instrument="WAND^2")  # noqa: F841
 
         # Check the error message
         error_msg = str(cm.exception)
@@ -31,7 +41,7 @@ class LoadInputErrorMessages(unittest.TestCase):
     def test_validate_sample_inputs_missing_fields(self):
         # Test that not providing any sample inputs raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            HFIRPowderReduction(Instrument="WAND^2")
+            res = HFIRPowderReduction(Instrument="WAND^2")  # noqa: F841
 
         # Check the error message
         error_msg = str(cm.exception)
@@ -53,7 +63,7 @@ class LoadInputErrorMessages(unittest.TestCase):
             }
 
             with self.assertRaises(RuntimeError) as cm:
-                HFIRPowderReduction(**kwargs)
+                res = HFIRPowderReduction(**kwargs)  # noqa: F841
 
             # Check the error message
             error_msg = str(cm.exception)
@@ -69,7 +79,7 @@ class LoadInputErrorMessages(unittest.TestCase):
             kwargs = {f"{field}IPTS": 123, "Instrument": "WAND^2"}
 
             with self.assertRaises(RuntimeError) as cm:
-                HFIRPowderReduction(**kwargs)
+                res = HFIRPowderReduction(**kwargs)
 
             # Check the error message
             error_msg = str(cm.exception)
@@ -79,7 +89,7 @@ class LoadInputErrorMessages(unittest.TestCase):
             kwargs = {f"{field}RunNumbers": [456], "Instrument": "WAND^2"}
 
             with self.assertRaises(RuntimeError) as cm:
-                HFIRPowderReduction(**kwargs)
+                res = HFIRPowderReduction(**kwargs)  # noqa: F841
 
             # Check the error message
             error_msg = str(cm.exception)
@@ -89,14 +99,14 @@ class LoadInputErrorMessages(unittest.TestCase):
     def test_valid_sample_input_combinations(self):
         # Test filename only - should not raise
         try:
-            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", Instrument="WAND^2")
+            res = HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", Instrument="WAND^2")
         except RuntimeError as e:
             if "Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers" in str(e):
                 self.fail("Valid input combination with SampleFilename failed validation")
 
         # Test IPTS and RunNumbers - should not raise
         try:
-            HFIRPowderReduction(SampleIPTS=123, SampleRunNumbers=[456], Instrument="WAND^2")
+            res = HFIRPowderReduction(SampleIPTS=123, SampleRunNumbers=[456], Instrument="WAND^2")  # noqa: F841
         except RuntimeError as e:
             if "Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers" in str(e):
                 self.fail("Valid input combination with IPTS and RunNumbers failed validation")
@@ -104,7 +114,7 @@ class LoadInputErrorMessages(unittest.TestCase):
     def test_validate_xmin_xmax(self):
         # Test that missing XMin raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMax=10.0, Instrument="WAND^2")
+            res = HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMax=10.0, Instrument="WAND^2")
 
         error_msg = str(cm.exception)
         self.assertIn("XMin", error_msg)
@@ -112,7 +122,7 @@ class LoadInputErrorMessages(unittest.TestCase):
 
         # Test that missing XMax raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=1.0, Instrument="WAND^2")
+            res = HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=1.0, Instrument="WAND^2")
 
         error_msg = str(cm.exception)
         self.assertIn("XMax", error_msg)
@@ -120,7 +130,7 @@ class LoadInputErrorMessages(unittest.TestCase):
 
         # Test that XMin >= XMax raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=10.0, XMax=5.0, Instrument="WAND^2")
+            res = HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=10.0, XMax=5.0, Instrument="WAND^2")
 
         error_msg = str(cm.exception)
         self.assertIn("XMin", error_msg)
@@ -129,7 +139,7 @@ class LoadInputErrorMessages(unittest.TestCase):
 
         # Test that XMin and XMax of different lengths raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=[1.0, 2.0], XMax=[5.0], Instrument="WAND^2")
+            res = HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=[1.0, 2.0], XMax=[5.0], Instrument="WAND^2")  # noqa: F841
         error_msg = str(cm.exception)
         self.assertIn("XMin", error_msg)
         self.assertIn("XMax", error_msg)
@@ -138,7 +148,7 @@ class LoadInputErrorMessages(unittest.TestCase):
     def test_validate_instrument(self):
         # Test that missing Instrument raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=1.0, XMax=10.0)
+            res = HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=1.0, XMax=10.0)  # noqa: F841
 
         error_msg = str(cm.exception)
         self.assertIn("Instrument", error_msg)
@@ -147,7 +157,7 @@ class LoadInputErrorMessages(unittest.TestCase):
     def test_validate_wavelength(self):
         # Test that missing Wavelength raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=1.0, XMax=10.0, Instrument="WAND^2", VanadiumDiameter=0.5)
+            res = HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=1.0, XMax=10.0, Instrument="WAND^2", VanadiumDiameter=0.5)  # noqa: F841
 
         error_msg = str(cm.exception)
         self.assertIn("Wavelength", error_msg)
@@ -156,7 +166,7 @@ class LoadInputErrorMessages(unittest.TestCase):
     def test_vanadium_diameter(self):
         # Test that missing Vandaium Diameter raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=1.0, XMax=10.0, Instrument="WAND^2", Wavelength=2.5)
+            res = HFIRPowderReduction(SampleFilename="HB2C_7000.nxs.h5", XMin=1.0, XMax=10.0, Instrument="WAND^2", Wavelength=2.5)  # noqa: F841
 
         error_msg = str(cm.exception)
         self.assertIn("VanadiumDiameter", error_msg)
@@ -526,6 +536,558 @@ class MetadataConsistencyTests(unittest.TestCase):
         finally:
             # Clean up temporary directory
             shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+class ReductionExecutionTests(unittest.TestCase):
+    def setUp(self):
+        self._test_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self._test_dir)
+
+    def _create_workspaces(self):
+        cal = CreateSampleWorkspace(NumBanks=1, BinWidth=20000, PixelSpacing=0.1, BankPixelWidth=100)
+        RotateInstrumentComponent(cal, ComponentName="bank1", X=1, Y=0.5, Z=2, Angle=35)
+        MoveInstrumentComponent(cal, ComponentName="bank1", X=1, Y=1, Z=5)
+        bkg = CloneWorkspace(cal)
+        data = CloneWorkspace(cal)
+        AddSampleLog(
+            cal,
+            LogName="gd_prtn_chrg",
+            LogType="Number",
+            NumberType="Double",
+            LogText="200",
+        )
+        AddSampleLog(
+            bkg,
+            LogName="gd_prtn_chrg",
+            LogType="Number",
+            NumberType="Double",
+            LogText="50",
+        )
+        AddSampleLog(
+            data,
+            LogName="gd_prtn_chrg",
+            LogType="Number",
+            NumberType="Double",
+            LogText="100",
+        )
+        AddSampleLog(cal, LogName="duration", LogType="Number", NumberType="Double", LogText="20")
+        AddSampleLog(bkg, LogName="duration", LogType="Number", NumberType="Double", LogText="5")
+        AddSampleLog(
+            data,
+            LogName="duration",
+            LogType="Number",
+            NumberType="Double",
+            LogText="10",
+        )
+
+        def get_cal_counts(n):
+            if n < 5000:
+                return 0.9
+            else:
+                return 1.0
+
+        def get_bkg_counts(n):
+            return 1.5 * get_cal_counts(n)
+
+        def get_data_counts(n, twoTheta):
+            tt1 = 30
+            tt2 = 45
+            return get_bkg_counts(n) + 10 * np.exp(-((twoTheta - tt1) ** 2) / 1) + 20 * np.exp(-((twoTheta - tt2) ** 2) / 0.2)
+
+        for i in range(cal.getNumberHistograms()):
+            cal.setY(i, [get_cal_counts(i) * 2.0])
+            bkg.setY(i, [get_bkg_counts(i) / 2.0])
+            twoTheta = data.getInstrument().getDetector(i + 10000).getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)) * 180 / np.pi
+            data.setY(i, [get_data_counts(i, twoTheta)])
+
+        data_file_name = os.path.join(self._test_dir, "sample_workspace.nxs")
+        SaveNexusESS(data, Filename=data_file_name)
+        vanadium_file_name = os.path.join(self._test_dir, "vanadium_workspace.nxs")
+        SaveNexusESS(cal, Filename=vanadium_file_name)
+        background_file_name = os.path.join(self._test_dir, "background_workspace.nxs")
+        SaveNexusESS(bkg, Filename=background_file_name)
+
+        return data_file_name, vanadium_file_name, background_file_name
+
+    def test(self):
+        data, cal, bkg = self._create_workspaces()
+
+        # data normalised by monitor
+        pd_out = HFIRPowderReduction(
+            SampleFileName=data, XUnits="2Theta", Instrument="WAND^2", XMax=180, XMin=0, Wavelength=1.6513, VanadiumDiameter=0.5
+        )
+
+        x = pd_out.extractX()
+        y = pd_out.extractY()
+
+        self.assertAlmostEqual(x.min(), 8.09946893)
+        self.assertAlmostEqual(x.max(), 50.80113407)
+        self.assertAlmostEqual(y.min(), 0.00784728)
+        self.assertAlmostEqual(y.max(), 9.94421639)
+        self.assertAlmostEqual(x[0, y.argmax()], 45.10091179)
+
+        # data normalised by monitor <- duplicate input as two
+        # NOTE:
+        # still needs to check physics
+        pd_out_multi = HFIRPowderReduction(
+            SampleFileName=(f"{data},{data}"),
+            XUnits="2Theta",
+            Instrument="WAND^2",
+            XMax=180,
+            XMin=0,
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+            Sum=True,
+        )
+
+        x = pd_out_multi.extractX()
+        y = pd_out_multi.extractY()
+
+        self.assertAlmostEqual(x.min(), 8.09946893)
+        self.assertAlmostEqual(x.max(), 50.80113407)
+        self.assertAlmostEqual(y.min(), 0.01569456)
+        self.assertAlmostEqual(y.max(), 19.88843277)
+        self.assertAlmostEqual(x[0, y.argmax()], 45.10091179)
+
+        # data and calibration, limited range
+        pd_out2 = HFIRPowderReduction(
+            SampleFileName=data,
+            VanadiumFilename=cal,
+            XUnits="2Theta",
+            XMin=10,
+            XMax=40,
+            Instrument="WAND^2",
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+        )
+
+        x = pd_out2.extractX()
+        y = pd_out2.extractY()
+
+        self.assertAlmostEqual(x.min(), 10.05)
+        self.assertAlmostEqual(x.max(), 39.95)
+        self.assertAlmostEqual(y.min(), 1.5)
+        self.assertAlmostEqual(y.max(), 12.57768805)
+        self.assertAlmostEqual(x[0, y.argmax()], 29.95)
+
+        # data and calibration, limited range
+        # NOTE:
+        # still needs to check physics
+        pd_out2_multi = HFIRPowderReduction(
+            SampleFileName=(f"{data},{data}"),
+            VanadiumFilename=cal,
+            XUnits="2Theta",
+            XMin=10,
+            XMax=40,
+            Sum=True,
+            Instrument="WAND^2",
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+        )
+
+        x = pd_out2_multi.extractX()
+        y = pd_out2_multi.extractY()
+
+        self.assertAlmostEqual(x.min(), 10.05)
+        self.assertAlmostEqual(x.max(), 39.95)
+        self.assertAlmostEqual(y.min(), 1.5)
+        self.assertAlmostEqual(y.max(), 12.57768805)
+        self.assertAlmostEqual(x[0, y.argmax()], 29.95)
+
+        # data, cal and background, normalised by time
+        pd_out3 = HFIRPowderReduction(
+            SampleFileName=data,
+            VanadiumFilename=cal,
+            VanadiumBackgroundFilename=bkg,
+            XUnits="2Theta",
+            NormaliseBy="Time",
+            XMin=0,
+            XMax=180,
+            Sum=True,
+            Instrument="WAND^2",
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+        )
+
+        x = pd_out3.extractX()
+        y = pd_out3.extractY()
+
+        self.assertAlmostEqual(x.min(), 8.09946893)
+        self.assertAlmostEqual(x.max(), 50.80113407)
+        self.assertAlmostEqual(y.min(), -42.8104874)
+        self.assertAlmostEqual(y.max(), -3.0)
+        np.testing.assert_allclose(x[0, y.argmax()], 36.40057252, rtol=1e-6, atol=1e-1)
+
+        # data, cal and background, normalised by time
+        # NOTE:
+        # still needs to check physics
+        pd_out3_multi = HFIRPowderReduction(
+            SampleFileName=(f"{data},{data}"),
+            VanadiumFilename=cal,
+            VanadiumBackgroundFilename=bkg,
+            XUnits="2Theta",
+            NormaliseBy="Time",
+            Sum=True,
+            Instrument="WAND^2",
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+            XMin=0,
+            XMax=180,
+        )
+
+        x = pd_out3_multi.extractX()
+        y = pd_out3_multi.extractY()
+
+        self.assertAlmostEqual(x.min(), 8.09946893)
+        self.assertAlmostEqual(x.max(), 50.80113407)
+        self.assertAlmostEqual(y.min(), -42.8104874)
+        self.assertAlmostEqual(y.max(), -3.0)
+        np.testing.assert_allclose(x[0, y.argmax()], 36.40057252, rtol=1e-6, atol=1e-1)
+
+        # data, cal and background. To d spacing
+        pd_out4 = HFIRPowderReduction(
+            SampleFileName=data,
+            VanadiumFilename=cal,
+            VanadiumBackgroundFilename=bkg,
+            XUnits="d-spacing",
+            Wavelength=1.6513045600369298,
+            XMin=2,
+            XMax=10,
+            Instrument="WAND^2",
+            VanadiumDiameter=0.5,
+        )
+
+        x = pd_out4.extractX()
+        y = pd_out4.extractY()
+
+        self.assertAlmostEqual(x.min(), 2.05)
+        self.assertAlmostEqual(x.max(), 9.95)
+        self.assertAlmostEqual(y.min(), -20.84743178)
+        self.assertAlmostEqual(y.max(), -3.0)
+        self.assertAlmostEqual(x[0, y.argmax()], 2.55)
+
+        pd_out4_multi = HFIRPowderReduction(
+            SampleFileName=(f"{data},{data}"),
+            VanadiumFilename=cal,
+            VanadiumBackgroundFilename=bkg,
+            XUnits="d-spacing",
+            Wavelength=1.6513045600369298,
+            Sum=True,
+            XMin=2,
+            XMax=10,
+            Instrument="WAND^2",
+            VanadiumDiameter=0.5,
+        )
+
+        x = pd_out4_multi.extractX()
+        y = pd_out4_multi.extractY()
+
+        self.assertAlmostEqual(x.min(), 2.05)
+        self.assertAlmostEqual(x.max(), 9.95)
+        self.assertAlmostEqual(y.min(), -20.84743178)
+        self.assertAlmostEqual(y.max(), -3.0)
+        self.assertAlmostEqual(x[0, y.argmax()], 2.55)
+
+        # data, cal and background with mask angle, to Q.
+        pd_out4 = HFIRPowderReduction(
+            SampleFileName=data,
+            VanadiumFilename=cal,
+            VanadiumBackgroundFilename=bkg,
+            XUnits="Q",
+            Wavelength=1.6513045600369298,
+            MaskAngle=60,
+            XMin=1,
+            XMax=3.2,
+            XBinWidth=0.001125,
+            Instrument="WAND^2",
+            VanadiumDiameter=0.5,
+        )
+
+        x = pd_out4.extractX()
+        y = pd_out4.extractY()
+
+        self.assertAlmostEqual(x.min(), 1.0006, places=4)
+        self.assertAlmostEqual(x.max(), 3.1994, places=4)
+        self.assertAlmostEqual(y.min(), -42.98771, places=4)
+        self.assertAlmostEqual(y.max(), -3.0, places=4)
+        np.testing.assert_allclose(x[0, y.argmax()], 1.07258, rtol=1e-6, atol=1e-1)
+
+        # NOTE:
+        # Need to check the physics
+        pd_out4_multi = HFIRPowderReduction(
+            SampleFileName=(f"{data},{data}"),
+            VanadiumFilename=cal,
+            VanadiumBackgroundFilename=bkg,
+            XUnits="Q",
+            Wavelength=1.6513045600369298,
+            MaskAngle=60,
+            XMin=1,
+            XMax=3.2,
+            XBinWidth=0.001125,
+            Instrument="WAND^2",
+            VanadiumDiameter=0.5,
+            Sum=True,
+        )
+
+        x = pd_out4_multi.extractX()
+        y = pd_out4_multi.extractY()
+
+        self.assertAlmostEqual(x.min(), 1.0006, places=4)
+        self.assertAlmostEqual(x.max(), 3.1994, places=4)
+        self.assertAlmostEqual(y.min(), -42.98771, places=4)
+        self.assertAlmostEqual(y.max(), -3.0, places=4)
+        np.testing.assert_allclose(x[0, y.argmax()], 1.07258, rtol=1e-6, atol=1e-1)
+
+        # data, cal and background, scale background
+        pd_out4 = HFIRPowderReduction(
+            SampleFileName=data,
+            VanadiumFilename=cal,
+            VanadiumBackgroundFilename=bkg,
+            Wavelength=1.6513045600369298,
+            Scale=0.5,
+            XUnits="2Theta",
+            NormaliseBy="Time",
+            Instrument="WAND^2",
+            VanadiumDiameter=0.5,
+            XMin=8,
+            XMax=50,
+        )
+
+        x = pd_out4.extractX()
+        y = pd_out4.extractY()
+
+        self.assertAlmostEqual(x.min(), 8.09952728)
+        self.assertAlmostEqual(x.max(), 49.94993970)
+        self.assertAlmostEqual(y.min(), -21.21099623)
+        self.assertAlmostEqual(y.max(), -1.5)
+        self.assertAlmostEqual(x[0, y.argmax()], 36.53377878)
+
+        pd_out4_multi = HFIRPowderReduction(
+            SampleFileName=(f"{data},{data}"),
+            VanadiumFilename=cal,
+            VanadiumBackgroundFilename=bkg,
+            Wavelength=1.6513045600369298,
+            Scale=0.5,
+            XUnits="2Theta",
+            NormaliseBy="Time",
+            Sum=True,
+            Instrument="WAND^2",
+            VanadiumDiameter=0.5,
+            XMin=8,
+            XMax=50,
+        )
+
+        x = pd_out4_multi.extractX()
+        y = pd_out4_multi.extractY()
+
+        self.assertAlmostEqual(x.min(), 8.09952728)
+        self.assertAlmostEqual(x.max(), 49.94993970)
+        self.assertAlmostEqual(y.min(), -21.21099623)
+        self.assertAlmostEqual(y.max(), -1.5)
+        self.assertAlmostEqual(x[0, y.argmax()], 36.53377878)
+
+    def test_event(self):
+        # check that the workflow runs with event workspaces as input, junk data
+
+        event_data = CreateSampleWorkspace(
+            NumBanks=1,
+            BinWidth=20000,
+            PixelSpacing=0.1,
+            BankPixelWidth=100,
+            WorkspaceType="Event",
+        )
+        event_cal = CreateSampleWorkspace(
+            NumBanks=1,
+            BinWidth=20000,
+            PixelSpacing=0.1,
+            BankPixelWidth=100,
+            WorkspaceType="Event",
+            Function="Flat background",
+        )
+        event_bkg = CreateSampleWorkspace(
+            NumBanks=1,
+            BinWidth=20000,
+            PixelSpacing=0.1,
+            BankPixelWidth=100,
+            WorkspaceType="Event",
+            Function="Flat background",
+        )
+        data_file_name = os.path.join(self._test_dir, "sample_workspace_event.nxs")
+        SaveNexusESS(event_data, Filename=data_file_name)
+        vanadium_file_name = os.path.join(self._test_dir, "vanadium_workspace_event.nxs")
+        SaveNexusESS(event_cal, Filename=vanadium_file_name)
+        background_file_name = os.path.join(self._test_dir, "background_workspace_event.nxs")
+        SaveNexusESS(event_bkg, Filename=background_file_name)
+
+        # CASE 1
+        # input single workspace, output single workspace
+        pd_out = HFIRPowderReduction(
+            SampleFilename=data_file_name,
+            VanadiumFilename=vanadium_file_name,
+            VanadiumBackgroundFilename=background_file_name,
+            XUnits="2Theta",
+            NormaliseBy="None",
+            Sum=False,
+            XMin=0,
+            XMax=70,
+            Instrument="WAND^2",
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+        )
+
+        assert isinstance(pd_out, MatrixWorkspace)
+
+        x = pd_out.extractX()
+        y = pd_out.extractY()
+
+        self.assertAlmostEqual(x.min(), 0.05)
+        self.assertAlmostEqual(x.max(), 69.95)
+        self.assertAlmostEqual(y[0, 0], np.inf)
+
+        # CASE 2
+        # input multiple single ws, output (single) summed ws
+        pd_out = HFIRPowderReduction(
+            SampleFilename=f"{data_file_name}, {data_file_name}",
+            VanadiumFilename=vanadium_file_name,
+            VanadiumBackgroundFilename=background_file_name,
+            XUnits="2Theta",
+            NormaliseBy="None",
+            Sum=True,
+            XMin=0,
+            XMax=70,
+            Instrument="WAND^2",
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+        )
+
+        x = pd_out.extractX()
+        y = pd_out.extractY()
+
+        self.assertAlmostEqual(x.min(), 0.05)
+        self.assertAlmostEqual(x.max(), 69.95)
+        self.assertAlmostEqual(y[0, 0], 0.0)
+        assert isinstance(pd_out, MatrixWorkspace)
+
+        # CASE 3
+        # input group ws containing several ws, output group ws containing several ws
+        pd_out = HFIRPowderReduction(
+            SampleFilename=f"{data_file_name}, {data_file_name}",
+            VanadiumFilename=vanadium_file_name,
+            VanadiumBackgroundFilename=background_file_name,
+            XUnits="2Theta",
+            NormaliseBy="None",
+            Sum=False,
+            XMin=0,
+            XMax=70,
+            Instrument="WAND^2",
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+        )
+
+        for i in pd_out:
+            x = i.extractX()
+            y = i.extractY()
+
+            self.assertAlmostEqual(x.min(), 0.05)
+            self.assertAlmostEqual(x.max(), 69.95)
+            self.assertAlmostEqual(y[0, 0], np.inf)
+
+        assert isinstance(pd_out, WorkspaceGroup)
+        assert len(pd_out) == 2
+
+        event_data2 = CloneWorkspace(event_data)
+
+        event_data_group = WorkspaceGroup()
+        event_data_group.addWorkspace(event_data)
+        event_data_group.addWorkspace(event_data2)
+        group_file_name = os.path.join(self._test_dir, "group_workspace_event.nxs")
+        SaveNexusESS(event_data_group, Filename=group_file_name)
+
+        # CASE 4 - input group ws, output group ws
+        pd_out = HFIRPowderReduction(
+            SampleFilename=group_file_name,
+            VanadiumFilename=vanadium_file_name,
+            VanadiumBackgroundFilename=background_file_name,
+            XUnits="2Theta",
+            NormaliseBy="None",
+            Sum=False,
+            XMin=0,
+            XMax=70,
+            Instrument="WAND^2",
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+        )
+
+        for i in pd_out:
+            x = i.extractX()
+            y = i.extractY()
+
+            self.assertAlmostEqual(x.min(), 0.05)
+            self.assertAlmostEqual(x.max(), 69.95)
+            self.assertAlmostEqual(y[0, 0], np.inf)
+
+        assert isinstance(pd_out, WorkspaceGroup)
+        assert len(pd_out) == 2
+
+        event_data2 = CloneWorkspace(event_data)
+        event_data_group = GroupWorkspaces([event_data, event_data2])
+        group_file_name = os.path.join(self._test_dir, "group_workspace_event.nxs")
+        SaveNexusESS(event_data_group, Filename=group_file_name)
+
+        pd_out = HFIRPowderReduction(
+            SampleFilename=group_file_name,
+            VanadiumFilename=vanadium_file_name,
+            VanadiumBackgroundFilename=background_file_name,
+            XUnits="2Theta",
+            NormaliseBy="None",
+            Sum=False,
+            XMin=0,
+            XMax=70,
+            Instrument="WAND^2",
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+        )
+
+        for i in pd_out:
+            x = i.extractX()
+            y = i.extractY()
+
+            self.assertAlmostEqual(x.min(), 0.05)
+            self.assertAlmostEqual(x.max(), 69.95)
+            self.assertAlmostEqual(y[0, 0], np.inf)
+
+        assert isinstance(pd_out, WorkspaceGroup)
+        assert len(pd_out) == 2
+
+    def test_save(self):
+        # check that the workflow can save output to a file, with event workspace input
+
+        data, cal, bkg = self._create_workspaces()
+
+        output_file_name = os.path.join(self._test_dir, "output_workspace.nxs")
+
+        HFIRPowderReduction(
+            SampleFilename=data,
+            XUnits="2Theta",
+            NormaliseBy="None",
+            Sum=False,
+            XMin=0,
+            XMax=70,
+            Instrument="WAND^2",
+            Wavelength=1.6513,
+            VanadiumDiameter=0.5,
+            OutputWorkspace="output_ws",
+            OutputDirectory=output_file_name,
+        )
+
+        # Check that the output file was created
+        self.assertTrue(os.path.isfile(output_file_name))
+
+        # Load the output file and check it contains a workspace
+        output_ws = Load(output_file_name)
+        self.assertIsInstance(output_ws, MatrixWorkspace)
 
 
 if __name__ == "__main__":
