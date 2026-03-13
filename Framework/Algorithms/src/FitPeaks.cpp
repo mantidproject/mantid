@@ -78,6 +78,7 @@ const std::string HIGH_BACKGROUND("HighBackground");
 const std::string POSITION_TOL("PositionTolerance");
 const std::string PEAK_MIN_HEIGHT("MinimumPeakHeight");
 const std::string CONSTRAIN_PEAK_POS("ConstrainPeakPositions");
+const std::string COPY_LAST_GOOD_PEAK_PARAMS("CopyLastGoodPeakParameters");
 const std::string OUTPUT_WKSP_MODEL("FittedPeaksWorkspace");
 const std::string OUTPUT_WKSP_PARAMS("OutputPeakParametersWorkspace");
 const std::string OUTPUT_WKSP_PARAM_ERRS("OutputParameterFitErrorsWorkspace");
@@ -400,6 +401,10 @@ void FitPeaks::init() {
                   "(highest Y value position) and "
                   "the peak width either estimted by observation or calculate.");
 
+  declareProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS, true,
+                  "If true, initial peak parameters (with the exception of peak centre) "
+                  "will be copied from the last succesfully fit peak in the spectra.");
+
   // additional output for reviewing
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP_MODEL, "",
                                                                        Direction::Output, PropertyMode::Optional),
@@ -585,6 +590,7 @@ void FitPeaks::processInputs() {
   m_fitPeaksFromRight = getProperty(PropertyNames::FIT_FROM_RIGHT);
   m_constrainPeaksPosition = getProperty(PropertyNames::CONSTRAIN_PEAK_POS);
   m_fitIterations = getProperty(PropertyNames::MAX_FIT_ITER);
+  m_copyLastGoodPeakParameters = getProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS);
 
   // Peak centers, tolerance and fitting range
   processInputPeakCenters();
@@ -1252,8 +1258,8 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       for (size_t i = 0; i < peakfunction->nParams(); ++i) {
         peakfunction->setParameter(i, lastGoodPeakParameters[peak_index][i]);
       }
-    } else if (neighborPeakSameSpectrum) {
-      // set the peak parameters from last good fit to that peak
+    } else if (neighborPeakSameSpectrum && m_copyLastGoodPeakParameters) {
+      // set the peak parameters from last good fit from ANY peak in the spectrum
       for (size_t i = 0; i < peakfunction->nParams(); ++i) {
         peakfunction->setParameter(i, lastGoodPeakParameters[prev_peak_index][i]);
       }
