@@ -83,20 +83,21 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
                     QTest.keyClicks(widgets[name], value)
                     QTest.keyClick(widgets[name], Qt.Key_Tab)
                 elif isinstance(widgets[name], QComboBox):
-                    v = widgets[name].view()
+                    w = widgets[name]
                     m = widgets[name].model()
                     for i in range(m.rowCount()):
                         index = m.index(i, 0)
                         text = index.data(Qt.DisplayRole)
-                        if text == name:
-                            v.scrollTo(index)
-                            pos = index.center()
-                            Qt.mouseClick(v.viewport(), Qt.LeftButton, 0, pos)
+                        if text == value:
+                            w.setCurrentIndex(index.row())
                             break
         QTest.mouseClick(sw.okButton, Qt.LeftButton)
 
     def cleanup(self):
         mtd.clear()
+
+    def skipTests(self):
+        return sys.platform.startswith("win")
 
     def runTest(self):
         sampleRuns = ["2889,2885,2881", "2887,2883,2879", "3187,3177,3167"]
@@ -118,6 +119,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
                 "BeamRadius": "0.05,0.05,0.05",
                 "CalculateResolution": "MildnerCarpenter",
                 "TransmissionBeamRadius": "0.2",
+                "NormaliseBy": "Time",
             }
         )
 

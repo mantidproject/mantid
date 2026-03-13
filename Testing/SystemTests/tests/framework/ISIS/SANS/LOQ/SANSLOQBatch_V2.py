@@ -9,7 +9,7 @@
 import systemtesting
 import os.path
 
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import config
 from mantid.api import FileFinder
 from mantid.simpleapi import LoadNexus, Plus
