@@ -128,7 +128,7 @@ class QSequentialTableModel(QAbstractTableModel):
             self.setHeaderData(len(default_table_columns) + i, Qt.Horizontal, parameter)
 
     def set_fit_parameter_values_for_row(self, row, parameter_values):
-        if len(parameter_values) != self.number_of_parameters:
+        if len(parameter_values) != self.number_of_parameters or len(self._parameterData) == 0:
             return
         leftIndex = self.index(row, NUM_DEFAULT_COLUMNS)  # first parameter changed index
         rightIndex = self.index(row, self.columnCount())  # last parameter changed index

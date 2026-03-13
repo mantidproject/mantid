@@ -49,7 +49,7 @@ private:
   // GroupingWorkspace_histogram_count, MaskWorkspace_histogram_count)
   std::size_t m_numValues{0};
   API::ITableWorkspace_sptr m_calibrationWS;
-  std::map<detid_t, size_t> m_detidToIndex;
+  std::map<detid_t, std::vector<size_t>> m_detidToIndex;
 };
 
 } // namespace DataHandling
