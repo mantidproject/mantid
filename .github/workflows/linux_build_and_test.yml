@@ -43,7 +43,8 @@ jobs:
       - X64
 
     steps:
-      - name: evaluate thread ratios
+      - if: false
+        name: evaluate thread ratios
         run: |
           read -r cores   <<<      $(grep -c '^processor' /proc/cpuinfo)
           read -r ram_gb  <<<  $(( $(grep    '^MemTotal'  /proc/meminfo | awk '{print $2}') / 1024 / 1024 ))
