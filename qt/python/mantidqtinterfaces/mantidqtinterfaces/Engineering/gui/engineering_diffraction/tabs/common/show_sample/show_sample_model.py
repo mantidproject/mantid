@@ -7,6 +7,7 @@
 #
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
+from mantid.simpleapi import EstimateScatteringVolumeCentreOfMass
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from typing import Sequence
 from mantid.kernel import logger
@@ -46,16 +47,17 @@ class ShowSampleModel(object):
     def plot_sample_directions(self, ax_transform: np.ndarray, ax_labels: Sequence[str], fix_axes_to_sample: bool = True) -> None:
         ax = self.fig.axes[0]
         ws = ADS.retrieve(self.ws_name)
+        scat_centre = np.asarray(EstimateScatteringVolumeCentreOfMass(InputWorkspace=ws))
         rotation_matrix = ws.getRun().getGoniometer().getR() if fix_axes_to_sample else np.eye(3)
         sample_mesh = ws.sample().getShape().getMesh()
         rd, nd, td, arrow_lens = get_scaled_intrinsic_sample_directions_in_lab_frame(ax_transform, rotation_matrix, sample_mesh, scale=1.2)
         s_rd, s_nd, s_td = rd * arrow_lens[0], nd * arrow_lens[1], td * arrow_lens[2]
-        ax.quiver(0, 0, 0, *s_rd, color="red", length=arrow_lens[0], normalize=True, arrow_length_ratio=0.05)
-        ax.quiver(0, 0, 0, *s_nd, color="green", length=arrow_lens[1], normalize=True, arrow_length_ratio=0.05)
-        ax.quiver(0, 0, 0, *s_td, color="blue", length=arrow_lens[2], normalize=True, arrow_length_ratio=0.05)
-        ax.text(*s_rd, ax_labels[0])
-        ax.text(*s_nd, ax_labels[1])
-        ax.text(*s_td, ax_labels[2])
+        ax.quiver(*scat_centre, *s_rd, color="red", length=arrow_lens[0], normalize=True, arrow_length_ratio=0.05)
+        ax.quiver(*scat_centre, *s_nd, color="green", length=arrow_lens[1], normalize=True, arrow_length_ratio=0.05)
+        ax.quiver(*scat_centre, *s_td, color="blue", length=arrow_lens[2], normalize=True, arrow_length_ratio=0.05)
+        ax.text(*(scat_centre + s_rd), ax_labels[0])
+        ax.text(*(scat_centre + s_nd), ax_labels[1])
+        ax.text(*(scat_centre + s_td), ax_labels[2])
 
     def plot_gauge_vol(self) -> None:
         if self.gauge_vol_str:

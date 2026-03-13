@@ -7,6 +7,7 @@
 import unittest
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_model import CroppingModel
+from Engineering.common.instrument_config import SUPPORTED_INSTRUMENTS
 
 
 class CroppingModelTest(unittest.TestCase):
@@ -59,6 +60,11 @@ class CroppingModelTest(unittest.TestCase):
             self.model.validate_and_clean_spectrum_numbers("6-6, 7-24, 6-4,1"),
             ("Ranges cannot contain the same value twice. Invalid Range: 6-6", ""),
         )
+
+    def test_get_cropping_options_returns_instrument_specific_options(self):
+        for instr in SUPPORTED_INSTRUMENTS:
+            options = self.model.get_cropping_options(instr)
+            self.assertTrue(len(options) > 0)
 
 
 if __name__ == "__main__":

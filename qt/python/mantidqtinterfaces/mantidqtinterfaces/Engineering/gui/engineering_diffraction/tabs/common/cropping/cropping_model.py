@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
+from Engineering.common.instrument_config import get_instr_config
 
 ENGINX_MAX_SPECTRA = 2400  # 2512 spectra appear in the ws. But from testing, anything > 2400 doesn't work.
 VALID_PUNCT = [",", " ", "-"]
@@ -64,3 +65,8 @@ class CroppingModel(object):
                 else:  # Not a valid range
                     raise ValueError("Ranges cannot contain the same value twice. Invalid Range: " + word)
         return word
+
+    @staticmethod
+    def get_cropping_options(instrument):
+        config = get_instr_config(instrument)
+        return config.interactive_grouping_options

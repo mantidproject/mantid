@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from enum import Enum
 from numpy import array, degrees, isfinite, reshape
 from os import path, makedirs
 from shutil import copy2
@@ -26,29 +25,6 @@ CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
 CURVES_PREFIX = "engggui_curves_"
 VAN_CURVE_REBINNED_NAME = "van_ws_foc_rb"
 XUNIT_SUFFIXES = {"d-Spacing": "dSpacing", "Time-of-flight": "TOF"}  # to put in saved focused data filename
-
-
-class GROUP(Enum):
-    """Group Enum with attributes: banks (list of banks required for calibration) and grouping ws name"""
-
-    def __new__(self, value, banks):
-        obj = object.__new__(self)
-        obj._value_ = value  # overwrite value to be first arg
-        obj.banks = banks  # set attribute bank
-        return obj
-
-    # value of enum is the file suffix of .prm (for easy creation)
-    #       value,  banks
-    BOTH = "banks", [1, 2]
-    NORTH = "1", [1]
-    SOUTH = "2", [2]
-    CROPPED = "Cropped", []  # pdcal results will be saved with grouping file with same suffix
-    CUSTOM = "Custom", []  # pdcal results will be saved with grouping file with same suffix
-    TEXTURE20 = "Texture20", [1, 2]
-    TEXTURE30 = "Texture30", [1, 2]
-
-
-TEXTURE_GROUPS = (GROUP.TEXTURE20, GROUP.TEXTURE30, GROUP.CUSTOM)  # lookup table for some texture specific behaviour
 
 
 def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
@@ -214,7 +190,7 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
     calib_dirs = [path.join(save_dir, "Calibration", "")]
     if rb_num:
         calib_dirs.append(path.join(save_dir, "User", rb_num, "Calibration", ""))
-        if calibration.group in TEXTURE_GROUPS:
+        if calibration.group in calibration.config.texture_groups:
             calib_dirs.pop(0)  # only save to RB directory to limit number files saved
 
     for calib_dir in calib_dirs:
@@ -225,7 +201,7 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
     return prm_filepath  # only from last calib_dir
 
 
-def write_prm_file(ws_foc, prm_savepath, spec_nums=None):
+def write_prm_file(ws_foc, prm_savepath, calibration, spec_nums=None):
     """
     Save GSAS prm file for ENGINX data - for specification see manual
     https://subversion.xray.aps.anl.gov/EXPGUI/gsas/all/GSAS%20Manual.pdf
@@ -237,7 +213,7 @@ def write_prm_file(ws_foc, prm_savepath, spec_nums=None):
         spec_nums = range(ws_foc.getNumberHistograms())  # one block per spectrum in ws
     nspec = len(spec_nums)
     # read header
-    with open(path.join(CALIB_DIR, "template_ENGINX_prm_header.prm")) as fheader:
+    with open(path.join(CALIB_DIR, calibration.config.prm_header_template)) as fheader:
         lines = fheader.readlines()
     lines[1] = lines[1].replace("2", f"{nspec}")  # replace with nspectra in header
     lines[13] = lines[13].replace("241391", f"{ws_foc.run().get('run_number').value}")  # replace run num
@@ -347,7 +323,7 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
         MaskWorkspace=cal_table_name + "_mask",
         DiagnosticWorkspaces=diag_ws_name,
         PeakPositions=default_ceria_expected_peaks(final=True),
-        TofBinning=[12000, -0.0003, 52000],
+        TofBinning=calibration.config.calibration_tof_binning,
         PeakWindow=default_ceria_expected_peak_windows(final=True),
         MinimumPeakHeight=0.5,
         PeakFunction="BackToBackExponential",
@@ -386,7 +362,7 @@ def create_output_files(calibration_dir, calibration, ws_foc):
 
     # save prm file(s)
     prm_filepath = path.join(calibration_dir, calibration.generate_output_file_name())
-    write_prm_file(ws_foc, prm_filepath)
+    write_prm_file(ws_foc, prm_filepath, calibration)
     calibration.set_prm_filepath(prm_filepath)
     # save pdcal output as nexus
     filepath, ext = path.splitext(prm_filepath)
@@ -394,12 +370,12 @@ def create_output_files(calibration_dir, calibration, ws_foc):
     mantid.SaveNexus(InputWorkspace=calibration.get_calibration_table(), Filename=nxs_filepath)
 
     # if both banks calibrated save individual banks separately as well
-    if calibration.group == GROUP.BOTH:
+    if calibration.group == calibration.config.group.BOTH:
         # output a separate prm for North and South when both banks included
         for ibank, bank in enumerate(calibration.group.banks):
             # get prm filename for individual banks by passing group enum as argument to generate_output_file_name
-            prm_filepath_bank = path.join(calibration_dir, calibration.generate_output_file_name(GROUP(str(ibank + 1))))
-            write_prm_file(ws_foc, prm_filepath_bank, spec_nums=[ibank])
+            prm_filepath_bank = path.join(calibration_dir, calibration.generate_output_file_name(calibration.config.group(str(ibank + 1))))
+            write_prm_file(ws_foc, prm_filepath_bank, calibration, spec_nums=[ibank])
             # copy pdcal output nxs for both banks
             filepath, ext = path.splitext(prm_filepath_bank)
             nxs_filepath_bank = filepath + ".nxs"
@@ -471,7 +447,7 @@ def focus_run(sample_paths, plot_output, rb_num, calibration, save_dir, full_cal
     ws_van_foc, van_run = process_vanadium(calibration, full_calib)
 
     # directories for saved focused data
-    calib_is_texture = calibration.group in TEXTURE_GROUPS
+    calib_is_texture = calibration.group in calibration.config.texture_groups
     focus_sub_dir = path.join("Focus", calibration.get_foc_ws_suffix()) if calib_is_texture else "Focus"
     focus_dirs = [path.join(save_dir, focus_sub_dir)]
     if rb_num:
@@ -540,7 +516,7 @@ def process_vanadium(calibration, full_calib, extra_suffix=None):
     if extra_suffix is not None:
         van_foc_name += extra_suffix
     if ADS.doesExist(van_foc_name):
-        if calibration.group == GROUP.CUSTOM or calibration.group == GROUP.CROPPED:
+        if calibration.group == calibration.config.group.CUSTOM or calibration.group == calibration.config.group.CROPPED:
             logger.warning(
                 f"Focussed Vanadium Data: '{van_foc_name}' has been loaded from the ADS from a previous focussing run. "
                 f"If the custom calibration has not changed, this is not a problem. "
