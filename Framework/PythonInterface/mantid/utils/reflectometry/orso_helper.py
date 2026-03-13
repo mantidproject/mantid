@@ -63,11 +63,14 @@ class MantidORSODataset:
         creator_name: str,
         creator_affiliation: str,
         enable_instrument_settings: bool,
+        model: str,
     ) -> None:
         self._data_columns = data_columns
         self._header = None
 
-        self._create_mandatory_header(ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation, enable_instrument_settings)
+        self._create_mandatory_header(
+            ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation, model, enable_instrument_settings
+        )
 
     @property
     def dataset(self) -> OrsoDataset:
@@ -108,6 +111,7 @@ class MantidORSODataset:
         reduction_timestamp: datetime,
         creator_name: str,
         creator_affiliation: str,
+        model: str,
         enable_instrument_settings: Optional[bool] = None,
     ) -> None:
         owner = Person(name=None, affiliation=None)
@@ -120,7 +124,7 @@ class MantidORSODataset:
             probe=self.PROBE_NEUTRON,
         )
 
-        sample = Sample(name=ws.getTitle())
+        sample = Sample(name=ws.getTitle(), model=model) if model else Sample(name=ws.getTitle())
 
         # This will initially only consider polarization
         instrument_settings = InstrumentSettings(None, None) if enable_instrument_settings else None
