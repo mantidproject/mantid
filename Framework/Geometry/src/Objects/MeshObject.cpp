@@ -13,6 +13,7 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
+#include "MantidNexus/NexusFile.h"
 
 #include <algorithm>
 #include <memory>
@@ -571,6 +572,61 @@ void MeshObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vect
   if (m_handler == nullptr)
     return;
   m_handler->GetObjectGeom(type, vectors, innerRadius, radius, height);
+}
+
+void MeshObject::saveNexus(Nexus::File *file, const std::string &group) const {
+  file->makeGroup(group, "NXoff_geometry", true);
+  file->writeData("vertices", getVertices());
+  file->writeData("winding_order", getTriangles());
+
+  const size_t nTriangles = numberOfTriangles();
+  std::vector<uint32_t> faceIndices(nTriangles);
+  for (size_t i = 0; i < nTriangles; ++i) {
+    faceIndices[i] = static_cast<uint32_t>(i * 3);
+  }
+  file->writeData("faces", faceIndices);
+  file->closeGroup();
+}
+
+std::shared_ptr<MeshObject> MeshObject::loadNexus(Nexus::File *file, const std::string &group,
+                                                  const Kernel::Material &material) {
+  file->openGroup(group, "NXoff_geometry");
+
+  std::vector<double> flatVertices;
+  file->readData("vertices", flatVertices);
+
+  std::vector<uint32_t> windingOrder;
+  file->readData("winding_order", windingOrder);
+
+  std::vector<uint32_t> faceIndices;
+  file->readData("faces", faceIndices);
+
+  file->closeGroup();
+
+  // Convert flat vertex array to V3D
+  const size_t nVerts = flatVertices.size() / 3;
+  std::vector<Kernel::V3D> vertices;
+  vertices.reserve(nVerts);
+  for (size_t i = 0; i < nVerts; ++i) {
+    vertices.emplace_back(flatVertices[3 * i], flatVertices[3 * i + 1], flatVertices[3 * i + 2]);
+  }
+
+  // Convert OFF face indices + winding order to triangle indices
+  std::vector<uint32_t> triangles;
+  triangles.reserve(windingOrder.size());
+  for (size_t f = 0; f < faceIndices.size(); ++f) {
+    const uint32_t start = faceIndices[f];
+    const uint32_t end = (f + 1 < faceIndices.size()) ? faceIndices[f + 1] : static_cast<uint32_t>(windingOrder.size());
+    const uint32_t nVertsInFace = end - start;
+    // We assume that any polygon face is convex and that we can use a fan triangulation
+    for (uint32_t v = 1; v + 1 < nVertsInFace; ++v) {
+      triangles.push_back(windingOrder[start]);
+      triangles.push_back(windingOrder[start + v]);
+      triangles.push_back(windingOrder[start + v + 1]);
+    }
+  }
+
+  return std::make_shared<MeshObject>(std::move(triangles), std::move(vertices), material);
 }
 
 } // namespace Mantid::Geometry
