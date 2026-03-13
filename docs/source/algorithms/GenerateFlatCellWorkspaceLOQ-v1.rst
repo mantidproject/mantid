@@ -27,14 +27,14 @@ Usage
     GenerateFlatCellWorkspaceLOQ(InputWorkspace="FlatCellInput", OutputWorkspace="FlatCellOuput")
 
     # Verify the changes are correct
-    print("The range of the output values is {}.".format(np.ptp(mtd['FlatCellOuput'].readY(0))))
+    print("The range of the output values is {:.3f}.".format(np.ptp(mtd['FlatCellOuput'].extractY())))
 
 
 Output:
 
 .. testoutput:: exGenerateFlatCellWorkspaceLOQ
 
-   The range of the output values is 1390.912709106737.
+   The range of the output values is 1390.904.
 
 .. categories::
 

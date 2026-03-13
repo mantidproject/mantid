@@ -102,7 +102,7 @@ class TestSideBySideProjection(unittest.TestCase):
         side_by_side = self._create_side_by_side(list(range(3)), False)
         side_by_side._calculator.setupBasisAxes.assert_called_once()
         args = side_by_side._calculator.setupBasisAxes.call_args_list[0][0]
-        self.assertEquals(3, len(args))
+        self.assertEqual(3, len(args))
         np.testing.assert_allclose([0, 0, 0], args[0])
         np.testing.assert_allclose([0, 0, 0], args[1])
         np.testing.assert_allclose([0, 0, 1], args[2])

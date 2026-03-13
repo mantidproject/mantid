@@ -111,7 +111,7 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
             self.model.apply_selectors()
             ads_mock.assert_not_called()
             gen_mask_tbl_mock.assert_called_once_with(store_in_ads=False)
-            alg_mock.create.called_once_with("MaksBinsFromTable")
+            alg_manager_mock.create.assert_called_once_with("MaskBinsFromTable")
             alg_mock.setProperty.assert_has_calls(
                 [
                     call("InputWorkspace", "test_ws_name"),

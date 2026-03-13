@@ -315,7 +315,7 @@ Output:
 .. testoutput:: Ex
 
     Number of workspaces = 2
-    First workspace type = TableWorkspace
+    First workspace type = SplittersWorkspace
     Second workspace type = TableWorkspace
     Number of columns in first TableWorkspace = 3
     Number of rows in first TableWorkspace = 6
@@ -355,7 +355,7 @@ Output:
 .. testoutput:: Ex
 
     Number of workspaces = 2
-    First workspace type = TableWorkspace
+    First workspace type = SplittersWorkspace
     Second workspace type = TableWorkspace
     Number of columns in first TableWorkspace = 3
     Number of rows in first TableWorkspace = 6

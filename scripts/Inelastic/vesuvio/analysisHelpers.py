@@ -25,7 +25,6 @@ EXPERT VESUVIO INSTRUMENT SCIENTIST.
 import numpy as np
 import mantid.simpleapi as sapi
 from scipy import optimize
-from ast import literal_eval
 
 #
 #   INITIALISING FUNCTIONS AND USEFUL FUNCTIONS
@@ -653,4 +652,5 @@ def generate_constraints(table):
 def evaluate(input):
     if input.isdigit():
         return float(input)
-    return literal_eval(input)
+    # disable ruff rule, using literal_eval breaks the doc test.
+    return eval(input)  # noqa: S307

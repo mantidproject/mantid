@@ -39,7 +39,7 @@ class SliceViewerMaskingPresenterTest(unittest.TestCase):
         ):
             self.assertIsNone(presenter._active_selector)
             presenter.new_selector(text=ToolItemText.RECT_MASKING)
-            mocks["selector_cls"].called_once_with(mocks["dataview"], mock_model)
+            mocks["selector_cls"].assert_called_once_with(mocks["dataview"], mock_model)
             mocks["selector_obj"][0].set_active.assert_called_once_with(True)
 
     @patch("mantidqt.widgets.sliceviewer.presenters.masking.MaskingModel", autospec=True)

@@ -91,7 +91,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
 
         self.error_report_presenter.error_handler(continue_working, share, name, email, text_box)
 
-        self.error_report_presenter._send_report_to_server.called_once_with(
+        self.error_report_presenter._send_report_to_server.assert_called_once_with(
             share_identifiable=True, name=name, email=email, uptime=mock.ANY, text_box=text_box
         )
         self.error_report_presenter._handle_exit.assert_called_once_with(False)

@@ -1,0 +1,1 @@
+- Upgraded python to 3.12. See the changes made to python `here <https://docs.python.org/3/whatsnew/3.12.html>`__.
