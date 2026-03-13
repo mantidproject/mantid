@@ -64,6 +64,10 @@ do
   shift
 done
 
+# Set pixi cache location to avoid Windows cache locking issues.
+export RATTLER_CACHE_DIR="$WORKSPACE/.rattler-cache"
+mkdir -p "$RATTLER_CACHE_DIR"
+
 # pixi
 install_pixi
 
