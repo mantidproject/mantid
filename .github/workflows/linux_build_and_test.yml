@@ -36,10 +36,9 @@ on:
 
 jobs:
   linux-build-and-test:
-    runs-on: ${{ format('[ "self-hosted", "Linux", "X64", "{0}" ]', inputs.RUNNER_SELECTION) }}
+    runs-on: ${{ fromJson('[self-hosted]') }}
 
     steps:
-
       - name: evaluate thread ratios
         run: |
           read -r cores   <<<      $(grep -c '^processor' /proc/cpuinfo)
