@@ -7,37 +7,37 @@ on:
   workflow_dispatch:
     inputs:
 
-      RELATE_THREADS_SYSTEM_TESTS:    # Relate number of system test threads to CPU cores and memory
-        description: 'BUILD_THREADS_SYSTEM_TESTS'
-        default: '$(( ram_gb / 10 ))'
-        required: false
-        type: string
+#      RELATE_THREADS_SYSTEM_TESTS:    # Relate number of system test threads to CPU cores and memory
+#        description: 'BUILD_THREADS_SYSTEM_TESTS'
+#        default: '$(( ram_gb / 10 ))'
+#        required: false
+#        type: string
 
-      RELATE_THREADS_UNIT_TESTS:      # Relate number of unit test threads to CPU cores and memory
-        description: 'UNIT_TEST_THREADS'
-        default: '$(( (cores - (ram_gb / cores)) * 15/16 ))'
-        required: false
-        type: string
+#      RELATE_THREADS_UNIT_TESTS:      # Relate number of unit test threads to CPU cores and memory
+#        description: 'UNIT_TEST_THREADS'
+#        default: '$(( (cores - (ram_gb / cores)) * 15/16 ))'
+#        required: false
+#        type: string
 
-      RUNNER_SELECTION:
+      RUNNER_GROUP:
         type: choice
         options:
           - ANY
           - isis
-          - isis-github-runner-1
-          - isis-github-runner-2
-          - isis-github-runner-3
-          - isis-github-runner-4
           - sns
-          - sns-github-runner-7
-          - sns-github-runner-8
-        default: any
+        default: ANY
         required: false
+
+      ADDITIONAL_LABEL:
+        description: 'ADDITIONAL_LABEL'
+        required: false
+        type: string
 
 jobs:
   linux-build-and-test:
     runs-on:
-      - ${{ (inputs.RUNNER_SELECTION == 'ANY' && 'self-hosted') || inputs.RUNNER_SELECTION }}
+      - ${{ (inputs.ADDITIONAL_LABEL == '' && 'self-hosted') || inputs.ADDITIONAL_LABEL }}
+      - ${{ (inputs.RUNNER_GROUP == 'ANY' && 'self-hosted') || inputs.RUNNER_GROUP }}
       - self-hosted
       - Linux
       - X64
