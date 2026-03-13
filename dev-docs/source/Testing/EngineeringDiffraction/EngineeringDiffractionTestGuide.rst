@@ -33,8 +33,8 @@ have been saved in the Mantid Workbench ini file. This file is in ``C:\Users\<fe
 Windows and ``~/.config/mantidproject/`` on linux. To ensure there are no saved settings open up the file mantidworkbench.ini
 and delete the settings with names starting with EngineeringDiffraction2 from the CustomInterfaces section
 
-Test 1
-^^^^^^
+Test 1 - Calibration and focussing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This test follows the simple steps for calibrating and focusing in the Engineering Diffraction Gui.
 
 Calibration
@@ -107,8 +107,8 @@ Focus
    - ENGINX_305761_307521_bank_dSpacing.nxs
    - ENGINX_305761_307521_bank_2_dSpacing.nxs
 
-Test 2
-^^^^^^
+Test 2 - RB Number
+^^^^^^^^^^^^^^^^^^
 
 This test covers the RB number.
 
@@ -119,8 +119,8 @@ This test covers the RB number.
    if an RB number is specified, otherwise they will be saved in the latter - this is to reduce the number of files being written).
 
 
-Test 3
-^^^^^^
+Test 3 - Cropping
+^^^^^^^^^^^^^^^^^
 
 This test covers the Cropping functionality in the ``Run Processing`` tab.
 
@@ -144,8 +144,8 @@ This test covers the Cropping functionality in the ``Run Processing`` tab.
 9. Set the ``Region of Interest`` to ``Texture (20 spec)`` and click ``Calibrate`` - there should be 20 spectra per run (5 tiled plot windows, 4 spectra per window).
 
 
-Test 4
-^^^^^^
+Test 4 - Absorption Correction
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This test covers the sample setting functionality in the ``Absorption Correction`` tab.
 
@@ -217,8 +217,8 @@ This test covers the sample setting functionality in the ``Absorption Correction
    - Load runs from browsing (some more ENGINX data can be found in ``ExternalData/Testing/Data/SystemTest``)
    - Load Orientation File (some orientation files can be found in ``ExternalData/Testing/Data/SystemTest/Texture``)
 
-Test 5
-^^^^^^
+Test 5 - Focused data
+^^^^^^^^^^^^^^^^^^^^^
 
 This test covers the loading and plotting focused data in the fitting tab.
 
@@ -247,16 +247,16 @@ This test covers the loading and plotting focused data in the fitting tab.
 
 9. To dock it double click the ``Fit Plot`` bar (or drag to the bottom of the toolbar). You may want to un-dock it again for subsequent tests.
 
-Test 6
-^^^^^^
+Test 6 - Browse Filters
+^^^^^^^^^^^^^^^^^^^^^^^
 
 This tests the ``Browse Filters`` functionality to filter the focused data in the ``Load Focused Data`` section at the top of ``Fitting`` tab.
 
 1. The tests so far have enabled you to produce many different focussed data files. In the ``Load Focused Data`` section at the top of ``Fitting`` tab,
    when clicked on ``Browse`` button, check that the ``Unit Filter`` and ``Region Filter`` combo boxes help you to find ``dSpacing`` data for Texture regions and ``TOF`` data for North bank.
 
-Test 7
-^^^^^^
+Test 7 - Run removal
+^^^^^^^^^^^^^^^^^^^^
 
 This tests the removal of focused runs from the ``Fitting`` tab.
 
@@ -274,8 +274,8 @@ This tests the removal of focused runs from the ``Fitting`` tab.
 
 6. Delete a ``_bgsub`` workspace in the ADS, the corresponding row will not be deleted, but the ``Subtract BG`` checkbox will be unchecked.
 
-Test 8
-^^^^^^
+Test 8 - Background subtraction
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This tests that the background subtraction works.
 
@@ -285,8 +285,8 @@ This tests that the background subtraction works.
 
 3. Click  ``Inspect Background`` to open a new figure which shows the raw data, the background and the subtracted data. Changing the values of ``Niter``, ``BG``, ``XWindow`` and ``SG`` (input to ``EnggEstimateFocussedBackground``, hover over a cell in the table to see a tool tip for explanation) should produce a change in the background on the external plot and in the UI plot.
 
-Test 9
-^^^^^^
+Test 9 - Fit browser
+^^^^^^^^^^^^^^^^^^^^
 
 This tests the operation of the fit browser.
 
@@ -312,8 +312,8 @@ This tests the operation of the fit browser.
 7. In the Fit property browser, go to ``Setup > Custom Setup``. The function string, including the best-fit parameters, should also have been automatically saved
    as a custom setup. Select ``Setup > Clear Model``, then select this new custom setup model. Inspect the fit by clicking ``Fit > Evaluate`` Function.
 
-Test 10
-^^^^^^^
+Test 10 - Sequential fitting
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This tests the sequential fitting capability of the UI (where the result of a fit to one workspace is used as the initial guess for the next).
 This test uses data generated in `Test 4`.
@@ -345,8 +345,8 @@ This test uses data generated in `Test 4`.
 
 9. Close and re-open the Engineering Diffraction interface. Reopen the Engineering Diffraction settings menu, it should remember the `Primary Log` and the order.
 
-Test 11
-^^^^^^^
+Test 11 - Serial fitting
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 This tests the serial fitting capability of the UI (where all loaded workspaces are fitted from the same starting parameters).
 This test uses data generated in `Test 4`.
@@ -360,8 +360,8 @@ This test uses data generated in `Test 4`.
    corresponds to the order of the runs in the table.
 
 
-Test 12
-^^^^^^^
+Test 12 - Pole Figures
+^^^^^^^^^^^^^^^^^^^^^^
 
 This test will check the Pole Figure plotting in the Texture Tab
 
@@ -411,8 +411,8 @@ This test will check the Pole Figure plotting in the Texture Tab
    - Try having a mixture of runs with/without parameter files
 
 
-Test 13
-^^^^^^^
+Test 13 - GSASII
+^^^^^^^^^^^^^^^^
 
 Note this test will only work if ``GSASII`` is also installed.
 Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightly and ``GSASII`` installed in the expected location.
@@ -447,8 +447,8 @@ Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightl
 
 12. Tick all the checkboxes: ``Microstrain``, ``Sigma-1`` and ``Gamma (Y)``. An asterisk should appear with an advice tooltip.
 
-Test 12
-^^^^^^^
+Test 14 - GSASII multiple files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This test covers the multiple data files functionality with multiple banks per file in the ``GSAS II`` tab.
 
 Note this test will only work if ``GSASII`` is also installed.
