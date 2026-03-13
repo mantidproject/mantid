@@ -228,9 +228,9 @@ void SumSpectra::exec() {
   m_calculateWeightedSum = getProperty("WeightedSum");
   m_multiplyByNumSpec = getProperty("MultiplyBySpectra");
 
-  Progress progress(this, 0.0, 1.0, m_indices.size());
   EventWorkspace_const_sptr eventW = std::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
   if (eventW) {
+    Progress progress(this, 0.0, 1.0, m_indices.size());
     if (m_calculateWeightedSum) {
       g_log.warning("Ignoring request for WeightedSum");
       m_calculateWeightedSum = false;
@@ -259,6 +259,7 @@ void SumSpectra::exec() {
       outSpec.addDetectorIDs(localworkspace->getSpectrum(i).getDetectorIDs());
     }
 
+    Progress progress(this, 0.0, 1.0, m_yLenth.size());
     if (localworkspace->id() == "RebinnedOutput") {
       // this version is for a special workspace that has fractional overlap information
       // Transform to real workspace types
