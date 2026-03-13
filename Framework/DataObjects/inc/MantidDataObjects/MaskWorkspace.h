@@ -25,6 +25,7 @@ public:
   MaskWorkspace(std::size_t numvectors);
   MaskWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument, const bool includeMonitors = false);
   MaskWorkspace(const API::MatrixWorkspace_const_sptr &parent);
+  MaskWorkspace(const std::vector<detid_t> &detids);
 
   /// Returns a clone of the workspace
   std::unique_ptr<MaskWorkspace> clone() const { return std::unique_ptr<MaskWorkspace>(doClone()); }

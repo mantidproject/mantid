@@ -56,6 +56,23 @@ SpecialWorkspace2D::SpecialWorkspace2D(const API::MatrixWorkspace_const_sptr &pa
   buildDetectorIDMapping();
 }
 
+/**
+ * Constructor, building from a list of detector IDs.
+ * Creates one spectrum per detector ID and associates each spectrum with its
+ * corresponding detector ID.
+ * @param detids :: vector of detector IDs, one per spectrum
+ */
+SpecialWorkspace2D::SpecialWorkspace2D(const std::vector<detid_t> &detids) {
+  this->init(detids.size(), 1, 1);
+  // set the detector ids
+  for (size_t wi = 0; wi < detids.size(); ++wi) {
+    this->getSpectrum(wi).setDetectorID(detids[wi]);
+  }
+  // set up the rest of the mapping information
+  this->MatrixWorkspace::rebuildSpectraMapping(false);
+  buildDetectorIDMapping();
+}
+
 //----------------------------------------------------------------------------------------------
 /** Sets the size of the workspace and initializes arrays to zero
  *  @param NVectors :: The number of vectors/histograms/detectors in the
@@ -68,6 +85,8 @@ void SpecialWorkspace2D::init(const size_t &NVectors, const size_t &XLength, con
     throw std::invalid_argument("SpecialWorkspace2D must have 'spectra' of length 1 only.");
   // Continue with standard initialization
   Workspace2D::init(NVectors, XLength, YLength);
+  // This method doesn't have an instrument to set the number of detectors, so set it here
+  this->setNumberOfDetectorGroups(NVectors);
 }
 
 void SpecialWorkspace2D::init(const HistogramData::Histogram &histogram) {

@@ -9,6 +9,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDTypes.h"
+#include <vector>
 
 namespace Mantid {
 namespace DataObjects {
@@ -27,6 +29,7 @@ public:
   GroupingWorkspace(const Geometry::Instrument_const_sptr &inst);
   GroupingWorkspace() = default;
   GroupingWorkspace(size_t numvectors);
+  GroupingWorkspace(const std::vector<detid_t> &detids);
   GroupingWorkspace &operator=(const GroupingWorkspace &) = delete;
 
   /// Returns a clone of the workspace

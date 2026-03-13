@@ -28,6 +28,14 @@ DECLARE_WORKSPACE(GroupingWorkspace)
  */
 GroupingWorkspace::GroupingWorkspace(size_t numvectors) { this->init(numvectors, 1, 1); }
 
+/**
+ * Constructor, building from a list of detector IDs.
+ * Creates one spectrum per detector ID and associates each spectrum with its
+ * corresponding detector ID.
+ * @param detids :: vector of detector IDs, one per spectrum
+ */
+GroupingWorkspace::GroupingWorkspace(const std::vector<detid_t> &detids) : SpecialWorkspace2D(detids) {}
+
 //----------------------------------------------------------------------------------------------
 /** Constructor, building from an instrument
  *
