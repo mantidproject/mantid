@@ -50,7 +50,7 @@ requirements:
     - pyvistaqt
     - superqt
     - pyyaml ${{ pyyaml }}
-    - qscintilla2
+    - qscintilla2 ${{ qscintilla2 }}
     - qt-main ${{ qt_main }}
     - qtconsole ${{ qtconsole }}
     - qtpy ${{ qtpy }}
