@@ -15,6 +15,7 @@ import pyvista as pv
 from instrumentview.renderers.base_renderer import InstrumentRenderer
 from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
 from instrumentview.renderers.shape_renderer import ShapeRenderer, _triangles_to_verts_faces, _make_fallback_shape
+from instrumentview.Projections.ProjectionType import ProjectionType
 
 
 class TestPointCloudRenderer(unittest.TestCase):
@@ -146,7 +147,7 @@ class TestShapeRenderer(unittest.TestCase):
     def test_build_detector_mesh_raises_without_precompute(self):
         positions = np.array([[0.0, 0.0, 0.0]])
         with self.assertRaises(RuntimeError):
-            self.renderer.build_detector_mesh(positions)
+            self.renderer.build_detector_mesh(positions, MagicMock())
 
     def test_precompute_and_build_mesh(self):
         """Integration test: create a mock workspace with detectors that have shapes
@@ -290,6 +291,57 @@ class TestShapeRenderer(unittest.TestCase):
         self.renderer.set_pickable_scalars(pickable_4, vis_4, "Visible Picked")
         self.assertEqual(len(pickable_4.cell_data["Visible Picked"]), pickable_4.number_of_cells)
 
+    def test_build_detector_mesh_projects_shape_vertices_for_cylindrical_projection(self):
+        workspace = self._create_mock_workspace(n_detectors=1)
+        self.renderer.precompute(workspace)
+
+        projection = MagicMock()
+        projection.project_points.side_effect = lambda points, apply_x_correction=True: np.column_stack(
+            [points[:, 0] + 5.0, points[:, 1] - 3.0]
+        )
+        projection.u_period = 0
+
+        model = self._create_mock_model(workspace, n_pickable=1)
+        model.is_2d_projection = True
+        model.projection_type = ProjectionType.CYLINDRICAL_Z
+        model.active_projection = projection
+
+        projected_centres = np.array([[100.0, 200.0, 0.0]], dtype=np.float64)
+        mesh = self.renderer.build_detector_mesh(projected_centres, model)
+
+        self.assertTrue(projection.project_points.called)
+        self.assertLess(np.max(mesh.points[:, 0]), 6.0)
+        self.assertGreater(np.min(mesh.points[:, 0]), 4.9)
+        self.assertLess(np.max(mesh.points[:, 1]), -2.9)
+
+    def test_build_detector_mesh_keeps_projected_shape_contiguous_across_seam(self):
+        workspace = self._create_mock_workspace(n_detectors=1)
+        self.renderer.precompute(workspace)
+
+        projection = MagicMock()
+        projection.u_period = 2 * np.pi
+
+        # Alternate near -pi/+pi to emulate seam crossing while matching input vertex count.
+        def seam_crossing_projection(points, apply_x_correction=True):
+            n = len(points)
+            xs = np.where(np.arange(n) % 2 == 0, -np.pi + 0.01, np.pi - 0.01)
+            ys = np.linspace(0.0, 0.01, n)
+            return np.column_stack([xs, ys]).astype(np.float64)
+
+        projection.project_points.side_effect = seam_crossing_projection
+
+        model = self._create_mock_model(workspace, n_pickable=1)
+        model.is_2d_projection = True
+        model.projection_type = ProjectionType.CYLINDRICAL_Z
+        model.active_projection = projection
+
+        # Centre close to +pi branch.
+        projected_centres = np.array([[np.pi - 0.015, 0.0, 0.0]], dtype=np.float64)
+        mesh = self.renderer.build_detector_mesh(projected_centres, model)
+
+        x_span = float(np.max(mesh.points[:, 0]) - np.min(mesh.points[:, 0]))
+        self.assertLess(x_span, 0.1)
+
     # ------------------------------------------------------------------
     # Helper methods to create mock objects
     # ------------------------------------------------------------------
@@ -363,6 +415,9 @@ class TestShapeRenderer(unittest.TestCase):
     def _create_mock_model(self, workspace, n_pickable=4):
         model = MagicMock()
         model.workspace = workspace
+        model.is_2d_projection = False
+        model.projection_type = ProjectionType.THREE_D
+        model.active_projection = None
         model.pickable_detector_ids = np.arange(n_pickable)
         model.masked_detector_ids = np.array([], dtype=np.int64)
         return model

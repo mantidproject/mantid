@@ -17,14 +17,14 @@ A cell-to-detector index map is maintained so that VTK cell-picking on the
 surface can be translated back to a logical detector index.
 """
 
-from typing import Callable, Optional
-
 import numpy as np
 import pyvista as pv
 from pyvistaqt import BackgroundPlotter
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation
+from typing import Callable, Optional
 
+from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.renderers.base_renderer import InstrumentRenderer
 from mantid.kernel import logger
 
@@ -38,6 +38,7 @@ class ShapeRenderer(InstrumentRenderer):
     """
 
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
+    _PICKING_TOLERANCE = 0.001
 
     def __init__(self):
         # Populated by ``precompute``.
@@ -121,10 +122,20 @@ class ShapeRenderer(InstrumentRenderer):
         self._precomputed = True
         logger.information(f"ShapeRenderer: precomputed {n_det} detectors, {len(shape_cache)} unique shapes")
 
+    def _is_spherical_or_cylindrical_projection(self, model) -> bool:
+        return model.projection_type in (
+            ProjectionType.SPHERICAL_X,
+            ProjectionType.SPHERICAL_Y,
+            ProjectionType.SPHERICAL_Z,
+            ProjectionType.CYLINDRICAL_X,
+            ProjectionType.CYLINDRICAL_Y,
+            ProjectionType.CYLINDRICAL_Z,
+        )
+
     # -----------------------------------------------------------------
     # Build meshes
     # -----------------------------------------------------------------
-    def build_detector_mesh(self, positions: np.ndarray, model=None) -> pv.PolyData:
+    def build_detector_mesh(self, positions: np.ndarray, model) -> pv.PolyData:
         """Build a surface mesh for the unmasked detectors whose centres are *positions*.
 
         *positions* may already be projected to 2D (with z=0).  In that case
@@ -134,10 +145,22 @@ class ShapeRenderer(InstrumentRenderer):
         if not self._precomputed:
             raise RuntimeError("ShapeRenderer.precompute() must be called before build_detector_mesh().")
 
-        flatten_2d = model is not None and model.is_2d_projection
         indices = self._resolve_detector_indices(positions, model, masked=False)
 
-        mesh, c2d, fpd = self._assemble_mesh(indices, positions, flatten_2d=flatten_2d)
+        project_vertices_2d = False
+        projection = None
+        if model.is_2d_projection:
+            if self._is_spherical_or_cylindrical_projection(model):
+                projection = model.active_projection
+                project_vertices_2d = projection is not None
+
+        mesh, c2d, fpd = self._assemble_mesh(
+            indices,
+            positions,
+            flatten_2d=model.is_2d_projection,
+            project_vertices_2d=project_vertices_2d,
+            projection=projection,
+        )
         self._cell_to_detector = c2d
         self._faces_per_detector = fpd
         self._detector_mesh_ref = mesh
@@ -154,13 +177,25 @@ class ShapeRenderer(InstrumentRenderer):
             return self._detector_mesh_ref.copy(deep=True)
         return pv.PolyData(positions)
 
-    def build_masked_mesh(self, positions: np.ndarray, model=None) -> pv.PolyData:
+    def build_masked_mesh(self, positions: np.ndarray, model) -> pv.PolyData:
         if len(positions) == 0:
             return pv.PolyData()
-        flatten_2d = model is not None and model.is_2d_projection
         indices = self._resolve_detector_indices(positions, model, masked=True)
 
-        mesh, _, _ = self._assemble_mesh(indices, positions, flatten_2d=flatten_2d)
+        project_vertices_2d = False
+        projection = None
+        if model.is_2d_projection:
+            if self._is_spherical_or_cylindrical_projection(model):
+                projection = model.active_projection
+                project_vertices_2d = projection is not None
+
+        mesh, _, _ = self._assemble_mesh(
+            indices,
+            positions,
+            flatten_2d=model.is_2d_projection,
+            project_vertices_2d=project_vertices_2d,
+            projection=projection,
+        )
         return mesh
 
     def add_detector_mesh_to_plotter(
@@ -241,7 +276,7 @@ class ShapeRenderer(InstrumentRenderer):
             show_point=False,
             pickable_window=False,
             picker="cell",
-            tolerance=0.005,
+            tolerance=self._PICKING_TOLERANCE,
         )
 
     def set_detector_scalars(self, mesh: pv.PolyData, counts: np.ndarray, label: str) -> None:
@@ -336,6 +371,8 @@ class ShapeRenderer(InstrumentRenderer):
         flatten_2d: bool = False,
         per_detector_scales: np.ndarray | None = None,
         per_detector_rotate: np.ndarray | None = None,
+        project_vertices_2d: bool = False,
+        projection=None,
     ) -> tuple[pv.PolyData, np.ndarray, np.ndarray]:
         """Vectorised mesh assembly.
 
@@ -385,7 +422,7 @@ class ShapeRenderer(InstrumentRenderer):
         # In 2D projection mode, compute a scale factor so that shapes
         # are proportional to the projected inter-detector spacing.
         projection_scale = 1.0
-        if flatten_2d and per_detector_scales is None and len(det_indices) > 1:
+        if flatten_2d and not project_vertices_2d and per_detector_scales is None and len(det_indices) > 1:
             projection_scale = self._compute_projection_scale(det_indices, display_positions)
 
         # Use display_positions as centres (they might be projected)
@@ -423,7 +460,27 @@ class ShapeRenderer(InstrumentRenderer):
             tiled = tiled * group_scales
 
             if flatten_2d:
-                if per_detector_scales is not None:
+                if project_vertices_2d and projection is not None:
+                    # Keep detector orientation in 3D before projecting vertices.
+                    group_rots = rotations[group_indices]
+                    tiled = np.einsum("nij,nvj->nvi", group_rots, tiled)
+
+                    group_world_pos = self._all_positions_3d[det_indices[group_indices]][:, np.newaxis, :]
+                    world_vertices = tiled + group_world_pos
+                    projected_vertices = projection.project_points(world_vertices.reshape(-1, 3), apply_x_correction=False).reshape(
+                        n_group, n_verts, 2
+                    )
+
+                    u_period = projection.u_period
+                    if np.isfinite(u_period) and abs(u_period) > 0.0:
+                        # Keep each detector polygon contiguous at the periodic seam
+                        # by wrapping vertices near the projected detector center.
+                        centre_x = positions[group_indices, 0][:, np.newaxis]
+                        projected_vertices[:, :, 0] += np.round((centre_x - projected_vertices[:, :, 0]) / u_period) * u_period
+
+                    tiled[:, :, :2] = projected_vertices
+                    tiled[:, :, 2] = 0.0
+                elif per_detector_scales is not None:
                     group_rotate = per_detector_rotate[group_indices] if per_detector_rotate is not None else np.zeros(n_group, dtype=bool)
                     if np.all(group_rotate):
                         group_rots = rotations[group_indices]
@@ -445,8 +502,9 @@ class ShapeRenderer(InstrumentRenderer):
                 tiled = np.einsum("nij,nvj->nvi", group_rots, tiled)
 
             # Translate
-            group_pos = positions[group_indices][:, np.newaxis, :]  # (n_group, 1, 3)
-            tiled = tiled + group_pos
+            if not (flatten_2d and project_vertices_2d and projection is not None):
+                group_pos = positions[group_indices][:, np.newaxis, :]  # (n_group, 1, 3)
+                tiled = tiled + group_pos
 
             # Flatten to (n_group * n_verts, 3)
             flat_verts = tiled.reshape(-1, 3)

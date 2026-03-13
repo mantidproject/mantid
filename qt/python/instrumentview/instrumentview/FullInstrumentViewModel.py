@@ -354,6 +354,18 @@ class FullInstrumentViewModel:
         projected_positions[:, :2] = projection.positions()  # Assign only x and y coordinate
         return projected_positions
 
+    @property
+    def active_projection(self):
+        """Return the active projection object for the current projection type."""
+        if self._projection_type == ProjectionType.THREE_D:
+            return None
+
+        projection = self._cached_projection_objects.get(self._projection_type.name)
+        if projection is None:
+            self._calculate_projection()
+            projection = self._cached_projection_objects.get(self._projection_type.name)
+        return projection
+
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
         workspace_indices = self.picked_workspace_indices
         if len(workspace_indices) == 0:
@@ -672,12 +684,9 @@ class FullInstrumentViewModel:
         """
         if self._projection_type != ProjectionType.SIDE_BY_SIDE:
             return None
-        projection = self._cached_projection_objects.get(self._projection_type.name)
+        projection = self.active_projection
         if projection is None:
-            self._calculate_projection()
-            projection = self._cached_projection_objects.get(self._projection_type.name)
-            if projection is None:
-                return None
+            return None
         return projection.get_bank_groups_by_detector_id()
 
     def component_tree_indices_selected(self, component_indices: np.ndarray) -> None:

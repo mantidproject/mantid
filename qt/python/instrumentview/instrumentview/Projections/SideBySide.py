@@ -292,3 +292,9 @@ class SideBySide(Projection):
             u_positions.append(position[0])
             v_positions.append(position[1])
         return (np.array(u_positions), np.array(v_positions))
+
+    def _calculate_2d_coordinates_from_relative_positions(self, detector_relative_positions: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Project arbitrary points using the side-by-side basis axes."""
+        x = detector_relative_positions.dot(np.asarray(self._x_axis, dtype=np.float64))
+        y = detector_relative_positions.dot(np.asarray(self._y_axis, dtype=np.float64))
+        return (x, y)
