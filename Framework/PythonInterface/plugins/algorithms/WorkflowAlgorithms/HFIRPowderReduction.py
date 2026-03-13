@@ -751,6 +751,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             else:
                 self.temp_workspace_list.append(temp_ws)
 
+            # This is a temp fix for reading in MIDAS data generated with McStas,
+            # this is to be removed once we have real MIDAS data
             if not sum_runs and instrument == "MIDAS":
                 CropWorkspace(InputWorkspace=temp_ws, OutputWorkspace="1spectrum", EndWorkspaceIndex=0)
                 AppendSpectra(InputWorkspace1="1spectrum", InputWorkspace2=temp_ws, OutputWorkspace=temp_ws)
