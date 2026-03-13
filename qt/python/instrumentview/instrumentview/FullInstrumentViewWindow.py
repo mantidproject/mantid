@@ -185,7 +185,9 @@ class FullInstrumentViewWindow(QMainWindow):
         )
 
         projection_group_box = QGroupBox("Projection")
-        projection_layout = QHBoxLayout(projection_group_box)
+        projection_layout = QVBoxLayout(projection_group_box)
+        projection_first_row = QHBoxLayout()
+        projection_second_row = QHBoxLayout()
         self._projection_combo_box = NoWheelComboBox(self)
         self._reset_projection = QPushButton("Reset Projection")
         self._reset_projection.setToolTip("Resets the projection to default.")
@@ -209,13 +211,15 @@ class FullInstrumentViewWindow(QMainWindow):
             "If checked, detectors are drawn using their actual geometric shapes "
             "(cuboids, cylinders, etc.) instead of points. May be slower for large instruments."
         )
-        projection_layout.addWidget(self._projection_combo_box)
-        projection_layout.addWidget(self._reset_projection)
-        projection_layout.addWidget(self._clear_point_picked_detectors)
-        projection_layout.addWidget(self._aspect_ratio_check_box)
-        projection_layout.addWidget(self._show_monitors_check_box)
-        projection_layout.addWidget(self._count_scale_combo_box)
-        projection_layout.addWidget(self._show_shapes_check_box)
+        projection_first_row.addWidget(self._projection_combo_box)
+        projection_first_row.addWidget(self._reset_projection)
+        projection_first_row.addWidget(self._clear_point_picked_detectors)
+        projection_second_row.addWidget(self._aspect_ratio_check_box)
+        projection_second_row.addWidget(self._show_monitors_check_box)
+        projection_second_row.addWidget(self._count_scale_combo_box)
+        projection_second_row.addWidget(self._show_shapes_check_box)
+        projection_layout.addLayout(projection_first_row)
+        projection_layout.addLayout(projection_second_row)
 
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
