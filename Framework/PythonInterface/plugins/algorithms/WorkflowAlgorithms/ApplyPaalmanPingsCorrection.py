@@ -9,6 +9,7 @@ from mantid.simpleapi import AddSampleLog, ScaleX, Divide, Minus, Multiply, Rena
 from mantid.api import (
     PythonAlgorithm,
     AlgorithmFactory,
+    AnalysisDataService as ads,
     MatrixWorkspaceProperty,
     WorkspaceGroupProperty,
     PropertyMode,
@@ -147,6 +148,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         if output_workspace.name():
             RenameWorkspace(InputWorkspace=output_workspace, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
         self.setProperty("OutputWorkspace", output_workspace)
+
+        # Remove hidden workspaces
+        self._remove_hidden_ws()
+
         prog_wrkflow.report("Algorithm Complete")
 
     def validateInputs(self):
@@ -216,6 +221,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self._shift_can = self._can_shift_factor != 0.0
 
         self._rebin_container_ws = self.getProperty("RebinCanToSample").value
+        self._hidden_ws_cache = {ws_name for ws_name in ads.getObjectNames() if ws_name.startswith("_")}
 
         if self._use_corrections:
             if self._corrections_workspace.size() == 1:
@@ -339,7 +345,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         """
         logger.information("Correcting sample")
         correction_in_lambda = self._convert_units_wavelength(a_ss_workspace)
-        corrected = Divide(LHSWorkspace=sample_workspace, RHSWorkspace=correction_in_lambda)
+        corrected = Divide(LHSWorkspace=sample_workspace, RHSWorkspace=correction_in_lambda, OutputWorkspace="__corrected")
         return corrected
 
     def _correct_sample_can(self, sample_workspace, container_workspace, factor_workspaces):
@@ -378,6 +384,11 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         subtrahend = Divide(container_workspace, acc, StoreInADS=False)
         difference = Minus(minuend, subtrahend, OutputWorkspace="__difference")
         return difference
+
+    def _remove_hidden_ws(self):
+        hidden_ws_on_alg_end = {ws_name for ws_name in ads.getObjectNames() if ws_name.startswith("_")}
+        for ws_name in hidden_ws_on_alg_end.difference(self._hidden_ws_cache):
+            ads.remove(ws_name)
 
 
 # Register algorithm with Mantid

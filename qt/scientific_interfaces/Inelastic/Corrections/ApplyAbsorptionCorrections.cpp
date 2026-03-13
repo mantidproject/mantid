@@ -234,17 +234,16 @@ void ApplyAbsorptionCorrections::handleRun() {
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
   // Get Can and Clone
-  MatrixWorkspace_sptr canClone;
   if (useCan) {
     const auto canName = m_uiForm.dsContainer->getCurrentDataName().toStdString();
     const auto cloneName = "__algorithm_can";
     IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
     clone->initialize();
     clone->setProperty("InputWorkspace", canName);
-    clone->setProperty("Outputworkspace", cloneName);
+    clone->setProperty("OutputWorkspace", cloneName);
     clone->execute();
 
-    canClone = getADSWorkspace(cloneName);
+    MatrixWorkspace_sptr canClone = getADSWorkspace(cloneName);
     // Check for same binning across sample and container
     if (!checkWorkspaceBinningMatches(sampleWs, canClone)) {
       const char *text = "Binning on sample and container does not match."
@@ -280,8 +279,6 @@ void ApplyAbsorptionCorrections::handleRun() {
     const bool rebinContainer = m_uiForm.ckRebinContainer->isChecked();
     applyCorrAlg->setProperty("RebinCanToSample", rebinContainer);
   }
-
-  QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
 
   bool interpolateAll = false;
   for (std::size_t i = 0; i < m_ppCorrectionsGp->size(); i++) {
@@ -321,47 +318,8 @@ void ApplyAbsorptionCorrections::handleRun() {
     applyCorrAlg->setProperty("CorrectionsWorkspace", m_correctionsGroupName);
   }
 
-  // Generate output workspace name
-  auto QStrSampleWsName = QString::fromStdString(m_sampleWorkspaceName);
-  int nameCutIndex = QStrSampleWsName.lastIndexOf("_");
-  if (nameCutIndex == -1)
-    nameCutIndex = QStrSampleWsName.length();
-
-  QString geometryType;
-  if (correctionsWsName.contains("FlatPlate")) {
-    geometryType = "_flt";
-  } else if (correctionsWsName.contains("Annulus")) {
-    geometryType = "_anl";
-  } else if (correctionsWsName.contains("Cylinder")) {
-    geometryType = "_cyl";
-  }
-
-  QString correctionType;
-  if (correctionsWsName.contains("PP")) {
-    correctionType = "_PP";
-  } else if (correctionsWsName.contains("MC")) {
-    correctionType = "_MC";
-  }
-
-  QString outputWsName = QStrSampleWsName.left(nameCutIndex);
-  outputWsName += geometryType + correctionType + "_Corrected";
-
-  // Using container
-  if (m_uiForm.ckUseCan->isChecked()) {
-    auto const canName = m_uiForm.dsContainer->getCurrentDataName().toStdString();
-    auto const containerWs = getADSWorkspace(canName);
-    auto const &logs = containerWs->run();
-    if (logs.hasProperty("run_number")) {
-      outputWsName += "_" + QString::fromStdString(logs.getProperty("run_number")->value());
-    } else {
-      auto canCutIndex = QString::fromStdString(canName).indexOf("_");
-      outputWsName += "_" + QString::fromStdString(canName).left(canCutIndex);
-    }
-  }
-
-  outputWsName += "_red";
-
-  applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
+  const auto outputWsName = createOutputName();
+  applyCorrAlg->setProperty("OutputWorkspace", outputWsName);
 
   // Add corrections algorithm to queue
   m_batchAlgoRunner->addAlgorithm(applyCorrAlg, std::move(absCorProps));
@@ -372,9 +330,38 @@ void ApplyAbsorptionCorrections::handleRun() {
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
-  m_pythonExportWsName = outputWsName.toStdString();
+  m_pythonExportWsName = outputWsName;
   // m_containerWorkspaceName = m_uiForm.dsContainer->getCurrentDataName();
   // updateContainer();
+}
+
+std::string ApplyAbsorptionCorrections::createOutputName() {
+  // Find type of correction prefixes
+  QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
+  std::string geometryType;
+  if (correctionsWsName.contains("FlatPlate")) {
+    geometryType = "_flt";
+  } else if (correctionsWsName.contains("Annulus")) {
+    geometryType = "_anl";
+  } else if (correctionsWsName.contains("Cylinder")) {
+    geometryType = "_cyl";
+  }
+
+  std::string correctionType;
+  if (correctionsWsName.contains("PP")) {
+    correctionType = "_PP";
+  } else if (correctionsWsName.contains("MC")) {
+    correctionType = "_MC";
+  }
+
+  std::string outputName = m_sampleWorkspaceName.substr(0, m_sampleWorkspaceName.find_last_of("_"));
+  outputName += geometryType + correctionType + "_Corrected";
+  // Using container
+  if (m_uiForm.ckUseCan->isChecked()) {
+    outputName += "_" + prepareContainerName(m_uiForm.dsContainer->getCurrentDataName().toStdString());
+  }
+
+  return outputName + "_red";
 }
 
 /**
