@@ -36,10 +36,7 @@ on:
 
 jobs:
   linux-build-and-test:
-    runs-on:
-      - self-hosted
-      - Linux
-      - X64
+    runs-on: ${{ format('[ "self-hosted", "Linux", "X64", "{0}" ]', inputs.RUNNER_SELECTION) }}
 
     steps:
       - name: evaluate thread ratios
