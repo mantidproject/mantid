@@ -15,6 +15,7 @@ namespace Mantid {
 
 namespace API { // forward declare
 class ISpectrum;
+class SpectrumInfo;
 } // namespace API
 
 namespace DataObjects { // forward declare
@@ -72,51 +73,27 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 private:
-  struct WorkspaceLikeVector : public std::vector<std::pair<std::vector<double>, std::vector<double>>> {
-    WorkspaceLikeVector(size_t yL, size_t numspec)
-        : std::vector<std::pair<std::vector<double>, std::vector<double>>>(yL) {
-      for (size_t j = 0; j < yL; j++) {
-        this->operator[](j).first.reserve(numspec);
-        this->operator[](j).second.reserve(numspec);
-      }
-      m_specNums.reserve(numspec);
-    }
-    std::vector<size_t> const &specNums() const { return m_specNums; }
-    std::vector<double> const &y(size_t j) const { return this->operator[](j).first; }
-    std::vector<double> const &e(size_t j) const { return this->operator[](j).second; }
-    void insertSpecNum(size_t specNum) { m_specNums.push_back(specNum); }
-    void insertY(size_t j, double const y) { this->operator[](j).first.push_back(y); }
-    void insertE(size_t j, double const e) { this->operator[](j).second.push_back(e); }
-
-  private:
-    std::vector<size_t> m_specNums;
-  };
-
   /// Handle logic for RebinnedOutput workspaces
-  void doFractionalSum(RebinnedOutput_const_sptr const &, RebinnedOutput_sptr const &, WorkspaceLikeVector const &,
-                       API::Progress &, size_t &);
-  void doFractionalWeightedSum(RebinnedOutput_const_sptr const &, RebinnedOutput_sptr const &,
-                               WorkspaceLikeVector const &, API::Progress &, size_t &);
+  void doFractionalSum(RebinnedOutput_const_sptr const &, RebinnedOutput_sptr const &, API::Progress &, size_t &);
+  void doFractionalWeightedSum(RebinnedOutput_const_sptr const &, RebinnedOutput_sptr const &, API::Progress &,
+                               size_t &);
   /// Handle logic for summing standard workspaces
-  void doSimpleSum(API::ISpectrum &, WorkspaceLikeVector const &, API::Progress &, size_t &);
-  void doSimpleWeightedSum(API::ISpectrum &, WorkspaceLikeVector const &, API::Progress &, size_t &);
+  void doSimpleSum(API::MatrixWorkspace_const_sptr const &, API::ISpectrum &, API::Progress &, size_t &);
+  void doSimpleWeightedSum(API::MatrixWorkspace_const_sptr const &, API::ISpectrum &, API::Progress &, size_t &);
 
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void execEvent(const API::MatrixWorkspace_sptr &outputWorkspace, API::Progress &progress, size_t &numSpectra,
-                 size_t &numMasked, size_t &numZeros);
+  void execEvent(const API::MatrixWorkspace_sptr &outputWorkspace, API::Progress &progress, size_t &numZeros);
   specnum_t getOutputSpecNo(const API::MatrixWorkspace_const_sptr &localworkspace);
 
   API::MatrixWorkspace_sptr replaceSpecialValues();
-  void determineIndices(const size_t numberOfSpectra);
+  size_t determineIndices(API::SpectrumInfo const &, const size_t numberOfSpectra);
 
   /// The output spectrum number
   specnum_t m_outSpecNum{0};
   /// Set true to keep monitors
   bool m_keepMonitors{false};
-  /// Set true to remove special values before processing
-  bool m_replaceSpecialValues{false};
   /// numberOfSpectra in the input
   size_t m_numberOfSpectra{0};
   /// Blocksize of the input workspace

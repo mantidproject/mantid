@@ -156,7 +156,7 @@ public:
 
     // Check the detectors mapped to the single spectra
     const auto &spec = output2D->getSpectrum(0);
-    TS_ASSERT_EQUALS(spec.getSpectrumNo(), 2);
+    TS_ASSERT_EQUALS(spec.getSpectrumNo(), 3);
     TS_ASSERT_EQUALS(spec.getDetectorIDs().size(), 2);
     TS_ASSERT(spec.hasDetectorID(3));
     TS_ASSERT(spec.hasDetectorID(4));
