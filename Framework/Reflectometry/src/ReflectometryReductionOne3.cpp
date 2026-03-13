@@ -121,6 +121,8 @@ DECLARE_ALGORITHM(ReflectometryReductionOne3)
 /** Initialize the algorithm's properties.
  */
 void ReflectometryReductionOne3::init() {
+  addAlgorithmTasks({std::make_shared<TaskA>(this), std::make_shared<TaskB>(this), std::make_shared<TaskC>(this),
+                     std::make_shared<TaskD>(this)});
 
   // Input workspace
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
@@ -212,6 +214,10 @@ void ReflectometryReductionOne3::setDefaultOutputWorkspaceNames() {
 /** Execute the algorithm.
  */
 void ReflectometryReductionOne3::exec() {
+  for (const auto &[name, task] : m_algorithmTasks) {
+    task->execute();
+  }
+
   setDefaultOutputWorkspaceNames();
 
   // Get input properties

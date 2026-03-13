@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/WorkspaceFactory.h" //remove this
 #include "MantidReflectometry/ReflectometryWorkflowBase2.h"
+#include <numeric>
 
 namespace Mantid {
 // Forward declaration
@@ -142,6 +144,143 @@ private:
   double m_wavelengthMax;
   // True if partial bins should be included in the summation in Q
   bool m_partialBins;
+
+  // Algorithm Tasks
+  class AlgorithmTask {
+  public:
+    explicit AlgorithmTask(ReflectometryReductionOne3 *parent, const std::string &name)
+        : m_parent(parent), m_name(name) {}
+    void setDependantTask(std::string task, std::string output_name = "") {
+      if (output_name.empty()) {
+        // If no output name is provided, assume the whole task output is required
+        m_dependantTasks[task] = {};
+      } else {
+        m_dependantTasks[task].push_back(output_name);
+      }
+    }
+    void execute() {
+      auto missingTasks = evaluateDependentTasks();
+      if (!missingTasks.empty()) {
+        throw std::runtime_error(
+            "Cannot execute task " + m_name + " as the following dependent tasks outputs are not available: " +
+            std::accumulate(missingTasks.begin(), missingTasks.end(), std::string(""),
+                            [](const std::string &a, const std::string &b) { return a + ", " + b; }));
+      }
+      executeImpl();
+    }
+    std::vector<std::string> getExpectedOutputs() { return m_expectedOutputs; }
+    void setExpectedOutputs(std::vector<std::string> expectedOutputs) { m_expectedOutputs = expectedOutputs; }
+    std::string name() const { return m_name; }
+
+  protected:
+    void outputWorkspace(std::shared_ptr<MatrixWorkspace> ws, const std::string &outputName) {
+      m_parent->m_algorithmTaskOutputs[m_name][outputName] = ws;
+    }
+
+  private:
+    // map of dependant task name: dependant outputs
+    std::unordered_map<std::string, std::vector<std::string>> m_dependantTasks;
+    ReflectometryReductionOne3 *m_parent;
+    std::string m_name;
+    std::vector<std::string> m_expectedOutputs;
+
+    virtual void executeImpl() = 0;
+
+    void populateExpectedOutputs() {
+      for (const auto &[taskName, outputs] : m_dependantTasks) {
+        if (outputs.empty()) {
+          // If no specific outputs are listed, populate with the whole task output
+          if (!m_parent->m_algorithmTasks.contains(taskName))
+            throw std::runtime_error("Dependant task " + taskName + " not found for task " + m_name +
+                                     "could not populate expected outputs.");
+          m_dependantTasks[taskName] = m_parent->m_algorithmTasks[taskName]->getExpectedOutputs();
+        }
+      }
+    }
+
+    // check if output from dependant tasks is available in m_algorithmTaskOutputs
+    // this could be supplied by dependant tasks, or manually setting algorithm properties
+    std::vector<std::string> evaluateDependentTasks() {
+      populateExpectedOutputs();
+      std::vector<std::string> missingTasks;
+      for (const auto &[taskName, outputs] : m_dependantTasks) {
+        if (!m_parent->m_algorithmTaskOutputs.contains(taskName)) {
+          missingTasks.push_back(taskName + ": ALL OUTPUTS");
+        } else {
+          for (const auto &output : outputs) {
+            if (!m_parent->m_algorithmTaskOutputs[taskName].contains(output)) {
+              missingTasks.push_back(taskName + ":" + output);
+            }
+          }
+        }
+      }
+      return missingTasks;
+    }
+  };
+
+  class TaskA : public AlgorithmTask {
+  public:
+    explicit TaskA(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskA") {
+      setExpectedOutputs({"Output1", "Output2"});
+    }
+    void executeImpl() override {
+      // Implementation of TaskA
+      MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 5, 4);
+      outputWorkspace(outputWS, "Output1");
+      outputWorkspace(outputWS, "Output2");
+    }
+  };
+
+  class TaskB : public AlgorithmTask {
+  public:
+    explicit TaskB(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskB") {
+      setExpectedOutputs({"Output3"});
+      setDependantTask("TaskA", "Output1");
+    }
+    void executeImpl() override {
+      // Implementation of TaskB
+      MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 5, 4);
+      outputWorkspace(outputWS, "Output3");
+    }
+  };
+
+  class TaskC : public AlgorithmTask {
+  public:
+    explicit TaskC(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskC") {
+      setExpectedOutputs({"Output4"});
+      setDependantTask("TaskB", "Output3");
+    }
+
+    void executeImpl() override {
+      // Implementation of TaskC
+      MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 5, 4);
+      outputWorkspace(outputWS, "Output4");
+    }
+  };
+
+  class TaskD : public AlgorithmTask {
+  public:
+    explicit TaskD(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskD") {
+      setExpectedOutputs({"Output5"});
+      setDependantTask("TaskC", "Output4");
+    }
+    void executeImpl() override {
+      // Implementation of TaskD
+      MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 5, 4);
+      outputWorkspace(outputWS, "Output5");
+    }
+  };
+
+  // map of task name: task
+  std::map<std::string, std::shared_ptr<AlgorithmTask>> m_algorithmTasks;
+  // map of task name: (map of output name: outputs)
+  std::map<std::string, std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>> m_algorithmTaskOutputs;
+  void addAlgorithmTask(std::shared_ptr<AlgorithmTask> task) { m_algorithmTasks[task->name()] = task; }
+  void addAlgorithmTasks(std::vector<std::shared_ptr<AlgorithmTask>> tasks) {
+    for (const auto &task : tasks) {
+      addAlgorithmTask(task);
+    }
+  }
 };
 
 } // namespace Reflectometry
