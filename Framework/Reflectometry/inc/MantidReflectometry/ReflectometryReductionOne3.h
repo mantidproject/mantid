@@ -167,6 +167,7 @@ private:
                             [](const std::string &a, const std::string &b) { return a + ", " + b; }));
       }
       executeImpl();
+      checkExpectedOutputs();
     }
     std::vector<std::string> getExpectedOutputs() { return m_expectedOutputs; }
     void setExpectedOutputs(std::vector<std::string> expectedOutputs) { m_expectedOutputs = expectedOutputs; }
@@ -195,6 +196,24 @@ private:
                                      "could not populate expected outputs.");
           m_dependantTasks[taskName] = m_parent->m_algorithmTasks[taskName]->getExpectedOutputs();
         }
+      }
+    }
+
+    // after execution, check that expected outputs from this task are present in m_algorithmTaskOutputs
+    void checkExpectedOutputs() {
+      if (!m_parent->m_algorithmTaskOutputs.contains(m_name))
+        throw std::runtime_error("No output from task " + m_name + " found after task execution");
+
+      std::vector<std::string> missingOutput;
+      for (const auto &output : m_expectedOutputs) {
+        if (!m_parent->m_algorithmTaskOutputs[m_name].contains(output))
+          missingOutput.push_back(output);
+      }
+      if (!missingOutput.empty()) {
+        throw std::runtime_error(
+            "Expected outputs from task " + m_name + " not found after task execution: " +
+            std::accumulate(std::next(missingOutput.begin()), missingOutput.end(), missingOutput.front(),
+                            [](const std::string &a, const std::string &b) { return a + ", " + b; }));
       }
     }
 
