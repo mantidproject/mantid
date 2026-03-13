@@ -16,22 +16,87 @@ spectra.
 
 If we define a the :math:`i^{th}` spectrum with bins :math:`j`. The unweighted sum is just (``WeightedSum=False``)
 
-.. math:: Signal[j] = \displaystyle\Sigma_{i \in spectra} Signal_i[j]
+.. math:: Signal[j] = \sum_{i \in spectra} Signal_i[j]
 
-The weighted sum (``WeightedSum=True`` and ``MultiplyBySpectra=True``, ignored for event workspaces), the sum is defined (skipping :math:`Signal_i[j]` when :math:`Error_i[j] == 0`),
+and the corresponding error is correctly propagated as
 
-.. math:: Signal[j] = NSpectra \times \displaystyle\Sigma_{i \in spectra} \left(\frac{Signal_i[j]}{Error_i^2[j]}\right) / \Sigma_{i \in spectra}\left(\frac{1}{Error_i^2[j]}\right)
+.. math:: Error[j] = \sqrt{\sum_{i \in spectra} Error_i^2[j]}.
 
-:math:`NSpectra` is the number of spectra contributing to that bin. If the weights contributing to the sum are equal, these result in the same value. This should be used for unnormalized (e.g. not divided by vanadium spectrum) data. If the data has been normalized (e.g. divided by vanadium spectrum for total scattering) then multiplying by the number of spectra contributing to the bin is incorrect, use ``WeightedSum=True`` and ``MultiplyBySpectra=False`` to sum as
+In the case of using ``WeightedSum=True`` and ``MultiplyBySpectra=False`` (both ignored for event workspaces),
+what is calculated is the weighted mean of the spectra,
+defined as (skipping :math:`Signal_i[j]` when :math:`Error_i[j] == 0`),
 
-.. math:: Signal[j] = \displaystyle\Sigma_{i \in spectra} \left(\frac{Signal_i[j]}{Error_i^2[j]}\right) / \Sigma_{i \in spectra}\left(\frac{1}{Error_i^2[j]}\right)
+.. math:: Signal[j] = \frac{
+        \sum_{i \in spectra} \left(\frac{Signal_i[j]}{Error_i^2[j]}\right)
+    }{
+        \sum_{i \in spectra}\left(\frac{1}{Error_i^2[j]}\right)
+    }
+
+and the error is correctly propagated as
+
+.. math:: Error[j] = \sqrt{\frac{1}{\sum_{i \in spectra}\left(\frac{1}{Error_i^2[j]}\right)}}.
+
+The weighted sum (``WeightedSum=True`` and ``MultiplyBySpectra=True``, ignored for event workspaces)
+is defined (skipping :math:`Signal_i[j]` when :math:`Error_i[j] == 0`) as
+
+.. math:: Signal[j] = \frac{
+        NSpectra \times \sum_{i \in spectra} \left(\frac{Signal_i[j]}{Error_i^2[j]}\right)
+    }{
+        \sum_{i \in spectra}\left(\frac{1}{Error_i^2[j]}\right)
+    }
+
+and the error is correctly propagated as
+
+.. math:: Error[j] = NSpectra \times \sqrt{\frac{1}{\sum_{i \in spectra}\left(\frac{1}{Error_i^2[j]}\right)}},
+
+where :math:`NSpectra` is the number of spectra contributing to that bin.
+If the weights contributing to the sum are equal, these result in the same value.
+This should be used for unnormalized (e.g. not divided by vanadium spectrum) data.
+
+If the data has been normalized (e.g. divided by vanadium spectrum for total scattering)
+then multiplying by the number of spectra contributing to the bin is incorrect,
+use ``WeightedSum=True`` and ``MultiplyBySpectra=False``.
+
+If a workspace contains fractional bins, it is useful to consider an "effective" signal and error
+given by :math:`\overline{Signal}_i[j] = Signal_i[j] \times fracVal_i[j]`
+and :math:`\overline{Error}_i[j] = Error_i[j] \times fracVal_i[j]`,
+where :math:`fracVal_i[j]` is the fractional value for the bin.
+Then the unweighted sum with fractional bins is defined as
+
+.. math:: Signal[j] = \sum_{i \in spectra} \overline{Signal}_i[j]
+    = \sum_{i \in spectra} Signal_i[j] \times fracVal_i[j],
+
+with error
+
+.. math:: Error[j] = \sqrt{\sum_{i \in spectra} \overline{Error}_i[j]^2}
+    = \sqrt{\sum_{i \in spectra} (Error_i[j] \times fracVal_i[j])^2}.
+
+The weighted sum with fractional bins is defined as
+
+.. math::
+  Signal[j] = \frac{
+    \sum_{i \in spectra} \frac{\overline{Signal}_i[j]}{\overline{Error}_i[j]^2}
+  }{
+    \sum_{i \in spectra} \frac{1}{\overline{Error}_i[j]^2}
+  }
+  = \frac{
+    \sum_{i \in spectra} \left(\frac{Signal_i[j] \times fracVal_i[j]}{(Error_i[j] \times fracVal_i[j])^2}\right)
+  }{
+    \sum_{i \in spectra} \left(\frac{1}{(Error_i[j] \times fracVal_i[j])^2}\right)
+  }
+
+with error
+
+.. math::
+  Error[j] = \sqrt{\frac{1}{\sum_{i \in spectra} \frac{1}{\overline{Error}_i[j]^2}}}
+  = \sqrt{\frac{1}{\sum_{i \in spectra}\left(\frac{1}{(Error_i[j] \times fracVal_i[j])^2}\right)}}.
 
 The algorithm adds to the ``OutputWorkspace`` three additional
 properties (Log values). The properties (Log) names are:
 
 * ``NumAllSpectra`` is the number of spectra contributed to the sum
 
-* ``NumMaskSpectra`` is the spectra dropped from the summations because they are masked. Monitors are not included in this total if ``IncludeMonitors=False``.
+* ``NumMaskSpectra`` is the number of spectra dropped from the summations because they are masked. Monitors are not included in this total if ``IncludeMonitors=False``.
 
 * ``NumZeroSpectra`` is the number of zero bins in histogram workspace or empty spectra for event workspace. These spectra are dropped from the summation of histogram workspace when ``WeightedSum=True``.
 
