@@ -425,6 +425,7 @@ void LeanElasticPeaksWorkspace::saveNexus(Nexus::File *file) const {
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
   std::vector<double> qlabs(3 * np);
+  std::vector<double> monitorCount(np);
 
   // Populate column vectors
   size_t maxShapeJSONLength = 0;
@@ -472,6 +473,7 @@ void LeanElasticPeaksWorkspace::saveNexus(Nexus::File *file) const {
       qlabs[3 * i + 1] = p.getQLabFrame().Y();
       qlabs[3 * i + 2] = p.getQLabFrame().Z();
     }
+    monitorCount[i] = p.getMonitorCount();
   }
 
   // Start Peaks Workspace in Nexus File
@@ -642,6 +644,14 @@ void LeanElasticPeaksWorkspace::saveNexus(Nexus::File *file) const {
   file->putAttr("name", "IntMNP");
   file->putAttr("interpret_as", "A vector of 3 doubles");
   file->putAttr("units", "r.l.u.");
+  file->closeData();
+
+  // Monitor Count column
+  file->writeData("column_18", monitorCount);
+  file->openData("column_18");
+  file->putAttr("name", "Monitor Count");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known");
   file->closeData();
 
   file->closeGroup(); // end of peaks workpace

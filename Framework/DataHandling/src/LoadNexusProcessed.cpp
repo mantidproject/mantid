@@ -1236,6 +1236,14 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
         mnp = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setIntMNP(mnp);
       }
+    } else if (str == "column_18") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+
+      for (size_t r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setMonitorCount(val);
+      }
     }
 
     // After all columns read set IntHKL if not set
@@ -1519,6 +1527,14 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
       for (size_t r = 0; r < numberPeaks; ++r) {
         mnp = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setIntMNP(mnp);
+      }
+    } else if (str == "column_21") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+
+      for (size_t r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setMonitorCount(val);
       }
     }
   }

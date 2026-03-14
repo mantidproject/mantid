@@ -38,6 +38,7 @@
 #include <filesystem>
 #include <string>
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Geometry;
@@ -1173,6 +1174,10 @@ public:
     lpws->addPeak(pk1);
     lpws->addPeak(pk2);
 
+    // Set known monitor counts
+    lpws->getPeak(0).setMonitorCount(12345.0);
+    lpws->getPeak(1).setMonitorCount(54321.0);
+
     // save the lean elastic peak workspace to temp
     std::string filename = "testLoadLeanElasticPeaksWorkspace.nxs";
     SaveNexusProcessed save;
@@ -1211,7 +1216,53 @@ public:
     TS_ASSERT_DELTA(lpws->getPeak(1).getQLabFrame().X(), pk2.getQLabFrame().X(), 1e-5);
     TS_ASSERT_DELTA(lpws->getPeak(1).getQLabFrame().Y(), pk2.getQLabFrame().Y(), 1e-5);
     TS_ASSERT_DELTA(lpws->getPeak(1).getQLabFrame().Z(), pk2.getQLabFrame().Z(), 1e-5);
+    // --monitor counts
+    TS_ASSERT_DELTA(lpws_loaded->getPeak(0).getMonitorCount(), 12345.0, 1e-5);
+    TS_ASSERT_DELTA(lpws_loaded->getPeak(1).getMonitorCount(), 54321.0, 1e-5);
 
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
+  }
+
+  void test_load_peaksWorkspace_monitor_count() {
+    // Create a PeaksWorkspace with known monitor counts
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    auto pw = std::make_shared<PeaksWorkspace>();
+    pw->setInstrument(inst);
+    Peak p1(inst, 1, 3.0);
+    Peak p2(inst, 10, 4.0);
+    p1.setMonitorCount(12345.0);
+    p2.setMonitorCount(54321.0);
+    pw->addPeak(p1);
+    pw->addPeak(p2);
+
+    // Save to file
+    std::string filename = "testLoadPeaksWorkspaceMonitorCount.nxs";
+    SaveNexusProcessed saveAlg;
+    saveAlg.initialize();
+    saveAlg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(pw));
+    saveAlg.setPropertyValue("Filename", filename);
+    saveAlg.execute();
+    TS_ASSERT(saveAlg.isExecuted());
+    filename = saveAlg.getPropertyValue("Filename");
+
+    // Load back
+    LoadNexusProcessed loadAlg;
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", filename);
+    loadAlg.setPropertyValue("OutputWorkspace", "loaded_peaks_monitor_count");
+    loadAlg.execute();
+    TS_ASSERT(loadAlg.isExecuted());
+
+    auto loaded = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("loaded_peaks_monitor_count");
+    TS_ASSERT(loaded);
+    if (loaded) {
+      TS_ASSERT_EQUALS(loaded->getNumberPeaks(), 2);
+      TS_ASSERT_DELTA(loaded->getPeak(0).getMonitorCount(), 12345.0, 1e-5);
+      TS_ASSERT_DELTA(loaded->getPeak(1).getMonitorCount(), 54321.0, 1e-5);
+    }
+
+    AnalysisDataService::Instance().remove("loaded_peaks_monitor_count");
     if (std::filesystem::exists(filename))
       std::filesystem::remove(filename);
   }
