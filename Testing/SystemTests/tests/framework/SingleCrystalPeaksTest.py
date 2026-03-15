@@ -37,6 +37,7 @@ class SingleCrystalPeaksIntHKLIntMNPSaveLoadTest(systemtesting.MantidSystemTest)
         pk = pks.createPeak([3, 2, 1])
         pk.setIntHKL(V3D(1, 3, 2))
         pk.setIntMNP(V3D(3, 2, 1))
+        pk.setMonitorCount(54321.0)
         pks.addPeak(pk)
 
         file_name = os.path.join(self._test_dir, "peaks_workspace.nxs")
@@ -46,6 +47,7 @@ class SingleCrystalPeaksIntHKLIntMNPSaveLoadTest(systemtesting.MantidSystemTest)
 
         self.assertAlmostEqual(ref.getPeak(0).getIntHKL(), pks.getPeak(0).getIntHKL())
         self.assertAlmostEqual(ref.getPeak(0).getIntMNP(), pks.getPeak(0).getIntMNP())
+        self.assertAlmostEqual(ref.getPeak(0).getMonitorCount(), 54321.0)
 
         # lean peaks workspace
         pks = ConvertPeaksWorkspace(pks)
@@ -57,3 +59,4 @@ class SingleCrystalPeaksIntHKLIntMNPSaveLoadTest(systemtesting.MantidSystemTest)
 
         self.assertAlmostEqual(ref.getPeak(0).getIntHKL(), pks.getPeak(0).getIntHKL())
         self.assertAlmostEqual(ref.getPeak(0).getIntMNP(), pks.getPeak(0).getIntMNP())
+        self.assertAlmostEqual(ref.getPeak(0).getMonitorCount(), 54321.0)
