@@ -82,6 +82,7 @@ void QtPreviewDockedWidgets::connectSignals() const {
   connect(m_ui.rs_edit_button, SIGNAL(clicked()), this, SLOT(onEditROIClicked()));
   // Line plot toolbar
   connect(m_ui.lp_ads_export_button, SIGNAL(clicked()), this, SLOT(onLinePlotExportToAdsClicked()));
+  connect(m_ui.set_yaxis_symlog_checkbox, SIGNAL(toggled(bool)), this, SLOT(setYAxisSymlog(bool)));
 }
 
 void QtPreviewDockedWidgets::onInstViewZoomClicked() const { m_notifyee->notifyInstViewZoomRequested(); }
@@ -94,6 +95,8 @@ void QtPreviewDockedWidgets::onRegionSelectorExportToAdsClicked() const {
 }
 
 void QtPreviewDockedWidgets::onEditROIClicked() const { m_notifyee->notifyEditROIModeRequested(); }
+
+void QtPreviewDockedWidgets::setYAxisSymlog(bool checked) { m_notifyee->notifySetYAxisSymlogChanged(checked); }
 
 void QtPreviewDockedWidgets::onAddRectangularROIClicked(QAction *regionType) const {
   m_ui.rs_rect_select_button->setDefaultAction(regionType);

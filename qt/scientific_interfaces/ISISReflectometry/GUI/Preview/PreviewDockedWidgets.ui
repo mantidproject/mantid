@@ -157,6 +157,16 @@
            </property>
           </spacer>
          </item>
+         <item>
+            <widget class="QCheckBox" name="set_yaxis_symlog_checkbox">
+                <property name="text">
+                    <string>Set Y-Axis Symlog</string>
+                </property>
+                <property name="checked">
+                    <bool>false</bool>
+                </property>
+            </widget>
+         </item>
         </layout>
        </item>
        <item>
