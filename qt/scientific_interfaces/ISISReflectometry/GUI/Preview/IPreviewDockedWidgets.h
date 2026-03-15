@@ -35,6 +35,7 @@ public:
 
   virtual void notifyEditROIModeRequested() = 0;
   virtual void notifyRectangularROIModeRequested() = 0;
+  virtual void notifySetYAxisSymlogChanged(bool checked) = 0;
 };
 
 class IPreviewDockedWidgets {
@@ -55,6 +56,7 @@ public:
   virtual void setInstViewSelectRectMode() = 0;
   virtual void setInstViewToolbarEnabled(bool enable) = 0;
   virtual void setRegionSelectorEnabled(bool enable) = 0;
+  virtual void setYAxisSymlog(bool checked) = 0;
   // Region selector toolbar
   virtual void setEditROIState(bool state) = 0;
   virtual void setRectangularROIState(bool state) = 0;
