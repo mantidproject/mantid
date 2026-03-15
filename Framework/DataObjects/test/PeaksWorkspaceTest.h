@@ -238,6 +238,23 @@ public:
       TS_ASSERT_DELTA(waveLengths[3], 3.0, 1e-5);
       TS_ASSERT_DELTA(waveLengths[4], 3.0, 1e-5);
     }
+
+    // Check monitor counts
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_21"));
+    std::string monitorColumnName;
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->getAttr("name", monitorColumnName));
+    TS_ASSERT_EQUALS(monitorColumnName, "Monitor Count");
+    std::vector<double> monitorCounts;
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->getData(monitorCounts));
+    nexusHelper.file->closeData();
+    TS_ASSERT_EQUALS(monitorCounts.size(), 5);
+    if (monitorCounts.size() >= 5) {
+      TS_ASSERT_DELTA(monitorCounts[0], 1000.0, 1e-5);
+      TS_ASSERT_DELTA(monitorCounts[1], 2000.0, 1e-5);
+      TS_ASSERT_DELTA(monitorCounts[2], 3000.0, 1e-5);
+      TS_ASSERT_DELTA(monitorCounts[3], 4000.0, 1e-5);
+      TS_ASSERT_DELTA(monitorCounts[4], 5000.0, 1e-5);
+    }
   }
 
   void test_getSetLogAccess() {
@@ -646,6 +663,11 @@ private:
     pw->addPeak(p2);
     pw->addPeak(p3);
     pw->addPeak(p4);
+
+    // Set known monitor counts on all 5 peaks
+    for (size_t i = 0; i < pw->getNumberPeaks(); i++) {
+      pw->getPeak(i).setMonitorCount(1000.0 * static_cast<double>(i + 1));
+    }
 
     return pw;
   }
