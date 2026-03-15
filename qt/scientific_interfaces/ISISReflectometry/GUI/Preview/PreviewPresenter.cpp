@@ -61,7 +61,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_dockedWidgets->setInstViewToolbarEnabled(false);
   m_dockedWidgets->setRegionSelectorEnabled(false);
 
-  m_plotPresenter->setScaleSymLog(AxisID::YLeft, 1e-4);
+  m_plotPresenter->setScaleLog(AxisID::YLeft);
   m_plotPresenter->setAxisLimit(AxisID::YLeft, -1e-5, 2.0);
   m_plotPresenter->setScaleLog(AxisID::XBottom);
   m_plotPresenter->setPlotErrorBars(true);
@@ -77,11 +77,21 @@ void PreviewPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState()
 
 void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
 
+void PreviewPresenter::notifySetYAxisSymlogChanged(bool checked) { updatePlotAxes(checked); }
+
 void PreviewPresenter::updateWidgetEnabledState() {
   if (m_mainPresenter->isProcessing() || m_mainPresenter->isAutoreducing()) {
     m_view->disableMainWidget();
   } else {
     m_view->enableMainWidget();
+  }
+}
+
+void PreviewPresenter::updatePlotAxes(bool checked) {
+  if (checked) {
+    m_plotPresenter->setScaleSymLog(AxisID::YLeft, 1e-4);
+  } else {
+    m_plotPresenter->setScaleLog(AxisID::YLeft);
   }
 }
 
