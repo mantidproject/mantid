@@ -1225,46 +1225,42 @@ public:
   }
 
   void test_load_peaksWorkspace_monitor_count() {
-    // Create a PeaksWorkspace with known monitor counts
-    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
-    auto pw = std::make_shared<PeaksWorkspace>();
-    pw->setInstrument(inst);
-    Peak p1(inst, 1, 3.0);
-    Peak p2(inst, 10, 4.0);
-    p1.setMonitorCount(12345.0);
-    p2.setMonitorCount(54321.0);
-    pw->addPeak(p1);
-    pw->addPeak(p2);
+    auto peaksTestWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
+    // contains two peaks
+    const std::string filename = FileFinder::Instance().getFullPath("unit_testing/MINITOPAZ_Definition.xml").string();
+    InstrumentDefinitionParser parser(filename, "MINITOPAZ", Strings::loadFile(filename));
+    auto instrument = parser.parseXML(nullptr);
+    peaksTestWS->populateInstrumentParameters();
+    peaksTestWS->setInstrument(instrument);
+    peaksTestWS->getPeak(0).setMonitorCount(12345);
+    peaksTestWS->getPeak(1).setMonitorCount(54321);
+    TS_ASSERT_EQUALS(peaksTestWS->getNumberPeaks(), 2);
 
-    // Save to file
-    std::string filename = "testLoadPeaksWorkspaceMonitorCount.nxs";
     SaveNexusProcessed saveAlg;
+    saveAlg.setChild(true);
     saveAlg.initialize();
-    saveAlg.setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(pw));
-    saveAlg.setPropertyValue("Filename", filename);
+    saveAlg.setProperty("InputWorkspace", peaksTestWS);
+    saveAlg.setPropertyValue("Filename", "test_load_peaksWorkspace_monitor_count.nxs");
     saveAlg.execute();
-    TS_ASSERT(saveAlg.isExecuted());
-    filename = saveAlg.getPropertyValue("Filename");
+    std::string filePath = saveAlg.getPropertyValue("Filename");
 
-    // Load back
     LoadNexusProcessed loadAlg;
+    loadAlg.setChild(true);
     loadAlg.initialize();
-    loadAlg.setPropertyValue("Filename", filename);
-    loadAlg.setPropertyValue("OutputWorkspace", "loaded_peaks_monitor_count");
+    loadAlg.setPropertyValue("Filename", filePath);
+    loadAlg.setPropertyValue("OutputWorkspace", "dummy");
     loadAlg.execute();
-    TS_ASSERT(loadAlg.isExecuted());
 
-    auto loaded = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("loaded_peaks_monitor_count");
-    TS_ASSERT(loaded);
-    if (loaded) {
-      TS_ASSERT_EQUALS(loaded->getNumberPeaks(), 2);
-      TS_ASSERT_DELTA(loaded->getPeak(0).getMonitorCount(), 12345.0, 1e-5);
-      TS_ASSERT_DELTA(loaded->getPeak(1).getMonitorCount(), 54321.0, 1e-5);
+    Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
+    auto loadedPeaksWS = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
+    TS_ASSERT_EQUALS(loadedPeaksWS->getNumberPeaks(), 2);
+    TS_ASSERT_DELTA(loadedPeaksWS->getPeak(0).getMonitorCount(), 12345.0, 1e-5);
+    TS_ASSERT_DELTA(loadedPeaksWS->getPeak(1).getMonitorCount(), 54321.0, 1e-5);
+
+    AnalysisDataService::Instance().remove("dummy");
+    if (std::filesystem::exists(filePath)) {
+      std::filesystem::remove(filePath);
     }
-
-    AnalysisDataService::Instance().remove("loaded_peaks_monitor_count");
-    if (std::filesystem::exists(filename))
-      std::filesystem::remove(filename);
   }
 
   void test_ws_run_title_failover_to_title() {
