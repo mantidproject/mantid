@@ -600,8 +600,10 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 EnableLogging=False,
             )
 
-            if vanadium_ws is not None:
+            if vanadium_ws:
                 vanadium_ws = self._resample_vanadium(ws_name, mask_name, xMin, xMax)
+            else:
+                vanadium_ws = None
 
             if vanadium_background_ws is not None:
                 vanadium_background_ws = self._resample_background(vanadium_background_ws, ws_name, mask_name, xMin, xMax, vanadium_ws)
@@ -696,7 +698,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             If sum_runs: single workspace name (str) or None
             If not sum_runs: list of workspace names or empty list
         """
-        from mantid.simpleapi import Load, Plus, LoadWAND, LoadInstrument, CropWorkspace, AppendSpectra
+        from mantid.simpleapi import Load, Plus, LoadWAND, LoadInstrument
 
         # Get properties based on data type
         filenames = self.getProperty(f"{data_type}Filename").value
@@ -751,13 +753,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             else:
                 self.temp_workspace_list.append(temp_ws)
 
-            # This is a temp fix for reading in MIDAS data generated with McStas,
-            # this is to be removed once we have real MIDAS data
-            if not sum_runs and instrument == "MIDAS":
-                CropWorkspace(InputWorkspace=temp_ws, OutputWorkspace="1spectrum", EndWorkspaceIndex=0)
-                AppendSpectra(InputWorkspace1="1spectrum", InputWorkspace2=temp_ws, OutputWorkspace=temp_ws)
-                LoadInstrument(temp_ws, InstrumentName="MIDAS", RewriteSpectraMap=True)
-                CropWorkspace(InputWorkspace=temp_ws, OutputWorkspace=temp_ws, StartWorkspaceIndex=1)
+            if instrument == "MIDAS":
+                # This is a temp fix for using simulated MIDAS data
+                LoadInstrument(temp_ws, Filename="/SNS/users/nxw/mccode_fixed.xml", RewriteSpectraMap=True)
                 self.temp_workspace_list.append("1spectrum")
 
             if sum_runs:
@@ -787,7 +785,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
     def _load_vanadium_data(self):
         """Load vanadium calibration data."""
-        return self._load_data("Vanadium")
+        return self._load_data("Vanadium", sum_runs=False)
 
     def _load_vanadium_background_data(self):
         """Load vanadium background data."""
@@ -1078,7 +1076,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         x_max,
     ):
         """Perform resample on Vanadium"""
-        ws_name = "vanadium"
+        ws_name = "vanadium_0"
 
         return self._to_spectrum_axis_resample(ws_name, "_ws_cal", mask_name, current_workspace, x_min, x_max)
 
