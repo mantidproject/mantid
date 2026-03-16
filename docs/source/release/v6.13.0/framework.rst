@@ -7,9 +7,6 @@ Framework Changes
    :height: 600px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 Algorithms
 ----------
 

@@ -2,9 +2,6 @@
 Inelastic Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Dialogs for selecting and opening workspaces no longer crash when setting spectra limits using a string with the format ``SpectraStart-SpectraEnd``, where Spectra Start is larger than Spectra End.

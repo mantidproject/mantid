@@ -11,9 +11,6 @@ Mantid 3.9.0 Release Notes
 
    The Slice Viewer now is able to display data with non orthogonal axes
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 3.9 of Mantid. This release contains the long awaited ability to visualise non orthogonal crystal systems correctly in the slice viewer, as well as partial project saving in the Mantidplot interface.
 
 These are just two of many improvements in this release, so please take a

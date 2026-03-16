@@ -4,9 +4,6 @@
 Event Filtering
 ===============
 
-.. contents::
-   :local:
-
 Given an :class:`EventWorkspace <<mantid.api.IEventWorkspace>` (:ref:`additional docs <EventWorkspace>`)
 one will generally want to either remove events (commonly called filtering) or divide them into separate output workspaces (splitting).
 While the full list of algorithms can be found in the event filtering algorithm category, a high level summary of them is included here:

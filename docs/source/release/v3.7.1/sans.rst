@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 New features
 ------------
 - The NXcanSAS format is now supported in Mantid using the :ref:`SaveNXcanSAS <algm-SaveNXcanSAS>` and :ref:`LoadNXcansSAS <algm-LoadNXcanSAS>` algorithms.

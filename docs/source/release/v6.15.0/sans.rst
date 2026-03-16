@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - (`#40443 <https://github.com/mantidproject/mantid/pull/40443>`_) ``transmission.wide_angle_correction`` is a new

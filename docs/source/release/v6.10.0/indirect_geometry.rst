@@ -2,9 +2,6 @@
 Indirect Geometry Changes
 =========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Algorithm :ref:`algm-ISISIndirectEnergyTransfer` now has sample logs for multiple run reductions. The ``run_number`` log stores the run numbers used in the reduction, separated by commas. The ``multi_run_reduction`` log informs about the reduction done on chopped runs or regular runs.

@@ -2,9 +2,6 @@
 Reflectometry Changes
 =====================
 
-.. contents:: Table of Contents
-   :local:
-
 ISIS Reflectometry Interface
 ----------------------------
 .. image::  ../../images/ISIS_reflectometry_release313.png

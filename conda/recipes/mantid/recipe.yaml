@@ -72,7 +72,6 @@ requirements:
     - pycifrw
     - pydantic ${{ pydantic }}
     - python
-    - python-dateutil ${{ python_dateutil }}
     - pyyaml ${{ pyyaml }}
     - scipy ${{ scipy }}
     - euphonic ${{ euphonic }}

@@ -1,11 +1,5 @@
 # VSCode
 
-```{contents}
----
-local:
----
-```
-
 ## Introduction
 
 This is a guide aimed at the developer who does not want a heavy complicated IDE

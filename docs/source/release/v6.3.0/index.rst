@@ -11,9 +11,6 @@ Mantid 6.3.0 Release Notes
    :width: 350px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 Summary
 -------
 

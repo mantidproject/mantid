@@ -4,9 +4,6 @@
 DetectorInfo
 ============
 
-.. contents::
-  :local:
-
 Introduction
 ------------
 :py:obj:`~mantid.geometry.DetectorInfo` provides faster and simpler access to instrument/beamline detector geometry and metadata as required by Mantid :ref:`Algorithms <Algorithm>` than was possible using :ref:`Instrument`. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` are designed as full replacements to :ref:`Instrument`.

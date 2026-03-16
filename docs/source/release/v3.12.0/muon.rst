@@ -2,9 +2,6 @@
 MuSR Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 .. figure:: ../../images/muon_release_3_12.png
    :class: screenshot
    :align: right

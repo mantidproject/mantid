@@ -4,9 +4,6 @@
 Fractional Rebinning (RebinnedOutput Workspaces)
 ================================================
 
-.. contents::
-  :local:
-
 In some instances of rebinning data, the information of the counts in the bins
 prior rebinning should be preserved in the output of rebinning in some way.
 This is because some algorithms depend on how the original data was treated.

@@ -2,9 +2,6 @@
 Mantid Workbench Changes
 ========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Clarified ``Report Usage Data`` checkbox on the Workbench About page to explain that usage reporting is required to use the Error Reporter.

@@ -2,12 +2,6 @@
 
 # PyCharm
 
-```{contents}
----
-local:
----
-```
-
 ## Selecting PyCharm versions
 
 There are two versions of PyCharm that are in use in the team, Community and Professional.

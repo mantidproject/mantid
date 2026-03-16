@@ -2,9 +2,6 @@
 Indirect Geometry Changes
 =========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - The Bayes Fortran libraries have been moved to a separate ``quasielasticbayes`` package.

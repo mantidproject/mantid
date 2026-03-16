@@ -2,9 +2,6 @@
 Diffraction Changes
 ===================
 
-.. contents:: Table of Contents
-   :local:
-
 Powder Diffraction
 ------------------
 

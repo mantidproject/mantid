@@ -2,9 +2,6 @@
 Reflectometry Changes
 =====================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - (`#40523 <https://github.com/mantidproject/mantid/pull/40523>`_) The :ref:`interface-isis-refl` will now apply

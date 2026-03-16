@@ -4,9 +4,6 @@
  ISIS Reflectometry
 ====================
 
-.. contents::
-  :local:
-
 
 
 

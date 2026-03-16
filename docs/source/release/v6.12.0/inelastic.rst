@@ -2,9 +2,6 @@
 Inelastic Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - The deprecated Calculate Paalman Pings tab on the :ref:`Inelastic Corrections interface <interface-inelastic-corrections>` has been removed after no user feedback from v6.10 and v6.11.

@@ -2,9 +2,6 @@
 Reflectometry Changes
 =====================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - The :ref:`algm-MagnetismReflectometryReduction` algorithm now has an option allowing the return of empty reflectivity curves.

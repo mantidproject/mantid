@@ -9,9 +9,6 @@ Mantid 6.15.0 Release Notes
    :width: 385px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 6.15.0 of Mantid.
 
 Key features of this release include:

@@ -2,9 +2,6 @@
 Inelastic Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 .. amalgamate:: Inelastic/New_features

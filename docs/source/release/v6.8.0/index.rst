@@ -9,9 +9,6 @@ Mantid 6.8.0 Release Notes
    :width: 285px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 6.8.0 of Mantid.
 
 This release includes a wide array of updates, bugfixes, and new features.

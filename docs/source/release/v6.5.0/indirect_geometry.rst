@@ -2,9 +2,6 @@
 Indirect Geometry Changes
 =========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - A new set of scripts has been produced to provide a method for processing OSIRIS data. :ref:`ISIS Powder Diffraction Scripts - OSIRIS <isis-powder-diffraction-osiris-ref>`.

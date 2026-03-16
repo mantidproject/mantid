@@ -414,6 +414,22 @@ class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.5325, places=3)
 
 
+class TotalScatteringStitchedTest(systemtesting.MantidSystemTest):
+    pdf_output = None
+
+    def runTest(self):
+        setup_mantid_paths()
+        # Load Focused ws
+        mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace="98533-ResultTOF")
+        self.pdf_output = run_total_scattering("98533", True, stitch_lims=[0.156, 42.1], stitch_points=[1, 2, 3, 4], overlap_width=0.05)
+
+    def validate(self):
+        # Whilst total scattering is in development, the validation will avoid using reference files as they will have
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.85 Angstrom will be checked.
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.85)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.8216, places=3)
+
+
 class TotalScatteringForceSofQMinusOneToZeroTest(systemtesting.MantidSystemTest):
     pdf_output = None
 
@@ -447,6 +463,24 @@ class TotalScatteringMergedPerDetTest(systemtesting.MantidSystemTest):
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.85 Angstrom will be checked.
         idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.85)
         self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.4836, places=3)
+
+
+class TotalScatteringStitchedPerDetTest(systemtesting.MantidSystemTest):
+    pdf_output = None
+
+    def runTest(self):
+        setup_mantid_paths()
+        # Load Focused ws
+        mantid.LoadNexus(Filename=total_scattering_input_file_per_det, OutputWorkspace="98533-ResultTOF")
+        self.pdf_output = run_total_scattering(
+            "98533", True, stitch_lims=[0.156, 42.1], stitch_points=[1, 2, 3, 4], overlap_width=0.05, per_detector_vanadium=True
+        )
+
+    def validate(self):
+        # Whilst total scattering is in development, the validation will avoid using reference files as they will have
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.85 Angstrom will be checked.
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.85)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.8688, places=3)
 
 
 class TotalScatteringPDFRebinTest(systemtesting.MantidSystemTest):

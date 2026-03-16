@@ -2,9 +2,6 @@
 MuSR Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 Muon Analysis 2 and Frequency Domain Analysis
 ---------------------------------------------
 

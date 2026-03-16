@@ -2,9 +2,6 @@
 SANS Changes
 ============
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - The ILL SANS workflow now adds more metadata to the reduced sample workspace. The sample logs now include information about empty container, empty beam, absorber, etc. plus the workspace names and files that were used to create them.

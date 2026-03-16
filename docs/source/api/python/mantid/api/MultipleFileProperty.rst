@@ -5,9 +5,6 @@
 This is a Python binding to the C++ class
 ``Mantid::API::MultipleFileProperty``.
 
-.. contents::
-   :local:
-
 Multiple file loading allows users to specify lists / ranges of files
 to load (and optionally sum together) into Mantid.
 

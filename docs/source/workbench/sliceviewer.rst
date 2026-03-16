@@ -4,9 +4,6 @@
 Sliceviewer
 ===========
 
-.. contents:: Table of Contents
-   :local:
-
 Overview
 --------
 

@@ -9,9 +9,6 @@ Mantid 6.2.0 Release Notes
    :width: 500px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 6.2.0 of Mantid.
 
 This release sees many new algorithms added or improved to extend the functionality of Mantid for users. In addition to this there are some significant new features

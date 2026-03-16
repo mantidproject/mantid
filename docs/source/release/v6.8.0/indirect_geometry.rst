@@ -2,9 +2,6 @@
 Indirect Geometry Changes
 =========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - When loading resolution data containing `NAN` values into :ref:`Data Analysis <interface-inelastic-qens-fitting>` they will be replaced with zeros and a warning displayed to the user.

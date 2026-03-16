@@ -198,16 +198,16 @@ if(ENABLE_DOCS)
   find_package(Sphinx REQUIRED)
   # run python to see if the theme is installed
   execute_process(
-    COMMAND ${Python_EXECUTABLE} -c "import sphinx_bootstrap_theme"
-    OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
-    ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
+    COMMAND ${Python_EXECUTABLE} -c "import mantid_sphinx_theme"
+    OUTPUT_VARIABLE MANTID_SPHINX_THEME_OUT
+    ERROR_VARIABLE MANTID_SPHINX_THEME_ERR
     OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE
   )
-  if(SPHINX_BOOTSTRAP_THEME_ERR)
-    message(ERROR " Did not find sphinx_bootstrap_theme")
-    message(STATUS "${Python_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
-    message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
-    message(FATAL_ERROR " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/")
+  if(MANTID_SPHINX_THEME_ERR)
+    message(ERROR " Did not find mantid_sphinx_theme")
+    message(STATUS "${Python_EXECUTABLE} -c \"import mantid_sphinx_theme\"")
+    message(STATUS "${MANTID_SPHINX_THEME_ERR}")
+    message(FATAL_ERROR " Install instructions at https://pypi.python.org/pypi/mantid-sphinx-theme/")
   endif()
 
   add_subdirectory(dev-docs)

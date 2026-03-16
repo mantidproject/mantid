@@ -4,9 +4,6 @@
 Workspace
 =========
 
-.. contents::
-  :local:
-
 What are Workspaces?
 --------------------
 

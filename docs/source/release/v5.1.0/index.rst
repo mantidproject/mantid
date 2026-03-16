@@ -9,9 +9,6 @@ Mantid 5.1.0 Release Notes
    :width: 600px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 5.1.0 of Mantid.
 
 :doc:`MantidWorkbench <mantidworkbench>` **is replacing MantidPlot**. While :doc:`MantidPlot <mantidplot>` is still fully functional for this release,
