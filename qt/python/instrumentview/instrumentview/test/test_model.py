@@ -710,6 +710,12 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.save_mask_to_xml("file")
         mock_save_mask.assert_called_with(model._mask_ws, OutputFile="file.xml")
 
+    @mock.patch("instrumentview.FullInstrumentViewModel.SaveCalFile")
+    def test_save_cal_mask(self, mock_save_cal_file):
+        model, _ = self._setup_model([1, 2, 3])
+        model.save_mask_to_cal("file")
+        mock_save_cal_file.assert_called_with(MaskWorkspace=model._mask_ws, Filename="file.cal")
+
     def test_clear_masks(self):
         model, _ = self._setup_model([1, 2, 3])
         model._cached_masks_map = {"1": 1, "2": 2}

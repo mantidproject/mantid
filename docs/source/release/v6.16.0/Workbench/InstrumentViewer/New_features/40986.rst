@@ -1,0 +1,1 @@
+- New Instrument View now allows Groupings and Masks to be saved as `.cal` files.

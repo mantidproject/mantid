@@ -25,6 +25,7 @@ from mantid.simpleapi import (
     ExtractMask,
     ExtractMaskToTable,
     SaveMask,
+    SaveCalFile,
     MaskDetectors,
     CloneWorkspace,
     CreatePeaksWorkspace,
@@ -582,6 +583,14 @@ class FullInstrumentViewModel:
             filename += ".xml"
         SaveMask(ws_to_save, OutputFile=filename)
 
+    def save_mask_to_cal(self, filename):
+        ws_to_save = self.mask_ws
+        if not filename:
+            return
+        if Path(filename).suffix != ".cal":
+            filename += ".cal"
+        SaveCalFile(MaskWorkspace=ws_to_save, Filename=filename)
+
     def overwrite_mask_to_current_workspace(self) -> None:
         MaskDetectors(self._workspace.name(), MaskedWorkspace=self.mask_ws)
 
@@ -616,6 +625,17 @@ class FullInstrumentViewModel:
         grouping_name = "__temp_grouping_workspace_to_save"
         grouping_ws = self._create_current_grouping_workspace(grouping_name)
         SaveDetectorsGrouping(grouping_ws, filename)
+        DeleteWorkspace(grouping_name)
+        return
+
+    def save_grouping_to_cal(self, filename):
+        if not filename:
+            return
+        if Path(filename).suffix != ".cal":
+            filename += ".cal"
+        grouping_name = "__temp_grouping_workspace_to_save"
+        grouping_ws = self._create_current_grouping_workspace(grouping_name)
+        SaveCalFile(GroupingWorkspace=grouping_ws, Filename=filename)
         DeleteWorkspace(grouping_name)
         return
 
