@@ -15,7 +15,8 @@ from mantid.kernel import (
     StringArrayProperty,
     CompositeValidator,
 )
-from mantid.api import AlgorithmFactory, FileProperty, FileAction, PythonAlgorithm, AnalysisDataService, WorkspaceGroup
+from mantid.api import AlgorithmFactory, AlgorithmManager, FileProperty, FileAction, PythonAlgorithm, AnalysisDataService, WorkspaceGroup
+
 
 from pathlib import Path
 from typing import Optional, Tuple, Union, List
@@ -54,6 +55,7 @@ class ReflectometryDataset:
         self._q_conversion_history = None
         self._q_conversion_theta: Optional[float] = None
         self._spin_state: str = ""
+        self._reduction_script: Optional[str] = None
 
         self._populate_histories()
         self._populate_q_conversion_info()
@@ -121,6 +123,12 @@ class ReflectometryDataset:
     @property
     def q_conversion_theta(self) -> Optional[float]:
         return self._q_conversion_theta
+
+    @property
+    def reduction_script(self) -> Optional[str]:
+        if self._reduction_script is None:
+            self._reduction_script = self._get_reduction_script()
+        return self._reduction_script
 
     def _populate_histories(self):
         ws_history = self._ws.getHistory()
@@ -199,6 +207,25 @@ class ReflectometryDataset:
             )
         except ValueError:
             self.log().debug("Could not parse reduction timestamp into required format - this information will be excluded from the file.")
+
+    def _get_reduction_script(self) -> Optional[str]:
+        """
+        Get the workspace reduction history as a script.
+        """
+        if self.is_ws_grp_member:
+            # We don't get an accurate history from ReflectometryISISLoadAndProcess for workspace groups, so only
+            # include this if the workspace is not part of a group
+            return None
+
+        if self.ws.getHistory().empty():
+            return None
+        alg = AlgorithmManager.createUnmanaged("GeneratePythonScript")
+        alg.initialize()
+        alg.setProperty("InputWorkspace", self.ws)
+        alg.setProperty("ExcludeHeader", True)
+        alg.execute()
+        script = alg.getPropertyValue("ScriptText")
+        return "\n".join(script.split("\n")[2:])  # trim the import statement
 
 
 class SaveISISReflectometryORSO(PythonAlgorithm):
@@ -475,7 +502,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         dataset.set_facility(self._FACILITY)
         dataset.set_proposal_id(rb_number)
         dataset.set_doi(doi)
-        dataset.set_reduction_call(self._get_reduction_script(refl_dataset))
+        dataset.set_reduction_call(refl_dataset.reduction_script)
         if refl_dataset.is_polarized:
             dataset.set_polarization(refl_dataset.spin_state)
 
@@ -657,23 +684,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         """
         calibration_file = reduction_workflow_histories[0].getPropertyValue("CalibrationFile")
         return Path(calibration_file).name if calibration_file else None
-
-    def _get_reduction_script(self, refl_dataset: ReflectometryDataset) -> Optional[str]:
-        """
-        Get the workspace reduction history as a script.
-        """
-        if refl_dataset.is_ws_grp_member:
-            # We don't get an accurate history from ReflectometryISISLoadAndProcess for workspace groups, so only
-            # include this if the workspace is not part of a group
-            return None
-
-        if refl_dataset.ws.getHistory().empty():
-            return None
-
-        alg = self.createChildAlgorithm("GeneratePythonScript", InputWorkspace=refl_dataset.ws, ExcludeHeader=True)
-        alg.execute()
-        script = alg.getPropertyValue("ScriptText")
-        return "\n".join(script.split("\n")[2:])  # trim the import statement
 
 
 # Register algorithm with Mantid
