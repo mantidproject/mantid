@@ -6,7 +6,7 @@ Mantid is a C++20 / Python 3.11 framework for processing materials-science data 
 
 ```bash
 pixi shell                        # activate dev environment (or: eval $(pixi shell-hook))
-cmake --preset=linux .            # configure (use win64 or osx-arm64 on other platforms)
+cmake --preset=linux .            # configure (use win-vs, win-ninja, or osx on other platforms)
 cd build/
 ```
 
