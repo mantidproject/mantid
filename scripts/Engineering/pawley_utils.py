@@ -245,7 +245,15 @@ class MtdFuncMixin:
 
 
 class PawleyPatternBase(MtdFuncMixin, ABC):
-    def __init__(self, ws: Workspace2D, phases: Phase, profile: PeakProfile, bg_func: Optional[FunctionWrapper] = None):
+    def __init__(
+        self,
+        ws: Workspace2D,
+        phases: Phase,
+        profile: PeakProfile,
+        bg_func: Optional[FunctionWrapper] = None,
+        param_bounds_frac: float = None,
+        param_bounds_abs_min: float = 1e-6,
+    ):
         self.ws = ws
         self.phases = phases
         self.alatt_params = [phase.get_params() for phase in self.phases]
@@ -265,6 +273,8 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         self.bg_isfree = np.ones_like(self.bg_params, dtype=bool)
         self.make_profile_function(bg_func)
         self.initial_params = None
+        self.param_bounds_frac = param_bounds_frac
+        self.param_bounds_abs_min = param_bounds_abs_min
 
     def make_profile_function(self, bg_func: Optional[FunctionWrapper] = None):
         self.comp_func = CompositeFunctionWrapper()
@@ -341,6 +351,9 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
         kwargs = {**default_kwargs, **kwargs}
         self.initial_params = self.get_free_params()
+        if self.param_bounds_frac is not None and "bounds" not in kwargs:
+            margin = np.maximum(np.abs(self.initial_params) * self.param_bounds_frac, self.param_bounds_abs_min)
+            kwargs["bounds"] = (self.initial_params - margin, self.initial_params + margin)
         res = least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
         # update parameters
         self.set_free_params(res.x)
@@ -481,15 +494,31 @@ class Poldi2DEvalMixin:
     def eval_2d(self, params: np.ndarray[float]) -> Workspace2D:
         self.ws_1d.setY(0, self.eval_profile(params))
         ws_sim = simulate_2d_data(self.ws, self.ws_1d, output_workspace=f"{self.ws.name()}_sim", lambda_max=self.lambda_max)
+        if self.apply_lorentz_correction:
+            si = ws_sim.spectrumInfo()
+            for ispec in range(ws_sim.getNumberHistograms()):
+                ws_sim.setY(ispec, ws_sim.readY(ispec) * np.sin(si.twoTheta(ispec) / 2))
         if not self.global_scale:
-            self.scales = np.zeros(self.ws.getNumberHistograms())
-            self.bgs = np.zeros_like(self.scales)
-            for ispec in range(self.ws.getNumberHistograms()):
-                yobs = self.ws.readY(ispec)
-                ycalc = ws_sim.readY(ispec)
-                ppval = np.polyfit(ycalc, yobs, 1)
-                self.scales[ispec], self.bgs[ispec] = ppval
-                ws_sim.setY(ispec, np.polyval(ppval, ycalc))
+            if self.scales is None:
+                # First call: fit both scale and offset per spectrum.
+                # The scale absorbs per-detector efficiency/geometry and is then held
+                # fixed during optimisation so the intensity Jacobian is non-zero.
+                self.scales = np.zeros(self.ws.getNumberHistograms())
+                self.bgs = np.zeros_like(self.scales)
+                for ispec in range(self.ws.getNumberHistograms()):
+                    yobs = self.ws.readY(ispec)
+                    ycalc = ws_sim.readY(ispec)
+                    ppval = np.polyfit(ycalc, yobs, 1)
+                    self.scales[ispec], self.bgs[ispec] = ppval
+                    ws_sim.setY(ispec, np.polyval(ppval, ycalc))
+            else:
+                # Subsequent calls: both scale and offset are fixed.
+                # Recomputing bg would mean-subtract the intensity Jacobian
+                # (dr/dI_k -> -scale*(d_ycalc/dI_k - mean(d_ycalc/dI_k))), which
+                # nearly cancels for POLDI correlation patterns spread across channels.
+                # Keeping bg fixed gives the clean Jacobian dr/dI_k = -scale*d_ycalc/dI_k.
+                for ispec in range(self.ws.getNumberHistograms()):
+                    ws_sim.setY(ispec, self.scales[ispec] * ws_sim.readY(ispec) + self.bgs[ispec])
         return ws_sim
 
     def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
@@ -502,11 +531,12 @@ class Poldi2DEvalMixin:
 
 
 class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
-    def __init__(self, *args, global_scale: bool = True, lambda_max: float = 5.0, **kwargs):
+    def __init__(self, *args, global_scale: bool = True, lambda_max: float = 5.0, apply_lorentz_correction: bool = False, **kwargs):
         super().__init__(*args, **kwargs)
         self.lambda_max = lambda_max
         self.scales = None
         self.bgs = None
+        self.apply_lorentz_correction = apply_lorentz_correction
         self.set_global_scale(global_scale)
         # create workspace in d-spacing to contain diffraction pattern
         self.ws_1d = self.make_1d_ws(self.ws)
@@ -536,7 +566,7 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
                 self.bg_params[:] = 0
                 self.bg_isfree[:] = False
 
-    def set_params_from_pawley1d(self, pawley1d: PawleyPattern1D):
+    def set_params_from_pawley1d(self, pawley1d: PawleyPattern1D, param_bounds_frac: float = None, param_bounds_abs_min: float = None):
         if len(pawley1d.phases) != len(self.phases):
             logger.error("PawleyPattern1D object has a different number of phases.")
             return
@@ -549,6 +579,10 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
                 intens_changed = True
         if intens_changed:
             self._estimate_intensities()
+        if param_bounds_frac is not None:
+            self.param_bounds_frac = param_bounds_frac
+        if param_bounds_abs_min is not None:
+            self.param_bounds_abs_min = param_bounds_abs_min
 
     def estimate_initial_params(self):
         self._estimate_intensities()
@@ -565,17 +599,38 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
         for iphase in range(len(self.phases)):
             self.intens[iphase] *= ppval[0]
 
-    def create_no_constriants_fit(self):
-        return PawleyPattern2DNoConstraints(self.ws, self.comp_func, self.global_scale, self.lambda_max)
+    def create_no_constriants_fit(self, param_bounds_frac: float = None, param_bounds_abs_min: float = 1e-6):
+        return PawleyPattern2DNoConstraints(
+            self.ws,
+            self.comp_func,
+            self.global_scale,
+            self.lambda_max,
+            param_bounds_frac=param_bounds_frac,
+            param_bounds_abs_min=param_bounds_abs_min,
+            apply_lorentz_correction=self.apply_lorentz_correction,
+        )
 
     def fit(self, *args, **kwargs) -> OptimizeResult:
+        # Reset scales so eval_2d recomputes them at the current parameter values,
+        # then lock them for the duration of the optimisation.
+        self.scales = None
+        self.eval_2d(self.get_free_params())
         res = super().fit(*args, **kwargs)
         self.eval_2d(res.x)  # ensure 2D simulated workspace up to date
         return res
 
 
 class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
-    def __init__(self, ws: Workspace2D, func: FunctionWrapper, global_scale: bool = True, lambda_max: float = 5.0):
+    def __init__(
+        self,
+        ws: Workspace2D,
+        func: FunctionWrapper,
+        global_scale: bool = True,
+        lambda_max: float = 5.0,
+        param_bounds_frac: float = None,
+        param_bounds_abs_min: float = 1e-6,
+        apply_lorentz_correction: bool = False,
+    ):
         self.ws = ws
         self.ws_1d = PawleyPattern2D.make_1d_ws(self.ws)
         self.comp_func = func
@@ -584,8 +639,11 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
         self.lambda_max = lambda_max
         self.scales = None
         self.bgs = None
+        self.apply_lorentz_correction = apply_lorentz_correction
         self.set_global_scale(global_scale)
         self.initial_params = None
+        self.param_bounds_frac = param_bounds_frac
+        self.param_bounds_abs_min = param_bounds_abs_min
 
     def get_peak_intensity_param_name(self):
         pk_func = FunctionFactory.Instance().createPeakFunction(self.comp_func[0].name)
@@ -642,6 +700,12 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
         default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
         kwargs = {**default_kwargs, **kwargs}
         self.initial_params = self.get_free_params()
+        if self.param_bounds_frac is not None and "bounds" not in kwargs:
+            margin = np.maximum(np.abs(self.initial_params) * self.param_bounds_frac, self.param_bounds_abs_min)
+            kwargs["bounds"] = (self.initial_params - margin, self.initial_params + margin)
+        # Pre-compute per-spectrum scales at the initial params then lock them.
+        self.scales = None
+        self.eval_2d(self.initial_params)
         res = least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
         # update parameters and ensure 2D simulated workspace up to date
         self.eval_2d(res.x)

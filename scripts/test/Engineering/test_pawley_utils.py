@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from unittest.mock import patch, create_autospec
+from unittest.mock import patch, create_autospec, MagicMock
+import numpy as np
 from numpy import allclose, log, zeros_like, ones, trapezoid, array, linspace, sqrt
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from mantid.api import AnalysisDataService, FileFinder
@@ -351,6 +352,106 @@ class PawleyPattern2DTest(unittest.TestCase):
         mock_pawley1d.intens = [ones(1)]
         return mock_pawley1d
 
+    # --- param_bounds tests ---
+
+    def test_param_bounds_default_values(self):
+        pawley = PawleyPattern2D(self.ws, [self.phase], profile=GaussianProfile())
+        self.assertIsNone(pawley.param_bounds_frac)
+        self.assertAlmostEqual(pawley.param_bounds_abs_min, 1e-6)
+
+    def test_param_bounds_set_on_construction(self):
+        pawley = PawleyPattern2D(self.ws, [self.phase], profile=GaussianProfile(), param_bounds_frac=0.1, param_bounds_abs_min=1e-4)
+        self.assertAlmostEqual(pawley.param_bounds_frac, 0.1)
+        self.assertAlmostEqual(pawley.param_bounds_abs_min, 1e-4)
+
+    @patch("Engineering.pawley_utils.least_squares")
+    def test_fit_passes_no_bounds_when_frac_none(self, mock_ls):
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
+        mock_ls.return_value = MagicMock(x=pawley.get_free_params())
+        pawley.fit()
+        self.assertNotIn("bounds", mock_ls.call_args[1])
+
+    @patch("Engineering.pawley_utils.least_squares")
+    def test_fit_passes_bounds_computed_from_initial_params(self, mock_ls):
+        frac, abs_min = 0.1, 1e-4
+        pawley = PawleyPattern2D(
+            self.ws, [self.phase], global_scale=True, profile=GaussianProfile(), param_bounds_frac=frac, param_bounds_abs_min=abs_min
+        )
+        initial_params = pawley.get_free_params()
+        mock_ls.return_value = MagicMock(x=initial_params)
+        pawley.fit()
+        lb, ub = mock_ls.call_args[1]["bounds"]
+        expected_margin = np.maximum(np.abs(initial_params) * frac, abs_min)
+        assert_array_almost_equal(lb, initial_params - expected_margin)
+        assert_array_almost_equal(ub, initial_params + expected_margin)
+
+    @patch("Engineering.pawley_utils.least_squares")
+    def test_fit_uses_abs_min_floor_for_zero_valued_params(self, mock_ls):
+        abs_min = 1e-4
+        # FlatBackground(A0=0) with global_scale=True gives a zero-valued free param
+        pawley = PawleyPattern2D(
+            self.ws,
+            [self.phase],
+            global_scale=True,
+            profile=GaussianProfile(),
+            bg_func=FlatBackground(A0=0),
+            param_bounds_frac=0.1,
+            param_bounds_abs_min=abs_min,
+        )
+        initial_params = pawley.get_free_params()
+        mock_ls.return_value = MagicMock(x=initial_params)
+        pawley.fit()
+        lb, ub = mock_ls.call_args[1]["bounds"]
+        zero_mask = initial_params == 0
+        self.assertTrue(zero_mask.any())
+        assert_array_almost_equal(ub[zero_mask], np.full(zero_mask.sum(), abs_min))
+        assert_array_almost_equal(lb[zero_mask], np.full(zero_mask.sum(), -abs_min))
+
+    @patch("Engineering.pawley_utils.least_squares")
+    def test_fit_does_not_override_explicit_bounds(self, mock_ls):
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile(), param_bounds_frac=0.1)
+        n = len(pawley.get_free_params())
+        mock_ls.return_value = MagicMock(x=pawley.get_free_params())
+        explicit_bounds = (-np.inf * np.ones(n), np.inf * np.ones(n))
+        pawley.fit(bounds=explicit_bounds)
+        self.assertIs(mock_ls.call_args[1]["bounds"], explicit_bounds)
+
+    @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
+    @patch("Engineering.pawley_utils.logger")
+    def test_set_params_from_pawley1d_sets_bounds(self, mock_log, mock_estimate_intens):
+        mock_pawley1d = self._make_mock_pawley1d()
+        mock_pawley1d.phases[0].nhkls.return_value = self.phase.nhkls()
+        mock_pawley1d.intens[0] = 2 * ones(self.phase.nhkls())
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
+        pawley.set_params_from_pawley1d(mock_pawley1d, param_bounds_frac=0.2, param_bounds_abs_min=1e-5)
+        self.assertAlmostEqual(pawley.param_bounds_frac, 0.2)
+        self.assertAlmostEqual(pawley.param_bounds_abs_min, 1e-5)
+
+    @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
+    @patch("Engineering.pawley_utils.logger")
+    def test_set_params_from_pawley1d_preserves_existing_bounds_when_args_omitted(self, mock_log, mock_estimate_intens):
+        mock_pawley1d = self._make_mock_pawley1d()
+        mock_pawley1d.phases[0].nhkls.return_value = self.phase.nhkls()
+        mock_pawley1d.intens[0] = 2 * ones(self.phase.nhkls())
+        pawley = PawleyPattern2D(
+            self.ws, [self.phase], global_scale=False, profile=GaussianProfile(), param_bounds_frac=0.3, param_bounds_abs_min=1e-3
+        )
+        pawley.set_params_from_pawley1d(mock_pawley1d)  # no bounds args
+        self.assertAlmostEqual(pawley.param_bounds_frac, 0.3)
+        self.assertAlmostEqual(pawley.param_bounds_abs_min, 1e-3)
+
+    def test_create_no_constriants_fit_forwards_bounds(self):
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
+        no_constr = pawley.create_no_constriants_fit(param_bounds_frac=0.15, param_bounds_abs_min=1e-5)
+        self.assertAlmostEqual(no_constr.param_bounds_frac, 0.15)
+        self.assertAlmostEqual(no_constr.param_bounds_abs_min, 1e-5)
+
+    def test_create_no_constriants_fit_default_no_bounds(self):
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
+        no_constr = pawley.create_no_constriants_fit()
+        self.assertIsNone(no_constr.param_bounds_frac)
+        self.assertAlmostEqual(no_constr.param_bounds_abs_min, 1e-6)
+
 
 class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
     @classmethod
@@ -395,6 +496,56 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
         self.assertEqual(result.nfev, 2)
         # assert parameters changed
         self.assertFalse(allclose(pawley.initial_params, pawley.get_free_params()))
+
+    # --- param_bounds tests ---
+
+    def test_param_bounds_default_values(self):
+        pawley = PawleyPattern2D(**self.init_kwargs).create_no_constriants_fit()
+        self.assertIsNone(pawley.param_bounds_frac)
+        self.assertAlmostEqual(pawley.param_bounds_abs_min, 1e-6)
+
+    @patch("Engineering.pawley_utils.least_squares")
+    def test_fit_passes_no_bounds_when_frac_none(self, mock_ls):
+        pawley = PawleyPattern2D(**self.init_kwargs).create_no_constriants_fit()
+        mock_ls.return_value = MagicMock(x=pawley.get_free_params())
+        pawley.fit()
+        self.assertNotIn("bounds", mock_ls.call_args[1])
+
+    @patch("Engineering.pawley_utils.least_squares")
+    def test_fit_passes_bounds_computed_from_initial_params(self, mock_ls):
+        frac, abs_min = 0.1, 1e-4
+        pawley = PawleyPattern2D(**self.init_kwargs).create_no_constriants_fit(param_bounds_frac=frac, param_bounds_abs_min=abs_min)
+        initial_params = pawley.get_free_params()
+        mock_ls.return_value = MagicMock(x=initial_params)
+        pawley.fit()
+        lb, ub = mock_ls.call_args[1]["bounds"]
+        expected_margin = np.maximum(np.abs(initial_params) * frac, abs_min)
+        assert_array_almost_equal(lb, initial_params - expected_margin)
+        assert_array_almost_equal(ub, initial_params + expected_margin)
+
+    @patch("Engineering.pawley_utils.least_squares")
+    def test_fit_uses_abs_min_floor_for_zero_valued_params(self, mock_ls):
+        abs_min = 1e-4
+        # FlatBackground(A0=0) with global_scale=True gives a zero-valued free param
+        init_kwargs_with_bg = {**self.init_kwargs, "global_scale": True, "bg_func": FlatBackground(A0=0)}
+        pawley = PawleyPattern2D(**init_kwargs_with_bg).create_no_constriants_fit(param_bounds_frac=0.1, param_bounds_abs_min=abs_min)
+        initial_params = pawley.get_free_params()
+        mock_ls.return_value = MagicMock(x=initial_params)
+        pawley.fit()
+        lb, ub = mock_ls.call_args[1]["bounds"]
+        zero_mask = initial_params == 0
+        self.assertTrue(zero_mask.any())
+        assert_array_almost_equal(ub[zero_mask], np.full(zero_mask.sum(), abs_min))
+        assert_array_almost_equal(lb[zero_mask], np.full(zero_mask.sum(), -abs_min))
+
+    @patch("Engineering.pawley_utils.least_squares")
+    def test_fit_does_not_override_explicit_bounds(self, mock_ls):
+        pawley = PawleyPattern2D(**self.init_kwargs).create_no_constriants_fit(param_bounds_frac=0.1)
+        n = len(pawley.get_free_params())
+        mock_ls.return_value = MagicMock(x=pawley.get_free_params())
+        explicit_bounds = (-np.inf * np.ones(n), np.inf * np.ones(n))
+        pawley.fit(bounds=explicit_bounds)
+        self.assertIs(mock_ls.call_args[1]["bounds"], explicit_bounds)
 
 
 if __name__ == "__main__":
