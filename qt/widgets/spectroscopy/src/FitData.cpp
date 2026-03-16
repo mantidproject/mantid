@@ -173,6 +173,18 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 FitData::FitData(const MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra)
     : m_workspace(workspace), m_spectra(FunctionModelSpectra("")) {
   setSpectra(spectra);
+  if (const auto &name = m_workspace->getName(); name != "") {
+    m_name = name;
+  }
+  auto const range = !spectra.empty() ? getBinRange(workspace) : std::make_pair(0.0, 0.0);
+  for (auto const &spectrum : spectra) {
+    m_ranges[spectrum] = range;
+  }
+}
+
+FitData::FitData(const MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra, const std::string &wsName)
+    : m_workspace(workspace), m_spectra(FunctionModelSpectra("")), m_name(std::move(wsName)) {
+  setSpectra(spectra);
   auto const range = !spectra.empty() ? getBinRange(workspace) : std::make_pair(0.0, 0.0);
   for (auto const &spectrum : spectra) {
     m_ranges[spectrum] = range;

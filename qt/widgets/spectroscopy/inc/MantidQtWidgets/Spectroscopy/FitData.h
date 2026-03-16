@@ -32,6 +32,8 @@ using namespace MantidWidgets;
 class MANTID_SPECTROSCOPY_DLL FitData {
 public:
   FitData(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra);
+  FitData(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra,
+          const std::string &wsName);
 
   std::string displayName(const std::string &formatString, const std::string &rangeDelimiter) const;
   std::string displayName(const std::string &formatString, WorkspaceIndex spectrum) const;
@@ -73,6 +75,7 @@ private:
   FunctionModelSpectra m_spectra;
   std::map<WorkspaceIndex, std::string> m_excludeRegions;
   std::map<WorkspaceIndex, std::pair<double, double>> m_ranges;
+  std::string m_name;
 };
 
 } // namespace Inelastic
