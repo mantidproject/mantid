@@ -156,7 +156,7 @@ public:
 
     // Check the detectors mapped to the single spectra
     const auto &spec = output2D->getSpectrum(0);
-    TS_ASSERT_EQUALS(spec.getSpectrumNo(), 2);
+    TS_ASSERT_EQUALS(spec.getSpectrumNo(), 3);
     TS_ASSERT_EQUALS(spec.getDetectorIDs().size(), 2);
     TS_ASSERT(spec.hasDetectorID(3));
     TS_ASSERT(spec.hasDetectorID(4));
@@ -233,6 +233,41 @@ public:
                      output2D->run().getLogData("NumAllSpectra")->value())
     TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1), output2D->run().getLogData("NumMaskSpectra")->value())
     TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0), output2D->run().getLogData("NumZeroSpectra")->value())
+  }
+
+  void testSumErrorIsNotWeightedSumError() {
+    if (!alg.isInitialized()) {
+      alg.initialize();
+      alg.setRethrows(true);
+    }
+
+    // Run once simply summing the workspaces
+    const std::string outputSpace1 = "SumSpectraOut1";
+    alg.setProperty("InputWorkspace", inputSpace);
+    alg.setPropertyValue("OutputWorkspace", outputSpace1);
+    alg.execute();
+    alg.isExecuted();
+
+    // Run again woth weighted sum
+    const std::string outputSpace2 = "SumSpectraOut2";
+    alg.setProperty("InputWorkspace", inputSpace);
+    alg.setPropertyValue("OutputWorkspace", outputSpace2);
+    alg.setProperty("WeightedSum", true);
+    alg.setProperty("MultiplyBySpectra", false);
+    alg.execute();
+    alg.isExecuted();
+
+    auto const wsSum =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace1));
+    auto const wsWeightedSum =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace2));
+
+    const auto &eSum = wsSum->e(0);
+    const auto &eWeightedSum = wsWeightedSum->e(0);
+    for (size_t j = 0; j < eSum.size(); ++j) {
+      TS_ASSERT_DIFFERS(eSum[j], eWeightedSum[j]);
+      TS_ASSERT_LESS_THAN(eWeightedSum[j], eSum[j]);
+    }
   }
 
   void testExecEvent_inplace() { dotestExecEvent("testEvent", "testEvent", "5,10-15"); }
@@ -362,6 +397,7 @@ public:
     alg2.setPropertyValue("OutputWorkspace", outputSpace2);
     alg2.setProperty("IncludeMonitors", false);
     alg2.setProperty("WeightedSum", true);
+    // NOTE "MultiplyBySpectra" set to True by default
 
     TS_ASSERT_THROWS_NOTHING(alg2.execute());
     TS_ASSERT(alg2.isExecuted());
@@ -398,6 +434,8 @@ public:
     TS_ASSERT_DELTA(y[7], double(nSignals) * y0[7], 1.e-6);
     TS_ASSERT_DELTA(y[38], double(nSignals - 1) * y0[38], 1.e-6);
     TS_ASSERT_DELTA(y[72], double(nSignals) * y0[72], 1.e-6);
+    // NOTE: since all errors are the same and we are multiplying by num spectra, then
+    // error = Nspec * sqrt( 1. / sum( 1. / e0^2)) = Nspec * e0 / sqrt(Nspec) = sqrt(Nspec) * e0
     TS_ASSERT_DELTA(e[28], std::sqrt(double(nSignals)) * e0[28], 0.00001);
     TS_ASSERT_DELTA(e[38], std::sqrt(double(nSignals - 1)) * e0[38], 0.00001);
     TS_ASSERT_DELTA(e[47], std::sqrt(double(nSignals)) * e0[47], 0.00001);
@@ -467,10 +505,10 @@ public:
     TS_ASSERT_DELTA(y[7], y0[7], 1.e-6);
     TS_ASSERT_DELTA(y[38], y0[38], 1.e-6);
     TS_ASSERT_DELTA(y[72], y0[72], 1.e-6);
-    TS_ASSERT_DELTA(e[28], std::sqrt(double(nSignals)) * e0[28], 0.00001);
-    TS_ASSERT_DELTA(e[38], std::sqrt(double(nSignals - 1)) * e0[38], 0.00001);
-    TS_ASSERT_DELTA(e[47], std::sqrt(double(nSignals)) * e0[47], 0.00001);
-    TS_ASSERT_DELTA(e[99], std::sqrt(double(nSignals)) * e0[99], 0.00001);
+    TS_ASSERT_DELTA(e[28], e0[28] / std::sqrt(double(nSignals)), 0.00001);
+    TS_ASSERT_DELTA(e[38], e0[38] / std::sqrt(double(nSignals - 1)), 0.00001);
+    TS_ASSERT_DELTA(e[47], e0[47] / std::sqrt(double(nSignals)), 0.00001);
+    TS_ASSERT_DELTA(e[99], e0[99] / std::sqrt(double(nSignals)), 0.00001);
 
     // Check the detectors mapped to the single spectra
     const auto &spec = output2D->getSpectrum(0);
@@ -514,10 +552,9 @@ public:
       }
       sum += 1.;
       weightSum += 1 / testVal[i];
-      testSig += testVal[i];
     }
     testRez = nHist * sum / weightSum;
-    testSig = std::sqrt(testSig);
+    testSig = nHist * sqrt(1. / weightSum);
     // Set the properties
     alg2.setProperty("InputWorkspace", tws);
     alg2.setPropertyValue("OutputWorkspace", outName);

@@ -12,7 +12,23 @@
 #include <set>
 
 namespace Mantid {
+
+namespace API { // forward declare
+class ISpectrum;
+class SpectrumInfo;
+} // namespace API
+
+namespace DataObjects { // forward declare
+class RebinnedOutput;
+using RebinnedOutput_sptr = std::shared_ptr<RebinnedOutput>;
+using RebinnedOutput_const_sptr = std::shared_ptr<const RebinnedOutput>;
+} // namespace DataObjects
+
 namespace Algorithms {
+
+using DataObjects::RebinnedOutput_const_sptr;
+using DataObjects::RebinnedOutput_sptr;
+
 /** Takes a workspace as input and sums all of the spectra within it maintaining
    the existing bin structure and units.
     The result is stored as a new workspace containing a single spectra.
@@ -58,28 +74,26 @@ public:
 
 private:
   /// Handle logic for RebinnedOutput workspaces
-  void doFractionalSum(const API::MatrixWorkspace_sptr &outputWorkspace, API::Progress &progress, size_t &numSpectra,
-                       size_t &numMasked, size_t &numZeros);
-  /// Handle logic for Workspace2D workspaces
-  void doSimpleSum(const API::MatrixWorkspace_sptr &outputWorkspace, API::Progress &progress, size_t &numSpectra,
-                   size_t &numMasked, size_t &numZeros);
+  void doFractionalSum(RebinnedOutput_const_sptr const &, RebinnedOutput_sptr const &, API::Progress &, size_t &);
+  void doFractionalWeightedSum(RebinnedOutput_const_sptr const &, RebinnedOutput_sptr const &, API::Progress &,
+                               size_t &);
+  /// Handle logic for summing standard workspaces
+  void doSimpleSum(API::MatrixWorkspace_const_sptr const &, API::ISpectrum &, API::Progress &, size_t &);
+  void doSimpleWeightedSum(API::MatrixWorkspace_const_sptr const &, API::ISpectrum &, API::Progress &, size_t &);
 
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void execEvent(const API::MatrixWorkspace_sptr &outputWorkspace, API::Progress &progress, size_t &numSpectra,
-                 size_t &numMasked, size_t &numZeros);
+  void execEvent(const API::MatrixWorkspace_sptr &outputWorkspace, API::Progress &progress, size_t &numZeros);
   specnum_t getOutputSpecNo(const API::MatrixWorkspace_const_sptr &localworkspace);
 
   API::MatrixWorkspace_sptr replaceSpecialValues();
-  void determineIndices(const size_t numberOfSpectra);
+  size_t determineIndices(API::SpectrumInfo const &, const size_t numberOfSpectra);
 
   /// The output spectrum number
   specnum_t m_outSpecNum{0};
   /// Set true to keep monitors
   bool m_keepMonitors{false};
-  /// Set true to remove special values before processing
-  bool m_replaceSpecialValues{false};
   /// numberOfSpectra in the input
   size_t m_numberOfSpectra{0};
   /// Blocksize of the input workspace
