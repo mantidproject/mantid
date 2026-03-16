@@ -78,6 +78,8 @@ private slots:
   void onLinePlotExportToAdsClicked() const;
   void onEditROIClicked() const;
   void onAddRectangularROIClicked(QAction *regionType) const;
-  void setYAxisSymlog(bool checked) override;
+  void onYAxisSymlogToggled(bool checked) const;
+  void onLineEditUpdated() const;
+  void onApplyButtonClicked() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

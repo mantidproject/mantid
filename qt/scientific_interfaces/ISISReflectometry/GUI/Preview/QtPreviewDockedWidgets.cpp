@@ -82,7 +82,9 @@ void QtPreviewDockedWidgets::connectSignals() const {
   connect(m_ui.rs_edit_button, SIGNAL(clicked()), this, SLOT(onEditROIClicked()));
   // Line plot toolbar
   connect(m_ui.lp_ads_export_button, SIGNAL(clicked()), this, SLOT(onLinePlotExportToAdsClicked()));
-  connect(m_ui.set_yaxis_symlog_checkbox, SIGNAL(toggled(bool)), this, SLOT(setYAxisSymlog(bool)));
+  connect(m_ui.set_yaxis_symlog_checkbox, SIGNAL(toggled(bool)), this, SLOT(onYAxisSymlogToggled(bool)));
+  connect(m_ui.linthresh_line_edit, SIGNAL(textChanged(QString)), this, SLOT(onLineEditUpdated()));
+  connect(m_ui.apply_button, SIGNAL(clicked()), this, SLOT(onApplyButtonClicked()));
 }
 
 void QtPreviewDockedWidgets::onInstViewZoomClicked() const { m_notifyee->notifyInstViewZoomRequested(); }
@@ -96,7 +98,23 @@ void QtPreviewDockedWidgets::onRegionSelectorExportToAdsClicked() const {
 
 void QtPreviewDockedWidgets::onEditROIClicked() const { m_notifyee->notifyEditROIModeRequested(); }
 
-void QtPreviewDockedWidgets::setYAxisSymlog(bool checked) { m_notifyee->notifySetYAxisSymlogChanged(checked); }
+void QtPreviewDockedWidgets::onYAxisSymlogToggled(bool checked) const {
+  m_ui.linthresh_container->setVisible(checked);
+  onLineEditUpdated();
+  m_notifyee->notifySetYAxisSymlogChanged(checked);
+}
+
+void QtPreviewDockedWidgets::onLineEditUpdated() const {
+  m_ui.apply_button->setEnabled(!m_ui.linthresh_line_edit->text().isEmpty());
+}
+
+void QtPreviewDockedWidgets::onApplyButtonClicked() const {
+  bool ok = false;
+  double linthresh = m_ui.linthresh_line_edit->text().toDouble(&ok);
+  if (ok && linthresh > 0.0) {
+    m_notifyee->notifySetLinthreshChanged(linthresh);
+  }
+}
 
 void QtPreviewDockedWidgets::onAddRectangularROIClicked(QAction *regionType) const {
   m_ui.rs_rect_select_button->setDefaultAction(regionType);
