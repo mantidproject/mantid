@@ -105,7 +105,7 @@ std::vector<std::pair<std::string, size_t>> DataModel::getResolutionsForFit() co
   for (size_t index = 0; index < m_resolutions->size(); ++index) {
     const auto resolutionWorkspace = m_resolutions->at(index).lock();
     const auto spectra = getSpectra(WorkspaceID{index});
-    if (!resolutionWorkspace) {
+    if (!resolutionWorkspace || !m_adsInstance.doesExist(resolutionWorkspace->getName())) {
       resolutionVector.reserve(spectra.size().value);
       std::transform(spectra.begin(), spectra.end(), std::back_inserter(resolutionVector),
                      [](const auto &spectraIndex) { return std::make_pair("", spectraIndex.value); });
@@ -129,7 +129,7 @@ bool DataModel::setResolution(const std::string &name, WorkspaceID workspaceID) 
   bool hasValidValues = true;
   if (!name.empty() && m_adsInstance.doesExist(name)) {
     const auto resolution = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(name);
-    const auto &y = resolution->readY(workspaceID.value);
+    const auto &y = resolution->readY(0);
     hasValidValues = std::all_of(y.cbegin(), y.cend(), [](double value) { return value == value; });
 
     if (m_resolutions->size() > workspaceID.value) {
@@ -192,11 +192,11 @@ void DataModel::addWorkspace(const std::string &workspaceName, const FunctionMod
 
 void DataModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) {
   if (!m_fittingData->empty()) {
-    auto it = std::find_if((*m_fittingData).begin(), (*m_fittingData).end(), [&](FitData const &fitData) {
+    auto it = std::find_if(m_fittingData->begin(), m_fittingData->end(), [&](FitData const &fitData) {
       return equivalentWorkspaces(workspace, fitData.workspace());
     });
-    if (it != (*m_fittingData).end()) {
-      (*it).combine(FitData(workspace, spectra));
+    if (it != m_fittingData->end()) {
+      it->combine(FitData(workspace, spectra));
       return;
     }
   }
@@ -285,6 +285,12 @@ void DataModel::setExcludeRegion(const std::string &exclude, WorkspaceID workspa
   if (m_fittingData->empty())
     return;
   m_fittingData->at(workspaceID.value).setExcludeRegionString(exclude, spectrum);
+}
+
+void DataModel::removeWorkspaceByName(const std::string &name) {
+  auto it = std::find_if(m_fittingData->cbegin(), m_fittingData->cend(),
+                         [&name](const auto &fittingData) { return fittingData.workspace()->getName() == name; });
+  m_fittingData->erase(it);
 }
 
 void DataModel::removeWorkspace(WorkspaceID workspaceID) {

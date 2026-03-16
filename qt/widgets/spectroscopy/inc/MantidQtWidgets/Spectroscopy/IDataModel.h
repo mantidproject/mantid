@@ -74,6 +74,7 @@ public:
 
   virtual std::pair<WorkspaceID, WorkspaceIndex> getSubIndices(FitDomainIndex) const = 0;
   virtual void removeSpecialValues(const std::string &name) = 0;
+  virtual void removeWorkspaceByName(const std::string &name) = 0;
 };
 
 } // namespace Inelastic
