@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitDataPresenter.h"
 #include "FitTab.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include <map>
 #include <utility>
@@ -94,7 +95,9 @@ void FitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *d
 void FitDataPresenter::updateTableFromModel() {
   m_view->clearTable();
   for (auto domainIndex = FitDomainIndex{0}; domainIndex < getNumberOfDomains(); domainIndex++) {
-    addTableEntry(domainIndex);
+    if (AnalysisDataService::Instance().doesExist(m_model->getWorkspace(domainIndex)->getName())) {
+      addTableEntry(domainIndex);
+    }
   }
 }
 
@@ -224,12 +227,20 @@ void FitDataPresenter::handleRemoveClicked() {
   m_tab->handleDataChanged();
 }
 
+std::vector<std::string> FitDataPresenter::getWorkspaceNames() const { return m_model->getWorkspaceNames(); }
+
 void FitDataPresenter::handleUnifyClicked() {
   auto selectedIndices = m_view->getSelectedIndexes();
   if (selectedIndices.size() == 0) {
     // check that there are selected indexes.
     return;
   }
+  for (const auto &index : selectedIndices) {
+    const auto &[wsId, wsIndex] = m_model->getSubIndices(index.row());
+    std::cout << "id " << wsId << " index" << wsIndex << std::endl;
+  }
+  return;
+
   std::sort(selectedIndices.begin(), selectedIndices.end());
   auto fitRange = m_model->getFittingRange(FitDomainIndex(selectedIndices.begin()->row()));
   for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {

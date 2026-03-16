@@ -73,6 +73,7 @@ public:
   };
 
   std::string tabName() const override;
+  std::vector<std::string> getWorkspaceNames() const;
 
   void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
   void handleRemoveClicked() override;
