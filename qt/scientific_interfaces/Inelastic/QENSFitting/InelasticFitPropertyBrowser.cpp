@@ -425,12 +425,21 @@ FitDomainIndex InelasticFitPropertyBrowser::currentDataset() const {
 void InelasticFitPropertyBrowser::updateFunctionBrowserData(
     int nData, const QList<FunctionModelDataset> &datasets, const std::vector<double> &qValues,
     const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
-  m_functionBrowser->setNumberOfDatasets(nData);
-  m_functionBrowser->setDatasets(datasets);
-  m_templatePresenter->setNumberOfDatasets(nData);
-  m_templatePresenter->setDatasets(datasets);
-  m_templatePresenter->setQValues(qValues);
-  m_templatePresenter->setResolution(fitResolutions);
+  try {
+    m_functionBrowser->setNumberOfDatasets(nData);
+    m_functionBrowser->setDatasets(datasets);
+    m_templatePresenter->setResolution(fitResolutions);
+    m_templatePresenter->setNumberOfDatasets(nData);
+    m_templatePresenter->setDatasets(datasets);
+    m_templatePresenter->setQValues(qValues);
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+    m_functionBrowser->setNumberOfDatasets(0);
+    // m_functionBrowser->setDatasets(datasets);
+    // //m_templatePresenter->setResolution(fitResolutions);
+    m_templatePresenter->setNumberOfDatasets(0);
+    // m_templatePresenter->setDatasets(datasets);
+    // m_templatePresenter->setQValues(qValues);
+  }
 }
 
 void InelasticFitPropertyBrowser::setFitEnabled(bool) {}
