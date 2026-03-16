@@ -501,7 +501,7 @@ pre-commit run --all-files           # Run all pre-commit hooks
 
 ### Properties
 
-- Snake_case for naming (e.g., `InputWorkspace`, `OutputWorkspace`, `LogName`)
+- PascalCase with directional prefix (e.g., `InputWorkspace`, `OutputWorkspace`, `LogName`)
 - Direction indicators: `Input`, `Output`, `InOut`
 - Consistent naming across algorithms
 

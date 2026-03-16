@@ -4,7 +4,7 @@ This directory contains comprehensive analysis and code patterns for the Mantid 
 
 ## Files in This Package
 
-### 1. **mantid_analysis.md** (451 lines)
+### 1. **.github/copilot/codebase-analysis.md** (451 lines)
 
 Complete structural reference for the Mantid codebase.
 
@@ -22,7 +22,7 @@ Complete structural reference for the Mantid codebase.
 
 **Best for:** Understanding overall structure, finding what goes where, referencing conventions
 
-### 2. **mantid_code_patterns.md** (400+ lines)
+### 2. **.github/copilot/code-patterns.md** (400+ lines)
 
 Ready-to-use code templates and implementation patterns.
 
@@ -37,7 +37,7 @@ Ready-to-use code templates and implementation patterns.
 
 **Best for:** Starting new code, learning by example, quick reference patterns
 
-### 3. **COPILOT_INSTRUCTIONS_REFERENCE.md** (This file)
+### 3. **instructions-reference.md** (This file)
 
 Index and navigation guide for the reference materials.
 
@@ -47,9 +47,9 @@ Index and navigation guide for the reference materials.
 
 **Starting a new algorithm:**
 
-1. Read: mantid_analysis.md § 5 (C++ Conventions)
-1. Use: mantid_code_patterns.md § "Algorithm Implementation Template"
-1. Checklist: mantid_code_patterns.md § "File Organization Checklist"
+1. Read: .github/copilot/codebase-analysis.md § 5 (C++ Conventions)
+1. Use: .github/copilot/code-patterns.md § "Algorithm Implementation Template"
+1. Checklist: .github/copilot/code-patterns.md § "File Organization Checklist"
 
 **Writing tests:**
 
@@ -116,7 +116,7 @@ Index and navigation guide for the reference materials.
 | **Python Tests**   | unittest, files named \*Test.py, unittest.TestCase       |
 | **Class Naming**   | PascalCase (AddSampleLog, FFTSmooth)                     |
 | **File Naming**    | Match class name exactly (AddSampleLog.h/cpp)            |
-| **Properties**     | snake_case (InputWorkspace, LogName)                     |
+| **Properties**     | PascalCase (InputWorkspace, LogName)                     |
 | **Namespaces**     | Mantid::Module::Submodule (e.g., Mantid::Algorithms)     |
 | **Registration**   | DECLARE_ALGORITHM(ClassName) in .cpp                     |
 | **Tests Location** | `test/{ClassName}Test.h` or `test/test_{module}.py`      |

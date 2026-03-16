@@ -1,1 +1,1 @@
-- New configuration files added for github copilot
+- New configuration files have been added for GitHub Copilot.
