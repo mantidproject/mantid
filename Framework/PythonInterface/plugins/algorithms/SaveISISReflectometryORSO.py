@@ -110,6 +110,15 @@ class ReflectometryDataset:
         return self._q_conversion_history
 
     @property
+    def q_conversion_method(self):
+        q_convert_history = self.q_conversion_history
+        if q_convert_history is None:
+            raise RuntimeError(
+                "Unable to calculate lambda values as cannot find algorithm used for original Q conversion in the workspace history."
+            )
+        return q_convert_history.name()
+
+    @property
     def q_conversion_theta(self) -> Optional[float]:
         return self._q_conversion_theta
 
@@ -408,33 +417,29 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         return data_columns
 
     def _convert_from_q_to_wavelength(self, refl_dataset: ReflectometryDataset, q_data: np.ndarray) -> np.ndarray:
-        q_convert_history = refl_dataset.q_conversion_history
-        if q_convert_history is None:
-            raise RuntimeError(
-                "Unable to calculate lambda values as cannot find algorithm used for original Q conversion in the workspace history."
-            )
+        conversion_method = refl_dataset.q_conversion_method
 
-        # The method to convert back to wavelength depends on which algorithm was used to perform the conversion to Q
-        if q_convert_history.name() == ReflectometryDataset.REF_ROI_ALG:
-            return 4 * np.pi * np.sin(np.radians(refl_dataset.q_conversion_theta)) / q_data
-
-        if q_convert_history.name() == ReflectometryDataset.CONVERT_ALG:
-            alg = self.createChildAlgorithm(
-                ReflectometryDataset.CONVERT_ALG,
-                InputWorkspace=refl_dataset.ws,
-                Target="Wavelength",
-                AlignBins=False,
-                OutputWorkspace="lambdaWs",
-            )
-            alg.execute()
-            lambda_ws = alg.getProperty("OutputWorkspace").value
-            lambda_point_data = self._convert_to_point_data(lambda_ws, "lambdaPointData")
-            # There is an inverse relationship between lambda and Q, and workspace X values are in ascending order.
-            # This means the first wavelength bin in the lambda workspace is the conversion for the last Q bin in the
-            # reduced workspace.
-            return np.flip(lambda_point_data.extractX()[0])
-
-        raise RuntimeError("Unable to calculate lambda values as cannot find a supported Q conversion algorithm in the workspace history.")
+        # The method to convert back to wavelength depends on which method was used to perform the conversion to Q
+        match conversion_method:
+            case ReflectometryDataset.REF_ROI_ALG:
+                return 4 * np.pi * np.sin(np.radians(refl_dataset.q_conversion_theta)) / q_data
+            case ReflectometryDataset.CONVERT_ALG:
+                alg = self.createChildAlgorithm(
+                    ReflectometryDataset.CONVERT_ALG,
+                    InputWorkspace=refl_dataset.ws,
+                    Target="Wavelength",
+                    AlignBins=False,
+                    OutputWorkspace="lambdaWs",
+                )
+                alg.execute()
+                lambda_ws = alg.getProperty("OutputWorkspace").value
+                lambda_point_data = self._convert_to_point_data(lambda_ws, "lambdaPointData")
+                # There is an inverse relationship between lambda and Q, and workspace X values are in ascending order.
+                # This means the first wavelength bin in the lambda workspace is the conversion for the last Q bin in the
+                # reduced workspace.
+                return np.flip(lambda_point_data.extractX()[0])
+            case _:
+                raise RuntimeError("Unable to calculate lambda values. A supported conversion method was not given.")
 
     def _convert_to_point_data(self, ws, out_ws_name):
         alg = self.createChildAlgorithm("ConvertToPointData", InputWorkspace=ws, OutputWorkspace=out_ws_name)
