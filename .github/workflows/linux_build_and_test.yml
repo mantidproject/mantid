@@ -41,6 +41,7 @@ jobs:
         if: (!cancelled())
         with:
           check_name: "Unit test results"
+          check_run: false
           files: build/Testing/*unittest.xml
 
       - name: System test report
@@ -48,4 +49,5 @@ jobs:
         if: (!cancelled())
         with:
           check_name: "System test results"
+          check_run: false
           files: build/Testing/SystemTests/**/TEST-systemtests*.xml
