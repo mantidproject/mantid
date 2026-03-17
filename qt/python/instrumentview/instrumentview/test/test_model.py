@@ -184,6 +184,69 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_projection_constructor.assert_called_once()
         self.assertTrue(all(all(point == [1, 2, 0]) for point in points))
 
+    @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
+    def test_flip_z_negates_z_in_projection(self, mock_cylindrical_projection):
+        """When flip_z is True, detector positions passed to projection should have negated Z coordinates"""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_projection = MagicMock()
+        mock_projection.positions.return_value = [[1, 2], [1, 2], [1, 2]]
+        mock_cylindrical_projection.return_value = mock_projection
+        original_positions = model._detector_positions_3d.copy()
+        model._projection_type = ProjectionType.CYLINDRICAL_Y
+        model.flip_z = True
+        model._calculate_projection()
+        call_args = mock_cylindrical_projection.call_args
+        passed_positions = call_args[0][2]
+        expected_positions = original_positions.copy()
+        expected_positions[:, 2] *= -1
+        np.testing.assert_array_equal(passed_positions, expected_positions)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
+    def test_flip_z_false_passes_original_positions(self, mock_cylindrical_projection):
+        """When flip_z is False, detector positions passed to projection should be unchanged"""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_projection = MagicMock()
+        mock_projection.positions.return_value = [[1, 2], [1, 2], [1, 2]]
+        mock_cylindrical_projection.return_value = mock_projection
+        original_positions = model._detector_positions_3d.copy()
+        model._projection_type = ProjectionType.CYLINDRICAL_Y
+        model.flip_z = False
+        model._calculate_projection()
+        call_args = mock_cylindrical_projection.call_args
+        passed_positions = call_args[0][2]
+        np.testing.assert_array_equal(passed_positions, original_positions)
+
+    def test_flip_z_invalidates_projection_cache(self):
+        """Changing flip_z should clear the projection cache"""
+        model, _ = self._setup_model([1, 2, 3])
+        original_flip_z = model.flip_z
+        model._cached_projections_map["dummy_key"] = "cached_value"
+        model.flip_z = not original_flip_z
+        self.assertEqual(len(model._cached_projections_map), 0)
+
+    def test_flip_z_same_value_preserves_cache(self):
+        """Setting flip_z to its current value should not clear the cache"""
+        model, _ = self._setup_model([1, 2, 3])
+        original_flip_z = model.flip_z
+        model._cached_projections_map["dummy_key"] = "cached_value"
+        model.flip_z = original_flip_z
+        self.assertEqual(len(model._cached_projections_map), 1)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
+    def test_flip_z_uses_separate_cache_keys(self, mock_cylindrical_projection):
+        """Flipped and non-flipped projections should use different cache keys"""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_projection = MagicMock()
+        mock_projection.positions.return_value = [[1, 2], [1, 2], [1, 2]]
+        mock_cylindrical_projection.return_value = mock_projection
+        model._projection_type = ProjectionType.CYLINDRICAL_Y
+        model.flip_z = False
+        model._calculate_projection()
+        self.assertEqual(mock_cylindrical_projection.call_count, 1)
+        model.flip_z = True
+        model._calculate_projection()
+        self.assertEqual(mock_cylindrical_projection.call_count, 2)
+
     def test_sample_position(self):
         expected_position = np.array([1.0, 2.0, 1.0])
         model, mock_workspace = self._setup_model([1, 2, 3])
@@ -538,16 +601,16 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_projection_constructor.return_value = mock_projection
         model._cached_projections_map = {}
         positions = model._calculate_projection()
+        cache_key = model._cache_key_for_projection(ProjectionType.CYLINDRICAL_X)
         np.testing.assert_almost_equal(positions, np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]]))
-        np.testing.assert_almost_equal(
-            model._cached_projections_map[ProjectionType.CYLINDRICAL_X.name], np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]])
-        )
+        np.testing.assert_almost_equal(model._cached_projections_map[cache_key], np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]]))
 
     @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
     def test_cached_projections_map_already_cached(self, mock_projection_constructor):
         model, _ = self._setup_model([1, 2, 3])
         model.projection_type = ProjectionType.CYLINDRICAL_X
-        model._cached_projections_map = {ProjectionType.CYLINDRICAL_X.name: np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]])}
+        cache_key = model._cache_key_for_projection(ProjectionType.CYLINDRICAL_X)
+        model._cached_projections_map = {cache_key: np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]])}
         positions = model._calculate_projection()
         np.testing.assert_almost_equal(positions, np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]]))
         mock_projection_constructor.assert_not_called()
