@@ -38,7 +38,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           # Needed to fetch the tags for versioningit
-          fetch-depth: "0"
+          fetch-depth: 100
+          fetch-tags: true
 
       - name: Run unit tests and system tests on Linux
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/conda-buildscript ${GITHUB_WORKSPACE} linux-64-ci --enable-systemtests
