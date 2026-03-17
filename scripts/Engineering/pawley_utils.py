@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import annotations
-from mantid.simpleapi import CreateSingleValuedWorkspace, LoadCIF, CreateWorkspace, EvaluateFunction, Fit
+from mantid.simpleapi import CreateSingleValuedWorkspace, LoadCIF, CreateWorkspace, EvaluateFunction, Fit, CreateEmptyTableWorkspace
 import numpy as np
 from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
@@ -18,7 +18,7 @@ from abc import ABC, abstractmethod
 
 
 if TYPE_CHECKING:
-    from mantid.dataobjects import Workspace2D
+    from mantid.dataobjects import Workspace2D, ITableWorkspace
     from scipy.optimize import OptimizeResult
 
 
@@ -207,6 +207,29 @@ class Phase:
         _, ihkls = np.unique((self.calc_dspacings() * (10**decimal_places)).astype(int), return_index=True)
         self.hkls = [self.hkls[ipk] for ipk in np.sort(ihkls)]
 
+    def filter_hkls_to_ws_range(self, ws, lambda_min: float = 1.1, lambda_max: float = 5.0) -> "Phase":
+        """Return a new Phase containing only HKLs whose d-spacing falls within the
+        accessible range of *ws* (determined from its angular coverage and the given
+        wavelength limits).  The Phase lattice and space-group are preserved."""
+        dspacs_all = get_dspac_array_from_ws(ws, lambda_min=lambda_min, lambda_max=lambda_max)
+        dmin, dmax = float(dspacs_all.min()), float(dspacs_all.max())
+        new_phase = Phase(
+            CrystalStructure(
+                " ".join(str(p) for p in self.alatt),
+                self.spgr.getHMSymbol(),
+                "",
+            )
+        )
+        accessible_hkls = [hkl for hkl in self.hkls if dmin <= self.unit_cell.d(hkl) <= dmax]
+        if accessible_hkls:
+            new_phase.set_hkls(accessible_hkls, do_sort=False)
+        else:
+            new_phase.hkls = []
+        return new_phase
+
+    def get_hkl_strings(self) -> Sequence[str]:
+        return ["".join(str(int(round(v))) for v in [hkl.X(), hkl.Y(), hkl.Z()]) for hkl in self.hkls]
+
 
 class MtdFuncMixin:
     """
@@ -244,17 +267,74 @@ class MtdFuncMixin:
                         func.fix(param_name)
 
 
-class PawleyPatternBase(MtdFuncMixin, ABC):
+class OutputTableMixin:
+    """Mixin that provides ``create_output_table`` to any Pawley-fit class.
+
+    Concrete classes must implement ``_iter_peak_rows`` which yields one row-dict
+    per fitted peak.  The mixin also owns ``get_parameter_errors`` so both
+    constrained and unconstrained fit classes share the same error computation.
+    """
+
+    @staticmethod
+    def get_parameter_errors(res: "OptimizeResult", cond_thresh: float = 1e8) -> np.ndarray:
+        hessian = res.jac.T @ res.jac
+        cond_num = np.linalg.cond(hessian)
+        if not np.isfinite(cond_num) or cond_num > cond_thresh:
+            covar = np.linalg.pinv(hessian)
+            logger.warning(f"Hessian is ill-conditioned (cond={cond_num:.2e}) using pseudoinverse")
+        else:
+            covar = np.linalg.inv(hessian)
+        ndat, npar = res.jac.shape
+        var = np.sum(res.fun**2) / (ndat - npar)
+        return np.sqrt(np.diag(var * covar))
+
+    def create_output_table(self, res: "OptimizeResult", output_workspace: str = None) -> "ITableWorkspace":
+        """Create a TableWorkspace with one row per fitted peak.
+
+        Columns: ``Workspace``, ``Spectrum``, ``HKL``, ``I``, ``I_err``,
+        ``X0``, ``X0_err``, ``FWHM``, ``FWHM_err``.
+        """
+        param_errors = self.get_parameter_errors(res)
+        isfree = self.get_isfree()
+        free_idx_of_full = np.full(len(isfree), -1, dtype=int)
+        free_idx_of_full[isfree] = np.arange(int(isfree.sum()))
+
+        ws_name = output_workspace or f"{self.ws.name()}_pawley_table"
+        tab = CreateEmptyTableWorkspace(OutputWorkspace=ws_name, EnableLogging=False)
+        tab.addColumn(type="str", name="Workspace")
+        tab.addColumn(type="int", name="Spectrum")
+        tab.addColumn(type="str", name="HKL")
+        tab.addColumn(type="double", name="I")
+        tab.addColumn(type="double", name="I_err")
+        tab.addColumn(type="double", name="X0")
+        tab.addColumn(type="double", name="X0_err")
+        tab.addColumn(type="double", name="FWHM")
+        tab.addColumn(type="double", name="FWHM_err")
+
+        if hasattr(self, "update_profile_function"):
+            self.update_profile_function()
+        for row in self._iter_peak_rows(param_errors, free_idx_of_full):
+            tab.addRow(row)
+        return tab
+
+    def _iter_peak_rows(self, param_errors: np.ndarray, free_idx_of_full: np.ndarray):
+        raise NotImplementedError()
+
+
+class PawleyPatternBase(MtdFuncMixin, OutputTableMixin, ABC):
     def __init__(
         self,
         ws: Workspace2D,
         phases: Phase,
         profile: PeakProfile,
         bg_func: Optional[FunctionWrapper] = None,
-        param_bounds_frac: float = None,
+        global_param_bound_frac: float = None,
+        param_bound_frac: dict = None,
         param_bounds_abs_min: float = 1e-6,
+        ispec: int = 0,
     ):
         self.ws = ws
+        self.ispec = ispec
         self.phases = phases
         self.alatt_params = [phase.get_params() for phase in self.phases]
         self.alatt_isfree = [np.ones_like(alatt, dtype=bool) for alatt in self.alatt_params]
@@ -273,13 +353,14 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         self.bg_isfree = np.ones_like(self.bg_params, dtype=bool)
         self.make_profile_function(bg_func)
         self.initial_params = None
-        self.param_bounds_frac = param_bounds_frac
+        self.global_param_bound_frac = global_param_bound_frac
         self.param_bounds_abs_min = param_bounds_abs_min
+        self.param_bound_frac = param_bound_frac
 
     def make_profile_function(self, bg_func: Optional[FunctionWrapper] = None):
         self.comp_func = CompositeFunctionWrapper()
-        for iphase, phase in enumerate(self.phases):
-            for ipk in range(phase.nhkls()):
+        for phase in self.phases:
+            for _ in range(phase.nhkls()):
                 self.comp_func += FunctionWrapper(FunctionFactory.Instance().createPeakFunction(self.profile.func_name))
         if bg_func is not None:
             self.comp_func += bg_func
@@ -306,6 +387,27 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
 
     def _get_peak_cens(self, dpks: np.ndarray[float]) -> np.ndarray[float]:
         return dpks
+
+    def get_param_names(self) -> np.ndarray:
+        """Return a name for every parameter in the same order as get_params()."""
+        names = []
+        for i, phase in enumerate(self.phases):
+            phase_suffix = f"_ph{i}" if len(self.phases) > 1 else ""
+            names.extend(n + phase_suffix for n in phase.get_param_names())
+        for i, phase in enumerate(self.phases):
+            phase_suffix = f"_ph{i}" if len(self.phases) > 1 else ""
+            names.extend(s + phase_suffix for s in phase.get_hkl_strings())
+        for i in range(len(self.phases)):
+            phase_suffix = f"_ph{i}" if len(self.phases) > 1 else ""
+            names.extend(lbl + phase_suffix for lbl in self.profile.labels)
+        names.extend(self.inst.labels)
+        if len(self.bg_params) > 0:
+            bg_func = self.comp_func[len(self.comp_func) - 1]
+            names.extend(bg_func.function.parameterName(j) for j in range(int(bg_func.nParams())))
+        return np.array(names, dtype=str)
+
+    def get_free_param_names(self) -> np.ndarray:
+        return self.get_param_names()[self.get_isfree()]
 
     def get_params(self) -> np.ndarray[float]:
         return np.concatenate((*self.alatt_params, *self.intens, *self.profile_params, self.inst_params, self.bg_params))
@@ -351,9 +453,33 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
         kwargs = {**default_kwargs, **kwargs}
         self.initial_params = self.get_free_params()
-        if self.param_bounds_frac is not None and "bounds" not in kwargs:
-            margin = np.maximum(np.abs(self.initial_params) * self.param_bounds_frac, self.param_bounds_abs_min)
-            kwargs["bounds"] = (self.initial_params - margin, self.initial_params + margin)
+        if "bounds" not in kwargs:
+            lb = np.full_like(self.initial_params, -np.inf)
+            ub = np.full_like(self.initial_params, np.inf)
+            if self.global_param_bound_frac is not None:
+                margin = np.maximum(np.abs(self.initial_params) * self.global_param_bound_frac, self.param_bounds_abs_min)
+                lb = self.initial_params - margin
+                ub = self.initial_params + margin
+            # apply per-parameter overrides (None entry → unconstrained for that param)
+            if self.param_bound_frac:
+                free_names = self.get_free_param_names()
+                for name, frac in self.param_bound_frac.items():
+                    mask = free_names == name
+                    if not mask.any():
+                        logger.warning(f"param_bound_frac: '{name}' not found in free parameters, ignoring.")
+                        continue
+                    if frac is None:
+                        lb[mask] = -np.inf
+                        ub[mask] = np.inf
+                    else:
+                        margin = np.maximum(np.abs(self.initial_params[mask]) * frac, self.param_bounds_abs_min)
+                        lb[mask] = self.initial_params[mask] - margin
+                        ub[mask] = self.initial_params[mask] + margin
+            # always enforce non-negativity for intensity parameters
+            n_alatt_free = sum(int(ai.sum()) for ai in self.alatt_isfree)
+            n_intens_free = sum(int(ii.sum()) for ii in self.intens_isfree)
+            lb[n_alatt_free : n_alatt_free + n_intens_free] = np.maximum(lb[n_alatt_free : n_alatt_free + n_intens_free], 0.0)
+            kwargs["bounds"] = (lb, ub)
         res = least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
         # update parameters
         self.set_free_params(res.x)
@@ -364,21 +490,30 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         if self.initial_params is not None:
             self.set_free_params(self.initial_params)
 
-    @staticmethod
-    def get_parameter_errors(res: OptimizeResult, cond_thresh=1e8):
-        hessian = res.jac.T @ res.jac
-        cond_num = np.linalg.cond(hessian)
-        if not np.isfinite(cond_num) or cond_num > cond_thresh:
-            # ill-conditioned
-            covar = np.linalg.pinv(hessian)
-            logger.warning(f"Hessian is ill-conditioned (cond={cond_num:.2e}) using pseudoinverse")
-        else:
-            covar = np.linalg.inv(hessian)
-
-        # scale by residual variance (as unweighted fit)
-        ndat, npar = res.jac.shape
-        var = np.sum(res.fun**2) / (ndat - npar)
-        return np.sqrt(np.diag(var * covar))
+    def _iter_peak_rows(self, param_errors: np.ndarray, free_idx_of_full: np.ndarray):
+        n_alatt = sum(len(a) for a in self.alatt_params)
+        n_intens_per_phase = [len(i) for i in self.intens]
+        intens_start = n_alatt
+        pk_offset = 0
+        for iphase, phase in enumerate(self.phases):
+            phase_intens_start = intens_start + sum(n_intens_per_phase[:iphase])
+            for ipk, hkl in enumerate(phase.hkls):
+                hkl_str = "".join(str(int(round(v))) for v in [hkl.X(), hkl.Y(), hkl.Z()])
+                fidx = int(free_idx_of_full[phase_intens_start + ipk])
+                pk_func = self.comp_func[pk_offset + ipk].function
+                cen_par = pk_func.getCentreParameterName()
+                yield {
+                    "Workspace": self.ws.name(),
+                    "Spectrum": self.ispec,
+                    "HKL": hkl_str,
+                    "I": float(self.intens[iphase][ipk]),
+                    "I_err": float(param_errors[fidx]) if fidx >= 0 else float("nan"),
+                    "X0": float(pk_func.getParameterValue(cen_par)),
+                    "X0_err": float("nan"),
+                    "FWHM": float(pk_func.fwhm()),
+                    "FWHM_err": float("nan"),
+                }
+            pk_offset += phase.nhkls()
 
     @abstractmethod
     def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
@@ -390,14 +525,13 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
 
 
 class PawleyPattern1D(PawleyPatternBase):
-    def __init__(self, *args, ispec: int = 0, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.xunit = self.ws.getAxis(0).getUnit().unitID()
         if self.xunit == "TOF":
             si = self.ws.spectrumInfo()
-            if not si.hasDetectors(ispec):
+            if not si.hasDetectors(self.ispec):
                 raise RuntimeError("Workspace has no detectors - cannot convert between TOF and d-spacing.")
-        self.ispec = ispec
         self.update_profile_function()
 
     def _get_peak_cens(self, dpks: np.ndarray[float]) -> np.ndarray[float]:
@@ -500,23 +634,28 @@ class Poldi2DEvalMixin:
                 ws_sim.setY(ispec, ws_sim.readY(ispec) * np.sin(si.twoTheta(ispec) / 2))
         if not self.global_scale:
             if self.scales is None:
-                # First call: fit both scale and offset per spectrum.
-                # The scale absorbs per-detector efficiency/geometry and is then held
-                # fixed during optimisation so the intensity Jacobian is non-zero.
+                # First call: estimate a per-spectrum background from the lower tail of the
+                # observed time series, then compute a scale from the background-subtracted
+                # signal.  Using a data-derived background (rather than fitting one from the
+                # simulation) means the scale only corrects for detector efficiency/geometry
+                # and does NOT absorb any peak-intensity or texture information.
+                # The per-spectrum bg is then locked alongside the scale for the rest of
+                # optimisation, so the Jacobian remains dr/dI_k = -scale * d_ycalc/dI_k.
                 self.scales = np.zeros(self.ws.getNumberHistograms())
                 self.bgs = np.zeros_like(self.scales)
                 for ispec in range(self.ws.getNumberHistograms()):
                     yobs = self.ws.readY(ispec)
                     ycalc = ws_sim.readY(ispec)
-                    ppval = np.polyfit(ycalc, yobs, 1)
-                    self.scales[ispec], self.bgs[ispec] = ppval
-                    ws_sim.setY(ispec, np.polyval(ppval, ycalc))
+                    bg = float(np.percentile(yobs, self.bg_percentile))
+                    yobs_bg_sub = yobs - bg
+                    denom = float(np.dot(ycalc, ycalc))
+                    scale = float(np.dot(ycalc, yobs_bg_sub)) / denom if denom > 0 else 1.0
+                    self.scales[ispec] = scale
+                    self.bgs[ispec] = bg
+                    # include bg in ws_sim so eval_resids = yobs - ws_sim = (yobs-bg) - scale*ycalc
+                    ws_sim.setY(ispec, scale * ycalc + bg)
             else:
-                # Subsequent calls: both scale and offset are fixed.
-                # Recomputing bg would mean-subtract the intensity Jacobian
-                # (dr/dI_k -> -scale*(d_ycalc/dI_k - mean(d_ycalc/dI_k))), which
-                # nearly cancels for POLDI correlation patterns spread across channels.
-                # Keeping bg fixed gives the clean Jacobian dr/dI_k = -scale*d_ycalc/dI_k.
+                # Subsequent calls: both scale and bg are locked.
                 for ispec in range(self.ws.getNumberHistograms()):
                     ws_sim.setY(ispec, self.scales[ispec] * ws_sim.readY(ispec) + self.bgs[ispec])
         return ws_sim
@@ -531,12 +670,21 @@ class Poldi2DEvalMixin:
 
 
 class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
-    def __init__(self, *args, global_scale: bool = True, lambda_max: float = 5.0, apply_lorentz_correction: bool = False, **kwargs):
+    def __init__(
+        self,
+        *args,
+        global_scale: bool = True,
+        lambda_max: float = 5.0,
+        apply_lorentz_correction: bool = False,
+        bg_percentile: float = 15.0,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
         self.lambda_max = lambda_max
         self.scales = None
         self.bgs = None
         self.apply_lorentz_correction = apply_lorentz_correction
+        self.bg_percentile = bg_percentile
         self.set_global_scale(global_scale)
         # create workspace in d-spacing to contain diffraction pattern
         self.ws_1d = self.make_1d_ws(self.ws)
@@ -557,32 +705,58 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
     def set_global_scale(self, global_scale: bool):
         self.global_scale = global_scale
         if not self.global_scale:
-            # check if a peak intensity is fixed in any phase
-            if all([all(phase_intens_isfree) for phase_intens_isfree in self.intens_isfree]):
-                # fix intensity of most intense peak in first phase to avoid perfectly correlated scales
-                self.intens_isfree[0][np.argmax(self.intens[0])] = False
-            # zero global background and fix
+            # Per-spectrum scales (locked after initialisation of each fit() call) make all
+            # peak intensities identifiable without needing to fix any individual intensity.
+            # Fixing the most-intense peak anchors the whole scale to what may be the most
+            # biased value from the 1D autocorrelation, so that practice is avoided here.
+            # Zero and fix any global background — background is handled per-spectrum in eval_2d.
             if len(self.bg_params) > 0:
                 self.bg_params[:] = 0
                 self.bg_isfree[:] = False
 
-    def set_params_from_pawley1d(self, pawley1d: PawleyPattern1D, param_bounds_frac: float = None, param_bounds_abs_min: float = None):
+    def set_params_from_pawley1d(
+        self,
+        pawley1d: PawleyPattern1D,
+        global_param_bound_frac: float = None,
+        param_bounds_abs_min: float = None,
+        param_bound_frac: dict = None,
+    ):
         if len(pawley1d.phases) != len(self.phases):
             logger.error("PawleyPattern1D object has a different number of phases.")
             return
         if pawley1d.profile.func_name == self.profile.func_name:
-            self.profile_params = pawley1d.profile_params.copy()
+            self.profile_params = [p.copy() for p in pawley1d.profile_params]
+        # Copy refined lattice parameters from the 1D fit so the 2D fit starts from
+        # the globally-constrained lattice and cannot drift to unphysical values if a
+        # peak is weakly constrained in a single sub-group.
+        for iphase in range(len(self.phases)):
+            self.alatt_params[iphase] = pawley1d.alatt_params[iphase].copy()
         intens_changed = False
         for iphase, phase in enumerate(self.phases):
-            if phase.nhkls() == pawley1d.phases[iphase].nhkls():
+            phase1d = pawley1d.phases[iphase]
+            if phase.nhkls() == phase1d.nhkls():
+                # identical set of HKLs — copy directly
                 self.intens[iphase] = pawley1d.intens[iphase].copy()
+                intens_changed = True
+            elif phase.nhkls() < phase1d.nhkls():
+                # 2D phase is a d-spacing-filtered subset: match each 2D HKL to the
+                # closest 1D d-spacing and copy the corresponding intensity.
+                dspacs_1d = phase1d.calc_dspacings()
+                dspacs_2d = phase.calc_dspacings()
+                new_intens = np.empty(phase.nhkls(), dtype=float)
+                for ipk, dpk in enumerate(dspacs_2d):
+                    idx = int(np.argmin(np.abs(dspacs_1d - dpk)))
+                    new_intens[ipk] = pawley1d.intens[iphase][idx]
+                self.intens[iphase] = new_intens
                 intens_changed = True
         if intens_changed:
             self._estimate_intensities()
-        if param_bounds_frac is not None:
-            self.param_bounds_frac = param_bounds_frac
+        if global_param_bound_frac is not None:
+            self.global_param_bound_frac = global_param_bound_frac
         if param_bounds_abs_min is not None:
             self.param_bounds_abs_min = param_bounds_abs_min
+        if param_bound_frac is not None:
+            self.param_bound_frac = param_bound_frac
 
     def estimate_initial_params(self):
         self._estimate_intensities()
@@ -593,21 +767,30 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
         return self.comp_func(self.ws_1d.readX(0))
 
     def _estimate_intensities(self):
-        # scale intensities
-        ws_sim = self.eval_2d(self.get_free_params())
-        ppval = np.polyfit(ws_sim.extractY().flat, self.ws.extractY().flat, 1)
-        for iphase in range(len(self.phases)):
-            self.intens[iphase] *= ppval[0]
+        # Compute per-spectrum scales at current intensities and use their median as a global
+        # correction factor.  The median is robust to high-texture detectors and avoids the
+        # background-dominated bias of a naive polyfit across all channels.
+        self.scales = None  # ensure fresh per-spectrum scale computation
+        _ = self.eval_2d(self.get_free_params())
+        if self.scales is not None and len(self.scales) > 0:
+            valid_scales = self.scales[self.scales > 0]
+            global_scale = float(np.median(valid_scales)) if len(valid_scales) > 0 else 1.0
+            for iphase in range(len(self.phases)):
+                self.intens[iphase] *= global_scale
+        self.scales = None  # reset so fit() recomputes scales at the updated intensities
 
-    def create_no_constriants_fit(self, param_bounds_frac: float = None, param_bounds_abs_min: float = 1e-6):
+    def create_no_constriants_fit(self, global_param_bound_frac: float = None, param_bounds_abs_min: float = 1e-6):
         return PawleyPattern2DNoConstraints(
             self.ws,
             self.comp_func,
             self.global_scale,
             self.lambda_max,
-            param_bounds_frac=param_bounds_frac,
+            global_param_bound_frac=global_param_bound_frac,
             param_bounds_abs_min=param_bounds_abs_min,
             apply_lorentz_correction=self.apply_lorentz_correction,
+            bg_percentile=self.bg_percentile,
+            phases=self.phases,
+            ispec=self.ispec,
         )
 
     def fit(self, *args, **kwargs) -> OptimizeResult:
@@ -620,18 +803,23 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
         return res
 
 
-class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
+class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin, OutputTableMixin):
     def __init__(
         self,
         ws: Workspace2D,
         func: FunctionWrapper,
         global_scale: bool = True,
         lambda_max: float = 5.0,
-        param_bounds_frac: float = None,
+        global_param_bound_frac: float = None,
         param_bounds_abs_min: float = 1e-6,
         apply_lorentz_correction: bool = False,
+        bg_percentile: float = 15.0,
+        phases: Optional[list] = None,
+        ispec: int = 0,
     ):
         self.ws = ws
+        self.ispec = ispec
+        self.phases = phases
         self.ws_1d = PawleyPattern2D.make_1d_ws(self.ws)
         self.comp_func = func
         self.intens_par_name = self.get_peak_intensity_param_name()
@@ -640,9 +828,10 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
         self.scales = None
         self.bgs = None
         self.apply_lorentz_correction = apply_lorentz_correction
+        self.bg_percentile = bg_percentile
         self.set_global_scale(global_scale)
         self.initial_params = None
-        self.param_bounds_frac = param_bounds_frac
+        self.global_param_bound_frac = global_param_bound_frac
         self.param_bounds_abs_min = param_bounds_abs_min
 
     def get_peak_intensity_param_name(self):
@@ -656,24 +845,11 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
     def set_global_scale(self, global_scale: bool):
         self.global_scale = global_scale
         if not self.global_scale:
-            npks = self.get_npks()
-            ipar_intens = self.comp_func[0].getParameterIndex(self.intens_par_name)
-            ipk_max_intens = 0
-            max_intens = -np.inf
-            any_fixed = False
-            for ipk in range(npks):
-                if self.comp_func[ipk].isFixed(ipar_intens):
-                    any_fixed = True
-                    break
-                intens = self.comp_func[ipk].function.intensity()
-                if intens > max_intens:
-                    max_intens = intens
-                    ipk_max_intens = ipk
-            if not any_fixed:
-                # fix intensity of most intense peak to avoid perfectly correlated scales
-                self.comp_func[ipk_max_intens].fix(self.intens_par_name)
-            # zero global background and fix
+            # Per-spectrum scales (locked after initialisation of each fit() call) make all
+            # peak intensities identifiable — no individual intensity needs to be fixed.
+            # Zero and fix any global background.
             if self.has_bg:
+                npks = self.get_npks()
                 bg_func = self.comp_func[npks]
                 [bg_func.function.setParameter(ipar, 0) for ipar in range(bg_func.nParams())]
                 bg_func.function.fixAll()
@@ -696,13 +872,50 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
         params[self.get_isfree()] = free_params
         self.set_params(params)
 
+    def _iter_peak_rows(self, param_errors: np.ndarray, free_idx_of_full: np.ndarray):
+        name_to_full = {self.comp_func.parameterName(i): i for i in range(self.comp_func.nParams())}
+        npks = self.get_npks()
+        hkl_strings = self.phases[0].get_hkl_strings() if self.phases else None
+        for ipk in range(npks):
+            hkl_str = hkl_strings[ipk] if hkl_strings and ipk < len(hkl_strings) else str(ipk)
+            pk_func = self.comp_func[ipk].function
+            cen_par = pk_func.getCentreParameterName()
+
+            def _err(par_name):
+                full_idx = name_to_full.get(f"f{ipk}.{par_name}", -1)
+                fidx = int(free_idx_of_full[full_idx]) if full_idx >= 0 else -1
+                return float(param_errors[fidx]) if fidx >= 0 else float("nan")
+
+            yield {
+                "Workspace": self.ws.name(),
+                "Spectrum": self.ispec,
+                "HKL": hkl_str,
+                "I": float(pk_func.intensity()),
+                "I_err": _err(self.intens_par_name),
+                "X0": float(pk_func.getParameterValue(cen_par)),
+                "X0_err": _err(cen_par),
+                "FWHM": float(pk_func.fwhm()),
+                "FWHM_err": float("nan"),
+            }
+
     def fit(self, **kwargs) -> OptimizeResult:
         default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
         kwargs = {**default_kwargs, **kwargs}
         self.initial_params = self.get_free_params()
-        if self.param_bounds_frac is not None and "bounds" not in kwargs:
-            margin = np.maximum(np.abs(self.initial_params) * self.param_bounds_frac, self.param_bounds_abs_min)
-            kwargs["bounds"] = (self.initial_params - margin, self.initial_params + margin)
+        if "bounds" not in kwargs:
+            lb = np.full_like(self.initial_params, -np.inf)
+            ub = np.full_like(self.initial_params, np.inf)
+            if self.global_param_bound_frac is not None:
+                margin = np.maximum(np.abs(self.initial_params) * self.global_param_bound_frac, self.param_bounds_abs_min)
+                lb = self.initial_params - margin
+                ub = self.initial_params + margin
+            # enforce non-negativity for intensity parameters identified by name
+            all_param_names = [self.comp_func.parameterName(ipar) for ipar in range(self.comp_func.nParams())]
+            isfree = self.get_isfree()
+            free_param_names = [name for name, free in zip(all_param_names, isfree) if free]
+            is_intens_free = np.array([f".{self.intens_par_name}" in name or name == self.intens_par_name for name in free_param_names])
+            lb[is_intens_free] = np.maximum(lb[is_intens_free], 0.0)
+            kwargs["bounds"] = (lb, ub)
         # Pre-compute per-spectrum scales at the initial params then lock them.
         self.scales = None
         self.eval_2d(self.initial_params)
