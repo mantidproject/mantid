@@ -665,7 +665,7 @@ private:
     pw->addPeak(p4);
 
     // Set known monitor counts on all 5 peaks
-    for (size_t i = 0; i < pw->getNumberPeaks(); i++) {
+    for (size_t i = 0; i < static_cast<size_t>(pw->getNumberPeaks()); i++) {
       pw->getPeak(i).setMonitorCount(1000.0 * static_cast<double>(i + 1));
     }
 
