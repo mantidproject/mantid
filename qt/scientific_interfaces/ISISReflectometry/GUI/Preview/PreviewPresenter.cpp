@@ -95,9 +95,13 @@ void PreviewPresenter::updatePlotAxes(bool checked) {
   } else {
     m_plotPresenter->setScaleLog(AxisID::YLeft);
   }
+  m_plotPresenter->plot();
 }
 
-void PreviewPresenter::updateLinthresh(double linthresh) { m_plotPresenter->setScaleSymLog(AxisID::YLeft, linthresh); }
+void PreviewPresenter::updateLinthresh(double linthresh) {
+  m_plotPresenter->setScaleSymLog(AxisID::YLeft, linthresh);
+  m_plotPresenter->plot();
+}
 
 /** Notification received when the user has requested to load a workspace. If it already exists in the ADS
  * then we use that and continue to plot it; otherwise we start an async load.
