@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   linux-build-and-test:
-    runs-on: [self-hosted, linux, x64, isis]
+    runs-on: [self-hosted, linux, x64]
     steps:
       - uses: actions/checkout@v4
         with:
