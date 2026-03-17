@@ -154,7 +154,7 @@ Output:
 .. testoutput:: GaussianPeaksExponentialBackground
 
     Low noise
-    Peak 1: centre=250.01+/-0.09, height=352.47+/-10.91, sigma=3.06+/-0.08
+    Peak 1: centre=250.01+/-0.09, height=352.47+/-10.91, sigma=3.06+/-0.09
     Peak 2: centre=750.00+/-0.09, height=200.03+/-9.13, sigma=2.01+/-0.07
 
     Strong noise
@@ -247,8 +247,8 @@ Output:
     Peak 2: centre=600.00+/-0.06, height=500.20+/-16.01, sigma=2.00+/-0.06
 
     Strong noise
-    Peak 1: centre=100.00+/-0.10, height=377.97+/-0.02, sigma=3.35+/-0.07
-    Peak 2: centre=600.00+/-0.06, height=503.59+/-15.68, sigma=2.08+/-0.06
+    Peak 1: centre=100.00+/-0.09, height=409.73+/-11.95, sigma=3.12+/-0.08
+    Peak 2: centre=600.00+/-0.06, height=503.64+/-15.68, sigma=2.08+/-0.06
 
 .. categories::
 .. sourcelink::

@@ -174,9 +174,9 @@ Output:
 .. testoutput:: ExPlotPeakByLogValueSeqWithOutputStatus
 
     Fit status = ['success', 'success', 'success', 'success', 'success', 'success', 'success', 'success', 'success', 'success']
-    Fit chi2 = [5.09648779e-08 6.89426130e-09 9.33124574e-10 1.26539259e-10
-     1.73025195e-11 2.45555803e-12 4.06465408e-13 1.04496124e-13
-     4.79987355e-14 3.01813222e-14]
+    Fit chi2 = [1.66303097e-17 1.83229176e-21 1.45413085e-21 1.39794468e-21
+     1.34393992e-21 1.29204641e-21 1.24218669e-21 1.19427939e-21
+     1.14824806e-21 1.10402028e-21]
 
 **Example - Fitting multiDomain function:**
 
@@ -200,9 +200,9 @@ Output:
 .. testoutput:: MultiDomainFunctionExample
 
     Fit status = ['success', 'success', 'success', 'success', 'success', 'success', 'success', 'success', 'success', 'success']
-    Fit chi2 = [5.09648779e-08 6.89426130e-09 9.33124574e-10 1.26539259e-10
-     1.73025195e-11 2.45555803e-12 4.06465408e-13 1.04496124e-13
-     4.79987355e-14 3.01813222e-14]
+    Fit chi2 = [1.66303097e-17 1.83229176e-21 1.45413085e-21 1.39794468e-21
+     1.34393992e-21 1.29204641e-21 1.24218669e-21 1.19427939e-21
+     1.14824806e-21 1.10402028e-21]
 
 **Example - :**
 
@@ -228,7 +228,7 @@ Output:
 .. testoutput:: ExPlotPeakByLogValueSeqWithExclusionRange
 
     Fit status = ['success', 'success', 'success']
-    Fit chi2 = [5.0965e-08, 0.0000e+00, 6.8943e-09]
+    Fit chi2 = [1.6757e-17, 0.0000e+00, 1.8323e-21]
 
 .. categories::
 
