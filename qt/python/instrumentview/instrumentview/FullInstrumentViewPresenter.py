@@ -64,6 +64,9 @@ class FullInstrumentViewPresenter:
 
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
+    _XML_FILE_FILTER = "XML files (*xml)"
+    _CAL_FILE_FILTER = "CAL files (*cal)"
+
     def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
@@ -217,6 +220,7 @@ class FullInstrumentViewPresenter:
 
     def update_plotter(self) -> None:
         self._model.projection_type = self._view.current_selected_projection()
+        self._model.flip_z = self._view.is_flip_z_axis_checkbox_checked()
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter()
             self.update_detector_picker()
@@ -272,6 +276,7 @@ class FullInstrumentViewPresenter:
 
         self._view.enable_or_disable_mask_widgets()
         self._view.enable_or_disable_aspect_ratio_box()
+        self._view.enable_or_disable_flip_z_axis_box()
         self.on_integration_limits_reset_clicked()
         self._view.cache_camera_position()
         self._view.reset_camera()
@@ -323,6 +328,9 @@ class FullInstrumentViewPresenter:
 
     def on_aspect_ratio_check_box_clicked(self) -> None:
         self._view.store_maintain_aspect_ratio_option()
+        self.update_plotter()
+
+    def on_flip_z_axis_check_box_clicked(self) -> None:
         self.update_plotter()
 
     @property
@@ -415,13 +423,22 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_clear_list_clicked, ()))
 
     def _on_save_mask_to_xml_clicked(self):
-        filename = self._view.get_filename_from_dialog()
+        filename = self._view.get_filename_from_dialog(self._XML_FILE_FILTER)
         if not filename:
             return
         self._model.save_mask_to_xml(filename)
 
     def on_save_mask_to_xml_clicked(self):
         self._callback_queue.put((self._on_save_mask_to_xml_clicked, ()))
+
+    def _on_save_mask_to_cal_clicked(self):
+        filename = self._view.get_filename_from_dialog(self._CAL_FILE_FILTER)
+        if not filename:
+            return
+        self._model.save_mask_to_cal(filename)
+
+    def on_save_mask_to_cal_clicked(self):
+        self._callback_queue.put((self._on_save_mask_to_cal_clicked, ()))
 
     def _on_save_grouping_to_ads_clicked(self):
         self._model.save_grouping_to_ads()
@@ -430,13 +447,22 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_save_grouping_to_ads_clicked, ()))
 
     def _on_save_grouping_to_xml_clicked(self):
-        filename = self._view.get_filename_from_dialog()
+        filename = self._view.get_filename_from_dialog(self._XML_FILE_FILTER)
         if not filename:
             return
         self._model.save_grouping_to_xml(filename)
 
     def on_save_grouping_to_xml_clicked(self):
         self._callback_queue.put((self._on_save_grouping_to_xml_clicked, ()))
+
+    def _on_save_grouping_to_cal_clicked(self):
+        filename = self._view.get_filename_from_dialog(self._CAL_FILE_FILTER)
+        if not filename:
+            return
+        self._model.save_grouping_to_cal(filename)
+
+    def on_save_grouping_to_cal_clicked(self):
+        self._callback_queue.put((self._on_save_grouping_to_cal_clicked, ()))
 
     def _reload_mask_workspaces(self) -> None:
         self._view.refresh_workspaces_in_list(CurrentTab.Masking)
