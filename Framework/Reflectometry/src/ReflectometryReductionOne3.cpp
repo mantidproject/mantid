@@ -213,21 +213,7 @@ void ReflectometryReductionOne3::setDefaultOutputWorkspaceNames() {
 /** Execute the algorithm.
  */
 void ReflectometryReductionOne3::exec() {
-  std::vector<std::string> taskExecutionOrder = getProperty("TaskExecutionOrder");
-  std::vector<std::shared_ptr<AlgorithmTask>> tasksToStage;
-  tasksToStage.reserve(taskExecutionOrder.size());
-  for (auto &task : m_AlgorithmTasks) {
-    auto it = std::find(taskExecutionOrder.begin(), taskExecutionOrder.end(), task->name());
-    if (it != taskExecutionOrder.end()) {
-      std::size_t index = std::distance(taskExecutionOrder.begin(), it);
-      tasksToStage[index] = task;
-    }
-  }
-  stageAlgorithmTasks(tasksToStage);
-
-  for (const auto &[name, task] : m_stagedAlgorithmTasks) {
-    task->execute();
-  }
+  // set up - extract this to seperate fn
 
   setDefaultOutputWorkspaceNames();
 
@@ -239,10 +225,6 @@ void ReflectometryReductionOne3::exec() {
   // indexes
   convertProcessingInstructions(m_runWS);
 
-  // Neither TOF or Lambda? Abort.
-  if ((xUnitID != "Wavelength") && (xUnitID != "TOF"))
-    throw std::invalid_argument("InputWorkspace must have units of TOF or Wavelength");
-
   // Cache the spectrum info and reference frame
   m_spectrumInfo = &m_runWS->spectrumInfo();
   auto instrument = m_runWS->getInstrument();
@@ -250,21 +232,37 @@ void ReflectometryReductionOne3::exec() {
   m_partialBins = getProperty("IncludePartialBins");
 
   // Find and cache detector groups and theta0
+  // do we need findDetectorGroups - cache is not used anyhere.
   findDetectorGroups();
   findTheta0();
+
+  // end set up
+
+  std::vector<std::string> taskExecutionOrder = getProperty("TaskExecutionOrder");
+  std::vector<std::shared_ptr<AlgorithmTask>> tasksToStage(taskExecutionOrder.size());
+  for (auto &task : m_AlgorithmTasks) {
+    auto it = std::find(taskExecutionOrder.begin(), taskExecutionOrder.end(), task->name());
+    if (it != taskExecutionOrder.end()) {
+      std::size_t index = std::distance(taskExecutionOrder.begin(), it);
+      tasksToStage[index] = task;
+    }
+  }
+  stageAlgorithmTasks(tasksToStage);
+
+  for (const auto &task : m_stagedAlgorithmTasks) {
+    task->execute();
+  }
+
+  // Neither TOF or Lambda? Abort.
+  // TO DO - do we want this validation?
+  if ((xUnitID != "Wavelength") && (xUnitID != "TOF"))
+    throw std::invalid_argument("InputWorkspace must have units of TOF or Wavelength");
 
   // Check whether conversion, normalisation, summation etc. need to be done
   m_convertUnits = true;
   m_normaliseMonitors = true;
   m_normaliseTransmission = true;
   m_sum = true;
-  if (xUnitID == "Wavelength") {
-    // Already converted converted to wavelength
-    m_convertUnits = false;
-    // Assume it's also already been normalised by monitors and summed
-    m_normaliseMonitors = false;
-    m_sum = false;
-  }
 
   // Create the output workspace in wavelength
   MatrixWorkspace_sptr IvsLam = makeIvsLam();
@@ -577,6 +575,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne3::transmissionCorrection(const Ma
 
   // If the detector workspace has been reduced then the spectrum maps
   // should match AFTER reducing the transmission workspace
+  // TODO: Can we just delete this?
   if (detectorWSReduced) {
     verifySpectrumMaps(detectorWS, transmissionWS);
   }
@@ -1242,5 +1241,142 @@ void ReflectometryReductionOne3::verifySpectrumMaps(const MatrixWorkspace_const_
     const std::string message = "Spectrum maps between workspaces do NOT match up.";
     g_log.warning(message);
   }
+}
+
+void ReflectometryReductionOne3::TaskBackgroundSubtraction::executeImpl() {
+  auto alg = m_parent->createChildAlgorithm("ReflectometryBackgroundSubtraction");
+  alg->initialize();
+  auto detectorWS = getDependantWorkspace("InputWorkspace");
+  alg->setProperty("InputWorkspace", detectorWS);
+  alg->setProperty("InputWorkspaceIndexType", "SpectrumNumber");
+  alg->setProperty("ProcessingInstructions", m_parent->getPropertyValue("BackgroundProcessingInstructions"));
+  alg->setProperty("BackgroundCalculationMethod", m_parent->getPropertyValue("BackgroundCalculationMethod"));
+  alg->setProperty("DegreeOfPolynomial", m_parent->getPropertyValue("DegreeOfPolynomial"));
+  alg->setProperty("CostFunction", m_parent->getPropertyValue("CostFunction"));
+  // For our case, the peak range is the same as the main processing
+  // instructions, and we do the summation separately so don't sum the peak
+  alg->setProperty("PeakRange", m_parent->getPropertyValue("ProcessingInstructions"));
+  alg->setProperty("SumPeak", false);
+  alg->execute();
+  MatrixWorkspace_sptr corrected = alg->getProperty("OutputWorkspace");
+  outputWorkspace(corrected, "BackgroundSubtractedWorkspace");
+}
+
+void ReflectometryReductionOne3::TaskConvertToWavelength::executeImpl() {
+  const auto &inputWS = getDependantWorkspace("InputWorkspace");
+  auto result = m_parent->convertToWavelength(inputWS);
+  outputWorkspace(result, "ConvertedWorkspaceWavelength");
+}
+
+void ReflectometryReductionOne3::TaskNormalizeByMonitor::executeImpl() {
+  const bool integratedMonitors = m_parent->getProperty("NormalizeByIntegratedMonitors");
+  int index = m_parent->getProperty("I0MonitorIndex");
+  if (!m_parent->m_spectrumInfo->isMonitor(index)) {
+    throw std::invalid_argument("A monitor is expected at spectrum index " + std::to_string(index));
+  }
+  const auto monitorWS = m_parent->makeMonitorWS(m_parent->m_runWS, integratedMonitors);
+  auto inputWS = getDependantWorkspace("InputWorkspace");
+  if (!integratedMonitors)
+    inputWS = m_parent->rebinDetectorsToMonitors(inputWS, monitorWS);
+  MatrixWorkspace_sptr normalized = m_parent->divide(inputWS, monitorWS);
+  outputWorkspace(normalized, "MonitorCorrectedWorkspace");
+}
+
+void ReflectometryReductionOne3::TaskNormalizeByTransmission::executeImpl() {
+  MatrixWorkspace_sptr transmissionWS = m_parent->getProperty("FirstTransmissionRun");
+
+  // If TransmissionProcessingInstructions are not passed then use
+  // passed processing instructions
+  std::string transmissionCommands = "";
+  if (m_parent->getPointerToProperty("TransmissionProcessingInstructions")->isDefault()) {
+    transmissionCommands = m_parent->m_processingInstructions;
+  } else {
+    transmissionCommands = m_parent->getPropertyValue("TransmissionProcessingInstructions");
+  }
+  auto alg = m_parent->createChildAlgorithm("CreateTransmissionWorkspace");
+  alg->initialize();
+  alg->setProperty("FirstTransmissionRun", transmissionWS);
+  MatrixWorkspace_sptr secondTransmissionWS = m_parent->getProperty("SecondTransmissionRun");
+  alg->setProperty("SecondTransmissionRun", secondTransmissionWS);
+  alg->setPropertyValue("Params", m_parent->getPropertyValue("Params"));
+  alg->setPropertyValue("StartOverlap", m_parent->getPropertyValue("StartOverlap"));
+  alg->setPropertyValue("EndOverlap", m_parent->getPropertyValue("EndOverlap"));
+  alg->setProperty("ScaleRHSWorkspace", m_parent->getPropertyValue("ScaleRHSWorkspace"));
+  alg->setPropertyValue("I0MonitorIndex", m_parent->getPropertyValue("I0MonitorIndex"));
+  alg->setPropertyValue("WavelengthMin", m_parent->getPropertyValue("WavelengthMin"));
+  alg->setPropertyValue("WavelengthMax", m_parent->getPropertyValue("WavelengthMax"));
+  alg->setPropertyValue("MonitorBackgroundWavelengthMin", m_parent->getPropertyValue("MonitorBackgroundWavelengthMin"));
+  alg->setPropertyValue("MonitorBackgroundWavelengthMax", m_parent->getPropertyValue("MonitorBackgroundWavelengthMax"));
+  alg->setPropertyValue("MonitorIntegrationWavelengthMin",
+                        m_parent->getPropertyValue("MonitorIntegrationWavelengthMin"));
+  alg->setPropertyValue("MonitorIntegrationWavelengthMax",
+                        m_parent->getPropertyValue("MonitorIntegrationWavelengthMax"));
+  alg->setProperty("ProcessingInstructions", transmissionCommands);
+  alg->setProperty("NormalizeByIntegratedMonitors", m_parent->getPropertyValue("NormalizeByIntegratedMonitors"));
+  bool const isDebug = m_parent->getProperty("Debug");
+  alg->setProperty("Debug", isDebug);
+  alg->execute();
+  transmissionWS = alg->getProperty("OutputWorkspace");
+
+  // Set interim workspace outputs
+  m_parent->setWorkspacePropertyFromChild(alg, "OutputWorkspaceFirstTransmission");
+  m_parent->setWorkspacePropertyFromChild(alg, "OutputWorkspaceSecondTransmission");
+
+  // Rebin the transmission run to be the same as the input.
+  auto rebinToWorkspaceAlg = m_parent->createChildAlgorithm("RebinToWorkspace");
+  rebinToWorkspaceAlg->initialize();
+  auto inputWS = getDependantWorkspace("InputWorkspace");
+  rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", inputWS);
+  rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", transmissionWS);
+  rebinToWorkspaceAlg->execute();
+  transmissionWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
+
+  // If the detector workspace has been reduced then the spectrum maps
+  // should match AFTER reducing the transmission workspace
+  // can we remove this, just a warning. Used to only happen on workspace was not reduced.
+  m_parent->verifySpectrumMaps(inputWS, transmissionWS);
+
+  MatrixWorkspace_sptr normalized = m_parent->divide(inputWS, transmissionWS);
+  outputWorkspace(transmissionWS, "TransmissionWorkspace");
+  outputWorkspace(normalized, "TransmissionCorrectedWorkspace");
+}
+
+void ReflectometryReductionOne3::TaskNormalizeByAlg::executeImpl() {
+  const std::string corrAlgName = m_parent->getProperty("CorrectionAlgorithm");
+  auto corrAlg = m_parent->createChildAlgorithm(corrAlgName);
+  corrAlg->initialize();
+  if (corrAlgName == "PolynomialCorrection") {
+    corrAlg->setPropertyValue("Coefficients", m_parent->getPropertyValue("Polynomial"));
+  } else if (corrAlgName == "ExponentialCorrection") {
+    corrAlg->setPropertyValue("C0", m_parent->getPropertyValue("C0"));
+    corrAlg->setPropertyValue("C1", m_parent->getPropertyValue("C1"));
+  } else {
+    throw std::runtime_error("Unknown correction algorithm: " + corrAlgName);
+  }
+  auto inputWS = getDependantWorkspace("InputWorkspace");
+  corrAlg->setProperty("InputWorkspace", inputWS);
+  corrAlg->setProperty("Operation", "Divide");
+  corrAlg->execute();
+  MatrixWorkspace_sptr normalized = corrAlg->getProperty("OutputWorkspace");
+  outputWorkspace(normalized, "TransmissionCorrectedWorkspace");
+}
+
+void ReflectometryReductionOne3::TaskExtractROI::executeImpl() {
+  auto inputWS = getDependantWorkspace("InputWorkspace");
+  auto summed = m_parent->makeDetectorWS(inputWS, false, false);
+  outputWorkspace(summed, "ExtractedROIWorkspace");
+}
+
+void ReflectometryReductionOne3::TaskSumInWavelength::executeImpl() {
+  auto inputWS = getDependantWorkspace("InputWorkspace");
+  auto summed = m_parent->makeDetectorWS(inputWS, false, true);
+  outputWorkspace(summed, "SummedWorkspace");
+}
+
+void ReflectometryReductionOne3::TaskCropWavelength::executeImpl() {
+  auto inputWS = getDependantWorkspace("InputWorkspace");
+  m_parent->findWavelengthMinMax(inputWS);
+  auto cropped = m_parent->cropWavelength(inputWS, true, m_parent->wavelengthMin(), m_parent->wavelengthMax());
+  outputWorkspace(cropped, "CroppedWorkspace");
 }
 } // namespace Mantid::Reflectometry

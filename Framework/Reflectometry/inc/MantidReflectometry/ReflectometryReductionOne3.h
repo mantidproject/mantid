@@ -149,13 +149,14 @@ private:
   class AlgorithmTask {
   public:
     explicit AlgorithmTask(ReflectometryReductionOne3 *parent, const std::string &name)
-        : m_parent(parent), m_name(name) {}
-    void setDependantTask(std::string task, std::string output_name = "") {
+        : m_parent(parent), m_name(name), m_firstTaskFlag(false) {}
+    void setDependantTask(std::string task, std::string output_name = "", std::string alias = "") {
       if (output_name.empty()) {
         // If no output name is provided, assume the whole task output is required
+        // If no alias is provided, use the task name as the alias
         m_dependantTasks[task] = {};
       } else {
-        m_dependantTasks[task].push_back(output_name);
+        m_dependantTasks[task].push_back({output_name, alias});
       }
     }
     void execute() {
@@ -166,35 +167,58 @@ private:
             std::accumulate(std::next(missingTasks.begin()), missingTasks.end(), missingTasks.front(),
                             [](const std::string &a, const std::string &b) { return a + ", " + b; }));
       }
+      m_parent->g_log.debug("Executing task: " + m_name + "\n");
       executeImpl();
       checkExpectedOutputs();
+      m_parent->g_log.debug("Finished executing task: " + m_name + "\n");
     }
     std::vector<std::string> getExpectedOutputs() { return m_expectedOutputs; }
     void setExpectedOutputs(std::vector<std::string> expectedOutputs) { m_expectedOutputs = expectedOutputs; }
     std::string name() const { return m_name; }
+    void initAsFirstTask(std::shared_ptr<MatrixWorkspace> inputWS) {
+      addDependantTaskOutput("InputWorkspace", inputWS);
+      m_firstTaskFlag = true;
+    }
 
   protected:
+    ReflectometryReductionOne3 *m_parent;
     void outputWorkspace(std::shared_ptr<MatrixWorkspace> ws, const std::string &outputName) {
       m_parent->m_algorithmTaskOutputs[m_name][outputName] = ws;
     }
 
+    std::shared_ptr<MatrixWorkspace> getDependantWorkspace(std::string outputAlias) {
+      return m_dependantOutputs[outputAlias];
+    }
+
   private:
-    // map of dependant task name: dependant outputs
-    std::unordered_map<std::string, std::vector<std::string>> m_dependantTasks;
-    ReflectometryReductionOne3 *m_parent;
+    // map of dependant task name: dependant outputs (task name, alias pairs)
+    std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>> m_dependantTasks;
     std::string m_name;
     std::vector<std::string> m_expectedOutputs;
+    std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>> m_dependantOutputs;
+    bool m_firstTaskFlag;
 
     virtual void executeImpl() = 0;
 
-    void populateExpectedOutputs() {
-      for (const auto &[taskName, outputs] : m_dependantTasks) {
+    void populateDependantTasks() {
+      for (const auto &item : m_dependantTasks) {
+        const auto &taskName = item.first;
+        const auto &outputs = item.second;
+        auto it = std::find_if(m_parent->m_stagedAlgorithmTasks.begin(), m_parent->m_stagedAlgorithmTasks.end(),
+                               [&taskName](std::shared_ptr<AlgorithmTask> task) { return task->name() == taskName; });
+        if (it == m_parent->m_stagedAlgorithmTasks.end())
+          throw std::runtime_error("Dependant task " + taskName + " not found for task " + m_name +
+                                   "could not populate expected outputs.");
         if (outputs.empty()) {
           // If no specific outputs are listed, populate with the whole task output
-          if (!m_parent->m_stagedAlgorithmTasks.contains(taskName))
-            throw std::runtime_error("Dependant task " + taskName + " not found for task " + m_name +
-                                     "could not populate expected outputs.");
-          m_dependantTasks[taskName] = m_parent->m_stagedAlgorithmTasks[taskName]->getExpectedOutputs();
+          const auto &expectedOutputs = (*it)->getExpectedOutputs();
+          for (const auto &output : expectedOutputs) {
+            m_dependantTasks[taskName].push_back({output, output});
+          }
+        } else {
+          for (const auto &[output, alias] : outputs) {
+            m_dependantTasks[taskName].push_back({output, alias});
+          }
         }
       }
     }
@@ -220,89 +244,136 @@ private:
     // check if output from dependant tasks is available in m_algorithmTaskOutputs
     // this could be supplied by dependant tasks, or manually setting algorithm properties
     std::vector<std::string> evaluateDependentTasks() {
-      populateExpectedOutputs();
+      populateDependantTasks();
       std::vector<std::string> missingTasks;
       for (const auto &[taskName, outputs] : m_dependantTasks) {
+        // If this is the first task, we expect the dependant outputs to be set as algorithm properties rather than
+        // outputs from other tasks
+        // TODO: Check that required input properties are provided. Currently we just take the input workspace
+        if (m_firstTaskFlag)
+          return missingTasks;
         if (!m_parent->m_algorithmTaskOutputs.contains(taskName)) {
           missingTasks.push_back(taskName + ": ALL OUTPUTS");
         } else {
           for (const auto &output : outputs) {
-            if (!m_parent->m_algorithmTaskOutputs[taskName].contains(output)) {
-              missingTasks.push_back(taskName + ":" + output);
+            if (!m_parent->m_algorithmTaskOutputs[taskName].contains(output.first)) {
+              missingTasks.push_back(taskName + ":" + output.first);
+            } else {
+              // populate dependent outputs for use in the task execution
+              addDependantTaskOutput(output.second, m_parent->m_algorithmTaskOutputs[taskName][output.first]);
             }
           }
         }
       }
       return missingTasks;
     }
-  };
 
-  class TaskA : public AlgorithmTask {
-  public:
-    explicit TaskA(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskA") {
-      setExpectedOutputs({"Output1", "Output2"});
-    }
-    void executeImpl() override {
-      // Implementation of TaskA
-      MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 5, 4);
-      outputWorkspace(outputWS, "Output1");
-      outputWorkspace(outputWS, "Output2");
+    void addDependantTaskOutput(const std::string &outputName, std::shared_ptr<MatrixWorkspace> ws) {
+      m_dependantOutputs[outputName] = ws;
     }
   };
 
-  class TaskB : public AlgorithmTask {
+  class TaskBackgroundSubtraction : public AlgorithmTask {
   public:
-    explicit TaskB(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskB") {
-      setExpectedOutputs({"Output3"});
-      setDependantTask("TaskA", "Output1");
+    explicit TaskBackgroundSubtraction(ReflectometryReductionOne3 *parent)
+        : AlgorithmTask(parent, "TaskBackgroundSubtraction") {
+      setExpectedOutputs({"BackgroundSubtractedWorkspace"});
+      setDependantTask("TaskExtractROI", "ExtractedROIWorkspace", "InputWorkspace");
     }
-    void executeImpl() override {
-      // Implementation of TaskB
-      MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 5, 4);
-      outputWorkspace(outputWS, "Output3");
-    }
+    void executeImpl() override;
   };
 
-  class TaskC : public AlgorithmTask {
+  class TaskConvertToWavelength : public AlgorithmTask {
   public:
-    explicit TaskC(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskC") {
-      setExpectedOutputs({"Output4"});
-      setDependantTask("TaskB", "Output3");
+    explicit TaskConvertToWavelength(ReflectometryReductionOne3 *parent)
+        : AlgorithmTask(parent, "TaskConvertToWavelength") {
+      setExpectedOutputs({"ConvertedWorkspaceWavelength"});
+      setDependantTask("TaskBackgroundSubtraction", "BackgroundSubtractedWorkspace", "InputWorkspace");
     }
-
-    void executeImpl() override {
-      // Implementation of TaskC
-      MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 5, 4);
-      outputWorkspace(outputWS, "Output4");
-    }
+    void executeImpl() override;
   };
 
-  class TaskD : public AlgorithmTask {
+  class TaskNormalizeByMonitor : public AlgorithmTask {
   public:
-    explicit TaskD(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskD") {
-      setExpectedOutputs({"Output5"});
-      setDependantTask("TaskC", "Output4");
+    explicit TaskNormalizeByMonitor(ReflectometryReductionOne3 *parent)
+        : AlgorithmTask(parent, "TaskNormalizeByMonitor") {
+      setExpectedOutputs({"MonitorCorrectedWorkspace"});
+      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace");
     }
-    void executeImpl() override {
-      // Implementation of TaskD
-      MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 5, 4);
-      outputWorkspace(outputWS, "Output5");
+    void executeImpl() override;
+  };
+
+  class TaskNormalizeByTransmission : public AlgorithmTask {
+  public:
+    explicit TaskNormalizeByTransmission(ReflectometryReductionOne3 *parent)
+        : AlgorithmTask(parent, "TaskNormalizeByTransmission") {
+      setExpectedOutputs({"TransmissionCorrectedWorkspace"});
+      setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
     }
+    void executeImpl() override;
+  };
+
+  class TaskNormalizeByAlg : public AlgorithmTask {
+  public:
+    explicit TaskNormalizeByAlg(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskNormalizeByAlg") {
+      setExpectedOutputs({"AlgorithmCorrectedWorkspace"});
+      setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
+    }
+    void executeImpl() override;
+  };
+
+  class TaskExtractROI : public AlgorithmTask {
+  public:
+    explicit TaskExtractROI(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskExtractROI") {
+      setExpectedOutputs({"ExtractedROIWorkspace"});
+      // setDependantTask("SET_TASK_HERE", "SET_OUTPUT_HERE", "InputWorkspace");
+    }
+    void executeImpl() override;
+  };
+
+  class TaskSumInWavelength : public AlgorithmTask {
+  public:
+    explicit TaskSumInWavelength(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskSumInWavelength") {
+      setExpectedOutputs({"SummedWorkspace"});
+      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace");
+    }
+    void executeImpl() override;
+  };
+
+  class TaskCropWavelength : public AlgorithmTask {
+  public:
+    explicit TaskCropWavelength(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskCropWavelength") {
+      setExpectedOutputs({"CroppedWorkspace"});
+      setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
+    }
+    void executeImpl() override;
   };
 
   // map of task name: task
-  std::vector<std::string> m_defaultTaskExecutionOrder{"TaskA", "TaskB", "TaskC", "TaskD"};
+  std::vector<std::string> m_defaultTaskExecutionOrder{"TaskExtractROI",          "TaskBackgroundSubtraction",
+                                                       "TaskConvertToWavelength", "TaskSumInWavelength",
+                                                       "TaskNormalizeByMonitor",  "TaskCropWavelength"};
+  // std::vector<std::string> m_defaultTaskExecutionOrder{"TaskExtractROI", "TaskBackgroundSubtraction",
+  // "TaskConvertToWavelength", "TaskSumInWavelength", "TaskNormalizeByMonitor", "TaskNormalizeByTransmission",
+  // "TaskCropWavelength"}; std::vector<std::string> m_defaultTaskExecutionOrder{"TaskBackgroundSubtraction",
+  // "TaskConvertToWavelength", "TaskNormalizeByMonitor", "TaskNormalizeByTransmission", "TaskSumInQ",
+  // "TaskCropWavelength"};
   std::vector<std::shared_ptr<AlgorithmTask>> m_AlgorithmTasks{
-      std::make_shared<TaskA>(this), std::make_shared<TaskB>(this), std::make_shared<TaskC>(this),
-      std::make_shared<TaskD>(this)};
-  std::map<std::string, std::shared_ptr<AlgorithmTask>> m_stagedAlgorithmTasks;
+      std::make_shared<TaskExtractROI>(this),          std::make_shared<TaskBackgroundSubtraction>(this),
+      std::make_shared<TaskConvertToWavelength>(this), std::make_shared<TaskSumInWavelength>(this),
+      std::make_shared<TaskNormalizeByMonitor>(this),  std::make_shared<TaskNormalizeByTransmission>(this),
+      std::make_shared<TaskCropWavelength>(this)};
+  std::vector<std::shared_ptr<AlgorithmTask>> m_stagedAlgorithmTasks;
   // map of task name: (map of output name: outputs)
-  std::map<std::string, std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>> m_algorithmTaskOutputs;
-  void stageAlgorithmTask(std::shared_ptr<AlgorithmTask> task) { m_stagedAlgorithmTasks[task->name()] = task; }
+  std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>>
+      m_algorithmTaskOutputs;
   void stageAlgorithmTasks(std::vector<std::shared_ptr<AlgorithmTask>> tasks) {
-    for (const auto &task : tasks) {
-      stageAlgorithmTask(task);
-    }
+    if (tasks.empty())
+      return;
+    // for first task in sequence, feed in the input workspace
+    API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+    tasks[0]->initAsFirstTask(inputWS);
+    m_stagedAlgorithmTasks = tasks;
   }
 };
 
