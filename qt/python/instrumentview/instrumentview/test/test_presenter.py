@@ -11,6 +11,8 @@ from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Peaks.Peak import Peak
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.renderers.shape_renderer import ShapeRenderer
+from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
+
 
 import numpy as np
 from mantid.simpleapi import CreateSampleWorkspace
@@ -30,6 +32,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model = FullInstrumentViewModel(self._ws)
         with mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"):
             self._presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
+        self._presenter._point_cloud_renderer = MagicMock(spec=PointCloudRenderer)
+        self._presenter._shape_renderer = MagicMock(spec=ShapeRenderer)
+        self._presenter._renderer = self._presenter._point_cloud_renderer
         self._mock_view.reset_mock()
 
     def tearDown(self):
@@ -73,6 +78,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mesh = MagicMock()
         mesh.point_data = {}
         self._presenter._detector_mesh = mesh
+        self._presenter._renderer.set_detector_scalars.side_effect = lambda m, counts, label: m.point_data.update({label: counts})
         self._presenter.set_view_integration_limits()
         np.testing.assert_allclose(mesh.point_data[self._presenter._counts_label], self._model.detector_counts)
         mock_on_contour_range_reset_clicked.assert_called_once()
@@ -86,9 +92,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_update_detector_picker(self):
         self._mock_view.is_multi_picking_checkbox_checked.return_value = False
         self._presenter.update_detector_picker()
-        # PointCloudRenderer delegates picking to plotter.enable_surface_point_picking
-        # via the renderer, not the view's enable_point_picking
-        self._mock_view.main_plotter.disable_picking.assert_called()
+        # Presenter delegates picking to the renderer, which calls plotter.disable_picking
+        # internally before setting up surface point picking.
+        self._presenter._renderer.enable_picking.assert_called_once_with(self._mock_view.main_plotter, callback=mock.ANY)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
     def test_unit_option_selected(self, mock_extract_spectra):
@@ -154,6 +160,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model.extract_spectra_for_line_plot = MagicMock()
         self._presenter._pickable_mesh = MagicMock()
         self._presenter._pickable_mesh.point_data = {}
+        self._presenter._renderer.set_pickable_scalars.side_effect = lambda m, visibility, label: m.point_data.update({label: visibility})
         self._mock_view.current_selected_unit.return_value = "TOF"
         self._mock_view.sum_spectra_selected.return_value = True
         self._presenter.update_picked_detectors_on_view()
@@ -327,7 +334,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.is_flip_z_axis_checkbox_checked.return_value = True
         self._presenter.on_flip_z_axis_check_box_clicked()
         mock_set_peaks.assert_called_once()
-        self._mock_view.add_detector_mesh.assert_called()
+        self._presenter._renderer.add_detector_mesh_to_plotter.assert_called_once()
         self.assertTrue(self._model.flip_z)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
@@ -636,12 +643,14 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     def test_get_shape_renderer_lazy_initialization(self):
         """Test that shape renderer is lazily initialized with precomputation."""
-        self.assertIsNone(self._presenter._shape_renderer)
-        renderer1 = self._presenter._get_shape_renderer()
+        with mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"):
+            presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
+        self.assertIsNone(presenter._shape_renderer)
+        renderer1 = presenter._get_shape_renderer()
         self.assertIsNotNone(renderer1)
-        self.assertIsNotNone(self._presenter._shape_renderer)
+        self.assertIsNotNone(presenter._shape_renderer)
         # Second call should return the same cached instance
-        renderer2 = self._presenter._get_shape_renderer()
+        renderer2 = presenter._get_shape_renderer()
         self.assertIs(renderer1, renderer2)
 
     def test_get_shape_renderer_after_clear(self):

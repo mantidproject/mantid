@@ -33,10 +33,10 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
     def test_build_detector_mesh_raises_without_precompute(self):
         positions = np.array([[0.0, 0.0, 0.0]])
         with self.assertRaises(RuntimeError):
-            self.renderer.build_detector_mesh(positions)
+            self.renderer.build_detector_mesh(positions, False)
 
     def test_build_masked_mesh_empty_positions(self):
-        mesh = self.renderer.build_masked_mesh(np.empty((0, 3)))
+        mesh = self.renderer.build_masked_mesh(np.empty((0, 3)), False)
         self.assertEqual(mesh.number_of_points, 0)
 
     # ------------------------------------------------------------------

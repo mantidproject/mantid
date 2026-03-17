@@ -20,7 +20,7 @@ class InstrumentRenderer(ABC):
     """
 
     @abstractmethod
-    def build_detector_mesh(self, positions: np.ndarray, model) -> pv.PolyData:
+    def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model) -> pv.PolyData:
         """Build the visual mesh for unmasked detectors.
 
         Parameters
@@ -37,7 +37,7 @@ class InstrumentRenderer(ABC):
         """
 
     @abstractmethod
-    def build_pickable_mesh(self, positions: np.ndarray) -> pv.PolyData:
+    def build_pickable_mesh(self, positions: np.ndarray, flip_z: bool) -> pv.PolyData:
         """Build the mesh used for interactive picking / selection highlighting.
 
         Parameters
@@ -52,7 +52,7 @@ class InstrumentRenderer(ABC):
         """
 
     @abstractmethod
-    def build_masked_mesh(self, positions: np.ndarray, model) -> pv.PolyData:
+    def build_masked_mesh(self, positions: np.ndarray, flip_z: bool, model) -> pv.PolyData:
         """Build the mesh for masked detectors.
 
         Parameters

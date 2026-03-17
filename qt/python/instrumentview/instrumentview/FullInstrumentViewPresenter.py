@@ -79,7 +79,7 @@ class FullInstrumentViewPresenter:
         self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = None  # lazily created
         self._sbs_shape_renderer = None  # lazily created
-        self._renderer = self._point_cloud_renderer  # Start with point cloud
+        self._renderer = self._point_cloud_renderer
         self._model.setup()
         self.setup()
         self._callback_queue = Queue()
@@ -109,8 +109,6 @@ class FullInstrumentViewPresenter:
         self._view.set_integration_range_limits(self._model.integration_limits)
         self._view.show_axes()
         self._setup_component_tree()
-        # Sync projection type and renderer with the view's default selection
-        self._on_projection_option_changed()
 
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
             self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_x_unit))
@@ -125,6 +123,7 @@ class FullInstrumentViewPresenter:
         self._view.hide_status_box()
         self._peak_interaction_status = PeakInteractionStatus.Disabled
         self._update_peak_buttons()
+        self.update_plotter()
 
     def _setup_component_tree(self) -> None:
         component_tree_model = ComponentTreeModel(self._model.workspace)
@@ -249,18 +248,18 @@ class FullInstrumentViewPresenter:
         self._view.clear_main_plotter()
         renderer = self._renderer
 
-        self._detector_mesh = renderer.build_detector_mesh(self._model.detector_positions, self._model)
+        self._detector_mesh = renderer.build_detector_mesh(self._model.detector_positions, self._model.flip_z, self._model)
         display_counts = self._transform_counts(self._model.detector_counts)
         renderer.set_detector_scalars(self._detector_mesh, display_counts, self._counts_label)
         renderer.add_detector_mesh_to_plotter(
             self._view.main_plotter, self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label
         )
 
-        self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions)
+        self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions, self._model.flip_z)
         renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
         renderer.add_pickable_mesh_to_plotter(self._view.main_plotter, self._pickable_mesh, scalars=self._visible_label)
 
-        self._masked_mesh = renderer.build_masked_mesh(self._model.masked_positions, self._model)
+        self._masked_mesh = renderer.build_masked_mesh(self._model.masked_positions, self._model.flip_z, self._model)
         renderer.add_masked_mesh_to_plotter(self._view.main_plotter, self._masked_mesh)
 
         monitor_mesh = self._create_and_add_monitor_mesh()

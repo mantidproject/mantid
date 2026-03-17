@@ -216,21 +216,13 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         passed_positions = call_args[0][2]
         np.testing.assert_array_equal(passed_positions, original_positions)
 
-    def test_flip_z_invalidates_projection_cache(self):
-        """Changing flip_z should clear the projection cache"""
-        model, _ = self._setup_model([1, 2, 3])
-        original_flip_z = model.flip_z
-        model._cached_projections_map["dummy_key"] = "cached_value"
-        model.flip_z = not original_flip_z
-        self.assertEqual(len(model._cached_projections_map), 0)
-
     def test_flip_z_same_value_preserves_cache(self):
         """Setting flip_z to its current value should not clear the cache"""
         model, _ = self._setup_model([1, 2, 3])
         original_flip_z = model.flip_z
-        model._cached_projections_map["dummy_key"] = "cached_value"
+        model._cached_projection_objects["dummy_key"] = "cached_value"
         model.flip_z = original_flip_z
-        self.assertEqual(len(model._cached_projections_map), 1)
+        self.assertEqual(len(model._cached_projection_objects), 1)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
     def test_flip_z_uses_separate_cache_keys(self, mock_cylindrical_projection):

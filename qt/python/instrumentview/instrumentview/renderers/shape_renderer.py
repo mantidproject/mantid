@@ -135,7 +135,7 @@ class ShapeRenderer(InstrumentRenderer):
     # -----------------------------------------------------------------
     # Build meshes
     # -----------------------------------------------------------------
-    def build_detector_mesh(self, positions: np.ndarray, model) -> pv.PolyData:
+    def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model) -> pv.PolyData:
         """Build a surface mesh for the unmasked detectors whose centres are *positions*.
 
         *positions* may already be projected to 2D (with z=0).  In that case
@@ -160,13 +160,14 @@ class ShapeRenderer(InstrumentRenderer):
             flatten_2d=model.is_2d_projection,
             project_vertices_2d=project_vertices_2d,
             projection=projection,
+            flip_z=flip_z,
         )
         self._cell_to_detector = c2d
         self._faces_per_detector = fpd
         self._detector_mesh_ref = mesh
         return mesh
 
-    def build_pickable_mesh(self, positions: np.ndarray) -> pv.PolyData:
+    def build_pickable_mesh(self, positions: np.ndarray, flip_z: bool) -> pv.PolyData:
         """Return a copy of the detector shape mesh for picking and highlighting.
 
         Cell-based picking on this mesh lets the user click anywhere on
@@ -175,9 +176,12 @@ class ShapeRenderer(InstrumentRenderer):
         """
         if self._detector_mesh_ref is not None and self._detector_mesh_ref.number_of_cells > 0:
             return self._detector_mesh_ref.copy(deep=True)
+        if flip_z:
+            positions = positions.copy()
+            positions[:, 2] *= -1
         return pv.PolyData(positions)
 
-    def build_masked_mesh(self, positions: np.ndarray, model) -> pv.PolyData:
+    def build_masked_mesh(self, positions: np.ndarray, flip_z: bool, model) -> pv.PolyData:
         if len(positions) == 0:
             return pv.PolyData()
         indices = self._resolve_detector_indices(positions, model, masked=True)
@@ -195,6 +199,7 @@ class ShapeRenderer(InstrumentRenderer):
             flatten_2d=model.is_2d_projection,
             project_vertices_2d=project_vertices_2d,
             projection=projection,
+            flip_z=flip_z,
         )
         return mesh
 
@@ -373,6 +378,7 @@ class ShapeRenderer(InstrumentRenderer):
         per_detector_rotate: np.ndarray | None = None,
         project_vertices_2d: bool = False,
         projection=None,
+        flip_z: bool = False,
     ) -> tuple[pv.PolyData, np.ndarray, np.ndarray]:
         """Vectorised mesh assembly.
 
@@ -467,6 +473,8 @@ class ShapeRenderer(InstrumentRenderer):
 
                     group_world_pos = self._all_positions_3d[det_indices[group_indices]][:, np.newaxis, :]
                     world_vertices = tiled + group_world_pos
+                    if flip_z:
+                        world_vertices[:, :, 2] *= -1
                     projected_vertices = projection.project_points(world_vertices.reshape(-1, 3), apply_x_correction=False).reshape(
                         n_group, n_verts, 2
                     )

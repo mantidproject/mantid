@@ -367,7 +367,7 @@ class FullInstrumentViewWindow(QMainWindow):
         return self._flip_z_axis_check_box.isChecked()
 
     def enable_or_disable_flip_z_axis_box(self) -> None:
-        self._flip_z_axis_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+        self._flip_z_axis_check_box.setDisabled(self.current_selected_projection() in [ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE])
 
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
@@ -779,43 +779,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def clear_main_plotter(self) -> None:
         self.delete_current_widget()
         self.main_plotter.clear()
-
-    def add_detector_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
-        """Draw the given mesh in the main plotter window"""
-        scalar_bar_args = dict(interactive=True, vertical=False, title_font_size=15, label_font_size=12) if scalars is not None else None
-        self.main_plotter.add_mesh(
-            mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15, scalar_bar_args=scalar_bar_args
-        )
-
-        if self.main_plotter.off_screen:
-            return
-
-        if not is_projection:
-            self.main_plotter.enable_trackball_style()
-            return
-
-        self.main_plotter.view_xy()
-        self.main_plotter.enable_parallel_projection()
-        self.main_plotter.enable_zoom_style()
-
-    def add_pickable_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
-        self.main_plotter.add_mesh(
-            point_cloud,
-            scalars=scalars,
-            opacity=[0.0, 0.3],
-            clim=[0, 1],
-            show_scalar_bar=False,
-            pickable=True,
-            cmap="Oranges",
-            point_size=30,
-            render_points_as_spheres=True,
-        )
-
-    def add_masked_mesh(self, mesh: PolyData) -> None:
-        if mesh.number_of_points == 0:
-            return
-        # RGB for dark grey is (64, 64, 64), normalised is (0.25, 0.25, 0.25)
-        self.main_plotter.add_mesh(mesh, color=(0.25, 0.25, 0.25), pickable=False, render_points_as_spheres=True, point_size=15)
 
     def add_cylinder_widget(self) -> None:
         cylinder_repr = vtkImplicitCylinderRepresentation()

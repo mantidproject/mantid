@@ -38,7 +38,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
         super().precompute(workspace)
         self._bank_groups_by_detector_id = [] if bank_groups_by_detector_id is None else bank_groups_by_detector_id
 
-    def build_detector_mesh(self, positions: np.ndarray, model=None) -> pv.PolyData:
+    def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
         if not self._precomputed:
             raise RuntimeError("SideBySideShapeRenderer.precompute() must be called before build_detector_mesh().")
 
@@ -62,7 +62,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
         self._detector_mesh_ref = mesh
         return mesh
 
-    def build_masked_mesh(self, positions: np.ndarray, model=None) -> pv.PolyData:
+    def build_masked_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
         if len(positions) == 0:
             return pv.PolyData()
         flatten_2d = model is not None and model.is_2d_projection
