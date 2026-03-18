@@ -16,9 +16,26 @@ import matplotlib.lines as lines
 from mantidqt.MPLwidgets import FigureCanvas
 
 from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.filtered_file_finder import FilteredFileFinderWidget
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.plot_toolbar import GSAS2PlotToolbar
 
 Ui_calib, _ = load_ui(__file__, "gsas2_tab.ui")
+
+
+_region_filter_values = {
+    "No Region Filter": "",
+    "1 (North)": "bank_1",
+    "2 (South)": "bank_2",
+    "Both Banks": "bank_",
+    "Custom": "Custom",
+    "Cropped": "Cropped",
+    "Texture": "Texture",
+}
+
+
+def _file_filter_generator(filter_options: dict[str, str]) -> str:
+    region_option = filter_options["Region"]
+    return f"*{_region_filter_values[region_option]}*"
 
 
 class GSAS2View(QtWidgets.QWidget, Ui_calib):
@@ -26,7 +43,9 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     sig_update_sample_field = QtCore.Signal()
     fit_range_changed = QtCore.Signal(list)
 
-    def __init__(self, parent=None, instrument="ENGINX"):
+    focused_data_file_finder: FilteredFileFinderWidget
+
+    def __init__(self, parent=None, instrument="ENGINX") -> None:
         super(GSAS2View, self).__init__(parent)
         self.setupUi(self)
 
@@ -44,6 +63,9 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.focused_data_file_finder.isForRunFiles(False)
         self.focused_data_file_finder.setFileExtensions([".gss", ".gsa"])
         self.focused_data_file_finder.allowMultipleFiles(True)
+
+        self.focused_data_file_finder.add_filter("Region", _region_filter_values.keys())
+        self.focused_data_file_finder.set_filter_generator(_file_filter_generator)
 
         self.mark_project_name_invalid_when_empty()
         self.project_name_line_edit.textChanged.connect(self.mark_project_name_invalid_when_empty)
