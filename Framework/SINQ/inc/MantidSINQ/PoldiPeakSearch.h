@@ -100,6 +100,7 @@ protected:
 
 private:
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 };
 

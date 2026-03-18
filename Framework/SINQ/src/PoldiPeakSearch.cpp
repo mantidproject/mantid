@@ -484,30 +484,45 @@ void PoldiPeakSearch::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("InputWorkspace", "", Direction::InOut),
                   "Workspace containing a POLDI auto-correlation spectrum.");
 
-  std::shared_ptr<BoundedValidator<int>> minPeakSeparationValidator = std::make_shared<BoundedValidator<int>>();
-  minPeakSeparationValidator->setLower(1);
-  declareProperty("MinimumPeakSeparation", 15, minPeakSeparationValidator,
+  auto mustBeIntGreaterThanOne = std::make_shared<BoundedValidator<int>>();
+  mustBeIntGreaterThanOne->setLower(1);
+  declareProperty("MinimumPeakSeparation", 15, mustBeIntGreaterThanOne,
                   "Minimum number of points in the spectrum by which two peaks "
                   "have to be separated.",
                   Direction::Input);
 
-  std::shared_ptr<BoundedValidator<int>> maxPeakNumberValidator = std::make_shared<BoundedValidator<int>>();
-  maxPeakNumberValidator->setLower(1);
-  declareProperty("MaximumPeakNumber", 24, maxPeakNumberValidator, "Maximum number of peaks to be detected.",
+  declareProperty("MaximumPeakNumber", 24, mustBeIntGreaterThanOne, "Maximum number of peaks to be detected.",
                   Direction::Input);
 
   declareProperty("MinimumPeakHeight", 0.0, "Minimum peak height.", Direction::Input);
 
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Workspace containing detected peaks.");
+  auto mustBePositiveInt = std::make_shared<BoundedValidator<int>>();
+  mustBePositiveInt->setLower(0);
+  declareProperty("WorkspaceIndex", 0, mustBePositiveInt,
+                  "Workspace index of spectrum in workspace in which to search for peaks.");
+}
+
+/// Validate the input properties are sane
+std::map<std::string, std::string> PoldiPeakSearch::validateInputs() {
+  std::map<std::string, std::string> helpMessages;
+
+  const int ispec = getProperty("WorkspaceIndex");
+  const Workspace2D_sptr ws = getProperty("InputWorkspace");
+  if (ispec >= ws->getNumberHistograms()) {
+    helpMessages["WorkspaceIndex"] = "WorkspaceIndex must be less than number of spectra.";
+  }
+  return helpMessages;
 }
 
 void PoldiPeakSearch::exec() {
   g_log.information() << "PoldiPeakSearch:\n";
 
-  Workspace2D_sptr correlationWorkspace = getProperty("InputWorkspace");
-  auto &correlationQValues = correlationWorkspace->x(0);
-  auto &correlatedCounts = correlationWorkspace->y(0);
+  const Workspace2D_sptr correlationWorkspace = getProperty("InputWorkspace");
+  const int ispec = getProperty("WorkspaceIndex");
+  auto &correlationQValues = correlationWorkspace->x(ispec);
+  auto &correlatedCounts = correlationWorkspace->y(ispec);
   g_log.information() << "   Auto-correlation data read.\n";
 
   Unit_sptr xUnit = correlationWorkspace->getAxis(0)->unit();

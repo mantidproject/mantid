@@ -8,6 +8,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidSINQ/PoldiPeakSearch.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
@@ -27,6 +30,8 @@ public:
   // This means the constructor isn't called when running other tests
   static PoldiPeakSearchTest *createSuite() { return new PoldiPeakSearchTest(); }
   static void destroySuite(PoldiPeakSearchTest *suite) { delete suite; }
+
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().clear(); }
 
   void testgetNeighborSums() {
     double raw[] = {1.0, 2.0, 3.0, 4.0};
@@ -255,5 +260,48 @@ public:
     TestablePoldiPeakSearch poldiPeakSearch;
 
     TS_ASSERT_EQUALS(poldiPeakSearch.minimumPeakHeightFromBackground(UncertainValue(3.0, 3.5)), 13.5);
+  }
+  void testWorkspaceIndex() {
+    // create workspace
+    std::string wsname = "ws_multiple_spectra";
+    auto create_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
+    create_alg->initialize();
+    create_alg->setProperty("Function", "Multiple Peaks");
+    create_alg->setProperty("XUnit", "dSpacing");
+    create_alg->setProperty("XMin", "1");
+    create_alg->setProperty("XMax", "10");
+    create_alg->setProperty("BinWidth", "0.1");
+    create_alg->setProperty("BankPixelWidth", "1");
+    create_alg->setProperty("OutputWorkspace", wsname);
+    create_alg->execute();
+
+    // shift spectra relative to each other so peaks depend on workspace index
+    auto conv_axis_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertAxisByFormula");
+    conv_axis_alg->initialize();
+    conv_axis_alg->setProperty("InputWorkspace", wsname);
+    conv_axis_alg->setProperty("OutputWorkspace", wsname);
+    conv_axis_alg->setProperty("Formula", "l2 + x");
+    conv_axis_alg->execute();
+
+    // run algorithm on second spectrum
+    PoldiPeakSearch alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", wsname));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaximumPeakNumber", "2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndex", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out_table"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // assert peaks found
+    // auto out = alg.getProperty("OutputWorkspace"); // Mantid::API::ITableWorkspace_sptr
+    // Mantid::DataObjects::TableWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+    Mantid::DataObjects::TableWorkspace_sptr out;
+    TS_ASSERT_THROWS_NOTHING(
+        out =
+            Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("out_table"));
+    auto dspacs = out->getColumn(1);
+    TS_ASSERT_DELTA(dspacs->toDouble(0), 13.7, 0.01);
+    TS_ASSERT_DELTA(dspacs->toDouble(1), 16.4, 0.01);
   }
 };
