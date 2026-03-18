@@ -1,0 +1,1 @@
+- Fix bug where not having IDF for some of the pixels resulted in an exception. Now those events are skipped.

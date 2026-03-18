@@ -2,9 +2,6 @@
 Reflectometry Changes
 =====================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Increased the time between polling for new runs when using the Autoprocessing feature in the :ref:`ISIS Reflectometry GUI<interface-isis-refl>` from 15 seconds to 30 seconds.

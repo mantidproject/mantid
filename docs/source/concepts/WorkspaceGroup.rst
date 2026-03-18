@@ -5,9 +5,6 @@ Workspace Group
 ===============
 
 
-.. contents::
-  :local:
-
 A WorkspaceGroup is a group of workspaces. The WorkspaceGroup object does not hold any data itself, but instead holds a list of Workspace objects. They appear as an expandable list of workspaces in the :ref:`Workspaces Toolbox <main_window>` in the main window (the list of workspaces is also called the ADS or *AnalysisDataService*). Thus, workspace groups add structure to the ADS and make it more readable and also allow algorithms to be executed over a list of workspaces contained within the group but passing the group to the algorithm.
 
 Most algorithms can be passed a WorkspaceGroup in place of a normal workspace input, and will simply execute the algorithm on each workspace contained within the group.

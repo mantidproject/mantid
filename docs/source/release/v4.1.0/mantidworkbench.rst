@@ -2,9 +2,6 @@
 MantidWorkbench Changes
 =======================
 
-.. contents:: Table of Contents
-   :local:
-
 Installation
 ############
 

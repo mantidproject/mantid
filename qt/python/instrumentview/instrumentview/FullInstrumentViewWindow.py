@@ -29,6 +29,7 @@ from qtpy.QtWidgets import (
 )
 from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
 from qtpy.QtCore import Qt, QEvent, QSize
+from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -44,6 +45,7 @@ from mantid import UsageService, ConfigService
 from mantid.kernel import FeatureType
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 from mantidqt.utils.qt.qappthreadcall import run_on_qapp_thread
+from mantidqt.io import open_a_file_dialog
 
 from instrumentview.Detectors import DetectorInfo
 from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
@@ -198,11 +200,20 @@ class FullInstrumentViewWindow(QMainWindow):
         self._aspect_ratio_check_box.setChecked(aspect_ratio_option.casefold() == "yes")
         self._show_monitors_check_box = QCheckBox()
         self._show_monitors_check_box.setText("Show Monitors?")
+        self._count_scale_combo_box = NoWheelComboBox(self)
+        self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
+        self._flip_z_axis_check_box = QCheckBox()
+        self._flip_z_axis_check_box.setText("Flip Z Axis")
+        self._flip_z_axis_check_box.setToolTip(
+            "If checked, the Z axis will be flipped in 2D projections, mirroring the instrument along the beam axis."
+        )
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
         projection_layout.addWidget(self._clear_point_picked_detectors)
         projection_layout.addWidget(self._aspect_ratio_check_box)
         projection_layout.addWidget(self._show_monitors_check_box)
+        projection_layout.addWidget(self._count_scale_combo_box)
+        projection_layout.addWidget(self._flip_z_axis_check_box)
 
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
@@ -247,17 +258,26 @@ class FullInstrumentViewWindow(QMainWindow):
             self._save_roi_to_ws,
             self._save_grouping_to_ws,
             self._save_grouping_to_xml,
+            self._save_grouping_to_cal,
         ) = self._add_tab(selection_tab, "ROI")
         self._save_roi_to_ws.setText("Export ROI to ADS")
         self._save_grouping_to_ws.setText("Export Grouping to ADS")
         self._save_grouping_to_xml.setText("Save Grouping to XML")
+        self._save_grouping_to_cal.setText("Save Grouping to CAL")
 
         mask_tab = QWidget()
-        (self._add_mask, self._clear_masks, self._mask_list, self._save_mask_to_ws, self._save_mask_to_file, self._overwrite_mask) = (
-            self._add_tab(mask_tab, "Mask")
-        )
+        (
+            self._add_mask,
+            self._clear_masks,
+            self._mask_list,
+            self._save_mask_to_ws,
+            self._save_mask_to_xml,
+            self._save_mask_to_cal,
+            self._overwrite_mask,
+        ) = self._add_tab(mask_tab, "Mask")
         self._save_mask_to_ws.setText("Save Mask to ADS")
-        self._save_mask_to_file.setText("Save Mask to XML")
+        self._save_mask_to_xml.setText("Save Mask to XML")
+        self._save_mask_to_cal.setText("Save Mask to CAL")
         self._overwrite_mask.setText("Apply Mask Permanently")
 
         self._picking_masking_tab = QTabWidget()
@@ -337,6 +357,12 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def enable_or_disable_aspect_ratio_box(self) -> None:
         self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+
+    def is_flip_z_axis_checkbox_checked(self) -> bool:
+        return self._flip_z_axis_check_box.isChecked()
+
+    def enable_or_disable_flip_z_axis_box(self) -> None:
+        self._flip_z_axis_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
@@ -464,21 +490,24 @@ class FullInstrumentViewWindow(QMainWindow):
         item_list.setSelectionMode(QAbstractItemView.NoSelection)
         post_list_layout = QHBoxLayout()
         save_to_ws_btn = QPushButton()
-        save_to_file_btn = QPushButton()
+        save_to_xml_btn = QPushButton()
+        save_to_cal_btn = QPushButton()
         overwrite_btn = QPushButton()
         post_list_layout.addWidget(save_to_ws_btn)
-        post_list_layout.addWidget(save_to_file_btn)
+        post_list_layout.addWidget(save_to_xml_btn)
+        post_list_layout.addWidget(save_to_cal_btn)
         post_list_layout.addWidget(overwrite_btn)
         tab_layout.addLayout(pre_list_layout)
         tab_layout.addWidget(item_list)
         tab_layout.addLayout(post_list_layout)
-        return (add_item_btn, clear_items_btn, item_list, save_to_ws_btn, save_to_file_btn, overwrite_btn)
+        return (add_item_btn, clear_items_btn, item_list, save_to_ws_btn, save_to_xml_btn, save_to_cal_btn, overwrite_btn)
 
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
         for unit in self._presenter.available_unit_options():
             self._units_combo_box.addItem(unit)
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
+        self._count_scale_combo_box.addItems(self._presenter.count_scale_combo_options())
         self.main_plotter.set_color_cycler(self._presenter._COLOURS)
         self.refresh_peaks_ws_list()
         self.refresh_workspaces_in_list(CurrentTab.Masking)
@@ -498,11 +527,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self._mask_list.itemChanged.connect(partial(self._presenter.on_list_item_selected, CurrentTab.Masking))
         self._selection_list.itemChanged.connect(partial(self._presenter.on_list_item_selected, CurrentTab.Grouping))
         self._save_mask_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
-        self._save_mask_to_file.clicked.connect(self._presenter.on_save_mask_to_xml_clicked)
+        self._save_mask_to_xml.clicked.connect(self._presenter.on_save_mask_to_xml_clicked)
+        self._save_mask_to_cal.clicked.connect(self._presenter.on_save_mask_to_cal_clicked)
         self._overwrite_mask.clicked.connect(self._presenter.on_apply_permanently_clicked)
         self._save_roi_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
         self._save_grouping_to_ws.clicked.connect(self._presenter.on_save_grouping_to_ads_clicked)
         self._save_grouping_to_xml.clicked.connect(self._presenter.on_save_grouping_to_xml_clicked)
+        self._save_grouping_to_cal.clicked.connect(self._presenter.on_save_grouping_to_cal_clicked)
         self._clear_masks.clicked.connect(self._presenter.on_clear_list_clicked)
         self._clear_selections.clicked.connect(self._presenter.on_clear_list_clicked)
         self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
@@ -510,6 +541,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._delete_peak_button.clicked.connect(self._presenter.on_delete_peak_clicked)
         self._delete_all_selected_peaks_button.clicked.connect(self._presenter.on_delete_all_selected_peaks_clicked)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
+        self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
+        self._flip_z_axis_check_box.clicked.connect(self._presenter.on_flip_z_axis_check_box_clicked)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -668,6 +701,10 @@ class FullInstrumentViewWindow(QMainWindow):
         """Get the currently selected unit from the combo box"""
         return self._units_combo_box.currentText()
 
+    def current_selected_count_scale(self) -> str:
+        """Get the currently selected display scale for integrated counts"""
+        return self._count_scale_combo_box.currentText()
+
     def sum_spectra_selected(self) -> bool:
         return self._sum_spectra_checkbox.isChecked()
 
@@ -697,9 +734,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self._contour_range_slider.setValue(contour_limits)
         return
 
-    def set_plotter_scalar_bar_range(self, clim: tuple[int, int], label: str) -> None:
+    def set_plotter_scalar_bar_range(self, clim: tuple[int, int], label: str, display_title: str | None = None) -> None:
         """Set the range of the colours displayed, i.e. the legend"""
         self.main_plotter.update_scalar_bar_range(clim, label)
+        if display_title is None:
+            return
+
+        self.main_plotter.scalar_bars[self._presenter._counts_label].SetTitle(display_title)
 
     def closeEvent(self, QCloseEvent: QEvent) -> None:
         """When closing, make sure to close the plotters and figure correctly to prevent errors"""
@@ -1050,3 +1091,12 @@ class FullInstrumentViewWindow(QMainWindow):
             self._lineplot_peak_cursor.linev.remove()
             self._lineplot_peak_cursor = None
             self._detector_figure_canvas.draw_idle()
+
+    def get_filename_from_dialog(self, file_filter: str):
+        # NOTE: Needs to be in view to run in main thread
+        return open_a_file_dialog(
+            accept_mode=QFileDialog.AcceptSave,
+            file_mode=QFileDialog.AnyFile,
+            file_filter=file_filter,
+            directory=ConfigService["defaultsave.directory"],
+        )

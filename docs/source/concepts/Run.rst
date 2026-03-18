@@ -5,9 +5,6 @@ Run
 ===
 
 
-.. contents::
-  :local:
-
 What the Run object
 -------------------
 

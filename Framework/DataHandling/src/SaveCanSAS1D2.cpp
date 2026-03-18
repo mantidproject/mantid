@@ -10,6 +10,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataHandling/FormattingHelpers.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
@@ -364,18 +365,18 @@ void SaveCanSAS1D2::createSASTransElement(std::string &sasTrans, const std::stri
     if (std::isnan(lambda[j]))
       trans << "NaN";
     else
-      trans << lambda[j];
+      trans << formatDouble(lambda[j]);
     trans << "</Lambda>"
           << "<T unit=\"" << t_unit << "\">";
     if (std::isnan(trans_value[j]))
       trans << "NaN";
     else
-      trans << trans_value[j];
+      trans << formatDouble(trans_value[j]);
     trans << "</T><Tdev unit=\"none\">";
     if (std::isnan(trans_err[j]))
       trans << "NaN";
     else
-      trans << trans_err[j];
+      trans << formatDouble(trans_err[j]);
     trans << "</Tdev></Tdata>";
   }
   trans << "\n\t\t</SAStransmission_spectrum>";
@@ -400,4 +401,5 @@ void SaveCanSAS1D2::writeHeader(const std::string &fileName) {
     throw Exception::FileError("Error opening the output file for writing", fileName);
   }
 }
+
 } // namespace Mantid::DataHandling

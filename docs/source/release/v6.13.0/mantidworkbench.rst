@@ -2,9 +2,6 @@
 Mantid Workbench Changes
 ========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - The :ref:`Python script editor <WorkbenchScriptWindow>` now supports ``bool`` and f-string syntax highlighting.

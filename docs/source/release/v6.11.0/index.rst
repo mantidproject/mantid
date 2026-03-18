@@ -9,9 +9,6 @@ Mantid 6.11.0 Release Notes
    :class: screenshot
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 6.11.0 of Mantid.
 
 In this release we gave extra attention to fixing bugs and improving algorithms (for example by making them run faster or use less memory).

@@ -2,9 +2,6 @@
 Inelastic Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - (`#40595 <https://github.com/mantidproject/mantid/pull/40595>`_) :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` has a new combo box to swap between using the ``quasielasticbayes`` (old Fortran library) backend and the ``quickbayes`` (new python library) backend. Changing this box won't effect the functionality of the ResNorm tab, which already uses ``quickbayes``.

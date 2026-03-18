@@ -4,9 +4,6 @@
  Texture Reduction
 ==================
 
-.. contents::
-  :local:
-
 
 
 

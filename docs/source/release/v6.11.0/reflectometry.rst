@@ -2,9 +2,6 @@
 Reflectometry Changes
 =====================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - New algorithm :ref:`algm-PolarizationEfficienciesWildes` has been added for calculating the efficiencies of the polarizing components of an instrument with two flippers.

@@ -7,9 +7,6 @@ Framework Changes
    :width: 385px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 
 Packaging
 #########

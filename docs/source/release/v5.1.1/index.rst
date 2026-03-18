@@ -4,9 +4,6 @@
 Mantid 5.1.1 Release Notes
 ==========================
 
-.. contents:: Table of Contents
-   :local:
-
 This is a patch release that corrects some significant issues since :ref:`version 5.1.0 <v5.1.0>`.
 
 The main changes are:

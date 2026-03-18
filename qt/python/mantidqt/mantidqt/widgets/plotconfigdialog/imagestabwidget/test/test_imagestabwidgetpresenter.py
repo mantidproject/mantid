@@ -191,7 +191,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig_with_toolbar = figure()
         fig_with_toolbar.canvas.manager.toolbar = MagicMock()
         fig = pcolormesh([self.ws, self.ws], fig=fig_with_toolbar)
-        fig_with_toolbar.canvas.manager.toolbar.push_current.called_once()
+        fig_with_toolbar.canvas.manager.toolbar.push_current.assert_called_once()
         props = {"label": "New Label", "colormap": "jet", "vmin": 0, "vmax": 2, "scale": "Linear", "interpolation": "None"}
         mock_view = Mock(get_selected_image_name=lambda: "ws: (0, 0) - child0", get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
@@ -222,7 +222,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig_with_toolbar = figure()
         fig_with_toolbar.canvas.manager.toolbar = MagicMock()
         fig = pcolormesh([self.ws, ws], fig=fig_with_toolbar)
-        fig_with_toolbar.canvas.manager.toolbar.push_current.called_once()
+        fig_with_toolbar.canvas.manager.toolbar.push_current.assert_called_once()
         self.assertTrue(isinstance(fig.axes[0].images[0], matplotlib.image.AxesImage))
         self.assertTrue(isinstance(fig.axes[1].collections[0], matplotlib.collections.QuadMesh))
         props = {"label": "New Label", "colormap": "jet", "vmin": 0, "vmax": 2, "scale": "Linear", "interpolation": "None"}

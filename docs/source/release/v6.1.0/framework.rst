@@ -2,9 +2,6 @@
 Framework Changes
 =================
 
-.. contents:: Table of Contents
-   :local:
-
 .. figure:: ../../images/Multiple_Scatter_Intensity.png
    :class: screenshot
    :width: 350px

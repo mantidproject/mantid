@@ -3,9 +3,6 @@
 Time-of-Flight Powder Diffraction Calibration
 =============================================
 
-.. contents::
-  :local:
-
 
 Data Required
 -------------

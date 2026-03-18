@@ -9,9 +9,6 @@ Mantid 5.0.0 Release Notes
    :width: 500px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 5.0.0 of Mantid.
 
 **MANTID NOW RUNS IN Python 3**

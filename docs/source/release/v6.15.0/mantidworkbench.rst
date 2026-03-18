@@ -2,9 +2,6 @@
 Mantid Workbench Changes
 ========================
 
-.. contents:: Table of Contents
-   :local:
-
 Bugfixes
 --------
 - (`#40298 <https://github.com/mantidproject/mantid/pull/40298>`_) The :ref:`inelastic-moments` tab of the

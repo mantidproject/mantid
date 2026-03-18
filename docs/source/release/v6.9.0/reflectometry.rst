@@ -2,9 +2,6 @@
 Reflectometry Changes
 =====================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Algorithm :ref:`algm-SaveISISReflectometryORSO` has been added to allow reduced Reflectometry data from experiments at the ISIS facility to be saved into the ORSO ASCII format.

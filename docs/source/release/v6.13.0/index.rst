@@ -9,9 +9,6 @@ Mantid 6.13.0 Release Notes
    :width: 600px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 6.13.0 of Mantid.
 
 This release showcases a wide range of new algorithms and behind-the-scenes improvements, including:

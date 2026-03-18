@@ -49,7 +49,7 @@ public:
   /// Returns the preferred file extension
   const std::string &preferredExtension() const { return m_extensions.front(); }
 
-  /// Returns the time zone designation compatible with pytz
+  /// Returns the time zone designation compatible with zoneinfo
   const std::string &timezone() const { return m_timezone; }
 
   /// Return the archive search interface names
@@ -86,7 +86,7 @@ private:
 
   CatalogInfo m_catalogs;                    ///< Gain access to the catalogInfo class.
   const std::string m_name;                  ///< facility name
-  std::string m_timezone;                    ///< Timezone designation in pytz
+  std::string m_timezone;                    ///< Timezone designation in zoneinfo
   int m_zeroPadding;                         ///< default zero padding for this facility
   std::string m_delimiter;                   ///< default delimiter between instrument name and run number
   std::vector<std::string> m_extensions;     ///< file extensions in order of preference

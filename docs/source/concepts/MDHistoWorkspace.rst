@@ -4,9 +4,6 @@
 MD Histogram Workspace
 ======================
 
-.. contents::
-  :local:
-
 The MD Histogram Workspace[MDHistoWorkspace] is a simple multi-dimensional workspace. In
 contrast to the :ref:`MDWorkspace <MDWorkspace>`, which contains
 points in space, the MDHistoWorkspace consists of a signal and error
