@@ -75,6 +75,7 @@ class ReflectometryDataset:
     _RRO_ALG = "ReflectometryReductionOne"
     _STITCH_ALG = "Stitch1DMany"
     _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
+    _REBIN_ALG = "Rebin"
 
     def __init__(self, ws, is_ws_grp_member: bool):
         self._name: str = ""
@@ -92,6 +93,7 @@ class ReflectometryDataset:
         self._transmission_files: Tuple[List[str], List[str]] = None
         self._flood_entry: Optional[tuple[str, str]] = None
         self._calibration_entry: Optional[str] = None
+        self._resolution: Optional[float] = None
 
         self._populate_histories()
         self._populate_q_conversion_info()
@@ -189,6 +191,12 @@ class ReflectometryDataset:
         if self._calibration_entry is None:
             self._calibration_entry = self._get_calibration_file_entry()
         return self._calibration_entry
+
+    @property
+    def resolution(self) -> Optional[float]:
+        if self._resolution is None:
+            self._resolution = self._get_resolution()
+        return self._resolution
 
     def _populate_histories(self):
         ws_history = self._ws.getHistory()
@@ -377,6 +385,23 @@ class ReflectometryDataset:
         calibration_file = self.reduction_workflow_histories[0].getPropertyValue("CalibrationFile")
         return Path(calibration_file).name if calibration_file else None
 
+    def _get_resolution(self) -> Optional[float]:
+        # Attempt to get the resolution from the workspace history
+        if self.is_stitched:
+            # The absolute value of the stitch parameter of the stitch algorithm is the resolution
+            return abs(float(self.stitch_history.getPropertyValue("Params")))
+
+        if self.reduction_history:
+            rebin_alg = self.reduction_history.getChildHistories()[-1]
+            if rebin_alg.name() == self._REBIN_ALG:
+                rebin_params = rebin_alg.getPropertyValue("Params").split(",")
+                if len(rebin_params) == 3:
+                    # The absolute value of the middle rebin parameter is the resolution
+                    return abs(float(rebin_params[1]))
+
+        logger.debug("Unable to find resolution from workspace history.")
+        return None
+
 
 class SaveISISReflectometryORSO(PythonAlgorithm):
     """
@@ -388,9 +413,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     _RB_NUM_LOGS = ("rb_proposal", "experiment_identifier")
     _INVALID_HEADER_COMMENT = "Mantid@ISIS output may not be fully ORSO compliant"
     _Q_UNIT = "MomentumTransfer"
-
-    # Algorithms
-    _REBIN_ALG = "Rebin"
 
     def category(self):
         return "Reflectometry\\ISIS"
@@ -694,22 +716,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     def _get_resolution(self, refl_dataset: ReflectometryDataset) -> Optional[float]:
         if not self.getProperty(Prop.WRITE_RESOLUTION).value and not self.getProperty(Prop.INCLUDE_EXTRA_COLS).value:
             return None
-
-        # Attempt to get the resolution from the workspace history
-        if refl_dataset.is_stitched:
-            # The absolute value of the stitch parameter of the stitch algorithm is the resolution
-            return abs(float(refl_dataset.stitch_history.getPropertyValue("Params")))
-
-        if refl_dataset.reduction_history:
-            rebin_alg = refl_dataset.reduction_history.getChildHistories()[-1]
-            if rebin_alg.name() == self._REBIN_ALG:
-                rebin_params = rebin_alg.getPropertyValue("Params").split(",")
-                if len(rebin_params) == 3:
-                    # The absolute value of the middle rebin parameter is the resolution
-                    return abs(float(rebin_params[1]))
-
-        self.log().debug("Unable to find resolution from workspace history.")
-        return None
+        return refl_dataset.resolution
 
 
 # Register algorithm with Mantid
