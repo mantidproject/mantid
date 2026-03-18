@@ -318,7 +318,7 @@ private:
     explicit TaskNormalizeByMonitor(ReflectometryReductionOne3 *parent)
         : AlgorithmTask(parent, "TaskNormalizeByMonitor") {
       setExpectedOutputs({"MonitorCorrectedWorkspace"});
-      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace");
+      setDependantTask("TaskSumInWavelength", "SummedWorkspace", "InputWorkspace");
     }
     void executeImpl() override;
   };
