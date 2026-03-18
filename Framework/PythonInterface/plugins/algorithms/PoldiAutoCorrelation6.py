@@ -71,6 +71,13 @@ class PoldiAutoCorrelation(PythonAlgorithm):
             validator=IntBoundedValidator(lower=1),
             doc="Number of groups to split poldi detectors into (returns a spectrum per group)",
         )
+        self.declareProperty(
+            name="XUnit",
+            defaultValue="MomentumTransfer",
+            validator=StringListValidator(["MomentumTransfer", "dSpacing"]),
+            direction=Direction.Input,
+            doc="XUnit of the correlation spectrum in OutpuWorkspace.",
+        )
 
     def validateInputs(self):
         issues = dict()
@@ -143,7 +150,10 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         for ispec, detids in enumerate(detids_in_groups):
             spec = ws_corr.getSpectrum(ispec)
             [spec.addDetectorID(int(detid)) for detid in detids]
-        ws_corr = self.exec_child_alg("ConvertUnits", InputWorkspace=ws_corr, Target="MomentumTransfer")
+
+        if self.getProperty("XUnit").value == "MomentumTransfer":
+            ws_corr = self.exec_child_alg("ConvertUnits", InputWorkspace=ws_corr, Target="MomentumTransfer")
+            ws_corr = self.exec_child_alg("ConvertToPointData", InputWorkspace=ws_corr, OutputWorkspace=ws_corr.name())
         self.setProperty("OutputWorkspace", ws_corr)
 
     def exec_child_alg(self, alg_name: str, **kwargs):

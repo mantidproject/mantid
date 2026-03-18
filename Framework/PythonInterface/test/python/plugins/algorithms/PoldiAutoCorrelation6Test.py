@@ -56,6 +56,13 @@ class PoldiAutoCorrelation6Test(unittest.TestCase):
         ndets = [len(ws_corr.getSpectrum(ispec).getDetectorIDs()) for ispec in range(ws_corr.getNumberHistograms())]
         assert_array_equal(ndets, np.array([150, 149, 149]))
 
+    def test_exec_xunit(self):
+        xunit = "dSpacing"
+        ws_corr = PoldiAutoCorrelation(InputWorkspace=self.ws, OutputWorkspace="ws_corr", XUnit=xunit, Version=6)
+        self.assertEqual(ws_corr.getAxis(0).getUnit().unitID(), xunit)
+        # assert min d (consistent with max Q in other tests)
+        self.assertAlmostEqual(ws_corr.readX(0)[0], 2 * np.pi / 9.0832, delta=1e-3)
+
     def _assert_auto_corr_workspace(self, ws_corr):
         # assert min/max Q
         self.assertAlmostEqual(ws_corr.readX(0)[0], 1.5144, delta=1e-3)
