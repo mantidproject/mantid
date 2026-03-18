@@ -340,8 +340,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self.move(window_geometry.topLeft())
 
         self._current_widget = None
-        self._projection_camera_map = {}
-        self._parallel_scales = {}
+        self._default_camera_position_map = {}
+        self._default_parallel_scales = {}
+        self._last_selected_projection = None
+        self._last_camera_position = None
+        self._last_parallel_scale = None
 
         UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
 
@@ -380,22 +383,34 @@ class FullInstrumentViewWindow(QMainWindow):
     def hide_status_box(self) -> None:
         self.status_group_box.hide()
 
+    def cache_current_camera_position(self) -> None:
+        self._last_camera_position = self.main_plotter.camera_position
+        self._last_parallel_scale = self.main_plotter.parallel_scale
+
+    def cache_current_selected_projection(self) -> None:
+        self._last_selected_projection = self.current_selected_projection()
+
+    def set_camera_to_cached_state(self) -> None:
+        if self._last_selected_projection == self.current_selected_projection():
+            self.main_plotter.camera_position = self._last_camera_position
+            self.main_plotter.camera.parallel_scale = self._last_parallel_scale
+
+    def cache_default_camera_position(self) -> None:
+        self.main_plotter.reset_camera()
+        self._default_camera_position_map[self.current_selected_projection()] = self.main_plotter.camera_position
+        self._default_parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
+
     def reset_camera(self) -> None:
         if self._off_screen:
             return
 
-        if self.current_selected_projection() in self._projection_camera_map.keys():
-            self.main_plotter.camera_position = self._projection_camera_map[self.current_selected_projection()]
-            self.main_plotter.camera.parallel_scale = self._parallel_scales[self.current_selected_projection()]
+        if self.current_selected_projection() in self._default_camera_position_map.keys():
+            self.main_plotter.camera_position = self._default_camera_position_map[self.current_selected_projection()]
+            self.main_plotter.camera.parallel_scale = self._default_parallel_scales[self.current_selected_projection()]
         else:
             # Apply default position, in case cache not available
             self.main_plotter.reset_camera()
         return
-
-    def cache_camera_position(self) -> None:
-        self.main_plotter.reset_camera()
-        self._projection_camera_map[self.current_selected_projection()] = self.main_plotter.camera_position
-        self._parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
 
     def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider, QPushButton]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
