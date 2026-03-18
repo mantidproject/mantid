@@ -203,12 +203,18 @@ class FullInstrumentViewWindow(QMainWindow):
         self._show_monitors_check_box.setText("Show Monitors?")
         self._count_scale_combo_box = NoWheelComboBox(self)
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
+        self._flip_z_axis_check_box = QCheckBox()
+        self._flip_z_axis_check_box.setText("Flip Z Axis")
+        self._flip_z_axis_check_box.setToolTip(
+            "If checked, the Z axis will be flipped in 2D projections, mirroring the instrument along the beam axis."
+        )
         projection_layout.addWidget(self._projection_combo_box)
         projection_layout.addWidget(self._reset_projection)
         projection_layout.addWidget(self._clear_point_picked_detectors)
         projection_layout.addWidget(self._aspect_ratio_check_box)
         projection_layout.addWidget(self._show_monitors_check_box)
         projection_layout.addWidget(self._count_scale_combo_box)
+        projection_layout.addWidget(self._flip_z_axis_check_box)
 
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
@@ -247,17 +253,26 @@ class FullInstrumentViewWindow(QMainWindow):
             self._save_roi_to_ws,
             self._save_grouping_to_ws,
             self._save_grouping_to_xml,
+            self._save_grouping_to_cal,
         ) = self._add_tab(selection_tab, "ROI")
         self._save_roi_to_ws.setText("Export ROI to ADS")
         self._save_grouping_to_ws.setText("Export Grouping to ADS")
         self._save_grouping_to_xml.setText("Save Grouping to XML")
+        self._save_grouping_to_cal.setText("Save Grouping to CAL")
 
         mask_tab = QWidget()
-        (self._add_mask, self._clear_masks, self._mask_list, self._save_mask_to_ws, self._save_mask_to_file, self._overwrite_mask) = (
-            self._add_tab(mask_tab, "Mask")
-        )
+        (
+            self._add_mask,
+            self._clear_masks,
+            self._mask_list,
+            self._save_mask_to_ws,
+            self._save_mask_to_xml,
+            self._save_mask_to_cal,
+            self._overwrite_mask,
+        ) = self._add_tab(mask_tab, "Mask")
         self._save_mask_to_ws.setText("Save Mask to ADS")
-        self._save_mask_to_file.setText("Save Mask to XML")
+        self._save_mask_to_xml.setText("Save Mask to XML")
+        self._save_mask_to_cal.setText("Save Mask to CAL")
         self._overwrite_mask.setText("Apply Mask Permanently")
 
         self._picking_masking_tab = QTabWidget()
@@ -336,6 +351,12 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def enable_or_disable_aspect_ratio_box(self) -> None:
         self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+
+    def is_flip_z_axis_checkbox_checked(self) -> bool:
+        return self._flip_z_axis_check_box.isChecked()
+
+    def enable_or_disable_flip_z_axis_box(self) -> None:
+        self._flip_z_axis_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
@@ -463,15 +484,17 @@ class FullInstrumentViewWindow(QMainWindow):
         item_list.setSelectionMode(QAbstractItemView.NoSelection)
         post_list_layout = QHBoxLayout()
         save_to_ws_btn = QPushButton()
-        save_to_file_btn = QPushButton()
+        save_to_xml_btn = QPushButton()
+        save_to_cal_btn = QPushButton()
         overwrite_btn = QPushButton()
         post_list_layout.addWidget(save_to_ws_btn)
-        post_list_layout.addWidget(save_to_file_btn)
+        post_list_layout.addWidget(save_to_xml_btn)
+        post_list_layout.addWidget(save_to_cal_btn)
         post_list_layout.addWidget(overwrite_btn)
         tab_layout.addLayout(pre_list_layout)
         tab_layout.addWidget(item_list)
         tab_layout.addLayout(post_list_layout)
-        return (add_item_btn, clear_items_btn, item_list, save_to_ws_btn, save_to_file_btn, overwrite_btn)
+        return (add_item_btn, clear_items_btn, item_list, save_to_ws_btn, save_to_xml_btn, save_to_cal_btn, overwrite_btn)
 
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
@@ -498,11 +521,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self._mask_list.itemChanged.connect(partial(self._presenter.on_list_item_selected, CurrentTab.Masking))
         self._selection_list.itemChanged.connect(partial(self._presenter.on_list_item_selected, CurrentTab.Grouping))
         self._save_mask_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
-        self._save_mask_to_file.clicked.connect(self._presenter.on_save_mask_to_xml_clicked)
+        self._save_mask_to_xml.clicked.connect(self._presenter.on_save_mask_to_xml_clicked)
+        self._save_mask_to_cal.clicked.connect(self._presenter.on_save_mask_to_cal_clicked)
         self._overwrite_mask.clicked.connect(self._presenter.on_apply_permanently_clicked)
         self._save_roi_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
         self._save_grouping_to_ws.clicked.connect(self._presenter.on_save_grouping_to_ads_clicked)
         self._save_grouping_to_xml.clicked.connect(self._presenter.on_save_grouping_to_xml_clicked)
+        self._save_grouping_to_cal.clicked.connect(self._presenter.on_save_grouping_to_cal_clicked)
         self._clear_masks.clicked.connect(self._presenter.on_clear_list_clicked)
         self._clear_selections.clicked.connect(self._presenter.on_clear_list_clicked)
         self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
@@ -511,6 +536,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._delete_all_selected_peaks_button.clicked.connect(self._presenter.on_delete_all_selected_peaks_clicked)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
+        self._flip_z_axis_check_box.clicked.connect(self._presenter.on_flip_z_axis_check_box_clicked)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -1092,14 +1118,11 @@ class FullInstrumentViewWindow(QMainWindow):
             self._lineplot_peak_cursor = None
             self._detector_figure_canvas.draw_idle()
 
-    def get_filename_from_dialog(self):
-        """
-        Open file dialog for saving xml files.
-        Needs to be in view to run in QThread.
-        """
+    def get_filename_from_dialog(self, file_filter: str):
+        # NOTE: Needs to be in view to run in main thread
         return open_a_file_dialog(
             accept_mode=QFileDialog.AcceptSave,
             file_mode=QFileDialog.AnyFile,
-            file_filter="XML files (*xml)",
+            file_filter=file_filter,
             directory=ConfigService["defaultsave.directory"],
         )

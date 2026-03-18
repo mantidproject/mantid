@@ -26,7 +26,7 @@ class LoadEMUWithFloatResolution(MantidSystemTest):
         output = Load(Filename="EMU03087.nxs", StoreInADS=False)
 
         workspace = output[0]
-        self.assertEquals("LoadMuonNexus", get_loader_name(workspace))
+        self.assertEqual("LoadMuonNexus", get_loader_name(workspace))
 
         first_good_data = output[3]
         self.assertDelta(0.416, first_good_data, 0.0001)
@@ -42,7 +42,7 @@ class LoadHDF4NexusFromMUSR(MantidSystemTest):
         output = Load(Filename="MUSR00032900.nxs", StoreInADS=False)
 
         workspace = output[0]
-        self.assertEquals("LoadMuonNexus", get_loader_name(workspace))
+        self.assertEqual("LoadMuonNexus", get_loader_name(workspace))
 
         first_good_data = output[3]
         self.assertDelta(0.656, first_good_data, 0.0001)
@@ -63,9 +63,9 @@ class LoadHDF4AndHDF5NexusWhenUsingV2Suffix(MantidSystemTest):
         output_hdf5 = Load(Filename="MUSR00087008_v2.nxs", StoreInADS=False)
 
         workspace_hdf4 = output_hdf4[0]
-        self.assertEquals("LoadMuonNexus", get_loader_name(workspace_hdf4))
+        self.assertEqual("LoadMuonNexus", get_loader_name(workspace_hdf4))
         workspace_hdf5 = output_hdf5[0]
-        self.assertEquals("LoadMuonNexusV2", get_loader_name(workspace_hdf5))
+        self.assertEqual("LoadMuonNexusV2", get_loader_name(workspace_hdf5))
 
         first_good_data_hdf4 = output_hdf4[3]
         self.assertDelta(0.56, first_good_data_hdf4, 0.0001)
@@ -91,9 +91,9 @@ class LoadHDF4AndHDF5NexusWhenUsingV1Suffix(MantidSystemTest):
         output_hdf5 = Load(Filename="MUSR00093260.nxs", StoreInADS=False)
 
         workspace_hdf4 = output_hdf4[0]
-        self.assertEquals("LoadMuonNexus", get_loader_name(workspace_hdf4))
+        self.assertEqual("LoadMuonNexus", get_loader_name(workspace_hdf4))
         workspace_hdf5 = output_hdf5[0]
-        self.assertEquals("LoadMuonNexusV2", get_loader_name(workspace_hdf5))
+        self.assertEqual("LoadMuonNexusV2", get_loader_name(workspace_hdf5))
 
         first_good_data_hdf4 = output_hdf4[3]
         self.assertDelta(0.56, first_good_data_hdf4, 0.0001)

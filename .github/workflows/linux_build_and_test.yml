@@ -44,31 +44,33 @@ jobs:
       - name: Run unit tests and system tests on Linux
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/conda-buildscript ${GITHUB_WORKSPACE} linux-64-ci --enable-systemtests
 
-      #- name: Upload build and test log artifacts
-      #  uses: actions/upload-artifact@v7
-      #  if: always()
-      #  with:
-      #    name: test_logs
-      #    path: ${{ github.workspace }}/build/test_logs/*.log
+      - name: Upload build and test log artifacts
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test_logs
+          path: ${{ github.workspace }}/build/test_logs/*.log
 
-      #- name: Upload system test mismatch files
-      #  uses: actions/upload-artifact@v7
-      #  if: always()
-      #  with:
-      #    name: system_test_mismatches
-      #    if-no-files-found: ignore
-      #    path: ${{ github.workspace }}/build/**/*-mismatch.nxs
+      - name: Upload system test mismatch files
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: system_test_mismatches
+          if-no-files-found: ignore
+          path: ${{ github.workspace }}/build/**/*-mismatch.nxs
 
-      #- name: Unit test report
-      #  uses: EnricoMi/publish-unit-test-result-action/linux@v2
-      #  if: (!cancelled())
-      #  with:
-      #    check_name: "Unit test results"
-      #    files: build/Testing/*unittest.xml
+      - name: Unit test report
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: (!cancelled())
+        with:
+          check_name: "Unit test results"
+          check_run: false
+          files: build/Testing/*unittest.xml
 
-      #- name: System test report
-      #  uses: EnricoMi/publish-unit-test-result-action/linux@v2
-      #  if: (!cancelled())
-      #  with:
-      #    check_name: "System test results"
-      #    files: build/Testing/SystemTests/**/TEST-systemtests*.xml
+      - name: System test report
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: (!cancelled())
+        with:
+          check_name: "System test results"
+          check_run: false
+          files: build/Testing/SystemTests/**/TEST-systemtests*.xml

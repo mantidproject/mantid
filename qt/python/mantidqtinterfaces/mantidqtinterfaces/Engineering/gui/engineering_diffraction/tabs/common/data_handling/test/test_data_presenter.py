@@ -102,7 +102,7 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         logger.error.assert_called_with("Error occurred when loading files.")
         self.assertEqual(1, self.view.sig_enable_load_button.emit.call_count)
-        self.view.sig_enable_load_button.emit.called_with(True)
+        self.view.sig_enable_load_button.emit.assert_called_with(True)
 
     def test_worker_success_valid_filename(self):
         model_dict = {"ENGINX_1_bank_1": self.ws1, "ENGINX_2_bank_South": self.ws3}
