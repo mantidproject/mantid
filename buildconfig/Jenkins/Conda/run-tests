@@ -20,10 +20,19 @@ BUILD_THREADS=$6
 
 XVFB_SERVER_NUM=101
 
-# If this isn't specified for a Jenkins agent, revert to default value
+# If number of system test threads is not defined, set a default value:
+# - Windows and MacOS: all builders currently use the default of 3, there is no override defined per machine
+# - Linux: allow 10GB RAM per system test, but revert to 3 parallel tests if < 30GB RAM.
 if [[ -z "$BUILD_THREADS_SYSTEM_TESTS" ]]; then
-    # Default to 3 system tests running in parallel, assuming builders have >= 32GB RAM
+  if [[ "$OSTYPE" == linux* ]]; then
+    ram_gb=$(awk '/MemTotal/ {print int($2/1024/1024)}' /proc/meminfo)
+    BUILD_THREADS_SYSTEM_TESTS=$(( ram_gb / 10 ))
+    if (( BUILD_THREADS_SYSTEM_TESTS < 3 )); then
+      BUILD_THREADS_SYSTEM_TESTS=3
+    fi
+  else
     BUILD_THREADS_SYSTEM_TESTS=3
+  fi
 fi
 
 # Jenkins nodes may specify the maximum number of unit tests to run in parallel.
@@ -92,7 +101,7 @@ cd $WORKSPACE/build
 # mkdir for test logs
 mkdir -p test_logs
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    run_with_xvfb ctest -L UnitTest -j$UNIT_TEST_THREADS --no-compress-output -T Test -O test_logs/ctest_$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
+    run_with_xvfb ctest -L UnitTest -j$UNIT_TEST_THREADS --no-compress-output -T Test -O test_logs/ctest_$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS --output-junit Testing/junit-unittest.xml -E MPIAlgorithmsTest
 fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then

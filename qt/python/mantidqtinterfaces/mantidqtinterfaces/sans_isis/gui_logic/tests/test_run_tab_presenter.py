@@ -411,9 +411,9 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.presenter._setup_instrument_specific_settings(SANSInstrument.LOQ)
 
-        self.presenter._view.set_instrument_settings.called_once_with(instrument)
-        self.presenter._beam_centre_presenter.on_update_instrument.called_once_with(instrument)
-        self.presenter._workspace_diagnostic_presenter.called_once_with(instrument)
+        self.presenter._view.set_instrument_settings.assert_called_once_with(instrument)
+        self.presenter._beam_centre_presenter.on_update_instrument.assert_called_once_with(instrument)
+        self.presenter._workspace_diagnostic_presenter.set_instrument_settings.assert_called_once_with(instrument)
 
     def test_on_instrument_change_notifies_child_presenters(self):
         self.presenter._beam_centre_presenter = mock.Mock()

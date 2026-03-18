@@ -203,6 +203,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self._show_monitors_check_box.setText("Show Monitors?")
         self._count_scale_combo_box = NoWheelComboBox(self)
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
+        self._flip_z_axis_check_box = QCheckBox()
+        self._flip_z_axis_check_box.setText("Flip Z Axis")
+        self._flip_z_axis_check_box.setToolTip(
+            "If checked, the Z axis will be flipped in 2D projections, mirroring the instrument along the beam axis."
+        )
         self._select_bank_tube = QPushButton("Select Bank/Tube")
         self._select_bank_tube.setCheckable(True)
         projection_layout.addWidget(self._projection_combo_box)
@@ -211,6 +216,7 @@ class FullInstrumentViewWindow(QMainWindow):
         projection_layout.addWidget(self._aspect_ratio_check_box)
         projection_layout.addWidget(self._show_monitors_check_box)
         projection_layout.addWidget(self._count_scale_combo_box)
+        projection_layout.addWidget(self._flip_z_axis_check_box)
         projection_layout.addWidget(self._select_bank_tube)
 
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
@@ -348,6 +354,12 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def enable_or_disable_aspect_ratio_box(self) -> None:
         self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+
+    def is_flip_z_axis_checkbox_checked(self) -> bool:
+        return self._flip_z_axis_check_box.isChecked()
+
+    def enable_or_disable_flip_z_axis_box(self) -> None:
+        self._flip_z_axis_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
@@ -527,6 +539,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._delete_all_selected_peaks_button.clicked.connect(self._presenter.on_delete_all_selected_peaks_clicked)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
+        self._flip_z_axis_check_box.clicked.connect(self._presenter.on_flip_z_axis_check_box_clicked)
         self._select_bank_tube.toggled.connect(self._presenter.on_select_bank_tube_toggled)
 
         self._add_connections_to_edits_and_slider(
