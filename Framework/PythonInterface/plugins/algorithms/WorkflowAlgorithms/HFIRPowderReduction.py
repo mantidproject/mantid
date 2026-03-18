@@ -51,6 +51,10 @@ from mantid.simpleapi import (
     GroupDetectors,
     SaveAscii,
     SaveNexus,
+    Load,
+    Plus,
+    LoadWAND,
+    LoadInstrument,
 )
 import h5py
 import numpy as np
@@ -589,63 +593,10 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         logger.information("Step 4: Resampling all data to common binning")
         xMin, xMax = self._locate_global_xlimit(sample_workspaces)
 
-        # Resample all sample workspaces
-        for n, (ws_name, mask_name) in enumerate(zip(sample_workspaces, sample_masks)):
-            ResampleX(
-                InputWorkspace=ws_name,
-                OutputWorkspace=ws_name,
-                XMin=xMin,
-                XMax=xMax,
-                NumberBins=int((xMax - xMin) / binWidth),
-                EnableLogging=False,
-            )
+        self._resample_inputs(
+            sample_workspaces, sample_masks, xMin, xMax, binWidth, vanadium_ws, vanadium_background_ws, sample_background_ws, summing
+        )
 
-            if vanadium_ws:
-                vanadium_ws = self._resample_vanadium(ws_name, mask_name, xMin, xMax)
-            else:
-                vanadium_ws = None
-
-            if vanadium_background_ws is not None:
-                vanadium_background_ws = self._resample_background(vanadium_background_ws, ws_name, mask_name, xMin, xMax, vanadium_ws)
-
-            Scale(
-                InputWorkspace=ws_name,
-                OutputWorkspace=ws_name,
-                Factor=self._get_scale(vanadium_ws) / self._get_scale(ws_name),
-                EnableLogging=False,
-            )
-
-            if sample_background_ws is not None:
-                sample_background_ws = self._resample_background(sample_background_ws, ws_name, mask_name, xMin, xMax, vanadium_ws)
-
-            # Step 5: Calibration & Normalization (vanadium correction)
-            logger.information("Step 5: Processing calibration (vanadium) data")
-            if vanadium_ws is not None:
-                vanadium_corrected = self._process_vanadium_calibration(
-                    vanadium_ws,
-                    vanadium_background_ws,
-                )
-                ws_name = self._apply_sample_absorption_correction(ws_name, vanadium_corrected, sample_background_ws)
-
-            if summing:
-                # conjoin
-                if n < 1:
-                    RenameWorkspace(
-                        InputWorkspace=ws_name,
-                        OutputWorkspace="__ws_conjoined",
-                        EnableLogging=False,
-                    )
-                else:
-                    # this adds to `InputWorkspace1`
-                    ConjoinWorkspaces(
-                        InputWorkspace1="__ws_conjoined",
-                        InputWorkspace2=ws_name,
-                        CheckOverlapping=False,
-                        EnableLogging=False,
-                    )
-
-        # Update the list with potentially renamed workspace
-        sample_workspaces[n] = ws_name
         # Step 8: Summing or Grouping
         logger.information("Step 8: Creating output workspace")
         if summing:
@@ -684,6 +635,67 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             if mtd.doesExist(ws):
                 DeleteWorkspace(ws, EnableLogging=False)
 
+    def _resample_inputs(
+        self, sample_workspaces, sample_masks, xMin, xMax, binWidth, vanadium_ws, vanadium_background_ws, sample_background_ws, summing
+    ):
+        # Resample all sample workspaces
+        for index, (ws_name, mask_name) in enumerate(zip(sample_workspaces, sample_masks)):
+            ResampleX(
+                InputWorkspace=ws_name,
+                OutputWorkspace=ws_name,
+                XMin=xMin,
+                XMax=xMax,
+                NumberBins=int((xMax - xMin) / binWidth),
+                EnableLogging=False,
+            )
+
+            if vanadium_ws:
+                vanadium_ws = self._resample_vanadium(ws_name, mask_name, xMin, xMax)
+            else:
+                vanadium_ws = None
+
+            if vanadium_background_ws is not None:
+                vanadium_background_ws = self._resample_background(vanadium_background_ws, ws_name, mask_name, xMin, xMax, vanadium_ws)
+
+            Scale(
+                InputWorkspace=ws_name,
+                OutputWorkspace=ws_name,
+                Factor=self._get_scale(vanadium_ws) / self._get_scale(ws_name),
+                EnableLogging=False,
+            )
+
+            if sample_background_ws is not None:
+                sample_background_ws = self._resample_background(sample_background_ws, ws_name, mask_name, xMin, xMax, vanadium_ws)
+
+            # Step 5: Calibration & Normalization (vanadium correction)
+            logger.information("Step 5: Processing calibration (vanadium) data")
+            if vanadium_ws is not None:
+                vanadium_corrected = self._process_vanadium_calibration(
+                    vanadium_ws,
+                    vanadium_background_ws,
+                )
+                ws_name = self._apply_sample_absorption_correction(ws_name, vanadium_corrected, sample_background_ws)
+
+            if summing:
+                # conjoin
+                if index < 1:
+                    RenameWorkspace(
+                        InputWorkspace=ws_name,
+                        OutputWorkspace="__ws_conjoined",
+                        EnableLogging=False,
+                    )
+                else:
+                    # this adds to `InputWorkspace1`
+                    ConjoinWorkspaces(
+                        InputWorkspace1="__ws_conjoined",
+                        InputWorkspace2=ws_name,
+                        CheckOverlapping=False,
+                        EnableLogging=False,
+                    )
+
+        # Update the list with potentially renamed workspace
+        sample_workspaces[index] = ws_name
+
     def _load_data(self, data_type, sum_runs=True):
         """
         Generic function to load data from files or IPTS/run numbers.
@@ -698,7 +710,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             If sum_runs: single workspace name (str) or None
             If not sum_runs: list of workspace names or empty list
         """
-        from mantid.simpleapi import Load, Plus, LoadWAND, LoadInstrument
 
         # Get properties based on data type
         filenames = self.getProperty(f"{data_type}Filename").value
@@ -963,12 +974,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         target = self.getProperty("XUnits").value
         wavelength = self.getProperty("Wavelength").value
         e_fixed = UnitConversion.run("Wavelength", "Energy", wavelength, 0, 0, 0, Elastic, 0)
-        if target == "d-spacing":
-            target = "ElasticDSpacing"
-        elif target == "2Theta":
-            target = "Theta"
-        elif target == "Q":
-            target = "ElasticQ"
+        _targetMap = {"d-spacing": "ElasticDSpacing", "2Theta": "Theta", "Q": "ElasticQ"}
+        target = _targetMap[target]
 
         ExtractUnmaskedSpectra(
             InputWorkspace=workspace_in,
@@ -1004,24 +1011,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             EnableLogging=False,
         )
 
-        # this checks for any duplicated values in target axis, if
-        # so then group them together
-        axis_values = mtd[workspace_out].getAxis(1).extractValues()
-        equal_values = axis_values == np.roll(axis_values, -1)
-        if np.any(equal_values):
-            operator = np.full_like(equal_values, ",", dtype="<U1")
-            operator[equal_values] = "+"
-            grouping_pattern = "".join(str(n) + op for n, op in enumerate(operator))
-            GroupDetectors(
-                InputWorkspace=workspace_out, OutputWorkspace=workspace_out, GroupingPattern=grouping_pattern, EnableLogging=False
-            )
-            ConvertSpectrumAxis(
-                InputWorkspace=workspace_out,
-                OutputWorkspace=workspace_out,
-                Target=target,
-                EFixed=e_fixed,
-                EnableLogging=False,
-            )
+        self._group_duplicates(workspace_out, target, e_fixed)
 
         Transpose(
             InputWorkspace=workspace_out,
@@ -1030,6 +1020,24 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         )
 
         return workspace_out
+
+    def _group_duplicates(self, workspace, target, e_fixed):
+        # this checks for any duplicated values in target axis, if
+        # so then group them together
+        axis_values = mtd[workspace].getAxis(1).extractValues()
+        equal_values = axis_values == np.roll(axis_values, -1)
+        if np.any(equal_values):
+            operator = np.full_like(equal_values, ",", dtype="<U1")
+            operator[equal_values] = "+"
+            grouping_pattern = "".join(str(n) + op for n, op in enumerate(operator))
+            GroupDetectors(InputWorkspace=workspace, OutputWorkspace=workspace, GroupingPattern=grouping_pattern, EnableLogging=False)
+            ConvertSpectrumAxis(
+                InputWorkspace=workspace,
+                OutputWorkspace=workspace,
+                Target=target,
+                EFixed=e_fixed,
+                EnableLogging=False,
+            )
 
     def _locate_global_xlimit(self, workspaces):
         """Find the global bin from all spectrum"""

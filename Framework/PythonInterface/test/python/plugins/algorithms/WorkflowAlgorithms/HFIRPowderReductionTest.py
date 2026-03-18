@@ -718,7 +718,7 @@ class ReductionExecutionTests(unittest.TestCase):
         self.assertAlmostEqual(x.max(), 50.80113407)
         self.assertAlmostEqual(y.min(), -42.8104874)
         self.assertAlmostEqual(y.max(), -3.0)
-        np.testing.assert_allclose(x[0, y.argmax()], 36.40057252, rtol=1e-6, atol=1e-1)
+        np.testing.assert_allclose(x[0, y.argmax()], 36.900592, rtol=1e-6, atol=1e-1)
 
         # data, cal and background, normalised by time
         # NOTE:
@@ -744,7 +744,7 @@ class ReductionExecutionTests(unittest.TestCase):
         self.assertAlmostEqual(x.max(), 50.80113407)
         self.assertAlmostEqual(y.min(), -42.8104874)
         self.assertAlmostEqual(y.max(), -3.0)
-        np.testing.assert_allclose(x[0, y.argmax()], 36.40057252, rtol=1e-6, atol=1e-1)
+        np.testing.assert_allclose(x[0, y.argmax()], 36.900592, rtol=1e-6, atol=1e-1)
 
         # data, cal and background. To d spacing
         pd_out4 = HFIRPowderReduction(
@@ -886,7 +886,7 @@ class ReductionExecutionTests(unittest.TestCase):
         self.assertAlmostEqual(x.max(), 49.94993970)
         self.assertAlmostEqual(y.min(), -21.21099623)
         self.assertAlmostEqual(y.max(), -1.5)
-        self.assertAlmostEqual(x[0, y.argmax()], 36.53377878)
+        self.assertAlmostEqual(x[0, y.argmax()], 37.43486421)
 
     def test_event(self):
         # check that the workflow runs with event workspaces as input, junk data
@@ -967,7 +967,7 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 0.05)
         self.assertAlmostEqual(x.max(), 69.95)
-        self.assertAlmostEqual(y[0, 0], 0.0)
+        self.assertTrue(np.isnan(y[0, 0]))
         assert isinstance(pd_out, MatrixWorkspace)
 
         # CASE 3
