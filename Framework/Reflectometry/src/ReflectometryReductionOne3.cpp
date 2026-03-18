@@ -255,26 +255,37 @@ void ReflectometryReductionOne3::exec() {
 
   // Neither TOF or Lambda? Abort.
   // TO DO - do we want this validation?
-  if ((xUnitID != "Wavelength") && (xUnitID != "TOF"))
-    throw std::invalid_argument("InputWorkspace must have units of TOF or Wavelength");
+  // if ((xUnitID != "Wavelength") && (xUnitID != "TOF"))
+  //  throw std::invalid_argument("InputWorkspace must have units of TOF or Wavelength");
 
   // Check whether conversion, normalisation, summation etc. need to be done
-  m_convertUnits = true;
-  m_normaliseMonitors = true;
-  m_normaliseTransmission = true;
-  m_sum = true;
-
-  // Create the output workspace in wavelength
-  MatrixWorkspace_sptr IvsLam = makeIvsLam();
-
-  // Convert to Q
-  auto IvsQ = convertToQ(IvsLam);
+  // These should all be covered by selecting tasks.
+  // m_convertUnits = true;
+  // m_normaliseMonitors = true;
+  // m_normaliseTransmission = true;
+  // m_sum = true;
 
   // Set outputs
-  if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
-    setProperty("OutputWorkspaceWavelength", IvsLam);
+  // if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
+  //  setProperty("OutputWorkspaceWavelength", IvsLam);
+  //}
+
+  const bool outputDiagnostics = getProperty("Diagnostics");
+  if (outputDiagnostics) {
+    std::string diagWSName = createDebugWorkspaceName(getPropertyValue("InputWorkspace"));
+    for (auto i = 0; i < taskExecutionOrder.size(); ++i) {
+      const auto &taskName = taskExecutionOrder[i];
+      const auto &taskOutput = m_algorithmTaskOutputs.at(taskName);
+      for (const auto &output : taskOutput) {
+        const auto &outputName = output.first;
+        outputDebugWorkspace(output.second, diagWSName, "_" + outputName, i);
+      }
+    }
   }
-  setProperty("OutputWorkspace", IvsQ);
+
+  // For now, output the first output of the final task as the output workspace.
+  // Order is not guarenteed in map, so we will want to make this configurable.
+  setProperty("OutputWorkspace", m_algorithmTaskOutputs.at(taskExecutionOrder.back()).begin()->second);
 }
 
 /** Get the twoTheta angle range for the top/bottom of the detector associated
@@ -345,15 +356,13 @@ std::string ReflectometryReductionOne3::createDebugWorkspaceName(const std::stri
  * and is incremented after the workspace is output
  */
 void ReflectometryReductionOne3::outputDebugWorkspace(const MatrixWorkspace_sptr &ws, const std::string &wsName,
-                                                      const std::string &wsSuffix, const bool debug, int &step) {
-  // Nothing to do if debug is not enabled
-  if (debug) {
-    // Clone the workspace because otherwise we can end up outputting the same
-    // workspace twice with different names, which is confusing.
-    MatrixWorkspace_sptr cloneWS = ws->clone();
-    AnalysisDataService::Instance().addOrReplace(wsName + "_" + std::to_string(step) + wsSuffix, cloneWS);
-    ++step;
-  }
+                                                      const std::string &wsSuffix, const int step) {
+  // Clone the workspace because otherwise we can end up outputting the same
+  // workspace twice with different names, which is confusing.
+  // TO DO, look into this - can we still end up doing this? Previously some tasks may have been a no op, could this
+  // still happen?
+  MatrixWorkspace_sptr cloneWS = ws->clone();
+  AnalysisDataService::Instance().addOrReplace(wsName + "_" + std::to_string(step) + wsSuffix, cloneWS);
 }
 
 /**
@@ -374,61 +383,61 @@ MatrixWorkspace_sptr ReflectometryReductionOne3::makeIvsLam() {
   if (summingInQ()) {
     // Background subtraction
     result = backgroundSubtraction(result);
-    outputDebugWorkspace(result, wsName, "_subtracted_bkg", debug, step);
+    // outputDebugWorkspace(result, wsName, "_subtracted_bkg", debug, step);
     if (m_convertUnits) {
       g_log.debug("Converting input workspace to wavelength\n");
       result = convertToWavelength(result);
-      outputDebugWorkspace(result, wsName, "_lambda", debug, step);
+      // outputDebugWorkspace(result, wsName, "_lambda", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
     findWavelengthMinMax(result);
     if (m_normaliseMonitors) {
       g_log.debug("Normalising input workspace by monitors\n");
       result = monitorCorrection(result);
-      outputDebugWorkspace(result, wsName, "_norm_monitor", debug, step);
+      // outputDebugWorkspace(result, wsName, "_norm_monitor", debug, step);
     }
     if (m_normaliseTransmission) {
       g_log.debug("Normalising input workspace by transmission run\n");
       result = transOrAlgCorrection(result, false);
-      outputDebugWorkspace(result, wsName, "_norm_trans", debug, step);
+      // outputDebugWorkspace(result, wsName, "_norm_trans", debug, step);
     }
     if (m_sum) {
       g_log.debug("Summing in Q\n");
       result = sumInQ(result);
-      outputDebugWorkspace(result, wsName, "_summed", debug, step);
+      // outputDebugWorkspace(result, wsName, "_summed", debug, step);
     }
     // Crop to wavelength limits
     g_log.debug("Cropping output workspace\n");
     result = cropWavelength(result, true, wavelengthMin(), wavelengthMax());
-    outputDebugWorkspace(result, wsName, "_cropped", debug, step);
+    // outputDebugWorkspace(result, wsName, "_cropped", debug, step);
   } else {
     g_log.debug("Extracting ROI\n");
     result = makeDetectorWS(result, false, false);
-    outputDebugWorkspace(result, wsName, "_lambda", debug, step);
-    // Background subtraction
+    // outputDebugWorkspace(result, wsName, "_lambda", debug, step);
+    //  Background subtraction
     result = backgroundSubtraction(result);
-    outputDebugWorkspace(result, wsName, "_lambda_subtracted_bkg", debug, step);
-    // Sum in lambda
+    // outputDebugWorkspace(result, wsName, "_lambda_subtracted_bkg", debug, step);
+    //  Sum in lambda
     if (m_sum) {
       g_log.debug("Summing in wavelength\n");
       result = makeDetectorWS(result, m_convertUnits, true);
-      outputDebugWorkspace(result, wsName, "_summed", debug, step);
+      // outputDebugWorkspace(result, wsName, "_summed", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
     findWavelengthMinMax(result);
     if (m_normaliseMonitors) {
       g_log.debug("Normalising output workspace by monitors\n");
       result = monitorCorrection(result);
-      outputDebugWorkspace(result, wsName, "_norm_monitor", debug, step);
+      // outputDebugWorkspace(result, wsName, "_norm_monitor", debug, step);
     }
     // Crop to wavelength limits
     g_log.debug("Cropping output workspace\n");
     result = cropWavelength(result, true, wavelengthMin(), wavelengthMax());
-    outputDebugWorkspace(result, wsName, "_cropped", debug, step);
+    // outputDebugWorkspace(result, wsName, "_cropped", debug, step);
     if (m_normaliseTransmission) {
       g_log.debug("Normalising output workspace by transmission run\n");
       result = transOrAlgCorrection(result, true);
-      outputDebugWorkspace(result, wsName, "_norm_trans", debug, step);
+      // outputDebugWorkspace(result, wsName, "_norm_trans", debug, step);
     }
   }
 
@@ -1363,8 +1372,8 @@ void ReflectometryReductionOne3::TaskNormalizeByAlg::executeImpl() {
 
 void ReflectometryReductionOne3::TaskExtractROI::executeImpl() {
   auto inputWS = getDependantWorkspace("InputWorkspace");
-  auto summed = m_parent->makeDetectorWS(inputWS, false, false);
-  outputWorkspace(summed, "ExtractedROIWorkspace");
+  auto extracted = m_parent->makeDetectorWS(inputWS, false, false);
+  outputWorkspace(extracted, "ExtractedROIWorkspace");
 }
 
 void ReflectometryReductionOne3::TaskSumInWavelength::executeImpl() {

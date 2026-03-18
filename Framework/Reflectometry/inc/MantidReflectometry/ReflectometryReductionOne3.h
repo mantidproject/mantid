@@ -80,7 +80,7 @@ private:
   std::string createDebugWorkspaceName(const std::string &inputName);
   // Utility function to output a diagnostic workspace to the ADS
   void outputDebugWorkspace(const API::MatrixWorkspace_sptr &ws, const std::string &wsName, const std::string &wsSuffix,
-                            const bool debug, int &step);
+                            const int step);
   // Create the output workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr makeIvsLam();
   // Do the reduction by summation in Q
@@ -149,14 +149,24 @@ private:
   class AlgorithmTask {
   public:
     explicit AlgorithmTask(ReflectometryReductionOne3 *parent, const std::string &name)
-        : m_parent(parent), m_name(name), m_firstTaskFlag(false) {}
-    void setDependantTask(std::string task, std::string output_name = "", std::string alias = "") {
+        : m_parent(parent), m_name(name), m_firstTaskFlag(false), m_activeDependantTaskSet(0) {
+      addDependantTaskSet(); // Start with one dependant task set by default
+    }
+    size_t addDependantTaskSet() {
+      m_dependantTasks.push_back({});
+      return m_dependantTasks.size() - 1;
+    }
+    void setDependantTask(const std::string &task, const std::string &output_name = "", const std::string &alias = "",
+                          const size_t dependantTaskSet = 0) {
+      if (dependantTaskSet >= m_dependantTasks.size())
+        throw std::runtime_error("Dependant task set index " + std::to_string(dependantTaskSet) +
+                                 " is out of range for task " + m_name);
       if (output_name.empty()) {
         // If no output name is provided, assume the whole task output is required
         // If no alias is provided, use the task name as the alias
-        m_dependantTasks[task] = {};
+        m_dependantTasks[dependantTaskSet][task] = {};
       } else {
-        m_dependantTasks[task].push_back({output_name, alias});
+        m_dependantTasks[dependantTaskSet][task].push_back({output_name, alias});
       }
     }
     void execute() {
@@ -192,16 +202,17 @@ private:
 
   private:
     // map of dependant task name: dependant outputs (task name, alias pairs)
-    std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>> m_dependantTasks;
+    std::vector<std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>>> m_dependantTasks;
     std::string m_name;
     std::vector<std::string> m_expectedOutputs;
     std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>> m_dependantOutputs;
     bool m_firstTaskFlag;
+    size_t m_activeDependantTaskSet;
 
     virtual void executeImpl() = 0;
 
     void populateDependantTasks() {
-      for (const auto &item : m_dependantTasks) {
+      for (const auto &item : m_dependantTasks[m_activeDependantTaskSet]) {
         const auto &taskName = item.first;
         const auto &outputs = item.second;
         auto it = std::find_if(m_parent->m_stagedAlgorithmTasks.begin(), m_parent->m_stagedAlgorithmTasks.end(),
@@ -213,11 +224,11 @@ private:
           // If no specific outputs are listed, populate with the whole task output
           const auto &expectedOutputs = (*it)->getExpectedOutputs();
           for (const auto &output : expectedOutputs) {
-            m_dependantTasks[taskName].push_back({output, output});
+            m_dependantTasks[m_activeDependantTaskSet][taskName].push_back({output, output});
           }
         } else {
           for (const auto &[output, alias] : outputs) {
-            m_dependantTasks[taskName].push_back({output, alias});
+            m_dependantTasks[m_activeDependantTaskSet][taskName].push_back({output, alias});
           }
         }
       }
@@ -246,23 +257,32 @@ private:
     std::vector<std::string> evaluateDependentTasks() {
       populateDependantTasks();
       std::vector<std::string> missingTasks;
-      for (const auto &[taskName, outputs] : m_dependantTasks) {
-        // If this is the first task, we expect the dependant outputs to be set as algorithm properties rather than
-        // outputs from other tasks
-        // TODO: Check that required input properties are provided. Currently we just take the input workspace
-        if (m_firstTaskFlag)
-          return missingTasks;
-        if (!m_parent->m_algorithmTaskOutputs.contains(taskName)) {
-          missingTasks.push_back(taskName + ": ALL OUTPUTS");
-        } else {
-          for (const auto &output : outputs) {
-            if (!m_parent->m_algorithmTaskOutputs[taskName].contains(output.first)) {
-              missingTasks.push_back(taskName + ":" + output.first);
-            } else {
-              // populate dependent outputs for use in the task execution
-              addDependantTaskOutput(output.second, m_parent->m_algorithmTaskOutputs[taskName][output.first]);
+      // If this is the first task, we expect the dependant outputs to be set as algorithm properties rather than
+      // outputs from other tasks
+      // TODO: Check that required input properties are provided. Currently we just take the input workspace
+      if (m_firstTaskFlag)
+        return missingTasks;
+      // Loop through each task set, take the first fulfilled task set.
+      for (auto i = 0; i < m_dependantTasks.size(); ++i) {
+        for (const auto &[taskName, outputs] : m_dependantTasks[i]) {
+          if (!m_parent->m_algorithmTaskOutputs.contains(taskName)) {
+            missingTasks.push_back(taskName + ": ALL OUTPUTS");
+          } else {
+            for (const auto &output : outputs) {
+              if (!m_parent->m_algorithmTaskOutputs[taskName].contains(output.first)) {
+                missingTasks.push_back(taskName + ":" + output.first);
+              } else {
+                // populate dependent outputs for use in the task execution
+                addDependantTaskOutput(output.second, m_parent->m_algorithmTaskOutputs[taskName][output.first]);
+              }
             }
           }
+        }
+        // If we have found a task set with all outputs available, use this one and break
+        // TODO: Handle multiple fulfilled task sets.
+        if (missingTasks.empty()) {
+          m_activeDependantTaskSet = i;
+          break;
         }
       }
       return missingTasks;
@@ -345,6 +365,8 @@ private:
     explicit TaskCropWavelength(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskCropWavelength") {
       setExpectedOutputs({"CroppedWorkspace"});
       setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
+      const auto taskSet = addDependantTaskSet();
+      setDependantTask("TaskNormalizeByTransmission", "TransmissionCorrectedWorkspace", "InputWorkspace", taskSet);
     }
     void executeImpl() override;
   };
