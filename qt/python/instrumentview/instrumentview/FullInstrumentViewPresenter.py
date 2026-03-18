@@ -245,6 +245,8 @@ class FullInstrumentViewPresenter:
             return np.log10(counts + 1)
 
     def _update_view_main_plotter(self):
+        self._view.cache_current_camera_position()
+
         self._view.clear_main_plotter()
         renderer = self._renderer
 
@@ -280,11 +282,14 @@ class FullInstrumentViewPresenter:
         self._view.enable_or_disable_flip_z_axis_box()
         self.on_integration_limits_reset_clicked()
 
-        self._view.cache_camera_position()
+        self._view.cache_default_camera_position()
         self._view.reset_camera()
 
         # Set style after camera reset for correct camera defaults
         renderer.set_interactive_style(self._view.main_plotter, self._model.is_2d_projection)
+
+        self._view.set_camera_to_cached_state()
+        self._view.cache_current_selected_projection()
 
     def _update_transform(self) -> None:
         if not self._model.is_2d_projection or self._view.is_maintain_aspect_ratio_checkbox_checked():
