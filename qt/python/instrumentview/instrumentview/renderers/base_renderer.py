@@ -11,6 +11,8 @@ import numpy as np
 import pyvista as pv
 from pyvistaqt import BackgroundPlotter
 
+from instrumentview.InteractorStyles import CursorZoomInteractorStyle
+
 
 class InstrumentRenderer(ABC):
     """Abstract base class defining the interface for rendering detectors in the instrument view.
@@ -121,3 +123,14 @@ class InstrumentRenderer(ABC):
         label : str
             Scalar array name.
         """
+
+    def set_parallel_view(self, plotter):
+        plotter.view_xy()
+        plotter.enable_parallel_projection()
+
+    def set_interactive_style(self, plotter, is_projection):
+        if not is_projection:
+            plotter.enable_trackball_style()
+            return
+        style = CursorZoomInteractorStyle(plotter)
+        plotter.iren.style = style

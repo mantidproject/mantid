@@ -51,14 +51,6 @@ class PointCloudRenderer(InstrumentRenderer):
         if plotter.off_screen:
             return
 
-        if not is_projection:
-            plotter.enable_trackball_style()
-            return
-
-        plotter.view_xy()
-        plotter.enable_parallel_projection()
-        plotter.enable_zoom_style()
-
     def add_pickable_mesh_to_plotter(self, plotter: BackgroundPlotter, mesh: pv.PolyData, scalars) -> None:
         plotter.add_mesh(
             mesh,

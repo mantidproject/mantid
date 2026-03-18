@@ -264,6 +264,8 @@ class FullInstrumentViewPresenter:
 
         monitor_mesh = self._create_and_add_monitor_mesh()
 
+        renderer.set_parallel_view(self._view.main_plotter)
+
         # Update transform needs to happen after adding to plotter
         # Uses display coordinates
         self._update_transform()
@@ -277,8 +279,12 @@ class FullInstrumentViewPresenter:
         self._view.enable_or_disable_aspect_ratio_box()
         self._view.enable_or_disable_flip_z_axis_box()
         self.on_integration_limits_reset_clicked()
+
         self._view.cache_camera_position()
         self._view.reset_camera()
+
+        # Set style after camera reset for correct camera defaults
+        renderer.set_interactive_style(self._view.main_plotter, self._model.is_2d_projection)
 
     def _update_transform(self) -> None:
         if not self._model.is_2d_projection or self._view.is_maintain_aspect_ratio_checkbox_checked():
@@ -342,11 +348,6 @@ class FullInstrumentViewPresenter:
         return [x for pair in zip(min_point, max_point) for x in pair]
 
     def update_detector_picker(self) -> None:
-        """Change between single and multi point picking"""
-        # Remove any custom interactor to avoid artifacts in 2D or 3D
-        if hasattr(self._view, "interactor_style"):
-            self._view.interactor_style.remove_interactor()
-
         def detector_picked(detector_index: int) -> None:
             self._model.update_point_picked_detectors(detector_index)
             self.update_picked_detectors_on_view()
