@@ -886,6 +886,7 @@ class ReductionExecutionTests(unittest.TestCase):
         self.assertAlmostEqual(y.min(), -21.21099623)
         self.assertAlmostEqual(y.max(), -1.5)
         self.assertAlmostEqual(x[0, y.argmax()], 37.43486421)
+        np.testing.assert_allclose(x[0, y.argmax()], 37.43486421, rtol=1e-1, atol=1e-1)
 
     def test_event(self):
         # check that the workflow runs with event workspaces as input, junk data
