@@ -58,6 +58,7 @@ sample_not_at_origin = [
     "V20_IMAGING_Definition.xml",
     "ZOOM_Definition.xml",
     "ZOOM_Definition_PolSANS_Compatibility_Feb2025.xml",
+    "ZOOM_Definition_PolSANS_Compatibility_Jan2026.xml",
 ]
 known_error_files = duplicate_bank_names + duplicate_monitor_names + no_source + sample_not_at_origin
 direc = config["instrumentDefinition.directory"]
