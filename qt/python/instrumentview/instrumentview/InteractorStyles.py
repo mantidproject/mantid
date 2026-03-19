@@ -1,4 +1,4 @@
-from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser
+from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser, vtkInteractorStyleTrackballCamera
 from vtkmodules.vtkCommonCore import vtkCommand
 import numpy as np
 
@@ -38,7 +38,7 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
         self.AddObserver(vtkCommand.MouseMoveEvent, self._on_mouse_move)
         self.AddObserver(vtkCommand.MouseWheelForwardEvent, self._on_wheel_forward)
         self.AddObserver(vtkCommand.MouseWheelBackwardEvent, self._on_wheel_backward)
-        self.AddObserver(vtkCommand.LeftButtonPressEvent, lambda *_: self._reset_camera())
+        self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera())
 
     def _on_mouse_move(self, obj, event):
         if self._zoom_in_progress:
@@ -132,3 +132,12 @@ def _display_to_world(renderer, dx, dy):
     if abs(ww) < 1e-10:
         return None
     return np.array([wx / ww, wy / ww, 0])  # project onto z=0
+
+
+class SwappedButtonTrackballCamera(vtkInteractorStyleTrackballCamera):
+    def __init__(self):
+        super().__init__()
+        self.AddObserver(vtkCommand.LeftButtonPressEvent, lambda *_: self.OnRightButtonDown())
+        self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self.OnLeftButtonDown())
+        self.AddObserver(vtkCommand.LeftButtonReleaseEvent, lambda *_: self.OnRightButtonUp())
+        self.AddObserver(vtkCommand.RightButtonReleaseEvent, lambda *_: self.OnLeftButtonUp())

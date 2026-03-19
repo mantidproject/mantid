@@ -9,6 +9,7 @@ from typing import Callable, Optional
 import numpy as np
 import pyvista as pv
 from pyvistaqt import BackgroundPlotter
+from vtkmodules.vtkRenderingCore import vtkPointPicker
 
 from instrumentview.renderers.base_renderer import InstrumentRenderer
 
@@ -77,27 +78,31 @@ class PointCloudRenderer(InstrumentRenderer):
 
     # --------------------------------------------------------------- picking
     def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None]) -> None:
-        """Set up point picking.  *callback* receives ``(detector_index: int)``."""
+        """Set up left-click point picking.  *callback* receives ``(detector_index: int)``."""
         plotter.disable_picking()
 
+        if plotter.off_screen:
+            return
+
         picking_tolerance = 0.01
-        if not plotter.off_screen:
+        picker = vtkPointPicker()
+        picker.SetTolerance(picking_tolerance)
+        interactor = plotter.iren
 
-            def _point_picked(point_position, picker):
-                if point_position is None:
-                    return
-                point_index = picker.GetPointId()
-                callback(point_index)
+        def _on_left_button_press(obj, event):
+            """Handle left mouse button press for picking."""
+            # Get the current mouse position from the interactor
+            x, y = interactor.get_event_position()
+            # Perform the pick operation
+            pick_result = picker.Pick(x, y, 0, plotter.renderer)
+            if pick_result > 0:
+                # Get the picked point ID
+                point_id = picker.GetPointId()
+                if point_id >= 0:
+                    callback(point_id)
 
-            plotter.enable_surface_point_picking(
-                show_message=False,
-                use_picker=True,
-                callback=_point_picked,
-                show_point=False,
-                pickable_window=False,
-                picker="point",
-                tolerance=picking_tolerance,
-            )
+        # Register callback for left button press
+        plotter.iren.style.AddObserver("LeftButtonPressEvent", _on_left_button_press)
 
     # -------------------------------------------------------------- scalars
     def set_detector_scalars(self, mesh: pv.PolyData, counts: np.ndarray, label: str) -> None:

@@ -11,7 +11,7 @@ import numpy as np
 import pyvista as pv
 from pyvistaqt import BackgroundPlotter
 
-from instrumentview.InteractorStyles import CursorZoomInteractorStyle
+from instrumentview.InteractorStyles import CursorZoomInteractorStyle, SwappedButtonTrackballCamera
 
 
 class InstrumentRenderer(ABC):
@@ -130,7 +130,6 @@ class InstrumentRenderer(ABC):
 
     def set_interactive_style(self, plotter, is_projection):
         if not is_projection:
-            plotter.enable_trackball_style()
+            plotter.iren.style = SwappedButtonTrackballCamera()
             return
-        style = CursorZoomInteractorStyle(plotter)
-        plotter.iren.style = style
+        plotter.iren.style = CursorZoomInteractorStyle(plotter)
