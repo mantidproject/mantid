@@ -28,10 +28,6 @@ function trim_conda() {
     rm "$bundle_conda_prefix"/bin/workbench
   fi
 
-  # Heavily cut down translations
-  mv "$bundle_conda_prefix"/translations "$bundle_conda_prefix"/translations_tmp
-  mkdir -p "$bundle_conda_prefix"/translations
-
   # Removals
   rm -rf "$bundle_conda_prefix"/bin_tmp \
     "$bundle_conda_prefix"/include \
@@ -40,7 +36,7 @@ function trim_conda() {
     "$bundle_conda_prefix"/phrasebooks \
     "$bundle_conda_prefix"/qml \
     "$bundle_conda_prefix"/qsci \
-    "$bundle_conda_prefix"/translations_tmp
+    "$bundle_conda_prefix"/translations
 
   find "$bundle_conda_prefix" -name '*.a' -delete
   find "$bundle_conda_prefix" -name "*.pyc" -type f -delete

@@ -99,12 +99,3 @@ class HelpWindowPresenter:
                 log.error(f"Fallback to online home page failed: {fallback_error}")
         except Exception as e:
             log.error(f"Error opening home page: {e}")
-
-    # Deprecated methods kept for backward compatibility
-    def show_help_window(self):
-        """Deprecated: Help window no longer exists, docs open in system browser."""
-        log.debug("show_help_window() called but is deprecated - docs open in system browser")
-
-    def cleanup(self):
-        """Deprecated: No cleanup needed as there's no embedded window."""
-        log.debug("cleanup() called but is deprecated - no embedded window to clean up")

@@ -160,7 +160,7 @@ pngmath_use_preview = True
 # Use our custom Mantid Sphinx theme (extends https://pydata-sphinx-theme.readthedocs.io)
 html_theme = "mantid_sphinx_theme"
 
-# Path to static files (like custom CSS)
+# Path to static files
 html_static_path = ["_static"]
 
 # -- Options for Epub output ---------------------------------------------------
