@@ -241,6 +241,7 @@ void ReflectometryReductionOne3::exec() {
   std::vector<std::string> taskExecutionOrder = getProperty("TaskExecutionOrder");
   std::vector<std::shared_ptr<AlgorithmTask>> tasksToStage(taskExecutionOrder.size());
   for (auto &task : m_AlgorithmTasks) {
+    task->setTaskExecutionOrder(&taskExecutionOrder);
     auto it = std::find(taskExecutionOrder.begin(), taskExecutionOrder.end(), task->name());
     if (it != taskExecutionOrder.end()) {
       std::size_t index = std::distance(taskExecutionOrder.begin(), it);

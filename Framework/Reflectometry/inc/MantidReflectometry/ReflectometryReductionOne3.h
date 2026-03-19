@@ -177,10 +177,12 @@ private:
             std::accumulate(std::next(missingTasks.begin()), missingTasks.end(), missingTasks.front(),
                             [](const std::string &a, const std::string &b) { return a + ", " + b; }));
       }
+      activateTaskSet();
       m_parent->g_log.debug("Executing task: " + m_name + "\n");
       executeImpl();
       checkExpectedOutputs();
       m_parent->g_log.debug("Finished executing task: " + m_name + "\n");
+      // ADD CLEAN UP OF MEMBER OJBECTS
     }
     std::vector<std::string> getExpectedOutputs() { return m_expectedOutputs; }
     void setExpectedOutputs(std::vector<std::string> expectedOutputs) { m_expectedOutputs = expectedOutputs; }
@@ -188,6 +190,9 @@ private:
     void initAsFirstTask(std::shared_ptr<MatrixWorkspace> inputWS) {
       addDependantTaskOutput("InputWorkspace", inputWS);
       m_firstTaskFlag = true;
+    }
+    void setTaskExecutionOrder(const std::vector<std::string> *taskExecutionOrder) {
+      m_taskExecutionOrder = taskExecutionOrder;
     }
 
   protected:
@@ -201,37 +206,62 @@ private:
     }
 
   private:
-    // map of dependant task name: dependant outputs (task name, alias pairs)
+    // vector of dependent task sets: map of dependant task name: dependant outputs (task name, alias pairs)
     std::vector<std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>>> m_dependantTasks;
     std::string m_name;
     std::vector<std::string> m_expectedOutputs;
     std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>> m_dependantOutputs;
     bool m_firstTaskFlag;
     size_t m_activeDependantTaskSet;
+    std::vector<int> m_fulfilledDependantTaskSets;
+    const std::vector<std::string> *m_taskExecutionOrder = nullptr;
 
     virtual void executeImpl() = 0;
 
-    void populateDependantTasks() {
-      for (const auto &item : m_dependantTasks[m_activeDependantTaskSet]) {
+    bool populateDependantTasks(const size_t taskSetIndex) {
+      std::vector<size_t> invalidTaskSets;
+      for (auto &item : m_dependantTasks[taskSetIndex]) {
         const auto &taskName = item.first;
-        const auto &outputs = item.second;
-        auto it = std::find_if(m_parent->m_stagedAlgorithmTasks.begin(), m_parent->m_stagedAlgorithmTasks.end(),
+        auto &outputs = item.second;
+        auto it = std::find_if(m_parent->m_stagedAlgorithmTasks.cbegin(), m_parent->m_stagedAlgorithmTasks.cend(),
                                [&taskName](std::shared_ptr<AlgorithmTask> task) { return task->name() == taskName; });
-        if (it == m_parent->m_stagedAlgorithmTasks.end())
-          throw std::runtime_error("Dependant task " + taskName + " not found for task " + m_name +
-                                   "could not populate expected outputs.");
+        if (it == m_parent->m_stagedAlgorithmTasks.cend())
+          return false; // Task not found, this task set cannot be fulfilled
         if (outputs.empty()) {
           // If no specific outputs are listed, populate with the whole task output
           const auto &expectedOutputs = (*it)->getExpectedOutputs();
           for (const auto &output : expectedOutputs) {
-            m_dependantTasks[m_activeDependantTaskSet][taskName].push_back({output, output});
-          }
-        } else {
-          for (const auto &[output, alias] : outputs) {
-            m_dependantTasks[m_activeDependantTaskSet][taskName].push_back({output, alias});
+            outputs.push_back({output, output});
           }
         }
       }
+      return true;
+    }
+
+    void activateTaskSet() {
+      if (m_fulfilledDependantTaskSets.size() <= 1)
+        return;
+      // We have multiple fulfilled task sets, how do we choose between them?
+      // Lets select based on the execution order of tasks.
+      // The task set containing the task executed in closest proximity to this task wins.
+      const auto myIt = std::find(m_taskExecutionOrder->cbegin(), m_taskExecutionOrder->cend(), m_name);
+      const auto myIndex = std::distance(m_taskExecutionOrder->cbegin(), myIt);
+      size_t closestTaskSet = 0;
+      int closestDistance = std::numeric_limits<int>::max();
+      for (auto taskSet : m_fulfilledDependantTaskSets) {
+        for (auto &task : m_dependantTasks[taskSet]) {
+          const auto &taskName = task.first;
+          auto it = std::find(m_taskExecutionOrder->cbegin(), m_taskExecutionOrder->cend(), taskName);
+          std::size_t index = std::distance(m_taskExecutionOrder->cbegin(), it);
+          int distance = (int)myIndex - (int)index;
+          // Do not consider tasks that occur after the current task
+          if ((distance < closestDistance) && distance > 0) {
+            closestDistance = distance;
+            closestTaskSet = taskSet;
+          }
+        }
+      }
+      m_activeDependantTaskSet = closestTaskSet;
     }
 
     // after execution, check that expected outputs from this task are present in m_algorithmTaskOutputs
@@ -255,37 +285,45 @@ private:
     // check if output from dependant tasks is available in m_algorithmTaskOutputs
     // this could be supplied by dependant tasks, or manually setting algorithm properties
     std::vector<std::string> evaluateDependentTasks() {
-      populateDependantTasks();
-      std::vector<std::string> missingTasks;
       // If this is the first task, we expect the dependant outputs to be set as algorithm properties rather than
       // outputs from other tasks
       // TODO: Check that required input properties are provided. Currently we just take the input workspace
       if (m_firstTaskFlag)
-        return missingTasks;
-      // Loop through each task set, take the first fulfilled task set.
+        return {};
+      std::vector<std::string> missingTasksAll;
+      // Loop through each task set
       for (auto i = 0; i < m_dependantTasks.size(); ++i) {
-        for (const auto &[taskName, outputs] : m_dependantTasks[i]) {
-          if (!m_parent->m_algorithmTaskOutputs.contains(taskName)) {
-            missingTasks.push_back(taskName + ": ALL OUTPUTS");
-          } else {
-            for (const auto &output : outputs) {
-              if (!m_parent->m_algorithmTaskOutputs[taskName].contains(output.first)) {
-                missingTasks.push_back(taskName + ":" + output.first);
-              } else {
-                // populate dependent outputs for use in the task execution
-                addDependantTaskOutput(output.second, m_parent->m_algorithmTaskOutputs[taskName][output.first]);
+        // if task set is unfulfillable due to missing tasks
+        std::vector<std::string> missingTasks;
+        if (!populateDependantTasks(i)) {
+          // TODO: print out required tasks
+          missingTasks.push_back("Task set " + std::to_string(i) + " unfulfillable as required tasks not staged.");
+        } else {
+          for (const auto &[taskName, outputs] : m_dependantTasks[i]) {
+            if (!m_parent->m_algorithmTaskOutputs.contains(taskName)) {
+              missingTasks.push_back("Task set: " + std::to_string(i) + " Task name: " + taskName + ": ALL OUTPUTS");
+            } else {
+              for (const auto &output : outputs) {
+                if (!m_parent->m_algorithmTaskOutputs[taskName].contains(output.first)) {
+                  missingTasks.push_back("Task set: " + std::to_string(i) + " Task name: " + taskName + ": " +
+                                         output.first);
+                } else {
+                  // populate dependent outputs for use in the task execution
+                  addDependantTaskOutput(output.second, m_parent->m_algorithmTaskOutputs[taskName][output.first]);
+                }
               }
             }
           }
         }
-        // If we have found a task set with all outputs available, use this one and break
-        // TODO: Handle multiple fulfilled task sets.
+        // If we have found a task set with all outputs available, add this to fulfilled sets
+        // otherwise, add missing tasks to the list of missing tasks for all sets
         if (missingTasks.empty()) {
-          m_activeDependantTaskSet = i;
-          break;
+          m_fulfilledDependantTaskSets.push_back(i);
+        } else {
+          missingTasksAll.insert(missingTasksAll.end(), missingTasks.begin(), missingTasks.end());
         }
       }
-      return missingTasks;
+      return (m_fulfilledDependantTaskSets.empty() ? missingTasksAll : std::vector<std::string>{});
     }
 
     void addDependantTaskOutput(const std::string &outputName, std::shared_ptr<MatrixWorkspace> ws) {
