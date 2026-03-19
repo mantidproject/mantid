@@ -371,10 +371,20 @@ private:
     void executeImpl() override;
   };
 
+  class TaskConvertToQ : public AlgorithmTask {
+  public:
+    explicit TaskConvertToQ(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskConvertToQ") {
+      setExpectedOutputs({"ConvertedWorkspaceQ"});
+      setDependantTask("TaskCropWavelength", "CroppedWorkspace", "InputWorkspace");
+    }
+    void executeImpl() override;
+  };
+
   // map of task name: task
-  std::vector<std::string> m_defaultTaskExecutionOrder{"TaskExtractROI",          "TaskBackgroundSubtraction",
-                                                       "TaskConvertToWavelength", "TaskSumInWavelength",
-                                                       "TaskNormalizeByMonitor",  "TaskCropWavelength"};
+  std::vector<std::string> m_defaultTaskExecutionOrder{
+      "TaskExtractROI",         "TaskBackgroundSubtraction", "TaskConvertToWavelength", "TaskSumInWavelength",
+      "TaskNormalizeByMonitor", "TaskCropWavelength",        "TaskConvertToQ"};
+
   // std::vector<std::string> m_defaultTaskExecutionOrder{"TaskExtractROI", "TaskBackgroundSubtraction",
   // "TaskConvertToWavelength", "TaskSumInWavelength", "TaskNormalizeByMonitor", "TaskNormalizeByTransmission",
   // "TaskCropWavelength"}; std::vector<std::string> m_defaultTaskExecutionOrder{"TaskBackgroundSubtraction",
@@ -384,7 +394,7 @@ private:
       std::make_shared<TaskExtractROI>(this),          std::make_shared<TaskBackgroundSubtraction>(this),
       std::make_shared<TaskConvertToWavelength>(this), std::make_shared<TaskSumInWavelength>(this),
       std::make_shared<TaskNormalizeByMonitor>(this),  std::make_shared<TaskNormalizeByTransmission>(this),
-      std::make_shared<TaskCropWavelength>(this)};
+      std::make_shared<TaskCropWavelength>(this),      std::make_shared<TaskConvertToQ>(this)};
   std::vector<std::shared_ptr<AlgorithmTask>> m_stagedAlgorithmTasks;
   // map of task name: (map of output name: outputs)
   std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>>

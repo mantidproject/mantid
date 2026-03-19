@@ -1388,4 +1388,12 @@ void ReflectometryReductionOne3::TaskCropWavelength::executeImpl() {
   auto cropped = m_parent->cropWavelength(inputWS, true, m_parent->wavelengthMin(), m_parent->wavelengthMax());
   outputWorkspace(cropped, "CroppedWorkspace");
 }
+
+void ReflectometryReductionOne3::TaskConvertToQ::executeImpl() {
+  auto inputWS = getDependantWorkspace("InputWorkspace");
+  // maybe bring the conversion code into this task
+  auto converted = m_parent->convertToQ(inputWS);
+  outputWorkspace(converted, "ConvertedWorkspaceQ");
+}
+
 } // namespace Mantid::Reflectometry
