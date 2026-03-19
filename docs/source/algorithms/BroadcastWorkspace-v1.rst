@@ -1,3 +1,6 @@
+.. _algm-BroadcastWorkspace:
+.. _algm-BroadcastWorkspace-v1:
+
 .. algorithm::
 
 .. summary::
