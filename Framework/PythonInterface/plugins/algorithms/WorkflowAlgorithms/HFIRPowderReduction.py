@@ -578,9 +578,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         # Step 2: Load vanadium and background data
         logger.information("Step 2: Loading vanadium and background data")
-        vanadium_ws = self._load_vanadium_data()
-        vanadium_background_ws = self._load_vanadium_background_data()
-        sample_background_ws = self._load_sample_background_data()
+        self.vanadium_ws = self._load_vanadium_data()
+        self.vanadium_background_ws = self._load_vanadium_background_data()
+        self.sample_background_ws = self._load_sample_background_data()
 
         # Step 3: Axis Conversion & Masking
         logger.information("Step 3: Converting axes and applying masks")
@@ -590,29 +590,18 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         logger.information("Step 4: Resampling, normalization, calibration & correction")
         xMin, xMax = self._locate_global_xlimit(sample_workspaces)
 
-        self._resample_inputs(
-            sample_workspaces, sample_masks, xMin, xMax, binWidth, vanadium_ws, vanadium_background_ws, sample_background_ws, summing
-        )
+        self._resample_inputs(sample_workspaces, sample_masks, xMin, xMax, binWidth, summing)
 
         # Step 5: Output (Summing or Grouping)
         logger.information("Step 5: Creating output workspace")
         if summing:
-            if vanadium_ws is not None:
-                outWS = SumSpectra(
-                    InputWorkspace="__ws_conjoined",
-                    OutputWorkspace=outWS,
-                    WeightedSum=True,
-                    MultiplyBySpectra=not bool(vanadium_ws),
-                    EnableLogging=False,
-                )
-            else:
-                outWS = SumSpectra(
-                    InputWorkspace="__ws_conjoined",
-                    OutputWorkspace=outWS,
-                    WeightedSum=True,
-                    MultiplyBySpectra=True,
-                    EnableLogging=False,
-                )
+            outWS = SumSpectra(
+                InputWorkspace="__ws_conjoined",
+                OutputWorkspace=outWS,
+                WeightedSum=True,
+                MultiplyBySpectra=not bool(self.vanadium_ws),
+                EnableLogging=False,
+            )
         else:
             if len(sample_workspaces) == 1:
                 outWS = RenameWorkspace(InputWorkspace=sample_workspaces[0], OutputWorkspace=outWS)
@@ -633,12 +622,10 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             if mtd.doesExist(ws):
                 DeleteWorkspace(ws, EnableLogging=False)
 
-    def _resample_inputs(
-        self, sample_workspaces, sample_masks, xMin, xMax, binWidth, vanadium_ws, vanadium_background_ws, sample_background_ws, summing
-    ):
+    def _resample_inputs(self, sample_workspaces, sample_masks, xMin, xMax, binWidth, summing):
         # Keep original raw workspace names so they can be re-used each iteration
-        raw_vanadium_background_ws = vanadium_background_ws
-        raw_sample_background_ws = sample_background_ws
+        raw_vanadium_background_ws = self.vanadium_background_ws
+        raw_sample_background_ws = self.sample_background_ws
 
         # Resample all sample workspaces
         for index, (ws_name, mask_name) in enumerate(zip(sample_workspaces, sample_masks)):
@@ -651,32 +638,34 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 EnableLogging=False,
             )
 
-            if vanadium_ws:
-                vanadium_ws = self._resample_vanadium(ws_name, mask_name, xMin, xMax)
-            else:
-                vanadium_ws = None
+            if self.vanadium_ws:
+                self.vanadium_ws = self._resample_vanadium(ws_name, mask_name, xMin, xMax)
 
             if raw_vanadium_background_ws is not None:
-                vanadium_background_ws = self._resample_background(raw_vanadium_background_ws, ws_name, mask_name, xMin, xMax, vanadium_ws)
+                self.vanadium_background_ws = self._resample_background(
+                    raw_vanadium_background_ws, ws_name, mask_name, xMin, xMax, self.vanadium_ws
+                )
 
             Scale(
                 InputWorkspace=ws_name,
                 OutputWorkspace=ws_name,
-                Factor=self._get_scale(vanadium_ws) / self._get_scale(ws_name),
+                Factor=self._get_scale(self.vanadium_ws) / self._get_scale(ws_name),
                 EnableLogging=False,
             )
 
             if raw_sample_background_ws is not None:
-                sample_background_ws = self._resample_background(raw_sample_background_ws, ws_name, mask_name, xMin, xMax, vanadium_ws)
+                self.sample_background_ws = self._resample_background(
+                    raw_sample_background_ws, ws_name, mask_name, xMin, xMax, self.vanadium_ws
+                )
 
             # Calibration & Normalization (vanadium correction)
             logger.information("Processing calibration (vanadium) data")
-            if vanadium_ws is not None:
+            if self.vanadium_ws is not None:
                 vanadium_corrected = self._process_vanadium_calibration(
-                    vanadium_ws,
-                    vanadium_background_ws,
+                    self.vanadium_ws,
+                    self.vanadium_background_ws,
                 )
-                ws_name = self._apply_sample_absorption_correction(ws_name, vanadium_corrected, sample_background_ws)
+                ws_name = self._apply_sample_absorption_correction(ws_name, vanadium_corrected, self.sample_background_ws)
 
             if summing:
                 # conjoin
@@ -698,7 +687,31 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         # Update the list with potentially renamed workspace
         sample_workspaces[index] = ws_name
 
-    def _load_data(self, data_type):
+    def _load_MIDAS(self, filename, ws):
+        Load(Filename=filename, OutputWorkspace=ws, EnableLogging=False)
+        if not isinstance(ws, WorkspaceGroup):
+            # This is a temp fix for using simulated MIDAS data
+            LoadInstrument(ws, Filename="/SNS/users/nxw/mccode_fixed.xml", RewriteSpectraMap=True)
+            self.temp_workspace_list.append("1spectrum")
+
+    def _load_WAND(self, filename, ws):
+        try:
+            LoadWAND(Filename=filename, OutputWorkspace=ws, EnableLogging=False)
+        except RuntimeError:
+            logger.warning(f"LoadWAND failed for {filename}, falling back to generic Load")
+            Load(Filename=filename, OutputWorkspace=ws, EnableLogging=False)
+
+    def _general_load_data(self, data_type):
+        instrument = self.getProperty("Instrument").value
+
+        file_source_map = {
+            "MIDAS": "/HFIR/HB2A/IPTS-{ipts}/nexus/HB2A_{run}.nxs.h5",
+            "WAND^2": "/HFIR/HB2C/IPTS-{ipts}/nexus/HB2C_{run}.nxs.h5",
+        }
+        loader_map = {"MIDAS": self._load_MIDAS, "WAND^2": self._load_WAND}
+        return self._load_data(data_type, file_source_map[instrument], loader_map[instrument])
+
+    def _load_data(self, data_type, source_template, loader):
         """
         Generic function to load data from files or IPTS/run numbers.
 
@@ -714,43 +727,26 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         filenames = self.getProperty(f"{data_type}Filename").value
         ipts = self.getProperty(f"{data_type}IPTS").value
         run_numbers = self.getProperty(f"{data_type}RunNumbers").value
-        instrument = self.getProperty("Instrument").value
 
         # Build file list
         files_to_load = []
         if filenames:
             files_to_load = list(filenames)
         elif ipts != Property.EMPTY_INT and len(run_numbers) > 0:
-            if instrument == "WAND^2":
-                files_to_load = [f"/HFIR/HB2C/IPTS-{ipts}/nexus/HB2C_{run}.nxs.h5" for run in run_numbers]
-            elif instrument == "MIDAS":
-                files_to_load = [f"/HFIR/HB2A/IPTS-{ipts}/nexus/HB2A_{run}.nxs.h5" for run in run_numbers]
+            files_to_load = [source_template.format(run=run, ipts=ipts) for run in run_numbers]
 
         if not files_to_load:
             return None
 
         grouping = self.getProperty("Grouping").value
         loaded_workspaces = []
-
         for i, filename in enumerate(files_to_load):
             temp_ws = f"{data_type.lower()}_{i}"
             self.temp_workspace_list.append(temp_ws)
-            if instrument == "WAND^2":
-                try:
-                    LoadWAND(Filename=filename, OutputWorkspace=temp_ws, EnableLogging=False)
-                except RuntimeError:
-                    logger.warning(f"LoadWAND failed for {filename}, falling back to generic Load")
-                    Load(Filename=filename, OutputWorkspace=temp_ws, EnableLogging=False)
-            else:
-                Load(Filename=filename, OutputWorkspace=temp_ws, EnableLogging=False)
+            loader(filename, temp_ws)
 
             if self._handle_loaded_workspace(temp_ws, loaded_workspaces):
                 continue
-
-            if instrument == "MIDAS":
-                # This is a temp fix for using simulated MIDAS data
-                LoadInstrument(temp_ws, Filename="/SNS/users/nxw/mccode_fixed.xml", RewriteSpectraMap=True)
-                self.temp_workspace_list.append("1spectrum")
 
             loaded_workspaces.append(temp_ws)
 
@@ -785,26 +781,27 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         """Load sample data as individual workspaces."""
         if not self._has_data_to_load("Sample"):
             return []
-        return self._load_data("Sample")
+        return self._general_load_data("Sample")
 
     def _load_vanadium_data(self):
         """Load vanadium calibration data."""
         if not self._has_data_to_load("Vanadium"):
-            return []
-        return self._load_data("Vanadium")
+            return None
+        result = self._general_load_data("Vanadium")
+        return result[0] if result else None
 
     def _load_vanadium_background_data(self):
         """Load vanadium background data."""
         if not self._has_data_to_load("VanadiumBackground"):
             return None
-        result = self._load_data("VanadiumBackground")
+        result = self._general_load_data("VanadiumBackground")
         return result[0] if result else None
 
     def _load_sample_background_data(self):
         """Load sample background data."""
         if not self._has_data_to_load("SampleBackground"):
             return None
-        result = self._load_data("SampleBackground")
+        result = self._general_load_data("SampleBackground")
         return result[0] if result else None
 
     def _apply_grouping(self, ws_name, grouping):
