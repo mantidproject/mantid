@@ -331,11 +331,9 @@ void ApplyAbsorptionCorrections::handleRun() {
 
   // Set the result workspace for Python script export
   m_pythonExportWsName = outputWsName;
-  // m_containerWorkspaceName = m_uiForm.dsContainer->getCurrentDataName();
-  // updateContainer();
 }
 
-std::string ApplyAbsorptionCorrections::createOutputName() {
+std::string ApplyAbsorptionCorrections::createOutputName() const {
   // Find type of correction prefixes
   QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
   std::string geometryType;

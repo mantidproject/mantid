@@ -157,7 +157,6 @@ std::string ContainerSubtraction::createOutputName() {
   const auto &sampleName = m_csSampleWS->getName();
   const auto containerName = prepareContainerName(m_csContainerWS->getName());
   return sampleName.substr(0, sampleName.find_last_of("_")) + "_Subtract_" + containerName + "_red";
-  ;
 }
 
 void ContainerSubtraction::loadSettings(const QSettings &settings) {
