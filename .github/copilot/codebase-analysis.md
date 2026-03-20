@@ -2,7 +2,7 @@
 
 ## 1. Repository Overview
 
-- **Language Stack**: C++20 and Python 3.11
+- **Language Stack**: C++20 and Python 3.12
 - **GUI Framework**: Qt5-based Workbench
 - **Build System**: CMake 3.21+ with Ninja generator
 - **Package Manager**: Conda (with pixi for development)
@@ -472,7 +472,7 @@ pre-commit run --all-files           # Run all pre-commit hooks
 
 ### Runtime
 
-- Python 3.11+
+- Python 3.12
 - Qt5 / PyQt5
 - HDF5 (NeXus format)
 - Boost

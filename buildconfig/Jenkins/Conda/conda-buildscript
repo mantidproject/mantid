@@ -131,6 +131,8 @@ git clean -d -x --force --exclude=".Xauthority-*" $git_clean_excludes_extra
 # install pixi if not already installed
 install_pixi
 
+pixi run --frozen python -m pip uninstall -y mantid mantidqt MantidWorkbench mantidqtinterfaces instrumentview
+
 # Check whether this is an incremental build that only changes rst files
 if [ -d $BUILD_DIR ]; then
     if ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
