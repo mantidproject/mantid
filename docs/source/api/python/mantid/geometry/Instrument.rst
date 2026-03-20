@@ -1,6 +1,3 @@
-.. _Instrument:
-.. _mantid.geometry.Instrument:
-
 ============
  Instrument
 ============

@@ -1,6 +1,3 @@
-.. _algm-GatherWorkspaces:
-.. _algm-GatherWorkspaces-v1:
-
 .. algorithm::
 
 .. summary::

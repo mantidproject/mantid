@@ -1,4 +1,3 @@
-.. _MatrixWorkspace:
 .. _mantid.api.MatrixWorkspace:
 
 =================

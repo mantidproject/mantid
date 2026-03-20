@@ -1,4 +1,3 @@
-.. _Sample:
 .. _mantid.api.Sample:
 
 ========

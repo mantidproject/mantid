@@ -1,6 +1,3 @@
-.. _LeanElasticPeaksWorkspace:
-.. _mantid.dataobjects.LeanElasticPeaksWorkspace:
-
 ===========================
  LeanElasticPeaksWorkspace
 ===========================

@@ -1,6 +1,3 @@
-.. _Workspace2D:
-.. _mantid.dataobjects.Workspace2D:
-
 =============
  Workspace2D
 =============

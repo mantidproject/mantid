@@ -1,6 +1,3 @@
-.. _EventWorkspace:
-.. _mantid.dataobjects.EventWorkspace:
-
 ================
  EventWorkspace
 ================

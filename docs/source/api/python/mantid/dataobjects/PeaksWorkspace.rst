@@ -1,6 +1,3 @@
-.. _PeaksWorkspace:
-.. _mantid.dataobjects.PeaksWorkspace:
-
 ================
  PeaksWorkspace
 ================

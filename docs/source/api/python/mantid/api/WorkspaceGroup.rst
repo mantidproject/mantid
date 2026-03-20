@@ -1,6 +1,3 @@
-.. _WorkspaceGroup:
-.. _mantid.api.WorkspaceGroup:
-
 ================
  WorkspaceGroup
 ================

@@ -1,4 +1,3 @@
-.. _Run:
 .. _mantid.api.Run:
 
 =====

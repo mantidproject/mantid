@@ -1,6 +1,3 @@
-.. _MDHistoWorkspace:
-.. _mantid.dataobjects.MDHistoWorkspace:
-
 ==================
  MDHistoWorkspace
 ==================
