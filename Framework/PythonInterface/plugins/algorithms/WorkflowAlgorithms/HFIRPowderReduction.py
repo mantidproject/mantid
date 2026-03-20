@@ -613,8 +613,16 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         if not self.getProperty("OutputDirectory").isDefault:
             # Step 6: Save
             logger.information("Step 6: Saving output to file")
-            SaveAscii(InputWorkspace=outWS, Filename=self.getPropertyValue("OutputDirectory"), EnableLogging=False)
-            SaveNexus(InputWorkspace=outWS, Filename=self.getPropertyValue("OutputDirectory").replace(".dat", ".nxs"))
+            output_dir = self.getProperty("OutputDirectory").value
+            # If directory ends with .dat, user has set the directoy with the browse button and no extra checking is required
+            if not output_dir.endswith(".dat"):
+                if not output_dir.endswith("/"):
+                    output_dir += "/"
+                if not output_dir.endswith(outWS.name()):
+                    output_dir += outWS.name()
+                output_dir += ".dat"
+            SaveAscii(InputWorkspace=outWS, Filename=output_dir, EnableLogging=False)
+            SaveNexus(InputWorkspace=outWS, Filename=output_dir.replace(".dat", ".nxs"))
 
         # Step 7: Cleanup
         logger.information("Step 7: Cleaning up temporary workspaces")

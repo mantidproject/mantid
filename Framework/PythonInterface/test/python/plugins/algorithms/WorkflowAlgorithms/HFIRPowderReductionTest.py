@@ -1065,7 +1065,7 @@ class ReductionExecutionTests(unittest.TestCase):
 
         data, cal, bkg = self._create_workspaces()
 
-        output_file_name = os.path.join(self._test_dir, "output_workspace.nxs")
+        output_file_name = os.path.join(self._test_dir, "output_workspace.dat")
 
         HFIRPowderReduction(
             SampleFilename=data,
@@ -1077,7 +1077,7 @@ class ReductionExecutionTests(unittest.TestCase):
             Instrument="WAND^2",
             Wavelength=1.6513,
             VanadiumDiameter=0.5,
-            OutputWorkspace="output_ws",
+            OutputWorkspace="output_workspace",
             OutputDirectory=output_file_name,
         )
 
