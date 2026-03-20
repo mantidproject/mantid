@@ -38,10 +38,16 @@ class IndirectResolution(DataProcessorAlgorithm):
             doc="Instrument used during run.",
         )
         self.declareProperty(
-            name="Analyser", defaultValue="", validator=StringListValidator(["graphite", "mica", "fmica"]), doc="Analyser used during run."
+            name="Analyser",
+            defaultValue="",
+            validator=StringListValidator(["graphite", "mica", "fmica", "silicon"]),
+            doc="Analyser used during run.",
         )
         self.declareProperty(
-            name="Reflection", defaultValue="", validator=StringListValidator(["002", "004", "006"]), doc="Reflection used during run."
+            name="Reflection",
+            defaultValue="",
+            validator=StringListValidator(["002", "004", "006", "111", "333"]),
+            doc="Reflection used during run.",
         )
 
         self.declareProperty(
