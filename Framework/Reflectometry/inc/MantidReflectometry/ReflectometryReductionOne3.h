@@ -153,7 +153,8 @@ private:
       addDependantTaskSet(); // Start with one dependant task set by default
     }
     size_t addDependantTaskSet() {
-      m_dependantTasks.push_back({});
+      m_dependantTasks.emplace_back();
+      m_dependantOutputs.emplace_back();
       return m_dependantTasks.size() - 1;
     }
     void setDependantTask(const std::string &task, const std::string &output_name = "", const std::string &alias = "",
@@ -188,7 +189,7 @@ private:
     void setExpectedOutputs(std::vector<std::string> expectedOutputs) { m_expectedOutputs = expectedOutputs; }
     std::string name() const { return m_name; }
     void initAsFirstTask(std::shared_ptr<MatrixWorkspace> inputWS) {
-      addDependantTaskOutput("InputWorkspace", inputWS);
+      addDependantTaskOutput("InputWorkspace", inputWS, 0);
       m_firstTaskFlag = true;
     }
     void setTaskExecutionOrder(const std::vector<std::string> *taskExecutionOrder) {
@@ -202,7 +203,7 @@ private:
     }
 
     std::shared_ptr<MatrixWorkspace> getDependantWorkspace(std::string outputAlias) {
-      return m_dependantOutputs[outputAlias];
+      return m_dependantOutputs[m_activeDependantTaskSet][outputAlias];
     }
 
   private:
@@ -210,7 +211,7 @@ private:
     std::vector<std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>>> m_dependantTasks;
     std::string m_name;
     std::vector<std::string> m_expectedOutputs;
-    std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>> m_dependantOutputs;
+    std::vector<std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>> m_dependantOutputs;
     bool m_firstTaskFlag;
     size_t m_activeDependantTaskSet;
     std::vector<int> m_fulfilledDependantTaskSets;
@@ -219,7 +220,6 @@ private:
     virtual void executeImpl() = 0;
 
     bool populateDependantTasks(const size_t taskSetIndex) {
-      std::vector<size_t> invalidTaskSets;
       for (auto &item : m_dependantTasks[taskSetIndex]) {
         const auto &taskName = item.first;
         auto &outputs = item.second;
@@ -239,8 +239,12 @@ private:
     }
 
     void activateTaskSet() {
-      if (m_fulfilledDependantTaskSets.size() <= 1)
+      if (m_fulfilledDependantTaskSets.size() == 1) {
+        m_activeDependantTaskSet = m_fulfilledDependantTaskSets.front();
         return;
+      } else if (m_fulfilledDependantTaskSets.size() == 0) {
+        return;
+      }
       // We have multiple fulfilled task sets, how do we choose between them?
       // Lets select based on the execution order of tasks.
       // The task set containing the task executed in closest proximity to this task wins.
@@ -309,7 +313,7 @@ private:
                                          output.first);
                 } else {
                   // populate dependent outputs for use in the task execution
-                  addDependantTaskOutput(output.second, m_parent->m_algorithmTaskOutputs[taskName][output.first]);
+                  addDependantTaskOutput(output.second, m_parent->m_algorithmTaskOutputs[taskName][output.first], i);
                 }
               }
             }
@@ -326,8 +330,9 @@ private:
       return (m_fulfilledDependantTaskSets.empty() ? missingTasksAll : std::vector<std::string>{});
     }
 
-    void addDependantTaskOutput(const std::string &outputName, std::shared_ptr<MatrixWorkspace> ws) {
-      m_dependantOutputs[outputName] = ws;
+    void addDependantTaskOutput(const std::string &outputName, std::shared_ptr<MatrixWorkspace> ws,
+                                const size_t taskSetIndex) {
+      m_dependantOutputs[taskSetIndex][outputName] = ws;
     }
   };
 
@@ -347,6 +352,8 @@ private:
         : AlgorithmTask(parent, "TaskConvertToWavelength") {
       setExpectedOutputs({"ConvertedWorkspaceWavelength"});
       setDependantTask("TaskBackgroundSubtraction", "BackgroundSubtractedWorkspace", "InputWorkspace");
+      const auto taskSet = addDependantTaskSet();
+      setDependantTask("TaskSumDetectors", "SummedWorkspace", "InputWorkspace", taskSet);
     }
     void executeImpl() override;
   };
@@ -356,7 +363,9 @@ private:
     explicit TaskNormalizeByMonitor(ReflectometryReductionOne3 *parent)
         : AlgorithmTask(parent, "TaskNormalizeByMonitor") {
       setExpectedOutputs({"MonitorCorrectedWorkspace"});
-      setDependantTask("TaskSumInWavelength", "SummedWorkspace", "InputWorkspace");
+      setDependantTask("TaskSumDetectors", "SummedWorkspace", "InputWorkspace");
+      const auto taskSet = addDependantTaskSet();
+      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet);
     }
     void executeImpl() override;
   };
@@ -389,11 +398,13 @@ private:
     void executeImpl() override;
   };
 
-  class TaskSumInWavelength : public AlgorithmTask {
+  class TaskSumDetectors : public AlgorithmTask {
   public:
-    explicit TaskSumInWavelength(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskSumInWavelength") {
+    explicit TaskSumDetectors(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskSumDetectors") {
       setExpectedOutputs({"SummedWorkspace"});
       setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace");
+      const auto taskSet = addDependantTaskSet();
+      setDependantTask("TaskBackgroundSubtraction", "BackgroundSubtractedWorkspace", "InputWorkspace", taskSet);
     }
     void executeImpl() override;
   };
@@ -420,17 +431,17 @@ private:
 
   // map of task name: task
   std::vector<std::string> m_defaultTaskExecutionOrder{
-      "TaskExtractROI",         "TaskBackgroundSubtraction", "TaskConvertToWavelength", "TaskSumInWavelength",
+      "TaskExtractROI",         "TaskBackgroundSubtraction", "TaskConvertToWavelength", "TaskSumDetectors",
       "TaskNormalizeByMonitor", "TaskCropWavelength",        "TaskConvertToQ"};
 
   // std::vector<std::string> m_defaultTaskExecutionOrder{"TaskExtractROI", "TaskBackgroundSubtraction",
-  // "TaskConvertToWavelength", "TaskSumInWavelength", "TaskNormalizeByMonitor", "TaskNormalizeByTransmission",
+  // "TaskConvertToWavelength", "TaskSumDetectors", "TaskNormalizeByMonitor", "TaskNormalizeByTransmission",
   // "TaskCropWavelength"}; std::vector<std::string> m_defaultTaskExecutionOrder{"TaskBackgroundSubtraction",
   // "TaskConvertToWavelength", "TaskNormalizeByMonitor", "TaskNormalizeByTransmission", "TaskSumInQ",
   // "TaskCropWavelength"};
   std::vector<std::shared_ptr<AlgorithmTask>> m_AlgorithmTasks{
       std::make_shared<TaskExtractROI>(this),          std::make_shared<TaskBackgroundSubtraction>(this),
-      std::make_shared<TaskConvertToWavelength>(this), std::make_shared<TaskSumInWavelength>(this),
+      std::make_shared<TaskConvertToWavelength>(this), std::make_shared<TaskSumDetectors>(this),
       std::make_shared<TaskNormalizeByMonitor>(this),  std::make_shared<TaskNormalizeByTransmission>(this),
       std::make_shared<TaskCropWavelength>(this),      std::make_shared<TaskConvertToQ>(this)};
   std::vector<std::shared_ptr<AlgorithmTask>> m_stagedAlgorithmTasks;

@@ -1377,7 +1377,7 @@ void ReflectometryReductionOne3::TaskExtractROI::executeImpl() {
   outputWorkspace(extracted, "ExtractedROIWorkspace");
 }
 
-void ReflectometryReductionOne3::TaskSumInWavelength::executeImpl() {
+void ReflectometryReductionOne3::TaskSumDetectors::executeImpl() {
   auto inputWS = getDependantWorkspace("InputWorkspace");
   auto summed = m_parent->makeDetectorWS(inputWS, false, true);
   outputWorkspace(summed, "SummedWorkspace");
