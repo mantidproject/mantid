@@ -44,6 +44,7 @@ requirements:
     - ${{ pin_compatible("python", upper_bound="x.x") }}
     - matplotlib ${{ matplotlib }}
     - pyvista ${{ pyvista }}
+    - vtk-base ${{ vtk_base }}
     - pyvistaqt
     - superqt
     - qtconsole ${{ qtconsole }}

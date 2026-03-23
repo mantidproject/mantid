@@ -132,6 +132,7 @@ graphviz = ">=2.47.0"
 mantid-sphinx-theme = ">=0.1.0,<1"
 myst-parser = ">=5.0.0,<6"
 sphinx = ">=9.0,<10"
+vtk-base = "<9.6.0"
 
 [target.linux-64.dependencies]
 gxx_linux-64 = "13.*"
