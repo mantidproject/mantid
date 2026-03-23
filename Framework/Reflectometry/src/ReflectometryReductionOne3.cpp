@@ -213,6 +213,7 @@ void ReflectometryReductionOne3::setDefaultOutputWorkspaceNames() {
 std::vector<std::string> ReflectometryReductionOne3::constructTaskExecutionOrder() {
   std::vector<std::string> teo;
   std::string sumDetectorsTask;
+  // Select tasks based upon summation type
   if (summingInQ()) {
     teo = {
         "TaskBackgroundSubtraction", "TaskConvertToWavelength", "TaskNormalizeByMonitor", "TaskNormalizeByTransmission",
@@ -223,13 +224,22 @@ std::vector<std::string> ReflectometryReductionOne3::constructTaskExecutionOrder
            "TaskNormalizeByMonitor", "TaskNormalizeByTransmission", "TaskCropWavelength", "TaskConvertToQ"};
     sumDetectorsTask = "TaskSumDetectors";
   }
+
   const auto xUnitID = m_runWS->getAxis(0)->unit()->unitID();
   if (xUnitID == "Wavelength") {
-    // Assume lambda workspace already normalised and summed
+    // Assume already part reduced: lambda workspace already normalised and summed
     teo.erase(std::remove(teo.begin(), teo.end(), "TaskConvertToWavelength"), teo.end());
     teo.erase(std::remove(teo.begin(), teo.end(), "TaskNormalizeByMonitor"), teo.end());
     teo.erase(std::remove(teo.begin(), teo.end(), "TaskNormalizeByTransmission"), teo.end());
     teo.erase(std::remove(teo.begin(), teo.end(), sumDetectorsTask), teo.end());
+  } else {
+    // evaluate necessity of normalisation tasks based on properties
+    const Property *monProperty = getProperty("I0MonitorIndex");
+    const Property *backgroundMinProperty = getProperty("MonitorBackgroundWavelengthMin");
+    const Property *backgroundMaxProperty = getProperty("MonitorBackgroundWavelengthMax");
+    if (monProperty->isDefault() || backgroundMinProperty->isDefault() || backgroundMaxProperty->isDefault()) {
+      teo.erase(std::remove(teo.begin(), teo.end(), "TaskNormalizeByMonitor"), teo.end());
+    }
   }
   return teo;
 }

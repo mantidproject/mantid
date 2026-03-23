@@ -376,6 +376,8 @@ private:
         : AlgorithmTask(parent, "TaskNormalizeByTransmission") {
       setExpectedOutputs({"TransmissionCorrectedWorkspace"});
       setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
+      const auto taskSet = addDependantTaskSet();
+      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet);
     }
     void executeImpl() override;
   };
