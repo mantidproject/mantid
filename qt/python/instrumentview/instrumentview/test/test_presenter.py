@@ -10,6 +10,9 @@ from instrumentview.Globals import CurrentTab
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Peaks.Peak import Peak
 from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.renderers.shape_renderer import ShapeRenderer
+from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
+
 
 import numpy as np
 from mantid.simpleapi import CreateSampleWorkspace
@@ -24,10 +27,14 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def setUp(self):
         self._mock_view = MagicMock()
         self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
+        self._mock_view.is_show_shapes_checkbox_checked.return_value = False
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter", EnableLogging=False)
         self._model = FullInstrumentViewModel(self._ws)
         with mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"):
             self._presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
+        self._presenter._point_cloud_renderer = MagicMock(spec=PointCloudRenderer)
+        self._presenter._shape_renderer = MagicMock(spec=ShapeRenderer)
+        self._presenter._renderer = self._presenter._point_cloud_renderer
         self._mock_view.reset_mock()
 
     def tearDown(self):
@@ -39,12 +46,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
     def test_update_plotter(self, mock_set_peaks_ws):
-        self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_X
         self._presenter.update_plotter()
-        self.assertEqual(self._model.projection_type, ProjectionType.CYLINDRICAL_X)
-        self._mock_view.add_detector_mesh.assert_called()
-        self._mock_view.add_pickable_mesh.assert_called()
-        self._mock_view.add_masked_mesh.assert_called()
+        self.assertEqual(self._model.projection_type, ProjectionType.CYLINDRICAL_Y)
+        self._mock_view.clear_main_plotter.assert_called()
         mock_set_peaks_ws.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_contour_range_reset_clicked")
@@ -71,9 +75,12 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_set_view_integration_limits(self, mock_on_contour_range_reset_clicked, mock_update_line_plot):
         self._mock_view.current_selected_unit.return_value = "MyUnit"
         self._model._counts = np.zeros(200)
-        self._presenter._detector_mesh = {}
+        mesh = MagicMock()
+        mesh.point_data = {}
+        self._presenter._detector_mesh = mesh
+        self._presenter._renderer.set_detector_scalars.side_effect = lambda m, counts, label: m.point_data.update({label: counts})
         self._presenter.set_view_integration_limits()
-        np.testing.assert_allclose(self._presenter._detector_mesh[self._presenter._counts_label], self._model.detector_counts)
+        np.testing.assert_allclose(mesh.point_data[self._presenter._counts_label], self._model.detector_counts)
         mock_on_contour_range_reset_clicked.assert_called_once()
         mock_update_line_plot.assert_called_once_with("MyUnit")
 
@@ -85,7 +92,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_update_detector_picker(self):
         self._mock_view.is_multi_picking_checkbox_checked.return_value = False
         self._presenter.update_detector_picker()
-        self._mock_view.enable_point_picking.assert_called_once()
+        # Presenter delegates picking to the renderer, which calls plotter.disable_picking
+        # internally before setting up surface point picking.
+        self._presenter._renderer.enable_picking.assert_called_once_with(self._mock_view.main_plotter, callback=mock.ANY)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
     def test_unit_option_selected(self, mock_extract_spectra):
@@ -149,12 +158,15 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._detector_ids = np.array([1, 2, 3])
         self._model.picked_detectors_info_text = MagicMock(return_value=["a", "a"])
         self._model.extract_spectra_for_line_plot = MagicMock()
-        self._presenter._pickable_mesh = {}
-        self._presenter._pickable_projection_mesh = {}
+        self._presenter._pickable_mesh = MagicMock()
+        self._presenter._pickable_mesh.point_data = {}
+        self._presenter._renderer.set_pickable_scalars.side_effect = lambda m, visibility, label: m.point_data.update({label: visibility})
         self._mock_view.current_selected_unit.return_value = "TOF"
         self._mock_view.sum_spectra_selected.return_value = True
         self._presenter.update_picked_detectors_on_view()
-        np.testing.assert_allclose(self._presenter._pickable_mesh[self._presenter._visible_label], self._model._detector_is_picked)
+        np.testing.assert_allclose(
+            self._presenter._pickable_mesh.point_data[self._presenter._visible_label], self._model._detector_is_picked
+        )
         self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace)
         self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
         self._model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
@@ -322,7 +334,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.is_flip_z_axis_checkbox_checked.return_value = True
         self._presenter.on_flip_z_axis_check_box_clicked()
         mock_set_peaks.assert_called_once()
-        self._mock_view.add_detector_mesh.assert_called()
+        self._presenter._renderer.add_detector_mesh_to_plotter.assert_called_once()
         self.assertTrue(self._model.flip_z)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
@@ -612,6 +624,111 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._count_scale_mode = "Logarithmic"
         transformed = self._presenter._transform_counts(counts)
         np.testing.assert_allclose(transformed, np.log10(counts + 1))
+
+    def test_get_point_cloud_renderer_lazy_initialization(self):
+        """Test that point cloud renderer is lazily initialized and cached."""
+        # Should already be initialized from __init__
+        renderer1 = self._presenter._get_point_cloud_renderer()
+        self.assertIsNotNone(renderer1)
+        # Second call should return the same cached instance
+        renderer2 = self._presenter._get_point_cloud_renderer()
+        self.assertIs(renderer1, renderer2)
+
+    def test_get_point_cloud_renderer_after_clear(self):
+        """Test that point cloud renderer is recreated after clearing."""
+        renderer1 = self._presenter._get_point_cloud_renderer()
+        self._presenter._clear_renderers()
+        renderer2 = self._presenter._get_point_cloud_renderer()
+        self.assertIsNot(renderer1, renderer2)
+
+    def test_get_shape_renderer_lazy_initialization(self):
+        """Test that shape renderer is lazily initialized with precomputation."""
+        with mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"):
+            presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
+        self.assertIsNone(presenter._shape_renderer)
+        renderer1 = presenter._get_shape_renderer()
+        self.assertIsNotNone(renderer1)
+        self.assertIsNotNone(presenter._shape_renderer)
+        # Second call should return the same cached instance
+        renderer2 = presenter._get_shape_renderer()
+        self.assertIs(renderer1, renderer2)
+
+    def test_get_shape_renderer_after_clear(self):
+        """Test that shape renderer is recreated after clearing."""
+        renderer1 = self._presenter._get_shape_renderer()
+        self._presenter._clear_renderers()
+        renderer2 = self._presenter._get_shape_renderer()
+        self.assertIsNot(renderer1, renderer2)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_show_shapes_toggled_enable_shapes(self, mock_update_plotter):
+        """Test that enabling shapes switches to ShapeRenderer."""
+        self._model.projection_type = ProjectionType.CYLINDRICAL_Y
+        initial_renderer = self._presenter._renderer
+        self._presenter._on_show_shapes_toggled(checked=True)
+        # Should switch to shape renderer
+        self.assertIsNot(self._presenter._renderer, initial_renderer)
+        self.assertIsInstance(self._presenter._renderer, ShapeRenderer)
+        mock_update_plotter.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_show_shapes_toggled_disable_shapes(self, mock_update_plotter):
+        """Test that disabling shapes switches to PointCloudRenderer."""
+        self._model.projection_type = ProjectionType.CYLINDRICAL_Y
+        self._presenter._on_show_shapes_toggled(checked=True)
+        shape_renderer = self._presenter._renderer
+        mock_update_plotter.reset_mock()
+        self._presenter._on_show_shapes_toggled(checked=False)
+        # Should switch back to point cloud renderer
+        self.assertIsNot(self._presenter._renderer, shape_renderer)
+        mock_update_plotter.assert_called_once()
+
+    def test_clear_renderers(self):
+        """Test that _clear_renderers nulls both cached renderers."""
+        # Initialize both renderers
+        self._presenter._get_point_cloud_renderer()
+        self._presenter._get_shape_renderer()
+        self.assertIsNotNone(self._presenter._point_cloud_renderer)
+        self.assertIsNotNone(self._presenter._shape_renderer)
+        self._presenter._clear_renderers()
+        self.assertIsNone(self._presenter._shape_renderer)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_projection_option_changed_syncs_model(self, mock_update_plotter):
+        """Test that changing projection updates model and enables/disables shapes checkbox."""
+        self._mock_view.current_selected_projection.return_value = ProjectionType.SPHERICAL_X
+        self._mock_view.is_show_shapes_checkbox_checked.return_value = False
+        self._presenter._on_projection_option_changed()
+        self.assertEqual(self._model.projection_type, ProjectionType.SPHERICAL_X)
+        self._mock_view.set_show_shapes_checkbox_enabled.assert_called_once_with(True)
+        mock_update_plotter.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_projection_option_changed_side_by_side_enables_checkbox(self, mock_update_plotter):
+        """Test that side-by-side projection enables the shapes checkbox."""
+        self._mock_view.current_selected_projection.return_value = ProjectionType.SIDE_BY_SIDE
+        self._mock_view.is_show_shapes_checkbox_checked.return_value = False
+        self._presenter._on_projection_option_changed()
+        self.assertEqual(self._model.projection_type, ProjectionType.SIDE_BY_SIDE)
+        self._mock_view.set_show_shapes_checkbox_enabled.assert_called_once_with(True)
+        self.assertIs(self._presenter._renderer, self._presenter._point_cloud_renderer)
+        mock_update_plotter.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_renderer_reuse_on_toggle(self, mock_update_plotter):
+        """Test that renderers are reused when toggling shapes on and off."""
+        self._model.projection_type = ProjectionType.CYLINDRICAL_Y
+        pc_renderer1 = self._presenter._renderer
+        self._presenter._on_show_shapes_toggled(checked=True)
+        shape_renderer1 = self._presenter._renderer
+        self._presenter._on_show_shapes_toggled(checked=False)
+        pc_renderer2 = self._presenter._renderer
+        self._presenter._on_show_shapes_toggled(checked=True)
+        shape_renderer2 = self._presenter._renderer
+        # Should reuse cached instances
+        self.assertIs(pc_renderer1, pc_renderer2)
+        self.assertIs(shape_renderer1, shape_renderer2)
+        self.assertEqual(mock_update_plotter.call_count, 3)
 
 
 if __name__ == "__main__":
