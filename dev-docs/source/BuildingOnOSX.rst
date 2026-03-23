@@ -58,13 +58,7 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
    # If you have enabled Zsh
    echo 'export PATH="/usr/local/opt/python@3.8/bin:$PATH"' >> ~/.zshenv
 
-9. Downgrade setuptools to 48.0.0 until https://github.com/mantidproject/mantid/issues/29010 is fixed.
-
-.. code-block:: sh
-
-   python3 -m pip install setuptools==48.0.0
-
-10. Install python requirements
+9. Install python requirements
 
 .. code-block:: sh
 
