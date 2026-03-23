@@ -442,16 +442,6 @@ private:
     void executeImpl() override;
   };
 
-  // map of task name: task
-  std::vector<std::string> m_defaultTaskExecutionOrder{
-      "TaskExtractROI",         "TaskBackgroundSubtraction", "TaskConvertToWavelength", "TaskSumDetectors",
-      "TaskNormalizeByMonitor", "TaskCropWavelength",        "TaskConvertToQ"};
-
-  // std::vector<std::string> m_defaultTaskExecutionOrder{"TaskExtractROI", "TaskBackgroundSubtraction",
-  // "TaskConvertToWavelength", "TaskSumDetectors", "TaskNormalizeByMonitor", "TaskNormalizeByTransmission",
-  // "TaskCropWavelength"}; std::vector<std::string> m_defaultTaskExecutionOrder{"TaskBackgroundSubtraction",
-  // "TaskConvertToWavelength", "TaskNormalizeByMonitor", "TaskNormalizeByTransmission", "TaskSumInQ",
-  // "TaskCropWavelength"};
   std::vector<std::shared_ptr<AlgorithmTask>> m_AlgorithmTasks{
       std::make_shared<TaskExtractROI>(this),          std::make_shared<TaskBackgroundSubtraction>(this),
       std::make_shared<TaskConvertToWavelength>(this), std::make_shared<TaskSumDetectors>(this),
@@ -470,6 +460,8 @@ private:
     tasks[0]->initAsFirstTask(inputWS);
     m_stagedAlgorithmTasks = tasks;
   }
+  std::vector<std::string> configureAlgorithmTasks();
+  std::vector<std::string> constructTaskExecutionOrder();
 };
 
 } // namespace Reflectometry

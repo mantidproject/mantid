@@ -121,7 +121,7 @@ DECLARE_ALGORITHM(ReflectometryReductionOne3)
 /** Initialize the algorithm's properties.
  */
 void ReflectometryReductionOne3::init() {
-  declareProperty("TaskExecutionOrder", m_defaultTaskExecutionOrder, "The tasks to execute, in execution order.");
+  declareProperty("TaskExecutionOrder", std::vector<std::string>(), "The tasks to execute, in execution order.");
 
   // Input workspace
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
@@ -210,6 +210,46 @@ void ReflectometryReductionOne3::setDefaultOutputWorkspaceNames() {
   }
 }
 
+std::vector<std::string> ReflectometryReductionOne3::constructTaskExecutionOrder() {
+  std::vector<std::string> teo;
+  std::string sumDetectorsTask;
+  if (summingInQ()) {
+    teo = {
+        "TaskBackgroundSubtraction", "TaskConvertToWavelength", "TaskNormalizeByMonitor", "TaskNormalizeByTransmission",
+        "TaskSumDetectorsInQ",       "TaskCropWavelength",      "TaskConvertToQ"};
+    sumDetectorsTask = "TaskSumDetectorsInQ";
+  } else {
+    teo = {"TaskExtractROI",         "TaskBackgroundSubtraction",   "TaskSumDetectors",   "TaskConvertToWavelength",
+           "TaskNormalizeByMonitor", "TaskNormalizeByTransmission", "TaskCropWavelength", "TaskConvertToQ"};
+    sumDetectorsTask = "TaskSumDetectors";
+  }
+  const auto xUnitID = m_runWS->getAxis(0)->unit()->unitID();
+  if (xUnitID == "Wavelength") {
+    // Assume lambda workspace already normalised and summed
+    teo.erase(std::remove(teo.begin(), teo.end(), "TaskConvertToWavelength"), teo.end());
+    teo.erase(std::remove(teo.begin(), teo.end(), "TaskNormalizeByMonitor"), teo.end());
+    teo.erase(std::remove(teo.begin(), teo.end(), "TaskNormalizeByTransmission"), teo.end());
+    teo.erase(std::remove(teo.begin(), teo.end(), sumDetectorsTask), teo.end());
+  }
+  return teo;
+}
+
+std::vector<std::string> ReflectometryReductionOne3::configureAlgorithmTasks() {
+  std::vector<std::string> taskExecutionOrder =
+      isDefault("TaskExecutionOrder") ? constructTaskExecutionOrder() : getProperty("TaskExecutionOrder");
+  std::vector<std::shared_ptr<AlgorithmTask>> tasksToStage(taskExecutionOrder.size());
+  for (auto &task : m_AlgorithmTasks) {
+    task->setTaskExecutionOrder(&taskExecutionOrder);
+    auto it = std::find(taskExecutionOrder.begin(), taskExecutionOrder.end(), task->name());
+    if (it != taskExecutionOrder.end()) {
+      std::size_t index = std::distance(taskExecutionOrder.begin(), it);
+      tasksToStage[index] = task;
+    }
+  }
+  stageAlgorithmTasks(tasksToStage);
+  return taskExecutionOrder;
+}
+
 /** Execute the algorithm.
  */
 void ReflectometryReductionOne3::exec() {
@@ -238,17 +278,7 @@ void ReflectometryReductionOne3::exec() {
 
   // end set up
 
-  std::vector<std::string> taskExecutionOrder = getProperty("TaskExecutionOrder");
-  std::vector<std::shared_ptr<AlgorithmTask>> tasksToStage(taskExecutionOrder.size());
-  for (auto &task : m_AlgorithmTasks) {
-    task->setTaskExecutionOrder(&taskExecutionOrder);
-    auto it = std::find(taskExecutionOrder.begin(), taskExecutionOrder.end(), task->name());
-    if (it != taskExecutionOrder.end()) {
-      std::size_t index = std::distance(taskExecutionOrder.begin(), it);
-      tasksToStage[index] = task;
-    }
-  }
-  stageAlgorithmTasks(tasksToStage);
+  const auto taskExecutionOrder = configureAlgorithmTasks();
 
   const bool outputDiagnostics = getProperty("Diagnostics");
   std::string diagWSName = createDebugWorkspaceName(getPropertyValue("InputWorkspace"));
@@ -325,7 +355,6 @@ double ReflectometryReductionOne3::getDetectorTwoThetaRange(const size_t spectru
  */
 std::string ReflectometryReductionOne3::createDebugWorkspaceName(const std::string &inputName) {
   std::string result = inputName;
-
   if (summingInQ()) {
     if (getPropertyValue("ReductionType") == "DivergentBeam")
       result += "_QSD"; // Q-summed divergent beam
@@ -334,7 +363,6 @@ std::string ReflectometryReductionOne3::createDebugWorkspaceName(const std::stri
   } else {
     result += "_LS"; // lambda-summed
   }
-
   return result;
 }
 
@@ -358,85 +386,6 @@ void ReflectometryReductionOne3::outputDebugWorkspace(const MatrixWorkspace_sptr
   // still happen?
   MatrixWorkspace_sptr cloneWS = ws->clone();
   AnalysisDataService::Instance().addOrReplace(wsName + "_" + std::to_string(step) + wsSuffix, cloneWS);
-}
-
-/**
- * Creates the output 1D array in wavelength from an input 2D workspace in
- * TOF. Summation is done over lambda or over lines of constant Q depending on
- * the type of reduction. For the latter, the output is projected to "virtual
- * lambda" at a reference angle twoThetaR.
- *
- * @return :: the output workspace in wavelength
- */
-MatrixWorkspace_sptr ReflectometryReductionOne3::makeIvsLam() {
-  MatrixWorkspace_sptr result = m_runWS;
-
-  std::string wsName = createDebugWorkspaceName(getPropertyValue("InputWorkspace"));
-  const bool debug = getProperty("Diagnostics");
-  int step = 1;
-
-  if (summingInQ()) {
-    // Background subtraction
-    result = backgroundSubtraction(result);
-    // outputDebugWorkspace(result, wsName, "_subtracted_bkg", debug, step);
-    if (m_convertUnits) {
-      g_log.debug("Converting input workspace to wavelength\n");
-      result = convertToWavelength(result);
-      // outputDebugWorkspace(result, wsName, "_lambda", debug, step);
-    }
-    // Now the workspace is in wavelength, find the min/max wavelength
-    findWavelengthMinMax(result);
-    if (m_normaliseMonitors) {
-      g_log.debug("Normalising input workspace by monitors\n");
-      result = monitorCorrection(result);
-      // outputDebugWorkspace(result, wsName, "_norm_monitor", debug, step);
-    }
-    if (m_normaliseTransmission) {
-      g_log.debug("Normalising input workspace by transmission run\n");
-      result = transOrAlgCorrection(result, false);
-      // outputDebugWorkspace(result, wsName, "_norm_trans", debug, step);
-    }
-    if (m_sum) {
-      g_log.debug("Summing in Q\n");
-      result = sumInQ(result);
-      // outputDebugWorkspace(result, wsName, "_summed", debug, step);
-    }
-    // Crop to wavelength limits
-    g_log.debug("Cropping output workspace\n");
-    result = cropWavelength(result, true, wavelengthMin(), wavelengthMax());
-    // outputDebugWorkspace(result, wsName, "_cropped", debug, step);
-  } else {
-    g_log.debug("Extracting ROI\n");
-    result = makeDetectorWS(result, false, false);
-    // outputDebugWorkspace(result, wsName, "_lambda", debug, step);
-    //  Background subtraction
-    result = backgroundSubtraction(result);
-    // outputDebugWorkspace(result, wsName, "_lambda_subtracted_bkg", debug, step);
-    //  Sum in lambda
-    if (m_sum) {
-      g_log.debug("Summing in wavelength\n");
-      result = makeDetectorWS(result, m_convertUnits, true);
-      // outputDebugWorkspace(result, wsName, "_summed", debug, step);
-    }
-    // Now the workspace is in wavelength, find the min/max wavelength
-    findWavelengthMinMax(result);
-    if (m_normaliseMonitors) {
-      g_log.debug("Normalising output workspace by monitors\n");
-      result = monitorCorrection(result);
-      // outputDebugWorkspace(result, wsName, "_norm_monitor", debug, step);
-    }
-    // Crop to wavelength limits
-    g_log.debug("Cropping output workspace\n");
-    result = cropWavelength(result, true, wavelengthMin(), wavelengthMax());
-    // outputDebugWorkspace(result, wsName, "_cropped", debug, step);
-    if (m_normaliseTransmission) {
-      g_log.debug("Normalising output workspace by transmission run\n");
-      result = transOrAlgCorrection(result, true);
-      // outputDebugWorkspace(result, wsName, "_norm_trans", debug, step);
-    }
-  }
-
-  return result;
 }
 
 /**
