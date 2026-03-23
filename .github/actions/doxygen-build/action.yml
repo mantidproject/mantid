@@ -3,7 +3,7 @@ description: 'Builds the doxygen documentation'
 runs:
   using: "composite"
   steps:
-    - name: build doxygen
+    - name: Configure cmake
       shell: bash
       working-directory: ${{ github.workspace }}
       run: |
@@ -16,6 +16,9 @@ runs:
 
         # Configure and generate build files
         pixi run --frozen cmake --preset=doxygen-ci ..
-
+    - name: Build doxygen
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      run: |
         # Build doxygen target
         pixi run --frozen cmake --build . --target doxygen
