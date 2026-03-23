@@ -409,13 +409,26 @@ private:
     void executeImpl() override;
   };
 
+  class TaskSumDetectorsInQ : public AlgorithmTask {
+  public:
+    explicit TaskSumDetectorsInQ(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskSumDetectorsInQ") {
+      setExpectedOutputs({"QSummedWorkspace"});
+      setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
+      const auto taskSet = addDependantTaskSet();
+      setDependantTask("TaskNormalizeByTransmission", "TransmissionCorrectedWorkspace", "InputWorkspace", taskSet);
+    }
+    void executeImpl() override;
+  };
+
   class TaskCropWavelength : public AlgorithmTask {
   public:
     explicit TaskCropWavelength(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskCropWavelength") {
       setExpectedOutputs({"CroppedWorkspace"});
       setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
-      const auto taskSet = addDependantTaskSet();
-      setDependantTask("TaskNormalizeByTransmission", "TransmissionCorrectedWorkspace", "InputWorkspace", taskSet);
+      const auto taskSet1 = addDependantTaskSet();
+      setDependantTask("TaskNormalizeByTransmission", "TransmissionCorrectedWorkspace", "InputWorkspace", taskSet1);
+      const auto taskSet2 = addDependantTaskSet();
+      setDependantTask("TaskSumDetectorsInQ", "QSummedWorkspace", "InputWorkspace", taskSet2);
     }
     void executeImpl() override;
   };
@@ -443,7 +456,8 @@ private:
       std::make_shared<TaskExtractROI>(this),          std::make_shared<TaskBackgroundSubtraction>(this),
       std::make_shared<TaskConvertToWavelength>(this), std::make_shared<TaskSumDetectors>(this),
       std::make_shared<TaskNormalizeByMonitor>(this),  std::make_shared<TaskNormalizeByTransmission>(this),
-      std::make_shared<TaskCropWavelength>(this),      std::make_shared<TaskConvertToQ>(this)};
+      std::make_shared<TaskCropWavelength>(this),      std::make_shared<TaskConvertToQ>(this),
+      std::make_shared<TaskSumDetectorsInQ>(this)};
   std::vector<std::shared_ptr<AlgorithmTask>> m_stagedAlgorithmTasks;
   // map of task name: (map of output name: outputs)
   std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>>

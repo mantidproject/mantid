@@ -250,8 +250,20 @@ void ReflectometryReductionOne3::exec() {
   }
   stageAlgorithmTasks(tasksToStage);
 
+  const bool outputDiagnostics = getProperty("Diagnostics");
+  std::string diagWSName = createDebugWorkspaceName(getPropertyValue("InputWorkspace"));
+  int step = 0;
   for (const auto &task : m_stagedAlgorithmTasks) {
     task->execute();
+    if (outputDiagnostics) {
+      const auto &taskName = task->name();
+      const auto &taskOutput = m_algorithmTaskOutputs.at(taskName);
+      for (const auto &output : taskOutput) {
+        const auto &outputName = output.first;
+        outputDebugWorkspace(output.second, diagWSName, "_" + outputName, step);
+        step++;
+      }
+    }
   }
 
   // Neither TOF or Lambda? Abort.
@@ -265,24 +277,6 @@ void ReflectometryReductionOne3::exec() {
   // m_normaliseMonitors = true;
   // m_normaliseTransmission = true;
   // m_sum = true;
-
-  // Set outputs
-  // if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
-  //  setProperty("OutputWorkspaceWavelength", IvsLam);
-  //}
-
-  const bool outputDiagnostics = getProperty("Diagnostics");
-  if (outputDiagnostics) {
-    std::string diagWSName = createDebugWorkspaceName(getPropertyValue("InputWorkspace"));
-    for (auto i = 0; i < taskExecutionOrder.size(); ++i) {
-      const auto &taskName = taskExecutionOrder[i];
-      const auto &taskOutput = m_algorithmTaskOutputs.at(taskName);
-      for (const auto &output : taskOutput) {
-        const auto &outputName = output.first;
-        outputDebugWorkspace(output.second, diagWSName, "_" + outputName, i);
-      }
-    }
-  }
 
   // For now, output the first output of the final task as the output workspace.
   // Order is not guarenteed in map, so we will want to make this configurable.
@@ -1275,6 +1269,7 @@ void ReflectometryReductionOne3::TaskBackgroundSubtraction::executeImpl() {
 void ReflectometryReductionOne3::TaskConvertToWavelength::executeImpl() {
   const auto &inputWS = getDependantWorkspace("InputWorkspace");
   auto result = m_parent->convertToWavelength(inputWS);
+  m_parent->findWavelengthMinMax(result);
   outputWorkspace(result, "ConvertedWorkspaceWavelength");
 }
 
@@ -1385,7 +1380,6 @@ void ReflectometryReductionOne3::TaskSumDetectors::executeImpl() {
 
 void ReflectometryReductionOne3::TaskCropWavelength::executeImpl() {
   auto inputWS = getDependantWorkspace("InputWorkspace");
-  m_parent->findWavelengthMinMax(inputWS);
   auto cropped = m_parent->cropWavelength(inputWS, true, m_parent->wavelengthMin(), m_parent->wavelengthMax());
   outputWorkspace(cropped, "CroppedWorkspace");
 }
@@ -1395,6 +1389,12 @@ void ReflectometryReductionOne3::TaskConvertToQ::executeImpl() {
   // maybe bring the conversion code into this task
   auto converted = m_parent->convertToQ(inputWS);
   outputWorkspace(converted, "ConvertedWorkspaceQ");
+}
+
+void ReflectometryReductionOne3::TaskSumDetectorsInQ::executeImpl() {
+  auto inputWS = getDependantWorkspace("InputWorkspace");
+  auto summedInQ = m_parent->sumInQ(inputWS);
+  outputWorkspace(summedInQ, "QSummedWorkspace");
 }
 
 } // namespace Mantid::Reflectometry
