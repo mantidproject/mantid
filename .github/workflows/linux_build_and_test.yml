@@ -51,7 +51,7 @@ jobs:
           frozen: true
 
       - uses: ./.github/actions/doxygen-build
-        name: build doxygen
+        name: Build doxygen
         if: steps.changes.outputs.doxygen == 'true'
 
 

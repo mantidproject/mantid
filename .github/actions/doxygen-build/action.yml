@@ -20,4 +20,5 @@ runs:
         echo "::endgroup::"
 
         # Build doxygen target
+        echo "Building doxygen"
         pixi run --frozen cmake --build . --target doxygen
