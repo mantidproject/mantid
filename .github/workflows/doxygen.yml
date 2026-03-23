@@ -51,7 +51,8 @@ jobs:
         with:
           frozen: true
 
-      - name: build doxygen
+      - uses: ./.github/actions/doxygen-build
+        name: build doxygen
         if: steps.changes.outputs.doxygen == 'true'
         run: |
           $GITHUB_WORKSPACE/buildconfig/Jenkins/Conda/doxygen.sh $GITHUB_WORKSPACE

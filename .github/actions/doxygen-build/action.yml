@@ -1,0 +1,24 @@
+name: 'Build Doxygen'
+description: 'Builds the doxygen documentation'
+runs:
+  using: "composite"
+  steps:
+    - uses: prefix-dev/setup-pixi@v0.9.4
+      with:
+        frozen: true
+    - name: build doxygen
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      run: |
+        # Create the build directory if it doesn't exist
+        [ -d build ] || mkdir build
+        cd build
+
+        # Set locale to C for latex
+        export LC_ALL=C
+
+        # Configure and generate build files
+        pixi run --frozen cmake --preset=doxygen-ci ..
+
+        # Build doxygen target
+        pixi run --frozen cmake --build . --target doxygen
