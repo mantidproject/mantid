@@ -37,7 +37,6 @@ jobs:
         name: Build doxygen
         if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
 
-
   build-and-test:
     needs: [doxygen]
     runs-on:
