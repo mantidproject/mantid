@@ -3,9 +3,6 @@ description: 'Builds the doxygen documentation'
 runs:
   using: "composite"
   steps:
-    - uses: prefix-dev/setup-pixi@v0.9.4
-      with:
-        frozen: true
     - name: build doxygen
       shell: bash
       working-directory: ${{ github.workspace }}

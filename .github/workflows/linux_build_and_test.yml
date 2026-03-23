@@ -18,7 +18,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  doxygen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        if: ${{  github.ref_name == 'main' }}
+        with:
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: |
+            doxygen:
+              - '**/*.cpp'
+              - '**/*.h'
+              - '**/*.hxx'
+              - 'Framework/Doxygen/**'
+              - 'conda/recipes/mantid-developer/**'
+              - 'conda/recipes/conda_build_config.yaml'
+              - '.github/actions/doxygen-build/**'
+              - '.github/workflows/doxygen.yml'
+
+      - uses: actions/checkout@v6
+        if: ${{ steps.changes.outputs.doxygen == 'true' && github.ref_name != 'main' }}
+        with:
+          fetch-depth: 0
+
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        if: steps.changes.outputs.doxygen == 'true'
+        with:
+          frozen: true
+
+      - uses: ./.github/actions/doxygen-build
+        name: build doxygen
+        if: steps.changes.outputs.doxygen == 'true'
+
+
   linux-build-and-test:
+    needs: [doxygen]
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
