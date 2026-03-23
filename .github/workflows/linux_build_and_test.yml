@@ -1,4 +1,4 @@
-name: Linux unit tests and system tests
+name: Linux
 
 on:
   pull_request:
@@ -55,7 +55,7 @@ jobs:
         if: steps.changes.outputs.doxygen == 'true'
 
 
-  linux-build-and-test:
+  build-and-test:
     needs: [doxygen]
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
