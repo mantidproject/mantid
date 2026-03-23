@@ -598,6 +598,13 @@ class PawleyPattern1D(PawleyPatternBase):
         self.bg_params = res.x
         return res
 
+    def get_bkg_ws(self, ws_name: str):
+        bg_func = self.comp_func[len(self.comp_func) - 1]
+        self._set_func_params(bg_func, self.bg_params)
+        return EvaluateFunction(
+            Function=bg_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, OutputWorkspace=ws_name, EnableLogging=False
+        )
+
     def _eval_bg_func(self, p: np.ndarray[float]) -> np.ndarray[float]:
         bg_func = self.comp_func[len(self.comp_func) - 1]
         self._set_func_params(bg_func, p)
