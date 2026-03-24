@@ -35,7 +35,7 @@ jobs:
       # publish documentation if on main branch of mantidproject/mantid
       - name: Checkout Doxygen repository
         # TODO
-        if: ${{ github.ref_name == 'publish_doxygen' && steps.changes.outputs.doxygen == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' }}
         uses: actions/checkout@v6
         with:
           repo: mantidproject/doxygen
@@ -43,14 +43,14 @@ jobs:
 
       - name: Copy Doxygen artifacts
         # TODO
-        if: ${{ github.ref_name == 'publish_doxygen' && steps.changes.outputs.doxygen == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' }}
         run: |
           rm -rf doxygen_repo/*
           cp -r $GITHUB_WORKSPACE/build/doxygen/html/* doxygen_repo/
 
       - name: Commit Doxygen and push
         # TODO
-        if: ${{ github.ref_name == 'publish_doxygen' && steps.changes.outputs.doxygen == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' }}
         working-directory: doxygen_repo
         run: |
           git config user.name "github-actions[bot]"
