@@ -216,21 +216,13 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         passed_positions = call_args[0][2]
         np.testing.assert_array_equal(passed_positions, original_positions)
 
-    def test_flip_z_invalidates_projection_cache(self):
-        """Changing flip_z should clear the projection cache"""
-        model, _ = self._setup_model([1, 2, 3])
-        original_flip_z = model.flip_z
-        model._cached_projections_map["dummy_key"] = "cached_value"
-        model.flip_z = not original_flip_z
-        self.assertEqual(len(model._cached_projections_map), 0)
-
     def test_flip_z_same_value_preserves_cache(self):
         """Setting flip_z to its current value should not clear the cache"""
         model, _ = self._setup_model([1, 2, 3])
         original_flip_z = model.flip_z
-        model._cached_projections_map["dummy_key"] = "cached_value"
+        model._cached_projection_objects["dummy_key"] = "cached_value"
         model.flip_z = original_flip_z
-        self.assertEqual(len(model._cached_projections_map), 1)
+        self.assertEqual(len(model._cached_projection_objects), 1)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
     def test_flip_z_uses_separate_cache_keys(self, mock_cylindrical_projection):
@@ -288,7 +280,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_detector_ids(self):
         expected_ids = [1, 2, 3]
         model, _ = self._setup_model(expected_ids)
-        np.testing.assert_array_equal(model.detector_ids, expected_ids)
+        np.testing.assert_array_equal(model.pickable_detector_ids, expected_ids)
 
     def test_counts_limits(self):
         model, mock_workspace = self._setup_model([1, 2, 3])
@@ -594,23 +586,24 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_allclose(q_lab_direction, iv_qlab, rtol=1e-5)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
-    def test_cached_projections_map_empty(self, mock_projection_constructor):
+    def test_cached_projection_objects_empty(self, mock_projection_constructor):
         model, _ = self._setup_model([1, 2, 3])
         model.projection_type = ProjectionType.CYLINDRICAL_X
         mock_projection = MagicMock(positions=MagicMock(return_value=np.array([[1, 2], [1, 2], [1, 2]])))
         mock_projection_constructor.return_value = mock_projection
-        model._cached_projections_map = {}
+        model._cached_projection_objects = {}
         positions = model._calculate_projection()
         cache_key = model._cache_key_for_projection(ProjectionType.CYLINDRICAL_X)
         np.testing.assert_almost_equal(positions, np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]]))
-        np.testing.assert_almost_equal(model._cached_projections_map[cache_key], np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]]))
+        self.assertEqual(mock_projection, model._cached_projection_objects[cache_key])
 
     @mock.patch("instrumentview.FullInstrumentViewModel.CylindricalProjection")
-    def test_cached_projections_map_already_cached(self, mock_projection_constructor):
+    def test_cached_projection_objects_already_cached(self, mock_projection_constructor):
         model, _ = self._setup_model([1, 2, 3])
         model.projection_type = ProjectionType.CYLINDRICAL_X
         cache_key = model._cache_key_for_projection(ProjectionType.CYLINDRICAL_X)
-        model._cached_projections_map = {cache_key: np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]])}
+        mock_projection = MagicMock(positions=MagicMock(return_value=np.array([[1, 2], [1, 2], [1, 2]])))
+        model._cached_projection_objects = {cache_key: mock_projection}
         positions = model._calculate_projection()
         np.testing.assert_almost_equal(positions, np.array([[1, 2, 0], [1, 2, 0], [1, 2, 0]]))
         mock_projection_constructor.assert_not_called()
