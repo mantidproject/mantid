@@ -55,18 +55,11 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   // Set default names for output workspaces
   void setDefaultOutputWorkspaceNames();
-  // Create a direct beam workspace from input workspace in wavelength
-  Mantid::API::MatrixWorkspace_sptr makeDirectBeamWS(Mantid::API::MatrixWorkspace_sptr inputWS);
-  // Performs direct beam correction
-  Mantid::API::MatrixWorkspace_sptr directBeamCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
-  // Performs transmission or algorithm correction
-  Mantid::API::MatrixWorkspace_sptr transOrAlgCorrection(const Mantid::API::MatrixWorkspace_sptr &detectorWS,
-                                                         const bool detectorWSReduced);
   // Performs background subtraction
   Mantid::API::MatrixWorkspace_sptr backgroundSubtraction(Mantid::API::MatrixWorkspace_sptr detectorWS);
   // Performs transmission corrections
-  Mantid::API::MatrixWorkspace_sptr transmissionCorrection(const Mantid::API::MatrixWorkspace_sptr &detectorWS,
-                                                           const bool detectorWSReduced);
+  std::pair<Mantid::API::MatrixWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr>
+  transmissionCorrection(const Mantid::API::MatrixWorkspace_sptr &detectorWS);
   // Performs transmission corrections using alternative correction algorithms
   Mantid::API::MatrixWorkspace_sptr algorithmicCorrection(const Mantid::API::MatrixWorkspace_sptr &detectorWS);
   // Performs monitor corrections
@@ -81,8 +74,6 @@ private:
   // Utility function to output a diagnostic workspace to the ADS
   void outputDebugWorkspace(const API::MatrixWorkspace_sptr &ws, const std::string &wsName, const std::string &wsSuffix,
                             const int step);
-  // Create the output workspace in wavelength
-  Mantid::API::MatrixWorkspace_sptr makeIvsLam();
   // Do the reduction by summation in Q
   Mantid::API::MatrixWorkspace_sptr sumInQ(const API::MatrixWorkspace_sptr &detectorWS);
   // Do the summation in Q for a single input value
@@ -130,11 +121,7 @@ private:
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
   std::shared_ptr<const Mantid::Geometry::ReferenceFrame> m_refFrame;
-  bool m_convertUnits;          // convert the input workspace to lambda
-  bool m_normaliseMonitors;     // normalise by monitors and direct beam
-  bool m_normaliseTransmission; // transmission or algorithmic correction
-  bool m_sum;                   // whether to do summation
-  double m_theta0;              // horizon angle
+  double m_theta0; // horizon angle
   // groups of spectrum indices of the detectors of interest
   std::vector<std::vector<size_t>> m_detectorGroups;
   // Store the min/max wavelength we're interested in. These will be the
@@ -382,11 +369,14 @@ private:
     void executeImpl() override;
   };
 
-  class TaskNormalizeByAlg : public AlgorithmTask {
+  class TaskNormalizeByAlgorithm : public AlgorithmTask {
   public:
-    explicit TaskNormalizeByAlg(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskNormalizeByAlg") {
+    explicit TaskNormalizeByAlgorithm(ReflectometryReductionOne3 *parent)
+        : AlgorithmTask(parent, "TaskNormalizeByAlgorithm") {
       setExpectedOutputs({"AlgorithmCorrectedWorkspace"});
       setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
+      const auto taskSet = addDependantTaskSet();
+      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet);
     }
     void executeImpl() override;
   };
@@ -395,7 +385,6 @@ private:
   public:
     explicit TaskExtractROI(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskExtractROI") {
       setExpectedOutputs({"ExtractedROIWorkspace"});
-      // setDependantTask("SET_TASK_HERE", "SET_OUTPUT_HERE", "InputWorkspace");
     }
     void executeImpl() override;
   };
@@ -405,8 +394,10 @@ private:
     explicit TaskSumDetectors(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskSumDetectors") {
       setExpectedOutputs({"SummedWorkspace"});
       setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace");
-      const auto taskSet = addDependantTaskSet();
-      setDependantTask("TaskBackgroundSubtraction", "BackgroundSubtractedWorkspace", "InputWorkspace", taskSet);
+      const auto taskSet1 = addDependantTaskSet();
+      setDependantTask("TaskBackgroundSubtraction", "BackgroundSubtractedWorkspace", "InputWorkspace", taskSet1);
+      const auto taskSet2 = addDependantTaskSet();
+      setDependantTask("TaskExtractROI", "ExtractedROIWorkspace", "InputWorkspace", taskSet2);
     }
     void executeImpl() override;
   };
@@ -416,8 +407,10 @@ private:
     explicit TaskSumDetectorsInQ(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskSumDetectorsInQ") {
       setExpectedOutputs({"QSummedWorkspace"});
       setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
-      const auto taskSet = addDependantTaskSet();
-      setDependantTask("TaskNormalizeByTransmission", "TransmissionCorrectedWorkspace", "InputWorkspace", taskSet);
+      const auto taskSet1 = addDependantTaskSet();
+      setDependantTask("TaskNormalizeByTransmission", "TransmissionCorrectedWorkspace", "InputWorkspace", taskSet1);
+      const auto taskSet2 = addDependantTaskSet();
+      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet2);
     }
     void executeImpl() override;
   };
@@ -431,6 +424,8 @@ private:
       setDependantTask("TaskNormalizeByTransmission", "TransmissionCorrectedWorkspace", "InputWorkspace", taskSet1);
       const auto taskSet2 = addDependantTaskSet();
       setDependantTask("TaskSumDetectorsInQ", "QSummedWorkspace", "InputWorkspace", taskSet2);
+      const auto taskSet3 = addDependantTaskSet();
+      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet3);
     }
     void executeImpl() override;
   };
@@ -449,7 +444,7 @@ private:
       std::make_shared<TaskConvertToWavelength>(this), std::make_shared<TaskSumDetectors>(this),
       std::make_shared<TaskNormalizeByMonitor>(this),  std::make_shared<TaskNormalizeByTransmission>(this),
       std::make_shared<TaskCropWavelength>(this),      std::make_shared<TaskConvertToQ>(this),
-      std::make_shared<TaskSumDetectorsInQ>(this)};
+      std::make_shared<TaskSumDetectorsInQ>(this),     std::make_shared<TaskNormalizeByAlgorithm>(this)};
   std::vector<std::shared_ptr<AlgorithmTask>> m_stagedAlgorithmTasks;
   // map of task name: (map of output name: outputs)
   std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>>
