@@ -38,7 +38,7 @@ jobs:
         if: ${{ steps.changes.outputs.doxygen == 'true' }}
         uses: actions/checkout@v6
         with:
-          repo: mantidproject/doxygen
+          repository: mantidproject/doxygen
           path: doxygen_repo
 
       - name: Copy Doxygen artifacts
