@@ -31,8 +31,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.is_select_bank_tube_checked.return_value = False
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter", EnableLogging=False)
         self._model = FullInstrumentViewModel(self._ws)
-        with mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"):
-            self._presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
+        self._presenter = self._create_test_presenter()
         self._presenter._point_cloud_renderer = MagicMock(spec=PointCloudRenderer)
         self._presenter._shape_renderer = MagicMock(spec=ShapeRenderer)
         self._presenter._renderer = self._presenter._point_cloud_renderer
@@ -41,6 +40,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def tearDown(self):
         self._presenter.handle_close()
         self._ws.delete()
+
+    def _create_test_presenter(self) -> FullInstrumentViewPresenter:
+        with (
+            mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"),
+            mock.patch("instrumentview.FullInstrumentViewPresenter.InstrumentViewADSObserver"),
+        ):
+            return FullInstrumentViewPresenter(self._mock_view, self._model)
 
     def _create_detector_peaks(self, det_id: int, spec_no: int, location: np.ndarray) -> DetectorPeaks:
         return DetectorPeaks([Peak(det_id, spec_no, location, 0, (1, 1, 1), 100, 1000, 100, 100)])
@@ -90,19 +96,21 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertEqual(len(green_vector), 2)
         self.assertTrue(green_vector.all(where=[0, 1, 0, 0]))
 
-    def test_update_detector_picker(self):
-        self._presenter._select_bank_tube = True
+    def test_update_detector_picker_single(self):
+        self._update_detector_picker(select_bank_tube=False)
+
+    def test_update_detector_picker_bank_tube(self):
+        self._update_detector_picker(select_bank_tube=True)
+
+    def _update_detector_picker(self, select_bank_tube: bool):
+        self._presenter._select_bank_tube = select_bank_tube
         self._presenter.update_detector_picker()
-        # Presenter delegates picking to the renderer, which calls plotter.disable_picking
-        # internally before setting up surface point picking.
         self._presenter._renderer.enable_picking.assert_called_once_with(self._mock_view.main_plotter, callback=mock.ANY)
-        callback = self._mock_view.enable_point_picking.call_args.kwargs["callback"]
-        picker = MagicMock()
-        picker.GetPointId.return_value = 3
+        callback = self._presenter._renderer.enable_picking.call_args.kwargs["callback"]
         self._presenter._model.update_point_picked_detectors = MagicMock()
         self._presenter.update_picked_detectors_on_view = MagicMock()
-        callback(np.array([0.0, 0.0, 0.0]), picker)
-        self._presenter._model.update_point_picked_detectors.assert_called_once_with(3, True)
+        callback(3)
+        self._presenter._model.update_point_picked_detectors.assert_called_once_with(3, select_bank_tube)
         self._presenter.update_picked_detectors_on_view.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
@@ -192,11 +200,15 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     def test_on_add_selection_clicked_select_bank_tube_expands_mask(self):
         mask = np.array([False, True, False], dtype=bool)
+        self._model.projection_type = ProjectionType.THREE_D
         self._mock_view.get_current_widget_implicit_function.return_value = MagicMock(
             EvaluateFunction=MagicMock(side_effect=[1.0, -1.0, 2.0])
         )
         self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
-        self._presenter._detector_mesh = MagicMock(points=np.array([[0, 0, 0], [1, 1, 1], [2, 2, 2]]))
+        self._model._is_masked = np.array([False, False, False])
+        self._model._is_valid = np.array([True, True, True])
+        self._model._is_selected_in_tree = np.array([True, True, True])
+        self._model._detector_positions_3d = np.array([[0, 0, 0], [1, 1, 1], [2, 2, 2]])
         self._presenter._select_bank_tube = True
         self._model.expand_pickable_mask_to_parent_subtrees = MagicMock(return_value=mask)
         self._model.add_new_detector_key = MagicMock(return_value="mock_key")
@@ -674,8 +686,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     def test_get_shape_renderer_lazy_initialization(self):
         """Test that shape renderer is lazily initialized with precomputation."""
-        with mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"):
-            presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
+        presenter = self._create_test_presenter()
         self.assertIsNone(presenter._shape_renderer)
         renderer1 = presenter._get_shape_renderer()
         self.assertIsNotNone(renderer1)
