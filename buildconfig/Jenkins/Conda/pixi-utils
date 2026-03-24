@@ -15,7 +15,7 @@ install_pixi() {
       pixi self-update --no-progress --quiet
       # Workaround on Windows to avoid rattler cache errors
       if [[ $OSTYPE == "msys"* ]]; then
-        pixi clean cache
+        pixi clean cache --yes
       fi
   else
     echo "install pixi"
