@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm takes a a :ref:`MatrixWorkspace <MatrixWorkspace>` and
+This algorithm takes a a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` and
 converts it into a :ref:`MDEventWorkspace <MDWorkspace>` that can be
 viewed in the :ref:`sliceviewer`.
 

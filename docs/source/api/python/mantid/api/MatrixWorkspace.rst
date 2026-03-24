@@ -10,8 +10,8 @@ This is a Python binding to the C++ class Mantid::API::MatrixWorkspace.
 
 A Matrix Workspace is a generic name for a family which contains measured (or derived) data (Y) with associated errors (E) and an axis (X) giving information about where the measurement was made. The Matrix Workspace forms a 2D structure, more details on this will be provided below. This is the most common structure for storing data in  Mantid. This covers several more detailed workspace types including:
 
--  :ref:`Workspace2D <Workspace2D>` - A workspace for holding 2D, accumulated data in memory, this is the most commonly used to store histograms.
--  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the individual neutron event data.
+-  :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` - A workspace for holding 2D, accumulated data in memory, this is the most commonly used to store histograms.
+-  :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` - A workspace that retains the individual neutron event data.
 
 What information is in a Matrix Workspace
 ------------------------------------------
@@ -20,8 +20,8 @@ All Matrix Workspaces contain one or more rows of data. A single row is formed o
 
 Also they may contain:
 
--  :ref:`Sample` and sample environment data
--  :ref:`Run` logs
+-  :py:obj:`Sample <mantid.api.Sample>` and sample environment data
+-  :py:obj:`Run <mantid.api.Run>` logs
 -  Usable geometry may be present, for example to determine the position of each detector, see :ref:`here <InstrumentAccessLayers>` for more information
 -  Spectra - detector mapping, and other spectra level information see :ref:`here <InstrumentAccessLayers>`.
 -  :ref:`Histogram <HistogramData>` information
@@ -122,7 +122,7 @@ Output:
 Instrument
 ^^^^^^^^^^
 
-You can get access to the :ref:`Instrument` for a workspace with
+You can get access to the :py:obj:`Instrument <mantid.geometry.Instrument>` for a workspace with
 
 .. testsetup:: MatrixWorkspaceInstrument
 
@@ -133,12 +133,12 @@ You can get access to the :ref:`Instrument` for a workspace with
 
   instrument = ws.getInstrument()
 
-For the properties and operations of the instrument look at the :ref:`Instrument help <Instrument>`.
+For the properties and operations of the instrument look at the :py:obj:`Instrument help <mantid.geometry.Instrument>`.
 
 Run - to access logs, and other run information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can get access to the :ref:`Run` for a workspace with
+You can get access to the :py:obj:`Run <mantid.api.Run>` for a workspace with
 
 .. testsetup:: MatrixWorkspaceRun
 
@@ -149,7 +149,7 @@ You can get access to the :ref:`Run` for a workspace with
 
   run = ws.getRun()
 
-For the properties and operations of the run object and how to access log data look at the :ref:`Run help <Run>`.
+For the properties and operations of the run object and how to access log data look at the :py:obj:`Run <mantid.api.Run>`.
 
 Axes
 ^^^^

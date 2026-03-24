@@ -41,7 +41,7 @@ Required import:
 
     DeleteWorkspace(ws)
 
-:ref:`Group Workspaces <WorkspaceGroup>`:
+:py:obj:`Group Workspaces <mantid.api.WorkspaceGroup>`:
 
 .. code-block:: python
 

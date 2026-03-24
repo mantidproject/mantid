@@ -14,7 +14,7 @@ Description
    This algorithm is being developed for a specific instrument. It might get changed or even
    removed without a notification, should instrument scientists decide to do so.
 
-This algorithm merges given matrix workspaces to a :ref:`Workspace2D <Workspace2D>`. The purpose of this algorithm is to merge the DNS diffraction mode data measured at different detector bank positions. The algorithm is not suitable to merge DNS single crystal diffraction data measured at different sample rotation angles.
+This algorithm merges given matrix workspaces to a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`. The purpose of this algorithm is to merge the DNS diffraction mode data measured at different detector bank positions. The algorithm is not suitable to merge DNS single crystal diffraction data measured at different sample rotation angles.
 
 .. note::
     The **OutputWorkspace** will have no connection to the instrument. Part of the sample logs will be lost either. This algorithm can be executed at any step of the data reduction to view the result. However, further data reduction must be performed on the original workspaces.

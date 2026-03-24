@@ -79,7 +79,7 @@ Bugfixes
 ########
 - Fixed the ``out-of-range`` error when trying to access the projection matrix for a workspace with a non-Q axis before other Q axes.
 - Fixed an issue to plot negative values with logarithm scaling.
-- Fixed a bug in :ref:`Run <Run>` goniometer when using :ref:`algm-Plus`.
+- Fixed a bug in :py:obj:`Run <mantid.api.Run>` goniometer when using :ref:`algm-Plus`.
 - Fixed the issue in ``SNSLiveEventDataListener`` when the instrument doesn't have monitors.
 - When entering a specific value for the center of the slicepoint of an integrated dimension/axis it will no longer jump to the nearest bin-center (this fix also affects ``MDEvent`` workspaces as it was assumed each dimension had 100 bins for the purpose of updating the slider for a integrated dimension/axis).
 - For ``MDHisto`` workspaces the projection matrix will be derived from the basis vectors on the workspace rather than searching for the ``W_MATRIX`` log.

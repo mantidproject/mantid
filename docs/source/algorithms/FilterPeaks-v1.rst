@@ -9,8 +9,8 @@
 Description
 -----------
 
-Filters a :ref:`PeaksWorkspace <PeaksWorkspace>` using a set number of
-queries. Outputs a filtered :ref:`PeaksWorkspace <PeaksWorkspace>`.
+Filters a :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` using a set number of
+queries. Outputs a filtered :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>`.
 
 .. categories::
 

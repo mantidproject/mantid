@@ -7,7 +7,7 @@ What is it?
 -----------
 
 Geometry is the description of the physical shape (volume) of an object
-within a Mantid :ref:`instrument <Instrument>` and the distances and
+within a Mantid :py:obj:`Instrument <mantid.geometry.Instrument>` and the distances and
 rotations between them.
 
 Geometry in Mantid

@@ -62,7 +62,7 @@ Explanation of Inputs
 #####################
 
 -  The event data to be integrated is obtained from an ordinary
-   :ref:`EventWorkspace <EventWorkspace>`
+   :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`
    with an X-axis in time-of-flight, as loaded from a
    NeXus event file. This algorithm maps the events to reciprocal space
    using *PeaksWorkwpace* with indexed peaks to determine the parameters
@@ -139,7 +139,7 @@ Detailed Algorithm Description
 ##############################
 
 This algorithm will integrate a list of indexed single-crystal diffraction peaks
-from a *PeaksWorkspace*, using events from an ( :ref:`EventWorkspace
+from a *PeaksWorkspace*, using events from an ( :py:obj:`EventWorkspace
 <EventWorkspace>` ).  The indexed peaks are first used to determine a :ref:`UB matrix <Lattice>`.
 The inverse of that :ref:`UB matrix <Lattice>` is then used to form lists of events that are
 close to peaks in reciprocal space. An event will be added to the list of events

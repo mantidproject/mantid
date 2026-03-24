@@ -13,7 +13,7 @@ Additional properties for a 1D function
 #############################################################
 
 If Function defines a one-dimensional function and InputWorkspace is a
-:ref:`MatrixWorkspace <MatrixWorkspace>` the algorithm will have these
+:py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` the algorithm will have these
 additional properties:
 
 +------------------+-------------+-----------+-------------------------+---------------------------------------------------------------------+
@@ -54,7 +54,7 @@ Overview
 
 This is a generic algorithm for fitting data in a Workspace with a
 function. The workspace must have the type supported by the algorithm.
-Currently supported types are: :ref:`MatrixWorkspace <MatrixWorkspace>` and
+Currently supported types are: :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` and
 :ref:`Table Workspace <Table Workspaces>` for fitting with a IFunction1D and
 :ref:`MDWorkspace <MDWorkspace>` for fitting with IFunctionMD.
 After Function and InputWorkspace properties are set the algorithm may decide
@@ -323,15 +323,15 @@ output workspaces.
 
 OutputParameters is a :ref:`TableWorkspace
 <Table Workspaces>` with the fitted
-parameter values. OutputWorkspace is a :ref:`Workspace2D
-<Workspace2D>` which compares the fit with the original data. The
+parameter values. OutputWorkspace is a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`
+which compares the fit with the original data. The
 names given to these workspaces are built by appending the suffixes
 "_Parameters" and "_Workspace" to the name given in the input property
 'Output'. For example, if 'Output' was set to "MyResults" the name of
 the parameter TableWorkspace will be "MyResults\_Parameters" and the
 name of the Workspace2D will be "MyResults\_Workspace".
 
-The :ref:`Workspace2D <Workspace2D>` produced in the output property
+The :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` produced in the output property
 'OutputWorkspace' (example name: "MyResults\_Workspace") has three
 spectra:
 

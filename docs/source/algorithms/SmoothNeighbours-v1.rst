@@ -12,8 +12,8 @@ Description
 This algorithm performs a moving-average smoothing of data by summing
 spectra of nearest neighbours over the face of detectors. The output
 workspace has the same number of spectra as the input workspace. This
-works on both :ref:`EventWorkspaces <EventWorkspace>` and
-:ref:`Workspace2D <Workspace2D>`'s. It has two main modes of operation.
+works on both :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` and
+:py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`'s. It has two main modes of operation.
 
 Processing Either Generically or Assuming Rectangular Detectors
 ###############################################################
@@ -34,7 +34,7 @@ section below).
 For Instruments With Rectangular Detectors
 ##########################################
 
-The algorithm looks through the :ref:`Instrument <Instrument>` to find all
+The algorithm looks through the :py:obj:`Instrument <mantid.geometry.Instrument>` to find all
 the :ref:`RectangularDetectors <RectangularDetector>` defined. For each
 pixel in each detector, the AdjX\*AdjY neighboring spectra are summed
 together and saved in the output workspace.

@@ -12,7 +12,7 @@ Description
 Loads the mapping table between spectra and detectors from a RAW file. It fills
 the spectra to detector map object contained in a :ref:`workspace <workspace>`.
 This algorithm will fail if the :ref:`workspace <workspace>` does not already
-point to a full :ref:`instrument <instrument>` :ref:`geometry <geometry>` (which
+point to a full :py:obj:`Instrument <mantid.geometry.Instrument>` :ref:`geometry <geometry>` (which
 usually means it must be run after :ref:`algm-LoadInstrument` or
 :ref:`algm-LoadInstrumentFromRaw`).
 

@@ -85,7 +85,7 @@ If *MaskedWorkspace* is provided, both *MaskedWorkspace* and
 
 The algorithm works differently depending on *MaskedWorkspace* property
 being a *Mask Workspace* (SpecialWorkspace2D object) or
-:ref:`Matrix Workspace <MatrixWorkspace>`.
+:py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 
 If source *MaskedWorkspace* is a *Mask Workspace* and the number of spectra in the source
 *MaskedWorkspace* is equal to number of spectra in the target *Workspace*, the
@@ -101,7 +101,7 @@ to always use *MaskedWorkspace* detector IDs as the source of the masking
 information. If a detector is masked, then the corresponding detector
 will be masked in the input *Workspace*.
 
-If the input *MaskedWorkspace* is a :ref:`Matrix Workspace <MatrixWorkspace>`
+If the input *MaskedWorkspace* is a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`
 and the number of spectra in the source *MaskedWorkspace* is equal to the number
 of spectra in the target *Workspace*, then workspace indices of the source are
 used.
@@ -138,7 +138,7 @@ mask detectors, including
 -  Detector IDs
 -  Instrument components
 -  MaskWorkspace
--  General :ref:`MatrixWorkspace <MatrixWorkspace>` other than
+-  General :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` other than
    MaskWorkspace (In this case, the mask will be
    extracted from this workspace)
 -  Workspace index range specified by setting either *StartWorkspacIndex* or *EndWorkspaceIndex* to non-default value.
@@ -152,14 +152,14 @@ Here are the rules for input information for masking
 
 1. At least one of the masking inputs must be specified.
 2. Workspace indices and Spectra cannot be given at the same time.
-3. MaskWorkspace  and general :ref:`MatrixWorkspace <MatrixWorkspace>` cannot be given at the same time.
-4. When a general :ref:`MatrixWorkspace <MatrixWorkspace>` is specified, then all detectors in a spectrum are treated as masked if the effective detector of that spectrum is masked.
+3. MaskWorkspace  and general :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` cannot be given at the same time.
+4. When a general :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` is specified, then all detectors in a spectrum are treated as masked if the effective detector of that spectrum is masked.
 5. The detectors found recursively in given instrument components are added to the list of detectors to mask. If multiple components with the same name exist, the first component found is masked.
 6. The masks specified from
 
    a) workspace indices/spectra
    b) detectors
-   c) MaskWorkspace /general :ref:`MatrixWorkspace <MatrixWorkspace>` will be combined by the *plus* operation.
+   c) MaskWorkspace /general :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` will be combined by the *plus* operation.
 
 Operations Involved in Masking
 ##############################

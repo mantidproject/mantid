@@ -4,7 +4,7 @@
 Run Info and Sample Logs
 ========================
 
-Each workspace has a method called `getRun()`, which can be used to access information regarding the experimental run. A full list of the methods available on the returned object is at :ref:`Run`.
+Each workspace has a method called `getRun()`, which can be used to access information regarding the experimental run. A full list of the methods available on the returned object is at :py:obj:`Run <mantid.api.Run>`.
 
 The logs recorded during a run are also stored on the Run object and can be accessed using the `getLogData()` method. It has two variants:
 

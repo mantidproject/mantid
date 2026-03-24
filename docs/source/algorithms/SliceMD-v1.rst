@@ -53,7 +53,7 @@ splitting uses the value of "SplitInto" from the InputWorkspace.
 Slicing a MDHistoWorkspace
 ##########################
 
-It is possible to slice a :ref:`MDHistoWorkspace <MDHistoWorkspace>`. Each
+It is possible to slice a :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`. Each
 MDHistoWorkspace holds a reference to the
 :ref:`MDEventWorkspace <MDWorkspace>` that created it, as well as the
 coordinate transformation that was used.

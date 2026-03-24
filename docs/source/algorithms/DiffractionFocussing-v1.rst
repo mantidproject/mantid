@@ -39,7 +39,7 @@ which is a :ref:`CalFile <CalFile>`.
 For EventWorkspaces
 ###################
 
-The algorithm can be used with an :ref:`EventWorkspace <EventWorkspace>`
+The algorithm can be used with an :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`
 input, and will create an EventWorkspace output if a different workspace
 is specified.
 

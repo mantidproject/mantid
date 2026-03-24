@@ -9,7 +9,7 @@
 Description
 -----------
 
-Take a :ref:`MatrixWorkspace <MatrixWorkspace>` as input, and replaces the
+Take a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` as input, and replaces the
 Y values by Y/E (signal divided by error)
 
 

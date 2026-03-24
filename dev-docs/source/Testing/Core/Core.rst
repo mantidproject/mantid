@@ -75,7 +75,7 @@ This was last updated for Release 6.2. Check if the organiser has considered if 
     ,Workspace History, "Check Script generation from History works in various cases"
     **Running Script**
     ,Random scripts, "e.g. from Solutions to last 2 induction courses, Script Repo"
-    ,Workspace Algebra, "See bottom of this page: :ref:`MatrixWorkspace`"
+    ,Workspace Algebra, "See bottom of this page: :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`"
     ,Error handling in Python, "Get creative, e.g. run code without imports, wrong filepath in Manage User directories, indent errors. Are Error Messages Useful??"
     **Algorithms**
     ,Execution, "Check 5-10 algorithms"

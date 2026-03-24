@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::DataObjects::LeanElasticPeaksW
 
 The LeanElasticPeaksWorkspace is a special Workspace that holds a list
 of single crystal LeanElasticPeak objects. It is the equivalent to the
-:ref:`PeaksWorkspace <PeaksWorkspace>` for Peak objects.
+:py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` for Peak objects.
 
 Creating a LeanElasticPeaksWorkspace
 ------------------------------------
@@ -136,8 +136,7 @@ Each peak object contains several pieces of information. Not all of them are nec
 The LeanElasticPeak Shape
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This is the same as the Peak object, see :ref:`PeaksWorkspace #The Peak Shape
-<the-peak-shape>`.
+This is the same as the Peak object, see :ref:`PeaksWorkspace #The Peak Shape <the-peak-shape>`.
 
 Using LeanElasticPeaksWorkspaces in Python
 ------------------------------------------

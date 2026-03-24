@@ -7,19 +7,19 @@ This is a Python binding to the C++ class Mantid::DataObjects::Workspace2D.
 *bases:* :py:obj:`mantid.api.MatrixWorkspace`
 
 The Workspace2D is a Mantid data type for a
-:ref:`MatrixWorkspace <MatrixWorkspace>`.
+:py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 
 It consists of a workspace with 1 or more spectra. Typically, each
 spectrum will be a histogram. For example, you might have 10 bins, and
 so have 11 X-value, 10 Y-values and 10 E-values in a workspace.
 
-In contrast to an :ref:`EventWorkspace <EventWorkspace>`, a Workspace2D
+In contrast to an :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`, a Workspace2D
 only contains bin information and does not contain the underlying event
-data. The :ref:`EventWorkspace <EventWorkspace>` presents itself as a
+data. The :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` presents itself as a
 histogram (with X,Y,E values) but preserves the underlying event data.
 
 For more information on what a Workspace2D contains, see
-:ref:`MatrixWorkspace <MatrixWorkspace>`.
+:py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 
 There is also a specialised form of Workspace2D, called a RebinnedOutput
 which is produced by some algorithms, such as :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`
@@ -35,7 +35,7 @@ relevant information on binary and unary operations on workspaces.
 Working with Workspace2Ds in Python
 -----------------------------------
 
-Workspace2D is a :ref:`MatrixWorkspace <MatrixWorkspace>` and does not offer any functionality above that of a Matrix Workspace.
+Workspace2D is a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` and does not offer any functionality above that of a Matrix Workspace.
 
 Accessing Workspaces
 ####################
@@ -65,7 +65,7 @@ Pickling Workspaces
 
 A Workspace2D may be `pickled <https://docs.python.org/2/library/pickle.html/>`_ and de-pickled in python. The current pickling process has the following limitations to beware.
 
-- Only Workspace2D objects can be pickled and de-pickled. Other :ref:`MatrixWorkspace <MatrixWorkspace>` subtypes cannot be pickled
+- Only Workspace2D objects can be pickled and de-pickled. Other :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` subtypes cannot be pickled
 - Meta-data such as sample logs are not pickled
 - Masking flags are not pickled
 - Scanning Workspace2D objects are not permitted for pickling

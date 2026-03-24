@@ -9,7 +9,7 @@
 Description
 -----------
 
-Stitches :ref:`Matrix Workspaces <MatrixWorkspace>`
+Stitches :py:obj:`Matrix Workspace <mantid.api.MatrixWorkspace>`s
 together outputting a stitched Matrix Workspace. This algorithm is a
 wrapper over :ref:`algm-Stitch1D`.
 

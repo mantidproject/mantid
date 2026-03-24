@@ -12,7 +12,7 @@ Description
 
 This algorithm will extract the background from a dataset where sample is rotated through multiple positions, so that I don't need to make a separate background measurement.
 
-This algorithm requires at least 2 input :ref:`EventWorkspace` that are all binned identically. The proton charge of the workspaces are check to be within 1% of each other as this algorithm assume all the data was collected in the same conditions.
+This algorithm requires at least 2 input :py:obj:`EventWorkspace` that are all binned identically. The proton charge of the workspaces are check to be within 1% of each other as this algorithm assume all the data was collected in the same conditions.
 
 This algorithm operates by first grouping the detectors of the input workspaces with the provided ``GroupingFile``.  Then iterating through each bin of each spectra of the grouped workspaces, selecting the range (defined by ``PercentMin`` and ``PercentMax`` properties) of workspaces sorted by intensity for that bin, copying the events from the associated ungrouped input to the output workspace. The output is then normalized by the number of input workspaces selected.
 

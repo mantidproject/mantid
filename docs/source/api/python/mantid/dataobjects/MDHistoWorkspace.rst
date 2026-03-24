@@ -13,8 +13,8 @@ spread around space on a regular grid.
 
 In a way, the MDHistoWorkspace is to a
 :ref:`MDWorkspace <MDWorkspace>` is what the
-:ref:`Workspace2D <Workspace2D>` is to the
-:ref:`EventWorkspace <EventWorkspace>`.
+:py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` is to the
+:py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`.
 
 Creating a MDHistoWorkspace
 ---------------------------

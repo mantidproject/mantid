@@ -10,9 +10,9 @@ Description
 -----------
 
 This algorithm is able to generate event splitting according to user's requirements.
-The generated time splitters are stored either in a :ref:`SplittersWorkspace` or a :ref:`MatrixWorkspace <MatrixWorkspace>`.
+The generated time splitters are stored either in a :ref:`SplittersWorkspace` or a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 Either can be used by algorithm :ref:`FilterEvents <algm-FilterEvents>`
-to filter an :ref:`EventWorkspace <EventWorkspace>`.
+to filter an :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`.
 
 This algorithm is designed as a general-purposed method for generating event splitting.
 The time resolution of this two algorithms is microseconds,
@@ -43,7 +43,7 @@ event splitters that are supported by this algorithm.
    time, stop time and target workspace for events within start time and
    stop time. This type of workspace is appropriate for the case that
    the amount of generated event splitters are not huge;
--  :ref:`MatrixWorkspace <MatrixWorkspace>`: It uses X-axis to store time
+-  :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`: It uses X-axis to store time
    stamp in total nanoseconds and Y-axis to store target workspace. For
    example, :math:`x_{i}, x_{i+1}` and :math:`y_{i}` construct an event filter as start
    time is :math:`x_{i}`, stop time is :math:`x_{i+1}`, and target workspace is :math:`y_{i}` -th
@@ -51,7 +51,7 @@ event splitters that are supported by this algorithm.
    between time :math:`x_{i}` and :math:`x_{i+1}` will be discarded. This type of
    workspace is appropriate for the case that the amount of generated
    event splitters are huge, because processing a
-   :ref:`MatrixWorkspace <MatrixWorkspace>` is way faster than a
+   :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` is way faster than a
    :ref:`TableWorkspace <Table Workspaces>` in Mantid.
 
 .. _functionalities-GenerateEventFilter-ref:
@@ -217,7 +217,7 @@ except that this algorithm does not support ``PulseFilter``.
 Parameter: ``FastLog``
 ######################
 
-When ``FastLog`` is set to True, a :ref:`MatrixWorkspace <MatrixWorkspace>` will be used to store the event
+When ``FastLog`` is set to True, a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` will be used to store the event
 splitters, which is more appropriate for fast changing logs. (see above for details).
 
 Parameter: ``UseReverseLogarithmic``
@@ -289,7 +289,7 @@ Usage
 **Example - Generate event filter by temperature value**
 
 The following is a contrived example to show how one would use the algorithm to split
-up an :ref:`EventWorkspace <EventWorkspace>` by a temperature
+up an :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` by a temperature
 log. The resulting workspaces would then be fed to
 :ref:`FilterEvents <algm-FilterEvents>`
 for further processing.

@@ -140,7 +140,7 @@ for an instrument the appropriate IDF is loaded based on its
 :ref:`valid-from <Top level instrument>` date. Note for this to work
 the :ref:`Workspace <Workspace>` for which an IDF is loaded into must
 contain a record of when the data were collected. This information is
-taken from the workspace's :ref:`Run <Run>` object, more specifically the
+taken from the workspace's :py:obj:`Run <mantid.api.Run>` object, more specifically the
 *run\_start* property of this object.
 
 You can determine which file would be selected for an instrument and date

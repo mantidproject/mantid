@@ -26,7 +26,7 @@ Bugfixes
 
 - Loading a batch now correctly re-populates the :ref:`Experiment Settings tab's <refl_exp_instrument_settings>` ``Settings Lookup`` table.
 - Fixed a potential crash when running a live data reduction if the :ref:`SliceViewer <sliceviewer>` is open on the live data workspace.
-- Workbench will no longer crash if :ref:`ReflectometryBackgroundSubtraction <algm-ReflectometryBackgroundSubtraction>` is run from the Algorithm Dialog with a :ref:`WorkspaceGroup <WorkspaceGroup>` as the input.
+- Workbench will no longer crash if :ref:`ReflectometryBackgroundSubtraction <algm-ReflectometryBackgroundSubtraction>` is run from the Algorithm Dialog with a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` as the input.
 - The default processing instructions for :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>` can no longer be incorrect.
   Sensible default values are now used for the INTER linear detector if not specified by the user.
   Previously, an incorrect pattern was being specified. This resulted in confusing errors such as a reduced workspace with multiple histograms, or error messages about invalid detector IDs or angle correction not being possible.

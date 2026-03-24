@@ -14,19 +14,19 @@ Event Workspaces are specialised for time-of-flight neutron scattering. Event Wo
 Summary for Users
 -----------------
 
-The Event Workspace is a type of :ref:`Matrix Workspace <MatrixWorkspace>`,
+The Event Workspace is a type of :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`,
 where the information about each individual neutron detection event is
 maintained. For you as a user, this means that:
 
 -  There are many options for filtering an Event Workspace, such as :ref:`FilterByLogValue <algm-FilterByLogValue>`
 -  You can histogram (via :ref:`rebin <algm-rebin>`) an Event Workspace over and over and no
    information is ever lost (as long as you choose the PreserveEvents option).
--  You can convert an Event Workspace to a histogram :ref:`Workspace 2D <Workspace2D>`
+-  You can convert an Event Workspace to a histogram :py:obj:`Workspace 2D <mantid.api.Workspace2D>`
    by using the :ref:`Rebin <algm-Rebin>` algorithm.
 -  You cannot modify the histogram Y values (for example, with the
    Divide algorithm) and keep the event data. If you use an algorithm
    that modifies the Y values, the output workspace will be a
-   :ref:`Workspace 2D <Workspace2D>` using the current binning parameters.
+   :py:obj:`Workspace 2D <mantid.api.Workspace2D>` using the current binning parameters.
 -  Some algorithms are Event Workspace-aware, meaning that the output of
    it can be another Event Workspace. For example, the :ref:`Plus <algm-Plus>`
    algorithm will append the event lists if given two input
@@ -39,7 +39,7 @@ Working with Event Workspaces in Python
 ----------------------------------------
 
 The python options for an Event Workspace are limited - it is designed to be able to be read (but not written to)
-like a :ref:`MatrixWorkspace <MatrixWorkspace>`.
+like a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 
 Accessing Workspaces
 ####################
@@ -69,7 +69,7 @@ Output:
 Event Workspace Properties
 ###########################
 
-In addition to the Properties of the :ref:`MatrixWorkspace <MatrixWorkspace>`, the Event Workspace also has the following:
+In addition to the Properties of the :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`, the Event Workspace also has the following:
 
 .. testcode:: EventWorkspaceProperties
 

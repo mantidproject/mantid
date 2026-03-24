@@ -10,7 +10,7 @@
 Description
 -----------
 
-This will save a 3 dimensional :ref:`MDHistoWorkspace` to a VTK file (``.vtu``, StructuredGrid XML VTK file) so that it can be visualized by software such as Paraview.
+This will save a 3 dimensional :py:obj:`MDHistoWorkspace <mantid.daaobjects.MDHistoWorkspace>` to a VTK file (``.vtu``, StructuredGrid XML VTK file) so that it can be visualized by software such as Paraview.
 
 If the workspace is in HKL space then the correct non-orthogonal transform will be included. To make use of the non-orthogonal transform in Paraview it is required to load the NonOrthogonalSource plugin. To set this plugin navigate to `Tools > Manage Plugins...` to open the Plugin Manager. Enable the Auto Load option on the plugin and press Load Selected.
 
