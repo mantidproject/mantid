@@ -185,7 +185,9 @@ class FullInstrumentViewWindow(QMainWindow):
         )
 
         projection_group_box = QGroupBox("Projection")
-        projection_layout = QHBoxLayout(projection_group_box)
+        projection_layout = QVBoxLayout(projection_group_box)
+        projection_first_row = QHBoxLayout()
+        projection_second_row = QHBoxLayout()
         self._projection_combo_box = NoWheelComboBox(self)
         self._reset_projection = QPushButton("Reset Projection")
         self._reset_projection.setToolTip("Resets the projection to default.")
@@ -208,13 +210,22 @@ class FullInstrumentViewWindow(QMainWindow):
         self._flip_z_axis_check_box.setToolTip(
             "If checked, the Z axis will be flipped in 2D projections, mirroring the instrument along the beam axis."
         )
-        projection_layout.addWidget(self._projection_combo_box)
-        projection_layout.addWidget(self._reset_projection)
-        projection_layout.addWidget(self._clear_point_picked_detectors)
-        projection_layout.addWidget(self._aspect_ratio_check_box)
-        projection_layout.addWidget(self._show_monitors_check_box)
-        projection_layout.addWidget(self._count_scale_combo_box)
-        projection_layout.addWidget(self._flip_z_axis_check_box)
+        self._show_shapes_check_box = QCheckBox()
+        self._show_shapes_check_box.setText("Draw Shapes")
+        self._show_shapes_check_box.setToolTip(
+            "If checked, detectors are drawn using their actual geometric shapes "
+            "(cuboids, cylinders, etc.) instead of points. May be slower for large instruments."
+        )
+        projection_first_row.addWidget(self._projection_combo_box)
+        projection_first_row.addWidget(self._reset_projection)
+        projection_first_row.addWidget(self._clear_point_picked_detectors)
+        projection_second_row.addWidget(self._aspect_ratio_check_box)
+        projection_second_row.addWidget(self._show_monitors_check_box)
+        projection_second_row.addWidget(self._count_scale_combo_box)
+        projection_second_row.addWidget(self._show_shapes_check_box)
+        projection_second_row.addWidget(self._flip_z_axis_check_box)
+        projection_layout.addLayout(projection_first_row)
+        projection_layout.addLayout(projection_second_row)
 
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
@@ -356,10 +367,16 @@ class FullInstrumentViewWindow(QMainWindow):
         return self._flip_z_axis_check_box.isChecked()
 
     def enable_or_disable_flip_z_axis_box(self) -> None:
-        self._flip_z_axis_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+        self._flip_z_axis_check_box.setDisabled(self.current_selected_projection() in [ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE])
 
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
+
+    def is_show_shapes_checkbox_checked(self) -> bool:
+        return self._show_shapes_check_box.isChecked()
+
+    def set_show_shapes_checkbox_enabled(self, enabled: bool) -> None:
+        self._show_shapes_check_box.setEnabled(enabled)
 
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
@@ -508,7 +525,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self.refresh_workspaces_in_list(CurrentTab.Grouping)
 
     def setup_connections_to_presenter(self) -> None:
-        self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
+        self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_changed)
         self._clear_point_picked_detectors.clicked.connect(self._presenter.on_clear_point_picked_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._contour_range_reset.clicked.connect(self._presenter.on_contour_range_reset_clicked)
@@ -537,6 +554,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
         self._flip_z_axis_check_box.clicked.connect(self._presenter.on_flip_z_axis_check_box_clicked)
+        self._show_shapes_check_box.clicked.connect(self._presenter.on_show_shapes_toggled)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -761,43 +779,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def clear_main_plotter(self) -> None:
         self.delete_current_widget()
         self.main_plotter.clear()
-
-    def add_detector_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
-        """Draw the given mesh in the main plotter window"""
-        scalar_bar_args = dict(interactive=True, vertical=False, title_font_size=15, label_font_size=12) if scalars is not None else None
-        self.main_plotter.add_mesh(
-            mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15, scalar_bar_args=scalar_bar_args
-        )
-
-        if self.main_plotter.off_screen:
-            return
-
-        if not is_projection:
-            self.main_plotter.enable_trackball_style()
-            return
-
-        self.main_plotter.view_xy()
-        self.main_plotter.enable_parallel_projection()
-        self.main_plotter.enable_zoom_style()
-
-    def add_pickable_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
-        self.main_plotter.add_mesh(
-            point_cloud,
-            scalars=scalars,
-            opacity=[0.0, 0.3],
-            clim=[0, 1],
-            show_scalar_bar=False,
-            pickable=True,
-            cmap="Oranges",
-            point_size=30,
-            render_points_as_spheres=True,
-        )
-
-    def add_masked_mesh(self, mesh: PolyData) -> None:
-        if mesh.number_of_points == 0:
-            return
-        # RGB for dark grey is (64, 64, 64), normalised is (0.25, 0.25, 0.25)
-        self.main_plotter.add_mesh(mesh, color=(0.25, 0.25, 0.25), pickable=False, render_points_as_spheres=True, point_size=15)
 
     def add_cylinder_widget(self) -> None:
         cylinder_repr = vtkImplicitCylinderRepresentation()

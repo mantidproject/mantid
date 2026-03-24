@@ -252,6 +252,11 @@ public:
     lpws->addPeak(p2);
     lpws->addPeak(p3);
 
+    // Set known monitor counts
+    lpws->getPeak(0).setMonitorCount(1000.0);
+    lpws->getPeak(1).setMonitorCount(2000.0);
+    lpws->getPeak(2).setMonitorCount(3000.0);
+
     // save to nexus
     NexusTestHelper nexusHelper(true);
     nexusHelper.createFile("testSaveLeanElasticPeaksWorkspace.nxs");
@@ -270,5 +275,20 @@ public:
     TS_ASSERT_DELTA(waveLengths[0], 3.0, 1e-5);
     TS_ASSERT_DELTA(waveLengths[1], 4.0, 1e-5);
     TS_ASSERT_DELTA(waveLengths[2], 5.0, 1e-5);
+
+    // Check monitor counts
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_18"));
+    std::string monitorColumnName;
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->getAttr("name", monitorColumnName));
+    TS_ASSERT_EQUALS(monitorColumnName, "Monitor Count");
+    std::vector<double> monitorCounts;
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->getData(monitorCounts));
+    nexusHelper.file->closeData();
+    TS_ASSERT_EQUALS(monitorCounts.size(), 3);
+    if (monitorCounts.size() >= 3) {
+      TS_ASSERT_DELTA(monitorCounts[0], 1000.0, 1e-5);
+      TS_ASSERT_DELTA(monitorCounts[1], 2000.0, 1e-5);
+      TS_ASSERT_DELTA(monitorCounts[2], 3000.0, 1e-5);
+    }
   }
 };

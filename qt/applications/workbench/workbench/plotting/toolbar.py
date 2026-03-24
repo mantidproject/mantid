@@ -52,6 +52,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     sig_waterfall_conversion = QtCore.Signal(bool)
     sig_change_line_collection_colour_triggered = QtCore.Signal(QtGui.QColor)
     sig_hide_plot_triggered = QtCore.Signal()
+    sig_superplot_help_triggered = QtCore.Signal()
 
     toolitems = (
         MantidNavigationTool("Home", "Reset axes limits", "mdi.home", "on_home_clicked", None),
@@ -145,7 +146,12 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         self._actions["toggle_fit"].trigger()
 
     def launch_plot_help(self):
-        self.sig_plot_help_triggered.emit()
+        superplot_action = self._actions["toggle_superplot"]
+        is_checked = superplot_action.isChecked()
+        if is_checked:
+            self.sig_superplot_help_triggered.emit()
+        else:
+            self.sig_plot_help_triggered.emit()
 
     def print_figure(self):
         printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)

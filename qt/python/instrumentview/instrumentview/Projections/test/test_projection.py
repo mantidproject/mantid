@@ -96,3 +96,7 @@ class TestProjection(unittest.TestCase):
         mock_calc_2d_coords.return_value = (np.arange(5).astype(float), np.arange(1, 6).astype(float))
         proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
         np.testing.assert_array_equal(proj.positions(), np.vstack([np.arange(5), np.arange(1, 6)]).T)
+
+    def test_project_points_matches_positions_for_detector_centers(self):
+        proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
+        np.testing.assert_allclose(proj.project_points(self.detector_positions), proj.positions())

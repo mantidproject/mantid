@@ -43,7 +43,7 @@ private:
 
   std::string m_filename;
   std::string m_workspaceName;
-  Geometry::Instrument_const_sptr m_instrument;
+  Geometry::Instrument_const_sptr m_instrument{nullptr};
 };
 
 } // namespace DataHandling
