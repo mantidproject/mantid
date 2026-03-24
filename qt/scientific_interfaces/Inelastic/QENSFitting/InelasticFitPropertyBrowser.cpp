@@ -428,17 +428,14 @@ void InelasticFitPropertyBrowser::updateFunctionBrowserData(
   try {
     m_functionBrowser->setNumberOfDatasets(nData);
     m_functionBrowser->setDatasets(datasets);
-    m_templatePresenter->setResolution(fitResolutions);
+
     m_templatePresenter->setNumberOfDatasets(nData);
     m_templatePresenter->setDatasets(datasets);
     m_templatePresenter->setQValues(qValues);
+    m_templatePresenter->setResolution(fitResolutions);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    m_functionBrowser->setNumberOfDatasets(0);
-    // m_functionBrowser->setDatasets(datasets);
-    // //m_templatePresenter->setResolution(fitResolutions);
-    m_templatePresenter->setNumberOfDatasets(0);
-    // m_templatePresenter->setDatasets(datasets);
-    // m_templatePresenter->setQValues(qValues);
+    // Convolution Function may have tried to access non-existent ADS workspaces
+    m_functionBrowser->resetLocalParameters();
   }
 }
 
