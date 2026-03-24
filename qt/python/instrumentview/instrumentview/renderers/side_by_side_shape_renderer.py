@@ -53,7 +53,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
         mesh, c2d, fpd = self._assemble_mesh(
             indices,
             positions,
-            flatten_2d=flatten_2d,
+            projection_type=model.projection_type,
             per_detector_scales=per_detector_scales,
             per_detector_rotate=per_detector_rotate,
         )
@@ -76,7 +76,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
         mesh, _, _ = self._assemble_mesh(
             indices,
             positions,
-            flatten_2d=flatten_2d,
+            projection_type=model.projection_type,
             per_detector_scales=per_detector_scales,
             per_detector_rotate=per_detector_rotate,
         )

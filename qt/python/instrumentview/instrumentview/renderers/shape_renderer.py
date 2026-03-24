@@ -147,19 +147,11 @@ class ShapeRenderer(InstrumentRenderer):
 
         indices = self._resolve_detector_indices(positions, model, masked=False)
 
-        project_vertices_2d = False
-        projection = None
-        if model.is_2d_projection:
-            if self._is_spherical_or_cylindrical_projection(model):
-                projection = model.active_projection
-                project_vertices_2d = projection is not None
-
         mesh, c2d, fpd = self._assemble_mesh(
             indices,
             positions,
-            flatten_2d=model.is_2d_projection,
-            project_vertices_2d=project_vertices_2d,
-            projection=projection,
+            projection_type=model.projection_type,
+            projection=model.active_projection,
             flip_z=flip_z,
         )
         self._cell_to_detector = c2d
@@ -186,19 +178,11 @@ class ShapeRenderer(InstrumentRenderer):
             return pv.PolyData()
         indices = self._resolve_detector_indices(positions, model, masked=True)
 
-        project_vertices_2d = False
-        projection = None
-        if model.is_2d_projection:
-            if self._is_spherical_or_cylindrical_projection(model):
-                projection = model.active_projection
-                project_vertices_2d = projection is not None
-
         mesh, _, _ = self._assemble_mesh(
             indices,
             positions,
-            flatten_2d=model.is_2d_projection,
-            project_vertices_2d=project_vertices_2d,
-            projection=projection,
+            projection_type=model.projection_type,
+            projection=model.active_projection,
             flip_z=flip_z,
         )
         return mesh
@@ -373,10 +357,9 @@ class ShapeRenderer(InstrumentRenderer):
         self,
         det_indices: np.ndarray,
         display_positions: np.ndarray,
-        flatten_2d: bool = False,
         per_detector_scales: np.ndarray | None = None,
         per_detector_rotate: np.ndarray | None = None,
-        project_vertices_2d: bool = False,
+        projection_type: ProjectionType | None = None,
         projection=None,
         flip_z: bool = False,
     ) -> tuple[pv.PolyData, np.ndarray, np.ndarray]:
@@ -425,15 +408,6 @@ class ShapeRenderer(InstrumentRenderer):
         rotations = self._det_rotations[det_indices]  # (N, 3, 3)
         scales = self._det_scales[det_indices]  # (N, 3)
 
-        # In 2D projection mode, compute a scale factor so that shapes
-        # are proportional to the projected inter-detector spacing.
-        projection_scale = 1.0
-        if flatten_2d and not project_vertices_2d and per_detector_scales is None and len(det_indices) > 1:
-            projection_scale = self._compute_projection_scale(det_indices, display_positions)
-
-        # Use display_positions as centres (they might be projected)
-        positions = display_positions
-
         all_verts_list: list[np.ndarray] = []
         all_faces_list: list[np.ndarray] = []
         cell_to_det_list: list[np.ndarray] = []
@@ -443,7 +417,7 @@ class ShapeRenderer(InstrumentRenderer):
 
         # Centroid of all display positions (2D) — used for z-offset
         # so detectors farther from the mesh centre sit above closer ones.
-        mesh_centre_2d = positions[:, :2].mean(axis=0)
+        mesh_centre_2d = display_positions[:, :2].mean(axis=0)
 
         # Group detectors by shape key for batch processing
         unique_keys = np.unique(shape_keys)
@@ -461,64 +435,46 @@ class ShapeRenderer(InstrumentRenderer):
                 faces_per_det[group_indices] = 0
                 continue
 
-            # --- Vectorised transform: scale → rotate → translate -----------
             # Tile template: (n_group, n_verts, 3)
             tiled = np.tile(template_verts, (n_group, 1, 1))
 
-            # Scale: (n_group, 1, 3) * (n_group, n_verts, 3)
-            group_scales = scales[group_indices][:, np.newaxis, :]
+            if projection_type is ProjectionType.SIDE_BY_SIDE:
+                rotate_mask = per_detector_rotate[group_indices]
+                group_scales = per_detector_scales[group_indices][:, np.newaxis, np.newaxis]
+                group_pos = display_positions[group_indices][:, np.newaxis, :]  # (n_group, 1, 3)
+            else:
+                rotate_mask = np.ones(n_group).astype(bool)
+                group_scales = scales[group_indices][:, np.newaxis, :]
+                group_pos = self._all_positions_3d[det_indices[group_indices]][:, np.newaxis, :]
+
+            # Scale
             tiled = tiled * group_scales
+            # Rotate
+            group_rots = rotations[group_indices[rotate_mask]]
+            tiled[rotate_mask] = np.einsum("nij,nvj->nvi", group_rots, tiled[rotate_mask])
+            # Translate
+            tiled = tiled + group_pos
 
-            if flatten_2d:
-                if project_vertices_2d and projection is not None:
-                    # Keep detector orientation in 3D before projecting vertices.
-                    group_rots = rotations[group_indices]
-                    tiled = np.einsum("nij,nvj->nvi", group_rots, tiled)
+            if projection_type is not ProjectionType.THREE_D and projection_type is not ProjectionType.SIDE_BY_SIDE:
+                if flip_z:
+                    tiled[:, :, 2] *= -1
 
-                    group_world_pos = self._all_positions_3d[det_indices[group_indices]][:, np.newaxis, :]
-                    world_vertices = tiled + group_world_pos
-                    if flip_z:
-                        world_vertices[:, :, 2] *= -1
-                    projected_vertices = projection.project_points(world_vertices.reshape(-1, 3), apply_x_correction=False).reshape(
-                        n_group, n_verts, 2
-                    )
+                projected_vertices = projection.project_points(tiled.reshape(-1, 3), apply_x_correction=False).reshape(n_group, n_verts, 2)
 
-                    u_period = projection.u_period
-                    if np.isfinite(u_period) and abs(u_period) > 0.0:
-                        # Keep each detector polygon contiguous at the periodic seam
-                        # by wrapping vertices near the projected detector center.
-                        centre_x = positions[group_indices, 0][:, np.newaxis]
-                        projected_vertices[:, :, 0] += np.round((centre_x - projected_vertices[:, :, 0]) / u_period) * u_period
+                u_period = projection.u_period
+                if np.isfinite(u_period) and abs(u_period) > 0.0:
+                    # Keep each detector polygon contiguous at the periodic seam
+                    # by wrapping vertices near the projected detector center.
+                    centre_x = display_positions[group_indices, 0][:, np.newaxis]
+                    projected_vertices[:, :, 0] += np.round((centre_x - projected_vertices[:, :, 0]) / u_period) * u_period
 
-                    tiled[:, :, :2] = projected_vertices
-                elif per_detector_scales is not None:
-                    group_rotate = per_detector_rotate[group_indices] if per_detector_rotate is not None else np.zeros(n_group, dtype=bool)
-                    if np.all(group_rotate):
-                        group_rots = rotations[group_indices]
-                        tiled = np.einsum("nij,nvj->nvi", group_rots, tiled)
-                    elif np.any(group_rotate):
-                        rot_mask = group_rotate
-                        group_rots = rotations[group_indices[rot_mask]]
-                        tiled[rot_mask] = np.einsum("nij,nvj->nvi", group_rots, tiled[rot_mask])
-                    # else: no rotation for this entire shape group
-                    group_proj_scales = per_detector_scales[group_indices][:, np.newaxis, np.newaxis]
-                    tiled = tiled * group_proj_scales
-                else:
-                    tiled = tiled * projection_scale
+                tiled[:, :, :2] = projected_vertices
+
                 # Assign tiny z offsets so detectors farther from the mesh
                 # centre sit above those closer, preventing picking
                 # ambiguity on overlapping coplanar cells.
-                group_center_dist = np.linalg.norm(positions[group_indices, :2] - mesh_centre_2d, axis=1)
+                group_center_dist = np.linalg.norm(display_positions[group_indices, :2] - mesh_centre_2d, axis=1)
                 tiled[:, :, 2] = group_center_dist[:, np.newaxis] * 1e-4
-            else:
-                # Rotate: R @ v  →  einsum('nij,nvj->nvi', R, V)
-                group_rots = rotations[group_indices]  # (n_group, 3, 3)
-                tiled = np.einsum("nij,nvj->nvi", group_rots, tiled)
-
-            # Translate
-            if not (flatten_2d and project_vertices_2d and projection is not None):
-                group_pos = positions[group_indices][:, np.newaxis, :]  # (n_group, 1, 3)
-                tiled = tiled + group_pos
 
             # Flatten to (n_group * n_verts, 3)
             flat_verts = tiled.reshape(-1, 3)
