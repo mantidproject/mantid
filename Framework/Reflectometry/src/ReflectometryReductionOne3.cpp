@@ -174,7 +174,6 @@ void ReflectometryReductionOne3::init() {
 /** Validate inputs
  */
 std::map<std::string, std::string> ReflectometryReductionOne3::validateInputs() {
-
   std::map<std::string, std::string> results;
 
   const auto background = validateBackgroundProperties();
@@ -193,6 +192,11 @@ std::map<std::string, std::string> ReflectometryReductionOne3::validateInputs() 
   const std::string reductionType = getProperty("ReductionType");
   if (summationType == "SumInQ" && reductionType == "DivergentBeam" && (*getProperty("ThetaIn")).isDefault())
     results["ThetaIn"] = "ThetaIn must be specified for the DivergentBeam case";
+
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  const auto xUnitID = inputWS->getAxis(0)->unit()->unitID();
+  if ((xUnitID != "Wavelength") && (xUnitID != "TOF"))
+    results["InputWorkspace"] = "InputWorkspace must have units of TOF or Wavelength";
 
   return results;
 }
@@ -279,16 +283,9 @@ std::vector<std::string> ReflectometryReductionOne3::configureAlgorithmTasks() {
   return taskExecutionOrder;
 }
 
-/** Execute the algorithm.
- */
-void ReflectometryReductionOne3::exec() {
-  // set up - extract this to seperate fn
-
+void ReflectometryReductionOne3::initalizeMembers() {
   setDefaultOutputWorkspaceNames();
-
-  // Get input properties
   m_runWS = getProperty("InputWorkspace");
-  const auto xUnitID = m_runWS->getAxis(0)->unit()->unitID();
 
   // Handle processing instructions conversion from spectra number to workspace
   // indexes
@@ -304,11 +301,13 @@ void ReflectometryReductionOne3::exec() {
   // do we need findDetectorGroups - cache is not used anyhere.
   findDetectorGroups();
   findTheta0();
+}
 
-  // end set up
-
+/** Execute the algorithm.
+ */
+void ReflectometryReductionOne3::exec() {
+  initalizeMembers();
   const auto taskExecutionOrder = configureAlgorithmTasks();
-
   const bool outputDiagnostics = getProperty("Diagnostics");
   std::string diagWSName = createDebugWorkspaceName(getPropertyValue("InputWorkspace"));
   int step = 0;
@@ -325,13 +324,8 @@ void ReflectometryReductionOne3::exec() {
     }
   }
 
-  // Neither TOF or Lambda? Abort.
-  // TO DO - do we want this validation?
-  // if ((xUnitID != "Wavelength") && (xUnitID != "TOF"))
-  //  throw std::invalid_argument("InputWorkspace must have units of TOF or Wavelength");
-
   // For now, output the first output of the final task as the output workspace.
-  // Order is not guarenteed in map, so we will want to make this configurable.
+  // Order is not guaranteed in map, so we will want to make this configurable.
   setProperty("OutputWorkspace", m_algorithmTaskOutputs.at(taskExecutionOrder.back()).begin()->second);
 }
 

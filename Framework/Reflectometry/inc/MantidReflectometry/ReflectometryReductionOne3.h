@@ -100,10 +100,12 @@ private:
                                const bool outerCorners = true);
   // Check whether two spectrum maps match
   void verifySpectrumMaps(const API::MatrixWorkspace_const_sptr &ws1, const API::MatrixWorkspace_const_sptr &ws2);
-
   // Find and cache constants
   void findDetectorGroups();
   void findTheta0();
+  // initialize algorithm members
+  void initalizeMembers();
+
   // Accessors for detectors and theta and lambda values
   const std::vector<std::vector<size_t>> &detectorGroups() const { return m_detectorGroups; };
   double theta0() { return m_theta0; }
