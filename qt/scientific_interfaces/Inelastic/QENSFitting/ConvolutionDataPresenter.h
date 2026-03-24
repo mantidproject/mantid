@@ -19,6 +19,8 @@ class MANTIDQT_INELASTIC_DLL ConvolutionDataPresenter : public FitDataPresenter 
 public:
   ConvolutionDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view);
 
+  void setResolution(const std::string &resName, const std::string &wsName,
+                     const FunctionModelSpectra &spectra) override;
   bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) override;
 
 protected:
