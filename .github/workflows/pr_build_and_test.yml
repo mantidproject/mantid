@@ -22,12 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        if: ${{  github.ref_name == 'main' }}
+        #if: ${{  github.ref_name == 'main' }}
 
       - uses: dorny/paths-filter@v4
         id: changes
         with:
-          filters: '.github/actions/filterdoxygen.yaml'
+          filters: .github/filterdoxygen.yaml
 
       - uses: actions/checkout@v6
         if: ${{ steps.changes.outputs.doxygen == 'true' && github.ref_name != 'main' }}
