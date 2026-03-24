@@ -27,7 +27,7 @@ jobs:
       - uses: dorny/paths-filter@v4
         id: changes
         with:
-          filters: ./.github/actions/doxygen-filter.yaml
+          filters: '.github/actions/filterdoxygen.yaml'
 
       - uses: actions/checkout@v6
         if: ${{ steps.changes.outputs.doxygen == 'true' && github.ref_name != 'main' }}
