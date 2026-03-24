@@ -13,6 +13,10 @@ install_pixi() {
   if [ "$(command -v pixi)" ]; then
       echo "updating previously installed pixi"
       pixi self-update --no-progress --quiet
+      # Workaround on Windows to avoid rattler cache errors
+      if [[ $OSTYPE == "msys"* ]]; then
+        pixi clean cache
+      fi
   else
     echo "install pixi"
     set +x # disable xtrace - don't care about details of pixi install
