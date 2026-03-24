@@ -68,8 +68,12 @@ void ConvolutionFunctionModel::setModel(const std::string &background,
                                         bool hasDeltaFunction, const std::vector<double> &qValues,
                                         const bool isQDependent, bool hasTempCorrection, double tempValue) {
   auto fitFunction = std::make_shared<MultiDomainFunction>();
-  auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
-  for (int i = 0; i < nf; ++i) {
+  auto nf = std::min(resolutionWorkspaces.size(), qValues.size());
+  if (m_numberDomains * nf < 0) {
+    nf = 1;
+  }
+
+  for (size_t i = 0; i < nf; ++i) {
     CompositeFunction_sptr domainFunction;
     auto qValue = qValues.empty() ? 0.0 : qValues[i];
     auto innerFunction = createInnerFunction(lorentzianPeaks, fitType, hasDeltaFunction, isQDependent, qValue,
