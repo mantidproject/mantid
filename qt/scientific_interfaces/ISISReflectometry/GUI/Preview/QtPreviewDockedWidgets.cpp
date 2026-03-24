@@ -107,12 +107,15 @@ void QtPreviewDockedWidgets::onYAxisSymlogToggled(bool checked) const {
 void QtPreviewDockedWidgets::onLineEditUpdated() const {
   m_ui.apply_button->setEnabled(!m_ui.linthresh_line_edit->text().isEmpty());
 }
+void QtPreviewDockedWidgets::setLinthreshold() const { onApplyButtonClicked(); }
 
 void QtPreviewDockedWidgets::onApplyButtonClicked() const {
   bool ok = false;
   double linthresh = m_ui.linthresh_line_edit->text().toDouble(&ok);
   if (ok && linthresh > 0.0) {
     m_notifyee->notifySetLinthreshChanged(linthresh);
+  } else {
+    m_notifyee->notifySetLinthreshChanged(1e-4);
   }
 }
 

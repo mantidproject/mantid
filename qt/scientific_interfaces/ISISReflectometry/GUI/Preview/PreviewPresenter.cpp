@@ -91,7 +91,7 @@ void PreviewPresenter::updateWidgetEnabledState() {
 
 void PreviewPresenter::updatePlotAxes(bool checked) {
   if (checked) {
-    m_plotPresenter->setScaleSymLog(AxisID::YLeft, 1e-4);
+    m_dockedWidgets->setLinthreshold();
   } else {
     m_plotPresenter->setScaleLog(AxisID::YLeft);
   }
