@@ -1,8 +1,10 @@
 name: Linux
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows: ["Check for merge conflicts"]
+    types:
+      - completed
 
   workflow_dispatch:
     inputs:
