@@ -22,7 +22,7 @@ jobs:
       - uses: dorny/paths-filter@v4
         id: changes
         with:
-          filters: .github/actions/filterdoxygen.yaml
+          filters: .github/filters.yaml
 
       - uses: prefix-dev/setup-pixi@v0.9.4
         if: steps.changes.outputs.doxygen == 'true'
@@ -43,12 +43,13 @@ jobs:
           rm -rf doxygen_repo/*
 
       - name: Copy Doxygen artifacts
-        if: ${{ steps.changes.outputs.doxygen == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
         run: |
+          rm -rf doxygen_repo/* # delete old version of the repository
           cp -r $GITHUB_WORKSPACE/build/doxygen/html/* doxygen_repo/
 
       - name: Commit Doxygen and push
-        if: ${{ steps.changes.outputs.doxygen == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
         working-directory: doxygen_repo
         run: |
           git config user.name "github-actions[bot]"
