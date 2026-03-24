@@ -62,7 +62,6 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_dockedWidgets->setRegionSelectorEnabled(false);
 
   m_plotPresenter->setScaleLog(AxisID::YLeft);
-  m_plotPresenter->setAxisLimit(AxisID::YLeft, -1e-5, 2.0);
   m_plotPresenter->setScaleLog(AxisID::XBottom);
   m_plotPresenter->setPlotErrorBars(true);
 }
@@ -92,6 +91,7 @@ void PreviewPresenter::updateWidgetEnabledState() {
 void PreviewPresenter::updatePlotAxes(bool checked) {
   if (checked) {
     m_dockedWidgets->setLinthreshold();
+    m_plotPresenter->setAxisLimit(AxisID::YLeft, -1e-5, 2.0);
   } else {
     m_plotPresenter->setScaleLog(AxisID::YLeft);
   }
