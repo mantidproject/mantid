@@ -170,6 +170,12 @@ fi
 # Make sure a failed build command still causes the buildscript to fail after being piped.
 set -o pipefail
 
+# Set a local cache for Windows builds to avoid file locking issues with concurrent builds
+if [[ "$OSTYPE" == "msys"* ]]; then
+    mkdir -p "$WORKSPACE/.pixi/rattler_cache"
+    export RATTLER_CACHE_DIR=$(cygpath -m "$WORKSPACE/.pixi/rattler_cache")
+fi
+
 # Run the script that handles the build
 pixi run --frozen bash -ex $SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" | tee $BUILD_DIR/test_logs/build_$OSTYPE.log
 
