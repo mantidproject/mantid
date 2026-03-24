@@ -369,7 +369,8 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_clear_point_picked_detectors_clicked, ()))
 
     def _on_add_item_clicked(self) -> None:
-        mask = self._view.get_shape_mask(np.array(self._detector_mesh.points))
+        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        mask = self._view.get_shape_mask(centres)
         if not np.any(mask):
             return
 
@@ -377,8 +378,8 @@ class FullInstrumentViewPresenter:
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
 
     def on_add_item_clicked(self) -> None:
-        points = np.array(self._detector_mesh.points)
-        self._view.project_and_cache_detector_points(points)
+        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        self._view.project_and_cache_detector_points(centres)
         self._callback_queue.put((self._on_add_item_clicked, ()))
 
     def _on_list_item_selected(self, kind: CurrentTab) -> None:
