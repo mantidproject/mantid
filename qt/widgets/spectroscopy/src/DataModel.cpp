@@ -37,8 +37,8 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 
 DataModel::DataModel()
     : m_adsInstance(Mantid::API::AnalysisDataService::Instance()),
-      m_fittingData(std::make_unique<std::vector<FitData>>()),
-      m_resolutions(std::make_unique<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>()) {}
+      m_fittingData(std::make_unique<std::vector<FitData>>()), m_uniqueWsNames(std::set<std::string>()),
+      m_uniqueResWsNames(std::set<std::string>()) {}
 
 std::vector<FitData> *DataModel::getFittingData() { return m_fittingData.get(); }
 
@@ -47,6 +47,15 @@ bool DataModel::hasWorkspace(std::string const &workspaceName) const {
   auto const iter = std::find(names.cbegin(), names.cend(), workspaceName);
   return iter != names.cend();
 }
+
+WorkspaceID DataModel::getWorkspaceID(const std::string &workspaceName) const {
+  auto const names = getWorkspaceNames();
+  auto const iter = std::find(names.cbegin(), names.cend(), workspaceName);
+
+  return {static_cast<size_t>(iter - names.cbegin())};
+}
+
+void DataModel::clearModel() { m_fittingData->clear(); }
 
 Mantid::API::MatrixWorkspace_sptr DataModel::getWorkspace(WorkspaceID workspaceID) const {
   if (workspaceID < m_fittingData->size())
@@ -102,48 +111,69 @@ std::vector<double> DataModel::getQValuesForData() const {
 
 std::vector<std::pair<std::string, size_t>> DataModel::getResolutionsForFit() const {
   std::vector<std::pair<std::string, size_t>> resolutionVector;
-  for (size_t index = 0; index < m_resolutions->size(); ++index) {
-    const auto resolutionWorkspace = m_resolutions->at(index).lock();
-    const auto spectra = getSpectra(WorkspaceID{index});
-    if (!resolutionWorkspace || !m_adsInstance.doesExist(resolutionWorkspace->getName())) {
-      resolutionVector.reserve(spectra.size().value);
-      std::transform(spectra.begin(), spectra.end(), std::back_inserter(resolutionVector),
-                     [](const auto &spectraIndex) { return std::make_pair("", spectraIndex.value); });
-      continue;
-    }
-
-    const auto singleSpectraResolution = m_resolutions->at(index).lock()->getNumberHistograms() == 1;
-    for (auto const &spectraIndex : spectra) {
-      const auto resolutionIndex = singleSpectraResolution ? 0 : spectraIndex.value;
-      resolutionVector.emplace_back(m_resolutions->at(index).lock()->getName(), resolutionIndex);
+  for (const auto &fittingData : *m_fittingData) {
+    std::map<std::string, bool> checkedResolutions;
+    for (const auto &[spectrum, resName] : fittingData.getResolutions()) {
+      if (!checkedResolutions.contains(resName)) {
+        if (m_adsInstance.doesExist(resName)) {
+          const auto resWs = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(resName);
+          checkedResolutions.insert_or_assign(resName, resWs->getNumberHistograms() == 1);
+        }
+      }
+      const auto name = checkedResolutions.contains(resName) ? resName : "";
+      const auto spIndex = !name.empty() && checkedResolutions.at(resName) ? 0 : spectrum.value;
+      resolutionVector.emplace_back(name, spIndex);
     }
   }
   return resolutionVector;
 }
 
-bool DataModel::setResolution(const std::string &name) {
-  return setResolution(name, getNumberOfWorkspaces() - WorkspaceID{1});
+std::string DataModel::getResolutionName(const WorkspaceID &wsID, const WorkspaceIndex &index) const {
+  return wsID.value < m_fittingData->size() ? m_fittingData->at(wsID.value).getResolutionFromWsIndex(index) : "";
 }
 
-bool DataModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
-  bool hasValidValues = true;
-  if (!name.empty() && m_adsInstance.doesExist(name)) {
-    const auto resolution = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(name);
-    const auto &y = resolution->readY(0);
-    hasValidValues = std::all_of(y.cbegin(), y.cend(), [](double value) { return value == value; });
+bool DataModel::setResolution(const std::string &resName, const std::string &wsName,
+                              const FunctionModelSpectra &spectra) {
+  return setResolution(resName, getWorkspaceID(wsName), spectra);
+}
 
-    if (m_resolutions->size() > workspaceID.value) {
-      m_resolutions->at(workspaceID.value) = resolution;
-    } else if (m_resolutions->size() == workspaceID.value) {
-      m_resolutions->emplace_back(resolution);
-    } else {
-      throw std::out_of_range("Provided resolution index '" + std::to_string(workspaceID.value) +
-                              "' was out of range.");
+bool DataModel::setResolution(const std::string &resName, WorkspaceID workspaceID,
+                              const FunctionModelSpectra &spectra) {
+  bool hasValidValues = true;
+  if (!resName.empty() && m_adsInstance.doesExist(resName)) {
+    const auto resolution = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(resName);
+    const auto resSpectra = resolution->getNumberHistograms() == 1 ? FunctionModelSpectra(0, 0) : spectra;
+    for (const auto &spIndex : resSpectra) {
+      try {
+        const auto &y = resolution->readY(spIndex.value);
+        hasValidValues = hasValidValues && std::ranges::all_of(y, [](double value) { return value == value; });
+      } catch (std::range_error const &) {
+        // Either resolution has one histogram, or there should be 1-1 correspondence
+      }
     }
+    m_fittingData->at(workspaceID.value).setResolution(resName, spectra);
   } else {
     throw std::runtime_error("A valid resolution file needs to be selected.");
   }
   return hasValidValues;
+}
+
+void DataModel::removeResolution(const std::string &resName) {
+  for (auto it = m_fittingData->begin(); it != m_fittingData->end();) {
+    auto &fitData = *it;
+    if (const auto names = fitData.getResolutionNames(); names.contains(resName)) {
+      if (names.size() == 1) {
+        // If there's only one resolution ws linked to a ws we remove the ws from the model as convolution is not
+        // possible.
+        it = m_fittingData->erase(it);
+      } else {
+        fitData.removeResolution(resName);
+        ++it;
+      }
+    } else {
+      ++it;
+    }
+  }
 }
 
 void DataModel::removeSpecialValues(const std::string &name) {
@@ -176,7 +206,7 @@ std::vector<std::string> DataModel::getWorkspaceNames() const {
   std::vector<std::string> names;
   names.reserve(m_fittingData->size());
   std::transform(m_fittingData->cbegin(), m_fittingData->cend(), std::back_inserter(names),
-                 [](const auto &fittingData) -> const std::string & { return fittingData.workspace()->getName(); });
+                 [](const auto &fittingData) { return fittingData.getWsName(); });
   return names;
 }
 
@@ -228,6 +258,25 @@ FitDomainIndex DataModel::getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex
 }
 
 void DataModel::clear() { m_fittingData->clear(); }
+
+std::set<std::string> DataModel::getResolutionNames() {
+  std::set<std::string> names;
+  for (const auto &fitData : *m_fittingData) {
+    const auto resNames = fitData.getResolutionNames();
+    names.insert(resNames.begin(), resNames.end());
+  }
+  return names;
+}
+
+std::set<std::string> const &DataModel::resolutionNames() const { return m_uniqueResWsNames; }
+std::set<std::string> const &DataModel::workspaceNames() const { return m_uniqueWsNames; }
+
+void DataModel::updateWorkspaceNames() {
+  // This makes it faster for the observers
+  const auto names = getWorkspaceNames();
+  m_uniqueWsNames = std::set<std::string>(names.begin(), names.end());
+  m_uniqueResWsNames = getResolutionNames();
+}
 
 std::pair<double, double> DataModel::getFittingRange(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
   if (workspaceID.value < m_fittingData->size() && !m_fittingData->at(workspaceID.value).zeroSpectra()) {
@@ -289,8 +338,10 @@ void DataModel::setExcludeRegion(const std::string &exclude, WorkspaceID workspa
 
 void DataModel::removeWorkspaceByName(const std::string &name) {
   auto it = std::find_if(m_fittingData->cbegin(), m_fittingData->cend(),
-                         [&name](const auto &fittingData) { return fittingData.workspace()->getName() == name; });
-  m_fittingData->erase(it);
+                         [&name](const auto &fittingData) { return fittingData.getWsName() == name; });
+  if (it != m_fittingData->cend()) {
+    m_fittingData->erase(it);
+  }
 }
 
 void DataModel::removeWorkspace(WorkspaceID workspaceID) {
@@ -303,8 +354,11 @@ void DataModel::removeWorkspace(WorkspaceID workspaceID) {
 
 void DataModel::removeDataByIndex(FitDomainIndex fitDomainIndex) {
   auto subIndices = getSubIndices(fitDomainIndex);
-  auto &spectra = m_fittingData->at(subIndices.first.value).getMutableSpectra();
+  auto &fitData = m_fittingData->at(subIndices.first.value);
+  auto &spectra = fitData.getMutableSpectra();
   spectra.erase(subIndices.second);
+  fitData.removeResolutionEntry(subIndices.second);
+
   // If the spectra list corresponding to a workspace is empty, remove workspace
   // at this index, else we'll have a workspace persist with no spectra loaded.
   if (spectra.empty()) {
