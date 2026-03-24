@@ -42,7 +42,7 @@ jobs:
   build-and-test:
     needs: [doxygen]
     runs-on:
-      - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
+      - ${{ inputs.RUNNER_LABEL || 'self-hosted' }}
       - self-hosted
       - Linux
       - X64
