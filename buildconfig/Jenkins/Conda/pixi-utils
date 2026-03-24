@@ -10,7 +10,7 @@ install_pixi() {
   fi
 
   # Specify pixi version
-  VERSION_PIXI=0.65.0
+  VERSION_PIXI=0.64.0
   # check if pixi is not installed
   if [ "$(command -v pixi)" ]; then
       echo "updating previously installed pixi"
