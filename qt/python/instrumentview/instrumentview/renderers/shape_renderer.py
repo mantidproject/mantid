@@ -441,6 +441,10 @@ class ShapeRenderer(InstrumentRenderer):
 
         vertex_offset = 0
 
+        # Centroid of all display positions (2D) — used for z-offset
+        # so detectors farther from the mesh centre sit above closer ones.
+        mesh_centre_2d = positions[:, :2].mean(axis=0)
+
         # Group detectors by shape key for batch processing
         unique_keys = np.unique(shape_keys)
 
@@ -487,7 +491,6 @@ class ShapeRenderer(InstrumentRenderer):
                         projected_vertices[:, :, 0] += np.round((centre_x - projected_vertices[:, :, 0]) / u_period) * u_period
 
                     tiled[:, :, :2] = projected_vertices
-                    tiled[:, :, 2] = 0.0
                 elif per_detector_scales is not None:
                     group_rotate = per_detector_rotate[group_indices] if per_detector_rotate is not None else np.zeros(n_group, dtype=bool)
                     if np.all(group_rotate):
@@ -502,8 +505,11 @@ class ShapeRenderer(InstrumentRenderer):
                     tiled = tiled * group_proj_scales
                 else:
                     tiled = tiled * projection_scale
-                # Flatten z so shapes lie in the XY plane.
-                tiled[:, :, 2] = 0.0
+                # Assign tiny z offsets so detectors farther from the mesh
+                # centre sit above those closer, preventing picking
+                # ambiguity on overlapping coplanar cells.
+                group_center_dist = np.linalg.norm(positions[group_indices, :2] - mesh_centre_2d, axis=1)
+                tiled[:, :, 2] = group_center_dist[:, np.newaxis] * 1e-4
             else:
                 # Rotate: R @ v  →  einsum('nij,nvj->nvi', R, V)
                 group_rots = rotations[group_indices]  # (n_group, 3, 3)
