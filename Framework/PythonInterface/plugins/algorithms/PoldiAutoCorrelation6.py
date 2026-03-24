@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm, Progress
-from mantid.kernel import Direction, FloatBoundedValidator, UnitParams, StringListValidator
+from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, UnitParams, StringListValidator
 import numpy as np
 from plugins.algorithms.poldi_utils import (
     get_instrument_settings_from_log,
@@ -16,6 +16,8 @@ from plugins.algorithms.poldi_utils import (
 from joblib import Parallel, delayed
 from functools import reduce
 from operator import iadd
+from itertools import islice
+from multiprocessing import cpu_count
 
 
 class PoldiAutoCorrelation(PythonAlgorithm):
@@ -62,6 +64,13 @@ class PoldiAutoCorrelation(PythonAlgorithm):
             doc="Interpolation used when adding intensity to a given bin in correlation function - "
             "'Nearest' is quicker but potentially less accurate.",
         )
+        self.declareProperty(
+            "NGroups",
+            defaultValue=1,
+            direction=Direction.Input,
+            validator=IntBoundedValidator(lower=1),
+            doc="Number of groups to split poldi detectors into (returns a spectrum per group)",
+        )
 
     def validateInputs(self):
         issues = dict()
@@ -86,6 +95,7 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         ws = self.getProperty("InputWorkspace").value
         lambda_min = self.getProperty("WavelengthMin").value
         lambda_max = self.getProperty("WavelengthMax").value
+        ngroups = self.getProperty("NGroups").value
 
         cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws)
         # get detector positions from IDF
@@ -115,16 +125,24 @@ class PoldiAutoCorrelation(PythonAlgorithm):
             do_autocorr = _autocorr_spec_linear
         else:
             do_autocorr = _autocorr_spec_nearest
-        inter_corr = reduce(
-            iadd,
-            Parallel(n_jobs=-2, prefer="threads", return_as="generator_unordered")(
-                delayed(do_autocorr)(ws.readY(ispec), tof_d1Ang[ispec], dspacs, offsets, bin_width, progress) for ispec in range(nspec)
-            ),
-        )  # npulses*nslits
-        # average of inverse intermediate correlation func (Eq.8 in POLDI concept paper)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            corr = 1 / np.nansum(1 / inter_corr, axis=1)
-        ws_corr = self.exec_child_alg("CreateWorkspace", DataX=dspacs, DataY=corr, UnitX="dSpacing", YUnitLabel="Intensity (a.u.)")
+        generator = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
+            delayed(do_autocorr)(ws.readY(ispec), tof_d1Ang[ispec], dspacs, offsets, bin_width, progress) for ispec in range(nspec)
+        )
+        # sum over spectra in each group
+        corr = np.zeros((ngroups, len(dspacs)))
+        nspectra_per_group = nspec // ngroups
+        for igroup in range(ngroups - 1):
+            corr[igroup, :] = _sum_over_intermediate_correlation_func(islice(generator, nspectra_per_group))
+        # eval last grouping with remainder of generator
+        corr[ngroups - 1, :] = _sum_over_intermediate_correlation_func(generator)
+        ws_corr = self.exec_child_alg(
+            "CreateWorkspace", DataX=dspacs, DataY=corr, UnitX="dSpacing", YUnitLabel="Intensity (a.u.)", NSpec=ngroups, ParentWorkspace=ws
+        )
+        # assign detector IDs to autocorr
+        detids_in_groups = np.array_split(ws_corr.detectorInfo().detectorIDs(), ngroups)
+        for ispec, detids in enumerate(detids_in_groups):
+            spec = ws_corr.getSpectrum(ispec)
+            [spec.addDetectorID(int(detid)) for detid in detids]
         ws_corr = self.exec_child_alg("ConvertUnits", InputWorkspace=ws_corr, Target="MomentumTransfer")
         self.setProperty("OutputWorkspace", ws_corr)
 
@@ -136,6 +154,14 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         alg.execute()
         out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
         return out_props[0] if len(out_props) == 1 else out_props
+
+
+def _sum_over_intermediate_correlation_func(generator):
+    inter_corr = reduce(iadd, generator)  # sum over spectra (output has shape len(dspacs) x npulses*nslits)
+    # average of inverse intermediate correlation func (Eq.8 in POLDI concept paper)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        corr = 1 / np.nansum(1 / inter_corr, axis=1)
+    return corr
 
 
 def _autocorr_spec_linear(y, tof_d1Ang, dspacs, offsets, bin_width, progress):

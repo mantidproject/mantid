@@ -1,3 +1,5 @@
+set(LIVEDATA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 set(SRC_FILES
     src/ADARA/ADARAPackets.cpp
     src/ADARA/ADARAParser.cpp
@@ -101,7 +103,7 @@ add_library(LiveData ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::LiveData ALIAS LiveData)
 
 # Use a precompiled header
-target_precompile_headers(LiveData PRIVATE inc/MantidLiveData/PrecompiledHeader.h)
+target_precompile_headers(LiveData PRIVATE <MantidAPI/Algorithm.h>)
 
 target_include_directories(
   LiveData PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

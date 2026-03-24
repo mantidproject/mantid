@@ -15,9 +15,9 @@
 #include "MantidKernel/Exception.h"
 
 #include <H5Cpp.h>
-#include <Poco/File.h>
 
 #include <algorithm>
+#include <filesystem>
 #include <string>
 
 namespace Mantid::DataObjects {
@@ -127,7 +127,7 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName, const std::stri
   }
 
   // open file if it exists or create it if not in the mode requested
-  m_fileName = API::FileFinder::Instance().getFullPath(fileName);
+  m_fileName = API::FileFinder::Instance().getFullPath(fileName).string();
   if (m_fileName.empty()) {
     if (!m_ReadOnly) {
       std::string filePath = Kernel::ConfigService::Instance().getString("defaultsave.directory");
@@ -175,12 +175,12 @@ void BoxControllerNeXusIO::copyFileTo(const std::string &destFilename) {
   // To copy the file must be closed, copied and reopened. To avoid
   // paying for this where not necessary first try without closing first
   try {
-    Poco::File(this->getFileName()).copyTo(destFilename);
+    std::filesystem::copy_file(this->getFileName(), destFilename, std::filesystem::copy_options::overwrite_existing);
     return;
-  } catch (const Poco::Exception &) {
+  } catch (const std::filesystem::filesystem_error &) {
     try {
       this->closeFile();
-      Poco::File(this->getFileName()).copyTo(destFilename);
+      std::filesystem::copy_file(this->getFileName(), destFilename, std::filesystem::copy_options::overwrite_existing);
     } catch (...) {
       // if an exception happened during the copy attempt to reopen the original
       this->openFile(this->getFileName(), m_ReadOnly ? "r" : "w");

@@ -20,14 +20,13 @@ single_entry_with_detector = namedtuple("range_entry_with_detector", "entry, det
 back_single_monitor_entry = namedtuple("back_single_monitor_entry", "monitor, start, stop")
 
 # Limits
-mask_angle_entry = namedtuple("mask_angle_entry", "min, max, use_mirror")
+mask_angle_entry = namedtuple("mask_angle_entry", "min, max, use_mirror,phi_range", defaults=[-90.0, 90.0, True, []])
 simple_range = namedtuple("simple_range", "start, stop, step, step_type")
 q_xy_range = namedtuple("q_xy_range", "start, stop, step")
 complex_range = namedtuple("complex_steps", "start, step1, mid, step2, stop, step_type1, step_type2")
 rebin_string_values = namedtuple("rebin_string_values", "value")
 event_binning_string_values = namedtuple("event_binning_string_values", "value")
 q_rebin_values = namedtuple("q_rebin_values", "min, max, rebin_string")
-
 
 # Mask
 mask_line = namedtuple("mask_line", "width, angle, x, y")

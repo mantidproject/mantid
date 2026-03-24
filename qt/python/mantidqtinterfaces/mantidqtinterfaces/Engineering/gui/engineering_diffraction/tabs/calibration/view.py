@@ -22,10 +22,18 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
         self.finder_sample.setLabelText("Calibration Sample #")
         self.finder_sample.setInstrumentOverride(instrument)
 
+        self.finder_vanadium.setLabelText("Vanadium #")
+        self.finder_vanadium.setInstrumentOverride(instrument)
+        self.finder_vanadium.allowMultipleFiles(True)
+
         self.finder_path.setLabelText("Path")
         self.finder_path.isForRunFiles(False)
         self.finder_path.setEnabled(False)
         self.finder_path.setFileExtensions([".prm"])
+
+        self.finder_focus.setLabelText("Sample Run #")
+        self.finder_focus.setInstrumentOverride(instrument)
+        self.finder_focus.allowMultipleFiles(True)
 
     # =================
     # Slot Connectors
@@ -67,9 +75,14 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def set_instrument_override(self, instrument):
         self.finder_sample.setInstrumentOverride(instrument)
+        self.finder_vanadium.setInstrumentOverride(instrument)
+        self.finder_focus.setInstrumentOverride(instrument)
 
     def set_sample_enabled(self, set_to):
         self.finder_sample.setEnabled(set_to)
+
+    def set_van_enabled(self, set_to):
+        self.finder_vanadium.setEnabled(set_to)
 
     def set_path_enabled(self, set_to):
         self.finder_path.setEnabled(set_to)
@@ -85,6 +98,9 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def set_file_text_with_search(self, text: str):
         self.finder_path.setFileTextWithSearch(text)
+
+    def set_van_file_text_with_search(self, text: str):
+        self.finder_vanadium.setFileTextWithSearch(text)
 
     def set_cropping_widget_visibility(self, visible):
         self.widget_cropping.setVisible(visible)
@@ -104,6 +120,15 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def get_sample_valid(self):
         return self.finder_sample.isValid()
+
+    def get_vanadium_filename(self):
+        return self.finder_vanadium.getFirstFilename()
+
+    def get_vanadium_run(self):
+        return self.finder_vanadium.getText()
+
+    def get_vanadium_valid(self):
+        return self.finder_vanadium.isValid()
 
     def get_path_filename(self):
         return self.finder_path.getFirstFilename()
@@ -131,7 +156,7 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     # =================
 
     def is_searching(self):
-        return self.finder_sample.isSearching()
+        return self.finder_sample.isSearching() or self.finder_vanadium.isSearching() or self.finder_focus.isSearching()
 
     # =================
     # Force Actions
@@ -146,12 +171,61 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
 
     def setup_tabbing_order(self):
         self.finder_sample.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.finder_vanadium.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
         self.finder_path.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
 
         self.setTabOrder(self.radio_newCalib, self.finder_sample.focusProxy())
-        self.setTabOrder(self.finder_sample.focusProxy(), self.radio_loadCalib)
+        self.setTabOrder(self.finder_sample.focusProxy(), self.finder_vanadium.focusProxy())
+        self.setTabOrder(self.finder_vanadium.focusProxy(), self.radio_loadCalib)
         self.setTabOrder(self.radio_loadCalib, self.finder_path.focusProxy())
         self.setTabOrder(self.finder_path.focusProxy(), self.check_roiCalib)
         self.setTabOrder(self.check_roiCalib, self.widget_cropping)
         self.setTabOrder(self.widget_cropping, self.check_plotOutput)
         self.setTabOrder(self.check_plotOutput, self.button_calibrate)
+
+    # =================
+    # Focus Slot Connectors
+    # =================
+
+    def set_on_focus_clicked(self, slot):
+        self.button_focus.clicked.connect(slot)
+
+    # =================
+    # Focus Component Setters
+    # =================
+
+    def set_focus_button_enabled(self, enabled):
+        self.button_focus.setEnabled(enabled)
+
+    def set_plot_output_enabled(self, enabled):
+        self.check_plotOutput.setEnabled(enabled)
+
+    def set_region_display_text(self, text):
+        self.regionDisplay.setText(text)
+
+    # =================
+    # Focus Component Getters
+    # =================
+
+    def get_focus_filenames(self):
+        return self.finder_focus.getFilenames()
+
+    def get_focus_valid(self):
+        return self.finder_focus.isValid()
+
+    def get_focus_plot_output(self):
+        return self.check_focusPlotOutput.isChecked()
+
+    # =================
+    # Focus Internal Setup
+    # =================
+
+    def set_default_files(self, filepaths, directory):
+        if not filepaths:
+            return
+        self.finder_focus.setUserInput(",".join(filepaths))
+        if directory:
+            self.set_finder_last_directory(directory)
+
+    def set_finder_last_directory(self, directory):
+        self.finder_focus.setLastDirectory(directory)

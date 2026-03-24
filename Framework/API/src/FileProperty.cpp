@@ -367,10 +367,10 @@ std::string FileProperty::setLoadProperty(const std::string &propValue) {
         addExtension(lower, exts);
         addExtension(upper, exts);
       }
-      foundFile = FileFinder::Instance().findRun(propValue, exts).result();
+      foundFile = FileFinder::Instance().findRun(propValue, exts).result().string();
     } else // non-runfiles go through FileFinder::getFullPath
     {
-      foundFile = FileFinder::Instance().getFullPath(propValue);
+      foundFile = FileFinder::Instance().getFullPath(propValue).string();
     }
   }
 

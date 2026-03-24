@@ -24,6 +24,7 @@ set(SRC_FILES
     src/ExtractPolarizationEfficiencies.cpp
     src/FindDetectorsInShape.cpp
     src/FindDetectorsPar.cpp
+    src/FormattingHelpers.cpp
     src/GenerateGroupingPowder.cpp
     src/GenerateGroupingPowder2.cpp
     src/GroupDetectors.cpp
@@ -208,6 +209,7 @@ set(SRC_FILES
     src/SinglePeriodLoadMuonStrategy.cpp
     src/SortTableWorkspace.cpp
     src/StartAndEndTimeFromNexusFileExtractor.cpp
+    src/TranslateSampleShape.cpp
     src/UpdateInstrumentFromFile.cpp
     src/XmlHandler.cpp
     src/RotateSampleShape.cpp
@@ -246,6 +248,7 @@ set(INC_FILES
     inc/MantidDataHandling/ExtractPolarizationEfficiencies.h
     inc/MantidDataHandling/FindDetectorsInShape.h
     inc/MantidDataHandling/FindDetectorsPar.h
+    inc/MantidDataHandling/FormattingHelpers.h
     inc/MantidDataHandling/GenerateGroupingPowder.h
     inc/MantidDataHandling/GenerateGroupingPowder2.h
     inc/MantidDataHandling/GroupDetectors.h
@@ -428,6 +431,7 @@ set(INC_FILES
     inc/MantidDataHandling/SinglePeriodLoadMuonStrategy.h
     inc/MantidDataHandling/SortTableWorkspace.h
     inc/MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h
+    inc/MantidDataHandling/TranslateSampleShape.h
     inc/MantidDataHandling/UpdateInstrumentFromFile.h
     inc/MantidDataHandling/XmlHandler.h
     src/LoadRaw/byte_rel_comp.h
@@ -470,6 +474,7 @@ set(TEST_FILES
     ExtractPolarizationEfficienciesTest.h
     FindDetectorsInShapeTest.h
     FindDetectorsParTest.h
+    FormattingHelpersTest.h
     GenerateGroupingPowder2Test.h
     GenerateGroupingPowderTest.h
     GroupDetectors2Test.h
@@ -637,6 +642,7 @@ set(TEST_FILES
     SetScalingPSDTest.h
     SortTableWorkspaceTest.h
     StartAndEndTimeFromNexusFileExtractorTest.h
+    TranslateSampleShapeTest.h
     UpdateInstrumentFromFileTest.h
     XMLInstrumentParameterTest.h
     RotateSampleShapeTest.h
@@ -665,7 +671,20 @@ add_library(DataHandling ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::DataHandling ALIAS DataHandling)
 
 # Use a precompiled header
-target_precompile_headers(DataHandling PRIVATE inc/MantidDataHandling/PrecompiledHeader.h)
+target_precompile_headers(
+  DataHandling
+  PRIVATE
+  <MantidAPI/Algorithm.h>
+  <MantidDataObjects/EventWorkspace.h>
+  <MantidDataObjects/Workspace2D.h>
+  <MantidGeometry/Instrument.h>
+  <MantidNexus/NexusException.h>
+  <MantidNexus/NexusFile.h>
+  <Poco/DOM/DOMParser.h>
+  <Poco/DOM/Document.h>
+  <Poco/DOM/Element.h>
+  <Poco/DOM/NodeList.h>
+)
 
 target_include_directories(
   DataHandling PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

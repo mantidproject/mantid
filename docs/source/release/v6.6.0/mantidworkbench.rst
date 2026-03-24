@@ -2,9 +2,6 @@
 Mantid Workbench Changes
 ========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - Added button to the figure tool bar which hides the figure (unhidden using the plots tab).

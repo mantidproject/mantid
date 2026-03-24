@@ -59,7 +59,7 @@ constexpr double WAVE_TO_E = 81.8;
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadILLDiffraction)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
 
 /// Returns confidence. @see IFileLoader::confidence
 int LoadILLDiffraction::confidence(Nexus::NexusDescriptorLazy &descriptor) const {

@@ -17,8 +17,9 @@
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "Poco/Path.h"
 #include "Poco/String.h"
+
+#include <filesystem>
 
 namespace Mantid::WorkflowAlgorithms {
 
@@ -88,9 +89,9 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   progress.report("Subtracting dark current");
 
   // Look for an entry for the dark current in the reduction table
-  Poco::Path path(fileName);
-  const std::string entryName = "DarkCurrent" + path.getBaseName();
-  std::string darkWSName = "__dark_current_" + path.getBaseName();
+  std::filesystem::path path(fileName);
+  const std::string entryName = "DarkCurrent" + path.stem().string();
+  std::string darkWSName = "__dark_current_" + path.stem().string();
 
   if (reductionManager->existsProperty(entryName)) {
     darkWS = reductionManager->getProperty(entryName);

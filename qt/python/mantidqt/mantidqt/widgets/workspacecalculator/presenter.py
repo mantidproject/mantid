@@ -19,8 +19,8 @@ class WorkspaceCalculator:
 
     def __init__(self, parent=None, model=None, view=None):
         # Create model and view, or accept mocked versions
-        self.model = model if model else WorkspaceCalculatorModel()
-        self.view = view if view else WorkspaceCalculatorView(parent)
+        self.model = model or WorkspaceCalculatorModel()
+        self.view = view or WorkspaceCalculatorView(parent)
 
         self.view.pushButton.clicked.connect(self.onPressedGo)
         self.view.lhs_scaling.returnPressed.connect(self.onPressedGo)

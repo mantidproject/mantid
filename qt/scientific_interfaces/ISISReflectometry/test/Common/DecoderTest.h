@@ -23,16 +23,16 @@ namespace {
 
 const std::string DIR_PATH = "ISISReflectometry/";
 auto &fileFinder = FileFinder::Instance();
-const auto MAINWINDOW_FILE = fileFinder.getFullPath(DIR_PATH + "mainwindow.json");
-const auto BATCH_FILE_PREVIOUS = fileFinder.getFullPath(DIR_PATH + "batch_previous.json");
-const auto BATCH_FILE_V1 = fileFinder.getFullPath(DIR_PATH + "batch.json");
-const auto BATCH_FILE_POLREF = fileFinder.getFullPath(DIR_PATH + "batch_POLREF.json");
-const auto EMPTY_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "empty_batch.json");
-const auto TWO_ROW_EXP_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "batch_2_exp_rows.json");
-const auto EIGHT_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "8_col_batch.json");
-const auto NINE_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "9_col_batch.json");
-const auto TEN_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "10_col_batch.json");
-const auto ELEVEN_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "11_col_batch.json");
+const auto MAINWINDOW_FILE = fileFinder.getFullPath(DIR_PATH + "mainwindow.json").string();
+const auto BATCH_FILE_PREVIOUS = fileFinder.getFullPath(DIR_PATH + "batch_previous.json").string();
+const auto BATCH_FILE_V1 = fileFinder.getFullPath(DIR_PATH + "batch.json").string();
+const auto BATCH_FILE_POLREF = fileFinder.getFullPath(DIR_PATH + "batch_POLREF.json").string();
+const auto EMPTY_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "empty_batch.json").string();
+const auto TWO_ROW_EXP_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "batch_2_exp_rows.json").string();
+const auto EIGHT_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "8_col_batch.json").string();
+const auto NINE_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "9_col_batch.json").string();
+const auto TEN_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "10_col_batch.json").string();
+const auto ELEVEN_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "11_col_batch.json").string();
 
 } // namespace
 

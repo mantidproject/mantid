@@ -2,9 +2,8 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: 'Bug'
+labels: Bug
 assignees: ''
-
 ---
 
 <!-- Issues which impact security should have a Vulnerability label added to them -->
@@ -14,9 +13,11 @@ assignees: ''
 -->
 
 **Describe the bug**
+
 <!-- A clear and concise description of what the bug is. -->
 
 **To Reproduce**
+
 <!--Steps to reproduce the behavior:
 
 For example
@@ -27,15 +28,19 @@ For example
 -->
 
 **Expected behavior**
+
 <!-- A clear and concise description of what you expected to happen. -->
 
 **Screenshots**
+
 <!--If applicable/possible, add screenshots to help explain your problem. -->
 
 **Platform/Version (please complete the following information):**
- - OS: [e.g. Windows, RHEL 7, Ubuntu, macOS]
- - OS Version:
- - Mantid Version [e.g. 6.0.0]
+
+- OS: [e.g. Windows, RHEL 7, Ubuntu, macOS]
+- OS Version:
+- Mantid Version [e.g. 6.0.0]
 
 **Additional context**
+
 <!--Add any other context about the problem here.-->

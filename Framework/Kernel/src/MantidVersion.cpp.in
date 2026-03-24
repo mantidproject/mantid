@@ -12,31 +12,117 @@
 /********** Source = MantidVersion.cpp.in *****************************************************/
 
 #include "MantidKernel/MantidVersion.h"
-
+#include <chrono>
+#include <iostream>
+#include <regex>
 #include <sstream>
 
 namespace Mantid::Kernel {
+
+namespace {
+
+/**
+ * The input month should only be the first 3 characters of the month name
+ */
+std::chrono::month to_month(const std::string &month) {
+  if (month == "Jan")
+    return std::chrono::January;
+  else if (month == "Feb")
+    return std::chrono::February;
+  else if (month == "Mar")
+    return std::chrono::March;
+  else if (month == "Apr")
+    return std::chrono::April;
+  else if (month == "May")
+    return std::chrono::May;
+  else if (month == "Jun")
+    return std::chrono::June;
+  else if (month == "Jul")
+    return std::chrono::July;
+  else if (month == "Aug")
+    return std::chrono::August;
+  else if (month == "Sep")
+    return std::chrono::September;
+  else if (month == "Oct")
+    return std::chrono::October;
+  else if (month == "Nov")
+    return std::chrono::November;
+  else if (month == "Dec")
+    return std::chrono::December;
+  else // should never get here
+    throw std::runtime_error("Cannot convert \"" + month + "\" to a month object");
+}
+
+Types::Core::DateAndTime create_releaseDateAndTime() {
+  const std::string REVISION_DATE{"@REVISION_DATE@"};
+
+  Types::Core::DateAndTime release;
+  // cppcheck-suppress knownConditionTrueFalse
+  if (REVISION_DATE == "UNKNOWN") {
+    // something went wrong in VersionNumber.cmake so give the default constructor result
+  } else {
+    // pull apart string into year, month, and day objects
+    // WARNING if the format changes this will break and default DateAndTime is returned
+    std::regex format(R"(^.+,\s+(\d{1,2})\s+(\w{3})\s+(\d{4})\s+(.+)\s*$)");
+    std::smatch matches;
+    if (std::regex_search(REVISION_DATE, matches, format)) {
+      constexpr size_t INDEX_DAY{1};
+      constexpr size_t INDEX_MONTH{2};
+      constexpr size_t INDEX_YEAR{3};
+      constexpr size_t INDEX_TIME{4};
+
+      // day is the next element by whitespace
+      const auto day = std::chrono::day(std::stoi(matches[INDEX_DAY].str()));
+      // then comes 3 character month
+      const auto month = to_month(matches[INDEX_MONTH].str());
+      // then 4 digit year
+      const auto year = std::chrono::year(std::stoi(matches[INDEX_YEAR].str()));
+      // everything past that is time
+      std::string time = matches[INDEX_TIME].str();
+      if (time.empty()) {
+	time = "00:01"; // assume one minute past midnight
+      } else {
+	// remove whitespace that is internal to the time
+	time.erase(find_if(time.begin(), time.end(), isspace));
+      }
+
+      // create a proper chrono from it
+      std::chrono::year_month_day ymd(year, month, day);
+
+      // convert to iso8601 string to get to DateAndTime
+      std::stringstream isostr;
+      isostr << ymd << "T" << time;
+
+      // convert to a proper object
+      release.setFromISO8601(isostr.str());
+    } // otherwise it will remain the default value
+  }
+  return release;
+}
+
+const std::string DOI{"http://dx.doi.org/10.1016/j.nima.2014.07.029"};
+const std::string VERSION_FULL{"@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@VERSION_TWEAK@"};
+const std::string VERSION_SHORT{"@VERSION_MAJOR@.@VERSION_MINOR@"};
+const std::string REVISION_SHORT{"@REVISION_SHORT@"};
+const std::string REVISION_FULL{"@REVISION_FULL@"};
+const Types::Core::DateAndTime REVISION_DATE_AND_TIME = create_releaseDateAndTime();
+
+} // namespace
 
 /**
  * See buildconfig/CMake/VersionNumber.cmake for more information on the meaning
  * of the version number elements
  */
 
-const char* MantidVersion::version()
-{
-  return "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@VERSION_TWEAK@";
-}
+const std::string &MantidVersion::version() { return VERSION_FULL; }
 
-const char* MantidVersion::versionShort()
-{
-  return "@VERSION_MAJOR@.@VERSION_MINOR@";
-}
+const std::string &MantidVersion::versionShort() { return VERSION_SHORT; }
 
 const MantidVersion::VersionInfo MantidVersion::versionInfo() {
   return {"@VERSION_MAJOR@", "@VERSION_MINOR@", "@VERSION_PATCH@", "@VERSION_TWEAK@"};
 }
 
-std::string MantidVersion::versionForReleaseNotes(const VersionInfo& version) {
+std::string MantidVersion::versionForReleaseNotes(const VersionInfo &version) {
   // Convert here in those cases where patch number is of the form "20131022.1356".
   const unsigned long patchVersion = std::stoul(version.patch);
   // For major/minor/patch/rc/local releases we point users to a specific release-notes.
@@ -45,22 +131,18 @@ std::string MantidVersion::versionForReleaseNotes(const VersionInfo& version) {
 
   std::stringstream versionLabel;
 
-  if ( (patchVersion < 100 && version.tweak.empty())
-      || version.tweak[0] == '+'
-      || version.tweak.substr(0, 2) == "rc") {
+  if ((patchVersion < 100 && version.tweak.empty()) || version.tweak[0] == '+' || version.tweak.substr(0, 2) == "rc") {
     versionLabel << version.major << "." << version.minor;
     versionLabel << "." << patchVersion;
-  }
-  else {
+  } else {
     const unsigned long minorVersion = std::stoul(version.minor);
-    versionLabel << version.major << "." << minorVersion + 1  << "." << "0";
+    versionLabel << version.major << "." << minorVersion + 1 << "." << "0";
   }
 
   return versionLabel.str();
 }
 
-std::string MantidVersion::releaseNotes()
-{
+std::string MantidVersion::releaseNotes() {
   const std::string STEM = "release/v";
   const std::string END = "/index.html";
 
@@ -71,23 +153,21 @@ std::string MantidVersion::releaseNotes()
   return url.str();
 }
 
-const char* MantidVersion::revision()
-{
-  return "@REVISION_SHORT@";
+const std::string &MantidVersion::revision() { return REVISION_SHORT; }
+
+const std::string &MantidVersion::revisionFull() { return REVISION_FULL; }
+
+Types::Core::DateAndTime MantidVersion::releaseDateAndTime() {
+  return REVISION_DATE_AND_TIME;
 }
 
-const char* MantidVersion::revisionFull()
-{
-  return "@REVISION_FULL@";
+std::string MantidVersion::releaseDate() {
+  const std::string GIT_DATE_FMT("%a, %e %b %Y");
+  const auto release = releaseDateAndTime();
+  return release.toFormattedString(GIT_DATE_FMT);
 }
 
-const char* MantidVersion::releaseDate()
-{
-  return "@REVISION_DATE@";
-}
-
-std::string MantidVersion::doi()
-{
+std::string MantidVersion::doi() {
   const std::string MAIN = "http://dx.doi.org/10.5286/Software/Mantid";
   // Cast here in those cases where patch number is of the form 20131022.1356.
   const unsigned int patchVersion = static_cast<unsigned int>(@VERSION_PATCH@);
@@ -97,22 +177,20 @@ std::string MantidVersion::doi()
   // we're currently in a dev version is to check if the patch version is larger than
   // some arbitrarily low value.
   const std::string tweakVersion("@VERSION_TWEAK@");
-  if( patchVersion > 100 || !tweakVersion.empty())
+  // cppcheck-suppress knownConditionTrueFalse
+  if (patchVersion > 100 || !tweakVersion.empty())
     return MAIN;
 
   std::stringstream doi;
   doi << MAIN << @VERSION_MAJOR@ << "." << @VERSION_MINOR@;
 
   // Keep to the convention where we write a version number like "3.0.0" as "3.0".
-  if( patchVersion != 0 )
+  if (patchVersion != 0)
     doi << "." << patchVersion;
 
   return doi.str();
 }
 
-std::string MantidVersion::paperCitation()
-{
-  return "http://dx.doi.org/10.1016/j.nima.2014.07.029";
-}
+const std::string &MantidVersion::paperCitation() { return DOI; }
 
 } // namespace Mantid::Kernel

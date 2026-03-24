@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "./.github/hooks/pre-commit.sh",
+        "comment": "Run pre-commit hooks on changed files (formatting, linting, etc)",
+        "timeoutSec": 60
+      }
+    ]
+  }
+}

@@ -27,7 +27,7 @@
 #include "MantidFrameworkTestHelpers/MultiDomainFunctionHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
-#include <Poco/File.h>
+#include <filesystem>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -686,9 +686,9 @@ public:
 
   void tearDown() override {
     std::string resFileName = "ResolutionTestResolution.res";
-    Poco::File phandle(resFileName);
-    if (phandle.exists()) {
-      phandle.remove();
+    std::filesystem::path phandle(resFileName);
+    if (std::filesystem::exists(phandle)) {
+      std::filesystem::remove(phandle);
     }
   }
 

@@ -33,10 +33,10 @@ void getGroup(H5::Group groupID, std::map<std::string, std::set<std::string>> &a
    * Return the NX_class attribute associate with objectName group entry
    */
   auto lf_getNxClassAttribute = [&](H5::Group groupID) -> std::string {
-    std::string attribute = "";
+    std::string attribute = UNKNOWN_GROUP_SPEC;
 
-    if (groupID.attrExists("NX_class")) {
-      const auto attributeID = groupID.openAttribute("NX_class");
+    if (groupID.attrExists(GROUP_CLASS_SPEC)) {
+      const auto attributeID = groupID.openAttribute(GROUP_CLASS_SPEC);
       attributeID.read(attributeID.getDataType(), attribute);
     }
 
@@ -89,10 +89,6 @@ NexusDescriptor::NexusDescriptor(std::string const &filename, NXaccess access)
 const std::string &NexusDescriptor::filename() const noexcept { return m_filename; }
 
 bool NexusDescriptor::hasRootAttr(const std::string &name) const { return (m_rootAttrs.count(name) == 1); }
-
-const std::map<std::string, std::set<std::string>> &NexusDescriptor::getAllEntries() const noexcept {
-  return m_allEntries;
-}
 
 void NexusDescriptor::addRootAttr(const std::string &name) { m_rootAttrs.insert(name); }
 
@@ -171,15 +167,6 @@ bool NexusDescriptor::isEntry(const std::string &entryName, const std::string &g
 bool NexusDescriptor::isEntry(const std::string &entryName) const noexcept {
   return std::any_of(m_allEntries.rbegin(), m_allEntries.rend(),
                      [&entryName](const auto &entry) { return entry.second.count(entryName) == 1; });
-}
-
-std::vector<std::string> NexusDescriptor::allAddressesOfType(const std::string &type) const {
-  std::vector<std::string> result;
-  if (auto itClass = m_allEntries.find(type); itClass != m_allEntries.end()) {
-    result.assign(itClass->second.begin(), itClass->second.end());
-  }
-
-  return result;
 }
 
 std::map<std::string, std::string> NexusDescriptor::allAddressesAtLevel(const std::string &level) const {

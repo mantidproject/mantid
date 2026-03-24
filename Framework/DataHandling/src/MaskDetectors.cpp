@@ -498,15 +498,30 @@ void MaskDetectors::appendToDetectorListFromWS(std::vector<detid_t> &detectorLis
   const auto startIndex = std::get<0>(range_info);
   const auto endIndex = std::get<1>(range_info);
   const auto &detMap = inputWs->getDetectorIDToWorkspaceIndexMap();
-  detectorList.reserve(maskWs->getNumberHistograms());
 
+  // check if the detid is in the range of workspace indeces available
+  auto condition = [detMap, startIndex, endIndex](const auto id) {
+    const auto &wksp_index = detMap.at(id);
+    return !(wksp_index < startIndex || wksp_index > endIndex);
+  };
+
+  // count number of detectors to be added
+  size_t count = 0;
+  for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
+    if (maskWs->y(i)[0] == 0) {
+      count += maskWs->getSpectrum(i).getDetectorIDs().size();
+    }
+  }
+
+  // add the detids to mask
+  detectorList.reserve(count);
   for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
     if (maskWs->y(i)[0] == 0) {
       const auto &detIds = maskWs->getSpectrum(i).getDetectorIDs();
-      auto condition = [detMap, startIndex, endIndex](const auto id) {
-        return detMap.at(id) >= startIndex && detMap.at(id) <= endIndex;
-      };
-      std::copy_if(detIds.cbegin(), detIds.cend(), std::back_inserter(detectorList), condition);
+      for (const auto &detid : detIds) { // std::copy_if is significantly slower
+        if (condition(detid))
+          detectorList.emplace_back(detid);
+      }
     }
   }
 }

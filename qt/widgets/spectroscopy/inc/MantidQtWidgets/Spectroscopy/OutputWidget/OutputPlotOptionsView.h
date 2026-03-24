@@ -103,6 +103,7 @@ private slots:
 
 private:
   void setupView();
+  void setIndicesErrorLabelVisibleImpl(bool visible);
   QValidator *createValidator(QString const &regex);
 
   bool m_fixedIndices;

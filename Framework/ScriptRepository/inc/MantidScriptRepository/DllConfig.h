@@ -14,12 +14,10 @@
 #else
 #define SCRIPT_DLL_EXPORT DLLImport
 #endif
-#elif defined(__GNUC__) && !defined(__clang__)
+#else
 #if (IN_MANTID_SCRIPTREPO)
 #define SCRIPT_DLL_EXPORT DLLExport
 #else
 #define SCRIPT_DLL_EXPORT DLLImport
 #endif
-#else
-#define SCRIPT_DLL_EXPORT
 #endif

@@ -15,8 +15,6 @@ requirements:
     - doxygen ${{ doxygen }}
     - eigen ${{ eigen }}
     - euphonic ${{ euphonic }}
-    # remove seekpath altogether once newer euphonic is released
-    - seekpath ==2.1.0 *2
     - graphviz ${{ graphviz }}
     - gsl ${{ gsl }}
     - gtest ${{ gtest }}
@@ -28,22 +26,23 @@ requirements:
     - libboost-devel ${{ libboost }}
     - libboost-python-devel ${{ libboost }}
     - librdkafka ${{ librdkafka }}
+    - mantid-sphinx-theme ${{ mantid_sphinx_theme }}
     - matplotlib ${{ matplotlib }}
     - muparser ${{ muparser }}
+    - myst-parser ${{ mystparser }}
     - ninja ${{ ninja }}
     - numpy ${{ numpy }}
     - occt ${{ occt }}
-    - pillow ${{ pillow }}
     - pip ${{ pip }}
     - poco ${{ poco }}
     - psutil ${{ psutil }}
     - pycifrw
     - pydantic ${{ pydantic }}
+    - pyparsing ${{ pyparsing }}
     - pyqt ${{ pyqt }}
     - pyqt5-sip ${{ pyqt5_sip }}
     - pyqtwebengine
     - pystog ${{ pystog }}
-    - python-dateutil ${{ python_dateutil }}
     - python ${{ python }}
     - pyvista ${{ pyvista }}
     - pyvistaqt
@@ -61,7 +60,6 @@ requirements:
     - scipy ${{ scipy }}
     - setuptools
     - sphinx ${{ sphinx }}
-    - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
     - tbb-devel ${{ tbb }}
     - toml ${{ toml }}
     - versioningit ${{ versioningit }}
@@ -73,11 +71,9 @@ requirements:
     - pre-commit>=4.0
     - if: linux
       then:
-        - jemalloc ${{ jemalloc }}
         - lz4
         - pystack
         - qt-gtk-platformtheme
-        - texlive-core ${{ texlive_core }}
         # OpenGL implementation:
         - libgl-devel
         - gxx_linux-64 ${{ cxx_compiler_version }}
@@ -90,6 +86,12 @@ requirements:
         - xorg-libxtst>=1.2.3
         # Development tooling:
         - gcovr>=4.2
+        - mantidprofiler>=1.4,<2
+        # MPI Support
+        - mpi
+        - mpi4py
+        - libboost-mpi
+        - mpich
     - if: win
       then:
         - conda-wrappers

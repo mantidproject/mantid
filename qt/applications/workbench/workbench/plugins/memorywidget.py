@@ -22,7 +22,7 @@ class MemoryWidget(PluginWidget):
     def __init__(self, parent, view=None):
         super(MemoryWidget, self).__init__(parent)
 
-        self.view = view if view else MemoryView(self)
+        self.view = view or MemoryView(self)
         self.presenter = MemoryPresenter(self.view)
 
         layout = QVBoxLayout()

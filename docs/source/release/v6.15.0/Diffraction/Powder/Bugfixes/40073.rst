@@ -1,1 +1,0 @@
-- Disabled StripVanadiumPeaks in ref:`SNSPowderReduction <algm-SNSPowderReduction>`'s test, "SNSPowderRedux.PG3Analysis" because it was causing stochastic test failures on ornl runners and contributed little to the test's purpose.

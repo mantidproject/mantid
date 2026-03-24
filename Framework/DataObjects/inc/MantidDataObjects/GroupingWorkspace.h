@@ -9,6 +9,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDTypes.h"
+#include <vector>
 
 namespace Mantid {
 namespace DataObjects {
@@ -27,6 +29,14 @@ public:
   GroupingWorkspace(const Geometry::Instrument_const_sptr &inst);
   GroupingWorkspace() = default;
   GroupingWorkspace(size_t numvectors);
+  /**
+   * Constructor, building from a list of detector IDs.
+   * Creates one spectrum per detector ID and associates each spectrum with its
+   * corresponding detector ID.
+   * @param detids :: vector of detector IDs, one per spectrum
+   */
+  inline GroupingWorkspace(const std::vector<detid_t> &detids) : SpecialWorkspace2D(detids) {}
+
   GroupingWorkspace &operator=(const GroupingWorkspace &) = delete;
 
   /// Returns a clone of the workspace
@@ -42,8 +52,8 @@ public:
   void makeDetectorIDToGroupMap(std::map<detid_t, int> &detIDToGroup, int64_t &ngroups) const;
   void makeDetectorIDToGroupVector(std::vector<int> &detIDToGroup, int64_t &ngroups) const;
   int getTotalGroups() const;
-  std::vector<int> getGroupIDs() const;
-  std::vector<int> getDetectorIDsOfGroup(const int groupID) const;
+  std::vector<int> getGroupIDs(const bool includeUnsetGroup = true) const;
+  std::vector<detid_t> getDetectorIDsOfGroup(const int groupID) const;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -63,3 +73,12 @@ using GroupingWorkspace_const_sptr = std::shared_ptr<const GroupingWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid
+
+#ifndef DataObjects_EXPORTS
+#include "MantidAPI/WorkspaceProperty.h"
+namespace Mantid::API {
+/// @cond
+extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::GroupingWorkspace>;
+/// @endcond
+} // namespace Mantid::API
+#endif

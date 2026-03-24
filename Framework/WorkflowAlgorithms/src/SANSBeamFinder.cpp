@@ -17,8 +17,9 @@
 #include "MantidWorkflowAlgorithms/HFIRInstrument.h"
 
 #include "Poco/NumberFormatter.h"
-#include "Poco/Path.h"
 #include "Poco/String.h"
+
+#include <filesystem>
 
 namespace Mantid::WorkflowAlgorithms {
 
@@ -52,8 +53,8 @@ void SANSBeamFinder::init() {
 }
 
 MatrixWorkspace_sptr SANSBeamFinder::loadBeamFinderFile(const std::string &beamCenterFile) {
-  Poco::Path path(beamCenterFile);
-  const std::string entryName = "SANSBeamFinder" + path.getBaseName();
+  std::filesystem::path path(beamCenterFile);
+  const std::string entryName = "SANSBeamFinder" + path.stem().string();
   const std::string reductionManagerName = getProperty("ReductionProperties");
 
   MatrixWorkspace_sptr finderWS;
@@ -63,7 +64,7 @@ MatrixWorkspace_sptr SANSBeamFinder::loadBeamFinderFile(const std::string &beamC
     m_output_message += "   |Using existing workspace: " + finderWS->getName() + '\n';
   } else {
     // Load the dark current if we don't have it already
-    std::string finderWSName = "__beam_finder_" + path.getBaseName();
+    std::string finderWSName = "__beam_finder_" + path.stem().string();
 
     if (!m_reductionManager->existsProperty("LoadAlgorithm")) {
       auto loadAlg = createChildAlgorithm("EQSANSLoad", 0.1, 0.3);
@@ -143,9 +144,9 @@ void SANSBeamFinder::exec() {
 
   // Check whether we already know the position
   const std::string beamCenterFile = getProperty("Filename");
-  Poco::Path path(beamCenterFile);
-  const std::string entryNameX = "SANSBeamFinder_X_" + path.getBaseName();
-  const std::string entryNameY = "SANSBeamFinder_Y_" + path.getBaseName();
+  std::filesystem::path path(beamCenterFile);
+  const std::string entryNameX = "SANSBeamFinder_X_" + path.stem().string();
+  const std::string entryNameY = "SANSBeamFinder_Y_" + path.stem().string();
 
   // If the beam enter was provided, simply add it to the reduction
   // property manager for other algorithms to find it

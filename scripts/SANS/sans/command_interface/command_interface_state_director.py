@@ -535,7 +535,8 @@ class CommandInterfaceStateDirector(object):
         phi_min = command.values[0]
         phi_max = command.values[1]
         use_phi_mirror = command.values[2]
-        new_state_entries = {LimitsId.ANGLE: mask_angle_entry(min=phi_min, max=phi_max, use_mirror=use_phi_mirror)}
+        phi_range = command.values[3]
+        new_state_entries = {LimitsId.ANGLE: mask_angle_entry(min=phi_min, max=phi_max, use_mirror=use_phi_mirror, phi_range=phi_range)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_wavelength_correction_file(self, command):
@@ -610,8 +611,8 @@ class CommandInterfaceStateDirector(object):
         # something is wrong
         if self._processed_state_obj and self._processed_state_obj.wavelength:
             existing_wavelength = self._processed_state_obj.wavelength
-            new_wav_min = wav_min if wav_min else existing_wavelength.wavelength_interval.wavelength_full_range[0]
-            new_wav_max = wav_max if wav_max else existing_wavelength.wavelength_interval.wavelength_full_range[1]
+            new_wav_min = wav_min or existing_wavelength.wavelength_interval.wavelength_full_range[0]
+            new_wav_max = wav_max or existing_wavelength.wavelength_interval.wavelength_full_range[1]
 
             if wav_min is not None or wav_max is not None:
                 step, step_type = self._process_wavrange_lists(new_wav_min, new_wav_max, existing_wavelength)

@@ -24,14 +24,13 @@ from testhelpers import run_algorithm
 class ExportSampleLogsToHDF5Test(unittest.TestCase):
     ALG_NAME = "ExportSampleLogsToHDF5"
     TEST_WS_NAME = "SampleWorkspace"
-    TEMP_FILE_NAME = os.path.join(tempfile.gettempdir(), "ExportSampleLogsToHDF5Test.hdf5")
+
+    def setUp(self):
+        self.TEMP_DIR = tempfile.TemporaryDirectory()
+        self.TEMP_FILE_NAME = os.path.join(self.TEMP_DIR.name, "ExportSampleLogsToHDF5Test.hdf5")
 
     def tearDown(self):
-        try:
-            os.remove(self.TEMP_FILE_NAME)
-
-        except OSError:
-            pass
+        self.TEMP_DIR.cleanup()
 
         if mantid.mtd.doesExist(self.TEST_WS_NAME):
             mantid.mtd.remove(self.TEST_WS_NAME)

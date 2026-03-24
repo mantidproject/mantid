@@ -164,6 +164,11 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         self.assertAlmostEqual(col, 4)
         self.assertAlmostEqual(row, 2)
 
+    def test_removePeaks(self):
+        pws = WorkspaceCreationHelper.createPeaksWorkspace(5)
+        pws.removePeaks([2, 3, 4])
+        self.assertEqual(pws.getNumberPeaks(), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

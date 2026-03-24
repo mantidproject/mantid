@@ -12,9 +12,6 @@ Mantid 4.0.0 Release Notes
    Overview of the MantidWorkbench
 
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 4.0.0 of Mantid.
 
 

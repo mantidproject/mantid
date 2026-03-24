@@ -49,7 +49,7 @@ class BayesStretch2(QuickBayesTemplate):
             name="StartFWHM", defaultValue=0.01, doc="Start of FWHM values", validator=FloatBoundedValidator(lower=0.0, upper=1.0)
         )
         self.declareProperty(
-            name="EndFWHM", defaultValue=0.1, doc="End of FWHM values", validator=FloatBoundedValidator(lower=0.0, upper=1.0)
+            name="EndFWHM", defaultValue=0.2, doc="End of FWHM values", validator=FloatBoundedValidator(lower=0.0, upper=1.0)
         )
 
         super().PyInit()

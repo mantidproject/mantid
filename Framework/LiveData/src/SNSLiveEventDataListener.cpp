@@ -75,8 +75,10 @@ namespace Mantid::LiveData {
 DECLARE_LISTENER(SNSLiveEventDataListener)
 
 namespace {
+
 /// static logger
 Kernel::Logger g_log("SNSLiveEventDataListener");
+
 } // namespace
 
 /// Constructor
@@ -91,9 +93,7 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
   initWorkspacePart1();
 
   // Initialize m_keepPausedEvents from the config file.
-  // NOTE: To the best of my knowledge, the existence of this property is not
-  // documented anywhere and this lack of documentation is deliberate.
-  auto keepPausedEvents = ConfigService::Instance().getValue<bool>("livelistener.keeppausedevents");
+  auto keepPausedEvents = ConfigService::Instance().getValue<bool>("SNSLiveEventDataListener.keepPausedEvents");
 
   // If the property hasn't been set, assume false
   m_keepPausedEvents = keepPausedEvents.value_or(false);
@@ -126,7 +126,7 @@ SNSLiveEventDataListener::~SNSLiveEventDataListener() {
 /// Connect to the SMS daemon.
 
 /// Attempts to connect to the SMS daemon at the specified address.  Note:
-/// if the address is '0.0.0.0', it looks on localhost:31415 (useful for
+/// if the address hasn't been set, it uses the "testaddress" (useful for
 /// debugging and testing).
 /// @param address The address to attempt to connect to
 /// @return Returns true if the connection succeeds.  False otherwise.
@@ -138,30 +138,42 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
 // and it doesn't check the return value.  (It does, however, trap the Poco
 // exceptions.)
 {
-  // If we don't have an address, force a connection to the test server running
-  // on
-  // localhost on the default port
-  if (address.host().toString() == "0.0.0.0") {
-    Poco::Net::SocketAddress tempAddress("localhost:31415");
+  // If we don't have an address, make a connection to the test server running
+  //   on localhost on the default port.
+  if (address == Poco::Net::SocketAddress()) {
+    // WARNING: check the config setting: system admin may not allow loopback!
+    const auto maybeTestAddress =
+        ConfigService::Instance().getValue<std::string>("SNSLiveEventDataListener.testAddress");
+    if (!maybeTestAddress.has_value())
+      throw std::runtime_error("SNSLiveEventDataListener: 'testAddress' is not set in `Config`");
+    Poco::Net::SocketAddress testAddress(maybeTestAddress.value());
+
     try {
-      m_socket.connect(tempAddress); // BLOCKING connect
+      m_socket.connect(testAddress); // BLOCKING connect
     } catch (...) {
-      g_log.error() << "Connection to " << tempAddress.toString() << " failed.\n";
+      g_log.error() << "Connection to " << testAddress.toString() << " failed.\n";
       return false;
     }
   } else {
     try {
       m_socket.connect(address); // BLOCKING connect
+    } catch (const Poco::Exception &e) {
+      g_log.error() << "POCO Exception in connect(): " << e.displayText();
+      return false;
+    } catch (const std::exception &e) {
+      g_log.error() << "STD Exception in connect(): " << e.what() << ": "
+                    << " type: " << typeid(e).name();
+      return false;
     } catch (...) {
-      g_log.debug() << "Connection to " << address.toString() << " failed.\n";
+      g_log.error() << "Unknown exception in connect()";
       return false;
     }
   }
 
   m_socket.setReceiveTimeout(Poco::Timespan(RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
   g_log.debug() << "Connected to " << m_socket.address().toString() << '\n';
-
   m_isConnected = true;
+
   return true;
 }
 
@@ -217,7 +229,8 @@ void SNSLiveEventDataListener::run() {
     // to update the StartLiveListener GUI, though.
 
     Poco::Timestamp now;
-    auto now_usec = static_cast<uint32_t>(now.epochMicroseconds() - now.epochTime());
+    uint32_t now_usec = static_cast<uint32_t>(now.epochMicroseconds() % 1000000);
+
     helloPkt[2] = static_cast<uint32_t>(now.epochTime() - ADARA::EPICS_EPOCH_OFFSET);
     helloPkt[3] = now_usec * 1000;
     helloPkt[4] = static_cast<uint32_t>(m_startTime.totalNanoseconds() /
@@ -743,6 +756,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     // disconnect us.
     // This flag will be cleared down in runStatus(), which is guaranteed to be
     // called after extractData().
+
     m_pauseNetRead = true;
 
     // Set the run number & start time if we don't already have it
@@ -1061,12 +1075,18 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
               // in the middle of a run (after the call to initWorkspacePart2),
               // so we really do need to the lock the mutex here.
               std::lock_guard<std::mutex> scopedLock(m_mutex);
-              m_eventBuffer->mutableRun().addLogData(prop);
-            }
+              if (m_eventBuffer->run().hasProperty(pvName)) {
+                g_log.error() << "Ignoring duplicate process variable " << pvName << " for devId=" << pkt.devId()
+                              << ", pvId=" << pvIdNum << "; skipping.\n";
+                delete prop;
+              } else {
+                m_eventBuffer->mutableRun().addLogData(prop);
 
-            // Add the pv id, device id and pv name to the name map so we can
-            // find the name when we process the variable value packets
-            m_nameMap[std::make_pair(pkt.devId(), pvIdNum)] = pvName;
+                // Add the pv id, device id and pv name to the name map so we can
+                // find the name when we process the variable value packets
+                m_nameMap[std::make_pair(pkt.devId(), pvIdNum)] = pvName;
+              }
+            }
           }
         }
       }

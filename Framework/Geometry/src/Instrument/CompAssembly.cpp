@@ -101,7 +101,7 @@ int CompAssembly::add(IComponent *comp) {
 
   if (comp) {
     comp->setParent(this);
-    m_children.emplace_back(comp);
+    m_children.emplace_back(std::move(comp));
   }
   return static_cast<int>(m_children.size());
 }

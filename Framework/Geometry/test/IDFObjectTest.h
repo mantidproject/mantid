@@ -11,13 +11,13 @@
 #include "MantidKernel/ConfigService.h"
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DigestStream.h>
-#include <Poco/Path.h>
 #include <Poco/SHA1Engine.h>
 #include <Poco/String.h>
 #include <Poco/Thread.h>
 #include <cxxtest/TestSuite.h>
 
 #include <boost/regex.hpp>
+#include <filesystem>
 
 using Mantid::Geometry::IDFObject;
 using Mantid::Kernel::ConfigService;
@@ -50,17 +50,18 @@ public:
   }
 
   void testGetParentDirectory() {
-    const Poco::Path expectedDir = Poco::Path(ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/");
-    std::string filename = expectedDir.toString() + "IDF_for_UNIT_TESTING.xml";
+    const std::filesystem::path expectedDir =
+        std::filesystem::path(ConfigService::Instance().getInstrumentDirectory()) / "unit_testing";
+    std::string filename = (expectedDir / "IDF_for_UNIT_TESTING.xml").string();
     IDFObject obj(filename);
-    TS_ASSERT_EQUALS(expectedDir.toString(), obj.getParentDirectory().toString());
+    TS_ASSERT_EQUALS(expectedDir, obj.getParentDirectory());
   }
 
   void testGetFullPath() {
     const std::string filename =
         ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename);
-    TS_ASSERT_EQUALS(Poco::Path(filename).toString(), obj.getFileFullPath().toString());
+    TS_ASSERT_EQUALS(std::filesystem::path(filename), obj.getFileFullPath());
   }
 
   void testGetExtension() {
@@ -81,7 +82,7 @@ public:
     const std::string filename =
         ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/IDF_for_UNIT_TESTING.xml";
 
-    Poco::Path path(filename);
+    std::filesystem::path path(filename);
 
     using Poco::DigestEngine;
     using Poco::DigestOutputStream;
@@ -112,8 +113,8 @@ public:
     outstr << contents;
     outstr.flush(); // to pass everything to the digest engine
 
-    auto head = path.getFileName();
-    auto tail = DigestEngine::digestToHex(sha1.digest());
+    auto const head = path.filename().string();
+    auto const tail = DigestEngine::digestToHex(sha1.digest());
 
     IDFObject obj(filename);
 
@@ -124,6 +125,6 @@ public:
     const std::string filename =
         ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename);
-    TS_ASSERT_EQUALS(Poco::Path(filename).toString(), obj.getFileFullPathStr());
+    TS_ASSERT_EQUALS(std::filesystem::path(filename).string(), obj.getFileFullPathStr());
   }
 };

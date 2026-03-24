@@ -164,7 +164,7 @@ class TiledPlotsTest(TestCase):
 
     def _create_plot(self, names, errors, overplot, wksp_indices=None, plot_type=SpectraSelection.Tiled, fig=None):
         selection = SpectraSelection(names)
-        selection.wksp_indices = wksp_indices if wksp_indices else [0]
+        selection.wksp_indices = wksp_indices or [0]
         selection.plot_type = plot_type
         self.get_spectra_selection_mock.return_value = selection
 

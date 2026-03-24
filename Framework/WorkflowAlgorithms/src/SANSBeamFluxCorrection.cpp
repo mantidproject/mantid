@@ -12,6 +12,8 @@
 #include "MantidKernel/PropertyManager.h"
 #include "Poco/Path.h"
 
+#include <filesystem>
+
 namespace Mantid::WorkflowAlgorithms {
 
 using namespace Kernel;
@@ -104,9 +106,9 @@ void SANSBeamFluxCorrection::exec() {
  */
 MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
   const std::string referenceFluxFile = getPropertyValue("ReferenceFluxFilename");
-  Poco::Path path(referenceFluxFile);
-  const std::string entryName = "SANSBeamFluxCorrection_" + path.getBaseName();
-  std::string fluxRefWSName = "__beam_flux_reference_" + path.getBaseName();
+  std::filesystem::path path(referenceFluxFile);
+  const std::string entryName = "SANSBeamFluxCorrection_" + path.stem().string();
+  std::string fluxRefWSName = "__beam_flux_reference_" + path.stem().string();
 
   // Load reference flux as needed
   MatrixWorkspace_sptr fluxRefWS;

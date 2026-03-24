@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #
-from Engineering.texture.polefigure.polefigure_model import TextureProjection, ster_proj, azim_proj
+from Engineering.texture.polefigure.polefigure_model import TextureProjection
+from Engineering.texture.texture_helper import ster_proj, azim_proj
 from mantid.kernel import logger
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import Load
@@ -28,6 +29,7 @@ class ProjectionModel(TextureProjection):
         self.grouping = None
         self.plot_exp = None
         self.contour_kernel = None
+        self.combined_ws = None
 
     # loading logic
 
@@ -52,6 +54,7 @@ class ProjectionModel(TextureProjection):
             wss,
             params,
             self.get_out_ws(),
+            self.get_combined_ws(),
             self.get_hkl(),
             self.get_inc_scatt(),
             self.get_scat_vol_pos(),
@@ -138,7 +141,7 @@ class ProjectionModel(TextureProjection):
     # setters
 
     def set_out_ws_and_grouping(self, wss, params):
-        self.out_ws, self.grouping = self.get_pf_table_name(wss, params, self.hkl, self.readout_col)
+        self.out_ws, self.combined_ws, self.grouping = self.get_pf_output_names(wss, params, self.hkl, self.readout_col)
 
     def set_hkl(self, hkl):
         self.hkl = self.parse_hkl(*hkl) if self.inc_scatt else None
@@ -180,6 +183,9 @@ class ProjectionModel(TextureProjection):
 
     def get_out_ws(self):
         return self.out_ws
+
+    def get_combined_ws(self):
+        return self.combined_ws
 
     def get_grouping(self):
         return self.grouping

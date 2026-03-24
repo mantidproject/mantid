@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-
+#include "MantidTypes/Core/DateAndTime.h"
 #include <string>
 
 namespace Mantid {
@@ -27,15 +27,16 @@ public:
     std::string tweak;
   };
 
-  static const char *version();           ///< The full version number
-  static const char *versionShort();      ///< The version number of the last full version
-  static const VersionInfo versionInfo(); ///< A data structure containing the full version info.
-  static std::string releaseNotes();      ///< The url to the most applicable release notes
-  static const char *revision();          ///< The abbreviated SHA-1 of the last commit
-  static const char *revisionFull();      ///< The full SHA-1 of the last commit
-  static const char *releaseDate();       ///< The date of the last commit
-  static std::string doi();               ///< The DOI for this release of Mantid.
-  static std::string paperCitation();     ///< The citation for the Mantid paper
+  static const std::string &version();                  ///< The full version number
+  static const std::string &versionShort();             ///< The version number of the last full version
+  static const VersionInfo versionInfo();               ///< A data structure containing the full version info.
+  static std::string releaseNotes();                    ///< The url to the most applicable release notes
+  static const std::string &revision();                 ///< The abbreviated SHA-1 of the last commit
+  static const std::string &revisionFull();             ///< The full SHA-1 of the last commit
+  static Types::Core::DateAndTime releaseDateAndTime(); ///< The DateAndTime of the last commit
+  static std::string releaseDate();                     ///< The date of the last commit
+  static std::string doi();                             ///< The DOI for this release of Mantid.
+  static const std::string &paperCitation();            ///< The citation for the Mantid paper
   static std::string versionForReleaseNotes(const VersionInfo &); ///< The version of mantid for the release notes url.
 
 private:

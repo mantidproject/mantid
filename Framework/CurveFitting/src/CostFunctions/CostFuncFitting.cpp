@@ -9,12 +9,11 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidCurveFitting/EigenFunctions.h"
 #include "MantidCurveFitting/EigenJacobian.h"
-#include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidKernel/Exception.h"
 
-#include <gsl/gsl_multifit_nlin.h>
 #include <limits>
 #include <utility>
 
@@ -132,15 +131,8 @@ void CostFuncFitting::calActiveCovarianceMatrix(EigenMatrix &covar, double epsre
   // calculate the derivatives
   m_function->functionDeriv(*m_domain, J);
 
-  // let the GSL to compute the covariance matrix
-  EigenMatrix covarTr(covar.tr());
-  EigenMatrix tempJTr;
-  tempJTr = j.transpose();
-  gsl_matrix_const_view tempJTrGSL = getGSLMatrixView_const(tempJTr.inspector());
-  gsl_matrix_view covarTrGSL = getGSLMatrixView(covarTr.mutator());
-
-  gsl_multifit_covar(&tempJTrGSL.matrix, epsrel, &covarTrGSL.matrix);
-  covar = covarTr.tr();
+  // let Eigen compute the covariance matrix
+  covar = covar_from_jacobian(j, epsrel);
 }
 
 /** Calculates covariance matrix

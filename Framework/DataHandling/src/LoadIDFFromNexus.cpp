@@ -42,21 +42,19 @@ void LoadIDFFromNexus::init() {
                   "The name of the workspace in which to attach the imported instrument");
 
   const std::vector<std::string> exts{".nxs", ".nxs.h5"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-                  "The name (including its full or relative path) of the Nexus file to "
-                  "attempt to load the instrument from.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The name (including its full or relative path) of the Nexus file to attempt to load the instrument from.");
 
-  declareProperty("InstrumentParentPath", std::string(""),
-                  "Path name within the Nexus tree of the folder containing "
-                  "the instrument folder. "
-                  "For example it is 'raw_data_1' for an ISIS raw Nexus file "
-                  "and 'mantid_workspace_1' for a processed nexus file. "
-                  "Only a one level path is curently supported",
-                  Direction::Input);
+  declareProperty(
+      "InstrumentParentPath", std::string(""),
+      "Path name within the Nexus tree of the folder containing the instrument folder. "
+      "For example it is 'raw_data_1' for an ISIS raw Nexus file and 'mantid_workspace_1' for a processed nexus file. "
+      "Only a one level path is curently supported",
+      Direction::Input);
   declareProperty("ParameterCorrectionFilePath", std::string(""),
                   "Full path name of Parameter Correction file. "
-                  "This should only be used in a situation,"
-                  "where the default full file path is inconvenient.",
+                  "This should only be used in a situation,where the default full file path is inconvenient.",
                   Direction::Input);
 }
 
@@ -253,11 +251,11 @@ void LoadIDFFromNexus::LoadParameters(Nexus::File *nxfile, const MatrixWorkspace
     // No parameters have been found in Nexus file, so we look for them in a
     // parameter file.
     std::vector<std::string> directoryNames = ConfigService::Instance().getInstrumentDirectories();
-    const std::string instrumentName = localWorkspace->getInstrument()->getName();
+    const std::string instrParameterFileName = localWorkspace->getInstrument()->getName() + "_Parameters.xml";
     for (const auto &directoryName : directoryNames) {
-      // This will iterate around the directories from user ->etc ->install, and
-      // find the first appropriate file
-      const std::string paramFile = directoryName + instrumentName + "_Parameters.xml";
+      // This will iterate around the directories from user->etc->install, and find the first appropriate file
+      const std::filesystem::path direc(directoryName);
+      const std::string paramFile = (direc / instrParameterFileName).string();
 
       // Attempt to load specified file, if successful, use file and stop
       // search.
@@ -275,7 +273,6 @@ void LoadIDFFromNexus::LoadParameters(Nexus::File *nxfile, const MatrixWorkspace
 // Private function to load parameter file specified by a full path name into
 // given workspace, returning success.
 bool LoadIDFFromNexus::loadParameterFile(const std::string &fullPathName, const MatrixWorkspace_sptr &localWorkspace) {
-
   try {
     // load and also populate instrument parameters from this 'fallback'
     // parameter file

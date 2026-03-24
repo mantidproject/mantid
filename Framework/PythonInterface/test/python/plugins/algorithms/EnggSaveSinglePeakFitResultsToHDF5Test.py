@@ -18,14 +18,13 @@ class EnggSaveSinglePeakFitResultsToHDF5Test(unittest.TestCase):
     ALG_NAME = "EnggSaveSinglePeakFitResultsToHDF5"
     FIT_PARAMS = ["dSpacing", "A0", "A0_Err", "A1", "A1_Err", "X0", "X0_Err", "A", "A_Err", "B", "B_Err", "S", "S_Err", "I", "I_Err", "Chi"]
     FIT_RESULTS_TABLE_NAME = "FitResults"
-    TEMP_FILE_NAME = os.path.join(tempfile.gettempdir(), "EnggSaveSinglePeakFitResultsToHDF5Test.hdf5")
+
+    def setUp(self):
+        self.TEMP_DIR = tempfile.TemporaryDirectory()
+        self.TEMP_FILE_NAME = os.path.join(self.TEMP_DIR.name, "EnggSaveSinglePeakFitResultsToHDF5Test.hdf5")
 
     def tearDown(self):
-        try:
-            os.remove(self.TEMP_FILE_NAME)
-
-        except OSError:
-            pass
+        self.TEMP_DIR.cleanup()
 
         if mantid.mtd.doesExist(self.FIT_RESULTS_TABLE_NAME):
             mantid.mtd.remove(self.FIT_RESULTS_TABLE_NAME)

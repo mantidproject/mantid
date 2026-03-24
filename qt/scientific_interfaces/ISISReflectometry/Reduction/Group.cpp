@@ -15,7 +15,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Group::Group(std::string name, std::vector<std::optional<Row>> rows)
     : m_name(std::move(name)), m_postprocessedWorkspaceName(), m_rows(std::move(rows)) {
-  setAllRowParents();
+  setAllRowParentsImpl();
 }
 
 Group::Group(
@@ -26,24 +26,24 @@ Group::Group(
 Group::Group(const Group &old_group)
     : IGroup(old_group), m_name(old_group.m_name), m_postprocessedWorkspaceName(old_group.m_postprocessedWorkspaceName),
       m_rows(old_group.m_rows) {
-  setAllRowParents();
+  setAllRowParentsImpl();
 }
 
 Group::Group(Group &&old_group) noexcept {
   swap(*this, old_group);
-  setAllRowParents();
+  setAllRowParentsImpl();
 }
 
 Group &Group::operator=(Group &&old_group) noexcept {
   swap(*this, old_group);
-  setAllRowParents();
+  setAllRowParentsImpl();
   return *this;
 }
 
 Group &Group::operator=(Group const &old_group) {
   Group group_copy(old_group);
   swap(*this, group_copy);
-  setAllRowParents();
+  setAllRowParentsImpl();
   return *this;
 }
 
@@ -244,7 +244,9 @@ int Group::completedItems() const {
   });
 }
 
-void Group::setAllRowParents() {
+void Group::setAllRowParents() { setAllRowParentsImpl(); }
+
+void Group::setAllRowParentsImpl() {
   std::for_each(m_rows.cbegin(), m_rows.cend(), [this](std::optional<Row> const &row) {
     if (row)
       row->setParent(this);

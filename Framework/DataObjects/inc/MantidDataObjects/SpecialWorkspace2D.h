@@ -33,6 +33,7 @@ public:
   SpecialWorkspace2D() = default;
   SpecialWorkspace2D(const Geometry::Instrument_const_sptr &inst, const bool includeMonitors = false);
   SpecialWorkspace2D(const API::MatrixWorkspace_const_sptr &parent);
+  SpecialWorkspace2D(const std::vector<detid_t> &detids);
 
   /// Returns a clone of the workspace
   std::unique_ptr<SpecialWorkspace2D> clone() const { return std::unique_ptr<SpecialWorkspace2D>(doClone()); }
@@ -95,3 +96,12 @@ using SpecialWorkspace2D_const_sptr = std::shared_ptr<const SpecialWorkspace2D>;
 
 } // namespace DataObjects
 } // namespace Mantid
+
+#ifndef DataObjects_EXPORTS
+#include "MantidAPI/WorkspaceProperty.h"
+namespace Mantid::API {
+/// @cond
+extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::SpecialWorkspace2D>;
+/// @endcond
+} // namespace Mantid::API
+#endif

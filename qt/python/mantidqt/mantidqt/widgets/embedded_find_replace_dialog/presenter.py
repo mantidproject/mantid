@@ -16,7 +16,7 @@ class SearchDirection(Enum):
 
 class EmbeddedFindReplaceDialog(object):
     def __init__(self, parent, editor, view=None):
-        self.view = view if view else EmbeddedFindReplaceDialogView(parent, self)
+        self.view = view or EmbeddedFindReplaceDialogView(parent, self)
         self.editor = editor
 
         self.visible = False

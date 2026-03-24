@@ -7,7 +7,7 @@
 import unittest
 from mantid.api import mtd, AnalysisDataService
 from mantid.kernel import config
-from mantid.simpleapi import DeleteWorkspace, LoadEmptyInstrument, MaskBTP
+from mantid.simpleapi import ClearMaskFlag, DeleteWorkspace, LoadEmptyInstrument, MaskBTP
 from testhelpers import WorkspaceCreationHelper
 from numpy import concatenate, arange, sort, array_equal, where
 
@@ -283,6 +283,72 @@ class MaskBTPTest(unittest.TestCase):
 
         self.assertEqual(len(mask), 256 * 32 * 2)
         self.checkConsistentMask(ws, mask)
+
+    def testHB3AMaskBTP(self):
+        ws_name = "hb3a"
+        LoadEmptyInstrument(InstrumentName="HB3A", OutputWorkspace=ws_name)
+        wksp = mtd[ws_name]
+
+        # Test masking individual bank 1 (512*512 pixels)
+        masked_bank1 = MaskBTP(Workspace=ws_name, Bank="1")
+        self.assertEqual(len(masked_bank1), 512 * 512)
+        self.checkConsistentMask(wksp, masked_bank1)
+
+        # Reload to start fresh
+        LoadEmptyInstrument(InstrumentName="HB3A", OutputWorkspace=ws_name)
+
+        # Test masking bank 2
+        masked_bank2 = MaskBTP(Workspace=ws_name, Bank="2")
+        self.assertEqual(len(masked_bank2), 512 * 512)
+        self.checkConsistentMask(wksp, masked_bank2)
+
+        # Reload to start fresh
+        LoadEmptyInstrument(InstrumentName="HB3A", OutputWorkspace=ws_name)
+
+        # Test masking multiple banks (all 3 banks)
+        masked_banks = MaskBTP(Workspace=ws_name, Bank="1-3")
+        self.assertEqual(len(masked_banks), 3 * 512 * 512)
+        self.checkConsistentMask(wksp, masked_banks)
+
+        # Reload to start fresh
+        LoadEmptyInstrument(InstrumentName="HB3A", OutputWorkspace=ws_name)
+
+        # Test masking specific pixels (first 10 pixels in all banks)
+        masked_pixels = MaskBTP(Workspace=ws_name, Pixel="0-9")
+        # 10 pixels * 512 tubes * 3 banks
+        self.assertEqual(len(masked_pixels), 10 * 512 * 3)
+        self.checkConsistentMask(wksp, masked_pixels)
+
+        DeleteWorkspace(ws_name)
+
+    def testIMAGINEMaskBTP(self):
+        ws_name = mtd.unique_hidden_name()
+        LoadEmptyInstrument(InstrumentName="IMAGINE", OutputWorkspace=ws_name)
+        wksp = mtd[ws_name]
+
+        # Test masking individual bank 11 (512*512 pixels)
+        masked_bank11 = MaskBTP(Workspace=ws_name, Bank="11")
+        self.assertEqual(len(masked_bank11), 512 * 512)
+        self.checkConsistentMask(wksp, masked_bank11)
+
+        # Clear mask to start fresh
+        ClearMaskFlag(Workspace=ws_name)
+
+        # Test masking multiple banks (banks 11-18, first series)
+        masked_banks = MaskBTP(Workspace=ws_name, Bank="11-18")
+        self.assertEqual(len(masked_banks), 8 * 512 * 512)
+        self.checkConsistentMask(wksp, masked_banks)
+
+        # Clear mask to start fresh
+        ClearMaskFlag(Workspace=ws_name)
+
+        # Test masking specific pixels (first 10 pixels in all banks, 0-indexed)
+        masked_pixels = MaskBTP(Workspace=ws_name, Pixel="0-9")
+        # 10 pixels * 512 tubes * 80 banks
+        self.assertEqual(len(masked_pixels), 10 * 512 * 80)
+        self.checkConsistentMask(wksp, masked_pixels)
+
+        DeleteWorkspace(ws_name)
 
 
 if __name__ == "__main__":

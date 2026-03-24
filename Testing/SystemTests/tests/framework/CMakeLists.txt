@@ -140,6 +140,7 @@ set(SYSTEST_NAMES
     MDNormHYSPECTest.py
     MDWorkspaceTests.py
     MonteCarloAbsorptionCorrTest.py
+    MPIAlgorithmsExecuteTest.py
     MRFilterCrossSectionsTest.py
     MultiThreadedLoadNeXusTest.py
     MuonFFTTest.py
@@ -162,6 +163,7 @@ set(SYSTEST_NAMES
     POLDIFitPeaks2DTest.py
     POLDILoadRunsTest.py
     POLDIMergeTest.py
+    POLDIPawleyTest.py
     POLDIPeakSearchTest.py
     POLDITruncateDataTest.py
     PolrefExample.py

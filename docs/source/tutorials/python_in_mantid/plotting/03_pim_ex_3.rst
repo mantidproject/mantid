@@ -42,7 +42,7 @@ B - plotSpectrum with ISIS Data
 C - 2D and 3D Plot ILL Data
 ===========================
 
-#. Load the file 164198.nxs
+#. Load the file 164198.nxs - note that if you may have to uncheck "Search Data Archive" or give the full path to load this file rather than the corresponding run number of your default instrument.
 #. :ref:`algm-ExtractSpectra` using X range 470-490 and WorkspaceIndex range 199-209. Use this region of interest for plotting.
 
 #. Produce a figure and axes for subplots with ncols=2, nrows=1, using the mantid projection and also set the figsize = (6,4)

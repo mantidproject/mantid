@@ -82,6 +82,6 @@ public:
     TS_ASSERT(!std::filesystem::exists(path));
   }
 
-  const std::string cubePath = FileFinder::Instance().getFullPath("cubeBin.stl");
+  const std::string cubePath = FileFinder::Instance().getFullPath("cubeBin.stl").string();
   std::string path;
 };

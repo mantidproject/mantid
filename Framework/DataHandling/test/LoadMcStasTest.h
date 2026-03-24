@@ -16,6 +16,7 @@
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include <Poco/TemporaryFile.h>
@@ -126,6 +127,18 @@ public:
 
     outputGroup = load_test("mccode_multiple_scattering.h5", outputSpace);
     TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 3);
+  }
+
+  void test_willLoadWithLoad() {
+    // We are verifying that the confidence information provided by the loader is good
+    std::vector<std::string> inputFiles{"mcstas_event_hist.h5", "mccode_contains_one_bank.h5",
+                                        "mccode_multiple_scattering.h5"};
+    Load loader;
+    loader.initialize();
+    for (auto const &inputFile : inputFiles) {
+      loader.setProperty("Filename", inputFile);
+      TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadMcStas");
+    }
   }
 
 private:

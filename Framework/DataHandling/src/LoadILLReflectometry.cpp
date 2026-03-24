@@ -146,7 +146,7 @@ using namespace Nexus;
 using Mantid::Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadILLReflectometry)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
 /**
  * Return the confidence with this algorithm can load the file

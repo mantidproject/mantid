@@ -62,9 +62,6 @@ public:
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
 
-  RunsPresenter(RunsPresenter &&) = default;
-  RunsPresenter &operator=(RunsPresenter &&) = default;
-
   // IRunsPresenter overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   std::string initInstrumentList(const std::string &selectedInstrument = "") override;

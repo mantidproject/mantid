@@ -31,6 +31,8 @@ class MANTID_DATAOBJECTS_DLL SplittersWorkspace : public DataObjects::TableWorks
 public:
   SplittersWorkspace();
 
+  const std::string id() const override { return "SplittersWorkspace"; }
+
   /// Returns a clone of the workspace
   std::unique_ptr<SplittersWorkspace> clone() const { return std::unique_ptr<SplittersWorkspace>(doClone()); }
 
@@ -60,3 +62,12 @@ using SplittersWorkspace_const_sptr = std::shared_ptr<const SplittersWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid
+
+#ifndef DataObjects_EXPORTS
+#include "MantidAPI/WorkspaceProperty.h"
+namespace Mantid::API {
+/// @cond
+extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::SplittersWorkspace>;
+/// @endcond
+} // namespace Mantid::API
+#endif

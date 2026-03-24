@@ -11,6 +11,7 @@
 #include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTaskBase.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/SpectraProcessingData.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/DateAndTime.h"
@@ -31,10 +32,11 @@ class MANTID_DATAHANDLING_DLL ProcessBankSplitFullTimeTask : public ProcessBankT
 public:
   ProcessBankSplitFullTimeTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                                std::shared_ptr<NexusLoader> loader, std::vector<int> &workspaceIndices,
-                               std::vector<API::MatrixWorkspace_sptr> &wksps,
+                               std::vector<SpectraProcessingData> &processingDatas,
                                const BankCalibrationFactory &calibFactory, const size_t events_per_chunk,
                                const size_t grainsize_event,
                                const std::map<Mantid::Types::Core::DateAndTime, int> &splitterMap,
+                               std::shared_ptr<std::vector<Types::Core::DateAndTime>> pulse_times,
                                std::shared_ptr<API::Progress> &progress);
 
   void operator()(const tbb::blocked_range<size_t> &range) const;
@@ -42,12 +44,15 @@ public:
 private:
   H5::H5File m_h5file;
   std::vector<int> m_workspaceIndices;
-  std::vector<API::MatrixWorkspace_sptr> m_wksps;
+  // Do not copy the processing data (contains atomics which are not copyable).
+  // Store a reference to the externally-owned vector instead.
+  std::vector<SpectraProcessingData> &m_processingDatas;
   /// number of events to read from disk at one time
   const size_t m_events_per_chunk;
   const std::map<Mantid::Types::Core::DateAndTime, int> m_splitterMap;
   /// number of events to histogram in a single thread
   const size_t m_grainsize_event;
+  std::shared_ptr<std::vector<Types::Core::DateAndTime>> m_pulse_times;
   std::shared_ptr<API::Progress> m_progress;
 };
 } // namespace Mantid::DataHandling::AlignAndFocusPowderSlim

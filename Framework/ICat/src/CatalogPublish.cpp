@@ -21,12 +21,12 @@
 #include <Poco/Net/PrivateKeyPassphraseHandler.h>
 #include <Poco/Net/SSLException.h>
 #include <Poco/Net/SSLManager.h>
-#include <Poco/Path.h>
 #include <Poco/SharedPtr.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
 
 #include <boost/regex.hpp>
+#include <filesystem>
 #include <fstream>
 
 namespace Mantid::ICat {
@@ -79,7 +79,8 @@ void CatalogPublish::exec() {
 
   // The user want to upload a file.
   if (!filePath.empty()) {
-    std::string fileName = Poco::Path(filePath).getFileName();
+    std::filesystem::path path(filePath);
+    std::string fileName = path.filename().string();
     // If the user has not set the name to save the file as, then use the
     // filename of the file being uploaded.
     if (nameInCatalog.empty()) {
@@ -185,7 +186,11 @@ void CatalogPublish::publish(std::istream &fileContents, const std::string &uplo
  * @returns True if the file in the path is a data file.
  */
 bool CatalogPublish::isDataFile(const std::string &filePath) {
-  std::string extension = Poco::Path(filePath).getExtension();
+  std::filesystem::path path(filePath);
+  std::string extension = path.extension().string();
+  if (!extension.empty() && extension[0] == '.') {
+    extension = extension.substr(1); // remove leading dot
+  }
   std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
   return extension == "raw" || extension == "nxs";
 }
@@ -218,7 +223,8 @@ void CatalogPublish::publishWorkspaceHistory(Mantid::API::ICatalogInfoService_sp
   // Obtain the workspace history as a string.
   ss << generateWorkspaceHistory(workspace);
   // Use the name the use wants to save the file to the server as and append .py
-  std::string fileName = Poco::Path(Poco::Path(getPropertyValue("NameInCatalog")).getFileName()).getBaseName() + ".py";
+  std::filesystem::path nameInCatalog(getPropertyValue("NameInCatalog"));
+  std::string fileName = nameInCatalog.stem().string() + ".py";
   // Publish the workspace history to the server.
   publish(ss, catalogInfoService->getUploadURL(getPropertyValue("InvestigationNumber"), fileName,
                                                getPropertyValue("DataFileDescription")));

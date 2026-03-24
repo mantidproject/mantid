@@ -87,7 +87,7 @@ public:
     cout << "Starting NAPI CHAR Test\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "NexusFile_test_char");
     std::string const nxFile(vars.relFilePath);
-    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(nxFile);
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(nxFile).string();
     File fileid(filepath);
 
     // tests of string/char read
@@ -134,7 +134,7 @@ public:
     cout << "Starting NAPI VEC Test\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "NexusFile_test_vec");
     std::string const nxFile(vars.relFilePath);
-    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(nxFile);
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(nxFile).string();
     File fileid(filepath);
 
     // tests of integer read
@@ -179,7 +179,7 @@ public:
     cout << "tests for openPath\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "NexusFile_openpathtest.nxs");
     string const filename(vars.relFilePath);
-    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename).string();
     File fileid(filepath);
 
     // compare
@@ -214,7 +214,7 @@ public:
     cout << "tests of linkature\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "NexusFIle_linktest.nxs");
     string const filename(vars.relFilePath);
-    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename).string();
     File fileid(filepath);
 
     // check data link

@@ -3,9 +3,6 @@
 Calibration
 ===========
 
-.. contents::
-  :local:
-
 What is Calibration?
 --------------------
 

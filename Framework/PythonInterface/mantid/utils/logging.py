@@ -46,7 +46,7 @@ def capture_logs(level=None) -> io.StringIO:
             if level.lower() not in ["debug", "information", "notice", "warning", "error"]:
                 raise ValueError("Unknown logging level")
             current_level = config["logging.loggers.root.level"]
-            backup["level"] = current_level if current_level else "notice"
+            backup["level"] = current_level or "notice"
             config["logging.loggers.root.level"] = level
         # redirect messages to log_file
         config["logging.channels.consoleChannel.class"] = "PythonStdoutChannel"

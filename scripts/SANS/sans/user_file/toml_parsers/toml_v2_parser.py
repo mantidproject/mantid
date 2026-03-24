@@ -13,7 +13,7 @@ from sans.user_file.toml_parsers.toml_v2_schema import TomlSchemaV2Validator
 
 class TomlV2Parser(TomlV1Parser):
     def __init__(self, dict_to_parse, file_information, schema_validator=None):
-        validator = schema_validator if schema_validator else TomlSchemaV2Validator(dict_to_parse)
+        validator = schema_validator or TomlSchemaV2Validator(dict_to_parse)
         super(TomlV2Parser, self).__init__(dict_to_parse, file_information, validator)
 
     @staticmethod

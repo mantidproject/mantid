@@ -192,31 +192,46 @@ void LoadInstrument::exec() {
       // If it does, just use the one from the one stored there
       instrument = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
-
       if (loader_type < LoaderType::Nxs) {
         // Really create the instrument
         Progress prog(this, 0.0, 1.0, 100);
-        instrument = parser.parseXML(&prog);
-        // Parse the instrument tree (internally create ComponentInfo and
-        // DetectorInfo). This is an optimization that avoids duplicate parsing
-        // of the instrument tree when loading multiple workspaces with the same
-        // instrument. As a consequence less time is spent and less memory is
-        // used. Note that this is only possible since the tree in `instrument`
-        // will not be modified once we add it to the IDS.
-        instrument->parseTreeAndCacheBeamline();
+        {
+          const auto timerStart = std::chrono::high_resolution_clock::now();
+          instrument = parser.parseXML(&prog);
+          addTimer("parseXML", timerStart, std::chrono::high_resolution_clock::now());
+        }
+        {
+          // Parse the instrument tree (internally create ComponentInfo and
+          // DetectorInfo). This is an optimization that avoids duplicate parsing
+          // of the instrument tree when loading multiple workspaces with the same
+          // instrument. As a consequence less time is spent and less memory is
+          // used. Note that this is only possible since the tree in `instrument`
+          // will not be modified once we add it to the IDS.
+          const auto timerStart = std::chrono::high_resolution_clock::now();
+          instrument->parseTreeAndCacheBeamline();
+          addTimer("parseTreeAndCacheBeamline", timerStart, std::chrono::high_resolution_clock::now());
+        }
       } else {
         Instrument_const_sptr ins =
             NexusGeometry::NexusGeometryParser::createInstrument(filename, NexusGeometry::makeLogger(&m_log));
         instrument = std::const_pointer_cast<Instrument>(ins);
       }
+
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
-    ws->setInstrument(instrument);
+    {
+      const auto timerStart = std::chrono::high_resolution_clock::now();
+      ws->setInstrument(instrument);
+      addTimer("setInstrument", timerStart, std::chrono::high_resolution_clock::now());
+    }
 
     // populate parameter map of workspace
-    ws->populateInstrumentParameters();
-
+    {
+      const auto timerStart = std::chrono::high_resolution_clock::now();
+      ws->populateInstrumentParameters();
+      addTimer("populateInstrumentParameters", timerStart, std::chrono::high_resolution_clock::now());
+    }
     // LoadParameterFile modifies the base instrument stored in the IDS so this
     // must also be protected by the lock until LoadParameterFile is fixed.
     // check if default parameter file is also present, unless loading from
@@ -230,8 +245,11 @@ void LoadInstrument::exec() {
   // Rebuild the spectra map for this workspace so that it matches the
   // instrument, if required
   const OptionalBool RewriteSpectraMap = getProperty("RewriteSpectraMap");
-  if (RewriteSpectraMap == OptionalBool::True)
+  if (RewriteSpectraMap == OptionalBool::True) {
+    const auto timerStart = std::chrono::high_resolution_clock::now();
     ws->rebuildSpectraMapping();
+    addTimer("rebuildSpectraMapping", timerStart, std::chrono::high_resolution_clock::now());
+  }
 }
 
 //-----------------------------------------------------------------------------------------------------------------------

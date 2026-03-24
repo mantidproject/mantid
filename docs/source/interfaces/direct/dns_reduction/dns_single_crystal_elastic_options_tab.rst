@@ -58,22 +58,22 @@ used to set a scaling factor for this correction.
 
 The **Lattice Parameters** group box can be used to set the lattice parameters of
 the sample. As a result, :math:`d`-spacings :math:`d_x` and :math:`d_y` for vectors
-:math:`n_x` and :math:`n_y`, specified in the **Orientation** group box, will be
+:math:`\tau_1` and :math:`\tau_2`, specified in the **Orientation** group box, will be
 automatically calculated. These :math:`d`-spacings will be used by the program for
-transforming the intensity function from :math:`2 \theta-\omega` space to
-:math:`n_x-n_y` in :math:`Q`-space. Alternatively, the user can set the
+transforming the intensity function from :math:`(2 \theta, \omega)` in coordinate space
+to :math:`(hkl_x, \hkl_y)` in reciprocal space. Alternatively, the user can set the
 :math:`d`-spacings manually by checking the
 **Use d-spacings Instead of Lattice Parameters** checkbox (in the **Orientation**
 group box) and providing the corresponding values for :math:`d_x` and :math:`d_y`.
 
 The **Orientation** group box can be used to specify the horizontal scattering plane.
-For this, hkl for vectors :math:`n_x` and :math:`n_y`, which define the horizontal
-plane, must be provided (:math:`n_x` and :math:`n_y` do not need to be perpendicular).
-In case when :math:`n_x` and :math:`n_y` are not perpendicular, instead of the vector
-:math:`n_y`, the GUI will use the vector that is perpendicular to :math:`n_x` and lies
-in the (:math:`n_x`, :math:`n_y`) plane. The :math:`\omega` offset box can be used to
+For this, hkl for vectors :math:`\tau_1` and :math:`\tau_2`, which define the horizontal
+plane, must be provided (:math:`\tau_1` and :math:`\tau_2` do not need to be perpendicular).
+In case when :math:`\tau_1` and :math:`\tau_2` are not perpendicular, instead of the vector
+:math:`\tau_2`, the GUI will use the vector that is perpendicular to :math:`\tau_1` and lies
+in the (:math:`\tau_1`, :math:`\tau_2`) plane. The :math:`\omega` offset box can be used to
 set the deviation of the rotation angle :math:`\omega` from 0 for the position
-when :math:`n_x` is parallel to the direct beam.
+when :math:`\tau_1` is parallel to the direct beam.
 
 When the **Automatic Binning** checkbox is selected, the interface will determine
 the minimum and maximum values for the scattering angle :math:`2 \theta` and the

@@ -8,6 +8,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/AnvredCorrection.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -467,14 +468,10 @@ void SaveLauenorm::sizeBanks(const std::string &bankName, int &nCols, int &nRows
     nCols = RDet->xpixels();
     nRows = RDet->ypixels();
   } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    std::shared_ptr<const Geometry::ICompAssembly> asmb =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
+    const auto &componentInfo = ws->componentInfo();
+    const size_t parentIndex = componentInfo.indexOfAny(bankName);
+    auto children = componentInfo.children(parentIndex);
+    auto grandchildren = componentInfo.children(children[0]);
     nRows = static_cast<int>(grandchildren.size());
     nCols = static_cast<int>(children.size());
   }

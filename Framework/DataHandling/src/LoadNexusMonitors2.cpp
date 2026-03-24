@@ -166,9 +166,6 @@ void LoadNexusMonitors2::exec() {
   }
 
   m_top_entry_name = this->getPropertyValue("NXentryName");
-  // must be done here before the Nexus::File, HDF5 files can't have 2
-  // simultaneous handlers
-  Nexus::NexusDescriptor descriptor(m_filename);
 
   // top level file information
   Nexus::File file(m_filename);
@@ -282,7 +279,11 @@ void LoadNexusMonitors2::exec() {
 
     // a certain generation of ISIS files modify the time-of-flight
     const std::string currentAddress = file.getAddress();
-    adjustTimeOfFlightISISLegacy(file, eventWS, m_top_entry_name, "NXmonitor");
+
+    if (doPerformISISEventShift(file, m_top_entry_name)) {
+      adjustTimeOfFlightISISLegacy(file, eventWS, m_top_entry_name, "NXmonitor");
+    }
+
     file.openAddress(currentAddress); // reset to where it was earlier
   }
 
@@ -340,7 +341,7 @@ void LoadNexusMonitors2::exec() {
   // Load the meta data, but don't stop on errors
   g_log.debug() << "Loading metadata\n";
   try {
-    LoadEventNexus::loadEntryMetadata<API::MatrixWorkspace_sptr>(m_filename, m_workspace, m_top_entry_name, descriptor);
+    LoadEventNexus::loadEntryMetadata<API::MatrixWorkspace_sptr>(m_filename, m_workspace, m_top_entry_name);
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }

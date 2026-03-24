@@ -2,9 +2,6 @@
 Indirect Geometry Changes
 =========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - **The** :ref:`Elwin <elwin>` **tab in** :ref:`Inelastic Data Analysis <interface-inelastic-qens-fitting>` **has a new loader which now allows users to add workspaces.**

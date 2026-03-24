@@ -216,7 +216,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         # Plot the displayed workspace
         elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting"]:
             plot_mode = self.plot_widget.fit_index
-        elif TAB_ORDER[index] in ["Model Fitting"]:
+        elif TAB_ORDER[index] == "Model Fitting":
             plot_mode = self.plot_widget.model_fit_index
         else:
             return

@@ -13,6 +13,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -66,12 +67,12 @@ void SaveIsawPeaks::exec() {
                        "      INTI    SIGI  RFLG";
 
   const std::string filename = getPropertyValue("Filename");
-  PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
-  const auto &peaks = ws->getPeaks();
-  inst = ws->getInstrument();
+  m_ws = getProperty("InputWorkspace");
+  const auto &peaks = m_ws->getPeaks();
+  inst = m_ws->getInstrument();
   if (!inst)
     throw std::runtime_error("No instrument in the Workspace. Cannot save DetCal file.");
-  const auto &detectorInfo = ws->detectorInfo();
+  const auto &detectorInfo = m_ws->detectorInfo();
 
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
@@ -85,21 +86,26 @@ void SaveIsawPeaks::exec() {
     bankPart = "WISHpanel";
 
   // Get all children
-  std::vector<IComponent_const_sptr> comps;
-  inst->getChildren(comps, true);
-
-  for (auto &comp : comps) {
-    std::string bankName = comp->getName();
-    boost::trim(bankName);
-    boost::erase_all(bankName, bankPart);
-    int bank = 0;
-    Strings::convert(bankName, bank);
-    if (bank == 0)
-      continue;
-    if (bankMasked(comp, detectorInfo))
-      continue;
-    // Track unique bank numbers
-    uniqueBanks.insert(bank);
+  const auto &componentInfo = m_ws->componentInfo();
+  // iterate over the top level components, which contain the banks
+  size_t const rootIndex = componentInfo.root();
+  auto const topChildren = componentInfo.children(rootIndex);
+  for (size_t const i : topChildren) {
+    size_t bankParent = componentInfo.findBankParent(i, bankPart);
+    auto const children = componentInfo.children(bankParent);
+    for (size_t const child : children) {
+      std::string bankName = componentInfo.name(child);
+      boost::trim(bankName);
+      boost::erase_all(bankName, bankPart);
+      int bank = 0;
+      Strings::convert(bankName, bank);
+      if (bank == 0)
+        continue;
+      if (bankMasked(child, detectorInfo))
+        continue;
+      // Track unique bank numbers
+      uniqueBanks.insert(bank);
+    }
   }
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
@@ -206,7 +212,7 @@ void SaveIsawPeaks::exec() {
     out << std::setprecision(4) << std::fixed << (l1 * 100);
     out << std::setw(12) << std::setprecision(3) << std::fixed;
     // Time offset from property
-    const API::Run &run = ws->run();
+    const API::Run &run = m_ws->run();
     double T0 = 0.0;
     if (run.hasProperty("T0")) {
       T0 = run.getPropertyValueAsType<double>("T0");
@@ -235,10 +241,11 @@ void SaveIsawPeaks::exec() {
       std::shared_ptr<const IComponent> det = inst->getComponentByName(bankName);
       if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
       {
-        std::vector<Geometry::IComponent_const_sptr> children;
-        auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
-        asmb->getChildren(children, false);
-        det = children[0];
+        const size_t bankIndex = componentInfo.indexOfAny(bankName);
+        const auto children = componentInfo.children(bankIndex);
+        if (!children.empty()) {
+          det.reset(componentInfo.componentID(children[0]), NoDeleting());
+        }
       }
       if (det) {
         // Center of the detector
@@ -281,7 +288,7 @@ void SaveIsawPeaks::exec() {
   // HKL's are flipped by -1 because of the internal Q convention
   // unless Crystallography convention
   double qSign = -1.0;
-  if (ws->getConvention() == "Crystallography")
+  if (m_ws->getConvention() == "Crystallography")
     qSign = 1.0;
 
   // Save all Peaks
@@ -417,29 +424,25 @@ void SaveIsawPeaks::exec() {
   out.close();
 }
 
-bool SaveIsawPeaks::bankMasked(const IComponent_const_sptr &parent, const Geometry::DetectorInfo &detectorInfo) {
-  std::vector<Geometry::IComponent_const_sptr> children;
-  auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-  asmb->getChildren(children, false);
-  if (children[0]->getName() == "sixteenpack") {
-    asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-    children.clear();
-    asmb->getChildren(children, false);
+bool SaveIsawPeaks::bankMasked(size_t componentIndex, const Geometry::DetectorInfo &detectorInfo) {
+  const auto &componentInfo = this->m_ws->componentInfo();
+  auto children = componentInfo.children(componentIndex);
+
+  if (!children.empty() && componentInfo.name(children[0]) == "sixteenpack") {
+    children = componentInfo.children(children[0]);
   }
 
-  for (const auto &col : children) {
-    auto asmb2 = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
-    for (const auto &row : grandchildren) {
-      auto *d = dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
-      if (d) {
-        auto detID = d->getID();
+  for (const auto &colIndex : children) { // cppcheck-suppress useStlAlgorithm
+    auto grandchildren = componentInfo.children(colIndex);
+    for (const auto &rowIndex : grandchildren) { // cppcheck-suppress useStlAlgorithm
+      if (componentInfo.isDetector(rowIndex)) {
+        const auto detID = detectorInfo.detid(rowIndex);
         if (detID < 0)
           continue;
-        const auto index = detectorInfo.indexOf(detID);
-        if (!detectorInfo.isMasked(index))
+        const auto detIndex = detectorInfo.indexOf(detID);
+        if (!detectorInfo.isMasked(detIndex)) {
           return false;
+        }
       }
     }
   }
@@ -453,22 +456,20 @@ V3D SaveIsawPeaks::findPixelPos(const std::string &bankName, int col, int row) {
     const auto pixel = RDet->getAtXY(col, row);
     return pixel->getPos();
   } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    if (children[0]->getName() == "sixteenpack") {
-      asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-      children.clear();
-      asmb->getChildren(children, false);
+    const auto &componentInfo = this->m_ws->componentInfo();
+    const size_t parentIndex = componentInfo.indexOfAny(bankName);
+    auto children = componentInfo.children(parentIndex);
+
+    if (!children.empty() && componentInfo.name(children[0]) == "sixteenpack") {
+      children = componentInfo.children(children[0]);
     }
     int col0 = col - 1;
     // WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
-    auto asmb2 = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[col0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
-    auto first = grandchildren[row - 1];
+
+    auto grandchildren = componentInfo.children(children[col0]);
+    const auto *first = componentInfo.componentID(grandchildren[row - 1]);
     return first->getPos();
   }
 }
@@ -484,24 +485,22 @@ void SaveIsawPeaks::sizeBanks(const std::string &bankName, int &NCOLS, int &NROW
     xsize = RDet->xsize();
     ysize = RDet->ysize();
   } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    auto asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    if (children[0]->getName() == "sixteenpack") {
-      asmb = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-      children.clear();
-      asmb->getChildren(children, false);
+    const auto &componentInfo = this->m_ws->componentInfo();
+    const size_t parentIndex = componentInfo.indexOfAny(bankName);
+    auto children = componentInfo.children(parentIndex);
+
+    if (!children.empty() && componentInfo.name(children[0]) == "sixteenpack") {
+      children = componentInfo.children(children[0]);
     }
-    const auto asmb2 = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
+
+    auto grandchildren = componentInfo.children(children[0]);
     NROWS = static_cast<int>(grandchildren.size());
     NCOLS = static_cast<int>(children.size());
-    auto first = children[0];
-    auto last = children[NCOLS - 1];
+    const auto *first = componentInfo.componentID(children[0]);
+    const auto *last = componentInfo.componentID(children[NCOLS - 1]);
     xsize = first->getDistance(*last);
-    first = grandchildren[0];
-    last = grandchildren[NROWS - 1];
+    first = componentInfo.componentID(grandchildren[0]);
+    last = componentInfo.componentID(grandchildren[NROWS - 1]);
     ysize = first->getDistance(*last);
   }
 }

@@ -66,6 +66,8 @@ public:
 
   NexusAddress &operator/=(NexusAddress const &p);
 
+  bool hasChild(std::string const &p) const;
+
   // access
 
   bool isAbsolute() const;

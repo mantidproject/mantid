@@ -11,7 +11,7 @@ from collections import defaultdict
 
 from mantid import FunctionFactory
 from mantid.api import TextAxis
-from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams
+from mantid.kernel import UnitConversion, DeltaEModeType
 from mantid.simpleapi import logger, CreateEmptyTableWorkspace, GroupWorkspaces, CreateWorkspace, FindPeaksConvolve, SaveNexus
 from mantid.api import AnalysisDataService as ADS
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import write_table_row
@@ -19,6 +19,7 @@ from mantid.api import CompositeFunction
 from mantid.fitfunctions import FunctionWrapper
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import wsname_in_instr_run_ceria_group_ispec_unit_format
+from Engineering.EnggUtils import convert_TOFerror_to_derror
 from os import path, makedirs
 
 
@@ -122,9 +123,7 @@ class FittingPlotModel(object):
 
     def _convert_TOFerror_to_derror(self, tof_error, d, ws_name):
         diff_consts = self._get_diff_constants(ws_name)
-        difc = diff_consts[UnitParams.difc]
-        difa = diff_consts[UnitParams.difa] if UnitParams.difa in diff_consts else 0
-        return tof_error / (2 * difa * d + difc)
+        return convert_TOFerror_to_derror(diff_consts, tof_error, d)
 
     def _get_diff_constants(self, ws_name):
         """

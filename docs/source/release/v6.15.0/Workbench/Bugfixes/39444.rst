@@ -1,1 +1,0 @@
-- The vertical sliders in the ``Moments`` tab of the :ref:`interface-inelastic-data-processor` are moved to the edge to the integration limits when new data is loaded for visualization.

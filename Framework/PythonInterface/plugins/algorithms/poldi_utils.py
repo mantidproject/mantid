@@ -10,6 +10,8 @@ import numpy as np
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
 from typing import Tuple, Sequence, Optional, TYPE_CHECKING
 from joblib import Parallel, delayed
+import h5py
+from multiprocessing import cpu_count
 
 if TYPE_CHECKING:
     from mantid.dataobjects import Workspace2D
@@ -66,6 +68,72 @@ def load_poldi(
         ParameterType="Number",
         Value=str(t0_const),
     )
+    ADS.addOrReplace(output_workspace, ws)
+    return ws
+
+
+def load_poldi_h5f(
+    fpath_data: str,
+    fpath_idf: str,
+    t0: float = 0.025701,
+    t0_const: float = 85.0,
+    output_workspace: str = "ws",
+):
+    """
+    Function to load POLDI v2 data from ASCII file containing array of counts
+    :param fpath_data: filepath of ASCII file with counts
+    :param fpath_idf: filepath to instrument definition file
+    :param chopper_speed: chopper speed used on instrument (rpm)
+    :param t0: time offset applied to slit openings (fraction of cycle time)
+    :param t0_const: TZERO diffractometer constant for instrument
+    :param output_workspace: output workspace name
+    :return ws: workspace containing POLDI data
+    """
+    # read in data
+    dat = []
+    with h5py.File(fpath_data, "r") as f:
+        for bank_name in ["south", "north"]:
+            dat.append(np.asarray(f.get(f"entry1/POLDI/detector_{bank_name}/histogram_folded")))
+        chopper_speed = f.get("entry1/POLDI/chopper/rotation_speed_target")[0]
+        if np.allclose([bank.sum() for bank in dat], 0):
+            monitor_count = 0  # can be error in detector electronics where no data but erroneous monitor counts
+        else:
+            monitor_count = 1
+            # check different fields as monitor name has changed
+            if "entry1/monitors/monitor_before_sample" in f:
+                monitor_count = f.get("entry1/monitors/monitor_before_sample")[0]
+            elif "entry1/monitors/monitor3" in f:
+                monitor_count = f.get("entry1/monitors/monitor3")[0]
+    dat = np.vstack(dat)
+    # calculate time bins
+    cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)
+    bin_width = cycle_time / dat.shape[-1]
+    ws = exec_alg("LoadEmptyInstrument", Filename=fpath_idf)
+    ws = exec_alg("Rebin", InputWorkspace=ws, Params=f"0,{bin_width},{cycle_time}")
+    for ispec in range(ws.getNumberHistograms()):
+        ws.setY(ispec, dat[ispec, :])
+    ws = exec_alg("ConvertToPointData", InputWorkspace=ws)
+    # add some logs (will eventually be set in file)
+    exec_alg("AddSampleLog", Workspace=ws, LogName="chopperspeed", LogText=str(chopper_speed), LogType="Number")
+    # set t0 (would normally live in parameter file)
+    exec_alg(
+        "SetInstrumentParameter",
+        Workspace=ws,
+        ComponentName="chopper",
+        ParameterName="t0",
+        ParameterType="Number",
+        Value=str(t0),
+    )
+    exec_alg(
+        "SetInstrumentParameter",
+        Workspace=ws,
+        ComponentName="chopper",
+        ParameterName="t0_const",
+        ParameterType="Number",
+        Value=str(t0_const),
+    )
+    # add monitor counts
+    exec_alg("AddSampleLog", Workspace=ws, LogName="gd_prtn_chrg", LogText=str(monitor_count), LogType="Number")
     ADS.addOrReplace(output_workspace, ws)
     return ws
 
@@ -172,7 +240,7 @@ def get_max_tof_from_chopper(l1: float, l1_chop: float, l2s: Sequence[float], tt
 
 
 def simulate_2d_data(
-    ws_2d: Workspace2D, ws_1d: Workspace2D, output_workspace: Optional[str] = None, lambda_max: float = 5.0
+    ws_2d: Workspace2D, ws_1d: Workspace2D, output_workspace: Optional[str] = None, lambda_max: float = 5.0, ispec=0
 ) -> Workspace2D:
     """
     Function to simulate 2D pulse overlap data given 1D spectrum in d-spacing (i.e. powder pattern).
@@ -189,7 +257,11 @@ def simulate_2d_data(
         ws_1d = exec_alg("ConvertToPointData", InputWorkspace=ws_1d)
     if output_workspace is None:
         output_workspace = ws_2d.name() + "_simulated"
-    ws_sim = exec_alg("CloneWorkspace", InputWorkspace=ws_2d)
+    if not ws_1d.spectrumInfo().hasDetectors(ispec) or ws_1d.getNumberHistograms() == 1:
+        ws_sim = exec_alg("CloneWorkspace", InputWorkspace=ws_2d)
+    else:
+        # simulate only detector IDs of interest
+        ws_sim = exec_alg("ExtractSpectra", InputWorkspace=ws_2d, DetectorList=np.array(ws_1d.getSpectrum(ispec).getDetectorIDs()))
     # get instrument settings
     cycle_time, slit_offsets, t0_const, l1_chop = get_instrument_settings_from_log(ws_sim)
     si = ws_sim.spectrumInfo()
@@ -206,7 +278,7 @@ def simulate_2d_data(
     tofs = ws_sim.readX(0)[:, None] + offsets  # same for all spectra
     path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
     tof_d1Ang = np.asarray([si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] for ispec in range(nspec)])
-    out = Parallel(n_jobs=-2, prefer="threads", return_as="generator")(
+    out = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
         delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.readX(0), ws_1d.readY(0)) for ispec in range(nspec)
     )
     # set y values

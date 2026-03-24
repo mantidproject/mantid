@@ -11,6 +11,7 @@
 #include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/NexusLoader.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim/ProcessBankTaskBase.h"
+#include "MantidDataHandling/AlignAndFocusPowderSlim/SpectraProcessingData.h"
 #include "MantidGeometry/IDTypes.h"
 #include <H5Cpp.h>
 #include <MantidAPI/Progress.h>
@@ -25,7 +26,7 @@ class ProcessBankSplitTask : public ProcessBankTaskBase {
 public:
   ProcessBankSplitTask(std::vector<std::string> &bankEntryNames, H5::H5File &h5file,
                        std::shared_ptr<NexusLoader> loader, std::vector<int> &workspaceIndices,
-                       std::vector<API::MatrixWorkspace_sptr> &wksps, const BankCalibrationFactory &calibFactory,
+                       std::vector<SpectraProcessingData> &processingDatas, const BankCalibrationFactory &calibFactory,
                        const size_t events_per_chunk, const size_t grainsize_event,
                        std::shared_ptr<API::Progress> &progress);
 
@@ -34,7 +35,7 @@ public:
 private:
   H5::H5File m_h5file;
   std::vector<int> m_workspaceIndices;
-  std::vector<API::MatrixWorkspace_sptr> m_wksps;
+  std::vector<SpectraProcessingData> &m_processingDatas;
   /// number of events to read from disk at one time
   const size_t m_events_per_chunk;
   /// number of events to histogram in a single thread

@@ -72,9 +72,9 @@ class InstrumentSettings(object):
             )
 
     def update_attributes(self, advanced_config=None, basic_config=None, kwargs=None, suppress_warnings=False):
-        self._adv_config_dict = advanced_config if advanced_config else self._adv_config_dict
-        self._basic_conf_dict = basic_config if basic_config else self._basic_conf_dict
-        self._kwargs = kwargs if kwargs else self._kwargs
+        self._adv_config_dict = advanced_config or self._adv_config_dict
+        self._basic_conf_dict = basic_config or self._basic_conf_dict
+        self._kwargs = kwargs or self._kwargs
 
         # Only update if one in hierarchy below it has been updated
         # so if advanced_config has been changed we need to parse the basic and kwargs again to ensure

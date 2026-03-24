@@ -14,8 +14,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Functions/Resolution.h"
-#include <Poco/File.h>
 
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid::CurveFitting;
@@ -103,9 +103,9 @@ public:
   }
 
   void tearDown() override {
-    Poco::File phandle(resFileName);
-    if (phandle.exists()) {
-      phandle.remove();
+    std::filesystem::path phandle(resFileName);
+    if (std::filesystem::exists(phandle)) {
+      std::filesystem::remove(phandle);
     }
   }
 

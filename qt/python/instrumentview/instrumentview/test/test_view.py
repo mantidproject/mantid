@@ -8,9 +8,12 @@ import unittest
 from unittest import mock
 from unittest.mock import MagicMock
 
+from vtkmodules.vtkInteractionWidgets import vtkBoxRepresentation
+import numpy as np
+
 from mantidqt.utils.qt.testing import start_qapplication
-from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from mantid.simpleapi import CreateSampleWorkspace
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 
 
 @start_qapplication
@@ -25,7 +28,8 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     @mock.patch("qtpy.QtWidgets.QSplitter.addWidget")
     @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
     def setUp(self, mock_plotter, mock_splitter_add_widget, mock_v_add_widget, mock_h_add_widget, mock_figure_canvas) -> None:
-        self._view = FullInstrumentViewWindow()
+        with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
+            self._view = FullInstrumentViewWindow()
         self._mock_plotter = mock_plotter
         self._mock_splitter_add_widget = mock_splitter_add_widget
         self._mock_v_add_widget = mock_v_add_widget
@@ -50,42 +54,18 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self.assertEqual(2, mock_close_event.call_count)
         self._view.main_plotter.close.assert_called_once()
 
+    @mock.patch("qtpy.QtWidgets.QMainWindow.closeEvent")
+    def test_close_no_presenter(self, mock_close_event):
+        self._view._presenter = None
+        self._view.closeEvent(MagicMock())
+        self._view.main_plotter.close.assert_called_once()
+
     def test_add_simple_shape(self):
         self._view.main_plotter.reset_mock()
         mock_mesh = MagicMock()
         mock_colour = MagicMock()
         self._view.add_simple_shape(mock_mesh, mock_colour, False)
         self._view.main_plotter.add_mesh.assert_called_once_with(mock_mesh, color=mock_colour, pickable=False)
-
-    def test_add_detector_mesh(self):
-        self._view.main_plotter.reset_mock()
-        mock_mesh = MagicMock()
-        mock_scalars = MagicMock()
-        self._view.add_detector_mesh(mock_mesh, False, mock_scalars)
-        self._view.main_plotter.add_mesh.assert_called_once_with(
-            mock_mesh,
-            pickable=False,
-            scalars=mock_scalars,
-            render_points_as_spheres=True,
-            point_size=15,
-            scalar_bar_args={"interactive": True, "vertical": False, "title_font_size": 15, "label_font_size": 12},
-        )
-
-    def test_add_pickable_mesh(self):
-        self._view.main_plotter.reset_mock()
-        mock_mesh = MagicMock()
-        mock_scalars = MagicMock()
-        self._view.add_pickable_mesh(mock_mesh, mock_scalars)
-        self._view.main_plotter.add_mesh.assert_called_once_with(
-            mock_mesh,
-            scalars=mock_scalars,
-            opacity=[0.0, 0.3],
-            show_scalar_bar=False,
-            pickable=True,
-            cmap="Oranges",
-            point_size=30,
-            render_points_as_spheres=True,
-        )
 
     def test_add_rgba_mesh(self):
         self._view.main_plotter.reset_mock()
@@ -201,6 +181,33 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_redraw_lineplot(self):
         self._view.redraw_lineplot()
         self._view._detector_figure_canvas.draw.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewWindow.vtkBoxRepresentation")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.RectangleWidgetNoRotation")
+    def test_add_rectangular_widget(self, mock_widget, mock_repr) -> None:
+        test_repr = vtkBoxRepresentation()
+        mock_repr.return_value = test_repr
+        self._view.main_plotter.renderer = MagicMock(GetSize=MagicMock(return_value=(1, 1)))
+        self._view.display_to_world_coords = MagicMock(side_effect=[(-1, -2, 3), (1, 2, 3)])
+        self._view.add_rectangular_widget()
+        self._view.display_to_world_coords.assert_called_with(2 / 3, 2 / 3, 0)
+        np.testing.assert_almost_equal(test_repr.bounds, [-1, 1, -2, 2, -0.1, 1])
+        self.assertEqual(self._view._current_widget, mock_widget())
+
+    @mock.patch("instrumentview.FullInstrumentViewWindow.vtkImplicitCylinderRepresentation")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.CylinderWidgetNoRotation")
+    def test_add_cylinder_widget(self, mock_cylinder_widget, mock_repr_call) -> None:
+        mock_repr = MagicMock()
+        mock_repr_call.return_value = mock_repr
+        self._view.main_plotter.renderer = MagicMock(GetSize=MagicMock(return_value=(1, 1)))
+        self._view.display_to_world_coords = MagicMock(side_effect=[(-1, -2, 3), (1, 2, 3)])
+        self._view.main_plotter.bounds = [1, 2, 1, 2, 1, 2]
+        self._view.add_cylinder_widget()
+        mock_repr.SetCenter.assert_called_with([-1, -2, 0.5])
+        mock_repr.SetRadius.assert_called_with(np.sqrt(2**2 + 4**2))
+        border = np.sqrt(1**2 + 1**2) / 2
+        mock_repr.SetWidgetBounds.assert_called_with([1 - border, 2 + border, 1 - border, 2 + border, 0, 1])
+        self.assertEqual(self._view._current_widget, mock_cylinder_widget())
 
 
 if __name__ == "__main__":

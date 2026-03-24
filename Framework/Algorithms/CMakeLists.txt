@@ -156,6 +156,7 @@ set(SRC_FILES
     src/FitPeak.cpp
     src/FitPeaks.cpp
     src/FixGSASInstrumentFile.cpp
+    src/GenerateFlatCellWorkspaceLOQ.cpp
     src/FlatPlateAbsorption.cpp
     src/GeneralisedSecondDifference.cpp
     src/GenerateEventsFilter.cpp
@@ -510,6 +511,7 @@ set(INC_FILES
     inc/MantidAlgorithms/FitPeaks.h
     inc/MantidAlgorithms/FixGSASInstrumentFile.h
     inc/MantidAlgorithms/FlatPlateAbsorption.h
+    inc/MantidAlgorithms/GenerateFlatCellWorkspaceLOQ.h
     inc/MantidAlgorithms/GSLFunctions.h
     inc/MantidAlgorithms/GeneralisedSecondDifference.h
     inc/MantidAlgorithms/GenerateEventsFilter.h
@@ -865,6 +867,7 @@ set(TEST_FILES
     FitPeaksTest.h
     FixGSASInstrumentFileTest.h
     FlatPlateAbsorptionTest.h
+    GenerateFlatCellWorkspaceLOQTest.h
     GeneralisedSecondDifferenceTest.h
     GenerateEventsFilterTest.h
     GenerateGoniometerIndependentBackgroundTest.h
@@ -1066,7 +1069,17 @@ add_library(Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 add_library(Mantid::Algorithms ALIAS Algorithms)
 
 # Add a precompiled header where they are supported
-target_precompile_headers(Algorithms PRIVATE inc/MantidAlgorithms/PrecompiledHeader.h)
+target_precompile_headers(
+  Algorithms
+  PRIVATE
+  <MantidAPI/Algorithm.h>
+  <MantidAPI/MatrixWorkspace.h>
+  <boost/algorithm/string.hpp>
+  <boost/format.hpp>
+  <boost/function.hpp>
+  <boost/lexical_cast.hpp>
+  <boost/math/special_functions.hpp>
+)
 
 target_include_directories(
   Algorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>

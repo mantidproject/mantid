@@ -1,0 +1,1 @@
+- :ref:`FileFinder <mantid.api.FileFinderImpl>` has been update to more reliably determine the instrument from the hint particularly when the instrument name contains digits.

@@ -436,9 +436,10 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors, const sp
     return;
   }
 
-  std::vector<detid_t> pixelIDs = this->getInstrument()->getDetectorIDs(!includeMonitors);
+  const std::vector<detid_t> pixelIDs = this->getInstrument()->getDetectorIDs(!includeMonitors);
 
   try {
+    const size_t NUM_HIST = this->getNumberHistograms();
     size_t index = 0;
     std::vector<detid_t>::const_iterator iend = pixelIDs.end();
     for (std::vector<detid_t>::const_iterator it = pixelIDs.begin(); it != iend; ++it) {
@@ -446,7 +447,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors, const sp
       const detid_t detId = *it;
       const auto specNo = specnum_t(index + specNumOffset);
 
-      if (index < this->getNumberHistograms()) {
+      if (index < NUM_HIST) {
         auto &spec = getSpectrum(index);
         spec.setSpectrumNo(specNo);
         spec.setDetectorID(detId);
@@ -2167,7 +2168,9 @@ void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
 
 void MatrixWorkspace::rebuildDetectorIDGroupings() {
   const auto &detInfo = detectorInfo();
+  const auto detInfo_scanCount = detInfo.scanCount(); // cache value outside of the loop
   const auto &allDetIDs = detInfo.detectorIDs();
+  const auto allDetIDs_size = allDetIDs.size(); // cache value outside of the loop
   const auto &specDefs = m_indexInfo->spectrumDefinitions();
   const auto indexInfoSize = static_cast<int64_t>(m_indexInfo->size());
   enum class ErrorCode { None, InvalidDetIndex, InvalidTimeIndex };
@@ -2181,10 +2184,9 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
     std::set<detid_t> detIDs;
     for (const auto &index : (*specDefs)[i]) {
       const size_t detIndex = index.first;
-      const size_t timeIndex = index.second;
-      if (detIndex >= allDetIDs.size()) {
+      if (detIndex >= allDetIDs_size) {
         errorValue = ErrorCode::InvalidDetIndex;
-      } else if (timeIndex >= detInfo.scanCount()) {
+      } else if (index.second >= detInfo_scanCount) { // timeIndex is second
         errorValue = ErrorCode::InvalidTimeIndex;
       } else {
         detIDs.insert(allDetIDs[detIndex]);

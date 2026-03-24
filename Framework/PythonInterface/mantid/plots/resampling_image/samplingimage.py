@@ -208,8 +208,8 @@ def imshow_sampling(
                         xmin = min([x_i_min, xmin]) if xmin else x_i_min
                     if np.isfinite(x_i_max):
                         xmax = max([x_i_max, xmax]) if xmax else x_i_max
-            x0 = xmin if xmin else x0
-            x1 = xmax if xmax else x1
+            x0 = xmin or x0
+            x1 = xmax or x1
 
         if workspace.getDimension(1).getNBins() == workspace.getAxis(1).length():
             width = workspace.getDimension(1).getBinWidth()

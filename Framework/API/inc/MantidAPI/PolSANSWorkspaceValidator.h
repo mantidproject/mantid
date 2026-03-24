@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/TypedValidator.h"
+#include <unordered_set>
 
 namespace Mantid {
 namespace API {

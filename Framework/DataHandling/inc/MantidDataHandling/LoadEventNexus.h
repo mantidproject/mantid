@@ -8,7 +8,6 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/InstrumentFileFinder.h"
-#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataHandling/DllConfig.h"
@@ -23,6 +22,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -50,7 +50,7 @@ namespace DataHandling {
  * Custom exception so we can re-propagate this error and
  * handle all other errors.
  */
-class InvalidLogPeriods : public std::invalid_argument {
+class MANTID_DATAHANDLING_DLL InvalidLogPeriods : public std::invalid_argument {
 public:
   InvalidLogPeriods(const std::string &msg) : std::invalid_argument(msg) {}
 };
@@ -58,6 +58,8 @@ public:
 bool exists(Nexus::File &file, const std::string &name);
 
 bool exists(const std::map<std::string, std::string> &entries, const std::string &name);
+
+MANTID_DATAHANDLING_DLL bool doPerformISISEventShift(Nexus::File &file, std::string &topEntryName);
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
@@ -71,7 +73,7 @@ bool exists(const std::map<std::string, std::string> &entries, const std::string
 
   @date Sep 27, 2010
   */
-class MANTID_DATAHANDLING_DLL LoadEventNexus : public API::NexusFileLoader {
+class MANTID_DATAHANDLING_DLL LoadEventNexus : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 
 public:
   LoadEventNexus();
@@ -92,7 +94,7 @@ public:
   /// Category
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
-  int confidence(Nexus::NexusDescriptor &descriptor) const override;
+  int confidence(Nexus::NexusDescriptorLazy &descriptor) const override;
 
   template <typename T>
   static std::shared_ptr<BankPulseTimes>
@@ -110,8 +112,7 @@ public:
                                       const int &nPeriods, const std::string &nexusfilename, std::string &status);
 
   template <typename T>
-  static void loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name,
-                                const Nexus::NexusDescriptor &descriptor);
+  static void loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name);
 
   /// Load instrument from Nexus file if possible, else from IDF spacified by Nexus file
   template <typename T>
@@ -193,7 +194,7 @@ private:
   void init() override;
 
   /// Execution code
-  void execLoader() override;
+  void exec() override;
 
   std::map<std::string, std::string> validateInputs() override;
 
@@ -267,17 +268,6 @@ private:
 template <typename T>
 void makeTimeOfFlightDataFuzzy(Nexus::File &file, T localWorkspace, const std::string &binsName, size_t start_wi = 0,
                                size_t end_wi = 0) {
-  const std::string EVENT_TIME_SHIFT_TAG("event_time_offset_shift");
-  // first check if the data is already randomized
-  const auto entries = file.getEntries();
-  if (entries.find(EVENT_TIME_SHIFT_TAG) != entries.end()) {
-    std::string event_shift_type;
-    file.readData(EVENT_TIME_SHIFT_TAG, event_shift_type);
-    if (event_shift_type == "random") {
-      return;
-    }
-  }
-
   // if the data is not randomized randomize it uniformly within each bin
   file.openData(binsName);
   // time of flights of events
@@ -351,31 +341,17 @@ void makeTimeOfFlightDataFuzzy(Nexus::File &file, T localWorkspace, const std::s
  *modified.
  * @param entry_name :: An NXentry tag in the file
  * @param classType :: The type of the events: either detector or monitor
- * @param descriptor :: input descriptor carrying metadata information
  */
 template <typename T>
 void adjustTimeOfFlightISISLegacy(Nexus::File &file, T localWorkspace, const std::string &entry_name,
-                                  const std::string &classType, const Nexus::NexusDescriptor *descriptor = nullptr) {
+                                  const std::string &classType) {
   bool done = false;
   // Go to the root, and then top entry
   file.openAddress("/");
   file.openGroup(entry_name, "NXentry");
 
-  // NexusDescriptor
-  if (descriptor != nullptr) {
-    // not an ISIS file
-    if (!descriptor->isEntry("/" + entry_name + "/detector_1_events")) {
-      return;
-    }
-  }
-
   using string_map_t = std::map<std::string, std::string>;
   string_map_t entries = file.getEntries();
-
-  if (entries.find("detector_1_events") == entries.end()) { // not an ISIS file
-    return;
-  }
-
   // try if monitors have their own bins
   if (classType == "NXmonitor") {
     std::vector<std::string> bankNames;
@@ -596,14 +572,13 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
 //-----------------------------------------------------------------------------
 /** Load the run number and other meta data from the given bank */
 template <typename T>
-void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name,
-                                       const Nexus::NexusDescriptor &descriptor) {
+void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name) {
   // Open the file
   Nexus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
 
   // get the title
-  if (descriptor.isEntry("/" + entry_name + "/title", "SDS")) {
+  if (file.hasData("/" + entry_name + "/title")) {
     file.openData("title");
     if (file.getInfo().type == NXnumtype::CHAR) {
       std::string title = file.getStrData();
@@ -614,7 +589,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
   }
 
   // get the notes
-  if (descriptor.isEntry("/" + entry_name + "/notes", "SDS")) {
+  if (file.hasData("/" + entry_name + "/notes")) {
     file.openData("notes");
     if (file.getInfo().type == NXnumtype::CHAR) {
       std::string notes = file.getStrData();
@@ -625,7 +600,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
   }
 
   // Get the run number
-  if (descriptor.isEntry("/" + entry_name + "/run_number", "SDS")) {
+  if (file.hasData("/" + entry_name + "/run_number")) {
     file.openData("run_number");
     std::string run;
     if (file.getInfo().type == NXnumtype::CHAR) {
@@ -644,7 +619,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
   }
 
   // get the experiment identifier
-  if (descriptor.isEntry("/" + entry_name + "/experiment_identifier", "SDS")) {
+  if (file.hasData("/" + entry_name + "/experiment_identifier")) {
     file.openData("experiment_identifier");
     std::string expId;
     if (file.getInfo().type == NXnumtype::CHAR) {
@@ -658,10 +633,10 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
 
   // get the sample name - nested try/catch to leave the handle in an
   // appropriate state
-  if (descriptor.isEntry("/" + entry_name + "/sample", "NXsample")) {
+  if (file.hasGroup("/" + entry_name + "/sample", "NXsample")) {
     file.openGroup("sample", "NXsample");
     try {
-      if (descriptor.isEntry("/" + entry_name + "/sample/name", "SDS")) {
+      if (file.hasData("/" + entry_name + "/sample/name")) {
         file.openData("name");
         const auto info = file.getInfo();
         std::string sampleName;
@@ -688,7 +663,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
   }
 
   // get the duration
-  if (descriptor.isEntry("/" + entry_name + "/duration", "SDS")) {
+  if (file.hasData("/" + entry_name + "/duration")) {
     file.openData("duration");
     std::vector<double> duration;
     file.getDataCoerce(duration);

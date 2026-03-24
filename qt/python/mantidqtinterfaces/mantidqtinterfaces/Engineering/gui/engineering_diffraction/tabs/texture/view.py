@@ -247,6 +247,8 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
 
         self.toolbar = NavigationToolbar(self.canvas, self)
 
+        self.canvas.setFocusPolicy(QtCore.Qt.StrongFocus)
+
         layout = QVBoxLayout()
         self.plot_canvas.setLayout(layout)
         layout.addWidget(self.toolbar)

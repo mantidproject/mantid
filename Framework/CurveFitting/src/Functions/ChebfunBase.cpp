@@ -11,10 +11,10 @@
 #include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidCurveFitting/HalfComplex.h"
 
-#include <gsl/gsl_eigen.h>
-#include <gsl/gsl_errno.h>
 #include <gsl/gsl_fft_halfcomplex.h>
 #include <gsl/gsl_fft_real.h>
+
+#include <Eigen/Eigenvalues>
 
 #include <algorithm>
 #include <cassert>
@@ -684,21 +684,16 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
     C.set(N + i, lasti, tmp);
   }
 
-  gsl_vector_complex *eigenval = gsl_vector_complex_alloc(N2);
-  auto workspace = gsl_eigen_nonsymm_alloc(N2);
-
-  EigenMatrix C_tr(C.tr());
-  gsl_matrix_view C_tr_gsl = getGSLMatrixView(C_tr.mutator());
-  gsl_eigen_nonsymm(&C_tr_gsl.matrix, eigenval, workspace);
-  gsl_eigen_nonsymm_free(workspace);
+  Eigen::EigenSolver<Eigen::MatrixXd> es(C.mutator());
+  const Eigen::VectorXcd evals = es.eigenvalues();
 
   const double Dx = endX() - startX();
   bool isFirst = true;
   double firstIm = 0;
   for (size_t i = 0; i < N2; ++i) {
-    auto val = gsl_vector_complex_get(eigenval, i);
-    double re = GSL_REAL(val);
-    double im = GSL_IMAG(val);
+    const std::complex<double> val = evals[static_cast<Eigen::Index>(i)];
+    double re = val.real();
+    double im = val.imag();
     double ab = re * re + im * im;
     if (fabs(ab - 1.0) > 1e-2) {
       isFirst = true;
@@ -715,8 +710,6 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
       isFirst = true;
     }
   }
-  gsl_vector_complex_free(eigenval);
-
   return r;
 }
 
@@ -824,25 +817,24 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
       return y;
     }
 
-    // high frequency filter values: smooth decreasing function
-    auto ri0f = static_cast<double>(i0 + 1);
-    double xm = (1.0 + ri0f) / 2;
-    ym /= ri0f;
-    double a1 = (xy - ri0f * xm * ym) / (xx - ri0f * xm * xm);
-    double b1 = ym - a1 * xm;
-
-    // std::cerr << "(a1,b1) = (" << a1 << ',' << b1 << ')' << '\n';
-
     // calculate coeffs of a cubic c3*i^3 + c2*i^2 + c1*i + c0
     // which will replace the linear a1*i + b1 in building the
     // second part of the filter
     double c0, c1, c2, c3;
     {
+      // high frequency filter values: smooth decreasing function
+      auto ri0f = static_cast<double>(i0 + 1);
+      double xm = (1.0 + ri0f) / 2;
+      ym /= ri0f;
+
       auto x0 = double(i0 + 1);
       auto x1 = double(n + 1);
       double sigma = g_tolerance / noise / 10;
       double s = sigma / (1.0 - sigma);
       double m1 = log(s);
+      double a1 = (xy - ri0f * xm * ym) / (xx - ri0f * xm * xm);
+      double b1 = ym - a1 * xm;
+      // std::cerr << "(a1,b1) = (" << a1 << ',' << b1 << ')' << '\n';
       double m0 = a1 * x0 + b1;
       if (a1 < 0.0) {
         c3 = 0.0;

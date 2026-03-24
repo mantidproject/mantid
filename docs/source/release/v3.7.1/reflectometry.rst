@@ -2,9 +2,6 @@
 Reflectometry Changes
 =====================
 
-.. contents:: Table of Contents
-   :local:
-
 Reflectometry Instruments
 --------------------------
 

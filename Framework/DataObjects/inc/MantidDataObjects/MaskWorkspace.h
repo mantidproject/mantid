@@ -25,6 +25,7 @@ public:
   MaskWorkspace(std::size_t numvectors);
   MaskWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument, const bool includeMonitors = false);
   MaskWorkspace(const API::MatrixWorkspace_const_sptr &parent);
+  inline MaskWorkspace(const std::vector<detid_t> &detids) : SpecialWorkspace2D(detids) { this->clearMask(); }
 
   /// Returns a clone of the workspace
   std::unique_ptr<MaskWorkspace> clone() const { return std::unique_ptr<MaskWorkspace>(doClone()); }
@@ -94,3 +95,12 @@ using MaskWorkspace_const_sptr = std::shared_ptr<const MaskWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid
+
+#ifndef DataObjects_EXPORTS
+#include "MantidAPI/WorkspaceProperty.h"
+namespace Mantid::API {
+/// @cond
+extern template class MANTID_DATAOBJECTS_DLL WorkspaceProperty<DataObjects::MaskWorkspace>;
+/// @endcond
+} // namespace Mantid::API
+#endif

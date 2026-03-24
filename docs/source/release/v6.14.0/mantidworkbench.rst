@@ -2,9 +2,6 @@
 Mantid Workbench Changes
 ========================
 
-.. contents:: Table of Contents
-   :local:
-
 New Features
 ------------
 - The ability to scale axes and colorbars to ``symlog`` has been added to plots. An option to specify the extent of the linear portion of the ``symlog`` axis (``linthresh``) has been added to the axes tab widget in the plot config dialog.

@@ -227,7 +227,7 @@ Workspace_sptr GenericDataProcessorAlgorithm<Base>::load(const std::string &inpu
   if (AnalysisDataService::Instance().doesExist(inputData)) {
     inputWS = AnalysisDataService::Instance().retrieve(inputData);
   } else {
-    std::string foundFile = FileFinder::Instance().getFullPath(inputData);
+    auto foundFile = FileFinder::Instance().getFullPath(inputData);
     if (foundFile.empty()) {
       // Get facility extensions
       FacilityInfo facilityInfo = ConfigService::Instance().getFacility();
@@ -236,11 +236,10 @@ Workspace_sptr GenericDataProcessorAlgorithm<Base>::load(const std::string &inpu
     }
 
     if (!foundFile.empty()) {
-      std::filesystem::path p(foundFile);
-      const std::string outputWSName = p.stem().string();
+      const std::string outputWSName = foundFile.stem().string();
 
       auto loadAlg = createChildAlgorithm(m_loadAlg);
-      loadAlg->setProperty(m_loadAlgFileProp, foundFile);
+      loadAlg->setProperty(m_loadAlgFileProp, foundFile.string());
       if (!loadQuiet) {
         loadAlg->setAlwaysStoreInADS(true);
       }

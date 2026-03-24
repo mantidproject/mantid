@@ -1,0 +1,25 @@
+# example `sessions.yml`
+
+##
+## Values from the environment, expressed as `${KEY}`, will be replaced during load.
+##
+
+# Notes:
+# - At the moment, we're simply *ignoring* any metadata-only files.
+#   Including these files in the playback generates "duplicate device-descriptor for XX"
+#   and "XX is not a time-series property" errors;
+# - This should be OK because the event-bearing files do contain the device-descriptor sections.
+#
+
+base_path: ${BUILD}/adara_player_tmp/input_data
+sessions:
+  - # session 1:
+#    - ds00000003-s00000001-run-68851.adara  # initial metadata & run status
+    - ds00000001-s00000001-run-68851.adara  # events
+    - m00000001-f00000001-run-68851.adara   # events
+    - ds00000001-s00000002-run-68851.adara  # events
+    - m00000001-f00000002-run-68851.adara   # events
+    - ds00000001-s00000003-run-68851.adara  # events
+#    - prologue-ds00000001-run-68851.adara   # trailing metadata: WARNING -- may be duplicate
+#    - prologue-ds00000003-run-68851.adara   # metadata: " "
+#    - prologue-m00000001-run-68851.adara    # metadata: " "

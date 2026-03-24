@@ -30,7 +30,7 @@ using namespace API;
 using namespace Nexus;
 using namespace HistogramData;
 
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadILLTOF3)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF3)
 
 /**
  * Return the confidence with with this algorithm can load the file

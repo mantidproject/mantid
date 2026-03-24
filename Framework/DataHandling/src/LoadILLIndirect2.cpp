@@ -35,7 +35,7 @@ using namespace API;
 using namespace Nexus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadILLIndirect2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect2)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

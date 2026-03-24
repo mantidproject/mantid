@@ -164,6 +164,7 @@ public:
     TS_ASSERT_THROWS(i.markAsSamplePos(sss), const std::runtime_error &);
     delete s;
     delete ss;
+    delete sss;
   }
 
   void testBeamDirection() { TS_ASSERT_EQUALS(instrument.getBeamDirection(), V3D(0, 0, 1)); }

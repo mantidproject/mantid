@@ -22,7 +22,7 @@
 
 namespace Mantid::DataHandling {
 
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadILLSALSA)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSALSA)
 
 const size_t LoadILLSALSA::VERTICAL_NUMBER_PIXELS = 256;
 const size_t LoadILLSALSA::HORIZONTAL_NUMBER_PIXELS = 256;
@@ -81,7 +81,6 @@ void LoadILLSALSA::exec() {
   switch (fileType) {
   case NONE:
     throw std::runtime_error("The Nexus file your are trying to open is not supported by the SALSA loader.");
-    break;
   case V1:
     loadNexusV1(h5file);
 

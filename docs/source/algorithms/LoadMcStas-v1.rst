@@ -26,8 +26,6 @@ The ErrorBarsSetTo1 property applies to event data, but not to histogram data.
 
 LoadMcStas replaces LoadMcStasEventNexus. LoadMcStas can be used for
 reading McStas 2.1 histogram and event data.
-:ref:`algm-LoadMcStasNexus` can be used
-for reading McStas 2.0 histogram data.
 
 Information about the required structure of the input Nexus file
 ################################################################

@@ -30,6 +30,10 @@ public:
   explicit StepScan(QWidget *parent = nullptr);
   ~StepScan() override;
 
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  StepScan(const StepScan &) = delete;
+  StepScan &operator=(const StepScan &) = delete;
+
 signals:
   void logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr & /*_t1*/);
   void logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr & /*_t1*/);

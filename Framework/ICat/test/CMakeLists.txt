@@ -9,6 +9,8 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(ICatTest ${TEST_FILES})
   target_link_libraries(ICatTest PRIVATE Mantid::ICat Mantid::API Mantid::DataObjects)
 
+  target_precompile_headers(ICatTest PRIVATE <cxxtest/WrappedTestSuite.h> <set> <string> <vector>)
+
   add_framework_test_helpers(ICatTest)
 
   if(TARGET GTest::gmock AND TARGET GTest::gtest)

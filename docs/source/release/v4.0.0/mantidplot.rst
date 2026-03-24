@@ -2,9 +2,6 @@
 MantidPlot Changes
 ==================
 
-.. contents:: Table of Contents
-   :local:
-
 Changes
 -------
 

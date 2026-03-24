@@ -1,0 +1,1 @@
+- The :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` GSAS-II tab allows filtering the region when loading focused data.

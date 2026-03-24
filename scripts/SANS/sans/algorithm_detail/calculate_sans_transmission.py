@@ -266,8 +266,8 @@ def _get_corrected_wavelength_workspace(workspace, wav_range, detector_ids, calc
         wavelength_high = calculate_transmission_state.wavelength_full_range_high
     else:
         fit_state = calculate_transmission_state.fit[data_type.value]
-        wavelength_low = fit_state.wavelength_low if fit_state.wavelength_low else wav_range[0]
-        wavelength_high = fit_state.wavelength_high if fit_state.wavelength_high else wav_range[1]
+        wavelength_low = fit_state.wavelength_low or wav_range[0]
+        wavelength_high = fit_state.wavelength_high or wav_range[1]
 
     wavelength_step = calculate_transmission_state.wavelength_interval.wavelength_step
     rebin_type = calculate_transmission_state.rebin_type

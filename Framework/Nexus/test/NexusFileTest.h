@@ -1471,6 +1471,7 @@ public:
     TS_ASSERT_EQUALS(entries.count("soft_link"), 1);
     TS_ASSERT_EQUALS(entries["soft_link"], "NX_UNKNOWN_GROUP");
   }
+
   // ##################################################################################################################
 
 #ifdef _WIN32

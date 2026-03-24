@@ -1,2 +1,0 @@
-- Improve stabiltiy of :ref:`func-Gaussian` fits by change of internal 'active' parameter to ``1/sigma`` instead of ``1/sigma^2``.
-- Fix normalisation in histogram evaluation of :ref:`func-Gaussian` function and Jacobian such that they are now consistent with ``CentrePoint`` evaluation for small bin-widths.

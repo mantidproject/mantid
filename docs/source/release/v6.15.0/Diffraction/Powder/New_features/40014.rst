@@ -1,1 +1,0 @@
-- HFIR MIDAS instrument definition added

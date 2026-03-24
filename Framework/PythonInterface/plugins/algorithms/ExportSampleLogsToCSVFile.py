@@ -486,7 +486,7 @@ def getLocalTimeShiftInSecond(utctime, localtimezone, currentlogger=None):
     DataAndTime
     """
     from datetime import datetime
-    from dateutil import tz
+    from zoneinfo import ZoneInfo
 
     if currentlogger:
         currentlogger.information("Input UTC time = %s" % (str(utctime)))
@@ -496,8 +496,8 @@ def getLocalTimeShiftInSecond(utctime, localtimezone, currentlogger=None):
         return 0
 
     # Find out difference in time zone
-    from_zone = tz.gettz("UTC")
-    to_zone = tz.gettz(localtimezone)
+    from_zone = ZoneInfo("UTC")
+    to_zone = ZoneInfo(localtimezone)
 
     t1str = (str(utctime)).split(".")[0].strip()
     if currentlogger:

@@ -29,6 +29,10 @@ class WorkspaceGroupTest_WorkspaceGroupObserver {
   Poco::NObserver<WorkspaceGroupTest_WorkspaceGroupObserver, Mantid::API::GroupUpdatedNotification>
       m_workspaceGroupUpdateObserver;
 
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  WorkspaceGroupTest_WorkspaceGroupObserver(const WorkspaceGroupTest_WorkspaceGroupObserver &) = delete;
+  WorkspaceGroupTest_WorkspaceGroupObserver &operator=(const WorkspaceGroupTest_WorkspaceGroupObserver &) = delete;
+
 public:
   bool received;
   WorkspaceGroupTest_WorkspaceGroupObserver()

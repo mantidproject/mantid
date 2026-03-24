@@ -11,9 +11,6 @@ Mantid 3.10.0 Release Notes
 
    Surface plot of a temperature ramp from 1.5 to 293 Kelvin, recorded on WISH
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 3.10.0 of Mantid. This release includes some new plotting functionality within MantidPlot to aid in the creation of advanced plot types, such as the one shown in the image. There have also been some significant performance enhancements for various algorithms with the framework.
 
 These are just some of many improvements in this release, so please take a

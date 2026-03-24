@@ -36,3 +36,5 @@ Workspace Context Menu
 
 The right-click menu on workspaces shows options to plot, show types of
 metadata, rename the workspace, save the workspace or remove it.
+If multiple workspaces are selected, only options supported by all the
+selected workspaces will appear in the context menu.

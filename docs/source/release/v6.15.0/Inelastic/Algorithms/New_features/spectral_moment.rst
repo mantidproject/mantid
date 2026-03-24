@@ -1,1 +1,0 @@
-- A new algorithm :ref:`SpectralMomentMD <algm-SpectralMomentMD>` can now be used to calculate sum rules for inelastic multi-dimensional event workspaces.

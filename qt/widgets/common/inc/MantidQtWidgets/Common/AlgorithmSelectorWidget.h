@@ -61,6 +61,11 @@ class EXPORT_OPT_MANTIDQT_COMMON AlgorithmSelectorWidget : public QWidget {
 public:
   AlgorithmSelectorWidget(QWidget *parent);
   ~AlgorithmSelectorWidget() override;
+
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  AlgorithmSelectorWidget(const AlgorithmSelectorWidget &) = delete;
+  AlgorithmSelectorWidget &operator=(const AlgorithmSelectorWidget &) = delete;
+
   SelectedAlgorithm getSelectedAlgorithm();
   void setSelectedAlgorithm(QString &algName);
   bool showExecuteButton() const;

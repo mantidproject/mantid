@@ -291,4 +291,32 @@ public:
       TS_ASSERT_EQUALS(num_steps, 2); // calculated by hand
     }
   }
+
+  // regression test: constructing with a pulse_roi that contains no events must not infinite-loop
+  void test_noEventsInPulseROI() {
+    // event_index where pulses 1 and 2 are empty (repeated value 10)
+    auto eventIndices = std::make_shared<std::vector<uint64_t>>();
+    eventIndices->push_back(0);
+    eventIndices->push_back(10);
+    eventIndices->push_back(10); // pulse 1: empty
+    eventIndices->push_back(10); // pulse 2: empty
+    eventIndices->push_back(20);
+
+    constexpr size_t start_event_index{0};
+    constexpr size_t total_events{20};
+
+    // roi selects only pulses 1 and 2, both of which have no events
+    std::vector<size_t> roi{1, 3};
+    PulseIndexer indexer(eventIndices, start_event_index, total_events, entry_name, roi);
+
+    // the roi contains no events, so the indexer should produce an empty range
+    TS_ASSERT_EQUALS(indexer.getFirstPulseIndex(), indexer.getLastPulseIndex());
+
+    size_t num_steps{0};
+    for (const auto &iter : indexer) {
+      (void)iter;
+      num_steps++;
+    }
+    TS_ASSERT_EQUALS(num_steps, 0);
+  }
 };

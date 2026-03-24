@@ -4,9 +4,6 @@
 MantidWorkbench
 ===============
 
-.. contents:: Table of Contents
-   :local:
-
 .. figure:: ../../images/Workbench/WorkbenchOverview.png
    :alt: Workbench
    :align: center

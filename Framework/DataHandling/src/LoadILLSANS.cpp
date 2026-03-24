@@ -37,7 +37,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Nexus;
 
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadILLSANS)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

@@ -16,7 +16,7 @@ namespace Kernel {
 
 using OptionalPath = std::optional<std::string>;
 
-class CatalogConfigService {
+class MANTID_KERNEL_DLL CatalogConfigService {
 public:
   virtual OptionalPath preferredMountPoint() const = 0;
   virtual ~CatalogConfigService() = default;

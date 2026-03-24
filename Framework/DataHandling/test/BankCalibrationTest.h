@@ -42,7 +42,7 @@ public:
     detid_t DETID_MIN(2);
     detid_t DETID_MAX(4);
     // all detectors go into the bank
-    const std::vector<detid_t> det_in_group{2, 3, 4};
+    const std::set<detid_t> det_in_group{2, 3, 4};
 
     // only get a subset of pixels
     BankCalibration bankCalib(TIME_CONVERSION, det_in_group, calibration_map, scale_map, mask);
@@ -77,7 +77,7 @@ public:
     detid_t DETID_MIN(3);
     detid_t DETID_MAX(4);
     // all detectors go into the bank
-    const std::vector<detid_t> det_in_group{3, 4}; // skipping detid=2
+    const std::set<detid_t> det_in_group{3, 4}; // skipping detid=2
 
     // only get a subset of pixels
     BankCalibration bankCalib(TIME_CONVERSION, det_in_group, calibration_map, scale_map, mask);
@@ -109,8 +109,8 @@ public:
     // id range to use
     detid_t DETID_MIN(1);
     detid_t DETID_MAX(4);
-    // all detectors go into the bank implied by empty grouping
-    const std::vector<detid_t> det_in_group;
+    // all detectors go into the bank
+    const std::set<detid_t> det_in_group{1, 2, 3, 4};
 
     // only get a subset of pixels
     BankCalibration bankCalib(TIME_CONVERSION, det_in_group, calibration_map, scale_map, mask);

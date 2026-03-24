@@ -1,1 +1,0 @@
-- Peak overlays in the new Instrument View now work when an instrument has multiple detector IDs per spectrum.

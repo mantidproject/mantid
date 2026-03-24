@@ -78,7 +78,7 @@ void LoadErrorEventsNexus::exec() {
 
   // load run metadata
   try {
-    LoadEventNexus::loadEntryMetadata(filename, outWS, "entry", descriptor);
+    LoadEventNexus::loadEntryMetadata(filename, outWS, "entry");
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }

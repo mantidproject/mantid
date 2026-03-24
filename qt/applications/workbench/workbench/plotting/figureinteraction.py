@@ -147,15 +147,21 @@ class FigureInteraction(object):
         if ax is None or isinstance(ax, Axes3D) or len(ax.get_images()) == 0 and len(ax.get_lines()) == 0:
             return
 
-        if event.key == "k":
-            current_xscale = ax.get_xscale()
-            next_xscale = self._get_next_axis_scale(current_xscale)
-            self._quick_change_axes(ax, next_xscale, ax.get_yscale())
-
-        if event.key == "l":
-            current_yscale = ax.get_yscale()
-            next_yscale = self._get_next_axis_scale(current_yscale)
-            self._quick_change_axes(ax, ax.get_xscale(), next_yscale)
+        match event.key:
+            case "k":
+                current_xscale = ax.get_xscale()
+                next_xscale = self._get_next_axis_scale(current_xscale)
+                self._quick_change_axes(ax, next_xscale, ax.get_yscale())
+            case "l":
+                current_yscale = ax.get_yscale()
+                next_yscale = self._get_next_axis_scale(current_yscale)
+                self._quick_change_axes(ax, ax.get_xscale(), next_yscale)
+            case "c" | "left" | "backspace" | "MouseButton.BACK":
+                self.toolbar_manager.update_navigate_mpl_stack(nav_forward=False)
+            case "v" | "right" | "MouseButton.FORWARD":
+                self.toolbar_manager.update_navigate_mpl_stack(nav_forward=True)
+            case "h" | "r" | "home":
+                self.toolbar_manager.emit_sig_home_clicked()
 
     def _get_next_axis_scale(self, current_scale):
         next_index = AXES_SCALE_MENU_OPTS.index(current_scale) + 1
@@ -828,8 +834,8 @@ class FigureInteraction(object):
             # to duplicate the handling.
             colorbar_log = False
             if ax.images:
-                colorbar_scale = ax.images[-1].norm.__class__
-                colorbar_log = isinstance(colorbar_scale, LogNorm) or isinstance(colorbar_scale, SymLogNorm)
+                norm = ax.images[-1].norm
+                colorbar_log = isinstance(norm, (LogNorm, SymLogNorm))
                 if colorbar_log:
                     self._change_colorbar_axes(Normalize)
 
@@ -850,7 +856,7 @@ class FigureInteraction(object):
                     if cb:
                         datafunctions.add_colorbar_label(cb, ax.get_figure().axes)
                 if colorbar_log:  # If it had a log scaled colorbar before, put it back.
-                    self._change_colorbar_axes(colorbar_scale)
+                    self._change_colorbar_axes(norm.__class__)
 
                 axesfunctions.update_colorplot_datalimits(ax, ax.images)
 

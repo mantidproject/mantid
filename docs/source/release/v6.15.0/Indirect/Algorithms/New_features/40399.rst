@@ -1,4 +1,0 @@
-- Abins2D algorithm will now validate combined chopper settings
-  (Chopper, IncidentEnergy, ChopperFrequency) for pychop-based
-  instruments (MAPS, MARI, MERLIN) and prevent algorithm running if
-  there would be no neutron transmission.

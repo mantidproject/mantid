@@ -47,6 +47,9 @@ attr_mapping = [
     ParamMapEntry(ext_name="per_detector_vanadium", int_name="per_detector_vanadium", optional=True),
     ParamMapEntry(ext_name="placzek_order", int_name="placzek_order", optional=True),
     ParamMapEntry(ext_name="q_lims", int_name="q_lims", optional=True),
+    ParamMapEntry(ext_name="stitch_points", int_name="stitch_points", optional=True),
+    ParamMapEntry(ext_name="overlap_width", int_name="overlap_width", optional=True),
+    ParamMapEntry(ext_name="stitch_lims", int_name="stitch_lims", optional=True),
     ParamMapEntry(ext_name="raw_data_cropping_values", int_name="raw_data_crop_values"),
     ParamMapEntry(ext_name="run_number", int_name="run_number"),
     ParamMapEntry(ext_name="sample_empty", int_name="sample_empty", optional=True),
@@ -64,5 +67,6 @@ attr_mapping = [
     ParamMapEntry(ext_name="pdf_output_name", int_name="pdf_output_name", optional=True),
     ParamMapEntry(ext_name="wavelength_lims", int_name="wavelength_lims", optional=True),
     ParamMapEntry(ext_name="r_lims", int_name="r_lims", optional=True),
+    ParamMapEntry(ext_name="enforce_high_q_to_1", int_name="enforce_high_q_to_1", optional=True),
 ]
 attr_mapping.extend(COMMON_PARAM_MAPPING)

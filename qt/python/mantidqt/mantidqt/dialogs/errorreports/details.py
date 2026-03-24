@@ -23,5 +23,5 @@ class MoreDetailsDialog(moreDetailsUIBase, moreDetailsUI):
         self.user_text.setText(mantid_user_text)
 
     def set_stacktrace_text(self, text):
-        text = text if text else DEFAULT_STACKTRACE_TEXT
+        text = text or DEFAULT_STACKTRACE_TEXT
         self.stacktrace_text.setText(text)

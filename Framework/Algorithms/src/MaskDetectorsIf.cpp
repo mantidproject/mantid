@@ -10,6 +10,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <fstream>
@@ -53,6 +54,14 @@ void MaskDetectorsIf::init() {
   declareProperty("Operator", "Equal", std::make_shared<StringListValidator>(select_operator),
                   "Operator to compare to given values.");
   declareProperty("Value", 0.0);
+  auto positiveIntValidator = std::make_shared<BoundedValidator<int>>();
+  positiveIntValidator->setLower(0);
+  declareProperty(
+      std::make_unique<PropertyWithValue<int>>("StartWorkspaceIndex", 0, positiveIntValidator, Direction::Input),
+      "The start of the spectrum range on which to apply the mask");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("EndWorkspaceIndex", EMPTY_INT(), positiveIntValidator,
+                                                           Direction::Input),
+                  "The end of the spectrum range on which to apply the mask.");
   declareProperty(std::make_unique<API::FileProperty>("InputCalFile", "", API::FileProperty::OptionalLoad, ".cal"),
                   "The name of the CalFile with grouping data.");
   declareProperty(std::make_unique<API::FileProperty>("OutputCalFile", "", API::FileProperty::OptionalSave, ".cal"),
@@ -75,6 +84,15 @@ std::map<std::string, std::string> MaskDetectorsIf::validateInputs() {
   } else if (noInputFile && !noOutputFile) {
     issues["InputCalFile"] = "Input file name is missing.";
   }
+  if (!isDefault("EndWorkspaceIndex")) {
+    const int nspec_start = getProperty("StartWorkspaceIndex");
+    const int nspec_end = getProperty("EndWorkspaceIndex");
+    if (nspec_end < nspec_start) {
+      issues["EndWorkspaceIndex"] =
+          "EndWorkspaceIndex should be more than StartWorkspaceIndex. Specify a value greater than " +
+          std::to_string(nspec_start) + ".\n";
+    }
+  }
   return issues;
 }
 
@@ -87,8 +105,7 @@ void MaskDetectorsIf::exec() {
     g_log.error() << "No InputCalFle or OutputWorkspace specified; " << this->name() << " will do nothing.\n";
     return;
   }
-  const size_t nspec = m_inputW->getNumberHistograms();
-  for (size_t i = 0; i < nspec; ++i) {
+  for (int i = m_start_ix; i <= m_end_ix; ++i) {
     // Get the list of udets contributing to this spectra
     const auto &dets = m_inputW->getSpectrum(i).getDetectorIDs();
 
@@ -107,7 +124,7 @@ void MaskDetectorsIf::exec() {
         }
       }
     }
-    const double p = static_cast<double>(i) / static_cast<double>(nspec);
+    const double p = static_cast<double>(i) / static_cast<double>(m_end_ix - m_start_ix);
     progress(p, "Generating detector map");
   }
 
@@ -173,6 +190,32 @@ void MaskDetectorsIf::retrieveProperties() {
     m_compar_f = std::not_equal_to<double>();
   else if (select_operator == "NotFinite")
     m_compar_f = not_finite<double>();
+
+  validateAndSetIxProperties();
+}
+
+/** Execution code.
+ *  @throw std::invalid_argument If StartWorkspaceIndex is greater than or equal to number of histograms.
+ *  @throw std::invalid_argument If EndWorkspaceIndex is greater than or equal to number of histograms.
+ */
+void MaskDetectorsIf::validateAndSetIxProperties() {
+  int nspec = static_cast<int>(m_inputW->getNumberHistograms());
+  m_start_ix = getProperty("StartWorkspaceIndex");
+  if (m_start_ix > nspec - 2) {
+    throw std::invalid_argument("StartWorkspaceIndex should be greater than or equal to 0 and less than " +
+                                std::to_string(nspec - 1) + ". Value provided is invalid.");
+  }
+  if (isDefault("EndWorkspaceIndex")) {
+    m_end_ix = nspec - 1;
+  } else {
+    int end_ix = getProperty("EndWorkspaceIndex");
+    if (end_ix > nspec - 1) {
+      throw std::invalid_argument("EndWorkspaceIndex should be greater than 0 and less than " + std::to_string(nspec) +
+                                  ". Value provided is invalid.");
+    } else {
+      m_end_ix = end_ix;
+    }
+  }
 }
 
 /**

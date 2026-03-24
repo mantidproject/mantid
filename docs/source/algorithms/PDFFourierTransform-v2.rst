@@ -16,8 +16,8 @@ spectral density :math:`S(Q)`, :math:`S(Q)-1`, or :math:`Q[S(Q)-1]`
 reduced pair distribution function :math:`G(r)`, the pair distribution function :math:`g(r)`, the
 radial distribution function :math:`RDF(r)`, and the total radial distribution function :math:`G_k(r)`.
 
-The output from this algorithm will have an x-range between 0.0 and the maximum parameter of the output,
-i.e. if converting from `g(r)` to `S(Q)` the output will be between 0.0 and `Qmax`.
+The output from this algorithm will have an x-range between the minimum and maximum parameter of the output,
+i.e. if converting from `g(r)` to `S(Q)` the output will be between `Qmin` and `Qmax`.
 
 The spectrum density should be in the Q-space (\ **MomentumTransfer**\ ) :ref:`units <Unit Factory>` .
 (d-spacing is not supported any more. Contact development team to fix that and enable **dSpacing** again)

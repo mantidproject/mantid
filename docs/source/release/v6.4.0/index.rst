@@ -9,9 +9,6 @@ Mantid 6.4.0 Release Notes
    :width: 385px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 We are proud to announce version 6.4.0 of Mantid.
 
 Many of the updates in this version have focused on improvements for users, building on existing algorithms and interfaces.

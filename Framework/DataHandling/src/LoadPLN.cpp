@@ -911,6 +911,6 @@ void LoadPLN::exec() {
 }
 
 // register the algorithms into the AlgorithmFactory
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadPLN)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadPLN)
 
 } // namespace Mantid::DataHandling

@@ -42,8 +42,8 @@ called *ABCDEF*. The facilities attributes have the following meanings:
 -  ``FileExtensions`` should list the extensions of the data files for
    the facility. The first is taken as the preferred extension.
 - ``timezone`` specifies what timezone the facility is in for use with
-  `pytz <https://pythonhosted.org/pytz/>`_. Valid timezones can be found
-  in python by looking at the list in ``pytz.all_timezones``
+  `zoneinfo <https://docs.python.org/3/library/zoneinfo.html>`_. Valid timezones can be found
+  in python by looking at the set returned by ``zoneinfo.available_timezones()``
 
 An instrument can have further attributes which define properties of the
 that instrument rather than the facility as a whole, e.g.

@@ -10,6 +10,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/Converters/PyObjectToV3D.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include <boost/none.hpp>
 #include <boost/python/class.hpp>
@@ -26,6 +27,7 @@ using Mantid::API::Column_sptr;
 using Mantid::Kernel::SpecialCoordinateSystem;
 using Mantid::Kernel::V3D;
 using Mantid::PythonInterface::Converters::PyObjectToV3D;
+using Mantid::PythonInterface::Converters::PySequenceToVector;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 
 GET_POINTER_SPECIALIZATION(IPeaksWorkspace)
@@ -75,6 +77,12 @@ void addPeak2(IPeaksWorkspace &self, const object &data, const SpecialCoordinate
 /// Remove a peak and send an AfterReplaceNotification for subscribed viewers, such as sliceviewer's
 void removePeak(IPeaksWorkspace &self, int peak_num) {
   self.removePeak(peak_num);
+  self.modified();
+}
+
+/// Remove all specified peaks
+void removePeaks(IPeaksWorkspace &self, const boost::python::object &peak_nums) {
+  self.removePeaks(PySequenceToVector<int32_t>(peak_nums)());
   self.modified();
 }
 
@@ -263,6 +271,7 @@ void export_IPeaksWorkspace() {
       .def("addPeak", addPeak, (arg("self"), arg("peak")), "Add a peak to the workspace")
       .def("addPeak", addPeak2, (arg("self"), arg("data"), arg("coord_system")), "Add a peak to the workspace")
       .def("removePeak", removePeak, (arg("self"), arg("peak_num")), "Remove a peak from the workspace")
+      .def("removePeaks", removePeaks, (arg("self"), arg("peak_num")), "Remove specified peaks from the workspace")
       .def("getPeak", &IPeaksWorkspace::getPeakPtr, (arg("self"), arg("peak_num")), return_internal_reference<>(),
            "Returns a peak at the given index")
       .def("createPeak", createPeakQLab, (arg("self"), arg("data")), return_value_policy<manage_new_object>(),

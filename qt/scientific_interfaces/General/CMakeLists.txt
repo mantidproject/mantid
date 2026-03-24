@@ -8,6 +8,19 @@ set(MOC_FILES FitScriptGenerator.h StepScan.h)
 
 set(UI_FILES StepScan.ui)
 
+set(PRECOMP_HEADERS
+    <MantidAPI/Algorithm.h>
+    <MantidAPI/MatrixWorkspace_fwd.h>
+    <MantidKernel/System.h>
+    <QDialog>
+    <QString>
+    <QWidget>
+    <map>
+    <set>
+    <string>
+    <vector>
+)
+
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesGeneral
   QT_VERSION 5
@@ -15,7 +28,7 @@ mtd_add_qt_library(
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
-  DEFS IN_MANTIDQT_INTERFACESGENERAL PRECOMPILED PrecompiledHeader.h
+  DEFS IN_MANTIDQT_INTERFACESGENERAL PRECOMPILED ${PRECOMP_HEADERS}
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
   SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES} Mantid::Json

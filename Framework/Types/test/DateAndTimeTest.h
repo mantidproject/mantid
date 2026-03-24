@@ -370,6 +370,11 @@ public:
     TS_ASSERT_DELTA(DateAndTime::secondsFromDuration(time_no_tz - time_negative_tz2), 0.0, 1e-4);
   }
 
+  void test_httpFormat() {
+    DateAndTime time_no_tz = DateAndTime("2010-03-24T14:12:51.562"); // seconds and microseconds are ignored for now
+    TS_ASSERT_EQUALS(time_no_tz.toHttpFormat(), "Wed, 24 Mar 2010 14:12:00 GMT");
+  }
+
   void testDurations() {
     time_duration onesec = time_duration(0, 0, 1, 0);
     TS_ASSERT_EQUALS(DateAndTime::secondsFromDuration(onesec), 1.0);

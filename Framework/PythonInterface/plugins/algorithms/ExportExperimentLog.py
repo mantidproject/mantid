@@ -508,7 +508,7 @@ class ExportExperimentLog(PythonAlgorithm):
         """Convert a UTC time in string to the local time in string
         and add
         """
-        from dateutil import tz
+        from zoneinfo import ZoneInfo
 
         # Make certain that the input is utc time string
         utctimestr = str(utctimestr)
@@ -522,8 +522,8 @@ class ExportExperimentLog(PythonAlgorithm):
         # Convert
         self.log().debug("Input UTC time = %s" % (utctimestr))
 
-        from_zone = tz.gettz("UTC")
-        to_zone = tz.gettz(self._timezone)
+        from_zone = ZoneInfo("UTC")
+        to_zone = ZoneInfo(self._timezone)
 
         # Determine the parsing format
         if utctimestr.count("T") == 0:

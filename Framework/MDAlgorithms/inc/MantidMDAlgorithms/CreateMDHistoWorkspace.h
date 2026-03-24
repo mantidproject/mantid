@@ -29,6 +29,8 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"ConvertToMD", "CreateMDWorkspace"}; }
   const std::string category() const override;
 
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   void init() override;
   void exec() override;

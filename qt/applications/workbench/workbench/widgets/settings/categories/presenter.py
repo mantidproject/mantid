@@ -23,7 +23,7 @@ class CategoriesSettings(SettingsPresenterBase):
     def __init__(self, parent, model: CategoriesSettingsModel, view=None):
         super().__init__(model)
         self.parent = parent
-        self._view = view if view else CategoriesSettingsView(parent, self)
+        self._view = view or CategoriesSettingsView(parent, self)
         self._view.algorithm_tree_widget.setHeaderLabel("Show/Hide Algorithm Categories")
         self._view.interface_tree_widget.setHeaderLabel("Show/Hide Interface Categories")
         self.set_algorithm_tree_categories()

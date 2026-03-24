@@ -261,20 +261,45 @@ class BasicFittingModel:
         """Returns the currently selected fit function for single fitting."""
         current_dataset_index = self.fitting_context.current_dataset_index
         if current_dataset_index is not None:
-            return self.fitting_context.single_fit_functions[current_dataset_index]
+            return self.get_single_fit_function(current_dataset_index)
         else:
             return DEFAULT_SINGLE_FIT_FUNCTION
 
     @current_single_fit_function.setter
     def current_single_fit_function(self, fit_function: IFunction) -> None:
         """Sets the currently selected single fit function."""
-        self.fitting_context.single_fit_functions[self.fitting_context.current_dataset_index] = fit_function
+        self.set_single_fit_function(self.fitting_context.current_dataset_index, fit_function)
+
+    def get_single_fit_function(self, f_index) -> IFunction:
+        """Returns the single fit function at the given index"""
+        if f_index <= len(self.fitting_context.single_fit_functions) - 1:
+            return self.fitting_context.single_fit_functions[f_index]
+        else:
+            if (
+                len(self.fitting_context.single_fit_functions) == 1
+                and type(self.fitting_context.single_fit_functions[0]) is CompositeFunction
+                and self.fitting_context.single_fit_functions[0].nFunctions() > f_index
+            ):
+                return self.fitting_context.single_fit_functions[0].getFunction(f_index)
+            else:
+                return DEFAULT_SINGLE_FIT_FUNCTION
+
+    def set_single_fit_function(self, f_index, function):
+        """Sets the single fit function at the given index with the given function"""
+        if (
+            len(self.fitting_context.single_fit_functions) == 1
+            and type(self.fitting_context.single_fit_functions[0]) is CompositeFunction
+            and 1 <= f_index < self.fitting_context.single_fit_functions[0].nFunctions()
+        ):
+            self.fitting_context.single_fit_functions[0][f_index] = function
+        else:
+            self.fitting_context.single_fit_functions[f_index] = function
 
     def get_single_fit_function_for(self, dataset_name: str) -> IFunction:
         """Returns the single fit function that corresponds to the given dataset name."""
         dataset_names = self.fitting_context.dataset_names
         if dataset_name in dataset_names:
-            return self.fitting_context.single_fit_functions[dataset_names.index(dataset_name)]
+            return self.get_single_fit_function(dataset_names.index(dataset_name))
         else:
             return DEFAULT_SINGLE_FIT_FUNCTION
 
@@ -292,7 +317,7 @@ class BasicFittingModel:
             undo_fit_status = self.fitting_context.fit_statuses_for_undo.pop()
             undo_chi_squared = self.fitting_context.chi_squared_for_undo.pop()
 
-            self.fitting_context.single_fit_functions[undo_dataset_index] = undo_fit_function
+            self.set_single_fit_function(undo_dataset_index, undo_fit_function)
             self.fitting_context.fit_statuses[undo_dataset_index] = undo_fit_status
             self.fitting_context.chi_squared[undo_dataset_index] = undo_chi_squared
 
@@ -618,9 +643,7 @@ class BasicFittingModel:
         """Returns the function to use for the new dataset. It tries to use an existing function if possible."""
         dataset_names = self.fitting_context.dataset_names
         if new_dataset_name in dataset_names:
-            return self._clear_function_errors(
-                self._clone_function(self.fitting_context.single_fit_functions[dataset_names.index(new_dataset_name)])
-            )
+            return self._clear_function_errors(self._clone_function(self.get_single_fit_function(dataset_names.index(new_dataset_name))))
         else:
             return self._clear_function_errors(self._clone_function(self.current_single_fit_function))
 
@@ -1059,7 +1082,7 @@ class BasicFittingModel:
         for workspace_index, workspace_name in enumerate(workspaces):
             if workspace_name in dataset_names:
                 dataset_index = dataset_names.index(workspace_name)
-                self.fitting_context.single_fit_functions[dataset_index] = functions[workspace_index]
+                self.set_single_fit_function(dataset_index, functions[workspace_index])
 
     def _update_fit_statuses_and_chi_squared_after_sequential_fit(self, workspaces, fit_statuses, chi_squared_list):
         """Updates the fit statuses and chi squared after a sequential fit."""

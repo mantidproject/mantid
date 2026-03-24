@@ -101,6 +101,7 @@ set(TEST_PY_FILES
     MatchSpectraTest.py
     MaskAngleTest.py
     MaskBTPTest.py
+    MaskDetectorsIfTest.py
     MaskWorkspaceToCalFileTest.py
     MatchPeaksTest.py
     MeanTest.py

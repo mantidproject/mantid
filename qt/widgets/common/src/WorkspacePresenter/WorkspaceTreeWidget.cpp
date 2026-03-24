@@ -29,8 +29,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <Poco/Path.h>
-
+#include <cctype>
+#include <cstdlib>
+#include <cstring>
+#include <filesystem>
 #include <memory>
 
 #include <QFileDialog>
@@ -50,6 +52,72 @@ namespace {
 Mantid::Kernel::Logger docklog("MantidDockWidget");
 
 WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
+
+/// Expands environment variables in a path string
+/// Supports $VAR, ${VAR} on Unix and %VAR% on Windows
+std::string expandEnvironmentVariables(const std::string &target) {
+  std::string result = target;
+  size_t pos = 0;
+
+#ifdef _WIN32
+  // Windows style: %VAR%
+  while ((pos = result.find('%', pos)) != std::string::npos) {
+    size_t end = result.find('%', pos + 1);
+    if (end == std::string::npos)
+      break;
+
+    std::string varName = result.substr(pos + 1, end - pos - 1);
+    const char *envValue = std::getenv(varName.c_str());
+
+    if (envValue) {
+      result.replace(pos, end - pos + 1, envValue);
+      pos += std::strlen(envValue);
+    } else {
+      pos = end + 1;
+    }
+  }
+#else
+  // Unix style: $VAR or ${VAR}
+  pos = 0;
+  while ((pos = result.find('$', pos)) != std::string::npos) {
+    size_t start = pos;
+    size_t end;
+    std::string varName;
+
+    if (pos + 1 < result.length() && result[pos + 1] == '{') {
+      // ${VAR} format
+      end = result.find('}', pos + 2);
+      if (end == std::string::npos) {
+        pos++;
+        continue;
+      }
+      varName = result.substr(pos + 2, end - pos - 2);
+      end++; // include the closing brace
+    } else {
+      // $VAR format - find end of variable name
+      end = pos + 1;
+      while (end < result.length() && (std::isalnum(result[end]) || result[end] == '_')) {
+        end++;
+      }
+      varName = result.substr(pos + 1, end - pos - 1);
+    }
+
+    if (!varName.empty()) {
+      const char *envValue = std::getenv(varName.c_str());
+      if (envValue) {
+        result.replace(start, end - start, envValue);
+        pos = start + std::strlen(envValue);
+      } else {
+        pos = end;
+      }
+    } else {
+      pos++;
+    }
+  }
+#endif
+
+  return result;
+}
 } // namespace
 
 namespace MantidQt::MantidWidgets {
@@ -1301,7 +1369,7 @@ void WorkspaceTreeWidget::saveToProgram() {
   // Check to see if mandatory information is included
   if ((programKeysAndDetails.count("name") != 0) && (programKeysAndDetails.count("target") != 0) &&
       (programKeysAndDetails.count("saveusing") != 0)) {
-    std::string expTarget = Poco::Path::expand(programKeysAndDetails.find("target")->second);
+    std::string expTarget = expandEnvironmentVariables(programKeysAndDetails.find("target")->second);
 
     QFileInfo target = QString::fromStdString(expTarget);
     if (target.exists()) {

@@ -137,6 +137,8 @@ public:
   const ComponentInfoIterator<const ComponentInfo> cbegin();
   const ComponentInfoIterator<const ComponentInfo> cend();
 
+  size_t findBankParent(size_t index, const std::string &bankPart) const;
+
   friend class Instrument;
 };
 

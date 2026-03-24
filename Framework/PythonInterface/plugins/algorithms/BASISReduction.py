@@ -402,7 +402,7 @@ the first two hours"""
 
         self._maskFile = self.getProperty("MaskFile").value
         maskfile = self.getProperty("MaskFile").value
-        self._maskFile = maskfile if maskfile else pjoin(DEFAULT_MASK_GROUP_DIR, self._reflection["mask_file"])
+        self._maskFile = maskfile or pjoin(DEFAULT_MASK_GROUP_DIR, self._reflection["mask_file"])
 
         self._groupDetOpt = self.getProperty("GroupDetectors").value
         self._normalizeToFirst = self.getProperty("NormalizeToFirst").value

@@ -1,1 +1,0 @@
-- Fixed crash that could occur when erasing peaks in the Instrument View, especially when deleting lots of peaks in a short space of time.

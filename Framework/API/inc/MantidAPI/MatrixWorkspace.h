@@ -14,6 +14,7 @@
 #include "MantidKernel/EmptyValues.h"
 
 #include <atomic>
+#include <map>
 #include <mutex>
 
 namespace Mantid {

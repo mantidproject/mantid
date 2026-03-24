@@ -19,8 +19,7 @@
 
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
-#include <Poco/File.h>
-
+#include <filesystem>
 #include <fstream>
 
 using namespace Mantid::CurveFitting;
@@ -42,7 +41,7 @@ public:
 
   TabulatedFunctionTest()
       : m_asciiFileName("TabulatedFunctionTest_testAsciiFile.txt"),
-        m_nexusFileName(Mantid::API::FileFinder::Instance().getFullPath("argus0026287.nxs")) {
+        m_nexusFileName(Mantid::API::FileFinder::Instance().getFullPath("argus0026287.nxs").string()) {
     FunctionDomain1DVector x(-5.0, 5.0, 100);
     FunctionValues y(x);
     UserFunction fun;
@@ -56,9 +55,8 @@ public:
   }
 
   ~TabulatedFunctionTest() override {
-    Poco::File hAscii(m_asciiFileName);
-    if (hAscii.exists()) {
-      hAscii.remove();
+    if (std::filesystem::exists(m_asciiFileName)) {
+      std::filesystem::remove(m_asciiFileName);
     }
   }
 

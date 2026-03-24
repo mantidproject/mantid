@@ -50,6 +50,8 @@ public:
 
   const std::string getSubscriberName() const override { return "ResNorm"; }
 
+  void notifyBackendChanged(const BayesBackendType &backend) override { (void)backend; };
+
 protected:
   void runComplete(IAlgorithm_sptr const &algorithm, bool const error) override;
 

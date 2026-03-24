@@ -17,7 +17,7 @@ from mantidqt.widgets.sliceviewer.presenters.masking import Masking
 
 class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
     def __init__(self, ws, data_view: SliceViewerDataView, model: SliceViewerBaseModel = None, disable_masking_override=False):
-        self.model = model if model else SliceViewerBaseModel(ws)
+        self.model = model or SliceViewerBaseModel(ws)
         self._data_view: SliceViewerDataView = data_view
         self.normalization = False
         self._disable_masking_override = disable_masking_override

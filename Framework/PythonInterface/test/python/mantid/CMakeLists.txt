@@ -5,6 +5,7 @@ add_subdirectory(api)
 add_subdirectory(dataobjects)
 add_subdirectory(plots)
 add_subdirectory(utils)
+add_subdirectory(LiveData)
 add_subdirectory(_plugins)
 add_subdirectory(_testing)
 

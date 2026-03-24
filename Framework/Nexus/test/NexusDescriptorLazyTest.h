@@ -11,6 +11,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <thread>
 
 #include <cxxtest/TestSuite.h>
 
@@ -122,5 +123,57 @@ public:
 
     // verify that non-existing data returns empty string
     TS_ASSERT_EQUALS(descriptor.getStrData("/entry/instrument/not_a_data"), "");
+  }
+
+  void test_init_loads_class() {
+    std::cout << "\nTesting classTypeExists in NexusDescriptorLazy" << std::endl;
+    // create a descriptor with the correct values
+    std::string const filename = NexusTest::getFullPath("HB3A_data.nxs");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+    // verify that class types are correctly identified
+    TS_ASSERT_EQUALS(descriptor.classTypeExists("NXentry"), true);
+    TS_ASSERT(descriptor.isEntry("/MDHistoWorkspace"));
+    TS_ASSERT(descriptor.isEntry("/MDHistoWorkspace", "NXentry"));
+  }
+
+  void test_threadSafety() {
+    constexpr int NUM_THREAD{5}; // number of threads to spawn
+
+    const std::string filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+
+    std::atomic<int> failureCount{0}; // threadsafe count of issues
+    std::vector<std::thread> threads(NUM_THREAD);
+    for (int i = 0; i < NUM_THREAD; ++i) {
+      threads[i] = std::thread([&descriptor, &failureCount]() {
+        // things that are always there
+        if (!descriptor.hasRootAttr("file_name"))
+          failureCount++;
+        if (!descriptor.hasRootAttr("file_time"))
+          failureCount++;
+        if (!descriptor.isEntry("/entry", "NXentry"))
+          failureCount++;
+        if (!descriptor.isEntry("/entry/instrument"))
+          failureCount++;
+        if (!descriptor.isEntry("/entry/DASlogs"))
+          failureCount++;
+        if (!descriptor.isEntry("/entry/DASlogs/LambdaRequest"))
+          failureCount++;
+        // things that are never there
+        if (descriptor.hasRootAttr("file_zaniness"))
+          failureCount++;
+        if (descriptor.isEntry("/entry/pants"))
+          failureCount++;
+        // things that are lazy loaded
+        if (!descriptor.isEntry("/entry/instrument/chopper1/phase"))
+          failureCount++;
+      });
+    }
+
+    for (int i = 0; i < NUM_THREAD; ++i) {
+      threads[i].join();
+    }
+
+    TS_ASSERT_EQUALS(failureCount.load(), 0);
   }
 };

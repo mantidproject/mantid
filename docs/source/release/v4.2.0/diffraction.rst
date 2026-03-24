@@ -14,9 +14,6 @@ Diffraction Changes
    :width: 300px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 Single Crystal Diffraction
 ##########################
 

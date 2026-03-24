@@ -147,8 +147,7 @@ public:
 
       //  with conversion
       TS_ASSERT_EQUALS(H5Util::readArray1DCoerce<double>(group, "array1d_float"), array1d_double);
-      TS_ASSERT_THROWS(H5Util::readArray1DCoerce<int32_t>(group, "array1d_uint32"),
-                       const boost::numeric::positive_overflow &);
+      TS_ASSERT_THROWS(H5Util::readArray1DCoerce<int32_t>(group, "array1d_uint32"), const std::bad_cast &);
       TS_ASSERT_THROWS_NOTHING(H5Util::readArray1DCoerce<uint32_t>(group, "array1d_int32"));
 
       // ---------- slicing read tests

@@ -32,6 +32,7 @@ class DetectorInfo;
 class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
+class InstrumentVisitor;
 /// Convenience typedef
 using InstrumentParameterCache =
     std::map<std::pair<std::string, const IComponent *>, std::shared_ptr<XMLInstrumentParameter>>;
@@ -116,6 +117,7 @@ public:
 
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const IComponent &comp) const;
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const std::string &bankName) const;
+  std::set<detid_t> getDetectorIDsInBank(const std::string &bankName) const;
 
   /// Returns a list containing the detector ids of monitors
   std::vector<detid_t> getMonitors() const;
@@ -219,6 +221,8 @@ public:
   void parseTreeAndCacheBeamline();
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
+
+  friend InstrumentVisitor;
 
 private:
   /// Save information about a set of detectors to Nexus

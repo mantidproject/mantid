@@ -17,6 +17,10 @@ class BayesQuasiTest(MantidSystemTest):
     _sample_name = "irs26176_graphite002_red"
     _resolution_name = "irs26173_graphite002_res"
     _reference_result_file_name = "irs26176_graphite002_QLr_Result.nxs"
+    _reference_prob_file_name = "irs26176_graphite002_QLr_Prob.nxs"
+    _fit_ws_name = "irs26176_graphite002_QLr_Fit"
+    _result_ws_name = "irs26176_graphite002_QLr_Result"
+    _prob_ws_name = "irs26176_graphite002_QLr_Prob"
 
     def skipTests(self):
         return platform == "darwin"
@@ -34,9 +38,9 @@ class BayesQuasiTest(MantidSystemTest):
             Elastic=False,
             Background="Sloping",
             FixedWidth=False,
-            OutputWorkspaceFit=f"{self._sample_name}_QLr_quasielasticbayes_Fit",
-            OutputWorkspaceResult=f"{self._sample_name}_QLr_Result",
-            OutputWorkspaceProb=f"{self._sample_name}_QLr_Prob",
+            OutputWorkspaceFit=self._fit_ws_name,
+            OutputWorkspaceResult=self._result_ws_name,
+            OutputWorkspaceProb=self._prob_ws_name,
         )
 
     def validate(self):
@@ -46,10 +50,10 @@ class BayesQuasiTest(MantidSystemTest):
         self.tolerance = 1e-10
 
         return (
-            "irs26176_graphite002_QLr_Result",
+            self._result_ws_name,
             self._reference_result_file_name,
-            "irs26176_graphite002_QLr_Prob",
-            "irs26176_graphite002_QLr_Prob.nxs",
+            self._prob_ws_name,
+            self._reference_prob_file_name,
         )
 
     def validateMethod(self):
@@ -81,7 +85,7 @@ class BayesQuasiTest(MantidSystemTest):
             EndWorkspaceIndex=max_spectrum_index,
         )
         CropWorkspace(
-            InputWorkspace="irs26176_graphite002_QLr_Result",
+            InputWorkspace=self._result_ws_name,
             OutputWorkspace="bayesquasi_result_cropped",
             XMax=max_q,
             EndWorkspaceIndex=max_spectrum_index,

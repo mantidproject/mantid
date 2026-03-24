@@ -4,6 +4,7 @@
 # serve to show the default.
 
 import sys
+from datetime import datetime
 
 # Workaround module destruction order issues. If Qt is imported after
 # mantid then any active Qt widgets are deleted before the mantid
@@ -13,11 +14,9 @@ import sys
 import qtpy.QtCore  # noqa: F401
 
 import os
-import runpy
 
 import mantid
 from mantid.kernel import ConfigService
-import sphinx_bootstrap_theme
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -32,15 +31,30 @@ def setup(app):
     app.add_css_file("custom.css")
 
 
+# General information about the project.
+project = "MantidProject"
+copyright = f"{datetime.now().year}, Mantid"
+
+# The full version, including alpha/beta/rc tags.
+release = mantid.__version__
+# The short X.Y version.
+version = ".".join(release.split(".")[:2])
+
+# The root toctree document.
+root_doc = "index"
+
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "mantid_sphinx_theme",
     # we use pngmath over mathjax so that the offline help isn't reliant on
     # anything external and we don't need to include the large mathjax package
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.doctest",
+    # our custom directives
     "mantiddoc.directives.algorithm",
     "mantiddoc.directives.attributes",
     "mantiddoc.directives.categories",
@@ -54,28 +68,44 @@ extensions = [
     "mantiddoc.directives.summary",
     "mantiddoc.autodoc",
     "mantiddoc.doctest",
+    # myst_parser enables markdown support
+    "myst_parser",
 ]
 # Deal with math extension. Can be overridden with MATH_EXT environment variable
 mathext = os.environ.get("MATH_EXT", "sphinx.ext.mathjax")
 extensions.append(mathext)
 
+# MathJax configuration to:
+# - define Angstrom symbol macro
+# - enable polyfill for hasOwn (needed for some older browsers)
+mathjax3_config = {"tex": {"macros": {"AA": r"\unicode{x212B}"}}, "startup": {"polyfillHasOwn": True}}
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = ".rst"
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
 
-# The root toctree document.
-root_doc = "index"
+# MyST parser configuration
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "substitution",
+    "tasklist",
+]
 
-# General information about the project.
-project = "MantidProject"
-copyright = "2015, Mantid"
-
-# The full version, including alpha/beta/rc tags.
-release = mantid.__version__
-# The short X.Y version.
-version = ".".join(release.split(".")[:2])
+# Allow heading anchors
+myst_heading_anchors = 3
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -133,48 +163,11 @@ pngmath_latex_preamble = r"\usepackage[active]{preview}"
 pngmath_use_preview = True
 
 # -- HTML output ----------------------------------------------------
+# Options for HTML output. For a full list and more details see the documentation:
+# http://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-qthelp_theme = "bootstrap"
-html_theme = "bootstrap"
-
-# Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-
-# The "title" for HTML documentation generated with Sphinx' templates. This is appended to the <title> tag of individual pages
-# and used in the navigation bar as the "topmost" element.
-html_title = ""
-
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-html_logo = os.path.relpath(os.path.join("..", "..", "images", "Mantid_Logo_Transparent.png"))
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
-
-# Add any extra paths that contain custom files (such as robots.txt or
-# .htaccess) here, relative to this directory. These files are copied
-# directly to the root of the documentation.
-# html_extra_path = []
-
-# If true, Smart Quotes will be used to convert quotes and dashes to
-# typographically correct entities.
-smartquotes = True
-
-# Hide the Sphinx usage as we reference it on github instead.
-html_show_sphinx = False
-
-# If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
-html_show_copyright = False
-
-# Do not show last updated information in the HTML footer.
-html_last_updated_fmt = None
-
-# Hide the navigation sidebar, we use a table of contents instead.
-html_sidebars = {"**": []}
+# Use our custom Mantid Sphinx theme (extends https://pydata-sphinx-theme.readthedocs.io)
+html_theme = "mantid_sphinx_theme"
 
 # -- Options for Epub output ---------------------------------------------------
 # This flag determines if a toc entry is inserted again at the beginning of its nested toc listing.
@@ -205,12 +198,6 @@ epub_scheme = "URL"
 # The default value is 'unknown'.
 epub_uid = "Mantid Reference: " + version
 
-# -- Options for selected builder output ---------------------------------------
-# Default is to use standard HTML theme unless the qthelp tag is specified
-# 'tags' is a special object available in config files, which exposes the project tags
-html_theme_cfg = "conf-qthelp.py" if "qthelp" in [k.strip() for k in tags] else "conf-html.py"  # noqa: F821
-runpy.run_path(html_theme_cfg)
-
 # -- Link to other projects ----------------------------------------------------
 
 intersphinx_mapping = {
@@ -219,7 +206,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "python": ("https://docs.python.org/3/", None),
     "SciPy": ("https://docs.scipy.org/doc/scipy/", None),
-    "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
     "pystog": ("https://pystog.readthedocs.io/en/latest/", None),
     "mantid-dev": ("https://developer.mantidproject.org/", None),
 }
@@ -228,6 +215,7 @@ intersphinx_mapping = {
 # "WARNING: document isn't included in any toctree"
 # for individual release notes files.
 exclude_patterns = [
+    "images/README.md",
     "release/templates/*.rst",
     "release/**/Bugfixes/*.rst",
     "release/**/New_features/*.rst",

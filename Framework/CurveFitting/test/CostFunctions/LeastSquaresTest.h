@@ -22,7 +22,6 @@
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidCurveFitting/GSLFunctions.h"
 
-#include <gsl/gsl_blas.h>
 #include <sstream>
 
 using namespace Mantid;
@@ -201,15 +200,11 @@ public:
     dx.set(1, -0.2);
 
     double L; // = d*dx + 0.5 * dx * H * dx
+    EigenVector Trdx = H.tr() * dx;
+    Trdx *= 0.5;
+    g += Trdx;
+    L = g.dot(dx);
 
-    EigenMatrix temp_H_tr = H.tr();
-    const gsl_matrix_const_view temp_H_tr_gsl = getGSLMatrixView_const(temp_H_tr.inspector());
-    const gsl_vector_const_view dx_gsl = getGSLVectorView_const(dx.inspector());
-    gsl_vector_view g_gsl = getGSLVectorView(g.mutator());
-
-    gsl_blas_dgemv(CblasNoTrans, 0.5, &temp_H_tr_gsl.matrix, &dx_gsl.vector, 1., &g_gsl.vector);
-
-    gsl_blas_ddot(&g_gsl.vector, &dx_gsl.vector, &L);
     TS_ASSERT_DELTA(L, -0.145, 1e-10); // L + costFun->val() == 0
   }
 

@@ -5,11 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCLatestFileFinder.h"
-#include <Poco/DirectoryIterator.h>
-#include <Poco/Exception.h>
+
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <cctype>
+#include <filesystem>
 
 namespace MantidQt::CustomInterfaces {
 
@@ -23,24 +23,22 @@ std::string ALCLatestFileFinder::getMostRecentFile() const {
     return "";
   } else {
     // List all valid Nexus files in the directory
-    Poco::Path path(m_firstRunFileName);
+    std::filesystem::path path(m_firstRunFileName);
     std::vector<std::string> fileNames;
     // if it found no valid files then return an error
     // and retry disable the auto button
     try {
       // Directory iterator - check if we were passed a file or a directory
-      Poco::DirectoryIterator iter(path.isDirectory() ? path : path.parent());
-      Poco::DirectoryIterator end; // the end iterator
-      while (iter != end) {
-        if (isValid(iter->path())) {
-          fileNames.emplace_back(iter->path());
+      std::filesystem::path dirPath = std::filesystem::is_directory(path) ? path : path.parent_path();
+      for (const auto &entry : std::filesystem::directory_iterator(dirPath)) {
+        if (isValid(entry.path().string())) {
+          fileNames.emplace_back(entry.path().string());
         }
-        ++iter;
       }
-    } catch (const Poco::Exception &) {
+    } catch (const std::filesystem::filesystem_error &) {
       // There was some problem iterating through the directory.
       // Return the file we were given.
-      return path.toString();
+      return path.string();
     }
 
     if (!fileNames.empty()) {
@@ -63,8 +61,8 @@ std::string ALCLatestFileFinder::getMostRecentFile() const {
  */
 bool ALCLatestFileFinder::isValid(const std::string &path) const {
   bool valid = false;
-  const Poco::Path filePath(path);
-  const Poco::Path firstPath(m_firstRunFileName);
+  const std::filesystem::path filePath(path);
+  const std::filesystem::path firstPath(m_firstRunFileName);
 
   auto getInstrumentAndRun = [](const std::string &name) {
     // No muon instruments have numbers in their names
@@ -76,13 +74,17 @@ bool ALCLatestFileFinder::isValid(const std::string &path) const {
     }
   };
 
-  auto firstRunInstrument = getInstrumentAndRun(firstPath.getBaseName()).first;
+  auto firstRunInstrument = getInstrumentAndRun(firstPath.stem().string()).first;
   // 0. Must be a file
-  if (filePath.isFile()) {
+  if (std::filesystem::is_regular_file(filePath)) {
     // 1. Must be a NeXus file
-    if (filePath.getExtension() == "nxs") {
+    std::string extension = filePath.extension().string();
+    if (!extension.empty() && extension[0] == '.') {
+      extension = extension.substr(1); // remove leading dot
+    }
+    if (extension == "nxs") {
       // 2. Instrument must be correct
-      auto fileName = filePath.getBaseName();
+      auto fileName = filePath.stem().string();
       if (fileName.size() > 5) {
         auto fileSplit = getInstrumentAndRun(fileName);
         if (boost::iequals(fileSplit.first, firstRunInstrument)) {

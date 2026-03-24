@@ -1,1 +1,0 @@
-- correct for dot-pattern artifact when rendering sparse data in log scale.

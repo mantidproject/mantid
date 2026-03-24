@@ -1,1 +1,0 @@
-- Use multi-threading in :ref:`algm-EnggEstimateFocussedBackground` algorithm to speed up execution time by factor ~2-3

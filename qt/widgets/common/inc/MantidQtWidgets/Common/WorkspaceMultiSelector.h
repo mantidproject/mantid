@@ -46,6 +46,10 @@ public:
   /// Destructor
   ~WorkspaceMultiSelector() override;
 
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  WorkspaceMultiSelector(const WorkspaceMultiSelector &) = delete;
+  WorkspaceMultiSelector &operator=(const WorkspaceMultiSelector &) = delete;
+
   void setupTable();
 
   void refresh();

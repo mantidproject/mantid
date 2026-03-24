@@ -9,7 +9,6 @@
 //-------------------------------------------------------------
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"

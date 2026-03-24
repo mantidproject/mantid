@@ -25,10 +25,10 @@
 #include <Poco/Net/SSLException.h>
 #include <Poco/Net/SSLManager.h>
 #include <Poco/Net/SecureStreamSocket.h>
-#include <Poco/Path.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
 
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <memory>
@@ -121,7 +121,11 @@ void CatalogDownloadDataFiles::exec() {
  * @returns True if the file is a data file.
  */
 bool CatalogDownloadDataFiles::isDataFile(const std::string &fileName) {
-  std::string extension = Poco::Path(fileName).getExtension();
+  std::filesystem::path path(fileName);
+  std::string extension = path.extension().string();
+  if (!extension.empty() && extension[0] == '.') {
+    extension = extension.substr(1); // remove leading dot
+  }
   std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
   return (extension == "raw" || extension == "nxs");
 }
@@ -213,16 +217,17 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(const std::s
  * @return Full path of where file is saved to
  */
 std::string CatalogDownloadDataFiles::saveFiletoDisk(std::istream &rs, const std::string &fileName) {
-  std::string filepath = Poco::Path(getPropertyValue("DownloadPath"), fileName).toString();
+  std::filesystem::path downloadPath(getPropertyValue("DownloadPath"));
+  std::filesystem::path filepath = downloadPath / fileName;
   std::ios_base::openmode mode = isDataFile(fileName) ? std::ios_base::binary : std::ios_base::out;
 
-  std::ofstream ofs(filepath.c_str(), mode);
+  std::ofstream ofs(filepath, mode);
   if (ofs.rdstate() & std::ios::failbit)
     throw Exception::FileError("Error on creating File", fileName);
   // copy the input stream to a file.
   Poco::StreamCopier::copyStream(rs, ofs);
 
-  return filepath;
+  return filepath.string();
 }
 
 /**

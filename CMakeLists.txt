@@ -54,7 +54,8 @@ if(NOT
    (ENABLE_WORKBENCH
     OR MANTID_QT_LIB STREQUAL "BUILD"
     OR MANTID_FRAMEWORK_LIB STREQUAL "BUILD"
-    OR ENABLE_DOCS)
+    OR ENABLE_DOCS
+    OR MPI_BUILD)
 )
   message(FATAL_ERROR "Must select at least one component to build")
 endif()
@@ -155,6 +156,10 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "SYSTEM")
   if(BUILD_MANTIDQT)
     find_package(MantidFramework REQUIRED)
   endif()
+  if(MPI_BUILD)
+    find_package(MantidFramework REQUIRED)
+    add_subdirectory(Framework/MPIAlgorithms)
+  endif()
 else()
   add_subdirectory(Framework)
 endif()
@@ -193,16 +198,16 @@ if(ENABLE_DOCS)
   find_package(Sphinx REQUIRED)
   # run python to see if the theme is installed
   execute_process(
-    COMMAND ${Python_EXECUTABLE} -c "import sphinx_bootstrap_theme"
-    OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
-    ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
+    COMMAND ${Python_EXECUTABLE} -c "import mantid_sphinx_theme"
+    OUTPUT_VARIABLE MANTID_SPHINX_THEME_OUT
+    ERROR_VARIABLE MANTID_SPHINX_THEME_ERR
     OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE
   )
-  if(SPHINX_BOOTSTRAP_THEME_ERR)
-    message(ERROR " Did not find sphinx_bootstrap_theme")
-    message(STATUS "${Python_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
-    message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
-    message(FATAL_ERROR " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/")
+  if(MANTID_SPHINX_THEME_ERR)
+    message(ERROR " Did not find mantid_sphinx_theme")
+    message(STATUS "${Python_EXECUTABLE} -c \"import mantid_sphinx_theme\"")
+    message(STATUS "${MANTID_SPHINX_THEME_ERR}")
+    message(FATAL_ERROR " Install instructions at https://pypi.python.org/pypi/mantid-sphinx-theme/")
   endif()
 
   add_subdirectory(dev-docs)

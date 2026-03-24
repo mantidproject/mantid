@@ -20,9 +20,12 @@ from mantidqt.plotting import functions
 from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWorkbench
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from mantid.plots.plotfunctions import plot
-from mantid.simpleapi import CreateSampleWorkspace, CreateMDHistoWorkspace, Load, mtd, LoadSampleShape
+from mantid.simpleapi import CreateSampleWorkspace, CreateMDHistoWorkspace, Load, mtd, LoadSampleShape, CreateWorkspace
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import mantid.simpleapi as msa
+from unittest.mock import MagicMock, PropertyMock
+from mantid.plots import MantidAxes
+from matplotlib.colors import LogNorm
 
 
 @start_qapplication
@@ -314,6 +317,63 @@ class ToolBarTest(unittest.TestCase):
         ax[0].grid(is_grid)
         # Create a figure manager with a toolbar and check that the grid toggle button has the correct state.
         self.assertEqual(self._is_grid_button_checked(fig), is_grid, "Wrong grid button toggle state for " + plot_type + " plot")
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_back_and_forward_button_state(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+
+        fig, axes = plt.subplots()
+        axes.plot([-10, 10], [1, 2])
+
+        self.assertFalse(self._is_button_enabled(fig, "on_back_clicked"))
+        self.assertFalse(self._is_button_enabled(fig, "on_forward_clicked"))
+
+    @patch("matplotlib.backend_bases.NavigationToolbar2.back")
+    @patch("matplotlib.backend_bases.NavigationToolbar2.forward")
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_back_navigating_mpl_stack_on_fresh_plot(self, mock_qappthread, mock_forward, mock_back):
+        mock_qappthread.return_value = mock_qappthread
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
+        ws = CreateWorkspace(DataX="1,2,3,4,5", DataY="-4,1,-2,0,0", StoreInADS=True)
+        cfill = axes.pcolormesh(ws)
+        cfill.set_norm(LogNorm(vmin=0.0001, vmax=1.0))
+        fig.colorbar(cfill, ax=[axes])
+
+        fig_manager = self._press_key(fig, "c")
+        self.assertFalse(fig_manager.toolbar._actions["on_back_clicked"].isEnabled())
+        self.assertFalse(fig_manager.toolbar._actions["on_forward_clicked"].isEnabled())
+        mock_back.assert_called_once()
+        mock_forward.assert_not_called()
+
+    @patch("matplotlib.backend_bases.NavigationToolbar2.back")
+    @patch("matplotlib.backend_bases.NavigationToolbar2.forward")
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_forward_navigating_mpl_stack_on_fresh_plot(self, mock_qappthread, mock_forward, mock_back):
+        mock_qappthread.return_value = mock_qappthread
+        fig, axes = plt.subplots(subplot_kw={"projection": "mantid"})
+        ws = CreateWorkspace(DataX="1,2,3,4,5", DataY="-4,1,-2,0,0", StoreInADS=True)
+        cfill = axes.pcolormesh(ws)
+        cfill.set_norm(LogNorm(vmin=0.0001, vmax=1.0))
+        fig.colorbar(cfill, ax=[axes])
+
+        fig_manager = self._press_key(fig, "v")
+        self.assertFalse(fig_manager.toolbar._actions["on_back_clicked"].isEnabled())
+        self.assertFalse(fig_manager.toolbar._actions["on_forward_clicked"].isEnabled())
+        mock_back.assert_not_called()
+        mock_forward.assert_called_once()
+
+    @classmethod
+    def _press_key(cls, fig, key):
+        canvas = MantidFigureCanvas(fig)
+        fig_manager = FigureManagerWorkbench(canvas, 1)
+        fig_manager.toolbar.set_buttons_visibility(fig)
+
+        key_press_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections=[], creation_args=[{}]))
+        type(key_press_event).key = PropertyMock(return_value=key)
+        key_press_event.inaxes = MagicMock()
+        key_press_event.inaxes.get_lines.return_value = ["fake_line"]
+        fig_manager._fig_interaction.on_key_press(key_press_event)
+        return fig_manager
 
     @classmethod
     def _is_grid_button_checked(cls, fig):

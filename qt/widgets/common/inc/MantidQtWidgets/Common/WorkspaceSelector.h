@@ -64,6 +64,10 @@ public:
   /// Destructor
   ~WorkspaceSelector() override;
 
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  WorkspaceSelector(const WorkspaceSelector &) = delete;
+  WorkspaceSelector &operator=(const WorkspaceSelector &) = delete;
+
   const QStringList &getWorkspaceTypes() const;
   void setWorkspaceTypes(const QStringList &types);
   bool showHiddenWorkspaces() const;

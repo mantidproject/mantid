@@ -4,9 +4,6 @@
 Mantid 3.9.2 Release Notes
 ==========================
 
-.. contents:: Table of Contents
-   :local:
-
 This is a patch release that corrects some significant issues since :ref:`version 3.9.0 <v3.9.0>`.
 
 There is no common theme to the fixes contained in this patch, rather it is collection of small but

@@ -7,9 +7,6 @@ Direct Geometry Changes
    :width: 750px
    :align: right
 
-.. contents:: Table of Contents
-   :local:
-
 Interfaces
 ##########
 

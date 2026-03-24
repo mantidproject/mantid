@@ -74,7 +74,9 @@ void FindFilesWorker::run() {
     }
     // Else if we are loading run files, then use findRuns.
     else if (m_parameters.isForRunFiles) {
-      filenames = fileSearcher.findRuns(m_parameters.searchText, m_parameters.extensions);
+      auto paths = fileSearcher.findRuns(m_parameters.searchText, m_parameters.extensions);
+      std::transform(paths.begin(), paths.end(), std::back_inserter(filenames),
+                     [](const auto &p) { return p.string(); });
       valueForProperty = "";
       for (auto const &filename : filenames) {
         valueForProperty += QString::fromStdString(filename) + ",";
@@ -92,7 +94,7 @@ void FindFilesWorker::run() {
       auto it = filestext.begin();
       for (; it != filestext.end(); ++it) {
         boost::algorithm::trim(*it);
-        std::string result = fileSearcher.getFullPath(*it);
+        auto result = fileSearcher.getFullPath(*it);
         if ((!result.empty()) && std::filesystem::exists(result)) {
           filenames.emplace_back(*it);
           valueForProperty += QString::fromStdString(*it) + ",";

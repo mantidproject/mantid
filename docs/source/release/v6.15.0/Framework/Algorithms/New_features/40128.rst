@@ -1,3 +1,0 @@
-- :ref:`CreateDetectorTable <algm-CreateDetectorTable>` now supports option ``PickOneDetectorID`` for returning column of detector IDs as a column of integers containing only one detector ID per row.
-  By default this option is disabled, so by default the column of detector IDs will consist of strings of one or more detector ID per row.
-  This new option was introduced to be used in the background of the new instrument view interface, but might also be useful if the user wants a single detector ID per row.

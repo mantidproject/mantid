@@ -62,7 +62,7 @@ public:
 
     // 3. Set property and run
     TS_ASSERT(savealg.setProperty("InputWorkspace", maskws));
-    TS_ASSERT(savealg.setProperty("OutputFile", "maskcopy.xml"));
+    TS_ASSERT(savealg.setProperty("OutputFile", "maskcopy"));
 
     savealg.execute();
     TS_ASSERT(savealg.isExecuted());

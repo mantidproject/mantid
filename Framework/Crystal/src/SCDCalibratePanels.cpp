@@ -23,6 +23,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -61,10 +62,11 @@ void SCDCalibratePanels::exec() {
   // Remove peaks on edge
   int edge = this->getProperty("EdgePixels");
   Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
+  Geometry::ComponentInfo const &compInfo = peaksWs->componentInfo();
   if (edge > 0) {
     std::vector<Peak> &peaks = peaksWs->getPeaks();
-    auto it = std::remove_if(peaks.begin(), peaks.end(), [edge, inst](const Peak &pk) {
-      return edgePixel(inst, pk.getBankName(), pk.getCol(), pk.getRow(), edge);
+    auto it = std::remove_if(peaks.begin(), peaks.end(), [edge, &compInfo](const Peak &pk) {
+      return edgePixel(compInfo, pk.getBankName(), pk.getCol(), pk.getRow(), edge);
     });
     peaks.erase(it, peaks.end());
   }

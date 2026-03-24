@@ -13,7 +13,7 @@ from sans.user_file.toml_parsers.toml_v2_parser import TomlV2Parser
 
 class TomlParser(object):
     def __init__(self, toml_reader=None):
-        self._lib_impl = toml_reader if toml_reader else TomlReader()
+        self._lib_impl = toml_reader or TomlReader()
 
     def get_toml_parser(self, toml_file_path, file_information) -> IStateParser:
         parsed_dict = self._lib_impl.get_user_file_dict(toml_file_path)

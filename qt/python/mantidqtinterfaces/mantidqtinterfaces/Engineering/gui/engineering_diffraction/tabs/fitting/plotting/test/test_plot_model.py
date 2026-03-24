@@ -669,19 +669,6 @@ class FittingPlotModelTest(unittest.TestCase):
 
         self.run_the_save_tests(expected_dirs, mock_makedirs, mock_save)
 
-    @patch(plot_model_path + ".FittingPlotModel._get_diff_constants")
-    def test_convert_centres_and_error_from_TOF_to_d(self, mock_get_diffs):
-        params = UnitParametersMap()
-        params[UnitParams.difc] = 18000
-        mock_get_diffs.return_value = params
-        tof = 40000
-        tof_error = 5
-        d = self.model._convert_TOF_to_d(tof, "ws_name")
-        d_error = self.model._convert_TOFerror_to_derror(tof_error, d, "ws_name")
-
-        self.assertAlmostEqual(tof / d, 18000, delta=1e-10)
-        self.assertAlmostEqual(d_error / d, tof_error / tof, delta=1e-10)
-
     def _get_sample_findpeaksconvolve_group_ws(self):
         peak_centers = CreateEmptyTableWorkspace(OutputWorkspace="PeakCentre")
         peak_centers.addColumn("int", "SpecIndex")

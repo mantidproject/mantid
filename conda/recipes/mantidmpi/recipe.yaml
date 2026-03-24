@@ -1,0 +1,71 @@
+schema_version: 1
+
+context:
+  version: ${{ env.get('MANTID_VERSION', default='0.0.0') }}
+
+package:
+  name: mantidmpi
+  version: ${{ version }}
+
+source:
+  path: ../../../
+
+build:
+  number: 0
+  script: build.sh
+  skip:
+    - win
+    - osx
+
+requirements:
+  build:
+    - ${{ compiler("c") }}
+    - ${{ compiler("cxx") }}
+    - ninja ${{ ninja }}
+    - cmake ${{ cmake }}
+    - git
+    - ${{ stdlib("c") }}
+    - libgomp
+    - mpi
+    - mpich
+  host:
+    - mantid ==${{ version }}
+    - libboost-devel ${{ libboost }}
+    - libboost-python-devel ${{ libboost }}
+    - libboost-mpi ${{ libboost }}
+    - eigen ${{ eigen }}
+    - gsl ${{ gsl }}
+    - hdf5 ${{ hdf5 }}
+    - jsoncpp ${{ jsoncpp }}
+    - muparser ${{ muparser }}
+    - poco ${{ poco }}
+    - tbb-devel ${{ tbb }}
+    - mpi
+    - mpi4py
+    - mpich
+    - python ${{ python }}
+  run:
+    - mantid ==${{ version }}
+    - mpi
+    - mpich
+    - mpi4py
+    - ${{ pin_compatible('libboost-mpi', upper_bound='x.x') }}
+  run_exports:
+    - ${{ pin_subpackage('mantidmpi', upper_bound='x.x.x') }}
+
+tests:
+  - script:
+      - test -f $PREFIX/plugins/libMantidMPIAlgorithms.so
+      - python -c "import mantid.simpleapi as s; assert hasattr(s, 'BroadcastWorkspace'), 'BroadcastWorkspace not found!'"
+
+about:
+  license: GPL-3.0-or-later
+  homepage: https://github.com/mantidproject/mantid
+  summary: Mantid with MPI support for distributed high-performance computing of materials science data.
+  description: Mantid with MPI support enabled. Provides distributed computing capabilities on top of the base Mantid framework.
+
+extra:
+  recipe-maintainers:
+    - thomashampson
+    - sf1919
+    - peterfpeterson

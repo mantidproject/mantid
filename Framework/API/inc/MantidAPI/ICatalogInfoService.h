@@ -19,10 +19,12 @@ namespace API {
  @author Jay Rainey, ISIS Rutherford Appleton Laboratory
  @date 24/02/2010
  */
-class ICatalogInfoService {
+class MANTID_API_DLL ICatalogInfoService {
 public:
+  // Constructor
+  ICatalogInfoService();
   // Virtual destructor
-  virtual ~ICatalogInfoService() = default;
+  virtual ~ICatalogInfoService();
   /// Obtain the datafile location string from the archives.
   virtual const std::string getFileLocation(const long long &) = 0;
   /// Obtain url to download a file from.

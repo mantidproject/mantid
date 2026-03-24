@@ -81,10 +81,10 @@ void OptimizeLatticeForCellType::exec() {
   if (edge > 0)
     if (auto pw = std::dynamic_pointer_cast<PeaksWorkspace>(ws)) {
       std::vector<int> badPeaks;
-      Geometry::Instrument_const_sptr inst = ws->getInstrument();
+      Geometry::ComponentInfo const &compInfo = ws->componentInfo();
       for (int i = int(pw->getNumberPeaks()) - 1; i >= 0; --i) {
         const std::vector<Peak> &peaks = pw->getPeaks();
-        if (edgePixel(inst, peaks[i].getBankName(), peaks[i].getCol(), peaks[i].getRow(), edge)) {
+        if (edgePixel(compInfo, peaks[i].getBankName(), peaks[i].getCol(), peaks[i].getRow(), edge)) {
           badPeaks.emplace_back(i);
         }
       }

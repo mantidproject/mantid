@@ -28,11 +28,12 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_crop_checked.return_value = False
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
+        self.view.get_vanadium_filename.return_value = "307521"
         self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
 
         self.presenter.update_calibration_from_view()
 
-        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
+        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749", "307521")
         self.presenter.current_calibration.set_group.assert_called_once_with(GROUP.BOTH)
         self.presenter.current_calibration.set_grouping_file.assert_not_called()
         self.presenter.current_calibration.set_spectra_list.assert_not_called()
@@ -43,11 +44,12 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.cropping_widget.get_group.return_value = GROUP.NORTH
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
+        self.view.get_vanadium_filename.return_value = "307521"
         self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
 
         self.presenter.update_calibration_from_view()
 
-        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
+        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749", "307521")
         self.presenter.current_calibration.set_group.assert_called_once_with(self.presenter.cropping_widget.get_group())
         self.presenter.current_calibration.set_grouping_file.assert_not_called()
         self.presenter.current_calibration.set_spectra_list.assert_not_called()
@@ -58,11 +60,12 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.cropping_widget.get_group.return_value = GROUP.TEXTURE30
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
+        self.view.get_vanadium_filename.return_value = "307521"
         self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
 
         self.presenter.update_calibration_from_view()
 
-        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
+        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749", "307521")
         self.presenter.current_calibration.set_group.assert_called_once_with(self.presenter.cropping_widget.get_group())
         self.presenter.current_calibration.set_grouping_file.assert_not_called()
         self.presenter.current_calibration.set_spectra_list.assert_not_called()
@@ -74,12 +77,13 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.cropping_widget.get_custom_spectra.return_value = "1"
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
+        self.view.get_vanadium_filename.return_value = "307521"
         self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
         self.presenter.current_calibration.group = self.presenter.cropping_widget.get_group()
 
         self.presenter.update_calibration_from_view()
 
-        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
+        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749", "307521")
         self.presenter.current_calibration.set_group.assert_called_once_with(self.presenter.cropping_widget.get_group())
         self.presenter.current_calibration.set_grouping_file.assert_not_called()
         self.presenter.current_calibration.set_spectra_list.assert_called_once_with(self.presenter.cropping_widget.get_custom_spectra())
@@ -91,12 +95,13 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter.cropping_widget.get_custom_groupingfile.return_value = "cal"
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
+        self.view.get_vanadium_filename.return_value = "307521"
         self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
         self.presenter.current_calibration.group = self.presenter.cropping_widget.get_group()
 
         self.presenter.update_calibration_from_view()
 
-        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
+        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749", "307521")
         self.presenter.current_calibration.set_group.assert_called_once_with(self.presenter.cropping_widget.get_group())
         self.presenter.current_calibration.set_grouping_file.assert_called_once_with(
             self.presenter.cropping_widget.get_custom_groupingfile()
@@ -110,6 +115,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_plot_output.return_value = True
         self.view.get_load_checked.return_value = False
         self.view.is_searching.return_value = True
+        self.view.get_vanadium_run.return_value = "307521"
 
         self.presenter.on_calibrate_clicked()
         worker_method.assert_not_called()
@@ -123,6 +129,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.is_searching.return_value = False
         self.view.get_load_checked.return_value = False
         self.view.get_sample_valid.return_value = False
+        self.view.get_vanadium_run.return_value = "307521"
 
         self.presenter.on_calibrate_clicked()
 
@@ -137,6 +144,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.is_searching.return_value = False
         self.view.get_new_checked.return_value = True
         self.view.get_load_checked.return_value = False
+        self.view.get_vanadium_run.return_value = "307521"
         self.presenter.cropping_widget.is_spectra_valid.return_value = False
 
         self.presenter.on_calibrate_clicked()
@@ -193,7 +201,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.model.load_existing_calibration_files.assert_called_with(self.presenter.current_calibration)
         self.presenter.current_calibration.set_calibration_from_prm_fname.assert_called_with(prm_filepath)
         self.presenter.calibration_notifier.notify_subscribers.assert_called_once()
-        mock_setting.assert_called_once()
+        self.assertEqual(2, mock_setting.call_count)
 
     @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.validate_path")
@@ -208,13 +216,14 @@ class CalibrationPresenterTest(unittest.TestCase):
 
         self.presenter.current_calibration.set_calibration_from_prm_fname.assert_not_called()
         self.presenter.calibration_notifier.notify_subscribers.assert_not_called()
-        mock_setting.assert_not_called()
+        self.assertEqual(1, mock_setting.call_count)
 
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
     @patch(tab_path + ".presenter.CalibrationPresenter._validate")
     def test_calibrate_clicked_new_valid_calibration_with_plotting(self, mock_validate, mock_start_worker):
         self.view.get_new_checked.return_value = True
         self.view.get_plot_output.return_value = True
+        self.view.get_vanadium_run.return_value = "307521"
         mock_validate.return_value = True
         self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
 
@@ -222,12 +231,14 @@ class CalibrationPresenterTest(unittest.TestCase):
 
         mock_start_worker.assert_called_once_with(mock_validate())
 
+    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
     @patch(tab_path + ".presenter.CalibrationPresenter._validate")
-    def test_calibrate_clicked_new_invalid_calibration(self, mock_validate, mock_start_worker):
+    def test_calibrate_clicked_new_invalid_calibration(self, mock_validate, mock_start_worker, mock_setting):
         self.view.get_new_checked.return_value = True
         self.view.get_plot_output.return_value = True
         self.view.get_load_checked.return_value = False
+        self.view.get_vanadium_run.return_value = "307521"
         mock_validate.return_value = False
         self.presenter.current_calibration = mock.create_autospec(CalibrationInfo(), instance=True)
 
@@ -235,6 +246,7 @@ class CalibrationPresenterTest(unittest.TestCase):
 
         mock_start_worker.assert_not_called()  # called if created new one
         self.model.load_existing_calibration_files.assert_not_called()  # called if loaded calibration
+        self.assertEqual(1, mock_setting.call_count)
 
     def test_create_new_enabled_true(self):
         self.presenter.set_create_new_enabled(True)

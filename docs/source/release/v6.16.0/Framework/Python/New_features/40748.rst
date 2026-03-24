@@ -1,0 +1,2 @@
+- ADARA-packet replay utility: for ORNL-facility instruments which use the ADARA system, it is now possible
+  to record and playback an ADARA-packet stream.

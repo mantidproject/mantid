@@ -52,7 +52,7 @@ public:
     int const nReOpen = 1000;
     cout << "Running Leak Test 1: " << nReOpen << " iterations\n";
     FormatUniqueVars vars = getFormatUniqueVars(fmt, "nexus_leak_test1.nxs");
-    const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+    const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
 
     for (int iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
       if (0 == iReOpen % 100) {
@@ -81,7 +81,7 @@ public:
     for (int iFile = 0; iFile < nFiles; iFile++) {
       strFile = strmakef("nexus_leak_test2_%03d.nxs", iFile);
       FormatUniqueVars vars = getFormatUniqueVars(fmt, strFile);
-      const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath);
+      const std::string szFile = Mantid::API::FileFinder::Instance().getFullPath(vars.relFilePath).string();
       cout << "file " << szFile << "\n";
 
       File fileid(szFile, access_mode);

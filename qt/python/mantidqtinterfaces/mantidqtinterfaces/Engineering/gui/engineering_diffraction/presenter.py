@@ -10,7 +10,6 @@ from .tabs.calibration.model import CalibrationModel
 from .tabs.calibration.view import CalibrationView
 from .tabs.calibration.presenter import CalibrationPresenter
 from .tabs.focus.model import FocusModel
-from .tabs.focus.view import FocusView
 from .tabs.focus.presenter import FocusPresenter
 from .tabs.correction.model import CorrectionModel
 from .tabs.correction.view import TextureCorrectionView
@@ -58,9 +57,11 @@ class EngineeringDiffractionPresenter(object):
 
     def setup_calibration(self, view):
         cal_model = CalibrationModel()
+        focus_model = FocusModel()
         cal_view = CalibrationView(parent=view.tabs)
         self.calibration_presenter = CalibrationPresenter(cal_model, cal_view)
-        view.tabs.addTab(cal_view, "Calibration")
+        self.focus_presenter = FocusPresenter(focus_model, cal_view)
+        view.tabs.addTab(cal_view, "Run Processing")
 
     def setup_calibration_notifier(self):
         self.calibration_presenter.calibration_notifier.add_subscriber(self.focus_presenter.calibration_observer)
@@ -71,13 +72,7 @@ class EngineeringDiffractionPresenter(object):
         correction_view = TextureCorrectionView()
         self.correction_presenter = TextureCorrectionPresenter(correction_model, correction_view)
         view.tabs.addTab(correction_view, "Absorption Correction")
-
-    def setup_focus(self, view):
-        focus_model = FocusModel()
-        focus_view = FocusView()
-        self.focus_presenter = FocusPresenter(focus_model, focus_view)
         self.correction_presenter.add_correction_subscriber(self.focus_presenter.correction_observer)
-        view.tabs.addTab(focus_view, "Focus")
 
     def setup_fitting(self, view):
         fitting_view = FittingView()
@@ -126,7 +121,8 @@ class EngineeringDiffractionPresenter(object):
     def update_calibration(self, calibration):
         instrument = calibration.get_instrument()
         ceria_no = calibration.get_ceria_runno()
-        self.statusbar_observable.notify_subscribers(f"CeO2: {ceria_no}, Instrument: {instrument}")
+        vanadium_no = calibration.get_vanadium_runno()
+        self.statusbar_observable.notify_subscribers(f"CeO2: {ceria_no}, V: {vanadium_no}, Instrument: {instrument}")
 
     @staticmethod
     def get_saved_rb_number() -> str:

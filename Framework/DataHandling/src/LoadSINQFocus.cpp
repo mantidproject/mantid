@@ -30,7 +30,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Nexus;
 
-DECLARE_NEXUS_LAZY_FILELOADER_ALGORITHM(LoadSINQFocus)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

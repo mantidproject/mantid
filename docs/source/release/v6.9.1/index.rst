@@ -4,9 +4,6 @@
 Mantid 6.9.1 Release Notes
 ==========================
 
-.. contents:: Table of Contents
-   :local:
-
 This is a patch release that corrects some significant issues since :ref:`version 6.9.0 <v6.9.0>`.
 
 The changes are:

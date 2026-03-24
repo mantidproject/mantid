@@ -168,6 +168,7 @@ class BayesQuasi2(QuickBayesTemplate):
         # calculation
         for spec in range(N):
             report_progress.report(f"spectrum {spec}")
+            self.log().notice(f"Fitting spectrum {spec + 1} of {N}")
             sx = sample_ws.readX(spec)
             sy = sample_ws.readY(spec)
             se = sample_ws.readE(spec)

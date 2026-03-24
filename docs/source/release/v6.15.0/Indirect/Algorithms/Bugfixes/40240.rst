@@ -1,2 +1,0 @@
-- Fixed incident energy limits of Abins2D instruments: MARI 1000 meV,
-  PANTHER 181 meV, Ideal2D infinite

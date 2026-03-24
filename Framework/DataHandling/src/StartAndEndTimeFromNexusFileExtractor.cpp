@@ -115,7 +115,7 @@ std::string getDataFieldAddress(const NexusType nexusType, const TimeType type) 
  */
 Mantid::Types::Core::DateAndTime extractDateAndTime(TimeType type, const std::string &filename) {
   // convert relative to absolute path
-  auto fullFileName = Mantid::API::FileFinder::Instance().getFullPath(filename);
+  auto fullFileName = Mantid::API::FileFinder::Instance().getFullPath(filename).string();
   // Figure out the type of the Nexus file. We need to handle them individually since they store the datetime
   // differently
   auto nexusType = whichNexusType(fullFileName);

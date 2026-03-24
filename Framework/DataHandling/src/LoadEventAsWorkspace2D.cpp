@@ -180,7 +180,7 @@ void LoadEventAsWorkspace2D::exec() {
   // load run metadata
   prog->doReport("Loading metadata");
   try {
-    LoadEventNexus::loadEntryMetadata(filename, WS, "entry", descriptor);
+    LoadEventNexus::loadEntryMetadata(filename, WS, "entry");
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }
@@ -237,6 +237,18 @@ void LoadEventAsWorkspace2D::exec() {
   Types::Core::DateAndTime filter_time_start;
   Types::Core::DateAndTime filter_time_stop;
 
+  // compute time filter bounds
+  if (filter_time_start_sec != EMPTY_DBL()) {
+    filter_time_start = runstart + filter_time_start_sec;
+  } else {
+    filter_time_start = runstart;
+  }
+  if (filter_time_stop_sec != EMPTY_DBL()) {
+    filter_time_stop = runstart + filter_time_stop_sec;
+  } else {
+    filter_time_stop = endtime;
+  }
+
   // vector to stored to integrated counts by detector ID
   std::vector<uint32_t> Y(max_detid - min_detid + 1, 0);
 
@@ -246,13 +258,10 @@ void LoadEventAsWorkspace2D::exec() {
   h5file.openGroup("entry", "NXentry");
 
   // Now we want to go through all the bankN_event entries
-  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
-
   prog->doReport("Reading and integrating data");
-  auto itClassEntries = allEntries.find("NXevent_data");
-  if (itClassEntries != allEntries.end()) {
 
-    const std::set<std::string> &classEntries = itClassEntries->second;
+  std::set<std::string> const classEntries = h5file.getEntriesByClass("NXevent_data");
+  if (!classEntries.empty()) {
     const std::regex classRegex("(/entry/)([^/]*)");
     std::smatch groups;
     for (const std::string &classEntry : classEntries) {
@@ -285,25 +294,11 @@ void LoadEventAsWorkspace2D::exec() {
         const auto event_index =
             std::make_shared<std::vector<uint64_t>>(Nexus::IOHelper::readNexusVector<uint64_t>(h5file, "event_index"));
 
-        // if "filterTimeStart" is empty, use run start time as default
-        if (filter_time_start_sec != EMPTY_DBL()) {
-          filter_time_start = runstart + filter_time_start_sec;
-        } else {
-          filter_time_start = runstart;
-        }
+        // Use filter_time_start time as starting reference in time and create a pulseROI using bankPulseTimes
+        const auto pulseROI = bankPulseTimes->getPulseIndices(filter_time_start, filter_time_stop);
 
-        // if "filterTimeStop" is empty, use end time as default
-        if (filter_time_stop_sec != EMPTY_DBL()) {
-          filter_time_stop = runstart + filter_time_stop_sec;
-        } else {
-          filter_time_stop = endtime;
-        }
-
-        // Use filter_time_start time as starting reference in time and create a TimeROI using bankPulseTimes
-        const auto TimeROI = bankPulseTimes->getPulseIndices(filter_time_start, filter_time_stop);
-
-        // set up PulseIndexer and give previous TimeROI to pulseIndexer
-        const PulseIndexer pulseIndexer(event_index, event_index->at(0), event_ids.size(), entry_name, TimeROI);
+        // set up PulseIndexer and give previous pulseROI to pulseIndexer
+        const PulseIndexer pulseIndexer(event_index, event_index->at(0), event_ids.size(), entry_name, pulseROI);
 
         std::vector<float> event_times;
         if (tof_filtering) {
@@ -313,7 +308,7 @@ void LoadEventAsWorkspace2D::exec() {
             event_times = Nexus::IOHelper::readNexusVector<float>(h5file, "event_time_of_flight");
         }
 
-        // Nested loop to loop through all the relavent pulses and relavent event_ids.
+        // Nested loop to loop through all the relevant pulses and relevant event_ids.
         // For someone new to this, every pulse creates an entry in event_index, event_index.size() = # of pulses,
         // the value of event_index[i] points to the index of event_ids. In short, event_ids[event_index[i]] is the
         // detector id from the i-th pulse. See NXevent_data description for more details.
@@ -338,6 +333,14 @@ void LoadEventAsWorkspace2D::exec() {
 
   h5file.closeGroup();
   h5file.close();
+
+  // filter the logs the same way FilterByTime does
+  const bool is_time_filtered = (filter_time_start_sec != EMPTY_DBL() || filter_time_stop_sec != EMPTY_DBL());
+  if (is_time_filtered) {
+    Kernel::TimeROI timeroi(filter_time_start, filter_time_stop);
+    outWS->mutableRun().setTimeROI(timeroi);
+    outWS->mutableRun().removeDataOutsideTimeROI();
+  }
 
   // determine x values
   const auto xBins = {center - width / 2, center + width / 2};

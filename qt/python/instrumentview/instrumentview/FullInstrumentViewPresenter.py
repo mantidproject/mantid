@@ -6,21 +6,29 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import pyvista as pv
-from pyvista.plotting.picking import RectangleSelection
-from pyvista.plotting.opts import PickerType
-from qtpy.QtWidgets import QFileDialog
+from queue import Queue
+from typing import Optional
+from instrumentview.Globals import CurrentTab
+from threading import Thread
 from mantid import mtd
-from mantid.kernel import logger, ConfigService
+from mantid.kernel import logger
 from mantid.simpleapi import AnalysisDataService
-from mantidqt.io import open_a_file_dialog
+from mantid.dataobjects import MaskWorkspace, GroupingWorkspace, PeaksWorkspace
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
+from instrumentview.ComponentTreeModel import ComponentTreeModel
+from instrumentview.ComponentTreePresenter import ComponentTreePresenter
+from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
+from instrumentview.renderers.shape_renderer import ShapeRenderer
+from instrumentview.renderers.side_by_side_shape_renderer import SideBySideShapeRenderer
 
 from vtkmodules.vtkRenderingCore import vtkCoordinate
-from vtkmodules.vtkCommonDataModel import vtkCylinder
+
+from enum import Enum
 
 
 class SuppressRendering:
@@ -36,6 +44,12 @@ class SuppressRendering:
         self.plotter.suppress_rendering = self.old_value
 
 
+class PeakInteractionStatus(Enum):
+    Disabled = 1
+    Adding = 2
+    Deleting = 3
+
+
 class FullInstrumentViewPresenter:
     """Presenter for the Instrument View window"""
 
@@ -45,7 +59,13 @@ class FullInstrumentViewPresenter:
     _MOMENTUM_TRANSFER = "MomentumTransfer"
     _UNIT_OPTIONS = [_TIME_OF_FLIGHT, _D_SPACING, _WAVELENGTH, _MOMENTUM_TRANSFER]
 
+    _LINEAR = "Linear"
+    _LOGARITHMIC = "Logarithmic"
+
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
+
+    _XML_FILE_FILTER = "XML files (*xml)"
+    _CAL_FILE_FILTER = "CAL files (*cal)"
 
     def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
@@ -55,8 +75,31 @@ class FullInstrumentViewPresenter:
         self._transform = np.eye(4)
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
+        self._count_scale_mode = self._LINEAR
+        self._point_cloud_renderer = PointCloudRenderer()
+        self._shape_renderer = None  # lazily created
+        self._sbs_shape_renderer = None  # lazily created
+        self._renderer = self._point_cloud_renderer
         self._model.setup()
         self.setup()
+        self._callback_queue = Queue()
+        self._callback_stop_sentinel = object()
+        self._callback_thread = Thread(None, self._callback_worker, daemon=True)
+        self._callback_thread.start()
+
+    def _callback_worker(self):
+        while True:
+            item = self._callback_queue.get()
+            if item is self._callback_stop_sentinel:
+                self._callback_queue.task_done()
+                break
+            func, args = item
+            try:
+                func(*args)
+            except Exception as e:
+                logger.error(f"Error in callback worker: {e}")
+            finally:
+                self._callback_queue.task_done()
 
     def setup(self):
         self._view.subscribe_presenter(self)
@@ -64,14 +107,8 @@ class FullInstrumentViewPresenter:
         self._view.setup_connections_to_presenter()
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_integration_range_limits(self._model.integration_limits)
-
-        if len(self._model.monitor_positions) > 0:
-            monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions)
-            monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions), 1, 0, 0, 1)
-            self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
-
         self._view.show_axes()
-        self.update_plotter()
+        self._setup_component_tree()
 
         if self._model.workspace_x_unit in self._UNIT_OPTIONS:
             self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_x_unit))
@@ -84,6 +121,24 @@ class FullInstrumentViewPresenter:
             add_callback=self.add_workspace_callback,
         )
         self._view.hide_status_box()
+        self._peak_interaction_status = PeakInteractionStatus.Disabled
+        self._update_peak_buttons()
+        self.update_plotter()
+
+    def _setup_component_tree(self) -> None:
+        component_tree_model = ComponentTreeModel(self._model.workspace)
+        self._component_tree_presenter = ComponentTreePresenter(
+            self._view.component_tree, component_tree_model, self.on_component_tree_item_selected
+        )
+        self._view.component_tree.subscribe_presenter(self._component_tree_presenter)
+
+    def _create_and_add_monitor_mesh(self) -> Optional[pv.PolyData]:
+        if len(self._model.monitor_positions) == 0 or not self._view.is_show_monitors_checkbox_checked():
+            return None
+        monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions)
+        monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions), 1, 0, 0, 1)
+        self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
+        return monitor_point_cloud
 
     def on_export_workspace_clicked(self) -> None:
         self._model.save_line_plot_workspace_to_ads()
@@ -102,43 +157,112 @@ class FullInstrumentViewPresenter:
             return self._model.workspace_x_unit_display
         return ""
 
+    def integration_limits_in_current_unit(self) -> tuple[float, float]:
+        limits = self._model.integration_limits
+        min_in_workspace_unit = self._model.convert_units(self._model.workspace_x_unit, self._view.current_selected_unit(), 0, limits[0])
+        max_in_workspace_unit = self._model.convert_units(self._model.workspace_x_unit, self._view.current_selected_unit(), 0, limits[1])
+        return min_in_workspace_unit, max_in_workspace_unit
+
     def on_integration_limits_updated(self) -> None:
         """When integration limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
         self._model.integration_limits = self._view.get_integration_limits()
         self.set_view_integration_limits()
+        self.on_contour_range_reset_clicked()
+
+    def on_integration_limits_reset_clicked(self) -> None:
+        self._model.calculate_and_set_full_integration_range()
+        self._view.set_integration_range_limits(self._model.full_integration_limits)
+        self._view.set_integration_min_max_boxes(self._model.full_integration_limits)
+        self.set_view_integration_limits()
 
     def set_view_integration_limits(self) -> None:
-        self._detector_mesh[self._counts_label] = self._model.detector_counts
+        display_counts = self._transform_counts(self._model.detector_counts)
+        self._renderer.set_detector_scalars(self._detector_mesh, display_counts, self._counts_label)
+        self.on_contour_range_reset_clicked()
+        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
 
     def on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
-        self._model.counts_limits = self._view.get_contour_limits()
+        # Read limits from view (these are in the current display scale).
+        lower, upper = self._view.get_contour_limits()
+        # Convert back to model's linear counts if we're in Logarithmic display mode
+        if self._count_scale_mode == self._LINEAR:
+            self._model.counts_limits = (lower, upper)
+        else:
+            # Inverse of log10(counts + 1): counts = 10**value - 1
+            with np.errstate(over="ignore", invalid="ignore"):
+                lin_lower = 10**lower - 1
+                lin_upper = 10**upper - 1
+            self._model.counts_limits = (lin_lower, lin_upper)
+        self._view.set_plotter_scalar_bar_range((lower, upper), self._counts_label)
+
+    def on_contour_range_reset_clicked(self) -> None:
+        self._model.counts_limits = self._model.full_counts_limits
         self.set_view_contour_limits()
 
     def set_view_contour_limits(self) -> None:
-        self._view.set_plotter_scalar_bar_range(self._model.counts_limits, self._counts_label)
+        transformed_limits = self._transform_counts(np.array(self._model.counts_limits))
+        clim = (float(transformed_limits[0]), float(transformed_limits[1]))
+        display_title = self._counts_label if self._count_scale_mode == self._LINEAR else f"log10({self._counts_label})"
+        self._view.set_plotter_scalar_bar_range(clim, self._counts_label, display_title=display_title)
+        self._view.set_contour_range_limits(clim)
+        self._view.set_contour_min_max_boxes(clim)
+
+    def _on_projection_option_changed(self) -> None:
+        """Update the projection, enable/disable shapes checkbox, and select appropriate renderer."""
+        self._model.projection_type = self._view.current_selected_projection()
+        self._view.set_show_shapes_checkbox_enabled(True)
+        self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
+
+    def on_projection_option_changed(self) -> None:
+        self._callback_queue.put((self._on_projection_option_changed, ()))
 
     def update_plotter(self) -> None:
-        """Update the projection based on the selected option."""
         self._model.projection_type = self._view.current_selected_projection()
+        self._model.flip_z = self._view.is_flip_z_axis_checkbox_checked()
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter()
             self.update_detector_picker()
             self.on_peaks_workspace_selected()
 
+    def count_scale_combo_options(self) -> list[str]:
+        return [self._LINEAR, self._LOGARITHMIC]
+
+    def on_count_scale_selected(self, _index) -> None:
+        """Handler for count scale combo box changes."""
+        text = self._view.current_selected_count_scale()
+        if text in (self._LINEAR, self._LOGARITHMIC):
+            self._count_scale_mode = text
+            self.set_view_integration_limits()
+
+    def _transform_counts(self, counts: np.ndarray) -> np.ndarray:
+        """Return counts transformed for display according to selected scale."""
+        if self._count_scale_mode == self._LINEAR:
+            return counts
+        # Logarithmic: use base-10 log with +1 offset to avoid -inf at zero
+        # Preserve NaNs/infs if present
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return np.log10(counts + 1)
+
     def _update_view_main_plotter(self):
         self._view.clear_main_plotter()
+        renderer = self._renderer
 
-        self._detector_mesh = self.create_poly_data_mesh(self._model.detector_positions)
-        self._detector_mesh[self._counts_label] = self._model.detector_counts
-        self._view.add_detector_mesh(self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label)
+        self._detector_mesh = renderer.build_detector_mesh(self._model.detector_positions, self._model.flip_z, self._model)
+        display_counts = self._transform_counts(self._model.detector_counts)
+        renderer.set_detector_scalars(self._detector_mesh, display_counts, self._counts_label)
+        renderer.add_detector_mesh_to_plotter(
+            self._view.main_plotter, self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label
+        )
 
-        self._pickable_mesh = self.create_poly_data_mesh(self._model.detector_positions)
-        self._pickable_mesh[self._visible_label] = self._model.picked_visibility
-        self._view.add_pickable_mesh(self._pickable_mesh, scalars=self._visible_label)
+        self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions, self._model.flip_z)
+        renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
+        renderer.add_pickable_mesh_to_plotter(self._view.main_plotter, self._pickable_mesh, scalars=self._visible_label)
 
-        self._masked_mesh = self.create_poly_data_mesh(self._model.masked_positions)
-        self._view.add_masked_mesh(self._masked_mesh)
+        self._masked_mesh = renderer.build_masked_mesh(self._model.masked_positions, self._model.flip_z, self._model)
+        renderer.add_masked_mesh_to_plotter(self._view.main_plotter, self._masked_mesh)
+
+        monitor_mesh = self._create_and_add_monitor_mesh()
 
         # Update transform needs to happen after adding to plotter
         # Uses display coordinates
@@ -146,12 +270,13 @@ class FullInstrumentViewPresenter:
         self._detector_mesh.transform(self._transform, inplace=True)
         self._pickable_mesh.transform(self._transform, inplace=True)
         self._masked_mesh.transform(self._transform, inplace=True)
+        if monitor_mesh is not None:
+            monitor_mesh.transform(self._transform, inplace=True)
 
         self._view.enable_or_disable_mask_widgets()
         self._view.enable_or_disable_aspect_ratio_box()
-        self.set_view_contour_limits()
-        self.set_view_integration_limits()
-
+        self._view.enable_or_disable_flip_z_axis_box()
+        self.on_integration_limits_reset_clicked()
         self._view.cache_camera_position()
         self._view.reset_camera()
 
@@ -180,6 +305,10 @@ class FullInstrumentViewPresenter:
 
         window_width, window_height = plotter.window_size
 
+        # Safeguard against division by zero
+        mesh_width = mesh_width if mesh_width > 0 else window_width
+        mesh_height = mesh_height if mesh_height > 0 else window_height
+
         return self._scale_matrix_relative_to_centre((min_point + max_point) / 2, window_width / mesh_width, window_height / mesh_height)
 
     def _scale_matrix_relative_to_centre(self, centre, scale_x=1.0, scale_y=1.0) -> np.ndarray:
@@ -200,6 +329,9 @@ class FullInstrumentViewPresenter:
         self._view.store_maintain_aspect_ratio_option()
         self.update_plotter()
 
+    def on_flip_z_axis_check_box_clicked(self) -> None:
+        self.update_plotter()
+
     @property
     def _detector_mesh_bounds(self) -> list[float]:
         # Output format matches vtk's mesh.GetBounds()
@@ -211,77 +343,144 @@ class FullInstrumentViewPresenter:
 
     def update_detector_picker(self) -> None:
         """Change between single and multi point picking"""
-        if self._view.is_multi_picking_checkbox_checked():
-            self._view.check_sum_spectra_checkbox()
+        # Remove any custom interactor to avoid artifacts in 2D or 3D
+        if hasattr(self._view, "interactor_style"):
+            self._view.interactor_style.remove_interactor()
 
-            def rectangle_picked(rectangle: RectangleSelection) -> None:
-                """Get points within the selection rectangle and display information for those detectors"""
-                selected_mesh = self._detector_mesh.select_enclosed_points(rectangle.frustum_mesh)
-                selected_mask = selected_mesh.point_data["SelectedPoints"].view(bool)
-                self.update_picked_detectors(selected_mask)
+        def detector_picked(detector_index: int) -> None:
+            self._model.update_point_picked_detectors(detector_index)
+            self.update_picked_detectors_on_view()
 
-            self._view.enable_rectangle_picking(self._model.is_2d_projection, callback=rectangle_picked)
-        else:
+        self._renderer.enable_picking(self._view.main_plotter, callback=detector_picked)
 
-            def point_picked(point_position: np.ndarray | None, picker: PickerType.POINT.value) -> None:
-                if point_position is None:
-                    return
-                point_index = picker.GetPointId()
-                picked_mask = np.full(self._detector_mesh.GetNumberOfPoints(), False)
-                picked_mask[point_index] = True
-                self.update_picked_detectors(picked_mask)
-
-            self._view.enable_point_picking(self._model.is_2d_projection, callback=point_picked)
-
-    def update_picked_detectors(self, picked_mask: np.ndarray) -> None:
-        if not np.any(picked_mask):
-            self._model.clear_all_picked_detectors()
-        else:
-            self._model.negate_picked_visibility(picked_mask)
+    def update_picked_detectors_on_view(self) -> None:
         # Update to visibility shows up in real time
-        self._pickable_mesh[self._visible_label] = self._model.picked_visibility
+        self._renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+        self._peak_interaction_status = PeakInteractionStatus.Disabled
+        self._view.remove_peak_cursor_from_lineplot()
+        self._update_peak_buttons()
 
-    def on_add_cylinder_clicked(self) -> None:
-        self._view.add_cylinder_widget(self._detector_mesh_bounds)
+    def _on_clear_point_picked_detectors_clicked(self) -> None:
+        self._model.clear_point_picked_detectors()
+        self.update_picked_detectors_on_view()
 
-    def on_cylinder_select_clicked(self) -> None:
-        widget = self._view.get_current_widget()
-        if widget is None:
+    def on_clear_point_picked_detectors_clicked(self) -> None:
+        self._callback_queue.put((self._on_clear_point_picked_detectors_clicked, ()))
+
+    def _on_add_item_clicked(self) -> None:
+        implicit_function = self._view.get_current_widget_implicit_function()
+        if not implicit_function:
             return
-        cylinder = vtkCylinder()
-        widget.GetCylinderRepresentation().GetCylinder(cylinder)
-        mask = [(cylinder.FunctionValue(pt) < 0) for pt in self._detector_mesh.points]
-        new_key = self._model.add_new_detector_mask(mask)
-        self._view.set_new_mask_key(new_key)
+        # Evaluate against transformed detector positions (one per detector),
+        # not mesh vertices — shape meshes have many vertices per detector.
+        detector_positions = self._transform_vectors_with_matrix(self._model.detector_positions, self._transform)
+        mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in detector_positions]
+        new_key = self._model.add_new_detector_key(mask, self._view.get_current_selected_tab())
+        self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
 
-    def on_mask_item_selected(self) -> None:
-        self._model.apply_detector_masks(self._view.selected_masks())
-        self.update_plotter()
-        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+    def on_add_item_clicked(self) -> None:
+        self._callback_queue.put((self._on_add_item_clicked, ()))
 
-    def on_save_mask_to_workspace_clicked(self) -> None:
-        self._model.save_mask_workspace_to_ads()
-        self.on_mask_item_selected()
+    def _on_list_item_selected(self, kind: CurrentTab) -> None:
+        self._model.apply_detector_items(self._view.selected_items_in_list(kind), kind)
 
-    def on_overwrite_mask_clicked(self) -> None:
+        if kind is CurrentTab.Masking:
+            self.update_plotter()
+            self.on_integration_limits_reset_clicked()
+            self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+            self._update_peak_buttons()
+        else:
+            self.update_picked_detectors_on_view()
+            # NOTE: This is required explicitly
+            self._view.enable_or_disable_mask_widgets()
+
+    def on_list_item_selected(self, kind: CurrentTab) -> None:
+        self._callback_queue.put((self._on_list_item_selected, (kind,)))
+
+    def _on_save_to_workspace_clicked(self) -> None:
+        self._model.save_workspace_to_ads(self._view.get_current_selected_tab())
+
+    def on_save_to_workspace_clicked(self) -> None:
+        self._callback_queue.put((self._on_save_to_workspace_clicked, ()))
+
+    def _on_apply_permanently_clicked(self) -> None:
+        # Clear both lists before overwriting to workspace (reset of model)
+        self._view.clear_item_list(CurrentTab.Masking)
+        self._view.clear_item_list(CurrentTab.Grouping)
         self._model.overwrite_mask_to_current_workspace()
-        self.on_clear_masks_clicked()
 
-    def on_clear_masks_clicked(self) -> None:
-        self._view.clear_mask_list()
-        self._model.clear_stored_masks()
-        self.on_mask_item_selected()
+    def on_apply_permanently_clicked(self) -> None:
+        self._callback_queue.put((self._on_apply_permanently_clicked, ()))
+
+    def _on_clear_list_clicked(self) -> None:
+        self._view.clear_item_list(self._view.get_current_selected_tab())
+        self._model.clear_stored_keys(self._view.get_current_selected_tab())
+        self.on_list_item_selected(self._view.get_current_selected_tab())
+
+    def on_clear_list_clicked(self) -> None:
+        self._callback_queue.put((self._on_clear_list_clicked, ()))
+
+    def _on_save_mask_to_xml_clicked(self):
+        filename = self._view.get_filename_from_dialog(self._XML_FILE_FILTER)
+        if not filename:
+            return
+        self._model.save_mask_to_xml(filename)
+
+    def on_save_mask_to_xml_clicked(self):
+        self._callback_queue.put((self._on_save_mask_to_xml_clicked, ()))
+
+    def _on_save_mask_to_cal_clicked(self):
+        filename = self._view.get_filename_from_dialog(self._CAL_FILE_FILTER)
+        if not filename:
+            return
+        self._model.save_mask_to_cal(filename)
+
+    def on_save_mask_to_cal_clicked(self):
+        self._callback_queue.put((self._on_save_mask_to_cal_clicked, ()))
+
+    def _on_save_grouping_to_ads_clicked(self):
+        self._model.save_grouping_to_ads()
+
+    def on_save_grouping_to_ads_clicked(self):
+        self._callback_queue.put((self._on_save_grouping_to_ads_clicked, ()))
+
+    def _on_save_grouping_to_xml_clicked(self):
+        filename = self._view.get_filename_from_dialog(self._XML_FILE_FILTER)
+        if not filename:
+            return
+        self._model.save_grouping_to_xml(filename)
+
+    def on_save_grouping_to_xml_clicked(self):
+        self._callback_queue.put((self._on_save_grouping_to_xml_clicked, ()))
+
+    def _on_save_grouping_to_cal_clicked(self):
+        filename = self._view.get_filename_from_dialog(self._CAL_FILE_FILTER)
+        if not filename:
+            return
+        self._model.save_grouping_to_cal(filename)
+
+    def on_save_grouping_to_cal_clicked(self):
+        self._callback_queue.put((self._on_save_grouping_to_cal_clicked, ()))
 
     def _reload_mask_workspaces(self) -> None:
-        self._view.refresh_mask_ws_list()
-        self.on_mask_item_selected()
+        self._view.refresh_workspaces_in_list(CurrentTab.Masking)
+        self.on_list_item_selected(CurrentTab.Masking)
 
-    def mask_workspaces_in_ads(self) -> list[str]:
-        return [ws.name() for ws in self._model.get_mask_workspaces_in_ads()]
+    def _reload_grouping_workspaces(self) -> None:
+        self._view.refresh_workspaces_in_list(CurrentTab.Grouping)
+        self.on_list_item_selected(CurrentTab.Grouping)
 
-    def cached_masks_keys(self) -> list[str]:
-        return self._model.cached_masks_keys
+    def get_list_keys_from_workspaces_in_ads(self, kind: CurrentTab):
+        if kind is CurrentTab.Masking:
+            # Mask list shows workspace names
+            return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(MaskWorkspace)]
+        else:
+            # Grouping list shows an entry per group in grouping workspace
+            return self._model.get_grouping_keys_from_workspaces_in_ads()
+
+    def cached_keys(self, kind: CurrentTab) -> list[str]:
+        return self._model.cached_keys(kind)
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
@@ -296,9 +495,6 @@ class FullInstrumentViewPresenter:
             self._view.set_relative_detector_angle(None)
         else:
             self._view.set_relative_detector_angle(self._model.relative_detector_angle())
-
-    def on_clear_selected_detectors_clicked(self) -> None:
-        self.update_picked_detectors(np.array([]))
 
     def create_poly_data_mesh(self, points: np.ndarray, faces=None) -> pv.PolyData:
         """Create a PyVista mesh from the given points and faces"""
@@ -318,44 +514,61 @@ class FullInstrumentViewPresenter:
         self._view.refresh_peaks_ws_list()
         self.on_peaks_workspace_selected()
 
-    def delete_workspace_callback(self, ws_name):
-        if self._model._workspace.name() == ws_name:
+    def _delete_workspace_callback(self, ws_name):
+        if self._model.workspace.name() == ws_name:
             self._view.close()
             logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
         else:
-            self._reload_peaks_workspaces()
-            self._reload_mask_workspaces()
+            self._reload_everything()
 
-    def rename_workspace_callback(self, ws_old_name, ws_new_name):
+    def delete_workspace_callback(self, ws_name):
+        self._callback_queue.put((self._delete_workspace_callback, (ws_name,)))
+
+    def _rename_workspace_callback(self, ws_old_name, ws_new_name):
         if self._model._workspace.name() == ws_old_name:
             self._model._workspace = mtd[ws_new_name]
             self._model.setup()
+            self._setup_component_tree()
             logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
-        self._reload_peaks_workspaces()
-        self._reload_mask_workspaces()
+
+        self._reload_everything()
+
+    def rename_workspace_callback(self, ws_old_name, ws_new_name):
+        self._callback_queue.put((self._rename_workspace_callback, (ws_old_name, ws_new_name)))
 
     def clear_workspace_callback(self):
         self._view.close()
 
-    def replace_workspace_callback(self, ws_name, ws):
-        if ws_name in self.peaks_workspaces_in_ads():
+    def _replace_workspace_callback(self, ws_name, ws):
+        if isinstance(ws, PeaksWorkspace):
             self._reload_peaks_workspaces()
-        elif ws_name in self.mask_workspaces_in_ads():
+        elif isinstance(ws, MaskWorkspace):
             self._reload_mask_workspaces()
+        elif isinstance(ws, GroupingWorkspace):
+            self._reload_grouping_workspaces()
         elif ws_name == self._model.workspace.name():
-            # This check is needed because observers are triggered
-            # before the RenameWorkspace is completed.
-            # Prevents strange behaviour from workspace not being fully replaced yet
-            if AnalysisDataService.retrieve(ws_name).name() != ws_name:
-                return
             self._model._workspace = AnalysisDataService.retrieve(ws_name)
             self._model.setup()
+            self._setup_component_tree()
+            self._clear_renderers()  # Clear cached renderers before rendering
+            self.update_plotter()
 
-    def add_workspace_callback(self, ws_name, ws):
+    def replace_workspace_callback(self, ws_name, ws):
+        self._callback_queue.put((self._replace_workspace_callback, (ws_name, ws)))
+
+    def _add_workspace_callback(self, ws_name, ws):
         self._reload_peaks_workspaces()
         self._reload_mask_workspaces()
+        self._reload_grouping_workspaces()
+
+    def add_workspace_callback(self, ws_name, ws):
+        self._callback_queue.put((self._add_workspace_callback, (ws_name, ws)))
 
     def handle_close(self):
+        if hasattr(self, "_callback_queue"):
+            self._callback_queue.put(self._callback_stop_sentinel)
+            if hasattr(self, "_callback_thread"):
+                self._callback_thread.join(timeout=1)
         # The observers are unsubscribed on object deletion, it's safer to manually
         # delete the observer rather than wait for the garbage collector, because
         # we don't want stale workspace references hanging around.
@@ -366,11 +579,11 @@ class FullInstrumentViewPresenter:
         self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
 
     def peaks_workspaces_in_ads(self) -> list[str]:
-        return [ws.name() for ws in self._model.peaks_workspaces_in_ads()]
+        return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(PeaksWorkspace)]
 
     def _update_peaks_workspaces(self) -> None:
         peaks_grouped_by_ws = []
-        points_from_model = self._model.peak_overlay_points()
+        points_from_model = list(self._model.peak_overlay_points().values())
         for ws_index in range(len(points_from_model)):
             peaks_grouped_by_ws.append(WorkspaceDetectorPeaks(points_from_model[ws_index], self._COLOURS[ws_index % len(self._COLOURS)]))
         self._peaks_grouped_by_ws = peaks_grouped_by_ws
@@ -399,7 +612,6 @@ class FullInstrumentViewPresenter:
             ordered_indices = ordered_indices[valid]
             labels = [p.label for i, p in enumerate(ws_peaks.detector_peaks) if valid[i]]
             projected_points = self._model.detector_positions[ordered_indices]
-            # Plot the peaks and their labels on the projection
             if len(projected_points) > 0:
                 transformed_points = self._transform_vectors_with_matrix(projected_points, self._transform)
                 self._view.plot_overlay_mesh(transformed_points, labels, ws_peaks.colour)
@@ -413,29 +625,113 @@ class FullInstrumentViewPresenter:
             labels = []
             for peak in ws_peaks.detector_peaks:
                 if peak.spectrum_no in self._model.picked_spectrum_nos:
-                    match self._view.current_selected_unit():
-                        case self._TIME_OF_FLIGHT:
-                            x_values += [p.tof for p in peak.peaks]
-                        case self._D_SPACING:
-                            x_values += [p.dspacing for p in peak.peaks]
-                        case self._WAVELENGTH:
-                            x_values += [p.wavelength for p in peak.peaks]
-                        case self._MOMENTUM_TRANSFER:
-                            x_values += [p.q for p in peak.peaks]
-                        case _:
-                            raise RuntimeError("Unknown unit for drawing peak overlays")
+                    x_values += [p.location_in_unit(self._view.current_selected_unit()) for p in peak.peaks]
                     labels += [p.label for p in peak.peaks]
             if len(x_values) > 0:
                 self._view.plot_lineplot_overlay(x_values, labels, ws_peaks.colour)
         self._view.redraw_lineplot()
 
-    def on_save_xml_mask_clicked(self):
-        filename = open_a_file_dialog(
-            accept_mode=QFileDialog.AcceptSave,
-            file_mode=QFileDialog.AnyFile,
-            file_filter="XML files (*xml)",
-            directory=ConfigService["defaultsave.directory"],
+    def on_add_peak_clicked(self) -> None:
+        self._on_peak_clicked_in_lineplot(PeakInteractionStatus.Adding)
+
+    def on_peak_selected(self, x: float) -> None:
+        # First convert to workspace x unit
+        x_in_workspace_unit = self._model.convert_units(self._view.current_selected_unit(), self._model.workspace_x_unit, 0, x)
+        if self._peak_interaction_status == PeakInteractionStatus.Adding:
+            peaks_ws = self._model.add_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
+            self._view.refresh_peaks_ws_list()
+            self._view.select_peaks_workspace(peaks_ws)
+        elif self._peak_interaction_status == PeakInteractionStatus.Deleting:
+            self._model.delete_peak(x_in_workspace_unit)
+        else:
+            raise RuntimeError("Unknown peak operation")
+        self._peak_interaction_status = PeakInteractionStatus.Disabled
+        self._view.remove_peak_cursor_from_lineplot()
+        self._update_peak_buttons()
+
+    def _update_peak_buttons(self) -> None:
+        self._view.set_add_peak_button_enabled(
+            len(self._model.picked_detector_ids) == 1 and self._peak_interaction_status != PeakInteractionStatus.Adding
         )
-        if not filename:
-            return
-        self._model.save_xml_mask(filename)
+        self._view.set_delete_peak_button_enabled(
+            self._view.has_any_peak_overlays() and self._peak_interaction_status != PeakInteractionStatus.Adding
+        )
+        self._view.set_delete_all_selected_peaks_button_enabled(
+            len(self._model.picked_detector_ids) > 0 and self._peak_interaction_status != PeakInteractionStatus.Adding
+        )
+
+    def _on_peak_clicked_in_lineplot(self, status: PeakInteractionStatus) -> None:
+        self._peak_interaction_status = status
+        self._view.add_peak_cursor_to_lineplot()
+        self._update_peak_buttons()
+
+    def on_delete_peak_clicked(self) -> None:
+        self._on_peak_clicked_in_lineplot(PeakInteractionStatus.Deleting)
+
+    def on_delete_all_selected_peaks_clicked(self) -> None:
+        self._model.delete_peaks_on_all_selected_detectors()
+        self._update_peak_buttons()
+
+    def on_show_monitors_check_box_clicked(self) -> None:
+        self.update_plotter()
+
+    def on_component_tree_item_selected(self, component_indices: np.ndarray) -> None:
+        self._model.component_tree_indices_selected(component_indices)
+        self.update_plotter()
+
+    def _get_point_cloud_renderer(self) -> PointCloudRenderer:
+        if self._point_cloud_renderer is None:
+            self._point_cloud_renderer = PointCloudRenderer()
+        return self._point_cloud_renderer
+
+    def _get_shape_renderer(self) -> ShapeRenderer:
+        """Get or create a cached shape renderer instance.
+
+        Returns a :class:`SideBySideShapeRenderer` when the current
+        projection is side-by-side, otherwise a plain :class:`ShapeRenderer`.
+        On first call for each type, precomputes geometry from the workspace
+        which may be expensive.  Subsequent calls return the cached instance.
+        """
+        is_sbs = self._model.projection_type == ProjectionType.SIDE_BY_SIDE
+        if is_sbs:
+            if self._sbs_shape_renderer is None:
+                self._sbs_shape_renderer = SideBySideShapeRenderer()
+                self._sbs_shape_renderer.precompute(self._model.workspace, self._model.bank_groups_by_detector_id)
+            return self._sbs_shape_renderer
+        else:
+            if self._shape_renderer is None:
+                self._shape_renderer = ShapeRenderer()
+                self._shape_renderer.precompute(self._model.workspace)
+            return self._shape_renderer
+
+    def _on_show_shapes_toggled(self, checked: bool) -> None:
+        if checked:
+            self._renderer = self._get_shape_renderer()
+        else:
+            self._renderer = self._get_point_cloud_renderer()
+
+        self.update_plotter()
+
+    def on_show_shapes_toggled(self, checked: bool) -> None:
+        self._callback_queue.put((self._on_show_shapes_toggled, (checked,)))
+
+    def _clear_renderers(self) -> None:
+        """Clear cached renderer instances, forcing recreation on next use.
+
+        Called when the workspace changes to ensure renderers recompute geometry
+        from the new workspace data.
+        """
+        self._shape_renderer = None
+        self._sbs_shape_renderer = None
+        self._point_cloud_renderer = None
+        self._renderer = self._get_shape_renderer() if self._view.is_show_shapes_checkbox_checked() else self._get_point_cloud_renderer()
+
+    def _reload_everything(self) -> None:
+        """Reload all workspace-dependent data (peaks, masks, groupings) and clear renderer cache.
+
+        Called when workspaces are added to or removed from the ADS.
+        """
+        self._clear_renderers()
+        self._reload_peaks_workspaces()
+        self._reload_mask_workspaces()
+        self._reload_grouping_workspaces()

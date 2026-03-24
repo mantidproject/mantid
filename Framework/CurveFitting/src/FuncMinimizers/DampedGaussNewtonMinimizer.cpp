@@ -18,7 +18,6 @@
 #include "MantidKernel/Logger.h"
 
 #include <cmath>
-#include <gsl/gsl_blas.h>
 
 namespace Mantid::CurveFitting::FuncMinimisers {
 
@@ -121,9 +120,7 @@ bool DampedGaussNewtonMinimizer::iterate(size_t /*iteration*/) {
   // Try the stop condition
   EigenVector p(n);
   m_leastSquares->getParameters(p);
-  gsl_vector_view dx_gsl = getGSLVectorView(dx.mutator());
-  double dx_norm = gsl_blas_dnrm2(&dx_gsl.vector);
-  return dx_norm >= m_relTol;
+  return dx.norm() >= m_relTol;
 }
 
 /// Return current value of the cost function

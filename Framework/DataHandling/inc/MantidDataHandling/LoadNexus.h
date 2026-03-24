@@ -56,7 +56,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return {"LoadMcStasNexus",    "LoadNexusMonitors", "LoadNexusProcessed", "LoadTOFRawNexus",
+    return {"LoadMcStas",         "LoadNexusMonitors", "LoadNexusProcessed", "LoadTOFRawNexus",
             "LoadILLDiffraction", "LoadILLTOF",        "LoadILLIndirect",    "LoadILLReflectometry",
             "LoadILLSANS",        "LoadMuonNexus",     "LoadFlexiNexus"};
   }

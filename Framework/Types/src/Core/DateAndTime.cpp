@@ -438,6 +438,20 @@ std::string DateAndTime::toFormattedString(const std::string &format) const {
  */
 std::string DateAndTime::toISO8601String() const { return boost::posix_time::to_iso_extended_string(to_ptime()); }
 
+/**
+ * Convert to RFC2616.
+ *
+ * Examples (from Poco::DateTimeFormat)
+ * Sat, 01 Jan 2005 12:00:00 +0100
+ * Sat, 01 Jan 2005 11:00:00 GMT
+ */
+std::string DateAndTime::toHttpFormat() const {
+  // time zone information doesn't come through correctly
+  // seconds should be included, but that isn't playing nice either
+  const std::string FORMAT("%a, %e %b %Y %H:%M");
+  return this->toFormattedString(FORMAT) + ":00 GMT";
+}
+
 //------------------------------------------------------------------------------------------------
 /** Get the year of this date.
  * @return the year

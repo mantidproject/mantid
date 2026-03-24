@@ -81,19 +81,15 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         view, model = self.create_table(ws, parent, window_flags, model, view, batch, group)
         self.view = view
         self.model = model
-        self.name = name if name else model.get_name()
-        self.container = (
-            container
-            if container
-            else StatusBarView(
-                parent,
-                view,
-                self.name,
-                window_width=window_width,
-                window_height=window_height,
-                window_flags=window_flags,
-                presenter=self,
-            )
+        self.name = name or model.get_name()
+        self.container = container or StatusBarView(
+            parent,
+            view,
+            self.name,
+            window_width=window_width,
+            window_height=window_height,
+            window_flags=window_flags,
+            presenter=self,
         )
 
         DataCopier.__init__(self, self.container.status_bar)
@@ -102,7 +98,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.plot = plot
         self.group = group
 
-        self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self, observe_group_update=self.group)
+        self.ads_observer = ads_observer or WorkspaceDisplayADSObserver(self, observe_group_update=self.group)
 
         self.presenter.refresh()
 
@@ -121,27 +117,21 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
 
     def _create_table_standard(self, ws, parent, window_flags, view, model):
         model = model if model is not None else TableWorkspaceDisplayModel(ws)
-        view = view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags)
+        view = view or TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags)
         self.presenter = TableWorkspaceDataPresenterStandard(model, view)
         return view, model
 
     def _create_table_batch(self, ws, parent, window_flags, view, model):
         model = model if model is not None else TableWorkspaceDisplayModel(ws)
         table_model = TableModel(parent=parent, data_model=model)
-        view = (
-            view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags, table_model=table_model)
-        )
+        view = view or TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags, table_model=table_model)
         self.presenter = TableWorkspaceDataPresenterBatch(model, view)
         return view, model
 
     def _create_table_group(self, ws, parent, window_flags, view, model):
         model = model if model is not None else GroupTableWorkspaceDisplayModel(ws)
         table_model = GroupTableModel(model, view)
-        view = (
-            view
-            if view
-            else GroupTableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags, table_model=table_model)
-        )
+        view = view or GroupTableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags, table_model=table_model)
         self.presenter = TableWorkspaceDataPresenterGroup(model, view)
         return view, model
 

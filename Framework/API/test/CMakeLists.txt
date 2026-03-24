@@ -28,6 +28,8 @@ if(CXXTEST_FOUND)
     target_link_libraries(APITest PRIVATE gmock gtest)
   endif()
 
+  target_precompile_headers(APITest PRIVATE <cxxtest/WrappedTestSuite.h> <set> <string> <vector>)
+
   add_framework_test_helpers(APITest)
 
   add_dependencies(FrameworkTests APITest)

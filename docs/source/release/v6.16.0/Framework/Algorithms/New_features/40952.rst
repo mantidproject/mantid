@@ -1,0 +1,1 @@
+- MPI Algorithms :ref:`BroadcastWorkspace <algm-BroadcastWorkspace>` and :ref:`GatherWorkspaces <algm-GatherWorkspaces>` have been added to mantid to allow for MPI processing that is workspace friendly. These are available on linux in the ``mantidmpi`` package.

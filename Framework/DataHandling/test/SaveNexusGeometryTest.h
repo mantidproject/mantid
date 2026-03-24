@@ -36,7 +36,7 @@ public:
 
   void test_exec() {
 
-    FileResource fileResource("algorithm_test_file.hdf5");
+    FileResource fileResource("algorithm_test_file.hdf5", false, true);
     auto destinationFile = fileResource.fullPath();
     // Create test input
     Mantid::API::IEventWorkspace_sptr inputWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument2(1, 5);
@@ -58,7 +58,7 @@ public:
 
   void test_execution_successful_when_no_h5_root_provided_and_default_root_is_used() {
 
-    FileResource fileResource("algorithm_no_h5_root_file.hdf5");
+    FileResource fileResource("algorithm_no_h5_root_file.hdf5", false, true);
     auto destinationFile = fileResource.fullPath();
     // Create test input if necessary
     Mantid::API::IEventWorkspace_sptr inputWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument2(1, 5);
@@ -84,7 +84,7 @@ public:
     into the Input workspace property.
     */
 
-    FileResource fileResource("algorithm_no_instrument_in_workspace_provided_test_file.hdf5");
+    FileResource fileResource("algorithm_no_instrument_in_workspace_provided_test_file.hdf5", false, true);
     auto destinationFile = fileResource.fullPath();
     // Create test input if necessary
 
@@ -114,7 +114,7 @@ public:
     when invalid file extension is passed into fileName property.
     */
 
-    FileResource fileResource("algorithm_invalid_extension_provided_test_file.txt");
+    FileResource fileResource("algorithm_invalid_extension_provided_test_file.txt", false, true);
     auto destinationFile = fileResource.fullPath();
     // Create test workspace
     Mantid::API::IEventWorkspace_sptr inputWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument2(5, 5);
@@ -138,7 +138,7 @@ public:
 
   void test_eight_pack() {
 
-    FileResource fileResource("eight_pack.hdf5");
+    FileResource fileResource("eight_pack.hdf5", false, true);
     auto destinationFile = fileResource.fullPath();
 
     Mantid::DataHandling::LoadEmptyInstrument alg;
@@ -168,7 +168,7 @@ public:
     exception.
     */
 
-    FileResource fileResource("duplicate_names_test.hdf5");
+    FileResource fileResource("duplicate_names_test.hdf5", false, true);
     auto destinationFile = fileResource.fullPath();
 
     Mantid::DataHandling::LoadEmptyInstrument loader;

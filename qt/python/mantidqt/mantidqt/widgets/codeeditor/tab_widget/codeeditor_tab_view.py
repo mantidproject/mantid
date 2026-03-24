@@ -26,7 +26,7 @@ class CodeEditorTabWidget(QTabWidget):
     SHOW_IN_EXPLORER_ACTION_OBJECT_NAME = "show-in-explorer-action"
 
     def __init__(self, parent=None, presenter=None):
-        self.presenter = presenter if presenter else CodeEditorTabPresenter(self)
+        self.presenter = presenter or CodeEditorTabPresenter(self)
         super(CodeEditorTabWidget, self).__init__(parent)
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)

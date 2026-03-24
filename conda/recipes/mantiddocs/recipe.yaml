@@ -28,18 +28,19 @@ requirements:
         - ninja ${{ ninja }}
   host:
     - mantid == ${{ version }}
+    - mantidmpi == ${{ version }}
     - mantidqt == ${{ version }}
+    - mantid-sphinx-theme ${{ mantid_sphinx_theme }}
+    - myst-parser ${{ mystparser }}
     - python ${{ python }}
     - setuptools
     - sphinx ${{ sphinx }}
-    - sphinx_bootstrap_theme ${{ sphinx_bootstrap_theme }}
     - graphviz ${{ graphviz }}
     - gtest ${{ gtest }}
     - pystog ${{ pystog }}
     - if: linux
       then:
         - libgl-devel
-        - texlive-core ${{ texlive_core }}
         - xorg-libxxf86vm
         - xorg-libx11
         - xorg-xorgproto

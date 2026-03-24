@@ -131,6 +131,23 @@ class BayesQuasiTest(unittest.TestCase):
         self.assertTrue(np.allclose(expected_eisf, eisf))
         self.assertTrue(np.allclose(expected_eisf_error, eisf_error))
 
+    def test_output_workspace_names_are_respected(self):
+        fit_group, result, prob = BayesQuasi(
+            SampleWorkspace=self._sample_ws,
+            ResolutionWorkspace=self._res_ws,
+            MinRange=-0.54760699999999995,
+            MaxRange=0.54411200000000004,
+            Elastic=False,
+            Background="Sloping",
+            FixedWidth=False,
+            OutputWorkspaceFit="test_name_fit",
+            OutputWorkspaceResult="test_name_result",
+            OutputWorkspaceProb="test_name_prob",
+        )
+        self.assertEqual(fit_group.getName(), "test_name_fit")
+        self.assertEqual(result.getName(), "test_name_result")
+        self.assertEqual(prob.getName(), "test_name_prob")
+
     # --------------------------------Validate results------------------------------------------------
 
     def _validate_QLr_shape(self, result, probability, group):

@@ -130,6 +130,20 @@ public:
     TS_ASSERT_EQUALS(notroot.isRoot(), false);
   }
 
+  void test_hasChild() {
+    NexusAddress start("/entry"), next("another");
+    std::string another("one_more");
+
+    // operator /
+    NexusAddress up1 = start / next;
+    TS_ASSERT_EQUALS(up1, "/entry/another");
+    TS_ASSERT(start.hasChild(up1))
+
+    NexusAddress up2 = start / another;
+    TS_ASSERT_EQUALS(up2, "/entry/one_more");
+    TS_ASSERT(start.hasChild(up2))
+  }
+
   void test_parent_path() {
     NexusAddress root;
     TS_ASSERT_EQUALS(root.parent_path(), root);

@@ -33,8 +33,6 @@ void NexusFileLoader::setFileInfo(std::shared_ptr<Nexus::NexusDescriptor> fileIn
   m_fileInfo = std::move(fileInfo);
 }
 
-const std::shared_ptr<Nexus::NexusDescriptor> NexusFileLoader::getFileInfo() const noexcept { return m_fileInfo; }
-
 std::string NexusFileLoader::getFilenamePropertyName() const { return "Filename"; }
 
 } // namespace Mantid::API

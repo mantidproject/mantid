@@ -37,15 +37,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     alg.setPropertyValue("Filename", "REF_L_32035.nxs");
-    Mantid::Nexus::NexusDescriptor descr(alg.getPropertyValue("Filename"));
+    Mantid::Nexus::NexusDescriptorLazy descr(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr), 80);
 
     alg.setPropertyValue("Filename", "CNCS_7860_event.nxs");
-    Mantid::Nexus::NexusDescriptor descr2(alg.getPropertyValue("Filename"));
+    Mantid::Nexus::NexusDescriptorLazy descr2(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr2), 20);
 
     alg.setPropertyValue("Filename", "PG3_733.nxs");
-    Mantid::Nexus::NexusDescriptor descr4(alg.getPropertyValue("Filename"));
+    Mantid::Nexus::NexusDescriptorLazy descr4(alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(alg.confidence(descr4), 0);
   }
 
@@ -160,85 +160,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
   }
-
-  /** Refs #3716: Different signals (binned in q-space, d-space, tof)
-   * File is rather large (and slow to load) so not in SVN.
-   * Test passes if file is not found.
-   *
-   * @param signal :: signal number to load
-   * @param expectedXLength :: # of bins
-   * */
-  Mantid::API::MatrixWorkspace_sptr do_test_signal(int signal, size_t expectedXLength) {
-    Mantid::API::AnalysisDataService::Instance().remove("outWS");
-    std::string filename = "NOM_2011_09_15T16_17_30Z_histo.nxs";
-    Mantid::API::FrameworkManager::Instance();
-    Mantid::DataHandling::LoadTOFRawNexus ld;
-    ld.initialize();
-    try {
-      ld.setPropertyValue("Filename", filename);
-    } catch (...) {
-      std::cout << "Test not completed due to missing data file " << filename << '\n';
-      return Mantid::API::MatrixWorkspace_sptr();
-    }
-    ld.setProperty("Signal", signal);
-    ld.setPropertyValue("OutputWorkspace", "outWS");
-    TS_ASSERT_THROWS_NOTHING(ld.execute());
-    TS_ASSERT(ld.isExecuted());
-
-    Mantid::API::MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                                 Mantid::API::AnalysisDataService::Instance().retrieve("outWS")););
-    TS_ASSERT(ws);
-    if (!ws)
-      return ws;
-    TS_ASSERT_EQUALS(ws->getAxis(0)->length(), expectedXLength);
-    TS_ASSERT_EQUALS(ws->blocksize(), expectedXLength - 1);
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 99 * 8 * 128);
-    return ws;
-  }
-
-  void test_signal_1() {
-    Mantid::API::MatrixWorkspace_sptr ws = do_test_signal(1, 168);
-    if (!ws)
-      return;
-    TS_ASSERT_DELTA(ws->getAxis(0)->operator()(0, 0), 0, 1e-6);
-    TS_ASSERT_DELTA(ws->getAxis(0)->operator()(1, 0), 1000, 1e-6);
-    TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->unitID(), "TOF");
-  }
-
-  void test_signal_5() {
-    Mantid::API::MatrixWorkspace_sptr ws = do_test_signal(5, 2501);
-    if (!ws)
-      return;
-    TS_ASSERT_DELTA(ws->getAxis(0)->operator()(0, 0), 0.02, 1e-6);
-    TS_ASSERT_DELTA(ws->getAxis(0)->operator()(1, 0), 0.04, 1e-6);
-    TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->unitID(), "MomentumTransfer");
-  }
-
-  /** Disabled because it is slow */
-  void xtest_signal_6() {
-    Mantid::API::MatrixWorkspace_sptr ws = do_test_signal(6, 2521);
-    if (!ws)
-      return;
-    TS_ASSERT_DELTA(ws->getAxis(0)->operator()(0, 0), 0.125, 1e-6);
-    TS_ASSERT_DELTA(ws->getAxis(0)->operator()(1, 0), 0.250, 1e-6);
-    TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->unitID(), "dSpacing");
-  }
-
-  class LoadTOFRawNexusExposed : public LoadTOFRawNexus {
-  public:
-    void doExec() { this->exec(); }
-  };
-
-  void xtest_SNAP_3893() ///< DISABLED because it takes > 60 seconds.
-  {
-    LoadTOFRawNexusExposed alg;
-    alg.initialize();
-    alg.setPropertyValue("Filename", "SNAP_3893.nxs");
-    alg.setPropertyValue("OutputWorkspace", "outWS");
-    alg.doExec();
-    TS_ASSERT(alg.isExecuted());
-  };
 };
 
 //------------------------------------------------------------------------------

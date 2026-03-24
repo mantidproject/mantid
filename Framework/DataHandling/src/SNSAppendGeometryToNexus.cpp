@@ -14,7 +14,6 @@
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <Poco/Exception.h>
 #include <filesystem>
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -94,7 +93,7 @@ void SNSAppendGeometryToNexus::exec() {
         std::filesystem::copy_file(originalFile, destinationFile);
         g_log.notice() << "Copied " << m_filename << " to " << destinationFile << ".\n";
         m_filename = destinationFile.string();
-      } catch (Poco::FileAccessDeniedException &) {
+      } catch (std::filesystem::filesystem_error &) {
         throw std::runtime_error("A Problem occurred in making a copy of the "
                                  "NeXus file. Failed to copy " +
                                  originalFile.string() + " to " + destinationFile.string() +

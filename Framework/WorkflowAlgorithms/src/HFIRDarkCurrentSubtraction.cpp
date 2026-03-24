@@ -12,8 +12,9 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
-#include "Poco/Path.h"
 #include "Poco/String.h"
+
+#include <filesystem>
 
 namespace Mantid::WorkflowAlgorithms {
 
@@ -71,8 +72,8 @@ void HFIRDarkCurrentSubtraction::exec() {
   progress.report("Subtracting dark current");
 
   // Look for an entry for the dark current in the reduction table
-  Poco::Path path(fileName);
-  const std::string entryName = "DarkCurrent" + path.getBaseName();
+  std::filesystem::path path(fileName);
+  const std::string entryName = "DarkCurrent" + path.stem().string();
 
   if (reductionManager->existsProperty(entryName)) {
     darkWS = reductionManager->getProperty(entryName);
@@ -81,7 +82,7 @@ void HFIRDarkCurrentSubtraction::exec() {
   } else {
     // Load the dark current if we don't have it already
     if (darkWSName.empty()) {
-      darkWSName = "__dark_current_" + path.getBaseName();
+      darkWSName = "__dark_current_" + path.stem().string();
       setPropertyValue("OutputDarkCurrentWorkspace", darkWSName);
     }
 

@@ -47,7 +47,7 @@ class SuperplotViewTest(unittest.TestCase):
     def test_show(self):
         self.view.show()
         calls = [mock.call(Qt.LeftDockWidgetArea, self.m_dock_side), mock.call(Qt.BottomDockWidgetArea, self.m_dock_bottom)]
-        self.m_window.addDockWidget.has_calls(calls)
+        self.m_window.addDockWidget.assert_has_calls(calls)
         self.m_dock_bottom.setFocus.assert_called_once()
 
     def test_close(self):

@@ -59,17 +59,29 @@ void LoadTOFRawNexus::init() {
                   "set.");
 }
 
+namespace {
+// constants for the strings to look for
+const std::string ENTRY_NAME("/entry");
+const std::string ENTRY_STATE_NAME("/entry-state0");
+const std::string NXENTRY("NXentry");
+const std::string NXEVENT_DATA("NXevent_data");
+const std::string NX_DATA("NXdata");
+} // namespace
+
 /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadTOFRawNexus::confidence(Nexus::NexusDescriptor &descriptor) const {
+int LoadTOFRawNexus::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   int confidence(0);
-  if (descriptor.isEntry("/entry", "NXentry") || descriptor.isEntry("/entry-state0", "NXentry")) {
-    const bool hasEventData = descriptor.classTypeExists("NXevent_data");
-    const bool hasData = descriptor.classTypeExists("NXdata");
+  if (descriptor.isEntry(ENTRY_NAME, NXENTRY) || descriptor.isEntry(ENTRY_STATE_NAME, NXENTRY)) {
+    const bool hasEventData = descriptor.classTypeExistsChild(ENTRY_NAME, NXEVENT_DATA) ||
+                              descriptor.classTypeExistsChild(ENTRY_STATE_NAME, NXEVENT_DATA);
+    const bool hasData = descriptor.classTypeExistsChild(ENTRY_NAME, NX_DATA) ||
+                         descriptor.classTypeExistsChild(ENTRY_STATE_NAME, NX_DATA);
+
     if (hasData && hasEventData)
       // Event data = this is event NXS
       confidence = 20;
@@ -487,10 +499,9 @@ void LoadTOFRawNexus::exec() {
   // Load the meta data, but don't stop on errors
   prog->report("Loading metadata");
   g_log.debug() << "Loading metadata\n";
-  Nexus::NexusDescriptor descriptor(filename);
 
   try {
-    LoadEventNexus::loadEntryMetadata(filename, WS, entry_name, descriptor);
+    LoadEventNexus::loadEntryMetadata(filename, WS, entry_name);
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }

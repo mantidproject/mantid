@@ -19,6 +19,8 @@ endif()
 option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
 option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
 option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
+# Build with MPI (Linux only)
+option(MPI_BUILD "Enable MPI options (Linux / RedHat only)" OFF)
 
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 make_directory(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Testing)
@@ -189,12 +191,10 @@ endif()
 # ######################################################################################################################
 # Visibility Setting
 # ######################################################################################################################
-if(CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_VISIBILITY_PRESET
-      hidden
-      CACHE STRING ""
-  )
-endif()
+set(CMAKE_CXX_VISIBILITY_PRESET
+    hidden
+    CACHE STRING ""
+)
 
 # ######################################################################################################################
 # Bundles setting used for install commands if not set by something else e.g. Darwin
@@ -252,6 +252,15 @@ if(ENABLE_PRECOMMIT)
       )
     endif()
   endif()
+endif()
+
+# ######################################################################################################################
+# Look for MPI
+# ######################################################################################################################
+if(MPI_BUILD AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(MPI_ENABLED TRUE)
+  find_package(MPI REQUIRED)
+  find_package(Boost CONFIG REQUIRED COMPONENTS mpi)
 endif()
 
 # ######################################################################################################################

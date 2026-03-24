@@ -11,7 +11,6 @@
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/LegacyNexusDescriptor.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidNexus/NexusDescriptor.h"
 #include "MantidNexus/NexusDescriptorLazy.h"
 
 #ifndef Q_MOC_RUN
@@ -41,7 +40,7 @@ Use this in place of the standard DECLARE_ALGORITHM macro
 class MANTID_API_DLL FileLoaderRegistryImpl {
 public:
   /// Defines types of possible file
-  enum LoaderFormat { LegacyNexus = 0, Generic, Nexus, NexusLazy, enum_count };
+  enum LoaderFormat { LegacyNexus = 0, Generic, Nexus, enum_count };
 
 public:
   /// @returns the number of entries in the registry
@@ -96,16 +95,9 @@ private:
         }
         break;
       case Nexus:
-        if (!std::is_base_of<IFileLoader<Nexus::NexusDescriptor>, T>::value) {
-          throw std::runtime_error(
-              std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
-              "' registered as Nexus loader but it does not inherit from API::IFileLoader<Kernel::NexusDescriptor>");
-        }
-        break;
-      case NexusLazy:
         if (!std::is_base_of<IFileLoader<Nexus::NexusDescriptorLazy>, T>::value) {
           throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
-                                   "' registered as NexusLazy loader but it does not inherit from "
+                                   "' registered as Nexus loader but it does not inherit from "
                                    "API::IFileLoader<Nexus::NexusDescriptorLazy>");
         }
         break;

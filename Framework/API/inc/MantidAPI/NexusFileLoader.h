@@ -25,14 +25,15 @@ public:
                                                   const int &version = -1) override;
   virtual void setFileInfo(std::shared_ptr<Mantid::Nexus::NexusDescriptor> fileInfo);
 
-  /// Required to pass m_fileInfo to static functions
-  /// Keeping it shared_ptr to match setFileInfo signature (although passing
-  /// ownership is not the main goal).
-  virtual const std::shared_ptr<Mantid::Nexus::NexusDescriptor> getFileInfo() const noexcept;
-
   virtual int confidence(Nexus::NexusDescriptor &descriptor) const override = 0;
 
 private:
+  /// Required to pass m_fileInfo to static functions
+  /// Keeping it shared_ptr to match setFileInfo signature (although passing
+  /// ownership is not the main goal).
+  /// AVOID USING THIS.  Use methods in Nexus::File instead
+  virtual const std::shared_ptr<Mantid::Nexus::NexusDescriptor> getFileInfo() const noexcept { return m_fileInfo; };
+
   std::shared_ptr<Mantid::Nexus::NexusDescriptor> m_fileInfo;
 };
 } // namespace Mantid::API

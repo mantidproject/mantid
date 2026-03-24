@@ -29,11 +29,11 @@ repos:
     hooks:
       - id: taplo-format # format toml files
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.30.0
+    rev: v8.30.1
     hooks:
       - id: gitleaks
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v21.1.8
+    rev: v22.1.1
     hooks:
     - id: clang-format
       exclude: Testing/Tools/cxxtest|tools|qt/icons/resources/
@@ -67,8 +67,17 @@ repos:
           ^docs/source/techniques/.*
           )$
 
+  - repo: https://github.com/hukkin/mdformat
+    rev: 1.0.0
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+        - mdformat-gfm # github flavored markdown
+        - mdformat-myst # myst-parser
+        - mdformat-ruff # ruff format code snippets
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.10
+    rev: v0.15.6
     # ruff must appear before black in the list of hooks
     hooks:
       - id: ruff-check
@@ -86,7 +95,8 @@ repos:
           (?x)^(
           ^conda/recipes/mantid-developer/recipe.yaml$|
           ^conda/recipes/conda_build_config.yaml$|
-          ^pixi.toml$
+          ^pixi.toml$|
+          ^pixi.lock$
           )$
         additional_dependencies:
           - pyyaml

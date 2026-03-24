@@ -39,6 +39,7 @@ from sans.common.general_functions import (
     parse_event_slice_setting,
     wav_range_to_str,
     wav_ranges_to_str,
+    parse_simple_range_of_number_pairs,
 )
 from sans.state.StateObjects.StateData import StateData
 from sans.test_helper.test_director import TestDirector
@@ -676,6 +677,31 @@ class SANSEventSliceParsing(unittest.TestCase):
         )
         self.assertEqual([SANSDetector.ZOOM_LAB.value], get_detector_names_from_instrument(SANSInstrument.ZOOM))
         self.assertEqual([SANSDetector.LARMOR_LAB.value], get_detector_names_from_instrument(SANSInstrument.LARMOR))
+
+    def test_parse_number_pairs_fails_for_wrong_input(self):
+        test_strs = ["11.2e,11", "a,b"]
+
+        for test_str in test_strs:
+            with self.subTest(test_case=test_str):
+                err_msg = f"The provided string: '{test_str}' , could not be converted to a list of pair of floats"
+                self.assertRaisesRegex(ValueError, err_msg, parse_simple_range_of_number_pairs, test_str)
+
+    def test_parse_number_pairs_fails_for_odd_or_zero_input(self):
+        test_strs = ["", "1,2,3"]
+
+        for test_str in test_strs:
+            with self.subTest(test_case=test_str):
+                err_msg = "At least one pair of numbers separated by comma should be entered: eg: '-15.0,15.0'"
+                self.assertRaisesRegex(ValueError, err_msg, parse_simple_range_of_number_pairs, test_str)
+
+    def test_parse_number_pairs_for_pairs_that_are_convertible_to_float(self):
+        test_strs = ["1,2,3,4", "15.1,2", "-15.1,30.2", "2e1, 5e1"]
+        expected_results = [[1.0, 2.0, 3.0, 4.0], [15.1, 2.0], [-15.1, 30.2], [20.0, 50.0]]
+
+        for test_str, expected in zip(test_strs, expected_results):
+            with self.subTest(test_case=test_str):
+                result = parse_simple_range_of_number_pairs(test_str)
+                self.assertEqual(result, expected)
 
 
 if __name__ == "__main__":

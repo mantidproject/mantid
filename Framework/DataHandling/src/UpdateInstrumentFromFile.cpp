@@ -16,7 +16,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidNexus/NexusDescriptor.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
@@ -94,12 +94,10 @@ void UpdateInstrumentFromFile::exec() {
     LoadEventNexus eventNexus;
 
     // we open and close the HDF5 file.
-    // LoadEventNexus is still using NexusDescriptor rather than NexusDescriptorLazy, so need both
-    boost::scoped_ptr<Nexus::NexusDescriptor> descriptorNexusHDF5(new Nexus::NexusDescriptor(filename));
     boost::scoped_ptr<Nexus::NexusDescriptorLazy> descriptorNexusLazy(new Nexus::NexusDescriptorLazy(filename));
 
-    if (isisNexus.confidence(*descriptorNexusLazy) > 0 || eventNexus.confidence(*descriptorNexusHDF5) > 0) {
-      const auto &rootEntry = descriptorNexusHDF5->firstEntryNameType();
+    if (isisNexus.confidence(*descriptorNexusLazy) > 0 || eventNexus.confidence(*descriptorNexusLazy) > 0) {
+      const auto &rootEntry = descriptorNexusLazy->firstEntryNameType();
       Nexus::File nxFile(filename);
       nxFile.openGroup(rootEntry.first, rootEntry.second);
       updateFromNeXus(nxFile);

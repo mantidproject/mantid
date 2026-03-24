@@ -18,9 +18,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidNexus/NexusException.h"
-#include "MantidNexus/NexusFile.h"
-#include "MantidNexusGeometry/NexusGeometryParser.h"
 
 #include <filesystem>
 
@@ -170,10 +167,14 @@ void LoadEmptyInstrument::exec() {
     }
   }
 
+  auto timerStart = std::chrono::high_resolution_clock::now();
   Instrument_const_sptr instrument = ws->getInstrument();
+  addTimer("getInstrument", timerStart, std::chrono::high_resolution_clock::now());
 
   // Get number of detectors stored in instrument
+  timerStart = std::chrono::high_resolution_clock::now();
   const size_t number_spectra = instrument->getNumberDetectors();
+  addTimer("getNumberDetectors", timerStart, std::chrono::high_resolution_clock::now());
 
   // Check that we have some spectra for the workspace
   if (number_spectra == 0) {
@@ -181,30 +182,38 @@ void LoadEmptyInstrument::exec() {
     throw Kernel::Exception::InstrumentDefinitionError("No detectors found in instrument");
   }
 
+  timerStart = std::chrono::high_resolution_clock::now();
   Indexing::IndexInfo indexInfo(number_spectra);
+  addTimer("createIndexInfo", timerStart, std::chrono::high_resolution_clock::now());
   bool MakeEventWorkspace = getProperty("MakeEventWorkspace");
   prog.reportIncrement(5, "Creating Data");
   if (MakeEventWorkspace) {
     setProperty("OutputWorkspace",
                 create<EventWorkspace>(instrument, indexInfo, BinEdges{0.0, std::numeric_limits<double>::min()}));
   } else {
+    timerStart = std::chrono::high_resolution_clock::now();
     const double detector_value = getProperty("DetectorValue");
     const double monitor_value = getProperty("MonitorValue");
     auto ws2D = create<Workspace2D>(
         instrument, indexInfo,
         Histogram(BinEdges{0.0, 1.0}, Counts(1, detector_value), CountStandardDeviations(1, detector_value)));
+    addTimer("makeWorkspace2D", timerStart, std::chrono::high_resolution_clock::now());
 
-    Counts v_monitor_y(1, monitor_value);
-    CountStandardDeviations v_monitor_e(1, monitor_value);
+    if (monitor_value != detector_value) {
+      timerStart = std::chrono::high_resolution_clock::now();
+      Counts v_monitor_y(1, monitor_value);
+      CountStandardDeviations v_monitor_e(1, monitor_value);
 
-    const auto &spectrumInfo = ws2D->spectrumInfo();
-    const auto size = static_cast<int64_t>(spectrumInfo.size());
+      const auto &spectrumInfo = ws2D->spectrumInfo();
+      const auto size = static_cast<int64_t>(spectrumInfo.size());
 #pragma omp parallel for
-    for (int64_t i = 0; i < size; i++) {
-      if (spectrumInfo.isMonitor(i)) {
-        ws2D->setCounts(i, v_monitor_y);
-        ws2D->setCountStandardDeviations(i, v_monitor_e);
+      for (int64_t i = 0; i < size; i++) {
+        if (spectrumInfo.isMonitor(i)) {
+          ws2D->setCounts(i, v_monitor_y);
+          ws2D->setCountStandardDeviations(i, v_monitor_e);
+        }
       }
+      addTimer("setMonitors", timerStart, std::chrono::high_resolution_clock::now());
     }
     setProperty("OutputWorkspace", std::move(ws2D));
   }
@@ -229,34 +238,19 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument(const std::stri
 // Call LoadIDFFromNexus as a child algorithm
 API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadIDFFromNexus(const std::string &filename) {
   const std::string instrumentEntryName{"/instrument/instrument_xml"};
-  // There are two possibilities for the parent of the instrument IDF entry
-  const std::string instrumentParentEntryName_1{"mantid_workspace_1"};
-  const std::string instrumentParentEntryName_2{"raw_data_1"};
-  std::string instrumentParentEntryName{instrumentParentEntryName_1};
-
-  // Test if instrument XML definition exists in the file
+  // get the top-level entry name
   bool foundIDF{false};
-  try {
-    Nexus::File nxsfile(filename);
-    nxsfile.openAddress("/" + instrumentParentEntryName + instrumentEntryName);
-    foundIDF = true;
-  } catch (Nexus::Exception const &) {
+  std::string instrumentParentEntryName;
+  {
+    // since we only need to evaluate if a single entry is present, use a lazy descriptor
+    Nexus::NexusDescriptorLazy nxsfile(filename);
+    instrumentParentEntryName = "/" + nxsfile.firstEntryNameType().first;
+    foundIDF = nxsfile.isEntry(instrumentParentEntryName + instrumentEntryName);
   }
 
   if (!foundIDF) {
-    instrumentParentEntryName = instrumentParentEntryName_2;
-    try {
-      Nexus::File nxsfile(filename);
-      nxsfile.openAddress("/" + instrumentParentEntryName + instrumentEntryName);
-      foundIDF = true;
-    } catch (Nexus::Exception const &) {
-    }
-  }
-
-  if (!foundIDF) {
-    throw std::runtime_error("No instrument XML definition found in " + filename + " at " +
-                             instrumentParentEntryName_1 + instrumentEntryName + " or at " +
-                             instrumentParentEntryName_2 + instrumentEntryName);
+    throw std::runtime_error("No instrument XML definition found in " + filename + " at " + instrumentParentEntryName +
+                             instrumentEntryName);
   }
 
   auto loadInst = createChildAlgorithm("LoadIDFFromNexus");

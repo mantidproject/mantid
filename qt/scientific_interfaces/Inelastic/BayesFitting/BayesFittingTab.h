@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "BayesBackendType.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 
@@ -72,6 +73,8 @@ public:
   virtual void applySettings(std::map<std::string, QVariant> const &settings);
   void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) override;
 
+  virtual void notifyBackendChanged(const BayesBackendType &backend) = 0;
+
 protected slots:
   /// Slot to update the guides when the range properties change
   virtual void updateProperties(QtProperty *prop, double val);
@@ -86,6 +89,7 @@ protected:
   /// Tree of the properties
   QtTreePropertyBrowser *m_propTree;
   std::unique_ptr<MantidQt::API::IAlgorithmRunner> m_algorithmRunner;
+  bool m_useQuickBayes;
 
 private:
   virtual void setFileExtensionsByName(bool filter);

@@ -268,7 +268,7 @@ def _get_value_from_dict(input_dict: dict[str, Any], keys: list[str], default_va
     except KeyError as key_err:
         if mandatory:
             raise KeyError(key_err)
-    return val if val else default_value
+    return val or default_value
 
 
 def _user_file_reader(file_path: str, names_dict: dict[str, WsInfo]) -> InstrumentConfig:
@@ -648,7 +648,7 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
 
         if self.getProperty(MAIN_PROPERTIES.reduction).value == REDUCTION.correction:
             # We already have the efficiencies in the ADS and the parameters from the calibration
-            self._load_workspace_from_path([key for key in self.eff_basenames if key not in ["empty_cell"]])
+            self._load_workspace_from_path([key for key in self.eff_basenames if key != "empty_cell"])
             self.parameters = _build_parameters_from_table(self.aux_ws["pol_fit_table"].ads_name)
 
         scattering_runs_list = self._load_and_process_runs(

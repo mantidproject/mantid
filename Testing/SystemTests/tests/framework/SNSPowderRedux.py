@@ -49,10 +49,9 @@ SI_NUMBER_DENSITY_EFFECTIVE = 0.02498013275658258
 
 def _skip_test():
     """Helper function to determine if we run the test"""
-    import platform
 
     # Only runs on RHEL6 at the moment
-    return "Linux" not in platform.platform()
+    return False
 
 
 def getSaveDir():

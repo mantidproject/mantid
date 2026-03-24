@@ -83,6 +83,26 @@ public:
     AnalysisDataService::Instance().remove("InputWS");
   }
 
+  void testExecSameNamesDifferentCapitalization() {
+    AnalysisDataService::Instance().clear();
+    MatrixWorkspace_sptr inputWS = createWorkspace();
+    AnalysisDataService::Instance().add("InputWS", inputWS);
+
+    Mantid::Algorithms::RenameWorkspace alg3;
+    alg3.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InputWorkspace", "Inputws"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("OutputWorkspace", "InputWS"));
+
+    TS_ASSERT_THROWS_NOTHING(alg3.execute());
+    TS_ASSERT(alg3.isExecuted());
+
+    Workspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<Workspace>("Inputws"));
+    TS_ASSERT(result);
+
+    AnalysisDataService::Instance().remove("InputWS");
+  }
+
   void testExecNameAlreadyExists() {
     // Tests renaming a workspace to a name which is already used
     AnalysisDataService::Instance().clear();

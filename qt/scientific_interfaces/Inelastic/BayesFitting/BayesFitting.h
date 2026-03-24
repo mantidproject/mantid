@@ -7,6 +7,7 @@
 #pragma once
 #include "ui_BayesFitting.h"
 
+#include "BayesBackendType.h"
 #include "BayesFittingTab.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
@@ -38,6 +39,11 @@ public: // public constructor, destructor and functions
   BayesFitting(QWidget *parent = nullptr);
   /// Destructor
   ~BayesFitting() override;
+
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  BayesFitting(const BayesFitting &) = delete;
+  BayesFitting &operator=(const BayesFitting &) = delete;
+
   /// Interface name
   static std::string name() { return "Bayes Fitting"; }
   // This interface's categories.
@@ -64,6 +70,10 @@ private:
   Poco::NObserver<BayesFitting, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
   /// Main interface window
   Ui::BayesFitting m_uiForm;
+  BayesBackendType m_backend;
+
+private slots:
+  void setBackend(const QString &text);
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

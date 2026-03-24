@@ -25,6 +25,7 @@
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
+constexpr double DELTA = 1e-3;
 class BayesStretch : public Algorithm {
 public:
   const std::string name() const override { return "BayesStretch"; };
@@ -98,6 +99,11 @@ private:
     declareProperty("EMin", 0.0);
     declareProperty("EMax", 0.0);
     declareProperty("NumberBeta", 0);
+    declareProperty("NumberFWHM", 0);
+    declareProperty("StartFWHM", 0.01);
+    declareProperty("EndFWHM", 0.1);
+    declareProperty("StartBeta", 0.5);
+    declareProperty("EndBeta", 1.0);
     declareProperty("Elastic", false);
     declareProperty("OutputWorkspaceFit", "");
     declareProperty("OutputWorkspaceContour", "");
@@ -112,6 +118,11 @@ private:
     outputWS->addColumn("double", "EMin");
     outputWS->addColumn("double", "EMax");
     outputWS->addColumn("int", "NumberBeta");
+    outputWS->addColumn("int", "NumberFWHM");
+    outputWS->addColumn("double", "StartFWHM");
+    outputWS->addColumn("double", "EndFWHM");
+    outputWS->addColumn("double", "StartBeta");
+    outputWS->addColumn("double", "EndBeta");
     outputWS->addColumn("bool", "Elastic");
     outputWS->addColumn("str", "OutputWorkspaceFit");
     outputWS->addColumn("str", "OutputWorkspaceContour");
@@ -124,13 +135,18 @@ private:
     auto eMin = std::stod(getPropertyValue("EMin"));
     auto eMax = std::stod(getPropertyValue("EMax"));
     auto numBeta = std::stoi(getPropertyValue("NumberBeta"));
+    auto numFWHM = std::stoi(getPropertyValue("NumberFWHM"));
+    auto startFWHM = std::stod(getPropertyValue("StartFWHM"));
+    auto endFWHM = std::stod(getPropertyValue("EndFWHM"));
+    auto startBeta = std::stod(getPropertyValue("StartBeta"));
+    auto endBeta = std::stod(getPropertyValue("EndBeta"));
     auto elastic = getPropertyValue("Elastic") == "1";
     auto outputFit = getPropertyValue("OutputWorkspaceFit");
     auto outputContour = getPropertyValue("OutputWorkspaceContour");
     auto background = getPropertyValue("Background");
 
-    newRow << sampleWS << resolutionWS << eMin << eMax << numBeta << elastic << outputFit << outputContour
-           << background;
+    newRow << sampleWS << resolutionWS << eMin << eMax << numBeta << numFWHM << startFWHM << endFWHM << startBeta
+           << endBeta << elastic << outputFit << outputContour << background;
 
     Mantid::API::AnalysisDataService::Instance().addOrReplace("outputWS", outputWS);
   };
@@ -150,7 +166,9 @@ public:
   }
 
   void test_stretchAlgorithm_creates_BayesStretch_by_default() {
-    StretchRunData params("sample_ws", "res_ws", -0.5, 0.5, 50, true, "flat", 30, 1, true);
+    StretchRunData params("sample_ws", "res_ws", "flat", -0.5, 0.5, 50, 30, true);
+    params.sequentialFit = true;
+    params.sampleBinning = 1;
 
     auto configuredAlgorithm = m_model->stretchAlgorithm(params, "fit_ws", "contour_ws");
 
@@ -160,8 +178,8 @@ public:
 
     TS_ASSERT_EQUALS("sample_ws", properties.getPropertyValue("SampleWorkspace"));
     TS_ASSERT_EQUALS("res_ws", properties.getPropertyValue("ResolutionWorkspace"));
-    TS_ASSERT_EQUALS("-0.5", properties.getPropertyValue("EMin"));
-    TS_ASSERT_EQUALS("0.5", properties.getPropertyValue("EMax"));
+    TS_ASSERT_DELTA(-0.5, static_cast<double>(properties.getProperty("EMin")), DELTA);
+    TS_ASSERT_DELTA(0.5, static_cast<double>(properties.getProperty("EMax")), DELTA);
     TS_ASSERT_EQUALS("50", properties.getPropertyValue("NumberBeta"));
     TS_ASSERT_EQUALS("30", properties.getPropertyValue("NumberSigma"));
     TS_ASSERT_EQUALS("1", properties.getPropertyValue("Elastic"));
@@ -170,10 +188,20 @@ public:
     TS_ASSERT_EQUALS("flat", properties.getPropertyValue("Background"));
     TS_ASSERT_EQUALS("1", properties.getPropertyValue("SampleBins"));
     TS_ASSERT_EQUALS("1", properties.getPropertyValue("Loop"));
+
+    TS_ASSERT(!properties.existsProperty("StartBeta"));
+    TS_ASSERT(!properties.existsProperty("EndBeta"));
+    TS_ASSERT(!properties.existsProperty("StartFWHM"));
+    TS_ASSERT(!properties.existsProperty("EndFWHM"));
+    TS_ASSERT(!properties.existsProperty("NumberFWHM"));
   }
 
   void test_stretchAlgorithm_creates_BayesStretch2_when_quickbayes_enabled() {
-    StretchRunData params("sample_ws", "res_ws", -0.5, 0.5, 50, true, "flat", 30, 1, true);
+    StretchRunData params("sample_ws", "res_ws", "flat", -0.5, 0.5, 50, 30, true);
+    params.startBeta = 0.5;
+    params.endBeta = 1.0;
+    params.startFWHM = 0.01;
+    params.endFWHM = 0.1;
 
     auto configuredAlgorithm = m_model->stretchAlgorithm(params, "fit_ws", "contour_ws", true);
 
@@ -183,9 +211,14 @@ public:
 
     TS_ASSERT_EQUALS("sample_ws", properties.getPropertyValue("SampleWorkspace"));
     TS_ASSERT_EQUALS("res_ws", properties.getPropertyValue("ResolutionWorkspace"));
-    TS_ASSERT_EQUALS("-0.5", properties.getPropertyValue("EMin"));
-    TS_ASSERT_EQUALS("0.5", properties.getPropertyValue("EMax"));
+    TS_ASSERT_DELTA(-0.5, static_cast<double>(properties.getProperty("EMin")), DELTA);
+    TS_ASSERT_DELTA(0.5, static_cast<double>(properties.getProperty("EMax")), DELTA);
     TS_ASSERT_EQUALS("50", properties.getPropertyValue("NumberBeta"));
+    TS_ASSERT_EQUALS("30", properties.getPropertyValue("NumberFWHM"));
+    TS_ASSERT_DELTA(0.5, static_cast<double>(properties.getProperty("StartBeta")), DELTA);
+    TS_ASSERT_DELTA(1.0, static_cast<double>(properties.getProperty("EndBeta")), DELTA);
+    TS_ASSERT_DELTA(0.01, static_cast<double>(properties.getProperty("StartFWHM")), DELTA);
+    TS_ASSERT_DELTA(0.1, static_cast<double>(properties.getProperty("EndFWHM")), DELTA);
     TS_ASSERT_EQUALS("1", properties.getPropertyValue("Elastic"));
     TS_ASSERT_EQUALS("fit_ws", properties.getPropertyValue("OutputWorkspaceFit"));
     TS_ASSERT_EQUALS("contour_ws", properties.getPropertyValue("OutputWorkspaceContour"));

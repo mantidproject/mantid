@@ -57,6 +57,11 @@ public:
   explicit DataReduction(QWidget *parent = nullptr);
   /// Destructor
   ~DataReduction() override;
+
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  DataReduction(const DataReduction &) = delete;
+  DataReduction &operator=(const DataReduction &) = delete;
+
   /// Interface name
   static std::string name() { return "Data Reduction"; }
   // This interface's categories.

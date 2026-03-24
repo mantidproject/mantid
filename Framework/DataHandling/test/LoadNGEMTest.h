@@ -276,7 +276,7 @@ public:
 private:
   // Helper function to get the path of a specified file.
   std::string getTestFilePath(const std::string &filename) {
-    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename);
+    const std::string filepath = Mantid::API::FileFinder::Instance().getFullPath(filename).string();
     TS_ASSERT_DIFFERS(filepath, "");
     return filepath;
   }

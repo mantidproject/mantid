@@ -7,7 +7,6 @@ which can be found in the `WorkflowAlgorithm` section of Mantid's `PythonInterfa
 
 This package contains implementation details of some SANS-specific algorithms which are defined in mantid/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/SANS
 
-
 ## `common`
 
 The elements in the `common` package include widely used general purpose functions, constants and SANS-wide type definitions.

@@ -10,7 +10,6 @@
 #include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeROI.h"
@@ -586,7 +585,7 @@ public:
     // ---- Now re-load the same and compare ------
     th.reopenFile();
     LogManager run2;
-    run2.loadNexus(th.file.get(), "logs");
+    run2.loadNexus(th.file.get(), "logs", false);
     TS_ASSERT(run2.hasProperty("double_series"));
     TS_ASSERT(run2.hasProperty("int_val"));
     TS_ASSERT(run2.hasProperty("string_val"));
@@ -597,7 +596,7 @@ public:
     // files)
     LogManager run3;
     th.file.get()->openGroup("logs", "NXgroup");
-    run3.loadNexus(th.file.get(), "");
+    run3.loadNexus(th.file.get(), "", false);
     TS_ASSERT(run3.hasProperty("double_series"));
     TS_ASSERT(run3.hasProperty("int_val"));
     TS_ASSERT(run3.hasProperty("string_val"));
@@ -613,7 +612,7 @@ public:
     th.reopenFile();
     th.file->openGroup("sample", "NXsample");
     LogManager run3;
-    run3.loadNexus(th.file.get(), "");
+    run3.loadNexus(th.file.get(), "", false);
   }
 
   void test_operator_equals() {
@@ -669,34 +668,6 @@ public:
     addTestTimeSeriesFilter(runInfo, filterName);
 
     TS_ASSERT_EQUALS(runInfo.hasInvalidValuesFilter(name), true);
-  }
-
-  void test_get_invalid_values_filter() {
-    LogManager runInfo;
-    const std::string name = "test_get_invalid_values_filter";
-    const std::string filterName = runInfo.getInvalidValuesFilterLogName(name);
-    addTestTimeSeries<double>(runInfo, name);
-    auto *filterfail = runInfo.getInvalidValuesFilter(name);
-    TSM_ASSERT("The filter was returned correrctly as NULL", filterfail == nullptr);
-    addTestTimeSeriesFilter(runInfo, filterName);
-
-    auto *filter = runInfo.getInvalidValuesFilter(name);
-    TSM_ASSERT("The filter was returned incorrectly as NULL", filter);
-    TS_ASSERT_THROWS_NOTHING(filter->firstTime());
-
-    // check it can be used to filter the log
-    auto *log = runInfo.getProperty(name);
-    auto *tsLog = dynamic_cast<TimeSeriesProperty<double> *>(log);
-    TS_ASSERT(tsLog);
-    if (tsLog) {
-      auto filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(tsLog, *filter);
-      TS_ASSERT_DELTA(filtered->nthValue(0), 2, 1e-5);
-      TS_ASSERT_DELTA(filtered->nthValue(1), 3, 1e-5);
-      TS_ASSERT_DELTA(filtered->nthValue(2), 4, 1e-5);
-      TS_ASSERT_DELTA(filtered->nthValue(3), 5, 1e-5);
-      TS_ASSERT_DELTA(filtered->nthValue(4), 21, 1e-5);
-      TS_ASSERT_DELTA(filtered->nthValue(5), 22, 1e-5);
-    }
   }
 
   void test_removeDataOutsideTimeROI() {

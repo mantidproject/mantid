@@ -6,9 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>638</width>
+    <width>950</width>
     <height>848</height>
    </rect>
+  </property>
+  <property name="minimumWidth">
+   <number>950</number>
   </property>
   <property name="windowTitle">
    <string>Engineering Diffraction Analysis</string>
@@ -16,10 +19,21 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="1" column="0" colspan="2">
-     <widget class="QTabWidget" name="tab_main">
-      <property name="enabled">
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="widgetResizable">
        <bool>true</bool>
       </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidget">
+       <layout class="QGridLayout" name="scrollAreaGridLayout">
+        <item row="0" column="0">
+         <widget class="QTabWidget" name="tab_main">
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
     <item row="0" column="0" colspan="2">
@@ -82,8 +96,8 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>30</width>
-          <height>16777215</height>
+          <width>35</width>
+          <height>35</height>
          </size>
         </property>
         <property name="text">

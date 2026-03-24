@@ -12,7 +12,6 @@
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <Poco/AutoPtr.h>
-#include <Poco/NObserver.h>
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
 

@@ -18,7 +18,7 @@ from sans.common.general_functions import (
     get_transmission_output_name,
     get_wav_range_from_ws,
 )
-from sans.common.enums import SANSDataType, SaveType, OutputMode, ReductionMode, DataType, CanonicalCoordinates
+from sans.common.enums import SANSDataType, SaveType, OutputMode, ReductionMode, DataType, CanonicalCoordinates, ReductionDimensionality
 from sans.common.constants import (
     TRANS_SUFFIX,
     SANS_SUFFIX,
@@ -37,9 +37,16 @@ from sans.common.constants import (
     SCALED_BGSUB_SUFFIX,
 )
 from sans.common.file_information import get_extension_for_file_type, SANSFileInformationFactory
-from sans.gui_logic.plotting import get_plotting_module
 from sans.state.Serializer import Serializer
 from sans.state.StateObjects.StateData import StateData
+import sys
+
+plotting_module = None
+if "workbench.app" in sys.modules:
+    try:
+        import mantidqt.plotting.functions as plotting_module
+    except ImportError:
+        pass
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -267,8 +274,9 @@ def plot_workspace(reduction_package, output_graph):
     :param reduction_package: An object containing the reduced workspaces
     :param output_graph: Name to the plot window
     """
-    plotting_module = get_plotting_module()
-    plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
+    if plotting_module:
+        plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
+    # else: plotting not available in script context
 
 
 def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
@@ -572,7 +580,7 @@ def check_for_background_workspace_in_ads(state, reduction_package):
     full_name = (
         background_ws_name
         + reduced_name.split(
-            state.save.user_specified_output_name if state.save.user_specified_output_name else str(state.data.sample_scatter_run_number),
+            state.save.user_specified_output_name or str(state.data.sample_scatter_run_number),
             1,
         )[-1]
     )
@@ -705,10 +713,12 @@ def create_initial_reduction_packages(state, workspaces, monitors):
     for each one of these workspaces. Hence, we need to create a deep copy of them for each reduction package.
 
     The way multi-period files are handled over the different workspaces input types is:
-    1. The sample scatter period determines all other periods, i.e. if the sample scatter workspace is has only
+    1. The sample scatter period determines all other periods, i.e. if the sample scatter workspace has only
        one period, but the sample transmission has two, then only the first period is used.
     2. If the sample scatter period is not available on another workspace type, then the last period on that
        workspace type is used.
+
+    If multiple phi slices are selected, data is split in several reduction packages, one per slice.
 
     For the cases where the periods between the different workspaces types does not match, an information is logged.
 
@@ -739,20 +749,34 @@ def create_initial_reduction_packages(state, workspaces, monitors):
         for workspace_type, workspace_list in list(monitors.items()):
             workspace = get_workspace_for_index(index, workspace_list)
             monitors_for_package.update({workspace_type: workspace})
-        state_copy = deepcopy(state)
 
-        # Set the period on the state
-        if requires_new_period_selection:
-            state_copy.data.sample_scatter_period = index + 1
-        packages.append(
-            ReductionPackage(
-                state=state_copy,
-                workspaces=workspaces_for_package,
-                monitors=monitors_for_package,
-                is_part_of_wavelength_range_reduction=is_multi_wavelength,
-                is_part_of_multi_period_reduction=is_multi_period,
+        # if we require multiple phi slicing
+        phi_range = state.mask.phi_range if state.mask.use_phi_range and state.mask.phi_range else [state.mask.phi_min, state.mask.phi_max]
+        if len(phi_range) > 2 and state.reduction.reduction_dimensionality is not ReductionDimensionality.ONE_DIM:
+            # We select min and max of the whole range
+            phi_range = [min(phi_range), max(phi_range)]
+
+        for phi_index in range(0, len(phi_range), 2):
+            # first set the period on state
+            state_copy = deepcopy(state)
+            if requires_new_period_selection:
+                state_copy.data.sample_scatter_period = index + 1
+
+            # second set the phi slice
+            phi_min = phi_range[phi_index]
+            phi_max = phi_range[phi_index + 1]
+            state_copy.mask.phi_min = phi_min
+            state_copy.mask.phi_max = phi_max
+
+            packages.append(
+                ReductionPackage(
+                    state=state_copy,
+                    workspaces=workspaces_for_package,
+                    monitors=monitors_for_package,
+                    is_part_of_wavelength_range_reduction=is_multi_wavelength,
+                    is_part_of_multi_period_reduction=is_multi_period,
+                )
             )
-        )
     return packages
 
 

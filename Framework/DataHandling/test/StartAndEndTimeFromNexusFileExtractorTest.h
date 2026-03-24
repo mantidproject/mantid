@@ -59,7 +59,7 @@ public:
 private:
   void do_test(const std::string &filename, const std::string &startTime, const std::string &endTime) {
     // Arrange
-    auto fullFilePath = Mantid::API::FileFinder::Instance().getFullPath(filename);
+    auto fullFilePath = Mantid::API::FileFinder::Instance().getFullPath(filename).string();
 
     // Act
     auto startTimeExtracted = extractStartTime(fullFilePath);

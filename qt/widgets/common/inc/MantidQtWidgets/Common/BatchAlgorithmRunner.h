@@ -90,6 +90,10 @@ public:
   explicit BatchAlgorithmRunner(QObject *parent = nullptr);
   ~BatchAlgorithmRunner() override;
 
+  // delete copy operations - Poco::NObserver contains std::atomic which is not copyable
+  BatchAlgorithmRunner(const BatchAlgorithmRunner &) = delete;
+  BatchAlgorithmRunner &operator=(const BatchAlgorithmRunner &) = delete;
+
   /// Adds an algorithm to the execution queue
   void addAlgorithm(const Mantid::API::IAlgorithm_sptr &algo);
   void addAlgorithm(const Mantid::API::IAlgorithm_sptr &algo,

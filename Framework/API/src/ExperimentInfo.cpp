@@ -931,22 +931,20 @@ void ExperimentInfo::saveExperimentInfoNexus(Nexus::File *file, bool saveInstrum
 
 /** Load the sample and log info from an open NeXus file.
  * @param file :: open NeXus file object
- * @param fileInfo :: The file info descriptor corresponding to the provided file
  * @param prefix :: The prefix of the file
  */
-void ExperimentInfo::loadSampleAndLogInfoNexus(Nexus::File *file, const Nexus::NexusDescriptor &fileInfo,
-                                               const std::string &prefix) {
+void ExperimentInfo::loadSampleAndLogInfoNexus(Nexus::File *file, std::string const &prefix) {
   // First, the sample and then the logs
   int sampleVersion = mutableSample().loadNexus(file, "sample");
   if (sampleVersion == 0) {
     // Old-style (before Sep-9-2011) NXS processed
     // sample field contains both the logs and the sample details
     file->openGroup("sample", "NXsample");
-    this->mutableRun().loadNexus(file, "", fileInfo, prefix);
+    this->mutableRun().loadNexus(file, "", prefix);
     file->closeGroup();
   } else {
     // Newer style: separate "logs" field for the Run object
-    this->mutableRun().loadNexus(file, "logs", fileInfo, prefix);
+    this->mutableRun().loadNexus(file, "logs", prefix);
   }
 }
 
@@ -969,10 +967,9 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(Nexus::File *file) {
 }
 
 void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, Nexus::File *file,
-                                             std::string &parameterStr, const Nexus::NexusDescriptor &fileInfo,
-                                             const std::string &prefix) {
+                                             std::string &parameterStr, const std::string &prefix) {
   // TODO load sample and log info
-  loadSampleAndLogInfoNexus(file, fileInfo, prefix);
+  loadSampleAndLogInfoNexus(file, prefix);
   loadInstrumentInfoNexus(nxFilename, file, parameterStr);
 }
 

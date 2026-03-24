@@ -124,6 +124,11 @@ proxy.httpsTargetUrl = http://www.mantidproject.org
 # it might need to be increased if you are trying to download histogram data from a very large instrument
 ISISDAE.Timeout = 120
 
+# Default values for SNS DAE (live data)
+SNSLiveEventDataListener.keepPausedEvents = false
+SNSLiveEventDataListener.testAddress = 127.0.0.1:12345
+
+
 # Defines the precision of h, k, and l when output in peak workspace table
 PeakColumn.hklPrec=2
 
