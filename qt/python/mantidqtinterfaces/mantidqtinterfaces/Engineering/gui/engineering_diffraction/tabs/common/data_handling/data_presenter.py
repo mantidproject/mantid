@@ -31,8 +31,6 @@ class FittingDataPresenter(object):
         self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
         self.view.set_on_plotBG_clicked(self._plotBG)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
-        self.view.set_on_region_changed(self._update_file_filter)
-        self.view.set_on_xunit_changed(self._update_file_filter)
         self.view.set_table_selection_changed(self._handle_selection_changed)
 
         # Observable Setup
@@ -49,8 +47,7 @@ class FittingDataPresenter(object):
 
     def set_default_files_texture(self, filepaths):
         if self.model.texture_auto_populate():
-            index = self.view.combo_xunit.findText("dSpacing")
-            self.view.combo_xunit.setCurrentIndex(index)
+            self.view.finder_data.set_filter_option("Unit", "dSpacing")
             self._set_default_files(filepaths)
 
     def _set_default_files(self, filepaths):
@@ -68,9 +65,6 @@ class FittingDataPresenter(object):
 
     def get_log_ws_group_name(self):
         return self.model.get_log_workspace_group_name()
-
-    def _update_file_filter(self, region, xunit):
-        self.view.update_file_filter(region, xunit)
 
     def on_load_clicked(self):
         if self._validate():

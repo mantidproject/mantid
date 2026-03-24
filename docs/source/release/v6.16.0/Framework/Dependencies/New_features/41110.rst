@@ -1,0 +1,1 @@
+- Move to `euphonic <https://github.com/pace-neutrons/Euphonic>`_ v1.6.0

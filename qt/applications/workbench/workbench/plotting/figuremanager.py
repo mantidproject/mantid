@@ -223,6 +223,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_copy_to_clipboard_triggered.connect(self.copy_to_clipboard)
             self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
             self.toolbar.sig_plot_help_triggered.connect(self.launch_plot_help)
+            self.toolbar.sig_superplot_help_triggered.connect(self.launch_superplot_help)
             self.toolbar.sig_generate_plot_script_clipboard_triggered.connect(self.generate_plot_script_clipboard)
             self.toolbar.sig_generate_plot_script_file_triggered.connect(self.generate_plot_script_file)
             self.toolbar.sig_home_clicked.connect(self.set_figure_zoom_to_display_all)
@@ -373,6 +374,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def launch_plot_help(self):
         PlotHelpPages.show_help_page_for_figure(self.canvas.figure)
+
+    def launch_superplot_help(self):
+        PlotHelpPages.show_help_page_for_figure(None, superplot=True)
 
     def hide_plot(self):
         self.window.hide()

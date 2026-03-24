@@ -10,7 +10,7 @@ Complete structural reference for the Mantid codebase.
 
 **Contents:**
 
-- Repository overview (C++20, Python 3.11, Qt5 GUI, CMake, Conda)
+- Repository overview (C++20, Python 3.12, Qt5 GUI, CMake, Conda)
 - Full project structure (Framework modules, Qt GUI, scripts, testing, instruments)
 - Build system (CMakePresets.json, build targets, workflow)
 - Code formatting (clang-format, clang-tidy, pre-commit hooks)
@@ -109,7 +109,7 @@ Index and navigation guide for the reference materials.
 
 | Aspect             | Details                                                  |
 | ------------------ | -------------------------------------------------------- |
-| **Language**       | C++20 (primary), Python 3.11, Qt5 (GUI)                  |
+| **Language**       | C++20 (primary), Python 3.12, Qt5 (GUI)                  |
 | **Build**          | CMake 3.21+, Ninja generator, Conda/Pixi for deps        |
 | **Code Format**    | LLVM style (clang-format), 120 column limit              |
 | **C++ Tests**      | CxxTest framework, header files (.h), CxxTest::TestSuite |
