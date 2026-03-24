@@ -22,7 +22,7 @@ jobs:
       - uses: dorny/paths-filter@v4
         id: changes
         with:
-          filters: .github/filterdoxygen.yaml
+          filters: .github/actions/filterdoxygen.yaml
 
       - uses: prefix-dev/setup-pixi@v0.9.4
         if: steps.changes.outputs.doxygen == 'true'

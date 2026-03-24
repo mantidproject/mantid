@@ -22,15 +22,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        #if: ${{  github.ref_name == 'main' }}
 
       - uses: dorny/paths-filter@v4
         id: changes
         with:
-          filters: .github/filterdoxygen.yaml
-
-      - uses: actions/checkout@v6
-        if: ${{ steps.changes.outputs.doxygen == 'true' && github.ref_name != 'main' }}
+          filters: .github/actions/filterdoxygen.yaml
 
       - uses: prefix-dev/setup-pixi@v0.9.4
         if: steps.changes.outputs.doxygen == 'true'
