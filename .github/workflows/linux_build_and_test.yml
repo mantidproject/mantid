@@ -40,7 +40,7 @@ jobs:
       # print a sorted list of all shell environment variables
       #
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # Needed to fetch the tags for versioningit
           fetch-depth: 100
