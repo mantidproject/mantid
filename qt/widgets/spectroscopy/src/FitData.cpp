@@ -210,7 +210,7 @@ std::string FitData::displayName(const std::string &formatString, const std::str
   return name;
 }
 
-std::string FitData::getWsName() const { return m_name; }
+const std::string &FitData::getWsName() const { return m_name; }
 
 std::string FitData::displayName(const std::string &formatString, WorkspaceIndex spectrum) const {
   const auto workspaceName = getBasename();
@@ -377,7 +377,7 @@ void FitData::removeResolutionEntry(const WorkspaceIndex &index) {
   }
 }
 
-std::map<WorkspaceIndex, std::string> FitData::getResolutions() const { return m_resolutions; }
+const std::map<WorkspaceIndex, std::string> &FitData::getResolutions() const { return m_resolutions; }
 
 std::set<std::string> FitData::getResolutionNames() const {
   auto resNames = std::set<std::string>();

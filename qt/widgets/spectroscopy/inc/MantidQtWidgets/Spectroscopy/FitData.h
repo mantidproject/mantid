@@ -40,7 +40,7 @@ public:
   std::string displayName(const std::string &formatString, const std::string &rangeDelimiter) const;
   std::string displayName(const std::string &formatString, WorkspaceIndex spectrum) const;
   std::string getBasename() const;
-  std::string getWsName() const;
+  const std::string &getWsName() const;
 
   Mantid::API::MatrixWorkspace_sptr workspace() const;
   const FunctionModelSpectra &spectra() const;
@@ -54,7 +54,7 @@ public:
 
   std::vector<double> excludeRegionsVector(WorkspaceIndex spectrum) const;
   std::vector<double> getQValues() const;
-  std::map<WorkspaceIndex, std::string> getResolutions() const;
+  const std::map<WorkspaceIndex, std::string> &getResolutions() const;
   void removeResolutionEntry(const WorkspaceIndex &index);
   std::set<std::string> getResolutionNames() const;
   std::string getResolutionFromWsIndex(const WorkspaceIndex &index) const;
