@@ -9,14 +9,16 @@ install_pixi() {
     export PATH="$PATH:$HOME/.pixi/bin"
   fi
 
+  # Specify pixi version
+  VERSION_PIXI=0.60.0
   # check if pixi is not installed
   if [ "$(command -v pixi)" ]; then
       echo "updating previously installed pixi"
-      pixi self-update --no-progress --quiet
+      pixi self-update --no-progress --quiet --version $VERSION_PIXI
   else
     echo "install pixi"
     set +x # disable xtrace - don't care about details of pixi install
-    curl -fsSL https://pixi.sh/install.sh | sh
+    curl -fsSL https://pixi.sh/install.sh | PIXI_VERSION=$VERSION_PIXI sh
     set -x # turn logging back on (enable xtrace)
     # source bashrc for updated PATH
     . "$HOME/.bashrc"
