@@ -333,6 +333,7 @@
           <xs:attribute name="n-elements"/>
 		  <xs:attribute name="name-count-start"/>
 		  <xs:attribute name="name-count-increment"/>
+          <xs:attributeGroup ref="idf:axes"/>
         </xs:complexType>
       </xs:element>
       <!--LOCATION ELEMENT-->
