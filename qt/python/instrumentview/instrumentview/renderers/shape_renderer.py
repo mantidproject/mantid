@@ -20,7 +20,6 @@ surface can be translated back to a logical detector index.
 import numpy as np
 import pyvista as pv
 from pyvistaqt import BackgroundPlotter
-from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation
 from typing import Callable, Optional
 
@@ -40,7 +39,8 @@ class ShapeRenderer(InstrumentRenderer):
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
     _PICKING_TOLERANCE = 0.001
 
-    def __init__(self):
+    def __init__(self, workspace):
+        self._workspace = workspace
         # Populated by ``precompute``.
         self._precomputed = False
         # Per-unique-shape: {xml_hash: (local_verts (V,3), local_faces (F,3))}
@@ -60,14 +60,14 @@ class ShapeRenderer(InstrumentRenderer):
     # -----------------------------------------------------------------
     # Pre-computation: fetch shape meshes and detector transforms once
     # -----------------------------------------------------------------
-    def precompute(self, workspace) -> None:
+    def precompute(self) -> None:
         """Extract shape meshes and per-detector transforms from *workspace*.
 
         This should be called once when the workspace is first loaded or
         replaced, *before* any ``build_*`` calls.
         """
-        comp_info = workspace.componentInfo()
-        det_info = workspace.detectorInfo()
+        comp_info = self._workspace.componentInfo()
+        det_info = self._workspace.detectorInfo()
         n_det = det_info.size()
 
         shape_cache: dict[int, tuple[np.ndarray, np.ndarray]] = {}
@@ -122,16 +122,6 @@ class ShapeRenderer(InstrumentRenderer):
         self._precomputed = True
         logger.information(f"ShapeRenderer: precomputed {n_det} detectors, {len(shape_cache)} unique shapes")
 
-    def _is_spherical_or_cylindrical_projection(self, model) -> bool:
-        return model.projection_type in (
-            ProjectionType.SPHERICAL_X,
-            ProjectionType.SPHERICAL_Y,
-            ProjectionType.SPHERICAL_Z,
-            ProjectionType.CYLINDRICAL_X,
-            ProjectionType.CYLINDRICAL_Y,
-            ProjectionType.CYLINDRICAL_Z,
-        )
-
     # -----------------------------------------------------------------
     # Build meshes
     # -----------------------------------------------------------------
@@ -143,7 +133,7 @@ class ShapeRenderer(InstrumentRenderer):
         compute the 3D→2D offset per detector and apply it to every vertex.
         """
         if not self._precomputed:
-            raise RuntimeError("ShapeRenderer.precompute() must be called before build_detector_mesh().")
+            self.precompute()
 
         indices = self._resolve_detector_indices(positions, model, masked=False)
 
@@ -317,42 +307,6 @@ class ShapeRenderer(InstrumentRenderer):
             indices[i] = det_info.indexOf(int(did))
         return indices
 
-    def _compute_projection_scale(self, det_indices: np.ndarray, projected_positions: np.ndarray) -> float:
-        """Compute a uniform scale factor so shapes in 2D projections are
-        proportional to the inter-detector spacing.
-
-        Compares median nearest-neighbour distance in 3D (metres) to the
-        median nearest-neighbour distance in the projected coordinate space.
-        """
-        n = len(det_indices)
-        if n < 2:
-            return 1.0
-
-        # Sample to avoid O(n log n) overhead on very large instruments
-        max_sample = 2000
-        if n > max_sample:
-            rng = np.random.default_rng(42)
-            sample = rng.choice(n, max_sample, replace=False)
-        else:
-            sample = np.arange(n)
-
-        pos_3d = self._all_positions_3d[det_indices[sample]]
-        pos_2d = projected_positions[sample, :2]
-
-        tree_3d = cKDTree(pos_3d)
-        nnd_3d = tree_3d.query(pos_3d, k=2)[0][:, 1]
-
-        tree_2d = cKDTree(pos_2d)
-        nnd_2d = tree_2d.query(pos_2d, k=2)[0][:, 1]
-
-        med_3d = np.median(nnd_3d)
-        med_2d = np.median(nnd_2d)
-
-        if med_3d < 1e-12:
-            return 1.0
-
-        return med_2d / med_3d
-
     def _assemble_mesh(
         self,
         det_indices: np.ndarray,
@@ -366,11 +320,10 @@ class ShapeRenderer(InstrumentRenderer):
         """Vectorised mesh assembly.
 
         For each unique shape (group of detectors sharing the same template
-        mesh), we:
+        shape), we:
 
         1. Tile the template vertices for each detector in the group.
-        2. Apply per-detector scale, rotation and translation (via
-           ``np.einsum``).
+        2. Apply per-detector scale, rotation and translation.
         3. Concatenate with face arrays, offsetting vertex indices.
         4. Return a single merged ``pv.PolyData`` plus a mapping from cell
            index to detector-in-group index.
@@ -383,9 +336,6 @@ class ShapeRenderer(InstrumentRenderer):
         display_positions : np.ndarray
             (N, 3) display positions (may be 2D projected).  These are used
             as the centre of each shape.
-        flatten_2d : bool
-            If True, skip 3D rotations and rescale shapes so they are
-            proportional to the projected inter-detector spacing.
         per_detector_scales : np.ndarray or None
             If provided, (N,) per-detector scale factors to use instead of
             a single uniform projection_scale.  Only used when *flatten_2d*

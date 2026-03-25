@@ -34,13 +34,16 @@ class SideBySideShapeRenderer(ShapeRenderer):
     no shape extends past half the inter-detector spacing.
     """
 
-    def precompute(self, workspace: Workspace2D, bank_groups_by_detector_id: list[tuple[list[int], str]] | None) -> None:
-        super().precompute(workspace)
+    def __init__(self, workspace: Workspace2D, bank_groups_by_detector_id: list[tuple[list[int], str]] | None) -> None:
+        super().__init__(workspace)
         self._bank_groups_by_detector_id = [] if bank_groups_by_detector_id is None else bank_groups_by_detector_id
+
+    def precompute(self):
+        super().precompute()
 
     def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
         if not self._precomputed:
-            raise RuntimeError("SideBySideShapeRenderer.precompute() must be called before build_detector_mesh().")
+            self.precompute()
 
         flatten_2d = model is not None and model.is_2d_projection
         indices = self._resolve_detector_indices(positions, model, masked=False)
@@ -135,8 +138,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
         per_det_rotate = np.zeros(len(det_indices), dtype=bool)
 
         if not bank_local_groups:
-            uniform = self._compute_projection_scale(det_indices, projected_positions)
-            per_det_scale[:] = uniform
+            per_det_scale[:] = 1.0
             return per_det_scale, per_det_rotate
 
         for local_indices, bank_type in bank_local_groups:
