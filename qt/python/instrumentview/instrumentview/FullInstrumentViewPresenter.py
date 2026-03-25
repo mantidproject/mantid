@@ -79,7 +79,7 @@ class FullInstrumentViewPresenter:
         self._model.setup()
         self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = ShapeRenderer(self._model.workspace)
-        self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace, self._model.bank_groups_by_detector_id)
+        self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
         self._renderer = self._point_cloud_renderer
         self.setup()
         self._callback_queue = Queue()
@@ -700,7 +700,7 @@ class FullInstrumentViewPresenter:
         """
         self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = ShapeRenderer(self._model.workspace)
-        self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace, self._model.bank_groups_by_detector_id)
+        self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
         self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
 
     def _reload_everything(self) -> None:

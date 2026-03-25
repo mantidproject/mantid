@@ -140,3 +140,7 @@ class Projection(ABC):
 
     def positions(self) -> np.ndarray:
         return np.vstack([self._detector_x_coordinates, self._detector_y_coordinates]).transpose()
+
+    # Overwritten in side-by-side
+    def get_bank_groups_by_detector_id(self) -> list[tuple[list[int], str]]:
+        return []

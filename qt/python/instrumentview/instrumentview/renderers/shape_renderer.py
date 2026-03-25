@@ -135,7 +135,7 @@ class ShapeRenderer(InstrumentRenderer):
         if not self._precomputed:
             self.precompute()
 
-        indices = self._resolve_detector_indices(positions, model, masked=False)
+        indices = self._resolve_detector_indices(positions, model.pickable_detector_ids)
 
         mesh, c2d, fpd = self._assemble_mesh(
             indices,
@@ -166,7 +166,7 @@ class ShapeRenderer(InstrumentRenderer):
     def build_masked_mesh(self, positions: np.ndarray, flip_z: bool, model) -> pv.PolyData:
         if len(positions) == 0:
             return pv.PolyData()
-        indices = self._resolve_detector_indices(positions, model, masked=True)
+        indices = self._resolve_detector_indices(positions, model.masked_detector_ids)
 
         mesh, _, _ = self._assemble_mesh(
             indices,
@@ -275,7 +275,7 @@ class ShapeRenderer(InstrumentRenderer):
             # No shape mesh available — fall back to point data
             mesh.point_data[label] = visibility
 
-    def _resolve_detector_indices(self, positions: np.ndarray, model, masked: bool) -> np.ndarray:
+    def _resolve_detector_indices(self, positions: np.ndarray, detector_ids: np.ndarray) -> np.ndarray:
         """Return indices into ``self._all_positions_3d`` for the detectors
         represented by *positions*.
 
@@ -286,24 +286,14 @@ class ShapeRenderer(InstrumentRenderer):
         We match by looking up the detector IDs that correspond to the
         pickable/masked subset and converting them via ``detectorInfo.indexOf``.
         """
-        if model is None:
-            # Fallback: assume positions indexing matches precomputed
-            return np.arange(len(positions))
-
-        ws = model.workspace
-        det_info = ws.detectorInfo()
-
-        if masked:
-            det_ids = model.masked_detector_ids
-        else:
-            det_ids = model.pickable_detector_ids
+        det_info = self._workspace.detectorInfo()
 
         # Convert detector IDs → detectorInfo indices (vectorised via the
         # C++ call).  ``detectorInfo().indexOf(id)`` works element-wise in C++
         # but not in Python, so we loop.  For large instruments this is fast
         # because it's just a dict lookup in C++.
-        indices = np.empty(len(det_ids), dtype=np.int64)
-        for i, did in enumerate(det_ids):
+        indices = np.empty(len(detector_ids), dtype=np.int64)
+        for i, did in enumerate(detector_ids):
             indices[i] = det_info.indexOf(int(did))
         return indices
 

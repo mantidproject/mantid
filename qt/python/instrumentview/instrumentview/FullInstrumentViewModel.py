@@ -717,10 +717,10 @@ class FullInstrumentViewModel:
         ``(detector_ids, bank_type)``.
         """
         if self._projection_type != ProjectionType.SIDE_BY_SIDE:
-            return None
+            return []
         projection = self.active_projection
         if projection is None:
-            return None
+            return []
         return projection.get_bank_groups_by_detector_id()
 
     def component_tree_indices_selected(self, component_indices: np.ndarray) -> None:
