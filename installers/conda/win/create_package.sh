@@ -66,9 +66,13 @@ PACKAGE_PREFIX=MantidWorkbench
 PACKAGE_NAME="$PACKAGE_PREFIX${SUFFIX}"
 LOWER_CASE_SUFFIX="$(echo ${SUFFIX} | tr [:upper:] [:lower:])"
 
+# Use a shorter path for conda package cache on Windows to avoid MAX_PATH issues
+export CONDA_PKGS_DIRS="C:/tmp/pkgs"
+
 echo "Cleaning up left over old directories"
 rm -rf $COPY_DIR
 rm -rf $CONDA_ENV_PATH
+rm -rf C:/tmp/pkgs
 
 mkdir $COPY_DIR
 
