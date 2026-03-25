@@ -15,28 +15,35 @@ from scipy.spatial.transform import Rotation
 
 from instrumentview.renderers.shape_renderer import ShapeRenderer
 from instrumentview.renderers.side_by_side_shape_renderer import SideBySideShapeRenderer
+from instrumentview.Projections.ProjectionType import ProjectionType
 
 
 class TestSideBySideShapeRenderer(unittest.TestCase):
     """Tests for the SideBySideShapeRenderer class."""
-
-    def setUp(self):
-        self.renderer = SideBySideShapeRenderer()
 
     # ------------------------------------------------------------------
     # Basics
     # ------------------------------------------------------------------
 
     def test_is_shape_renderer_subclass(self):
-        self.assertIsInstance(self.renderer, ShapeRenderer)
+        ws = self._create_mock_workspace(n_detectors=1)
+        renderer = SideBySideShapeRenderer(ws, None)
+        self.assertIsInstance(renderer, ShapeRenderer)
 
-    def test_build_detector_mesh_raises_without_precompute(self):
+    def test_build_detector_mesh_auto_precomputes(self):
+        """build_detector_mesh should auto-precompute if not already done."""
+        ws = self._create_mock_workspace(n_detectors=1)
+        renderer = SideBySideShapeRenderer(ws, None)
+        model = self._create_mock_model(ws, n_pickable=1)
         positions = np.array([[0.0, 0.0, 0.0]])
-        with self.assertRaises(RuntimeError):
-            self.renderer.build_detector_mesh(positions, False)
+        mesh = renderer.build_detector_mesh(positions, False, model)
+        self.assertTrue(renderer._precomputed)
+        self.assertIsInstance(mesh, pv.PolyData)
 
     def test_build_masked_mesh_empty_positions(self):
-        mesh = self.renderer.build_masked_mesh(np.empty((0, 3)), False)
+        ws = self._create_mock_workspace(n_detectors=1)
+        renderer = SideBySideShapeRenderer(ws, None)
+        mesh = renderer.build_masked_mesh(np.empty((0, 3)), False)
         self.assertEqual(mesh.number_of_points, 0)
 
     # ------------------------------------------------------------------
@@ -47,11 +54,12 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         """Detectors in a grid bank should produce a valid mesh with no rotation."""
         ws = self._create_mock_workspace(n_detectors=4)
         bank_groups = [([0, 1, 2, 3], "grid")]
-        self.renderer.precompute(ws, bank_groups)
+        self.renderer = SideBySideShapeRenderer(ws, bank_groups)
+        self.renderer.precompute()
 
         model = self._create_mock_model(ws, n_pickable=4)
         positions = np.array([[0, 0, 0], [0.1, 0, 0], [0, 0.1, 0], [0.1, 0.1, 0]], dtype=np.float64)
-        mesh = self.renderer.build_detector_mesh(positions, model)
+        mesh = self.renderer.build_detector_mesh(positions, False, model)
 
         self.assertIsInstance(mesh, pv.PolyData)
         self.assertGreater(mesh.number_of_points, 0)
@@ -61,11 +69,12 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         """Detectors in a tube bank should produce a valid mesh."""
         ws = self._create_mock_workspace(n_detectors=4)
         bank_groups = [([0, 1, 2, 3], "tube")]
-        self.renderer.precompute(ws, bank_groups)
+        self.renderer = SideBySideShapeRenderer(ws, bank_groups)
+        self.renderer.precompute()
 
         model = self._create_mock_model(ws, n_pickable=4)
         positions = np.array([[0, 0, 0], [0, 0.1, 0], [0, 0.2, 0], [0, 0.3, 0]], dtype=np.float64)
-        mesh = self.renderer.build_detector_mesh(positions, model)
+        mesh = self.renderer.build_detector_mesh(positions, False, model)
 
         self.assertIsInstance(mesh, pv.PolyData)
         self.assertGreater(mesh.number_of_points, 0)
@@ -74,14 +83,15 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         """Multiple banks of different types should all be included."""
         ws = self._create_mock_workspace(n_detectors=6)
         bank_groups = [([0, 1, 2], "grid"), ([3, 4, 5], "tube")]
-        self.renderer.precompute(ws, bank_groups)
+        self.renderer = SideBySideShapeRenderer(ws, bank_groups)
+        self.renderer.precompute()
 
         model = self._create_mock_model(ws, n_pickable=6)
         positions = np.array(
             [[0, 0, 0], [0.1, 0, 0], [0.2, 0, 0], [0.5, 0, 0], [0.5, 0.1, 0], [0.5, 0.2, 0]],
             dtype=np.float64,
         )
-        mesh = self.renderer.build_detector_mesh(positions, model)
+        mesh = self.renderer.build_detector_mesh(positions, False, model)
 
         self.assertIsInstance(mesh, pv.PolyData)
         self.assertGreater(mesh.number_of_cells, 0)
@@ -94,12 +104,13 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         """build_masked_mesh should also apply bank-aware scaling."""
         ws = self._create_mock_workspace(n_detectors=4)
         bank_groups = [([0, 1, 2, 3], "grid")]
-        self.renderer.precompute(ws, bank_groups)
+        self.renderer = SideBySideShapeRenderer(ws, bank_groups)
+        self.renderer.precompute()
 
         model = self._create_mock_model(ws, n_pickable=0)
         model.masked_detector_ids = np.arange(4)
         positions = np.array([[0, 0, 0], [0.1, 0, 0], [0, 0.1, 0], [0.1, 0.1, 0]], dtype=np.float64)
-        mesh = self.renderer.build_masked_mesh(positions, model)
+        mesh = self.renderer.build_masked_mesh(positions, False, model)
 
         self.assertIsInstance(mesh, pv.PolyData)
         self.assertGreater(mesh.number_of_cells, 0)
@@ -107,11 +118,12 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
     def test_no_bank_groups_falls_back_to_uniform_scale(self):
         """When bank_groups_by_detector_id is None, uniform scaling is used."""
         ws = self._create_mock_workspace(n_detectors=4)
-        self.renderer.precompute(ws, None)
+        self.renderer = SideBySideShapeRenderer(ws, None)
+        self.renderer.precompute()
 
         model = self._create_mock_model(ws, n_pickable=4)
         positions = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]], dtype=np.float64)
-        mesh = self.renderer.build_detector_mesh(positions, model)
+        mesh = self.renderer.build_detector_mesh(positions, False, model)
 
         self.assertIsInstance(mesh, pv.PolyData)
         self.assertGreater(mesh.number_of_cells, 0)
@@ -124,7 +136,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         """Grid bank detectors should have per_det_rotate = False."""
         ws = self._create_mock_workspace(n_detectors=4)
         bank_groups = [([0, 1, 2, 3], "grid")]
-        self.renderer.precompute(ws, bank_groups)
+        self.renderer = SideBySideShapeRenderer(ws, bank_groups)
+        self.renderer.precompute()
 
         det_indices = np.arange(4)
         positions = np.array([[0, 0, 0], [0.1, 0, 0], [0, 0.1, 0], [0.1, 0.1, 0]], dtype=np.float64)
@@ -140,7 +153,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         """Tube bank detectors should have per_det_rotate = True."""
         ws = self._create_mock_workspace(n_detectors=4)
         bank_groups = [([0, 1, 2, 3], "tube")]
-        self.renderer.precompute(ws, bank_groups)
+        self.renderer = SideBySideShapeRenderer(ws, bank_groups)
+        self.renderer.precompute()
 
         det_indices = np.arange(4)
         positions = np.array([[0, 0, 0], [0, 0.1, 0], [0, 0.2, 0], [0, 0.3, 0]], dtype=np.float64)
@@ -156,7 +170,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         """Mixed grid + tube banks: only tube detectors should have rotate=True."""
         ws = self._create_mock_workspace(n_detectors=6)
         bank_groups = [([0, 1, 2], "grid"), ([3, 4, 5], "tube")]
-        self.renderer.precompute(ws, bank_groups)
+        self.renderer = SideBySideShapeRenderer(ws, bank_groups)
+        self.renderer.precompute()
 
         det_indices = np.arange(6)
         positions = np.array(
@@ -177,7 +192,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         """All computed scales should be positive."""
         ws = self._create_mock_workspace(n_detectors=4)
         bank_groups = [([0, 1, 2, 3], "grid")]
-        self.renderer.precompute(ws, bank_groups)
+        self.renderer = SideBySideShapeRenderer(ws, bank_groups)
+        self.renderer.precompute()
 
         det_indices = np.arange(4)
         positions = np.array([[0, 0, 0], [0.1, 0, 0], [0, 0.1, 0], [0.1, 0.1, 0]], dtype=np.float64)
@@ -192,7 +208,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         """All detectors in the same bank should get the same scale factor."""
         ws = self._create_mock_workspace(n_detectors=4, same_shape=True)
         bank_groups = [([0, 1, 2, 3], "grid")]
-        self.renderer.precompute(ws, bank_groups)
+        self.renderer = SideBySideShapeRenderer(ws, bank_groups)
+        self.renderer.precompute()
 
         det_indices = np.arange(4)
         positions = np.array([[0, 0, 0], [0.1, 0, 0], [0, 0.1, 0], [0.1, 0.1, 0]], dtype=np.float64)
@@ -208,7 +225,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         """A bank with only one detector should still produce a valid scale."""
         ws = self._create_mock_workspace(n_detectors=3)
         bank_groups = [([0], "grid"), ([1, 2], "grid")]
-        self.renderer.precompute(ws, bank_groups)
+        self.renderer = SideBySideShapeRenderer(ws, bank_groups)
+        self.renderer.precompute()
 
         det_indices = np.arange(3)
         positions = np.array([[0, 0, 0], [0.1, 0, 0], [0.2, 0, 0]], dtype=np.float64)
@@ -228,7 +246,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         direction should not exceed half the nearest-neighbour distance."""
         ws = self._create_mock_workspace(n_detectors=4, same_shape=True)
         bank_groups = [([0, 1, 2, 3], "grid")]
-        self.renderer.precompute(ws, bank_groups)
+        self.renderer = SideBySideShapeRenderer(ws, bank_groups)
+        self.renderer.precompute()
 
         det_indices = np.arange(4)
         positions = np.array([[0, 0, 0], [0.1, 0, 0], [0, 0.1, 0], [0.1, 0.1, 0]], dtype=np.float64)
@@ -252,7 +271,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
     def test_extent_along_x_direction(self):
         """Extent along x should match the shape's x span."""
         ws = self._create_mock_workspace(n_detectors=1)
-        self.renderer.precompute(ws, None)
+        self.renderer = SideBySideShapeRenderer(ws, None)
+        self.renderer.precompute()
 
         direction = np.array([1.0, 0.0])
         extent = self.renderer._shape_extent_along_direction_2d(0, direction)
@@ -263,7 +283,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
     def test_extent_along_y_direction(self):
         """Extent along y should match the shape's y span."""
         ws = self._create_mock_workspace(n_detectors=1)
-        self.renderer.precompute(ws, None)
+        self.renderer = SideBySideShapeRenderer(ws, None)
+        self.renderer.precompute()
 
         direction = np.array([0.0, 1.0])
         extent = self.renderer._shape_extent_along_direction_2d(0, direction)
@@ -274,7 +295,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
     def test_extent_along_diagonal(self):
         """Extent along [1,1]/sqrt(2) should be larger than along axis."""
         ws = self._create_mock_workspace(n_detectors=1)
-        self.renderer.precompute(ws, None)
+        self.renderer = SideBySideShapeRenderer(ws, None)
+        self.renderer.precompute()
 
         diag = np.array([1.0, 1.0]) / np.sqrt(2)
         extent_diag = self.renderer._shape_extent_along_direction_2d(0, diag)
@@ -284,6 +306,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
 
     def test_extent_with_empty_shape(self):
         """An empty shape should return 0.0."""
+        ws = self._create_mock_workspace(n_detectors=1)
+        self.renderer = SideBySideShapeRenderer(ws, None)
         self.renderer._precomputed = True
         self.renderer._shape_cache = {0: (np.empty((0, 3)), np.empty((0, 3)))}
         self.renderer._det_shape_keys = np.array([0])
@@ -296,7 +320,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
     def test_extent_with_rotation(self):
         """When apply_rotation=True, the extent should reflect the rotated shape."""
         ws = self._create_mock_workspace(n_detectors=1)
-        self.renderer.precompute(ws, None)
+        self.renderer = SideBySideShapeRenderer(ws, None)
+        self.renderer.precompute()
 
         # Force a 90° rotation around z so x→y and y→-x
         rot_90z = Rotation.from_euler("z", 90, degrees=True).as_matrix()
@@ -321,7 +346,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
     def test_radial_extent(self):
         """Radial extent should be the max distance from origin to any vertex."""
         ws = self._create_mock_workspace(n_detectors=1)
-        self.renderer.precompute(ws, None)
+        self.renderer = SideBySideShapeRenderer(ws, None)
+        self.renderer.precompute()
 
         extent = self.renderer._shape_radial_extent_2d(0)
 
@@ -331,6 +357,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
 
     def test_radial_extent_empty_shape(self):
         """An empty shape should return 0.0."""
+        ws = self._create_mock_workspace(n_detectors=1)
+        self.renderer = SideBySideShapeRenderer(ws, None)
         self.renderer._precomputed = True
         self.renderer._shape_cache = {0: (np.empty((0, 3)), np.empty((0, 3)))}
         self.renderer._det_shape_keys = np.array([0])
@@ -409,6 +437,8 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         model = MagicMock()
         model.workspace = workspace
         model.is_2d_projection = True
+        model.projection_type = ProjectionType.SIDE_BY_SIDE
+        model.active_projection = None
         model.pickable_detector_ids = np.arange(n_pickable)
         model.masked_detector_ids = np.array([], dtype=np.int64)
         return model

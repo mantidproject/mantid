@@ -141,7 +141,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._replace_workspace_callback(ws_name, None)
         self._model.setup.assert_called_once()
         mock_setup_component_tree.assert_called_once()
-        mock_update_plotter.assert_called_once()
+        # update_plotter is called once explicitly and once via _reload_renderers
+        self.assertEqual(mock_update_plotter.call_count, 2)
         self._mock_view.setup.reset_mock()
         mock_update_plotter.reset_mock()
         self._presenter._replace_workspace_callback("not_my_workspace", None)
@@ -625,40 +626,22 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         transformed = self._presenter._transform_counts(counts)
         np.testing.assert_allclose(transformed, np.log10(counts + 1))
 
-    def test_get_point_cloud_renderer_lazy_initialization(self):
-        """Test that point cloud renderer is lazily initialized and cached."""
-        # Should already be initialized from __init__
-        renderer1 = self._presenter._get_point_cloud_renderer()
-        self.assertIsNotNone(renderer1)
-        # Second call should return the same cached instance
-        renderer2 = self._presenter._get_point_cloud_renderer()
-        self.assertIs(renderer1, renderer2)
+    def test_renderers_eagerly_initialized(self):
+        """Test that all renderers are initialized at construction time."""
+        self.assertIsNotNone(self._presenter._point_cloud_renderer)
+        self.assertIsNotNone(self._presenter._shape_renderer)
+        self.assertIsNotNone(self._presenter._sbs_shape_renderer)
 
-    def test_get_point_cloud_renderer_after_clear(self):
-        """Test that point cloud renderer is recreated after clearing."""
-        renderer1 = self._presenter._get_point_cloud_renderer()
-        self._presenter._clear_renderers()
-        renderer2 = self._presenter._get_point_cloud_renderer()
-        self.assertIsNot(renderer1, renderer2)
-
-    def test_get_shape_renderer_lazy_initialization(self):
-        """Test that shape renderer is lazily initialized with precomputation."""
-        with mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"):
-            presenter = FullInstrumentViewPresenter(self._mock_view, self._model)
-        self.assertIsNone(presenter._shape_renderer)
-        renderer1 = presenter._get_shape_renderer()
-        self.assertIsNotNone(renderer1)
-        self.assertIsNotNone(presenter._shape_renderer)
-        # Second call should return the same cached instance
-        renderer2 = presenter._get_shape_renderer()
-        self.assertIs(renderer1, renderer2)
-
-    def test_get_shape_renderer_after_clear(self):
-        """Test that shape renderer is recreated after clearing."""
-        renderer1 = self._presenter._get_shape_renderer()
-        self._presenter._clear_renderers()
-        renderer2 = self._presenter._get_shape_renderer()
-        self.assertIsNot(renderer1, renderer2)
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_reload_renderers_creates_new_instances(self, mock_update_plotter):
+        """Test that _reload_renderers creates fresh renderer instances."""
+        old_pc = self._presenter._point_cloud_renderer
+        old_shape = self._presenter._shape_renderer
+        old_sbs = self._presenter._sbs_shape_renderer
+        self._presenter._reload_renderers()
+        self.assertIsNot(self._presenter._point_cloud_renderer, old_pc)
+        self.assertIsNot(self._presenter._shape_renderer, old_shape)
+        self.assertIsNot(self._presenter._sbs_shape_renderer, old_sbs)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
     def test_on_show_shapes_toggled_enable_shapes(self, mock_update_plotter):
@@ -683,15 +666,17 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertIsNot(self._presenter._renderer, shape_renderer)
         mock_update_plotter.assert_called_once()
 
-    def test_clear_renderers(self):
-        """Test that _clear_renderers nulls both cached renderers."""
-        # Initialize both renderers
-        self._presenter._get_point_cloud_renderer()
-        self._presenter._get_shape_renderer()
-        self.assertIsNotNone(self._presenter._point_cloud_renderer)
-        self.assertIsNotNone(self._presenter._shape_renderer)
-        self._presenter._clear_renderers()
-        self.assertIsNone(self._presenter._shape_renderer)
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_reload_renderers_sets_active_renderer(self, mock_update_plotter):
+        """Test that _reload_renderers sets the active renderer based on shapes checkbox."""
+        self._mock_view.is_show_shapes_checkbox_checked.return_value = False
+        self._presenter._reload_renderers()
+        self.assertIs(self._presenter._renderer, self._presenter._point_cloud_renderer)
+
+        self._mock_view.is_show_shapes_checkbox_checked.return_value = True
+        self._model.projection_type = ProjectionType.CYLINDRICAL_Y
+        self._presenter._reload_renderers()
+        self.assertIs(self._presenter._renderer, self._presenter._shape_renderer)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
     def test_on_projection_option_changed_syncs_model(self, mock_update_plotter):
