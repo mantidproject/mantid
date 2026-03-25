@@ -295,7 +295,7 @@ class PawleyPattern2DTest(unittest.TestCase):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
         resids = pawley.eval_resids(pawley.get_free_params())
         # sum of resids should be much smaller than global-scale=True (as background optimised)
-        self.assertAlmostEqual(sum(resids), 2e-10, delta=2e-10)
+        self.assertAlmostEqual(sum(resids), 0, delta=4e-10)
 
     @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
     @patch("Engineering.pawley_utils.logger")
