@@ -333,14 +333,6 @@ void ReflectometryReductionOne3::exec() {
   // For now, output the first output of the final task as the output workspace.
   // Order is not guaranteed in map, so we will want to make this configurable.
   setProperty("OutputWorkspace", m_algorithmTaskOutputs.at(taskExecutionOrder.back()).begin()->second);
-  // Do we need this? Is this just here to satisfy legacy output requirements for polarization corrections?
-  // This currently finds the task before "TaskConvertToQ", and outputs the first workspace from the previous task (i.e
-  // the lambda input workspace)
-  if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
-    const auto it = std::find(taskExecutionOrder.begin(), taskExecutionOrder.end(), "TaskConvertToQ");
-    if (it != taskExecutionOrder.end() && it != taskExecutionOrder.begin())
-      setProperty("OutputWorkspaceWavelength", m_algorithmTaskOutputs.at(*(std::prev(it))).begin()->second);
-  }
 }
 
 /** Get the twoTheta angle range for the top/bottom of the detector associated
@@ -1234,6 +1226,11 @@ void ReflectometryReductionOne3::TaskCropWavelength::executeImpl() {
 
 void ReflectometryReductionOne3::TaskConvertToQ::executeImpl() {
   auto inputWS = getDependantWorkspace("InputWorkspace");
+  // Do we need this? Is this just here to satisfy legacy output requirements for polarization corrections?
+  // This currently outputs the input workspace to convert to Q (i.e wavelength output workspace)
+  if (!m_parent->isDefault("OutputWorkspaceWavelength") || m_parent->isChild())
+    m_parent->setProperty("OutputWorkspaceWavelength", inputWS);
+
   auto converted = m_parent->convertToQ(inputWS);
   outputWorkspace(converted, "ConvertedWorkspaceQ");
 }
