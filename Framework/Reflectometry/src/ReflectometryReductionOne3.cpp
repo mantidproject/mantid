@@ -224,8 +224,14 @@ std::vector<std::string> ReflectometryReductionOne3::constructTaskExecutionOrder
         "TaskSumDetectorsInQ",       "TaskCropWavelength",      "TaskConvertToQ"};
     sumDetectorsTask = "TaskSumDetectorsInQ";
   } else {
-    teo = {"TaskExtractROI",         "TaskBackgroundSubtraction",   "TaskSumDetectors",   "TaskConvertToWavelength",
-           "TaskNormalizeByMonitor", "TaskNormalizeByTransmission", "TaskCropWavelength", "TaskConvertToQ"};
+    teo = {"TaskExtractROI",
+           "TaskBackgroundSubtraction",
+           "TaskSumDetectors",
+           "TaskConvertToWavelength",
+           "TaskNormalizeByMonitor",
+           "TaskCropWavelength",
+           "TaskNormalizeByTransmission",
+           "TaskConvertToQ"};
     sumDetectorsTask = "TaskSumDetectors";
   }
 

@@ -365,8 +365,10 @@ private:
         : AlgorithmTask(parent, "TaskNormalizeByTransmission") {
       setExpectedOutputs({"TransmissionCorrectedWorkspace"});
       setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
-      const auto taskSet = addDependantTaskSet();
-      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet);
+      const auto taskSet1 = addDependantTaskSet();
+      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet1);
+      const auto taskSet2 = addDependantTaskSet();
+      setDependantTask("TaskCropWavelength", "CroppedWorkspace", "InputWorkspace", taskSet2);
     }
     void executeImpl() override;
   };
@@ -377,8 +379,10 @@ private:
         : AlgorithmTask(parent, "TaskNormalizeByAlgorithm") {
       setExpectedOutputs({"AlgorithmCorrectedWorkspace"});
       setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
-      const auto taskSet = addDependantTaskSet();
-      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet);
+      const auto taskSet1 = addDependantTaskSet();
+      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet1);
+      const auto taskSet2 = addDependantTaskSet();
+      setDependantTask("TaskCropWavelength", "CroppedWorkspace", "InputWorkspace", taskSet2);
     }
     void executeImpl() override;
   };
@@ -423,11 +427,9 @@ private:
       setExpectedOutputs({"CroppedWorkspace"});
       setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
       const auto taskSet1 = addDependantTaskSet();
-      setDependantTask("TaskNormalizeByTransmission", "TransmissionCorrectedWorkspace", "InputWorkspace", taskSet1);
+      setDependantTask("TaskSumDetectorsInQ", "QSummedWorkspace", "InputWorkspace", taskSet1);
       const auto taskSet2 = addDependantTaskSet();
-      setDependantTask("TaskSumDetectorsInQ", "QSummedWorkspace", "InputWorkspace", taskSet2);
-      const auto taskSet3 = addDependantTaskSet();
-      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet3);
+      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet2);
     }
     void executeImpl() override;
   };
@@ -437,6 +439,8 @@ private:
     explicit TaskConvertToQ(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskConvertToQ") {
       setExpectedOutputs({"ConvertedWorkspaceQ"});
       setDependantTask("TaskCropWavelength", "CroppedWorkspace", "InputWorkspace");
+      const auto taskSet1 = addDependantTaskSet();
+      setDependantTask("TaskNormalizeByTransmission", "TransmissionCorrectedWorkspace", "InputWorkspace", taskSet1);
     }
     void executeImpl() override;
   };
