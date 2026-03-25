@@ -895,7 +895,6 @@ def create_pf_loop(
     scatter: Union[str, bool],
     scat_vol_pos: Sequence[float],
     save_root: str,
-    exp_name: str,
     projection_method: str,
     xtal_input: Optional[str] = None,
     xtal_args: Optional[Sequence[str]] = None,
@@ -923,7 +922,6 @@ def create_pf_loop(
             the string "both" is also a valid argument and that will create both
     scat_vol_pos: position of the centre of mass of the scattering gauge volume
     save_root: root of the directory to which the data should be saved
-    exp_name: experiment name, which provides the overarching folder within the root directory
     projection_method: the type of projection to use to create the pole figure ("Azimuthal", "Stereographic")
     xtal_input: method by which the crystal structure will be input, options are ("cif", "array", "string")
     xtal_args: list of arguments for the specified crystal input:
@@ -964,7 +962,6 @@ def create_pf_loop(
                 "chi2_thresh": chi2_thresh,
                 "peak_thresh": peak_thresh,
                 "root_dir": save_root,
-                "exp_name": exp_name,
                 "projection_method": projection_method,
                 "create_combined_output": create_combined_output,
                 "debug_info_level": debug_info_level,
