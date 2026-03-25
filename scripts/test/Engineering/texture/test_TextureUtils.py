@@ -919,7 +919,6 @@ class TextureUtilsPoleFigureTests(unittest.TestCase):
             "chi2_thresh": None,
             "peak_thresh": None,
             "save_root": "/save",
-            "exp_name": "exp",
             "projection_method": "Azimuthal",
         }
 

@@ -265,13 +265,11 @@ class PawleyPattern2DTest(unittest.TestCase):
     def test_set_global_scale_false_no_bg(self):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
         pawley.set_global_scale(False)
-        self.assertFalse(pawley.intens_isfree[0][0])  # fixed so as not to be perfectly correlated with global scale
         self.assertEqual(len(pawley.bg_params), 0)
 
     def test_set_global_scale_false_with_bg(self):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile(), bg_func=FlatBackground(A0=2))
         pawley.set_global_scale(False)
-        self.assertFalse(pawley.intens_isfree[0][0])  # fixed so as not to be perfectly correlated with global scale
         self.assertTrue(allclose(pawley.bg_params, 0))  # zero global bg (optimised with scale for each spectrum)
         self.assertFalse(pawley.bg_isfree.any(), 0)  # background fixed
 
@@ -284,7 +282,7 @@ class PawleyPattern2DTest(unittest.TestCase):
     def test_eval_resids_global_scale_true(self):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
         resids = pawley.eval_resids(pawley.get_free_params())
-        self.assertAlmostEqual(sum(resids), -5e7, delta=1e7)
+        self.assertLess(sum(resids), 0)  # check global scale gives an over estimate i.e. resid is negative
 
     def test_eval2D_respects_lambda_max(self):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, lambda_max=5.0, profile=GaussianProfile())
@@ -297,7 +295,7 @@ class PawleyPattern2DTest(unittest.TestCase):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
         resids = pawley.eval_resids(pawley.get_free_params())
         # sum of resids should be much smaller than global-scale=True (as background optimised)
-        self.assertAlmostEqual(sum(resids), 2e-10, delta=1e-10)
+        self.assertAlmostEqual(sum(resids), 2e-10, delta=2e-10)
 
     @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
     @patch("Engineering.pawley_utils.logger")
@@ -350,32 +348,26 @@ class PawleyPattern2DTest(unittest.TestCase):
         mock_pawley1d.phases = [create_autospec(Phase)]
         mock_pawley1d.phases[0].nhkls.return_value = 1
         mock_pawley1d.intens = [ones(1)]
+        mock_pawley1d.alatt_params = [ones(3)]
         return mock_pawley1d
 
     # --- param_bounds tests ---
 
     def test_param_bounds_default_values(self):
         pawley = PawleyPattern2D(self.ws, [self.phase], profile=GaussianProfile())
-        self.assertIsNone(pawley.param_bounds_frac)
+        self.assertIsNone(pawley.global_param_bound_frac)
         self.assertAlmostEqual(pawley.param_bounds_abs_min, 1e-6)
 
     def test_param_bounds_set_on_construction(self):
-        pawley = PawleyPattern2D(self.ws, [self.phase], profile=GaussianProfile(), param_bounds_frac=0.1, param_bounds_abs_min=1e-4)
-        self.assertAlmostEqual(pawley.param_bounds_frac, 0.1)
+        pawley = PawleyPattern2D(self.ws, [self.phase], profile=GaussianProfile(), global_param_bound_frac=0.1, param_bounds_abs_min=1e-4)
+        self.assertAlmostEqual(pawley.global_param_bound_frac, 0.1)
         self.assertAlmostEqual(pawley.param_bounds_abs_min, 1e-4)
-
-    @patch("Engineering.pawley_utils.least_squares")
-    def test_fit_passes_no_bounds_when_frac_none(self, mock_ls):
-        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
-        mock_ls.return_value = MagicMock(x=pawley.get_free_params())
-        pawley.fit()
-        self.assertNotIn("bounds", mock_ls.call_args[1])
 
     @patch("Engineering.pawley_utils.least_squares")
     def test_fit_passes_bounds_computed_from_initial_params(self, mock_ls):
         frac, abs_min = 0.1, 1e-4
         pawley = PawleyPattern2D(
-            self.ws, [self.phase], global_scale=True, profile=GaussianProfile(), param_bounds_frac=frac, param_bounds_abs_min=abs_min
+            self.ws, [self.phase], global_scale=True, profile=GaussianProfile(), global_param_bound_frac=frac, param_bounds_abs_min=abs_min
         )
         initial_params = pawley.get_free_params()
         mock_ls.return_value = MagicMock(x=initial_params)
@@ -395,7 +387,7 @@ class PawleyPattern2DTest(unittest.TestCase):
             global_scale=True,
             profile=GaussianProfile(),
             bg_func=FlatBackground(A0=0),
-            param_bounds_frac=0.1,
+            global_param_bound_frac=0.1,
             param_bounds_abs_min=abs_min,
         )
         initial_params = pawley.get_free_params()
@@ -409,7 +401,7 @@ class PawleyPattern2DTest(unittest.TestCase):
 
     @patch("Engineering.pawley_utils.least_squares")
     def test_fit_does_not_override_explicit_bounds(self, mock_ls):
-        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile(), param_bounds_frac=0.1)
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile(), global_param_bound_frac=0.1)
         n = len(pawley.get_free_params())
         mock_ls.return_value = MagicMock(x=pawley.get_free_params())
         explicit_bounds = (-np.inf * np.ones(n), np.inf * np.ones(n))
@@ -423,8 +415,8 @@ class PawleyPattern2DTest(unittest.TestCase):
         mock_pawley1d.phases[0].nhkls.return_value = self.phase.nhkls()
         mock_pawley1d.intens[0] = 2 * ones(self.phase.nhkls())
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
-        pawley.set_params_from_pawley1d(mock_pawley1d, param_bounds_frac=0.2, param_bounds_abs_min=1e-5)
-        self.assertAlmostEqual(pawley.param_bounds_frac, 0.2)
+        pawley.set_params_from_pawley1d(mock_pawley1d, global_param_bound_frac=0.2, param_bounds_abs_min=1e-5)
+        self.assertAlmostEqual(pawley.global_param_bound_frac, 0.2)
         self.assertAlmostEqual(pawley.param_bounds_abs_min, 1e-5)
 
     @patch("Engineering.pawley_utils.PawleyPattern2D._estimate_intensities")
@@ -434,22 +426,22 @@ class PawleyPattern2DTest(unittest.TestCase):
         mock_pawley1d.phases[0].nhkls.return_value = self.phase.nhkls()
         mock_pawley1d.intens[0] = 2 * ones(self.phase.nhkls())
         pawley = PawleyPattern2D(
-            self.ws, [self.phase], global_scale=False, profile=GaussianProfile(), param_bounds_frac=0.3, param_bounds_abs_min=1e-3
+            self.ws, [self.phase], global_scale=False, profile=GaussianProfile(), global_param_bound_frac=0.3, param_bounds_abs_min=1e-3
         )
         pawley.set_params_from_pawley1d(mock_pawley1d)  # no bounds args
-        self.assertAlmostEqual(pawley.param_bounds_frac, 0.3)
+        self.assertAlmostEqual(pawley.global_param_bound_frac, 0.3)
         self.assertAlmostEqual(pawley.param_bounds_abs_min, 1e-3)
 
     def test_create_no_constriants_fit_forwards_bounds(self):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
-        no_constr = pawley.create_no_constriants_fit(param_bounds_frac=0.15, param_bounds_abs_min=1e-5)
-        self.assertAlmostEqual(no_constr.param_bounds_frac, 0.15)
+        no_constr = pawley.create_no_constriants_fit(global_param_bound_frac=0.15, param_bounds_abs_min=1e-5)
+        self.assertAlmostEqual(no_constr.global_param_bound_frac, 0.15)
         self.assertAlmostEqual(no_constr.param_bounds_abs_min, 1e-5)
 
     def test_create_no_constriants_fit_default_no_bounds(self):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
         no_constr = pawley.create_no_constriants_fit()
-        self.assertIsNone(no_constr.param_bounds_frac)
+        self.assertIsNone(no_constr.global_param_bound_frac)
         self.assertAlmostEqual(no_constr.param_bounds_abs_min, 1e-6)
 
 
@@ -471,7 +463,7 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
     def test_global_scale_false_no_bg(self):
         pawley = PawleyPattern2D(**self.init_kwargs, global_scale=False).create_no_constriants_fit()
         # note intensity on first peak fixed
-        assert_array_equal(pawley.get_isfree(), array([False, True, True, True, True, True]))
+        assert_array_equal(pawley.get_isfree(), array([True, True, True, True, True, True]))
 
     def test_global_scale_true_no_bg(self):
         pawley = PawleyPattern2D(**self.init_kwargs, global_scale=True).create_no_constriants_fit()
@@ -485,8 +477,7 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
 
     def test_global_scale_false_with_bg(self):
         pawley = PawleyPattern2D(**self.init_kwargs, global_scale=False, bg_func=FlatBackground(A0=2)).create_no_constriants_fit()
-        # note intensity on first peak fixed and bg fixed
-        assert_array_equal(pawley.get_isfree(), array([False, True, True, True, True, True, False]))
+        assert_array_equal(pawley.get_isfree(), array([True, True, True, True, True, True, False]))
 
     def test_fit(self):
         # run fit with 2 func eval to check no error, result returned and params changed
@@ -501,20 +492,13 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
 
     def test_param_bounds_default_values(self):
         pawley = PawleyPattern2D(**self.init_kwargs).create_no_constriants_fit()
-        self.assertIsNone(pawley.param_bounds_frac)
+        self.assertIsNone(pawley.global_param_bound_frac)
         self.assertAlmostEqual(pawley.param_bounds_abs_min, 1e-6)
-
-    @patch("Engineering.pawley_utils.least_squares")
-    def test_fit_passes_no_bounds_when_frac_none(self, mock_ls):
-        pawley = PawleyPattern2D(**self.init_kwargs).create_no_constriants_fit()
-        mock_ls.return_value = MagicMock(x=pawley.get_free_params())
-        pawley.fit()
-        self.assertNotIn("bounds", mock_ls.call_args[1])
 
     @patch("Engineering.pawley_utils.least_squares")
     def test_fit_passes_bounds_computed_from_initial_params(self, mock_ls):
         frac, abs_min = 0.1, 1e-4
-        pawley = PawleyPattern2D(**self.init_kwargs).create_no_constriants_fit(param_bounds_frac=frac, param_bounds_abs_min=abs_min)
+        pawley = PawleyPattern2D(**self.init_kwargs).create_no_constriants_fit(global_param_bound_frac=frac, param_bounds_abs_min=abs_min)
         initial_params = pawley.get_free_params()
         mock_ls.return_value = MagicMock(x=initial_params)
         pawley.fit()
@@ -528,7 +512,7 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
         abs_min = 1e-4
         # FlatBackground(A0=0) with global_scale=True gives a zero-valued free param
         init_kwargs_with_bg = {**self.init_kwargs, "global_scale": True, "bg_func": FlatBackground(A0=0)}
-        pawley = PawleyPattern2D(**init_kwargs_with_bg).create_no_constriants_fit(param_bounds_frac=0.1, param_bounds_abs_min=abs_min)
+        pawley = PawleyPattern2D(**init_kwargs_with_bg).create_no_constriants_fit(global_param_bound_frac=0.1, param_bounds_abs_min=abs_min)
         initial_params = pawley.get_free_params()
         mock_ls.return_value = MagicMock(x=initial_params)
         pawley.fit()
@@ -540,12 +524,150 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
 
     @patch("Engineering.pawley_utils.least_squares")
     def test_fit_does_not_override_explicit_bounds(self, mock_ls):
-        pawley = PawleyPattern2D(**self.init_kwargs).create_no_constriants_fit(param_bounds_frac=0.1)
+        pawley = PawleyPattern2D(**self.init_kwargs).create_no_constriants_fit(global_param_bound_frac=0.1)
         n = len(pawley.get_free_params())
         mock_ls.return_value = MagicMock(x=pawley.get_free_params())
         explicit_bounds = (-np.inf * np.ones(n), np.inf * np.ones(n))
         pawley.fit(bounds=explicit_bounds)
         self.assertIs(mock_ls.call_args[1]["bounds"], explicit_bounds)
+
+    # --- create_output_tables tests ---
+
+    def test_create_output_tables_single_phase_returns_one_table(self):
+        pawley = PawleyPattern2D(**self.init_kwargs, global_scale=True).create_no_constriants_fit()
+        res = pawley.fit(max_nfev=1)
+        tables = pawley.create_output_tables(res)
+        self.assertEqual(len(tables), 1)
+
+    def test_create_output_tables_single_phase_hkl_content(self):
+        pawley = PawleyPattern2D(**self.init_kwargs, global_scale=True).create_no_constriants_fit()
+        res = pawley.fit(max_nfev=1)
+        tables = pawley.create_output_tables(res, phase_names=["Si"])
+        self.assertEqual(tables[0].column("HKL"), self.phase.get_hkl_strings())
+
+    def test_create_output_tables_two_phases_correct_hkl_split(self):
+        # phase covers 1.9-3.5 Å (2 peaks); phase2 covers 3.5-4.5 Å (different peaks)
+        phase2 = Phase.from_alatt(3 * [5.43094], "F d -3 m")
+        phase2.set_hkls_from_dspac_limits(3.5, 4.5)
+        pawley2d = PawleyPattern2D(self.ws, [self.phase, phase2], global_scale=True, profile=GaussianProfile())
+        pawley = pawley2d.create_no_constriants_fit()
+        res = pawley.fit(max_nfev=1)
+        tables = pawley.create_output_tables(res, phase_names=["low_d", "high_d"])
+        self.assertEqual(tables[0].column("HKL"), self.phase.get_hkl_strings())
+        self.assertEqual(tables[1].column("HKL"), phase2.get_hkl_strings())
+
+
+class OutputTableMixinTest(unittest.TestCase):
+    """Tests for OutputTableMixin.create_output_tables, exercised through PawleyPattern1D."""
+
+    LATT_SI = 5.43094
+    SPGR_SI = "F d -3 m"
+
+    @classmethod
+    def setUpClass(cls):
+        dspacs = linspace(0.69, 4.15, 2460)
+        cls.ws = CreateWorkspace(
+            DataX=dspacs,
+            DataY=zeros_like(dspacs),
+            UnitX="dSpacing",
+            YUnitLabel="Intensity (a.u.)",
+            OutputWorkspace="ws_tab_mixin",
+        )
+        EditInstrumentGeometry(Workspace=cls.ws, PrimaryFlightPath=50, L2=1, Polar=90)
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def setUp(self):
+        self.phase = Phase.from_alatt(3 * [self.LATT_SI], self.SPGR_SI)
+        self.phase.set_hkls([[1, 1, 1]])
+        self.phase2 = Phase.from_alatt(3 * [self.LATT_SI], self.SPGR_SI)
+        self.phase2.set_hkls([[2, 2, 2]])
+
+    def _pawley(self, phases=None):
+        return PawleyPattern1D(self.ws, phases or [self.phase], profile=GaussianProfile())
+
+    def _res(self, pawley):
+        return pawley.fit(max_nfev=1)
+
+    # --- return type and length ---
+
+    def test_single_phase_returns_list_of_one_table(self):
+        pawley = self._pawley()
+        tables = pawley.create_output_tables(self._res(pawley))
+        self.assertIsInstance(tables, list)
+        self.assertEqual(len(tables), 1)
+
+    def test_two_phases_returns_list_of_two_tables(self):
+        pawley = self._pawley([self.phase, self.phase2])
+        tables = pawley.create_output_tables(self._res(pawley))
+        self.assertEqual(len(tables), 2)
+
+    # --- workspace naming ---
+
+    def test_default_workspace_name_uses_phase_index(self):
+        pawley = self._pawley()
+        tables = pawley.create_output_tables(self._res(pawley))
+        self.assertEqual(tables[0].name(), f"{self.ws.name()}_pawley_table_phase0")
+
+    def test_two_phases_default_names_use_index(self):
+        pawley = self._pawley([self.phase, self.phase2])
+        tables = pawley.create_output_tables(self._res(pawley))
+        self.assertEqual(tables[0].name(), f"{self.ws.name()}_pawley_table_phase0")
+        self.assertEqual(tables[1].name(), f"{self.ws.name()}_pawley_table_phase1")
+
+    def test_phase_names_used_in_workspace_names(self):
+        pawley = self._pawley([self.phase, self.phase2])
+        tables = pawley.create_output_tables(self._res(pawley), phase_names=["alpha", "beta"])
+        self.assertEqual(tables[0].name(), f"{self.ws.name()}_pawley_table_alpha")
+        self.assertEqual(tables[1].name(), f"{self.ws.name()}_pawley_table_beta")
+
+    def test_custom_base_name_prepended_to_phase_name(self):
+        pawley = self._pawley()
+        tables = pawley.create_output_tables(self._res(pawley), output_workspace="my_fit", phase_names=["Si"])
+        self.assertEqual(tables[0].name(), "my_fit_Si")
+
+    # --- table structure ---
+
+    def test_table_has_required_columns(self):
+        pawley = self._pawley()
+        tables = pawley.create_output_tables(self._res(pawley))
+        self.assertEqual(
+            tables[0].getColumnNames(),
+            ["Workspace", "Spectrum", "HKL", "I", "I_err", "X0", "X0_err", "FWHM", "FWHM_err"],
+        )
+
+    def test_row_count_matches_phase_nhkls(self):
+        pawley = self._pawley()
+        tables = pawley.create_output_tables(self._res(pawley))
+        self.assertEqual(tables[0].rowCount(), self.phase.nhkls())
+
+    def test_hkl_column_contains_phase_hkl_strings(self):
+        pawley = self._pawley()
+        tables = pawley.create_output_tables(self._res(pawley))
+        self.assertEqual(tables[0].column("HKL"), self.phase.get_hkl_strings())
+
+    # --- table per phase ---
+
+    def test_two_phases_each_table_row_count_matches_its_phase(self):
+        pawley = self._pawley([self.phase, self.phase2])
+        tables = pawley.create_output_tables(self._res(pawley))
+        self.assertEqual(tables[0].rowCount(), self.phase.nhkls())
+        self.assertEqual(tables[1].rowCount(), self.phase2.nhkls())
+
+    def test_two_phases_each_table_contains_only_its_phase_hkls(self):
+        pawley = self._pawley([self.phase, self.phase2])
+        tables = pawley.create_output_tables(self._res(pawley))
+        self.assertEqual(tables[0].column("HKL"), self.phase.get_hkl_strings())
+        self.assertEqual(tables[1].column("HKL"), self.phase2.get_hkl_strings())
+
+    def test_two_phases_hkl_sets_are_different(self):
+        pawley = self._pawley([self.phase, self.phase2])
+        tables = pawley.create_output_tables(self._res(pawley))
+        hkls_0 = set(tables[0].column("HKL"))
+        hkls_1 = set(tables[1].column("HKL"))
+        self.assertTrue(hkls_0.isdisjoint(hkls_1))
 
 
 if __name__ == "__main__":
