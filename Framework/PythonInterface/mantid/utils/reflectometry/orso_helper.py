@@ -8,7 +8,7 @@ import numpy as np
 from datetime import datetime, timezone
 from typing import Optional, Union, List
 import re
-from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, Measurement, Polarization, InstrumentSettings
+from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, SampleModel, Measurement, Polarization, InstrumentSettings
 from orsopy.fileio import Reduction, Software
 from orsopy.fileio.orso import Orso, OrsoDataset, save_orso, save_nexus
 from orsopy.fileio.base import Column, ErrorColumn, File
@@ -124,7 +124,18 @@ class MantidORSODataset:
             probe=self.PROBE_NEUTRON,
         )
 
-        sample = Sample(name=ws.getTitle(), model=model) if model else Sample(name=ws.getTitle())
+        if model:
+            # Verify that the sample string is correct before creating the sample
+            try:
+                SampleModel(stack=model).resolve_to_layers()
+            except:
+                raise ValueError(
+                    f"The provided model description {model} contains an error. "
+                    "Please check that the string follows the correct ORSO format.\n"
+                )
+            sample = Sample(name=ws.getTitle(), model=model)
+        else:
+            sample = Sample(name=ws.getTitle())
 
         # This will initially only consider polarization
         instrument_settings = InstrumentSettings(None, None) if enable_instrument_settings else None
