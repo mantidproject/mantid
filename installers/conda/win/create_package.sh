@@ -128,7 +128,6 @@ mv $CONDA_ENV_PATH/Library/instrument $COPY_DIR/
 echo "Constructing package/lib/qt5"
 mkdir -p $COPY_DIR/lib/qt5/bin
 cp $THIS_SCRIPT_DIR/../common/qt.conf $COPY_DIR/lib/qt5/bin
-mv $CONDA_ENV_PATH/Library/resources $COPY_DIR/lib/qt5/
 
 echo "Copy plugins to the package"
 mkdir $COPY_DIR/plugins
