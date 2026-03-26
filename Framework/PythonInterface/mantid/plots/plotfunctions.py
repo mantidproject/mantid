@@ -574,7 +574,8 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, lo
             plot_fn(ws, **_plot_kwargs)
 
     _set_axes_limits_from_properties(ax)
-    ax.make_legend()
+    if nums:
+        ax.make_legend()
     if set_title:
         workspace_names = [ws.name() for ws in workspaces]
         title = ", ".join(workspace_names)
