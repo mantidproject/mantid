@@ -114,16 +114,6 @@ class MantidORSODataset:
         model: str,
         enable_instrument_settings: Optional[bool] = None,
     ) -> None:
-        owner = Person(name=None, affiliation=None)
-
-        run = ws.getRun()
-        experiment = Experiment(
-            title=None,
-            instrument=ws.getInstrument().getName(),
-            start_date=self._get_exp_start_time(run),
-            probe=self.PROBE_NEUTRON,
-        )
-
         if model:
             # Verify that the sample string is correct before creating the sample
             try:
@@ -136,6 +126,16 @@ class MantidORSODataset:
             sample = Sample(name=ws.getTitle(), model=model)
         else:
             sample = Sample(name=ws.getTitle())
+
+        owner = Person(name=None, affiliation=None)
+
+        run = ws.getRun()
+        experiment = Experiment(
+            title=None,
+            instrument=ws.getInstrument().getName(),
+            start_date=self._get_exp_start_time(run),
+            probe=self.PROBE_NEUTRON,
+        )
 
         # This will initially only consider polarization
         instrument_settings = InstrumentSettings(None, None) if enable_instrument_settings else None
