@@ -276,7 +276,7 @@ void PDCalibration::init() {
   declareProperty(
       "CopyLastGoodPeakParameters", true,
       "If true, for a given peak in a spectrum the initial peak parameters (with the exception of peak centre) "
-      "will be copied from the last succesfully fit peak in that spectrum.");
+      "will be copied from the last successfully fit peak in that spectrum.");
 
   declareProperty("MinimumSignalToNoiseRatio", 0.,
                   "Used for validating peaks before fitting. If the signal-to-noise ratio is under this value, "
@@ -628,7 +628,7 @@ void PDCalibration::exec() {
   }
 
   // whether, for a given peak in each spectrum, the initial peak parameters (with the exception of peak centre)
-  // will be copied from the last succesfully fit peak in that spectrum.
+  // will be copied from the last successfully fit peak in that spectrum.
   algFitPeaks->setProperty("CopyLastGoodPeakParameters", copyLastGoodPeakParameters);
 
   // run and get the result

@@ -403,7 +403,7 @@ void FitPeaks::init() {
 
   declareProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS, true,
                   "If true, initial peak parameters (with the exception of peak centre) "
-                  "will be copied from the last succesfully fit peak in the spectra.");
+                  "will be copied from the last successfully fit peak in the spectra.");
 
   // additional output for reviewing
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP_MODEL, "",

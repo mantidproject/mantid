@@ -55,7 +55,11 @@ public:
   void setUp() override {
     // Needs other algorithms and functions to be registered
     FrameworkManager::Instance();
+    // Run serially so test values don't depend on number of cores
+    FrameworkManager::Instance().setNumOMPThreads(1);
   }
+
+  void tearDown() override { FrameworkManager::Instance().setNumOMPThreadsToConfigValue(); }
 
   void test_Init() {
     // Initialize FitPeak
@@ -214,8 +218,6 @@ public:
    */
   void test_multiPeaksMultiSpectra() {
     g_log.notice() << "TEST MULTIPLE PEAKS MULTI SPECTRA";
-    // run serially so values don't depend on no. cores etc.
-    FrameworkManager::Instance().setNumOMPThreads(1);
 
     // set up parameters with starting value
     std::vector<string> peakparnames;
@@ -305,8 +307,6 @@ public:
     AnalysisDataService::Instance().remove("PeakPositionsWS");
     AnalysisDataService::Instance().remove("FittedPeaksWS");
     AnalysisDataService::Instance().remove("PeakParametersWS");
-
-    FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -315,8 +315,6 @@ public:
    */
   void test_effectivePeakParameters() {
     g_log.notice() << "TEST EFFECTIVE PEAK PARAMS";
-    // run serially so values don't depend on no. cores etc.
-    FrameworkManager::Instance().setNumOMPThreads(1);
 
     // set up parameters with starting value
     std::vector<string> peakparnames;
@@ -408,8 +406,6 @@ public:
     AnalysisDataService::Instance().remove("PeakPositionsWS");
     AnalysisDataService::Instance().remove("FittedPeaksWS");
     AnalysisDataService::Instance().remove("PeakParametersWS");
-
-    FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -811,8 +807,6 @@ public:
    */
   void test_multiPeaksMultiSpectraBackToBackExp_with_Param_xml() {
     g_log.notice() << "TEST MULTI PEAKS SPECTRA BACK TO BACK WITH PARAM XML";
-    // run serially so values don't depend on no. cores etc.
-    FrameworkManager::Instance().setNumOMPThreads(1);
 
     // Generate input workspace
     std::string input_ws_name = generateTestDataBackToBackExponential();
@@ -913,8 +907,6 @@ public:
     AnalysisDataService::Instance().remove(peak_pos_ws_name);
     AnalysisDataService::Instance().remove(param_ws_name);
     AnalysisDataService::Instance().remove(model_ws_name);
-
-    FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
 
     return;
   }
@@ -1550,13 +1542,11 @@ public:
    * without seeding initial parameters from the last successfully fitted neighbouring peak.
    * With this option disabled, each peak must be independently initialized from
    * data observation rather than inheriting potentially position-inappropriate
-   * parameters from a neighbour at a different d-spacing or TOF. Fitted positions
-   * should still match those obtained with the default (true) setting.
+   * parameters from a neighbour at a different d-spacing or TOF. The test verifies
+   * that sensible, independently determined peak positions and widths are obtained.
    */
   void test_multiPeaksMultiSpectra_noCopyLastGoodPeakParameters() {
     g_log.notice() << "TEST MULTIPLE PEAKS MULTI SPECTRA NO COPY LAST GOOD PEAK PARAMS";
-    // run serially so values don't depend on no. cores etc.
-    FrameworkManager::Instance().setNumOMPThreads(1);
 
     // Generate input workspace with two Gaussian peaks of differing widths:
     // ws=0: peak at x=5 (sigma=0.15) and peak at x=10 (sigma=0.1).
@@ -1625,8 +1615,6 @@ public:
     AnalysisDataService::Instance().remove("PeakPositionsWS_noCopy");
     AnalysisDataService::Instance().remove("FittedPeaksWS_noCopy");
     AnalysisDataService::Instance().remove("PeakParametersWS_noCopy");
-
-    FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
   }
 
   //--------------------------------------------------------------------------------------------------------------
