@@ -231,6 +231,9 @@ void GenerateFlatCellWorkspaceLOQ::createAndSaveMaskWorkspace(const MatrixWorksp
     createDetectorMaskWorkspace(extractedmaskWS);
   }
   createFlatcellWorkspace(directMaskWS);
+  if (!isDefault("OutputRKHFilePath")) {
+    saveRKH();
+  }
 }
 
 void GenerateFlatCellWorkspaceLOQ::createDetectorMaskWorkspace(const API::MatrixWorkspace_sptr &ws) {
@@ -274,6 +277,20 @@ void GenerateFlatCellWorkspaceLOQ::createFlatcellWorkspace(const API::MatrixWork
 
   // Set the flatcell workspace as the OutputWorkspace
   setProperty("OutputWorkspace", conjoinedWS);
+}
+
+void GenerateFlatCellWorkspaceLOQ::saveRKH() {
+  // Retrieve the properties
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  std::string outputRKHFilePath = getProperty("OutputRKHFilePath");
+
+  // Save the RKH file
+  auto saveRKH = createChildAlgorithm("SaveRKH");
+  saveRKH->initialize();
+  saveRKH->setProperty("InputWorkspace", outputWS);
+  saveRKH->setProperty("Filename", outputRKHFilePath);
+  saveRKH->setProperty("Append", false);
+  saveRKH->execute();
 }
 
 /** Execution code for EventWorkspaces

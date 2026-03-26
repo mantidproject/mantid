@@ -51,6 +51,7 @@ private:
   std::vector<double> extractIntegratedValues(const API::MatrixWorkspace_sptr &ws) const;
   void createDetectorMaskWorkspace(const API::MatrixWorkspace_sptr &ws);
   void createFlatcellWorkspace(const API::MatrixWorkspace_sptr &ws);
+  void saveRKH();
   FlatCellStats normalizeBanks(std::span<double> values) const;
 };
 
