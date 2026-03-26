@@ -169,3 +169,6 @@ class Projection:
 
 # Import subclasses at the BOTTOM to avoid circular imports,
 # but ensure they're always registered when Projection is imported
+from instrumentview.Projections.CylindricalProjection import CylindricalProjection  # noqa: F401 E402
+from instrumentview.Projections.SphericalProjection import SphericalProjection  # noqa: F401 E402
+from instrumentview.Projections.SideBySide import SideBySide  # noqa: F401 E402

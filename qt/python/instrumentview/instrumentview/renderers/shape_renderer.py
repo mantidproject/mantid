@@ -380,20 +380,23 @@ class ShapeRenderer(InstrumentRenderer):
             # Tile template: (n_group, n_verts, 3)
             tiled = np.tile(template_verts, (n_group, 1, 1))
 
+            # Scale
+            native_scales = scales[group_indices][:, np.newaxis, :]
+            tiled = tiled * native_scales
+
             if projection is not None and projection.type is ProjectionType.SIDE_BY_SIDE:
                 if per_detector_rotate is None or per_detector_scales is None:
                     return pv.PolyData(), np.array([], dtype=np.int64), np.array([], dtype=np.int64)
 
+                projection_scales = per_detector_scales[group_indices][:, np.newaxis, np.newaxis]
+                tiled = tiled * projection_scales
+
                 rotate_mask = per_detector_rotate[group_indices]
-                group_scales = per_detector_scales[group_indices][:, np.newaxis, np.newaxis]
                 group_pos = detector_positions[group_indices][:, np.newaxis, :]  # (n_group, 1, 3)
             else:
                 rotate_mask = np.ones(n_group).astype(bool)
-                group_scales = scales[group_indices][:, np.newaxis, :]
                 group_pos = self._all_positions_3d[detector_indices[group_indices]][:, np.newaxis, :]
 
-            # Scale
-            tiled = tiled * group_scales
             # Rotate
             group_rots = rotations[group_indices[rotate_mask]]
             tiled[rotate_mask] = np.einsum("nij,nvj->nvi", group_rots, tiled[rotate_mask])
