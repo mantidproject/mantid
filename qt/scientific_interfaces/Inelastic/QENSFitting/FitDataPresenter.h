@@ -24,6 +24,7 @@ class IFitTab;
 
 class MANTIDQT_INELASTIC_DLL IFitDataPresenter {
 public:
+  virtual ~IFitDataPresenter() = default;
   virtual std::string tabName() const = 0;
 
   virtual void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) = 0;
@@ -38,7 +39,7 @@ public:
 class MANTIDQT_INELASTIC_DLL FitDataPresenter : public IFitDataPresenter {
 public:
   FitDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view);
-  ~FitDataPresenter() = default;
+  ~FitDataPresenter() override = default;
   virtual bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &workspaceIndices);
   void setStartX(double startX, WorkspaceID workspaceID);
