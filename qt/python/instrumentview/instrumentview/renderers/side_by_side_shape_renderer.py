@@ -40,11 +40,11 @@ class SideBySideShapeRenderer(ShapeRenderer):
     def precompute(self):
         super().precompute()
 
-    def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
+    def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model) -> pv.PolyData:
         if not self._precomputed:
             self.precompute()
 
-        indices = self._resolve_detector_indices(positions, model.pickable_detector_ids)
+        indices = self._resolve_detector_indices(model.pickable_detector_ids)
 
         per_detector_scales = None
         per_detector_rotate = None
@@ -54,9 +54,9 @@ class SideBySideShapeRenderer(ShapeRenderer):
             )
 
         mesh, c2d, fpd = self._assemble_mesh(
-            indices,
-            positions,
-            projection_type=model.projection_type,
+            detector_indices=indices,
+            detector_positions=positions,
+            projection=model.active_projection,
             per_detector_scales=per_detector_scales,
             per_detector_rotate=per_detector_rotate,
         )
@@ -69,7 +69,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
         if len(positions) == 0:
             return pv.PolyData()
 
-        indices = self._resolve_detector_indices(positions, model.masked_detector_ids)
+        indices = self._resolve_detector_indices(model.masked_detector_ids)
 
         per_detector_scales = None
         per_detector_rotate = None
@@ -79,9 +79,9 @@ class SideBySideShapeRenderer(ShapeRenderer):
             )
 
         mesh, _, _ = self._assemble_mesh(
-            indices,
-            positions,
-            projection_type=model.projection_type,
+            detector_indices=indices,
+            detector_positions=positions,
+            projection=model.active_projection,
             per_detector_scales=per_detector_scales,
             per_detector_rotate=per_detector_rotate,
         )
