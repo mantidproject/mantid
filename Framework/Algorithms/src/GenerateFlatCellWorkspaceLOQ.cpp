@@ -28,6 +28,7 @@ using namespace Mantid::DataObjects;
 
 struct LoqMeta {
   static constexpr int histograms() { return 17776; }
+  static constexpr int monitors() { return 8; }
   static constexpr int LABIndexStart() { return 0; }
   static constexpr int LABTotalBanks() { return 16384; }
   static constexpr int HABTotalBanks() { return 1392; }
@@ -53,10 +54,10 @@ void GenerateFlatCellWorkspaceLOQ::init() {
                   "the high angle bank. The masking threshold is calculated by the equation "
                   "maskingThreshold = 1.0 + (HABThresholdMultiplier x standard deviation of the normalized HAB data);");
   declareProperty("ApplyMaskDirectlyToWorkspace", false, "Determines if mask is directly applied to workspace.");
-  declareProperty("ApplyCorrectionsDirectlyToWorkspace", true,
-                  "Determines if the input data should be divided by the output of GenerateFlatCellWorkspaceLOQ.");
   declareProperty("OutputMaskFilePath", "",
-                  "Path to the detector mask XML file. It must be provided for the algorithm to create the xml file.");
+                  "Path to the detector mask XML file. It must be provided for the algorithm to create the .xml file.");
+  declareProperty("OutputRKHFilePath", "",
+                  "Path to the RKH file. It must be provided for the algorithm to create the .out file.");
 }
 
 /** Computes the mean of the input span
@@ -116,8 +117,7 @@ void GenerateFlatCellWorkspaceLOQ::exec() {
   FlatCellStats stats = normalizeBanks(valuesSpan);
 
   // Save the Y data into the output WS
-  const size_t nHist = inputWS->getNumberHistograms();
-  for (size_t i = 0; i < nHist; ++i) {
+  for (size_t i = 0; i < LoqMeta::histograms(); ++i) {
     auto &Y = outputWS->mutableY(i);
     Y[0] = valuesSpan[i];
   }
@@ -208,8 +208,7 @@ void GenerateFlatCellWorkspaceLOQ::createAndSaveMaskWorkspace(const MatrixWorksp
   maskDetectorsHAB->execute();
 
   // Extract Mask
-  const std::string wsName = getPropertyValue("OutputWorkspace");
-  const std::string maskName = wsName + "_MASK";
+  const std::string maskName = getPropertyValue("OutputWorkspace") + "_MASK";
   auto extractMask = createChildAlgorithm("ExtractMask");
   extractMask->initialize();
   extractMask->setProperty("InputWorkspace", directMaskWS);
@@ -227,27 +226,54 @@ void GenerateFlatCellWorkspaceLOQ::createAndSaveMaskWorkspace(const MatrixWorksp
     saveMask->execute();
   }
 
-  bool applyMaskDirectlyToWorkspace = getProperty("ApplyMaskDirectlyToWorkspace");
-  if (applyMaskDirectlyToWorkspace) {
-    setProperty("OutputWorkspace", directMaskWS);
-  }
   bool createMaskWorkspace = getProperty("CreateMaskWorkspace");
   if (createMaskWorkspace) {
-    AnalysisDataService::Instance().addOrReplace(maskName, extractedmaskWS);
+    createDetectorMaskWorkspace(extractedmaskWS);
   }
-  bool createCorrectionsWorkspace = getProperty("ApplyCorrectionsDirectlyToWorkspace");
-  if (createCorrectionsWorkspace) {
-    const std::string correctionsName = wsName + "_CORR";
-    EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
-    auto divide = createChildAlgorithm("Divide");
-    divide->initialize();
-    divide->setProperty("LHSWorkspace", inputWS);
-    divide->setProperty("RHSWorkspace", directMaskWS);
-    divide->setProperty("OutputWorkspace", correctionsName);
-    divide->execute();
-    MatrixWorkspace_sptr correctedWS = divide->getProperty("OutputWorkspace");
-    AnalysisDataService::Instance().addOrReplace(correctionsName, correctedWS);
+  createFlatcellWorkspace(directMaskWS);
+}
+
+void GenerateFlatCellWorkspaceLOQ::createDetectorMaskWorkspace(const API::MatrixWorkspace_sptr &ws) {
+  // Create the monitor workspace
+  MatrixWorkspace_sptr monitor_ws = WorkspaceFactory::Instance().create(ws, LoqMeta::monitors(), 1, 1);
+
+  // Prepend the mask with the monitors
+  auto conjoin = createChildAlgorithm("ConjoinWorkspaces");
+  conjoin->initialize();
+  conjoin->setProperty("InputWorkspace1", monitor_ws);
+  conjoin->setProperty("InputWorkspace2", ws);
+  conjoin->setProperty("CheckOverlapping", false);
+  conjoin->execute();
+  MatrixWorkspace_sptr conjoinedWS = conjoin->getProperty("InputWorkspace1");
+
+  // Save the conjoined mask workspace
+  const std::string maskName = getPropertyValue("OutputWorkspace") + "_MASK";
+  AnalysisDataService::Instance().addOrReplace(maskName, conjoinedWS);
+}
+
+void GenerateFlatCellWorkspaceLOQ::createFlatcellWorkspace(const API::MatrixWorkspace_sptr &ws) {
+  // Retrieve the properties
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  bool applyMaskDirectlyToWorkspace = getProperty("ApplyMaskDirectlyToWorkspace");
+
+  // Create the monitor workspace
+  MatrixWorkspace_sptr monitor_ws = WorkspaceFactory::Instance().create(ws, LoqMeta::monitors(), 1, 1);
+
+  // Prepend the mask with the monitors
+  auto conjoin = createChildAlgorithm("ConjoinWorkspaces");
+  conjoin->initialize();
+  conjoin->setProperty("InputWorkspace1", monitor_ws);
+  if (applyMaskDirectlyToWorkspace) {
+    conjoin->setProperty("InputWorkspace2", ws);
+  } else {
+    conjoin->setProperty("InputWorkspace2", outputWS);
   }
+  conjoin->setProperty("CheckOverlapping", false);
+  conjoin->execute();
+  MatrixWorkspace_sptr conjoinedWS = conjoin->getProperty("InputWorkspace1");
+
+  // Set the flatcell workspace as the OutputWorkspace
+  setProperty("OutputWorkspace", conjoinedWS);
 }
 
 /** Execution code for EventWorkspaces
