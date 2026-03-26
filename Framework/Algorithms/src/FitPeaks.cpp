@@ -403,7 +403,7 @@ void FitPeaks::init() {
 
   declareProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS, true,
                   "If true, initial peak parameters (with the exception of peak centre) "
-                  "will be copied from the last successfully fit peak in the spectra.");
+                  "may be copied from the last successfully fit peak in the spectra.");
 
   // additional output for reviewing
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP_MODEL, "",
@@ -1003,6 +1003,8 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
     // vector to store fit params for last good fit to each peak
     std::vector<std::vector<double>> lastGoodPeakParameters(m_numPeaksToFit,
                                                             std::vector<double>(m_peakFunction->nParams(), 0.0));
+    // track which spectrum index last successfully fitted each peak
+    std::vector<size_t> lastGoodPeakSpectra(m_numPeaksToFit, 0);
 
     for (auto wi = iws_begin; wi < iws_end; ++wi) {
       // peaks to fit
@@ -1017,7 +1019,7 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
           std::make_shared<FitPeaksAlgorithm::PeakFitPreCheckResult>();
 
       fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers, fit_result, lastGoodPeakParameters,
-                       spectrum_pre_check_result);
+                       lastGoodPeakSpectra, spectrum_pre_check_result);
 
       PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
         writeFitResult(static_cast<size_t>(wi), expected_peak_centers, fit_result);
@@ -1145,6 +1147,7 @@ private:
 void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
                                 const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
                                 std::vector<std::vector<double>> &lastGoodPeakParameters,
+                                std::vector<size_t> &lastGoodPeakSpectra,
                                 const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result) {
   assert(fit_result->getNumberPeaks() == m_numPeaksToFit);
   pre_check_result->setNumberOfSubmittedSpectrumPeaks(m_numPeaksToFit);
@@ -1221,14 +1224,13 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
                                                                     lastGoodPeakParameters[peak_index].end(),
                                                                     [&](auto const &val) { return val <= 1e-10; })));
 
-    // Check whether current spectrum's pixel (detector ID) is close to its
-    // previous spectrum's pixel (detector ID).
+    // Check whether current spectrum's pixel (detector ID) is close to the
+    // spectrum that last successfully fitted this peak.
     try {
+      size_t lastGoodWi = lastGoodPeakSpectra[peak_index];
       if (wi > 0 && samePeakCrossSpectrum) {
-        // First spectrum or discontinuous detector ID: do not start from same
-        // peak of last spectrum
         std::shared_ptr<const Geometry::Detector> pdetector =
-            std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi - 1));
+            std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(lastGoodWi));
         std::shared_ptr<const Geometry::Detector> cdetector =
             std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi));
 
@@ -1327,10 +1329,11 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       // reset the flag such that there is at a peak fit in this spectrum
       neighborPeakSameSpectrum = true;
       prev_peak_index = peak_index;
-      // copy values
+      // copy values and record which spectrum they came from
       for (size_t i = 0; i < lastGoodPeakParameters[peak_index].size(); ++i) {
         lastGoodPeakParameters[peak_index][i] = peakfunction->getParameter(i);
       }
+      lastGoodPeakSpectra[peak_index] = wi;
     }
   }
 

@@ -151,6 +151,7 @@ private:
   void fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
                         const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
                         std::vector<std::vector<double>> &lastGoodPeakParameters,
+                        std::vector<size_t> &lastGoodPeakSpectra,
                         const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result);
 
   /// fit background
