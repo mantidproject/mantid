@@ -1227,8 +1227,8 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
     // Check whether current spectrum's pixel (detector ID) is close to the
     // spectrum that last successfully fitted this peak.
     try {
-      size_t lastGoodWi = lastGoodPeakSpectra[peak_index];
       if (wi > 0 && samePeakCrossSpectrum) {
+        size_t lastGoodWi = lastGoodPeakSpectra[peak_index];
         std::shared_ptr<const Geometry::Detector> pdetector =
             std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(lastGoodWi));
         std::shared_ptr<const Geometry::Detector> cdetector =
