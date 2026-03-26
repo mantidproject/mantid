@@ -339,6 +339,7 @@ class FullInstrumentViewPresenter:
     def on_aspect_ratio_check_box_clicked(self) -> None:
         self._view.store_maintain_aspect_ratio_option()
         self.update_plotter()
+        self._view.reset_camera()
 
     def on_flip_z_axis_check_box_clicked(self) -> None:
         self.update_plotter()
