@@ -65,27 +65,13 @@ class Prop:
     VALIDATION = "ValidateModel"
 
 
-class ReflectometryDataset:
-    REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
-    CONVERT_ALG = "ConvertUnits"
-    REF_ROI_ALG = "RefRoi"
-    _RUN_NUM_LOG = "run_number"
-
-    _REDUCTION_ALG = "ReflectometryReductionOneAuto"
-    _RRO_ALG = "ReflectometryReductionOne"
-    _STITCH_ALG = "Stitch1DMany"
-    _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
-    _REBIN_ALG = "Rebin"
-
+class ReflectometryDataSetBase:
     def __init__(self, ws, is_ws_grp_member: bool):
         self._name: str = ""
         self._ws = ws
         self._is_ws_grp_member: bool = is_ws_grp_member
-        self._reduction_history = None
         self._reduction_timestamp: datetime = None
-        self._reduction_workflow_histories = []
-        self._stitch_history = None
-        self._q_conversion_history = None
+        self._is_stitched = None
         self._q_conversion_theta: Optional[float] = None
         self._spin_state: str = ""
         self._reduction_script: Optional[str] = None
@@ -94,12 +80,6 @@ class ReflectometryDataset:
         self._flood_entry: Optional[tuple[str, str]] = None
         self._calibration_entry: Optional[str] = None
         self._resolution: Optional[float] = None
-
-        self._populate_histories()
-        self._populate_q_conversion_info()
-        self._set_reduction_timestamp_from_history()
-        self._set_spin_state_from_logs()
-        self._set_name()
 
     @property
     def name(self) -> str:
@@ -122,12 +102,78 @@ class ReflectometryDataset:
         return self._spin_state
 
     @property
-    def reduction_history(self):
-        return self._reduction_history
-
-    @property
     def reduction_timestamp(self) -> datetime:
         return self._reduction_timestamp
+
+    @property
+    def is_stitched(self) -> bool:
+        return self._is_stitched
+
+    @property
+    def is_polarized(self) -> bool:
+        return len(self._spin_state) > 0
+
+    @property
+    def q_conversion_method(self):
+        self._q_conversion_method
+
+    @property
+    def q_conversion_theta(self) -> Optional[float]:
+        return self._q_conversion_theta
+
+    @property
+    def reduction_script(self) -> Optional[str]:
+        return self._reduction_script
+
+    @property
+    def angle_files(self) -> List[Tuple[str, str]]:
+        return self._angle_files
+
+    @property
+    def transmission_files(self) -> Tuple[List[str], List[str]]:
+        return self._transmission_files
+
+    @property
+    def flood_entry(self) -> Optional[tuple[str, str]]:
+        return self._flood_entry
+
+    @property
+    def calibration_entry(self) -> Optional[str]:
+        return self._calibration_entry
+
+    @property
+    def resolution(self) -> Optional[float]:
+        return self._resolution
+
+
+class ReflectometryDatasetHistory(ReflectometryDataSetBase):
+    REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
+    CONVERT_ALG = "ConvertUnits"
+    REF_ROI_ALG = "RefRoi"
+    _RUN_NUM_LOG = "run_number"
+
+    _REDUCTION_ALG = "ReflectometryReductionOneAuto"
+    _RRO_ALG = "ReflectometryReductionOne"
+    _STITCH_ALG = "Stitch1DMany"
+    _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
+    _REBIN_ALG = "Rebin"
+
+    def __init__(self, ws, is_ws_grp_member: bool):
+        super(ReflectometryDatasetHistory, self).__init__(ws, is_ws_grp_member)
+        self._q_conversion_history = None
+        self._stitch_history = None
+        self._reduction_history = None
+        self._reduction_workflow_histories = []
+
+        self._populate_histories()
+        self._populate_q_conversion_info()
+        self._set_reduction_timestamp_from_history()
+        self._set_spin_state_from_logs()
+        self._set_name()
+
+    @property
+    def reduction_history(self):
+        return self._reduction_history
 
     @property
     def reduction_workflow_histories(self):
@@ -142,10 +188,6 @@ class ReflectometryDataset:
         return self._stitch_history is not None
 
     @property
-    def is_polarized(self) -> bool:
-        return len(self._spin_state) > 0
-
-    @property
     def q_conversion_history(self):
         return self._q_conversion_history
 
@@ -157,10 +199,6 @@ class ReflectometryDataset:
                 "Unable to calculate lambda values as cannot find algorithm used for original Q conversion in the workspace history."
             )
         return q_convert_history.name()
-
-    @property
-    def q_conversion_theta(self) -> Optional[float]:
-        return self._q_conversion_theta
 
     @property
     def reduction_script(self) -> Optional[str]:
@@ -544,7 +582,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 ws_groups.append(ws)
         return ws_groups
 
-    def _create_and_sort_refl_datasets(self) -> List[ReflectometryDataset]:
+    def _create_and_sort_refl_datasets(self) -> List[ReflectometryDatasetHistory]:
         """Retrieve the workspaces from the input list, transform them into ReflectometryDataset objects and sort them
         into the order that the datasets should appear in the ORSO file"""
         ws_groups_in_ADS = self._get_all_workspace_groups()
@@ -560,15 +598,15 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         for ws_name in self.getProperty(Prop.WORKSPACE_LIST).value:
             ws = AnalysisDataService.retrieve(ws_name)
             if isinstance(ws, WorkspaceGroup):
-                dataset_list.extend([ReflectometryDataset(child_ws, True) for child_ws in ws])
+                dataset_list.extend([ReflectometryDatasetHistory(child_ws, True) for child_ws in ws])
             else:
-                dataset_list.append(ReflectometryDataset(ws, is_workspace_group_member(ws_name)))
+                dataset_list.append(ReflectometryDatasetHistory(ws, is_workspace_group_member(ws_name)))
 
         # Stitched datasets should be sorted to the end of the list
         dataset_list.sort(key=lambda refl_dataset: refl_dataset.is_stitched)
         return dataset_list
 
-    def _create_orso_dataset(self, refl_dataset: ReflectometryDataset) -> MantidORSODataset:
+    def _create_orso_dataset(self, refl_dataset: ReflectometryDatasetHistory) -> MantidORSODataset:
         data_columns = self._create_data_columns(refl_dataset)
         dataset = self._create_dataset_with_mandatory_header(data_columns, refl_dataset)
         if dataset.dataset is None:
@@ -577,7 +615,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         self._add_optional_header_info(dataset, refl_dataset)
         return dataset
 
-    def _create_data_columns(self, refl_dataset: ReflectometryDataset) -> MantidORSODataColumns:
+    def _create_data_columns(self, refl_dataset: ReflectometryDatasetHistory) -> MantidORSODataColumns:
         """
         Set up the column headers and data values
         """
@@ -613,16 +651,16 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         return data_columns
 
-    def _convert_from_q_to_wavelength(self, refl_dataset: ReflectometryDataset, q_data: np.ndarray) -> np.ndarray:
+    def _convert_from_q_to_wavelength(self, refl_dataset: ReflectometryDatasetHistory, q_data: np.ndarray) -> np.ndarray:
         conversion_method = refl_dataset.q_conversion_method
 
         # The method to convert back to wavelength depends on which method was used to perform the conversion to Q
         match conversion_method:
-            case ReflectometryDataset.REF_ROI_ALG:
+            case ReflectometryDatasetHistory.REF_ROI_ALG:
                 return 4 * np.pi * np.sin(np.radians(refl_dataset.q_conversion_theta)) / q_data
-            case ReflectometryDataset.CONVERT_ALG:
+            case ReflectometryDatasetHistory.CONVERT_ALG:
                 alg = self.createChildAlgorithm(
-                    ReflectometryDataset.CONVERT_ALG,
+                    ReflectometryDatasetHistory.CONVERT_ALG,
                     InputWorkspace=refl_dataset.ws,
                     Target="Wavelength",
                     AlignBins=False,
@@ -646,7 +684,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     def _create_dataset_with_mandatory_header(
         self,
         data_columns: MantidORSODataColumns,
-        refl_dataset: ReflectometryDataset,
+        refl_dataset: ReflectometryDatasetHistory,
     ) -> MantidORSODataset:
         """
         Create a dataset with the data columns and the mandatory information populated in the header
@@ -663,7 +701,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             validate=self.getProperty(Prop.VALIDATION).value,
         )
 
-    def _add_optional_header_info(self, dataset: MantidORSODataset, refl_dataset: ReflectometryDataset) -> None:
+    def _add_optional_header_info(self, dataset: MantidORSODataset, refl_dataset: ReflectometryDatasetHistory) -> None:
         """
         Populate the non_mandatory information in the header
         """
@@ -678,7 +716,8 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         if not refl_dataset.reduction_workflow_histories:
             self.log().debug(
-                f"Unable to find history for {ReflectometryDataset.REDUCTION_WORKFLOW_ALG} - some metadata will be excluded from the file."
+                f"Unable to find history for {ReflectometryDatasetHistory.REDUCTION_WORKFLOW_ALG}"
+                "- some metadata will be excluded from the file."
             )
             return
 
@@ -713,7 +752,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 return rb_num, f"{self._ISIS_DOI_PREFIX}{rb_num}"
         return None, None
 
-    def _get_resolution(self, refl_dataset: ReflectometryDataset) -> Optional[float]:
+    def _get_resolution(self, refl_dataset: ReflectometryDatasetHistory) -> Optional[float]:
         if not self.getProperty(Prop.WRITE_RESOLUTION).value and not self.getProperty(Prop.INCLUDE_EXTRA_COLS).value:
             return None
         return refl_dataset.resolution
