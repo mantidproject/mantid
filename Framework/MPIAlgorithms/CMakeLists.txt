@@ -39,9 +39,9 @@ if(MPI_BUILD)
   )
   # Add the unit tests directory
   add_subdirectory(test)
-  # libMantidMPIAlgorithms.so is always built so documentation for the algorithms can be built
-  mtd_install_targets(TARGETS MPIAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
 endif()
+# libMantidMPIAlgorithms.so is always built so documentation for the algorithms can be built
+mtd_install_targets(TARGETS MPIAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
 
 target_include_directories(
   MPIAlgorithms
