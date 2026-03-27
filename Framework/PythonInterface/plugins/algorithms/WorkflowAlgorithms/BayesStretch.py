@@ -210,7 +210,7 @@ class BayesStretch(PythonAlgorithm):
         workflow_prog.report("Creating OutputWorkspace")
 
         if not self.getProperty("OutputWorkspaceFit").isDefault:
-            # append the backend name i.e. QuickBayes or QuasiElasticBayes to individual ws names
+            # include the backend name i.e. QuickBayes or QuasiElasticBayes to individual ws names
             backendName = self.getPropertyValue("OutputWorkspaceFit").split("_")[-1]
             sigma_ws_name = f"{fname}_{backendName}_Sigma"
             beta_ws_name = f"{fname}_{backendName}_Beta"
