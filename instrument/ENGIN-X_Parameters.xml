@@ -19,6 +19,16 @@ the create a distinct ENTITY for each bank-->
     <!ENTITY PVsigma_0_sq "388.24">
     <!ENTITY PVsigma_1_sq "76.865">
     <!ENTITY PVsigma_2_sq "43.299">
+    <!ENTITY IC_Alpha0     "0.010417">
+    <!ENTITY IC_Alpha1     "1.000000">
+    <!ENTITY IC_Beta0      "70.893046">
+    <!ENTITY IC_Kappa      "17.801942">
+    <!ENTITY ICSigma0_sq   "8.202973">
+    <!ENTITY ICSigma1_sq   "404.142510">
+    <!ENTITY ICSigma2_sq   "-27.028712">
+    <!ENTITY ICGamma0      "26.668804">
+    <!ENTITY ICGamma1      "-31.753649">
+    <!ENTITY ICGamma2      "9.450218">
 ]>
 
 <parameter-file instrument="ENGIN-X" valid-from="2020-10-23">
@@ -134,6 +144,32 @@ the create a distinct ENTITY for each bank-->
   <!-- Specify the axis of the collimator, default is assumed pointing upwards -->
   <parameter name="col-axis" type="string">
     <value val="0,1,0"/>
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+  <formula eq="(&IC_Alpha0;)" unit="dSpacing" result-unit="TOF"/>
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+    <formula eq="(&IC_Alpha1;)" unit="dSpacing" result-unit="TOF"/>
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+    <formula eq="(&IC_Beta0;)" unit="dSpacing" result-unit="TOF"/>
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Kappa" type="fitting">
+    <formula eq="(&IC_Kappa;)" unit="dSpacing" result-unit=""/>
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+    <formula eq="(&ICSigma2_sq;)*centre^4 + (&ICSigma1_sq;)*centre^2 + (&ICSigma0_sq;)"
+             unit="dSpacing" result-unit="TOF^2" />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+    <formula eq="(&ICGamma2;)*centre^2 + (&ICGamma1;)*centre + (&ICGamma0;)"
+             unit="dSpacing" result-unit="TOF" />
   </parameter>
 
 </component-link>

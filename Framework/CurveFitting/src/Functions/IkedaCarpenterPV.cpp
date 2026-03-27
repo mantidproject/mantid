@@ -384,6 +384,10 @@ void IkedaCarpenterPV::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorks
                                           double startX, double endX) {
   IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
 
+  // Invalidate cached wavelengths so they are recalculated on the next
+  // function evaluation using the newly-set workspace and workspace index.
+  m_waveLength.clear();
+
   if (workspace) {
     // Scale all time-dependent IC parameters so the function evaluates
     // correctly in non-TOF workspaces (e.g. d-spacing, wavelength).
