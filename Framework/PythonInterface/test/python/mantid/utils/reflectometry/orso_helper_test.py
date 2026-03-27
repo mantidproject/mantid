@@ -245,9 +245,8 @@ class MantidORSODatasetTest(unittest.TestCase):
     def test_create_mandatory_header_raises_error(self):
         model_def = ["air | Ni 100 | SiO2 0.5 | 02", "air | 25 [ Si 7 | Fe 7 ] | Si", "Si | SiO2 0.5 | wat:er"]
         for model in model_def:
-            with self.assertRaises(ValueError) as context:
+            with self.assertRaisesRegex(ValueError, "Please check that the string follows the correct ORSO format."):
                 MantidORSODataset(None, None, None, None, None, None, None, model=model)
-                self.assertIn("Please check that the string follows the correct ORSO format.", str(context.exception))
 
     def test_set_facility_on_mantid_orso_dataset(self):
         dataset = self._create_test_dataset()
