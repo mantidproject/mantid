@@ -20,8 +20,8 @@ class GenerateFlatCellWorkspaceLOQTest(systemtesting.MantidSystemTest):
         GenerateFlatCellWorkspaceLOQ(InputWorkspace="input", OutputWorkspace="output")
 
         # Load the output data and save into a workspace
-        LoadNexus(Filename="GenerateFlatCellWorkspaceLOQOutput.nxs", OutputWorkspace="expected_output")
-        LoadNexus(Filename="GenerateFlatCellWorkspaceLOQMASK.nxs", OutputWorkspace="expected_mask")
+        LoadNexus(Filename="GenerateFlatCellWorkspaceLOQExpectedOutput.nxs", OutputWorkspace="expected_output")
+        LoadNexus(Filename="GenerateFlatCellWorkspaceLOQExpectedMask.nxs", OutputWorkspace="expected_mask")
 
         # Compare the mask workspaces
         result, _ = CompareWorkspaces("output_MASK", "expected_mask")
