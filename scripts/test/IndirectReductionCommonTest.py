@@ -13,6 +13,8 @@ from IndirectReductionCommon import (
     create_grouping_string,
     create_grouping_workspace,
     create_range_string,
+    group_spectra_by_theta,
+    group_spectra_of,
     _excluded_detector_ids,
     _get_x_range_when_bins_vary,
 )
@@ -72,6 +74,61 @@ class IndirectReductionCommonTest(unittest.TestCase):
 
         self.assertEquals(50100.00, x_min)
         self.assertEquals(70100.00, x_max)
+
+
+class GroupSpectraByThetaTest(unittest.TestCase):
+    """Tests for group_spectra_by_theta using OSIRIS silicon analyser data.
+
+    OSI100320_silicon_test.nxs is used with spectra_range=[1005, 2564] so that
+    spectrum numbers (starting at 1005) differ from workspace indices (0-based).
+    This is an explicit regression check for the bug where workspace indices
+    were passed as spectrum numbers to GroupDetectors.SpectraList, causing
+    "All list properties are empty, nothing to group".
+    """
+
+    _SPECTRA_MIN = 1005  # OSIRIS silicon analyser spectra-min (from IPF)
+    _SPECTRA_MAX = 2564  # OSIRIS silicon analyser spectra-max (from IPF)
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls._workspace = Load(Filename="OSI100320_silicon_test.nxs", StoreInADS=False)
+
+    def test_returns_requested_number_of_groups(self):
+        result = group_spectra_by_theta(self._workspace, number_of_groups=3, spectra_range=[self._SPECTRA_MIN, self._SPECTRA_MAX])
+        self.assertEqual(3, result.getNumberHistograms())
+
+    def test_single_group_combines_all_spectra_into_one(self):
+        result = group_spectra_by_theta(self._workspace, number_of_groups=1, spectra_range=[self._SPECTRA_MIN, self._SPECTRA_MAX])
+        self.assertEqual(1, result.getNumberHistograms())
+
+    def test_number_of_groups_does_not_exceed_requested_count(self):
+        # Empty theta bins are dropped, so output histograms <= number_of_groups
+        result = group_spectra_by_theta(self._workspace, number_of_groups=5, spectra_range=[self._SPECTRA_MIN, self._SPECTRA_MAX])
+        self.assertLessEqual(result.getNumberHistograms(), 5)
+
+    def test_raises_when_spectra_range_contains_no_valid_detectors(self):
+        with self.assertRaisesRegex(RuntimeError, "No valid detectors found"):
+            group_spectra_by_theta(self._workspace, number_of_groups=3, spectra_range=[99999, 99999])
+
+
+class GroupSpectraDetectorsTest(unittest.TestCase):
+    """Tests for the 'Detectors' grouping method in group_spectra_of."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls._si_workspace = Load(Filename="OSI100320_silicon_test.nxs", StoreInADS=False)
+        # Graphite workspace has no Workflow.DetectorsGroupingFile in its IPF
+        cls._pg_workspace = Load(Filename="OSI10203.raw", StoreInADS=False)
+
+    def test_groups_spectra_using_detectors_grouping_file(self):
+        # The SI workspace IPF defines Workflow.DetectorsGroupingFile pointing
+        # to OSIRIS_Si_Detectors_Grouping.xml
+        result = group_spectra_of(self._si_workspace, method="Detectors")
+        self.assertGreater(result.getNumberHistograms(), 0)
+
+    def test_raises_when_detectors_grouping_file_parameter_is_missing(self):
+        with self.assertRaisesRegex(RuntimeError, "Workflow.DetectorsGroupingFile"):
+            group_spectra_of(self._pg_workspace, method="Detectors")
 
 
 if __name__ == "__main__":
