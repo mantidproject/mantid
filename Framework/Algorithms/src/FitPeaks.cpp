@@ -1196,11 +1196,13 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       bkgdfunction->setParameter(i, 0.);
 
     double expected_peak_pos = expected_peak_centers[peak_index];
+    std::pair<double, double> peak_window_i = m_getPeakFitWindow(wi, peak_index);
 
     // clone peak function for each peak (need to do this so can
     // set center and calc any parameters from xml)
     auto peakfunction = std::dynamic_pointer_cast<API::IPeakFunction>(m_peakFunction->clone());
     peakfunction->setCentre(expected_peak_pos);
+    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window_i.first, peak_window_i.second);
 
     std::map<size_t, double> keep_values;
     for (size_t ipar = 0; ipar < peakfunction->nParams(); ++ipar) {
@@ -1269,8 +1271,6 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
     // reset center though - don't know before hand which element this is
     peakfunction->setCentre(expected_peak_pos);
 
-    std::pair<double, double> peak_window_i = m_getPeakFitWindow(wi, peak_index);
-    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window_i.first, peak_window_i.second);
     // reset value of parameters that were fixed (but are now free to vary)
     for (const auto &[ipar, value] : keep_values) {
       peakfunction->setParameter(ipar, value);
