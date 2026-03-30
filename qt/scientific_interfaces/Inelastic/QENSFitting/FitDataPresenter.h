@@ -32,7 +32,7 @@ public:
   virtual void handleUnifyClicked() = 0;
   virtual void handleCellChanged(int row, int column) = 0;
   virtual void handleADSDelete(const std::string &wsName) = 0;
-  virtual void handleADSRename(const std::string &newName, const std::string &oldName) = 0;
+  virtual void handleADSRename(const std::string &oldName, const std::string &newName) = 0;
   virtual void handleADSClear() = 0;
 };
 

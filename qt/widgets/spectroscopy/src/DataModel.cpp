@@ -134,7 +134,11 @@ std::string DataModel::getResolutionName(const WorkspaceID &wsID, const Workspac
 
 bool DataModel::setResolution(const std::string &resName, const std::string &wsName,
                               const FunctionModelSpectra &spectra) {
-  return setResolution(resName, getWorkspaceID(wsName), spectra);
+  const auto workspaceID = getWorkspaceID(wsName);
+  if (workspaceID.value >= getNumberOfWorkspaces().value) {
+    throw std::runtime_error("Workspace '" + wsName + "' not found in the model.");
+  }
+  return setResolution(resName, workspaceID, spectra);
 }
 
 bool DataModel::setResolution(const std::string &resName, WorkspaceID workspaceID,

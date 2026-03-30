@@ -435,7 +435,6 @@ void InelasticFitPropertyBrowser::updateFunctionBrowserData(
     m_templatePresenter->setResolution(fitResolutions);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     // Convolution Function may have tried to access non-existent ADS workspaces
-    m_functionBrowser->resetLocalParameters();
   }
 }
 

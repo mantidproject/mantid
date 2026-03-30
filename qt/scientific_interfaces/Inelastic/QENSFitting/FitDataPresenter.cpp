@@ -28,12 +28,13 @@ void FitDataPresenter::handleADSDelete(const std::string &wsName) {
   }
 }
 
-void FitDataPresenter::handleADSRename(const std::string &newName, const std::string &oldName) {
+void FitDataPresenter::handleADSRename(const std::string &oldName, const std::string &newName) {
   if (const auto removedNew = removeADSWorkspace(newName), removedOld = removeADSWorkspace(oldName);
       removedNew || removedOld) {
     updateTab();
     auto names = removedNew ? newName : "";
     names = removedOld ? names + " , " + oldName : names;
+    names = names.starts_with(",") ? names.substr(1) : names;
     displayWarning("Data " + names + " was removed from the ADS.");
   }
 }
@@ -267,11 +268,6 @@ void FitDataPresenter::handleUnifyClicked() {
     // check that there are selected indexes.
     return;
   }
-  for (const auto &index : selectedIndices) {
-    const auto &[wsId, wsIndex] = m_model->getSubIndices(index.row());
-    std::cout << "id " << wsId << " index" << wsIndex << std::endl;
-  }
-
   std::sort(selectedIndices.begin(), selectedIndices.end());
   auto fitRange = m_model->getFittingRange(FitDomainIndex(selectedIndices.begin()->row()));
   for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {

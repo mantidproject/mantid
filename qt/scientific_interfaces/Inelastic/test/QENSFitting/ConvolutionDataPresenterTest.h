@@ -94,21 +94,21 @@ public:
   }
 
   void test_setResolution_calls_to_model() {
-    ON_CALL(*m_model, setResolution("ResWs", "TestWS", FunctionModelSpectra("0-3"))).WillByDefault(Return(true));
-    EXPECT_CALL(*m_model, setResolution("ResWs", "TestWS", FunctionModelSpectra("0-3"))).Times(Exactly(1));
+    ON_CALL(*m_model, setResolution("ResWs", "TestWs", FunctionModelSpectra("0-3"))).WillByDefault(Return(true));
+    EXPECT_CALL(*m_model, setResolution("ResWs", "TestWs", FunctionModelSpectra("0-3"))).Times(Exactly(1));
     EXPECT_CALL(*m_model, removeSpecialValues("ResWs")).Times(Exactly(0));
     EXPECT_CALL(*m_view, displayWarning("Replaced the NaN's and infinities in ResWs with zeros")).Times(Exactly(0));
 
-    m_presenter->setResolution("ResWs", "TestWS", FunctionModelSpectra("0-3"));
+    m_presenter->setResolution("ResWs", "TestWs", FunctionModelSpectra("0-3"));
   }
 
   void test_setResolution_has_bad_values() {
-    ON_CALL(*m_model, setResolution("ResWs", "TestWS", FunctionModelSpectra("0-3"))).WillByDefault(Return(false));
-    EXPECT_CALL(*m_model, setResolution("ResWs", "TestWS", FunctionModelSpectra("0-3"))).Times(Exactly(1));
+    ON_CALL(*m_model, setResolution("ResWs", "TestWs", FunctionModelSpectra("0-3"))).WillByDefault(Return(false));
+    EXPECT_CALL(*m_model, setResolution("ResWs", "TestWs", FunctionModelSpectra("0-3"))).Times(Exactly(1));
     EXPECT_CALL(*m_model, removeSpecialValues("ResWs")).Times(Exactly(1));
     EXPECT_CALL(*m_view, displayWarning("Replaced the NaN's and infinities in ResWs with zeros")).Times(Exactly(1));
 
-    m_presenter->setResolution("ResWs", "TestWS", FunctionModelSpectra("0-3"));
+    m_presenter->setResolution("ResWs", "TestWs", FunctionModelSpectra("0-3"));
   }
 
   void test_updateTableFromModel_clears_table_and_adds_new_row_for_each_entry() {

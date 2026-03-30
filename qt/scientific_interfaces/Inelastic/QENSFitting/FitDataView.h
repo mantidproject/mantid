@@ -49,7 +49,7 @@ public:
   void displayWarning(const std::string &warning) override;
   void clearHandle() override;
   void deleteHandle(const std::string &name, const Workspace_sptr &ws) override;
-  void renameHandle(const std::string &newName, const std::string &oldName) override;
+  void renameHandle(const std::string &oldName, const std::string &newName) override;
 
 protected slots:
   void notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog);
@@ -70,7 +70,7 @@ private slots:
   void notifyUnifyClicked();
   void notifyCellChanged(int row, int column);
   void notifyADSDelete(const std::string &wsName) const;
-  void notifyADSRename(const std::string &newName, const std::string &oldName) const;
+  void notifyADSRename(const std::string &oldName, const std::string &newName) const;
   void notifyADSClear() const;
 
 private:

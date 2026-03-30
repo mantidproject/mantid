@@ -58,7 +58,7 @@ FitDataView::~FitDataView() {
 
 void FitDataView::clearHandle() { QMetaObject::invokeMethod(this, "notifyADSClear", Qt::AutoConnection); }
 
-void FitDataView::renameHandle(const std::string &newName, const std::string &oldName) {
+void FitDataView::renameHandle(const std::string &oldName, const std::string &newName) {
   QMetaObject::invokeMethod(this, "notifyADSRename", Qt::AutoConnection, Q_ARG(const std::string &, newName),
                             Q_ARG(const std::string &, oldName));
 }
@@ -72,8 +72,8 @@ void FitDataView::notifyADSClear() const { m_presenter->handleADSClear(); }
 
 void FitDataView::notifyADSDelete(const std::string &wsName) const { m_presenter->handleADSDelete(wsName); }
 
-void FitDataView::notifyADSRename(const std::string &newName, const std::string &oldName) const {
-  m_presenter->handleADSRename(newName, oldName);
+void FitDataView::notifyADSRename(const std::string &oldName, const std::string &newName) const {
+  m_presenter->handleADSRename(oldName, newName);
 }
 
 void FitDataView::subscribePresenter(IFitDataPresenter *presenter) { m_presenter = presenter; }
