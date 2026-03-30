@@ -173,7 +173,9 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(
             name="GroupingMethod",
             defaultValue="IPF",
-            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
+            validator=StringListValidator(
+                ["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups", "Detectors", "ThetaGroups"]
+            ),
             doc="The method used to group detectors.",
         )
         self.declareProperty(
