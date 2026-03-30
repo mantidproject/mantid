@@ -23,6 +23,7 @@ from pyvistaqt import BackgroundPlotter
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation
 from typing import Callable, Optional
+from vtkmodules.vtkRenderingCore import vtkCellPicker
 
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.renderers.base_renderer import InstrumentRenderer
@@ -38,7 +39,7 @@ class ShapeRenderer(InstrumentRenderer):
     """
 
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
-    _PICKING_TOLERANCE = 0.001
+    _PICKING_TOLERANCE = 0.0001
 
     def __init__(self):
         # Populated by ``precompute``.
@@ -220,14 +221,6 @@ class ShapeRenderer(InstrumentRenderer):
         if plotter.off_screen:
             return
 
-        if not is_projection:
-            plotter.enable_trackball_style()
-            return
-
-        plotter.view_xy()
-        plotter.enable_parallel_projection()
-        plotter.enable_zoom_style()
-
     def add_pickable_mesh_to_plotter(self, plotter: BackgroundPlotter, mesh: pv.PolyData, scalars) -> None:
         if mesh.number_of_cells == 0:
             return
@@ -258,31 +251,33 @@ class ShapeRenderer(InstrumentRenderer):
         )
 
     def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None]) -> None:
-        """Set up cell picking on the shape surface.  *callback* receives ``(detector_index: int)``."""
+        """Set up left-click cell picking on the shape surface.  *callback* receives ``(detector_index: int)``."""
         plotter.disable_picking()
 
         if plotter.off_screen:
             return
 
         c2d = self._cell_to_detector
+        picker = vtkCellPicker()
+        picker.SetTolerance(self._PICKING_TOLERANCE)
+        interactor = plotter.iren
 
-        def _cell_picked(point_position, picker):
-            if point_position is None:
+        def _on_left_button_press(obj, event):
+            """Handle left mouse button press for picking."""
+            if c2d is None:
                 return
-            cell_id = picker.GetCellId()
-            if cell_id < 0 or c2d is None:
-                return
-            callback(int(c2d[cell_id]))
+            # Get the current mouse position from the interactor
+            x, y = interactor.get_event_position()
+            # Perform the pick operation
+            pick_result = picker.Pick(x, y, 0, plotter.renderer)
+            if pick_result > 0:
+                # Get the picked cell ID
+                cell_id = picker.GetCellId()
+                if cell_id >= 0:
+                    callback(int(c2d[cell_id]))
 
-        plotter.enable_surface_point_picking(
-            show_message=False,
-            use_picker=True,
-            callback=_cell_picked,
-            show_point=False,
-            pickable_window=False,
-            picker="cell",
-            tolerance=self._PICKING_TOLERANCE,
-        )
+        # Register callback for left button press
+        plotter.iren.style.AddObserver("LeftButtonPressEvent", _on_left_button_press)
 
     def set_detector_scalars(self, mesh: pv.PolyData, counts: np.ndarray, label: str) -> None:
         if self._cell_to_detector is not None and len(counts) > 0:

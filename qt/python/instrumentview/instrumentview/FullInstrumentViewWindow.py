@@ -34,8 +34,6 @@ from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.widgets import Cursor
-from pyvista.plotting.picking import RectangleSelection
-from pyvista.plotting.opts import PickerType
 from vtkmodules.vtkCommonDataModel import vtkBox, vtkCylinder, vtkImplicitFunction
 from vtkmodules.vtkInteractionWidgets import (
     vtkImplicitCylinderRepresentation,
@@ -52,7 +50,6 @@ from mantidqt.utils.qt.qappthreadcall import run_on_qapp_thread
 from mantidqt.io import open_a_file_dialog
 
 from instrumentview.Detectors import DetectorInfo
-from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.Globals import CurrentTab
 from instrumentview.ComponentTreeView import ComponentTreeView
@@ -332,7 +329,6 @@ class FullInstrumentViewWindow(QMainWindow):
         component_layout.addWidget(self.component_tree)
         tab_widget.addTab(component_tree_tab, "Component Tree")
 
-        self.interactor_style = CustomInteractorStyleZoomAndSelect()
         self._overlay_meshes = []
         self._lineplot_overlays = []
 
@@ -344,8 +340,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self.move(window_geometry.topLeft())
 
         self._current_widget = None
-        self._projection_camera_map = {}
-        self._parallel_scales = {}
+        self._default_camera_position_map = {}
+        self._default_parallel_scales = {}
+        self._last_selected_projection = None
+        self._last_camera_position = None
+        self._last_parallel_scale = None
 
         UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
 
@@ -384,22 +383,34 @@ class FullInstrumentViewWindow(QMainWindow):
     def hide_status_box(self) -> None:
         self.status_group_box.hide()
 
+    def cache_current_camera_position(self) -> None:
+        self._last_camera_position = self.main_plotter.camera_position
+        self._last_parallel_scale = self.main_plotter.parallel_scale
+
+    def cache_current_selected_projection(self) -> None:
+        self._last_selected_projection = self.current_selected_projection()
+
+    def set_camera_to_cached_state(self) -> None:
+        if self._last_selected_projection == self.current_selected_projection():
+            self.main_plotter.camera_position = self._last_camera_position
+            self.main_plotter.camera.parallel_scale = self._last_parallel_scale
+
+    def cache_default_camera_position(self) -> None:
+        self.main_plotter.reset_camera()
+        self._default_camera_position_map[self.current_selected_projection()] = self.main_plotter.camera_position
+        self._default_parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
+
     def reset_camera(self) -> None:
         if self._off_screen:
             return
 
-        if self.current_selected_projection() in self._projection_camera_map.keys():
-            self.main_plotter.camera_position = self._projection_camera_map[self.current_selected_projection()]
-            self.main_plotter.camera.parallel_scale = self._parallel_scales[self.current_selected_projection()]
+        if self.current_selected_projection() in self._default_camera_position_map.keys():
+            self.main_plotter.camera_position = self._default_camera_position_map[self.current_selected_projection()]
+            self.main_plotter.camera.parallel_scale = self._default_parallel_scales[self.current_selected_projection()]
         else:
             # Apply default position, in case cache not available
             self.main_plotter.reset_camera()
         return
-
-    def cache_camera_position(self) -> None:
-        self.main_plotter.reset_camera()
-        self._projection_camera_map[self.current_selected_projection()] = self.main_plotter.camera_position
-        self._parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
 
     def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider, QPushButton]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
@@ -896,45 +907,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
         self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, pickable=False, render_points_as_spheres=True, point_size=10)
-
-    def enable_point_picking(self, is_projection: bool, callback: Callable) -> None:
-        """Switch on point picking, i.e. picking a single point with right-click"""
-        self.main_plotter.disable_picking()
-        # NOTE: Need to remove interactor to avoid artifacts in 2D or 3D
-        self.interactor_style.remove_interactor()
-        picking_tolerance = 0.01
-        if not self.main_plotter.off_screen:
-            if is_projection:
-                self.main_plotter.enable_zoom_style()
-            else:
-                self.main_plotter.enable_trackball_style()
-            self.main_plotter.enable_surface_point_picking(
-                show_message=False,
-                use_picker=True,
-                callback=callback,
-                show_point=False,
-                pickable_window=False,
-                picker="point",
-                tolerance=picking_tolerance,
-            )
-
-    def enable_rectangle_picking(self, is_projection: bool, callback: Callable) -> None:
-        """Switch on rectangle picking, i.e. draw a rectangle to select all detectors within the rectangle"""
-        self.main_plotter.disable_picking()
-
-        if not self.main_plotter.off_screen:
-            if is_projection:
-                self.interactor_style.set_interactor(self.main_plotter.iren.interactor)
-                self.main_plotter.iren.style = self.interactor_style
-            else:
-                self.main_plotter.iren.style = CustomInteractorStyleRubberBand3D()
-
-            def _end_pick_helper(picker, *_):
-                callback(RectangleSelection(frustum=picker.GetFrustum(), viewport=(-1, -1, -1, -1)))
-
-            self.main_plotter.iren.picker = PickerType.RENDERED
-            self.main_plotter.iren.add_pick_observer(_end_pick_helper)
-            self.main_plotter._picker_in_use = True
 
     def show_axes(self) -> None:
         """Show axes on the main plotter"""
