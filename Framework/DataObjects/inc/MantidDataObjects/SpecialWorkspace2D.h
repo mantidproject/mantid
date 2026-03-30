@@ -33,6 +33,7 @@ public:
   SpecialWorkspace2D() = default;
   SpecialWorkspace2D(const Geometry::Instrument_const_sptr &inst, const bool includeMonitors = false);
   SpecialWorkspace2D(const API::MatrixWorkspace_const_sptr &parent);
+  SpecialWorkspace2D(const std::vector<detid_t> &detids);
 
   /// Returns a clone of the workspace
   std::unique_ptr<SpecialWorkspace2D> clone() const { return std::unique_ptr<SpecialWorkspace2D>(doClone()); }
