@@ -101,23 +101,14 @@ void QtPreviewDockedWidgets::onEditROIClicked() const { m_notifyee->notifyEditRO
 void QtPreviewDockedWidgets::onYAxisSymlogToggled(bool checked) const {
   m_ui.linthresh_container->setVisible(checked);
   onLineEditUpdated();
-  m_notifyee->notifySetYAxisSymlogChanged(checked);
+  m_notifyee->notifySetYAxisSymlogChanged();
 }
 
 void QtPreviewDockedWidgets::onLineEditUpdated() const {
   m_ui.apply_button->setEnabled(!m_ui.linthresh_line_edit->text().isEmpty());
 }
-void QtPreviewDockedWidgets::setLinthreshold() const { onApplyButtonClicked(); }
 
-void QtPreviewDockedWidgets::onApplyButtonClicked() const {
-  bool ok = false;
-  double linthresh = m_ui.linthresh_line_edit->text().toDouble(&ok);
-  if (ok && linthresh > 0.0) {
-    m_notifyee->notifySetLinthreshChanged(linthresh);
-  } else {
-    m_notifyee->notifySetLinthreshChanged(1e-4);
-  }
-}
+void QtPreviewDockedWidgets::onApplyButtonClicked() const { m_notifyee->notifySetYAxisSymlogChanged(); }
 
 void QtPreviewDockedWidgets::onAddRectangularROIClicked(QAction *regionType) const {
   m_ui.rs_rect_select_button->setDefaultAction(regionType);
@@ -178,6 +169,18 @@ void QtPreviewDockedWidgets::setInstViewToolbarEnabled(bool enable) {
   m_ui.iv_zoom_button->setEnabled(enable);
   m_ui.iv_edit_button->setEnabled(enable);
   m_ui.iv_rect_select_button->setEnabled(enable);
+}
+
+bool QtPreviewDockedWidgets::getSymlogEnabled() const { return m_ui.set_yaxis_symlog_checkbox->isChecked(); }
+
+double QtPreviewDockedWidgets::getLinthresh() const {
+  bool ok = false;
+  double linthresh = m_ui.linthresh_line_edit->text().toDouble(&ok);
+  if (ok && linthresh > 0.0) {
+    return linthresh;
+  } else {
+    return 1e-4;
+  }
 }
 
 void QtPreviewDockedWidgets::setRegionSelectorEnabled(bool enable) { m_ui.rs_dock_content->setEnabled(enable); }

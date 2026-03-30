@@ -35,8 +35,7 @@ public:
 
   virtual void notifyEditROIModeRequested() = 0;
   virtual void notifyRectangularROIModeRequested() = 0;
-  virtual void notifySetYAxisSymlogChanged(bool checked) = 0;
-  virtual void notifySetLinthreshChanged(double linthresh) = 0;
+  virtual void notifySetYAxisSymlogChanged() = 0;
 };
 
 class IPreviewDockedWidgets {
@@ -60,10 +59,11 @@ public:
   // Region selector toolbar
   virtual void setEditROIState(bool state) = 0;
   virtual void setRectangularROIState(bool state) = 0;
-  virtual void setLinthreshold() const = 0;
 
   virtual std::vector<size_t> getSelectedDetectors() const = 0;
   virtual std::string getRegionType() const = 0;
+  virtual double getLinthresh() const = 0;
+  virtual bool getSymlogEnabled() const = 0;
 
   virtual QLayout *getRegionSelectorLayout() const = 0;
   virtual MantidQt::MantidWidgets::IPlotView *getLinePlotView() const = 0;

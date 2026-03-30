@@ -79,8 +79,7 @@ public:
 
   void notifyEditROIModeRequested() override;
   void notifyRectangularROIModeRequested() override;
-  void notifySetYAxisSymlogChanged(bool checked) override;
-  void notifySetLinthreshChanged(double linthresh) override;
+  void notifySetYAxisSymlogChanged() override;
 
   void notifyApplyRequested() override;
 
@@ -124,7 +123,6 @@ private:
   void clearReductionPlot();
   bool isRegionSelectionChanged();
   bool isRegionChanged(ROIType type);
-  void updatePlotAxes(bool checked);
-  void updateLinthresh(double linthresh);
+  void updatePlotAxes();
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

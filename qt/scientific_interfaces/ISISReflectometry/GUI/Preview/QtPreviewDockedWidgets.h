@@ -52,10 +52,11 @@ public:
   // Region selector toolbar
   void setEditROIState(bool state) override;
   void setRectangularROIState(bool state) override;
-  void setLinthreshold() const override;
 
   std::vector<size_t> getSelectedDetectors() const override;
   std::string getRegionType() const override;
+  double getLinthresh() const override;
+  bool getSymlogEnabled() const override;
 
   QLayout *getRegionSelectorLayout() const override;
   MantidQt::MantidWidgets::IPlotView *getLinePlotView() const override;

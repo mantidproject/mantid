@@ -76,9 +76,7 @@ void PreviewPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState()
 
 void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
 
-void PreviewPresenter::notifySetYAxisSymlogChanged(bool checked) { updatePlotAxes(checked); }
-
-void PreviewPresenter::notifySetLinthreshChanged(double linthresh) { updateLinthresh(linthresh); }
+void PreviewPresenter::notifySetYAxisSymlogChanged() { updatePlotAxes(); }
 
 void PreviewPresenter::updateWidgetEnabledState() {
   if (m_mainPresenter->isProcessing() || m_mainPresenter->isAutoreducing()) {
@@ -88,18 +86,16 @@ void PreviewPresenter::updateWidgetEnabledState() {
   }
 }
 
-void PreviewPresenter::updatePlotAxes(bool checked) {
+void PreviewPresenter::updatePlotAxes() {
+  bool checked = m_dockedWidgets->getSymlogEnabled();
   if (checked) {
-    m_dockedWidgets->setLinthreshold();
+    double linthresh = m_dockedWidgets->getLinthresh();
+    m_plotPresenter->setScaleSymLog(AxisID::YLeft, linthresh);
     m_plotPresenter->setAxisLimit(AxisID::YLeft, -1e-5, 2.0);
   } else {
     m_plotPresenter->setScaleLog(AxisID::YLeft);
+    m_plotPresenter->setAxisLimit(AxisID::YLeft, 1e-5, 2.0);
   }
-  m_plotPresenter->plot();
-}
-
-void PreviewPresenter::updateLinthresh(double linthresh) {
-  m_plotPresenter->setScaleSymLog(AxisID::YLeft, linthresh);
   m_plotPresenter->plot();
 }
 
