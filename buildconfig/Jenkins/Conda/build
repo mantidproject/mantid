@@ -41,7 +41,8 @@ if [[ ${JOB_NAME} == *pull_requests* ]]; then
     EXTRA_CMAKE_FLAGS+=" -DPR_JOB=True"
 fi
 
-if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
+# MPI library is needed for some system tests and doc tests
+if [[ $ENABLE_SYSTEM_TESTS == true || $ENABLE_DOCS == true ]]; then
     EXTRA_CMAKE_FLAGS+=" -DMPI_BUILD=ON"
 fi
 

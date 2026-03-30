@@ -67,37 +67,6 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.add_simple_shape(mock_mesh, mock_colour, False)
         self._view.main_plotter.add_mesh.assert_called_once_with(mock_mesh, color=mock_colour, pickable=False)
 
-    def test_add_detector_mesh(self):
-        self._view.main_plotter.reset_mock()
-        mock_mesh = MagicMock()
-        mock_scalars = MagicMock()
-        self._view.add_detector_mesh(mock_mesh, False, mock_scalars)
-        self._view.main_plotter.add_mesh.assert_called_once_with(
-            mock_mesh,
-            pickable=False,
-            scalars=mock_scalars,
-            render_points_as_spheres=True,
-            point_size=15,
-            scalar_bar_args={"interactive": True, "vertical": False, "title_font_size": 15, "label_font_size": 12},
-        )
-
-    def test_add_pickable_mesh(self):
-        self._view.main_plotter.reset_mock()
-        mock_mesh = MagicMock()
-        mock_scalars = MagicMock()
-        self._view.add_pickable_mesh(mock_mesh, mock_scalars)
-        self._view.main_plotter.add_mesh.assert_called_once_with(
-            mock_mesh,
-            scalars=mock_scalars,
-            opacity=[0.0, 0.3],
-            clim=[0, 1],
-            show_scalar_bar=False,
-            pickable=True,
-            cmap="Oranges",
-            point_size=30,
-            render_points_as_spheres=True,
-        )
-
     def test_add_rgba_mesh(self):
         self._view.main_plotter.reset_mock()
         mock_mesh = MagicMock()
@@ -106,60 +75,6 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.main_plotter.add_mesh.assert_called_once_with(
             mock_mesh, scalars=mock_scalars, rgba=True, pickable=False, render_points_as_spheres=True, point_size=10
         )
-
-    def test_enable_point_picking(self):
-        self._view.main_plotter.reset_mock()
-        self._view.main_plotter.off_screen = False
-        mock_callback = MagicMock()
-        self._view.interactor_style = MagicMock()
-        self._view.enable_point_picking(False, mock_callback)
-        self._view.interactor_style.remove_interactor.assert_called_once()
-        self._view.main_plotter.disable_picking.assert_called_once()
-        self._view.main_plotter.enable_surface_point_picking.assert_called_once_with(
-            show_message=False,
-            use_picker=True,
-            callback=mock_callback,
-            show_point=False,
-            pickable_window=False,
-            picker="point",
-            tolerance=0.01,
-        )
-
-    def test_enable_point_picking_off_screen(self):
-        self._view.main_plotter.reset_mock()
-        self._view.main_plotter.off_screen = True
-        mock_callback = MagicMock()
-        self._view.interactor_style = MagicMock()
-        self._view.enable_point_picking(False, mock_callback)
-        self._view.main_plotter.disable_picking.assert_called_once()
-        self._view.interactor_style.remove_interactor.assert_called_once()
-        self._view.main_plotter.enable_surface_point_picking.assert_not_called()
-
-    @mock.patch("instrumentview.FullInstrumentViewWindow.CustomInteractorStyleRubberBand3D")
-    def test_enable_rectangle_picking_3d(self, mock_style_3d):
-        self._view.main_plotter.reset_mock()
-        self._view.main_plotter.off_screen = False
-        mock_callback = MagicMock()
-        self._view.enable_rectangle_picking(False, mock_callback)
-        self._view.main_plotter.disable_picking.assert_called_once()
-        mock_style_3d.assert_called_once()
-
-    def test_enable_rectangle_picking_2d(self):
-        self._view.main_plotter.reset_mock()
-        self._view.main_plotter.off_screen = False
-        self._view.interactor_style = MagicMock()
-        mock_callback = MagicMock()
-        self._view.enable_rectangle_picking(True, mock_callback)
-        self._view.main_plotter.disable_picking.assert_called_once()
-        self._view.interactor_style.set_interactor.assert_called_once()
-
-    def test_enable_rectangle_picking_off_screen(self):
-        self._view.main_plotter.reset_mock()
-        self._view.main_plotter.off_screen = True
-        mock_callback = MagicMock()
-        self._view.enable_rectangle_picking(False, mock_callback)
-        self._view.main_plotter.disable_picking.assert_called_once()
-        self._view.main_plotter.enable_rectangle_picking.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.QListWidgetItem")
     def test_refresh_peaks_ws_list(self, mock_qlist_widget_item):

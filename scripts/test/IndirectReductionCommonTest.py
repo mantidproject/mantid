@@ -72,8 +72,8 @@ class IndirectReductionCommonTest(unittest.TestCase):
 
         x_min, x_max = _get_x_range_when_bins_vary(self._workspace, grouping_workspace)
 
-        self.assertEquals(50100.00, x_min)
-        self.assertEquals(70100.00, x_max)
+        self.assertEqual(50100.00, x_min)
+        self.assertEqual(70100.00, x_max)
 
 
 class GroupSpectraByThetaTest(unittest.TestCase):

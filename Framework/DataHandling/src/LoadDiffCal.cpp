@@ -164,22 +164,32 @@ void LoadDiffCal::getInstrument(H5File &file) {
 
   g_log.debug() << "IDF : " << idf << "\n"
                 << "NAME: " << instrumentName << "\n";
-
   API::Algorithm_sptr childAlg = this->createChildAlgorithm("LoadInstrument", 0.0, 0.1);
   MatrixWorkspace_sptr tempWS(new Workspace2D());
   childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
-  if (idf.empty()) {
-    childAlg->setPropertyValue("InstrumentName", instrumentName);
-  } else {
-    childAlg->setPropertyValue("Filename", idf);
+  try {
+    if (idf.empty()) {
+      childAlg->setPropertyValue("InstrumentName", instrumentName);
+    } else {
+      childAlg->setPropertyValue("Filename", idf);
+    }
+    childAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
+    childAlg->executeAsChildAlg();
+    if (childAlg->isExecuted()) {
+      m_instrument = tempWS->getInstrument();
+
+      g_log.information() << "Loaded instrument \"" << m_instrument->getName() << "\" from \""
+                          << m_instrument->getFilename() << "\"\n";
+    } else {
+      g_log.debug("LoadInstrument child algorithm did not execute successfully. No instrument will be associated with "
+                  "the output workspaces.");
+      m_instrument = nullptr;
+    }
+  } catch (const std::exception &) {
+    g_log.debug("LoadInstrument child algorithm threw an exception. No instrument will be associated with the output "
+                "workspaces.");
+    m_instrument = nullptr;
   }
-  childAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
-  childAlg->executeAsChildAlg();
-
-  m_instrument = tempWS->getInstrument();
-
-  g_log.information() << "Loaded instrument \"" << m_instrument->getName() << "\" from \""
-                      << m_instrument->getFilename() << "\"\n";
 }
 
 void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &groups) {
@@ -198,7 +208,12 @@ void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids, cons
   size_t numDet = detids.size();
   Progress progress(this, .4, .6, numDet);
 
-  GroupingWorkspace_sptr wksp = std::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
+  GroupingWorkspace_sptr wksp{nullptr};
+  if (m_instrument) {
+    wksp = std::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
+  } else {
+    wksp = std::make_shared<DataObjects::GroupingWorkspace>(detids);
+  }
   wksp->setTitle(m_filename);
   wksp->mutableRun().addProperty("Filename", m_filename);
 
@@ -221,7 +236,12 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids, const st
   size_t numDet = detids.size();
   Progress progress(this, .6, .8, numDet);
 
-  MaskWorkspace_sptr wksp = std::make_shared<DataObjects::MaskWorkspace>(m_instrument);
+  MaskWorkspace_sptr wksp{nullptr};
+  if (m_instrument) {
+    wksp = std::make_shared<DataObjects::MaskWorkspace>(m_instrument);
+  } else {
+    wksp = std::make_shared<DataObjects::MaskWorkspace>(detids);
+  }
   wksp->setTitle(m_filename);
   wksp->mutableRun().addProperty("Filename", m_filename);
 
@@ -465,6 +485,7 @@ void LoadDiffCal::exec() {
   } catch (FileIException &) {
     throw FileError("Failed to open file using HDF5", m_filename);
   }
+  // try to get the instrument - this can leave the instrument as nullptr if anything goes wrong
   getInstrument(file);
 
   Progress progress(this, 0.1, 0.4, 8);

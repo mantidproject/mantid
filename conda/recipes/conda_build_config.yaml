@@ -20,7 +20,7 @@ c_stdlib_version:            # [linux]
   - '2.17.*'                 # [linux]
 
 python:
-  - '3.11.*'
+  - '3.12.*'
 
 # Aim to follow conda-forge
 libboost:
@@ -56,7 +56,7 @@ gtest:
   - '==1.17.0'
 
 jsoncpp:
-  - '>=1.9.4,<2'
+  - '>=1.9.4,<1.9.7'
 
 libglu:
   - '>=9.0'
@@ -79,7 +79,7 @@ matplotlib:
   - '3.9.*'
 
 mslice:
-  - '2.14.*'
+  - '2.15.*'
 
 ninja:
   - '>=1.10.2'
@@ -140,7 +140,7 @@ qtconsole:
   - '>5.5.0'
 
 qscintilla2:
-  - '2.13.*'
+  - '>=2.14.1'
 
 # 2.4.2 fails workbench.test_mainwindow.test_mainwindow which uses isinstance()
 qtpy:
@@ -169,11 +169,8 @@ gsl:
 libopenblas:
   - '==0.3.27'
 
-# currently pinning seekpath in mantid-developer and mantid to use v2.1.0 build 2
-# which does not require future https://github.com/conda-forge/seekpath-feedstock/pull/15/
-# please remove this comment and the pins in those recipes when euphonic and seekpath release new versions
 euphonic:
-  - '>=1.4.5,<2.0'
+  - '>=1.6.0,<2.0'
 
 librdkafka:
   - '>=1.6.0'

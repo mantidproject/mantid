@@ -287,8 +287,8 @@ QString SequentialFitDialog::getIndex(int row) const {
   QString wsIndex = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 3)).toString();
   QString range = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 4)).toString();
 
-  if (!isValidRangeFormat(range)) {
-    g_log.error() << "Invaild range please use the format start:end." << std::endl;
+  if (!range.isEmpty() && !isValidRangeFormat(range)) {
+    g_log.error() << "Invalid range. Please use the format start:end." << std::endl;
     return "";
   }
 

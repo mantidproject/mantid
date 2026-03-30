@@ -39,6 +39,11 @@ class Projection(ABC):
         self._calculate_detector_coordinates()
         self._find_and_correct_x_gap()
 
+    @property
+    def u_period(self) -> float:
+        """The period of the projection in the x direction, used to wrap points around when they are outside the x range."""
+        return self._u_period
+
     def _calculate_axes(self, root_position: np.ndarray) -> None:
         """The projection axis is specified, we calculate a 3D coordinate system based on that"""
         z = root_position.dot(self._projection_axis)
@@ -58,6 +63,11 @@ class Projection(ABC):
 
     @abstractmethod
     def _calculate_2d_coordinates(self) -> tuple[np.ndarray, np.ndarray]:
+        pass
+
+    @abstractmethod
+    def _calculate_2d_coordinates_from_relative_positions(self, detector_relative_positions: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Project detector-relative positions to 2D coordinates."""
         pass
 
     def _calculate_detector_coordinates(self) -> None:
@@ -101,12 +111,29 @@ class Projection(ABC):
         if self._u_period == 0:
             return
 
-        # Get view of x coordinates, can change in-place
-        x = self._detector_x_coordinates
+        self._apply_x_correction_to_values(self._detector_x_coordinates)
+
+    def _apply_x_correction_to_values(self, x_values: np.ndarray) -> np.ndarray:
+        """Shift x values into the current periodic x range and return corrected values."""
         x_min, x_max = self._x_range
 
-        x[x < x_min] += np.floor((x_max - x[x < x_min]) / self._u_period) * self._u_period
-        x[x > x_max] -= np.floor((x[x > x_max] - x_min) / self._u_period) * self._u_period
+        x_values[x_values < x_min] += np.floor((x_max - x_values[x_values < x_min]) / self._u_period) * self._u_period
+        x_values[x_values > x_max] -= np.floor((x_values[x_values > x_max] - x_min) / self._u_period) * self._u_period
+        return x_values
+
+    def project_points(self, points_3d: np.ndarray, apply_x_correction: bool = True) -> np.ndarray:
+        """Project world-space points to this projection's 2D coordinates."""
+        points = np.asarray(points_3d, dtype=np.float64)
+        if points.ndim == 1:
+            points = points[np.newaxis, :]
+
+        relative_positions = points - self._sample_position
+        x_coordinates, y_coordinates = self._calculate_2d_coordinates_from_relative_positions(relative_positions)
+
+        if apply_x_correction and self._u_period != 0 and self._x_range[1] != self._x_range[0]:
+            x_coordinates = self._apply_x_correction_to_values(x_coordinates.copy())
+
+        return np.column_stack([x_coordinates, y_coordinates])
 
     def coordinate_for_detector(self, detector_index: int) -> tuple[float, float]:
         return (self._detector_x_coordinates[detector_index], self._detector_y_coordinates[detector_index])

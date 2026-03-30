@@ -671,6 +671,7 @@ void PeaksWorkspace::saveNexus(Nexus::File *file) const {
   std::vector<double> intMNP(3 * np);
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
+  std::vector<double> monitorCount(np);
 
   // Populate column vectors from Peak Workspace
   size_t maxShapeJSONLength = 0;
@@ -717,6 +718,7 @@ void PeaksWorkspace::saveNexus(Nexus::File *file) const {
     if (shapeJSON.size() > maxShapeJSONLength) {
       maxShapeJSONLength = shapeJSON.size();
     }
+    monitorCount[i] = p.getMonitorCount();
   }
 
   // Start Peaks Workspace in Nexus File
@@ -878,6 +880,14 @@ void PeaksWorkspace::saveNexus(Nexus::File *file) const {
   file->putAttr("name", "IntMNP");
   file->putAttr("interpret_as", "A vector of 3 doubles");
   file->putAttr("units", "r.l.u.");
+  file->closeData();
+
+  // Monitor Count column
+  file->writeData("column_21", monitorCount);
+  file->openData("column_21");
+  file->putAttr("name", "Monitor Count");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known");
   file->closeData();
 
   // Goniometer Matrix Column

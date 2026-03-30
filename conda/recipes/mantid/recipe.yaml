@@ -75,8 +75,6 @@ requirements:
     - pyyaml ${{ pyyaml }}
     - scipy ${{ scipy }}
     - euphonic ${{ euphonic }}
-    # remove seekpath altogether once newer euphonic is released
-    - seekpath ==2.1.0 *2
     - toml ${{ toml }}
     - joblib
     - orsopy ${{ orsopy }}

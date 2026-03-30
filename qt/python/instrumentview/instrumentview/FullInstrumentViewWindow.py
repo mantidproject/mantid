@@ -34,8 +34,6 @@ from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.widgets import Cursor
-from pyvista.plotting.picking import RectangleSelection
-from pyvista.plotting.opts import PickerType
 from vtkmodules.vtkCommonDataModel import vtkBox, vtkCylinder, vtkImplicitFunction
 from vtkmodules.vtkInteractionWidgets import (
     vtkImplicitCylinderRepresentation,
@@ -52,7 +50,6 @@ from mantidqt.utils.qt.qappthreadcall import run_on_qapp_thread
 from mantidqt.io import open_a_file_dialog
 
 from instrumentview.Detectors import DetectorInfo
-from instrumentview.InteractorStyles import CustomInteractorStyleZoomAndSelect, CustomInteractorStyleRubberBand3D
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.Globals import CurrentTab
 from instrumentview.ComponentTreeView import ComponentTreeView
@@ -185,7 +182,9 @@ class FullInstrumentViewWindow(QMainWindow):
         )
 
         projection_group_box = QGroupBox("Projection")
-        projection_layout = QHBoxLayout(projection_group_box)
+        projection_layout = QVBoxLayout(projection_group_box)
+        projection_first_row = QHBoxLayout()
+        projection_second_row = QHBoxLayout()
         self._projection_combo_box = NoWheelComboBox(self)
         self._reset_projection = QPushButton("Reset Projection")
         self._reset_projection.setToolTip("Resets the projection to default.")
@@ -203,12 +202,27 @@ class FullInstrumentViewWindow(QMainWindow):
         self._show_monitors_check_box.setText("Show Monitors?")
         self._count_scale_combo_box = NoWheelComboBox(self)
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
-        projection_layout.addWidget(self._projection_combo_box)
-        projection_layout.addWidget(self._reset_projection)
-        projection_layout.addWidget(self._clear_point_picked_detectors)
-        projection_layout.addWidget(self._aspect_ratio_check_box)
-        projection_layout.addWidget(self._show_monitors_check_box)
-        projection_layout.addWidget(self._count_scale_combo_box)
+        self._flip_z_axis_check_box = QCheckBox()
+        self._flip_z_axis_check_box.setText("Flip Z Axis")
+        self._flip_z_axis_check_box.setToolTip(
+            "If checked, the Z axis will be flipped in 2D projections, mirroring the instrument along the beam axis."
+        )
+        self._show_shapes_check_box = QCheckBox()
+        self._show_shapes_check_box.setText("Draw Shapes")
+        self._show_shapes_check_box.setToolTip(
+            "If checked, detectors are drawn using their actual geometric shapes "
+            "(cuboids, cylinders, etc.) instead of points. May be slower for large instruments."
+        )
+        projection_first_row.addWidget(self._projection_combo_box)
+        projection_first_row.addWidget(self._reset_projection)
+        projection_first_row.addWidget(self._clear_point_picked_detectors)
+        projection_second_row.addWidget(self._aspect_ratio_check_box)
+        projection_second_row.addWidget(self._show_monitors_check_box)
+        projection_second_row.addWidget(self._count_scale_combo_box)
+        projection_second_row.addWidget(self._show_shapes_check_box)
+        projection_second_row.addWidget(self._flip_z_axis_check_box)
+        projection_layout.addLayout(projection_first_row)
+        projection_layout.addLayout(projection_second_row)
 
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
@@ -247,17 +261,26 @@ class FullInstrumentViewWindow(QMainWindow):
             self._save_roi_to_ws,
             self._save_grouping_to_ws,
             self._save_grouping_to_xml,
+            self._save_grouping_to_cal,
         ) = self._add_tab(selection_tab, "ROI")
         self._save_roi_to_ws.setText("Export ROI to ADS")
         self._save_grouping_to_ws.setText("Export Grouping to ADS")
         self._save_grouping_to_xml.setText("Save Grouping to XML")
+        self._save_grouping_to_cal.setText("Save Grouping to CAL")
 
         mask_tab = QWidget()
-        (self._add_mask, self._clear_masks, self._mask_list, self._save_mask_to_ws, self._save_mask_to_file, self._overwrite_mask) = (
-            self._add_tab(mask_tab, "Mask")
-        )
+        (
+            self._add_mask,
+            self._clear_masks,
+            self._mask_list,
+            self._save_mask_to_ws,
+            self._save_mask_to_xml,
+            self._save_mask_to_cal,
+            self._overwrite_mask,
+        ) = self._add_tab(mask_tab, "Mask")
         self._save_mask_to_ws.setText("Save Mask to ADS")
-        self._save_mask_to_file.setText("Save Mask to XML")
+        self._save_mask_to_xml.setText("Save Mask to XML")
+        self._save_mask_to_cal.setText("Save Mask to CAL")
         self._overwrite_mask.setText("Apply Mask Permanently")
 
         self._picking_masking_tab = QTabWidget()
@@ -306,7 +329,6 @@ class FullInstrumentViewWindow(QMainWindow):
         component_layout.addWidget(self.component_tree)
         tab_widget.addTab(component_tree_tab, "Component Tree")
 
-        self.interactor_style = CustomInteractorStyleZoomAndSelect()
         self._overlay_meshes = []
         self._lineplot_overlays = []
 
@@ -318,8 +340,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self.move(window_geometry.topLeft())
 
         self._current_widget = None
-        self._projection_camera_map = {}
-        self._parallel_scales = {}
+        self._default_camera_position_map = {}
+        self._default_parallel_scales = {}
+        self._last_selected_projection = None
+        self._last_camera_position = None
+        self._last_parallel_scale = None
 
         UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
 
@@ -337,8 +362,20 @@ class FullInstrumentViewWindow(QMainWindow):
     def enable_or_disable_aspect_ratio_box(self) -> None:
         self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
+    def is_flip_z_axis_checkbox_checked(self) -> bool:
+        return self._flip_z_axis_check_box.isChecked()
+
+    def enable_or_disable_flip_z_axis_box(self) -> None:
+        self._flip_z_axis_check_box.setDisabled(self.current_selected_projection() in [ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE])
+
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
+
+    def is_show_shapes_checkbox_checked(self) -> bool:
+        return self._show_shapes_check_box.isChecked()
+
+    def set_show_shapes_checkbox_enabled(self, enabled: bool) -> None:
+        self._show_shapes_check_box.setEnabled(enabled)
 
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
@@ -346,22 +383,34 @@ class FullInstrumentViewWindow(QMainWindow):
     def hide_status_box(self) -> None:
         self.status_group_box.hide()
 
+    def cache_current_camera_position(self) -> None:
+        self._last_camera_position = self.main_plotter.camera_position
+        self._last_parallel_scale = self.main_plotter.parallel_scale
+
+    def cache_current_selected_projection(self) -> None:
+        self._last_selected_projection = self.current_selected_projection()
+
+    def set_camera_to_cached_state(self) -> None:
+        if self._last_selected_projection == self.current_selected_projection():
+            self.main_plotter.camera_position = self._last_camera_position
+            self.main_plotter.camera.parallel_scale = self._last_parallel_scale
+
+    def cache_default_camera_position(self) -> None:
+        self.main_plotter.reset_camera()
+        self._default_camera_position_map[self.current_selected_projection()] = self.main_plotter.camera_position
+        self._default_parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
+
     def reset_camera(self) -> None:
         if self._off_screen:
             return
 
-        if self.current_selected_projection() in self._projection_camera_map.keys():
-            self.main_plotter.camera_position = self._projection_camera_map[self.current_selected_projection()]
-            self.main_plotter.camera.parallel_scale = self._parallel_scales[self.current_selected_projection()]
+        if self.current_selected_projection() in self._default_camera_position_map.keys():
+            self.main_plotter.camera_position = self._default_camera_position_map[self.current_selected_projection()]
+            self.main_plotter.camera.parallel_scale = self._default_parallel_scales[self.current_selected_projection()]
         else:
             # Apply default position, in case cache not available
             self.main_plotter.reset_camera()
         return
-
-    def cache_camera_position(self) -> None:
-        self.main_plotter.reset_camera()
-        self._projection_camera_map[self.current_selected_projection()] = self.main_plotter.camera_position
-        self._parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
 
     def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider, QPushButton]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
@@ -463,15 +512,17 @@ class FullInstrumentViewWindow(QMainWindow):
         item_list.setSelectionMode(QAbstractItemView.NoSelection)
         post_list_layout = QHBoxLayout()
         save_to_ws_btn = QPushButton()
-        save_to_file_btn = QPushButton()
+        save_to_xml_btn = QPushButton()
+        save_to_cal_btn = QPushButton()
         overwrite_btn = QPushButton()
         post_list_layout.addWidget(save_to_ws_btn)
-        post_list_layout.addWidget(save_to_file_btn)
+        post_list_layout.addWidget(save_to_xml_btn)
+        post_list_layout.addWidget(save_to_cal_btn)
         post_list_layout.addWidget(overwrite_btn)
         tab_layout.addLayout(pre_list_layout)
         tab_layout.addWidget(item_list)
         tab_layout.addLayout(post_list_layout)
-        return (add_item_btn, clear_items_btn, item_list, save_to_ws_btn, save_to_file_btn, overwrite_btn)
+        return (add_item_btn, clear_items_btn, item_list, save_to_ws_btn, save_to_xml_btn, save_to_cal_btn, overwrite_btn)
 
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
@@ -485,7 +536,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self.refresh_workspaces_in_list(CurrentTab.Grouping)
 
     def setup_connections_to_presenter(self) -> None:
-        self._projection_combo_box.currentIndexChanged.connect(self._presenter.update_plotter)
+        self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_changed)
         self._clear_point_picked_detectors.clicked.connect(self._presenter.on_clear_point_picked_detectors_clicked)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._contour_range_reset.clicked.connect(self._presenter.on_contour_range_reset_clicked)
@@ -498,11 +549,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self._mask_list.itemChanged.connect(partial(self._presenter.on_list_item_selected, CurrentTab.Masking))
         self._selection_list.itemChanged.connect(partial(self._presenter.on_list_item_selected, CurrentTab.Grouping))
         self._save_mask_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
-        self._save_mask_to_file.clicked.connect(self._presenter.on_save_mask_to_xml_clicked)
+        self._save_mask_to_xml.clicked.connect(self._presenter.on_save_mask_to_xml_clicked)
+        self._save_mask_to_cal.clicked.connect(self._presenter.on_save_mask_to_cal_clicked)
         self._overwrite_mask.clicked.connect(self._presenter.on_apply_permanently_clicked)
         self._save_roi_to_ws.clicked.connect(self._presenter.on_save_to_workspace_clicked)
         self._save_grouping_to_ws.clicked.connect(self._presenter.on_save_grouping_to_ads_clicked)
         self._save_grouping_to_xml.clicked.connect(self._presenter.on_save_grouping_to_xml_clicked)
+        self._save_grouping_to_cal.clicked.connect(self._presenter.on_save_grouping_to_cal_clicked)
         self._clear_masks.clicked.connect(self._presenter.on_clear_list_clicked)
         self._clear_selections.clicked.connect(self._presenter.on_clear_list_clicked)
         self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
@@ -511,6 +564,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._delete_all_selected_peaks_button.clicked.connect(self._presenter.on_delete_all_selected_peaks_clicked)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
+        self._flip_z_axis_check_box.clicked.connect(self._presenter.on_flip_z_axis_check_box_clicked)
+        self._show_shapes_check_box.clicked.connect(self._presenter.on_show_shapes_toggled)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -736,43 +791,6 @@ class FullInstrumentViewWindow(QMainWindow):
         self.delete_current_widget()
         self.main_plotter.clear()
 
-    def add_detector_mesh(self, mesh: PolyData, is_projection: bool, scalars=None) -> None:
-        """Draw the given mesh in the main plotter window"""
-        scalar_bar_args = dict(interactive=True, vertical=False, title_font_size=15, label_font_size=12) if scalars is not None else None
-        self.main_plotter.add_mesh(
-            mesh, pickable=False, scalars=scalars, render_points_as_spheres=True, point_size=15, scalar_bar_args=scalar_bar_args
-        )
-
-        if self.main_plotter.off_screen:
-            return
-
-        if not is_projection:
-            self.main_plotter.enable_trackball_style()
-            return
-
-        self.main_plotter.view_xy()
-        self.main_plotter.enable_parallel_projection()
-        self.main_plotter.enable_zoom_style()
-
-    def add_pickable_mesh(self, point_cloud: PolyData, scalars: np.ndarray | str) -> None:
-        self.main_plotter.add_mesh(
-            point_cloud,
-            scalars=scalars,
-            opacity=[0.0, 0.3],
-            clim=[0, 1],
-            show_scalar_bar=False,
-            pickable=True,
-            cmap="Oranges",
-            point_size=30,
-            render_points_as_spheres=True,
-        )
-
-    def add_masked_mesh(self, mesh: PolyData) -> None:
-        if mesh.number_of_points == 0:
-            return
-        # RGB for dark grey is (64, 64, 64), normalised is (0.25, 0.25, 0.25)
-        self.main_plotter.add_mesh(mesh, color=(0.25, 0.25, 0.25), pickable=False, render_points_as_spheres=True, point_size=15)
-
     def add_cylinder_widget(self) -> None:
         cylinder_repr = vtkImplicitCylinderRepresentation()
         cylinder_repr.SetOutlineTranslation(False)
@@ -889,45 +907,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
         self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, pickable=False, render_points_as_spheres=True, point_size=10)
-
-    def enable_point_picking(self, is_projection: bool, callback: Callable) -> None:
-        """Switch on point picking, i.e. picking a single point with right-click"""
-        self.main_plotter.disable_picking()
-        # NOTE: Need to remove interactor to avoid artifacts in 2D or 3D
-        self.interactor_style.remove_interactor()
-        picking_tolerance = 0.01
-        if not self.main_plotter.off_screen:
-            if is_projection:
-                self.main_plotter.enable_zoom_style()
-            else:
-                self.main_plotter.enable_trackball_style()
-            self.main_plotter.enable_surface_point_picking(
-                show_message=False,
-                use_picker=True,
-                callback=callback,
-                show_point=False,
-                pickable_window=False,
-                picker="point",
-                tolerance=picking_tolerance,
-            )
-
-    def enable_rectangle_picking(self, is_projection: bool, callback: Callable) -> None:
-        """Switch on rectangle picking, i.e. draw a rectangle to select all detectors within the rectangle"""
-        self.main_plotter.disable_picking()
-
-        if not self.main_plotter.off_screen:
-            if is_projection:
-                self.interactor_style.set_interactor(self.main_plotter.iren.interactor)
-                self.main_plotter.iren.style = self.interactor_style
-            else:
-                self.main_plotter.iren.style = CustomInteractorStyleRubberBand3D()
-
-            def _end_pick_helper(picker, *_):
-                callback(RectangleSelection(frustum=picker.GetFrustum(), viewport=(-1, -1, -1, -1)))
-
-            self.main_plotter.iren.picker = PickerType.RENDERED
-            self.main_plotter.iren.add_pick_observer(_end_pick_helper)
-            self.main_plotter._picker_in_use = True
 
     def show_axes(self) -> None:
         """Show axes on the main plotter"""
@@ -1092,14 +1071,11 @@ class FullInstrumentViewWindow(QMainWindow):
             self._lineplot_peak_cursor = None
             self._detector_figure_canvas.draw_idle()
 
-    def get_filename_from_dialog(self):
-        """
-        Open file dialog for saving xml files.
-        Needs to be in view to run in QThread.
-        """
+    def get_filename_from_dialog(self, file_filter: str):
+        # NOTE: Needs to be in view to run in main thread
         return open_a_file_dialog(
             accept_mode=QFileDialog.AcceptSave,
             file_mode=QFileDialog.AnyFile,
-            file_filter="XML files (*xml)",
+            file_filter=file_filter,
             directory=ConfigService["defaultsave.directory"],
         )
