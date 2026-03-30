@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import unittest
+from time import sleep
+import concurrent.futures
 from unittest import mock
 from mantid.kernel import version
 from datetime import datetime, timezone, date, time
@@ -247,6 +249,16 @@ class MantidORSODatasetTest(unittest.TestCase):
         for model in model_def:
             with self.assertRaisesRegex(ValueError, "Please check that the string follows the correct ORSO format."):
                 MantidORSODataset(None, None, None, None, None, None, None, model=model)
+
+    @mock.patch("mantid.utils.reflectometry.orso_helper.SampleModel")
+    def test_create_mandatory_header_raises_timeout_error(self, mock_sample_model):
+        def slow_resolve(*args, **kwargs):
+            sleep(10)
+
+        sample_model = mock_sample_model.return_value
+        sample_model.resolve_to_layers.side_effect = slow_resolve
+        with self.assertRaises(concurrent.futures.TimeoutError):
+            MantidORSODataset(None, None, None, None, None, None, None, model="model")
 
     def test_set_facility_on_mantid_orso_dataset(self):
         dataset = self._create_test_dataset()
