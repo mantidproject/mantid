@@ -65,7 +65,7 @@ Kernel::Logger g_log("InstrumentDefinitionParser");
 InstrumentDefinitionParser::InstrumentDefinitionParser()
     : m_xmlFile(std::make_shared<NullIDFObject>()), m_cacheFile(std::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false), m_deltaOffsets(false), m_angleConvertConst(1.0),
-      m_indirectPositions(false), m_cachingOption(NoneApplied) {
+      m_indirectPositions(false), m_mixedNeutronicPositions(false), m_cachingOption(NoneApplied) {
   initialise("", "", "", "");
 }
 //----------------------------------------------------------------------------------------------
@@ -1007,6 +1007,15 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
   // Any neutronic position tags will be ignored if this tag is missing
   if (defaults->getChildElement("indirect-neutronic-positions"))
     m_indirectPositions = true;
+
+  // Check if the IDF requests mixed-mode neutronic positions.
+  // When set, detectors without <neutronic> tags retain their physical
+  // positions instead of being removed from the instrument. This also
+  // implies indirect neutronic positions are enabled.
+  if (defaults->getChildElement("indirect-neutronic-positions-mixed")) {
+    m_indirectPositions = true;
+    m_mixedNeutronicPositions = true;
+  }
 
   /*
   Try to extract the reference frame information.
@@ -2605,10 +2614,20 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
     } else // We have a null Element*, which signals a detector with no
            // neutronic position
     {
-      // This should only happen for detectors
-      auto *det = dynamic_cast<Detector *>(component.first);
-      if (det)
-        m_instrument->removeDetector(det);
+      if (m_mixedNeutronicPositions) {
+        // Mixed mode: detector keeps its physical position in the neutronic
+        // instrument. This allows IDFs to define neutronic positions only
+        // for analysed detectors (e.g. silicon) while diffraction, graphite
+        // and monitor detectors remain at their physical locations.
+        g_log.debug() << "Component '" << component.first->getName()
+                      << "' has no <neutronic> tag; keeping physical position"
+                      << " (mixed-mode enabled).\n";
+      } else {
+        // Original behaviour: remove detectors without neutronic positions
+        auto *det = dynamic_cast<Detector *>(component.first);
+        if (det)
+          m_instrument->removeDetector(det);
+      }
     }
   }
 }
