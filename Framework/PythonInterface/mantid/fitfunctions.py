@@ -443,8 +443,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
                             self.pureAddition = a.pureAddition
                         if self.pureMultiplication:
                             self.pureMultiplication = a.pureMultiplication
-                    functionToAdd = FunctionFactory.createInitialized(a.fun.__str__())
-                    self.fun.add(functionToAdd)
+                    self.fun.add(a.fun)
         self.init_paramgeters_and_attributes(**kwargs)
 
     def getParameter(self, name):
