@@ -31,12 +31,12 @@ class ISISIndirectEnergyTransferTest(MantidSystemTest):
 class ISISIndirectEnergyTransferSiliconAnalyserTest(MantidSystemTest):
     def runTest(self):
         ISISIndirectEnergyTransfer(
-            InputFiles="OSI100320_15sim_silicon.nxs",
+            InputFiles="OSI100320_silicon_test.nxs",
             Instrument="OSIRIS",
             Analyser="silicon",
             Reflection="111",
             SpectraRange="1005,1019",
-            OutputWorkspace="OSI100320_15sim_silicon_002_Reduced",
+            OutputWorkspace="OSI100320_silicon_002_Reduced",
         )
 
     def validate(self):
