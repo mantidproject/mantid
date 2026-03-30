@@ -12,12 +12,10 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-static std::unordered_map<std::string, GroupingMethod> GROUPING_METHODS = {{"Individual", GroupingMethod::Individual},
-                                                                           {"All", GroupingMethod::All},
-                                                                           {"IPF", GroupingMethod::IPF},
-                                                                           {"File", GroupingMethod::File},
-                                                                           {"Groups", GroupingMethod::Groups},
-                                                                           {"Custom", GroupingMethod::Custom}};
+static std::unordered_map<std::string, GroupingMethod> GROUPING_METHODS = {
+    {"Individual", GroupingMethod::Individual},   {"All", GroupingMethod::All},      {"IPF", GroupingMethod::IPF},
+    {"Detectors", GroupingMethod::Detectors},     {"File", GroupingMethod::File},    {"Groups", GroupingMethod::Groups},
+    {"ThetaGroups", GroupingMethod::ThetaGroups}, {"Custom", GroupingMethod::Custom}};
 
 DetectorGroupingOptions::DetectorGroupingOptions(QWidget *parent) : QWidget(parent) {
   m_uiForm.setupUi(parent);
@@ -37,6 +35,33 @@ void DetectorGroupingOptions::removeGroupingMethod(std::string const &option) {
 
 void DetectorGroupingOptions::setGroupingMethod(std::string const &option) {
   m_uiForm.cbGroupingOptions->setCurrentIndex(optionIndex(option));
+}
+
+void DetectorGroupingOptions::setDetectorsGroupingVisible(bool visible) {
+  bool const isPresent = m_uiForm.cbGroupingOptions->findText("Detectors") >= 0;
+  if (visible && !isPresent) {
+    int const ipfIndex = m_uiForm.cbGroupingOptions->findText("IPF");
+    m_uiForm.cbGroupingOptions->insertItem(ipfIndex + 1, "Detectors");
+  } else if (!visible && isPresent) {
+    if (groupingMethod() == "Detectors") {
+      setGroupingMethod("Individual");
+    }
+    removeGroupingMethod("Detectors");
+  }
+}
+
+void DetectorGroupingOptions::setThetaGroupingVisible(bool visible) {
+  bool const isPresent = m_uiForm.cbGroupingOptions->findText("ThetaGroups") >= 0;
+  if (visible && !isPresent) {
+    int const tubeIndex = m_uiForm.cbGroupingOptions->findText("Detectors");
+    int const insertAfter = tubeIndex >= 0 ? tubeIndex : m_uiForm.cbGroupingOptions->findText("IPF");
+    m_uiForm.cbGroupingOptions->insertItem(insertAfter + 1, "ThetaGroups");
+  } else if (!visible && isPresent) {
+    if (groupingMethod() == "ThetaGroups") {
+      setGroupingMethod("Individual");
+    }
+    removeGroupingMethod("ThetaGroups");
+  }
 }
 
 void DetectorGroupingOptions::setSaveCustomVisible(bool const visible) {
@@ -73,13 +98,15 @@ std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> DetectorGroupingOptions::gro
     Mantid::API::AlgorithmProperties::update("GroupingFile", groupingFile(), *properties);
     break;
   case GroupingMethod::Groups:
+    // ThetaGroups shares the same enum value (Groups = ThetaGroups = 2) so this
+    // case handles both; NGroups controls the number of theta bins.
     Mantid::API::AlgorithmProperties::update("NGroups", std::to_string(nGroups()), *properties);
     break;
   case GroupingMethod::Custom:
     Mantid::API::AlgorithmProperties::update("GroupingString", customGrouping(), *properties);
     break;
   default:
-    // No properties to update for 'Individual', 'All' or 'IPF'
+    // No properties to update for 'Individual', 'All', 'IPF' or 'Detectors'
     break;
   }
   return properties;

@@ -120,7 +120,7 @@ public:
   MOCK_METHOD4(setInstrumentRebinning,
                void(std::vector<double> const &rebinParams, std::string const &rebinText, bool checked, int tabIndex));
   MOCK_METHOD2(setInstrumentEFixed, void(std::string const &instrumentName, double eFixed));
-  MOCK_METHOD1(setInstrumentGrouping, void(std::string const &instrumentName));
+  MOCK_METHOD2(setInstrumentGrouping, void(std::string const &instrumentName, std::string const &analyserName));
   MOCK_METHOD1(setInstrumentSpecDefault, void(std::map<std::string, bool> &specMap));
 
   MOCK_METHOD1(showMessageBox, void(std::string const &message));
