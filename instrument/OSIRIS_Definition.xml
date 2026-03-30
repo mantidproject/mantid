@@ -12,6 +12,7 @@
 <defaults>
   <length unit="meter" />
   <angle unit="degree" />
+  <indirect-neutronic-positions-mixed/>
   <reference-frame>
     <along-beam axis="z" />
     <pointing-up axis="y" />
