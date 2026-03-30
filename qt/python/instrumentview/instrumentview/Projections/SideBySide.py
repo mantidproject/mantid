@@ -74,10 +74,6 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
         workspace: Workspace2D,
         detector_ids: np.ndarray,
         **kwargs,
-        # sample_position: np.ndarray,
-        # root_position: np.ndarray,
-        # detector_positions: list[DetectorPosition] | np.ndarray,
-        # axis: np.ndarray,
     ):
         self._calculator = PanelsSurfaceCalculator()
         self._detector_id_to_flat_bank_map: dict[int, FlatBankInfo] = {}
@@ -91,7 +87,6 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
         detector_component_indices = np.where(np.isin(all_detector_ids, detector_ids))[0]
         self._component_index_detector_id_map = dict(zip(detector_component_indices, detector_ids))
         self._detector_id_component_index_map = {id: c for c, id in self._component_index_detector_id_map.items()}
-        # super().__init__(sample_position, root_position, detector_positions, axis)
         super().__init__(type, **kwargs)
 
     def _find_and_correct_x_gap(self) -> None:

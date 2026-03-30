@@ -139,6 +139,10 @@ class SideBySideShapeRenderer(ShapeRenderer):
         per_det_rotate = np.zeros(len(det_indices), dtype=bool)
 
         if not bank_local_groups:
+            # It should not be possible for bank_local_groups to be empty,
+            # as any detectors not in a grid in the IDF are put into a custom flat bank.
+            # If there are some detectors then there will be at least one bank.
+            # Safeguard anyway by setting a default scale of 1
             per_det_scale[:] = 1.0
             return per_det_scale, per_det_rotate
 
