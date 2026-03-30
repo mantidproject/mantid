@@ -76,6 +76,33 @@ the create a distinct ENTITY for each bank-->
   <parameter name="Bk2BkExpConvPV:Gamma" type="fitting">
     <formula eq="(&PVgamma_2;)*centre^2+(&PVgamma_1;)*centre+(&PVgamma_0;)" unit="dSpacing" result-unit="TOF" />
   </parameter>
+
+    <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+  <formula eq="(&IC_Alpha0;)" unit="dSpacing" result-unit="TOF"/>
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+    <formula eq="(&IC_Alpha1;)" unit="dSpacing" result-unit="TOF"/>
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+    <formula eq="(&IC_Beta0;)" unit="dSpacing" result-unit="TOF"/>
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Kappa" type="fitting">
+    <formula eq="(&IC_Kappa;)" unit="dSpacing" result-unit=""/>
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+    <formula eq="(&ICSigma2_sq;)*centre^4 + (&ICSigma1_sq;)*centre^2 + (&ICSigma0_sq;)"
+             unit="dSpacing" result-unit="TOF^2" />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+    <formula eq="(&ICGamma2;)*centre^2 + (&ICGamma1;)*centre + (&ICGamma0;)"
+             unit="dSpacing" result-unit="TOF" />
+  </parameter>
+
   
 </component-link>
 
@@ -122,6 +149,33 @@ the create a distinct ENTITY for each bank-->
   <parameter name="Bk2BkExpConvPV:Gamma" type="fitting">
     <formula eq="(&PVgamma_2;)*centre^2+(&PVgamma_1;)*centre+(&PVgamma_0;)" unit="dSpacing" result-unit="TOF" />
   </parameter>
+
+    <parameter name="Alpha0" type="fitting">
+  <formula eq="(&IC_Alpha0;)" unit="dSpacing" result-unit="TOF"/>
+  </parameter>
+
+  <parameter name="Alpha1" type="fitting">
+    <formula eq="(&IC_Alpha1;)" unit="dSpacing" result-unit="TOF"/>
+  </parameter>
+
+  <parameter name="Beta0" type="fitting">
+    <formula eq="(&IC_Beta0;)" unit="dSpacing" result-unit="TOF"/>
+  </parameter>
+
+  <parameter name="Kappa" type="fitting">
+    <formula eq="(&IC_Kappa;)" unit="dSpacing" result-unit=""/>
+  </parameter>
+
+  <parameter name="SigmaSquared" type="fitting">
+    <formula eq="(&ICSigma2_sq;)*centre^4 + (&ICSigma1_sq;)*centre^2 + (&ICSigma0_sq;)"
+             unit="dSpacing" result-unit="TOF^2" />
+  </parameter>
+
+  <parameter name="Gamma" type="fitting">
+    <formula eq="(&ICGamma2;)*centre^2 + (&ICGamma1;)*centre + (&ICGamma0;)"
+             unit="dSpacing" result-unit="TOF" />
+  </parameter>
+
 
 </component-link>
 

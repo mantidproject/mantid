@@ -24,7 +24,6 @@ from Engineering.EnginX import EnginX
 from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
-from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from plugins.algorithms.IntegratePeaks1DProfile import calc_intens_and_sigma_arrays
 from Engineering.texture.xtal_helper import get_xtal_structure
 from Engineering.EnggUtils import convert_TOFerror_to_derror
@@ -34,7 +33,22 @@ from Engineering.texture.texture_helper import plot_pole_figure
 
 from mantid.kernel import DeltaEModeType, UnitConversion
 from plugins.algorithms.peakdata_utils import PeakData
+
+
 # -------- Utility --------------------------------
+
+
+def _make_composite(peak_func, bg_func):
+    """Build a CompositeFunction from existing C++ function objects without
+    serialising them (which would discard workspace references, fixed-parameter
+    state, etc.).  NumDeriv is NOT set so that each member function uses its own
+    derivative method (analytical for LinearBackground, numerical fallback for
+    IkedaCarpenterPV) — this avoids redundant expensive peak evaluations when
+    computing derivatives for background parameters."""
+    comp = FunctionFactory.createFunction("CompositeFunction")
+    comp.add(peak_func)
+    comp.add(bg_func)
+    return comp
 
 
 def find_all_files(directory):
@@ -303,6 +317,7 @@ def fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs, peak_func_na
         peak_func.setIntensity(intens)
         intens_par_name = "I"
         peak_func.setCentre(centre)
+        peak_func.setMatrixWorkspace(window_ws, 0, low_bound, hi_bound)
         cen_par_name = "X0"
         peak_func.addConstraints(f"{low_bound} < {cen_par_name} < {hi_bound}")
         peak_func.addConstraints(f"{intens_par_name} > 0")
@@ -313,7 +328,7 @@ def fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs, peak_func_na
             for par in ("Alpha0", "Alpha1", "Beta0", "Kappa"):
                 peak_func.fixParameter(par)
 
-        comp_func = CompositeFunctionWrapper(FunctionWrapper(peak_func), FunctionWrapper(bg_func), NumDeriv=True)
+        comp_func = _make_composite(peak_func, bg_func)
         fit_kwargs["InputWorkspace"] = window_ws.name()
         fit_kwargs["StartX"] = low_bound
         fit_kwargs["EndX"] = hi_bound
@@ -357,7 +372,6 @@ def get_initial_fit_function_and_kwargs_from_specs(
     function = MultiDomainFunction()
     bg_func = FunctionFactory.createFunction(bg_func_name)
     base_peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
-    base_peak_func.setIntensity(1.0)
 
     # save parameter names for future ties/constraints
     intens_par_name = "I"
@@ -385,8 +399,6 @@ def get_initial_fit_function_and_kwargs_from_specs(
         peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
         peak_func.setCentre(centre)
         peak_func.setIntensity(intens)
-        # set workspace on peak function directly so IkedaCarpenterPV can calculate wavelengths
-        # (MDF.setMatrixWorkspace does not propagate to member functions)
         peak_func.setMatrixWorkspace(ws_tof, ispec, tof_start, tof_end)
 
         # calculate constraint values
@@ -400,7 +412,7 @@ def get_initial_fit_function_and_kwargs_from_specs(
 
         # add these constraints
         peak_func.addConstraints(f"{x0_lower} < {cen_par_name} < {x0_upper}")
-        peak_func.addConstraints(f"{intens / 5} < {intens_par_name} < {intens * 5}")
+        peak_func.addConstraints(f"0 < {intens_par_name} < {intens * 5}")
         if width_par_name:
             peak_func.addConstraints(f"{width_min}<{width_par_name}<{width_max}")
 
@@ -408,13 +420,13 @@ def get_initial_fit_function_and_kwargs_from_specs(
             bg_func.setParameter("A0", bg)
 
         # for IkedaCarpenterPV, fix instrument parameters during non-final fits to improve speed and stability
-        if peak_func_name == "IkedaCarpenterPV":
-            for par in ("Alpha0", "Alpha1", "Beta0", "Kappa"):
-                peak_func.fixParameter(par)
+        # if peak_func_name == "IkedaCarpenterPV":
+        #    for par in ("Alpha0", "Alpha1", "Beta0", "Kappa"):
+        #        peak_func.fixParameter(par)
 
         # package up the spectra fit functions (peak + background) into a composite function
-        comp_func = CompositeFunctionWrapper(FunctionWrapper(peak_func), FunctionWrapper(bg_func), NumDeriv=True)
-        function.add(comp_func.function)
+        comp_func = _make_composite(peak_func, bg_func)
+        function.add(comp_func)
         function.setDomainIndex(ispec, ispec)
         function.setMatrixWorkspace(ws_tof, ispec, tof_start, tof_end)
 
@@ -461,6 +473,7 @@ def rerun_fit_with_new_ws(
     parameters_to_tie: Optional[Sequence[str]] = None,
     tie_background: bool = False,
     is_final: bool = False,
+    last_fit_ic: bool = False,
 ):
     # update the input workspace in the fitting kwargs
     for k in md_fit_kwargs.keys():
@@ -474,22 +487,34 @@ def rerun_fit_with_new_ws(
         peak = comp[0]
         bg = comp[1]
 
-        new_peak = FunctionFactory.Instance().createPeakFunction(peak.name())
+        peak_name = "IkedaCarpenterPV" if last_fit_ic and is_final else peak.name()
+
+        new_peak = FunctionFactory.Instance().createPeakFunction(peak_name)
 
         intens_par_name = "I"
         cen_par_name = "X0"
 
-        # create fresh peak as ties are causing problems
-        [
-            new_peak.setParameter(param, peak.getParameterValue(param))
-            for param in [new_peak.getParamName(i) for i in range(new_peak.nParams())]
-        ]
-        # update constraints around new values
         intens = max(peak.getParameterValue(intens_par_name), 1)
         x0 = peak.getParameterValue(cen_par_name)
+        key_suffix = f"_{idom}" if idom > 0 else ""
+
+        # create fresh peak as ties are causing problems
+        if last_fit_ic and is_final:
+            new_peak.setMatrixWorkspace(new_ws, idom, md_fit_kwargs["StartX" + key_suffix], md_fit_kwargs["EndX" + key_suffix])
+            new_peak.setCentre(x0)
+            new_peak.setIntensity(intens)
+            new_peak.setMatrixWorkspace(new_ws, idom, md_fit_kwargs["StartX" + key_suffix], md_fit_kwargs["EndX" + key_suffix])
+
+        else:
+            [
+                new_peak.setParameter(param, peak.getParameterValue(param))
+                for param in [new_peak.getParamName(i) for i in range(new_peak.nParams())]
+            ]
+        # update constraints around new values
+
         if not is_final:
             # don't constrain the intensity on the final fit
-            new_peak.addConstraints(f"{max(intens / 2, 1e-6)}<{intens_par_name}<{intens * 2}")
+            new_peak.addConstraints(f"{min(intens / 2, 1e-6)}<{intens_par_name}<{intens * 2}")
         new_peak.addConstraints(f"{x0 * (1 - x0_frac_move)}<{cen_par_name}<{x0 * (1 + x0_frac_move)}")
         # apply ties to the first domain, if ties are required
         if idom > 0:
@@ -506,16 +531,16 @@ def rerun_fit_with_new_ws(
                 new_peak.fixParameter(param)
 
         # for IkedaCarpenterPV, fix instrument parameters during non-final fits to improve speed and stability
-        if not is_final and new_peak.name() == "IkedaCarpenterPV":
-            for par in ("Alpha0", "Alpha1", "Beta0", "Kappa"):
-                new_peak.fixParameter(par)
+        # if not is_final and new_peak.name() == "IkedaCarpenterPV":
+        #    for par in ("Alpha0", "Alpha1", "Beta0", "Kappa"):
+        #        new_peak.fixParameter(par)
 
         # set workspace on peak function directly so IkedaCarpenterPV can calculate wavelengths
         key_suffix = f"_{idom}" if idom > 0 else ""
         new_peak.setMatrixWorkspace(new_ws, idom, md_fit_kwargs["StartX" + key_suffix], md_fit_kwargs["EndX" + key_suffix])
 
-        comp_func = CompositeFunctionWrapper(FunctionWrapper(new_peak), FunctionWrapper(bg), NumDeriv=True)
-        new_func.add(comp_func.function)
+        comp_func = _make_composite(new_peak, bg)
+        new_func.add(comp_func)
         new_func.setDomainIndex(idom, idom)
 
     # add ties directly to function object to preserve workspace references on member functions
@@ -545,7 +570,7 @@ def fit_all_peaks(
     final_fit_raw: bool = True,
     parameters_to_tie: Optional[Sequence[str]] = None,
     subsequent_fit_param_fix: Optional[Sequence[str]] = None,
-    peak_func_name: str = "BackToBackExponential",
+    last_fit_ic: bool = False,
 ) -> None:
     """
 
@@ -571,6 +596,7 @@ def fit_all_peaks(
     """
 
     # currently the only fit functions intended to be used - less flexibility here allows for less user input
+    peak_func_name = "BackToBackExponential"
     supported_peaks = ("BackToBackExponential", "IkedaCarpenterPV")
     bg_func_name = "LinearBackground"
 
@@ -579,14 +605,6 @@ def fit_all_peaks(
             f"Provided peak function: '{peak_func_name}' not one of the supported peak functions: ({', '.join(supported_peaks)})."
             f" Behaviour may be unreliable."
         )
-
-    # set default parameters to tie based on peak function if not specified
-    if parameters_to_tie is None:
-        default_ties = {
-            "BackToBackExponential": ("A", "B"),
-            "IkedaCarpenterPV": ("Alpha0", "Alpha1", "Beta0", "Kappa"),
-        }
-        parameters_to_tie = default_ties.get(peak_func_name, ())
 
     # define some parameters for the fit
     fit_kwargs = {
@@ -630,6 +648,10 @@ def fit_all_peaks(
                 fit_wss.append(ws_tof)
                 bkg_is_tied.append(True)
 
+            if last_fit_ic:
+                fit_wss.append(ws_tof)
+                bkg_is_tied.append(True)
+
             # low level information
             logger.information(f"Workspace: {wsname}, Peak: {peak}")
 
@@ -667,12 +689,13 @@ def fit_all_peaks(
                     fit_kwargs,
                     md_fit_kwargs,
                     fit_ws,
-                    0.01,  # allow x0 to only vary by 1% from previous fit
+                    0.02,  # allow x0 to only vary by 1% from previous fit
                     50,
                     subsequent_fit_param_fix,
                     parameters_to_tie,
                     bkg_is_tied[fit_num],
                     fit_num == len(fit_wss) - 1,
+                    last_fit_ic,
                 )
 
             # establish which detectors have sufficient I over sigma
