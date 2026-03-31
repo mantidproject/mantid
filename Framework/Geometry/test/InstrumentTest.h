@@ -81,7 +81,7 @@ public:
     TS_ASSERT_EQUALS(i.nelements(), instrument.nelements());
     TS_ASSERT_EQUALS(i.getLogfileCache(), instrument.getLogfileCache());
     TS_ASSERT_EQUALS(i.getLogfileUnit(), instrument.getLogfileUnit());
-    TS_ASSERT_EQUALS(i.getMonitors(), instrument.getMonitors());
+    TS_ASSERT_EQUALS(i.getMonitorIDs(), instrument.getMonitorIDs());
     TS_ASSERT_EQUALS(i.getDefaultView(), instrument.getDefaultView());
     TS_ASSERT_EQUALS(i.getDefaultAxis(), instrument.getDefaultAxis());
     // Should not be parameterized - there's a different constructor for that
@@ -211,9 +211,9 @@ public:
     Detector *m = new Detector("mon", 1, &i);
     TS_ASSERT_THROWS_NOTHING(i.add(m));
     TS_ASSERT_THROWS_NOTHING(i.markAsMonitor(m));
-    TS_ASSERT_EQUALS(i.getMonitors().size(), 1);
+    TS_ASSERT_EQUALS(i.getMonitorIDs().size(), 1);
     TS_ASSERT_THROWS_NOTHING(i.removeDetector(m));
-    TS_ASSERT(i.getMonitors().empty());
+    TS_ASSERT(i.getMonitorIDs().empty());
     TS_ASSERT(i.getDetectorIDs(false).empty());
   }
 

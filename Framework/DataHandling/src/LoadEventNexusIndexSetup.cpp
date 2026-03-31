@@ -135,7 +135,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
   const auto &spec = spectrumDetectorMapping.first;
   const auto &udet = spectrumDetectorMapping.second;
 
-  const std::vector<detid_t> monitors = m_instrumentWorkspace->getInstrument()->getMonitors();
+  const std::vector<detid_t> monitors = m_instrumentWorkspace->getInstrument()->getMonitorIDs();
   const auto &detectorInfo = m_instrumentWorkspace->detectorInfo();
   if (monitorsOnly) {
     std::vector<Indexing::SpectrumNumber> spectrumNumbers;
