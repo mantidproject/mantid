@@ -90,9 +90,14 @@ double IkedaCarpenterPV::fwhm() const {
                   << "If this is frequent problem please report to Mantid team.\n"
                   << "For now to calculate width force Gamma positive.\n";
     gamma = -gamma;
-    ;
   }
-  return sqrt(8.0 * M_LN2 * sigmaSquared) + gamma;
+
+  // Use the same Thompson-Cox-Hastings approximation that the peak shape
+  // itself uses (via convertVoigtToPseudo) so that the reported FWHM is
+  // consistent with the actual profile width.
+  double H = 1.0, eta = 0.5;
+  convertVoigtToPseudo(sigmaSquared, gamma, H, eta);
+  return H;
 }
 
 void IkedaCarpenterPV::setFwhm(const double w) {
@@ -209,80 +214,12 @@ void IkedaCarpenterPV::convertVoigtToPseudo(const double &voigtSigmaSq, const do
 }
 
 void IkedaCarpenterPV::constFunction(double *out, const double *xValues, const int &nData) const {
-  const double I = getParameter("I");
-  const double alpha0 = getParameter("Alpha0");
-  const double alpha1 = getParameter("Alpha1");
-  const double beta0 = getParameter("Beta0");
-  const double kappa = getParameter("Kappa");
-  const double voigtsigmaSquared = getParameter("SigmaSquared");
-  const double voigtgamma = getParameter("Gamma");
-  const double X0 = getParameter("X0");
-
-  // cal pseudo voigt sigmaSq and gamma and eta
-  double gamma = 1.0; // dummy initialization
-  double eta = 0.5;   // dummy initialization
-  convertVoigtToPseudo(voigtsigmaSquared, voigtgamma, gamma, eta);
-  double sigmaSquared = gamma * gamma / (8.0 * M_LN2);
-
-  const double beta = 1 / beta0;
-
-  // equations taken from Fullprof manual
-
-  const double k = 0.05;
-
-  // Not entirely sure what to do if sigmaSquared ever negative
-  // for now just post a warning
-  double someConst = std::numeric_limits<double>::max() / 100.0;
-  if (sigmaSquared > 0)
-    someConst = 1 / sqrt(2.0 * sigmaSquared);
-  else if (sigmaSquared < 0) {
-    g_log.warning() << "sigmaSquared negative in functionLocal.\n";
-  }
-
-  // update wavelength vector
-  calWavelengthAtEachDataPoint(xValues, nData);
-
-  for (int i = 0; i < nData; i++) {
-    double diff = xValues[i] - X0;
-
-    double R = exp(-81.799 / (m_waveLength[i] * m_waveLength[i] * kappa));
-    double alpha = 1.0 / (alpha0 + m_waveLength[i] * alpha1);
-
-    double a_minus = alpha * (1 - k);
-    double a_plus = alpha * (1 + k);
-    double x = a_minus - beta;
-    double y = alpha - beta;
-    double z = a_plus - beta;
-
-    double Nu = 1 - R * a_minus / x;
-    double Nv = 1 - R * a_plus / z;
-    double Ns = -2 * (1 - R * alpha / y);
-    double Nr = 2 * R * alpha * alpha * beta * k * k / (x * y * z);
-
-    double u = a_minus * (a_minus * sigmaSquared - 2 * diff) / 2.0;
-    double v = a_plus * (a_plus * sigmaSquared - 2 * diff) / 2.0;
-    double s = alpha * (alpha * sigmaSquared - 2 * diff) / 2.0;
-    double r = beta * (beta * sigmaSquared - 2 * diff) / 2.0;
-
-    double yu = (a_minus * sigmaSquared - diff) * someConst;
-    double yv = (a_plus * sigmaSquared - diff) * someConst;
-    double ys = (alpha * sigmaSquared - diff) * someConst;
-    double yr = (beta * sigmaSquared - diff) * someConst;
-
-    std::complex<double> zs = std::complex<double>(-alpha * diff, 0.5 * alpha * gamma);
-    std::complex<double> zu = (1 - k) * zs;
-    std::complex<double> zv = (1 + k) * zs;
-    std::complex<double> zr = std::complex<double>(-beta * diff, 0.5 * beta * gamma);
-
-    double N = 0.25 * alpha * (1 - k * k) / (k * k);
-
-    out[i] = I * N *
-             ((1 - eta) * (Nu * exp(u + gsl_sf_log_erfc(yu)) + Nv * exp(v + gsl_sf_log_erfc(yv)) +
-                           Ns * exp(s + gsl_sf_log_erfc(ys)) + Nr * exp(r + gsl_sf_log_erfc(yr))) -
-              eta * 2.0 / M_PI *
-                  (Nu * exponentialIntegral(zu).imag() + Nv * exponentialIntegral(zv).imag() +
-                   Ns * exponentialIntegral(zs).imag() + Nr * exponentialIntegral(zr).imag()));
-  }
+  // Save the wavelength cache so that single-point evaluations (e.g. from
+  // height()) do not invalidate the full-spectrum cache used by functionLocal.
+  auto savedWaveLength = std::move(m_waveLength);
+  m_waveLength.clear();
+  functionLocal(out, xValues, static_cast<size_t>(nData));
+  m_waveLength = std::move(savedWaveLength);
 }
 
 void IkedaCarpenterPV::functionLocal(double *out, const double *xValues, const size_t nData) const {
@@ -299,7 +236,8 @@ void IkedaCarpenterPV::functionLocal(double *out, const double *xValues, const s
   double gamma = 1.0; // dummy initialization
   double eta = 0.5;   // dummy initialization
   convertVoigtToPseudo(voigtsigmaSquared, voigtgamma, gamma, eta);
-  double sigmaSquared = gamma * gamma / (8.0 * M_LN2); // pseudo voigt sigma^2
+  const double eps = std::numeric_limits<double>::epsilon() * 1000.0;
+  double sigmaSquared = std::max(gamma * gamma / (8.0 * M_LN2), eps); // pseudo voigt sigma^2
 
   const double beta = 1 / beta0;
 
@@ -307,14 +245,7 @@ void IkedaCarpenterPV::functionLocal(double *out, const double *xValues, const s
 
   const double k = 0.05;
 
-  // Not entirely sure what to do if sigmaSquared ever negative
-  // for now just post a warning
-  double someConst = std::numeric_limits<double>::max() / 100.0;
-  if (sigmaSquared > 0)
-    someConst = 1 / sqrt(2.0 * sigmaSquared);
-  else if (sigmaSquared < 0) {
-    g_log.warning() << "sigmaSquared negative in functionLocal.\n";
-  }
+  const double someConst = 1.0 / sqrt(2.0 * sigmaSquared);
 
   // update wavelength vector
   calWavelengthAtEachDataPoint(xValues, nData);
@@ -363,8 +294,7 @@ void IkedaCarpenterPV::functionLocal(double *out, const double *xValues, const s
 }
 
 void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *jacobian, const double *xValues, const size_t nData) {
-  // Parameter order from init():
-  // 0:I, 1:Alpha0, 2:Alpha1, 3:Beta0, 4:Kappa, 5:SigmaSquared, 6:Gamma, 7:X0
+  // Parameter order: 0:I 1:Alpha0 2:Alpha1 3:Beta0 4:Kappa 5:SigmaSquared 6:Gamma 7:X0
 
   const double I = getParameter("I");
   const double alpha0 = getParameter("Alpha0");
@@ -375,23 +305,33 @@ void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *jacobian, const double 
   const double voigtGamma = getParameter("Gamma");
   const double X0 = getParameter("X0");
 
-  // Convert user Voigt params -> pseudo-Voigt H, eta exactly as functionLocal does
-  double H = 1.0;
-  double eta = 0.5;
+  double H = 1.0, eta = 0.5;
   convertVoigtToPseudo(voigtSigmaSq, voigtGamma, H, eta);
 
   const double eps = std::numeric_limits<double>::epsilon() * 1000.0;
   const double Hsafe = std::max(H, eps);
-  const double S = std::max(Hsafe * Hsafe / (8.0 * M_LN2), eps); // pseudo-Voigt sigma^2
+  const double Hsafe2 = Hsafe * Hsafe;
+  const double S = std::max(Hsafe2 / (8.0 * M_LN2), eps);
   const double beta = 1.0 / beta0;
+  const double beta2 = beta * beta;
 
-  const double k = 0.05;
-  const double kk = k * k;
-  const double twoOverPi = 2.0 / M_PI;
-  const double invSqrtPi = 1.0 / std::sqrt(M_PI);
+  constexpr double k = 0.05;
+  constexpr double kk = k * k;
+  constexpr double one_minus_k = 1.0 - k;
+  constexpr double one_plus_k = 1.0 + k;
+  const double one_minus_eta = 1.0 - eta;
+  constexpr double twoOverPi = 2.0 / M_PI;
+  const double etaTwoOverPi = eta * twoOverPi;
+  const double halfHsafe = 0.5 * Hsafe;
+  const double halfH2 = halfHsafe * halfHsafe;
 
-  // Precompute chain derivatives for Voigt -> pseudo-Voigt conversion
-  // g = Gaussian FWHM, H = pseudo-Voigt FWHM
+  // Loop-invariant quantities derived from S (hoisted from inner loop)
+  const double invRoot2S = 1.0 / std::sqrt(2.0 * S);
+  const double rootSOver2 = std::sqrt(S / 2.0);
+  const double twoInvSqrtPi = 2.0 / std::sqrt(M_PI);
+  const double CexpSFactor = invRoot2S / (2.0 * S); // = 1/(2*S*sqrt(2S)), for dK/dS
+
+  // Voigt -> pseudo-Voigt chain derivatives (all loop-invariant)
   const double g2 = std::max(8.0 * M_LN2 * voigtSigmaSq, eps);
   const double g = std::sqrt(g2);
   const double g3 = g2 * g;
@@ -402,85 +342,88 @@ void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *jacobian, const double 
   const double L3 = L2 * L;
   const double L4 = L2 * L2;
 
-  const double c1 = 2.69269;
-  const double c2 = 2.42843;
-  const double c3 = 4.47163;
-  const double c4 = 0.07842;
+  constexpr double c1 = 2.69269, c2 = 2.42843, c3 = 4.47163, c4 = 0.07842;
 
-  const double P = g4 * g + c1 * g4 * L + c2 * g3 * L2 + c3 * g2 * L3 + c4 * g * L4 + L4 * L;
-  const double H4 = std::max(std::pow(Hsafe, 4), eps);
+  const double H4 = Hsafe2 * Hsafe2;
+  const double inv5H4 = 1.0 / (5.0 * std::max(H4, eps));
 
   const double dPdg = 5.0 * g4 + 4.0 * c1 * g3 * L + 3.0 * c2 * g2 * L2 + 2.0 * c3 * g * L3 + c4 * L4;
   const double dPdL = c1 * g4 + 2.0 * c2 * g3 * L + 3.0 * c3 * g2 * L2 + 4.0 * c4 * g * L3 + 5.0 * L4;
 
   const double dgdV = (4.0 * M_LN2) / g;
-  const double dHdV = (dPdg * dgdV) / (5.0 * H4);
-  const double dHdL = dPdL / (5.0 * H4);
+  const double dHdV = dPdg * dgdV * inv5H4;
+  const double dHdL = dPdL * inv5H4;
 
   const double t = L / Hsafe;
   const double deta_dt = 1.36603 - 0.95438 * t + 0.33348 * t * t;
+  const double invHsafe2 = 1.0 / Hsafe2;
 
-  const double dtdV = -L * dHdV / (Hsafe * Hsafe);
-  const double dtdL = 1.0 / Hsafe - L * dHdL / (Hsafe * Hsafe);
+  const double deta_dV = deta_dt * (-L * dHdV * invHsafe2);
+  const double deta_dL = deta_dt * (1.0 / Hsafe - L * dHdL * invHsafe2);
 
-  const double deta_dV = deta_dt * dtdV;
-  const double deta_dL = deta_dt * dtdL;
+  const double inv4Ln2 = 1.0 / (4.0 * M_LN2);
+  const double dSdV = Hsafe * dHdV * inv4Ln2;
+  const double dSdL = Hsafe * dHdL * inv4Ln2;
 
-  const double dSdV = (Hsafe * dHdV) / (4.0 * M_LN2);
-  const double dSdL = (Hsafe * dHdL) / (4.0 * M_LN2);
+  const double kappa2_inv = 1.0 / (kappa * kappa);
 
   calWavelengthAtEachDataPoint(xValues, nData);
-
-  auto Kval = [](double q, double y) { return std::exp(q + gsl_sf_log_erfc(y)); };
-
-  // Assumes exponentialIntegral(z) in SpecialFunctionSupport is the same scaled
-  // complex exponential-integral used in functionLocal.
-  auto Fprime = [](const std::complex<double> &z, const std::complex<double> &F) {
-    return F - (1.0 / z); // d/dz [ e^z E1(z) ] = e^z E1(z) - 1/z
-  };
 
   for (size_t i = 0; i < nData; ++i) {
     const double lambda = m_waveLength[i];
     const double lambda2 = lambda * lambda;
     const double diff = xValues[i] - X0;
+    const double diff2 = diff * diff;
 
     const double R = std::exp(-81.799 / (lambda2 * kappa));
     const double alpha = 1.0 / (alpha0 + lambda * alpha1);
+    const double alpha2 = alpha * alpha;
 
-    const double a_minus = alpha * (1.0 - k);
-    const double a_plus = alpha * (1.0 + k);
+    const double a_minus = alpha * one_minus_k;
+    const double a_plus = alpha * one_plus_k;
 
     const double x = a_minus - beta;
     const double y = alpha - beta;
     const double z = a_plus - beta;
 
-    const double Nu = 1.0 - R * a_minus / x;
-    const double Nv = 1.0 - R * a_plus / z;
-    const double Ns = -2.0 * (1.0 - R * alpha / y);
-    const double Nr = 2.0 * R * alpha * alpha * beta * kk / (x * y * z);
+    const double inv_x = 1.0 / x;
+    const double inv_y = 1.0 / y;
+    const double inv_z = 1.0 / z;
+    const double inv_x2 = inv_x * inv_x;
+    const double inv_y2 = inv_y * inv_y;
+    const double inv_z2 = inv_z * inv_z;
 
-    const double u = 0.5 * a_minus * (a_minus * S - 2.0 * diff);
-    const double v = 0.5 * a_plus * (a_plus * S - 2.0 * diff);
-    const double s = 0.5 * alpha * (alpha * S - 2.0 * diff);
-    const double r = 0.5 * beta * (beta * S - 2.0 * diff);
+    const double Nu = 1.0 - R * a_minus * inv_x;
+    const double Nv = 1.0 - R * a_plus * inv_z;
+    const double Ns = -2.0 * (1.0 - R * alpha * inv_y);
+    const double Nr = 2.0 * R * alpha2 * beta * kk * inv_x * inv_y * inv_z;
 
-    const double root2S = std::sqrt(2.0 * S);
-    const double invRoot2S = 1.0 / root2S;
+    // Gaussian kernel values: K = exp(u + log_erfc(y))
+    const double amuS_d = a_minus * S - diff; // a_minus*S - diff (reused in dK)
+    const double apuS_d = a_plus * S - diff;
+    const double alS_d = alpha * S - diff;
+    const double beS_d = beta * S - diff;
 
-    const double yu = (a_minus * S - diff) * invRoot2S;
-    const double yv = (a_plus * S - diff) * invRoot2S;
-    const double ys = (alpha * S - diff) * invRoot2S;
-    const double yr = (beta * S - diff) * invRoot2S;
+    const double u = 0.5 * a_minus * (amuS_d - diff);
+    const double v = 0.5 * a_plus * (apuS_d - diff);
+    const double s = 0.5 * alpha * (alS_d - diff);
+    const double r = 0.5 * beta * (beS_d - diff);
 
-    const double Ku = Kval(u, yu);
-    const double Kv = Kval(v, yv);
-    const double Ks = Kval(s, ys);
-    const double Kr = Kval(r, yr);
+    const double yu = amuS_d * invRoot2S;
+    const double yv = apuS_d * invRoot2S;
+    const double ys = alS_d * invRoot2S;
+    const double yr = beS_d * invRoot2S;
 
-    const std::complex<double> zu(-a_minus * diff, 0.5 * a_minus * Hsafe);
-    const std::complex<double> zv(-a_plus * diff, 0.5 * a_plus * Hsafe);
-    const std::complex<double> zs(-alpha * diff, 0.5 * alpha * Hsafe);
-    const std::complex<double> zr(-beta * diff, 0.5 * beta * Hsafe);
+    const double Ku = std::exp(u + gsl_sf_log_erfc(yu));
+    const double Kv = std::exp(v + gsl_sf_log_erfc(yv));
+    const double Ks = std::exp(s + gsl_sf_log_erfc(ys));
+    const double Kr = std::exp(r + gsl_sf_log_erfc(yr));
+
+    // Lorentzian kernel values
+    const std::complex<double> zu(-a_minus * diff, a_minus * halfHsafe);
+    const std::complex<double> zv(-a_plus * diff, a_plus * halfHsafe);
+    const std::complex<double> zs(-alpha * diff, alpha * halfHsafe);
+    const std::complex<double> zr(-beta * diff, beta * halfHsafe);
 
     const std::complex<double> Fu = exponentialIntegral(zu);
     const std::complex<double> Fv = exponentialIntegral(zv);
@@ -492,166 +435,137 @@ void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *jacobian, const double 
     const double Js = Fs.imag();
     const double Jr = Fr.imag();
 
-    const std::complex<double> Fpu = Fprime(zu, Fu);
-    const std::complex<double> Fpv = Fprime(zv, Fv);
-    const std::complex<double> Fps = Fprime(zs, Fs);
-    const std::complex<double> Fpr = Fprime(zr, Fr);
+    // F'(z) = F(z) - 1/z, decomposed into real/imag to avoid complex division.
+    // For z = (-a*diff, a*halfH): 1/z = (-diff, -halfH) / (a*(diff^2+halfH^2))
+    // So F'_r = F_r + diff/(a*d2h2), F'_i = F_i + halfH/(a*d2h2)
+    const double inv_d2h2 = 1.0 / (diff2 + halfH2);
+    const double d_term = diff * inv_d2h2;      // diff / (diff^2 + halfH^2)
+    const double h_term = halfHsafe * inv_d2h2; // halfH / (diff^2 + halfH^2)
 
+    const double Fpu_r = Fu.real() + d_term / a_minus;
+    const double Fpu_i = Fu.imag() + h_term / a_minus;
+    const double Fpv_r = Fv.real() + d_term / a_plus;
+    const double Fpv_i = Fv.imag() + h_term / a_plus;
+    const double Fps_r = Fs.real() + d_term / alpha;
+    const double Fps_i = Fs.imag() + h_term / alpha;
+    const double Fpr_r = Fr.real() + d_term / beta;
+    const double Fpr_i = Fr.imag() + h_term / beta;
+
+    // Function value components
     const double Q = 0.25 * alpha * (1.0 - kk) / kk;
+    const double IQ = I * Q;
 
     const double G = Nu * Ku + Nv * Kv + Ns * Ks + Nr * Kr;
     const double Lmix = Nu * Ju + Nv * Jv + Ns * Js + Nr * Jr;
+    const double modelCore = one_minus_eta * G - etaTwoOverPi * Lmix;
 
-    const double modelCore = (1.0 - eta) * G - twoOverPi * eta * Lmix;
+    // Common Gaussian derivative factor: (2/sqrt(pi)) * exp(-diff^2/(2S))
+    const double Cexp = twoInvSqrtPi * std::exp(-diff2 / (2.0 * S));
+    const double CexpRS2 = Cexp * rootSOver2; // for dK/da
 
-    // Common erfc derivative factor
-    const double Cexp = 2.0 * invSqrtPi * std::exp(-(diff * diff) / (2.0 * S));
-    const double rootSOver2 = std::sqrt(S / 2.0);
+    // -- Inlined K kernel derivatives --
+    // dK/da = (a*S - diff)*K - Cexp*sqrt(S/2)
+    const double dKu_da = amuS_d * Ku - CexpRS2;
+    const double dKv_da = apuS_d * Kv - CexpRS2;
+    const double dKs_da = alS_d * Ks - CexpRS2;
+    const double dKr_da = beS_d * Kr - CexpRS2;
 
-    // ---- Kernel derivatives K(a,S,diff) ----
-    auto dK_da = [&](double a, double K) { return (a * S - diff) * K - Cexp * rootSOver2; };
-    auto dK_dS = [&](double a, double K) {
-      const double denom = 2.0 * S * std::sqrt(2.0 * S);
-      return 0.5 * a * a * K - Cexp * (a * S + diff) / denom;
-    };
-    auto dK_dd = [&](double a, double K) { return -a * K + Cexp * invRoot2S; };
+    // dK/dS = 0.5*a^2*K - Cexp*(a*S+diff)/(2*S*sqrt(2S))
+    const double dKu_dS = 0.5 * a_minus * a_minus * Ku - Cexp * (a_minus * S + diff) * CexpSFactor;
+    const double dKv_dS = 0.5 * a_plus * a_plus * Kv - Cexp * (a_plus * S + diff) * CexpSFactor;
+    const double dKs_dS = 0.5 * alpha2 * Ks - Cexp * (alpha * S + diff) * CexpSFactor;
+    const double dKr_dS = 0.5 * beta2 * Kr - Cexp * (beta * S + diff) * CexpSFactor;
 
-    // ---- Kernel derivatives J(a,H,diff) = imag(exponentialIntegral(z)) ----
-    auto dJ_da = [&](const std::complex<double> &Fp) {
-      return std::imag(Fp * std::complex<double>(-diff, 0.5 * Hsafe));
-    };
-    auto dJ_dH = [&](double a, const std::complex<double> &Fp) { return 0.5 * a * std::real(Fp); };
-    auto dJ_dd = [&](double a, const std::complex<double> &Fp) { return -a * std::imag(Fp); };
+    // dK/dd = -a*K + Cexp/sqrt(2S)
+    const double CexpIR2S = Cexp * invRoot2S;
+    const double dKu_dd = -a_minus * Ku + CexpIR2S;
+    const double dKv_dd = -a_plus * Kv + CexpIR2S;
+    const double dKs_dd = -alpha * Ks + CexpIR2S;
+    const double dKr_dd = -beta * Kr + CexpIR2S;
 
-    // ---- Coefficient derivatives wrt alpha, beta, R ----
-    const double dNu_dalpha = R * (1.0 - k) * beta / (x * x);
-    const double dNv_dalpha = R * (1.0 + k) * beta / (z * z);
-    const double dNs_dalpha = -2.0 * R * beta / (y * y);
-    const double dNr_dalpha = Nr * (2.0 / alpha - (1.0 - k) / x - 1.0 / y - (1.0 + k) / z);
+    // -- Inlined J kernel derivatives (pure real arithmetic) --
+    // dJ/da = Im(Fp * (-diff, halfH)) = Fp_r*halfH - Fp_i*diff
+    const double dJu_da = Fpu_r * halfHsafe - Fpu_i * diff;
+    const double dJv_da = Fpv_r * halfHsafe - Fpv_i * diff;
+    const double dJs_da = Fps_r * halfHsafe - Fps_i * diff;
+    const double dJr_da = Fpr_r * halfHsafe - Fpr_i * diff;
 
-    const double dNu_dbeta = -R * a_minus / (x * x);
-    const double dNv_dbeta = -R * a_plus / (z * z);
-    const double dNs_dbeta = 2.0 * R * alpha / (y * y);
-    const double dNr_dbeta = Nr * (1.0 / beta + 1.0 / x + 1.0 / y + 1.0 / z);
+    // dJ/dH = 0.5*a*Re(Fp)
+    const double dJu_dH = 0.5 * a_minus * Fpu_r;
+    const double dJv_dH = 0.5 * a_plus * Fpv_r;
+    const double dJs_dH = 0.5 * alpha * Fps_r;
+    const double dJr_dH = 0.5 * beta * Fpr_r;
 
-    const double dNu_dR = -a_minus / x;
-    const double dNv_dR = -a_plus / z;
-    const double dNs_dR = 2.0 * alpha / y;
-    const double dNr_dR = 2.0 * alpha * alpha * beta * kk / (x * y * z);
+    // dJ/dd = -a*Im(Fp)
+    const double dJu_dd = -a_minus * Fpu_i;
+    const double dJv_dd = -a_plus * Fpv_i;
+    const double dJs_dd = -alpha * Fps_i;
+    const double dJr_dd = -beta * Fpr_i;
 
-    // ---- Derivatives of K and J wrt natural variables alpha, beta, S, H, diff ----
-    const double dKu_dalpha = (1.0 - k) * dK_da(a_minus, Ku);
-    const double dKv_dalpha = (1.0 + k) * dK_da(a_plus, Kv);
-    const double dKs_dalpha = dK_da(alpha, Ks);
-    const double dKr_dalpha = 0.0;
+    // -- Coefficient derivatives wrt alpha, beta, R --
+    const double Rbeta = R * beta;
+    const double dNu_dalpha = Rbeta * one_minus_k * inv_x2;
+    const double dNv_dalpha = Rbeta * one_plus_k * inv_z2;
+    const double dNs_dalpha = -2.0 * Rbeta * inv_y2;
+    const double dNr_dalpha = Nr * (2.0 / alpha - one_minus_k * inv_x - inv_y - one_plus_k * inv_z);
 
-    const double dKu_dbeta = 0.0;
-    const double dKv_dbeta = 0.0;
-    const double dKs_dbeta = 0.0;
-    const double dKr_dbeta = dK_da(beta, Kr);
+    const double dNu_dbeta = -R * a_minus * inv_x2;
+    const double dNv_dbeta = -R * a_plus * inv_z2;
+    const double dNs_dbeta = 2.0 * R * alpha * inv_y2;
+    const double dNr_dbeta = Nr * (1.0 / beta + inv_x + inv_y + inv_z);
 
-    const double dKu_dS = dK_dS(a_minus, Ku);
-    const double dKv_dS = dK_dS(a_plus, Kv);
-    const double dKs_dS = dK_dS(alpha, Ks);
-    const double dKr_dS = dK_dS(beta, Kr);
+    const double dNu_dR = -a_minus * inv_x;
+    const double dNv_dR = -a_plus * inv_z;
+    const double dNs_dR = 2.0 * alpha * inv_y;
+    const double dNr_dR = 2.0 * alpha2 * beta * kk * inv_x * inv_y * inv_z;
 
-    const double dKu_dd = dK_dd(a_minus, Ku);
-    const double dKv_dd = dK_dd(a_plus, Kv);
-    const double dKs_dd = dK_dd(alpha, Ks);
-    const double dKr_dd = dK_dd(beta, Kr);
+    // -- Mix derivatives (zero terms eliminated) --
+    // dG/dalpha: Kr doesn't depend on alpha, so dKr_dalpha term is zero
+    const double dG_dalpha = dNu_dalpha * Ku + Nu * one_minus_k * dKu_da + dNv_dalpha * Kv + Nv * one_plus_k * dKv_da +
+                             dNs_dalpha * Ks + Ns * dKs_da + dNr_dalpha * Kr;
 
-    const double dJu_dalpha = (1.0 - k) * dJ_da(Fpu);
-    const double dJv_dalpha = (1.0 + k) * dJ_da(Fpv);
-    const double dJs_dalpha = dJ_da(Fps);
-    const double dJr_dalpha = 0.0;
+    const double dL_dalpha = dNu_dalpha * Ju + Nu * one_minus_k * dJu_da + dNv_dalpha * Jv + Nv * one_plus_k * dJv_da +
+                             dNs_dalpha * Js + Ns * dJs_da + dNr_dalpha * Jr;
 
-    const double dJu_dbeta = 0.0;
-    const double dJv_dbeta = 0.0;
-    const double dJs_dbeta = 0.0;
-    const double dJr_dbeta = dJ_da(Fpr);
+    // dG/dbeta: Ku,Kv,Ks don't depend on beta, so only Nr*dKr_da survives
+    const double dG_dbeta = dNu_dbeta * Ku + dNv_dbeta * Kv + dNs_dbeta * Ks + dNr_dbeta * Kr + Nr * dKr_da;
 
-    const double dJu_dH = dJ_dH(a_minus, Fpu);
-    const double dJv_dH = dJ_dH(a_plus, Fpv);
-    const double dJs_dH = dJ_dH(alpha, Fps);
-    const double dJr_dH = dJ_dH(beta, Fpr);
+    const double dL_dbeta = dNu_dbeta * Ju + dNv_dbeta * Jv + dNs_dbeta * Js + dNr_dbeta * Jr + Nr * dJr_da;
 
-    const double dJu_dd = dJ_dd(a_minus, Fpu);
-    const double dJv_dd = dJ_dd(a_plus, Fpv);
-    const double dJs_dd = dJ_dd(alpha, Fps);
-    const double dJr_dd = dJ_dd(beta, Fpr);
-
-    // ---- Mix derivatives wrt natural variables ----
-    const double dG_dalpha = dNu_dalpha * Ku + Nu * dKu_dalpha + dNv_dalpha * Kv + Nv * dKv_dalpha + dNs_dalpha * Ks +
-                             Ns * dKs_dalpha + dNr_dalpha * Kr + Nr * dKr_dalpha;
-
-    const double dL_dalpha = dNu_dalpha * Ju + Nu * dJu_dalpha + dNv_dalpha * Jv + Nv * dJv_dalpha + dNs_dalpha * Js +
-                             Ns * dJs_dalpha + dNr_dalpha * Jr + Nr * dJr_dalpha;
-
-    const double dG_dbeta = dNu_dbeta * Ku + Nu * dKu_dbeta + dNv_dbeta * Kv + Nv * dKv_dbeta + dNs_dbeta * Ks +
-                            Ns * dKs_dbeta + dNr_dbeta * Kr + Nr * dKr_dbeta;
-
-    const double dL_dbeta = dNu_dbeta * Ju + Nu * dJu_dbeta + dNv_dbeta * Jv + Nv * dJv_dbeta + dNs_dbeta * Js +
-                            Ns * dJs_dbeta + dNr_dbeta * Jr + Nr * dJr_dbeta;
-
+    // dG/dR, dL/dR: R doesn't affect kernel arguments, only coefficients
     const double dG_dR = dNu_dR * Ku + dNv_dR * Kv + dNs_dR * Ks + dNr_dR * Kr;
-
     const double dL_dR = dNu_dR * Ju + dNv_dR * Jv + dNs_dR * Js + dNr_dR * Jr;
 
+    // dG/dS (K depends on S; J does not, so dL/dS = 0)
     const double dG_dS = Nu * dKu_dS + Nv * dKv_dS + Ns * dKs_dS + Nr * dKr_dS;
 
-    const double dL_dS = 0.0; // J terms depend on H, not S, in this split
-
-    const double dG_dH = 0.0;
+    // dL/dH (J depends on H; K does not, so dG/dH = 0)
     const double dL_dH = Nu * dJu_dH + Nv * dJv_dH + Ns * dJs_dH + Nr * dJr_dH;
 
+    // dG/dd, dL/dd
     const double dG_dd = Nu * dKu_dd + Nv * dKv_dd + Ns * dKs_dd + Nr * dKr_dd;
-
     const double dL_dd = Nu * dJu_dd + Nv * dJv_dd + Ns * dJs_dd + Nr * dJr_dd;
 
-    // ---- Derivatives wrt natural variables ----
-    const double dQ_dalpha = Q / alpha;
-
+    // -- Derivatives wrt natural variables (dG_dH=0, dL_dS=0 folded in) --
     const double df_dI = Q * modelCore;
+    const double df_dalpha = I * (Q / alpha * modelCore + Q * (one_minus_eta * dG_dalpha - etaTwoOverPi * dL_dalpha));
+    const double df_dbeta = IQ * (one_minus_eta * dG_dbeta - etaTwoOverPi * dL_dbeta);
+    const double df_dR = IQ * (one_minus_eta * dG_dR - etaTwoOverPi * dL_dR);
+    const double df_dS = IQ * one_minus_eta * dG_dS; // dL_dS = 0
+    const double df_dH = -IQ * etaTwoOverPi * dL_dH; // dG_dH = 0
+    const double df_deta = -IQ * (G + twoOverPi * Lmix);
+    const double df_ddiff = IQ * (one_minus_eta * dG_dd - etaTwoOverPi * dL_dd);
 
-    const double df_dalpha = I * (dQ_dalpha * modelCore + Q * ((1.0 - eta) * dG_dalpha - twoOverPi * eta * dL_dalpha));
-
-    const double df_dbeta = I * Q * ((1.0 - eta) * dG_dbeta - twoOverPi * eta * dL_dbeta);
-
-    const double df_dR = I * Q * ((1.0 - eta) * dG_dR - twoOverPi * eta * dL_dR);
-
-    const double df_dS = I * Q * ((1.0 - eta) * dG_dS - twoOverPi * eta * dL_dS);
-
-    const double df_dH = I * Q * ((1.0 - eta) * dG_dH - twoOverPi * eta * dL_dH);
-
-    const double df_deta = -I * Q * (G + twoOverPi * Lmix);
-
-    const double df_ddiff = I * Q * ((1.0 - eta) * dG_dd - twoOverPi * eta * dL_dd);
-
-    // ---- Chain rule back to Mantid fit parameters ----
-    const double dalpha_dAlpha0 = -alpha * alpha;
-    const double dalpha_dAlpha1 = -lambda * alpha * alpha;
-    const double dbeta_dBeta0 = -beta * beta;
-    const double dR_dKappa = R * 81.799 / (lambda2 * kappa * kappa);
-
-    const double df_dAlpha0 = df_dalpha * dalpha_dAlpha0;
-    const double df_dAlpha1 = df_dalpha * dalpha_dAlpha1;
-    const double df_dBeta0 = df_dbeta * dbeta_dBeta0;
-    const double df_dKappa = df_dR * dR_dKappa;
-
-    const double df_dSigmaSquared = df_dS * dSdV + df_dH * dHdV + df_deta * deta_dV;
-
-    const double df_dGamma = df_dS * dSdL + df_dH * dHdL + df_deta * deta_dL;
-
-    const double df_dX0 = -df_ddiff;
-
+    // -- Chain rule to Mantid fit parameters --
+    const double neg_alpha2 = -alpha2;
     jacobian->set(i, 0, df_dI);
-    jacobian->set(i, 1, df_dAlpha0);
-    jacobian->set(i, 2, df_dAlpha1);
-    jacobian->set(i, 3, df_dBeta0);
-    jacobian->set(i, 4, df_dKappa);
-    jacobian->set(i, 5, df_dSigmaSquared);
-    jacobian->set(i, 6, df_dGamma);
-    jacobian->set(i, 7, df_dX0);
+    jacobian->set(i, 1, df_dalpha * neg_alpha2);
+    jacobian->set(i, 2, df_dalpha * neg_alpha2 * lambda);
+    jacobian->set(i, 3, df_dbeta * (-beta2));
+    jacobian->set(i, 4, df_dR * R * 81.799 * kappa2_inv / lambda2);
+    jacobian->set(i, 5, df_dS * dSdV + df_dH * dHdV + df_deta * deta_dV);
+    jacobian->set(i, 6, df_dS * dSdL + df_dH * dHdL + df_deta * deta_dL);
+    jacobian->set(i, 7, -df_ddiff);
   }
 }
 

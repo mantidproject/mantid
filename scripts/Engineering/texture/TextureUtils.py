@@ -514,7 +514,7 @@ def rerun_fit_with_new_ws(
 
         if not is_final:
             # don't constrain the intensity on the final fit
-            new_peak.addConstraints(f"{min(intens / 2, 1e-6)}<{intens_par_name}<{intens * 2}")
+            new_peak.addConstraints(f"{max(intens / 2, 1e-6)}<{intens_par_name}<{intens * 2}")
         new_peak.addConstraints(f"{x0 * (1 - x0_frac_move)}<{cen_par_name}<{x0 * (1 + x0_frac_move)}")
         # apply ties to the first domain, if ties are required
         if idom > 0:
@@ -556,6 +556,16 @@ def rerun_fit_with_new_ws(
     ), md_fit_kwargs
 
 
+def _get_default_param_ties(peak_func_name, parameters_to_tie):
+    if not parameters_to_tie:
+        match peak_func_name:
+            case "BackToBackExponential":
+                parameters_to_tie("A", "B")
+            case "IkedaCarpenterPV":
+                parameters_to_tie = ("Alpha0", "Alpha1", "Beta0", "Kappa")
+    return parameters_to_tie
+
+
 def fit_all_peaks(
     wss: Sequence[str],
     peaks: Sequence[float],
@@ -570,12 +580,11 @@ def fit_all_peaks(
     final_fit_raw: bool = True,
     parameters_to_tie: Optional[Sequence[str]] = None,
     subsequent_fit_param_fix: Optional[Sequence[str]] = None,
+    peak_func_name: str = "BackToBackExponential",
     last_fit_ic: bool = False,
 ) -> None:
     """
-
     Fit all the peaks given in all the spectra of all the workspaces, for use in a texture analysis workflow
-
     wss: Workspace names of all the workspaces to fit
     peaks: Sequence of peak positions in d-spacing
     peak_window: size of the window to create around the desired peak for purpose of fitting
@@ -596,7 +605,6 @@ def fit_all_peaks(
     """
 
     # currently the only fit functions intended to be used - less flexibility here allows for less user input
-    peak_func_name = "BackToBackExponential"
     supported_peaks = ("BackToBackExponential", "IkedaCarpenterPV")
     bg_func_name = "LinearBackground"
 
@@ -615,6 +623,8 @@ def fit_all_peaks(
         "Minimizer": "Levenberg-Marquardt",
         "CostFunction": "Unweighted least squares",
     }
+
+    parameters_to_tie = _get_default_param_ties(peak_func_name, parameters_to_tie)
 
     # we are initially going to fit a summed spectra to get a good starting point for the peak centre
     # we will then fix the amount this can change in the individual fits
@@ -648,7 +658,8 @@ def fit_all_peaks(
                 fit_wss.append(ws_tof)
                 bkg_is_tied.append(True)
 
-            if last_fit_ic:
+            # if the peak func isn't already Ikeda Carpenter, and the last_fit_ic is true, add another ws_tof to be fit
+            if last_fit_ic and peak_func_name != "IkedaCarpenterPV":
                 fit_wss.append(ws_tof)
                 bkg_is_tied.append(True)
 

@@ -1811,7 +1811,7 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
   }
 
   // Execute fit and get result of fitting background
-  g_log.warning() << "[E1201] FitSingleDomain Before fitting, Fit function: " << fit->asString() << "\n";
+  g_log.debug() << "[E1201] FitSingleDomain Before fitting, Fit function: " << fit->asString() << "\n";
   errorid << " starting function [" << comp_func->asString() << "]";
   try {
     fit->execute();
