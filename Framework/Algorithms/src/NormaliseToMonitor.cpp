@@ -106,7 +106,7 @@ bool MonIDPropChanger::monitorIdReader(const MatrixWorkspace_const_sptr &inputWS
     return false;
 
   // are these monitors really there?
-  std::vector<detid_t> monitorIDList = pInstr->getMonitors();
+  std::vector<detid_t> monitorIDList = pInstr->getMonitorIDs();
   {
     const auto &specInfo = inputWS->spectrumInfo();
     std::set<detid_t> idsInWorkspace;

@@ -109,7 +109,10 @@ public:
   /// return reference to detector cache
   void getDetectors(detid2det_map &out_map) const;
 
+  /// Returns a list containing the detector ids of all detectors, optionally skipping monitors
   std::vector<detid_t> getDetectorIDs(bool skipMonitors = false) const;
+  /// Returns a list containing the detector ids of monitors
+  std::vector<detid_t> getMonitorIDs() const;
 
   std::size_t getNumberDetectors(bool skipMonitors = false) const;
 
@@ -118,9 +121,6 @@ public:
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const IComponent &comp) const;
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const std::string &bankName) const;
   std::set<detid_t> getDetectorIDsInBank(const std::string &bankName) const;
-
-  /// Returns a list containing the detector ids of monitors
-  std::vector<detid_t> getMonitors() const;
 
   /// Get the bounding box for this component and store it in the given argument
   void getBoundingBox(BoundingBox &assemblyBox) const override;
