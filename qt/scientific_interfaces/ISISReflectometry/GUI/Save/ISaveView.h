@@ -51,6 +51,7 @@ public:
   virtual std::vector<std::string> getSelectedWorkspaces() const = 0;
   virtual std::vector<std::string> getSelectedParameters() const = 0;
   virtual int getFileFormatIndex() const = 0;
+  virtual int getModelValidationIndex() const = 0;
   virtual bool getHeaderCheck() const = 0;
   virtual bool getQResolutionCheck() const = 0;
   virtual bool getAdditionalColumnsCheck() const = 0;

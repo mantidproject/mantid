@@ -83,12 +83,13 @@ class MantidORSODataset:
         creator_affiliation: str,
         enable_instrument_settings: bool,
         model: str,
+        validate: bool,
     ) -> None:
         self._data_columns = data_columns
         self._header = None
 
         self._create_mandatory_header(
-            ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation, model, enable_instrument_settings
+            ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation, model, validate, enable_instrument_settings
         )
 
     @property
@@ -131,19 +132,21 @@ class MantidORSODataset:
         creator_name: str,
         creator_affiliation: str,
         model: str,
+        validate: Optional[bool] = False,
         enable_instrument_settings: Optional[bool] = None,
     ) -> None:
         if model:
             # Verify that the sample string is correct before creating the sample
-            try:
-                result = run_with_timeout(lambda: SampleModel(stack=model).resolve_to_layers(), timeout=5.0)
-            except:
-                raise ValueError(
-                    f"The provided model description {model} contains an error. "
-                    "Please check that the string follows the correct ORSO format.\n"
-                )
-            if result is None:
-                raise concurrent.futures.TimeoutError(f"The provided model description {model} could not be validated.")
+            if validate:
+                try:
+                    result = run_with_timeout(lambda: SampleModel(stack=model).resolve_to_layers(), timeout=5.0)
+                except:
+                    raise ValueError(
+                        f"The provided model description {model} contains an error. "
+                        "Please check that the string follows the correct ORSO format.\n"
+                    )
+                if result is None:
+                    raise concurrent.futures.TimeoutError(f"The provided model description {model} could not be validated.")
             sample = Sample(name=ws.getTitle(), model=model)
         else:
             sample = Sample(name=ws.getTitle())

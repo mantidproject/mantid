@@ -16,11 +16,13 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos, ORSOAscii, ORSONexus };
+enum class ModelValidationMethod { NoValidation, StrictValidation };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL FileFormatOptions {
 public:
   FileFormatOptions(NamedFormat format, std::string prefix, bool includeHeader, std::string separator,
-                    bool includeQResolution, bool includeAdditionalColumns, bool saveToSingleFile, std::string model);
+                    bool includeQResolution, bool includeAdditionalColumns, bool saveToSingleFile, std::string model,
+                    bool model_validation);
   bool shouldIncludeHeader() const;
   bool shouldIncludeQResolution() const;
   bool shouldIncludeAdditionalColumns() const;
@@ -28,6 +30,7 @@ public:
   std::string const &separator() const;
   std::string const &prefix() const;
   std::string const &model() const;
+  bool validate() const;
   NamedFormat format() const;
   bool isORSOFormat() const;
 
@@ -35,6 +38,7 @@ private:
   NamedFormat m_format;
   std::string m_prefix;
   std::string m_model;
+  bool m_model_validation;
   bool m_includeHeader;
   std::string m_separator;
   bool m_includeQResolution;

@@ -139,11 +139,13 @@ void QtSaveView::disableAdditionalColumnsCheckBox() { m_ui.extraColumnsCheckBox-
 void QtSaveView::showModelEditTextBox() {
   m_ui.modelEditLabel->setVisible(true);
   m_ui.modelEdit->setVisible(true);
+  m_ui.validationOptionComboBox->setVisible(true);
 }
 
 void QtSaveView::hideModelEditTextBox() {
   m_ui.modelEditLabel->setVisible(false);
   m_ui.modelEdit->setVisible(false);
+  m_ui.validationOptionComboBox->setVisible(false);
 }
 
 void QtSaveView::enableSeparatorButtonGroup() {
@@ -232,6 +234,11 @@ std::vector<std::string> QtSaveView::getSelectedParameters() const {
  * @return :: File format index
  */
 int QtSaveView::getFileFormatIndex() const { return m_ui.fileFormatComboBox->currentIndex(); }
+
+/** Returns the index of the selected validation method
+ * @return :: Validation method format index
+ */
+int QtSaveView::getModelValidationIndex() const { return m_ui.validationOptionComboBox->currentIndex(); }
 
 /** Returns the header check value
  * @return :: The header check

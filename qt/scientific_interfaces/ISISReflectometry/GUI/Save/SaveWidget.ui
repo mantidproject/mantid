@@ -366,6 +366,29 @@
         <widget class="QLineEdit" name="modelEdit"/>
         </item>
         <item>
+            <widget class="QComboBox" name="validationOptionComboBox">
+            <property name="font">
+            <font>
+                <weight>75</weight>
+                <bold>true</bold>
+            </font>
+            </property>
+            <property name="styleSheet">
+            <string notr="true"/>
+            </property>
+            <item>
+            <property name="text">
+                <string>Don't validate model string</string>
+            </property>
+            </item>
+            <item>
+            <property name="text">
+                <string>Validate model string</string>
+            </property>
+            </item>
+            </widget>
+        </item>
+        <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
