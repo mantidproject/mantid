@@ -4,7 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from instrumentview.Projections.SideBySide import SideBySide, FlatBankInfo
+from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.Projections.Projection import SideBySide
+from instrumentview.Projections.SideBySide import FlatBankInfo
 
 import numpy as np
 from unittest.mock import MagicMock, patch
@@ -72,12 +74,12 @@ class TestSideBySideProjection(unittest.TestCase):
         mock_detector_info.detectorIDs.return_value = detector_ids + [100] if has_other_detectors else detector_ids
         mock_workspace.detectorInfo.return_value = mock_detector_info
         side_by_side = SideBySide(
+            type=ProjectionType.SIDE_BY_SIDE,
             workspace=mock_workspace,
             detector_ids=np.array(detector_ids),
             sample_position=np.zeros(3),
             root_position=np.zeros(3),
             detector_positions=np.array([[1, 1, 1], [0, 1, 0], [0, 0, 1]]),
-            axis=np.array([0, 0, 1]),
         )
         return side_by_side
 
@@ -105,7 +107,7 @@ class TestSideBySideProjection(unittest.TestCase):
         self.assertEqual(3, len(args))
         np.testing.assert_allclose([0, 0, 0], args[0])
         np.testing.assert_allclose([0, 0, 0], args[1])
-        np.testing.assert_allclose([0, 0, 1], args[2])
+        np.testing.assert_allclose([1, 0, 0], args[2])
 
     @patch("instrumentview.Projections.SideBySide.SideBySide._arrange_panels")
     @patch("instrumentview.Projections.Projection.Projection._calculate_detector_coordinates")

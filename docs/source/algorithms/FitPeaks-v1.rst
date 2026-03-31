@@ -62,6 +62,59 @@ user's input.
 The first peak will be fit with the starting value provided by the user.
 except background and peak center, which will be determiend by *observation*.
 
+Peak parameter initialisation order
+####################################
+
+Once at least one peak has been successfully fitted, the starting parameters for
+subsequent peaks are determined in the following priority order:
+
+1. **Same peak in a previous spectrum** — if the same peak was successfully
+   fitted in an earlier spectrum and the current spectrum has a consecutive
+   detector ID with the spectrum that produced that fit, those fitted
+   parameters are used as the starting point.
+
+2. **Last successfully fitted peak in the current spectrum** — if cross-spectrum
+   parameters are not available and ``CopyLastGoodPeakParameters`` is ``True``
+   (the default), the parameters from the most recently fitted peak *in the
+   same spectrum* are copied as starting values. This is generally a good
+   strategy because physically nearby peaks tend to have similar profile
+   parameters.
+
+3. **IDF / Parameter File defaults** — if neither of the above applies (e.g.
+   the very first peak in the first spectrum), the peak function retains the
+   default values from the Instrument Definition File (IDF). For peak functions
+   such as :ref:`func-BackToBackExponential`, the ``setMatrixWorkspace`` call
+   can calculate parameters (e.g. *A* and *B*) from formulae in the
+   ``INSTR_Parameter.xml`` file, which can provide physically meaningful
+   starting values.
+
+4. **Internal estimation routines** — peak centre, height and FWHM are always
+   estimated by *observation* of the data within the fit window (see
+   `Estimation of values of peak profiles`_ below). User-specified starting
+   values (``PeakParameterNames`` / ``PeakParameterValues``) are applied when
+   no parameter copying has occurred.
+
+Parameters marked as ``<fixed />`` in the Parameter File are applied as
+**ties** by ``setMatrixWorkspace()``. This means that regardless of which step
+above sets the starting values, these tied parameters are forced back to their
+IDF-calculated values during each iteration of the fit. In effect, they act as
+constraints that override any values copied from neighbouring peaks.
+
+CopyLastGoodPeakParameters
+==========================
+
+The ``CopyLastGoodPeakParameters`` property (default ``True``) controls whether
+step 2 above is used. Copying parameters from the last successfully fitted peak
+in the same spectrum is, in general, a good way of providing physically sensible
+starting values and has been retained as the default behaviour.
+
+However, in situations where peak parameters are highly wavelength-dependent but
+are *not* marked as fixed in the Parameter File, copying from a peak at a
+potentially very different wavelength can give a worse starting position than the
+default or data-driven estimation. Setting ``CopyLastGoodPeakParameters`` to
+``False`` disables step 2, so the algorithm falls through directly to the IDF
+defaults (step 3) and internal estimation (step 4) for each peak independently.
+
 Background
 ##########
 

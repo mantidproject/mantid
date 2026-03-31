@@ -1,0 +1,2 @@
+- The :ref:`BayesStretch <algm-BayesStretch>` algorithm was updated to include the backend name to the name of each workspace in its fit workspaces group in ``Stretch`` tab of :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>`
+- In addition a duplicate ``Stretch`` word was removed from names of workspaces in the fit workspace group resulting from :ref:`BayesStretch2 <algm-BayesStretch2>` when the backend is set to ``quickbayes`` in ``Stretch`` tab.

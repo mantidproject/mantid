@@ -128,7 +128,7 @@ def find_bg_of_spectrum(wsname, ispec, xwindow, niter, do_sg_filter, prog):
     # find kernel size
     nwindow = _get_nbins_in_xwindow(ws.readX(ispec), xwindow)
     # do initial filter to remove very high intensity points
-    ybg = ws.readY(ispec)[:]  # copy
+    ybg = ws.readY(ispec).copy()  # copy
     if do_sg_filter:
         ybg = savgol_filter(ybg, nwindow, polyorder=1)
     yavg = ybg.mean()
