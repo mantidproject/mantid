@@ -122,7 +122,7 @@ pyqt:
   - '>=5.15,<6'
 
 pyqt5_sip:
-  - '<12.13'
+  - '>12.13,<13'
 
 # v0.45 and above addresses vtk compatibility issues by pinning in the pyvista feedstock.
 pyvista:
