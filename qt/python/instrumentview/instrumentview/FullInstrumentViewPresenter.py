@@ -76,11 +76,11 @@ class FullInstrumentViewPresenter:
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
         self._count_scale_mode = self._LINEAR
-        self._point_cloud_renderer = PointCloudRenderer()
-        self._shape_renderer = None  # lazily created
-        self._sbs_shape_renderer = None  # lazily created
-        self._renderer = self._point_cloud_renderer
         self._model.setup()
+        self._point_cloud_renderer = PointCloudRenderer()
+        self._shape_renderer = ShapeRenderer(self._model.workspace)
+        self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
+        self._renderer = self._point_cloud_renderer
         self.setup()
         self._callback_queue = Queue()
         self._callback_stop_sentinel = object()
@@ -557,7 +557,7 @@ class FullInstrumentViewPresenter:
             self._model._workspace = AnalysisDataService.retrieve(ws_name)
             self._model.setup()
             self._setup_component_tree()
-            self._clear_renderers()  # Clear cached renderers before rendering
+            self._reload_renderers()  # Clear cached renderers before rendering
             self.update_plotter()
 
     def replace_workspace_callback(self, ws_name, ws):
@@ -686,59 +686,37 @@ class FullInstrumentViewPresenter:
         self._model.component_tree_indices_selected(component_indices)
         self.update_plotter()
 
-    def _get_point_cloud_renderer(self) -> PointCloudRenderer:
-        if self._point_cloud_renderer is None:
-            self._point_cloud_renderer = PointCloudRenderer()
-        return self._point_cloud_renderer
-
-    def _get_shape_renderer(self) -> ShapeRenderer:
-        """Get or create a cached shape renderer instance.
-
-        Returns a :class:`SideBySideShapeRenderer` when the current
-        projection is side-by-side, otherwise a plain :class:`ShapeRenderer`.
-        On first call for each type, precomputes geometry from the workspace
-        which may be expensive.  Subsequent calls return the cached instance.
-        """
-        is_sbs = self._model.projection_type == ProjectionType.SIDE_BY_SIDE
-        if is_sbs:
-            if self._sbs_shape_renderer is None:
-                self._sbs_shape_renderer = SideBySideShapeRenderer()
-                self._sbs_shape_renderer.precompute(self._model.workspace, self._model.bank_groups_by_detector_id)
-            return self._sbs_shape_renderer
-        else:
-            if self._shape_renderer is None:
-                self._shape_renderer = ShapeRenderer()
-                self._shape_renderer.precompute(self._model.workspace)
-            return self._shape_renderer
-
     def _on_show_shapes_toggled(self, checked: bool) -> None:
         if checked:
-            self._renderer = self._get_shape_renderer()
+            if self._model.projection_type == ProjectionType.SIDE_BY_SIDE:
+                self._renderer = self._sbs_shape_renderer
+            else:
+                self._renderer = self._shape_renderer
         else:
-            self._renderer = self._get_point_cloud_renderer()
+            self._renderer = self._point_cloud_renderer
 
         self.update_plotter()
 
     def on_show_shapes_toggled(self, checked: bool) -> None:
         self._callback_queue.put((self._on_show_shapes_toggled, (checked,)))
 
-    def _clear_renderers(self) -> None:
-        """Clear cached renderer instances, forcing recreation on next use.
-
+    def _reload_renderers(self) -> None:
+        """
         Called when the workspace changes to ensure renderers recompute geometry
         from the new workspace data.
         """
-        self._shape_renderer = None
-        self._sbs_shape_renderer = None
-        self._point_cloud_renderer = None
-        self._renderer = self._get_shape_renderer() if self._view.is_show_shapes_checkbox_checked() else self._get_point_cloud_renderer()
+        self._point_cloud_renderer = PointCloudRenderer()
+        self._shape_renderer = ShapeRenderer(self._model.workspace)
+        self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
+        self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
 
     def _reload_everything(self) -> None:
         """Reload all workspace-dependent data (peaks, masks, groupings) and clear renderer cache.
 
         Called when workspaces are added to or removed from the ADS.
         """
-        self._clear_renderers()
-        self._reload_peaks_workspaces()
-        self._reload_mask_workspaces()
-        self._reload_grouping_workspaces()
+        with SuppressRendering(self._view.main_plotter):
+            self._reload_renderers()
+            self._reload_peaks_workspaces()
+            self._reload_mask_workspaces()
+            self._reload_grouping_workspaces()

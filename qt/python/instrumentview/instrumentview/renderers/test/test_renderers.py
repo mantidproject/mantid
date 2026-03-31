@@ -139,26 +139,28 @@ class TestShapeRenderer(unittest.TestCase):
     """Tests for the ShapeRenderer class."""
 
     def setUp(self):
-        self.renderer = ShapeRenderer()
+        self._workspace = self._refresh_render_with_mock_workspace(n_detectors=4)
 
     def test_is_instrument_renderer(self):
         self.assertIsInstance(self.renderer, InstrumentRenderer)
 
-    def test_build_detector_mesh_raises_without_precompute(self):
+    def test_build_detector_mesh_auto_precomputes(self):
+        """build_detector_mesh should auto-precompute if not already done."""
+        model = self._create_mock_model(self._workspace, n_pickable=1)
         positions = np.array([[0.0, 0.0, 0.0]])
-        with self.assertRaises(RuntimeError):
-            self.renderer.build_detector_mesh(positions, False, MagicMock())
+        mesh = self.renderer.build_detector_mesh(positions, False, model)
+        self.assertTrue(self.renderer._precomputed)
+        self.assertIsInstance(mesh, pv.PolyData)
 
     def test_precompute_and_build_mesh(self):
         """Integration test: create a mock workspace with detectors that have shapes
         and verify mesh assembly produces valid geometry."""
-        workspace = self._create_mock_workspace(n_detectors=4)
-        self.renderer.precompute(workspace)
 
+        # Test precomputing before building a mesh
         self.assertTrue(self.renderer._precomputed)
         self.assertGreater(len(self.renderer._shape_cache), 0)
 
-        model = self._create_mock_model(workspace, n_pickable=4)
+        model = self._create_mock_model(self._workspace, n_pickable=4)
         positions = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]], dtype=np.float64)
         mesh = self.renderer.build_detector_mesh(positions, False, model)
 
@@ -169,10 +171,8 @@ class TestShapeRenderer(unittest.TestCase):
     def test_build_pickable_mesh_returns_shape_copy(self):
         """build_pickable_mesh should return a shape mesh copy (not a point cloud)
         so that cell picking works on the full detector surface."""
-        workspace = self._create_mock_workspace(n_detectors=4)
-        self.renderer.precompute(workspace)
 
-        model = self._create_mock_model(workspace, n_pickable=4)
+        model = self._create_mock_model(self._workspace, n_pickable=4)
         positions = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]], dtype=np.float64)
         self.renderer.build_detector_mesh(positions, False, model)
 
@@ -185,8 +185,7 @@ class TestShapeRenderer(unittest.TestCase):
 
     def test_set_pickable_scalars_sets_cell_data(self):
         """Visibility should be set as cell data via _cell_to_detector."""
-        workspace = self._create_mock_workspace(n_detectors=2)
-        self.renderer.precompute(workspace)
+        workspace = self._refresh_render_with_mock_workspace(n_detectors=2)
 
         model = self._create_mock_model(workspace, n_pickable=2)
         positions = np.array([[0, 0, 0], [1, 0, 0]], dtype=np.float64)
@@ -204,8 +203,7 @@ class TestShapeRenderer(unittest.TestCase):
 
     def test_cell_to_detector_mapping(self):
         """Verify that each cell in the assembled mesh maps to a valid detector index."""
-        workspace = self._create_mock_workspace(n_detectors=3)
-        self.renderer.precompute(workspace)
+        workspace = self._refresh_render_with_mock_workspace(n_detectors=3)
 
         model = self._create_mock_model(workspace, n_pickable=3)
         positions = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0]], dtype=np.float64)
@@ -220,8 +218,7 @@ class TestShapeRenderer(unittest.TestCase):
 
     def test_set_detector_scalars_cell_data(self):
         """Scalars should be repeated per-cell for each detector."""
-        workspace = self._create_mock_workspace(n_detectors=2)
-        self.renderer.precompute(workspace)
+        workspace = self._refresh_render_with_mock_workspace(n_detectors=2)
 
         model = self._create_mock_model(workspace, n_pickable=2)
         positions = np.array([[0, 0, 0], [1, 0, 0]], dtype=np.float64)
@@ -239,15 +236,13 @@ class TestShapeRenderer(unittest.TestCase):
             np.testing.assert_array_equal(cell_scalars[mask], expected)
 
     def test_empty_positions_returns_empty_mesh(self):
-        workspace = self._create_mock_workspace(n_detectors=2)
-        self.renderer.precompute(workspace)
+        self._refresh_render_with_mock_workspace(n_detectors=2)
         mesh = self.renderer.build_masked_mesh(np.empty((0, 3)), False, model=None)
         self.assertEqual(mesh.number_of_points, 0)
 
     def test_shape_deduplication(self):
         """Detectors sharing the same shape XML should reuse the cached template."""
-        workspace = self._create_mock_workspace(n_detectors=10, same_shape=True)
-        self.renderer.precompute(workspace)
+        self._refresh_render_with_mock_workspace(n_detectors=10, same_shape=True)
         # Only 1 unique shape (plus potentially the fallback)
         # Since all share the same XML, cache should have exactly 1 entry
         self.assertEqual(len(self.renderer._shape_cache), 1)
@@ -268,8 +263,7 @@ class TestShapeRenderer(unittest.TestCase):
         """Rebuilding the detector mesh with fewer detectors should not cause
         an array shape mismatch in set_pickable_scalars.
         """
-        workspace = self._create_mock_workspace(n_detectors=6, same_shape=True)
-        self.renderer.precompute(workspace)
+        workspace = self._refresh_render_with_mock_workspace(n_detectors=6, same_shape=True)
 
         # First render: 6 detectors
         model_6 = self._create_mock_model(workspace, n_pickable=6)
@@ -292,8 +286,7 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertEqual(len(pickable_4.cell_data["Visible Picked"]), pickable_4.number_of_cells)
 
     def test_build_detector_mesh_projects_shape_vertices_for_cylindrical_projection(self):
-        workspace = self._create_mock_workspace(n_detectors=1)
-        self.renderer.precompute(workspace)
+        workspace = self._refresh_render_with_mock_workspace(n_detectors=1)
 
         projection = MagicMock()
         projection.project_points.side_effect = lambda points, apply_x_correction=True: np.column_stack(
@@ -315,8 +308,7 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertLess(np.max(mesh.points[:, 1]), -2.9)
 
     def test_build_detector_mesh_keeps_projected_shape_contiguous_across_seam(self):
-        workspace = self._create_mock_workspace(n_detectors=1)
-        self.renderer.precompute(workspace)
+        workspace = self._refresh_render_with_mock_workspace(n_detectors=1)
 
         projection = MagicMock()
         projection.u_period = 2 * np.pi
@@ -360,8 +352,7 @@ class TestShapeRenderer(unittest.TestCase):
         """When _detector_mesh_ref has been built, build_pickable_mesh should
         return a shape mesh copy regardless of flip_z — the flip is already
         baked into the detector mesh vertices."""
-        workspace = self._create_mock_workspace(n_detectors=2)
-        self.renderer.precompute(workspace)
+        workspace = self._refresh_render_with_mock_workspace(n_detectors=2)
         model = self._create_mock_model(workspace, n_pickable=2)
         positions = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=np.float64)
         ref_mesh = self.renderer.build_detector_mesh(positions, False, model)
@@ -374,8 +365,7 @@ class TestShapeRenderer(unittest.TestCase):
     def test_build_detector_mesh_flip_z_negates_world_z_before_projection(self):
         """In cylindrical projections, flip_z=True must negate the world-space
         z-coordinate of each shape vertex before it is passed to project_points."""
-        workspace = self._create_mock_workspace(n_detectors=1)
-        self.renderer.precompute(workspace)
+        workspace = self._refresh_render_with_mock_workspace(n_detectors=1)
         # Override the stored 3D position so the flip is observable (z ≠ 0)
         self.renderer._all_positions_3d = np.array([[0.0, 0.0, 1.5]])
 
@@ -416,8 +406,8 @@ class TestShapeRenderer(unittest.TestCase):
     def test_build_masked_mesh_flip_z_negates_world_z_before_projection(self):
         """flip_z=True should also negate world-space z for masked detector vertices
         before projection (same _assemble_mesh path as build_detector_mesh)."""
-        workspace = self._create_mock_workspace(n_detectors=1)
-        self.renderer.precompute(workspace)
+
+        workspace = self._refresh_render_with_mock_workspace(n_detectors=1)
         self.renderer._all_positions_3d = np.array([[0.0, 0.0, 2.0]])
 
         model = self._create_mock_model(workspace, n_pickable=0)
@@ -456,6 +446,13 @@ class TestShapeRenderer(unittest.TestCase):
     # ------------------------------------------------------------------
     # Helper methods to create mock objects
     # ------------------------------------------------------------------
+
+    def _refresh_render_with_mock_workspace(self, **kwargs):
+        mock_ws = self._create_mock_workspace(**kwargs)
+        self.renderer = ShapeRenderer(mock_ws)
+        self.renderer.precompute()
+        return mock_ws
+
     def _create_mock_workspace(self, n_detectors=4, same_shape=False):
         """Create a mock workspace with mock componentInfo and detectorInfo."""
         workspace = MagicMock()
