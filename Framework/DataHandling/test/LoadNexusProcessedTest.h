@@ -38,6 +38,7 @@
 #include <filesystem>
 #include <string>
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Geometry;
@@ -1173,6 +1174,10 @@ public:
     lpws->addPeak(pk1);
     lpws->addPeak(pk2);
 
+    // Set known monitor counts
+    lpws->getPeak(0).setMonitorCount(12345.0);
+    lpws->getPeak(1).setMonitorCount(54321.0);
+
     // save the lean elastic peak workspace to temp
     std::string filename = "testLoadLeanElasticPeaksWorkspace.nxs";
     SaveNexusProcessed save;
@@ -1211,9 +1216,51 @@ public:
     TS_ASSERT_DELTA(lpws->getPeak(1).getQLabFrame().X(), pk2.getQLabFrame().X(), 1e-5);
     TS_ASSERT_DELTA(lpws->getPeak(1).getQLabFrame().Y(), pk2.getQLabFrame().Y(), 1e-5);
     TS_ASSERT_DELTA(lpws->getPeak(1).getQLabFrame().Z(), pk2.getQLabFrame().Z(), 1e-5);
+    // --monitor counts
+    TS_ASSERT_DELTA(lpws_loaded->getPeak(0).getMonitorCount(), 12345.0, 1e-5);
+    TS_ASSERT_DELTA(lpws_loaded->getPeak(1).getMonitorCount(), 54321.0, 1e-5);
 
     if (std::filesystem::exists(filename))
       std::filesystem::remove(filename);
+  }
+
+  void test_load_peaksWorkspace_monitor_count() {
+    auto peaksTestWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
+    // contains two peaks
+    const std::string filename = FileFinder::Instance().getFullPath("unit_testing/MINITOPAZ_Definition.xml").string();
+    InstrumentDefinitionParser parser(filename, "MINITOPAZ", Strings::loadFile(filename));
+    auto instrument = parser.parseXML(nullptr);
+    peaksTestWS->populateInstrumentParameters();
+    peaksTestWS->setInstrument(instrument);
+    peaksTestWS->getPeak(0).setMonitorCount(12345);
+    peaksTestWS->getPeak(1).setMonitorCount(54321);
+    TS_ASSERT_EQUALS(peaksTestWS->getNumberPeaks(), 2);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.setChild(true);
+    saveAlg.initialize();
+    saveAlg.setProperty("InputWorkspace", peaksTestWS);
+    saveAlg.setPropertyValue("Filename", "test_load_peaksWorkspace_monitor_count.nxs");
+    saveAlg.execute();
+    std::string filePath = saveAlg.getPropertyValue("Filename");
+
+    LoadNexusProcessed loadAlg;
+    loadAlg.setChild(true);
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", filePath);
+    loadAlg.setPropertyValue("OutputWorkspace", "dummy");
+    loadAlg.execute();
+
+    Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
+    auto loadedPeaksWS = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
+    TS_ASSERT_EQUALS(loadedPeaksWS->getNumberPeaks(), 2);
+    TS_ASSERT_DELTA(loadedPeaksWS->getPeak(0).getMonitorCount(), 12345.0, 1e-5);
+    TS_ASSERT_DELTA(loadedPeaksWS->getPeak(1).getMonitorCount(), 54321.0, 1e-5);
+
+    AnalysisDataService::Instance().remove("dummy");
+    if (std::filesystem::exists(filePath)) {
+      std::filesystem::remove(filePath);
+    }
   }
 
   void test_ws_run_title_failover_to_title() {

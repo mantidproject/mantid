@@ -268,8 +268,8 @@ class BayesStretch2(QuickBayesTemplate):
         :param name: the name of the output worksapce
         :return group workspaces with the FWHM and beta slices
         """
-        beta = self.make_slice_ws(slice_list=beta_list, x_data=x_data, x_unit=x_unit, name=f"{name}_Stretch_Beta")
-        FWHM = self.make_slice_ws(slice_list=FWHM_list, x_data=x_data, x_unit="FWHM", name=f"{name}_Stretch_FWHM")
+        beta = self.make_slice_ws(slice_list=beta_list, x_data=x_data, x_unit=x_unit, name=f"{name}_Beta")
+        FWHM = self.make_slice_ws(slice_list=FWHM_list, x_data=x_data, x_unit="FWHM", name=f"{name}_FWHM")
         FWHM = self.set_label(ws_str=FWHM, label="FWHM", unit="eV")
         beta = self.set_label(ws_str=beta, label="beta", unit="")
 

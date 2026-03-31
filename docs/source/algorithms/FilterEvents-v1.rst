@@ -306,8 +306,8 @@ Output:
     workspace tempsplitws_1 has 16951 events
     workspace tempsplitws_2 has 9972 events
     workspace tempsplitws_3 has 7019 events
-    workspace tempsplitws_4 has 22514 events
-    workspace tempsplitws_5 has 5082 events
+    workspace tempsplitws_4 has 22529 events
+    workspace tempsplitws_5 has 5067 events
     workspace tempsplitws_unfiltered has 50605 events
 
 .. categories::

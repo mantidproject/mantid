@@ -782,7 +782,8 @@ And the same reduction, but with the use of the :ref:`algm-DirectILLAutoProcess`
         ReductionType='Powder',
         FlatBkg = 'Flat Bkg ON',
         ElasticChannel='Elastic Channel AUTO',
-        EPPCreationMethod='Fit EPP'
+        EPPCreationMethod='Fit EPP',
+        SaveOutput=False,
     )
 
     DirectILLAutoProcess(
@@ -791,7 +792,8 @@ And the same reduction, but with the use of the :ref:`algm-DirectILLAutoProcess`
         ProcessAs='Empty',
         ReductionType='Powder',
         IncidentEnergyCalibration="Energy Calibration ON",
-        IncidentEnergy=Ei
+        IncidentEnergy=Ei,
+        SaveOutput=False,
     )
 
     # Need to interpolate container to 50K
@@ -836,18 +838,5 @@ Output:
 
     sample_SofQW_087294_Ei9meV_T1.5K: Q range: 0.0...9.21A; W range -97.0...7.62meV
     sample_SofQW_087283_Ei9meV_T50.0K: Q range: 0.0...9.19A; W range -96.6...7.62meV
-
-.. testcleanup:: FullExampleAutoProcess
-
-    mtd.clear()
-    import os
-    to_remove = ["vanadium_auto_SofQW_085801_Ei9meV_T20.0K.nxs",
-                 "vanadium_auto_SofTW_085801_Ei9meV_T20.0K.nxspe",
-                 "vanadium_auto_diag_085801_Ei9meV_T20.0K",
-                 "vanadium_auto_integral_085801_Ei9meV_T20.0K.nxs",
-                 "container_087306_Ei9meV_T1.5K.nxs",
-                 "container_087311_Ei9meV_T100.0K.nxs"]
-    for ftr in to_remove:
-        os.remove(ftr)
 
 .. categories:: Techniques

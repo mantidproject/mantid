@@ -1,0 +1,1 @@
+- In the new Instrument View, added an option to draw detectors using their actual geometric shapes instead of as points.
