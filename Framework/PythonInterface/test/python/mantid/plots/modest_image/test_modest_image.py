@@ -37,6 +37,7 @@ def default_data():
 
 
 def init(img_cls, data, origin="upper", extent=None):
+    plt.close()
     fig = plt.figure()
     ax = fig.add_subplot(111)
     artist = img_cls(ax, data=data, origin=origin, interpolation="nearest", extent=extent)
@@ -74,7 +75,8 @@ def check(label, modest, axes, thresh=2.0e-5):
     data2 = data2[:, :, :3]
 
     # Here we need to convert to float to avoid underflow
-    rms = np.mean(np.abs(data1.astype(float) - data2.astype(float)))
+    diff = data1.astype(np.float64) - data2.astype(np.float64)
+    rms = np.sqrt(np.mean(diff**2))
 
     result = "PASS" if rms < thresh else "FAIL"
     modest_label = "test_%s_modest" % label
