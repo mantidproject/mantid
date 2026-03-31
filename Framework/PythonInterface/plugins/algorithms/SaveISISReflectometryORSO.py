@@ -13,7 +13,10 @@ from mantid.kernel import (
     StringArrayLengthValidator,
     StringArrayMandatoryValidator,
     StringArrayProperty,
+    StringListValidator,
+    EnabledWhenProperty,
     CompositeValidator,
+    PropertyCriterion,
     logger,
 )
 from mantid.api import AlgorithmFactory, AlgorithmManager, FileProperty, FileAction, PythonAlgorithm, AnalysisDataService, WorkspaceGroup
@@ -63,6 +66,24 @@ class Prop:
     FILENAME = "Filename"
     MODEL = "ModelDescription"
     VALIDATION = "ValidateModel"
+    META_SOURCE = "MetadataSource"
+
+    # Optional Properties for Manual Metadata Entry
+    Q_CONVERT_METHOD = "QConversionMethod"
+    REDUCTION_TIMESTAMP = "ReductionTimestamp"
+    ANGLE_FILES = "AngleFileList"
+    TRANS_FILES_1 = "FirstTransmissionFileList"
+    TRANS_FILES_2 = "SecondTransmissionFileList"
+    FLOOD_ENTRY = "FloodCorrectionSource"
+    CALIB_FILE = "CalibrationFile"
+    RESOLUTION = "Resolution"
+    SCRIPT = "ReductionScript"
+
+
+class MetadataSourceOptions:
+    FROM_HISTORY = "History"
+    HYBRID = "HistoryWherePossible"
+    MANUAL = "Manual"
 
 
 class ReflectometryDataSetBase:
@@ -73,6 +94,7 @@ class ReflectometryDataSetBase:
         self._reduction_timestamp: datetime = None
         self._is_stitched = None
         self._q_conversion_theta: Optional[float] = None
+        self._q_conversion_method = ""
         self._spin_state: str = ""
         self._reduction_script: Optional[str] = None
         self._angle_files: List[Tuple[str, str]] = None
@@ -114,8 +136,8 @@ class ReflectometryDataSetBase:
         return len(self._spin_state) > 0
 
     @property
-    def q_conversion_method(self):
-        self._q_conversion_method
+    def q_conversion_method(self) -> str:
+        return self._q_conversion_method
 
     @property
     def q_conversion_theta(self) -> Optional[float]:
@@ -473,6 +495,58 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             StringArrayProperty(Prop.WORKSPACE_LIST, values=[], validator=mandatory_ws_list),
             doc="A list of workspace names containing the reduced reflectivity data to be saved.",
         )
+
+        meta_source_validator = StringListValidator([MetadataSourceOptions.FROM_HISTORY, MetadataSourceOptions.MANUAL])
+        self.declareProperty(
+            name=Prop.META_SOURCE,
+            defaultValue=MetadataSourceOptions.FROM_HISTORY,
+            validator=meta_source_validator,
+            doc=f"Where the metadata in the file should be taken from. "
+            f"{MetadataSourceOptions.FROM_HISTORY}: Takes from the workspace history (Relies on ReflectometryReductionOne). "
+            f"{MetadataSourceOptions.MANUAL}: Requires all metadata to be given as properties to this algorithm.",
+        )
+
+        manual_metadata_condition = EnabledWhenProperty(Prop.META_SOURCE, PropertyCriterion.IsNotDefault)
+
+        convert_method_validator = StringListValidator(
+            [ReflectometryDatasetHistory.REDUCTION_WORKFLOW_ALG, ReflectometryDatasetHistory.CONVERT_ALG]
+        )
+        self.declareProperty(
+            name=Prop.Q_CONVERT_METHOD,
+            defaultValue=ReflectometryDatasetHistory.REDUCTION_WORKFLOW_ALG,
+            validator=convert_method_validator,
+            doc="The method used for converting from Q Space to Wavelength.",
+        )
+        self.setPropertySettings(Prop.Q_CONVERT_METHOD, manual_metadata_condition)
+
+        self.declareProperty(name=Prop.REDUCTION_TIMESTAMP, defaultValue="", doc="When the reduction took place (ISO8601 Standard).")
+        self.setPropertySettings(Prop.REDUCTION_TIMESTAMP, manual_metadata_condition)
+
+        self.declareProperty(StringArrayProperty(Prop.ANGLE_FILES, values=[]), doc="Input angle file list.")
+        self.setPropertySettings(Prop.ANGLE_FILES, manual_metadata_condition)
+
+        self.declareProperty(StringArrayProperty(Prop.TRANS_FILES_1, values=[]), doc="List of files used in the first transmission run.")
+        self.setPropertySettings(Prop.TRANS_FILES_1, manual_metadata_condition)
+
+        self.declareProperty(StringArrayProperty(Prop.TRANS_FILES_2, values=[]), doc="List of files used in the second transmission run.")
+        self.setPropertySettings(Prop.TRANS_FILES_2, manual_metadata_condition)
+
+        flood_entry_validator = StringArrayLengthValidator()
+        flood_entry_validator.setLengthMax(2)
+        self.declareProperty(
+            StringArrayProperty(Prop.FLOOD_ENTRY, values=["", ""], validator=flood_entry_validator),
+            doc="Entry for the flood correction. Must be in the form 'filename, comment'.",
+        )
+        self.setPropertySettings(Prop.FLOOD_ENTRY, manual_metadata_condition)
+
+        self.declareProperty(Prop.CALIB_FILE, defaultValue="", doc="Calibration file used.")
+        self.setPropertySettings(Prop.CALIB_FILE, manual_metadata_condition)
+
+        self.declareProperty(Prop.RESOLUTION, defaultValue=0.0, doc="Resolution of the run.")
+        self.setPropertySettings(Prop.RESOLUTION, manual_metadata_condition)
+
+        self.declareProperty(Prop.SCRIPT, defaultValue="", doc="Script used to perform the reduction.")
+        self.setPropertySettings(Prop.SCRIPT, manual_metadata_condition)
 
         self.declareProperty(
             name=Prop.WRITE_RESOLUTION,
