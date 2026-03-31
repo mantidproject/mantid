@@ -9,8 +9,8 @@
 Description
 -----------
 
-This algorithm sums two :ref:`MDHistoWorkspaces <MDHistoWorkspace>` or
-merges two :ref:`MDEventWorkspaces <MDWorkspace>` together.
+This algorithm sums two :py:obj:`MDHistoWorkspace <mantid.daaobjects.MDHistoWorkspace>` or
+merges two :py:obj:`MDEventWorkspace <mantid.daaobjects.MDEventWorkspace>` together.
 
 MDHistoWorkspaces
 #################
@@ -28,7 +28,7 @@ MDEventWorkspaces
 #################
 
 This algorithm operates similarly to calling Plus on two
-:ref:`EventWorkspaces <EventWorkspace>`: it combines the events from the
+:py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`: it combines the events from the
 two workspaces together to form one large workspace.
 
 Note for file-backed workspaces

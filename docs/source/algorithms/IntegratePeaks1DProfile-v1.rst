@@ -10,7 +10,7 @@
 Description
 -----------
 
-This is an algorithm to integrate single-crystal Bragg peaks in a :ref:`MatrixWorkspace <MatrixWorkspace>` with x-units
+This is an algorithm to integrate single-crystal Bragg peaks in a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` with x-units
 of Time-of-Flight (TOF). It is adapted and extended from an algorithm in SXD2001 [1]_.
 
 The algorithm proceeds by fitting a ``PeakFunction`` and ``BackgroundFunction`` to the TOF spectrum of individual

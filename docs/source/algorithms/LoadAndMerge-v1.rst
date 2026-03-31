@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm loads multiple runs conforming the rules in :py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`.
-When listing is requested, the output is a :ref:`WorkspaceGroup <WorkspaceGroup>`, containing items for each run.
+When listing is requested, the output is a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`, containing items for each run.
 When summing is requested, it is performed pair-wise *in-situ* with :ref:`MergeRuns <algm-MergeRuns>`.
 By doing this, the metadata (SampleLogs) are also merged governed by the rules specified in the Instrument Parameter File (IPF)
 as explained in :ref:`MergeRuns <algm-MergeRuns>`.

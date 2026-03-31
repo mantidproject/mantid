@@ -41,7 +41,7 @@ completed much faster than they were in MantidPlot.
     * :ref:`WorkbenchIPythonConsole`: Provides an IPython console allowing the immediate execution of Python commands.
     * :ref:`WorkbenchPlotWindow`: The way that plots are created and manipulated in Workbench, includes plot options
       and fitting.
-    * *Workspace data views*: Display data from a :ref:`MatrixWorkspace <MatrixWorkspace>` or :ref:`TableWorkspace <Table Workspaces>` and edit :ref:`TableWorkspaces <Table Workspaces>`.
+    * *Workspace data views*: Display data from a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` or :ref:`TableWorkspace <Table Workspaces>` and edit :ref:`TableWorkspaces <Table Workspaces>`.
     * :ref:`InstrumentViewer`: Visualize an instrument attached to a workspace.
     * :ref:`SliceViewer`: View 2D slices of multi-dimensional workspaces.
     * *Sample log viewer*: Display information, plots and statistics about the sample logs in a workspace.

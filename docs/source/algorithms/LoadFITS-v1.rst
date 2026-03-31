@@ -10,11 +10,11 @@ Description
 -----------
 
 Load FITS files, which typically contain images, into a
-:ref:`WorkspaceGroup <WorkspaceGroup>`. FITS stands for Flexible Image
+:py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`. FITS stands for Flexible Image
 Transport System, see http://en.wikipedia.org/wiki/FITS. A new
-workspace (of type :ref:`Workspace2D <Workspace2D>`) is created for
+workspace (of type :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`) is created for
 every FITS file loaded with this algorithm, and these workspaces are
-added into a :ref:`WorkspaceGroup <WorkspaceGroup>`. The group
+added into a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`. The group
 workspace is named as indicated in the OutputWorkspace input
 property. The workspaces included in the group are named with the same
 name and an appendix _1, _2, etc., incremented sequentially as new

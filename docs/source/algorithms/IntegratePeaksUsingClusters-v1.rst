@@ -10,10 +10,10 @@ Description
 -----------
 
 Integrates arbitrary shaped single crystal peaks defined on an
-:ref:`MDHistoWorkspace <MDHistoWorkspace>` using connected component
+:py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` using connected component
 analysis to determine regions of interest around each peak of the
-:ref:`PeaksWorkspace <PeaksWorkspace>`. The output is an integrated
-:ref:`PeaksWorkspace <PeaksWorkspace>` as well as an image containing the
+:py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>`. The output is an integrated
+:py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` as well as an image containing the
 labels assigned to each cluster for diagnostic and visualisation
 purposes.
 
@@ -69,10 +69,10 @@ the detector/TOF space is no longer accessible.
 No Cluster Corresponding to Peak
 ################################
 
-This is because the input :ref:`PeaksWorkspace <PeaksWorkspace>` has peaks
+This is because the input :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` has peaks
 that do not align with peaks in the image. The error could either be on
 the side of the input PeaksWorkspace (spurious peaks), or of the
-:ref:`MDHistoWorkspace <MDHistoWorkspace>` generated as part of processing.
+:py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` generated as part of processing.
 One thing to verify is that the combination of Threshold and
 Normalization input parameters are not so low that they are treating
 genuine peaks in the image as background.

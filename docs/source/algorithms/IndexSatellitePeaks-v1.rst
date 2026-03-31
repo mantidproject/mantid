@@ -30,13 +30,11 @@ distance in HKL space). Reflections which cannot be indexed within the
 tolerance are set to (0,0,0).
 
 .. warning:: The current version of the algorithm returns a
-    :ref:`TableWorkspace <Table Workspaces>` and not a :ref:`PeaksWorkspace
-    <PeaksWorkspace>`. This means that the workspace cannot be overlaid on the
-    slice viewer or the instrument view.
+    :ref:`TableWorkspace <Table Workspaces>` and not a :py:obj:`PeaksWorkspace <mantid.dataobjects.PeaksWorkspace>`.
+    This means that the workspace cannot be overlaid on the slice viewer or the instrument view.
 
 .. seealso:: As well as being able to export the data to the nexus file format,
-    saving the data to the Jana format is supported via the :ref:`SaveReflections
-    <algm-SaveReflections-v1>` algorithm.
+    saving the data to the Jana format is supported via the :ref:`SaveReflections <algm-SaveReflections-v1>` algorithm.
 
 For more information on superspace crystallography see:
 

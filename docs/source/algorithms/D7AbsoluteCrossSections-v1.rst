@@ -72,7 +72,7 @@ Cross-section separation method
 
 Below are presented formulae used to separate magnetic (M), nuclear coherent (N), and spin-incoherent (I) cross-sections using
 spin-flip :math:`\left(\frac{d\sigma}{d\Omega}\right)_{\text{sf}}` and non-spin-flip :math:`\left(\frac{d\sigma}{d\Omega}\right)_{\text{nsf}}`
-cross-sections from the provided input :ref:`WorkspaceGroup <WorkspaceGroup>`.
+cross-sections from the provided input :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`.
 
 1. Z
 

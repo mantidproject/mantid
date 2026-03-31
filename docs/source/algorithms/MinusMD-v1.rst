@@ -9,7 +9,7 @@
 Description
 -----------
 
-Subtract two :ref:`MDHistoWorkspace <MDHistoWorkspace>`'s or a
+Subtract two :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`'s or a
 MDHistoWorkspace and a scalar.
 
 -  **MDHistoWorkspace - MDHistoWorkspace**

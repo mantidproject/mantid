@@ -71,7 +71,7 @@ centered at 0-energy transfer (see Unmirror Option 6 above) for the calibration 
 Output
 ------
 
-A :ref:`WorkspaceGroup <WorkspaceGroup>` will be returned, containing workspaces for each individual (unsummed) run.
+A :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` will be returned, containing workspaces for each individual (unsummed) run.
 
 Workflow
 --------

@@ -8,7 +8,7 @@ The MD Workspace [MDWorkspace] (short for "Multi-Dimensional" Workspace) is a ge
 data structure holdings points (MDEvents) that are defined by their
 position in several dimensions.
 
-.. seealso:: :ref:`MDHistoWorkspace <MDHistoWorkspace>`
+.. seealso:: :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`
 
 Description of MDWorkspace
 --------------------------
@@ -63,8 +63,8 @@ There are several algorithms that will create a MDWorkspace:
    with any arbitrary set of dimensions.
 -  :ref:`CreateMD <algm-CreateMD>` Creates an MDWorkspace in the Q3D, HKL frame.
 -  :ref:`ConvertToDiffractionMDWorkspace <algm-ConvertToDiffractionMDWorkspace>`
-   converts an :ref:`EventWorkspace <EventWorkspace>` or
-   :ref:`Workspace2D <Workspace2D>` from detector space to reciprocal
+   converts an :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` or
+   :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` from detector space to reciprocal
    space, for elastic single-crystal or powder diffraction experiments.
 -  :ref:`ConvertToMD <algm-ConvertToMD>` converts workspaces for
    inelastic experiments.
@@ -210,7 +210,7 @@ As a generic multi dimensional container being able to access information about 
 Accessing the Data
 ^^^^^^^^^^^^^^^^^^
 
-To access the data of an MDWorkspace you need to convert it to a regular grid, or :ref:`MDHistoWorkspace`.
+To access the data of an MDWorkspace you need to convert it to a regular grid, or :py:obj:`MDHistoWorkspace <mantid.daaobjects.MDHistoWorkspace>`.
 
 
 .. testcode:: MDWorkspaceConvertToHisto

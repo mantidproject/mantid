@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm converts from a :ref:`MatrixWorkspace <MatrixWorkspace>` (in
+This algorithm converts from a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` (in
 detector/time-of-flight space) to a
 :ref:`MDEventWorkspace <MDWorkspace>` containing events in reciprocal
 space.
@@ -75,9 +75,9 @@ Also, the :ref:`algm-FindPeaksMD` algorithm may not work optimally
 because it depends partly on higher density of events causing more
 finely split boxes.
 
-If your input is a :ref:`Workspace2D <Workspace2D>` and you do NOT check
+If your input is a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` and you do NOT check
 *OneEventPerBin*, then the workspace is converted to an
-:ref:`EventWorkspace <EventWorkspace>` but with no events for empty bins.
+:py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` but with no events for empty bins.
 
 Performance Notes
 #################

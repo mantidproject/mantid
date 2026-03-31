@@ -23,8 +23,8 @@ There are two types of mask workspace that can serve as input.
 In this case, :ref:`algm-SaveMask` will read Y values to determine
 which detectors are masked;
 
-2. A non-MaskWorkspace :ref:`MatrixWorkspace <MatrixWorkspace>` containing :ref:`Instrument <Instrument>`
-#########################################################################################################
+2. A non-MaskWorkspace :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` containing :py:obj:`Instrument <mantid.geometry.Instrument>`
+##########################################################################################################################################
 
 In this case, :ref:`algm-SaveMask` will scan through all detectors to
 determine which are masked.

@@ -45,17 +45,17 @@ FABADA Specific Outputs
 
 PDF (*required*)
   Probability Density Function for each fitted parameter and the cost function.
-  This is output as a :ref:`MatrixWorkspace`.
+  This is output as a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 
 Chains (*optional*)
   The value of each parameter and the cost function for each step taken.
-  This is output as a :ref:`MatrixWorkspace`.
+  This is output as a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 
 ConvergedChain (*optional*)
   A subset of Chains containing only the section after which the parameters have
   converged.
   This records the parameters at step intervals given by StepsBetweenValues.
-  This is output as a :ref:`MatrixWorkspace`.
+  This is output as a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 
 CostFunctionTable (*optional*)
   Table containing the minimum and most probable values of the cost function as

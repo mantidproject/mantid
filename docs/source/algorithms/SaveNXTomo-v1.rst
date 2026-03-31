@@ -9,12 +9,12 @@
 Description
 -----------
 
-Save one or more workspaces (of type :ref:`Workspace2D <Workspace2D>`)
+Save one or more workspaces (of type :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`)
 into a NeXus NXtomo file (NeXus application definition format). When
-the input workspace given is a :ref:`Workspace2D <Workspace2D>`, that
+the input workspace given is a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`, that
 single workspace is written to the output NXTomo file. When the input
-workspace is a :ref:`WorkspaceGroup <WorkspaceGroup>` (as LoadFITS
-produces), all the :ref:`Workspace2D <Workspace2D>` workspaces
+workspace is a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` (as LoadFITS
+produces), all the :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` workspaces
 included in the group will be written to the output file.
 
 This algorithm has been designed to save workspaces such as those

@@ -9,7 +9,7 @@
 Description
 -----------
 
-Saves the given :ref:`MatrixWorkspace` to a file in the NeXus-based 'NXSPE' format.
+Saves the given :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` to a file in the NeXus-based 'NXSPE' format.
 
 Restrictions on the Input Workspace
 ###################################

@@ -14,14 +14,14 @@ If Algorithms are the verbs of Mantid, then Workspaces are the nouns.
 Workspaces are used to store data within Mantid, and when you manipulate data,
 you output to a new Workspace.
 
-Workspaces come in several forms, but the most common two are the :ref:`Workspace2D` and the :ref:`EventWorkspace`. Their data are in an XYE format (the general Mantid term is :ref:`MatrixWorkspace`)
+Workspaces come in several forms, but the most common two are the :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` and the :py:obj:`EventWorkspace`. Their data are in an XYE format (the general Mantid term is :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`)
 containing 1 or more spectra.
 
 
 Workspace2D
 ===========
 
-A :ref:`Workspace2D` is histogrammed data, with one or more spectra. For each spectrum X, Y (counts) and E
+A :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` is histogrammed data, with one or more spectra. For each spectrum X, Y (counts) and E
 (error) data is stored.
 
 .. figure:: /images/MBC_Workspace2D.png
@@ -78,7 +78,7 @@ Another important use of rebinning is prior to point-by-point normalisation (e.g
 Event Workspaces
 ================
 
-An :ref:`EventWorkspace` stores information about each
+An :py:obj:`EventWorkspace` stores information about each
 individual particle detection. More specifically, at a
 neutron spallation source, this means that the Time of arrival and
 Detector ID of each individual neutron is recorded. Only fairly recent
@@ -150,14 +150,14 @@ TableWorkspaces
 
 A :ref:`Table Workspaces` has columns of mixed data, like a spreadsheet. It can store text or calculated/measured values, which may relate to data from an experiment. An example is the output fit parameters from fitting within Mantid.
 
-A :ref:`PeaksWorkspace` is a special type of TableWorkspace with additional support for Single Crystal peaks.
+A :py:obj:`PeaksWorkspace <mantid.dataobjects.PeaksWorkspace>` is a special type of TableWorkspace with additional support for Single Crystal peaks.
 See right for an example of a PeaksWorkspace.
 
 
 Other Workspace Types
 =====================
 
--  A :ref:`WorkspaceGroup` allows you to organise Workspaces into groups.
+-  A :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` allows you to organise Workspaces into groups.
    To create a group simply select more than one workspace in the Workspace Toolbox and click the "**Group**" button.
    Either the whole group or individual members can be processed when using algorithms.
 

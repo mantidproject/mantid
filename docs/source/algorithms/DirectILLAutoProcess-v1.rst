@@ -92,7 +92,7 @@ Caching with ADS
 This algorithm cleans-up the intermediate workspaces after execution if `ClearCache` property is checked (`True` by default). It is recommended to keep it checked due
 to large memory consumption coming from keeping rawdata.
 
-Default naming schemes are imposed to ensure smooth communication of workspace contents. While user can specify the name for the output :ref:`WorkspaceGroup <WorkspaceGroup>`,
+Default naming schemes are imposed to ensure smooth communication of workspace contents. While user can specify the name for the output :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`,
 the names of contents will consist of the name of the group as a prefix, the numor of the rawdata (or first rawdata in case of merging), initial energy, and temperature (when
 `ReductionType` is `Powder`).
 

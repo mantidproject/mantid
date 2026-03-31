@@ -63,7 +63,7 @@ LoadISISNexus executes :ref:`algm-LoadNexusLogs` to load run logs from the Nexus
 It also loads the Nexus ``raw_data_1/periods/proton_charge`` group
 into the ``proton_charge_by_period`` property of the workspace run object.
 
-Properties of the workspace :ref:`Run <Run>` object are loaded as follows:
+Properties of the workspace :py:obj:`Run <mantid.api.Run>` object are loaded as follows:
 
 +----------------+---------------------------------+-----------------------+
 | vms_compat     | Alternative location            | Workspace run object  |

@@ -9,8 +9,8 @@
 Description
 -----------
 
-This algorithm provides bi-directional conversion between regular :ref:`PeaksWorkspace <PeaksWorkspace>`
-and :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
+This algorithm provides bi-directional conversion between regular :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>`
+and :py:obj:`LeanElasticPeaksWorkspace <mantid.dataobjects.LeanElasticPeaksWorkspace>`.
 
 When casting a PeaksWorkspace into a LeanElasticPeaksWorkspace, information related to detector
 (DetID, BankName, Row, Col) is discarded.

@@ -23,9 +23,9 @@ be run *before* converting to multidimensional workspace. Optionally, in aadditi
 using the :ref:`RecalculateTrajectoriesExtents  <algm-RecalculateTrajectoriesExtents>` algorithm after convering to the
 multidimensional workspace.
 
-The solid angle workspace is a :ref:`MatrixWorkspace <MatrixWorkspace>` that contains the solid angle/efficiency of the detectors.
+The solid angle workspace is a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` that contains the solid angle/efficiency of the detectors.
 One can just integrate a vanadium file between some appropriate limits. For diffraction measurements, the flux workspace
-is a mandatory input. It is a :ref:`MatrixWorkspace <MatrixWorkspace>`
+is a mandatory input. It is a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`
 that contains the indefinite integral of the incident flux. It contains one or more spectra, each of them corresponding to
 detectors that have the same energy response. The algorithm :ref:`MDNormSCDPreprocessIncoherent
 <algm-MDNormSCDPreprocessIncoherent>` can be used to process Vanadium

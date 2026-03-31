@@ -155,7 +155,7 @@ to take into account dark currents in the readout system electronics and thus th
 
 It is possible to provide more than one numor as input for the transmission calculation. In such a case, the input workspaces are averaged.
 
-The output of the transmission calculation is given as a :ref:`WorkspaceGroup <WorkspaceGroup>` with a single workspace containing a single value of the calculated polarisation.
+The output of the transmission calculation is given as a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` with a single workspace containing a single value of the calculated polarisation.
 
 Instead of running the transmission calculation it is also possible to either provide a workspace with a single value or a floating-point value for the transmission to the workflows
 that require transmission.
@@ -262,9 +262,9 @@ Finally, the polariser-analyser efficiency can be calculated, using the followin
 where :math:`f_{p}` is the flipper efficiency, currently assumed to be 1.0, and :math:`\dot{I_{B}}(00)` and :math:`\dot{I_{B}}(01)` denote normalised
 and background-subtracted data with flipper states off and on respectively.
 
-The output is given in as a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries consistent with the number of measured polarisation directions.
+The output is given in as a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` with the number of entries consistent with the number of measured polarisation directions.
 Each workspace in the group contains a single value of the polariser-analyser efficiency per detector. The flipping ratios are also available for inspection
-in a :ref:`WorkspaceGroup <WorkspaceGroup>` named `flipping_ratios`.
+in a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` named `flipping_ratios`.
 
 Workflow diagram and working example
 ------------------------------------
@@ -614,7 +614,7 @@ Output
 
 The corrected counts in each each detector are normalised to the expected total cross-section for vanadium
 of :math:`0.404 \frac{\text{barn}}{\text{steradian} \cdot \text{atom}}`. The output of vanadium reduction
-is a :ref:`WorkspaceGroup <WorkspaceGroup>` with one entry if the `OutputTreatment` is set to `Sum`, or
+is a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` with one entry if the `OutputTreatment` is set to `Sum`, or
 the same number of entries as input data if `Individual` was selected. In the case of `TOF` reduction mode,
 vanadium counts are integrated around the elastic peak position for each detector before normalisation
 to the expected cross-section.
@@ -798,7 +798,7 @@ and relevant only for the `SingleCrystal` reduction are:
 * KiXAngle - the angle between the incident momentum and the Sharpf angle,
 * OmegaShift - omega offset of the sample.
 
-The output of the  is a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries equal to number of measured polarisations
+The output of the  is a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` with the number of entries equal to number of measured polarisations
 times number of steps in a :math:`2\theta` scan. This output can be provided to :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
 for cross-section separation, e.g. for diagnostic purposes, or for the final normalisation.
 
@@ -860,7 +860,7 @@ options available to normalise the sample data:
 Output
 ------
 
-The output of the reduction and normalisation is a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries consistent with the input
+The output of the reduction and normalisation is a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` with the number of entries consistent with the input
 if the `OutputTreatment` property was selected to be `Individual`, or the number of entries will be consistent with either the number of polarisation
 orientations present in the data (e.g. six for a XYZ method) or the number of separated cross-section.
 Each entry of the output group is a workspace with X-axis unit being either momentum exchange :math:`Q`, the scattering angle :math:`2\theta`,
