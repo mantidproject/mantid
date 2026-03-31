@@ -9,20 +9,17 @@ Overview
 
 This page records the analytical derivative of the implemented
 :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` peak shape.
-The derivation follows the handwritten notes reproduced during development,
-and uses notation that is convenient for the code in
-``IkedaCarpenterPV.cpp``.
+This derivation has been transcribed from handwritten notes produced during development, so there
+may be notation error, Please flag if you find an issue.
+The notation has been used for convenience with comparison to the code in
+``IkedaCarpenterPV.cpp`` as well as clarity for distinguishing between variables, so there are some differences
+in the symbols used compared with :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>`.
 
-One important point is that the implemented function contains an explicit
-linear intensity factor :math:`I`. Some literature formulae are written only
-for the peak-shape kernel, whereas the Mantid implementation evaluates
+The Mantid implementation of :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` evaluates
 
 .. math::
 
-   f = I Q \left[(1-\eta)C - \frac{2\eta}{\pi}L\right].
-
-This page therefore derives the Jacobian for the full function used by the
-implementation.
+   f = I Q \left[(1-\eta)G - \frac{2\eta}{\pi}L\right].
 
 Natural parameters and helper definitions
 -----------------------------------------
@@ -121,11 +118,13 @@ Now define the Gaussian-like and Lorentzian-like building blocks
 
    F_j = e^{z_j}E_1(z_j), \qquad J_j = \Im(F_j),
 
+Where :math:`\Im` denotes taking the imaginary component.
+
 and the two sums
 
 .. math::
 
-   C = N_u K_u + N_v K_v + N_s K_s + N_r K_r,
+   G = N_u K_u + N_v K_v + N_s K_s + N_r K_r,
 
 .. math::
 
@@ -135,7 +134,7 @@ The implemented function is therefore
 
 .. math::
 
-   f = I Q \left[(1-\eta)C - \frac{2\eta}{\pi}L\right].
+   f = I Q \left[(1-\eta)G - \frac{2\eta}{\pi}L\right].
 
 Basic derivatives of the full function
 --------------------------------------
@@ -144,7 +143,7 @@ Let
 
 .. math::
 
-   M = (1-\eta)C - \frac{2\eta}{\pi}L,
+   M = (1-\eta)G - \frac{2\eta}{\pi}L,
 
 so that :math:`f = IQM`.
 
@@ -161,7 +160,7 @@ For :math:`p = \eta`, the prefactor :math:`Q` does not depend on
 
    \frac{\partial f}{\partial \eta}
    = IQ\frac{\partial M}{\partial \eta}
-   = -IQ\left(C + \frac{2}{\pi}L\right).
+   = -IQ\left(G + \frac{2}{\pi}L\right).
 
 For any other natural parameter :math:`p`,
 
@@ -175,7 +174,7 @@ with
 .. math::
 
    \frac{\partial M}{\partial p}
-   = (1-\eta)\frac{\partial C}{\partial p}
+   = (1-\eta)\frac{\partial G}{\partial p}
      - \frac{2\eta}{\pi}\frac{\partial L}{\partial p}.
 
 Since
@@ -194,20 +193,20 @@ it follows that
      0, & p \neq \alpha.
      \end{cases}
 
-Derivative of :math:`C`
+Derivative of :math:`G`
 -----------------------
 
 The Gaussian-like sum is
 
 .. math::
 
-   C = \sum_{j \in \{u,v,s,r\}} N_j K_j,
+   G = \sum_{j \in \{u,v,s,r\}} N_j K_j,
 
 so by the product rule
 
 .. math::
 
-   \frac{\partial C}{\partial p}
+   \frac{\partial G}{\partial p}
    = \sum_{j \in \{u,v,s,r\}}
      \left[ \frac{\partial N_j}{\partial p}K_j + N_j\frac{\partial K_j}{\partial p} \right].
 
@@ -469,6 +468,8 @@ so
    = \Im\left[\left(F_j - \frac{1}{z_j}\right)i\frac{a_j}{2}\right]
    = \frac{a_j}{2}\Re\left(F_j - \frac{1}{z_j}\right).
 
+Where :math:`\Re` denotes taking the real component
+
 Derivative of :math:`J_j` with respect to :math:`\Delta`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -675,7 +676,7 @@ With the pieces above, the natural-parameter derivatives are
 
 .. math::
 
-   \frac{\partial C}{\partial p}
+   \frac{\partial G}{\partial p}
    = \sum_{j \in \{u,v,s,r\}}
      \left[ \frac{\partial N_j}{\partial p}K_j + N_j\frac{\partial K_j}{\partial p} \right],
 
@@ -688,7 +689,7 @@ With the pieces above, the natural-parameter derivatives are
 .. math::
 
    \frac{\partial M}{\partial p}
-   = (1-\eta)\frac{\partial C}{\partial p}
+   = (1-\eta)\frac{\partial G}{\partial p}
      - \frac{2\eta}{\pi}\frac{\partial L}{\partial p},
 
 .. math::
@@ -701,7 +702,7 @@ for :math:`p \neq \eta`, together with
 .. math::
 
    \frac{\partial f}{\partial \eta}
-   = -IQ\left(C + \frac{2}{\pi}L\right).
+   = -IQ\left(G + \frac{2}{\pi}L\right).
 
 Chain rule back to Mantid parameters
 ------------------------------------
