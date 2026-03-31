@@ -8,9 +8,7 @@ from instrumentview.Detectors import DetectorInfo
 from instrumentview.Globals import CurrentTab
 from instrumentview.Peaks.Peak import Peak
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
-from instrumentview.Projections.SphericalProjection import SphericalProjection
-from instrumentview.Projections.CylindricalProjection import CylindricalProjection
-from instrumentview.Projections.SideBySide import SideBySide
+from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.ConvertUnitsCalculator import ConvertUnitsCalculator
 
@@ -343,30 +341,19 @@ class FullInstrumentViewModel:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
         cache_key = self._cache_key_for_projection(self._projection_type)
         if cache_key not in self._cached_projection_objects.keys():
-            axis = [1, 0, 0]
-            if self._projection_type in (ProjectionType.SPHERICAL_Y, ProjectionType.CYLINDRICAL_Y):
-                axis = [0, 1, 0]
-            elif self._projection_type in (ProjectionType.SPHERICAL_Z, ProjectionType.CYLINDRICAL_Z):
-                axis = [0, 0, 1]
-
             detector_positions = self._detector_positions_3d
             if self._flip_z:
                 detector_positions = detector_positions.copy()
                 detector_positions[:, 2] *= -1
 
-            if self._projection_type in (ProjectionType.SPHERICAL_X, ProjectionType.SPHERICAL_Y, ProjectionType.SPHERICAL_Z):
-                projection = SphericalProjection(self._sample_position, self._root_position, detector_positions, np.array(axis))
-            elif self._projection_type in (ProjectionType.CYLINDRICAL_X, ProjectionType.CYLINDRICAL_Y, ProjectionType.CYLINDRICAL_Z):
-                projection = CylindricalProjection(self._sample_position, self._root_position, detector_positions, np.array(axis))
-            else:
-                projection = SideBySide(
-                    self._workspace,
-                    self._detector_ids,
-                    self._sample_position,
-                    self._root_position,
-                    detector_positions,
-                    np.array(axis),
-                )
+            projection = Projection(
+                type=self._projection_type,
+                workspace=self._workspace,
+                detector_ids=self._detector_ids,
+                sample_position=self._sample_position,
+                root_position=self._root_position,
+                detector_positions=detector_positions,
+            )
             self._cached_projection_objects[cache_key] = projection
 
         projection = self._cached_projection_objects[cache_key]
@@ -716,12 +703,9 @@ class FullInstrumentViewModel:
         doesn't support bank grouping.  Each element is
         ``(detector_ids, bank_type)``.
         """
-        if self._projection_type != ProjectionType.SIDE_BY_SIDE:
-            return None
-        projection = self.active_projection
-        if projection is None:
-            return None
-        return projection.get_bank_groups_by_detector_id()
+        if self.active_projection is None or self.active_projection.type is not ProjectionType.SIDE_BY_SIDE:
+            return []
+        return self.active_projection.get_bank_groups_by_detector_id()
 
     def component_tree_indices_selected(self, component_indices: np.ndarray) -> None:
         if len(component_indices) == 0:

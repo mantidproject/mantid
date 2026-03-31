@@ -4,27 +4,48 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import numpy as np
 from instrumentview.Detectors import DetectorPosition
 
 
-class Projection(ABC):
+class Projection:
     """Base class for calculating a 2D projection with a specified axis"""
+
+    _registry = {}
+
+    def __init_subclass__(cls, projection_types=None, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if projection_types:
+            for projection_type, defaults in projection_types.items():
+                Projection._registry[projection_type] = (cls, defaults)
+
+    def __new__(cls, type, **kwargs):
+        if cls is Projection:
+            entry = Projection._registry.get(type)
+            if not entry:
+                raise ValueError(f"Unknown projection type: '{type}'. Available: {list(Projection._registry)}")
+            subclass, _ = entry
+            return super().__new__(subclass)
+        return super().__new__(cls)
 
     def __init__(
         self,
+        type,
         sample_position: np.ndarray,
         root_position: np.ndarray,
         detector_positions: list[DetectorPosition] | np.ndarray,
-        axis: np.ndarray,
+        **kwargs,
     ):
         """For the given workspace and detectors, calculate 2D points with specified projection axis"""
+
+        self.type = type
+        _, defaults = Projection._registry[type]
+        self._projection_axis = np.asarray(defaults["axis"], dtype=np.float64)
 
         self._sample_position = np.asarray(sample_position, dtype=np.float64)
         self._root_position = np.asarray(root_position, dtype=np.float64)
         self._detector_positions = np.asarray(detector_positions, dtype=np.float64)
-        self._projection_axis = np.asarray(axis, dtype=np.float64)
 
         self._x_axis = np.zeros_like(self._projection_axis, dtype=np.float64)
         self._y_axis = np.zeros_like(self._projection_axis, dtype=np.float64)
@@ -140,3 +161,14 @@ class Projection(ABC):
 
     def positions(self) -> np.ndarray:
         return np.vstack([self._detector_x_coordinates, self._detector_y_coordinates]).transpose()
+
+    # Overwritten in side-by-side
+    def get_bank_groups_by_detector_id(self) -> list[tuple[list[int], str]]:
+        return []
+
+
+# Import subclasses at the BOTTOM to avoid circular imports,
+# but ensure they're always registered when Projection is imported
+from instrumentview.Projections.CylindricalProjection import CylindricalProjection  # noqa: F401 E402
+from instrumentview.Projections.SphericalProjection import SphericalProjection  # noqa: F401 E402
+from instrumentview.Projections.SideBySide import SideBySide  # noqa: F401 E402

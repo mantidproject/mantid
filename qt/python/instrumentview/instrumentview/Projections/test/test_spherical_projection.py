@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest.mock
-from instrumentview.Projections.SphericalProjection import SphericalProjection
+from instrumentview.Projections.Projection import SphericalProjection
+from instrumentview.Projections.ProjectionType import ProjectionType
 import unittest
 import numpy as np
 
@@ -22,7 +23,7 @@ class TestSphericalProjection(unittest.TestCase):
     def test_calculate_2d_coordinates_x(self):
         # x-axis projection
         self._run_test(
-            projection_axis=[1, 0, 0],
+            projection_type=ProjectionType.SPHERICAL_X,
             expected_x_axis=[0, 1, 0],
             expected_y_axis=[0, 0, 1],
             expected_projections=[(0, -np.pi / 2), (-np.pi / 2, -np.pi / 2), (0, 0)],
@@ -31,7 +32,7 @@ class TestSphericalProjection(unittest.TestCase):
     def test_calculate_2d_coordinates_y(self):
         # y-axis projection
         self._run_test(
-            projection_axis=[0, 1, 0],
+            projection_type=ProjectionType.SPHERICAL_Y,
             expected_x_axis=[0, 0, 1],
             expected_y_axis=[1, 0, 0],
             expected_projections=[(0, 0), (0, -np.pi / 2), (-np.pi / 2, -np.pi / 2)],
@@ -40,15 +41,19 @@ class TestSphericalProjection(unittest.TestCase):
     def test_calculate_2d_coordinates_z(self):
         # z-axis projection
         self._run_test(
-            projection_axis=[0, 0, 1],
+            projection_type=ProjectionType.SPHERICAL_Z,
             expected_x_axis=[1, 0, 0],
             expected_y_axis=[0, 1, 0],
             expected_projections=[(-np.pi / 2, -np.pi / 2), (0, 0), (0, -np.pi / 2)],
         )
 
-    def _run_test(self, projection_axis, expected_x_axis, expected_y_axis, expected_projections):
-        sphere = SphericalProjection(self.sample_position, self.root_position, self.detector_positions, np.array(projection_axis))
-        np.testing.assert_allclose(sphere._projection_axis, projection_axis, atol=self.abs_tol)
+    def _run_test(self, projection_type, expected_x_axis, expected_y_axis, expected_projections):
+        sphere = SphericalProjection(
+            type=projection_type,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
         np.testing.assert_allclose(sphere._x_axis, expected_x_axis, atol=self.abs_tol)
         np.testing.assert_allclose(sphere._y_axis, expected_y_axis, atol=self.abs_tol)
         calculated = sphere.positions()
