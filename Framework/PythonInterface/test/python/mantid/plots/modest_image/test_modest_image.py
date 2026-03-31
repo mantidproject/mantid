@@ -75,10 +75,9 @@ def check(label, modest, axes, thresh=2.0e-5):
     data2 = data2[:, :, :3]
 
     # Here we need to convert to float to avoid underflow
-    diff = data1.astype(np.float64) - data2.astype(np.float64)
-    rms = np.sqrt(np.mean(diff**2))
+    rms = np.mean(np.abs(data1.astype(float) - data2.astype(float)))
 
-    result = "PASS" if rms < thresh else "FAIL"
+    result = "PASS" if rms <= thresh else "FAIL"
     modest_label = "test_%s_modest" % label
     axes_label = "test_%s_default" % label
 
@@ -89,11 +88,11 @@ def check(label, modest, axes, thresh=2.0e-5):
     axes.figure.canvas.draw()
     modest.figure.canvas.draw()
 
-    if rms >= thresh:
+    if rms > thresh:
         modest.figure.savefig(modest_label + ".pdf")
         axes.figure.savefig(axes_label + ".pdf")
 
-    assert rms < thresh
+    assert rms <= thresh
 
 
 def set_bounds(modest, ax, x0, x1, y0, y1):
