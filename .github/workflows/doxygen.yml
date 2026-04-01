@@ -2,9 +2,6 @@ name: doxygen documentation build and publish
 on:
   push:
     branches: [main]
-  # TODO
-  pull_request:
-    types: [opened, synchronize, reopened]
 
 # cancel previous job if new commit is pushed
 concurrency:
@@ -38,27 +35,24 @@ jobs:
 
       # publish documentation if on main branch of mantidproject/mantid
       - name: Checkout Doxygen repository
-        # TODO
-        if: ${{ steps.changes.outputs.doxygen == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
         uses: actions/checkout@v6
         with:
           repository: mantidproject/doxygen
           path: doxygen_repo
 
       - name: Copy Doxygen artifacts
-        # TODO
-        if: ${{ steps.changes.outputs.doxygen == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
         run: |
           rm -rf doxygen_repo/* # delete old version of the repository
           cp -r $GITHUB_WORKSPACE/build/doxygen/html/* doxygen_repo/
 
       - name: Commit Doxygen and push
-        # TODO
-        if: ${{ steps.changes.outputs.doxygen == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
         working-directory: doxygen_repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git commit -m "Update Doxygen docs"
-          # TODO uncomment git push origin main
+          git push origin main
