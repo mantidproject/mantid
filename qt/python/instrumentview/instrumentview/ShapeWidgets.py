@@ -928,6 +928,7 @@ class ShapeOverlayManager:
         # create_plots adds line/area plots which create new sub-charts
         # inside PyVista's _MultiCompChart.  Clear their borders too.
         self._set_all_chart_borders_zero()
+        self._detach_style()
         self._install_observers()
         self._plotter.render()
         self._read_plot_transform()
@@ -938,6 +939,7 @@ class ShapeOverlayManager:
             self._shape.cleanup()
             self._shape = None
         self._uninstall_observers()
+        self._restore_style()
         if self._chart is not None:
             try:
                 self._plotter.remove_chart(self._chart)
@@ -973,9 +975,8 @@ class ShapeOverlayManager:
 
     def _detach_style(self):
         try:
-            interactor = self._plotter.iren.interactor
-            self._state["_saved_style"] = interactor.GetInteractorStyle()
-            interactor.SetInteractorStyle(None)
+            self._state["_saved_style"] = self._plotter.iren.style
+            self._plotter.iren.style = None
         except Exception:
             pass
 
@@ -983,8 +984,7 @@ class ShapeOverlayManager:
         saved = self._state.pop("_saved_style", None)
         if saved is not None:
             try:
-                self._plotter.iren.interactor.SetInteractorStyle(saved)
-                saved.OnLeftButtonUp()
+                self._plotter.iren.style = saved
             except Exception:
                 pass
 
@@ -1011,7 +1011,6 @@ class ShapeOverlayManager:
             elif hit == "inside":
                 self._state["mode"] = "drag"
                 self._state["drag_offset"] = (npos[0] - self._shape.cx, npos[1] - self._shape.cy)
-            self._detach_style()
         except Exception:
             logger.debug("Exception in shape left-press handler.")
 
@@ -1021,7 +1020,6 @@ class ShapeOverlayManager:
                 self._state["mode"] = None
                 self._state.pop("_resize_which", None)
                 self._state["active_shape"] = None
-                self._restore_style()
         except Exception:
             logger.debug("Exception in shape left-release handler.")
 
