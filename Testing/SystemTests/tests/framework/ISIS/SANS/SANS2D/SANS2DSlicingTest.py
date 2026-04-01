@@ -26,9 +26,9 @@ from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DMinimalBatchReductionSlicedTest_V2(systemtesting.MantidSystemTest):
+class SANS2DMinimalBatchReductionSlicedTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        super(SANS2DMinimalBatchReductionSlicedTest_V2, self).__init__()
+        super(SANS2DMinimalBatchReductionSlicedTest, self).__init__()
 
     def runTest(self):
         UseCompatibilityMode()
@@ -47,9 +47,9 @@ class SANS2DMinimalBatchReductionSlicedTest_V2(systemtesting.MantidSystemTest):
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DMinimalSingleReductionSlicedTest_V2(systemtesting.MantidSystemTest):
+class SANS2DMinimalSingleReductionSlicedTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        super(SANS2DMinimalSingleReductionSlicedTest_V2, self).__init__()
+        super(SANS2DMinimalSingleReductionSlicedTest, self).__init__()
 
     def runTest(self):
         UseCompatibilityMode()
