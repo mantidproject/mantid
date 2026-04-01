@@ -18,7 +18,6 @@ from mantid.dataobjects import MaskWorkspace, GroupingWorkspace, PeaksWorkspace
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
-from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 from instrumentview.ComponentTreeModel import ComponentTreeModel
 from instrumentview.ComponentTreePresenter import ComponentTreePresenter
 from instrumentview.Projections.ProjectionType import ProjectionType
@@ -61,8 +60,6 @@ class FullInstrumentViewPresenter:
 
     _LINEAR = "Linear"
     _LOGARITHMIC = "Logarithmic"
-
-    _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     _XML_FILE_FILTER = "XML files (*xml)"
     _CAL_FILE_FILTER = "CAL files (*cal)"
@@ -501,7 +498,7 @@ class FullInstrumentViewPresenter:
         self._view.show_plot_for_detectors(self._model.line_plot_workspace)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
         self._update_relative_detector_angle()
-        self._update_peaks_workspaces()
+        self._model.update_peaks_grouped_by_ws()
         self.refresh_lineplot_peaks()
 
     def _update_relative_detector_angle(self) -> None:
@@ -595,46 +592,25 @@ class FullInstrumentViewPresenter:
     def peaks_workspaces_in_ads(self) -> list[str]:
         return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(PeaksWorkspace)]
 
-    def _update_peaks_workspaces(self) -> None:
-        peaks_grouped_by_ws = []
-        points_from_model = list(self._model.peak_overlay_points().values())
-        for ws_index in range(len(points_from_model)):
-            peaks_grouped_by_ws.append(WorkspaceDetectorPeaks(points_from_model[ws_index], self._COLOURS[ws_index % len(self._COLOURS)]))
-        self._peaks_grouped_by_ws = peaks_grouped_by_ws
+    @property
+    def colours(self):
+        return self._model._COLOURS.list()
 
     def on_peaks_workspace_selected(self) -> None:
         self._model.set_peaks_workspaces(self._view.selected_peaks_workspaces())
         self._view.clear_overlay_meshes()
-        self._update_peaks_workspaces()
         self.refresh_lineplot_peaks()
         self._view.refresh_peaks_ws_list_colours()
-        if len(self._peaks_grouped_by_ws) == 0:
-            return
-        # Keeping the points from each workspace separate so we can colour them differently
-        for ws_peaks in self._peaks_grouped_by_ws:
-            peaks_spectrum_nos = np.array([p.spectrum_no for p in ws_peaks.detector_peaks])
-            spectrum_nos = self._model.spectrum_nos
-            # Use argsort + searchsorted for fast lookup. Using np.where(np.isin) does not
-            # maintain the original order. It is faster to sort then search the sorted
-            # array for matching spectrum numbers
-            sorted_idx = np.argsort(spectrum_nos)
-            sorted_spectrum_nos = spectrum_nos[sorted_idx]
-            positions = np.searchsorted(sorted_spectrum_nos, peaks_spectrum_nos)
-            # Map back to original indices
-            ordered_indices = sorted_idx[positions]
-            valid = sorted_spectrum_nos[positions] == peaks_spectrum_nos
-            ordered_indices = ordered_indices[valid]
-            labels = [p.label for i, p in enumerate(ws_peaks.detector_peaks) if valid[i]]
-            projected_points = self._model.detector_positions[ordered_indices]
-            if len(projected_points) > 0:
-                transformed_points = self._transform_vectors_with_matrix(projected_points, self._transform)
-                self._view.plot_overlay_mesh(transformed_points, labels, ws_peaks.colour)
+
+        for ws_peaks in self._model.peak_positions_labels_colours():
+            transformed_points = self._transform_vectors_with_matrix(ws_peaks.projected_points, self._transform)
+            self._view.plot_overlay_mesh(transformed_points, ws_peaks.labels, ws_peaks.colour)
 
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
         self._view.clear_lineplot_overlays()
 
-        for ws_peaks in self._peaks_grouped_by_ws:
+        for ws_peaks in self._model.peaks_grouped_by_ws.values():
             x_values = []
             labels = []
             for peak in ws_peaks.detector_peaks:

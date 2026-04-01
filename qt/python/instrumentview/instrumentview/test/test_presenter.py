@@ -9,6 +9,7 @@ from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.Globals import CurrentTab
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Peaks.Peak import Peak
+from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.renderers.shape_renderer import ShapeRenderer
 from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
@@ -50,6 +51,16 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     def _create_detector_peaks(self, det_id: int, spec_no: int, location: np.ndarray) -> DetectorPeaks:
         return DetectorPeaks([Peak(det_id, spec_no, location, 0, (1, 1, 1), 100, 1000, 100, 100)])
+
+    def _create_workspace_detector_peaks(
+        self, det_id: int, spec_no: int, location: np.ndarray, colour: str = "#ff7f0e"
+    ) -> WorkspaceDetectorPeaks:
+        ws_peaks = MagicMock(spec=WorkspaceDetectorPeaks)
+        ws_peaks.detector_peaks = [self._create_detector_peaks(det_id, spec_no, location)]
+        ws_peaks.colour = colour
+        ws_peaks.projected_points = np.array([location])
+        ws_peaks.labels = ["(1, 1, 1)"]
+        return ws_peaks
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
     def test_update_plotter(self, mock_set_peaks_ws):
@@ -256,15 +267,16 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._transform_vectors_with_matrix")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.refresh_lineplot_peaks")
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_positions_labels_colours")
     def test_on_peaks_workspace_selected(
         self,
-        mock_peak_overlay_points,
+        mock_peak_positions_labels_colours,
         mock_refresh_lineplot_peaks,
         mock_set_peaks_workspaces,
         mock_transform,
     ):
-        mock_peak_overlay_points.return_value = {"ws1": [self._create_detector_peaks(50, 50, np.zeros(3))]}
+        ws_peaks = self._create_workspace_detector_peaks(50, 50, np.zeros(3))
+        mock_peak_positions_labels_colours.return_value = [ws_peaks]
         self._model._calculate_projection = MagicMock(return_value=np.array([np.zeros(3), np.zeros(3)]))
         self._model._detector_ids = np.array([50, 52])
         self._model._spectrum_nos = np.array([50, 52])
@@ -278,15 +290,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.plot_overlay_mesh.assert_called_once()
         mock_transform.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
     @mock.patch.object(FullInstrumentViewModel, "picked_spectrum_nos", new_callable=mock.PropertyMock)
-    def test_refresh_lineplot_peaks(self, mock_picked_spectrum_nos, mock_peak_overlay_points):
-        mock_peak_overlay_points.return_value = {"ws1": [self._create_detector_peaks(50, 50, np.zeros(3))]}
+    def test_refresh_lineplot_peaks(self, mock_picked_spectrum_nos):
+        ws_peaks = self._create_workspace_detector_peaks(50, 50, np.zeros(3))
+        self._model.peaks_grouped_by_ws = {"ws1": ws_peaks}
         mock_picked_spectrum_nos.return_value = [50]
         self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
-        self._presenter._update_peaks_workspaces()
         self._presenter.refresh_lineplot_peaks()
-        mock_peak_overlay_points.assert_called_once()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
         self._mock_view.plot_lineplot_overlay.assert_called_once()
@@ -294,15 +304,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertEqual([100], overlay_call_args[0])
         self.assertEqual(["(1, 1, 1)"], overlay_call_args[1])
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
     @mock.patch.object(FullInstrumentViewModel, "picked_spectrum_nos", new_callable=mock.PropertyMock)
-    def test_refresh_lineplot_peaks_q(self, mock_picked_spectrum_nos, mock_peak_overlay_points):
-        mock_peak_overlay_points.return_value = {"ws1": [self._create_detector_peaks(50, 50, np.zeros(3))]}
+    def test_refresh_lineplot_peaks_q(self, mock_picked_spectrum_nos):
+        ws_peaks = self._create_workspace_detector_peaks(50, 50, np.zeros(3))
+        self._model.peaks_grouped_by_ws = {"ws1": ws_peaks}
         mock_picked_spectrum_nos.return_value = [50]
         self._mock_view.current_selected_unit.return_value = self._presenter._MOMENTUM_TRANSFER
-        self._presenter._update_peaks_workspaces()
         self._presenter.refresh_lineplot_peaks()
-        mock_peak_overlay_points.assert_called_once()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
         self._mock_view.plot_lineplot_overlay.assert_called_once()
@@ -310,30 +318,25 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertEqual([100], overlay_call_args[0])
         self.assertEqual(["(1, 1, 1)"], overlay_call_args[1])
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
     @mock.patch.object(FullInstrumentViewModel, "picked_spectrum_nos", new_callable=mock.PropertyMock)
-    def test_refresh_lineplot_peaks_no_detector(self, mock_picked_spectrum_nos, mock_peak_overlay_points):
-        mock_peak_overlay_points.return_value = {"ws1": [self._create_detector_peaks(50, 50, np.zeros(3))]}
+    def test_refresh_lineplot_peaks_no_detector(self, mock_picked_spectrum_nos):
+        ws_peaks = self._create_workspace_detector_peaks(50, 50, np.zeros(3))
+        self._model.peaks_grouped_by_ws = {"ws1": ws_peaks}
         mock_picked_spectrum_nos.return_value = []
         self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
-        self._presenter._update_peaks_workspaces()
         self._presenter.refresh_lineplot_peaks()
-        mock_peak_overlay_points.assert_called_once()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
         self._mock_view.plot_lineplot_overlay.assert_not_called()
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
     @mock.patch.object(FullInstrumentViewModel, "picked_spectrum_nos", new_callable=mock.PropertyMock)
-    def test_refresh_lineplot_peaks_wrong_unit(self, mock_picked_spectrum_nos, mock_peak_overlay_points):
-        mock_peak_overlay_points.return_value = {"ws1": [self._create_detector_peaks(50, 50, np.zeros(3))]}
+    def test_refresh_lineplot_peaks_wrong_unit(self, mock_picked_spectrum_nos):
+        ws_peaks = self._create_workspace_detector_peaks(50, 50, np.zeros(3))
+        self._model.peaks_grouped_by_ws = {"ws1": ws_peaks}
         mock_picked_spectrum_nos.return_value = [50]
         self._mock_view.current_selected_unit.return_value = "Light Years"
-        self._presenter.refresh_lineplot_peaks()
-        mock_peak_overlay_points.assert_not_called()
-        self._mock_view.clear_lineplot_overlays.assert_called_once()
-        self._mock_view.redraw_lineplot.assert_called_once()
-        self._mock_view.plot_lineplot_overlay.assert_not_called()
+        with self.assertRaises(RuntimeError):
+            self._presenter.refresh_lineplot_peaks()
 
     @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.relative_detector_angle")

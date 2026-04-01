@@ -492,8 +492,9 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(1, len(peaks_workspaces))
         self.assertEqual(mock_peaks_workspace, peaks_workspaces[0])
 
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_peaks_grouped_by_ws")
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
-    def test_set_peaks_workspaces(self, mock_ads):
+    def test_set_peaks_workspaces(self, mock_ads, mock_update_peaks):
         mock_ads_instance = mock_ads.Instance()
         mock_peaks_workspace = PeaksWorkspaceMock()
         mock_ads_instance.retrieveWorkspaces.return_value = [mock_peaks_workspace]
@@ -502,8 +503,9 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.set_peaks_workspaces(names)
         mock_ads_instance.retrieveWorkspaces.assert_called_once_with(names)
         self.assertEqual(mock_peaks_workspace, model._selected_peaks_workspaces[0])
+        mock_update_peaks.assert_called_once()
 
-    def test_peak_overlay_points(self):
+    def test_update_peaks_grouped_by_ws(self):
         model = FullInstrumentViewModel(self._ws)
         peaks_ws = CreatePeaksWorkspace(self._ws, 2)
         model._selected_peaks_workspaces = [peaks_ws]
@@ -512,9 +514,9 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._is_valid = np.array([True])
         model._is_masked = np.array([False])
         model._is_selected_in_tree = np.array([True])
-        peaks = model.peak_overlay_points()
-        self.assertEqual(1, len(peaks))
-        detector_peak = peaks["peaks_ws"][0]
+        model.update_peaks_grouped_by_ws()
+        self.assertEqual(1, len(model.peaks_grouped_by_ws))
+        detector_peak = model.peaks_grouped_by_ws["peaks_ws"].detector_peaks[0]
         self.assertEqual(100, detector_peak.detector_id)
         self.assertEqual("[0, 0, 0] x 2", detector_peak.label)
         np.testing.assert_almost_equal(np.array([0, 0, 5.0]), detector_peak.location)
@@ -554,11 +556,11 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._is_valid = np.array([True, True, True])
         model._is_masked = np.array([False, False, False])
         model._is_selected_in_tree = np.array([True, True, True])
-        peaks = model.peak_overlay_points()
+        model.update_peaks_grouped_by_ws()
         # Should get one peak with detector ID 4 and spectrum
         # number 1
-        self.assertEqual(1, len(peaks))
-        detector_peak = peaks[mock_peaks_ws.name()][0]
+        self.assertEqual(1, len(model.peaks_grouped_by_ws))
+        detector_peak = model.peaks_grouped_by_ws[mock_peaks_ws.name()].detector_peaks[0]
         self.assertEqual(1, len(detector_peak.peaks))
         self.assertEqual(test_detector_id, detector_peak.detector_id)
         self.assertEqual("(2, 2, 2)", detector_peak.label)
@@ -825,8 +827,13 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._is_valid = np.array([True])
         model._is_masked = np.array([True])
         model._is_selected_in_tree = np.array([True])
-        peaks = model.peak_overlay_points()
-        self.assertEqual(0, len(peaks[peaks_ws.name()]))
+        model._projection_type = ProjectionType.THREE_D
+        model._detector_positions_3d = np.array([[0, 0, 5.0]])
+        model.update_peaks_grouped_by_ws()
+        # Peaks are still created but will have no valid projected points once positions are set
+        ws_peaks = model.peaks_grouped_by_ws[peaks_ws.name()]
+        ws_peaks.set_positions_and_labels(model.detector_positions, model.spectrum_nos)
+        self.assertEqual(0, len(ws_peaks.projected_points))
 
     def test_delete_all_peaks_skips_workspaces_not_in_overlay(self):
         """Workspaces missing from overlay mapping are ignored."""
@@ -840,8 +847,9 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws2.removePeaks = MagicMock()
         model._selected_peaks_workspaces = [ws1, ws2]
         # Only ws1 present in overlay
-        overlay = {"ws1": [DetectorPeaks([self._create_peak(10, 7), self._create_peak(11, 7)])]}
-        model.peak_overlay_points = MagicMock(return_value=overlay)
+        ws_peaks = MagicMock()
+        ws_peaks.detector_peaks = [DetectorPeaks([self._create_peak(10, 7), self._create_peak(11, 7)])]
+        model.peaks_grouped_by_ws = {"ws1": ws_peaks}
         model.delete_peaks_on_all_selected_detectors()
         ws1.removePeaks.assert_called_once_with([10, 11])
         ws2.removePeaks.assert_not_called()
@@ -854,13 +862,12 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws1.name.return_value = "ws1"
         ws1.removePeaks = MagicMock()
         model._selected_peaks_workspaces = [ws1]
-        overlay = {
-            "ws1": [
-                DetectorPeaks([self._create_peak(1, 99)]),  # not selected
-                DetectorPeaks([self._create_peak(2, 100)]),  # not selected
-            ]
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
+        ws_peaks = MagicMock()
+        ws_peaks.detector_peaks = [
+            DetectorPeaks([self._create_peak(1, 99)]),  # not selected
+            DetectorPeaks([self._create_peak(2, 100)]),  # not selected
+        ]
+        model.peaks_grouped_by_ws = {"ws1": ws_peaks}
         model.delete_peaks_on_all_selected_detectors()
         ws1.removePeaks.assert_not_called()
 
@@ -873,14 +880,13 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws1.removePeaks = MagicMock()
         model._selected_peaks_workspaces = [ws1]
         # Matching detectors: 7 and 8; non-matching 99
-        overlay = {
-            "ws1": [
-                DetectorPeaks([self._create_peak(10, 7), self._create_peak(11, 7)]),
-                DetectorPeaks([self._create_peak(20, 8)]),
-                DetectorPeaks([self._create_peak(999, 99)]),  # should be ignored
-            ]
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
+        ws_peaks = MagicMock()
+        ws_peaks.detector_peaks = [
+            DetectorPeaks([self._create_peak(10, 7), self._create_peak(11, 7)]),
+            DetectorPeaks([self._create_peak(20, 8)]),
+            DetectorPeaks([self._create_peak(999, 99)]),  # should be ignored
+        ]
+        model.peaks_grouped_by_ws = {"ws1": ws_peaks}
         model.delete_peaks_on_all_selected_detectors()
         # Order preserves traversal: group(7) then group(8)
         ws1.removePeaks.assert_called_once_with([10, 11, 20])
@@ -896,16 +902,16 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws2.name.return_value = "ws2"
         ws2.removePeaks = MagicMock()
         model._selected_peaks_workspaces = [ws1, ws2]
-        overlay = {
-            "ws1": [
-                DetectorPeaks([self._create_peak(1, 7), self._create_peak(2, 7)]),
-                DetectorPeaks([self._create_peak(3, 8)]),
-            ],
-            "ws2": [
-                DetectorPeaks([self._create_peak(100, 8), self._create_peak(200, 8)]),
-            ],
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
+        ws1_peaks = MagicMock()
+        ws1_peaks.detector_peaks = [
+            DetectorPeaks([self._create_peak(1, 7), self._create_peak(2, 7)]),
+            DetectorPeaks([self._create_peak(3, 8)]),
+        ]
+        ws2_peaks = MagicMock()
+        ws2_peaks.detector_peaks = [
+            DetectorPeaks([self._create_peak(100, 8), self._create_peak(200, 8)]),
+        ]
+        model.peaks_grouped_by_ws = {"ws1": ws1_peaks, "ws2": ws2_peaks}
         model.delete_peaks_on_all_selected_detectors()
         ws1.removePeaks.assert_called_once_with([1, 2, 3])
         ws2.removePeaks.assert_called_once_with([100, 200])
@@ -915,10 +921,9 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, _ = self._setup_model([1, 7, 8])
         model._detector_is_picked = [False, True, True]
         model._selected_peaks_workspaces = []
-        model.peak_overlay_points = MagicMock(return_value={})
+        model.peaks_grouped_by_ws = {}
         # Should not raise
         model.delete_peaks_on_all_selected_detectors()
-        model.peak_overlay_points.assert_called_once()
 
     def _create_peak(self, peak_index: int, detector_id: int, x: float = 1.0) -> Peak:
         return Peak(detector_id, 0, np.zeros(3), peak_index, (0, 0, 0), x, x, x, x)
@@ -929,9 +934,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._detector_is_picked = [True, False, False]
         model._selected_peaks_workspaces = []
         model.peak_overlay_points = MagicMock(return_value={})
-        model.delete_peak(5.0)
         # No workspace exists to assert removePeak calls; just ensure method didn’t crash.
-        model.peak_overlay_points.assert_called_once()
+        self.assertEqual(None, model.delete_peak(5.0))
 
     def test_no_matching_detector_peaks_no_removal(self):
         """If overlay contains no groups with the picked detector_id, nothing is removed."""
@@ -942,8 +946,9 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws1.removePeak = MagicMock()
         model._selected_peaks_workspaces = [ws1]
         # Only detector_id=3 in overlay; model expects detector_id=7
-        overlay = {"ws1": [DetectorPeaks([self._create_peak(10, 3, 1.0), self._create_peak(11, 3, 2.0)])]}
-        model.peak_overlay_points = MagicMock(return_value=overlay)
+        ws_peaks = MagicMock()
+        ws_peaks.detector_peaks = [DetectorPeaks([self._create_peak(10, 3, 1.0), self._create_peak(11, 3, 2.0)])]
+        model.peaks_grouped_by_ws = {"ws1": ws_peaks}
         model.delete_peak(2.2)
         ws1.removePeak.assert_not_called()
 
@@ -956,10 +961,11 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws1.removePeak = MagicMock()
         model._selected_peaks_workspaces = [ws1]
         # Peaks at 1.0 (idx=100), 2.0 (idx=101), 10.0 (idx=102); click at 2.2 -> closest is 2.0
-        overlay = {
-            "ws1": [DetectorPeaks([self._create_peak(100, 7, 1.0), self._create_peak(101, 7, 2.0), self._create_peak(102, 7, 10.0)])]
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
+        ws_peaks = MagicMock()
+        ws_peaks.detector_peaks = [
+            DetectorPeaks([self._create_peak(100, 7, 1.0), self._create_peak(101, 7, 2.0), self._create_peak(102, 7, 10.0)])
+        ]
+        model.peaks_grouped_by_ws = {"ws1": ws_peaks}
         model.delete_peak(2.2)
         ws1.removePeak.assert_called_once_with(101)
 
@@ -976,17 +982,17 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._selected_peaks_workspaces = [ws1, ws2]
         # ws1 closest distance = |2.5 - 2.2| = 0.3 (peak_index=201)
         # ws2 closest distance = |2.3 - 2.2| = 0.1 (peak_index=301) -> ws2 should be chosen
-        overlay = {
-            "ws1": [DetectorPeaks([self._create_peak(201, 7, 2.5), self._create_peak(202, 7, 100.0)])],
-            "ws2": [DetectorPeaks([self._create_peak(301, 7, 2.3), self._create_peak(302, 7, 50.0)])],
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
+        ws1_peaks = MagicMock()
+        ws1_peaks.detector_peaks = [DetectorPeaks([self._create_peak(201, 7, 2.5), self._create_peak(202, 7, 100.0)])]
+        ws2_peaks = MagicMock()
+        ws2_peaks.detector_peaks = [DetectorPeaks([self._create_peak(301, 7, 2.3), self._create_peak(302, 7, 50.0)])]
+        model.peaks_grouped_by_ws = {"ws1": ws1_peaks, "ws2": ws2_peaks}
         model.delete_peak(2.2)
         ws2.removePeak.assert_called_once_with(301)
         ws1.removePeak.assert_not_called()
 
     def test_skips_workspaces_not_in_overlay(self):
-        """Workspaces not present in peak_overlay_points mapping are ignored."""
+        """Workspaces not present in peaks_grouped_by_ws mapping are ignored."""
         model, _ = self._setup_model([7])
         model._detector_is_picked = [True]
         ws1 = MagicMock()
@@ -997,11 +1003,10 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws3.removePeak = MagicMock()
 
         model._selected_peaks_workspaces = [ws1, ws3]
-        overlay = {
-            "ws1": [DetectorPeaks([self._create_peak(10, 7, 1.9)])]
-            # ws3 missing from overlay
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
+        ws_peaks = MagicMock()
+        ws_peaks.detector_peaks = [DetectorPeaks([self._create_peak(10, 7, 1.9)])]
+        model.peaks_grouped_by_ws = {"ws1": ws_peaks}
+        # ws3 missing from peaks_grouped_by_ws
         model.delete_peak(2.0)
         ws1.removePeak.assert_called_once_with(10)
         ws3.removePeak.assert_not_called()

@@ -539,7 +539,7 @@ class FullInstrumentViewWindow(QMainWindow):
             self._units_combo_box.addItem(unit)
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
         self._count_scale_combo_box.addItems(self._presenter.count_scale_combo_options())
-        self.main_plotter.set_color_cycler(self._presenter._COLOURS)
+        self.main_plotter.set_color_cycler(self._presenter.colours)
         self.refresh_peaks_ws_list()
         self.refresh_workspaces_in_list(CurrentTab.Masking)
         self.refresh_workspaces_in_list(CurrentTab.Grouping)
@@ -709,7 +709,7 @@ class FullInstrumentViewWindow(QMainWindow):
         for list_i in range(self._peak_ws_list.count()):
             list_item = self._peak_ws_list.item(list_i)
             if list_item.checkState() > 0:
-                list_item.setForeground(QColor(self._presenter._COLOURS[picked_index % len(self._presenter._COLOURS)]))
+                list_item.setForeground(QColor(self._presenter.colours[picked_index % len(self._presenter.colours)]))
                 picked_index += 1
             else:
                 list_item.setForeground(self._peak_ws_list.palette().color(QPalette.Text))
@@ -964,6 +964,8 @@ class FullInstrumentViewWindow(QMainWindow):
             text.remove()
 
     def plot_overlay_mesh(self, positions: np.ndarray, labels: list[str], colour: str) -> None:
+        if positions.size == 0:
+            return
         points_actor = self.main_plotter.add_points(positions, color=colour, point_size=15, render_points_as_spheres=True, opacity=0.2)
         labels_actor = self.main_plotter.add_point_labels(
             positions,

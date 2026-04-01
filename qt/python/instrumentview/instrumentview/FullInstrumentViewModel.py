@@ -6,12 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.Detectors import DetectorInfo
 from instrumentview.Globals import CurrentTab
-from instrumentview.Peaks.Peak import Peak
-from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.ConvertUnitsCalculator import ConvertUnitsCalculator
 from instrumentview.ComponentSelectionUtils import detector_table_indices_for_parent_subtrees
+from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
 from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace, GroupingWorkspace
 from mantid.simpleapi import (
@@ -34,13 +33,31 @@ from mantid.simpleapi import (
     DeleteWorkspace,
 )
 from mantid.api import MatrixWorkspace
-from itertools import groupby
 from pathlib import Path
 import numpy as np
+
+from itertools import cycle
+
+
+class Colours:
+    def __init__(self, colours: list[str]):
+        self._colours = colours
+        self._cycle = cycle(colours)
+
+    def next(self) -> str:
+        return next(self._cycle)
+
+    def reset(self):
+        self._cycle = cycle(self._colours)
+
+    def list(self) -> list[str]:
+        return self._colours
 
 
 class FullInstrumentViewModel:
     """Model for the Instrument View Window. Will calculate detector positions, indices, and integrated counts that give the colours"""
+
+    _COLOURS = Colours(["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"])
 
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
@@ -51,6 +68,7 @@ class FullInstrumentViewModel:
     _workspace_x_unit: str
     _workspace_x_unit_display: str
     _selected_peaks_workspaces: list[PeaksWorkspace]
+    peaks_grouped_by_ws: dict[str, WorkspaceDetectorPeaks]
 
     def __init__(self, workspace: Workspace2D):
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
@@ -448,37 +466,18 @@ class FullInstrumentViewModel:
 
     def set_peaks_workspaces(self, peaks_workspace_names: list[str]) -> None:
         self._selected_peaks_workspaces = AnalysisDataService.Instance().retrieveWorkspaces(peaks_workspace_names)
+        self.update_peaks_grouped_by_ws()
 
-    def peak_overlay_points(self) -> dict[str : list[DetectorPeaks]]:
-        detector_info = self._workspace.detectorInfo()
-        peaks_grouped_by_ws = {}
+    def update_peaks_grouped_by_ws(self):
+        self._COLOURS.reset()
+        self.peaks_grouped_by_ws = {}
         for pws in self._selected_peaks_workspaces:
-            peaks = []
-            peaks_dict = pws.toDict()
-            detector_ids = peaks_dict["DetID"]
-            workspace_indices = self.workspace.getIndicesFromDetectorIDs(detector_ids)
-            spectrum_nos = self._spectrum_nos[workspace_indices]
-            hkls = zip(peaks_dict["h"], peaks_dict["k"], peaks_dict["l"], strict=True)
-            positions = [np.array(detector_info.position(detector_info.indexOf(id))) for id in detector_ids]
-            tofs = peaks_dict["TOF"]
-            dspacings = peaks_dict["DSpacing"]
-            wavelengths = peaks_dict["Wavelength"]
-            peaks += [
-                Peak(det_id, spec_no, v, peak_idx, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
-                for (det_id, spec_no, v, peak_idx, hkl, tof, dspacing, wavelength) in zip(
-                    detector_ids, spectrum_nos, positions, range(len(tofs)), hkls, tofs, dspacings, wavelengths, strict=True
-                )
-            ]
-            # Combine peaks on the same detector
-            detector_peaks = []
-            # groupby groups consecutive matches, so must be sorted
-            peaks.sort(key=lambda x: x.spectrum_no)
-            for spec_no, peaks_for_spec in groupby(peaks, lambda x: x.spectrum_no):
-                if spec_no in self.spectrum_nos:
-                    detector_peaks.append(DetectorPeaks(list(peaks_for_spec)))
+            self.peaks_grouped_by_ws[pws.name()] = WorkspaceDetectorPeaks(pws, self._COLOURS.next(), self._workspace, self._spectrum_nos)
 
-            peaks_grouped_by_ws[pws.name()] = detector_peaks
-        return peaks_grouped_by_ws
+    def peak_positions_labels_colours(self):
+        for key in self.peaks_grouped_by_ws:
+            self.peaks_grouped_by_ws[key].set_positions_and_labels(self.detector_positions, self.spectrum_nos)
+        return self.peaks_grouped_by_ws.values()
 
     def _peaks_workspace_for_adding_new_peak(self, selected_peaks_workspaces: list[str]) -> PeaksWorkspace:
         # If exactly one Peaks workspace in selected, add the peak to that workspace, otherwise
@@ -500,12 +499,11 @@ class FullInstrumentViewModel:
 
     def delete_peak(self, x_in_workspace_unit: float) -> None:
         detector_ids = self.picked_detector_ids
-        peaks_grouped_by_ws = self.peak_overlay_points()
         closest_peak_by_ws = []
         for peaks_ws in self._selected_peaks_workspaces:
-            if peaks_ws.name() not in peaks_grouped_by_ws:
+            if peaks_ws.name() not in self.peaks_grouped_by_ws:
                 continue
-            peaks_by_detector = peaks_grouped_by_ws[peaks_ws.name()]
+            peaks_by_detector = self.peaks_grouped_by_ws[peaks_ws.name()].detector_peaks
             picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in detector_ids]
             if len(picked_detector_peaks) == 0:
                 continue
@@ -524,11 +522,10 @@ class FullInstrumentViewModel:
         closest_over_all_workspaces[0].removePeak(closest_over_all_workspaces[1])
 
     def delete_peaks_on_all_selected_detectors(self) -> None:
-        peaks_grouped_by_ws = self.peak_overlay_points()
         for peaks_ws in self._selected_peaks_workspaces:
-            if peaks_ws.name() not in peaks_grouped_by_ws:
+            if peaks_ws.name() not in self.peaks_grouped_by_ws:
                 continue
-            peaks_by_detector = peaks_grouped_by_ws[peaks_ws.name()]
+            peaks_by_detector = self.peaks_grouped_by_ws[peaks_ws.name()].detector_peaks
             picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in self.picked_detector_ids]
             if len(picked_detector_peaks) == 0:
                 continue
