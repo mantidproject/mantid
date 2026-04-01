@@ -503,13 +503,15 @@ def rerun_fit_with_new_ws(
             new_peak.setMatrixWorkspace(new_ws, idom, md_fit_kwargs["StartX" + key_suffix], md_fit_kwargs["EndX" + key_suffix])
             new_peak.setCentre(x0)
             new_peak.setIntensity(intens)
-            new_peak.setMatrixWorkspace(new_ws, idom, md_fit_kwargs["StartX" + key_suffix], md_fit_kwargs["EndX" + key_suffix])
 
         else:
             [
                 new_peak.setParameter(param, peak.getParameterValue(param))
                 for param in [new_peak.getParamName(i) for i in range(new_peak.nParams())]
             ]
+        # set workspace on peak function directly so IkedaCarpenterPV can calculate wavelengths
+        new_peak.setMatrixWorkspace(new_ws, idom, md_fit_kwargs["StartX" + key_suffix], md_fit_kwargs["EndX" + key_suffix])
+
         # update constraints around new values
 
         if not is_final:
@@ -534,10 +536,6 @@ def rerun_fit_with_new_ws(
         # if not is_final and new_peak.name() == "IkedaCarpenterPV":
         #    for par in ("Alpha0", "Alpha1", "Beta0", "Kappa"):
         #        new_peak.fixParameter(par)
-
-        # set workspace on peak function directly so IkedaCarpenterPV can calculate wavelengths
-        key_suffix = f"_{idom}" if idom > 0 else ""
-        new_peak.setMatrixWorkspace(new_ws, idom, md_fit_kwargs["StartX" + key_suffix], md_fit_kwargs["EndX" + key_suffix])
 
         comp_func = _make_composite(new_peak, bg)
         new_func.add(comp_func)
