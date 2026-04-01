@@ -1,0 +1,62 @@
+name: Windows unit tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+  workflow_dispatch:
+    inputs:
+      RUNNER_LABEL:
+        description: 'Match Runner Label'
+        required: false
+        type: string
+
+
+# cancel previous job if a new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-build-and-test:
+    runs-on:
+      - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
+      - self-hosted
+      - Windows
+      - X64
+    #
+    # If the user who clicked "Run Workflow" button left the RUNNER_LABEL field blank,
+    # the default evaluated output is the string 'self-hosted'.
+    # Otherwise set it to the value the user specified when they clicked "Run Workflow"
+    #
+
+    steps:
+      - name: Print shell environment vars (debug)
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: "Get-ChildItem Env: | Sort-Object Name | Format-Table -AutoSize"
+
+      - uses: actions/checkout@v6
+        with:
+          # Needed to fetch the tags for versioningit
+          fetch-depth: 100
+          fetch-tags: true
+
+      - name: Run unit tests on Windows
+        shell: bash
+        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/conda-buildscript ${GITHUB_WORKSPACE} win-64-ci
+
+      - name: Upload build and test log artifacts
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test_logs
+          path: ${{ github.workspace }}/build/test_logs/*.log
+
+      - name: Unit test report
+        uses: EnricoMi/publish-unit-test-result-action/windows@v2
+        if: (!cancelled())
+        with:
+          check_name: "Unit test results"
+          check_run: false
+          files: build/Testing/*unittest.xml
