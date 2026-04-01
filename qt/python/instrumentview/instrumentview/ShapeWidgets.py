@@ -54,6 +54,7 @@ class SelectionShape(ABC):
         self.angle = 0.0
         self._line_plot = None
         self._fill_plot = None
+        self._pixel_aspect = 1.0
 
     @abstractmethod
     def outline_xy(self):
@@ -98,6 +99,16 @@ class SelectionShape(ABC):
         """No-op base cleanup; subclasses may override."""
         pass
 
+    def set_pixel_aspect(self, aspect: float) -> None:
+        """Set x:y data-unit aspect ratio.
+
+        The *aspect* is ``sx / sy`` from the chart PlotTransform where
+        ``sx`` and ``sy`` are data->pixel scales on x/y.  Shapes that need
+        round geometry in screen space (e.g. circles) use this.
+        """
+        aspect = aspect if aspect > 0 else 1.0
+        self._pixel_aspect = aspect
+
 
 class CircleSelectionShape(SelectionShape):
     """Circle selection shape in normalised viewport coords."""
@@ -115,17 +126,18 @@ class CircleSelectionShape(SelectionShape):
     def outline_xy(self):
         return (
             self.cx + self.radius * np.cos(self._theta),
-            self.cy + self.radius * np.sin(self._theta),
+            self.cy + (self.radius * self._pixel_aspect) * np.sin(self._theta),
         )
 
     def fill_coords(self):
         fx = self.cx + self.radius * self._fill_x
-        fy_top = self.cy + self.radius * self._fill_upper
-        fy_bot = self.cy - self.radius * self._fill_upper
+        ry = self.radius * self._pixel_aspect
+        fy_top = self.cy + ry * self._fill_upper
+        fy_bot = self.cy - ry * self._fill_upper
         return fx, fy_bot, fy_top
 
     def hit_test(self, nx, ny):
-        dist = np.hypot(nx - self.cx, ny - self.cy)
+        dist = np.hypot(nx - self.cx, (ny - self.cy) / self._pixel_aspect)
         if abs(dist - self.radius) < EDGE_TOL:
             return "edge"
         if dist < self.radius:
@@ -136,12 +148,12 @@ class CircleSelectionShape(SelectionShape):
         return dict(radius=self.radius)
 
     def apply_resize_delta(self, nx, ny, start_nx, start_ny, saved_size):
-        start_dist = np.hypot(start_nx - self.cx, start_ny - self.cy)
-        curr_dist = np.hypot(nx - self.cx, ny - self.cy)
+        start_dist = np.hypot(start_nx - self.cx, (start_ny - self.cy) / self._pixel_aspect)
+        curr_dist = np.hypot(nx - self.cx, (ny - self.cy) / self._pixel_aspect)
         self.radius = max(0.01, saved_size["radius"] + (curr_dist - start_dist))
 
     def indices_in_shape(self, proj):
-        dist = np.hypot(proj[:, 0] - self.cx, proj[:, 1] - self.cy)
+        dist = np.hypot(proj[:, 0] - self.cx, (proj[:, 1] - self.cy) / self._pixel_aspect)
         return dist <= self.radius
 
 
@@ -290,11 +302,16 @@ class EllipseSelectionShape(SelectionShape):
 
     # ── coordinate helpers ──
     def _rot(self, lx, ly):
+        """Map local shape-space coordinates to chart data coordinates."""
         c, s = np.cos(self.angle), np.sin(self.angle)
-        return self.cx + lx * c - ly * s, self.cy + lx * s + ly * c
+        dx = lx * c - ly * s
+        dy = lx * s + ly * c
+        return self.cx + dx, self.cy + dy * self._pixel_aspect
 
     def _inv_rot(self, gx, gy):
+        """Map chart data coordinates to local shape-space coordinates."""
         dx, dy = gx - self.cx, gy - self.cy
+        dy /= self._pixel_aspect
         c, s = np.cos(self.angle), np.sin(self.angle)
         return dx * c + dy * s, -dx * s + dy * c
 
@@ -317,7 +334,7 @@ class EllipseSelectionShape(SelectionShape):
         c, s = np.cos(self.angle), np.sin(self.angle)
         lx = self.half_a * np.cos(self._theta)
         ly = self.half_b * np.sin(self._theta)
-        return self.cx + lx * c - ly * s, self.cy + lx * s + ly * c
+        return self.cx + lx * c - ly * s, self.cy + (lx * s + ly * c) * self._pixel_aspect
 
     def fill_coords(self):
         c, s = np.cos(self.angle), np.sin(self.angle)
@@ -331,8 +348,10 @@ class EllipseSelectionShape(SelectionShape):
         C = u**2 * (c**2 / a2 + s**2 / b2) - 1
         disc = np.clip(B**2 - 4 * A * C, 0, None)
         sq = np.sqrt(disc)
-        fy_top = self.cy + (-B + sq) / (2 * A)
-        fy_bot = self.cy + (-B - sq) / (2 * A)
+        dy_top = (-B + sq) / (2 * A)
+        dy_bot = (-B - sq) / (2 * A)
+        fy_top = self.cy + self._pixel_aspect * dy_top
+        fy_bot = self.cy + self._pixel_aspect * dy_bot
         valid = disc > 0
         return fx[valid], fy_bot[valid], fy_top[valid]
 
@@ -365,7 +384,7 @@ class EllipseSelectionShape(SelectionShape):
 
     def indices_in_shape(self, proj):
         dx = proj[:, 0] - self.cx
-        dy = proj[:, 1] - self.cy
+        dy = (proj[:, 1] - self.cy) / self._pixel_aspect
         c, s = np.cos(self.angle), np.sin(self.angle)
         lx = dx * c + dy * s
         ly = -dx * s + dy * c
@@ -911,6 +930,24 @@ class ShapeOverlayManager:
             return None
         return self._pixel_to_data(pos[0], pos[1])
 
+    def _shape_pixel_aspect(self) -> float:
+        """Return current data x:y aspect ratio for equal screen pixels."""
+        params = self._read_plot_transform()
+        if params is not None:
+            sx, sy, _, _ = params
+            if sy != 0:
+                return abs(sx / sy)
+        try:
+            w, h = self._plotter.renderer.GetSize()
+        except Exception:
+            try:
+                w, h = self._plotter.window_size
+            except Exception:
+                w, h = 1, 1
+        if h == 0:
+            return 1.0
+        return abs(w / h)
+
     def _set_cursor(self, hit_type):
         try:
             rw = self._plotter.iren.interactor.GetRenderWindow()
@@ -924,6 +961,8 @@ class ShapeOverlayManager:
         self.remove_shape()
         self._ensure_chart()
         self._shape = shape
+        self._read_plot_transform()
+        self._shape.set_pixel_aspect(self._shape_pixel_aspect())
         shape.create_plots(self._chart)
         # create_plots adds line/area plots which create new sub-charts
         # inside PyVista's _MultiCompChart.  Clear their borders too.

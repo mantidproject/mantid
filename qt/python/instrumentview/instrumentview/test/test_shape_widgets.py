@@ -86,6 +86,17 @@ class TestCircleSelectionShape(unittest.TestCase):
         self.assertEqual(len(fx), CircleSelectionShape.N_FILL)
         self.assertTrue(np.all(fy_top >= fy_bot))
 
+    def test_circle_uses_pixel_aspect_in_outline(self):
+        self.shape.set_pixel_aspect(2.0)
+        _, oy = self.shape.outline_xy()
+        self.assertAlmostEqual(float(np.max(oy) - self.shape.cy), 0.30, places=3)
+
+    def test_circle_hit_test_uses_pixel_aspect(self):
+        self.shape.set_pixel_aspect(2.0)
+        # With aspect=2, vertical displayed radius maps to 2*radius in data-y.
+        self.assertEqual(self.shape.hit_test(0.5, 0.5 + 0.15), "inside")
+        self.assertEqual(self.shape.hit_test(0.5, 0.5 + 0.30), "edge")
+
 
 class TestRectangleSelectionShape(unittest.TestCase):
     def setUp(self):
@@ -153,6 +164,12 @@ class TestRectangleSelectionShape(unittest.TestCase):
         fx, fy_bot, fy_top = self.shape.fill_coords()
         self.assertGreater(len(fx), 0)
         self.assertTrue(np.all(fy_top >= fy_bot))
+
+    def test_outline_xy_ignores_pixel_aspect(self):
+        _, oy_default = self.shape.outline_xy()
+        self.shape.set_pixel_aspect(2.0)
+        _, oy_aspect = self.shape.outline_xy()
+        np.testing.assert_allclose(oy_aspect, oy_default)
 
 
 class TestEllipseSelectionShape(unittest.TestCase):
@@ -269,6 +286,16 @@ class TestEllipseSelectionShape(unittest.TestCase):
         mask = self.shape.indices_in_shape(proj)
         self.assertFalse(mask[0])
 
+    def test_indices_in_shape_uses_pixel_aspect(self):
+        self.shape.half_a = 0.1
+        self.shape.half_b = 0.1
+        self.shape.angle = 0.0
+        self.shape.set_pixel_aspect(2.0)
+        inside = np.array([[0.5, 0.5 + 0.18]])
+        outside = np.array([[0.5, 0.5 + 0.22]])
+        self.assertTrue(self.shape.indices_in_shape(inside)[0])
+        self.assertFalse(self.shape.indices_in_shape(outside)[0])
+
 
 class TestShapeOverlayManager(unittest.TestCase):
     def _make_mock_plotter(self):
@@ -292,6 +319,23 @@ class TestShapeOverlayManager(unittest.TestCase):
         shape = CircleSelectionShape(0.5, 0.5, 0.1)
         mgr.set_shape(shape)
         self.assertIs(mgr.current_shape, shape)
+
+    def test_set_shape_syncs_aspect_before_initial_create_plots(self):
+        plotter = self._make_mock_plotter()
+        mgr = ShapeOverlayManager(plotter)
+        mgr._shape_pixel_aspect = MagicMock(return_value=2.0)
+        shape = CircleSelectionShape(0.5, 0.5, 0.1)
+        seen = {}
+        original_create_plots = shape.create_plots
+
+        def create_plots_capture_aspect(chart):
+            seen["aspect"] = shape._pixel_aspect
+            return original_create_plots(chart)
+
+        shape.create_plots = create_plots_capture_aspect
+        mgr.set_shape(shape)
+        self.assertAlmostEqual(seen["aspect"], 2.0)
+        mgr._shape_pixel_aspect.assert_called()
 
     def test_remove_shape(self):
         plotter = self._make_mock_plotter()
@@ -421,6 +465,31 @@ class TestShapeOverlayManager(unittest.TestCase):
         # (100/800, 500/600)
         self.assertAlmostEqual(mgr._cached_projected_points[1, 0], 0.125)
         self.assertAlmostEqual(mgr._cached_projected_points[1, 1], 500.0 / 600.0)
+
+    def test_shape_pixel_aspect_from_transform(self):
+        plotter = self._make_mock_plotter()
+        mgr = ShapeOverlayManager(plotter)
+        mgr._cached_transform = (800.0, 400.0, 0.0, 0.0)
+        self.assertAlmostEqual(mgr._shape_pixel_aspect(), 2.0)
+
+    def test_mouse_move_does_not_resync_pixel_aspect(self):
+        plotter = self._make_mock_plotter()
+        mgr = ShapeOverlayManager(plotter)
+        mgr._shape = CircleSelectionShape(0.5, 0.5, 0.1)
+        mgr._shape_pixel_aspect = MagicMock(return_value=1.0)
+        mgr._on_mouse_move(None, None)
+        mgr._shape_pixel_aspect.assert_not_called()
+
+    def test_get_shape_mask_does_not_resync_pixel_aspect(self):
+        plotter = self._make_mock_plotter()
+        mgr = ShapeOverlayManager(plotter)
+        mgr._shape = CircleSelectionShape(0.5, 0.5, 0.1)
+        mgr._shape_pixel_aspect = MagicMock(return_value=1.0)
+
+        points = np.array([[0.0, 0.0, 0.0]])
+        mgr.get_shape_mask(points)
+
+        mgr._shape_pixel_aspect.assert_not_called()
 
 
 class TestAnnulusSelectionShape(unittest.TestCase):
