@@ -28,7 +28,7 @@ from qtpy.QtWidgets import (
     QFrame,
 )
 from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
-from qtpy.QtCore import Qt, QEvent, QSize
+from qtpy.QtCore import Qt, QEvent, QSize, QObject
 from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
@@ -92,6 +92,22 @@ class NoWheelComboBox(QComboBox):
         event.ignore()
 
 
+class _DoubleClickBlocker(QObject):
+    """Qt event filter to swallow mouse double-clicks on the render widget."""
+
+    def eventFilter(self, _watched, event):
+        dbl_click_type = getattr(QEvent, "MouseButtonDblClick", None)
+        if dbl_click_type is None:
+            dbl_click_type = QEvent.Type.MouseButtonDblClick
+        if event is not None and event.type() == dbl_click_type:
+            try:
+                event.accept()
+            except Exception:
+                pass
+            return True
+        return False
+
+
 @run_on_qapp_thread()
 class FullInstrumentViewWindow(QMainWindow):
     """View for the Instrument View window. Contains the 3D view, the projection view, boxes showing information about the selected
@@ -136,6 +152,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=off_screen)
         pyvista_vertical_layout.addWidget(self.main_plotter.app_window)
+        self._double_click_blocker = _DoubleClickBlocker()
+        pyvista_vertical_layout.installEventFilter(self._double_click_blocker)
+        self.main_plotter.installEventFilter(self._double_click_blocker)
 
         self._detector_spectrum_fig, self._detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
