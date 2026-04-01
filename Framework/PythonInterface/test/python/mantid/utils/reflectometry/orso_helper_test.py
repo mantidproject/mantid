@@ -237,6 +237,7 @@ class MantidORSODatasetTest(unittest.TestCase):
             creator_affiliation,
             enable_instrument_settings=False,
             model="air | Ni 100 | SiO2 0.5 | Si",
+            validate=False,
         )
 
         orso_dataset = dataset.dataset
@@ -248,7 +249,7 @@ class MantidORSODatasetTest(unittest.TestCase):
         model_def = ["air | Ni 100 | SiO2 0.5 | 02", "air | 25 [ Si 7 | Fe 7 ] | Si", "Si | SiO2 0.5 | wat:er"]
         for model in model_def:
             with self.assertRaisesRegex(ValueError, "Please check that the string follows the correct ORSO format."):
-                MantidORSODataset(None, None, None, None, None, None, None, model=model)
+                MantidORSODataset(None, None, None, None, None, None, None, model=model, validate=True)
 
     @mock.patch("mantid.utils.reflectometry.orso_helper.SampleModel")
     def test_create_mandatory_header_raises_timeout_error(self, mock_sample_model):
@@ -258,7 +259,7 @@ class MantidORSODatasetTest(unittest.TestCase):
         sample_model = mock_sample_model.return_value
         sample_model.resolve_to_layers.side_effect = slow_resolve
         with self.assertRaises(concurrent.futures.TimeoutError):
-            MantidORSODataset(None, None, None, None, None, None, None, model="model")
+            MantidORSODataset(None, None, None, None, None, None, None, model="model", validate=True)
 
     def test_set_facility_on_mantid_orso_dataset(self):
         dataset = self._create_test_dataset()
@@ -389,7 +390,15 @@ class MantidORSODatasetTest(unittest.TestCase):
 
     def _create_test_dataset(self, polarized=False):
         return MantidORSODataset(
-            "Test dataset", self._data_columns, self._ws, datetime.now(), "", "", enable_instrument_settings=polarized, model=""
+            "Test dataset",
+            self._data_columns,
+            self._ws,
+            datetime.now(),
+            "",
+            "",
+            enable_instrument_settings=polarized,
+            model="",
+            validate=False,
         )
 
     def _check_mantid_default_header(self, orso_dataset, dataset_name, ws, reduction_timestamp, creator_name, creator_affiliation):
