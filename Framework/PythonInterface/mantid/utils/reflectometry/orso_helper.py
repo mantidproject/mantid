@@ -13,6 +13,7 @@ from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, Sa
 from orsopy.fileio import Reduction, Software
 from orsopy.fileio.orso import Orso, OrsoDataset, save_orso, save_nexus
 from orsopy.fileio.base import Column, ErrorColumn, File
+from mantid.kernel import logger
 
 from mantid.kernel import version
 from enum import Enum
@@ -32,7 +33,7 @@ def run_with_timeout(func: Callable, timeout: float, *args, **kwargs) -> Any:
             return future.result(timeout=timeout)
 
         except concurrent.futures.TimeoutError:
-            print(f"⚠️ Function '{func.__name__}' timed out after {timeout} seconds")
+            logger.warning(f"Function '{func.__name__}' timed out after {timeout} seconds")
             return None
 
 
@@ -141,12 +142,14 @@ class MantidORSODataset:
                 try:
                     result = run_with_timeout(lambda: SampleModel(stack=model).resolve_to_layers(), timeout=5.0)
                 except:
-                    raise ValueError(
-                        f"The provided model description {model} contains an error. "
+                    logger.warning(
+                        f"The provided model description '{model}' contains an error. "
                         "Please check that the string follows the correct ORSO format.\n"
                     )
+                    return
                 if result is None:
-                    raise concurrent.futures.TimeoutError(f"The provided model description {model} could not be validated.")
+                    logger.warning(f"The provided model description '{model}' could not be validated because of database unavalibility.")
+                    return
             sample = Sample(name=ws.getTitle(), model=model)
         else:
             sample = Sample(name=ws.getTitle())

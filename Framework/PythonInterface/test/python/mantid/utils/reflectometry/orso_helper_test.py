@@ -7,7 +7,6 @@
 import numpy as np
 import unittest
 from time import sleep
-import concurrent.futures
 from unittest import mock
 from mantid.kernel import version
 from datetime import datetime, timezone, date, time
@@ -245,21 +244,43 @@ class MantidORSODatasetTest(unittest.TestCase):
         self._check_mantid_default_header(orso_dataset, dataset_name, self._ws, reduction_timestamp, creator_name, creator_affiliation)
         self._check_data(orso_dataset)
 
-    def test_create_mandatory_header_raises_error(self):
+    @mock.patch("mantid.utils.reflectometry.orso_helper.logger.warning")
+    def test_create_mandatory_header_raises_error(self, mock_logger):
         model_def = ["air | Ni 100 | SiO2 0.5 | 02", "air | 25 [ Si 7 | Fe 7 ] | Si", "Si | SiO2 0.5 | wat:er"]
         for model in model_def:
-            with self.assertRaisesRegex(ValueError, "Please check that the string follows the correct ORSO format."):
-                MantidORSODataset(None, None, None, None, None, None, None, model=model, validate=True)
+            MantidORSODataset(None, None, None, None, None, None, None, model=model, validate=True)
+        mock_logger.assert_has_calls(
+            [
+                mock.call(
+                    "The provided model description 'air | Ni 100 | SiO2 0.5 | 02' contains an error. "
+                    "Please check that the string follows the correct ORSO format.\n"
+                ),
+                mock.call(
+                    "The provided model description 'air | 25 [ Si 7 | Fe 7 ] | Si' contains an error. "
+                    "Please check that the string follows the correct ORSO format.\n"
+                ),
+                mock.call(
+                    "The provided model description 'Si | SiO2 0.5 | wat:er' contains an error. "
+                    "Please check that the string follows the correct ORSO format.\n"
+                ),
+            ]
+        )
 
+    @mock.patch("mantid.utils.reflectometry.orso_helper.logger.warning")
     @mock.patch("mantid.utils.reflectometry.orso_helper.SampleModel")
-    def test_create_mandatory_header_raises_timeout_error(self, mock_sample_model):
+    def test_create_mandatory_header_raises_timeout_error(self, mock_sample_model, mock_logger):
         def slow_resolve(*args, **kwargs):
             sleep(10)
 
         sample_model = mock_sample_model.return_value
         sample_model.resolve_to_layers.side_effect = slow_resolve
-        with self.assertRaises(concurrent.futures.TimeoutError):
-            MantidORSODataset(None, None, None, None, None, None, None, model="model", validate=True)
+        MantidORSODataset(None, None, None, None, None, None, None, model="air", validate=True)
+        mock_logger.assert_has_calls(
+            [
+                mock.call("Function '<lambda>' timed out after 5.0 seconds"),
+                mock.call("The provided model description 'air' could not be validated because of database unavalibility."),
+            ]
+        )
 
     def test_set_facility_on_mantid_orso_dataset(self):
         dataset = self._create_test_dataset()
