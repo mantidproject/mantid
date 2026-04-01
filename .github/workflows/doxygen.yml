@@ -1,6 +1,10 @@
+name: doxygen documentation build and publish
 on:
   push:
     branches: [main]
+  # TODO
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 # cancel previous job if new commit is pushed
 concurrency:
@@ -45,7 +49,7 @@ jobs:
         # TODO
         if: ${{ steps.changes.outputs.doxygen == 'true' }}
         run: |
-          rm -rf doxygen_repo/*
+          rm -rf doxygen_repo/* # delete old version of the repository
           cp -r $GITHUB_WORKSPACE/build/doxygen/html/* doxygen_repo/
 
       - name: Commit Doxygen and push
@@ -57,4 +61,4 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git commit -m "Update Doxygen docs"
-          # TODO uncommentgit push origin main
+          # TODO uncomment git push origin main
