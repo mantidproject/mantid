@@ -244,7 +244,7 @@ class MantidORSODatasetTest(unittest.TestCase):
         self._check_mantid_default_header(orso_dataset, dataset_name, self._ws, reduction_timestamp, creator_name, creator_affiliation)
         self._check_data(orso_dataset)
 
-    @mock.patch("mantid.utils.reflectometry.orso_helper.logger.warning")
+    @mock.patch("mantid.utils.reflectometry.orso_helper.logger.error")
     def test_create_mandatory_header_raises_error(self, mock_logger):
         model_def = ["air | Ni 100 | SiO2 0.5 | 02", "air | 25 [ Si 7 | Fe 7 ] | Si", "Si | SiO2 0.5 | wat:er"]
         for model in model_def:
@@ -266,7 +266,7 @@ class MantidORSODatasetTest(unittest.TestCase):
             ]
         )
 
-    @mock.patch("mantid.utils.reflectometry.orso_helper.logger.warning")
+    @mock.patch("mantid.utils.reflectometry.orso_helper.logger.error")
     @mock.patch("mantid.utils.reflectometry.orso_helper.SampleModel")
     def test_create_mandatory_header_raises_timeout_error(self, mock_sample_model, mock_logger):
         def slow_resolve(*args, **kwargs):

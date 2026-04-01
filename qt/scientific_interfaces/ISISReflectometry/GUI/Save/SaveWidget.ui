@@ -370,7 +370,6 @@
             <property name="font">
             <font>
                 <weight>75</weight>
-                <bold>true</bold>
             </font>
             </property>
             <property name="styleSheet">
@@ -378,12 +377,12 @@
             </property>
             <item>
             <property name="text">
-                <string>Don't validate model description</string>
+                <string>Validate model description</string>
             </property>
             </item>
             <item>
             <property name="text">
-                <string>Validate model description</string>
+                <string>Do not validate model description</string>
             </property>
             </item>
             </widget>

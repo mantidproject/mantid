@@ -145,14 +145,14 @@ class MantidORSODataset:
                 try:
                     result = run_with_timeout(lambda: SampleModel(stack=model).resolve_to_layers(), timeout=5.0)
                 except:
-                    logger.warning(
+                    logger.error(
                         f"The provided model description '{model}' contains an error. "
                         "Please check that the string follows the correct ORSO format."
                     )
                     self._header = None
                     return
                 if result is None:
-                    logger.warning(f"The provided model description '{model}' could not be validated because of database unavalibility.")
+                    logger.error(f"The provided model description '{model}' could not be validated because of database unavalibility.")
                     self._header = None
                     return
             sample = Sample(name=ws.getTitle(), model=model)

@@ -274,10 +274,10 @@ NamedFormat SavePresenter::formatFromIndex(int formatIndex) const {
 
 bool SavePresenter::validationFromIndex(int validationIndex) const {
   switch (validationIndex) {
-  case 0: // Don't validate model string
-    return false;
-  case 1: // validate model string
+  case 0: // Validate model description
     return true;
+  case 1: // Do not validate model description
+    return false;
   default:
     throw std::runtime_error("Unknown validation option.");
   }

@@ -345,11 +345,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         data_columns = self._create_data_columns(refl_dataset)
         dataset = self._create_dataset_with_mandatory_header(data_columns, refl_dataset)
         if dataset.dataset is None:
-            self.log().error(
-                "There was an issue while validating the model description. "
-                "An ORSO file cannot be saved. "
-                "Select 'Don't validate model description' to save the file without validating the model."
-            )
+            self.log().error("An ORSO file cannot be saved because there was an issue while validating the model description.")
             return None
         self._add_optional_header_info(dataset, refl_dataset)
         return dataset
