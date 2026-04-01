@@ -287,7 +287,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         # Create the file contents
         for refl_dataset in self._create_and_sort_refl_datasets():
-            orso_saver.add_dataset(self._create_orso_dataset(refl_dataset))
+            data = self._create_orso_dataset(refl_dataset)
+            if data is None:
+                return
+            orso_saver.add_dataset(data)
 
         # Write the file to disk in the relevant ORSO format
         save_filepath = Path(orso_saver.filename)
@@ -341,6 +344,13 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     def _create_orso_dataset(self, refl_dataset: ReflectometryDataset) -> MantidORSODataset:
         data_columns = self._create_data_columns(refl_dataset)
         dataset = self._create_dataset_with_mandatory_header(data_columns, refl_dataset)
+        if dataset.dataset is None:
+            self.log().error(
+                "There was an issue while validating the model description. "
+                "An ORSO file cannot be saved. "
+                "Select 'Don't validate model description' to save the file without validating the model."
+            )
+            return None
         self._add_optional_header_info(dataset, refl_dataset)
         return dataset
 

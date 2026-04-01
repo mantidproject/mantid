@@ -378,12 +378,12 @@
             </property>
             <item>
             <property name="text">
-                <string>Don't validate model string</string>
+                <string>Don't validate model description</string>
             </property>
             </item>
             <item>
             <property name="text">
-                <string>Validate model string</string>
+                <string>Validate model description</string>
             </property>
             </item>
             </widget>

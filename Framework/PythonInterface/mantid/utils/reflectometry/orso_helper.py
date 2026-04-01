@@ -95,7 +95,10 @@ class MantidORSODataset:
 
     @property
     def dataset(self) -> OrsoDataset:
-        return OrsoDataset(info=self._header, data=self._data_columns.data)
+        if self._header:
+            return OrsoDataset(info=self._header, data=self._data_columns.data)
+        else:
+            return None
 
     def set_facility(self, facility: str) -> None:
         self._header.data_source.experiment.facility = facility
@@ -144,11 +147,13 @@ class MantidORSODataset:
                 except:
                     logger.warning(
                         f"The provided model description '{model}' contains an error. "
-                        "Please check that the string follows the correct ORSO format.\n"
+                        "Please check that the string follows the correct ORSO format."
                     )
+                    self._header = None
                     return
                 if result is None:
                     logger.warning(f"The provided model description '{model}' could not be validated because of database unavalibility.")
+                    self._header = None
                     return
             sample = Sample(name=ws.getTitle(), model=model)
         else:
