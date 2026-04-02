@@ -37,6 +37,7 @@ from mantid.plots.datafunctions import (
     check_resample_to_regular_grid,
     get_indices,
     get_normalize_by_bin_width,
+    get_normalization_type,
     get_spectrum_normalisation,
 )
 from mantid.plots.utility import MantidAxType, PlotNormalizationType
@@ -122,8 +123,7 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
     else:
         normalise_spectrum, kwargs = get_spectrum_normalisation(**kwargs)
         axis = MantidAxType(kwargs.pop("axis", MantidAxType.SPECTRUM))
-        normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
-        workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(workspace, axis, **kwargs)
+        workspace_index, _, kwargs = get_wksp_index_dist_and_label(workspace, axis, **kwargs)
         if axis == MantidAxType.BIN:
             # get_bin returns the bin *without the monitor data*
             x, y, dy, dx = get_bins(workspace, workspace_index, with_dy, with_dx)
@@ -141,8 +141,8 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
                 x = [spectrum_numbers[i] for i in x]
 
         elif axis == MantidAxType.SPECTRUM:
-            normalization = PlotNormalizationType.BIN_WIDTH if normalize_by_bin_width else PlotNormalizationType.NONE
-            x, y, dy, dx = get_spectrum(workspace, workspace_index, normalization, with_dy, with_dx)
+            normalization_type = get_normalization_type(workspace, axes, **kwargs)
+            x, y, dy, dx = get_spectrum(workspace, workspace_index, normalization_type, with_dy, with_dx)
         else:
             raise ValueError("Axis {} is not a valid axis number.".format(axis))
         indices = None
@@ -185,6 +185,7 @@ def _plot_impl(axes, workspace, args, kwargs):
         if kwargs.pop("update_axes_labels", True):
             _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width, axis=axis)
     kwargs.pop("normalize_by_bin_width", None)
+    kwargs.pop("normalize_type", None)
     return x, y, args, kwargs
 
 
@@ -209,6 +210,10 @@ def plot(axes, workspace, *args, **kwargs):
     :param normalize_by_bin_width: ``None`` (default) ask the workspace. It can override
                           the value from distribution. Is implemented so get_normalize_by_bin_width
                           only need to be run once.
+    :param normalization_type: :class:`mantid.plots.utility.PlotNormalizationType` enum specifying the
+                          normalization to apply. Can be ``NONE``, ``BIN_WIDTH``, or ``INVERSE_Q_FOURTH_POWER``.
+                          If specified, this takes precedence over ``normalize_by_bin_width``.
+                          Applies to MatrixWorkspace spectra plots.
     :param LogName:   if specified, it will plot the corresponding sample log. The x-axis
                       of the plot is the time difference between the log time and the first
                       value of the `proton_charge` log (if available) or the sample log's
@@ -271,6 +276,10 @@ def errorbar(axes, workspace, *args, **kwargs):
                          Applies only when the workspace is a MatrixWorkspace histogram.
     :param normalize_by_bin_width: Plot the workspace as a distribution. If None default to global
                                    setting: config['graph1d.autodistribution']
+    :param normalization_type: :class:`mantid.plots.utility.PlotNormalizationType` enum specifying the
+                          normalization to apply. Can be ``NONE``, ``BIN_WIDTH``, or ``INVERSE_Q_FOURTH_POWER``.
+                          If specified, this takes precedence over ``normalize_by_bin_width``.
+                          Applies to MatrixWorkspace spectra plots.
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
@@ -311,6 +320,7 @@ def errorbar(axes, workspace, *args, **kwargs):
     if kwargs.pop("update_axes_labels", True):
         _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width, axis=axis)
     kwargs.pop("normalize_by_bin_width", None)
+    kwargs.pop("normalize_type", None)
 
     if dy is not None and min(dy) < 0:
         dy = None
@@ -338,6 +348,10 @@ def scatter(axes, workspace, *args, **kwargs):
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the workspace is a MatrixWorkspace histogram.
+    :param normalization_type: :class:`mantid.plots.utility.PlotNormalizationType` enum specifying the
+                          normalization to apply. Can be ``NONE``, ``BIN_WIDTH``, or ``INVERSE_Q_FOURTH_POWER``.
+                          If specified, this takes precedence over ``distribution``.
+                          Applies to MatrixWorkspace spectra plots.
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization

@@ -704,18 +704,16 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
-            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or (hasattr(workspace, "isDistribution") and workspace.isDistribution())
-            normalization = PlotNormalizationType.BIN_WIDTH if is_normalized else PlotNormalizationType.NONE
+            normalization_type = datafunctions.get_normalization_type(workspace, self, **kwargs)
             if isinstance(workspace, MatrixWorkspace):
                 kwargs = get_plot_specific_properties(workspace, workspace.getPlotType(), kwargs)
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(
                     workspace,
-                    axesfunctions.plot(self, normalize_by_bin_width=is_normalized, *args, **kwargs),
+                    axesfunctions.plot(self, normalize_type=normalization_type, *args, **kwargs),
                     _data_update,
                     spec_num,
-                    normalization,
+                    normalization_type,
                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs),
                     kwargs.get("LogName", None),
                     kwargs.get("Filtered", None),
