@@ -22,7 +22,7 @@ import mantid.api
 import mantid.kernel
 from mantid.api import MultipleExperimentInfos, MatrixWorkspace
 from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
-from mantid.plots.utility import convert_color_to_hex, MantidAxType
+from mantid.plots.utility import convert_color_to_hex, MantidAxType, PlotNormalizationType
 
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
@@ -107,7 +107,7 @@ def get_spectrum_normalisation(**kwargs):
     return norm, kwargs
 
 
-def get_normalization(md_workspace, **kwargs):
+def get_md_normalization(md_workspace, **kwargs):
     """
     Gets the normalization flag of an MDHistoWorkspace. For workspaces
     derived similar to MSlice/Horace, one needs to average data, the so-called
@@ -266,24 +266,24 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     return workspace_index, spectrum_number, kwargs
 
 
-def get_md_data1d(workspace, normalization, indices=None):
+def get_md_data1d(workspace, md_normalization, indices=None):
     """
     Function to transform data in an MDHisto workspace with exactly
     one non-integrated dimension into arrays of bin centers, data,
     and error, to be used in 1D plots (plot, scatter, errorbar)
     """
-    coordinate, data, err = get_md_data(workspace, normalization, indices, withError=True)
+    coordinate, data, err = get_md_data(workspace, md_normalization, indices, withError=True)
     assert len(coordinate) == 1, "The workspace is not 1D"
     coordinate = points_from_boundaries(coordinate[0])
     return coordinate, data, err
 
 
-def get_md_data(workspace, normalization, indices=None, withError=False):
+def get_md_data(workspace, md_normalization, indices=None, withError=False):
     """
     Generic function to extract data from an MDHisto workspace
 
     :param workspace: :class:`mantid.api.IMDHistoWorkspace` containing data
-    :param normalization: if :class:`mantid.api.MDNormalization.NumEventsNormalization`
+    :param md_normalization: if :class:`mantid.api.MDNormalization.NumEventsNormalization`
         it will divide intensity by the number of corresponding MDEvents
     :param indices: slice indices to select data
     :param withError: flag for if the error is calculated. If False, err is returned as None
@@ -299,13 +299,13 @@ def get_md_data(workspace, normalization, indices=None, withError=False):
     dim_arrays = [_dim2array(d) for d in dims]
     # get data
     data = workspace.getSignalArray()[indices].copy()
-    if normalization == mantid.api.MDNormalization.NumEventsNormalization:
+    if md_normalization == mantid.api.MDNormalization.NumEventsNormalization:
         nev = workspace.getNumEventsArray()[indices]
         data /= nev
     err = None
     if withError:
         err2 = workspace.getErrorSquaredArray()[indices].copy()
-        if normalization == mantid.api.MDNormalization.NumEventsNormalization:
+        if md_normalization == mantid.api.MDNormalization.NumEventsNormalization:
             err2 /= nev * nev
         err = np.sqrt(err2)
     data = data.squeeze().T
@@ -316,15 +316,13 @@ def get_md_data(workspace, normalization, indices=None, withError=False):
     return dim_arrays, data, err
 
 
-def get_spectrum(workspace, wkspIndex, normalize_by_bin_width, withDy=False, withDx=False):
+def get_spectrum(workspace, wkspIndex, normalization: PlotNormalizationType, withDy=False, withDx=False):
     """
     Extract a single spectrum and process the data into a frequency
 
     :param workspace: a Workspace2D or an EventWorkspace
     :param wkspIndex: workspace index
-    :param normalize_by_bin_width: flag to divide the data by bin width. The same
-        effect can be obtained by running the :ref:`algm-ConvertToDistribution`
-        algorithm
+    :param normalization: PlotNormalizationType, the type of normalization to apply
     :param withDy: if True, it will return the error in the "counts", otherwise None
     :param with Dx: if True, and workspace has them, it will return errors
         in the x coordinate, otherwise None
@@ -344,7 +342,7 @@ def get_spectrum(workspace, wkspIndex, normalize_by_bin_width, withDy=False, wit
         dx = workspace.readDx(wkspIndex)
 
     if workspace.isHistogramData():
-        if normalize_by_bin_width and not workspace.isDistribution():
+        if normalization == PlotNormalizationType.BIN_WIDTH and not workspace.isDistribution():
             y = y / (x[1:] - x[0:-1])
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])
@@ -430,7 +428,7 @@ def get_bins(workspace, bin_index, withDy=False, withDx=False):
     return x_values, y_values, dy, dx
 
 
-def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=False):
+def get_md_data2d_bin_bounds(workspace, md_normalization, indices=None, transpose=False):
     """
     Function to transform data in an MDHisto workspace with exactly
     two non-integrated dimension into arrays of bin boundaries in each
@@ -438,7 +436,7 @@ def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=F
 
     Note: return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     """
-    coordinate, data, _ = get_md_data(workspace, normalization, indices, withError=False)
+    coordinate, data, _ = get_md_data(workspace, md_normalization, indices, withError=False)
     assert len(coordinate) == 2, "The workspace is not 2D"
     if transpose:
         return coordinate[1], coordinate[0], data.T
@@ -446,7 +444,7 @@ def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=F
         return coordinate[0], coordinate[1], data
 
 
-def get_md_data2d_bin_centers(workspace, normalization, indices=None, transpose=False):
+def get_md_data2d_bin_centers(workspace, md_normalization, indices=None, transpose=False):
     """
     Function to transform data in an MDHisto workspace with exactly
     two non-integrated dimension into arrays of bin centers in each
@@ -455,7 +453,7 @@ def get_md_data2d_bin_centers(workspace, normalization, indices=None, transpose=
 
     Note: return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     """
-    x, y, data = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
+    x, y, data = get_md_data2d_bin_bounds(workspace, md_normalization, indices, transpose)
     x = points_from_boundaries(x)
     y = points_from_boundaries(y)
     return x, y, data
@@ -627,9 +625,8 @@ def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=No
             continue
         previous_index = workspace_index
         if not (spectrum_info and spectrum_info.hasDetectors(workspace_index) and spectrum_info.isMonitor(workspace_index)):
-            centers, ztmp, _, _ = get_spectrum(
-                workspace, workspace_index, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False
-            )
+            normalization = PlotNormalizationType.BIN_WIDTH if normalize_by_bin_width else PlotNormalizationType.NONE
+            centers, ztmp, _, _ = get_spectrum(workspace, workspace_index, normalization=normalization, withDy=False, withDx=False)
             interpolation_function = interp1d(centers, ztmp, kind="nearest", bounds_error=False, fill_value="extrapolate")
             # only set values in the range of workspace
             x_range = np.where((x >= workspace.readX(workspace_index)[0]) & (x <= workspace.readX(workspace_index)[-1]))
