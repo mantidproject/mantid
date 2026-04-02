@@ -7,7 +7,7 @@
 import numpy as np
 import pyvista as pv
 from queue import Queue
-from typing import Optional
+from typing import Literal, Optional
 from instrumentview.Globals import CurrentTab
 from threading import Thread
 from mantid import mtd
@@ -27,8 +27,6 @@ from instrumentview.renderers.side_by_side_shape_renderer import SideBySideShape
 
 from vtkmodules.vtkRenderingCore import vtkCoordinate
 
-from enum import Enum
-
 
 class SuppressRendering:
     def __init__(self, plotter):
@@ -41,12 +39,6 @@ class SuppressRendering:
 
     def __exit__(self, exc_type, exc, tb):
         self.plotter.suppress_rendering = self.old_value
-
-
-class PeakInteractionStatus(Enum):
-    Disabled = 1
-    Adding = 2
-    Deleting = 3
 
 
 class FullInstrumentViewPresenter:
@@ -120,8 +112,6 @@ class FullInstrumentViewPresenter:
         )
         self._view.hide_status_box()
         self._select_bank_tube = self._view.is_select_bank_tube_checked()
-        self._peak_interaction_status = PeakInteractionStatus.Disabled
-        self._update_peak_buttons()
         self.update_plotter()
 
     def _setup_component_tree(self) -> None:
@@ -363,9 +353,6 @@ class FullInstrumentViewPresenter:
         # Update to visibility shows up in real time
         self._renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
-        self._peak_interaction_status = PeakInteractionStatus.Disabled
-        self._view.remove_peak_cursor_from_lineplot()
-        self._update_peak_buttons()
 
     def _on_clear_point_picked_detectors_clicked(self) -> None:
         self._model.clear_point_picked_detectors()
@@ -400,7 +387,6 @@ class FullInstrumentViewPresenter:
             self.update_plotter()
             self.on_integration_limits_reset_clicked()
             self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
-            self._update_peak_buttons()
         else:
             self.update_picked_detectors_on_view()
             # NOTE: This is required explicitly
@@ -500,6 +486,8 @@ class FullInstrumentViewPresenter:
         self._update_relative_detector_angle()
         self._model.update_peaks_grouped_by_ws()
         self.refresh_lineplot_peaks()
+        if self._model.peak_picking_enabled():
+            self._view.add_peak_cursor_to_lineplot()
 
     def _update_relative_detector_angle(self) -> None:
         if len(self._model.picked_detector_ids) != 2:
@@ -621,46 +609,36 @@ class FullInstrumentViewPresenter:
                 self._view.plot_lineplot_overlay(x_values, labels, ws_peaks.colour)
         self._view.redraw_lineplot()
 
-    def on_add_peak_clicked(self) -> None:
-        self._on_peak_clicked_in_lineplot(PeakInteractionStatus.Adding)
+    def on_start_adding_peaks_toggled(self, checked) -> None:
+        if checked:
+            self._model.turn_on_single_point_picking()
+            self._view.add_peak_cursor_to_lineplot()
+            self._view.set_delete_all_selected_peaks_button_enabled(False)
+            self._view.disable_and_uncheck_selection_list()
+            self._on_list_item_selected(CurrentTab.Grouping)
+        else:
+            self._model.turn_off_single_point_picking()
+            self._view.remove_peak_cursor_from_lineplot()
+            self._view.set_delete_all_selected_peaks_button_enabled(True)
+            self._view.enable_and_restore_selection_list()
+            self._on_list_item_selected(CurrentTab.Grouping)
 
-    def on_peak_selected(self, x: float) -> None:
+    def on_peak_selected(self, x: float, mouse_click: Literal["right", "left"]) -> None:
+        if len(self._model.picked_detector_ids) == 0:
+            return
         # First convert to workspace x unit
         x_in_workspace_unit = self._model.convert_units(self._view.current_selected_unit(), self._model.workspace_x_unit, 0, x)
-        if self._peak_interaction_status == PeakInteractionStatus.Adding:
+
+        if mouse_click == "left":
             peaks_ws = self._model.add_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
             self._view.refresh_peaks_ws_list()
             self._view.select_peaks_workspace(peaks_ws)
-        elif self._peak_interaction_status == PeakInteractionStatus.Deleting:
+
+        elif mouse_click == "right":
             self._model.delete_peak(x_in_workspace_unit)
-        else:
-            raise RuntimeError("Unknown peak operation")
-        self._peak_interaction_status = PeakInteractionStatus.Disabled
-        self._view.remove_peak_cursor_from_lineplot()
-        self._update_peak_buttons()
-
-    def _update_peak_buttons(self) -> None:
-        self._view.set_add_peak_button_enabled(
-            len(self._model.picked_detector_ids) == 1 and self._peak_interaction_status != PeakInteractionStatus.Adding
-        )
-        self._view.set_delete_peak_button_enabled(
-            self._view.has_any_peak_overlays() and self._peak_interaction_status != PeakInteractionStatus.Adding
-        )
-        self._view.set_delete_all_selected_peaks_button_enabled(
-            len(self._model.picked_detector_ids) > 0 and self._peak_interaction_status != PeakInteractionStatus.Adding
-        )
-
-    def _on_peak_clicked_in_lineplot(self, status: PeakInteractionStatus) -> None:
-        self._peak_interaction_status = status
-        self._view.add_peak_cursor_to_lineplot()
-        self._update_peak_buttons()
-
-    def on_delete_peak_clicked(self) -> None:
-        self._on_peak_clicked_in_lineplot(PeakInteractionStatus.Deleting)
 
     def on_delete_all_selected_peaks_clicked(self) -> None:
         self._model.delete_peaks_on_all_selected_detectors()
-        self._update_peak_buttons()
 
     def on_show_monitors_check_box_clicked(self) -> None:
         self.update_plotter()

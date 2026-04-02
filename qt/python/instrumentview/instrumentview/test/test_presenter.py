@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter, PeakInteractionStatus
+from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.Globals import CurrentTab
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
@@ -21,7 +21,6 @@ from mantid.simpleapi import CreateSampleWorkspace
 import unittest
 from unittest import mock
 from unittest.mock import MagicMock, PropertyMock
-from enum import Enum
 
 
 class TestFullInstrumentViewPresenter(unittest.TestCase):
@@ -501,66 +500,59 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._view.current_selected_unit.return_value = "view-unit"
         self._presenter._view.selected_peaks_workspaces.return_value = ["wsA", "wsB"]
         self._presenter._model.convert_units.return_value = 123.456
-        self._presenter._update_peak_buttons = MagicMock()
-        self._presenter._view.remove_peak_cursor_from_lineplot = MagicMock()
 
-    def test_add_mode_calls_add_peak_and_select_workspace_and_resets_state(self):
-        """In Adding mode: convert -> add_peak -> select_peaks_workspace, then disable & cleanup."""
+    def test_left_click_calls_add_peak_and_selects_workspace(self):
+        """Left click: convert -> add_peak -> refresh list -> select_peaks_workspace."""
         self._setup_on_peak_selected_tests()
-        self._presenter._peak_interaction_status = PeakInteractionStatus.Adding
         returned_ws = MagicMock(name="ReturnedWorkspace")
         self._presenter._model.add_peak.return_value = returned_ws
-        self._presenter.on_peak_selected(3.14)
+        self._presenter.on_peak_selected(3.14, "left")
         self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 3.14)
         self._presenter._model.add_peak.assert_called_once_with(123.456, ["wsA", "wsB"])
+        self._presenter._view.refresh_peaks_ws_list.assert_called_once()
         self._presenter._view.select_peaks_workspace.assert_called_once_with(returned_ws)
-        self.assertEqual(self._presenter._peak_interaction_status, PeakInteractionStatus.Disabled)
-        self._presenter._view.remove_peak_cursor_from_lineplot.assert_called_once()
-        self._presenter._update_peak_buttons.assert_called_once()
         self._presenter._model.delete_peak.assert_not_called()
 
-    def test_delete_mode_calls_delete_peak_and_resets_state(self):
-        """In Deleting mode: convert -> delete_peak, then disable & cleanup."""
+    def test_right_click_calls_delete_peak(self):
+        """Right click: convert -> delete_peak."""
         self._setup_on_peak_selected_tests()
-        self._presenter._peak_interaction_status = PeakInteractionStatus.Deleting
-        self._presenter.on_peak_selected(9.81)
+        self._presenter.on_peak_selected(9.81, "right")
         self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 9.81)
         self._presenter._model.delete_peak.assert_called_once_with(123.456)
         self._presenter._model.add_peak.assert_not_called()
         self._presenter._view.select_peaks_workspace.assert_not_called()
-        self.assertEqual(self._presenter._peak_interaction_status, PeakInteractionStatus.Disabled)
-        self._presenter._view.remove_peak_cursor_from_lineplot.assert_called_once()
-        self._presenter._update_peak_buttons.assert_called_once()
 
-    def test_unknown_status_raises_and_does_not_change_state_or_cleanup(self):
-        """Unknown status -> raises RuntimeError, no cleanup or state changes."""
-
-        # Use a fake/unknown status (not Adding/Deleting)
-        class FakeStatus(Enum):
-            Unknown = 99
-
-        self._setup_on_peak_selected_tests()
-        self._presenter._peak_interaction_status = FakeStatus.Unknown
-        with self.assertRaises(RuntimeError):
-            self._presenter.on_peak_selected(1.23)
-        self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 1.23)
-        self._presenter._model.add_peak.assert_not_called()
-        self._presenter._model.delete_peak.assert_not_called()
-        self._presenter._view.select_peaks_workspace.assert_not_called()
-        self._presenter._view.remove_peak_cursor_from_lineplot.assert_not_called()
-        self._presenter._update_peak_buttons.assert_not_called()
-        self.assertEqual(self._presenter._peak_interaction_status, FakeStatus.Unknown)
-
-    def test_add_mode_uses_selected_peaks_workspaces_from_view(self):
+    def test_left_click_uses_selected_peaks_workspaces_from_view(self):
         """Ensures the workspace selection passed to add_peak is sourced from the view."""
         self._setup_on_peak_selected_tests()
-        self._presenter._peak_interaction_status = PeakInteractionStatus.Adding
         self._presenter._view.selected_peaks_workspaces.return_value = ["ws1"]
         returned_ws = MagicMock(name="WS")
         self._presenter._model.add_peak.return_value = returned_ws
-        self._presenter.on_peak_selected(2.0)
+        self._presenter.on_peak_selected(2.0, "left")
         self._presenter._model.add_peak.assert_called_once_with(123.456, ["ws1"])
         self._presenter._view.select_peaks_workspace.assert_called_once_with(returned_ws)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._on_list_item_selected")
+    def test_on_start_adding_peaks_toggled_on(self, mock_on_list_item_selected):
+        """Toggling peak mode on enables single point picking and disables selection list."""
+        self._presenter._model = MagicMock()
+        self._presenter.on_start_adding_peaks_toggled(True)
+        self._presenter._model.turn_on_single_point_picking.assert_called_once()
+        self._mock_view.add_peak_cursor_to_lineplot.assert_called_once()
+        self._mock_view.set_delete_all_selected_peaks_button_enabled.assert_called_once_with(False)
+        self._mock_view.disable_and_uncheck_selection_list.assert_called_once()
+        mock_on_list_item_selected.assert_called_once_with(CurrentTab.Grouping)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._on_list_item_selected")
+    def test_on_start_adding_peaks_toggled_off(self, mock_on_list_item_selected):
+        """Toggling peak mode off restores normal picking and re-enables selection list."""
+        self._presenter._model = MagicMock()
+        self._presenter.on_start_adding_peaks_toggled(False)
+        self._presenter._model.turn_off_single_point_picking.assert_called_once()
+        self._mock_view.remove_peak_cursor_from_lineplot.assert_called_once()
+        self._mock_view.set_delete_all_selected_peaks_button_enabled.assert_called_once_with(True)
+        self._mock_view.enable_and_restore_selection_list.assert_called_once()
+        mock_on_list_item_selected.assert_called_once_with(CurrentTab.Grouping)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._create_and_add_monitor_mesh")
     def test_monitor_mesh_added(self, mock_create_monitor_mesh):

@@ -37,6 +37,12 @@ from pathlib import Path
 import numpy as np
 
 from itertools import cycle
+from enum import Enum
+
+
+class PeakPickingStatus(Enum):
+    On = 1
+    Off = 2
 
 
 class Colours:
@@ -69,6 +75,9 @@ class FullInstrumentViewModel:
     _workspace_x_unit_display: str
     _selected_peaks_workspaces: list[PeaksWorkspace]
     peaks_grouped_by_ws: dict[str, WorkspaceDetectorPeaks]
+    _peak_picking_status: PeakPickingStatus = PeakPickingStatus.Off
+    _projection_type: ProjectionType = ProjectionType.THREE_D
+    _flip_z: bool = False
 
     def __init__(self, workspace: Workspace2D):
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
@@ -76,6 +85,12 @@ class FullInstrumentViewModel:
         self._workspace = workspace
 
     def setup(self):
+        # Mutable containers must be initialised per-instance (class-level
+        # defaults are shared across all instances).
+        self._cached_projection_objects = {}
+        self._cached_masks_map = {}
+        self._cached_rois_map = {}
+
         x_unit = self._workspace.getAxis(0).getUnit()
         self._workspace_x_unit = x_unit.unitID()
         self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
@@ -121,13 +136,6 @@ class FullInstrumentViewModel:
         self._detector_is_picked = np.full(len(self._detector_ids), False)
         self._current_detector_groupings = np.zeros_like(self._detector_ids)
         self._point_picked_detectors = np.full(len(self._detector_ids), False)
-
-        self._projection_type = ProjectionType.THREE_D
-        self._flip_z = False
-        self._cached_projection_objects = {}
-
-        self._cached_masks_map = {}
-        self._cached_rois_map = {}
 
         self._calculate_and_set_full_integration_range(self._is_valid)
 
@@ -302,17 +310,39 @@ class FullInstrumentViewModel:
         expanded_pickable_mask[np.isin(pickable_table_indices, expanded_pickable_table_indices)] = True
         return expanded_pickable_mask
 
-    def update_point_picked_detectors(self, index: int, expand_to_parent_subtree: bool = False) -> None:
-        # TODO: Check which selection is quicker, mask or indices
-        # NOTE: This is slightly awkard because cannot do chained mask selections
-        global_index = np.argwhere(self.is_pickable).flatten()[index]
-        indices_to_update = np.array([global_index], dtype=int)
-        if expand_to_parent_subtree:
-            indices_to_update = self._detector_table_indices_for_parent_subtree(indices_to_update, pickable_only=True)
+    def peak_picking_enabled(self):
+        return True if self._peak_picking_status == PeakPickingStatus.On else False
 
-        new_selection_value = ~self._detector_is_picked[global_index]
-        self._detector_is_picked[indices_to_update] = new_selection_value
-        self._point_picked_detectors[indices_to_update] = new_selection_value
+    def turn_on_single_point_picking(self) -> None:
+        self._peak_picking_status = PeakPickingStatus.On
+        self._point_picked_detectors_cached = self._point_picked_detectors.copy()
+        self._point_picked_detectors[:] = False
+
+    def turn_off_single_point_picking(self) -> None:
+        self._peak_picking_status = PeakPickingStatus.Off
+        self._point_picked_detectors = self._point_picked_detectors_cached
+        # Assuming groupings have been turned off for while peak picking
+        # Only need to update picked detectors with point picked
+        # Restoring groupings will handle the rest
+        self._detector_is_picked = self._point_picked_detectors
+
+    def update_point_picked_detectors(self, index: int, expand_to_parent_subtree: bool) -> None:
+        if self._peak_picking_status == PeakPickingStatus.Off:
+            global_index = np.argwhere(self.is_pickable).flatten()[index]
+            indices_to_update = np.array([global_index], dtype=int)
+            if expand_to_parent_subtree:
+                indices_to_update = self._detector_table_indices_for_parent_subtree(indices_to_update, pickable_only=True)
+
+            new_selection_value = ~self._detector_is_picked[global_index]
+            self._detector_is_picked[indices_to_update] = new_selection_value
+            self._point_picked_detectors[indices_to_update] = new_selection_value
+
+        elif self._peak_picking_status == PeakPickingStatus.On:
+            global_index = np.argwhere(self.is_pickable)[index]
+            self._detector_is_picked[:] = False
+            self._detector_is_picked[global_index] = True
+            self._point_picked_detectors[:] = False
+            self._point_picked_detectors[global_index] = True
 
     def clear_point_picked_detectors(self) -> None:
         self._detector_is_picked[self._point_picked_detectors] = False

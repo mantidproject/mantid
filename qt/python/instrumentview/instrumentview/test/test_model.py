@@ -144,7 +144,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_negate_picked_visibility(self):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([False, False, False])
-        model.update_point_picked_detectors(1)
+        model.update_point_picked_detectors(1, False)
         np.testing.assert_equal(model._detector_is_picked, [False, True, False])
 
     def test_clear_point_picked_detectors(self):
@@ -183,6 +183,49 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
         expanded = model.expand_pickable_mask_to_parent_subtrees(np.array([False, True, False, False]))
         np.testing.assert_equal(expanded, [False, True, True, False])
+
+    def test_peak_picking_enabled_off_by_default(self):
+        model, _ = self._setup_model([1, 2, 3])
+        self.assertFalse(model.peak_picking_enabled())
+
+    def test_peak_picking_enabled_after_turn_on(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model.turn_on_single_point_picking()
+        self.assertTrue(model.peak_picking_enabled())
+
+    def test_peak_picking_disabled_after_turn_off(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model.turn_on_single_point_picking()
+        model.turn_off_single_point_picking()
+        self.assertFalse(model.peak_picking_enabled())
+
+    def test_turn_on_single_point_picking_caches_and_clears(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._point_picked_detectors = np.array([True, False, True])
+        model.turn_on_single_point_picking()
+        np.testing.assert_equal(model._point_picked_detectors, [False, False, False])
+        np.testing.assert_equal(model._point_picked_detectors_cached, [True, False, True])
+
+    def test_turn_off_single_point_picking_restores_cached(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._point_picked_detectors = np.array([True, False, True])
+        model._detector_is_picked = np.array([True, False, True])
+        model.turn_on_single_point_picking()
+        model.turn_off_single_point_picking()
+        np.testing.assert_equal(model._point_picked_detectors, [True, False, True])
+        np.testing.assert_equal(model._detector_is_picked, [True, False, True])
+
+    def test_update_point_picked_detectors_peak_picking_on_selects_single(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._detector_is_picked = np.array([False, False, False])
+        model.turn_on_single_point_picking()
+        model.update_point_picked_detectors(0, False)
+        np.testing.assert_equal(model._detector_is_picked, [True, False, False])
+        np.testing.assert_equal(model._point_picked_detectors, [True, False, False])
+        # Picking another detector clears the previous one
+        model.update_point_picked_detectors(1, False)
+        np.testing.assert_equal(model._detector_is_picked, [False, True, False])
+        np.testing.assert_equal(model._point_picked_detectors, [False, True, False])
 
     def test_detectors_with_no_spectra(self):
         self._setup_mocks([1, 20, 300, 400], monitors=np.array(["no", "no", "n/a", "yes"]))

@@ -141,6 +141,12 @@ class FullInstrumentViewWindow(QMainWindow):
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
         self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, self)
+        # Unwrap matplotlib's internal callback wrappers (_StrongRef, WeakMethod)
+        # to store the actual callables, so they can be re-connected later.
+        # Must be done after toolbar creation so its callbacks are included.
+        self._default_lineplot_callbacks = {
+            cid: ref() for cid, ref in self._detector_figure_canvas.callbacks.callbacks.get("button_press_event", {}).items()
+        }
         plot_widget = QWidget()
         plot_layout = QVBoxLayout(plot_widget)
         plot_layout.addWidget(self._detector_figure_canvas)
@@ -229,13 +235,12 @@ class FullInstrumentViewWindow(QMainWindow):
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
         peak_buttons_h_layout = QHBoxLayout()
-        self._add_peak_button = QPushButton("Add Peak")
-        self._delete_peak_button = QPushButton("Delete Single Peak")
-        self._delete_all_selected_peaks_button = QPushButton("Delete All Selected Peaks")
+        self._delete_all_selected_peaks_button = QPushButton("Delete All Peaks In Selected Detectors")
+        self._start_adding_peaks_button = QPushButton("Adding/Deleting Peaks Mode")
+        self._start_adding_peaks_button.setCheckable(True)
         self._peak_ws_list = WorkspaceListWidget(self)
         self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
-        peak_buttons_h_layout.addWidget(self._add_peak_button)
-        peak_buttons_h_layout.addWidget(self._delete_peak_button)
+        peak_buttons_h_layout.addWidget(self._start_adding_peaks_button)
         peak_buttons_h_layout.addWidget(self._delete_all_selected_peaks_button)
         peak_v_layout.addLayout(peak_buttons_h_layout)
         peak_v_layout.addWidget(self._peak_ws_list)
@@ -261,7 +266,7 @@ class FullInstrumentViewWindow(QMainWindow):
         shapes_layout.addWidget(self._add_hollow_rectangle)
         self._shape_buttons = [self._add_circle, self._add_rectangle, self._add_ellipse, self._add_annulus, self._add_hollow_rectangle]
 
-        selection_tab = QWidget()
+        self._selection_tab = QWidget()
         (
             self._add_selection,
             self._clear_selections,
@@ -270,7 +275,7 @@ class FullInstrumentViewWindow(QMainWindow):
             self._save_grouping_to_ws,
             self._save_grouping_to_xml,
             self._save_grouping_to_cal,
-        ) = self._add_tab(selection_tab, "ROI")
+        ) = self._add_tab(self._selection_tab, "ROI")
         self._save_roi_to_ws.setText("Export ROI to ADS")
         self._save_grouping_to_ws.setText("Export Grouping to ADS")
         self._save_grouping_to_xml.setText("Save Grouping to XML")
@@ -292,7 +297,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._overwrite_mask.setText("Apply Mask Permanently")
 
         self._picking_masking_tab = QTabWidget()
-        self._picking_masking_tab.addTab(selection_tab, CurrentTab.Grouping.value)
+        self._picking_masking_tab.addTab(self._selection_tab, CurrentTab.Grouping.value)
         self._picking_masking_tab.addTab(mask_tab, CurrentTab.Masking.value)
         grouping_masking_group_layout.addWidget(shapes_widget)
         grouping_masking_group_layout.addWidget(self._picking_masking_tab)
@@ -568,9 +573,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._clear_masks.clicked.connect(self._presenter.on_clear_list_clicked)
         self._clear_selections.clicked.connect(self._presenter.on_clear_list_clicked)
         self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
-        self._add_peak_button.clicked.connect(self._presenter.on_add_peak_clicked)
-        self._delete_peak_button.clicked.connect(self._presenter.on_delete_peak_clicked)
         self._delete_all_selected_peaks_button.clicked.connect(self._presenter.on_delete_all_selected_peaks_clicked)
+        self._start_adding_peaks_button.toggled.connect(self._presenter.on_start_adding_peaks_toggled)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
         self._flip_z_axis_check_box.clicked.connect(self._presenter.on_flip_z_axis_check_box_clicked)
@@ -704,6 +708,28 @@ class FullInstrumentViewWindow(QMainWindow):
                 removed = list_to_refresh.takeItem(i)
                 del removed
 
+    def _cache_and_uncheck_list(self, list_widget: WorkspaceListWidget) -> dict:
+        cache = {}
+        for i in range(list_widget.count()):
+            item = list_widget.item(i)
+            cache[i] = item.checkState()
+            item.setCheckState(Qt.Unchecked)
+        return cache
+
+    def _restore_list(self, list_widget: WorkspaceListWidget, cache):
+        """Restore check states from cache."""
+        for i in range(list_widget.count()):
+            if i in cache:
+                list_widget.item(i).setCheckState(cache[i])
+
+    def disable_and_uncheck_selection_list(self) -> None:
+        self._selection_list_cache = self._cache_and_uncheck_list(self._selection_list)
+        self._selection_tab.setEnabled(False)
+
+    def enable_and_restore_selection_list(self) -> None:
+        self._restore_list(self._selection_list, self._selection_list_cache)
+        self._selection_tab.setEnabled(True)
+
     def refresh_peaks_ws_list_colours(self) -> None:
         picked_index = 0
         for list_i in range(self._peak_ws_list.count()):
@@ -720,12 +746,6 @@ class FullInstrumentViewWindow(QMainWindow):
             if list_item.text() == peaks_ws:
                 list_item.setCheckState(Qt.Checked)
                 return
-
-    def set_add_peak_button_enabled(self, is_enabled: bool) -> None:
-        self._add_peak_button.setEnabled(is_enabled)
-
-    def set_delete_peak_button_enabled(self, is_enabled: bool) -> None:
-        self._delete_peak_button.setEnabled(is_enabled)
 
     def set_delete_all_selected_peaks_button_enabled(self, is_enabled: bool) -> None:
         self._delete_all_selected_peaks_button.setEnabled(is_enabled)
@@ -1039,19 +1059,30 @@ class FullInstrumentViewWindow(QMainWindow):
         self._plot_toolbar.setDisabled(False)
         if event.inaxes is not self._detector_spectrum_axes or event.xdata is None:
             return
-        self._presenter.on_peak_selected(event.xdata)
+        if event.button == 1:  # Left click
+            self._presenter.on_peak_selected(event.xdata, "left")
+        elif event.button == 3:  # Right click
+            self._presenter.on_peak_selected(event.xdata, "right")
 
     def add_peak_cursor_to_lineplot(self) -> None:
         self._lineplot_peak_cursor = Cursor(self._detector_spectrum_axes, color="tab:red", linewidth=1, horizOn=False)
+        for cid in self._default_lineplot_callbacks:
+            self._detector_figure_canvas.mpl_disconnect(cid)
         self._figure_canvas_click_id = self._detector_figure_canvas.mpl_connect("button_press_event", self._on_axes_click)
         self._plot_toolbar.setDisabled(True)
 
     def remove_peak_cursor_from_lineplot(self) -> None:
         if self._lineplot_peak_cursor is not None:
             self._detector_figure_canvas.mpl_disconnect(self._figure_canvas_click_id)
+            new_lineplot_callbacks = {}
+            for cid, func in self._default_lineplot_callbacks.items():
+                new_cid = self._detector_figure_canvas.mpl_connect("button_press_event", func)
+                new_lineplot_callbacks[new_cid] = func
+            self._default_lineplot_callbacks = new_lineplot_callbacks
             self._figure_canvas_click_id = None
             self._lineplot_peak_cursor.linev.remove()
             self._lineplot_peak_cursor = None
+            self._plot_toolbar.setDisabled(False)
             self._detector_figure_canvas.draw_idle()
 
     def get_filename_from_dialog(self, file_filter: str):
