@@ -29,7 +29,7 @@ from mantid.plots.datafunctions import (
     get_md_data1d,
     get_md_data2d_bin_bounds,
     get_md_data2d_bin_centers,
-    get_normalization,
+    get_md_normalization,
     get_sample_log,
     get_spectrum,
     get_uneven_data,
@@ -39,7 +39,7 @@ from mantid.plots.datafunctions import (
     get_normalize_by_bin_width,
     get_spectrum_normalisation,
 )
-from mantid.plots.utility import MantidAxType
+from mantid.plots.utility import MantidAxType, PlotNormalizationType
 from mantid.plots.quad_mesh_wrapper import QuadMeshWrapper
 from mantid import logger
 
@@ -68,9 +68,9 @@ def _pcolormesh_nonortho(axes, workspace, nonortho_tr, *args, **kwargs):
     :param transpose: ``bool`` to transpose the x and y axes of the plotted dimensions of an MDHistoWorkspace
     """
     transpose = kwargs.pop("transpose", False)
-    (normalization, kwargs) = get_normalization(workspace, **kwargs)
+    (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
     indices, kwargs = get_indices(workspace, **kwargs)
-    x, y, z = get_md_data2d_bin_bounds(workspace, indices=indices, normalization=normalization, transpose=transpose)
+    x, y, z = get_md_data2d_bin_bounds(workspace, indices=indices, md_normalization=normalization, transpose=transpose)
     X, Y = numpy.meshgrid(x, y)
     xx, yy = nonortho_tr(X, Y)
     _setLabels2D(axes, workspace, indices, transpose)
@@ -109,7 +109,7 @@ def _setLabels2D(axes, workspace, indices=None, transpose=False, xscale=None, no
 
 def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         (x, y, dy) = get_md_data1d(workspace, normalization, indices)
         # Protect against unused arguments for MDHisto workspaces
@@ -141,7 +141,8 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
                 x = [spectrum_numbers[i] for i in x]
 
         elif axis == MantidAxType.SPECTRUM:
-            x, y, dy, dx = get_spectrum(workspace, workspace_index, normalize_by_bin_width, with_dy, with_dx)
+            normalization = PlotNormalizationType.BIN_WIDTH if normalize_by_bin_width else PlotNormalizationType.NONE
+            x, y, dy, dx = get_spectrum(workspace, workspace_index, normalization, with_dy, with_dx)
         else:
             raise ValueError("Axis {} is not a valid axis number.".format(axis))
         indices = None
@@ -356,13 +357,14 @@ def scatter(axes, workspace, *args, **kwargs):
     dimension
     """
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         (x, y, _) = get_md_data1d(workspace, normalization, indices)
         _setLabels1D(axes, workspace, indices)
     else:
         (wkspIndex, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
-        (x, y, _, _) = get_spectrum(workspace, wkspIndex, distribution)
+        normalization = PlotNormalizationType.BIN_WIDTH if distribution else PlotNormalizationType.NONE
+        (x, y, _, _) = get_spectrum(workspace, wkspIndex, normalization)
         _setLabels1D(axes, workspace)
     return axes.scatter(x, y, *args, **kwargs)
 
@@ -395,7 +397,7 @@ def contour(axes, workspace, *args, **kwargs):
     """
     transpose = kwargs.pop("transpose", False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_centers(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
@@ -434,7 +436,7 @@ def contourf(axes, workspace, *args, **kwargs):
     """
     transpose = kwargs.pop("transpose", False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_centers(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
@@ -524,7 +526,7 @@ def pcolor(axes, workspace, *args, **kwargs):
     """
     transpose = kwargs.pop("transpose", False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
@@ -569,7 +571,7 @@ def pcolorfast(axes, workspace, *args, **kwargs):
     """
     transpose = kwargs.pop("transpose", False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
@@ -614,7 +616,7 @@ def pcolormesh(axes, workspace, *args, **kwargs):
     """
     transpose = kwargs.pop("transpose", False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
@@ -659,7 +661,7 @@ def imshow(axes, workspace, *args, **kwargs):
     """
     transpose = kwargs.get("transpose", False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
@@ -707,7 +709,7 @@ def tripcolor(axes, workspace, *args, **kwargs):
     """
     transpose = kwargs.pop("transpose", False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         x_temp, y_temp, z = get_md_data2d_bin_centers(workspace, normalization, indices, transpose)
         x, y = numpy.meshgrid(x_temp, y_temp)
@@ -750,7 +752,7 @@ def tricontour(axes, workspace, *args, **kwargs):
     """
     transpose = kwargs.pop("transpose", False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         x_temp, y_temp, z = get_md_data2d_bin_centers(workspace, normalization, indices, transpose)
         x, y = numpy.meshgrid(x_temp, y_temp)
@@ -802,7 +804,7 @@ def tricontourf(axes, workspace, *args, **kwargs):
     """
     transpose = kwargs.pop("transpose", False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         x_temp, y_temp, z = get_md_data2d_bin_centers(workspace, normalization, indices, transpose)
         x, y = numpy.meshgrid(x_temp, y_temp)

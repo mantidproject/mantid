@@ -304,13 +304,13 @@ class DataFunctionsTest(unittest.TestCase):
 
     def test_get_spectrum_non_distribution_workspace(self):
         # get data divided by bin width
-        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1, normalize_by_bin_width=True, withDy=True, withDx=True)
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1, normalization=True, withDy=True, withDx=True)
         self.assertTrue(np.array_equal(x, np.array([15.0, 25.0])))
         self.assertTrue(np.array_equal(y, np.array([0.4, 0.5])))
         self.assertTrue(np.array_equal(dy, np.array([0.3, 0.4])))
         self.assertEqual(dx, None)
         # get data not divided by bin width
-        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1, normalize_by_bin_width=False, withDy=True, withDx=True)
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1, normalization=False, withDy=True, withDx=True)
         self.assertTrue(np.array_equal(x, np.array([15.0, 25.0])))
         self.assertTrue(np.array_equal(y, np.array([4, 5])))
         self.assertTrue(np.array_equal(dy, np.array([3, 4])))
@@ -680,7 +680,7 @@ class DataFunctionsTest(unittest.TestCase):
 
     @add_md_workspace_with_data
     def test_get_md_data_no_error(self, mdws):
-        dim_arrays, data, err = funcs.get_md_data(mdws, normalization=None)
+        dim_arrays, data, err = funcs.get_md_data(mdws, md_normalization=None)
         self.assertEqual(11, len(dim_arrays[0]))
         self.assertEqual(-3, dim_arrays[0][0])
         self.assertEqual(3, dim_arrays[0][-1])
@@ -697,7 +697,7 @@ class DataFunctionsTest(unittest.TestCase):
 
     @add_md_workspace_with_data
     def test_get_md_data_with_error(self, mdws):
-        dim_arrays, data, err = funcs.get_md_data(mdws, normalization=None, withError=True)
+        dim_arrays, data, err = funcs.get_md_data(mdws, md_normalization=None, withError=True)
         self.assertEqual(11, len(dim_arrays[0]))
         self.assertEqual(-3, dim_arrays[0][0])
         self.assertEqual(3, dim_arrays[0][-1])
@@ -716,7 +716,7 @@ class DataFunctionsTest(unittest.TestCase):
 
     @add_workspace_with_data
     def test_get_spectrum_no_dy_dx(self, ws):
-        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalize_by_bin_width=False, withDy=False, withDx=False)
+        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalization=False, withDy=False, withDx=False)
         self.assertTrue(np.array_equal([13.5, 14.5, 15.5], x))
         self.assertTrue(np.array_equal([10.0, 11.0, 12.0], y))
         self.assertIsNone(dy)
@@ -724,7 +724,7 @@ class DataFunctionsTest(unittest.TestCase):
 
     @add_workspace_with_data
     def test_get_spectrum_with_dy_dx(self, ws):
-        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalize_by_bin_width=False, withDy=True, withDx=True)
+        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalization=False, withDy=True, withDx=True)
 
         self.assertTrue(np.array_equal([13.5, 14.5, 15.5], x))
         self.assertTrue(np.array_equal([10.0, 11.0, 12.0], y))
