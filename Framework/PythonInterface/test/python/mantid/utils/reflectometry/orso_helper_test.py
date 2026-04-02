@@ -266,21 +266,22 @@ class MantidORSODatasetTest(unittest.TestCase):
             ]
         )
 
+    @mock.patch("mantid.utils.reflectometry.orso_helper.logger.warning")
     @mock.patch("mantid.utils.reflectometry.orso_helper.logger.error")
     @mock.patch("mantid.utils.reflectometry.orso_helper.SampleModel")
-    def test_create_mandatory_header_raises_timeout_error(self, mock_sample_model, mock_logger):
+    def test_create_mandatory_header_raises_timeout_error(self, mock_sample_model, error_logger, warning_logger):
         def slow_resolve(*args, **kwargs):
             sleep(10)
 
         sample_model = mock_sample_model.return_value
         sample_model.resolve_to_layers.side_effect = slow_resolve
         MantidORSODataset(None, None, None, None, None, None, None, model="air", validate=True)
-        mock_logger.assert_has_calls(
+        error_logger.assert_has_calls(
             [
-                mock.call("Function '<lambda>' timed out after 5.0 seconds"),
                 mock.call("The provided model description 'air' could not be validated because of database unavalibility."),
             ]
         )
+        warning_logger.assert_has_calls([mock.call("Function '<lambda>' timed out after 5.0 seconds")])
 
     def test_set_facility_on_mantid_orso_dataset(self):
         dataset = self._create_test_dataset()
