@@ -295,6 +295,8 @@ void IkedaCarpenterPV::functionLocal(double *out, const double *xValues, const s
 
 void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *jacobian, const double *xValues, const size_t nData) {
   // Parameter order: 0:I 1:Alpha0 2:Alpha1 3:Beta0 4:Kappa 5:SigmaSquared 6:Gamma 7:X0
+  // For more details on the origin of this derivative see
+  // docs/source/fitting/fitfunctions/IkedaCarpenterPV_analytical_derivative.rst
 
   const double I = getParameter("I");
   const double alpha0 = getParameter("Alpha0");
@@ -325,13 +327,12 @@ void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *jacobian, const double 
   const double halfHsafe = 0.5 * Hsafe;
   const double halfH2 = halfHsafe * halfHsafe;
 
-  // Loop-invariant quantities derived from S (hoisted from inner loop)
   const double invRoot2S = 1.0 / std::sqrt(2.0 * S);
   const double rootSOver2 = std::sqrt(S / 2.0);
   const double twoInvSqrtPi = 2.0 / std::sqrt(M_PI);
   const double CexpSFactor = invRoot2S / (2.0 * S); // = 1/(2*S*sqrt(2S)), for dK/dS
 
-  // Voigt -> pseudo-Voigt chain derivatives (all loop-invariant)
+  // Voigt -> pseudo-Voigt chain derivatives
   const double g2 = std::max(8.0 * M_LN2 * voigtSigmaSq, eps);
   const double g = std::sqrt(g2);
   const double g3 = g2 * g;
@@ -483,7 +484,7 @@ void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *jacobian, const double 
     const double dKs_dd = -alpha * Ks + CexpIR2S;
     const double dKr_dd = -beta * Kr + CexpIR2S;
 
-    // -- Inlined J kernel derivatives (pure real arithmetic) --
+    // -- J kernel derivatives --
     // dJ/da = Im(Fp * (-diff, halfH)) = Fp_r*halfH - Fp_i*diff
     const double dJu_da = Fpu_r * halfHsafe - Fpu_i * diff;
     const double dJv_da = Fpv_r * halfHsafe - Fpv_i * diff;
@@ -519,7 +520,7 @@ void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *jacobian, const double 
     const double dNs_dR = 2.0 * alpha * inv_y;
     const double dNr_dR = 2.0 * alpha2 * beta * kk * inv_x * inv_y * inv_z;
 
-    // -- Mix derivatives (zero terms eliminated) --
+    // -- Mix derivatives --
     // dG/dalpha: Kr doesn't depend on alpha, so dKr_dalpha term is zero
     const double dG_dalpha = dNu_dalpha * Ku + Nu * one_minus_k * dKu_da + dNv_dalpha * Kv + Nv * one_plus_k * dKv_da +
                              dNs_dalpha * Ks + Ns * dKs_da + dNr_dalpha * Kr;
@@ -546,7 +547,7 @@ void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *jacobian, const double 
     const double dG_dd = Nu * dKu_dd + Nv * dKv_dd + Ns * dKs_dd + Nr * dKr_dd;
     const double dL_dd = Nu * dJu_dd + Nv * dJv_dd + Ns * dJs_dd + Nr * dJr_dd;
 
-    // -- Derivatives wrt natural variables (dG_dH=0, dL_dS=0 folded in) --
+    // -- Derivatives wrt natural variables (noting dG_dH=0, dL_dS=0) --
     const double df_dI = Q * modelCore;
     const double df_dalpha = I * (Q / alpha * modelCore + Q * (one_minus_eta * dG_dalpha - etaTwoOverPi * dL_dalpha));
     const double df_dbeta = IQ * (one_minus_eta * dG_dbeta - etaTwoOverPi * dL_dbeta);
