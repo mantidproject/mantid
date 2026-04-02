@@ -7,6 +7,7 @@
 from functools import partial
 from pyvista import PolyData
 from qtpy.QtWidgets import (
+    QApplication,
     QMainWindow,
     QVBoxLayout,
     QHBoxLayout,
@@ -60,6 +61,7 @@ from instrumentview.ShapeWidgets import (
 
 import os
 from contextlib import suppress
+import time
 from typing import Callable
 
 
@@ -93,18 +95,53 @@ class NoWheelComboBox(QComboBox):
 
 
 class _DoubleClickBlocker(QObject):
-    """Qt event filter to swallow mouse double-clicks on the render widget."""
+    """Qt event filter to swallow mouse double-clicks *and* the residual
+    press/release events that follow them (i.e. triple-clicks).
+
+    Without this, a triple-click produces an unmatched
+    ``LeftButtonReleaseEvent`` in VTK (the release after the blocked
+    double-click) plus a rapid third press, which can corrupt the
+    Chart2D overlay state and crash the application.
+    """
+
+    # Time (seconds) after a blocked double-click during which subsequent
+    # press / release events are also suppressed.  This must be at least
+    # as long as the OS double-click interval (~500 ms on Windows) so that
+    # the third click of a triple-click is caught.
+    _SUPPRESS_WINDOW = QApplication.doubleClickInterval() / 1000.0
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._suppress_until: float = 0.0
 
     def eventFilter(self, _watched, event):
-        dbl_click_type = getattr(QEvent, "MouseButtonDblClick", None)
-        if dbl_click_type is None:
-            dbl_click_type = QEvent.Type.MouseButtonDblClick
-        if event is not None and event.type() == dbl_click_type:
+        if event is None:
+            return False
+
+        etype = event.type()
+        if etype == QEvent.Type.MouseButtonDblClick:
+            # Block the double-click and open a suppression window so the
+            # subsequent release and any third click are also eaten.
+            self._suppress_until = time.monotonic() + self._SUPPRESS_WINDOW
             try:
                 event.accept()
             except Exception:
                 pass
             return True
+
+        # Inside the suppression window, also swallow press and release
+        # events to prevent unmatched VTK events and triple-click issues.
+        if self._suppress_until > 0:
+            if etype in (QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease):
+                if time.monotonic() < self._suppress_until:
+                    try:
+                        event.accept()
+                    except Exception:
+                        pass
+                    return True
+                # Window expired – stop checking until the next double-click.
+                self._suppress_until = 0
+
         return False
 
 
