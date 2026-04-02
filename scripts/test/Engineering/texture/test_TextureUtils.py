@@ -570,8 +570,8 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
         peak1.name.return_value = "BackToBackExponential"
 
         # peak parameter vals
-        peak0.getParameterValue.side_effect = lambda p: {"I": 0.5, "X0": 10.0}[p]
-        peak1.getParameterValue.side_effect = lambda p: {"I": 4.0, "X0": 20.0}[p]
+        peak0.getParameterValue.side_effect = lambda p: {"I": 0.5, "X0": 10.0, "A": 1, "B": 1, "S": 1}[p]
+        peak1.getParameterValue.side_effect = lambda p: {"I": 4.0, "X0": 20.0, "A": 1, "B": 1, "S": 1}[p]
 
         # background params
         bg1.nParams.return_value = 2
