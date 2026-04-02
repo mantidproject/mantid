@@ -1196,7 +1196,6 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       bkgdfunction->setParameter(i, 0.);
 
     double expected_peak_pos = expected_peak_centers[peak_index];
-    std::pair<double, double> peak_window_i = m_getPeakFitWindow(wi, peak_index);
 
     // clone peak function for each peak (need to do this so can
     // set center and calc any parameters from xml)
