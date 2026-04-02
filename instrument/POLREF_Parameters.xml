@@ -84,7 +84,7 @@
    </parameter>
 
    <parameter name="WildesFlipperConfig" type="string">
-     <value val="00,01,10,11" />
+     <value val="0, 1" />
    </parameter>
 
 <!-- 1DStitchMany parameters-->

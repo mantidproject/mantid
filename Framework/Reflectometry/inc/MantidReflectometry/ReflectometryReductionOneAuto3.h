@@ -62,6 +62,21 @@ private:
     std::vector<double> asVector() const { return {qMin, *qStep, qMax}; }
   };
 
+  struct RROOutputs {
+    MatrixWorkspace_sptr IvsQ;
+    MatrixWorkspace_sptr IvsLam;
+    MatrixWorkspace_sptr trans;
+    MatrixWorkspace_sptr trans1;
+    MatrixWorkspace_sptr trans2;
+    MatrixWorkspace_sptr out;
+    double theta;
+  };
+
+  struct processGroupMembersOutput {
+    std::vector<RROOutputs> rroOutputs;
+    std::vector<WorkspaceNames> outputNames;
+  };
+
   void init() override;
   void exec() override;
   std::string getRunNumberForWorkspaceGroup(std::string const &wsName);
@@ -87,11 +102,14 @@ private:
   void populateAlgorithmicCorrectionProperties(const Mantid::API::IAlgorithm_sptr &alg,
                                                const Mantid::Geometry::Instrument_const_sptr &instrument);
   std::string findPolarizationCorrectionMethod(const API::MatrixWorkspace_sptr &efficiencies);
-  std::string findPolarizationCorrectionOption(const std::string &correctionMethod);
+  std::string findPolarizationCorrectionOption(const std::string &correctionMethod,
+                                               const WorkspaceGroup_sptr &groupIvsLam);
   std::string getFredrikzeInputSpinStateOrder(const std::string &correctionMethod);
   /// Get a polarization efficiencies workspace.
-  std::tuple<API::MatrixWorkspace_sptr, std::string, std::string, std::string> getPolarizationEfficiencies();
-  void applyPolarizationCorrection(const std::string &outputIvsLam);
+  std::tuple<API::MatrixWorkspace_sptr, std::string, std::string, std::string>
+  getPolarizationEfficiencies(const WorkspaceGroup_sptr &groupIvsLam);
+  WorkspaceGroup_sptr applyPolarizationCorrection(const WorkspaceGroup_sptr &outputIvsLam,
+                                                  const std::string &outputGroupName);
   API::MatrixWorkspace_sptr getFloodWorkspace();
   void applyFloodCorrection(const API::MatrixWorkspace_sptr &flood, const std::string &propertyName);
   void applyFloodCorrections();
@@ -100,20 +118,26 @@ private:
                             const bool isTransWs = false);
   void sumBanks();
   double getPropertyOrDefault(const std::string &propertyName, const double defaultValue, bool &isDefault);
-  void setTransmissionProperties(const Algorithm_sptr &alg, std::string const &propertyName);
-  WorkspaceNames getOutputNamesForGroupMember(const std::vector<std::string> &inputNames, const std::string &runNumber,
+  WorkspaceNames getOutputNamesForGroupMember(const std::string &inputNames, const std::string &runNumber,
                                               const size_t wsGroupNumber);
   void getTransmissionRun(std::map<std::string, std::string> &results, WorkspaceGroup_sptr &workspaceGroup,
                           const std::string &transmissionRun);
-  Algorithm_sptr createAlgorithmForGroupMember(std::string const &inputName, WorkspaceNames const &outputNames,
-                                               bool recalculateIvsQ = false);
   void setOutputGroupedWorkspaces(std::vector<WorkspaceNames> const &outputNames,
                                   WorkspaceNames const &outputGroupNames);
   void setOutputPropertyFromChild(const Algorithm_sptr &alg, std::string const &name);
   void setOutputPropertiesFromChild(const Algorithm_sptr &alg);
-  auto processGroupMembers(std::vector<std::string> const &inputNames, std::vector<std::string> const &originalNames,
-                           std::string const &runNumber, bool recalculateIvsQ = false);
-  void groupWorkspaces(const std::vector<std::string> &workspaceNames, std::string const &outputName);
+  processGroupMembersOutput processGroupMembers(Algorithm::WorkspaceVector members, std::string const &runNumber,
+                                                std::vector<std::string> const &taskOrder,
+                                                const std::vector<WorkspaceNames> &workspaceNames = {});
+  WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaceNames,
+                                      std::string const &outputName = "");
+  void setWorkspaceProperty(MatrixWorkspace_sptr workspace, const std::string &propertyName);
+  RROOutputs performCoreReduction(MatrixWorkspace_sptr inputWS, const std::vector<std::string> &taskOrder = {});
+  MatrixWorkspace_sptr postReductionProcessing(RROOutputs &out, const RebinParams &params);
+  void postReductionProcessingGroups(std::vector<RROOutputs> &outputs, std::vector<WorkspaceNames> const &outputNames,
+                                     const WorkspaceNames &groupedOutputNames);
+  void setOutputWorkspaces(RROOutputs &out, const MatrixWorkspace_sptr &binnedWS);
+  void updatePropertiesAfterReduction(RROOutputs &out, const RebinParams &params);
 };
 } // namespace Reflectometry
 } // namespace Mantid

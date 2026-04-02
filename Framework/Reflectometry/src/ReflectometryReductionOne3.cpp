@@ -160,13 +160,18 @@ void ReflectometryReductionOne3::init() {
 
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
-      "Output Workspace IvsQ.");
+      "Outputs the workspace associated with the last performed task. Typically IvsQ.");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspaceWavelength", "", Direction::Output, PropertyMode::Optional),
       "Output Workspace IvsLam. Intermediate workspace.");
   setPropertySettings("OutputWorkspaceWavelength",
                       std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspaceQ", "", Direction::Output, PropertyMode::Optional),
+      "Output Workspace IvsQ.");
+  setPropertySettings("OutputWorkspaceQ", std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
 
   initTransmissionOutputProperties();
 }
@@ -1226,12 +1231,13 @@ void ReflectometryReductionOne3::TaskCropWavelength::executeImpl() {
 
 void ReflectometryReductionOne3::TaskConvertToQ::executeImpl() {
   auto inputWS = getDependantWorkspace("InputWorkspace");
-  // Do we need this? Is this just here to satisfy legacy output requirements for polarization corrections?
-  // This currently outputs the input workspace to convert to Q (i.e wavelength output workspace)
+  // Outputs the input workspace to convert to Q (i.e wavelength output workspace)
   if (!m_parent->isDefault("OutputWorkspaceWavelength") || m_parent->isChild())
     m_parent->setProperty("OutputWorkspaceWavelength", inputWS);
-
   auto converted = m_parent->convertToQ(inputWS);
+  // Outputs the converted workspace
+  if (!m_parent->isDefault("OutputWorkspaceQ") || m_parent->isChild())
+    m_parent->setProperty("OutputWorkspaceQ", converted);
   outputWorkspace(converted, "ConvertedWorkspaceQ");
 }
 
