@@ -24,14 +24,14 @@ what to call each output workspace created.
 MDEventWorkspaces
 #################
 
-For input of type :ref:`MDEventWorkspace <MDWorkspace>` the algorithm uses :ref:`algm-BinMD` or
+For input of type :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` the algorithm uses :ref:`algm-BinMD` or
 :ref:`algm-SliceMD` to achieve the binning of the data. The choice of child
 algorithm used for slicing in this case is controlled by the NoPix option.
 
 MDHistoWorkspaces
 #################
 
-If the input is an :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` :ref:`algm-BinMD` and :ref:`algm-SliceMD` are not made available as they needto get hold of the original MDEvents associated with an :ref:`MDEventWorkspace <MDWorkspace>` in order to perform the rebinning. As this information is missing from the MDHistoWorkspace images, those operations are forbidden. Instead, a limited subset of the operations are allowed, and are performed via :ref:`algm-IntegrateMDHistoWorkspace`. In this case, the Projection and NoPix properties are ignored. See :ref:`algm-IntegrateMDHistoWorkspace` for how the binning parameters are used.
+If the input is an :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` :ref:`algm-BinMD` and :ref:`algm-SliceMD` are not made available as they needto get hold of the original MDEvents associated with an :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` in order to perform the rebinning. As this information is missing from the MDHistoWorkspace images, those operations are forbidden. Instead, a limited subset of the operations are allowed, and are performed via :ref:`algm-IntegrateMDHistoWorkspace`. In this case, the Projection and NoPix properties are ignored. See :ref:`algm-IntegrateMDHistoWorkspace` for how the binning parameters are used.
 
 Projection Binning
 ##################
@@ -42,7 +42,7 @@ The dimension will be truncated to have extents 'minimum' and 'maximum', with 's
 
 Note that if the output workspace is an MDEventWorkspace (NoPix=False), these properties define the top-level box structure of the workspace.
 If the MaxRecursionDepth property is set to higher than its default of 1 then if many events fall within a single box it may be split further,
-see the documentation for :ref:`MDEventWorkspace <MDWorkspace>`.
+see the documentation for :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`.
 
 The PnBin parameters must match one of these three formats:
 
@@ -67,7 +67,7 @@ Creating Projections
 ####################
 
 Projections are used by CutMD to transform the multidimensional data prior to
-cutting it. Projections are provided to CutMD in the form of a :ref:`TableWorkspace <Table Workspaces>`.
+cutting it. Projections are provided to CutMD in the form of a :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>`.
 The format of these workspaces is as follows:
 
 +------------+--------+-------------------------------------------------------+

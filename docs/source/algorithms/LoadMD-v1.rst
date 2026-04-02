@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm loads a :ref:`MDEventWorkspace <MDWorkspace>` that was
+This algorithm loads a :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` that was
 previously saved using the :ref:`algm-SaveMD` algorithm to a .nxs file
 format.
 

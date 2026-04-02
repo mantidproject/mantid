@@ -11,7 +11,7 @@ Description
 
 This algorithm converts from a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` (in
 detector/time-of-flight space) to a
-:ref:`MDEventWorkspace <MDWorkspace>` containing events in reciprocal
+:py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` containing events in reciprocal
 space.
 
 The calculations apply only to elastic diffraction experiments. The
@@ -20,7 +20,7 @@ to HKL of the crystal.
 
 If the OutputWorkspace does NOT already exist, a default one is created.
 In order to define more precisely the parameters of the
-:ref:`MDEventWorkspace <MDWorkspace>`, use the :ref:`algm-CreateMDWorkspace`
+:py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`, use the :ref:`algm-CreateMDWorkspace`
 algorithm first.
 
 Types of Conversion

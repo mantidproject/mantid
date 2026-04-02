@@ -138,7 +138,7 @@ where INSTRUMENTNAME is the name of the instrument and ANYTHING can be
 any string including an empty string. Where more than one IDF is defined
 for an instrument the appropriate IDF is loaded based on its
 :ref:`valid-from <Top level instrument>` date. Note for this to work
-the :ref:`Workspace <Workspace>` for which an IDF is loaded into must
+the :py:obj:`~mantid.api.Workspace` for which an IDF is loaded into must
 contain a record of when the data were collected. This information is
 taken from the workspace's :py:obj:`Run <mantid.api.Run>` object, more specifically the
 *run\_start* property of this object.
@@ -1243,14 +1243,14 @@ shape function as known prior to the start of the fitting process. The
 attributes 'unit' is optional. If it is not set then the peak
 centre-value is directly substituted for the centre variable in the
 formula. If it is set then it must be set to no one of the units defined
-in :ref:`Unit Factory <Unit Factory>`, and what happens is that the peak
+in :py:obj:`UnitFactory <mantid.kernel.UnitFactoryImpl>`, and what happens is that the peak
 centre-value is converted to this unit before assigned to the centre
 variable in the formula.
 
 The optional 'result-unit' attribute tells what the unit is of the
 output of the formula. In the example above this unit is "1/dSpacing^2"
 (for the 'result-unit' this attribute can be set to an algebraic
-expression of the units defined in :ref:`Unit Factory <Unit Factory>`). If
+expression of the units defined in :py:obj:`UnitFactory <mantid.kernel.UnitFactoryImpl>`). If
 the x-axis unit of the data you are trying to fit is dSpacing then the
 output of the formula is left as it is. But for example if the x-axis
 unit of the data is TOF then the formula output is converted into, it in
@@ -1277,7 +1277,7 @@ As with a formula the look-up is done for the 'x'-value that corresponds
 to the centre of the peak as known prior to the start of the fitting
 process. The only interpolation option currently supported is 'linear'.
 The optional 'x-unit' and 'y-unit' attributes must be set to one of the
-units defined in :ref:`Unit Factory <Unit Factory>`. The 'x-unit' and
+units defined in :py:obj:`UnitFactory <mantid.kernel.UnitFactoryImpl>`. The 'x-unit' and
 'y-unit' have very similar effect to the 'unit' and 'result-unit'
 attributes for described above. 'x-unit' converts the unit of the centre
 before lookup against the x-values. 'y-axis' is the unit of the y values

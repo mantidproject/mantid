@@ -1,7 +1,7 @@
 Other Information on Workspaces
 -------------------------------
 
--  :ref:`Workspace <Workspace>` - Overview of workspaces, which include the following classes:
+-  :py:obj:`~mantid.api.Workspace` - Overview of workspaces, which include the following classes:
     -  :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` - A base class that contains
        among others:
 
@@ -14,7 +14,7 @@ Other Information on Workspaces
        -  :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` - A workspace that retains the
           individual neutron event data.
 
-    -  :ref:`TableWorkspace <Table Workspaces>` - A workspace holding data in
+    -  :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` - A workspace holding data in
        rows of columns having a particular type (e.g. text, integer, ...).
     -  :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` - A container for a collection of
        workspaces. Algorithms given a group as input run sequentially on
