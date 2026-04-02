@@ -8,6 +8,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/IkedaCarpenterPV.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -598,15 +599,28 @@ void IkedaCarpenterPV::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorks
   m_waveLength.clear();
 
   if (workspace) {
-    // Scale all time-dependent IC parameters so the function evaluates
-    // correctly in non-TOF workspaces (e.g. d-spacing, wavelength).
-    //
-    // scaleFactor = X0_workspace / X0_tof  (approx d/tof = 1/DIFC for d-spacing)
-    //
-    // Only scale when the workspace is not already in TOF and X0 has been set.
+    // If the instrument definition provided IC parameters the base-class call above handles
+    // the formula evaluation and unit conversion.
+    if (isExplicitlySet(parameterIndex("Alpha0")))
+      return;
+
+    // This next section handles conversion when no instrument defaults are present
+    // in such a scenario the generic defaults will be used, which are in TOF units.
+
+    // This will scale these default time-dependent IC parameters so the initial plot guess
+    // is reasonable for non-TOF workspaces (e.g. d-spacing, wavelength).
+
+    // Only applies to units with a simple power-law relationship with TOF;
+    // units like DeltaE have a non-linear, energy-dependent conversion that
+    // may be kinematically forbidden at the peak position.
+    const auto wsUnit = workspace->getAxis(0)->unit();
+    auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    double factor, power;
+    if (!wsUnit->quickConversion(*tof, factor, power))
+      return;
+
     const auto peakCentre = getParameter("X0");
     if (peakCentre != 0.0) {
-      auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
       const auto tofCentre = convertValue(peakCentre, tof, workspace, wi);
       if (tofCentre != 0.0) {
         const double scaleFactor = peakCentre / tofCentre;
