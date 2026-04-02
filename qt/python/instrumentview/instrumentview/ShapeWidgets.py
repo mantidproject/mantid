@@ -436,9 +436,9 @@ class AnnulusSelectionShape(SelectionShape):
         )
         oy = np.concatenate(
             [
-                self.cy + self.outer_radius * np.sin(t),
+                self.cy + (self.outer_radius * self._pixel_aspect) * np.sin(t),
                 [np.nan],
-                self.cy + self.inner_radius * np.sin(t),
+                self.cy + (self.inner_radius * self._pixel_aspect) * np.sin(t),
             ]
         )
         return ox, oy
@@ -452,11 +452,12 @@ class AnnulusSelectionShape(SelectionShape):
         inner_y = np.sqrt(np.clip(ratio**2 - fx_o**2, 0, None))
         fx = self.cx + self.outer_radius * fx_o
         has_inner = np.abs(fx_o) <= ratio
-        fy_top = self.cy + self.outer_radius * outer_y
+        ry_outer = self.outer_radius * self._pixel_aspect
+        fy_top = self.cy + ry_outer * outer_y
         fy_bot = np.where(
             has_inner,
-            self.cy + self.outer_radius * inner_y,
-            self.cy + self.outer_radius * (-outer_y),
+            self.cy + ry_outer * inner_y,
+            self.cy + ry_outer * (-outer_y),
         )
         return fx, fy_bot, fy_top
 
@@ -469,17 +470,18 @@ class AnnulusSelectionShape(SelectionShape):
         inner_y = np.sqrt(np.clip(ratio**2 - fx_o**2, 0, None))
         has_inner = np.abs(fx_o) <= ratio
         fx = self.cx + self.outer_radius * fx_o
+        ry_outer = self.outer_radius * self._pixel_aspect
         fy_top = np.where(
             has_inner,
-            self.cy - self.outer_radius * inner_y,
-            self.cy + self.outer_radius * outer_y,
+            self.cy - ry_outer * inner_y,
+            self.cy + ry_outer * outer_y,
         )
-        fy_bot = self.cy - self.outer_radius * outer_y
+        fy_bot = self.cy - ry_outer * outer_y
         return fx[has_inner], fy_bot[has_inner], fy_top[has_inner]
 
     # ── hit-testing ──────────────────────────────────────────────
     def hit_test(self, nx, ny):
-        dist = np.hypot(nx - self.cx, ny - self.cy)
+        dist = np.hypot(nx - self.cx, (ny - self.cy) / self._pixel_aspect)
         if abs(dist - self.outer_radius) < EDGE_TOL:
             return "edge"
         if abs(dist - self.inner_radius) < EDGE_TOL:
@@ -493,8 +495,8 @@ class AnnulusSelectionShape(SelectionShape):
         return dict(inner_radius=self.inner_radius, outer_radius=self.outer_radius)
 
     def apply_resize_delta(self, nx, ny, start_nx, start_ny, saved_size):
-        start_dist = np.hypot(start_nx - self.cx, start_ny - self.cy)
-        curr_dist = np.hypot(nx - self.cx, ny - self.cy)
+        start_dist = np.hypot(start_nx - self.cx, (start_ny - self.cy) / self._pixel_aspect)
+        curr_dist = np.hypot(nx - self.cx, (ny - self.cy) / self._pixel_aspect)
         delta = curr_dist - start_dist
         # ShapeOverlayManager stores '_resize_which' in its state dict;
         # however the shape itself doesn't see it.  We determine which
@@ -517,7 +519,7 @@ class AnnulusSelectionShape(SelectionShape):
             )
 
     def indices_in_shape(self, proj):
-        dist = np.hypot(proj[:, 0] - self.cx, proj[:, 1] - self.cy)
+        dist = np.hypot(proj[:, 0] - self.cx, (proj[:, 1] - self.cy) / self._pixel_aspect)
         return (dist >= self.inner_radius) & (dist <= self.outer_radius)
 
     # ── drawing (two fill bands) ─────────────────────────────────

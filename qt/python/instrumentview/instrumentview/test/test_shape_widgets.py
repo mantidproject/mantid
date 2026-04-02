@@ -614,6 +614,29 @@ class TestAnnulusSelectionShape(unittest.TestCase):
         self.assertGreater(len(fx), 0)
         self.assertTrue(np.all(fy_top >= fy_bot))
 
+    def test_outline_xy_uses_pixel_aspect(self):
+        self.shape.set_pixel_aspect(2.0)
+        _, oy = self.shape.outline_xy()
+        finite = np.isfinite(oy)
+        self.assertAlmostEqual(float(np.max(oy[finite]) - self.shape.cy), 0.30, places=3)
+
+    def test_hit_test_uses_pixel_aspect(self):
+        self.shape.set_pixel_aspect(2.0)
+        self.assertEqual(self.shape.hit_test(0.5, 0.5 + 0.20), "inside")
+        self.assertEqual(self.shape.hit_test(0.5, 0.5 + 0.30), "edge")
+
+    def test_indices_in_shape_uses_pixel_aspect(self):
+        self.shape.set_pixel_aspect(2.0)
+        proj = np.array(
+            [
+                [0.5, 0.5 + 0.20],
+                [0.5, 0.5 + 0.08],
+                [0.5, 0.5 + 0.32],
+            ]
+        )
+        mask = self.shape.indices_in_shape(proj)
+        np.testing.assert_array_equal(mask, [True, False, False])
+
 
 class TestHollowRectangleSelectionShape(unittest.TestCase):
     def setUp(self):
