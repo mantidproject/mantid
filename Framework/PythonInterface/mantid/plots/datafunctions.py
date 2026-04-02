@@ -94,6 +94,40 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     return normalization, kwargs
 
 
+def get_normalization_type(workspace, axes, **kwargs) -> PlotNormalizationType:
+    """
+    Infer PlotNormalizationType from kwargs or workspace state.
+
+    Priority (in order):
+    1. If 'normalization_type' in kwargs, use it (may be enum or string)
+    2. Else if 'normalize_by_bin_width' in kwargs, convert bool to enum
+    3. Else infer via get_normalize_by_bin_width() and convert to enum
+
+    Note: Does NOT pop from kwargs (reader only, idempotent).
+
+    :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
+    :param axes: The axes being plotted on
+    :param kwargs: Plot keyword arguments
+    :return: PlotNormalizationType enum
+    """
+    # Priority 1: explicit normalization_type in kwargs
+    if "normalization_type" in kwargs:
+        norm_type = kwargs["normalization_type"]
+        # Handle string form (from plot restoration)
+        if isinstance(norm_type, str):
+            return PlotNormalizationType[norm_type]
+        return norm_type
+
+    # Priority 2: normalize_by_bin_width if explicit
+    if "normalize_by_bin_width" in kwargs:
+        normalize_by_bin_width = kwargs["normalize_by_bin_width"]
+        return PlotNormalizationType.BIN_WIDTH if normalize_by_bin_width else PlotNormalizationType.NONE
+
+    # Priority 3: infer from workspace state
+    normalize_by_bin_width, _ = get_normalize_by_bin_width(workspace, axes, **kwargs)
+    return PlotNormalizationType.BIN_WIDTH if normalize_by_bin_width else PlotNormalizationType.NONE
+
+
 def get_spectrum_normalisation(**kwargs):
     """
     Get the spectrum normalisation flag from the plot keyword arguments.
@@ -346,6 +380,9 @@ def get_spectrum(workspace, wkspIndex, normalization: PlotNormalizationType, wit
             y = y / (x[1:] - x[0:-1])
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])
+        elif normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER and not workspace.isDistribution():
+            # TODO: Implement Q^-4 normalization
+            pass
         x = points_from_boundaries(x)
     try:
         specInfo = workspace.spectrumInfo()

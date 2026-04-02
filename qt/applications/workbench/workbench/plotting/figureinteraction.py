@@ -904,6 +904,9 @@ class FigureInteraction(object):
                     if ws_artist.spec_num == arg_set_copy.get("specNum"):
                         ws_artist.normalization = normalization
 
+                        if "normalization_type" not in arg_set_copy:
+                            arg_set_copy["normalization_type"] = normalization
+
                         # This check is to prevent the contour lines being re-plotted using the colorfill plot args.
                         if isinstance(ws_artist._artists[0], QuadContourSet):
                             contour_line_colour = ws_artist._artists[0].get_edgecolor()
