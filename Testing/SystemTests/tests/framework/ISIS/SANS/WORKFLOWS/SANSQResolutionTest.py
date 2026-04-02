@@ -20,7 +20,7 @@ class SANSQResolutionWithoutGravity(systemtesting.MantidSystemTest):
 
         SANS2D()
         # MaskFile contains setting for Q Resolution
-        MaskFile("/home/twy67886/Documents/MASKSANS2D_094i_RKH_QRes1.txt")
+        MaskFile("MASKSANS2D_094i_RKH_QRes1.txt")
         SetDetectorOffsets("REAR", -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
         SetDetectorOffsets("FRONT", -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
         Gravity(False)
@@ -45,7 +45,7 @@ class SANSQResolutionWithGravity(systemtesting.MantidSystemTest):
     def runTest(self):
         SANS2D()
         # MaskFile contains setting for Q Resolution
-        MaskFile("/home/twy67886/Documents/MASKSANS2D_094i_RKH_QRes2.txt")
+        MaskFile("MASKSANS2D_094i_RKH_QRes2.txt")
         SetDetectorOffsets("REAR", -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
         SetDetectorOffsets("FRONT", -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
         Gravity(flag=True, extra_length=10.0)
