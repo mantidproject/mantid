@@ -24,7 +24,7 @@ from Engineering.EnginX import EnginX
 from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
-from plugins.algorithms.IntegratePeaks1DProfile import calc_intens_and_sigma_arrays
+from plugins.algorithms.IntegratePeaks1DProfile import get_eval_ws, calc_sigma_from_summation
 from Engineering.texture.xtal_helper import get_xtal_structure
 from Engineering.EnggUtils import convert_TOFerror_to_derror
 
@@ -309,16 +309,15 @@ def fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs, peak_func_na
         # set up a function to fit
         bg_func = FunctionFactory.createFunction("LinearBackground")
         peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
-        peak_func.setMatrixWorkspace(window_ws, 0, low_bound, hi_bound)
 
         # estimate starting params
         intens, sigma, bg, centre = _estimate_intensity_background_and_centre(window_ws, 0, 0, len(window_ws.readX(0)) - 1, peak)
         bg_func.setParameter("A0", bg)
-        peak_func.setIntensity(intens)
         intens_par_name = "I"
-        peak_func.setCentre(centre)
         peak_func.setMatrixWorkspace(window_ws, 0, low_bound, hi_bound)
         cen_par_name = "X0"
+        peak_func.setParameter(cen_par_name, centre)
+        peak_func.setParameter(intens_par_name, intens)
         peak_func.addConstraints(f"{low_bound} < {cen_par_name} < {hi_bound}")
         peak_func.addConstraints(f"{intens_par_name} > 0")
 
@@ -397,8 +396,8 @@ def get_initial_fit_function_and_kwargs_from_specs(
 
         # create an individual peak, using estimated values as initial guess
         peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
-        peak_func.setCentre(centre)
-        peak_func.setIntensity(intens)
+        peak_func.setParameter(cen_par_name, centre)
+        peak_func.setParameter(intens_par_name, intens)
         peak_func.setMatrixWorkspace(ws_tof, ispec, tof_start, tof_end)
 
         # calculate constraint values
@@ -500,9 +499,16 @@ def rerun_fit_with_new_ws(
 
         # create fresh peak as ties are causing problems
         if last_fit_ic and is_final:
+            # set X0 and I BEFORE setMatrixWorkspace so that the instrument
+            # parameter file formulas for SigmaSquared and Gamma are evaluated
+            # at the correct peak centre rather than at X0=0 (default)
+            new_peak.setParameter(cen_par_name, x0)
+            new_peak.setParameter(intens_par_name, intens)
             new_peak.setMatrixWorkspace(new_ws, idom, md_fit_kwargs["StartX" + key_suffix], md_fit_kwargs["EndX" + key_suffix])
-            new_peak.setCentre(x0)
-            new_peak.setIntensity(intens)
+            # if we have changed to IC for the last fit we will just use default parameter ties
+            if peak.name() != "IkedaCarpenter":
+                parameters_to_tie = _get_default_param_ties("IkedaCarpenterPV", None)
+            # fit_kwargs = {**fit_kwargs, "Minimizer": "Levenberg-Marquardt,AbsError=1e-08,RelError=1e-08"}
 
         else:
             [
@@ -533,9 +539,9 @@ def rerun_fit_with_new_ws(
                 new_peak.fixParameter(param)
 
         # for IkedaCarpenterPV, fix instrument parameters during non-final fits to improve speed and stability
-        # if not is_final and new_peak.name() == "IkedaCarpenterPV":
-        #    for par in ("Alpha0", "Alpha1", "Beta0", "Kappa"):
-        #        new_peak.fixParameter(par)
+        if not is_final and new_peak.name() == "IkedaCarpenterPV":
+            for par in ("Alpha0", "Alpha1", "Beta0", "Kappa"):
+                new_peak.fixParameter(par)
 
         comp_func = _make_composite(new_peak, bg)
         new_func.add(comp_func)
@@ -558,10 +564,26 @@ def _get_default_param_ties(peak_func_name, parameters_to_tie):
     if not parameters_to_tie:
         match peak_func_name:
             case "BackToBackExponential":
-                parameters_to_tie("A", "B")
+                parameters_to_tie = ("A", "B")
             case "IkedaCarpenterPV":
                 parameters_to_tie = ("Alpha0", "Alpha1", "Beta0", "Kappa")
     return parameters_to_tie
+
+
+def calc_intens_and_sigma_arrays(fit_result):
+    function = fit_result["Function"]
+    ndoms = function.nDomains()
+    intens = np.zeros(ndoms)
+    sigma = np.zeros(intens.shape)
+    intens_over_sig = np.zeros(intens.shape)
+    peak_limits = np.full(intens.shape, None)
+    for idom, comp_func in enumerate(function):
+        intens[idom] = comp_func.getParameterValue("f0.I")
+        ws_fit = get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms)
+        sigma[idom], peak_limits[idom] = calc_sigma_from_summation(ws_fit.readX(0), ws_fit.readE(0) ** 2, ws_fit.readY(3))
+    ivalid = ~np.isclose(sigma, 0)
+    intens_over_sig[ivalid] = intens[ivalid] / sigma[ivalid]
+    return intens, sigma, intens_over_sig, peak_limits
 
 
 def fit_all_peaks(
@@ -658,7 +680,7 @@ def fit_all_peaks(
 
             # if the peak func isn't already Ikeda Carpenter, and the last_fit_ic is true, add another ws_tof to be fit
             if last_fit_ic and peak_func_name != "IkedaCarpenterPV":
-                fit_wss.append(ws_tof)
+                fit_wss.append(CloneWorkspace(ws_tof, OutputWorkspace="ws_tof_IkedaCarpenter"))
                 bkg_is_tied.append(True)
 
             # low level information
@@ -698,7 +720,7 @@ def fit_all_peaks(
                     fit_kwargs,
                     md_fit_kwargs,
                     fit_ws,
-                    0.02,  # allow x0 to only vary by 1% from previous fit
+                    0.02,  # allow x0 to only vary by 2% from previous fit
                     50,
                     subsequent_fit_param_fix,
                     parameters_to_tie,
@@ -711,7 +733,7 @@ def fit_all_peaks(
             mdf = fit_object.Function.function
             fit_result = {"Function": mdf, "OutputWorkspace": fit_object.OutputWorkspace.name()}
             # update peak mask based on I/sig from fit
-            *_, i_over_sigma, _ = calc_intens_and_sigma_arrays(fit_result, "Summation")
+            *_, i_over_sigma, _ = calc_intens_and_sigma_arrays(fit_result)
             fit_mask = i_over_sigma > i_over_sigma_thresh
 
             # setup output table columns
