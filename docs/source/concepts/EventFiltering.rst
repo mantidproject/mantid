@@ -4,13 +4,13 @@
 Event Filtering
 ===============
 
-Given an :class:`EventWorkspace <<mantid.api.IEventWorkspace>` (:ref:`additional docs <EventWorkspace>`)
+Given an :class:`EventWorkspace <mantid.api.IEventWorkspace>` (additional docs: :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`)
 one will generally want to either remove events (commonly called filtering) or divide them into separate output workspaces (splitting).
 While the full list of algorithms can be found in the event filtering algorithm category, a high level summary of them is included here:
 
 * :ref:`FilterByTime <algm-FilterByTime>` and :ref:`FilterByLogValue <algm-FilterByLogValue>` which will create a filter and apply it in a single step
 * :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` which can create an event filter to be used by :ref:`FilterEvents <algm-FilterEvents>`
-* :ref:`FilterEvents <algm-FilterEvents>` which allows for a variety of workspaces to specify how an :ref:`EventWorkspace` is split.
+* :ref:`FilterEvents <algm-FilterEvents>` which allows for a variety of workspaces to specify how an :py:obj:`EventWorkspace` is split.
 
 
 This document focuses on how to create workspaces for filtering and will largely
@@ -34,7 +34,7 @@ Explicit filters
 
 :ref:`algm-FilterEvents` takes either a :class:`SplittersWorkspace
 <mantid.api.ISplittersWorkspace>`, :ref:`TableWorkspace <Table
-Workspaces>`, or :ref:`MatrixWorkspace <MatrixWorkspace>` as the
+Workspaces>`, or :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` as the
 ``SplitterWorkspace``. The events are split into output workspaces
 according to their pulse times or the times they arrive at detectors.
 Note, times in ``MatrixWorkspace`` and ``TableWorkspace`` are in seconds,

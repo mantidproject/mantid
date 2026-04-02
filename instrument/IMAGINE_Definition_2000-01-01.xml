@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="CG4D" valid-from="2000-01-01 00:00:00" valid-to="2025-09-30 23:59:59" last-modified="2025-10-02 12:00:00" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="IMAGINE" valid-from="2000-01-01 00:00:00" valid-to="2025-09-30 23:59:59" last-modified="2025-10-02 12:00:00" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!--Created by Zachary Morgan-->
   <!--DEFAULTS-->
   <defaults>

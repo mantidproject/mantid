@@ -18,7 +18,7 @@ also optionally check the axes (this includes the units), the
 spectra-detector map, the instrument (the name and parameter map) and
 any bin masking.
 
-In the case of :ref:`EventWorkspaces <EventWorkspace>`, they are checked to
+In the case of :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`, they are checked to
 hold identical event lists. Comparisons between an EventList and a
 Workspace2D always fail.
 

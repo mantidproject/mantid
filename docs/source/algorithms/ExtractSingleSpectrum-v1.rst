@@ -9,7 +9,7 @@
 Description
 -----------
 
-Extracts a single spectrum from a :ref:`Workspace2D <Workspace2D>` and
+Extracts a single spectrum from a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` and
 stores it in a new workspace.
 
 Usage

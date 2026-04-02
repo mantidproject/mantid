@@ -19,7 +19,7 @@ In this case ``MergeRuns`` algorithm will be invoked, which will forbid the merg
 (e.g. different mirror senses, doppler energy or velocity profiles).
 Note, that this algorithm is compatible with the data recorded from 03.2014 onwards
 (i.e. where Doppler's ``mirror_sense``, ``maximum_delta_energy`` and ``velocity_profile`` entries are defined in ``.nxs`` files).
-It returns a :ref:`WorkspaceGroup <WorkspaceGroup>`, containing one (no mirror sense) or two workspaces (with mirror sense) for left and right wings respectively.
+It returns a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`, containing one (no mirror sense) or two workspaces (with mirror sense) for left and right wings respectively.
 This algorithm is **not** intended to be used directly by the end users. Instead it is used as a child algorithm by :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>`
 and :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` for QENS and FWS type of reductions correspondingly.
 

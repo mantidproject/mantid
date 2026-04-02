@@ -10,7 +10,7 @@ Description
 -----------
 
 ApplyInstrumentToPeaks will update the instrument contained within
-peaks of a :ref:`PeaksWorkspace <PeaksWorkspace>`. It will keep the
+peaks of a :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>`. It will keep the
 same detector ID and TOF but recalculate the detector positions and
 therefore the Q-vectors.
 

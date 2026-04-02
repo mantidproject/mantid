@@ -45,8 +45,7 @@ There is a lot of information about workspaces that can be accessed.
 
 Below is a brief overview of the most commonly used functionality, for further details see:
 
-* :ref:`An exhaustive list <mantid.api.MatrixWorkspace>`
-* :ref:`A wider explanation <MatrixWorkspace>`
+* :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`
 
 getSpectrum for info on the structure of a workspace eg. the spectrum number related to workspace index 0:
 
@@ -60,7 +59,7 @@ getSpectrum for info on the structure of a workspace eg. the spectrum number rel
 
     ws.getAxis(0).getUnit().setLabel("Time-of-flight", "Milliseconds")
 
-:ref:`getInstrument <Instrument>` for :ref:`Sample` and Source :ref:`Geometry`.
+:py:obj:`getInstrument <mantid.geometry.Instrument>` for :py:obj:`Sample <mantid.api.Sample>` and Source :ref:`Geometry`.
 
 .. code-block:: python
 
@@ -79,6 +78,6 @@ Useful links
 ============
 
 * :ref:`WorkingWithWorkspaces`
-* :ref:`MatrixWorkspace`
+* :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`
 * :ref:`Mantid_api`
 * :ref:`concepts contents`

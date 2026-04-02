@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm takes a list of workspace names (workspaces can be :ref:`Matrix <MatrixWorkspace>` or :ref:`Group <WorkspaceGroup>`)
+This algorithm takes a list of workspace names (can be a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` or :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`)
 and compares the middle time (defined below) at which each run occurs to a reference value.
 The differences are entered into the output table workspace with columns for the time in seconds and hours (plus errors).
 To establish the time at which each run occurs, the start times are taken from either ``run_start`` or ``start_time`` logs and the end times

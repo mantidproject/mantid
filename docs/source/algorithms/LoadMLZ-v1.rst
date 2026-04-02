@@ -9,7 +9,7 @@
 Description
 -----------
 
-Loads an MLZ NeXus file into a :ref:`Workspace2D <Workspace2D>`
+Loads an MLZ NeXus file into a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`
 with the given name.
 
 This algorithm masks detectors using a mask defined in the input Nexus

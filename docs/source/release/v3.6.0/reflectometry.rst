@@ -21,7 +21,7 @@ ConvertToReflectometryQ
 -----------------------
 
 :ref:`ConvertToReflectometryQ <algm-ConvertToReflectometryQ>` can now output any transformation (Centre point
-or NormalisedPolygon) in the form of an :ref:`MDHistoWorkspace <MDHistoWorkspace>`. See
+or NormalisedPolygon) in the form of an :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`. See
 ``OutputAsMDWorkspace property`` in the :ref:`documentation <algm-ConvertToReflectometryQ>`.
 
 A bug that was causing :ref:`ConvertToReflectometryQ <algm-ConvertToReflectometryQ>` to output wrong values

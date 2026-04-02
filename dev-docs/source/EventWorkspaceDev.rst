@@ -8,7 +8,7 @@ Event Workspace Development
   :local:
 
 The following information will be useful to you if you want to write an
-:ref:`algorithm` that is :ref:`Event Workspace <EventWorkspace>` aware.
+:ref:`algorithm` that is :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` aware.
 
 Individual Neutron Event Data (TofEvent)
 ########################################
@@ -66,9 +66,9 @@ Workspace2D compatibility
 #########################
 
 Event Workspace is designed to be able to be read (but not written to)
-like a :ref:`MatrixWorkspace <MatrixWorkspace>`. By default, if an algorithm
+like a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`. By default, if an algorithm
 performs an operation and outputs a new workspace, the
-WorkspaceFactory will create a :ref:`Workspace2D` *copy*
+WorkspaceFactory will create a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` *copy*
 of your Event Workspace's histogram representation. If you attempt to
 change an Event Workspace's Y or E data in place, you will get an ``NotImplementedError`` raised, since that is not possible.
 

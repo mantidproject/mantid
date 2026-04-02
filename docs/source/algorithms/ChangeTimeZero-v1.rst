@@ -9,8 +9,8 @@
 Description
 -----------
 
-The algorithm modifies the time signatures of a :ref:`MatrixWorkspace <MatrixWorkspace>`. The new time signature
-alters the logs and in case of an :ref:`EventWorkspace <EventWorkspace>` the neutron times as well.
+The algorithm modifies the time signatures of a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`. The new time signature
+alters the logs and in case of an :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` the neutron times as well.
 
 The time offset can be specified in one of the two following ways:
 

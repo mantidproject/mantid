@@ -11,6 +11,7 @@ from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.ConvertUnitsCalculator import ConvertUnitsCalculator
+from instrumentview.ComponentSelectionUtils import detector_table_indices_for_parent_subtrees
 
 from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace, GroupingWorkspace
 from mantid.simpleapi import (
@@ -83,6 +84,8 @@ class FullInstrumentViewModel:
         self._detector_positions_3d = detector_info_table.columnArray("Position")
         self._workspace_indices = detector_info_table.columnArray("Index")
         self._spectrum_nos = detector_info_table.columnArray("Spectrum No")
+        self._detector_ids_by_info_index = np.array(self._workspace.detectorInfo().detectorIDs())
+        self._detector_id_to_table_index = {int(det_id): i for i, det_id in enumerate(self._detector_ids)}
         # Array of strings 'yes', 'no' and 'n/a'
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
@@ -253,12 +256,45 @@ class FullInstrumentViewModel:
             self._integration_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
         self.full_integration_limits = self._integration_limits
 
-    def update_point_picked_detectors(self, index: int) -> None:
+    def _detector_table_indices_for_parent_subtree(self, detector_table_indices: np.ndarray, pickable_only: bool) -> np.ndarray:
+        pickable_mask = self.is_pickable if pickable_only else None
+        return detector_table_indices_for_parent_subtrees(
+            detector_table_indices=np.asarray(detector_table_indices, dtype=int),
+            detector_ids=self._detector_ids,
+            detector_ids_by_info_index=self._detector_ids_by_info_index,
+            detector_id_to_table_index=self._detector_id_to_table_index,
+            detector_info=self._workspace.detectorInfo(),
+            component_info=self._workspace.componentInfo(),
+            pickable_mask=pickable_mask,
+        )
+
+    def expand_pickable_mask_to_parent_subtrees(self, pickable_mask: list[bool] | np.ndarray) -> np.ndarray:
+        pickable_mask = np.array(pickable_mask, dtype=bool)
+        pickable_table_indices = np.argwhere(self.is_pickable).flatten()
+        if pickable_mask.size != pickable_table_indices.size:
+            raise ValueError("pickable_mask must have one value per pickable detector")
+
+        selected_pickable_indices = pickable_table_indices[pickable_mask]
+        expanded_pickable_table_indices = self._detector_table_indices_for_parent_subtree(selected_pickable_indices, pickable_only=True)
+
+        expanded_pickable_mask = np.zeros_like(pickable_mask, dtype=bool)
+        if expanded_pickable_table_indices.size == 0:
+            return expanded_pickable_mask
+
+        expanded_pickable_mask[np.isin(pickable_table_indices, expanded_pickable_table_indices)] = True
+        return expanded_pickable_mask
+
+    def update_point_picked_detectors(self, index: int, expand_to_parent_subtree: bool = False) -> None:
         # TODO: Check which selection is quicker, mask or indices
         # NOTE: This is slightly awkard because cannot do chained mask selections
-        global_index = np.argwhere(self.is_pickable)[index]
-        self._detector_is_picked[global_index] = ~self._detector_is_picked[global_index]
-        self._point_picked_detectors[global_index] = self._detector_is_picked[global_index]
+        global_index = np.argwhere(self.is_pickable).flatten()[index]
+        indices_to_update = np.array([global_index], dtype=int)
+        if expand_to_parent_subtree:
+            indices_to_update = self._detector_table_indices_for_parent_subtree(indices_to_update, pickable_only=True)
+
+        new_selection_value = ~self._detector_is_picked[global_index]
+        self._detector_is_picked[indices_to_update] = new_selection_value
+        self._point_picked_detectors[indices_to_update] = new_selection_value
 
     def clear_point_picked_detectors(self) -> None:
         self._detector_is_picked[self._point_picked_detectors] = False

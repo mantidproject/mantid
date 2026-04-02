@@ -26,7 +26,7 @@ The workspace options are relatively self explanatory, however key differences
 include that **Load** has the option to load a file or run a live data
 listener. **Delete** will remove the Workspace from the Workbench. After
 selecting multiple workspaces click the **Group** button to group the
-workspaces into a :ref:`WorkspaceGroup`. The Sort option has multiple choices,
+workspaces into a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`. The Sort option has multiple choices,
 you can sort in ascending or descending order by name, size, or last modified.
 
 Workspace Context Menu

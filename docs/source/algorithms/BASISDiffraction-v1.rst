@@ -30,7 +30,7 @@ is in directory /SNS/BSS/shared/autoreduce/new_masks_08_12_2015.
 Incoming neutrons with a wavelength outside this range will be filtered out.
 The default range is [5.86, 6.75].
 
-**OutputWorkspace**: a two-dimensional :ref:`MDHistoWorkspace <MDHistoWorkspace>`
+**OutputWorkspace**: a two-dimensional :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`
 containing the intensities projected onto the reciprocal slice, integrated over
 the independent axis *Wproj*. The diffraction pattern can be visualized with
 the :ref:`sliceviewer`.

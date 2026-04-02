@@ -1,0 +1,11 @@
+cpp:
+ - '**/*.cpp'
+ - '**/*.h'
+ - '**/*.hxx'
+doxygen:
+ - 'Framework/Doxygen/**'
+ - 'conda/recipes/mantid-developer/**'
+ - 'conda/recipes/conda_build_config.yaml'
+ - '.github/filters.yaml'
+ - '.github/actions/doxygen-build/**'
+ - '.github/workflows/doxygen.yml'

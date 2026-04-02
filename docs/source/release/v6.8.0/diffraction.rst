@@ -46,9 +46,9 @@ New features
 - :ref:`LoadWANDSCD <algm-LoadWANDSCD>` has new keyword argument to apply or not apply goniometer tilts
 - Update fitting coefficients for :ref:`BackToBackExponential <func-BackToBackExponential>` in SXD parameters xml file.
 - Add parameter ``MinIntensOverSigma`` in :ref:`SaveReflections <algm-SaveReflections>` to filter peaks to export by Intensity/Sigma
-- Support saving :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>` with GSAS format in :ref:`SaveReflections <algm-SaveReflections>` (calls :ref:`SaveHKLCW <algm-SaveHKLCW>`)
+- Support saving :py:obj:`LeanElasticPeaksWorkspace <mantid.dataobjects.LeanElasticPeaksWorkspace>` with GSAS format in :ref:`SaveReflections <algm-SaveReflections>` (calls :ref:`SaveHKLCW <algm-SaveHKLCW>`)
 - New parameter in :ref:`SaveIsawUB <algm-SaveIsawUB>` to rotate the UB by the goniometer matrix.
-- New algorithm :ref:`LoadGaussCube <algm-LoadGaussCube>` to load Gaussian cube files for volumetric data into a 3D :ref:`MDHistoWorkspace <MDHistoWorkspace>`
+- New algorithm :ref:`LoadGaussCube <algm-LoadGaussCube>` to load Gaussian cube files for volumetric data into a 3D :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`
 - :ref:`LoadWANDSCD <algm-LoadWANDSCD>` with grouping option has been sped up
 - New algorithm :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` to find single-crystal Bragg peaks in instruments with :ref:`RectangularDetectors <RectangularDetector>` (such as SXD).
 - ISIS single crystal reduction class for SXD now supports defining a file extension when loading data (previously available for WISH class - in both cases the argument to ``load_run`` has been renamed to ``file_ext``)

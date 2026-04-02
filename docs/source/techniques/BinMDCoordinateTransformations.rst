@@ -23,7 +23,7 @@ Binning an MDWorkspace
    :alt: Coordinate transform line example
    :align: center
 
-- The output :ref:`MDHistoWorkspace`, called ``binned_ws`` still has two dimensions, now called ``H`` and ``K``.
+- The output :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`, called ``binned_ws`` still has two dimensions, now called ``H`` and ``K``.
 - The ``binned_ws`` workspace holds a reference to the original workspace.
 
   - This can be seen in the details of the workspace in the Workspaces widget (``Binned from 'original_ws'``).
@@ -44,7 +44,7 @@ Binning an MDWorkspace
 Binning a Line From an MDHistoWorkspace
 ---------------------------------------
 
-It is possible to call :ref:`algm-BinMD` on an :ref:`MDHistoWorkspace` that has already been binned.
+It is possible to call :ref:`algm-BinMD` on an :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` that has already been binned.
 For example, if you are viewing ``binned_ws`` in the :ref:`sliceviewer`, you can use the
 :ref:`Non-axis aligned cutting tool <sliceviewer_nonaxiscuts>` to bin a line from that.
 

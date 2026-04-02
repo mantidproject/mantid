@@ -1,4 +1,4 @@
-name: Linux unit tests and system tests
+name: Linux
 
 on:
   pull_request:
@@ -18,7 +18,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux-build-and-test:
+  doxygen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
+        with:
+          frozen: true
+
+      - uses: ./.github/actions/doxygen-build
+        name: Build doxygen
+        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
+
+
+  build-and-test:
+    needs: [doxygen]
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted

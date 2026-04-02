@@ -713,7 +713,7 @@ void LoadILLTOF2::fillScanWorkspace(const LegacyNexus::NXEntry &entry, const std
   LegacyLoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 0, true, detectorIDs, std::set<int>(), dimOrder);
 
   // Load monitor data, there is only one monitor
-  const std::vector<int> monitorIDs = m_localWorkspace->getInstrument()->getMonitors();
+  const std::vector<int> monitorIDs = m_localWorkspace->getInstrument()->getMonitorIDs();
   const auto spectrumNo = data.dim1() * data.dim2();
   auto monitorData = LegacyLoadHelper::getDoubleDataset(entry, monitorList[0]);
   monitorData.load();

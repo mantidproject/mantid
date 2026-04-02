@@ -11,7 +11,7 @@ Description
 
 This algorithm applies a simple linear transformation to a
 :ref:`MDWorkspace <MDWorkspace>` or
-:ref:`MDHistoWorkspace <MDHistoWorkspace>`. This could be used, for
+:py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`. This could be used, for
 example, to scale the Energy dimension to different units.
 
 Each coordinate is transformed so that :math:`x'_d = (x_d * s_d) + o_d`
@@ -31,7 +31,7 @@ Notes
 The relationship between the workspace and the original
 :ref:`MDWorkspace <MDWorkspace>`, for example when the MDHistoWorkspace is
 the result of :ref:`algm-BinMD`, is lost. This means that you cannot
-re-bin a transformed :ref:`MDHistoWorkspace <MDHistoWorkspace>`.
+re-bin a transformed :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`.
 
 No units are not modified by this algorithm.
 
@@ -41,7 +41,7 @@ Performance Notes
 -  Performing the operation in-place (input=output) is always faster
    because the first step of the algorithm if NOT in-place is to clone
    the original workspace.
--  For :ref:`MDHistoWorkspaces <MDHistoWorkspace>` done in-place,
+-  For :py:obj:`MDHistoWorkspaces <mantid.dataobjects.MDHistoWorkspace>` done in-place,
    TransformMD is very quick (no data is modified, just the
    coordinates).
 -  For :ref:`MDWorkspaces <MDWorkspace>`, every event's coordinates gets

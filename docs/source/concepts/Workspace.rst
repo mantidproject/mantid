@@ -22,17 +22,17 @@ Workspace is as loose term that encompases a range of possible data structures. 
 Workspaces Types
 ------------------
 
--  :ref:`Matrix Workspace <MatrixWorkspace>` - Is really a catagorisation for a family which contains measured (or derived) data with associated errors and an axis giving information about where the measurement was made. Matrix Workspaces are typically create initially by executing one of Mantid's :ref:`Load<algm-Load>` algorithms, for example :ref:`LoadRaw <algm-LoadRaw>` or :ref:`LoadNexus <algm-LoadNexus>`. Of data structures representing 2D measurement data. The following are common sorts of Matrix Workspace:
+-  :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` - Is really a categorisation for a family which contains measured (or derived) data with associated errors and an axis giving information about where the measurement was made. Matrix Workspaces are typically create initially by executing one of Mantid's :ref:`Load<algm-Load>` algorithms, for example :ref:`LoadRaw <algm-LoadRaw>` or :ref:`LoadNexus <algm-LoadNexus>`. Of data structures representing 2D measurement data. The following are common sorts of Matrix Workspace:
 
-   -  :ref:`Workspace 2D <Workspace2D>` - A workspace for holding two
+   -  :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` - A workspace for holding two
       dimensional histogram data in memory, this is the most commonly used
       workspace.
-   -  :ref:`Event Workspace <EventWorkspace>` - A workspace that retains the
+   -  :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` - A workspace that retains the
       individual neutron event data often including the pulse time corresponding to the reading.
 
 -  :ref:`Table Workspace <Table Workspaces>` - A workspace holding data in
    rows of columns having a particular type (e.g. text, integer, ...).
--  :ref:`Workspace Group <WorkspaceGroup>` - A container for a collection of
+-  :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` - A container for a collection of
    workspaces. Algorithms given a group as input usually run sequentially on
    each member of the group.
 
@@ -40,35 +40,35 @@ The workspace type id identifies the type of a Workspace instance.
 
 .. tip:: For C++ or Python development, these values are needed in such functions as the :ref:`Analysis Data Service's <Analysis Data Service>` createWorkspace.
 
-+-------------------------------+-------------------------------------------+
-| ID                            | Workspace Type                            |
-+===============================+===========================================+
-| "IEventWorkspace"             | IEventWorkspace                           |
-+-------------------------------+-------------------------------------------+
-| "ITableWorkspace"             | ITableWorkspace                           |
-+-------------------------------+-------------------------------------------+
-| "WorkspaceGroup"              | WorkspaceGroup                            |
-+-------------------------------+-------------------------------------------+
-| "AbsManagedWorkspace2D"       | AbsManagedWorkspace2D                     |
-+-------------------------------+-------------------------------------------+
-| "CompressedWorkspace2D"       | CompressedWorkspace2D                     |
-+-------------------------------+-------------------------------------------+
-| "EventWorkspace"              | :ref:`EventWorkspace <EventWorkspace>`    |
-+-------------------------------+-------------------------------------------+
-| "ManagedWorkspace2D"          | ManagedWorkspace2D                        |
-+-------------------------------+-------------------------------------------+
-| "TableWorkspace"              | TableWorkspace                            |
-+-------------------------------+-------------------------------------------+
-| "Workspace2D"                 | :ref:`Workspace2D <Workspace2D>`          |
-+-------------------------------+-------------------------------------------+
-| "WorkspaceSingleValue"        | WorkspaceSingleValue                      |
-+-------------------------------+-------------------------------------------+
-| "ManagedRawFileWorkspace2D"   | ManagedRawFileWorkspace2D                 |
-+-------------------------------+-------------------------------------------+
-| "MDWorkspace"                 | :ref:`MDWorkspace <MDWorkspace>`          |
-+-------------------------------+-------------------------------------------+
-| "MDHistoWorkspace"            | :ref:`MDHistoWorkspace <MDHistoWorkspace>`|
-+-------------------------------+-------------------------------------------+
++-------------------------------+-----------------------------------------------------------------+
+| ID                            | Workspace Type                                                  |
++===============================+=================================================================+
+| "IEventWorkspace"             | IEventWorkspace                                                 |
++-------------------------------+-----------------------------------------------------------------+
+| "ITableWorkspace"             | ITableWorkspace                                                 |
++-------------------------------+-----------------------------------------------------------------+
+| "WorkspaceGroup"              | WorkspaceGroup                                                  |
++-------------------------------+-----------------------------------------------------------------+
+| "AbsManagedWorkspace2D"       | AbsManagedWorkspace2D                                           |
++-------------------------------+-----------------------------------------------------------------+
+| "CompressedWorkspace2D"       | CompressedWorkspace2D                                           |
++-------------------------------+-----------------------------------------------------------------+
+| "EventWorkspace"              | :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`    |
++-------------------------------+-----------------------------------------------------------------+
+| "ManagedWorkspace2D"          | ManagedWorkspace2D                                              |
++-------------------------------+-----------------------------------------------------------------+
+| "TableWorkspace"              | TableWorkspace                                                  |
++-------------------------------+-----------------------------------------------------------------+
+| "Workspace2D"                 | :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`          |
++-------------------------------+-----------------------------------------------------------------+
+| "WorkspaceSingleValue"        | WorkspaceSingleValue                                            |
++-------------------------------+-----------------------------------------------------------------+
+| "ManagedRawFileWorkspace2D"   | ManagedRawFileWorkspace2D                                       |
++-------------------------------+-----------------------------------------------------------------+
+| "MDWorkspace"                 | :ref:`MDWorkspace <MDWorkspace>`                                |
++-------------------------------+-----------------------------------------------------------------+
+| "MDHistoWorkspace"            | :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`|
++-------------------------------+-----------------------------------------------------------------+
 
 Working with Workspaces
 -----------------------

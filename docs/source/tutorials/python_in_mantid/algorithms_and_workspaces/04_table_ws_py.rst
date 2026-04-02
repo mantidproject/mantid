@@ -42,4 +42,4 @@ There are various ways to access your data from the workspace.
 PeaksWorkspace
 ==============
 
-A peaks workspace is a type of table workspace, with a fixed structure, where each row of the tale represents a peak. This functionality is also exposed to python, however, usage of this type is outside the scope of this course. See :ref:`PeaksWorkspace` for more details.
+A peaks workspace is a type of table workspace, with a fixed structure, where each row of the tale represents a peak. This functionality is also exposed to python, however, usage of this type is outside the scope of this course. See :py:obj:`PeaksWorkspace <mantid.dataobjects.PeaksWorkspace>` for more details.

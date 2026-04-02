@@ -10,7 +10,7 @@ Description
 -----------
 
 Converts the representation of the vertical axis of a
-:ref:`MatrixWorkspace <MatrixWorkspace>` from its default of holding the
+:py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` from its default of holding the
 spectrum number to the target unit given.
 
 The spectra will be reordered in increasing order by the new unit and

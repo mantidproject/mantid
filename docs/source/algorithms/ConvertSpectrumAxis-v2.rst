@@ -10,7 +10,7 @@ Description
 -----------
 
 Converts the representation of the vertical axis of a
-:ref:`MatrixWorkspace <MatrixWorkspace>` from its default of holding the
+:py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` from its default of holding the
 spectrum number to the target unit given - theta, elastic Q, elastic
 Q^2 or elastic d-spacing.
 

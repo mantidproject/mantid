@@ -9,7 +9,7 @@
 Description
 -----------
 
-Loads an ILL TOF NeXus file into a :ref:`Workspace2D <Workspace2D>` with the given name.
+Loads an ILL TOF NeXus file into a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` with the given name.
 
 To date this algorithm only supports: IN4, IN5, IN6, PANTHER, and SHARP.
 

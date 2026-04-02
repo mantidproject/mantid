@@ -58,7 +58,7 @@ Restrictions on the input workspace
    known to the :ref:`Unit Factory <Unit Factory>`.
 -  Histograms and Point data can be handled.
 -  The algorithm will also fail if the source-sample distance cannot be
-   calculated (i.e. the :ref:`instrument <instrument>` has not been
+   calculated (i.e. the :py:obj:`Instrument <mantid.geometry.Instrument>` has not been
    properly defined).
 
 Available units

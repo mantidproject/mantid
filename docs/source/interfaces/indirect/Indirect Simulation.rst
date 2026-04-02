@@ -172,8 +172,8 @@ Ion List
 
 Sum Ion Contributions
   If selected, the contributions of each selected ion will be summed into a
-  single :ref:`MatrixWorkspace`, otherwise a :ref:`WorkspaceGroup` with a
-  :ref:`MatrixWorkspace` for each ion will be produced.
+  single :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`, otherwise a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`
+  with a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` for each ion will be produced.
 
 Scale by cross sections
   If selected the contribution for each ion will be multiplied by the given

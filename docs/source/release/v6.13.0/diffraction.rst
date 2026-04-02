@@ -55,7 +55,7 @@ New features
   geometry on POLDI (as of December 2024). For older POLDI data please use the previous version
   (:ref:`algm-PoldiAutoCorrelation-v5`) by calling the algorithm with the keyword argument ``Version=5``.
 - ``poldi_utils`` contains helper functions to load post-detector upgrade POLDI data (currently ASCII format with no
-  meta-data) and simulate the spectra in a :ref:`Workspace2D <Workspace2D>` from an input powder spectrum.
+  meta-data) and simulate the spectra in a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` from an input powder spectrum.
 
   - The functions can be used in a script by importing them using ``from plugins.algorithms.poldi_utils import *``.
 

@@ -61,7 +61,7 @@ the sample. As a result, :math:`d`-spacings :math:`d_x` and :math:`d_y` for vect
 :math:`\tau_1` and :math:`\tau_2`, specified in the **Orientation** group box, will be
 automatically calculated. These :math:`d`-spacings will be used by the program for
 transforming the intensity function from :math:`(2 \theta, \omega)` in coordinate space
-to :math:`(hkl_x, \hkl_y)` in reciprocal space. Alternatively, the user can set the
+to :math:`(hkl_x, hkl_y)` in reciprocal space. Alternatively, the user can set the
 :math:`d`-spacings manually by checking the
 **Use d-spacings Instead of Lattice Parameters** checkbox (in the **Orientation**
 group box) and providing the corresponding values for :math:`d_x` and :math:`d_y`.

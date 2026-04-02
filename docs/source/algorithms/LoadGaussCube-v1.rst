@@ -10,7 +10,7 @@
 Description
 -----------
 
-Algorithm to load Gaussian Cube files (for volumetric data) into a 3D :ref:`MDHistoWorkspace <MDHistoWorkspace>`.
+Algorithm to load Gaussian Cube files (for volumetric data) into a 3D :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`.
 The file is assumed to follow the XYZ order for flattening (i.e. the outer loop is over X coordinate and inner loop
 is over Z).
 
