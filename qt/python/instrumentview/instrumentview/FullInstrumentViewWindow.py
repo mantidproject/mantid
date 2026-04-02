@@ -207,6 +207,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._flip_z_axis_check_box.setToolTip(
             "If checked, the Z axis will be flipped in 2D projections, mirroring the instrument along the beam axis."
         )
+        self._select_bank_tube = QPushButton("Select Bank/Tube")
+        self._select_bank_tube.setCheckable(True)
         self._show_shapes_check_box = QCheckBox()
         self._show_shapes_check_box.setText("Draw Shapes")
         self._show_shapes_check_box.setToolTip(
@@ -221,6 +223,7 @@ class FullInstrumentViewWindow(QMainWindow):
         projection_second_row.addWidget(self._count_scale_combo_box)
         projection_second_row.addWidget(self._show_shapes_check_box)
         projection_second_row.addWidget(self._flip_z_axis_check_box)
+        projection_second_row.addWidget(self._select_bank_tube)
         projection_layout.addLayout(projection_first_row)
         projection_layout.addLayout(projection_second_row)
 
@@ -566,6 +569,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
         self._flip_z_axis_check_box.clicked.connect(self._presenter.on_flip_z_axis_check_box_clicked)
         self._show_shapes_check_box.clicked.connect(self._presenter.on_show_shapes_toggled)
+        self._select_bank_tube.toggled.connect(self._presenter.on_select_bank_tube_toggled)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -597,6 +601,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def on_toggle_add_ellipse(self, checked):
         self._on_toggle_add_shape(checked, self.add_ellipse_widget)
+
+    def is_select_bank_tube_checked(self) -> bool:
+        return self._select_bank_tube.isChecked()
 
     def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
         if checked:

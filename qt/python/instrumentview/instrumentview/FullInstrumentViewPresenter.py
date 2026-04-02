@@ -81,6 +81,7 @@ class FullInstrumentViewPresenter:
         self._shape_renderer = ShapeRenderer(self._model.workspace)
         self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
         self._renderer = self._point_cloud_renderer
+        self._select_bank_tube = False
         self.setup()
         self._callback_queue = Queue()
         self._callback_stop_sentinel = object()
@@ -121,6 +122,7 @@ class FullInstrumentViewPresenter:
             add_callback=self.add_workspace_callback,
         )
         self._view.hide_status_box()
+        self._select_bank_tube = self._view.is_select_bank_tube_checked()
         self._peak_interaction_status = PeakInteractionStatus.Disabled
         self._update_peak_buttons()
         self.update_plotter()
@@ -355,7 +357,7 @@ class FullInstrumentViewPresenter:
 
     def update_detector_picker(self) -> None:
         def detector_picked(detector_index: int) -> None:
-            self._model.update_point_picked_detectors(detector_index)
+            self._model.update_point_picked_detectors(detector_index, self._select_bank_tube)
             self.update_picked_detectors_on_view()
 
         self._renderer.enable_picking(self._view.main_plotter, callback=detector_picked)
@@ -382,9 +384,14 @@ class FullInstrumentViewPresenter:
         # Evaluate against transformed detector positions (one per detector),
         # not mesh vertices — shape meshes have many vertices per detector.
         detector_positions = self._transform_vectors_with_matrix(self._model.detector_positions, self._transform)
-        mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in detector_positions]
+        mask = np.array([(implicit_function.EvaluateFunction(pt) < 0) for pt in detector_positions], dtype=bool)
+        if self._select_bank_tube:
+            mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
         new_key = self._model.add_new_detector_key(mask, self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
+
+    def on_select_bank_tube_toggled(self, checked: bool) -> None:
+        self._select_bank_tube = checked
 
     def on_add_item_clicked(self) -> None:
         self._callback_queue.put((self._on_add_item_clicked, ()))

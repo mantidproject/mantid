@@ -6,6 +6,7 @@ add_dependencies(instrumentview mantidqt)
 
 # ctest targets
 set(PYTHON_TEST_FILES
+    instrumentview/test/test_component_selection_utils.py
     instrumentview/test/test_component_tree_model.py
     instrumentview/test/test_component_tree_presenter.py
     instrumentview/test/test_convert_units_calculator.py

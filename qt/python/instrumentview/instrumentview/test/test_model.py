@@ -85,7 +85,10 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace = MagicMock()
         mock_workspace.isRaggedWorkspace.return_value = False
         mock_workspace.isCommonBins.return_value = False
-        mock_workspace.detectorInfo.return_value = MagicMock()
+        mock_detector_info = MagicMock()
+        mock_detector_info.detectorIDs.return_value = np.array(detector_ids)
+        mock_detector_info.indexOf.side_effect = lambda det_id: detector_ids.index(det_id)
+        mock_workspace.detectorInfo.return_value = mock_detector_info
         mock_workspace.componentInfo.return_value = MagicMock()
         mock_workspace.dataY.return_value = MagicMock()
         mock_workspace.getNumberHistograms.return_value = len(detector_ids)
@@ -151,6 +154,35 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.clear_point_picked_detectors()
         np.testing.assert_equal(model._point_picked_detectors, [False, False, False])
         np.testing.assert_equal(model._detector_is_picked, [True, False, False])
+
+    def test_update_point_picked_detectors_expand_to_parent_subtree(self):
+        model, mock_workspace = self._setup_model([10, 11, 12, 13])
+        component_info = mock_workspace.componentInfo.return_value
+        component_info.hasParent.return_value = True
+        component_info.parent.side_effect = lambda detector_info_index: 100 if detector_info_index in (1, 2) else 200
+        component_info.detectorsInSubtree.side_effect = lambda parent: np.array([1, 2]) if parent == 100 else np.array([3])
+
+        model._is_valid = np.array([True, True, True, True])
+        model._is_masked = np.array([False, False, False, False])
+        model._is_selected_in_tree = np.array([True, True, True, True])
+
+        model.update_point_picked_detectors(1, expand_to_parent_subtree=True)
+        np.testing.assert_equal(model._detector_is_picked, [False, True, True, False])
+        np.testing.assert_equal(model._point_picked_detectors, [False, True, True, False])
+
+    def test_expand_pickable_mask_to_parent_subtrees(self):
+        model, mock_workspace = self._setup_model([10, 11, 12, 13])
+        component_info = mock_workspace.componentInfo.return_value
+        component_info.hasParent.return_value = True
+        component_info.parent.side_effect = lambda detector_info_index: 100 if detector_info_index in (1, 2) else 200
+        component_info.detectorsInSubtree.side_effect = lambda parent: np.array([1, 2]) if parent == 100 else np.array([3])
+
+        model._is_valid = np.array([True, True, True, True])
+        model._is_masked = np.array([False, False, False, False])
+        model._is_selected_in_tree = np.array([True, True, True, True])
+
+        expanded = model.expand_pickable_mask_to_parent_subtrees(np.array([False, True, False, False]))
+        np.testing.assert_equal(expanded, [False, True, True, False])
 
     def test_detectors_with_no_spectra(self):
         self._setup_mocks([1, 20, 300, 400], monitors=np.array(["no", "no", "n/a", "yes"]))
