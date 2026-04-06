@@ -112,9 +112,9 @@ done
 
 # Clean the source tree to remove stale configured files
 if [[ $CLEAN_BUILD  == true ]]; then
-    $SCRIPT_DIR/clean-builder --clean-build
+    $SCRIPT_DIR/clean-builder $WORKSPACE --clean-build
 else
-    $SCRIPT_DIR/clean-builder
+    $SCRIPT_DIR/clean-builder $WORKSPACE
 fi
 
 pushd $WORKSPACE
