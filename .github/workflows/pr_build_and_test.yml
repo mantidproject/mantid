@@ -50,6 +50,17 @@ jobs:
     # Otherwise set it to the value the user specified when they clicked "Run Workflow"
     #
 
+    env:
+      CMAKE_PRESET: linux-64-ci
+      EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
+      ENABLE_BUILD_CODE: true
+      ENABLE_UNIT_TESTS: true
+      ENABLE_SYSTEM_TESTS: true # default is false
+      ENABLE_DOCS: false
+      ENABLE_DOC_TESTS: false
+      ENABLE_DEV_DOCS: false
+      ENABLE_COVERITY: false
+
     steps:
       - name: Print shell environment vars (debug)
         if: github.event_name == 'workflow_dispatch'
@@ -66,8 +77,25 @@ jobs:
           fetch-depth: 100
           fetch-tags: true
 
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          frozen: true
+
+      - name: Clean build tree
+        # supplying --clean-build or CLEAN_BUILD=true should be added here
+        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
+
+      - name: Build code
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY $EXTRA_CMAKE_FLAGS
+
       - name: Run unit tests and system tests on Linux
-        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/conda-buildscript ${GITHUB_WORKSPACE} linux-64-ci --enable-systemtests
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          # Not physical but logical cores, includes hyper threaded - different for darwin
+          BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
+          ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
 
       - name: Upload build and test log artifacts
         uses: actions/upload-artifact@v7
