@@ -68,7 +68,5 @@ fi
 rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz *.exe
 # Remove test logs from previous builds
 rm -rf  $BUILD_DIR/test_logs
-# Remake the directory for the test logs.
-mkdir $BUILD_DIR/test_logs
 
 popd # go back to starting location

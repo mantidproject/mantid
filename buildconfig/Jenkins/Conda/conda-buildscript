@@ -139,7 +139,7 @@ else
 fi
 
 # Remake the directory for the test logs.
-mkdir $BUILD_DIR/test_logs
+mkdir -p $BUILD_DIR/test_logs
 
 # Set locale to avoid problems building the docs
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
