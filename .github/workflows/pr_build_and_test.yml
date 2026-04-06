@@ -80,6 +80,9 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
           frozen: true
+          post-cleanup: true
+          # ${{ runner.temp }}\Scripts\pixi.exe on Windows
+          pixi-bin-path: ${{ runner.temp }}/bin/pixi
 
       - name: Clean build tree
         # supplying --clean-build or CLEAN_BUILD=true should be added here
