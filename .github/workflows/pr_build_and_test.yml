@@ -80,7 +80,8 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
           frozen: true
-          post-cleanup: true
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
           # ${{ runner.temp }}\Scripts\pixi.exe on Windows
           pixi-bin-path: ${{ runner.temp }}/bin/pixi
 
