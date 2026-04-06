@@ -77,19 +77,11 @@ jobs:
           fetch-depth: 100
           fetch-tags: true
 
-      # TODO remove one of these pixi setup steps
       - name: Install pixi
         run: |
           source ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/pixi-utils
           install_pixi
-
-      #- uses: prefix-dev/setup-pixi@v0.9.4
-      #  with:
-      #    frozen: true
-      #    cache: true
-      #    cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-      #    # ${{ runner.temp }}\Scripts\pixi.exe on Windows
-      #    pixi-bin-path: ${{ runner.temp }}/bin/pixi
+          echo "Add pixi to path for future use"
 
       - name: Clean build tree
         # supplying --clean-build or CLEAN_BUILD=true should be added here
@@ -98,6 +90,7 @@ jobs:
       - name: Build code
         run: |
           cd ${GITHUB_WORKSPACE}
+          export PATH="$PATH:$HOME/.pixi/bin"
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY $EXTRA_CMAKE_FLAGS
 
       - name: Run unit tests and system tests on Linux
@@ -105,7 +98,8 @@ jobs:
           cd ${GITHUB_WORKSPACE}
           # Not physical but logical cores, includes hyper threaded - different for darwin
           BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
-          ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
+          export PATH="$PATH:$HOME/.pixi/bin"
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
 
       - name: Upload build and test log artifacts
         uses: actions/upload-artifact@v7
