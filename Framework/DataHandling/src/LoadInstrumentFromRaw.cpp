@@ -140,7 +140,7 @@ void LoadInstrumentFromRaw::exec() {
   }
   localWorkspace->setInstrument(instrument);
 
-  std::vector<detid_t> monitorList = instrument->getMonitors();
+  std::vector<detid_t> monitorList = instrument->getMonitorIDs();
   setProperty("MonitorList", monitorList);
   // Information to the user about what info is extracted from raw file
   g_log.information() << "SamplePos component added with position set to (0,0,0).\n"

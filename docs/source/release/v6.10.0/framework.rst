@@ -7,7 +7,7 @@ Algorithms
 
 New features
 ############
-- Algorithm :ref:`algm-SaveASCII` now supports 1D :ref:`MDHistoWorkspace`.
+- Algorithm :ref:`algm-SaveASCII` now supports 1D :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`.
 - Algorithm :ref:`algm-CompressEvents` is now able to combine events together in logarithmically increasing size groups.
 - Algorithm :ref:`algm-PolarizationCorrectionWildes` now accepts input workspace order.
 - Algorithms :ref:`algm-Abins` and :ref:`algm-Abins2D` can now import phonopy .yaml data.

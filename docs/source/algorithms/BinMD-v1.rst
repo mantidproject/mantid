@@ -11,7 +11,7 @@ Description
 
 This algorithm performs dense binning of the events in multiple
 dimensions of an input :ref:`MDWorkspace <MDWorkspace>` and
-places them into a dense :ref:`MDHistoWorkspace <MDHistoWorkspace>` with 1-4 dimensions.
+places them into a dense :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` with 1-4 dimensions.
 
 The input :ref:`MDWorkspace <MDWorkspace>` may have more dimensions than the number of
 output dimensions. The names of the dimensions in the DimX, etc.
@@ -89,8 +89,8 @@ dimensions!
 Binning a MDHistoWorkspace
 ##########################
 
-It is possible to rebin a :ref:`MDHistoWorkspace <MDHistoWorkspace>`. Each
-:ref:`MDHistoWorkspace <MDHistoWorkspace>` holds a reference to the
+It is possible to rebin a :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`. Each
+:py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` holds a reference to the
 :ref:`MDWorkspace <MDWorkspace>` that created it, as well as the
 coordinate transformation that was used. In this case, the rebinning is
 actually performed on the original :ref:`MDWorkspace <MDWorkspace>`, after suitably

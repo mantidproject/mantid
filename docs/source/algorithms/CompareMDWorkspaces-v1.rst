@@ -10,7 +10,7 @@ Description
 -----------
 
 Compare two MDWorkspaces (:ref:`MDEventWorkspace <MDWorkspace>` or
-:ref:`MDHistoWorkspace <MDHistoWorkspace>`) to see if they are the same.
+:py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`) to see if they are the same.
 This is mostly meant for testing/debugging use by developers.
 
 **What is compared**: The dimensions, as well as the signal and error

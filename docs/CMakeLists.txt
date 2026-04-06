@@ -3,11 +3,6 @@
 # Build options
 option(DOCS_DOTDIAGRAMS "If enabled include workflow diagrams generated with dot" OFF)
 option(DOCS_SCREENSHOTS "If enabled include automatically generated screenshots of interfaces" OFF)
-set(DOCS_MATH_EXT
-    "sphinx.ext.mathjax"
-    CACHE STRING "Sphinx extension to be used for rendering math equations in qtassistant. mathjax is used in html."
-)
-set_property(CACHE DOCS_MATH_EXT PROPERTY STRINGS "sphinx.ext.imgmath" "sphinx.ext.mathjax")
 option(DOCS_PLOTDIRECTIVE "If enabled include plots generated with the plot directive. " OFF)
 option(SPHINX_WARNINGS_AS_ERRORS "non-zero exit if there are sphinx warnings" ON)
 option(SPHINX_FRESH_ENV "Don't use a saved environment, but rebuild it completely" ON)
@@ -48,10 +43,10 @@ endif()
 
 # Add a sphinx build target to build documentation builder - Name of the sphinx builder: html, qthelp etc target_name -
 # Optional target name. Default=docs-${builder}
-function(add_sphinx_build_target builder math_renderer)
+function(add_sphinx_build_target builder)
 
-  if(ARGC GREATER 2)
-    set(target_name ${ARGV2})
+  if(ARGC GREATER 1)
+    set(target_name ${ARGV1})
   else()
     set(target_name docs-${builder})
   endif()
@@ -73,8 +68,8 @@ function(add_sphinx_build_target builder math_renderer)
       ${DOCTREES_DIR}
   )
   # add a tag to differentiate between html/qthelp in conf
-  if(ARGC GREATER 3)
-    set(sphinx_options ${sphinx_options} -t ${ARGV3})
+  if(ARGC GREATER 2)
+    set(sphinx_options ${sphinx_options} -t ${ARGV2})
   endif()
 
   set(target_dependencies)
@@ -91,11 +86,11 @@ function(add_sphinx_build_target builder math_renderer)
     ${target_name}
     COMMAND
       ${CMAKE_COMMAND} -E env SCREENSHOTS_DIR=${SCREENSHOTS_DIR} DIAGRAMS_DIR=${DIAGRAMS_DIR}
-      DOT_EXECUTABLE=${DOT_EXECUTABLE} MATH_EXT=${math_renderer} ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE}
+      DOT_EXECUTABLE=${DOT_EXECUTABLE} ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE}
       PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} ${Python_EXECUTABLE} -m ${SPHINX_MAIN}
       ${sphinx_options} ${SPHINX_CONF_DIR} ${output_dir}
     DEPENDS ${target_dependencies} ${SPHINX_CONF_DIR}/conf.py ${conf_builder}
-    COMMENT "Building ${builder} documentation using ${math_renderer}"
+    COMMENT "Building ${builder} documentation"
   )
   # Group within VS and exclude from whole build
   set_target_properties(
@@ -107,13 +102,13 @@ function(add_sphinx_build_target builder math_renderer)
 endfunction()
 
 # Documentation types
-add_sphinx_build_target(html "sphinx.ext.mathjax")
+add_sphinx_build_target(html)
 add_dependencies(docs-html DocTestData)
-add_sphinx_build_target(doctest "sphinx.ext.mathjax")
+add_sphinx_build_target(doctest)
 add_dependencies(docs-doctest DocTestData)
 
 # add target for checking external links
-add_sphinx_build_target(linkcheck ${DOCS_MATH_EXT})
+add_sphinx_build_target(linkcheck)
 
 # Installation settings
 option(PACKAGE_DOCS "If true the HTML documentation is bundled with the package" OFF)

@@ -50,7 +50,7 @@ void EQSANSMonitorTOF::exec() {
   // const double MD = MONITORPOS/1000.0;
 
   // Get the monitor
-  const std::vector<detid_t> monitor_list = inputWS->getInstrument()->getMonitors();
+  const std::vector<detid_t> monitor_list = inputWS->getInstrument()->getMonitorIDs();
   if (monitor_list.size() != 1)
     g_log.error() << "EQSANS workspace does not have exactly ones monitor! "
                      "This should not happen\n";

@@ -101,7 +101,7 @@ void FindCenterOfMassPosition::exec() {
 
   // Get the number of monitors. We assume that all monitors are stored in the
   // first spectra
-  int n_monitors = static_cast<int>(inputWS->getInstrument()->getMonitors().size());
+  int n_monitors = static_cast<int>(inputWS->getInstrument()->getMonitorIDs().size());
   const auto numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
   // Find center of mass and iterate until we converge

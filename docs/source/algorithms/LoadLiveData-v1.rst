@@ -72,7 +72,7 @@ its documentation for details of how the script is run.
    during the process step (with ``ProcessingAlgorithm``,
    ``ProcessingScript``, or ``ProcessingScriptFilename``), the data
    will be rebinned at the end of the step to include all events. Use
-   the Post-Process step instead for :ref:`EventWorkspaces <EventWorkspace>`.
+   the Post-Process step instead for :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`.
 
 Data Accumulation
 #################
@@ -90,7 +90,7 @@ Data Accumulation
 .. warning::
 
    Beware! If you select ``PreserveEvents=True`` and your processing
-   keeps the data as :ref:`EventWorkspaces <EventWorkspace>`, you may end
+   keeps the data as :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`, you may end
    up creating **very large** EventWorkspaces in long runs. Most plots
    require re-sorting the events, which is an operation that gets much
    slower as the list gets bigger (Order of :math:`N * log(N)`). This

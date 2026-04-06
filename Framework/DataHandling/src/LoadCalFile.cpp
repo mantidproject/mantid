@@ -333,7 +333,7 @@ void LoadCalFile::readCalFile(const std::string &calFileName, const GroupingWork
  * @return True if a monitor, false otherwise
  */
 bool LoadCalFile::idIsMonitor(const Instrument_const_sptr &inst, int detID) {
-  auto monitorList = inst->getMonitors();
+  auto monitorList = inst->getMonitorIDs();
   auto it = std::find(monitorList.begin(), monitorList.end(), detID);
   return (it != monitorList.end());
 }

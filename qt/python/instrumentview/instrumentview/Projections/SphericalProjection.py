@@ -5,10 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.Projections.Projection import Projection
+from instrumentview.Projections.ProjectionType import ProjectionType
 import numpy as np
 
 
-class SphericalProjection(Projection):
+class SphericalProjection(
+    Projection,
+    projection_types={
+        ProjectionType.SPHERICAL_X: {"axis": [1, 0, 0]},
+        ProjectionType.SPHERICAL_Y: {"axis": [0, 1, 0]},
+        ProjectionType.SPHERICAL_Z: {"axis": [0, 0, 1]},
+    },
+):
     """2D projection with a spherical coordinate system, see https://en.wikipedia.org/wiki/Spherical_coordinate_system"""
 
     def _calculate_2d_coordinates(self) -> tuple[np.ndarray, np.ndarray]:

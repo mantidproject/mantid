@@ -9,8 +9,8 @@
 Description
 -----------
 
-The algorithm is used transform existing :ref:`Event <EventWorkspace>`
-or :ref:`Matrix <MatrixWorkspace>` workspace into
+The algorithm is used transform existing :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`
+or :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` into
 :ref:`Multidimensional workspace <MDWorkspace>`.
 
 If  the target workspace does not exist, the algorithm creates :ref:`MDEventWorkspace <MDWorkspace>`

@@ -11,8 +11,8 @@ Description
 
 This algorithm can be used to combine lists of single crystal peaks,
 possibly obtained by different methods, in to a single list (contained
-in a :ref:`PeaksWorkspace <PeaksWorkspace>` or
-:ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`).  With
+in a :py:obj:`PeaksWorkspace <mantid.dataobjects.PeaksWorkspace>` or
+:py:obj:`LeanElasticPeaksWorkspace <mantid.dataobjects.LeanElasticPeaksWorkspace>`).  With
 the default options, this will simply append the lists of peaks.  If
 CombineMatchingPeaks is selected then an attempt will be made to
 identify identical peaks by matching them in Q within the specified

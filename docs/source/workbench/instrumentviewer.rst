@@ -127,7 +127,7 @@ Create a Single Crystal Peak List
 #################################
 
 The |singleCrystal| tool allows the user to create a single crystal peak list and add a peak to it. First, select the tool and click a detector. Then
-click on the peak in the mini-plot. If it is the first peak Workbench will create a :ref:`PeaksWorkspace <PeaksWorkspace>` named ``SingleCrystalPeakTable``
+click on the peak in the mini-plot. If it is the first peak Workbench will create a :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` named ``SingleCrystalPeakTable``
 and add a peak to it. Peak markers will then be displayed over the instrument.
 
 .. |singleCrystal| image:: ../images/PickTabAddPeakButton.png
@@ -139,7 +139,7 @@ Single Crystal Peak Eraser
 ##########################
 
 The |eraser| tool can be used to remove single crystal peaks by clicking on or dragging over the peak markers. The hatched rectangle indicates the
-area where peaks will be erased. The rows in the :ref:`PeaksWorkspace <PeaksWorkspace>` are then deleted with the markers. The size of the rectangle
+area where peaks will be erased. The rows in the :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` are then deleted with the markers. The size of the rectangle
 can be adjusted by scrolling.
 
 .. |eraser| image:: ../images/PickTabEraseButton.png

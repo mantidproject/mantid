@@ -7,7 +7,7 @@ Concepts
 --------
 
 - :class:`mantid.kernel.IntArrayProperty` now supports specifying step sizes
-- Support has been added for negative indexing of :ref:`WorkspaceGroups <WorkspaceGroup>`.
+- Support has been added for negative indexing of :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`.
   Try :code:`ws_group[-1]` to get the last workspace in the WorkspaceGroup :code:`ws_group`.
 - Updated the clone method of IFunction to copy parameter errors across as well as parameter values.
 

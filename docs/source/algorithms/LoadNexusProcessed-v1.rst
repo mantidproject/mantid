@@ -22,8 +22,8 @@ The optional parameters can be used to control which spectra are
 loaded into the workspace. If SpectrumMin and SpectrumMax are given,
 then only that range to data will be loaded. A specific list of
 spectra to load can also be given (SpectrumList). Filtering of spectra
-is supported when loading into workspaces of type :ref:`Workspace2Ds
-<Workspace2D>` and also :ref:`EventWorkspaces <EventWorkspace>`.
+is supported when loading into workspaces of type :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`
+and also :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`.
 
 
 A Mantid Nexus file may contain several workspace entries each labelled

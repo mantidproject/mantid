@@ -10,7 +10,7 @@
 Description
 -----------
 
-Save a :ref:`PeaksWorkspace <PeaksWorkspace>` to a variety of different text formats. This algorithm currently provides support for exporting a PeaksWorkspace to GSAS, SHELX, Fullprof, and Jana formats.
+Save a :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` to a variety of different text formats. This algorithm currently provides support for exporting a PeaksWorkspace to GSAS, SHELX, Fullprof, and Jana formats.
 
 Usage
 -----

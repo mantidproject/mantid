@@ -104,17 +104,17 @@ New features
 LeanElasticPeak
 ^^^^^^^^^^^^^^^
 
-**A new Peak concept has been create, a LeanElasticPeak where the instrument is not included as part of Peak. The only requirement for this peak is a Q-sample vector. There are a number of modifications made to facilitate this. The new LeanElasticPeak and LeanElasticPeakWorkspace concept is show in detail at** :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`
+**A new Peak concept has been create, a LeanElasticPeak where the instrument is not included as part of Peak. The only requirement for this peak is a Q-sample vector. There are a number of modifications made to facilitate this. The new LeanElasticPeak and LeanElasticPeakWorkspace concept is show in detail at** :py:obj:`LeanElasticPeaksWorkspace <mantid.dataobjects.LeanElasticPeaksWorkspace>`
 
 .. figure:: ../../images/WAND2_LeanPeaks_satellites.PNG
    :width: 400px
    :align: right
 
-- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
-- :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
-- :ref:`PredictPeaks <algm-PredictPeaks>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
-- :ref:`PredictSatellitePeaks <algm-PredictSatellitePeaks>` will work with :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
-- New algorithm :ref:`HFIRCalculateGoniometer <algm-HFIRCalculateGoniometer>` allows the goniometer to be found for constant wavelength peaks after creation, works with :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
+- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` has been modified to optionally create a :py:obj:`LeanElasticPeaksWorkspace <mantid.dataobjects.LeanElasticPeaksWorkspace>`.
+- :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to optionally create a :py:obj:`LeanElasticPeaksWorkspace <mantid.dataobjects.LeanElasticPeaksWorkspace>`.
+- :ref:`PredictPeaks <algm-PredictPeaks>` has been modified to optionally create a :py:obj:`LeanElasticPeaksWorkspace <mantid.dataobjects.LeanElasticPeaksWorkspace>`.
+- :ref:`PredictSatellitePeaks <algm-PredictSatellitePeaks>` will work with :py:obj:`LeanElasticPeaksWorkspace <mantid.dataobjects.LeanElasticPeaksWorkspace>`.
+- New algorithm :ref:`HFIRCalculateGoniometer <algm-HFIRCalculateGoniometer>` allows the goniometer to be found for constant wavelength peaks after creation, works with :py:obj:`LeanElasticPeaksWorkspace <mantid.dataobjects.LeanElasticPeaksWorkspace>`.
 - These following other algorithms have either been made to work or confirmed to already work with the LeanElasticPeak:
 
    - :ref:`algm-AddPeakHKL`

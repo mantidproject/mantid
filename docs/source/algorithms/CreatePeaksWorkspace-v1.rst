@@ -11,14 +11,14 @@ Description
 
 This algorithm can be used to create a:
 
-- :ref:`PeaksWorkspace <PeaksWorkspace>` (Default, or when `OutputType` is set to `Peak`.)
-- :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>` (when `OutputType` is set to `LeanElasticPeak`)
+- :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` (Default, or when `OutputType` is set to `Peak`.)
+- :py:obj:`LeanElasticPeaksWorkspace <mantid.dataobjects.LeanElasticPeaksWorkspace>` (when `OutputType` is set to `LeanElasticPeak`)
 
 Use :ref:`algm-LoadIsawPeaks` or :ref:`algm-FindPeaksMD` to
 create a peaks workspace with peaks.
 
 This workspace can serve as a starting point for modifying the
-:ref:`PeaksWorkspace <PeaksWorkspace>`, using the GUI or python scripting,
+:py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>`, using the GUI or python scripting,
 for example.
 
 If the input workspace is a MDWorkspace then the instrument from the

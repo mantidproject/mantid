@@ -7,7 +7,7 @@ What is it?
 -----------
 
 In Mantid we need to be able to define the position and orientation of
-every component within an :ref:`instrument <instrument>`.
+every component within an :py:obj:`Instrument <mantid.geometry.Instrument>`.
 
 What is a component?
 --------------------

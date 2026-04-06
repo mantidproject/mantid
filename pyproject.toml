@@ -1,6 +1,11 @@
 [project]
 requires-python = ">=3.12"
 
+[tool.sip.metadata]
+# this is deprecated as of v6.8 and will use project metadata
+# https://python-sip.readthedocs.io/en/stable/pyproject_toml.html#tool-sip-metadata-section
+name = "mantid"
+
 [tool.ruff]
 line-length = 140
 # https://beta.ruff.rs/docs/rules/

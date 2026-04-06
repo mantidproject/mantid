@@ -8,7 +8,7 @@
 
 Description
 -----------
-Used to crop an n-dimensional :ref:`MDHistoWorkspace <MDHistoWorkspace>` to the first non-zero signal values found in all dimensions.
+Used to crop an n-dimensional :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` to the first non-zero signal values found in all dimensions.
 
 Cropping
 --------

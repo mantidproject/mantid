@@ -14,7 +14,7 @@ Refactored `PeakShape` to better support arbitrary shapes.
 Performance
 -----------
 
-- :ref:`ChangeBinOffset <algm-ChangeBinOffset>` should now run faster for a :ref:`MatrixWorkspace <MatrixWorkspace>` (not EventWorkspaces).
+- :ref:`ChangeBinOffset <algm-ChangeBinOffset>` should now run faster for a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` (not EventWorkspaces).
 - Applying ParameterMaps to Detectors now about 30% faster. Algorithms that involve applying ParameterMaps will see performance improvements.
 - This release saw the introduction of the StructuredDetector. This change has reduced load times via LoadInstrument from ~10minutes down to ~0.5seconds for the prospective ESS LOKI instrument.
   For more information on how to generate a StructuredDetector based instrument follow
@@ -93,13 +93,13 @@ Improved
    deviations). By default, this is set to false, keeping the original
    behaviour.
 -  :ref:`ConvertUnits <algm-ConvertUnits>`
-   now works correctly for 'distribution' data in a :ref:`MatrixWorkspace <MatrixWorkspace>` in
+   now works correctly for 'distribution' data in a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` in
    in-place mode (``InputWorkspace`` = ``OutputWorkspace``).
 -  When plotting a workspace that had been normalized by bin widths, the y-axis unit label was incorrect.
    An appropriate labelling has now been implemented.
 -  :ref:`SumSpectra <algm-SumSpectra>` fixed broken scaling of bins for the `WeightedSum=true` case.
 -  :ref:`LoadISISNexus <algm-LoadISISNexus>` now works correctly for data with non-contiguous detector IDs for either monitors or detectors.
--  A bug has been fixed in several algorithms where they would crash when given a :ref:`WorkspaceGroup <WorkspaceGroup>` as input (if run in the GUI). These algorithms are:
+-  A bug has been fixed in several algorithms where they would crash when given a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` as input (if run in the GUI). These algorithms are:
 
    - :ref:`AsymmetryCalc <algm-AsymmetryCalc>`
    - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`

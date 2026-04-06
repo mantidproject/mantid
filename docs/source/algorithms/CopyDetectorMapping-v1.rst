@@ -17,7 +17,7 @@ both have their vertical axes in spectrum number then the IndexBySpectrumNumber
 option should be considered. With the option disabled the algorithm will copy
 the mapping based on the index of the spectrum in the workspace.
 
-Both workspaces must be a :ref:`MatrixWorkspace` with the same number of
+Both workspaces must be a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` with the same number of
 histograms.
 
 Usage:

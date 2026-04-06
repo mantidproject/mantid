@@ -9,7 +9,7 @@
 Description
 -----------
 
-Given a :ref:`PeaksWorkspace <PeaksWorkspace>` and a set of lattice parameters,
+Given a :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` and a set of lattice parameters,
 attempts to tag each peak with a HKL value by comparing d-spacings between
 potential HKL matches and the peaks as well as angles between Q vectors.
 

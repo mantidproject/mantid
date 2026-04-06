@@ -9,7 +9,7 @@
 Description
 -----------
 
-The algorithm converts from a :ref:`MatrixWorkspace <MatrixWorkspace>` (in
+The algorithm converts from a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` (in
 any input units) into a :ref:`MDWorkspace <MDWorkspace>` containing
 3D events in reciprocal space.
 

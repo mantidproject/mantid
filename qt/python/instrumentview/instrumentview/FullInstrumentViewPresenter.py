@@ -76,11 +76,12 @@ class FullInstrumentViewPresenter:
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
         self._count_scale_mode = self._LINEAR
-        self._point_cloud_renderer = PointCloudRenderer()
-        self._shape_renderer = None  # lazily created
-        self._sbs_shape_renderer = None  # lazily created
-        self._renderer = self._point_cloud_renderer
         self._model.setup()
+        self._point_cloud_renderer = PointCloudRenderer()
+        self._shape_renderer = ShapeRenderer(self._model.workspace)
+        self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
+        self._renderer = self._point_cloud_renderer
+        self._select_bank_tube = False
         self.setup()
         self._callback_queue = Queue()
         self._callback_stop_sentinel = object()
@@ -121,6 +122,7 @@ class FullInstrumentViewPresenter:
             add_callback=self.add_workspace_callback,
         )
         self._view.hide_status_box()
+        self._select_bank_tube = self._view.is_select_bank_tube_checked()
         self._peak_interaction_status = PeakInteractionStatus.Disabled
         self._update_peak_buttons()
         self.update_plotter()
@@ -245,6 +247,8 @@ class FullInstrumentViewPresenter:
             return np.log10(counts + 1)
 
     def _update_view_main_plotter(self):
+        self._view.cache_current_camera_position()
+
         self._view.clear_main_plotter()
         renderer = self._renderer
 
@@ -264,6 +268,8 @@ class FullInstrumentViewPresenter:
 
         monitor_mesh = self._create_and_add_monitor_mesh()
 
+        renderer.set_parallel_view(self._view.main_plotter)
+
         # Update transform needs to happen after adding to plotter
         # Uses display coordinates
         self._update_transform()
@@ -277,8 +283,15 @@ class FullInstrumentViewPresenter:
         self._view.enable_or_disable_aspect_ratio_box()
         self._view.enable_or_disable_flip_z_axis_box()
         self.on_integration_limits_reset_clicked()
-        self._view.cache_camera_position()
+
+        self._view.cache_default_camera_position()
         self._view.reset_camera()
+
+        # Set style after camera reset for correct camera defaults
+        renderer.set_interactive_style(self._view.main_plotter, self._model.is_2d_projection)
+
+        self._view.set_camera_to_cached_state()
+        self._view.cache_current_selected_projection()
 
     def _update_transform(self) -> None:
         if not self._model.is_2d_projection or self._view.is_maintain_aspect_ratio_checkbox_checked():
@@ -328,6 +341,7 @@ class FullInstrumentViewPresenter:
     def on_aspect_ratio_check_box_clicked(self) -> None:
         self._view.store_maintain_aspect_ratio_option()
         self.update_plotter()
+        self._view.reset_camera()
 
     def on_flip_z_axis_check_box_clicked(self) -> None:
         self.update_plotter()
@@ -342,13 +356,8 @@ class FullInstrumentViewPresenter:
         return [x for pair in zip(min_point, max_point) for x in pair]
 
     def update_detector_picker(self) -> None:
-        """Change between single and multi point picking"""
-        # Remove any custom interactor to avoid artifacts in 2D or 3D
-        if hasattr(self._view, "interactor_style"):
-            self._view.interactor_style.remove_interactor()
-
         def detector_picked(detector_index: int) -> None:
-            self._model.update_point_picked_detectors(detector_index)
+            self._model.update_point_picked_detectors(detector_index, self._select_bank_tube)
             self.update_picked_detectors_on_view()
 
         self._renderer.enable_picking(self._view.main_plotter, callback=detector_picked)
@@ -375,9 +384,14 @@ class FullInstrumentViewPresenter:
         # Evaluate against transformed detector positions (one per detector),
         # not mesh vertices — shape meshes have many vertices per detector.
         detector_positions = self._transform_vectors_with_matrix(self._model.detector_positions, self._transform)
-        mask = [(implicit_function.EvaluateFunction(pt) < 0) for pt in detector_positions]
+        mask = np.array([(implicit_function.EvaluateFunction(pt) < 0) for pt in detector_positions], dtype=bool)
+        if self._select_bank_tube:
+            mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
         new_key = self._model.add_new_detector_key(mask, self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
+
+    def on_select_bank_tube_toggled(self, checked: bool) -> None:
+        self._select_bank_tube = checked
 
     def on_add_item_clicked(self) -> None:
         self._callback_queue.put((self._on_add_item_clicked, ()))
@@ -550,7 +564,7 @@ class FullInstrumentViewPresenter:
             self._model._workspace = AnalysisDataService.retrieve(ws_name)
             self._model.setup()
             self._setup_component_tree()
-            self._clear_renderers()  # Clear cached renderers before rendering
+            self._reload_renderers()  # Clear cached renderers before rendering
             self.update_plotter()
 
     def replace_workspace_callback(self, ws_name, ws):
@@ -679,59 +693,37 @@ class FullInstrumentViewPresenter:
         self._model.component_tree_indices_selected(component_indices)
         self.update_plotter()
 
-    def _get_point_cloud_renderer(self) -> PointCloudRenderer:
-        if self._point_cloud_renderer is None:
-            self._point_cloud_renderer = PointCloudRenderer()
-        return self._point_cloud_renderer
-
-    def _get_shape_renderer(self) -> ShapeRenderer:
-        """Get or create a cached shape renderer instance.
-
-        Returns a :class:`SideBySideShapeRenderer` when the current
-        projection is side-by-side, otherwise a plain :class:`ShapeRenderer`.
-        On first call for each type, precomputes geometry from the workspace
-        which may be expensive.  Subsequent calls return the cached instance.
-        """
-        is_sbs = self._model.projection_type == ProjectionType.SIDE_BY_SIDE
-        if is_sbs:
-            if self._sbs_shape_renderer is None:
-                self._sbs_shape_renderer = SideBySideShapeRenderer()
-                self._sbs_shape_renderer.precompute(self._model.workspace, self._model.bank_groups_by_detector_id)
-            return self._sbs_shape_renderer
-        else:
-            if self._shape_renderer is None:
-                self._shape_renderer = ShapeRenderer()
-                self._shape_renderer.precompute(self._model.workspace)
-            return self._shape_renderer
-
     def _on_show_shapes_toggled(self, checked: bool) -> None:
         if checked:
-            self._renderer = self._get_shape_renderer()
+            if self._model.projection_type == ProjectionType.SIDE_BY_SIDE:
+                self._renderer = self._sbs_shape_renderer
+            else:
+                self._renderer = self._shape_renderer
         else:
-            self._renderer = self._get_point_cloud_renderer()
+            self._renderer = self._point_cloud_renderer
 
         self.update_plotter()
 
     def on_show_shapes_toggled(self, checked: bool) -> None:
         self._callback_queue.put((self._on_show_shapes_toggled, (checked,)))
 
-    def _clear_renderers(self) -> None:
-        """Clear cached renderer instances, forcing recreation on next use.
-
+    def _reload_renderers(self) -> None:
+        """
         Called when the workspace changes to ensure renderers recompute geometry
         from the new workspace data.
         """
-        self._shape_renderer = None
-        self._sbs_shape_renderer = None
-        self._point_cloud_renderer = None
-        self._renderer = self._get_shape_renderer() if self._view.is_show_shapes_checkbox_checked() else self._get_point_cloud_renderer()
+        self._point_cloud_renderer = PointCloudRenderer()
+        self._shape_renderer = ShapeRenderer(self._model.workspace)
+        self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
+        self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
 
     def _reload_everything(self) -> None:
         """Reload all workspace-dependent data (peaks, masks, groupings) and clear renderer cache.
 
         Called when workspaces are added to or removed from the ADS.
         """
-        self._clear_renderers()
-        self._reload_peaks_workspaces()
-        self._reload_mask_workspaces()
-        self._reload_grouping_workspaces()
+        with SuppressRendering(self._view.main_plotter):
+            self._reload_renderers()
+            self._reload_peaks_workspaces()
+            self._reload_mask_workspaces()
+            self._reload_grouping_workspaces()

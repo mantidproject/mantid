@@ -56,7 +56,7 @@ New features
 
 - Added an option to clear instrument calibration from a peaks workspace in addition to a Workspace2D in ``SXD.undo_calibration``.
 - Added documentation for :ref:`ISIS Single Crystal Diffraction Reduction Classes <isis-single-crystal-diffraction-ref>`.
-- Added the :ref:`SymmetriseMDHisto <algm-SymmetriseMDHisto>` algorithm for symmetrising :ref:`MDHistoWorkspaces <MDHistoWorkspace>` by operations in the Laue class of the point group.
+- Added the :ref:`SymmetriseMDHisto <algm-SymmetriseMDHisto>` algorithm for symmetrising :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` by operations in the Laue class of the point group.
 
 .. image::  ../../images/6_9_release/Diffraction/slices_symmetrised_mdhisto.png
     :align: center

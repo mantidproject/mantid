@@ -11,7 +11,7 @@ Description
 
 This algorithm is used to find single-crystal peaks in a
 multi-dimensional workspace (:ref:`MDEventWorkspace <MDWorkspace>` or
-:ref:`MDHistoWorkspace <MDHistoWorkspace>`). It looks for high signal
+:py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`). It looks for high signal
 density areas, and is based on an algorithm designed by Dennis Mikkelson
 for ISAW.
 
@@ -33,19 +33,18 @@ The algorithm proceeds in this way:
 
 -  This is repeated until we find up to MaxPeaks peaks.
 
-Each peak created is placed in the output :ref:`PeaksWorkspace
-<PeaksWorkspace>` or :ref:`LeanElasticPeaksWorkspace
-<LeanElasticPeaksWorkspace>` (depending on the `OutputType` option),
+Each peak created is placed in the output :py:obj:`PeaksWorkspace <mantid.dataobjects.PeaksWorkspace>`
+or :py:obj:`LeanElasticPeaksWorkspace <mantid.dataobjects.LeanElasticPeaksWorkspace>` (depending on the `OutputType` option),
 which can be a new workspace or replace the old one. If `OutputType`
 is the default `Automatic` then the output type will be PeakWorkspace
 unless the input workspace doesn't contain an experiment info in which
 case it will default to LeanElasticPeaksWorkspace.
 
-This algorithm works on a :ref:`MDHistoWorkspace <MDHistoWorkspace>`
+This algorithm works on a :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`
 resulting from the :ref:`algm-BinMD` algorithm also. It works in the
 same way, except that the center of each bin is used since the centroid
 is not accessible. It may give better results on
-:ref:`Workspace2D <Workspace2D>`'s that were converted to
+:py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`'s that were converted to
 :ref:`MDWorkspaces <MDWorkspace>`.
 
 

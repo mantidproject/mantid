@@ -1354,7 +1354,7 @@ public:
     TS_ASSERT_EQUALS(inst->getName(), "HYSPECA");
     TS_ASSERT_EQUALS(inst->getValidFromDate(), std::string("2011-Jul-20 17:02:48.437294000"));
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 20483);
-    TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitors().size(), 3);
+    TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitorIDs().size(), 3);
     auto params = inst->getParameterMap();
     // Previously this was 49. Position/rotations are now stored in
     // ComponentInfo and DetectorInfo so the following four parameters are no
@@ -1386,7 +1386,7 @@ public:
                                              // file
     TS_ASSERT_EQUALS(inst->getName(), "CNCS");
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 51203);
-    TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitors().size(), 3);
+    TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitorIDs().size(), 3);
 
     // check that CNCS_Parameters.xml has been loaded
     auto params = inst->getParameterMap();

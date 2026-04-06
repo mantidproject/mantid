@@ -15,7 +15,7 @@ The Filter Events interface provides aid to users in order to set up event filte
 :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` which is able to generate event splitters
 according to user’s requirement for filtering events.
 The generated time splitters are stored either in a SplittersWorkspace or a
-:ref:`MatrixWorkspace <MatrixWorkspace>`. Both of them will be used by algorithm
+:py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`. Both of them will be used by algorithm
 :ref:`FilterEvents <algm-FilterEvents>` which filters the events from a EventWorkspace to one or
 multiple EventWorkspaces according to an input :ref:`SplittersWorkspace`
 containing a series of splitters.
@@ -40,7 +40,7 @@ For the data loading step, MantidWorkbench provides an interface in which the us
 appropriate file via *Browse* button or by entering an integer as a valid run number in the
 *File/Run* field, if the instrument name is set up in Mantid. The user must provide a file,
 which contains valid sample logs
-for splitting and :ref:`EventWorkspace <EventWorkspace>`. The data will be loaded once the user
+for splitting and :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`. The data will be loaded once the user
 has clicked upon the *Load* button.
 With the help of *drop-down* list, user is be able to load more than one file and then click
 on the *Use* button which will load the selected
@@ -74,13 +74,13 @@ output workspaces for storing event splitters that are supported by
   appropriate for the case that the amount of generated event splitters are not huge.
 
 
-- :ref:`MatrixWorkspace <MatrixWorkspace>`: It uses X-axis to store time stamp in total nanoseconds
+- :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`: It uses X-axis to store time stamp in total nanoseconds
   and Y-axis to store target workspace. For example, :math:`[x_i, x_i+1]` and :math:`[y_i]` construct
   an event filter as start time is :math:`[x_i]`, stop time is :math:`[x_i+1]`, and target workspace
   is :math:`[y_i-th]` workspace. If :math:`[y_i]`, is less than 0, then it means
   that all events between time :math:`[x_i]` and :math:`[x_i+1]` will be discarded. This type of
   workspace is appropriate for the case that the amount of generated event splitters are huge, because
-  processing a :ref:`MatrixWorkspace <MatrixWorkspace>` is way faster than a
+  processing a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` is way faster than a
   :ref:`TableWorkspace <Table Workspaces>` in Mantid.
 
 .. _advsetup-FilterEventUI-ref:

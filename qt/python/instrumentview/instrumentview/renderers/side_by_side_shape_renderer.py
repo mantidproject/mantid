@@ -34,26 +34,29 @@ class SideBySideShapeRenderer(ShapeRenderer):
     no shape extends past half the inter-detector spacing.
     """
 
-    def precompute(self, workspace: Workspace2D, bank_groups_by_detector_id: list[tuple[list[int], str]] | None) -> None:
-        super().precompute(workspace)
-        self._bank_groups_by_detector_id = [] if bank_groups_by_detector_id is None else bank_groups_by_detector_id
+    def __init__(self, workspace: Workspace2D) -> None:
+        super().__init__(workspace)
 
-    def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
+    def precompute(self):
+        super().precompute()
+
+    def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model) -> pv.PolyData:
         if not self._precomputed:
-            raise RuntimeError("SideBySideShapeRenderer.precompute() must be called before build_detector_mesh().")
+            self.precompute()
 
-        flatten_2d = model is not None and model.is_2d_projection
-        indices = self._resolve_detector_indices(positions, model, masked=False)
+        indices = self._resolve_detector_indices(model.pickable_detector_ids)
 
         per_detector_scales = None
         per_detector_rotate = None
-        if flatten_2d and model is not None:
-            per_detector_scales, per_detector_rotate = self._compute_bank_projection_scales(indices, positions, model)
+        if model is not None and model.is_2d_projection:
+            per_detector_scales, per_detector_rotate = self._compute_bank_projection_scales(
+                indices, positions, model.bank_groups_by_detector_id
+            )
 
         mesh, c2d, fpd = self._assemble_mesh(
-            indices,
-            positions,
-            flatten_2d=flatten_2d,
+            detector_indices=indices,
+            detector_positions=positions,
+            projection=model.active_projection,
             per_detector_scales=per_detector_scales,
             per_detector_rotate=per_detector_rotate,
         )
@@ -65,18 +68,20 @@ class SideBySideShapeRenderer(ShapeRenderer):
     def build_masked_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
         if len(positions) == 0:
             return pv.PolyData()
-        flatten_2d = model is not None and model.is_2d_projection
-        indices = self._resolve_detector_indices(positions, model, masked=True)
+
+        indices = self._resolve_detector_indices(model.masked_detector_ids)
 
         per_detector_scales = None
         per_detector_rotate = None
-        if flatten_2d and model is not None:
-            per_detector_scales, per_detector_rotate = self._compute_bank_projection_scales(indices, positions, model)
+        if model is not None and model.is_2d_projection:
+            per_detector_scales, per_detector_rotate = self._compute_bank_projection_scales(
+                indices, positions, model.bank_groups_by_detector_id
+            )
 
         mesh, _, _ = self._assemble_mesh(
-            indices,
-            positions,
-            flatten_2d=flatten_2d,
+            detector_indices=indices,
+            detector_positions=positions,
+            projection=model.active_projection,
             per_detector_scales=per_detector_scales,
             per_detector_rotate=per_detector_rotate,
         )
@@ -86,7 +91,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
         self,
         det_indices: np.ndarray,
         projected_positions: np.ndarray,
-        model,
+        bank_groups_by_detector_id,
     ) -> tuple[np.ndarray, np.ndarray]:
         """Compute per-detector scale factors using vertex-based overlap detection.
 
@@ -109,8 +114,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
             Per-detector boolean flag, True if the 3D rotation should be
             applied (tube banks), False otherwise (grid banks).
         """
-        ws = model.workspace
-        det_info = ws.detectorInfo()
+        det_info = self._workspace.detectorInfo()
         all_det_ids = np.array(det_info.detectorIDs())
         det_id_to_global = {int(did): idx for idx, did in enumerate(all_det_ids)}
 
@@ -119,7 +123,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
 
         # Convert detector-ID-based bank groups to local-index-based groups
         bank_local_groups: list[tuple[list[int], str]] = []
-        for bank_det_ids, bank_type in self._bank_groups_by_detector_id:
+        for bank_det_ids, bank_type in bank_groups_by_detector_id:
             local_indices = []
             for did in bank_det_ids:
                 global_idx = det_id_to_global.get(int(did))
@@ -135,8 +139,11 @@ class SideBySideShapeRenderer(ShapeRenderer):
         per_det_rotate = np.zeros(len(det_indices), dtype=bool)
 
         if not bank_local_groups:
-            uniform = self._compute_projection_scale(det_indices, projected_positions)
-            per_det_scale[:] = uniform
+            # It should not be possible for bank_local_groups to be empty,
+            # as any detectors not in a grid in the IDF are put into a custom flat bank.
+            # If there are some detectors then there will be at least one bank.
+            # Safeguard anyway by setting a default scale of 1
+            per_det_scale[:] = 1.0
             return per_det_scale, per_det_rotate
 
         for local_indices, bank_type in bank_local_groups:

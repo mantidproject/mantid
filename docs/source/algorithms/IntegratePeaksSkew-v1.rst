@@ -9,7 +9,7 @@
 Description
 -----------
 
-IntegratePeaksSkew is an algorithm that integrates single-crystal Bragg peaks in a :ref:`MatrixWorkspace <MatrixWorkspace>`
+IntegratePeaksSkew is an algorithm that integrates single-crystal Bragg peaks in a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`
 by identifying the detectors and bins that contribute to a peak by minimising the skew (third moment) of the points in
 the background.
 

@@ -42,6 +42,6 @@ New features
 
 Bugfixes
 ############
-- The :ref:`sliceviewer` no longer raises an error when exporting a pixel cut from an :ref:`MDHistoWorkspace`
+- The :ref:`sliceviewer` no longer raises an error when exporting a pixel cut from a :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`
 
 :ref:`Release 6.13.0 <v6.13.0>`

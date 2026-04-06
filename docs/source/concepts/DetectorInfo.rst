@@ -6,7 +6,7 @@ DetectorInfo
 
 Introduction
 ------------
-:py:obj:`~mantid.geometry.DetectorInfo` provides faster and simpler access to instrument/beamline detector geometry and metadata as required by Mantid :ref:`Algorithms <Algorithm>` than was possible using :ref:`Instrument`. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` are designed as full replacements to :ref:`Instrument`.
+:py:obj:`~mantid.geometry.DetectorInfo` provides faster and simpler access to instrument/beamline detector geometry and metadata as required by Mantid :ref:`Algorithms <Algorithm>` than was possible using :py:obj:`Instrument <mantid.geometry.Instrument>`. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` are designed as full replacements to :py:obj:`Instrument <mantid.geometry.Instrument>`.
 
 :ref:`Instrument Access Layers <InstrumentAccessLayers>` provides details on how :py:obj:`~mantid.geometry.DetectorInfo` interacts with other geometry access layers.
 

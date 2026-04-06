@@ -9,10 +9,9 @@
 Description
 -----------
 
-:ref:`MDEventWorkspaces <MDWorkspace>` and
-:ref:`MDHistoWorkspaces <MDHistoWorkspace>` can be used with any type of
-coordinate system. On the other hand
-:ref:`PeaksWorkspaces <PeaksWorkspace>` may be plotted either in QLab,
+:ref:`MDEventWorkspaces <MDWorkspace>` and :py:obj:`MDHistoWorkspace <mantid.daaobjects.MDHistoWorkspace>`
+can be used with any type of coordinate system. On the other hand
+:py:obj:`PeaksWorkspace <mantid.dataobjects.PeaksWorkspace>` may be plotted either in QLab,
 QSample or HKL. There is an inherent link between a PeaksWorkspace and a
 MDWorkspace in that an MDWorkspace may utilise the same coordinate
 systems as the PeaksWorkspaces. For example, workspaces created via

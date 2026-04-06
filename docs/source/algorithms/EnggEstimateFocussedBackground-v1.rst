@@ -18,7 +18,7 @@ Useage
 
 **Example:**
 
-.. code-block:: python
+.. testcode:: EnggEstimateFocussedBackground
 
 	from mantid.simpleapi import *
 

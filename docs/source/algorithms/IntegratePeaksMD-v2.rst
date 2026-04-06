@@ -16,7 +16,7 @@ Similar algorithms
 ##################
 
 See :ref:`algm-IntegrateEllipsoids` for a ways of integrating peaks from data collected in
-:ref:`EventWorkspace <EventWorkspace>`. :ref:`algm-PeakIntensityVsRadius`
+:py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`. :ref:`algm-PeakIntensityVsRadius`
 is meant to help determine an appropriate value for `PeakRadius`.
 
 Inputs

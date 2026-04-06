@@ -1,0 +1,1 @@
+- Help documentation now opens in the system's default web browser instead of an embedded viewer, improving Qt6 compatibility. Removed `qtwebengine` dependency and related code. This change was necessary in order to resolve issues with the render limitations of `qttextbrowser` and to ensure that the help documentation is displayed correctly across different platforms.

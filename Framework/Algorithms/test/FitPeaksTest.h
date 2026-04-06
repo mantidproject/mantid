@@ -55,7 +55,11 @@ public:
   void setUp() override {
     // Needs other algorithms and functions to be registered
     FrameworkManager::Instance();
+    // Run serially so test values don't depend on number of cores
+    FrameworkManager::Instance().setNumOMPThreads(1);
   }
+
+  void tearDown() override { FrameworkManager::Instance().setNumOMPThreadsToConfigValue(); }
 
   void test_Init() {
     // Initialize FitPeak
@@ -214,8 +218,6 @@ public:
    */
   void test_multiPeaksMultiSpectra() {
     g_log.notice() << "TEST MULTIPLE PEAKS MULTI SPECTRA";
-    // run serially so values don't depend on no. cores etc.
-    FrameworkManager::Instance().setNumOMPThreads(1);
 
     // set up parameters with starting value
     std::vector<string> peakparnames;
@@ -305,8 +307,6 @@ public:
     AnalysisDataService::Instance().remove("PeakPositionsWS");
     AnalysisDataService::Instance().remove("FittedPeaksWS");
     AnalysisDataService::Instance().remove("PeakParametersWS");
-
-    FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -315,8 +315,6 @@ public:
    */
   void test_effectivePeakParameters() {
     g_log.notice() << "TEST EFFECTIVE PEAK PARAMS";
-    // run serially so values don't depend on no. cores etc.
-    FrameworkManager::Instance().setNumOMPThreads(1);
 
     // set up parameters with starting value
     std::vector<string> peakparnames;
@@ -408,8 +406,6 @@ public:
     AnalysisDataService::Instance().remove("PeakPositionsWS");
     AnalysisDataService::Instance().remove("FittedPeaksWS");
     AnalysisDataService::Instance().remove("PeakParametersWS");
-
-    FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -811,8 +807,6 @@ public:
    */
   void test_multiPeaksMultiSpectraBackToBackExp_with_Param_xml() {
     g_log.notice() << "TEST MULTI PEAKS SPECTRA BACK TO BACK WITH PARAM XML";
-    // run serially so values don't depend on no. cores etc.
-    FrameworkManager::Instance().setNumOMPThreads(1);
 
     // Generate input workspace
     std::string input_ws_name = generateTestDataBackToBackExponential();
@@ -913,8 +907,6 @@ public:
     AnalysisDataService::Instance().remove(peak_pos_ws_name);
     AnalysisDataService::Instance().remove(param_ws_name);
     AnalysisDataService::Instance().remove(model_ws_name);
-
-    FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
 
     return;
   }
@@ -1531,6 +1523,98 @@ public:
     // clean
     API::AnalysisDataService::Instance().remove(peak_center_ws_name);
     API::AnalysisDataService::Instance().remove(fit_window_ws_name);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that CopyLastGoodPeakParameters property exists and defaults to true
+   */
+  void test_CopyLastGoodPeakParametersDefaultIsTrue() {
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    bool defaultVal = fitpeaks.getProperty("CopyLastGoodPeakParameters");
+    TS_ASSERT_EQUALS(defaultVal, true);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that CopyLastGoodPeakParameters=false correctly fits multiple peaks
+   * without seeding initial parameters from the last successfully fitted neighbouring peak.
+   * With this option disabled, each peak must be independently initialized from
+   * data observation rather than inheriting potentially position-inappropriate
+   * parameters from a neighbour at a different d-spacing or TOF. The test verifies
+   * that sensible, independently determined peak positions and widths are obtained.
+   */
+  void test_multiPeaksMultiSpectra_noCopyLastGoodPeakParameters() {
+    g_log.notice() << "TEST MULTIPLE PEAKS MULTI SPECTRA NO COPY LAST GOOD PEAK PARAMS";
+
+    // Generate input workspace with two Gaussian peaks of differing widths:
+    // ws=0: peak at x=5 (sigma=0.15) and peak at x=10 (sigma=0.1).
+    // With FitFromRight=true the narrower peak at x=10 is fitted first.
+    // When CopyLastGoodPeakParameters=false, the wider peak at x=5 cannot
+    // inherit sigma~0.1 from the right-hand neighbour; instead it must be
+    // estimated independently from the data.
+    generateTestDataGaussian(m_inputWorkspaceName);
+
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
+    // No PeakParameterNames/Values: each peak observes its own shape from data.
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("CopyLastGoodPeakParameters", false));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS_noCopy");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_noCopy");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS_noCopy");
+    fitpeaks.setProperty("ConstrainPeakPositions", false);
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (!fitpeaks.isExecuted())
+      return;
+
+    API::MatrixWorkspace_sptr main_out_ws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("PeakPositionsWS_noCopy"));
+    TS_ASSERT(main_out_ws);
+    TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
+
+    // Fitted peak positions must be correct regardless of how parameters are seeded.
+    const auto &fitted_positions_0 = main_out_ws->histogram(0).y();
+    TS_ASSERT_EQUALS(fitted_positions_0.size(), 2);
+    TS_ASSERT_DELTA(fitted_positions_0[0], 5.0, 1.E-6);
+    TS_ASSERT_DELTA(fitted_positions_0[1], 10.0, 1.E-6);
+
+    const auto &fitted_positions_2 = main_out_ws->histogram(2).y();
+    TS_ASSERT_EQUALS(fitted_positions_2.size(), 2);
+    TS_ASSERT_DELTA(fitted_positions_2[0], 5.03, 1.E-6);
+    TS_ASSERT_DELTA(fitted_positions_2[1], 10.02, 1.E-6);
+
+    // Verify each peak's fitted sigma is its own true width, not inherited from
+    // the neighbour. Peak at x=10 has sigma~0.1; peak at x=5 has sigma~0.15.
+    // Row order in param table: peak index within spectrum (right-to-left fit order
+    // means the table rows are still in peak-index order: row 0 = peak0/x=5,
+    // row 1 = peak1/x=10 for ws=0).
+    API::ITableWorkspace_sptr param_ws = std::dynamic_pointer_cast<API::ITableWorkspace>(
+        AnalysisDataService::Instance().retrieve("PeakParametersWS_noCopy"));
+    TS_ASSERT(param_ws);
+    // ws=0, peak0 (x=5, sigma~0.15): row 0, Sigma column = col 4 (Height, Sigma, PeakCentre + 2 index cols)
+    TS_ASSERT_DELTA(param_ws->cell<double>(0, 4), 0.15, 0.02);
+    // ws=0, peak1 (x=10, sigma~0.1): row 1
+    TS_ASSERT_DELTA(param_ws->cell<double>(1, 4), 0.1, 0.02);
+
+    // clean up
+    AnalysisDataService::Instance().remove(m_inputWorkspaceName);
+    AnalysisDataService::Instance().remove("PeakPositionsWS_noCopy");
+    AnalysisDataService::Instance().remove("FittedPeaksWS_noCopy");
+    AnalysisDataService::Instance().remove("PeakParametersWS_noCopy");
   }
 
   //--------------------------------------------------------------------------------------------------------------

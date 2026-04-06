@@ -215,6 +215,21 @@ std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
   return out;
 }
 
+/** This method returns monitor detector ids
+ *  @return a vector holding detector ids of  monitors
+ */
+std::vector<detid_t> Instrument::getMonitorIDs() const {
+  // Monitors cannot be parametrized. So just return the base.
+  if (m_map)
+    return m_instr->getMonitorIDs();
+
+  std::vector<detid_t> mons;
+  for (const auto &item : m_detectorCache)
+    if (std::get<2>(item))
+      mons.emplace_back(std::get<0>(item));
+  return mons;
+}
+
 /// @return The total number of detector IDs in the instrument */
 std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
   std::size_t numDetIDs(0);
@@ -716,21 +731,6 @@ void Instrument::removeDetector(IDetector *det) {
   }
 }
 
-/** This method returns monitor detector ids
- *  @return a vector holding detector ids of  monitors
- */
-std::vector<detid_t> Instrument::getMonitors() const {
-  // Monitors cannot be parametrized. So just return the base.
-  if (m_map)
-    return m_instr->getMonitors();
-
-  std::vector<detid_t> mons;
-  for (const auto &item : m_detectorCache)
-    if (std::get<2>(item))
-      mons.emplace_back(std::get<0>(item));
-  return mons;
-}
-
 /**
  * Get the bounding box for this instrument. It is simply the sum of the
  * bounding boxes of its children excluding the source
@@ -918,23 +918,19 @@ void Instrument::saveNexus(Nexus::File *file, const std::string &group) const {
     params->saveNexus(file, "instrument_parameter_map");
   }
 
-  // Add physical detector and monitor data
-  auto detmonIDs = getDetectorIDs(false);
-  if (!detmonIDs.empty()) {
-    auto detectorIDs = getDetectorIDs(true);
+  // Add physical detector data
+  auto detectorIDs = getDetectorIDs(true);
+  if (!detectorIDs.empty()) {
     // Add detectors group
     file->makeGroup("physical_detectors", "NXdetector", true);
     file->writeData("number_of_detectors", uint64_t(detectorIDs.size()));
     saveDetectorSetInfoToNexus(file, detectorIDs);
     file->closeGroup(); // detectors
+  }
 
-    // Create Monitor IDs vector
-    std::vector<detid_t> monitorIDs;
-    for (size_t i = 0; i < detmonIDs.size(); i++) {
-      if (isMonitorViaIndex(i))
-        monitorIDs.emplace_back(detmonIDs[i]);
-    }
-
+  // Add monitor data
+  auto monitorIDs = getMonitorIDs();
+  if (!monitorIDs.empty()) {
     // Add Monitors group
     file->makeGroup("physical_monitors", "NXmonitor", true);
     file->writeData("number_of_monitors", uint64_t(monitorIDs.size()));

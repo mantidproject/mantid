@@ -12,8 +12,8 @@ Description
 The `Sassena <http://sassena.org>`__  application generates
 intermediate scattering factors from molecular dynamics trajectories.
 This algorithm reads Sassena output and stores all data in workspaces of
-type :ref:`Workspace2D <Workspace2D>`, grouped under a single
-:ref:`WorkspaceGroup <WorkspaceGroup>`. It is implied that the time unit is
+type :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`, grouped under a single
+:py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`. It is implied that the time unit is
 one **picosecond**.
 
 Sassena output files are in `HDF5 <http://www.hdfgroup.org/HDF5>`__ format, and can be made up of the

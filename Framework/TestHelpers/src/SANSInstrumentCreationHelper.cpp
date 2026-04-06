@@ -95,7 +95,7 @@ void SANSInstrumentCreationHelper::runLoadMappingTable(const Mantid::DataObjects
   size_t nMonitors(0);
   size_t nXbins, nYbins;
   std::shared_ptr<const Instrument> instrument = workspace->getInstrument();
-  std::vector<detid_t> monitors = instrument->getMonitors();
+  std::vector<detid_t> monitors = instrument->getMonitorIDs();
   nMonitors = monitors.size();
 
   // Number of monitors should be consistent with data file format
