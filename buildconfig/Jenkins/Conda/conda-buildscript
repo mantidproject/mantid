@@ -22,7 +22,6 @@
 #   --enable-doctests: Run the documentation tests
 #   --enable-coverity: Run coverity and submit results; ignores all other options and does not run unit tests
 #   --clean-build: Clear the build folder and build from scratch
-#   --clean-external-projects: Clear the external projects from the build folder
 #
 # Possible parameters:
 #   --extra-cmake-flags: Extra flags to pass directly to cmake, enclose in "", defaults to nothing
@@ -61,7 +60,6 @@ ENABLE_DOC_TESTS=false
 ENABLE_DEV_DOCS=false
 ENABLE_COVERITY=false
 CLEAN_BUILD=false
-CLEAN_EXTERNAL_PROJECTS=false
 EXTRA_CMAKE_FLAGS="-DENABLE_PRECOMMIT=OFF"
 
 # This removes '-ci' from the end of the cmake preset to get the target platform
@@ -96,7 +94,6 @@ do
             ENABLE_UNIT_TESTS=false
 	    ;;
         --clean-build) CLEAN_BUILD=true ;;
-        --clean-external-projects) CLEAN_EXTERNAL_PROJECTS=true ;;
         --extra-cmake-flags)
             EXTRA_CMAKE_FLAGS="$2"
             shift
@@ -113,20 +110,14 @@ do
   shift
 done
 
-# Clean the source tree to remove stale configured files. Only remove
-# the build and Miniforge directories if this is a clean build
-pushd $WORKSPACE
+# Clean the source tree to remove stale configured files
 if [[ $CLEAN_BUILD  == true ]]; then
-    # git clean will delete most things in build but leave subrepositories such as build/_deps/span-src
-    # so we need to remove the whole of build/ by hand
-    rm -fr $BUILD_DIR
-    rm -fr "$WORKSPACE/.pixi/" # less logs with rm
+    $SCRIPT_DIR/clean-builder $WORKSPACE --clean-build
 else
-    git_clean_excludes_extra="--exclude=build --exclude=miniforge --exclude=.pixi"
+    $SCRIPT_DIR/clean-builder $WORKSPACE
 fi
-# -d is recurse into directories
-# -x ignores what is listed in the .gitignore
-git clean -d -x --force --exclude=".Xauthority-*" $git_clean_excludes_extra
+
+pushd $WORKSPACE
 
 # install pixi if not already installed
 install_pixi
@@ -143,23 +134,12 @@ if [ -d $BUILD_DIR ]; then
       ENABLE_SYSTEM_TESTS=false
       ENABLE_DOC_TESTS=false
     fi
-    rm -rf ${BUILD_DIR}/bin ${BUILD_DIR}/ExternalData ${BUILD_DIR}/Testing
-    find $WORKSPACE \( -iname 'TEST-*.xml' -o -name 'Test.xml' \) -delete
 else
   mkdir -p $BUILD_DIR
 fi
 
-if [[ ${CLEAN_EXTERNAL_PROJECTS} == true ]]; then
-    rm -rf $BUILD_DIR/eigen-*
-    rm -rf $BUILD_DIR/googletest-*
-fi
-
-# Clean up artifacts from previous builds
-rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz *.exe
-# Remove test logs from previous builds
-rm -rf  $BUILD_DIR/test_logs
 # Remake the directory for the test logs.
-mkdir $BUILD_DIR/test_logs
+mkdir -p $BUILD_DIR/test_logs
 
 # Set locale to avoid problems building the docs
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do

@@ -50,6 +50,17 @@ jobs:
     # Otherwise set it to the value the user specified when they clicked "Run Workflow"
     #
 
+    env:
+      CMAKE_PRESET: linux-64-ci
+      EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
+      ENABLE_BUILD_CODE: true
+      ENABLE_UNIT_TESTS: true
+      ENABLE_SYSTEM_TESTS: true # default is false
+      ENABLE_DOCS: false
+      ENABLE_DOC_TESTS: false
+      ENABLE_DEV_DOCS: false
+      ENABLE_COVERITY: false
+
     steps:
       - name: Print shell environment vars (debug)
         if: github.event_name == 'workflow_dispatch'
@@ -66,8 +77,39 @@ jobs:
           fetch-depth: 100
           fetch-tags: true
 
-      - name: Run unit tests and system tests on Linux
-        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/conda-buildscript ${GITHUB_WORKSPACE} linux-64-ci --enable-systemtests
+      - name: Install pixi
+        run: |
+          source ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/pixi-utils
+          install_pixi
+          # Add pixi to path for use in other steps
+          echo "$HOME/.pixi/bin" >> $GITHUB_PATH
+
+      - name: Clean build tree
+        # supplying --clean-build or CLEAN_BUILD=true should be added here
+        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
+
+      - name: Build code
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY $EXTRA_CMAKE_FLAGS
+
+      - name: Run unit tests
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          # Not physical but logical cores, includes hyper threaded - different for darwin
+          BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
+          # bool flags for this are
+          # SYSTEM_TESTS UNIT_TESTS DOCS DOC_TESTS
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} false true $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
+
+      - name: Run system tests
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          # Not physical but logical cores, includes hyper threaded - different for darwin
+          BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
+          # bool flags for this are
+          # SYSTEM_TESTS UNIT_TESTS DOCS DOC_TESTS
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} true false $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
 
       - name: Upload build and test log artifacts
         uses: actions/upload-artifact@v7
