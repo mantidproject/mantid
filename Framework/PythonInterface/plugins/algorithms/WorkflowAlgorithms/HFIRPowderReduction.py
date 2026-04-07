@@ -54,7 +54,6 @@ from mantid.simpleapi import (
     Load,
     LoadWAND,
     LoadInstrument,
-    MaskBTP,
     CreateWorkspace,
     LoadNexusLogs,
     AddSampleLog,
@@ -67,6 +66,11 @@ logger = Logger(__name__)
 
 
 class HFIRPowderReduction(DataProcessorAlgorithm):
+    MIDAS_NUM_BANKS = 7
+    MIDAS_TUBES_PER_BANK = 16
+    MIDAS_PIXELS_PER_TUBE = 512
+    MIDAS_TOTAL_PIXELS = MIDAS_NUM_BANKS * MIDAS_TUBES_PER_BANK * MIDAS_PIXELS_PER_TUBE  # 57344
+
     def name(self):
         return "HFIRPowderReduction"
 
@@ -557,112 +561,76 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         return issues
 
-    def group_detectors(workspace, group_size):
-        detector_list = ""
-        num_columns = 512  # Adjust this for your detector dimensions
-        num_rows = 1  # Adjust this for your detector dimensions
-
-        for x in range(0, num_rows, group_size):
-            for y in range(0, num_columns, group_size):
-                spectra_list = []
-                for j in range(group_size):
-                    for i in range(group_size):
-                        if (x + j) < num_rows and (y + i) < num_columns:
-                            spectra_list.append(str(y + i + (x + j) * num_columns))
-                if spectra_list:
-                    detector_list += "," + "+".join(spectra_list)
-
-        # Remove leading comma
-        detector_list = detector_list.removeprefix(",")
-
-        return GroupDetectors(InputWorkspace=workspace, GroupingPattern=detector_list, EnableLogging=False)
-
-    def _loadMIDASData(self, filename, ipts, runNumbers, outputName):
-        # This version of loading MIDAS data will be used once the HB2A instrument is operational
-        runs = filename
-
-        if not runs:
-            runs = ["/HFIR/HB2A/IPTS-{}/nexus/HB2A_{}.nxs.h5".format(ipts, run) for run in runNumbers]
-
-        outWS = outputName
-        group_names = []
-
-        NUM_BANKS = 7
-        TUBES_PER_BANK = 16
-        PIXELS_PER_TUBE = 512
-        TOTAL_PIXELS = NUM_BANKS * TUBES_PER_BANK * PIXELS_PER_TUBE  # 57344
-
-        for run in runs:
-            data = np.zeros(TOTAL_PIXELS, dtype=np.int64)
-            with h5py.File(run, "r") as f:
-                monitor_count = f["/entry/monitor1/total_counts"][0]
-                duration = f["/entry/duration"][0]
-                run_number = f["/entry/run_number"][0]
-                for b in range(NUM_BANKS):
-                    data += np.bincount(
-                        f["/entry/bank" + str(b + 1) + "_events/event_id"][()],
-                        minlength=TOTAL_PIXELS,
-                    )
-
-            CreateWorkspace(
-                DataX=[0, 1],
-                DataY=data,
-                DataE=np.sqrt(data),
-                UnitX="Empty",
-                YUnitLabel="Counts",
-                NSpec=TOTAL_PIXELS,
-                OutputWorkspace="__tmp_load",
-                EnableLogging=False,
-            )
-            LoadNexusLogs("__tmp_load", Filename=run, EnableLogging=False)
-            AddSampleLog(
-                "__tmp_load",
-                LogName="monitor_count",
-                LogType="Number",
-                NumberType="Double",
-                LogText=str(monitor_count),
-                EnableLogging=False,
-            )
-            AddSampleLog(
-                "__tmp_load",
-                LogName="gd_prtn_chrg",
-                LogType="Number",
-                NumberType="Double",
-                LogText=str(monitor_count),
-                EnableLogging=False,
-            )
-            AddSampleLog("__tmp_load", LogName="run_number", LogText=str(run_number), EnableLogging=False)
-            AddSampleLog(
-                "__tmp_load",
-                LogName="duration",
-                LogType="Number",
-                LogText=str(duration),
-                NumberType="Double",
-                EnableLogging=False,
+    def _loadMIDASData(self, filename, ws):
+        # Check if the file has the expected fields
+        with h5py.File(filename, "r") as f:
+            has_entry_fields = (
+                "/entry/monitor1/total_counts" in f
+                and "/entry/duration" in f
+                and "/entry/run_number" in f
+                and all(f"/entry/bank{b + 1}_events/event_id" in f for b in range(self.MIDAS_NUM_BANKS))
             )
 
-            LoadInstrument("__tmp_load", InstrumentName="MIDAS", RewriteSpectraMap=True, EnableLogging=False)
+        if not has_entry_fields:
+            # Fall back to the generic MIDAS loader
+            self._load_MIDAS(filename, ws)
+            return
 
-            if self.getProperty("ApplyMask").value:
-                MaskBTP("__tmp_load", Pixel="1,2,511,512", EnableLogging=False)
+        data = np.zeros(self.MIDAS_TOTAL_PIXELS, dtype=np.int64)
+        with h5py.File(filename, "r") as f:
+            monitor_count = f["/entry/monitor1/total_counts"][0]
+            duration = f["/entry/duration"][0]
+            run_number = f["/entry/run_number"][0]
+            for b in range(self.MIDAS_NUM_BANKS):
+                data += np.bincount(
+                    f["/entry/bank" + str(b + 1) + "_events/event_id"][()],
+                    minlength=self.MIDAS_TOTAL_PIXELS,
+                )
+        CreateWorkspace(
+            DataX=[0, 1],
+            DataY=data,
+            DataE=np.sqrt(data),
+            UnitX="Empty",
+            YUnitLabel="Counts",
+            NSpec=self.MIDAS_TOTAL_PIXELS,
+            OutputWorkspace="__tmp_load",
+            EnableLogging=False,
+        )
+        LoadNexusLogs("__tmp_load", Filename=filename, EnableLogging=False)
+        AddSampleLog(
+            "__tmp_load",
+            LogName="monitor_count",
+            LogType="Number",
+            NumberType="Double",
+            LogText=str(monitor_count),
+            EnableLogging=False,
+        )
+        AddSampleLog(
+            "__tmp_load",
+            LogName="gd_prtn_chrg",
+            LogType="Number",
+            NumberType="Double",
+            LogText=str(monitor_count),
+            EnableLogging=False,
+        )
+        AddSampleLog("__tmp_load", LogName="run_number", LogText=str(run_number), EnableLogging=False)
+        AddSampleLog(
+            "__tmp_load",
+            LogName="duration",
+            LogType="Number",
+            LogText=str(duration),
+            NumberType="Double",
+            EnableLogging=False,
+        )
 
-            if len(runs) == 1:
-                RenameWorkspace("__tmp_load", outWS, EnableLogging=False)
-            else:
-                try:
-                    temp_val = mtd["__tmp_load"].run().getTimeAveragedValue("HB2A:SE:SampleTemp")
-                except RuntimeError:
-                    temp_val = 300.0
+        # Use the modified IDF that supports simulated data until we get real MIDAS data
+        # LoadInstrument("__tmp_load", InstrumentName="MIDAS", RewriteSpectraMap=True, EnableLogging=False)
+        LoadInstrument("__tmp_load", Filename="/SNS/users/nxw/mccode_fixed.xml", RewriteSpectraMap=True, EnableLogging=False)
+        # Masking is not used yet, but will be added back later
+        # if self.getProperty("ApplyMask").value:
+        #     MaskBTP("__tmp_load", Pixel="1,2,511,512", EnableLogging=False)
 
-                if temp_val == 0.0 or np.isnan(temp_val):
-                    temp_val = 300.0
-                temp_val = "{:.1F}".format(temp_val).replace(".", "p")
-                outName = outWS + "_" + str(mtd["__tmp_load"].getRunNumber()) + f"_T{temp_val}K"
-                group_names.append(outName)
-                RenameWorkspace("__tmp_load", outName, EnableLogging=False)
-
-        if len(runs) > 1:
-            GroupWorkspaces(group_names, OutputWorkspace=outWS, EnableLogging=False)
+        RenameWorkspace("__tmp_load", ws, EnableLogging=False)
 
     def PyExec(self):
         """
@@ -811,7 +779,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         if not isinstance(ws, WorkspaceGroup):
             # This is a temp fix for using simulated MIDAS data
             LoadInstrument(ws, Filename="/SNS/users/nxw/mccode_fixed.xml", RewriteSpectraMap=True)
-            self.temp_workspace_list.append("1spectrum")
 
     def _load_WAND_Data(self, filename, ws):
         grouping = self.getProperty("Grouping").value
@@ -829,7 +796,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             "MIDAS": "/HFIR/HB2A/IPTS-{ipts}/nexus/HB2A_{run}.nxs.h5",
             "WAND^2": "/HFIR/HB2C/IPTS-{ipts}/nexus/HB2C_{run}.nxs.h5",
         }
-        loader_map = {"MIDAS": self._load_MIDAS, "WAND^2": self._load_WAND_Data}
+        loader_map = {"MIDAS": self._loadMIDASData, "WAND^2": self._load_WAND_Data}
         return self._load_data(data_type, file_source_map[instrument], loader_map[instrument])
 
     def _load_data(self, data_type, source_template, loader):
