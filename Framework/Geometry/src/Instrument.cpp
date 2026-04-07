@@ -486,7 +486,8 @@ template <class T> auto find(T &map, const detid_t key) -> decltype(map.begin())
 IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
   // ensure instrument is finalized
   if (!isFinalized())
-    throw std::runtime_error("Instrument definition is not finalized. Can't search for detector ID " + std::to_string(detector_id));
+    throw std::runtime_error("Instrument definition is not finalized. Can't search for detector ID " +
+                             std::to_string(detector_id));
 
   const auto &baseInstr = m_map ? *m_instr : *this;
   const auto it = find(baseInstr.m_detectorCache, detector_id);
@@ -514,7 +515,8 @@ const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
   if (!m_map)
     throw std::runtime_error("Instrument::getBaseDetector() called on a non-parametrized instrument.");
   if (!isFinalized())
-    throw std::runtime_error("Instrument definition is not finalized. Can't find base detector ID " + std::to_string(detector_id));
+    throw std::runtime_error("Instrument definition is not finalized. Can't find base detector ID " +
+                             std::to_string(detector_id));
   auto it = find(m_instr->m_detectorCache, detector_id);
   if (it == m_instr->m_detectorCache.end()) {
     return nullptr;
@@ -525,7 +527,8 @@ const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
 bool Instrument::isMonitor(const detid_t &detector_id) const {
   // ensure instrument is finalized
   if (!isFinalized())
-    throw std::runtime_error("Instrument definition is not finalized. Can't search for monitor ID " + std::to_string(detector_id));
+    throw std::runtime_error("Instrument definition is not finalized. Can't search for monitor ID " +
+                             std::to_string(detector_id));
 
   const auto &baseInstr = m_map ? *m_instr : *this;
   const auto it = find(baseInstr.m_detectorCache, detector_id);
@@ -661,7 +664,8 @@ void Instrument::markAsDetector(const IDetector *det) {
                              "parametrized Instrument object.");
   // ensure instrument is finalized
   if (!isFinalized())
-    throw std::runtime_error("Instrument definition is not finalized.  Add detector with markAsDetectorIncomplete, then call markAsDetectorFinalized when finished.");
+    throw std::runtime_error("Instrument definition is not finalized.  Add detector with markAsDetectorIncomplete, "
+                             "then call markAsDetectorFinalized when finished.");
 
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
@@ -748,7 +752,8 @@ void Instrument::removeDetector(IDetector *det) {
     throw std::runtime_error("Instrument::removeDetector() called on a "
                              "parameterized Instrument object.");
   if (!isFinalized())
-    throw std::runtime_error("Instrument definition is not finalized. Can't remove detector with ID " + std::to_string(det->getID()));
+    throw std::runtime_error("Instrument definition is not finalized. Can't remove detector with ID " +
+                             std::to_string(det->getID()));
 
   const detid_t id = det->getID();
   // Remove the detector from the detector cache
@@ -1174,7 +1179,8 @@ bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
 /// Returns the index for a detector ID. Used for accessing DetectorInfo.
 size_t Instrument::detectorIndex(const detid_t detID) const {
   if (!isFinalized())
-    throw std::runtime_error("Instrument definition is not finalized. Can't get detector index for ID " + std::to_string(detID));
+    throw std::runtime_error("Instrument definition is not finalized. Can't get detector index for ID " +
+                             std::to_string(detID));
 
   const auto &baseInstr = m_map ? *m_instr : *this;
   const auto it = find(baseInstr.m_detectorCache, detID);
