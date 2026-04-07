@@ -270,6 +270,15 @@ private:
   /// monitor flags.
   std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
 
+  bool m_detectorCacheFinalized{true};
+  bool isFinalized() const {
+    if (m_map) {
+      return m_instr->isFinalized();
+    } else {
+      return m_detectorCacheFinalized;
+    }
+  }
+
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component
   const IComponent *m_sourceCache = nullptr;
