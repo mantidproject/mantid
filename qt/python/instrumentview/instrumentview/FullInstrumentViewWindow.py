@@ -7,7 +7,6 @@
 from functools import partial
 from pyvista import PolyData
 from qtpy.QtWidgets import (
-    QApplication,
     QMainWindow,
     QVBoxLayout,
     QHBoxLayout,
@@ -29,7 +28,7 @@ from qtpy.QtWidgets import (
     QFrame,
 )
 from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
-from qtpy.QtCore import Qt, QEvent, QSize, QObject
+from qtpy.QtCore import Qt, QEvent, QSize
 from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
@@ -61,7 +60,6 @@ from instrumentview.ShapeWidgets import (
 
 import os
 from contextlib import suppress
-import time
 from typing import Callable
 
 
@@ -92,57 +90,6 @@ class NoWheelComboBox(QComboBox):
 
     def wheelEvent(self, event):
         event.ignore()
-
-
-class _DoubleClickBlocker(QObject):
-    """Qt event filter to swallow mouse double-clicks *and* the residual
-    press/release events that follow them (i.e. triple-clicks).
-
-    Without this, a triple-click produces an unmatched
-    ``LeftButtonReleaseEvent`` in VTK (the release after the blocked
-    double-click) plus a rapid third press, which can corrupt the
-    Chart2D overlay state and crash the application.
-    """
-
-    # Time (seconds) after a blocked double-click during which subsequent
-    # press / release events are also suppressed.  This must be at least
-    # as long as the OS double-click interval (~500 ms on Windows) so that
-    # the third click of a triple-click is caught.
-    _SUPPRESS_WINDOW = QApplication.doubleClickInterval() / 1000.0
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self._suppress_until: float = 0.0
-
-    def eventFilter(self, _watched, event):
-        if event is None:
-            return False
-
-        etype = event.type()
-        if etype == QEvent.Type.MouseButtonDblClick:
-            # Block the double-click and open a suppression window so the
-            # subsequent release and any third click are also eaten.
-            self._suppress_until = time.monotonic() + self._SUPPRESS_WINDOW
-            try:
-                event.accept()
-            except Exception:
-                pass
-            return True
-
-        # Inside the suppression window, also swallow press and release
-        # events to prevent unmatched VTK events and triple-click issues.
-        if self._suppress_until > 0:
-            if etype in (QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease):
-                if time.monotonic() < self._suppress_until:
-                    try:
-                        event.accept()
-                    except Exception:
-                        pass
-                    return True
-                # Window expired – stop checking until the next double-click.
-                self._suppress_until = 0
-
-        return False
 
 
 @run_on_qapp_thread()
@@ -189,9 +136,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=off_screen)
         pyvista_vertical_layout.addWidget(self.main_plotter.app_window)
-        self._double_click_blocker = _DoubleClickBlocker()
-        pyvista_vertical_layout.installEventFilter(self._double_click_blocker)
-        self.main_plotter.installEventFilter(self._double_click_blocker)
 
         self._detector_spectrum_fig, self._detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)

@@ -819,6 +819,11 @@ class ShapeOverlayManager:
         self._chart.x_range = [0, 1]
         self._chart.y_range = [0, 1]
         self._set_all_chart_borders_zero()
+        # Prevent PyVista from detecting this chart under the mouse cursor.
+        # Without this, PyVista's render_window_interactor swaps the active
+        # interactor style to a Context style that forwards mouse events to
+        # the vtkChartXY, causing a grey rubber-band selection overlay.
+        self._chart._is_within = lambda pos: False
         self._plotter.add_chart(self._chart)
 
     def _set_all_chart_borders_zero(self):
