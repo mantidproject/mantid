@@ -511,9 +511,10 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
  */
 const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
   // ensure instrument is finalized
-  if (!m_instr->isFinalized())
+  if (!m_map)
+    throw std::runtime_error("Instrument::getBaseDetector() called on a non-parametrized instrument.");
+  if (!isFinalized())
     throw std::runtime_error("Instrument definition is not finalized. Can't find base detector ID " + std::to_string(detector_id));
-
   auto it = find(m_instr->m_detectorCache, detector_id);
   if (it == m_instr->m_detectorCache.end()) {
     return nullptr;
@@ -680,7 +681,7 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
     throw std::runtime_error("Instrument::markAsDetector() called on a "
                              "parametrized Instrument object.");
 
-  m_detectorCacheFinalized &= false;
+  m_detectorCacheFinalized = false;
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
   bool isMonitorFlag = false;
