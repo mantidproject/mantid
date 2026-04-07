@@ -160,10 +160,7 @@ class FullInstrumentViewPresenter:
         return ""
 
     def integration_limits_in_current_unit(self) -> tuple[float, float]:
-        limits = self._model.integration_limits
-        min_in_workspace_unit = self._model.convert_units(self._model.workspace_x_unit, self._view.current_selected_unit(), 0, limits[0])
-        max_in_workspace_unit = self._model.convert_units(self._model.workspace_x_unit, self._view.current_selected_unit(), 0, limits[1])
-        return min_in_workspace_unit, max_in_workspace_unit
+        return self._model.integration_limits
 
     def on_integration_limits_updated(self) -> None:
         """When integration limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
@@ -498,7 +495,7 @@ class FullInstrumentViewPresenter:
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
-        self._view.show_plot_for_detectors(self._model.line_plot_workspace)
+        self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.integration_limits)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
         self._update_relative_detector_angle()
         self._update_peaks_workspaces()
@@ -590,7 +587,9 @@ class FullInstrumentViewPresenter:
             del self._ads_observer
 
     def on_unit_option_selected(self, value) -> None:
+        self._model.set_integration_units(self._UNIT_OPTIONS[value])
         self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
+        self.on_integration_limits_reset_clicked()
 
     def peaks_workspaces_in_ads(self) -> list[str]:
         return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(PeaksWorkspace)]
@@ -650,6 +649,7 @@ class FullInstrumentViewPresenter:
 
     def on_peak_selected(self, x: float) -> None:
         # First convert to workspace x unit
+        # TODO: Replace convert units with getting the row and column of model._integration_workspace after Peak Interaction PR is in
         x_in_workspace_unit = self._model.convert_units(self._view.current_selected_unit(), self._model.workspace_x_unit, 0, x)
         if self._peak_interaction_status == PeakInteractionStatus.Adding:
             peaks_ws = self._model.add_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())

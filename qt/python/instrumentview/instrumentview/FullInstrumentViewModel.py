@@ -111,10 +111,10 @@ class FullInstrumentViewModel:
         self._cached_masks_map = {}
         self._cached_rois_map = {}
 
+        self._integration_workspace = self._workspace.clone(StoreInADS=False)
         self._calculate_and_set_full_integration_range(self._is_valid)
-
         # Update counts with default total range
-        self.update_integration_range(self._integration_limits, True)
+        self.update_integration_range(True)
         self.full_counts_limits = self._counts_limits
 
     @property
@@ -223,14 +223,17 @@ class FullInstrumentViewModel:
             return
         self._integration_limits = limits
         # Update the counts
-        self.update_integration_range(self._integration_limits)
+        self.update_integration_range(entire_range=False)
 
-    def update_integration_range(self, integration_limits: tuple[float, float], entire_range: bool = False) -> None:
-        integration_min, integration_max = integration_limits
+    def update_integration_range(self, entire_range: bool = False) -> None:
         workspace_indices = self._workspace_indices[self.is_pickable]
         new_detector_counts = np.array(
-            self._workspace.getIntegratedCountsForWorkspaceIndices(
-                workspace_indices, len(workspace_indices), float(integration_min), float(integration_max), entire_range
+            self._integration_workspace.getIntegratedCountsForWorkspaceIndices(
+                workspace_indices,
+                len(workspace_indices),
+                float(self.integration_limits[0]),
+                float(self.integration_limits[1]),
+                entire_range,
             ),
             dtype=int,
         )
@@ -244,17 +247,29 @@ class FullInstrumentViewModel:
 
     def _calculate_and_set_full_integration_range(self, valid_indices: np.ndarray) -> None:
         workspace_indices = self._workspace_indices[valid_indices]
-        if self._workspace.isRaggedWorkspace():
-            first_last = np.array([self._workspace.readX(i)[[0, -1]] for i in workspace_indices])
+        if self._integration_workspace.isRaggedWorkspace():
+            first_last = np.array([self._integration_workspace.readX(i)[[0, -1]] for i in workspace_indices])
             self._integration_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
 
-        elif self._workspace.isCommonBins():
-            self._integration_limits = tuple(self._workspace.dataX(int(workspace_indices[0]))[[0, -1]])
+        elif self._integration_workspace.isCommonBins():
+            self._integration_limits = tuple(self._integration_workspace.dataX(int(workspace_indices[0]))[[0, -1]])
 
         else:
-            data_x = self._workspace.extractX()[valid_indices]
+            data_x = self._integration_workspace.extractX()[valid_indices]
             self._integration_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
         self.full_integration_limits = self._integration_limits
+
+    def set_integration_units(self, unit):
+        if self.has_unit and unit != self.workspace_x_unit:
+            self._integration_workspace = ConvertUnits(
+                InputWorkspace=self._workspace, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False
+            )
+            self.calculate_and_set_full_integration_range()
+        else:
+            self._integration_workspace = self._workspace.clone(EnableLogging=False, StoreInADS=False)
+
+    def get_integration_units(self):
+        return self._integration_workspace.getAxis(0).getUnit().unitID()
 
     def _detector_table_indices_for_parent_subtree(self, detector_table_indices: np.ndarray, pickable_only: bool) -> np.ndarray:
         pickable_mask = self.is_pickable if pickable_only else None
@@ -416,9 +431,9 @@ class FullInstrumentViewModel:
             self.line_plot_workspace = None
             return
 
-        ws = ExtractSpectra(InputWorkspace=self._workspace, WorkspaceIndexList=workspace_indices, EnableLogging=False, StoreInADS=False)
-        if self.has_unit and unit != self.workspace_x_unit:
-            ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
+        ws = ExtractSpectra(
+            InputWorkspace=self._integration_workspace, WorkspaceIndexList=workspace_indices, EnableLogging=False, StoreInADS=False
+        )
 
         if sum_spectra and len(workspace_indices) > 1:
             # Find the spectrum with the widest range, and the one with the smallest bin width and use that
