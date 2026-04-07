@@ -81,7 +81,8 @@ jobs:
         run: |
           source ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/pixi-utils
           install_pixi
-          echo "Add pixi to path for future use"
+          # Add pixi to path for use in other steps
+          echo "$HOME/.pixi/bin" >> $GITHUB_PATH
 
       - name: Clean build tree
         # supplying --clean-build or CLEAN_BUILD=true should be added here
@@ -90,16 +91,25 @@ jobs:
       - name: Build code
         run: |
           cd ${GITHUB_WORKSPACE}
-          export PATH="$PATH:$HOME/.pixi/bin"
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY $EXTRA_CMAKE_FLAGS
 
-      - name: Run unit tests and system tests on Linux
+      - name: Run unit tests
         run: |
           cd ${GITHUB_WORKSPACE}
           # Not physical but logical cores, includes hyper threaded - different for darwin
           BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
-          export PATH="$PATH:$HOME/.pixi/bin"
-          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
+          # bool flags for this are
+          # SYSTEM_TESTS UNIT_TESTS DOCS DOC_TESTS
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} false true $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
+
+      - name: Run system tests
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          # Not physical but logical cores, includes hyper threaded - different for darwin
+          BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
+          # bool flags for this are
+          # SYSTEM_TESTS UNIT_TESTS DOCS DOC_TESTS
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} true false $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
 
       - name: Upload build and test log artifacts
         uses: actions/upload-artifact@v7
