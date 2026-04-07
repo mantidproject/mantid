@@ -105,7 +105,7 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest(systemtesting.MantidSyste
         AddRuns(
             ("28827", "28797"),
             "SANS2DTUBES",
-            ".nxs",
+            defType=".nxs",
             rawTypes=(".add", ".raw", ".s*"),
             lowMem=False,
             saveAsEvent=True,
@@ -115,7 +115,7 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest(systemtesting.MantidSyste
         AddRuns(
             ("28823", "28793"),
             "SANS2DTUBES",
-            ".nxs",
+            defType=".nxs",
             rawTypes=(".add", ".raw", ".s*"),
             lowMem=False,
             saveAsEvent=True,
