@@ -266,8 +266,9 @@ Instrument_sptr InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progr
   // <component-link> XML elements
   setComponentLinks(m_instrument, pRootElem);
 
-  if (m_indirectPositions)
+  if (m_indirectPositions) {
     createNeutronicInstrument();
+  }
 
   // Instrument::markAsDetector is slow unless the detector IDs in the IDF are
   // sorted. To circumvent this we use the 2-part interface,
@@ -1290,15 +1291,16 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(Geometry::ICompAssembly
   }
 
   try {
-    if (category == "Monitor" || category == "monitor")
-      m_instrument->markAsMonitor(detector);
-    else {
+    if (category == "Monitor" || category == "monitor") {
+      m_instrument->markAsMonitorIncomplete(detector);
+    } else {
       // for backwards compatibility look for mark-as="monitor"
       if ((pCompElem->hasAttribute("mark-as") && pCompElem->getAttribute("mark-as") == "monitor") ||
           (pLocElem->hasAttribute("mark-as") && pLocElem->getAttribute("mark-as") == "monitor")) {
-        m_instrument->markAsMonitor(detector);
-      } else
+        m_instrument->markAsMonitorIncomplete(detector);
+      } else {
         m_instrument->markAsDetectorIncomplete(detector);
+      }
     }
 
   } catch (Kernel::Exception::ExistsError &) {

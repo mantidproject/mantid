@@ -86,14 +86,21 @@ Instrument::Instrument(const Instrument &instr)
   // into the new instrument
   std::vector<IComponent_const_sptr> children;
   getChildren(children, true);
-  std::vector<IComponent_const_sptr>::const_iterator it;
-  for (it = children.begin(); it != children.end(); ++it) {
-    // First check if the current component is a detector and add to cache if it is
-    if (const IDetector *det = dynamic_cast<const Detector *>(it->get())) {
-      if (instr.isMonitor(det->getID()))
-        markAsMonitor(det);
-      else
-        markAsDetector(det);
+  // First check if the current component is a detector and add to cache if it is
+  // NOTE this does not require the copied instrument to be finalized
+  for (auto it = instr.m_detectorCache.begin(); it != instr.m_detectorCache.end(); ++it) {
+    if (std::get<2>(*it)) { // check if isMonitor
+      markAsMonitorIncomplete(std::get<1>(*it).get());
+    } else {
+      markAsDetectorIncomplete(std::get<1>(*it).get());
+    }
+  }
+  // finalize detector cache
+  markAsDetectorFinalize();
+  // Now loop through all children to find the source and sample components.
+  for (auto it = children.begin(); it != children.end(); ++it) {
+    // if this is a detector, it was already handled above.
+    if (dynamic_cast<const Detector *>(it->get())) {
       continue;
     }
     // Now check whether the current component is the source or sample.
@@ -674,8 +681,7 @@ void Instrument::markAsDetector(const IDetector *det) {
   if ((it != m_detectorCache.end()) && (std::get<0>(*it) == det->getID())) {
     raiseDuplicateDetectorError(det->getID());
   }
-  bool isMonitorFlag = false;
-  m_detectorCache.emplace(it, det->getID(), det_sptr, isMonitorFlag);
+  m_detectorCache.emplace(it, det->getID(), det_sptr, false);
 }
 
 /// As markAsDetector but without the required sorting. Must call
@@ -688,8 +694,7 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
   m_detectorCacheFinalized = false;
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
-  bool isMonitorFlag = false;
-  m_detectorCache.emplace_back(det->getID(), det_sptr, isMonitorFlag);
+  m_detectorCache.emplace_back(det->getID(), det_sptr, false);
 }
 
 /// Sorts the detector cache. Called after all detectors have been marked via
@@ -732,7 +737,8 @@ void Instrument::markAsMonitor(const IDetector *det) {
   // NOTE markAsMonitor is not designed to be used with an unfinalized detector cache.
   // However, actual usage in the codebase is inconsistent.  Finalizing here prevents some errors.
   if (!isFinalized()) {
-    markAsDetectorFinalize();
+    throw std::runtime_error("Instrument definition is not finalized.  Add monitor with markAsMonitorIncomplete, then "
+                             "call markAsDetectorFinalized when finished.");
   }
 
   // attempt to add monitor to instrument detector cache
@@ -741,6 +747,23 @@ void Instrument::markAsMonitor(const IDetector *det) {
   // mark detector as a monitor
   auto it = find(m_detectorCache, det->getID());
   std::get<2>(*it) = true;
+}
+
+/** Mark a Component which has already been added to the Instrument class
+ * as a monitor and add it to the detector cache, but without requiring sorting
+ *
+ * @param det :: Component to be marked (stored for later retrieval) as a
+ *detector Component
+ */
+void Instrument::markAsMonitorIncomplete(const IDetector *det) {
+  if (m_map)
+    throw std::runtime_error("Instrument::markAsMonitorIncomplete() called on a "
+                             "parametrized Instrument object.");
+
+  m_detectorCacheFinalized = false;
+  // Create a (non-deleting) shared pointer to it
+  IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
+  m_detectorCache.emplace_back(det->getID(), det_sptr, true);
 }
 
 /** Removes a detector from the instrument and from the detector cache.

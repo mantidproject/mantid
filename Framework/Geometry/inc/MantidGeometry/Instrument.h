@@ -102,6 +102,7 @@ public:
   /// to be a monitor and also add it to _detectorCache for possible later
   /// retrieval
   void markAsMonitor(const IDetector *);
+  void markAsMonitorIncomplete(const IDetector *);
 
   /// Remove a detector from the instrument
   void removeDetector(IDetector *);
