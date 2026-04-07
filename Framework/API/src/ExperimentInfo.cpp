@@ -169,7 +169,7 @@ void checkDetectorInfoSize(const Instrument &instr, const Geometry::DetectorInfo
   if (numDets != detInfo.size())
     throw std::runtime_error("ExperimentInfo: size mismatch between "
                              "DetectorInfo and number of detectors in "
-                             "instrument" +
+                             "instrument: " +
                              std::to_string(numDets) + " vs " + std::to_string(detInfo.size()));
 }
 } // namespace
