@@ -86,13 +86,18 @@ protected:
   std::string m_processingInstructionsWorkspaceIndex;
   std::string m_processingInstructions;
 
-protected:
   std::string convertToSpectrumNumber(const std::string &workspaceIndex,
                                       const Mantid::API::MatrixWorkspace_const_sptr &ws) const;
   std::string convertProcessingInstructionsToSpectrumNumbers(const std::string &instructions,
                                                              const Mantid::API::MatrixWorkspace_const_sptr &ws) const;
 
   void setWorkspacePropertyFromChild(const Algorithm_sptr &alg, std::string const &propertyName);
+
+  std::vector<std::string>
+  getTaskExecutionOrderFromProperties(const bool summingInQ, const bool reduced, const std::string &IOMonIndexProp,
+                                      const std::string &MonBGWaveMinProp, const std::string &MonBGWaveMaxProp,
+                                      const std::string &firstTransRunProp, const std::string &correctionAlgProp,
+                                      const std::string &subBGProp) const;
 };
 } // namespace Reflectometry
 } // namespace Mantid

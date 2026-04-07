@@ -369,7 +369,7 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
   // Task order
   alg->setProperty("TaskExecutionOrder", taskOrder);
 
-  // TO DO: We could selectively set properties based upon task order, or we could just set them all anyway.
+  // TO DO: Need to selectively set properties based upon task order.
   // Specifying a task order should just use only the relevant input props.
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
@@ -924,13 +924,11 @@ bool ReflectometryReductionOneAuto3::processGroups() {
 
   const bool polarizationAnalysisOn = getProperty("PolarizationAnalysis");
   std::vector<std::string> taskOrder;
+  const bool summingInQ = getPropertyValue("SummationType") == "SumInQ";
   if (polarizationAnalysisOn)
-    // task order will differ based upon inputs. This method is currently in RRO, need to access it here.
-    // Currently hardcoded Sum in lambda tasks
-    taskOrder = {"TaskExtractROI",          "TaskBackgroundSubtraction", "TaskSumDetectors",
-                 "TaskConvertToWavelength", "TaskNormalizeByMonitor",    "TaskNormalizeByTransmission",
-                 "TaskCropWavelength"}; // if polarization analysis is on, only reduce up to IvsLam
-
+    taskOrder = getTaskExecutionOrderFromProperties(
+        summingInQ, false, "I0MonitorIndex", "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
+        "FirstTransmissionRun", "CorrectionAlgorithm", "SubtractBackground");
   processGroupMembersOutput processGroupsOutput = processGroupMembers(groupMembers, runNumber, taskOrder);
   const auto groupedOutputNames = getOutputWorkspaceNames();
   if (polarizationAnalysisOn) {
@@ -940,9 +938,12 @@ bool ReflectometryReductionOneAuto3::processGroups() {
       groupIvsLam->addWorkspace(output.out); // Generic output ws will be IvsLam at this point due specified task order
     }
     const auto corrected = applyPolarizationCorrection(groupIvsLam, groupedOutputNames.iVsLam);
+    taskOrder = getTaskExecutionOrderFromProperties(
+        summingInQ, true, "I0MonitorIndex", "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
+        "FirstTransmissionRun", "CorrectionAlgorithm", "SubtractBackground");
     // finish the processing using RRO
     processGroupsOutput =
-        processGroupMembers(corrected->getAllItems(), runNumber, {"TaskConvertToQ"}, processGroupsOutput.outputNames);
+        processGroupMembers(corrected->getAllItems(), runNumber, taskOrder, processGroupsOutput.outputNames);
   }
   postReductionProcessingGroups(processGroupsOutput.rroOutputs, processGroupsOutput.outputNames, groupedOutputNames);
   return true;

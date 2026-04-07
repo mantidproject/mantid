@@ -220,62 +220,10 @@ void ReflectometryReductionOne3::setDefaultOutputWorkspaceNames() {
 }
 
 std::vector<std::string> ReflectometryReductionOne3::constructTaskExecutionOrder() {
-  std::vector<std::string> teo;
-  std::string sumDetectorsTask;
-  // Select tasks based upon summation type
-  if (summingInQ()) {
-    teo = {
-        "TaskBackgroundSubtraction", "TaskConvertToWavelength", "TaskNormalizeByMonitor", "TaskNormalizeByTransmission",
-        "TaskSumDetectorsInQ",       "TaskCropWavelength",      "TaskConvertToQ"};
-    sumDetectorsTask = "TaskSumDetectorsInQ";
-  } else {
-    teo = {"TaskExtractROI",
-           "TaskBackgroundSubtraction",
-           "TaskSumDetectors",
-           "TaskConvertToWavelength",
-           "TaskNormalizeByMonitor",
-           "TaskCropWavelength",
-           "TaskNormalizeByTransmission",
-           "TaskConvertToQ"};
-    sumDetectorsTask = "TaskSumDetectors";
-  }
-
-  const auto xUnitID = m_runWS->getAxis(0)->unit()->unitID();
-  if (xUnitID == "Wavelength") {
-    // Assume already part reduced: lambda workspace already normalised and summed
-    std::erase(teo, "TaskConvertToWavelength");
-    std::erase(teo, "TaskNormalizeByMonitor");
-    std::erase(teo, "TaskNormalizeByTransmission");
-    std::erase(teo, sumDetectorsTask);
-  } else {
-    // evaluate necessity of monitor normalization
-    const Property *monProperty = getProperty("I0MonitorIndex");
-    const Property *backgroundMinProperty = getProperty("MonitorBackgroundWavelengthMin");
-    const Property *backgroundMaxProperty = getProperty("MonitorBackgroundWavelengthMax");
-    if (monProperty->isDefault() || backgroundMinProperty->isDefault() || backgroundMaxProperty->isDefault()) {
-      std::erase(teo, "TaskNormalizeByMonitor");
-    }
-
-    // evaluate necessity of transmission/alg normalization
-    const Property *transRun = getProperty("FirstTransmissionRun");
-    const Property *correctionAlg = getProperty("CorrectionAlgorithm");
-    if (transRun->isDefault()) {
-      std::erase(teo, "TaskNormalizeByTransmission");
-    } else if (!correctionAlg->isDefault()) {
-      auto it = std::find(teo.begin(), teo.end(), "TaskNormalizeByTransmission");
-      if (it != teo.end()) {
-        *it = "TaskNormalizeByAlgorithm";
-      }
-    }
-  }
-
-  // evaluate necessity of background subtraction
-  const Property *subtractBackground = getProperty("SubtractBackground");
-  if (subtractBackground->isDefault()) {
-    std::erase(teo, "TaskBackgroundSubtraction");
-  }
-
-  return teo;
+  const bool reduced = m_runWS->getAxis(0)->unit()->unitID() == "Wavelength";
+  return getTaskExecutionOrderFromProperties(summingInQ(), reduced, "I0MonitorIndex", "MonitorBackgroundWavelengthMin",
+                                             "MonitorBackgroundWavelengthMax", "FirstTransmissionRun",
+                                             "CorrectionAlgorithm", "SubtractBackground");
 }
 
 std::vector<std::string> ReflectometryReductionOne3::configureAlgorithmTasks() {
