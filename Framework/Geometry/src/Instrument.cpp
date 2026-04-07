@@ -63,53 +63,41 @@ Instrument::Instrument(const std::shared_ptr<const Instrument> &instr, const std
       m_defaultView(instr->m_defaultView), m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom), m_ValidTo(instr->m_ValidTo),
       m_referenceFrame(new ReferenceFrame) {
-  // Note that we do not copy m_detectorInfo and m_componentInfo into the
-  // parametrized instrument since the ParameterMap will make a copy, if
-  // applicable.
+  // Note that we do not copy m_detectorInfo and m_componentInfo into the parametrized instrument since the ParameterMap
+  // will make a copy, if applicable.
 }
 
 /** Copy constructor
- *  This method was added to deal with having distinct neutronic and physical
- * positions
- *  in indirect instruments.
+ *  This method was added to deal with having distinct neutronic and physical positions in indirect instruments.
+ *  NOTE the copied instrument MUST be finalized first
  */
 Instrument::Instrument(const Instrument &instr)
     : CompAssembly(instr), m_sourceCache(nullptr), m_sampleCache(nullptr), /* Should only be temporarily null */
       m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit), m_defaultView(instr.m_defaultView),
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(), m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo), m_referenceFrame(instr.m_referenceFrame) {
-  // Note that we do not copy m_detectorInfo and m_componentInfo into the new
-  // instrument since they are only non-NULL for the base instrument, which
-  // should usually not be copied.
+  // Note that we do not copy m_detectorInfo and m_componentInfo into the new instrument since they are only non-NULL
+  // for the base instrument, which should usually not be copied.
 
-  // Now we need to fill the detector, source and sample caches with pointers
-  // into the new instrument
+  // Now we need to fill the detector, source and sample caches with pointers into the new instrument
   std::vector<IComponent_const_sptr> children;
   getChildren(children, true);
-  // First check if the current component is a detector and add to cache if it is
-  // NOTE this does not require the copied instrument to be finalized
-  for (auto it = instr.m_detectorCache.begin(); it != instr.m_detectorCache.end(); ++it) {
-    if (std::get<2>(*it)) { // check if isMonitor
-      markAsMonitorIncomplete(std::get<1>(*it).get());
-    } else {
-      markAsDetectorIncomplete(std::get<1>(*it).get());
-    }
-  }
-  // finalize detector cache
-  markAsDetectorFinalize();
-  // Now loop through all children to find the source and sample components.
-  for (auto it = children.begin(); it != children.end(); ++it) {
-    // if this is a detector, it was already handled above.
-    if (dynamic_cast<const Detector *>(it->get())) {
+  std::vector<IComponent_const_sptr>::const_iterator it;
+  for (it = children.begin(); it != children.end(); ++it) {
+    // First check if the current component is a detector and add to cache if it is
+    if (const IDetector *det = dynamic_cast<const Detector *>(it->get())) {
+      if (instr.isMonitor(det->getID()))
+        markAsMonitor(det);
+      else
+        markAsDetector(det);
       continue;
     }
     // Now check whether the current component is the source or sample.
     // As the majority of components will be detectors, we will rarely get to here
     if (const auto *obj = dynamic_cast<const Component *>(it->get())) {
       const std::string objName = obj->getName();
-      // This relies on the source and sample having a unique name.
-      // I think the way our instrument definition files work ensures this is
-      // the case.
+      // This relies on the source and sample having a unique name. I think the way our instrument definition files work
+      // ensures this is the case.
       if (objName == instr.m_sourceCache->getName()) {
         markAsSource(obj);
         continue;
