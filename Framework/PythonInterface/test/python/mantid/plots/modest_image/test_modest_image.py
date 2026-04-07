@@ -65,6 +65,9 @@ def check(label, modest, axes, thresh=2.0e-5):
     buf1 = modest.figure.canvas.buffer_rgba()
     buf2 = axes.figure.canvas.buffer_rgba()
 
+    if buf1 == buf2:
+        return
+
     # convert to array and reshape
     shp = modest.figure.canvas.get_width_height()[::-1] + (4,)  # (4,) for RGBA
     data1 = np.frombuffer(buf1, dtype=np.uint8).reshape(shp)
@@ -92,7 +95,7 @@ def check(label, modest, axes, thresh=2.0e-5):
         modest.figure.savefig(modest_label + ".pdf")
         axes.figure.savefig(axes_label + ".pdf")
 
-    assert rms <= thresh
+    assert rms < thresh
 
 
 def set_bounds(modest, ax, x0, x1, y0, y1):
