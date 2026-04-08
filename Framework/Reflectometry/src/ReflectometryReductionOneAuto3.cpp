@@ -369,8 +369,6 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
   // Task order
   alg->setProperty("TaskExecutionOrder", taskOrder);
 
-  // TO DO: Need to selectively set properties based upon task order.
-  // Specifying a task order should just use only the relevant input props.
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
   alg->setProperty("ReductionType", getPropertyValue("ReductionType"));
@@ -383,6 +381,7 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
   alg->setProperty("WavelengthMax", wavMax);
 
   convertProcessingInstructions(instrument, inputWS);
+
   alg->setProperty("ProcessingInstructions", m_processingInstructions);
   // Now that we know the detectors of interest, we can move them if
   // necessary (i.e. if theta is given). If not, we calculate theta from the
@@ -403,10 +402,8 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
 
   // Pass theta to the child algorithm
   alg->setProperty("ThetaIn", theta);
-
-  if (correctDetectors) {
+  if (correctDetectors)
     inputWS = correctDetectorPositions(inputWS, 2 * theta);
-  }
 
   // Optional properties
 
@@ -429,13 +426,13 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
   alg->setPropertyValue("OutputWorkspaceQ", "QOutputWorkspace");
 
   alg->execute();
-  return {alg->getProperty("OutputWorkspaceQ"),
-          alg->getProperty("OutputWorkspaceWavelength"),
-          alg->getProperty("OutputWorkspaceTransmission"),
-          alg->getProperty("OutputWorkspaceFirstTransmission"),
-          alg->getProperty("OutputWorkspaceSecondTransmission"),
-          alg->getProperty("OutputWorkspace"),
-          theta};
+  return {.IvsQ = alg->getProperty("OutputWorkspaceQ"),
+          .IvsLam = alg->getProperty("OutputWorkspaceWavelength"),
+          .trans = alg->getProperty("OutputWorkspaceTransmission"),
+          .trans1 = alg->getProperty("OutputWorkspaceFirstTransmission"),
+          .trans2 = alg->getProperty("OutputWorkspaceSecondTransmission"),
+          .out = alg->getProperty("OutputWorkspace"),
+          .theta = theta};
 }
 
 void ReflectometryReductionOneAuto3::setWorkspaceProperty(MatrixWorkspace_sptr workspace,
@@ -534,7 +531,7 @@ void ReflectometryReductionOneAuto3::exec() {
 std::vector<std::string> ReflectometryReductionOneAuto3::getDetectorNames(const MatrixWorkspace_sptr &inputWS) {
   std::vector<std::string> wsIndices;
   boost::split(wsIndices, m_processingInstructionsWorkspaceIndex, boost::is_any_of(":,-+"));
-  // vector of comopnents
+  // vector of components
   std::vector<std::string> detectors;
 
   try {
@@ -883,10 +880,9 @@ void ReflectometryReductionOneAuto3::setOutputPropertiesFromChild(const Algorith
  * outputs; IvsLam outputs must be passed as the new inputNames
  * @returns : the grouped output workspace names
  */
-ReflectometryReductionOneAuto3::processGroupMembersOutput
-ReflectometryReductionOneAuto3::processGroupMembers(Algorithm::WorkspaceVector members, std::string const &runNumber,
-                                                    std::vector<std::string> const &taskOrder,
-                                                    const std::vector<WorkspaceNames> &workspaceNames) {
+ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReductionOneAuto3::processGroupMembers(
+    Algorithm::WorkspaceVector members, std::string const &runNumber, std::vector<std::string> const &taskOrder,
+    const std::vector<WorkspaceNames> &workspaceNames, const bool reduced) {
   // Compile a list of output workspace names for each group member
   // No need to compile list if the output names are already provided, e.g. from a previous run of RRO
   bool populateOutputNames = workspaceNames.empty();
@@ -906,9 +902,34 @@ ReflectometryReductionOneAuto3::processGroupMembers(Algorithm::WorkspaceVector m
     if (populateOutputNames)
       allOutputNames.emplace_back(getOutputNamesForGroupMember(matrixWs->getName(), runNumber, i));
     auto &outputNames = allOutputNames[i];
-    allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder));
+
+    // If data has already been reduced, as workspace is summed we need to change processing instructions.
+    if (reduced) {
+      const auto &origProcessingInstructions = getPropertyValue("ProcessingInstructions");
+      setPropertyValue("ProcessingInstructions", convertToSpectrumNumber("0", matrixWs));
+      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder));
+      setPropertyValue("ProcessingInstructions", origProcessingInstructions);
+    } else {
+      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder));
+    }
   }
-  return {allRROOutputs, allOutputNames};
+  return {.rroOutputs = allRROOutputs, .outputNames = allOutputNames};
+}
+
+std::vector<std::string> ReflectometryReductionOneAuto3::getTaskExecutionOrder(const bool reduced,
+                                                                               const bool summingInQ) const {
+  const std::vector<std::string> taskOrderReduced = getTaskExecutionOrderFromProperties(
+      summingInQ, true, "I0MonitorIndex", "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
+      "FirstTransmissionRun", "CorrectionAlgorithm", "SubtractBackground");
+  if (reduced)
+    return taskOrderReduced;
+  auto taskOrder = getTaskExecutionOrderFromProperties(
+      summingInQ, false, "I0MonitorIndex", "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
+      "FirstTransmissionRun", "CorrectionAlgorithm", "SubtractBackground");
+  for (const auto &task : taskOrderReduced) {
+    std::erase(taskOrder, task);
+  }
+  return taskOrder;
 }
 
 /** Process groups. Groups are processed differently depending on transmission
@@ -925,10 +946,9 @@ bool ReflectometryReductionOneAuto3::processGroups() {
   const bool polarizationAnalysisOn = getProperty("PolarizationAnalysis");
   std::vector<std::string> taskOrder;
   const bool summingInQ = getPropertyValue("SummationType") == "SumInQ";
+  // isDefault might not work on some of these, alg corr?
   if (polarizationAnalysisOn)
-    taskOrder = getTaskExecutionOrderFromProperties(
-        summingInQ, false, "I0MonitorIndex", "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
-        "FirstTransmissionRun", "CorrectionAlgorithm", "SubtractBackground");
+    taskOrder = getTaskExecutionOrder(false, summingInQ);
   processGroupMembersOutput processGroupsOutput = processGroupMembers(groupMembers, runNumber, taskOrder);
   const auto groupedOutputNames = getOutputWorkspaceNames();
   if (polarizationAnalysisOn) {
@@ -938,12 +958,10 @@ bool ReflectometryReductionOneAuto3::processGroups() {
       groupIvsLam->addWorkspace(output.out); // Generic output ws will be IvsLam at this point due specified task order
     }
     const auto corrected = applyPolarizationCorrection(groupIvsLam, groupedOutputNames.iVsLam);
-    taskOrder = getTaskExecutionOrderFromProperties(
-        summingInQ, true, "I0MonitorIndex", "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
-        "FirstTransmissionRun", "CorrectionAlgorithm", "SubtractBackground");
+    taskOrder = getTaskExecutionOrder(true, summingInQ);
     // finish the processing using RRO
     processGroupsOutput =
-        processGroupMembers(corrected->getAllItems(), runNumber, taskOrder, processGroupsOutput.outputNames);
+        processGroupMembers(corrected->getAllItems(), runNumber, taskOrder, processGroupsOutput.outputNames, true);
   }
   postReductionProcessingGroups(processGroupsOutput.rroOutputs, processGroupsOutput.outputNames, groupedOutputNames);
   return true;
@@ -1101,7 +1119,6 @@ WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyPolarizationCorrection(
   polAlg->setProperty("SpinStatesInFredrikze", fredrikzeInputOrder);
   polAlg->setProperty(CorrectionMethod::OPTION_NAME.at(correctionMethod), correctionOption);
   polAlg->setProperty("AddSpinStateToLog", true);
-  // TO DO: Check this still works, we don't pass in seperate ws names for wildes anymore.
   polAlg->setProperty("InputWorkspaceGroup", outputIvsLam);
   polAlg->execute();
   return polAlg->getProperty("OutputWorkspace");

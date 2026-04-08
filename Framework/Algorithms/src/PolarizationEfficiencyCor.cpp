@@ -167,7 +167,6 @@ void PolarizationEfficiencyCor::exec() {
 //----------------------------------------------------------------------------------------------
 void PolarizationEfficiencyCor::execWildes() {
   checkWildesProperties();
-  MatrixWorkspace_sptr efficiencies = getEfficiencies();
   auto alg = createChildAlgorithm("PolarizationCorrectionWildes");
   alg->initialize();
   if (!isDefault(Prop::INPUT_WORKSPACES)) {
@@ -177,6 +176,7 @@ void PolarizationEfficiencyCor::execWildes() {
     auto group = getWorkspaceGroup();
     alg->setProperty("InputWorkspaceGroup", group);
   }
+  MatrixWorkspace_sptr efficiencies = getEfficiencies();
   alg->setProperty("Efficiencies", efficiencies);
   if (!isDefault(Prop::FLIPPERS)) {
     alg->setPropertyValue("Flippers", getPropertyValue(Prop::FLIPPERS));

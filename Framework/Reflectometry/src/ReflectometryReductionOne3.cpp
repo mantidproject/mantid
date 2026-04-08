@@ -174,6 +174,7 @@ void ReflectometryReductionOne3::init() {
   setPropertySettings("OutputWorkspaceQ", std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
 
   initTransmissionOutputProperties();
+  m_wavelengthMinMaxSet = false;
 }
 
 /** Validate inputs
@@ -270,7 +271,9 @@ void ReflectometryReductionOne3::exec() {
   const bool outputDiagnostics = getProperty("Diagnostics");
   std::string diagWSName = createDebugWorkspaceName(getPropertyValue("InputWorkspace"));
   int step = 0;
-  for (const auto &task : m_stagedAlgorithmTasks) {
+
+  for (auto i = 0; i < m_stagedAlgorithmTasks.size(); ++i) {
+    const auto &task = m_stagedAlgorithmTasks[i];
     task->execute();
     if (outputDiagnostics) {
       const auto &taskName = task->name();
@@ -281,11 +284,12 @@ void ReflectometryReductionOne3::exec() {
         step++;
       }
     }
-  }
 
-  // For now, output the first output of the final task as the output workspace.
-  // Order is not guaranteed in map, so we will want to make this configurable.
-  setProperty("OutputWorkspace", m_algorithmTaskOutputs.at(taskExecutionOrder.back()).begin()->second);
+    // Output the specified output of the final task as the output workspace.
+    // TO DO: associated an output workspace with each task and take that.
+    if (i == m_stagedAlgorithmTasks.size() - 1)
+      setProperty("OutputWorkspace", m_algorithmTaskOutputs.at(task->name()).begin()->second);
+  }
 }
 
 /** Get the twoTheta angle range for the top/bottom of the detector associated
@@ -1142,7 +1146,10 @@ void ReflectometryReductionOne3::TaskBackgroundSubtraction::executeImpl() {
 void ReflectometryReductionOne3::TaskConvertToWavelength::executeImpl() {
   const auto &inputWS = getDependantWorkspace("InputWorkspace");
   auto result = m_parent->convertToWavelength(inputWS);
-  m_parent->findWavelengthMinMax(result);
+  if (!m_parent->m_wavelengthMinMaxSet) {
+    m_parent->findWavelengthMinMax(result);
+    m_parent->m_wavelengthMinMaxSet = true;
+  }
   outputWorkspace(result, "ConvertedWorkspaceWavelength");
 }
 
@@ -1156,7 +1163,8 @@ void ReflectometryReductionOne3::TaskNormalizeByTransmission::executeImpl() {
   auto inputWS = getDependantWorkspace("InputWorkspace");
   auto [transmissionCorrected, transmission] = m_parent->transmissionCorrection(inputWS);
   outputWorkspace(transmissionCorrected, "TransmissionCorrectedWorkspace");
-  outputWorkspace(transmission, "TransmissionWorkspace");
+  // TO DO: disable this until we can specify the output.
+  // outputWorkspace(transmission, "TransmissionWorkspace");
 }
 
 void ReflectometryReductionOne3::TaskExtractROI::executeImpl() {
@@ -1173,6 +1181,10 @@ void ReflectometryReductionOne3::TaskSumDetectors::executeImpl() {
 
 void ReflectometryReductionOne3::TaskCropWavelength::executeImpl() {
   auto inputWS = getDependantWorkspace("InputWorkspace");
+  if (!m_parent->m_wavelengthMinMaxSet) {
+    m_parent->findWavelengthMinMax(inputWS);
+    m_parent->m_wavelengthMinMaxSet = true;
+  }
   auto cropped = m_parent->cropWavelength(inputWS, true, m_parent->wavelengthMin(), m_parent->wavelengthMax());
   outputWorkspace(cropped, "CroppedWorkspace");
 }

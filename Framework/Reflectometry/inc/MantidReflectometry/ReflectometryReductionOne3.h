@@ -133,6 +133,8 @@ private:
   double m_wavelengthMax;
   // True if partial bins should be included in the summation in Q
   bool m_partialBins;
+  // When a task sets wavelength min/max, flag this so it is not repeated.
+  bool m_wavelengthMinMaxSet;
 
   // Algorithm Tasks
   class AlgorithmTask {

@@ -327,10 +327,10 @@ void PolarizationCorrectionWildes::init() {
                       Prop::INPUT_WS, "", std::make_shared<API::ADSValidator>(true, true), Kernel::Direction::Input),
                   "A list of workspaces to be corrected corresponding to the "
                   "flipper configurations.");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::INPUT_WS_GROUP, "", Kernel::Direction::Input),
-      "A group of workspaces to be corrected corresponding to the "
-      "flipper configurations.");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
+                      Prop::INPUT_WS_GROUP, "", Kernel::Direction::Input, API::PropertyMode::Optional),
+                  "A group of workspaces to be corrected corresponding to the "
+                  "flipper configurations.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A group of polarization efficiency corrected workspaces.");
