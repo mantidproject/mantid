@@ -284,11 +284,9 @@ void ReflectometryReductionOne3::exec() {
         step++;
       }
     }
-
-    // Output the specified output of the final task as the output workspace.
-    // TO DO: associated an output workspace with each task and take that.
+    // Output the selected output of the last task
     if (i == m_stagedAlgorithmTasks.size() - 1)
-      setProperty("OutputWorkspace", m_algorithmTaskOutputs.at(task->name()).begin()->second);
+      setProperty("OutputWorkspace", m_algorithmTaskOutputs.at(task->name()).at(task->getSelectedOutput()));
   }
 }
 
@@ -1161,10 +1159,12 @@ void ReflectometryReductionOne3::TaskNormalizeByMonitor::executeImpl() {
 
 void ReflectometryReductionOne3::TaskNormalizeByTransmission::executeImpl() {
   auto inputWS = getDependantWorkspace("InputWorkspace");
+  std::string corrWSName = "TransmissionCorrectedWorkspace";
   auto [transmissionCorrected, transmission] = m_parent->transmissionCorrection(inputWS);
-  outputWorkspace(transmissionCorrected, "TransmissionCorrectedWorkspace");
-  // TO DO: disable this until we can specify the output.
-  // outputWorkspace(transmission, "TransmissionWorkspace");
+  outputWorkspace(transmissionCorrected, corrWSName);
+  outputWorkspace(transmission, "TransmissionWorkspace");
+
+  setSelectedOutput(corrWSName, true);
 }
 
 void ReflectometryReductionOne3::TaskExtractROI::executeImpl() {

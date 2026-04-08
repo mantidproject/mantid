@@ -187,14 +187,24 @@ private:
       m_taskExecutionOrder = taskExecutionOrder;
     }
 
+    std::string getSelectedOutput() const { return m_selectedOutput; }
+
   protected:
     ReflectometryReductionOne3 *m_parent;
     void outputWorkspace(std::shared_ptr<MatrixWorkspace> ws, const std::string &outputName) {
+      setSelectedOutput(outputName);
       m_parent->m_algorithmTaskOutputs[m_name][outputName] = ws;
     }
 
     std::shared_ptr<MatrixWorkspace> getDependantWorkspace(std::string outputAlias) {
       return m_dependantOutputs[m_activeDependantTaskSet][outputAlias];
+    }
+
+    void setSelectedOutput(const std::string &output, const bool overwrite = false) {
+      // If overwrite is false, only set the selected output if it has not already been set
+      if (!overwrite && !m_selectedOutput.empty())
+        return;
+      m_selectedOutput = output;
     }
 
   private:
@@ -207,6 +217,7 @@ private:
     size_t m_activeDependantTaskSet;
     std::vector<int> m_fulfilledDependantTaskSets;
     const std::vector<std::string> *m_taskExecutionOrder = nullptr;
+    std::string m_selectedOutput;
 
     virtual void executeImpl() = 0;
 
