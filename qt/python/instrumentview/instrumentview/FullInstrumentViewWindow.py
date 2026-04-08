@@ -55,8 +55,8 @@ from instrumentview.ShapeWidgets import (
     HollowRectangleSelectionShape,
     RectangleSelectionShape,
     EllipseSelectionShape,
-    ShapeOverlayManager,
 )
+from instrumentview.ShapeOverlayManager import ShapeOverlayManager
 
 import os
 from contextlib import suppress
