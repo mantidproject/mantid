@@ -34,6 +34,8 @@ public:
   MOCK_METHOD(void, setEditROIState, (bool), (override));
   MOCK_METHOD(std::vector<size_t>, getSelectedDetectors, (), (const, override));
   MOCK_METHOD(std::string, getRegionType, (), (const, override));
+  MOCK_METHOD(double, getLinthresh, (), (const, override));
+  MOCK_METHOD(bool, getSymlogEnabled, (), (const, override));
   MOCK_METHOD(QLayout *, getRegionSelectorLayout, (), (const, override));
   MOCK_METHOD(MantidQt::MantidWidgets::IPlotView *, getLinePlotView, (), (const, override));
 };

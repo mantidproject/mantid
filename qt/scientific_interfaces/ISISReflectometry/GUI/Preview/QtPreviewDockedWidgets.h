@@ -55,6 +55,8 @@ public:
 
   std::vector<size_t> getSelectedDetectors() const override;
   std::string getRegionType() const override;
+  double getLinthresh() const override;
+  bool getSymlogEnabled() const override;
 
   QLayout *getRegionSelectorLayout() const override;
   MantidQt::MantidWidgets::IPlotView *getLinePlotView() const override;
@@ -78,5 +80,8 @@ private slots:
   void onLinePlotExportToAdsClicked() const;
   void onEditROIClicked() const;
   void onAddRectangularROIClicked(QAction *regionType) const;
+  void onYAxisSymlogToggled(bool checked) const;
+  void onLineEditUpdated() const;
+  void onApplyButtonClicked() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

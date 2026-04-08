@@ -378,22 +378,22 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_clear_point_picked_detectors_clicked, ()))
 
     def _on_add_item_clicked(self) -> None:
-        implicit_function = self._view.get_current_widget_implicit_function()
-        if not implicit_function:
+        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        mask = self._view.get_shape_mask(centres)
+        if not np.any(mask):
             return
-        # Evaluate against transformed detector positions (one per detector),
-        # not mesh vertices — shape meshes have many vertices per detector.
-        detector_positions = self._transform_vectors_with_matrix(self._model.detector_positions, self._transform)
-        mask = np.array([(implicit_function.EvaluateFunction(pt) < 0) for pt in detector_positions], dtype=bool)
+
         if self._select_bank_tube:
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
-        new_key = self._model.add_new_detector_key(mask, self._view.get_current_selected_tab())
+        new_key = self._model.add_new_detector_key(mask.tolist(), self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
 
     def on_select_bank_tube_toggled(self, checked: bool) -> None:
         self._select_bank_tube = checked
 
     def on_add_item_clicked(self) -> None:
+        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        self._view.project_and_cache_detector_points(centres)
         self._callback_queue.put((self._on_add_item_clicked, ()))
 
     def _on_list_item_selected(self, kind: CurrentTab) -> None:

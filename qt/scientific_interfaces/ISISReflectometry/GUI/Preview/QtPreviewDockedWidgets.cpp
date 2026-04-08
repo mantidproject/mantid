@@ -82,6 +82,9 @@ void QtPreviewDockedWidgets::connectSignals() const {
   connect(m_ui.rs_edit_button, SIGNAL(clicked()), this, SLOT(onEditROIClicked()));
   // Line plot toolbar
   connect(m_ui.lp_ads_export_button, SIGNAL(clicked()), this, SLOT(onLinePlotExportToAdsClicked()));
+  connect(m_ui.set_yaxis_symlog_checkbox, SIGNAL(toggled(bool)), this, SLOT(onYAxisSymlogToggled(bool)));
+  connect(m_ui.linthresh_line_edit, SIGNAL(textChanged(QString)), this, SLOT(onLineEditUpdated()));
+  connect(m_ui.apply_button, SIGNAL(clicked()), this, SLOT(onApplyButtonClicked()));
 }
 
 void QtPreviewDockedWidgets::onInstViewZoomClicked() const { m_notifyee->notifyInstViewZoomRequested(); }
@@ -94,6 +97,18 @@ void QtPreviewDockedWidgets::onRegionSelectorExportToAdsClicked() const {
 }
 
 void QtPreviewDockedWidgets::onEditROIClicked() const { m_notifyee->notifyEditROIModeRequested(); }
+
+void QtPreviewDockedWidgets::onYAxisSymlogToggled(bool checked) const {
+  m_ui.linthresh_container->setVisible(checked);
+  onLineEditUpdated();
+  m_notifyee->notifySetYAxisSymlogChanged();
+}
+
+void QtPreviewDockedWidgets::onLineEditUpdated() const {
+  m_ui.apply_button->setEnabled(!m_ui.linthresh_line_edit->text().isEmpty());
+}
+
+void QtPreviewDockedWidgets::onApplyButtonClicked() const { m_notifyee->notifySetYAxisSymlogChanged(); }
 
 void QtPreviewDockedWidgets::onAddRectangularROIClicked(QAction *regionType) const {
   m_ui.rs_rect_select_button->setDefaultAction(regionType);
@@ -154,6 +169,18 @@ void QtPreviewDockedWidgets::setInstViewToolbarEnabled(bool enable) {
   m_ui.iv_zoom_button->setEnabled(enable);
   m_ui.iv_edit_button->setEnabled(enable);
   m_ui.iv_rect_select_button->setEnabled(enable);
+}
+
+bool QtPreviewDockedWidgets::getSymlogEnabled() const { return m_ui.set_yaxis_symlog_checkbox->isChecked(); }
+
+double QtPreviewDockedWidgets::getLinthresh() const {
+  bool ok = false;
+  double linthresh = m_ui.linthresh_line_edit->text().toDouble(&ok);
+  if (ok && linthresh > 0.0) {
+    return linthresh;
+  } else {
+    return 1e-4;
+  }
 }
 
 void QtPreviewDockedWidgets::setRegionSelectorEnabled(bool enable) { m_ui.rs_dock_content->setEnabled(enable); }

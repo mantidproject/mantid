@@ -35,6 +35,7 @@ public:
 
   virtual void notifyEditROIModeRequested() = 0;
   virtual void notifyRectangularROIModeRequested() = 0;
+  virtual void notifySetYAxisSymlogChanged() = 0;
 };
 
 class IPreviewDockedWidgets {
@@ -61,6 +62,8 @@ public:
 
   virtual std::vector<size_t> getSelectedDetectors() const = 0;
   virtual std::string getRegionType() const = 0;
+  virtual double getLinthresh() const = 0;
+  virtual bool getSymlogEnabled() const = 0;
 
   virtual QLayout *getRegionSelectorLayout() const = 0;
   virtual MantidQt::MantidWidgets::IPlotView *getLinePlotView() const = 0;

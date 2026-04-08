@@ -63,27 +63,23 @@ Instrument::Instrument(const std::shared_ptr<const Instrument> &instr, const std
       m_defaultView(instr->m_defaultView), m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom), m_ValidTo(instr->m_ValidTo),
       m_referenceFrame(new ReferenceFrame) {
-  // Note that we do not copy m_detectorInfo and m_componentInfo into the
-  // parametrized instrument since the ParameterMap will make a copy, if
-  // applicable.
+  // Note that we do not copy m_detectorInfo and m_componentInfo into the parametrized instrument since the ParameterMap
+  // will make a copy, if applicable.
 }
 
 /** Copy constructor
- *  This method was added to deal with having distinct neutronic and physical
- * positions
- *  in indirect instruments.
+ *  This method was added to deal with having distinct neutronic and physical positions in indirect instruments.
+ *  NOTE the copied instrument MUST be finalized first
  */
 Instrument::Instrument(const Instrument &instr)
     : CompAssembly(instr), m_sourceCache(nullptr), m_sampleCache(nullptr), /* Should only be temporarily null */
       m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit), m_defaultView(instr.m_defaultView),
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(), m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo), m_referenceFrame(instr.m_referenceFrame) {
-  // Note that we do not copy m_detectorInfo and m_componentInfo into the new
-  // instrument since they are only non-NULL for the base instrument, which
-  // should usually not be copied.
+  // Note that we do not copy m_detectorInfo and m_componentInfo into the new instrument since they are only non-NULL
+  // for the base instrument, which should usually not be copied.
 
-  // Now we need to fill the detector, source and sample caches with pointers
-  // into the new instrument
+  // Now we need to fill the detector, source and sample caches with pointers into the new instrument
   std::vector<IComponent_const_sptr> children;
   getChildren(children, true);
   std::vector<IComponent_const_sptr>::const_iterator it;
@@ -100,9 +96,8 @@ Instrument::Instrument(const Instrument &instr)
     // As the majority of components will be detectors, we will rarely get to here
     if (const auto *obj = dynamic_cast<const Component *>(it->get())) {
       const std::string objName = obj->getName();
-      // This relies on the source and sample having a unique name.
-      // I think the way our instrument definition files work ensures this is
-      // the case.
+      // This relies on the source and sample having a unique name. I think the way our instrument definition files work
+      // ensures this is the case.
       if (objName == instr.m_sourceCache->getName()) {
         markAsSource(obj);
         continue;
@@ -264,6 +259,10 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
  * @param max :: set to the max detector ID
  */
 void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
+  // ensure instrument is finalized
+  if (!isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized. Can't find min/max ids");
+
   const auto *in_dets = m_map ? &m_instr->m_detectorCache : &m_detectorCache;
 
   if (in_dets->empty())
@@ -480,6 +479,11 @@ template <class T> auto find(T &map, const detid_t key) -> decltype(map.begin())
  *  @throw   NotFoundError If no detector is found for the detector ID given
  */
 IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
+  // ensure instrument is finalized
+  if (!isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized. Can't search for detector ID " +
+                             std::to_string(detector_id));
+
   const auto &baseInstr = m_map ? *m_instr : *this;
   const auto it = find(baseInstr.m_detectorCache, detector_id);
   if (it == baseInstr.m_detectorCache.end()) {
@@ -502,6 +506,12 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
  *  @returns A const pointer to the detector object
  */
 const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
+  // ensure instrument is finalized
+  if (!m_map)
+    throw std::runtime_error("Instrument::getBaseDetector() called on a non-parametrized instrument.");
+  if (!isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized. Can't find base detector ID " +
+                             std::to_string(detector_id));
   auto it = find(m_instr->m_detectorCache, detector_id);
   if (it == m_instr->m_detectorCache.end()) {
     return nullptr;
@@ -510,6 +520,11 @@ const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
 }
 
 bool Instrument::isMonitor(const detid_t &detector_id) const {
+  // ensure instrument is finalized
+  if (!isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized. Can't search for monitor ID " +
+                             std::to_string(detector_id));
+
   const auto &baseInstr = m_map ? *m_instr : *this;
   const auto it = find(baseInstr.m_detectorCache, detector_id);
   if (it == baseInstr.m_detectorCache.end())
@@ -642,6 +657,10 @@ void Instrument::markAsDetector(const IDetector *det) {
   if (m_map)
     throw std::runtime_error("Instrument::markAsDetector() called on a "
                              "parametrized Instrument object.");
+  // ensure instrument is finalized
+  if (!isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized.  Add detector with markAsDetectorIncomplete, "
+                             "then call markAsDetectorFinalized when finished.");
 
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
@@ -650,8 +669,7 @@ void Instrument::markAsDetector(const IDetector *det) {
   if ((it != m_detectorCache.end()) && (std::get<0>(*it) == det->getID())) {
     raiseDuplicateDetectorError(det->getID());
   }
-  bool isMonitorFlag = false;
-  m_detectorCache.emplace(it, det->getID(), det_sptr, isMonitorFlag);
+  m_detectorCache.emplace(it, det->getID(), det_sptr, false);
 }
 
 /// As markAsDetector but without the required sorting. Must call
@@ -661,15 +679,19 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
     throw std::runtime_error("Instrument::markAsDetector() called on a "
                              "parametrized Instrument object.");
 
+  m_detectorCacheFinalized = false;
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
-  bool isMonitorFlag = false;
-  m_detectorCache.emplace_back(det->getID(), det_sptr, isMonitorFlag);
+  m_detectorCache.emplace_back(det->getID(), det_sptr, false);
 }
 
 /// Sorts the detector cache. Called after all detectors have been marked via
 /// markAsDetectorIncomplete.
 void Instrument::markAsDetectorFinalize() {
+  // We're already finalized! We can't finalize any further!
+  if (isFinalized())
+    return;
+
   // Detectors (even when different objects) are NOT allowed to have duplicate
   // ids. This method establishes the presence of duplicates.
   std::sort(
@@ -685,6 +707,7 @@ void Instrument::markAsDetectorFinalize() {
   if (resultIt != m_detectorCache.end()) {
     raiseDuplicateDetectorError(std::get<0>(*resultIt));
   }
+  m_detectorCacheFinalized = true;
 }
 
 /** Mark a Component which has already been added to the Instrument class
@@ -699,6 +722,12 @@ void Instrument::markAsMonitor(const IDetector *det) {
   if (m_map)
     throw std::runtime_error("Instrument::markAsMonitor() called on a "
                              "parametrized Instrument object.");
+  // NOTE markAsMonitor is not designed to be used with an unfinalized detector cache.
+  // However, actual usage in the codebase is inconsistent.  Finalizing here prevents some errors.
+  if (!isFinalized()) {
+    throw std::runtime_error("Instrument definition is not finalized.  Add monitor with markAsMonitorIncomplete, then "
+                             "call markAsDetectorFinalized when finished.");
+  }
 
   // attempt to add monitor to instrument detector cache
   markAsDetector(det);
@@ -706,6 +735,23 @@ void Instrument::markAsMonitor(const IDetector *det) {
   // mark detector as a monitor
   auto it = find(m_detectorCache, det->getID());
   std::get<2>(*it) = true;
+}
+
+/** Mark a Component which has already been added to the Instrument class
+ * as a monitor and add it to the detector cache, but without requiring sorting
+ *
+ * @param det :: Component to be marked (stored for later retrieval) as a
+ *detector Component
+ */
+void Instrument::markAsMonitorIncomplete(const IDetector *det) {
+  if (m_map)
+    throw std::runtime_error("Instrument::markAsMonitorIncomplete() called on a "
+                             "parametrized Instrument object.");
+
+  m_detectorCacheFinalized = false;
+  // Create a (non-deleting) shared pointer to it
+  IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
+  m_detectorCache.emplace_back(det->getID(), det_sptr, true);
 }
 
 /** Removes a detector from the instrument and from the detector cache.
@@ -716,6 +762,9 @@ void Instrument::removeDetector(IDetector *det) {
   if (m_map)
     throw std::runtime_error("Instrument::removeDetector() called on a "
                              "parameterized Instrument object.");
+  if (!isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized. Can't remove detector with ID " +
+                             std::to_string(det->getID()));
 
   const detid_t id = det->getID();
   // Remove the detector from the detector cache
@@ -1140,6 +1189,10 @@ bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
 
 /// Returns the index for a detector ID. Used for accessing DetectorInfo.
 size_t Instrument::detectorIndex(const detid_t detID) const {
+  if (!isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized. Can't get detector index for ID " +
+                             std::to_string(detID));
+
   const auto &baseInstr = m_map ? *m_instr : *this;
   const auto it = find(baseInstr.m_detectorCache, detID);
   return std::distance(baseInstr.m_detectorCache.cbegin(), it);
@@ -1148,6 +1201,9 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
 /// Returns a legacy ParameterMap, containing information that is now stored in
 /// DetectorInfo (masking, positions, rotations, scale factors).
 std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
+  if (!isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized. Can't create legacy ParameterMap.");
+
   auto pmap = std::make_shared<ParameterMap>(*getParameterMap());
   // Instrument is only needed for DetectorInfo access so it is not needed. This
   // also clears DetectorInfo and ComponentInfo (information will be stored
