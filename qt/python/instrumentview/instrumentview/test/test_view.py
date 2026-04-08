@@ -95,14 +95,13 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_refresh_peaks_ws_list(self, mock_qlist_widget_item):
         mock_list = MagicMock()
         mock_item = MagicMock()
+        mock_item.text.return_value = "existing_ws"
         mock_list.item.return_value = mock_item
         mock_list.count.return_value = 1
-        mock_item.checkState.return_value = 0
         self._view._peak_ws_list = mock_list
-        self._view._presenter.peaks_workspaces_in_ads.return_value = [MagicMock()]
+        self._view._presenter.peaks_workspaces_in_ads.return_value = ["existing_ws", "new_ws"]
         self._view.refresh_peaks_ws_list()
-        mock_list.clear.assert_called_once()
-        mock_list.adjustSize.assert_called_once()
+        # Only the new workspace should trigger QListWidgetItem creation
         mock_qlist_widget_item.assert_called_once()
 
     def test_clear_overlay_meshes(self):
@@ -124,18 +123,21 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self.assertEqual(0, len(self._view._lineplot_overlays))
         mock_text.remove.assert_called_once()
 
-    def test_plot_overlay_mesh(self):
-        position_groups = np.array([[0, 0, 0]])
-        self._view.plot_overlay_mesh(position_groups, MagicMock(), "colour")
+    def test_plot_overlay_meshes(self):
+        positions = [np.array([[0, 0, 0]])]
+        labels = [["label"]]
+        colours = ["colour"]
+        self._view.plot_overlay_meshes(positions, labels, colours)
         self._view.main_plotter.add_points.assert_called_once()
         self._view.main_plotter.add_point_labels.assert_called_once()
         self.assertEqual(1, len(self._view._overlay_meshes))
 
-    def test_plot_lineplot_overlay(self):
-        x_values = [1.0, 2.0]
-        labels = ["a", "b"]
+    def test_plot_lineplot_peak_overlays(self):
+        x_values = [[1.0, 2.0]]
+        labels = [["a", "b"]]
+        colours = ["colour"]
         self._view._detector_spectrum_axes = MagicMock()
-        self._view.plot_lineplot_overlay(x_values, labels, "colour")
+        self._view.plot_lineplot_peak_overlays(x_values, labels, colours)
         self.assertEqual(2, self._view._detector_spectrum_axes.text.call_count)
         self.assertEqual(2, len(self._view._lineplot_overlays))
 
@@ -186,7 +188,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         event.xdata = 5.0
         event.button = 1
         self._view._on_axes_click(event)
-        self._view._presenter.on_peak_selected.assert_called_once_with(5.0, "left")
+        self._view._presenter.on_peak_selected_in_lineplot.assert_called_once_with(5.0, "left")
 
     def test_on_axes_click_right_calls_presenter_with_right(self):
         event = MagicMock()
@@ -194,14 +196,14 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         event.xdata = 7.0
         event.button = 3
         self._view._on_axes_click(event)
-        self._view._presenter.on_peak_selected.assert_called_once_with(7.0, "right")
+        self._view._presenter.on_peak_selected_in_lineplot.assert_called_once_with(7.0, "right")
 
     def test_on_axes_click_outside_axes_does_nothing(self):
         event = MagicMock()
         event.inaxes = MagicMock()  # different axes
         event.xdata = 5.0
         self._view._on_axes_click(event)
-        self._view._presenter.on_peak_selected.assert_not_called()
+        self._view._presenter.on_peak_selected_in_lineplot.assert_not_called()
 
     def test_disable_and_uncheck_selection_list(self):
         mock_item_0 = MagicMock()

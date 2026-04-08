@@ -10,6 +10,8 @@ from queue import Queue
 from typing import Literal, Optional
 from instrumentview.Globals import CurrentTab
 from threading import Thread
+
+# from instrumentview.Peaks import WorkspaceDetectorPeaks
 from mantid import mtd
 from mantid.kernel import logger
 from mantid.simpleapi import AnalysisDataService
@@ -212,7 +214,7 @@ class FullInstrumentViewPresenter:
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter()
             self.update_detector_picker()
-            self.on_peaks_workspace_selected()
+            self.refresh_plotter_peaks()
 
     def count_scale_combo_options(self) -> list[str]:
         return [self._LINEAR, self._LOGARITHMIC]
@@ -318,6 +320,8 @@ class FullInstrumentViewPresenter:
         return np.array([[scale_x, 0, 0, c_x * (1 - scale_x)], [0, scale_y, 0, c_y * (1 - scale_y)], [0, 0, 1, 0], [0, 0, 0, 1]])
 
     def _transform_vectors_with_matrix(self, points: np.ndarray, transform: np.ndarray) -> np.ndarray:
+        if points.size == 0:
+            return points
         # The transform is a 4x4 matrix, the points are 3D vectors, first we need an extra
         # entry on the points
         transformed_points = np.hstack([points, np.ones((points.shape[0], 1))])
@@ -484,7 +488,6 @@ class FullInstrumentViewPresenter:
         self._view.show_plot_for_detectors(self._model.line_plot_workspace)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
         self._update_relative_detector_angle()
-        self._model.update_peaks_grouped_by_ws()
         self.refresh_lineplot_peaks()
         if self._model.peak_picking_enabled():
             self._view.add_peak_cursor_to_lineplot()
@@ -585,28 +588,22 @@ class FullInstrumentViewPresenter:
         return self._model._COLOURS.list()
 
     def on_peaks_workspace_selected(self) -> None:
-        self._model.set_peaks_workspaces(self._view.selected_peaks_workspaces())
-        self._view.clear_overlay_meshes()
+        self.refresh_plotter_peaks()
         self.refresh_lineplot_peaks()
-        self._view.refresh_peaks_ws_list_colours()
 
-        for ws_peaks in self._model.peak_positions_labels_colours():
-            transformed_points = self._transform_vectors_with_matrix(ws_peaks.projected_points, self._transform)
-            self._view.plot_overlay_mesh(transformed_points, ws_peaks.labels, ws_peaks.colour)
+    def refresh_plotter_peaks(self) -> None:
+        self._view.clear_overlay_meshes()
+        pos, labels, colours = self._model.get_peak_overlay_arguments(self._view.selected_peaks_workspaces())
+        transformed_pos = [self._transform_vectors_with_matrix(p, self._transform) for p in pos]
+        self._view.plot_overlay_meshes(transformed_pos, labels, colours)
+        self._view.refresh_peaks_ws_list_colours(colours)
 
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
         self._view.clear_lineplot_overlays()
-
-        for ws_peaks in self._model.peaks_grouped_by_ws.values():
-            x_values = []
-            labels = []
-            for peak in ws_peaks.detector_peaks:
-                if peak.spectrum_no in self._model.picked_spectrum_nos:
-                    x_values += [p.location_in_unit(self._view.current_selected_unit()) for p in peak.peaks]
-                    labels += [p.label for p in peak.peaks]
-            if len(x_values) > 0:
-                self._view.plot_lineplot_overlay(x_values, labels, ws_peaks.colour)
+        self._view.plot_lineplot_peak_overlays(
+            *self._model.get_peak_lineplot_overlay_arguments(self._view.current_selected_unit(), self._view.selected_peaks_workspaces())
+        )
         self._view.redraw_lineplot()
 
     def on_start_adding_peaks_toggled(self, checked) -> None:
@@ -623,7 +620,7 @@ class FullInstrumentViewPresenter:
             self._view.enable_and_restore_selection_list()
             self._on_list_item_selected(CurrentTab.Grouping)
 
-    def on_peak_selected(self, x: float, mouse_click: Literal["right", "left"]) -> None:
+    def on_peak_selected_in_lineplot(self, x: float, mouse_click: Literal["right", "left"]) -> None:
         if len(self._model.picked_detector_ids) == 0:
             return
         # First convert to workspace x unit
@@ -631,14 +628,12 @@ class FullInstrumentViewPresenter:
 
         if mouse_click == "left":
             peaks_ws = self._model.add_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
-            self._view.refresh_peaks_ws_list()
             self._view.select_peaks_workspace(peaks_ws)
-
         elif mouse_click == "right":
-            self._model.delete_peak(x_in_workspace_unit)
+            self._model.delete_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
 
     def on_delete_all_selected_peaks_clicked(self) -> None:
-        self._model.delete_peaks_on_all_selected_detectors()
+        self._model.delete_peaks_on_all_selected_detectors(self._view.selected_peaks_workspaces())
 
     def on_show_monitors_check_box_clicked(self) -> None:
         self.update_plotter()

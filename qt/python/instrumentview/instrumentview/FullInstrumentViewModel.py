@@ -494,22 +494,41 @@ class FullInstrumentViewModel:
         name_exported_ws = f"instrument_view_selected_spectra_{self._workspace.name()}"
         AnalysisDataService.addOrReplace(name_exported_ws, self.line_plot_workspace)
 
-    def set_peaks_workspaces(self, peaks_workspace_names: list[str]) -> None:
-        self._selected_peaks_workspaces = AnalysisDataService.Instance().retrieveWorkspaces(peaks_workspace_names)
-        self.update_peaks_grouped_by_ws()
-
-    def update_peaks_grouped_by_ws(self):
+    def get_peak_overlay_arguments(self, selected_peaks_workspaces: list[str]) -> tuple:
         self._COLOURS.reset()
-        self.peaks_grouped_by_ws = {}
-        for pws in self._selected_peaks_workspaces:
-            self.peaks_grouped_by_ws[pws.name()] = WorkspaceDetectorPeaks(pws, self._COLOURS.next(), self._workspace, self._spectrum_nos)
+        positions_by_pws = []
+        labels_by_pws = []
+        colours_by_pws = []
+        for ws_name in selected_peaks_workspaces:
+            wdp = WorkspaceDetectorPeaks(ws_name)
+            positions_by_pws.append(wdp.get_positions(self.detector_positions, self.pickable_detector_ids))
+            labels_by_pws.append(wdp.get_labels())
+            colours_by_pws.append(self._COLOURS.next())
+        return positions_by_pws, labels_by_pws, colours_by_pws
 
-    def peak_positions_labels_colours(self):
-        for key in self.peaks_grouped_by_ws:
-            self.peaks_grouped_by_ws[key].set_positions_and_labels(self.detector_positions, self.spectrum_nos)
-        return self.peaks_grouped_by_ws.values()
+    def get_peak_lineplot_overlay_arguments(self, unit: str, selected_peaks_workspaces: list[str]):
+        self._COLOURS.reset()
+        x_by_pws = []
+        labels_by_pws = []
+        colours_by_pws = []
+        for ws_name in selected_peaks_workspaces:
+            wdp = WorkspaceDetectorPeaks(ws_name)
+            x_values = [
+                p.location_in_unit(unit) for peak in wdp.detector_peaks for p in peak.peaks if peak.detector_id in self.picked_detector_ids
+            ]
+            labels = [p.label for peak in wdp.detector_peaks for p in peak.peaks if peak.detector_id in self.picked_detector_ids]
+            x_by_pws.append(x_values)
+            labels_by_pws.append(labels)
+            colours_by_pws.append(self._COLOURS.next())
+        return x_by_pws, labels_by_pws, colours_by_pws
 
-    def _peaks_workspace_for_adding_new_peak(self, selected_peaks_workspaces: list[str]) -> PeaksWorkspace:
+    def add_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> str:
+        peaks_ws = self._get_peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)
+        detector_id = self.picked_detector_ids[0]
+        AddPeak(peaks_ws, self._workspace, x_in_workspace_unit, int(detector_id))
+        return peaks_ws.name()
+
+    def _get_peaks_workspace_for_adding_new_peak(self, selected_peaks_workspaces: list[str]) -> PeaksWorkspace:
         # If exactly one Peaks workspace in selected, add the peak to that workspace, otherwise
         # use a special workspace, which we create if it doesn't exist already.
         ads = AnalysisDataService.Instance()
@@ -521,19 +540,11 @@ class FullInstrumentViewModel:
         ads.addOrReplace(self._instrument_view_peaks_ws_name, peaks_ws)
         return peaks_ws
 
-    def add_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> str:
-        peaks_ws = self._peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)
-        detector_id = self.picked_detector_ids[0]
-        AddPeak(peaks_ws, self._workspace, x_in_workspace_unit, int(detector_id))
-        return peaks_ws.name()
-
-    def delete_peak(self, x_in_workspace_unit: float) -> None:
+    def delete_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> None:
         detector_ids = self.picked_detector_ids
         closest_peak_by_ws = []
-        for peaks_ws in self._selected_peaks_workspaces:
-            if peaks_ws.name() not in self.peaks_grouped_by_ws:
-                continue
-            peaks_by_detector = self.peaks_grouped_by_ws[peaks_ws.name()].detector_peaks
+        for ws_name in selected_peaks_workspaces:
+            peaks_by_detector = WorkspaceDetectorPeaks(ws_name).detector_peaks
             picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in detector_ids]
             if len(picked_detector_peaks) == 0:
                 continue
@@ -543,24 +554,22 @@ class FullInstrumentViewModel:
             distance_to_click = np.abs([p.location_in_unit(self.workspace_x_unit) - x_in_workspace_unit for p in peaks])
             index_of_closest = np.argmin(distance_to_click)
             closest_peak = peaks[index_of_closest]
-            closest_peak_by_ws.append((peaks_ws, closest_peak.peak_index, distance_to_click[index_of_closest]))
+            closest_peak_by_ws.append((ws_name, closest_peak.peak_index, distance_to_click[index_of_closest]))
 
         if len(closest_peak_by_ws) == 0:
             return
 
         closest_over_all_workspaces = min(closest_peak_by_ws, key=lambda x: x[2])
-        closest_over_all_workspaces[0].removePeak(closest_over_all_workspaces[1])
+        AnalysisDataService.retrieve(closest_over_all_workspaces[0]).removePeak(closest_over_all_workspaces[1])
 
-    def delete_peaks_on_all_selected_detectors(self) -> None:
-        for peaks_ws in self._selected_peaks_workspaces:
-            if peaks_ws.name() not in self.peaks_grouped_by_ws:
-                continue
-            peaks_by_detector = self.peaks_grouped_by_ws[peaks_ws.name()].detector_peaks
+    def delete_peaks_on_all_selected_detectors(self, selected_peaks_workspaces) -> None:
+        for ws_name in selected_peaks_workspaces:
+            peaks_by_detector = WorkspaceDetectorPeaks(ws_name).detector_peaks
             picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in self.picked_detector_ids]
             if len(picked_detector_peaks) == 0:
                 continue
             peaks_to_remove = sum([[p.peak_index for p in detector.peaks] for detector in picked_detector_peaks], [])
-            peaks_ws.removePeaks(peaks_to_remove)
+            AnalysisDataService.retrieve(ws_name).removePeaks(peaks_to_remove)
 
     def relative_detector_angle(self) -> float:
         picked_ids = self.picked_detector_ids

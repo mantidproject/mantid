@@ -668,25 +668,22 @@ class FullInstrumentViewWindow(QMainWindow):
         parent.addLayout(hBox)
 
     def refresh_peaks_ws_list(self) -> None:
-        # Maintain any peaks workspaces that are checked
-        current_checked_peak_workspaces: list[str] = []
-        for list_i in range(self._peak_ws_list.count()):
-            list_item = self._peak_ws_list.item(list_i)
-            if list_item.checkState() > 0:
-                current_checked_peak_workspaces.append(list_item.text())
+        list_to_refresh = self._peak_ws_list
+        keys_from_workspaces_in_ads = self._presenter.peaks_workspaces_in_ads()
+        keys_in_current_list = [list_to_refresh.item(i).text() for i in range(list_to_refresh.count())]
 
-        self._peak_ws_list.blockSignals(True)
-        self._peak_ws_list.clear()
-        peaks_workspaces = self._presenter.peaks_workspaces_in_ads()
-        for peaks_ws_index in range(len(peaks_workspaces)):
-            peaks_ws = peaks_workspaces[peaks_ws_index]
-            list_item = QListWidgetItem(peaks_ws, self._peak_ws_list)
-            if peaks_ws in current_checked_peak_workspaces:
-                list_item.setCheckState(Qt.Checked)
-            else:
-                list_item.setCheckState(Qt.Unchecked)
-        self._peak_ws_list.blockSignals(False)
-        self._peak_ws_list.adjustSize()
+        # Keys from ads but not yet in list
+        for key in keys_from_workspaces_in_ads:
+            if key not in keys_in_current_list:
+                item = QListWidgetItem(key, list_to_refresh)
+                item.setCheckState(Qt.Unchecked)
+
+        # Remove keys that are not in ads
+        for i in range(list_to_refresh.count() - 1, -1, -1):
+            item = list_to_refresh.item(i)
+            if item.text() not in keys_from_workspaces_in_ads:
+                removed = list_to_refresh.takeItem(i)
+                del removed
 
     def refresh_workspaces_in_list(self, kind: CurrentTab) -> None:
         list_to_refresh = self._mask_list if kind is CurrentTab.Masking else self._selection_list
@@ -730,12 +727,12 @@ class FullInstrumentViewWindow(QMainWindow):
         self._restore_list(self._selection_list, self._selection_list_cache)
         self._selection_tab.setEnabled(True)
 
-    def refresh_peaks_ws_list_colours(self) -> None:
+    def refresh_peaks_ws_list_colours(self, colours: list[str]) -> None:
         picked_index = 0
         for list_i in range(self._peak_ws_list.count()):
             list_item = self._peak_ws_list.item(list_i)
             if list_item.checkState() > 0:
-                list_item.setForeground(QColor(self._presenter.colours[picked_index % len(self._presenter.colours)]))
+                list_item.setForeground(QColor(colours[picked_index % len(colours)]))
                 picked_index += 1
             else:
                 list_item.setForeground(self._peak_ws_list.palette().color(QPalette.Text))
@@ -983,38 +980,40 @@ class FullInstrumentViewWindow(QMainWindow):
         for text in self._detector_spectrum_axes.texts:
             text.remove()
 
-    def plot_overlay_mesh(self, positions: np.ndarray, labels: list[str], colour: str) -> None:
-        if positions.size == 0:
-            return
-        points_actor = self.main_plotter.add_points(positions, color=colour, point_size=15, render_points_as_spheres=True, opacity=0.2)
-        labels_actor = self.main_plotter.add_point_labels(
-            positions,
-            labels,
-            font_size=15,
-            font_family="times",
-            show_points=False,
-            always_visible=True,
-            fill_shape=False,
-            shape_opacity=0,
-            text_color=colour,
-        )
-        self._overlay_meshes.append((points_actor, labels_actor))
-
-    def plot_lineplot_overlay(self, x_values: list[float], labels: list[str], colour: str) -> None:
-        for x, label in zip(x_values, labels):
-            self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color=colour, linestyle="--"))
-            self._detector_spectrum_axes.text(
-                x,
-                0.99,
-                label,
-                transform=self._detector_spectrum_axes.get_xaxis_transform(),
-                color=colour,
-                ha="right",
-                va="top",
-                fontsize=8,
-                rotation=90,
+    def plot_overlay_meshes(self, positions_by_pws: list[np.ndarray], labels_by_pws: list[list[str]], colours_by_pws: list[str]) -> None:
+        for positions, labels, colour in zip(positions_by_pws, labels_by_pws, colours_by_pws):
+            if len(positions) == 0:
+                return
+            points_actor = self.main_plotter.add_points(positions, color=colour, point_size=15, render_points_as_spheres=True, opacity=0.2)
+            labels_actor = self.main_plotter.add_point_labels(
+                positions,
+                labels,
+                font_size=15,
+                font_family="times",
+                show_points=False,
+                always_visible=True,
+                fill_shape=False,
+                shape_opacity=0,
+                text_color=colour,
             )
-        self.redraw_lineplot()
+            self._overlay_meshes.append((points_actor, labels_actor))
+
+    def plot_lineplot_peak_overlays(self, x_by_pws: list[list[float]], labels_by_pws: list[list[str]], colours_by_pws: list[str]) -> None:
+        for x_values, labels, colour in zip(x_by_pws, labels_by_pws, colours_by_pws):
+            for x, label in zip(x_values, labels):
+                self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color=colour, linestyle="--"))
+                self._detector_spectrum_axes.text(
+                    x,
+                    0.99,
+                    label,
+                    transform=self._detector_spectrum_axes.get_xaxis_transform(),
+                    color=colour,
+                    ha="right",
+                    va="top",
+                    fontsize=8,
+                    rotation=90,
+                )
+            self.redraw_lineplot()
 
     def redraw_lineplot(self) -> None:
         self._detector_spectrum_fig.tight_layout()
@@ -1060,9 +1059,9 @@ class FullInstrumentViewWindow(QMainWindow):
         if event.inaxes is not self._detector_spectrum_axes or event.xdata is None:
             return
         if event.button == 1:  # Left click
-            self._presenter.on_peak_selected(event.xdata, "left")
+            self._presenter.on_peak_selected_in_lineplot(event.xdata, "left")
         elif event.button == 3:  # Right click
-            self._presenter.on_peak_selected(event.xdata, "right")
+            self._presenter.on_peak_selected_in_lineplot(event.xdata, "right")
 
     def add_peak_cursor_to_lineplot(self) -> None:
         self._lineplot_peak_cursor = Cursor(self._detector_spectrum_axes, color="tab:red", linewidth=1, horizOn=False)
