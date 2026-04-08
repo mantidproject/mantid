@@ -21,6 +21,17 @@ from instrumentview.ShapeWidgets import (
     VTK_CURSOR_DEFAULT,
 )
 
+# Keys for the _state interaction dictionary.
+_STATE_MODE = "mode"
+_STATE_ACTIVE_SHAPE = "active_shape"
+_STATE_SAVED_STYLE = "_saved_style"
+_STATE_ROTATE_START_CURSOR = "rotate_start_cursor"
+_STATE_ROTATE_START_ANGLE = "rotate_start_angle"
+_STATE_RESIZE_START = "resize_start"
+_STATE_RESIZE_SAVED = "resize_saved"
+_STATE_RESIZE_WHICH = "_resize_which"
+_STATE_DRAG_OFFSET = "drag_offset"
+
 
 class ShapeOverlayManager:
     """Manages a Chart2D overlay and mouse interaction for a single selection shape.
@@ -33,7 +44,7 @@ class ShapeOverlayManager:
         self._plotter = plotter
         self._chart = None
         self._shape: SelectionShape | None = None
-        self._state = dict(mode=None, active_shape=None)
+        self._state = {_STATE_MODE: None, _STATE_ACTIVE_SHAPE: None}
         self._observer_ids = []
         # Cached PlotTransform parameters (sx, sy, tx, ty).
         # Populated by _read_plot_transform() after each successful VTK
@@ -242,7 +253,7 @@ class ShapeOverlayManager:
                 logger.debug(f"Failed to remove chart from plotter: {ex}")
             self._chart = None
         self._cached_transform = None
-        self._state = dict(mode=None, active_shape=None)
+        self._state = {_STATE_MODE: None, _STATE_ACTIVE_SHAPE: None}
 
     def _install_observers(self):
         if self._plotter.iren is None:
@@ -270,13 +281,13 @@ class ShapeOverlayManager:
 
     def _detach_style(self):
         try:
-            self._state["_saved_style"] = self._plotter.iren.style
+            self._state[_STATE_SAVED_STYLE] = self._plotter.iren.style
             self._plotter.iren.style = None
         except Exception as ex:
             logger.debug(f"Failed to detach interactor style: {ex}")
 
     def _restore_style(self):
-        saved = self._state.pop("_saved_style", None)
+        saved = self._state.pop(_STATE_SAVED_STYLE, None)
         if saved is not None:
             try:
                 self._plotter.iren.style = saved
@@ -293,28 +304,28 @@ class ShapeOverlayManager:
             hit = self._shape.hit_test(*npos)
             if hit is None:
                 return
-            self._state["active_shape"] = self._shape
+            self._state[_STATE_ACTIVE_SHAPE] = self._shape
             if hit == "handle":
-                self._state["mode"] = "rotate"
-                self._state["rotate_start_cursor"] = np.arctan2(npos[1] - self._shape.cy, npos[0] - self._shape.cx)
-                self._state["rotate_start_angle"] = self._shape.angle
+                self._state[_STATE_MODE] = "rotate"
+                self._state[_STATE_ROTATE_START_CURSOR] = np.arctan2(npos[1] - self._shape.cy, npos[0] - self._shape.cx)
+                self._state[_STATE_ROTATE_START_ANGLE] = self._shape.angle
             elif hit in ("edge", "inner_edge"):
-                self._state["mode"] = "resize"
-                self._state["resize_start"] = npos
-                self._state["resize_saved"] = self._shape.save_size()
-                self._state["_resize_which"] = "inner" if hit == "inner_edge" else "outer"
+                self._state[_STATE_MODE] = "resize"
+                self._state[_STATE_RESIZE_START] = npos
+                self._state[_STATE_RESIZE_SAVED] = self._shape.save_size()
+                self._state[_STATE_RESIZE_WHICH] = "inner" if hit == "inner_edge" else "outer"
             elif hit == "inside":
-                self._state["mode"] = "drag"
-                self._state["drag_offset"] = (npos[0] - self._shape.cx, npos[1] - self._shape.cy)
+                self._state[_STATE_MODE] = "drag"
+                self._state[_STATE_DRAG_OFFSET] = (npos[0] - self._shape.cx, npos[1] - self._shape.cy)
         except Exception as ex:
             logger.debug(f"Exception in shape left-press handler: {ex}")
 
     def _on_left_release(self, obj, event):
         try:
-            if self._state.get("mode") is not None:
-                self._state["mode"] = None
-                self._state.pop("_resize_which", None)
-                self._state["active_shape"] = None
+            if self._state.get(_STATE_MODE) is not None:
+                self._state[_STATE_MODE] = None
+                self._state.pop(_STATE_RESIZE_WHICH, None)
+                self._state[_STATE_ACTIVE_SHAPE] = None
         except Exception as ex:
             logger.debug(f"Exception in shape left-release handler: {ex}")
 
@@ -323,23 +334,23 @@ class ShapeOverlayManager:
             s = self._shape
             if s is None:
                 return
-            mode = self._state.get("mode")
+            mode = self._state.get(_STATE_MODE)
             if mode is not None:
                 npos = self._screen_pos(obj)
                 if npos is None:
                     return
                 nx, ny = npos
                 if mode == "drag":
-                    ox, oy = self._state.get("drag_offset", (0, 0))
+                    ox, oy = self._state.get(_STATE_DRAG_OFFSET, (0, 0))
                     s.cx = nx - ox
                     s.cy = ny - oy
                 elif mode == "resize":
                     s.apply_resize_delta(
-                        nx, ny, self._state["resize_start"][0], self._state["resize_start"][1], self._state["resize_saved"]
+                        nx, ny, self._state[_STATE_RESIZE_START][0], self._state[_STATE_RESIZE_START][1], self._state[_STATE_RESIZE_SAVED]
                     )
                 elif mode == "rotate":
                     cur = np.arctan2(ny - s.cy, nx - s.cx)
-                    s.angle = self._state["rotate_start_angle"] + (cur - self._state["rotate_start_cursor"])
+                    s.angle = self._state[_STATE_ROTATE_START_ANGLE] + (cur - self._state[_STATE_ROTATE_START_CURSOR])
                 s.update_plots()
                 self._plotter.render()
                 return
