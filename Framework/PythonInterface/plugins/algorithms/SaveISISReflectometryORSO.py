@@ -30,7 +30,7 @@ class Prop:
     INCLUDE_EXTRA_COLS = "IncludeAdditionalColumns"
     FILENAME = "Filename"
     MODEL = "ModelDescription"
-    VALIDATION = "ModelValidation"
+    VALIDATION = "ValidateModel"
 
 
 class ReflectometryDataset:
@@ -243,7 +243,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             name=Prop.VALIDATION,
             defaultValue=False,
             direction=Direction.Input,
-            doc="The validation method for model description of the sample.",
+            doc="Whether or not to validate the model provided to `ModelDescription`.",
         )
 
     def validateInputs(self):

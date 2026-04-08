@@ -142,17 +142,18 @@ class MantidORSODataset:
         if model:
             # Verify that the sample string is correct before creating the sample
             if validate:
+                future = executor.submit(SampleModel(stack=model).resolve_to_layers)
                 try:
-                    result = run_with_timeout(lambda: SampleModel(stack=model).resolve_to_layers(), timeout=5.0)
+                    result =future.result(timeout=5.0)
+                except concurrent.futures.TimeoutError:
+                    logger.error(f"The provided model description '{model}' could not be validated because of database unavalibility.")
+                    self._header = None
+                    return
                 except:
                     logger.error(
                         f"The provided model description '{model}' contains an error. "
                         "Please check that the string follows the correct ORSO format."
                     )
-                    self._header = None
-                    return
-                if result is None:
-                    logger.error(f"The provided model description '{model}' could not be validated because of database unavalibility.")
                     self._header = None
                     return
             sample = Sample(name=ws.getTitle(), model=model)
