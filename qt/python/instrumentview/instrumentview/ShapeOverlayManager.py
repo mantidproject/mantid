@@ -82,12 +82,12 @@ class ShapeOverlayManager:
             return
         try:
             self._chart.SetBorders(0, 0, 0, 0)
-        except Exception:
-            pass
+        except Exception as ex:
+            logger.debug(f"Failed to set chart borders to zero: {ex}")
         try:
             self._chart.SetHiddenAxisBorder(0)
-        except Exception:
-            pass
+        except Exception as ex:
+            logger.debug(f"Failed to set chart hidden axis border to zero: {ex}")
 
     def _read_plot_transform(self):
         """Read the PlotTransform matrix from the chart (main thread only).
@@ -104,16 +104,16 @@ class ShapeOverlayManager:
         transform = None
         try:
             transform = self._chart.GetPlotTransform()
-        except Exception:
-            pass
+        except Exception as ex:
+            logger.debug(f"Failed to read PlotTransform from chart: {ex}")
         if transform is None:
             for sub in getattr(self._chart, "_charts", []):
                 try:
                     transform = sub.GetPlotTransform()
                     if transform is not None:
                         break
-                except Exception:
-                    continue
+                except Exception as ex:
+                    logger.debug(f"Failed to read PlotTransform from sub-chart: {ex}")
 
         if transform is not None:
             m = transform.GetMatrix()
@@ -152,10 +152,12 @@ class ShapeOverlayManager:
         # same coordinate system as GetEventPosition().
         try:
             w, h = self._plotter.renderer.GetSize()
-        except Exception:
+        except Exception as ex:
+            logger.debug(f"Failed to get renderer size for pixel-to-data conversion: {ex}")
             try:
                 w, h = self._plotter.window_size
-            except Exception:
+            except Exception as ex:
+                logger.debug(f"Failed to get plotter window size for pixel-to-data conversion: {ex}")
                 w, h = 1, 1
         if w == 0 or h == 0:
             return None
@@ -173,7 +175,8 @@ class ShapeOverlayManager:
         if vtk_interactor is not None:
             try:
                 pos = vtk_interactor.GetEventPosition()
-            except Exception:
+            except Exception as ex:
+                logger.debug(f"Failed to get event position from interactor: {ex}")
                 pos = None
         else:
             pos = self._plotter.mouse_position
@@ -190,10 +193,12 @@ class ShapeOverlayManager:
                 return abs(sx / sy)
         try:
             w, h = self._plotter.renderer.GetSize()
-        except Exception:
+        except Exception as ex:
+            logger.debug(f"Failed to get renderer size for pixel aspect ratio: {ex}")
             try:
                 w, h = self._plotter.window_size
-            except Exception:
+            except Exception as ex:
+                logger.debug(f"Failed to get plotter window size for pixel aspect ratio: {ex}")
                 w, h = 1, 1
         if h == 0:
             return 1.0
@@ -204,8 +209,8 @@ class ShapeOverlayManager:
             rw = self._plotter.iren.interactor.GetRenderWindow()
             cursor_id = CURSOR_MAP.get(hit_type, VTK_CURSOR_DEFAULT)
             rw.SetCurrentCursor(cursor_id)
-        except Exception:
-            pass
+        except Exception as ex:
+            logger.debug(f"Failed to set cursor: {ex}")
 
     def set_shape(self, shape: SelectionShape):
         """Set (replace) the active selection shape and install observers."""
@@ -233,8 +238,8 @@ class ShapeOverlayManager:
         if self._chart is not None:
             try:
                 self._plotter.remove_chart(self._chart)
-            except Exception:
-                pass
+            except Exception as ex:
+                logger.debug(f"Failed to remove chart from plotter: {ex}")
             self._chart = None
         self._cached_transform = None
         self._state = dict(mode=None, active_shape=None)
@@ -259,24 +264,24 @@ class ShapeOverlayManager:
             if interactor is not None:
                 for oid in self._observer_ids:
                     interactor.RemoveObserver(oid)
-        except Exception:
-            pass
+        except Exception as ex:
+            logger.debug(f"Failed to remove VTK observers: {ex}")
         self._observer_ids = []
 
     def _detach_style(self):
         try:
             self._state["_saved_style"] = self._plotter.iren.style
             self._plotter.iren.style = None
-        except Exception:
-            pass
+        except Exception as ex:
+            logger.debug(f"Failed to detach interactor style: {ex}")
 
     def _restore_style(self):
         saved = self._state.pop("_saved_style", None)
         if saved is not None:
             try:
                 self._plotter.iren.style = saved
-            except Exception:
-                pass
+            except Exception as ex:
+                logger.debug(f"Failed to restore interactor style: {ex}")
 
     def _on_left_press(self, obj, event):
         try:
@@ -301,8 +306,8 @@ class ShapeOverlayManager:
             elif hit == "inside":
                 self._state["mode"] = "drag"
                 self._state["drag_offset"] = (npos[0] - self._shape.cx, npos[1] - self._shape.cy)
-        except Exception:
-            logger.debug("Exception in shape left-press handler.")
+        except Exception as ex:
+            logger.debug(f"Exception in shape left-press handler: {ex}")
 
     def _on_left_release(self, obj, event):
         try:
@@ -310,8 +315,8 @@ class ShapeOverlayManager:
                 self._state["mode"] = None
                 self._state.pop("_resize_which", None)
                 self._state["active_shape"] = None
-        except Exception:
-            logger.debug("Exception in shape left-release handler.")
+        except Exception as ex:
+            logger.debug(f"Exception in shape left-release handler: {ex}")
 
     def _on_mouse_move(self, obj, event):
         try:
@@ -344,8 +349,8 @@ class ShapeOverlayManager:
             if npos is not None:
                 hit = s.hit_test(*npos)
                 self._set_cursor(hit)
-        except Exception:
-            logger.debug("Exception in shape mouse-move handler.")
+        except Exception as ex:
+            logger.debug(f"Exception in shape mouse-move handler. {ex}")
 
     def _project_world_to_data(self, points: np.ndarray) -> np.ndarray:
         """Project Nx3 world-space *points* to Nx2 chart data coords [0-1].
@@ -389,7 +394,8 @@ class ShapeOverlayManager:
         # Fallback: normalise by window size.
         try:
             w, h = renderer.GetSize()
-        except Exception:
+        except Exception as ex:
+            logger.debug(f"Failed to get renderer size for projection: {ex}")
             w, h = self._plotter.window_size
         coords[:, 0] /= max(w, 1)
         coords[:, 1] /= max(h, 1)
@@ -404,8 +410,8 @@ class ShapeOverlayManager:
         """
         try:
             self._cached_projected_points = self._project_world_to_data(points)
-        except Exception:
-            logger.debug("Failed to project and cache points.")
+        except Exception as ex:
+            logger.debug(f"Failed to project and cache points: {ex}")
 
     def project_points_to_screen(self, points: np.ndarray) -> np.ndarray:
         """Project Nx3 world-space points to Nx2 chart data coords [0-1].
