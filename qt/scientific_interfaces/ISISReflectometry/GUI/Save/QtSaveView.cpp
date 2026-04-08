@@ -37,6 +37,7 @@ void QtSaveView::initLayout() {
   connect(m_ui.saveIndividualRowsCheckBox, SIGNAL(stateChanged(int)), this, SLOT(onSaveIndividualRowsChanged(int)));
   connect(m_ui.savePathEdit, SIGNAL(editingFinished()), this, SLOT(onSavePathChanged()));
   connect(m_ui.savePathBrowseButton, SIGNAL(clicked()), this, SLOT(browseToSaveDirectory()));
+  connect(m_ui.modelEdit, SIGNAL(textChanged(const QString &)), this, SLOT(onModelTextChanged(const QString &)));
 }
 
 void QtSaveView::connectSettingsChange(QLineEdit &edit) {
@@ -54,6 +55,8 @@ void QtSaveView::connectSettingsChange(QCheckBox &edit) {
 void QtSaveView::connectSettingsChange(QRadioButton &edit) {
   connect(&edit, SIGNAL(clicked()), this, SLOT(onSettingsChanged()));
 }
+
+void QtSaveView::onModelTextChanged(const QString &text) { m_ui.validateModelCheckBox->setEnabled(!text.isEmpty()); }
 
 void QtSaveView::onSettingsChanged() { m_notifyee->notifySettingsChanged(); }
 

@@ -128,6 +128,7 @@ public slots:
 
 private slots:
   void onSettingsChanged();
+  void onModelTextChanged(const QString &text);
 
 private:
   /// Initialize the interface
