@@ -657,6 +657,13 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 f"to save as ORSO ASCII or {MantidORSOSaver.NEXUS_FILE_EXT} to save as ORSO Nexus."
             )
 
+        angle_files = self.getProperty(Prop.ANGLE_FILES).value
+        angle_files_theta = self.getProperty(Prop.ANGLE_FILES_THETA).value
+        if len(angle_files) > 0 or len(angle_files_theta) > 0:
+            if len(angle_files) != len(angle_files_theta):
+                issues[Prop.ANGLE_FILES] = (
+                    f"Both the {Prop.ANGLE_FILES} and {Prop.ANGLE_FILES_THETA} properties must be lists of equal length. "
+                )
         return issues
 
     def _validate_ws(self, ws_name: str) -> str:
