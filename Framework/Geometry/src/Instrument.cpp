@@ -176,36 +176,33 @@ void Instrument::setPhysicalInstrument(std::unique_ptr<Instrument> physInst) {
 /**	Fills a copy of the detector cache
  */
 void Instrument::getDetectors(detid2det_map &out_map) const {
+  out_map.clear();
+  auto it = out_map.end();
   if (m_map) {
     // Get the base instrument detectors
-    out_map.clear();
     const auto &in_dets = m_instr->m_detectorCache;
     // And turn them into parametrized versions
     for (const auto &in_det : in_dets) {
-      out_map.emplace(std::get<0>(in_det), getDetector(std::get<0>(in_det)));
+      it = out_map.emplace_hint(it, in_det.id(), getDetector(in_det.id()));
     }
   } else {
     // You can just return the detector cache directly.
-    out_map.clear();
-    for (const auto &in_det : m_detectorCache)
-      out_map.emplace(std::get<0>(in_det), std::get<1>(in_det));
+    for (const auto &in_det : m_detectorCache) {
+      it = out_map.emplace_hint(it, in_det.id(), in_det.detector());
+    }
   }
 }
 
 //------------------------------------------------------------------------------------------
 /** Return a vector of detector IDs in this instrument */
 std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
+  const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
   std::vector<detid_t> out;
-  if (m_map) {
-    const auto &in_dets = m_instr->m_detectorCache;
-    for (const auto &in_det : in_dets)
-      if (!skipMonitors || !std::get<2>(in_det))
-        out.emplace_back(std::get<0>(in_det));
-  } else {
-    const auto &in_dets = m_detectorCache;
-    for (const auto &in_det : in_dets)
-      if (!skipMonitors || !std::get<2>(in_det))
-        out.emplace_back(std::get<0>(in_det));
+  out.reserve(in_dets.size());
+  for (const auto &in_det : in_dets) {
+    if (!skipMonitors || !in_det.isMonitor()) {
+      out.emplace_back(in_det.id());
+    }
   }
   return out;
 }
@@ -220,33 +217,21 @@ std::vector<detid_t> Instrument::getMonitorIDs() const {
 
   std::vector<detid_t> mons;
   for (const auto &item : m_detectorCache)
-    if (std::get<2>(item))
-      mons.emplace_back(std::get<0>(item));
+    if (item.isMonitor())
+      mons.emplace_back(item.id());
   return mons;
 }
 
 /// @return The total number of detector IDs in the instrument */
 std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
-  std::size_t numDetIDs(0);
+  const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
 
-  if (m_map) {
-    numDetIDs = m_instr->m_detectorCache.size();
-  } else {
-    numDetIDs = m_detectorCache.size();
-  }
+  std::size_t numDetIDs = in_dets.size();
 
   if (skipMonitors) // this slow, but gets the right answer
   {
     std::size_t monitors(0);
-    if (m_map) {
-      const auto &in_dets = m_instr->m_detectorCache;
-      monitors =
-          std::count_if(in_dets.cbegin(), in_dets.cend(), [](const auto &in_det) { return std::get<2>(in_det); });
-    } else {
-      const auto &in_dets = m_detectorCache;
-      monitors =
-          std::count_if(in_dets.cbegin(), in_dets.cend(), [](const auto &in_det) { return std::get<2>(in_det); });
-    }
+    monitors = std::count_if(in_dets.cbegin(), in_dets.cend(), [](const auto &in_det) { return in_det.isMonitor(); });
     return (numDetIDs - monitors);
   } else {
     return numDetIDs;
@@ -263,13 +248,13 @@ void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
   if (!isFinalized())
     throw std::runtime_error("Instrument definition is not finalized. Can't find min/max ids");
 
-  const auto *in_dets = m_map ? &m_instr->m_detectorCache : &m_detectorCache;
+  const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
 
-  if (in_dets->empty())
+  if (in_dets.empty())
     throw std::runtime_error("No detectors on this instrument. Can't find min/max ids");
   // Maps are sorted by key. So it is easy to find
-  min = std::get<0>(*in_dets->begin());
-  max = std::get<0>(*in_dets->rbegin());
+  min = in_dets.front().id();
+  max = in_dets.back().id();
 }
 
 /** Fill a vector with all the detectors contained (at any depth) in a named
@@ -484,14 +469,14 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
     throw std::runtime_error("Instrument definition is not finalized. Can't search for detector ID " +
                              std::to_string(detector_id));
 
-  const auto &baseInstr = m_map ? *m_instr : *this;
-  const auto it = find(baseInstr.m_detectorCache, detector_id);
-  if (it == baseInstr.m_detectorCache.end()) {
+  const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
+  const auto it = find(in_dets, detector_id);
+  if (it == in_dets.end()) {
     std::stringstream readInt;
     readInt << detector_id;
     throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.", "");
   }
-  IDetector_const_sptr baseDet = std::get<1>(*it);
+  IDetector_const_sptr baseDet = it->detector();
 
   if (!m_map)
     return baseDet;
@@ -516,7 +501,7 @@ const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
   if (it == m_instr->m_detectorCache.end()) {
     return nullptr;
   }
-  return std::get<1>(*it).get();
+  return it->detector().get();
 }
 
 bool Instrument::isMonitor(const detid_t &detector_id) const {
@@ -525,11 +510,11 @@ bool Instrument::isMonitor(const detid_t &detector_id) const {
     throw std::runtime_error("Instrument definition is not finalized. Can't search for monitor ID " +
                              std::to_string(detector_id));
 
-  const auto &baseInstr = m_map ? *m_instr : *this;
-  const auto it = find(baseInstr.m_detectorCache, detector_id);
-  if (it == baseInstr.m_detectorCache.end())
+  const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
+  const auto it = find(in_dets, detector_id);
+  if (it == in_dets.end())
     return false;
-  return std::get<2>(*it);
+  return it->isMonitor();
 }
 
 bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
@@ -666,7 +651,7 @@ void Instrument::markAsDetector(const IDetector *det) {
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
   auto it = lower_bound(m_detectorCache, det->getID());
   // Duplicate detector ids are forbidden
-  if ((it != m_detectorCache.end()) && (std::get<0>(*it) == det->getID())) {
+  if ((it != m_detectorCache.end()) && (it->id() == det->getID())) {
     raiseDuplicateDetectorError(det->getID());
   }
   m_detectorCache.emplace(it, det->getID(), det_sptr, false);
@@ -694,18 +679,14 @@ void Instrument::markAsDetectorFinalize() {
 
   // Detectors (even when different objects) are NOT allowed to have duplicate
   // ids. This method establishes the presence of duplicates.
-  std::sort(
-      m_detectorCache.begin(), m_detectorCache.end(),
-      [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
-         const std::tuple<detid_t, IDetector_const_sptr, bool> &b) -> bool { return std::get<0>(a) < std::get<0>(b); });
+  std::sort(m_detectorCache.begin(), m_detectorCache.end(),
+            [](DetectorCacheEntry const &a, DetectorCacheEntry const &b) -> bool { return a.id() < b.id(); });
 
-  auto resultIt = std::adjacent_find(m_detectorCache.begin(), m_detectorCache.end(),
-                                     [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
-                                        const std::tuple<detid_t, IDetector_const_sptr, bool> &b) -> bool {
-                                       return std::get<0>(a) == std::get<0>(b);
-                                     });
+  auto resultIt = std::adjacent_find(
+      m_detectorCache.begin(), m_detectorCache.end(),
+      [](DetectorCacheEntry const &a, DetectorCacheEntry const &b) -> bool { return a.id() == b.id(); });
   if (resultIt != m_detectorCache.end()) {
-    raiseDuplicateDetectorError(std::get<0>(*resultIt));
+    raiseDuplicateDetectorError(resultIt->id());
   }
   m_detectorCacheFinalized = true;
 }
@@ -1179,10 +1160,8 @@ bool Instrument::addAssemblyChildrenToQueue(std::queue<IComponent_const_sptr> &q
 
 /// Temporary helper for refactoring. Argument is index, *not* ID!
 bool Instrument::isMonitorViaIndex(const size_t index) const {
-  if (m_map)
-    return std::get<2>(m_instr->m_detectorCache[index]);
-  else
-    return std::get<2>(m_detectorCache[index]);
+  const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
+  return in_dets[index].isMonitor();
 }
 
 bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
@@ -1193,9 +1172,9 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
     throw std::runtime_error("Instrument definition is not finalized. Can't get detector index for ID " +
                              std::to_string(detID));
 
-  const auto &baseInstr = m_map ? *m_instr : *this;
-  const auto it = find(baseInstr.m_detectorCache, detID);
-  return std::distance(baseInstr.m_detectorCache.cbegin(), it);
+  const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
+  const auto it = find(in_dets, detID);
+  return std::distance(in_dets.cbegin(), it);
 }
 
 /// Returns a legacy ParameterMap, containing information that is now stored in
@@ -1243,11 +1222,9 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     }
 
     if (componentInfo.isDetector(i)) {
-
-      const std::shared_ptr<const IDetector> &baseDet = std::get<1>(baseInstr.m_detectorCache[i]);
-
       isDetFixedInBank = ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, i);
       if (detectorInfo.isMasked(i)) {
+        auto const &baseDet = baseInstr.m_detectorCache[i].detector();
         pmap->forceUnsafeSetMasked(baseDet.get(), true);
       }
 

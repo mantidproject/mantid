@@ -78,29 +78,22 @@ public:
   /// Returns a list of Detectors for the given detectors ids
   std::vector<IDetector_const_sptr> getDetectors(const std::set<detid_t> &det_ids) const;
 
-  /// mark a Component which has already been added to the Instrument (as a
-  /// child comp.)
-  /// to be 'the' samplePos Component. For now it is assumed that we have
-  /// at most one of these.
+  /// mark a Component which has already been added to the Instrument (as a child comp.)
+  /// to be 'the' samplePos Component. For now it is assumed that we have at most one of these.
   void markAsSamplePos(const IComponent *);
 
-  /// mark a Component which has already been added to the Instrument (as a
-  /// child comp.)
-  /// to be 'the' source Component. For now it is assumed that we have
-  /// at most one of these.
+  /// mark a Component which has already been added to the Instrument (as a child comp.)
+  /// to be 'the' source Component. For now it is assumed that we have at most one of these.
   void markAsSource(const IComponent *);
 
-  /// mark a Component which has already been added to the Instrument (as a
-  /// child comp.)
+  /// mark a Component which has already been added to the Instrument (as a child comp.)
   /// to be a Detector component by adding it to _detectorCache
   void markAsDetector(const IDetector *);
   void markAsDetectorIncomplete(const IDetector *);
   void markAsDetectorFinalize();
 
-  /// mark a Component which has already been added to the Instrument (as a
-  /// child comp.)
-  /// to be a monitor and also add it to _detectorCache for possible later
-  /// retrieval
+  /// mark a Component which has already been added to the Instrument (as a child comp.)
+  /// to be a monitor and also add it to _detectorCache for possible later retrieval
   void markAsMonitor(const IDetector *);
   void markAsMonitorIncomplete(const IDetector *);
 
@@ -267,9 +260,13 @@ private:
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo, const DetectorInfo &detectorInfo) const;
 
-  /// Map which holds detector-IDs and pointers to detector components, and
-  /// monitor flags.
-  std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
+  /// Map which holds detector-IDs and pointers to detector components, and monitor flags.
+  struct DetectorCacheEntry : std::tuple<detid_t, IDetector_const_sptr, bool> {
+    detid_t const &id() const { return std::get<0>(*this); }
+    IDetector_const_sptr const &detector() const { return std::get<1>(*this); }
+    bool const &isMonitor() const { return std::get<2>(*this); }
+  };
+  std::vector<DetectorCacheEntry> m_detectorCache;
 
   bool m_detectorCacheFinalized{true};
   bool isFinalized() const {
