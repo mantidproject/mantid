@@ -10,6 +10,7 @@ from mantid.utils.reflectometry import SpinStatesORSO
 from mantid.kernel import (
     Direction,
     config,
+    FloatArrayProperty,
     StringArrayLengthValidator,
     StringArrayMandatoryValidator,
     StringArrayProperty,
@@ -72,6 +73,7 @@ class Prop:
     Q_CONVERT_METHOD = "QConversionMethod"
     REDUCTION_TIMESTAMP = "ReductionTimestamp"
     ANGLE_FILES = "AngleFileList"
+    ANGLE_FILES_THETA = "AngleFileThetaList"
     TRANS_FILES_1 = "FirstTransmissionFileList"
     TRANS_FILES_2 = "SecondTransmissionFileList"
     FLOOD_ENTRY = "FloodCorrectionSource"
@@ -86,15 +88,15 @@ class MetadataSourceOptions:
     MANUAL = "Manual"
 
 
-class ReflectometryDataSetBase:
+class ReflectometryDatasetBase:
     def __init__(self, ws, is_ws_grp_member: bool):
         self._name: str = ""
         self._ws = ws
         self._is_ws_grp_member: bool = is_ws_grp_member
         self._reduction_timestamp: datetime = None
-        self._is_stitched = None
+        self._is_stitched: bool = None
         self._q_conversion_theta: Optional[float] = None
-        self._q_conversion_method = ""
+        self._q_conversion_method: str = ""
         self._spin_state: str = ""
         self._reduction_script: Optional[str] = None
         self._angle_files: List[Tuple[str, str]] = None
@@ -168,7 +170,57 @@ class ReflectometryDataSetBase:
         return self._resolution
 
 
-class ReflectometryDatasetHistory(ReflectometryDataSetBase):
+class ReflectometryDatasetManual(ReflectometryDatasetBase):
+    @ReflectometryDatasetBase.name.setter
+    def name(self, name: str) -> None:
+        self._name = name
+
+    @ReflectometryDatasetBase.spin_state.setter
+    def spin_state(self, spin_state: str) -> None:
+        self._spin_state = spin_state
+
+    @ReflectometryDatasetBase.reduction_timestamp.setter
+    def reduction_timestamp(self, reduction_timestamp: datetime) -> None:
+        self._reduction_timestamp = reduction_timestamp
+
+    @ReflectometryDatasetBase.is_stitched.setter
+    def is_stitched(self, is_stitched: bool) -> None:
+        self.is_stitched = is_stitched
+
+    @ReflectometryDatasetBase.q_conversion_method.setter
+    def q_conversion_method(self, q_conversion_method: str) -> None:
+        self._q_conversion_method = q_conversion_method
+
+    @ReflectometryDatasetBase.q_conversion_theta.setter
+    def q_conversion_theta(self, q_conversion_theta: Optional[float]) -> None:
+        self._q_conversion_theta = q_conversion_theta
+
+    @ReflectometryDatasetBase.reduction_script.setter
+    def reduction_script(self, reduction_script: Optional[str]) -> None:
+        self._reduction_script = reduction_script
+
+    @ReflectometryDatasetBase.angle_files.setter
+    def angle_files(self, angle_files: List[Tuple[str, str]]) -> None:
+        self._angle_files = angle_files
+
+    @ReflectometryDatasetBase.transmission_files.setter
+    def transmission_files(self, transmission_files: Tuple[List[str], List[str]]) -> None:
+        self._transmission_files = transmission_files
+
+    @ReflectometryDatasetBase.flood_entry.setter
+    def flood_entry(self, flood_entry: Optional[tuple[str, str]]) -> None:
+        self._flood_entry = flood_entry
+
+    @ReflectometryDatasetBase.calibration_entry.setter
+    def calibration_entry(self, calibration_entry: Optional[str]) -> None:
+        self._calibration_entry = calibration_entry
+
+    @ReflectometryDatasetBase.resolution.setter
+    def resolution(self, resolution: Optional[float]) -> None:
+        self._resolution = resolution
+
+
+class ReflectometryDatasetHistory(ReflectometryDatasetBase):
     REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
     CONVERT_ALG = "ConvertUnits"
     REF_ROI_ALG = "RefRoi"
@@ -525,6 +577,9 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         self.declareProperty(StringArrayProperty(Prop.ANGLE_FILES, values=[]), doc="Input angle file list.")
         self.setPropertySettings(Prop.ANGLE_FILES, manual_metadata_condition)
 
+        self.declareProperty(FloatArrayProperty(Prop.ANGLE_FILES_THETA, values=[]), doc="Input angle file list of theta values.")
+        self.setPropertySettings(Prop.ANGLE_FILES_THETA, manual_metadata_condition)
+
         self.declareProperty(StringArrayProperty(Prop.TRANS_FILES_1, values=[]), doc="List of files used in the first transmission run.")
         self.setPropertySettings(Prop.TRANS_FILES_1, manual_metadata_condition)
 
@@ -672,13 +727,31 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         for ws_name in self.getProperty(Prop.WORKSPACE_LIST).value:
             ws = AnalysisDataService.retrieve(ws_name)
             if isinstance(ws, WorkspaceGroup):
-                dataset_list.extend([ReflectometryDatasetHistory(child_ws, True) for child_ws in ws])
+                dataset_list.extend([self._create_single_refl_dataset(child_ws, True) for child_ws in ws])
             else:
-                dataset_list.append(ReflectometryDatasetHistory(ws, is_workspace_group_member(ws_name)))
+                dataset_list.append(self._create_single_refl_dataset(ws, is_workspace_group_member(ws_name)))
 
         # Stitched datasets should be sorted to the end of the list
         dataset_list.sort(key=lambda refl_dataset: refl_dataset.is_stitched)
         return dataset_list
+
+    def _create_single_refl_dataset(self, ws, is_child) -> ReflectometryDatasetBase:
+        match self.getPropertyValue(Prop.META_SOURCE):
+            case MetadataSourceOptions.FROM_HISTORY:
+                return ReflectometryDatasetHistory(ws, is_child)
+            case MetadataSourceOptions.MANUAL:
+                dataset = ReflectometryDatasetManual(ws, is_child)
+                dataset.q_conversion_method = self.getPropertyValue(Prop.Q_CONVERT_METHOD)
+                dataset.reduction_timestamp = self.getPropertyValue(Prop.REDUCTION_TIMESTAMP)
+                dataset.angle_files = zip(self.getProperty(Prop.ANGLE_FILES).value, self.getProperty(Prop.ANGLE_FILES_THETA).value)
+                dataset.transmission_files = (self.getProperty(Prop.TRANS_FILES_1).value, self.getProperty(Prop.TRANS_FILES_2).value)
+                dataset.flood_entry = tuple(self.getProperty(Prop.FLOOD_ENTRY).value)
+                dataset.calibration_entry = self.getPropertyValue(Prop.CALIB_FILE)
+                dataset.resolution = self.getProperty(Prop.RESOLUTION).value
+                dataset.reduction_script = self.getPropertyValue(Prop.SCRIPT)
+                return dataset
+            case _:
+                raise RuntimeError("An invalid metadata source was given.")
 
     def _create_orso_dataset(self, refl_dataset: ReflectometryDatasetHistory) -> MantidORSODataset:
         data_columns = self._create_data_columns(refl_dataset)
@@ -775,7 +848,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             validate=self.getProperty(Prop.VALIDATION).value,
         )
 
-    def _add_optional_header_info(self, dataset: MantidORSODataset, refl_dataset: ReflectometryDatasetHistory) -> None:
+    def _add_optional_header_info(self, dataset: MantidORSODataset, refl_dataset: ReflectometryDatasetBase) -> None:
         """
         Populate the non_mandatory information in the header
         """
@@ -788,7 +861,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         if refl_dataset.is_polarized:
             dataset.set_polarization(refl_dataset.spin_state)
 
-        if not refl_dataset.reduction_workflow_histories:
+        if isinstance(refl_dataset, ReflectometryDatasetHistory) and not refl_dataset.reduction_workflow_histories:
             self.log().debug(
                 f"Unable to find history for {ReflectometryDatasetHistory.REDUCTION_WORKFLOW_ALG}"
                 "- some metadata will be excluded from the file."
