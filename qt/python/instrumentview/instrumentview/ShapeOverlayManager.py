@@ -252,6 +252,7 @@ class ShapeOverlayManager:
             except Exception as ex:
                 logger.debug(f"Failed to remove chart from plotter: {ex}")
             self._chart = None
+        self._cached_projected_points = None
         self._cached_transform = None
         self._state = {_STATE_MODE: None, _STATE_ACTIVE_SHAPE: None}
 
@@ -425,6 +426,7 @@ class ShapeOverlayManager:
         The projected Nx2 array is kept in ``_cached_projected_points`` and
         consumed once by ``get_shape_mask``.
         """
+        self._cached_projected_points = None
         try:
             self._cached_projected_points = self._project_world_to_data(points)
         except Exception as ex:

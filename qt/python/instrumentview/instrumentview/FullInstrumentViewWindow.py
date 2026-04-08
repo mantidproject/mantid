@@ -875,15 +875,6 @@ class FullInstrumentViewWindow(QMainWindow):
         if self._shape_overlay_manager is not None:
             self._shape_overlay_manager.project_and_cache_points(points)
 
-    def update_shape_projection_cache(self):
-        """Refresh the cached projection matrices used by get_shape_mask.
-
-        Must be called on the main/Qt thread **before** queuing background
-        work that calls get_shape_mask.
-        """
-        if self._shape_overlay_manager is not None:
-            self._shape_overlay_manager.update_projection_cache()
-
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
         self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, pickable=False, render_points_as_spheres=True, point_size=10)
