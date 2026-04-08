@@ -176,6 +176,9 @@ void Instrument::setPhysicalInstrument(std::unique_ptr<Instrument> physInst) {
 /**	Fills a copy of the detector cache
  */
 void Instrument::getDetectors(detid2det_map &out_map) const {
+  if (!isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized. Can't get detectors");
+
   out_map.clear();
   if (m_map) {
     // Get the base instrument detectors
@@ -195,6 +198,9 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
 //------------------------------------------------------------------------------------------
 /** Return a vector of detector IDs in this instrument */
 std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
+  if (!isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized. Can't get detector IDs");
+
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
   std::vector<detid_t> out;
   out.reserve(in_dets.size());
@@ -210,6 +216,9 @@ std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
  *  @return a vector holding detector ids of  monitors
  */
 std::vector<detid_t> Instrument::getMonitorIDs() const {
+  if (!isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized. Can't get monitor IDs");
+
   // Monitors cannot be parametrized. So just return the base.
   if (m_map)
     return m_instr->getMonitorIDs();
@@ -223,6 +232,9 @@ std::vector<detid_t> Instrument::getMonitorIDs() const {
 
 /// @return The total number of detector IDs in the instrument */
 std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
+  if (!isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized. Can't get number of detectors");
+
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
 
   std::size_t numDetIDs = in_dets.size();
