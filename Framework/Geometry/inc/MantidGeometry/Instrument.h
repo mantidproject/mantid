@@ -102,6 +102,7 @@ public:
   /// to be a monitor and also add it to _detectorCache for possible later
   /// retrieval
   void markAsMonitor(const IDetector *);
+  void markAsMonitorIncomplete(const IDetector *);
 
   /// Remove a detector from the instrument
   void removeDetector(IDetector *);
@@ -269,6 +270,15 @@ private:
   /// Map which holds detector-IDs and pointers to detector components, and
   /// monitor flags.
   std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
+
+  bool m_detectorCacheFinalized{true};
+  bool isFinalized() const {
+    if (m_map) {
+      return m_instr->isFinalized();
+    } else {
+      return m_detectorCacheFinalized;
+    }
+  }
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component

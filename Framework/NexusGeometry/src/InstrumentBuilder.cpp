@@ -117,7 +117,7 @@ void InstrumentBuilder::addMonitor(const std::string &detName, detid_t detId, co
   detector->setShape(shape);
 
   m_instrument->add(detector);
-  m_instrument->markAsMonitor(detector);
+  m_instrument->markAsMonitorIncomplete(detector);
 }
 
 /// Sorts detectors
