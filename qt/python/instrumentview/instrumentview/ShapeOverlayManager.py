@@ -305,18 +305,19 @@ class ShapeOverlayManager:
             if hit is None:
                 return
             self._state[_STATE_ACTIVE_SHAPE] = self._shape
-            if hit == "handle":
-                self._state[_STATE_MODE] = "rotate"
-                self._state[_STATE_ROTATE_START_CURSOR] = np.arctan2(npos[1] - self._shape.cy, npos[0] - self._shape.cx)
-                self._state[_STATE_ROTATE_START_ANGLE] = self._shape.angle
-            elif hit in ("edge", "inner_edge"):
-                self._state[_STATE_MODE] = "resize"
-                self._state[_STATE_RESIZE_START] = npos
-                self._state[_STATE_RESIZE_SAVED] = self._shape.save_size()
-                self._state[_STATE_RESIZE_WHICH] = "inner" if hit == "inner_edge" else "outer"
-            elif hit == "inside":
-                self._state[_STATE_MODE] = "drag"
-                self._state[_STATE_DRAG_OFFSET] = (npos[0] - self._shape.cx, npos[1] - self._shape.cy)
+            match hit:
+                case "handle":
+                    self._state[_STATE_MODE] = "rotate"
+                    self._state[_STATE_ROTATE_START_CURSOR] = np.arctan2(npos[1] - self._shape.cy, npos[0] - self._shape.cx)
+                    self._state[_STATE_ROTATE_START_ANGLE] = self._shape.angle
+                case "edge" | "inner_edge":
+                    self._state[_STATE_MODE] = "resize"
+                    self._state[_STATE_RESIZE_START] = npos
+                    self._state[_STATE_RESIZE_SAVED] = self._shape.save_size()
+                    self._state[_STATE_RESIZE_WHICH] = "inner" if hit == "inner_edge" else "outer"
+                case "inside":
+                    self._state[_STATE_MODE] = "drag"
+                    self._state[_STATE_DRAG_OFFSET] = (npos[0] - self._shape.cx, npos[1] - self._shape.cy)
         except Exception as ex:
             logger.debug(f"Exception in shape left-press handler: {ex}")
 
@@ -340,17 +341,22 @@ class ShapeOverlayManager:
                 if npos is None:
                     return
                 nx, ny = npos
-                if mode == "drag":
-                    ox, oy = self._state.get(_STATE_DRAG_OFFSET, (0, 0))
-                    s.cx = nx - ox
-                    s.cy = ny - oy
-                elif mode == "resize":
-                    s.apply_resize_delta(
-                        nx, ny, self._state[_STATE_RESIZE_START][0], self._state[_STATE_RESIZE_START][1], self._state[_STATE_RESIZE_SAVED]
-                    )
-                elif mode == "rotate":
-                    cur = np.arctan2(ny - s.cy, nx - s.cx)
-                    s.angle = self._state[_STATE_ROTATE_START_ANGLE] + (cur - self._state[_STATE_ROTATE_START_CURSOR])
+                match mode:
+                    case "drag":
+                        ox, oy = self._state.get(_STATE_DRAG_OFFSET, (0, 0))
+                        s.cx = nx - ox
+                        s.cy = ny - oy
+                    case "resize":
+                        s.apply_resize_delta(
+                            nx,
+                            ny,
+                            self._state[_STATE_RESIZE_START][0],
+                            self._state[_STATE_RESIZE_START][1],
+                            self._state[_STATE_RESIZE_SAVED],
+                        )
+                    case "rotate":
+                        cur = np.arctan2(ny - s.cy, nx - s.cx)
+                        s.angle = self._state[_STATE_ROTATE_START_ANGLE] + (cur - self._state[_STATE_ROTATE_START_CURSOR])
                 s.update_plots()
                 self._plotter.render()
                 return

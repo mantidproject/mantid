@@ -644,14 +644,15 @@ class HollowRectangleSelectionShape(SelectionShape):
         """Return 4 corners (global coords) for one of the 4 fill strips."""
         ohw, ohh = self.outer_half_width, self.outer_half_height
         ihw, ihh = self.inner_half_width, self.inner_half_height
-        if which == "left":
-            local = [(-ohw, -ohh), (-ihw, -ohh), (-ihw, ohh), (-ohw, ohh)]
-        elif which == "right":
-            local = [(ihw, -ohh), (ohw, -ohh), (ohw, ohh), (ihw, ohh)]
-        elif which == "top":
-            local = [(-ihw, ihh), (ihw, ihh), (ihw, ohh), (-ihw, ohh)]
-        else:  # bottom
-            local = [(-ihw, -ohh), (ihw, -ohh), (ihw, -ihh), (-ihw, -ihh)]
+        match which:
+            case "left":
+                local = [(-ohw, -ohh), (-ihw, -ohh), (-ihw, ohh), (-ohw, ohh)]
+            case "right":
+                local = [(ihw, -ohh), (ohw, -ohh), (ohw, ohh), (ihw, ohh)]
+            case "top":
+                local = [(-ihw, ihh), (ihw, ihh), (ihw, ohh), (-ihw, ohh)]
+            case _:  # bottom
+                local = [(-ihw, -ohh), (ihw, -ohh), (ihw, -ihh), (-ihw, -ihh)]
         return [self._rot(lx, ly) for lx, ly in local]
 
     def fill_coords(self):
