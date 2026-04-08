@@ -1183,6 +1183,10 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
 
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
   const auto it = in_dets.find(detID);
+  if (it == in_dets.end()) {
+    throw Mantid::Kernel::Exception::NotFoundError("Instrument: Detector with ID not found in instrument: ",
+                                                   std::to_string(detID));
+  }
   return std::distance(in_dets.cbegin(), it);
 }
 
