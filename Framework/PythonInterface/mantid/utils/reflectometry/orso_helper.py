@@ -7,7 +7,7 @@
 import concurrent.futures
 import numpy as np
 from datetime import datetime, timezone
-from typing import Optional, Union, List, Callable, Any
+from typing import Optional, Union, List
 import re
 from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, SampleModel, Measurement, Polarization, InstrumentSettings
 from orsopy.fileio import Reduction, Software
@@ -17,24 +17,6 @@ from mantid.kernel import logger
 
 from mantid.kernel import version
 from enum import Enum
-
-
-def run_with_timeout(func: Callable, timeout: float, *args, **kwargs) -> Any:
-    """
-    Run `func` with the given timeout.
-
-    If `func` does not return within `timeout`, return None
-    and print a warning.
-    """
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(func, *args, **kwargs)
-
-        try:
-            return future.result(timeout=timeout)
-
-        except concurrent.futures.TimeoutError:
-            logger.warning(f"Function '{func.__name__}' timed out after {timeout} seconds")
-            return None
 
 
 class MantidORSOSaver:
@@ -142,20 +124,21 @@ class MantidORSODataset:
         if model:
             # Verify that the sample string is correct before creating the sample
             if validate:
-                future = executor.submit(SampleModel(stack=model).resolve_to_layers)
-                try:
-                    result = future.result(timeout=5.0)
-                except concurrent.futures.TimeoutError:
-                    logger.error(f"The provided model description '{model}' could not be validated because of database unavalibility.")
-                    self._header = None
-                    return
-                except:
-                    logger.error(
-                        f"The provided model description '{model}' contains an error. "
-                        "Please check that the string follows the correct ORSO format."
-                    )
-                    self._header = None
-                    return
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                    future = executor.submit(SampleModel(stack=model).resolve_to_layers)
+                    try:
+                        future.result(timeout=5.0)
+                    except concurrent.futures.TimeoutError:
+                        logger.error(f"The provided model description '{model}' could not be validated because of database unavalibility.")
+                        self._header = None
+                        return
+                    except:
+                        logger.error(
+                            f"The provided model description '{model}' contains an error. "
+                            "Please check that the string follows the correct ORSO format."
+                        )
+                        self._header = None
+                        return
             sample = Sample(name=ws.getTitle(), model=model)
         else:
             sample = Sample(name=ws.getTitle())

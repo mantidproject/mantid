@@ -16,7 +16,6 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos, ORSOAscii, ORSONexus };
-enum class ModelValidationMethod { NoValidation, StrictValidation };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL FileFormatOptions {
 public:
