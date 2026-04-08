@@ -276,13 +276,12 @@ void ReflectometryReductionOne3::exec() {
     const auto &task = m_stagedAlgorithmTasks[i];
     task->execute();
     if (outputDiagnostics) {
-      const auto &taskName = task->name();
-      const auto &taskOutput = m_algorithmTaskOutputs.at(taskName);
+      const auto &taskOutput = m_algorithmTaskOutputs.at(task->name());
       for (const auto &output : taskOutput) {
         const auto &outputName = output.first;
         outputDebugWorkspace(output.second, diagWSName, "_" + outputName, step);
-        step++;
       }
+      step++;
     }
     // Output the selected output of the last task
     if (i == m_stagedAlgorithmTasks.size() - 1)
