@@ -139,13 +139,13 @@ void QtSaveView::disableAdditionalColumnsCheckBox() { m_ui.extraColumnsCheckBox-
 void QtSaveView::showModelEditTextBox() {
   m_ui.modelEditLabel->setVisible(true);
   m_ui.modelEdit->setVisible(true);
-  m_ui.validationOptionComboBox->setVisible(true);
+  m_ui.validateModelCheckBox->setVisible(true);
 }
 
 void QtSaveView::hideModelEditTextBox() {
   m_ui.modelEditLabel->setVisible(false);
   m_ui.modelEdit->setVisible(false);
-  m_ui.validationOptionComboBox->setVisible(false);
+  m_ui.validateModelCheckBox->setVisible(false);
 }
 
 void QtSaveView::enableSeparatorButtonGroup() {
@@ -235,10 +235,10 @@ std::vector<std::string> QtSaveView::getSelectedParameters() const {
  */
 int QtSaveView::getFileFormatIndex() const { return m_ui.fileFormatComboBox->currentIndex(); }
 
-/** Returns the index of the selected validation method
- * @return :: Validation method format index
+/** Returns the validate model check value
+ * @return :: validate model check
  */
-int QtSaveView::getModelValidationIndex() const { return m_ui.validationOptionComboBox->currentIndex(); }
+bool QtSaveView::getValidateModelCheck() const { return m_ui.validateModelCheckBox->isChecked(); }
 
 /** Returns the header check value
  * @return :: The header check

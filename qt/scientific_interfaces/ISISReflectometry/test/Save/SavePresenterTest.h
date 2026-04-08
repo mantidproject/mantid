@@ -608,7 +608,7 @@ private:
     EXPECT_CALL(m_view, getQResolutionCheck()).Times(1).WillOnce(Return(m_includeQResolution));
     EXPECT_CALL(m_view, getAdditionalColumnsCheck()).Times(1).WillOnce(Return(m_includeAdditionalColumns));
     EXPECT_CALL(m_view, getModel()).Times(1).WillOnce(Return(m_model));
-    EXPECT_CALL(m_view, getModelValidationIndex()).Times(1).WillOnce(Return(m_validation));
+    EXPECT_CALL(m_view, getValidateModelCheck()).Times(1).WillOnce(Return(m_validation));
     if (isAutoSave) {
       EXPECT_CALL(m_view, getSaveToSingleFileCheck()).Times(1).WillOnce(Return(saveToSingleFile));
     } else {

@@ -51,8 +51,8 @@ public:
   std::vector<std::string> getSelectedParameters() const override;
   /// Returns the index of selected file format
   int getFileFormatIndex() const override;
-  /// Returns the index of selected model Validation
-  int getModelValidationIndex() const override;
+  /// Returns the validate model check
+  bool getValidateModelCheck() const override;
   /// Returns the title check
   bool getHeaderCheck() const override;
   /// Returns the Q resolution check

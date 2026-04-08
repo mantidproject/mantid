@@ -75,7 +75,6 @@ private:
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
   NamedFormat formatFromIndex(int formatIndex) const;
-  bool validationFromIndex(int validationIndex) const;
   FileFormatOptions getSaveParametersFromView(bool const isAutoSave) const;
   void enableAutosave();
   void disableAutosave();

@@ -366,25 +366,18 @@
         <widget class="QLineEdit" name="modelEdit"/>
         </item>
         <item>
-            <widget class="QComboBox" name="validationOptionComboBox">
-            <property name="font">
-            <font>
-                <weight>75</weight>
-            </font>
-            </property>
-            <property name="styleSheet">
-            <string notr="true"/>
-            </property>
-            <item>
-            <property name="text">
-                <string>Validate model description</string>
-            </property>
-            </item>
-            <item>
-            <property name="text">
-                <string>Do not validate model description</string>
-            </property>
-            </item>
+            <widget class="QCheckBox" name="validateModelCheckBox">
+                <property name="font">
+                    <font>
+                        <weight>75</weight>
+                    </font>
+                </property>
+                <property name="text">
+                    <string>Validate model description</string>
+                </property>
+                <property name="checked">
+                    <bool>true</bool>
+                </property>
             </widget>
         </item>
         <item>

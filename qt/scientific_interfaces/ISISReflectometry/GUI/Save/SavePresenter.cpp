@@ -272,17 +272,6 @@ NamedFormat SavePresenter::formatFromIndex(int formatIndex) const {
   }
 }
 
-bool SavePresenter::validationFromIndex(int validationIndex) const {
-  switch (validationIndex) {
-  case 0: // Validate model description
-    return true;
-  case 1: // Do not validate model description
-    return false;
-  default:
-    throw std::runtime_error("Unknown validation option.");
-  }
-}
-
 FileFormatOptions SavePresenter::getSaveParametersFromView(bool const isAutoSave) const {
   return FileFormatOptions(
       /*format=*/formatFromIndex(m_view->getFileFormatIndex()),
@@ -293,7 +282,7 @@ FileFormatOptions SavePresenter::getSaveParametersFromView(bool const isAutoSave
       /*includeAdditionalColumns=*/m_view->getAdditionalColumnsCheck(),
       /*shouldSaveToSingleFile=*/isAutoSave && m_view->getSaveToSingleFileCheck(),
       /*model=*/m_view->getModel(),
-      /*model_validation=*/validationFromIndex(m_view->getModelValidationIndex()));
+      /*model_validation=*/m_view->getValidateModelCheck());
 }
 
 void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames,
