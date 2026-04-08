@@ -54,6 +54,9 @@ from mantid.simpleapi import (
     Load,
     LoadWAND,
     LoadInstrument,
+    CreateWorkspace,
+    LoadNexusLogs,
+    AddSampleLog,
 )
 import h5py
 import numpy as np
@@ -63,6 +66,11 @@ logger = Logger(__name__)
 
 
 class HFIRPowderReduction(DataProcessorAlgorithm):
+    MIDAS_NUM_BANKS = 7
+    MIDAS_TUBES_PER_BANK = 16
+    MIDAS_PIXELS_PER_TUBE = 512
+    MIDAS_TOTAL_PIXELS = MIDAS_NUM_BANKS * MIDAS_TUBES_PER_BANK * MIDAS_PIXELS_PER_TUBE  # 57344
+
     def name(self):
         return "HFIRPowderReduction"
 
@@ -553,6 +561,77 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         return issues
 
+    def _loadMIDASData(self, filename, ws):
+        # Check if the file has the expected fields
+        with h5py.File(filename, "r") as f:
+            has_entry_fields = (
+                "/entry/monitor1/total_counts" in f
+                and "/entry/duration" in f
+                and "/entry/run_number" in f
+                and all(f"/entry/bank{b + 1}_events/event_id" in f for b in range(self.MIDAS_NUM_BANKS))
+            )
+
+        if not has_entry_fields:
+            # Fall back to the generic MIDAS loader
+            self._load_MIDAS(filename, ws)
+            return
+
+        data = np.zeros(self.MIDAS_TOTAL_PIXELS, dtype=np.int64)
+        with h5py.File(filename, "r") as f:
+            monitor_count = f["/entry/monitor1/total_counts"][0]
+            duration = f["/entry/duration"][0]
+            run_number = f["/entry/run_number"][0]
+            for b in range(self.MIDAS_NUM_BANKS):
+                data += np.bincount(
+                    f["/entry/bank" + str(b + 1) + "_events/event_id"][()],
+                    minlength=self.MIDAS_TOTAL_PIXELS,
+                )
+        CreateWorkspace(
+            DataX=[0, 1],
+            DataY=data,
+            DataE=np.sqrt(data),
+            UnitX="Empty",
+            YUnitLabel="Counts",
+            NSpec=self.MIDAS_TOTAL_PIXELS,
+            OutputWorkspace="__tmp_load",
+            EnableLogging=False,
+        )
+        LoadNexusLogs("__tmp_load", Filename=filename, EnableLogging=False)
+        AddSampleLog(
+            "__tmp_load",
+            LogName="monitor_count",
+            LogType="Number",
+            NumberType="Double",
+            LogText=str(monitor_count),
+            EnableLogging=False,
+        )
+        AddSampleLog(
+            "__tmp_load",
+            LogName="gd_prtn_chrg",
+            LogType="Number",
+            NumberType="Double",
+            LogText=str(monitor_count),
+            EnableLogging=False,
+        )
+        AddSampleLog("__tmp_load", LogName="run_number", LogText=str(run_number), EnableLogging=False)
+        AddSampleLog(
+            "__tmp_load",
+            LogName="duration",
+            LogType="Number",
+            LogText=str(duration),
+            NumberType="Double",
+            EnableLogging=False,
+        )
+
+        # Use the modified IDF that supports simulated data until we get real MIDAS data
+        # LoadInstrument("__tmp_load", InstrumentName="MIDAS", RewriteSpectraMap=True, EnableLogging=False)
+        LoadInstrument("__tmp_load", Filename="/SNS/users/nxw/mccode_fixed.xml", RewriteSpectraMap=True, EnableLogging=False)
+        # Masking is not used yet, but will be added back later
+        # if self.getProperty("ApplyMask").value:
+        #     MaskBTP("__tmp_load", Pixel="1,2,511,512", EnableLogging=False)
+
+        RenameWorkspace("__tmp_load", ws, EnableLogging=False)
+
     def PyExec(self):
         """
         Main execution method following these steps:
@@ -700,11 +779,12 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         if not isinstance(ws, WorkspaceGroup):
             # This is a temp fix for using simulated MIDAS data
             LoadInstrument(ws, Filename="/SNS/users/nxw/mccode_fixed.xml", RewriteSpectraMap=True)
-            self.temp_workspace_list.append("1spectrum")
 
-    def _load_WAND(self, filename, ws):
+    def _load_WAND_Data(self, filename, ws):
+        grouping = self.getProperty("Grouping").value
+        apply_mask = self.getProperty("ApplyMask").value
         try:
-            LoadWAND(Filename=filename, OutputWorkspace=ws, EnableLogging=False)
+            LoadWAND(Filename=filename, OutputWorkspace=ws, Grouping=grouping, ApplyMask=apply_mask, EnableLogging=False)
         except RuntimeError:
             logger.warning(f"LoadWAND failed for {filename}, falling back to generic Load")
             Load(Filename=filename, OutputWorkspace=ws, EnableLogging=False)
@@ -716,7 +796,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             "MIDAS": "/HFIR/HB2A/IPTS-{ipts}/nexus/HB2A_{run}.nxs.h5",
             "WAND^2": "/HFIR/HB2C/IPTS-{ipts}/nexus/HB2C_{run}.nxs.h5",
         }
-        loader_map = {"MIDAS": self._load_MIDAS, "WAND^2": self._load_WAND}
+        loader_map = {"MIDAS": self._loadMIDASData, "WAND^2": self._load_WAND_Data}
         return self._load_data(data_type, file_source_map[instrument], loader_map[instrument])
 
     def _load_data(self, data_type, source_template, loader):
@@ -746,7 +826,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         if not files_to_load:
             return None
 
-        grouping = self.getProperty("Grouping").value
         loaded_workspaces = []
         for i, filename in enumerate(files_to_load):
             temp_ws = f"{data_type.lower()}_{i}"
@@ -757,9 +836,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 continue
 
             loaded_workspaces.append(temp_ws)
-
-            if grouping != "None":
-                self._apply_grouping(temp_ws, grouping)
 
         logger.information(f"Loaded {len(loaded_workspaces)} {data_type.lower()} workspace(s)")
         return loaded_workspaces
@@ -811,13 +887,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             return None
         result = self._general_load_data("SampleBackground")
         return result[0] if result else None
-
-    def _apply_grouping(self, ws_name, grouping):
-        """Apply 2x2 or 4x4 pixel grouping."""
-        # Implementation depends on specific requirements for WAND/MIDAS
-        # This is a placeholder - actual grouping logic would need to be instrument-specific
-        logger.information(f"Applying {grouping} grouping to {ws_name}")
-        return ws_name
 
     def _process_vanadium_calibration(self, vanadium_ws, vanadium_bg_ws):
         """

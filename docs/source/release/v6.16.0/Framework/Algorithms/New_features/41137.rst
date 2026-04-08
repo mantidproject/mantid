@@ -1,0 +1,1 @@
+- :ref:`algm-HFIRPowderReduction` now has logic for loading MIDAS data
