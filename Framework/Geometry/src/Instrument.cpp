@@ -1241,6 +1241,8 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
           transformation.prescale(scale);
         }
       }
+      // keep track of the current detector in the base instrument
+      detIt++;
     }
 
     const auto componentId = componentInfo.componentID(i);
@@ -1266,8 +1268,6 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     if ((relRot * toQuaterniond(baseComponent->getRelativeRot()).conjugate()).vec().norm() >= imag_norm_max) {
       pmap->addQuat(componentId, ParameterMap::rot(), Kernel::toQuat(relRot));
     }
-    // keep track of the current detector in the base instrument
-    detIt++;
   }
 
   return pmap;
