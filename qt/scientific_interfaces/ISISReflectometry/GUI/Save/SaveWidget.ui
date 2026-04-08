@@ -367,11 +367,6 @@
         </item>
         <item>
             <widget class="QCheckBox" name="validateModelCheckBox">
-                <property name="font">
-                    <font>
-                        <weight>75</weight>
-                    </font>
-                </property>
                 <property name="text">
                     <string>Validate model description</string>
                 </property>
