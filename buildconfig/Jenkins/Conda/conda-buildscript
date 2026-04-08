@@ -22,7 +22,6 @@
 #   --enable-doctests: Run the documentation tests
 #   --enable-coverity: Run coverity and submit results; ignores all other options and does not run unit tests
 #   --clean-build: Clear the build folder and build from scratch
-#   --clean-external-projects: Clear the external projects from the build folder
 #
 # Possible parameters:
 #   --extra-cmake-flags: Extra flags to pass directly to cmake, enclose in "", defaults to nothing
@@ -96,7 +95,6 @@ do
             ENABLE_UNIT_TESTS=false
 	    ;;
         --clean-build) CLEAN_BUILD=true ;;
-        --clean-external-projects) CLEAN_EXTERNAL_PROJECTS=true ;;
         --extra-cmake-flags)
             EXTRA_CMAKE_FLAGS="$2"
             shift
