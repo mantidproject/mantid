@@ -469,9 +469,12 @@ void ReflectometryReductionOneAuto3::setOutputWorkspaces(RROOutputs &out, const 
   if (!isDefault("OutputWorkspaceWavelength") || isChild())
     setProperty("OutputWorkspaceWavelength", out.IvsLam);
   setProperty("OutputWorkspaceBinned", binnedWS);
-  setWorkspaceProperty(out.trans, "OutputWorkspaceTransmission");
-  setWorkspaceProperty(out.trans1, "OutputWorkspaceFirstTransmission");
-  setWorkspaceProperty(out.trans2, "OutputWorkspaceSecondTransmission");
+  if (out.trans)
+    setWorkspaceProperty(out.trans, "OutputWorkspaceTransmission");
+  if (out.trans1)
+    setWorkspaceProperty(out.trans1, "OutputWorkspaceFirstTransmission");
+  if (out.trans2)
+    setWorkspaceProperty(out.trans2, "OutputWorkspaceSecondTransmission");
 }
 
 void ReflectometryReductionOneAuto3::updatePropertiesAfterReduction(RROOutputs &out, const RebinParams &params) {
