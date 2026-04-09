@@ -455,7 +455,6 @@ void ReflectometryReductionOneAuto3::postReductionProcessingGroups(std::vector<R
     params = getRebinParams(out.IvsQ, out.theta);
     const auto binnedWS = postReductionProcessing(out, params);
     AnalysisDataService::Instance().addOrReplace(outputNames[i].iVsQBinned, binnedWS);
-    AnalysisDataService::Instance().addOrReplace(outputNames[i].iVsLam, out.IvsLam);
     AnalysisDataService::Instance().addOrReplace(outputNames[i].iVsQ, out.IvsQ);
   }
   setOutputGroupedWorkspaces(outputNames, groupedOutputNames);
@@ -834,22 +833,20 @@ WorkspaceGroup_sptr ReflectometryReductionOneAuto3::groupWorkspaces(const std::v
 }
 
 /** Set the output workspaces for the main algorithm based on the grouped
- * outputs of the child algorihms from processGroups
+ * outputs of the child algorithms from processGroups
  */
 void ReflectometryReductionOneAuto3::setOutputGroupedWorkspaces(std::vector<WorkspaceNames> const &outputNames,
                                                                 WorkspaceNames const &outputGroupNames) {
   // Extract each type of output workspaces as a string list for grouping
-  std::vector<std::string> IvsQGroup, IvsQBinnedGroup, IvsLamGroup;
-  std::for_each(outputNames.cbegin(), outputNames.cend(),
-                [&IvsQGroup, &IvsQBinnedGroup, &IvsLamGroup](auto const &names) {
-                  IvsQGroup.push_back(names.iVsQ);
-                  IvsQBinnedGroup.push_back(names.iVsQBinned);
-                  IvsLamGroup.push_back(names.iVsLam);
-                });
+  // We don't need to handle iVsLam here as the polarization algorithms already output a group into the ADS
+  std::vector<std::string> IvsQGroup, IvsQBinnedGroup;
+  std::for_each(outputNames.cbegin(), outputNames.cend(), [&IvsQGroup, &IvsQBinnedGroup](auto const &names) {
+    IvsQGroup.push_back(names.iVsQ);
+    IvsQBinnedGroup.push_back(names.iVsQBinned);
+  });
 
   groupWorkspaces(IvsQGroup, outputGroupNames.iVsQ);
   groupWorkspaces(IvsQBinnedGroup, outputGroupNames.iVsQBinned);
-  groupWorkspaces(IvsLamGroup, outputGroupNames.iVsLam);
 
   setPropertyValue("OutputWorkspace", outputGroupNames.iVsQ);
   setPropertyValue("OutputWorkspaceBinned", outputGroupNames.iVsQBinned);
@@ -1115,6 +1112,7 @@ WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyPolarizationCorrection(
   CorrectionMethod::validate(correctionMethod);
 
   Algorithm_sptr polAlg = createChildAlgorithm("PolarizationEfficiencyCor");
+  polAlg->setChild(false);
   polAlg->setRethrows(true);
   polAlg->setProperty("OutputWorkspace", outputGroupName);
   polAlg->setProperty("Efficiencies", efficiencies);
@@ -1124,7 +1122,7 @@ WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyPolarizationCorrection(
   polAlg->setProperty("AddSpinStateToLog", true);
   polAlg->setProperty("InputWorkspaceGroup", outputIvsLam);
   polAlg->execute();
-  return polAlg->getProperty("OutputWorkspace");
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputGroupName);
 }
 
 /**
