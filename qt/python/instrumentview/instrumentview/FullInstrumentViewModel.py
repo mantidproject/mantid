@@ -36,7 +36,6 @@ from mantid.api import MatrixWorkspace
 from pathlib import Path
 import numpy as np
 
-from itertools import cycle
 from enum import Enum
 
 
@@ -45,25 +44,8 @@ class PeakPickingStatus(Enum):
     Off = 2
 
 
-class Colours:
-    def __init__(self, colours: list[str]):
-        self._colours = colours
-        self._cycle = cycle(colours)
-
-    def next(self) -> str:
-        return next(self._cycle)
-
-    def reset(self):
-        self._cycle = cycle(self._colours)
-
-    def list(self) -> list[str]:
-        return self._colours
-
-
 class FullInstrumentViewModel:
     """Model for the Instrument View Window. Will calculate detector positions, indices, and integrated counts that give the colours"""
-
-    _COLOURS = Colours(["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"])
 
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
@@ -495,20 +477,20 @@ class FullInstrumentViewModel:
         AnalysisDataService.addOrReplace(name_exported_ws, self.line_plot_workspace)
 
     def get_peak_overlay_arguments(self, selected_peaks_workspaces: list[str]) -> tuple:
-        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
+        wrapped_workspaces = [
+            WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces if AnalysisDataService.doesExist(ws_name)
+        ]
         positions_by_pws = [wws.get_positions(self.detector_positions, self.pickable_detector_ids) for wws in wrapped_workspaces]
         labels_by_pws = [wws.get_labels() for wws in wrapped_workspaces]
-        self._COLOURS.reset()
-        colours_by_pws = [self._COLOURS.next() for wws in wrapped_workspaces]
-        return positions_by_pws, labels_by_pws, colours_by_pws
+        return positions_by_pws, labels_by_pws, selected_peaks_workspaces
 
     def get_peak_lineplot_overlay_arguments(self, unit: str, selected_peaks_workspaces: list[str]):
-        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
+        wrapped_workspaces = [
+            WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces if AnalysisDataService.doesExist(ws_name)
+        ]
         x_by_pws = [wws.get_x_values(unit, self.picked_detector_ids) for wws in wrapped_workspaces]
         labels_by_pws = [wws.get_labels_picked(self.picked_detector_ids) for wws in wrapped_workspaces]
-        self._COLOURS.reset()
-        colours_by_pws = [self._COLOURS.next() for wws in wrapped_workspaces]
-        return x_by_pws, labels_by_pws, colours_by_pws
+        return x_by_pws, labels_by_pws, selected_peaks_workspaces
 
     def add_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> str:
         peaks_ws = self._get_peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)

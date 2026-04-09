@@ -99,6 +99,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
     _detector_spectrum_fig = None
     _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRato"
+    _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     def __init__(self, parent=None, off_screen=False):
         """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
@@ -344,6 +345,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self._overlay_meshes = []
         self._lineplot_overlays = []
+        self._peak_ws_list_colours = {}
 
         screen_geometry = self.screen().geometry()
         self.resize(int(screen_geometry.width() * 0.8), int(screen_geometry.height() * 0.8))
@@ -726,15 +728,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self._restore_list(self._selection_list, self._selection_list_cache)
         self._selection_tab.setEnabled(True)
 
-    def refresh_peaks_ws_list_colours(self, colours: list[str]) -> None:
-        picked_index = 0
+    def refresh_peaks_ws_list_colours(self) -> None:
+        self._peak_ws_list_colours = {}
         for list_i in range(self._peak_ws_list.count()):
             list_item = self._peak_ws_list.item(list_i)
-            if list_item.checkState() > 0:
-                list_item.setForeground(QColor(colours[picked_index % len(colours)]))
-                picked_index += 1
-            else:
-                list_item.setForeground(self._peak_ws_list.palette().color(QPalette.Text))
+            colour = self._COLOURS[list_i % len(self._COLOURS)]
+            list_item.setForeground(QColor(colour))
+            self._peak_ws_list_colours[list_item.text()] = colour
 
     def select_peaks_workspace(self, peaks_ws: str) -> None:
         for list_i in range(self._peak_ws_list.count()):
@@ -979,11 +979,16 @@ class FullInstrumentViewWindow(QMainWindow):
         for text in self._detector_spectrum_axes.texts:
             text.remove()
 
-    def plot_overlay_meshes(self, positions_by_pws: list[np.ndarray], labels_by_pws: list[list[str]], colours_by_pws: list[str]) -> None:
-        for positions, labels, colour in zip(positions_by_pws, labels_by_pws, colours_by_pws):
+    def plot_overlay_meshes(
+        self, positions_by_pws: list[np.ndarray], labels_by_pws: list[list[str]], selected_workspaces: list[str]
+    ) -> None:
+        for positions, labels, ws_key in zip(positions_by_pws, labels_by_pws, selected_workspaces):
             if len(positions) == 0:
                 continue
-            points_actor = self.main_plotter.add_points(positions, color=colour, point_size=15, render_points_as_spheres=True, opacity=0.2)
+
+            points_actor = self.main_plotter.add_points(
+                positions, color=self._peak_ws_list_colours[ws_key], point_size=15, render_points_as_spheres=True, opacity=0.2
+            )
             labels_actor = self.main_plotter.add_point_labels(
                 positions,
                 labels,
@@ -993,22 +998,27 @@ class FullInstrumentViewWindow(QMainWindow):
                 always_visible=True,
                 fill_shape=False,
                 shape_opacity=0,
-                text_color=colour,
+                text_color=self._peak_ws_list_colours[ws_key],
             )
             self._overlay_meshes.append((points_actor, labels_actor))
 
-    def plot_lineplot_peak_overlays(self, x_by_pws: list[list[float]], labels_by_pws: list[list[str]], colours_by_pws: list[str]) -> None:
-        for x_values, labels, colour in zip(x_by_pws, labels_by_pws, colours_by_pws):
+    def plot_lineplot_peak_overlays(
+        self, x_by_pws: list[list[float]], labels_by_pws: list[list[str]], selected_workspaces: list[str]
+    ) -> None:
+        for x_values, labels, ws_key in zip(x_by_pws, labels_by_pws, selected_workspaces):
             if len(x_values) == 0:
                 continue
+
             for x, label in zip(x_values, labels):
-                self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color=colour, linestyle="--"))
+                self._lineplot_overlays.append(
+                    self._detector_spectrum_axes.axvline(x, color=self._peak_ws_list_colours[ws_key], linestyle="--")
+                )
                 self._detector_spectrum_axes.text(
                     x,
                     0.99,
                     label,
                     transform=self._detector_spectrum_axes.get_xaxis_transform(),
-                    color=colour,
+                    color=self._peak_ws_list_colours[ws_key],
                     ha="right",
                     va="top",
                     fontsize=8,
@@ -1065,6 +1075,8 @@ class FullInstrumentViewWindow(QMainWindow):
             self._presenter.on_peak_selected_in_lineplot(event.xdata, "right")
 
     def add_peak_cursor_to_lineplot(self) -> None:
+        if self._lineplot_peak_cursor is not None:
+            self.remove_peak_cursor_from_lineplot()
         self._lineplot_peak_cursor = Cursor(self._detector_spectrum_axes, color="tab:red", linewidth=1, horizOn=False)
         for cid in self._default_lineplot_callbacks:
             self._detector_figure_canvas.mpl_disconnect(cid)
@@ -1072,18 +1084,19 @@ class FullInstrumentViewWindow(QMainWindow):
         self._plot_toolbar.setDisabled(True)
 
     def remove_peak_cursor_from_lineplot(self) -> None:
-        if self._lineplot_peak_cursor is not None:
-            self._detector_figure_canvas.mpl_disconnect(self._figure_canvas_click_id)
-            new_lineplot_callbacks = {}
-            for cid, func in self._default_lineplot_callbacks.items():
-                new_cid = self._detector_figure_canvas.mpl_connect("button_press_event", func)
-                new_lineplot_callbacks[new_cid] = func
-            self._default_lineplot_callbacks = new_lineplot_callbacks
-            self._figure_canvas_click_id = None
-            self._lineplot_peak_cursor.linev.remove()
-            self._lineplot_peak_cursor = None
-            self._plot_toolbar.setDisabled(False)
-            self._detector_figure_canvas.draw_idle()
+        if self._lineplot_peak_cursor is None:
+            return
+        self._detector_figure_canvas.mpl_disconnect(self._figure_canvas_click_id)
+        new_lineplot_callbacks = {}
+        for cid, func in self._default_lineplot_callbacks.items():
+            new_cid = self._detector_figure_canvas.mpl_connect("button_press_event", func)
+            new_lineplot_callbacks[new_cid] = func
+        self._default_lineplot_callbacks = new_lineplot_callbacks
+        self._figure_canvas_click_id = None
+        self._lineplot_peak_cursor.linev.remove()
+        self._lineplot_peak_cursor = None
+        self._plot_toolbar.setDisabled(False)
+        self._detector_figure_canvas.draw_idle()
 
     def get_filename_from_dialog(self, file_filter: str):
         # NOTE: Needs to be in view to run in main thread

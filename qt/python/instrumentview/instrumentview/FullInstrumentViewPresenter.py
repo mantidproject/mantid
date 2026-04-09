@@ -514,6 +514,7 @@ class FullInstrumentViewPresenter:
 
     def _reload_peaks_workspaces(self):
         self._view.refresh_peaks_ws_list()
+        self._view.refresh_peaks_ws_list_colours()
         self.on_peaks_workspace_selected()
 
     def _delete_workspace_callback(self, ws_name):
@@ -592,10 +593,9 @@ class FullInstrumentViewPresenter:
 
     def refresh_plotter_peaks(self) -> None:
         self._view.clear_overlay_meshes()
-        pos, labels, colours = self._model.get_peak_overlay_arguments(self._view.selected_peaks_workspaces())
+        pos, labels, selected_peaks_workspaces = self._model.get_peak_overlay_arguments(self._view.selected_peaks_workspaces())
         transformed_pos = [self._transform_vectors_with_matrix(p, self._transform) for p in pos]
-        self._view.plot_overlay_meshes(transformed_pos, labels, colours)
-        self._view.refresh_peaks_ws_list_colours(colours)
+        self._view.plot_overlay_meshes(transformed_pos, labels, selected_peaks_workspaces)
 
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
@@ -671,7 +671,9 @@ class FullInstrumentViewPresenter:
         Called when workspaces are added to or removed from the ADS.
         """
         with SuppressRendering(self._view.main_plotter):
-            self._reload_renderers()
             self._reload_peaks_workspaces()
             self._reload_mask_workspaces()
             self._reload_grouping_workspaces()
+            # Reload renderers only after updating the lists in the view
+            # Otherwise can trigger a plotter update when lists are not in sync with ADS
+            self._reload_renderers()

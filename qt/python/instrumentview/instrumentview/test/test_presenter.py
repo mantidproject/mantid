@@ -240,6 +240,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_reload_peaks_workspaces(self, mock_on_peaks_workspace_selected):
         self._presenter._reload_peaks_workspaces()
         self._mock_view.refresh_peaks_ws_list.assert_called_once()
+        self._mock_view.refresh_peaks_ws_list_colours.assert_called_once()
         mock_on_peaks_workspace_selected.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_workspaces_in_ads_of_type")
@@ -258,7 +259,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_get_peak_overlay_arguments,
         mock_transform,
     ):
-        mock_get_peak_overlay_arguments.return_value = ([np.zeros((1, 3))], [["(1, 1, 1)"]], ["#ff7f0e"])
+        mock_get_peak_overlay_arguments.return_value = ([np.zeros((1, 3))], [["(1, 1, 1)"]], ["ws1"])
         mock_transform.return_value = np.zeros((1, 3))
         self._presenter.on_peaks_workspace_selected()
         mock_refresh_lineplot_peaks.assert_called_once()
@@ -268,12 +269,12 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
     def test_refresh_lineplot_peaks(self, mock_get_lineplot_args):
-        mock_get_lineplot_args.return_value = ([[100]], [["(1, 1, 1)"]], ["#ff7f0e"])
+        mock_get_lineplot_args.return_value = ([[100]], [["(1, 1, 1)"]], ["ws1"])
         self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
         self._presenter.refresh_lineplot_peaks()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
-        self._mock_view.plot_lineplot_peak_overlays.assert_called_once_with([[100]], [["(1, 1, 1)"]], ["#ff7f0e"])
+        self._mock_view.plot_lineplot_peak_overlays.assert_called_once_with([[100]], [["(1, 1, 1)"]], ["ws1"])
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
     def test_refresh_lineplot_peaks_no_peaks(self, mock_get_lineplot_args):

@@ -126,8 +126,9 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_plot_overlay_meshes(self):
         positions = [np.array([[0, 0, 0]])]
         labels = [["label"]]
-        colours = ["colour"]
-        self._view.plot_overlay_meshes(positions, labels, colours)
+        selected_workspaces = ["ws1"]
+        self._view._peak_ws_list_colours = {"ws1": "#ff7f0e"}
+        self._view.plot_overlay_meshes(positions, labels, selected_workspaces)
         self._view.main_plotter.add_points.assert_called_once()
         self._view.main_plotter.add_point_labels.assert_called_once()
         self.assertEqual(1, len(self._view._overlay_meshes))
@@ -135,9 +136,10 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_plot_lineplot_peak_overlays(self):
         x_values = [[1.0, 2.0]]
         labels = [["a", "b"]]
-        colours = ["colour"]
+        selected_workspaces = ["ws1"]
+        self._view._peak_ws_list_colours = {"ws1": "#ff7f0e"}
         self._view._detector_spectrum_axes = MagicMock()
-        self._view.plot_lineplot_peak_overlays(x_values, labels, colours)
+        self._view.plot_lineplot_peak_overlays(x_values, labels, selected_workspaces)
         self.assertEqual(2, self._view._detector_spectrum_axes.text.call_count)
         self.assertEqual(2, len(self._view._lineplot_overlays))
 
