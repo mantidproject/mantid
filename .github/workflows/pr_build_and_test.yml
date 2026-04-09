@@ -91,7 +91,9 @@ jobs:
       - name: Build code
         run: |
           cd ${GITHUB_WORKSPACE}
+          echo "::add-matcher::.github/matchers/gcc.json"
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY $EXTRA_CMAKE_FLAGS
+          echo "::remove-matcher owner=gcc-problem-matcher::"
 
       - name: Run unit tests
         run: |
