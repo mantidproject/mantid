@@ -183,7 +183,7 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
     const auto &in_dets = m_instr->m_detectorCache;
     // And turn them into parametrized versions
     for (const auto &in_det : in_dets) {
-      it = out_map.emplace_hint(it, in_det.id(), getDetector(in_det.id()));
+      it = out_map.emplace_hint(it, in_det.id(), ParComponentFactory::createDetector(in_det.detector().get(), m_map));
     }
   } else {
     // You can just return the detector cache directly.

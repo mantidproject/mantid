@@ -17,6 +17,7 @@
 
 #include <map>
 #include <queue>
+#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <unordered_map>
