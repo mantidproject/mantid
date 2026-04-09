@@ -60,34 +60,9 @@ static const std::string DEFAULT_FLIPPERS_NO_ANALYSER{"0, 1"};
 static const std::string DEFAULT_FLIPPERS_FULL{"00, 01, 10, 11"};
 } // namespace CorrectionOption
 
-std::vector<std::string> getGroupMemberNames(const std::string &groupName) {
-  auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
-  return group->getNames();
-}
-
 Algorithm::WorkspaceVector getGroupMembers(const std::string &groupName) {
   auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
   return group->getAllItems();
-}
-
-std::string vectorToString(const std::vector<std::string> &vec) {
-  std::string result;
-  for (const auto &item : vec) {
-    if (!result.empty())
-      result += ",";
-    result += item;
-  }
-  return result;
-}
-
-void removeAllWorkspacesFromGroup(const std::string &groupName) {
-  auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
-  group->removeAll();
-}
-
-void removeWorkspacesFromADS(const std::vector<std::string> &workspaceNames) {
-  for (const auto &workspaceName : workspaceNames)
-    AnalysisDataService::Instance().remove(workspaceName);
 }
 
 bool anyWorkspaceInListExists(std::vector<std::string> const &names) {
@@ -892,7 +867,7 @@ ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReduction
     allOutputNames = workspaceNames;
   // Process each group member
   std::vector<RROOutputs> allRROOutputs;
-  for (int i; i < members.size(); i++) {
+  for (auto i = 0; i < members.size(); i++) {
     auto ws = members[i];
     MatrixWorkspace_sptr matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
     if (!matrixWs) {
@@ -901,7 +876,6 @@ ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReduction
     }
     if (populateOutputNames)
       allOutputNames.emplace_back(getOutputNamesForGroupMember(matrixWs->getName(), runNumber, i));
-    auto &outputNames = allOutputNames[i];
 
     // If data has already been reduced, as workspace is summed we need to change processing instructions.
     if (reduced) {
