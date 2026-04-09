@@ -23,10 +23,10 @@ set_target_properties(MPIAlgorithms PROPERTIES OUTPUT_NAME MantidMPIAlgorithms)
 # Add to the 'Framework' group in VS
 set_property(TARGET MPIAlgorithms PROPERTY FOLDER "MantidFramework")
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(MPIAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(MPIAlgorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR};\$ORIGIN/../${PLUGINS_DIR}")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set_target_properties(MPIAlgorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+else()
+  message(STATUS "Only linux builds are currently supported")
 endif()
 
 target_link_libraries(
