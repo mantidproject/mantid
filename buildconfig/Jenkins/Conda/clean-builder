@@ -18,7 +18,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 start_time=$(date +%s)
 
 # Check arguments passed are 2 or higher, and aren't optional flags.
-if [[ $# < 1 || $1 == "--"* || $2 == "--"* ]]; then
+if [[ $# < 1 || $1 == "--"* ]]; then
     echo "Pass 1 argument followed by optional flags usage: clean-builder <path-to-workspace> [options]"
     exit 1
 fi
