@@ -96,6 +96,7 @@ jobs:
           echo "::remove-matcher owner=gcc-problem-matcher::"
 
       - name: Run unit tests
+        id: testunit
         run: |
           cd ${GITHUB_WORKSPACE}
           # Not physical but logical cores, includes hyper threaded - different for darwin
@@ -104,7 +105,16 @@ jobs:
           # SYSTEM_TESTS UNIT_TESTS DOCS DOC_TESTS
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} false true $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
 
+      - name: Unit test report
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: ${{ failure() && steps.testunit.conclusion == 'failure' }}
+        with:
+          check_name: "Unit test results"
+          check_run: false
+          files: build/Testing/*unittest.xml
+
       - name: Run system tests
+        id: testsystem
         run: |
           cd ${GITHUB_WORKSPACE}
           # Not physical but logical cores, includes hyper threaded - different for darwin
@@ -113,33 +123,25 @@ jobs:
           # SYSTEM_TESTS UNIT_TESTS DOCS DOC_TESTS
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} true false $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
 
+      - name: Upload system test mismatch files
+        uses: actions/upload-artifact@v7
+        if: ${{ failure() && steps.testsystem.conclusion == 'failure' }}
+        with:
+          name: system_test_mismatches
+          if-no-files-found: ignore
+          path: ${{ github.workspace }}/build/**/*-mismatch.nxs
+
+      - name: System test report
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: ${{ failure() && steps.testsystem.conclusion == 'failure' }}
+        with:
+          check_name: "System test results"
+          check_run: false
+          files: build/Testing/SystemTests/**/TEST-systemtests*.xml
+
       - name: Upload build and test log artifacts
         uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test_logs
           path: ${{ github.workspace }}/build/test_logs/*.log
-
-      - name: Upload system test mismatch files
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: system_test_mismatches
-          if-no-files-found: ignore
-          path: ${{ github.workspace }}/build/**/*-mismatch.nxs
-
-      - name: Unit test report
-        uses: EnricoMi/publish-unit-test-result-action/linux@v2
-        if: (!cancelled())
-        with:
-          check_name: "Unit test results"
-          check_run: false
-          files: build/Testing/*unittest.xml
-
-      - name: System test report
-        uses: EnricoMi/publish-unit-test-result-action/linux@v2
-        if: (!cancelled())
-        with:
-          check_name: "System test results"
-          check_run: false
-          files: build/Testing/SystemTests/**/TEST-systemtests*.xml
