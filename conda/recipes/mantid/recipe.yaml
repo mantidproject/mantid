@@ -112,6 +112,15 @@ outputs:
           - plugins/libMantidMPIAlgorithms.so
 
     requirements:
+      ignore_run_exports:
+        from_package:
+          - if: linux
+            then:
+              - libboost-mpi
+              - mpi
+              - mpi4py
+              - mpich
+
       run_exports:
         - ${{ pin_subpackage('mantid', exact=True) }}
       run_constraints:
