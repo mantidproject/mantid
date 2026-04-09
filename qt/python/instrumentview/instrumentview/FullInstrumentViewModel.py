@@ -477,17 +477,17 @@ class FullInstrumentViewModel:
         AnalysisDataService.addOrReplace(name_exported_ws, self.line_plot_workspace)
 
     def get_peak_overlay_arguments(self, selected_peaks_workspaces: list[str]) -> tuple:
-        wrapped_workspaces = [
-            WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces if AnalysisDataService.doesExist(ws_name)
-        ]
+        # Safeguard against missing workspaces in ADS
+        selected_peaks_workspaces = [ws for ws in selected_peaks_workspaces if AnalysisDataService.doesExist(ws)]
+        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
         positions_by_pws = [wws.get_positions(self.detector_positions, self.pickable_detector_ids) for wws in wrapped_workspaces]
         labels_by_pws = [wws.get_labels() for wws in wrapped_workspaces]
         return positions_by_pws, labels_by_pws, selected_peaks_workspaces
 
     def get_peak_lineplot_overlay_arguments(self, unit: str, selected_peaks_workspaces: list[str]):
-        wrapped_workspaces = [
-            WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces if AnalysisDataService.doesExist(ws_name)
-        ]
+        # Safeguard against missing workspaces in ADS
+        selected_peaks_workspaces = [ws for ws in selected_peaks_workspaces if AnalysisDataService.doesExist(ws)]
+        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
         x_by_pws = [wws.get_x_values(unit, self.picked_detector_ids) for wws in wrapped_workspaces]
         labels_by_pws = [wws.get_labels_picked(self.picked_detector_ids) for wws in wrapped_workspaces]
         return x_by_pws, labels_by_pws, selected_peaks_workspaces

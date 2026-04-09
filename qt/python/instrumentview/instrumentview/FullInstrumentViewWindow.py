@@ -669,6 +669,7 @@ class FullInstrumentViewWindow(QMainWindow):
         parent.addLayout(hBox)
 
     def refresh_peaks_ws_list(self) -> None:
+        # TODO: Very similar to other refresh list function, combine in one function
         list_to_refresh = self._peak_ws_list
         keys_from_workspaces_in_ads = self._presenter.peaks_workspaces_in_ads()
         keys_in_current_list = [list_to_refresh.item(i).text() for i in range(list_to_refresh.count())]
@@ -685,6 +686,14 @@ class FullInstrumentViewWindow(QMainWindow):
             if item.text() not in keys_from_workspaces_in_ads:
                 removed = list_to_refresh.takeItem(i)
                 del removed
+
+        # Update peaks list colours
+        self._peak_ws_list_colours = {}
+        for list_i in range(self._peak_ws_list.count()):
+            list_item = self._peak_ws_list.item(list_i)
+            colour = self._COLOURS[list_i % len(self._COLOURS)]
+            list_item.setForeground(QColor(colour))
+            self._peak_ws_list_colours[list_item.text()] = colour
 
     def refresh_workspaces_in_list(self, kind: CurrentTab) -> None:
         list_to_refresh = self._mask_list if kind is CurrentTab.Masking else self._selection_list
@@ -727,14 +736,6 @@ class FullInstrumentViewWindow(QMainWindow):
     def enable_and_restore_selection_list(self) -> None:
         self._restore_list(self._selection_list, self._selection_list_cache)
         self._selection_tab.setEnabled(True)
-
-    def refresh_peaks_ws_list_colours(self) -> None:
-        self._peak_ws_list_colours = {}
-        for list_i in range(self._peak_ws_list.count()):
-            list_item = self._peak_ws_list.item(list_i)
-            colour = self._COLOURS[list_i % len(self._COLOURS)]
-            list_item.setForeground(QColor(colour))
-            self._peak_ws_list_colours[list_item.text()] = colour
 
     def select_peaks_workspace(self, peaks_ws: str) -> None:
         for list_i in range(self._peak_ws_list.count()):

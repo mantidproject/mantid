@@ -514,7 +514,6 @@ class FullInstrumentViewPresenter:
 
     def _reload_peaks_workspaces(self):
         self._view.refresh_peaks_ws_list()
-        self._view.refresh_peaks_ws_list_colours()
         self.on_peaks_workspace_selected()
 
     def _delete_workspace_callback(self, ws_name):

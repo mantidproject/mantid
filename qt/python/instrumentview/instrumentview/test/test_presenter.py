@@ -240,7 +240,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_reload_peaks_workspaces(self, mock_on_peaks_workspace_selected):
         self._presenter._reload_peaks_workspaces()
         self._mock_view.refresh_peaks_ws_list.assert_called_once()
-        self._mock_view.refresh_peaks_ws_list_colours.assert_called_once()
         mock_on_peaks_workspace_selected.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_workspaces_in_ads_of_type")
