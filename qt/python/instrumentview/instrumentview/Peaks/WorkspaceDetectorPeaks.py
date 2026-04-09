@@ -33,10 +33,10 @@ class WorkspaceDetectorPeaks:
         for det_id, peaks_for_spec in groupby(peaks, lambda x: x.detector_id):
             self.detector_peaks.append(DetectorPeaks(list(peaks_for_spec)))
 
-    def get_positions(self, detector_positions, detector_ids):
+    def get_positions(self, detector_positions, detector_ids) -> np.ndarray:
         peaks_ids = np.array([p.detector_id for p in self.detector_peaks])
         if len(peaks_ids) == 0:
-            return np.array([]), []
+            return np.array([])
         # Use argsort + searchsorted for fast lookup. Using np.where(np.isin) does not
         # maintain the original order. It is faster to sort then search the sorted
         # array for matching spectrum numbers
@@ -46,3 +46,11 @@ class WorkspaceDetectorPeaks:
 
     def get_labels(self):
         return [p.label for p in self.detector_peaks]
+
+    def get_x_values(self, unit, picked_detector_ids):
+        # x values for vertical markers in lineplot
+        return [p.location_in_unit(unit) for peak in self.detector_peaks for p in peak.peaks if peak.detector_id in picked_detector_ids]
+
+    def get_labels_picked(self, picked_detector_ids):
+        # Select only labels in picked detectors for lineplot
+        return [p.label for peak in self.detector_peaks for p in peak.peaks if peak.detector_id in picked_detector_ids]

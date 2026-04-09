@@ -495,50 +495,36 @@ class FullInstrumentViewModel:
         AnalysisDataService.addOrReplace(name_exported_ws, self.line_plot_workspace)
 
     def get_peak_overlay_arguments(self, selected_peaks_workspaces: list[str]) -> tuple:
+        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
+        positions_by_pws = [wws.get_positions(self.detector_positions, self.pickable_detector_ids) for wws in wrapped_workspaces]
+        labels_by_pws = [wws.get_labels() for wws in wrapped_workspaces]
         self._COLOURS.reset()
-        positions_by_pws = []
-        labels_by_pws = []
-        colours_by_pws = []
-        for ws_name in selected_peaks_workspaces:
-            wdp = WorkspaceDetectorPeaks(ws_name)
-            positions_by_pws.append(wdp.get_positions(self.detector_positions, self.pickable_detector_ids))
-            labels_by_pws.append(wdp.get_labels())
-            colours_by_pws.append(self._COLOURS.next())
+        colours_by_pws = [self._COLOURS.next() for wws in wrapped_workspaces]
         return positions_by_pws, labels_by_pws, colours_by_pws
 
     def get_peak_lineplot_overlay_arguments(self, unit: str, selected_peaks_workspaces: list[str]):
+        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
+        x_by_pws = [wws.get_x_values(unit, self.picked_detector_ids) for wws in wrapped_workspaces]
+        labels_by_pws = [wws.get_labels_picked(self.picked_detector_ids) for wws in wrapped_workspaces]
         self._COLOURS.reset()
-        x_by_pws = []
-        labels_by_pws = []
-        colours_by_pws = []
-        for ws_name in selected_peaks_workspaces:
-            wdp = WorkspaceDetectorPeaks(ws_name)
-            x_values = [
-                p.location_in_unit(unit) for peak in wdp.detector_peaks for p in peak.peaks if peak.detector_id in self.picked_detector_ids
-            ]
-            labels = [p.label for peak in wdp.detector_peaks for p in peak.peaks if peak.detector_id in self.picked_detector_ids]
-            x_by_pws.append(x_values)
-            labels_by_pws.append(labels)
-            colours_by_pws.append(self._COLOURS.next())
+        colours_by_pws = [self._COLOURS.next() for wws in wrapped_workspaces]
         return x_by_pws, labels_by_pws, colours_by_pws
 
     def add_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> str:
         peaks_ws = self._get_peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)
         detector_id = self.picked_detector_ids[0]
         AddPeak(peaks_ws, self._workspace, x_in_workspace_unit, int(detector_id))
-        return peaks_ws.name()
+        return peaks_ws
 
     def _get_peaks_workspace_for_adding_new_peak(self, selected_peaks_workspaces: list[str]) -> PeaksWorkspace:
         # If exactly one Peaks workspace in selected, add the peak to that workspace, otherwise
         # use a special workspace, which we create if it doesn't exist already.
-        ads = AnalysisDataService.Instance()
         if len(selected_peaks_workspaces) == 1:
-            return ads.retrieveWorkspaces(selected_peaks_workspaces)[0]
-        if ads.doesExist(self._instrument_view_peaks_ws_name):
-            return ads.retrieveWorkspaces([self._instrument_view_peaks_ws_name])[0]
-        peaks_ws = CreatePeaksWorkspace(self._workspace, 0, OutputWorkspace=self._instrument_view_peaks_ws_name, StoreInADS=False)
-        ads.addOrReplace(self._instrument_view_peaks_ws_name, peaks_ws)
-        return peaks_ws
+            return selected_peaks_workspaces[0]
+        if AnalysisDataService.doesExist(self._instrument_view_peaks_ws_name):
+            return self._instrument_view_peaks_ws_name
+        CreatePeaksWorkspace(self._workspace, 0, OutputWorkspace=self._instrument_view_peaks_ws_name)
+        return self._instrument_view_peaks_ws_name
 
     def delete_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> None:
         detector_ids = self.picked_detector_ids

@@ -916,41 +916,37 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
     def test_get_peaks_workspace_for_adding_new_peak(self, mock_ads, mock_create_peaks_ws):
         model, _ = self._setup_model([1, 2, 3])
-        mock_ads_instance = mock_ads.Instance()
-        mock_ads_instance.doesExist.return_value = False
-        model._get_peaks_workspace_for_adding_new_peak([])
-        mock_create_peaks_ws.assert_called_once_with(
-            model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name, StoreInADS=False
-        )
+        mock_ads.doesExist.return_value = False
+        result = model._get_peaks_workspace_for_adding_new_peak([])
+        mock_create_peaks_ws.assert_called_once_with(model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name)
+        self.assertEqual(result, model._instrument_view_peaks_ws_name)
         mock_create_peaks_ws.reset_mock()
-        mock_ads_instance.doesExist.reset_mock()
+        mock_ads.doesExist.reset_mock()
 
-        model._get_peaks_workspace_for_adding_new_peak(["my_peaks_ws"])
+        result = model._get_peaks_workspace_for_adding_new_peak(["my_peaks_ws"])
         mock_create_peaks_ws.assert_not_called()
-        mock_ads_instance.retrieveWorkspaces.assert_called_once_with(["my_peaks_ws"])
-        mock_ads_instance.retrieveWorkspaces.reset_mock()
+        self.assertEqual(result, "my_peaks_ws")
 
-        mock_ads_instance.doesExist.return_value = True
-        model._get_peaks_workspace_for_adding_new_peak(["my_peaks_ws1", "my_peaks_ws2"])
-        mock_ads_instance.doesExist.assert_called_once_with(model._instrument_view_peaks_ws_name)
-        mock_ads_instance.doesExist.reset_mock()
+        mock_ads.doesExist.return_value = True
+        result = model._get_peaks_workspace_for_adding_new_peak(["my_peaks_ws1", "my_peaks_ws2"])
+        mock_ads.doesExist.assert_called_once_with(model._instrument_view_peaks_ws_name)
+        self.assertEqual(result, model._instrument_view_peaks_ws_name)
+        mock_ads.doesExist.reset_mock()
 
-        mock_ads_instance.doesExist.return_value = False
-        model._get_peaks_workspace_for_adding_new_peak(["my_peaks_ws1", "my_peaks_ws2"])
-        mock_create_peaks_ws.assert_called_once_with(
-            model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name, StoreInADS=False
-        )
+        mock_ads.doesExist.return_value = False
+        result = model._get_peaks_workspace_for_adding_new_peak(["my_peaks_ws1", "my_peaks_ws2"])
+        mock_create_peaks_ws.assert_called_once_with(model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name)
+        self.assertEqual(result, model._instrument_view_peaks_ws_name)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.AddPeak")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._get_peaks_workspace_for_adding_new_peak")
     def test_add_peak(self, mock_peaks_ws_for_adding, mock_add_peak):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([False, False, True])
-        peaks_ws = mock_peaks_ws_for_adding()
-        peaks_ws.name.return_value = "my_peaks_ws"
+        mock_peaks_ws_for_adding.return_value = "my_peaks_ws"
         peak_x = 1500
         ws = model.add_peak(peak_x, ["my_peaks_ws"])
-        mock_add_peak.assert_called_once_with(peaks_ws, model._workspace, peak_x, 3)
+        mock_add_peak.assert_called_once_with("my_peaks_ws", model._workspace, peak_x, 3)
         self.assertEqual("my_peaks_ws", ws)
 
     def test_component_tree_no_matching_detector_ids(self):

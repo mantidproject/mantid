@@ -544,7 +544,6 @@ class FullInstrumentViewWindow(QMainWindow):
             self._units_combo_box.addItem(unit)
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
         self._count_scale_combo_box.addItems(self._presenter.count_scale_combo_options())
-        self.main_plotter.set_color_cycler(self._presenter.colours)
         self.refresh_peaks_ws_list()
         self.refresh_workspaces_in_list(CurrentTab.Masking)
         self.refresh_workspaces_in_list(CurrentTab.Grouping)
@@ -983,7 +982,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def plot_overlay_meshes(self, positions_by_pws: list[np.ndarray], labels_by_pws: list[list[str]], colours_by_pws: list[str]) -> None:
         for positions, labels, colour in zip(positions_by_pws, labels_by_pws, colours_by_pws):
             if len(positions) == 0:
-                return
+                continue
             points_actor = self.main_plotter.add_points(positions, color=colour, point_size=15, render_points_as_spheres=True, opacity=0.2)
             labels_actor = self.main_plotter.add_point_labels(
                 positions,
@@ -1000,6 +999,8 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def plot_lineplot_peak_overlays(self, x_by_pws: list[list[float]], labels_by_pws: list[list[str]], colours_by_pws: list[str]) -> None:
         for x_values, labels, colour in zip(x_by_pws, labels_by_pws, colours_by_pws):
+            if len(x_values) == 0:
+                continue
             for x, label in zip(x_values, labels):
                 self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color=colour, linestyle="--"))
                 self._detector_spectrum_axes.text(

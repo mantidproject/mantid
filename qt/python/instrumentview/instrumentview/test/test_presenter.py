@@ -441,14 +441,15 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._model.convert_units.return_value = 123.456
 
     def test_left_click_calls_add_peak_and_selects_workspace(self):
-        """Left click: convert -> add_peak -> select_peaks_workspace."""
+        """Left click: convert -> add_peak -> queue select_peaks_workspace."""
         self._setup_on_peak_selected_tests()
-        returned_ws = MagicMock(name="ReturnedWorkspace")
+        self._presenter._callback_queue = MagicMock()
+        returned_ws = "ReturnedWorkspace"
         self._presenter._model.add_peak.return_value = returned_ws
         self._presenter.on_peak_selected_in_lineplot(3.14, "left")
         self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 3.14)
         self._presenter._model.add_peak.assert_called_once_with(123.456, ["wsA", "wsB"])
-        self._presenter._view.select_peaks_workspace.assert_called_once_with(returned_ws)
+        self._presenter._callback_queue.put.assert_called_once_with((self._presenter._view.select_peaks_workspace, (returned_ws,)))
         self._presenter._model.delete_peak.assert_not_called()
 
     def test_right_click_calls_delete_peak(self):
@@ -463,12 +464,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_left_click_uses_selected_peaks_workspaces_from_view(self):
         """Ensures the workspace selection passed to add_peak is sourced from the view."""
         self._setup_on_peak_selected_tests()
+        self._presenter._callback_queue = MagicMock()
         self._presenter._view.selected_peaks_workspaces.return_value = ["ws1"]
-        returned_ws = MagicMock(name="WS")
+        returned_ws = "WS"
         self._presenter._model.add_peak.return_value = returned_ws
         self._presenter.on_peak_selected_in_lineplot(2.0, "left")
         self._presenter._model.add_peak.assert_called_once_with(123.456, ["ws1"])
-        self._presenter._view.select_peaks_workspace.assert_called_once_with(returned_ws)
+        self._presenter._callback_queue.put.assert_called_once_with((self._presenter._view.select_peaks_workspace, (returned_ws,)))
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._on_list_item_selected")
     def test_on_start_adding_peaks_toggled_on(self, mock_on_list_item_selected):

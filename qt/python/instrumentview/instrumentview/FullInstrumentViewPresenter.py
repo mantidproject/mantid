@@ -559,9 +559,12 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._replace_workspace_callback, (ws_name, ws)))
 
     def _add_workspace_callback(self, ws_name, ws):
-        self._reload_peaks_workspaces()
-        self._reload_mask_workspaces()
-        self._reload_grouping_workspaces()
+        if isinstance(ws, PeaksWorkspace):
+            self._reload_peaks_workspaces()
+        elif isinstance(ws, MaskWorkspace):
+            self._reload_mask_workspaces()
+        elif isinstance(ws, GroupingWorkspace):
+            self._reload_grouping_workspaces()
 
     def add_workspace_callback(self, ws_name, ws):
         self._callback_queue.put((self._add_workspace_callback, (ws_name, ws)))
@@ -582,10 +585,6 @@ class FullInstrumentViewPresenter:
 
     def peaks_workspaces_in_ads(self) -> list[str]:
         return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(PeaksWorkspace)]
-
-    @property
-    def colours(self):
-        return self._model._COLOURS.list()
 
     def on_peaks_workspace_selected(self) -> None:
         self.refresh_plotter_peaks()
@@ -625,10 +624,10 @@ class FullInstrumentViewPresenter:
             return
         # First convert to workspace x unit
         x_in_workspace_unit = self._model.convert_units(self._view.current_selected_unit(), self._model.workspace_x_unit, 0, x)
-
         if mouse_click == "left":
             peaks_ws = self._model.add_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
-            self._view.select_peaks_workspace(peaks_ws)
+            # Trigger selection of peak ws must happen after the callbacks from add peak are complete
+            self._callback_queue.put((self._view.select_peaks_workspace, (peaks_ws,)))
         elif mouse_click == "right":
             self._model.delete_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
 
