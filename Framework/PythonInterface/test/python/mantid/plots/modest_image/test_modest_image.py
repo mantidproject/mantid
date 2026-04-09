@@ -79,7 +79,7 @@ def check(label, modest, axes, thresh=2.0e-5):
     # Here we need to convert to float to avoid underflow
     rms = np.mean(np.abs(data1.astype(float) - data2.astype(float)))
 
-    result = "PASS" if rms <= thresh else "FAIL"
+    result = "PASS" if rms < thresh else "FAIL"
     modest_label = "test_%s_modest" % label
     axes_label = "test_%s_default" % label
 
