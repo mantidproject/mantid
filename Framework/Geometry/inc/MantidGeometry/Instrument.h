@@ -260,20 +260,59 @@ private:
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo, const DetectorInfo &detectorInfo) const;
 
-  /// Map which holds detector-IDs and pointers to detector components, and monitor flags.
-  struct DetectorCacheEntry : std::tuple<detid_t, IDetector_const_sptr, bool> {
+  /// @brief Tuple which holds detector-IDs and pointers to detector components, and monitor flags.
+  /// This is the type of the elements in the detector cache vector.
+  /// Provides a more convenient interface to the elements of the detector cache vector than a raw tuple.
+  /// @extends std::tuple<detid_t, IDetector_const_sptr, bool>
+  struct DetectorCacheEntry : public std::tuple<detid_t, IDetector_const_sptr, bool> {
+    DetectorCacheEntry(detid_t id, IDetector_const_sptr det, bool isMonitorFlag)
+        : std::tuple<detid_t, IDetector_const_sptr, bool>(id, det, isMonitorFlag) {}
     detid_t const &id() const { return std::get<0>(*this); }
     IDetector_const_sptr const &detector() const { return std::get<1>(*this); }
     bool const &isMonitor() const { return std::get<2>(*this); }
+    bool &isMonitor() { return std::get<2>(*this); }
   };
-  std::vector<DetectorCacheEntry> m_detectorCache;
 
-  bool m_detectorCacheFinalized{true};
+  /// @brief A vector of DetectorCacheEntry, which holds the detector cache
+  /// This is implemented as a vector rather than an ordered map to facilitate
+  /// faster (unsorted) insertion some hotpaths requiring access by index.
+  /// This vector otherwise should act like an ordered map.
+  /// @note this class anticipates future extension by optimizing the lower_bound and find methods
+  struct DetectorCache : public std::vector<DetectorCacheEntry> {
+    bool m_isFinalized{true};
+    bool isFinalized() const { return m_isFinalized; }
+    void setIncomplete() { m_isFinalized &= false; }
+    void setFinalized(bool const flag = true) { m_isFinalized = flag; }
+    detid_t const minID() const {
+      if (isFinalized()) {
+        return front().id();
+      } else {
+        throwUnfinalized("minID()");
+      }
+    }
+    detid_t const maxID() const {
+      if (isFinalized()) {
+        return back().id();
+      } else {
+        throwUnfinalized("maxID()");
+      }
+    }
+    DetectorCache::iterator lower_bound(detid_t id);
+    DetectorCache::const_iterator lower_bound(detid_t id) const;
+    DetectorCache::iterator find(detid_t id);
+    DetectorCache::const_iterator find(detid_t id) const;
+
+  private:
+    detid_t const throwUnfinalized(std::string const &method) const {
+      throw std::runtime_error(method + " called on non-finalized DetectorCache");
+    }
+  } m_detectorCache;
+
   bool isFinalized() const {
     if (m_map) {
       return m_instr->isFinalized();
     } else {
-      return m_detectorCacheFinalized;
+      return m_detectorCache.isFinalized();
     }
   }
 

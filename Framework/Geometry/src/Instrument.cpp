@@ -242,19 +242,18 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
  *
  * @param min :: set to the min detector ID
  * @param max :: set to the max detector ID
+ * @throws std::runtime_error if there are no detectors, or if the detector cache is not finalized
  */
 void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
-  // ensure instrument is finalized
-  if (!isFinalized())
-    throw std::runtime_error("Instrument definition is not finalized. Can't find min/max ids");
-
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
-
+  // ensure there are detectors
   if (in_dets.empty())
     throw std::runtime_error("No detectors on this instrument. Can't find min/max ids");
-  // Maps are sorted by key. So it is easy to find
-  min = in_dets.front().id();
-  max = in_dets.back().id();
+  // ensure the cache is finalized
+  if (!in_dets.isFinalized())
+    throw std::runtime_error("Instrument definition is not finalized. Can't find min/max ids");
+  min = in_dets.minID();
+  max = in_dets.maxID();
 }
 
 /** Fill a vector with all the detectors contained (at any depth) in a named
@@ -397,8 +396,7 @@ std::shared_ptr<const IComponent> Instrument::getComponentByID(const IComponent 
  *  has a unique name use instead getComponentByName(), which is as fast or
  * faster for retrieving a uniquely
  *  named component.
- *  @param cname :: The name of the component. If there are multiple matches,
- * the first one found is returned.
+ *  @param cname :: The name of the component. If there are multiple matches, the first one found is returned.
  *  @returns Pointers to components
  */
 std::vector<std::shared_ptr<const IComponent>> Instrument::getAllComponentsWithName(const std::string &cname) const {
@@ -434,30 +432,80 @@ std::vector<std::shared_ptr<const IComponent>> Instrument::getAllComponentsWithN
   return retVec;
 }
 
-namespace {
-// Helpers for accessing m_detectorCache, which is a vector of tuples used as a
-// map. Lookup is by first element in a tuple. Templated to support const and
-// non-const.
-template <class T> auto lower_bound(T &map, const detid_t key) -> decltype(map.begin()) {
-  return std::lower_bound(map.begin(), map.end(), std::make_tuple(key, IDetector_const_sptr(nullptr), false),
-                          [](const typename T::value_type &a, const typename T::value_type &b) -> bool {
-                            return std::get<0>(a) < std::get<0>(b);
-                          });
+/** @brief Perform a lower bound search on the detector cache, for the element with the given ID.
+ * Note that this method is only valid for a finalized (sorted) detector cache; otherwise the results are undefined.
+ * This method should complete in O(log N), where N is the number of detectors in the cache.
+ * @param id the detector ID to search for
+ * @returns an iterator to the first DetectorCacheEntry with ID >= the given ID, or end() if no such element exists
+ * @throws std::runtime_error if the detector cache is not finalized
+ * @note optimizations in this method could improve performance in lookuo speeds
+ */
+Instrument::DetectorCache::iterator Instrument::DetectorCache::lower_bound(detid_t id) {
+  if (!isFinalized()) {
+    throwUnfinalized("lower_bound()");
+  }
+  return std::lower_bound(begin(), end(), id,
+                          [](DetectorCacheEntry const &entry, detid_t id) { return entry.id() < id; });
 }
 
-template <class T> auto find(T &map, const detid_t key) -> decltype(map.begin()) {
-  auto it = lower_bound(map, key);
-  if ((it != map.end()) && (std::get<0>(*it) == key))
-    return it;
-  return map.end();
+/** @brief Perform a lower bound search on the detector cache, for the element with the given ID.
+ * Note that this method is only valid for a finalized (sorted) detector cache; otherwise the results are undefined.
+ * This method should complete in O(log N), where N is the number of detectors in the cache.
+ * @param id the detector ID to search for
+ * @returns a constant iterator to the first DetectorCacheEntry with ID >= the given ID, or cend() if no such element
+ * exists
+ * @throws std::runtime_error if the detector cache is not finalized
+ * @note optimizations in this method could improve performance in lookuo speeds
+ */
+Instrument::DetectorCache::const_iterator Instrument::DetectorCache::lower_bound(detid_t id) const {
+  if (!isFinalized()) {
+    throwUnfinalized("lower_bound()");
+  }
+  return std::lower_bound(cbegin(), cend(), id,
+                          [](DetectorCacheEntry const &entry, detid_t id) { return entry.id() < id; });
 }
-} // namespace
+
+/** @brief Find the element in the detector cache with the given ID.
+ * Note that this method is only valid for a finalized (sorted) instrument cache; otherwise the results are undefined.
+ * This method should complete in O(log N), where N is the number of detectors in the cache.
+ * @param id the detector ID to search for
+ * @returns an iterator to the DetectorCacheEntry with the given ID, or end() if no such element exists
+ * @throws std::runtime_error if the detector cache is not finalized
+ */
+Instrument::DetectorCache::iterator Instrument::DetectorCache::find(detid_t id) {
+  if (!isFinalized()) {
+    throwUnfinalized("find()");
+  }
+  auto it = lower_bound(id);
+  if (it != end() && it->id() == id) {
+    return it;
+  } else {
+    return end();
+  }
+}
+
+/** @brief Find the element in the detector cache with the given ID.
+ * Note that this method is only valid for a finalized (sorted) instrument cache; otherwise the results are undefined.
+ * This method should complete in O(log N), where N is the number of detectors in the cache.
+ * @param id the detector ID to search for
+ * @returns a const iterator to the DetectorCacheEntry with the given ID, or end() if no such element exists
+ * @throws std::runtime_error if the detector cache is not finalized
+ */
+Instrument::DetectorCache::const_iterator Instrument::DetectorCache::find(detid_t id) const {
+  if (!isFinalized()) {
+    throwUnfinalized("find()");
+  }
+  auto const it = lower_bound(id);
+  if (it != cend() && it->id() == id) {
+    return it;
+  } else {
+    return cend();
+  }
+}
 
 /**	Gets a pointer to the detector from its ID
- *  Note that for getting the detector associated with a spectrum, the
- * MatrixWorkspace::getDetector
- *  method should be used rather than this one because it takes account of the
- * possibility of more
+ *  Note that for getting the detector associated with a spectrum, the MatrixWorkspace::getDetector
+ *  method should be used rather than this one because it takes account of the possibility of more
  *  than one detector contributing to a single spectrum
  *  @param   detector_id The requested detector ID
  *  @returns A pointer to the detector object
@@ -470,7 +518,7 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
                              std::to_string(detector_id));
 
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
-  const auto it = find(in_dets, detector_id);
+  const auto it = in_dets.find(detector_id);
   if (it == in_dets.end()) {
     std::stringstream readInt;
     readInt << detector_id;
@@ -497,7 +545,8 @@ const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
   if (!isFinalized())
     throw std::runtime_error("Instrument definition is not finalized. Can't find base detector ID " +
                              std::to_string(detector_id));
-  auto it = find(m_instr->m_detectorCache, detector_id);
+
+  auto it = m_instr->m_detectorCache.find(detector_id);
   if (it == m_instr->m_detectorCache.end()) {
     return nullptr;
   }
@@ -511,7 +560,7 @@ bool Instrument::isMonitor(const detid_t &detector_id) const {
                              std::to_string(detector_id));
 
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
-  const auto it = find(in_dets, detector_id);
+  const auto it = in_dets.find(detector_id);
   if (it == in_dets.end())
     return false;
   return it->isMonitor();
@@ -647,13 +696,13 @@ void Instrument::markAsDetector(const IDetector *det) {
     throw std::runtime_error("Instrument definition is not finalized.  Add detector with markAsDetectorIncomplete, "
                              "then call markAsDetectorFinalized when finished.");
 
-  // Create a (non-deleting) shared pointer to it
-  IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
-  auto it = lower_bound(m_detectorCache, det->getID());
   // Duplicate detector ids are forbidden
+  auto it = m_detectorCache.lower_bound(det->getID());
   if ((it != m_detectorCache.end()) && (it->id() == det->getID())) {
     raiseDuplicateDetectorError(det->getID());
   }
+  // Create a (non-deleting) shared pointer to it
+  IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
   m_detectorCache.emplace(it, det->getID(), det_sptr, false);
 }
 
@@ -664,7 +713,7 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
     throw std::runtime_error("Instrument::markAsDetector() called on a "
                              "parametrized Instrument object.");
 
-  m_detectorCacheFinalized = false;
+  m_detectorCache.setIncomplete();
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
   m_detectorCache.emplace_back(det->getID(), det_sptr, false);
@@ -687,8 +736,9 @@ void Instrument::markAsDetectorFinalize() {
       [](DetectorCacheEntry const &a, DetectorCacheEntry const &b) -> bool { return a.id() == b.id(); });
   if (resultIt != m_detectorCache.end()) {
     raiseDuplicateDetectorError(resultIt->id());
+  } else {
+    m_detectorCache.setFinalized();
   }
-  m_detectorCacheFinalized = true;
 }
 
 /** Mark a Component which has already been added to the Instrument class
@@ -703,8 +753,6 @@ void Instrument::markAsMonitor(const IDetector *det) {
   if (m_map)
     throw std::runtime_error("Instrument::markAsMonitor() called on a "
                              "parametrized Instrument object.");
-  // NOTE markAsMonitor is not designed to be used with an unfinalized detector cache.
-  // However, actual usage in the codebase is inconsistent.  Finalizing here prevents some errors.
   if (!isFinalized()) {
     throw std::runtime_error("Instrument definition is not finalized.  Add monitor with markAsMonitorIncomplete, then "
                              "call markAsDetectorFinalized when finished.");
@@ -714,8 +762,8 @@ void Instrument::markAsMonitor(const IDetector *det) {
   markAsDetector(det);
 
   // mark detector as a monitor
-  auto it = find(m_detectorCache, det->getID());
-  std::get<2>(*it) = true;
+  auto it = m_detectorCache.find(det->getID());
+  it->isMonitor() = true;
 }
 
 /** Mark a Component which has already been added to the Instrument class
@@ -729,7 +777,7 @@ void Instrument::markAsMonitorIncomplete(const IDetector *det) {
     throw std::runtime_error("Instrument::markAsMonitorIncomplete() called on a "
                              "parametrized Instrument object.");
 
-  m_detectorCacheFinalized = false;
+  m_detectorCache.setIncomplete();
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
   m_detectorCache.emplace_back(det->getID(), det_sptr, true);
@@ -749,11 +797,11 @@ void Instrument::removeDetector(IDetector *det) {
 
   const detid_t id = det->getID();
   // Remove the detector from the detector cache
-  const auto it = find(m_detectorCache, id);
+  const auto it = m_detectorCache.find(id);
   m_detectorCache.erase(it);
 
-  // Remove it from the parent assembly (and thus the instrument). Evilness
-  // required here unfortunately.
+  // Remove it from the parent assembly (and thus the instrument).
+  // Evilness required here unfortunately.
   auto *parentAssembly = dynamic_cast<CompAssembly *>(const_cast<IComponent *>(det->getBareParent()));
   if (parentAssembly) // Should always be true, but check just in case
   {
@@ -810,8 +858,7 @@ std::shared_ptr<const std::vector<IObjComponent_const_sptr>> Instrument::getPlot
     // Get the 'base' plottable components
     std::shared_ptr<const std::vector<IObjComponent_const_sptr>> objs = m_instr->getPlottable();
 
-    // Get a reference to the underlying vector, casting away the constness so
-    // that we
+    // Get a reference to the underlying vector, casting away the constness so that we
     // can modify it to get our result rather than creating another long vector
     auto &res = const_cast<std::vector<IObjComponent_const_sptr> &>(*objs);
     const std::vector<IObjComponent_const_sptr>::size_type total = res.size();
@@ -1161,6 +1208,10 @@ bool Instrument::addAssemblyChildrenToQueue(std::queue<IComponent_const_sptr> &q
 /// Temporary helper for refactoring. Argument is index, *not* ID!
 bool Instrument::isMonitorViaIndex(const size_t index) const {
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
+  if (!in_dets.isFinalized())
+    throw std::runtime_error("Instrument::isMonitorViaIndex: detector cache is not finalized");
+  if (index >= in_dets.size())
+    throw std::out_of_range("Instrument::isMonitorViaIndex: index out of range");
   return in_dets[index].isMonitor();
 }
 
@@ -1173,7 +1224,7 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
                              std::to_string(detID));
 
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
-  const auto it = find(in_dets, detID);
+  const auto it = in_dets.find(detID);
   return std::distance(in_dets.cbegin(), it);
 }
 
