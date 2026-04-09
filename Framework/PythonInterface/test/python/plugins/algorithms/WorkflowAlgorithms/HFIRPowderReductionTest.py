@@ -325,6 +325,97 @@ class LoadInputErrorMessages(unittest.TestCase):
     #     self.assertTrue(mtd.doesExist("test_existing_midas"))
 
 
+class WarnUnsetOptionalFieldsTests(unittest.TestCase):
+    def _create_algo(self, **kwargs):
+        """Helper to create and initialize an HFIRPowderReduction algorithm with properties set."""
+        algo = _HFIRPowderReduction()
+        algo.initialize()
+        algo.temp_workspace_list = []
+        for key, value in kwargs.items():
+            algo.setProperty(key, value)
+        return algo
+
+    def test_all_warnings_when_no_optional_fields_set(self):
+        """Test that all optional field warnings are logged when none are set."""
+        algo = self._create_algo(Instrument="WAND^2")
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertIn("No vanadium run supplied. Data will not be normalized by vanadium.", messages)
+            self.assertIn("VanadiumBackground is not set.", messages)
+            self.assertIn("SampleBackground is not set.", messages)
+            self.assertIn("MaskWorkspace is not set.", messages)
+            self.assertIn("MaskAngle is not set.", messages)
+            self.assertIn("AttenuationmuR is not set.", messages)
+            self.assertEqual(mock_warning.call_count, 6)
+
+    def test_no_vanadium_warning_when_vanadium_filename_set(self):
+        """Test that no vanadium warning is logged when VanadiumFilename is provided."""
+        algo = self._create_algo(Instrument="WAND^2", VanadiumFilename="HB2C_7000.nxs.h5")
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertNotIn("No vanadium run supplied. Data will not be normalized by vanadium.", messages)
+
+    def test_no_vanadium_warning_when_vanadium_ipts_and_runs_set(self):
+        """Test that no vanadium warning is logged when VanadiumIPTS and VanadiumRunNumbers are provided."""
+        algo = self._create_algo(Instrument="WAND^2", VanadiumIPTS=123, VanadiumRunNumbers=[456])
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertNotIn("No vanadium run supplied. Data will not be normalized by vanadium.", messages)
+
+    def test_no_vanadium_background_warning_when_set(self):
+        """Test that no VanadiumBackground warning is logged when it is provided."""
+        algo = self._create_algo(Instrument="WAND^2", VanadiumBackgroundFilename="HB2C_7000.nxs.h5")
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertNotIn("VanadiumBackground is not set.", messages)
+
+    def test_no_sample_background_warning_when_set(self):
+        """Test that no SampleBackground warning is logged when it is provided."""
+        algo = self._create_algo(Instrument="WAND^2", SampleBackgroundFilename="HB2C_7000.nxs.h5")
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertNotIn("SampleBackground is not set.", messages)
+
+    def test_no_mask_angle_warning_when_set(self):
+        """Test that no MaskAngle warning is logged when it is provided."""
+        algo = self._create_algo(Instrument="WAND^2", MaskAngle=60.0)
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertNotIn("MaskAngle is not set.", messages)
+
+    def test_no_attenuation_warning_when_set(self):
+        """Test that no AttenuationmuR warning is logged when it is provided."""
+        algo = self._create_algo(Instrument="WAND^2", AttenuationmuR=1.5)
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertNotIn("AttenuationmuR is not set.", messages)
+
+    def test_no_warnings_when_all_optional_fields_set(self):
+        """Test that no warnings are logged when all optional fields are provided."""
+        algo = self._create_algo(
+            Instrument="WAND^2",
+            VanadiumFilename="HB2C_7000.nxs.h5",
+            VanadiumBackgroundFilename="HB2C_7000.nxs.h5",
+            SampleBackgroundFilename="HB2C_7000.nxs.h5",
+            MaskAngle=60.0,
+            AttenuationmuR=1.5,
+        )
+        # MaskWorkspace requires a real workspace, so we still expect that one warning
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            # Only MaskWorkspace warning should remain (requires a real workspace object)
+            self.assertEqual(mock_warning.call_count, 1)
+            self.assertIn("MaskWorkspace is not set.", messages)
+
+
 class AutoPopulateTests(unittest.TestCase):
     def test_auto_populate_instrument_from_filename(self):
         algo = AlgorithmManager.create("HFIRPowderReduction")

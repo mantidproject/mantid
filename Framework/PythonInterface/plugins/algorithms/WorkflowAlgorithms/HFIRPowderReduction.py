@@ -561,6 +561,21 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         return issues
 
+    def _warn_unset_optional_fields(self):
+        """Log warnings for optional fields that are not set (excludes fields already checked by validateInputs)."""
+        if not self._has_data_to_load("Vanadium"):
+            logger.warning("No vanadium run supplied. Data will not be normalized by vanadium.")
+        if not self._has_data_to_load("VanadiumBackground"):
+            logger.warning("VanadiumBackground is not set.")
+        if not self._has_data_to_load("SampleBackground"):
+            logger.warning("SampleBackground is not set.")
+        if self.getProperty("MaskWorkspace").value is None:
+            logger.warning("MaskWorkspace is not set.")
+        if self.getProperty("MaskAngle").value == Property.EMPTY_DBL:
+            logger.warning("MaskAngle is not set.")
+        if self.getProperty("AttenuationmuR").value == Property.EMPTY_DBL:
+            logger.warning("AttenuationmuR is not set.")
+
     def _loadMIDASData(self, filename, ws):
         # Check if the file has the expected fields
         with h5py.File(filename, "r") as f:
@@ -643,6 +658,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         6. Save (optional)
         7. Cleanup
         """
+        self._warn_unset_optional_fields()
+
         # Initialize temp workspace list for cleanup
         self.temp_workspace_list = ["_ws_cal", "_ws_cal_background"]
 
