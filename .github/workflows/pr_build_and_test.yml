@@ -28,7 +28,7 @@ jobs:
         with:
           filters: .github/filters.yaml
 
-      - uses: prefix-dev/setup-pixi@v0.9.4
+      - uses: prefix-dev/setup-pixi@v0.9.5
         if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
         with:
           frozen: true
