@@ -401,6 +401,12 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
   alg->setPropertyValue("OutputWorkspaceQ", "QOutputWorkspace");
 
   alg->execute();
+
+  // Get the output transmission names from RRO
+  setPropertyValue("OutputWorkspaceTransmission", alg->getPropertyValue("OutputWorkspaceTransmission"));
+  setPropertyValue("OutputWorkspaceFirstTransmission", alg->getPropertyValue("OutputWorkspaceFirstTransmission"));
+  setPropertyValue("OutputWorkspaceSecondTransmission", alg->getPropertyValue("OutputWorkspaceSecondTransmission"));
+
   return {.IvsQ = alg->getProperty("OutputWorkspaceQ"),
           .IvsLam = alg->getProperty("OutputWorkspaceWavelength"),
           .trans = alg->getProperty("OutputWorkspaceTransmission"),
@@ -408,17 +414,6 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
           .trans2 = alg->getProperty("OutputWorkspaceSecondTransmission"),
           .out = alg->getProperty("OutputWorkspace"),
           .theta = theta};
-}
-
-void ReflectometryReductionOneAuto3::setWorkspaceProperty(MatrixWorkspace_sptr workspace,
-                                                          const std::string &propertyName) {
-  if (workspace)
-    return;
-  const auto &workspaceName = workspace->getName();
-  if (isDefault(workspaceName)) {
-    setPropertyValue(propertyName, workspaceName);
-  }
-  setProperty(propertyName, workspace);
 }
 
 void ReflectometryReductionOneAuto3::postReductionProcessingGroups(std::vector<RROOutputs> &outputs,
@@ -443,12 +438,9 @@ void ReflectometryReductionOneAuto3::setOutputWorkspaces(RROOutputs &out, const 
   if (!isDefault("OutputWorkspaceWavelength") || isChild())
     setProperty("OutputWorkspaceWavelength", out.IvsLam);
   setProperty("OutputWorkspaceBinned", binnedWS);
-  if (out.trans)
-    setWorkspaceProperty(out.trans, "OutputWorkspaceTransmission");
-  if (out.trans1)
-    setWorkspaceProperty(out.trans1, "OutputWorkspaceFirstTransmission");
-  if (out.trans2)
-    setWorkspaceProperty(out.trans2, "OutputWorkspaceSecondTransmission");
+  setProperty("OutputWorkspaceTransmission", out.trans);
+  setProperty("OutputWorkspaceFirstTransmission", out.trans1);
+  setProperty("OutputWorkspaceSecondTransmission", out.trans2);
 }
 
 void ReflectometryReductionOneAuto3::updatePropertiesAfterReduction(RROOutputs &out, const RebinParams &params) {
@@ -867,7 +859,7 @@ ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReduction
     allOutputNames = workspaceNames;
   // Process each group member
   std::vector<RROOutputs> allRROOutputs;
-  for (auto i = 0; i < members.size(); i++) {
+  for (size_t i = 0; i < members.size(); i++) {
     auto ws = members[i];
     MatrixWorkspace_sptr matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
     if (!matrixWs) {
