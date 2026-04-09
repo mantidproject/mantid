@@ -283,29 +283,24 @@ private:
     bool isFinalized() const { return m_isFinalized; }
     void setIncomplete() { m_isFinalized &= false; }
     void setFinalized(bool const flag = true) { m_isFinalized = flag; }
-    detid_t const minID() const {
+    detid_t minID() const {
       if (isFinalized()) {
         return front().id();
       } else {
-        throwUnfinalized("minID()");
+        throw std::runtime_error("minID() called on non-finalized DetectorCache");
       }
     }
-    detid_t const maxID() const {
+    detid_t maxID() const {
       if (isFinalized()) {
         return back().id();
       } else {
-        throwUnfinalized("maxID()");
+        throw std::runtime_error("maxID() called on non-finalized DetectorCache");
       }
     }
     DetectorCache::iterator lower_bound(detid_t id);
     DetectorCache::const_iterator lower_bound(detid_t id) const;
     DetectorCache::iterator find(detid_t id);
     DetectorCache::const_iterator find(detid_t id) const;
-
-  private:
-    detid_t const throwUnfinalized(std::string const &method) const {
-      throw std::runtime_error(method + " called on non-finalized DetectorCache");
-    }
   } m_detectorCache;
 
   bool isFinalized() const {

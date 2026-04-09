@@ -442,7 +442,7 @@ std::vector<std::shared_ptr<const IComponent>> Instrument::getAllComponentsWithN
  */
 Instrument::DetectorCache::iterator Instrument::DetectorCache::lower_bound(detid_t id) {
   if (!isFinalized()) {
-    throwUnfinalized("lower_bound()");
+    throw std::runtime_error("lower_bound() called on non-finalized DetectorCache");
   }
   return std::lower_bound(begin(), end(), id,
                           [](DetectorCacheEntry const &entry, detid_t id) { return entry.id() < id; });
@@ -459,7 +459,7 @@ Instrument::DetectorCache::iterator Instrument::DetectorCache::lower_bound(detid
  */
 Instrument::DetectorCache::const_iterator Instrument::DetectorCache::lower_bound(detid_t id) const {
   if (!isFinalized()) {
-    throwUnfinalized("lower_bound()");
+    throw std::runtime_error("lower_bound() called on non-finalized DetectorCache");
   }
   return std::lower_bound(cbegin(), cend(), id,
                           [](DetectorCacheEntry const &entry, detid_t id) { return entry.id() < id; });
@@ -474,7 +474,7 @@ Instrument::DetectorCache::const_iterator Instrument::DetectorCache::lower_bound
  */
 Instrument::DetectorCache::iterator Instrument::DetectorCache::find(detid_t id) {
   if (!isFinalized()) {
-    throwUnfinalized("find()");
+    throw std::runtime_error("find() called on non-finalized DetectorCache");
   }
   auto it = lower_bound(id);
   if (it != end() && it->id() == id) {
@@ -493,7 +493,7 @@ Instrument::DetectorCache::iterator Instrument::DetectorCache::find(detid_t id) 
  */
 Instrument::DetectorCache::const_iterator Instrument::DetectorCache::find(detid_t id) const {
   if (!isFinalized()) {
-    throwUnfinalized("find()");
+    throw std::runtime_error("find() called on non-finalized DetectorCache");
   }
   auto const it = lower_bound(id);
   if (it != cend() && it->id() == id) {
