@@ -438,7 +438,7 @@ std::vector<std::shared_ptr<const IComponent>> Instrument::getAllComponentsWithN
  * @param id the detector ID to search for
  * @returns an iterator to the first DetectorCacheEntry with ID >= the given ID, or end() if no such element exists
  * @throws std::runtime_error if the detector cache is not finalized
- * @note optimizations in this method could improve performance in lookuo speeds
+ * @note optimizations in this method could improve performance in lookup speeds
  */
 Instrument::DetectorCache::iterator Instrument::DetectorCache::lower_bound(detid_t id) {
   if (!isFinalized()) {

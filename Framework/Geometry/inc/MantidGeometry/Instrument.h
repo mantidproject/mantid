@@ -281,17 +281,17 @@ private:
   struct DetectorCache : public std::vector<DetectorCacheEntry> {
     bool m_isFinalized{true};
     bool isFinalized() const { return m_isFinalized; }
-    void setIncomplete() { m_isFinalized &= false; }
+    void setIncomplete() { m_isFinalized = false; }
     void setFinalized(bool const flag = true) { m_isFinalized = flag; }
     detid_t minID() const {
-      if (isFinalized()) {
+      if (isFinalized() && !empty()) {
         return front().id();
       } else {
         throw std::runtime_error("minID() called on non-finalized DetectorCache");
       }
     }
     detid_t maxID() const {
-      if (isFinalized()) {
+      if (isFinalized() && !empty()) {
         return back().id();
       } else {
         throw std::runtime_error("maxID() called on non-finalized DetectorCache");
