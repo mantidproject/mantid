@@ -90,7 +90,7 @@ def check(label, modest, axes, thresh=2.0e-5):
     axes.figure.canvas.draw()
     modest.figure.canvas.draw()
 
-    if rms > thresh:
+    if rms >= thresh:
         modest.figure.savefig(modest_label + ".pdf")
         axes.figure.savefig(axes_label + ".pdf")
 
