@@ -37,7 +37,6 @@ def default_data():
 
 
 def init(img_cls, data, origin="upper", extent=None):
-    plt.close()
     fig = plt.figure()
     ax = fig.add_subplot(111)
     artist = img_cls(ax, data=data, origin=origin, interpolation="nearest", extent=extent)
