@@ -123,7 +123,7 @@ private:
   void getTransmissionRun(std::map<std::string, std::string> &results, WorkspaceGroup_sptr &workspaceGroup,
                           const std::string &transmissionRun);
   void setOutputGroupedWorkspaces(std::vector<WorkspaceNames> const &outputNames,
-                                  WorkspaceNames const &outputGroupNames);
+                                  WorkspaceNames const &outputGroupNames, const bool outputIvsLam);
   void setOutputPropertyFromChild(const Algorithm_sptr &alg, std::string const &name);
   void setOutputPropertiesFromChild(const Algorithm_sptr &alg);
   processGroupMembersOutput processGroupMembers(Algorithm::WorkspaceVector members, std::string const &runNumber,
@@ -136,7 +136,7 @@ private:
   RROOutputs performCoreReduction(MatrixWorkspace_sptr inputWS, const std::vector<std::string> &taskOrder = {});
   MatrixWorkspace_sptr postReductionProcessing(RROOutputs &out, const RebinParams &params);
   void postReductionProcessingGroups(std::vector<RROOutputs> &outputs, std::vector<WorkspaceNames> const &outputNames,
-                                     const WorkspaceNames &groupedOutputNames);
+                                     const WorkspaceNames &groupedOutputNames, const bool outputIvsLam);
   void setOutputWorkspaces(RROOutputs &out, const MatrixWorkspace_sptr &binnedWS);
   void updatePropertiesAfterReduction(RROOutputs &out, const RebinParams &params);
   std::vector<std::string> getTaskExecutionOrder(const bool reduced, const bool summingInQ) const;

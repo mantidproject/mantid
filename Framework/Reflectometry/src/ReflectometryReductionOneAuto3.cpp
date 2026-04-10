@@ -418,7 +418,8 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
 
 void ReflectometryReductionOneAuto3::postReductionProcessingGroups(std::vector<RROOutputs> &outputs,
                                                                    std::vector<WorkspaceNames> const &outputNames,
-                                                                   const WorkspaceNames &groupedOutputNames) {
+                                                                   const WorkspaceNames &groupedOutputNames,
+                                                                   const bool outputIvsLam) {
   RebinParams params;
   for (std::size_t i = 0; i < outputs.size(); ++i) {
     auto &out = outputs[i];
@@ -426,8 +427,11 @@ void ReflectometryReductionOneAuto3::postReductionProcessingGroups(std::vector<R
     const auto binnedWS = postReductionProcessing(out, params);
     AnalysisDataService::Instance().addOrReplace(outputNames[i].iVsQBinned, binnedWS);
     AnalysisDataService::Instance().addOrReplace(outputNames[i].iVsQ, out.IvsQ);
+    if (outputIvsLam) // If polarization analysis is off, add iVsLam to ADS here. Otherwise it is done inside the
+                      // polarization correction algorithms.
+      AnalysisDataService::Instance().addOrReplace(outputNames[i].iVsLam, out.IvsLam);
   }
-  setOutputGroupedWorkspaces(outputNames, groupedOutputNames);
+  setOutputGroupedWorkspaces(outputNames, groupedOutputNames, outputIvsLam);
   // Update properties using last run
   updatePropertiesAfterReduction(outputs.back(), params);
   // Doesn't look like we set transmission workspaces for groups.
@@ -803,17 +807,21 @@ WorkspaceGroup_sptr ReflectometryReductionOneAuto3::groupWorkspaces(const std::v
  * outputs of the child algorithms from processGroups
  */
 void ReflectometryReductionOneAuto3::setOutputGroupedWorkspaces(std::vector<WorkspaceNames> const &outputNames,
-                                                                WorkspaceNames const &outputGroupNames) {
+                                                                WorkspaceNames const &outputGroupNames,
+                                                                const bool outputIvsLam) {
   // Extract each type of output workspaces as a string list for grouping
-  // We don't need to handle iVsLam here as the polarization algorithms already output a group into the ADS
-  std::vector<std::string> IvsQGroup, IvsQBinnedGroup;
-  std::for_each(outputNames.cbegin(), outputNames.cend(), [&IvsQGroup, &IvsQBinnedGroup](auto const &names) {
-    IvsQGroup.push_back(names.iVsQ);
-    IvsQBinnedGroup.push_back(names.iVsQBinned);
-  });
+  std::vector<std::string> IvsQGroup, IvsQBinnedGroup, IvsLamGroup;
+  std::for_each(outputNames.cbegin(), outputNames.cend(),
+                [&IvsQGroup, &IvsQBinnedGroup, &IvsLamGroup](auto const &names) {
+                  IvsQGroup.push_back(names.iVsQ);
+                  IvsQBinnedGroup.push_back(names.iVsQBinned);
+                  IvsLamGroup.push_back(names.iVsLam);
+                });
 
   groupWorkspaces(IvsQGroup, outputGroupNames.iVsQ);
   groupWorkspaces(IvsQBinnedGroup, outputGroupNames.iVsQBinned);
+  if (outputIvsLam)
+    groupWorkspaces(IvsLamGroup, outputGroupNames.iVsLam);
 
   setPropertyValue("OutputWorkspace", outputGroupNames.iVsQ);
   setPropertyValue("OutputWorkspaceBinned", outputGroupNames.iVsQBinned);
@@ -929,7 +937,8 @@ bool ReflectometryReductionOneAuto3::processGroups() {
     processGroupsOutput =
         processGroupMembers(corrected->getAllItems(), runNumber, taskOrder, processGroupsOutput.outputNames, true);
   }
-  postReductionProcessingGroups(processGroupsOutput.rroOutputs, processGroupsOutput.outputNames, groupedOutputNames);
+  postReductionProcessingGroups(processGroupsOutput.rroOutputs, processGroupsOutput.outputNames, groupedOutputNames,
+                                !polarizationAnalysisOn);
   return true;
 }
 
