@@ -36,7 +36,6 @@ from mantid.plots.datafunctions import (
     get_wksp_index_dist_and_label,
     check_resample_to_regular_grid,
     get_indices,
-    get_normalize_by_bin_width,
     get_normalization_type,
     get_spectrum_normalisation,
 )
@@ -80,21 +79,21 @@ def _pcolormesh_nonortho(axes, workspace, nonortho_tr, *args, **kwargs):
     return QuadMeshWrapper(mesh)
 
 
-def _setLabels1D(axes, workspace, indices=None, normalize_by_bin_width=True, axis=MantidAxType.SPECTRUM):
+def _setLabels1D(axes, workspace, indices=None, normalization=PlotNormalizationType.BIN_WIDTH, axis=MantidAxType.SPECTRUM):
     """
     helper function to automatically set axes labels for 1D plots
     """
-    labels = get_axes_labels(workspace, indices, normalize_by_bin_width)
+    labels = get_axes_labels(workspace, indices, normalization)
     # We assume that previous checking has ensured axis can only be 1 of 2 types
     axes.set_xlabel(labels[2 if axis == MantidAxType.BIN else 1])
     axes.set_ylabel(labels[0])
 
 
-def _setLabels2D(axes, workspace, indices=None, transpose=False, xscale=None, normalize_by_bin_width=True):
+def _setLabels2D(axes, workspace, indices=None, transpose=False, xscale=None, normalization=PlotNormalizationType.BIN_WIDTH):
     """
     helper function to automatically set axes labels for 2D plots
     """
-    labels = get_axes_labels(workspace, indices, normalize_by_bin_width)
+    labels = get_axes_labels(workspace, indices, normalization)
     if transpose:
         axes.set_xlabel(labels[2])
         axes.set_ylabel(labels[1])
@@ -176,14 +175,14 @@ def _plot_impl(axes, workspace, args, kwargs):
             axes.set_xlabel("Time")
         kwargs["drawstyle"] = "steps-post"
     else:
-        normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
+        normalization = get_normalization_type(workspace, axes, **kwargs)
         # the get... function returns kwargs without 'normalize_by_bin_width', but it is needed in _get_data_for_plot to
         # avoid reverting to the default norm setting, in the event that this function is being called as part of a plot
         # restoration
-        kwargs["normalize_by_bin_width"] = normalize_by_bin_width
+        kwargs["normalize_by_bin_width"] = normalization == PlotNormalizationType.BIN_WIDTH
         x, y, _, _, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs)
         if kwargs.pop("update_axes_labels", True):
-            _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width, axis=axis)
+            _setLabels1D(axes, workspace, indices, normalization=normalization, axis=axis)
     kwargs.pop("normalize_by_bin_width", None)
     kwargs.pop("normalize_type", None)
     return x, y, args, kwargs
@@ -315,10 +314,10 @@ def errorbar(axes, workspace, *args, **kwargs):
             withDy = True
             withDx = True
 
-    normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
     x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs, with_dy=withDy, with_dx=withDx)
     if kwargs.pop("update_axes_labels", True):
-        _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width, axis=axis)
+        normalization = get_normalization_type(workspace, axes, **kwargs)
+        _setLabels1D(axes, workspace, indices, normalization=normalization, axis=axis)
     kwargs.pop("normalize_by_bin_width", None)
     kwargs.pop("normalize_type", None)
 
@@ -546,14 +545,14 @@ def pcolor(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
-        (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if aligned:
             kwargs["pcolortype"] = ""
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
+            normalization = get_normalization_type(workspace, axes, **kwargs)
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-            _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
+            _setLabels2D(axes, workspace, transpose=transpose, normalization=normalization)
     return axes.pcolor(x, y, z, *args, **kwargs)
 
 
@@ -591,14 +590,14 @@ def pcolorfast(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
-        (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
+        normalization = get_normalization_type(workspace, axes, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if aligned:
             kwargs["pcolortype"] = "fast"
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
+        _setLabels2D(axes, workspace, transpose=transpose, normalization=normalization)
     return axes.pcolorfast(x, y, z, *args, **kwargs)
 
 
@@ -636,14 +635,14 @@ def pcolormesh(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
-        (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
+        normalization = get_normalization_type(workspace, axes, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if aligned:
             kwargs["pcolortype"] = "mesh"
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
+        _setLabels2D(axes, workspace, transpose=transpose, normalization=normalization)
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
 
@@ -687,9 +686,9 @@ def imshow(axes, workspace, *args, **kwargs):
         return mantid.plots.modest_image.imshow(axes, z, *args, **kwargs)
     else:
         (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
-        (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
-        kwargs["normalize_by_bin_width"] = normalize_by_bin_width
-        _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
+        normalization = get_normalization_type(workspace, axes, **kwargs)
+        kwargs["normalize_by_bin_width"] = normalization == PlotNormalizationType.BIN_WIDTH
+        _setLabels2D(axes, workspace, transpose=transpose, normalization=normalization)
         return samplingimage.imshow_sampling(axes, workspace=workspace, *args, **kwargs)
 
 

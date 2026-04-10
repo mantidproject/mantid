@@ -18,7 +18,7 @@ import mantid.api
 import mantid.plots.datafunctions as funcs
 from unittest.mock import Mock
 from mantid.kernel import config, ConfigService
-from mantid.plots.utility import MantidAxType
+from mantid.plots.utility import MantidAxType, PlotNormalizationType
 from mantid.simpleapi import (
     AddSampleLog,
     AddTimeSeriesLog,
@@ -229,28 +229,28 @@ class DataFunctionsTest(unittest.TestCase):
 
     def test_y_units_for_distribution_and_autodist_off_with_latex(self):
         ws = self.ws2d_distribution
-        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=False, use_latex=True)
+        labels = funcs.get_axes_labels(ws, normalization=PlotNormalizationType.NONE, use_latex=True)
         self.assertEqual(labels[0], "Counts (microAmp.hour)$^{-1}$")
 
     def test_y_units_for_non_distribution_and_autodist_on_with_ascii(self):
         ws = self.ws2d_non_distribution
-        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=True, use_latex=False)
+        labels = funcs.get_axes_labels(ws, use_latex=False)
         self.assertEqual(labels[0], "Counts per microAmp.hour per Angstrom")
 
     def test_y_units_for_non_distribution_and_autodist_on_with_latex(self):
         ws = self.ws2d_non_distribution
-        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=True)
+        labels = funcs.get_axes_labels(ws)
         self.assertEqual(labels[0], "Counts (microAmp.hour $\\AA$)$^{-1}$")
 
     def test_y_units_for_non_distribution_with_no_x_or_y_unit_and_autodist_on(self):
         ws = self.ws1d_point
-        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=True, use_latex=True)
+        labels = funcs.get_axes_labels(ws, use_latex=True)
         self.assertEqual(labels[0], "")
 
     def test_y_units_for_non_distribution_with_no_x_unit_and_autodist_on(self):
         ws = self.ws2d_point
         ws.setYUnit("Counts")
-        labels = funcs.get_axes_labels(ws, normalize_by_bin_width=True, use_latex=True)
+        labels = funcs.get_axes_labels(ws, use_latex=True)
         self.assertEqual(labels[0], "Counts")
         ws.setYUnit("")
 
@@ -304,13 +304,15 @@ class DataFunctionsTest(unittest.TestCase):
 
     def test_get_spectrum_non_distribution_workspace(self):
         # get data divided by bin width
-        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1, normalization=True, withDy=True, withDx=True)
+        x, y, dy, dx = funcs.get_spectrum(
+            self.ws2d_non_distribution, 1, normalization=PlotNormalizationType.BIN_WIDTH, withDy=True, withDx=True
+        )
         self.assertTrue(np.array_equal(x, np.array([15.0, 25.0])))
         self.assertTrue(np.array_equal(y, np.array([0.4, 0.5])))
         self.assertTrue(np.array_equal(dy, np.array([0.3, 0.4])))
         self.assertEqual(dx, None)
         # get data not divided by bin width
-        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1, normalization=False, withDy=True, withDx=True)
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_non_distribution, 1, normalization=PlotNormalizationType.NONE, withDy=True, withDx=True)
         self.assertTrue(np.array_equal(x, np.array([15.0, 25.0])))
         self.assertTrue(np.array_equal(y, np.array([4, 5])))
         self.assertTrue(np.array_equal(dy, np.array([3, 4])))
