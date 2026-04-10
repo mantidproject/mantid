@@ -1379,11 +1379,13 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
         for (const auto &rowIndex : grandchildren) {
           auto *d = dynamic_cast<Detector *>(const_cast<IComponent *>(componentInfo.componentID(rowIndex)));
           if (d) {
-            // NOTE the call to erase within Instrument::removeDetector makes this entire loop run in O(N^2)
-            inst->removeDetector(d);
+            // NOTE removeDetectorIncomplete minimizes time complexity for removal
+            inst->removeDetectorIncomplete(d);
           }
         }
       }
+      inst->removeDetectorFinalize();
+      // remove the column itself -- necessary after removeDetectorIncomplete
       auto *comp = dynamic_cast<IComponent *>(det.get());
       inst->remove(comp);
     }

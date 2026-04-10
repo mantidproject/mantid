@@ -20,7 +20,7 @@
 #include <stdexcept>
 #include <string>
 #include <tuple>
-#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace Mantid {
@@ -100,6 +100,9 @@ public:
 
   /// Remove a detector from the instrument
   void removeDetector(IDetector *);
+  /// Efficiently remove multiple detectors
+  void removeDetectorIncomplete(IDetector const *);
+  void removeDetectorFinalize();
 
   /// return reference to detector cache
   void getDetectors(detid2det_map &out_map) const;
@@ -302,6 +305,7 @@ private:
     DetectorCache::const_iterator lower_bound(detid_t id) const;
     DetectorCache::iterator find(detid_t id);
     DetectorCache::const_iterator find(detid_t id) const;
+    std::unordered_set<IDetector const *> m_toRemove;
   } m_detectorCache;
 
   bool isFinalized() const {

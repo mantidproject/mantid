@@ -786,6 +786,7 @@ void Instrument::markAsMonitorIncomplete(const IDetector *det) {
 /** Removes a detector from the instrument and from the detector cache.
  *  The object is deleted.
  *  @param det The detector to remove
+ *  @note this method is O(N); for removing many detectors, use removeDetectorIncomplete instead
  */
 void Instrument::removeDetector(IDetector *det) {
   if (m_map)
@@ -808,6 +809,47 @@ void Instrument::removeDetector(IDetector *det) {
   {
     parentAssembly->remove(det);
   }
+}
+
+/** Mark a detector for removal from the detector cache.
+ * The detector is not removed until removeDetectorFinalize() is called.
+ * This allows multiple detectors to be removed without needing to repeatedly call vector::erase on each one,
+ * which can be expensive for a vector-based cache.
+ * @param det The detector to remove
+ * @note This method does not remove the detector from the parent assembly; this must be done separately.
+ */
+void Instrument::removeDetectorIncomplete(IDetector const *det) {
+  if (m_map)
+    throw std::runtime_error("Instrument::removeDetectorIncomplete() called on a "
+                             "parameterized Instrument object.");
+  m_detectorCache.setIncomplete();
+  if (m_detectorCache.m_toRemove.empty()) {
+    m_detectorCache.m_toRemove.reserve(m_detectorCache.size());
+  }
+  m_detectorCache.m_toRemove.insert(det);
+}
+
+/** Remove all detectors that have been marked for removal with removeDetectorIncomplete() from the detector cache.
+ * This MUST be called after all removals and before any other operations touching the cache.
+ * @note This method does not remove the detectors from the parent assembly; this must be done separately.
+ */
+void Instrument::removeDetectorFinalize() {
+  if (m_map)
+    throw std::runtime_error("Instrument::removeDetectorFinalize() called on a "
+                             "parameterized Instrument object.");
+
+  if (isFinalized())
+    return;
+
+  // Remove from the cache all the ones to be removed
+  auto newEnd = std::remove_if(m_detectorCache.begin(), m_detectorCache.end(), [this](const auto &entry) {
+    return m_detectorCache.m_toRemove.contains(entry.detector().get());
+  });
+  m_detectorCache.erase(newEnd, m_detectorCache.end());
+
+  // clear the removal set and finalize the cache
+  m_detectorCache.m_toRemove.clear();
+  m_detectorCache.setFinalized();
 }
 
 /**
