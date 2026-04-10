@@ -11,7 +11,6 @@ from typing import Literal, Optional
 from instrumentview.Globals import CurrentTab
 from threading import Thread
 
-# from instrumentview.Peaks import WorkspaceDetectorPeaks
 from mantid import mtd
 from mantid.kernel import logger
 from mantid.simpleapi import AnalysisDataService

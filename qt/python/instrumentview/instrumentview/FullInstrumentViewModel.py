@@ -67,8 +67,6 @@ class FullInstrumentViewModel:
         self._workspace = workspace
 
     def setup(self):
-        # Mutable containers must be initialised per-instance (class-level
-        # defaults are shared across all instances).
         self._cached_projection_objects = {}
         self._cached_masks_map = {}
         self._cached_rois_map = {}
@@ -477,7 +475,6 @@ class FullInstrumentViewModel:
         AnalysisDataService.addOrReplace(name_exported_ws, self.line_plot_workspace)
 
     def get_peak_overlay_arguments(self, selected_peaks_workspaces: list[str]) -> tuple:
-        # Safeguard against missing workspaces in ADS
         selected_peaks_workspaces = [ws for ws in selected_peaks_workspaces if AnalysisDataService.doesExist(ws)]
         wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
         positions_by_pws = [wws.get_positions(self.detector_positions, self.pickable_detector_ids) for wws in wrapped_workspaces]
@@ -485,7 +482,6 @@ class FullInstrumentViewModel:
         return positions_by_pws, labels_by_pws, selected_peaks_workspaces
 
     def get_peak_lineplot_overlay_arguments(self, unit: str, selected_peaks_workspaces: list[str]):
-        # Safeguard against missing workspaces in ADS
         selected_peaks_workspaces = [ws for ws in selected_peaks_workspaces if AnalysisDataService.doesExist(ws)]
         wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
         x_by_pws = [wws.get_x_values(unit, self.picked_detector_ids) for wws in wrapped_workspaces]
