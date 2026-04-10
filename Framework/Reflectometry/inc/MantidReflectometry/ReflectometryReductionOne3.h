@@ -215,7 +215,7 @@ private:
     std::vector<std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>> m_dependantOutputs;
     bool m_firstTaskFlag;
     size_t m_activeDependantTaskSet;
-    std::vector<int> m_fulfilledDependantTaskSets;
+    std::vector<size_t> m_fulfilledDependantTaskSets;
     const std::vector<std::string> *m_taskExecutionOrder = nullptr;
     std::string m_selectedOutput;
 
@@ -338,7 +338,7 @@ private:
     }
   };
 
-  class TaskBackgroundSubtraction : public AlgorithmTask {
+  class TaskBackgroundSubtraction final : public AlgorithmTask {
   public:
     explicit TaskBackgroundSubtraction(ReflectometryReductionOne3 *parent)
         : AlgorithmTask(parent, "TaskBackgroundSubtraction") {
