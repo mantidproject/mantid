@@ -214,7 +214,7 @@ class PeakFitMixin(object):
             "S_err",
             "S/S_err",
         ]
-        self.cols_to_check_vals = ["wsindex", "I_est", "I", "X0", "S"]
+        self.cols_to_check_vals = ["wsindex", "I_est", "I", "X0"]
         self.default_kwargs = {
             "wss": ["ENGINX_280625_focused_bank_1_dSpacing"],
             "peaks": self.peaks,
