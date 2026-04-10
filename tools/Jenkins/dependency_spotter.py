@@ -176,7 +176,6 @@ def form_url_for_build_artifact(build_number: int, os_name: str, pipeline: str, 
     :return: URL for build artifact
     """
     url_base = f"https://builds.mantidproject.org/job/{pipeline}/{build_number}/artifact/conda-bld/"
-
     return url_base + (f"env_logs/{os_name}/{log_file}" if not os_name == "win-64" else f"bld/env_logs/win-64/{log_file}")
 
 
