@@ -1107,6 +1107,121 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         # The setter calls update_integration_range which calls getIntegratedCountsForWorkspaceIndices
         mock_workspace.getIntegratedCountsForWorkspaceIndices.assert_called()
 
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_overlay_arguments_filters_nonexistent_workspaces(self, mock_wdp_cls, mock_ads):
+        """Workspaces that don't exist in ADS are filtered out."""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_ads.doesExist.side_effect = lambda name: name == "ws1"
+        mock_wdp = MagicMock()
+        mock_wdp.get_positions_and_labels.return_value = (np.array([[0, 0, 0]]), ["label1"])
+        mock_wdp_cls.return_value = mock_wdp
+
+        positions, labels, ws_names = model.get_peak_overlay_arguments(["ws1", "ws_gone"])
+
+        self.assertEqual(ws_names, ["ws1"])
+        self.assertEqual(len(positions), 1)
+        self.assertEqual(len(labels), 1)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_overlay_arguments_empty_list(self, mock_wdp_cls, mock_ads):
+        """Empty input returns empty results."""
+        model, _ = self._setup_model([1, 2, 3])
+
+        positions, labels, ws_names = model.get_peak_overlay_arguments([])
+
+        self.assertEqual(positions, [])
+        self.assertEqual(labels, [])
+        self.assertEqual(ws_names, [])
+        mock_wdp_cls.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_overlay_arguments_multiple_workspaces(self, mock_wdp_cls, mock_ads):
+        """Returns separate positions and labels per workspace."""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_ads.doesExist.return_value = True
+
+        ws1_wdp = MagicMock()
+        ws1_wdp.get_positions_and_labels.return_value = (np.array([[1, 1, 1]]), ["hkl_1"])
+        ws2_wdp = MagicMock()
+        ws2_wdp.get_positions_and_labels.return_value = (np.array([[2, 2, 2], [3, 3, 3]]), ["hkl_2", "hkl_3"])
+        mock_wdp_cls.side_effect = lambda name, _ws, _spec: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+
+        positions, labels, ws_names = model.get_peak_overlay_arguments(["ws1", "ws2"])
+
+        self.assertEqual(ws_names, ["ws1", "ws2"])
+        np.testing.assert_array_equal(positions[0], np.array([[1, 1, 1]]))
+        np.testing.assert_array_equal(positions[1], np.array([[2, 2, 2], [3, 3, 3]]))
+        self.assertEqual(labels[0], ["hkl_1"])
+        self.assertEqual(labels[1], ["hkl_2", "hkl_3"])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_lineplot_overlay_arguments_filters_nonexistent_workspaces(self, mock_wdp_cls, mock_ads):
+        """Workspaces that don't exist in ADS are filtered out."""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_ads.doesExist.side_effect = lambda name: name == "ws1"
+        mock_wdp = MagicMock()
+        mock_wdp.get_x_values_and_labels.return_value = ([1.5], ["label1"])
+        mock_wdp_cls.return_value = mock_wdp
+
+        x_vals, labels, ws_names = model.get_peak_lineplot_overlay_arguments("TOF", ["ws1", "ws_gone"])
+
+        self.assertEqual(ws_names, ["ws1"])
+        self.assertEqual(len(x_vals), 1)
+        self.assertEqual(len(labels), 1)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_lineplot_overlay_arguments_empty_list(self, mock_wdp_cls, mock_ads):
+        """Empty input returns empty results."""
+        model, _ = self._setup_model([1, 2, 3])
+
+        x_vals, labels, ws_names = model.get_peak_lineplot_overlay_arguments("TOF", [])
+
+        self.assertEqual(x_vals, [])
+        self.assertEqual(labels, [])
+        self.assertEqual(ws_names, [])
+        mock_wdp_cls.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_lineplot_overlay_arguments_multiple_workspaces(self, mock_wdp_cls, mock_ads):
+        """Returns separate x-values and labels per workspace."""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_ads.doesExist.return_value = True
+
+        ws1_wdp = MagicMock()
+        ws1_wdp.get_x_values_and_labels.return_value = ([100.0], ["hkl_1"])
+        ws2_wdp = MagicMock()
+        ws2_wdp.get_x_values_and_labels.return_value = ([200.0, 300.0], ["hkl_2", "hkl_3"])
+        mock_wdp_cls.side_effect = lambda name, _ws, _spec: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+
+        x_vals, labels, ws_names = model.get_peak_lineplot_overlay_arguments("dSpacing", ["ws1", "ws2"])
+
+        self.assertEqual(ws_names, ["ws1", "ws2"])
+        self.assertEqual(x_vals[0], [100.0])
+        self.assertEqual(x_vals[1], [200.0, 300.0])
+        self.assertEqual(labels[0], ["hkl_1"])
+        self.assertEqual(labels[1], ["hkl_2", "hkl_3"])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_lineplot_overlay_arguments_passes_unit(self, mock_wdp_cls, mock_ads):
+        """The unit argument is forwarded to get_x_values_and_labels."""
+        model, _ = self._setup_model([1, 2, 3])
+        model._detector_is_picked = np.array([True, False, False])
+        mock_ads.doesExist.return_value = True
+        mock_wdp = MagicMock()
+        mock_wdp.get_x_values_and_labels.return_value = ([], [])
+        mock_wdp_cls.return_value = mock_wdp
+
+        model.get_peak_lineplot_overlay_arguments("Wavelength", ["ws1"])
+
+        mock_wdp.get_x_values_and_labels.assert_called_once_with("Wavelength", model.picked_spectrum_nos)
+
 
 if __name__ == "__main__":
     unittest.main()
