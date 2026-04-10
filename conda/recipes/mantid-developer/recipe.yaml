@@ -55,7 +55,7 @@ requirements:
     - quickbayes ${{ quickbayes }}
     - rattler-build ==0.51.0
     - rattler-index
-    - requests>=2.32.4
+    - requests>=2.32.4,<2.33.1
     - scipy ${{ scipy }}
     - setuptools
     - sphinx ${{ sphinx }}
