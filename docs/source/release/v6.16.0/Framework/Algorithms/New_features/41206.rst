@@ -1,1 +1,1 @@
-- :ref:`algm-HFIRPowderReduction` now throws warnings for unset optional fields
+- :ref:`algm-HFIRPowderReduction` now logs warnings for unset optional fields.
