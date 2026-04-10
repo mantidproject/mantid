@@ -87,7 +87,7 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
             current_artists = None
 
         if current_artists:
-            current_normalization = any([artist[0].is_normalized for artist in current_artists])
+            current_normalization = any([artist[0].is_normalized_by_bin_width() for artist in current_artists])
             normalization = current_normalization
         else:
             normalization = mantid.kernel.config["graph1d.autodistribution"].lower() == "on"
@@ -380,9 +380,10 @@ def get_spectrum(workspace, wkspIndex, normalization: PlotNormalizationType, wit
             y = y / (x[1:] - x[0:-1])
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])
-        elif normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER and not workspace.isDistribution():
-            # TODO: Implement Q^-4 normalization
-            pass
+        elif normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER:
+            y = y / (points_from_boundaries(x) ** -4)
+            if dy is not None:
+                dy = dy / (points_from_boundaries(x) ** -4)
         x = points_from_boundaries(x)
     try:
         specInfo = workspace.spectrumInfo()
