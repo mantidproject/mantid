@@ -49,14 +49,9 @@ class FullInstrumentViewModel:
 
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
-    _invalid_index = -1
-    _data_min = 0.0
-    _data_max = 0.0
     line_plot_workspace = None
     _workspace_x_unit: str
     _workspace_x_unit_display: str
-    _selected_peaks_workspaces: list[PeaksWorkspace]
-    peaks_grouped_by_ws: dict[str, WorkspaceDetectorPeaks]
     _peak_picking_status: PeakPickingStatus = PeakPickingStatus.Off
     _projection_type: ProjectionType = ProjectionType.THREE_D
     _flip_z: bool = False
@@ -476,16 +471,20 @@ class FullInstrumentViewModel:
 
     def get_peak_overlay_arguments(self, selected_peaks_workspaces: list[str]) -> tuple:
         selected_peaks_workspaces = [ws for ws in selected_peaks_workspaces if AnalysisDataService.doesExist(ws)]
-        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
-        positions_by_pws = [wws.get_positions(self.detector_positions, self.pickable_detector_ids) for wws in wrapped_workspaces]
-        labels_by_pws = [wws.get_labels() for wws in wrapped_workspaces]
+        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name, self._workspace, self._spectrum_nos) for ws_name in selected_peaks_workspaces]
+        positions_and_labels_by_pws = [
+            wws.get_positions_and_labels(self.detector_positions, self.spectrum_nos) for wws in wrapped_workspaces
+        ]
+        positions_by_pws = [pair[0] for pair in positions_and_labels_by_pws]
+        labels_by_pws = [pair[1] for pair in positions_and_labels_by_pws]
         return positions_by_pws, labels_by_pws, selected_peaks_workspaces
 
     def get_peak_lineplot_overlay_arguments(self, unit: str, selected_peaks_workspaces: list[str]):
         selected_peaks_workspaces = [ws for ws in selected_peaks_workspaces if AnalysisDataService.doesExist(ws)]
-        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
-        x_by_pws = [wws.get_x_values(unit, self.picked_detector_ids) for wws in wrapped_workspaces]
-        labels_by_pws = [wws.get_labels_picked(self.picked_detector_ids) for wws in wrapped_workspaces]
+        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name, self._workspace, self._spectrum_nos) for ws_name in selected_peaks_workspaces]
+        x_and_labels_by_pws = [wws.get_x_values_and_labels(unit, self.picked_spectrum_nos) for wws in wrapped_workspaces]
+        x_by_pws = [pair[0] for pair in x_and_labels_by_pws]
+        labels_by_pws = [pair[1] for pair in x_and_labels_by_pws]
         return x_by_pws, labels_by_pws, selected_peaks_workspaces
 
     def add_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> str:
@@ -505,11 +504,10 @@ class FullInstrumentViewModel:
         return self._instrument_view_peaks_ws_name
 
     def delete_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> None:
-        detector_ids = self.picked_detector_ids
         closest_peak_by_ws = []
         for ws_name in selected_peaks_workspaces:
-            peaks_by_detector = WorkspaceDetectorPeaks(ws_name).detector_peaks
-            picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in detector_ids]
+            peaks_by_detector = WorkspaceDetectorPeaks(ws_name, self._workspace, self._spectrum_nos).detector_peaks
+            picked_detector_peaks = [p for p in peaks_by_detector if p.spectrum_no in self.picked_spectrum_nos]
             if len(picked_detector_peaks) == 0:
                 continue
             peaks = sum([p.peaks for p in picked_detector_peaks], [])
@@ -528,7 +526,7 @@ class FullInstrumentViewModel:
 
     def delete_peaks_on_all_selected_detectors(self, selected_peaks_workspaces) -> None:
         for ws_name in selected_peaks_workspaces:
-            peaks_by_detector = WorkspaceDetectorPeaks(ws_name).detector_peaks
+            peaks_by_detector = WorkspaceDetectorPeaks(ws_name, self._workspace, self._spectrum_nos).detector_peaks
             picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in self.picked_detector_ids]
             if len(picked_detector_peaks) == 0:
                 continue

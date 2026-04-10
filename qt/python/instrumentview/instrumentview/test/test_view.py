@@ -45,7 +45,6 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
 
     def test_plotters_created(self):
         self._mock_plotter.assert_called_once()
-        # self.assertEqual(self._mock_plotter.call_count, 2)
 
     def test_select_bank_tube_button_is_checkable(self):
         self.assertEqual(self._view._select_bank_tube.text(), "Select Bank/Tube")
@@ -209,9 +208,9 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
 
     def test_disable_and_uncheck_selection_list(self):
         mock_item_0 = MagicMock()
-        mock_item_0.checkState.return_value = 2  # Qt.Checked
+        mock_item_0.checkState.return_value = Qt.Checked
         mock_item_1 = MagicMock()
-        mock_item_1.checkState.return_value = 0  # Qt.Unchecked
+        mock_item_1.checkState.return_value = Qt.Unchecked
         self._view._selection_list = MagicMock()
         self._view._selection_list.count.return_value = 2
         self._view._selection_list.item.side_effect = [mock_item_0, mock_item_1, mock_item_0, mock_item_1]
@@ -228,7 +227,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view._selection_list.count.return_value = 2
         self._view._selection_list.item.side_effect = [mock_item_0, mock_item_1]
         self._view._selection_tab = MagicMock()
-        self._view._selection_list_cache = {0: 2, 1: 0}  # Qt.Checked, Qt.Unchecked
+        self._view._selection_list_cache = {0: Qt.Checked, 1: Qt.Unchecked}
         self._view.enable_and_restore_selection_list()
         mock_item_0.setCheckState.assert_called_once_with(2)
         mock_item_1.setCheckState.assert_called_once_with(0)

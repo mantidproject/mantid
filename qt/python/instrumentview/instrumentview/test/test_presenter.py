@@ -47,7 +47,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
             return FullInstrumentViewPresenter(self._mock_view, self._model)
 
     def _create_detector_peaks(self, det_id: int) -> DetectorPeaks:
-        return DetectorPeaks([Peak(det_id, 0, (1, 1, 1), 100, 1000, 100, 100)])
+        return DetectorPeaks([Peak(det_id, 0, 0, (1, 1, 1), 100, 1000, 100, 100)])
 
     def test_update_plotter(self):
         self._presenter.update_plotter()
