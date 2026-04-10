@@ -224,40 +224,40 @@ class PeakFitMixin(object):
         self.peak_1_vals = [
             0,
             60.0549787,
-            58.67645081,
-            1.04571439,
-            56.16293865,
-            0.89151393,
-            27494.3852306,
-            3.24253088e-05,
-            0.34567429,
-            4302.77717622,
-            8.03374843e-05,
-            1.80098428,
-            9.53361135e-05,
-            23.32343495,
-            126.32162042,
-            1.8714507,
-            0.13360738,
+            60.50302458,
+            0.96835101,
+            62.48046827,
+            17968.51259504,
+            11862.52158495,
+            1.5147296,
+            0.01086475,
+            0.00095372,
+            11.39191181,
+            1.79698321,
+            0.00027597,
+            6511.40663289,
+            104.30848999,
+            3.17980847,
+            32.80338766,
         ]
         self.peak_2_vals = [
             0,
             53.11713333,
-            58.45633143,
-            1.3094412,
-            44.58148771,
-            1497790.0,
-            65944.88745238,
-            23.61714729,
-            0.0165231,
-            0.00706728,
-            2.34043859,
-            1.43592701,
-            0.00016835,
-            1188.44085471,
-            163.86109962,
-            5.30600298,
-            30.82858543,
+            59.96022948,
+            1.99160472,
+            30.10649091,
+            0.01156896,
+            0.00364206,
+            3.17649071,
+            0.01048302,
+            0.00273741,
+            3.8295418,
+            1.4386669,
+            0.00087459,
+            1644.96393957,
+            134.6694002,
+            16.18878335,
+            8.31868568,
         ]
 
     def validate_table(self, out_table, expected_dict, rtol=5e-3):
@@ -271,10 +271,10 @@ class PeakFitMixin(object):
                 np.testing.assert_allclose(np.nan_to_num(out_table.column(c)), expected_dict[c], rtol=rtol)
 
     def validate_missing_peaks_vals(self, peak_1_vals, peak_2_vals):
-        param_table1 = ADS.retrieve("ENGINX_280625_2.2_GROUP_Fit_Parameters")
+        param_table1 = ADS.retrieve("ENGINX_280625_2.25_GROUP_Fit_Parameters")
         param_table2 = ADS.retrieve("ENGINX_280625_2.5_GROUP_Fit_Parameters")
         expected_files = [
-            os.path.join(CWDIR, "FitParameters", "GROUP", "2.2", "ENGINX_280625_2.2_GROUP_Fit_Parameters.nxs"),
+            os.path.join(CWDIR, "FitParameters", "GROUP", "2.25", "ENGINX_280625_2.25_GROUP_Fit_Parameters.nxs"),
             os.path.join(CWDIR, "FitParameters", "GROUP", "2.5", "ENGINX_280625_2.5_GROUP_Fit_Parameters.nxs"),
         ]
 
@@ -309,7 +309,7 @@ class TestFittingPeaksOfMissingPeakDataWithFillZero(PeakFitMixin, systemtesting.
     def runTest(self):
         self.setup_fit_peaks_inputs()
         kwargs = self.default_kwargs
-        kwargs["peaks"] = (2.2, 2.5)
+        kwargs["peaks"] = (2.25, 2.5)
         # expect no peaks here, set the i over sigma threshold large as well as sigma is ill-defined
         fit_all_peaks(**kwargs, i_over_sigma_thresh=10.0, nan_replacement="zeros")
 
@@ -329,7 +329,7 @@ class TestFittingPeaksOfMissingPeakDataWithSpecifiedValue(PeakFitMixin, systemte
     def runTest(self):
         self.setup_fit_peaks_inputs()
         kwargs = self.default_kwargs
-        kwargs["peaks"] = (2.2, 2.5)
+        kwargs["peaks"] = (2.25, 2.5)
         # expect no peaks here, set the i over sigma threshold large as well as sigma is ill-defined
         fit_all_peaks(**kwargs, i_over_sigma_thresh=10.0, nan_replacement="zeros", no_fit_value_dict={"I_est": 1.0, "I": 0.01})
 

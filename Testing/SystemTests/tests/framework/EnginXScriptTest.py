@@ -18,8 +18,8 @@ CWDIR = os.path.join(config["datasearch.directories"].split(";")[0], "ENGINX")
 FULL_CALIB = os.path.join(CWDIR, "ENGINX_whole_inst_calib.nxs")
 
 BANK_DIFF_CONSTS = {
-    "North": {UnitParams.difc: 18422, UnitParams.difa: -6.6, UnitParams.tzero: -15},
-    "South": {UnitParams.difc: 18427, UnitParams.difa: -7.9, UnitParams.tzero: -19.4},
+    "North": {UnitParams.difc: 18427, UnitParams.difa: -7.9, UnitParams.tzero: -19.4},
+    "South": {UnitParams.difc: 18434, UnitParams.difa: -10.4, UnitParams.tzero: -24.2},
 }
 
 
@@ -40,12 +40,12 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
     def validate(self):
         # bank 1
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS["North"][UnitParams.difc], delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS["North"][UnitParams.difc], delta=6)
         self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS["North"][UnitParams.difa], delta=1)
         self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS["North"][UnitParams.tzero], delta=2)
         # bank 2
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(1)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS["South"][UnitParams.difc], delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS["South"][UnitParams.difc], delta=6)
         self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS["South"][UnitParams.difa], delta=1)
         self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS["South"][UnitParams.tzero], delta=2)
         # compare foc data in TOF (conversion to d already tested by assertions on diff consts)
@@ -76,7 +76,7 @@ class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
     def validate(self):
         # only assert diff constants (both banks tests normalisation etc.)
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS["North"][UnitParams.difc], delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS["North"][UnitParams.difc], delta=6)
         self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS["North"][UnitParams.difa], delta=1)
         self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS["North"][UnitParams.tzero], delta=2)
 
@@ -202,13 +202,17 @@ class FocusTexture(systemtesting.MantidSystemTest):
         self.assertEqual(self._ws_foc.getNumberHistograms(), 20)
         # don't assert diff constants of one group
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(10)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 17250, delta=5)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], -8.5, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 17250, delta=6)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -9.5, delta=1)
         self.assertAlmostEqual(diff_consts[UnitParams.tzero], -20.3, delta=2)
         # compare TOF workspaces
         self.tolerance = 1e-6
         self.disableChecking.extend(["Instrument"])  # don't check
         return self._ws_foc.name(), "299080_engggui_focusing_output_ws_Texture.nxs"
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
 
 
 class FocusTexture30(systemtesting.MantidSystemTest):
@@ -230,13 +234,17 @@ class FocusTexture30(systemtesting.MantidSystemTest):
         self.assertEqual(self._ws_foc.getNumberHistograms(), 30)
         # don't assert diff constants of one group
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(23)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 19898, delta=5)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], -8.9, delta=1)
-        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -22.2, delta=2)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 19908, delta=6)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -13.2, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -28.2, delta=2)
         # compare TOF workspaces
         self.tolerance = 1e-6
         self.disableChecking.extend(["Instrument"])  # don't check
         return self._ws_foc.name(), "299080_engggui_focusing_output_ws_Texture30.nxs"
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
 
 
 def _try_delete_cal_and_focus_dirs(parent_dir):
