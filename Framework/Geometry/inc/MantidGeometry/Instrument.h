@@ -95,8 +95,8 @@ public:
 
   /// mark a Component which has already been added to the Instrument (as a child comp.)
   /// to be a monitor and also add it to _detectorCache for possible later retrieval
-  void markAsMonitor(const IDetector *);
-  void markAsMonitorIncomplete(const IDetector *);
+  void markAsMonitor(IDetector const *);
+  void markAsMonitorIncomplete(IDetector const *);
 
   /// Remove a detector from the instrument
   void removeDetector(IDetector *);
@@ -288,14 +288,14 @@ private:
       if (isFinalized() && !empty()) {
         return front().id();
       } else {
-        throw std::runtime_error("minID() called on non-finalized DetectorCache");
+        throw std::runtime_error("minID() called on non-finalized or empty DetectorCache");
       }
     }
     detid_t maxID() const {
       if (isFinalized() && !empty()) {
         return back().id();
       } else {
-        throw std::runtime_error("maxID() called on non-finalized DetectorCache");
+        throw std::runtime_error("maxID() called on non-finalized or empty DetectorCache");
       }
     }
     DetectorCache::iterator lower_bound(detid_t id);

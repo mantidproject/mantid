@@ -455,7 +455,7 @@ Instrument::DetectorCache::iterator Instrument::DetectorCache::lower_bound(detid
  * @returns a constant iterator to the first DetectorCacheEntry with ID >= the given ID, or cend() if no such element
  * exists
  * @throws std::runtime_error if the detector cache is not finalized
- * @note optimizations in this method could improve performance in lookuo speeds
+ * @note optimizations in this method could improve performance in lookup speeds
  */
 Instrument::DetectorCache::const_iterator Instrument::DetectorCache::lower_bound(detid_t id) const {
   if (!isFinalized()) {
@@ -798,6 +798,7 @@ void Instrument::removeDetector(IDetector *det) {
   const detid_t id = det->getID();
   // Remove the detector from the detector cache
   const auto it = m_detectorCache.find(id);
+  // NOTE this operation is O(N) for the vector cache
   m_detectorCache.erase(it);
 
   // Remove it from the parent assembly (and thus the instrument).
@@ -1345,11 +1346,13 @@ void Instrument::parseTreeAndCacheBeamline() {
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
   // If we have source and it has Beamline objects just copy them
-  if (source && source->hasComponentInfo(this))
+  if (source && source->hasComponentInfo(this)) {
     return makeWrappers(pmap, source->componentInfo(), source->detectorInfo());
+  }
   // If pmap is empty and base instrument has Beamline objects just copy them
-  if (pmap.empty() && m_componentInfo)
+  if (pmap.empty() && m_componentInfo) {
     return makeWrappers(pmap, *m_componentInfo, *m_detectorInfo);
+  }
   // pmap not empty and/or no cached Beamline objects found
   return InstrumentVisitor::makeWrappers(*this, &pmap);
 }
