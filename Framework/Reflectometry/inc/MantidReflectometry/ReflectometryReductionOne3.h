@@ -298,7 +298,7 @@ private:
         return {};
       std::vector<std::string> missingTasksAll;
       // Loop through each task set
-      for (auto i = 0; i < m_dependantTasks.size(); ++i) {
+      for (size_t i = 0; i < m_dependantTasks.size(); ++i) {
         // if task set is unfulfillable due to missing tasks
         std::vector<std::string> missingTasks;
         if (!populateDependantTasks(i)) {
@@ -348,7 +348,7 @@ private:
     void executeImpl() override;
   };
 
-  class TaskConvertToWavelength : public AlgorithmTask {
+  class TaskConvertToWavelength final : public AlgorithmTask {
   public:
     explicit TaskConvertToWavelength(ReflectometryReductionOne3 *parent)
         : AlgorithmTask(parent, "TaskConvertToWavelength") {
@@ -360,7 +360,7 @@ private:
     void executeImpl() override;
   };
 
-  class TaskNormalizeByMonitor : public AlgorithmTask {
+  class TaskNormalizeByMonitor final : public AlgorithmTask {
   public:
     explicit TaskNormalizeByMonitor(ReflectometryReductionOne3 *parent)
         : AlgorithmTask(parent, "TaskNormalizeByMonitor") {
@@ -372,7 +372,7 @@ private:
     void executeImpl() override;
   };
 
-  class TaskNormalizeByTransmission : public AlgorithmTask {
+  class TaskNormalizeByTransmission final : public AlgorithmTask {
   public:
     explicit TaskNormalizeByTransmission(ReflectometryReductionOne3 *parent)
         : AlgorithmTask(parent, "TaskNormalizeByTransmission") {
@@ -386,7 +386,7 @@ private:
     void executeImpl() override;
   };
 
-  class TaskNormalizeByAlgorithm : public AlgorithmTask {
+  class TaskNormalizeByAlgorithm final : public AlgorithmTask {
   public:
     explicit TaskNormalizeByAlgorithm(ReflectometryReductionOne3 *parent)
         : AlgorithmTask(parent, "TaskNormalizeByAlgorithm") {
@@ -400,7 +400,7 @@ private:
     void executeImpl() override;
   };
 
-  class TaskExtractROI : public AlgorithmTask {
+  class TaskExtractROI final : public AlgorithmTask {
   public:
     explicit TaskExtractROI(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskExtractROI") {
       setExpectedOutputs({"ExtractedROIWorkspace"});
@@ -408,7 +408,7 @@ private:
     void executeImpl() override;
   };
 
-  class TaskSumDetectors : public AlgorithmTask {
+  class TaskSumDetectors final : public AlgorithmTask {
   public:
     explicit TaskSumDetectors(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskSumDetectors") {
       setExpectedOutputs({"SummedWorkspace"});
@@ -421,7 +421,7 @@ private:
     void executeImpl() override;
   };
 
-  class TaskSumDetectorsInQ : public AlgorithmTask {
+  class TaskSumDetectorsInQ final : public AlgorithmTask {
   public:
     explicit TaskSumDetectorsInQ(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskSumDetectorsInQ") {
       setExpectedOutputs({"QSummedWorkspace"});
@@ -434,7 +434,7 @@ private:
     void executeImpl() override;
   };
 
-  class TaskCropWavelength : public AlgorithmTask {
+  class TaskCropWavelength final : public AlgorithmTask {
   public:
     explicit TaskCropWavelength(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskCropWavelength") {
       setExpectedOutputs({"CroppedWorkspace"});
@@ -447,7 +447,7 @@ private:
     void executeImpl() override;
   };
 
-  class TaskConvertToQ : public AlgorithmTask {
+  class TaskConvertToQ final : public AlgorithmTask {
   public:
     explicit TaskConvertToQ(ReflectometryReductionOne3 *parent) : AlgorithmTask(parent, "TaskConvertToQ") {
       setExpectedOutputs({"ConvertedWorkspaceQ"});

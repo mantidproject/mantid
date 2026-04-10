@@ -272,7 +272,7 @@ void ReflectometryReductionOne3::exec() {
   std::string diagWSName = createDebugWorkspaceName(getPropertyValue("InputWorkspace"));
   int step = 0;
 
-  for (auto i = 0; i < m_stagedAlgorithmTasks.size(); ++i) {
+  for (size_t i = 0; i < m_stagedAlgorithmTasks.size(); ++i) {
     const auto &task = m_stagedAlgorithmTasks[i];
     task->execute();
     if (outputDiagnostics) {
