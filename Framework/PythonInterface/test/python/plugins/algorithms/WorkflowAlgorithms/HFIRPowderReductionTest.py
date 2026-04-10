@@ -399,21 +399,21 @@ class WarnUnsetOptionalFieldsTests(unittest.TestCase):
 
     def test_no_warnings_when_all_optional_fields_set(self):
         """Test that no warnings are logged when all optional fields are provided."""
+        mask_workspace = CreateSampleWorkspace()
         algo = self._create_algo(
             Instrument="WAND^2",
             VanadiumFilename="HB2C_7000.nxs.h5",
             VanadiumBackgroundFilename="HB2C_7000.nxs.h5",
             SampleBackgroundFilename="HB2C_7000.nxs.h5",
+            MaskWorkspace=mask_workspace,
             MaskAngle=60.0,
             AttenuationmuR=1.5,
         )
-        # MaskWorkspace requires a real workspace, so we still expect that one warning
         with patch.object(Logger, "warning") as mock_warning:
             algo._warn_unset_optional_fields()
             messages = [call.args[0] for call in mock_warning.call_args_list]
-            # Only MaskWorkspace warning should remain (requires a real workspace object)
-            self.assertEqual(mock_warning.call_count, 1)
-            self.assertIn("MaskWorkspace is not set.", messages)
+            self.assertEqual(mock_warning.call_count, 0)
+            self.assertEqual(messages, [])
 
 
 class AutoPopulateTests(unittest.TestCase):
