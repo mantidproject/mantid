@@ -487,25 +487,31 @@ class FigureInteraction(object):
             menu.addMenu(axes_menu)
 
     def _add_normalization_option_menu(self, menu, ax):
-        # Check if toggling normalization makes sense
-        # TODO: Add check here for inverse Q normalisation
         can_toggle_normalize_by_bin_width = self._can_toggle_normalize_by_bin_width(ax)
-        if not can_toggle_normalize_by_bin_width:
+        can_normalise_by_inverse_q = self._can_normalize_by_q(ax)
+        if not can_toggle_normalize_by_bin_width and not can_normalise_by_inverse_q:
             return None
 
         # Create menu
+        actions = []
         norm_menu = QMenu("Normalization", menu)
         norm_actions_group = QActionGroup(norm_menu)
         none_action = norm_menu.addAction("None", lambda: self._normalization_type_changed(ax, PlotNormalizationType.NONE))
-        bin_width_action = norm_menu.addAction("Bin Width", lambda: self._normalization_type_changed(ax, PlotNormalizationType.BIN_WIDTH))
-        inverse_q_action = norm_menu.addAction(
-            "Q^-4", lambda: self._normalization_type_changed(ax, PlotNormalizationType.INVERSE_Q_FOURTH_POWER)
-        )
-        for action in [none_action, bin_width_action, inverse_q_action]:
+        actions.append(none_action)
+        if can_toggle_normalize_by_bin_width:
+            bin_width_action = norm_menu.addAction(
+                "Bin Width", lambda: self._normalization_type_changed(ax, PlotNormalizationType.BIN_WIDTH)
+            )
+            actions.append(bin_width_action)
+        if can_normalise_by_inverse_q:
+            inverse_q_action = norm_menu.addAction(
+                "Q^-4", lambda: self._normalization_type_changed(ax, PlotNormalizationType.INVERSE_Q_FOURTH_POWER)
+            )
+            actions.append(inverse_q_action)
+        for action in actions:
             norm_actions_group.addAction(action)
             action.setCheckable(True)
 
-        # Update menu state
         normalization = self._get_normalization_from_artists(ax)
         if normalization == PlotNormalizationType.BIN_WIDTH:
             bin_width_action.setChecked(True)
@@ -943,6 +949,15 @@ class FigureInteraction(object):
         if all(plotted_normalized_by_bin_width) or not any(plotted_normalized_by_bin_width):
             return True
         return False
+
+    @staticmethod
+    def _can_normalize_by_q(ax):
+        plotted_x_is_q = []
+        for workspace_name, artists in ax.tracked_workspaces.items():
+            ws = ads.retrieve(workspace_name)
+            plotted_x_is_q.append(ws.getAxis(0).getUnit().unitID() == "MomentumTransfer")
+
+        return all(plotted_x_is_q)
 
     def _quick_change_axes(self, ax, x_scale_type=None, y_scale_type=None):
         """
