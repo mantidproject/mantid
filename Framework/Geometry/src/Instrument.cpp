@@ -1399,6 +1399,15 @@ Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
   return InstrumentVisitor::makeWrappers(*this, &pmap);
 }
 
+/** Return ComponentInfo and DetectorInfo for instrument given by pmap.
+ *
+ * Force the creation of new ComponentInfo and DetectorInfo for instrument,
+ * even if they already exist */
+std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+Instrument::makeBeamlineNew(ParameterMap &pmap) const {
+  return InstrumentVisitor::makeWrappers(*this, &pmap);
+}
+
 /// Sets up links between m_detectorInfo, m_componentInfo, and m_instrument.
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,

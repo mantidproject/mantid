@@ -219,6 +219,7 @@ public:
   void parseTreeAndCacheBeamline();
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeBeamlineNew(ParameterMap &pmap) const;
 
   friend InstrumentVisitor;
 

@@ -1120,7 +1120,11 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
     throw std::logic_error("ParameterMap::setInstrument must be called with "
                            "base instrument, not a parametrized instrument");
   m_instrument = instrument;
-  std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamline(*this);
+  if (m_map.empty()) {
+    std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamlineNew(*this);
+  } else {
+    std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamline(*this);
+  }
 }
 
 } // namespace Mantid::Geometry
