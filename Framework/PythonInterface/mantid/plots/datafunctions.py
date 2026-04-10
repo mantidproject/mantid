@@ -9,6 +9,7 @@
 #
 import datetime
 from itertools import tee
+import re
 
 import numpy as np
 from matplotlib.collections import PolyCollection, QuadMesh
@@ -897,7 +898,7 @@ def get_sample_log(workspace, **kwargs):
 # ====================================================
 
 
-def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_latex=True):
+def get_axes_labels(workspace, indices=None, normalization=PlotNormalizationType.BIN_WIDTH, use_latex=True):
     """
     Get axis labels from a Workspace2D or an MDHistoWorkspace
     Returns a tuple. The first element is the quantity label, such as "Intensity" or "Counts".
@@ -934,7 +935,7 @@ def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_la
         axes_labels.append(title.strip())
     else:
         # For matrix workspaces, return a tuple of ``(YUnit, <other units>)``
-        axes_labels = [workspace.YUnitLabel(useLatex=use_latex, plotAsDistribution=normalize_by_bin_width)]
+        axes_labels = [_get_y_axes_label(workspace, normalization, use_latex)]
         for index in range(workspace.axes()):
             axis = workspace.getAxis(index)
             unit = axis.getUnit()
@@ -944,6 +945,31 @@ def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_la
                 unit = unit.caption()
             axes_labels.append(unit)
     return tuple(axes_labels)
+
+
+def _get_y_axes_label(workspace, normalization, use_latex):
+    y_unit = workspace.YUnitLabel(use_latex)
+    x_label = ""
+    if normalization == PlotNormalizationType.BIN_WIDTH and not workspace.isDistribution():
+        x_label = workspace.getAxis(0).getUnit().symbol().latex() if use_latex else workspace.getAxis(0).getUnit().symbol().ascii()
+    elif normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER:
+        x_label = "Q^{-4}"
+    return _add_denominator_to_y_label(y_unit, x_label, use_latex)
+
+
+def _add_denominator_to_y_label(y_label, x_label, use_latex):
+    if use_latex:
+        if x_label:
+            label_expression = re.compile(r"(.*)\((.*)\)(\$\^\{-1\}\$)")
+            # if already normalised by a unit
+            if match := label_expression.match(y_label):
+                y_label = f"{match.group(1)}({match.group(2)} ${x_label}$){match.group(3)}"
+            else:
+                y_label += f" (${x_label}$)" + "$^{-1}$"
+    else:
+        y_label += f" per {x_label}"
+
+    return y_label
 
 
 def get_data_from_errorbar_container(err_cont):
