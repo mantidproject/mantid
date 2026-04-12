@@ -1401,7 +1401,7 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
     }
   }
   // must reset the instrument on the workspace
-  ws->setInstrument(inst);
+  workspace->setInstrument(inst);
 }
 //-----------------------------------------------------------------------------
 /**
