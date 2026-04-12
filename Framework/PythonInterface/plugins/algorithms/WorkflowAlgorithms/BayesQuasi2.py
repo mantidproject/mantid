@@ -201,6 +201,13 @@ class BayesQuasi2(QuickBayesTemplate):
                 engine=engine, max_features=max_num_peaks, ws_list=ws_list, x_unit="DeltaE", name=f"{name}_{prog}_Workspace_{spec}"
             )
 
+            # Check if the results have converged
+            if spec > 0:
+                converged = self.validate_results_convergence(results)
+                if converged:
+                    self.log().warning("Fitting stopped because the fitted parameters values have converged.")
+                    break
+
         sample_logs = [("background", BG_str), ("elastic_peak", elastic), ("energy_min", start_x), ("energy_max", end_x)]
 
         return ws_list, results, results_errors, sample_logs
@@ -310,6 +317,20 @@ class BayesQuasi2(QuickBayesTemplate):
 
         self.setProperty("OutputWorkspaceResult", params)
         self.setProperty("OutputWorkspaceProb", prob)
+
+    def validate_results_convergence(self, results):
+        """
+        Takes the output of quickBayes and checks if the fitted
+        parameters have converged or not.
+        :param results: dict of quickBayes parameter results
+        """
+        stopping_criteria = 5e-3
+        parameters = results.keys()
+        converged = dict.fromkeys(results, False)
+        for parameter in parameters:
+            if abs(results[parameter][-2] - results[parameter][-1]) <= stopping_criteria:
+                converged[parameter] = True
+        return all(converged.values())
 
 
 # Register algorithm with Mantid

@@ -157,9 +157,11 @@ class BayesQuasi2Test(unittest.TestCase):
             VerticalAxisValues=["1 feature(s)", "2 feature(s)"],
         )
 
-    def test_calculate(self):
+    @mock.patch("BayesQuasi2.BayesQuasi2.validate_results_convergence")
+    def test_calculate(self, validate_mock):
         func_mock = mock.Mock()
         engine_mock = mock.Mock()
+        validate_mock.return_value = False
 
         self._alg.get_background_function = mock.Mock(return_value=func_mock)
 
@@ -500,6 +502,17 @@ class BayesQuasi2Test(unittest.TestCase):
             name_params="results",
             name_prob="prob",
         )
+
+    def test_validate_results_convergence(self):
+        results = [
+            {"a": [np.float64(1.0), np.float64(1.5)], "b": [np.float64(2.0), np.float64(2.5)], "c": [np.float64(3), np.float64(3.5)]},
+            {"a": [np.float64(1.0), np.float64(1.005)], "b": [np.float64(2.0), np.float64(2.5)], "c": [np.float64(3), np.float64(3.5)]},
+            {"a": [np.float64(1.0), np.float64(1.005)], "b": [np.float64(2.0), np.float64(2.005)], "c": [np.float64(3), np.float64(3.5)]},
+            {"a": [np.float64(1.0), np.float64(1.005)], "b": [np.float64(2.0), np.float64(2.005)], "c": [np.float64(3), np.float64(3.005)]},
+        ]
+        converged = [False, False, False, True]
+        for r, c in zip(results, converged):
+            self.assertEqual(self._alg.validate_results_convergence(r), c)
 
 
 if __name__ == "__main__":
