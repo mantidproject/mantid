@@ -763,7 +763,7 @@ void Instrument::markAsMonitor(const IDetector *det) {
 
   // mark detector as a monitor
   auto it = m_detectorCache.find(det->getID());
-  it->isMonitor() = true;
+  it->setIsMonitor(true);
 }
 
 /** Mark a Component which has already been added to the Instrument class
@@ -838,8 +838,10 @@ void Instrument::removeDetectorFinalize() {
     throw std::runtime_error("Instrument::removeDetectorFinalize() called on a "
                              "parameterized Instrument object.");
 
-  if (isFinalized())
+  if (isFinalized()) {
+    m_detectorCache.m_toRemove.clear();
     return;
+  }
 
   // Remove from the cache all the ones to be removed
   auto newEnd = std::remove_if(m_detectorCache.begin(), m_detectorCache.end(), [this](const auto &entry) {

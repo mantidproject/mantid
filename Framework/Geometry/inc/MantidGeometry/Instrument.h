@@ -275,7 +275,7 @@ private:
     detid_t const &id() const { return std::get<0>(*this); }
     IDetector_const_sptr const &detector() const { return std::get<1>(*this); }
     bool const &isMonitor() const { return std::get<2>(*this); }
-    bool &isMonitor() { return std::get<2>(*this); }
+    void setIsMonitor(bool flag) { std::get<2>(*this) = flag; }
   };
 
   /// @brief A vector of DetectorCacheEntry, which holds the detector cache
