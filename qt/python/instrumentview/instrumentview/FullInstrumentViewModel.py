@@ -218,7 +218,7 @@ class FullInstrumentViewModel:
     def integration_limits(self, limits) -> None:
         try:
             min, max = limits
-            assert float(max) > float(min)
+            assert float(max) >= float(min)
         except (ValueError, AssertionError):
             return
         self._integration_limits = limits
