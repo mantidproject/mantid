@@ -249,7 +249,7 @@ std::unique_ptr<IPeak> PeaksWorkspace::createPeakQSample(const V3D &position) co
 
   LogManager_const_sptr props = getLogs();
   // See if we can get a wavelength/energy
-  // Then assume constant wavelenth
+  // Then assume constant wavelength
   double wavelength(0);
   if (props->hasProperty("wavelength")) {
     wavelength = props->getLogAsSingleValue("wavelength");
