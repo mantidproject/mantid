@@ -36,10 +36,10 @@ class WorkspaceDetectorPeaks:
             if spec_no in all_spectrum_nos:
                 self.detector_peaks.append(DetectorPeaks(list(peaks_for_spec)))
 
-    def get_positions_and_labels(self, detector_positions, spectrum_nos):
+    def get_positions_and_labels(self, detector_positions, spectrum_nos) -> tuple[np.ndarray, np.ndarray]:
         peaks_spectrum_nos = np.array([p.spectrum_no for p in self.detector_peaks])
         if len(peaks_spectrum_nos) == 0:
-            return np.array([])
+            return np.array([]), np.array([])
         # Use argsort + searchsorted for fast lookup. Using np.where(np.isin) does not
         # maintain the original order. It is faster to sort then search the sorted
         # array for matching spectrum numbers
@@ -50,7 +50,7 @@ class WorkspaceDetectorPeaks:
         ordered_indices = sorted_idx[positions]
         valid = sorted_spectrum_nos[positions] == peaks_spectrum_nos
         ordered_indices = ordered_indices[valid]
-        labels = [p.label for i, p in enumerate(self.detector_peaks) if valid[i]]
+        labels = np.array([p.label for i, p in enumerate(self.detector_peaks) if valid[i]])
         return detector_positions[ordered_indices], labels
 
     def get_x_values_and_labels(self, unit, picked_spectrum_numbers):
@@ -58,5 +58,5 @@ class WorkspaceDetectorPeaks:
         x_values = [
             p.location_in_unit(unit) for peak in self.detector_peaks for p in peak.peaks if peak.spectrum_no in picked_spectrum_numbers
         ]
-        labels = [p.label for peak in self.detector_peaks for p in peak.peaks if peak.spectrum_no in picked_spectrum_numbers]
+        labels = np.array([p.label for peak in self.detector_peaks for p in peak.peaks if peak.spectrum_no in picked_spectrum_numbers])
         return x_values, labels
