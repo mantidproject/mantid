@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest.mock
-from instrumentview.Projections.CylindricalProjection import CylindricalProjection
+from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.Projections.Projection import CylindricalProjection
 import unittest
 import numpy as np
 
@@ -23,7 +24,7 @@ class TestCylindricalProjection(unittest.TestCase):
         # No need to mock out the x adjustments because in this case there isn't any need for
         # the projection class to call it.
         self._run_test(
-            projection_axis=[1, 0, 0],
+            projection_type=ProjectionType.CYLINDRICAL_X,
             expected_x_axis=[0, 1, 0],
             expected_y_axis=[0, 0, 1],
             expected_projections=[(0, 0), (0, 3 / np.sqrt(10)), (0, -3 / np.sqrt(10))],
@@ -32,7 +33,7 @@ class TestCylindricalProjection(unittest.TestCase):
     def test_calculate_2d_coordinates_y(self):
         # y-axis projection
         self._run_test(
-            projection_axis=[0, 1, 0],
+            projection_type=ProjectionType.CYLINDRICAL_Y,
             expected_x_axis=[0, 0, 1],
             expected_y_axis=[1, 0, 0],
             expected_projections=[(0, 1), (-np.pi / 2, 1 / np.sqrt(10)), (np.pi / 2, 1 / np.sqrt(10))],
@@ -42,16 +43,20 @@ class TestCylindricalProjection(unittest.TestCase):
     def test_calculate_2d_coordinates_z(self):
         # z-axis projection
         self._run_test(
-            projection_axis=[0, 0, 1],
+            projection_type=ProjectionType.CYLINDRICAL_Z,
             expected_x_axis=[1, 0, 0],
             expected_y_axis=[0, 1, 0],
             expected_projections=[(-np.pi / 2, 0), (-np.atan2(1, 3), 0), (-np.atan2(1, -3), 0)],
             mock_apply_x_correction=None,
         )
 
-    def _run_test(self, projection_axis, expected_x_axis, expected_y_axis, expected_projections, mock_apply_x_correction=None):
-        cylinder = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array(projection_axis))
-        np.testing.assert_allclose(cylinder._projection_axis, projection_axis, atol=self.abs_tol)
+    def _run_test(self, projection_type, expected_x_axis, expected_y_axis, expected_projections, mock_apply_x_correction=None):
+        cylinder = CylindricalProjection(
+            type=projection_type,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
         np.testing.assert_allclose(cylinder._x_axis, expected_x_axis, atol=self.abs_tol)
         np.testing.assert_allclose(cylinder._y_axis, expected_y_axis, atol=self.abs_tol)
         calculated = cylinder.positions()

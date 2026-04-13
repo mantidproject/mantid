@@ -56,7 +56,7 @@ Concepts
 --------
 
 **Domain**
-This refers to a set of X, Y and error data at a specific index of a :ref:`MatrixWorkspace <MatrixWorkspace>`.
+This refers to a set of X, Y and error data at a specific index of a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 
 **Function Index**
 Different domains can have the same function, and therefore have identically named parameters. A Function Index is used to differentiate

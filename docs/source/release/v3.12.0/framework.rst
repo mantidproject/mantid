@@ -112,7 +112,7 @@ Improved
 Bugfixes
 ########
 - A `bug <https://github.com/mantidproject/mantid/pull/20953>`_ in the handling of fractional bin weights in a specialised form
-  (``RebinnedOutput``) of :ref:`Workspace2D <Workspace2D>` has been fixed.
+  (``RebinnedOutput``) of :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` has been fixed.
   This mainly affects the algorithms :ref:`algm-SofQWNormalisedPolygon` and :ref:`algm-Rebin2D`,
   which underlies the `SliceViewer <http://archive.mantidproject.org/MantidPlot:_SliceViewer>`_.
 
@@ -137,7 +137,7 @@ Improved
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
 - The previously mentioned ``ConfigObserver`` and ``ConfigPropertyObserver`` classes are also exposed to Python.
 - ``mantid.kernel.V3D`` vectors now support negation through the usual ``-`` operator.
-- It is now possible to `pickle <https://docs.python.org/2/library/pickle.html>`_ and de-pickle :ref:`Workspace2D <Workspace2D>` and :ref:`TableWorkspace <Table Workspaces>` in Python. This has been added to make it easier to transfer your workspaces over a network. Only these two workspace types currently supports the pickling process, and there are limitations to be aware of described :ref:`here <Workspace2D>`.
+- It is now possible to `pickle <https://docs.python.org/2/library/pickle.html>`_ and de-pickle :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` and :ref:`TableWorkspace <Table Workspaces>` in Python. This has been added to make it easier to transfer your workspaces over a network. Only these two workspace types currently supports the pickling process, and there are limitations to be aware of described here: :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`.
 - Support for unicode property names has been added to Python. This means that one can run the following in Python2 or Python3.
 
 .. code-block:: python

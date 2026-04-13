@@ -12,7 +12,7 @@ Description
 Developed for CORELLI but should work on any instrument. This workflow
 algorithm loops over a series of runs combining them with correct
 normalisation, subtract the background and apply symmetry. The
-resulting workspace is a :ref:`MDHistoWorkspace <MDHistoWorkspace>`
+resulting workspace is a :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`
 containing a volume of scattering.
 
 The input filename follows the syntax from

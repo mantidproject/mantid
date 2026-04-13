@@ -30,7 +30,7 @@ components.
 
 The method property changes how the solid angle calculation is
 performed.
-``GenericShape`` uses the ray-tracing methods of :ref:`Instrument`.
+``GenericShape`` uses the ray-tracing methods of :py:obj:`Instrument <mantid.geometry.Instrument>`.
 
 All of the others have special analytical forms taken from small angle scattering literature.
 Those are fast analytical approximations that are valid in large detector distance and small pixel area limit.

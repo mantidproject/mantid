@@ -26,7 +26,7 @@ New
 - :ref:`algm-IntegrateEllipsoidsTwoStep` which can be used to integrate weak single crystal peaks by using parameters derived from strong peaks.
 - :ref:`FindEPP-v2 <algm-FindEPP-v2>` reimplements `FindEPP-v1` in C++, providing an order of magnitude gain in execution time for large workspaces.
 - :ref:`LineProfile <algm-LineProfile>` will give a horizontal or vertical line profile over a workspace.
-- :ref:`SaveYDA <algm-SaveYDA>` do export :ref:`Workspace2D <Workspace2D>` to `Frida 2.0 <http://apps.jcns.fz-juelich.de/doku/frida/start>`_ YAML format.
+- :ref:`SaveYDA <algm-SaveYDA>` do export :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` to `Frida 2.0 <http://apps.jcns.fz-juelich.de/doku/frida/start>`_ YAML format.
 
 Improved
 ########

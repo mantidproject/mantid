@@ -51,7 +51,8 @@ const std::string GenerateGoniometerIndependentBackground::summary() const {
  */
 void GenerateGoniometerIndependentBackground::init() {
   declareProperty(std::make_unique<ArrayProperty<std::string>>("InputWorkspaces", std::make_shared<ADSValidator>()),
-                  "Input workspaces. Must be :ref:`EventWorkspace` and have at least 2 input workspaces.");
+                  "Input workspaces. Must be :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` and have at "
+                  "least 2 input workspaces.");
 
   const std::vector<std::string> exts{".map", ".xml"};
   declareProperty(

@@ -240,7 +240,7 @@ void LoadInstrument::exec() {
   } // end of mutex scope
 
   // Set the monitors output property
-  setProperty("MonitorList", (ws->getInstrument())->getMonitors());
+  setProperty("MonitorList", (ws->getInstrument())->getMonitorIDs());
 
   // Rebuild the spectra map for this workspace so that it matches the
   // instrument, if required

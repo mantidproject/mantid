@@ -22,7 +22,7 @@ From the File menu you have access to standard options such as load (Open) and
 save for your current :ref:`project <Project>` or scripts open in the
 :ref:`script window <WorkbenchScriptWindow>`. You can also access the Workbench
 settings, from which you can choose your facility and
-:ref:`instrument <Instrument>`. There are also options to manage your user
+:py:obj:`Instrument <mantid.geometry.Instrument>`. There are also options to manage your user
 directories or close the Workbench.
 
 The manage user directory dialogue, is useful for allowing search of the

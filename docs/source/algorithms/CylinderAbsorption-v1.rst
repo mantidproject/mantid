@@ -38,7 +38,7 @@ Restrictions on the input workspace
 ###################################
 
 The input workspace must have units of wavelength. The
-:ref:`instrument <instrument>` associated with the workspace must be fully
+:py:obj:`Instrument <mantid.geometry.Instrument>` associated with the workspace must be fully
 defined because detector, source & sample position are needed.
 
 References

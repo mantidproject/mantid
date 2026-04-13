@@ -102,6 +102,7 @@ public:
   /// to be a monitor and also add it to _detectorCache for possible later
   /// retrieval
   void markAsMonitor(const IDetector *);
+  void markAsMonitorIncomplete(const IDetector *);
 
   /// Remove a detector from the instrument
   void removeDetector(IDetector *);
@@ -109,7 +110,10 @@ public:
   /// return reference to detector cache
   void getDetectors(detid2det_map &out_map) const;
 
+  /// Returns a list containing the detector ids of all detectors, optionally skipping monitors
   std::vector<detid_t> getDetectorIDs(bool skipMonitors = false) const;
+  /// Returns a list containing the detector ids of monitors
+  std::vector<detid_t> getMonitorIDs() const;
 
   std::size_t getNumberDetectors(bool skipMonitors = false) const;
 
@@ -118,9 +122,6 @@ public:
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const IComponent &comp) const;
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const std::string &bankName) const;
   std::set<detid_t> getDetectorIDsInBank(const std::string &bankName) const;
-
-  /// Returns a list containing the detector ids of monitors
-  std::vector<detid_t> getMonitors() const;
 
   /// Get the bounding box for this component and store it in the given argument
   void getBoundingBox(BoundingBox &assemblyBox) const override;
@@ -269,6 +270,15 @@ private:
   /// Map which holds detector-IDs and pointers to detector components, and
   /// monitor flags.
   std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
+
+  bool m_detectorCacheFinalized{true};
+  bool isFinalized() const {
+    if (m_map) {
+      return m_instr->isFinalized();
+    } else {
+      return m_detectorCacheFinalized;
+    }
+  }
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component

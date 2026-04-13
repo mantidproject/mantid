@@ -21,7 +21,7 @@ Multiple files following the syntax given in
 
 Output
 ------
-A :ref:`WorkspaceGroup <WorkspaceGroup>` that contains as many workspaces as many distinct Doppler's energy values were present in input files list (including E=0 for EFWS).
+A :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` that contains as many workspaces as many distinct Doppler's energy values were present in input files list (including E=0 for EFWS).
 Each Workspace in the group will have the given observable as the x-axis and as many bins, as many files were given corresponding to the same energy.
 Y-axis will be detector angle, and the values would be the intensities integrated over the whole spectra (for EFWS) or over the two peaks
 (symmetric around each peak) at the beginning and the end of the spectra (for IFWS).

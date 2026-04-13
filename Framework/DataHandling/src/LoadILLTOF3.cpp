@@ -435,7 +435,7 @@ void LoadILLTOF3::fillScanWorkspace(const Nexus::NXEntry &entry, const std::vect
   LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 0, true, detectorIDs, std::set<detid_t>(), dimOrder);
 
   // Load monitor data, there is only one monitor
-  const std::vector<int> monitorIDs = m_localWorkspace->getInstrument()->getMonitors();
+  const std::vector<int> monitorIDs = m_localWorkspace->getInstrument()->getMonitorIDs();
   const auto spectrumNo = data.dim1() * data.dim2();
   auto monitorData = LoadHelper::getDoubleDataset(entry, monitorList[0]);
   monitorData.load();

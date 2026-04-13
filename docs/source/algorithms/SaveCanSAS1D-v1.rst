@@ -13,7 +13,7 @@
 Description
 -----------
 
-Saves the given :ref:`MatrixWorkspace` to a file in the canSAS 1-D format.
+Saves the given :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` to a file in the canSAS 1-D format.
 
 The canSAS 1-D Format
 #####################

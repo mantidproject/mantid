@@ -14,7 +14,7 @@ Description
    This algorithm is being developed for a specific instrument. It might get changed or even
    removed without a notification, should instrument scientists decide to do so.
 
-This algorithm loads a DNS legacy data file into a :ref:`Workspace2D <Workspace2D>`. The loader rotates the detector bank
+This algorithm loads a DNS legacy data file into a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`. The loader rotates the detector bank
 in the position given in the data file.
 
 .. note::
@@ -24,9 +24,9 @@ in the position given in the data file.
 
 **Output**
 
-- For diffraction mode data (only one time channel) output is the :ref:`Workspace2D <Workspace2D>` with the X-axis in the wavelength units.
+- For diffraction mode data (only one time channel) output is the :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` with the X-axis in the wavelength units.
 
-- For TOF data (more than one time channel) output is the :ref:`Workspace2D <Workspace2D>` with the X-axis in TOF units. The lower bin boundary for the channel :math:`i`, :math:`t_i` is calculated as :math:`t_i = t_1 + t_{delay} + i*\Delta t`, where :math:`\Delta t` is the channel width and :math:`t_1` is the time-of-flight from the source (chopper) to sample. Given in the data file channel width is scaled by the *channel_width_factor* which can be set in the :ref:`parameter file <InstrumentParameterFile>`.
+- For TOF data (more than one time channel) output is the :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` with the X-axis in TOF units. The lower bin boundary for the channel :math:`i`, :math:`t_i` is calculated as :math:`t_i = t_1 + t_{delay} + i*\Delta t`, where :math:`\Delta t` is the channel width and :math:`t_1` is the time-of-flight from the source (chopper) to sample. Given in the data file channel width is scaled by the *channel_width_factor* which can be set in the :ref:`parameter file <InstrumentParameterFile>`.
 
 
 .. note::

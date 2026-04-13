@@ -9,7 +9,7 @@
 Description
 -----------
 
-Stitches single histogram :ref:`Matrix Workspaces <MatrixWorkspace>`
+Stitches single histogram :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`
 together outputting a stitched Matrix Workspace.
 The type of the input workspaces (histogram or point data) determines the stitch procedure.
 The x-error values Dx will always be ignored in case of histogram workspaces.

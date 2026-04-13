@@ -18,7 +18,7 @@ Analysis
 
 A workspace has one or more *spectra* contained within it; each spectra has a unique detector ID. Assuming the y-values represent counts; a *detector grouping* operation causes the counts to be summed across the given set of detector IDs which are supplied to the **Grouping** argument (for example `1,2,3,4,5` and `1-5`).
 
-The **InputWorkspace** must be a :ref:`WorkspaceGroup <WorkspaceGroup>`, where each workspace within the group represents a single period. Thus, single period data is just a *WorkspaceGroup* with a single workspace within it.
+The **InputWorkspace** must be a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`, where each workspace within the group represents a single period. Thus, single period data is just a *WorkspaceGroup* with a single workspace within it.
 
 The group must be given a name via **GroupName** which can consist of letters, numbers and underscores.
 

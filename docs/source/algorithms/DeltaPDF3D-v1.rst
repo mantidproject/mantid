@@ -19,9 +19,8 @@ removed or changed. The scale of the resulting 3D-ΔPDF is, as yet, not
 scaled correctly, so while the magnitude is not correct the sign
 should be.
 
-The input workspace must be a :ref:`MDHistoWorkspace
-<MDHistoWorkspace>` with dimensions '[H,0,0]', '[0,K,0]' and
-'[0,0,L]', The dimensions must be centered on zero.
+The input workspace must be a :py:obj:`MDHistoWorkspace <mantid.daaobjects.MDHistoWorkspace>`
+with dimensions '[H,0,0]', '[0,K,0]' and '[0,0,L]'. The dimensions must be centered on zero.
 
 
 Peak removal

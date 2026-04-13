@@ -63,14 +63,15 @@ class PropertiesDirective(AlgorithmBaseDirective):
 
             # dictionary to convert from property type to link to category page (where possible)
             property_type_dict = {
-                "Workspace": ":ref:`Workspace <Workspace>`",
-                "Workspace2D": ":ref:`Workspace2D <Workspace2D>`",
-                "EventWorkspace": ":ref:`EventWorkspace <EventWorkspace>`",
-                "MatrixWorkspace": ":ref:`MatrixWorkspace <MatrixWorkspace>`",
-                "GroupWorkspace": ":ref:`GroupWorkspace <WorkspaceGroup>`",
-                "MDEventWorkspace": ":ref:`MDEventWorkspace <MDWorkspace>`",
-                "MDHistoWorkspace": ":ref:`MDHistoWorkspace <MDHistoWorkspace>`",
-                "TableWorkspace": ":ref:`TableWorkspace <Table Workspaces>`",
+                "EventWorkspace": ":py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`",
+                "MatrixWorkspace": ":py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`",
+                "GroupWorkspace": ":py:obj:`GroupWorkspace <mantid.api.WorkspaceGroup>`",
+                "MDEventWorkspace": ":py:obj:`MDEventWorkspace <mantid.dataobjects.MDEventWorkspace1D>`",
+                "MDLeanEventWorkspace": ":py:obj:`MDLeanEventWorkspace <mantid.dataobjects.MDLeanEventWorkspace1D>`",
+                "MDHistoWorkspace": ":py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`",
+                "TableWorkspace": ":py:obj:`TableWorkspace <mantid.dataobjects.TableWorkspace>`",
+                "Workspace": ":py:obj:`Workspace <mantid.api.Workspace>`",
+                "Workspace2D": ":py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`",
             }
 
             for prop in alg_properties:

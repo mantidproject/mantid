@@ -9,7 +9,7 @@
 Description
 -----------
 
-Clones the input :ref:`Matrix Workspaces <MatrixWorkspace>` and orders the
+Clones the input :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` and orders the
 x-axis in an ascending or descending fashion. Ensures that the y-axis and error data as well as optional Dx data
 are sorted in a consistent way with the x-axis.
 

@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm constructs a :ref:`MatrixWorkspace <MatrixWorkspace>`
+This algorithm constructs a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`
 when passed a vector for each of the X, Y and optionally E and Dx values.
 The E values of the output workspace will be zero if not provided.
 The unit for the X Axis can optionally be specified as any of the units in the

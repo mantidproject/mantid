@@ -19,7 +19,7 @@ field.  At present, the standard samples used for measuring the flood field
 are H2O in a 1 mm path length cell for GP-SANS and Bio-SANS, and a 1 mm sheet
 of PMMA for EQ-SANS.
 
-In case the input is a :ref:`WorkspaceGroup <WorkspaceGroup>`, it is processed
+In case the input is a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`, it is processed
 entry-by-entry if the `MergeGroup` property is set to False. Otherwise, the input
 group is going to be merged and counts will be averaged. In addition, counts
 in spectra that are masked in one of the entries of the group but not the other

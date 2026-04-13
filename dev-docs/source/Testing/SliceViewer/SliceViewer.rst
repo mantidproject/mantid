@@ -95,7 +95,7 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
 MD Workspaces
 #############
 
-MD workspaces hold multi-dimensional data (typically 2-4D) and come in two forms: :ref:`MDEventWorkspace <MDWorkspace>`, :ref:`MDHistoWorkspace <MDHistoWorkspace>`.
+MD workspaces hold multi-dimensional data (typically 2-4D) and come in two forms: :ref:`MDEventWorkspace <MDWorkspace>`, :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`.
 In terms of sliceviewer functionality, the key difference is that MDHistoWorkspace have binned the events onto a regular grid and cannot be dynamically rebinned unless the original MDWorkspace
 (that holds the events) exists in the ADS (and the MDHistoWorkspace has not been altered by a binary operation e.g. ``MinusMD``).
 

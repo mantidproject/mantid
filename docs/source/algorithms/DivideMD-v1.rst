@@ -9,7 +9,7 @@
 Description
 -----------
 
-Divide two :ref:`MDHistoWorkspace <MDHistoWorkspace>`'s or a
+Divide two :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`'s or a
 MDHistoWorkspace and a scalar.
 
 The error of :math:`f = a / b` is propagated with

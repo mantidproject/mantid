@@ -78,6 +78,7 @@ const std::string HIGH_BACKGROUND("HighBackground");
 const std::string POSITION_TOL("PositionTolerance");
 const std::string PEAK_MIN_HEIGHT("MinimumPeakHeight");
 const std::string CONSTRAIN_PEAK_POS("ConstrainPeakPositions");
+const std::string COPY_LAST_GOOD_PEAK_PARAMS("CopyLastGoodPeakParameters");
 const std::string OUTPUT_WKSP_MODEL("FittedPeaksWorkspace");
 const std::string OUTPUT_WKSP_PARAMS("OutputPeakParametersWorkspace");
 const std::string OUTPUT_WKSP_PARAM_ERRS("OutputParameterFitErrorsWorkspace");
@@ -400,6 +401,10 @@ void FitPeaks::init() {
                   "(highest Y value position) and "
                   "the peak width either estimted by observation or calculate.");
 
+  declareProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS, true,
+                  "If true, initial peak parameters (with the exception of peak centre) "
+                  "may be copied from the last successfully fit peak in the spectra.");
+
   // additional output for reviewing
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP_MODEL, "",
                                                                        Direction::Output, PropertyMode::Optional),
@@ -585,6 +590,7 @@ void FitPeaks::processInputs() {
   m_fitPeaksFromRight = getProperty(PropertyNames::FIT_FROM_RIGHT);
   m_constrainPeaksPosition = getProperty(PropertyNames::CONSTRAIN_PEAK_POS);
   m_fitIterations = getProperty(PropertyNames::MAX_FIT_ITER);
+  m_copyLastGoodPeakParameters = getProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS);
 
   // Peak centers, tolerance and fitting range
   processInputPeakCenters();
@@ -997,6 +1003,8 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
     // vector to store fit params for last good fit to each peak
     std::vector<std::vector<double>> lastGoodPeakParameters(m_numPeaksToFit,
                                                             std::vector<double>(m_peakFunction->nParams(), 0.0));
+    // track which spectrum index last successfully fitted each peak
+    std::vector<size_t> lastGoodPeakSpectra(m_numPeaksToFit, 0);
 
     for (auto wi = iws_begin; wi < iws_end; ++wi) {
       // peaks to fit
@@ -1011,7 +1019,7 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
           std::make_shared<FitPeaksAlgorithm::PeakFitPreCheckResult>();
 
       fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers, fit_result, lastGoodPeakParameters,
-                       spectrum_pre_check_result);
+                       lastGoodPeakSpectra, spectrum_pre_check_result);
 
       PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
         writeFitResult(static_cast<size_t>(wi), expected_peak_centers, fit_result);
@@ -1139,6 +1147,7 @@ private:
 void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
                                 const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
                                 std::vector<std::vector<double>> &lastGoodPeakParameters,
+                                std::vector<size_t> &lastGoodPeakSpectra,
                                 const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result) {
   assert(fit_result->getNumberPeaks() == m_numPeaksToFit);
   pre_check_result->setNumberOfSubmittedSpectrumPeaks(m_numPeaksToFit);
@@ -1187,12 +1196,13 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       bkgdfunction->setParameter(i, 0.);
 
     double expected_peak_pos = expected_peak_centers[peak_index];
+    std::pair<double, double> peak_window_i = m_getPeakFitWindow(wi, peak_index);
 
     // clone peak function for each peak (need to do this so can
     // set center and calc any parameters from xml)
     auto peakfunction = std::dynamic_pointer_cast<API::IPeakFunction>(m_peakFunction->clone());
     peakfunction->setCentre(expected_peak_pos);
-    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, 0.0, 0.0);
+    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window_i.first, peak_window_i.second);
 
     std::map<size_t, double> keep_values;
     for (size_t ipar = 0; ipar < peakfunction->nParams(); ++ipar) {
@@ -1214,14 +1224,13 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
                                                                     lastGoodPeakParameters[peak_index].end(),
                                                                     [&](auto const &val) { return val <= 1e-10; })));
 
-    // Check whether current spectrum's pixel (detector ID) is close to its
-    // previous spectrum's pixel (detector ID).
+    // Check whether current spectrum's pixel (detector ID) is close to the
+    // spectrum that last successfully fitted this peak.
     try {
       if (wi > 0 && samePeakCrossSpectrum) {
-        // First spectrum or discontinuous detector ID: do not start from same
-        // peak of last spectrum
+        size_t lastGoodWi = lastGoodPeakSpectra[peak_index];
         std::shared_ptr<const Geometry::Detector> pdetector =
-            std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi - 1));
+            std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(lastGoodWi));
         std::shared_ptr<const Geometry::Detector> cdetector =
             std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi));
 
@@ -1252,8 +1261,8 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       for (size_t i = 0; i < peakfunction->nParams(); ++i) {
         peakfunction->setParameter(i, lastGoodPeakParameters[peak_index][i]);
       }
-    } else if (neighborPeakSameSpectrum) {
-      // set the peak parameters from last good fit to that peak
+    } else if (neighborPeakSameSpectrum && m_copyLastGoodPeakParameters) {
+      // set the peak parameters from last good fit from ANY peak in the spectrum
       for (size_t i = 0; i < peakfunction->nParams(); ++i) {
         peakfunction->setParameter(i, lastGoodPeakParameters[prev_peak_index][i]);
       }
@@ -1261,6 +1270,7 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
 
     // reset center though - don't know before hand which element this is
     peakfunction->setCentre(expected_peak_pos);
+
     // reset value of parameters that were fixed (but are now free to vary)
     for (const auto &[ipar, value] : keep_values) {
       peakfunction->setParameter(ipar, value);
@@ -1272,15 +1282,16 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       peakfunction->setIntensity(0);
       number_of_out_of_range_peaks++;
     } else {
-      // find out the peak position to fit
-      std::pair<double, double> peak_window_i = m_getPeakFitWindow(wi, peak_index);
-
       // Decide whether to estimate peak width by observation
       // If no peaks fitted in the same or cross spectrum then the user supplied
       // parameters will be used if present and the width will not be estimated
       // (note this will overwrite parameter values caluclated from
       // Parameters.xml)
-      auto useUserSpecifedIfGiven = !(samePeakCrossSpectrum || neighborPeakSameSpectrum);
+      // When CopyLastGoodPeakParameters is disabled, treat each peak as if it
+      // has no fitted neighbour so that user-specified initial values are
+      // re-applied as the baseline rather than falling back to function defaults.
+      auto useUserSpecifedIfGiven =
+          !(samePeakCrossSpectrum || (neighborPeakSameSpectrum && m_copyLastGoodPeakParameters));
       bool observe_peak_width = decideToEstimatePeakParams(useUserSpecifedIfGiven, peakfunction);
 
       if (observe_peak_width && m_peakWidthEstimateApproach == EstimatePeakWidth::NoEstimation) {
@@ -1318,10 +1329,11 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       // reset the flag such that there is at a peak fit in this spectrum
       neighborPeakSameSpectrum = true;
       prev_peak_index = peak_index;
-      // copy values
+      // copy values and record which spectrum they came from
       for (size_t i = 0; i < lastGoodPeakParameters[peak_index].size(); ++i) {
         lastGoodPeakParameters[peak_index][i] = peakfunction->getParameter(i);
       }
+      lastGoodPeakSpectra[peak_index] = wi;
     }
   }
 

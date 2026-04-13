@@ -60,7 +60,7 @@ Entry in group  Measurement
 Output from Polarized Neutron Reflectivity
 ------------------------------------------
 
-The output of this algorithm is a :ref:`WorkspaceGroup <WorkspaceGroup>`. The resulting :ref:`WorkspaceGroup <WorkspaceGroup>` will have 2 entries, corresponding to the specified output spin state orders. If no specific output spin states are specified, it will be formatted as follows:
+The output of this algorithm is a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`. The resulting :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` will have 2 entries, corresponding to the specified output spin state orders. If no specific output spin states are specified, it will be formatted as follows:
 
 ==============  ================
 Entry in group  Measurement

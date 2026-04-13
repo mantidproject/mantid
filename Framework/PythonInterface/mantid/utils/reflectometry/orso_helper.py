@@ -4,14 +4,16 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import concurrent.futures
 import numpy as np
 from datetime import datetime, timezone
 from typing import Optional, Union, List
 import re
-from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, Measurement, Polarization, InstrumentSettings
+from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, SampleModel, Measurement, Polarization, InstrumentSettings
 from orsopy.fileio import Reduction, Software
 from orsopy.fileio.orso import Orso, OrsoDataset, save_orso, save_nexus
 from orsopy.fileio.base import Column, ErrorColumn, File
+from mantid.kernel import logger
 
 from mantid.kernel import version
 from enum import Enum
@@ -63,15 +65,22 @@ class MantidORSODataset:
         creator_name: str,
         creator_affiliation: str,
         enable_instrument_settings: bool,
+        model: str,
+        validate: bool,
     ) -> None:
         self._data_columns = data_columns
         self._header = None
 
-        self._create_mandatory_header(ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation, enable_instrument_settings)
+        self._create_mandatory_header(
+            ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation, model, validate, enable_instrument_settings
+        )
 
     @property
     def dataset(self) -> OrsoDataset:
-        return OrsoDataset(info=self._header, data=self._data_columns.data)
+        if self._header:
+            return OrsoDataset(info=self._header, data=self._data_columns.data)
+        else:
+            return None
 
     def set_facility(self, facility: str) -> None:
         self._header.data_source.experiment.facility = facility
@@ -108,8 +117,32 @@ class MantidORSODataset:
         reduction_timestamp: datetime,
         creator_name: str,
         creator_affiliation: str,
+        model: str,
+        validate: Optional[bool] = False,
         enable_instrument_settings: Optional[bool] = None,
     ) -> None:
+        if model:
+            # Verify that the sample string is correct before creating the sample
+            if validate:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                    future = executor.submit(SampleModel(stack=model).resolve_to_layers)
+                    try:
+                        future.result(timeout=5.0)
+                    except concurrent.futures.TimeoutError:
+                        logger.error(f"The provided model description '{model}' could not be validated because of database unavalibility.")
+                        self._header = None
+                        return
+                    except:
+                        logger.error(
+                            f"The provided model description '{model}' contains an error. "
+                            "Please check that the string follows the correct ORSO format."
+                        )
+                        self._header = None
+                        return
+            sample = Sample(name=ws.getTitle(), model=model)
+        else:
+            sample = Sample(name=ws.getTitle())
+
         owner = Person(name=None, affiliation=None)
 
         run = ws.getRun()
@@ -119,8 +152,6 @@ class MantidORSODataset:
             start_date=self._get_exp_start_time(run),
             probe=self.PROBE_NEUTRON,
         )
-
-        sample = Sample(name=ws.getTitle())
 
         # This will initially only consider polarization
         instrument_settings = InstrumentSettings(None, None) if enable_instrument_settings else None

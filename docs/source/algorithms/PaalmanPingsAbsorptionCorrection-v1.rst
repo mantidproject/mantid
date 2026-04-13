@@ -23,7 +23,7 @@ calculated for the centre-point of each element, and a numerical
 integration is carried out using these path lengths over the volume
 elements.
 
-The output workspace will be a :ref:`WorkspaceGroup <WorkspaceGroup>`
+The output workspace will be a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`
 containing workpsace with the attenuation factors for :math:`A_{s,s}`,
 :math:`A_{s,sc}`, :math:`A_{c,c}` and :math:`A_{c,sc}`. This output
 can be applied as the :literal:`CorrectionsWorkspace` input of
@@ -42,7 +42,7 @@ be defined one of two ways.
 
 1. Using the :ref:`algm-DefineGaugeVolume` algorithm (or by otherwise
    adding a valid XML string :ref:`defining a
-   shape <HowToDefineGeometricShape>` to a :ref:`Run <Run>` property called
+   shape <HowToDefineGeometricShape>` to a :py:obj:`Run <mantid.api.Run>` property called
    "GaugeVolume").
 
 2. Using the :ref:`algm-SetBeam` algorithm to set the shape and size of the

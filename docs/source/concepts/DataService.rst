@@ -20,7 +20,7 @@ Data Services in Mantid
 -  :ref:`Analysis Data Service <Analysis Data Service>` - A data service
    holding all of the :ref:`workspaces <Workspace>` used in this session.
 -  :ref:`Instrument Data Service <Instrument Data Service>` - A data
-   service holding all of the :ref:`instruments <Instrument>` used in this
+   service holding all of the :py:obj:`instruments <mantid.geometry.Instrument>` used in this
    session.
 
 

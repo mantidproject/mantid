@@ -10,7 +10,7 @@ Description
 -----------
 
 The LoadRawSpectrum0 algorithm stores spectrum zero data from the
-selected :ref:`RAW <Raw File>` file in a :ref:`Workspace2D <Workspace2D>`.
+selected :ref:`RAW <Raw File>` file in a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`.
 
 Usage
 -----

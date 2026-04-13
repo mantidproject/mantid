@@ -9,7 +9,7 @@
 Description
 -----------
 
-This executes the power function on a :ref:`MDHistoWorkspace <MDHistoWorkspace>`.
+This executes the power function on a :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`.
 
 The signal :math:`a` becomes :math:`f = a^b`
 
@@ -17,7 +17,7 @@ The error :math:`da` becomes :math:`df^2 = f^2 * b^2 * (da^2 / a^2)`
 
 This algorithm cannot be run on a
 :ref:`MDEventWorkspace <MDWorkspace>`. Its equivalent on a
-:ref:`MatrixWorkspace <MatrixWorkspace>` is called :ref:`algm-Power`.
+:py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` is called :ref:`algm-Power`.
 
 .. categories::
 

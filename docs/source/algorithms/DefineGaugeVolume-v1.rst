@@ -19,7 +19,7 @@ defined using XML descriptions that can be found
 :ref:`here <HowToDefineGeometricShape>`.
 
 Internally, this works by attaching the XML string (after validating it)
-to a property called "GaugeVolume" on the workspace's :ref:`Run <Run>`
+to a property called "GaugeVolume" on the workspace's :py:obj:`Run <mantid.api.Run>`
 object.
 
 

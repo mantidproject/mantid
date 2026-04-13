@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest.mock
-from instrumentview.Projections.CylindricalProjection import CylindricalProjection
+from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.Projections.Projection import Projection
 
 import numpy as np
 import unittest
@@ -20,7 +21,12 @@ class TestProjection(unittest.TestCase):
         cls.detector_positions = np.array([[0, 1, 0], [2, 1, 0], [-2, 1, 0]])
 
     def test_apply_x_correction_below_min(self):
-        proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 1, 0]))
+        proj = Projection(
+            type=ProjectionType.CYLINDRICAL_Y,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
         x_min = proj._x_range[0]
         x_max = proj._x_range[1]
         proj._detector_x_coordinates[0] = x_min - 3 * np.pi / 2
@@ -30,7 +36,12 @@ class TestProjection(unittest.TestCase):
         self.assertLessEqual(proj._detector_x_coordinates[0], x_max)
 
     def test_apply_x_correction_above_max(self):
-        proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 1, 0]))
+        proj = Projection(
+            type=ProjectionType.CYLINDRICAL_Y,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
         x_min = proj._x_range[0]
         x_max = proj._x_range[1]
         proj._detector_x_coordinates[0] = x_max + 3 * np.pi / 2
@@ -42,7 +53,12 @@ class TestProjection(unittest.TestCase):
     @unittest.mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection._calculate_2d_coordinates")
     def test_find_and_correct_x_gap_multiple_similar_gaps(self, mock_calc_2d_coords):
         mock_calc_2d_coords.return_value = np.array([0, np.pi / 4, -np.pi / 4]), np.array([0, 0, 0])
-        proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
+        proj = Projection(
+            type=ProjectionType.CYLINDRICAL_Z,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
         np.testing.assert_allclose(proj._detector_x_coordinates, [0, np.pi / 4, -np.pi / 4], rtol=1e-3)
         np.testing.assert_allclose(proj._x_range, [-np.pi / 4, np.pi / 4], rtol=1e-3)
         proj._u_period = np.pi / 2
@@ -53,7 +69,12 @@ class TestProjection(unittest.TestCase):
     @unittest.mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection._calculate_2d_coordinates")
     def test_find_and_correct_x_gap_one_big_gap(self, mock_calc_2d_coords):
         mock_calc_2d_coords.return_value = np.array([0, np.pi / 8, -np.pi / 4]), np.array([0, 0, 0])
-        proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
+        proj = Projection(
+            type=ProjectionType.CYLINDRICAL_Z,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
         np.testing.assert_allclose(proj._detector_x_coordinates, [0, np.pi / 8, -np.pi / 4], rtol=1e-3)
         np.testing.assert_allclose(proj._x_range, [-np.pi / 4, np.pi / 8], rtol=1e-3)
         proj._u_period = np.pi / 2
@@ -65,7 +86,12 @@ class TestProjection(unittest.TestCase):
     @unittest.mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection._calculate_2d_coordinates")
     def test_find_and_correct_x_gap_not_applied(self, mock_calc_2d_coords, mock_apply_x_correction):
         mock_calc_2d_coords.return_value = np.array([0, -np.pi / 8, np.pi / 4]), np.array([0, 0, 0])
-        proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
+        proj = Projection(
+            type=ProjectionType.CYLINDRICAL_Z,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
         np.testing.assert_allclose(proj._detector_x_coordinates, [0, -np.pi / 8, np.pi / 4], rtol=1e-3)
         np.testing.assert_allclose(proj._x_range, [-np.pi / 8, np.pi / 4], rtol=1e-3)
         proj._u_period = np.pi
@@ -78,7 +104,12 @@ class TestProjection(unittest.TestCase):
     @unittest.mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection._calculate_2d_coordinates")
     def test_calculate_detector_coordinates(self, mock_calc_2d_coords, mock_find_and_correct_x_gap):
         mock_calc_2d_coords.return_value = (np.arange(5).astype(float), np.arange(1, 6).astype(float))
-        proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
+        proj = Projection(
+            type=ProjectionType.CYLINDRICAL_Z,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
         np.testing.assert_array_equal(proj._x_range, np.array([0, 4]))
         np.testing.assert_array_equal(proj._y_range, np.array([1, 5]))
 
@@ -86,7 +117,12 @@ class TestProjection(unittest.TestCase):
     @unittest.mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection._calculate_2d_coordinates")
     def test_coordinate_for_detector(self, mock_calc_2d_coords, mock_find_and_correct_x_gap):
         mock_calc_2d_coords.return_value = (np.arange(5).astype(float), np.arange(1, 6).astype(float))
-        proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
+        proj = Projection(
+            type=ProjectionType.CYLINDRICAL_Z,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
         np.testing.assert_array_equal(proj.coordinate_for_detector(0), [0, 1])
         np.testing.assert_array_equal(proj.coordinate_for_detector(4), [4, 5])
 
@@ -94,9 +130,19 @@ class TestProjection(unittest.TestCase):
     @unittest.mock.patch("instrumentview.Projections.CylindricalProjection.CylindricalProjection._calculate_2d_coordinates")
     def test_positions(self, mock_calc_2d_coords, mock_find_and_correct_x_gap):
         mock_calc_2d_coords.return_value = (np.arange(5).astype(float), np.arange(1, 6).astype(float))
-        proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
+        proj = Projection(
+            type=ProjectionType.CYLINDRICAL_Z,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
         np.testing.assert_array_equal(proj.positions(), np.vstack([np.arange(5), np.arange(1, 6)]).T)
 
     def test_project_points_matches_positions_for_detector_centers(self):
-        proj = CylindricalProjection(self.sample_position, self.root_position, self.detector_positions, np.array([0, 0, 1]))
+        proj = Projection(
+            type=ProjectionType.CYLINDRICAL_Z,
+            sample_position=self.sample_position,
+            root_position=self.root_position,
+            detector_positions=self.detector_positions,
+        )
         np.testing.assert_allclose(proj.project_points(self.detector_positions), proj.positions())

@@ -9,7 +9,7 @@
 Description
 -----------
 
-Function to symmeterise an :ref:`MDHistoWorkspace <MDHistoWorkspace>` with 3 dimensions (HKL) using the
+Function to symmeterise an :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` with 3 dimensions (HKL) using the
 symmetry operations of the point group of the Laue class (inferred from the ``PointGroup`` or ``Spacegroup`` provided).
 
 Two types of average can be performed:

@@ -15,14 +15,14 @@ adjustment of the detector positions. `DetectorHeightOffset` adjusts all banks a
 detector position.
 
 The output can be either an :ref:`MDEventWorkspace <MDWorkspace>` or a
-:ref:`MDHistoWorkspace <MDHistoWorkspace>`. For a `MDHistoWorkspace,`
+:py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`. For a `MDHistoWorkspace,`
 the conversion to Q-space is done using :ref:`ConvertWANDSCDtoQ
 <algm-ConvertWANDSCDtoQ>` while :ref:`ConvertHFIRSCDtoMDE
 <algm-ConvertHFIRSCDtoMDE>` is used for outputting an
 `MDEventWorkspace.`
 
 If multiple data file are included then the output will be a
-:ref:`WorkspaceGroup <WorkspaceGroup>` containing all the
+:py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` containing all the
 :ref:`MDWorkspaces <MDWorkspace>`.
 
 Normalisation

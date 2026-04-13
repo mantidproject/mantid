@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.Projections.Projection import Projection
+from instrumentview.Projections.ProjectionType import ProjectionType
 import numpy as np
-from instrumentview.Detectors import DetectorPosition
 from mantid.api import PanelsSurfaceCalculator
 from mantid.dataobjects import Workspace2D
 from mantid.geometry import ComponentInfo
@@ -67,15 +67,13 @@ class FlatBankInfo:
                 self.detector_id_position_map[id] = detector_position
 
 
-class SideBySide(Projection):
+class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"axis": [1, 0, 0]}}):
     def __init__(
         self,
+        type,
         workspace: Workspace2D,
         detector_ids: np.ndarray,
-        sample_position: np.ndarray,
-        root_position: np.ndarray,
-        detector_positions: list[DetectorPosition] | np.ndarray,
-        axis: np.ndarray,
+        **kwargs,
     ):
         self._calculator = PanelsSurfaceCalculator()
         self._detector_id_to_flat_bank_map: dict[int, FlatBankInfo] = {}
@@ -89,7 +87,7 @@ class SideBySide(Projection):
         detector_component_indices = np.where(np.isin(all_detector_ids, detector_ids))[0]
         self._component_index_detector_id_map = dict(zip(detector_component_indices, detector_ids))
         self._detector_id_component_index_map = {id: c for c, id in self._component_index_detector_id_map.items()}
-        super().__init__(sample_position, root_position, detector_positions, axis)
+        super().__init__(type, **kwargs)
 
     def _find_and_correct_x_gap(self) -> None:
         # We don't want any gaps corrected
