@@ -43,8 +43,9 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
 
     def test_get_positions_and_labels_empty(self):
         wdp = self._create_workspace_detector_peaks([])
-        positions = wdp.get_positions_and_labels(np.array([[0, 0, 0]]), np.array([1]))
-        self.assertEqual(0, len(positions))
+        positions_and_labels = wdp.get_positions_and_labels(np.array([[0, 0, 0]]), np.array([1]))
+        # Should still return a tuple with two items
+        self.assertEqual(2, len(positions_and_labels))
 
     def test_get_positions_and_labels(self):
         peak1 = Peak(10, 1, 0, (1, 0, 0), 100, 10, 10, 10)

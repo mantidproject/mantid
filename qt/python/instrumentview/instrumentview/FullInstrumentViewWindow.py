@@ -346,7 +346,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self._overlay_meshes = []
         self._lineplot_overlays = []
-        self._peak_ws_list_colours = {}
 
         screen_geometry = self.screen().geometry()
         self.resize(int(screen_geometry.width() * 0.8), int(screen_geometry.height() * 0.8))
@@ -689,12 +688,10 @@ class FullInstrumentViewWindow(QMainWindow):
                 del removed
 
         # Update peaks list colours
-        self._peak_ws_list_colours = {}
         for list_i in range(self._peak_ws_list.count()):
             list_item = self._peak_ws_list.item(list_i)
             colour = self._COLOURS[list_i % len(self._COLOURS)]
             list_item.setForeground(QColor(colour))
-            self._peak_ws_list_colours[list_item.text()] = colour
 
     def refresh_workspaces_in_list(self, kind: CurrentTab) -> None:
         list_to_refresh = self._mask_list if kind is CurrentTab.Masking else self._selection_list
@@ -986,8 +983,13 @@ class FullInstrumentViewWindow(QMainWindow):
             if len(positions) == 0:
                 continue
 
+            items = self._peak_ws_list.findItems(ws_key, Qt.MatchExactly)
+            if not items:
+                continue
+            item_color = items[0].foreground().color().name()
+
             points_actor = self.main_plotter.add_points(
-                positions, color=self._peak_ws_list_colours[ws_key], point_size=15, render_points_as_spheres=True, opacity=0.2
+                positions, color=item_color, point_size=15, render_points_as_spheres=True, opacity=0.2
             )
             labels_actor = self.main_plotter.add_point_labels(
                 positions,
@@ -998,7 +1000,7 @@ class FullInstrumentViewWindow(QMainWindow):
                 always_visible=True,
                 fill_shape=False,
                 shape_opacity=0,
-                text_color=self._peak_ws_list_colours[ws_key],
+                text_color=item_color,
             )
             self._overlay_meshes.append((points_actor, labels_actor))
 
@@ -1009,16 +1011,19 @@ class FullInstrumentViewWindow(QMainWindow):
             if len(x_values) == 0:
                 continue
 
+            items = self._peak_ws_list.findItems(ws_key, Qt.MatchExactly)
+            if not items:
+                continue
+            item_color = items[0].foreground().color().name()
+
             for x, label in zip(x_values, labels):
-                self._lineplot_overlays.append(
-                    self._detector_spectrum_axes.axvline(x, color=self._peak_ws_list_colours[ws_key], linestyle="--")
-                )
+                self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color=item_color, linestyle="--"))
                 self._detector_spectrum_axes.text(
                     x,
                     0.99,
                     label,
                     transform=self._detector_spectrum_axes.get_xaxis_transform(),
-                    color=self._peak_ws_list_colours[ws_key],
+                    color=item_color,
                     ha="right",
                     va="top",
                     fontsize=8,

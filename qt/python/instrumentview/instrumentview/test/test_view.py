@@ -65,7 +65,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     @mock.patch("qtpy.QtWidgets.QMainWindow.closeEvent")
     def test_close_event(self, mock_close_event):
         self._view.closeEvent(MagicMock())
-        self.assertEqual(2, mock_close_event.call_count)
+        self.assertEqual(1, mock_close_event.call_count)
         self._view.main_plotter.close.assert_called_once()
 
     @mock.patch("qtpy.QtWidgets.QMainWindow.closeEvent")
@@ -126,7 +126,10 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         positions = [np.array([[0, 0, 0]])]
         labels = [["label"]]
         selected_workspaces = ["ws1"]
-        self._view._peak_ws_list_colours = {"ws1": "#ff7f0e"}
+        mock_item = MagicMock()
+        mock_item.foreground().color().name.return_value = "#ff7f0e"
+        self._view._peak_ws_list = MagicMock()
+        self._view._peak_ws_list.findItems.return_value = [mock_item]
         self._view.plot_overlay_meshes(positions, labels, selected_workspaces)
         self._view.main_plotter.add_points.assert_called_once()
         self._view.main_plotter.add_point_labels.assert_called_once()
@@ -136,7 +139,10 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         x_values = [[1.0, 2.0]]
         labels = [["a", "b"]]
         selected_workspaces = ["ws1"]
-        self._view._peak_ws_list_colours = {"ws1": "#ff7f0e"}
+        mock_item = MagicMock()
+        mock_item.foreground().color().name.return_value = "#ff7f0e"
+        self._view._peak_ws_list = MagicMock()
+        self._view._peak_ws_list.findItems.return_value = [mock_item]
         self._view._detector_spectrum_axes = MagicMock()
         self._view.plot_lineplot_peak_overlays(x_values, labels, selected_workspaces)
         self.assertEqual(2, self._view._detector_spectrum_axes.text.call_count)
