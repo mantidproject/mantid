@@ -602,6 +602,7 @@ def fit_all_peaks(
     subsequent_fit_param_fix: Optional[Sequence[str]] = None,
     peak_func_name: str = "BackToBackExponential",
     last_fit_ic: bool = False,
+    max_fit_iters: int = 50,
 ) -> None:
     """
     Fit all the peaks given in all the spectra of all the workspaces, for use in a texture analysis workflow
@@ -622,6 +623,7 @@ def fit_all_peaks(
                        BackToBackExponential: ("A", "B"), IkedaCarpenterPV: ("Alpha0", "Alpha1", "Beta0", "Kappa")
     subsequent_fit_param_fix: parameters which should be fixed after the initial fit (Default is None)
     peak_func_name: peak function to use, should be either BackToBackExponential or IkedaCarpenterPV
+    max_fit_iters: maximum number of iterations for a single fit
     """
 
     # currently the only fit functions intended to be used - less flexibility here allows for less user input
@@ -705,7 +707,7 @@ def fit_all_peaks(
             fit_object = Fit(
                 Function=initial_function,
                 Output=f"fit_{fit_ws}",
-                MaxIterations=50,  # if it hasn't fit in 50 it is likely because the texture has the peak missing
+                MaxIterations=max_fit_iters,
                 **fit_kwargs,
                 **md_fit_kwargs,
             )
@@ -721,7 +723,7 @@ def fit_all_peaks(
                     md_fit_kwargs,
                     fit_ws,
                     0.02,  # allow x0 to only vary by 2% from previous fit
-                    50,
+                    max_fit_iters,
                     subsequent_fit_param_fix,
                     parameters_to_tie,
                     bkg_is_tied[fit_num],

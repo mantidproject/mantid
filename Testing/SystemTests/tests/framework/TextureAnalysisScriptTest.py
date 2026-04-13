@@ -297,7 +297,7 @@ class TestFittingPeaksOfFocusedDataNoGroup(PeakFitMixin, systemtesting.MantidSys
         ]
 
         self.validate_table(param_table1, dict(zip(self.reference_columns, self.peak_1_vals)))
-        self.validate_table(param_table2, dict(zip(self.reference_columns, self.peak_2_vals)), rtol=8e-3)
+        self.validate_table(param_table2, dict(zip(self.reference_columns, self.peak_2_vals)))
         [self.assertTrue(os.path.exists(ef)) for ef in expected_files]
 
     def cleanup(self):
@@ -311,7 +311,7 @@ class TestFittingPeaksOfMissingPeakDataWithFillZero(PeakFitMixin, systemtesting.
         kwargs = self.default_kwargs
         kwargs["peaks"] = (2.25, 2.5)
         # expect no peaks here, set the i over sigma threshold large as well as sigma is ill-defined
-        fit_all_peaks(**kwargs, i_over_sigma_thresh=10.0, nan_replacement="zeros")
+        fit_all_peaks(**kwargs, i_over_sigma_thresh=10.0, nan_replacement="zeros", max_fit_iters=1)
 
     def validate(self):
         # expect all params vals to be zeros (coincidentally including val[0] as this is the wsindex)
@@ -331,7 +331,9 @@ class TestFittingPeaksOfMissingPeakDataWithSpecifiedValue(PeakFitMixin, systemte
         kwargs = self.default_kwargs
         kwargs["peaks"] = (2.25, 2.5)
         # expect no peaks here, set the i over sigma threshold large as well as sigma is ill-defined
-        fit_all_peaks(**kwargs, i_over_sigma_thresh=10.0, nan_replacement="zeros", no_fit_value_dict={"I_est": 1.0, "I": 0.01})
+        fit_all_peaks(
+            **kwargs, i_over_sigma_thresh=10.0, nan_replacement="zeros", no_fit_value_dict={"I_est": 1.0, "I": 0.01}, max_fit_iters=1
+        )
 
     def validate(self):
         # expect all params to be zeros (coincidentally including val[0] as this is the wsindex)
@@ -361,7 +363,7 @@ class TestFittingPeaksOfFocusedDataWithGroup(PeakFitMixin, systemtesting.MantidS
         ]
 
         self.validate_table(param_table1, dict(zip(self.reference_columns, self.peak_1_vals)))
-        self.validate_table(param_table2, dict(zip(self.reference_columns, self.peak_2_vals)), rtol=8e-3)
+        self.validate_table(param_table2, dict(zip(self.reference_columns, self.peak_2_vals)))
         [self.assertTrue(os.path.exists(ef)) for ef in expected_files]
 
     def cleanup(self):
