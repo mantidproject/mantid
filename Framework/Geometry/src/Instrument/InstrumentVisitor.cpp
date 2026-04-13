@@ -112,8 +112,9 @@ void InstrumentVisitor::walkInstrument() {
   if (m_pmap && m_pmap->empty()) {
     // Go through the base instrument for speed.
     m_instrument->baseInstrument()->registerContents(*this);
-  } else
+  } else {
     m_instrument->registerContents(*this);
+  }
 }
 
 size_t InstrumentVisitor::commonRegistration(const IComponent &component) {
