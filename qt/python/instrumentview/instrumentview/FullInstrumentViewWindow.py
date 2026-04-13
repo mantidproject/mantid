@@ -37,7 +37,7 @@ from matplotlib.widgets import Cursor
 
 import numpy as np
 import pyvista as pv
-import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 from mantid.dataobjects import Workspace2D
 from mantid import UsageService, ConfigService
 from mantid.kernel import FeatureType
@@ -138,7 +138,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=off_screen)
         pyvista_vertical_layout.addWidget(self.main_plotter.app_window)
 
-        self._detector_spectrum_fig, self._detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
+        self._detector_spectrum_fig = Figure()
+        self._detector_spectrum_axes = self._detector_spectrum_fig.add_subplot(111, projection="mantid")
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
         self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, self)
@@ -802,8 +803,6 @@ class FullInstrumentViewWindow(QMainWindow):
             self._contour_range_max_edit.disconnect()
             self._contour_range_min_edit.disconnect()
         self.main_plotter.close()
-        if self._detector_spectrum_fig is not None:
-            plt.close(self._detector_spectrum_fig.get_label())
         if hasattr(self, "_presenter") and self._presenter is not None:
             self._presenter.handle_close()
 
