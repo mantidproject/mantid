@@ -784,6 +784,8 @@ class FullInstrumentViewWindow(QMainWindow):
         with suppress(TypeError):
             self._contour_range_max_edit.disconnect()
             self._contour_range_min_edit.disconnect()
+            self._integration_limit_max_edit.disconnect()
+            self._integration_limit_min_edit.disconnect()
         self.main_plotter.close()
         if self._detector_spectrum_fig is not None:
             plt.close(self._detector_spectrum_fig.get_label())
