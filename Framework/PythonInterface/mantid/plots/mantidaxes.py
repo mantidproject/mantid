@@ -435,7 +435,8 @@ class MantidAxes(Axes):
             if unary_predicate(artist):
                 artist.remove()
                 if isinstance(artist, ErrorbarContainer):
-                    self.containers.remove(artist)
+                    if artist in self.containers:
+                        self.containers.remove(artist)
 
         return self.is_empty(self)
 
