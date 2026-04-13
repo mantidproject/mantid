@@ -272,10 +272,9 @@ void GatherWorkspaces::execAppendChunked(MatrixWorkspace_sptr &outputWorkspace, 
 void GatherWorkspaces::execEvent() {
 #ifdef MPI_BUILD
   // Every process in an MPI job must hit this next line or everything hangs!
-  mpi::communicator included; // The communicator containing all processes
   // The root process needs to create a workspace of the appropriate size
   EventWorkspace_sptr outputWorkspace;
-  if (included.rank() == 0) {
+  if (m_included.rank() == 0) {
     g_log.debug() << "Total number of spectra is " << m_totalSpec << "\n";
     // Create the workspace for the output
     outputWorkspace = std::dynamic_pointer_cast<EventWorkspace>(
@@ -288,12 +287,12 @@ void GatherWorkspaces::execEvent() {
   }
 
   for (size_t wi = 0; wi < m_totalSpec; wi++) {
-    if (included.rank() == 0) {
+    if (m_included.rank() == 0) {
       // How do we accumulate the data?
       std::string accum = this->getPropertyValue("AccumulationMethod");
       std::vector<Mantid::DataObjects::EventList> out_values;
       gather(included, m_eventW->getSpectrum(wi), out_values, 0);
-      for (int i = 0; i < included.size(); i++) {
+      for (int i = 0; i < m_included.size(); i++) {
         size_t index = wi; // accum == "Add"
         if (accum == "Append")
           index = wi + i * m_totalSpec;
@@ -305,7 +304,7 @@ void GatherWorkspaces::execEvent() {
         outSpec.addDetectorIDs(inSpec.getDetectorIDs());
       }
     } else {
-      gather(included, m_eventW->getSpectrum(wi), 0);
+      gather(m_included, m_eventW->getSpectrum(wi), 0);
     }
   }
 #else
