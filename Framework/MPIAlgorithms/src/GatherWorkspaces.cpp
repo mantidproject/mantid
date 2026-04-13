@@ -291,7 +291,7 @@ void GatherWorkspaces::execEvent() {
       // How do we accumulate the data?
       std::string accum = this->getPropertyValue("AccumulationMethod");
       std::vector<Mantid::DataObjects::EventList> out_values;
-      gather(included, m_eventW->getSpectrum(wi), out_values, 0);
+      gather(m_included, m_eventW->getSpectrum(wi), out_values, 0);
       for (int i = 0; i < m_included.size(); i++) {
         size_t index = wi; // accum == "Add"
         if (accum == "Append")
