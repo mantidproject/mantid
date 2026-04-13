@@ -101,7 +101,7 @@ class ReflectometryDatasetBase:
         self._reduction_script: Optional[str] = None
         self._angle_files: List[Tuple[str, str]] = None
         self._transmission_files: Tuple[List[str], List[str]] = None
-        self._flood_entry: Optional[tuple[str, str]] = None
+        self._flood_entry: Optional[Tuple[str, str]] = None
         self._calibration_entry: Optional[str] = None
         self._resolution: Optional[float] = None
 
@@ -515,6 +515,49 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
         return None
 
 
+class ReflectometryDatasetHybrid(ReflectometryDatasetManual, ReflectometryDatasetHistory):
+    """
+    This hybrid version of the datasets allows as much of the information as possible to be extracted from the history
+    and then leaves the rest with setters to be set manually.
+
+    It is intended that extraction from the history takes place at validation to give the user
+    a chance to manually enter any remaining properties.
+    """
+
+    def __init__(self, ws, is_ws_grp_member: bool):
+        super(ReflectometryDatasetHybrid, self).__init__(ws, is_ws_grp_member)
+
+    def get_missing_metadata_list(self) -> List:
+        """
+        Get a list of any metadata that could not be extracted from the workspace history.
+
+        TODO: Work out if this should be using the property names. Coupled too tight to the alg?
+        """
+        missing_metadata = []
+        if not self.q_conversion_method:
+            missing_metadata.append(Prop.Q_CONVERT_METHOD)
+        if self.reduction_timestamp is None:
+            missing_metadata.append(Prop.REDUCTION_TIMESTAMP)
+        if not self.angle_files:
+            missing_metadata.append(Prop.ANGLE_FILES)
+        if self.transmission_files:
+            if not self.transmission_files[0]:
+                missing_metadata.append(Prop.TRANS_FILES_1)
+            if not self.transmission_files[1]:
+                missing_metadata.append(Prop.TRANS_FILES_2)
+        else:
+            missing_metadata.extend([Prop.TRANS_FILES_1, Prop.TRANS_FILES_2])
+        if not self.flood_entry:
+            missing_metadata.append(Prop.FLOOD_ENTRY)
+        if not self.calibration_entry:
+            missing_metadata.append(Prop.CALIB_FILE)
+        if self.resolution is None:  # Could be float, 0, or None.
+            missing_metadata.append(Prop.RESOLUTION)
+        if self.reduction_script is None:
+            missing_metadata.append(Prop.SCRIPT)
+        return missing_metadata
+
+
 class SaveISISReflectometryORSO(PythonAlgorithm):
     """
     See https://www.reflectometry.org/ for more information about the ORSO .ort format
@@ -548,13 +591,16 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             doc="A list of workspace names containing the reduced reflectivity data to be saved.",
         )
 
-        meta_source_validator = StringListValidator([MetadataSourceOptions.FROM_HISTORY, MetadataSourceOptions.MANUAL])
+        meta_source_validator = StringListValidator(
+            [MetadataSourceOptions.FROM_HISTORY, MetadataSourceOptions.HYBRID, MetadataSourceOptions.MANUAL]
+        )
         self.declareProperty(
             name=Prop.META_SOURCE,
             defaultValue=MetadataSourceOptions.FROM_HISTORY,
             validator=meta_source_validator,
             doc=f"Where the metadata in the file should be taken from. "
             f"{MetadataSourceOptions.FROM_HISTORY}: Takes from the workspace history (Relies on ReflectometryReductionOne). "
+            f"{MetadataSourceOptions.HYBRID}: Checks workspace history, then prompts for manual input for anything not gathered."
             f"{MetadataSourceOptions.MANUAL}: Requires all metadata to be given as properties to this algorithm.",
         )
 
@@ -656,6 +702,12 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 f"File path to save to must end with a supported ORSO extension. Use {MantidORSOSaver.ASCII_FILE_EXT} "
                 f"to save as ORSO ASCII or {MantidORSOSaver.NEXUS_FILE_EXT} to save as ORSO Nexus."
             )
+
+        if self.getProperty(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID:
+            check_dataset = self._create_and_sort_refl_datasets()[0]
+            missing_meta = check_dataset.get_missing_metadata_list()
+            for prop in missing_meta:
+                issues[prop] = "Metadata could not be found in the workspace history. Please provide some."
 
         angle_files = self.getProperty(Prop.ANGLE_FILES).value
         angle_files_theta = self.getProperty(Prop.ANGLE_FILES_THETA).value
