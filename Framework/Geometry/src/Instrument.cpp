@@ -110,6 +110,46 @@ Instrument::Instrument(const Instrument &instr)
   }
 }
 
+/** Constructor for creating a partial copy without the detector cache.
+ *  This method was added to allow copying an instrument without copying the detector cache, which is necessary
+ * for the implementation in LoadEventNexus to load single banks form large instruments.
+ * @param instr the instrument to copy
+ * @param copyCache a flag that signals to select this constructor from the vtable
+ * @note the copyCache flag is not used, except to identify this constructor as the one to use
+ */
+Instrument::Instrument(const Instrument &instr, bool copyCache)
+    : CompAssembly(), m_sourceCache(nullptr), m_sampleCache(nullptr), /* Should only be temporarily null */
+      m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit), m_defaultView(instr.m_defaultView),
+      m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(), m_map_nonconst(), /* Should not be parameterized */
+      m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo), m_referenceFrame(instr.m_referenceFrame) {
+  UNUSED_ARG(copyCache);
+  setName(instr.getName());
+  // add in the sample and the source
+  auto sampleComp = instr.getSample();
+  auto sourceComp = instr.getSource();
+  if (!sampleComp || !sourceComp) {
+    throw std::runtime_error("Cannot copy instrument: source instrument must have valid sample and source components");
+  }
+  auto sample = sampleComp->clone();
+  auto source = sourceComp->clone();
+  add(sample);
+  add(source);
+  markAsSource(source);
+  markAsSamplePos(sample);
+  // also add in the monitors
+  std::vector<IComponent_const_sptr> children;
+  instr.getChildren(children, true);
+  for (auto const &child : children) {
+    if (IDetector const *det = dynamic_cast<Detector const *>(child.get())) {
+      if (instr.isMonitor(det->getID())) {
+        auto dclone = dynamic_cast<IDetector *>(det->clone());
+        add(dclone);
+        markAsMonitor(dclone);
+      }
+    }
+  }
+}
+
 /// Virtual copy constructor
 Instrument *Instrument::clone() const { return new Instrument(*this); }
 

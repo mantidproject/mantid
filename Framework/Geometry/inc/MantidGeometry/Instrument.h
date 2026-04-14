@@ -55,6 +55,7 @@ public:
   Instrument();
   Instrument(const std::string &name);
   Instrument(const Instrument &);
+  Instrument(const Instrument &, bool copyCache);
 
   Instrument *clone() const override;
 
