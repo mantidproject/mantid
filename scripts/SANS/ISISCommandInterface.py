@@ -34,8 +34,8 @@ err_msgs = [
     "Please import using 'import sans.command_interface.ISISCommandInterface' instead of 'import ISISCommandInterface' "
     "or 'from ISISCommandInterface'.",
     "Contact us on Mantid Support `mantid-help@mantidproject.org` if you have any questions or concerns about this change.",
-    "If you can't port yet your script to the new command interface, set the flag 'sans.deprecated_command_interface=On'"
-    " on the 'Mantid.user.properties' file to allow usage of this command interface until is removed.",
+    "If you cannot port your script to the new command interface yet, set the flag 'sans.deprecated_command_interface=On'"
+    " in the 'Mantid.user.properties' file to allow temporary usage of this command interface until is removed.",
 ]
 
 if str.lower(allow_import) not in ["on", "true", "1"]:
