@@ -791,10 +791,11 @@ class Poldi2DEvalMixin:
                 # Both are then locked for the duration of the inner Pawley optimisation
                 self.scales = np.zeros(self.ws.getNumberHistograms())
                 self.bgs = np.zeros_like(self.scales)
+                ones = np.ones_like(ws_sim.readY(0))
                 for ispec in range(self.ws.getNumberHistograms()):
                     yobs = self.ws.readY(ispec)
                     ycalc = ws_sim.readY(ispec)
-                    A = np.column_stack([ycalc, np.ones(len(ycalc))])
+                    A = np.column_stack([ycalc, ones])
                     result, _, _, _ = np.linalg.lstsq(A, yobs, rcond=None)
                     scale = float(max(result[0], 1e-6))  # physically non-negative
                     bg = float(result[1])
