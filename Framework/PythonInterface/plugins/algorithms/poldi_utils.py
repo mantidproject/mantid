@@ -286,24 +286,32 @@ def simulate_2d_data(
     tofs = ws_sim.readX(0)[:, None] + offsets  # same for all spectra
     path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
     tof_d1Ang = np.asarray([si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] for ispec in range(nspec)])
-    lam_grid, flux_vals = _get_flux_arrays(ws_sim, n_points=flux_sample_points) if flux_sample_points else (None, None)
-    sin_thetas = np.sin(tths / 2.0)
-    out = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
-        delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.readX(0), ws_1d.readY(0), sin_thetas[ispec], lam_grid, flux_vals)
-        for ispec in range(nspec)
-    )
+    if flux_sample_points:
+        lam_grid, flux_vals = _get_flux_arrays(ws_sim, n_points=flux_sample_points)
+        sin_thetas = np.sin(tths / 2.0)
+        out = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
+            delayed(_do_interp_with_flux_correction)(
+                tofs / tof_d1Ang[ispec], ws_1d.readX(0), ws_1d.readY(0), sin_thetas[ispec], lam_grid, flux_vals
+            )
+            for ispec in range(nspec)
+        )
+    else:
+        out = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
+            delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.readX(0), ws_1d.readY(0)) for ispec in range(nspec)
+        )
     # set y values
     [ws_sim.setY(ispec, yvec) for ispec, yvec in enumerate(out)]
     ADS.addOrReplace(output_workspace, ws_sim)
     return ws_sim
 
 
-def _do_interp(dtarget, d, intensity, sin_theta=None, lam_grid=None, flux_vals=None):
-    interp_vals = np.interp(dtarget, d, intensity)
-    if flux_vals is not None:
-        flux_weights = np.interp(dtarget * (2.0 * sin_theta), lam_grid, flux_vals)
-        interp_vals *= flux_weights
-    return interp_vals.sum(axis=1)
+def _do_interp(dtarget, d, intensity):
+    return np.interp(dtarget, d, intensity).sum(axis=1)
+
+
+def _do_interp_with_flux_correction(dtarget, d, intensity, sin_theta, lam_grid, flux_vals):
+    flux_weights = np.interp(d * (2.0 * sin_theta), lam_grid, flux_vals)
+    return np.interp(dtarget, d, intensity * flux_weights).sum(axis=1)
 
 
 def _get_flux_arrays(ws, lam_min: float = 1.1, lam_max: float = 5.0, n_points: int = 100):
