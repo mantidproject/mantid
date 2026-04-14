@@ -194,9 +194,9 @@ def addToReleaseList(release_root, version):
         search_for_insertion = True
         for i in range(len(oldtext)):
             line = oldtext[i].strip()
-            if search_for_insertion and line.startswith("* :doc:`v") and line.endswith("/index>`"):
+            if search_for_insertion and line.startswith("* v") and "/index>`" in line:
                 if version not in line:
-                    handle.write(f"* :doc:`{version} <{version}/index>`\n")
+                    handle.write(f"* {version} - in progress - :doc:`release notes <{version}/index>`\n")
                 search_for_insertion = False
             handle.write(oldtext[i])
 

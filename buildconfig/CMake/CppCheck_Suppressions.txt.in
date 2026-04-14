@@ -58,7 +58,7 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Paramet
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Run.h:39
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Workspace.h:32
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/WorkspaceProperty.hxx:91
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:890
+nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:891
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:156
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:167
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculateDIFC.cpp:41

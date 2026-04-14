@@ -800,6 +800,8 @@ class FullInstrumentViewWindow(QMainWindow):
         with suppress(TypeError):
             self._contour_range_max_edit.disconnect()
             self._contour_range_min_edit.disconnect()
+            self._integration_limit_max_edit.disconnect()
+            self._integration_limit_min_edit.disconnect()
         # Shut down any callbacks before closing the plotter and the figure
         if hasattr(self, "_presenter") and self._presenter is not None:
             self._presenter.handle_close()

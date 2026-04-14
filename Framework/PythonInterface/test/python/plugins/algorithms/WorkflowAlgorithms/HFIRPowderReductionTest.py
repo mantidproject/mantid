@@ -9,6 +9,7 @@ import unittest
 from mantid.simpleapi import (
     HFIRPowderReduction,
     CreateSampleWorkspace,
+    ExtractMask,
     RotateInstrumentComponent,
     MoveInstrumentComponent,
     CloneWorkspace,
@@ -27,6 +28,16 @@ import numpy as np
 import tempfile
 import shutil
 from unittest.mock import patch
+
+
+def _create_algo(**kwargs):
+    """Helper to create and initialize an HFIRPowderReduction algorithm with properties set."""
+    algo = _HFIRPowderReduction()
+    algo.initialize()
+    algo.temp_workspace_list = []
+    for key, value in kwargs.items():
+        algo.setProperty(key, value)
+    return algo
 
 
 class LoadInputErrorMessages(unittest.TestCase):
@@ -224,18 +235,9 @@ class LoadInputErrorMessages(unittest.TestCase):
         self.assertIn("VanadiumDiameter", error_msg)
         self.assertIn("VanadiumDiameter must be provided", error_msg)
 
-    def _create_algo(self, **kwargs):
-        """Helper to create and initialize an HFIRPowderReduction algorithm with properties set."""
-        algo = _HFIRPowderReduction()
-        algo.initialize()
-        algo.temp_workspace_list = []
-        for key, value in kwargs.items():
-            algo.setProperty(key, value)
-        return algo
-
     def test_load_wand_data(self):
         # Test that valid WAND^2 data loads without error via _load_WAND
-        algo = self._create_algo(SampleFilename="HB2C_7000.nxs.h5", Instrument="WAND^2")
+        algo = _create_algo(SampleFilename="HB2C_7000.nxs.h5", Instrument="WAND^2")
         try:
             algo._load_WAND_Data("HB2C_7000.nxs.h5", "test_wand_load")
         except RuntimeError as e:
@@ -246,7 +248,7 @@ class LoadInputErrorMessages(unittest.TestCase):
 
     def test_load_wand_workspaces(self):
         # Test loading WAND^2 for each type of input and verify workspaces are created
-        algo = self._create_algo(
+        algo = _create_algo(
             SampleFilename="HB2C_7000.nxs.h5",
             VanadiumFilename="HB2C_7000.nxs.h5",
             SampleBackgroundFilename="HB2C_7000.nxs.h5",
@@ -264,14 +266,14 @@ class LoadInputErrorMessages(unittest.TestCase):
 
     def test_load_existing_wand(self):
         # Test that _load_WAND creates a workspace in the ADS
-        algo = self._create_algo(Instrument="WAND^2")
+        algo = _create_algo(Instrument="WAND^2")
         algo._load_WAND_Data("HB2C_7000.nxs.h5", "test_existing_wand")
         self.assertTrue(mtd.doesExist("test_existing_wand"))
 
     # These tests will be uncommented and verified once real MIDAS data is obtained
     # def test_load_midas_data(self):
     #     # Test that valid MIDAS data loads without error via _loadMIDASData
-    #     algo = self._create_algo(Instrument="MIDAS")
+    #     algo = _create_algo(Instrument="MIDAS")
     #     try:
     #         algo._loadMIDASData(["Midas_HFIR_1234.nxs.h5"], None, [], "test_midas_load")
     #     except RuntimeError as e:
@@ -282,7 +284,7 @@ class LoadInputErrorMessages(unittest.TestCase):
 
     # def test_load_midas_contents(self):
     #     # Test loading MIDAS data and verify contents
-    #     algo = self._create_algo(Instrument="MIDAS")
+    #     algo = _create_algo(Instrument="MIDAS")
     #     algo._loadMIDASData(["Midas_HFIR_1234.nxs.h5"], None, [], "test_midas_contents")
     #     ws = mtd["test_midas_contents"]
     #     self.assertTrue(ws)
@@ -302,7 +304,7 @@ class LoadInputErrorMessages(unittest.TestCase):
 
     # def test_load_midas_workspaces(self):
     #     # Test loading MIDAS for each type of input and verify workspaces are created
-    #     algo = self._create_algo(
+    #     algo = _create_algo(
     #         SampleFilename="Midas_HFIR_1234.nxs.h5",
     #         VanadiumFilename="Midas_HFIR_1234.nxs.h5",
     #         SampleBackgroundFilename="Midas_HFIR_1234.nxs.h5",
@@ -320,9 +322,92 @@ class LoadInputErrorMessages(unittest.TestCase):
 
     # def test_load_existing_midas(self):
     #     # Test that _loadMIDASData creates a workspace in the ADS
-    #     algo = self._create_algo(Instrument="MIDAS")
+    #     algo = _create_algo(Instrument="MIDAS")
     #     algo._loadMIDASData(["HB2C_7000.nxs.h5"], None, [], "test_existing_midas")
     #     self.assertTrue(mtd.doesExist("test_existing_midas"))
+
+
+class WarnUnsetOptionalFieldsTests(unittest.TestCase):
+    def test_all_warnings_when_no_optional_fields_set(self):
+        """Test that all optional field warnings are logged when none are set."""
+        algo = _create_algo(Instrument="WAND^2")
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertIn("No vanadium run supplied. Data will not be normalized by vanadium.", messages)
+            self.assertIn("VanadiumBackground is not set.", messages)
+            self.assertIn("SampleBackground is not set.", messages)
+            self.assertIn("MaskWorkspace is not set.", messages)
+            self.assertIn("MaskAngle is not set.", messages)
+            self.assertIn("AttenuationmuR is not set.", messages)
+            self.assertEqual(mock_warning.call_count, 6)
+
+    def test_no_vanadium_warning_when_vanadium_filename_set(self):
+        """Test that no vanadium warning is logged when VanadiumFilename is provided."""
+        algo = _create_algo(Instrument="WAND^2", VanadiumFilename="HB2C_7000.nxs.h5")
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertNotIn("No vanadium run supplied. Data will not be normalized by vanadium.", messages)
+
+    def test_no_vanadium_warning_when_vanadium_ipts_and_runs_set(self):
+        """Test that no vanadium warning is logged when VanadiumIPTS and VanadiumRunNumbers are provided."""
+        algo = _create_algo(Instrument="WAND^2", VanadiumIPTS=123, VanadiumRunNumbers=[456])
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertNotIn("No vanadium run supplied. Data will not be normalized by vanadium.", messages)
+
+    def test_no_vanadium_background_warning_when_set(self):
+        """Test that no VanadiumBackground warning is logged when it is provided."""
+        algo = _create_algo(Instrument="WAND^2", VanadiumBackgroundFilename="HB2C_7000.nxs.h5")
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertNotIn("VanadiumBackground is not set.", messages)
+
+    def test_no_sample_background_warning_when_set(self):
+        """Test that no SampleBackground warning is logged when it is provided."""
+        algo = _create_algo(Instrument="WAND^2", SampleBackgroundFilename="HB2C_7000.nxs.h5")
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertNotIn("SampleBackground is not set.", messages)
+
+    def test_no_mask_angle_warning_when_set(self):
+        """Test that no MaskAngle warning is logged when it is provided."""
+        algo = _create_algo(Instrument="WAND^2", MaskAngle=60.0)
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertNotIn("MaskAngle is not set.", messages)
+
+    def test_no_attenuation_warning_when_set(self):
+        """Test that no AttenuationmuR warning is logged when it is provided."""
+        algo = _create_algo(Instrument="WAND^2", AttenuationmuR=1.5)
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertNotIn("AttenuationmuR is not set.", messages)
+
+    def test_no_warnings_when_all_optional_fields_set(self):
+        """Test that no warnings are logged when all optional fields are provided."""
+        sample_ws = CreateSampleWorkspace()
+        mask_workspace = ExtractMask(InputWorkspace=sample_ws, OutputWorkspace="test_mask").OutputWorkspace
+        algo = _create_algo(
+            Instrument="WAND^2",
+            VanadiumFilename="HB2C_7000.nxs.h5",
+            VanadiumBackgroundFilename="HB2C_7000.nxs.h5",
+            SampleBackgroundFilename="HB2C_7000.nxs.h5",
+            MaskWorkspace=mask_workspace,
+            MaskAngle=60.0,
+            AttenuationmuR=1.5,
+        )
+        with patch.object(Logger, "warning") as mock_warning:
+            algo._warn_unset_optional_fields()
+            messages = [call.args[0] for call in mock_warning.call_args_list]
+            self.assertEqual(mock_warning.call_count, 0)
+            self.assertEqual(messages, [])
 
 
 class AutoPopulateTests(unittest.TestCase):

@@ -72,10 +72,10 @@ new_legend_props = {
     "background_color": "#ffffff",
     "edge_color": "#000000",
     "transparency": 0.5,
-    "entries_font": "Bitstream Vera Sans",
+    "entries_font": "DejaVu Sans",
     "entries_size": 12,
     "entries_color": "#000000",
-    "title_font": "Bitstream Vera Sans",
+    "title_font": "DejaVu Sans",
     "title_size": 14,
     "title_color": "#000000",
     "marker_size": 3.0,
@@ -289,7 +289,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
             cap_color = convert_color_to_hex(cap_color[0])
         if not isinstance(bar_color, str) or not bar_color.startswith("#"):
             bar_color = convert_color_to_hex(bar_color[0])
-        self.assertEqual(new_curve_view_props["ecolor"], cap_color)
+        self.assertEqual(new_curve_view_props["color"], cap_color)
         self.assertEqual(new_curve_view_props["ecolor"], bar_color)
 
     def test_apply_properties_on_figure_with_curve_sets_errorbar_line_width(self):

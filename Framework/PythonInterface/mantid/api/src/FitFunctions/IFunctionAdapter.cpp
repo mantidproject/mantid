@@ -207,7 +207,7 @@ void IFunctionAdapter::setAttributePythonValue(IFunction &self, const std::strin
  */
 void IFunctionAdapter::setAttribute(const std::string &attName, const Attribute &attr) {
   auto self = getSelf();
-  if (typeHasAttribute(self, "setAttributeValue")) {
+  if (GlobalInterpreterLock gil; typeHasAttribute(self, "setAttributeValue")) {
     object value = object(handle<>(getAttributeValue(*this, attr)));
     callMethod<void, std::string, object>(self, "setAttributeValue", attName, value);
     storeAttributeValue(attName, attr);
