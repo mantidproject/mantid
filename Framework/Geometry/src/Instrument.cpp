@@ -123,7 +123,7 @@ Instrument::Instrument(const Instrument &instr, bool copyCache)
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(), m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo), m_referenceFrame(instr.m_referenceFrame) {
   UNUSED_ARG(copyCache);
-  setName(instr.getName());
+  setName(instr.getName() + "_clone");
   // add in the sample and the source
   auto sampleComp = instr.getSample();
   auto sourceComp = instr.getSource();
