@@ -198,6 +198,18 @@ auto ReflectometryReductionOneAuto3::getOutputWorkspaceNames() -> WorkspaceNames
   else
     result.iVsLam = getPropertyValue("OutputWorkspaceWavelength");
 
+  const MatrixWorkspace_const_sptr &firstTransRun = getProperty("FirstTransmissionRun");
+  const MatrixWorkspace_const_sptr &secondTransRun = getProperty("SecondTransmissionRun");
+  if (firstTransRun != nullptr && secondTransRun != nullptr) {
+    const std::string &firstTransRunNo = getRunNumber(*firstTransRun);
+    const std::string &secondTransRunNo = getRunNumber(*secondTransRun);
+    result.trans = TRANS_LAM_PREFIX + firstTransRunNo + secondTransRunNo;
+    result.trans1 = TRANS_LAM_PREFIX + firstTransRunNo;
+    result.trans2 = TRANS_LAM_PREFIX + secondTransRunNo;
+  } else if (firstTransRun != nullptr) {
+    const std::string &firstTransRunNo = getRunNumber(*firstTransRun);
+    result.trans = TRANS_LAM_PREFIX + firstTransRunNo;
+  }
   return result;
 }
 
@@ -206,15 +218,16 @@ void ReflectometryReductionOneAuto3::setDefaultOutputWorkspaceNames() {
   const bool isDebug = getProperty("Debug");
   auto outputNames = getOutputWorkspaceNames();
 
-  if (isDefault("OutputWorkspaceBinned")) {
+  if (isDefault("OutputWorkspaceBinned"))
     setPropertyValue("OutputWorkspaceBinned", outputNames.iVsQBinned);
-  }
-  if (isDefault("OutputWorkspace")) {
+  if (isDefault("OutputWorkspace"))
     setPropertyValue("OutputWorkspace", outputNames.iVsQ);
-  }
-  if (isDebug && isDefault("OutputWorkspaceWavelength")) {
+  if (isDebug && isDefault("OutputWorkspaceWavelength"))
     setPropertyValue("OutputWorkspaceWavelength", outputNames.iVsLam);
-  }
+
+  // If not processing groups, we only ever output the overall transmission run
+  if (!isDefault("FirstTransmissionRun"))
+    setPropertyValue("OutputWorkspaceTransmission", outputNames.trans);
 }
 
 /** Initialize the algorithm's properties.
@@ -402,11 +415,6 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
 
   alg->execute();
 
-  // Get the output transmission names from RRO
-  setPropertyValue("OutputWorkspaceTransmission", alg->getPropertyValue("OutputWorkspaceTransmission"));
-  setPropertyValue("OutputWorkspaceFirstTransmission", alg->getPropertyValue("OutputWorkspaceFirstTransmission"));
-  setPropertyValue("OutputWorkspaceSecondTransmission", alg->getPropertyValue("OutputWorkspaceSecondTransmission"));
-
   return {.IvsQ = alg->getProperty("OutputWorkspaceQ"),
           .IvsLam = alg->getProperty("OutputWorkspaceWavelength"),
           .trans = alg->getProperty("OutputWorkspaceTransmission"),
@@ -430,8 +438,15 @@ void ReflectometryReductionOneAuto3::postReductionProcessingGroups(std::vector<R
     if (outputIvsLam) // If polarization analysis is off, add iVsLam to ADS here. Otherwise it is done inside the
                       // polarization correction algorithms.
       AnalysisDataService::Instance().addOrReplace(outputNames[i].iVsLam, out.IvsLam);
+    if (out.trans)
+      AnalysisDataService::Instance().addOrReplace(outputNames[i].trans, out.trans);
+    if (out.trans1)
+      AnalysisDataService::Instance().addOrReplace(outputNames[i].trans1, out.trans1);
+    if (out.trans2)
+      AnalysisDataService::Instance().addOrReplace(outputNames[i].trans2, out.trans2);
   }
-  setOutputGroupedWorkspaces(outputNames, groupedOutputNames, outputIvsLam);
+  setOutputGroupedWorkspaces(outputNames, groupedOutputNames, outputIvsLam, outputs.front().trans != nullptr,
+                             outputs.front().trans1 != nullptr, outputs.front().trans2 != nullptr);
   // Update properties using last run
   updatePropertiesAfterReduction(outputs.back(), params);
   // Doesn't look like we set transmission workspaces for groups.
@@ -808,7 +823,8 @@ WorkspaceGroup_sptr ReflectometryReductionOneAuto3::groupWorkspaces(const std::v
  */
 void ReflectometryReductionOneAuto3::setOutputGroupedWorkspaces(std::vector<WorkspaceNames> const &outputNames,
                                                                 WorkspaceNames const &outputGroupNames,
-                                                                const bool outputIvsLam) {
+                                                                const bool outputIvsLam, bool outputTrans,
+                                                                bool outputTrans1, bool outputTrans2) {
   // Extract each type of output workspaces as a string list for grouping
   std::vector<std::string> IvsQGroup, IvsQBinnedGroup, IvsLamGroup;
   std::for_each(outputNames.cbegin(), outputNames.cend(),
@@ -826,6 +842,16 @@ void ReflectometryReductionOneAuto3::setOutputGroupedWorkspaces(std::vector<Work
   setPropertyValue("OutputWorkspace", outputGroupNames.iVsQ);
   setPropertyValue("OutputWorkspaceBinned", outputGroupNames.iVsQBinned);
   setPropertyValue("OutputWorkspaceWavelength", outputGroupNames.iVsLam);
+
+  // Use the first set of output names, as for trans workspaces they are all the same across group members
+  // as we only use the first transmission run provided in a group
+  // this is consistent with historic algorithm behaviour
+  if (outputTrans)
+    setPropertyValue("OutputWorkspaceTransmission", outputNames.front().trans);
+  if (outputTrans1)
+    setPropertyValue("OutputWorkspaceFirstTransmission", outputNames.front().trans1);
+  if (outputTrans2)
+    setPropertyValue("OutputWorkspaceSecondTransmission", outputNames.front().trans2);
 }
 
 /** Set an output property from a child algorithm
@@ -967,7 +993,9 @@ auto ReflectometryReductionOneAuto3::getOutputNamesForGroupMember(const std::str
     outputNames.iVsQBinned = output.iVsQBinned + "_" + std::to_string(wsGroupNumber + 1);
     outputNames.iVsLam = output.iVsLam + "_" + std::to_string(wsGroupNumber + 1);
   }
-
+  outputNames.trans = output.trans;
+  outputNames.trans1 = output.trans1;
+  outputNames.trans2 = output.trans2;
   return outputNames;
 }
 

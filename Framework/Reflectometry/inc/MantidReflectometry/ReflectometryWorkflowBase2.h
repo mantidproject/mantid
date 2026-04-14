@@ -17,6 +17,9 @@ using namespace Mantid::Geometry;
 namespace Mantid {
 namespace Reflectometry {
 
+// Prefix for names of intermediate transmission workspaces in lambda
+std::string const TRANS_LAM_PREFIX("TRANS_LAM");
+
 /** ReflectometryWorkflowBase2 : base class containing common implementation
  functionality usable by concrete reflectometry workflow algorithms. Version 2.
  */

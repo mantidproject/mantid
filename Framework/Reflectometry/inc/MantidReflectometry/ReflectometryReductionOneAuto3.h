@@ -39,6 +39,9 @@ private:
     std::string iVsQ;
     std::string iVsQBinned;
     std::string iVsLam;
+    std::string trans;
+    std::string trans1;
+    std::string trans2;
   };
 
   // Utility struct to collate output properties of child algorithm when
@@ -123,7 +126,8 @@ private:
   void getTransmissionRun(std::map<std::string, std::string> &results, WorkspaceGroup_sptr &workspaceGroup,
                           const std::string &transmissionRun);
   void setOutputGroupedWorkspaces(std::vector<WorkspaceNames> const &outputNames,
-                                  WorkspaceNames const &outputGroupNames, const bool outputIvsLam);
+                                  WorkspaceNames const &outputGroupNames, const bool outputIvsLam, bool outputTrans,
+                                  bool outputTrans1, bool outputTrans2);
   void setOutputPropertyFromChild(const Algorithm_sptr &alg, std::string const &name);
   void setOutputPropertiesFromChild(const Algorithm_sptr &alg);
   processGroupMembersOutput processGroupMembers(Algorithm::WorkspaceVector members, std::string const &runNumber,
