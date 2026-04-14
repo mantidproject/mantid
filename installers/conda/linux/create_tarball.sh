@@ -142,7 +142,7 @@ fi
 
 echo "Creating conda environment in '$bundle_conda_prefix'"
 "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
-  --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
+  --channel $mantid_channel --channel conda-forge --channel "$conda_channel" --yes \
   mantidworkbench \
   mantiddocs \
   mslice \
