@@ -515,7 +515,7 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
         return None
 
 
-class ReflectometryDatasetHybrid(ReflectometryDatasetManual, ReflectometryDatasetHistory):
+class ReflectometryDatasetHybrid(ReflectometryDatasetHistory, ReflectometryDatasetManual):
     """
     This hybrid version of the datasets allows as much of the information as possible to be extracted from the history
     and then leaves the rest with setters to be set manually.
@@ -551,7 +551,7 @@ class ReflectometryDatasetHybrid(ReflectometryDatasetManual, ReflectometryDatase
             missing_metadata.append(Prop.FLOOD_ENTRY)
         if not self.calibration_entry:
             missing_metadata.append(Prop.CALIB_FILE)
-        if self.resolution is None:  # Could be float, 0, or None.
+        if self.resolution is None:
             missing_metadata.append(Prop.RESOLUTION)
         if self.reduction_script is None:
             missing_metadata.append(Prop.SCRIPT)
@@ -703,11 +703,13 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 f"to save as ORSO ASCII or {MantidORSOSaver.NEXUS_FILE_EXT} to save as ORSO Nexus."
             )
 
-        if self.getProperty(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID:
+        if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID:
             check_dataset = self._create_and_sort_refl_datasets()[0]
             missing_meta = check_dataset.get_missing_metadata_list()
             for prop in missing_meta:
-                issues[prop] = "Metadata could not be found in the workspace history. Please provide some."
+                manual_entry = self.getProperty(prop).value
+                if manual_entry is None:
+                    issues[prop] = "Metadata could not be found in the workspace history. Please provide some."
 
         angle_files = self.getProperty(Prop.ANGLE_FILES).value
         angle_files_theta = self.getProperty(Prop.ANGLE_FILES_THETA).value
@@ -798,6 +800,8 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         match self.getPropertyValue(Prop.META_SOURCE):
             case MetadataSourceOptions.FROM_HISTORY:
                 return ReflectometryDatasetHistory(ws, is_child)
+            case MetadataSourceOptions.HYBRID:
+                return ReflectometryDatasetHybrid(ws, is_child)
             case MetadataSourceOptions.MANUAL:
                 dataset = ReflectometryDatasetManual(ws, is_child)
                 dataset.q_conversion_method = self.getPropertyValue(Prop.Q_CONVERT_METHOD)
