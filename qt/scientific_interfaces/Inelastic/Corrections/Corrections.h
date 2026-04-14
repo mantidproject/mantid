@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "ContainerSubtractionPresenter.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 
@@ -82,6 +83,7 @@ private:
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
   std::map<unsigned int, CorrectionsTab *> m_tabs;
+  std::unique_ptr<ContainerSubtractionPresenter> m_csPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
