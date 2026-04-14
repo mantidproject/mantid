@@ -36,9 +36,11 @@ jobs:
       # publish documentation if on main branch of mantidproject/mantid
       - name: Checkout Doxygen repository
         if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
-        run: |
-          git clone https://$DOXYGEN_REPO_TOKEN@github.com/mantidproject/doxygen.git doxygen_repo
-          rm -rf doxygen_repo/*
+        uses: actions/checkout@v6
+        with:
+          repository: mantidproject/doxygen
+          path: doxygen_repo
+          token: ${{ secrets.DOXYGEN_REPO_TOKEN }}
 
       - name: Copy Doxygen artifacts
         if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
