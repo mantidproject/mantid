@@ -348,20 +348,152 @@ class OutputTableMixin:
         raise NotImplementedError()
 
 
-class PawleyPatternBase(MtdFuncMixin, OutputTableMixin, ABC):
+class BoundsMixin(ABC):
+    """Mixin providing flexible parameter bounds.
+
+    Requires subclasses to provide: ``get_param_names()``, ``get_free_params()``,
+    ``get_isfree()``, and a ``param_bounds_abs_min`` attribute.
+    """
+
+    param_bounds_abs_min = None
+
+    def get_param_names(self) -> np.ndarray:
+        pass
+
+    def get_params(self) -> np.ndarray:
+        pass
+
+    def get_free_params(self) -> np.ndarray:
+        pass
+
+    def get_isfree(self) -> np.ndarray[bool]:
+        pass
+
+    def _init_bounds(self):
+        self._param_bounds: dict[str, Tuple[float, float]] = {}
+
+    # --- helpers that compute (lb, ub) for a single parameter value --------
+
+    def _fractional_bounds(self, p: float, frac: float) -> Tuple[float, float]:
+        margin = max(abs(p) * frac, self.param_bounds_abs_min)
+        return p - margin, p + margin
+
+    def _log_bounds(self, p: float, factor: float) -> Tuple[float, float]:
+        if p > 0:
+            return p / factor, p * factor
+        elif p < 0:
+            return p * factor, p / factor
+        return -self.param_bounds_abs_min, self.param_bounds_abs_min
+
+    @staticmethod
+    def _absolute_bounds(lb: float, ub: float) -> Tuple[float, float]:
+        return (lb if lb is not None else -np.inf), (ub if ub is not None else np.inf)
+
+    def set_bounds(
+        self,
+        names: str | Sequence[str],
+        mode: str = "fractional",
+        value: float = None,
+        lb: float = None,
+        ub: float = None,
+    ):
+        """Set bounds for specific parameters by name.
+
+        Bounds are computed immediately from the current parameter values and
+        stored as ``(lb, ub)`` pairs.
+
+        Parameters
+        ----------
+        names : str or sequence of str
+            Parameter names (as returned by ``get_param_names``).
+        mode : ["fractional", "log", "absolute", None]
+            "fractional" - symmetric bounds: p +/- max(|p| * value, abs_min)
+            "log" - multiplicative bounds: [p / value, p * value]
+            "absolute" - explicit bounds given by *lb* and *ub*
+            None - remove bounds (unconstrained)
+        value : float, optional
+            Fraction (for "fractional") or factor (for "log").
+        lb, ub : float, optional
+            Lower / upper bound (for "absolute").
+        """
+        if isinstance(names, str):
+            names = [names]
+        all_names = self.get_param_names()
+        all_params = self.get_params()
+        name_to_value = dict(zip(all_names, all_params))
+
+        for name in names:
+            if name not in name_to_value:
+                logger.warning(f"set_bounds: '{name}' not found in parameters, ignoring.")
+                continue
+            match mode:
+                case None:
+                    self._param_bounds.pop(name, None)
+                case "fractional":
+                    self._param_bounds[name] = self._fractional_bounds(name_to_value[name], value)
+                case "log":
+                    self._param_bounds[name] = self._log_bounds(name_to_value[name], value)
+                case "absolute":
+                    self._param_bounds[name] = self._absolute_bounds(lb, ub)
+                case _:
+                    logger.error(f"Mode: '{mode}' is not a valid option. Options are: ['fractional', 'log', 'absolute', None]")
+
+    def set_bounds_all(self, mode: str = "fractional", value: float = None):
+        """Set the same bound mode on every parameter."""
+        self.set_bounds(list(self.get_param_names()), mode=mode, value=value)
+
+    def clear_bounds(self, names: str | Sequence[str] = None):
+        """Remove bounds for *names*, or all if *names* is ``None``."""
+        if names is None:
+            self._param_bounds.clear()
+        else:
+            if isinstance(names, str):
+                names = [names]
+            for name in names:
+                self._param_bounds.pop(name, None)
+
+    def get_bounds(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Assemble ``(lb, ub)`` arrays for the free parameters from stored bounds."""
+        isfree = self.get_isfree()
+        free_names = self.get_param_names()[isfree]
+        n = len(free_names)
+
+        lo = np.full(n, -np.inf)
+        hi = np.full(n, np.inf)
+
+        for i, name in enumerate(free_names):
+            bounds = self._param_bounds.get(name)
+            if bounds is not None:
+                lo[i], hi[i] = bounds
+
+        return lo, hi
+
+    def set_non_negative(self, names: str | Sequence[str]):
+        """Enforce a lower bound of zero on the named parameters.
+
+        If the parameter already has bounds, the lower bound is raised to zero.
+        If it has no bounds, bounds of [0, +inf] are set.
+        """
+        if isinstance(names, str):
+            names = [names]
+        for name in names:
+            existing = self._param_bounds.get(name)
+            if existing is not None:
+                self._param_bounds[name] = (max(existing[0], 0.0), existing[1])
+            else:
+                self._param_bounds[name] = (0.0, np.inf)
+
+
+class PawleyPatternBase(BoundsMixin, MtdFuncMixin, OutputTableMixin, ABC):
     def __init__(
         self,
         ws: Workspace2D,
         phases: Phase,
         profile: PeakProfile,
         bg_func: Optional[FunctionWrapper] = None,
-        global_param_bound_frac: float = None,
-        param_bound_frac: dict = None,
         param_bounds_abs_min: float = 1e-6,
-        ispec: int = 0,
     ):
         self.ws = ws
-        self.ispec = ispec
         self.phases = phases
         self.alatt_params = [phase.get_params() for phase in self.phases]
         self.alatt_isfree = [np.ones_like(alatt, dtype=bool) for alatt in self.alatt_params]
@@ -380,9 +512,8 @@ class PawleyPatternBase(MtdFuncMixin, OutputTableMixin, ABC):
         self.bg_isfree = np.ones_like(self.bg_params, dtype=bool)
         self.make_profile_function(bg_func)
         self.initial_params = None
-        self.global_param_bound_frac = global_param_bound_frac
         self.param_bounds_abs_min = param_bounds_abs_min
-        self.param_bound_frac = param_bound_frac
+        self._init_bounds()
 
     def make_profile_function(self, bg_func: Optional[FunctionWrapper] = None):
         self.comp_func = CompositeFunctionWrapper()
@@ -436,6 +567,18 @@ class PawleyPatternBase(MtdFuncMixin, OutputTableMixin, ABC):
     def get_free_param_names(self) -> np.ndarray:
         return self.get_param_names()[self.get_isfree()]
 
+    def get_intens_param_names(self) -> list[str]:
+        """Return the names of all intensity parameters across phases."""
+        names = []
+        for i, phase in enumerate(self.phases):
+            phase_suffix = f"_ph{i}" if len(self.phases) > 1 else ""
+            names.extend(s + phase_suffix for s in phase.get_hkl_strings())
+        return names
+
+    def force_non_negative_intensities(self):
+        """Enforce a lower bound of zero on all intensity parameters."""
+        self.set_non_negative(self.get_intens_param_names())
+
     def get_params(self) -> np.ndarray[float]:
         return np.concatenate((*self.alatt_params, *self.intens, *self.profile_params, self.inst_params, self.bg_params))
 
@@ -481,32 +624,7 @@ class PawleyPatternBase(MtdFuncMixin, OutputTableMixin, ABC):
         kwargs = {**default_kwargs, **kwargs}
         self.initial_params = self.get_free_params()
         if "bounds" not in kwargs:
-            lb = np.full_like(self.initial_params, -np.inf)
-            ub = np.full_like(self.initial_params, np.inf)
-            if self.global_param_bound_frac is not None:
-                margin = np.maximum(np.abs(self.initial_params) * self.global_param_bound_frac, self.param_bounds_abs_min)
-                lb = self.initial_params - margin
-                ub = self.initial_params + margin
-            # apply per-parameter overrides (None entry means unconstrained for that param)
-            if self.param_bound_frac:
-                free_names = self.get_free_param_names()
-                for name, frac in self.param_bound_frac.items():
-                    mask = free_names == name
-                    if not mask.any():
-                        logger.warning(f"param_bound_frac: '{name}' not found in free parameters, ignoring.")
-                        continue
-                    if frac is None:
-                        lb[mask] = -np.inf
-                        ub[mask] = np.inf
-                    else:
-                        margin = np.maximum(np.abs(self.initial_params[mask]) * frac, self.param_bounds_abs_min)
-                        lb[mask] = self.initial_params[mask] - margin
-                        ub[mask] = self.initial_params[mask] + margin
-            # always enforce non-negativity for intensity parameters
-            n_alatt_free = sum(int(ai.sum()) for ai in self.alatt_isfree)
-            n_intens_free = sum(int(ii.sum()) for ii in self.intens_isfree)
-            lb[n_alatt_free : n_alatt_free + n_intens_free] = np.maximum(lb[n_alatt_free : n_alatt_free + n_intens_free], 0.0)
-            kwargs["bounds"] = (lb, ub)
+            kwargs["bounds"] = self.get_bounds()
         res = least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
         # update parameters
         self.set_free_params(res.x)
@@ -551,8 +669,9 @@ class PawleyPatternBase(MtdFuncMixin, OutputTableMixin, ABC):
 
 
 class PawleyPattern1D(PawleyPatternBase):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, ispec: int = 0, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.ispec = ispec
         self.xunit = self.ws.getAxis(0).getUnit().unitID()
         if self.xunit == "TOF":
             si = self.ws.spectrumInfo()
@@ -741,9 +860,6 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
     def set_params_from_pawley1d(
         self,
         pawley1d: PawleyPattern1D,
-        global_param_bound_frac: float = None,
-        param_bounds_abs_min: float = None,
-        param_bound_frac: dict = None,
     ):
         if len(pawley1d.phases) != len(self.phases):
             logger.error("PawleyPattern1D object has a different number of phases.")
@@ -775,12 +891,6 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
                 intens_changed = True
         if intens_changed:
             self._estimate_intensities()
-        if global_param_bound_frac is not None:
-            self.global_param_bound_frac = global_param_bound_frac
-        if param_bounds_abs_min is not None:
-            self.param_bounds_abs_min = param_bounds_abs_min
-        if param_bound_frac is not None:
-            self.param_bound_frac = param_bound_frac
 
     def estimate_initial_params(self):
         self._estimate_intensities()
@@ -802,17 +912,15 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
                 self.intens[iphase] *= global_scale
         self.scales = None  # reset so fit() recomputes scales at the updated intensities
 
-    def create_no_constriants_fit(self, global_param_bound_frac: float = None, param_bounds_abs_min: float = 1e-6):
+    def create_no_constriants_fit(self, param_bounds_abs_min: float = 1e-6):
         return PawleyPattern2DNoConstraints(
             self.ws,
             self.comp_func,
             self.global_scale,
             self.lambda_max,
-            global_param_bound_frac=global_param_bound_frac,
             param_bounds_abs_min=param_bounds_abs_min,
             apply_lorentz_correction=self.apply_lorentz_correction,
             phases=self.phases,
-            ispec=self.ispec,
         )
 
     def fit(self, *args, max_scale_iter: int = 2, **kwargs) -> OptimizeResult:
@@ -832,21 +940,18 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
         return res
 
 
-class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin, OutputTableMixin):
+class PawleyPattern2DNoConstraints(BoundsMixin, MtdFuncMixin, Poldi2DEvalMixin, OutputTableMixin):
     def __init__(
         self,
         ws: Workspace2D,
         func: FunctionWrapper,
         global_scale: bool = True,
         lambda_max: float = 5.0,
-        global_param_bound_frac: float = None,
         param_bounds_abs_min: float = 1e-6,
         apply_lorentz_correction: bool = False,
         phases: Optional[list] = None,
-        ispec: int = 0,
     ):
         self.ws = ws
-        self.ispec = ispec
         self.phases = phases
         self.ws_1d = PawleyPattern2D.make_1d_ws(self.ws)
         self.comp_func = func
@@ -858,8 +963,8 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin, OutputTableMi
         self.apply_lorentz_correction = apply_lorentz_correction
         self.set_global_scale(global_scale)
         self.initial_params = None
-        self.global_param_bound_frac = global_param_bound_frac
         self.param_bounds_abs_min = param_bounds_abs_min
+        self._init_bounds()
 
     def get_peak_intensity_param_name(self):
         pk_func = FunctionFactory.Instance().createPeakFunction(self.comp_func[0].name)
@@ -880,6 +985,14 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin, OutputTableMi
                 bg_func = self.comp_func[npks]
                 [bg_func.function.setParameter(ipar, 0) for ipar in range(bg_func.nParams())]
                 bg_func.function.fixAll()
+
+    def get_param_names(self) -> np.ndarray:
+        return np.array([self.comp_func.parameterName(i) for i in range(self.comp_func.nParams())])
+
+    def force_non_negative_intensities(self):
+        """Enforce a lower bound of zero on all intensity parameters."""
+        intens_names = [n for n in self.get_param_names() if f".{self.intens_par_name}" in n or n == self.intens_par_name]
+        self.set_non_negative(intens_names)
 
     def get_params(self) -> np.ndarray[float]:
         return np.asarray([self.comp_func.getParameterValue(ipar) for ipar in range(self.comp_func.nParams())])
@@ -922,7 +1035,6 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin, OutputTableMi
 
             yield {
                 "Workspace": self.ws.name(),
-                "Spectrum": self.ispec,
                 "HKL": hkl_str,
                 "I": float(pk_func.intensity()),
                 "I_err": _err(self.intens_par_name),
@@ -937,19 +1049,7 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin, OutputTableMi
         kwargs = {**default_kwargs, **kwargs}
         self.initial_params = self.get_free_params()
         if "bounds" not in kwargs:
-            lb = np.full_like(self.initial_params, -np.inf)
-            ub = np.full_like(self.initial_params, np.inf)
-            if self.global_param_bound_frac is not None:
-                margin = np.maximum(np.abs(self.initial_params) * self.global_param_bound_frac, self.param_bounds_abs_min)
-                lb = self.initial_params - margin
-                ub = self.initial_params + margin
-            # enforce non-negativity for intensity parameters identified by name
-            all_param_names = [self.comp_func.parameterName(ipar) for ipar in range(self.comp_func.nParams())]
-            isfree = self.get_isfree()
-            free_param_names = [name for name, free in zip(all_param_names, isfree) if free]
-            is_intens_free = np.array([f".{self.intens_par_name}" in name or name == self.intens_par_name for name in free_param_names])
-            lb[is_intens_free] = np.maximum(lb[is_intens_free], 0.0)
-            kwargs["bounds"] = (lb, ub)
+            kwargs["bounds"] = self.get_bounds()
         # Pre-compute per-spectrum scales at the initial params then lock them.
         self.scales = None
         self.eval_2d(self.initial_params)
