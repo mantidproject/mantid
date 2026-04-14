@@ -528,15 +528,15 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
 
     def test_create_output_tables_single_phase_returns_one_table(self):
         pawley = PawleyPattern2D(**self.init_kwargs, global_scale=True).create_no_constriants_fit()
-        res = pawley.fit(max_nfev=1)
-        tables = pawley.create_output_tables(res)
+        pawley.fit(max_nfev=1)
+        tables = pawley.create_output_tables()
         self.assertEqual(len(tables), 1)
 
     def test_create_output_tables_single_phase_hkl_content(self):
         pawley = PawleyPattern2D(**self.init_kwargs, global_scale=True).create_no_constriants_fit()
-        res = pawley.fit(max_nfev=1)
+        pawley.fit(max_nfev=1)
         pawley.phases[0].set_phase_name("Si")
-        tables = pawley.create_output_tables(res)
+        tables = pawley.create_output_tables()
         self.assertEqual(tables[0].column("HKL"), self.phase.get_hkl_strings())
 
     def test_create_output_tables_two_phases_correct_hkl_split(self):
@@ -545,10 +545,10 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
         phase2.set_hkls_from_dspac_limits(3.5, 4.5)
         pawley2d = PawleyPattern2D(self.ws, [self.phase, phase2], global_scale=True, profile=GaussianProfile())
         pawley = pawley2d.create_no_constriants_fit()
-        res = pawley.fit(max_nfev=1)
+        pawley.fit(max_nfev=1)
         for iphase, phase_name in enumerate(["low_d", "high_d"]):
             pawley.phases[iphase].set_phase_name(phase_name)
-        tables = pawley.create_output_tables(res)
+        tables = pawley.create_output_tables()
         self.assertEqual(tables[0].column("HKL"), self.phase.get_hkl_strings())
         self.assertEqual(tables[1].column("HKL"), phase2.get_hkl_strings())
 
@@ -584,32 +584,36 @@ class OutputTableMixinTest(unittest.TestCase):
     def _pawley(self, phases=None):
         return PawleyPattern1D(self.ws, phases or [self.phase], profile=GaussianProfile())
 
-    def _res(self, pawley):
-        return pawley.fit(max_nfev=1)
+    def _fit(self, pawley):
+        pawley.fit(max_nfev=1)
 
     # --- return type and length ---
 
     def test_single_phase_returns_list_of_one_table(self):
         pawley = self._pawley()
-        tables = pawley.create_output_tables(self._res(pawley))
+        self._fit(pawley)
+        tables = pawley.create_output_tables()
         self.assertIsInstance(tables, list)
         self.assertEqual(len(tables), 1)
 
     def test_two_phases_returns_list_of_two_tables(self):
         pawley = self._pawley([self.phase, self.phase2])
-        tables = pawley.create_output_tables(self._res(pawley))
+        self._fit(pawley)
+        tables = pawley.create_output_tables()
         self.assertEqual(len(tables), 2)
 
     # --- workspace naming ---
 
     def test_default_workspace_name_uses_phase_index(self):
         pawley = self._pawley()
-        tables = pawley.create_output_tables(self._res(pawley))
+        self._fit(pawley)
+        tables = pawley.create_output_tables()
         self.assertEqual(tables[0].name(), f"{self.ws.name()}_pawley_table_phase0")
 
     def test_two_phases_default_names_use_index(self):
         pawley = self._pawley([self.phase, self.phase2])
-        tables = pawley.create_output_tables(self._res(pawley))
+        self._fit(pawley)
+        tables = pawley.create_output_tables()
         self.assertEqual(tables[0].name(), f"{self.ws.name()}_pawley_table_phase0")
         self.assertEqual(tables[1].name(), f"{self.ws.name()}_pawley_table_phase1")
 
@@ -618,21 +622,24 @@ class OutputTableMixinTest(unittest.TestCase):
         for iphase, phase_name in enumerate(["alpha", "beta"]):
             phases[iphase].set_phase_name(phase_name)
         pawley = self._pawley([self.phase, self.phase2])
-        tables = pawley.create_output_tables(self._res(pawley))
+        self._fit(pawley)
+        tables = pawley.create_output_tables()
         self.assertEqual(tables[0].name(), f"{self.ws.name()}_pawley_table_alpha")
         self.assertEqual(tables[1].name(), f"{self.ws.name()}_pawley_table_beta")
 
     def test_custom_base_name_prepended_to_phase_name(self):
         self.phase.set_phase_name("Si")
         pawley = self._pawley([self.phase])
-        tables = pawley.create_output_tables(self._res(pawley), output_workspace="my_fit")
+        self._fit(pawley)
+        tables = pawley.create_output_tables(output_workspace="my_fit")
         self.assertEqual(tables[0].name(), "my_fit_Si")
 
     # --- table structure ---
 
     def test_table_has_required_columns(self):
         pawley = self._pawley()
-        tables = pawley.create_output_tables(self._res(pawley))
+        self._fit(pawley)
+        tables = pawley.create_output_tables()
         self.assertEqual(
             tables[0].getColumnNames(),
             ["Workspace", "Spectrum", "HKL", "I", "I_err", "X0", "X0_err", "FWHM", "FWHM_err"],
@@ -640,31 +647,36 @@ class OutputTableMixinTest(unittest.TestCase):
 
     def test_row_count_matches_phase_nhkls(self):
         pawley = self._pawley()
-        tables = pawley.create_output_tables(self._res(pawley))
+        self._fit(pawley)
+        tables = pawley.create_output_tables()
         self.assertEqual(tables[0].rowCount(), self.phase.nhkls())
 
     def test_hkl_column_contains_phase_hkl_strings(self):
         pawley = self._pawley()
-        tables = pawley.create_output_tables(self._res(pawley))
+        self._fit(pawley)
+        tables = pawley.create_output_tables()
         self.assertEqual(tables[0].column("HKL"), self.phase.get_hkl_strings())
 
     # --- table per phase ---
 
     def test_two_phases_each_table_row_count_matches_its_phase(self):
         pawley = self._pawley([self.phase, self.phase2])
-        tables = pawley.create_output_tables(self._res(pawley))
+        self._fit(pawley)
+        tables = pawley.create_output_tables()
         self.assertEqual(tables[0].rowCount(), self.phase.nhkls())
         self.assertEqual(tables[1].rowCount(), self.phase2.nhkls())
 
     def test_two_phases_each_table_contains_only_its_phase_hkls(self):
         pawley = self._pawley([self.phase, self.phase2])
-        tables = pawley.create_output_tables(self._res(pawley))
+        self._fit(pawley)
+        tables = pawley.create_output_tables()
         self.assertEqual(tables[0].column("HKL"), self.phase.get_hkl_strings())
         self.assertEqual(tables[1].column("HKL"), self.phase2.get_hkl_strings())
 
     def test_two_phases_hkl_sets_are_different(self):
         pawley = self._pawley([self.phase, self.phase2])
-        tables = pawley.create_output_tables(self._res(pawley))
+        self._fit(pawley)
+        tables = pawley.create_output_tables()
         hkls_0 = set(tables[0].column("HKL"))
         hkls_1 = set(tables[1].column("HKL"))
         self.assertTrue(hkls_0.isdisjoint(hkls_1))

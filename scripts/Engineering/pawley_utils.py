@@ -260,6 +260,14 @@ class MtdFuncMixin:
         bg_func_names = FunctionFactory.Instance().getBackgroundFunctionNames()
         return np.array([f.function.intensity() for f in self.comp_func if f.name not in bg_func_names])
 
+    def get_peak_param_errors(self, param_name: str) -> np.ndarray[float]:
+        bg_func_names = FunctionFactory.Instance().getBackgroundFunctionNames()
+        return np.array([f.function.getError(param_name) for f in self.comp_func if f.name not in bg_func_names])
+
+    def get_peak_centre_errors(self) -> np.ndarray[float]:
+        cen_par_name = self.comp_func[0].function.getCentreParameterName()
+        return self.get_peak_param_errors(cen_par_name)
+
     def set_mantid_peak_param_isfree(self, param_names: str | Sequence[str], isfree: bool = False):
         # relevant only for subsequent unconstrained fits - not used in Pawley fits
         bg_func_names = FunctionFactory.Instance().getBackgroundFunctionNames()
@@ -275,11 +283,12 @@ class MtdFuncMixin:
 
 
 class OutputTableMixin:
-    """Mixin that provides ``create_output_table`` to any Pawley-fit class.
+    """Mixin that provides ``create_output_tables`` to any Pawley-fit class.
 
-    Concrete classes must implement ``_iter_peak_rows`` which yields one row-dict
-    per fitted peak.  The mixin also owns ``get_parameter_errors`` so both
-    constrained and unconstrained fit classes share the same error computation.
+    The mixin creates and names the tables, while concrete classes control their
+    schema (``_get_table_columns``) and content (``_populate_table``).  The mixin
+    also owns ``get_parameter_errors`` so both constrained and unconstrained fit
+    classes share the same error computation.
     """
 
     @staticmethod
@@ -295,29 +304,44 @@ class OutputTableMixin:
         var = np.sum(res.fun**2) / (ndat - npar)
         return np.sqrt(np.diag(var * covar))
 
+    def _create_table(self, ws_name: str):
+        """Create an empty TableWorkspace with the columns returned by ``_get_table_columns``."""
+        tab = CreateEmptyTableWorkspace(OutputWorkspace=ws_name, EnableLogging=False)
+        for col_type, col_name in self._get_table_columns():
+            tab.addColumn(type=col_type, name=col_name)
+        return tab
+
+    def _get_table_columns(self) -> list[Tuple[str, str]]:
+        """Return ``(type, name)`` pairs for the output table columns.
+
+        Subclasses may override to add or remove columns (e.g. ``Spectrum``).
+        """
+        return [
+            ("str", "Workspace"),
+            ("str", "HKL"),
+            ("double", "I"),
+            ("double", "I_err"),
+            ("double", "X0"),
+            ("double", "X0_err"),
+            ("double", "FWHM"),
+            ("double", "FWHM_err"),
+        ]
+
     def create_output_tables(
         self,
-        res: "OptimizeResult",
         output_workspace: str = None,
     ) -> list:
         """Create one TableWorkspace per phase, each with one row per fitted peak.
 
-        Columns: ``Workspace``, ``Spectrum``, ``HKL``, ``I``, ``I_err``,
-        ``X0``, ``X0_err``, ``FWHM``, ``FWHM_err``.
+        Reads peak data and errors from the object state (set by ``fit()``).
 
         Parameters
         ----------
-        res : OptimizeResult
         output_workspace : str, optional
             Base name for output workspaces.  Each table is named
             ``<base>_<phase_name>`` (or ``<base>_phase<i>`` when no names
             are provided).
         """
-        param_errors = self.get_parameter_errors(res)
-        isfree = self.get_isfree()
-        free_idx_of_full = np.full(len(isfree), -1, dtype=int)
-        free_idx_of_full[isfree] = np.arange(int(isfree.sum()))
-
         if hasattr(self, "update_profile_function"):
             self.update_profile_function()
 
@@ -328,23 +352,13 @@ class OutputTableMixin:
         for iphase in range(nphases):
             phase_name = self.phases[iphase].get_phase_name()
             suffix = phase_name or f"phase{iphase}"
-            ws_name = f"{base_name}_{suffix}"
-            tab = CreateEmptyTableWorkspace(OutputWorkspace=ws_name, EnableLogging=False)
-            tab.addColumn(type="str", name="Workspace")
-            tab.addColumn(type="int", name="Spectrum")
-            tab.addColumn(type="str", name="HKL")
-            tab.addColumn(type="double", name="I")
-            tab.addColumn(type="double", name="I_err")
-            tab.addColumn(type="double", name="X0")
-            tab.addColumn(type="double", name="X0_err")
-            tab.addColumn(type="double", name="FWHM")
-            tab.addColumn(type="double", name="FWHM_err")
-            for row in self._iter_peak_rows(param_errors, free_idx_of_full, iphase=iphase):
-                tab.addRow(row)
+            tab = self._create_table(f"{base_name}_{suffix}")
+            self._populate_table(tab, iphase)
             tables.append(tab)
         return tables
 
-    def _iter_peak_rows(self, param_errors: np.ndarray, free_idx_of_full: np.ndarray, iphase: int = 0):
+    def _populate_table(self, tab, iphase: int):
+        """Add rows to *tab* for the given phase. Subclasses must implement this."""
         raise NotImplementedError()
 
 
@@ -512,6 +526,7 @@ class PawleyPatternBase(BoundsMixin, MtdFuncMixin, OutputTableMixin, ABC):
         self.bg_isfree = np.ones_like(self.bg_params, dtype=bool)
         self.make_profile_function(bg_func)
         self.initial_params = None
+        self.param_errors = np.full_like(self.get_params(), np.nan)
         self.param_bounds_abs_min = param_bounds_abs_min
         self._init_bounds()
 
@@ -626,38 +641,48 @@ class PawleyPatternBase(BoundsMixin, MtdFuncMixin, OutputTableMixin, ABC):
         if "bounds" not in kwargs:
             kwargs["bounds"] = self.get_bounds()
         res = least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
-        # update parameters
+        # update parameters and errors
         self.set_free_params(res.x)
+        self._set_errors_from_result(res)
         self.update_profile_function()
         return res
+
+    def _set_errors_from_result(self, res: "OptimizeResult"):
+        free_errors = self.get_parameter_errors(res)
+        self.param_errors = np.full_like(self.get_params(), np.nan)
+        self.param_errors[self.get_isfree()] = free_errors
 
     def undo_fit(self):
         if self.initial_params is not None:
             self.set_free_params(self.initial_params)
 
-    def _iter_peak_rows(self, param_errors: np.ndarray, free_idx_of_full: np.ndarray, iphase: int = 0):
-        n_alatt = sum(len(a) for a in self.alatt_params)
-        n_intens_per_phase = [len(i) for i in self.intens]
-        intens_start = n_alatt
-        phase_intens_start = intens_start + sum(n_intens_per_phase[:iphase])
-        pk_offset = sum(self.phases[i].nhkls() for i in range(iphase))
+    def _get_intens_error(self, iphase: int) -> np.ndarray:
+        """Return the intensity errors for a single phase from self.param_errors"""
+        n_alatt = sum(a.size for a in self.alatt_params)
+        offset = n_alatt + sum(self.intens[i].size for i in range(iphase))
+        return self.param_errors[offset : offset + self.intens[iphase].size]
+
+    def _populate_table(self, tab, iphase: int):
         phase = self.phases[iphase]
+        pk_offset = sum(self.phases[i].nhkls() for i in range(iphase))
+        intens_errors = self._get_intens_error(iphase)
         for ipk, hkl in enumerate(phase.hkls):
-            hkl_str = "".join(str(int(round(v))) for v in [hkl.X(), hkl.Y(), hkl.Z()])
-            fidx = int(free_idx_of_full[phase_intens_start + ipk])
+            hkl_str = "".join(str(int(round(v))) for v in hkl)
             pk_func = self.comp_func[pk_offset + ipk].function
-            cen_par = pk_func.getCentreParameterName()
-            yield {
-                "Workspace": self.ws.name(),
-                "Spectrum": self.ispec,
-                "HKL": hkl_str,
-                "I": float(self.intens[iphase][ipk]),
-                "I_err": float(param_errors[fidx]) if fidx >= 0 else float("nan"),
-                "X0": float(pk_func.getParameterValue(cen_par)),
-                "X0_err": float("nan"),
-                "FWHM": float(pk_func.fwhm()),
-                "FWHM_err": float("nan"),
-            }
+            tab.addRow(self._make_peak_row(iphase, ipk, hkl_str, pk_func, intens_errors[ipk]))
+
+    def _make_peak_row(self, iphase, ipk, hkl_str, pk_func, intens_err):
+        cen_par = pk_func.getCentreParameterName()
+        return {
+            "Workspace": self.ws.name(),
+            "HKL": hkl_str,
+            "I": float(self.intens[iphase][ipk]),
+            "I_err": float(intens_err),
+            "X0": float(pk_func.getParameterValue(cen_par)),
+            "X0_err": float("nan"),
+            "FWHM": float(pk_func.fwhm()),
+            "FWHM_err": float("nan"),
+        }
 
     @abstractmethod
     def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
@@ -681,6 +706,24 @@ class PawleyPattern1D(PawleyPatternBase):
             si = self.ws.spectrumInfo()
             if not si.hasDetectors(self.ispec):
                 raise RuntimeError("Workspace has no detectors - may not be able to convert to d-spacing.")
+
+    def _get_table_columns(self) -> list[Tuple[str, str]]:
+        return [
+            ("str", "Workspace"),
+            ("int", "Spectrum"),
+            ("str", "HKL"),
+            ("double", "I"),
+            ("double", "I_err"),
+            ("double", "X0"),
+            ("double", "X0_err"),
+            ("double", "FWHM"),
+            ("double", "FWHM_err"),
+        ]
+
+    def _make_peak_row(self, iphase, ipk, hkl_str, pk_func, intens_err):
+        row = super()._make_peak_row(iphase, ipk, hkl_str, pk_func, intens_err)
+        row["Spectrum"] = self.ispec
+        return row
 
     def _get_peak_cens(self, dpks: np.ndarray[float]) -> np.ndarray[float]:
         if self.xunit == "TOF":
@@ -967,6 +1010,7 @@ class PawleyPattern2DNoConstraints(BoundsMixin, MtdFuncMixin, Poldi2DEvalMixin, 
         self.apply_lorentz_correction = apply_lorentz_correction
         self.set_global_scale(global_scale)
         self.initial_params = None
+        self.param_errors = np.full(self.comp_func.nParams(), np.nan)
         self.param_bounds_abs_min = param_bounds_abs_min
         self._init_bounds()
 
@@ -1016,8 +1060,14 @@ class PawleyPattern2DNoConstraints(BoundsMixin, MtdFuncMixin, Poldi2DEvalMixin, 
         params[self.get_isfree()] = free_params
         self.set_params(params)
 
-    def _iter_peak_rows(self, param_errors: np.ndarray, free_idx_of_full: np.ndarray, iphase: int = 0):
-        name_to_full = {self.comp_func.parameterName(i): i for i in range(self.comp_func.nParams())}
+    def _get_param_error_by_name(self, name: str) -> float:
+        """Look up the stored error for a composite-function parameter by its full name."""
+        for i in range(self.comp_func.nParams()):
+            if self.comp_func.parameterName(i) == name:
+                return float(self.param_errors[i])
+        return float("nan")
+
+    def _populate_table(self, tab, iphase: int):
         if self.phases:
             pk_start = sum(len(self.phases[i].hkls) for i in range(iphase))
             npks = len(self.phases[iphase].hkls)
@@ -1031,22 +1081,18 @@ class PawleyPattern2DNoConstraints(BoundsMixin, MtdFuncMixin, Poldi2DEvalMixin, 
             hkl_str = hkl_strings[ipk] if hkl_strings and ipk < len(hkl_strings) else str(abs_ipk)
             pk_func = self.comp_func[abs_ipk].function
             cen_par = pk_func.getCentreParameterName()
-
-            def _err(par_name, abs_ipk=abs_ipk):
-                full_idx = name_to_full.get(f"f{abs_ipk}.{par_name}", -1)
-                fidx = int(free_idx_of_full[full_idx]) if full_idx >= 0 else -1
-                return float(param_errors[fidx]) if fidx >= 0 else float("nan")
-
-            yield {
-                "Workspace": self.ws.name(),
-                "HKL": hkl_str,
-                "I": float(pk_func.intensity()),
-                "I_err": _err(self.intens_par_name),
-                "X0": float(pk_func.getParameterValue(cen_par)),
-                "X0_err": _err(cen_par),
-                "FWHM": float(pk_func.fwhm()),
-                "FWHM_err": float("nan"),
-            }
+            tab.addRow(
+                {
+                    "Workspace": self.ws.name(),
+                    "HKL": hkl_str,
+                    "I": float(pk_func.intensity()),
+                    "I_err": self._get_param_error_by_name(f"f{abs_ipk}.{self.intens_par_name}"),
+                    "X0": float(pk_func.getParameterValue(cen_par)),
+                    "X0_err": self._get_param_error_by_name(f"f{abs_ipk}.{cen_par}"),
+                    "FWHM": float(pk_func.fwhm()),
+                    "FWHM_err": float("nan"),
+                }
+            )
 
     def fit(self, **kwargs) -> OptimizeResult:
         default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
@@ -1058,6 +1104,8 @@ class PawleyPattern2DNoConstraints(BoundsMixin, MtdFuncMixin, Poldi2DEvalMixin, 
         self.scales = None
         self.eval_2d(self.initial_params)
         res = least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
-        # update parameters and ensure 2D simulated workspace up to date
+        # update parameters, errors, and ensure 2D simulated workspace up to date
+        self.param_errors = np.full(self.comp_func.nParams(), np.nan)
+        self.param_errors[self.get_isfree()] = self.get_parameter_errors(res)
         self.eval_2d(res.x)
         return res
