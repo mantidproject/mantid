@@ -15,6 +15,7 @@
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "PropertyManagerHelper.h"
 
+using Mantid::detid_t;
 using Mantid::API::ExperimentInfo;
 using Mantid::DataObjects::MaskWorkspace_const_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
@@ -30,8 +31,8 @@ public:
     Mantid::DataObjects::MaskWorkspace maskWS(nDetectors);
     TS_ASSERT_EQUALS(maskWS.getNumberHistograms(), nDetectors);
     TS_ASSERT_EQUALS(maskWS.blocksize(), 1);
-    TS_ASSERT_THROWS(maskWS.getNumberMasked(), const std::runtime_error &);
-    TS_ASSERT_THROWS(maskWS.isMasked(0), const std::runtime_error &);
+    TS_ASSERT_EQUALS(maskWS.getNumberMasked(), 0);
+    TS_ASSERT_EQUALS(maskWS.isMasked(0), false);
     TS_ASSERT_EQUALS(maskWS.isMaskedIndex(0), false);
     maskWS.setMaskedIndex(0);
     TS_ASSERT_EQUALS(maskWS.isMaskedIndex(0), true);
@@ -51,6 +52,35 @@ public:
     TS_ASSERT_EQUALS(maskWS.getNumberHistograms(), pixels * pixels);
     TS_ASSERT_EQUALS(maskWS.getNumberMasked(), pixels);
     TS_ASSERT(maskWS.isMasked(0));
+  }
+
+  void test_constructor_from_detids() {
+    const std::vector<detid_t> detids = {10, 20, 30, 40, 50};
+    Mantid::DataObjects::MaskWorkspace ws(detids);
+    // mask 20 and 40
+    ws.setMasked(20, true);
+    ws.setMasked(40, true);
+
+    TS_ASSERT_EQUALS(ws.getNumberHistograms(), detids.size());
+    TS_ASSERT_EQUALS(ws.blocksize(), 1);
+    for (size_t wi = 0; wi < detids.size(); ++wi) {
+      auto ids = ws.getSpectrum(wi).getDetectorIDs();
+      TS_ASSERT_EQUALS(ids.size(), 1);
+      TS_ASSERT_EQUALS(*ids.begin(), detids[wi]);
+    }
+
+    // verify values
+    TS_ASSERT_EQUALS(ws.getValue(10), 0);
+    TS_ASSERT_EQUALS(ws.getValue(20), 1);
+    TS_ASSERT_EQUALS(ws.getValue(30), 0);
+    TS_ASSERT_EQUALS(ws.getValue(40), 1);
+    TS_ASSERT_EQUALS(ws.getValue(50), 0);
+
+    TS_ASSERT_EQUALS(ws.getNumberMasked(), 2);
+
+    // check that the set of masked detectors is right
+    std::set<detid_t> maskedDetectors = ws.getMaskedDetectors();
+    TS_ASSERT_EQUALS(maskedDetectors.size(), 2);
   }
 
   void testClone() {
