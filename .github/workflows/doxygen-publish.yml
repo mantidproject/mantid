@@ -25,13 +25,13 @@ jobs:
           filters: .github/filters.yaml
 
       - uses: prefix-dev/setup-pixi@v0.9.5
-        if: steps.changes.outputs.doxygen == 'true'
+        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
         with:
           frozen: true
 
       - uses: ./.github/actions/doxygen-build
         name: build doxygen
-        if: steps.changes.outputs.doxygen == 'true'
+        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
 
       # publish documentation if on main branch of mantidproject/mantid
       - name: Checkout Doxygen repository
@@ -40,6 +40,7 @@ jobs:
         with:
           repository: mantidproject/doxygen
           path: doxygen_repo
+          token: ${{ secrets.DOXYGEN_REPO_TOKEN }}
 
       - name: Copy Doxygen artifacts
         if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
@@ -52,7 +53,7 @@ jobs:
         working-directory: doxygen_repo
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Update Doxygen docs"
+          git commit -m "Update Doxygen docs from mantidproject/mantid@${{ github.sha }}"
           git push origin main
