@@ -119,8 +119,9 @@ class BackToBackGauss(PeakProfile):
 
 
 class Phase:
-    def __init__(self, crystal_structure: CrystalStructure, hkls: Optional[np.ndarray] = None):
+    def __init__(self, crystal_structure: CrystalStructure, hkls: Optional[np.ndarray] = None, name: Optional[str] = None):
         self.unit_cell = crystal_structure.getUnitCell()
+        self.name = name
         # check initial unit cell compatible with spacegroup
         self.spgr = crystal_structure.getSpaceGroup()
         if not self.spgr.isAllowedUnitCell(self.unit_cell):
@@ -207,7 +208,7 @@ class Phase:
         _, ihkls = np.unique((self.calc_dspacings() * (10**decimal_places)).astype(int), return_index=True)
         self.hkls = [self.hkls[ipk] for ipk in np.sort(ihkls)]
 
-    def filter_hkls_to_ws_range(self, ws, lambda_min: float = 1.1, lambda_max: float = 5.0) -> "Phase":
+    def filter_hkls_to_ws_range(self, ws, lambda_min: float = 1.1, lambda_max: float = 5.0) -> Phase:
         """Return a new Phase containing only HKLs whose d-spacing falls within the
         accessible range of *ws* (determined from its angular coverage and the given
         wavelength limits).  The Phase lattice and space-group are preserved."""
@@ -229,6 +230,12 @@ class Phase:
 
     def get_hkl_strings(self) -> Sequence[str]:
         return ["".join(str(int(round(v))) for v in [hkl.X(), hkl.Y(), hkl.Z()]) for hkl in self.hkls]
+
+    def get_phase_name(self) -> Optional[str]:
+        return self.name
+
+    def set_phase_name(self, phase_name: str) -> None:
+        self.name = phase_name
 
 
 class MtdFuncMixin:
@@ -292,7 +299,6 @@ class OutputTableMixin:
         self,
         res: "OptimizeResult",
         output_workspace: str = None,
-        phase_names: Optional[list] = None,
     ) -> list:
         """Create one TableWorkspace per phase, each with one row per fitted peak.
 
@@ -306,8 +312,6 @@ class OutputTableMixin:
             Base name for output workspaces.  Each table is named
             ``<base>_<phase_name>`` (or ``<base>_phase<i>`` when no names
             are provided).
-        phase_names : list of str, optional
-            Names for each phase used to suffix the workspace names.
         """
         param_errors = self.get_parameter_errors(res)
         isfree = self.get_isfree()
@@ -322,7 +326,8 @@ class OutputTableMixin:
 
         tables = []
         for iphase in range(nphases):
-            suffix = phase_names[iphase] if (phase_names and iphase < len(phase_names)) else f"phase{iphase}"
+            phase_name = self.phases[iphase].get_phase_name()
+            suffix = phase_name or f"phase{iphase}"
             ws_name = f"{base_name}_{suffix}"
             tab = CreateEmptyTableWorkspace(OutputWorkspace=ws_name, EnableLogging=False)
             tab.addColumn(type="str", name="Workspace")

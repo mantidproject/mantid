@@ -542,7 +542,8 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
     def test_create_output_tables_single_phase_hkl_content(self):
         pawley = PawleyPattern2D(**self.init_kwargs, global_scale=True).create_no_constriants_fit()
         res = pawley.fit(max_nfev=1)
-        tables = pawley.create_output_tables(res, phase_names=["Si"])
+        pawley.phases[0].set_phase_name("Si")
+        tables = pawley.create_output_tables(res)
         self.assertEqual(tables[0].column("HKL"), self.phase.get_hkl_strings())
 
     def test_create_output_tables_two_phases_correct_hkl_split(self):
@@ -552,7 +553,9 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
         pawley2d = PawleyPattern2D(self.ws, [self.phase, phase2], global_scale=True, profile=GaussianProfile())
         pawley = pawley2d.create_no_constriants_fit()
         res = pawley.fit(max_nfev=1)
-        tables = pawley.create_output_tables(res, phase_names=["low_d", "high_d"])
+        for iphase, phase_name in enumerate(["low_d", "high_d"]):
+            pawley.phases[iphase].set_phase_name(phase_name)
+        tables = pawley.create_output_tables(res)
         self.assertEqual(tables[0].column("HKL"), self.phase.get_hkl_strings())
         self.assertEqual(tables[1].column("HKL"), phase2.get_hkl_strings())
 
@@ -618,14 +621,18 @@ class OutputTableMixinTest(unittest.TestCase):
         self.assertEqual(tables[1].name(), f"{self.ws.name()}_pawley_table_phase1")
 
     def test_phase_names_used_in_workspace_names(self):
+        phases = [self.phase, self.phase2]
+        for iphase, phase_name in enumerate(["alpha", "beta"]):
+            phases[iphase].set_phase_name(phase_name)
         pawley = self._pawley([self.phase, self.phase2])
-        tables = pawley.create_output_tables(self._res(pawley), phase_names=["alpha", "beta"])
+        tables = pawley.create_output_tables(self._res(pawley))
         self.assertEqual(tables[0].name(), f"{self.ws.name()}_pawley_table_alpha")
         self.assertEqual(tables[1].name(), f"{self.ws.name()}_pawley_table_beta")
 
     def test_custom_base_name_prepended_to_phase_name(self):
-        pawley = self._pawley()
-        tables = pawley.create_output_tables(self._res(pawley), output_workspace="my_fit", phase_names=["Si"])
+        self.phase.set_phase_name("Si")
+        pawley = self._pawley([self.phase])
+        tables = pawley.create_output_tables(self._res(pawley), output_workspace="my_fit")
         self.assertEqual(tables[0].name(), "my_fit_Si")
 
     # --- table structure ---
