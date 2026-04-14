@@ -15,6 +15,7 @@ from typing import Optional, Tuple, TYPE_CHECKING, Sequence
 from scipy.optimize import least_squares
 from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 
 
 if TYPE_CHECKING:
@@ -198,6 +199,10 @@ class Phase:
     def calc_dspacings(self) -> np.ndarray[float]:
         return np.array([self.unit_cell.d(hkl) for hkl in self.hkls])
 
+    @staticmethod
+    def hkl_as_key(hkl) -> tuple:
+        return (int(round(hkl.X())), int(round(hkl.Y())), int(round(hkl.Z())))
+
     def nhkls(self) -> int:
         return len(self.hkls)
 
@@ -236,6 +241,9 @@ class Phase:
 
     def set_phase_name(self, phase_name: str) -> None:
         self.name = phase_name
+
+    def has_the_same_parameters_as(self, other):
+        return set(*self.get_param_names()) == set(*other.get_param_names())
 
 
 class MtdFuncMixin:
@@ -403,11 +411,30 @@ class BoundsMixin(ABC):
     def _absolute_bounds(lb: float, ub: float) -> Tuple[float, float]:
         return (lb if lb is not None else -np.inf), (ub if ub is not None else np.inf)
 
+    @staticmethod
+    def repeat_values(obj, n: int, obj_name: str) -> Optional[Iterable]:
+        # if object is None skip
+        if not obj:
+            return
+        # if object isn't iterable, return an iterator with n values
+        if not isinstance(obj, Iterable):
+            return [obj] * n
+        else:
+            # if object is iterable check it is the expected length
+            if len(obj) == n:
+                return obj
+            # otherwise throw error
+            else:
+                logger.error(
+                    f"Length of sequence provided for {obj_name} ({len(obj)})does not match number of parameter names provided ({n})"
+                )
+                return
+
     def set_bounds(
         self,
-        names: str | Sequence[str],
+        names: Optional[str | Sequence[str]] = None,
         mode: str = "fractional",
-        value: float = None,
+        values: float | Sequence[float] = None,
         lb: float = None,
         ub: float = None,
     ):
@@ -425,18 +452,25 @@ class BoundsMixin(ABC):
             "log" - multiplicative bounds: [p / value, p * value]
             "absolute" - explicit bounds given by *lb* and *ub*
             None - remove bounds (unconstrained)
-        value : float, optional
-            Fraction (for "fractional") or factor (for "log").
+        values : float, optional
+            Fractions (for "fractional") or factors (for "log").
         lb, ub : float, optional
             Lower / upper bound (for "absolute").
         """
+        if not names:
+            return
         if isinstance(names, str):
             names = [names]
         all_names = self.get_param_names()
         all_params = self.get_params()
         name_to_value = dict(zip(all_names, all_params))
+        n_params = len(names)
 
-        for name in names:
+        values = self.repeat_values(values, n_params, "values")
+        lb = self.repeat_values(lb, n_params, "lb")
+        ub = self.repeat_values(ub, n_params, "ub")
+
+        for i, name in enumerate(names):
             if name not in name_to_value:
                 logger.warning(f"set_bounds: '{name}' not found in parameters, ignoring.")
                 continue
@@ -444,17 +478,17 @@ class BoundsMixin(ABC):
                 case None:
                     self._param_bounds.pop(name, None)
                 case "fractional":
-                    self._param_bounds[name] = self._fractional_bounds(name_to_value[name], value)
+                    self._param_bounds[name] = self._fractional_bounds(name_to_value[name], values[i])
                 case "log":
-                    self._param_bounds[name] = self._log_bounds(name_to_value[name], value)
+                    self._param_bounds[name] = self._log_bounds(name_to_value[name], values[i])
                 case "absolute":
-                    self._param_bounds[name] = self._absolute_bounds(lb, ub)
+                    self._param_bounds[name] = self._absolute_bounds(lb[i], ub[i])
                 case _:
                     logger.error(f"Mode: '{mode}' is not a valid option. Options are: ['fractional', 'log', 'absolute', None]")
 
     def set_bounds_all(self, mode: str = "fractional", value: float = None):
         """Set the same bound mode on every parameter."""
-        self.set_bounds(list(self.get_param_names()), mode=mode, value=value)
+        self.set_bounds(list(self.get_param_names()), mode=mode, values=value)
 
     def clear_bounds(self, names: str | Sequence[str] = None):
         """Remove bounds for *names*, or all if *names* is ``None``."""
@@ -913,27 +947,32 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
             return
         if pawley1d.profile.func_name == self.profile.func_name:
             self.profile_params = [p.copy() for p in pawley1d.profile_params]
-        # Copy refined lattice parameters from the 1D fit so the 2D fit starts from
-        # the globally-constrained lattice and cannot drift to unphysical values if a
-        # peak is weakly constrained in a single sub-group.
-        for iphase in range(len(self.phases)):
-            self.alatt_params[iphase] = pawley1d.alatt_params[iphase].copy()
         intens_changed = False
         for iphase, phase in enumerate(self.phases):
             phase1d = pawley1d.phases[iphase]
+
+            # check the phase lattice parameters can be copied
+            if phase.has_the_same_parameters_as(phase1d):
+                self.alatt_params[iphase] = pawley1d.alatt_params[iphase].copy()
+            else:
+                logger.error("Lattice parameterisation of phases on Pawley1D don't match phases on Pawley2D")
+                return
+
             if phase.nhkls() == phase1d.nhkls():
                 # identical set of HKLs — copy directly
                 self.intens[iphase] = pawley1d.intens[iphase].copy()
                 intens_changed = True
             elif phase.nhkls() < phase1d.nhkls():
                 # 2D phase is a d-spacing-filtered subset: match each 2D HKL to the
-                # closest 1D d-spacing and copy the corresponding intensity.
-                dspacs_1d = phase1d.calc_dspacings()
-                dspacs_2d = phase.calc_dspacings()
+                # corresponding 1D HKL by integer (h,k,l) and copy the intensity.
+                hkl_to_idx = {}
+                for idx, hkl in enumerate(phase1d.hkls):
+                    key = phase.hkl_as_key(hkl)
+                    hkl_to_idx[key] = idx
                 new_intens = np.empty(phase.nhkls(), dtype=float)
-                for ipk, dpk in enumerate(dspacs_2d):
-                    idx = int(np.argmin(np.abs(dspacs_1d - dpk)))
-                    new_intens[ipk] = pawley1d.intens[iphase][idx]
+                for ipk, hkl in enumerate(phase.hkls):
+                    key = phase.hkl_as_key(hkl)
+                    new_intens[ipk] = pawley1d.intens[iphase][hkl_to_idx[key]]
                 self.intens[iphase] = new_intens
                 intens_changed = True
         if intens_changed:
