@@ -196,7 +196,6 @@ class ConfigServiceTest(unittest.TestCase):
             "logging.loggers.root.channel.class",
             "MantidOptions.ReusePlotInstances",
             "mantidqt.python_interfaces",
-            "sans.deprecated_command_interface",  # Temporary setting until we remove in mantid v6.17
         ]
 
         # create the list of things
