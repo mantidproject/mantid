@@ -353,11 +353,13 @@ void AlignAndFocusPowderSlim::exec() {
   LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog, allow_logs,
                                                          block_logs);
 
+  LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
+
   // load calibration file if provided
   const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
   ITableWorkspace_sptr calibrationWS;
   if (!cal_filename.empty()) {
-    calibrationWS = this->loadCalFile(cal_filename, groupingWS);
+    calibrationWS = this->loadCalFile(wksp, cal_filename, groupingWS);
   }
 
   if (groupingWS) {
@@ -389,9 +391,6 @@ void AlignAndFocusPowderSlim::exec() {
   const std::vector<double> azimuthals(setPhi);
   const std::vector<specnum_t> specids;
   const auto difc_focused = calculate_difc_focused(l1, l2s, polars);
-
-  // various things below need the geometry
-  LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
 
   const auto timeSplitter = this->timeSplitterFromSplitterWorkspace(wksp->run().startTime());
   const auto filterROI = this->getFilterROI(wksp);
@@ -772,13 +771,19 @@ void AlignAndFocusPowderSlim::initCalibrationConstantsFromCalWS(const std::vecto
   }
 }
 
-const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const std::string &filename,
+const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const API::Workspace_sptr &inputWS,
+                                                                const std::string &filename,
                                                                 GroupingWorkspace_sptr &groupingWS) {
   const bool load_grouping = !groupingWS;
 
   auto alg = createChildAlgorithm("LoadDiffCal");
-  // intentionally do not supply the input workspace since the geometry is not used here
   alg->setPropertyValue("Filename", filename);
+  if (filename.ends_with(".cal")) {
+    alg->setProperty("InputWorkspace", inputWS);
+  } else {
+    // intentionally do not supply the input workspace because h5 version can work without
+    g_log.debug("Not supplying instrument information to LoadDifCal");
+  }
   alg->setProperty<bool>("MakeCalWorkspace", true);
   alg->setProperty<bool>("MakeGroupingWorkspace", load_grouping);
   alg->setProperty<bool>("MakeMaskWorkspace", true);

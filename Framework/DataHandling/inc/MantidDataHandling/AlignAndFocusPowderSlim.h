@@ -49,7 +49,7 @@ private:
   void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp, const std::vector<double> &difc_focus);
   void initCalibrationConstantsFromCalWS(const std::vector<double> &difc_focus,
                                          const API::ITableWorkspace_sptr calibrationWS);
-  const API::ITableWorkspace_sptr loadCalFile(const std::string &filename,
+  const API::ITableWorkspace_sptr loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
                                               DataObjects::GroupingWorkspace_sptr &groupingWS);
   void initScaleAtSample(const API::MatrixWorkspace_sptr &wksp);
   std::vector<std::pair<size_t, size_t>> determinePulseIndices(const Kernel::TimeROI &filterROI);
