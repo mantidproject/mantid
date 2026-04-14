@@ -669,15 +669,18 @@ class PawleyPatternBase(BoundsMixin, MtdFuncMixin, OutputTableMixin, ABC):
 
 
 class PawleyPattern1D(PawleyPatternBase):
-    def __init__(self, ispec: int = 0, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.ispec = ispec
         self.xunit = self.ws.getAxis(0).getUnit().unitID()
-        if self.xunit == "TOF":
+        self.set_ispec(0)
+        self.update_profile_function()
+
+    def set_ispec(self, ispec: int):
+        self.ispec = ispec
+        if self.xunit != "dSpacing":
             si = self.ws.spectrumInfo()
             if not si.hasDetectors(self.ispec):
-                raise RuntimeError("Workspace has no detectors - cannot convert between TOF and d-spacing.")
-        self.update_profile_function()
+                raise RuntimeError("Workspace has no detectors - may not be able to convert to d-spacing.")
 
     def _get_peak_cens(self, dpks: np.ndarray[float]) -> np.ndarray[float]:
         if self.xunit == "TOF":
