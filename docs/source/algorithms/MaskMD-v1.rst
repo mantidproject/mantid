@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm masks a :ref:`MDWorkspace <MDWorkspace>` in-situ.
+This algorithm masks a :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` in-situ.
 
 This algorithm will first clear-out any existing masking and then apply
 the new masking, unless ClearExistingMasks is set to false. Note that

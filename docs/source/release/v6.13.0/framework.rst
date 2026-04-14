@@ -34,7 +34,7 @@ New features
 - ``AnyShapeAbsorption`` can now determine the gauge volume by using the BeamProfile
 - A new algorithm :ref:`algm-DebyeWallerFactorCorrectionMD` to scale the MDEvents by the inverse of Debye-Waller form
   factor.
-- New algorithm :ref:`algm-CombineTableWorkspaces` allows combination of a pair of :ref:`Table Workspaces`, provided
+- New algorithm :ref:`algm-CombineTableWorkspaces` allows combination of a pair of :py:obj:`TableWorkspaces <mantid.api.ITableWorkspace>`, provided
   they have matching column names and data types.
 - Introduced a new python algorithm, :ref:`algm-RefineSingleCrystalGoniometer`, that refines the UB-matrix and
   goniometer offsets simultaneously. This improves the indexing of the peaks for those cases when there is sample

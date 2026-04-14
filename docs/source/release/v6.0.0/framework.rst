@@ -18,7 +18,7 @@ Concepts
 - Sphinx documentation now uses MathJax to render equations
 - Time-dependent values for individual instrument parameters are now allowed
 - Added a ``PythonStdOutChannel`` and the ability to change the :ref:`logging channel <Properties File>` without restarting mantid framework
-- Added packing fraction to :ref:`Material <Materials>` for separate and effective number density
+- Added packing fraction to :py:obj:`Material <mantid.kernel.Material>` for separate and effective number density
 - Bugfix :ref:`DownloadInstrument <algm-DownloadInstrument>` to try unauthenticated connections if authenticated failes. Also added the ability to allow for setting the github api token in the :ref:`properties file <Properties File>`
 
 Algorithms

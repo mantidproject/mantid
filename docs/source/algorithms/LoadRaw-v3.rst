@@ -13,7 +13,7 @@ The LoadRaw algorithm stores data from the :ref:`RAW file <RAW File>` in a
 :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`, which will naturally contain histogram
 data with each spectrum going into a separate histogram. The time bin
 boundaries (X values) will be common to all histograms and will have
-their :ref:`units <Unit Factory>` set to time-of-flight. The Y values will contain
+their :py:obj:`Units <mantid.kernel.UnitFactoryImpl>` set to time-of-flight. The Y values will contain
 the counts and will be unit-less (i.e. no division by bin width or
 normalisation of any kind). The errors, currently assumed Gaussian, will
 be set to be the square root of the number of counts in the bin.
@@ -45,7 +45,7 @@ Subalgorithms used
 ##################
 
 LoadRaw runs the following algorithms as child algorithms to populate
-aspects of the output :ref:`Workspace <Workspace>`:
+aspects of the output :py:obj:`~mantid.api.Workspace`:
 
 -  :ref:`algm-LoadInstrument` - Looks for an instrument
    definition file named XXX\_Definition.xml, where XXX is the 3 letter

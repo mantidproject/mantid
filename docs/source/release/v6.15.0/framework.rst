@@ -91,7 +91,7 @@ Data Objects
 
 New features
 ############
-- (`#40054 <https://github.com/mantidproject/mantid/pull/40054>`_) :ref:`Table Workspaces` now support
+- (`#40054 <https://github.com/mantidproject/mantid/pull/40054>`_) :py:obj:`TableWorkspaces <mantid.api.ITableWorkspace>` now support
   :py:meth:`mantid.api.ITableWorkspace.columnArray` for retrieving a column as a NumPy array. For example, with
   ``import numpy as np``: ``table_ws.columnArray("Index")`` returns ``np.array([0, 1, 2, 3])``.
 

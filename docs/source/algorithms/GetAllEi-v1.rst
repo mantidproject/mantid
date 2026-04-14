@@ -35,7 +35,7 @@ sorted according to energy in peaks (peaks with maximal energy are returned firs
 
 Used Subalgorithms
 ------------------
-The algorithm uses :ref:`Unit Factory <Unit Factory>` and :ref:`algm-ConvertUnits` algorithm
+The algorithm uses :py:obj:`UnitFactory <mantid.kernel.UnitFactoryImpl>` and :ref:`algm-ConvertUnits` algorithm
 to convert units from TOF to energy.
 
 

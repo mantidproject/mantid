@@ -62,8 +62,8 @@ Normalizing the input workspace
 This section describes the normalisation/scaling/correction of the input
 workspace using PixelAdj, WavelengthAdj and WavePixelAdj.
 
-This :ref:`algorithm <Algorithm>` takes as input a workspace of neutron
-counts against :ref:`wavelength <Unit Factory>` and creates a workspace of cross
+This :py:obj:`algorithm <mantid.api.Algorithm>` takes as input a workspace of neutron
+counts against :py:obj:`wavelength <mantid.kernel.UnitFactoryImpl>` and creates a workspace of cross
 section against Q. The output Q bins boundaries are defined by setting
 the property OutputBinning.
 

@@ -9,14 +9,12 @@
 Description
 -----------
 
-Changes the units in which the X values of a :ref:`workspace <Workspace>`
-are represented. The available units are those registered with the :ref:`Unit
-Factory <Unit Factory>`. If the Y data is 'dimensioned' (i.e. has been
-divided by the bin width), then this will be correctly handled, but at
-present nothing else is done to the Y data. If the sample-detector
-distance cannot be calculated then the affected spectrum will be zeroed,
-and a warning message will be output on the :ref:`logging <05_logging>`
-service.
+Changes the units in which the X values of a :py:obj:`~mantid.api.Workspace`
+are represented. The available units are those registered with the :py:obj:`UnitFactory <mantid.kernel.UnitFactoryImpl>`.
+If the Y data is 'dimensioned' (i.e. has been divided by the bin width),
+then this will be correctly handled, but at present nothing else is done to the Y data.
+If the sample-detector distance cannot be calculated then the affected spectrum will be zeroed,
+and a warning message will be output on the :ref:`logging <05_logging>` service.
 
 If AlignBins is false or left at the default the output workspace may be
 a :ref:`ragged workspace <Ragged_Workspace>`. If it is set to true then the
@@ -42,7 +40,7 @@ Some workflows involve applying a calibration in the form of updated detector po
 time-of-flight (TOF) diffraction it is also possible to provide detector offsets
 (from :ref:`GetDetectorOffsets <algm-GetDetectorOffsets>`) or diffractometer constants
 (from :ref:`PDCalibration <algm-PDCalibration>`) for the conversion between TOF and d-spacing.
-For more details on diffractometer constants see :ref:`Unit Factory`, for the relation between offsets and diffractometer
+For more details on diffractometer constants see :py:obj:`UnitFactory <mantid.kernel.UnitFactoryImpl>`, for the relation between offsets and diffractometer
 constants see :ref:`algm-ConvertDiffCal`.
 
 :ref:`ApplyDiffCal <algm-ApplyDiffCal>` is used to apply a detector calibration in the form of a ``CalibrationFile``,
@@ -55,7 +53,7 @@ Restrictions on the input workspace
 ###################################
 
 -  Naturally, the X values must have a unit set, and that unit must be
-   known to the :ref:`Unit Factory <Unit Factory>`.
+   known to the :py:obj:`UnitFactory <mantid.kernel.UnitFactoryImpl>`.
 -  Histograms and Point data can be handled.
 -  The algorithm will also fail if the source-sample distance cannot be
    calculated (i.e. the :py:obj:`Instrument <mantid.geometry.Instrument>` has not been
@@ -64,9 +62,8 @@ Restrictions on the input workspace
 Available units
 ---------------
 
-The units currently available to this algorithm are listed
-:ref:`here <Unit Factory>`, along with equations specifying exactly how the
-conversions are done.
+The units currently available to this algorithm are listed in :py:obj:`UnitFactory <mantid.kernel.UnitFactoryImpl>`,
+along with equations specifying exactly how the conversions are done.
 
 Usage
 -----

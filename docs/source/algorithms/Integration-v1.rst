@@ -9,8 +9,8 @@
 Description
 -----------
 
-Integration sums up spectra in a :ref:`Workspace <Workspace>` and outputs a
-:ref:`Workspace <Workspace>` that contains only 1 value per spectrum (i.e.
+Integration sums up spectra in a :py:obj:`~mantid.api.Workspace` and outputs a
+:py:obj:`~mantid.api.Workspace` that contains only 1 value per spectrum (i.e.
 the sum). The associated errors are added in quadrature. The two X
 values per spectrum are set to the limits of the range over which the
 spectrum has been integrated. By default, the entire range is integrated

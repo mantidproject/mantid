@@ -11,12 +11,12 @@ Description
 
 The algorithm transforms a single spectrum workspace containing
 spectral density :math:`S(Q)`, :math:`S(Q)-1`, or :math:`Q[S(Q)-1]`
-(as a function of **MomentumTransfer** or **dSpacing** :ref:`units <Unit Factory>`) to a PDF
+(as a function of **MomentumTransfer** or **dSpacing** :py:obj:`Units <mantid.kernel.UnitFactoryImpl>`) to a PDF
 (pair distribution function) as described below. The available output types are the reduced pair
 distribution function :math:`G(r)`, the pair distribution function :math:`g(r)`, and the radial distribution
 function :math:`RDF(r)`.
 
-The input Workspace spectrum should be in the Q-space (\ **MomentumTransfer**\ ) :ref:`units <Unit Factory>` .
+The input Workspace spectrum should be in the Q-space (\ **MomentumTransfer**\ ) :py:obj:`Units <mantid.kernel.UnitFactoryImpl>` .
 (d-spacing is not supported any more. Contact development team to fix that and enable **dSpacing** again)
 
 References

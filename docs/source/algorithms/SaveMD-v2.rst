@@ -9,7 +9,7 @@
 Description
 -----------
 
-Save an :ref:`MDEventWorkspace <MDWorkspace>` or a
+Save an :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` or a
 :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` to a .nxs file. The
 workspace's current box structure and entire list of events is
 preserved. The resulting file can be loaded via :ref:`LoadMD <algm-LoadMD>`.

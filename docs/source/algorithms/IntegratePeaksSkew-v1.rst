@@ -77,11 +77,11 @@ For each peak the algorithm proceeds as follows:
 Assumptions about the instrument
 --------------------------------
 
-This algorithm supports instruments with detector banks of two types: :ref:`RectangularDetector <RectangularDetector>`
+This algorithm supports instruments with detector banks of two types: :py:obj:`~mantid.geometry.RectangularDetector`
 (e.g. SXD, TOPAZ) and a more generic type ``CompAssembly`` (e.g WISH) - for which the behaviour of the algorithm is
 slightly different.
 
-For :ref:`RectangularDetector <RectangularDetector>` the window around the peak on the detector is truncated at the
+For :py:obj:`~mantid.geometry.RectangularDetector` the window around the peak on the detector is truncated at the
 window edge - it is assumed that banks are not adjacent and that a peak can only reside in a single bank.
 
 For ``CompAssembly`` banks, if the window on the detector exceed the boundaries of a bank, the algorithm will look for

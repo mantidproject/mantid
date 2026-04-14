@@ -5,8 +5,7 @@ Levenberg-Marquardt MD Minimizer
 
 This minimizer is the same as the :ref:`Levenberg-Marquardt minimizer <LevenbergMarquardt>` as explained
 in - `Wikipedia <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ , but is intended for
-:ref:`MD workspaces <MDWorkspace>`
-or for a large number of data points.
+:py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` or for a large number of data points.
 It divides its work into chunks to achieve a greater efficiency for a large number of data points than
 can be obtained from the default Levenberg-Marquardt minimizer.
 

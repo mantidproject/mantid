@@ -10,7 +10,7 @@ Description
 -----------
 
 This is an algorithm to find single-crystal Bragg peaks in a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` with detector
-banks of type :ref:`RectangularDetector <RectangularDetector>` (e.g. SXD, TOPAZ).
+banks of type :py:obj:`~mantid.geometry.RectangularDetector` (e.g. SXD, TOPAZ).
 
 There are two peak finding strategies set by ``PeakFindingStrategy``:
 

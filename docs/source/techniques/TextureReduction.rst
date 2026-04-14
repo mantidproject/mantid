@@ -41,7 +41,7 @@ If you would like to follow along with all the below steps using your own experi
 #. Raw Diffraction Data for each experimental run (this would ideally be nexus files or, if data search directories and priviledges are setup correctly, just the run numbers may suffice)
 #. Calibration Run Data files, for ENGINX this is a Ceria run for diffraction parameter calibration and a vanadium run for intensity normalisation (see :ref:`interface documentation<Engineering_Diffraction-ref>` for more information)
 #. Sample Shape information, either as an ``STL`` file that you have created/obtained already or as a Constructive Solid Geometry shape definition ``XML`` string (see :ref:`HowToDefineGeometricShape` for more info)
-#. Sample Material Information, this is solely for attenuation correction and so the accuracy of the information will be determined by the accuracy required by your experiment (see :ref:`Materials` for more info)
+#. Sample Material Information, this is solely for attenuation correction and so the accuracy of the information will be determined by the accuracy required by your experiment (see :py:obj:`Material <mantid.kernel.Material>` for more info)
 #. Correct definition of the Sample Shape in its initial state when the goniometer is homed/default (this would ideally be how the sample shape information is provided above, but the shape definition could be defined in a different orientation and transformed to the initial state if necessary)
 #. Orientation Information for each experimental run, either provided as transformation matrices or euler angles (if using euler angles you must know the axes of rotation for the goniometer and the sense of these rotations - *take care to get this correct*)
 #. Sample Directions relative to sample shape (texture can be defined relative to intrinsic directions of the sample, for example the Rolling, Normal and Tranverse Directions)
@@ -316,7 +316,7 @@ Interpolating the Experimental Pole Figure
 Adding Crystal Structure Information
 ------------------------------------
 
-In the Workspace list (:ref:`ADS <Analysis Data Service>`), in the main Mantid window, you might notice some pole figure Table Workspaces have been created. These are named with the convention:
+In the Workspace list (:py:obj:`ADS <mantid.api.AnalysisDataServiceImpl>`), in the main Mantid window, you might notice some pole figure Table Workspaces have been created. These are named with the convention:
 ``{Peak}_{Instrument}_{StartRun}-{EndRun}_{Grouping}_pf_table_{parameter}`` provided a parameter file is loaded to get ``Peak`` and ``parameter`` metadata. ``Peak`` will be the average peak centre value of all
 the parameter files. If, instead, you would like peak to be the HKL indices, you must provide crystal structure information, either as a ``CIF`` file or by input
 

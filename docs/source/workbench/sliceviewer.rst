@@ -11,7 +11,7 @@ Overview
    :class: screenshot
    :align: center
 
-The Sliceviewer is a viewer supporting :ref:`MDEventWorkspace <MDWorkspace>`, :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` & :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
+The Sliceviewer is a viewer supporting :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`, :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` & :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 For multi-dimensional workspaces, you can view both MDWorkspaces and MDHistoWorkspaces, a 2D "slice" of the higher dimensional space
 is shown, whereas a MarixWorkspace simply shows the 2 defined dimensions.
 

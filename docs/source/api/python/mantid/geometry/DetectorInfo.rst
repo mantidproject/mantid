@@ -4,7 +4,11 @@
 
 This is a python binding to the C++ class Mantid::Geometry::DetectorInfo.
 
-Most of the information concerning :py:obj:`~mantid.geometry.DetectorInfo` can be found in the :ref:`Instrument Access Layers <InstrumentAccessLayers>` document.
+*bases:* :py:obj:`mantid.geometry.DetectorInfo`
+
+:py:obj:`~mantid.geometry.DetectorInfo` provides faster and simpler access to instrument/beamline detector geometry and metadata as required by Mantid :py:obj:`algorithm <mantid.api.Algorithm>` than was possible using :py:obj:`Instrument <mantid.geometry.Instrument>`. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` are designed as full replacements to :py:obj:`Instrument <mantid.geometry.Instrument>`.
+
+Most of the information concerning :py:obj:`~mantid.geometry.DetectorInfo` can be found in the :ref:`Instrument Access Layers <InstrumentAccessLayers>` document, which provides details on how :py:obj:`~mantid.geometry.DetectorInfo` interacts with other geometry access layers.
 
 --------
 Purpose
@@ -102,8 +106,31 @@ Output:
 	200
 	200
 
+**Example 3 - Mask detectors at some distance from the source**
 
-*bases:* :py:obj:`mantid.geometry.DetectorInfo`
+.. testcode:: mask_detectors
+
+   from mantid.simpleapi import CreateSampleWorkspace
+
+   # Test workspace with instrument
+   ws = CreateSampleWorkspace()
+   det_info = ws.detectorInfo();
+   mask_count = 0
+   for item in det_info:
+       if not item.isMonitor and item.l2 > 2.0:
+           item.setMasked(True)
+           mask_count += 1
+   print('masked {} detectors'.format(mask_count))
+
+Output:
+
+.. testoutput:: mask_detectors
+
+   masked 200 detectors
+
+
+Reference
+---------
 
 .. module:`mantid.geometry`
 

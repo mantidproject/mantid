@@ -56,7 +56,7 @@ New
   parameters (DIFA, DIFC, TZERO) from peaks fitted using
   :ref:`EnggFitPeaks <algm-EnggFitPeaks>`.
 - :ref:`FindEPP <algm-FindEPP>` This algorithm performs Gaussian fit to find the elastic peak position.
-  As a result, :ref:`TableWorkspace <Table Workspaces>` with parameters of the fitted peaks is created.
+  As a result, :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` with parameters of the fitted peaks is created.
 - :ref:`GetIPTS <algm-GetIPTS>` Returns the IPTS directory of the specified ORNL run.
 - :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` uses the GSAS-II
   software to refine lattice parameters (whole pattern refinement) and fit

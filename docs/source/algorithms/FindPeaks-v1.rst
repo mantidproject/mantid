@@ -17,7 +17,7 @@ is then searched for patterns consistent with the presence of a peak.
 The list of candidate peaks found is passed to a fitting routine and
 those that are successfully fitted are kept and returned in the output
 workspace (and logged at information level). The output
-:ref:`TableWorkspace <Table Workspaces>` contains columns,
+:py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` contains columns,
 which reflect the fact that the peak has been fitted to a peak function atop
 a background: spectrum, centre, width, height, backgroundintercept and
 backgroundslope. Setting ``RawPeakParameters=True`` will give the actual

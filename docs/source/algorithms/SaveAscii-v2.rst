@@ -23,7 +23,7 @@ followed by three separate columns corresponding to X, Y, and E, respectively.
 
 It is possible to create a header for the ASCII file containing selected sample log entries and its unit,
 specified through `LogList` property. In case the requested log does not exist, it will be printed as
-`Not defined`. This feature is not enabled for :ref:`TableWorkspace <Table Workspaces>`.
+`Not defined`. This feature is not enabled for :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>`.
 
 If the workspace (matrix workspace) contains several spectra, two options are
 available:

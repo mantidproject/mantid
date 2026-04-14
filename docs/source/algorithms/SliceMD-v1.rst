@@ -10,7 +10,7 @@ Description
 -----------
 
 Algorithm that can take a slice out of an original
-:ref:`MDEventWorkspace <MDWorkspace>` while preserving all the events
+:py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` while preserving all the events
 contained therein.
 
 It uses the same parameters as :ref:`algm-BinMD` to determine a
@@ -55,7 +55,7 @@ Slicing a MDHistoWorkspace
 
 It is possible to slice a :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`. Each
 MDHistoWorkspace holds a reference to the
-:ref:`MDEventWorkspace <MDWorkspace>` that created it, as well as the
+:py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` that created it, as well as the
 coordinate transformation that was used.
 
 In this case, the algorithm is executed on the original

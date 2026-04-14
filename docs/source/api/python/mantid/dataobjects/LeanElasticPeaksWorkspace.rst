@@ -13,7 +13,7 @@ of single crystal LeanElasticPeak objects. It is the equivalent to the
 Creating a LeanElasticPeaksWorkspace
 ------------------------------------
 
-* :ref:`FindPeaksMD <algm-FindPeaksMD>` will find peaks in reciprocal space in a :ref:`MDWorkspace <MDWorkspace>`.
+* :ref:`FindPeaksMD <algm-FindPeaksMD>` will find peaks in reciprocal space in a :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>`.
 * :ref:`PredictPeaks <algm-PredictPeaks>` will predict peaks in reciprocal space for a given UB matrix.
 * :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` will create an empty LeanElasticPeaksWorkspace that you can then edit. *_e.g._* :code:`CreatePeaksWorkspace(NumberOfPeaks=0, OutputType="LeanElasticPeak", OutputWorkspace='peaks')`
 
