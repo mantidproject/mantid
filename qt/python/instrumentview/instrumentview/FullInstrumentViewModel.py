@@ -285,8 +285,8 @@ class FullInstrumentViewModel:
         expanded_pickable_mask[np.isin(pickable_table_indices, expanded_pickable_table_indices)] = True
         return expanded_pickable_mask
 
-    def peak_picking_enabled(self):
-        return True if self._peak_picking_status == PeakPickingStatus.On else False
+    def peak_picking_enabled(self) -> bool:
+        return self._peak_picking_status == PeakPickingStatus.On
 
     def turn_on_single_point_picking(self) -> None:
         self._peak_picking_status = PeakPickingStatus.On
