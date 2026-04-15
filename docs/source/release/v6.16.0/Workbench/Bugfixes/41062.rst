@@ -1,0 +1,1 @@
+- The mantid code `editor` now supports higher contrast font formatting for users using dark mode on macOS.
