@@ -22,6 +22,8 @@ if TYPE_CHECKING:
     from mantid.dataobjects import Workspace2D
     from scipy.optimize import OptimizeResult
 
+_MIN_SCALE = 1e-6  # floor for per-spectrum scale factors (must be positive)
+
 
 class InstrumentParams:
     def __init__(self):
@@ -697,10 +699,10 @@ class PawleyPatternBase(BoundsMixin, MtdFuncMixin, OutputTableMixin, ABC):
         phase = self.phases[iphase]
         pk_offset = sum(self.phases[i].nhkls() for i in range(iphase))
         intens_errors = self._get_intens_error(iphase)
-        for ipk, hkl in enumerate(phase.hkls):
-            hkl_str = "".join(str(int(round(v))) for v in hkl)
+        hkl_strings = phase.get_hkl_strings()
+        for ipk in range(phase.nhkls()):
             pk_func = self.comp_func[pk_offset + ipk].function
-            tab.addRow(self._make_peak_row(iphase, ipk, hkl_str, pk_func, intens_errors[ipk]))
+            tab.addRow(self._make_peak_row(iphase, ipk, hkl_strings[ipk], pk_func, intens_errors[ipk]))
 
     def _make_peak_row(self, iphase, ipk, hkl_str, pk_func, intens_err):
         cen_par = pk_func.getCentreParameterName()
@@ -876,7 +878,7 @@ class Poldi2DEvalMixin:
                     ycalc = ws_sim.readY(ispec)
                     A = np.column_stack([ycalc, ones])
                     result, _, _, _ = np.linalg.lstsq(A, yobs, rcond=None)
-                    scale = float(max(result[0], 1e-6))  # physically non-negative
+                    scale = float(max(result[0], _MIN_SCALE))  # physically non-negative
                     bg = float(result[1])
                     self.scales[ispec] = scale
                     self.bgs[ispec] = bg
@@ -997,7 +999,7 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
                 self.intens[iphase] *= global_scale
         self.scales = None  # reset so fit() recomputes scales at the updated intensities
 
-    def create_no_constriants_fit(self, param_bounds_abs_min: float = 1e-6):
+    def create_no_constraints_fit(self, param_bounds_abs_min: float = 1e-6):
         return PawleyPattern2DNoConstraints(
             self.ws,
             self.comp_func,
