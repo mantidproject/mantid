@@ -9,10 +9,8 @@
 #
 """Utility functions to deal with fetching fonts"""
 
-import subprocess
-
 # third-party imports
-from qtpy.QtGui import QFont, QFontDatabase, QColor
+from qtpy.QtGui import QFont, QFontDatabase
 from qtpy.QtCore import QSettings
 
 import mantid.kernel.environment as mtd_env
@@ -72,37 +70,11 @@ def text_font():
     return _TEXT_FONT_CACHE
 
 
-# Returns if the user is using a dark theme on macOS
-def _is_theme_dark():
-    try:
-        result = subprocess.run(
-            ["/usr/bin/defaults", "read", "-g", "AppleInterfaceStyle"],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=1,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return False
-    return bool(result.stdout.strip())
-
-
-# Returns the background color of the current line in the code editor
-def _get_currentline_background_color():
-    if IS_MAC:
-        if IS_DARK_MODE:
-            return QColor(0, 52, 110)
-    return QColor(247, 236, 248)
-
-
 if IS_MAC := mtd_env.is_mac():
-    IS_DARK_MODE = _is_theme_dark()
+    IS_DARK_MODE = mtd_env.is_theme_dark()
 else:
     IS_DARK_MODE = False
 
 settings = QSettings()
 settings.setValue("OS/IS_MAC", IS_MAC)
 settings.setValue("OS/IS_DARK_MODE", IS_DARK_MODE)
-
-# The current line background color to be used in the code editor
-CURRENTLINE_BKGD_COLOR = _get_currentline_background_color()

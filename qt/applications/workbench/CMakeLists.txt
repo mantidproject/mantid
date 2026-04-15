@@ -121,7 +121,6 @@ endif()
 # Testing
 set(TEST_FILES
     workbench/config/test/test_user.py
-    workbench/config/test/test_fonts.py
     workbench/test/test_mainwindow.py
     workbench/test/test_import.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratoraxes.py

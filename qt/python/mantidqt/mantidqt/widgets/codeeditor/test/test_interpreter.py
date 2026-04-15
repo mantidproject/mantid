@@ -9,7 +9,8 @@ import unittest
 
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
+from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter, get_currentline_background_color
+from qtpy.QtGui import QColor
 
 
 @start_qapplication
@@ -90,6 +91,22 @@ class PythonFileInterpreterTest(unittest.TestCase):
 
         w.disconnect_from_progress_reports()
         w.editor.progressMade.disconnect.assert_called_once()
+
+
+class InterpreterHelperFunctionTest(unittest.TestCase):
+    @mock.patch("mantid.kernel.environment.is_mac", True)
+    @mock.patch("mantid.kernel.environment.is_theme_dark", True)
+    def test_mac_dark_mode(self):
+        self.assertEqual(get_currentline_background_color(), QColor(0, 52, 110))
+
+    @mock.patch("mantid.kernel.environment.is_mac", True)
+    @mock.patch("mantid.kernel.environment.is_theme_dark", False)
+    def test_mac_light_mode(self):
+        self.assertEqual(get_currentline_background_color(), QColor(247, 236, 248))
+
+    @mock.patch("mantid.kernel.environment.is_mac", False)
+    def test_non_mac(self):
+        self.assertEqual(get_currentline_background_color(), QColor(247, 236, 248))
 
 
 if __name__ == "__main__":
