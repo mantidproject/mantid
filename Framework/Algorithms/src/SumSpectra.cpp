@@ -425,11 +425,10 @@ void SumSpectra::doSimpleWeightedSum(MatrixWorkspace_const_sptr const &inWS, ISp
     YErrorSum[jbin] = 0.;
     // loop over spectra
     for (size_t iwksp : m_indices) {
-      double weight = 0.;
       double e = inWS->e(iwksp)[jbin];
       double y = inWS->y(iwksp)[jbin];
       if (std::isnormal(e)) {
-        weight = 1. / (e * e);
+        double weight = 1. / (e * e);
         normalization += weight;
         YSum[jbin] += weight * y;
       } else {
@@ -538,9 +537,8 @@ void SumSpectra::doFractionalWeightedSum(RebinnedOutput_const_sptr const &inWS, 
       double y = inWS->y(iwksp)[jbin] * fracVal;
       double e = inWS->e(iwksp)[jbin] * fracVal;
       // now perform weghted sum of the mapped values
-      double weight = 0.;
       if (std::isnormal(e)) { // is non-zero, nan, or infinity
-        weight = 1. / (e * e);
+        double weight = 1. / (e * e);
         normalization += weight;
         YSum[jbin] += weight * y;
       } else {
