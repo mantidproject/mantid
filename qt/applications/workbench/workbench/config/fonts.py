@@ -74,7 +74,7 @@ def text_font():
 
 
 # Returns if the user is using a dark theme on macOS
-def _is_macos_theme_dark():
+def _is_theme_dark():
     result = subprocess.run(
         ["defaults", "read", "-g", "AppleInterfaceStyle"],
         capture_output=True,
@@ -94,7 +94,7 @@ def _get_currentline_background_color():
 
 IS_MAC = sys.platform == "darwin"
 if IS_MAC:
-    IS_DARK_MODE = _is_macos_theme_dark()
+    IS_DARK_MODE = _is_theme_dark()
 else:
     IS_DARK_MODE = False
 

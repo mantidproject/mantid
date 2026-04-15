@@ -11,7 +11,11 @@
  * Construct a lexer with a font to be used for all text styles
  * @param font A font to used for the text
  */
-AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font) : QsciLexerPython(), m_font(font) {}
+AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font) : QsciLexerPython(), m_font(font) {
+  QSettings settings;
+  m_isMac = settings.value("OS/IS_MAC", false).toBool();
+  m_isDarkMode = settings.value("OS/IS_DARK_MODE", false).toBool();
+}
 
 /**
  * Returns the foreground colour of the text for a style.
@@ -19,10 +23,7 @@ AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font) : QsciLexerPyt
  * @return A QColor for this element type
  */
 QColor AlternateCSPythonLexer::defaultColor(int style) const {
-  QSettings settings;
-  bool is_mac = settings.value("OS/IS_MAC", false).toBool();
-  bool is_dark_mode = settings.value("OS/IS_DARK_MODE", false).toBool();
-  if (is_mac && is_dark_mode) {
+  if (m_isMac && m_isDarkMode) {
     return defaultColorDark(style);
   } else {
     return defaultColorLight(style);
