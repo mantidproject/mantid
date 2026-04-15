@@ -99,7 +99,7 @@ QColor AlternateCSPythonLexer::defaultColorLight(int style) const {
 QColor AlternateCSPythonLexer::defaultColorDark(int style) const {
   switch (style) {
   case Default:
-    return QColor(0x00, 0x00, 0x00);
+    return QColor(0xFF, 0xFF, 0xFF);
 
   case Comment:
     return QColor(0x72, 0x86, 0xB7);
@@ -142,10 +142,10 @@ QColor AlternateCSPythonLexer::defaultColorDark(int style) const {
     return QColor(0xad, 0xad, 0xad);
 
   case UnclosedString:
-    return QColor(0x00, 0x00, 0x00);
+    return QColor(0xFF, 0xFF, 0xFF);
 
   case HighlightedIdentifier:
-    return QColor(0x40, 0x70, 0x90);
+    return QColor(0x00, 0x3F, 0x8E);
 
   case Decorator:
     return QColor(0xBB, 0xDA, 0xFF);

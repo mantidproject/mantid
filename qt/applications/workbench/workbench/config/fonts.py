@@ -75,13 +75,17 @@ def text_font():
 
 # Returns if the user is using a dark theme on macOS
 def _is_theme_dark():
-    result = subprocess.run(
-        ["defaults", "read", "-g", "AppleInterfaceStyle"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    return True if result.stdout.strip() else False
+    try:
+        result = subprocess.run(
+            ["/usr/bin/defaults", "read", "-g", "AppleInterfaceStyle"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=1,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return bool(result.stdout.strip())
 
 
 # Returns the background color of the current line in the code editor
