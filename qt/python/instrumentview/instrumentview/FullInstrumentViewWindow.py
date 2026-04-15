@@ -98,7 +98,8 @@ class FullInstrumentViewWindow(QMainWindow):
     detector, and a line plot of selected detector(s)"""
 
     _detector_spectrum_fig = None
-    _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRato"
+    _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRatio"
+    _DRAW_SHAPES_SETTING_STRING = "InstrumentView.DrawShapes"
 
     def __init__(self, parent=None, off_screen=False):
         """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
@@ -195,8 +196,11 @@ class FullInstrumentViewWindow(QMainWindow):
             "If checked, the detectors will be drawn in 2D projections in their original aspect ratio, "
             "otherwise they will fill the available area."
         )
-        aspect_ratio_option = ConfigService.Instance()[self._ASPECT_RATIO_SETTING_STRING]
-        self._aspect_ratio_check_box.setChecked(aspect_ratio_option.casefold() == "yes")
+
+        def is_config_setting_true(key: str) -> bool:
+            return ConfigService.Instance()[key].casefold() == "yes"
+
+        self._aspect_ratio_check_box.setChecked(is_config_setting_true(self._ASPECT_RATIO_SETTING_STRING))
         self._show_monitors_check_box = QCheckBox()
         self._show_monitors_check_box.setText("Show Monitors?")
         self._count_scale_combo_box = NoWheelComboBox(self)
@@ -210,6 +214,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._select_bank_tube.setCheckable(True)
         self._show_shapes_check_box = QCheckBox()
         self._show_shapes_check_box.setText("Draw Shapes")
+        self._show_shapes_check_box.setChecked(is_config_setting_true(self._DRAW_SHAPES_SETTING_STRING))
         self._show_shapes_check_box.setToolTip(
             "If checked, detectors are drawn using their actual geometric shapes "
             "(cuboids, cylinders, etc.) instead of points. May be slower for large instruments."
@@ -365,8 +370,14 @@ class FullInstrumentViewWindow(QMainWindow):
         return self._aspect_ratio_check_box.isChecked()
 
     def store_maintain_aspect_ratio_option(self) -> None:
-        option = "Yes" if self.is_maintain_aspect_ratio_checkbox_checked() else "No"
-        ConfigService.Instance()[self._ASPECT_RATIO_SETTING_STRING] = option
+        self._store_checkbox_option(self._aspect_ratio_check_box, self._ASPECT_RATIO_SETTING_STRING)
+
+    def store_draw_shapes_option(self) -> None:
+        self._store_checkbox_option(self._show_shapes_check_box, self._DRAW_SHAPES_SETTING_STRING)
+
+    def _store_checkbox_option(self, checkbox: QCheckBox, config_key: str) -> None:
+        option = "Yes" if checkbox.isChecked() else "No"
+        ConfigService.Instance()[config_key] = option
 
     def enable_or_disable_aspect_ratio_box(self) -> None:
         self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)

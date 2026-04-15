@@ -179,6 +179,46 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self.assertIsNone(self._view._current_widget)
         self.assertIsNone(self._view._shape_overlay_manager)
 
+    @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
+    def test_store_draw_shapes_option_stores_yes_when_checked(self, mock_config):
+        self._view._show_shapes_check_box.setChecked(True)
+        self._view.store_draw_shapes_option()
+        mock_config.Instance.return_value.__setitem__.assert_called_once_with(self._view._DRAW_SHAPES_SETTING_STRING, "Yes")
+
+    @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
+    def test_store_draw_shapes_option_stores_no_when_unchecked(self, mock_config):
+        self._view._show_shapes_check_box.setChecked(False)
+        self._view.store_draw_shapes_option()
+        mock_config.Instance.return_value.__setitem__.assert_called_once_with(self._view._DRAW_SHAPES_SETTING_STRING, "No")
+
+    @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
+    @mock.patch("qtpy.QtWidgets.QHBoxLayout.addWidget")
+    @mock.patch("qtpy.QtWidgets.QVBoxLayout.addWidget")
+    @mock.patch("qtpy.QtWidgets.QSplitter.addWidget")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
+    def test_draw_shapes_checkbox_initialised_checked_when_config_is_yes(
+        self, mock_config, mock_plotter, mock_splitter, mock_v_layout, mock_h_layout, mock_canvas
+    ):
+        mock_config.Instance.return_value.__getitem__.return_value = "Yes"
+        with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
+            view = FullInstrumentViewWindow()
+        self.assertTrue(view.is_show_shapes_checkbox_checked())
+
+    @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
+    @mock.patch("qtpy.QtWidgets.QHBoxLayout.addWidget")
+    @mock.patch("qtpy.QtWidgets.QVBoxLayout.addWidget")
+    @mock.patch("qtpy.QtWidgets.QSplitter.addWidget")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
+    def test_draw_shapes_checkbox_initialised_unchecked_when_config_is_no(
+        self, mock_config, mock_plotter, mock_splitter, mock_v_layout, mock_h_layout, mock_canvas
+    ):
+        mock_config.Instance.return_value.__getitem__.return_value = "No"
+        with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
+            view = FullInstrumentViewWindow()
+        self.assertFalse(view.is_show_shapes_checkbox_checked())
+
 
 if __name__ == "__main__":
     unittest.main()

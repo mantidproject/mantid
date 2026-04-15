@@ -11,6 +11,7 @@ from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
 from instrumentview.Peaks.Peak import Peak
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.renderers.shape_renderer import ShapeRenderer
+from instrumentview.renderers.side_by_side_shape_renderer import SideBySideShapeRenderer
 from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
 
 
@@ -765,6 +766,21 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertIs(pc_renderer1, pc_renderer2)
         self.assertIs(shape_renderer1, shape_renderer2)
         self.assertEqual(mock_update_plotter.call_count, 3)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_show_shapes_toggled_side_by_side_uses_sbs_renderer(self, mock_update_plotter):
+        """Test that enabling shapes with SIDE_BY_SIDE projection switches to SideBySideShapeRenderer."""
+        self._model.projection_type = ProjectionType.SIDE_BY_SIDE
+        self._presenter._on_show_shapes_toggled(checked=True)
+        self.assertIsInstance(self._presenter._renderer, SideBySideShapeRenderer)
+        self.assertIs(self._presenter._renderer, self._presenter._sbs_shape_renderer)
+        mock_update_plotter.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_show_shapes_toggled_stores_draw_shapes_option(self, mock_update_plotter):
+        """Test that on_show_shapes_toggled calls store_draw_shapes_option on the view when toggled."""
+        self._presenter.on_show_shapes_toggled(True)
+        self._mock_view.store_draw_shapes_option.assert_called_once()
 
 
 if __name__ == "__main__":

@@ -80,7 +80,7 @@ class FullInstrumentViewPresenter:
         self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = ShapeRenderer(self._model.workspace)
         self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
-        self._renderer = self._point_cloud_renderer
+        self._renderer = self._shape_renderer if view.is_show_shapes_checkbox_checked() else self._point_cloud_renderer
         self._select_bank_tube = False
         self.setup()
         self._callback_queue = Queue()
@@ -705,6 +705,7 @@ class FullInstrumentViewPresenter:
         self.update_plotter()
 
     def on_show_shapes_toggled(self, checked: bool) -> None:
+        self._view.store_draw_shapes_option()
         self._callback_queue.put((self._on_show_shapes_toggled, (checked,)))
 
     def _reload_renderers(self) -> None:
