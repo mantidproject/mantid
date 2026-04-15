@@ -430,12 +430,11 @@ void SumSpectra::doSimpleWeightedSum(MatrixWorkspace_const_sptr const &inWS, ISp
       double y = inWS->y(iwksp)[jbin];
       if (std::isnormal(e)) {
         weight = 1. / (e * e);
+        normalization += weight;
+        YSum[jbin] += weight * y;
       } else {
-        weight = 0.;
         nZeroes[jbin]++;
       }
-      normalization += weight;
-      YSum[jbin] += weight * y;
     }
     // apply the normalization factor
     if (normalization != 0.) {
@@ -542,12 +541,11 @@ void SumSpectra::doFractionalWeightedSum(RebinnedOutput_const_sptr const &inWS, 
       double weight = 0.;
       if (std::isnormal(e)) { // is non-zero, nan, or infinity
         weight = 1. / (e * e);
+        normalization += weight;
+        YSum[jbin] += weight * y;
       } else {
-        weight = 0.;
         nZeroes[jbin]++;
       }
-      normalization += weight;
-      YSum[jbin] += weight * y;
       FracSum[jbin] += inWS->readF(iwksp)[jbin];
     }
     // apply the normalization factor
