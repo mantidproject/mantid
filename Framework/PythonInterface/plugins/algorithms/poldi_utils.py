@@ -300,7 +300,8 @@ def simulate_2d_data(
             delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.readX(0), ws_1d.readY(0)) for ispec in range(nspec)
         )
     # set y values
-    [ws_sim.setY(ispec, yvec) for ispec, yvec in enumerate(out)]
+    for ispec, yvec in enumerate(out):
+        ws_sim.setY(ispec, yvec)
     ADS.addOrReplace(output_workspace, ws_sim)
     return ws_sim
 

@@ -586,7 +586,8 @@ class PawleyPatternBase(BoundsMixin, MtdFuncMixin, OutputTableMixin, ABC):
                 self.comp_func[istart + ipk].function.setIntensity(self.intens[iphase][ipk])
             istart += phase.nhkls()
         if len(self.bg_params) > 0:
-            [self.comp_func[len(self.comp_func) - 1].function.setParameter(ipar, par) for ipar, par in enumerate(self.bg_params)]
+            for ipar, par in enumerate(self.bg_params):
+                self.comp_func[len(self.comp_func) - 1].function.setParameter(ipar, par)
 
     def _get_peak_cens(self, dpks: np.ndarray[float]) -> np.ndarray[float]:
         return dpks
@@ -791,7 +792,8 @@ class PawleyPattern1D(PawleyPatternBase):
         kwargs = {**default_kwargs, **kwargs}
         res = Fit(Function=self.comp_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, **kwargs)
         # update parameters in comp_func (can't replace comp_func as result doesn't return individual IPeakFunctions)
-        [self.comp_func.setParameter(ipar, res.Function.getParamValue(ipar)) for ipar in range(self.comp_func.nParams())]
+        for ipar in range(self.comp_func.nParams()):
+            self.comp_func.setParameter(ipar, res.Function.getParamValue(ipar))
         return res
 
     def estimate_initial_params(self):
@@ -834,7 +836,8 @@ class PawleyPattern1D(PawleyPatternBase):
 
     @staticmethod
     def _set_func_params(func: FunctionWrapper, p: np.ndarray[float]):
-        [func.function.setParameter(ipar, param) for ipar, param in enumerate(p)]
+        for ipar, param in enumerate(p):
+            func.function.setParameter(ipar, param)
 
     def _calc_robust_bg_resids(self, p: np.ndarray[float]) -> np.ndarray[float]:
         # quadratic for negative residuals, scaled cauchy loss for positive (turnover to logarithmic at ~ 2 sigma)
@@ -1066,7 +1069,8 @@ class PawleyPattern2DNoConstraints(BoundsMixin, MtdFuncMixin, Poldi2DEvalMixin, 
             if self.has_bg:
                 npks = self.get_npks()
                 bg_func = self.comp_func[npks]
-                [bg_func.function.setParameter(ipar, 0) for ipar in range(bg_func.nParams())]
+                for ipar in range(bg_func.nParams()):
+                    bg_func.function.setParameter(ipar, 0)
                 bg_func.function.fixAll()
 
     def get_param_names(self) -> np.ndarray:
@@ -1088,7 +1092,8 @@ class PawleyPattern2DNoConstraints(BoundsMixin, MtdFuncMixin, Poldi2DEvalMixin, 
         return np.asarray([not self.comp_func.isFixed(ipar) for ipar in range(self.comp_func.nParams())])
 
     def set_params(self, params: np.ndarray[float]):
-        [self.comp_func.setParameter(ipar, val) for ipar, val in enumerate(params)]
+        for ipar, val in enumerate(params):
+            self.comp_func.setParameter(ipar, val)
 
     def set_free_params(self, free_params: np.ndarray[float]):
         params = self.get_params()
