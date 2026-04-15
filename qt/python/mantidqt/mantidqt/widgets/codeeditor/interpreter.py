@@ -10,7 +10,7 @@ import sys
 import traceback
 
 from qtpy.QtCore import QObject, Qt, Signal
-from qtpy.QtGui import QColor, QFont, QFontMetrics
+from qtpy.QtGui import QFont, QFontMetrics
 from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
 from mantidqt.io import open_a_file_dialog
@@ -21,6 +21,7 @@ from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 from mantidqt.widgets.embedded_find_replace_dialog.presenter import EmbeddedFindReplaceDialog
+from workbench.config.fonts import CURRENTLINE_BKGD_COLOR
 
 IDLE_STATUS_MSG = "Status: Idle."
 LAST_JOB_MSG_TEMPLATE = "Last job completed {} at {} in {:.3f}s"
@@ -28,7 +29,6 @@ RUNNING_STATUS_MSG = "Status: Running"
 ABORTED_STATUS_MSG = "Status: Aborted"
 
 # Editor
-CURRENTLINE_BKGD_COLOR = QColor(247, 236, 248)
 TAB_WIDTH = 4
 TAB_CHAR = "\t"
 SPACE_CHAR = " "
