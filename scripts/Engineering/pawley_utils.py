@@ -244,7 +244,7 @@ class Phase:
         self.name = phase_name
 
     def has_the_same_parameters_as(self, other):
-        return set(*self.get_param_names()) == set(*other.get_param_names())
+        return set(self.get_param_names()) == set(other.get_param_names())
 
 
 class MtdFuncMixin:
