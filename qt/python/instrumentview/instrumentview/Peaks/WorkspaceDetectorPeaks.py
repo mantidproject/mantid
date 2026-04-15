@@ -55,8 +55,7 @@ class WorkspaceDetectorPeaks:
 
     def get_x_values_and_labels(self, unit, picked_spectrum_numbers) -> tuple[list, list]:
         # x values for vertical markers in lineplot
-        x_values = [
-            p.location_in_unit(unit) for peak in self.detector_peaks for p in peak.peaks if peak.spectrum_no in picked_spectrum_numbers
-        ]
-        labels = [p.label for peak in self.detector_peaks for p in peak.peaks if peak.spectrum_no in picked_spectrum_numbers]
+        picked_peaks = [p for peak in self.detector_peaks for p in peak.peaks if peak.spectrum_no in picked_spectrum_numbers]
+        x_values = [p.location_in_unit(unit) for p in picked_peaks]
+        labels = [p.label for p in picked_peaks]
         return x_values, labels
