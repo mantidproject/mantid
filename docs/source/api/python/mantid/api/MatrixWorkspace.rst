@@ -16,7 +16,7 @@ A Matrix Workspace is a generic name for a family which contains measured (or de
 What information is in a Matrix Workspace
 ------------------------------------------
 
-All Matrix Workspaces contain one or more rows of data. A single row is formed of a set of arrays (Y, E, X). For example, the output of a single detector in a white-beam measuring wavelength would form a single row. In this scenario The x-axis (or "horizontal axis") has units of length for wavelength, and Y would be the counts at each wavelength. The rows may have no correlation to each other. However, they are usually marked and sorted by some other attribute, such as detector number, or scattering angle. We call this row axis the "vertical axis". Axis have :ref:`Units <Unit Factory>`.
+All Matrix Workspaces contain one or more rows of data. A single row is formed of a set of arrays (Y, E, X). For example, the output of a single detector in a white-beam measuring wavelength would form a single row. In this scenario The x-axis (or "horizontal axis") has units of length for wavelength, and Y would be the counts at each wavelength. The rows may have no correlation to each other. However, they are usually marked and sorted by some other attribute, such as detector number, or scattering angle. We call this row axis the "vertical axis". Axis have :py:obj:`Units <mantid.kernel.UnitFactoryImpl>`.
 
 Also they may contain:
 
@@ -32,7 +32,7 @@ Working with Matrix Workspaces in Python
 
 As alluded to above, Matrix Workspace is an abstraction. Matrix Workspace provides access to the majority of the common information for all 2D workspaces in its family, without needing to know all the details of how that data is actually stored.
 
-Matrix Workspaces have all the data and operations of the base :ref:`Workspace <Workspace>` class, but add operations to access the 2D data itself a useful way.
+Matrix Workspaces have all the data and operations of the base :py:obj:`~mantid.api.Workspace` class, but add operations to access the 2D data itself a useful way.
 
 Accessing Workspaces
 ####################

@@ -28,7 +28,7 @@ workspaces. It can have one of three types:
 +--------------------------------------------------------------+-------------+----------+
 | :class:`SplittersWorkspace <mantid.api.ISplittersWorkspace>` | nanoseconds | absolute |
 +--------------------------------------------------------------+-------------+----------+
-| :ref:`TableWorkspace <Table Workspaces>`                     | seconds     | either   |
+| :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>`        | seconds     | either   |
 +--------------------------------------------------------------+-------------+----------+
 
 Whether the times in ``SplitterWorkspace`` are treated as relative or
@@ -38,7 +38,7 @@ the run (in the ``ws.run()['run_start']``) or, if specified, the
 ``FilterStartTime``. In the case of ``RelativeTime=False``, the times
 are relative to the :class:`GPS epoch <mantid.kernel.DateAndTime>`.
 
-Both :ref:`TableWorkspace <Table Workspaces>` and
+Both :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` and
 :class:`SplittersWorkspace <mantid.api.ISplittersWorkspace>` have 3
 columns, ``start``, ``stop``, and ``target``. :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` has a single spectrum where X-values
 represent the time boundaries and Y-values represent the target workspace indexes.
@@ -46,8 +46,7 @@ The :ref:`filter-events-usage-label` examples and :ref:`Event Filtering <EventFi
 page have details on creating the ``SplitterWorkspace`` by hand.
 Note that event filtering treats all time intervals as [inclusive,exclusive).
 
-The optional ``InformationWorkspace`` is a :ref:`TableWorkspace <Table
-Workspaces>` for information on splitters.
+The optional ``InformationWorkspace`` is a :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` for information on splitters.
 
 Unfiltered Events
 #################

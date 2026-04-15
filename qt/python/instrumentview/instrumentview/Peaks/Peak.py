@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import numpy as np
 from dataclasses import dataclass
 
 
@@ -16,7 +15,6 @@ def _format_hkl(value):
 class Peak:
     detector_id: int
     spectrum_no: int
-    location: np.ndarray
     peak_index: int
     hkl: tuple[float, float, float]
     tof: float

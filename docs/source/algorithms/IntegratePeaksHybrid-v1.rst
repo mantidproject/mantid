@@ -16,7 +16,7 @@ Integrates arbitrary shaped single crystal peaks defined on an
 :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` using connected component
 analysis to determine regions of interest around each peak of the
 :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>`. The output is an integrated
-:py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` as well as a group of images :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` of :ref:`MDWorkspaces <MDWorkspace>`  containing the
+:py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` as well as a group of images :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` of :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>`  containing the
 labels assigned to each cluster for diagnostic and visualisation
 purposes.
 

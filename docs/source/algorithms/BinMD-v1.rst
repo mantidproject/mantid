@@ -10,10 +10,10 @@ Description
 -----------
 
 This algorithm performs dense binning of the events in multiple
-dimensions of an input :ref:`MDWorkspace <MDWorkspace>` and
+dimensions of an input :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` and
 places them into a dense :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` with 1-4 dimensions.
 
-The input :ref:`MDWorkspace <MDWorkspace>` may have more dimensions than the number of
+The input :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` may have more dimensions than the number of
 output dimensions. The names of the dimensions in the DimX, etc.
 parameters are used to find the corresponding dimensions that will be
 created in the output.
@@ -91,9 +91,9 @@ Binning a MDHistoWorkspace
 
 It is possible to rebin a :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`. Each
 :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` holds a reference to the
-:ref:`MDWorkspace <MDWorkspace>` that created it, as well as the
+:py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` that created it, as well as the
 coordinate transformation that was used. In this case, the rebinning is
-actually performed on the original :ref:`MDWorkspace <MDWorkspace>`, after suitably
+actually performed on the original :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>`, after suitably
 transforming the basis vectors.
 
 Only the non-axis aligned binning method can be performed on a

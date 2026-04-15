@@ -11,7 +11,7 @@ Notes
 #####
 
 * This approach has been imported from ISAW (SCD Calibration)
-* Only works for :ref:`RectangularDetector`
+* Only works for :py:obj:`RectangularDetector <mantid.geometry.RectangularDetector>`
 
 Data Required
 #############

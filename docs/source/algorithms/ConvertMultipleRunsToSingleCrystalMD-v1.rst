@@ -10,17 +10,15 @@ Description
 -----------
 
 This workflow algorithm loads, converts to MDWorkspace and combines a
-series of runs. The resulting workspace is a :ref:`MDWorkspace
-<MDWorkspace>` containing a volume of scattering events. If a :ref:`UB
-matrix <Lattice>` is provided and `QFrame='HKL'`, then the MD workspace
-will be in HKL otherwise it will be in Q_sample.
+series of runs. The resulting workspace is a :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>`
+containing a volume of scattering events. If a :ref:`UB matrix <Lattice>`
+is provided and `QFrame='HKL'`, then the MD workspace will be in HKL otherwise it will be in Q_sample.
 
 This is **not** a correctly normalized workspace, for that look at
-:ref:`SingleCrystalDiffuseReduction
-<algm-SingleCrystalDiffuseReduction>`. The output workspace can be
-used with :ref:`FindPeaksMD <algm-FindPeaksMD>` and from that
-determine the :ref:`UB matrix <Lattice>`. The output workspace (if in
-Q sample) can then be used with :ref:`MDNorm <algm-MDNorm>` to
+:ref:`SingleCrystalDiffuseReduction <algm-SingleCrystalDiffuseReduction>`.
+The output workspace can be used with :ref:`FindPeaksMD <algm-FindPeaksMD>`
+and from that determine the :ref:`UB matrix <Lattice>`.
+The output workspace (if in Q sample) can then be used with :ref:`MDNorm <algm-MDNorm>` to
 correctly bin and normalise the data.
 
 The input filename follows the syntax from

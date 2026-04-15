@@ -36,7 +36,7 @@ There is also a near-complete implementation of the "real" ``DetectorInfo`` clas
 
 The python interface to ``DetectorInfo`` has matured, and includes widespread immutable access via iterators. The iterators can also be used to set masking flags.
 
-See :ref:`DetectorInfo <DetectorInfo>` for more information.
+See :py:obj:`DetectorInfo <mantid.geometry.DetectorInfo>` for more information.
 
 ComponentInfo
 ______________
@@ -46,7 +46,7 @@ For writing to the component tree. You can extract a non-const ``ComponentInfo``
 
 The python interface to ``ComponentInfo`` has matured, and now provides equal, if not better support than the ``Instrument`` API for navigating the high-level instrument. Iterator support has also been provided for ``ComponentInfo``.
 
-See :ref:`ComponentInfo <ComponentInfo>` for more information.
+See :py:obj:`ComponentInfo <mantid.geometry.ComponentInfo>` for more information.
 
 Changes for Rollout
 -------------------

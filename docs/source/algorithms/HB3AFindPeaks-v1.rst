@@ -9,7 +9,7 @@
 Description
 -----------
 
-Finds peaks for the given :ref:`MDWorkspace <MDWorkspace>` in Q-space
+Finds peaks for the given :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` in Q-space
 and sets the UB matrix, refining it for a specific `CellType` and
 `Centering`. If the lattice parameters are specified, then the UB
 matrix will be found with those parameters by :ref:`FindUBUsingLatticeParameters <algm-FindUBUsingLatticeParameters>`.

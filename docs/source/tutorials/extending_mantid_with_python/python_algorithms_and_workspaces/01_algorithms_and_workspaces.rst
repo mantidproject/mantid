@@ -9,7 +9,7 @@ Declaring Workspace Properties
 
 Workspaces are the main source of data for input and most algorithms output another data workspace.
 Workspace properties are required in order to either provide input data for an algorithm or store data at the end of execution.
-Mantid has a variety of different workspace types, for example :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`, :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` or :ref:`TableWorkspace <Table Workspaces>`.
+Mantid has a variety of different workspace types, for example :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`, :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` or :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>`.
 A generic Workspace type also exists which can refer to any of these.
 
 Declaring input workspace properties restricts the types of workspace that will be accepted when a user wants to pass a workspace into the algorithm.
@@ -62,8 +62,8 @@ In general, using a specific workspace type reduces users passing an invalid inp
 
 Some of the currently available types of property are:
 
-* :class:`~mantid.api.WorkspaceProperty` for specifying :ref:`Workspace <Workspace>`
+* :class:`~mantid.api.WorkspaceProperty` for specifying :py:obj:`~mantid.api.Workspace`
 * :class:`~mantid.api.MatrixWorkspaceProperty` for specifying :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` as input or output
 * :class:`~mantid.api.IEventWorkspaceProperty` for specifying :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`
 * :class:`~mantid.api.IPeaksWorkspaceProperty` for specifying :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>`
-* :class:`~mantid.api.ITableWorkspaceProperty` for specifying :ref:`TableWorkspace <Table Workspaces>`
+* :class:`~mantid.api.ITableWorkspaceProperty` for specifying :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>`

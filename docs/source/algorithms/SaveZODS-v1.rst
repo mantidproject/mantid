@@ -73,7 +73,7 @@ Description of data fields
 Usage
 -----
 
-This algorithm can be run on a pre-existing :ref:`MDEventWorkspace <MDWorkspace>`
+This algorithm can be run on a pre-existing :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`
 or a newly created one. The example below will be done with newly created one
 using :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>`.
 

@@ -12,7 +12,7 @@ Description
 This algorithm performs a deep copy of all of the information in the
 workspace. It maintains events if the input is an
 :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`. It will call CloneMDWorkspace for a
-:ref:`MDEventWorkspace <MDWorkspace>` or a
+:py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` or a
 :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`. It can also clone a
 :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>`.
 

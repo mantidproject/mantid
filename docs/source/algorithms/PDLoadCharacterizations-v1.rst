@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm loads information into a
-:ref:`TableWorkspace <Table Workspaces>` for the
+:py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` for the
 characterization information and a collection of output parameters for
 the focus positions to be used in :ref:`algm-EditInstrumentGeometry`. If
 a section is missing then those parameters will be empty. This includes an empty
@@ -52,7 +52,7 @@ specifying azimuthal angles for the focus positions is being supplied
 as it uncommon except for preferred orientation studies.
 
 The second section of the characterizations file is read into the output
-:ref:`TableWorkspace <Table Workspaces>` as described below.
+:py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` as described below.
 
 A second example from NOMAD demonstrates how to specify different
 ranges for each focused spectrum as well as the optional wavelength
