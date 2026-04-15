@@ -94,18 +94,14 @@ class PythonFileInterpreterTest(unittest.TestCase):
 
 
 class InterpreterHelperFunctionTest(unittest.TestCase):
-    @mock.patch("mantid.kernel.environment.is_mac", True)
-    @mock.patch("mantid.kernel.environment.is_theme_dark", True)
-    def test_mac_dark_mode(self):
+    @mock.patch("mantid.kernel.environment.is_theme_dark")
+    def test_mac_dark_mode(self, mock_is_theme_dark):
+        mock_is_theme_dark.return_value = True
         self.assertEqual(get_currentline_background_color(), QColor(0, 52, 110))
 
-    @mock.patch("mantid.kernel.environment.is_mac", True)
-    @mock.patch("mantid.kernel.environment.is_theme_dark", False)
-    def test_mac_light_mode(self):
-        self.assertEqual(get_currentline_background_color(), QColor(247, 236, 248))
-
-    @mock.patch("mantid.kernel.environment.is_mac", False)
-    def test_non_mac(self):
+    @mock.patch("mantid.kernel.environment.is_theme_dark")
+    def test_mac_light_mode(self, mock_is_theme_dark):
+        mock_is_theme_dark.return_value = False
         self.assertEqual(get_currentline_background_color(), QColor(247, 236, 248))
 
 
