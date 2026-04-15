@@ -1010,19 +1010,28 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
             phases=self.phases,
         )
 
-    def fit(self, *args, max_scale_iter: int = 2, **kwargs) -> OptimizeResult:
-        # Alternating least squares: alternate between (a) jointly solving for the
-        # per-spectrum scale and background via linear regression given the current ycalc,
-        # locking them, then (b) optimising the Bragg intensities with those locked values.
-        # Re-solving after I_k convergence removes the dependence on the initial ycalc_0
-        # quality.
-        # Default to max_scale_iter=2 for two iterations of the outer loop
+    def fit(self, *args, max_scale_iter: int = 2, scale_rtol: float = 1e-3, **kwargs) -> OptimizeResult:
+        """Fit by alternating scale/background estimation and Bragg-intensity optimisation.
+
+        Parameters
+        ----------
+        max_scale_iter : int
+            Maximum number of outer iterations (scale re-estimation cycles).
+        scale_rtol : float
+            Relative tolerance on the cost function between successive outer
+            iterations.  The loop breaks early when the fractional change in
+            cost drops below this threshold.
+        """
         res = None
+        prev_cost = None
         for _ in range(max_scale_iter):
             self.scales = None  # force scale+bg re-estimation from current params
             self.eval_2d(self.get_free_params())
             res = super().fit(*args, **kwargs)
             self.set_free_params(res.x)
+            if prev_cost is not None and abs(prev_cost - res.cost) / max(prev_cost, 1e-12) < scale_rtol:
+                break
+            prev_cost = res.cost
         self.eval_2d(res.x)  # ensure 2D simulated workspace up to date
         return res
 
