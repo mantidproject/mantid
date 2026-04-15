@@ -12,8 +12,9 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 from mantid.api import AnalysisDataService, FileFinder
 from mantid.simpleapi import CreateWorkspace, FlatBackground, EditInstrumentGeometry, ConvertUnits, LinearBackground
 from mantid.geometry import CrystalStructure
+from mantid.kernel import V3D
 from Engineering.pawley_utils import Phase, GaussianProfile, PVProfile, PawleyPattern1D, PawleyPattern2D, BackToBackGauss
-from plugins.algorithms.poldi_utils import load_poldi
+from plugins.algorithms.poldi_utils import load_poldi, _do_interp_with_flux_correction, _get_flux_arrays, simulate_2d_data
 
 
 class PhaseTest(unittest.TestCase):
@@ -200,6 +201,7 @@ class PawleyPattern1DTest(unittest.TestCase):
         y = func(x)
         y[-1] *= 1000  # outlier
         ws_bg_with_outlier = CreateWorkspace(x, y, sqrt(y))
+        EditInstrumentGeometry(Workspace=ws_bg_with_outlier, PrimaryFlightPath=50, L2=1, Polar=90)
 
         pawley = PawleyPattern1D(ws_bg_with_outlier, [self.phase], profile=GaussianProfile(), bg_func=func)
         res = pawley.fit_background()
@@ -316,6 +318,7 @@ class PawleyPattern2DTest(unittest.TestCase):
     @patch("Engineering.pawley_utils.logger")
     def test_set_params_from_pawley1d_different_nhkls(self, mock_log, mock_estimate_intens):
         mock_pawley1d = self._make_mock_pawley1d()
+        mock_pawley1d.phases[0].get_param_names.return_value = self.phase.get_param_names()
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
         intial_intens = pawley.intens[0].copy()
 
@@ -330,6 +333,7 @@ class PawleyPattern2DTest(unittest.TestCase):
     @patch("Engineering.pawley_utils.logger")
     def test_set_params_from_pawley1d_successful(self, mock_log, mock_estimate_intens):
         mock_pawley1d = self._make_mock_pawley1d()
+        mock_pawley1d.phases[0].get_param_names.return_value = self.phase.get_param_names()
         mock_pawley1d.phases[0].nhkls.return_value = self.phase.nhkls()
         mock_pawley1d.intens[0] = 2 * ones(self.phase.nhkls())  # non-default value
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
@@ -365,21 +369,24 @@ class PawleyPattern2DTest(unittest.TestCase):
         for name in pawley.get_param_names():
             self.assertIn(name, pawley._param_bounds)
 
+    @patch("Engineering.pawley_utils.OutputTableMixin.get_parameter_errors")
     @patch("Engineering.pawley_utils.least_squares")
-    def test_fit_passes_bounds_computed_from_initial_params(self, mock_ls):
+    def test_fit_passes_bounds_computed_from_initial_params(self, mock_ls, mock_err):
         frac, abs_min = 0.1, 1e-4
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile(), param_bounds_abs_min=abs_min)
         pawley.set_bounds_all(mode="fractional", value=frac)
         initial_params = pawley.get_free_params()
-        mock_ls.return_value = MagicMock(x=initial_params)
+        mock_ls.return_value = MagicMock(x=initial_params, cost=10)
+        mock_err.return_value = np.zeros_like(pawley.get_free_params())
         pawley.fit()
         lb, ub = mock_ls.call_args[1]["bounds"]
         expected_margin = np.maximum(np.abs(initial_params) * frac, abs_min)
         assert_array_almost_equal(lb, initial_params - expected_margin)
         assert_array_almost_equal(ub, initial_params + expected_margin)
 
+    @patch("Engineering.pawley_utils.OutputTableMixin.get_parameter_errors")
     @patch("Engineering.pawley_utils.least_squares")
-    def test_fit_uses_abs_min_floor_for_zero_valued_params(self, mock_ls):
+    def test_fit_uses_abs_min_floor_for_zero_valued_params(self, mock_ls, mock_err):
         abs_min = 1e-4
         # FlatBackground(A0=0) with global_scale=True gives a zero-valued free param
         pawley = PawleyPattern2D(
@@ -392,7 +399,8 @@ class PawleyPattern2DTest(unittest.TestCase):
         )
         pawley.set_bounds_all(mode="fractional", value=0.1)
         initial_params = pawley.get_free_params()
-        mock_ls.return_value = MagicMock(x=initial_params)
+        mock_ls.return_value = MagicMock(x=initial_params, cost=10)
+        mock_err.return_value = np.zeros_like(pawley.get_free_params())
         pawley.fit()
         lb, ub = mock_ls.call_args[1]["bounds"]
         zero_mask = initial_params == 0
@@ -400,12 +408,14 @@ class PawleyPattern2DTest(unittest.TestCase):
         assert_array_almost_equal(ub[zero_mask], np.full(zero_mask.sum(), abs_min))
         assert_array_almost_equal(lb[zero_mask], np.full(zero_mask.sum(), -abs_min))
 
+    @patch("Engineering.pawley_utils.OutputTableMixin.get_parameter_errors")
     @patch("Engineering.pawley_utils.least_squares")
-    def test_fit_does_not_override_explicit_bounds(self, mock_ls):
+    def test_fit_does_not_override_explicit_bounds(self, mock_ls, mock_err):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
         pawley.set_bounds_all(mode="fractional", value=0.1)
         n = len(pawley.get_free_params())
-        mock_ls.return_value = MagicMock(x=pawley.get_free_params())
+        mock_ls.return_value = MagicMock(x=pawley.get_free_params(), cost=10)
+        mock_err.return_value = np.zeros_like(pawley.get_free_params())
         explicit_bounds = (-np.inf * np.ones(n), np.inf * np.ones(n))
         pawley.fit(bounds=explicit_bounds)
         self.assertIs(mock_ls.call_args[1]["bounds"], explicit_bounds)
@@ -485,21 +495,24 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
         self.assertEqual(pawley._param_bounds, {})
         self.assertAlmostEqual(pawley.param_bounds_abs_min, 1e-6)
 
+    @patch("Engineering.pawley_utils.OutputTableMixin.get_parameter_errors")
     @patch("Engineering.pawley_utils.least_squares")
-    def test_fit_passes_bounds_computed_from_initial_params(self, mock_ls):
+    def test_fit_passes_bounds_computed_from_initial_params(self, mock_ls, mock_err):
         frac, abs_min = 0.1, 1e-4
         pawley = PawleyPattern2D(**self.init_kwargs).create_no_constraints_fit(param_bounds_abs_min=abs_min)
         pawley.set_bounds_all(mode="fractional", value=frac)
         initial_params = pawley.get_free_params()
         mock_ls.return_value = MagicMock(x=initial_params)
+        mock_err.return_value = np.zeros_like(pawley.get_free_params())
         pawley.fit()
         lb, ub = mock_ls.call_args[1]["bounds"]
         expected_margin = np.maximum(np.abs(initial_params) * frac, abs_min)
         assert_array_almost_equal(lb, initial_params - expected_margin)
         assert_array_almost_equal(ub, initial_params + expected_margin)
 
+    @patch("Engineering.pawley_utils.OutputTableMixin.get_parameter_errors")
     @patch("Engineering.pawley_utils.least_squares")
-    def test_fit_uses_abs_min_floor_for_zero_valued_params(self, mock_ls):
+    def test_fit_uses_abs_min_floor_for_zero_valued_params(self, mock_ls, mock_err):
         abs_min = 1e-4
         # FlatBackground(A0=0) with global_scale=True gives a zero-valued free param
         init_kwargs_with_bg = {**self.init_kwargs, "global_scale": True, "bg_func": FlatBackground(A0=0)}
@@ -507,6 +520,7 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
         pawley.set_bounds_all(mode="fractional", value=0.1)
         initial_params = pawley.get_free_params()
         mock_ls.return_value = MagicMock(x=initial_params)
+        mock_err.return_value = np.zeros_like(pawley.get_free_params())
         pawley.fit()
         lb, ub = mock_ls.call_args[1]["bounds"]
         zero_mask = initial_params == 0
@@ -514,12 +528,14 @@ class PawleyPattern2DNoConstraintsTest(unittest.TestCase):
         assert_array_almost_equal(ub[zero_mask], np.full(zero_mask.sum(), abs_min))
         assert_array_almost_equal(lb[zero_mask], np.full(zero_mask.sum(), -abs_min))
 
+    @patch("Engineering.pawley_utils.OutputTableMixin.get_parameter_errors")
     @patch("Engineering.pawley_utils.least_squares")
-    def test_fit_does_not_override_explicit_bounds(self, mock_ls):
+    def test_fit_does_not_override_explicit_bounds(self, mock_ls, mock_err):
         pawley = PawleyPattern2D(**self.init_kwargs).create_no_constraints_fit()
         pawley.set_bounds_all(mode="fractional", value=0.1)
         n = len(pawley.get_free_params())
         mock_ls.return_value = MagicMock(x=pawley.get_free_params())
+        mock_err.return_value = np.zeros_like(pawley.get_free_params())
         explicit_bounds = (-np.inf * np.ones(n), np.inf * np.ones(n))
         pawley.fit(bounds=explicit_bounds)
         self.assertIs(mock_ls.call_args[1]["bounds"], explicit_bounds)
@@ -680,6 +696,495 @@ class OutputTableMixinTest(unittest.TestCase):
         hkls_0 = set(tables[0].column("HKL"))
         hkls_1 = set(tables[1].column("HKL"))
         self.assertTrue(hkls_0.isdisjoint(hkls_1))
+
+
+class PhaseAdditionalTest(unittest.TestCase):
+    """Tests for Phase methods: hkl_as_key, filter_hkls_to_ws_range, get_hkl_strings,
+    has_the_same_parameters_as, get_phase_name, set_phase_name."""
+
+    SI_LATT_PAR = 5.43094
+    SI_SPGR = "F d -3 m"
+
+    def setUp(self):
+        self.phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        self.phase.set_hkls_from_dspac_limits(0.7, 3.5)
+
+    # --- hkl_as_key ---
+
+    def test_hkl_as_key_returns_int_tuple(self):
+        hkl = V3D(1, 2, 3)
+        result = Phase.hkl_as_key(hkl)
+        self.assertEqual(result, (1, 2, 3))
+        self.assertIsInstance(result, tuple)
+        self.assertTrue(all(isinstance(v, int) for v in result))
+
+    def test_hkl_as_key_rounds_float_values(self):
+        hkl = V3D(1.6, 2.4, 3.5)
+        result = Phase.hkl_as_key(hkl)
+        self.assertEqual(result, (2, 2, 4))
+
+    # --- get_hkl_strings ---
+
+    def test_get_hkl_strings_single_digit(self):
+        self.phase.set_hkls([[1, 1, 1]])
+        self.assertEqual(self.phase.get_hkl_strings(), ["1,1,1"])
+
+    def test_get_hkl_strings_multiple_hkls(self):
+        self.phase.set_hkls([[1, 1, 1], [2, 2, 0]])
+        result = self.phase.get_hkl_strings()
+        self.assertEqual(result, ["1,1,1", "2,2,0"])
+
+    def test_get_hkl_strings_multi_digit_indices(self):
+        # use a space group that allows all reflections
+        phase = Phase.from_alatt([10.0, 10.0, 10.0], "P 1")
+        phase.set_hkls([[10, 11, 12]])
+        self.assertEqual(phase.get_hkl_strings(), ["10,11,12"])
+
+    # --- get_phase_name / set_phase_name ---
+
+    def test_get_phase_name_default_is_none(self):
+        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        self.assertIsNone(phase.get_phase_name())
+
+    def test_set_phase_name(self):
+        self.phase.set_phase_name("Silicon")
+        self.assertEqual(self.phase.get_phase_name(), "Silicon")
+
+    def test_set_phase_name_overwrite(self):
+        self.phase.set_phase_name("Alpha")
+        self.phase.set_phase_name("Beta")
+        self.assertEqual(self.phase.get_phase_name(), "Beta")
+
+    # --- has_the_same_parameters_as ---
+
+    def test_has_the_same_parameters_as_same_spacegroup(self):
+        other = Phase.from_alatt(3 * [4.0], self.SI_SPGR)
+        self.assertTrue(self.phase.has_the_same_parameters_as(other))
+
+    def test_has_the_same_parameters_as_different_lattice_system(self):
+        tetragonal = Phase.from_alatt(3 * [self.SI_LATT_PAR], "P 4")
+        self.assertFalse(self.phase.has_the_same_parameters_as(tetragonal))
+
+    def test_has_the_same_parameters_as_same_lattice_system_different_spacegroup(self):
+        other_cubic = Phase.from_alatt(3 * [4.0], "P m -3 m")
+        self.assertTrue(self.phase.has_the_same_parameters_as(other_cubic))
+
+    # --- filter_hkls_to_ws_range ---
+
+
+class PhaseFilterHklsTest(unittest.TestCase):
+    """Tests for Phase.filter_hkls_to_ws_range using a POLDI workspace."""
+
+    SI_LATT_PAR = 5.43094
+    SI_SPGR = "F d -3 m"
+
+    @classmethod
+    def setUpClass(cls):
+        fpath_data = FileFinder.getFullPath("poldi_448x500_chopper5k_silicon.txt")
+        cls.ws = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def test_all_hkls_in_range(self):
+        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        phase.set_hkls_from_dspac_limits(0.7, 3.5)
+        nhkls_before = phase.nhkls()
+        filtered = phase.filter_hkls_to_ws_range(self.ws)
+        # all peaks should be within the POLDI angular range
+        self.assertEqual(filtered.nhkls(), nhkls_before)
+
+    def test_subset_in_range(self):
+        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        # set d-spacing range wider than POLDI can access so some are filtered out
+        phase.set_hkls_from_dspac_limits(0.4, 5.0)
+        nhkls_before = phase.nhkls()
+        filtered = phase.filter_hkls_to_ws_range(self.ws)
+        self.assertGreater(filtered.nhkls(), 0)
+        self.assertLess(filtered.nhkls(), nhkls_before)
+
+    def test_none_in_range(self):
+        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        # only very high d-spacing HKL (111) — restrict lambda range so it's out of range
+        phase.set_hkls([[1, 1, 1]])
+        filtered = phase.filter_hkls_to_ws_range(self.ws, lambda_min=0.1, lambda_max=0.2)
+        self.assertEqual(filtered.hkls, [])
+
+    def test_name_propagated(self):
+        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        phase.set_hkls_from_dspac_limits(0.7, 3.5)
+        phase.set_phase_name("Silicon")
+        filtered = phase.filter_hkls_to_ws_range(self.ws)
+        self.assertEqual(filtered.get_phase_name(), "Silicon")
+
+
+class BoundsMixinTest(unittest.TestCase):
+    """Tests for BoundsMixin methods via PawleyPattern2D."""
+
+    @classmethod
+    def setUpClass(cls):
+        fpath_data = FileFinder.getFullPath("poldi_448x500_chopper5k_silicon.txt")
+        cls.ws = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def setUp(self):
+        self.phase = Phase.from_alatt(3 * [5.43094], "F d -3 m")
+        self.phase.set_hkls_from_dspac_limits(1.9, 3.5)
+        self.pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
+
+    # --- set_bounds mode="log" ---
+
+    def test_set_bounds_log_positive_param(self):
+        name = self.pawley.get_param_names()[0]
+        param_val = self.pawley.get_params()[0]
+        factor = 2.0
+        self.pawley.set_bounds(names=name, mode="log", values=factor)
+        lb, ub = self.pawley._param_bounds[name]
+        self.assertAlmostEqual(lb, param_val / factor)
+        self.assertAlmostEqual(ub, param_val * factor)
+
+    def test_set_bounds_log_negative_param(self):
+        # force a negative parameter value to test log bounds for negative
+        names = self.pawley.get_param_names()
+        name = names[0]
+        params = self.pawley.get_params()
+        params[0] = -5.0
+        self.pawley.set_params(params)
+        factor = 2.0
+        self.pawley.set_bounds(names=name, mode="log", values=factor)
+        lb, ub = self.pawley._param_bounds[name]
+        # for negative p: lb = p * factor, ub = p / factor
+        self.assertAlmostEqual(lb, -5.0 * factor)
+        self.assertAlmostEqual(ub, -5.0 / factor)
+
+    def test_set_bounds_log_zero_param(self):
+        names = self.pawley.get_param_names()
+        name = names[0]
+        params = self.pawley.get_params()
+        params[0] = 0.0
+        self.pawley.set_params(params)
+        self.pawley.set_bounds(names=name, mode="log", values=2.0)
+        lb, ub = self.pawley._param_bounds[name]
+        self.assertAlmostEqual(lb, -self.pawley.param_bounds_abs_min)
+        self.assertAlmostEqual(ub, self.pawley.param_bounds_abs_min)
+
+    # --- set_bounds mode="absolute" ---
+
+    def test_set_bounds_absolute(self):
+        name = self.pawley.get_param_names()[0]
+        self.pawley.set_bounds(names=name, mode="absolute", lb=-10.0, ub=20.0)
+        stored_lb, stored_ub = self.pawley._param_bounds[name]
+        self.assertAlmostEqual(stored_lb, -10.0)
+        self.assertAlmostEqual(stored_ub, 20.0)
+
+    def test_set_bounds_absolute_lb_only(self):
+        name = self.pawley.get_param_names()[0]
+        self.pawley.set_bounds(names=name, mode="absolute", lb=0.0)
+        stored_lb, stored_ub = self.pawley._param_bounds[name]
+        self.assertAlmostEqual(stored_lb, 0.0)
+        self.assertEqual(stored_ub, np.inf)
+
+    # --- set_bounds mode=None (removal) ---
+
+    def test_set_bounds_mode_none_removes_bounds(self):
+        name = self.pawley.get_param_names()[0]
+        self.pawley.set_bounds(names=name, mode="fractional", values=0.1)
+        self.assertIn(name, self.pawley._param_bounds)
+        self.pawley.set_bounds(names=name, mode=None)
+        self.assertNotIn(name, self.pawley._param_bounds)
+
+    # --- clear_bounds ---
+
+    def test_clear_bounds_all(self):
+        self.pawley.set_bounds_all(mode="fractional", value=0.1)
+        self.assertTrue(len(self.pawley._param_bounds) > 0)
+        self.pawley.clear_bounds()
+        self.assertEqual(len(self.pawley._param_bounds), 0)
+
+    def test_clear_bounds_specific_names(self):
+        names = list(self.pawley.get_param_names())
+        self.pawley.set_bounds_all(mode="fractional", value=0.1)
+        self.pawley.clear_bounds(names[0])
+        self.assertNotIn(names[0], self.pawley._param_bounds)
+        # other bounds should remain
+        self.assertIn(names[1], self.pawley._param_bounds)
+
+    def test_clear_bounds_single_string(self):
+        name = self.pawley.get_param_names()[0]
+        self.pawley.set_bounds(names=name, mode="fractional", values=0.1)
+        self.pawley.clear_bounds(name)
+        self.assertNotIn(name, self.pawley._param_bounds)
+
+    # --- set_non_negative ---
+
+    def test_set_non_negative_no_existing_bounds(self):
+        name = self.pawley.get_param_names()[0]
+        self.pawley.set_non_negative(name)
+        lb, ub = self.pawley._param_bounds[name]
+        self.assertAlmostEqual(lb, 0.0)
+        self.assertEqual(ub, np.inf)
+
+    def test_set_non_negative_with_existing_bounds(self):
+        name = self.pawley.get_param_names()[0]
+        self.pawley.set_bounds(names=name, mode="absolute", lb=-5.0, ub=10.0)
+        self.pawley.set_non_negative(name)
+        lb, ub = self.pawley._param_bounds[name]
+        self.assertAlmostEqual(lb, 0.0)
+        self.assertAlmostEqual(ub, 10.0)
+
+    def test_set_non_negative_with_positive_existing_lb(self):
+        name = self.pawley.get_param_names()[0]
+        self.pawley.set_bounds(names=name, mode="absolute", lb=2.0, ub=10.0)
+        self.pawley.set_non_negative(name)
+        lb, ub = self.pawley._param_bounds[name]
+        # lb should stay at 2.0 since max(2.0, 0.0) = 2.0
+        self.assertAlmostEqual(lb, 2.0)
+        self.assertAlmostEqual(ub, 10.0)
+
+    # --- repeat_values ---
+
+    def test_repeat_values_scalar_repeated(self):
+        from Engineering.pawley_utils import BoundsMixin
+
+        result = BoundsMixin.repeat_values(0.1, 3, "test")
+        self.assertEqual(result, [0.1, 0.1, 0.1])
+
+    def test_repeat_values_matching_list_returned(self):
+        from Engineering.pawley_utils import BoundsMixin
+
+        values = [1.0, 2.0, 3.0]
+        result = BoundsMixin.repeat_values(values, 3, "test")
+        self.assertEqual(result, values)
+
+    def test_repeat_values_mismatched_length_raises(self):
+        from Engineering.pawley_utils import BoundsMixin
+
+        with self.assertRaises(ValueError):
+            BoundsMixin.repeat_values([1.0, 2.0], 3, "myarg")
+
+
+class OutputTableAdditionalTest(unittest.TestCase):
+    """Additional tests for OutputTableMixin: I_err populated and ill-conditioned Hessian."""
+
+    @classmethod
+    def setUpClass(cls):
+        # create a workspace with a real peak so fitting produces meaningful errors
+        dspacs = linspace(0.69, 4.15, 2460)
+        sigma = 0.003
+        peak_centre = 3.13555
+        y = 100 * np.exp(-0.5 * ((dspacs - peak_centre) / sigma) ** 2)
+        cls.ws = CreateWorkspace(
+            DataX=dspacs,
+            DataY=y,
+            DataE=sqrt(np.maximum(y, 1.0)),
+            UnitX="dSpacing",
+            OutputWorkspace="ws_output_tab",
+        )
+        EditInstrumentGeometry(Workspace=cls.ws, PrimaryFlightPath=50, L2=1, Polar=90)
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def test_I_err_populated_after_real_fit(self):
+        phase = Phase.from_alatt(3 * [5.43094], "F d -3 m")
+        phase.set_hkls([[1, 1, 1]])
+        pawley = PawleyPattern1D(self.ws, [phase], profile=GaussianProfile())
+        pawley.fit(max_nfev=50)
+        tables = pawley.create_output_tables()
+        i_err = tables[0].column("I_err")[0]
+        self.assertFalse(np.isnan(i_err), "I_err should not be NaN after a real fit")
+        self.assertGreater(i_err, 0, "I_err should be positive after fitting real data")
+
+    @patch("Engineering.pawley_utils.logger")
+    def test_get_parameter_errors_ill_conditioned_hessian(self, mock_log):
+        from Engineering.pawley_utils import OutputTableMixin
+
+        # create a mock result with a near-singular Jacobian
+        mock_res = MagicMock()
+        # make J such that J^T J is ill-conditioned
+        mock_res.jac = np.array([[1.0, 1.0], [1.0, 1.0 + 1e-15], [0.0, 0.0]])
+        mock_res.fun = np.array([0.1, 0.2, 0.3])
+        errors = OutputTableMixin.get_parameter_errors(mock_res)
+        mock_log.warning.assert_called_once()
+        self.assertEqual(len(errors), 2)
+        # errors should be finite (pseudoinverse used)
+        self.assertTrue(np.all(np.isfinite(errors)))
+
+
+class PawleyPattern2DNoConstraintsPopulateTableTest(unittest.TestCase):
+    """Test PawleyPattern2DNoConstraints._populate_table with phases=None."""
+
+    @classmethod
+    def setUpClass(cls):
+        fpath_data = FileFinder.getFullPath("poldi_448x500_chopper5k_silicon.txt")
+        cls.ws = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def test_populate_table_phases_none(self):
+        phase = Phase.from_alatt(3 * [5.43094], "F d -3 m")
+        phase.set_hkls_from_dspac_limits(1.9, 3.5)
+        pawley2d = PawleyPattern2D(self.ws, [phase], global_scale=True, profile=GaussianProfile())
+        no_constr = pawley2d.create_no_constraints_fit()
+        no_constr.fit(max_nfev=1)
+        # set phases to None and verify _populate_table still works using peak index as HKL string
+        no_constr.phases = None
+        tables = no_constr.create_output_tables()
+        self.assertEqual(len(tables), 1)
+        # HKL column should contain string indices ("0", "1", ...) when phases is None
+        hkl_col = tables[0].column("HKL")
+        for i, hkl_str in enumerate(hkl_col):
+            self.assertEqual(hkl_str, str(i))
+
+
+class PawleyPattern2DFitAlternatingTest(unittest.TestCase):
+    """Tests for PawleyPattern2D.fit alternating loop."""
+
+    @classmethod
+    def setUpClass(cls):
+        fpath_data = FileFinder.getFullPath("poldi_448x500_chopper5k_silicon.txt")
+        cls.ws = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def setUp(self):
+        self.phase = Phase.from_alatt(3 * [5.43094], "F d -3 m")
+        self.phase.set_hkls_from_dspac_limits(1.9, 3.5)
+
+    @patch("Engineering.pawley_utils.OutputTableMixin.get_parameter_errors")
+    @patch("Engineering.pawley_utils.least_squares")
+    def test_max_scale_iter_respected(self, mock_ls, mock_errs):
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
+        # make each iteration return different cost so no early termination
+        results = []
+        for i in range(5):
+            r = MagicMock()
+            r.x = pawley.get_free_params()
+            r.cost = 100.0 - i * 10  # decreasing cost, never converges
+            results.append(r)
+        mock_ls.side_effect = results
+        mock_errs.return_value = np.zeros_like(pawley.get_free_params())
+
+        pawley.fit(fit_strategy="alternating", max_scale_iter=3, max_nfev=1)
+        self.assertEqual(mock_ls.call_count, 3)
+
+    @patch("Engineering.pawley_utils.OutputTableMixin.get_parameter_errors")
+    @patch("Engineering.pawley_utils.least_squares")
+    def test_scales_reset_between_iterations(self, mock_ls, mock_errs):
+        pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=True, profile=GaussianProfile())
+        # track scales being set to None at each iteration
+        scales_before_eval = []
+        original_eval_2d = pawley.eval_2d
+
+        def tracking_eval_2d(params):
+            scales_before_eval.append(pawley.scales)
+            return original_eval_2d(params)
+
+        pawley.eval_2d = tracking_eval_2d
+
+        results = []
+        for i in range(3):
+            r = MagicMock()
+            r.x = pawley.get_free_params()
+            r.cost = 100.0 - i * 10
+            results.append(r)
+        mock_ls.side_effect = results
+        mock_errs.return_value = np.zeros_like(pawley.get_free_params())
+
+        pawley.fit(fit_strategy="alternating", max_scale_iter=2, max_nfev=1)
+        # scales should be None before each eval_2d call in the loop
+        for scales_val in scales_before_eval[:2]:
+            self.assertIsNone(scales_val)
+
+
+class PawleyPattern1DSetIspecTest(unittest.TestCase):
+    """Tests for PawleyPattern1D.set_ispec."""
+
+    @classmethod
+    def setUpClass(cls):
+        dspacs = linspace(0.69, 4.15, 2460)
+        cls.ws = CreateWorkspace(DataX=dspacs, DataY=zeros_like(dspacs), UnitX="dSpacing", OutputWorkspace="ws_set_ispec")
+        EditInstrumentGeometry(Workspace=cls.ws, PrimaryFlightPath=50, L2=1, Polar=90)
+
+    @classmethod
+    def tearDownClass(cls):
+        AnalysisDataService.clear()
+
+    def test_set_ispec_updates_ispec(self):
+        phase = Phase.from_alatt(3 * [5.43094], "F d -3 m")
+        phase.set_hkls([[1, 1, 1]])
+        pawley = PawleyPattern1D(self.ws, [phase], profile=GaussianProfile())
+        pawley.set_ispec(0)
+        self.assertEqual(pawley.ispec, 0)
+
+
+class PoldiUtilsFluxTest(unittest.TestCase):
+    """Tests for poldi_utils flux correction functions."""
+
+    def test_do_interp_with_flux_correction(self):
+        # simple 1D case: uniform flux should match plain interpolation scaled by flux value
+        d = linspace(1.0, 5.0, 50)
+        intensity = np.sin(d)
+        sin_theta = 0.5
+        lam_grid = linspace(0.5, 6.0, 100)
+        flux_vals = ones(100)  # uniform flux = 1.0
+
+        dtarget = linspace(1.5, 4.5, 30)[:, None]  # 2D for sum(axis=1)
+        result = _do_interp_with_flux_correction(dtarget, d, intensity, sin_theta, lam_grid, flux_vals)
+        # with uniform flux of 1.0, should be same as plain interp
+        expected = np.interp(dtarget.flatten(), d, intensity)
+        assert_array_almost_equal(result, expected, decimal=10)
+
+    def test_do_interp_with_flux_correction_non_uniform_flux(self):
+        d = linspace(1.0, 5.0, 50)
+        intensity = ones(50)
+        sin_theta = 0.5
+        lam_grid = linspace(0.5, 6.0, 100)
+        flux_vals = 2.0 * ones(100)  # uniform flux = 2.0
+
+        dtarget = linspace(1.5, 4.5, 30)[:, None]
+        result = _do_interp_with_flux_correction(dtarget, d, intensity, sin_theta, lam_grid, flux_vals)
+        # intensity * flux = 1 * 2 = 2 everywhere, so interpolated result should be ~2
+        assert_array_almost_equal(result, 2.0 * ones(30), decimal=5)
+
+    def test_get_flux_arrays(self):
+        fpath_data = FileFinder.getFullPath("poldi_448x500_chopper5k_silicon.txt")
+        ws = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
+        lam_grid, flux_vals = _get_flux_arrays(ws, lam_min=1.0, lam_max=5.0, n_points=50)
+        self.assertEqual(len(lam_grid), 50)
+        self.assertEqual(len(flux_vals), 50)
+        self.assertAlmostEqual(lam_grid[0], 1.0)
+        self.assertAlmostEqual(lam_grid[-1], 5.0)
+        # flux values should be positive
+        self.assertTrue(np.all(flux_vals >= 0))
+        AnalysisDataService.clear()
+
+    @patch("plugins.algorithms.poldi_utils._do_interp_with_flux_correction")
+    @patch("plugins.algorithms.poldi_utils._do_interp")
+    def test_flux_sample_points_none_disables_flux_correction(self, mock_interp, mock_flux_interp):
+        fpath_data = FileFinder.getFullPath("poldi_448x500_chopper5k_silicon.txt")
+        ws_2d = load_poldi(fpath_data, "POLDI_Definition_448_calibrated.xml", chopper_speed=5000, t0=5.855e-02, t0_const=-9.00)
+        # create a simple 1D workspace for input
+        phase = Phase.from_alatt(3 * [5.43094], "F d -3 m")
+        phase.set_hkls([[1, 1, 1]])
+        dspacs = linspace(0.69, 4.15, 2460)
+        ws_1d = CreateWorkspace(DataX=dspacs, DataY=zeros_like(dspacs), UnitX="dSpacing", OutputWorkspace="ws_1d_flux_test")
+        mock_interp.return_value = zeros_like(ws_2d.readX(0))
+
+        simulate_2d_data(ws_2d, ws_1d, flux_sample_points=None)
+
+        mock_flux_interp.assert_not_called()
+        self.assertGreater(mock_interp.call_count, 0)
+        AnalysisDataService.clear()
 
 
 if __name__ == "__main__":

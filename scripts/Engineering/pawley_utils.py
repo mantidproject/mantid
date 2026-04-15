@@ -361,7 +361,7 @@ class OutputTableMixin(ABC):
 
         tables = []
         for iphase in range(nphases):
-            phase_name = self.phases[iphase].get_phase_name()
+            phase_name = self.phases[iphase].get_phase_name() if self.phases else None
             suffix = phase_name or f"phase{iphase}"
             tab = self._create_table(f"{base_name}_{suffix}")
             self._populate_table(tab, iphase)
@@ -420,8 +420,6 @@ class BoundsMixin(ABC):
 
     @staticmethod
     def repeat_values(obj, n: int, obj_name: str) -> Optional[Iterable]:
-        if obj is None:
-            return None
         if not isinstance(obj, Iterable):
             return [obj] * n
         if len(obj) == n:
