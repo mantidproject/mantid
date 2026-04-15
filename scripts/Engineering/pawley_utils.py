@@ -291,7 +291,7 @@ class MtdFuncMixin:
                         func.fix(param_name)
 
 
-class OutputTableMixin:
+class OutputTableMixin(ABC):
     """Mixin that provides ``create_output_tables`` to any Pawley-fit class.
 
     The mixin creates and names the tables, while concrete classes control their
@@ -366,9 +366,9 @@ class OutputTableMixin:
             tables.append(tab)
         return tables
 
+    @abstractmethod
     def _populate_table(self, tab, iphase: int):
         """Add rows to *tab* for the given phase. Subclasses must implement this."""
-        raise NotImplementedError()
 
 
 class BoundsMixin(ABC):
@@ -380,15 +380,19 @@ class BoundsMixin(ABC):
 
     param_bounds_abs_min = None
 
+    @abstractmethod
     def get_param_names(self) -> np.ndarray:
         pass
 
+    @abstractmethod
     def get_params(self) -> np.ndarray:
         pass
 
+    @abstractmethod
     def get_free_params(self) -> np.ndarray:
         pass
 
+    @abstractmethod
     def get_isfree(self) -> np.ndarray[bool]:
         pass
 
@@ -414,22 +418,13 @@ class BoundsMixin(ABC):
 
     @staticmethod
     def repeat_values(obj, n: int, obj_name: str) -> Optional[Iterable]:
-        # if object is None skip
-        if not obj:
-            return
-        # if object isn't iterable, return an iterator with n values
+        if obj is None:
+            return None
         if not isinstance(obj, Iterable):
             return [obj] * n
-        else:
-            # if object is iterable check it is the expected length
-            if len(obj) == n:
-                return obj
-            # otherwise throw error
-            else:
-                logger.error(
-                    f"Length of sequence provided for {obj_name} ({len(obj)})does not match number of parameter names provided ({n})"
-                )
-                return
+        if len(obj) == n:
+            return obj
+        raise ValueError(f"Length of sequence provided for {obj_name} ({len(obj)}) does not match number of parameter names provided ({n})")
 
     def set_bounds(
         self,
