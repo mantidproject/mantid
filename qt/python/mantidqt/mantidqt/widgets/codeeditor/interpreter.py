@@ -31,9 +31,8 @@ ABORTED_STATUS_MSG = "Status: Aborted"
 
 # Returns the background color of the current line in the code editor
 def get_currentline_background_color():
-    if mtd_env.is_mac():
-        if mtd_env.is_dark_mode():
-            return QColor(0, 52, 110)
+    if mtd_env.is_theme_dark():
+        return QColor(0, 52, 110)
     return QColor(247, 236, 248)
 
 

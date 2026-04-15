@@ -85,14 +85,16 @@ def is_theme_dark():
     """
     Returns true if the user is using a dark theme on macOS
     """
-    try:
-        result = subprocess.run(
-            ["/usr/bin/defaults", "read", "-g", "AppleInterfaceStyle"],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=1,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return False
-    return bool(result.stdout.strip())
+    if is_mac():
+        try:
+            result = subprocess.run(
+                ["/usr/bin/defaults", "read", "-g", "AppleInterfaceStyle"],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=1,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return False
+        return bool(result.stdout.strip())
+    return False

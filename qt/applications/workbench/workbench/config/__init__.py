@@ -100,6 +100,8 @@ SAVE_STATE_VERSION = 2
 # 'Singleton' instance
 QSettings.setDefaultFormat(QSettings.IniFormat)
 CONF = UserConfig(ORGANIZATION, APPNAME, defaults=DEFAULTS)
+CONF.qsettings.setValue("os/is_mac", mtd_env.is_mac())
+CONF.qsettings.setValue("os/is_theme_dark", mtd_env.is_theme_dark())
 
 
 # Configuration for additional MainWindow instances: matplotlib figures, custom user interfaces etc

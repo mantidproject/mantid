@@ -11,7 +11,6 @@
 
 # third-party imports
 from qtpy.QtGui import QFont, QFontDatabase
-from qtpy.QtCore import QSettings
 
 import mantid.kernel.environment as mtd_env
 
@@ -68,13 +67,3 @@ def text_font():
         _TEXT_FONT_CACHE.setFixedPitch(True)
 
     return _TEXT_FONT_CACHE
-
-
-if IS_MAC := mtd_env.is_mac():
-    IS_DARK_MODE = mtd_env.is_theme_dark()
-else:
-    IS_DARK_MODE = False
-
-settings = QSettings()
-settings.setValue("OS/IS_MAC", IS_MAC)
-settings.setValue("OS/IS_DARK_MODE", IS_DARK_MODE)

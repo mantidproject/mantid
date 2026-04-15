@@ -13,8 +13,8 @@
  */
 AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font) : QsciLexerPython(), m_font(font) {
   QSettings settings;
-  m_isMac = settings.value("OS/IS_MAC", false).toBool();
-  m_isDarkMode = settings.value("OS/IS_DARK_MODE", false).toBool();
+  m_isMac = settings.value("os/is_mac", false).toBool();
+  m_isDarkMode = settings.value("os/is_theme_dark", false).toBool();
 }
 
 /**
