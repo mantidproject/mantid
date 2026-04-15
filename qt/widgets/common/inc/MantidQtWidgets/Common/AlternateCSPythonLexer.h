@@ -21,6 +21,8 @@ public:
   const char *keywords(int set) const override;
 
 private:
+  QColor defaultColorLight(int style) const;
+  QColor defaultColorDark(int style) const;
   QFont m_font;
   static constexpr const char *customKeywords = "True False";
 };
