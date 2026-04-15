@@ -9,6 +9,7 @@
 #include "DllConfig.h"
 #include "ui_ContainerSubtraction.h"
 #include <MantidQtWidgets/Common/UserInputValidator.h>
+#include <MantidQtWidgets/Spectroscopy/OutputWidget/OutputNameView.h>
 #include <QObject>
 #include <QWidget>
 
@@ -44,6 +45,7 @@ public:
 
   virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
   virtual IRunView *getRunView() const = 0;
+  virtual IOutputNameView *getOutputNameView() const = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL ContainerSubtractionView final : public QWidget, public IContainerSubtractionView {
@@ -74,6 +76,7 @@ public:
 
   IOutputPlotOptionsView *getPlotOptions() const override;
   IRunView *getRunView() const override;
+  IOutputNameView *getOutputNameView() const override;
 
   void removeSpectrum(const std::string &spName) const override;
   void plotSpectra(const std::vector<std::pair<CSCurves, MatrixWorkspace_sptr>> &wsToPlot, size_t specNo) override;

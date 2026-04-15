@@ -31,7 +31,7 @@
         <x>0</x>
         <y>0</y>
         <width>658</width>
-        <height>790</height>
+        <height>810</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -281,6 +281,9 @@
         </widget>
        </item>
        <item>
+        <widget class="MantidQt::CustomInterfaces::OutputNameView" name="outputNameWidget" native="true"/>
+       </item>
+       <item>
         <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
        </item>
        <item>
@@ -353,6 +356,12 @@
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/DataSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::OutputNameView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputNameView.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

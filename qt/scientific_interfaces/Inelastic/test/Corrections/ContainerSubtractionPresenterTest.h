@@ -38,6 +38,7 @@ public:
     auto algorithmRunner = std::make_unique<NiceMock<MockAlgorithmRunner>>();
     m_algorithmRunner = algorithmRunner.get();
     m_runView = std::make_unique<NiceMock<MockRunView>>();
+    m_outputNameView = std::make_unique<NiceMock<MockOutputNameView>>();
     m_view = std::make_unique<NiceMock<MockContainerSubtractionView>>();
     m_outputPlotView = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
     auto model = std::make_unique<NiceMock<MockContainerSubtractionModel>>();
@@ -45,6 +46,7 @@ public:
 
     ON_CALL(*m_view, getRunView()).WillByDefault(Return((m_runView.get())));
     ON_CALL(*m_view, getPlotOptions()).WillByDefault(Return((m_outputPlotView.get())));
+    ON_CALL(*m_view, getOutputNameView()).WillByDefault(Return((m_outputNameView.get())));
 
     EXPECT_CALL(*m_view, subscribe(_)).Times(Exactly(1));
     m_presenter = std::make_unique<ContainerSubtractionPresenter>(nullptr, std::move(algorithmRunner), std::move(model),
@@ -65,6 +67,7 @@ public:
     const auto ws = m_workspace;
 
     ON_CALL(*m_model, sampleWS()).WillByDefault(ReturnRef(ws));
+    ON_CALL(*m_model, canWS()).WillByDefault(ReturnRef(ws));
     EXPECT_CALL(*m_model, setSampleWS(testName)).Times(Exactly(1));
     EXPECT_CALL(*m_model, removeSubtractedWS()).Times(Exactly(1));
     EXPECT_CALL(*m_view, setSpMax(4)).Times(Exactly(1));
@@ -78,6 +81,7 @@ public:
     const auto ws = m_workspace;
 
     ON_CALL(*m_model, canWS()).WillByDefault(ReturnRef(ws));
+    ON_CALL(*m_model, sampleWS()).WillByDefault(ReturnRef(ws));
     EXPECT_CALL(*m_model, setCanWS(testName)).Times(Exactly(1));
     EXPECT_CALL(*m_model, removeSubtractedWS()).Times(Exactly(1));
     EXPECT_CALL(*m_view, setSpMax(4)).Times(Exactly(1));
@@ -91,6 +95,7 @@ public:
     const MatrixWorkspace_sptr ws;
 
     ON_CALL(*m_model, canWS()).WillByDefault(ReturnRef(ws));
+    ON_CALL(*m_model, sampleWS()).WillByDefault(ReturnRef(ws));
     EXPECT_CALL(*m_model, setCanWS(testName)).Times(Exactly(1));
     EXPECT_CALL(*m_model, removeSubtractedWS()).Times(Exactly(0));
     EXPECT_CALL(*m_view, setSpMax(4)).Times(Exactly(0));
@@ -173,6 +178,7 @@ private:
   NiceMock<MockAlgorithmRunner> *m_algorithmRunner;
   std::unique_ptr<NiceMock<MockRunView>> m_runView;
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputPlotView;
+  std::unique_ptr<NiceMock<MockOutputNameView>> m_outputNameView;
   std::unique_ptr<ContainerSubtractionPresenter> m_presenter;
   std::unique_ptr<NiceMock<MockContainerSubtractionView>> m_view;
   NiceMock<MockContainerSubtractionModel> *m_model;

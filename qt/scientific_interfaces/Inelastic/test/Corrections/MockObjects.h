@@ -49,6 +49,7 @@ public:
   MOCK_METHOD0(requestRebinToSample, bool());
   MOCK_CONST_METHOD0(getPlotOptions, IOutputPlotOptionsView *());
   MOCK_CONST_METHOD0(getRunView, IRunView *());
+  MOCK_CONST_METHOD0(getOutputNameView, IOutputNameView *());
 };
 
 class MockContainerSubtractionModel : public IContainerSubtractionModel {

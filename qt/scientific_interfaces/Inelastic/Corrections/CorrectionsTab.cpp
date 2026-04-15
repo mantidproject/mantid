@@ -159,6 +159,9 @@ void CorrectionsTab::displayInvalidWorkspaceTypeError(const std::string &workspa
 
 std::string CorrectionsTab::prepareContainerName(const std::string &containerName) {
   std::string runNum;
+  if (!doesExistInADS(containerName)) {
+    return runNum;
+  }
   const auto containerWs = getADSWorkspace(containerName);
   if (const auto &logs = containerWs->run(); logs.hasProperty("run_number")) {
     runNum = logs.getProperty("run_number")->value();

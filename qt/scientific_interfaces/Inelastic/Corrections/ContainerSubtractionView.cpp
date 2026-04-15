@@ -63,6 +63,7 @@ void ContainerSubtractionView::removeSpectrum(const std::string &spName) const {
 
 IOutputPlotOptionsView *ContainerSubtractionView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 IRunView *ContainerSubtractionView::getRunView() const { return m_uiForm.runWidget; }
+IOutputNameView *ContainerSubtractionView::getOutputNameView() const { return m_uiForm.outputNameWidget; }
 
 void ContainerSubtractionView::plotSpectra(const std::vector<std::pair<CSCurves, MatrixWorkspace_sptr>> &wsToPlot,
                                            size_t specNo) {

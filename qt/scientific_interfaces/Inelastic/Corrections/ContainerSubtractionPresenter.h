@@ -60,6 +60,7 @@ private:
   void setLoadHistory(bool doLoadHistory) override;
 
   bool requestRebinToSample() const;
+  void updateOutputName();
   void updateNewDataEntry(const MatrixWorkspace_sptr &ws, const CSCurves &curve) const;
 
   std::unique_ptr<IContainerSubtractionModel> m_model;

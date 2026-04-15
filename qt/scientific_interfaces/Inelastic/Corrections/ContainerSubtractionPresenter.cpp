@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ContainerSubtractionPresenter.h"
 
+#include <MantidQtWidgets/Common/ParseKeyValueString.h>
 #include <MantidQtWidgets/Spectroscopy/InterfaceUtils.h>
 #include <MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h>
 
@@ -15,7 +16,6 @@ Mantid::Kernel::Logger g_log("ContainerSubtraction");
 
 using namespace Mantid::API;
 namespace MantidQt::CustomInterfaces {
-
 ContainerSubtractionPresenter::ContainerSubtractionPresenter(QWidget *parent,
                                                              std::unique_ptr<API::IAlgorithmRunner> algoRunner,
                                                              std::unique_ptr<IContainerSubtractionModel> model,
@@ -24,6 +24,9 @@ ContainerSubtractionPresenter::ContainerSubtractionPresenter(QWidget *parent,
   m_view->subscribe(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface);
+  setOutputNamePresenter(m_view->getOutputNameView());
+  m_outputNamePresenter->setWsSuffixes(
+      MantidWidgets::qStringListToStdVector(InterfaceUtils::getSampleWSSuffixes("ContainerSubtraction")));
 }
 
 void ContainerSubtractionPresenter::handleValidation(IUserInputValidator *validator) const {
@@ -70,10 +73,11 @@ void ContainerSubtractionPresenter::runComplete(const Mantid::API::IAlgorithm_sp
     showMessageBox("Error on subtraction algorithm");
     return;
   }
-  m_pythonExportWsName = createOutputName();
+  m_pythonExportWsName = m_outputNamePresenter->generateOutputLabel();
   const MatrixWorkspace_sptr outWS = algorithm->getProperty("OutputWorkspace");
   AnalysisDataService::Instance().addOrReplace(m_pythonExportWsName, outWS);
   m_model->setSubtractedWS(m_pythonExportWsName);
+  m_outputNamePresenter->generateWarningLabel();
   updatePlot(m_view->getSpNo());
 
   if (const auto shiftX = m_view->getShift(); shiftX != 0.0) {
@@ -86,8 +90,16 @@ void ContainerSubtractionPresenter::runComplete(const Mantid::API::IAlgorithm_sp
 
 std::string ContainerSubtractionPresenter::createOutputName() {
   const auto &sampleName = m_model->sampleWS()->getName();
+  std::string sampleNameSuffix;
+  for (const auto &qSuffix : InterfaceUtils::getSampleWSSuffixes("ContainerSubtraction")) {
+    auto suffix = qSuffix.toStdString();
+    if (sampleName.ends_with(suffix)) {
+      sampleNameSuffix = suffix;
+      break;
+    }
+  }
   const auto containerName = prepareContainerName(m_model->canWS()->getName());
-  return sampleName.substr(0, sampleName.find_last_of("_")) + "_Subtract_" + containerName + "_red";
+  return sampleName.substr(0, sampleName.find_last_of("_")) + "_Subtract_" + containerName + sampleNameSuffix;
 }
 
 void ContainerSubtractionPresenter::setFileExtensionsByName(bool filter) {
@@ -104,14 +116,23 @@ void ContainerSubtractionPresenter::setFileExtensionsByName(bool filter) {
 bool ContainerSubtractionPresenter::requestRebinToSample() const { return m_view->requestRebinToSample(); }
 
 void ContainerSubtractionPresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
+
+void ContainerSubtractionPresenter::updateOutputName() {
+  if (m_model->sampleWS() && m_model->canWS()) {
+    m_outputNamePresenter->setOutputWsBasename(createOutputName());
+  }
+}
+
 void ContainerSubtractionPresenter::handleCanReady(const std::string &dataName) {
   m_model->setCanWS(dataName);
   updateNewDataEntry(m_model->canWS(), CSCurves::CONTAINER);
+  updateOutputName();
 }
 
 void ContainerSubtractionPresenter::handleSampleReady(const std::string &dataName) {
   m_model->setSampleWS(dataName);
   updateNewDataEntry(m_model->sampleWS(), CSCurves::SAMPLE);
+  updateOutputName();
 }
 
 void ContainerSubtractionPresenter::updateNewDataEntry(const MatrixWorkspace_sptr &ws, const CSCurves &curve) const {
