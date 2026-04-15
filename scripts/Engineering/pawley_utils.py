@@ -224,7 +224,8 @@ class Phase:
                 " ".join(str(p) for p in self.alatt),
                 self.spgr.getHMSymbol(),
                 "",
-            )
+            ),
+            name=self.name,
         )
         accessible_hkls = [hkl for hkl in self.hkls if dmin <= self.unit_cell.d(hkl) <= dmax]
         if accessible_hkls:
@@ -234,7 +235,7 @@ class Phase:
         return new_phase
 
     def get_hkl_strings(self) -> Sequence[str]:
-        return ["".join(str(int(round(v))) for v in [hkl.X(), hkl.Y(), hkl.Z()]) for hkl in self.hkls]
+        return [",".join(str(c) for c in self.hkl_as_key(hkl)) for hkl in self.hkls]
 
     def get_phase_name(self) -> Optional[str]:
         return self.name
