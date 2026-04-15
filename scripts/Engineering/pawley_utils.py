@@ -160,10 +160,10 @@ class Phase:
         return Phase(ws.sample().getCrystalStructure())
 
     @classmethod
-    def from_alatt(cls, alatt: np.ndarray, spgr: str = "P 1", basis: str = ""):
+    def from_alatt(cls, alatt: np.ndarray, spgr: str = "P 1", basis: str = "", name: Optional[str] = None):
         alatt_str = " ".join([str(par) for par in alatt])
         xtal = CrystalStructure(alatt_str, spgr, basis)
-        return Phase(xtal)
+        return Phase(xtal, name=name)
 
     def _get_alatt(self) -> np.ndarray[float]:
         return np.array([getattr(self.unit_cell, method)() for method in self.param_names])
