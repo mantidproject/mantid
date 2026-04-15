@@ -33,8 +33,8 @@ Explicit filters
 ----------------
 
 :ref:`algm-FilterEvents` takes either a :class:`SplittersWorkspace
-<mantid.api.ISplittersWorkspace>`, :ref:`TableWorkspace <Table
-Workspaces>`, or :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` as the
+<mantid.api.ISplittersWorkspace>`, :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>`,
+or :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` as the
 ``SplitterWorkspace``. The events are split into output workspaces
 according to their pulse times or the times they arrive at detectors.
 Note, times in ``MatrixWorkspace`` and ``TableWorkspace`` are in seconds,

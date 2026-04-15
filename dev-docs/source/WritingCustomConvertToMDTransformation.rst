@@ -15,7 +15,7 @@ plugin then becomes automatically available to use in the
 :ref:`ConvertToMD <algm-ConvertToMD-v1>` algorithm.
 
 As the MD transformation factory is similar to the :ref:`Dynamic Factory <Dynamic Factory>`
-used for converting :ref:`units <Unit Factory>`, the
+used for converting :py:obj:`Units <mantid.kernel.UnitFactoryImpl>`, the
 procedure of writing a custom ``ConvertToMD`` transformation is very similar to adding a new unit to use
 with :ref:`ConvertUnits <algm-ConvertUnits-v1>` algorithm
 or writing a new algorithm to use with Mantid.

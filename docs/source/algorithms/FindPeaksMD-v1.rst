@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm is used to find single-crystal peaks in a
-multi-dimensional workspace (:ref:`MDEventWorkspace <MDWorkspace>` or
+multi-dimensional workspace (:py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` or
 :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`). It looks for high signal
 density areas, and is based on an algorithm designed by Dennis Mikkelson
 for ISAW.
@@ -45,7 +45,7 @@ resulting from the :ref:`algm-BinMD` algorithm also. It works in the
 same way, except that the center of each bin is used since the centroid
 is not accessible. It may give better results on
 :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`'s that were converted to
-:ref:`MDWorkspaces <MDWorkspace>`.
+:py:obj:`MDWorkspace <mantid.api.IMDWorkspace>`.
 
 
 For data which has originally been based on histogram-type data and that has been converted to

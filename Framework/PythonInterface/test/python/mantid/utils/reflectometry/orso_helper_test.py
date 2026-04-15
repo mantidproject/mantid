@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import unittest
+from time import sleep
 from unittest import mock
 from mantid.kernel import version
 from datetime import datetime, timezone, date, time
@@ -234,12 +235,51 @@ class MantidORSODatasetTest(unittest.TestCase):
             creator_name,
             creator_affiliation,
             enable_instrument_settings=False,
+            model="air | Ni 100 | SiO2 0.5 | Si",
+            validate=False,
         )
 
         orso_dataset = dataset.dataset
         self.assertIsNotNone(orso_dataset)
         self._check_mantid_default_header(orso_dataset, dataset_name, self._ws, reduction_timestamp, creator_name, creator_affiliation)
         self._check_data(orso_dataset)
+
+    @mock.patch("mantid.utils.reflectometry.orso_helper.logger.error")
+    def test_create_mandatory_header_raises_error(self, mock_logger):
+        model_def = ["air | Ni 100 | SiO2 0.5 | 02", "air | 25 [ Si 7 | Fe 7 ] | Si", "Si | SiO2 0.5 | wat:er"]
+        for model in model_def:
+            MantidORSODataset(None, None, None, None, None, None, None, model=model, validate=True)
+        mock_logger.assert_has_calls(
+            [
+                mock.call(
+                    "The provided model description 'air | Ni 100 | SiO2 0.5 | 02' contains an error. "
+                    "Please check that the string follows the correct ORSO format."
+                ),
+                mock.call(
+                    "The provided model description 'air | 25 [ Si 7 | Fe 7 ] | Si' contains an error. "
+                    "Please check that the string follows the correct ORSO format."
+                ),
+                mock.call(
+                    "The provided model description 'Si | SiO2 0.5 | wat:er' contains an error. "
+                    "Please check that the string follows the correct ORSO format."
+                ),
+            ]
+        )
+
+    @mock.patch("mantid.utils.reflectometry.orso_helper.logger.error")
+    @mock.patch("mantid.utils.reflectometry.orso_helper.SampleModel")
+    def test_create_mandatory_header_raises_timeout_error(self, mock_sample_model, error_logger):
+        def slow_resolve(*args, **kwargs):
+            sleep(10)
+
+        sample_model = mock_sample_model.return_value
+        sample_model.resolve_to_layers.side_effect = slow_resolve
+        MantidORSODataset(None, None, None, None, None, None, None, model="air", validate=True)
+        error_logger.assert_has_calls(
+            [
+                mock.call("The provided model description 'air' could not be validated because of database unavalibility."),
+            ]
+        )
 
     def test_set_facility_on_mantid_orso_dataset(self):
         dataset = self._create_test_dataset()
@@ -369,7 +409,17 @@ class MantidORSODatasetTest(unittest.TestCase):
         self._check_files_are_created(dataset, filenames, 0, len(filenames), False)
 
     def _create_test_dataset(self, polarized=False):
-        return MantidORSODataset("Test dataset", self._data_columns, self._ws, datetime.now(), "", "", enable_instrument_settings=polarized)
+        return MantidORSODataset(
+            "Test dataset",
+            self._data_columns,
+            self._ws,
+            datetime.now(),
+            "",
+            "",
+            enable_instrument_settings=polarized,
+            model="",
+            validate=False,
+        )
 
     def _check_mantid_default_header(self, orso_dataset, dataset_name, ws, reduction_timestamp, creator_name, creator_affiliation):
         """Check that the default header contains only the information that can be shared
@@ -387,6 +437,8 @@ class MantidORSODatasetTest(unittest.TestCase):
             "    probe: neutron\n"
             "  sample:\n"
             f"    name: {ws.getTitle()}\n"
+            "    model:\n"
+            "      stack: air | Ni 100 | SiO2 0.5 | Si\n"
             "  measurement:\n"
             "    instrument_settings: null\n"
             "    data_files: []\n"

@@ -36,7 +36,7 @@ class CompilationDirective(BaseDirective):
         if os.path.exists(script_dir):
             for file in os.listdir(script_dir):
                 if file.endswith(".rst"):
-                    with open(script_dir.joinpath(file)) as f:
+                    with open(script_dir.joinpath(file), encoding="utf-8") as f:
                         contents = f.read()
                         self.add_rst(contents)
 

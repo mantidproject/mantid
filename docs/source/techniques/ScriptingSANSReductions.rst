@@ -101,7 +101,7 @@ AssignSample
     AssignSample(sample_run, reload=True, period)
 
 Specifies the run to analyse using the format ``InstRun#.extension``, e.g. ``SANS2D7777.nxs``.
-This is one of the few commands that executes :ref:`Mantid algorithms <Algorithm>` when called,
+This is one of the few commands that executes Mantid :py:obj:`algorithms <mantid.api.Algorithm>` when called,
 the effects of most commands are only felt after the reduction starts.
 On calling this function the experimental run is :ref:`loaded <algm-Load>` and component positions are :ref:`changed <algm-MoveInstrumentComponent>`
 (normally the detector bank and sample).

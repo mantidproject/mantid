@@ -71,8 +71,8 @@ a space group name, a point group name, or a list of symmetry operations. More i
 Using Background
 ----------------
 Starting with Mantid 6.1, the algorithm allows efficient processing of the background. In previous versions one used to
-create a background :ref:`MD Event workspaces <MDWorkspace>` by replicating data for each goniometer setting in the input workspace.
-The current implementation uses instead an :ref:`MD Event workspace<MDWorkspace>` in the sample frame of the laboratory, so no need
+create a background :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` by replicating data for each goniometer setting in the input workspace.
+The current implementation uses instead a :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` in the sample frame of the laboratory, so no need
 to replicate the background data.
 
 Similar to the case without background, temporary histogram workspaces are created for the background data and background normalization.

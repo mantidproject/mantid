@@ -169,8 +169,8 @@ void checkDetectorInfoSize(const Instrument &instr, const Geometry::DetectorInfo
   if (numDets != detInfo.size())
     throw std::runtime_error("ExperimentInfo: size mismatch between "
                              "DetectorInfo and number of detectors in "
-                             "instrument" +
-                             std::to_string(numDets) + " vs " + std::to_string(detInfo.size()));
+                             "instrument: " +
+                             std::to_string(detInfo.size()) + " vs " + std::to_string(numDets));
 }
 } // namespace
 
@@ -184,8 +184,9 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
   // changed.
-  if (sptr_instrument != (instr->isParametrized() ? instr->baseInstrument() : instr))
+  if (sptr_instrument != (instr->isParametrized() ? instr->baseInstrument() : instr)) {
     invalidateAllSpectrumDefinitions();
+  }
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
     // We take a *copy* of the ParameterMap since we are modifying it by setting

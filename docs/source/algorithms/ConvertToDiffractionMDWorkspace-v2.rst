@@ -10,7 +10,7 @@ Description
 -----------
 
 The algorithm converts from a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` (in
-any input units) into a :ref:`MDWorkspace <MDWorkspace>` containing
+any input units) into a :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` containing
 3D events in reciprocal space.
 
 The calculations apply only to elastic diffraction experiments. The
@@ -25,10 +25,10 @@ See the :ref:`algm-ConvertToDiffractionMDWorkspace-v1` for details of the old an
 
 The main difference between the results produced by the version one and two of this algorithm
 is the type of the workspace, produced by default.
-Version one is producing :ref:`MDLeanEvent\<3\> <MDWorkspace>`-s workspace
-and this version generates :ref:`MDEvent\<3\> <MDWorkspace>`-s workspace.
+Version one is producing :py:obj:`MDLeanEvent\<3\> <mantid.api.IMDWorkspace>`-s workspace
+and this version generates :py:obj:`MDEvent\<3\> <mantid.api.IMDWorkspace>`-s workspace.
 
-To obtain a workspace containing :ref:`MDLeanEvent\<3\> <MDWorkspace>`-s,
+To obtain a workspace containing :py:obj:`MDLeanEvent\<3\> <mantid.api.IMDWorkspace>`-s,
 and fine-tune the output workspace properties,
 one has to create OutputWorkspace using :ref:`algm-CreateMDWorkspace` algorithm first.
 

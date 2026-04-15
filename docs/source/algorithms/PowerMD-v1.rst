@@ -16,7 +16,7 @@ The signal :math:`a` becomes :math:`f = a^b`
 The error :math:`da` becomes :math:`df^2 = f^2 * b^2 * (da^2 / a^2)`
 
 This algorithm cannot be run on a
-:ref:`MDEventWorkspace <MDWorkspace>`. Its equivalent on a
+:py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`. Its equivalent on a
 :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` is called :ref:`algm-Power`.
 
 .. categories::

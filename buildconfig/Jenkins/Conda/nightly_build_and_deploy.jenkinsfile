@@ -588,7 +588,7 @@ def checkoutSource(sha) {
 
 def build_and_test(platform) {
   def buildscript_path = "${CISCRIPT_DIR}/conda-buildscript"
-  def common_args = '--clean-build --clean-external-projects --enable-systemtests'
+  def common_args = '--clean-build --enable-systemtests'
   def cmake_preset = "${platform}-ci"
   if(platform.startsWith('win')) {
     def workspace_unix_style = toUnixStylePath("${WORKSPACE}")

@@ -35,7 +35,7 @@ Here the :math:`N` is the number of scattered neutrons in unit time in a solid a
 
     F_K(Q) = \langle b_{coh} \rangle^2 [S(Q) - 1] = \frac{\langle b_{coh} \rangle^2}{Q} F(Q)
 
-where :math:`N_s` is the number of scatters in the sample and both :math:`\langle b_{tot}^2 \rangle` and :math:`\langle b_{coh} \rangle^2` are defined in the :ref:`Materials concept page <Materials>`.
+where :math:`N_s` is the number of scatters in the sample and both :math:`\langle b_{tot}^2 \rangle` and :math:`\langle b_{coh} \rangle^2` are defined in the :py:obj:`~mantid.kernel.Material` class.
 
 NOTE: This algorithm requires that :ref:`algm-SetSampleMaterial` is called prior in order to determine the :math:`\langle b_{tot}^2 \rangle` and :math:`\langle b_{coh} \rangle^2` terms.
 

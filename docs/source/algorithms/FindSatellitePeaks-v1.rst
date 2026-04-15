@@ -9,7 +9,7 @@ Description
 
 FindSatellitePeaks can be used to refine the locations of "satellite" peaks
 occurring at fractional HKL locations in reciprocal space. FindSatellitePeaks
-takes a :ref:`MDWorkspace <MDWorkspace>` of experimental data, a
+takes a :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` of experimental data, a
 :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` containing the locations of peaks with
 integer HKL, and another PeaksWorkspace containing a subset of peaks found at
 fractional HKL.
@@ -31,7 +31,7 @@ into exactly `k` clusters. If `ClusterThreshold` is specified then offsets will
 be grouped into clusters separated by no more than a cophenetic distance below
 this threshold.  The centroid of each cluster calculated for each group and is
 used as the offset to predict the location of fractional peaks everywhere in
-the :ref:`MDWorkspace <MDWorkspace>`.
+the :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>`.
 
 .. figure:: ../images/FindSatellitePeaks-clustering.png
    :align: center

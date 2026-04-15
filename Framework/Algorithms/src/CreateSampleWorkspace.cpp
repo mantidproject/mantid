@@ -513,7 +513,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
         std::shared_ptr<Detector> detector = bank->getAtXY(x, y);
         if (detector) {
           // Mark it as a detector (add to the instrument cache)
-          testInst->markAsDetector(detector.get());
+          testInst->markAsDetectorIncomplete(detector.get());
         }
       }
     }
@@ -535,12 +535,15 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
 
     Detector *detector = new Detector(monitorName, monitorNumber, monitorShape, testInst.get());
     // Mark it as a monitor (add to the instrument cache)
-    testInst->markAsMonitor(detector);
+    testInst->markAsMonitorIncomplete(detector);
 
     testInst->add(detector);
     // Set the bank along the z-axis of the instrument, between the detectors.
     detector->setPos(V3D(0.0, 0.0, bankDistanceFromSample * (monitorNumber - monitorsStart + 0.5)));
   }
+
+  // finalize the instrument
+  testInst->markAsDetectorFinalize();
 
   // Define a source component
   ObjComponent *source = new ObjComponent("moderator", IObject_sptr(new CSGObject), testInst.get());

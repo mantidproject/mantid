@@ -20,7 +20,7 @@ from a list of peaks fitted to a diffraction pattern. The peaks can be
 fitted to a Mantid workspace spectrum using the algorithm
 :ref:`EnggFitPeaks <algm-EnggFitPeaks>` which produces a table with
 parameter values for peaks in time-of-flight (TOF, see
-:ref:`Unit Factory <Unit Factory>`). The table is the essential
+:py:obj:`UnitFactory <mantid.kernel.UnitFactoryImpl>`). The table is the essential
 input to this algorithm.
 
 This algorithm fits the adjusted peak time-of-flight value positions
@@ -40,7 +40,7 @@ a table workspace with that name, containing the parameters fitted
 (DIFA, DIFC, TZERO).
 
 The parameters DIFA, DIFC, TZERO are also used in other Mantid algorithms. See
-:ref:`Unit Factory <Unit Factory>` for more details.
+:py:obj:`UnitFactory <mantid.kernel.UnitFactoryImpl>` for more details.
 
 Usage
 -----

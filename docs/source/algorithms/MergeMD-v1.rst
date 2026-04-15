@@ -9,11 +9,11 @@
 Description
 -----------
 
-This algorithm merges several :ref:`MDWorkspaces <MDWorkspace>` together
+This algorithm merges several :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` together
 into one by adding their events together.
 
 The algorithm starts by going through the list of
-:ref:`MDWorkspaces <MDWorkspace>` to find the extents that fully encompass
+:py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` to find the extents that fully encompass
 all input workspaces in each dimension. The number and names of
 dimensions must match for all input workspaces.
 

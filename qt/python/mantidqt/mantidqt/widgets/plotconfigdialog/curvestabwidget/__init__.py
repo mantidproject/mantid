@@ -96,7 +96,8 @@ def remove_curve_from_ax(curve):
     else:
         curve.remove()
         if isinstance(curve, ErrorbarContainer):
-            ax.containers.remove(curve)
+            if curve in ax.containers:
+                ax.containers.remove(curve)
 
 
 def curve_has_errors(curve):

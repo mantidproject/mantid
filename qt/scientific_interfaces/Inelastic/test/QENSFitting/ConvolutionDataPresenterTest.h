@@ -52,8 +52,8 @@ public:
     m_presenter = std::make_unique<ConvolutionDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
 
     m_workspace = createWorkspace(6);
-    m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
-    m_model->addWorkspace("WorkspaceName", FunctionModelSpectra("0-5"));
+    m_ads = std::make_unique<SetUpADSWithWorkspace>("TestWs", m_workspace);
+    m_model->addWorkspace("TestWs", FunctionModelSpectra("0-5"));
   }
 
   void tearDown() override {
@@ -93,19 +93,39 @@ public:
     TS_ASSERT(m_presenter->addWorkspaceFromDialog(dialog));
   }
 
+  void test_setResolution_calls_to_model() {
+    ON_CALL(*m_model, setResolution("ResWs", "TestWs", FunctionModelSpectra("0-3"))).WillByDefault(Return(true));
+    EXPECT_CALL(*m_model, setResolution("ResWs", "TestWs", FunctionModelSpectra("0-3"))).Times(Exactly(1));
+    EXPECT_CALL(*m_model, removeSpecialValues("ResWs")).Times(Exactly(0));
+    EXPECT_CALL(*m_view, displayWarning("Replaced the NaN's and infinities in ResWs with zeros")).Times(Exactly(0));
+
+    m_presenter->setResolution("ResWs", "TestWs", FunctionModelSpectra("0-3"));
+  }
+
+  void test_setResolution_has_bad_values() {
+    ON_CALL(*m_model, setResolution("ResWs", "TestWs", FunctionModelSpectra("0-3"))).WillByDefault(Return(false));
+    EXPECT_CALL(*m_model, setResolution("ResWs", "TestWs", FunctionModelSpectra("0-3"))).Times(Exactly(1));
+    EXPECT_CALL(*m_model, removeSpecialValues("ResWs")).Times(Exactly(1));
+    EXPECT_CALL(*m_view, displayWarning("Replaced the NaN's and infinities in ResWs with zeros")).Times(Exactly(1));
+
+    m_presenter->setResolution("ResWs", "TestWs", FunctionModelSpectra("0-3"));
+  }
+
   void test_updateTableFromModel_clears_table_and_adds_new_row_for_each_entry() {
     EXPECT_CALL(*m_view, clearTable()).Times(Exactly(1));
+    EXPECT_CALL(*m_model, updateWorkspaceNames()).Times(Exactly(1));
     EXPECT_CALL(*m_model, getNumberOfDomains()).Times(Exactly(4)).WillRepeatedly(Return(3));
-    EXPECT_CALL(*m_model, getWorkspace(FitDomainIndex(0))).Times(Exactly(1)).WillOnce(Return(m_workspace));
-    EXPECT_CALL(*m_model, getWorkspace(FitDomainIndex(1))).Times(Exactly(1)).WillOnce(Return(m_workspace));
-    EXPECT_CALL(*m_model, getWorkspace(FitDomainIndex(2))).Times(Exactly(1)).WillOnce(Return(m_workspace));
-    std::vector<std::pair<std::string, size_t>> resolutionsForFit(
-        {{"Workspace", 1}, {"Workspace", 1}, {"Workspace", 1}});
-    EXPECT_CALL(*m_model, getResolutionsForFit()).Times(Exactly(3)).WillRepeatedly(Return(resolutionsForFit));
+    EXPECT_CALL(*m_model, getWorkspaceID("TestWs")).Times(Exactly(3)).WillRepeatedly(Return(WorkspaceID{0}));
+
     FitDataRow newRow;
-    EXPECT_CALL(*m_view, addTableEntry(0, _)).Times(Exactly(1));
-    EXPECT_CALL(*m_view, addTableEntry(1, _)).Times(Exactly(1));
-    EXPECT_CALL(*m_view, addTableEntry(2, _)).Times(Exactly(1));
+    for (size_t index = 0; index < 3; index++) {
+      EXPECT_CALL(*m_model, getWorkspace(FitDomainIndex(index))).Times(Exactly(1)).WillOnce(Return(m_workspace));
+      EXPECT_CALL(*m_model, getSpectrum(FitDomainIndex(index))).Times(Exactly(1)).WillOnce(Return(index));
+      EXPECT_CALL(*m_model, getResolutionName(WorkspaceID{0}, WorkspaceIndex{index}))
+          .Times(Exactly(1))
+          .WillOnce(Return("ResWs"));
+      EXPECT_CALL(*m_view, addTableEntry(index, _)).Times(Exactly(1));
+    }
 
     m_presenter->updateTableFromModel();
   }

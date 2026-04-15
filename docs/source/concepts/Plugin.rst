@@ -22,13 +22,12 @@ functionality that you need. Within the outputs of the Mantid project
 Several of the libraries we deliver are created as plugins. Examples
 are:
 
--  MantidAlgorithms - Contains the general :ref:`algorithms <Algorithm>`
+-  MantidAlgorithms - Contains the general :py:obj:`algorithms <mantid.api.Algorithm>`
 -  MantidDataHandling - Contains the basic data loading and saving
-   :ref:`algorithms <Algorithm>`
--  MantidNexus - Contains the :ref:`algorithms <Algorithm>` for handling
-   nexus files
+   :py:obj:`algorithms <mantid.api.Algorithm>`
+-  MantidNexus - Contains the :py:obj:`algorithms <mantid.api.Algorithm>` for handling nexus files
 -  MantidDataObjects - Contains the definitions of the standard
-   :ref:`workspaces <Workspace>`
+   :py:obj:`Workspaces <mantid.api.Workspace>`
 
 How can you extend Mantid?
 --------------------------
@@ -37,8 +36,8 @@ The following areas have been designed to be easily extensible through
 using plugins. Each one contains more details in case you wish to create
 one of your own.
 
--  :ref:`Algorithm <Algorithm>`
--  :ref:`Workspace <Workspace>`
+-  :py:obj:`algorithm <mantid.api.Algorithm>`
+-  :py:obj:`~mantid.api.Workspace`
 -  Unit
 
 How do you create a plugin?

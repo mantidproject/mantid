@@ -50,7 +50,7 @@ New features
 - New parameter in :ref:`SaveIsawUB <algm-SaveIsawUB>` to rotate the UB by the goniometer matrix.
 - New algorithm :ref:`LoadGaussCube <algm-LoadGaussCube>` to load Gaussian cube files for volumetric data into a 3D :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`
 - :ref:`LoadWANDSCD <algm-LoadWANDSCD>` with grouping option has been sped up
-- New algorithm :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` to find single-crystal Bragg peaks in instruments with :ref:`RectangularDetectors <RectangularDetector>` (such as SXD).
+- New algorithm :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` to find single-crystal Bragg peaks in instruments with :py:obj:`~mantid.geometry.RectangularDetector` (such as SXD).
 - ISIS single crystal reduction class for SXD now supports defining a file extension when loading data (previously available for WISH class - in both cases the argument to ``load_run`` has been renamed to ``file_ext``)
 - Constant wavelength HFIR DEMAND instrument has been added to :ref:`dgsplanner-ref`
 

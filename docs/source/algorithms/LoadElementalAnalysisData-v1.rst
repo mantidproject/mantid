@@ -10,7 +10,7 @@ Description
 -----------
 
 The LoadElementalAnalysisData algorithm loads data from .dat files for the run chosen into a single
-:py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` containing a :ref:`Workspace <Workspace>` for each Detector identified. Each :ref:`Workspace <Workspace>` contains the identified spectra
+:py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` containing a :py:obj:`~mantid.api.Workspace` for each Detector identified. Each :py:obj:`~mantid.api.Workspace` contains the identified spectra
 results. The name of the :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>` depends on the setting of GroupWorkspace. The path of the directory where the .dat files are located is provided
 as an output property.
 
