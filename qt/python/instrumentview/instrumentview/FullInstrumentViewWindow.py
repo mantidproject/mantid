@@ -1138,7 +1138,7 @@ class FullInstrumentViewWindow(QMainWindow):
             new_lineplot_callbacks[new_cid] = func
         self._default_lineplot_callbacks = new_lineplot_callbacks
         self._figure_canvas_click_id = None
-        self._lineplot_peak_cursor.linev.remove()
+        del self._lineplot_peak_cursor
         self._lineplot_peak_cursor = None
         self._plot_toolbar.setDisabled(False)
         self._detector_figure_canvas.draw_idle()
