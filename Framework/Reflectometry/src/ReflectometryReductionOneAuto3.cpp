@@ -200,7 +200,9 @@ auto ReflectometryReductionOneAuto3::getOutputWorkspaceNames() -> WorkspaceNames
 
   const MatrixWorkspace_const_sptr &firstTransRun = getProperty("FirstTransmissionRun");
   const MatrixWorkspace_const_sptr &secondTransRun = getProperty("SecondTransmissionRun");
-  if (firstTransRun != nullptr && secondTransRun != nullptr) {
+  if (firstTransRun != nullptr && firstTransRun->getAxis(0)->unit()->unitID() != "TOF") {
+    result.trans = firstTransRun->getName();
+  } else if (firstTransRun != nullptr && secondTransRun != nullptr) {
     const std::string &firstTransRunNo = getRunNumber(*firstTransRun);
     const std::string &secondTransRunNo = getRunNumber(*secondTransRun);
     result.trans = TRANS_LAM_PREFIX + firstTransRunNo + secondTransRunNo;
