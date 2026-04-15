@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter, PeakInteractionStatus
+from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.Globals import CurrentTab
 from instrumentview.Peaks.DetectorPeaks import DetectorPeaks
@@ -21,7 +21,6 @@ from mantid.simpleapi import CreateSampleWorkspace
 import unittest
 from unittest import mock
 from unittest.mock import MagicMock, PropertyMock
-from enum import Enum
 
 
 class TestFullInstrumentViewPresenter(unittest.TestCase):
@@ -30,6 +29,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
         self._mock_view.is_show_shapes_checkbox_checked.return_value = False
         self._mock_view.is_select_bank_tube_checked.return_value = False
+        self._mock_view.selected_peaks_workspaces.return_value = []
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter", EnableLogging=False)
         self._model = FullInstrumentViewModel(self._ws)
         self._presenter = self._create_test_presenter()
@@ -37,27 +37,23 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._shape_renderer = MagicMock(spec=ShapeRenderer)
         self._presenter._renderer = self._presenter._point_cloud_renderer
         self._mock_view.reset_mock()
+        self._mock_view.selected_peaks_workspaces.return_value = []
 
     def tearDown(self):
         self._presenter.handle_close()
         self._ws.delete()
 
     def _create_test_presenter(self) -> FullInstrumentViewPresenter:
-        with (
-            mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces"),
-            mock.patch("instrumentview.FullInstrumentViewPresenter.InstrumentViewADSObserver"),
-        ):
+        with mock.patch("instrumentview.FullInstrumentViewPresenter.InstrumentViewADSObserver"):
             return FullInstrumentViewPresenter(self._mock_view, self._model)
 
-    def _create_detector_peaks(self, det_id: int, spec_no: int, location: np.ndarray) -> DetectorPeaks:
-        return DetectorPeaks([Peak(det_id, spec_no, location, 0, (1, 1, 1), 100, 1000, 100, 100)])
+    def _create_detector_peaks(self, det_id: int) -> DetectorPeaks:
+        return DetectorPeaks([Peak(det_id, 0, 0, (1, 1, 1), 100, 1000, 100, 100)])
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
-    def test_update_plotter(self, mock_set_peaks_ws):
+    def test_update_plotter(self):
         self._presenter.update_plotter()
         self.assertEqual(self._model.projection_type, ProjectionType.CYLINDRICAL_Y)
         self._mock_view.clear_main_plotter.assert_called()
-        mock_set_peaks_ws.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_contour_range_reset_clicked")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_integration_range")
@@ -255,86 +251,46 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertEqual([self._ws.name(), self._ws.name()], workspaces)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._transform_vectors_with_matrix")
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_overlay_arguments")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.refresh_lineplot_peaks")
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
     def test_on_peaks_workspace_selected(
         self,
-        mock_peak_overlay_points,
         mock_refresh_lineplot_peaks,
-        mock_set_peaks_workspaces,
+        mock_get_peak_overlay_arguments,
         mock_transform,
     ):
-        mock_peak_overlay_points.return_value = {"ws1": [self._create_detector_peaks(50, 50, np.zeros(3))]}
-        self._model._calculate_projection = MagicMock(return_value=np.array([np.zeros(3), np.zeros(3)]))
-        self._model._detector_ids = np.array([50, 52])
-        self._model._spectrum_nos = np.array([50, 52])
-        self._model._is_valid = np.array([True, True])
-        self._model._is_masked = np.array([False, False])
-        self._model._is_selected_in_tree = np.array([True, True])
+        mock_get_peak_overlay_arguments.return_value = ([np.zeros((1, 3))], [["(1, 1, 1)"]], ["ws1"])
+        mock_transform.return_value = np.zeros((1, 3))
         self._presenter.on_peaks_workspace_selected()
         mock_refresh_lineplot_peaks.assert_called_once()
         self._mock_view.clear_overlay_meshes.assert_called_once()
-        mock_set_peaks_workspaces.assert_called_once()
-        self._mock_view.plot_overlay_mesh.assert_called_once()
+        self._mock_view.plot_overlay_meshes.assert_called_once()
         mock_transform.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
-    @mock.patch.object(FullInstrumentViewModel, "picked_spectrum_nos", new_callable=mock.PropertyMock)
-    def test_refresh_lineplot_peaks(self, mock_picked_spectrum_nos, mock_peak_overlay_points):
-        mock_peak_overlay_points.return_value = {"ws1": [self._create_detector_peaks(50, 50, np.zeros(3))]}
-        mock_picked_spectrum_nos.return_value = [50]
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
+    def test_refresh_lineplot_peaks(self, mock_get_lineplot_args):
+        mock_get_lineplot_args.return_value = ([[100]], [["(1, 1, 1)"]], ["ws1"])
         self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
-        self._presenter._update_peaks_workspaces()
         self._presenter.refresh_lineplot_peaks()
-        mock_peak_overlay_points.assert_called_once()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
-        self._mock_view.plot_lineplot_overlay.assert_called_once()
-        overlay_call_args = self._mock_view.plot_lineplot_overlay.call_args[0]
-        self.assertEqual([100], overlay_call_args[0])
-        self.assertEqual(["(1, 1, 1)"], overlay_call_args[1])
+        self._mock_view.plot_lineplot_peak_overlays.assert_called_once_with([[100]], [["(1, 1, 1)"]], ["ws1"])
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
-    @mock.patch.object(FullInstrumentViewModel, "picked_spectrum_nos", new_callable=mock.PropertyMock)
-    def test_refresh_lineplot_peaks_q(self, mock_picked_spectrum_nos, mock_peak_overlay_points):
-        mock_peak_overlay_points.return_value = {"ws1": [self._create_detector_peaks(50, 50, np.zeros(3))]}
-        mock_picked_spectrum_nos.return_value = [50]
-        self._mock_view.current_selected_unit.return_value = self._presenter._MOMENTUM_TRANSFER
-        self._presenter._update_peaks_workspaces()
-        self._presenter.refresh_lineplot_peaks()
-        mock_peak_overlay_points.assert_called_once()
-        self._mock_view.clear_lineplot_overlays.assert_called_once()
-        self._mock_view.redraw_lineplot.assert_called_once()
-        self._mock_view.plot_lineplot_overlay.assert_called_once()
-        overlay_call_args = self._mock_view.plot_lineplot_overlay.call_args[0]
-        self.assertEqual([100], overlay_call_args[0])
-        self.assertEqual(["(1, 1, 1)"], overlay_call_args[1])
-
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
-    @mock.patch.object(FullInstrumentViewModel, "picked_spectrum_nos", new_callable=mock.PropertyMock)
-    def test_refresh_lineplot_peaks_no_detector(self, mock_picked_spectrum_nos, mock_peak_overlay_points):
-        mock_peak_overlay_points.return_value = {"ws1": [self._create_detector_peaks(50, 50, np.zeros(3))]}
-        mock_picked_spectrum_nos.return_value = []
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
+    def test_refresh_lineplot_peaks_no_peaks(self, mock_get_lineplot_args):
+        mock_get_lineplot_args.return_value = ([], [], [])
         self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
-        self._presenter._update_peaks_workspaces()
         self._presenter.refresh_lineplot_peaks()
-        mock_peak_overlay_points.assert_called_once()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
-        self._mock_view.plot_lineplot_overlay.assert_not_called()
+        self._mock_view.plot_lineplot_peak_overlays.assert_called_once_with([], [], [])
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.peak_overlay_points")
-    @mock.patch.object(FullInstrumentViewModel, "picked_spectrum_nos", new_callable=mock.PropertyMock)
-    def test_refresh_lineplot_peaks_wrong_unit(self, mock_picked_spectrum_nos, mock_peak_overlay_points):
-        mock_peak_overlay_points.return_value = {"ws1": [self._create_detector_peaks(50, 50, np.zeros(3))]}
-        mock_picked_spectrum_nos.return_value = [50]
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
+    def test_refresh_lineplot_peaks_wrong_unit(self, mock_get_lineplot_args):
+        mock_get_lineplot_args.side_effect = RuntimeError("Unknown unit Light Years for peak location")
         self._mock_view.current_selected_unit.return_value = "Light Years"
-        self._presenter.refresh_lineplot_peaks()
-        mock_peak_overlay_points.assert_not_called()
-        self._mock_view.clear_lineplot_overlays.assert_called_once()
-        self._mock_view.redraw_lineplot.assert_called_once()
-        self._mock_view.plot_lineplot_overlay.assert_not_called()
+        with self.assertRaises(RuntimeError):
+            self._presenter.refresh_lineplot_peaks()
 
     @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.relative_detector_angle")
@@ -352,59 +308,44 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_relative_detector_angle.assert_called_once()
         self._mock_view.set_relative_detector_angle.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
-    def test_aspect_ratio_box_visibility_set(self, mock_set_peaks):
+    def test_aspect_ratio_box_visibility_set(self):
         self._mock_view.current_selected_projection.return_value = ProjectionType.THREE_D
         self._presenter.update_plotter()
-        mock_set_peaks.assert_called_once()
-        mock_set_peaks.reset_mock()
         self.assertEqual(ProjectionType.THREE_D, self._model.projection_type)
         self._mock_view.enable_or_disable_aspect_ratio_box.assert_called_once()
         self._mock_view.enable_or_disable_aspect_ratio_box.reset_mock()
         self._mock_view.current_selected_projection.return_value = ProjectionType.SPHERICAL_X
         self._presenter.update_plotter()
         self.assertEqual(ProjectionType.SPHERICAL_X, self._model.projection_type)
-        mock_set_peaks.assert_called_once()
         self._mock_view.enable_or_disable_aspect_ratio_box.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
-    def test_flip_z_axis_box_enabled_disabled(self, mock_set_peaks):
+    def test_flip_z_axis_box_enabled_disabled(self):
         self._mock_view.current_selected_projection.return_value = ProjectionType.THREE_D
         self._presenter.update_plotter()
         self.assertEqual(ProjectionType.THREE_D, self._model.projection_type)
-        mock_set_peaks.assert_called_once()
-        mock_set_peaks.reset_mock()
         self._mock_view.enable_or_disable_flip_z_axis_box.assert_called_once()
         self._mock_view.enable_or_disable_flip_z_axis_box.reset_mock()
         self._mock_view.current_selected_projection.return_value = ProjectionType.SPHERICAL_X
         self._presenter.update_plotter()
         self.assertEqual(ProjectionType.SPHERICAL_X, self._model.projection_type)
-        mock_set_peaks.assert_called_once()
         self._mock_view.enable_or_disable_flip_z_axis_box.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
-    def test_on_flip_z_axis_calls_update_plotter(self, mock_set_peaks):
+    def test_on_flip_z_axis_calls_update_plotter(self):
         self._mock_view.is_flip_z_axis_checkbox_checked.return_value = True
         self._presenter.on_flip_z_axis_check_box_clicked()
-        mock_set_peaks.assert_called_once()
         self._presenter._renderer.add_detector_mesh_to_plotter.assert_called_once()
         self.assertTrue(self._model.flip_z)
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
-    def test_flip_z_state_propagated_to_model(self, mock_set_peaks):
+    def test_flip_z_state_propagated_to_model(self):
         self._mock_view.is_flip_z_axis_checkbox_checked.return_value = False
         self._presenter.update_plotter()
-        mock_set_peaks.assert_called_once()
-        mock_set_peaks.reset_mock()
         self.assertFalse(self._model.flip_z)
         self._mock_view.is_flip_z_axis_checkbox_checked.return_value = True
         self._presenter.update_plotter()
-        mock_set_peaks.assert_called_once()
         self.assertTrue(self._model.flip_z)
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_peaks_workspaces")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_transform")
-    def test_transform_updated_on_redraw(self, mock_update_transform, mock_set_peaks):
+    def test_transform_updated_on_redraw(self, mock_update_transform):
         # Anything apart from 3D
         self._model.projection_type = ProjectionType.SPHERICAL_X
         self._presenter.update_plotter()
@@ -499,66 +440,60 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._view.current_selected_unit.return_value = "view-unit"
         self._presenter._view.selected_peaks_workspaces.return_value = ["wsA", "wsB"]
         self._presenter._model.convert_units.return_value = 123.456
-        self._presenter._update_peak_buttons = MagicMock()
-        self._presenter._view.remove_peak_cursor_from_lineplot = MagicMock()
 
-    def test_add_mode_calls_add_peak_and_select_workspace_and_resets_state(self):
-        """In Adding mode: convert -> add_peak -> select_peaks_workspace, then disable & cleanup."""
+    def test_left_click_calls_add_peak_and_selects_workspace(self):
+        """Left click: convert -> add_peak -> queue select_peaks_workspace."""
         self._setup_on_peak_selected_tests()
-        self._presenter._peak_interaction_status = PeakInteractionStatus.Adding
-        returned_ws = MagicMock(name="ReturnedWorkspace")
+        self._presenter._callback_queue = MagicMock()
+        returned_ws = "ReturnedWorkspace"
         self._presenter._model.add_peak.return_value = returned_ws
-        self._presenter.on_peak_selected(3.14)
+        self._presenter.on_peak_selected_in_lineplot(3.14, "left")
         self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 3.14)
         self._presenter._model.add_peak.assert_called_once_with(123.456, ["wsA", "wsB"])
-        self._presenter._view.select_peaks_workspace.assert_called_once_with(returned_ws)
-        self.assertEqual(self._presenter._peak_interaction_status, PeakInteractionStatus.Disabled)
-        self._presenter._view.remove_peak_cursor_from_lineplot.assert_called_once()
-        self._presenter._update_peak_buttons.assert_called_once()
+        self._presenter._callback_queue.put.assert_called_once_with((self._presenter._view.select_peaks_workspace, (returned_ws,)))
         self._presenter._model.delete_peak.assert_not_called()
 
-    def test_delete_mode_calls_delete_peak_and_resets_state(self):
-        """In Deleting mode: convert -> delete_peak, then disable & cleanup."""
+    def test_right_click_calls_delete_peak(self):
+        """Right click: convert -> delete_peak."""
         self._setup_on_peak_selected_tests()
-        self._presenter._peak_interaction_status = PeakInteractionStatus.Deleting
-        self._presenter.on_peak_selected(9.81)
+        self._presenter.on_peak_selected_in_lineplot(9.81, "right")
         self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 9.81)
-        self._presenter._model.delete_peak.assert_called_once_with(123.456)
+        self._presenter._model.delete_peak.assert_called_once_with(123.456, ["wsA", "wsB"])
         self._presenter._model.add_peak.assert_not_called()
         self._presenter._view.select_peaks_workspace.assert_not_called()
-        self.assertEqual(self._presenter._peak_interaction_status, PeakInteractionStatus.Disabled)
-        self._presenter._view.remove_peak_cursor_from_lineplot.assert_called_once()
-        self._presenter._update_peak_buttons.assert_called_once()
 
-    def test_unknown_status_raises_and_does_not_change_state_or_cleanup(self):
-        """Unknown status -> raises RuntimeError, no cleanup or state changes."""
-
-        # Use a fake/unknown status (not Adding/Deleting)
-        class FakeStatus(Enum):
-            Unknown = 99
-
-        self._setup_on_peak_selected_tests()
-        self._presenter._peak_interaction_status = FakeStatus.Unknown
-        with self.assertRaises(RuntimeError):
-            self._presenter.on_peak_selected(1.23)
-        self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 1.23)
-        self._presenter._model.add_peak.assert_not_called()
-        self._presenter._model.delete_peak.assert_not_called()
-        self._presenter._view.select_peaks_workspace.assert_not_called()
-        self._presenter._view.remove_peak_cursor_from_lineplot.assert_not_called()
-        self._presenter._update_peak_buttons.assert_not_called()
-        self.assertEqual(self._presenter._peak_interaction_status, FakeStatus.Unknown)
-
-    def test_add_mode_uses_selected_peaks_workspaces_from_view(self):
+    def test_left_click_uses_selected_peaks_workspaces_from_view(self):
         """Ensures the workspace selection passed to add_peak is sourced from the view."""
         self._setup_on_peak_selected_tests()
-        self._presenter._peak_interaction_status = PeakInteractionStatus.Adding
+        self._presenter._callback_queue = MagicMock()
         self._presenter._view.selected_peaks_workspaces.return_value = ["ws1"]
-        returned_ws = MagicMock(name="WS")
+        returned_ws = "WS"
         self._presenter._model.add_peak.return_value = returned_ws
-        self._presenter.on_peak_selected(2.0)
+        self._presenter.on_peak_selected_in_lineplot(2.0, "left")
         self._presenter._model.add_peak.assert_called_once_with(123.456, ["ws1"])
-        self._presenter._view.select_peaks_workspace.assert_called_once_with(returned_ws)
+        self._presenter._callback_queue.put.assert_called_once_with((self._presenter._view.select_peaks_workspace, (returned_ws,)))
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._on_list_item_selected")
+    def test_on_start_adding_peaks_toggled_on(self, mock_on_list_item_selected):
+        """Toggling peak mode on enables single point picking and disables selection list."""
+        self._presenter._model = MagicMock()
+        self._presenter.on_start_adding_peaks_toggled(True)
+        self._presenter._model.turn_on_single_point_picking.assert_called_once()
+        self._mock_view.add_peak_cursor_to_lineplot.assert_called_once()
+        self._mock_view.set_delete_all_selected_peaks_button_enabled.assert_called_once_with(False)
+        self._mock_view.disable_and_uncheck_selection_list.assert_called_once()
+        mock_on_list_item_selected.assert_called_once_with(CurrentTab.Grouping)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._on_list_item_selected")
+    def test_on_start_adding_peaks_toggled_off(self, mock_on_list_item_selected):
+        """Toggling peak mode off restores normal picking and re-enables selection list."""
+        self._presenter._model = MagicMock()
+        self._presenter.on_start_adding_peaks_toggled(False)
+        self._presenter._model.turn_off_single_point_picking.assert_called_once()
+        self._mock_view.remove_peak_cursor_from_lineplot.assert_called_once()
+        self._mock_view.set_delete_all_selected_peaks_button_enabled.assert_called_once_with(True)
+        self._mock_view.enable_and_restore_selection_list.assert_called_once()
+        mock_on_list_item_selected.assert_called_once_with(CurrentTab.Grouping)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._create_and_add_monitor_mesh")
     def test_monitor_mesh_added(self, mock_create_monitor_mesh):

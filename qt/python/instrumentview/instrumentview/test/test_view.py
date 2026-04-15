@@ -8,7 +8,8 @@ import unittest
 from unittest import mock
 from unittest.mock import MagicMock
 
-
+import numpy as np
+from qtpy.QtCore import Qt
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
@@ -44,7 +45,6 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
 
     def test_plotters_created(self):
         self._mock_plotter.assert_called_once()
-        # self.assertEqual(self._mock_plotter.call_count, 2)
 
     def test_select_bank_tube_button_is_checkable(self):
         self.assertEqual(self._view._select_bank_tube.text(), "Select Bank/Tube")
@@ -65,7 +65,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     @mock.patch("qtpy.QtWidgets.QMainWindow.closeEvent")
     def test_close_event(self, mock_close_event):
         self._view.closeEvent(MagicMock())
-        self.assertEqual(2, mock_close_event.call_count)
+        self.assertEqual(1, mock_close_event.call_count)
         self._view.main_plotter.close.assert_called_once()
 
     @mock.patch("qtpy.QtWidgets.QMainWindow.closeEvent")
@@ -94,14 +94,13 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_refresh_peaks_ws_list(self, mock_qlist_widget_item):
         mock_list = MagicMock()
         mock_item = MagicMock()
+        mock_item.text.return_value = "existing_ws"
         mock_list.item.return_value = mock_item
         mock_list.count.return_value = 1
-        mock_item.checkState.return_value = 0
         self._view._peak_ws_list = mock_list
-        self._view._presenter.peaks_workspaces_in_ads.return_value = [MagicMock()]
+        self._view._presenter.peaks_workspaces_in_ads.return_value = ["existing_ws", "new_ws"]
         self._view.refresh_peaks_ws_list()
-        mock_list.clear.assert_called_once()
-        mock_list.adjustSize.assert_called_once()
+        # Only the new workspace should trigger QListWidgetItem creation
         mock_qlist_widget_item.assert_called_once()
 
     def test_clear_overlay_meshes(self):
@@ -123,18 +122,29 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self.assertEqual(0, len(self._view._lineplot_overlays))
         mock_text.remove.assert_called_once()
 
-    def test_plot_overlay_mesh(self):
-        position_groups = [[0, 0, 0]]
-        self._view.plot_overlay_mesh(position_groups, MagicMock(), "colour")
+    def test_plot_overlay_meshes(self):
+        positions = [np.array([[0, 0, 0]])]
+        labels = [["label"]]
+        selected_workspaces = ["ws1"]
+        mock_item = MagicMock()
+        mock_item.foreground().color().name.return_value = "#ff7f0e"
+        self._view._peak_ws_list = MagicMock()
+        self._view._peak_ws_list.findItems.return_value = [mock_item]
+        self._view.plot_overlay_meshes(positions, labels, selected_workspaces)
         self._view.main_plotter.add_points.assert_called_once()
         self._view.main_plotter.add_point_labels.assert_called_once()
         self.assertEqual(1, len(self._view._overlay_meshes))
 
-    def test_plot_lineplot_overlay(self):
-        x_values = [1.0, 2.0]
-        labels = ["a", "b"]
+    def test_plot_lineplot_peak_overlays(self):
+        x_values = [[1.0, 2.0]]
+        labels = [["a", "b"]]
+        selected_workspaces = ["ws1"]
+        mock_item = MagicMock()
+        mock_item.foreground().color().name.return_value = "#ff7f0e"
+        self._view._peak_ws_list = MagicMock()
+        self._view._peak_ws_list.findItems.return_value = [mock_item]
         self._view._detector_spectrum_axes = MagicMock()
-        self._view.plot_lineplot_overlay(x_values, labels, "colour")
+        self._view.plot_lineplot_peak_overlays(x_values, labels, selected_workspaces)
         self.assertEqual(2, self._view._detector_spectrum_axes.text.call_count)
         self.assertEqual(2, len(self._view._lineplot_overlays))
 
@@ -185,6 +195,14 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.store_draw_shapes_option()
         mock_config.Instance.return_value.__setitem__.assert_called_once_with(self._view._DRAW_SHAPES_SETTING_STRING, "Yes")
 
+    def test_on_axes_click_left_calls_presenter_with_left(self):
+        event = MagicMock()
+        event.inaxes = self._view._detector_spectrum_axes
+        event.xdata = 5.0
+        event.button = 1
+        self._view._on_axes_click(event)
+        self._view._presenter.on_peak_selected_in_lineplot.assert_called_once_with(5.0, "left")
+
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
     def test_store_draw_shapes_option_stores_no_when_unchecked(self, mock_config):
         self._view._show_shapes_check_box.setChecked(False)
@@ -218,6 +236,53 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
             view = FullInstrumentViewWindow()
         self.assertFalse(view.is_show_shapes_checkbox_checked())
+
+    def test_on_axes_click_right_calls_presenter_with_right(self):
+        event = MagicMock()
+        event.inaxes = self._view._detector_spectrum_axes
+        event.xdata = 7.0
+        event.button = 3
+        self._view._on_axes_click(event)
+        self._view._presenter.on_peak_selected_in_lineplot.assert_called_once_with(7.0, "right")
+
+    def test_on_axes_click_outside_axes_does_nothing(self):
+        event = MagicMock()
+        event.inaxes = MagicMock()  # different axes
+        event.xdata = 5.0
+        self._view._on_axes_click(event)
+        self._view._presenter.on_peak_selected_in_lineplot.assert_not_called()
+
+    def test_disable_and_uncheck_selection_list(self):
+        mock_item_0 = MagicMock()
+        mock_item_0.checkState.return_value = Qt.Checked
+        mock_item_1 = MagicMock()
+        mock_item_1.checkState.return_value = Qt.Unchecked
+        self._view._selection_list = MagicMock()
+        self._view._selection_list.count.return_value = 2
+        self._view._selection_list.item.side_effect = [mock_item_0, mock_item_1, mock_item_0, mock_item_1]
+        self._view._selection_tab = MagicMock()
+        self._view.disable_and_uncheck_selection_list()
+        mock_item_0.setCheckState.assert_called_with(Qt.Unchecked)
+        mock_item_1.setCheckState.assert_called_with(Qt.Unchecked)
+        self._view._selection_tab.setEnabled.assert_called_once_with(False)
+
+    def test_enable_and_restore_selection_list(self):
+        mock_item_0 = MagicMock()
+        mock_item_1 = MagicMock()
+        self._view._selection_list = MagicMock()
+        self._view._selection_list.count.return_value = 2
+        self._view._selection_list.item.side_effect = [mock_item_0, mock_item_1]
+        self._view._selection_tab = MagicMock()
+        self._view._selection_list_cache = {0: Qt.Checked, 1: Qt.Unchecked}
+        self._view.enable_and_restore_selection_list()
+        mock_item_0.setCheckState.assert_called_once_with(2)
+        mock_item_1.setCheckState.assert_called_once_with(0)
+        self._view._selection_tab.setEnabled.assert_called_once_with(True)
+
+    def test_set_delete_all_selected_peaks_button_enabled(self):
+        self._view._delete_all_selected_peaks_button = MagicMock()
+        self._view.set_delete_all_selected_peaks_button_enabled(False)
+        self._view._delete_all_selected_peaks_button.setEnabled.assert_called_once_with(False)
 
 
 if __name__ == "__main__":

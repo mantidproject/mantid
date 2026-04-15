@@ -7,9 +7,10 @@
 import numpy as np
 import pyvista as pv
 from queue import Queue
-from typing import Optional
+from typing import Literal, Optional
 from instrumentview.Globals import CurrentTab
 from threading import Thread
+
 from mantid import mtd
 from mantid.kernel import logger
 from mantid.simpleapi import AnalysisDataService
@@ -18,7 +19,6 @@ from mantid.dataobjects import MaskWorkspace, GroupingWorkspace, PeaksWorkspace
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
-from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 from instrumentview.ComponentTreeModel import ComponentTreeModel
 from instrumentview.ComponentTreePresenter import ComponentTreePresenter
 from instrumentview.Projections.ProjectionType import ProjectionType
@@ -27,8 +27,6 @@ from instrumentview.renderers.shape_renderer import ShapeRenderer
 from instrumentview.renderers.side_by_side_shape_renderer import SideBySideShapeRenderer
 
 from vtkmodules.vtkRenderingCore import vtkCoordinate
-
-from enum import Enum
 
 
 class SuppressRendering:
@@ -44,12 +42,6 @@ class SuppressRendering:
         self.plotter.suppress_rendering = self.old_value
 
 
-class PeakInteractionStatus(Enum):
-    Disabled = 1
-    Adding = 2
-    Deleting = 3
-
-
 class FullInstrumentViewPresenter:
     """Presenter for the Instrument View window"""
 
@@ -61,8 +53,6 @@ class FullInstrumentViewPresenter:
 
     _LINEAR = "Linear"
     _LOGARITHMIC = "Logarithmic"
-
-    _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     _XML_FILE_FILTER = "XML files (*xml)"
     _CAL_FILE_FILTER = "CAL files (*cal)"
@@ -123,8 +113,6 @@ class FullInstrumentViewPresenter:
         )
         self._view.hide_status_box()
         self._select_bank_tube = self._view.is_select_bank_tube_checked()
-        self._peak_interaction_status = PeakInteractionStatus.Disabled
-        self._update_peak_buttons()
         self.update_plotter()
 
     def _setup_component_tree(self) -> None:
@@ -225,7 +213,7 @@ class FullInstrumentViewPresenter:
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter()
             self.update_detector_picker()
-            self.on_peaks_workspace_selected()
+            self.refresh_plotter_peaks()
 
     def count_scale_combo_options(self) -> list[str]:
         return [self._LINEAR, self._LOGARITHMIC]
@@ -331,6 +319,8 @@ class FullInstrumentViewPresenter:
         return np.array([[scale_x, 0, 0, c_x * (1 - scale_x)], [0, scale_y, 0, c_y * (1 - scale_y)], [0, 0, 1, 0], [0, 0, 0, 1]])
 
     def _transform_vectors_with_matrix(self, points: np.ndarray, transform: np.ndarray) -> np.ndarray:
+        if points.size == 0:
+            return points
         # The transform is a 4x4 matrix, the points are 3D vectors, first we need an extra
         # entry on the points
         transformed_points = np.hstack([points, np.ones((points.shape[0], 1))])
@@ -366,9 +356,6 @@ class FullInstrumentViewPresenter:
         # Update to visibility shows up in real time
         self._renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
         self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
-        self._peak_interaction_status = PeakInteractionStatus.Disabled
-        self._view.remove_peak_cursor_from_lineplot()
-        self._update_peak_buttons()
 
     def _on_clear_point_picked_detectors_clicked(self) -> None:
         self._model.clear_point_picked_detectors()
@@ -403,7 +390,6 @@ class FullInstrumentViewPresenter:
             self.update_plotter()
             self.on_integration_limits_reset_clicked()
             self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
-            self._update_peak_buttons()
         else:
             self.update_picked_detectors_on_view()
             # NOTE: This is required explicitly
@@ -501,8 +487,9 @@ class FullInstrumentViewPresenter:
         self._view.show_plot_for_detectors(self._model.line_plot_workspace)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
         self._update_relative_detector_angle()
-        self._update_peaks_workspaces()
         self.refresh_lineplot_peaks()
+        if self._model.peak_picking_enabled():
+            self._view.add_peak_cursor_to_lineplot()
 
     def _update_relative_detector_angle(self) -> None:
         if len(self._model.picked_detector_ids) != 2:
@@ -571,9 +558,12 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._replace_workspace_callback, (ws_name, ws)))
 
     def _add_workspace_callback(self, ws_name, ws):
-        self._reload_peaks_workspaces()
-        self._reload_mask_workspaces()
-        self._reload_grouping_workspaces()
+        if isinstance(ws, PeaksWorkspace):
+            self._reload_peaks_workspaces()
+        elif isinstance(ws, MaskWorkspace):
+            self._reload_mask_workspaces()
+        elif isinstance(ws, GroupingWorkspace):
+            self._reload_grouping_workspaces()
 
     def add_workspace_callback(self, ws_name, ws):
         self._callback_queue.put((self._add_workspace_callback, (ws_name, ws)))
@@ -595,96 +585,52 @@ class FullInstrumentViewPresenter:
     def peaks_workspaces_in_ads(self) -> list[str]:
         return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(PeaksWorkspace)]
 
-    def _update_peaks_workspaces(self) -> None:
-        peaks_grouped_by_ws = []
-        points_from_model = list(self._model.peak_overlay_points().values())
-        for ws_index in range(len(points_from_model)):
-            peaks_grouped_by_ws.append(WorkspaceDetectorPeaks(points_from_model[ws_index], self._COLOURS[ws_index % len(self._COLOURS)]))
-        self._peaks_grouped_by_ws = peaks_grouped_by_ws
-
     def on_peaks_workspace_selected(self) -> None:
-        self._model.set_peaks_workspaces(self._view.selected_peaks_workspaces())
-        self._view.clear_overlay_meshes()
-        self._update_peaks_workspaces()
+        self.refresh_plotter_peaks()
         self.refresh_lineplot_peaks()
-        self._view.refresh_peaks_ws_list_colours()
-        if len(self._peaks_grouped_by_ws) == 0:
-            return
-        # Keeping the points from each workspace separate so we can colour them differently
-        for ws_peaks in self._peaks_grouped_by_ws:
-            peaks_spectrum_nos = np.array([p.spectrum_no for p in ws_peaks.detector_peaks])
-            spectrum_nos = self._model.spectrum_nos
-            # Use argsort + searchsorted for fast lookup. Using np.where(np.isin) does not
-            # maintain the original order. It is faster to sort then search the sorted
-            # array for matching spectrum numbers
-            sorted_idx = np.argsort(spectrum_nos)
-            sorted_spectrum_nos = spectrum_nos[sorted_idx]
-            positions = np.searchsorted(sorted_spectrum_nos, peaks_spectrum_nos)
-            # Map back to original indices
-            ordered_indices = sorted_idx[positions]
-            valid = sorted_spectrum_nos[positions] == peaks_spectrum_nos
-            ordered_indices = ordered_indices[valid]
-            labels = [p.label for i, p in enumerate(ws_peaks.detector_peaks) if valid[i]]
-            projected_points = self._model.detector_positions[ordered_indices]
-            if len(projected_points) > 0:
-                transformed_points = self._transform_vectors_with_matrix(projected_points, self._transform)
-                self._view.plot_overlay_mesh(transformed_points, labels, ws_peaks.colour)
+
+    def refresh_plotter_peaks(self) -> None:
+        self._view.clear_overlay_meshes()
+        pos, labels, selected_peaks_workspaces = self._model.get_peak_overlay_arguments(self._view.selected_peaks_workspaces())
+        transformed_pos = [self._transform_vectors_with_matrix(p, self._transform) for p in pos]
+        self._view.plot_overlay_meshes(transformed_pos, labels, selected_peaks_workspaces)
 
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
         self._view.clear_lineplot_overlays()
-
-        for ws_peaks in self._peaks_grouped_by_ws:
-            x_values = []
-            labels = []
-            for peak in ws_peaks.detector_peaks:
-                if peak.spectrum_no in self._model.picked_spectrum_nos:
-                    x_values += [p.location_in_unit(self._view.current_selected_unit()) for p in peak.peaks]
-                    labels += [p.label for p in peak.peaks]
-            if len(x_values) > 0:
-                self._view.plot_lineplot_overlay(x_values, labels, ws_peaks.colour)
+        self._view.plot_lineplot_peak_overlays(
+            *self._model.get_peak_lineplot_overlay_arguments(self._view.current_selected_unit(), self._view.selected_peaks_workspaces())
+        )
         self._view.redraw_lineplot()
 
-    def on_add_peak_clicked(self) -> None:
-        self._on_peak_clicked_in_lineplot(PeakInteractionStatus.Adding)
+    def on_start_adding_peaks_toggled(self, checked) -> None:
+        if checked:
+            self._model.turn_on_single_point_picking()
+            self._view.add_peak_cursor_to_lineplot()
+            self._view.set_delete_all_selected_peaks_button_enabled(False)
+            self._view.disable_and_uncheck_selection_list()
+            self._on_list_item_selected(CurrentTab.Grouping)
+        else:
+            self._model.turn_off_single_point_picking()
+            self._view.remove_peak_cursor_from_lineplot()
+            self._view.set_delete_all_selected_peaks_button_enabled(True)
+            self._view.enable_and_restore_selection_list()
+            self._on_list_item_selected(CurrentTab.Grouping)
 
-    def on_peak_selected(self, x: float) -> None:
+    def on_peak_selected_in_lineplot(self, x: float, mouse_click: Literal["right", "left"]) -> None:
+        if len(self._model.picked_detector_ids) == 0:
+            return
         # First convert to workspace x unit
         x_in_workspace_unit = self._model.convert_units(self._view.current_selected_unit(), self._model.workspace_x_unit, 0, x)
-        if self._peak_interaction_status == PeakInteractionStatus.Adding:
+        if mouse_click == "left":
             peaks_ws = self._model.add_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
-            self._view.refresh_peaks_ws_list()
-            self._view.select_peaks_workspace(peaks_ws)
-        elif self._peak_interaction_status == PeakInteractionStatus.Deleting:
-            self._model.delete_peak(x_in_workspace_unit)
-        else:
-            raise RuntimeError("Unknown peak operation")
-        self._peak_interaction_status = PeakInteractionStatus.Disabled
-        self._view.remove_peak_cursor_from_lineplot()
-        self._update_peak_buttons()
-
-    def _update_peak_buttons(self) -> None:
-        self._view.set_add_peak_button_enabled(
-            len(self._model.picked_detector_ids) == 1 and self._peak_interaction_status != PeakInteractionStatus.Adding
-        )
-        self._view.set_delete_peak_button_enabled(
-            self._view.has_any_peak_overlays() and self._peak_interaction_status != PeakInteractionStatus.Adding
-        )
-        self._view.set_delete_all_selected_peaks_button_enabled(
-            len(self._model.picked_detector_ids) > 0 and self._peak_interaction_status != PeakInteractionStatus.Adding
-        )
-
-    def _on_peak_clicked_in_lineplot(self, status: PeakInteractionStatus) -> None:
-        self._peak_interaction_status = status
-        self._view.add_peak_cursor_to_lineplot()
-        self._update_peak_buttons()
-
-    def on_delete_peak_clicked(self) -> None:
-        self._on_peak_clicked_in_lineplot(PeakInteractionStatus.Deleting)
+            # Trigger selection of peak ws must happen after the callbacks from add peak are complete
+            self._callback_queue.put((self._view.select_peaks_workspace, (peaks_ws,)))
+        elif mouse_click == "right":
+            self._model.delete_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
 
     def on_delete_all_selected_peaks_clicked(self) -> None:
-        self._model.delete_peaks_on_all_selected_detectors()
-        self._update_peak_buttons()
+        self._model.delete_peaks_on_all_selected_detectors(self._view.selected_peaks_workspaces())
 
     def on_show_monitors_check_box_clicked(self) -> None:
         self.update_plotter()
@@ -724,7 +670,9 @@ class FullInstrumentViewPresenter:
         Called when workspaces are added to or removed from the ADS.
         """
         with SuppressRendering(self._view.main_plotter):
-            self._reload_renderers()
             self._reload_peaks_workspaces()
             self._reload_mask_workspaces()
             self._reload_grouping_workspaces()
+            # Reload renderers only after updating the lists in the view
+            # Otherwise can trigger a plotter update when lists are not in sync with ADS
+            self._reload_renderers()
