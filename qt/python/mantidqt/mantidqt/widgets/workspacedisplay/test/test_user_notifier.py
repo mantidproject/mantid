@@ -5,13 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-import sys
 import unittest
 
 from unittest.mock import patch
 
 from mantidqt.utils.testing.mocks.mock_qt import MockQStatusBar
 from mantidqt.widgets.workspacedisplay.user_notifier import UserNotifier
+import mantid.kernel.environment as mtd_env
 
 
 def with_user_notifier(func):
@@ -39,7 +39,7 @@ class UserNotifierTest(unittest.TestCase):
             "mantidqt.widgets.workspacedisplay.user_notifier.UserNotifier._get_mouse_position", return_value=mouse_position
         ) as mock_get_mouse_position:
             self.user_notifier.show_mouse_toast(message)
-            if sys.platform == "win32":
+            if mtd_env.is_windows():
                 mock_get_mouse_position.assert_called_once_with()
                 mock_showText.assert_called_once_with(mouse_position, message)
             else:

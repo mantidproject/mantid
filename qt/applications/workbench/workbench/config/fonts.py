@@ -10,7 +10,6 @@
 """Utility functions to deal with fetching fonts"""
 
 import subprocess
-import sys
 
 # third-party imports
 from qtpy.QtGui import QFont, QFontDatabase, QColor
@@ -96,8 +95,7 @@ def _get_currentline_background_color():
     return QColor(247, 236, 248)
 
 
-IS_MAC = sys.platform == "darwin"
-if IS_MAC:
+if IS_MAC := mtd_env.is_mac():
     IS_DARK_MODE = _is_theme_dark()
 else:
     IS_DARK_MODE = False
