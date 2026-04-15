@@ -1010,18 +1010,43 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
             phases=self.phases,
         )
 
-    def fit(self, *args, max_scale_iter: int = 2, scale_rtol: float = 1e-3, **kwargs) -> OptimizeResult:
-        """Fit by alternating scale/background estimation and Bragg-intensity optimisation.
+    def fit(
+        self,
+        *args,
+        fit_strategy: str = "alternating",
+        max_scale_iter: int = 2,
+        scale_rtol: float = 1e-3,
+        **kwargs,
+    ) -> OptimizeResult:
+        """Fit the 2D Pawley pattern.
 
         Parameters
         ----------
+        fit_strategy : str
+            ``"alternating"`` — alternate between per-spectrum scale/background
+            estimation (via linear regression) and Bragg-intensity optimisation.
+            ``"single"`` — compute per-spectrum scales once, then run a single
+            least-squares optimisation (no outer iteration).
         max_scale_iter : int
-            Maximum number of outer iterations (scale re-estimation cycles).
+            Maximum number of outer iterations (only used by ``"alternating"``).
         scale_rtol : float
             Relative tolerance on the cost function between successive outer
             iterations.  The loop breaks early when the fractional change in
-            cost drops below this threshold.
+            cost drops below this threshold (only used by ``"alternating"``).
         """
+        if fit_strategy == "alternating":
+            res = self._fit_alternating(*args, max_scale_iter=max_scale_iter, scale_rtol=scale_rtol, **kwargs)
+        elif fit_strategy == "single":
+            self.scales = None
+            self.eval_2d(self.get_free_params())
+            res = super().fit(*args, **kwargs)
+            self.set_free_params(res.x)
+        else:
+            raise ValueError(f"Unknown fit_strategy '{fit_strategy}'. Options: 'alternating', 'single'.")
+        self.eval_2d(res.x)  # ensure 2D simulated workspace up to date
+        return res
+
+    def _fit_alternating(self, *args, max_scale_iter: int = 2, scale_rtol: float = 1e-3, **kwargs) -> OptimizeResult:
         res = None
         prev_cost = None
         for _ in range(max_scale_iter):
@@ -1032,7 +1057,6 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
             if prev_cost is not None and abs(prev_cost - res.cost) / max(prev_cost, 1e-12) < scale_rtol:
                 break
             prev_cost = res.cost
-        self.eval_2d(res.x)  # ensure 2D simulated workspace up to date
         return res
 
 
