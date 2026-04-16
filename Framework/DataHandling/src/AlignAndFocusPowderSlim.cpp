@@ -771,14 +771,19 @@ void AlignAndFocusPowderSlim::initCalibrationConstantsFromCalWS(const std::vecto
   }
 }
 
-const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS,
+const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const API::Workspace_sptr &inputWS,
                                                                 const std::string &filename,
                                                                 GroupingWorkspace_sptr &groupingWS) {
   const bool load_grouping = !groupingWS;
 
   auto alg = createChildAlgorithm("LoadDiffCal");
-  alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("Filename", filename);
+  if (filename.ends_with(".cal")) {
+    alg->setProperty("InputWorkspace", inputWS);
+  } else {
+    // intentionally do not supply the input workspace because h5 version can work without
+    g_log.debug("Not supplying instrument information to LoadDifCal");
+  }
   alg->setProperty<bool>("MakeCalWorkspace", true);
   alg->setProperty<bool>("MakeGroupingWorkspace", load_grouping);
   alg->setProperty<bool>("MakeMaskWorkspace", true);
