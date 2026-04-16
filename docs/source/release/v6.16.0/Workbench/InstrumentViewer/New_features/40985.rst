@@ -1,0 +1,1 @@
+- In New Instrument Viewer, peak selection no longer requires constantly clicking buttons for adding and deleting peaks. Peak selection now is triggered with a peak selection mode that lets you continually select detectors and add (left mouse click) and delete (right mouse click) peaks without extra clicking or moving the mouse around.

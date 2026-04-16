@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm takes a a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` and
-converts it into a :ref:`MDEventWorkspace <MDWorkspace>` that can be
+converts it into a :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` that can be
 viewed in the :ref:`sliceviewer`.
 
 The algorithm currently only works for instruments with
@@ -25,7 +25,7 @@ output workspace are:
 Each MDEvent created has a weight given by the number of counts in that
 bin. Zero bins are not converted to events (saving memory).
 
-Once created, the :ref:`MDEventWorkspace <MDWorkspace>` can be viewed
+Once created, the :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` can be viewed
 in the :ref:`sliceviewer`. It can also be rebinned with
 different parameters using :ref:`algm-BinMD`. This allows you to view
 the data in detector-space. For example, you might use this feature to
@@ -49,7 +49,7 @@ looks for :ref:`rectangular detectors <Creating Rectangular Area Detectors>` wit
 bank number.
 
 If you specify more than one bank number, then the algorithm will create
-a 4D :ref:`MDEventWorkspace <MDWorkspace>`. The fourth dimension will be equal to the bank
+a 4D :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`. The fourth dimension will be equal to the bank
 number, allowing you to easily pick a bank to view.
 
 .. categories::

@@ -221,6 +221,9 @@ Mantid Graphical User Interface Properties
 | ``InstrumentView.MaintainAspectRatio``             |Value of the "Maintain Aspect Ratio" option in the  | ``Yes``, ``No`` |
 |                                                    |Instrument View                                     |                 |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``InstrumentView.DrawShapes``                      |Value of the "Draw Shapes" option in the Instrument | ``Yes``, ``No`` |
+|                                                    |View                                                |                 |
++----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``MantidOptions.InvisibleWorkspaces``              |Do not show 'invisible' workspaces                  | ``0``, ``1``    |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``PeakColumn.hklPrec``                             |Precision of hkl values shown in tables             | ``2``           |

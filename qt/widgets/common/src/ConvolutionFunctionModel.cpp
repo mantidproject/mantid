@@ -67,17 +67,17 @@ void ConvolutionFunctionModel::setModel(const std::string &background,
                                         const std::string &lorentzianPeaks, const std::string &fitType,
                                         bool hasDeltaFunction, const std::vector<double> &qValues,
                                         const bool isQDependent, bool hasTempCorrection, double tempValue) {
-  auto fitFunction = std::make_shared<MultiDomainFunction>();
-  auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
-  for (int i = 0; i < nf; ++i) {
+  const auto fitFunction = std::make_shared<MultiDomainFunction>();
+  const auto nf = m_numberDomains > 0 ? m_numberDomains : 1;
+  for (size_t i = 0; i < nf; ++i) {
     CompositeFunction_sptr domainFunction;
-    auto qValue = qValues.empty() ? 0.0 : qValues[i];
+    const auto qValue = qValues.empty() || i >= qValues.size() ? 0.0 : qValues[i];
     auto innerFunction = createInnerFunction(lorentzianPeaks, fitType, hasDeltaFunction, isQDependent, qValue,
                                              hasTempCorrection, tempValue);
-    auto workspace = resolutionWorkspaces.empty() ? "" : resolutionWorkspaces[i].first;
-    auto workspaceIndex = resolutionWorkspaces.empty() ? 0 : resolutionWorkspaces[i].second;
-    auto resolutionFunction = createResolutionFunction(workspace, workspaceIndex);
-    auto convolutionFunction = createConvolutionFunction(resolutionFunction, innerFunction);
+    const auto &[workspace, workspaceIndex] =
+        resolutionWorkspaces.empty() || i >= resolutionWorkspaces.size() ? std::pair("", 0.0) : resolutionWorkspaces[i];
+    const auto resolutionFunction = createResolutionFunction(workspace, workspaceIndex);
+    const auto convolutionFunction = createConvolutionFunction(resolutionFunction, innerFunction);
     domainFunction = addBackground(convolutionFunction, background);
 
     fitFunction->addFunction(domainFunction);
@@ -88,7 +88,7 @@ void ConvolutionFunctionModel::setModel(const std::string &background,
   // structure subtly changing. For example composite functions of only one
   // member are removed and unneeded brackets are removed from user defined
   // functions. As function cloning is used later on in the workflow it seems
-  // safer to clone twice here to get the function in it's final state early on
+  // safer to clone twice here to get the function in its final state early on
   // rather than have it change during the workflow.
   setFunction(fitFunction->clone()->clone());
 }

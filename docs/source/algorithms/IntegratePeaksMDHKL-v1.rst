@@ -11,7 +11,7 @@ Description
 -----------
 
 :ref:`IntegratePeaksMDHKL <algm-IntegratePeaksMDHKL>` provides integration of a
-:py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` or :ref:`MDEventWorkspace <MDWorkspace>` in 3-dimensions.
+:py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` or :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` in 3-dimensions.
 The units of the workspace must be HKL.  The  main usage will be for data normalized by
 :ref:`MDNormSCD <algm-MDNormSCD>`.
 A 3D box is created for each peak and the background and peak data are separated.  The intensity and sigma of the

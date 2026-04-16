@@ -9,14 +9,14 @@
 Description
 -----------
 
-Compare two MDWorkspaces (:ref:`MDEventWorkspace <MDWorkspace>` or
+Compare two MDWorkspaces (:py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` or
 :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`) to see if they are the same.
 This is mostly meant for testing/debugging use by developers.
 
 **What is compared**: The dimensions, as well as the signal and error
 for each bin of each workspace will be compared.
 
-:ref:`MDEventWorkspace <MDWorkspace>` : the events in each box will
+:py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` : the events in each box will
 be compared if the *CheckEvents* option is checked. The events would
 need to be in the same order to match.
 

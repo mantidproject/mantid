@@ -17,8 +17,8 @@ deleting it.
 Data Services in Mantid
 -----------------------
 
--  :ref:`Analysis Data Service <Analysis Data Service>` - A data service
-   holding all of the :ref:`workspaces <Workspace>` used in this session.
+-  :py:obj:`AnalysisDataService <mantid.api.AnalysisDataServiceImpl>` - A data service
+   holding all of the :py:obj:`Workspaces <mantid.api.Workspace>` used in this session.
 -  :ref:`Instrument Data Service <Instrument Data Service>` - A data
    service holding all of the :py:obj:`instruments <mantid.geometry.Instrument>` used in this
    session.

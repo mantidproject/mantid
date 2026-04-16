@@ -85,7 +85,7 @@ using this are
 1. :ref:`Load <algm-Load>` the calibration data
 2. Run :ref:`PDCalibration <algm-PDCalibration>` with appropriate
    properties
-3. The ``OutputCalibrationTable`` is a :ref:`TableWorkspace <Table Workspaces>`. See
+3. The ``OutputCalibrationTable`` is a :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>`. See
    below for how to save, load, and use the workspace.
 
 

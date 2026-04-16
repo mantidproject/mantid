@@ -144,7 +144,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_negate_picked_visibility(self):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([False, False, False])
-        model.update_point_picked_detectors(1)
+        model.update_point_picked_detectors(1, False)
         np.testing.assert_equal(model._detector_is_picked, [False, True, False])
 
     def test_clear_point_picked_detectors(self):
@@ -183,6 +183,49 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
         expanded = model.expand_pickable_mask_to_parent_subtrees(np.array([False, True, False, False]))
         np.testing.assert_equal(expanded, [False, True, True, False])
+
+    def test_peak_picking_enabled_off_by_default(self):
+        model, _ = self._setup_model([1, 2, 3])
+        self.assertFalse(model.peak_picking_enabled())
+
+    def test_peak_picking_enabled_after_turn_on(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model.turn_on_single_point_picking()
+        self.assertTrue(model.peak_picking_enabled())
+
+    def test_peak_picking_disabled_after_turn_off(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model.turn_on_single_point_picking()
+        model.turn_off_single_point_picking()
+        self.assertFalse(model.peak_picking_enabled())
+
+    def test_turn_on_single_point_picking_caches_and_clears(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._point_picked_detectors = np.array([True, False, True])
+        model.turn_on_single_point_picking()
+        np.testing.assert_equal(model._point_picked_detectors, [False, False, False])
+        np.testing.assert_equal(model._point_picked_detectors_cached, [True, False, True])
+
+    def test_turn_off_single_point_picking_restores_cached(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._point_picked_detectors = np.array([True, False, True])
+        model._detector_is_picked = np.array([True, False, True])
+        model.turn_on_single_point_picking()
+        model.turn_off_single_point_picking()
+        np.testing.assert_equal(model._point_picked_detectors, [True, False, True])
+        np.testing.assert_equal(model._detector_is_picked, [True, False, True])
+
+    def test_update_point_picked_detectors_peak_picking_on_selects_single(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._detector_is_picked = np.array([False, False, False])
+        model.turn_on_single_point_picking()
+        model.update_point_picked_detectors(0, False)
+        np.testing.assert_equal(model._detector_is_picked, [True, False, False])
+        np.testing.assert_equal(model._point_picked_detectors, [True, False, False])
+        # Picking another detector clears the previous one
+        model.update_point_picked_detectors(1, False)
+        np.testing.assert_equal(model._detector_is_picked, [False, True, False])
+        np.testing.assert_equal(model._point_picked_detectors, [False, True, False])
 
     def test_detectors_with_no_spectra(self):
         self._setup_mocks([1, 20, 300, 400], monitors=np.array(["no", "no", "n/a", "yes"]))
@@ -492,81 +535,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(1, len(peaks_workspaces))
         self.assertEqual(mock_peaks_workspace, peaks_workspaces[0])
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
-    def test_set_peaks_workspaces(self, mock_ads):
-        mock_ads_instance = mock_ads.Instance()
-        mock_peaks_workspace = PeaksWorkspaceMock()
-        mock_ads_instance.retrieveWorkspaces.return_value = [mock_peaks_workspace]
-        model = FullInstrumentViewModel(self._ws)
-        names = ["a", "b"]
-        model.set_peaks_workspaces(names)
-        mock_ads_instance.retrieveWorkspaces.assert_called_once_with(names)
-        self.assertEqual(mock_peaks_workspace, model._selected_peaks_workspaces[0])
-
-    def test_peak_overlay_points(self):
-        model = FullInstrumentViewModel(self._ws)
-        peaks_ws = CreatePeaksWorkspace(self._ws, 2)
-        model._selected_peaks_workspaces = [peaks_ws]
-        model._detector_ids = np.array([100])
-        model._spectrum_nos = np.array([2])
-        model._is_valid = np.array([True])
-        model._is_masked = np.array([False])
-        model._is_selected_in_tree = np.array([True])
-        peaks = model.peak_overlay_points()
-        self.assertEqual(1, len(peaks))
-        detector_peak = peaks["peaks_ws"][0]
-        self.assertEqual(100, detector_peak.detector_id)
-        self.assertEqual("[0, 0, 0] x 2", detector_peak.label)
-        np.testing.assert_almost_equal(np.array([0, 0, 5.0]), detector_peak.location)
-
-    def test_peaks_with_spectrum_multiple_detectors(self):
-        # We want to test the case where a peaks workspace has a
-        # detector ID that is not in the model. This can happen when
-        # an instrument has multiple detector IDs per spectrum. The
-        # spectrum number should be used instead
-        mock_ws = self._create_mock_workspace([1, 2, 3, 4])
-        test_detector_id = 4
-        test_spectrum_no = 1
-
-        # Detector ID 4 is workspace index 2
-        def mock_getIndicesFromDetectorIDs(ids):
-            return [2]
-
-        mock_ws.getIndicesFromDetectorIDs = mock_getIndicesFromDetectorIDs
-        model = FullInstrumentViewModel(mock_ws)
-        mock_peaks_ws = MagicMock()
-        mock_peaks_ws.toDict.return_value = {
-            "DetID": [test_detector_id],
-            "h": [2],
-            "k": [2],
-            "l": [2],
-            "DSpacing": [10],
-            "Wavelength": [10],
-            "TOF": [10],
-        }
-        mock_peaks_ws.name.return_value = "mock_peaks_ws"
-
-        model._selected_peaks_workspaces = [mock_peaks_ws]
-        # Only read three detectors, not ID 4
-        model._detector_ids = np.array([1, 2, 3])
-        # Everything on spectrum number 1
-        model._spectrum_nos = np.array([test_spectrum_no, test_spectrum_no, test_spectrum_no])
-        model._is_valid = np.array([True, True, True])
-        model._is_masked = np.array([False, False, False])
-        model._is_selected_in_tree = np.array([True, True, True])
-        peaks = model.peak_overlay_points()
-        # Should get one peak with detector ID 4 and spectrum
-        # number 1
-        self.assertEqual(1, len(peaks))
-        detector_peak = peaks[mock_peaks_ws.name()][0]
-        self.assertEqual(1, len(detector_peak.peaks))
-        self.assertEqual(test_detector_id, detector_peak.detector_id)
-        self.assertEqual("(2, 2, 2)", detector_peak.label)
-        self.assertEqual(test_spectrum_no, detector_peak.spectrum_no)
-        single_peak = detector_peak.peaks[0]
-        self.assertEqual(test_detector_id, single_peak.detector_id)
-        self.assertEqual(test_spectrum_no, single_peak.spectrum_no)
-
     @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
     def test_relative_detector_angle_no_picked(self, mock_picked_detector_ids):
         model, mock_workspace = self._setup_model([10, 11, 12])
@@ -816,235 +784,171 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.clear_stored_keys(CurrentTab.Grouping)
         self.assertEqual(model._cached_rois_map, {})
 
-    def test_masked_spectrum_peak_not_included(self):
-        model = FullInstrumentViewModel(self._ws)
-        peaks_ws = CreatePeaksWorkspace(self._ws, 2)
-        model._selected_peaks_workspaces = [peaks_ws]
-        model._detector_ids = np.array([100])
-        model._spectrum_nos = np.array([2])
-        model._is_valid = np.array([True])
-        model._is_masked = np.array([True])
-        model._is_selected_in_tree = np.array([True])
-        peaks = model.peak_overlay_points()
-        self.assertEqual(0, len(peaks[peaks_ws.name()]))
-
-    def test_delete_all_peaks_skips_workspaces_not_in_overlay(self):
-        """Workspaces missing from overlay mapping are ignored."""
-        model, _ = self._setup_model([1, 7, 8])
-        model._detector_is_picked = [False, True, True]
-        ws1 = MagicMock()
-        ws1.name.return_value = "ws1"
-        ws1.removePeaks = MagicMock()
-        ws2 = MagicMock()
-        ws2.name.return_value = "ws2"
-        ws2.removePeaks = MagicMock()
-        model._selected_peaks_workspaces = [ws1, ws2]
-        # Only ws1 present in overlay
-        overlay = {"ws1": [DetectorPeaks([self._create_peak(10, 7), self._create_peak(11, 7)])]}
-        model.peak_overlay_points = MagicMock(return_value=overlay)
-        model.delete_peaks_on_all_selected_detectors()
-        ws1.removePeaks.assert_called_once_with([10, 11])
-        ws2.removePeaks.assert_not_called()
-
-    def test_delete_all_peaks_no_matching_detector_ids_no_removal(self):
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_delete_all_peaks_no_matching_detector_ids_no_removal(self, mock_wdp_cls, mock_ads):
         """No groups with a detector_id in picked_detector_ids -> no removePeaks calls."""
         model, _ = self._setup_model([1, 7, 8])
         model._detector_is_picked = [False, True, True]
-        ws1 = MagicMock()
-        ws1.name.return_value = "ws1"
-        ws1.removePeaks = MagicMock()
-        model._selected_peaks_workspaces = [ws1]
-        overlay = {
-            "ws1": [
-                DetectorPeaks([self._create_peak(1, 99)]),  # not selected
-                DetectorPeaks([self._create_peak(2, 100)]),  # not selected
-            ]
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
-        model.delete_peaks_on_all_selected_detectors()
-        ws1.removePeaks.assert_not_called()
+        ws1_wdp = MagicMock()
+        ws1_wdp.detector_peaks = [
+            DetectorPeaks([self._create_peak(1, 99)]),  # not selected
+            DetectorPeaks([self._create_peak(2, 100)]),  # not selected
+        ]
+        mock_wdp_cls.return_value = ws1_wdp
+        mock_ws1 = MagicMock()
+        mock_ads.retrieve.return_value = mock_ws1
+        model.delete_peaks_on_all_selected_detectors(["ws1"])
+        mock_ws1.removePeaks.assert_not_called()
 
-    def test_delete_all_peaks_removes_peaks_for_multiple_selected_detectors_in_same_workspace(self):
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_delete_all_peaks_removes_peaks_for_multiple_selected_detectors_in_same_workspace(self, mock_wdp_cls, mock_ads):
         """Aggregates peak indices from all matching detector groups in a workspace."""
         model, _ = self._setup_model([1, 7, 8])
         model._detector_is_picked = [False, True, True]
-        ws1 = MagicMock()
-        ws1.name.return_value = "ws1"
-        ws1.removePeaks = MagicMock()
-        model._selected_peaks_workspaces = [ws1]
-        # Matching detectors: 7 and 8; non-matching 99
-        overlay = {
-            "ws1": [
-                DetectorPeaks([self._create_peak(10, 7), self._create_peak(11, 7)]),
-                DetectorPeaks([self._create_peak(20, 8)]),
-                DetectorPeaks([self._create_peak(999, 99)]),  # should be ignored
-            ]
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
-        model.delete_peaks_on_all_selected_detectors()
+        ws1_wdp = MagicMock()
+        ws1_wdp.detector_peaks = [
+            DetectorPeaks([self._create_peak(10, 7), self._create_peak(11, 7)]),
+            DetectorPeaks([self._create_peak(20, 8)]),
+            DetectorPeaks([self._create_peak(999, 99)]),  # should be ignored
+        ]
+        mock_wdp_cls.return_value = ws1_wdp
+        mock_ws1 = MagicMock()
+        mock_ads.retrieve.return_value = mock_ws1
+        model.delete_peaks_on_all_selected_detectors(["ws1"])
         # Order preserves traversal: group(7) then group(8)
-        ws1.removePeaks.assert_called_once_with([10, 11, 20])
+        mock_ws1.removePeaks.assert_called_once_with([10, 11, 20])
 
-    def test_delete_all_peaks_aggregates_per_workspace_independently(self):
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_delete_all_peaks_aggregates_per_workspace_independently(self, mock_wdp_cls, mock_ads):
         """Each workspace gets its own set of aggregated indices."""
         model, _ = self._setup_model([1, 7, 8])
         model._detector_is_picked = [False, True, True]
-        ws1 = MagicMock()
-        ws1.name.return_value = "ws1"
-        ws1.removePeaks = MagicMock()
-        ws2 = MagicMock()
-        ws2.name.return_value = "ws2"
-        ws2.removePeaks = MagicMock()
-        model._selected_peaks_workspaces = [ws1, ws2]
-        overlay = {
-            "ws1": [
-                DetectorPeaks([self._create_peak(1, 7), self._create_peak(2, 7)]),
-                DetectorPeaks([self._create_peak(3, 8)]),
-            ],
-            "ws2": [
-                DetectorPeaks([self._create_peak(100, 8), self._create_peak(200, 8)]),
-            ],
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
-        model.delete_peaks_on_all_selected_detectors()
-        ws1.removePeaks.assert_called_once_with([1, 2, 3])
-        ws2.removePeaks.assert_called_once_with([100, 200])
+        ws1_wdp = MagicMock()
+        ws1_wdp.detector_peaks = [
+            DetectorPeaks([self._create_peak(1, 7), self._create_peak(2, 7)]),
+            DetectorPeaks([self._create_peak(3, 8)]),
+        ]
+        ws2_wdp = MagicMock()
+        ws2_wdp.detector_peaks = [
+            DetectorPeaks([self._create_peak(100, 8), self._create_peak(200, 8)]),
+        ]
+        mock_wdp_cls.side_effect = lambda name, _ws, _specnos: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+        mock_ws1 = MagicMock()
+        mock_ws2 = MagicMock()
+        mock_ads.retrieve.side_effect = lambda name: {"ws1": mock_ws1, "ws2": mock_ws2}[name]
+        model.delete_peaks_on_all_selected_detectors(["ws1", "ws2"])
+        mock_ws1.removePeaks.assert_called_once_with([1, 2, 3])
+        mock_ws2.removePeaks.assert_called_once_with([100, 200])
 
     def test_delete_all_peaks_no_selected_workspaces_no_crash(self):
         """With no selected workspaces, method exits quietly."""
         model, _ = self._setup_model([1, 7, 8])
         model._detector_is_picked = [False, True, True]
-        model._selected_peaks_workspaces = []
-        model.peak_overlay_points = MagicMock(return_value={})
         # Should not raise
-        model.delete_peaks_on_all_selected_detectors()
-        model.peak_overlay_points.assert_called_once()
+        model.delete_peaks_on_all_selected_detectors([])
 
     def _create_peak(self, peak_index: int, detector_id: int, x: float = 1.0) -> Peak:
-        return Peak(detector_id, 0, np.zeros(3), peak_index, (0, 0, 0), x, x, x, x)
+        return Peak(detector_id, detector_id, peak_index, (0, 0, 0), x, x, x, x)
 
     def test_no_selected_workspaces_no_overlay_no_removal(self):
         """When there are no selected workspaces or overlay entries, nothing is removed."""
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = [True, False, False]
-        model._selected_peaks_workspaces = []
-        model.peak_overlay_points = MagicMock(return_value={})
-        model.delete_peak(5.0)
         # No workspace exists to assert removePeak calls; just ensure method didn’t crash.
-        model.peak_overlay_points.assert_called_once()
+        self.assertEqual(None, model.delete_peak(5.0, []))
 
-    def test_no_matching_detector_peaks_no_removal(self):
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_no_matching_detector_peaks_no_removal(self, mock_wdp_cls, mock_ads):
         """If overlay contains no groups with the picked detector_id, nothing is removed."""
         model, _ = self._setup_model([7])
         model._detector_is_picked = [True]
-        ws1 = MagicMock()
-        ws1.name.return_value = "ws1"
-        ws1.removePeak = MagicMock()
-        model._selected_peaks_workspaces = [ws1]
         # Only detector_id=3 in overlay; model expects detector_id=7
-        overlay = {"ws1": [DetectorPeaks([self._create_peak(10, 3, 1.0), self._create_peak(11, 3, 2.0)])]}
-        model.peak_overlay_points = MagicMock(return_value=overlay)
-        model.delete_peak(2.2)
-        ws1.removePeak.assert_not_called()
+        ws1_wdp = MagicMock()
+        ws1_wdp.detector_peaks = [DetectorPeaks([self._create_peak(10, 3, 1.0), self._create_peak(11, 3, 2.0)])]
+        mock_wdp_cls.return_value = ws1_wdp
+        mock_ws1 = MagicMock()
+        mock_ads.retrieve.return_value = mock_ws1
+        model.delete_peak(2.2, ["ws1"])
+        mock_ws1.removePeak.assert_not_called()
 
-    def test_removes_closest_peak_in_single_workspace(self):
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_removes_closest_peak_in_single_workspace(self, mock_wdp_cls, mock_ads):
         """Selects and removes the closest peak within a single workspace."""
         model, _ = self._setup_model([7])
+        model._spectrum_nos = np.array([7])
         model._detector_is_picked = [True]
-        ws1 = MagicMock()
-        ws1.name.return_value = "ws1"
-        ws1.removePeak = MagicMock()
-        model._selected_peaks_workspaces = [ws1]
         # Peaks at 1.0 (idx=100), 2.0 (idx=101), 10.0 (idx=102); click at 2.2 -> closest is 2.0
-        overlay = {
-            "ws1": [DetectorPeaks([self._create_peak(100, 7, 1.0), self._create_peak(101, 7, 2.0), self._create_peak(102, 7, 10.0)])]
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
-        model.delete_peak(2.2)
-        ws1.removePeak.assert_called_once_with(101)
+        ws1_wdp = MagicMock()
+        ws1_wdp.detector_peaks = [
+            DetectorPeaks([self._create_peak(100, 7, 1.0), self._create_peak(101, 7, 2.0), self._create_peak(102, 7, 10.0)])
+        ]
+        mock_wdp_cls.return_value = ws1_wdp
+        mock_ws1 = MagicMock()
+        mock_ads.retrieve.return_value = mock_ws1
+        model.delete_peak(2.2, ["ws1"])
+        mock_ws1.removePeak.assert_called_once_with(101)
 
-    def test_selects_workspace_with_overall_min_distance(self):
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_selects_workspace_with_overall_min_distance(self, mock_wdp_cls, mock_ads):
         """Among multiple workspaces, chooses the peak with the smallest distance overall."""
         model, _ = self._setup_model([1, 2, 3, 7])
+        model._spectrum_nos = np.array([1, 2, 3, 7])
         model._detector_is_picked = [False, False, False, True]
-        ws1 = MagicMock()
-        ws1.name.return_value = "ws1"
-        ws1.removePeak = MagicMock()
-        ws2 = MagicMock()
-        ws2.name.return_value = "ws2"
-        ws2.removePeak = MagicMock()
-        model._selected_peaks_workspaces = [ws1, ws2]
         # ws1 closest distance = |2.5 - 2.2| = 0.3 (peak_index=201)
         # ws2 closest distance = |2.3 - 2.2| = 0.1 (peak_index=301) -> ws2 should be chosen
-        overlay = {
-            "ws1": [DetectorPeaks([self._create_peak(201, 7, 2.5), self._create_peak(202, 7, 100.0)])],
-            "ws2": [DetectorPeaks([self._create_peak(301, 7, 2.3), self._create_peak(302, 7, 50.0)])],
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
-        model.delete_peak(2.2)
-        ws2.removePeak.assert_called_once_with(301)
-        ws1.removePeak.assert_not_called()
-
-    def test_skips_workspaces_not_in_overlay(self):
-        """Workspaces not present in peak_overlay_points mapping are ignored."""
-        model, _ = self._setup_model([7])
-        model._detector_is_picked = [True]
-        ws1 = MagicMock()
-        ws1.name.return_value = "ws1"
-        ws1.removePeak = MagicMock()
-        ws3 = MagicMock()
-        ws3.name.return_value = "ws3"
-        ws3.removePeak = MagicMock()
-
-        model._selected_peaks_workspaces = [ws1, ws3]
-        overlay = {
-            "ws1": [DetectorPeaks([self._create_peak(10, 7, 1.9)])]
-            # ws3 missing from overlay
-        }
-        model.peak_overlay_points = MagicMock(return_value=overlay)
-        model.delete_peak(2.0)
-        ws1.removePeak.assert_called_once_with(10)
-        ws3.removePeak.assert_not_called()
+        ws1_wdp = MagicMock()
+        ws1_wdp.detector_peaks = [DetectorPeaks([self._create_peak(201, 7, 2.5), self._create_peak(202, 7, 100.0)])]
+        ws2_wdp = MagicMock()
+        ws2_wdp.detector_peaks = [DetectorPeaks([self._create_peak(301, 7, 2.3), self._create_peak(302, 7, 50.0)])]
+        mock_wdp_cls.side_effect = lambda name, _ws, _spec_nos: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+        mock_ws1 = MagicMock()
+        mock_ws2 = MagicMock()
+        mock_ads.retrieve.side_effect = lambda name: {"ws1": mock_ws1, "ws2": mock_ws2}[name]
+        model.delete_peak(2.2, ["ws1", "ws2"])
+        mock_ws2.removePeak.assert_called_once_with(301)
+        mock_ws1.removePeak.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.CreatePeaksWorkspace")
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
-    def test_peaks_workspace_for_adding_new_peak(self, mock_ads, mock_create_peaks_ws):
+    def test_get_peaks_workspace_for_adding_new_peak(self, mock_ads, mock_create_peaks_ws):
         model, _ = self._setup_model([1, 2, 3])
-        mock_ads_instance = mock_ads.Instance()
-        mock_ads_instance.doesExist.return_value = False
-        model._peaks_workspace_for_adding_new_peak([])
-        mock_create_peaks_ws.assert_called_once_with(
-            model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name, StoreInADS=False
-        )
+        mock_ads.doesExist.return_value = False
+        result = model._get_peaks_workspace_for_adding_new_peak([])
+        mock_create_peaks_ws.assert_called_once_with(model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name)
+        self.assertEqual(result, model._instrument_view_peaks_ws_name)
         mock_create_peaks_ws.reset_mock()
-        mock_ads_instance.doesExist.reset_mock()
+        mock_ads.doesExist.reset_mock()
 
-        model._peaks_workspace_for_adding_new_peak(["my_peaks_ws"])
+        result = model._get_peaks_workspace_for_adding_new_peak(["my_peaks_ws"])
         mock_create_peaks_ws.assert_not_called()
-        mock_ads_instance.retrieveWorkspaces.assert_called_once_with(["my_peaks_ws"])
-        mock_ads_instance.retrieveWorkspaces.reset_mock()
+        self.assertEqual(result, "my_peaks_ws")
 
-        mock_ads_instance.doesExist.return_value = True
-        model._peaks_workspace_for_adding_new_peak(["my_peaks_ws1", "my_peaks_ws2"])
-        mock_ads_instance.doesExist.assert_called_once_with(model._instrument_view_peaks_ws_name)
-        mock_ads_instance.doesExist.reset_mock()
+        mock_ads.doesExist.return_value = True
+        result = model._get_peaks_workspace_for_adding_new_peak(["my_peaks_ws1", "my_peaks_ws2"])
+        mock_ads.doesExist.assert_called_once_with(model._instrument_view_peaks_ws_name)
+        self.assertEqual(result, model._instrument_view_peaks_ws_name)
+        mock_ads.doesExist.reset_mock()
 
-        mock_ads_instance.doesExist.return_value = False
-        model._peaks_workspace_for_adding_new_peak(["my_peaks_ws1", "my_peaks_ws2"])
-        mock_create_peaks_ws.assert_called_once_with(
-            model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name, StoreInADS=False
-        )
+        mock_ads.doesExist.return_value = False
+        result = model._get_peaks_workspace_for_adding_new_peak(["my_peaks_ws1", "my_peaks_ws2"])
+        mock_create_peaks_ws.assert_called_once_with(model._workspace, 0, OutputWorkspace=model._instrument_view_peaks_ws_name)
+        self.assertEqual(result, model._instrument_view_peaks_ws_name)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.AddPeak")
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._peaks_workspace_for_adding_new_peak")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._get_peaks_workspace_for_adding_new_peak")
     def test_add_peak(self, mock_peaks_ws_for_adding, mock_add_peak):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([False, False, True])
-        peaks_ws = mock_peaks_ws_for_adding()
-        peaks_ws.name.return_value = "my_peaks_ws"
+        mock_peaks_ws_for_adding.return_value = "my_peaks_ws"
         peak_x = 1500
-        ws = model.add_peak(peak_x, MagicMock())
-        mock_add_peak.assert_called_once_with(peaks_ws, model._workspace, peak_x, 3)
+        ws = model.add_peak(peak_x, ["my_peaks_ws"])
+        mock_add_peak.assert_called_once_with("my_peaks_ws", model._workspace, peak_x, 3)
         self.assertEqual("my_peaks_ws", ws)
 
     def test_component_tree_no_matching_detector_ids(self):
@@ -1202,6 +1106,121 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.calculate_and_set_full_integration_range()
         # The setter calls update_integration_range which calls getIntegratedCountsForWorkspaceIndices
         mock_workspace.getIntegratedCountsForWorkspaceIndices.assert_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_overlay_arguments_filters_nonexistent_workspaces(self, mock_wdp_cls, mock_ads):
+        """Workspaces that don't exist in ADS are filtered out."""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_ads.doesExist.side_effect = lambda name: name == "ws1"
+        mock_wdp = MagicMock()
+        mock_wdp.get_positions_and_labels.return_value = (np.array([[0, 0, 0]]), ["label1"])
+        mock_wdp_cls.return_value = mock_wdp
+
+        positions, labels, ws_names = model.get_peak_overlay_arguments(["ws1", "ws_gone"])
+
+        self.assertEqual(ws_names, ["ws1"])
+        self.assertEqual(len(positions), 1)
+        self.assertEqual(len(labels), 1)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_overlay_arguments_empty_list(self, mock_wdp_cls, mock_ads):
+        """Empty input returns empty results."""
+        model, _ = self._setup_model([1, 2, 3])
+
+        positions, labels, ws_names = model.get_peak_overlay_arguments([])
+
+        self.assertEqual(positions, [])
+        self.assertEqual(labels, [])
+        self.assertEqual(ws_names, [])
+        mock_wdp_cls.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_overlay_arguments_multiple_workspaces(self, mock_wdp_cls, mock_ads):
+        """Returns separate positions and labels per workspace."""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_ads.doesExist.return_value = True
+
+        ws1_wdp = MagicMock()
+        ws1_wdp.get_positions_and_labels.return_value = (np.array([[1, 1, 1]]), ["hkl_1"])
+        ws2_wdp = MagicMock()
+        ws2_wdp.get_positions_and_labels.return_value = (np.array([[2, 2, 2], [3, 3, 3]]), ["hkl_2", "hkl_3"])
+        mock_wdp_cls.side_effect = lambda name, _ws, _spec: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+
+        positions, labels, ws_names = model.get_peak_overlay_arguments(["ws1", "ws2"])
+
+        self.assertEqual(ws_names, ["ws1", "ws2"])
+        np.testing.assert_array_equal(positions[0], np.array([[1, 1, 1]]))
+        np.testing.assert_array_equal(positions[1], np.array([[2, 2, 2], [3, 3, 3]]))
+        self.assertEqual(labels[0], ["hkl_1"])
+        self.assertEqual(labels[1], ["hkl_2", "hkl_3"])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_lineplot_overlay_arguments_filters_nonexistent_workspaces(self, mock_wdp_cls, mock_ads):
+        """Workspaces that don't exist in ADS are filtered out."""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_ads.doesExist.side_effect = lambda name: name == "ws1"
+        mock_wdp = MagicMock()
+        mock_wdp.get_x_values_and_labels.return_value = ([1.5], ["label1"])
+        mock_wdp_cls.return_value = mock_wdp
+
+        x_vals, labels, ws_names = model.get_peak_lineplot_overlay_arguments("TOF", ["ws1", "ws_gone"])
+
+        self.assertEqual(ws_names, ["ws1"])
+        self.assertEqual(len(x_vals), 1)
+        self.assertEqual(len(labels), 1)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_lineplot_overlay_arguments_empty_list(self, mock_wdp_cls, mock_ads):
+        """Empty input returns empty results."""
+        model, _ = self._setup_model([1, 2, 3])
+
+        x_vals, labels, ws_names = model.get_peak_lineplot_overlay_arguments("TOF", [])
+
+        self.assertEqual(x_vals, [])
+        self.assertEqual(labels, [])
+        self.assertEqual(ws_names, [])
+        mock_wdp_cls.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_lineplot_overlay_arguments_multiple_workspaces(self, mock_wdp_cls, mock_ads):
+        """Returns separate x-values and labels per workspace."""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_ads.doesExist.return_value = True
+
+        ws1_wdp = MagicMock()
+        ws1_wdp.get_x_values_and_labels.return_value = ([100.0], ["hkl_1"])
+        ws2_wdp = MagicMock()
+        ws2_wdp.get_x_values_and_labels.return_value = ([200.0, 300.0], ["hkl_2", "hkl_3"])
+        mock_wdp_cls.side_effect = lambda name, _ws, _spec: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+
+        x_vals, labels, ws_names = model.get_peak_lineplot_overlay_arguments("dSpacing", ["ws1", "ws2"])
+
+        self.assertEqual(ws_names, ["ws1", "ws2"])
+        self.assertEqual(x_vals[0], [100.0])
+        self.assertEqual(x_vals[1], [200.0, 300.0])
+        self.assertEqual(labels[0], ["hkl_1"])
+        self.assertEqual(labels[1], ["hkl_2", "hkl_3"])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_lineplot_overlay_arguments_passes_unit(self, mock_wdp_cls, mock_ads):
+        """The unit argument is forwarded to get_x_values_and_labels."""
+        model, _ = self._setup_model([1, 2, 3])
+        model._detector_is_picked = np.array([True, False, False])
+        mock_ads.doesExist.return_value = True
+        mock_wdp = MagicMock()
+        mock_wdp.get_x_values_and_labels.return_value = ([], [])
+        mock_wdp_cls.return_value = mock_wdp
+
+        model.get_peak_lineplot_overlay_arguments("Wavelength", ["ws1"])
+
+        mock_wdp.get_x_values_and_labels.assert_called_once_with("Wavelength", model.picked_spectrum_nos)
 
 
 if __name__ == "__main__":

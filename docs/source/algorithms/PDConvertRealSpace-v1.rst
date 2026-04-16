@@ -32,7 +32,7 @@ One can transform between this quantity and :math:`GK(r)` or :math:`g(r)` using:
 
     g(r)=\frac{G(r)}{4\pi r\rho_0}+1
 
-where :math:`\rho_0` is the sample number density and :math:`\langle b_{coh} \rangle^2` is defined in the :ref:`Materials concept page <Materials>`.
+where :math:`\rho_0` is the sample number density and :math:`\langle b_{coh} \rangle^2` is defined in the :py:obj:`~mantid.kernel.Material` class.
 
 NOTE: This algorithm requires that :ref:`algm-SetSampleMaterial` is called prior in order to determine the :math:`\rho_0` and :math:`\langle b_{coh} \rangle^2` terms.
 

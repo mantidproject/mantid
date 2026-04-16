@@ -16,11 +16,9 @@ Specification
 
 A sample environment is defined by:
 
-- one or more available containers, each with a defined :ref:`geometry
-  <HowToDefineGeometricShape>` and :ref:`composition <Materials>`
+- one or more available containers, each with a defined :ref:`geometry <HowToDefineGeometricShape>` and :py:obj:`material <mantid.kernel.Material>` composition
 - optional additional components that will be in the beam, each with
-  their own :ref:`geometry <HowToDefineGeometricShape>` and
-  :ref:`composition <Materials>`
+  their own :ref:`geometry <HowToDefineGeometricShape>` and :py:obj:`material <mantid.kernel.Material>` composition
 
 At a minimum a sample environment is expected to define a container with both its
 geometry and composition.

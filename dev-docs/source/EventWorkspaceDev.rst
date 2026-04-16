@@ -8,7 +8,7 @@ Event Workspace Development
   :local:
 
 The following information will be useful to you if you want to write an
-:ref:`algorithm` that is :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` aware.
+:py:obj:`algorithm <mantid.api.Algorithm>` that is :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` aware.
 
 Individual Neutron Event Data (TofEvent)
 ########################################

@@ -7,7 +7,7 @@ A **Nexus file** is a common data exchange format for neutron, X-ray,
 and muon experiments.
 
 Mantid is capable of loading certain types of Nexus files and of saving certain types of
-:ref:`workspace <workspace>` as a Nexus file.  It can also save a
+:py:obj:`~mantid.api.Workspace` as a Nexus file.  It can also save a
 :ref:`project <project>` as a mantid file plus Nexus files.
 
 Structure

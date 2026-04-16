@@ -150,6 +150,8 @@ private:
   const std::string m_prefix = "test_";
   const std::string m_saveDirectory = "Test";
   const std::string m_multiFileSuffix = "_multi";
+  const std::string m_model = "";
+  const bool m_validation = false;
 
   FileSaver createSaver(std::unique_ptr<MockSaveAlgorithmRunner> saveAlgRunner, MockFileHandler &mockFileHandler) {
     return FileSaver(std::move(saveAlgRunner), &mockFileHandler);
@@ -178,7 +180,7 @@ private:
 
   const FileFormatOptions createFileFormatOptions(NamedFormat format, const bool saveAsSingleFile = false) {
     return FileFormatOptions(format, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
-                             m_includeAdditionalColumns, saveAsSingleFile);
+                             m_includeAdditionalColumns, saveAsSingleFile, m_model, m_validation);
   }
 
   const std::string expectedExtension(NamedFormat format) {
@@ -229,8 +231,8 @@ private:
                                      const NamedFormat format) {
     auto extension = expectedExtension(format);
     auto savePath = expectedSavePath(wsName, format);
-    EXPECT_CALL(mockSaveAlgorithmRunner,
-                runSaveORSOAlgorithm(_, savePath, m_includeQResolution, m_includeAdditionalColumns))
+    EXPECT_CALL(mockSaveAlgorithmRunner, runSaveORSOAlgorithm(_, savePath, m_includeQResolution,
+                                                              m_includeAdditionalColumns, m_model, m_validation))
         .Times(1);
   }
 

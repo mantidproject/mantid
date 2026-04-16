@@ -9,13 +9,13 @@ BinMD Coordinate Transformations
 Introduction
 ------------
 
-The algorithms :ref:`algm-BinMD` and :ref:`algm-SliceMD` allow an :ref:`MDWorkspace` to be binned into a new coordinate
+The algorithms :ref:`algm-BinMD` and :ref:`algm-SliceMD` allow an :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` to be binned into a new coordinate
 system. This guide describes the coordinate transformations and relations between binned workspaces.
 
 Binning an MDWorkspace
 ----------------------
 
-- Begin with an initial :ref:`MDWorkspace` called ``original_ws`` with two dimensions, ``Qx`` and ``Qy``.
+- Begin with an initial :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` called ``original_ws`` with two dimensions, ``Qx`` and ``Qy``.
 - The :ref:`algm-BinMD` algorithm can transform these coordinates into a new coordinate space with, for example, a
   rotation and a translation:
 

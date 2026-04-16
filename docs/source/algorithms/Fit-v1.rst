@@ -27,7 +27,7 @@ additional properties:
 +------------------+-------------+-----------+-------------------------+---------------------------------------------------------------------+
 
 If Function defines a one-dimensional function and InputWorkspace is a
-:ref:`Table Workspace <Table Workspaces>` the algorithm will have these
+:py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` the algorithm will have these
 additional properties:
 
 +------------------+-------------+-----------+-------------------------+---------------------------------------------------------+
@@ -55,8 +55,8 @@ Overview
 This is a generic algorithm for fitting data in a Workspace with a
 function. The workspace must have the type supported by the algorithm.
 Currently supported types are: :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` and
-:ref:`Table Workspace <Table Workspaces>` for fitting with a IFunction1D and
-:ref:`MDWorkspace <MDWorkspace>` for fitting with IFunctionMD.
+:py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` for fitting with a IFunction1D and
+:py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` for fitting with IFunctionMD.
 After Function and InputWorkspace properties are set the algorithm may decide
 that it needs more information from the caller to locate the fitting data.
 For example, if a spectrum in a MatrixWorkspace is to be fit with a 1D
@@ -321,8 +321,7 @@ replace the name of the workspace with a different name if you give a
 value to the property 'Output' which redefines the base name of the
 output workspaces.
 
-OutputParameters is a :ref:`TableWorkspace
-<Table Workspaces>` with the fitted
+OutputParameters is a :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` with the fitted
 parameter values. OutputWorkspace is a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`
 which compares the fit with the original data. The
 names given to these workspaces are built by appending the suffixes
@@ -340,7 +339,7 @@ spectra:
 3. The third spectrum is the difference between the first two.
 
 Also, if the function's derivatives can be evaluated an additional
-:ref:`TableWorkspace <Table Workspaces>` is
+:py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` is
 produced. If for example the property Output is set to "MyResults"
 then this TableWorkspace will have the name
 "MyResults\_NormalisedCovarianceMatrix" and it contains a calculated

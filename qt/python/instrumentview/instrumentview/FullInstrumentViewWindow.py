@@ -37,7 +37,7 @@ from matplotlib.widgets import Cursor
 
 import numpy as np
 import pyvista as pv
-import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 from mantid.dataobjects import Workspace2D
 from mantid import UsageService, ConfigService
 from mantid.kernel import FeatureType
@@ -61,6 +61,18 @@ from instrumentview.ShapeOverlayManager import ShapeOverlayManager
 import os
 from contextlib import suppress
 from typing import Callable
+
+
+def _skip_if_closing(method):
+    """Decorator that silently returns if the view is closing."""
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if self._closing:
+            return
+        return method(self, *args, **kwargs)
+
+    return wrapper
 
 
 def _ensure_overlay_manager(method):
@@ -112,7 +124,9 @@ class FullInstrumentViewWindow(QMainWindow):
     detector, and a line plot of selected detector(s)"""
 
     _detector_spectrum_fig = None
-    _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRato"
+    _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRatio"
+    _DRAW_SHAPES_SETTING_STRING = "InstrumentView.DrawShapes"
+    _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     def __init__(self, parent=None, off_screen=False):
         """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
@@ -151,10 +165,17 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=off_screen)
         pyvista_vertical_layout.addWidget(self.main_plotter.app_window)
 
-        self._detector_spectrum_fig, self._detector_spectrum_axes = plt.subplots(subplot_kw={"projection": "mantid"})
+        self._detector_spectrum_fig = Figure()
+        self._detector_spectrum_axes = self._detector_spectrum_fig.add_subplot(111, projection="mantid")
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
         self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, self)
+        # Unwrap matplotlib's internal callback wrappers (_StrongRef, WeakMethod)
+        # to store the actual callables, so they can be re-connected later.
+        # Must be done after toolbar creation so its callbacks are included.
+        self._default_lineplot_callbacks = {
+            cid: ref() for cid, ref in self._detector_figure_canvas.callbacks.callbacks.get("button_press_event", {}).items()
+        }
         plot_widget = QWidget()
         plot_layout = QVBoxLayout(plot_widget)
         plot_layout.addWidget(self._detector_figure_canvas)
@@ -209,8 +230,11 @@ class FullInstrumentViewWindow(QMainWindow):
             "If checked, the detectors will be drawn in 2D projections in their original aspect ratio, "
             "otherwise they will fill the available area."
         )
-        aspect_ratio_option = ConfigService.Instance()[self._ASPECT_RATIO_SETTING_STRING]
-        self._aspect_ratio_check_box.setChecked(aspect_ratio_option.casefold() == "yes")
+
+        def is_config_setting_true(key: str) -> bool:
+            return ConfigService.Instance()[key].casefold() == "yes"
+
+        self._aspect_ratio_check_box.setChecked(is_config_setting_true(self._ASPECT_RATIO_SETTING_STRING))
         self._show_monitors_check_box = QCheckBox()
         self._show_monitors_check_box.setText("Show Monitors?")
         self._count_scale_combo_box = NoWheelComboBox(self)
@@ -224,6 +248,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._select_bank_tube.setCheckable(True)
         self._show_shapes_check_box = QCheckBox()
         self._show_shapes_check_box.setText("Draw Shapes")
+        self._show_shapes_check_box.setChecked(is_config_setting_true(self._DRAW_SHAPES_SETTING_STRING))
         self._show_shapes_check_box.setToolTip(
             "If checked, detectors are drawn using their actual geometric shapes "
             "(cuboids, cylinders, etc.) instead of points. May be slower for large instruments."
@@ -243,13 +268,12 @@ class FullInstrumentViewWindow(QMainWindow):
         peak_ws_group_box = QGroupBox("Peaks Workspaces")
         peak_v_layout = QVBoxLayout(peak_ws_group_box)
         peak_buttons_h_layout = QHBoxLayout()
-        self._add_peak_button = QPushButton("Add Peak")
-        self._delete_peak_button = QPushButton("Delete Single Peak")
-        self._delete_all_selected_peaks_button = QPushButton("Delete All Selected Peaks")
+        self._delete_all_selected_peaks_button = QPushButton("Delete All Peaks In Selected Detectors")
+        self._start_adding_peaks_button = QPushButton("Adding/Deleting Peaks Mode")
+        self._start_adding_peaks_button.setCheckable(True)
         self._peak_ws_list = WorkspaceListWidget(self)
         self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
-        peak_buttons_h_layout.addWidget(self._add_peak_button)
-        peak_buttons_h_layout.addWidget(self._delete_peak_button)
+        peak_buttons_h_layout.addWidget(self._start_adding_peaks_button)
         peak_buttons_h_layout.addWidget(self._delete_all_selected_peaks_button)
         peak_v_layout.addLayout(peak_buttons_h_layout)
         peak_v_layout.addWidget(self._peak_ws_list)
@@ -275,7 +299,7 @@ class FullInstrumentViewWindow(QMainWindow):
         shapes_layout.addWidget(self._add_hollow_rectangle)
         self._shape_buttons = [self._add_circle, self._add_rectangle, self._add_ellipse, self._add_annulus, self._add_hollow_rectangle]
 
-        selection_tab = QWidget()
+        self._selection_tab = QWidget()
         (
             self._add_selection,
             self._clear_selections,
@@ -284,7 +308,7 @@ class FullInstrumentViewWindow(QMainWindow):
             self._save_grouping_to_ws,
             self._save_grouping_to_xml,
             self._save_grouping_to_cal,
-        ) = self._add_tab(selection_tab, "ROI")
+        ) = self._add_tab(self._selection_tab, "ROI")
         self._save_roi_to_ws.setText("Export ROI to ADS")
         self._save_grouping_to_ws.setText("Export Grouping to ADS")
         self._save_grouping_to_xml.setText("Save Grouping to XML")
@@ -306,7 +330,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._overwrite_mask.setText("Apply Mask Permanently")
 
         self._picking_masking_tab = QTabWidget()
-        self._picking_masking_tab.addTab(selection_tab, CurrentTab.Grouping.value)
+        self._picking_masking_tab.addTab(self._selection_tab, CurrentTab.Grouping.value)
         self._picking_masking_tab.addTab(mask_tab, CurrentTab.Masking.value)
         grouping_masking_group_layout.addWidget(shapes_widget)
         grouping_masking_group_layout.addWidget(self._picking_masking_tab)
@@ -361,6 +385,7 @@ class FullInstrumentViewWindow(QMainWindow):
         window_geometry.moveCenter(center_point)
         self.move(window_geometry.topLeft())
 
+        self._closing = False
         self._current_widget = None
         self._shape_overlay_manager = None
         self._default_camera_position_map = {}
@@ -379,8 +404,14 @@ class FullInstrumentViewWindow(QMainWindow):
         return self._aspect_ratio_check_box.isChecked()
 
     def store_maintain_aspect_ratio_option(self) -> None:
-        option = "Yes" if self.is_maintain_aspect_ratio_checkbox_checked() else "No"
-        ConfigService.Instance()[self._ASPECT_RATIO_SETTING_STRING] = option
+        self._store_checkbox_option(self._aspect_ratio_check_box, self._ASPECT_RATIO_SETTING_STRING)
+
+    def store_draw_shapes_option(self) -> None:
+        self._store_checkbox_option(self._show_shapes_check_box, self._DRAW_SHAPES_SETTING_STRING)
+
+    def _store_checkbox_option(self, checkbox: QCheckBox, config_key: str) -> None:
+        option = "Yes" if checkbox.isChecked() else "No"
+        ConfigService.Instance()[config_key] = option
 
     def enable_or_disable_aspect_ratio_box(self) -> None:
         self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
@@ -553,7 +584,6 @@ class FullInstrumentViewWindow(QMainWindow):
             self._units_combo_box.addItem(unit)
         self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
         self._count_scale_combo_box.addItems(self._presenter.count_scale_combo_options())
-        self.main_plotter.set_color_cycler(self._presenter._COLOURS)
         self.refresh_peaks_ws_list()
         self.refresh_workspaces_in_list(CurrentTab.Masking)
         self.refresh_workspaces_in_list(CurrentTab.Grouping)
@@ -582,9 +612,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._clear_masks.clicked.connect(self._presenter.on_clear_list_clicked)
         self._clear_selections.clicked.connect(self._presenter.on_clear_list_clicked)
         self._aspect_ratio_check_box.clicked.connect(self._presenter.on_aspect_ratio_check_box_clicked)
-        self._add_peak_button.clicked.connect(self._presenter.on_add_peak_clicked)
-        self._delete_peak_button.clicked.connect(self._presenter.on_delete_peak_clicked)
         self._delete_all_selected_peaks_button.clicked.connect(self._presenter.on_delete_all_selected_peaks_clicked)
+        self._start_adding_peaks_button.toggled.connect(self._presenter.on_start_adding_peaks_toggled)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
         self._flip_z_axis_check_box.clicked.connect(self._presenter.on_flip_z_axis_check_box_clicked)
@@ -678,25 +707,29 @@ class FullInstrumentViewWindow(QMainWindow):
         parent.addLayout(hBox)
 
     def refresh_peaks_ws_list(self) -> None:
-        # Maintain any peaks workspaces that are checked
-        current_checked_peak_workspaces: list[str] = []
+        # TODO: Very similar to other refresh list function, combine in one function
+        list_to_refresh = self._peak_ws_list
+        keys_from_workspaces_in_ads = self._presenter.peaks_workspaces_in_ads()
+        keys_in_current_list = [list_to_refresh.item(i).text() for i in range(list_to_refresh.count())]
+
+        # Keys from ads but not yet in list
+        for key in keys_from_workspaces_in_ads:
+            if key not in keys_in_current_list:
+                item = QListWidgetItem(key, list_to_refresh)
+                item.setCheckState(Qt.Unchecked)
+
+        # Remove keys that are not in ads
+        for i in range(list_to_refresh.count() - 1, -1, -1):
+            item = list_to_refresh.item(i)
+            if item.text() not in keys_from_workspaces_in_ads:
+                removed = list_to_refresh.takeItem(i)
+                del removed
+
+        # Update peaks list colours
         for list_i in range(self._peak_ws_list.count()):
             list_item = self._peak_ws_list.item(list_i)
-            if list_item.checkState() > 0:
-                current_checked_peak_workspaces.append(list_item.text())
-
-        self._peak_ws_list.blockSignals(True)
-        self._peak_ws_list.clear()
-        peaks_workspaces = self._presenter.peaks_workspaces_in_ads()
-        for peaks_ws_index in range(len(peaks_workspaces)):
-            peaks_ws = peaks_workspaces[peaks_ws_index]
-            list_item = QListWidgetItem(peaks_ws, self._peak_ws_list)
-            if peaks_ws in current_checked_peak_workspaces:
-                list_item.setCheckState(Qt.Checked)
-            else:
-                list_item.setCheckState(Qt.Unchecked)
-        self._peak_ws_list.blockSignals(False)
-        self._peak_ws_list.adjustSize()
+            colour = self._COLOURS[list_i % len(self._COLOURS)]
+            list_item.setForeground(QColor(colour))
 
     def refresh_workspaces_in_list(self, kind: CurrentTab) -> None:
         list_to_refresh = self._mask_list if kind is CurrentTab.Masking else self._selection_list
@@ -718,15 +751,27 @@ class FullInstrumentViewWindow(QMainWindow):
                 removed = list_to_refresh.takeItem(i)
                 del removed
 
-    def refresh_peaks_ws_list_colours(self) -> None:
-        picked_index = 0
-        for list_i in range(self._peak_ws_list.count()):
-            list_item = self._peak_ws_list.item(list_i)
-            if list_item.checkState() > 0:
-                list_item.setForeground(QColor(self._presenter._COLOURS[picked_index % len(self._presenter._COLOURS)]))
-                picked_index += 1
-            else:
-                list_item.setForeground(self._peak_ws_list.palette().color(QPalette.Text))
+    def _cache_and_uncheck_list(self, list_widget: WorkspaceListWidget) -> dict:
+        cache = {}
+        for i in range(list_widget.count()):
+            item = list_widget.item(i)
+            cache[i] = item.checkState()
+            item.setCheckState(Qt.Unchecked)
+        return cache
+
+    def _restore_list(self, list_widget: WorkspaceListWidget, cache):
+        """Restore check states from cache."""
+        for i in range(list_widget.count()):
+            if i in cache:
+                list_widget.item(i).setCheckState(cache[i])
+
+    def disable_and_uncheck_selection_list(self) -> None:
+        self._selection_list_cache = self._cache_and_uncheck_list(self._selection_list)
+        self._selection_tab.setEnabled(False)
+
+    def enable_and_restore_selection_list(self) -> None:
+        self._restore_list(self._selection_list, self._selection_list_cache)
+        self._selection_tab.setEnabled(True)
 
     def select_peaks_workspace(self, peaks_ws: str) -> None:
         for list_i in range(self._peak_ws_list.count()):
@@ -734,12 +779,6 @@ class FullInstrumentViewWindow(QMainWindow):
             if list_item.text() == peaks_ws:
                 list_item.setCheckState(Qt.Checked)
                 return
-
-    def set_add_peak_button_enabled(self, is_enabled: bool) -> None:
-        self._add_peak_button.setEnabled(is_enabled)
-
-    def set_delete_peak_button_enabled(self, is_enabled: bool) -> None:
-        self._delete_peak_button.setEnabled(is_enabled)
 
     def set_delete_all_selected_peaks_button_enabled(self, is_enabled: bool) -> None:
         self._delete_all_selected_peaks_button.setEnabled(is_enabled)
@@ -784,6 +823,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._contour_range_slider.setValue(contour_limits)
         return
 
+    @_skip_if_closing
     def set_plotter_scalar_bar_range(self, clim: tuple[int, int], label: str, display_title: str | None = None) -> None:
         """Set the range of the colours displayed, i.e. the legend"""
         self.main_plotter.update_scalar_bar_range(clim, label)
@@ -794,15 +834,17 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def closeEvent(self, QCloseEvent: QEvent) -> None:
         """When closing, make sure to close the plotters and figure correctly to prevent errors"""
+        self._closing = True
         super().closeEvent(QCloseEvent)
         with suppress(TypeError):
             self._contour_range_max_edit.disconnect()
             self._contour_range_min_edit.disconnect()
-        self.main_plotter.close()
-        if self._detector_spectrum_fig is not None:
-            plt.close(self._detector_spectrum_fig.get_label())
+            self._integration_limit_max_edit.disconnect()
+            self._integration_limit_min_edit.disconnect()
+        # Shut down any callbacks before closing the plotter and the figure
         if hasattr(self, "_presenter") and self._presenter is not None:
             self._presenter.handle_close()
+        self.main_plotter.close()
 
     def set_projection_combo_options(self, default_index: int, options: list[str]) -> None:
         self._projection_combo_box.addItems(options)
@@ -811,10 +853,12 @@ class FullInstrumentViewWindow(QMainWindow):
     def current_selected_projection(self) -> str:
         return self._projection_combo_box.currentText()
 
+    @_skip_if_closing
     def add_simple_shape(self, mesh: PolyData, colour=None, pickable=False) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.add_mesh(mesh, color=colour, pickable=pickable)
 
+    @_skip_if_closing
     def clear_main_plotter(self) -> None:
         self.delete_current_widget()
         self.main_plotter.clear()
@@ -875,10 +919,12 @@ class FullInstrumentViewWindow(QMainWindow):
         if self._shape_overlay_manager is not None:
             self._shape_overlay_manager.project_and_cache_points(points)
 
+    @_skip_if_closing
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
         self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, pickable=False, render_points_as_spheres=True, point_size=10)
 
+    @_skip_if_closing
     def show_axes(self) -> None:
         """Show axes on the main plotter"""
         if not self.main_plotter.off_screen:
@@ -888,6 +934,7 @@ class FullInstrumentViewWindow(QMainWindow):
         """Set the camera focal point on the main plotter"""
         self.main_plotter.camera.focal_point = focal_point
 
+    @_skip_if_closing
     def show_plot_for_detectors(self, workspace: Workspace2D) -> None:
         """Plot all the given spectra, where they are defined by their workspace indices, not the spectra numbers"""
         self._detector_spectrum_axes.clear()
@@ -940,12 +987,14 @@ class FullInstrumentViewWindow(QMainWindow):
             if self._peak_ws_list.item(row_index).checkState() > 0
         ]
 
+    @_skip_if_closing
     def clear_overlay_meshes(self) -> None:
         for mesh in self._overlay_meshes:
             self.main_plotter.remove_actor(mesh[0])
             self.main_plotter.remove_actor(mesh[1])
         self._overlay_meshes.clear()
 
+    @_skip_if_closing
     def clear_lineplot_overlays(self) -> None:
         for line in self._lineplot_overlays:
             line.remove()
@@ -953,37 +1002,64 @@ class FullInstrumentViewWindow(QMainWindow):
         for text in self._detector_spectrum_axes.texts:
             text.remove()
 
-    def plot_overlay_mesh(self, positions: np.ndarray, labels: list[str], colour: str) -> None:
-        points_actor = self.main_plotter.add_points(positions, color=colour, point_size=15, render_points_as_spheres=True, opacity=0.2)
-        labels_actor = self.main_plotter.add_point_labels(
-            positions,
-            labels,
-            font_size=15,
-            font_family="times",
-            show_points=False,
-            always_visible=True,
-            fill_shape=False,
-            shape_opacity=0,
-            text_color=colour,
-        )
-        self._overlay_meshes.append((points_actor, labels_actor))
+    @_skip_if_closing
+    def plot_overlay_meshes(
+        self, positions_by_pws: list[np.ndarray], labels_by_pws: list[list[str]], selected_workspaces: list[str]
+    ) -> None:
+        for positions, labels, ws_key in zip(positions_by_pws, labels_by_pws, selected_workspaces):
+            if len(positions) == 0:
+                continue
 
-    def plot_lineplot_overlay(self, x_values: list[float], labels: list[str], colour: str) -> None:
-        for x, label in zip(x_values, labels):
-            self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color=colour, linestyle="--"))
-            self._detector_spectrum_axes.text(
-                x,
-                0.99,
-                label,
-                transform=self._detector_spectrum_axes.get_xaxis_transform(),
-                color=colour,
-                ha="right",
-                va="top",
-                fontsize=8,
-                rotation=90,
+            items = self._peak_ws_list.findItems(ws_key, Qt.MatchExactly)
+            if not items:
+                continue
+            item_color = items[0].foreground().color().name()
+
+            points_actor = self.main_plotter.add_points(
+                positions, color=item_color, point_size=15, render_points_as_spheres=True, opacity=0.2
             )
-        self.redraw_lineplot()
+            labels_actor = self.main_plotter.add_point_labels(
+                positions,
+                labels,
+                font_size=15,
+                font_family="times",
+                show_points=False,
+                always_visible=True,
+                fill_shape=False,
+                shape_opacity=0,
+                text_color=item_color,
+            )
+            self._overlay_meshes.append((points_actor, labels_actor))
 
+    @_skip_if_closing
+    def plot_lineplot_peak_overlays(
+        self, x_by_pws: list[list[float]], labels_by_pws: list[list[str]], selected_workspaces: list[str]
+    ) -> None:
+        for x_values, labels, ws_key in zip(x_by_pws, labels_by_pws, selected_workspaces):
+            if len(x_values) == 0:
+                continue
+
+            items = self._peak_ws_list.findItems(ws_key, Qt.MatchExactly)
+            if not items:
+                continue
+            item_color = items[0].foreground().color().name()
+
+            for x, label in zip(x_values, labels):
+                self._lineplot_overlays.append(self._detector_spectrum_axes.axvline(x, color=item_color, linestyle="--"))
+                self._detector_spectrum_axes.text(
+                    x,
+                    0.99,
+                    label,
+                    transform=self._detector_spectrum_axes.get_xaxis_transform(),
+                    color=item_color,
+                    ha="right",
+                    va="top",
+                    fontsize=8,
+                    rotation=90,
+                )
+            self.redraw_lineplot()
+
+    @_skip_if_closing
     def redraw_lineplot(self) -> None:
         self._detector_spectrum_fig.tight_layout()
         self._detector_figure_canvas.draw()
@@ -1027,20 +1103,34 @@ class FullInstrumentViewWindow(QMainWindow):
         self._plot_toolbar.setDisabled(False)
         if event.inaxes is not self._detector_spectrum_axes or event.xdata is None:
             return
-        self._presenter.on_peak_selected(event.xdata)
+        if event.button == 1:  # Left click
+            self._presenter.on_peak_selected_in_lineplot(event.xdata, "left")
+        elif event.button == 3:  # Right click
+            self._presenter.on_peak_selected_in_lineplot(event.xdata, "right")
 
     def add_peak_cursor_to_lineplot(self) -> None:
+        if self._lineplot_peak_cursor is not None:
+            self.remove_peak_cursor_from_lineplot()
         self._lineplot_peak_cursor = Cursor(self._detector_spectrum_axes, color="tab:red", linewidth=1, horizOn=False)
+        for cid in self._default_lineplot_callbacks:
+            self._detector_figure_canvas.mpl_disconnect(cid)
         self._figure_canvas_click_id = self._detector_figure_canvas.mpl_connect("button_press_event", self._on_axes_click)
         self._plot_toolbar.setDisabled(True)
 
     def remove_peak_cursor_from_lineplot(self) -> None:
-        if self._lineplot_peak_cursor is not None:
-            self._detector_figure_canvas.mpl_disconnect(self._figure_canvas_click_id)
-            self._figure_canvas_click_id = None
-            self._lineplot_peak_cursor.linev.remove()
-            self._lineplot_peak_cursor = None
-            self._detector_figure_canvas.draw_idle()
+        if self._lineplot_peak_cursor is None:
+            return
+        self._detector_figure_canvas.mpl_disconnect(self._figure_canvas_click_id)
+        new_lineplot_callbacks = {}
+        for cid, func in self._default_lineplot_callbacks.items():
+            new_cid = self._detector_figure_canvas.mpl_connect("button_press_event", func)
+            new_lineplot_callbacks[new_cid] = func
+        self._default_lineplot_callbacks = new_lineplot_callbacks
+        self._figure_canvas_click_id = None
+        del self._lineplot_peak_cursor
+        self._lineplot_peak_cursor = None
+        self._plot_toolbar.setDisabled(False)
+        self._detector_figure_canvas.draw_idle()
 
     def get_filename_from_dialog(self, file_filter: str):
         # NOTE: Needs to be in view to run in main thread

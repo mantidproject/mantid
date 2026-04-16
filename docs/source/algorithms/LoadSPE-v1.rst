@@ -11,8 +11,8 @@ Description
 
 Loads the file given into a :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` with the given name.
 The file should be in the SPE format, which is described `here <https://www.ncnr.nist.gov/dave/documentation/dcs_mslice.pdf>`_.
-The workspace will have X units of :ref:`Energy transfer <Unit Factory>`.
-The other axis will be binned and have units of either `Momentum transfer / Q <Unit Factory>`_ or degrees, depending on the label in the input file.
+The workspace will have X :py:obj:`Units <mantid.kernel.UnitFactoryImpl>` of ``Energy transfer``.
+The other axis will be binned and have :py:obj:`Units <mantid.kernel.UnitFactoryImpl>` of either Q (momentum transfer) or degrees, depending on the label in the input file.
 The workspace will be flagged as a distribution.
 
 File Format

@@ -26,7 +26,7 @@ Data Processing
    live listener.
 
    -  This consists of all the data collected since the previous call.
-   -  The data is saved in a temporary :ref:`workspace <workspace>`.
+   -  The data is saved in a temporary :py:obj:`~mantid.api.Workspace`.
 
 -  You have two options on how to process this workspace:
 

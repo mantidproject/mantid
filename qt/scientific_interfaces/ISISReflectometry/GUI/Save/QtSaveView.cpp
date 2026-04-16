@@ -37,6 +37,7 @@ void QtSaveView::initLayout() {
   connect(m_ui.saveIndividualRowsCheckBox, SIGNAL(stateChanged(int)), this, SLOT(onSaveIndividualRowsChanged(int)));
   connect(m_ui.savePathEdit, SIGNAL(editingFinished()), this, SLOT(onSavePathChanged()));
   connect(m_ui.savePathBrowseButton, SIGNAL(clicked()), this, SLOT(browseToSaveDirectory()));
+  connect(m_ui.modelEdit, SIGNAL(textChanged(const QString &)), this, SLOT(onModelTextChanged(const QString &)));
 }
 
 void QtSaveView::connectSettingsChange(QLineEdit &edit) {
@@ -54,6 +55,8 @@ void QtSaveView::connectSettingsChange(QCheckBox &edit) {
 void QtSaveView::connectSettingsChange(QRadioButton &edit) {
   connect(&edit, SIGNAL(clicked()), this, SLOT(onSettingsChanged()));
 }
+
+void QtSaveView::onModelTextChanged(const QString &text) { m_ui.validateModelCheckBox->setEnabled(!text.isEmpty()); }
 
 void QtSaveView::onSettingsChanged() { m_notifyee->notifySettingsChanged(); }
 
@@ -136,6 +139,18 @@ void QtSaveView::enableAdditionalColumnsCheckBox() { m_ui.extraColumnsCheckBox->
 
 void QtSaveView::disableAdditionalColumnsCheckBox() { m_ui.extraColumnsCheckBox->setEnabled(false); }
 
+void QtSaveView::showModelEditTextBox() {
+  m_ui.modelEditLabel->setVisible(true);
+  m_ui.modelEdit->setVisible(true);
+  m_ui.validateModelCheckBox->setVisible(true);
+}
+
+void QtSaveView::hideModelEditTextBox() {
+  m_ui.modelEditLabel->setVisible(false);
+  m_ui.modelEdit->setVisible(false);
+  m_ui.validateModelCheckBox->setVisible(false);
+}
+
 void QtSaveView::enableSeparatorButtonGroup() {
   m_ui.commaRadioButton->setEnabled(true);
   m_ui.spaceRadioButton->setEnabled(true);
@@ -175,6 +190,11 @@ std::string QtSaveView::getPrefix() const { return m_ui.prefixEdit->text().toStd
  * @return :: The filter
  */
 std::string QtSaveView::getFilter() const { return m_ui.filterEdit->text().toStdString(); }
+
+/** Returns the custom model defination
+ * @return :: The model
+ */
+std::string QtSaveView::getModel() const { return m_ui.modelEdit->text().toStdString(); }
 
 /** Returns the regular expression check value
  * @return :: The regex check
@@ -217,6 +237,11 @@ std::vector<std::string> QtSaveView::getSelectedParameters() const {
  * @return :: File format index
  */
 int QtSaveView::getFileFormatIndex() const { return m_ui.fileFormatComboBox->currentIndex(); }
+
+/** Returns the validate model check value
+ * @return :: validate model check
+ */
+bool QtSaveView::getValidateModelCheck() const { return m_ui.validateModelCheckBox->isChecked(); }
 
 /** Returns the header check value
  * @return :: The header check

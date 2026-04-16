@@ -6,7 +6,7 @@ Time of Flight Converter
 Description
 -----------
 
-Converts the units of single value which can be either entered by the user or by using a :ref:`workspace <Workspace>` with a single value in it.
+Converts the units of single value which can be either entered by the user or by using a :py:obj:`~mantid.api.Workspace` with a single value in it.
 ToF converter takes multiple inputs depending on the units you wish to convert between.
 
 Input
@@ -23,8 +23,8 @@ The output of the program will be the converted value produced by the input valu
 Available Conversion Units
 --------------------------
 
-Some of the units available are those registered with see: :ref:`Units <Unit Factory>`.
-The units that are not specified in :ref:`Units <Unit Factory>` but are used in ToFConverter
+Some of the units available are those registered with see: :py:obj:`Units <mantid.kernel.UnitFactoryImpl>`.
+The units that are not specified in :py:obj:`Units <mantid.kernel.UnitFactoryImpl>` but are used in ToFConverter
 are:
 
 Nu (:math:`\nu`): :math:`\frac{h}{m_{N}\lambda^2}`

@@ -1,0 +1,1 @@
+- In the new Instrument View, fix a bug where an error message could appear if the interface is closed while certain operations were still processing.
