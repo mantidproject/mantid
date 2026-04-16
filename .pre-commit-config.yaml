@@ -20,7 +20,6 @@ repos:
       - id: check-xml
       - id: check-yaml
         args: [--allow-multiple-documents]
-        exclude: conda/recipes/mantid/meta.yaml|conda/recipes/mantid-developer/meta.yaml|conda/recipes/mantidqt/meta.yaml|conda/recipes/mantiddocs/meta.yaml|conda/recipes/mantidworkbench/meta.yaml
       - id: end-of-file-fixer
         exclude: .md5$|^external/|^tools/|Testing/Tools/cxxtest
       - id: trailing-whitespace
