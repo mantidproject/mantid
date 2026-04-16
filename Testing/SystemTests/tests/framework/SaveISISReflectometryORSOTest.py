@@ -136,7 +136,8 @@ class SaveISISReflectometryORSOTest(systemtesting.MantidSystemTest):
     def _check_line(self, line, ref_line):
         if ref_line.startswith("#"):
             # Check the header metadata
-            self.assertEqual(ref_line, line)
+            if ref_line != line:
+                self.assertTrue(False)
         else:
             # Check the data values
             ref_values = np.fromstring(ref_line, dtype=float, sep=" ")

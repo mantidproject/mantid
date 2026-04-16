@@ -357,7 +357,7 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
   Algorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
 
-  // Run as a child to enable workspace history for groups
+  // Run as a non-child to enable workspace history for groups
   if (!runAsChild) {
     alg->setChild(runAsChild);
     alg->setAlwaysStoreInADS(false);
