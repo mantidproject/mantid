@@ -362,7 +362,7 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
         elif self._q_conversion_history.name() == self.CONVERT_ALG:
             self._q_conversion_theta = float(np.rad2deg(self._ws.spectrumInfo().signedTwoTheta(0))) / 2.0
 
-        self.q_conversion_method = self.q_conversion_history.name()
+        self._q_conversion_method = self.q_conversion_history.name()
 
     def _set_name(self):
         if self.is_stitched:
