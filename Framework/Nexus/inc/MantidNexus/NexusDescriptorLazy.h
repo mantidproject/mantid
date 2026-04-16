@@ -9,14 +9,24 @@
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/UniqueID.h"
 
+#include <cmath>
+#include <concepts>
 #include <map>
+#include <optional>
 #include <shared_mutex>
 #include <string>
 #include <unordered_set>
 #include <vector>
 
+#include <H5Cpp.h>
+
 namespace Mantid {
 namespace Nexus {
+
+template <typename T>
+concept entryTypes = std::integral<T> || std::floating_point<T> || std::same_as<T, std::string>;
+
+template <typename T> hid_t getH5NativeType();
 
 class MANTID_NEXUS_DLL NexusDescriptorLazy {
 
@@ -93,6 +103,8 @@ public:
    */
   bool isEntry(std::string const &entryName) const;
 
+  template <entryTypes T> bool checkEntry(const std::string &entryName, const T &value) const;
+
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(std::string const &classType) const;
 
@@ -141,6 +153,134 @@ private:
   /// the set of non-existent entries that have been checked
   mutable std::unordered_set<std::string> m_allMisses;
 };
+
+template <>
+inline bool NexusDescriptorLazy::checkEntry<std::string>(const std::string &entryName, const std::string &value) const {
+  if (H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT) <= 0)
+    return false;
+
+  UniqueID<&H5Oclose> entryID(H5Oopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
+  hid_t datatype = H5Dget_type(entryID.get());
+
+  if (H5Tget_class(datatype) == H5T_STRING) {
+    if (H5Tis_variable_str(datatype)) {
+      char *rdata = nullptr;
+      H5Dread(entryID.get(), datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+      const std::string s(rdata);
+      H5free_memory(rdata);
+      return s == value;
+    } else {
+      size_t size = H5Tget_size(datatype);
+      std::vector<char> buffer(size + 1, '\0');
+      H5Dread(entryID.get(), datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
+      const std::string s(buffer.data());
+      return s == value;
+    }
+  }
+  return false;
+}
+
+template <> inline hid_t getH5NativeType<float>() { return H5T_NATIVE_FLOAT; }
+
+template <> inline hid_t getH5NativeType<double>() { return H5T_NATIVE_DOUBLE; }
+
+template <> inline hid_t getH5NativeType<int8_t>() { return H5T_NATIVE_INT8; }
+
+template <> inline hid_t getH5NativeType<uint8_t>() { return H5T_NATIVE_UINT8; }
+
+template <> inline hid_t getH5NativeType<int16_t>() { return H5T_NATIVE_INT16; }
+
+template <> inline hid_t getH5NativeType<uint16_t>() { return H5T_NATIVE_UINT16; }
+
+template <> inline hid_t getH5NativeType<int32_t>() { return H5T_NATIVE_INT32; }
+
+template <> inline hid_t getH5NativeType<uint32_t>() { return H5T_NATIVE_UINT32; }
+
+template <> inline hid_t getH5NativeType<int64_t>() { return H5T_NATIVE_INT64; }
+
+template <> inline hid_t getH5NativeType<uint64_t>() { return H5T_NATIVE_UINT64; }
+
+template <entryTypes T> bool NexusDescriptorLazy::checkEntry(const std::string &entryName, const T &value) const {
+
+  if (H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT) <= 0)
+    return false;
+
+  UniqueID<&H5Dclose> entryID(H5Dopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
+
+  // The entry must be a scalar
+  // hid_t dataspace = H5Dget_space(entryID.get());
+  // int ndims = H5Sget_simple_extent_ndims(dataspace);
+  // if (ndims != 0) {
+  //   H5Sclose(dataspace);
+  //   return false;
+  // }
+
+  hid_t datatype = H5Dget_type(entryID.get());
+
+  // Case of a string (fixed or variable length) type
+  if constexpr (std::same_as<T, std::string>) {
+
+    if (H5Tget_class(datatype) != H5T_STRING)
+      return false;
+
+    // Variable-length string
+    if (H5Tis_variable_str(datatype)) {
+
+      char *rdata = nullptr;
+      H5Dread(entryID.get(), datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+
+      std::string s(rdata);
+      H5free_memory(rdata);
+      return s == value;
+
+      // Fixed-length string
+    } else {
+
+      size_t size = H5Tget_size(datatype);
+      std::vector<char> buffer(size + 1, '\0');
+
+      H5Dread(entryID.get(), datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
+
+      std::string s(buffer.data());
+      return s == value;
+    }
+    // Numeric type
+  } else {
+
+    if (H5Tget_class(datatype) != H5T_FLOAT && H5Tget_class(datatype) != H5T_INTEGER)
+      return false;
+
+    hid_t dataspace = H5Dget_space(entryID.get());
+    int ndims = H5Sget_simple_extent_ndims(dataspace);
+
+    // The ndims < 0 is for case when an error occured while fetching the dims
+    if (ndims < 0 || ndims > 1) {
+      H5Sclose(dataspace);
+      return false;
+    }
+
+    hsize_t size = 1;
+    hsize_t dims[1] = {1};
+
+    if (ndims == 1) {
+      H5Sget_simple_extent_dims(dataspace, dims, nullptr);
+      size = dims[0];
+    }
+    H5Sclose(dataspace);
+
+    // Read the entry
+    std::vector<T> buffer(size);
+    H5Dread(entryID.get(), getH5NativeType<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
+
+    if (buffer.size() != 1)
+      return false;
+
+    if constexpr (std::floating_point<T>)
+      return std::fabs(buffer[0] - value) < 1e-12;
+    else
+      return buffer[0] == value;
+  }
+}
 
 } // namespace Nexus
 } // namespace Mantid
