@@ -84,6 +84,11 @@ repos:
       - id: ruff-format
         exclude: scripts/templates/reference/|Testing/Tools/cxxtest
 
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
   - repo: local
     hooks:
       - id: pixi-deps
