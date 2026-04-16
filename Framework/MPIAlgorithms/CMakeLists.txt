@@ -37,7 +37,7 @@ target_link_libraries(
 if(MPI_BUILD)
   target_sources(MPIAlgorithms PRIVATE src/MPILifetime.cpp)
   message(STATUS "Boost_MPI_LIBRARY = ${Boost_MPI_LIBRARY}")
-  target_compile_definitions(MPIAlgorithms PRIVATE MPI_BUILD)
+  target_compile_definitions(MPIAlgorithms PUBLIC MPI_BUILD)
   target_link_libraries(
     MPIAlgorithms
     PUBLIC ${Boost_MPI_LIBRARY} ${Boost_SERIALIZATION_LIBRARY}
