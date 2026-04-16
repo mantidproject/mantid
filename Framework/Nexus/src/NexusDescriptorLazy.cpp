@@ -11,13 +11,13 @@
 #include "MantidNexus/UniqueID.h"
 
 #include "MantidNexus/NexusFile_fwd.h"
-#include <H5Cpp.h>
 #include <hdf5.h>
 
 #include <algorithm>
 #include <cstdlib> // malloc, calloc
 #include <cstring> // strcpy
 #include <filesystem>
+#include <iostream>
 #include <map>
 #include <stdexcept> // std::invalid_argument
 #include <unordered_set>
