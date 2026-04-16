@@ -155,7 +155,7 @@ outputs:
 
     requirements:
       run:
-        - mantid == ${{ version }}
+        - ${{ pin_subpackage('mantid', exact=True) }}
 
       run_exports:
         - ${{ pin_subpackage('mantidmpi', upper_bound='x.x.x') }}
