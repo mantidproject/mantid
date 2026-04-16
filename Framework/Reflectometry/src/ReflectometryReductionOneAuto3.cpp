@@ -227,8 +227,9 @@ void ReflectometryReductionOneAuto3::setDefaultOutputWorkspaceNames() {
   if (isDebug && isDefault("OutputWorkspaceWavelength"))
     setPropertyValue("OutputWorkspaceWavelength", outputNames.iVsLam);
 
+  // If no output transmission workspace name is provided, used the default
   // If not processing groups, we only ever output the overall transmission run
-  if (!isDefault("FirstTransmissionRun"))
+  if (!isDefault("FirstTransmissionRun") && getPropertyValue("OutputWorkspaceTransmission").empty())
     setPropertyValue("OutputWorkspaceTransmission", outputNames.trans);
 }
 
@@ -848,11 +849,11 @@ void ReflectometryReductionOneAuto3::setOutputGroupedWorkspaces(std::vector<Work
   // Use the first set of output names, as for trans workspaces they are all the same across group members
   // as we only use the first transmission run provided in a group
   // this is consistent with historic algorithm behaviour
-  if (outputTrans)
+  if (outputTrans && getPropertyValue("OutputWorkspaceTransmission").empty())
     setPropertyValue("OutputWorkspaceTransmission", outputNames.front().trans);
-  if (outputTrans1)
+  if (outputTrans1 && getPropertyValue("OutputWorkspaceFirstTransmission").empty())
     setPropertyValue("OutputWorkspaceFirstTransmission", outputNames.front().trans1);
-  if (outputTrans2)
+  if (outputTrans2 && getPropertyValue("OutputWorkspaceSecondTransmission").empty())
     setPropertyValue("OutputWorkspaceSecondTransmission", outputNames.front().trans2);
 }
 
