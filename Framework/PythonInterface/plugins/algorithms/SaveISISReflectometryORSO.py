@@ -105,6 +105,17 @@ class ReflectometryDatasetBase:
         self._calibration_entry: Optional[str] = None
         self._resolution: Optional[float] = None
 
+    def _read_only(self) -> bool:
+        return True
+
+    def check_read_only(func):
+        def inner(self, *args, **kwargs):
+            if self._read_only():
+                raise AttributeError("Properties cannot be manually set on this dataset.")
+            return func(self, *args, **kwargs)
+
+        return inner
+
     @property
     def name(self) -> str:
         return self._name
@@ -169,55 +180,70 @@ class ReflectometryDatasetBase:
     def resolution(self) -> Optional[float]:
         return self._resolution
 
-
-class ReflectometryDatasetManual(ReflectometryDatasetBase):
-    @ReflectometryDatasetBase.name.setter
+    @name.setter
+    @check_read_only
     def name(self, name: str) -> None:
         self._name = name
 
-    @ReflectometryDatasetBase.spin_state.setter
+    @spin_state.setter
+    @check_read_only
     def spin_state(self, spin_state: str) -> None:
         self._spin_state = spin_state
 
-    @ReflectometryDatasetBase.reduction_timestamp.setter
+    @reduction_timestamp.setter
+    @check_read_only
     def reduction_timestamp(self, reduction_timestamp: datetime) -> None:
         self._reduction_timestamp = reduction_timestamp
 
-    @ReflectometryDatasetBase.is_stitched.setter
+    @is_stitched.setter
+    @check_read_only
     def is_stitched(self, is_stitched: bool) -> None:
-        self.is_stitched = is_stitched
+        self._is_stitched = is_stitched
 
-    @ReflectometryDatasetBase.q_conversion_method.setter
+    @q_conversion_method.setter
+    @check_read_only
     def q_conversion_method(self, q_conversion_method: str) -> None:
         self._q_conversion_method = q_conversion_method
 
-    @ReflectometryDatasetBase.q_conversion_theta.setter
+    @q_conversion_theta.setter
+    @check_read_only
     def q_conversion_theta(self, q_conversion_theta: Optional[float]) -> None:
         self._q_conversion_theta = q_conversion_theta
 
-    @ReflectometryDatasetBase.reduction_script.setter
+    @reduction_script.setter
+    @check_read_only
     def reduction_script(self, reduction_script: Optional[str]) -> None:
         self._reduction_script = reduction_script
 
-    @ReflectometryDatasetBase.angle_files.setter
+    @angle_files.setter
+    @check_read_only
     def angle_files(self, angle_files: List[Tuple[str, str]]) -> None:
         self._angle_files = angle_files
 
-    @ReflectometryDatasetBase.transmission_files.setter
+    @transmission_files.setter
+    @check_read_only
     def transmission_files(self, transmission_files: Tuple[List[str], List[str]]) -> None:
         self._transmission_files = transmission_files
 
-    @ReflectometryDatasetBase.flood_entry.setter
+    @flood_entry.setter
+    @check_read_only
     def flood_entry(self, flood_entry: Optional[tuple[str, str]]) -> None:
         self._flood_entry = flood_entry
 
-    @ReflectometryDatasetBase.calibration_entry.setter
+    @calibration_entry.setter
+    @check_read_only
     def calibration_entry(self, calibration_entry: Optional[str]) -> None:
         self._calibration_entry = calibration_entry
 
-    @ReflectometryDatasetBase.resolution.setter
+    @resolution.setter
+    @check_read_only
     def resolution(self, resolution: Optional[float]) -> None:
         self._resolution = resolution
+
+
+class ReflectometryDatasetManual(ReflectometryDatasetBase):
+    def _read_only(self) -> bool:
+        return False
 
 
 class ReflectometryDatasetHistory(ReflectometryDatasetBase):
@@ -232,6 +258,9 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
     _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
     _REBIN_ALG = "Rebin"
 
+    def _read_only(self) -> bool:
+        return True
+
     def __init__(self, ws, is_ws_grp_member: bool):
         super(ReflectometryDatasetHistory, self).__init__(ws, is_ws_grp_member)
         self._q_conversion_history = None
@@ -244,6 +273,12 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
         self._set_reduction_timestamp_from_history()
         self._set_spin_state_from_logs()
         self._set_name()
+        self._populate_reduction_script()
+        self._populate_angle_files()
+        self._populate_transmission_files()
+        self._populate_flood_entry()
+        self._populate_calibration_entry()
+        self._populate_resolution()
 
     @property
     def reduction_history(self):
@@ -258,57 +293,26 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
         return self._stitch_history
 
     @property
-    def is_stitched(self) -> bool:
-        return self._stitch_history is not None
-
-    @property
     def q_conversion_history(self):
         return self._q_conversion_history
 
-    @property
-    def q_conversion_method(self):
-        q_convert_history = self.q_conversion_history
-        if q_convert_history is None:
-            raise RuntimeError(
-                "Unable to calculate lambda values as cannot find algorithm used for original Q conversion in the workspace history."
-            )
-        return q_convert_history.name()
+    def _populate_reduction_script(self):
+        self._reduction_script = self._get_reduction_script()
 
-    @property
-    def reduction_script(self) -> Optional[str]:
-        if self._reduction_script is None:
-            self._reduction_script = self._get_reduction_script()
-        return self._reduction_script
+    def _populate_angle_files(self):
+        self._angle_files = self._get_individual_angle_files()
 
-    @property
-    def angle_files(self) -> List[Tuple[str, str]]:
-        if self._angle_files is None:
-            self._angle_files = self._get_individual_angle_files()
-        return self._angle_files
+    def _populate_transmission_files(self):
+        self._transmission_files = self._get_transmission_files()
 
-    @property
-    def transmission_files(self) -> Tuple[List[str], List[str]]:
-        if self._transmission_files is None:
-            self._transmission_files = self._get_transmission_files()
-        return self._transmission_files
+    def _populate_flood_entry(self):
+        self._flood_entry = self._get_flood_correction_entry()
 
-    @property
-    def flood_entry(self) -> Optional[tuple[str, str]]:
-        if self._flood_entry is None:
-            self._flood_entry = self._get_flood_correction_entry()
-        return self._flood_entry
+    def _populate_calibration_entry(self):
+        self._calibration_entry = self._get_calibration_file_entry()
 
-    @property
-    def calibration_entry(self) -> Optional[str]:
-        if self._calibration_entry is None:
-            self._calibration_entry = self._get_calibration_file_entry()
-        return self._calibration_entry
-
-    @property
-    def resolution(self) -> Optional[float]:
-        if self._resolution is None:
-            self._resolution = self._get_resolution()
-        return self._resolution
+    def _populate_resolution(self):
+        self._resolution = self._get_resolution()
 
     def _populate_histories(self):
         ws_history = self._ws.getHistory()
@@ -322,6 +326,7 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
                 # We want the last call to the stitch algorithm in the history
                 # (we would normally expect there to be only one)
                 self._stitch_history = history
+                self._is_stitched = True
 
         # Get the last occurrence of the reduction algorithm in the workspace history
         for history in reversed(ws_history.getAlgorithmHistories()):
@@ -347,12 +352,17 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
                     break
 
         if self._q_conversion_history is None:
+            logger.warning(
+                "Unable to calculate lambda values as cannot find algorithm used for original Q conversion in the workspace history."
+            )
             return
 
         if self._q_conversion_history.name() == self.REF_ROI_ALG:
             self._q_conversion_theta = float(self._q_conversion_history.getPropertyValue("ScatteringAngle"))
         elif self._q_conversion_history.name() == self.CONVERT_ALG:
             self._q_conversion_theta = float(np.rad2deg(self._ws.spectrumInfo().signedTwoTheta(0))) / 2.0
+
+        self.q_conversion_method = self.q_conversion_history.name()
 
     def _set_name(self):
         if self.is_stitched:
@@ -499,7 +509,7 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
 
     def _get_resolution(self) -> Optional[float]:
         # Attempt to get the resolution from the workspace history
-        if self.is_stitched:
+        if self._is_stitched:
             # The absolute value of the stitch parameter of the stitch algorithm is the resolution
             return abs(float(self.stitch_history.getPropertyValue("Params")))
 
@@ -527,6 +537,9 @@ class ReflectometryDatasetHybrid(ReflectometryDatasetHistory, ReflectometryDatas
     def __init__(self, ws, is_ws_grp_member: bool):
         super(ReflectometryDatasetHybrid, self).__init__(ws, is_ws_grp_member)
 
+    def _read_only(self):
+        return False
+
     def get_missing_metadata_list(self) -> List:
         """
         Get a list of any metadata that could not be extracted from the workspace history.
@@ -534,26 +547,26 @@ class ReflectometryDatasetHybrid(ReflectometryDatasetHistory, ReflectometryDatas
         TODO: Work out if this should be using the property names. Coupled too tight to the alg?
         """
         missing_metadata = []
-        if not self.q_conversion_method:
+        if not self._q_conversion_method:
             missing_metadata.append(Prop.Q_CONVERT_METHOD)
-        if self.reduction_timestamp is None:
+        if self._reduction_timestamp is None:
             missing_metadata.append(Prop.REDUCTION_TIMESTAMP)
-        if not self.angle_files:
+        if not self._angle_files:
             missing_metadata.append(Prop.ANGLE_FILES)
-        if self.transmission_files:
-            if not self.transmission_files[0]:
+        if self._transmission_files:
+            if not self._transmission_files[0]:
                 missing_metadata.append(Prop.TRANS_FILES_1)
-            if not self.transmission_files[1]:
+            if not self._transmission_files[1]:
                 missing_metadata.append(Prop.TRANS_FILES_2)
         else:
             missing_metadata.extend([Prop.TRANS_FILES_1, Prop.TRANS_FILES_2])
-        if not self.flood_entry:
+        if not self._flood_entry:
             missing_metadata.append(Prop.FLOOD_ENTRY)
-        if not self.calibration_entry:
+        if not self._calibration_entry:
             missing_metadata.append(Prop.CALIB_FILE)
-        if self.resolution is None:
+        if self._resolution is None:
             missing_metadata.append(Prop.RESOLUTION)
-        if self.reduction_script is None:
+        if self._reduction_script is None:
             missing_metadata.append(Prop.SCRIPT)
         return missing_metadata
 
@@ -801,20 +814,34 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             case MetadataSourceOptions.FROM_HISTORY:
                 return ReflectometryDatasetHistory(ws, is_child)
             case MetadataSourceOptions.HYBRID:
-                return ReflectometryDatasetHybrid(ws, is_child)
+                dataset = ReflectometryDatasetHybrid(ws, is_child)
+                use_default = False
             case MetadataSourceOptions.MANUAL:
                 dataset = ReflectometryDatasetManual(ws, is_child)
-                dataset.q_conversion_method = self.getPropertyValue(Prop.Q_CONVERT_METHOD)
-                dataset.reduction_timestamp = self.getPropertyValue(Prop.REDUCTION_TIMESTAMP)
-                dataset.angle_files = zip(self.getProperty(Prop.ANGLE_FILES).value, self.getProperty(Prop.ANGLE_FILES_THETA).value)
-                dataset.transmission_files = (self.getProperty(Prop.TRANS_FILES_1).value, self.getProperty(Prop.TRANS_FILES_2).value)
-                dataset.flood_entry = tuple(self.getProperty(Prop.FLOOD_ENTRY).value)
-                dataset.calibration_entry = self.getPropertyValue(Prop.CALIB_FILE)
-                dataset.resolution = self.getProperty(Prop.RESOLUTION).value
-                dataset.reduction_script = self.getPropertyValue(Prop.SCRIPT)
-                return dataset
+                use_default = True
             case _:
                 raise RuntimeError("An invalid metadata source was given.")
+
+        def set_simple_dataset_value(dataset_attr: str, value, alg_prop: str):
+            if use_default or not self.getProperty(alg_prop).isDefault:
+                setattr(dataset, dataset_attr, value)
+
+        set_simple_dataset_value("q_conversion_method", self.getPropertyValue(Prop.Q_CONVERT_METHOD), Prop.Q_CONVERT_METHOD)
+        set_simple_dataset_value("reduction_timestamp", self.getPropertyValue(Prop.REDUCTION_TIMESTAMP), Prop.REDUCTION_TIMESTAMP)
+        set_simple_dataset_value("calibration_entry", self.getPropertyValue(Prop.CALIB_FILE), Prop.CALIB_FILE)
+        set_simple_dataset_value("resolution", self.getProperty(Prop.RESOLUTION).value, Prop.RESOLUTION)
+        set_simple_dataset_value("reduction_script", self.getPropertyValue(Prop.SCRIPT), Prop.SCRIPT)
+
+        if use_default or (not self.getProperty(Prop.ANGLE_FILES).isDefault and not self.getProperty(Prop.ANGLE_FILES).isDefault):
+            dataset.angle_files = zip(self.getProperty(Prop.ANGLE_FILES).value, self.getProperty(Prop.ANGLE_FILES_THETA).value)
+
+        if use_default or (not self.getProperty(Prop.TRANS_FILES_1).isDefault and not self.getProperty(Prop.TRANS_FILES_2).isDefault):
+            dataset.transmission_files = (self.getProperty(Prop.TRANS_FILES_1).value, self.getProperty(Prop.TRANS_FILES_2).value)
+
+        if use_default or not self.getProperty(Prop.FLOOD_ENTRY).isDefault:
+            dataset.flood_entry = tuple(self.getProperty(Prop.FLOOD_ENTRY).value)
+
+        return dataset
 
     def _create_orso_dataset(self, refl_dataset: ReflectometryDatasetHistory) -> MantidORSODataset:
         data_columns = self._create_data_columns(refl_dataset)
