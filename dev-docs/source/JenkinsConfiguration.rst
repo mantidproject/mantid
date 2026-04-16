@@ -215,16 +215,25 @@ Take the target nodes offline and edit the list of agentNames.
     JOB_PREFIX = "pull_requests-"
     suffixes = ["conda-linux", "conda-osx", "conda-windows", "doc-tests"];
 
+    DRY_RUN = true // set to false to actually delete
+
     nodes = Jenkins.instance.slaves
     for (node in nodes) {
-      for(agentName in agentNames) {
-        if(node.toString() == "hudson.slaves.DumbSlave[$agentName]") {
+      for (agentName in agentNames) {
+        if (node.name == agentName) {
           for (suffix in suffixes) {
             FilePath fp = node.createPath(node.getRootPath().toString() + File.separator + "workspace" + File.separator + JOB_PREFIX + suffix + File.separator +  "build");
-            if(fp!=null && fp.exists()) {
-              println(node.toString())
-              println(fp.toString())
-              fp.deleteRecursive()
+            if (fp != null && fp.exists()) {
+              println("Node: ${node.name}")
+              println("Path: ${fp}")
+              
+              if (DRY_RUN) {
+                println("DRY RUN: Would delete ${fp}\n")
+              }
+              else {
+                println("Deleting ${fp}\n")
+                fp.deleteRecursive()
+              }
             }
           }
         }
