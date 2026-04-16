@@ -336,16 +336,15 @@ def _validate_pcolormesh_inputs(workspaces):
     raise_if_not_sequence(workspaces, "workspaces", MatrixWorkspace)
 
 
-def _filter_pcolormesh_inputs(workspaces):
+def _filter_pcolormesh_inputs(workspaces: list[MatrixWorkspace]):
     """Returns a list of only MatrixWorkspaces with more than 1 bin from the input list"""
     filtered_workspaces = []
     for ws in workspaces:
-        if isinstance(ws, MatrixWorkspace):
-            n_bins = len(ws.readX(0)) - 1
-            if n_bins <= 1:
-                LOGGER.error(f"Workspace '{ws.name()}' contains only {n_bins} bin. It must contain more than 1 bin for a Colorfill plot.")
-            else:
-                filtered_workspaces.append(ws)
+        n_bins = len(ws.readX(0)) - 1
+        if n_bins <= 1:
+            LOGGER.error(f"Workspace '{ws.name()}' contains only {n_bins} bin. It must contain more than 1 bin for a Colorfill plot.")
+        else:
+            filtered_workspaces.append(ws)
     return filtered_workspaces
 
 

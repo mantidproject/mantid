@@ -442,8 +442,7 @@ class FunctionsTest(TestCase):
         ws1 = CreateWorkspace(DataX=[1, 2, 3], DataY=[2] * 3, NSpec=1)
         ws2 = CreateWorkspace(DataX=[1, 2, 3], DataY=[2] * 3, NSpec=1)
         ws3 = CreateWorkspace(DataX=[1, 2], DataY=[2] * 2, NSpec=1)
-        table = WorkspaceFactory.Instance().createTable()
-        workspaces = [ws1, table, ws2, ws3]
+        workspaces = [ws1, ws2, ws3]
         filtered_workspaces = _filter_pcolormesh_inputs(workspaces)
         self.assertEqual(filtered_workspaces, [ws1, ws2])
 
