@@ -226,7 +226,7 @@ Take the target nodes offline and edit the list of agentNames.
             if (fp != null && fp.exists()) {
               println("Node: ${node.name}")
               println("Path: ${fp}")
-              
+
               if (DRY_RUN) {
                 println("DRY RUN: Would delete ${fp}\n")
               }
