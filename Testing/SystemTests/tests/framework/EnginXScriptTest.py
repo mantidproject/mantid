@@ -59,6 +59,38 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
         _try_delete_cal_and_focus_dirs(CWDIR)
 
 
+class FocusEventMode(systemtesting.MantidSystemTest):
+    def runTest(self):
+        enginx = EnginX(
+            vanadium_run="ENGINX371347",
+            focus_runs=["ENGINX371872"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX371346",
+            group=GROUP.BOTH,
+        )
+        enginx.main(plot_cal=False, plot_foc=False)
+        # store workspaces for validation
+        self._ws_foc = ADS.retrieve("371872_engggui_focusing_output_ws_bank")
+
+    def validate(self):
+        # assert correct number spectra
+        self.assertEqual(self._ws_foc.getNumberHistograms(), 2)
+        # assert diff constants of one group
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18397, delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], 1.86, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], 0.2, delta=2)
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(1)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18483, delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -29.8, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -54.4, delta=2)
+        # compare TOF workspaces
+        self.tolerance = 1e-6
+        self.disableChecking.extend(["Instrument"])  # don't check
+        return self._ws_foc.name(), "371872_engggui_focusing_output_ws_bank.nxs"
+
+
 class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
     def runTest(self):
         enginx = EnginX(
