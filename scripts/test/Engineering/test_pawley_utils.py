@@ -22,15 +22,15 @@ class PhaseTest(unittest.TestCase):
     SI_SPGR = "F d -3 m"
 
     def test_init(self):
-        si = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""))
+        si = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""), None, "Si", ",")
         self._assert_si_phase(si)
 
     def test_init_phase_from_cif(self):
-        si = Phase.from_cif("SI.cif")
+        si = Phase.from_cif("SI.cif", "Si", ",")
         self._assert_si_phase(si)
 
     def test_init_phase_from_alatt(self):
-        si = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        si = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR, "", "Si", ",")
         self._assert_si_phase(si)
 
     def test_set_hkls_from_dspac_limits(self):
@@ -66,6 +66,106 @@ class PhaseTest(unittest.TestCase):
         self.assertEqual(
             str(phase.unit_cell), "UnitCell with lattice parameters: a = 5.43094 b = 5.43094 c = 5.43094 alpha = 90 beta = 90 gamma = 90"
         )
+        self.assertEqual(phase.name, "Si")
+        self.assertEqual(phase.hkl_str_delimiter, ",")
+
+    # --- hkl_as_key ---
+
+    def test_hkl_as_key_returns_int_tuple(self):
+        hkl = V3D(1, 2, 3)
+        result = Phase.hkl_as_key(hkl)
+        self.assertEqual(result, (1, 2, 3))
+        self.assertIsInstance(result, tuple)
+        self.assertTrue(all(isinstance(v, int) for v in result))
+
+    def test_hkl_as_key_rounds_float_values(self):
+        hkl = V3D(1.6, 2.4, 3.5)
+        result = Phase.hkl_as_key(hkl)
+        self.assertEqual(result, (2, 2, 4))
+
+    # --- get_hkl_strings ---
+
+    def test_get_hkl_strings_single_digit(self):
+        phase = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""))
+        phase.set_hkls([[1, 1, 1]])
+        self.assertEqual(phase.get_hkl_strings(), ["111"])
+
+    def test_get_hkl_strings_multiple_hkls(self):
+        phase = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""))
+        phase.set_hkls([[1, 1, 1], [2, 2, 0]])
+        result = phase.get_hkl_strings()
+        self.assertEqual(result, ["111", "220"])
+
+    def test_get_hkl_strings_multi_digit_indices(self):
+        # use a space group that allows all reflections
+        # set delimiter to distinguish indices
+        phase = Phase.from_alatt([10.0, 10.0, 10.0], "P 1", hkl_delimiter="-")
+        phase.set_hkls([[10, 11, 12]])
+        self.assertEqual(phase.get_hkl_strings(), ["10-11-12"])
+
+    # --- get_hkl_strings ---
+
+    def test_get_hkl_from_str_default_delim(self):
+        phase = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""))
+        self.assertEqual(phase.hkl_string_to_indices("111"), [1, 1, 1])
+
+    def test_get_hkl_from_str_provided_delim_on_phase(self):
+        delim = "-"
+        phase = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""), None, "", delim)
+        self.assertEqual(phase.hkl_string_to_indices("1-1-1"), [1, 1, 1])
+
+    def test_get_hkl_from_str_provided_delim_in_method(self):
+        delim = "-"
+        phase = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""))
+        self.assertEqual(phase.hkl_string_to_indices("1-1-1", delim), [1, 1, 1])
+
+    @patch("Engineering.pawley_utils.logger")
+    def test_get_hkl_from_str_using_default_delim_but_input_has_different_delim(self, mock_logger):
+        phase = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""))
+        hkl_inds = phase.hkl_string_to_indices("1-1-1")
+        self.assertEqual(hkl_inds, None)
+        mock_logger.error.assert_called_once_with("Can't convert input string ('1-1-1') to H,K, and L indices. Delimiter being used is: ''")
+
+    @patch("Engineering.pawley_utils.logger")
+    def test_get_hkl_from_str_with_bad_number_of_indices(self, mock_logger):
+        phase = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""))
+        hkl_inds = phase.hkl_string_to_indices("1-1")
+        self.assertEqual(hkl_inds, None)
+        mock_logger.error.assert_called_once_with("Can't convert input string ('1-1') to H,K, and L indices. Delimiter being used is: ''")
+
+    # --- get_phase_name / set_phase_name ---
+
+    def test_get_phase_name_default_is_none(self):
+        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        self.assertIsNone(phase.get_phase_name())
+
+    def test_set_phase_name(self):
+        phase = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""))
+        phase.set_phase_name("Silicon")
+        self.assertEqual(phase.get_phase_name(), "Silicon")
+
+    def test_set_phase_name_overwrite(self):
+        phase = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""))
+        phase.set_phase_name("Alpha")
+        phase.set_phase_name("Beta")
+        self.assertEqual(phase.get_phase_name(), "Beta")
+
+    # --- has_the_same_parameters_as ---
+
+    def test_has_the_same_parameters_as_same_spacegroup(self):
+        phase = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""))
+        other = Phase.from_alatt(3 * [4.0], self.SI_SPGR)
+        self.assertTrue(phase.has_the_same_parameters_as(other))
+
+    def test_has_the_same_parameters_as_different_lattice_system(self):
+        phase = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""))
+        tetragonal = Phase.from_alatt(3 * [self.SI_LATT_PAR], "P 4")
+        self.assertFalse(phase.has_the_same_parameters_as(tetragonal))
+
+    def test_has_the_same_parameters_as_same_lattice_system_different_spacegroup(self):
+        phase = Phase(CrystalStructure(f"{self.SI_LATT_PAR} {self.SI_LATT_PAR} {self.SI_LATT_PAR}", self.SI_SPGR, ""))
+        other_cubic = Phase.from_alatt(3 * [4.0], "P m -3 m")
+        self.assertTrue(phase.has_the_same_parameters_as(other_cubic))
 
 
 class ProfileTest(unittest.TestCase):
@@ -696,80 +796,6 @@ class OutputTableMixinTest(unittest.TestCase):
         hkls_0 = set(tables[0].column("HKL"))
         hkls_1 = set(tables[1].column("HKL"))
         self.assertTrue(hkls_0.isdisjoint(hkls_1))
-
-
-class PhaseAdditionalTest(unittest.TestCase):
-    """Tests for Phase methods: hkl_as_key, filter_hkls_to_ws_range, get_hkl_strings,
-    has_the_same_parameters_as, get_phase_name, set_phase_name."""
-
-    SI_LATT_PAR = 5.43094
-    SI_SPGR = "F d -3 m"
-
-    def setUp(self):
-        self.phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
-        self.phase.set_hkls_from_dspac_limits(0.7, 3.5)
-
-    # --- hkl_as_key ---
-
-    def test_hkl_as_key_returns_int_tuple(self):
-        hkl = V3D(1, 2, 3)
-        result = Phase.hkl_as_key(hkl)
-        self.assertEqual(result, (1, 2, 3))
-        self.assertIsInstance(result, tuple)
-        self.assertTrue(all(isinstance(v, int) for v in result))
-
-    def test_hkl_as_key_rounds_float_values(self):
-        hkl = V3D(1.6, 2.4, 3.5)
-        result = Phase.hkl_as_key(hkl)
-        self.assertEqual(result, (2, 2, 4))
-
-    # --- get_hkl_strings ---
-
-    def test_get_hkl_strings_single_digit(self):
-        self.phase.set_hkls([[1, 1, 1]])
-        self.assertEqual(self.phase.get_hkl_strings(), ["1,1,1"])
-
-    def test_get_hkl_strings_multiple_hkls(self):
-        self.phase.set_hkls([[1, 1, 1], [2, 2, 0]])
-        result = self.phase.get_hkl_strings()
-        self.assertEqual(result, ["1,1,1", "2,2,0"])
-
-    def test_get_hkl_strings_multi_digit_indices(self):
-        # use a space group that allows all reflections
-        phase = Phase.from_alatt([10.0, 10.0, 10.0], "P 1")
-        phase.set_hkls([[10, 11, 12]])
-        self.assertEqual(phase.get_hkl_strings(), ["10,11,12"])
-
-    # --- get_phase_name / set_phase_name ---
-
-    def test_get_phase_name_default_is_none(self):
-        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
-        self.assertIsNone(phase.get_phase_name())
-
-    def test_set_phase_name(self):
-        self.phase.set_phase_name("Silicon")
-        self.assertEqual(self.phase.get_phase_name(), "Silicon")
-
-    def test_set_phase_name_overwrite(self):
-        self.phase.set_phase_name("Alpha")
-        self.phase.set_phase_name("Beta")
-        self.assertEqual(self.phase.get_phase_name(), "Beta")
-
-    # --- has_the_same_parameters_as ---
-
-    def test_has_the_same_parameters_as_same_spacegroup(self):
-        other = Phase.from_alatt(3 * [4.0], self.SI_SPGR)
-        self.assertTrue(self.phase.has_the_same_parameters_as(other))
-
-    def test_has_the_same_parameters_as_different_lattice_system(self):
-        tetragonal = Phase.from_alatt(3 * [self.SI_LATT_PAR], "P 4")
-        self.assertFalse(self.phase.has_the_same_parameters_as(tetragonal))
-
-    def test_has_the_same_parameters_as_same_lattice_system_different_spacegroup(self):
-        other_cubic = Phase.from_alatt(3 * [4.0], "P m -3 m")
-        self.assertTrue(self.phase.has_the_same_parameters_as(other_cubic))
-
-    # --- filter_hkls_to_ws_range ---
 
 
 class PhaseFilterHklsTest(unittest.TestCase):

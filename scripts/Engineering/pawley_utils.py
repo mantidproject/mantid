@@ -122,9 +122,16 @@ class BackToBackGauss(PeakProfile):
 
 
 class Phase:
-    def __init__(self, crystal_structure: CrystalStructure, hkls: Optional[np.ndarray] = None, name: Optional[str] = None):
+    def __init__(
+        self,
+        crystal_structure: CrystalStructure,
+        hkls: Optional[np.ndarray] = None,
+        name: Optional[str] = None,
+        hkl_str_delimiter: str = "",
+    ):
         self.unit_cell = crystal_structure.getUnitCell()
         self.name = name
+        self.hkl_str_delimiter = hkl_str_delimiter
         # check initial unit cell compatible with spacegroup
         self.spgr = crystal_structure.getSpaceGroup()
         if not self.spgr.isAllowedUnitCell(self.unit_cell):
@@ -156,16 +163,16 @@ class Phase:
                 self.ipars = range(len(self.alatt))  # a, b, c, alpha, beta, gamma
 
     @classmethod
-    def from_cif(cls, cif_file: str):
+    def from_cif(cls, cif_file: str, name: Optional[str] = None, hkl_delimiter: str = ","):
         ws = CreateSingleValuedWorkspace(StoreInADS=False, EnableLogging=False)
         LoadCIF(ws, cif_file, StoreInADS=False)
-        return Phase(ws.sample().getCrystalStructure())
+        return Phase(ws.sample().getCrystalStructure(), name=name, hkl_str_delimiter=hkl_delimiter)
 
     @classmethod
-    def from_alatt(cls, alatt: np.ndarray, spgr: str = "P 1", basis: str = "", name: Optional[str] = None):
+    def from_alatt(cls, alatt: np.ndarray, spgr: str = "P 1", basis: str = "", name: Optional[str] = None, hkl_delimiter: str = ""):
         alatt_str = " ".join([str(par) for par in alatt])
         xtal = CrystalStructure(alatt_str, spgr, basis)
-        return Phase(xtal, name=name)
+        return Phase(xtal, name=name, hkl_str_delimiter=hkl_delimiter)
 
     def _get_alatt(self) -> np.ndarray[float]:
         return np.array([getattr(self.unit_cell, method)() for method in self.param_names])
@@ -237,7 +244,24 @@ class Phase:
         return new_phase
 
     def get_hkl_strings(self) -> Sequence[str]:
-        return [",".join(str(c) for c in self.hkl_as_key(hkl)) for hkl in self.hkls]
+        return [self.hkl_str_delimiter.join(str(c) for c in self.hkl_as_key(hkl)) for hkl in self.hkls]
+
+    def hkl_string_to_indices(self, hkl_str: str, delimiter: Optional[str] = None) -> Optional[Sequence[int]]:
+        # if no delimiter is given uses the one set on the phase
+        delim = delimiter or self.hkl_str_delimiter
+        # if delimeter is "" we can use the string as the iterable
+        iterable = hkl_str.split(delim) if delim else hkl_str
+        err_msg = f"Can't convert input string ('{hkl_str}') to H,K, and L indices. Delimiter being used is: '{delim}'"
+        try:
+            hkls = [int(x) for x in iterable]
+            if len(hkls) == 3:
+                return hkls
+            else:
+                logger.error(err_msg)
+                return
+        except:
+            logger.error(err_msg)
+            return
 
     def get_phase_name(self) -> Optional[str]:
         return self.name
