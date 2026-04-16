@@ -350,12 +350,18 @@ void ReflectometryReductionOneAuto3::init() {
 // Performs the reduction using ReflectometryReductionOne
 ReflectometryReductionOneAuto3::RROOutputs
 ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputWS,
-                                                     const std::vector<std::string> &taskOrder) {
+                                                     const std::vector<std::string> &taskOrder, const bool runAsChild) {
   auto instrument = inputWS->getInstrument();
   bool const isDebug = getProperty("Debug");
 
   Algorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
+
+  // Run as a child to enable workspace history for groups
+  if (!runAsChild) {
+    alg->setChild(runAsChild);
+    alg->setAlwaysStoreInADS(false);
+  }
 
   // Task order
   alg->setProperty("TaskExecutionOrder", taskOrder);
@@ -910,10 +916,10 @@ ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReduction
     if (reduced) {
       const auto &origProcessingInstructions = getPropertyValue("ProcessingInstructions");
       setPropertyValue("ProcessingInstructions", convertToSpectrumNumber("0", matrixWs));
-      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder));
+      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false));
       setPropertyValue("ProcessingInstructions", origProcessingInstructions);
     } else {
-      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder));
+      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false));
     }
   }
   return {.rroOutputs = allRROOutputs, .outputNames = allOutputNames};
