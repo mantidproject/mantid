@@ -66,7 +66,7 @@ direc = config["instrumentDefinition.directory"]
 
 class LoadAndSaveLotsOfInstruments(systemtesting.MantidSystemTest):
     def __getDataFileList__(self):
-        # get a list of directories to look in
+        # Get a list of directories to look in
         print("Looking for instrument definition files in: %s" % direc)
         cwd = os.getcwd()
         os.chdir(direc)
