@@ -306,9 +306,9 @@ class MantidAxesTest(unittest.TestCase):
         self.ax.plot(workspace, specNum=1, axis=MantidAxType.BIN, distribution=True)
         self.ax.plot(workspace, specNum=1, axis=MantidAxType.BIN)
         ws_artists = self.ax.tracked_workspaces[workspace.name()]
-        self.assertFalse(ws_artists[0].is_normalized)
-        self.assertFalse(ws_artists[1].is_normalized)
-        self.assertFalse(ws_artists[2].is_normalized)
+        self.assertFalse(ws_artists[0].is_normalized_by_bin_width())
+        self.assertFalse(ws_artists[1].is_normalized_by_bin_width())
+        self.assertFalse(ws_artists[2].is_normalized_by_bin_width())
 
     def test_artists_normalization_state_labeled_correctly_for_dist_workspace(self):
         dist_ws = CreateWorkspace(DataX=[10, 20], DataY=[2, 3], DataE=[1, 2], NSpec=1, Distribution=True, OutputWorkspace="dist_workpace")
@@ -316,25 +316,25 @@ class MantidAxesTest(unittest.TestCase):
         self.ax.plot(dist_ws, specNum=1, distribution=True)
         self.ax.plot(dist_ws, specNum=1)
         ws_artists = self.ax.tracked_workspaces[dist_ws.name()]
-        self.assertTrue(ws_artists[0].is_normalized)
-        self.assertTrue(ws_artists[1].is_normalized)
-        self.assertTrue(ws_artists[2].is_normalized)
+        self.assertTrue(ws_artists[0].is_normalized_by_bin_width())
+        self.assertTrue(ws_artists[1].is_normalized_by_bin_width())
+        self.assertTrue(ws_artists[2].is_normalized_by_bin_width())
 
     def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace(self):
         non_dist_ws = CreateWorkspace(
             DataX=[10, 20], DataY=[2, 3], DataE=[1, 2], NSpec=1, Distribution=False, OutputWorkspace="non_dist_workpace"
         )
         self.ax.plot(non_dist_ws, specNum=1, distribution=False)
-        self.assertTrue(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
+        self.assertTrue(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized_by_bin_width())
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
         self.ax.errorbar(non_dist_ws, specNum=1, distribution=True)
-        self.assertFalse(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
+        self.assertFalse(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized_by_bin_width())
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
         auto_dist = config["graph1d.autodistribution"] == "On"
         self.ax.plot(non_dist_ws, specNum=1)
-        self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
+        self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized_by_bin_width())
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
     def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace_and_global_setting_off(self):
@@ -343,7 +343,7 @@ class MantidAxesTest(unittest.TestCase):
         )
         config["graph1d.autodistribution"] = "Off"
         self.ax.plot(non_dist_ws, specNum=1)
-        self.assertFalse(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
+        self.assertFalse(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized_by_bin_width())
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
     def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_dist_workspace(self):
@@ -357,9 +357,9 @@ class MantidAxesTest(unittest.TestCase):
             func(dist_2d_ws, distribution=True)
             func(dist_2d_ws)
             ws_artists = self.ax.tracked_workspaces[dist_2d_ws.name()]
-            self.assertTrue(ws_artists[0].is_normalized)
-            self.assertTrue(ws_artists[1].is_normalized)
-            self.assertTrue(ws_artists[2].is_normalized)
+            self.assertTrue(ws_artists[0].is_normalized_by_bin_width())
+            self.assertTrue(ws_artists[1].is_normalized_by_bin_width())
+            self.assertTrue(ws_artists[2].is_normalized_by_bin_width())
 
     def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_false(self):
         plot_funcs = ["imshow", "pcolor", "pcolormesh", "pcolorfast", "tripcolor", "contour", "contourf", "tricontour", "tricontourf"]
@@ -369,7 +369,7 @@ class MantidAxesTest(unittest.TestCase):
         for plot_func in plot_funcs:
             func = getattr(self.ax, plot_func)
             func(non_dist_2d_ws, distribution=False)
-            self.assertTrue(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            self.assertTrue(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized_by_bin_width())
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
     def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_true(self):
@@ -380,7 +380,7 @@ class MantidAxesTest(unittest.TestCase):
         for plot_func in plot_funcs:
             func = getattr(self.ax, plot_func)
             func(non_dist_2d_ws, distribution=True)
-            self.assertFalse(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            self.assertFalse(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized_by_bin_width())
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
     def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_on(self):
@@ -392,7 +392,7 @@ class MantidAxesTest(unittest.TestCase):
             auto_dist = config["graph1d.autodistribution"] == "On"
             func = getattr(self.ax, plot_func)
             func(non_dist_2d_ws)
-            self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized_by_bin_width())
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
     def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_off(self):
@@ -409,7 +409,7 @@ class MantidAxesTest(unittest.TestCase):
             config["graph1d.autodistribution"] = "Off"
             func = getattr(self.ax, plot_func)
             func(non_dist_2d_ws)
-            self.assertFalse(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            self.assertFalse(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized_by_bin_width())
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
     def test_check_axes_distribution_consistency_mixed_normalization(self):
@@ -793,9 +793,15 @@ class MantidAxesTest(unittest.TestCase):
         self.ax.rename_workspace(new_name="new_name", old_name="ws")
 
     def _run_check_axes_distribution_consistency(self, normalization_states):
+        mock_artists = []
+        for normalization_state in normalization_states:
+            mock_artist = Mock()
+            mock_artist.is_normalized_by_bin_width.return_value = normalization_state
+            mock_artists.append(mock_artist)
+
         mock_tracked_workspaces = {
-            "ws": [Mock(is_normalized=normalization_states[0]), Mock(is_normalized=normalization_states[1])],
-            "ws1": [Mock(is_normalized=normalization_states[2])],
+            "ws": [mock_artists[0], mock_artists[1]],
+            "ws1": [mock_artists[2]],
         }
         with patch("mantid.kernel.logger.warning", Mock()) as mock_logger:
             with patch.object(self.ax, "tracked_workspaces", mock_tracked_workspaces):

@@ -287,20 +287,20 @@ class DataFunctionsTest(unittest.TestCase):
 
     def test_get_spectrum_distribution_workspace(self):
         # Since the workspace being plotted is a distribution, we should not
-        # divide by bin width whether or not normalize_by_bin_width is True
-        x, y, dy, dx = funcs.get_spectrum(self.ws2d_histo, 1, True, withDy=True, withDx=True)
+        # divide by bin width whether or not the normalisation type is BIN_WIDTH
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_histo, 1, PlotNormalizationType.BIN_WIDTH, withDy=True, withDx=True)
         self.assertTrue(np.array_equal(x, np.array([15.0, 25.0])))
         self.assertTrue(np.array_equal(y, np.array([4, 5])))
         self.assertTrue(np.array_equal(dy, np.array([3, 4])))
         self.assertEqual(dx, None)
 
-        x, y, dy, dx = funcs.get_spectrum(self.ws2d_histo, 0, False, withDy=True, withDx=True)
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_histo, 0, PlotNormalizationType.NONE, withDy=True, withDx=True)
         self.assertTrue(np.array_equal(x, np.array([15.0, 25.0])))
         self.assertTrue(np.array_equal(y, np.array([2, 3])))
         self.assertTrue(np.array_equal(dy, np.array([1, 2])))
         self.assertEqual(dx, None)
         # fail case - try to find spectrum out of range
-        self.assertRaises(RuntimeError, funcs.get_spectrum, self.ws2d_histo, 10, True)
+        self.assertRaises(RuntimeError, funcs.get_spectrum, self.ws2d_histo, 10, PlotNormalizationType.BIN_WIDTH)
 
     def test_get_spectrum_non_distribution_workspace(self):
         # get data divided by bin width
@@ -318,7 +318,7 @@ class DataFunctionsTest(unittest.TestCase):
         self.assertTrue(np.array_equal(dy, np.array([3, 4])))
         self.assertEqual(dx, None)
         # fail case - try to find spectrum out of range
-        self.assertRaises(RuntimeError, funcs.get_spectrum, self.ws2d_non_distribution, 10, True)
+        self.assertRaises(RuntimeError, funcs.get_spectrum, self.ws2d_non_distribution, 10, normalization=PlotNormalizationType.BIN_WIDTH)
 
     def test_get_md_data2d_bin_bounds(self):
         x, y, data = funcs.get_md_data2d_bin_bounds(self.ws_MD_2d, mantid.api.MDNormalization.NoNormalization)
@@ -718,7 +718,7 @@ class DataFunctionsTest(unittest.TestCase):
 
     @add_workspace_with_data
     def test_get_spectrum_no_dy_dx(self, ws):
-        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalization=False, withDy=False, withDx=False)
+        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalization=PlotNormalizationType.BIN_WIDTH, withDy=False, withDx=False)
         self.assertTrue(np.array_equal([13.5, 14.5, 15.5], x))
         self.assertTrue(np.array_equal([10.0, 11.0, 12.0], y))
         self.assertIsNone(dy)
@@ -726,7 +726,7 @@ class DataFunctionsTest(unittest.TestCase):
 
     @add_workspace_with_data
     def test_get_spectrum_with_dy_dx(self, ws):
-        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalization=False, withDy=True, withDx=True)
+        x, y, dy, dx = funcs.get_spectrum(ws, 3, normalization=PlotNormalizationType.NONE, withDy=True, withDx=True)
 
         self.assertTrue(np.array_equal([13.5, 14.5, 15.5], x))
         self.assertTrue(np.array_equal([10.0, 11.0, 12.0], y))
