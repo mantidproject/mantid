@@ -35,6 +35,39 @@ public:
   static LoadMaskTest *createSuite() { return new LoadMaskTest(); }
   static void destroySuite(LoadMaskTest *suite) { delete suite; }
 
+  // Loading a nonexistent mask should throw an exception
+  void test_LoadNonexistentThrow() {
+    LoadMask loadfile;
+    loadfile.initialize();
+    loadfile.setRethrows(true);
+
+    // this file does not exist, but has the right extensions
+    std::string const not_a_mask_file = "does_not_exist.msk";
+
+    loadfile.setProperty("Instrument", POWGEN_INSTR);
+    TS_ASSERT_THROWS_ASSERT(loadfile.setProperty("InputFile", not_a_mask_file), std::invalid_argument const &e,
+                            TS_ASSERT(strstr(e.what(), "Invalid value for property InputFile (string) from string")));
+    TS_ASSERT(!loadfile.isExecuted());
+  }
+
+  // Loading a file with the wrong format should throw an exception, not create an empty workspace
+  void test_LoadBadThrow() {
+    LoadMask loadfile;
+    loadfile.initialize();
+    loadfile.setRethrows(true);
+
+    // this is some file in the unit test data that is not a mask
+    std::string const not_a_mask_file = "48098.Q";
+
+    loadfile.setProperty("Instrument", POWGEN_INSTR);
+    loadfile.setProperty("InputFile", not_a_mask_file);
+    loadfile.setProperty("OutputWorkspace", "PG3Mask");
+
+    TS_ASSERT_THROWS_ASSERT(loadfile.execute(), std::runtime_error const &e,
+                            TS_ASSERT(strstr(e.what(), " is not in supported format.")));
+    TS_ASSERT(!loadfile.isExecuted());
+  }
+
   void test_LoadXML() {
     LoadMask loadfile;
     loadfile.initialize();
