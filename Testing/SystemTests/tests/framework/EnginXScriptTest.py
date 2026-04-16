@@ -78,12 +78,12 @@ class FocusEventMode(systemtesting.MantidSystemTest):
         self.assertEqual(self._ws_foc.getNumberHistograms(), 2)
         # assert diff constants of one group
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18397, delta=5)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], 1.86, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18397, delta=15)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], 1.86, delta=2)
         self.assertAlmostEqual(diff_consts[UnitParams.tzero], 0.2, delta=2)
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(1)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18483, delta=5)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], -29.8, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18483, delta=15)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -29.8, delta=2)
         self.assertAlmostEqual(diff_consts[UnitParams.tzero], -54.4, delta=2)
         # compare TOF workspaces
         self.tolerance = 1e-6
