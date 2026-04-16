@@ -62,6 +62,7 @@ class FullInstrumentViewPresenter:
         any monitors."""
         self._view = view
         self._model = model
+        self._closing = False
         self._transform = np.eye(4)
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
@@ -86,7 +87,8 @@ class FullInstrumentViewPresenter:
                 break
             func, args = item
             try:
-                func(*args)
+                if not self._closing:
+                    func(*args)
             except Exception as e:
                 logger.error(f"Error in callback worker: {e}")
             finally:
@@ -208,6 +210,8 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._on_projection_option_changed, ()))
 
     def update_plotter(self) -> None:
+        if self._closing:
+            return
         self._model.projection_type = self._view.current_selected_projection()
         self._model.flip_z = self._view.is_flip_z_axis_checkbox_checked()
         with SuppressRendering(self._view.main_plotter):
@@ -569,15 +573,14 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._add_workspace_callback, (ws_name, ws)))
 
     def handle_close(self):
-        if hasattr(self, "_callback_queue"):
-            self._callback_queue.put(self._callback_stop_sentinel)
-            if hasattr(self, "_callback_thread"):
-                self._callback_thread.join(timeout=1)
+        self._closing = True
         # The observers are unsubscribed on object deletion, it's safer to manually
         # delete the observer rather than wait for the garbage collector, because
         # we don't want stale workspace references hanging around.
         if hasattr(self, "_ads_observer"):
             del self._ads_observer
+        if hasattr(self, "_callback_queue"):
+            self._callback_queue.put(self._callback_stop_sentinel)
 
     def on_unit_option_selected(self, value) -> None:
         self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
@@ -669,6 +672,8 @@ class FullInstrumentViewPresenter:
 
         Called when workspaces are added to or removed from the ADS.
         """
+        if self._closing:
+            return
         with SuppressRendering(self._view.main_plotter):
             self._reload_peaks_workspaces()
             self._reload_mask_workspaces()

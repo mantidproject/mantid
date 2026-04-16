@@ -60,7 +60,20 @@ from instrumentview.ShapeWidgets import (
 
 import os
 from contextlib import suppress
+from functools import wraps
 from typing import Callable
+
+
+def _skip_if_closing(method):
+    """Decorator that silently returns if the view is closing."""
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if self._closing:
+            return
+        return method(self, *args, **kwargs)
+
+    return wrapper
 
 
 class WorkspaceListWidget(QListWidget):
@@ -359,6 +372,7 @@ class FullInstrumentViewWindow(QMainWindow):
         window_geometry.moveCenter(center_point)
         self.move(window_geometry.topLeft())
 
+        self._closing = False
         self._current_widget = None
         self._shape_overlay_manager = None
         self._default_camera_position_map = {}
@@ -796,6 +810,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._contour_range_slider.setValue(contour_limits)
         return
 
+    @_skip_if_closing
     def set_plotter_scalar_bar_range(self, clim: tuple[int, int], label: str, display_title: str | None = None) -> None:
         """Set the range of the colours displayed, i.e. the legend"""
         self.main_plotter.update_scalar_bar_range(clim, label)
@@ -806,15 +821,17 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def closeEvent(self, QCloseEvent: QEvent) -> None:
         """When closing, make sure to close the plotters and figure correctly to prevent errors"""
+        self._closing = True
         super().closeEvent(QCloseEvent)
         with suppress(TypeError):
             self._contour_range_max_edit.disconnect()
             self._contour_range_min_edit.disconnect()
             self._integration_limit_max_edit.disconnect()
             self._integration_limit_min_edit.disconnect()
-        self.main_plotter.close()
+        # Shut down any callbacks before closing the plotter and the figure
         if hasattr(self, "_presenter") and self._presenter is not None:
             self._presenter.handle_close()
+        self.main_plotter.close()
 
     def set_projection_combo_options(self, default_index: int, options: list[str]) -> None:
         self._projection_combo_box.addItems(options)
@@ -823,10 +840,12 @@ class FullInstrumentViewWindow(QMainWindow):
     def current_selected_projection(self) -> str:
         return self._projection_combo_box.currentText()
 
+    @_skip_if_closing
     def add_simple_shape(self, mesh: PolyData, colour=None, pickable=False) -> None:
         """Draw the given mesh in the main plotter window"""
         self.main_plotter.add_mesh(mesh, color=colour, pickable=pickable)
 
+    @_skip_if_closing
     def clear_main_plotter(self) -> None:
         self.delete_current_widget()
         self.main_plotter.clear()
@@ -911,10 +930,12 @@ class FullInstrumentViewWindow(QMainWindow):
         if self._shape_overlay_manager is not None:
             self._shape_overlay_manager.update_projection_cache()
 
+    @_skip_if_closing
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
         """Draw the given mesh in the main plotter window, and set the colours manually with RGBA numbers"""
         self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, pickable=False, render_points_as_spheres=True, point_size=10)
 
+    @_skip_if_closing
     def show_axes(self) -> None:
         """Show axes on the main plotter"""
         if not self.main_plotter.off_screen:
@@ -924,6 +945,7 @@ class FullInstrumentViewWindow(QMainWindow):
         """Set the camera focal point on the main plotter"""
         self.main_plotter.camera.focal_point = focal_point
 
+    @_skip_if_closing
     def show_plot_for_detectors(self, workspace: Workspace2D) -> None:
         """Plot all the given spectra, where they are defined by their workspace indices, not the spectra numbers"""
         self._detector_spectrum_axes.clear()
@@ -976,12 +998,14 @@ class FullInstrumentViewWindow(QMainWindow):
             if self._peak_ws_list.item(row_index).checkState() > 0
         ]
 
+    @_skip_if_closing
     def clear_overlay_meshes(self) -> None:
         for mesh in self._overlay_meshes:
             self.main_plotter.remove_actor(mesh[0])
             self.main_plotter.remove_actor(mesh[1])
         self._overlay_meshes.clear()
 
+    @_skip_if_closing
     def clear_lineplot_overlays(self) -> None:
         for line in self._lineplot_overlays:
             line.remove()
@@ -989,6 +1013,7 @@ class FullInstrumentViewWindow(QMainWindow):
         for text in self._detector_spectrum_axes.texts:
             text.remove()
 
+    @_skip_if_closing
     def plot_overlay_meshes(
         self, positions_by_pws: list[np.ndarray], labels_by_pws: list[list[str]], selected_workspaces: list[str]
     ) -> None:
@@ -1017,6 +1042,7 @@ class FullInstrumentViewWindow(QMainWindow):
             )
             self._overlay_meshes.append((points_actor, labels_actor))
 
+    @_skip_if_closing
     def plot_lineplot_peak_overlays(
         self, x_by_pws: list[list[float]], labels_by_pws: list[list[str]], selected_workspaces: list[str]
     ) -> None:
@@ -1044,6 +1070,7 @@ class FullInstrumentViewWindow(QMainWindow):
                 )
             self.redraw_lineplot()
 
+    @_skip_if_closing
     def redraw_lineplot(self) -> None:
         self._detector_spectrum_fig.tight_layout()
         self._detector_figure_canvas.draw()
@@ -1111,7 +1138,7 @@ class FullInstrumentViewWindow(QMainWindow):
             new_lineplot_callbacks[new_cid] = func
         self._default_lineplot_callbacks = new_lineplot_callbacks
         self._figure_canvas_click_id = None
-        self._lineplot_peak_cursor.linev.remove()
+        del self._lineplot_peak_cursor
         self._lineplot_peak_cursor = None
         self._plot_toolbar.setDisabled(False)
         self._detector_figure_canvas.draw_idle()
