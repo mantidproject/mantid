@@ -97,9 +97,11 @@ void SavePresenter::updateWidgetStateBasedOnFileFormat() const {
   if (isORSOFormat(fileFormat)) {
     m_view->enableAdditionalColumnsCheckBox();
     m_view->showModelEditTextBox();
+    m_view->showMetadataSourceSelection();
   } else {
     m_view->disableAdditionalColumnsCheckBox();
     m_view->hideModelEditTextBox();
+    m_view->hideMetadataSourceSelection();
   }
 
   // Enable/disable the save to single file checkbox for formats that support this
