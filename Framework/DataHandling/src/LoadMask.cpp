@@ -22,6 +22,7 @@
 
 #include "MantidKernel/Strings.h"
 
+#include <algorithm>
 #include <fstream>
 #include <map>
 #include <sstream>
@@ -246,8 +247,7 @@ void LoadMask::init() {
   declareProperty("Instrument", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the instrument to apply the mask.");
 
-  const std::vector<std::string> maskExts{".xml", ".msk"};
-  declareProperty(std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, maskExts),
+  declareProperty(std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, validExtensions()),
                   "Masking file for masking. Supported file format is XML and "
                   "ISIS ASCII. ");
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("RefWorkspace", "", Direction::Input,
@@ -293,7 +293,6 @@ void LoadMask::exec() {
 
   // 2. Parse Mask File
   std::string filename = getProperty("InputFile");
-
   if (filename.ends_with("l") || filename.ends_with("L")) {
     // 2.1 XML File
     this->initializeXMLParser(filename);
@@ -303,9 +302,11 @@ void LoadMask::exec() {
     loadISISMaskFile(filename, m_maskSpecID);
     m_defaultToUse = true;
   } else {
-    g_log.error() << "File " << filename << " is not in supported format. \n";
-    return;
+    // we have already validated, so this should not occur
+    throw std::runtime_error("Error reading mask from file " + filename +
+                             ".  Supported formats are XML and ISIS mask files.  No mask was loaded.");
   }
+
   // 3. Translate and set geometry
   g_log.information() << "To Mask: \n";
 
@@ -567,6 +568,11 @@ void LoadMask::parseXML() {
   Poco::AutoPtr<NodeList> pNL_type = m_pRootElem->getElementsByTagName("type");
   g_log.information() << "Node Size = " << pNL_type->length() << '\n';
 
+  Poco::AutoPtr<NodeList> masking_nodes = m_pDoc->getElementsByTagName("detector-masking");
+  if (masking_nodes->length() == 0 && m_pRootElem->nodeName() != "detector-masking") {
+    throw std::runtime_error("No node with name 'detector-masking' is found in the mask file.  Wrong format.");
+  }
+
   Poco::XML::NodeIterator it(m_pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
   Poco::XML::Node *pNode = it.nextNode();
 
@@ -701,6 +707,17 @@ if no errors is found.
 std::map<std::string, std::string> LoadMask::validateInputs() {
 
   std::map<std::string, std::string> result;
+
+  // check the extensions of the file
+  // NOTE the validator on the file property does not error if not correct
+  std::string filename = getProperty("InputFile");
+  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+  auto exts = validExtensions();
+  if (std::none_of(exts.cbegin(), exts.cend(),
+                   [&filename](std::string const &ext) { return filename.ends_with(ext); })) {
+    result["InputFile"] =
+        "File " + filename + " is not in supported format.  Supported formats are XML and ISIS mask files.";
+  }
 
   API::MatrixWorkspace_sptr inputWS = getProperty("RefWorkspace");
   std::string InstrName = getProperty("Instrument");
