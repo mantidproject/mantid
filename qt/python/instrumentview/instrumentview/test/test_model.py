@@ -369,8 +369,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isCommonBins.return_value = True
         mock_workspace.dataX.return_value = np.array([1, 2, 3])
-        model._integration_workspace = mock_workspace
         model.setup()
+        model._integration_workspace = mock_workspace
         self.assertEqual(model.integration_limits, (1, 3))
 
     def test_integration_limits_on_ragged_workspace(self):
@@ -378,16 +378,16 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.isRaggedWorkspace.return_value = True
         data_x = {0: np.array([1, 2, 3]), 1: np.array([10, 20, 30, 40]), 2: np.array([10, 20, 30, 40, 50])}
         mock_workspace.readX.side_effect = lambda i: data_x[i]
-        model._integration_workspace = mock_workspace
         model.setup()
+        model._integration_workspace = mock_workspace
         self.assertEqual(model.integration_limits, (1, 50))
 
     def test_integration_limits_on_non_ragged_workspace(self):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = False
         mock_workspace.extractX.return_value = np.array([[1, 2, 3], [10, 20, 30], [10, 20, 50]])
-        model._integration_workspace = mock_workspace
         model.setup()
+        model._integration_workspace = mock_workspace
         self.assertEqual(model.integration_limits, (1, 50))
 
     def test_monitor_positions(self):
@@ -991,7 +991,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.isRaggedWorkspace.return_value = False
         mock_workspace.isCommonBins.return_value = True
         mock_workspace.dataX.return_value = np.array([10.0, 20.0, 30.0])
-        model._integration_workspace = mock_workspace
         # Only include detectors 1 and 2 (indices 0, 1)
         valid_mask = np.array([True, True, False])
         model._calculate_and_set_full_integration_range(valid_mask)
@@ -1006,7 +1005,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.isRaggedWorkspace.return_value = True
         data_x = {0: np.array([5.0, 10.0, 15.0]), 1: np.array([1.0, 20.0, 50.0]), 2: np.array([100.0, 200.0])}
         mock_workspace.readX.side_effect = lambda i: data_x[i]
-        model._integration_workspace = mock_workspace
         # Only include detectors 0 and 2 (skip detector 1 which has range 1-50)
         valid_mask = np.array([True, False, True])
         model._calculate_and_set_full_integration_range(valid_mask)
@@ -1019,7 +1017,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.isRaggedWorkspace.return_value = False
         mock_workspace.isCommonBins.return_value = False
         mock_workspace.extractX.return_value = np.array([[1.0, 2.0, 3.0], [10.0, 20.0, 30.0], [5.0, 15.0, 50.0]])
-        model._integration_workspace = mock_workspace
         valid_mask = np.array([True, True, True])
         model._calculate_and_set_full_integration_range(valid_mask)
         self.assertEqual(model.integration_limits, (1.0, 50.0))
@@ -1032,7 +1029,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         # Detector 1 has range 1-500, detectors 0 and 2 have range 10-100
         data_x = {0: np.array([10.0, 50.0, 100.0]), 1: np.array([1.0, 250.0, 500.0]), 2: np.array([20.0, 60.0, 90.0])}
         mock_workspace.readX.side_effect = lambda i: data_x[i]
-        model._integration_workspace = mock_workspace
         all_valid = np.array([True, True, True])
         model._calculate_and_set_full_integration_range(all_valid)
         self.assertEqual(model.integration_limits, (1.0, 500.0))
@@ -1049,7 +1045,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.isCommonBins.return_value = False
         # Detector 0 has range 1-500, detector 2 has range 5-50
         mock_workspace.extractX.return_value = np.array([[1.0, 250.0, 500.0], [10.0, 50.0, 100.0], [5.0, 25.0, 50.0]])
-        model._integration_workspace = mock_workspace
         all_valid = np.array([True, True, True])
         model._calculate_and_set_full_integration_range(all_valid)
         self.assertEqual(model.integration_limits, (1.0, 500.0))
@@ -1067,7 +1062,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         data_x = {0: np.array([1.0, 250.0, 500.0]), 1: np.array([10.0, 50.0, 100.0]), 2: np.array([20.0, 60.0, 90.0])}
         mock_workspace.readX.side_effect = lambda i: data_x[i]
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100, 200]
-        model._integration_workspace = mock_workspace
         # Mask detector 0 so only detectors 1 and 2 are pickable
         model._is_masked = np.array([True, False, False])
         model._is_valid = np.array([True, True, True])
@@ -1083,7 +1077,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.isRaggedWorkspace.return_value = False
         mock_workspace.isCommonBins.return_value = True
         mock_workspace.dataX.return_value = np.array([10.0, 20.0, 30.0])
-        model._integration_workspace = mock_workspace
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [50, 150, 250]
         model.calculate_and_set_full_integration_range()
         # The setter calls update_integration_range which calls getIntegratedCountsForWorkspaceIndices
