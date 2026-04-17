@@ -815,11 +815,11 @@ class FigureInteraction(object):
     def _get_normalization_from_artists(ax):
         artists = [art for art in ax.tracked_workspaces.values()]
         normalizations = [art[0].normalization for art in artists]
-        all_the_same = all(map(operator.eq, normalizations[1:], normalizations[:-1]))
-        if all_the_same:
-            return normalizations[0]
-        else:
-            return PlotNormalizationType.NONE
+        if normalizations:
+            all_the_same = all(map(operator.eq, normalizations[1:], normalizations[:-1]))
+            if all_the_same:
+                return normalizations[0]
+        return PlotNormalizationType.NONE
 
     def _toggle_normalization(self, selected_ax, normalization: PlotNormalizationType):
         if figure_type(self.canvas.figure) == FigureType.Image and len(self.canvas.figure.get_axes()) > 1:
