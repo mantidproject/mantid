@@ -103,9 +103,6 @@ class FullInstrumentViewPresenter:
         self._view.show_axes()
         self._setup_component_tree()
 
-        if self._model.workspace_x_unit in self._UNIT_OPTIONS:
-            self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_x_unit))
-
         self._ads_observer = InstrumentViewADSObserver(
             delete_callback=self.delete_workspace_callback,
             rename_callback=self.rename_workspace_callback,
@@ -116,6 +113,9 @@ class FullInstrumentViewPresenter:
         self._view.hide_status_box()
         self._select_bank_tube = self._view.is_select_bank_tube_checked()
         self.update_plotter()
+
+        if self._model.workspace_x_unit in self._UNIT_OPTIONS:
+            self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_x_unit))
 
     def _setup_component_tree(self) -> None:
         component_tree_model = ComponentTreeModel(self._model.workspace)
