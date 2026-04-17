@@ -137,8 +137,7 @@ Useful links
 ============
 
 * :ref:`WorkingWithWorkspaces`
-* :ref:`More ADS options <mantid.api.AnalysisDataServiceImpl>`
-* :ref:`Analysis Data Service Explained <Analysis Data Service>`
+* :py:obj:`Analysis Data Service <mantid.api.AnalysisDataServiceImpl>`
 
 
 Overall Example

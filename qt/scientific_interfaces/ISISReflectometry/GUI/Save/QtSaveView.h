@@ -39,6 +39,8 @@ public:
   std::string getPrefix() const override;
   /// Returns the filter
   std::string getFilter() const override;
+  /// Returns the model
+  std::string getModel() const override;
   /// Returns the regex check
   bool getRegexCheck() const override;
   /// Get name of the currently selected workspace name
@@ -49,6 +51,8 @@ public:
   std::vector<std::string> getSelectedParameters() const override;
   /// Returns the index of selected file format
   int getFileFormatIndex() const override;
+  /// Returns the validate model check
+  bool getValidateModelCheck() const override;
   /// Returns the title check
   bool getHeaderCheck() const override;
   /// Returns the Q resolution check
@@ -93,6 +97,8 @@ public:
   void disableSaveToSingleFileCheckBox() override;
   void enableSaveIndividualRowsCheckbox() override;
   void disableSaveIndividualRowsCheckbox() override;
+  void showModelEditTextBox() override;
+  void hideModelEditTextBox() override;
 
   void error(const std::string &title, const std::string &prompt);
   void warning(const std::string &title, const std::string &prompt);
@@ -122,6 +128,7 @@ public slots:
 
 private slots:
   void onSettingsChanged();
+  void onModelTextChanged(const QString &text);
 
 private:
   /// Initialize the interface

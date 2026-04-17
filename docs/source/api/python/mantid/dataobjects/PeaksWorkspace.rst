@@ -11,7 +11,7 @@ The PeaksWorkspace is a special Workspace that holds a list of single crystal Pe
 Creating a PeaksWorkspace
 -------------------------
 
-* :ref:`FindPeaksMD <algm-FindPeaksMD>` will find peaks in reciprocal space in a :ref:`MDWorkspace <MDWorkspace>`.
+* :ref:`FindPeaksMD <algm-FindPeaksMD>` will find peaks in reciprocal space in a :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>`.
 * :ref:`FindSXPeaks <algm-FindSXPeaks>` will find peaks in detector space.
 * :ref:`PredictPeaks <algm-PredictPeaks>` will predict peak positions in a workspace given a UB matrix.
 * The :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` algorithm will load a PeaksWorkspace from file.
@@ -33,7 +33,7 @@ Each peak object contains several pieces of information. Not all of them are nec
 * H K L indices (optional)
 * Goniometer rotation matrix (for finding Q in the sample frame)
 * Integrated intensity and error (optional)
-* Row/column of detector (only for :ref:`RectangularDetectors <RectangularDetector>` )
+* Row/column of detector (only for :py:obj:`~mantid.geometry.RectangularDetector` )
 * An integration shape (see below)
 
 .. _the-peak-shape:

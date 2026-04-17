@@ -9,7 +9,7 @@
 Description
 -----------
 
-Uses a :ref:`MDEventWorkspace <MDWorkspace>` and `PeaksWorkspace` to integrate the peaks provided in the peaks
+Uses a :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` and `PeaksWorkspace` to integrate the peaks provided in the peaks
 workspace. A :ref:`LorentzCorrection <algm-LorentzCorrection>` can be optionally applied to the integrated peaks with
 the `ApplyLorentz` option.
 

@@ -10,17 +10,17 @@ Description
 -----------
 
 This algorithm will resize a
-:ref:`RectangularDetector <RectangularDetector>` by applying X and Y
+:py:obj:`~mantid.geometry.RectangularDetector` by applying X and Y
 scaling factors. Each pixel's position will be modified relative to the
 0,0 point of the detector by these factors. Typically, a
 RectangularDetector is constructed around its center, so this would
 scale the detector around its center.
 
-This only works on :ref:`RectangularDetectors <RectangularDetector>`. Banks
+This only works on :py:obj:`~mantid.geometry.RectangularDetector`. Banks
 formed by e.g. tubes cannot be scaled in this way.
 
 Internally, this sets the "scalex" and "scaley" parameters on the
-:ref:`RectangularDetector <RectangularDetector>`. Note that the scaling is
+:py:obj:`~mantid.geometry.RectangularDetector`. Note that the scaling is
 relative to the original size, and is not cumulative: that is, if you
 Resize \* 2 and again \* 3, your final detector is 3 times larger than
 the original, not 6 times.

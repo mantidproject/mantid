@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm will clones an existing
-:ref:`MDEventWorkspace <MDWorkspace>` or
+:py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` or
 :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` into a new one.
 
 If the InputWorkspace is a file-backed MDEventWorkspace, then the

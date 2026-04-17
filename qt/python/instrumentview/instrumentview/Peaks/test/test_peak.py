@@ -10,7 +10,7 @@ import unittest
 
 class TestPeak(unittest.TestCase):
     def test_label(self):
-        peak = Peak(0, 0, None, 0, (1.233333, 4.0, 36), 0, 0, 0, 0)
+        peak = Peak(0, 0, 0, (1.233333, 4.0, 36), 0, 0, 0, 0)
         self.assertEqual("(1.23, 4, 36)", peak.label)
 
     def test_location_in_unit(self):
@@ -18,14 +18,14 @@ class TestPeak(unittest.TestCase):
         wavelength = 15
         dspacing = 20
         q = 25
-        peak = Peak(0, 0, None, 0, (1.233333, 4.0, 36), tof, dspacing, wavelength, q)
+        peak = Peak(0, 0, 0, (1.233333, 4.0, 36), tof, dspacing, wavelength, q)
         self.assertEqual(tof, peak.location_in_unit("TOF"))
         self.assertEqual(wavelength, peak.location_in_unit("WAVELENGTH"))
         self.assertEqual(dspacing, peak.location_in_unit("dspacing"))
         self.assertEqual(q, peak.location_in_unit("Q"))
 
     def test_location_in_unit_wrong_unit(self):
-        peak = Peak(0, 0, None, 0, (1.233333, 4.0, 36), 0, 0, 0, 0)
+        peak = Peak(0, 0, 0, (1.233333, 4.0, 36), 0, 0, 0, 0)
         self.assertRaisesRegex(RuntimeError, "Unknown unit Oops for peak location", peak.location_in_unit, "Oops")
 
 

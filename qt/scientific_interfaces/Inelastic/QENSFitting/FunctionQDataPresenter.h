@@ -27,6 +27,7 @@ class MANTIDQT_INELASTIC_DLL FunctionQDataPresenter : public FitDataPresenter, p
 
 public:
   FunctionQDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view);
+  ~FunctionQDataPresenter() override = default;
   bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
   void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) override;
   void setActiveSpectra(std::vector<std::size_t> const &activeParameterSpectra, std::size_t parameterIndex,

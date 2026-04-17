@@ -7,12 +7,12 @@ This is a Python binding to the C++ class Mantid::DataObjects::MDHistoWorkspace.
 *bases:* :py:obj:`mantid.api.IMDHistoWorkspace`
 
 The MD Histogram Workspace (MDHistoWorkspace) is a simple multi-dimensional workspace. In
-contrast to the :ref:`MDWorkspace <MDWorkspace>`, which contains
+contrast to the :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>`, which contains
 points in space, the MDHistoWorkspace consists of a signal and error
 spread around space on a regular grid.
 
 In a way, the MDHistoWorkspace is to a
-:ref:`MDWorkspace <MDWorkspace>` is what the
+:py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` is what the
 :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` is to the
 :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`.
 
@@ -22,7 +22,7 @@ Creating a MDHistoWorkspace
 MDHistoWorkspaces typically have 3 or 4 dimensions, although they can be
 created in up to 9 dimensions.
 
--  You can bin a :ref:`MDWorkspace <MDWorkspace>` to a
+-  You can bin a :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` to a
    MDHistoWorkspace using the :ref:`BinMD <algm-BinMD>` algorithm.
 
    -  You can use :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>` to create a

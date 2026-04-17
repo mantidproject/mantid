@@ -5,7 +5,7 @@ TableWorkspace with Python
 ===========================
 
 
-TableWorkspaces are a type of :ref:`workspace <02_ws_types>` designed to handle data other than particle count spectra. They contain a single array, rather than the 3 tables of X-value, Y-value and E-value characteristic of most :ref:`workspaces <03_matrix_ws_py>` and few :ref:`algorithms <Algorithm>` manipulate. TableWorkspaces are analogous to sheets in Microsoft Excel. An example is the :ref:`algm-Fit` algorithm that saves the calculated fit parameters in this format.
+TableWorkspaces are a type of :ref:`workspace <02_ws_types>` designed to handle data other than particle count spectra. They contain a single array, rather than the 3 tables of X-value, Y-value and E-value characteristic of most :ref:`workspaces <03_matrix_ws_py>` and few :py:obj:`algorithm <mantid.api.Algorithm>` manipulate. TableWorkspaces are analogous to sheets in Microsoft Excel. An example is the :ref:`algm-Fit` algorithm that saves the calculated fit parameters in this format.
 
 
 .. figure:: /images/ITableWorkspaceHierachy.png

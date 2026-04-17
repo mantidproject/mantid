@@ -148,7 +148,7 @@ Example of Workspace usage
 TableWorkspaces
 ===============
 
-A :ref:`Table Workspaces` has columns of mixed data, like a spreadsheet. It can store text or calculated/measured values, which may relate to data from an experiment. An example is the output fit parameters from fitting within Mantid.
+A :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` has columns of mixed data, like a spreadsheet. It can store text or calculated/measured values, which may relate to data from an experiment. An example is the output fit parameters from fitting within Mantid.
 
 A :py:obj:`PeaksWorkspace <mantid.dataobjects.PeaksWorkspace>` is a special type of TableWorkspace with additional support for Single Crystal peaks.
 See right for an example of a PeaksWorkspace.
@@ -161,4 +161,4 @@ Other Workspace Types
    To create a group simply select more than one workspace in the Workspace Toolbox and click the "**Group**" button.
    Either the whole group or individual members can be processed when using algorithms.
 
--  :ref:`MDWorkspace` is a more complex, multi-dimension type of workspace.
+-  :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` is a more complex, multi-dimension type of workspace.

@@ -1,0 +1,1 @@
+- The New Instrument Viewer now updates the counts data when the integration range has min == max.

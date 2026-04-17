@@ -9,7 +9,7 @@
 Description
 -----------
 
-Converts a 2D workspace from :ref:`units <Unit Factory>`
+Converts a 2D workspace from :py:obj:`Units <mantid.kernel.UnitFactoryImpl>`
 of spectrum number/**energy transfer**
 to the intensity as a function of **momentum transfer** :math:`Q`
 and **energy transfer** :math:`\Delta E`.

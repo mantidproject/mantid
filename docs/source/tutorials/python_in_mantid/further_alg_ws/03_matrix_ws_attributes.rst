@@ -66,7 +66,7 @@ getSpectrum for info on the structure of a workspace eg. the spectrum number rel
     instrument = ws.getInstrument()
     print(instrument.getName())
 
-:ref:`SpectrumInfo`, :ref:`DetectorInfo` and :ref:`ComponentInfo` have many other features:
+:ref:`SpectrumInfo`, :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` have many other features:
 
 .. code-block:: python
 

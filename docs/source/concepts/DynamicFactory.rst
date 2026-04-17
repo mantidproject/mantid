@@ -11,8 +11,7 @@ implementing the :ref:`Plugin <Plugin>` technology in Mantid.
 
 A factory in software terms is an class that is responsible for creating
 other objects on demand. In mantid terms the AlgorithmFactory is
-responsible for creating instances of :ref:`Algorithms <Algorithm>` when
-you need them.
+responsible for creating instances of :py:obj:`algorithm <mantid.api.Algorithm>` when you need them.
 
 As the factory is dynamic it does not have a set list of objects that it
 can create instead it knows how to create instances of a particular base

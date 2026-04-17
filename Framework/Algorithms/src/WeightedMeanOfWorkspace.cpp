@@ -70,7 +70,7 @@ void WeightedMeanOfWorkspace::exec() {
   }
   singleValued->mutableX(0)[0] = 0.0;
   singleValued->mutableY(0)[0] = averageValue / weightSum;
-  singleValued->mutableE(0)[0] = std::sqrt(weightSum);
+  singleValued->mutableE(0)[0] = 1.0 / std::sqrt(weightSum);
   this->setProperty("OutputWorkspace", singleValued);
 }
 
