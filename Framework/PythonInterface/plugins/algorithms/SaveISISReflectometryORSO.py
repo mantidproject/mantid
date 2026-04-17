@@ -22,7 +22,7 @@ from mantid.kernel import (
 )
 from mantid.api import AlgorithmFactory, AlgorithmManager, FileProperty, FileAction, PythonAlgorithm, AnalysisDataService, WorkspaceGroup
 
-
+from functools import wraps
 from pathlib import Path
 from typing import Optional, Tuple, Union, List
 import re
@@ -109,6 +109,7 @@ class ReflectometryDatasetBase:
         return True
 
     def check_read_only(func):
+        @wraps(func)
         def inner(self, *args, **kwargs):
             if self._read_only():
                 raise AttributeError("Properties cannot be manually set on this dataset.")

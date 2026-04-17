@@ -75,6 +75,7 @@ void QtSaveView::connectSaveSettingsWidgets() {
   connectSettingsChange(*m_ui.spaceRadioButton);
   connectSettingsChange(*m_ui.tabRadioButton);
   connectSettingsChange(*m_ui.fileFormatComboBox);
+  connectSettingsChange(*m_ui.metaSourceComboBox);
 }
 
 void QtSaveView::browseToSaveDirectory() {
@@ -109,6 +110,16 @@ void QtSaveView::onSaveIndividualRowsChanged(int state) {
   } else {
     m_notifyee->notifySaveIndividualRowsDisabled();
   }
+}
+
+void QtSaveView::showMetadataSourceSelection() {
+  m_ui.metaSourceComboBox->setVisible(true);
+  m_ui.metaSourceLabel->setVisible(true);
+}
+
+void QtSaveView::hideMetadataSourceSelection() {
+  m_ui.metaSourceComboBox->setVisible(false);
+  m_ui.metaSourceLabel->setVisible(false);
 }
 
 void QtSaveView::disableAutosaveControls() { m_ui.autosaveGroup->setEnabled(false); }
@@ -242,6 +253,11 @@ int QtSaveView::getFileFormatIndex() const { return m_ui.fileFormatComboBox->cur
  * @return :: validate model check
  */
 bool QtSaveView::getValidateModelCheck() const { return m_ui.validateModelCheckBox->isChecked(); }
+
+/** Returns the index of the selected source of metadata for ORSO files.
+ * @return :: Metadata source index.
+ */
+int QtSaveView::getMetaSourceIndex() const { return m_ui.metaSourceComboBox->currentIndex(); }
 
 /** Returns the header check value
  * @return :: The header check
