@@ -53,6 +53,8 @@ public:
   int getFileFormatIndex() const override;
   /// Returns the validate model check
   bool getValidateModelCheck() const override;
+  /// Returns the index of the selected source of metadata for ORSO files.
+  int getMetaSourceIndex() const override;
   /// Returns the title check
   bool getHeaderCheck() const override;
   /// Returns the Q resolution check
@@ -74,6 +76,9 @@ public:
   void setParametersList(const std::vector<std::string> & /*unused*/) const override;
 
   void disallowAutosave() override;
+
+  void showMetadataSourceSelection() override;
+  void hideMetadataSourceSelection() override;
 
   void disableAutosaveControls() override;
   void enableAutosaveControls() override;
