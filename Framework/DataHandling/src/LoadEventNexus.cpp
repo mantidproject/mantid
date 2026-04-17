@@ -1146,18 +1146,17 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
   prog->report("Initializing all pixels");
 
-  /** If only some banks are to be loaded AND if the instrument has the remove-unused-banks flag set to 1 (true)
+  /** If only some banks are to be loaded AND if the instrument has the remove-unused-banks flag set to true
    * then we will reduce the instrument by deleting the banks that are not being loaded.
-   * Note that this will change the instrument, so it should only run when selected.
+   * Note that this will change the workspace's instrument, so it should only run when selected.
+   * This parameter is currently only set on MANDI and TOPAZ instruments
    */
   if (!someBanks.empty() && m_ws->getInstrument()->hasParameter("remove-unused-banks")) {
-    // retrieve the remove-unused-banks flag from the instrument parameters; currently only set to MANDI and TOPAZ
-    // the param is retrieved as a vector, but should only have one value
-    // this must be read as a number parameter instead of a bool parameter, because of reasons
-    std::vector<double> instrumentUnused = m_ws->getInstrument()->getNumberParameter("remove-unused-banks", true);
+    // retrieve the remove-unused-banks flag from the instrument parameters; this is is a single-valued vector
+    std::vector<bool> instrumentUnused = m_ws->getInstrument()->getBoolParameter("remove-unused-banks", true);
     if (!instrumentUnused.empty()) {
       // if the flag is set to true, delete the banks that are not being loaded
-      if (static_cast<int>(instrumentUnused.front()) == 1)
+      if (instrumentUnused.front())
         deleteBanks(m_ws, bankNames);
     }
   }
