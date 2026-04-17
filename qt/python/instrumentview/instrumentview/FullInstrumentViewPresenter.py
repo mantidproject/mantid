@@ -622,15 +622,12 @@ class FullInstrumentViewPresenter:
     def on_peak_selected_in_lineplot(self, x: float, mouse_click: Literal["right", "left"]) -> None:
         if len(self._model.picked_detector_ids) == 0:
             return
-        # First convert to workspace x unit
-        # TODO: Replace convert units with getting the row and column of model._integration_workspace after Peak Interaction PR is in
-        x_in_workspace_unit = self._model.convert_units(self._view.current_selected_unit(), self._model.workspace_x_unit, 0, x)
         if mouse_click == "left":
-            peaks_ws = self._model.add_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
+            peaks_ws = self._model.add_peak(x, self._view.selected_peaks_workspaces())
             # Trigger selection of peak ws must happen after the callbacks from add peak are complete
             self._callback_queue.put((self._view.select_peaks_workspace, (peaks_ws,)))
         elif mouse_click == "right":
-            self._model.delete_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
+            self._model.delete_peak(x, self._view.selected_peaks_workspaces())
 
     def on_delete_all_selected_peaks_clicked(self) -> None:
         self._model.delete_peaks_on_all_selected_detectors(self._view.selected_peaks_workspaces())

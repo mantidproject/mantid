@@ -8,7 +8,6 @@ from instrumentview.Detectors import DetectorInfo
 from instrumentview.Globals import CurrentTab
 from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
-from instrumentview.ConvertUnitsCalculator import ConvertUnitsCalculator
 from instrumentview.ComponentSelectionUtils import detector_table_indices_for_parent_subtrees
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
@@ -71,7 +70,6 @@ class FullInstrumentViewModel:
         self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
         self._selected_peaks_workspaces = []
         self._instrument_view_peaks_ws_name = f"instrument_view_peaks_{self._workspace.name()}"
-        self._unit_converter = ConvertUnitsCalculator(self._workspace)
 
         component_info = self._workspace.componentInfo()
         self._sample_position = np.array(component_info.samplePosition()) if component_info.hasSample() else np.zeros(3)
@@ -502,11 +500,17 @@ class FullInstrumentViewModel:
         labels_by_pws = [pair[1] for pair in x_and_labels_by_pws]
         return x_by_pws, labels_by_pws, selected_peaks_workspaces
 
-    def add_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> str:
+    def add_peak(self, x_in_integration_unit: float, selected_peaks_workspaces: list[str]) -> str:
         peaks_ws = self._get_peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)
         detector_id = self.picked_detector_ids[0]
+        x_in_workspace_unit = self._match_integration_unit_to_workspace_units(x_in_integration_unit)
         AddPeak(peaks_ws, self._workspace, x_in_workspace_unit, int(detector_id))
         return peaks_ws
+
+    def _match_integration_unit_to_workspace_units(self, x_in_integration_units: float):
+        # Find closest dataX cell in integration workspace and get the value of that cell in self._workspace
+        ws_idx = int(self.picked_workspace_indices[0])
+        return self._workspace.dataX(ws_idx)[np.argmin(np.abs(self._integration_workspace.dataX(ws_idx)[:] - x_in_integration_units))]
 
     def _get_peaks_workspace_for_adding_new_peak(self, selected_peaks_workspaces: list[str]) -> PeaksWorkspace:
         # If exactly one Peaks workspace in selected, add the peak to that workspace, otherwise
@@ -518,7 +522,8 @@ class FullInstrumentViewModel:
         CreatePeaksWorkspace(self._workspace, 0, OutputWorkspace=self._instrument_view_peaks_ws_name)
         return self._instrument_view_peaks_ws_name
 
-    def delete_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> None:
+    def delete_peak(self, x_in_integration_unit: float, selected_peaks_workspaces: list[str]) -> None:
+        x_in_workspace_unit = self._match_integration_unit_to_workspace_units(x_in_integration_unit)
         closest_peak_by_ws = []
         for ws_name in selected_peaks_workspaces:
             peaks_by_detector = WorkspaceDetectorPeaks(ws_name, self._workspace, self._spectrum_nos).detector_peaks
@@ -734,15 +739,6 @@ class FullInstrumentViewModel:
             OutputWorkspace=grouping_name,
         )
         return AnalysisDataService.retrieve(grouping_name)
-
-    def convert_units(self, source_unit: str, target_unit: str, picked_detector_index: int, value: float) -> float:
-        return self._unit_converter.convert(
-            source_unit,
-            target_unit,
-            self.picked_spectrum_nos[picked_detector_index],
-            self.picked_detector_ids[picked_detector_index],
-            value,
-        )
 
     @property
     def bank_groups_by_detector_id(self) -> list[tuple[list[int], str]] | None:

@@ -833,12 +833,16 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = [True, False, False]
         # No workspace exists to assert removePeak calls; just ensure method didn’t crash.
+        model._integration_workspace = MagicMock()
+        model._integration_workspace.dataX = MagicMock(return_value=np.array([1, 2, 3]))
         self.assertEqual(None, model.delete_peak(5.0, []))
 
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
     @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
-    def test_no_matching_detector_peaks_no_removal(self, mock_wdp_cls, mock_ads):
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._match_integration_unit_to_workspace_units")
+    def test_no_matching_detector_peaks_no_removal(self, mock_match_units, mock_wdp_cls, mock_ads):
         """If overlay contains no groups with the picked detector_id, nothing is removed."""
+        mock_match_units.side_effect = lambda x: x
         model, _ = self._setup_model([7])
         model._detector_is_picked = [True]
         # Only detector_id=3 in overlay; model expects detector_id=7
@@ -852,8 +856,10 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
     @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
-    def test_removes_closest_peak_in_single_workspace(self, mock_wdp_cls, mock_ads):
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._match_integration_unit_to_workspace_units")
+    def test_removes_closest_peak_in_single_workspace(self, mock_match_units, mock_wdp_cls, mock_ads):
         """Selects and removes the closest peak within a single workspace."""
+        mock_match_units.side_effect = lambda x: x
         model, _ = self._setup_model([7])
         model._spectrum_nos = np.array([7])
         model._detector_is_picked = [True]
@@ -870,8 +876,10 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
     @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
-    def test_selects_workspace_with_overall_min_distance(self, mock_wdp_cls, mock_ads):
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._match_integration_unit_to_workspace_units")
+    def test_selects_workspace_with_overall_min_distance(self, mock_match_units, mock_wdp_cls, mock_ads):
         """Among multiple workspaces, chooses the peak with the smallest distance overall."""
+        mock_match_units.side_effect = lambda x: x
         model, _ = self._setup_model([1, 2, 3, 7])
         model._spectrum_nos = np.array([1, 2, 3, 7])
         model._detector_is_picked = [False, False, False, True]
@@ -917,14 +925,36 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewModel.AddPeak")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._get_peaks_workspace_for_adding_new_peak")
-    def test_add_peak(self, mock_peaks_ws_for_adding, mock_add_peak):
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._match_integration_unit_to_workspace_units")
+    def test_add_peak(self, mock_match_units, mock_peaks_ws_for_adding, mock_add_peak):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([False, False, True])
         mock_peaks_ws_for_adding.return_value = "my_peaks_ws"
+        mock_match_units.return_value = 2500
         peak_x = 1500
         ws = model.add_peak(peak_x, ["my_peaks_ws"])
-        mock_add_peak.assert_called_once_with("my_peaks_ws", model._workspace, peak_x, 3)
+        mock_match_units.assert_called_once_with(peak_x)
+        mock_add_peak.assert_called_once_with("my_peaks_ws", model._workspace, 2500, 3)
         self.assertEqual("my_peaks_ws", ws)
+
+    def test_match_integration_unit_to_workspace_units(self):
+        """_match_integration_unit_to_workspace_units returns the workspace-unit x value
+        corresponding to the closest integration-unit x value for the picked spectrum."""
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        model._detector_is_picked = np.array([False, False, True])  # ws_idx = 2
+        workspace_x = np.array([100.0, 200.0, 300.0, 400.0, 500.0])
+        integration_x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+        mock_workspace.dataX.return_value = workspace_x
+        mock_integration_ws = MagicMock()
+        mock_integration_ws.dataX.return_value = integration_x
+        model._integration_workspace = mock_integration_ws
+
+        # 1.1 is closest to integration_x[0]=1.0 -> workspace_x[0]=100.0
+        self.assertEqual(model._match_integration_unit_to_workspace_units(1.1), 100.0)
+        # 4.6 is closest to integration_x[4]=5.0 -> workspace_x[4]=500.0
+        self.assertEqual(model._match_integration_unit_to_workspace_units(4.6), 500.0)
+        # 2.9 is closest to integration_x[2]=3.0 -> workspace_x[2]=300.0
+        self.assertEqual(model._match_integration_unit_to_workspace_units(2.9), 300.0)
 
     def test_component_tree_no_matching_detector_ids(self):
         """If no detector_table_indices match, all values become True."""

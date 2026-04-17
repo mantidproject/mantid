@@ -438,31 +438,25 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     def _setup_on_peak_selected_tests(self):
         self._presenter._model = MagicMock()
-        self._presenter._model.workspace_x_unit = "workspace-unit"
-        self._presenter._model.picked_spectrum_nos = [42]
         self._presenter._model.picked_detector_ids = [42]
-        self._presenter._view.current_selected_unit.return_value = "view-unit"
         self._presenter._view.selected_peaks_workspaces.return_value = ["wsA", "wsB"]
-        self._presenter._model.convert_units.return_value = 123.456
 
     def test_left_click_calls_add_peak_and_selects_workspace(self):
-        """Left click: convert -> add_peak -> queue select_peaks_workspace."""
+        """Left click: add_peak -> queue select_peaks_workspace."""
         self._setup_on_peak_selected_tests()
         self._presenter._callback_queue = MagicMock()
         returned_ws = "ReturnedWorkspace"
         self._presenter._model.add_peak.return_value = returned_ws
         self._presenter.on_peak_selected_in_lineplot(3.14, "left")
-        self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 3.14)
-        self._presenter._model.add_peak.assert_called_once_with(123.456, ["wsA", "wsB"])
+        self._presenter._model.add_peak.assert_called_once_with(3.14, ["wsA", "wsB"])
         self._presenter._callback_queue.put.assert_called_once_with((self._presenter._view.select_peaks_workspace, (returned_ws,)))
         self._presenter._model.delete_peak.assert_not_called()
 
     def test_right_click_calls_delete_peak(self):
-        """Right click: convert -> delete_peak."""
+        """Right click: delete_peak."""
         self._setup_on_peak_selected_tests()
         self._presenter.on_peak_selected_in_lineplot(9.81, "right")
-        self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 9.81)
-        self._presenter._model.delete_peak.assert_called_once_with(123.456, ["wsA", "wsB"])
+        self._presenter._model.delete_peak.assert_called_once_with(9.81, ["wsA", "wsB"])
         self._presenter._model.add_peak.assert_not_called()
         self._presenter._view.select_peaks_workspace.assert_not_called()
 
@@ -474,7 +468,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         returned_ws = "WS"
         self._presenter._model.add_peak.return_value = returned_ws
         self._presenter.on_peak_selected_in_lineplot(2.0, "left")
-        self._presenter._model.add_peak.assert_called_once_with(123.456, ["ws1"])
+        self._presenter._model.add_peak.assert_called_once_with(2.0, ["ws1"])
         self._presenter._callback_queue.put.assert_called_once_with((self._presenter._view.select_peaks_workspace, (returned_ws,)))
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._on_list_item_selected")
@@ -566,20 +560,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_integration_limits.return_value = (1000.0, 5000.0)
         result = self._presenter.integration_limits_in_current_unit()
         self.assertEqual(result, (1000.0, 5000.0))
-
-    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
-    def test_integration_limits_in_current_unit_with_same_units(self, mock_integration_limits):
-        """Test that integration_limits_in_current_unit returns model limits directly when units match."""
-        mock_integration_limits.return_value = (1000.0, 5000.0)
-        result = self._presenter.integration_limits_in_current_unit()
-        self.assertEqual(result, (1000.0, 5000.0))
-
-    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
-    def test_integration_limits_in_current_unit_wavelength_conversion(self, mock_integration_limits):
-        """Test that integration_limits_in_current_unit returns model limits directly."""
-        mock_integration_limits.return_value = (2000.0, 8000.0)
-        result = self._presenter.integration_limits_in_current_unit()
-        self.assertEqual(result, (2000.0, 8000.0))
 
     def test_count_scale_selection_by_index_uses_view_item_text(self):
         # Ensure selecting by index queries the view combo box when available
