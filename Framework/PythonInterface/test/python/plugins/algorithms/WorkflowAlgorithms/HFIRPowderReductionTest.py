@@ -1203,7 +1203,7 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 0.05)
         self.assertAlmostEqual(x.max(), 69.95)
-        self.assertTrue(np.isnan(y[0, 0]))
+        self.assertEqual(y[0, 0], 0.0)
         assert isinstance(pd_out, MatrixWorkspace)
 
         # CASE 3
