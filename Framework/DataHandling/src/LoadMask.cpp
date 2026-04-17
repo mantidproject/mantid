@@ -568,6 +568,11 @@ void LoadMask::parseXML() {
   Poco::AutoPtr<NodeList> pNL_type = m_pRootElem->getElementsByTagName("type");
   g_log.information() << "Node Size = " << pNL_type->length() << '\n';
 
+  Poco::AutoPtr<NodeList> masking_nodes = m_pDoc->getElementsByTagName("detector-masking");
+  if (masking_nodes->length() == 0 && m_pRootElem->nodeName() != "detector-masking") {
+    throw std::runtime_error("No node with name 'detector-masking' is found in the mask file.  Wrong format.");
+  }
+
   Poco::XML::NodeIterator it(m_pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
   Poco::XML::Node *pNode = it.nextNode();
 

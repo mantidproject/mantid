@@ -51,7 +51,7 @@ public:
   }
 
   // Loading a file with the wrong format should throw an exception, not create an empty workspace
-  void test_LoadBadThrow() {
+  void test_LoadBadExtensionThrow() {
     LoadMask loadfile;
     loadfile.initialize();
     loadfile.setRethrows(true);
@@ -65,6 +65,23 @@ public:
 
     TS_ASSERT_THROWS_ASSERT(loadfile.execute(), std::runtime_error const &e,
                             TS_ASSERT(strstr(e.what(), " is not in supported format.")));
+    TS_ASSERT(!loadfile.isExecuted());
+  }
+
+  void test_LoadBadMaskFileThrow() {
+    LoadMask loadfile;
+    loadfile.initialize();
+    loadfile.setRethrows(true);
+
+    // this is some file in the unit test data that is not a mask
+    std::string const not_a_mask_file = "BASIS_Definition.xml";
+
+    loadfile.setProperty("Instrument", POWGEN_INSTR);
+    loadfile.setProperty("InputFile", not_a_mask_file);
+    loadfile.setProperty("OutputWorkspace", "PG3Mask");
+
+    TS_ASSERT_THROWS_ASSERT(loadfile.execute(), std::runtime_error const &e,
+                            TS_ASSERT(strstr(e.what(), "No node with name 'detector-masking' is found")));
     TS_ASSERT(!loadfile.isExecuted());
   }
 
@@ -103,6 +120,29 @@ public:
     }
 
   } // test_LoadXML
+
+  void test_LoadBlankMask() {
+    std::vector<int> banks1(0);
+    std::vector<int> detids(0);
+    auto emptyMaskFile = genMaskingFile("maskingdet.xml", detids, banks1);
+
+    // run and check
+    LoadMask loadfile;
+    loadfile.initialize();
+    loadfile.setProperty("Instrument", VULCAN_INSTR);
+    loadfile.setProperty("InputFile", emptyMaskFile.getFileName());
+    loadfile.setProperty("OutputWorkspace", "Empty_Mask");
+
+    TS_ASSERT_EQUALS(loadfile.execute(), true);
+    DataObjects::MaskWorkspace_sptr maskws =
+        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("Empty_Mask");
+
+    // check it is empty
+    std::set<detid_t> maskFlags = maskws->getMaskedDetectors();
+    TS_ASSERT(maskFlags.empty());
+    std::set<std::size_t> maskWkspIndices = maskws->getMaskedWkspIndices();
+    TS_ASSERT(maskWkspIndices.empty());
+  }
 
   /*
    * Test mask by detector ID
