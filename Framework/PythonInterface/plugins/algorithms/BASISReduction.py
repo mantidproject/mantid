@@ -421,7 +421,17 @@ the first two hours"""
             self._maskFile = self._reflection["mask_file"]
 
         self._maskWs = tws("BASIS_MASK")
-        sapi.LoadMask(Instrument="BASIS", OutputWorkspace=self._maskWs, InputFile=self._maskFile)
+        try:
+            sapi.LoadMask(Instrument="BASIS", OutputWorkspace=self._maskWs, InputFile=self._maskFile)
+        except ValueError as exc:
+            raise ValueError(f"Mask file {self._maskFile} could not be loaded. Please check the file path and try again.") from exc
+        except RuntimeError as exc:
+            if "Supported formats are XML and ISIS mask files" in str(exc):
+                raise RuntimeError(f"Mask file {self._maskFile} is not of the correct format.  Please use an XML mask file.") from exc
+            else:
+                raise RuntimeError(
+                    f"An unexpected error occurred when loading mask file {self._maskFile}. Please check the file and try again."
+                ) from exc
 
         # Work around length issue
         _dMask = sapi.ExtractMask(InputWorkspace=self._maskWs, OutputWorkspace=tws("ExtractMask"))
