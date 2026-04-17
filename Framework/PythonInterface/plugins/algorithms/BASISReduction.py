@@ -384,7 +384,7 @@ the first two hours"""
         with pyexec_setup(remove_temp, config_new_options) as self._temps:
             self._PyExec()
 
-    def _PyExec(self):
+    def _PyExec(self):  # noqa: C901
         # Collect Flux Normalization
         if self.getProperty("DoFluxNormalization").value is True:
             self._flux_normalization_type = self.getProperty("FluxNormalizationType").value
