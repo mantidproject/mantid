@@ -357,25 +357,27 @@ class BASISReduction7Test(systemtesting.MantidSystemTest, PreppingMixin):
             raise RuntimeError("Could not locate BASISReduction module to patch default mask lookups")
 
         # step 3: run with no mask -- should resort to default, which will not exist
-        with tempfile.TemporaryDirectory() as dir:
-            mask = os.path.join(dir, "BASIS_Mask_default_333.xml")
+        with tempfile.TemporaryDirectory() as tdir:
+            mask = os.path.join(tdir, "BASIS_Mask_default_333.xml")
             assert not os.path.exists(mask)
-            with mock.patch.dict(mod.__dict__, {"DEFAULT_MASK_GROUP_DIR": dir}):
+            with mock.patch.dict(mod.__dict__, {"DEFAULT_MASK_GROUP_DIR": tdir}):
                 with self.assertRaisesRegex(RuntimeError, f"Mask file {mask} could not be loaded"):
                     BASISReduction(**def_args, MaskFile=None)  # run with no mask, set None for clarity
 
         # step 4: run with no mask -- should resort to default, which we set to exist but be unreadable
-        with tempfile.TemporaryDirectory() as dir:
-            mask = os.path.join(dir, "BASIS_Mask_default_333.xml")
+        with tempfile.TemporaryDirectory() as tdir:
+            mask = os.path.join(tdir, "BASIS_Mask_default_333.xml")
             with open(mask, "w", encoding="utf-8") as f:
                 f.write("This is an XML file!")
             assert os.path.exists(mask)
-            with mock.patch.dict(mod.__dict__, {"DEFAULT_MASK_GROUP_DIR": dir}):
+            with mock.patch.dict(mod.__dict__, {"DEFAULT_MASK_GROUP_DIR": tdir}):
                 with self.assertRaisesRegex(RuntimeError, f"An unexpected error occurred when loading mask file {mask}"):
                     BASISReduction(**def_args, MaskFile=None)
 
+        # cleanup
+        self.preptear()
+
     def validate(self):
-        print("done")
         return True
 
 
