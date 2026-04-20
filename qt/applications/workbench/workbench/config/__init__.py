@@ -90,6 +90,7 @@ DEFAULTS = {
     },
     "Editors": {
         "completion_enabled": True,
+        "apply_dark_theme": mtd_env.is_theme_dark(),
     },
 }
 
@@ -100,7 +101,6 @@ SAVE_STATE_VERSION = 2
 # 'Singleton' instance
 QSettings.setDefaultFormat(QSettings.IniFormat)
 CONF = UserConfig(ORGANIZATION, APPNAME, defaults=DEFAULTS)
-CONF.qsettings.setValue("is_theme_dark", mtd_env.is_theme_dark())
 
 
 # Configuration for additional MainWindow instances: matplotlib figures, custom user interfaces etc

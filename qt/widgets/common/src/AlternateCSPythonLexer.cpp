@@ -13,7 +13,7 @@
  */
 AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font) : QsciLexerPython(), m_font(font) {
   QSettings settings;
-  m_isDarkMode = settings.value("os/is_theme_dark", false).toBool();
+  m_isDarkMode = settings.value("Editors/apply_dark_theme", false).toBool();
 }
 
 /**

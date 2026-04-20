@@ -9,12 +9,13 @@ import os.path
 import sys
 import traceback
 
-from qtpy.QtCore import QObject, Qt, Signal
+from qtpy.QtCore import QObject, Qt, Signal, QSettings
 from qtpy.QtGui import QFont, QFontMetrics, QColor
 from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
 from mantidqt.io import open_a_file_dialog
 from mantid.kernel import config
+from workbench.config import CONF
 import mantid.kernel.environment as mtd_env
 from mantidqt.widgets.codeeditor.codecommenter import CodeCommenter
 from mantidqt.widgets.codeeditor.completion import CodeCompleter
@@ -31,8 +32,13 @@ ABORTED_STATUS_MSG = "Status: Aborted"
 
 # Returns the background color of the current line in the code editor
 def get_currentline_background_color():
+    settings = QSettings()
     if mtd_env.is_theme_dark():
+        CONF.set("Editors", "apply_dark_theme", True)
+        settings.setValue("Editors/apply_dark_theme", True)
         return QColor(0, 52, 110)
+    settings.setValue("Editors/apply_dark_theme", False)
+    CONF.set("Editors", "apply_dark_theme", False)
     return QColor(247, 236, 248)
 
 
