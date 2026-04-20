@@ -1030,7 +1030,7 @@ void MatrixWorkspace::setYUnit(const std::string &newUnit) { m_YUnit = newUnit; 
 
 /**
  * Returns a caption for the units of the data in the workspace.
- * @param plotAsDistribution :: If true, the Y-axis has been divided by bin
+ * @param useLatex :: Return label using Latex syntax
  * width
  */
 std::string MatrixWorkspace::YUnitLabel(bool useLatex /* = false */) const {
