@@ -217,6 +217,28 @@ public:
     TS_ASSERT(i.getDetectorIDs(false).empty());
   }
 
+  void testRemoveDetectorIncomplete() {
+    Instrument i;
+    Detector *d = new Detector("det", 1, &i);
+    TS_ASSERT_THROWS_NOTHING(i.add(d));
+    TS_ASSERT_THROWS_NOTHING(i.markAsDetector(d));
+    TS_ASSERT_EQUALS(i.getDetector(1).get(), d);
+    TS_ASSERT_EQUALS(i.getDetectorIDs(false).size(), 1);
+    TS_ASSERT_EQUALS(i.nelements(), 1);
+    // Remove the detector incomplete; verify Instrument is set to unfinalized state
+    TS_ASSERT_THROWS_NOTHING(i.removeDetectorIncomplete(d));
+    TS_ASSERT_THROWS(i.getDetector(1), std::runtime_error const &);
+    // NOTE: getDetectorIDs will still return the ID, and nelements will still return 1, until the instrument is
+    // finalized Finalize the instrument; ensure the detector is gone
+    TS_ASSERT_THROWS_NOTHING(i.removeDetectorFinalize());
+    TS_ASSERT_THROWS(i.getDetector(1), Exception::NotFoundError const &);
+    TS_ASSERT(i.getDetectorIDs(false).empty());
+    // NOTE removeDetectorFinalize does not change the CompAssembly tree, so still one element
+    // This is because removeDetectorIncomplete is used when entire banks are being deleted,
+    // which will have the effect of removing all form the component tree in bulk.
+    TS_ASSERT_EQUALS(i.nelements(), 1);
+  }
+
   void test_GetDetectors_With_All_Valid_IDs() {
     const size_t ndets(3);
     std::vector<detid_t> detIDs(ndets);

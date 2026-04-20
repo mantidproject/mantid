@@ -1,1 +1,0 @@
-- The algorithm `LoadEventNexus` will no longer delete unused banks for the TOPAZ and MANDI instruments.  This feature had not truly worked since Mantid 6.6, and was causing long loading times or errors.

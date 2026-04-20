@@ -1146,6 +1146,21 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
   prog->report("Initializing all pixels");
 
+  /** If only some banks are to be loaded AND if the instrument has the remove-unused-banks flag set to true
+   * then we will reduce the instrument by deleting the banks that are not being loaded.
+   * Note that this will change the workspace's instrument, so it should only run when selected.
+   * This parameter is currently only set on MANDI and TOPAZ instruments
+   */
+  if (!someBanks.empty() && m_ws->getInstrument()->hasParameter("remove-unused-banks")) {
+    // retrieve the remove-unused-banks flag from the instrument parameters; this is is a single-valued vector
+    std::vector<bool> instrumentUnused = m_ws->getInstrument()->getBoolParameter("remove-unused-banks", true);
+    if (!instrumentUnused.empty()) {
+      // if the flag is set to true, delete the banks that are not being loaded
+      if (instrumentUnused.front())
+        deleteBanks(m_ws, bankNames);
+    }
+  }
+
   //----------------- Pad Empty Pixels -------------------------------
   createSpectraMapping(m_filename, monitors, someBanks);
 
@@ -1314,7 +1329,10 @@ bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(const std:
  */
 void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
                                  const std::vector<std::string> &bankNames) {
-  Instrument_sptr inst = std::const_pointer_cast<Instrument>(workspace->getInstrument()->baseInstrument());
+  // work from the base instrument of the current workspace
+  auto const &ws = workspace->getSingleHeldWorkspace();
+  auto const &inst = ws->getInstrument()->baseInstrument();
+
   // Build a list of Rectangular Detectors
   std::vector<std::shared_ptr<RectangularDetector>> detList;
   for (int i = 0; i < inst->nelements(); i++) {
@@ -1335,7 +1353,6 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
           det = std::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
             detList.emplace_back(det);
-
           } else {
             // Also, look in the second sub-level for RectangularDetectors
             // (e.g. PG3). We are not doing a full recursive search since that
@@ -1357,37 +1374,38 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
   if (detList.empty())
     return;
 
-  // Get ComponentInfo from the first workspace in the collection
-  auto ws = workspace->getSingleHeldWorkspace();
-  const auto &componentInfo = ws->componentInfo();
-
+  // Create a new instrument to hold the reduced set of detectors.
+  // This clones from the original instrument, but without copying any components
+  auto newInst = std::make_shared<Instrument>(*inst, false);
+  // Then add in only the needed detectors
   for (auto &det : detList) {
-    bool keep = false;
-    std::string det_name = det->getName();
-    for (const auto &bankName : bankNames) {
-      size_t pos = bankName.find("_events");
-      if (det_name == bankName.substr(0, pos))
-        keep = true;
-      if (keep)
-        break;
-    }
-    if (!keep) {
-      const size_t parentIndex = componentInfo.indexOfAny(det_name);
-      const auto children = componentInfo.children(parentIndex);
-      for (const auto &colIndex : children) {
-        const auto grandchildren = componentInfo.children(colIndex);
-        for (const auto &rowIndex : grandchildren) {
-          auto *d = dynamic_cast<Detector *>(const_cast<IComponent *>(componentInfo.componentID(rowIndex)));
+    std::string const det_name = det->getName();
+    std::string const det_name_check = det_name + "_events";
+    bool const keep = std::any_of(bankNames.cbegin(), bankNames.cend(),
+                                  [&det_name_check](const auto &bankName) { return bankName == det_name_check; });
+    if (keep) {
+      // add this detector to the new instrument
+      newInst->setName(newInst->getName() + "_" + det_name);
+      auto *bankComp = dynamic_cast<IComponent const *>(det.get());
+      if (bankComp) {
+        std::unique_ptr<IComponent> clonedDet(det->clone());
+        auto *clonedRaw = clonedDet.get();
+        newInst->add(clonedDet.release());
+        std::vector<IDetector_const_sptr> detsInBank;
+        newInst->getDetectorsInBank(detsInBank, *clonedRaw);
+        for (auto const &dConst : detsInBank) {
+          auto *d = const_cast<IDetector *>(dConst.get());
           if (d) {
-            // NOTE the call to erase within Instrument::removeDetector makes this entire loop run in O(N^2)
-            inst->removeDetector(d);
+            newInst->markAsDetectorIncomplete(d);
           }
         }
       }
-      auto *comp = dynamic_cast<IComponent *>(det.get());
-      inst->remove(comp);
+      newInst->markAsDetectorFinalize();
     }
   }
+  // update the instrument in the workspaces
+  // this will also create the new beamline wrappers
+  workspace->setInstrument(newInst);
 }
 //-----------------------------------------------------------------------------
 /**
