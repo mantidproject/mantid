@@ -23,12 +23,7 @@ AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font) : QsciLexerPyt
  * @return A QColor for this element type
  */
 QColor AlternateCSPythonLexer::defaultColor(int style) const {
-  if (m_isMac && m_isDarkMode) {
-    return defaultColorDark(style);
-  } else {
-    return defaultColorLight(style);
-  }
-}
+  return m_isDarkMode ? defaultColorDark(style) : defaultColorLight(style);
 
 /**
  * Returns the foreground colour of the text for a light theme style.

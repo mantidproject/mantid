@@ -96,5 +96,5 @@ def is_theme_dark():
             )
         except (OSError, subprocess.SubprocessError):
             return False
-        return bool(result.stdout.strip())
+        return bool('dark' in result.stdout.strip().lower())
     return False
