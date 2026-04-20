@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from functools import partial
+from functools import partial, wraps
 from pyvista import PolyData
 from qtpy.QtWidgets import (
     QMainWindow,
@@ -55,12 +55,11 @@ from instrumentview.ShapeWidgets import (
     HollowRectangleSelectionShape,
     RectangleSelectionShape,
     EllipseSelectionShape,
-    ShapeOverlayManager,
 )
+from instrumentview.ShapeOverlayManager import ShapeOverlayManager
 
 import os
 from contextlib import suppress
-from functools import wraps
 from typing import Callable
 
 
@@ -72,6 +71,20 @@ def _skip_if_closing(method):
         if self._closing:
             return
         return method(self, *args, **kwargs)
+
+    return wrapper
+
+
+def _ensure_overlay_manager(method):
+    """Decorator that lazily creates the ShapeOverlayManager before the wrapped method runs."""
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if self._shape_overlay_manager is None:
+            self._shape_overlay_manager = ShapeOverlayManager(self.main_plotter)
+        shape = method(self, *args, **kwargs)
+        self._shape_overlay_manager.set_shape(shape)
+        self._current_widget = shape
 
     return wrapper
 
@@ -850,47 +863,32 @@ class FullInstrumentViewWindow(QMainWindow):
         self.delete_current_widget()
         self.main_plotter.clear()
 
-    def _ensure_overlay_manager(self):
-        """Create the shape overlay manager if it does not already exist."""
-        if self._shape_overlay_manager is None:
-            self._shape_overlay_manager = ShapeOverlayManager(self.main_plotter)
-
+    @_ensure_overlay_manager
     def add_circle_widget(self) -> None:
         """Add a circle selection shape centred on the viewport."""
-        self._ensure_overlay_manager()
-        shape = CircleSelectionShape(cx=0.5, cy=0.5, radius=0.15)
-        self._shape_overlay_manager.set_shape(shape)
-        self._current_widget = shape
+        return CircleSelectionShape(cx=0.5, cy=0.5, radius=0.15)
 
+    @_ensure_overlay_manager
     def add_rectangular_widget(self) -> None:
         """Add a rectangle selection shape in the middle third of the viewport."""
-        self._ensure_overlay_manager()
-        shape = RectangleSelectionShape(cx=0.5, cy=0.5, half_w=1.0 / 6.0, half_h=1.0 / 6.0)
-        self._shape_overlay_manager.set_shape(shape)
-        self._current_widget = shape
+        return RectangleSelectionShape(cx=0.5, cy=0.5, half_w=1.0 / 6.0, half_h=1.0 / 6.0)
 
+    @_ensure_overlay_manager
     def add_ellipse_widget(self) -> None:
         """Add an ellipse selection shape centred on the viewport."""
-        self._ensure_overlay_manager()
-        shape = EllipseSelectionShape(cx=0.5, cy=0.5, half_a=1.0 / 6.0, half_b=1.0 / 6.0)
-        self._shape_overlay_manager.set_shape(shape)
-        self._current_widget = shape
+        return EllipseSelectionShape(cx=0.5, cy=0.5, half_a=1.0 / 6.0, half_b=1.0 / 6.0)
 
+    @_ensure_overlay_manager
     def add_annulus_widget(self) -> None:
         """Add an annulus (ring) selection shape centred on the viewport."""
-        self._ensure_overlay_manager()
-        shape = AnnulusSelectionShape(cx=0.5, cy=0.5, inner_radius=0.06, outer_radius=0.15)
-        self._shape_overlay_manager.set_shape(shape)
-        self._current_widget = shape
+        return AnnulusSelectionShape(cx=0.5, cy=0.5, inner_radius=0.06, outer_radius=0.15)
 
+    @_ensure_overlay_manager
     def add_hollow_rectangle_widget(self) -> None:
         """Add a hollow rectangle (frame) selection shape centred on the viewport."""
-        self._ensure_overlay_manager()
-        shape = HollowRectangleSelectionShape(
+        return HollowRectangleSelectionShape(
             cx=0.5, cy=0.5, outer_half_width=0.12, outer_half_height=0.08, inner_half_width=0.06, inner_half_height=0.04
         )
-        self._shape_overlay_manager.set_shape(shape)
-        self._current_widget = shape
 
     def display_to_world_coords(self, x, y, z):
         # Convert from display coordinates to world coordinates
@@ -920,15 +918,6 @@ class FullInstrumentViewWindow(QMainWindow):
         """
         if self._shape_overlay_manager is not None:
             self._shape_overlay_manager.project_and_cache_points(points)
-
-    def update_shape_projection_cache(self):
-        """Refresh the cached projection matrices used by get_shape_mask.
-
-        Must be called on the main/Qt thread **before** queuing background
-        work that calls get_shape_mask.
-        """
-        if self._shape_overlay_manager is not None:
-            self._shape_overlay_manager.update_projection_cache()
 
     @_skip_if_closing
     def add_rgba_mesh(self, mesh: PolyData, scalars: np.ndarray | str):
