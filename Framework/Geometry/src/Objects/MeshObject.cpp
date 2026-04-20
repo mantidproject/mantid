@@ -620,9 +620,9 @@ std::shared_ptr<MeshObject> MeshObject::loadNexus(Nexus::File *file, const std::
     const uint32_t nVertsInFace = end - start;
     // We assume that any polygon face is convex and that we can use a fan triangulation
     for (uint32_t v = 1; v + 1 < nVertsInFace; ++v) {
-      triangles.push_back(windingOrder[start]);
-      triangles.push_back(windingOrder[start + v]);
-      triangles.push_back(windingOrder[start + v + 1]);
+      triangles.push_back(windingOrder.at(start));
+      triangles.push_back(windingOrder.at(start + v));
+      triangles.push_back(windingOrder.at(start + v + 1));
     }
   }
 

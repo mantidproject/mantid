@@ -331,9 +331,10 @@ public:
     NexusTestHelper th(true);
     th.createFile("SampleTestMesh.nxs");
 
-    // create single face mesh
-    const std::vector<V3D> vertices{V3D(0.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0), V3D(0.0, 1.0, 0.0)};
-    const std::vector<uint32_t> faces{0, 1, 2};
+    // create tetrahedral mesh
+    const std::vector<V3D> vertices{V3D(0.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0), V3D(0.0, 1.0, 0.0), V3D(0.0, 0.0, 1.0)};
+    // winding order should be CCW from outside the face
+    const std::vector<uint32_t> faces{0, 2, 1, 0, 1, 3, 1, 2, 3, 0, 3, 2};
 
     const Material material;
     IObject_sptr meshShape = std::make_shared<MeshObject>(faces, vertices, material);
@@ -355,6 +356,61 @@ public:
 
     TS_ASSERT_EQUALS(loadedMesh.getVertices(), originalMesh.getVertices());
     TS_ASSERT_EQUALS(loadedMesh.getTriangles(), originalMesh.getTriangles());
+  }
+
+  void test_load_nexus_with_square_faces() {
+    NexusTestHelper th(true);
+    th.createFile("SampleTestMesh.nxs");
+
+    Sample sample;
+    const Material material;
+
+    // create square-based pyramid, with a square face for the base and trangular faces for the others
+    const std::vector<V3D> vertices{V3D(0.0, 0.0, 0.0), V3D(2.0, 0.0, 0.0), V3D(0.0, 2.0, 0.0), V3D(2.0, 2.0, 0.0),
+                                    V3D(2.0, 2.0, 2.0)};
+    // winding order should be CCW from outside the face
+    const std::vector<uint32_t> winding{0, 2, 3, 1, 0, 1, 4, 1, 3, 4, 0, 4, 2, 2, 4, 3};
+    // face inds - where each face starts
+    const std::vector<uint32_t> faceInds{0, 4, 7, 10, 13};
+
+    // for validation this will be loaded as a triangular mesh, so triangulating the square base
+    const std::vector<uint32_t> validationWinding{0, 2, 3, 0, 3, 1, 0, 1, 4, 1, 3, 4, 0, 4, 2, 2, 4, 3};
+
+    const MeshObject validationMesh(validationWinding, vertices, material);
+
+    // to test - we won't set the shape because mantid doesn't support non triangular faces
+    // so we need to create the sample directly in nexus data which can be loaded
+
+    th.file->makeGroup("sample", "NXsample", true);
+    th.file->putAttr("name", "MeshSample");
+    th.file->putAttr("version", 1);
+    th.file->putAttr("shape_xml", std::string(""));
+    material.saveNexus(th.file.get(), "material");
+
+    th.file->makeGroup("shape_mesh", "NXoff_geometry", true);
+    th.file->writeData("vertices",
+                       validationMesh.getVertices()); // convert vector<V3D> into vector<double> for nexus saving
+    th.file->writeData("winding_order", winding);
+    th.file->writeData("faces", faceInds);
+    th.file->closeGroup();
+
+    th.file->writeData("num_other_samples", 0);
+    th.file->writeData("num_oriented_lattice", 0);
+    th.file->closeGroup(); // close sample
+
+    // validate
+
+    th.reopenFile();
+
+    Sample loaded;
+    loaded.loadNexus(th.file.get(), "sample");
+
+    TS_ASSERT_EQUALS(loaded.getName(), "MeshSample");
+
+    const auto &loadedMesh = dynamic_cast<const MeshObject &>(loaded.getShape());
+
+    TS_ASSERT_EQUALS(loadedMesh.getVertices(), validationMesh.getVertices());
+    TS_ASSERT_EQUALS(loadedMesh.getTriangles(), validationMesh.getTriangles());
   }
 
   void test_nexus_empty_name() {
