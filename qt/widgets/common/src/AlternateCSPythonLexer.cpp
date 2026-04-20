@@ -13,7 +13,6 @@
  */
 AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font) : QsciLexerPython(), m_font(font) {
   QSettings settings;
-  m_isMac = settings.value("os/is_mac", false).toBool();
   m_isDarkMode = settings.value("os/is_theme_dark", false).toBool();
 }
 
@@ -24,6 +23,7 @@ AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font) : QsciLexerPyt
  */
 QColor AlternateCSPythonLexer::defaultColor(int style) const {
   return m_isDarkMode ? defaultColorDark(style) : defaultColorLight(style);
+}
 
 /**
  * Returns the foreground colour of the text for a light theme style.

@@ -25,6 +25,5 @@ private:
   QColor defaultColorDark(int style) const;
   QFont m_font;
   static constexpr const char *customKeywords = "True False";
-  bool m_isMac{false};
   bool m_isDarkMode{false};
 };
