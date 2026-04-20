@@ -818,6 +818,50 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
+  void test_event_workspace_ragged_bins_with_workspace_index_list() {
+    std::vector<std::vector<int>> groups(2);
+    groups[0].emplace_back(10);
+    groups[1].emplace_back(20);
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 50, 1.0, 1.0);
+
+    // Different bin edges per spectrum forces the ragged (non-shared-bins) path in LoadNexusProcessed
+    ws->setX(0, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 1.0, 2.0}));
+    ws->setX(1, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 2.0, 4.0}));
+
+    AnalysisDataService::Instance().add("testEventRagged", ws);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.initialize();
+    saveAlg.setPropertyValue("InputWorkspace", "testEventRagged");
+    FileResource file("SaveNexusProcessedTest_event_ragged_index_list.nxs", !clearfiles);
+    saveAlg.setPropertyValue("Filename", file.fullPath());
+    saveAlg.setPropertyValue("WorkspaceIndexList", "1"); // save only 2nd spectrum
+    saveAlg.setProperty("PreserveEvents", true);
+    TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
+    TS_ASSERT(saveAlg.isExecuted());
+
+    LoadNexus loadAlg;
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", file.fullPath());
+    loadAlg.setPropertyValue("OutputWorkspace", "testEventRaggedReloaded");
+    TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
+    TS_ASSERT(loadAlg.isExecuted());
+
+    auto wsReloaded =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("testEventRaggedReloaded"));
+    TS_ASSERT(wsReloaded);
+    if (wsReloaded) {
+      TS_ASSERT_EQUALS(wsReloaded->getNumberHistograms(), 1);
+      // Verify bin edges from spectrum 1 were saved, not spectrum 0
+      TS_ASSERT_EQUALS(wsReloaded->readX(0), ws->readX(1));
+      // Verify events from spectrum 1 were saved, not spectrum 0
+      TS_ASSERT_EQUALS(wsReloaded->getSpectrum(0).getNumberEvents(), ws->getSpectrum(1).getNumberEvents());
+    }
+
+    AnalysisDataService::Instance().remove("testEventRagged");
+    AnalysisDataService::Instance().remove("testEventRaggedReloaded");
+  }
+
   void test_ragged_x_bins_input_data_bounds() {
     // Fix SEGFAULT when writing ragged data: respect input vector bounds at `putSlab`.
 
