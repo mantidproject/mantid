@@ -300,8 +300,13 @@ class PythonFileInterpreter(QWidget):
         editor.setTabWidth(TAB_WIDTH)
 
         # show current editing line but in a softer color
+        if CONF.get("Editors", "apply_dark_theme", type=bool):
+            editor.setCaretForegroundColor(QColor("white"))
+        else:
+            editor.setCaretForegroundColor(QColor("black"))
         editor.setCaretLineBackgroundColor(CURRENTLINE_BKGD_COLOR)
         editor.setCaretLineVisible(True)
+        editor.setCaretWidth(5)
 
         # set a margin large enough for sensible file sizes < 1000 lines
         # and the progress marker
