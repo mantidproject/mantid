@@ -96,6 +96,15 @@ class DataFunctionsTest(unittest.TestCase):
             VerticalAxisValues=[4, 6, 8],
             OutputWorkspace="ws2d_non_distribution",
         )
+        cls.ws2d_q = CreateWorkspace(
+            DataX=[0.5, 1, 1.5, 2, 2.5],
+            DataY=[2, 3, 4, 5],
+            DataE=[1, 2, 3, 4],
+            NSpec=1,
+            UnitX="MomentumTransfer",
+            YUnitLabel="Counts",
+            OutputWorkspace="ws2d_q",
+        )
         cls.ws2d_distribution = CreateWorkspace(
             DataX=[10, 20, 30, 10, 20, 30],
             DataY=[2, 3, 4, 5, 6],
@@ -264,6 +273,10 @@ class DataFunctionsTest(unittest.TestCase):
         # should get the first two dimension labels only
         self.assertEqual(axs, ("Intensity", "Dim2 (EnergyTransfer)", "Dim1=-2.4; Dim3=0.0;"))
 
+    def test_get_axes_label_inverse_Q_normalization(self):
+        labels = funcs.get_axes_labels(self.ws2d_q, normalization=PlotNormalizationType.INVERSE_Q_FOURTH_POWER)
+        self.assertEqual(labels[0], "Counts ($Q^{-4}$)$^{-1}$")
+
     def test_get_data_uneven_flag(self):
         flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_rag, axisaligned=True, other_kwarg=1)
         self.assertTrue(flag)
@@ -319,6 +332,22 @@ class DataFunctionsTest(unittest.TestCase):
         self.assertEqual(dx, None)
         # fail case - try to find spectrum out of range
         self.assertRaises(RuntimeError, funcs.get_spectrum, self.ws2d_non_distribution, 10, normalization=PlotNormalizationType.BIN_WIDTH)
+
+    def test_get_spectrum_q_workspace(self):
+        # get data divided by Q^-4
+        x, y, dy, dx = funcs.get_spectrum(
+            self.ws2d_q, 0, normalization=PlotNormalizationType.INVERSE_Q_FOURTH_POWER, withDy=True, withDx=True
+        )
+        self.assertTrue(np.array_equal(x, np.array([0.75, 1.25, 1.75, 2.25])))
+        self.assertTrue(np.array_equal(y, np.array([0.6328125, 7.32421875, 37.515625, 128.14453125])))
+        self.assertTrue(np.array_equal(dy, np.array([0.31640625, 4.8828125, 28.13671875, 102.515625])))
+        self.assertEqual(dx, None)
+        # get data not divided by Q^-4
+        x, y, dy, dx = funcs.get_spectrum(self.ws2d_q, 0, normalization=PlotNormalizationType.NONE, withDy=True, withDx=True)
+        self.assertTrue(np.array_equal(x, np.array([0.75, 1.25, 1.75, 2.25])))
+        self.assertTrue(np.array_equal(y, np.array([2, 3, 4, 5])))
+        self.assertTrue(np.array_equal(dy, np.array([1, 2, 3, 4])))
+        self.assertEqual(dx, None)
 
     def test_get_md_data2d_bin_bounds(self):
         x, y, data = funcs.get_md_data2d_bin_bounds(self.ws_MD_2d, mantid.api.MDNormalization.NoNormalization)
