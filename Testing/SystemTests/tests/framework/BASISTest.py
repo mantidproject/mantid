@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
-from mantid import config
+from mantid import config, FileFinder
 from mantid.simpleapi import (
     BASISCrystalDiffraction,
     GroupWorkspaces,
@@ -17,6 +17,8 @@ from mantid.simpleapi import (
     Divide,
     ReplaceSpecialValues,
 )
+
+from unittest import mock
 
 
 class PreppingMixin(object):
@@ -312,6 +314,71 @@ class BASISReduction6Test(systemtesting.MantidSystemTest, PreppingMixin):
         self.tolerance = 0.1
         self.disableChecking.extend(["SpectraMap", "Instrument"])
         return "BSS_90146_divided_sqw", "BASIS_90146_divided_sqw.nxs"
+
+
+class BASISReduction7Test(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Ensure an error is thrown if no mask file is given nor can be found in the defaults"""
+
+    def __init__(self):
+        super(BASISReduction7Test, self).__init__()
+        self.config = None
+        self.prepset("BASISReduction")
+
+    def runTest(self):
+        import sys
+        import os
+        import tempfile
+
+        def_args = {
+            "RunNumbers": "90146",
+            "DoFluxNormalization": True,
+            "FluxNormalizationType": "Monitor",
+            "ReflectionType": "silicon_333",
+            "EnergyBins": [-330, 4.0, 330],
+            "MomentumTransferBins": [3.05, 4.30, 3.05],
+        }
+
+        # step 1: run with a file that does not exist -- should throw a runtime error
+        dnemask = "does_not_exist.xml"
+        assert not FileFinder.getFullPath(dnemask)
+        assert not os.path.exists(dnemask)
+        with self.assertRaisesRegex(RuntimeError, f"Mask file {dnemask} could not be loaded"):
+            BASISReduction(**def_args, MaskFile=dnemask)
+
+        # step 2: run with a file that does exist but is wrong format -- should throw a runtime error
+        mask = FileFinder.getFullPath("arg_si.dat")
+        assert os.path.exists(mask)
+        with self.assertRaisesRegex(RuntimeError, f"Mask file {mask} is not of the correct format"):
+            BASISReduction(**def_args, MaskFile=mask)
+
+        # lookup the module object for BASISReduction to patch the lookups to simulate situations where a mask is not found
+        mod = sys.modules.get("BASISReduction", None)
+        if mod is None:
+            raise RuntimeError("Could not locate BASISReduction module to patch default mask lookups")
+
+        # step 3: run with no mask -- should resort to default, which will not exist
+        with tempfile.TemporaryDirectory() as tdir:
+            mask = os.path.join(tdir, "BASIS_Mask_default_333.xml")
+            assert not os.path.exists(mask)
+            with mock.patch.dict(mod.__dict__, {"DEFAULT_MASK_GROUP_DIR": tdir}):
+                with self.assertRaisesRegex(RuntimeError, f"Mask file {mask} could not be loaded"):
+                    BASISReduction(**def_args, MaskFile=None)  # run with no mask, set None for clarity
+
+        # step 4: run with no mask -- should resort to default, which we set to exist but be unreadable
+        with tempfile.TemporaryDirectory() as tdir:
+            mask = os.path.join(tdir, "BASIS_Mask_default_333.xml")
+            with open(mask, "w", encoding="utf-8") as f:
+                f.write("This is an XML file!")
+            assert os.path.exists(mask)
+            with mock.patch.dict(mod.__dict__, {"DEFAULT_MASK_GROUP_DIR": tdir}):
+                with self.assertRaisesRegex(RuntimeError, f"An unexpected error occurred when loading mask file {mask}"):
+                    BASISReduction(**def_args, MaskFile=None)
+
+        # cleanup
+        self.preptear()
+
+    def validate(self):
+        return True
 
 
 class BASISReductionOutputSEnergyNXSTest(systemtesting.MantidSystemTest, PreppingMixin):
