@@ -16,7 +16,7 @@ import unittest
 
 from mantid.kernel import config
 from mantid.plots import datafunctions
-from mantid.plots.utility import convert_color_to_hex, MantidAxType
+from mantid.plots.utility import convert_color_to_hex, MantidAxType, PlotNormalizationType
 from mantid.plots.axesfunctions import get_colorplot_extents
 from unittest.mock import Mock, patch
 from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace, RemoveSpectra, AnalysisDataService as ADS
@@ -297,6 +297,22 @@ class MantidAxesTest(unittest.TestCase):
         ax = fig.add_subplot(111, projection="3d")
         self.assertRaises(Exception, ax.plot_wireframe, self.ws2d_histo)
         self.assertRaises(Exception, ax.plot_surface, self.ws2d_histo)
+
+    def test_plot_normalised_by_inverse_q_given_normalization_type_argument(self):
+        workspace = CreateWorkspace(
+            DataX=[10, 20], DataY=[2, 3, 4, 5, 6], DataE=[1, 2, 1, 2, 1], NSpec=5, Distribution=False, OutputWorkspace="workspace"
+        )
+        self.ax.plot(workspace, specNum=1, axis=MantidAxType.BIN, normalization_type=PlotNormalizationType.INVERSE_Q_FOURTH_POWER)
+        self.ax.plot(
+            workspace, specNum=1, axis=MantidAxType.BIN, distribution=False, normalization_type=PlotNormalizationType.INVERSE_Q_FOURTH_POWER
+        )
+        self.ax.plot(
+            workspace, specNum=1, axis=MantidAxType.BIN, distribution=True, normalization_type=PlotNormalizationType.INVERSE_Q_FOURTH_POWER
+        )
+        ws_artists = self.ax.tracked_workspaces[workspace.name()]
+        self.assertEqual(ws_artists[0].normalization, PlotNormalizationType.INVERSE_Q_FOURTH_POWER)
+        self.assertEqual(ws_artists[1].normalization, PlotNormalizationType.INVERSE_Q_FOURTH_POWER)
+        self.assertEqual(ws_artists[2].normalization, PlotNormalizationType.INVERSE_Q_FOURTH_POWER)
 
     def test_plot_is_not_normalized_for_bin_plots(self):
         workspace = CreateWorkspace(
