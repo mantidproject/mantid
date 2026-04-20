@@ -133,6 +133,7 @@ if [ -d $BUILD_DIR ]; then
       ENABLE_UNIT_TESTS=false
       ENABLE_SYSTEM_TESTS=false
       ENABLE_DOC_TESTS=false
+      ENABLE_DOCS=false
     fi
 else
   mkdir -p $BUILD_DIR
