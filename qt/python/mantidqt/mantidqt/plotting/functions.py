@@ -342,7 +342,7 @@ def _filter_pcolormesh_inputs(workspaces: list[MatrixWorkspace]):
     for ws in workspaces:
         n_bins = len(ws.readX(0)) - 1
         if n_bins <= 1:
-            LOGGER.error(f"Workspace '{ws.name()}' contains only {n_bins} bin. It must contain more than 1 bin for a Colorfill plot.")
+            LOGGER.error(f"Workspace '{ws.name()}' must contain more than 1 bin for a Colorfill plot (Number of bins found: {n_bins}).")
         else:
             filtered_workspaces.append(ws)
     return filtered_workspaces
