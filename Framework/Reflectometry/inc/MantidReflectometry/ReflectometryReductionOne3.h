@@ -237,9 +237,11 @@ private:
       setExpectedOutputs({"CroppedWorkspace"});
       setDependantTask("TaskNormalizeByMonitor", "MonitorCorrectedWorkspace", "InputWorkspace");
       const auto taskSet1 = addDependantTaskSet();
-      setDependantTask("TaskSumDetectorsInQ", "QSummedWorkspace", "InputWorkspace", taskSet1);
+      setDependantTask("TaskNormalizeByTransmission", "TransmissionCorrectedWorkspace", "InputWorkspace", taskSet1);
       const auto taskSet2 = addDependantTaskSet();
-      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet2);
+      setDependantTask("TaskSumDetectorsInQ", "QSummedWorkspace", "InputWorkspace", taskSet2);
+      const auto taskSet3 = addDependantTaskSet();
+      setDependantTask("TaskConvertToWavelength", "ConvertedWorkspaceWavelength", "InputWorkspace", taskSet3);
     }
     void executeImpl() override;
   };
