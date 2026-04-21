@@ -15,7 +15,6 @@ on when they are used.
 import platform as _platform
 import sys as _sys
 import os.path as _osp
-import subprocess
 
 
 def is_windows():
@@ -79,22 +78,3 @@ def is_64bit():
     else:
         bits = _platform.architecture()[0]
         return bits == "64bit"
-
-
-def is_theme_dark():
-    """
-    Returns true if the user is using a dark theme on macOS
-    """
-    if is_mac():
-        try:
-            result = subprocess.run(
-                ["/usr/bin/defaults", "read", "-g", "AppleInterfaceStyle"],
-                capture_output=True,
-                text=True,
-                check=False,
-                timeout=1,
-            )
-        except (OSError, subprocess.SubprocessError):
-            return False
-        return bool("dark" in result.stdout.strip().lower())
-    return False
