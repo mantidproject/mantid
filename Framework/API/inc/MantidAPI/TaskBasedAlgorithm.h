@@ -57,9 +57,9 @@ protected:
       m_parent->g_log.debug("Finished executing task: " + m_name + "\n");
       // ADD CLEAN UP OF MEMBER OJBECTS
     }
-    std::vector<std::string> getExpectedOutputs() { return m_expectedOutputs; }
-    void setExpectedOutputs(std::vector<std::string> expectedOutputs) { m_expectedOutputs = expectedOutputs; }
-    std::string name() const { return m_name; }
+    const std::vector<std::string> &getExpectedOutputs() const { return m_expectedOutputs; }
+    void setExpectedOutputs(const std::vector<std::string> &expectedOutputs) { m_expectedOutputs = expectedOutputs; }
+    const std::string &name() const { return m_name; }
     void initAsFirstTask(std::shared_ptr<MatrixWorkspace> inputWS) {
       addDependantTaskOutput("InputWorkspace", inputWS, 0);
       m_firstTaskFlag = true;
@@ -68,7 +68,7 @@ protected:
       m_taskExecutionOrder = taskExecutionOrder;
     }
 
-    std::string getSelectedOutput() const { return m_selectedOutput; }
+    const std::string &getSelectedOutput() const { return m_selectedOutput; }
 
   protected:
     T *m_parent;
@@ -77,7 +77,7 @@ protected:
       m_parent->m_algorithmTaskOutputs[m_name][outputName] = ws;
     }
 
-    std::shared_ptr<MatrixWorkspace> getDependantWorkspace(std::string outputAlias) {
+    std::shared_ptr<MatrixWorkspace> getDependantWorkspace(const std::string &outputAlias) {
       return m_dependantOutputs[m_activeDependantTaskSet][outputAlias];
     }
 
@@ -136,7 +136,7 @@ protected:
       size_t closestTaskSet = 0;
       int closestDistance = std::numeric_limits<int>::max();
       for (auto taskSet : m_fulfilledDependantTaskSets) {
-        for (auto &task : m_dependantTasks[taskSet]) {
+        for (const auto &task : m_dependantTasks[taskSet]) {
           const auto &taskName = task.first;
           auto it = std::find(m_taskExecutionOrder->cbegin(), m_taskExecutionOrder->cend(), taskName);
           std::size_t index = std::distance(m_taskExecutionOrder->cbegin(), it);
@@ -249,7 +249,7 @@ protected:
   }
 
   void execTasks(const std::string &diagWorkspacePrefix = "") {
-    const auto taskExecutionOrder = configureAlgorithmTasks();
+    configureAlgorithmTasks();
     int step = 0;
     for (size_t i = 0; i < m_stagedAlgorithmTasks.size(); ++i) {
       const auto &task = m_stagedAlgorithmTasks[i];

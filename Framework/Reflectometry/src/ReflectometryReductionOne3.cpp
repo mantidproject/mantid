@@ -253,7 +253,7 @@ void ReflectometryReductionOne3::initalizeMembers() {
  */
 void ReflectometryReductionOne3::exec() {
   initalizeMembers();
-  const auto taskExecutionOrder = configureAlgorithmTasks();
+  configureAlgorithmTasks();
   const bool outputDiagnostics = getProperty("Diagnostics");
   std::string diagWSName = (outputDiagnostics) ? createDebugWorkspaceName(getPropertyValue("InputWorkspace")) : "";
   execTasks(diagWSName);

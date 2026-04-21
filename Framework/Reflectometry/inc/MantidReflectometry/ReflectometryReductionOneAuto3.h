@@ -130,19 +130,18 @@ private:
                                   bool outputTrans1, bool outputTrans2);
   void setOutputPropertyFromChild(const Algorithm_sptr &alg, std::string const &name);
   void setOutputPropertiesFromChild(const Algorithm_sptr &alg);
-  processGroupMembersOutput processGroupMembers(Algorithm::WorkspaceVector members, std::string const &runNumber,
+  processGroupMembersOutput processGroupMembers(const Algorithm::WorkspaceVector &members, std::string const &runNumber,
                                                 std::vector<std::string> const &taskOrder,
                                                 const std::vector<WorkspaceNames> &workspaceNames = {},
                                                 const bool reduced = false);
   WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaceNames,
                                       std::string const &outputName = "");
-  void setWorkspaceProperty(MatrixWorkspace_sptr workspace, const std::string &propertyName);
   RROOutputs performCoreReduction(MatrixWorkspace_sptr inputWS, const std::vector<std::string> &taskOrder = {},
                                   const bool runAsChild = true);
-  MatrixWorkspace_sptr postReductionProcessing(RROOutputs &out, const RebinParams &params);
+  MatrixWorkspace_sptr postReductionProcessing(const RROOutputs &out, const RebinParams &params);
   void postReductionProcessingGroups(std::vector<RROOutputs> &outputs, std::vector<WorkspaceNames> const &outputNames,
                                      const WorkspaceNames &groupedOutputNames, const bool outputIvsLam);
-  void setOutputWorkspaces(RROOutputs &out, const MatrixWorkspace_sptr &binnedWS);
+  void setOutputWorkspaces(const RROOutputs &out, const MatrixWorkspace_sptr &binnedWS);
   void updatePropertiesAfterReduction(RROOutputs &out, const RebinParams &params);
   std::vector<std::string> getTaskExecutionOrder(const bool reduced, const bool summingInQ) const;
 };

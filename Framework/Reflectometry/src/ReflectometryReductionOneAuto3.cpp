@@ -461,7 +461,7 @@ void ReflectometryReductionOneAuto3::postReductionProcessingGroups(std::vector<R
   // Doesn't look like we set transmission workspaces for groups.
 }
 
-void ReflectometryReductionOneAuto3::setOutputWorkspaces(RROOutputs &out, const MatrixWorkspace_sptr &binnedWS) {
+void ReflectometryReductionOneAuto3::setOutputWorkspaces(const RROOutputs &out, const MatrixWorkspace_sptr &binnedWS) {
   // Set the output workspace in wavelength
   if (!isDefault("OutputWorkspaceWavelength") || isChild())
     setProperty("OutputWorkspaceWavelength", out.IvsLam);
@@ -483,7 +483,7 @@ void ReflectometryReductionOneAuto3::updatePropertiesAfterReduction(RROOutputs &
     setProperty("ScaleFactor", 1.0);
 }
 
-MatrixWorkspace_sptr ReflectometryReductionOneAuto3::postReductionProcessing(RROOutputs &out,
+MatrixWorkspace_sptr ReflectometryReductionOneAuto3::postReductionProcessing(const RROOutputs &out,
                                                                              const RebinParams &params) {
   // Set the unbinned output workspace in Q, scaled and cropped if necessary
   MatrixWorkspace_sptr IvsQ = scale(out.IvsQ);
@@ -891,7 +891,7 @@ void ReflectometryReductionOneAuto3::setOutputPropertiesFromChild(const Algorith
  * @returns : the grouped output workspace names
  */
 ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReductionOneAuto3::processGroupMembers(
-    Algorithm::WorkspaceVector members, std::string const &runNumber, std::vector<std::string> const &taskOrder,
+    const Algorithm::WorkspaceVector &members, std::string const &runNumber, std::vector<std::string> const &taskOrder,
     const std::vector<WorkspaceNames> &workspaceNames, const bool reduced) {
   // Compile a list of output workspace names for each group member
   // No need to compile list if the output names are already provided, e.g. from a previous run of RRO
