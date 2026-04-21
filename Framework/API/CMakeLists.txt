@@ -150,6 +150,7 @@ set(SRC_FILES
     src/SpectrumDetectorMapping.cpp
     src/SpectrumInfo.cpp
     src/TableRow.cpp
+    src/TaskBasedAlgorithm.cpp
     src/TimeAtSampleStrategyDirect.cpp
     src/TimeAtSampleStrategyElastic.cpp
     src/TimeAtSampleStrategyIndirect.cpp
@@ -356,6 +357,7 @@ set(INC_FILES
     inc/MantidAPI/SpectrumInfoItem.h
     inc/MantidAPI/SpectrumInfoIterator.h
     inc/MantidAPI/TableRow.h
+    inc/MantidAPI/TaskBasedAlgorithm.h
     inc/MantidAPI/TextAxis.h
     inc/MantidAPI/TimeAtSampleStrategy.h
     inc/MantidAPI/TimeAtSampleStrategyDirect.h

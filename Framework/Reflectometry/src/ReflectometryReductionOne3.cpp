@@ -121,7 +121,9 @@ DECLARE_ALGORITHM(ReflectometryReductionOne3)
 /** Initialize the algorithm's properties.
  */
 void ReflectometryReductionOne3::init() {
-  declareProperty("TaskExecutionOrder", std::vector<std::string>(), "The tasks to execute, in execution order.");
+  initTaskBasedAlgorithm<TaskExtractROI, TaskBackgroundSubtraction, TaskConvertToWavelength, TaskSumDetectors,
+                         TaskNormalizeByMonitor, TaskNormalizeByTransmission, TaskCropWavelength, TaskConvertToQ,
+                         TaskSumDetectorsInQ, TaskNormalizeByAlgorithm>();
 
   // Input workspace
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
@@ -227,22 +229,6 @@ std::vector<std::string> ReflectometryReductionOne3::constructTaskExecutionOrder
                                              "CorrectionAlgorithm", "SubtractBackground");
 }
 
-std::vector<std::string> ReflectometryReductionOne3::configureAlgorithmTasks() {
-  std::vector<std::string> taskExecutionOrder =
-      isDefault("TaskExecutionOrder") ? constructTaskExecutionOrder() : getProperty("TaskExecutionOrder");
-  std::vector<std::shared_ptr<AlgorithmTask>> tasksToStage(taskExecutionOrder.size());
-  for (auto &task : m_AlgorithmTasks) {
-    task->setTaskExecutionOrder(&taskExecutionOrder);
-    auto it = std::find(taskExecutionOrder.begin(), taskExecutionOrder.end(), task->name());
-    if (it != taskExecutionOrder.end()) {
-      std::size_t index = std::distance(taskExecutionOrder.begin(), it);
-      tasksToStage[index] = task;
-    }
-  }
-  stageAlgorithmTasks(tasksToStage);
-  return taskExecutionOrder;
-}
-
 void ReflectometryReductionOne3::initalizeMembers() {
   setDefaultOutputWorkspaceNames();
   m_runWS = getProperty("InputWorkspace");
@@ -269,24 +255,8 @@ void ReflectometryReductionOne3::exec() {
   initalizeMembers();
   const auto taskExecutionOrder = configureAlgorithmTasks();
   const bool outputDiagnostics = getProperty("Diagnostics");
-  std::string diagWSName = createDebugWorkspaceName(getPropertyValue("InputWorkspace"));
-  int step = 0;
-
-  for (size_t i = 0; i < m_stagedAlgorithmTasks.size(); ++i) {
-    const auto &task = m_stagedAlgorithmTasks[i];
-    task->execute();
-    if (outputDiagnostics) {
-      const auto &taskOutput = m_algorithmTaskOutputs.at(task->name());
-      for (const auto &output : taskOutput) {
-        const auto &outputName = output.first;
-        outputDebugWorkspace(output.second, diagWSName, "_" + outputName, step);
-      }
-      step++;
-    }
-    // Output the selected output of the last task
-    if (i == m_stagedAlgorithmTasks.size() - 1)
-      setProperty("OutputWorkspace", m_algorithmTaskOutputs.at(task->name()).at(task->getSelectedOutput()));
-  }
+  std::string diagWSName = (outputDiagnostics) ? createDebugWorkspaceName(getPropertyValue("InputWorkspace")) : "";
+  execTasks(diagWSName);
 }
 
 /** Get the twoTheta angle range for the top/bottom of the detector associated
@@ -340,28 +310,6 @@ std::string ReflectometryReductionOne3::createDebugWorkspaceName(const std::stri
     result += "_LS"; // lambda-summed
   }
   return result;
-}
-
-/**
- * Utility function to add the given workspace to the ADS if debugging is
- * enabled.
- *
- * @param ws [in] : the workspace to add to the ADS
- * @param wsName [in] : the name to output the workspace as
- * @param wsSuffix [in] : a suffix to apply to the wsName
- * @param debug [in] : true if the workspace should be added to the ADS (the
- * function does nothing if this is false)
- * @param step [inout] : the current step number, which is added to the wsSuffix
- * and is incremented after the workspace is output
- */
-void ReflectometryReductionOne3::outputDebugWorkspace(const MatrixWorkspace_sptr &ws, const std::string &wsName,
-                                                      const std::string &wsSuffix, const int step) {
-  // Clone the workspace because otherwise we can end up outputting the same
-  // workspace twice with different names, which is confusing.
-  // TO DO, look into this - can we still end up doing this? Previously some tasks may have been a no op, could this
-  // still happen?
-  MatrixWorkspace_sptr cloneWS = ws->clone();
-  AnalysisDataService::Instance().addOrReplace(wsName + "_" + std::to_string(step) + wsSuffix, cloneWS);
 }
 
 /**

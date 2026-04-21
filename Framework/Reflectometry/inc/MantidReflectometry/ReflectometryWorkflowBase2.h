@@ -23,7 +23,7 @@ std::string const TRANS_LAM_PREFIX("TRANS_LAM");
 /** ReflectometryWorkflowBase2 : base class containing common implementation
  functionality usable by concrete reflectometry workflow algorithms. Version 2.
  */
-class MANTID_REFLECTOMETRY_DLL ReflectometryWorkflowBase2 : public API::DataProcessorAlgorithm {
+class MANTID_REFLECTOMETRY_DLL ReflectometryWorkflowBase2 : virtual public API::DataProcessorAlgorithm {
 protected:
   /// Initialize the analysis properties
   void initAnalysisProperties();

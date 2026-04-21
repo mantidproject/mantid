@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/TaskBasedAlgorithm.h"
 #include "MantidAPI/WorkspaceFactory.h" //remove this
 #include "MantidReflectometry/ReflectometryWorkflowBase2.h"
 #include <numeric>
@@ -28,7 +29,8 @@ namespace Reflectometry {
 /** ReflectometryReductionOne3 : Reflectometry reduction of a single input TOF
  workspace to an IvsQ workspace. Version 3 of the algorithm.
  */
-class MANTID_REFLECTOMETRY_DLL ReflectometryReductionOne3 : public ReflectometryWorkflowBase2 {
+class MANTID_REFLECTOMETRY_DLL ReflectometryReductionOne3 : public ReflectometryWorkflowBase2,
+                                                            public TaskBasedAlgorithm<ReflectometryReductionOne3> {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ReflectometryReductionOne"; };
@@ -71,9 +73,6 @@ private:
   double getDetectorTwoThetaRange(const size_t spectrumIdx);
   // Utility function to create name for diagnostic workspaces
   std::string createDebugWorkspaceName(const std::string &inputName);
-  // Utility function to output a diagnostic workspace to the ADS
-  void outputDebugWorkspace(const API::MatrixWorkspace_sptr &ws, const std::string &wsName, const std::string &wsSuffix,
-                            const int step);
   // Do the reduction by summation in Q
   Mantid::API::MatrixWorkspace_sptr sumInQ(const API::MatrixWorkspace_sptr &detectorWS);
   // Do the summation in Q for a single input value
@@ -135,208 +134,6 @@ private:
   bool m_partialBins;
   // When a task sets wavelength min/max, flag this so it is not repeated.
   bool m_wavelengthMinMaxSet;
-
-  // Algorithm Tasks
-  class AlgorithmTask {
-  public:
-    explicit AlgorithmTask(ReflectometryReductionOne3 *parent, const std::string &name)
-        : m_parent(parent), m_name(name), m_firstTaskFlag(false), m_activeDependantTaskSet(0) {
-      addDependantTaskSet(); // Start with one dependant task set by default
-    }
-    size_t addDependantTaskSet() {
-      m_dependantTasks.emplace_back();
-      m_dependantOutputs.emplace_back();
-      return m_dependantTasks.size() - 1;
-    }
-    void setDependantTask(const std::string &task, const std::string &output_name = "", const std::string &alias = "",
-                          const size_t dependantTaskSet = 0) {
-      if (dependantTaskSet >= m_dependantTasks.size())
-        throw std::runtime_error("Dependant task set index " + std::to_string(dependantTaskSet) +
-                                 " is out of range for task " + m_name);
-      if (output_name.empty()) {
-        // If no output name is provided, assume the whole task output is required
-        // If no alias is provided, use the task name as the alias
-        m_dependantTasks[dependantTaskSet][task] = {};
-      } else {
-        m_dependantTasks[dependantTaskSet][task].push_back({output_name, alias});
-      }
-    }
-    void execute() {
-      auto missingTasks = evaluateDependentTasks();
-      if (!missingTasks.empty()) {
-        throw std::runtime_error(
-            "Cannot execute task " + m_name + " as the following dependent tasks outputs are not available: " +
-            std::accumulate(std::next(missingTasks.begin()), missingTasks.end(), missingTasks.front(),
-                            [](const std::string &a, const std::string &b) { return a + ", " + b; }));
-      }
-      activateTaskSet();
-      m_parent->g_log.debug("Executing task: " + m_name + "\n");
-      executeImpl();
-      checkExpectedOutputs();
-      m_parent->g_log.debug("Finished executing task: " + m_name + "\n");
-      // ADD CLEAN UP OF MEMBER OJBECTS
-    }
-    std::vector<std::string> getExpectedOutputs() { return m_expectedOutputs; }
-    void setExpectedOutputs(std::vector<std::string> expectedOutputs) { m_expectedOutputs = expectedOutputs; }
-    std::string name() const { return m_name; }
-    void initAsFirstTask(std::shared_ptr<MatrixWorkspace> inputWS) {
-      addDependantTaskOutput("InputWorkspace", inputWS, 0);
-      m_firstTaskFlag = true;
-    }
-    void setTaskExecutionOrder(const std::vector<std::string> *taskExecutionOrder) {
-      m_taskExecutionOrder = taskExecutionOrder;
-    }
-
-    std::string getSelectedOutput() const { return m_selectedOutput; }
-
-  protected:
-    ReflectometryReductionOne3 *m_parent;
-    void outputWorkspace(std::shared_ptr<MatrixWorkspace> ws, const std::string &outputName) {
-      setSelectedOutput(outputName);
-      m_parent->m_algorithmTaskOutputs[m_name][outputName] = ws;
-    }
-
-    std::shared_ptr<MatrixWorkspace> getDependantWorkspace(std::string outputAlias) {
-      return m_dependantOutputs[m_activeDependantTaskSet][outputAlias];
-    }
-
-    void setSelectedOutput(const std::string &output, const bool overwrite = false) {
-      // If overwrite is false, only set the selected output if it has not already been set
-      if (!overwrite && !m_selectedOutput.empty())
-        return;
-      m_selectedOutput = output;
-    }
-
-  private:
-    // vector of dependent task sets: map of dependant task name: dependant outputs (task name, alias pairs)
-    std::vector<std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>>> m_dependantTasks;
-    std::string m_name;
-    std::vector<std::string> m_expectedOutputs;
-    std::vector<std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>> m_dependantOutputs;
-    bool m_firstTaskFlag;
-    size_t m_activeDependantTaskSet;
-    std::vector<size_t> m_fulfilledDependantTaskSets;
-    const std::vector<std::string> *m_taskExecutionOrder = nullptr;
-    std::string m_selectedOutput;
-
-    virtual void executeImpl() = 0;
-
-    bool populateDependantTasks(const size_t taskSetIndex) {
-      for (auto &item : m_dependantTasks[taskSetIndex]) {
-        const auto &taskName = item.first;
-        auto &outputs = item.second;
-        auto it = std::find_if(m_parent->m_stagedAlgorithmTasks.cbegin(), m_parent->m_stagedAlgorithmTasks.cend(),
-                               [&taskName](std::shared_ptr<AlgorithmTask> task) { return task->name() == taskName; });
-        if (it == m_parent->m_stagedAlgorithmTasks.cend())
-          return false; // Task not found, this task set cannot be fulfilled
-        if (outputs.empty()) {
-          // If no specific outputs are listed, populate with the whole task output
-          const auto &expectedOutputs = (*it)->getExpectedOutputs();
-          for (const auto &output : expectedOutputs) {
-            outputs.push_back({output, output});
-          }
-        }
-      }
-      return true;
-    }
-
-    void activateTaskSet() {
-      if (m_fulfilledDependantTaskSets.size() == 1) {
-        m_activeDependantTaskSet = m_fulfilledDependantTaskSets.front();
-        return;
-      } else if (m_fulfilledDependantTaskSets.size() == 0) {
-        return;
-      }
-      // We have multiple fulfilled task sets, how do we choose between them?
-      // Lets select based on the execution order of tasks.
-      // The task set containing the task executed in closest proximity to this task wins.
-      const auto myIt = std::find(m_taskExecutionOrder->cbegin(), m_taskExecutionOrder->cend(), m_name);
-      const auto myIndex = std::distance(m_taskExecutionOrder->cbegin(), myIt);
-      size_t closestTaskSet = 0;
-      int closestDistance = std::numeric_limits<int>::max();
-      for (auto taskSet : m_fulfilledDependantTaskSets) {
-        for (auto &task : m_dependantTasks[taskSet]) {
-          const auto &taskName = task.first;
-          auto it = std::find(m_taskExecutionOrder->cbegin(), m_taskExecutionOrder->cend(), taskName);
-          std::size_t index = std::distance(m_taskExecutionOrder->cbegin(), it);
-          int distance = (int)myIndex - (int)index;
-          // Do not consider tasks that occur after the current task
-          if ((distance < closestDistance) && distance > 0) {
-            closestDistance = distance;
-            closestTaskSet = taskSet;
-          }
-        }
-      }
-      m_activeDependantTaskSet = closestTaskSet;
-    }
-
-    // after execution, check that expected outputs from this task are present in m_algorithmTaskOutputs
-    void checkExpectedOutputs() {
-      if (!m_parent->m_algorithmTaskOutputs.contains(m_name))
-        throw std::runtime_error("No output from task " + m_name + " found after task execution");
-
-      std::vector<std::string> missingOutput;
-      for (const auto &output : m_expectedOutputs) {
-        if (!m_parent->m_algorithmTaskOutputs[m_name].contains(output))
-          missingOutput.push_back(output);
-      }
-      if (!missingOutput.empty()) {
-        throw std::runtime_error(
-            "Expected outputs from task " + m_name + " not found after task execution: " +
-            std::accumulate(std::next(missingOutput.begin()), missingOutput.end(), missingOutput.front(),
-                            [](const std::string &a, const std::string &b) { return a + ", " + b; }));
-      }
-    }
-
-    // check if output from dependant tasks is available in m_algorithmTaskOutputs
-    // this could be supplied by dependant tasks, or manually setting algorithm properties
-    std::vector<std::string> evaluateDependentTasks() {
-      // If this is the first task, we expect the dependant outputs to be set as algorithm properties rather than
-      // outputs from other tasks
-      // TODO: Check that required input properties are provided. Currently we just take the input workspace
-      if (m_firstTaskFlag)
-        return {};
-      std::vector<std::string> missingTasksAll;
-      // Loop through each task set
-      for (size_t i = 0; i < m_dependantTasks.size(); ++i) {
-        // if task set is unfulfillable due to missing tasks
-        std::vector<std::string> missingTasks;
-        if (!populateDependantTasks(i)) {
-          // TODO: print out required tasks
-          missingTasks.push_back("Task set " + std::to_string(i) + " unfulfillable as required tasks not staged.");
-        } else {
-          for (const auto &[taskName, outputs] : m_dependantTasks[i]) {
-            if (!m_parent->m_algorithmTaskOutputs.contains(taskName)) {
-              missingTasks.push_back("Task set: " + std::to_string(i) + " Task name: " + taskName + ": ALL OUTPUTS");
-            } else {
-              for (const auto &output : outputs) {
-                if (!m_parent->m_algorithmTaskOutputs[taskName].contains(output.first)) {
-                  missingTasks.push_back("Task set: " + std::to_string(i) + " Task name: " + taskName + ": " +
-                                         output.first);
-                } else {
-                  // populate dependent outputs for use in the task execution
-                  addDependantTaskOutput(output.second, m_parent->m_algorithmTaskOutputs[taskName][output.first], i);
-                }
-              }
-            }
-          }
-        }
-        // If we have found a task set with all outputs available, add this to fulfilled sets
-        // otherwise, add missing tasks to the list of missing tasks for all sets
-        if (missingTasks.empty()) {
-          m_fulfilledDependantTaskSets.push_back(i);
-        } else {
-          missingTasksAll.insert(missingTasksAll.end(), missingTasks.begin(), missingTasks.end());
-        }
-      }
-      return (m_fulfilledDependantTaskSets.empty() ? missingTasksAll : std::vector<std::string>{});
-    }
-
-    void addDependantTaskOutput(const std::string &outputName, std::shared_ptr<MatrixWorkspace> ws,
-                                const size_t taskSetIndex) {
-      m_dependantOutputs[taskSetIndex][outputName] = ws;
-    }
-  };
 
   class TaskBackgroundSubtraction final : public AlgorithmTask {
   public:
@@ -458,26 +255,7 @@ private:
     void executeImpl() override;
   };
 
-  std::vector<std::shared_ptr<AlgorithmTask>> m_AlgorithmTasks{
-      std::make_shared<TaskExtractROI>(this),          std::make_shared<TaskBackgroundSubtraction>(this),
-      std::make_shared<TaskConvertToWavelength>(this), std::make_shared<TaskSumDetectors>(this),
-      std::make_shared<TaskNormalizeByMonitor>(this),  std::make_shared<TaskNormalizeByTransmission>(this),
-      std::make_shared<TaskCropWavelength>(this),      std::make_shared<TaskConvertToQ>(this),
-      std::make_shared<TaskSumDetectorsInQ>(this),     std::make_shared<TaskNormalizeByAlgorithm>(this)};
-  std::vector<std::shared_ptr<AlgorithmTask>> m_stagedAlgorithmTasks;
-  // map of task name: (map of output name: outputs)
-  std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>>
-      m_algorithmTaskOutputs;
-  void stageAlgorithmTasks(std::vector<std::shared_ptr<AlgorithmTask>> tasks) {
-    if (tasks.empty())
-      return;
-    // for first task in sequence, feed in the input workspace
-    API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-    tasks[0]->initAsFirstTask(inputWS);
-    m_stagedAlgorithmTasks = tasks;
-  }
-  std::vector<std::string> configureAlgorithmTasks();
-  std::vector<std::string> constructTaskExecutionOrder();
+  std::vector<std::string> constructTaskExecutionOrder() override;
 };
 
 } // namespace Reflectometry
