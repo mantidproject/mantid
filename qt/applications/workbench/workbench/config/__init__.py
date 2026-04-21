@@ -90,7 +90,7 @@ DEFAULTS = {
     },
     "Editors": {
         "completion_enabled": True,
-        "apply_dark_theme": mtd_env.is_theme_dark(),
+        "apply_dark_theme": False,
     },
 }
 

@@ -68,7 +68,7 @@ QColor AlternateCSPythonLexer::defaultColorLight(int style) const {
 
   case Operator:
   case Identifier:
-    break;
+    return QColor(0x00, 0x00, 0x00);
 
   case CommentBlock:
     return QColor(0xad, 0xad, 0xad);
@@ -131,7 +131,7 @@ QColor AlternateCSPythonLexer::defaultColorDark(int style) const {
     return QColor(0x99, 0xFF, 0xFF);
 
   case Identifier:
-    break;
+    return QColor(0xFF, 0xFF, 0xFF);
 
   case CommentBlock:
     return QColor(0xad, 0xad, 0xad);
@@ -177,4 +177,18 @@ const char *AlternateCSPythonLexer::keywords(int set) const {
   }
 
   return QsciLexerPython::keywords(set);
+}
+
+QColor AlternateCSPythonLexer::defaultPaper(int style) const {
+  return m_isDarkMode ? defaultPaperDark(style) : defaultPaperLight(style);
+}
+
+QColor AlternateCSPythonLexer::defaultPaperLight(int style) const {
+  Q_UNUSED(style);
+  return QColor(255, 255, 255);
+}
+
+QColor AlternateCSPythonLexer::defaultPaperDark(int style) const {
+  Q_UNUSED(style);
+  return QColor(30, 30, 30);
 }
