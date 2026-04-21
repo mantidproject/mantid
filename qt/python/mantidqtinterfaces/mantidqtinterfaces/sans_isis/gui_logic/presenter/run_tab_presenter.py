@@ -62,7 +62,6 @@ from mantidqtinterfaces.sans_isis.gui_logic.presenter.save_other_presenter impor
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.settings_adjustment_presenter import SettingsAdjustmentPresenter
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
 from sans.state.AllStates import AllStates
-from mantid.plots.plotfunctions import get_plot_fig
 
 row_state_to_colour_mapping = {RowState.UNPROCESSED: "#FFFFFF", RowState.PROCESSED: "#d0f4d0", RowState.ERROR: "#accbff"}
 
@@ -345,8 +344,6 @@ class RunTabPresenter(PresenterCommon):
 
         self._view.setup_layout()
 
-        self.hide_or_show_plot_results_checkbox_based_on_user_properties()
-
         self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
 
         self._view.set_out_default_output_mode()
@@ -429,19 +426,6 @@ class RunTabPresenter(PresenterCommon):
             # user file contains an error that would not otherwise be caught
             traceback.print_exc()
             self._on_user_file_load_failure(other_error, "Unknown error in loading user file.", use_error_name=True)
-
-    def hide_or_show_plot_results_checkbox_based_on_user_properties(self):
-        """
-        Hide the plot results checkbox if it has not been explicitly enabled in the user properties file.
-
-        When performing merged reduction, if both the scale option and the plot result option are selected,
-        it causes an issue. The agreed temporary fix is to hide the plot result checkbox by default since
-        the functionality is rarely used. Users can enable the visibility of the plot result checkbox
-        from their properties file if needed. This experiment will help us determine whether to
-        permanently hide the checkbox or fix the underlying issue.
-        """
-        visibility = ConfigService.getString("sans.isis_sans.plotResults")
-        self._view.set_plot_results_checkbox_visibility(visibility == "On")
 
     def _on_user_file_load_failure(self, e, message, use_error_name=False):
         self._setup_instrument_specific_settings(SANSInstrument.NO_INSTRUMENT)
@@ -540,16 +524,6 @@ class RunTabPresenter(PresenterCommon):
     # Processing
     # ----------------------------------------------------------------------------------------------
 
-    def _plot_graph(self):
-        """
-        Plot a graph if continuous output specified.
-        """
-        if self._view.plot_results:
-            ax_properties = {"yscale": "log", "xscale": "log"}
-            fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
-            fig.show()
-            self.output_fig = fig
-
     def _set_progress_bar(self, current, number_steps):
         """
         The progress of the progress bar is given by min / max
@@ -584,7 +558,6 @@ class RunTabPresenter(PresenterCommon):
         self._processing = True
         self.sans_logger.information("Starting processing of batch table.")
 
-        self._plot_graph()
         save_can = self._view.save_can
 
         self.batch_process_runner.process_states_on_thread(
@@ -592,7 +565,6 @@ class RunTabPresenter(PresenterCommon):
             self.get_states,
             self._view.use_optimizations,
             self._view.output_mode,
-            self._view.plot_results,
             self.output_fig,
             save_can,
         )
