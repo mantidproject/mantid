@@ -498,6 +498,8 @@ class FigureInteraction(object):
         norm_actions_group = QActionGroup(norm_menu)
         none_action = norm_menu.addAction("None", lambda: self._normalization_type_changed(ax, PlotNormalizationType.NONE))
         actions.append(none_action)
+        bin_width_action = None
+        inverse_q_action = None
         if can_toggle_normalize_by_bin_width:
             bin_width_action = norm_menu.addAction(
                 "Bin Width", lambda: self._normalization_type_changed(ax, PlotNormalizationType.BIN_WIDTH)
@@ -513,9 +515,9 @@ class FigureInteraction(object):
             action.setCheckable(True)
 
         normalization = self._get_normalization_from_artists(ax)
-        if normalization == PlotNormalizationType.BIN_WIDTH:
+        if normalization == PlotNormalizationType.BIN_WIDTH and can_toggle_normalize_by_bin_width:
             bin_width_action.setChecked(True)
-        elif normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER:
+        elif normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER and can_normalise_by_inverse_q:
             inverse_q_action.setChecked(True)
         else:
             none_action.setChecked(True)
