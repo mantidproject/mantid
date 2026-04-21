@@ -12,7 +12,7 @@
 
 #include "AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MatrixWorkspace.h" //MatrixWorkspace_fwd.h
+#include "MatrixWorkspace.h"
 
 namespace Mantid::API {
 

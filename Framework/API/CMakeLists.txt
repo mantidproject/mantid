@@ -150,7 +150,6 @@ set(SRC_FILES
     src/SpectrumDetectorMapping.cpp
     src/SpectrumInfo.cpp
     src/TableRow.cpp
-    src/TaskBasedAlgorithm.cpp
     src/TimeAtSampleStrategyDirect.cpp
     src/TimeAtSampleStrategyElastic.cpp
     src/TimeAtSampleStrategyIndirect.cpp

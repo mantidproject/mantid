@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/TaskBasedAlgorithm.h"
-#include "MantidAPI/WorkspaceFactory.h" //remove this
 #include "MantidReflectometry/ReflectometryWorkflowBase2.h"
 #include <numeric>
 
@@ -135,6 +134,7 @@ private:
   // When a task sets wavelength min/max, flag this so it is not repeated.
   bool m_wavelengthMinMaxSet;
 
+  /** Task based Algorithm declarations */
   class TaskBackgroundSubtraction final : public AlgorithmTask {
   public:
     explicit TaskBackgroundSubtraction(ReflectometryReductionOne3 *parent)
