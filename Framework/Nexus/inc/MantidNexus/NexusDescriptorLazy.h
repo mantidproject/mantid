@@ -16,12 +16,16 @@
 #include <shared_mutex>
 #include <string>
 #include <unordered_set>
+#include <variant>
 #include <vector>
 
 #include <H5Cpp.h>
 
 namespace Mantid {
 namespace Nexus {
+
+using CacheValue =
+    std::variant<float, double, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, std::string>;
 
 template <typename T>
 concept entryTypes = std::integral<T> || std::floating_point<T> || std::same_as<T, std::string>;
@@ -104,6 +108,7 @@ public:
   bool isEntry(std::string const &entryName) const;
 
   template <entryTypes T> bool checkEntry(const std::string &entryName, const T &value) const;
+  template <typename T> std::optional<std::reference_wrapper<const T>> getCached(const std::string &key) const;
 
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(std::string const &classType) const;
@@ -152,6 +157,8 @@ private:
 
   /// the set of non-existent entries that have been checked
   mutable std::unordered_set<std::string> m_allMisses;
+
+  mutable std::map<std::string, CacheValue> m_readEntries;
 };
 
 template <>
@@ -200,20 +207,39 @@ template <> inline hid_t getH5NativeType<int64_t>() { return H5T_NATIVE_INT64; }
 
 template <> inline hid_t getH5NativeType<uint64_t>() { return H5T_NATIVE_UINT64; }
 
+template <typename T>
+std::optional<std::reference_wrapper<const T>> NexusDescriptorLazy::getCached(const std::string &key) const {
+  auto it = m_readEntries.find(key);
+  if (it == m_readEntries.end())
+    return std::nullopt;
+
+  if (auto ptr = std::get_if<T>(&it->second))
+    return std::cref(*ptr);
+
+  return std::nullopt;
+}
+
 template <entryTypes T> bool NexusDescriptorLazy::checkEntry(const std::string &entryName, const T &value) const {
 
+  // Checks if the entry is cached and if so compare the value with the cached one
+  auto cachedValueOpt = getCached<T>(entryName);
+  if (cachedValueOpt) {
+    T cachedValue = cachedValueOpt.value().get();
+    if constexpr (std::same_as<T, std::string>) {
+      return cachedValue == value;
+    } else {
+      if constexpr (std::floating_point<T>)
+        return std::fabs(cachedValue - value) < 1e-12;
+      else
+        return cachedValue == value;
+    }
+  }
+
+  // Otherwise fetch if possible the entry and performs the comparison
   if (H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT) <= 0)
     return false;
 
   UniqueID<&H5Dclose> entryID(H5Dopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
-
-  // The entry must be a scalar
-  // hid_t dataspace = H5Dget_space(entryID.get());
-  // int ndims = H5Sget_simple_extent_ndims(dataspace);
-  // if (ndims != 0) {
-  //   H5Sclose(dataspace);
-  //   return false;
-  // }
 
   hid_t datatype = H5Dget_type(entryID.get());
 
@@ -274,6 +300,9 @@ template <entryTypes T> bool NexusDescriptorLazy::checkEntry(const std::string &
 
     if (buffer.size() != 1)
       return false;
+
+    // Update the cache
+    m_readEntries[entryName] = value;
 
     if constexpr (std::floating_point<T>)
       return std::fabs(buffer[0] - value) < 1e-12;
