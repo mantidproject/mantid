@@ -115,7 +115,7 @@ QColor AlternateCSPythonLexer::defaultColorDark(int style) const {
 
   case TripleSingleQuotedString:
   case TripleDoubleQuotedString:
-    return QColor(0x98, 0xC3, 0x78);
+    return QColor(0xCE, 0x91, 0x78);
 
   case TripleSingleQuotedFString:
   case TripleDoubleQuotedFString:
@@ -143,7 +143,7 @@ QColor AlternateCSPythonLexer::defaultColorDark(int style) const {
     return QColor(0x00, 0x3F, 0x8E);
 
   case Decorator:
-    return QColor(0xBB, 0xDA, 0xFF);
+    return QColor(0xDC, 0xDC, 0xAA);
   }
 
   return QsciLexer::defaultColor(style);
@@ -180,15 +180,6 @@ const char *AlternateCSPythonLexer::keywords(int set) const {
 }
 
 QColor AlternateCSPythonLexer::defaultPaper(int style) const {
-  return m_isDarkMode ? defaultPaperDark(style) : defaultPaperLight(style);
-}
-
-QColor AlternateCSPythonLexer::defaultPaperLight(int style) const {
   Q_UNUSED(style);
-  return QColor(255, 255, 255);
-}
-
-QColor AlternateCSPythonLexer::defaultPaperDark(int style) const {
-  Q_UNUSED(style);
-  return QColor(30, 30, 30);
+  return m_isDarkMode ? QColor(30, 30, 30) : QColor(255, 255, 255);
 }

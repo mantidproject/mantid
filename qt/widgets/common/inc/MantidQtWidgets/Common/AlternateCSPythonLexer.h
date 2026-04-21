@@ -24,8 +24,6 @@ public:
 private:
   QColor defaultColorLight(int style) const;
   QColor defaultColorDark(int style) const;
-  QColor defaultPaperLight(int style) const;
-  QColor defaultPaperDark(int style) const;
   QFont m_font;
   static constexpr const char *customKeywords = "True False";
   bool m_isDarkMode{false};
