@@ -3,6 +3,11 @@ name: Coverity
 on:
   pull_request: # TODO DELETEME
   workflow_dispatch:
+    inputs:
+      RUNNER_LABEL:
+        description: 'Match Runner Label'
+        required: false
+        type: string
   schedule:
     - cron: 0 6 * * *
 
@@ -14,7 +19,10 @@ concurrency:
 jobs:
   build:
     runs-on:
+      - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
+      - Linux
+      - X64
       - coverity
 
     env:
@@ -74,6 +82,7 @@ jobs:
           cd ${GITHUB_WORKSPACE}/build
           echo "::add-matcher::.github/matchers/gcc.json"
           pixi run --frozen ${COVERITY_DIR}/cov-build --dir cov-int cmake --build .
+          echo "::remove-matcher owner=gcc-problem-matcher::"
 
       - name: Prepare result
         run: |
@@ -88,9 +97,9 @@ jobs:
             echo "${REPORT_FILE} does not exist with nonzero size"
             exit 1
           fi
-          curl --fail-with-body -X POST -d version=${{ github.ref }} -d email=mantidproject@gmail.com -d token=$COVERITY_TOKEN -d file_name="${REPORT_FILE}" https://scan.coverity.com/projects/335/builds/init > response
+          curl --fail-with-body -X POST -d version=${{ github.ref }} -d email=mantidproject@gmail.com -d token=${{ secrets.COVERITY_TOKEN }} -d file_name="${REPORT_FILE}" https://scan.coverity.com/projects/335/builds/init > response
           cat response
           upload_url=$(jq -r '.url' response)
           build_id=$(jq -r '.build_id' response)
           curl -f -X PUT --header "Content-Type: application/json" --upload-file mantid.tgz $upload_url
-          curl -f -X PUT -d token=$COVERITY_TOKEN https://scan.coverity.com/projects/335/builds/$build_id/enqueue
+          curl -f -X PUT -d token=${{ secrets.COVERITY_TOKEN }} https://scan.coverity.com/projects/335/builds/$build_id/enqueue
