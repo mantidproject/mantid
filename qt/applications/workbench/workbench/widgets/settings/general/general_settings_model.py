@@ -11,7 +11,6 @@ from mantid.kernel import ConfigService
 
 from workbench.widgets.settings.base_classes.config_settings_changes_model import ConfigSettingsChangesModel
 from workbench.config import CONF
-from qtpy.QtCore import QSettings
 
 
 class GeneralProperties(Enum):
@@ -24,6 +23,7 @@ class GeneralProperties(Enum):
     PR_TIME_BETWEEN_RECOVERY = "projectRecovery.secondsBetween"
     PR_RECOVERY_ENABLED = "projectRecovery.enabled"
     USE_NOTIFICATIONS = "Notifications.Enabled"
+    APPLY_DARK_THEME_ENABLED = "editors.apply_dark_theme"
 
 
 class GeneralUserConfigProperties(Enum):
@@ -34,14 +34,12 @@ class GeneralUserConfigProperties(Enum):
     USER_LAYOUT = "MainWindow/user_layouts"
     WINDOW_BEHAVIOUR = "AdditionalWindows/behaviour"
     COMPLETION_ENABLED = "Editors/completion_enabled"
-    APPLY_DARK_THEME_ENABLED = "Editors/apply_dark_theme"
 
 
 class GeneralSettingsModel(ConfigSettingsChangesModel):
     def __init__(self):
         super().__init__()
         self._user_config_changes: Dict[str, Any] = {}
-        self.settings = QSettings()
 
     def properties_to_be_changed(self) -> List[str]:
         return list(self._user_config_changes.keys()) + super().properties_to_be_changed()
@@ -139,9 +137,8 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
     def get_completion_enabled() -> str:
         return CONF.get(GeneralUserConfigProperties.COMPLETION_ENABLED.value, type=bool)
 
-    @staticmethod
-    def get_apply_dark_theme_enabled() -> str:
-        return CONF.get(GeneralUserConfigProperties.APPLY_DARK_THEME_ENABLED.value, type=bool)
+    def get_apply_dark_theme_enabled(self) -> str:
+        return self.get_saved_value(GeneralProperties.APPLY_DARK_THEME_ENABLED.value)
 
     def set_crystallography_convention(self, value: str) -> None:
         self.add_change(GeneralProperties.CRYSTALLOGRAPY_CONV.value, value)
@@ -191,6 +188,5 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
     def set_user_layout(self, value: dict) -> None:
         self.add_change(GeneralUserConfigProperties.USER_LAYOUT.value, value)
 
-    def set_apply_dark_theme_enabled(self, value: bool) -> None:
-        self.add_change(GeneralUserConfigProperties.APPLY_DARK_THEME_ENABLED.value, value)
-        self.settings.setValue(GeneralUserConfigProperties.APPLY_DARK_THEME_ENABLED.value, value)
+    def set_apply_dark_theme_enabled(self, value: str) -> None:
+        self.add_change(GeneralProperties.APPLY_DARK_THEME_ENABLED.value, value)

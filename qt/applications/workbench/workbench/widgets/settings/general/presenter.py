@@ -117,7 +117,7 @@ class GeneralSettings(SettingsPresenterBase):
         self.notify_changes()
 
     def action_apply_dark_theme_enabled_modified(self, state):
-        self._model.set_apply_dark_theme_enabled(bool(state))
+        self._model.set_apply_dark_theme_enabled(str(bool(state)))
         self.notify_changes()
 
     def setup_checkbox_signals(self):
@@ -178,7 +178,7 @@ class GeneralSettings(SettingsPresenterBase):
         use_open_gl = "on" == self._model.get_use_opengl().lower()
         invisible_workspaces = "1" == self._model.get_show_invisible_workspaces().lower()
         completion_enabled = self._model.get_completion_enabled()
-        apply_dark_theme_enabled = self._model.get_apply_dark_theme_enabled()
+        apply_dark_theme_enabled = "true" == self._model.get_apply_dark_theme_enabled().lower()
 
         self._view.project_recovery_enabled.setChecked(pr_enabled)
         self._view.time_between_recovery.setValue(pr_time_between_recovery)

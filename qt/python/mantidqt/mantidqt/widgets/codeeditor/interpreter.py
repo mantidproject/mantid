@@ -15,7 +15,7 @@ from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QW
 
 from mantidqt.io import open_a_file_dialog
 from mantid.kernel import config
-from workbench.config import CONF
+from mantid.kernel import ConfigService
 from mantidqt.widgets.codeeditor.codecommenter import CodeCommenter
 from mantidqt.widgets.codeeditor.completion import CodeCompleter
 from mantidqt.widgets.codeeditor.editor import CodeEditor
@@ -31,7 +31,7 @@ ABORTED_STATUS_MSG = "Status: Aborted"
 
 # Returns the background color of the current line in the code editor
 def get_currentline_background_color():
-    if CONF.get("Editors", "apply_dark_theme", type=bool):
+    if ConfigService["editors.apply_dark_theme"] == "True":
         return QColor(0, 52, 110)
     return QColor(247, 236, 248)
 
@@ -293,7 +293,7 @@ class PythonFileInterpreter(QWidget):
         editor.setTabWidth(TAB_WIDTH)
 
         # show current editing line but in a softer color
-        if CONF.get("Editors", "apply_dark_theme", type=bool):
+        if ConfigService["editors.apply_dark_theme"] == "True":
             editor.setCaretForegroundColor(QColor("white"))
         else:
             editor.setCaretForegroundColor(QColor("black"))

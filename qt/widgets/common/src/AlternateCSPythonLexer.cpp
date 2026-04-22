@@ -5,15 +5,15 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlternateCSPythonLexer.h"
-#include <QSettings>
+#include "MantidKernel/ConfigService.h"
 
 /**
  * Construct a lexer with a font to be used for all text styles
  * @param font A font to used for the text
  */
 AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font) : QsciLexerPython(), m_font(font) {
-  QSettings settings;
-  m_isDarkMode = settings.value("Editors/apply_dark_theme", false).toBool();
+  std::string apply_dark_theme = Mantid::Kernel::ConfigService::Instance().getString("editors.apply_dark_theme");
+  m_isDarkMode = (apply_dark_theme == "True");
 }
 
 /**
