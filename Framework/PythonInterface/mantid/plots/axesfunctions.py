@@ -182,7 +182,7 @@ def _plot_impl(axes, workspace, args, kwargs):
         if kwargs.pop("update_axes_labels", True):
             _setLabels1D(axes, workspace, indices, normalization=normalization, axis=axis)
     kwargs.pop("normalize_by_bin_width", None)
-    kwargs.pop("normalize_type", None)
+    kwargs.pop("normalization_type", None)
     return x, y, args, kwargs
 
 
@@ -317,7 +317,7 @@ def errorbar(axes, workspace, *args, **kwargs):
         normalization, kwargs = get_normalization_type(workspace, axes, **kwargs)
         _setLabels1D(axes, workspace, indices, normalization=normalization, axis=axis)
     kwargs.pop("normalize_by_bin_width", None)
-    kwargs.pop("normalize_type", None)
+    kwargs.pop("normalizeation_type", None)
 
     if dy is not None and min(dy) < 0:
         dy = None
