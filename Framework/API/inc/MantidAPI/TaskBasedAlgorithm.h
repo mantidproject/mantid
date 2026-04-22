@@ -113,9 +113,8 @@ protected:
         if (outputs.empty()) {
           // If no specific outputs are listed, populate with the whole task output
           const auto &expectedOutputs = (*it)->getExpectedOutputs();
-          for (const auto &output : expectedOutputs) {
-            outputs.push_back({output, output});
-          }
+          std::transform(expectedOutputs.begin(), expectedOutputs.end(), std::back_inserter(outputs),
+                         [](const auto &output) { return std::pair<std::string, std::string>{output, output}; });
         }
       }
       return true;
@@ -155,12 +154,10 @@ protected:
     void checkExpectedOutputs() {
       if (!m_parent->m_algorithmTaskOutputs.contains(m_name))
         throw std::runtime_error("No output from task " + m_name + " found after task execution");
-
       std::vector<std::string> missingOutput;
-      for (const auto &output : m_expectedOutputs) {
-        if (!m_parent->m_algorithmTaskOutputs[m_name].contains(output))
-          missingOutput.push_back(output);
-      }
+      const auto &taskOutputs = m_parent->m_algorithmTaskOutputs[m_name];
+      std::copy_if(m_expectedOutputs.begin(), m_expectedOutputs.end(), std::back_inserter(missingOutput),
+                   [&taskOutputs](const auto &output) { return !taskOutputs.contains(output); });
       if (!missingOutput.empty()) {
         throw std::runtime_error(
             "Expected outputs from task " + m_name + " not found after task execution: " +
