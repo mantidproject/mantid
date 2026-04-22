@@ -711,7 +711,7 @@ class MantidAxes(Axes):
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(
                     workspace,
-                    axesfunctions.plot(self, normalize_type=normalization_type, *args, **kwargs),
+                    axesfunctions.plot(self, normalization_type=normalization_type, *args, **kwargs),
                     _data_update,
                     spec_num,
                     normalization_type,
