@@ -31,7 +31,7 @@ ABORTED_STATUS_MSG = "Status: Aborted"
 
 # Returns the background color of the current line in the code editor
 def get_currentline_background_color():
-    if ConfigService["editors.apply_dark_theme"] == "True":
+    if (ConfigService["editors.apply_dark_theme"].lower()) == "true":
         return QColor(0, 52, 110)
     return QColor(247, 236, 248)
 
@@ -293,7 +293,7 @@ class PythonFileInterpreter(QWidget):
         editor.setTabWidth(TAB_WIDTH)
 
         # show current editing line but in a softer color
-        if ConfigService["editors.apply_dark_theme"] == "True":
+        if (ConfigService["editors.apply_dark_theme"].lower()) == "true":
             editor.setCaretForegroundColor(QColor("white"))
         else:
             editor.setCaretForegroundColor(QColor("black"))
