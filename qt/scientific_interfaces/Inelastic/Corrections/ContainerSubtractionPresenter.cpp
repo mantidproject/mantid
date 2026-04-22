@@ -62,13 +62,19 @@ void ContainerSubtractionPresenter::handleRun() {
   auto doRebin(false);
   if (!checkWorkspaceBinningMatches(m_model->sampleWS(), m_model->canWS())) {
     doRebin = requestRebinToSample();
+    if (!doRebin) {
+      g_log.error("Cannot apply container corrections using a sample and "
+                  "container with different binning.");
+      m_runPresenter->setRunEnabled(true);
+      return;
+    }
   }
+
   auto confAlg = m_model->prepareSubtraction(m_view->getShift(), m_view->getScale(), doRebin);
   m_algorithmRunner->execute(std::move(confAlg));
 }
 
 void ContainerSubtractionPresenter::runComplete(const Mantid::API::IAlgorithm_sptr algorithm, const bool error) {
-  m_runPresenter->setRunEnabled(true);
   if (error) {
     showMessageBox("Error on subtraction algorithm");
     return;
