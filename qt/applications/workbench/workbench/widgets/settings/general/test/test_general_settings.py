@@ -255,7 +255,7 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.get_use_opengl.return_value = "123"  # wrong, therefore false
         self.mock_model.get_show_invisible_workspaces.return_value = "1"
         self.mock_model.get_completion_enabled.return_value = True
-        self.mock_model.get_apply_dark_theme_enabled.return_value = False
+        self.mock_model.get_apply_dark_theme_enabled.return_value = "False"
 
         GeneralSettings(None, model=self.mock_model, view=mock_view)
 
@@ -415,15 +415,15 @@ class GeneralSettingsTest(unittest.TestCase):
     def test_action_apply_dark_theme_enabled_modified(self, mock_notify_changes: MagicMock):
         presenter = GeneralSettings(None, model=self.mock_model)
 
-        presenter.action_apply_dark_theme_enabled_modified(True)
-        self.mock_model.set_apply_dark_theme_enabled.assert_called_once_with(True)
+        presenter.action_apply_dark_theme_enabled_modified(Qt.Checked)
+        self.mock_model.set_apply_dark_theme_enabled.assert_called_once_with("True")
         mock_notify_changes.assert_called_once()
 
         self.mock_model.set_apply_dark_theme_enabled.reset_mock()
         mock_notify_changes.reset_mock()
 
-        presenter.action_apply_dark_theme_enabled_modified(False)
-        self.mock_model.set_apply_dark_theme_enabled.assert_called_once_with(False)
+        presenter.action_apply_dark_theme_enabled_modified(Qt.Unchecked)
+        self.mock_model.set_apply_dark_theme_enabled.assert_called_once_with("False")
         mock_notify_changes.assert_called_once()
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
