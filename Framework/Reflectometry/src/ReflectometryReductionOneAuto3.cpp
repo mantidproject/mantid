@@ -228,9 +228,12 @@ void ReflectometryReductionOneAuto3::setDefaultOutputWorkspaceNames() {
     setPropertyValue("OutputWorkspaceWavelength", outputNames.iVsLam);
 
   // If no output transmission workspace name is provided, used the default
-  // If not processing groups, we only ever output the overall transmission run
   if (!isDefault("FirstTransmissionRun") && getPropertyValue("OutputWorkspaceTransmission").empty())
     setPropertyValue("OutputWorkspaceTransmission", outputNames.trans);
+  if (isDebug && !isDefault("FirstTransmissionRun") && getPropertyValue("OutputWorkspaceFirstTransmission").empty())
+    setPropertyValue("OutputWorkspaceFirstTransmission", outputNames.trans1);
+  if (isDebug && !isDefault("SecondTransmissionRun") && getPropertyValue("OutputWorkspaceSecondTransmission").empty())
+    setPropertyValue("OutputWorkspaceSecondTransmission", outputNames.trans2);
 }
 
 /** Initialize the algorithm's properties.

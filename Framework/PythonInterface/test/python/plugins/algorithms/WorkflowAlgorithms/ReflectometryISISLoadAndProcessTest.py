@@ -579,7 +579,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "AddSampleLog",
             "GroupWorkspaces",
             "ReflectometryReductionOneAuto",
-            "ReflectometryReductionOneAuto",
             "GroupWorkspaces",
         ]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_12345_1"), history, False)
@@ -815,7 +814,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             algHistories = reductionHistory.getChildHistories()
             algNames = [alg.name() for alg in algHistories]
         else:
-            algNames = [alg.name() for alg in history]
+            algNames = [alg.name() for alg in history.getAlgorithmHistories()]
 
         self.assertEqual(algNames.sort(), expected.sort())
 
