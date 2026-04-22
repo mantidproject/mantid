@@ -96,8 +96,6 @@ returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crys
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/CrystalStructure.h:74
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/UnitCell.h:212
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/MDGeometry/MDImplicitFunction.h:169
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Objects/MeshObject.h:62
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rendering/GeometryHandler.h:43
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Surfaces/Cone.h:80
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Surfaces/Plane.h:75
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Surfaces/Sphere.h:72
