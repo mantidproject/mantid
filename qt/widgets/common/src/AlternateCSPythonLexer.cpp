@@ -6,16 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlternateCSPythonLexer.h"
 #include "MantidKernel/ConfigService.h"
-#include <algorithm>
 
 /**
  * Construct a lexer with a font to be used for all text styles
  * @param font A font to used for the text
  */
 AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font) : QsciLexerPython(), m_font(font) {
-  std::string apply_dark_theme = Mantid::Kernel::ConfigService::Instance().getString("editors.apply_dark_theme");
-  std::transform(apply_dark_theme.begin(), apply_dark_theme.end(), apply_dark_theme.begin(), ::tolower);
-  m_isDarkMode = (apply_dark_theme == "true");
+  auto &config = Mantid::Kernel::ConfigService::Instance();
+  std::string apply_dark_theme = "False";
+  if (config.hasProperty("editors.apply_dark_theme")) {
+    apply_dark_theme = config.getString("editors.apply_dark_theme");
+  }
+  m_isDarkMode = (apply_dark_theme == "True");
 }
 
 /**
