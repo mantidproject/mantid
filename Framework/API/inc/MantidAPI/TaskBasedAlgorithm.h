@@ -67,7 +67,6 @@ protected:
     void setTaskExecutionOrder(const std::vector<std::string> *taskExecutionOrder) {
       m_taskExecutionOrder = taskExecutionOrder;
     }
-
     const std::string &getSelectedOutput() const { return m_selectedOutput; }
 
   protected:
@@ -229,20 +228,19 @@ protected:
     m_stagedAlgorithmTasks = tasks;
   }
 
-  std::vector<std::string> configureAlgorithmTasks() {
-    std::vector<std::string> taskExecutionOrder =
+  void configureAlgorithmTasks() {
+    m_taskExecutionOrder =
         isDefault("TaskExecutionOrder") ? constructTaskExecutionOrder() : getProperty("TaskExecutionOrder");
-    std::vector<std::shared_ptr<AlgorithmTask>> tasksToStage(taskExecutionOrder.size());
+    std::vector<std::shared_ptr<AlgorithmTask>> tasksToStage(m_taskExecutionOrder.size());
     for (auto &task : m_AlgorithmTasks) {
-      task->setTaskExecutionOrder(&taskExecutionOrder);
-      auto it = std::find(taskExecutionOrder.begin(), taskExecutionOrder.end(), task->name());
-      if (it != taskExecutionOrder.end()) {
-        std::size_t index = std::distance(taskExecutionOrder.begin(), it);
+      task->setTaskExecutionOrder(&m_taskExecutionOrder);
+      auto it = std::find(m_taskExecutionOrder.begin(), m_taskExecutionOrder.end(), task->name());
+      if (it != m_taskExecutionOrder.end()) {
+        std::size_t index = std::distance(m_taskExecutionOrder.begin(), it);
         tasksToStage[index] = task;
       }
     }
     stageAlgorithmTasks(tasksToStage);
-    return taskExecutionOrder;
   }
 
   void execTasks(const std::string &diagWorkspacePrefix = "") {
@@ -291,5 +289,6 @@ protected:
   };
 
   std::vector<std::shared_ptr<AlgorithmTask>> m_AlgorithmTasks;
+  std::vector<std::string> m_taskExecutionOrder;
 };
 } // namespace Mantid::API
