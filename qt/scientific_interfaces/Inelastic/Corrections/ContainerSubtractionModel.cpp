@@ -131,7 +131,7 @@ API::IConfiguredAlgorithm_sptr ContainerSubtractionModel::prepareSubtraction(dou
   if (!modCanWS()) {
     updateContainer(shiftX, scale);
   }
-  if ((shiftX == 0.0) & doRebin) {
+  if ((shiftX == 0.0) && doRebin) {
     m_csModContainerWS = rebinToWorkspace(modCanWS(), sampleWS());
   }
   return minusWorkspace(sampleWS(), modCanWS());
