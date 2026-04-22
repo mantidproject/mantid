@@ -1,7 +1,9 @@
 name: Coverity
 
 on:
-  pull_request: # TODO DELETEME
+  pull_request:
+    paths: # when editing workflow
+      - '.github/workflows/coverity.yml'
   workflow_dispatch:
     inputs:
       RUNNER_LABEL:
@@ -28,11 +30,6 @@ jobs:
     env:
       CMAKE_PRESET: linux-64-ci
       EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
-      ENABLE_BUILD_CODE: true
-      ENABLE_DOCS: false
-      ENABLE_DOC_TESTS: false
-      ENABLE_DEV_DOCS: false
-      ENABLE_COVERITY: true
       REPORT_FILE: "mantid.tar.gz"
 
     steps:
@@ -44,10 +41,6 @@ jobs:
       # If this workflow was triggered manually,
       # print a sorted list of all shell environment variables
       #
-
-
-      # in jenkins
-      # $WORKSPACE/buildconfig/Jenkins/Conda/conda-buildscript $WORKSPACE linux-64-ci --enable-coverity --clean-build
 
       - uses: actions/checkout@v6
         with:
@@ -75,7 +68,7 @@ jobs:
       - name: Configure cmake
         run: |
           cd ${GITHUB_WORKSPACE}
-          pixi run --frozen cmake --preset=${CMAKE_PRESET} -DMPI_BUILD=ON ${GITHUB_WORKSPACE}
+          pixi run --frozen cmake --preset=${CMAKE_PRESET} ${EXTRA_CMAKE_FLAGS} -DMPI_BUILD=ON ${GITHUB_WORKSPACE}
 
       - name: Build code
         run: |
