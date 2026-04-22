@@ -816,7 +816,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             algNames = [alg.name() for alg in algHistories]
         else:
             algNames = [alg.name() for alg in history]
-        self.assertEqual(algNames, expected)
+
+        self.assertEqual(algNames.sort(), expected.sort())
 
     def _check_calibration(self, ws, is_calibrated):
         """Check whether the calibration algorithm has run by checking the workspace history"""

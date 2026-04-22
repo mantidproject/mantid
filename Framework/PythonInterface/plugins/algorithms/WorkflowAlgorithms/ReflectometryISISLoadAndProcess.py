@@ -105,7 +105,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Check if we will need to sum banks as part of the reduction
         self._should_sum_banks(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
         # Slice the input workspace, if required
-        inputWorkspace = self._sliceWorkspace(inputWorkspace)
+        if self._slicingEnabled():
+            inputWorkspace = self._sliceWorkspace(inputWorkspace)
+            input_is_group = True
         # Perform the reduction
         alg = self._reduce(inputWorkspace, firstTransWorkspace, secondTransWorkspace, input_is_group)
         # Set outputs and tidy TOF workspaces into a group
@@ -621,10 +623,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return alg.getProperty("OutputWorkspace").value
 
     def _sliceWorkspace(self, workspace):
-        """If slicing has been requested, slice the input workspace, otherwise
-        return it unchanged"""
-        if not self._slicingEnabled():
-            return workspace
         # Perform the slicing
         sliced_workspace_name = self._getSlicedWorkspaceGroupName(workspace)
         self.log().information("Slicing workspace " + workspace + " into " + sliced_workspace_name)
