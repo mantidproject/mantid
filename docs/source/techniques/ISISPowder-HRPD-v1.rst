@@ -4,8 +4,6 @@
 ISIS Powder Diffraction Scripts - HRPD Reference
 ==================================================
 
-.. contents:: Table of Contents
-    :local:
 
 .. _creating_hrpd_object-isis-powder-diffraction-ref:
 

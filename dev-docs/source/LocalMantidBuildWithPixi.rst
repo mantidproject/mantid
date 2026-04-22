@@ -4,8 +4,6 @@
 Using Local Mantid Build in Other Projects with Pixi
 ====================================================
 
-.. contents::
-  :local:
 
 Overview
 ########

@@ -3,8 +3,6 @@
 Inelastic QENS Fitting Testing
 ==============================
 
-.. contents::
-   :local:
 
 *Prerequisites*
 

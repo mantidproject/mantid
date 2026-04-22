@@ -3,8 +3,6 @@
 EnumeratedString
 ==================
 
-.. contents::
-  :local:
 
 Why EnumeratedString?
 -----------------------

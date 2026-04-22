@@ -4,8 +4,6 @@
 ISIS Single Crystal Diffraction Reduction Scripts
 =================================================
 
-.. contents:: Table of Contents
-    :local:
 
 Introduction
 ------------

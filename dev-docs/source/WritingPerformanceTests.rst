@@ -4,8 +4,6 @@
 Writing Performance Tests
 =========================
 
-.. contents::
-  :local:
 
 Overview
 ########

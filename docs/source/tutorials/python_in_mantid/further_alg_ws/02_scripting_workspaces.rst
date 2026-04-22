@@ -9,10 +9,6 @@ The :ref:`Workspaces Toolbox<WorkbenchWorkspaceToolbox>` is used to store and ma
 
 Below are some examples of how to control workspaces with a script.
 
-.. contents:: Table of contents
-    :local:
-
-
 
 Relevant Algorithms
 ===================

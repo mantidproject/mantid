@@ -2,8 +2,6 @@
 The Automated Build Process
 ===========================
 
-.. contents:: Contents
-   :local:
 
 Summary
 ^^^^^^^

@@ -4,9 +4,6 @@
 ISIS Powder Diffraction Scripts - SampleDetails Reference
 =========================================================
 
-.. contents:: Table of Contents
-    :local:
-
 
 Introduction
 ------------

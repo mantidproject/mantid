@@ -4,8 +4,6 @@
 Running the Unit Tests
 ======================
 
-.. contents::
-  :local:
 
 Overview
 ########

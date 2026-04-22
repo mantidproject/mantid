@@ -1,8 +1,6 @@
 Debugging Unit Tests
 ====================
 
-.. contents::
-  :local:
 
 Using gdb
 ---------

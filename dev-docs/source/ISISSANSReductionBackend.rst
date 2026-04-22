@@ -4,10 +4,6 @@
 ISIS SANS Reduction Back-end
 ============================
 
-.. contents::
-  :local:
-
-
 
 What is calculated in a SANS reduction?
 #######################################

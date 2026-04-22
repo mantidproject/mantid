@@ -4,8 +4,6 @@
 Unit Test Good Practice
 =======================
 
-.. contents::
-  :local:
 
 General Guidance
 ################

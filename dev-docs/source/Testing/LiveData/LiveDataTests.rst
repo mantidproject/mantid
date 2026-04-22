@@ -3,8 +3,6 @@
 Live Data Testing
 =================
 
-.. contents::
-   :local:
 
 Introduction
 ------------

@@ -4,8 +4,6 @@
 ISIS Powder - Tutorials
 ==============================
 
-.. contents:: Table of Contents
-    :local:
 
 Introduction
 -------------

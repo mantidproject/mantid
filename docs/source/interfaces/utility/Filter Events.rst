@@ -4,8 +4,6 @@
 Filter Events Interface
 =======================
 
-.. contents:: Table of Contents
-  :local:
 
 Description
 -----------

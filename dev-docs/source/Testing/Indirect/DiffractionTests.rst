@@ -1,8 +1,6 @@
 Indirect Diffraction Testing
 ============================
 
-.. contents::
-   :local:
 
 Diffraction
 -----------

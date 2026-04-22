@@ -24,8 +24,6 @@
 |
 |
 
-.. contents:: 3D Plots Surface and Wireframe - Table of contents
-    :local:
 
 Surface Plots
 =============

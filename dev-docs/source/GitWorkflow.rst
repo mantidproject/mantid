@@ -4,8 +4,6 @@
 Mantid Git Workflow
 ===================
 
-.. contents:: Contents
-   :local:
 
 Summary
 -------

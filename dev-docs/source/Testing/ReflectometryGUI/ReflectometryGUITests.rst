@@ -3,8 +3,6 @@
 Reflectometry GUI Testing
 =========================
 
-.. contents::
-   :local:
 
 Introduction
 ------------

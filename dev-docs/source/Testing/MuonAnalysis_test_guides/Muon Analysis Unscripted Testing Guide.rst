@@ -3,8 +3,6 @@
 Muon Interfaces Unscripted Testing
 ==================================
 
-.. contents:: Table of Contents
-    :local:
 
 Preamble
 ^^^^^^^^^

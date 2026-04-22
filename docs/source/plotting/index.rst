@@ -29,9 +29,6 @@ Matplotlib in Mantid
 * :ref:`3D_Plots`
 * :ref:`Mesh_Plots`
 
-.. contents:: Table of contents
-    :local:
-
 
 Introduction
 ------------

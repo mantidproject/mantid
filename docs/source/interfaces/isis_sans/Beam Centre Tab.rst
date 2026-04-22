@@ -3,8 +3,6 @@
 Beam centre tab
 ---------------
 
-.. contents:: Table of Contents
-  :local:
 
 .. image::  /images/ISISSansInterface/beam_centre_page.png
    :align: right

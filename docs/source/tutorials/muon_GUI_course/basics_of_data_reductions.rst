@@ -16,8 +16,6 @@ This section explains:
 * how to set the detector calibration factor, :math:`{\alpha}`
 * how to group data
 
-.. contents:: Table of Contents
-  :local:
 
 The concept of |tzero| and |tgood|
 ==================================

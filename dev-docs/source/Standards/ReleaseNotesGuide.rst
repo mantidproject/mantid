@@ -4,8 +4,6 @@
 Release Notes Guide
 ===================
 
-.. contents::
-  :local:
 
 This page gives an overview of the release note process for Mantid.
 

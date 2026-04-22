@@ -15,9 +15,6 @@
 |
 |
 
-.. contents:: 3D Mesh Plots - Table of contents
-    :local:
-
 
 Here the mesh is plotted as a Poly3DCollection `Polygon <https://matplotlib.org/stable/users/explain/toolkits/mplot3d.html#polygon-plots>`_.
 

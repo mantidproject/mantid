@@ -4,8 +4,6 @@
 Dynamic dialog properties
 =========================
 
-.. contents::
-  :local:
 
 Overview
 --------

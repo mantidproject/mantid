@@ -4,8 +4,6 @@
 User Support
 ============
 
-.. contents::
-  :local:
 
 Introduction
 ------------

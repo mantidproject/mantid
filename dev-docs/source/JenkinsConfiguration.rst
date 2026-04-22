@@ -4,8 +4,6 @@
 Jenkins Configuration
 =====================
 
-.. contents::
-  :local:
 
 Summary
 #######

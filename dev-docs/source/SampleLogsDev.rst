@@ -4,8 +4,6 @@
 Sample Logs
 ============
 
-.. contents::
-  :local:
 
 The following information will be useful to you if you want to write an
 :py:obj:`algorithm <mantid.api.Algorithm>` that manipulates sample log data.

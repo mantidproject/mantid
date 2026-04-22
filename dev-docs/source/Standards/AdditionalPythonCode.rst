@@ -4,8 +4,6 @@
 Additional Python code
 ======================
 
-.. contents::
-  :local:
 
 Overview
 ########

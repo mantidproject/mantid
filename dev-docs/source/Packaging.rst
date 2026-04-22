@@ -4,8 +4,6 @@
 Packaging
 =========
 
-.. contents::
-  :local:
 
 This page gives an overview of the different packaging mechanisms used to deliver
 Mantid to users.

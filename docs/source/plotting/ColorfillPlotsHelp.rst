@@ -21,8 +21,6 @@ Colorfill and Contour Plots
 |
 |
 
-.. contents:: Colorfill and Contour Plots - Table of contents
-    :local:
 
 Colorfill Plots
 ===============

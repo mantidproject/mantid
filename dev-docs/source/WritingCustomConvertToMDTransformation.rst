@@ -3,8 +3,6 @@
 Writing a Custom ConvertToMD Transformation
 ===========================================
 
-.. contents::
-  :local:
 
 Introduction
 ############

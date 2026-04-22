@@ -4,9 +4,6 @@
 Matplotlib in C++
 =================
 
-.. contents::
-  :local:
-
 
 Overview
 --------

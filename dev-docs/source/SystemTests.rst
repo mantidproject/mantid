@@ -4,8 +4,6 @@
 System Tests
 ============
 
-.. contents::
-  :local:
 
 Overview
 ########

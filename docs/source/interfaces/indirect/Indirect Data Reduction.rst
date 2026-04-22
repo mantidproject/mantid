@@ -3,8 +3,6 @@
 Indirect Data Reduction
 =======================
 
-.. contents:: Table of Contents
-  :local:
 
 Overview
 --------

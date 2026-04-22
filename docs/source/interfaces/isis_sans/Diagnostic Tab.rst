@@ -7,8 +7,6 @@ Diagnostic tab
    :align: right
    :width: 800px
 
-.. contents:: Table of Contents
-  :local:
 
 .. _Diagnostic:
 

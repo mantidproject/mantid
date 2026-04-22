@@ -3,8 +3,6 @@
 Create Ikeda Carpenter Parameters GSAS
 ======================================
 
-.. contents:: Table of Contents
-  :local:
 
 Introduction
 ------------

@@ -3,8 +3,6 @@
 CaChannel
 =========
 
-.. contents:: Table of Contents
-  :local:
 
 Summary
 -------

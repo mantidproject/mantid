@@ -7,8 +7,6 @@ Mantid Standards
 These standards relate specifically to the implementation of the
 Mantid framework and the workbench application.
 
-.. contents:: Contents
-   :local:
 
 General Notes on Naming
 ^^^^^^^^^^^^^^^^^^^^^^^

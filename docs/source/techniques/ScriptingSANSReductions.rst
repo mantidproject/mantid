@@ -3,8 +3,6 @@
 Scripting SANS Reductions
 =========================
 
-.. contents:: Table of Contents
-  :local:
 
 Introduction
 ------------

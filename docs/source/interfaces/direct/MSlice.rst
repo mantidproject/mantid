@@ -3,8 +3,6 @@
 MSlice
 ========
 
-.. contents:: Table of Contents
-  :local:
 
 Interface Overview
 ------------------

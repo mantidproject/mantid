@@ -3,8 +3,6 @@
 SANS GUI Testing
 ================
 
-.. contents::
-   :local:
 
 Data reduction
 --------------
