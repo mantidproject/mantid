@@ -929,13 +929,13 @@ std::vector<std::string> ReflectometryWorkflowBase2::getTaskExecutionOrderFromPr
   // evaluate necessity of transmission/alg normalization
   const Property *transRun = getProperty(firstTransRunProp);
   const Property *correctionAlg = getProperty(correctionAlgProp);
-  if (transRun->isDefault()) {
-    std::erase(teo, "TaskNormalizeByTransmission");
-  } else if (!correctionAlg->isDefault()) {
+  if (!correctionAlg->isDefault()) {
     auto it = std::find(teo.begin(), teo.end(), "TaskNormalizeByTransmission");
     if (it != teo.end()) {
       *it = "TaskNormalizeByAlgorithm";
     }
+  } else if (transRun->isDefault()) {
+    std::erase(teo, "TaskNormalizeByTransmission");
   }
   // evaluate necessity of background subtraction
   const Property *subtractBackground = getProperty(subBGProp);

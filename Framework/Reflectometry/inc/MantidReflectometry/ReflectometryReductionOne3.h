@@ -253,6 +253,8 @@ private:
       setDependantTask("TaskCropWavelength", "CroppedWorkspace", "InputWorkspace");
       const auto taskSet1 = addDependantTaskSet();
       setDependantTask("TaskNormalizeByTransmission", "TransmissionCorrectedWorkspace", "InputWorkspace", taskSet1);
+      const auto taskSet2 = addDependantTaskSet();
+      setDependantTask("TaskNormalizeByAlgorithm", "AlgorithmCorrectedWorkspace", "InputWorkspace", taskSet2);
     }
     void executeImpl() override;
   };
