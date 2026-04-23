@@ -47,7 +47,7 @@ private:
   std::vector<int> workspaceIndices;
   bool includeData;
   bool includeDetectorPosition;
-  bool PickOneDetectorID;
+  bool OneDetectorIdPerRow;
   bool isScanning;
   bool calcQ;
   bool hasDiffConstants;

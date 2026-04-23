@@ -47,9 +47,8 @@ void CreateDetectorTable::init() {
   setPropertySettings("IncludeDetectorPosition",
                       std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
 
-  declareProperty<bool>("PickOneDetectorID", false, "Populate the Detector ID column with only the first of the set.",
-                        Direction::Input);
-  setPropertySettings("PickOneDetectorID",
+  declareProperty<bool>("OneDetectorIdPerRow", false, "Order rows in table by de.", Direction::Input);
+  setPropertySettings("OneDetectorIdPerRow",
                       std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
 
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DetectorTableWorkspace", "", Direction::Output,
@@ -63,7 +62,7 @@ void CreateDetectorTable::exec() {
   includeData = getProperty("IncludeData");
   workspaceIndices = getProperty("WorkspaceIndices");
   includeDetectorPosition = getProperty("IncludeDetectorPosition");
-  PickOneDetectorID = getProperty("PickOneDetectorID");
+  OneDetectorIdPerRow = getProperty("OneDetectorIdPerRow");
 
   if (auto peaks = std::dynamic_pointer_cast<IPeaksWorkspace>(inputWs)) {
     table = peaks->createDetectorTable();
@@ -77,7 +76,7 @@ void CreateDetectorTable::exec() {
     }
     setup();
     createColumns();
-    if (PickOneDetectorID) {
+    if (OneDetectorIdPerRow) {
       // Used in Instrument View
       populateTableByDetID();
     } else {
@@ -162,7 +161,7 @@ void CreateDetectorTable::setup() {
     std::iota(workspaceIndices.begin(), workspaceIndices.end(), 0);
   }
 
-  if (PickOneDetectorID) {
+  if (OneDetectorIdPerRow) {
     nrows = detectorInfo->detectorIDs().size();
   } else {
     nrows = workspaceIndices.size();
@@ -175,7 +174,7 @@ void CreateDetectorTable::createColumns() {
   std::vector<std::pair<std::string, std::string>> colNames;
   colNames.emplace_back("int", "Index");
   colNames.emplace_back("int", "Spectrum No");
-  if (PickOneDetectorID) {
+  if (OneDetectorIdPerRow) {
     colNames.emplace_back("int", "Detector ID(s)");
   } else {
     colNames.emplace_back("str", "Detector ID(s)");
@@ -300,7 +299,7 @@ void CreateDetectorTable::writeRowToTable(const size_t row, const size_t wsIndex
   TableRow colValues = table->getRow(row);
   colValues << static_cast<int>(wsIndex);
   colValues << specNo;
-  if (PickOneDetectorID) {
+  if (OneDetectorIdPerRow) {
     // Populate detector column with first det id in set
     colValues << static_cast<int>(*detIds.begin());
   } else {
