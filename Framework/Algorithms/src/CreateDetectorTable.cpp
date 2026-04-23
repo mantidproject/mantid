@@ -367,7 +367,7 @@ void CreateDetectorTable::calculateWsIdxData(const size_t wsIndex, int &specNo, 
 void CreateDetectorTable::populateTable() {
 
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
-  for (size_t row = 0; row < workspaceIndices.size(); row++) {
+  for (int row = 0; row < workspaceIndices.size(); row++) {
 
     size_t wsIndex = workspaceIndices[row];
 
@@ -400,7 +400,7 @@ void CreateDetectorTable::populateTableByDetID() {
   const auto &workspaceDetectorIds = detectorInfo->detectorIDs();
 
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
-  for (size_t row = 0; row < workspaceDetectorIds.size(); row++) {
+  for (int row = 0; row < workspaceDetectorIds.size(); row++) {
 
     int detId = workspaceDetectorIds[row];
     size_t wsIndex = detIdToWorkspaceIndexMap[detId];
