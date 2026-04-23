@@ -139,7 +139,7 @@ They all have a couple of features in common:
   The whole string appears in the user docs and python help.
 
 An optional :ref:`validator <Properties Validators>` or :ref:`directional argument <Properties Directions>` (input, output or both) can also be appended.
-The syntax for other property types (``WorkspaceProperty`` and ``ArrayProperty``) is more complex - see the :ref:`properties <Properties>` page.
+The syntax for other property types (``WorkspaceProperty`` and ``ArrayProperty``) is more complex - see the :ref:`properties <mantid:mantid.kernel.Property>` page.
 
 Validation of inputs
 --------------------
@@ -187,7 +187,7 @@ All of them eventually call the `API::Algorithm::executeInternal() <https://gith
 * run the ``exec()`` method
 * add history to the Workspace annotating the parameters that the algorithm was called with
 
-Additionally, the algorithm framework also handles things like sync/async calling, exception handling, and interaction with :ref:`AnalysisDataService <Analysis Data Service>`.
+Additionally, the algorithm framework also handles things like sync/async calling, exception handling, and interaction with :ref:`AnalysisDataService <mantid:mantid.api.AnalysisDataServiceImpl>`.
 
 
 Fetching properties
