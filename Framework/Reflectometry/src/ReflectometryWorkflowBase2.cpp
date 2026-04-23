@@ -10,6 +10,7 @@
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidIndexing/IndexInfo.h"
@@ -759,14 +760,12 @@ std::string ReflectometryWorkflowBase2::findProcessingInstructions(const Instrum
  * @return Boolean, whether or not any transmission runs were found
  */
 bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm_sptr &alg) const {
-
   bool transRunsExist = false;
-
-  MatrixWorkspace_sptr firstWS = getProperty("FirstTransmissionRun");
+  const auto &firstWS = getWorkspaceFromProperty("FirstTransmissionRun");
   if (firstWS) {
     transRunsExist = true;
     alg->setProperty("FirstTransmissionRun", firstWS);
-    MatrixWorkspace_sptr secondWS = getProperty("SecondTransmissionRun");
+    const auto &secondWS = getWorkspaceFromProperty("SecondTransmissionRun");
     if (secondWS) {
       alg->setProperty("SecondTransmissionRun", secondWS);
       alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
@@ -777,6 +776,21 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm
   }
 
   return transRunsExist;
+}
+
+const MatrixWorkspace_sptr &ReflectometryWorkflowBase2::getWorkspaceFromProperty(const std::string &propName) const {
+  const std::string str = getPropertyValue(propName);
+  WorkspaceGroup_sptr transmissionGroup;
+  if (!str.empty())
+    transmissionGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(str);
+
+  MatrixWorkspace_sptr ws;
+  if (transmissionGroup) {
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(transmissionGroup->getItem(0));
+  } else {
+    ws = getProperty(propName);
+  }
+  return ws;
 }
 
 /**

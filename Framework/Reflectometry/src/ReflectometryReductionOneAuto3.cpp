@@ -106,9 +106,9 @@ const std::string ReflectometryReductionOneAuto3::summary() const {
  *
  * @return :: void
  */
-void ReflectometryReductionOneAuto3::getTransmissionRun(std::map<std::string, std::string> &results,
-                                                        WorkspaceGroup_sptr &workspaceGroup,
-                                                        const std::string &transmissionRun) {
+void ReflectometryReductionOneAuto3::validateTransmissionRun(std::map<std::string, std::string> &results,
+                                                             WorkspaceGroup_sptr &workspaceGroup,
+                                                             const std::string &transmissionRun) {
   const std::string str = getPropertyValue(transmissionRun);
   if (!str.empty()) {
     auto transmissionGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(str);
@@ -141,8 +141,8 @@ std::map<std::string, std::string> ReflectometryReductionOneAuto3::validateInput
     return results;
 
   // First and second transmission runs
-  getTransmissionRun(results, group, "FirstTransmissionRun");
-  getTransmissionRun(results, group, "SecondTransmissionRun");
+  validateTransmissionRun(results, group, "FirstTransmissionRun");
+  validateTransmissionRun(results, group, "SecondTransmissionRun");
 
   return results;
 }
@@ -198,8 +198,8 @@ auto ReflectometryReductionOneAuto3::getOutputWorkspaceNames() -> WorkspaceNames
   else
     result.iVsLam = getPropertyValue("OutputWorkspaceWavelength");
 
-  const MatrixWorkspace_const_sptr &firstTransRun = getProperty("FirstTransmissionRun");
-  const MatrixWorkspace_const_sptr &secondTransRun = getProperty("SecondTransmissionRun");
+  const MatrixWorkspace_const_sptr &firstTransRun = getWorkspaceFromProperty("FirstTransmissionRun");
+  const MatrixWorkspace_const_sptr &secondTransRun = getWorkspaceFromProperty("SecondTransmissionRun");
   if (firstTransRun != nullptr && firstTransRun->getAxis(0)->unit()->unitID() != "TOF") {
     result.trans = firstTransRun->getName();
   } else if (firstTransRun != nullptr && secondTransRun != nullptr) {
@@ -410,6 +410,7 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
   alg->setPropertyValue("TransmissionProcessingInstructions", getPropertyValue("TransmissionProcessingInstructions"));
   populateMonitorProperties(alg, instrument);
   alg->setPropertyValue("NormalizeByIntegratedMonitors", getPropertyValue("NormalizeByIntegratedMonitors"));
+
   bool transRunsFound = populateTransmissionProperties(alg);
   if (!transRunsFound)
     populateAlgorithmicCorrectionProperties(alg, instrument);
