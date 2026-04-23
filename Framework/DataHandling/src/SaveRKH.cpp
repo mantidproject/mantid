@@ -60,7 +60,7 @@ void SaveRKH::exec() {
   Poco::Path path(filename);
   std::string ext = path.getExtension();
   if (ext.empty()) {
-    filename += ".txt";
+    filename += ".out";
   }
 
   m_outRKH.open(filename.c_str(), mode);
