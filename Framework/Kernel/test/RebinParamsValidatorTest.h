@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>
@@ -101,6 +102,26 @@ public:
     vec[1] = 0.0;
     TS_ASSERT_EQUALS(allowRangeValidator.isValid(vec),
                      "When giving a range the second value must be larger than the first");
+  }
+
+  void testTooManyBins() {
+    size_t mem = Mantid::Kernel::MemoryStats().availMem();
+    size_t numBins = mem / sizeof(double) + 1; // one more than can fit in memory
+    std::vector<double> vec(3);
+    vec[0] = 1.0;
+    vec[1] = 1.0;
+    vec[2] = 1.0 + static_cast<double>(numBins); // make sure we have more than numBins bins
+    TS_ASSERT(!standardValidator.isValid(vec).empty());
+  }
+
+  void testTooManyBinsLog() {
+    size_t mem = Mantid::Kernel::MemoryStats().availMem();
+    size_t numBins = mem / sizeof(double) + 1; // one more than can fit in memory
+    std::vector<double> vec(3);
+    vec[0] = 1.0;
+    vec[1] = std::pow(10.0, 1. / static_cast<double>(numBins)) - 1.; // make sure we have more than numBins bins
+    vec[2] = 10.0;
+    TS_ASSERT(!standardValidator.isValid(vec).empty());
   }
 
 private:
