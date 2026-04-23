@@ -286,12 +286,11 @@ class PythonFileInterpreter(QWidget):
 
         # show current editing line but in a softer color
         if (ConfigService["editors.apply_dark_theme"].lower()) == "true":
-            editor.setCaretForegroundColor(QColor("white")) 
-            editor.setCaretLineBackgroundColor(QColor(0,52,110))         
-          
+            editor.setCaretForegroundColor(QColor("white"))
+            editor.setCaretLineBackgroundColor(QColor(0, 52, 110))
         else:
             editor.setCaretForegroundColor(QColor("black"))
-            editor.setCaretBackgroundColor(QColor(247,236,248))
+            editor.setCaretLineBackgroundColor(QColor(247, 236, 248))
         editor.setCaretLineVisible(True)
         editor.setCaretWidth(5)
 
