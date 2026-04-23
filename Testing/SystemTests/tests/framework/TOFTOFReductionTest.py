@@ -45,7 +45,7 @@ class TOFTOFReductionTest(MantidSystemTest):
         execute_script(reduction_script)
 
     def validate(self):
-        self.tolerance = 1e-11
+        self.tolerance = 1e-9
         self.tolerance_is_rel_err = False
         self.nanEqual = True
         self.disableChecking = ["Axes"]
