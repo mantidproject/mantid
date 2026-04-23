@@ -5,7 +5,8 @@ Settings
 ========
 
 .. image:: ../images/SettingsGeneral.png
-    :scale: 70%
+    :width: 600px
+    :height: 750px
     :align: right
     :alt: SettingsGeneral
 
