@@ -466,6 +466,95 @@ public:
 
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  void test_populateTableByDetID_row_count_unconstrained_by_workspace_indices() {
+    // When PickOneDetectorID=true the table iterates over all detector IDs,
+    // so WorkspaceIndices is ignored and the row count equals the detector count.
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10);
+    std::string outWSName = "pick_one_det_row_count";
+
+    CreateDetectorTable alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndices", "1"));   // only index 1 requested…
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PickOneDetectorID", true)); // …but this path ignores it
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TableWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    // 3 detectors in the instrument → 3 rows, not 1
+    TS_ASSERT_EQUALS(ws->rowCount(), 3);
+
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_populateTableByDetID_each_row_has_unique_detector_id() {
+    // populateTableByDetID writes one distinct detector ID per row as an integer.
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10);
+    std::string outWSName = "pick_one_det_unique_ids";
+
+    CreateDetectorTable alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PickOneDetectorID", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TableWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    // Collect all detector IDs from col 2; every row must have a distinct integer ID.
+    std::set<int> seenIds;
+    for (size_t row = 0; row < ws->rowCount(); ++row)
+      seenIds.insert(ws->cell<int>(row, 2));
+
+    TS_ASSERT_EQUALS(seenIds.size(), ws->rowCount());
+
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_populateTableByDetID_monitor_physics_via_calculateWsIdxData() {
+    // Exercises calculateWsIdxData through the populateTableByDetID code path:
+    // monitor rows should carry positive R and theta=180.
+    // create2DWorkspaceWithFullInstrument(3, 10, true) → 1 regular detector + 2 monitors.
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
+    std::string outWSName = "pick_one_det_monitor_physics";
+
+    CreateDetectorTable alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PickOneDetectorID", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TableWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    // Rows 1 and 2 correspond to the monitors placed at z=-9 and z=-2 (behind sample).
+    // Col 3 = R (must be positive), col 4 = theta (must be 180 for monitors behind sample),
+    // col 6 = isMonitor string.
+    TS_ASSERT_EQUALS(ws->cell<std::string>(0, 6), "no");  // row 0: regular detector
+    TS_ASSERT_EQUALS(ws->cell<std::string>(1, 6), "yes"); // row 1: monitor
+    TS_ASSERT_EQUALS(ws->cell<std::string>(2, 6), "yes"); // row 2: monitor
+    TS_ASSERT_LESS_THAN(0.0, ws->cell<double>(1, 3));     // R must be positive
+    TS_ASSERT_EQUALS(ws->cell<double>(1, 4), 180.0);      // theta=180 for monitor behind sample
+
+    AnalysisDataService::Instance().remove(outWSName);
+  }
 };
 
 class CreateDetectorTablePerformance : public CxxTest::TestSuite {

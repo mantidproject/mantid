@@ -18,6 +18,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/V3D.h"
+#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -76,7 +77,13 @@ void CreateDetectorTable::exec() {
     }
     setup();
     createColumns();
-    populateTable();
+    if (PickOneDetectorID) {
+      // Used in Instrument View
+      populateTableByDetID();
+    } else {
+      // General case
+      populateTable();
+    }
     setTableToOutput();
     return;
   }
@@ -145,16 +152,21 @@ void CreateDetectorTable::setup() {
 
   hasDiffConstants = (ws->getEMode() == DeltaEMode::Elastic);
 
-  nrows = workspaceIndices.empty() ? ws->getNumberHistograms() : workspaceIndices.size();
-  // if (PickOneDetectorID) {
-  //   nrows = detectorInfo->detectorIDs().size();
-  // }
-
   beamAxisIndex = ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
   sampleDist = ws->getInstrument()->getSample()->getPos()[beamAxisIndex];
   signedThetaParamRetrieved = false;
   showSignedTwoTheta = false; // If true, signedVersion of the two theta
-                              // value should be displayed
+
+  if (workspaceIndices.empty()) {
+    workspaceIndices = std::vector<int>(ws->getNumberHistograms());
+    std::iota(workspaceIndices.begin(), workspaceIndices.end(), 0);
+  }
+
+  if (PickOneDetectorID) {
+    nrows = detectorInfo->detectorIDs().size();
+  } else {
+    nrows = workspaceIndices.size();
+  }
   table = WorkspaceFactory::Instance().createTable("TableWorkspace");
   table->setRowCount(nrows);
 }
@@ -315,48 +327,103 @@ void CreateDetectorTable::writeRowToTable(const size_t row, const size_t wsIndex
   }
 }
 
-void CreateDetectorTable::populateTable() {
-  PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
-  for (size_t row = 0; row < nrows; ++row) {
+void CreateDetectorTable::calculateWsIdxData(const size_t wsIndex, int &specNo, std::set<int> &detIds,
+                                             std::string &timeIndexes, double &dataY0, double &dataE0, double &R,
+                                             double &theta, double &q, double &phi, std::string &isMonitor,
+                                             double &difa, double &difc, double &difcUnc, double &tzero,
+                                             Kernel::V3D &detPosition) {
 
-    size_t wsIndex = workspaceIndices.empty() ? row : workspaceIndices[row];
-    // Data Y/E
-    const double dataY0{ws->y(wsIndex)[0]}, dataE0{ws->e(wsIndex)[0]};
+  // Geometry
+  if (!spectrumInfo->hasDetectors(wsIndex))
+    throw std::runtime_error("No detectors found.");
+  if (!signedThetaParamRetrieved) {
+    const std::vector<std::string> &parameters =
+        spectrumInfo->detector(wsIndex).getStringParameter("show-signed-theta", true); // recursive
+    showSignedTwoTheta =
+        (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
+    signedThetaParamRetrieved = true;
+  }
+
+  // Spec No
+  auto &spectrum = ws->getSpectrum(wsIndex);
+  specNo = spectrum.getSpectrumNo();
+  detIds = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
+  // Time indexes
+  timeIndexes = get_time_indexes(wsIndex);
+  // data Y/E
+  dataY0 = ws->y(wsIndex)[0];
+  dataE0 = ws->e(wsIndex)[0];
+  // R, Theta, Phi
+  get_spherical_coordinates(wsIndex, R, theta, phi);
+  // Q
+  q = get_q(wsIndex);
+  // Is monitor
+  isMonitor = spectrumInfo->isMonitor(wsIndex) ? "yes" : "no";
+  // Diff consts
+  get_diff_consts(wsIndex, difa, difc, difcUnc, tzero);
+  // Detector position
+  detPosition = spectrumInfo->position(wsIndex);
+}
+
+void CreateDetectorTable::populateTable() {
+
+  PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
+  for (size_t row = 0; row < workspaceIndices.size(); row++) {
+
+    size_t wsIndex = workspaceIndices[row];
 
     try {
-      // Geometry
-      if (!spectrumInfo->hasDetectors(wsIndex))
-        throw std::runtime_error("No detectors found.");
-      if (!signedThetaParamRetrieved) {
-        const std::vector<std::string> &parameters =
-            spectrumInfo->detector(wsIndex).getStringParameter("show-signed-theta", true); // recursive
-        showSignedTwoTheta =
-            (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
-        signedThetaParamRetrieved = true;
-      }
-      // Spec No
-      auto &spectrum = ws->getSpectrum(wsIndex);
-      Mantid::specnum_t specNo = spectrum.getSpectrumNo();
-      const auto &detIds = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
-      // Time indexes
-      const std::string timeIndexes = get_time_indexes(wsIndex);
-      // R, Theta, Phi
-      double R{0.0}, theta{0.0}, phi{0.0};
-      get_spherical_coordinates(wsIndex, R, theta, phi);
-      // Q
-      const double q = get_q(wsIndex);
-      // Is monitor
-      const std::string isMonitor = spectrumInfo->isMonitor(wsIndex) ? "yes" : "no";
-      // Diff consts
-      double difa = 0, difc = 0, difcUnc = 0, tzero = 0;
-      get_diff_consts(wsIndex, difa, difc, difcUnc, tzero);
-      // Detector position
-      const auto &detPosition = spectrumInfo->position(wsIndex);
+      int specNo = 0;
+      std::set<int> detIds;
+      std::string timeIndexes, isMonitor;
+      double dataY0, dataE0, R, theta, q, phi, difa, difc, difcUnc, tzero;
+      dataY0 = dataE0 = R = theta = q = phi = difa = difc = difcUnc = tzero = 0;
+      Kernel::V3D detPosition(0, 0, 0);
+
+      calculateWsIdxData(wsIndex, specNo, detIds, timeIndexes, dataY0, dataE0, R, theta, q, phi, isMonitor, difa, difc,
+                         difcUnc, tzero, detPosition);
 
       writeRowToTable(row, wsIndex, specNo, detIds, timeIndexes, dataY0, dataE0, R, theta, q, phi, isMonitor, difa,
                       difc, difcUnc, tzero, detPosition);
 
     } catch (const std::exception &) {
+      double dataY0 = ws->y(wsIndex)[0];
+      double dataE0 = ws->e(wsIndex)[0];
+
+      writeRowToTable(row, wsIndex, -1, std::set<int>{0}, "0", dataY0, dataE0, 0, 0, 0, 0, "n/a", 0, 0, 0, 0,
+                      V3D(0, 0, 0));
+    } // End catch for no spectrum
+  }
+}
+
+void CreateDetectorTable::populateTableByDetID() {
+  auto detIdToWorkspaceIndexMap = ws->getDetectorIDToWorkspaceIndexMap();
+  const auto &workspaceDetectorIds = detectorInfo->detectorIDs();
+
+  PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
+  for (size_t row = 0; row < workspaceDetectorIds.size(); row++) {
+
+    int detId = workspaceDetectorIds[row];
+    size_t wsIndex = detIdToWorkspaceIndexMap[detId];
+
+    try {
+      std::set<int> detIds;
+      int specNo = 0;
+      std::string timeIndexes, isMonitor;
+      double dataY0, dataE0, R, theta, q, phi, difa, difc, difcUnc, tzero;
+      dataY0 = dataE0 = R = theta = q = phi = difa = difc = difcUnc = tzero = 0;
+      Kernel::V3D detPosition(0, 0, 0);
+
+      calculateWsIdxData(wsIndex, specNo, detIds, timeIndexes, dataY0, dataE0, R, theta, q, phi, isMonitor, difa, difc,
+                         difcUnc, tzero, detPosition);
+
+      writeRowToTable(row, wsIndex, specNo, std::set<int>{detId}, timeIndexes, dataY0, dataE0, R, theta, q, phi,
+                      isMonitor, difa, difc, difcUnc, tzero, detPosition);
+
+    } catch (const std::exception &) {
+      double dataY0 = ws->y(wsIndex)[0];
+      double dataE0 = ws->e(wsIndex)[0];
+
       writeRowToTable(row, wsIndex, -1, std::set<int>{0}, "0", dataY0, dataE0, 0, 0, 0, 0, "n/a", 0, 0, 0, 0,
                       V3D(0, 0, 0));
     } // End catch for no spectrum

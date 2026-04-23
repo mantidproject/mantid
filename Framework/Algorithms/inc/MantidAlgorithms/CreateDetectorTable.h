@@ -39,6 +39,7 @@ public:
   void setup();
   void createColumns();
   void populateTable();
+  void populateTableByDetID();
   void setTableToOutput();
 
 private:
@@ -72,6 +73,11 @@ private:
                        const double theta, const double q, const double phi, const std::string isMonitor,
                        const double difa, const double difc, const double difcUnc, const double tzero,
                        const Kernel::V3D detPosition);
+
+  void calculateWsIdxData(const size_t wsIndex, int &specNo, std::set<int> &detIds, std::string &timeIndexes,
+                          double &dataY0, double &dataE0, double &R, double &theta, double &q, double &phi,
+                          std::string &isMonitor, double &difa, double &difc, double &difcUnc, double &tzero,
+                          Kernel::V3D &detPosition);
 };
 
 /// Converts a list to a string, shortened if necessary
