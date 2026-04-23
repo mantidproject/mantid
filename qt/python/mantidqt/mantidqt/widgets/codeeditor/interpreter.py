@@ -28,14 +28,6 @@ LAST_JOB_MSG_TEMPLATE = "Last job completed {} at {} in {:.3f}s"
 RUNNING_STATUS_MSG = "Status: Running"
 ABORTED_STATUS_MSG = "Status: Aborted"
 
-
-# Returns the background color of the current line in the code editor
-def get_currentline_background_color():
-    if (ConfigService["editors.apply_dark_theme"].lower()) == "true":
-        return QColor(0, 52, 110)
-    return QColor(247, 236, 248)
-
-
 # Editor
 TAB_WIDTH = 4
 TAB_CHAR = "\t"
@@ -294,10 +286,12 @@ class PythonFileInterpreter(QWidget):
 
         # show current editing line but in a softer color
         if (ConfigService["editors.apply_dark_theme"].lower()) == "true":
-            editor.setCaretForegroundColor(QColor("white"))
+            editor.setCaretForegroundColor(QColor("white")) 
+            editor.setCaretLineBackgroundColor(QColor(0,52,110))         
+          
         else:
             editor.setCaretForegroundColor(QColor("black"))
-        editor.setCaretLineBackgroundColor(get_currentline_background_color())
+            editor.setCaretBackgroundColor(QColor(247,236,248))
         editor.setCaretLineVisible(True)
         editor.setCaretWidth(5)
 

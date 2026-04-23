@@ -416,7 +416,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Apply dark theme to the code editor</string>
+               <string>Apply dark theme to the script editor</string>
               </property>
               <property name="checked">
                <bool>false</bool>
