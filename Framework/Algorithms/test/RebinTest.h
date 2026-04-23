@@ -34,6 +34,9 @@ using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 
+// this is a simple mock of the availMem function to keep consistent and small values from this function
+std::size_t Mantid::Kernel::MemoryStats::availMem() const { return 12; }
+
 class RebinTest : public CxxTest::TestSuite {
 public:
   double BIN_DELTA;
@@ -131,8 +134,9 @@ public:
     // Logarithmic case
     rebin.initialize();
     start = 1.0;
-    binWidth = std::pow(10.0, 1. / static_cast<double>(numBins)) - 1.;
+    binWidth = 1.0 - std::pow(10.0, 1. / static_cast<double>(numBins + 1));
     end = 10.0;
+    TS_ASSERT_LESS_THAN(binWidth, 0.0); // make sure it is negative, to trigger log binning
     TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{start, binWidth, end}));
   }
 

@@ -13,6 +13,9 @@
 
 using namespace Mantid::Kernel;
 
+// this is a simple mock of the availMem function to keep consistent and small values from this function
+std::size_t Mantid::Kernel::MemoryStats::availMem() const { return 12; }
+
 class RebinParamsValidatorTest : public CxxTest::TestSuite {
 public:
   void testClone() {
@@ -119,8 +122,9 @@ public:
     size_t numBins = mem * 1024 / sizeof(double) + 1; // one more than can fit in memory
     std::vector<double> vec(3);
     vec[0] = 1.0;
-    vec[1] = std::pow(10.0, 1. / static_cast<double>(numBins)) - 1.; // make sure we have more than numBins bins
+    vec[1] = 1.0 - std::pow(10.0, 1. / static_cast<double>(numBins)); // make sure we have more than numBins bins
     vec[2] = 10.0;
+    TS_ASSERT_LESS_THAN(vec[1], 0.0); // make sure it is negative, to trigger log binning
     TS_ASSERT(!standardValidator.isValid(vec).empty());
   }
 
@@ -129,7 +133,7 @@ public:
     // 1. find the number of KiB remaining in memory.
     // 2. calculate the number of bins that would equal that value in *bytes* (i.e. numBins * sizeof(double))
     // 3. make sure that the validator passes, if the bytes of the bins are less than the available memory
-    size_t memInKiB = Mantid::Kernel::MemoryStats().availMem(); // one more than can fit in memory
+    size_t memInKiB = Mantid::Kernel::MemoryStats().availMem();
     size_t numBins =
         memInKiB / sizeof(double); // the number bins (doubles) that would fit in memory, IF memory were in bytes
     std::vector<double> vec{1., 1., 1. + static_cast<double>(numBins)}; // make sure we have numBins bins
