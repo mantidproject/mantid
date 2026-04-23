@@ -34,8 +34,8 @@ void ContainerSubtractionPresenter::handleValidation(IUserInputValidator *valida
   m_view->validate(validator);
   if (auto sampleWS = m_model->sampleWS(), canWS = m_model->canWS(); sampleWS && canWS) {
     // Check Sample is of same type as container
-    const auto containerType = sampleWS->YUnit();
-    const auto sampleType = canWS->YUnit();
+    const auto containerType = canWS->YUnit();
+    const auto sampleType = sampleWS->YUnit();
 
     g_log.debug() << "Sample Y-Unit is: " << sampleType << '\n';
     g_log.debug() << "Container Y-Unit is: " << containerType << '\n';
@@ -60,7 +60,7 @@ void ContainerSubtractionPresenter::handleRun() {
   clearOutputPlotOptionsWorkspaces();
   m_view->enableSaveButton(false);
   auto doRebin(false);
-  if (!checkWorkspaceBinningMatches(m_model->sampleWS(), m_model->canWS())) {
+  if ((m_view->getShift() == 0.0) && !checkWorkspaceBinningMatches(m_model->sampleWS(), m_model->canWS())) {
     doRebin = requestRebinToSample();
     if (!doRebin) {
       g_log.error("Cannot apply container corrections using a sample and "
