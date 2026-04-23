@@ -122,8 +122,8 @@ public:
     Rebin rebin;
     // Linear case
     rebin.initialize();
-    size_t mem = Mantid::Kernel::MemoryStats().availMem();
-    size_t numBins = mem / sizeof(double) + 1; // one more than can fit in memory
+    size_t memInKiB = Mantid::Kernel::MemoryStats().availMem();
+    size_t numBins = memInKiB * 1024 / sizeof(double) + 1; // one more than can fit in memory
     double binWidth = 1.0;
     double start = 1.0;
     double end = start + static_cast<double>(numBins) * binWidth;

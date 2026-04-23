@@ -73,7 +73,7 @@ std::string RebinParamsValidator::checkValidity(const std::vector<double> &value
             break;
           }
         }
-        // the bins and bounds are okay, now check the memory allocation
+        // the bins and bounds are okay, accumulate memory
         if (binWidth < 0.0) {
           // logarithmic binning
           numBins += static_cast<size_t>(std::log(nextBoundary / previousBoundary) / std::log(1. - binWidth));
@@ -83,12 +83,14 @@ std::string RebinParamsValidator::checkValidity(const std::vector<double> &value
         }
         previousBoundary = nextBoundary;
       } // end for checking bins/boundaries
-      size_t mem = MemoryStats().availMem();
-      if (numBins > mem / sizeof(double)) {
+      size_t memInBytes = MemoryStats().availMem() * 1024;
+      size_t binSpaceInBytes = numBins * sizeof(double);
+      if (binSpaceInBytes > memInBytes) {
+        size_t bytesInGB = 1'000'000'000;
         error = "The number of bins requested is expected to exceed available memory. "
                 "This binning requires approximately " +
-                std::to_string(numBins * sizeof(double) / 1'000'000'000) + " GB of memory, but only " +
-                std::to_string(mem / 1'000'000) + " GB is available.";
+                std::to_string(binSpaceInBytes / bytesInGB) + " GB of memory, but only " +
+                std::to_string(memInBytes / bytesInGB) + " GB is available.";
       }
     } // end else odd
   } // end default case

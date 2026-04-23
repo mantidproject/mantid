@@ -106,7 +106,7 @@ public:
 
   void testTooManyBins() {
     size_t mem = Mantid::Kernel::MemoryStats().availMem();
-    size_t numBins = mem / sizeof(double) + 1; // one more than can fit in memory
+    size_t numBins = mem * 1024 / sizeof(double) + 1; // one more than can fit in memory
     std::vector<double> vec(3);
     vec[0] = 1.0;
     vec[1] = 1.0;
@@ -116,12 +116,24 @@ public:
 
   void testTooManyBinsLog() {
     size_t mem = Mantid::Kernel::MemoryStats().availMem();
-    size_t numBins = mem / sizeof(double) + 1; // one more than can fit in memory
+    size_t numBins = mem * 1024 / sizeof(double) + 1; // one more than can fit in memory
     std::vector<double> vec(3);
     vec[0] = 1.0;
     vec[1] = std::pow(10.0, 1. / static_cast<double>(numBins)) - 1.; // make sure we have more than numBins bins
     vec[2] = 10.0;
     TS_ASSERT(!standardValidator.isValid(vec).empty());
+  }
+
+  void testBinsInKiB() {
+    // make sure we are calculating the number of bins in KiB correctly
+    // 1. find the number of KiB remaining in memory.
+    // 2. calculate the number of bins that would equal that value in *bytes* (i.e. numBins * sizeof(double))
+    // 3. make sure that the validator passes, if the bytes of the bins are less than the available memory
+    size_t memInKiB = Mantid::Kernel::MemoryStats().availMem(); // one more than can fit in memory
+    size_t numBins =
+        memInKiB / sizeof(double); // the number bins (doubles) that would fit in memory, IF memory were in bytes
+    std::vector<double> vec{1., 1., 1. + static_cast<double>(numBins)}; // make sure we have numBins bins
+    TS_ASSERT(standardValidator.isValid(vec).empty());
   }
 
 private:
