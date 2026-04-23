@@ -778,7 +778,7 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm
   return transRunsExist;
 }
 
-const MatrixWorkspace_sptr &ReflectometryWorkflowBase2::getWorkspaceFromProperty(const std::string &propName) const {
+const MatrixWorkspace_sptr ReflectometryWorkflowBase2::getWorkspaceFromProperty(const std::string &propName) const {
   const std::string str = getPropertyValue(propName);
   WorkspaceGroup_sptr transmissionGroup;
   if (!str.empty())
