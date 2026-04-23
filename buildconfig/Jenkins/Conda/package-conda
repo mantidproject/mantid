@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 
-# This script expects to be in a POSIX environment. Uses rattler to build the suite of
+# This script expects to be in a POSIX environment. Uses the pixi
+# ``rattler-builder`` feature environment to build the suite of
 # mantid packages. You must pass flags to specify which packages to build. If building
 # a package dependent on another one it will either install a locally built package
 # (if present from a previous build step) or build and produce that package too.
@@ -17,11 +18,11 @@
 #                 outputs are placed in $WORKSPACE/conda-bld
 #
 # Possible flags:
-#   --build-mantid-developer: build the mantid-developer metapackage using conda-build
-#   --build-mantid: build the mantid package using conda-build
-#   --build-qt: build the qt package using conda-build (this will implicitly build mantid)
+#   --build-mantid-developer: build the mantid-developer metapackage using rattler-build
+#   --build-mantid: build the mantid package using rattler-build
+#   --build-qt: build the qt package using rattler-build (this will implicitly build mantid)
 #   --build-docs: build the HTML/Qthelp documentation
-#   --build-workbench: build the workbench package using conda-build (this will implicitly build qt and mantid)
+#   --build-workbench: build the workbench package using rattler-build (this will implicitly build qt and mantid)
 #   --git-tag: specify a tag for a release or nightly version
 #   --platform: target architecture, e.g. linux-64
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -89,6 +90,10 @@ done
 # install pixi if not already installed
 install_pixi
 
+# Activate the pixi environment backed by the rattler-builder feature so the
+# build tools can be used directly below.
+eval "$(pixi shell-hook -e rattler-builder --frozen --change-ps1 false)"
+
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
 if [[ -d conda-recipes ]]; then
@@ -106,7 +111,7 @@ if [[ -n "$GIT_TAG" ]]; then
 fi
 
 # Set the version to inject into the recipe file
-export MANTID_VERSION=$(pixi run -e rattler-builder --frozen versioningit $REPO_ROOT_DIR)
+export MANTID_VERSION=$(versioningit $REPO_ROOT_DIR)
 
 # Set locale to avoid problems building the docs
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
@@ -118,7 +123,7 @@ export LC_ALL=C
 # copy the source to a working folder.
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
 if [[ -d $CONDA_BLD_PATH ]]; then
-    pixi run -e rattler-builder --frozen rattler-index fs $CONDA_BLD_PATH
+    rattler-index fs $CONDA_BLD_PATH
 fi
 cd $RECIPES_DIR
 
@@ -137,19 +142,19 @@ pixi list -e rattler-builder --frozen
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    pixi run -e rattler-builder --frozen rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c neutrons $EXTRA_BUILD_OPTIONS
+    rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c neutrons $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
-    pixi run -e rattler-builder --frozen rattler-build build --experimental -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    rattler-build build --experimental -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_QT == true ]]; then
-    pixi run -e rattler-builder --frozen rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_DOCS == true ]]; then
-    pixi run -e rattler-builder --frozen rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c conda-forge -c neutrons -c mantid $EXTRA_BUILD_OPTIONS
+    rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c conda-forge -c neutrons -c mantid $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
-    pixi run -e rattler-builder --frozen rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
+    rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 
 # elapsed time with second resolution
