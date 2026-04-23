@@ -350,6 +350,122 @@ public:
     TS_ASSERT(indexCol->isType<int>());
     AnalysisDataService::Instance().remove(ws->getName());
   }
+
+  void test_index_column_contains_sequential_workspace_indices() {
+    // Without WorkspaceIndices set, the Index column should contain 0, 1, 2, ...
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10);
+    std::string outWSName = "seq_index_test";
+
+    CreateDetectorTable alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TableWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws) {
+      return;
+    }
+
+    TS_ASSERT_EQUALS(ws->cell<int>(0, 0), 0);
+    TS_ASSERT_EQUALS(ws->cell<int>(1, 0), 1);
+    TS_ASSERT_EQUALS(ws->cell<int>(2, 0), 2);
+
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_index_column_reflects_workspace_index_when_subset_selected() {
+    // When WorkspaceIndices=[2], the single output row's Index should be 2 (the wsIndex), not 0 (the row number)
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10);
+    std::string outWSName = "subset_index_test";
+
+    CreateDetectorTable alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndices", "2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TableWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws) {
+      return;
+    }
+
+    TS_ASSERT_EQUALS(ws->rowCount(), 1);
+    TS_ASSERT_EQUALS(ws->cell<int>(0, 0), 2); // Index stores the wsIndex (2), not the row number (0)
+    TS_ASSERT_EQUALS(ws->cell<int>(0, 1), 3); // Spectrum No for wsIndex 2 is 3
+
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_r_and_theta_are_valid_for_regular_detector() {
+    // R (L2 distance) should be positive, theta should be in [0, 180] for a regular detector
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
+    std::string outWSName = "r_theta_test";
+
+    CreateDetectorTable alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TableWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws) {
+      return;
+    }
+
+    // Col 3 = R, Col 4 = Theta (no Q column since no efixed)
+    const double R = ws->cell<double>(0, 3);
+    const double theta = ws->cell<double>(0, 4);
+    TS_ASSERT_LESS_THAN(0.0, R);
+    TS_ASSERT_LESS_THAN_EQUALS(0.0, theta);
+    TS_ASSERT_LESS_THAN_EQUALS(theta, 180.0);
+    TS_ASSERT_EQUALS(ws->cell<std::string>(0, 6), "no"); // Monitor column
+
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_monitor_row_has_correct_theta_and_positive_R() {
+    // Monitors behind the sample (z < 0) should have theta=180 and positive R
+    // create2DWorkspaceWithFullInstrument(3, 10, true) → rows 1 and 2 are monitors at (0,0,-9)
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
+    std::string outWSName = "monitor_theta_test";
+
+    CreateDetectorTable alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TableWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws) {
+      return;
+    }
+
+    // Row 0: regular detector
+    TS_ASSERT_EQUALS(ws->cell<std::string>(0, 6), "no");
+    // Rows 1 and 2: monitors
+    TS_ASSERT_EQUALS(ws->cell<std::string>(1, 6), "yes");
+    TS_ASSERT_EQUALS(ws->cell<std::string>(2, 6), "yes");
+    // Monitor R must be positive (absolute value of l2, which can be negative in DetectorInfo)
+    TS_ASSERT_LESS_THAN(0.0, ws->cell<double>(1, 3));
+    // Monitor behind the sample (position z=-9 < sampleDist=0) → theta=180
+    TS_ASSERT_EQUALS(ws->cell<double>(1, 4), 180.0);
+
+    AnalysisDataService::Instance().remove(outWSName);
+  }
 };
 
 class CreateDetectorTablePerformance : public CxxTest::TestSuite {
