@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -21,10 +21,6 @@
 
 using namespace testing;
 using namespace MantidQt::CustomInterfaces;
-
-namespace {
-auto &ads = Mantid::API::AnalysisDataService::Instance();
-}
 
 class ContainerSubtractionPresenterTest : public CxxTest::TestSuite {
 public:
@@ -55,11 +51,10 @@ public:
 
   void tearDown() override {
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
 
     m_presenter.reset();
     m_view.reset();
-    ads.clear();
   }
 
   void test_handle_sample_ready_updates_plot_for_new_valid_ws() {

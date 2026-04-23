@@ -82,8 +82,8 @@ private:
   Poco::NObserver<Corrections, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
-  std::map<unsigned int, CorrectionsTab *> m_tabs;
   std::unique_ptr<ContainerSubtractionPresenter> m_csPresenter;
+  std::map<unsigned int, CorrectionsTab *> m_tabs;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

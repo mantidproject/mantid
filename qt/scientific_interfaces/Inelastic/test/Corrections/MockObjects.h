@@ -69,7 +69,7 @@ public:
   MOCK_METHOD2(updateContainer, void(double shiftX, double scale));
 
   MOCK_CONST_METHOD0(getAllValidWorkspaceNames, std::vector<std::string>());
-  MOCK_CONST_METHOD1(addShiftLog, void(double shiftX));
+  MOCK_METHOD1(addShiftLog, void(double shiftX));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "Corrections/ContainerSubtractionModel.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -15,12 +16,9 @@
 using namespace testing;
 using namespace MantidQt::CustomInterfaces;
 
-namespace {
-auto &ads = Mantid::API::AnalysisDataService::Instance();
-}
-
 class ContainerSubtractionModelTest : public CxxTest::TestSuite {
 public:
+  ContainerSubtractionModelTest() : m_ads(Mantid::API::AnalysisDataService::Instance()) {}
   static ContainerSubtractionModelTest *createSuite() { return new ContainerSubtractionModelTest(); }
 
   static void destroySuite(ContainerSubtractionModelTest *suite) { delete suite; }
@@ -32,12 +30,12 @@ public:
 
   void tearDown() override {
     m_model.reset();
-    ads.clear();
+    m_ads.clear();
   }
 
   void test_getters_and_setters() {
     const auto wsName = "test";
-    ads.add(wsName, m_workspace);
+    m_ads.add(wsName, m_workspace);
 
     m_model->setSampleWS(wsName);
     const auto sampleWsName = m_model->sampleWS()->getName();
@@ -54,7 +52,7 @@ public:
 
   void test_reset_subtract_ws() {
     const auto wsName = "test";
-    ads.add(wsName, m_workspace);
+    m_ads.add(wsName, m_workspace);
 
     m_model->setSubtractedWS(wsName);
     TS_ASSERT(m_model->subtractedWS());
@@ -65,7 +63,7 @@ public:
   void test_valid_workspace_return() {
     auto outNames = std::vector<std::string>({"test"});
     const auto wsName = "test";
-    ads.add(wsName, m_workspace);
+    m_ads.add(wsName, m_workspace);
 
     m_model->setSampleWS(wsName);
     TS_ASSERT_EQUALS(m_model->getAllValidWorkspaceNames().size(), outNames.size());
@@ -83,8 +81,8 @@ public:
   void test_update_container_does_rebin_to_sample_for_shift_different_than_zero() {
     std::string wsName = "test";
     auto ws2 = WorkspaceCreationHelper::create2DWorkspace(5, 8);
-    ads.add(wsName, m_workspace);
-    ads.add(wsName + "can", ws2);
+    m_ads.add(wsName, m_workspace);
+    m_ads.add(wsName + "can", ws2);
     m_model->setSampleWS(wsName);
     m_model->setCanWS(wsName + "can");
 
@@ -95,6 +93,7 @@ public:
   }
 
 private:
+  Mantid::API::AnalysisDataServiceImpl &m_ads;
   std::unique_ptr<IContainerSubtractionModel> m_model;
   Mantid::API::MatrixWorkspace_sptr m_workspace;
 };

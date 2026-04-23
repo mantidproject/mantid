@@ -16,7 +16,7 @@ static const std::map<CSCurves, std::pair<QString, QColor>> CSPlotCurves = {
     {CSCurves::CONTAINER, {"Container", Qt::red}},
     {CSCurves::SUBTRACTED, {"Subtracted", Qt::blue}}};
 
-ContainerSubtractionView::ContainerSubtractionView(QWidget *parent) : m_presenter() {
+ContainerSubtractionView::ContainerSubtractionView(QWidget *parent) : QWidget(parent), m_presenter() {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &ContainerSubtractionView::notifySampleDataReady);
@@ -128,7 +128,7 @@ bool ContainerSubtractionView::requestRebinToSample() {
   const char *text = "Binning on sample and container does not match."
                      "Would you like to rebin the container to match the sample?";
 
-  const int result = QMessageBox::question(this, tr("Rebin sample?"), tr(text), QMessageBox::Yes, QMessageBox::No,
+  const int result = QMessageBox::question(this, tr("Rebin container?"), tr(text), QMessageBox::Yes, QMessageBox::No,
                                            QMessageBox::NoButton);
 
   return result == QMessageBox::Yes;

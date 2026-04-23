@@ -74,7 +74,7 @@ MatrixWorkspace_sptr ContainerSubtractionModel::rebinToWorkspace(const MatrixWor
   return rebin->getProperty("OutputWorkspace");
 }
 
-void ContainerSubtractionModel::addShiftLog(double shiftX) const {
+void ContainerSubtractionModel::addShiftLog(double shiftX) {
   IAlgorithm_sptr shiftLog = AlgorithmManager::Instance().create("AddSampleLog");
   shiftLog->initialize();
   shiftLog->setLogging(true);
