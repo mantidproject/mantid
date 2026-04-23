@@ -15,7 +15,9 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitConversion.h"
+#include "MantidKernel/V3D.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -123,6 +125,7 @@ void CreateDetectorTable::setup() {
   isScanning = ws->detectorInfo().isScanning();
 
   spectrumInfo = &ws->spectrumInfo();
+  detectorInfo = &ws->detectorInfo();
 
   // check if efixed value is available
   calcQ = true;
@@ -142,8 +145,10 @@ void CreateDetectorTable::setup() {
 
   hasDiffConstants = (ws->getEMode() == DeltaEMode::Elastic);
 
-  nrows = workspaceIndices.empty() ? static_cast<int>(ws->getNumberHistograms())
-                                   : static_cast<int>(workspaceIndices.size());
+  nrows = workspaceIndices.empty() ? ws->getNumberHistograms() : workspaceIndices.size();
+  // if (PickOneDetectorID) {
+  //   nrows = detectorInfo->detectorIDs().size();
+  // }
 
   beamAxisIndex = ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
   sampleDist = ws->getInstrument()->getSample()->getPos()[beamAxisIndex];
@@ -195,17 +200,130 @@ void CreateDetectorTable::createColumns() {
   return;
 }
 
+void CreateDetectorTable::get_spherical_coordinates(size_t wsIndex, double &R, double &theta, double &phi) {
+  // theta used as a dummy variable
+  // Note: phi is the angle around Z, not necessarily the beam direction.
+  spectrumInfo->position(wsIndex).getSpherical(R, theta, phi);
+  // R is actually L2 (same as R if sample is at (0,0,0)), except for
+  // monitors which are handled below.
+  R = spectrumInfo->l2(wsIndex);
+  // Theta is actually 'twoTheta' for detectors (twice the scattering
+  // angle), if Z is the beam direction this corresponds to theta in
+  // spherical coordinates.
+  // For monitors we follow historic behaviour and display theta
+  if (!spectrumInfo->isMonitor(wsIndex)) {
+    try {
+      theta = showSignedTwoTheta ? spectrumInfo->signedTwoTheta(wsIndex) : spectrumInfo->twoTheta(wsIndex);
+      theta *= 180.0 / M_PI; // To degrees
+    } catch (const std::exception &ex) {
+      // Log the error and leave theta as it is
+      g_log.error(ex.what());
+    }
+  } else {
+    const auto dist = spectrumInfo->position(wsIndex)[beamAxisIndex];
+    theta = sampleDist > dist ? 180.0 : 0.0;
+
+    // If monitors are before the sample in the beam, DetectorInfo
+    // returns a negative l2 distance.
+    R = std::abs(R);
+  }
+}
+
+const std::string CreateDetectorTable::get_time_indexes(size_t wsIndex) {
+  if (!isScanning) {
+    return "0";
+  }
+  std::set<int> timeIndexSet;
+  for (const auto &def : spectrumInfo->spectrumDefinition(wsIndex)) {
+    timeIndexSet.insert(int(def.second));
+  }
+  const std::string timeIndexes = createTruncatedList(timeIndexSet);
+  return timeIndexes;
+}
+
+double CreateDetectorTable::get_q(size_t wsIndex) {
+  if (!calcQ) {
+    return std::nan("");
+  }
+  if (spectrumInfo->isMonitor(wsIndex)) {
+    // twoTheta is not defined for monitors.
+    return std::nan("");
+  }
+  try {
+    // Get unsigned theta and efixed value
+    IDetector_const_sptr det{&spectrumInfo->detector(wsIndex), Mantid::NoDeleting()};
+    double efixed = ws->getEFixed(det);
+    double usignTheta = spectrumInfo->twoTheta(wsIndex) * 0.5;
+    double q = UnitConversion::convertToElasticQ(usignTheta, efixed);
+    return q;
+  } catch (std::runtime_error &) {
+    // No Efixed
+    return std::nan("");
+  }
+}
+
+void CreateDetectorTable::get_diff_consts(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero) {
+  if (!hasDiffConstants) {
+    difa = difc = difcUnc = tzero = 0;
+    return;
+  }
+  if (spectrumInfo->isMonitor(wsIndex)) {
+    difa = difc = difcUnc = tzero = 0;
+    return;
+  }
+  auto diffConsts = spectrumInfo->diffractometerConstants(wsIndex);
+  // map will create an entry with zero value if not present already
+  difa = diffConsts[UnitParams::difa];
+  difc = diffConsts[UnitParams::difc];
+  difcUnc = spectrumInfo->difcUncalibrated(wsIndex);
+  tzero = diffConsts[UnitParams::tzero];
+}
+
+void CreateDetectorTable::writeRowToTable(const size_t row, const size_t wsIndex, const int specNo,
+                                          const std::set<int> &detIds, const std::string timeIndexes,
+                                          const double dataY0, const double dataE0, const double R, const double theta,
+                                          const double q, const double phi, const std::string isMonitor,
+                                          const double difa, const double difc, const double difcUnc,
+                                          const double tzero, const Kernel::V3D detPosition) {
+  TableRow colValues = table->getRow(row);
+  colValues << static_cast<int>(wsIndex);
+  colValues << specNo;
+  if (PickOneDetectorID) {
+    // Populate detector column with first det id in set
+    colValues << static_cast<int>(*detIds.begin());
+  } else {
+    // Populate detector column with a truncated string of all det ids
+    colValues << createTruncatedList(detIds);
+  }
+  if (isScanning) {
+    colValues << timeIndexes;
+  }
+  if (includeData) {
+    colValues << dataY0 << dataE0; // data
+  }
+  colValues << R << theta;
+  if (calcQ) {
+    colValues << q;
+  }
+  colValues << phi;       // rtp
+  colValues << isMonitor; // monitor
+  if (hasDiffConstants) {
+    colValues << difa << difc << difcUnc << tzero;
+  }
+  if (includeDetectorPosition) {
+    colValues << detPosition;
+  }
+}
+
 void CreateDetectorTable::populateTable() {
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
-  for (int row = 0; row < nrows; ++row) {
-    TableRow colValues = table->getRow(row);
-    size_t wsIndex = workspaceIndices.empty() ? static_cast<size_t>(row) : workspaceIndices[row];
-    colValues << static_cast<int>(wsIndex);
-    const double dataY0{ws->y(wsIndex)[0]}, dataE0{ws->e(wsIndex)[0]};
-    try {
-      auto &spectrum = ws->getSpectrum(wsIndex);
-      Mantid::specnum_t specNo = spectrum.getSpectrumNo();
+  for (size_t row = 0; row < nrows; ++row) {
 
+    size_t wsIndex = workspaceIndices.empty() ? row : workspaceIndices[row];
+    // Data Y/E
+    const double dataY0{ws->y(wsIndex)[0]}, dataE0{ws->e(wsIndex)[0]};
+
+    try {
       // Geometry
       if (!spectrumInfo->hasDetectors(wsIndex))
         throw std::runtime_error("No detectors found.");
@@ -216,128 +334,31 @@ void CreateDetectorTable::populateTable() {
             (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
         signedThetaParamRetrieved = true;
       }
-
+      // Spec No
+      auto &spectrum = ws->getSpectrum(wsIndex);
+      Mantid::specnum_t specNo = spectrum.getSpectrumNo();
+      const auto &detIds = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
+      // Time indexes
+      const std::string timeIndexes = get_time_indexes(wsIndex);
+      // R, Theta, Phi
       double R{0.0}, theta{0.0}, phi{0.0};
-      // theta used as a dummy variable
-      // Note: phi is the angle around Z, not necessarily the beam direction.
-      spectrumInfo->position(wsIndex).getSpherical(R, theta, phi);
-      // R is actually L2 (same as R if sample is at (0,0,0)), except for
-      // monitors which are handled below.
-      R = spectrumInfo->l2(wsIndex);
-      // Theta is actually 'twoTheta' for detectors (twice the scattering
-      // angle), if Z is the beam direction this corresponds to theta in
-      // spherical coordinates.
-      // For monitors we follow historic behaviour and display theta
-      const bool isMonitor = spectrumInfo->isMonitor(wsIndex);
-      if (!isMonitor) {
-        try {
-          theta = showSignedTwoTheta ? spectrumInfo->signedTwoTheta(wsIndex) : spectrumInfo->twoTheta(wsIndex);
-          theta *= 180.0 / M_PI; // To degrees
-        } catch (const std::exception &ex) {
-          // Log the error and leave theta as it is
-          g_log.error(ex.what());
-        }
-      } else {
-        const auto dist = spectrumInfo->position(wsIndex)[beamAxisIndex];
-        theta = sampleDist > dist ? 180.0 : 0.0;
-      }
-      const std::string isMonitorDisplay = isMonitor ? "yes" : "no";
+      get_spherical_coordinates(wsIndex, R, theta, phi);
+      // Q
+      const double q = get_q(wsIndex);
+      // Is monitor
+      const std::string isMonitor = spectrumInfo->isMonitor(wsIndex) ? "yes" : "no";
+      // Diff consts
+      double difa = 0, difc = 0, difcUnc = 0, tzero = 0;
+      get_diff_consts(wsIndex, difa, difc, difcUnc, tzero);
+      // Detector position
+      const auto &detPosition = spectrumInfo->position(wsIndex);
 
-      colValues << static_cast<int>(specNo);
+      writeRowToTable(row, wsIndex, specNo, detIds, timeIndexes, dataY0, dataE0, R, theta, q, phi, isMonitor, difa,
+                      difc, difcUnc, tzero, detPosition);
 
-      const auto &ids = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
-      if (PickOneDetectorID) {
-        // Populate detector column with first det id in set
-        colValues << static_cast<int>(*ids.begin());
-      } else {
-        // Populate detector column with a truncated string of all det ids
-        colValues << createTruncatedList(ids);
-      }
-      if (isScanning) {
-        std::set<int> timeIndexSet;
-        for (const auto &def : spectrumInfo->spectrumDefinition(wsIndex)) {
-          timeIndexSet.insert(int(def.second));
-        }
-
-        const std::string timeIndexes = createTruncatedList(timeIndexSet);
-        colValues << timeIndexes;
-      }
-      // Y/E
-      if (includeData) {
-        colValues << dataY0 << dataE0; // data
-      }
-      // If monitors are before the sample in the beam, DetectorInfo
-      // returns a negative l2 distance.
-      if (isMonitor) {
-        R = std::abs(R);
-      }
-      colValues << R << theta;
-
-      if (calcQ) {
-        if (isMonitor) {
-          // twoTheta is not defined for monitors.
-          colValues << std::nan("");
-        } else {
-          try {
-
-            // Get unsigned theta and efixed value
-            IDetector_const_sptr det{&spectrumInfo->detector(wsIndex), Mantid::NoDeleting()};
-            double efixed = ws->getEFixed(det);
-            double usignTheta = spectrumInfo->twoTheta(wsIndex) * 0.5;
-
-            double q = UnitConversion::convertToElasticQ(usignTheta, efixed);
-            colValues << q;
-          } catch (std::runtime_error &) {
-            // No Efixed
-            colValues << std::nan("");
-          }
-        }
-      }
-
-      colValues << phi               // rtp
-                << isMonitorDisplay; // monitor
-
-      if (hasDiffConstants) {
-        if (isMonitor) {
-          colValues << 0. << 0. << 0. << 0.;
-        } else {
-          auto diffConsts = spectrumInfo->diffractometerConstants(wsIndex);
-          auto difcValueUncalibrated = spectrumInfo->difcUncalibrated(wsIndex);
-          // map will create an entry with zero value if not present already
-          colValues << diffConsts[UnitParams::difa] << diffConsts[UnitParams::difc] << difcValueUncalibrated
-                    << diffConsts[UnitParams::tzero];
-        }
-      }
-      if (includeDetectorPosition) {
-        const auto &detectorPosition = spectrumInfo->position(wsIndex);
-        colValues << detectorPosition;
-      }
     } catch (const std::exception &) {
-      colValues.row(row);
-      colValues << static_cast<int>(wsIndex);
-      // spectrumNo=-1, detID=0
-      colValues << -1;
-      if (PickOneDetectorID) {
-        colValues << 0;
-      } else {
-        colValues << "0";
-      }
-      // Y/E
-      if (includeData) {
-        colValues << dataY0 << dataE0; // data
-      }
-      colValues << 0.0 << 0.0; // rt
-      if (calcQ) {
-        colValues << 0.0; // efixed
-      }
-      colValues << 0.0    // rtp
-                << "n/a"; // monitor
-      if (hasDiffConstants) {
-        colValues << 0.0 << 0.0 << 0.0 << 0.0;
-      }
-      if (includeDetectorPosition) {
-        colValues << V3D(0.0, 0.0, 0.0);
-      }
+      writeRowToTable(row, wsIndex, -1, std::set<int>{0}, "0", dataY0, dataE0, 0, 0, 0, 0, "n/a", 0, 0, 0, 0,
+                      V3D(0, 0, 0));
     } // End catch for no spectrum
   }
 }

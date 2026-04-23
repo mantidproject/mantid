@@ -13,6 +13,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include <cstddef>
 
 namespace Mantid {
 namespace Algorithms {
@@ -51,15 +52,26 @@ private:
   bool hasDiffConstants;
   API::ITableWorkspace_sptr table;
   const API::SpectrumInfo *spectrumInfo;
+  const Geometry::DetectorInfo *detectorInfo;
   bool signedThetaParamRetrieved;
   bool showSignedTwoTheta; // If true, signedVersion of the two theta
   Geometry::PointingAlong beamAxisIndex;
   double sampleDist;
-  int nrows;
+  size_t nrows;
   /// Initialisation code
   void init() override;
   /// Execution code
   void exec() override;
+
+  void get_spherical_coordinates(size_t wsIndex, double &R, double &theta, double &phi);
+  const std::string get_time_indexes(size_t wsIndex);
+  double get_q(size_t wsIndex);
+  void get_diff_consts(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero);
+  void writeRowToTable(const size_t row, const size_t wsIndex, const int specNo, const std::set<int> &detIds,
+                       const std::string timeIndexes, const double dataY0, const double dataE0, const double R,
+                       const double theta, const double q, const double phi, const std::string isMonitor,
+                       const double difa, const double difc, const double difcUnc, const double tzero,
+                       const Kernel::V3D detPosition);
 };
 
 /// Converts a list to a string, shortened if necessary
