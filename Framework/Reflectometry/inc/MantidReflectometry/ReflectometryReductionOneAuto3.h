@@ -123,8 +123,7 @@ private:
   double getPropertyOrDefault(const std::string &propertyName, const double defaultValue, bool &isDefault);
   WorkspaceNames getOutputNamesForGroupMember(const std::string &inputNames, const std::string &runNumber,
                                               const size_t wsGroupNumber);
-  void validateTransmissionRun(std::map<std::string, std::string> &results, WorkspaceGroup_sptr &workspaceGroup,
-                               const std::string &transmissionRun);
+  void validateTransmissionRun(std::map<std::string, std::string> &results, const std::string &transmissionRun);
   void setOutputGroupedWorkspaces(std::vector<WorkspaceNames> const &outputNames,
                                   WorkspaceNames const &outputGroupNames, const bool outputIvsLam, bool outputTrans,
                                   bool outputTrans1, bool outputTrans2);

@@ -107,7 +107,6 @@ const std::string ReflectometryReductionOneAuto3::summary() const {
  * @return :: void
  */
 void ReflectometryReductionOneAuto3::validateTransmissionRun(std::map<std::string, std::string> &results,
-                                                             WorkspaceGroup_sptr &workspaceGroup,
                                                              const std::string &transmissionRun) {
   const std::string str = getPropertyValue(transmissionRun);
   if (!str.empty()) {
@@ -119,7 +118,7 @@ void ReflectometryReductionOneAuto3::validateTransmissionRun(std::map<std::strin
     // juxtaposition to the original error message.
     // See original implementation of setTransmissionProperties
     g_log.warning("Transmission run provided as a group. Only the first member of the group will be used.");
-    if (workspaceGroup->size() < 1) {
+    if (transmissionGroup->size() < 1) {
       results[transmissionRun] = transmissionRun + " group is empty. ";
     }
   }
@@ -141,8 +140,8 @@ std::map<std::string, std::string> ReflectometryReductionOneAuto3::validateInput
     return results;
 
   // First and second transmission runs
-  validateTransmissionRun(results, group, "FirstTransmissionRun");
-  validateTransmissionRun(results, group, "SecondTransmissionRun");
+  validateTransmissionRun(results, "FirstTransmissionRun");
+  validateTransmissionRun(results, "SecondTransmissionRun");
 
   return results;
 }
