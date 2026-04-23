@@ -109,6 +109,7 @@ def get_pixi_mantid_dev_pins() -> DependencyPins:
     manifest_data = {}
     dependency_headers = (
         ("dependencies", "all"),
+        ("feature.rattler-builder.dependencies", "all"),  # for building packages
         ("target.linux-64.dependencies", "linux"),
         ("target.win-64.dependencies", "win"),
         ("target.osx-arm64.dependencies", "osx"),
@@ -126,6 +127,12 @@ def get_pixi_mantid_dev_pins() -> DependencyPins:
                 elif isinstance(version, dict):
                     version_and_build = f"{version['version']} {version['build']}"
                     pin_map[package] |= {os_name: version_and_build}
+
+    # skills are only available in pixi
+    IGNORE_LIST = ["agent-skill-rattler-build"]
+    for ignore in IGNORE_LIST:
+        if ignore in pin_map:
+            del pin_map[ignore]
 
     return pin_map
 
@@ -168,6 +175,15 @@ def _run_pixi_command(command: List[str]):
     elif process.returncode != 0:
         print(f'Tried to run "{" ".join(command)}" but encountered a problem:')
         print(process.stderr)
+
+
+def _file_has_changes(filename: Path) -> bool:
+    process = run(["git", "status", "--porcelain", filename], text=True, capture_output=True)
+    if process.stderr:  # something went wrong
+        raise RuntimeError(process.stderr)
+
+    # any sort of status is a change of some sort
+    return bool(process.stdout)
 
 
 def _compare_version_numbers(conda_version: str, pixi_version: str):
@@ -281,7 +297,10 @@ def main(argv: Sequence[str] = None) -> int:
         command = ["pixi", "install"]
         print("Invoking pixi environment to update pixi.lock")
         _run_pixi_command(command)
-        return EXIT_CODE_ERROR
+        if _file_has_changes(PIXI_LOCK):
+            return EXIT_CODE_ERROR
+        else:
+            return EXIT_CODE_SUCCESS
 
     return EXIT_CODE_SUCCESS
 
