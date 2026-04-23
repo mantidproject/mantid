@@ -92,7 +92,7 @@ install_pixi
 
 # Activate the pixi environment backed by the rattler-builder feature so the
 # build tools can be used directly below.
-eval "$(pixi shell-hook -e rattler-builder --frozen --change-ps1 false)"
+eval "$(pixi shell -e rattler-builder --frozen --change-ps1 false)"
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
@@ -156,6 +156,7 @@ fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
+exit # leave pixi shell
 
 # elapsed time with second resolution
 end_time=$(date +%s)
