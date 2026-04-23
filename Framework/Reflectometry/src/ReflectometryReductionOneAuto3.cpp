@@ -1210,7 +1210,7 @@ void ReflectometryReductionOneAuto3::applyFloodCorrection(const MatrixWorkspace_
   alg->setProperty("InputWorkspace", ws);
   alg->setProperty("FloodWorkspace", flood);
   alg->execute();
-  MatrixWorkspace_sptr out = alg->getProperty("OutputWOrkspace");
+  MatrixWorkspace_sptr out = alg->getProperty("OutputWorkspace");
   setProperty(propertyName, out);
 }
 
