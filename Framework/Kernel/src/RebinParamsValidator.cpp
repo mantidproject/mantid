@@ -55,10 +55,9 @@ std::string RebinParamsValidator::checkValidity(const std::vector<double> &value
       size_t numBins = 0;
       // ensure all bin widths are non-zero
       double previousBoundary = value[0];
-      double binWidth, nextBoundary;
       for (size_t i = 1; i < value.size() - 1; i += 2) {
-        binWidth = value[i];
-        nextBoundary = value[i + 1];
+        double binWidth = value[i];
+        double nextBoundary = value[i + 1];
         // first validate the bins and boundaries
         if (binWidth == 0.0) {
           error = "Cannot have a zero bin width";
