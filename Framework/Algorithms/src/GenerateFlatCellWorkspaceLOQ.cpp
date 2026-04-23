@@ -56,7 +56,7 @@ void GenerateFlatCellWorkspaceLOQ::init() {
   declareProperty("ApplyMaskDirectlyToWorkspace", false, "Determines if mask is directly applied to workspace.");
   declareProperty("OutputMaskFilePath", "",
                   "Path to the detector mask XML file. It must be provided for the algorithm to create the .xml file.");
-  declareProperty("OutputRKHFilePath", "",
+  declareProperty("OutputFlatCellFilePath", "",
                   "Path to the RKH file. It must be provided for the algorithm to create the .out file.");
 }
 
@@ -231,7 +231,7 @@ void GenerateFlatCellWorkspaceLOQ::createAndSaveMaskWorkspace(const MatrixWorksp
     createDetectorMaskWorkspace(extractedmaskWS);
   }
   createFlatcellWorkspace(directMaskWS);
-  if (!isDefault("OutputRKHFilePath")) {
+  if (!isDefault("OutputFlatCellFilePath")) {
     saveRKH();
   }
 }
@@ -282,13 +282,13 @@ void GenerateFlatCellWorkspaceLOQ::createFlatcellWorkspace(const API::MatrixWork
 void GenerateFlatCellWorkspaceLOQ::saveRKH() {
   // Retrieve the properties
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  std::string outputRKHFilePath = getProperty("OutputRKHFilePath");
+  std::string outputFlatCellFilePath = getProperty("OutputFlatCellFilePath");
 
   // Save the RKH file
   auto saveRKH = createChildAlgorithm("SaveRKH");
   saveRKH->initialize();
   saveRKH->setProperty("InputWorkspace", outputWS);
-  saveRKH->setProperty("Filename", outputRKHFilePath);
+  saveRKH->setProperty("Filename", outputFlatCellFilePath);
   saveRKH->setProperty("Append", false);
   saveRKH->execute();
 }
