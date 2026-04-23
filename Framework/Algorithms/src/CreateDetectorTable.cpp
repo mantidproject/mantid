@@ -291,9 +291,9 @@ void CreateDetectorTable::get_diff_consts(size_t wsIndex, double &difa, double &
 }
 
 void CreateDetectorTable::writeRowToTable(const size_t row, const size_t wsIndex, const int specNo,
-                                          const std::set<int> &detIds, const std::string timeIndexes,
+                                          const std::set<int> &detIds, const std::string &timeIndexes,
                                           const double dataY0, const double dataE0, const double R, const double theta,
-                                          const double q, const double phi, const std::string isMonitor,
+                                          const double q, const double phi, const std::string &isMonitor,
                                           const double difa, const double difc, const double difcUnc,
                                           const double tzero, const Kernel::V3D detPosition) {
   TableRow colValues = table->getRow(row);
