@@ -155,7 +155,7 @@ void ContainerSubtractionPresenter::handleUpdateContainerPlot() {
   const auto shift = m_view->getShift();
   const auto scale = m_view->getScale();
   m_model->updateContainer(shift, scale);
-  m_view->plotSpectrum(CSCurves::CONTAINER, m_model->modCanWS(), m_view->getSpNo());
+  updatePlot(m_view->getSpNo());
 }
 
 void ContainerSubtractionPresenter::loadSettings(const QSettings &settings) { m_view->loadSettings(settings); }

@@ -16,6 +16,9 @@
 using namespace Mantid::API;
 
 namespace ContainerSubtractionModelHelperAlgorithms {
+
+static const std::string hiddenPrefix = "__CsTransformed_";
+
 MatrixWorkspace_sptr shiftWorkspace(const MatrixWorkspace_sptr &workspace, double shiftValue) {
   const IAlgorithm_sptr shift = AlgorithmManager::Instance().create("ScaleX");
   shift->initialize();
@@ -61,6 +64,15 @@ using namespace ContainerSubtractionModelHelperAlgorithms;
 ContainerSubtractionModel::ContainerSubtractionModel()
     : m_csSampleWS(), m_csContainerWS(), m_csSubtractedWS(), m_csModContainerWS() {}
 
+ContainerSubtractionModel::~ContainerSubtractionModel() {
+  auto &ads = AnalysisDataService::Instance();
+  const auto wsNames = ads.getObjectNames();
+  for (const auto &name : wsNames) {
+    if (name.starts_with(hiddenPrefix)) {
+      ads.remove(name);
+    }
+  }
+}
 MatrixWorkspace_sptr ContainerSubtractionModel::rebinToWorkspace(const MatrixWorkspace_sptr &workspaceToRebin,
                                                                  const MatrixWorkspace_sptr &workspaceToMatch) const {
   const IAlgorithm_sptr rebin = AlgorithmManager::Instance().create("RebinToWorkspace");
@@ -112,10 +124,12 @@ MatrixWorkspace_sptr ContainerSubtractionModel::newWorkspace(const std::string &
 }
 
 void ContainerSubtractionModel::updateContainer(double shiftX, double scale) {
+  auto &ads = AnalysisDataService::Instance();
   if (!canWS() || !sampleWS()) {
     return;
   }
   MatrixWorkspace_sptr updatedCanWs = canWS()->clone();
+  const auto modCanName = hiddenPrefix + canWS()->getName();
   if (shiftX != 0.0) {
     updatedCanWs = shiftWorkspace(updatedCanWs, shiftX);
     updatedCanWs = rebinToWorkspace(updatedCanWs, sampleWS());
@@ -123,7 +137,9 @@ void ContainerSubtractionModel::updateContainer(double shiftX, double scale) {
   if (scale != 1.0) {
     updatedCanWs = scaleWorkspace(updatedCanWs, scale);
   }
-  m_csModContainerWS = updatedCanWs;
+
+  ads.addOrReplace(modCanName, updatedCanWs);
+  m_csModContainerWS = ads.retrieveWS<MatrixWorkspace>(modCanName);
 }
 
 API::IConfiguredAlgorithm_sptr ContainerSubtractionModel::prepareSubtraction(double shiftX, double scale,
@@ -151,7 +167,7 @@ const MatrixWorkspace_sptr &ContainerSubtractionModel::subtractedWS() const { re
 const MatrixWorkspace_sptr &ContainerSubtractionModel::modCanWS() const { return m_csModContainerWS; }
 
 std::vector<std::string> ContainerSubtractionModel::getAllValidWorkspaceNames() const {
-  const auto workspaces = {sampleWS(), canWS(), subtractedWS()};
+  const auto workspaces = {sampleWS(), modCanWS() ? modCanWS() : canWS(), subtractedWS()};
   std::vector<std::string> names;
   for (const auto &ws : workspaces) {
     if (ws) {
