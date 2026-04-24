@@ -123,7 +123,7 @@ private:
   getPolarizationEfficiencies(const WorkspaceGroup_sptr &groupIvsLam);
   WorkspaceGroup_sptr applyPolarizationCorrection(const WorkspaceGroup_sptr &outputIvsLam,
                                                   const std::string &outputGroupName);
-  API::MatrixWorkspace_sptr getFloodWorkspace();
+  API::MatrixWorkspace_sptr getFloodWorkspace(const Instrument_const_sptr &instrument);
   std::string getSummedWorkspaceName(const std::string &wsPropertyName, const bool isTransWs = false);
   void sumBanksForWorkspace(const std::string &roiDetectorIDs, const std::string &wsPropertyName,
                             const bool isTransWs = false);

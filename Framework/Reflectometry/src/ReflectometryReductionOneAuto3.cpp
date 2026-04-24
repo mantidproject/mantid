@@ -357,12 +357,12 @@ ReflectometryReductionOneAuto3::RROOutputs
 ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputWS,
                                                      const std::vector<std::string> &taskOrder, const bool runAsChild,
                                                      const bool applyFloodCorrections) {
-  MatrixWorkspace_sptr flood = (applyFloodCorrections) ? getFloodWorkspace() : MatrixWorkspace_sptr{};
+  auto instrument = inputWS->getInstrument();
+  MatrixWorkspace_sptr flood = (applyFloodCorrections) ? getFloodWorkspace(instrument) : MatrixWorkspace_sptr{};
   if (flood) {
     inputWS = runFloodCorrectionAlg(flood, inputWS);
   }
 
-  auto instrument = inputWS->getInstrument();
   bool const isDebug = getProperty("Debug");
 
   Algorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
@@ -940,13 +940,14 @@ ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReduction
       allOutputNames.emplace_back(getOutputNamesForGroupMember(matrixWs->getName(), runNumber, i));
 
     // If data has already been reduced, as workspace is summed we need to change processing instructions.
+    // Also, do not perform flood corrections as these will have been performed upon initial reduction
     if (reduced) {
       const auto &origProcessingInstructions = getPropertyValue("ProcessingInstructions");
       setPropertyValue("ProcessingInstructions", convertToSpectrumNumber("0", matrixWs));
       allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false, false));
       setPropertyValue("ProcessingInstructions", origProcessingInstructions);
     } else {
-      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false, false));
+      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false));
     }
   }
   return {.rroOutputs = allRROOutputs, .outputNames = allOutputNames};
@@ -1173,7 +1174,7 @@ WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyPolarizationCorrection(
  * FloodWorkspace property return it. Otherwise create it using parameters
  * in the instrument parameter file.
  */
-MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace() {
+MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace(const Instrument_const_sptr &instrument) {
   const std::string method = getProperty("FloodCorrection");
   if (method == "None") {
     return MatrixWorkspace_sptr();
@@ -1187,8 +1188,6 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace() {
                          "ignored."
                       << std::endl;
     }
-    MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-    const auto instrument = inputWS->getInstrument();
     const auto floodRunParam = instrument->getParameterAsString("Flood_Run");
     if (floodRunParam.empty()) {
       throw std::invalid_argument("Instrument parameter file doesn't have the Flood_Run parameter.");
