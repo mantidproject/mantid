@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<parameter-file instrument="CNCS"  valid-from="2026-02-02 00:00:00">
+<parameter-file instrument="CNCS"  valid-from="2025-08-07 10:00:00">
 
 	<component-link name="CNCS">
 
@@ -189,9 +189,9 @@
 			<value val="3.3" />
 		</parameter>
 		
-		<!--   formula for t0 calculation. See https://beltoforion.de/en/muparser/features.php for available operators-->
+		<!--   formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators-->
 		<parameter name="t0_formula" type="string">
-			<value val="288.595706061-110.833514059/sqrt(incidentEnergy)+89.6080314589/incidentEnergy-42.6999684563*sqrt(incidentEnergy)+1.89672170078*incidentEnergy"/>
+			<value val="222.92561565-62.36876256*ln(incidentEnergy)-(-19.26586222)*ln(incidentEnergy)*ln(incidentEnergy)-( 4.01443773)*ln(incidentEnergy) *ln(incidentEnergy) *ln(incidentEnergy)"/>
 		</parameter>
 
 		<parameter name="treat-background-as-events" type="string">
