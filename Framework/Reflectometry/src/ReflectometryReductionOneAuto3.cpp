@@ -372,6 +372,7 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
   if (!runAsChild) {
     alg->setChild(runAsChild);
     alg->setAlwaysStoreInADS(false);
+    alg->setRethrows(true);
   }
 
   // Task order
