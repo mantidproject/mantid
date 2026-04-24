@@ -667,8 +667,8 @@ void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(const Instrume
           throw std::runtime_error("Could not find parameter 'C1' in parameter "
                                    "file. Cannot apply exponential correction.");
         corrProps.type = "ExponentialCorrection";
-        corrProps.c0 = c0Vec[0];
-        corrProps.c1 = c1Vec[0];
+        corrProps.c0 = std::to_string(c0Vec[0]);
+        corrProps.c1 = std::to_string(c1Vec[0]);
       }
     } catch (std::runtime_error &e) {
       g_log.error() << e.what() << ". Algorithmic correction will not be performed.";
@@ -958,8 +958,11 @@ std::vector<std::string> ReflectometryReductionOneAuto3::getTaskExecutionOrder(c
   auto taskOrder = getTaskExecutionOrderFromProperties(
       summingInQ, false, "I0MonitorIndex", "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
       "FirstTransmissionRun", "CorrectionAlgorithm", "SubtractBackground");
+  // For the first non-reduced run, remove all tasks that will be performed as part of the subsequent reduced run
+  // apart from TaskCropWavelength which is repeated as per pre-existing behaviour.
   for (const auto &task : taskOrderReduced) {
-    std::erase(taskOrder, task);
+    if (task != "TaskCropWavelength")
+      std::erase(taskOrder, task);
   }
   return taskOrder;
 }
