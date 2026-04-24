@@ -26,11 +26,11 @@ std::string const &InvalidWorkspaceName::name() const { return m_name; }
 
 FileFormatOptions::FileFormatOptions(NamedFormat format, std::string prefix, bool includeHeader, std::string separator,
                                      bool includeQResolution, bool includeAdditionalColumns, bool saveToSingleFile,
-                                     std::string model, bool model_validation)
+                                     std::string model, bool model_validation, ORSOMetaSource metaSource)
     : m_format(format), m_prefix(std::move(prefix)), m_model(std::move(model)),
       m_model_validation(std::move(model_validation)), m_includeHeader(includeHeader),
       m_separator(std::move(separator)), m_includeQResolution(includeQResolution),
-      m_includeAdditionalCols(includeAdditionalColumns), m_saveToSingleFile(saveToSingleFile) {}
+      m_includeAdditionalCols(includeAdditionalColumns), m_saveToSingleFile(saveToSingleFile), m_metaSource(metaSource) {}
 bool FileFormatOptions::shouldIncludeHeader() const { return m_includeHeader; }
 bool FileFormatOptions::shouldIncludeQResolution() const { return m_includeQResolution; }
 bool FileFormatOptions::shouldIncludeAdditionalColumns() const { return m_includeAdditionalCols; }
@@ -40,6 +40,7 @@ std::string const &FileFormatOptions::prefix() const { return m_prefix; }
 std::string const &FileFormatOptions::model() const { return m_model; }
 bool FileFormatOptions::validate() const { return m_model_validation; }
 NamedFormat FileFormatOptions::format() const { return m_format; }
+ORSOMetaSource FileFormatOptions::orsoMetaSource() const { return m_metaSource; }
 bool FileFormatOptions::isORSOFormat() const {
   switch (m_format) {
   case NamedFormat::ORSOAscii:

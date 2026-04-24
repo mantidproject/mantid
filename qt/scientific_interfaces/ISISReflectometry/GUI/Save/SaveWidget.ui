@@ -411,12 +411,12 @@
             </item>
             <item>
              <property name="text">
-              <string>Manual</string>
+              <string>History where possible</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>History where possible</string>
+              <string>Manual</string>
              </property>
             </item>
            </widget>

@@ -274,6 +274,19 @@ NamedFormat SavePresenter::formatFromIndex(int formatIndex) const {
   }
 }
 
+ORSOMetaSource SavePresenter::metaSourceFromIndex(int metaSourceIndex) const {
+  switch (metaSourceIndex) {
+  case 0:
+    return ORSOMetaSource::History;
+  case 1:
+    return ORSOMetaSource::Hybrid;
+  case 2:
+    return ORSOMetaSource::Manual;
+  default:
+    throw std::runtime_error("Unknown ORSO Meta Source");
+  }
+}
+
 FileFormatOptions SavePresenter::getSaveParametersFromView(bool const isAutoSave) const {
   return FileFormatOptions(
       /*format=*/formatFromIndex(m_view->getFileFormatIndex()),
@@ -284,7 +297,8 @@ FileFormatOptions SavePresenter::getSaveParametersFromView(bool const isAutoSave
       /*includeAdditionalColumns=*/m_view->getAdditionalColumnsCheck(),
       /*shouldSaveToSingleFile=*/isAutoSave && m_view->getSaveToSingleFileCheck(),
       /*model=*/m_view->getModel(),
-      /*model_validation=*/m_view->getValidateModelCheck());
+      /*model_validation=*/m_view->getValidateModelCheck(),
+      /*orsoMetaSource=*/metaSourceFromIndex(m_view->getMetaSourceIndex()));
 }
 
 void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames,
