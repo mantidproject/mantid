@@ -21,6 +21,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL FileSaver : public IFileSaver {
 public:
   FileSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler);
   static std::string extensionForFormat(NamedFormat format);
+  static std::string propertyForMetaSource(ORSOMetaSource metaSource);
 
   bool isValidSaveDirectory(std::string const &filePath) const override;
   void save(std::string const &saveDirectory, std::vector<std::string> const &workspaceNames,

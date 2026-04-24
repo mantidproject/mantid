@@ -28,6 +28,12 @@ static auto constexpr ORT = ".ort";
 static auto constexpr ORB = ".orb";
 } // namespace FileExtensions
 
+namespace MetaSourcePropStrings {
+static auto constexpr HISTORY = "History";
+static auto constexpr HYBRID = "HistoryWherePossible";
+static auto constexpr MANUAL = "Manual";
+} // namespace MetaSourcePropStrings
+
 FileSaver::FileSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler)
     : m_saveAlgRunner(std::move(saveAlgRunner)), m_fileHandler(fileHandler) {}
 
@@ -48,6 +54,17 @@ std::string FileSaver::extensionForFormat(NamedFormat format) {
     return FileExtensions::ORB;
   default:
     throw std::runtime_error("Unknown save format.");
+  }
+}
+
+std::string FileSaver::propertyForMetaSource(ORSOMetaSource metaSource) {
+  switch (metaSource) {
+  case ORSOMetaSource::History:
+    return MetaSourcePropStrings::HISTORY;
+  case ORSOMetaSource::Hybrid:
+    return MetaSourcePropStrings::HYBRID;
+  case ORSOMetaSource::Manual:
+    return MetaSourcePropStrings::MANUAL;
   }
 }
 
@@ -91,7 +108,7 @@ void FileSaver::runSaveORSOAlgorithm(std::string const &savePath, std::vector<st
                                      FileFormatOptions const &fileFormat) const {
   m_saveAlgRunner->runSaveORSOAlgorithm(workspaceNames, savePath, fileFormat.shouldIncludeQResolution(),
                                         fileFormat.shouldIncludeAdditionalColumns(), fileFormat.model(),
-                                        fileFormat.validate());
+                                        fileFormat.validate(), propertyForMetaSource(fileFormat.orsoMetaSource()));
 }
 
 void FileSaver::save(Mantid::API::Workspace_sptr const &workspace, std::string const &saveDirectory,

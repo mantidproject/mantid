@@ -17,11 +17,13 @@ namespace ISISReflectometry {
 
 enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos, ORSOAscii, ORSONexus };
 
+enum class ORSOMetaSource { History, Hybrid, Manual };
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL FileFormatOptions {
 public:
   FileFormatOptions(NamedFormat format, std::string prefix, bool includeHeader, std::string separator,
                     bool includeQResolution, bool includeAdditionalColumns, bool saveToSingleFile, std::string model,
-                    bool model_validation);
+                    bool model_validation, ORSOMetaSource metaSource);
   bool shouldIncludeHeader() const;
   bool shouldIncludeQResolution() const;
   bool shouldIncludeAdditionalColumns() const;
@@ -31,6 +33,7 @@ public:
   std::string const &model() const;
   bool validate() const;
   NamedFormat format() const;
+  ORSOMetaSource orsoMetaSource() const;
   bool isORSOFormat() const;
 
 private:
@@ -43,6 +46,7 @@ private:
   bool m_includeQResolution;
   bool m_includeAdditionalCols;
   bool m_saveToSingleFile;
+  ORSOMetaSource m_metaSource;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL InvalidSavePath : public std::runtime_error {
