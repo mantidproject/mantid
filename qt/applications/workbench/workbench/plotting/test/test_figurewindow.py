@@ -29,6 +29,7 @@ class Test(unittest.TestCase):
 
         cls.ws = CreateWorkspace(DataX=[0, 3], DataY=[3, 0], DataE=[1, 1], NSpec=1, OutputWorkspace="ws")
         cls.single_bin_ws = CreateWorkspace(DataX=[0], DataY=[0], DataE=[1], NSpec=1, OutputWorkspace="single_bin_ws")
+        cls.table_ws = CreateEmptyTableWorkspace(OutputWorkspace="table_ws")
 
     @classmethod
     def setUp(cls):
@@ -41,6 +42,7 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         cls.ws.delete()
         cls.single_bin_ws.delete()
+        cls.table_ws.delete()
         cls.show_patch.stop()
 
     def test_drag_and_drop_adds_plot_to_correct_axes(self):
@@ -59,7 +61,6 @@ class Test(unittest.TestCase):
             self.fail("KeyError was raised for non-existent workspaces.")
 
     def test_validate_workspaces_returns_false_on_non_matrix_workspace(self):
-        _ = CreateEmptyTableWorkspace(OutputWorkspace="table_ws")
         result = _validate_workspaces(["table_ws"])
         self.assertEqual(result, [False])
 
