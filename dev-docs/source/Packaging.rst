@@ -193,7 +193,7 @@ This is useful if you need to change a pinned version of one of Mantid's depende
         pixi shell -e rattler-builder --frozen
         MANTID_VERSION=$(versioningit ../../) rattler-build build -r ./mantid-developer -m ./conda_build_config.yaml --output-dir=/home/me/tmp/rattler
 
-    This will build a local version of ``mantid-developer`` with your changes and place it in the directory ``/home/me/tmp/rattler``. **This must be outside of the buildtree** because rattler will recursively copy everything.
+   This will build a local version of ``mantid-developer`` with your changes and place it in the directory ``/home/me/tmp/rattler``. **This must be outside of the buildtree** because rattler will recursively copy everything.
 5. Index the new packages
 
    .. code-block:: sh
