@@ -18,6 +18,7 @@ from mantid.simpleapi import (
     ReplaceSpecialValues,
 )
 
+import re
 from unittest import mock
 
 
@@ -342,13 +343,13 @@ class BASISReduction7Test(systemtesting.MantidSystemTest, PreppingMixin):
         dnemask = "does_not_exist.xml"
         assert not FileFinder.getFullPath(dnemask)
         assert not os.path.exists(dnemask)
-        with self.assertRaisesRegex(RuntimeError, f"Mask file {dnemask} could not be loaded"):
+        with self.assertRaisesRegex(RuntimeError, f"Mask file {re.escape(dnemask)} could not be loaded"):
             BASISReduction(**def_args, MaskFile=dnemask)
 
         # step 2: run with a file that does exist but is wrong format -- should throw a runtime error
         mask = FileFinder.getFullPath("arg_si.dat")
         assert os.path.exists(mask)
-        with self.assertRaisesRegex(RuntimeError, f"Mask file {mask} is not of the correct format"):
+        with self.assertRaisesRegex(RuntimeError, f"Mask file {re.escape(mask)} is not of the correct format"):
             BASISReduction(**def_args, MaskFile=mask)
 
         # lookup the module object for BASISReduction to patch the lookups to simulate situations where a mask is not found
@@ -361,7 +362,7 @@ class BASISReduction7Test(systemtesting.MantidSystemTest, PreppingMixin):
             mask = os.path.join(tdir, "BASIS_Mask_default_333.xml")
             assert not os.path.exists(mask)
             with mock.patch.dict(mod.__dict__, {"DEFAULT_MASK_GROUP_DIR": tdir}):
-                with self.assertRaisesRegex(RuntimeError, f"Mask file {mask} could not be loaded"):
+                with self.assertRaisesRegex(RuntimeError, f"Mask file {re.escape(mask)} could not be loaded"):
                     BASISReduction(**def_args, MaskFile=None)  # run with no mask, set None for clarity
 
         # step 4: run with no mask -- should resort to default, which we set to exist but be unreadable
@@ -371,7 +372,7 @@ class BASISReduction7Test(systemtesting.MantidSystemTest, PreppingMixin):
                 f.write("This is an XML file!")
             assert os.path.exists(mask)
             with mock.patch.dict(mod.__dict__, {"DEFAULT_MASK_GROUP_DIR": tdir}):
-                with self.assertRaisesRegex(RuntimeError, f"An unexpected error occurred when loading mask file {mask}"):
+                with self.assertRaisesRegex(RuntimeError, f"An unexpected error occurred when loading mask file {re.escape(mask)}"):
                     BASISReduction(**def_args, MaskFile=None)
 
         # cleanup
