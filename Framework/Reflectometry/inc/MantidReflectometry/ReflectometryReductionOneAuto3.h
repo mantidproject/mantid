@@ -80,6 +80,16 @@ private:
     std::vector<WorkspaceNames> outputNames;
   };
 
+  struct CorrectionProperties {
+    std::string type;
+    std::string c0;
+    std::string c1;
+    std::string polynomial;
+  };
+
+  // A class member to cache properties associated with the algorithmic correction to be applied
+  CorrectionProperties m_correctionProperties;
+
   void init() override;
   void exec() override;
   std::string getRunNumberForWorkspaceGroup(std::string const &wsName);
@@ -102,6 +112,7 @@ private:
   /// Optionally crop a workspace in Q
   MatrixWorkspace_sptr cropQ(MatrixWorkspace_sptr inputWS, const RebinParams &params);
   /// Populate algorithmic correction properties
+  void determineCorrectionAlgorithm(const Instrument_const_sptr &instrument);
   void populateAlgorithmicCorrectionProperties(const Mantid::API::IAlgorithm_sptr &alg,
                                                const Mantid::Geometry::Instrument_const_sptr &instrument);
   std::string findPolarizationCorrectionMethod(const API::MatrixWorkspace_sptr &efficiencies);

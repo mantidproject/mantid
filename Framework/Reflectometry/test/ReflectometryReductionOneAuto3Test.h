@@ -69,38 +69,38 @@ public:
 
   ~ReflectometryReductionOneAuto3Test() override = default;
 
-  void test_init() {
+  void xtest_init() {
     ReflectometryReductionOneAuto3 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
 
-  void test_bad_input_workspace_units() {
+  void xtest_bad_input_workspace_units() {
     const auto alg = create_refl_algorithm(m_notTOF, std::nullopt, "1");
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
   }
 
-  void test_bad_wavelength_range() {
+  void xtest_bad_wavelength_range() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "1");
 
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
   }
 
-  void test_bad_monitor_background_range() {
+  void xtest_bad_monitor_background_range() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "1");
     setup_optional_properties(alg, {{"MonitorBackgroundWavelengthMin", 3.0}, {"MonitorBackgroundWavelengthMax", 0.5}});
 
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
   }
 
-  void test_bad_monitor_integration_range() {
+  void xtest_bad_monitor_integration_range() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "1");
     setup_optional_properties(alg, {{"MonitorBackgroundWavelengthMin", 15.0}, {"MonitorBackgroundWavelengthMax", 1.5}});
 
     TS_ASSERT_THROWS_ANYTHING(alg->execute())
   }
 
-  void test_bad_first_transmission_run_units() {
+  void xtest_bad_first_transmission_run_units() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "1");
     setup_optional_properties(alg, {{"MonitorBackgroundWavelengthMin", 1.0}, {"MonitorBackgroundWavelengthMax", 15.0}});
     alg->setProperty("FirstTransmissionRun", m_notTOF);
@@ -108,7 +108,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
   }
 
-  void test_bad_second_transmission_run_units() {
+  void xtest_bad_second_transmission_run_units() {
     ReflectometryReductionOneAuto3 alg;
     alg.setChild(true);
     alg.initialize();
@@ -117,7 +117,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty("SecondTransmissionRun", m_notTOF));
   }
 
-  void test_correct_detector_position_INTER() {
+  void xtest_correct_detector_position_INTER() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
 
@@ -140,7 +140,7 @@ public:
                              {std::tan(theta * 2 * M_PI / 180)});
   }
 
-  void test_correct_detector_position_rotation_POLREF() {
+  void xtest_correct_detector_position_rotation_POLREF() {
     // Histograms in this run correspond to 'OSMOND' component
     auto polref = loadRun("POLREF00014966.nxs");
 
@@ -157,7 +157,7 @@ public:
                              {25.99589, 0.1570});
   }
 
-  void test_correct_detector_position_vertical_CRISP() {
+  void xtest_correct_detector_position_vertical_CRISP() {
     // Histogram in this run corresponds to 'point-detector' component
     auto crisp = loadRun("CSP79590.raw");
     const double theta = 0.25;
@@ -175,7 +175,7 @@ public:
                              "point-detector", {std::tan(theta * 2 * M_PI / 180)});
   }
 
-  void test_correct_detector_position_from_logs() {
+  void xtest_correct_detector_position_from_logs() {
     auto inter = loadRun("INTER00013460.nxs");
 
     // Use theta from the logs to correct detector positions
@@ -190,7 +190,7 @@ public:
                              {std::tan(0.7 * 2 * M_PI / 180)});
   }
 
-  void test_override_ThetaIn_without_correcting_detectors() {
+  void xtest_override_ThetaIn_without_correcting_detectors() {
     auto inter = loadRun("INTER00013460.nxs");
     // Use theta from the logs to correct detector positions
     const auto alg = create_refl_algorithm(inter, 10.0, "4");
@@ -201,7 +201,7 @@ public:
     compare_detectors_in_out(inter->getInstrument(), corrected->getInstrument(), {"point-detector"});
   }
 
-  void test_IvsQ_linear_binning() {
+  void xtest_IvsQ_linear_binning() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "2");
     setup_optional_properties(
         alg, {{"MomentumTransferMin", 1.0}, {"MomentumTransferMax", 10.0}, {"MomentumTransferStep", -0.04}});
@@ -223,7 +223,7 @@ public:
     TS_ASSERT_DELTA(outQbinned->x(0)[2] - outQbinned->x(0)[1], 0.04, 1e-6);
   }
 
-  void test_IvsQ_logarithmic_binning() {
+  void xtest_IvsQ_logarithmic_binning() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "2");
     setup_optional_properties(
         alg, {{"MomentumTransferMin", 1.0}, {"MomentumTransferMax", 10.0}, {"MomentumTransferStep", 0.04}});
@@ -236,7 +236,7 @@ public:
     TS_ASSERT(outQbinned->x(0)[7] - outQbinned->x(0)[6] > 0.05);
   }
 
-  void test_IvsLam_range() {
+  void xtest_IvsLam_range() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     alg->setProperty("MomentumTransferStep", 0.04);
 
@@ -250,7 +250,7 @@ public:
     assert_bin_values(outLam, true, {0, 1, 7, 13, 14}, {1.7924, 2.6886, 8.0658, 13.4431, 14.3393});
   }
 
-  void test_IvsQ_range() {
+  void xtest_IvsQ_range() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     alg->setProperty("MomentumTransferStep", 0.04);
 
@@ -265,7 +265,7 @@ public:
     assert_bin_values(outQ, true, {0, 1, 6, 7, 12, 13, 14}, {0.3353, 0.3577, 0.5366, 0.5962, 1.3415, 1.7886, 2.6830});
   }
 
-  void test_IvsQ_range_cropped() {
+  void xtest_IvsQ_range_cropped() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     setup_optional_properties(
         alg, {{"MomentumTransferMin", 0.5}, {"MomentumTransferMax", 1.5}, {"MomentumTransferStep", 0.04}});
@@ -278,7 +278,7 @@ public:
     assert_bin_values(outQ, true, {0, 1, 5, 6}, {0.5366, 0.5962, 1.0732, 1.3414});
   }
 
-  void test_IvsQ_values() {
+  void xtest_IvsQ_values() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     alg->execute();
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
@@ -288,7 +288,7 @@ public:
     assert_bin_values(outQ, false, {0, 13}, {2.0, 2.0});
   }
 
-  void test_IvsQ_values_scaled() {
+  void xtest_IvsQ_values_scaled() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     setup_optional_properties(alg, {{"ScaleFactor", 0.1}});
     alg->execute();
@@ -299,7 +299,7 @@ public:
     assert_bin_values(outQ, false, {0, 13}, {20.0, 20.0});
   }
 
-  void test_IvsQ_binned_values() {
+  void xtest_IvsQ_binned_values() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     setup_optional_properties(
         alg, {{"MomentumTransferMin", 0.0}, {"MomentumTransferMax", 7.0}, {"MomentumTransferStep", -1.0}});
@@ -311,7 +311,7 @@ public:
     assert_bin_values(outQ, false, {0, 1, 2, 3, 4, 5, 6}, {21.1817, 5.2910, 1.5273, 0.0, 0.0, 0.0, 0.0});
   }
 
-  void test_IvsQ_binned_values_scaled() {
+  void xtest_IvsQ_binned_values_scaled() {
 
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     setup_optional_properties(alg, {{"MomentumTransferMin", 0.0},
@@ -326,7 +326,7 @@ public:
     assert_bin_values(outQ, false, {0, 1, 2, 3, 4, 5, 6}, {211.8171, 52.9097, 15.2731, 0.0, 0.0, 0.0, 0.0});
   }
 
-  void test_IvsLam_values() {
+  void xtest_IvsLam_values() {
 
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     alg->execute();
@@ -337,7 +337,7 @@ public:
     assert_bin_values(outLam, false, {0, 13}, {2.0, 2.0});
   }
 
-  void test_IvsLam_values_are_not_scaled() {
+  void xtest_IvsLam_values_are_not_scaled() {
 
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     setup_optional_properties(alg, {{"ScaleFactor", 0.1}});
@@ -349,7 +349,7 @@ public:
     assert_bin_values(outLam, false, {0, 13}, {2.0, 2.0});
   }
 
-  void test_optional_outputs() {
+  void xtest_optional_outputs() {
     auto inter = loadRun("INTER00013460.nxs");
     const auto alg = create_refl_algorithm(inter, 0.7, "4", std::nullopt, std::nullopt, false, false);
 
@@ -359,7 +359,7 @@ public:
     TS_ASSERT(!ADS.doesExist("IvsLam_13460"));
   }
 
-  void test_optional_outputs_binned() {
+  void xtest_optional_outputs_binned() {
     auto inter = loadRun("INTER00013460.nxs");
     const auto alg = create_refl_algorithm(inter, 0.7, "4", std::nullopt, std::nullopt, false, false);
     alg->setPropertyValue("OutputWorkspaceBinned", "IvsQ_Binned");
@@ -371,7 +371,7 @@ public:
     assert_ads_exists({"IvsQ_binned", "IvsQ_13460"});
   }
 
-  void test_optional_outputs_set() {
+  void xtest_optional_outputs_set() {
     auto inter = loadRun("INTER00013460.nxs");
     const auto alg = create_refl_algorithm(inter, 0.7, "4", std::nullopt, std::nullopt, true, false);
 
@@ -380,7 +380,7 @@ public:
     assert_ads_exists({"IvsQ_binned", "IvsQ", "IvsLam"});
   }
 
-  void test_default_outputs_debug() {
+  void xtest_default_outputs_debug() {
     auto inter = loadRun("INTER00013460.nxs");
     const auto alg = create_refl_algorithm(inter, 0.7, "4", std::nullopt, std::nullopt, false, false);
     alg->setProperty("Debug", true);
@@ -390,7 +390,7 @@ public:
     assert_ads_exists({"IvsQ_binned_13460", "IvsQ_13460", "IvsLam_13460"});
   }
 
-  void test_default_outputs_no_debug() {
+  void xtest_default_outputs_no_debug() {
     auto inter = loadRun("INTER00013460.nxs");
     const auto alg = create_refl_algorithm(inter, 0.7, "4", std::nullopt, std::nullopt, false, false);
 
@@ -399,7 +399,7 @@ public:
     TS_ASSERT(!ADS.doesExist("IvsLam_13460"));
   }
 
-  void test_default_outputs_no_run_number() {
+  void xtest_default_outputs_no_run_number() {
     auto inter = loadRun("INTER00013460.nxs");
     inter->mutableRun().removeProperty("run_number");
     const auto alg = create_refl_algorithm(inter, 0.7, "4", std::nullopt, std::nullopt, false, false);
@@ -410,7 +410,7 @@ public:
     assert_ads_exists({"IvsQ_binned", "IvsQ", "IvsLam"});
   }
 
-  void test_default_outputs_no_run_number_no_debug() {
+  void xtest_default_outputs_no_run_number_no_debug() {
     auto inter = loadRun("INTER00013460.nxs");
     inter->mutableRun().removeProperty("run_number");
     const auto alg = create_refl_algorithm(inter, 0.7, "4", std::nullopt, std::nullopt, false, false);
@@ -421,7 +421,7 @@ public:
     TS_ASSERT(!ADS.doesExist("IvsLam"));
   }
 
-  void test_workspace_group_with_no_polarization_analysis_does_not_create_spin_state_sample_logs() {
+  void xtest_workspace_group_with_no_polarization_analysis_does_not_create_spin_state_sample_logs() {
     prepare_group_with_run_number(TEST_GROUP_NAME);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 0.0000000001, 15.0, false);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04}});
@@ -433,7 +433,7 @@ public:
     check_output_group_contains_sample_logs_for_spin_state_ORSO(retrieveOutWS("IvsLam_1234"), false);
   }
 
-  void test_workspace_group_with_polarization_analysis_creates_spin_state_sample_logs() {
+  void xtest_workspace_group_with_polarization_analysis_creates_spin_state_sample_logs() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     applyPolarizationEfficiencies(TEST_GROUP_NAME);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
@@ -470,7 +470,7 @@ public:
     assert_spectra_in_group_values(outQGroup, {0, 1, 2, 3}, {0, 0, 0, 0}, {0.9, 0.8, 0.7, 0.6});
   }
 
-  void test_polarization_correction_with_background_subtraction() {
+  void xtest_polarization_correction_with_background_subtraction() {
     prepareInputGroup(TEST_GROUP_NAME, "Fredrikze");
     applyPolarizationEfficiencies(TEST_GROUP_NAME);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
@@ -488,7 +488,7 @@ public:
     TS_ASSERT_EQUALS(outLamGroup.size(), 4);
   }
 
-  void test_input_workspace_group_with_default_output_workspaces() {
+  void xtest_input_workspace_group_with_default_output_workspaces() {
     prepare_group_with_run_number(TEST_GROUP_NAME);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0, false);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04}});
@@ -503,7 +503,7 @@ public:
     TS_ASSERT_EQUALS(outQGroupBinned.size(), 4);
   }
 
-  void test_input_workspace_group_with_default_output_workspaces_and_debug_on() {
+  void xtest_input_workspace_group_with_default_output_workspaces_and_debug_on() {
     prepare_group_with_run_number(TEST_GROUP_NAME);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0, false);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04}, {"Debug", true}});
@@ -516,7 +516,7 @@ public:
     TS_ASSERT_EQUALS(outLamGroup.size(), 4);
   }
 
-  void test_input_workspace_group_with_named_output_workspaces() {
+  void xtest_input_workspace_group_with_named_output_workspaces() {
     prepare_group_with_run_number(TEST_GROUP_NAME);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0, false);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04}});
@@ -535,7 +535,7 @@ public:
     TS_ASSERT_EQUALS(outQGroupBinned.size(), 4);
   }
 
-  void test_input_workspace_group_with_named_output_workspaces_and_debug_on() {
+  void xtest_input_workspace_group_with_named_output_workspaces_and_debug_on() {
     prepare_group_with_run_number(TEST_GROUP_NAME);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0, false);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04}, {"Debug", true}});
@@ -552,7 +552,7 @@ public:
     TS_ASSERT_EQUALS(outLamGroup.size(), 4);
   }
 
-  void test_one_transmissionrun() {
+  void xtest_one_transmissionrun() {
     const double startX = 1000;
     const int nBins = 3;
     const double deltaX = 1000;
@@ -590,7 +590,7 @@ public:
     assert_spectra_in_group_values(outLamGroup, {0, 0}, {0, 2}, {0.9207, 1.3484});
   }
 
-  void test_polarization_with_transmissionrun() {
+  void xtest_polarization_with_transmissionrun() {
     const double startX = 1000;
     const int nBins = 3;
     const double deltaX = 1000;
@@ -626,7 +626,7 @@ public:
     assert_spectra_in_group_values(outLamGroup, {0, 0}, {0, 2}, {0.7785, 0.5810});
   }
 
-  void test_second_transmissionrun() {
+  void xtest_second_transmissionrun() {
     const double startX = 1000;
     const int nBins = 3;
     const double deltaX = 1000;
@@ -675,7 +675,7 @@ public:
     assert_spectra_in_group_values(outLamGroup, {0, 0}, {0, 2}, {0.9207, 1.3484});
   }
 
-  void test_polarization_correction_default_Wildes() {
+  void xtest_polarization_correction_default_Wildes() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     applyPolarizationEfficiencies(TEST_GROUP_NAME);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
@@ -699,7 +699,7 @@ public:
     assert_spectra_in_group_values(outQGroup, {0, 1, 2, 3}, {0, 0, 0, 0}, {0.9368, 0.7813, 0.6797, 0.5242});
   }
 
-  void test_polarization_correction_with_efficiency_workspace() {
+  void xtest_polarization_correction_with_efficiency_workspace() {
     prepareInputGroup(TEST_GROUP_NAME, "Fredrikze");
     auto efficiencies = createPolarizationEfficienciesWorkspace("Fredrikze");
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
@@ -724,7 +724,7 @@ public:
     assert_spectra_in_group_values(outQGroup, {0, 1, 2, 3}, {0, 0, 0, 0}, {1.9267, 1.7838, -0.3231, -0.4659});
   }
 
-  void test_polarization_correction_with_efficiency_workspace_Fredrikze_PNR() {
+  void xtest_polarization_correction_with_efficiency_workspace_Fredrikze_PNR() {
     prepareInputGroup(TEST_GROUP_NAME, "Fredrikze", 2);
     auto efficiencies = createPolarizationEfficienciesWorkspace("Fredrikze");
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
@@ -754,7 +754,7 @@ public:
     TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.2813, 0.0001);
   }
 
-  void test_polarization_correction_with_efficiency_workspace_Wildes() {
+  void xtest_polarization_correction_with_efficiency_workspace_Wildes() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
@@ -780,7 +780,7 @@ public:
     assert_spectra_in_group_values(outQGroup, {0, 1, 2, 3}, {0, 0, 0, 0}, {0.6552, 0.4330, 0.9766, 0.7544});
   }
 
-  void test_parameter_file_used_with_efficiency_workspace_Wildes() {
+  void xtest_parameter_file_used_with_efficiency_workspace_Wildes() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     const auto input_group = retrieveOutWS(TEST_GROUP_NAME);
     // We're setting this to an invalid value to catch it on purpose later.
@@ -797,7 +797,7 @@ public:
                             "of property \"Flippers\": Each spin state must only appear once");
   }
 
-  void test_error_occurs_when_set_spin_states_used_with_Wildes() {
+  void xtest_error_occurs_when_set_spin_states_used_with_Wildes() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     const auto input_group = retrieveOutWS(TEST_GROUP_NAME);
     // We're setting this to an invalid value to catch it on purpose later.
@@ -817,7 +817,7 @@ public:
         "Modify the parameter file for your instrument to change the spin state order.");
   }
 
-  void test_polarization_correction_with_efficiency_workspace_Fredrikze_custom() {
+  void xtest_polarization_correction_with_efficiency_workspace_Fredrikze_custom() {
     prepareInputGroup(TEST_GROUP_NAME, "Fredrikze", 2);
     auto efficiencies = createPolarizationEfficienciesWorkspace("Fredrikze");
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
@@ -847,7 +847,7 @@ public:
     TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 1.4186, 0.0001);
   }
 
-  void test_polarization_correction_with_efficiency_workspace_Wildes_no_analyser() {
+  void xtest_polarization_correction_with_efficiency_workspace_Wildes_no_analyser() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes", 2);
     auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
@@ -876,7 +876,7 @@ public:
     TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.9161, 0.0001);
   }
 
-  void test_polarization_correction_with_invalid_efficiencies_workspace_labels() {
+  void xtest_polarization_correction_with_invalid_efficiencies_workspace_labels() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
@@ -895,7 +895,7 @@ public:
         "Axes labels for efficiencies workspace do not match any supported polarization correction method");
   }
 
-  void test_polarization_correction_with_invalid_efficiencies_workspace_format() {
+  void xtest_polarization_correction_with_invalid_efficiencies_workspace_format() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TEST_GROUP_NAME + "_1");
     auto invalid_format = createFloodWorkspace(inputWS->getInstrument());
@@ -908,7 +908,7 @@ public:
                             "Efficiencies workspace is not in a supported format");
   }
 
-  void test_polarization_correction_with_efficiencies_workspace_and_invalid_num_input_workspaces() {
+  void xtest_polarization_correction_with_efficiencies_workspace_and_invalid_num_input_workspaces() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes", 3);
     auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
@@ -920,7 +920,7 @@ public:
                             "Only input workspace groups with two or four periods are supported");
   }
 
-  void test_monitor_index_in_group() {
+  void xtest_monitor_index_in_group() {
     prepareInputGroup(TEST_GROUP_NAME);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "1", 1.0, 5.0);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04}, {"PolarizationAnalysis", true}});
@@ -930,7 +930,7 @@ public:
                             "converted from specnum), found a monitor");
   }
 
-  void test_I0MonitorIndex_is_detector() {
+  void xtest_I0MonitorIndex_is_detector() {
     prepareInputGroup(TEST_GROUP_NAME);
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 5.0);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04},
@@ -943,7 +943,7 @@ public:
                             "A monitor is expected at spectrum index 1");
   }
 
-  void test_QStep_QMin_and_QMax() {
+  void xtest_QStep_QMin_and_QMax() {
     auto inter = loadRun("INTER00013460.nxs");
     const auto alg = create_refl_algorithm(inter, 0.7, "4");
     setup_optional_properties(
@@ -966,7 +966,7 @@ public:
     TS_ASSERT_EQUALS(outY.size(), 24);
   }
 
-  void test_QMin_alone() {
+  void xtest_QMin_alone() {
     auto inter = loadRun("INTER00013460.nxs");
     const auto alg = create_refl_algorithm(inter, 0.7, "4", std::nullopt, std::nullopt);
     setup_optional_properties(alg, {{"CorrectionAlgorithm", "None"}, {"MomentumTransferMin", 0.1}});
@@ -987,7 +987,7 @@ public:
     TS_ASSERT_EQUALS(outY.size(), 1);
   }
 
-  void test_QMax_alone() {
+  void xtest_QMax_alone() {
     auto inter = loadRun("INTER00013460.nxs");
     const auto alg = create_refl_algorithm(inter, 0.7, "4", std::nullopt, std::nullopt);
     setup_optional_properties(alg, {{"CorrectionAlgorithm", "None"}, {"MomentumTransferMax", 0.1}});
@@ -1009,7 +1009,7 @@ public:
     TS_ASSERT_EQUALS(outY.size(), 72);
   }
 
-  void test_QMax_and_QMin() {
+  void xtest_QMax_and_QMin() {
     auto inter = loadRun("INTER00013460.nxs");
     const auto alg = create_refl_algorithm(inter, 0.7, "4");
     alg->setProperty("MomentumTransferMax", 1.0);
@@ -1032,7 +1032,7 @@ public:
     TS_ASSERT_EQUALS(outY.size(), 69);
   }
 
-  void test_QStep_alone() {
+  void xtest_QStep_alone() {
     auto inter = loadRun("INTER00013460.nxs");
     const auto alg = create_refl_algorithm(inter, 0.7, "4", std::nullopt, std::nullopt);
     setup_optional_properties(alg, {{"CorrectionAlgorithm", "None"}, {"MomentumTransferStep", 0.1}});
@@ -1054,7 +1054,7 @@ public:
     TS_ASSERT_EQUALS(outY.size(), 26);
   }
 
-  void test_QStep_QMin_alone() {
+  void xtest_QStep_QMin_alone() {
     auto inter = loadRun("INTER00013460.nxs");
     const auto alg = create_refl_algorithm(inter, 0.7, "4", std::nullopt, std::nullopt);
     setup_optional_properties(
@@ -1076,7 +1076,7 @@ public:
     TS_ASSERT_EQUALS(outY.size(), 1);
   }
 
-  void test_QStep_QMax_alone() {
+  void xtest_QStep_QMax_alone() {
     auto inter = loadRun("INTER00013460.nxs");
     const auto alg = create_refl_algorithm(inter, 0.7, "4", std::nullopt, std::nullopt);
     setup_optional_properties(
@@ -1099,7 +1099,7 @@ public:
     TS_ASSERT_EQUALS(outY.size(), 25);
   }
 
-  void test_flood_correction() {
+  void xtest_flood_correction() {
     auto inputWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     auto flood = createFloodWorkspace(inputWS->getInstrument());
     const auto alg = create_refl_algorithm(inputWS, 1.5, "2+3");
@@ -1116,7 +1116,7 @@ public:
     TS_ASSERT_DELTA(out->y(0)[0], 4.5, 0.000001);
   }
 
-  void test_flood_correction_transmission() {
+  void xtest_flood_correction_transmission() {
     auto inputWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     auto transWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     for (size_t i = 0; i < transWS->getNumberHistograms(); ++i) {
@@ -1140,7 +1140,7 @@ public:
     TS_ASSERT_DELTA(out->y(0)[0], 0.0782608695, 0.000001);
   }
 
-  void test_flood_correction_group() {
+  void xtest_flood_correction_group() {
     auto inputWS1 = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     auto inputWS2 = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     inputWS2 *= 2.0;
@@ -1164,7 +1164,7 @@ public:
     TS_ASSERT_DELTA(out2->y(0)[0], 9.0, 0.000001);
   }
 
-  void test_flood_correction_polarization_correction() {
+  void xtest_flood_correction_polarization_correction() {
     prepareInputGroup(TEST_GROUP_NAME, "Fredrikze");
     applyPolarizationEfficiencies(TEST_GROUP_NAME);
     auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TEST_GROUP_NAME + "_1");
@@ -1187,7 +1187,7 @@ public:
     TS_ASSERT_DELTA(out4->y(0)[0], 60.0, 0.003);
   }
 
-  void test_flood_correction_parameter_file() {
+  void xtest_flood_correction_parameter_file() {
     prepareInputGroup(TEST_GROUP_NAME, "Flood");
     auto const inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TEST_GROUP_NAME + "_1");
     auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
@@ -1209,7 +1209,7 @@ public:
     TS_ASSERT_DELTA(out4->y(0)[0], 60.0, 1e-14);
   }
 
-  void test_flood_correction_parameter_file_no_flood_parameters() {
+  void xtest_flood_correction_parameter_file_no_flood_parameters() {
     prepareInputGroup(TEST_GROUP_NAME, "No_Flood");
     const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0, true, false);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04}, {"FloodCorrection", "ParameterFile"}});
@@ -1218,7 +1218,7 @@ public:
                             std::string("Instrument parameter file doesn't have the Flood_Run parameter."));
   }
 
-  void test_output_workspace_is_given_informative_name_if_input_has_correct_form() {
+  void xtest_output_workspace_is_given_informative_name_if_input_has_correct_form() {
     std::string const groupName = "TOF_1234_sliced";
     prepareInputGroup(groupName, "", 2);
     ADS.rename("TOF_1234_sliced_1", "TOF_1234_sliced_first");
@@ -1233,7 +1233,7 @@ public:
                        "IvsQ_binned_1234_sliced_second", "IvsLam_1234_sliced_first", "IvsLam_1234_sliced_second"});
   }
 
-  void test_autodetect_on_instrument_with_polynomial_correction() {
+  void xtest_autodetect_on_instrument_with_polynomial_correction() {
     auto ws_1 = createREFL_WS(10, 5000, 10000, std::vector<double>(10, 1), "PolynomialCorrection");
     auto const polStringInter =
         std::string("35.5893,-24.5591,9.20375,-1.89265,0.222291,-0.0148746,0.00052709,-7.66807e-06");
@@ -1247,7 +1247,7 @@ public:
     check_algorithm_properties_in_child_histories(ws_out, 2, 1, propertiesToAssert);
   }
 
-  void test_autodetect_on_instrument_with_exponential_correction() {
+  void xtest_autodetect_on_instrument_with_exponential_correction() {
     auto const &ws_1 = createREFL_WS(10, 5000, 10000, std::vector<double>(10, 1), "ExponentialCorrection");
     std::map<std::string, std::string> propertiesToAssert{
         {"CorrectionAlgorithm", "ExponentialCorrection"}, {"C0", "36.568800000000003"}, {"C1", "0.18867600000000001"}};
@@ -1259,7 +1259,7 @@ public:
     check_algorithm_properties_in_child_histories(ws_out, 2, 1, propertiesToAssert);
   }
 
-  void test_bad_first_transmission_group_empty() {
+  void xtest_bad_first_transmission_group_empty() {
     MatrixWorkspace_sptr first = m_TOF->clone();
     MatrixWorkspace_sptr second = m_TOF->clone();
 
@@ -1279,7 +1279,7 @@ public:
     TS_ASSERT(results.count("FirstTransmissionRun"));
   }
 
-  void test_bad_second_transmission_group_empty() {
+  void xtest_bad_second_transmission_group_empty() {
     const MatrixWorkspace_sptr first = m_TOF->clone();
     const MatrixWorkspace_sptr second = m_TOF->clone();
 

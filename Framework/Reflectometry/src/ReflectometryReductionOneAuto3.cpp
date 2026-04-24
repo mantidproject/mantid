@@ -347,6 +347,9 @@ void ReflectometryReductionOneAuto3::init() {
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("HideSummedWorkspaces", false, Direction::Input),
                   "Whether to hide the workspaces created from the sum banks step, if performed.");
+
+  // TO DO, do we need this?
+  m_correctionProperties = CorrectionProperties{};
 }
 
 // Performs the reduction using ReflectometryReductionOne
@@ -513,6 +516,7 @@ void ReflectometryReductionOneAuto3::exec() {
   setDefaultOutputWorkspaceNames();
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  determineCorrectionAlgorithm(inputWS->getInstrument());
   RROOutputs out = performCoreReduction(inputWS);
   const auto params = getRebinParams(out.IvsQ, out.theta);
   const auto binnedWS = postReductionProcessing(out, params);
@@ -616,27 +620,17 @@ double ReflectometryReductionOneAuto3::calculateTheta(const MatrixWorkspace_sptr
   return theta * 0.5;
 }
 
-/** Set algorithmic correction properties
- *
- * @param alg :: ReflectometryReductionOne algorithm
- * @param instrument :: The instrument attached to the workspace
- */
-void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(const IAlgorithm_sptr &alg,
-                                                                             const Instrument_const_sptr &instrument) {
-
+void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(const Instrument_const_sptr &instrument) {
   // With algorithmic corrections, monitors should not be integrated, see below
   const std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");
+  CorrectionProperties corrProps;
   if (correctionAlgorithm == "PolynomialCorrection") {
-    alg->setProperty("NormalizeByIntegratedMonitors", false);
-    alg->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
-    alg->setPropertyValue("Polynomial", getPropertyValue("Polynomial"));
-
+    corrProps.type = correctionAlgorithm;
+    corrProps.polynomial = getPropertyValue("Polynomial");
   } else if (correctionAlgorithm == "ExponentialCorrection") {
-    alg->setProperty("NormalizeByIntegratedMonitors", false);
-    alg->setProperty("CorrectionAlgorithm", "ExponentialCorrection");
-    alg->setProperty("C0", getPropertyValue("C0"));
-    alg->setProperty("C1", getPropertyValue("C1"));
-
+    corrProps.type = correctionAlgorithm;
+    corrProps.c0 = getPropertyValue("C0");
+    corrProps.c1 = getPropertyValue("C1");
   } else if (correctionAlgorithm == "AutoDetect") {
     // Figure out what to do from the instrument
     try {
@@ -654,8 +648,8 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(con
           throw std::runtime_error("Could not find parameter 'polystring' in "
                                    "parameter file. Cannot apply polynomial "
                                    "correction.");
-        alg->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
-        alg->setProperty("Polynomial", polyVec[0]);
+        corrProps.type = "PolynomialCorrection";
+        corrProps.polynomial = polyVec[0];
       } else if (correctionStr == "exponential") {
         const auto c0Vec = instrument->getNumberParameter("C0");
         if (c0Vec.empty())
@@ -665,16 +659,36 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(con
         if (c1Vec.empty())
           throw std::runtime_error("Could not find parameter 'C1' in parameter "
                                    "file. Cannot apply exponential correction.");
-
-        alg->setProperty("CorrectionAlgorithm", "ExponentialCorrection");
-        alg->setProperty("C0", c0Vec[0]);
-        alg->setProperty("C1", c1Vec[0]);
+        corrProps.type = "ExponentialCorrection";
+        corrProps.c0 = c0Vec[0];
+        corrProps.c1 = c1Vec[0];
       }
-      alg->setProperty("NormalizeByIntegratedMonitors", false);
     } catch (std::runtime_error &e) {
       g_log.error() << e.what() << ". Algorithmic correction will not be performed.";
-      alg->setProperty("CorrectionAlgorithm", "None");
+      corrProps.type = "None";
     }
+  } else {
+    corrProps.type = "None";
+  }
+  m_correctionProperties = corrProps;
+}
+
+/** Set algorithmic correction properties
+ *
+ * @param alg :: ReflectometryReductionOne algorithm
+ * @param instrument :: The instrument attached to the workspace
+ */
+void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(const IAlgorithm_sptr &alg,
+                                                                             const Instrument_const_sptr &instrument) {
+  if (m_correctionProperties.type == "PolynomialCorrection") {
+    alg->setProperty("NormalizeByIntegratedMonitors", false);
+    alg->setProperty("CorrectionAlgorithm", m_correctionProperties.type);
+    alg->setPropertyValue("Polynomial", m_correctionProperties.polynomial);
+  } else if (m_correctionProperties.type == "ExponentialCorrection") {
+    alg->setProperty("NormalizeByIntegratedMonitors", false);
+    alg->setProperty("CorrectionAlgorithm", m_correctionProperties.type);
+    alg->setProperty("C0", m_correctionProperties.c0);
+    alg->setProperty("C1", m_correctionProperties.c1);
   } else {
     alg->setProperty("CorrectionAlgorithm", "None");
   }
@@ -909,8 +923,7 @@ ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReduction
     auto ws = members[i];
     MatrixWorkspace_sptr matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
     if (!matrixWs) {
-      // Will this ever happen, can we just remove this and use static cast?
-      throw std::runtime_error("Workspace is not a MatrixWorkspace");
+      throw std::runtime_error("Group Member is not a MatrixWorkspace");
     }
     if (populateOutputNames)
       allOutputNames.emplace_back(getOutputNamesForGroupMember(matrixWs->getName(), runNumber, i));
@@ -954,6 +967,7 @@ bool ReflectometryReductionOneAuto3::processGroups() {
   auto const groupName = getPropertyValue("InputWorkspace");
   auto const groupMembers = getGroupMembers(groupName);
   std::string const runNumber = getRunNumberForWorkspaceGroup(groupName);
+  determineCorrectionAlgorithm(std::dynamic_pointer_cast<MatrixWorkspace>(groupMembers[0])->getInstrument());
 
   const bool polarizationAnalysisOn = getProperty("PolarizationAnalysis");
   std::vector<std::string> taskOrder;
