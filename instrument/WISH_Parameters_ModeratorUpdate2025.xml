@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 5th Sep 2025 is the date of the first dataset of the cycle with the new moderator -->
+<parameter-file instrument = "WISH" valid-from = "2025-09-5T00:00:00">
+    
+    <component-link name="WISH">
+    
+        <!-- Specify the gap between the tubes for Peak::findDetector -->
+        <parameter name="tube-gap">
+            <value val="0.00017"/>
+        </parameter>
+
+        <!-- SplitInto defaults for MDWorkspaces -->
+        <parameter name="SplitInto">
+            <value val="2"/>
+        </parameter>
+
+        <!-- SplitThreshold defaults for MDWorkspaces -->
+        <parameter name="SplitThreshold">
+            <value val="30"/>
+        </parameter>
+
+        <!-- MaxRecursionDepth defaults for MDWorkspaces -->
+        <parameter name="MaxRecursionDepth">
+            <value val="20"/>
+        </parameter>
+        
+         <!-- Offset the psi values in the mini-plot -->
+         <parameter name="offset-phi" type="string">
+          <value val="Always" />
+         </parameter>
+        
+    </component-link>
+    
+            <component-link name="panel01" >
+        <parameter name="BackToBackExponential:S" type="fitting">
+            <formula eq="sqrt(12.4967*centre^4+132.638*centre^2+0)" unit="dSpacing" result-unit="TOF" />
+        </parameter>
+        <parameter name="BackToBackExponential:A" type="fitting">
+            <formula eq="(0.103056/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+        <parameter name="BackToBackExponential:B" type="fitting">
+            <formula eq="(0.0047972+0.311836/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+    </component-link>
+            <component-link name="panel06" >
+        <parameter name="BackToBackExponential:S" type="fitting">
+            <formula eq="sqrt(12.4967*centre^4+132.638*centre^2+0)" unit="dSpacing" result-unit="TOF" />
+        </parameter>
+        <parameter name="BackToBackExponential:A" type="fitting">
+            <formula eq="(0.103056/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+        <parameter name="BackToBackExponential:B" type="fitting">
+            <formula eq="(0.0047972+0.311836/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+    </component-link>
+    
+            <component-link name="panel02" >
+        <parameter name="BackToBackExponential:S" type="fitting">
+            <formula eq="sqrt(19.248*centre^4+115.611*centre^2+0)" unit="dSpacing" result-unit="TOF" />
+        </parameter>
+        <parameter name="BackToBackExponential:A" type="fitting">
+            <formula eq="(0.145222/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+        <parameter name="BackToBackExponential:B" type="fitting">
+            <formula eq="(0.00833523+0.153128/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+    </component-link>
+            <component-link name="panel07" >
+        <parameter name="BackToBackExponential:S" type="fitting">
+            <formula eq="sqrt(19.248*centre^4+115.611*centre^2+0)" unit="dSpacing" result-unit="TOF" />
+        </parameter>
+        <parameter name="BackToBackExponential:A" type="fitting">
+            <formula eq="(0.145222/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+        <parameter name="BackToBackExponential:B" type="fitting">
+            <formula eq="(0.00833523+0.153128/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+    </component-link>
+    
+                <component-link name="panel03" >
+        <parameter name="BackToBackExponential:S" type="fitting">
+            <formula eq="sqrt(22.6814*centre^4+33.2538*centre^2+0)" unit="dSpacing" result-unit="TOF" />
+        </parameter>
+        <parameter name="BackToBackExponential:A" type="fitting">
+            <formula eq="(0.110629/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+        <parameter name="BackToBackExponential:B" type="fitting">
+            <formula eq="(0.00985028+0.0642503/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+    </component-link>
+                <component-link name="panel08" >
+        <parameter name="BackToBackExponential:S" type="fitting">
+            <formula eq="sqrt(22.6814*centre^4+33.2538*centre^2+0)" unit="dSpacing" result-unit="TOF" />
+        </parameter>
+        <parameter name="BackToBackExponential:A" type="fitting">
+            <formula eq="(0.110629/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+        <parameter name="BackToBackExponential:B" type="fitting">
+            <formula eq="(0.00985028+0.0642503/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+    </component-link>
+    
+                                <component-link name="panel04" >
+        <parameter name="BackToBackExponential:S" type="fitting">
+            <formula eq="sqrt(18.0455*centre^4+54.1971*centre^2+0)" unit="dSpacing" result-unit="TOF" />
+        </parameter>
+        <parameter name="BackToBackExponential:A" type="fitting">
+            <formula eq="(0.10876/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+        <parameter name="BackToBackExponential:B" type="fitting">
+            <formula eq="(0.00861336+0.11622/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+    </component-link>
+                                <component-link name="panel09" >
+        <parameter name="BackToBackExponential:S" type="fitting">
+            <formula eq="sqrt(18.0455*centre^4+54.1971*centre^2+0)" unit="dSpacing" result-unit="TOF" />
+        </parameter>
+        <parameter name="BackToBackExponential:A" type="fitting">
+            <formula eq="(0.10876/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+        <parameter name="BackToBackExponential:B" type="fitting">
+            <formula eq="(0.00861336+0.11622/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+    </component-link>
+    
+                <component-link name="panel05" >
+        <parameter name="BackToBackExponential:S" type="fitting">
+            <formula eq="sqrt(18.4246*centre^4+1.53815*centre^2+0)" unit="dSpacing" result-unit="TOF" />
+        </parameter>
+        <parameter name="BackToBackExponential:A" type="fitting">
+            <formula eq="(0.100847/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+        <parameter name="BackToBackExponential:B" type="fitting">
+            <formula eq="(0.0104767+0.0480796/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+    </component-link>
+                    <component-link name="panel10" >
+        <parameter name="BackToBackExponential:S" type="fitting">
+            <formula eq="sqrt(18.4246*centre^4+1.53815*centre^2+0)" unit="dSpacing" result-unit="TOF" />
+        </parameter>
+        <parameter name="BackToBackExponential:A" type="fitting">
+            <formula eq="(0.100847/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+        <parameter name="BackToBackExponential:B" type="fitting">
+            <formula eq="(0.0104767+0.0480796/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+    </component-link>
+</parameter-file>
