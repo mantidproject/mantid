@@ -11,7 +11,7 @@ import unittest
 import matplotlib
 from mantid import plots  # noqa: F401  # need mantid projection
 from unittest.mock import Mock, patch
-from mantid.simpleapi import CreateWorkspace
+from mantid.simpleapi import CreateWorkspace, CreateEmptyTableWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figurewindow import FigureWindow, _validate_workspaces
 
@@ -57,6 +57,11 @@ class Test(unittest.TestCase):
             self.assertEqual(result, [False, False])
         except KeyError:
             self.fail("KeyError was raised for non-existent workspaces.")
+
+    def test_validate_workspaces_returns_false_on_non_matrix_workspace(self):
+        _ = CreateEmptyTableWorkspace(OutputWorkspace="table_ws")
+        result = _validate_workspaces(["table_ws"])
+        self.assertEqual(result, [False])
 
     def _drop_workspace(self, ws_name: str):
         ax = self.fig.get_axes()[1]
