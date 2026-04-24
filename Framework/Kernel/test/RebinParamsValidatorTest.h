@@ -6,15 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/MockMemory.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
 using namespace Mantid::Kernel;
-
-// this is a simple mock of the availMem function to keep consistent and small values from this function
-std::size_t Mantid::Kernel::MemoryStats::availMem() const { return 12; }
 
 class RebinParamsValidatorTest : public CxxTest::TestSuite {
 public:
@@ -107,7 +105,21 @@ public:
                      "When giving a range the second value must be larger than the first");
   }
 
+  void testIsMocked() {
+    std::size_t memSize = 13;
+    size_t mem1 = Mantid::Kernel::MemoryStats().availMem();
+    TS_ASSERT_LESS_THAN(memSize, mem1);
+    { // scope the mock
+      Mantid::TestMemory::MockMemory memL(memSize);
+      size_t mem = Mantid::Kernel::MemoryStats().availMem();
+      TS_ASSERT_EQUALS(mem, memSize);
+    }
+    size_t mem2 = Mantid::Kernel::MemoryStats().availMem();
+    TS_ASSERT_LESS_THAN(memSize, mem2);
+  }
+
   void testTooManyBins() {
+    Mantid::TestMemory::MockMemory memL;
     size_t mem = Mantid::Kernel::MemoryStats().availMem();
     size_t numBins = mem * 1024 / sizeof(double) + 1; // one more than can fit in memory
     std::vector<double> vec(3);
@@ -118,6 +130,7 @@ public:
   }
 
   void testTooManyBinsLog() {
+    Mantid::TestMemory::MockMemory memL;
     size_t mem = Mantid::Kernel::MemoryStats().availMem();
     size_t numBins = mem * 1024 / sizeof(double) + 1; // one more than can fit in memory
     std::vector<double> vec(3);
@@ -133,7 +146,8 @@ public:
     // 1. find the number of KiB remaining in memory.
     // 2. calculate the number of bins that would equal that value in *bytes* (i.e. numBins * sizeof(double))
     // 3. make sure that the validator passes, if the bytes of the bins are less than the available memory
-    size_t memInKiB = Mantid::Kernel::MemoryStats().availMem();
+    constexpr std::size_t memInKiB{12};
+    Mantid::TestMemory::MockMemory memL(memInKiB);
     size_t numBins =
         memInKiB / sizeof(double); // the number bins (doubles) that would fit in memory, IF memory were in bytes
     std::vector<double> vec{1., 1., 1. + static_cast<double>(numBins)}; // make sure we have numBins bins

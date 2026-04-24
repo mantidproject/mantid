@@ -19,6 +19,7 @@
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/MockMemory.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Memory.h"
@@ -33,9 +34,6 @@ using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
-
-// this is a simple mock of the availMem function to keep consistent and small values from this function
-std::size_t Mantid::Kernel::MemoryStats::availMem() const { return 12; }
 
 class RebinTest : public CxxTest::TestSuite {
 public:
@@ -120,7 +118,21 @@ public:
     TS_ASSERT(errmsg->second.substr(0, 20) == "Provided width value");
   }
 
+  void testIsMocked() {
+    constexpr std::size_t newMem{25};
+    size_t mem1 = Mantid::Kernel::MemoryStats().availMem();
+    TS_ASSERT_LESS_THAN(newMem, mem1);
+    {
+      Mantid::TestMemory::MockMemory memL(newMem);
+      size_t mem = Mantid::Kernel::MemoryStats().availMem();
+      TS_ASSERT_EQUALS(mem, newMem);
+    }
+    std::size_t mem2 = Mantid::Kernel::MemoryStats().availMem();
+    TS_ASSERT_LESS_THAN(newMem, mem2);
+  }
+
   void test_failure_too_much_memory() {
+    Mantid::TestMemory::MockMemory memL; // patch the available memory calculator
     // ensure that rebinning will fail if the number of bins requested is expected to exceed available memory
     Rebin rebin;
     // Linear case
