@@ -118,6 +118,10 @@ export LC_ALL=C
 # Use the workspace root outside of the git tree or conda-build cannot
 # copy the source to a working folder.
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
+if [[ $OSTYPE == "msys" ]]; then
+    # Windows can leave handles open in rattler work/cache dirs; clean them before reuse.
+    rm -rf "$CONDA_BLD_PATH"/bld/rattler-build_* "$CONDA_BLD_PATH"/build_cache/staging_*
+fi
 if [[ -d $CONDA_BLD_PATH ]]; then
     pixi run -e rattler-builder --frozen rattler-index fs $CONDA_BLD_PATH
 fi
