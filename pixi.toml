@@ -1,7 +1,12 @@
 [workspace]
 name = "mantid"
 authors = ["Pete Peterson <petersonpf@ornl.gov>"]
-channels = ["conda-forge", "neutrons", "mantid"]
+channels = [
+  "conda-forge",
+  "neutrons",
+  "mantid",
+  "https://prefix.dev/skill-forge",
+]
 # when editing local copy of mantid-developer, will need to temporarily remove
 # the platforms that you aren't working on
 platforms = ["linux-64", "win-64", "osx-arm64"]
@@ -24,7 +29,7 @@ docs-migration = { features = ["docs-migration"], no-default-feature = true }
 
 [feature.rattler-builder.dependencies]
 rattler-build = "==0.51.0"
-versioningit = ">=3.3.0,<4"
+versioningit = ">=2.1"
 rattler-index = ">=0.27.6,<0.28"
 
 [feature.rattler-builder.target.linux-64.dependencies]
@@ -114,7 +119,6 @@ qtconsole = ">5.5.0"
 qtpy = ">=2.4,!=2.4.2"
 quasielasticbayes = "==0.3.0"
 quickbayes = "==1.0.2"
-rattler-build = "==0.51.0"
 rattler-index = ">=0.27.4,<0.28"
 requests = ">=2.32.4"
 scipy = ">=1.16.0,<1.17"
@@ -130,6 +134,7 @@ graphviz = ">=2.47.0"
 mantid-sphinx-theme = ">=0.1.0,<1"
 myst-parser = ">=5.0.0,<6"
 sphinx = ">=9.0,<10"
+agent-skill-rattler-build = ">=0.0.2,<0.0.3"
 
 [target.linux-64.dependencies]
 gxx_linux-64 = "13.*"

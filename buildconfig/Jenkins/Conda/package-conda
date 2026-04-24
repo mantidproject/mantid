@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 
-# This script expects to be in a POSIX environment. Uses rattler to build the suite of
+# This script expects to be in a POSIX environment. Uses the pixi
+# ``rattler-builder`` feature environment to build the suite of
 # mantid packages. You must pass flags to specify which packages to build. If building
 # a package dependent on another one it will either install a locally built package
 # (if present from a previous build step) or build and produce that package too.
@@ -17,11 +18,11 @@
 #                 outputs are placed in $WORKSPACE/conda-bld
 #
 # Possible flags:
-#   --build-mantid-developer: build the mantid-developer metapackage using conda-build
-#   --build-mantid: build the mantid package using conda-build
-#   --build-qt: build the qt package using conda-build (this will implicitly build mantid)
+#   --build-mantid-developer: build the mantid-developer metapackage using rattler-build
+#   --build-mantid: build the mantid package using rattler-build
+#   --build-qt: build the qt package using rattler-build (this will implicitly build mantid)
 #   --build-docs: build the HTML/Qthelp documentation
-#   --build-workbench: build the workbench package using conda-build (this will implicitly build qt and mantid)
+#   --build-workbench: build the workbench package using rattler-build (this will implicitly build qt and mantid)
 #   --git-tag: specify a tag for a release or nightly version
 #   --platform: target architecture, e.g. linux-64
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
