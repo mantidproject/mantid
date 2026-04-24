@@ -4,8 +4,6 @@
 New Starter Python
 ==================
 
-.. contents::
-   :local:
 
 -------------
 Prerequisites

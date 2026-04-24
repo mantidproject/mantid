@@ -3,8 +3,6 @@
 Engineering Diffraction
 =========================
 
-.. contents:: Table of Contents
-    :local:
 
 Interface Overview
 ------------------

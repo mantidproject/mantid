@@ -3,8 +3,6 @@
 Filter Events Interface Testing
 ===============================
 
-.. contents::
-   :local:
 
 *Prerequisites*
 

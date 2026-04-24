@@ -1,8 +1,6 @@
 Inelastic Corrections Testing
 =============================
 
-.. contents::
-   :local:
 
 *Prerequisites*
 

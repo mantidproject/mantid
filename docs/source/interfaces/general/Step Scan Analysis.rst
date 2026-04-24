@@ -1,8 +1,6 @@
 Step Scan Analysis
 ==================
 
-.. contents:: Table of Contents
-  :local:
 
 Interface Overview
 ------------------

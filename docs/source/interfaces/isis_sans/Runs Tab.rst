@@ -3,8 +3,6 @@
 Runs Tab
 ========
 
-.. contents:: Table of Contents
-  :local:
 
 The *Runs* tab is where the majority of processing takes place. You can select
 your user file, batch file or manually enter data sets for reduction in the

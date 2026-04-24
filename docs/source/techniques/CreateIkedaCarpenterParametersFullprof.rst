@@ -3,8 +3,6 @@
 Create Ikeda Carpenter Parameters Fullprof
 ==========================================
 
-.. contents:: Table of Contents
-  :local:
 
 Introduction
 ------------

@@ -3,8 +3,6 @@
 HFIR Single Crystal Reduction Interface
 =======================================
 
-.. contents:: Table of Contents
-  :local:
 
 Overview
 --------

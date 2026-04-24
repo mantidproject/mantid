@@ -5,8 +5,6 @@
 ISIS Reflectometry Interface
 ============================
 
-.. contents:: Table of Contents
-  :local:
 
 .. |process| image:: /images/icons/sigma.png
 .. |pause| image:: /images/icons/pause.png

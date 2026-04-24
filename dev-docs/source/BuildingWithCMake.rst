@@ -4,8 +4,6 @@
 Building with CMake
 ===================
 
-.. contents::
-  :local:
 
 CMake is the build system for the entirety of Mantid (Framework, MantidQt and MantidWorkbench). It is used to generate native build files for your platform, which can be Makefiles (for use with make, nmake or jom) for command line builds or project/solution files for an IDE (e.g. Visual Studio, Eclipse, Qt Creator, XCode).
 For a "how is it used version" of this guide, see the `build script <https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/Conda/build>`_ used on the build servers.

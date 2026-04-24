@@ -3,8 +3,6 @@
 DGS Planner
 ===========
 
-.. contents:: Table of Contents
-  :local:
 
 .. figure:: /images/DGSPlanner.png
    :alt: DGSPlanner.png

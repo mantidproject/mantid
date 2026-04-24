@@ -2,8 +2,6 @@
 Python Coding Standards
 =======================
 
-.. contents:: Contents
-   :local:
 
 Style
 ^^^^^

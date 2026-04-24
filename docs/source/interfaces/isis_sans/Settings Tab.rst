@@ -2,8 +2,6 @@
 
 Settings
 ========
-.. contents:: Table of Contents
-  :local:
 
 .. _Settings:
 

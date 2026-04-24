@@ -6,8 +6,6 @@ Python in Mantid: Exercise 1
 
 The aim of this exercise is to show some simple examples of data exploration
 
-.. contents:: Table of contents
-    :local:
 
 A - ISIS Data
 =============

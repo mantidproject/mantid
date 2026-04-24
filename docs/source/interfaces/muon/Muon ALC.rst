@@ -3,8 +3,6 @@
 Muon ALC
 ========
 
-.. contents:: Table of Contents
-  :local:
 
 Overview
 --------

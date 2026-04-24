@@ -3,9 +3,6 @@
 Crystal Field Theory
 ====================
 
-.. contents:: Table of Contents
-  :local:
-
 
 Introduction
 ------------

@@ -12,8 +12,6 @@ This section allows the user to:
 * Learn how to read/export data.
 * Learn how to overlay data/change plot style.
 
-.. contents:: Table of Contents
-  :local:
 
 Workspaces
 ==========

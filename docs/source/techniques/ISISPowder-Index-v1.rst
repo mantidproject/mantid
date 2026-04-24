@@ -4,8 +4,6 @@
 ISIS Powder Diffraction Scripts
 ================================
 
-.. contents:: Table of Contents
-    :local:
 
 .. _script_param_overview_isis-powder-diffraction-ref:
 

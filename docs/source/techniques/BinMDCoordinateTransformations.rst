@@ -3,8 +3,6 @@
 BinMD Coordinate Transformations
 ================================
 
-.. contents:: Table of Contents
-  :local:
 
 Introduction
 ------------

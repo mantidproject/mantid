@@ -4,8 +4,6 @@
 SANS TOML Files
 ===============
 
-.. contents:: Table of Contents
-    :local:
 
 General Notes
 =============

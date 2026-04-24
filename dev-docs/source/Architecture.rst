@@ -2,8 +2,6 @@
 Architecture
 ============
 
-.. contents::
-   :local:
 
 Summary
 -------

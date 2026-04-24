@@ -8,8 +8,6 @@ Mantid supports the calculation and fitting of inelastic neutron scattering (INS
 
 This page contains specific worked examples. The data files can be found `here <https://github.com/mducle/cf_examples/raw/master/cf_examples_data.zip>`_. Please download and unzip this into a folder which is on your Mantid path (set using the "Manage User Directories" menu item).
 
-.. contents:: Table of contents
-    :local:
 
 Fitting INS spectrum
 ====================

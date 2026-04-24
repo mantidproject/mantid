@@ -4,8 +4,6 @@
 Data Fitting
 ============
 
-.. contents:: Table of Contents
-  :local:
 
 Fit Function
 ============

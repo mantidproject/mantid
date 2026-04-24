@@ -3,9 +3,6 @@
 Writing An Algorithm
 ====================
 
-.. contents::
-   :local:
-
 
 Introduction
 ############

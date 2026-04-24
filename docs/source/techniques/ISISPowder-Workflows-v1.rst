@@ -4,8 +4,6 @@
 ISIS Powder Diffraction Scripts Workflow Diagrams
 ==================================================
 
-.. contents:: Table of Contents
-    :local:
 
 Methods
 -------

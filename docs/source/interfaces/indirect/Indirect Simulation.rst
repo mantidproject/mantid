@@ -3,8 +3,6 @@
 Indirect Simulation
 ===================
 
-.. contents:: Table of Contents
-  :local:
 
 Overview
 --------

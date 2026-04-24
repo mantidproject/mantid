@@ -2,9 +2,6 @@
 Generating code coverage
 ========================
 
-.. contents::
-    :local:
-
 
 C++
 ====

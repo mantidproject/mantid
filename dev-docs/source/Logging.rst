@@ -4,8 +4,6 @@
 Logging
 =======
 
-.. contents::
-  :local:
 
 Overview
 --------

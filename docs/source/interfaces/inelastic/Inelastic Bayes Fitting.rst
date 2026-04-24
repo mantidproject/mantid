@@ -3,8 +3,6 @@
 Inelastic Bayes Fitting
 =======================
 
-.. contents:: Table of Contents
-  :local:
 
 Overview
 --------

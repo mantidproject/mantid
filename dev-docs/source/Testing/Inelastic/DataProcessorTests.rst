@@ -1,8 +1,6 @@
 Inelastic Data Processor Testing
 ================================
 
-.. contents::
-   :local:
 
 *Prerequisites*
 

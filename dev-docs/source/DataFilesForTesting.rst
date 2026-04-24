@@ -4,8 +4,6 @@
 Data Files for Testing
 ======================
 
-.. contents::
-  :local:
 
 Summary
 #######

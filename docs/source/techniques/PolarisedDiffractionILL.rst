@@ -4,8 +4,6 @@
 Data reduction for D7 instrument at the ILL
 ===========================================
 
-.. contents:: Table of contents
-    :local:
 
 There are three workflow algorithms supporting data reduction at ILL's D7 polarised diffraction and spectroscopy instrument. These algorithms are:
 

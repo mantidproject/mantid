@@ -13,8 +13,6 @@ Formatting Plots with the User Interface
 * :ref:`Colorfill_Plots`
 * :ref:`3D_Plots`
 
-.. contents:: Table of contents
-    :local:
 
 |
 |

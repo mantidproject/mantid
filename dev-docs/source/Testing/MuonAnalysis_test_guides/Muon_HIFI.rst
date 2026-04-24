@@ -3,8 +3,6 @@
 Muon Unscripted Testing: HIFI
 =============================
 
-.. contents:: Table of Contents
-   :local:
 
 Introduction
 ------------

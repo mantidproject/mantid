@@ -4,8 +4,6 @@
 Libraries
 =========
 
-.. contents:: Contents
-   :local:
 
 Summary
 ^^^^^^^
