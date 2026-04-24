@@ -557,7 +557,7 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, lo
             plot_fn = ax.errorbar if errors else ax.plot
             if isinstance(ws, MatrixWorkspace):
                 plot_type = ws.getPlotType()
-                _plot_kwargs = get_plot_specific_properties(ws, plot_type, plot_kwargs)
+                _plot_kwargs = get_plot_specific_properties(ws, plot_type, plot_kwargs, errors=errors)
                 if "errorbar" in plot_type or errors:
                     plot_fn = ax.errorbar
 
