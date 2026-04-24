@@ -42,9 +42,6 @@ public:
   MOCK_CONST_METHOD0(getSpMax, int());
   MOCK_METHOD1(setSpMax, void(int max));
   MOCK_CONST_METHOD0(clearPlot, void());
-  MOCK_CONST_METHOD1(removeSpectrum, void(const std::string &spName));
-  MOCK_METHOD2(plotSpectra,
-               void(const std::vector<std::pair<CSCurves, MatrixWorkspace_sptr>> &wsToPlot, size_t specNo));
   MOCK_METHOD3(plotSpectrum, void(const CSCurves &curveName, const MatrixWorkspace_sptr &ws, size_t specNo));
   MOCK_METHOD0(requestRebinToSample, bool());
   MOCK_CONST_METHOD0(getPlotOptions, IOutputPlotOptionsView *());

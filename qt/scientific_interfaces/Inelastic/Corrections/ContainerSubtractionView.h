@@ -38,8 +38,6 @@ public:
   virtual int getSpMax() const = 0;
   virtual void setSpMax(int max) = 0;
   virtual void clearPlot() const = 0;
-  virtual void removeSpectrum(const std::string &spName) const = 0;
-  virtual void plotSpectra(const std::vector<std::pair<CSCurves, MatrixWorkspace_sptr>> &wsToPlot, size_t specNo) = 0;
   virtual void plotSpectrum(const CSCurves &curveName, const MatrixWorkspace_sptr &ws, size_t specNo) = 0;
   virtual bool requestRebinToSample() = 0;
 
@@ -78,8 +76,6 @@ public:
   IRunView *getRunView() const override;
   IOutputNameView *getOutputNameView() const override;
 
-  void removeSpectrum(const std::string &spName) const override;
-  void plotSpectra(const std::vector<std::pair<CSCurves, MatrixWorkspace_sptr>> &wsToPlot, size_t specNo) override;
   void plotSpectrum(const CSCurves &curveName, const MatrixWorkspace_sptr &ws, size_t specNo) override;
 
 private slots:

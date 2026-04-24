@@ -57,23 +57,10 @@ void ContainerSubtractionView::notifyPreviewClicked() const { m_presenter->handl
 void ContainerSubtractionView::notifySpectraIncreaseClicked(int specNo) const { m_presenter->updatePlot(specNo); }
 void ContainerSubtractionView::notifyUpdateCan() const { m_presenter->handleUpdateContainerPlot(); }
 
-void ContainerSubtractionView::removeSpectrum(const std::string &spName) const {
-  m_uiForm.ppPreview->removeSpectrum(QString::fromStdString(spName));
-}
-
 IOutputPlotOptionsView *ContainerSubtractionView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 IRunView *ContainerSubtractionView::getRunView() const { return m_uiForm.runWidget; }
 IOutputNameView *ContainerSubtractionView::getOutputNameView() const { return m_uiForm.outputNameWidget; }
 
-void ContainerSubtractionView::plotSpectra(const std::vector<std::pair<CSCurves, MatrixWorkspace_sptr>> &wsToPlot,
-                                           size_t specNo) {
-  clearPlot();
-  m_uiForm.ppPreview->setUpdatesEnabled(false);
-  for (const auto &[curveName, ws] : wsToPlot) {
-    plotSpectrum(curveName, ws, specNo);
-  }
-  m_uiForm.ppPreview->setUpdatesEnabled(true);
-}
 void ContainerSubtractionView::plotSpectrum(const CSCurves &curveName, const MatrixWorkspace_sptr &ws, size_t specNo) {
   const auto &[qCurveName, qCurveColor] = CSPlotCurves.at(curveName);
   m_uiForm.ppPreview->addSpectrum(qCurveName, ws, specNo, qCurveColor);
