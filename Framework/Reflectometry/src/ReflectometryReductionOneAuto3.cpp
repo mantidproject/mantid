@@ -621,9 +621,16 @@ double ReflectometryReductionOneAuto3::calculateTheta(const MatrixWorkspace_sptr
 }
 
 void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(const Instrument_const_sptr &instrument) {
-  // With algorithmic corrections, monitors should not be integrated, see below
-  const std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");
   CorrectionProperties corrProps;
+  // if a trans workspace is provided, algorithmic correction not performed.
+  const auto &firstWS = getWorkspaceFromProperty("FirstTransmissionRun");
+  if (firstWS) {
+    corrProps.type = "None";
+    m_correctionProperties = corrProps;
+    return;
+  }
+
+  const std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");
   if (correctionAlgorithm == "PolynomialCorrection") {
     corrProps.type = correctionAlgorithm;
     corrProps.polynomial = getPropertyValue("Polynomial");
