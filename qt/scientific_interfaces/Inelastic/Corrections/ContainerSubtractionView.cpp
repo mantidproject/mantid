@@ -45,6 +45,8 @@ void ContainerSubtractionView::notifySampleDataReady(const QString &dataName) co
 }
 
 void ContainerSubtractionView::notifyCanDataReady(const QString &dataName) const {
+  QSignalBlocker blockSpShift(m_uiForm.spShift);
+  QSignalBlocker blockerSpCan(m_uiForm.spCanScale);
   m_uiForm.spShift->setValue(0.0);
   m_uiForm.spCanScale->setValue(1.0);
   m_presenter->handleCanReady(dataName.toStdString());
