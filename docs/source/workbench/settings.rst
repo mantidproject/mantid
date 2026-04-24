@@ -5,7 +5,8 @@ Settings
 ========
 
 .. image:: ../images/SettingsGeneral.png
-    :scale: 70%
+    :width: 600px
+    :height: 750px
     :align: right
     :alt: SettingsGeneral
 
@@ -24,6 +25,7 @@ General
 - Confirmations and Notifications: These settings enable and disable confirmation boxes to save scripts
   and projects and error notifications.
 - Project Recovery: These settings enable project recovery in case of a crash (recommended).
+- Editor: These settings toggle the auto-completion and dark theme display in the script editor.
 - Main Font: Edit the font type and size used for all of Workbench, except for the script editor and messages box.
 - Additional Window Behavior: This setting controls the behavior of additional windows in Workbench.
   When it is set to ontop, additional windows such as plot will be kept ontop of the workbench main window.

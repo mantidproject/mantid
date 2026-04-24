@@ -13,7 +13,7 @@ bar, multiple tabs for scripts, run and abort buttons and an options menu.
     :scale: 80%
 
 Editor Tabbing
----------------
+--------------
 
 .. image:: ../images/Workbench/Editor/EditorWidgetTabOptions.png
 
@@ -21,6 +21,15 @@ Click the **+** button to open a new tab (or use the :code:`Ctrl+N` keyboard sho
 script in a new tab, go to "File" -> "Open Script" (or use the :code:`Ctrl+O`
 keyboard shortcut). When opening the Workbench any script window tabs that were
 open last time it was closed will be restored.
+
+Editor Themes
+-------------
+
+.. image:: ../images/Workbench/Editor/EditorDarkTheme.png
+
+The script window supports a dark theme in addition to the default theme. To enable the dark theme, go to :ref:`settings<WorkbenchSettings>` and check the
+"Apply dark theme" option under the Editor group in the General settings tab. Click Apply and close the settings window.
+Click the **+** button to open a new tab (or use the :code:`Ctrl+N` keyboard shortcut). A new tab will open with the dark theme applied.
 
 Editor Options
 --------------

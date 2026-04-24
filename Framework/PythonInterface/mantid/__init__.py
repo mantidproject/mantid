@@ -29,6 +29,7 @@ import sys
 
 import site
 from .buildconfig import check_python_version
+import mantid.kernel.environment as mtd_env
 
 check_python_version()
 
@@ -75,7 +76,7 @@ if _bindir is None:
 
 # Windows doesn't have rpath settings so make sure the C-extensions can find the rest of the
 # mantid dlls. We assume they will be next to the properties file.
-if sys.platform == "win32":
+if mtd_env.is_windows():
     os.environ["PATH"] = _bindir + ";" + os.environ.get("PATH", "")
 # Make sure the config service loads this properties file
 os.environ["MANTIDPATH"] = _bindir

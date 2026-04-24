@@ -13,8 +13,8 @@ import glob
 import os
 import re
 import subprocess
-import sys
 import zipfile
+import mantid.kernel.environment as mtd_env
 
 
 def filter_filenames(all_datafiles, start, end):
@@ -101,11 +101,11 @@ def open_editor(filename, current_dir=None):
     else:
         current_path = filename
     if os.path.exists(current_path):
-        if sys.platform.startswith("win"):
+        if mtd_env.is_windows():
             subprocess.call(["cmd.exe", "/c", current_path])
-        elif sys.platform.startswith("linux"):
+        elif mtd_env.is_linux():
             subprocess.call(["xdg-open", current_path])
-        elif sys.platform == "darwin":
+        elif mtd_env.is_mac():
             subprocess.call(["open", current_path])
 
 

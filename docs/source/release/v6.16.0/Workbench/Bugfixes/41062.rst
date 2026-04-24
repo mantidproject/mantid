@@ -1,0 +1,1 @@
+- The :ref:`Script Editor<main_window>` of Mantid Workbench can now be toggled between the default light and a new dark theme via the General Settings on all platforms (macOS, Windows, Linux).

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.kernel import MemoryStats
-import sys
+import mantid.kernel.environment as mtd_env
 
 
 class MemoryStatsTest(unittest.TestCase):
@@ -20,7 +20,7 @@ class MemoryStatsTest(unittest.TestCase):
         self.assertTrue(mem.residentMem() > 0.0, "Value should be larger than 0.0")
         self.assertTrue(mem.virtualMem() > 0.0, "Value should be larger than 0.0")
         self.assertTrue(mem.getFreeRatio() > 0.0, "Value should be larger than 0.0")
-        if sys.platform == "win32":
+        if mtd_env.is_windows():
             self.assertTrue(mem.reservedMem() > 0.0, "Value should be larger than 0.0")
         else:
             self.assertEqual(mem.reservedMem(), 0.0, "Value should 0.0")

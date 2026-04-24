@@ -10,11 +10,12 @@ import sys
 import traceback
 
 from qtpy.QtCore import QObject, Qt, Signal
-from qtpy.QtGui import QColor, QFont, QFontMetrics
+from qtpy.QtGui import QFont, QFontMetrics, QColor
 from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
 from mantidqt.io import open_a_file_dialog
 from mantid.kernel import config
+from mantid.kernel import ConfigService
 from mantidqt.widgets.codeeditor.codecommenter import CodeCommenter
 from mantidqt.widgets.codeeditor.completion import CodeCompleter
 from mantidqt.widgets.codeeditor.editor import CodeEditor
@@ -28,7 +29,6 @@ RUNNING_STATUS_MSG = "Status: Running"
 ABORTED_STATUS_MSG = "Status: Aborted"
 
 # Editor
-CURRENTLINE_BKGD_COLOR = QColor(247, 236, 248)
 TAB_WIDTH = 4
 TAB_CHAR = "\t"
 SPACE_CHAR = " "
@@ -285,8 +285,14 @@ class PythonFileInterpreter(QWidget):
         editor.setTabWidth(TAB_WIDTH)
 
         # show current editing line but in a softer color
-        editor.setCaretLineBackgroundColor(CURRENTLINE_BKGD_COLOR)
+        if (ConfigService["editors.apply_dark_theme"].lower()) == "true":
+            editor.setCaretForegroundColor(QColor("white"))
+            editor.setCaretLineBackgroundColor(QColor(0, 52, 110))
+        else:
+            editor.setCaretForegroundColor(QColor("black"))
+            editor.setCaretLineBackgroundColor(QColor(247, 236, 248))
         editor.setCaretLineVisible(True)
+        editor.setCaretWidth(5)
 
         # set a margin large enough for sensible file sizes < 1000 lines
         # and the progress marker

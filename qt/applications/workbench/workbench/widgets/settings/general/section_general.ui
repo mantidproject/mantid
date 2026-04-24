@@ -392,20 +392,45 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5">
             <item>
-             <widget class="QCheckBox" name="completion_enabled">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <widget class="QGroupBox" name="editorSettingsGroup">
+            <property name="title">
+            <string>Editor</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_editorSettings">
+            <item>
+                <widget class="QCheckBox" name="completion_enabled">
+                <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Provide auto-completion suggestions in the script editor</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
+                </sizepolicy>
+                </property>
+                <property name="text">
+                <string>Provide auto-completion suggestions</string>
+                </property>
+                <property name="checked">
+                <bool>true</bool>
+                </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QCheckBox" name="apply_dark_theme_enabled">
+                <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+                </sizepolicy>
+                </property>
+                <property name="text">
+                <string>Apply dark theme</string>
+                </property>
+                <property name="checked">
+                <bool>false</bool>
+                </property>
+                </widget>
+            </item>
+            </layout>
+            </widget>
             </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_7">
