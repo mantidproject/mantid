@@ -20,7 +20,6 @@
 #   --enable-docs: Build the docs
 #   --enable-dev-docs: Build the developer docs
 #   --enable-doctests: Run the documentation tests
-#   --enable-coverity: Run coverity and submit results; ignores all other options and does not run unit tests
 #   --clean-build: Clear the build folder and build from scratch
 #
 # Possible parameters:
@@ -58,7 +57,6 @@ ENABLE_SYSTEM_TESTS=false
 ENABLE_DOCS=false
 ENABLE_DOC_TESTS=false
 ENABLE_DEV_DOCS=false
-ENABLE_COVERITY=false
 CLEAN_BUILD=false
 EXTRA_CMAKE_FLAGS="-DENABLE_PRECOMMIT=OFF"
 
@@ -89,10 +87,6 @@ do
             ENABLE_DOC_TESTS=true
             ;;
         --enable-dev-docs) ENABLE_DEV_DOCS=true ;;
-        --enable-coverity)
-            ENABLE_COVERITY=true
-            ENABLE_UNIT_TESTS=false
-	    ;;
         --clean-build) CLEAN_BUILD=true ;;
         --extra-cmake-flags)
             EXTRA_CMAKE_FLAGS="$2"
@@ -152,7 +146,7 @@ fi
 set -o pipefail
 
 # Run the script that handles the build
-pixi run --frozen bash -ex $SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" | tee $BUILD_DIR/test_logs/build_$OSTYPE.log
+pixi run --frozen bash -ex $SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS "$EXTRA_CMAKE_FLAGS" | tee $BUILD_DIR/test_logs/build_$OSTYPE.log
 
 # Return to original behaviour.
 set +o pipefail

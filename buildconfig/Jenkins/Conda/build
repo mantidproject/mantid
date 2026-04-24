@@ -12,8 +12,7 @@
 #   6. ENABLE_UNIT_TESTS: whether or not to build the unit tests target
 #   7. ENABLE_SYSTEM_TESTS: whether or not to build the system test data
 #   8. ENABLE_DOC_TESTS: whether or not to build the test data for doc tests
-#   9. ENABLE_COVERITY: enables the coverity scan static analysis
-#   10. EXTRA_CMAKE_FLAGS: Extra flags to pass directly to cmake, enclose in "".
+#   9. EXTRA_CMAKE_FLAGS: Extra flags to pass directly to cmake, enclose in "".
 
 WORKSPACE=$1
 CMAKE_PRESET=$2
@@ -23,8 +22,7 @@ ENABLE_BUILD_CODE=$5
 ENABLE_UNIT_TESTS=$6
 ENABLE_SYSTEM_TESTS=$7
 ENABLE_DOC_TESTS=$8
-ENABLE_COVERITY=$9
-EXTRA_CMAKE_FLAGS=${10}
+EXTRA_CMAKE_FLAGS=${9}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_MIRROR="$("${SCRIPT_DIR}/../data_mirrors")"
 
@@ -58,22 +56,6 @@ cd $WORKSPACE/build
 BUILD_OPTIONS=""
 if [ ! -f build.ninja ]; then
     BUILD_OPTIONS="-j20 --config Release"
-fi
-
-if [[ $ENABLE_COVERITY == true ]]; then
-    conda install -y jq curl
-
-    ${COVERITY_DIR}/cov-build --dir cov-int cmake --build . $BUILD_OPTIONS
-    tar czvf mantid.tgz cov-int
-
-    curl --fail-with-body -X POST -d version=$GIT_COMMIT -d email=mantidproject@gmail.com -d token=$COVERITY_TOKEN -d file_name="mantid.tgz" https://scan.coverity.com/projects/335/builds/init > response
-    cat response
-    upload_url=$(jq -r '.url' response)
-    build_id=$(jq -r '.build_id' response)
-    curl -f -X PUT --header 'Content-Type: application/json' --upload-file mantid.tgz $upload_url
-    curl -f -X PUT -d token=$COVERITY_TOKEN https://scan.coverity.com/projects/335/builds/$build_id/enqueue
-
-    exit 0
 fi
 
 if [[ $ENABLE_BUILD_CODE == true ]]; then

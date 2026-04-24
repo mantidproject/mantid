@@ -1,0 +1,101 @@
+name: Coverity
+
+on:
+  pull_request:
+    paths: # when editing workflow
+      - '.github/workflows/coverity.yml'
+  workflow_dispatch:
+    inputs:
+      RUNNER_LABEL:
+        description: 'Match Runner Label'
+        required: false
+        type: string
+  schedule:
+    - cron: 42 3 */2 * *
+
+# cancel previous job if a new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on:
+      - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
+      - self-hosted
+      - Linux
+      - X64
+      - coverity
+
+    env:
+      CMAKE_PRESET: linux-64-ci
+      EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
+      REPORT_FILE: "mantid.tar.gz"
+
+    steps:
+      - name: Print shell environment vars (debug)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          env -0 | while IFS='' read -d '' line ; do printf '%s\t: %s\n' "${line%%=*}" "${line#*=}" | expand -t 30 | sed ':a;N;$!ba;s/\n/ /g'; done | LC_COLLATE=C sort -b
+      #
+      # If this workflow was triggered manually,
+      # print a sorted list of all shell environment variables
+      #
+
+      - uses: actions/checkout@v6
+        with:
+          # Needed to fetch the tags for versioningit
+          fetch-depth: 100
+          fetch-tags: true
+
+      - name: Install pixi
+        run: |
+          source ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/pixi-utils
+          install_pixi
+          # Add pixi to path for use in other steps
+          echo "$HOME/.pixi/bin" >> $GITHUB_PATH
+
+      - name: Clean build tree
+        # supplying --clean-build deletes the build tree so everything is compiled
+        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE} --clean-build
+
+      - name: Configure coverity
+        run: |
+          pixi run --frozen ${COVERITY_DIR}/cov-configure --template --comptype prefix --compiler ccache
+          pixi run --frozen ${COVERITY_DIR}/cov-configure --template --comptype g++ --compiler x86_64-conda-linux-gnu-c++
+          pixi run --frozen ${COVERITY_DIR}/cov-configure --template --comptype gcc --compiler x86_64-conda-linux-gnu-cc
+
+      - name: Configure cmake
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          pixi run --frozen cmake --preset=${CMAKE_PRESET} ${EXTRA_CMAKE_FLAGS} -DMPI_BUILD=ON ${GITHUB_WORKSPACE}
+
+      - name: Build code
+        run: |
+          cd ${GITHUB_WORKSPACE}/build
+          echo "::add-matcher::.github/matchers/gcc.json"
+          pixi run --frozen ${COVERITY_DIR}/cov-build --dir cov-int cmake --build .
+          echo "::remove-matcher owner=gcc-problem-matcher::"
+
+      - name: Prepare result
+        run: |
+          cd ${GITHUB_WORKSPACE}/build
+          tar czvf ${REPORT_FILE} cov-int
+          ls -lah ${REPORT_FILE}
+          # verify the report is non-empty
+          if [ ! -s ${REPORT_FILE} ]; then
+            echo "${REPORT_FILE} does not exist with nonzero size"
+            exit 1
+          fi
+
+      - name: Upload result
+        # only run on schedule or workflow_dispatch when the secret is available
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          cd ${GITHUB_WORKSPACE}/build
+          curl --fail-with-body -X POST -d version=${{ github.ref }} -d email=mantidproject@gmail.com -d token=${{ secrets.COVERITY_TOKEN }} -d file_name="${REPORT_FILE}" https://scan.coverity.com/projects/335/builds/init > response
+          cat response
+          upload_url=$(jq -r '.url' response)
+          build_id=$(jq -r '.build_id' response)
+          curl -f -X PUT --header "Content-Type: application/json" --upload-file mantid.tgz $upload_url
+          curl -f -X PUT -d token=${{ secrets.COVERITY_TOKEN }} https://scan.coverity.com/projects/335/builds/$build_id/enqueue
