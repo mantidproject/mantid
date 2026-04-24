@@ -78,9 +78,11 @@ protected:
   std::string findProcessingInstructions(const Mantid::Geometry::Instrument_const_sptr &instrument,
                                          const Mantid::API::MatrixWorkspace_sptr &inputWS) const;
   /// Populate transmission properties
-  bool populateTransmissionProperties(const Mantid::API::IAlgorithm_sptr &alg) const;
+  bool populateTransmissionProperties(const Mantid::API::IAlgorithm_sptr &alg,
+                                      const MatrixWorkspace_sptr &flood = nullptr);
+  MatrixWorkspace_sptr runFloodCorrectionAlg(const MatrixWorkspace_sptr &flood, const MatrixWorkspace_sptr &ws);
   /// Given a algorithm workspace property name return the workspace, or if a group workspace, the first member.
-  const MatrixWorkspace_sptr getWorkspaceFromProperty(const std::string &propName) const;
+  MatrixWorkspace_sptr getWorkspaceFromProperty(const std::string &propName) const;
 
   /// Find theta from a named log value
   double getThetaFromLogs(const Mantid::API::MatrixWorkspace_sptr &inputWs, const std::string &logName) const;

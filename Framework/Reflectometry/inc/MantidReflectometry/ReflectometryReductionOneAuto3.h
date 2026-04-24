@@ -113,8 +113,7 @@ private:
   MatrixWorkspace_sptr cropQ(MatrixWorkspace_sptr inputWS, const RebinParams &params);
   /// Populate algorithmic correction properties
   void determineCorrectionAlgorithm(const Instrument_const_sptr &instrument);
-  void populateAlgorithmicCorrectionProperties(const Mantid::API::IAlgorithm_sptr &alg,
-                                               const Mantid::Geometry::Instrument_const_sptr &instrument);
+  void populateAlgorithmicCorrectionProperties(const Mantid::API::IAlgorithm_sptr &alg);
   std::string findPolarizationCorrectionMethod(const API::MatrixWorkspace_sptr &efficiencies);
   std::string findPolarizationCorrectionOption(const std::string &correctionMethod,
                                                const WorkspaceGroup_sptr &groupIvsLam);
@@ -125,8 +124,6 @@ private:
   WorkspaceGroup_sptr applyPolarizationCorrection(const WorkspaceGroup_sptr &outputIvsLam,
                                                   const std::string &outputGroupName);
   API::MatrixWorkspace_sptr getFloodWorkspace();
-  void applyFloodCorrection(const API::MatrixWorkspace_sptr &flood, const std::string &propertyName);
-  void applyFloodCorrections();
   std::string getSummedWorkspaceName(const std::string &wsPropertyName, const bool isTransWs = false);
   void sumBanksForWorkspace(const std::string &roiDetectorIDs, const std::string &wsPropertyName,
                             const bool isTransWs = false);
@@ -147,7 +144,7 @@ private:
   WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaceNames,
                                       std::string const &outputName = "");
   RROOutputs performCoreReduction(MatrixWorkspace_sptr inputWS, const std::vector<std::string> &taskOrder = {},
-                                  const bool runAsChild = true);
+                                  const bool runAsChild = true, const bool applyFloodCorrections = true);
   MatrixWorkspace_sptr postReductionProcessing(const RROOutputs &out, const RebinParams &params);
   void postReductionProcessingGroups(std::vector<RROOutputs> &outputs, std::vector<WorkspaceNames> const &outputNames,
                                      const WorkspaceNames &groupedOutputNames, const bool outputIvsLam);

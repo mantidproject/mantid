@@ -759,14 +759,17 @@ std::string ReflectometryWorkflowBase2::findProcessingInstructions(const Instrum
  * @param alg :: The algorithm to populate parameters for
  * @return Boolean, whether or not any transmission runs were found
  */
-bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm_sptr &alg) const {
+bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm_sptr &alg,
+                                                                const MatrixWorkspace_sptr &flood) {
   bool transRunsExist = false;
-  const auto &firstWS = getWorkspaceFromProperty("FirstTransmissionRun");
+  auto firstWS = getWorkspaceFromProperty("FirstTransmissionRun");
   if (firstWS) {
     transRunsExist = true;
+    firstWS = (flood) ? runFloodCorrectionAlg(flood, firstWS) : firstWS;
     alg->setProperty("FirstTransmissionRun", firstWS);
-    const auto &secondWS = getWorkspaceFromProperty("SecondTransmissionRun");
+    auto secondWS = getWorkspaceFromProperty("SecondTransmissionRun");
     if (secondWS) {
+      secondWS = (flood) ? runFloodCorrectionAlg(flood, secondWS) : secondWS;
       alg->setProperty("SecondTransmissionRun", secondWS);
       alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
       alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
@@ -778,7 +781,18 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm
   return transRunsExist;
 }
 
-const MatrixWorkspace_sptr ReflectometryWorkflowBase2::getWorkspaceFromProperty(const std::string &propName) const {
+MatrixWorkspace_sptr ReflectometryWorkflowBase2::runFloodCorrectionAlg(const MatrixWorkspace_sptr &flood,
+                                                                       const MatrixWorkspace_sptr &ws) {
+  auto alg = createChildAlgorithm("ApplyFloodWorkspace");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", ws);
+  alg->setProperty("FloodWorkspace", flood);
+  alg->execute();
+  MatrixWorkspace_sptr out = alg->getProperty("OutputWorkspace");
+  return out;
+}
+
+MatrixWorkspace_sptr ReflectometryWorkflowBase2::getWorkspaceFromProperty(const std::string &propName) const {
   const std::string str = getPropertyValue(propName);
   WorkspaceGroup_sptr transmissionGroup;
   if (!str.empty())

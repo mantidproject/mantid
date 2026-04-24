@@ -355,7 +355,13 @@ void ReflectometryReductionOneAuto3::init() {
 // Performs the reduction using ReflectometryReductionOne
 ReflectometryReductionOneAuto3::RROOutputs
 ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputWS,
-                                                     const std::vector<std::string> &taskOrder, const bool runAsChild) {
+                                                     const std::vector<std::string> &taskOrder, const bool runAsChild,
+                                                     const bool applyFloodCorrections) {
+  MatrixWorkspace_sptr flood = (applyFloodCorrections) ? getFloodWorkspace() : MatrixWorkspace_sptr{};
+  if (flood) {
+    inputWS = runFloodCorrectionAlg(flood, inputWS);
+  }
+
   auto instrument = inputWS->getInstrument();
   bool const isDebug = getProperty("Debug");
 
@@ -413,9 +419,9 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
   populateMonitorProperties(alg, instrument);
   alg->setPropertyValue("NormalizeByIntegratedMonitors", getPropertyValue("NormalizeByIntegratedMonitors"));
 
-  bool transRunsFound = populateTransmissionProperties(alg);
+  bool transRunsFound = populateTransmissionProperties(alg, flood);
   if (!transRunsFound)
-    populateAlgorithmicCorrectionProperties(alg, instrument);
+    populateAlgorithmicCorrectionProperties(alg);
 
   alg->setPropertyValue("SubtractBackground", getPropertyValue("SubtractBackground"));
   alg->setPropertyValue("BackgroundProcessingInstructions", getPropertyValue("BackgroundProcessingInstructions"));
@@ -511,7 +517,6 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::postReductionProcessing(con
 /** Execute the algorithm.
  */
 void ReflectometryReductionOneAuto3::exec() {
-  applyFloodCorrections();
   sumBanks();
   setDefaultOutputWorkspaceNames();
 
@@ -685,8 +690,7 @@ void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(const Instrume
  * @param alg :: ReflectometryReductionOne algorithm
  * @param instrument :: The instrument attached to the workspace
  */
-void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(const IAlgorithm_sptr &alg,
-                                                                             const Instrument_const_sptr &instrument) {
+void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(const IAlgorithm_sptr &alg) {
   if (m_correctionProperties.type == "PolynomialCorrection") {
     alg->setProperty("NormalizeByIntegratedMonitors", false);
     alg->setProperty("CorrectionAlgorithm", m_correctionProperties.type);
@@ -939,10 +943,10 @@ ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReduction
     if (reduced) {
       const auto &origProcessingInstructions = getPropertyValue("ProcessingInstructions");
       setPropertyValue("ProcessingInstructions", convertToSpectrumNumber("0", matrixWs));
-      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false));
+      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false, false));
       setPropertyValue("ProcessingInstructions", origProcessingInstructions);
     } else {
-      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false));
+      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false, false));
     }
   }
   return {.rroOutputs = allRROOutputs, .outputNames = allOutputNames};
@@ -1217,42 +1221,6 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace() {
     }
   }
   return MatrixWorkspace_sptr();
-}
-
-/**
- * Apply flood correction to a single data workspace.
- * @param flood :: The flood workspace.
- * @param propertyName :: Name of an input property containing a workspace
- *   that should be corrected. The corrected workspace replaces the old
- *   value of this property.
- */
-void ReflectometryReductionOneAuto3::applyFloodCorrection(const MatrixWorkspace_sptr &flood,
-                                                          const std::string &propertyName) {
-  MatrixWorkspace_sptr ws = getProperty(propertyName);
-  auto alg = createChildAlgorithm("ApplyFloodWorkspace");
-  alg->initialize();
-  alg->setProperty("InputWorkspace", ws);
-  alg->setProperty("FloodWorkspace", flood);
-  alg->execute();
-  MatrixWorkspace_sptr out = alg->getProperty("OutputWorkspace");
-  setProperty(propertyName, out);
-}
-
-/**
- * Apply flood correction to all workspaces that need to be corrected:
- * the input data and the transmission runs.
- */
-void ReflectometryReductionOneAuto3::applyFloodCorrections() {
-  MatrixWorkspace_sptr flood = getFloodWorkspace();
-  if (flood) {
-    applyFloodCorrection(flood, "InputWorkspace");
-    if (!isDefault("FirstTransmissionRun")) {
-      applyFloodCorrection(flood, "FirstTransmissionRun");
-    }
-    if (!isDefault("SecondTransmissionRun")) {
-      applyFloodCorrection(flood, "SecondTransmissionRun");
-    }
-  }
 }
 
 /**
