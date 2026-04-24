@@ -61,7 +61,7 @@ private:
 
   bool requestRebinToSample() const;
   void updateOutputName();
-  void updateNewDataEntry(const MatrixWorkspace_sptr &ws, const CSCurves &curve) const;
+  void updateNewDataEntry(const MatrixWorkspace_sptr &ws);
 
   std::unique_ptr<IContainerSubtractionModel> m_model;
   IContainerSubtractionView *m_view;

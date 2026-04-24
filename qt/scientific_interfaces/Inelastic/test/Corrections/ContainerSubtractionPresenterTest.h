@@ -60,12 +60,16 @@ public:
   void test_handle_sample_ready_updates_plot_for_new_valid_ws() {
     const auto testName = "test";
     const auto ws = m_workspace;
+    MatrixWorkspace_sptr ws_empty;
 
     ON_CALL(*m_model, sampleWS()).WillByDefault(ReturnRef(ws));
-    ON_CALL(*m_model, canWS()).WillByDefault(ReturnRef(ws));
+    ON_CALL(*m_model, canWS()).WillByDefault(ReturnRef(ws_empty));
+    ON_CALL(*m_model, modCanWS()).WillByDefault(ReturnRef(ws_empty));
+    ON_CALL(*m_model, subtractedWS()).WillByDefault(ReturnRef(ws_empty));
     EXPECT_CALL(*m_model, setSampleWS(testName)).Times(Exactly(1));
     EXPECT_CALL(*m_model, removeSubtractedWS()).Times(Exactly(1));
     EXPECT_CALL(*m_view, setSpMax(4)).Times(Exactly(1));
+    EXPECT_CALL(*m_view, clearPlot()).Times(Exactly(1));
     EXPECT_CALL(*m_view, plotSpectrum(CSCurves::SAMPLE, ws, 0)).Times(Exactly(1));
 
     m_presenter->handleSampleReady(testName);
@@ -74,12 +78,16 @@ public:
   void test_handle_can_ready_updates_plot_for_new_valid_ws() {
     const auto testName = "test";
     const auto ws = m_workspace;
+    MatrixWorkspace_sptr ws_empty;
 
     ON_CALL(*m_model, canWS()).WillByDefault(ReturnRef(ws));
-    ON_CALL(*m_model, sampleWS()).WillByDefault(ReturnRef(ws));
+    ON_CALL(*m_model, sampleWS()).WillByDefault(ReturnRef(ws_empty));
+    ON_CALL(*m_model, modCanWS()).WillByDefault(ReturnRef(ws_empty));
+    ON_CALL(*m_model, subtractedWS()).WillByDefault(ReturnRef(ws_empty));
     EXPECT_CALL(*m_model, setCanWS(testName)).Times(Exactly(1));
     EXPECT_CALL(*m_model, removeSubtractedWS()).Times(Exactly(1));
     EXPECT_CALL(*m_view, setSpMax(4)).Times(Exactly(1));
+    EXPECT_CALL(*m_view, clearPlot()).Times(Exactly(1));
     EXPECT_CALL(*m_view, plotSpectrum(CSCurves::CONTAINER, ws, 0)).Times(Exactly(1));
 
     m_presenter->handleCanReady(testName);
@@ -87,14 +95,19 @@ public:
 
   void test_handle_can_ready_does_not_update_plot_for_invalid_ws() {
     const auto testName = "test";
-    const MatrixWorkspace_sptr ws;
+    const MatrixWorkspace_sptr ws_empty;
 
-    ON_CALL(*m_model, canWS()).WillByDefault(ReturnRef(ws));
-    ON_CALL(*m_model, sampleWS()).WillByDefault(ReturnRef(ws));
+    ON_CALL(*m_model, canWS()).WillByDefault(ReturnRef(ws_empty));
+    ON_CALL(*m_model, sampleWS()).WillByDefault(ReturnRef(ws_empty));
+    ON_CALL(*m_model, modCanWS()).WillByDefault(ReturnRef(ws_empty));
+    ON_CALL(*m_model, subtractedWS()).WillByDefault(ReturnRef(ws_empty));
     EXPECT_CALL(*m_model, setCanWS(testName)).Times(Exactly(1));
     EXPECT_CALL(*m_model, removeSubtractedWS()).Times(Exactly(0));
     EXPECT_CALL(*m_view, setSpMax(4)).Times(Exactly(0));
-    EXPECT_CALL(*m_view, plotSpectrum(CSCurves::CONTAINER, ws, 0)).Times(Exactly(0));
+    EXPECT_CALL(*m_view, clearPlot()).Times(Exactly(0));
+    EXPECT_CALL(*m_view, plotSpectrum(CSCurves::SAMPLE, ws_empty, 0)).Times(Exactly(0));
+    EXPECT_CALL(*m_view, plotSpectrum(CSCurves::CONTAINER, ws_empty, 0)).Times(Exactly(0));
+    EXPECT_CALL(*m_view, plotSpectrum(CSCurves::SUBTRACTED, ws_empty, 0)).Times(Exactly(0));
 
     m_presenter->handleCanReady(testName);
   }

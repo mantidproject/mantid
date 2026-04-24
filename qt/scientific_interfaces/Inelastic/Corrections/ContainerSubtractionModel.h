@@ -33,7 +33,7 @@ class MANTIDQT_INELASTIC_DLL ContainerSubtractionModel final : public IContainer
 
 public:
   ContainerSubtractionModel();
-  ~ContainerSubtractionModel() override;
+  ~ContainerSubtractionModel() override = default;
 
   void setSampleWS(const std::string &name) override;
   void setCanWS(const std::string &name) override;

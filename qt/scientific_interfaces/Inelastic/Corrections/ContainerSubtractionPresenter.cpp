@@ -131,23 +131,23 @@ void ContainerSubtractionPresenter::updateOutputName() {
 
 void ContainerSubtractionPresenter::handleCanReady(const std::string &dataName) {
   m_model->setCanWS(dataName);
-  updateNewDataEntry(m_model->canWS(), CSCurves::CONTAINER);
+  updateNewDataEntry(m_model->canWS());
   updateOutputName();
 }
 
 void ContainerSubtractionPresenter::handleSampleReady(const std::string &dataName) {
   m_model->setSampleWS(dataName);
-  updateNewDataEntry(m_model->sampleWS(), CSCurves::SAMPLE);
+  updateNewDataEntry(m_model->sampleWS());
   updateOutputName();
 }
 
-void ContainerSubtractionPresenter::updateNewDataEntry(const MatrixWorkspace_sptr &ws, const CSCurves &curve) const {
+void ContainerSubtractionPresenter::updateNewDataEntry(const MatrixWorkspace_sptr &ws) {
   if (ws) {
     m_model->removeSubtractedWS();
     const auto maxWsIndex = static_cast<int>(ws->getNumberHistograms() - 1);
     const auto max = m_view->getSpMax() != 0 ? std::min(maxWsIndex, m_view->getSpMax()) : maxWsIndex;
     m_view->setSpMax(max);
-    m_view->plotSpectrum(curve, ws, 0);
+    updatePlot(0);
   }
 }
 
