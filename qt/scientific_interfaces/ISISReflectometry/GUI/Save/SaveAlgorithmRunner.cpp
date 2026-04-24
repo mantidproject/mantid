@@ -8,6 +8,8 @@
 #include "SaveAlgorithmRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -30,7 +32,8 @@ void SaveAlgorithmRunner::runSaveAsciiAlgorithm(const Mantid::API::Workspace_spt
 void SaveAlgorithmRunner::runSaveORSOAlgorithm(std::vector<std::string> const &workspaceNames,
                                                std::string const &savePath, const bool &includeQResolution,
                                                const bool &includeAdditionalColumns,
-                                               std::string const &modelDescription, const bool &validateModel) const {
+                                               std::string const &modelDescription, const bool &validateModel,
+                                               const std::string &metaSource) const {
   auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveISISReflectometryORSO");
   alg->setRethrows(true);
   alg->setProperty("WorkspaceList", workspaceNames);
@@ -39,6 +42,15 @@ void SaveAlgorithmRunner::runSaveORSOAlgorithm(std::vector<std::string> const &w
   alg->setProperty("IncludeAdditionalColumns", includeAdditionalColumns);
   alg->setProperty("ModelDescription", modelDescription);
   alg->setProperty("ValidateModel", validateModel);
-  alg->execute();
+  if (metaSource == "History") {
+    alg->execute();
+    return;
+  }
+  API::InterfaceManager interfaceManager;
+  auto dialog = dynamic_cast<MantidQt::API::AlgorithmDialog *>(interfaceManager.createDialog(alg));
+  dialog->setModal(true);
+  dialog->show();
+  dialog->raise();
+  dialog->activateWindow();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
