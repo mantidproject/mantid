@@ -22,7 +22,7 @@ extern "C" void disable_mem_override();
 struct MockMemory {
   /// @brief Patch the available memory while in scope
   /// @param value The amount of available memory, in kiB, that will be reported.  Default 12 kiB.
-  MockMemory(std::size_t value = g_default_value) : m_value(value) { enable_mem_override(value); }
+  MockMemory(std::size_t value = g_default_value) : m_value(value) { enable_mem_override(m_value); }
   ~MockMemory() { disable_mem_override(); }
   // delete copies and moves to fill out rule-of-five
   MockMemory(MockMemory const &) = delete;
@@ -33,13 +33,12 @@ struct MockMemory {
   std::size_t numberOfFloats() const {
     return static_cast<std::size_t>(static_cast<double>(m_value * 1024) / sizeof(double) + 1);
   }
-
-private:
-  std::size_t m_value{g_default_value};
 #else
   // a very large number, sure to always exhaust memory
   std::size_t numberOfFloats() const { return static_cast<std::size_t>(1e12); }
 #endif
+private:
+  std::size_t m_value{g_default_value};
 };
 
 } // namespace Mantid::TestMemory
