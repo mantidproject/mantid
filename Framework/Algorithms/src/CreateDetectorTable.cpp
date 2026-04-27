@@ -48,7 +48,9 @@ void CreateDetectorTable::init() {
                       std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
 
   declareProperty<bool>("OneRowPerDetectorID", false,
-                        "Order rows in table by detector IDs, with each detector ID having its own row.",
+                        "Order rows in table by detector IDs, with each detector ID having its own row. When "
+                        "OneRowPerDetectorID=true the table iterates over all detector IDs, so WorkspaceIndices is "
+                        "ignored and the row count equals the detector count.",
                         Direction::Input);
   setPropertySettings("OneRowPerDetectorID",
                       std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
