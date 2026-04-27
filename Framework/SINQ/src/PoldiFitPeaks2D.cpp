@@ -35,6 +35,11 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+namespace {
+// The logger object
+Mantid::Kernel::Logger g_log("PoldiFitPeaks2D");
+} // namespace
+
 namespace Mantid::Poldi {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PoldiFitPeaks2D)
@@ -266,7 +271,7 @@ PoldiFitPeaks2D::getNormalizedPeakCollection(const PoldiPeakCollection_sptr &pea
   for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = peakCollection->peak(i);
     double calculatedIntensity = m_timeTransformer->calculatedTotalIntensity(peak->d());
-
+    g_log.notice() << "peak index: " << i << " , calc intenisty: " << calculatedIntensity << "\n";
     PoldiPeak_sptr normalizedPeak = peak->clonePeak();
     normalizedPeak->setIntensity(peak->intensity() / calculatedIntensity);
     normalizedPeakCollection->addPeak(normalizedPeak);
