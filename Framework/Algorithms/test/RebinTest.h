@@ -118,6 +118,8 @@ public:
     TS_ASSERT(errmsg->second.substr(0, 20) == "Provided width value");
   }
 
+// NOTE this test will only run on linux, as it requires the availMem patch to work
+#if defined(__linux__) || defined(__gnu_linux__)
   void testIsMocked() {
     constexpr std::size_t newMem{25};
     size_t mem1 = Mantid::Kernel::MemoryStats().availMem();
@@ -130,15 +132,15 @@ public:
     std::size_t mem2 = Mantid::Kernel::MemoryStats().availMem();
     TS_ASSERT_LESS_THAN(newMem, mem2);
   }
+#endif
 
   void test_failure_too_much_memory() {
     Mantid::TestMemory::MockMemory memL; // patch the available memory calculator
+    size_t numBins = memL.numberOfFloats();
     // ensure that rebinning will fail if the number of bins requested is expected to exceed available memory
     Rebin rebin;
     // Linear case
     rebin.initialize();
-    size_t memInKiB = Mantid::Kernel::MemoryStats().availMem();
-    size_t numBins = memInKiB * 1024 / sizeof(double) + 1; // one more than can fit in memory
     double binWidth = 1.0;
     double start = 1.0;
     double end = start + static_cast<double>(numBins) * binWidth;

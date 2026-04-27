@@ -6,14 +6,14 @@
 // SPDX-License-Identifier: GPL-3.0+
 
 #include "MantidFrameworkTestHelpers/MockMemory.h"
+
+// only define the methods for the patch if using Linux
+#if defined(__linux__) || defined(__gnu_linux__)
+
 #include "MantidKernel/Memory.h"
 
 #include <atomic>
-#if defined(_WIN32) || defined(_WIN64)
-#include <windows.h>
-#else
 #include <dlfcn.h>
-#endif
 #include <stdexcept>
 
 namespace {
@@ -24,47 +24,21 @@ static std::atomic<std::size_t> g_value{Mantid::TestMemory::g_default_value}; //
 static std::once_flag g_init_flag;
 
 static void init_real_availMem() {
+  // NOTE: begin Deep Magic
   // if not set, set the real function for availMem by looking up its mangled name in the symbol list
   std::call_once(g_init_flag, []() {
-  // NOTE: The following is Deep Magic.
-#if defined(_WIN32) || defined(_WIN64) // windows
-    HMODULE hModule = GetModuleHandleA(nullptr);
-    if (hModule) {
-      // char const *const func_name = "?availMem@MemoryStats@Kernel@Mantid@@QEBA_KXZ";
-      char const *const func_name = "Mantid_TestMemory_get_real_availMem";
-      FARPROC proc = GetProcAddress(hModule, func_name);
-      if (proc) {
-        using Getter = void *(*)();
-        try {
-          Getter getter = reinterpret_cast<Getter>(proc);
-          void *raw = getter();
-          g_real_availMem.store(reinterpret_cast<AvailMemFunc>(raw));
-        } catch (...) {
-          throw std::runtime_error("Failed to cast or call the original MemoryStats::availMem");
-        }
-      } else {
-        throw std::runtime_error("Failed to locate the original MemoryStats::availMem");
-      }
-    } else {
-      throw std::runtime_error("Failed to get module handle for MemoryStats::availMem");
-    }
-#else // unix
+    // the mangled name may be found with: nm -D bin/libMantidKernel.so | grep availMem
     char const *const mangled = "_ZNK6Mantid6Kernel11MemoryStats8availMemEv";
-#if defined(__linux__) || defined(__gnu_linux__)
     void *sym = dlsym(RTLD_NEXT, mangled);
-#else // on MacOS or other, should use RLTD_DEFAULT
-    void *sym = dlsym(RTLD_DEFAULT, mangled);
-#endif
-    // try fallback to default if not found
+    // fallback to RTLD_DEFAULT if still not found
     if (!sym) {
       sym = dlsym(RTLD_DEFAULT, mangled);
     }
     if (sym) {
       g_real_availMem.store(reinterpret_cast<AvailMemFunc>(sym));
     }
-#endif // win32 or unix
-    // end deep magic
   });
+  // end Deep Magic
 }
 } // namespace
 
@@ -76,10 +50,10 @@ extern "C" void enable_mem_override(std::size_t value) {
 extern "C" void disable_mem_override() { g_override_availMem.store(false); }
 } // namespace Mantid::TestMemory
 
-// this is a patched availMem which will be used in testing
+// this is a patched availMem which will be used in testing.
 // when g_override_availMem has been set, it will return a fixed value
-// otherwise, it will prepare the real function from symbol lookup, and
-// return the actual memory count
+// otherwise, it will prepare the real function from symbol lookup,
+// and return the actual memory count
 std::size_t Mantid::Kernel::MemoryStats::availMem() const {
   if (g_override_availMem.load()) {
     return g_value;
@@ -93,3 +67,9 @@ std::size_t Mantid::Kernel::MemoryStats::availMem() const {
     }
   }
 }
+#else
+namespace Mantid::TestMemory {
+extern "C" void enable_mem_override(std::size_t value) { UNUSED_ARG(value); }
+extern "C" void disable_mem_override() {}
+} // namespace Mantid::TestMemory
+#endif
