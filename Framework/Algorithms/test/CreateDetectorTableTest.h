@@ -55,7 +55,7 @@ public:
     TS_ASSERT_EQUALS(props[3]->name(), "IncludeDetectorPosition");
     TS_ASSERT(props[3]->isDefault());
 
-    TS_ASSERT_EQUALS(props[4]->name(), "OneDetectorIdPerRow");
+    TS_ASSERT_EQUALS(props[4]->name(), "OneRowPerDetectorID");
     TS_ASSERT(props[4]->isDefault());
 
     TS_ASSERT_EQUALS(props[5]->name(), "DetectorTableWorkspace");
@@ -282,7 +282,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OneDetectorIdPerRow", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OneRowPerDetectorID", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -468,7 +468,7 @@ public:
   }
 
   void test_populateTableByDetID_row_count_unconstrained_by_workspace_indices() {
-    // When OneDetectorIdPerRow=true the table iterates over all detector IDs,
+    // When OneRowPerDetectorID=true the table iterates over all detector IDs,
     // so WorkspaceIndices is ignored and the row count equals the detector count.
     Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10);
     std::string outWSName = "pick_one_det_row_count";
@@ -477,7 +477,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndices", "1"));     // only index 1 requested…
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OneDetectorIdPerRow", true)); // …but this path ignores it
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OneRowPerDetectorID", true)); // …but this path ignores it
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -502,7 +502,7 @@ public:
     CreateDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OneDetectorIdPerRow", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OneRowPerDetectorID", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -533,7 +533,7 @@ public:
     CreateDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OneDetectorIdPerRow", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OneRowPerDetectorID", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
