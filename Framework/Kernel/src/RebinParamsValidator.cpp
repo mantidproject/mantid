@@ -83,10 +83,10 @@ std::string RebinParamsValidator::checkValidity(const std::vector<double> &value
         }
         previousBoundary = nextBoundary;
       } // end for checking bins/boundaries
-      size_t memInBytes = MemoryStats().availMem() * 1024;
-      size_t binSpaceInBytes = numBins * sizeof(double);
+      double memInBytes = static_cast<double>(MemoryStats().availMem() * 1024);
+      double binSpaceInBytes = static_cast<double>(numBins * sizeof(double));
       if (binSpaceInBytes > memInBytes) {
-        size_t bytesInGB = 1'000'000'000;
+        double bytesInGB = 1e9;
         error = "The number of bins requested is expected to exceed available memory. "
                 "This binning requires approximately " +
                 std::to_string(binSpaceInBytes / bytesInGB) + " GB of memory, but only " +
