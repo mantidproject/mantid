@@ -80,48 +80,30 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         self.assertEqual([], x_values)
         self.assertEqual([], labels)
 
-    # @mock.patch("instrumentview.Peaks.WorkspaceDetectorPeaks.AnalysisDataService")
-    # def test_peaks_with_spectrum_multiple_detectors(self, peaks_mock_ads):
-    #     # We want to test the case where a peaks workspace has a
-    #     # detector ID that is not in the model. This can happen when
-    #     # an instrument has multiple detector IDs per spectrum. The
-    #     # spectrum number should be used instead
-    #     test_detector_id = 4
-    #     test_spectrum_no = 1
-    #
-    #     # Detector ID 4 is workspace index 2
-    #     def mock_getIndicesFromDetectorIDs(ids):
-    #         return [2]
-    #
-    #     mock_ws = mock.MagicMock()
-    #     mock_ws.getIndicesFromDetectorIDs = mock_getIndicesFromDetectorIDs
-    #
-    #     mock_peaks_ws = mock.MagicMock()
-    #     mock_peaks_ws.toDict.return_value = {
-    #         "DetID": [test_detector_id],
-    #         "h": [2],
-    #         "k": [2],
-    #         "l": [2],
-    #         "DSpacing": [10],
-    #         "Wavelength": [10],
-    #         "TOF": [10],
-    #     }
-    #     peaks_mock_ads.retrieve.return_value = mock_peaks_ws
-    #
-    #     # Everything on spectrum number 1
-    #     spectrum_nos = np.array([test_spectrum_no, test_spectrum_no, test_spectrum_no])
-    #     # Should get one peak with detector ID 4 and spectrum
-    #     # number 1
-    #     wdp = WorkspaceDetectorPeaks("dummy")
-    #     self.assertEqual(1, len(wdp.detector_peaks))
-    #     detector_peak = wdp.detector_peaks[0]
-    #     self.assertEqual(1, len(detector_peak.peaks))
-    #     self.assertEqual(test_detector_id, detector_peak.detector_id)
-    #     self.assertEqual("(2, 2, 2)", detector_peak.label)
-    #     self.assertEqual(test_spectrum_no, detector_peak.spectrum_no)
-    #     single_peak = detector_peak.peaks[0]
-    #     self.assertEqual(test_detector_id, single_peak.detector_id)
-    #     self.assertEqual(test_spectrum_no, single_peak.spectrum_no)
+    @mock.patch("instrumentview.Peaks.WorkspaceDetectorPeaks.AnalysisDataService")
+    def test_peaks_read_from_ads_workspace(self, peaks_mock_ads):
+        test_detector_id = 4
+
+        mock_peaks_ws = mock.MagicMock()
+        mock_peaks_ws.toDict.return_value = {
+            "DetID": [4],
+            "h": [2],
+            "k": [2],
+            "l": [2],
+            "DSpacing": [10],
+            "Wavelength": [10],
+            "TOF": [10],
+        }
+        peaks_mock_ads.retrieve.return_value = mock_peaks_ws
+
+        wdp = WorkspaceDetectorPeaks("dummy")
+        self.assertEqual(1, len(wdp.detector_peaks))
+        detector_peak = wdp.detector_peaks[0]
+        self.assertEqual(1, len(detector_peak.peaks))
+        self.assertEqual(test_detector_id, detector_peak.detector_id)
+        self.assertEqual("(2, 2, 2)", detector_peak.label)
+        single_peak = detector_peak.peaks[0]
+        self.assertEqual(test_detector_id, single_peak.detector_id)
 
 
 if __name__ == "__main__":

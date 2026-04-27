@@ -45,17 +45,6 @@ class WorkspaceDetectorPeaks:
         labels = [p.label for i, p in enumerate(self.detector_peaks)]
         return detector_positions[idx], labels
 
-        # sorted_idx = np.argsort(spectrum_nos)
-        # sorted_spectrum_nos = spectrum_nos[sorted_idx]
-        # positions = np.searchsorted(sorted_spectrum_nos, peaks_spectrum_nos)
-        # # Map back to original indices
-        # ordered_indices = sorted_idx[positions]
-        # valid = sorted_spectrum_nos[positions] == peaks_spectrum_nos
-        # ordered_indices = ordered_indices[valid]
-        # labels = [p.label for i, p in enumerate(self.detector_peaks) if valid[i]]
-        # return detector_positions[ordered_indices], labels
-        #
-
     def get_x_values_and_labels(self, unit, picked_detector_ids) -> tuple[list, list]:
         # x values for vertical markers in lineplot
         picked_peaks = [p for peak in self.detector_peaks for p in peak.peaks if peak.detector_id in picked_detector_ids]
