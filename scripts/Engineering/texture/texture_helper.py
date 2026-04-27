@@ -15,6 +15,8 @@ from mantid.simpleapi import (
     CombineTableWorkspaces,
     ConjoinWorkspaces,
     RebinToWorkspace,
+    SaveAscii,
+    ExtractSingleSpectrum,
 )
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence
@@ -518,3 +520,13 @@ def _retrieve_ws_object(ws: str | Workspace2D | TableWorkspace):
     if isinstance(ws, str):
         return ADS.retrieve(ws)
     return ws
+
+
+def save_texture_ws_ascii(ws: str | Workspace2D, save_dir: str):
+    try:
+        SaveAscii(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")
+    except RuntimeError:
+        logger.notice(f"Failed to save {ws} as a txt file, Rebinning all spectra to match first spectrum")
+        single_spec = ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace="__single_spec", WorkspaceIndex=0, StoreInADS=False)
+        ascii_ws = RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=single_spec, OutputWorkspace="ascii_ws")
+        SaveAscii(InputWorkspace=ascii_ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")

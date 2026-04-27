@@ -6,8 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 import unittest
+import tempfile
+import os
 from unittest.mock import patch, MagicMock, call, mock_open
 from mantid.api import AnalysisDataService as ADS
+from mantid.simpleapi import CreateWorkspace, ConjoinWorkspaces
 from Engineering.texture.texture_helper import (
     load_all_orientations,
     _read_xml,
@@ -20,6 +23,7 @@ from Engineering.texture.texture_helper import (
     plot_pole_figure,
     _retrieve_ws_object,
     get_debug_info,
+    save_texture_ws_ascii,
 )
 import numpy as np
 from os import path
@@ -446,6 +450,48 @@ class TestDebugInfo(unittest.TestCase):
         self.assertEqual(len(labels), 2)
         self.assertEqual("Alpha: 1.0, Beta: 2.0, I: 1.0", labels[0])
         self.assertEqual("Alpha: 1.0, Beta: 0.0, I: 2.0", labels[1])
+
+
+class TestSaveTextureWsAscii(unittest.TestCase):
+    def setUp(self):
+        self.save_dir = tempfile.mkdtemp()
+        self.ws_name = "test_ws"
+
+    def tearDown(self):
+        for name in [self.ws_name, "ascii_ws", "__single_spec", "__spec_a", "__spec_b"]:
+            if ADS.doesExist(name):
+                ADS.remove(name)
+        for f in os.listdir(self.save_dir):
+            os.remove(os.path.join(self.save_dir, f))
+        os.rmdir(self.save_dir)
+
+    def test_save_uniform_bins_creates_file(self):
+        # Workspace with matching X bins on all spectra — SaveAscii succeeds directly.
+        x = [1.0, 2.0, 3.0, 1.0, 2.0, 3.0]
+        y = [1.0, 2.0, 1.0, 2.0]
+        CreateWorkspace(DataX=x, DataY=y, NSpec=2, OutputWorkspace=self.ws_name)
+
+        save_texture_ws_ascii(self.ws_name, self.save_dir)
+
+        expected = os.path.join(self.save_dir, self.ws_name + ".txt")
+        self.assertTrue(os.path.isfile(expected), f"Expected output file not found: {expected}")
+
+    def test_save_ragged_bins_creates_file_via_rebin_fallback(self):
+        # Workspace with mismatched bin counts throws and,
+        # triggers rebin fallback.
+        CreateWorkspace(DataX=[1.0, 2.0, 3.0], DataY=[1.0, 2.0], NSpec=1, OutputWorkspace="__spec_a")
+        CreateWorkspace(DataX=[1.0, 2.0, 3.0, 4.0], DataY=[1.0, 2.0, 3.0], NSpec=1, OutputWorkspace="__spec_b")
+        ConjoinWorkspaces(
+            InputWorkspace1="__spec_a",
+            InputWorkspace2="__spec_b",
+            CheckOverlapping=False,
+            CheckMatchingBins=False,
+        )
+
+        save_texture_ws_ascii("__spec_a", self.save_dir)
+
+        expected = os.path.join(self.save_dir, "__spec_a.txt")
+        self.assertTrue(os.path.isfile(expected), f"Expected output file not found: {expected}")
 
 
 if __name__ == "__main__":
