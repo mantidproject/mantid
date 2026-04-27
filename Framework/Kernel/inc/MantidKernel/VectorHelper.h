@@ -96,9 +96,7 @@ MANTID_KERNEL_DLL void smoothInRange(const std::vector<double> &input, std::vect
  * @return length of the vector
  */
 template <typename T> T lengthVector(const std::vector<T> &x) {
-  T total = 0;
-  for (size_t i = 0; i < x.size(); i++)
-    total += x[i] * x[i];
+  T total = std::accumulate(x.cbegin(), x.cend(), static_cast<T>(0), SumSquares<T>());
   // Length is sqrt
   total = sqrt(total);
   return total;

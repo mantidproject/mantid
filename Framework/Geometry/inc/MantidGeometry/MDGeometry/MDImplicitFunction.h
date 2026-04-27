@@ -92,11 +92,9 @@ public:
    * @return true if it is contained in the implicit function.
    */
   virtual bool isPointContained(const coord_t *coords) {
-    for (size_t i = 0; i < m_numPlanes; i++) {
-      if (!m_planes[i].isPointBounded(coords))
-        return false;
-    }
-    return true;
+    const auto it = std::find_if(m_planes.begin(), m_planes.end(),
+                                 [coords](const MDPlane &plane) { return !plane.isPointBounded(coords); });
+    return it == m_planes.end();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -108,11 +106,9 @@ public:
    * @return true if it is contained in the implicit function.
    */
   virtual bool isPointContained(const Mantid::Kernel::VMD &coords) {
-    for (size_t i = 0; i < m_numPlanes; i++) {
-      if (!m_planes[i].isPointBounded(coords))
-        return false;
-    }
-    return true;
+    const auto it = std::find_if(m_planes.begin(), m_planes.end(),
+                                 [coords](const MDPlane &plane) { return !plane.isPointBounded(coords); });
+    return it == m_planes.end();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -124,11 +120,9 @@ public:
    * @return true if it is contained in the implicit function.
    */
   virtual bool isPointContained(const std::vector<coord_t> &coords) {
-    for (size_t i = 0; i < m_numPlanes; i++) {
-      if (!m_planes[i].isPointBounded(coords))
-        return false;
-    }
-    return true;
+    const auto it = std::find_if(m_planes.begin(), m_planes.end(),
+                                 [coords](const MDPlane &plane) { return !plane.isPointBounded(coords); });
+    return it == m_planes.end();
   }
 
   //----------------------------------------------------------------------------------------------

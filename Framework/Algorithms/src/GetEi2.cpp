@@ -506,19 +506,17 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
   auto nyvals = static_cast<int64_t>(peak_y.size());
   if (peak_y[nyvals - 1] < hby2) {
     int64_t ip1(0), ip2(0);
-    for (int64_t i = ipk_int; i < nyvals; ++i) {
-      if (peak_y[i] < hby2) {
-        // after this point the intensity starts to go below half-height
-        ip1 = i - 1;
-        break;
-      }
+    auto it = std::find_if(peak_y.cbegin() + ipk_int, peak_y.cend(), [hby2](const double y) { return y < hby2; });
+    if (it != peak_y.cend()) {
+      // after this point the intensity starts to go below half-height
+      ip1 = static_cast<int64_t>(std::distance(peak_y.cbegin(), it)) - 1;
     }
-    for (int64_t i = nyvals - 1; i >= ipk_int; --i) {
-      if (peak_y[i] > hby2) {
-        ip2 = i + 1; //   ! point closest to peak after which the intensity is
-                     //   always below half height
-        break;
-      }
+    auto rit_end = std::make_reverse_iterator(peak_y.cbegin() + ipk_int);
+    auto rit = std::find_if(peak_y.crbegin(), rit_end, [hby2](const double y) { return y > hby2; });
+    if (rit != rit_end) {
+      //   ! point closest to peak after which the intensity is
+      //   always below half height
+      ip2 = nyvals - static_cast<int64_t>(std::distance(peak_y.crbegin(), rit));
     }
     // A broad peak with many local maxima on the side can cause the algorithm to give the same indices for the two
     // points (ip1 and ip2) either side of the half-width point. Noise may also result in equal y values for different
@@ -544,19 +542,19 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
   double xm_hh(0);
   if (peak_y[0] < hby2) {
     int64_t im1(0), im2(0);
-    for (int64_t i = ipk_int; i >= 0; --i) {
-      if (peak_y[i] < hby2) {
-        im1 = i + 1; // ! before this point the intensity starts to go below
-                     // half-height
-        break;
-      }
+    auto rit_begin = std::make_reverse_iterator(peak_y.cbegin() + ipk_int + 1);
+    auto rit = std::find_if(rit_begin, peak_y.crend(), [hby2](double y) { return y < hby2; });
+    if (rit != peak_y.crend()) {
+      // ! before this point the intensity starts to go below
+      // half-height
+      // rit.base() points one past the found element
+      im1 = static_cast<int64_t>(rit.base() - peak_y.cbegin());
     }
-    for (int64_t i = 0; i <= ipk_int; ++i) {
-      if (peak_y[i] > hby2) {
-        im2 = i - 1; // ! point closest to peak before which the intensity is
-                     // always below half height
-        break;
-      }
+    auto it = std::find_if(peak_y.cbegin(), peak_y.cbegin() + ipk_int + 1, [hby2](double y) { return y > hby2; });
+    if (it != peak_y.cbegin() + ipk_int + 1) {
+      // ! point closest to peak before which the intensity is
+      // always below half height
+      im2 = static_cast<int64_t>(std::distance(peak_y.cbegin(), it)) - 1;
     }
     // A broad peak with many local maxima on the side can cause the algorithm to give the same indices for the two
     // points (im1 and im2) either side of the half-width point. Noise may also result in equal y values for different
