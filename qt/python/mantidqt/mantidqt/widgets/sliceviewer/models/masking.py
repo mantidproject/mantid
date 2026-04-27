@@ -103,6 +103,17 @@ class RectCursorInfo(RectCursorInfoBase):
         return [row]
 
 
+class RectCursorInvertedInfo(RectCursorInfoBase):
+    def __init__(self, click, release, transpose):
+        super().__init__(click, release, transpose)
+
+    def generate_table_rows(self):
+        x_data, y_data = self.get_xy_data()
+        y_min, y_max = self.snap_to_bin_centre(y_data[0]), self.snap_to_bin_centre(y_data[-1])
+        row = TableRow(spec_list=f"{y_min}-{y_max}", x_min=x_data[0], x_max=x_data[-1])
+        return [row]
+
+
 class ElliCursorInfo(RectCursorInfoBase):
     def __init__(self, click, release, transpose):
         super().__init__(click, release, transpose)
@@ -238,6 +249,7 @@ class MaskingModel:
         self._active_mask = None
         self._masks = []
         self._ws_name = ws_name
+        self._apply_inverted_mask = False
 
     def update_active_mask(self, mask):
         self._active_mask = mask
@@ -293,3 +305,6 @@ class MaskingModel:
         alg.setProperty("MaskingInformation", mask_ws)
         alg.setProperty("InputWorkspaceIndexType", "SpectrumNumber")
         alg.execute()
+
+    def invert_masking_clicked(self, active):
+        self._apply_inverted_mask = active

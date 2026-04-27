@@ -229,3 +229,6 @@ class Masking:
     def clear_model(self):
         self._model.clear_active_mask()
         self._model.clear_stored_masks()
+
+    def invert_masking_clicked(self, active):
+        self._model.invert_masking_clicked(active)

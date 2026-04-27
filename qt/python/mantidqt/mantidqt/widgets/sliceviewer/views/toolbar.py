@@ -23,6 +23,7 @@ class ToolItemText:
     SAVE = "Save"
     NONAXISALIGNEDCUTS = "NonAxisAlignedCuts"
     MASKING = "Masking"
+    INVERTED_MASKING = "InvertMasking"
     RECT_MASKING = "RectangleMasking"
     ELLI_MASKING = "EllipticalMasking"
     POLY_MASKING = "PolygonMasking"
@@ -46,6 +47,7 @@ class SliceViewerNavigationToolbar(MantidNavigationToolbar):
     polyMaskingClicked = Signal(bool)
     applyMaskingClicked = Signal(bool)
     exportMaskingClicked = Signal(bool)
+    invertMaskingClicked = Signal(bool)
 
     toolitems = (
         MantidNavigationTool(ToolItemText.HOME, "Reset original view", "mdi.home", "homeClicked", None),
@@ -71,6 +73,7 @@ class SliceViewerNavigationToolbar(MantidNavigationToolbar):
         MantidNavigationTool(ToolItemText.POLY_MASKING, "Select polygon mask", "mdi.triangle-outline", "polyMaskingClicked", False),
         MantidNavigationTool(ToolItemText.APPLY_MASKING, "Apply drawn mask", "mdi.checkbox-marked-outline", "applyMaskingClicked", None),
         MantidNavigationTool(ToolItemText.EXPORT_MASKING, "Export drawn mask to table", "mdi.export", "exportMaskingClicked", None),
+        MantidNavigationTool(ToolItemText.INVERTED_MASKING, "Toggle inverted masking", "mdi.transition", "invertMaskingClicked", False),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool(ToolItemText.SAVE, "Save the figure", "mdi.content-save", "save_figure", None),
     )
