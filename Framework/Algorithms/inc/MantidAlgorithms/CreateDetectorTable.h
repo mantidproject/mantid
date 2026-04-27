@@ -60,6 +60,17 @@ private:
   double sampleDist;
   size_t nrows;
   /// Initialisation code
+  struct DetectorRowData {
+    int specNo = 0;
+    std::set<int> detIds;
+    std::string timeIndexes;
+    std::string isMonitor;
+    double dataY0 = 0, dataE0 = 0;
+    double R = 0, theta = 0, q = 0, phi = 0;
+    double difa = 0, difc = 0, difcUnc = 0, tzero = 0;
+    Kernel::V3D detPosition{0, 0, 0};
+  };
+
   void init() override;
   /// Execution code
   void exec() override;
@@ -68,16 +79,8 @@ private:
   const std::string get_time_indexes(size_t wsIndex);
   double get_q(size_t wsIndex);
   void get_diff_consts(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero);
-  void writeRowToTable(const size_t row, const size_t wsIndex, const int specNo, const std::set<int> &detIds,
-                       const std::string &timeIndexes, const double dataY0, const double dataE0, const double R,
-                       const double theta, const double q, const double phi, const std::string &isMonitor,
-                       const double difa, const double difc, const double difcUnc, const double tzero,
-                       const Kernel::V3D detPosition);
-
-  void calculateWsIdxData(const size_t wsIndex, int &specNo, std::set<int> &detIds, std::string &timeIndexes,
-                          double &dataY0, double &dataE0, double &R, double &theta, double &q, double &phi,
-                          std::string &isMonitor, double &difa, double &difc, double &difcUnc, double &tzero,
-                          Kernel::V3D &detPosition);
+  void writeRowToTable(size_t row, size_t wsIndex, const DetectorRowData &data);
+  DetectorRowData calculateWsIdxData(size_t wsIndex);
 };
 
 /// Converts a list to a string, shortened if necessary

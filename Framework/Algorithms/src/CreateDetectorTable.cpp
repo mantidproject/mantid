@@ -47,7 +47,9 @@ void CreateDetectorTable::init() {
   setPropertySettings("IncludeDetectorPosition",
                       std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
 
-  declareProperty<bool>("OneDetectorIdPerRow", false, "Order rows in table by de.", Direction::Input);
+  declareProperty<bool>("OneDetectorIdPerRow", false,
+                        "Order rows in table by detector IDs, with each detector ID having its own row.",
+                        Direction::Input);
   setPropertySettings("OneDetectorIdPerRow",
                       std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
 
@@ -290,47 +292,39 @@ void CreateDetectorTable::get_diff_consts(size_t wsIndex, double &difa, double &
   tzero = diffConsts[UnitParams::tzero];
 }
 
-void CreateDetectorTable::writeRowToTable(const size_t row, const size_t wsIndex, const int specNo,
-                                          const std::set<int> &detIds, const std::string &timeIndexes,
-                                          const double dataY0, const double dataE0, const double R, const double theta,
-                                          const double q, const double phi, const std::string &isMonitor,
-                                          const double difa, const double difc, const double difcUnc,
-                                          const double tzero, const Kernel::V3D detPosition) {
+void CreateDetectorTable::writeRowToTable(const size_t row, const size_t wsIndex, const DetectorRowData &data) {
   TableRow colValues = table->getRow(row);
   colValues << static_cast<int>(wsIndex);
-  colValues << specNo;
+  colValues << data.specNo;
   if (OneDetectorIdPerRow) {
     // Populate detector column with first det id in set
-    colValues << static_cast<int>(*detIds.begin());
+    colValues << static_cast<int>(*data.detIds.begin());
   } else {
     // Populate detector column with a truncated string of all det ids
-    colValues << createTruncatedList(detIds);
+    colValues << createTruncatedList(data.detIds);
   }
   if (isScanning) {
-    colValues << timeIndexes;
+    colValues << data.timeIndexes;
   }
   if (includeData) {
-    colValues << dataY0 << dataE0; // data
+    colValues << data.dataY0 << data.dataE0; // data
   }
-  colValues << R << theta;
+  colValues << data.R << data.theta;
   if (calcQ) {
-    colValues << q;
+    colValues << data.q;
   }
-  colValues << phi;       // rtp
-  colValues << isMonitor; // monitor
+  colValues << data.phi;       // rtp
+  colValues << data.isMonitor; // monitor
   if (hasDiffConstants) {
-    colValues << difa << difc << difcUnc << tzero;
+    colValues << data.difa << data.difc << data.difcUnc << data.tzero;
   }
   if (includeDetectorPosition) {
-    colValues << detPosition;
+    colValues << data.detPosition;
   }
 }
 
-void CreateDetectorTable::calculateWsIdxData(const size_t wsIndex, int &specNo, std::set<int> &detIds,
-                                             std::string &timeIndexes, double &dataY0, double &dataE0, double &R,
-                                             double &theta, double &q, double &phi, std::string &isMonitor,
-                                             double &difa, double &difc, double &difcUnc, double &tzero,
-                                             Kernel::V3D &detPosition) {
+CreateDetectorTable::DetectorRowData CreateDetectorTable::calculateWsIdxData(const size_t wsIndex) {
+  DetectorRowData data;
 
   // Geometry
   if (!spectrumInfo->hasDetectors(wsIndex))
@@ -345,52 +339,46 @@ void CreateDetectorTable::calculateWsIdxData(const size_t wsIndex, int &specNo, 
 
   // Spec No
   auto &spectrum = ws->getSpectrum(wsIndex);
-  specNo = spectrum.getSpectrumNo();
-  detIds = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
+  data.specNo = spectrum.getSpectrumNo();
+  data.detIds = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
   // Time indexes
-  timeIndexes = get_time_indexes(wsIndex);
+  data.timeIndexes = get_time_indexes(wsIndex);
   // data Y/E
-  dataY0 = ws->y(wsIndex)[0];
-  dataE0 = ws->e(wsIndex)[0];
+  data.dataY0 = ws->y(wsIndex)[0];
+  data.dataE0 = ws->e(wsIndex)[0];
   // R, Theta, Phi
-  get_spherical_coordinates(wsIndex, R, theta, phi);
+  get_spherical_coordinates(wsIndex, data.R, data.theta, data.phi);
   // Q
-  q = get_q(wsIndex);
+  data.q = get_q(wsIndex);
   // Is monitor
-  isMonitor = spectrumInfo->isMonitor(wsIndex) ? "yes" : "no";
+  data.isMonitor = spectrumInfo->isMonitor(wsIndex) ? "yes" : "no";
   // Diff consts
-  get_diff_consts(wsIndex, difa, difc, difcUnc, tzero);
+  get_diff_consts(wsIndex, data.difa, data.difc, data.difcUnc, data.tzero);
   // Detector position
-  detPosition = spectrumInfo->position(wsIndex);
+  data.detPosition = spectrumInfo->position(wsIndex);
+  return data;
 }
 
 void CreateDetectorTable::populateTable() {
 
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
-  for (int row = 0; row < workspaceIndices.size(); row++) {
+  for (size_t row = 0; row < workspaceIndices.size(); row++) {
 
-    size_t wsIndex = workspaceIndices[row];
+    auto wsIndex = static_cast<size_t>(workspaceIndices[row]);
 
     try {
-      int specNo = 0;
-      std::set<int> detIds;
-      std::string timeIndexes, isMonitor;
-      double dataY0, dataE0, R, theta, q, phi, difa, difc, difcUnc, tzero;
-      dataY0 = dataE0 = R = theta = q = phi = difa = difc = difcUnc = tzero = 0;
-      Kernel::V3D detPosition(0, 0, 0);
-
-      calculateWsIdxData(wsIndex, specNo, detIds, timeIndexes, dataY0, dataE0, R, theta, q, phi, isMonitor, difa, difc,
-                         difcUnc, tzero, detPosition);
-
-      writeRowToTable(row, wsIndex, specNo, detIds, timeIndexes, dataY0, dataE0, R, theta, q, phi, isMonitor, difa,
-                      difc, difcUnc, tzero, detPosition);
+      auto data = calculateWsIdxData(wsIndex);
+      writeRowToTable(row, wsIndex, data);
 
     } catch (const std::exception &) {
-      double dataY0 = ws->y(wsIndex)[0];
-      double dataE0 = ws->e(wsIndex)[0];
-
-      writeRowToTable(row, wsIndex, -1, std::set<int>{0}, "0", dataY0, dataE0, 0, 0, 0, 0, "n/a", 0, 0, 0, 0,
-                      V3D(0, 0, 0));
+      DetectorRowData errorData;
+      errorData.specNo = -1;
+      errorData.detIds = {0};
+      errorData.timeIndexes = "0";
+      errorData.dataY0 = ws->y(wsIndex)[0];
+      errorData.dataE0 = ws->e(wsIndex)[0];
+      errorData.isMonitor = "n/a";
+      writeRowToTable(row, wsIndex, errorData);
     } // End catch for no spectrum
   }
 }
@@ -400,31 +388,25 @@ void CreateDetectorTable::populateTableByDetID() {
   const auto &workspaceDetectorIds = detectorInfo->detectorIDs();
 
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
-  for (int row = 0; row < workspaceDetectorIds.size(); row++) {
+  for (size_t row = 0; row < workspaceDetectorIds.size(); row++) {
 
     int detId = workspaceDetectorIds[row];
     size_t wsIndex = detIdToWorkspaceIndexMap[detId];
 
     try {
-      std::set<int> detIds;
-      int specNo = 0;
-      std::string timeIndexes, isMonitor;
-      double dataY0, dataE0, R, theta, q, phi, difa, difc, difcUnc, tzero;
-      dataY0 = dataE0 = R = theta = q = phi = difa = difc = difcUnc = tzero = 0;
-      Kernel::V3D detPosition(0, 0, 0);
-
-      calculateWsIdxData(wsIndex, specNo, detIds, timeIndexes, dataY0, dataE0, R, theta, q, phi, isMonitor, difa, difc,
-                         difcUnc, tzero, detPosition);
-
-      writeRowToTable(row, wsIndex, specNo, std::set<int>{detId}, timeIndexes, dataY0, dataE0, R, theta, q, phi,
-                      isMonitor, difa, difc, difcUnc, tzero, detPosition);
+      auto data = calculateWsIdxData(wsIndex);
+      data.detIds = {detId};
+      writeRowToTable(row, wsIndex, data);
 
     } catch (const std::exception &) {
-      double dataY0 = ws->y(wsIndex)[0];
-      double dataE0 = ws->e(wsIndex)[0];
-
-      writeRowToTable(row, wsIndex, -1, std::set<int>{0}, "0", dataY0, dataE0, 0, 0, 0, 0, "n/a", 0, 0, 0, 0,
-                      V3D(0, 0, 0));
+      DetectorRowData errorData;
+      errorData.specNo = -1;
+      errorData.detIds = {0};
+      errorData.timeIndexes = "0";
+      errorData.dataY0 = ws->y(wsIndex)[0];
+      errorData.dataE0 = ws->e(wsIndex)[0];
+      errorData.isMonitor = "n/a";
+      writeRowToTable(row, wsIndex, errorData);
     } // End catch for no spectrum
   }
 }
