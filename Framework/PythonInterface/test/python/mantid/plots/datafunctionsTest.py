@@ -241,6 +241,11 @@ class DataFunctionsTest(unittest.TestCase):
         labels = funcs.get_axes_labels(ws, normalization=PlotNormalizationType.NONE, use_latex=True)
         self.assertEqual(labels[0], "Counts (microAmp.hour)$^{-1}$")
 
+    def test_y_units_for_distribution_and_autodist_off_with_ascii(self):
+        ws = self.ws2d_distribution
+        labels = funcs.get_axes_labels(ws, normalization=PlotNormalizationType.NONE, use_latex=False)
+        self.assertEqual(labels[0], "Counts per microAmp.hour")
+
     def test_y_units_for_non_distribution_and_autodist_on_with_ascii(self):
         ws = self.ws2d_non_distribution
         labels = funcs.get_axes_labels(ws, use_latex=False)

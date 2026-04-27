@@ -317,7 +317,7 @@ def errorbar(axes, workspace, *args, **kwargs):
         normalization, kwargs = get_normalization_type(workspace, axes, **kwargs)
         _setLabels1D(axes, workspace, indices, normalization=normalization, axis=axis)
     kwargs.pop("normalize_by_bin_width", None)
-    kwargs.pop("normalizeation_type", None)
+    kwargs.pop("normalization_type", None)
 
     if dy is not None and min(dy) < 0:
         dy = None
