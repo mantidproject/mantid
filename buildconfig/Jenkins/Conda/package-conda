@@ -118,15 +118,6 @@ export LC_ALL=C
 # Use the workspace root outside of the git tree or conda-build cannot
 # copy the source to a working folder.
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
-clean_build_and_staging() {
-  if [[ $OSTYPE == "msys"* ]]; then
-    sleep 2s # wait for previous steps to finish before cleaning
-    # Windows can leave handles open in rattler work/cache dirs; clean them before reuse.
-    rm -rf "$CONDA_BLD_PATH"/bld/rattler-build_* "$CONDA_BLD_PATH"/build_cache/staging_*
-  fi
-}
-clean_build_and_staging # clean build tree before everything
-
 if [[ -d $CONDA_BLD_PATH ]]; then
     pixi run -e rattler-builder --frozen rattler-index fs $CONDA_BLD_PATH
 fi
@@ -150,7 +141,6 @@ if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
     pixi run -e rattler-builder --frozen rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c neutrons $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
-    clean_build_and_staging # clean build tree again before this package
     pixi run -e rattler-builder --frozen rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_QT == true ]]; then
