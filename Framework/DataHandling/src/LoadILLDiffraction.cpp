@@ -565,7 +565,7 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(const NX
                                [&](const ScannedVariables &var) { return var.property == propertyName; });
   if (it != m_scanVar.end()) {
     const int i = static_cast<int>(std::distance(m_scanVar.begin(), it));
-    scannedVariable.reserve(m_numberScanPoints);
+    scannedVariable.resize(m_numberScanPoints);
     std::generate(scannedVariable.begin(), scannedVariable.end(), [i, j = 0, &scan]() mutable { return scan(i, j++); });
   } else {
     throw std::runtime_error("Can not load file because scanned variable with property name " + propertyName +

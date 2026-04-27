@@ -294,6 +294,9 @@ bool WorkspaceSelector::checkEligibility(const QString &name, const Mantid::API:
 }
 
 bool WorkspaceSelector::hasValidSuffix(const QString &name) const {
+  if (m_suffix.isEmpty())
+    return true;
+
   const auto it =
       std::find_if(m_suffix.cbegin(), m_suffix.cend(), [&name](const QString &s) { return name.endsWith(s); });
   return it != m_suffix.cend();

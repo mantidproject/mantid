@@ -72,6 +72,7 @@ containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:608
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
 derefInvalidIteratorRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ExcludeRangeFinder.cpp:77
 duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldFunction.cpp:120
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:432
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:222
@@ -84,6 +85,7 @@ unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_co
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:233
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:371
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:386
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice2D.cpp:417
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:571
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:680
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h:36
@@ -105,6 +107,7 @@ nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelp
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:169
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:256
 invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142
+variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:59
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi.cpp:622
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:605

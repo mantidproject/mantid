@@ -12,6 +12,7 @@
 #include "MantidKernel/DllConfig.h"
 #include <cmath>
 #include <functional>
+#include <numeric>
 #include <stdexcept>
 #include <vector>
 
@@ -87,6 +88,9 @@ MANTID_KERNEL_DLL int getBinIndex(const std::vector<double> &bins, const double 
 MANTID_KERNEL_DLL void smoothInRange(const std::vector<double> &input, std::vector<double> &output, double avrgInterval,
                                      std::vector<double> const *const binBndrs = nullptr, size_t startIndex = 0,
                                      size_t endIndex = 0, std::vector<double> *const outBins = nullptr);
+
+// Forward declare SumSquares to use it in lengthVector
+template <class T> struct SumSquares;
 
 //-------------------------------------------------------------------------------------
 /** Return the length of the vector (in the physical sense),

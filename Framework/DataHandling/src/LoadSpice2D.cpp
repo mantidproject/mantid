@@ -411,8 +411,12 @@ void LoadSpice2D::setBeamTrapRunProperty(std::map<std::string, std::string> &met
 
   // Check how many traps are in use (store indexes):
   std::vector<size_t> trapIndexInUse;
-  std::transform(trapMotorPositions.cbegin(), trapMotorPositions.cend(), std::back_inserter(trapIndexInUse),
-                 [](double pos) { return pos > 26.0; });
+  for (size_t i = 0; i < trapMotorPositions.size(); i++) {
+    if (trapMotorPositions[i] > 26.0) {
+      // Resting positions are below 25. Make sure we have one trap in use!
+      trapIndexInUse.emplace_back(i);
+    }
+  }
 
   g_log.debug() << "trapIndexInUse length:" << trapIndexInUse.size() << "\n";
 

@@ -31,12 +31,10 @@ Logger g_log("TimeSeriesProperty");
  * @return :: false if there is at least one non-match, true otherwise.
  */
 template <typename TYPE> bool allValuesAreSame(const std::vector<TimeValueUnit<TYPE>> &values) {
-  const std::size_t num_values = values.size();
-  assert(num_values > 1);
+  assert(values.size() > 1);
   const auto &first_value = values.front().value();
-  const auto it = std::find_if(values.cbegin() + 1, values.cend(),
-                               [&first_value](const TimeValueUnit<TYPE> &v) { return v.value() != first_value; });
-  return it == values.cend();
+  return std::all_of(std::next(values.cbegin()), values.cend(),
+                     [&first_value](const auto &v) { return v.value() == first_value; });
 }
 } // namespace
 

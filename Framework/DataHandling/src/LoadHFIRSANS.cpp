@@ -426,12 +426,12 @@ void LoadHFIRSANS::setBeamTrapRunProperty() {
 
   // Check how many traps are in use (store indexes):
   std::vector<size_t> trapIndexInUse;
-  // Resting positions are below 25. Make sure we have one trap in use!
-  std::transform(trapMotorPositions.cbegin(), trapMotorPositions.cend(), std::back_inserter(trapIndexInUse),
-                 [](auto index) {
-                   if (index > 26.0)
-                     return index;
-                 });
+  for (size_t i = 0; i < trapMotorPositions.size(); i++) {
+    if (trapMotorPositions[i] > 26.0) {
+      // Resting positions are below 25. Make sure we have one trap in use!
+      trapIndexInUse.emplace_back(i);
+    }
+  }
 
   g_log.debug() << "trapIndexInUse length:" << trapIndexInUse.size() << "\n";
 
