@@ -115,7 +115,7 @@ def get_normalization_type(workspace, axes, **kwargs):
         norm_type = kwargs.pop("normalization_type")
         # Handle string form (from plot restoration)
         if isinstance(norm_type, str):
-            return PlotNormalizationType[norm_type]
+            return PlotNormalizationType[norm_type], kwargs
         return norm_type, kwargs
 
     if "normalize_by_bin_width" in kwargs:
@@ -376,15 +376,16 @@ def get_spectrum(workspace, wkspIndex, normalization: PlotNormalizationType, wit
         dx = workspace.readDx(wkspIndex)
 
     if workspace.isHistogramData():
+        boundary_points = points_from_boundaries(x)
         if normalization == PlotNormalizationType.BIN_WIDTH and not workspace.isDistribution():
             y = y / (x[1:] - x[0:-1])
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])
         elif normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER:
-            y = y / (points_from_boundaries(x) ** -4)
+            y = y / (boundary_points**-4)
             if dy is not None:
-                dy = dy / (points_from_boundaries(x) ** -4)
-        x = points_from_boundaries(x)
+                dy = dy / (boundary_points**-4)
+        x = boundary_points
     try:
         specInfo = workspace.spectrumInfo()
         if specInfo.isMasked(wkspIndex):
@@ -948,6 +949,8 @@ def get_axes_labels(workspace, indices=None, normalization=PlotNormalizationType
 
 def _get_y_axes_label(workspace, normalization, use_latex):
     y_unit = workspace.YUnitLabel(use_latex)
+    if normalization == PlotNormalizationType.NONE:
+        return y_unit
     x_label = ""
     if normalization == PlotNormalizationType.BIN_WIDTH and not workspace.isDistribution():
         x_label = workspace.getAxis(0).getUnit().symbol().latex() if use_latex else workspace.getAxis(0).getUnit().symbol().ascii()
