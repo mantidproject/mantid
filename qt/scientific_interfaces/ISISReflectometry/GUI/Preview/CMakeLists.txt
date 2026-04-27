@@ -5,7 +5,7 @@ set(PREVIEW_SRC_FILES
     QtPreviewView.cpp
     QtPreviewDockedWidgets.cpp
     PreviewModel.cpp
-    PreviewInstrumentDisplay.cpp
+    QtPreviewInstrumentDisplay.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
@@ -22,7 +22,7 @@ set(PREVIEW_INC_FILES
     IPreviewView.h
     IPreviewDockedWidgets.h
     IPreviewInstrumentDisplay.h
-    PreviewInstrumentDisplay.h
+    QtPreviewInstrumentDisplay.h
     ROIType.h
     QtPreviewView.h
 )

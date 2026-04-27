@@ -9,7 +9,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
-#include "PreviewInstrumentDisplay.h"
+#include "QtPreviewInstrumentDisplay.h"
 #include "ROIType.h"
 
 #include <QAction>
@@ -27,7 +27,7 @@ QtPreviewDockedWidgets::QtPreviewDockedWidgets(QWidget *parent, QLayout *layout)
   m_ui.setupUi(this);
   m_layout->addWidget(this);
 
-  m_instDisplay = std::make_unique<PreviewInstrumentDisplay>(
+  m_instDisplay = std::make_unique<QtPreviewInstrumentDisplay>(
       m_ui.iv_placeholder, [this]() { onInstViewShapeChanged(); }, std::make_unique<InstViewModel>());
   loadToolbarIcons();
   setupSelectRegionTypes();

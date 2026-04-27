@@ -21,11 +21,11 @@ class QWidget;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewInstrumentDisplay : public IPreviewInstrumentDisplay {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtPreviewInstrumentDisplay : public IPreviewInstrumentDisplay {
 public:
-  PreviewInstrumentDisplay(QWidget *placeholder, std::function<void()> onShapeChanged,
-                           std::unique_ptr<IInstViewModel> instViewModel);
-  ~PreviewInstrumentDisplay() override;
+  QtPreviewInstrumentDisplay(QWidget *placeholder, std::function<void()> onShapeChanged,
+                             std::unique_ptr<IInstViewModel> instViewModel);
+  ~QtPreviewInstrumentDisplay() override;
 
   void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) override;
   void resetInstView() override;

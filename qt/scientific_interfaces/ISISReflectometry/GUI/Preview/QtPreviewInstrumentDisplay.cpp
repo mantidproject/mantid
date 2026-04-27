@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "PreviewInstrumentDisplay.h"
+#include "QtPreviewInstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 
@@ -14,25 +14,25 @@ using MantidQt::MantidWidgets::ProjectionSurface;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-PreviewInstrumentDisplay::PreviewInstrumentDisplay(QWidget *placeholder, std::function<void()> onShapeChanged,
-                                                   std::unique_ptr<IInstViewModel> instViewModel)
+QtPreviewInstrumentDisplay::QtPreviewInstrumentDisplay(QWidget *placeholder, std::function<void()> onShapeChanged,
+                                                       std::unique_ptr<IInstViewModel> instViewModel)
     : m_placeholder(placeholder), m_instViewModel(std::move(instViewModel)),
       m_onShapeChanged(std::move(onShapeChanged)) {
   resetInstView();
 }
 
-PreviewInstrumentDisplay::~PreviewInstrumentDisplay() { disconnectSurfaceSignals(); }
+QtPreviewInstrumentDisplay::~QtPreviewInstrumentDisplay() { disconnectSurfaceSignals(); }
 
-void PreviewInstrumentDisplay::updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) {
+void QtPreviewInstrumentDisplay::updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) {
   m_instViewModel->updateWorkspace(workspace);
 }
 
-void PreviewInstrumentDisplay::resetInstView() {
+void QtPreviewInstrumentDisplay::resetInstView() {
   disconnectSurfaceSignals();
   m_instDisplay = std::make_unique<MantidWidgets::InstrumentDisplay>(m_placeholder);
 }
 
-void PreviewInstrumentDisplay::plotInstView() {
+void QtPreviewInstrumentDisplay::plotInstView() {
   auto *actor = m_instViewModel->getInstrumentViewActor();
   if (!actor)
     return;
@@ -45,19 +45,19 @@ void PreviewInstrumentDisplay::plotInstView() {
   connectSurfaceSignals();
 }
 
-void PreviewInstrumentDisplay::setInstViewZoomMode() {
+void QtPreviewInstrumentDisplay::setInstViewZoomMode() {
   auto surface = getSurface();
   if (surface)
     surface->setInteractionMode(ProjectionSurface::MoveMode);
 }
 
-void PreviewInstrumentDisplay::setInstViewEditMode() {
+void QtPreviewInstrumentDisplay::setInstViewEditMode() {
   auto surface = getSurface();
   if (surface)
     surface->setInteractionMode(ProjectionSurface::EditShapeMode);
 }
 
-void PreviewInstrumentDisplay::setInstViewSelectRectMode() {
+void QtPreviewInstrumentDisplay::setInstViewSelectRectMode() {
   auto surface = getSurface();
   if (surface) {
     surface->setInteractionMode(ProjectionSurface::EditShapeMode);
@@ -65,7 +65,7 @@ void PreviewInstrumentDisplay::setInstViewSelectRectMode() {
   }
 }
 
-std::vector<size_t> PreviewInstrumentDisplay::getSelectedDetectors() const {
+std::vector<size_t> QtPreviewInstrumentDisplay::getSelectedDetectors() const {
   std::vector<size_t> result;
   if (m_instDisplay)
     if (auto surface = m_instDisplay->getSurface())
@@ -73,18 +73,19 @@ std::vector<size_t> PreviewInstrumentDisplay::getSelectedDetectors() const {
   return result;
 }
 
-std::vector<Mantid::detid_t> PreviewInstrumentDisplay::detIndicesToDetIDs(std::vector<size_t> const &detIndices) const {
+std::vector<Mantid::detid_t>
+QtPreviewInstrumentDisplay::detIndicesToDetIDs(std::vector<size_t> const &detIndices) const {
   return m_instViewModel->detIndicesToDetIDs(detIndices);
 }
 
-void PreviewInstrumentDisplay::disconnectSurfaceSignals() {
+void QtPreviewInstrumentDisplay::disconnectSurfaceSignals() {
   for (auto &conn : m_surfaceConnections) {
     QObject::disconnect(conn);
   }
   m_surfaceConnections.clear();
 }
 
-void PreviewInstrumentDisplay::connectSurfaceSignals() {
+void QtPreviewInstrumentDisplay::connectSurfaceSignals() {
   auto surface = getSurface();
   if (!surface)
     return;
@@ -100,7 +101,7 @@ void PreviewInstrumentDisplay::connectSurfaceSignals() {
       QObject::connect(surface.get(), &ProjectionSurface::shapesCleared, m_placeholder, callback));
 }
 
-MantidQt::MantidWidgets::ProjectionSurface_sptr PreviewInstrumentDisplay::getSurface() {
+MantidQt::MantidWidgets::ProjectionSurface_sptr QtPreviewInstrumentDisplay::getSurface() {
   if (!m_instDisplay)
     return nullptr;
   return m_instDisplay->getSurface();
