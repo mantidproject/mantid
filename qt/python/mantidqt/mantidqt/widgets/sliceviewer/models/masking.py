@@ -91,18 +91,7 @@ class RectCursorInfoBase(CursorInfoBase, ABC):
         x_data = sorted([self._click.data[0], self._release.data[0]])
         return (x_data, y_data) if not self._transpose else (y_data, x_data)
 
-
-class RectCursorInfo(RectCursorInfoBase):
-    def __init__(self, click, release, transpose):
-        super().__init__(click, release, transpose)
-
-    def generate_table_rows(self):
-        x_data, y_data = self.get_xy_data()
-        y_min, y_max = self.snap_to_bin_centre(y_data[0]), self.snap_to_bin_centre(y_data[-1])
-        row = TableRow(spec_list=f"{y_min}-{y_max}", x_min=x_data[0], x_max=x_data[-1])
-        return [row]
-
-    def generate_inverted_table_rows(self):
+    def get_rows_outside_rect(self):
         x_min, x_max, spec_min, spec_max = self._click.extent
         spec_min = int(ceil(spec_min))
         spec_max = self.snap_to_bin_centre((spec_max))
@@ -115,21 +104,27 @@ class RectCursorInfo(RectCursorInfoBase):
         return [row1, row2, row3, row4]
 
 
+class RectCursorInfo(RectCursorInfoBase):
+    def __init__(self, click, release, transpose):
+        super().__init__(click, release, transpose)
+
+    def generate_table_rows(self):
+        x_data, y_data = self.get_xy_data()
+        y_min, y_max = self.snap_to_bin_centre(y_data[0]), self.snap_to_bin_centre(y_data[-1])
+        row = TableRow(spec_list=f"{y_min}-{y_max}", x_min=x_data[0], x_max=x_data[-1])
+        return [row]
+
+    def generate_inverted_table_rows(self):
+        return self.get_rows_outside_rect()
+
+
 class ElliCursorInfo(RectCursorInfoBase):
     def __init__(self, click, release, transpose):
         super().__init__(click, release, transpose)
 
     def generate_table_rows(self):
         x_data, y_data = self.get_xy_data()
-        y_min = self.snap_to_bin_centre(y_data[0])
-        y_max = self.snap_to_bin_centre(y_data[1])
-        y_range = [n / 3 for n in range(y_min * 3, (y_max * 3) + 1)]  # inclusive range with 1/3 step for greater resolution
-
-        x_min, x_max = x_data[0], x_data[-1]
-        a = (x_max - x_min) / 2
-        b = (y_max - y_min) / 2
-        h = x_min + a
-        k = y_min + b
+        y_range, a, b, h, k = self._process_elli_parameters(x_data, y_data)
 
         rows = []
         for index, y in enumerate(y_range):
@@ -145,8 +140,32 @@ class ElliCursorInfo(RectCursorInfoBase):
     def _calc_sqrt_portion(y, a, b, k):
         return sqrt(round((a**2) * (1 - ((y - k) ** 2) / (b**2)), ALLOWABLE_ERROR_SIG_FIGS))
 
+    def _process_elli_parameters(self, x_data, y_data):
+        y_min = self.snap_to_bin_centre(y_data[0])
+        y_max = self.snap_to_bin_centre(y_data[1])
+        y_range = [n / 3 for n in range(y_min * 3, (y_max * 3) + 1)]  # inclusive range with 1/3 step for greater resolution
+
+        x_min, x_max = x_data[0], x_data[-1]
+        a = (x_max - x_min) / 2
+        b = (y_max - y_min) / 2
+        h = x_min + a
+        k = y_min + b
+        return y_range, a, b, h, k
+
     def generate_inverted_table_rows(self):
-        pass
+        rect_rows = self.get_rows_outside_rect()
+
+        x_data, y_data = self.get_xy_data()
+        y_range, a, b, h, k = self._process_elli_parameters(x_data, y_data)
+
+        rows = []
+        for index, y in enumerate(y_range):
+            x_min, x_max = self._calc_x_val(y, a, b, h, k)
+            x_min = x_min - 10**-ALLOWABLE_ERROR_SIG_FIGS if x_min == x_max else x_min  # slightly adjust min value so x vals are different.
+            rows.append(TableRow(spec_list=str(round(y)), x_min=x_data[0], x_max=x_min))
+            rows.append(TableRow(spec_list=str(round(y)), x_min=x_max, x_max=x_data[-1]))
+        rows = self.consolidate_table_rows(rows)
+        return rect_rows + rows
 
 
 class PolyCursorInfo(CursorInfoBase):
