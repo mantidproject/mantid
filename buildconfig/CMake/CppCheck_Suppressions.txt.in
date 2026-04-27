@@ -60,8 +60,6 @@ operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/WorkspaceProp
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:891
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:156
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:167
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculateDIFC.cpp:41
-variableScope:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreateGroupingWorkspace.cpp:684
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:892
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:999
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1263
@@ -74,7 +72,6 @@ containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:608
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
 derefInvalidIteratorRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ExcludeRangeFinder.cpp:77
 duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldFunction.cpp:120
-constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/DynamicKuboToyabe.cpp:69
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:222
@@ -89,9 +86,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/v
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:386
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:571
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:680
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TimeSplitter.cpp:36
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TimeSplitter.cpp:37
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TimeSplitter.cpp:38
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h:36
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/CrystalStructure.h:74
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/UnitCell.h:212
@@ -111,7 +105,6 @@ nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelp
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:169
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:256
 invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142
-variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi.cpp:622
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:605
@@ -189,7 +182,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common
 missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h:35
 passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptOptionsBrowser.cpp:169
 duplicateAssignExpression:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionBrowser/FunctionBrowserUtils.cpp:20
-iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:171
 iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:161
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/ParameterPropertyManager.cpp:54
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp:136
