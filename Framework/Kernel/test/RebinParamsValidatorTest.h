@@ -105,9 +105,9 @@ public:
                      "When giving a range the second value must be larger than the first");
   }
 
-// NOTE this test will only run on linux, as it requires the availMem patch to work
-#if defined(__linux__) || defined(__gnu_linux__)
+  // NOTE this test will only run on linux, as it requires the availMem patch to work
   void testIsMocked() {
+#if defined(__linux__) || defined(__gnu_linux__)
     std::size_t memSize = 13;
     size_t mem1 = Mantid::Kernel::MemoryStats().availMem();
     TS_ASSERT_LESS_THAN(memSize, mem1);
@@ -118,8 +118,8 @@ public:
     }
     size_t mem2 = Mantid::Kernel::MemoryStats().availMem();
     TS_ASSERT_LESS_THAN(memSize, mem2);
-  }
 #endif
+  }
 
   void testTooManyBins() {
     Mantid::TestMemory::MockMemory memL;
@@ -142,9 +142,9 @@ public:
     TS_ASSERT(!standardValidator.isValid(vec).empty());
   }
 
-// NOTE this test will only run on linux, as it requires the availMem patch to work
-#if defined(__linux__) || defined(__gnu_linux__)
+  // NOTE this test will only run on linux, as it requires the availMem patch to work
   void testBinsInKiB() {
+#if defined(__linux__) || defined(__gnu_linux__)
     // make sure we are calculating the number of bins in KiB correctly
     // 1. find the number of KiB remaining in memory.
     // 2. calculate the number of bins that would equal that value in *bytes* (i.e. numBins * sizeof(double))
@@ -155,8 +155,8 @@ public:
         memInKiB / sizeof(double); // the number bins (doubles) that would fit in memory, IF memory were in bytes
     std::vector<double> vec{1., 1., 1. + static_cast<double>(numBins)}; // make sure we have numBins bins
     TS_ASSERT(standardValidator.isValid(vec).empty());
-  }
 #endif
+  }
 
 private:
   RebinParamsValidator standardValidator;

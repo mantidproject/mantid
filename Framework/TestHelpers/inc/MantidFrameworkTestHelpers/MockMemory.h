@@ -29,16 +29,17 @@ struct MockMemory {
   MockMemory(MockMemory &&) = delete;
   MockMemory &operator=(MockMemory const &) = delete;
   MockMemory &operator=(MockMemory &&) = delete;
-  std::size_t numberOfFloats() const {
 #if defined(__linux__) || defined(__gnu_linux__)
+  std::size_t numberOfFloats() const {
     return static_cast<std::size_t>(static_cast<double>(m_value * 1024) / sizeof(double) + 1);
-#else
-    return static_cast<std::size_t>(1e12); // a very large number, sure to always exhaust memory
-#endif
   }
 
 private:
   std::size_t m_value{g_default_value};
+#else
+  // a very large number, sure to always exhaust memory
+  std::size_t numberOfFloats() const { return static_cast<std::size_t>(1e12); }
+#endif
 };
 
 } // namespace Mantid::TestMemory

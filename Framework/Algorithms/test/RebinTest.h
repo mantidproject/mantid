@@ -118,9 +118,9 @@ public:
     TS_ASSERT(errmsg->second.substr(0, 20) == "Provided width value");
   }
 
-// NOTE this test will only run on linux, as it requires the availMem patch to work
-#if defined(__linux__) || defined(__gnu_linux__)
+  // NOTE this test will only run on linux, as it requires the availMem patch to work
   void testIsMocked() {
+#if defined(__linux__) || defined(__gnu_linux__)
     constexpr std::size_t newMem{25};
     size_t mem1 = Mantid::Kernel::MemoryStats().availMem();
     TS_ASSERT_LESS_THAN(newMem, mem1);
@@ -131,8 +131,8 @@ public:
     }
     std::size_t mem2 = Mantid::Kernel::MemoryStats().availMem();
     TS_ASSERT_LESS_THAN(newMem, mem2);
-  }
 #endif
+  }
 
   void test_failure_too_much_memory() {
     Mantid::TestMemory::MockMemory memL; // patch the available memory calculator
