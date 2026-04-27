@@ -83,7 +83,7 @@ outputs:
     inherit: mantid-build
 
     build:
-      script: echo "Mantid Build Using Cache"
+      script: echo "Repackaging mantid from mantid-build staging"
       files:
         exclude:
           - plugins/libMantidMPIAlgorithms.so
@@ -159,7 +159,7 @@ outputs:
     inherit: mantid-build
 
     build:
-      script: echo "Using Cache"
+      script: echo "Repackaging mantidmpi from mantid-build staging"
       skip:
         - win
         - osx
