@@ -34,10 +34,9 @@ void QtPreviewInstrumentDisplay::resetInstView() {
 
 void QtPreviewInstrumentDisplay::plotInstView() {
   auto *actor = m_instViewModel->getInstrumentViewActor();
-  if (!actor)
+  if (!actor || !m_instDisplay) {
     return;
-  if (!m_instDisplay)
-    return;
+  }
   disconnectSurfaceSignals();
   auto widgetSize = m_instDisplay->currentWidget()->size();
   m_instDisplay->setSurface(std::make_shared<MantidWidgets::UnwrappedCylinder>(
@@ -86,7 +85,7 @@ void QtPreviewInstrumentDisplay::disconnectSurfaceSignals() {
 }
 
 void QtPreviewInstrumentDisplay::connectSurfaceSignals() {
-  auto surface = getSurface();
+  const auto &surface = getSurface();
   if (!surface)
     return;
   auto callback = [this]() {
