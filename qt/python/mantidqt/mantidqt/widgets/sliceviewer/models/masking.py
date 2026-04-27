@@ -102,16 +102,17 @@ class RectCursorInfo(RectCursorInfoBase):
         row = TableRow(spec_list=f"{y_min}-{y_max}", x_min=x_data[0], x_max=x_data[-1])
         return [row]
 
-
-class RectCursorInvertedInfo(RectCursorInfoBase):
-    def __init__(self, click, release, transpose):
-        super().__init__(click, release, transpose)
-
-    def generate_table_rows(self):
+    def generate_inverted_table_rows(self):
+        x_min, x_max, spec_min, spec_max = self._click.extent
+        spec_min = int(ceil(spec_min))
+        spec_max = self.snap_to_bin_centre((spec_max))
         x_data, y_data = self.get_xy_data()
         y_min, y_max = self.snap_to_bin_centre(y_data[0]), self.snap_to_bin_centre(y_data[-1])
-        row = TableRow(spec_list=f"{y_min}-{y_max}", x_min=x_data[0], x_max=x_data[-1])
-        return [row]
+        row1 = TableRow(spec_list=f"{spec_min}-{spec_max}", x_min=x_min, x_max=x_data[0])
+        row2 = TableRow(spec_list=f"{spec_min}-{y_min}", x_min=x_data[0], x_max=x_data[-1])
+        row3 = TableRow(spec_list=f"{y_max}-{spec_max}", x_min=x_data[0], x_max=x_data[-1])
+        row4 = TableRow(spec_list=f"{spec_min}-{spec_max}", x_min=x_data[-1], x_max=x_max)
+        return [row1, row2, row3, row4]
 
 
 class ElliCursorInfo(RectCursorInfoBase):
@@ -143,6 +144,9 @@ class ElliCursorInfo(RectCursorInfoBase):
     @staticmethod
     def _calc_sqrt_portion(y, a, b, k):
         return sqrt(round((a**2) * (1 - ((y - k) ** 2) / (b**2)), ALLOWABLE_ERROR_SIG_FIGS))
+
+    def generate_inverted_table_rows(self):
+        pass
 
 
 class PolyCursorInfo(CursorInfoBase):
@@ -243,6 +247,9 @@ class PolyCursorInfo(CursorInfoBase):
             return False
         return True
 
+    def generate_inverted_table_rows(self):
+        pass
+
 
 class MaskingModel:
     def __init__(self, ws_name):
@@ -289,7 +296,10 @@ class MaskingModel:
     def generate_mask_table_ws(self, store_in_ads=True):
         table_rows = []
         for info in self._masks:
-            table_rows.extend(info.generate_table_rows())
+            if self._apply_inverted_mask:
+                table_rows.extend(info.generate_inverted_table_rows())
+            else:
+                table_rows.extend(info.generate_table_rows())
         return self.create_table_workspace_from_rows(table_rows, store_in_ads)
 
     def export_selectors(self):
