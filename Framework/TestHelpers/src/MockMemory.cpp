@@ -69,7 +69,7 @@ std::size_t Mantid::Kernel::MemoryStats::availMem() const {
 }
 #else
 namespace Mantid::TestMemory {
-extern "C" void enable_mem_override(std::size_t value) { UNUSED_ARG(value); }
+extern "C" void enable_mem_override(std::size_t value) { (void)value; }
 extern "C" void disable_mem_override() {}
 } // namespace Mantid::TestMemory
 #endif
