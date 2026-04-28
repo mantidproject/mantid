@@ -38,8 +38,8 @@ private:
   static std::string lookupIPF(const std::string &dir, std::string filename);
 
   static std::string getFilenameByInstrumentDateAndSearchTerm(const std::string &instrumentName,
-                                                              const std::string &date = "",
-                                                              const std::string &searchTerm = "_Definition");
+                                                              const std::string &date, const std::string &searchTerm,
+                                                              const std::vector<std::string> &fileFormats);
 };
 
 } // Namespace Mantid::API

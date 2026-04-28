@@ -50,7 +50,7 @@ void exportInstrumentFileFinder() {
       .staticmethod("getInstrumentFilename")
       //
       .def(
-          "getParameterFilename", &InstrumentFileFinder::getInstrumentFilename,
+          "getParameterFilename", &InstrumentFileFinder::getParameterFilename,
           getParameterFilename_Overload("Returns Instrument Parameter filename", (arg("instrument"), arg("date") = "")))
       .staticmethod("getParameterFilename")
       // -

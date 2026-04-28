@@ -75,21 +75,19 @@ namespace Mantid::API {
  *
  * @throws Exception::NotFoundError If no valid filename is found
  */
-std::string InstrumentFileFinder::getFilenameByInstrumentDateAndSearchTerm(const std::string &instrumentName,
-                                                                           const std::string &date,
-                                                                           const std::string &searchTerm) {
-  const std::vector<std::string> validFormats = {"xml", "nxs", "hdf5"};
+std::string
+InstrumentFileFinder::getFilenameByInstrumentDateAndSearchTerm(const std::string &instrumentName,
+                                                               const std::string &date, const std::string &searchTerm,
+                                                               const std::vector<std::string> &fileFormats) {
   std::string fileType;
-  switch (searchTerm) {
-  case "_Definition":
+  if (searchTerm == "_Definition")
     fileType = "instrument file";
-  case "_Parameters":
+  else if (searchTerm == "_Parameters")
     fileType = "parameter file";
-  default:
+  else
     fileType = searchTerm + " file";
-  }
 
-  g_log.debug() << "Looking for " << file_type << " for " << instrumentName << " that is valid on '" << date << "'\n";
+  g_log.debug() << "Looking for " << fileType << " for " << instrumentName << " that is valid on '" << date << "'\n";
   // Lookup the instrument (long) name
   const std::string instrument(Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
 
@@ -98,13 +96,13 @@ std::string InstrumentFileFinder::getFilenameByInstrumentDateAndSearchTerm(const
 
   // matching files sorted with newest files coming first
   const std::vector<std::string> matchingFiles =
-      getResourceFilenames(instrument + searchTerm, validFormats, directoryNames, date);
+      getResourceFilenames(instrument + searchTerm, fileFormats, directoryNames, date);
   std::string foundFile;
   if (!matchingFiles.empty()) {
     foundFile = matchingFiles[0];
-    g_log.debug() << "The " << file_type << "selected is " << foundFile << '\n';
+    g_log.debug() << "The " << fileType << " selected is " << foundFile << '\n';
   } else {
-    g_log.debug() << "No " << file_type << " found\n";
+    g_log.debug() << "No " << fileType << " found\n";
   }
   return foundFile;
 }
@@ -132,7 +130,7 @@ std::string InstrumentFileFinder::getFilenameByInstrumentDateAndSearchTerm(const
  *is found
  */
 std::string InstrumentFileFinder::getInstrumentFilename(const std::string &instrumentName, const std::string &date) {
-  return getFilenameByInstrumentDateAndSearchTerm(instrumentName, date, "_Definition");
+  return getFilenameByInstrumentDateAndSearchTerm(instrumentName, date, "_Definition", {"xml", "nxs", "hdf5"});
 }
 
 /** A given instrument may also have multiple parameter files associated with it.
@@ -157,7 +155,7 @@ std::string InstrumentFileFinder::getInstrumentFilename(const std::string &instr
  *is found
  */
 std::string InstrumentFileFinder::getParameterFilename(const std::string &instrumentName, const std::string &date) {
-  return getFilenameByInstrumentDateAndSearchTerm(instrumentName, date, "_Parameters");
+  return getFilenameByInstrumentDateAndSearchTerm(instrumentName, date, "_Parameters", {"xml"});
 }
 
 /// Search the directory for the Parameter IDF file and return full path name if
