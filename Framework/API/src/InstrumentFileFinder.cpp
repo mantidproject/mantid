@@ -56,6 +56,59 @@ class myContentHandler : public Poco::XML::ContentHandler {
 
 namespace Mantid::API {
 
+/** This method returns a file name which identifies for a given date
+ * a file which contains the given instrument name + search term.
+ *
+ *The filename is required to be of the form InstrumentName + SearchTerm +
+ *Identifier + extension.
+ *
+ *  If several files are valid the file with
+ *the most recent "from" date is selected. If no such files are found the file
+ *with the latest "from" date is selected.
+ *
+ *  If no file is found for the given instrument, an empty string is returned.
+ *
+ *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
+ *  @param date :: ISO 8601 date
+ *  @param searchTerm :: Snippet expected as part of filename eg. "_Definition" or "_Parameters"
+ *  @return full path of the file
+ *
+ * @throws Exception::NotFoundError If no valid filename is found
+ */
+std::string InstrumentFileFinder::getFilenameByInstrumentDateAndSearchTerm(const std::string &instrumentName,
+                                                                           const std::string &date,
+                                                                           const std::string &searchTerm) {
+  const std::vector<std::string> validFormats = {"xml", "nxs", "hdf5"};
+  std::string fileType;
+  switch (searchTerm) {
+  case "_Definition":
+    fileType = "instrument file";
+  case "_Parameters":
+    fileType = "parameter file";
+  default:
+    fileType = searchTerm + " file";
+  }
+
+  g_log.debug() << "Looking for " << file_type << " for " << instrumentName << " that is valid on '" << date << "'\n";
+  // Lookup the instrument (long) name
+  const std::string instrument(Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
+
+  // Get the instrument directories for file search
+  const std::vector<std::string> &directoryNames = Kernel::ConfigService::Instance().getInstrumentDirectories();
+
+  // matching files sorted with newest files coming first
+  const std::vector<std::string> matchingFiles =
+      getResourceFilenames(instrument + searchTerm, validFormats, directoryNames, date);
+  std::string foundFile;
+  if (!matchingFiles.empty()) {
+    foundFile = matchingFiles[0];
+    g_log.debug() << "The " << file_type << "selected is " << foundFile << '\n';
+  } else {
+    g_log.debug() << "No " << file_type << " found\n";
+  }
+  return foundFile;
+}
+
 /** A given instrument may have multiple definition files associated with it.
  *This method returns a file name which identifies a given instrument definition
  *for a given instrument.
@@ -79,25 +132,32 @@ namespace Mantid::API {
  *is found
  */
 std::string InstrumentFileFinder::getInstrumentFilename(const std::string &instrumentName, const std::string &date) {
-  const std::vector<std::string> validFormats = {"xml", "nxs", "hdf5"};
-  g_log.debug() << "Looking for instrument file for " << instrumentName << " that is valid on '" << date << "'\n";
-  // Lookup the instrument (long) name
-  const std::string instrument(Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
+  return getFilenameByInstrumentDateAndSearchTerm(instrumentName, date, "_Definition");
+}
 
-  // Get the instrument directories for instrument file search
-  const std::vector<std::string> &directoryNames = Kernel::ConfigService::Instance().getInstrumentDirectories();
-
-  // matching files sorted with newest files coming first
-  const std::vector<std::string> matchingFiles =
-      getResourceFilenames(instrument + "_Definition", validFormats, directoryNames, date);
-  std::string instFile;
-  if (!matchingFiles.empty()) {
-    instFile = matchingFiles[0];
-    g_log.debug() << "Instrument file selected is " << instFile << '\n';
-  } else {
-    g_log.debug() << "No instrument file found\n";
-  }
-  return instFile;
+/** A given instrument may also have multiple parameter files associated with it.
+ *This method returns a file name which identifies a parameter file associated with the
+ *given date for a given instrument.
+ *The parameter can be loaded from either a ".xml" file (old-style
+ *IDF) or a ".hdf5/.nxs" file (new-style nexus).
+ *The filename is required to be of the form InstrumentName + _Parameters +
+ *Identifier + extension.
+ *
+ *  If several parameter files are valid at the given date the file with
+ *the most recent from date is selected. If no such files are found the file
+ *with the latest from date is selected.
+ *
+ *  If no file is found for the given instrument, an empty string is returned.
+ *
+ *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
+ *  @param date :: ISO 8601 date
+ *  @return full path of instrument parameter file
+ *
+ * @throws Exception::NotFoundError If no valid parameter filename
+ *is found
+ */
+std::string InstrumentFileFinder::getParameterFilename(const std::string &instrumentName, const std::string &date) {
+  return getFilenameByInstrumentDateAndSearchTerm(instrumentName, date, "_Parameters");
 }
 
 /// Search the directory for the Parameter IDF file and return full path name if

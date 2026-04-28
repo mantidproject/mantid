@@ -236,7 +236,7 @@ void LoadInstrument::exec() {
     // must also be protected by the lock until LoadParameterFile is fixed.
     // check if default parameter file is also present, unless loading from
     if (!filename.empty() && (loader_type < LoaderType::Nxs))
-      runLoadParameterFile(ws, filename);
+      runLoadParameterFile(ws);
   } // end of mutex scope
 
   // Set the monitors output property
@@ -254,14 +254,13 @@ void LoadInstrument::exec() {
 
 //-----------------------------------------------------------------------------------------------------------------------
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
-void LoadInstrument::runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws,
-                                          const std::string &filename) {
+void LoadInstrument::runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws) {
   g_log.debug("Loading the parameter definition...");
 
-  // First search for XML parameter file in same folder as IDF file
-  const std::string::size_type dir_end = filename.find_last_of("\\/");
-  std::string directoryName = filename.substr(0, dir_end + 1); // include final '/'.
-  std::string fullPathParamIDF = InstrumentFileFinder::getParameterPath(filename, directoryName);
+  // First search for XML parameter file which matches instrument and date
+  const std::string instName = ws->getInstrument()->getName();
+  const std::string runDate = ws->getWorkspaceStartDate();
+  std::string fullPathParamIDF = InstrumentFileFinder::getParameterFilename(instName, runDate);
 
   if (!fullPathParamIDF.empty()) {
 
