@@ -166,18 +166,7 @@ void CreateDetectorTable::setup() {
     std::iota(workspaceIndices.begin(), workspaceIndices.end(), 0);
   }
 
-  if (OneRowPerDetectorID) {
-    // nrows = detectorInfo->detectorIDs().size();
-
-    nrows = 0;
-    for (int wsIndex : workspaceIndices) {
-      nrows += ws->getSpectrum(static_cast<size_t>(wsIndex)).getDetectorIDs().size();
-    }
-  } else {
-    nrows = workspaceIndices.size();
-  }
   table = WorkspaceFactory::Instance().createTable("TableWorkspace");
-  table->setRowCount(nrows);
 }
 
 void CreateDetectorTable::createColumns() {
@@ -371,6 +360,8 @@ CreateDetectorTable::DetectorRowData CreateDetectorTable::calculateWsIdxData(con
 
 void CreateDetectorTable::populateTable() {
 
+  table->setRowCount(workspaceIndices.size());
+
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (size_t row = 0; row < workspaceIndices.size(); row++) {
 
@@ -396,16 +387,15 @@ void CreateDetectorTable::populateTable() {
 
 void CreateDetectorTable::populateTableByDetID() {
 
-  std::vector<DetectorRowData> allRowsData(nrows);
-
   // Each thread will pick up a workspace index and populate all det ids from that index
   // Need to find partitions for each workspace index beforehand, since executing in parallel
   std::vector<size_t> wsIndexToChunkStart(workspaceIndices.size());
-  size_t counter = 0;
+  size_t rowsCounter = 0;
   for (size_t i = 0; i < workspaceIndices.size(); i++) {
-    wsIndexToChunkStart[i] = counter;
-    counter += ws->getSpectrum(static_cast<size_t>(workspaceIndices[i])).getDetectorIDs().size();
+    wsIndexToChunkStart[i] = rowsCounter;
+    rowsCounter += ws->getSpectrum(static_cast<size_t>(workspaceIndices[i])).getDetectorIDs().size();
   }
+  std::vector<DetectorRowData> allRowsData(rowsCounter);
 
   // Executing in parallel, each thread writes to unique chunk in array, avoids contention
   // NOTE: Attempted a shared dict implementation, too much thread contention for many det ids
@@ -419,7 +409,7 @@ void CreateDetectorTable::populateTableByDetID() {
     try {
       data = calculateWsIdxData(wsIndex);
     } catch (const std::exception &) {
-      data.wsIndex = 0;
+      data.wsIndex = static_cast<int>(wsIndex);
       data.specNo = -1;
       data.detIds = {0};
       data.timeIndexes = "0";
@@ -445,12 +435,15 @@ void CreateDetectorTable::populateTableByDetID() {
     }
   }
   // Write rows in order of component index
+  // Number of rows matches number of detectorIDs exactly
   const auto &workspaceDetectorIds = detectorInfo->detectorIDs();
+  table->setRowCount(workspaceDetectorIds.size());
   size_t row = 0;
   for (int detId : workspaceDetectorIds) {
     auto it = detIdToData.find(detId);
     if (it != detIdToData.end()) {
       writeRowToTable(row++, it->second);
+      detIdToData.erase(it);
     }
   }
 }

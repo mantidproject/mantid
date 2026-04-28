@@ -80,7 +80,7 @@ class FullInstrumentViewModel:
         self._root_position = np.array(component_info.position(0))
 
         detector_info_table = CreateDetectorTable(
-            self._workspace, IncludeDetectorPosition=True, OneDetectorIdPerRow=True, StoreInADS=False, EnableLogging=False
+            self._workspace, IncludeDetectorPosition=True, OneRowPerDetectorID=True, StoreInADS=False, EnableLogging=False
         )
 
         self._detector_ids = detector_info_table.columnArray("Detector ID(s)")

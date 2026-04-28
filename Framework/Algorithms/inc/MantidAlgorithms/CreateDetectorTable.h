@@ -58,7 +58,6 @@ private:
   bool showSignedTwoTheta; // If true, signedVersion of the two theta
   Geometry::PointingAlong beamAxisIndex;
   double sampleDist;
-  size_t nrows;
   /// Initialisation code
   struct DetectorRowData {
     int wsIndex = 0;
