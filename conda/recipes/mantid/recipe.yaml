@@ -16,10 +16,15 @@ outputs:
 
     build:
       script:
+        # this is funky because of PKG_VERSION not being propagated in stage cache builds
         - if: win
-          then: build.bat
+          then:
+            - set "MANTID_VERSION=${{ version }}"
+            - call "%RECIPE_DIR%\\build.bat"
         - if: not win
-          then: build.sh
+          then:
+            - export MANTID_VERSION="${{ version }}"
+            - bash "${RECIPE_DIR}/build.sh"
 
     requirements:
       build:
