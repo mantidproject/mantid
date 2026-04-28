@@ -61,6 +61,7 @@ private:
   size_t nrows;
   /// Initialisation code
   struct DetectorRowData {
+    int wsIndex = 0;
     int specNo = 0;
     std::set<int> detIds;
     std::string timeIndexes;
@@ -79,7 +80,7 @@ private:
   const std::string get_time_indexes(size_t wsIndex);
   double get_q(size_t wsIndex);
   void get_diff_consts(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero);
-  void writeRowToTable(size_t row, size_t wsIndex, const DetectorRowData &data);
+  void writeRowToTable(size_t row, const DetectorRowData &data);
   DetectorRowData calculateWsIdxData(size_t wsIndex);
 };
 

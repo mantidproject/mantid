@@ -18,6 +18,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/V3D.h"
+#include <unordered_map>
 #include <vector>
 
 using namespace Mantid::API;
@@ -166,7 +167,12 @@ void CreateDetectorTable::setup() {
   }
 
   if (OneRowPerDetectorID) {
-    nrows = detectorInfo->detectorIDs().size();
+    // nrows = detectorInfo->detectorIDs().size();
+
+    nrows = 0;
+    for (int wsIndex : workspaceIndices) {
+      nrows += ws->getSpectrum(static_cast<size_t>(wsIndex)).getDetectorIDs().size();
+    }
   } else {
     nrows = workspaceIndices.size();
   }
@@ -294,9 +300,9 @@ void CreateDetectorTable::get_diff_consts(size_t wsIndex, double &difa, double &
   tzero = diffConsts[UnitParams::tzero];
 }
 
-void CreateDetectorTable::writeRowToTable(const size_t row, const size_t wsIndex, const DetectorRowData &data) {
+void CreateDetectorTable::writeRowToTable(const size_t row, const DetectorRowData &data) {
   TableRow colValues = table->getRow(row);
-  colValues << static_cast<int>(wsIndex);
+  colValues << static_cast<int>(data.wsIndex);
   colValues << data.specNo;
   if (OneRowPerDetectorID) {
     // Populate detector column with first det id in set
@@ -339,6 +345,8 @@ CreateDetectorTable::DetectorRowData CreateDetectorTable::calculateWsIdxData(con
     signedThetaParamRetrieved = true;
   }
 
+  // wsIndex
+  data.wsIndex = static_cast<int>(wsIndex);
   // Spec No
   auto &spectrum = ws->getSpectrum(wsIndex);
   data.specNo = spectrum.getSpectrumNo();
@@ -370,46 +378,80 @@ void CreateDetectorTable::populateTable() {
 
     try {
       auto data = calculateWsIdxData(wsIndex);
-      writeRowToTable(row, wsIndex, data);
+      writeRowToTable(row, data);
 
     } catch (const std::exception &) {
       DetectorRowData errorData;
+      errorData.wsIndex = static_cast<int>(wsIndex);
       errorData.specNo = -1;
       errorData.detIds = {0};
       errorData.timeIndexes = "0";
       errorData.dataY0 = ws->y(wsIndex)[0];
       errorData.dataE0 = ws->e(wsIndex)[0];
       errorData.isMonitor = "n/a";
-      writeRowToTable(row, wsIndex, errorData);
+      writeRowToTable(row, errorData);
     } // End catch for no spectrum
   }
 }
 
 void CreateDetectorTable::populateTableByDetID() {
-  auto detIdToWorkspaceIndexMap = ws->getDetectorIDToWorkspaceIndexMap();
-  const auto &workspaceDetectorIds = detectorInfo->detectorIDs();
 
+  std::vector<DetectorRowData> allRowsData(nrows);
+
+  // Each thread will pick up a workspace index and populate all det ids from that index
+  // Need to find partitions for each workspace index beforehand, since executing in parallel
+  std::vector<size_t> wsIndexToChunkStart(workspaceIndices.size());
+  size_t counter = 0;
+  for (size_t i = 0; i < workspaceIndices.size(); i++) {
+    wsIndexToChunkStart[i] = counter;
+    counter += ws->getSpectrum(static_cast<size_t>(workspaceIndices[i])).getDetectorIDs().size();
+  }
+
+  // Executing in parallel, each thread writes to unique chunk in array, avoids contention
+  // NOTE: Attempted a shared dict implementation, too much thread contention for many det ids
+  // Need to stick to an array implementation where each thread writes to unique place in array
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
-  for (size_t row = 0; row < workspaceDetectorIds.size(); row++) {
+  for (size_t i = 0; i < workspaceIndices.size(); i++) {
 
-    int detId = workspaceDetectorIds[row];
-    size_t wsIndex = detIdToWorkspaceIndexMap[detId];
+    auto wsIndex = static_cast<size_t>(workspaceIndices[i]);
 
+    DetectorRowData data;
     try {
-      auto data = calculateWsIdxData(wsIndex);
-      data.detIds = {detId};
-      writeRowToTable(row, wsIndex, data);
-
+      data = calculateWsIdxData(wsIndex);
     } catch (const std::exception &) {
-      DetectorRowData errorData;
-      errorData.specNo = -1;
-      errorData.detIds = {0};
-      errorData.timeIndexes = "0";
-      errorData.dataY0 = ws->y(wsIndex)[0];
-      errorData.dataE0 = ws->e(wsIndex)[0];
-      errorData.isMonitor = "n/a";
-      writeRowToTable(row, wsIndex, errorData);
+      data.wsIndex = 0;
+      data.specNo = -1;
+      data.detIds = {0};
+      data.timeIndexes = "0";
+      data.dataY0 = ws->y(wsIndex)[0];
+      data.dataE0 = ws->e(wsIndex)[0];
+      data.isMonitor = "n/a";
     } // End catch for no spectrum
+
+    size_t chunkStart = wsIndexToChunkStart[i];
+    auto detIds = dynamic_cast<const std::set<int> &>(ws->getSpectrum(wsIndex).getDetectorIDs());
+    for (int detId : detIds) {
+      data.detIds = std::set<int>({detId});
+      allRowsData[chunkStart++] = data;
+    }
+  }
+
+  // Build detector id map for easy ordering
+  std::unordered_map<int, DetectorRowData> detIdToData;
+  detIdToData.reserve(allRowsData.size());
+  for (auto &rowData : allRowsData) {
+    if (!rowData.detIds.empty()) {
+      detIdToData[*rowData.detIds.begin()] = std::move(rowData);
+    }
+  }
+  // Write rows in order of component index
+  const auto &workspaceDetectorIds = detectorInfo->detectorIDs();
+  size_t row = 0;
+  for (int detId : workspaceDetectorIds) {
+    auto it = detIdToData.find(detId);
+    if (it != detIdToData.end()) {
+      writeRowToTable(row++, it->second);
+    }
   }
 }
 
