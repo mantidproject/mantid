@@ -75,7 +75,7 @@ private:
   /// return success
   bool runLoadParameterFile(const std::string &fullPathName, const API::MatrixWorkspace_sptr &localWorkspace);
   /// Search for and then load parameter file
-  void loadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws)
+  void loadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws);
 };
 
 } // namespace DataHandling

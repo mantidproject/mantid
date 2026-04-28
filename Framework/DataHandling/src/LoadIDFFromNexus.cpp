@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadIDFFromNexus.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
@@ -121,7 +122,7 @@ void LoadIDFFromNexus::exec() {
     } else {
       g_log.notice() << "Using correction parameter file: " << corrParamFile.string() << " to replace parameters.\n";
     }
-    runloadParameterFile(corrParamFile.string(), localWorkspace);
+    runLoadParameterFile(corrParamFile.string(), localWorkspace);
   } else {
     g_log.notice() << "No correction parameter file applies to the date for "
                       "correction file.\n";
@@ -265,10 +266,9 @@ void LoadIDFFromNexus::loadParameterFile(const std::shared_ptr<API::MatrixWorksp
   const std::string instName = ws->getInstrument()->getName();
   const std::string runDate = ws->getWorkspaceStartDate();
   std::string fullPathParamIDF = InstrumentFileFinder::getParameterFilename(instName, runDate);
-  bool paramLoaded;
   if (!fullPathParamIDF.empty()) {
     g_log.debug() << "Parameter file: " << fullPathParamIDF << '\n';
-    paramLoaded = runLoadParameterFile(fullPathParamIDF, ws);
+    bool paramLoaded = runLoadParameterFile(fullPathParamIDF, ws);
     if (!paramLoaded) {
       g_log.notice() << "No Instrument parameter map entry found.\n\n";
     }

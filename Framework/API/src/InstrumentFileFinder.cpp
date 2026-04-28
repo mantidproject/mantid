@@ -71,6 +71,7 @@ namespace Mantid::API {
  *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
  *  @param date :: ISO 8601 date
  *  @param searchTerm :: Snippet expected as part of filename eg. "_Definition" or "_Parameters"
+ *  @param fileFormats :: Acceptable file extensions
  *  @return full path of the file
  *
  * @throws Exception::NotFoundError If no valid filename is found
