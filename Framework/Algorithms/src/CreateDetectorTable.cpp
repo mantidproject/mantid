@@ -363,7 +363,7 @@ void CreateDetectorTable::populateTable() {
   table->setRowCount(workspaceIndices.size());
 
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
-  for (size_t row = 0; row < workspaceIndices.size(); row++) {
+  for (int row = 0; row < workspaceIndices.size(); row++) {
 
     auto wsIndex = static_cast<size_t>(workspaceIndices[row]);
 
@@ -401,7 +401,7 @@ void CreateDetectorTable::populateTableByDetID() {
   // NOTE: Attempted a shared dict implementation, too much thread contention for many det ids
   // Need to stick to an array implementation where each thread writes to unique place in array
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
-  for (size_t i = 0; i < workspaceIndices.size(); i++) {
+  for (int i = 0; i < workspaceIndices.size(); i++) {
 
     auto wsIndex = static_cast<size_t>(workspaceIndices[i]);
 
