@@ -418,11 +418,6 @@ def get_initial_fit_function_and_kwargs_from_specs(
         if not tie_bkg:
             bg_func.setParameter("A0", bg)
 
-        # for IkedaCarpenterPV, fix instrument parameters during non-final fits to improve speed and stability
-        # if peak_func_name == "IkedaCarpenterPV":
-        #    for par in ("Alpha0", "Alpha1", "Beta0", "Kappa"):
-        #        peak_func.fixParameter(par)
-
         # package up the spectra fit functions (peak + background) into a composite function
         comp_func = _make_composite(peak_func, bg_func)
         function.add(comp_func)
