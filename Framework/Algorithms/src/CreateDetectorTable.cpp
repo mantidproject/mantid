@@ -406,6 +406,9 @@ void CreateDetectorTable::populateTableByDetID() {
     auto wsIndex = static_cast<size_t>(workspaceIndices[i]);
 
     DetectorRowData data;
+    // TODO: Not entirely sure this catch is necessary
+    // Only necessary if there is a det id in detectorInfo->detectorIDs()
+    // that somehow triggers the crash, but that seems unlikely
     try {
       data = calculateWsIdxData(wsIndex);
     } catch (const std::exception &) {
@@ -440,11 +443,21 @@ void CreateDetectorTable::populateTableByDetID() {
   table->setRowCount(workspaceDetectorIds.size());
   size_t row = 0;
   for (int detId : workspaceDetectorIds) {
+    DetectorRowData data;
     auto it = detIdToData.find(detId);
     if (it != detIdToData.end()) {
-      writeRowToTable(row++, it->second);
-      detIdToData.erase(it);
+      data = it->second;
+    } else {
+      // Rows need to match detectorIDs, if not found, pad with invalid flags
+      data.wsIndex = -1;
+      data.specNo = -1;
+      data.detIds = {detId};
+      data.timeIndexes = "0";
+      data.dataY0 = 0;
+      data.dataE0 = 0;
+      data.isMonitor = "n/a";
     }
+    writeRowToTable(row++, data);
   }
 }
 
