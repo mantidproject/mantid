@@ -90,6 +90,20 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
             self.model.generate_mask_table_ws(store_in_ads=False)
             create_tbl_mock.assert_called_once_with(["test_0", "test_1", "test_2"], False)
 
+    def test_generate_mask_table_ws_inverted(self):
+        mock_masks = [Mock(generate_inverted_table_rows=Mock(return_value=[f"test_{i}"])) for i in range(3)]
+        self.model._masks = mock_masks
+        self.model._apply_inverted_mask = True
+        with patch("mantidqt.widgets.sliceviewer.models.masking.MaskingModel.create_table_workspace_from_rows") as create_tbl_mock:
+            self.model.generate_mask_table_ws(store_in_ads=False)
+            create_tbl_mock.assert_called_once_with(["test_0", "test_1", "test_2"], False)
+
+    def test_invert_masking_clicked(self):
+        self.model.invert_masking_clicked(True)
+        self.assertEqual(self.model._apply_inverted_mask, True)
+        self.model.invert_masking_clicked(False)
+        self.assertEqual(self.model._apply_inverted_mask, False)
+
     def test_export_selectors(self):
         with (
             patch("mantidqt.widgets.sliceviewer.models.masking.AnalysisDataService") as ads_mock,
