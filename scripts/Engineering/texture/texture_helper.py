@@ -14,9 +14,9 @@ from mantid.simpleapi import (
     CloneWorkspace,
     CombineTableWorkspaces,
     ConjoinWorkspaces,
+    Rebin,
     RebinToWorkspace,
     SaveAscii,
-    ExtractSingleSpectrum,
 )
 from mantid.api import AnalysisDataService as ADS
 from typing import Optional, Sequence
@@ -522,11 +522,24 @@ def _retrieve_ws_object(ws: str | Workspace2D | TableWorkspace):
     return ws
 
 
-def save_texture_ws_ascii(ws: str | Workspace2D, save_dir: str):
+def generous_rebin(ws: str | Workspace2D, out_ws: str, StoreInADS: bool = True) -> Workspace2D:
+    ws = _retrieve_ws_object(ws)
+    if ws.getInstrument().getName() not in ("ENGIN-X", "IMAT"):
+        # the size and detector ranges for enginx and imat should not cause issues with this
+        logger.warning("Rebinning generously - this may cause memory issuesfor workspaces with very different x binning")
+    minX, maxX, diffX = np.inf, 0, np.inf
+    for i in range(ws.getNumberHistograms()):
+        xdat = ws.readX(i)
+        minX = min(xdat.min(), minX)
+        maxX = max(xdat.max(), maxX)
+        diffX = min(np.diff(xdat).min(), diffX)
+    return Rebin(InputWorkspace=ws, Params=(minX, diffX, maxX), OutputWorkspace=out_ws, StoreInADS=StoreInADS)
+
+
+def save_texture_ws_ascii(ws: str | Workspace2D, save_dir: str, StoreInADS: bool = False):
     try:
         SaveAscii(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")
     except RuntimeError:
-        logger.notice(f"Failed to save {ws} as a txt file, Rebinning all spectra to match first spectrum")
-        single_spec = ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace="__single_spec", WorkspaceIndex=0, StoreInADS=False)
-        ascii_ws = RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=single_spec, OutputWorkspace="ascii_ws")
+        logger.notice(f"Failed to save {ws} as a txt file, Rebinning generously")
+        ascii_ws = generous_rebin(ws, "ascii_ws", StoreInADS)
         SaveAscii(InputWorkspace=ascii_ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")
