@@ -526,7 +526,7 @@ def generous_rebin(ws: str | Workspace2D, out_ws: str, StoreInADS: bool = True) 
     ws = _retrieve_ws_object(ws)
     if ws.getInstrument().getName() not in ("ENGIN-X", "IMAT"):
         # the size and detector ranges for enginx and imat should not cause issues with this
-        logger.warning("Rebinning generously - this may cause memory issuesfor workspaces with very different x binning")
+        logger.warning("Rebinning generously - this may cause memory issues for workspaces with very different x binning")
     minX, maxX, diffX = np.inf, 0, np.inf
     for i in range(ws.getNumberHistograms()):
         xdat = ws.readX(i)
