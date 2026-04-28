@@ -59,7 +59,7 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
 
     @patch("mantidqt.widgets.sliceviewer.models.masking.PolyCursorInfo")
     def test_add_poly_cursor_info(self, CursorInfo_mock):
-        kwargs = {"nodes": "nodes", "transpose": "test_transpose"}
+        kwargs = {"nodes": "nodes", "transpose": "test_transpose", "x_limits": "test_x_limits", "y_limits": "test_y_limits"}
         self.model.add_poly_cursor_info(**kwargs)
         CursorInfo_mock.assert_called_once_with(**kwargs)
 
@@ -169,7 +169,10 @@ class CursorInfoTest(unittest.TestCase):
     def test_poly_cursor_info_generate_table_rows(self):
         # Actual alg uses float64. This is important as divide by 0 returns inf rather than an exception.
         cursor_info = PolyCursorInfo(
-            [self.Click((float64(0), float64(0))), self.Click((float64(10), float64(5))), self.Click((float64(0), float64(10)))], False
+            [self.Click((float64(0), float64(0))), self.Click((float64(10), float64(5))), self.Click((float64(0), float64(10)))],
+            False,
+            (1, 2),
+            (3, 4),
         )
         actual_rows = cursor_info.generate_table_rows()
         expected_table_rows = [
@@ -196,6 +199,8 @@ class CursorInfoTest(unittest.TestCase):
                 self.Click((float64(10), float64(0))),
             ],
             False,
+            (1, 2),
+            (3, 4),
         )
         actual_rows = cursor_info.generate_table_rows()
         expected_table_rows = [
@@ -226,6 +231,8 @@ class CursorInfoTest(unittest.TestCase):
                     self.Click((float64(10), float64(5))),
                 ],
                 False,
+                (1, 2),
+                (3, 4),
             )
 
 
