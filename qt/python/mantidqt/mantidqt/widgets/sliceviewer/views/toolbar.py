@@ -68,7 +68,9 @@ class SliceViewerNavigationToolbar(MantidNavigationToolbar):
         ),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool(ToolItemText.MASKING, "Toggle masking on/off", "mdi.transition-masked", "maskingClicked", False),
-        MantidNavigationTool(ToolItemText.INVERTED_MASKING, "Toggle inverted masking", "mdi.transition", "invertMaskingClicked", False),
+        MantidNavigationTool(
+            ToolItemText.INVERTED_MASKING, "Toggle inverted masking on/off", "mdi.transition", "invertMaskingClicked", False
+        ),
         MantidNavigationTool(ToolItemText.RECT_MASKING, "Select rectangle mask", "mdi.square-outline", "rectMaskingClicked", False),
         MantidNavigationTool(ToolItemText.ELLI_MASKING, "Select elliptical mask", "mdi.circle-outline", "elliMaskingClicked", False),
         MantidNavigationTool(ToolItemText.POLY_MASKING, "Select polygon mask", "mdi.triangle-outline", "polyMaskingClicked", False),

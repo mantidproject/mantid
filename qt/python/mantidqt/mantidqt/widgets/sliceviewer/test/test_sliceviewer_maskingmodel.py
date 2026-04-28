@@ -124,7 +124,7 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
 
 
 class CursorInfoTest(unittest.TestCase):
-    Click = namedtuple("Click", ["data"])
+    Click = namedtuple("Click", ["data", "extent"], defaults=[None])
 
     @staticmethod
     def _set_up_model_test(text, transpose=False, images=None):
@@ -148,6 +148,19 @@ class CursorInfoTest(unittest.TestCase):
         row = cursor_info.generate_table_rows()
         self.assertEqual(row, [TableRow(spec_list="1-11", x_min=-5.2, x_max=5.6)])
 
+    def test_rect_cursor_info_generate_inverted_table_rows(self):
+        cursor_info = RectCursorInfo(
+            self.Click(data=(-5.2, 0.8), extent=(-0.5, 10, 1, 10)), self.Click(data=(5.6, 10.8), extent=(-0.5, 10, 1, 10)), False
+        )
+        actual_rows = cursor_info.generate_inverted_table_rows()
+        expected_table_rows = [
+            TableRow(spec_list="1-10", x_min=-0.5, x_max=-5.2),
+            TableRow(spec_list="1-1", x_min=-5.2, x_max=5.6),
+            TableRow(spec_list="11-10", x_min=-5.2, x_max=5.6),
+            TableRow(spec_list="1-10", x_min=5.6, x_max=10),
+        ]
+        self._assert_table_rows_delta(actual_rows, expected_table_rows, delta=0.001)
+
     def test_elli_cursor_info_generate_table_rows(self):
         cursor_info = ElliCursorInfo(self.Click((-5, 0)), self.Click((5, 10)), False)
         actual_rows = cursor_info.generate_table_rows()
@@ -163,6 +176,35 @@ class CursorInfoTest(unittest.TestCase):
             TableRow(spec_list="8", x_min=-4.229, x_max=4.229),
             TableRow(spec_list="9", x_min=-3.399, x_max=3.399),
             TableRow(spec_list="10", x_min=-1.795, x_max=1.795),
+        ]
+        self._assert_table_rows_delta(expected_table_rows, actual_rows, delta=0.001)
+
+    def test_elli_cursor_info_generate_inverted_table_rows(self):
+        cursor_info = ElliCursorInfo(
+            self.Click(data=(3, 0), extent=(-0.5, 10, 1, 10)), self.Click(data=(5, 7), extent=(-0.5, 10, 1, 10)), False
+        )
+        actual_rows = cursor_info.generate_inverted_table_rows()
+        expected_table_rows = [
+            TableRow(spec_list="1-10", x_min=-0.5, x_max=3),
+            TableRow(spec_list="1-0", x_min=3, x_max=5),
+            TableRow(spec_list="7-10", x_min=3, x_max=5),
+            TableRow(spec_list="1-10", x_min=5, x_max=10),
+            TableRow(spec_list="0", x_min=3, x_max=3.99999999),
+            TableRow(spec_list="0", x_min=4.0, x_max=5),
+            TableRow(spec_list="1", x_min=3, x_max=3.4129129536431586),
+            TableRow(spec_list="1", x_min=4.587087046356841, x_max=5),
+            TableRow(spec_list="2", x_min=3, x_max=3.1481645816238912),
+            TableRow(spec_list="2", x_min=4.851835418376108, x_max=5),
+            TableRow(spec_list="3", x_min=3, x_max=3.0287581866496893),
+            TableRow(spec_list="3", x_min=4.971241813350311, x_max=5),
+            TableRow(spec_list="4", x_min=3, x_max=3.0287581866496893),
+            TableRow(spec_list="4", x_min=4.971241813350311, x_max=5),
+            TableRow(spec_list="5", x_min=3, x_max=3.1481645816238912),
+            TableRow(spec_list="5", x_min=4.851835418376108, x_max=5),
+            TableRow(spec_list="6", x_min=3, x_max=3.4129129536431586),
+            TableRow(spec_list="6", x_min=4.587087046356841, x_max=5),
+            TableRow(spec_list="7", x_min=3, x_max=3.99999999),
+            TableRow(spec_list="7", x_min=4.0, x_max=5),
         ]
         self._assert_table_rows_delta(expected_table_rows, actual_rows, delta=0.001)
 
@@ -187,6 +229,42 @@ class CursorInfoTest(unittest.TestCase):
             TableRow(spec_list="8", x_min=0, x_max=4.666),
             TableRow(spec_list="9", x_min=0, x_max=2.666),
             TableRow(spec_list="10", x_min=0, x_max=0.666),
+        ]
+        self._assert_table_rows_delta(expected_table_rows, actual_rows, delta=0.001)
+
+    def test_poly_cursor_info_generate_inverted_table_rows(self):
+        cursor_info = PolyCursorInfo(
+            [self.Click((float64(0), float64(0))), self.Click((float64(10), float64(5))), self.Click((float64(0), float64(10)))],
+            False,
+            (-0.5, 15),
+            (1, 15),
+        )
+        actual_rows = cursor_info.generate_inverted_table_rows()
+        expected_table_rows = [
+            TableRow(spec_list="1-0", x_min=-0.5, x_max=15),
+            TableRow(spec_list="10-15", x_min=-0.5, x_max=15),
+            TableRow(spec_list="0", x_min=-0.5, x_max=float64(0.0)),
+            TableRow(spec_list="0", x_min=float64(0.6666666666666666), x_max=15),
+            TableRow(spec_list="1", x_min=-0.5, x_max=float64(0.0)),
+            TableRow(spec_list="1", x_min=float64(1.3333333333333333), x_max=15),
+            TableRow(spec_list="2", x_min=-0.5, x_max=float64(0.0)),
+            TableRow(spec_list="2", x_min=float64(3.3333333333333335), x_max=15),
+            TableRow(spec_list="3", x_min=-0.5, x_max=float64(0.0)),
+            TableRow(spec_list="3", x_min=float64(5.333333333333333), x_max=15),
+            TableRow(spec_list="4", x_min=-0.5, x_max=float64(0.0)),
+            TableRow(spec_list="4", x_min=float64(7.333333333333333), x_max=15),
+            TableRow(spec_list="5", x_min=-0.5, x_max=float64(0.0)),
+            TableRow(spec_list="5", x_min=float64(9.333333333333334), x_max=15),
+            TableRow(spec_list="6", x_min=-0.5, x_max=float64(0.0)),
+            TableRow(spec_list="6", x_min=float64(7.333333333333334), x_max=15),
+            TableRow(spec_list="7", x_min=-0.5, x_max=float64(0.0)),
+            TableRow(spec_list="7", x_min=float64(5.333333333333334), x_max=15),
+            TableRow(spec_list="8", x_min=-0.5, x_max=float64(0.0)),
+            TableRow(spec_list="8", x_min=float64(3.333333333333332), x_max=15),
+            TableRow(spec_list="9", x_min=-0.5, x_max=float64(0.0)),
+            TableRow(spec_list="9", x_min=float64(1.3333333333333321), x_max=15),
+            TableRow(spec_list="10", x_min=-0.5, x_max=float64(0.0)),
+            TableRow(spec_list="10", x_min=float64(0.0), x_max=15),
         ]
         self._assert_table_rows_delta(expected_table_rows, actual_rows, delta=0.001)
 
