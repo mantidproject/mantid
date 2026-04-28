@@ -25,6 +25,10 @@ class CursorInfoBase(ABC):
     def generate_table_rows(self):
         pass
 
+    @abstractmethod
+    def generate_inverted_table_rows(self):
+        pass
+
     @staticmethod
     def consolidate_table_rows(table_rows):
         @dataclass()
@@ -91,12 +95,20 @@ class RectCursorInfoBase(CursorInfoBase, ABC):
         x_data = sorted([self._click.data[0], self._release.data[0]])
         return (x_data, y_data) if not self._transpose else (y_data, x_data)
 
-    def get_rows_outside_rect(self):
-        x_min, x_max, spec_min, spec_max = self._click.extent
+    def get_image_axis_boundaries(self, click):
+        x_min, x_max, spec_min, spec_max = click.extent
+        # Round the spec min and max
         spec_min = int(ceil(spec_min))
         spec_max = self.snap_to_bin_centre((spec_max))
+        return x_min, x_max, spec_min, spec_max
+
+    def get_rows_outside_rect(self):
+        # Get the axis limits
+        x_min, x_max, spec_min, spec_max = self.get_image_axis_boundaries(self._click)
         x_data, y_data = self.get_xy_data()
         y_min, y_max = self.snap_to_bin_centre(y_data[0]), self.snap_to_bin_centre(y_data[-1])
+
+        # Mask everything outside selected rectangle
         row1 = TableRow(spec_list=f"{spec_min}-{spec_max}", x_min=x_min, x_max=x_data[0])
         row2 = TableRow(spec_list=f"{spec_min}-{y_min}", x_min=x_data[0], x_max=x_data[-1])
         row3 = TableRow(spec_list=f"{y_max}-{spec_max}", x_min=x_data[0], x_max=x_data[-1])
@@ -127,7 +139,7 @@ class ElliCursorInfo(RectCursorInfoBase):
         y_range, a, b, h, k = self._process_elli_parameters(x_data, y_data)
 
         rows = []
-        for index, y in enumerate(y_range):
+        for y in y_range:
             x_min, x_max = self._calc_x_val(y, a, b, h, k)
             x_min = x_min - 10**-ALLOWABLE_ERROR_SIG_FIGS if x_min == x_max else x_min  # slightly adjust min value so x vals are different.
             rows.append(TableRow(spec_list=str(round(y)), x_min=x_min, x_max=x_max))
@@ -159,9 +171,10 @@ class ElliCursorInfo(RectCursorInfoBase):
         y_range, a, b, h, k = self._process_elli_parameters(x_data, y_data)
 
         rows = []
-        for index, y in enumerate(y_range):
+        for y in y_range:
             x_min, x_max = self._calc_x_val(y, a, b, h, k)
-            x_min = x_min - 10**-ALLOWABLE_ERROR_SIG_FIGS if x_min == x_max else x_min  # slightly adjust min value so x vals are different.
+            # slightly adjust min value so x vals are different.
+            x_min = x_min - 10**-ALLOWABLE_ERROR_SIG_FIGS if x_min == x_max else x_min
             rows.append(TableRow(spec_list=str(round(y)), x_min=x_data[0], x_max=x_min))
             rows.append(TableRow(spec_list=str(round(y)), x_min=x_max, x_max=x_data[-1]))
         rows = self.consolidate_table_rows(rows)
@@ -169,8 +182,10 @@ class ElliCursorInfo(RectCursorInfoBase):
 
 
 class PolyCursorInfo(CursorInfoBase):
-    def __init__(self, nodes, transpose):
+    def __init__(self, nodes, transpose, x_limits, y_limits):
         super().__init__(transpose)
+        self._x_limits = x_limits
+        self._y_limits = y_limits
 
         self._lines = self._generate_lines(nodes)
         if not self._check_intersecting_lines():
@@ -267,7 +282,29 @@ class PolyCursorInfo(CursorInfoBase):
         return True
 
     def generate_inverted_table_rows(self):
-        pass
+        rows = []
+
+        # Get the axis limits to mask eveything outside the selected polygon
+        x_axis_min, x_axis_max = self._x_limits
+        spec_min, spec_max = self._y_limits
+        spec_min = int(ceil(spec_min))
+        spec_max = self.snap_to_bin_centre((spec_max))
+        y_min, y_max = self._extract_global_y_limits()
+
+        # inclusive range with 1/3 step for greater resolution
+        y_range = [n / 3 for n in range(y_min * 3, (y_max * 3) + 1)]
+
+        # Mask the rectangles above and below the polygon
+        rows.append(TableRow(spec_list=f"{spec_min}-{str(round(y_range[0]))}", x_min=x_axis_min, x_max=x_axis_max))
+        rows.append(TableRow(spec_list=f"{str(round(y_range[-1]))}-{spec_max}", x_min=x_axis_min, x_max=x_axis_max))
+
+        # Mask the area around the polygon
+        for y in y_range:
+            x_val_pairs = self._calculate_relevant_x_value_pairs(y)
+            for x_min, x_max in x_val_pairs:
+                rows.append(TableRow(spec_list=str(round(y)), x_min=x_axis_min, x_max=x_min))
+                rows.append(TableRow(spec_list=str(round(y)), x_min=x_max, x_max=x_axis_max))
+        return self.consolidate_table_rows(rows)
 
 
 class MaskingModel:
@@ -297,8 +334,8 @@ class MaskingModel:
     def add_elli_cursor_info(self, click, release, transpose):
         self.update_active_mask(ElliCursorInfo(click=click, release=release, transpose=transpose))
 
-    def add_poly_cursor_info(self, nodes, transpose):
-        self.update_active_mask(PolyCursorInfo(nodes=nodes, transpose=transpose))
+    def add_poly_cursor_info(self, nodes, transpose, x_limits, y_limits):
+        self.update_active_mask(PolyCursorInfo(nodes=nodes, transpose=transpose, x_limits=x_limits, y_limits=y_limits))
 
     def create_table_workspace_from_rows(self, table_rows, store_in_ads):
         # create table ws_from rows
