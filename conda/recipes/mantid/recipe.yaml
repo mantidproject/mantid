@@ -57,7 +57,6 @@ outputs:
         - setuptools
         - tbb-devel ${{ tbb }}
         - pip ${{ pip }}
-        - versioningit ${{ versioningit }}
         - zlib
         - if: linux
           then:
