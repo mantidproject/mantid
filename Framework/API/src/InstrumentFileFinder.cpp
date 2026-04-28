@@ -2,6 +2,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 
@@ -89,8 +90,13 @@ InstrumentFileFinder::getFilenameByInstrumentDateAndSearchTerm(const std::string
     fileType = searchTerm + " file";
 
   g_log.debug() << "Looking for " << fileType << " for " << instrumentName << " that is valid on '" << date << "'\n";
-  // Lookup the instrument (long) name
-  const std::string instrument(Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
+  // Lookup the instrument (long) name, falling back to the provided name if not found in any facility
+  std::string instrument;
+  try {
+    instrument = Kernel::ConfigService::Instance().getInstrument(instrumentName).name();
+  } catch (const Kernel::Exception::NotFoundError &) {
+    instrument = instrumentName;
+  }
 
   // Get the instrument directories for file search
   const std::vector<std::string> &directoryNames = Kernel::ConfigService::Instance().getInstrumentDirectories();
@@ -267,7 +273,11 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
   const std::string allFileFormats = ss.str();
 
   const boost::regex regex(prefix + ".*\\." + allFileFormats, boost::regex_constants::icase);
-  DateAndTime d(date);
+  // Normalize date: if only YYYY-MM-DD was provided (no time component), append midnight so
+  // DateAndTime can parse it. Parameter files commonly store date-only valid-from attributes.
+  static const boost::regex dateOnlyRegex("\\d{4}-\\d{2}-\\d{2}");
+  const std::string normalizedDate = boost::regex_match(date, dateOnlyRegex) ? date + "T00:00:00" : date;
+  DateAndTime d(normalizedDate);
 
   DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
   // recently starting file, if none match
@@ -296,15 +306,21 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
         getValidFromTo(pathName, validFrom, validTo);
         g_log.debug() << "File '" << pathName << " valid dates: from '" << validFrom << "' to '" << validTo << "'\n";
         // Use default valid "from" and "to" dates if none were found.
+        // Normalize date-only strings (YYYY-MM-DD) to full datetimes before parsing.
         DateAndTime to, from;
-        if (validFrom.length() > 0)
-          from.setFromISO8601(validFrom);
-        else
+        if (validFrom.length() > 0) {
+          const std::string normFrom =
+              boost::regex_match(validFrom, dateOnlyRegex) ? validFrom + "T00:00:00" : validFrom;
+          from.setFromISO8601(normFrom);
+        } else {
           from = refDate;
-        if (validTo.length() > 0)
-          to.setFromISO8601(validTo);
-        else
+        }
+        if (validTo.length() > 0) {
+          const std::string normTo = boost::regex_match(validTo, dateOnlyRegex) ? validTo + "T00:00:00" : validTo;
+          to.setFromISO8601(normTo);
+        } else {
           to.setFromISO8601("2100-01-01T00:00:00");
+        }
 
         if (from <= d && d <= to) {
           foundFile = true;
