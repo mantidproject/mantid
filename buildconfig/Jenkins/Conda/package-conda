@@ -130,8 +130,22 @@ if [[ $OSTYPE == "msys"* ]]; then
     # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
     EXTRA_BUILD_OPTIONS+="--no-build-id --log-style=plain"
 
-    # Use a dedicated package cache on Windows to avoid temp-directory rename failures.
-    export RATTLER_CACHE_DIR=$WORKSPACE/rattler-cache
+    branch_name="${BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
+    branch_slug="$(printf '%s' "$branch_name" | tr '[:upper:]' '[:lower:]' | tr '/\\:*?"<>| ' '-' | tr -cd 'a-z0-9._-')"
+
+    cache_root_win="C:/mantid-ci/${branch_slug}"
+    cache_root_bash="/c/mantid-ci/${branch_slug}"
+
+    export RATTLER_CACHE_DIR="${cache_root_win}/rattler-cache"
+    export TMP="${cache_root_win}/tmp"
+    export TEMP="${cache_root_win}/tmp"
+
+    mkdir -p "${cache_root_bash}/rattler-cache" "${cache_root_bash}/tmp"
+
+    cleanup_windows_cache_dirs() {
+        rm -rf "${cache_root_bash}/rattler-cache" "${cache_root_bash}/tmp" || true
+    }
+    trap cleanup_windows_cache_dirs EXIT
 fi
 
 export CONDA_SUBDIR=$PLATFORM
