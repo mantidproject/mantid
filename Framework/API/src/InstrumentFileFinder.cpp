@@ -73,6 +73,7 @@ namespace Mantid::API {
  *  @param date :: ISO 8601 date
  *  @param searchTerm :: Snippet expected as part of filename eg. "_Definition" or "_Parameters"
  *  @param fileFormats :: Acceptable file extensions
+ *  @param dirHint :: Any non-standard directory that should be search alongside the Instrument Directories
  *  @return full path of the file
  *
  * @throws Exception::NotFoundError If no valid filename is found
@@ -166,6 +167,7 @@ std::string InstrumentFileFinder::getInstrumentFilename(const std::string &instr
  *
  *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
  *  @param date :: ISO 8601 date
+ *  @param dirHint :: Any non-standard directory that should be search alongside the Instrument Directories
  *  @return full path of instrument parameter file
  *
  * @throws Exception::NotFoundError If no valid parameter filename
