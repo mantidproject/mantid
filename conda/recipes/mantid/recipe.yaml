@@ -167,6 +167,7 @@ outputs:
         - if: win
           then:
             - lib3mf
+            - mkl ${{ mkl }}
         - if: osx
           then:
             - libopenblas ${{ libopenblas }}
@@ -199,6 +200,9 @@ outputs:
         - libboost-python-devel ${{ libboost }}
         - numpy ${{ numpy }}
         - python ${{ python }}
+        - if: win
+          then:
+            - mkl ${{ mkl }}
       run:
         - ${{ pin_compatible("gsl", upper_bound="x.x") }}
         - ${{ pin_compatible("hdf4", upper_bound="x.x") }}
