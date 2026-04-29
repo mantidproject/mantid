@@ -292,9 +292,9 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
   const std::string normalizedDate = boost::regex_match(date, dateOnlyRegex) ? date + "T00:00:00" : date;
   DateAndTime d(normalizedDate);
 
-  DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
+  DateAndTime refDate("1899-01-01 23:59:00"); // used to help determine the most
   // recently starting file, if none match
-  DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine the most recently
+  DateAndTime refDateGoodFile("1899-01-01 23:59:00"); // used to help determine the most recently
 
   // Two files could have the same `from` date so multimap is required.
   // Sort with newer dates placed at the beginning
