@@ -17,11 +17,14 @@ using std::size_t;
 
 namespace {
 // edge checks
+struct EdgeCheck { // for polymorphic access to functors
+  virtual bool operator()(double, double, double) const = 0;
+};
 
 // Standard check, for linear, log, and power
-struct standardEdgeCheck {
-  standardEdgeCheck(double lastBinCoef) : m_lastBinCoef(lastBinCoef) {}
-  bool operator()(double xcurr, double xs, double rightEdge) const {
+struct StandardEdgeCheck : EdgeCheck {
+  StandardEdgeCheck(double lastBinCoef) : m_lastBinCoef(lastBinCoef) {}
+  bool operator()(double xcurr, double xs, double rightEdge) const override {
     return xcurr + (1. + m_lastBinCoef) * xs <= rightEdge;
   }
 
@@ -29,45 +32,44 @@ private:
   double m_lastBinCoef;
 };
 // Reverse log check, for reverse log only
-struct reverseLogEdgeCheck {
-  bool operator()(double xcurr, double xs, double leftEdge) const { return xcurr + 2. * xs >= leftEdge; }
+struct ReverseLogEdgeCheck : EdgeCheck {
+  bool operator()(double xcurr, double xs, double leftEdge) const override { return xcurr + 2. * xs >= leftEdge; }
 };
 
-// bin width functions
+// bin width functionss
+struct BinWidth { // for polymorphic access to functors
+  virtual double operator()(double, double) const = 0;
+};
 
 // Linear bin width is just the alpha parameter
-struct linearBinWidth {
-  double operator()(double xcurr, double alpha) const {
-    (void)xcurr;
-    return alpha;
-  }
+struct LinearBinWidth : BinWidth {
+  double operator()([[maybe_unused]] double xcurr, double alpha) const override { return alpha; }
 };
 // Log bin width is current position times the alpha parameter
-struct logBinWidth {
-  double operator()(double xcurr, double alpha) const { return xcurr * alpha; }
+struct LogBinWidth : BinWidth {
+  double operator()(double xcurr, double alpha) const override { return xcurr * alpha; }
 };
 
 // REVERSE LOGARITHMIC
 // we go through a reverse log bin by starting from its end, and working our way back to the beginning
-// this way we can define the bins in a reccuring way, and with a more obvious closeness with the usual log.
-struct reverseLogBinWidth {
-  reverseLogBinWidth(double leftEdge, double rightEdge) : m_leftEdge(leftEdge), m_rightEdge(rightEdge) {}
-  double operator()(double xcurr, double alpha) const { return (xcurr - m_rightEdge - m_leftEdge) * alpha; }
+// this way we can define the bins in a recurring way, and with a more obvious closeness with the usual log.
+struct ReverseLogBinWidth : BinWidth {
+  ReverseLogBinWidth(double leftEdge, double rightEdge) : m_leftEdge(leftEdge), m_rightEdge(rightEdge) {}
+  double operator()(double xcurr, double alpha) const override { return (xcurr - m_rightEdge - m_leftEdge) * alpha; }
 
 private:
   double m_leftEdge;
   double m_rightEdge;
 };
-// Power bin width is the alpha parameter divided by the curren index to the power
-struct powerBinWidth {
-  powerBinWidth(std::size_t &currDiv, double power) : m_currDiv(currDiv), m_power(power) {}
-  double operator()(double xcurr, double alpha) {
-    (void)xcurr;
-    return alpha * std::pow(m_currDiv++, -m_power);
+// Power bin width is the alpha parameter divided by the current index to the power
+struct PowerBinWidth : BinWidth {
+  PowerBinWidth(std::size_t &currDiv, double power) : m_currDiv(&currDiv), m_power(power) {}
+  double operator()([[maybe_unused]] double xcurr, double alpha) const override {
+    return alpha * std::pow((*m_currDiv)++, -m_power);
   }
 
 private:
-  std::size_t &m_currDiv;
+  std::size_t *m_currDiv; // make a pointer so operator() can be const; the pointed-to changes, but not the pointer
   double m_power;
 };
 } // namespace
@@ -104,16 +106,16 @@ std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &param
   }
   std::vector<double> const &fullParams = params.size() == 1 ? tmp : params;
 
-  // if resize_new is true, do a first run to determine the needed number of bins
+  // if resize_xnew is true, do a first run to determine the needed number of bins
   if (resize_xnew) {
     std::vector<double> xnewTemp;
     size_t neededSize = createAxisFromRebinParams(fullParams, xnewTemp, /*resize_new*/ false, full_bins_only, xMinHint,
                                                   xMaxHint, useReverseLogarithmic, power);
-    // NOTE memory overflow error could occur here
+    /* NOTE memory overflow check could occur here */
     xnew.reserve(neededSize);
   }
 
-  // This coefficitent represents the maximum difference between the size of the last bin and all
+  // This coefficient represents the maximum difference between the size of the last bin and all
   // the other bins.
   // For full_bin_only, we want it so that last bin couldn't be smaller than the previous bin
   double const lastBinCoef = full_bins_only ? 1.0 : 0.25;
@@ -136,28 +138,33 @@ std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &param
     double rightEdge = fullParams[i + 1];
     double alpha = std::fabs(binParam);
 
-    // determine the binning mode for this range
-    std::function<double(double, double)> binWidth = nullptr;
-    std::function<bool(double, double, double)> edgeCheck = standardEdgeCheck(lastBinCoef);
+    // functions for calculating bin width and checking if within range
+    std::unique_ptr<BinWidth> binWidth(nullptr);
+    std::unique_ptr<EdgeCheck> edgeCheck(nullptr);
     if (binParam < 0.0 && useReverseLogarithmic) {
       // REVERSE LOGARITHMIC
-      binWidth = reverseLogBinWidth(leftEdge, rightEdge);
-      edgeCheck = reverseLogEdgeCheck();
+      binWidth.reset(new ReverseLogBinWidth{leftEdge, rightEdge});
+      edgeCheck.reset(new ReverseLogEdgeCheck);
+      // for reverse log, we start at the right edge and work back to left; to use the same loop, swap the edges
+      // the final edge will be added after the loop, fullParams[i+1]
       xcurr = rightEdge;
       std::swap(leftEdge, rightEdge);
     } else if (binParam < 0.0) {
       // LOGARITHMIC
-      binWidth = logBinWidth();
+      binWidth.reset(new LogBinWidth);
+      edgeCheck.reset(new StandardEdgeCheck{lastBinCoef});
     } else if (isPower) {
       // POWER
-      binWidth = powerBinWidth(currDiv, power);
+      binWidth.reset(new PowerBinWidth{currDiv, power});
+      edgeCheck.reset(new StandardEdgeCheck{lastBinCoef});
     } else {
       // LINEAR
-      binWidth = linearBinWidth();
+      binWidth.reset(new LinearBinWidth);
+      edgeCheck.reset(new StandardEdgeCheck{lastBinCoef});
     }
 
-    double xs = binWidth(xcurr, alpha);
-    while (edgeCheck(xcurr, xs, rightEdge) || !std::isfinite(xs)) { // let errors fall through
+    double xs = (*binWidth)(xcurr, alpha);
+    while ((*edgeCheck)(xcurr, xs, rightEdge) || !std::isfinite(xs)) { // let errors fall through
       if (xs == 0.0) {
         // Someone gave a 0-sized step! What a dope.
         throw std::runtime_error("Invalid binning step provided! Can't create binning axis.");
@@ -170,7 +177,7 @@ std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &param
       }
       inew++;
       // prepare for next step
-      xs = binWidth(xcurr, alpha);
+      xs = (*binWidth)(xcurr, alpha);
     }
 
     // handle last edge specially, depending on if full_bins_only is set
@@ -189,7 +196,10 @@ std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &param
     // prepare for next range
     leftEdge = xcurr;
   }
-  std::sort(xnew.begin(), xnew.end());
+  // if using reverse log, some bins were added in wrong order; so sort them
+  if (useReverseLogarithmic) {
+    std::sort(xnew.begin(), xnew.end());
+  }
   return inew;
 }
 
