@@ -616,7 +616,7 @@ LoadDataResult LoadNGEM::readDataAsHistograms(double &minToF, double &maxToF, co
   strategy->addFrame(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts);
   progress(0.90);
   dataWorkspace = createHistogramWorkspace(std::move(strategy->getBinEdges()), std::move(strategy->getCounts()));
-  return {rawFrames, goodFrames, frameEventCounts, dataWorkspace};
+  return {rawFrames, goodFrames, std::move(frameEventCounts), std::move(dataWorkspace)};
 }
 
 /**
