@@ -61,8 +61,8 @@
 		</parameter>
 
 		<parameter name="correct_chopper_sample_distance" type="bool" visible="false">
-		  <value val="true" valid-to="2022-04-20T23:59:59"/>
-		  <value val="false" valid-from="2022-04-20T23:59:59"/>
+		  <value val="true" valid-to="2100-01-31 23:59:59"/>
+		  <value val="false" valid-from="2017-01-31 23:59:59"/>
 		</parameter>
 
 	  <parameter name="logbook_default_parameters" type="string" visible="false">
