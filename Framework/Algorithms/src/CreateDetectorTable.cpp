@@ -289,8 +289,8 @@ void CreateDetectorTable::get_diff_consts(size_t wsIndex, double &difa, double &
   tzero = diffConsts[UnitParams::tzero];
 }
 
-void CreateDetectorTable::writeRowToTable(const size_t row, const DetectorRowData &data) {
-  TableRow colValues = table->getRow(row);
+void CreateDetectorTable::writeRowToTable(const int row, const DetectorRowData &data) {
+  TableRow colValues = table->getRow(static_cast<size_t>(row));
   colValues << static_cast<int>(data.wsIndex);
   colValues << data.specNo;
   if (OneRowPerDetectorID) {
@@ -363,9 +363,9 @@ void CreateDetectorTable::populateTable() {
   table->setRowCount(workspaceIndices.size());
 
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
-  for (int row = 0; row < workspaceIndices.size(); row++) {
+  for (int row = 0; row < static_cast<int>(workspaceIndices.size()); row++) {
 
-    auto wsIndex = static_cast<size_t>(workspaceIndices[row]);
+    auto wsIndex = static_cast<size_t>(workspaceIndices[static_cast<size_t>(row)]);
 
     try {
       auto data = calculateWsIdxData(wsIndex);
@@ -400,10 +400,11 @@ void CreateDetectorTable::populateTableByDetID() {
   // Executing in parallel, each thread writes to unique chunk in array, avoids contention
   // NOTE: Attempted a shared dict implementation, too much thread contention for many det ids
   // Need to stick to an array implementation where each thread writes to unique place in array
+  // NOTE: Iterating variable needs to be signed for omp, can't use size_t
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
-  for (int i = 0; i < workspaceIndices.size(); i++) {
+  for (int i = 0; i < static_cast<int>(workspaceIndices.size()); i++) {
 
-    auto wsIndex = static_cast<size_t>(workspaceIndices[i]);
+    auto wsIndex = static_cast<size_t>(workspaceIndices[static_cast<size_t>(i)]);
 
     DetectorRowData data;
     // TODO: Not entirely sure this catch is necessary
@@ -421,7 +422,7 @@ void CreateDetectorTable::populateTableByDetID() {
       data.isMonitor = "n/a";
     } // End catch for no spectrum
 
-    size_t chunkStart = wsIndexToChunkStart[i];
+    size_t chunkStart = wsIndexToChunkStart[static_cast<size_t>(i)];
     auto detIds = dynamic_cast<const std::set<int> &>(ws->getSpectrum(wsIndex).getDetectorIDs());
     for (int detId : detIds) {
       data.detIds = std::set<int>({detId});
@@ -441,7 +442,7 @@ void CreateDetectorTable::populateTableByDetID() {
   // Number of rows matches number of detectorIDs exactly
   const auto &workspaceDetectorIds = detectorInfo->detectorIDs();
   table->setRowCount(workspaceDetectorIds.size());
-  size_t row = 0;
+  int row = 0;
   for (int detId : workspaceDetectorIds) {
     DetectorRowData data;
     auto it = detIdToData.find(detId);

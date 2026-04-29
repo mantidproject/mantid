@@ -79,7 +79,7 @@ private:
   const std::string get_time_indexes(size_t wsIndex);
   double get_q(size_t wsIndex);
   void get_diff_consts(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero);
-  void writeRowToTable(size_t row, const DetectorRowData &data);
+  void writeRowToTable(const int row, const DetectorRowData &data);
   DetectorRowData calculateWsIdxData(size_t wsIndex);
 };
 
