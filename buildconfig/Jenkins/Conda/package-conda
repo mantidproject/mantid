@@ -137,15 +137,16 @@ if [[ $OSTYPE == "msys"* ]]; then
     cache_root_bash="/c/mantid-ci/${branch_slug}"
 
     export RATTLER_CACHE_DIR="${cache_root_win}/rattler-cache"
+    export PIXI_CACHE_DIR="${cache_root_win}/pixi-cache"
     export TMP="${cache_root_win}/tmp"
     export TEMP="${cache_root_win}/tmp"
 
-    mkdir -p "${cache_root_bash}/rattler-cache" "${cache_root_bash}/tmp"
+    mkdir -p "${cache_root_bash}/rattler-cache" "${cache_root_bash}/pixi-cache" "${cache_root_bash}/tmp"
 
-    cleanup_windows_cache_dirs() {
-        rm -rf "${cache_root_bash}/rattler-cache" "${cache_root_bash}/tmp" || true
+    cleanup_windows_tmp_dir() {
+        rm -rf "${cache_root_bash}/tmp" || true
     }
-    trap cleanup_windows_cache_dirs EXIT
+    trap cleanup_windows_tmp_dir EXIT
 fi
 
 export CONDA_SUBDIR=$PLATFORM
