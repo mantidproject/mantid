@@ -138,6 +138,12 @@ std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &param
     double rightEdge = fullParams[i + 1];
     double alpha = std::fabs(binParam);
 
+    if (leftEdge >= rightEdge) {
+      throw std::runtime_error("createAxisFromRebinParams: in the " + std::to_string((i + 1) / 2) +
+                               "th range, the left edge is not smaller than right edge: " + std::to_string(leftEdge) +
+                               " vs " + std::to_string(rightEdge));
+    }
+
     // functions for calculating bin width and checking if within range
     std::unique_ptr<BinWidth> binWidth(nullptr);
     std::unique_ptr<EdgeCheck> edgeCheck(nullptr);
