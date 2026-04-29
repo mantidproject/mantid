@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument name="HRPD" valid-from   ="1900-03-31 23:59:59"
-                        valid-to     ="1910-01-31 23:59:59"
+<instrument name="HRPD" valid-from   ="1920-01-01 00:00:00"
+                        valid-to     ="1930-12-31 23:59:59"
 		        last-modified="2012-12-12 00:00:00">
 
 <defaults>
