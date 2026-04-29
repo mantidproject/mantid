@@ -257,10 +257,23 @@ void LoadInstrument::exec() {
 void LoadInstrument::runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws) {
   g_log.debug("Loading the parameter definition...");
 
-  // First search for XML parameter file which matches instrument and date
+  // Pass the IDF directory as a hint so that parameter files co-located with
+  // the IDF (e.g. in unit_testing/) are found before standard instrument dirs.
+  const std::string idfFilename = getPropertyValue("Filename");
+  const auto pathSep = idfFilename.find_last_of("/\\");
+  const std::string idfDir = (pathSep != std::string::npos) ? idfFilename.substr(0, pathSep) : "";
+
   const std::string instName = ws->getInstrument()->getName();
-  const std::string runDate = ws->getWorkspaceStartDate();
-  std::string fullPathParamIDF = InstrumentFileFinder::getParameterFilename(instName, runDate);
+  std::string runDate = ws->getWorkspaceStartDate();
+  // When the workspace has no run date (e.g. LoadEmptyInstrument), fall back to
+  // the IDF's own valid-from date so that a specific versioned IDF selects its
+  // matching parameter file rather than whichever file is valid today.
+  if (runDate.empty()) {
+    std::string validFrom, validTo;
+    InstrumentFileFinder::getValidFromTo(idfFilename, validFrom, validTo);
+    runDate = validFrom;
+  }
+  std::string fullPathParamIDF = InstrumentFileFinder::getParameterFilename(instName, runDate, idfDir);
 
   if (!fullPathParamIDF.empty()) {
 

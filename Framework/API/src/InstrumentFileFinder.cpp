@@ -77,10 +77,11 @@ namespace Mantid::API {
  *
  * @throws Exception::NotFoundError If no valid filename is found
  */
-std::string
-InstrumentFileFinder::getFilenameByInstrumentDateAndSearchTerm(const std::string &instrumentName,
-                                                               const std::string &date, const std::string &searchTerm,
-                                                               const std::vector<std::string> &fileFormats) {
+std::string InstrumentFileFinder::getFilenameByInstrumentDateAndSearchTerm(const std::string &instrumentName,
+                                                                           const std::string &date,
+                                                                           const std::string &searchTerm,
+                                                                           const std::vector<std::string> &fileFormats,
+                                                                           const std::string &dirHint) {
   std::string fileType;
   if (searchTerm == "_Definition")
     fileType = "instrument file";
@@ -98,8 +99,17 @@ InstrumentFileFinder::getFilenameByInstrumentDateAndSearchTerm(const std::string
     instrument = instrumentName;
   }
 
-  // Get the instrument directories for file search
-  const std::vector<std::string> &directoryNames = Kernel::ConfigService::Instance().getInstrumentDirectories();
+  // Build the directory search list: dirHint (if any) is checked first so that
+  // parameter files co-located with the IDF in a non-standard directory (e.g.
+  // unit_testing/) are preferred over files in the standard instrument dirs.
+  const std::vector<std::string> &configDirs = Kernel::ConfigService::Instance().getInstrumentDirectories();
+  std::vector<std::string> directoryNames;
+  if (!dirHint.empty()) {
+    directoryNames.push_back(dirHint);
+    directoryNames.insert(directoryNames.end(), configDirs.begin(), configDirs.end());
+  } else {
+    directoryNames = configDirs;
+  }
 
   // matching files sorted with newest files coming first
   const std::vector<std::string> matchingFiles =
@@ -161,8 +171,9 @@ std::string InstrumentFileFinder::getInstrumentFilename(const std::string &instr
  * @throws Exception::NotFoundError If no valid parameter filename
  *is found
  */
-std::string InstrumentFileFinder::getParameterFilename(const std::string &instrumentName, const std::string &date) {
-  return getFilenameByInstrumentDateAndSearchTerm(instrumentName, date, "_Parameters", {"xml"});
+std::string InstrumentFileFinder::getParameterFilename(const std::string &instrumentName, const std::string &date,
+                                                       const std::string &dirHint) {
+  return getFilenameByInstrumentDateAndSearchTerm(instrumentName, date, "_Parameters", {"xml"}, dirHint);
 }
 
 /// Search the directory for the Parameter IDF file and return full path name if

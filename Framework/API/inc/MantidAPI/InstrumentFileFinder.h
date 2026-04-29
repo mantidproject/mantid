@@ -22,8 +22,10 @@ public:
   /// Get the IDF using the instrument name and date
   static std::string getInstrumentFilename(const std::string &instrumentName, const std::string &date = "");
 
-  /// Get the Parameter file using the instrument name and date
-  static std::string getParameterFilename(const std::string &instrumentName, const std::string &date = "");
+  /// Get the Parameter file using the instrument name and date, optionally
+  /// searching dirHint first before the standard instrument directories.
+  static std::string getParameterFilename(const std::string &instrumentName, const std::string &date = "",
+                                          const std::string &dirHint = "");
 
   /// Utility to retrieve a resource file (IDF, Parameters, ..)
   static std::vector<std::string> getResourceFilenames(const std::string &prefix,
@@ -39,7 +41,8 @@ private:
 
   static std::string getFilenameByInstrumentDateAndSearchTerm(const std::string &instrumentName,
                                                               const std::string &date, const std::string &searchTerm,
-                                                              const std::vector<std::string> &fileFormats);
+                                                              const std::vector<std::string> &fileFormats,
+                                                              const std::string &dirHint = "");
 };
 
 } // Namespace Mantid::API
