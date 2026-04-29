@@ -19,9 +19,10 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MockPreviewDockedWidgets : public IPreviewDockedWidgets {
 public:
   MOCK_METHOD(void, subscribe, (PreviewDockedWidgetsSubscriber *), (noexcept, override));
+  MOCK_METHOD(void, updateWorkspace, (Mantid::API::MatrixWorkspace_sptr &), (override));
   MOCK_METHOD(void, resetInstView, (), (override));
-  MOCK_METHOD(void, plotInstView,
-              (MantidWidgets::InstrumentActor *, Mantid::Kernel::V3D const &, Mantid::Kernel::V3D const &), (override));
+  MOCK_METHOD(void, plotInstView, (), (override));
+  MOCK_METHOD(std::vector<Mantid::detid_t>, detIndicesToDetIDs, (std::vector<size_t> const &), (const, override));
   MOCK_METHOD(void, setInstViewZoomState, (bool), (override));
   MOCK_METHOD(void, setInstViewEditState, (bool), (override));
   MOCK_METHOD(void, setInstViewSelectRectState, (bool), (override));

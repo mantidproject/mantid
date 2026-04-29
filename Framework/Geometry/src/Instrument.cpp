@@ -110,6 +110,46 @@ Instrument::Instrument(const Instrument &instr)
   }
 }
 
+/** Constructor for creating a partial copy without the detector cache.
+ *  This method was added to allow copying an instrument without copying the detector cache, which is necessary
+ * for the implementation in LoadEventNexus to load single banks form large instruments.
+ * @param instr the instrument to copy
+ * @param copyCache a flag that signals to select this constructor from the vtable
+ * @note the copyCache flag is not used, except to identify this constructor as the one to use
+ */
+Instrument::Instrument(const Instrument &instr, bool copyCache)
+    : CompAssembly(), m_sourceCache(nullptr), m_sampleCache(nullptr), /* Should only be temporarily null */
+      m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit), m_defaultView(instr.m_defaultView),
+      m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(), m_map_nonconst(), /* Should not be parameterized */
+      m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo), m_referenceFrame(instr.m_referenceFrame) {
+  UNUSED_ARG(copyCache);
+  setName(instr.getName() + "_clone");
+  // add in the sample and the source
+  auto sampleComp = instr.getSample();
+  auto sourceComp = instr.getSource();
+  if (!sampleComp || !sourceComp) {
+    throw std::runtime_error("Cannot copy instrument: source instrument must have valid sample and source components");
+  }
+  auto sample = sampleComp->clone();
+  auto source = sourceComp->clone();
+  add(sample);
+  add(source);
+  markAsSource(source);
+  markAsSamplePos(sample);
+  // also add in the monitors
+  std::vector<IComponent_const_sptr> children;
+  instr.getChildren(children, true);
+  for (auto const &child : children) {
+    if (IDetector const *det = dynamic_cast<Detector const *>(child.get())) {
+      if (instr.isMonitor(det->getID())) {
+        auto dclone = dynamic_cast<IDetector *>(det->clone());
+        add(dclone);
+        markAsMonitor(dclone);
+      }
+    }
+  }
+}
+
 /// Virtual copy constructor
 Instrument *Instrument::clone() const { return new Instrument(*this); }
 
@@ -763,7 +803,7 @@ void Instrument::markAsMonitor(const IDetector *det) {
 
   // mark detector as a monitor
   auto it = m_detectorCache.find(det->getID());
-  it->isMonitor() = true;
+  it->setIsMonitor(true);
 }
 
 /** Mark a Component which has already been added to the Instrument class
@@ -786,6 +826,7 @@ void Instrument::markAsMonitorIncomplete(const IDetector *det) {
 /** Removes a detector from the instrument and from the detector cache.
  *  The object is deleted.
  *  @param det The detector to remove
+ *  @note this method is O(N); for removing many detectors, use removeDetectorIncomplete instead
  */
 void Instrument::removeDetector(IDetector *det) {
   if (m_map)
@@ -808,6 +849,49 @@ void Instrument::removeDetector(IDetector *det) {
   {
     parentAssembly->remove(det);
   }
+}
+
+/** Mark a detector for removal from the detector cache.
+ * The detector is not removed until removeDetectorFinalize() is called.
+ * This allows multiple detectors to be removed without needing to repeatedly call vector::erase on each one,
+ * which can be expensive for a vector-based cache.
+ * @param det The detector to remove
+ * @note This method does not remove the detector from the parent assembly; this must be done separately.
+ */
+void Instrument::removeDetectorIncomplete(IDetector const *det) {
+  if (m_map)
+    throw std::runtime_error("Instrument::removeDetectorIncomplete() called on a "
+                             "parameterized Instrument object.");
+  m_detectorCache.setIncomplete();
+  if (m_detectorCache.m_toRemove.empty()) {
+    m_detectorCache.m_toRemove.reserve(m_detectorCache.size());
+  }
+  m_detectorCache.m_toRemove.insert(det);
+}
+
+/** Remove all detectors that have been marked for removal with removeDetectorIncomplete() from the detector cache.
+ * This MUST be called after all removals and before any other operations touching the cache.
+ * @note This method does not remove the detectors from the parent assembly; this must be done separately.
+ */
+void Instrument::removeDetectorFinalize() {
+  if (m_map)
+    throw std::runtime_error("Instrument::removeDetectorFinalize() called on a "
+                             "parameterized Instrument object.");
+
+  if (isFinalized()) {
+    m_detectorCache.m_toRemove.clear();
+    return;
+  }
+
+  // Remove from the cache all the ones to be removed
+  auto newEnd = std::remove_if(m_detectorCache.begin(), m_detectorCache.end(), [this](const auto &entry) {
+    return m_detectorCache.m_toRemove.contains(entry.detector().get());
+  });
+  m_detectorCache.erase(newEnd, m_detectorCache.end());
+
+  // clear the removal set and finalize the cache
+  m_detectorCache.m_toRemove.clear();
+  m_detectorCache.setFinalized();
 }
 
 /**
@@ -1354,6 +1438,15 @@ Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
     return makeWrappers(pmap, *m_componentInfo, *m_detectorInfo);
   }
   // pmap not empty and/or no cached Beamline objects found
+  return InstrumentVisitor::makeWrappers(*this, &pmap);
+}
+
+/** Return ComponentInfo and DetectorInfo for instrument given by pmap.
+ *
+ * Force the creation of new ComponentInfo and DetectorInfo for instrument,
+ * even if they already exist */
+std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+Instrument::makeBeamlineNew(ParameterMap &pmap) const {
   return InstrumentVisitor::makeWrappers(*this, &pmap);
 }
 

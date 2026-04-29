@@ -9,7 +9,6 @@
 #include "IPreviewModel.h"
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
-#include "InstViewModel.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 #include "PreviewJobManager.h"
 #include "PreviewModel.h"
@@ -25,8 +24,7 @@ public:
   std::unique_ptr<IPreviewPresenter> make(IPreviewView *view, std::unique_ptr<IReflAlgorithmFactory> algFactory) {
     auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
     auto jobManager = std::make_unique<PreviewJobManager>(std::move(jobRunner), std::move(algFactory));
-    auto dependencies = PreviewPresenter::Dependencies{view, std::make_unique<PreviewModel>(), std::move(jobManager),
-                                                       std::make_unique<InstViewModel>()};
+    auto dependencies = PreviewPresenter::Dependencies{view, std::make_unique<PreviewModel>(), std::move(jobManager)};
     return std::make_unique<PreviewPresenter>(std::move(dependencies));
   }
 };

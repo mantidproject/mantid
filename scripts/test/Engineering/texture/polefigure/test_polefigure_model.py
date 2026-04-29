@@ -128,7 +128,7 @@ class TextureProjectionTest(unittest.TestCase):
         mock_makedirs.assert_called()
 
     @patch(correction_model_path + ".SaveNexus")
-    @patch(correction_model_path + ".SaveAscii")
+    @patch(correction_model_path + ".save_texture_ws_ascii")
     def test_save_files_calls_both_savers(self, mock_ascii, mock_nexus):
         with tempfile.TemporaryDirectory() as d:
             self.model._save_files("ws1", [d])

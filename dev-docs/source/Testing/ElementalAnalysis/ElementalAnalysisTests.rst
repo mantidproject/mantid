@@ -3,8 +3,6 @@
 Elemental Analysis GUI Testing
 ==============================
 
-.. contents::
-   :local:
 
 Introduction
 ------------

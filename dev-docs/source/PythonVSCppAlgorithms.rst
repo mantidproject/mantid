@@ -4,8 +4,6 @@
 Python vs C++ Algorithms
 ========================
 
-.. contents::
-  :local:
 
 Overview
 --------

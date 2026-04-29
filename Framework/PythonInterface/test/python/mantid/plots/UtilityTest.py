@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateSampleWorkspace
-from mantid.plots.utility import col_num, legend_set_draggable, row_num
+from mantid.plots.utility import col_num, get_plot_specific_properties, legend_set_draggable, row_num
 from matplotlib.legend import Legend
 from unittest.mock import create_autospec
 
@@ -69,6 +69,22 @@ class UtilityTest(unittest.TestCase):
         expected_col_nums = [0, 1, None]
         for axis, col_number in zip(self.fig.get_axes(), expected_col_nums):
             self.assertEqual(col_num(axis), col_number)
+
+    def test_get_plot_specific_properties_preserves_errorbar_kwargs_when_errors_true(self):
+        plot_kwargs = {"capsize": 4.0, "capthick": 1.0, "errorevery": 1, "elinewidth": 1.0}
+        result = get_plot_specific_properties(self.workspace, "plot", plot_kwargs, errors=True)
+        self.assertAlmostEqual(result["capsize"], 4.0)
+        self.assertAlmostEqual(result["capthick"], 1.0)
+        self.assertEqual(result["errorevery"], 1)
+        self.assertAlmostEqual(result["elinewidth"], 1.0)
+
+    def test_get_plot_specific_properties_removes_errorbar_kwargs_when_errors_false(self):
+        plot_kwargs = {"capsize": 4.0, "capthick": 1.0, "errorevery": 1, "elinewidth": 1.0}
+        result = get_plot_specific_properties(self.workspace, "plot", plot_kwargs, errors=False)
+        self.assertNotIn("capsize", result)
+        self.assertNotIn("capthick", result)
+        self.assertNotIn("errorevery", result)
+        self.assertNotIn("elinewidth", result)
 
 
 if __name__ == "__main__":

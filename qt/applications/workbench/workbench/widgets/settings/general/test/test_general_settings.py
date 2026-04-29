@@ -47,6 +47,7 @@ class MockGeneralSettingsModel:
         self.get_user_layout = MagicMock()
         self.get_window_behaviour = MagicMock()
         self.get_completion_enabled = MagicMock()
+        self.get_apply_dark_theme_enabled = MagicMock()
         self.set_crystallography_convention = MagicMock()
         self.set_facility = MagicMock()
         self.set_font = MagicMock()
@@ -63,6 +64,7 @@ class MockGeneralSettingsModel:
         self.set_show_invisible_workspaces = MagicMock()
         self.set_use_opengl = MagicMock()
         self.set_user_layout = MagicMock()
+        self.set_apply_dark_theme_enabled = MagicMock()
 
 
 @start_qapplication
@@ -132,6 +134,9 @@ class GeneralSettingsTest(unittest.TestCase):
         )
 
         self.assert_connected_once(presenter.get_view().completion_enabled, presenter.get_view().completion_enabled.stateChanged)
+        self.assert_connected_once(
+            presenter.get_view().apply_dark_theme_enabled, presenter.get_view().apply_dark_theme_enabled.stateChanged
+        )
 
     def test_font_dialog_signals(self):
         presenter = GeneralSettings(None, model=self.mock_model)
@@ -250,6 +255,7 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.get_use_opengl.return_value = "123"  # wrong, therefore false
         self.mock_model.get_show_invisible_workspaces.return_value = "1"
         self.mock_model.get_completion_enabled.return_value = True
+        self.mock_model.get_apply_dark_theme_enabled.return_value = "False"
 
         GeneralSettings(None, model=self.mock_model, view=mock_view)
 
@@ -264,6 +270,7 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.get_use_opengl.assert_called_once()
         self.mock_model.get_show_invisible_workspaces.assert_called_once()
         self.mock_model.get_completion_enabled.assert_called_once()
+        self.mock_model.get_apply_dark_theme_enabled.assert_called_once()
 
         mock_view.project_recovery_enabled.setChecked.assert_called_once_with(True)
         mock_view.total_number_checkpoints.setValue.assert_called_once_with(5)
@@ -274,6 +281,7 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_view.use_open_gl.setChecked.assert_called_once_with(False)
         mock_view.show_invisible_workspaces.setChecked.assert_called_once_with(True)
         mock_view.completion_enabled.setChecked.assert_called_once_with(True)
+        mock_view.apply_dark_theme_enabled.setChecked.assert_called_once_with(False)
 
     @patch(NOTIFY_CHANGES_PATH)
     def test_action_project_recovery_enabled(self, mock_notify_changes: MagicMock):
@@ -401,6 +409,21 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.action_completion_enabled_modified(False)
         self.mock_model.set_completion_enabled.assert_called_once_with(False)
+        mock_notify_changes.assert_called_once()
+
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_apply_dark_theme_enabled_modified(self, mock_notify_changes: MagicMock):
+        presenter = GeneralSettings(None, model=self.mock_model)
+
+        presenter.action_apply_dark_theme_enabled_modified(Qt.Checked)
+        self.mock_model.set_apply_dark_theme_enabled.assert_called_once_with("True")
+        mock_notify_changes.assert_called_once()
+
+        self.mock_model.set_apply_dark_theme_enabled.reset_mock()
+        mock_notify_changes.reset_mock()
+
+        presenter.action_apply_dark_theme_enabled_modified(Qt.Unchecked)
+        self.mock_model.set_apply_dark_theme_enabled.assert_called_once_with("False")
         mock_notify_changes.assert_called_once()
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)

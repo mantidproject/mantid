@@ -4,8 +4,6 @@
 Mantid Git Config
 =================
 
-.. contents:: Contents
-   :local:
 
 Summary
 -------

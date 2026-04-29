@@ -6,7 +6,7 @@ Create `mantid-developer` conda environment by following the steps below:
   but you are free to choose any name. The `neutrons` channel is also required for PyStoG.
 
   ```sh
-  mamba create -n mantid-developer mantid/label/nightly::mantid-developer -c neutrons
+  mamba create -n mantid-developer mantid/label/nightly::mantid-developer -c neutrons -c mantid
   ```
 
 - Then activate the conda environment with
@@ -19,7 +19,7 @@ Create `mantid-developer` conda environment by following the steps below:
   With your `mantid-developer` environment activated, run the following command:
 
   ```sh
-  mamba update -c mantid/label/nightly -c neutrons --all
+  mamba update -c mantid/label/nightly -c neutrons -c mantid --all
   ```
 
 See [packaging](../Packaging) for more information on this topic.

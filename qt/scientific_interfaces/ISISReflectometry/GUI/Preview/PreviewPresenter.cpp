@@ -36,12 +36,13 @@ Mantid::Kernel::Logger g_log("Reflectometry Preview Presenter");
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(Dependencies dependencies)
     : m_view(dependencies.view), m_model(std::move(dependencies.model)),
-      m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)),
-      m_dockedWidgets(std::move(dependencies.dockedWidgets)), m_regionSelector(std::move(dependencies.regionSelector)),
-      m_plotPresenter(std::move(dependencies.plotPresenter)), m_stubRegionObserver{new StubRegionObserver} {
+      m_jobManager(std::move(dependencies.jobManager)), m_dockedWidgets(std::move(dependencies.dockedWidgets)),
+      m_regionSelector(std::move(dependencies.regionSelector)), m_plotPresenter(std::move(dependencies.plotPresenter)),
+      m_stubRegionObserver{new StubRegionObserver} {
   if (!m_dockedWidgets) {
     m_dockedWidgets = std::make_unique<QtPreviewDockedWidgets>(nullptr, m_view->getDockedWidgetsLayout());
   }
+
   if (!m_regionSelector) {
     m_regionSelector =
         std::make_unique<RegionSelector>(nullptr, m_dockedWidgets->getRegionSelectorLayout(), m_view->getImageInfo());
@@ -137,8 +138,8 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   // Clear the region selector to ensure all spectra are shown.
   m_regionSelector->clearWorkspace();
 
-  // Notify the instrument view model that the workspace has changed before we get the surface
-  m_instViewModel->updateWorkspace(ws);
+  // Notify the instrument display that the workspace has changed before we plot
+  m_dockedWidgets->updateWorkspace(ws);
   plotInstView();
   // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
   m_dockedWidgets->setInstViewToolbarEnabled(true);
@@ -203,7 +204,7 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   notifyInstViewEditRequested();
   // Get the masked workspace indices
   std::optional<ProcessingInstructions> detIDs = std::nullopt;
-  auto indices = m_instViewModel->detIndicesToDetIDs(m_dockedWidgets->getSelectedDetectors());
+  auto indices = m_dockedWidgets->detIndicesToDetIDs(m_dockedWidgets->getSelectedDetectors());
   if (indices.size() > 0) {
     auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");
     detIDs = ProcessingInstructions{detIDsStr};
@@ -281,10 +282,7 @@ void PreviewPresenter::notifyApplyRequested() {
   }
 }
 
-void PreviewPresenter::plotInstView() {
-  m_dockedWidgets->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
-                                m_instViewModel->getAxis());
-}
+void PreviewPresenter::plotInstView() { m_dockedWidgets->plotInstView(); }
 
 void PreviewPresenter::plotRegionSelector() {
   if (!m_plotExistingROIs) {

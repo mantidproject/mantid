@@ -22,6 +22,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexusGeometry/Hdf5Version.h"
 
+#include <ctime>
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
 
@@ -1739,6 +1740,54 @@ public:
 
     // cleanup
     AnalysisDataService::Instance().remove(wsname);
+  }
+
+  void test_delete_banks() {
+    std::cout << "test delete banks" << std::endl;
+
+    size_t const bankSize = 65536;
+    size_t const numBanks = 41;
+
+    std::string const filename = "MANDI_13064.nxs.h5";
+    std::string const wsname = "MANDI_bank26";
+    std::string const bankname = "bank26";
+
+    // run the algorithm for a single bank
+    LoadEventNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", filename);
+    loader.setPropertyValue("OutputWorkspace", wsname);
+    loader.setProperty("BankName", bankname);
+    clock_t time1 = clock();
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    time1 = clock() - time1;
+
+    // validate the event workspace
+    EventWorkspace_sptr wksp = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname);
+    TS_ASSERT(wksp);
+    auto instr = wksp->getInstrument();
+    TS_ASSERT(instr);
+    TS_ASSERT_EQUALS(instr->getName(), "MANDI_clone_bank26");
+    size_t monitors = instr->baseInstrument()->getMonitorIDs().size();
+    TS_ASSERT_EQUALS(instr->getNumberDetectors(/*skip monitors*/ true), bankSize);
+    TS_ASSERT_EQUALS(instr->getNumberDetectors(/*skip monitors*/ false), bankSize + monitors);
+
+    // load the full file to ensure that the original instrument still exists
+    LoadEventNexus loader2;
+    std::string const wsname_full = wsname + "_full";
+    loader2.initialize();
+    loader2.setPropertyValue("Filename", filename);
+    loader2.setPropertyValue("OutputWorkspace", wsname_full);
+    clock_t time2 = clock();
+    TS_ASSERT_THROWS_NOTHING(loader2.execute());
+    time2 = clock() - time2;
+    EventWorkspace_sptr wksp_full = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname_full);
+    auto instr_full = wksp_full->getInstrument();
+    TS_ASSERT_EQUALS(instr_full->getName(), "MANDI");
+    TS_ASSERT_EQUALS(bankSize * numBanks + monitors, instr_full->getNumberDetectors());
+
+    // ensure that loading only one bank does not take substantially longer than full instrument
+    TS_ASSERT_LESS_THAN_EQUALS(time1, 100 * time2);
   }
 
 private:

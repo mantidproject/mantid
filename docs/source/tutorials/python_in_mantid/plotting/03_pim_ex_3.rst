@@ -4,8 +4,6 @@
 Python in Mantid: Exercise 3
 ============================
 
-.. contents:: Table of contents
-    :local:
 
 A - Direct Matplotlib with SNS Data
 ===================================

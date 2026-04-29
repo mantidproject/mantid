@@ -4,8 +4,6 @@
 Event Workspace Development
 ===========================
 
-.. contents::
-  :local:
 
 The following information will be useful to you if you want to write an
 :py:obj:`algorithm <mantid.api.Algorithm>` that is :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` aware.

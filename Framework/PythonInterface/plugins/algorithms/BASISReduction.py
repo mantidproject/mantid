@@ -420,8 +420,8 @@ the first two hours"""
             mantid_config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
             self._maskFile = self._reflection["mask_file"]
 
-        self._maskWs = tws("BASIS_MASK")
-        sapi.LoadMask(Instrument="BASIS", OutputWorkspace=self._maskWs, InputFile=self._maskFile)
+        # load the mask
+        self._load_mask()
 
         # Work around length issue
         _dMask = sapi.ExtractMask(InputWorkspace=self._maskWs, OutputWorkspace=tws("ExtractMask"))
@@ -661,6 +661,23 @@ the first two hours"""
         sapi.LoadEventNexus(**kwargs)
         if str(run) + ":" in self.getProperty("ExcludeTimeSegment").value:
             self._filterEvents(run, name)
+
+    def _load_mask(self):
+        r"""
+        Load a mask file into a workspace
+        """
+        self._maskWs = tws("BASIS_MASK")
+        try:
+            sapi.LoadMask(Instrument="BASIS", OutputWorkspace=self._maskWs, InputFile=self._maskFile)
+        except ValueError as exc:
+            raise ValueError(f"Mask file {self._maskFile} could not be loaded. Please check the file path and try again.") from exc
+        except RuntimeError as exc:
+            if "Supported formats are XML and ISIS mask files" in str(exc):
+                raise RuntimeError(f"Mask file {self._maskFile} is not of the correct format.  Please use an XML mask file.") from exc
+            else:
+                raise RuntimeError(
+                    f"An unexpected error occurred when loading mask file {self._maskFile}. Please check the file and try again."
+                ) from exc
 
     def _sum_monitors(self, run_set, mon_ws):
         r"""

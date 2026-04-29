@@ -1,0 +1,1 @@
+- Algorithm `LoadMask` will now throw an error if given an invalid file.

@@ -306,6 +306,21 @@ class FunctionsTest(unittest.TestCase):
         layout_engine = fig.get_layout_engine()
         self.assertIsInstance(layout_engine, ConstrainedLayoutEngine)
 
+    def test_capsize_setting_applied_when_plotting_spectrum_with_errors(self):
+        original_capsize = config["plots.errorbar.Capsize"]
+        try:
+            config["plots.errorbar.Capsize"] = "4.0"
+            fig = plot([self._test_ws], wksp_indices=[1], errors=True)
+            ax = fig.get_axes()[0]
+            containers = ax.containers
+            self.assertTrue(len(containers) > 0, "Expected at least one ErrorbarContainer")
+            caps = containers[0][1]
+            # With capsize=4.0 the cap lines are drawn with a positive marker size
+            self.assertTrue(len(caps) > 0, "Cap lines should be created when capsize > 0")
+            self.assertGreater(caps[0].get_markersize(), 0.0)
+        finally:
+            config["plots.errorbar.Capsize"] = original_capsize
+
     # ------------- Failure tests -------------
     def test_that_manage_workspace_names_raises_on_mix_of_workspaces_and_names(self):
         ws = ["some_workspace", self._test_ws]

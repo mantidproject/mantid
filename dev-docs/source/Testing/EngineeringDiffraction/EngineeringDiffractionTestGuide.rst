@@ -3,8 +3,6 @@
 Engineering Diffraction Testing
 =================================
 
-.. contents:: Table of Contents
-    :local:
 
 Preamble
 ^^^^^^^^^

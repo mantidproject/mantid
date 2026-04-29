@@ -248,9 +248,29 @@ public:
     file.close();
   }
 
+  void testExecExtension() {
+    if (!testAlgorithm4.isInitialized())
+      testAlgorithm4.initialize();
+
+    MatrixWorkspace_sptr inputWS4 = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 1.0);
+    AnalysisDataService::Instance().add("testInputFour", inputWS4);
+
+    testAlgorithm4.setPropertyValue("InputWorkspace", "testInputFour");
+    testAlgorithm4.setPropertyValue("Filename", "SAVERKH");
+    std::string outputFile = testAlgorithm4.getPropertyValue("Filename") + ".out"; // get absolute path
+    testAlgorithm4.setProperty<bool>("Append", false);
+
+    // Execute the algorithm
+    TS_ASSERT_THROWS_NOTHING(testAlgorithm4.execute());
+    TS_ASSERT(testAlgorithm4.isExecuted());
+
+    // Check if the file exists
+    TS_ASSERT(std::filesystem::exists(outputFile));
+  }
+
 private:
   /// The algorithm object
-  Mantid::DataHandling::SaveRKH testAlgorithm1, testAlgorithm2, testAlgorithm3;
+  Mantid::DataHandling::SaveRKH testAlgorithm1, testAlgorithm2, testAlgorithm3, testAlgorithm4;
 
   /// The name of the file to use as output
   std::string outputFile;

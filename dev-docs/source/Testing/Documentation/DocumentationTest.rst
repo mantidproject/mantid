@@ -3,8 +3,6 @@
 Documentation Testing
 ===============================
 
-.. contents::
-   :local:
 
 *Prerequisites*
 

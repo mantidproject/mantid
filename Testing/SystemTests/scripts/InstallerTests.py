@@ -12,6 +12,7 @@ import subprocess
 import sys
 
 from mantidinstaller import createScriptLog, log, stop, failure, scriptfailure, get_installer
+import mantid.kernel.environment as mtd_env
 
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 SAVE_DIR_LIST_PATH = os.path.join(THIS_MODULE_DIR, "defaultsave-directory.txt")
@@ -82,7 +83,7 @@ try:
     # The workaround places a space in the --exec-args parameter that is then stripped off inside
     # runSystemTests.
     executor_args = installer.python_args
-    if sys.platform == "win32":
+    if mtd_env.is_windows():
         executor_args = " " + executor_args
     run_test_cmd = '{} {} {}/runSystemTests.py --loglevel={} --executable="{}" --exec-args="{}"'.format(
         installer.python_cmd, installer.python_args, THIS_MODULE_DIR, options.log_level, installer.python_cmd, executor_args

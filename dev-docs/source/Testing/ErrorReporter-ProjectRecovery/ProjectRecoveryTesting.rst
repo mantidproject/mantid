@@ -3,8 +3,6 @@
 Project Recovery Testing
 =========================
 
-.. contents::
-  :local:
 
 Project Recovery test
 ---------------------

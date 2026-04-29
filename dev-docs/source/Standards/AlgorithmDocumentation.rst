@@ -4,8 +4,6 @@
 Algorithm Documentation
 =======================
 
-.. contents::
-  :local:
 
 Summary
 =======

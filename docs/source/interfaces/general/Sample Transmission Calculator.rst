@@ -3,8 +3,6 @@
 Sample Transmission Calculator
 ==============================
 
-.. contents:: Table of Contents
-  :local:
 
 Overview
 --------

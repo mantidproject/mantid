@@ -1,0 +1,1 @@
+- Remove the 'plot results' check box from the ISIS SANS interface which has been hidden since August 2024.

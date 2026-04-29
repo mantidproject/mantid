@@ -8,7 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "IPreviewDockedWidgets.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
+#include "IPreviewInstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
@@ -36,10 +36,11 @@ public:
 
   void subscribe(PreviewDockedWidgetsSubscriber *notifyee) noexcept override;
 
-  // Plotting
+  // Instrument display
+  void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) override;
   void resetInstView() override;
-  void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
-                    Mantid::Kernel::V3D const &axis) override;
+  void plotInstView() override;
+  std::vector<Mantid::detid_t> detIndicesToDetIDs(std::vector<size_t> const &detIndices) const override;
   // Instrument viewer toolbar
   void setInstViewZoomState(bool isChecked) override;
   void setInstViewEditState(bool isChecked) override;
@@ -65,7 +66,7 @@ private:
   Ui::PreviewDockedWidgets m_ui;
   QLayout *m_layout;
   PreviewDockedWidgetsSubscriber *m_notifyee{nullptr};
-  std::unique_ptr<MantidQt::MantidWidgets::InstrumentDisplay> m_instDisplay{nullptr};
+  std::unique_ptr<IPreviewInstrumentDisplay> m_instDisplay;
 
   void connectSignals() const;
   void loadToolbarIcons();

@@ -6,17 +6,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
-import sys
 import testhelpers
 import unittest
 
 from mantid.kernel import ConfigService, ConfigServiceImpl, config, std_vector_str, FacilityInfo, InstrumentInfo
+import mantid.kernel.environment as mtd_env
 
 
 class ConfigServiceTest(unittest.TestCase):
     __dirs_to_rm = []
     __init_dir_list = ""
-    _on_windows = sys.platform == "win32"
+    _on_windows = mtd_env.is_windows()
     if _on_windows:
         _original_appdata_path = os.environ["APPDATA"]
 

@@ -52,6 +52,9 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
+  /// Valudate inputs
+  std::vector<std::string> validExtensions() const { return {"xml", "msk"}; }
+  std::map<std::string, std::string> validateInputs() override;
   /// Initialize XML parser
   void initializeXMLParser(const std::string &filename);
   /// Parse XML
@@ -68,8 +71,6 @@ private:
   void processMaskOnWorkspaceIndex(bool mask, std::vector<specnum_t> &maskedSpecID, std::vector<detid_t> &singleDetIds);
 
   void initDetectors();
-
-  std::map<std::string, std::string> validateInputs() override;
 
   void convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS, const std::vector<specnum_t> &maskedSpecID,
                               std::vector<detid_t> &singleDetIds);

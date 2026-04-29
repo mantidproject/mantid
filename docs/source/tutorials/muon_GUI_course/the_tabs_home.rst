@@ -6,8 +6,6 @@ The Tabs - Home
 
 .. index:: The Tabs - Home
 
-.. contents:: Table of Contents
-  :local:
 
 Home
 ====

@@ -1,0 +1,3 @@
+- The algorithm `LoadEventNexus` when loading a single bank on the TOPAZ or MANDI instruments
+    will no longer appear to hang, and will no longer throw an error on completion.
+    The loaded instrument will contain only the specified bank, with no other components.

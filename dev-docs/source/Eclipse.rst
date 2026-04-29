@@ -4,8 +4,6 @@
 Eclipse on Ubuntu
 =================
 
-.. contents::
-	:local:
 
 Prerequisites
 ################

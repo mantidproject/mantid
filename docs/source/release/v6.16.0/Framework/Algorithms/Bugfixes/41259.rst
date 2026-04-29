@@ -1,0 +1,1 @@
+- The algorithm `BASISReduction` has been updated to throw an error if a mask workspace cannot be found.

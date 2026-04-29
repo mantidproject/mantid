@@ -3,8 +3,6 @@
 Muon Unscripted Testing: ARGUS
 ==============================
 
-.. contents:: Table of Contents
-   :local:
 
 Introduction
 ------------

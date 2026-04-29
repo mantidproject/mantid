@@ -15,8 +15,8 @@ from instrumentview.ShapeWidgets import (
     HollowRectangleSelectionShape,
     RectangleSelectionShape,
     EllipseSelectionShape,
-    ShapeOverlayManager,
 )
+from instrumentview.ShapeOverlayManager import ShapeOverlayManager
 
 
 class TestCircleSelectionShape(unittest.TestCase):

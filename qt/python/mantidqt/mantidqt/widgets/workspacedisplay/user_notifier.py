@@ -5,12 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-import sys
 import weakref
 
 from qtpy.QtCore import QPoint
 from qtpy.QtGui import QCursor, QFont, QFontMetrics
 from qtpy.QtWidgets import QToolTip
+import mantid.kernel.environment as mtd_env
 
 
 class UserNotifier(object):
@@ -36,7 +36,7 @@ class UserNotifier(object):
         self.__status_bar = weakref.ref(status_bar)
 
     def show_mouse_toast(self, message):
-        if not sys.platform == "win32":
+        if not mtd_env.is_windows():
             # There is no reason to draw tooltips for OSs that don't display anything
             return
 

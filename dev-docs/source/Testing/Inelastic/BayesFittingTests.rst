@@ -3,8 +3,6 @@
 Inelastic Bayes Fitting Testing
 ===============================
 
-.. contents::
-   :local:
 
 *Prerequisites*
 

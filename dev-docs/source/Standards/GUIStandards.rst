@@ -4,8 +4,6 @@
 GUI Standards
 #############
 
-.. contents:: Contents
-    :local:
 
 **********************
 Prerequisite Knowledge

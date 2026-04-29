@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/MockMemory.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>
@@ -101,6 +103,59 @@ public:
     vec[1] = 0.0;
     TS_ASSERT_EQUALS(allowRangeValidator.isValid(vec),
                      "When giving a range the second value must be larger than the first");
+  }
+
+  // NOTE this test will only run on linux, as it requires the availMem patch to work
+  void testIsMocked() {
+#if defined(__linux__) || defined(__gnu_linux__)
+    std::size_t memSize = 13;
+    size_t mem1 = Mantid::Kernel::MemoryStats().availMem();
+    TS_ASSERT_LESS_THAN(memSize, mem1);
+    { // scope the mock
+      Mantid::TestMemory::MockMemory memL(memSize);
+      size_t mem = Mantid::Kernel::MemoryStats().availMem();
+      TS_ASSERT_EQUALS(mem, memSize);
+    }
+    size_t mem2 = Mantid::Kernel::MemoryStats().availMem();
+    TS_ASSERT_LESS_THAN(memSize, mem2);
+#endif
+  }
+
+  void testTooManyBins() {
+    Mantid::TestMemory::MockMemory memL;
+    size_t numBins = memL.numberOfFloats();
+    std::vector<double> vec(3);
+    vec[0] = 1.0;
+    vec[1] = 1.0;
+    vec[2] = 1.0 + static_cast<double>(numBins); // make sure we have more than numBins bins
+    TS_ASSERT(!standardValidator.isValid(vec).empty());
+  }
+
+  void testTooManyBinsLog() {
+    Mantid::TestMemory::MockMemory memL;
+    size_t numBins = memL.numberOfFloats();
+    std::vector<double> vec(3);
+    vec[0] = 1.0;
+    vec[1] = 1.0 - std::pow(10.0, 1. / static_cast<double>(numBins)); // make sure we have more than numBins bins
+    vec[2] = 10.0;
+    TS_ASSERT_LESS_THAN(vec[1], 0.0); // make sure it is negative, to trigger log binning
+    TS_ASSERT(!standardValidator.isValid(vec).empty());
+  }
+
+  // NOTE this test will only run on linux, as it requires the availMem patch to work
+  void testBinsInKiB() {
+#if defined(__linux__) || defined(__gnu_linux__)
+    // make sure we are calculating the number of bins in KiB correctly
+    // 1. find the number of KiB remaining in memory.
+    // 2. calculate the number of bins that would equal that value in *bytes* (i.e. numBins * sizeof(double))
+    // 3. make sure that the validator passes, if the bytes of the bins are less than the available memory
+    constexpr std::size_t memInKiB{12};
+    Mantid::TestMemory::MockMemory memL(memInKiB);
+    size_t numBins =
+        memInKiB / sizeof(double); // the number bins (doubles) that would fit in memory, IF memory were in bytes
+    std::vector<double> vec{1., 1., 1. + static_cast<double>(numBins)}; // make sure we have numBins bins
+    TS_ASSERT(standardValidator.isValid(vec).empty());
+#endif
   }
 
 private:

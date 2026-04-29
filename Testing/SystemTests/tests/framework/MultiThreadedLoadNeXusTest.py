@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import concurrent.futures
-import sys
 
 from mantid.simpleapi import Load
 from systemtesting import MantidSystemTest, linux_distro_description
+import mantid.kernel.environment as mtd_env
 
 
 def load_nexus_in_multiple_threads(filename, nthreads):
@@ -59,11 +59,11 @@ class MultiThreadedLoadNeXusTest(MantidSystemTest):
         """HDF5 is currently not built in threadsafe mode on RHEL or macOS"""
         # Ideally this would be a capability check but that's very difficult as
         # the RHEL library doesn't have the H5is_library_threadsafe function
-        if sys.platform == "linux":
+        if mtd_env.is_linux():
             distro = linux_distro_description().lower()
             is_redhat_like = [name in distro for name in ("red hat", "centos", "fedora")]
             return any(is_redhat_like)
-        elif sys.platform == "darwin":
+        elif mtd_env.is_mac():
             return True
         else:
             return False

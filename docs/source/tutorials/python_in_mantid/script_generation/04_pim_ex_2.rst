@@ -10,10 +10,6 @@ Perform a set of algorithms by pointing and clicking within Mantid
 Use the history window to generate a script based upon the executed algorithms
 Use the dialog functions to make the script more general for future runs.
 
-.. contents:: Table of contents
-    :local:
-
-
 
 A - Processing ISIS Data
 ========================

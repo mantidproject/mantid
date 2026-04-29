@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 
 #include <QLayout>
@@ -43,10 +45,11 @@ public:
   virtual ~IPreviewDockedWidgets() = default;
   virtual void subscribe(PreviewDockedWidgetsSubscriber *notifyee) noexcept = 0;
 
-  // Plotting
+  // Instrument display
+  virtual void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
   virtual void resetInstView() = 0;
-  virtual void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
-                            Mantid::Kernel::V3D const &axis) = 0;
+  virtual void plotInstView() = 0;
+  virtual std::vector<Mantid::detid_t> detIndicesToDetIDs(std::vector<size_t> const &detIndices) const = 0;
   //  Instrument viewer toolbar
   virtual void setInstViewZoomState(bool on) = 0;
   virtual void setInstViewEditState(bool on) = 0;

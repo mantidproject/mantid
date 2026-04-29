@@ -10,7 +10,6 @@
 import os
 import shutil
 import socket
-import sys
 import tempfile
 import time
 import unittest
@@ -21,12 +20,9 @@ from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
 from unittest import mock
 from workbench.projectrecovery.projectrecovery import ProjectRecovery, SAVING_TIME_KEY, NO_OF_CHECKPOINTS_KEY, RECOVERY_ENABLED_KEY
+import mantid.kernel.environment as mtd_env
 
 unicode = str
-
-
-def is_macOS():
-    return sys.platform == "darwin"
 
 
 class ProjectRecoveryTest(unittest.TestCase):
@@ -130,7 +126,7 @@ class ProjectRecoveryTest(unittest.TestCase):
 
         self.assertTrue(not os.path.exists(temp_dir))
 
-    @unittest.skipIf(is_macOS(), "Can be unreliable on macOS and is a test of logic not OS capability")
+    @unittest.skipIf(mtd_env.is_mac(), "Can be unreliable on macOS and is a test of logic not OS capability")
     def test_sort_paths_by_last_modified(self):
         paths = [self.secondPath, self.thirdPath, self.firstPath]
         paths = self.pr.sort_by_last_modified(paths)

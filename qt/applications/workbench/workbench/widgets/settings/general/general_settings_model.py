@@ -23,6 +23,7 @@ class GeneralProperties(Enum):
     PR_TIME_BETWEEN_RECOVERY = "projectRecovery.secondsBetween"
     PR_RECOVERY_ENABLED = "projectRecovery.enabled"
     USE_NOTIFICATIONS = "Notifications.Enabled"
+    APPLY_DARK_THEME_ENABLED = "editors.apply_dark_theme"
 
 
 class GeneralUserConfigProperties(Enum):
@@ -136,6 +137,9 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
     def get_completion_enabled() -> str:
         return CONF.get(GeneralUserConfigProperties.COMPLETION_ENABLED.value, type=bool)
 
+    def get_apply_dark_theme_enabled(self) -> str:
+        return self.get_saved_value(GeneralProperties.APPLY_DARK_THEME_ENABLED.value)
+
     def set_crystallography_convention(self, value: str) -> None:
         self.add_change(GeneralProperties.CRYSTALLOGRAPY_CONV.value, value)
 
@@ -183,3 +187,6 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
 
     def set_user_layout(self, value: dict) -> None:
         self.add_change(GeneralUserConfigProperties.USER_LAYOUT.value, value)
+
+    def set_apply_dark_theme_enabled(self, value: str) -> None:
+        self.add_change(GeneralProperties.APPLY_DARK_THEME_ENABLED.value, value)

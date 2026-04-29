@@ -6,9 +6,6 @@ Formatting Plots with a script
 
 **Sometimes the easiest way to find out how to control part of a plot with Matplotlib is to search online for their** `documentation <https://matplotlib.org/3.2.1/index.html>`_ **! Below are some useful commands and a handful of links**
 
-.. contents:: Table of contents
-    :local:
-
 
 General
 =======

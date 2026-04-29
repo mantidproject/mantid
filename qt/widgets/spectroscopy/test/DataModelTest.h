@@ -21,10 +21,10 @@
 
 namespace DataModelTestingNamespace {
 auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
-constexpr std::string DATA_WS1 = "DataWorkspace1";
-constexpr std::string DATA_WS2 = "DataWorkspace2";
-constexpr std::string RES_WS = "ResolutionWs";
-constexpr std::string SPEC_RANGE = "0-3";
+std::string DATA_WS1 = "DataWorkspace1";
+std::string DATA_WS2 = "DataWorkspace2";
+std::string RES_WS = "ResolutionWs";
+std::string SPEC_RANGE = "0-3";
 
 void createInvalidResolutionWorkspace(const std::string &name, bool storeADS = true) {
   const std::vector<double> x = {0., 1., 2., 0., 1., 2., 0., 1., 2., 0., 1., 2.};

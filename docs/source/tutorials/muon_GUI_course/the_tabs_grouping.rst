@@ -6,8 +6,6 @@ The Tabs - Grouping
 
 .. index:: The Tabs - Grouping
 
-.. contents:: Table of Contents
-  :local:
 
 Grouping
 ========

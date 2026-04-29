@@ -3,8 +3,6 @@
 Muon Elemental Analysis
 =======================
 
-.. contents:: Table of Contents
-  :local:
 
 Interface overview
 ------------------

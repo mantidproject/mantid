@@ -4,8 +4,6 @@
 User File Format
 ================
 
-.. contents:: Table of Contents
-  :local:
 
 Instrument Selection
 --------------------

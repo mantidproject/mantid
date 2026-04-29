@@ -24,8 +24,6 @@ Waterfall Plots
 |
 |
 
-.. contents:: Waterfall Plots - Table of contents
-    :local:
 
 |
 |

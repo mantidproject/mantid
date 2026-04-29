@@ -7,8 +7,6 @@ Muon Analysis
    :align: right
    :height: 400px
 
-.. contents:: Table of Contents
-  :local:
 
 Interface Overview
 ------------------

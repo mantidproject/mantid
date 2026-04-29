@@ -4,8 +4,6 @@
 Developer Accounts
 ==================
 
-.. contents::
-  :local:
 
 Unique Profiles
 ---------------

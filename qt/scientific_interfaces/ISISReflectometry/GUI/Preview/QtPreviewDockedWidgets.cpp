@@ -5,12 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtPreviewDockedWidgets.h"
+#include "InstViewModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtIcons/Icon.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
-#include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
+#include "QtPreviewInstrumentDisplay.h"
 #include "ROIType.h"
 
 #include <QAction>
@@ -19,7 +18,6 @@
 
 using namespace Mantid::Kernel;
 using MantidQt::MantidWidgets::IPlotView;
-using MantidQt::MantidWidgets::ProjectionSurface;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 QtPreviewDockedWidgets::QtPreviewDockedWidgets(QWidget *parent, QLayout *layout)
@@ -29,7 +27,8 @@ QtPreviewDockedWidgets::QtPreviewDockedWidgets(QWidget *parent, QLayout *layout)
   m_ui.setupUi(this);
   m_layout->addWidget(this);
 
-  resetInstView();
+  m_instDisplay = std::make_unique<QtPreviewInstrumentDisplay>(
+      m_ui.iv_placeholder, [this]() { onInstViewShapeChanged(); }, std::make_unique<InstViewModel>());
   loadToolbarIcons();
   setupSelectRegionTypes();
   connectSignals();
@@ -117,29 +116,13 @@ void QtPreviewDockedWidgets::onAddRectangularROIClicked(QAction *regionType) con
 
 void QtPreviewDockedWidgets::onLinePlotExportToAdsClicked() const { m_notifyee->notifyLinePlotExportAdsRequested(); }
 
-void QtPreviewDockedWidgets::resetInstView() {
-  if (m_instDisplay) {
-    // Destruct the previous instance
-    m_instDisplay = nullptr;
-  }
-  m_instDisplay = std::make_unique<MantidWidgets::InstrumentDisplay>(m_ui.iv_placeholder);
+void QtPreviewDockedWidgets::updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) {
+  m_instDisplay->updateWorkspace(workspace);
 }
 
-void QtPreviewDockedWidgets::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D const &samplePos,
-                                          V3D const &axis) {
-  // We need to recreate the surface so disconnect any existing signals first
-  if (m_instDisplay->getSurface()) {
-    disconnect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()));
-    disconnect(m_instDisplay->getSurface().get(), SIGNAL(shapesRemoved()));
-    disconnect(m_instDisplay->getSurface().get(), SIGNAL(shapesCleared()));
-  }
-  auto widgetSize = m_instDisplay->currentWidget()->size();
-  m_instDisplay->setSurface(
-      std::make_shared<MantidWidgets::UnwrappedCylinder>(instActor, samplePos, axis, widgetSize, false));
-  connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onInstViewShapeChanged()));
-  connect(m_instDisplay->getSurface().get(), SIGNAL(shapesRemoved()), this, SLOT(onInstViewShapeChanged()));
-  connect(m_instDisplay->getSurface().get(), SIGNAL(shapesCleared()), this, SLOT(onInstViewShapeChanged()));
-}
+void QtPreviewDockedWidgets::resetInstView() { m_instDisplay->resetInstView(); }
+
+void QtPreviewDockedWidgets::plotInstView() { m_instDisplay->plotInstView(); }
 
 QLayout *QtPreviewDockedWidgets::getRegionSelectorLayout() const { return m_ui.rs_plot_layout; }
 
@@ -152,18 +135,11 @@ void QtPreviewDockedWidgets::setInstViewSelectRectState(bool isChecked) {
   m_ui.iv_rect_select_button->setDown(isChecked);
 }
 
-void QtPreviewDockedWidgets::setInstViewZoomMode() {
-  m_instDisplay->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
-}
+void QtPreviewDockedWidgets::setInstViewZoomMode() { m_instDisplay->setInstViewZoomMode(); }
 
-void QtPreviewDockedWidgets::setInstViewEditMode() {
-  m_instDisplay->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
-}
+void QtPreviewDockedWidgets::setInstViewEditMode() { m_instDisplay->setInstViewEditMode(); }
 
-void QtPreviewDockedWidgets::setInstViewSelectRectMode() {
-  m_instDisplay->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
-  m_instDisplay->getSurface()->startCreatingShape2D("rectangle", Qt::green, QColor(255, 255, 255, 80));
-}
+void QtPreviewDockedWidgets::setInstViewSelectRectMode() { m_instDisplay->setInstViewSelectRectMode(); }
 
 void QtPreviewDockedWidgets::setInstViewToolbarEnabled(bool enable) {
   m_ui.iv_zoom_button->setEnabled(enable);
@@ -190,11 +166,11 @@ void QtPreviewDockedWidgets::setEditROIState(bool state) { m_ui.rs_edit_button->
 void QtPreviewDockedWidgets::setRectangularROIState(bool state) { m_ui.rs_rect_select_button->setDown(state); }
 
 std::vector<size_t> QtPreviewDockedWidgets::getSelectedDetectors() const {
-  std::vector<size_t> result;
-  // The name is confusing here but "masked" detectors refers to those selected by a "mask shape"
-  // (although weather it's treated as a mask or not is up to the caller)
-  m_instDisplay->getSurface()->getMaskedDetectors(result);
-  return result;
+  return m_instDisplay->getSelectedDetectors();
+}
+
+std::vector<Mantid::detid_t> QtPreviewDockedWidgets::detIndicesToDetIDs(std::vector<size_t> const &detIndices) const {
+  return m_instDisplay->detIndicesToDetIDs(detIndices);
 }
 
 std::string QtPreviewDockedWidgets::getRegionType() const {

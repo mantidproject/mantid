@@ -7,20 +7,20 @@
 #  This file is part of the mantidqt package
 import os
 import subprocess
-import sys
 
 from mantid.kernel import logger
+import mantid.kernel.environment as mtd_env
 
 
 class ShowInExplorer(object):
     @staticmethod
     def open_directory(path):
         try:
-            if sys.platform == "win32":
+            if mtd_env.is_windows():
                 os.startfile(path)  # noqa: S606
-            elif sys.platform == "darwin":
+            elif mtd_env.is_mac():
                 subprocess.check_call(["open", "--", path])
-            elif sys.platform == "linux2":
+            elif mtd_env.is_linux():
                 call_params = ["xdg-open", path]
                 subprocess.check_call(call_params)
         except Exception as ex:

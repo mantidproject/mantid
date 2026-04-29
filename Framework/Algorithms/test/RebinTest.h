@@ -19,8 +19,10 @@
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/MockMemory.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/Memory.h"
 
 #include <numeric>
 
@@ -114,6 +116,42 @@ public:
     auto errmsg = errmsgs.find("Params");
     TS_ASSERT(errmsg != errmsgs.end());
     TS_ASSERT(errmsg->second.substr(0, 20) == "Provided width value");
+  }
+
+  // NOTE this test will only run on linux, as it requires the availMem patch to work
+  void testIsMocked() {
+#if defined(__linux__) || defined(__gnu_linux__)
+    constexpr std::size_t newMem{25};
+    size_t mem1 = Mantid::Kernel::MemoryStats().availMem();
+    TS_ASSERT_LESS_THAN(newMem, mem1);
+    {
+      Mantid::TestMemory::MockMemory memL(newMem);
+      size_t mem = Mantid::Kernel::MemoryStats().availMem();
+      TS_ASSERT_EQUALS(mem, newMem);
+    }
+    std::size_t mem2 = Mantid::Kernel::MemoryStats().availMem();
+    TS_ASSERT_LESS_THAN(newMem, mem2);
+#endif
+  }
+
+  void test_failure_too_much_memory() {
+    Mantid::TestMemory::MockMemory memL; // patch the available memory calculator
+    size_t numBins = memL.numberOfFloats();
+    // ensure that rebinning will fail if the number of bins requested is expected to exceed available memory
+    Rebin rebin;
+    // Linear case
+    rebin.initialize();
+    double binWidth = 1.0;
+    double start = 1.0;
+    double end = start + static_cast<double>(numBins) * binWidth;
+    TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{start, binWidth, end}));
+    // Logarithmic case
+    rebin.initialize();
+    start = 1.0;
+    binWidth = 1.0 - std::pow(10.0, 1. / static_cast<double>(numBins + 1));
+    end = 10.0;
+    TS_ASSERT_LESS_THAN(binWidth, 0.0); // make sure it is negative, to trigger log binning
+    TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{start, binWidth, end}));
   }
 
   /* execution tests */

@@ -3,8 +3,6 @@
 Muon Unscripted Testing: PSI
 ============================
 
-.. contents:: Table of Contents
-    :local:
 
 Introduction
 ------------

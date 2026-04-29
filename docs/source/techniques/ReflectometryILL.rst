@@ -4,8 +4,6 @@
 Data reduction for reflectometry instruments at the ILL
 =======================================================
 
-.. contents:: Table of contents
-    :local:
 
 There is one algorithm providing the entry point and steering the reduction workflow for both FIGARO and D17:
 
