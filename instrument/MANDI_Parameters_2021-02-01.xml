@@ -3,6 +3,9 @@
 
 <component-link name = "MANDI">
 <!-- Specify that any banks not in NeXus file are to be removed -->
+<parameter name="remove-unused-banks" type="bool">
+  <value val="true"/>
+</parameter>
 <parameter name="T0">
  <value val="-6.711"/>
 </parameter>
