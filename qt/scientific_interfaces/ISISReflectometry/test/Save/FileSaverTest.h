@@ -178,9 +178,10 @@ private:
     }
   }
 
-  const FileFormatOptions createFileFormatOptions(NamedFormat format, const bool saveAsSingleFile = false) {
+  const FileFormatOptions createFileFormatOptions(NamedFormat format, const bool saveAsSingleFile = false,
+                                                  ORSOMetaSource metaSource = ORSOMetaSource::History) {
     return FileFormatOptions(format, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
-                             m_includeAdditionalColumns, saveAsSingleFile, m_model, m_validation);
+                             m_includeAdditionalColumns, saveAsSingleFile, m_model, m_validation, metaSource);
   }
 
   const std::string expectedExtension(NamedFormat format) {
@@ -232,7 +233,7 @@ private:
     auto extension = expectedExtension(format);
     auto savePath = expectedSavePath(wsName, format);
     EXPECT_CALL(mockSaveAlgorithmRunner, runSaveORSOAlgorithm(_, savePath, m_includeQResolution,
-                                                              m_includeAdditionalColumns, m_model, m_validation))
+                                                              m_includeAdditionalColumns, m_model, m_validation, _))
         .Times(1);
   }
 
