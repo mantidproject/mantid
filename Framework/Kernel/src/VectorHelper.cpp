@@ -19,6 +19,7 @@ namespace {
 // edge checks
 struct EdgeCheck { // for polymorphic access to functors
   virtual bool operator()(double, double, double) const = 0;
+  virtual ~EdgeCheck() = default;
 };
 
 // Standard check, for linear, log, and power
@@ -39,6 +40,7 @@ struct ReverseLogEdgeCheck : EdgeCheck {
 // bin width functionss
 struct BinWidth { // for polymorphic access to functors
   virtual double operator()(double, double) const = 0;
+  virtual ~BinWidth() = default;
 };
 
 // Linear bin width is just the alpha parameter
