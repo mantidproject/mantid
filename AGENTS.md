@@ -27,12 +27,13 @@ The project provides tools for processing materials-science data from neutron sc
   - Windows: `cmake --preset=win64 . && cd build/`
   - macOS Apple Silicon: `cmake --preset=osx-arm64 . && cd build/`
 - If unsure which preset to use, check `CMakePresets.json`.
-- Build:
+- Build (run from the build directory):
   - Framework: `ninja Framework`
   - Workbench GUI: `ninja workbench`
   - Tests: `ninja AllTests`
 - Mantid typically uses out of source builds. If build files related to ninja and cmake cannot be found, ask the user to
   grant access to the external build process.
+- Ninja commands are typically ran from the build directory. If using pixi, you must specify the directory containing the `pixi.toml` file using the `--manifest-path` flag.
 - Do not make direct changes to files in the build directory. These are generated as part of the build process.
 
 # CMake
