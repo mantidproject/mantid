@@ -256,7 +256,7 @@ class FullInstrumentViewModel:
             self._integration_limits = tuple(self._workspace.dataX(int(workspace_indices[0]))[[0, -1]])
 
         else:
-            data_x = self._workspace.extractX()[valid_indices]
+            data_x = self._workspace.extractX()[workspace_indices]
             self._integration_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
         self.full_integration_limits = self._integration_limits
 
