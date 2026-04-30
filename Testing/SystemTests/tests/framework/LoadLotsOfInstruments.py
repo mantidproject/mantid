@@ -30,7 +30,9 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
                 for clone in clone_set[1:]:
                     with open(os.path.join(instrument_directory, clone + file_type)) as f:
                         clone_file = f.read()
-                    self.assertEqual(self._remove_file_def_tags(original_file), self._remove_file_def_tags(clone_file))
+                    self.assertEqual(
+                        self._remove_file_def_tags(original_file).replace(original, clone), self._remove_file_def_tags(clone_file)
+                    )
 
     @staticmethod
     def _remove_tag(txt, tag):
