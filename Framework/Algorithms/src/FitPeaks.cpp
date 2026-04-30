@@ -1351,10 +1351,6 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
  */
 bool FitPeaks::decideToEstimatePeakParams(const bool firstPeakInSpectrum,
                                           const API::IPeakFunction_sptr &peak_function) {
-  // Don't trust the IkedaCarpenter parameter estimation
-  if (peak_function->name() == "IkedaCarpenterPV") {
-    return false;
-  }
   // should observe the peak width if the user didn't supply all of the peak
   // function parameters
   bool observe_peak_shape(m_initParamIndexes.size() != peak_function->nParams());
