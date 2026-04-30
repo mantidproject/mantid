@@ -117,6 +117,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view._detector_spectrum_axes.texts = [mock_text]
         self.assertEqual(0, len(self._view._lineplot_overlays))
         self._view._lineplot_overlays.append(mock_line)
+        self._view._detector_spectrum_axes.lines = [mock_line]
         self._view.clear_lineplot_overlays()
         mock_line.remove.assert_called_once()
         self.assertEqual(0, len(self._view._lineplot_overlays))
