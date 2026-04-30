@@ -21,7 +21,7 @@ the create a distinct ENTITY for each bank-->
     <!ENTITY PVsigma_2_sq "43.299">
 ]>
 
-<parameter-file instrument="ENGIN-X" valid-from="1900-01-31 23:59:59" valid-to = "2100-01-31 23:59:59">
+<parameter-file instrument="ENGIN-X" valid-from="2020-10-23">
 
 <component-link name="NorthBank" >
 
