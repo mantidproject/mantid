@@ -94,7 +94,7 @@ class ReflectometryDatasetBase:
         self._ws = ws
         self._is_ws_grp_member: bool = is_ws_grp_member
         self._reduction_timestamp: datetime = None
-        self._is_stitched: bool = None
+        self._is_stitched: bool = False
         self._q_conversion_theta: Optional[float] = None
         self._q_conversion_method: str = ""
         self._spin_state: str = ""
@@ -327,7 +327,6 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
                 # We want the last call to the stitch algorithm in the history
                 # (we would normally expect there to be only one)
                 self._stitch_history = history
-                self._is_stitched = True
 
         # Get the last occurrence of the reduction algorithm in the workspace history
         for history in reversed(ws_history.getAlgorithmHistories()):
@@ -341,7 +340,7 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
                         return
 
     def _populate_q_conversion_info(self):
-        if self.is_stitched or self._reduction_history is None:
+        if self.stitch_history is not None or self._reduction_history is None:
             # Q conversion information isn't relevant for a stitched dataset
             return
 
@@ -366,7 +365,7 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
         self._q_conversion_method = self.q_conversion_history.name()
 
     def _set_name(self):
-        if self.is_stitched:
+        if self.stitch_history is not None:
             self._name = "Stitched"
         elif self._q_conversion_theta is not None:
             self._name = f"{self._q_conversion_theta:.3f}"
@@ -489,6 +488,8 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
         """
         # The flood correction may have been passed either as a full filepath or workspace name
         # The FloodCorrection parameter says Workspace in both cases, so we don't know which we have
+        if not self.reduction_workflow_histories:
+            return None
         flood_name = self.reduction_workflow_histories[0].getPropertyValue("FloodWorkspace")
         if flood_name:
             return Path(flood_name).name, "Flood correction workspace or file"
@@ -498,22 +499,25 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
             flood_history = self.reduction_history.getChildHistories()[0]
             if flood_history.name() == self._CREATE_FLOOD_ALG:
                 return Path(flood_history.getPropertyValue("Filename")).name, "Flood correction run file"
-
         return None
 
     def _get_calibration_file_entry(self) -> Optional[str]:
         """
         Get the calibration file name from the reduction history.
         """
+        if not self.reduction_workflow_histories:
+            return None
         calibration_file = self.reduction_workflow_histories[0].getPropertyValue("CalibrationFile")
         return Path(calibration_file).name if calibration_file else None
 
     def _get_resolution(self) -> Optional[float]:
         # Attempt to get the resolution from the workspace history
-        if self._is_stitched:
+        if self.stitch_history is not None:
             # The absolute value of the stitch parameter of the stitch algorithm is the resolution
-            return abs(float(self.stitch_history.getPropertyValue("Params")))
-
+            try:
+                return abs(float(self.stitch_history.getPropertyValue("Params")))
+            except ValueError:
+                logger.debug("Resolution could not be found in stitch history.")
         if self.reduction_history:
             rebin_alg = self.reduction_history.getChildHistories()[-1]
             if rebin_alg.name() == self._REBIN_ALG:
