@@ -79,6 +79,14 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::
     bool isReverseLogBin = isLogBin && useReverseLogarithmic;
     double alpha = std::fabs(fullParams[istep]);
 
+    // make sure parameters are specified in strictly increasing order
+    if (fullParams[ibound - 2] >= fullParams[ibound]) {
+      std::stringstream msg;
+      msg << "createAxisFromRebinParams: in the " << ((ibound) / 2) << "th range, "
+          << "the left edge is not smaller than right edge: " << fullParams[ibound - 2] << " vs " << fullParams[ibound];
+      throw std::runtime_error(msg.str());
+    }
+
     if (isReverseLogBin && xcurr == fullParams[ibound - 2]) {
       // we are starting a new bin, but since it is a rev log, xcurr needs to be at its end
       xcurr = fullParams[ibound];
