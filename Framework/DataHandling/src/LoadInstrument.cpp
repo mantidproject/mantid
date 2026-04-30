@@ -264,7 +264,7 @@ void LoadInstrument::runLoadParameterFile(const std::shared_ptr<API::MatrixWorks
   const std::string idfDir = (pathSep != std::string::npos) ? idfFilename.substr(0, pathSep) : "";
 
   const std::string instName = ws->getInstrument()->getName();
-  std::string runDate = ws->getWorkspaceStartDate();
+  std::string runDate = ws->getAvailableWorkspaceStartDate();
   // When the workspace has no run date (e.g. LoadEmptyInstrument), fall back to
   // the IDF's own valid-from date so that a specific versioned IDF selects its
   // matching parameter file rather than whichever file is valid today.
