@@ -57,7 +57,6 @@ anaconda-client = "*"
 conda = "24.7.*"
 rattler-index = "*"
 mamba = "<2"
-versioningit = ">=3.3.0,<4"
 
 [feature.docs-migration.dependencies]
 # rst-to-myst doesn't play nice with dependencies in the default environment
