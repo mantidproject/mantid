@@ -270,9 +270,9 @@ protected:
 
   void execTasks(const std::string &diagWorkspacePrefix = "") {
     configureAlgorithmTasks();
-    int step = 0;
 
     try {
+      int step = 0;
       for (size_t i = 0; i < m_stagedAlgorithmTasks.size(); ++i) {
         const auto &task = m_stagedAlgorithmTasks[i];
         task->execute();
