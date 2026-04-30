@@ -17,7 +17,6 @@
 #include <cstdlib> // malloc, calloc
 #include <cstring> // strcpy
 #include <filesystem>
-#include <iostream>
 #include <map>
 #include <stdexcept> // std::invalid_argument
 #include <unordered_set>
@@ -192,7 +191,7 @@ void NexusDescriptorLazy::loadGroups(std::map<std::string, std::string> &allEntr
   H5Gget_num_objs(groupID.get(), &numObjs);
   for (hsize_t i = 0; i < numObjs; i++) {
     H5G_obj_t type = H5Gget_objtype_by_idx(groupID, i);
-    ssize_t name_len = H5Gget_objname_by_idx(groupID, i, nullptr, 0);
+    size_t name_len = H5Gget_objname_by_idx(groupID, i, nullptr, 0);
     if (name_len <= 0)
       continue;
     std::string memberName(name_len, 'X');                              // fill with X for obvious errors
@@ -263,5 +262,120 @@ std::map<std::string, std::string> NexusDescriptorLazy::initAllEntries() {
   // rely on move semantics for single return
   return allEntries;
 }
+
+using CRS_t = NexusDescriptorLazy::CacheReturnStatus_t;
+
+const NexusDescriptorLazy::CacheValue_t NexusDescriptorLazy::_getEntryValue(const std::string &entryName) const {
+  // Otherwise fetch if possible the entry and performs the comparison
+  if (H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT) <= 0)
+    return CRS_t::DATASET_NOT_FOUND;
+
+  UniqueID<&H5Dclose> entryID(H5Dopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
+
+  hid_t datatype = H5Dget_type(entryID.get());
+
+  // Case of a string (fixed or variable length) type
+
+  if (H5Tget_class(datatype) == H5T_STRING) {
+
+    // Variable-length string
+    if (H5Tis_variable_str(datatype)) {
+
+      char *rdata = nullptr;
+      H5Dread(entryID.get(), datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+
+      std::string s(rdata);
+      H5free_memory(rdata);
+
+      return s; // return std::string
+
+      // Fixed-length string
+    } else {
+
+      size_t size = H5Tget_size(datatype);
+      std::vector<char> buffer(size + 1, '\0');
+
+      H5Dread(entryID.get(), datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
+
+      std::string s(buffer.data());
+      return s; // return std::string
+    }
+    // Numeric type
+  } else {
+    if (H5Tget_class(datatype) != H5T_FLOAT && H5Tget_class(datatype) != H5T_INTEGER)
+      return CRS_t::WRONG_TYPE;
+
+    hid_t dataspace = H5Dget_space(entryID.get());
+    int ndims = H5Sget_simple_extent_ndims(dataspace);
+
+    // The ndims < 0 is for case when an error occured while fetching the dims
+    if (ndims < 0 || ndims > 1) {
+      H5Sclose(dataspace);
+      return CRS_t::ERROR;
+    }
+    hsize_t size = 1;
+    hsize_t dims[1] = {1};
+
+    // if (ndims == 1) { // ensured by the previous if
+    H5Sget_simple_extent_dims(dataspace, dims, nullptr);
+    size = dims[0];
+    //}
+    H5Sclose(dataspace);
+
+    // what about unsigned int?
+    if (H5Tget_class(datatype) == H5T_FLOAT) {
+      // Read the entry
+      std::vector<float> buffer(size);
+      H5Dread(entryID.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
+
+      if (buffer.size() != 1)
+        return CRS_t::ERROR;
+      else
+        return buffer[0];
+    } else if (H5Tget_class(datatype) == H5T_INTEGER) {
+      // Read the entry
+      std::vector<int> buffer(size);
+      H5Dread(entryID.get(), H5T_NATIVE_INT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
+
+      if (buffer.size() != 1)
+        return CRS_t::ERROR;
+      else
+        return buffer[0];
+    }
+
+  } // else numeric
+
+  return CRS_t::ERROR;
+}
+
+template <typename T>
+std::pair<T, NexusDescriptorLazy::CacheReturnStatus_t>
+NexusDescriptorLazy::getEntryValue(const std::string &entryName) const {
+
+  T value = T{};
+  NexusDescriptorLazy::CacheReturnStatus_t returnStatus = NexusDescriptorLazy::CacheReturnStatus_t::CACHED;
+  // Checks if the entry is cached and if so compare the value with the cached one
+  auto it = m_readEntries.find(entryName);
+  if (it == m_readEntries.end()) {
+    auto result = _getEntryValue(entryName);
+
+    std::tie(it, std::ignore) = m_readEntries.insert(std::pair{entryName, result});
+    returnStatus = NexusDescriptorLazy::CacheReturnStatus_t::FOUND;
+  }
+
+  // value not found or not available
+  if (auto ptr = std::get_if<NexusDescriptorLazy::CacheReturnStatus_t>(&it->second))
+    returnStatus = *ptr;
+  else if (auto ptr = std::get_if<T>(&it->second))
+    value = *ptr;
+  else
+    returnStatus = NexusDescriptorLazy::CacheReturnStatus_t::WRONG_TYPE;
+
+  // the value type is wrong
+  return std::pair<T, NexusDescriptorLazy::CacheReturnStatus_t>{value, returnStatus};
+}
+
+template std::pair<std::string, NexusDescriptorLazy::CacheReturnStatus_t>
+NexusDescriptorLazy::getEntryValue<std::string>(const std::string &) const;
 
 } // namespace Mantid::Nexus

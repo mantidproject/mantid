@@ -136,6 +136,39 @@ public:
     TS_ASSERT(descriptor.isEntry("/MDHistoWorkspace", "NXentry"));
   }
 
+  void test_getEntryValue() {
+    std::cout << "\nTesting getEntryValue in NexusDescriptorLazy" << std::endl;
+    const std::string filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+
+    {
+      auto v = descriptor.getEntryValue<std::string>("/entry/instrument/not_a_data");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::cacheReturnStatus_t::DATASET_NOT_FOUND)
+    }
+    {
+      auto v = descriptor.getEntryValue<std::string>("/entry/entry_identifier");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::cacheReturnStatus_t::FOUND)
+      TS_ASSERT_EQUALS(v.first, "89157")
+    }
+    {
+      auto v = descriptor.getEntryValue<int>("/entry/entry_identifier");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::cacheReturnStatus_t::WRONG_TYPE)
+    }
+    {
+      auto v = descriptor.getEntryValue<float>("/entry/duration");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::cacheReturnStatus_t::FOUND)
+      TS_ASSERT_DELTA(v.first, 7200.01, 1e-2)
+
+      auto v2 = descriptor.getEntryValue<float>("/entry/duration");
+      TS_ASSERT_EQUALS(v2.second, Mantid::Nexus::NexusDescriptorLazy::cacheReturnStatus_t::CACHED)
+      TS_ASSERT_DELTA(v2.first, 7200.01, 1e-2)
+    }
+    {
+      auto v = descriptor.getEntryValue<int>("/entry/duration");
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::cacheReturnStatus_t::WRONG_TYPE)
+    }
+  }
+
   void test_threadSafety() {
     constexpr int NUM_THREAD{5}; // number of threads to spawn
 
