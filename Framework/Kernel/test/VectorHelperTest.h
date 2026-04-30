@@ -213,6 +213,14 @@ public:
     TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis), const std::runtime_error &);
   }
 
+  void test_CreateAxisFromRebinParams_throwsRangeBackwards() {
+    const std::vector<double> goodParams = {1.0, 1.0, 5.0};
+    const std::vector<double> badParams = {5.0, 1.0, 1.0}; // backwards
+    std::vector<double> axis;
+    TS_ASSERT_THROWS_NOTHING(VectorHelper::createAxisFromRebinParams(goodParams, axis));
+    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(badParams, axis), const std::runtime_error &);
+  }
+
   void test_CreateAxisFromRebinParams_xMinXMaxHints() {
     const std::vector<double> rbParams = {1.0};
     std::vector<double> axis;
