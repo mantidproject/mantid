@@ -24,7 +24,7 @@ The project provides tools for processing materials-science data from neutron sc
 
 - Configure:
   - Linux: `cmake --preset=linux . && cd build/`
-  - Windows: `cmake --preset=win64 . && cd build/`
+  - Windows: `cmake --preset=win-ninja . && cd build/`
   - macOS Apple Silicon: `cmake --preset=osx-arm64 . && cd build/`
 - If unsure which preset to use, check `CMakePresets.json`.
 - Build (run from the build directory):
