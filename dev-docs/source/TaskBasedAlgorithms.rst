@@ -4,9 +4,6 @@
 Task Based Algorithms
 =====================
 
-.. contents::
-  :local:
-
 Overview
 --------
 
@@ -16,7 +13,7 @@ small, named tasks.
 This is useful when the caller needs control over execution flow while reusing the same implementation.
 
 The algorithm exposes a ``TaskExecutionOrder`` property so users can choose the task order at runtime.
-The TaskBasedAlgorithm then stages those tasks and executes them in that order.
+The ``TaskBasedAlgorithm`` then stages those tasks and executes them in that order.
 
 Concepts
 --------

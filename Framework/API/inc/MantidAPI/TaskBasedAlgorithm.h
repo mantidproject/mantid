@@ -110,14 +110,14 @@ protected:
 
     // if dependent outputs have been supplied, check they are fulfillable. If not, take all outputs from any specified
     // tasks.
-    bool populateDependantTasks(const size_t taskSetIndex) {
+    std::string populateDependantTasks(const size_t taskSetIndex) {
       for (auto &item : m_dependantTasks[taskSetIndex]) {
         const auto &taskName = item.first;
         auto &outputs = item.second;
         auto it = std::find_if(m_parent->m_stagedAlgorithmTasks.cbegin(), m_parent->m_stagedAlgorithmTasks.cend(),
                                [&taskName](std::shared_ptr<AlgorithmTask> task) { return task->name() == taskName; });
         if (it == m_parent->m_stagedAlgorithmTasks.cend())
-          return false; // Task not found, this task set cannot be fulfilled
+          return taskName; // Task not found, this task set cannot be fulfilled
         if (outputs.empty()) {
           // If no specific outputs are listed, populate with the whole task output
           const auto &expectedOutputs = (*it)->getExpectedOutputs();
@@ -125,7 +125,7 @@ protected:
                          [](const auto &output) { return std::pair<std::string, std::string>{output, output}; });
         }
       }
-      return true;
+      return "";
     }
 
     void activateTaskSet() {
@@ -184,8 +184,10 @@ protected:
       for (size_t i = 0; i < m_dependantTasks.size(); ++i) {
         // if task set is unfulfillable due to missing tasks
         std::vector<std::string> missingTasks;
-        if (!populateDependantTasks(i)) {
-          missingTasks.push_back("Task set " + std::to_string(i) + " unfulfillable as required tasks not staged");
+        const auto &missingTask = populateDependantTasks(i);
+        if (!missingTask.empty()) {
+          missingTasks.push_back("Task set " + std::to_string(i) +
+                                 " unfulfillable as required tasks not staged: " + missingTask);
         } else {
           for (const auto &[taskName, outputs] : m_dependantTasks[i]) {
             if (!m_parent->m_algorithmTaskOutputs.contains(taskName)) {
@@ -208,7 +210,7 @@ protected:
         if (missingTasks.empty()) {
           m_fulfilledDependantTaskSets.push_back(i);
         } else {
-          missingTasksAll.insert(missingTasksAll.end(), missingTasks.begin(), missingTasks.end());
+          missingTasksAll.insert(missingTasksAll.cend(), missingTasks.cbegin(), missingTasks.cend());
         }
       }
       return (m_fulfilledDependantTaskSets.empty() ? missingTasksAll : std::vector<std::string>{});
@@ -220,10 +222,6 @@ protected:
     }
   };
 
-  std::vector<std::shared_ptr<AlgorithmTask>> m_stagedAlgorithmTasks;
-  // map of task name: (map of output name: outputs)
-  std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>>
-      m_algorithmTaskOutputs;
   void stageAlgorithmTasks(std::vector<std::shared_ptr<AlgorithmTask>> tasks) {
     if (tasks.empty())
       return;
@@ -331,6 +329,10 @@ protected:
   // Allows the tasks to mutate the original input workspace
   void setMutableInput(const bool inputIsMutable) { m_mutableInput = inputIsMutable; }
 
+  std::vector<std::shared_ptr<AlgorithmTask>> m_stagedAlgorithmTasks;
+  // map of task name: (map of output name: outputs)
+  std::unordered_map<std::string, std::unordered_map<std::string, std::shared_ptr<MatrixWorkspace>>>
+      m_algorithmTaskOutputs;
   std::vector<std::shared_ptr<AlgorithmTask>> m_AlgorithmTasks;
   std::vector<std::string> m_taskExecutionOrder;
   bool m_mutableInput;

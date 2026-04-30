@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -266,25 +266,35 @@ public:
     m_alg->setProperty("InputWorkspace", inputWS);
     m_alg->setProperty("OutputWorkspace", "test_ws");
     m_alg->setRethrows(true);
-    TSM_ASSERT_THROWS(
+    TS_ASSERT_THROWS_EQUALS(
+        m_alg->execute(), std::runtime_error & e, std::string(e.what()),
         "Cannot execute task TaskD as the following dependent tasks outputs are not available: Task set 0 "
-        "unfulfillable as required tasks not staged, Task set 1 unfulfillable as required tasks not staged",
-        m_alg->execute(), std::runtime_error &);
+        "unfulfillable as required tasks not staged: TaskC, Task set 1 unfulfillable as required tasks not staged: "
+        "TaskB");
   }
 
   void testTaskBasedAlgorithmThrowsIfInvalidTaskSpecified() {
     m_alg->initialize();
+    m_alg->setAlwaysStoreInADS(false);
     m_alg->setProperty("TaskExecutionOrder", "TaskA, TaskD, TaskZ");
+    Mantid::API::MatrixWorkspace_sptr inputWS = makeMatrixWorkspaceFromVector({1.0, 2.0, 3.0, 4.0, 5.0});
+    m_alg->setProperty("InputWorkspace", inputWS);
+    m_alg->setProperty("OutputWorkspace", "test_ws");
     m_alg->setRethrows(true);
-    TSM_ASSERT_THROWS("Invalid task specified in TaskExecutionOrder: TaskZ", m_alg->execute(), std::runtime_error &);
+    TS_ASSERT_THROWS_EQUALS(m_alg->execute(), std::runtime_error & e, std::string(e.what()),
+                            "Invalid task specified in TaskExecutionOrder: TaskZ");
   }
 
   void testTaskBasedAlgorithmThrowsIfDuplicateTaskSpecified() {
     m_alg->initialize();
+    m_alg->setAlwaysStoreInADS(false);
     m_alg->setProperty("TaskExecutionOrder", "TaskA, TaskD, TaskA");
+    Mantid::API::MatrixWorkspace_sptr inputWS = makeMatrixWorkspaceFromVector({1.0, 2.0, 3.0, 4.0, 5.0});
+    m_alg->setProperty("InputWorkspace", inputWS);
+    m_alg->setProperty("OutputWorkspace", "test_ws");
     m_alg->setRethrows(true);
-    TSM_ASSERT_THROWS("Duplicate task specified in TaskExecutionOrder, this is not yet supported: TaskA",
-                      m_alg->execute(), std::runtime_error &);
+    TS_ASSERT_THROWS_EQUALS(m_alg->execute(), std::runtime_error & e, std::string(e.what()),
+                            "Duplicate task specified in TaskExecutionOrder, this is not yet supported: TaskA");
   }
 
   void testTaskBasedAlgorithmABCDAlternateOutput() {
