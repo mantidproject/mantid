@@ -562,7 +562,7 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(const NX
                                                                         const std::string &propertyName) const {
   std::vector<double> scannedVariable;
   const auto it = std::find_if(m_scanVar.begin(), m_scanVar.end(),
-                               [&](const ScannedVariables &var) { return var.property == propertyName; });
+                               [&propertyName](const ScannedVariables &var) { return var.property == propertyName; });
   if (it != m_scanVar.end()) {
     const int i = static_cast<int>(std::distance(m_scanVar.begin(), it));
     scannedVariable.resize(m_numberScanPoints);
@@ -585,7 +585,7 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(const NX
 std::vector<double> LoadILLDiffraction::getMonitor(const NXDouble &scan) const {
 
   std::vector<double> monitor = {0.};
-  const auto it = std::find_if(m_scanVar.begin(), m_scanVar.end(), [&](const ScannedVariables &var) {
+  const auto it = std::find_if(m_scanVar.begin(), m_scanVar.end(), [](const ScannedVariables &var) {
     return var.name == "Monitor1" || var.name == "Monitor_1" || var.name == "monitor1";
   });
   if (it != m_scanVar.end()) {
@@ -606,7 +606,7 @@ std::vector<double> LoadILLDiffraction::getAxis(const NXDouble &scan) const {
   std::vector<double> axis = {0.};
   if (m_scanType == OtherScan) {
     const auto it =
-        std::find_if(m_scanVar.begin(), m_scanVar.end(), [&](const ScannedVariables &var) { return var.axis == 1; });
+        std::find_if(m_scanVar.begin(), m_scanVar.end(), [](const ScannedVariables &var) { return var.axis == 1; });
     if (it != m_scanVar.end()) {
       const auto i = std::distance(m_scanVar.begin(), it);
       axis.assign(scan() + m_numberScanPoints * i, scan() + m_numberScanPoints * (i + 1));
