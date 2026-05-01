@@ -680,6 +680,7 @@ def package_standalone_options(platform) {
   if(PACKAGE_SUFFIX.trim() != '') {
     package_options += " --package-suffix ${PACKAGE_SUFFIX}"
   }
+  package_options += " --git-tag ${GIT_TAG}"
   return package_options.trim() + " --platform ${platform}"
 }
 
