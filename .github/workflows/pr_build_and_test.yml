@@ -69,7 +69,7 @@ jobs:
       EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
       ENABLE_BUILD_CODE: true
       ENABLE_UNIT_TESTS: true
-      ENABLE_SYSTEM_TESTS: ${{ matrix.os == 'Linux' }}
+      ENABLE_SYSTEM_TESTS: true
       ENABLE_DOCS: false
       ENABLE_DOC_TESTS: false
       ENABLE_DEV_DOCS: false
@@ -137,7 +137,6 @@ jobs:
           files: build/Testing/*unittest.xml
 
       - name: Run system tests
-        if: matrix.os == 'Linux'
         id: testsystem
         run: |
           cd ${GITHUB_WORKSPACE}
@@ -149,7 +148,7 @@ jobs:
 
       - name: Upload system test mismatch files
         uses: actions/upload-artifact@v7
-        if: ${{ matrix.os == 'Linux' && failure() && steps.testsystem.conclusion == 'failure' }}
+        if: ${{ failure() && steps.testsystem.conclusion == 'failure' }}
         with:
           name: system_test_mismatches
           if-no-files-found: ignore
