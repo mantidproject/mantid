@@ -102,7 +102,7 @@ SofQW::setUpOutputWorkspace(const API::MatrixWorkspace &inputWorkspace, const st
   }
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
-  int yLength;
+  size_t yLength;
   if (qbinParams.size() == 1) {
     if (std::isnan(eMin)) {
       inputWorkspace.getXMinMax(eMin, eMax);
