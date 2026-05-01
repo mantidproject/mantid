@@ -31,9 +31,12 @@ namespace Mantid::Kernel::VectorHelper {
  *  @param[in] power the power in case of inverse power sum. Must be between 0 and 1 or is ignored.
  *  @return The number of bin boundaries in the new axis
  **/
-int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,
-                                        const bool resize_xnew, const bool full_bins_only, const double xMinHint,
-                                        const double xMaxHint, const bool useReverseLogarithmic, const double power) {
+std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,
+                                                const bool resize_xnew, const bool full_bins_only,
+                                                const double xMinHint, const double xMaxHint,
+                                                const bool useReverseLogarithmic, const double power) {
+
+  // correctly expand the parameters
   std::vector<double> tmp;
   const std::vector<double> &fullParams = [&params, &tmp, xMinHint, xMaxHint]() {
     if (params.size() == 1) {
@@ -48,10 +51,10 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::
     }
     return params;
   }();
-  int ibound(2), istep(1), inew(1);
+  std::size_t ibound(2), istep(1), inew(1);
   // highest index in params array containing a bin boundary
-  auto ibounds = static_cast<int>(fullParams.size());
-  int isteps = ibounds - 1; // highest index in params array containing a step
+  std::size_t ibounds = fullParams.size();
+  std::size_t isteps = ibounds - 1; // highest index in params array containing a step
 
   // This coefficitent represents the maximum difference between the size of the last bin and all
   // the other bins.

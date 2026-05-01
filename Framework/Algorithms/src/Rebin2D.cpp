@@ -174,7 +174,7 @@ MatrixWorkspace_sptr Rebin2D::createOutputWorkspace(const MatrixWorkspace_const_
   auto &newY = newYBins.mutableRawData();
   // First create the two sets of bin boundaries
   static_cast<void>(createAxisFromRebinParams(getProperty("Axis1Binning"), newXBins.mutableRawData()));
-  const int newYSize = createAxisFromRebinParams(getProperty("Axis2Binning"), newY);
+  const size_t newYSize = createAxisFromRebinParams(getProperty("Axis2Binning"), newY);
   // and now the workspace
   HistogramData::BinEdges binEdges(newXBins);
   Workspace2D_sptr outputWS;
