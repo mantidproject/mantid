@@ -154,11 +154,19 @@ jobs:
           if-no-files-found: ignore
           path: ${{ github.workspace }}/build/**/*-mismatch.nxs
 
-      - name: System test report
+      - name: System test report (Linux)
         uses: EnricoMi/publish-unit-test-result-action/linux@v2
         if: ${{ matrix.os == 'Linux' && failure() && steps.testsystem.conclusion == 'failure' }}
         with:
-          check_name: "System test results"
+          check_name: "System test results (Linux)"
+          check_run: false
+          files: build/Testing/SystemTests/**/TEST-systemtests*.xml
+
+      - name: System test report (Windows)
+        uses: EnricoMi/publish-unit-test-result-action/windows/bash@v2
+        if: ${{ matrix.os == 'Windows' && failure() && steps.testsystem.conclusion == 'failure' }}
+        with:
+          check_name: "System test results (Windows)"
           check_run: false
           files: build/Testing/SystemTests/**/TEST-systemtests*.xml
 
