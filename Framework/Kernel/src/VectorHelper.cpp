@@ -7,6 +7,7 @@
 #include <cmath>
 #include <stdexcept>
 
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
@@ -78,6 +79,74 @@ private:
 
 namespace Mantid::Kernel::VectorHelper {
 
+/** Validate rebinning parameters, throwing an error if any assumptions are invalidated */
+void MANTID_KERNEL_DLL validateRebinParameters(std::vector<double> const &params, bool const isPower) {
+  size_t numParams = params.size();
+  if (numParams < 3 || numParams % 2 != 1) {
+    throw std::runtime_error("validateRebinParameters: Invalid number of rebin parameters (" +
+                             std::to_string(numParams) + ")! Must be odd number of parameters, 3 or more.");
+  }
+  double previousEdge = params[0];
+  for (size_t i = 1; i < numParams - 1; i += 2) {
+    double binWidth = params[i];
+    double nextEdge = params[i + 1];
+    if (previousEdge >= nextEdge) {
+      throw std::runtime_error(
+          "validateRebinParameters: Bin boundary values must be given in order of increasing value! " +
+          std::to_string(previousEdge) + " >= " + std::to_string(nextEdge));
+    } else if (binWidth == 0) {
+      throw std::runtime_error("validateRebinParameters: Bin width cannot be zero!  Found in range " +
+                               std::to_string(previousEdge) + " to " + std::to_string(nextEdge));
+    } else if (binWidth < 0 && previousEdge <= 0) {
+      throw std::runtime_error("Bin boundaries must be positive for logarithmic binning. Got " +
+                               std::to_string(previousEdge) + " to " + std::to_string(nextEdge));
+    } else if (binWidth < 0 && isPower) {
+      throw std::runtime_error(
+          "validateRebinParameters: Cannot use power binning with negative bin width!  Bin width was " +
+          std::to_string(binWidth));
+    }
+    previousEdge = nextEdge;
+  }
+}
+
+/** Returns a size_t with the estimated size, in bytes, that would be needed
+ * @param params Rebin parameters in form [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n]
+ * @param power the power in case of inverse power sum. Must be between 0 and 1 or is ignored.
+ */
+std::size_t MANTID_KERNEL_DLL estimateNumberOfBins(std::vector<double> const &params, double const power) {
+  bool isPower = power > 0 && power <= 1;
+  validateRebinParameters(params, isPower);
+  double numBins = 0.;
+  double previousEdge = params[0];
+  for (size_t i = 1; i < params.size() - 1; i += 2) {
+    double binWidth = params[i];
+    double nextEdge = params[i + 1];
+    if (binWidth < 0) {
+      // LOGARITHMIC BINNING
+      // NOTE log or reverse log should have approximately the same number of bins here
+      numBins += std::ceil(std::log(nextEdge / previousEdge) / std::log(1. - binWidth));
+    } else if (isPower) {
+      // POWER BINNING
+      // formulas taken from Rebin::validateInputs
+      if (power == 1) {
+        double constexpr eulerMascheroni = 0.5772156649; // Euler-Mascheroni constant
+        numBins += std::exp((nextEdge - previousEdge) / binWidth - eulerMascheroni);
+      } else {
+        numBins += std::pow(((nextEdge - previousEdge) / binWidth) * (1 - power) + 1, 1 / (1 - power));
+      }
+    } else if (binWidth > 0) {
+      // LINEAR BINNING
+      numBins += std::ceil((nextEdge - previousEdge) / binWidth);
+    }
+    previousEdge = nextEdge;
+  }
+  if (numBins >= static_cast<double>(std::numeric_limits<std::size_t>::max())) {
+    throw std::runtime_error(
+        "estimateNumberOfBins: The number of bins requested exceeds the maximum storable by size_t.");
+  }
+  return static_cast<size_t>(numBins);
+}
+
 /** Creates a new output X array given a 'standard' set of rebinning parameters.
  *  @param[in]  params Rebin parameters input [x_1, delta_1,x_2, ...
  *,x_n-1,delta_n-1,x_n]
@@ -108,29 +177,30 @@ std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &param
   }
   std::vector<double> const &fullParams = params.size() == 1 ? tmp : params;
 
-  // if resize_xnew is true, do a first run to determine the needed number of bins
-  if (resize_xnew) {
-    std::vector<double> xnewTemp;
-    size_t neededSize = createAxisFromRebinParams(fullParams, xnewTemp, /*resize_new*/ false, full_bins_only, xMinHint,
-                                                  xMaxHint, useReverseLogarithmic, power);
-    /* NOTE memory overflow check could occur here */
-    xnew.reserve(neededSize);
-  }
-
   // This coefficient represents the maximum difference between the size of the last bin and all
   // the other bins.
   // For full_bin_only, we want it so that last bin couldn't be smaller than the previous bin
   double const lastBinCoef = full_bins_only ? 1.0 : 0.25;
+  // whether to use power binning
+  bool isPower = power > 0 && power <= 1;
 
+  // if resize_xnew is true, prepare the vector
   double xcurr = fullParams[0];
   xnew.clear();
   if (resize_xnew) {
+    size_t neededSize = estimateNumberOfBins(fullParams, power);
+    /* detect potential memory overflows */
+    std::string memError = MemoryStats().checkAvailableMemory(neededSize * sizeof(double));
+    if (!memError.empty()) {
+      throw std::runtime_error(memError);
+    }
+    xnew.reserve(neededSize);
     xnew.push_back(xcurr);
+  } else {
+    validateRebinParameters(fullParams, isPower);
   }
 
   std::size_t currDiv = 1;
-
-  bool isPower = power > 0 && power <= 1;
 
   // for each range specified, fill in the axis with correct bin edges
   std::size_t inew = 1; // we start with 1, the leftmost edge
@@ -140,35 +210,29 @@ std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &param
     double rightEdge = fullParams[i + 1];
     double alpha = std::fabs(binParam);
 
-    if (leftEdge >= rightEdge) {
-      throw std::runtime_error("createAxisFromRebinParams: in the " + std::to_string((i + 1) / 2) +
-                               "th range, the left edge is not smaller than right edge: " + std::to_string(leftEdge) +
-                               " vs " + std::to_string(rightEdge));
-    }
-
     // functions for calculating bin width and checking if within range
     std::unique_ptr<BinWidth> binWidth(nullptr);
     std::unique_ptr<EdgeCheck> edgeCheck(nullptr);
     if (binParam < 0.0 && useReverseLogarithmic) {
       // REVERSE LOGARITHMIC
-      binWidth.reset(new ReverseLogBinWidth{leftEdge, rightEdge});
-      edgeCheck.reset(new ReverseLogEdgeCheck);
+      binWidth = std::make_unique<ReverseLogBinWidth>(leftEdge, rightEdge);
+      edgeCheck = std::make_unique<ReverseLogEdgeCheck>();
       // for reverse log, we start at the right edge and work back to left; to use the same loop, swap the edges
       // the final edge will be added after the loop, fullParams[i+1]
       xcurr = rightEdge;
       std::swap(leftEdge, rightEdge);
     } else if (binParam < 0.0) {
       // LOGARITHMIC
-      binWidth.reset(new LogBinWidth);
-      edgeCheck.reset(new StandardEdgeCheck{lastBinCoef});
+      binWidth = std::make_unique<LogBinWidth>();
+      edgeCheck = std::make_unique<StandardEdgeCheck>(lastBinCoef);
     } else if (isPower) {
       // POWER
-      binWidth.reset(new PowerBinWidth{currDiv, power});
-      edgeCheck.reset(new StandardEdgeCheck{lastBinCoef});
+      binWidth = std::make_unique<PowerBinWidth>(currDiv, power);
+      edgeCheck = std::make_unique<StandardEdgeCheck>(lastBinCoef);
     } else {
       // LINEAR
-      binWidth.reset(new LinearBinWidth);
-      edgeCheck.reset(new StandardEdgeCheck{lastBinCoef});
+      binWidth = std::make_unique<LinearBinWidth>();
+      edgeCheck = std::make_unique<StandardEdgeCheck>(lastBinCoef);
     }
 
     double xs = (*binWidth)(xcurr, alpha);
@@ -181,7 +245,7 @@ std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &param
       }
       xcurr = xcurr + xs;
       if (resize_xnew) {
-        xnew.emplace_back(xcurr);
+        xnew.push_back(xcurr);
       }
       inew++;
       // prepare for next step
@@ -198,7 +262,7 @@ std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &param
       xcurr = fullParams[i + 1];
     }
     if (resize_xnew) {
-      xnew.emplace_back(xcurr);
+      xnew.push_back(xcurr);
     }
     inew++;
     // prepare for next range

@@ -26,6 +26,10 @@ namespace Kernel {
  */
 namespace VectorHelper {
 
+void MANTID_KERNEL_DLL validateRebinParameters(std::vector<double> const &, bool const = false);
+
+std::size_t MANTID_KERNEL_DLL estimateNumberOfBins(std::vector<double> const &params, double const power = -1);
+
 std::size_t MANTID_KERNEL_DLL createAxisFromRebinParams(
     const std::vector<double> &params, std::vector<double> &xnew, const bool resize_xnew = true,
     const bool full_bins_only = false, const double xMinHint = std::nan(""), const double xMaxHint = std::nan(""),

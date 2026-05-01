@@ -564,6 +564,25 @@ size_t MemoryStats::getCurrentRSS() const {
 #endif
 }
 
+/** @brief Check if there is enough space in memory to hold the requested amount of memory.
+ * @param requestedMemory :: The amount of memory that is being requested, in bytes.
+ * @return error string if the requested memory would exceed the available memory; else empty string
+ */
+std::string MemoryStats::checkAvailableMemory(std::size_t const requestedMemory) const {
+  std::string errorString;
+  const auto availableMemory = this->availMem() * 1024; // Convert from KiB to bytes
+  if (requestedMemory > availableMemory) {
+    double constexpr byesToGB = 1e9;
+    double requestedGB = static_cast<double>(requestedMemory) / byesToGB;
+    double availableGB = static_cast<double>(availableMemory) / byesToGB;
+    errorString = "The number of bins requested is expected to exceed available memory. "
+                  "This binning requires approximately " +
+                  std::to_string(requestedGB) + " GB of memory, but only " + std::to_string(availableGB) +
+                  " GB is available.";
+  }
+  return errorString;
+}
+
 // -------------------------- concrete instantiations
 template DLLExport string memToString<uint32_t>(const uint32_t);
 template DLLExport string memToString<uint64_t>(const uint64_t);
