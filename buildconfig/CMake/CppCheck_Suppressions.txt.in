@@ -63,6 +63,10 @@ operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:167
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:892
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:999
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1263
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:510
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:517
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:548
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:555
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PaalmanPingsAbsorptionCorrection.cpp:464
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:32
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/ClearUB.h:25
