@@ -76,7 +76,7 @@ public:
     rbParams[2] = 10;
 
     std::vector<double> axis;
-    const int numBoundaries = VectorHelper::createAxisFromRebinParams(rbParams, axis);
+    const size_t numBoundaries = VectorHelper::createAxisFromRebinParams(rbParams, axis);
 
     TS_ASSERT_EQUALS(numBoundaries, 10);
     TS_ASSERT_EQUALS(axis.size(), 10);
@@ -89,7 +89,7 @@ public:
     rbParams[2] = 10;
 
     std::vector<double> axis;
-    const int numBoundaries = VectorHelper::createAxisFromRebinParams(rbParams, axis, false);
+    const size_t numBoundaries = VectorHelper::createAxisFromRebinParams(rbParams, axis, false);
 
     TS_ASSERT_EQUALS(numBoundaries, 10);
     TS_ASSERT_EQUALS(axis.size(), 0);
@@ -129,7 +129,7 @@ public:
     std::vector<double> rbParams = {1, -1, 37};
 
     std::vector<double> axis;
-    VectorHelper::createAxisFromRebinParams(rbParams, axis, true, false, 1, 37, true);
+    VectorHelper::createAxisFromRebinParams(rbParams, axis, true, true, 1, 37, true);
 
     std::vector<double> expectedAxis = {1, 22, 30, 34, 36, 37};
     TS_ASSERT_EQUALS(axis, expectedAxis);

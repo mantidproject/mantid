@@ -191,9 +191,9 @@ void ResampleX::setOptions(const int numBins, const bool useLogBins, const bool 
 double ResampleX::determineBinning(MantidVec &xValues, const double xmin, const double xmax) {
   xValues.clear(); // clear out the x-values
 
-  int numBoundaries(0);
-  int reqNumBoundaries(m_numBins);
-  int expNumBoundaries(m_numBins);
+  size_t numBoundaries(0);
+  size_t reqNumBoundaries(m_numBins);
+  size_t expNumBoundaries(m_numBins);
   if (m_isDistribution)
     reqNumBoundaries -= 1; // to get the VectorHelper to do the right thing
   else
