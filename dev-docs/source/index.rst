@@ -299,6 +299,7 @@ Component Overviews
    PythonVSCppAlgorithms
    SampleLogsDev
    ScriptRepository
+   TaskBasedAlgorithms
    Widgets/Plotting
    WritingAnAlgorithm
    DynamicProperties

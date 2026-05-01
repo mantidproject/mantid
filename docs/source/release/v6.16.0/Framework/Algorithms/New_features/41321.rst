@@ -1,0 +1,1 @@
+- A new c++ algorithm type ``TaskBasedAlgorithm`` has been added. Such an algorithm consists of tasks, linked via an input-output dependency structure. A user can control the workflow by specifying a custom task execution order.
