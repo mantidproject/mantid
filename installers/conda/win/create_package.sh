@@ -24,6 +24,7 @@ function usage() {
 # Optional arguments
 CONDA_CHANNEL=mantid
 SUFFIX=""
+MANTID_VERSION=""
 while [ ! $# -eq 0 ]
 do
     case "$1" in
@@ -33,6 +34,10 @@ do
             ;;
         -s)
             SUFFIX="$2"
+            shift
+            ;;
+        -v)
+            MANTID_VERSION="$2"
             shift
             ;;
         -h)
@@ -66,7 +71,6 @@ PACKAGE_PREFIX=MantidWorkbench
 PACKAGE_NAME="$PACKAGE_PREFIX${SUFFIX}"
 LOWER_CASE_SUFFIX="$(echo ${SUFFIX} | tr [:upper:] [:lower:])"
 
-
 echo "Cleaning up left over old directories"
 rm -rf $COPY_DIR
 rm -rf $CONDA_ENV_PATH
@@ -81,11 +85,16 @@ if [[ "$SUFFIX" == "Unstable" ]] || [[ "$SUFFIX" == "Nightly" ]]; then
   MANTID_CHANNEL=mantid/label/nightly
 fi
 
-echo "Creating conda env from mantidworkbench and jq"
+if [ -z "$MANTID_VERSION" ]; then
+  echo "Error: Mantid version must be specified with -v flag"
+  exit 1
+fi
+
+echo "Creating conda env from mantidworkbench==${MANTID_VERSION} and jq"
 "$CONDA_EXE" create --prefix $CONDA_ENV_PATH \
   --copy --channel $CONDA_CHANNEL --channel conda-forge --channel $MANTID_CHANNEL -y \
-  mantidworkbench \
-  mantiddocs \
+  "mantidworkbench==${MANTID_VERSION}" \
+  "mantiddocs==${MANTID_VERSION}" \
   mslice \
   m2w64-jq
 echo "Conda env created"
