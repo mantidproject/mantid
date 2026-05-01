@@ -168,7 +168,7 @@ QList<MatrixWorkspace_const_sptr> MantidTreeWidget::getSelectedMatrixWorkspaces(
   // We preserve the order, but use a set to avoid adding duplicate workspaces.
   std::set<QString> selectedWsNameSet;
   std::vector<QString> selectedWsNameList;
-  foreach (const QString wsName, this->getSelectedWorkspaceNames()) {
+  foreach (const QString &wsName, this->getSelectedWorkspaceNames()) {
     const auto groupWs = std::dynamic_pointer_cast<const WorkspaceGroup>(m_ads.retrieve(wsName.toStdString()));
     if (groupWs) {
       const auto childWsNames = groupWs->getNames();

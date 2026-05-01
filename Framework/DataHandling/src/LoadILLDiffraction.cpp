@@ -561,19 +561,16 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
 std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(const NXDouble &scan,
                                                                         const std::string &propertyName) const {
   std::vector<double> scannedVariable;
-
-  for (size_t i = 0; i < m_scanVar.size(); ++i) {
-    if (m_scanVar[i].property == propertyName) {
-      for (size_t j = 0; j < m_numberScanPoints; ++j) {
-        scannedVariable.emplace_back(scan(static_cast<int>(i), static_cast<int>(j)));
-      }
-      break;
-    }
-  }
-
-  if (scannedVariable.empty())
+  const auto it = std::find_if(m_scanVar.begin(), m_scanVar.end(),
+                               [&propertyName](const ScannedVariables &var) { return var.property == propertyName; });
+  if (it != m_scanVar.end()) {
+    const int i = static_cast<int>(std::distance(m_scanVar.begin(), it));
+    scannedVariable.resize(m_numberScanPoints);
+    std::generate(scannedVariable.begin(), scannedVariable.end(), [i, j = 0, &scan]() mutable { return scan(i, j++); });
+  } else {
     throw std::runtime_error("Can not load file because scanned variable with property name " + propertyName +
                              " was not found");
+  }
 
   return scannedVariable;
 }
@@ -588,11 +585,13 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(const NX
 std::vector<double> LoadILLDiffraction::getMonitor(const NXDouble &scan) const {
 
   std::vector<double> monitor = {0.};
-  for (size_t i = 0; i < m_scanVar.size(); ++i) {
-    if ((m_scanVar[i].name == "Monitor1") || (m_scanVar[i].name == "Monitor_1") || (m_scanVar[i].name == "monitor1")) {
-      monitor.assign(scan() + m_numberScanPoints * i, scan() + m_numberScanPoints * (i + 1));
-      return monitor;
-    }
+  const auto it = std::find_if(m_scanVar.begin(), m_scanVar.end(), [](const ScannedVariables &var) {
+    return var.name == "Monitor1" || var.name == "Monitor_1" || var.name == "monitor1";
+  });
+  if (it != m_scanVar.end()) {
+    const auto i = std::distance(m_scanVar.begin(), it);
+    monitor.assign(scan() + m_numberScanPoints * i, scan() + m_numberScanPoints * (i + 1));
+    return monitor;
   }
   throw std::runtime_error("Monitors not found in scanned variables");
 }
@@ -606,11 +605,11 @@ std::vector<double> LoadILLDiffraction::getAxis(const NXDouble &scan) const {
 
   std::vector<double> axis = {0.};
   if (m_scanType == OtherScan) {
-    for (size_t i = 0; i < m_scanVar.size(); ++i) {
-      if (m_scanVar[i].axis == 1) {
-        axis.assign(scan() + m_numberScanPoints * i, scan() + m_numberScanPoints * (i + 1));
-        break;
-      }
+    const auto it =
+        std::find_if(m_scanVar.begin(), m_scanVar.end(), [](const ScannedVariables &var) { return var.axis == 1; });
+    if (it != m_scanVar.end()) {
+      const auto i = std::distance(m_scanVar.begin(), it);
+      axis.assign(scan() + m_numberScanPoints * i, scan() + m_numberScanPoints * (i + 1));
     }
   }
   return axis;

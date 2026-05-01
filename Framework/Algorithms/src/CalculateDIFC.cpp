@@ -38,7 +38,7 @@ typedef Mantid::Kernel::EnumeratedString<OffsetMode, &offsetModeNames> OFFSETMOD
  */
 void calculateFromOffset(API::Progress &progress, DataObjects::SpecialWorkspace2D &outputWs,
                          const DataObjects::OffsetsWorkspace *const offsetsWS,
-                         const Geometry::DetectorInfo &detectorInfo, double binWidth, OFFSETMODE offsetMode) {
+                         const Geometry::DetectorInfo &detectorInfo, double binWidth, const OFFSETMODE &offsetMode) {
   const auto &detectorIDs = detectorInfo.detectorIDs();
   const bool haveOffset = (offsetsWS != nullptr);
   const double l1 = detectorInfo.l1();

@@ -165,9 +165,9 @@ void MDHistoWorkspace::cacheValues() {
     indexMultiplier[d] = 0;
 
   // Compute the volume of each cell.
-  coord_t volume = 1.0;
-  for (size_t i = 0; i < numDimensions; ++i)
-    volume *= m_dimensions[i]->getBinWidth();
+  coord_t volume = std::accumulate(
+      m_dimensions.cbegin(), m_dimensions.cend(), static_cast<coord_t>(1.0),
+      [](coord_t currentVolume, const auto &dimension) { return currentVolume * dimension->getBinWidth(); });
   m_inverseVolume = 1.0f / volume;
 
   // Continue with the vertexes array
