@@ -30,6 +30,7 @@ static const std::string FLIPPERS{"Flippers"};
 static const std::string OUTPUT_WILDES_SPIN_STATES{"SpinStatesOutWildes"};
 static const std::string POLARIZATION_ANALYSIS{"PolarizationAnalysis"};
 static const std::string EFFICIENCIES{"Efficiencies"};
+static const std::string INPUT_WORKSPACE{"InputWorkspace"};
 static const std::string INPUT_WORKSPACES{"InputWorkspaces"};
 static const std::string INPUT_WORKSPACE_GROUP{"InputWorkspaceGroup"};
 static const std::string OUTPUT_WORKSPACES{"OutputWorkspace"};
@@ -167,26 +168,30 @@ void PolarizationEfficiencyCor::exec() {
 //----------------------------------------------------------------------------------------------
 void PolarizationEfficiencyCor::execWildes() {
   checkWildesProperties();
-  std::vector<std::string> workspaces = getWorkspaceNameList();
-
-  MatrixWorkspace_sptr efficiencies = getEfficiencies();
   auto alg = createChildAlgorithm("PolarizationCorrectionWildes");
   alg->initialize();
-  alg->setProperty("InputWorkspaces", workspaces);
-  alg->setProperty("Efficiencies", efficiencies);
+  if (!isDefault(Prop::INPUT_WORKSPACES)) {
+    std::vector<std::string> workspaces = getWorkspaceNameList();
+    alg->setProperty(Prop::INPUT_WORKSPACES, workspaces);
+  } else {
+    auto group = getWorkspaceGroup();
+    alg->setProperty(Prop::INPUT_WORKSPACE_GROUP, group);
+  }
+  MatrixWorkspace_sptr efficiencies = getEfficiencies();
+  alg->setProperty(Prop::EFFICIENCIES, efficiencies);
   if (!isDefault(Prop::FLIPPERS)) {
-    alg->setPropertyValue("Flippers", getPropertyValue(Prop::FLIPPERS));
+    alg->setPropertyValue(Prop::FLIPPERS, getPropertyValue(Prop::FLIPPERS));
   }
   if (!isDefault(Prop::ADD_SPIN_STATE_LOG)) {
-    alg->setPropertyValue("AddSpinStateToLog", getPropertyValue(Prop::ADD_SPIN_STATE_LOG));
+    alg->setPropertyValue(Prop::ADD_SPIN_STATE_LOG, getPropertyValue(Prop::ADD_SPIN_STATE_LOG));
   }
   if (!isDefault(Prop::OUTPUT_WILDES_SPIN_STATES)) {
-    alg->setPropertyValue("SpinStates", getPropertyValue(Prop::OUTPUT_WILDES_SPIN_STATES));
+    alg->setPropertyValue(Prop::OUTPUT_WILDES_SPIN_STATES, getPropertyValue(Prop::OUTPUT_WILDES_SPIN_STATES));
   }
   auto out = getPropertyValue(Prop::OUTPUT_WORKSPACES);
-  alg->setPropertyValue("OutputWorkspace", out);
+  alg->setPropertyValue(Prop::OUTPUT_WORKSPACES, out);
   alg->execute();
-  API::WorkspaceGroup_sptr outWS = alg->getProperty("OutputWorkspace");
+  API::WorkspaceGroup_sptr outWS = alg->getProperty(Prop::OUTPUT_WORKSPACES);
   setProperty(Prop::OUTPUT_WORKSPACES, outWS);
 }
 
@@ -197,10 +202,10 @@ void PolarizationEfficiencyCor::execFredrikze() {
   MatrixWorkspace_sptr efficiencies = getEfficiencies();
   auto alg = createChildAlgorithm("PolarizationCorrectionFredrikze");
   alg->initialize();
-  alg->setProperty("InputWorkspace", group);
-  alg->setProperty("Efficiencies", efficiencies);
+  alg->setProperty(Prop::INPUT_WORKSPACE, group);
+  alg->setProperty(Prop::EFFICIENCIES, efficiencies);
   if (!isDefault(Prop::POLARIZATION_ANALYSIS)) {
-    alg->setPropertyValue("PolarizationAnalysis", getPropertyValue(Prop::POLARIZATION_ANALYSIS));
+    alg->setPropertyValue(Prop::POLARIZATION_ANALYSIS, getPropertyValue(Prop::POLARIZATION_ANALYSIS));
   }
   if (!isDefault(Prop::INPUT_FRED_SPIN_STATES)) {
     alg->setPropertyValue("InputSpinStates", getPropertyValue(Prop::INPUT_FRED_SPIN_STATES));
@@ -208,9 +213,9 @@ void PolarizationEfficiencyCor::execFredrikze() {
   if (!isDefault(Prop::OUTPUT_FRED_SPIN_STATES)) {
     alg->setPropertyValue("OutputSpinStates", getPropertyValue(Prop::OUTPUT_FRED_SPIN_STATES));
   }
-  alg->setPropertyValue("OutputWorkspace", getPropertyValue(Prop::OUTPUT_WORKSPACES));
+  alg->setPropertyValue(Prop::OUTPUT_WORKSPACES, getPropertyValue(Prop::OUTPUT_WORKSPACES));
   alg->execute();
-  API::WorkspaceGroup_sptr outWS = alg->getProperty("OutputWorkspace");
+  API::WorkspaceGroup_sptr outWS = alg->getProperty(Prop::OUTPUT_WORKSPACES);
   setProperty(Prop::OUTPUT_WORKSPACES, outWS);
 }
 
@@ -275,18 +280,6 @@ std::vector<std::string> PolarizationEfficiencyCor::getWorkspaceNameList() const
       throw std::invalid_argument(
           "Only Matrix Workspaces can be added in InputWorkspace property list. If the input is a group, "
           "use the InputWorkspaceGroup property");
-    }
-  } else {
-    WorkspaceGroup_sptr group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
-    auto const n = group->size();
-    for (size_t i = 0; i < n; ++i) {
-      auto ws = group->getItem(i);
-      auto const wsName = ws->getName();
-      if (wsName.empty()) {
-        throw std::invalid_argument("Workspace from the input workspace group is not stored in the "
-                                    "Analysis Data Service which is required by the Wildes method.");
-      }
-      wsNames.emplace_back(wsName);
     }
   }
   return wsNames;
