@@ -400,10 +400,7 @@ public:
 private:
   /// When you split a MDBox, it becomes this many sub-boxes
   void calcNumSplit() {
-    m_numSplit = 1;
-    for (size_t d = 0; d < nd; d++) {
-      m_numSplit *= m_splitInto[d];
-    }
+    m_numSplit = std::accumulate(m_splitInto.cbegin(), m_splitInto.cbegin() + nd, size_t{1}, std::multiplies<size_t>());
     /// And this changes the max # of boxes too
     resetMaxNumBoxes();
   }

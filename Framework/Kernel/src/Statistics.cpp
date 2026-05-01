@@ -55,8 +55,8 @@ template <typename TYPE> double getMedian(const vector<TYPE> &data) {
     return static_cast<double>(data[0]);
 
   const bool isSorted = std::is_sorted(data.cbegin(), data.cend());
-  std::vector<TYPE> tmpSortedData;
   auto sortedDataRef = std::ref(data);
+  std::vector<TYPE> tmpSortedData;
   if (!isSorted) {
     tmpSortedData = data;
     std::sort(tmpSortedData.begin(), tmpSortedData.end());

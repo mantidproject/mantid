@@ -681,10 +681,10 @@ void CreateGroupingWorkspace::exec() {
     std::map<detid_t, int>::const_iterator it;
     std::unordered_set<int> groupCount;
     for (it = detIDtoGroup.begin(); it != it_end; ++it) {
-      int detID = it->first;
       int group = it->second;
       groupCount.insert(group);
       try {
+        int detID = it->first;
         outWS->setValue(detID, double(group));
       } catch (std::invalid_argument &) {
         numNotFound++;

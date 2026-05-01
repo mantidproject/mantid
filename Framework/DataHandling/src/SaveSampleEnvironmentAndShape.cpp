@@ -57,9 +57,10 @@ void SaveSampleEnvironmentAndShape::mergeSampleEnvironmentIntoSingleMesh(
 
     // go through the environment, adding the triangles and vertices to the
     // vector
-    for (size_t i = 0; i < environmentPieces.size(); ++i) {
-      offset = addMeshToVector(*environmentPieces[i], offset);
-    }
+    offset = std::accumulate(environmentPieces.begin(), environmentPieces.end(), offset,
+                             [this](size_t currentOffset, const Geometry::MeshObject *mesh) {
+                               return addMeshToVector(*mesh, currentOffset);
+                             });
   } else {
     // get the sample vertices and triangles and add them into the vector
     addMeshToVector(sampleShape);
