@@ -32,11 +32,8 @@ Kernel::Logger g_log("TimeSplitter");
 
 } // namespace
 
-TimeSplitter::TimeSplitter(const TimeSplitter &other) {
-  m_roi_map = other.m_roi_map;
-  m_name_index_map = other.m_name_index_map;
-  m_index_name_map = other.m_index_name_map;
-}
+TimeSplitter::TimeSplitter(const TimeSplitter &other)
+    : m_roi_map(other.m_roi_map), m_name_index_map(other.m_name_index_map), m_index_name_map(other.m_index_name_map) {}
 
 TimeSplitter &TimeSplitter::operator=(const TimeSplitter &other) {
   m_roi_map = other.m_roi_map;

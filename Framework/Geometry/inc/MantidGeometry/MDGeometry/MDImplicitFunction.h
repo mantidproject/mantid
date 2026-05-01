@@ -9,6 +9,7 @@
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Exception.h"
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <vector>
@@ -92,11 +93,9 @@ public:
    * @return true if it is contained in the implicit function.
    */
   virtual bool isPointContained(const coord_t *coords) {
-    for (size_t i = 0; i < m_numPlanes; i++) {
-      if (!m_planes[i].isPointBounded(coords))
-        return false;
-    }
-    return true;
+    const auto it = std::find_if(m_planes.begin(), m_planes.end(),
+                                 [coords](const MDPlane &plane) { return !plane.isPointBounded(coords); });
+    return it == m_planes.end();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -108,11 +107,9 @@ public:
    * @return true if it is contained in the implicit function.
    */
   virtual bool isPointContained(const Mantid::Kernel::VMD &coords) {
-    for (size_t i = 0; i < m_numPlanes; i++) {
-      if (!m_planes[i].isPointBounded(coords))
-        return false;
-    }
-    return true;
+    const auto it = std::find_if(m_planes.begin(), m_planes.end(),
+                                 [coords](const MDPlane &plane) { return !plane.isPointBounded(coords); });
+    return it == m_planes.end();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -124,11 +121,9 @@ public:
    * @return true if it is contained in the implicit function.
    */
   virtual bool isPointContained(const std::vector<coord_t> &coords) {
-    for (size_t i = 0; i < m_numPlanes; i++) {
-      if (!m_planes[i].isPointBounded(coords))
-        return false;
-    }
-    return true;
+    const auto it = std::find_if(m_planes.begin(), m_planes.end(),
+                                 [coords](const MDPlane &plane) { return !plane.isPointBounded(coords); });
+    return it == m_planes.end();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -159,21 +154,14 @@ public:
    *    return false if the box does touch.
    */
   bool isBoxTouching(const std::vector<std::vector<coord_t>> &vertexes) {
-    size_t numPoints = vertexes.size();
-
     // As the description states, the first plane with NO points inside it
     // means the box does NOT touch. So iterate by planes
     for (size_t i = 0; i < m_numPlanes; i++) {
-      size_t numBounded = 0;
-      for (size_t j = 0; j < numPoints; j++) {
-        if (m_planes[i].isPointBounded(vertexes[j])) {
-          numBounded++;
-          // No need to evaluate any more points.
-          break;
-        }
-      }
+      const bool anyBounded =
+          std::any_of(vertexes.cbegin(), vertexes.cend(),
+                      [this, i](const std::vector<coord_t> &vertex) { return m_planes[i].isPointBounded(vertex); });
       // Not a single point is in this plane
-      if (numBounded == 0)
+      if (!anyBounded)
         // That means the box CANNOT touch the implicit function
         return false;
     }

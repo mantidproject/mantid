@@ -500,10 +500,11 @@ template <typename TYPE> VMDBase<TYPE> VMDBase<TYPE>::getNormalVector(const std:
   if (vectors.size() != nd - 1)
     throw std::invalid_argument("VMDBase::getNormalVector: Must have as many "
                                 "N-1 vectors if there are N dimensions.");
-  for (size_t i = 0; i < vectors.size(); i++)
-    if (vectors[i].getNumDims() != nd)
-      throw std::invalid_argument("VMDBase::getNormalVector: Inconsistent "
-                                  "number of dimensions in the vectors given!");
+  const auto it =
+      std::find_if(vectors.cbegin(), vectors.cend(), [nd](const VMDBase<TYPE> &v) { return v.getNumDims() != nd; });
+  if (it != vectors.cend())
+    throw std::invalid_argument("VMDBase::getNormalVector: Inconsistent "
+                                "number of dimensions in the vectors given!");
 
   // Start the normal vector
   VMDBase normal = VMDBase(nd);

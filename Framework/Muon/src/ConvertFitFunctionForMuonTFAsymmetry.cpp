@@ -56,10 +56,9 @@ std::string rmInsertFunction(const std::string &originalTie) {
 }
 
 int findName(const std::vector<std::string> &colNames, const char *name) {
-  for (size_t j = 0; j < colNames.size(); j++) {
-    if (colNames[j] == name) {
-      return static_cast<int>(j);
-    }
+  const auto it = std::find(colNames.cbegin(), colNames.cend(), name);
+  if (it != colNames.cend()) {
+    return static_cast<int>(std::distance(colNames.cbegin(), it));
   }
   return -1;
 }

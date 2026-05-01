@@ -68,12 +68,13 @@ CoordTransformAligned::CoordTransformAligned(const size_t inD, const size_t outD
   if (m_dimensionToBinFrom.size() != outD || m_origin.size() != outD || m_scaling.size() != outD)
     throw std::runtime_error("CoordTransformAligned::ctor(): at least one of "
                              "the input vectors is the wrong size.");
-  for (size_t d = 0; d < outD; d++) {
-    if (m_dimensionToBinFrom[d] >= inD) {
-      throw std::runtime_error("CoordTransformAligned::ctor(): invalid entry in "
-                               "dimensionToBinFrom[" +
-                               std::to_string(d) + "]. Cannot build the coordinate transformation.");
-    }
+  const auto it = std::find_if(m_dimensionToBinFrom.cbegin(), m_dimensionToBinFrom.cbegin() + outD,
+                               [inD](const size_t i) { return i >= inD; });
+  if (it != m_dimensionToBinFrom.cbegin() + outD) {
+    const size_t d = std::distance(m_dimensionToBinFrom.cbegin(), it);
+    throw std::runtime_error("CoordTransformAligned::ctor(): invalid entry in "
+                             "dimensionToBinFrom[" +
+                             std::to_string(d) + "]. Cannot build the coordinate transformation.");
   }
 }
 
