@@ -190,10 +190,13 @@ std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &param
   if (resize_xnew) {
     // call to estimateNumberOfBins will also validate the parameters
     size_t neededSize = estimateNumberOfBins(fullParams, power);
-    /* detect potential memory overflows */
-    std::string memError = MemoryStats().checkAvailableMemory(neededSize * sizeof(double));
-    if (!memError.empty()) {
-      throw std::runtime_error(memError);
+    /* detect potential memory overflows
+     *  TODO find a way to check against actual available system memory
+     *  NOTE use of MemoryStats.availMem() was considered, but introduces large overhead into this hot path
+     */
+    if (neededSize >= xnew.max_size()) {
+      throw std::runtime_error(
+          "createAxisFromRebinParams: The number of bins requested exceeds the maximum storable by the output vector.");
     }
     xnew.reserve(neededSize);
     xnew.push_back(xcurr);
