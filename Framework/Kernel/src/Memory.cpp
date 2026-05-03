@@ -572,9 +572,9 @@ std::string MemoryStats::checkAvailableMemory(std::size_t const requestedMemory)
   std::string errorString;
   const auto availableMemory = this->availMem() * 1024; // Convert from KiB to bytes
   if (requestedMemory > availableMemory) {
-    double constexpr byesToGB = 1e9;
-    double requestedGB = static_cast<double>(requestedMemory) / byesToGB;
-    double availableGB = static_cast<double>(availableMemory) / byesToGB;
+    double constexpr bytesToGB = 1e9;
+    double requestedGB = static_cast<double>(requestedMemory) / bytesToGB;
+    double availableGB = static_cast<double>(availableMemory) / bytesToGB;
     errorString = "The number of bins requested is expected to exceed available memory. "
                   "This binning requires approximately " +
                   std::to_string(requestedGB) + " GB of memory, but only " + std::to_string(availableGB) +

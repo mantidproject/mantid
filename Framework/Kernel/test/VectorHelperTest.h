@@ -128,7 +128,7 @@ public:
     rbParams[2] = 10.;
 
     const size_t memFootprint = VectorHelper::estimateNumberOfBins(rbParams);
-    const size_t expectedFootprint = static_cast<size_t>((rbParams[2] - rbParams[0]) / rbParams[1]);
+    const size_t expectedFootprint = static_cast<size_t>(1 + (rbParams[2] - rbParams[0]) / rbParams[1]);
     TS_ASSERT_EQUALS(memFootprint, expectedFootprint);
   }
 
@@ -140,7 +140,7 @@ public:
 
     const size_t memFootprint = VectorHelper::estimateNumberOfBins(rbParams);
     const size_t expectedFootprint =
-        static_cast<size_t>(std::ceil(std::log(rbParams[2] / rbParams[0]) / std::log(1. - rbParams[1])));
+        static_cast<size_t>(1 + std::ceil(std::log(rbParams[2] / rbParams[0]) / std::log(1. - rbParams[1])));
     TS_ASSERT_EQUALS(memFootprint, expectedFootprint);
   }
 
@@ -150,7 +150,7 @@ public:
     const size_t memFootprint = VectorHelper::estimateNumberOfBins(rbParams);
     const size_t expectedFootprintStep1 = static_cast<size_t>((rbParams[2] - rbParams[0]) / rbParams[1]);
     const size_t expectedFootprintStep2 =
-        static_cast<size_t>(std::ceil(std::log(rbParams[4] / rbParams[2]) / std::log(1. - rbParams[3])));
+        static_cast<size_t>(1 + std::ceil(std::log(rbParams[4] / rbParams[2]) / std::log(1. - rbParams[3])));
     TS_ASSERT_EQUALS(memFootprint, expectedFootprintStep1 + expectedFootprintStep2);
   }
 

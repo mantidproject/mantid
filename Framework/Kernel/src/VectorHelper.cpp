@@ -38,7 +38,7 @@ struct ReverseLogEdgeCheck : EdgeCheck {
   bool operator()(double xcurr, double xs, double leftEdge) const override { return xcurr + 2. * xs >= leftEdge; }
 };
 
-// bin width functionss
+// bin width functions
 struct BinWidth { // for polymorphic access to functors
   virtual double operator()(double, double) const = 0;
   virtual ~BinWidth() = default;
@@ -72,7 +72,7 @@ struct PowerBinWidth : BinWidth {
   }
 
 private:
-  std::size_t *m_currDiv; // make a pointer so operator() can be const; the pointed-to changes, but not the pointer
+  std::size_t *const m_currDiv; // the pointed-to changes, but not the pointer
   double m_power;
 };
 } // namespace
@@ -109,14 +109,14 @@ void MANTID_KERNEL_DLL validateRebinParameters(std::vector<double> const &params
   }
 }
 
-/** Returns a size_t with the estimated size, in bytes, that would be needed
+/** Returns a size_t with the estimated number of bins that would be needed for a rebinning operation
  * @param params Rebin parameters in form [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n]
  * @param power the power in case of inverse power sum. Must be between 0 and 1 or is ignored.
  */
 std::size_t MANTID_KERNEL_DLL estimateNumberOfBins(std::vector<double> const &params, double const power) {
   bool isPower = power > 0 && power <= 1;
   validateRebinParameters(params, isPower);
-  double numBins = 0.;
+  double numBins = 1.; // always start with 1 left edge / fencepost
   double previousEdge = params[0];
   for (size_t i = 1; i < params.size() - 1; i += 2) {
     double binWidth = params[i];
@@ -188,6 +188,7 @@ std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &param
   double xcurr = fullParams[0];
   xnew.clear();
   if (resize_xnew) {
+    // call to estimateNumberOfBins will also validate the parameters
     size_t neededSize = estimateNumberOfBins(fullParams, power);
     /* detect potential memory overflows */
     std::string memError = MemoryStats().checkAvailableMemory(neededSize * sizeof(double));
@@ -197,6 +198,7 @@ std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &param
     xnew.reserve(neededSize);
     xnew.push_back(xcurr);
   } else {
+    // validate the parameters, but don't calculate needed size
     validateRebinParameters(fullParams, isPower);
   }
 
