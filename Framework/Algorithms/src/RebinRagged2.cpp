@@ -17,8 +17,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RebinRagged)
@@ -316,5 +315,4 @@ void RebinRagged::extend_value(int histnumber, std::vector<double> &array) {
     array.resize(histnumber, array[0]);
   }
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms
