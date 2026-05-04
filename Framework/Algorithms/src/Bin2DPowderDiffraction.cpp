@@ -152,8 +152,6 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
   if (!beFileName.empty())
     binsFromFile = true;
 
-  const auto &oldXEdges = m_inputWS->x(0);
-
   std::vector<double> dPerp, dBins;
   std::vector<std::vector<double>> fileXbins;
 
