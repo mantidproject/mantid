@@ -62,11 +62,12 @@ void Regroup::exec() {
   const bool dist = inputW->isDistribution();
 
   const auto histnumber = static_cast<int>(inputW->getNumberHistograms());
-  HistogramData::BinEdges XValues_new(0);
   auto &XValues_old = inputW->x(0);
   std::vector<int> xoldIndex; // indeces of new x in XValues_old
   // create new output X axis
-  int ntcnew = newAxis(rb_params, XValues_old.rawData(), XValues_new.mutableRawData(), xoldIndex);
+  std::vector<double> tmp;
+  int ntcnew = newAxis(rb_params, XValues_old.rawData(), tmp, xoldIndex);
+  HistogramData::BinEdges XValues_new(std::move(tmp));
 
   // make output Workspace the same type is the input, but with new length of
   // signal array
