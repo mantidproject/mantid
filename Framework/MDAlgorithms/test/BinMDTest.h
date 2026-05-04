@@ -101,7 +101,9 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
+  /// This test should only run on Linux, as it requires the memory patch
   void test_fail_too_much_memory_general() {
+#if defined(__linux__) || defined(__gnu_linux__)
     BinMD alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -120,9 +122,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBins", "4,4,5"));
     Mantid::TestMemory::MockMemory memL(12);
     TS_ASSERT_THROWS_ANYTHING(alg.execute();)
+#endif
   }
 
+  /// This test should only run on Linux, as it requires the memory patch
   void test_fail_too_much_memory_aligned() {
+#if defined(__linux__) || defined(__gnu_linux__)
     BinMD alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -138,6 +143,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
     Mantid::TestMemory::MockMemory memL(12);
     TS_ASSERT_THROWS_ANYTHING(alg.execute();)
+#endif
   }
 
   /** Test the algo

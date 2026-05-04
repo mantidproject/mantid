@@ -198,6 +198,8 @@ public:
     TSM_ASSERT_THROWS_ANYTHING("Dimension name not found",
                                do_createAlignedTransform("NotAnAxis, 2.0,8.0, 3", "", "", ""));
     TSM_ASSERT_THROWS_ANYTHING("0 bins is bad", do_createAlignedTransform("Axis0, 2.0,8.0, 0", "", "", ""));
+    // the below requires the memory patch and should only run on Linux
+#if defined(__linux__) || defined(__gnu_linux__)
     {
       Mantid::TestMemory::MockMemory memL(12);
       TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 1D",
@@ -207,6 +209,7 @@ public:
                                do_createAlignedTransform("Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 8", "", ""),
                                std::runtime_error & e, strstr(e.what(), "Mock Memory"));
     }
+#endif
   }
 
   void test_createAlignedTransform() {
@@ -585,6 +588,8 @@ public:
     TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 1D no mock",
                              do_createGeneralTransform(ws, "x,m,1,0,0", "", "", "", VMD(1, 2, 3), "0,10", "600000000"),
                              std::runtime_error & e, strstr(e.what(), "Requested Memory"));
+    // the below requires the memory patch and should only run on Linux
+#if defined(__linux__) || defined(__gnu_linux__)
     {
       Mantid::TestMemory::MockMemory memL(12);
       TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 1D",
@@ -595,6 +600,7 @@ public:
           do_createGeneralTransform(ws, "x,m,1,0,0", "y,m,0,1,0", "", "", VMD(1, 2, 3), "0,10,0,10", "6,7"),
           std::runtime_error & e, strstr(e.what(), "Mock Memory"));
     }
+#endif
   }
 
   void test_createGeneralTransform_3D_to_3D() {
