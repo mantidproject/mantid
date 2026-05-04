@@ -565,7 +565,7 @@ size_t MemoryStats::getCurrentRSS() const {
 }
 
 /** @brief Check if there is enough space in memory to hold the requested amount of memory.
- * @param requestedMemory :: The amount of memory that is being requested, in bytes.
+ * @param requestedMemoryBytes :: The amount of memory that is being requested, in bytes.
  * @return error string if the requested memory would exceed the available memory; else empty string
  */
 std::string MemoryStats::checkAvailableMemory(std::size_t const requestedMemoryBytes) const {
