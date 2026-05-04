@@ -123,9 +123,9 @@ clean_build_and_staging() {
         sleep 2s # wait for previous steps to finish before cleaning
         # Windows can leave handles open in rattler work/cache dirs; clean them before reuse.
         rm -rf "$CONDA_BLD_PATH"/bld/rattler-build_* "$CONDA_BLD_PATH"/build_cache/staging_*
+        rm -rf "$RATTLER_CACHE_DIR"
     fi
 }
-clean_build_and_staging # clean build tree before everything
 
 if [[ -d $CONDA_BLD_PATH ]]; then
     pixi run -e rattler-builder --frozen rattler-index fs $CONDA_BLD_PATH
@@ -157,6 +157,8 @@ if [[ $OSTYPE == "msys"* ]]; then
     }
     trap cleanup_windows_tmp_dir EXIT
 fi
+
+clean_build_and_staging # clean build tree before everything
 
 export CONDA_SUBDIR=$PLATFORM
 
