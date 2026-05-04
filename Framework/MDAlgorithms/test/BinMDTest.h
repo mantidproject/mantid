@@ -14,6 +14,7 @@
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidAPI/ImplicitFunctionParser.h"
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/MockMemory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -98,6 +99,45 @@ public:
     BinMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
+  }
+
+  void test_fail_too_much_memory_general() {
+    BinMD alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    auto in_ws = createSimple3DWorkspace();
+    AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AxisAligned", "0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector0", "x,m,1,0,0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector1", "y,m,0,1,0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector2", "z,m,0,0,1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector3", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
+    // make so many bins it will crash
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputExtents", "0,10,0,10,0,10"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBins", "4,4,5"));
+    Mantid::TestMemory::MockMemory memL(12);
+    TS_ASSERT_THROWS_ANYTHING(alg.execute();)
+  }
+
+  void test_fail_too_much_memory_aligned() {
+    BinMD alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    auto in_ws = createSimple3DWorkspace();
+    AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AxisAligned", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim0", "x,0,0,4"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", "y,0,0,4"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", "z,0,0,5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
+    Mantid::TestMemory::MockMemory memL(12);
+    TS_ASSERT_THROWS_ANYTHING(alg.execute();)
   }
 
   /** Test the algo
