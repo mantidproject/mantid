@@ -109,7 +109,7 @@ void RebinByTimeBase::exec() {
 
   MantidVecPtr XValues_new;
   // create new X axis, with absolute times in seconds.
-  static_cast<void>(VectorHelper::createAxisFromRebinParams(rebinningParams, XValues_new.access()));
+  VectorHelper::createAxisFromRebinParams(rebinningParams, XValues_new.access());
 
   ConvertToRelativeTime transformToRelativeT(runStartTime);
 

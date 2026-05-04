@@ -672,16 +672,15 @@ void AlignAndFocusPowderSlim::initializeOutputWorkspace(const MatrixWorkspace_sp
   constexpr bool full_bins_only{false};
 
   // always use the first histogram x-values for initialization
-  HistogramData::BinEdges XValues(0);
+  std::vector<double> tmp;
   if (linearBins) {
     const std::vector<double> params{x_min[0], x_delta[0], x_max[0]};
-    UNUSED_ARG(
-        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
+    Kernel::VectorHelper::createAxisFromRebinParams(params, tmp, resize_xnew, full_bins_only);
   } else {
     const std::vector<double> params{x_min[0], -1. * std::abs(x_delta[0]), x_max[0]};
-    UNUSED_ARG(
-        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
+    Kernel::VectorHelper::createAxisFromRebinParams(params, tmp, resize_xnew, full_bins_only);
   }
+  HistogramData::BinEdges XValues(std::move(tmp));
   wksp->initialize(num_hist, HistogramData::Histogram(XValues, HistogramData::Counts(XValues.size() - 1, 0.0)));
 
   if (raggedBins) {
@@ -694,17 +693,15 @@ void AlignAndFocusPowderSlim::initializeOutputWorkspace(const MatrixWorkspace_sp
       x_max.resize(num_hist, x_max[0]);
 
     for (size_t i = 1; i < num_hist; ++i) {
-      HistogramData::BinEdges XValues_new(0);
-
+      std::vector<double> tmpragged;
       if (linearBins) {
         const std::vector<double> params{x_min[i], x_delta[i], x_max[i]};
-        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
-                                                        full_bins_only);
+        Kernel::VectorHelper::createAxisFromRebinParams(params, tmpragged, resize_xnew, full_bins_only);
       } else {
         const std::vector<double> params{x_min[i], -1. * std::abs(x_delta[i]), x_max[i]};
-        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
-                                                        full_bins_only);
+        Kernel::VectorHelper::createAxisFromRebinParams(params, tmpragged, resize_xnew, full_bins_only);
       }
+      HistogramData::BinEdges XValues_new(std::move(tmpragged));
       wksp->setHistogram(i, HistogramData::Histogram(XValues_new, HistogramData::Counts(XValues_new.size() - 1, 0.0)));
     }
   }

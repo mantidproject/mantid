@@ -166,9 +166,9 @@ void RebinRagged::exec() {
         auto xmax = xmaxs[hist];
         const auto delta = deltas[hist];
 
-        HistogramData::BinEdges XValues_new(0);
-        static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData(),
-                                                                  true, fullBinsOnly));
+        std::vector<double> tmp;
+        VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, tmp, true, fullBinsOnly);
+        HistogramData::BinEdges XValues_new(std::move(tmp));
         EventList &el = eventOutputWS->getSpectrum(hist);
         el.setHistogram(XValues_new);
       }
@@ -191,9 +191,9 @@ void RebinRagged::exec() {
         // Get a const event list reference. eventInputWS->dataY() doesn't work.
         const EventList &el = eventInputWS->getSpectrum(hist);
 
-        HistogramData::BinEdges XValues_new(0);
-        static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData(),
-                                                                  true, fullBinsOnly));
+        std::vector<double> tmp;
+        VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, tmp, true, fullBinsOnly);
+        HistogramData::BinEdges XValues_new(std::move(tmp));
 
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
@@ -246,9 +246,9 @@ void RebinRagged::exec() {
       auto xmax = xmaxs[hist];
       const auto delta = deltas[hist];
 
-      HistogramData::BinEdges XValues_new(0);
-      static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData(), true,
-                                                                fullBinsOnly));
+      std::vector<double> tmp;
+      VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, tmp, true, fullBinsOnly);
+      HistogramData::BinEdges XValues_new(std::move(tmp));
 
       outputWS->setHistogram(hist, HistogramData::rebin(inputWS->histogram(hist), XValues_new));
       prog.report();

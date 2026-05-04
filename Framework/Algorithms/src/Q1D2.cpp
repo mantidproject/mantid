@@ -308,8 +308,9 @@ void Q1D2::exec() {
  */
 API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   // Calculate the output binning
-  HistogramData::BinEdges XOut(0);
-  static_cast<void>(VectorHelper::createAxisFromRebinParams(binParams, XOut.mutableRawData()));
+  std::vector<double> tmp;
+  VectorHelper::createAxisFromRebinParams(binParams, tmp);
+  HistogramData::BinEdges XOut(std::move(tmp));
 
   // Create output workspace. On all but rank 0 this is a temporary workspace.
   Indexing::IndexInfo indexInfo(1);
