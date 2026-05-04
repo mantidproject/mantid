@@ -18,7 +18,9 @@ using std::size_t;
 
 namespace {
 // edge checks
+/// @brief  When creating a new axis, check if the next bin would go to close to the edge, and if so, stop
 struct EdgeCheck { // for polymorphic access to functors
+  /// Ensure the next bin will not go too close to the right edge of this range
   virtual bool operator()(double, double, double) const = 0;
   virtual ~EdgeCheck() = default;
 };
@@ -39,7 +41,9 @@ struct ReverseLogEdgeCheck : EdgeCheck {
 };
 
 // bin width functions
+/// @brief When creating a new axis, calculate the width of the next bin, and return it
 struct BinWidth { // for polymorphic access to functors
+  /// the width of the next bin to add to the axis, given the current position and the alpha parameter
   virtual double operator()(double, double) const = 0;
   virtual ~BinWidth() = default;
 };
@@ -80,7 +84,7 @@ private:
 namespace Mantid::Kernel::VectorHelper {
 
 /** Validate rebinning parameters, throwing an error if any assumptions are invalidated */
-void MANTID_KERNEL_DLL validateRebinParameters(std::vector<double> const &params, bool const isPower) {
+void validateRebinParameters(std::vector<double> const &params, bool const isPower) {
   size_t numParams = params.size();
   if (numParams < 3 || numParams % 2 != 1) {
     throw std::runtime_error("validateRebinParameters: Invalid number of rebin parameters (" +
@@ -88,8 +92,8 @@ void MANTID_KERNEL_DLL validateRebinParameters(std::vector<double> const &params
   }
   double previousEdge = params[0];
   for (size_t i = 1; i < numParams - 1; i += 2) {
-    double binWidth = params[i];
-    double nextEdge = params[i + 1];
+    double const binWidth = params[i];
+    double const nextEdge = params[i + 1];
     if (previousEdge >= nextEdge) {
       throw std::runtime_error(
           "validateRebinParameters: Bin boundary values must be given in order of increasing value! " +
@@ -113,14 +117,14 @@ void MANTID_KERNEL_DLL validateRebinParameters(std::vector<double> const &params
  * @param params Rebin parameters in form [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n]
  * @param power the power in case of inverse power sum. Must be between 0 and 1 or is ignored.
  */
-std::size_t MANTID_KERNEL_DLL estimateNumberOfBins(std::vector<double> const &params, double const power) {
-  bool isPower = power > 0 && power <= 1;
+std::size_t estimateNumberOfBins(std::vector<double> const &params, double const power) {
+  bool const isPower = power > 0 && power <= 1;
   validateRebinParameters(params, isPower);
   double numBins = 1.; // always start with 1 left edge / fencepost
   double previousEdge = params[0];
   for (size_t i = 1; i < params.size() - 1; i += 2) {
-    double binWidth = params[i];
-    double nextEdge = params[i + 1];
+    double const binWidth = params[i];
+    double const nextEdge = params[i + 1];
     if (binWidth < 0) {
       // LOGARITHMIC BINNING
       // NOTE log or reverse log should have approximately the same number of bins here
@@ -161,10 +165,9 @@ std::size_t MANTID_KERNEL_DLL estimateNumberOfBins(std::vector<double> const &pa
  *  @param[in] power the power in case of inverse power sum. Must be between 0 and 1 or is ignored.
  *  @return The number of bin boundaries in the new axis
  **/
-std::size_t DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,
-                                                const bool resize_xnew, const bool full_bins_only,
-                                                const double xMinHint, const double xMaxHint,
-                                                const bool useReverseLogarithmic, const double power) {
+std::size_t createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,
+                                      const bool resize_xnew, const bool full_bins_only, const double xMinHint,
+                                      const double xMaxHint, const bool useReverseLogarithmic, const double power) {
 
   // correctly expand the parameters
   std::vector<double> tmp;

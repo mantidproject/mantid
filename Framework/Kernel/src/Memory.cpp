@@ -568,17 +568,15 @@ size_t MemoryStats::getCurrentRSS() const {
  * @param requestedMemory :: The amount of memory that is being requested, in bytes.
  * @return error string if the requested memory would exceed the available memory; else empty string
  */
-std::string MemoryStats::checkAvailableMemory(std::size_t const requestedMemory) const {
+std::string MemoryStats::checkAvailableMemory(std::size_t const requestedMemoryBytes) const {
   std::string errorString;
   const auto availableMemory = this->availMem() * 1024; // Convert from KiB to bytes
-  if (requestedMemory > availableMemory) {
+  if (requestedMemoryBytes > availableMemory) {
     double constexpr bytesToGB = 1e9;
-    double requestedGB = static_cast<double>(requestedMemory) / bytesToGB;
+    double requestedGB = static_cast<double>(requestedMemoryBytes) / bytesToGB;
     double availableGB = static_cast<double>(availableMemory) / bytesToGB;
-    errorString = "The number of bins requested is expected to exceed available memory. "
-                  "This binning requires approximately " +
-                  std::to_string(requestedGB) + " GB of memory, but only " + std::to_string(availableGB) +
-                  " GB is available.";
+    errorString = "Requested " + std::to_string(requestedGB) + " GB of memory, but only " +
+                  std::to_string(availableGB) + " GB is available.";
   }
   return errorString;
 }
