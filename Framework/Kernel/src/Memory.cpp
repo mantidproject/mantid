@@ -564,6 +564,23 @@ size_t MemoryStats::getCurrentRSS() const {
 #endif
 }
 
+/** @brief Check if there is enough space in memory to hold the requested amount of memory.
+ * @param requestedMemoryBytes :: The amount of memory that is being requested, in bytes.
+ * @return error string if the requested memory would exceed the available memory; else empty string
+ */
+std::string MemoryStats::checkAvailableMemory(std::size_t const requestedMemoryBytes) const {
+  std::string errorString;
+  const auto availableMemory = this->availMem() * 1024; // Convert from KiB to bytes
+  if (requestedMemoryBytes > availableMemory) {
+    double constexpr bytesToGB = 1e9;
+    double requestedGB = static_cast<double>(requestedMemoryBytes) / bytesToGB;
+    double availableGB = static_cast<double>(availableMemory) / bytesToGB;
+    errorString = "Requested " + std::to_string(requestedGB) + " GB of memory, but only " +
+                  std::to_string(availableGB) + " GB is available.";
+  }
+  return errorString;
+}
+
 // -------------------------- concrete instantiations
 template DLLExport string memToString<uint32_t>(const uint32_t);
 template DLLExport string memToString<uint64_t>(const uint64_t);
