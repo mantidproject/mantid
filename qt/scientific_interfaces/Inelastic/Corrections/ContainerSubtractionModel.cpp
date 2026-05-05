@@ -64,6 +64,12 @@ using namespace ContainerSubtractionModelHelperAlgorithms;
 ContainerSubtractionModel::ContainerSubtractionModel()
     : m_csSampleWS(), m_csContainerWS(), m_csSubtractedWS(), m_csModContainerWS() {}
 
+ContainerSubtractionModel::~ContainerSubtractionModel() {
+  if (AnalysisDataService::Instance().doesExist(modPrefix)) {
+    AnalysisDataService::Instance().remove(modPrefix);
+  }
+}
+
 MatrixWorkspace_sptr ContainerSubtractionModel::rebinToWorkspace(const MatrixWorkspace_sptr &workspaceToRebin,
                                                                  const MatrixWorkspace_sptr &workspaceToMatch) const {
   const IAlgorithm_sptr rebin = AlgorithmManager::Instance().create("RebinToWorkspace");
