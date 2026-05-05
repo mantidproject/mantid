@@ -145,6 +145,7 @@ function usage() {
 conda_channel=mantid
 platform=""
 suffix=
+mantid_version=
 while [ ! $# -eq 0 ]
 do
   case "$1" in
@@ -158,6 +159,10 @@ do
         ;;
     -s)
         suffix="$2"
+        shift
+        ;;
+    -v)
+        mantid_version="$2"
         shift
         ;;
     -h)
@@ -214,11 +219,16 @@ if [[ "$suffix" == "Unstable" ]] || [[ "$suffix" == "Nightly" ]]; then
   mantid_channel=mantid/label/nightly
 fi
 
+if [ -z "$mantid_version" ]; then
+  echo "Error: Mantid version must be specified with -v flag"
+  exit 1
+fi
+
 echo "Creating conda environment in '$bundle_conda_prefix'"
 CONDA_SUBDIR="$platform" "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
   --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
-  mantidworkbench \
-  mantiddocs \
+  "mantidworkbench==${mantid_version}" \
+  "mantiddocs==${mantid_version}" \
   mslice \
   jq  # used for processing the version string
 echo
