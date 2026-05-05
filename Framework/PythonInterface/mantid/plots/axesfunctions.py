@@ -345,10 +345,6 @@ def scatter(axes, workspace, *args, **kwargs):
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the workspace is a MatrixWorkspace histogram.
-    :param normalization_type: :class:`mantid.plots.utility.PlotNormalizationType` enum specifying the
-                          normalization to apply. Can be ``NONE``, ``BIN_WIDTH``, or ``INVERSE_Q_FOURTH_POWER``.
-                          If specified, this takes precedence over ``distribution``.
-                          Applies to MatrixWorkspace spectra plots.
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
