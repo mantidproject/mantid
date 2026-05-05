@@ -962,20 +962,28 @@ public:
     API::MatrixWorkspace_sptr main_out_ws =
         std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS"));
     TS_ASSERT(main_out_ws);
+    if (!main_out_ws)
+      return;
     TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
 
     API::MatrixWorkspace_sptr plot_ws =
         std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
     TS_ASSERT(plot_ws);
+    if (!plot_ws)
+      return;
     TS_ASSERT_EQUALS(plot_ws->getNumberHistograms(), 3);
 
     API::ITableWorkspace_sptr param_ws =
         std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve("PeakParametersWS"));
     TS_ASSERT(param_ws);
+    if (!param_ws)
+      return;
     TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
     API::ITableWorkspace_sptr error_table =
         std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve("FitErrorsWS"));
     TS_ASSERT(error_table);
+    if (!error_table)
+      return;
     // shall be same number of rows to OutputPeakParametersWorkspace
     // (PeakParametersWS)
     TS_ASSERT_EQUALS(error_table->rowCount(), param_ws->rowCount());
