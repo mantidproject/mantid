@@ -165,9 +165,9 @@ void RebinRagged::exec() {
         auto xmax = xmaxs[hist];
         const auto delta = deltas[hist];
 
-        std::vector<double> xtmp;
-        VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, xtmp, true, fullBinsOnly);
-        HistogramData::BinEdges XValues_new(std::move(xtmp));
+        std::vector<double> xAxisTmp;
+        VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, xAxisTmp, true, fullBinsOnly);
+        HistogramData::BinEdges XValues_new(std::move(xAxisTmp));
         EventList &el = eventOutputWS->getSpectrum(hist);
         el.setHistogram(XValues_new);
       }
@@ -190,9 +190,9 @@ void RebinRagged::exec() {
         // Get a const event list reference. eventInputWS->dataY() doesn't work.
         const EventList &el = eventInputWS->getSpectrum(hist);
 
-        std::vector<double> xtmp;
-        VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, xtmp, true, fullBinsOnly);
-        HistogramData::BinEdges XValues_new(std::move(xtmp));
+        std::vector<double> xAxisTmp;
+        VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, xAxisTmp, true, fullBinsOnly);
+        HistogramData::BinEdges XValues_new(std::move(xAxisTmp));
 
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
@@ -245,9 +245,9 @@ void RebinRagged::exec() {
       auto xmax = xmaxs[hist];
       const auto delta = deltas[hist];
 
-      std::vector<double> xtmp;
-      VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, xtmp, true, fullBinsOnly);
-      HistogramData::BinEdges XValues_new(std::move(xtmp));
+      std::vector<double> xAxisTmp;
+      VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, xAxisTmp, true, fullBinsOnly);
+      HistogramData::BinEdges XValues_new(std::move(xAxisTmp));
 
       outputWS->setHistogram(hist, HistogramData::rebin(inputWS->histogram(hist), XValues_new));
       prog.report();

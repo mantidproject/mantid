@@ -673,9 +673,10 @@ void AlignAndFocusPowderSlim::initializeOutputWorkspace(const MatrixWorkspace_sp
 
   // always use the first histogram x-values for initialization
   double const binWidth = linearBins ? x_delta[0] : -1. * std::abs(x_delta[0]);
-  std::vector<double> xtmp;
-  Kernel::VectorHelper::createAxisFromRebinParams({x_min[0], binWidth, x_max[0]}, xtmp, resize_xnew, full_bins_only);
-  HistogramData::BinEdges XValues(std::move(xtmp));
+  std::vector<double> xAxisTmp;
+  Kernel::VectorHelper::createAxisFromRebinParams({x_min[0], binWidth, x_max[0]}, xAxisTmp, resize_xnew,
+                                                  full_bins_only);
+  HistogramData::BinEdges XValues(std::move(xAxisTmp));
   wksp->initialize(num_hist, HistogramData::Histogram(XValues, HistogramData::Counts(XValues.size() - 1, 0.0)));
 
   if (raggedBins) {

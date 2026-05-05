@@ -304,9 +304,9 @@ void Rebin::exec() {
   inputWS->getXMinMax(xmin, xmax);
 
   // create new output X axis
-  std::vector<double> xtmp;
-  VectorHelper::createAxisFromRebinParams(rbParams, xtmp, true, fullBinsOnly, xmin, xmax, useReverseLog, power);
-  HistogramData::BinEdges XValues_new(std::move(xtmp));
+  std::vector<double> xAxisTmp;
+  VectorHelper::createAxisFromRebinParams(rbParams, xAxisTmp, true, fullBinsOnly, xmin, xmax, useReverseLog, power);
+  HistogramData::BinEdges XValues_new(std::move(xAxisTmp));
 
   // Now, determine if the input workspace is actually an EventWorkspace
   EventWorkspace_const_sptr eventInputWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
