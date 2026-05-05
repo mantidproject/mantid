@@ -290,7 +290,16 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
   // DateAndTime can parse it. Parameter files commonly store date-only valid-from attributes.
   static const boost::regex dateOnlyRegex("\\d{4}-\\d{2}-\\d{2}");
   const std::string normalizedDate = boost::regex_match(date, dateOnlyRegex) ? date + "T00:00:00" : date;
-  DateAndTime d(normalizedDate);
+  DateAndTime d;
+  try {
+    d = DateAndTime(normalizedDate);
+  } catch (const std::invalid_argument &) {
+    // Some legacy data files store dates in non-ISO8601 formats.
+    // In this case fall back to the current time so we select the most recent matching file.
+    g_log.warning() << "Could not parse date '" << date
+                    << "' as ISO8601; using current time for instrument file lookup.\n";
+    d = DateAndTime::getCurrentTime();
+  }
 
   DateAndTime refDate("1899-01-01 23:59:00"); // used to help determine the most
   // recently starting file, if none match
