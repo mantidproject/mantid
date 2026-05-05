@@ -51,14 +51,14 @@ class CursorInfoBase(ABC):
             return e.val
 
         new_table_rows = []
-        for row in consolidated_rows.items():
-            row[1].sort(key=sort_fn)
-            x_mins = [row[1][0].val]
+        for spec, xvals in consolidated_rows.items():
+            xvals.sort(key=sort_fn)
+            x_mins = [xvals[0].val]
             x_maxs = []
             found_end = False
             x_max = None
-            if len(row[1]) > 2:
-                for val in row[1][1:-1]:
+            if len(xvals) > 2:
+                for val in xvals[1:-1]:
                     if not found_end and not val.start:
                         found_end = True
                         x_max = val.val
@@ -68,9 +68,9 @@ class CursorInfoBase(ABC):
                         x_maxs.append(x_max)
                         x_mins.append(val.val)
                         found_end = False
-            x_maxs.append(row[1][-1].val)
+            x_maxs.append(xvals[-1].val)
             for i in range(len(x_mins)):
-                new_table_rows.append(TableRow(spec_list=row[0], x_min=x_mins[i], x_max=x_maxs[i]))
+                new_table_rows.append(TableRow(spec_list=spec, x_min=x_mins[i], x_max=x_maxs[i]))
         return new_table_rows
 
     @staticmethod
