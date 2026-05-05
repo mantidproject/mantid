@@ -30,20 +30,25 @@ class WorkspaceDetectorPeaks:
         ]
         # groupby groups consecutive matches, so must be sorted
         peaks.sort(key=lambda x: x.detector_id)
-        for spec_no, peaks_for_spec in groupby(peaks, lambda x: x.detector_id):
+        for _, peaks_for_spec in groupby(peaks, lambda x: x.detector_id):
             self.detector_peaks.append(DetectorPeaks(list(peaks_for_spec)))
 
     def get_positions_and_labels(self, detector_positions, detector_ids) -> tuple[np.ndarray, list]:
         peaks_ids = np.array([p.detector_id for p in self.detector_peaks])
         if len(peaks_ids) == 0:
             return np.array([]), []
+
         # Use argsort + searchsorted for fast lookup. Using np.where(np.isin) does not
         # maintain the original order. It is faster to sort then search the sorted
         # array for matching spectrum numbers
         sorter = np.argsort(detector_ids)
-        idx = sorter[np.searchsorted(detector_ids, peaks_ids, sorter=sorter)]
-        labels = [p.label for i, p in enumerate(self.detector_peaks)]
-        return detector_positions[idx], labels
+        sorted_detector_ids = detector_ids[sorter]
+        positions = np.searchsorted(sorted_detector_ids, peaks_ids)
+        ordered_indices = sorter[positions]
+        valid = sorted_detector_ids[positions] == peaks_ids
+        ordered_indices = ordered_indices[valid]
+        labels = [p.label for p in np.array(self.detector_peaks)[valid]]
+        return detector_positions[ordered_indices], labels
 
     def get_x_values_and_labels(self, unit, picked_detector_ids) -> tuple[list, list]:
         # x values for vertical markers in lineplot

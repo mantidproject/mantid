@@ -362,6 +362,7 @@ void CreateDetectorTable::populateTable() {
 
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int row = 0; row < static_cast<int>(workspaceIndices.size()); row++) {
+    PARALLEL_START_INTERRUPT_REGION
 
     auto wsIndex = static_cast<size_t>(workspaceIndices[static_cast<size_t>(row)]);
 
@@ -380,7 +381,9 @@ void CreateDetectorTable::populateTable() {
       errorData.isMonitor = "n/a";
       writeRowToTable(row, errorData);
     } // End catch for no spectrum
+    PARALLEL_END_INTERRUPT_REGION
   }
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 void CreateDetectorTable::populateTableByDetID() {
@@ -401,6 +404,7 @@ void CreateDetectorTable::populateTableByDetID() {
   // NOTE: Iterating variable needs to be signed for omp, can't use size_t
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int i = 0; i < static_cast<int>(workspaceIndices.size()); i++) {
+    PARALLEL_START_INTERRUPT_REGION
 
     auto wsIndex = static_cast<size_t>(workspaceIndices[static_cast<size_t>(i)]);
 
@@ -426,7 +430,9 @@ void CreateDetectorTable::populateTableByDetID() {
       data.detIds = std::set<int>({detId});
       allRowsData[chunkStart++] = data;
     }
+    PARALLEL_END_INTERRUPT_REGION
   }
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Build detector id map for easy ordering
   std::unordered_map<int, DetectorRowData> detIdToData;

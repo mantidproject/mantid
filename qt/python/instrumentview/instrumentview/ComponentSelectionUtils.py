@@ -38,12 +38,12 @@ def detector_table_indices_for_parent_subtrees(
         ``pickable_mask``.
     """
     if selected_indices.size == 0:
-        return np.array([])
+        return np.array([], dtype=int)
 
     expanded_indices: set[int] = set()
     for i, cidx in enumerate(component_idxs[selected_indices]):
         if not component_info.hasParent(int(cidx)):
-            expanded_indices.add(i)
+            expanded_indices.add(int(selected_indices[i]))
             continue
 
         parent_index = component_info.parent(int(cidx))
