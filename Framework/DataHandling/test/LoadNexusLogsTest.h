@@ -158,17 +158,18 @@ public:
       group = Mantid::Nexus::H5Util::createGroupNXS(group, "BL9:SampleRotation:chi:desc", "NXlog");
       H5::DataType datatype(H5::PredType::NATIVE_CHAR);
       int constexpr rank = 1;
-      hsize_t dims[rank] = {data.size()}; // dims[0] has the correct length
-      H5::DataSpace dataspace(1, dims);
+      hsize_t time_dims[rank] = {1}; // there is a single entry
+      H5::DataSpace dataspace(1, time_dims);
       H5::DSetCreatPropList propList(H5P_DATASET_CREATE);
       // this has to have both a time and a value dataset to be recognised by LoadNexusLogs
       // time must have a start and units attribute
       H5::DataSet time = group.createDataSet("time", datatype, dataspace, propList);
-      Mantid::Nexus::H5Util::writeStrAttribute(time, "start", "2026-01-01T00:00:00");
+      Mantid::Nexus::H5Util::writeStrAttribute(time, "start", "2016-05-03T19:46:27.024109666-04:00");
       Mantid::Nexus::H5Util::writeStrAttribute(time, "units", "second");
       // value must be set in C API to correctly have the incorrect length
-      Mantid::Nexus::DataTypeID dt = H5Tcopy(H5T_NATIVE_CHAR);
-      H5Tset_size(dt, 1); // set the length to 1
+      Mantid::Nexus::DataTypeID dt = H5Tcopy(H5T_C_S1);
+      H5Tset_size(dt, 1);                 // set the length to 1
+      hsize_t dims[rank] = {data.size()}; // set the dimension to the string length
       Mantid::Nexus::DataSpaceID ds = H5Screate_simple(rank, dims, NULL);
       Mantid::Nexus::DataSetID dataid =
           H5Dcreate(group.getId(), "value", dt, ds, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -181,10 +182,10 @@ public:
     loader.initialize();
     loader.setProperty("Workspace", testWS);
     loader.setPropertyValue("Filename", filename);
-    loader.execute();
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
     auto run = testWS->run();
     TS_ASSERT(run.hasProperty("BL9:SampleRotation:chi:desc"))
-    // TS_ASSERT_EQUALS(run.getTimeSeriesProperty<std::string>("BL9:SampleRotation:chi:desc")->value(), data)
+    TS_ASSERT_EQUALS(run.getTimeSeriesProperty<std::string>("BL9:SampleRotation:chi:desc")->firstValue(), data)
   }
 
   void xtest_extract_nperiod_log_from_event_nexus() {

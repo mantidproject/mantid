@@ -220,11 +220,13 @@ std::unique_ptr<Kernel::Property> createTimeSeries(Nexus::File &file, const std:
     return tsp;
   } else if (info.type == NXnumtype::CHAR) {
     std::string values;
-    const int64_t item_length = (info.dims.size() > 1 ? info.dims[1] : 1);
+    // the length of each string is normally stored in the second dimension (1),
+    // but some older files (wrongly) put this in the first dimension (0) if the rank is 1
+    const int64_t item_length = (info.dims.size() > 1 ? info.dims[1] : info.dims[0]);
     try {
-      const int64_t nitems = info.dims[0];
-      const std::size_t total_length = std::size_t(nitems * item_length);
-      boost::scoped_array<char> val_array(new char[total_length]);
+      const std::size_t total_length =
+          std::accumulate(info.dims.cbegin(), info.dims.cend(), 1, std::multiplies<int64_t>());
+      boost::scoped_array<char> val_array(new char[total_length + 1]);
       file.getData(val_array.get());
       file.closeData();
       values = std::string(val_array.get(), total_length);
