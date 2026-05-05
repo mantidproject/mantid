@@ -1226,10 +1226,12 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
     try {
       if (wi > 0 && samePeakCrossSpectrum) {
         size_t lastGoodWi = lastGoodPeakSpectra[peak_index];
-        std::shared_ptr<const Geometry::Detector> pdetector =
-            std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(lastGoodWi));
-        std::shared_ptr<const Geometry::Detector> cdetector =
-            std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi));
+        std::shared_ptr<const Geometry::Detector> pdetector;
+        std::shared_ptr<const Geometry::Detector> cdetector;
+        PARALLEL_CRITICAL(FitPeaks_DetectorInfoAccess) {
+          pdetector = std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(lastGoodWi));
+          cdetector = std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi));
+        }
 
         // If they do have detector ID
         if (pdetector && cdetector) {
@@ -1269,7 +1271,9 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
     peakfunction->setCentre(expected_peak_pos);
 
     std::pair<double, double> peak_window_i = m_getPeakFitWindow(wi, peak_index);
-    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window_i.first, peak_window_i.second);
+    PARALLEL_CRITICAL(FitPeaks_DetectorInfoAccess) {
+      peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window_i.first, peak_window_i.second);
+    }
     // reset value of parameters that were fixed (but are now free to vary)
     for (const auto &[ipar, value] : keep_values) {
       peakfunction->setParameter(ipar, value);
@@ -1534,7 +1538,7 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
         bkgd_function->setParameter(iparam, fit_result_i->getParameterValue(ipeak, num_peakfunc_params + iparam));
       // use domain and function to calcualte
       // get the range of start and stop to construct a function domain
-      const auto &vec_x = m_fittedPeakWS->points(iws);
+      const auto vec_x = m_fittedPeakWS->points(iws);
       std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
       auto start_x_iter = std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.first);
       auto stop_x_iter = std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.second);
@@ -1542,7 +1546,9 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
       if (start_x_iter == stop_x_iter)
         throw std::runtime_error("Range size is zero in calculateFittedPeaks");
 
-      peak_function->setMatrixWorkspace(m_inputMatrixWS, iws, peakwindow.first, peakwindow.second);
+      PARALLEL_CRITICAL(FitPeaks_DetectorInfoAccess) {
+        peak_function->setMatrixWorkspace(m_inputMatrixWS, iws, peakwindow.first, peakwindow.second);
+      }
 
       FunctionDomain1DVector domain(start_x_iter, stop_x_iter);
       FunctionValues values(domain);
@@ -1567,7 +1573,7 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
 
 double FitPeaks::calculateSignalToSigmaRatio(const size_t &iws, const std::pair<double, double> &peakWindow,
                                              const API::IPeakFunction_sptr &peakFunction) {
-  const auto &vecX = m_inputMatrixWS->points(iws);
+  const auto vecX = m_inputMatrixWS->points(iws);
   auto startX = std::lower_bound(vecX.begin(), vecX.end(), peakWindow.first);
   auto stopX = std::lower_bound(vecX.begin(), vecX.end(), peakWindow.second);
 
@@ -2352,7 +2358,9 @@ void FitPeaks::writeFitResult(size_t wi, const std::vector<double> &expected_pos
         peak_function->setParameter(iparam, fit_result->getParameterValue(ipeak, iparam));
 
       const std::pair<double, double> peak_window = m_getPeakFitWindow(wi, ipeak);
-      peak_function->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window.first, peak_window.second);
+      PARALLEL_CRITICAL(FitPeaks_DetectorInfoAccess) {
+        peak_function->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window.first, peak_window.second);
+      }
 
       // set the effective peak parameters
       m_fittedParamTable->cell<double>(row_index, 2) = peak_function->centre();
