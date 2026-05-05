@@ -34,7 +34,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/trim.hpp"
@@ -1651,7 +1650,8 @@ bool FitPeaks::fitBackground(const size_t &ws_index, const std::pair<double, dou
   constexpr size_t MIN_POINTS{10}; // TODO explain why 10
 
   // find out how to fit background
-  const auto &points = m_inputMatrixWS->histogram(ws_index).points();
+  const auto histogram = m_inputMatrixWS->histogram(ws_index);
+  const auto &points = histogram.points();
   size_t start_index = findXIndex(points.rawData(), fit_window.first);
   size_t expected_peak_index = findXIndex(points.rawData(), expected_peak_pos, start_index);
   size_t stop_index = findXIndex(points.rawData(), fit_window.second, expected_peak_index);
@@ -2097,7 +2097,8 @@ void FitPeaks::processOutputs(std::vector<std::shared_ptr<FitPeaksAlgorithm::Pea
  * @return :: total number of counts in the histogram
  */
 double FitPeaks::numberCounts(size_t iws) {
-  const std::vector<double> &vec_y = m_inputMatrixWS->histogram(iws).y().rawData();
+  const auto hist_y = m_inputMatrixWS->histogram(iws).y();
+  const auto &vec_y = hist_y.rawData();
   double total = std::accumulate(vec_y.begin(), vec_y.end(), 0.);
   return total;
 }
@@ -2133,8 +2134,6 @@ size_t FitPeaks::histRangeToDataPointCount(size_t iws, const std::pair<double, d
   return number_dp;
 }
 
-GNU_DIAG_OFF("dangling-reference")
-
 //----------------------------------------------------------------------------------------------
 /** Convert a histogram range to vector index boundaries
  * @param iws :: histogram index in workspace
@@ -2144,7 +2143,7 @@ GNU_DIAG_OFF("dangling-reference")
  */
 void FitPeaks::histRangeToIndexBounds(size_t iws, const std::pair<double, double> &range, size_t &left_index,
                                       size_t &right_index) {
-  const auto &orig_x = m_inputMatrixWS->histogram(iws).x();
+  const auto orig_x = m_inputMatrixWS->histogram(iws).x();
   rangeToIndexBounds(orig_x, range.first, range.second, left_index, right_index);
 
   // handle an invalid range case. For the histogram point data, make sure the number of data points is non-zero as
@@ -2176,7 +2175,7 @@ void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &range, 
   size_t num_elements_x = right_index - left_index;
 
   vec_x.resize(num_elements_x);
-  const auto &orig_x = m_inputMatrixWS->histogram(iws).x();
+  const auto orig_x = m_inputMatrixWS->histogram(iws).x();
   std::copy(orig_x.begin() + left_index, orig_x.begin() + right_index, vec_x.begin());
 
   size_t num_datapoints = m_inputMatrixWS->isHistogramData() ? num_elements_x - 1 : num_elements_x;
@@ -2188,8 +2187,6 @@ void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &range, 
   std::copy(orig_y.begin() + left_index, orig_y.begin() + left_index + num_datapoints, vec_y.begin());
   std::copy(orig_e.begin() + left_index, orig_e.begin() + left_index + num_datapoints, vec_e.begin());
 }
-
-GNU_DIAG_ON("dangling-reference")
 
 //----------------------------------------------------------------------------------------------
 /** Calculate signal-to-noise ratio in a histogram range
