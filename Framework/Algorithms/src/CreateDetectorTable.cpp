@@ -82,10 +82,8 @@ void CreateDetectorTable::exec() {
     setup();
     createColumns();
     if (OneRowPerDetectorID) {
-      // Used in Instrument View
       populateTableByDetID();
     } else {
-      // General case
       populateTable();
     }
     setTableToOutput();
