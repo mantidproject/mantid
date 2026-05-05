@@ -675,7 +675,8 @@ template <> void File::getData<char>(char *data) {
     H5free_memory(cdata);
   } else {
     hsize_t len = H5Tget_size(m_current_type_id);
-    for (int i = 0; i < rank - 1; i++) {
+    int rank_end = (rank == 1 && len == 1 ? rank : rank - 1); // if rank 1 and length 1, treat as scalar
+    for (int i = 0; i < rank_end; i++) {
       len *= (dims[i] > 1 ? dims[i] : 1);
     }
 
