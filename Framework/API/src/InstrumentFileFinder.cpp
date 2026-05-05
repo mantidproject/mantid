@@ -329,18 +329,32 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
         g_log.debug() << "File '" << pathName << " valid dates: from '" << validFrom << "' to '" << validTo << "'\n";
         // Use default valid "from" and "to" dates if none were found.
         // Normalize date-only strings (YYYY-MM-DD) to full datetimes before parsing.
+        // Some legacy instrument files store dates in non-ISO8601 formats; treat them as lowest-priority
+        // catch-alls (valid for all time) so they are still considered but ranked last.
         DateAndTime to, from;
-        if (validFrom.length() > 0) {
-          const std::string normFrom =
-              boost::regex_match(validFrom, dateOnlyRegex) ? validFrom + "T00:00:00" : validFrom;
-          from.setFromISO8601(normFrom);
-        } else {
+        try {
+          if (validFrom.length() > 0) {
+            const std::string normFrom =
+                boost::regex_match(validFrom, dateOnlyRegex) ? validFrom + "T00:00:00" : validFrom;
+            from.setFromISO8601(normFrom);
+          } else {
+            from = refDate;
+          }
+        } catch (const std::invalid_argument &) {
+          g_log.debug() << "Could not parse valid-from='" << validFrom << "' in '" << pathName
+                        << "'; treating as lowest priority.\n";
           from = refDate;
         }
-        if (validTo.length() > 0) {
-          const std::string normTo = boost::regex_match(validTo, dateOnlyRegex) ? validTo + "T00:00:00" : validTo;
-          to.setFromISO8601(normTo);
-        } else {
+        try {
+          if (validTo.length() > 0) {
+            const std::string normTo = boost::regex_match(validTo, dateOnlyRegex) ? validTo + "T00:00:00" : validTo;
+            to.setFromISO8601(normTo);
+          } else {
+            to.setFromISO8601("2100-01-01T00:00:00");
+          }
+        } catch (const std::invalid_argument &) {
+          g_log.debug() << "Could not parse valid-to='" << validTo << "' in '" << pathName
+                        << "'; treating as lowest priority.\n";
           to.setFromISO8601("2100-01-01T00:00:00");
         }
 
