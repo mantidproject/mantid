@@ -9,7 +9,7 @@ from instrumentview.Globals import CurrentTab
 from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.ConvertUnitsCalculator import ConvertUnitsCalculator
-from instrumentview.ComponentSelectionUtils import detector_table_indices_for_parent_subtrees
+from instrumentview.ComponentSelectionUtils import detector_table_indices_for_parent_subtrees, get_beam_axis, reflect_points_in_axis
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
 from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace, GroupingWorkspace
@@ -49,6 +49,7 @@ class FullInstrumentViewModel:
 
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
+    _beam_axis = np.array([0, 0, 1])
     line_plot_workspace = None
     _workspace_x_unit: str
     _workspace_x_unit_display: str
@@ -78,6 +79,7 @@ class FullInstrumentViewModel:
         has_source = self._workspace.getInstrument().getSource() is not None
         self._source_position = np.array(component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
         self._root_position = np.array(component_info.position(0))
+        self._beam_axis = get_beam_axis(self._workspace)
 
         detector_info_table = CreateDetectorTable(
             self._workspace, IncludeDetectorPosition=True, PickOneDetectorID=True, StoreInADS=False, EnableLogging=False
@@ -402,8 +404,7 @@ class FullInstrumentViewModel:
         if cache_key not in self._cached_projection_objects.keys():
             detector_positions = self._detector_positions_3d
             if self._flip_z:
-                detector_positions = detector_positions.copy()
-                detector_positions[:, 2] *= -1
+                detector_positions = reflect_points_in_axis(detector_positions, axis=self._beam_axis)
 
             projection = Projection(
                 type=self._projection_type,

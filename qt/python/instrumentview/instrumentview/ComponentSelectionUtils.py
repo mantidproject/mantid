@@ -62,3 +62,15 @@ def detector_table_indices_for_parent_subtrees(
     if pickable_mask is None:
         return expanded_array
     return expanded_array[pickable_mask[expanded_array]]
+
+
+def reflect_points_in_axis(points: np.ndarray, axis: np.ndarray) -> np.ndarray:
+    """Return points reflected across a plane perpendicular to the given axis."""
+    axis_normalized = axis / np.linalg.norm(axis)
+    M = np.eye(3) - 2 * np.outer(axis_normalized, axis_normalized)
+    return points @ M.T
+
+
+def get_beam_axis(workspace) -> np.ndarray:
+    """Return the beam axis vector for the given workspace."""
+    return np.array(workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam())
