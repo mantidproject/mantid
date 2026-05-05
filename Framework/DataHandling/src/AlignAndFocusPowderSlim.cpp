@@ -688,8 +688,8 @@ void AlignAndFocusPowderSlim::initializeOutputWorkspace(const MatrixWorkspace_sp
       x_max.resize(num_hist, x_max[0]);
 
     for (size_t i = 1; i < num_hist; ++i) {
-      double const binWidth = linearBins ? x_delta[i] : -1. * std::abs(x_delta[i]);
-      std::vector<double> const params{x_min[i], binWidth, x_max[i]};
+      double const raggedBinWidth = linearBins ? x_delta[i] : -1. * std::abs(x_delta[i]);
+      std::vector<double> const params{x_min[i], raggedBinWidth, x_max[i]};
       std::vector<double> xtmpragged;
       Kernel::VectorHelper::createAxisFromRebinParams(params, xtmpragged, resize_xnew, full_bins_only);
       HistogramData::BinEdges XValues_new(std::move(xtmpragged));
