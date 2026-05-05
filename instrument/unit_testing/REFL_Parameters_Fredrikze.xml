@@ -11,6 +11,14 @@
     <value val="PA" />
   </parameter>
 
+  <parameter name="FredrikzeInputSpinStateOrderPA" type="string">
+    <value val="pp, pa, ap, aa" />
+  </parameter>
+
+  <parameter name="FredrikzeInputSpinStateOrderPNR" type="string">
+    <value val="p, a" />
+  </parameter>
+
   <parameter name="efficiency_lambda" type="string">
     <value val="0 3 6 10 15 20" />
     <description is="The wavelengths at which the efficiencies are sampled."/>
