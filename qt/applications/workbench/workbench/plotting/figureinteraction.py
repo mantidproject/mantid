@@ -952,10 +952,13 @@ class FigureInteraction(object):
             return True
         return False
 
-    @staticmethod
-    def _can_normalize_by_q(ax):
+    def _can_normalize_by_q(self, ax):
+        fig_type = figure_type(self.canvas.figure)
+        if fig_type not in [FigureType.Line, FigureType.Errorbar, FigureType.Waterfall]:
+            return False
+
         plotted_x_is_q = []
-        for workspace_name, artists in ax.tracked_workspaces.items():
+        for workspace_name, _ in ax.tracked_workspaces.items():
             ws = ads.retrieve(workspace_name)
             plotted_x_is_q.append(ws.getAxis(0).getUnit().unitID() == "MomentumTransfer")
 
