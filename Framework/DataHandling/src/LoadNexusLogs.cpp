@@ -220,7 +220,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(Nexus::File &file, const std:
     return tsp;
   } else if (info.type == NXnumtype::CHAR) {
     std::string values;
-    const int64_t item_length = info.dims[1];
+    const int64_t item_length = (info.dims.size() > 1 ? info.dims[1] : 1);
     try {
       const int64_t nitems = info.dims[0];
       const std::size_t total_length = std::size_t(nitems * item_length);
