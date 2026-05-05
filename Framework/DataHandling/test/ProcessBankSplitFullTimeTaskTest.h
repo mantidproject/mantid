@@ -71,9 +71,9 @@ public:
     std::vector<Mantid::API::MatrixWorkspace_sptr> wksps;
     std::map<size_t, std::vector<Mantid::detid_t>> det_in_group; // empty signifies all into one group
     // create a two workspaces for output
-    std::vector<double> tmp;
-    Mantid::Kernel::VectorHelper::createAxisFromRebinParams({0, 6000, 12000}, tmp, true, false);
-    Mantid::HistogramData::BinEdges XValues(std::move(tmp));
+    std::vector<double> xtmp;
+    Mantid::Kernel::VectorHelper::createAxisFromRebinParams({0, 6000, 12000}, xtmp, true, false);
+    Mantid::HistogramData::BinEdges XValues(std::move(xtmp));
     // create pulse_times vector. 10ms pulses, 100Hz.
     std::shared_ptr<std::vector<Mantid::Types::Core::DateAndTime>> pulse_times =
         std::make_shared<std::vector<Mantid::Types::Core::DateAndTime>>();

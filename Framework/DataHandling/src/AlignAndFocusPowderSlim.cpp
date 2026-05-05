@@ -673,9 +673,9 @@ void AlignAndFocusPowderSlim::initializeOutputWorkspace(const MatrixWorkspace_sp
 
   // always use the first histogram x-values for initialization
   double const binWidth = linearBins ? x_delta[0] : -1. * std::abs(x_delta[0]);
-  std::vector<double> tmp;
-  Kernel::VectorHelper::createAxisFromRebinParams({x_min[0], binWidth, x_max[0]}, tmp, resize_xnew, full_bins_only);
-  HistogramData::BinEdges XValues(std::move(tmp));
+  std::vector<double> xtmp;
+  Kernel::VectorHelper::createAxisFromRebinParams({x_min[0], binWidth, x_max[0]}, xtmp, resize_xnew, full_bins_only);
+  HistogramData::BinEdges XValues(std::move(xtmp));
   wksp->initialize(num_hist, HistogramData::Histogram(XValues, HistogramData::Counts(XValues.size() - 1, 0.0)));
 
   if (raggedBins) {
@@ -688,15 +688,11 @@ void AlignAndFocusPowderSlim::initializeOutputWorkspace(const MatrixWorkspace_sp
       x_max.resize(num_hist, x_max[0]);
 
     for (size_t i = 1; i < num_hist; ++i) {
-      std::vector<double> tmpragged;
-      if (linearBins) {
-        const std::vector<double> params{x_min[i], x_delta[i], x_max[i]};
-        Kernel::VectorHelper::createAxisFromRebinParams(params, tmpragged, resize_xnew, full_bins_only);
-      } else {
-        const std::vector<double> params{x_min[i], -1. * std::abs(x_delta[i]), x_max[i]};
-        Kernel::VectorHelper::createAxisFromRebinParams(params, tmpragged, resize_xnew, full_bins_only);
-      }
-      HistogramData::BinEdges XValues_new(std::move(tmpragged));
+      double const binWidth = linearBins ? x_delta[i] : -1. * std::abs(x_delta[i]);
+      std::vector<double> const params{x_min[i], binWidth, x_max[i]};
+      std::vector<double> xtmpragged;
+      Kernel::VectorHelper::createAxisFromRebinParams(params, xtmpragged, resize_xnew, full_bins_only);
+      HistogramData::BinEdges XValues_new(std::move(xtmpragged));
       wksp->setHistogram(i, HistogramData::Histogram(XValues_new, HistogramData::Counts(XValues_new.size() - 1, 0.0)));
     }
   }
