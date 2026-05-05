@@ -9,7 +9,7 @@ import unittest
 import unittest.mock
 import numpy as np
 
-from instrumentview.ComponentSelectionUtils import detector_indices_in_component_subtrees
+from instrumentview.ComponentSelectionUtils import detector_indices_in_component_subtrees, reflect_points_in_axis
 
 
 class TestComponentSelectionUtils(unittest.TestCase):
@@ -36,3 +36,44 @@ class TestComponentSelectionUtils(unittest.TestCase):
         """Empty input returns an empty detector-index array."""
         result = detector_indices_in_component_subtrees([], self.component_info)
         np.testing.assert_array_equal(result, np.array([], dtype=int))
+
+    def test_reflect_across_plane_perpendicular_to_x(self):
+        """Reflecting across yz-plane (axis=[1,0,0]) negates x-component."""
+        points = np.array([[1.0, 2.0, 3.0], [-1.0, 0.0, 5.0]])
+        result = reflect_points_in_axis(points, np.array([1.0, 0.0, 0.0]))
+        expected = np.array([[-1.0, 2.0, 3.0], [1.0, 0.0, 5.0]])
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_reflect_across_plane_perpendicular_to_y(self):
+        """Reflecting across xz-plane (axis=[0,1,0]) negates y-component."""
+        points = np.array([[1.0, 2.0, 3.0]])
+        result = reflect_points_in_axis(points, np.array([0.0, 1.0, 0.0]))
+        expected = np.array([[1.0, -2.0, 3.0]])
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_reflect_across_plane_perpendicular_to_z(self):
+        """Reflecting across xy-plane (axis=[0,0,1]) negates z-component."""
+        points = np.array([[1.0, 2.0, 3.0]])
+        result = reflect_points_in_axis(points, np.array([0.0, 0.0, 1.0]))
+        expected = np.array([[1.0, 2.0, -3.0]])
+        np.testing.assert_array_almost_equal(result, expected)
+
+    def test_reflect_twice_returns_original(self):
+        """Reflecting a point twice across the same plane returns the original."""
+        points = np.array([[3.0, -1.0, 2.0]])
+        axis = np.array([1.0, 0.0, 0.0])
+        result = reflect_points_in_axis(reflect_points_in_axis(points, axis), axis)
+        np.testing.assert_array_almost_equal(result, points)
+
+    def test_point_on_reflection_plane_is_unchanged(self):
+        """A point lying in the reflection plane is unchanged."""
+        points = np.array([[0.0, 3.0, -4.0]])
+        result = reflect_points_in_axis(points, np.array([1.0, 0.0, 0.0]))
+        np.testing.assert_array_almost_equal(result, points)
+
+    def test_non_unit_axis_normalised_internally(self):
+        """A non-unit axis gives the same result as the normalised axis."""
+        points = np.array([[2.0, 5.0, -1.0]])
+        result_unit = reflect_points_in_axis(points, np.array([2.0, 0.0, 0.0]))
+        result_normalised = reflect_points_in_axis(points, np.array([1.0, 0.0, 0.0]))
+        np.testing.assert_array_almost_equal(result_unit, result_normalised)
