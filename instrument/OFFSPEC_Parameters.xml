@@ -76,6 +76,14 @@
     <value val="PA" />
   </parameter>
 
+  <parameter name="FredrikzeInputSpinStateOrderPA" type="string">
+    <value val="pp, pa, ap, aa" />
+  </parameter>
+
+  <parameter name="FredrikzeInputSpinStateOrderPNR" type="string">
+    <value val="p, a" />
+  </parameter>
+
   <parameter name="efficiency_lambda" type="string">
     <value val="0.525	0.5775	0.63525	0.698775	0.768653	0.845518	0.93007	1.02308	1.12538	1.23792	1.36171	1.49789	1.64767	1.81244	1.99369	2.19306	2.41236	2.6536	2.91896	3.21085	3.53194	3.88513	4.27364	4.70101	5.17111	5.68822	6.25704	6.88275	7.57102	8.32812	9.16094	10.077	11.0847	12.1932	13.4125	14.2756
 " />

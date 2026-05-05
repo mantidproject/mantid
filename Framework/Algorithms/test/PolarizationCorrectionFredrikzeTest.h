@@ -315,15 +315,14 @@ public:
                       alg->setProperty("OutputSpinStates", "xx,pp,ap,aa"), std::invalid_argument &);
 
     alg->setProperty("InputSpinStates", "pp,aa");
-    TSM_ASSERT_THROWS("Invalid value for property InputSpinStates (string) from string pp,aa: The spin states must "
-                      "either be one or two characters, "
-                      "with each being either a p or a",
+    TSM_ASSERT_THROWS("The Fredrikze input spin state order \"pp,aa\" contains 2 spin states, but PA polarization "
+                      "correction expects 4 paired spin states such as \"pp,pa,ap,aa\".",
                       alg->execute(), std::invalid_argument &);
 
+    alg->setProperty("InputSpinStates", "pp,pa,ap,aa");
     alg->setProperty("OutputSpinStates", "pp,aa");
-    TSM_ASSERT_THROWS("Invalid value for property OutputSpinStates (string) from string pp,aa: The spin states must "
-                      "either be one or two characters, "
-                      "with each being either a p or a",
+    TSM_ASSERT_THROWS("The Fredrikze output spin state order \"pp,aa\" contains 2 spin states, but PA polarization "
+                      "correction expects 4 paired spin states such as \"pp,pa,ap,aa\".",
                       alg->execute(), std::invalid_argument &);
   }
 

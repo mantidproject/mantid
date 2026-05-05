@@ -803,10 +803,26 @@ public:
                             "of property \"Flippers\": Each spin state must only appear once");
   }
 
-  void test_error_occurs_when_set_spin_states_used_with_Wildes() {
+  void test_polarization_correction_with_efficiency_workspace_Wildes_custom() {
+    prepareInputGroup(TEST_GROUP_NAME, "Wildes");
+    auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
+    const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
+    setup_optional_properties(alg, {{"MomentumTransferStep", 0.04},
+                                    {"PolarizationAnalysis", true},
+                                    {"PolarizationEfficiencies", efficiencies},
+                                    {"PolarizationCorrectionInputSpinStateOrder", "00,11,01,10"}});
+    alg->execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
+  }
+
+  void test_error_occurs_when_fredrikze_spin_states_used_with_Wildes() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     const auto input_group = retrieveOutWS(TEST_GROUP_NAME);
-    // We're setting this to an invalid value to catch it on purpose later.
     input_group[0]->instrumentParameters().addString(input_group[0]->getInstrument()->getComponentID(),
                                                      "WildesFlipperConfig", "00,11,01,10");
     auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
@@ -814,13 +830,12 @@ public:
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04},
                                     {"PolarizationAnalysis", true},
                                     {"PolarizationEfficiencies", efficiencies},
-                                    {"FredrikzePolarizationSpinStateOrder", "01,10,11,00"}});
+                                    {"PolarizationCorrectionInputSpinStateOrder", "pa, ap"}});
 
     TS_ASSERT_THROWS_EQUALS(
         alg->execute(), const std::runtime_error &e, std::string(e.what()),
-        "A custom spin state order cannot be entered using the FredrikzePolarizationSpinStateOrder property when "
-        "performing a Wildes polarization correction. Check you don't have one assigned in the Experiment Settings. "
-        "Modify the parameter file for your instrument to change the spin state order.");
+        "The input spin state order \"pa, ap\" uses Fredrikze spin states, but a Wildes polarization correction has "
+        "been selected. Use a Wildes flipper configuration such as \"00,01,10,11\" or \"0,1\".");
   }
 
   void test_polarization_correction_with_efficiency_workspace_Fredrikze_custom() {
@@ -830,7 +845,7 @@ public:
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04},
                                     {"PolarizationAnalysis", true},
                                     {"PolarizationEfficiencies", efficiencies},
-                                    {"FredrikzePolarizationSpinStateOrder", "a,p"}});
+                                    {"PolarizationCorrectionInputSpinStateOrder", "a,p"}});
     alg->execute();
 
     auto outQGroup = retrieveOutWS("IvsQ");
@@ -851,6 +866,75 @@ public:
 
     TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.2938, 0.0001);
     TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 1.4186, 0.0001);
+  }
+
+  void test_polarization_correction_with_efficiency_workspace_Fredrikze_uses_parameter_file_input_spin_state_order() {
+    prepareInputGroup(TEST_GROUP_NAME, "Fredrikze", 2);
+    const auto input_group = retrieveOutWS(TEST_GROUP_NAME);
+    input_group[0]->instrumentParameters().addString(input_group[0]->getInstrument()->getComponentID(),
+                                                     "FredrikzeInputSpinStateOrderPNR", "a,p");
+    auto efficiencies = createPolarizationEfficienciesWorkspace("Fredrikze");
+    const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
+    setup_optional_properties(
+        alg,
+        {{"MomentumTransferStep", 0.04}, {"PolarizationAnalysis", true}, {"PolarizationEfficiencies", efficiencies}});
+    alg->execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 2);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 2);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.2938, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 1.4186, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.2938, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 1.4186, 0.0001);
+  }
+
+  void test_error_occurs_when_wildes_spin_states_used_with_Fredrikze() {
+    prepareInputGroup(TEST_GROUP_NAME, "Fredrikze", 2);
+    auto efficiencies = createPolarizationEfficienciesWorkspace("Fredrikze");
+    const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
+    setup_optional_properties(alg, {{"MomentumTransferStep", 0.04},
+                                    {"PolarizationAnalysis", true},
+                                    {"PolarizationEfficiencies", efficiencies},
+                                    {"PolarizationCorrectionInputSpinStateOrder", "0,1"}});
+
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), const std::runtime_error &e, std::string(e.what()),
+        "The input spin state order \"0,1\" uses Wildes spin states, but a Fredrikze polarization correction has been "
+        "selected. Use Fredrikze spin states such as \"pa,ap,pp,aa\" or \"p,a\".");
+  }
+
+  void test_error_occurs_when_PA_spin_state_order_used_with_Fredrikze_PNR() {
+    prepareInputGroup(TEST_GROUP_NAME, "Fredrikze", 2);
+    auto efficiencies = createPolarizationEfficienciesWorkspace("Fredrikze");
+    const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
+    setup_optional_properties(alg, {{"MomentumTransferStep", 0.04},
+                                    {"PolarizationAnalysis", true},
+                                    {"PolarizationEfficiencies", efficiencies},
+                                    {"PolarizationCorrectionInputSpinStateOrder", "pa,ap,pp,aa"}});
+
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), const std::invalid_argument &e, std::string(e.what()),
+        "The Fredrikze input spin state order \"pa,ap,pp,aa\" contains 4 spin states, but PNR polarization correction "
+        "expects 2 single spin states such as \"p,a\".");
+  }
+
+  void test_error_occurs_when_PNR_spin_state_order_used_with_Fredrikze_PA() {
+    prepareInputGroup(TEST_GROUP_NAME, "Fredrikze");
+    auto efficiencies = createPolarizationEfficienciesWorkspace("Fredrikze");
+    const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
+    setup_optional_properties(alg, {{"MomentumTransferStep", 0.04},
+                                    {"PolarizationAnalysis", true},
+                                    {"PolarizationEfficiencies", efficiencies},
+                                    {"PolarizationCorrectionInputSpinStateOrder", "p,a"}});
+
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), const std::invalid_argument &e, std::string(e.what()),
+        "The Fredrikze input spin state order \"p,a\" contains 2 spin states, but PA polarization correction expects 4 "
+        "paired spin states such as \"pp,pa,ap,aa\".");
   }
 
   void test_polarization_correction_with_efficiency_workspace_Wildes_no_analyser() {

@@ -331,7 +331,7 @@ public:
     declareProperty("ScaleRHSWorkspace", "");
     declareProperty("PolarizationAnalysis", "");
     declareProperty("PolarizationEfficiencies", "");
-    declareProperty("FredrikzePolarizationSpinStateOrder", "");
+    declareProperty("PolarizationCorrectionInputSpinStateOrder", "");
     declareProperty("ReductionType", "");
     declareProperty("SummationType", "");
     declareProperty("IncludePartialBins", "");

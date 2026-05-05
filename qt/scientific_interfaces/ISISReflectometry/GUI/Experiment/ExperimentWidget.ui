@@ -732,7 +732,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Fredrikze Input SpinState Order</string>
+        <string>Input SpinState Order</string>
        </property>
       </widget>
      </item>

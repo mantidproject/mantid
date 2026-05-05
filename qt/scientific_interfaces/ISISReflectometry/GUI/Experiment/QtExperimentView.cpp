@@ -334,7 +334,7 @@ void QtExperimentView::registerExperimentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
   registerSettingWidget(*m_polCorrEfficienciesWsSelector, "PolarizationEfficiencies", alg);
   registerSettingWidget(*m_polCorrEfficienciesLineEdit, "PolarizationEfficiencies", alg);
-  registerSettingWidget(*m_ui.polCorrFredrikzeSpinStateEdit, "FredrikzePolarizationSpinStateOrder", alg);
+  registerSettingWidget(*m_ui.polCorrFredrikzeSpinStateEdit, "PolarizationCorrectionInputSpinStateOrder", alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
   registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins", alg);
@@ -588,12 +588,12 @@ void QtExperimentView::disablePolarizationEfficiencies() {
   m_ui.polCorrEfficienciesLabel->setEnabled(false);
 }
 
-void QtExperimentView::enableFredrikzeSpinStateOrder() {
+void QtExperimentView::enableInputSpinStateOrder() {
   m_ui.polCorrFredrikzeSpinStateLabel->setEnabled(true);
   m_ui.polCorrFredrikzeSpinStateEdit->setEnabled(true);
 }
 
-void QtExperimentView::disableFredrikzeSpinStateOrder() {
+void QtExperimentView::disableInputSpinStateOrder() {
   m_ui.polCorrFredrikzeSpinStateLabel->setEnabled(false);
   m_ui.polCorrFredrikzeSpinStateEdit->setEnabled(false);
 }
@@ -851,11 +851,9 @@ void QtExperimentView::setPolarizationEfficienciesFilePath(std::string const &fi
   setText(*m_polCorrEfficienciesLineEdit, filePath);
 }
 
-std::string QtExperimentView::getFredrikzeSpinStateOrder() const {
-  return getText(*m_ui.polCorrFredrikzeSpinStateEdit);
-}
+std::string QtExperimentView::getInputSpinStateOrder() const { return getText(*m_ui.polCorrFredrikzeSpinStateEdit); }
 
-void QtExperimentView::setFredrikzeSpinStateOrder(std::string const &spinStates) {
+void QtExperimentView::setInputSpinStateOrder(std::string const &spinStates) {
   setText(*m_ui.polCorrFredrikzeSpinStateEdit, spinStates);
 }
 

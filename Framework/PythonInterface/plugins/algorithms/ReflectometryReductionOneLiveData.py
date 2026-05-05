@@ -150,6 +150,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             "CalibrationFile",
             "OutputWorkspace",
             "PolarizationEfficiencies",
+            "PolarizationCorrectionInputSpinStateOrder",
             "FredrikzePolarizationSpinStateOrder",
             "ROIDetectorIDs",
         ]
