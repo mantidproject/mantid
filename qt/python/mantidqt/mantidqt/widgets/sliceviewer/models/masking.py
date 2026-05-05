@@ -5,7 +5,6 @@ from mantid.api import WorkspaceFactory, AnalysisDataService, AlgorithmManager
 from sys import float_info
 from numpy import inf
 
-# from qtpy.QtWidgets import QMessageBox
 from mantid.kernel import logger
 
 ALLOWABLE_ERROR_SIG_FIGS = 8
@@ -33,20 +32,23 @@ class CursorInfoBase(ABC):
         pass
 
     @staticmethod
-    def consolidate_table_rows(table_rows):
+    def create_consolidated_dict(table_rows):
         @dataclass()
         class XVal:
             start: bool
             val: float
 
-        def sort_fn(e):
-            return e.val
-
         consolidated_rows = {}
         for row in table_rows:
-            if row.spec_list not in consolidated_rows:
-                consolidated_rows[row.spec_list] = []
-            consolidated_rows[row.spec_list].extend([XVal(start=True, val=row.x_min), XVal(start=False, val=row.x_max)])
+            consolidated_rows.setdefault(row.spec_list, []).extend([XVal(start=True, val=row.x_min), XVal(start=False, val=row.x_max)])
+        return consolidated_rows
+
+    @staticmethod
+    def consolidate_table_rows(table_rows):
+        consolidated_rows = CursorInfoBase.create_consolidated_dict(table_rows)
+
+        def sort_fn(e):
+            return e.val
 
         new_table_rows = []
         for row in consolidated_rows.items():
@@ -69,6 +71,26 @@ class CursorInfoBase(ABC):
             x_maxs.append(row[1][-1].val)
             for i in range(len(x_mins)):
                 new_table_rows.append(TableRow(spec_list=row[0], x_min=x_mins[i], x_max=x_maxs[i]))
+        return new_table_rows
+
+    @staticmethod
+    def consolidate_inverted_table_rows(table_rows):
+        consolidated_rows = CursorInfoBase.create_consolidated_dict(table_rows)
+        new_table_rows = []
+        for spec, xvals in consolidated_rows.items():
+            starts = set()
+            stops = set()
+            for val in xvals:
+                if val.start:
+                    starts.add(val.val)
+                else:
+                    stops.add(val.val)
+            starts = sorted(starts)
+            stops = sorted(stops)
+            for start, stop in zip(starts, stops):
+                if start < stop:
+                    new_table_rows.append(TableRow(spec_list=spec, x_min=start, x_max=stop))
+
         return new_table_rows
 
     @property
@@ -112,11 +134,15 @@ class RectCursorInfoBase(CursorInfoBase, ABC):
         y_min, y_max = self.snap_to_bin_centre(y_data[0]), self.snap_to_bin_centre(y_data[-1])
 
         # Mask everything outside selected rectangle
-        row1 = TableRow(spec_list=f"{spec_min}-{spec_max}", x_min=x_min, x_max=x_data[0])
-        row2 = TableRow(spec_list=f"{spec_min}-{y_min}", x_min=x_data[0], x_max=x_data[-1])
-        row3 = TableRow(spec_list=f"{y_max}-{spec_max}", x_min=x_data[0], x_max=x_data[-1])
-        row4 = TableRow(spec_list=f"{spec_min}-{spec_max}", x_min=x_data[-1], x_max=x_max)
-        return [row1, row2, row3, row4]
+        rows = []
+        for s in range(spec_min, y_min):
+            rows.append(TableRow(spec_list=f"{s}", x_min=x_min, x_max=x_max))
+        for s in range(y_min, y_max + 1):
+            rows.append(TableRow(spec_list=f"{s}", x_min=x_min, x_max=x_data[0]))
+            rows.append(TableRow(spec_list=f"{s}", x_min=x_data[-1], x_max=x_max))
+        for s in range(y_max + 1, spec_max + 1):
+            rows.append(TableRow(spec_list=f"{s}", x_min=x_min, x_max=x_max))
+        return rows
 
 
 class RectCursorInfo(RectCursorInfoBase):
@@ -298,8 +324,10 @@ class PolyCursorInfo(CursorInfoBase):
         y_range = [n / 3 for n in range(y_min * 3, (y_max * 3) + 1)]
 
         # Mask the rectangles above and below the polygon
-        rows.append(TableRow(spec_list=f"{spec_min}-{str(round(y_range[0]))}", x_min=x_axis_min, x_max=x_axis_max))
-        rows.append(TableRow(spec_list=f"{str(round(y_range[-1]))}-{spec_max}", x_min=x_axis_min, x_max=x_axis_max))
+        for s in range(spec_min, round(y_range[0]) + 1):
+            rows.append(TableRow(spec_list=f"{s}", x_min=x_axis_min, x_max=x_axis_max))
+        for s in range(round(y_range[-1]), spec_max + 1):
+            rows.append(TableRow(spec_list=f"{s}", x_min=x_axis_min, x_max=x_axis_max))
 
         # Mask the area around the polygon
         for y in y_range:
@@ -359,6 +387,8 @@ class MaskingModel:
                 table_rows.extend(info.generate_inverted_table_rows())
             else:
                 table_rows.extend(info.generate_table_rows())
+        if self._apply_inverted_mask and len(self._masks) > 1:
+            table_rows = self._masks[0].consolidate_inverted_table_rows(table_rows)
         return self.create_table_workspace_from_rows(table_rows, store_in_ads)
 
     def export_selectors(self):
