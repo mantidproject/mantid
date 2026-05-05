@@ -94,9 +94,8 @@ class FullInstrumentViewModel:
         # Array of strings 'yes', 'no' and 'n/a'
         self._is_monitor = detector_info_table.columnArray("Monitor")
         self._is_valid = self._is_monitor == "no"
-
-        # TODO: Add these two columns to detector table
-        self._component_idxs = np.array([self._workspace.detectorInfo().indexOf(int(id)) for id in self._detector_ids])
+        self._component_idxs = np.arange(len(self._detector_ids))
+        # TODO: Add masked column to detector table
         self._is_masked_in_ws = np.array([self._workspace.detectorInfo().isMasked(i) for i, _ in enumerate(self._detector_ids)])
 
         # For computing current mask, detached from the permanent mask in ws
