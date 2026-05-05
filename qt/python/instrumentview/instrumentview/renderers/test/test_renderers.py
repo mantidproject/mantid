@@ -334,36 +334,36 @@ class TestShapeRenderer(unittest.TestCase):
         x_span = float(np.max(mesh.points[:, 0]) - np.min(mesh.points[:, 0]))
         self.assertLess(x_span, 0.1)
 
-    def test_build_pickable_mesh_flip_z_negates_z_in_point_cloud_fallback(self):
+    def test_build_pickable_mesh_flip_beam_negates_z_in_point_cloud_fallback(self):
         """When no detector mesh ref exists, build_pickable_mesh should negate
-        z-coordinates when flip_z=True (falls back to a plain point cloud)."""
+        z-coordinates when flip_beam=True (falls back to a plain point cloud)."""
         positions = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, -6.0]])
-        mesh = self.renderer.build_pickable_mesh(positions, flip_z=True)
+        mesh = self.renderer.build_pickable_mesh(positions, flip_beam=True)
         np.testing.assert_allclose(mesh.points[:, 2], [-3.0, 6.0])
 
-    def test_build_pickable_mesh_no_flip_z_unchanged_in_point_cloud_fallback(self):
+    def test_build_pickable_mesh_no_flip_beam_unchanged_in_point_cloud_fallback(self):
         """When no detector mesh ref exists, z-coordinates should be unchanged
-        when flip_z=False."""
+        when flip_beam=False."""
         positions = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, -6.0]])
-        mesh = self.renderer.build_pickable_mesh(positions, flip_z=False)
+        mesh = self.renderer.build_pickable_mesh(positions, flip_beam=False)
         np.testing.assert_allclose(mesh.points[:, 2], [3.0, -6.0])
 
-    def test_build_pickable_mesh_flip_z_ignored_when_detector_mesh_ref_exists(self):
+    def test_build_pickable_mesh_flip_beam_ignored_when_detector_mesh_ref_exists(self):
         """When _detector_mesh_ref has been built, build_pickable_mesh should
-        return a shape mesh copy regardless of flip_z — the flip is already
+        return a shape mesh copy regardless of flip_beam — the flip is already
         baked into the detector mesh vertices."""
         workspace = self._refresh_render_with_mock_workspace(n_detectors=2)
         model = self._create_mock_model(workspace, n_pickable=2)
         positions = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=np.float64)
         ref_mesh = self.renderer.build_detector_mesh(positions, False, model)
 
-        # flip_z=True should still return the shape mesh copy (not a point cloud)
-        pickable = self.renderer.build_pickable_mesh(positions, flip_z=True)
+        # flip_beam=True should still return the shape mesh copy (not a point cloud)
+        pickable = self.renderer.build_pickable_mesh(positions, flip_beam=True)
         self.assertGreater(pickable.number_of_cells, 0)
         self.assertEqual(pickable.number_of_cells, ref_mesh.number_of_cells)
 
-    def test_build_detector_mesh_flip_z_negates_world_z_before_projection(self):
-        """In cylindrical projections, flip_z=True must negate the world-space
+    def test_build_detector_mesh_flip_beam_negates_world_z_before_projection(self):
+        """In cylindrical projections, flip_beam=True must negate the world-space
         z-coordinate of each shape vertex before it is passed to project_points."""
         workspace = self._refresh_render_with_mock_workspace(n_detectors=1)
         # Override the stored 3D position so the flip is observable (z ≠ 0)
@@ -403,8 +403,8 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertTrue(np.all(z_flip < 0), f"Expected negative z with flip, got {z_flip}")
         np.testing.assert_allclose(z_flip, -z_no_flip)
 
-    def test_build_masked_mesh_flip_z_negates_world_z_before_projection(self):
-        """flip_z=True should also negate world-space z for masked detector vertices
+    def test_build_masked_mesh_flip_beam_negates_world_z_before_projection(self):
+        """flip_beam=True should also negate world-space z for masked detector vertices
         before projection (same _assemble_mesh path as build_detector_mesh)."""
 
         workspace = self._refresh_render_with_mock_workspace(n_detectors=1)
@@ -517,6 +517,7 @@ class TestShapeRenderer(unittest.TestCase):
 
         workspace.componentInfo.return_value = comp_info
         workspace.detectorInfo.return_value = det_info
+        workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = [0, 0, 1]
 
         return workspace
 
@@ -526,7 +527,7 @@ class TestShapeRenderer(unittest.TestCase):
         model.is_2d_projection = False
         model.projection_type = ProjectionType.THREE_D
         model.active_projection = None
-        model.flip_z = False
+        model.flip_beam = False
         model.pickable_detector_ids = np.arange(n_pickable)
         model.masked_detector_ids = np.array([], dtype=np.int64)
         return model

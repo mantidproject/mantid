@@ -26,13 +26,13 @@ class PointCloudRenderer(InstrumentRenderer):
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
 
     # ------------------------------------------------------------------ build
-    def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
+    def build_detector_mesh(self, positions: np.ndarray, flip_beam: bool, model=None) -> pv.PolyData:
         return pv.PolyData(positions)
 
-    def build_pickable_mesh(self, positions: np.ndarray, flip_z: bool) -> pv.PolyData:
+    def build_pickable_mesh(self, positions: np.ndarray, flip_beam: bool) -> pv.PolyData:
         return pv.PolyData(positions)
 
-    def build_masked_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
+    def build_masked_mesh(self, positions: np.ndarray, flip_beam: bool, model=None) -> pv.PolyData:
         return pv.PolyData(positions)
 
     # ------------------------------------------------------------ add to plot

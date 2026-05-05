@@ -129,7 +129,7 @@ class ShapeRenderer(InstrumentRenderer):
     # -----------------------------------------------------------------
     # Build meshes
     # -----------------------------------------------------------------
-    def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model) -> pv.PolyData:
+    def build_detector_mesh(self, positions: np.ndarray, flip_beam: bool, model) -> pv.PolyData:
         """Build a surface mesh for the unmasked detectors whose centres are *positions*.
 
         *positions* may already be projected to 2D (with z=0).  In that case
@@ -145,14 +145,14 @@ class ShapeRenderer(InstrumentRenderer):
             detector_indices=indices,
             detector_positions=positions,
             projection=model.active_projection,
-            flip_z=flip_z,
+            flip_beam=flip_beam,
         )
         self._cell_to_detector = c2d
         self._faces_per_detector = fpd
         self._detector_mesh_ref = mesh
         return mesh
 
-    def build_pickable_mesh(self, positions: np.ndarray, flip_z: bool) -> pv.PolyData:
+    def build_pickable_mesh(self, positions: np.ndarray, flip_beam: bool) -> pv.PolyData:
         """Return a copy of the detector shape mesh for picking and highlighting.
 
         Cell-based picking on this mesh lets the user click anywhere on
@@ -161,12 +161,12 @@ class ShapeRenderer(InstrumentRenderer):
         """
         if self._detector_mesh_ref is not None and self._detector_mesh_ref.number_of_cells > 0:
             return self._detector_mesh_ref.copy(deep=True)
-        if flip_z:
+        if flip_beam:
             positions = positions.copy()
             positions[:, 2] *= -1
         return pv.PolyData(positions)
 
-    def build_masked_mesh(self, positions: np.ndarray, flip_z: bool, model) -> pv.PolyData:
+    def build_masked_mesh(self, positions: np.ndarray, flip_beam: bool, model) -> pv.PolyData:
         if len(positions) == 0:
             return pv.PolyData()
         indices = self._resolve_detector_indices(model.masked_detector_ids)
@@ -175,7 +175,7 @@ class ShapeRenderer(InstrumentRenderer):
             detector_indices=indices,
             detector_positions=positions,
             projection=model.active_projection,
-            flip_z=flip_z,
+            flip_beam=flip_beam,
         )
         return mesh
 
@@ -300,7 +300,7 @@ class ShapeRenderer(InstrumentRenderer):
         projection: Projection | None = None,
         per_detector_scales: np.ndarray | None = None,
         per_detector_rotate: np.ndarray | None = None,
-        flip_z: bool = False,
+        flip_beam: bool = False,
     ) -> tuple[pv.PolyData, np.ndarray, np.ndarray]:
         """Vectorised mesh assembly.
 
@@ -401,7 +401,7 @@ class ShapeRenderer(InstrumentRenderer):
             tiled = tiled + group_pos
 
             if projection is not None and projection.type is not ProjectionType.SIDE_BY_SIDE:
-                if flip_z:
+                if flip_beam:
                     tiled = tiled - 2 * (tiled @ self._beam_axis)[..., np.newaxis] * self._beam_axis
 
                 projected_vertices = projection.project_points(tiled.reshape(-1, 3), apply_x_correction=False).reshape(n_group, n_verts, 2)
