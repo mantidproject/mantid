@@ -27,7 +27,7 @@ from vtkmodules.vtkRenderingCore import vtkCellPicker
 from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.renderers.base_renderer import InstrumentRenderer
-from instrumentview.ComponentSelectionUtils import get_beam_axis
+from instrumentview.ComponentSelectionUtils import get_beam_axis, reflect_points_in_axis
 from mantid.kernel import logger
 
 
@@ -162,8 +162,7 @@ class ShapeRenderer(InstrumentRenderer):
         if self._detector_mesh_ref is not None and self._detector_mesh_ref.number_of_cells > 0:
             return self._detector_mesh_ref.copy(deep=True)
         if flip_beam:
-            positions = positions.copy()
-            positions[:, 2] *= -1
+            positions = reflect_points_in_axis(positions, axis=self._beam_axis)
         return pv.PolyData(positions)
 
     def build_masked_mesh(self, positions: np.ndarray, flip_beam: bool, model) -> pv.PolyData:
