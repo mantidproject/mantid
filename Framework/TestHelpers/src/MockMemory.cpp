@@ -79,8 +79,10 @@ std::string Mantid::Kernel::MemoryStats::checkAvailableMemory(std::size_t const 
   } else {
     init_real_availMem();
     if (g_real_availMem.load()) {
-      if (requestedMemory > g_real_availMem.load()(this)) {
-        return "Requested Memory Failure";
+      // requestedMemory is in bytes, availMem is in KiB, so multiply
+      std::size_t avail = g_real_availMem.load()(this) * 1024;
+      if (requestedMemory > avail) {
+        return "Requested Memory Failure " + std::to_string(requestedMemory) + " > " + std::to_string(avail);
       } else {
         return "";
       }
