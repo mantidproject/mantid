@@ -11,6 +11,9 @@
 namespace Mantid::TestMemory {
 
 constexpr std::size_t g_default_value{12};
+/// Fallback bin count on non-Linux platforms where the memory mock is unavailable;
+/// large enough to reliably exhaust any real system's available memory.
+constexpr std::size_t g_fallback_bin_count{static_cast<std::size_t>(1e12)};
 
 extern "C" void enable_mem_override(std::size_t value = g_default_value);
 extern "C" void disable_mem_override();
@@ -35,7 +38,7 @@ struct MockMemory {
   }
 #else
   // a very large number, sure to always exhaust memory
-  std::size_t numberOfFloats() const { return static_cast<std::size_t>(1e12); }
+  std::size_t numberOfFloats() const { return g_fallback_bin_count; }
 #endif
 private:
   std::size_t m_value{g_default_value};

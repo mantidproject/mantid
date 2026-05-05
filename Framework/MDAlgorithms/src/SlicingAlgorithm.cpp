@@ -307,8 +307,13 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
     throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
 
   // ensure we are not asking for more total output bins than can fit into memory
-  std::size_t totalBins = std::accumulate(m_numBins.cbegin(), m_numBins.cend(), 0);
-  std::string memStr = Kernel::MemoryStats().checkAvailableMemory(totalBins * sizeof(double));
+  // the total number of bins in an N-D workspace is the product (not sum) of bins per dimension
+  std::size_t totalBins =
+      std::accumulate(m_numBins.cbegin(), m_numBins.cend(), std::size_t(1),
+                      [](std::size_t acc, int val) -> std::size_t { return acc * static_cast<std::size_t>(val); });
+  // MDHistoWorkspace allocates signal, error squared, and numEvents (each a double) plus a bool mask per bin
+  constexpr std::size_t bytesPerBin = 3 * sizeof(double) + sizeof(bool);
+  std::string memStr = Kernel::MemoryStats().checkAvailableMemory(totalBins * bytesPerBin);
   if (!memStr.empty()) {
     memStr = "You requested a total of " + std::to_string(totalBins) + " bins. " + memStr +
              " Please reduce the number of bins or output dimensions.";
@@ -535,10 +540,15 @@ void SlicingAlgorithm::createAlignedTransform() {
   m_outD = m_binDimensions.size();
 
   // ensure we are not asking for more total output bins than can fit into memory
-  std::size_t totalBins = std::accumulate(
-      m_binDimensions.cbegin(), m_binDimensions.cend(), 0,
-      [](std::size_t sum, const std::shared_ptr<MDHistoDimension> &dim) { return sum + dim->getNBins(); });
-  std::string memStr = Kernel::MemoryStats().checkAvailableMemory(totalBins * sizeof(double));
+  // the total number of bins in an N-D workspace is the product (not sum) of bins per dimension
+  std::size_t totalBins =
+      std::accumulate(m_binDimensions.cbegin(), m_binDimensions.cend(), std::size_t(1),
+                      [](std::size_t acc, const std::shared_ptr<MDHistoDimension> &dim) -> std::size_t {
+                        return acc * dim->getNBins();
+                      });
+  // MDHistoWorkspace allocates signal, error squared, and numEvents (each a double) plus a bool mask per bin
+  constexpr std::size_t bytesPerBin = 3 * sizeof(double) + sizeof(bool);
+  std::string memStr = Kernel::MemoryStats().checkAvailableMemory(totalBins * bytesPerBin);
   if (!memStr.empty()) {
     memStr = "You requested a total of " + std::to_string(totalBins) + " bins. " + memStr +
              " Please reduce the number of bins or output dimensions.";

@@ -117,10 +117,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector2", "z,m,0,0,1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVector3", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
-    // make so many bins it will crash
+    // make enough bins so that product * bytesPerBin exceeds the mock memory limit (12 KiB)
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputExtents", "0,10,0,10,0,10"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBins", "4,4,5"));
-    Mantid::TestMemory::MockMemory memL(12);
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputBins", "3, 3, 3"));
+    Mantid::TestMemory::MockMemory memL(26);
     TS_ASSERT_THROWS_ANYTHING(alg.execute();)
 #endif
   }
@@ -136,12 +136,12 @@ public:
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AxisAligned", "1"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim0", "x,0,0,4"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", "y,0,0,4"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", "z,0,0,5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim0", "x,0,0,3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", "y,0,0,3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", "z,0,0,3"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
-    Mantid::TestMemory::MockMemory memL(12);
+    Mantid::TestMemory::MockMemory memL(26);
     TS_ASSERT_THROWS_ANYTHING(alg.execute();)
 #endif
   }

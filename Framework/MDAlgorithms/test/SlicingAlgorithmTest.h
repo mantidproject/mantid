@@ -202,6 +202,7 @@ public:
 #if defined(__linux__) || defined(__gnu_linux__)
     {
       Mantid::TestMemory::MockMemory memL(12);
+      // bin counts are chosen so that product * bytesPerBin exceeds the mock memory limit (12 KiB)
       TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 1D",
                                do_createAlignedTransform("Axis0, 2.0,8.0, 13", "", "", ""), std::runtime_error & e,
                                strstr(e.what(), "Mock Memory"));
@@ -586,12 +587,14 @@ public:
         do_createGeneralTransform(ws, "x,m,1,0,0, 10.0, 10", "", "", "", VMD(1, 2, 3), "0,10", "5,5"));
 
     TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 1D no mock",
-                             do_createGeneralTransform(ws, "x,m,1,0,0", "", "", "", VMD(1, 2, 3), "0,10", "600000000"),
+                             do_createGeneralTransform(ws, "x,m,1,0,0", "x,m,0,1,0", "x,m,0,0,1", "", VMD(1, 2, 3),
+                                                       "0,10,0,10,0,10", "1000000,1000000,1000000"),
                              std::runtime_error & e, strstr(e.what(), "Requested Memory"));
     // the below requires the memory patch and should only run on Linux
 #if defined(__linux__) || defined(__gnu_linux__)
     {
       Mantid::TestMemory::MockMemory memL(12);
+      // bin counts are chosen so that product * bytesPerBin exceeds the mock memory limit (12 KiB)
       TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 1D",
                                do_createGeneralTransform(ws, "x,m,1,0,0", "", "", "", VMD(1, 2, 3), "0,10", "13"),
                                std::runtime_error & e, strstr(e.what(), "Mock Memory"));
