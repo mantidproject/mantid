@@ -962,7 +962,7 @@ public:
 
     fitpeaks.setProperty("RawPeakParameters", true);
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_oFE");
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setPropertyValue("OutputParameterFitErrorsWorkspace", "FitErrorsWS"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setPropertyValue("OutputParameterFitErrorsWorkspace", "FitErrorsWS_oFE"));
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
 
@@ -993,7 +993,7 @@ public:
       return;
     TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
     API::ITableWorkspace_sptr error_table =
-        std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve("FitErrorsWS"));
+        std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve("FitErrorsWS_oFE"));
     TS_ASSERT(error_table);
     if (!error_table)
       return;
@@ -1013,7 +1013,7 @@ public:
     AnalysisDataService::Instance().remove("PeakPositionsWS_oFE");
     AnalysisDataService::Instance().remove("FittedPeaksWS_oFE");
     AnalysisDataService::Instance().remove("PeakParametersWS_oFE");
-    AnalysisDataService::Instance().remove("FitErrorsWS");
+    AnalysisDataService::Instance().remove("FitErrorsWS_oFE");
   }
 
   //----------------------------------------------------------------------------------------------

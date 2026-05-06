@@ -1002,7 +1002,13 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
   const auto &specInfo = m_inputMatrixWS->spectrumInfo();
   for (size_t wi = m_startWorkspaceIndex; wi <= m_stopWorkspaceIndex; ++wi) {
     if (specInfo.hasDetectors(wi))
+      continue;
+    try {
       static_cast<void>(specInfo.detector(wi));
+    } catch (const Exception::NotFoundError &) {
+      // Leave this spectrum uncached; setMatrixWorkspace() will handle
+      // missing IDs via its normal fallback path.
+    }
   }
 
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
