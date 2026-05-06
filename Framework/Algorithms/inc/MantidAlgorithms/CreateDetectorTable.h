@@ -78,7 +78,7 @@ private:
   void getSphericalCoordinates(size_t wsIndex, double &R, double &theta, double &phi);
   const std::string getTimeIndexes(size_t wsIndex);
   double getQ(size_t wsIndex);
-  void get_diff_consts(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero);
+  void getDiffConst(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero);
   void writeRowToTable(const int row, const DetectorRowData &data);
   DetectorRowData calculateWsIdxData(size_t wsIndex);
 };

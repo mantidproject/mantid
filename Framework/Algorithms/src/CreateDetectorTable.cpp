@@ -270,7 +270,7 @@ double CreateDetectorTable::getQ(size_t wsIndex) {
   }
 }
 
-void CreateDetectorTable::get_diff_consts(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero) {
+void CreateDetectorTable::getDiffConst(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero) {
   if (!hasDiffConstants) {
     difa = difc = difcUnc = tzero = 0;
     return;
@@ -350,7 +350,7 @@ CreateDetectorTable::DetectorRowData CreateDetectorTable::calculateWsIdxData(con
   // Is monitor
   data.isMonitor = spectrumInfo->isMonitor(wsIndex) ? "yes" : "no";
   // Diff consts
-  get_diff_consts(wsIndex, data.difa, data.difc, data.difcUnc, data.tzero);
+  getDiffConst(wsIndex, data.difa, data.difc, data.difcUnc, data.tzero);
   // Detector position
   data.detPosition = spectrumInfo->position(wsIndex);
   return data;
