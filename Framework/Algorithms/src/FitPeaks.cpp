@@ -16,6 +16,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/FindPeakBackground.h"
@@ -992,6 +993,17 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
 
   std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> pre_check_result =
       std::make_shared<FitPeaksAlgorithm::PeakFitPreCheckResult>();
+
+  // Set the SpectrumInfo/DetectorInfo cache. DetectorInfo::getDetector
+  // lazily writes a shared_ptr<IDetector> slot on first access and is not
+  // thread-safe across different indices. Accessing every spectrum index outside the loop
+  // ensures all subsequent concurrent accesses (including those from inside
+  // the Fit child algorithm) are safe reads of already-populated slots.
+  const auto &specInfo = m_inputMatrixWS->spectrumInfo();
+  for (size_t wi = m_startWorkspaceIndex; wi <= m_stopWorkspaceIndex; ++wi) {
+    if (specInfo.hasDetectors(wi))
+      static_cast<void>(specInfo.detector(wi));
+  }
 
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (int ithread = 0; ithread < nThreads; ithread++) {
