@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/MockMemory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
@@ -197,6 +198,19 @@ public:
     TSM_ASSERT_THROWS_ANYTHING("Dimension name not found",
                                do_createAlignedTransform("NotAnAxis, 2.0,8.0, 3", "", "", ""));
     TSM_ASSERT_THROWS_ANYTHING("0 bins is bad", do_createAlignedTransform("Axis0, 2.0,8.0, 0", "", "", ""));
+    // the below requires the memory patch and should only run on Linux
+#if defined(__linux__) || defined(__gnu_linux__)
+    {
+      Mantid::TestMemory::MockMemory memL(12);
+      // bin counts are chosen so that product * bytesPerBin exceeds the mock memory limit (12 KiB)
+      TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 1D",
+                               do_createAlignedTransform("Axis0, 2.0,8.0, 13", "", "", ""), std::runtime_error & e,
+                               strstr(e.what(), "Mock Memory"));
+      TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 2D",
+                               do_createAlignedTransform("Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 8", "", ""),
+                               std::runtime_error & e, strstr(e.what(), "Mock Memory"));
+    }
+#endif
   }
 
   void test_createAlignedTransform() {
@@ -571,6 +585,25 @@ public:
     TSM_ASSERT_THROWS_ANYTHING(
         "Bad # of dimensions in the OutputBins",
         do_createGeneralTransform(ws, "x,m,1,0,0, 10.0, 10", "", "", "", VMD(1, 2, 3), "0,10", "5,5"));
+
+    TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 1D no mock",
+                             do_createGeneralTransform(ws, "x,m,1,0,0", "x,m,0,1,0", "x,m,0,0,1", "", VMD(1, 2, 3),
+                                                       "0,10,0,10,0,10", "1000000,1000000,1000000"),
+                             std::runtime_error & e, strstr(e.what(), "Requested Memory"));
+    // the below requires the memory patch and should only run on Linux
+#if defined(__linux__) || defined(__gnu_linux__)
+    {
+      Mantid::TestMemory::MockMemory memL(12);
+      // bin counts are chosen so that product * bytesPerBin exceeds the mock memory limit (12 KiB)
+      TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 1D",
+                               do_createGeneralTransform(ws, "x,m,1,0,0", "", "", "", VMD(1, 2, 3), "0,10", "13"),
+                               std::runtime_error & e, strstr(e.what(), "Mock Memory"));
+      TSM_ASSERT_THROWS_ASSERT(
+          "Excessive memory allocation 2D",
+          do_createGeneralTransform(ws, "x,m,1,0,0", "y,m,0,1,0", "", "", VMD(1, 2, 3), "0,10,0,10", "6,7"),
+          std::runtime_error & e, strstr(e.what(), "Mock Memory"));
+    }
+#endif
   }
 
   void test_createGeneralTransform_3D_to_3D() {
