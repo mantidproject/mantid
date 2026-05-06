@@ -124,6 +124,20 @@ public:
     TS_ASSERT_DELTA(result.value, 2.72014, 0.00001);
   }
 
+  void testErrorPropagation_uses_covariance_terms() {
+    constexpr size_t vars = 2;
+    using Types = Arithmetic::ErrorTypeHelper<vars>;
+
+    const auto errorProp = Arithmetic::makeErrorPropagation<vars>([](const auto &x) { return x[0] + x[1]; });
+    decltype(errorProp)::CovarianceMatrix covariance;
+    covariance << 4.0, 6.0, 6.0, 9.0;
+
+    const auto result = errorProp.evaluateWithCovariance(Types::InputArray{{10.0, 5.0}}, covariance);
+
+    TS_ASSERT_DELTA(15.0, result.value, 1e-10);
+    TS_ASSERT_DELTA(5.0, result.error, 1e-10);
+  }
+
   void testErrorPropagation_workspaces_quad() {
     const size_t vars = 1;
     const double a = 5.0;
@@ -154,6 +168,28 @@ public:
     for (size_t i = 0; i < result->size(); i++) {
       TS_ASSERT_DELTA(2.72014, result->y(0)[i], 0.001);
       TS_ASSERT_DELTA(0.139495, result->e(0)[i], 0.001);
+    }
+  }
+
+  void testErrorPropagation_workspaces_use_covariance_terms() {
+    constexpr size_t vars = 2;
+    const auto errorProp = Arithmetic::makeErrorPropagation<vars>([](const auto &x) { return x[0] - x[1]; });
+
+    auto wsA = createWorkspace("wsA", {0.0, 1.0, 2.0}, {3.0, 3.0, 3.0}, {2.0, 2.0, 2.0});
+    auto wsB = createWorkspace("wsB", {0.0, 1.0, 2.0}, {1.0, 1.0, 1.0}, {2.0, 2.0, 2.0});
+    using ErrorProp = decltype(errorProp);
+
+    const auto result = errorProp.evaluateWorkspacesWithCovariance(
+        [](const auto &, const auto &errors) {
+          ErrorProp::CovarianceMatrix covariance;
+          covariance << errors[0] * errors[0], errors[0] * errors[1], errors[0] * errors[1], errors[1] * errors[1];
+          return covariance;
+        },
+        wsA, wsB);
+
+    for (size_t i = 0; i < result->size(); i++) {
+      TS_ASSERT_DELTA(2.0, result->y(0)[i], 1e-10);
+      TS_ASSERT_DELTA(0.0, result->e(0)[i], 1e-10);
     }
   }
 

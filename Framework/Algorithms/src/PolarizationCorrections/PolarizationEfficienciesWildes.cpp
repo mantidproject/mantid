@@ -53,6 +53,33 @@ constexpr auto fnNumerator = [](const auto &x, const auto &fa) {
 constexpr auto fnDenominator = [](const auto &x, const auto &fp) {
   return (1 - 2 * fp) * x[4] + (2 * fp - 1) * x[5] - x[6] + x[7];
 };
+
+constexpr size_t DERIVED_EFFICIENCY_VAR_NUM = 5;
+
+auto covarianceMatrixForDerivedEfficiency(
+    const Mantid::Algorithms::Arithmetic::ErrorTypeHelper<DERIVED_EFFICIENCY_VAR_NUM>::InputArray &values,
+    const Mantid::Algorithms::Arithmetic::ErrorTypeHelper<DERIVED_EFFICIENCY_VAR_NUM>::InputArray &errors) {
+  using Types = Mantid::Algorithms::Arithmetic::ErrorTypeHelper<DERIVED_EFFICIENCY_VAR_NUM>;
+  using PhiTypes = Mantid::Algorithms::Arithmetic::ErrorTypeHelper<4>;
+
+  Eigen::Matrix<double, DERIVED_EFFICIENCY_VAR_NUM, DERIVED_EFFICIENCY_VAR_NUM> covariance =
+      Types::InputArray(errors.array().square()).asDiagonal();
+  const auto phiErrorProp =
+      Mantid::Algorithms::Arithmetic::makeErrorPropagation<4>([](const auto &x) { return fnPhi(x); });
+  const auto phiResult = phiErrorProp.evaluate(PhiTypes::InputArray{{values[0], values[1], values[2], values[3]}},
+                                               PhiTypes::InputArray{{errors[0], errors[1], errors[2], errors[3]}});
+
+  // When one efficiency is supplied and the other is solved from phi = (2p - 1)(2a - 1), the supplied efficiency may
+  // have been derived from the same non-magnetic workspaces as phi. The covariance with each intensity is
+  // Cov(I_i, eff) ~= d(eff)/d(I_i) Var(I_i), where d(eff)/d(I_i) = ((eff - 0.5) / phi) d(phi)/d(I_i).
+  for (size_t i = 0; i < 4; ++i) {
+    const double covarianceWithDerivedEfficiency =
+        ((values[4] - 0.5) / phiResult.value) * phiResult.derivatives[i] * errors[i] * errors[i];
+    covariance(i, 4) = covarianceWithDerivedEfficiency;
+    covariance(4, i) = covarianceWithDerivedEfficiency;
+  }
+  return covariance;
+}
 } // namespace
 
 namespace Mantid::Algorithms {
@@ -340,15 +367,14 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
     if (const MatrixWorkspace_sptr inWsP = getProperty(PropNames::INPUT_P_EFF_WS)) {
       m_wsP = inWsP->clone();
     } else {
-      g_log.warning("The analyser efficiency workspace provided has been used to calculate the polarizer efficiency."
-                    "This could lead to inflated errors as the analyser efficiency is a derived quantity.");
       const MatrixWorkspace_sptr inWsA = getProperty(PropNames::INPUT_A_EFF_WS);
-      constexpr int var_num = 5;
+      constexpr int var_num = DERIVED_EFFICIENCY_VAR_NUM;
       const auto errorProp = Arithmetic::makeErrorPropagation<var_num>([](const auto &x) {
         const auto TXMO = (2 * x[4]) - 1;
         return (fnPhi(x) / (2 * TXMO)) + 0.5;
       });
-      m_wsP = errorProp.evaluateWorkspaces(true, ws00, ws01, ws10, ws11, inWsA);
+      m_wsP = errorProp.evaluateWorkspacesWithCovariance(true, covarianceMatrixForDerivedEfficiency, ws00, ws01, ws10,
+                                                         ws11, inWsA);
     }
   }
 
@@ -356,15 +382,14 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
     if (const MatrixWorkspace_sptr inWsA = getProperty(PropNames::INPUT_A_EFF_WS)) {
       m_wsA = inWsA->clone();
     } else {
-      g_log.warning("The polarizer efficiency workspace provided has been used to calculate the analyser efficiency. "
-                    "This could lead to inflated errors as the polarizer efficiency is a derived quantity.");
       const MatrixWorkspace_sptr inWsP = getProperty(PropNames::INPUT_P_EFF_WS);
-      constexpr int var_num = 5;
+      constexpr int var_num = DERIVED_EFFICIENCY_VAR_NUM;
       const auto errorProp = Arithmetic::makeErrorPropagation<var_num>([](const auto &x) {
         const auto TXMO = (2 * x[4]) - 1;
         return (fnPhi(x) / (2 * TXMO)) + 0.5;
       });
-      m_wsA = errorProp.evaluateWorkspaces(true, ws00, ws01, ws10, ws11, inWsP);
+      m_wsA = errorProp.evaluateWorkspacesWithCovariance(true, covarianceMatrixForDerivedEfficiency, ws00, ws01, ws10,
+                                                         ws11, inWsP);
     }
   }
 }
