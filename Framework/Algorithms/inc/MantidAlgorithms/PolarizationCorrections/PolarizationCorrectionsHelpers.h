@@ -15,7 +15,9 @@
 #include <Eigen/Dense>
 #include <algorithm>
 #include <cmath>
+#include <concepts>
 #include <optional>
+#include <type_traits>
 #include <unsupported/Eigen/AutoDiff>
 
 namespace Mantid::Algorithms {
@@ -72,6 +74,11 @@ MANTID_ALGORITHMS_DLL void addORSOLogForSpinState(const Mantid::API::MatrixWorks
 
 namespace Arithmetic {
 
+template <typename Provider, typename InputArray, typename CovarianceMatrix>
+concept CovarianceMatrixProviderFor =
+    std::invocable<Provider, const InputArray &, const InputArray &> &&
+    std::convertible_to<std::invoke_result_t<Provider, const InputArray &, const InputArray &>, CovarianceMatrix>;
+
 template <size_t N> class ErrorTypeHelper {
 public:
   using DerType = Eigen::Matrix<double, N, 1>;
@@ -113,75 +120,45 @@ public:
 
   template <std::same_as<API::MatrixWorkspace_sptr>... Ts>
   API::MatrixWorkspace_sptr evaluateWorkspaces(const bool outputWorkspaceDistribution, Ts... args) const {
-    return evaluateWorkspacesImpl(outputWorkspaceDistribution, std::forward<Ts>(args)...);
+    return evaluateWorkspacesImpl(outputWorkspaceDistribution, independentCovarianceMatrixProvider,
+                                  std::forward<Ts>(args)...);
   }
 
   template <std::same_as<API::MatrixWorkspace_sptr>... Ts>
   API::MatrixWorkspace_sptr evaluateWorkspaces(Ts... args) const {
-    return evaluateWorkspacesImpl(std::nullopt, std::forward<Ts>(args)...);
+    return evaluateWorkspacesImpl(std::nullopt, independentCovarianceMatrixProvider, std::forward<Ts>(args)...);
   }
 
-  template <typename CovarianceMatrixProvider, std::same_as<API::MatrixWorkspace_sptr>... Ts>
+  template <typename Provider, std::same_as<API::MatrixWorkspace_sptr>... Ts>
+    requires CovarianceMatrixProviderFor<Provider, InputArray, CovarianceMatrix>
   API::MatrixWorkspace_sptr evaluateWorkspacesWithCovariance(const bool outputWorkspaceDistribution,
-                                                             CovarianceMatrixProvider covarianceMatrixProvider,
-                                                             Ts... args) const {
-    return evaluateWorkspacesWithCovarianceImpl(outputWorkspaceDistribution, covarianceMatrixProvider,
-                                                std::forward<Ts>(args)...);
+                                                             Provider covarianceMatrixProvider, Ts... args) const {
+    return evaluateWorkspacesImpl(outputWorkspaceDistribution, covarianceMatrixProvider, std::forward<Ts>(args)...);
   }
 
-  template <typename CovarianceMatrixProvider, std::same_as<API::MatrixWorkspace_sptr>... Ts>
-  API::MatrixWorkspace_sptr evaluateWorkspacesWithCovariance(CovarianceMatrixProvider covarianceMatrixProvider,
-                                                             Ts... args) const {
-    return evaluateWorkspacesWithCovarianceImpl(std::nullopt, covarianceMatrixProvider, std::forward<Ts>(args)...);
+  template <typename Provider, std::same_as<API::MatrixWorkspace_sptr>... Ts>
+    requires CovarianceMatrixProviderFor<Provider, InputArray, CovarianceMatrix>
+  API::MatrixWorkspace_sptr evaluateWorkspacesWithCovariance(Provider covarianceMatrixProvider, Ts... args) const {
+    return evaluateWorkspacesImpl(std::nullopt, covarianceMatrixProvider, std::forward<Ts>(args)...);
   }
 
   static CovarianceMatrix covarianceMatrixFromErrors(const InputArray &errors) {
+    // Independent inputs have no off-diagonal covariance terms, so their covariance matrix is diagonal with
+    // C_ii = Var(x_i) = sigma_i^2.
     return errors.array().square().matrix().asDiagonal();
   }
 
 private:
   Func computeFunc;
 
-  template <std::same_as<API::MatrixWorkspace_sptr>... Ts>
-  API::MatrixWorkspace_sptr evaluateWorkspacesImpl(std::optional<bool> outputWorkspaceDistribution, Ts... args) const {
-    const auto firstWs = std::get<0>(std::forward_as_tuple(args...));
-    API::MatrixWorkspace_sptr outWs = firstWs->clone();
-
-    if (outWs->id() == "EventWorkspace") {
-      outWs = convertToWorkspace2D(outWs);
-    }
-
-    const size_t numSpec = outWs->getNumberHistograms();
-    const size_t specSize = outWs->blocksize();
-
-    // cppcheck-suppress unreadVariable
-    const bool isThreadSafe = Kernel::threadSafe((*args)..., *outWs);
-    // cppcheck-suppress unreadVariable
-    const bool specOverBins = numSpec > specSize;
-
-    PARALLEL_FOR_IF(isThreadSafe && specOverBins)
-    for (int64_t i = 0; i < static_cast<int64_t>(numSpec); i++) {
-      auto &yOut = outWs->mutableY(i);
-      auto &eOut = outWs->mutableE(i);
-
-      PARALLEL_FOR_IF(isThreadSafe && !specOverBins)
-      for (int64_t j = 0; j < static_cast<int64_t>(specSize); ++j) {
-        const auto result = evaluate(InputArray{args->y(i)[j]...}, InputArray(args->e(i)[j]...));
-        yOut[j] = result.value;
-        eOut[j] = result.error;
-      }
-    }
-
-    if (outputWorkspaceDistribution.has_value()) {
-      outWs->setDistribution(outputWorkspaceDistribution.value());
-    }
-    return outWs;
+  static CovarianceMatrix independentCovarianceMatrixProvider(const InputArray &, const InputArray &errors) {
+    return covarianceMatrixFromErrors(errors);
   }
 
-  template <typename CovarianceMatrixProvider, std::same_as<API::MatrixWorkspace_sptr>... Ts>
-  API::MatrixWorkspace_sptr evaluateWorkspacesWithCovarianceImpl(std::optional<bool> outputWorkspaceDistribution,
-                                                                 CovarianceMatrixProvider covarianceMatrixProvider,
-                                                                 Ts... args) const {
+  template <typename Provider, std::same_as<API::MatrixWorkspace_sptr>... Ts>
+    requires CovarianceMatrixProviderFor<Provider, InputArray, CovarianceMatrix>
+  API::MatrixWorkspace_sptr evaluateWorkspacesImpl(std::optional<bool> outputWorkspaceDistribution,
+                                                   Provider covarianceMatrixProvider, Ts... args) const {
     const auto firstWs = std::get<0>(std::forward_as_tuple(args...));
     API::MatrixWorkspace_sptr outWs = firstWs->clone();
 
@@ -206,7 +183,7 @@ private:
       for (int64_t j = 0; j < static_cast<int64_t>(specSize); ++j) {
         const InputArray values{args->y(i)[j]...};
         const InputArray errors(args->e(i)[j]...);
-        const auto covariance = covarianceMatrixProvider(values, errors);
+        const CovarianceMatrix covariance = covarianceMatrixProvider(values, errors);
         const auto result = evaluateWithCovariance(values, covariance);
         yOut[j] = result.value;
         eOut[j] = result.error;
