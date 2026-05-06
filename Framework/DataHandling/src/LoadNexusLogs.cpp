@@ -197,13 +197,12 @@ std::unique_ptr<Kernel::Property> createTimeSeries(Nexus::File &file, const std:
 
   // Now the actual data
   Nexus::Info info = file.getInfo();
-  // Check the size
-  if (size_t(info.dims[0]) != time_double.size()) {
-    file.closeData();
-    throw Nexus::Exception("Invalid value entry for time series");
-  }
-  if (file.isDataInt()) // Int type
-  {
+  if (file.isDataInt()) { // Int type
+    // Check the size
+    if (size_t(info.dims[0]) != time_double.size()) {
+      file.closeData();
+      throw Nexus::Exception("Invalid value entry for time series");
+    }
     std::vector<int> values;
     try {
       file.getDataCoerce(values);
