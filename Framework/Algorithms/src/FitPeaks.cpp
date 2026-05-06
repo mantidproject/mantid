@@ -1226,10 +1226,12 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
     try {
       if (wi > 0 && samePeakCrossSpectrum) {
         size_t lastGoodWi = lastGoodPeakSpectra[peak_index];
-        std::shared_ptr<const Geometry::Detector> pdetector =
-            std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(lastGoodWi));
-        std::shared_ptr<const Geometry::Detector> cdetector =
-            std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi));
+        std::shared_ptr<const Geometry::Detector> pdetector;
+        std::shared_ptr<const Geometry::Detector> cdetector;
+        PARALLEL_CRITICAL(FitPeaks_DetectorInfoAccess) {
+          pdetector = std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(lastGoodWi));
+          cdetector = std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi));
+        }
 
         // If they do have detector ID
         if (pdetector && cdetector) {
@@ -1269,7 +1271,9 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
     peakfunction->setCentre(expected_peak_pos);
 
     std::pair<double, double> peak_window_i = m_getPeakFitWindow(wi, peak_index);
-    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window_i.first, peak_window_i.second);
+    PARALLEL_CRITICAL(FitPeaks_DetectorInfoAccess) {
+      peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window_i.first, peak_window_i.second);
+    }
     // reset value of parameters that were fixed (but are now free to vary)
     for (const auto &[ipar, value] : keep_values) {
       peakfunction->setParameter(ipar, value);
@@ -1510,65 +1514,41 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
   const size_t num_peakfunc_params = m_peakFunction->nParams();
   const size_t num_bkgdfunc_params = m_bkgdFunction->nParams();
 
-  // Configure the peak functions before entering the parallel region. Some peak
-  // functions use setMatrixWorkspace() to initialise detector/workspace-derived
-  // state. Doing that concurrently may cause issues
-  // evaluating the function later, when this requires that each function has
-  // already been configured for the correct workspace index and fit range.
-  std::vector<std::vector<IPeakFunction_sptr>> peak_functions(m_numSpectraToFit,
-                                                              std::vector<IPeakFunction_sptr>(m_numPeaksToFit));
-  std::vector<std::vector<IBackgroundFunction_sptr>> bkgd_functions(
-      m_numSpectraToFit, std::vector<IBackgroundFunction_sptr>(m_numPeaksToFit));
-
-  for (size_t iws = m_startWorkspaceIndex; iws <= m_stopWorkspaceIndex; ++iws) {
-    const size_t output_iws = iws - m_startWorkspaceIndex;
-    const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result_i = fit_results[output_iws];
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_fittedPeakWS))
+  for (int64_t iiws = m_startWorkspaceIndex; iiws <= static_cast<int64_t>(m_stopWorkspaceIndex); ++iiws) {
+    PARALLEL_START_INTERRUPT_REGION
+    std::size_t iws = static_cast<std::size_t>(iiws);
+    // get a copy of peak function and background function
+    IPeakFunction_sptr peak_function = std::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
+    IBackgroundFunction_sptr bkgd_function = std::dynamic_pointer_cast<IBackgroundFunction>(m_bkgdFunction->clone());
+    std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result_i = fit_results[iws - m_startWorkspaceIndex];
     // FIXME - This is a just a pure check
     if (!fit_result_i)
       throw std::runtime_error("There is something wroing with PeakFitResult vector!");
 
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
+      // get and set the peak function parameters
       const double chi2 = fit_result_i->getCost(ipeak);
       if (chi2 > 10.e10)
         continue;
-
-      IPeakFunction_sptr peak_function = std::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
-      IBackgroundFunction_sptr bkgd_function = std::dynamic_pointer_cast<IBackgroundFunction>(m_bkgdFunction->clone());
 
       for (size_t iparam = 0; iparam < num_peakfunc_params; ++iparam)
         peak_function->setParameter(iparam, fit_result_i->getParameterValue(ipeak, iparam));
       for (size_t iparam = 0; iparam < num_bkgdfunc_params; ++iparam)
         bkgd_function->setParameter(iparam, fit_result_i->getParameterValue(ipeak, num_peakfunc_params + iparam));
-
-      const std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
-      peak_function->setMatrixWorkspace(m_inputMatrixWS, iws, peakwindow.first, peakwindow.second);
-
-      peak_functions[output_iws][ipeak] = peak_function;
-      bkgd_functions[output_iws][ipeak] = bkgd_function;
-    }
-  }
-
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_fittedPeakWS))
-  for (int64_t iiws = m_startWorkspaceIndex; iiws <= static_cast<int64_t>(m_stopWorkspaceIndex); ++iiws) {
-    PARALLEL_START_INTERRUPT_REGION
-    const std::size_t iws = static_cast<std::size_t>(iiws);
-    const size_t output_iws = iws - m_startWorkspaceIndex;
-
-    for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-      const IPeakFunction_sptr &peak_function = peak_functions[output_iws][ipeak];
-      const IBackgroundFunction_sptr &bkgd_function = bkgd_functions[output_iws][ipeak];
-      if (!peak_function || !bkgd_function)
-        continue;
-
-      // use domain and function to calculate
+      // use domain and function to calcualte
       // get the range of start and stop to construct a function domain
       const auto vec_x = m_fittedPeakWS->points(iws);
-      const std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
+      std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
       auto start_x_iter = std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.first);
       auto stop_x_iter = std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.second);
 
       if (start_x_iter == stop_x_iter)
         throw std::runtime_error("Range size is zero in calculateFittedPeaks");
+
+      PARALLEL_CRITICAL(FitPeaks_DetectorInfoAccess) {
+        peak_function->setMatrixWorkspace(m_inputMatrixWS, iws, peakwindow.first, peakwindow.second);
+      }
 
       FunctionDomain1DVector domain(start_x_iter, stop_x_iter);
       FunctionValues values(domain);
@@ -2169,8 +2149,7 @@ size_t FitPeaks::histRangeToDataPointCount(size_t iws, const std::pair<double, d
  */
 void FitPeaks::histRangeToIndexBounds(size_t iws, const std::pair<double, double> &range, size_t &left_index,
                                       size_t &right_index) {
-  const auto hist_x = m_inputMatrixWS->histogram(iws).x();
-  const auto &orig_x = hist_x;
+  const auto orig_x = m_inputMatrixWS->histogram(iws).x();
   rangeToIndexBounds(orig_x, range.first, range.second, left_index, right_index);
 
   // handle an invalid range case. For the histogram point data, make sure the number of data points is non-zero as
@@ -2202,8 +2181,7 @@ void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &range, 
   size_t num_elements_x = right_index - left_index;
 
   vec_x.resize(num_elements_x);
-  const auto hist_x = m_inputMatrixWS->histogram(iws).x();
-  const auto &orig_x = hist_x;
+  const auto orig_x = m_inputMatrixWS->histogram(iws).x();
   std::copy(orig_x.begin() + left_index, orig_x.begin() + right_index, vec_x.begin());
 
   size_t num_datapoints = m_inputMatrixWS->isHistogramData() ? num_elements_x - 1 : num_elements_x;
@@ -2380,7 +2358,9 @@ void FitPeaks::writeFitResult(size_t wi, const std::vector<double> &expected_pos
         peak_function->setParameter(iparam, fit_result->getParameterValue(ipeak, iparam));
 
       const std::pair<double, double> peak_window = m_getPeakFitWindow(wi, ipeak);
-      peak_function->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window.first, peak_window.second);
+      PARALLEL_CRITICAL(FitPeaks_DetectorInfoAccess) {
+        peak_function->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window.first, peak_window.second);
+      }
 
       // set the effective peak parameters
       m_fittedParamTable->cell<double>(row_index, 2) = peak_function->centre();
