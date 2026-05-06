@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -41,8 +41,8 @@ namespace {
 std::string const OUTPUT_WORKSPACE_DEFAULT_PREFIX("IvsQ");
 std::string const OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX("IvsLam");
 
-static constexpr double degToRad = M_PI / 180.;
-static constexpr double radToDeg = 180. / M_PI;
+static constexpr double DEG_TO_RAD = M_PI / 180.;
+static constexpr double RAD_TO_DEG = 180. / M_PI;
 
 /** Get the twoTheta angle for the centre of the detector associated with the
  * given spectrum
@@ -337,13 +337,13 @@ MatrixWorkspace_sptr ReflectometryReductionOne3::backgroundSubtraction(MatrixWor
   alg->initialize();
   alg->setProperty("InputWorkspace", detectorWS);
   alg->setProperty("InputWorkspaceIndexType", "SpectrumNumber");
-  alg->setProperty("ProcessingInstructions", getPropertyValue("BackgroundProcessingInstructions"));
-  alg->setProperty("BackgroundCalculationMethod", getPropertyValue("BackgroundCalculationMethod"));
-  alg->setProperty("DegreeOfPolynomial", getPropertyValue("DegreeOfPolynomial"));
-  alg->setProperty("CostFunction", getPropertyValue("CostFunction"));
+  setAlgPropertyValueFromSelf("BackgroundProcessingInstructions", alg, "ProcessingInstructions");
+  setAlgPropertyValueFromSelf("BackgroundCalculationMethod", alg);
+  setAlgPropertyValueFromSelf("DegreeOfPolynomial", alg);
+  setAlgPropertyValueFromSelf("CostFunction", alg);
   // For our case, the peak range is the same as the main processing
   // instructions, and we do the summation separately so don't sum the peak
-  alg->setProperty("PeakRange", getPropertyValue("ProcessingInstructions"));
+  setAlgPropertyValueFromSelf("ProcessingInstructions", alg, "PeakRange");
   alg->setProperty("SumPeak", false);
   alg->execute();
   MatrixWorkspace_sptr corrected = alg->getProperty("OutputWorkspace");
@@ -376,26 +376,26 @@ ReflectometryReductionOne3::transmissionCorrection(const MatrixWorkspace_sptr &d
       transmissionCommands = getPropertyValue("TransmissionProcessingInstructions");
     }
 
-    bool const isDebug = getProperty("Debug");
-    MatrixWorkspace_sptr secondTransmissionWS = getProperty("SecondTransmissionRun");
     auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
     alg->initialize();
     alg->setProperty("FirstTransmissionRun", transmissionWS);
+
+    MatrixWorkspace_sptr secondTransmissionWS = getProperty("SecondTransmissionRun");
     alg->setProperty("SecondTransmissionRun", secondTransmissionWS);
-    alg->setPropertyValue("Params", getPropertyValue("Params"));
-    alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-    alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-    alg->setProperty("ScaleRHSWorkspace", getPropertyValue("ScaleRHSWorkspace"));
-    alg->setPropertyValue("I0MonitorIndex", getPropertyValue("I0MonitorIndex"));
-    alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
-    alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));
-    alg->setPropertyValue("MonitorBackgroundWavelengthMin", getPropertyValue("MonitorBackgroundWavelengthMin"));
-    alg->setPropertyValue("MonitorBackgroundWavelengthMax", getPropertyValue("MonitorBackgroundWavelengthMax"));
-    alg->setPropertyValue("MonitorIntegrationWavelengthMin", getPropertyValue("MonitorIntegrationWavelengthMin"));
-    alg->setPropertyValue("MonitorIntegrationWavelengthMax", getPropertyValue("MonitorIntegrationWavelengthMax"));
+    setAlgPropertyValueFromSelf("Params", alg);
+    setAlgPropertyValueFromSelf("StartOverlap", alg);
+    setAlgPropertyValueFromSelf("EndOverlap", alg);
+    setAlgPropertyValueFromSelf("ScaleRHSWorkspace", alg);
+    setAlgPropertyValueFromSelf("I0MonitorIndex", alg);
+    setAlgPropertyValueFromSelf("WavelengthMin", alg);
+    setAlgPropertyValueFromSelf("WavelengthMax", alg);
+    setAlgPropertyValueFromSelf("MonitorBackgroundWavelengthMin", alg);
+    setAlgPropertyValueFromSelf("MonitorBackgroundWavelengthMax", alg);
+    setAlgPropertyValueFromSelf("MonitorIntegrationWavelengthMin", alg);
+    setAlgPropertyValueFromSelf("MonitorIntegrationWavelengthMax", alg);
     alg->setProperty("ProcessingInstructions", transmissionCommands);
-    alg->setProperty("NormalizeByIntegratedMonitors", getPropertyValue("NormalizeByIntegratedMonitors"));
-    alg->setProperty("Debug", isDebug);
+    setAlgPropertyValueFromSelf("NormalizeByIntegratedMonitors", alg);
+    setAlgPropertyValueFromSelf("Debug", alg);
     alg->execute();
     transmissionWS = alg->getProperty("OutputWorkspace");
     transmissionWSName = alg->getPropertyValue("OutputWorkspace");
@@ -430,6 +430,13 @@ ReflectometryReductionOne3::transmissionCorrection(const MatrixWorkspace_sptr &d
   return {normalized, transmissionWS};
 }
 
+void ReflectometryReductionOne3::setAlgPropertyValueFromSelf(const std::string &propName, Algorithm_sptr &alg,
+                                                             const std::string &algPropName) {
+  std::string algPropNameToUse = algPropName.empty() ? propName : algPropName;
+  if (alg)
+    alg->setPropertyValue(algPropNameToUse, getPropertyValue(propName));
+}
+
 /**
  * Perform transmission correction using alternative correction algorithms
  * @param detectorWS : workspace in wavelength which is to be normalized by the
@@ -443,10 +450,10 @@ MatrixWorkspace_sptr ReflectometryReductionOne3::algorithmicCorrection(const Mat
   auto corrAlg = createChildAlgorithm(corrAlgName);
   corrAlg->initialize();
   if (corrAlgName == "PolynomialCorrection") {
-    corrAlg->setPropertyValue("Coefficients", getPropertyValue("Polynomial"));
+    setAlgPropertyValueFromSelf("Polynomial", corrAlg, "Coefficients");
   } else if (corrAlgName == "ExponentialCorrection") {
-    corrAlg->setPropertyValue("C0", getPropertyValue("C0"));
-    corrAlg->setPropertyValue("C1", getPropertyValue("C1"));
+    setAlgPropertyValueFromSelf("C0", corrAlg);
+    setAlgPropertyValueFromSelf("C1", corrAlg);
   } else {
     throw std::runtime_error("Unknown correction algorithm: " + corrAlgName);
   }
@@ -518,7 +525,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne3::convertToQ(const MatrixWorkspac
     // The angle to use in conversion is different for each mode
     double theta = 0.0;
     if (summingInQ())
-      theta = getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectorGroups()[0])) * radToDeg / 2.;
+      theta = getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectorGroups()[0])) * RAD_TO_DEG / 2.;
     else
       theta = getProperty("ThetaIn");
 
@@ -550,14 +557,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne3::convertToQ(const MatrixWorkspac
  * @return : true if the reduction should sum in Q; false otherwise
  */
 bool ReflectometryReductionOne3::summingInQ() const {
-  bool result = false;
   const std::string summationType = getProperty("SummationType");
-
-  if (summationType == "SumInQ") {
-    result = true;
-  }
-
-  return result;
+  return summationType == "SumInQ";
 }
 
 /**
@@ -625,7 +626,7 @@ void ReflectometryReductionOne3::findTheta0() {
   g_log.debug("theta0: " + std::to_string(theta0()) + " degrees\n");
 
   // Convert to radians
-  m_theta0 *= degToRad;
+  m_theta0 *= DEG_TO_RAD;
 }
 
 /**
@@ -1021,8 +1022,8 @@ void ReflectometryReductionOne3::getProjectedLambdaRange(const double lambda, co
 
   // We cannot project pixels below the horizon angle
   if (twoTheta <= theta0()) {
-    throw std::runtime_error("Cannot process twoTheta=" + std::to_string(twoTheta * radToDeg) +
-                             " as it is below the horizon angle=" + std::to_string(theta0() * radToDeg));
+    throw std::runtime_error("Cannot process twoTheta=" + std::to_string(twoTheta * RAD_TO_DEG) +
+                             " as it is below the horizon angle=" + std::to_string(theta0() * RAD_TO_DEG));
   }
 
   // Get the angle from twoThetaR to this detector
@@ -1046,7 +1047,7 @@ void ReflectometryReductionOne3::getProjectedLambdaRange(const double lambda, co
     lambdaVMax = std::max(lambdaV1, lambdaV2);
   } catch (std::exception &ex) {
     throw std::runtime_error("Failed to project (lambda, twoTheta) = (" + std::to_string(lambda) + "," +
-                             std::to_string(twoTheta * radToDeg) +
+                             std::to_string(twoTheta * RAD_TO_DEG) +
                              ") onto twoThetaR = " + std::to_string(twoThetaRVal) + ": " + ex.what());
   }
 }

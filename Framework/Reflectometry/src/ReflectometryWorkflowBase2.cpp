@@ -889,30 +889,34 @@ std::vector<std::string> ReflectometryWorkflowBase2::getTaskExecutionOrderFromPr
   std::string sumDetectorsTask;
   // Select tasks based upon summation type
   if (summingInQ) {
-    teo = {
-        "TaskBackgroundSubtraction", "TaskConvertToWavelength", "TaskNormalizeByMonitor", "TaskNormalizeByTransmission",
-        "TaskSumDetectorsInQ",       "TaskCropWavelength",      "TaskConvertToQ"};
-    sumDetectorsTask = "TaskSumDetectorsInQ";
+    teo = {Tasks::BackgroundSubtraction::name,
+           Tasks::ConvertToWavelength::name,
+           Tasks::NormalizeByMonitor::name,
+           Tasks::NormalizeByTransmission::name,
+           Tasks::SumDetectorsInQ::name,
+           Tasks::CropWavelength::name,
+           Tasks::ConvertToQ::name};
+    sumDetectorsTask = Tasks::SumDetectorsInQ::name;
   } else {
-    teo = {"TaskExtractROI",
-           "TaskBackgroundSubtraction",
-           "TaskSumDetectors",
-           "TaskConvertToWavelength",
-           "TaskNormalizeByMonitor",
-           "TaskCropWavelength",
-           "TaskNormalizeByTransmission",
-           "TaskConvertToQ"};
-    sumDetectorsTask = "TaskSumDetectors";
+    teo = {Tasks::ExtractROI::name,
+           Tasks::BackgroundSubtraction::name,
+           Tasks::SumDetectors::name,
+           Tasks::ConvertToWavelength::name,
+           Tasks::NormalizeByMonitor::name,
+           Tasks::CropWavelength::name,
+           Tasks::NormalizeByTransmission::name,
+           Tasks::ConvertToQ::name};
+    sumDetectorsTask = Tasks::SumDetectors::name;
   }
 
   if (reduced) {
     // Assume already part reduced: lambda workspace already normalized and summed
-    std::erase(teo, "TaskExtractROI");
-    std::erase(teo, "TaskBackgroundSubtraction");
-    std::erase(teo, "TaskNormalizeByMonitor");
-    std::erase(teo, "TaskConvertToWavelength");
-    std::erase(teo, "TaskNormalizeByMonitor");
-    std::erase(teo, "TaskNormalizeByTransmission");
+    std::erase(teo, Tasks::ExtractROI::name);
+    std::erase(teo, Tasks::BackgroundSubtraction::name);
+    std::erase(teo, Tasks::NormalizeByMonitor::name);
+    std::erase(teo, Tasks::ConvertToWavelength::name);
+    std::erase(teo, Tasks::NormalizeByMonitor::name);
+    std::erase(teo, Tasks::NormalizeByTransmission::name);
     std::erase(teo, sumDetectorsTask);
     return teo;
   }
@@ -922,24 +926,24 @@ std::vector<std::string> ReflectometryWorkflowBase2::getTaskExecutionOrderFromPr
   const Property *backgroundMinProperty = getProperty(MonBGWaveMinProp);
   const Property *backgroundMaxProperty = getProperty(MonBGWaveMaxProp);
   if (monProperty->isDefault() || backgroundMinProperty->isDefault() || backgroundMaxProperty->isDefault()) {
-    std::erase(teo, "TaskNormalizeByMonitor");
+    std::erase(teo, Tasks::NormalizeByMonitor::name);
   }
 
   // evaluate necessity of transmission/alg normalization
   const Property *transRun = getProperty(firstTransRunProp);
   const Property *correctionAlg = getProperty(correctionAlgProp);
   if (!correctionAlg->isDefault()) {
-    auto it = std::find(teo.begin(), teo.end(), "TaskNormalizeByTransmission");
+    auto it = std::find(teo.begin(), teo.end(), Tasks::NormalizeByTransmission::name);
     if (it != teo.end()) {
-      *it = "TaskNormalizeByAlgorithm";
+      *it = Tasks::NormalizeByAlgorithm::name;
     }
   } else if (transRun->isDefault()) {
-    std::erase(teo, "TaskNormalizeByTransmission");
+    std::erase(teo, Tasks::NormalizeByTransmission::name);
   }
   // evaluate necessity of background subtraction
   const Property *subtractBackground = getProperty(subBGProp);
   if (subtractBackground->isDefault()) {
-    std::erase(teo, "TaskBackgroundSubtraction");
+    std::erase(teo, Tasks::BackgroundSubtraction::name);
   }
   return teo;
 }

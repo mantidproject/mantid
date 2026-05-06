@@ -17,6 +17,70 @@ using namespace Mantid::Geometry;
 namespace Mantid {
 namespace Reflectometry {
 
+struct Tasks {
+  struct NormalizeByMonitor {
+    static constexpr const char *name = "TaskNormalizeByMonitor";
+    struct Outputs {
+      static constexpr const char *MonitorCorrectedWorkspace = "MonitorCorrectedWorkspace";
+    };
+  };
+  struct NormalizeByTransmission {
+    static constexpr const char *name = "TaskNormalizeByTransmission";
+    struct Outputs {
+      static constexpr const char *TransmissionCorrectedWorkspace = "TransmissionCorrectedWorkspace";
+      static constexpr const char *TransmissionWorkspace = "TransmissionWorkspace";
+    };
+  };
+  struct NormalizeByAlgorithm {
+    static constexpr const char *name = "TaskNormalizeByAlgorithm";
+    struct Outputs {
+      static constexpr const char *AlgorithmCorrectedWorkspace = "AlgorithmCorrectedWorkspace";
+    };
+  };
+  struct SumDetectorsInQ {
+    static constexpr const char *name = "TaskSumDetectorsInQ";
+    struct Outputs {
+      static constexpr const char *QSummedWorkspace = "QSummedWorkspace";
+    };
+  };
+  struct CropWavelength {
+    static constexpr const char *name = "TaskCropWavelength";
+    struct Outputs {
+      static constexpr const char *CroppedWorkspace = "CroppedWorkspace";
+    };
+  };
+  struct ConvertToQ {
+    static constexpr const char *name = "TaskConvertToQ";
+    struct Outputs {
+      static constexpr const char *ConvertedWorkspaceQ = "ConvertedWorkspaceQ";
+    };
+  };
+  struct ConvertToWavelength {
+    static constexpr const char *name = "TaskConvertToWavelength";
+    struct Outputs {
+      static constexpr const char *ConvertedWorkspaceWavelength = "ConvertedWorkspaceWavelength";
+    };
+  };
+  struct SumDetectors {
+    static constexpr const char *name = "TaskSumDetectors";
+    struct Outputs {
+      static constexpr const char *SummedWorkspace = "SummedWorkspace";
+    };
+  };
+  struct BackgroundSubtraction {
+    static constexpr const char *name = "TaskBackgroundSubtraction";
+    struct Outputs {
+      static constexpr const char *BackgroundSubtractedWorkspace = "BackgroundSubtractedWorkspace";
+    };
+  };
+  struct ExtractROI {
+    static constexpr const char *name = "TaskExtractROI";
+    struct Outputs {
+      static constexpr const char *ExtractedROIWorkspace = "ExtractedROIWorkspace";
+    };
+  };
+};
+
 /** ReflectometryWorkflowBase2 : base class containing common implementation
  functionality usable by concrete reflectometry workflow algorithms. Version 2.
  */
