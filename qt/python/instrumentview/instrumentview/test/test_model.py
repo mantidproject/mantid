@@ -675,13 +675,13 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_mask_ws(self):
         model, mock_ws = self._setup_model([1, 2, 3])
         _ = model.mask_ws
-        mock_ws.clone.assert_called_once_with(StoreInADS=True, OutputWorkspace="tmp")
+        mock_ws.clone.assert_called_once_with(StoreInADS=True, OutputWorkspace="_tmp")
         self._mock_extract_mask.assert_called()
 
     def test_roi_ws(self):
         model, mock_ws = self._setup_model([1, 2, 3])
         _ = model.roi_ws
-        mock_ws.clone.assert_called_once_with(StoreInADS=True, OutputWorkspace="tmp")
+        mock_ws.clone.assert_called_once_with(StoreInADS=True, OutputWorkspace="_tmp")
         self._mock_extract_mask.assert_called()
 
     def test_add_mask(self):

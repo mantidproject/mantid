@@ -198,20 +198,29 @@ class FullInstrumentViewModel:
 
     @property
     def mask_ws(self) -> MatrixWorkspace:
-        tmp = self._workspace.clone(StoreInADS=True, OutputWorkspace="tmp")
-        tmp.maskDetectors(DetectorList=self._detector_ids[self._is_masked])
-        mask_ws, _ = ExtractMask(tmp, StoreInADS=False)
-        DeleteWorkspace(tmp)
-        return mask_ws
+        # TODO: Fix MaskDetectors so it doesn't require ws to be in ADS
+        tmp_name = "_tmp"
+        tmp = self._workspace.clone(StoreInADS=True, OutputWorkspace=tmp_name)
+        try:
+            tmp.maskDetectors(DetectorList=self._detector_ids[self._is_masked])
+            mask_ws, _ = ExtractMask(tmp, StoreInADS=False)
+            return mask_ws
+        finally:
+            if AnalysisDataService.doesExist(tmp_name):
+                DeleteWorkspace(tmp_name)
 
     @property
     def roi_ws(self) -> MatrixWorkspace:
         # TODO: Fix MaskDetectors so it doesn't require ws to be in ADS
-        tmp = self._workspace.clone(StoreInADS=True, OutputWorkspace="tmp")
-        tmp.maskDetectors(DetectorList=self._detector_ids[~self._detector_is_picked])
-        roi_ws, _ = ExtractMask(tmp, StoreInADS=False)
-        DeleteWorkspace(tmp)
-        return roi_ws
+        tmp_name = "_tmp"
+        tmp = self._workspace.clone(StoreInADS=True, OutputWorkspace=tmp_name)
+        try:
+            tmp.maskDetectors(DetectorList=self._detector_ids[~self._detector_is_picked])
+            roi_ws, _ = ExtractMask(tmp, StoreInADS=False)
+            return roi_ws
+        finally:
+            if AnalysisDataService.doesExist(tmp_name):
+                DeleteWorkspace(tmp_name)
 
     @property
     def integration_limits(self) -> tuple[float, float]:
