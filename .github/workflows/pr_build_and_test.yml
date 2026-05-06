@@ -105,8 +105,8 @@ jobs:
 
       - name: Determine if a PR build
         run: |
+          echo "ACTION=${{ github.event_name }}"
           echo "ACTION=${{ github.event.action }}"
-          #if ${{ github.event.action }}"
           echo "Telling jenkins scripts this is a PR build"
           echo "JOB_NAME=pull_requests" >> $GITHUB_ENV
 
