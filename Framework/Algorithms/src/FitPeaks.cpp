@@ -1240,9 +1240,16 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
         std::shared_ptr<const Geometry::Detector> pdetector;
         std::shared_ptr<const Geometry::Detector> cdetector;
         PARALLEL_CRITICAL(FitPeaks_DetectorInfoAccess) {
-          size_t lastGoodWi = lastGoodPeakSpectra[peak_index];
-          pdetector = std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(lastGoodWi));
-          cdetector = std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi));
+          // getDetector() throws NotFoundError for detector IDs that exist in
+          // the spectrum mapping but not in the instrument. Catch inside the
+          // critical section
+          try {
+            size_t lastGoodWi = lastGoodPeakSpectra[peak_index];
+            pdetector = std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(lastGoodWi));
+            cdetector = std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi));
+          } catch (const Exception::NotFoundError &) {
+            // leave pdetector/cdetector null; handled by the null check below
+          }
         }
 
         // If they do have detector ID
