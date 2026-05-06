@@ -324,8 +324,9 @@ void ResampleX::exec() {
 
       if (common_limits) {
         // get the delta from the first since they are all the same
-        BinEdges xValues(0);
-        const double delta = this->determineBinning(xValues.mutableRawData(), xmins[0], xmaxs[0]);
+        std::vector<double> xAxisTmp;
+        const double delta = this->determineBinning(xAxisTmp, xmins[0], xmaxs[0]);
+        BinEdges xValues(std::move(xAxisTmp));
         g_log.debug() << "delta = " << delta << "\n";
         outputEventWS->setAllX(xValues);
       } else {
@@ -336,8 +337,9 @@ void ResampleX::exec() {
         PARALLEL_FOR_IF(Kernel::threadSafe(*inputEventWS, *outputWS))
         for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
           PARALLEL_START_INTERRUPT_REGION
-          BinEdges xValues(0);
-          const double delta = this->determineBinning(xValues.mutableRawData(), xmins[wkspIndex], xmaxs[wkspIndex]);
+          std::vector<double> xAxisTmp;
+          const double delta = this->determineBinning(xAxisTmp, xmins[wkspIndex], xmaxs[wkspIndex]);
+          BinEdges xValues(std::move(xAxisTmp));
           g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta << " xmin=" << xmins[wkspIndex]
                         << " xmax=" << xmaxs[wkspIndex] << "\n";
           outputEventWS->setHistogram(wkspIndex, xValues);
