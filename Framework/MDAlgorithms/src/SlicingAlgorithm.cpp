@@ -291,6 +291,10 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
   m_transformScaling.clear();
 
   // Create the dimensions based on the strings from the user
+  m_binDimensions.clear();
+  m_bases.clear();
+  m_binningScaling.clear();
+  m_transformScaling.clear();
   for (char dimChar : dimChars) {
     std::string propName = "BasisVector0";
     propName[11] = dimChar;
@@ -530,6 +534,8 @@ void SlicingAlgorithm::createAlignedTransform() {
                              "exist in the MDEventWorkspace.");
 
   // Create the dimensions based on the strings from the user
+  m_binDimensions.clear();
+  m_dimensionToBinFrom.clear();
   for (size_t i = 0; i < numDims; i++) {
     std::string propName = "AlignedDim0";
     propName[10] = dimChars[i];
