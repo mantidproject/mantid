@@ -6,22 +6,21 @@
 the create a distinct ENTITY for each bank-->
 
 <!DOCTYPE parameter-file [
-    <!ENTITY alpha_0 "0.0968">
-    <!ENTITY beta_0 "0.0216">
-    <!ENTITY beta_1 "0.0123">
-    <!ENTITY sigma_0_sq "0.0">
-    <!ENTITY sigma_1_sq "82.1321">
-    <!ENTITY sigma_2_sq "42.5988">
-    <!ENTITY PVgamma_0 "0.0">
-    <!ENTITY PVgamma_1 "5.147">
-    <!ENTITY PVgamma_2 "0.0">
-    <!ENTITY PValpha "0.2749">
-    <!ENTITY PVbeta_0 "0.01793">
-    <!ENTITY PVbeta_1 "0.03797">
-    <!ENTITY PVsigma_0_sq "388.24">
-    <!ENTITY PVsigma_1_sq "76.865">
-    <!ENTITY PVsigma_2_sq "43.299">
-]>
+          <!ENTITY alpha_0     "0.671635">
+          <!ENTITY beta_0      "0.003134">
+          <!ENTITY beta_1      "0.020802">
+          <!ENTITY sigma_0_sq  "538.955080">
+          <!ENTITY sigma_1_sq  "100.289438">
+          <!ENTITY sigma_2_sq  "90.359905">
+          <!ENTITY PVgamma_0 "0.0">
+          <!ENTITY PVgamma_1 "5.147">
+          <!ENTITY PVgamma_2 "0.0">
+          <!ENTITY PValpha "0.2749">
+          <!ENTITY PVbeta_0 "0.01793">
+          <!ENTITY PVbeta_1 "0.03797">
+          <!ENTITY PVsigma_0_sq "388.24">
+          <!ENTITY PVsigma_1_sq "76.865">
+          <!ENTITY PVsigma_2_sq "43.299">]>
 
 <parameter-file instrument="IMAT" valid-from="2026-1-1">
 
@@ -55,7 +54,7 @@ the create a distinct ENTITY for each bank-->
   <parameter name="BackToBackExponential:B" type="fitting">
     <formula eq="((&beta_0;)+(&beta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" />
   </parameter>
-  
+
   <parameter name="Bk2BkExpConvPV:Alpha" type="fitting">
     <formula eq="((&PValpha;)/centre)" unit="dSpacing" result-unit="1/TOF" />
   </parameter>
@@ -68,7 +67,7 @@ the create a distinct ENTITY for each bank-->
   <parameter name="Bk2BkExpConvPV:Gamma" type="fitting">
     <formula eq="(&PVgamma_2;)*centre^2+(&PVgamma_1;)*centre+(&PVgamma_0;)" unit="dSpacing" result-unit="TOF" />
   </parameter>
-  
+
 </component-link>
 
 <component-link name="SouthBank" >
@@ -101,7 +100,7 @@ the create a distinct ENTITY for each bank-->
   <parameter name="BackToBackExponential:B" type="fitting">
     <formula eq="((&beta_0;)+(&beta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" />
   </parameter>
-  
+
   <parameter name="Bk2BkExpConvPV:Alpha" type="fitting">
     <formula eq="((&PValpha;)/centre)" unit="dSpacing" result-unit="1/TOF" />
   </parameter>
