@@ -436,7 +436,14 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] != index) {
     m_lastIndex[thread] = index;
-    m_lastDetector[thread] = m_instrument->getDetector((*m_detectorIDs)[index]);
+    try {
+      m_lastDetector[thread] = m_instrument->getDetector((*m_detectorIDs)[index]);
+    } catch (...) {
+      // Reset so a future call for this index retries rather than returning
+      // whatever stale pointer m_lastDetector holds from a previous access.
+      m_lastIndex[thread] = -1;
+      throw;
+    }
   }
 
   return *m_lastDetector[thread];
