@@ -790,7 +790,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 ws_groups.append(ws)
         return ws_groups
 
-    def _create_and_sort_refl_datasets(self) -> List[ReflectometryDatasetHistory]:
+    def _create_and_sort_refl_datasets(self) -> List[ReflectometryDatasetBase]:
         """Retrieve the workspaces from the input list, transform them into ReflectometryDataset objects and sort them
         into the order that the datasets should appear in the ORSO file"""
         ws_groups_in_ADS = self._get_all_workspace_groups()
@@ -848,7 +848,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         return dataset
 
-    def _create_orso_dataset(self, refl_dataset: ReflectometryDatasetHistory) -> MantidORSODataset:
+    def _create_orso_dataset(self, refl_dataset: ReflectometryDatasetBase) -> MantidORSODataset:
         data_columns = self._create_data_columns(refl_dataset)
         dataset = self._create_dataset_with_mandatory_header(data_columns, refl_dataset)
         if dataset.dataset is None:
@@ -857,7 +857,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         self._add_optional_header_info(dataset, refl_dataset)
         return dataset
 
-    def _create_data_columns(self, refl_dataset: ReflectometryDatasetHistory) -> MantidORSODataColumns:
+    def _create_data_columns(self, refl_dataset: ReflectometryDatasetBase) -> MantidORSODataColumns:
         """
         Set up the column headers and data values
         """
@@ -893,7 +893,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         return data_columns
 
-    def _convert_from_q_to_wavelength(self, refl_dataset: ReflectometryDatasetHistory, q_data: np.ndarray) -> np.ndarray:
+    def _convert_from_q_to_wavelength(self, refl_dataset: ReflectometryDatasetBase, q_data: np.ndarray) -> np.ndarray:
         conversion_method = refl_dataset.q_conversion_method
 
         # The method to convert back to wavelength depends on which method was used to perform the conversion to Q
@@ -926,7 +926,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     def _create_dataset_with_mandatory_header(
         self,
         data_columns: MantidORSODataColumns,
-        refl_dataset: ReflectometryDatasetHistory,
+        refl_dataset: ReflectometryDatasetBase,
     ) -> MantidORSODataset:
         """
         Create a dataset with the data columns and the mandatory information populated in the header
@@ -994,7 +994,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 return rb_num, f"{self._ISIS_DOI_PREFIX}{rb_num}"
         return None, None
 
-    def _get_resolution(self, refl_dataset: ReflectometryDatasetHistory) -> Optional[float]:
+    def _get_resolution(self, refl_dataset: ReflectometryDatasetBase) -> Optional[float]:
         if not self.getProperty(Prop.WRITE_RESOLUTION).value and not self.getProperty(Prop.INCLUDE_EXTRA_COLS).value:
             return None
         return refl_dataset.resolution
