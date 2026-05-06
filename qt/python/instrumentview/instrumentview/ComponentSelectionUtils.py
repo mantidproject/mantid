@@ -66,7 +66,10 @@ def detector_table_indices_for_parent_subtrees(
 
 def reflect_points_in_axis(points: np.ndarray, axis: np.ndarray) -> np.ndarray:
     """Return points reflected across a plane perpendicular to the given axis."""
-    axis_normalized = axis / np.linalg.norm(axis)
+    axis_norm = np.linalg.norm(axis)
+    if axis_norm == 0.0:
+        raise ValueError("Axis vector cannot be the zero vector.")
+    axis_normalized = axis / axis_norm
     M = np.eye(3) - 2 * np.outer(axis_normalized, axis_normalized)
     return points @ M.T
 

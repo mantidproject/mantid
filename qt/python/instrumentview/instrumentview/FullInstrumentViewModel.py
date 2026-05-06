@@ -396,14 +396,14 @@ class FullInstrumentViewModel:
         self._flip_beam = value
 
     def _cache_key_for_projection(self, projection_type: ProjectionType) -> str:
-        return f"{projection_type.name}_flip_{self._flip_beam}"
+        return f"{projection_type.name}_flip_{self.flip_beam}"
 
     def _calculate_projection(self) -> np.ndarray:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
         cache_key = self._cache_key_for_projection(self._projection_type)
         if cache_key not in self._cached_projection_objects.keys():
             detector_positions = self._detector_positions_3d
-            if self._flip_beam:
+            if self.flip_beam:
                 detector_positions = reflect_points_in_axis(detector_positions, axis=self._beam_axis)
 
             projection = Projection(

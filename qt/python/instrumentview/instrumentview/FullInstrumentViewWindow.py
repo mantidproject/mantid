@@ -242,7 +242,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._flip_beam_check_box = QCheckBox()
         self._flip_beam_check_box.setText("Flip Beam?")
         self._flip_beam_check_box.setToolTip(
-            "If checked, the beam direction will be flipped in 2D projections, mirroring the instrument along the beam axis."
+            "If checked, 2D projections are mirrored across the plane perpendicular to the beam direction."
         )
         self._select_bank_tube = QPushButton("Select Bank/Tube")
         self._select_bank_tube.setCheckable(True)
