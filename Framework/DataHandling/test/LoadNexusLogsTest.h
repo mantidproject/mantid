@@ -144,7 +144,7 @@ public:
   void test_File_With_Bad_Char_Array() {
     // create a file and write string data with length 1 and a dimension equal to the string length
     // this has to be done using the hdf5 C library
-    std::string data("this is a string of data");
+    std::string data("GonioStick2 Trans (Chi)");
     std::string pathToLog("/entry/DASlogs/BL9:SampleRotation:chi:desc");
 
     // open the file
@@ -188,7 +188,7 @@ public:
     TS_ASSERT_EQUALS(run.getTimeSeriesProperty<std::string>("BL9:SampleRotation:chi:desc")->firstValue(), data)
   }
 
-  void xtest_extract_nperiod_log_from_event_nexus() {
+  void test_extract_nperiod_log_from_event_nexus() {
 
     auto testWS = createTestWorkspace();
     auto run = testWS->run();
