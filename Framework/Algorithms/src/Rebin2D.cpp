@@ -171,10 +171,12 @@ MatrixWorkspace_sptr Rebin2D::createOutputWorkspace(const MatrixWorkspace_const_
                                                     BinEdges &newYBins, const bool useFractionalArea) const {
   using Kernel::VectorHelper::createAxisFromRebinParams;
 
-  auto &newY = newYBins.mutableRawData();
+  std::vector<double> newX, newY;
   // First create the two sets of bin boundaries
-  static_cast<void>(createAxisFromRebinParams(getProperty("Axis1Binning"), newXBins.mutableRawData()));
+  createAxisFromRebinParams(getProperty("Axis1Binning"), newX);
+  newXBins = BinEdges(std::move(newX));
   const size_t newYSize = createAxisFromRebinParams(getProperty("Axis2Binning"), newY);
+  newYBins = BinEdges(std::move(newY));
   // and now the workspace
   HistogramData::BinEdges binEdges(newXBins);
   Workspace2D_sptr outputWS;
@@ -183,7 +185,7 @@ MatrixWorkspace_sptr Rebin2D::createOutputWorkspace(const MatrixWorkspace_const_
   } else {
     outputWS = create<RebinnedOutput>(*parent, newYSize - 1, binEdges);
   }
-  auto verticalAxis = std::make_unique<BinEdgeAxis>(newY);
+  auto verticalAxis = std::make_unique<BinEdgeAxis>(newYBins.rawData());
   // Meta data
   verticalAxis->unit() = parent->getAxis(1)->unit();
   verticalAxis->title() = parent->getAxis(1)->title();

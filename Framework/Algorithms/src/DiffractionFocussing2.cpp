@@ -800,8 +800,7 @@ void DiffractionFocussing2::determineRebinParametersFromParameters(const std::ve
     // NOTE must use a vector instead of a HistogramData::BinEdges here because the latter doesn't allow resizing
     // BinEdges stores HistogramX data, and HistogramX is a type of FixedLengthVector
     std::vector<double> xnew;
-    static_cast<void>(
-        VectorHelper::createAxisFromRebinParams({xmins[i], deltas[i], xmaxs[i]}, xnew, true, fullBinsOnly));
+    VectorHelper::createAxisFromRebinParams({xmins[i], deltas[i], xmaxs[i]}, xnew, true, fullBinsOnly);
     group2xvector[group] = std::move(xnew); // Register this vector in the map
     group2xstep[group] = deltas[i];
     i++;

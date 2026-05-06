@@ -152,11 +152,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
   if (!beFileName.empty())
     binsFromFile = true;
 
-  const auto &oldXEdges = m_inputWS->x(0);
-  BinEdges dBins(oldXEdges.size());
-  BinEdges dPerpBins(oldXEdges.size());
-
-  auto &dPerp = dPerpBins.mutableRawData();
+  std::vector<double> dPerp, dBins;
   std::vector<std::vector<double>> fileXbins;
 
   // First create the output Workspace filled with zeros
@@ -181,14 +177,14 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
     }
 
   } else {
-    static_cast<void>(createAxisFromRebinParams(getProperty("dSpaceBinning"), dBins.mutableRawData()));
+    createAxisFromRebinParams(getProperty("dSpaceBinning"), dBins);
     HistogramData::BinEdges binEdges(dBins);
     dPerpSize = createAxisFromRebinParams(getProperty("dPerpendicularBinning"), dPerp);
     dSize = binEdges.size();
     outputWS = WorkspaceFactory::Instance().create(m_inputWS, dPerpSize - 1, dSize, dSize - 1);
     for (size_t idx = 0; idx < dPerpSize - 1; idx++)
       outputWS->setBinEdges(idx, binEdges);
-    auto abscissa = std::make_unique<BinEdgeAxis>(dBins.mutableRawData());
+    auto abscissa = std::make_unique<BinEdgeAxis>(dBins);
     outputWS->replaceAxis(0, std::move(abscissa));
   }
   addTimer("createWorkspace", startTime, std::chrono::high_resolution_clock::now());
@@ -246,7 +242,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
         const auto dp_index = static_cast<size_t>(std::distance(dp_vec.begin(), lowy) - 1);
 
         // find d bin
-        const auto xs = binsFromFile ? fileXbins[dp_index] : dBins.rawData();
+        const auto xs = binsFromFile ? fileXbins[dp_index] : dBins;
         const auto d = calcD(ev.tof(), sin_theta);
         const auto lowx = std::lower_bound(xs.begin(), xs.end(), d);
         if ((lowx == xs.end()) || lowx == xs.begin())
