@@ -89,7 +89,7 @@ rattler-index = "*"
 [dependencies]
 cmake = ">=4.2,<5"
 ccache = ">=4.11.3,<5"
-cppcheck = "==2.18.1"
+cppcheck = "==2.20.0"
 euphonic = ">=1.6.0,<2.0"
 gmock = "==1.17.0"
 gsl = "2.8.*"
