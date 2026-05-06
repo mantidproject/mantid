@@ -19,6 +19,7 @@
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/EnumeratedStringProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -129,14 +130,16 @@ std::map<std::string, std::string> Rebin::validateInputs() {
 
   // determing the binning mode, if present, or use default setting
   BINMODE binMode;
-  if (existsProperty(PropertyNames::BINMODE))
+  if (existsProperty(PropertyNames::BINMODE)) {
     binMode = getPropertyValue(PropertyNames::BINMODE);
-  else
+  } else {
     binMode = "Default";
+  }
 
   // validate the rebin params, and outside default mode, reset them
   MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WKSP);
   std::vector<double> rbParams = getProperty(PropertyNames::PARAMS);
+  std::vector<double> validParams;
   if (inputWS == nullptr) {
     // The workspace could exist, but not be a MatrixWorkspace, e.g. it might be
     // a group workspace. In that case we don't want a validation error for the
@@ -147,7 +150,7 @@ std::map<std::string, std::string> Rebin::validateInputs() {
     }
   } else {
     try {
-      std::vector<double> validParams = rebinParamsFromInput(rbParams, *inputWS, g_log, binMode);
+      validParams = rebinParamsFromInput(rbParams, *inputWS, g_log, binMode);
       // if the binmode has been set, force the rebin params to be consistent
       if (binMode != BinningMode::DEFAULT) {
         setProperty(PropertyNames::PARAMS, validParams);
@@ -169,55 +172,45 @@ std::map<std::string, std::string> Rebin::validateInputs() {
     }
   }
 
-  // perform checks on the power property, if valid
+  // validate power property, if present
+  double power = 0.0;
   if (existsProperty(PropertyNames::POWER)) {
-    // ensure that the power property is set if using power binning
     if (isDefault(PropertyNames::POWER) && binMode == BinningMode::POWER) {
       std::string msg = "The binning mode was set to 'Power', but no power was given.";
       helpMessages[PropertyNames::POWER] = msg;
       helpMessages[PropertyNames::BINMODE] = msg;
       return helpMessages;
     }
-    // if the power is set, perform checks
-    else if (!isDefault(PropertyNames::POWER)) {
-      // power is only available in Default and Power binning modes
-      if (binMode != BinningMode::DEFAULT && binMode != BinningMode::POWER) {
-        g_log.information() << "Discarding input power for incompatible binning mode.";
-        setProperty(PropertyNames::POWER, 0.0);
-      } else { // power is a property, is not default, and binning mode is power of default
-        const double power = getProperty(PropertyNames::POWER);
+    if (binMode != BinningMode::DEFAULT && binMode != BinningMode::POWER) {
+      g_log.information() << "Discarding input power for incompatible binning mode.";
+      setProperty(PropertyNames::POWER, 0.0);
+    } else {
+      power = getProperty(PropertyNames::POWER);
+    }
+  }
+  // estimate the number of bins needed and compare to available memory
+  if (inputWS && !validParams.empty()) {
+    size_t numBins = VectorHelper::estimateNumberOfBins(validParams, power);
+    if (power != 0. && numBins > 10'001) { // this number of bins should only be considered an issue for power binning
+      helpMessages[PropertyNames::POWER] = "This binning is expected to give " + std::to_string(numBins) + " bins.";
+    } else { // otherwise compare against available memory
+      size_t numSpec = inputWS->getNumberHistograms();
+      std::size_t binSpaceInBytes = 2 * numSpec * numBins * sizeof(double); // memory required in bytes
+      std::string memMsg = MemoryStats().checkAvailableMemory(binSpaceInBytes);
+      if (!memMsg.empty()) {
+        memMsg = "This binning is expected to create " + std::to_string(numBins * numSpec) + " bins. " + memMsg +
+                 " Consider grouping spectra before rebinning, or using a coarser binning.";
+        helpMessages[PropertyNames::PARAMS] = memMsg;
+      }
+    }
+  } else {
+    try {
+      VectorHelper::validateRebinParameters(rbParams, static_cast<bool>(power));
+    } catch (std::exception &err) {
+      helpMessages[PropertyNames::PARAMS] = err.what();
+    }
+  }
 
-        // attempt to roughly guess how many bins these parameters imply
-        double roughEstimate = 0;
-
-        // Five significant places of the Euler-Mascheroni constant is probably more than enough for our needs
-        double eulerMascheroni = 0.57721;
-
-        // Params is checked by the validator first, so we can assume it is in a correct format
-        for (size_t i = 0; i < rbParams.size() - 2; i += 2) {
-          double upperLimit = rbParams[i + 2];
-          double lowerLimit = rbParams[i];
-          double factor = rbParams[i + 1];
-
-          // in default mode, give error if try to mix power and log binning
-          // because of prior validation, we can assume this will only happen in default mode
-          if (factor <= 0) {
-            helpMessages[PropertyNames::PARAMS] = "Provided width value cannot be negative for inverse power binning.";
-            return helpMessages;
-          }
-          if (power == 1) {
-            roughEstimate += std::exp((upperLimit - lowerLimit) / factor - eulerMascheroni);
-          } else {
-            roughEstimate += std::pow(((upperLimit - lowerLimit) / factor) * (1 - power) + 1, 1 / (1 - power));
-          }
-        } // end for i in rbParams.size()
-        // Prevent the user form creating too many bins
-        if (roughEstimate > 10000) {
-          helpMessages[PropertyNames::POWER] = "This binning is expected to give more than 10000 bins.";
-        }
-      } // end else
-    } // end else if
-  } // end if property power exists
   return helpMessages;
 }
 
