@@ -1512,9 +1512,7 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
 
   // Configure the peak functions before entering the parallel region. Some peak
   // functions use setMatrixWorkspace() to initialise detector/workspace-derived
-  // state. Doing that concurrently may cause issues
-  // evaluating the function later, when this requires that each function has
-  // already been configured for the correct workspace index and fit range.
+  // state.
   std::vector<std::vector<IPeakFunction_sptr>> peak_functions(m_numSpectraToFit,
                                                               std::vector<IPeakFunction_sptr>(m_numPeaksToFit));
   std::vector<std::vector<IBackgroundFunction_sptr>> bkgd_functions(
