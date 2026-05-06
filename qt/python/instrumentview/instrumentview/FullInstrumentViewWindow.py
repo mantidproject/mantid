@@ -205,9 +205,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self._integration_limit_group_box = QGroupBox("Units")
         integration_box_layout = QVBoxLayout(self._integration_limit_group_box)
-        self._units_combo_box = NoWheelComboBox(self)
-        self._units_combo_box.setToolTip("Select the units for the spectra line plot")
-        integration_box_layout.addWidget(self._units_combo_box)
+        self._units_combo_box_sliders = NoWheelComboBox(self)
+        self._units_combo_box_sliders.setToolTip("Select the units for the detectors shown.")
+        integration_box_layout.addWidget(self._units_combo_box_sliders)
         (
             self._integration_limit_min_edit,
             self._integration_limit_max_edit,
@@ -364,6 +364,8 @@ class FullInstrumentViewWindow(QMainWindow):
 
         lineplot_group_box = QGroupBox("Line Plot")
         lineplot_layout = QHBoxLayout(lineplot_group_box)
+        self._units_combo_box_lineplot = NoWheelComboBox(self)
+        self._units_combo_box_lineplot.setToolTip("Select the units for the lineplot.")
         self._export_workspace_button = QPushButton("Export Spectra to ADS", self)
         self._sum_spectra_checkbox = QCheckBox(self)
         self._sum_spectra_checkbox.setChecked(True)
@@ -371,6 +373,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._sum_spectra_checkbox.setToolTip(
             "Selected spectra will be converted to d-Spacing, summed, then converted back to the desired unit."
         )
+        lineplot_layout.addWidget((self._units_combo_box_lineplot))
         lineplot_layout.addWidget(self._export_workspace_button)
         lineplot_layout.addWidget(self._sum_spectra_checkbox)
 
@@ -593,7 +596,8 @@ class FullInstrumentViewWindow(QMainWindow):
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
         for unit in self._presenter.available_unit_options():
-            self._units_combo_box.addItem(unit)
+            self._units_combo_box_sliders.addItem(unit)
+            self._units_combo_box_lineplot.addItem(unit)
         self._count_scale_combo_box.addItems(self._presenter.count_scale_combo_options())
         self.refresh_peaks_ws_list()
         self.refresh_workspaces_in_list(CurrentTab.Masking)
@@ -606,7 +610,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._contour_range_reset.clicked.connect(self._presenter.on_contour_range_reset_clicked)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
         self._integration_limit_reset.clicked.connect(self._presenter.on_integration_limits_reset_clicked)
-        self._units_combo_box.currentIndexChanged.connect(self._presenter.on_unit_option_selected)
+        self._units_combo_box_sliders.currentIndexChanged.connect(self._presenter.on_sliders_unit_selected)
+        self._units_combo_box_lineplot.currentIndexChanged.connect(self._presenter.on_lineplot_unit_selected)
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
         self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
@@ -792,11 +797,15 @@ class FullInstrumentViewWindow(QMainWindow):
         self._delete_all_selected_peaks_button.setEnabled(is_enabled)
 
     def set_unit_combo_box_index(self, index: int) -> None:
-        self._units_combo_box.setCurrentIndex(index)
+        self._units_combo_box_sliders.setCurrentIndex(index)
 
-    def current_selected_unit(self) -> str:
+    def current_selected_sliders_unit(self) -> str:
         """Get the currently selected unit from the combo box"""
-        return self._units_combo_box.currentText()
+        return self._units_combo_box_sliders.currentText()
+
+    def current_selected_lineplot_unit(self) -> str:
+        """Get the currently selected unit from the combo box"""
+        return self._units_combo_box_lineplot.currentText()
 
     def current_selected_count_scale(self) -> str:
         """Get the currently selected display scale for integrated counts"""

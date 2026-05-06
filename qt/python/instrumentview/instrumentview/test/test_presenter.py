@@ -77,7 +77,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_contour_range_reset_clicked")
     def test_set_view_integration_limits(self, mock_on_contour_range_reset_clicked, mock_update_line_plot):
-        self._mock_view.current_selected_unit.return_value = "MyUnit"
+        self._mock_view.current_selected_lineplot_unit.return_value = "MyUnit"
         self._model._counts = np.zeros(200)
         mesh = MagicMock()
         mesh.point_data = {}
@@ -115,7 +115,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
     def test_unit_option_selected(self, mock_extract_spectra, mock_set_integration_units, mock_reset_integration):
         self._mock_view.sum_spectra_selected.return_value = True
-        self._presenter.on_unit_option_selected(1)
+        self._presenter.on_sliders_unit_selected(1)
         mock_set_integration_units.assert_called_once_with(self._presenter._UNIT_OPTIONS[1])
         self._mock_view.show_plot_for_detectors.assert_called_once()
         self._mock_view.set_selected_detector_info.assert_called_once()
@@ -129,7 +129,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
     def test_on_sum_spectra_checkbox_clicked(self, mock_update_line_plot_ws_and_draw):
-        self._mock_view.current_selected_unit.return_value = "dSpacing"
+        self._mock_view.current_selected_lineplot_unit.return_value = "dSpacing"
         self._presenter.on_sum_spectra_checkbox_clicked()
         mock_update_line_plot_ws_and_draw.assert_called_once_with("dSpacing")
 
@@ -180,13 +180,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._pickable_mesh = MagicMock()
         self._presenter._pickable_mesh.point_data = {}
         self._presenter._renderer.set_pickable_scalars.side_effect = lambda m, visibility, label: m.point_data.update({label: visibility})
-        self._mock_view.current_selected_unit.return_value = "TOF"
+        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
         self._mock_view.sum_spectra_selected.return_value = True
         self._presenter.update_picked_detectors_on_view()
         np.testing.assert_allclose(
             self._presenter._pickable_mesh.point_data[self._presenter._visible_label], self._model._detector_is_picked
         )
-        self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace, self._model.integration_limits)
+        self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace, self._model.lineplot_limits)
         self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
         self._model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
 
@@ -274,7 +274,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
     def test_refresh_lineplot_peaks(self, mock_get_lineplot_args):
         mock_get_lineplot_args.return_value = ([[100]], [["(1, 1, 1)"]], ["ws1"])
-        self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
         self._presenter.refresh_lineplot_peaks()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
@@ -283,7 +282,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
     def test_refresh_lineplot_peaks_no_peaks(self, mock_get_lineplot_args):
         mock_get_lineplot_args.return_value = ([], [], [])
-        self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
         self._presenter.refresh_lineplot_peaks()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
@@ -292,7 +290,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
     def test_refresh_lineplot_peaks_wrong_unit(self, mock_get_lineplot_args):
         mock_get_lineplot_args.side_effect = RuntimeError("Unknown unit Light Years for peak location")
-        self._mock_view.current_selected_unit.return_value = "Light Years"
         with self.assertRaises(RuntimeError):
             self._presenter.refresh_lineplot_peaks()
 
@@ -547,7 +544,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_on_list_item_selected_masking_resets_integration_limits(self, mock_apply, mock_update_plotter, mock_reset_integration):
         """Test that selecting a mask list item triggers an integration range reset."""
         self._mock_view.selected_items_in_list.return_value = ["Mask 1"]
-        self._mock_view.current_selected_unit.return_value = "TOF"
+        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
         self._mock_view.sum_spectra_selected.return_value = False
         self._presenter._on_list_item_selected(CurrentTab.Masking)
         mock_apply.assert_called_once_with(["Mask 1"], CurrentTab.Masking)
