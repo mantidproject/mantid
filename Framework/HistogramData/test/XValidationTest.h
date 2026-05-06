@@ -46,8 +46,7 @@ public:
   void test_works_for_BinEdges() {
     BinEdges data{1.0, 2.0};
     TS_ASSERT(isValid(data));
-    data.mutableRawData()[1] = data[0];
-    TS_ASSERT(!isValid(data));
+    TS_ASSERT_THROWS((BinEdges{1.0, 1.0}), std::runtime_error &);
   }
 
   void test_works_for_Points() {
