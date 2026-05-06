@@ -104,11 +104,9 @@ jobs:
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
 
       - name: Determine if a PR build
-        run: |
-          echo "ACTION=${{ github.event_name }}"
-          echo "ACTION=${{ github.event.action }}"
-          echo "Telling jenkins scripts this is a PR build"
-          echo "JOB_NAME=pull_requests" >> $GITHUB_ENV
+        if: ${{ github.event_name == 'pull_request' }}
+        # telling jenkins scripts this is a PR build
+        run: echo "JOB_NAME=pull_requests" >> $GITHUB_ENV
 
       - name: Build code
         run: |
