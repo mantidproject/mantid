@@ -47,7 +47,7 @@ private:
   std::vector<int> workspaceIndices;
   bool includeData;
   bool includeDetectorPosition;
-  bool OneRowPerDetectorID;
+  bool oneRowPerDetectorID;
   bool isScanning;
   bool calcQ;
   bool hasDiffConstants;
@@ -75,9 +75,9 @@ private:
   /// Execution code
   void exec() override;
 
-  void get_spherical_coordinates(size_t wsIndex, double &R, double &theta, double &phi);
-  const std::string get_time_indexes(size_t wsIndex);
-  double get_q(size_t wsIndex);
+  void getSphericalCoordinates(size_t wsIndex, double &R, double &theta, double &phi);
+  const std::string getTimeIndexes(size_t wsIndex);
+  double getQ(size_t wsIndex);
   void get_diff_consts(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero);
   void writeRowToTable(const int row, const DetectorRowData &data);
   DetectorRowData calculateWsIdxData(size_t wsIndex);

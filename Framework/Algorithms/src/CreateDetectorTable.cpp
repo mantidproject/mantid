@@ -67,7 +67,7 @@ void CreateDetectorTable::exec() {
   includeData = getProperty("IncludeData");
   workspaceIndices = getProperty("WorkspaceIndices");
   includeDetectorPosition = getProperty("IncludeDetectorPosition");
-  OneRowPerDetectorID = getProperty("OneRowPerDetectorID");
+  oneRowPerDetectorID = getProperty("OneRowPerDetectorID");
 
   if (auto peaks = std::dynamic_pointer_cast<IPeaksWorkspace>(inputWs)) {
     table = peaks->createDetectorTable();
@@ -81,7 +81,7 @@ void CreateDetectorTable::exec() {
     }
     setup();
     createColumns();
-    if (OneRowPerDetectorID) {
+    if (oneRowPerDetectorID) {
       populateTableByDetID();
     } else {
       populateTable();
@@ -171,7 +171,7 @@ void CreateDetectorTable::createColumns() {
   std::vector<std::pair<std::string, std::string>> colNames;
   colNames.emplace_back("int", "Index");
   colNames.emplace_back("int", "Spectrum No");
-  if (OneRowPerDetectorID) {
+  if (oneRowPerDetectorID) {
     colNames.emplace_back("int", "Detector ID(s)");
   } else {
     colNames.emplace_back("str", "Detector ID(s)");
@@ -208,7 +208,7 @@ void CreateDetectorTable::createColumns() {
   return;
 }
 
-void CreateDetectorTable::get_spherical_coordinates(size_t wsIndex, double &R, double &theta, double &phi) {
+void CreateDetectorTable::getSphericalCoordinates(size_t wsIndex, double &R, double &theta, double &phi) {
   // theta used as a dummy variable
   // Note: phi is the angle around Z, not necessarily the beam direction.
   spectrumInfo->position(wsIndex).getSpherical(R, theta, phi);
@@ -237,7 +237,7 @@ void CreateDetectorTable::get_spherical_coordinates(size_t wsIndex, double &R, d
   }
 }
 
-const std::string CreateDetectorTable::get_time_indexes(size_t wsIndex) {
+const std::string CreateDetectorTable::getTimeIndexes(size_t wsIndex) {
   if (!isScanning) {
     return "0";
   }
@@ -249,7 +249,7 @@ const std::string CreateDetectorTable::get_time_indexes(size_t wsIndex) {
   return timeIndexes;
 }
 
-double CreateDetectorTable::get_q(size_t wsIndex) {
+double CreateDetectorTable::getQ(size_t wsIndex) {
   if (!calcQ) {
     return std::nan("");
   }
@@ -291,7 +291,7 @@ void CreateDetectorTable::writeRowToTable(const int row, const DetectorRowData &
   TableRow colValues = table->getRow(static_cast<size_t>(row));
   colValues << static_cast<int>(data.wsIndex);
   colValues << data.specNo;
-  if (OneRowPerDetectorID) {
+  if (oneRowPerDetectorID) {
     // Populate detector column with first det id in set
     colValues << static_cast<int>(*data.detIds.begin());
   } else {
@@ -339,14 +339,14 @@ CreateDetectorTable::DetectorRowData CreateDetectorTable::calculateWsIdxData(con
   data.specNo = spectrum.getSpectrumNo();
   data.detIds = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
   // Time indexes
-  data.timeIndexes = get_time_indexes(wsIndex);
+  data.timeIndexes = getTimeIndexes(wsIndex);
   // data Y/E
   data.dataY0 = ws->y(wsIndex)[0];
   data.dataE0 = ws->e(wsIndex)[0];
   // R, Theta, Phi
-  get_spherical_coordinates(wsIndex, data.R, data.theta, data.phi);
+  getSphericalCoordinates(wsIndex, data.R, data.theta, data.phi);
   // Q
-  data.q = get_q(wsIndex);
+  data.q = getQ(wsIndex);
   // Is monitor
   data.isMonitor = spectrumInfo->isMonitor(wsIndex) ? "yes" : "no";
   // Diff consts
