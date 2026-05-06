@@ -272,15 +272,16 @@ void Parser::split() {
                               m_multiFileName.begin(), m_multiFileName.end(), isspace),
                           m_multiFileName.end());
   }
-  // Get the extension, if there is one.
-  const size_t lastDot = m_multiFileName.find_last_of('.');
-  if (lastDot != std::string::npos)
-    m_extString = m_multiFileName.substr(lastDot);
-
   // Get the directory, if there is one.
   const size_t lastSeparator = m_multiFileName.find_last_of("/\\");
   if (lastSeparator != std::string::npos)
     m_dirString = m_multiFileName.substr(0, lastSeparator + 1);
+
+  // Get the extension, if there is one. For multi-part extensions like
+  // ".nxs.h5", keep everything from the first dot in the filename part.
+  const size_t firstDotAfterDir = m_multiFileName.find('.', m_dirString.size());
+  if (firstDotAfterDir != std::string::npos)
+    m_extString = m_multiFileName.substr(firstDotAfterDir);
 
   // If the directory contains an instance of a comma, then the string is
   // a comma separated list of single *full* file names to load.
