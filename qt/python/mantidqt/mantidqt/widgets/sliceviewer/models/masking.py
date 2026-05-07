@@ -5,7 +5,6 @@ from mantid.api import WorkspaceFactory, AnalysisDataService, AlgorithmManager
 from sys import float_info
 from numpy import inf
 
-from mantid.kernel import logger
 
 ALLOWABLE_ERROR_SIG_FIGS = 8
 
@@ -407,7 +406,3 @@ class MaskingModel:
 
     def invert_masking_clicked(self, active):
         self._apply_inverted_mask = active
-        if active:
-            logger.warning("Inverted masking is enabled. This will apply the mask around the selected region.")
-        else:
-            logger.notice("Inverted masking disabled.")

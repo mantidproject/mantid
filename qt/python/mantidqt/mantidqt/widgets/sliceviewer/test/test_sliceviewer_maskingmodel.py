@@ -102,14 +102,10 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
         create_tbl_mock.assert_called_once_with(["consolidated"], False)
 
     def test_invert_masking_clicked(self):
-        with patch("mantidqt.widgets.sliceviewer.models.masking.logger") as logger_mock:
-            self.model.invert_masking_clicked(True)
-            self.assertTrue(self.model._apply_inverted_mask)
-            logger_mock.warning.assert_called_once_with("Inverted masking is enabled. This will apply the mask around the selected region.")
-            logger_mock.reset_mock()
-            self.model.invert_masking_clicked(False)
-            self.assertFalse(self.model._apply_inverted_mask)
-            logger_mock.notice.assert_called_once_with("Inverted masking disabled.")
+        self.model.invert_masking_clicked(True)
+        self.assertTrue(self.model._apply_inverted_mask)
+        self.model.invert_masking_clicked(False)
+        self.assertFalse(self.model._apply_inverted_mask)
 
     def test_export_selectors(self):
         with (
