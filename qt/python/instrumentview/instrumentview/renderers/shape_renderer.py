@@ -401,7 +401,7 @@ class ShapeRenderer(InstrumentRenderer):
 
             if projection is not None and projection.type is not ProjectionType.SIDE_BY_SIDE:
                 if flip_beam:
-                    tiled = tiled - 2 * (tiled @ self._beam_axis)[..., np.newaxis] * self._beam_axis
+                    tiled = reflect_points_in_axis(tiled, axis=self._beam_axis)
 
                 projected_vertices = projection.project_points(tiled.reshape(-1, 3), apply_x_correction=False).reshape(n_group, n_verts, 2)
 

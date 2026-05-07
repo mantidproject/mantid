@@ -70,8 +70,7 @@ def reflect_points_in_axis(points: np.ndarray, axis: np.ndarray) -> np.ndarray:
     if axis_norm == 0.0:
         raise ValueError("Axis vector cannot be the zero vector.")
     axis_normalized = axis / axis_norm
-    M = np.eye(3) - 2 * np.outer(axis_normalized, axis_normalized)
-    return points @ M.T
+    return points - 2 * (points @ axis_normalized)[..., np.newaxis] * axis_normalized
 
 
 def get_beam_axis(workspace) -> np.ndarray:
