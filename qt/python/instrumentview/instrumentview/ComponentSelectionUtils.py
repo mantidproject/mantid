@@ -66,13 +66,13 @@ def detector_table_indices_for_parent_subtrees(
 
 def reflect_points_in_axis(points: np.ndarray, axis: np.ndarray) -> np.ndarray:
     """Return points reflected across a plane perpendicular to the given axis."""
-    axis_norm = np.linalg.norm(axis)
-    if axis_norm == 0.0:
-        raise ValueError("Axis vector cannot be the zero vector.")
-    axis_normalized = axis / axis_norm
-    return points - 2 * (points @ axis_normalized)[..., np.newaxis] * axis_normalized
+    return points - 2 * (points @ axis)[..., np.newaxis] * axis
 
 
 def get_beam_axis(workspace) -> np.ndarray:
     """Return the beam axis vector for the given workspace."""
-    return np.array(workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam())
+    beam_axis = workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam()
+    beam_axis_norm = np.linalg.norm(beam_axis)
+    if beam_axis_norm == 0.0:
+        raise ValueError("Beam axis vector cannot be the zero vector.")
+    return beam_axis / beam_axis_norm

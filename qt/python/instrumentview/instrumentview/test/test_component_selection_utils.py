@@ -9,7 +9,7 @@ import unittest
 import unittest.mock
 import numpy as np
 
-from instrumentview.ComponentSelectionUtils import detector_indices_in_component_subtrees, reflect_points_in_axis
+from instrumentview.ComponentSelectionUtils import detector_indices_in_component_subtrees, get_beam_axis, reflect_points_in_axis
 
 
 class TestComponentSelectionUtils(unittest.TestCase):
@@ -71,9 +71,33 @@ class TestComponentSelectionUtils(unittest.TestCase):
         result = reflect_points_in_axis(points, np.array([1.0, 0.0, 0.0]))
         np.testing.assert_array_almost_equal(result, points)
 
-    def test_non_unit_axis_normalised_internally(self):
-        """A non-unit axis gives the same result as the normalised axis."""
-        points = np.array([[2.0, 5.0, -1.0]])
-        result_unit = reflect_points_in_axis(points, np.array([2.0, 0.0, 0.0]))
-        result_normalised = reflect_points_in_axis(points, np.array([1.0, 0.0, 0.0]))
-        np.testing.assert_array_almost_equal(result_unit, result_normalised)
+    def _make_workspace(self, vec):
+        ws = unittest.mock.MagicMock()
+        ws.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = vec
+        return ws
+
+    def test_unit_vector_returned_unchanged(self):
+        """A beam axis that is already a unit vector is returned as-is."""
+        ws = self._make_workspace(np.array([0.0, 0.0, 1.0]))
+        result = get_beam_axis(ws)
+        np.testing.assert_array_almost_equal(result, np.array([0.0, 0.0, 1.0]))
+
+    def test_non_unit_vector_is_normalised(self):
+        """A beam axis with magnitude != 1 is normalised to a unit vector."""
+        ws = self._make_workspace(np.array([0.0, 0.0, 3.0]))
+        result = get_beam_axis(ws)
+        np.testing.assert_almost_equal(np.linalg.norm(result), 1.0)
+        np.testing.assert_array_almost_equal(result, np.array([0.0, 0.0, 1.0]))
+
+    def test_diagonal_vector_is_normalised(self):
+        """A diagonal beam axis is normalised to a unit vector."""
+        ws = self._make_workspace(np.array([1.0, 1.0, 0.0]))
+        result = get_beam_axis(ws)
+        np.testing.assert_almost_equal(np.linalg.norm(result), 1.0)
+        np.testing.assert_array_almost_equal(result, np.array([1.0 / np.sqrt(2), 1.0 / np.sqrt(2), 0.0]))
+
+    def test_zero_vector_raises(self):
+        """A zero beam axis raises ValueError."""
+        ws = self._make_workspace(np.array([0.0, 0.0, 0.0]))
+        with self.assertRaises(ValueError):
+            get_beam_axis(ws)
