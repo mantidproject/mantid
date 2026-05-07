@@ -650,12 +650,14 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
     def test_mask_ws(self):
         model, mock_ws = self._setup_model([1, 2, 3])
+        mock_ws.clone.reset_mock()
         _ = model.mask_ws
         mock_ws.clone.assert_called_once_with(StoreInADS=True, OutputWorkspace="_tmp")
         self._mock_extract_mask.assert_called()
 
     def test_roi_ws(self):
         model, mock_ws = self._setup_model([1, 2, 3])
+        mock_ws.clone.reset_mock()
         _ = model.roi_ws
         mock_ws.clone.assert_called_once_with(StoreInADS=True, OutputWorkspace="_tmp")
         self._mock_extract_mask.assert_called()
@@ -1171,7 +1173,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws1_wdp.get_positions_and_labels.return_value = (np.array([[1, 1, 1]]), ["hkl_1"])
         ws2_wdp = MagicMock()
         ws2_wdp.get_positions_and_labels.return_value = (np.array([[2, 2, 2], [3, 3, 3]]), ["hkl_2", "hkl_3"])
-        mock_wdp_cls.side_effect = lambda name: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+        mock_wdp_cls.side_effect = lambda name, unit, limits: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
 
         positions, labels, ws_names = model.get_peak_overlay_arguments(["ws1", "ws2"])
 
@@ -1225,7 +1227,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws1_wdp.get_x_values_and_labels.return_value = ([100.0], ["hkl_1"])
         ws2_wdp = MagicMock()
         ws2_wdp.get_x_values_and_labels.return_value = ([200.0, 300.0], ["hkl_2", "hkl_3"])
-        mock_wdp_cls.side_effect = lambda name: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+        mock_wdp_cls.side_effect = lambda name, unit, limits: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
 
         x_vals, labels, ws_names = model.get_peak_lineplot_overlay_arguments(["ws1", "ws2"])
 
@@ -1250,7 +1252,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
         model.get_peak_lineplot_overlay_arguments(["ws1"])
 
-        mock_wdp.get_x_values_and_labels.assert_called_once_with("dSpacing", model.picked_spectrum_nos)
+        mock_wdp.get_x_values_and_labels.assert_called_once_with("dSpacing", model.picked_detector_ids)
 
 
 if __name__ == "__main__":

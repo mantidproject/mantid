@@ -168,6 +168,7 @@ class FullInstrumentViewPresenter:
         display_counts = self._transform_counts(self._model.detector_counts)
         self._renderer.set_detector_scalars(self._detector_mesh, display_counts, self._counts_label)
         self.on_contour_range_reset_clicked()
+        self.refresh_plotter_peaks()
         self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
     def on_contour_limits_updated(self) -> None:

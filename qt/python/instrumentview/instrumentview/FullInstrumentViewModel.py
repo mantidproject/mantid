@@ -479,7 +479,7 @@ class FullInstrumentViewModel:
             return
 
         self._lineplot_ws_in_base_units = ExtractSpectra(
-            InputWorkspace=self._workspace, WorkspaceIndexList=workspace_indices, EnableLogging=False, StoreInADS=False
+            InputWorkspace=self._workspace, WorkspaceIndexList=workspace_indices.tolist(), EnableLogging=False, StoreInADS=False
         )
         ws = self._lineplot_ws_in_base_units
         if self.has_unit and unit != self.workspace_base_unit:
@@ -513,7 +513,9 @@ class FullInstrumentViewModel:
 
     def get_peak_overlay_arguments(self, selected_peaks_workspaces: list[str]) -> tuple:
         selected_peaks_workspaces = [ws for ws in selected_peaks_workspaces if AnalysisDataService.doesExist(ws)]
-        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
+        wrapped_workspaces = [
+            WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self.integration_limits) for ws_name in selected_peaks_workspaces
+        ]
         positions_and_labels_by_pws = [
             wws.get_positions_and_labels(self.detector_positions, self.pickable_detector_ids) for wws in wrapped_workspaces
         ]
@@ -523,9 +525,10 @@ class FullInstrumentViewModel:
 
     def get_peak_lineplot_overlay_arguments(self, selected_peaks_workspaces: list[str]):
         selected_peaks_workspaces = [ws for ws in selected_peaks_workspaces if AnalysisDataService.doesExist(ws)]
-        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
-        # NOTE: Need to get x coods in workspace unit first and then convert
-        # Using conversion from Peaks workspace is unreliable
+        wrapped_workspaces = [
+            WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self._integration_limits) for ws_name in selected_peaks_workspaces
+        ]
+        # NOTE: Need to get x coords in workspace unit for better acuracy
         x_and_labels_by_pws = [wws.get_x_values_and_labels(self._workspace_x_unit, self.picked_detector_ids) for wws in wrapped_workspaces]
         x_by_pws = [pair[0] for pair in x_and_labels_by_pws]
         labels_by_pws = [pair[1] for pair in x_and_labels_by_pws]
