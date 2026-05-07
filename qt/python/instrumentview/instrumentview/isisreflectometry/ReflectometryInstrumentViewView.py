@@ -37,6 +37,11 @@ class ReflectometryInstrumentViewView(QWidget):
         self._shape_overlay_manager: ShapeOverlayManager | None = None
         self._on_resize_callback = None
 
+        self._resize_timer = QTimer(self)
+        self._resize_timer.setSingleShot(True)
+        self._resize_timer.setInterval(150)
+        self._resize_timer.timeout.connect(self._on_resize_finished)
+
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
@@ -58,20 +63,32 @@ class ReflectometryInstrumentViewView(QWidget):
         self._on_resize_callback = callback
 
     def resizeEvent(self, event):
-        """Re-fit the camera (and fill transform) when the widget is resized.
+        """Start (or restart) the debounce timer on every resize event.
 
-        Qt propagates the resize to child widgets synchronously inside
-        super().resizeEvent(), so QVTKRenderWindowInteractor.resizeEvent runs
-        and calls vtkRenderWindow.SetSize(w, h) before we return.  We then
-        defer one event-loop cycle (QTimer.singleShot(0, ...)) so that VTK's
-        own paint cycle completes before we reset the camera or recompute the
-        fill transform against the now-correct render window dimensions.
+        During a drag-resize Qt fires many resize events in rapid succession.
+        Restarting the timer each time means the actual fill-transform callback
+        only fires once, 150 ms after the *last* resize event — i.e. when the
+        user has finished resizing.  This prevents the mesh from flashing
+        between its original aspect ratio and the filled state on every pixel
+        of movement.
         """
         super().resizeEvent(event)
         if self.main_plotter is None:
             return
+        self._resize_timer.start()
+
+    def _on_resize_finished(self):
+        """Invoke the resize callback once resizing has stopped.
+
+        Called by the debounce timer.  By this point VTK has already applied
+        the final render-window dimensions (via QVTKRenderWindowInteractor.
+        resizeEvent inside super().resizeEvent()), so the fill transform can
+        read the correct size from plotter.ren_win.GetSize().
+        """
+        if self.main_plotter is None:
+            return
         callback = self._on_resize_callback if self._on_resize_callback is not None else self.main_plotter.reset_camera
-        QTimer.singleShot(0, callback)
+        callback()
 
     @property
     def shape_overlay_manager(self) -> ShapeOverlayManager | None:

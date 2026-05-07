@@ -148,33 +148,39 @@ class ReflectometryInstrumentViewPresenter:
         if mesh_width <= 0 or mesh_height <= 0:
             return
 
-        # Undo any previous fill transform so we work from the original bounds.
-        if not np.allclose(self._transform, np.eye(4)):
-            self._detector_mesh.transform(np.linalg.inv(self._transform), inplace=True)
-            self._transform = np.eye(4)
-
-        # Ask VTK to fit the original (untransformed) mesh with the correct
-        # viewport size now in effect.  Read back the actual parallel_scale it
-        # chose — this is the authoritative value regardless of VTK's internal
-        # formula (bounding sphere, padding, etc.).
-        plotter.reset_camera()
+        # In VTK parallel projection, parallel_scale is the world-space half-height of
+        # the viewport.  VTK does NOT change it when the pixel dimensions change (it
+        # is a camera property, not a viewport property), so the value established by
+        # reset_camera() in _render() stays valid after every resize.  We read it
+        # directly here rather than calling reset_camera() again, because reset_camera()
+        # internally calls Render() which would paint the unfilled mesh on screen and
+        # cause a visible flash.
         parallel_scale = plotter.camera.parallel_scale
 
-        # Derive the visible world rectangle from the camera.
+        # Derive the visible world rectangle from the (unchanged) camera.
         # In parallel projection: visible_height = 2 * parallel_scale
         # visible_width = visible_height * (viewport_width / viewport_height)
         visible_height = 2.0 * parallel_scale
         visible_width = visible_height * w / h
 
-        # Scale the mesh independently in X and Y so it exactly fills that
-        # rectangle.  Do NOT call reset_camera afterwards — the camera is
-        # already fitted correctly; a second call would refit to the scaled
-        # mesh and might produce a different (wrong) parallel_scale.
         centre = np.array([(xmin + xmax) / 2, (ymin + ymax) / 2, (zmin + zmax) / 2])
-        self._transform = self._scale_matrix_relative_to_centre(centre, visible_width / mesh_width, visible_height / mesh_height)
-        self._detector_mesh.transform(self._transform, inplace=True)
+        new_transform = self._scale_matrix_relative_to_centre(centre, visible_width / mesh_width, visible_height / mesh_height)
 
-        # The fill transform leaves the camera in the correct full-view state.
+        # Compute the delta transform (undo old fill, apply new fill) as a single
+        # matrix and apply it in ONE operation.  Splitting this into two separate
+        # transform() calls would risk an intermediate Render() (from PyVista's
+        # background timer or a Qt paint event) showing the unfilled mesh and causing
+        # a visible flash.
+        if not np.allclose(self._transform, np.eye(4)):
+            combined = new_transform @ np.linalg.inv(self._transform)
+        else:
+            combined = new_transform
+        self._transform = new_transform
+        self._detector_mesh.transform(combined, inplace=True)
+
+        # Render once with the correct filled state.
+        plotter.render_window.Render()
+
         # Update the cached default in CursorZoomInteractorStyle so that right-clicking
         # resets to this state rather than the stale pre-fill-transform scale.
         style = plotter.iren.style

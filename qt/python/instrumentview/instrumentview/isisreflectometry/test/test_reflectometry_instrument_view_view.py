@@ -152,6 +152,49 @@ class TestReflectometryInstrumentViewView(unittest.TestCase):
         """Closing before initialise() should not raise."""
         self._view.closeEvent(MagicMock())
 
+    @mock.patch("qtpy.QtWidgets.QWidget.resizeEvent")
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
+    def test_resize_event_starts_debounce_timer(self, mock_bg_plotter_cls, _mock_super_resize):
+        self._view.initialise()
+        self._view._resize_timer = MagicMock()
+        self._view.resizeEvent(MagicMock())
+        self._view._resize_timer.start.assert_called_once()
+
+    @mock.patch("qtpy.QtWidgets.QWidget.resizeEvent")
+    def test_resize_event_no_op_when_no_plotter(self, _mock_super_resize):
+        """resizeEvent should not start the timer before the plotter is created."""
+        self._view._resize_timer = MagicMock()
+        self._view.resizeEvent(MagicMock())
+        self._view._resize_timer.start.assert_not_called()
+
+    @mock.patch("qtpy.QtWidgets.QWidget.resizeEvent")
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
+    def test_resize_event_does_not_call_callback_immediately(self, mock_bg_plotter_cls, _mock_super_resize):
+        """The callback must not be invoked directly inside resizeEvent."""
+        self._view.initialise()
+        callback = MagicMock()
+        self._view.set_on_resize_callback(callback)
+        self._view.resizeEvent(MagicMock())
+        callback.assert_not_called()
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
+    def test_on_resize_finished_calls_registered_callback(self, mock_bg_plotter_cls):
+        self._view.initialise()
+        callback = MagicMock()
+        self._view.set_on_resize_callback(callback)
+        self._view._on_resize_finished()
+        callback.assert_called_once()
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
+    def test_on_resize_finished_calls_reset_camera_when_no_callback(self, mock_bg_plotter_cls):
+        self._view.initialise()
+        self._view._on_resize_finished()
+        self._view.main_plotter.reset_camera.assert_called_once()
+
+    def test_on_resize_finished_no_op_when_no_plotter(self):
+        """_on_resize_finished should not raise if the plotter has not been created."""
+        self._view._on_resize_finished()  # no exception expected
+
 
 if __name__ == "__main__":
     unittest.main()

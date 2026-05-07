@@ -248,14 +248,15 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
         self._presenter._original_mesh_bounds = (0, 2, 0, 1, 0, 0)
         self._presenter._transform = np.eye(4)
         self._mock_view.main_plotter.ren_win.GetSize.return_value = (400, 300)
-        # Simulate reset_camera setting parallel_scale = 0.75 for this mesh/viewport
+        # parallel_scale is read directly from the camera (no reset_camera call)
         self._mock_view.main_plotter.camera.parallel_scale = 0.75
 
         self._presenter._apply_fill_transform()
 
-        # reset_camera called once (to fit the original mesh before reading parallel_scale)
-        self._mock_view.main_plotter.reset_camera.assert_called_once()
-        # Fill transform applied to mesh
+        # reset_camera must NOT be called — calling it would render the unfilled mesh
+        # and cause a visible flash.
+        self._mock_view.main_plotter.reset_camera.assert_not_called()
+        # Fill transform applied to mesh as a single combined operation
         mesh.transform.assert_called_once()
         transform = mesh.transform.call_args[0][0]
         # parallel_scale=0.75 → visible_height=1.5, visible_width=1.5*(400/300)=2.0
@@ -263,20 +264,34 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
         np.testing.assert_allclose(transform[0, 0], 1.0, atol=1e-6)
         np.testing.assert_allclose(transform[1, 1], 1.5, atol=1e-6)
 
-    def test_apply_fill_transform_undoes_previous_transform(self):
-        """A second call should undo the first fill transform before applying a new one."""
+    def test_apply_fill_transform_renders_once_at_end(self):
+        """A single explicit Render() must be called after the fill transform."""
         mesh = MagicMock()
         self._presenter._detector_mesh = mesh
         self._presenter._original_mesh_bounds = (0, 2, 0, 1, 0, 0)
-        # Simulate a previously-applied non-identity transform
+        self._presenter._transform = np.eye(4)
+        self._mock_view.main_plotter.ren_win.GetSize.return_value = (400, 300)
+        self._mock_view.main_plotter.camera.parallel_scale = 0.75
+
+        self._presenter._apply_fill_transform()
+
+        self._mock_view.main_plotter.render_window.Render.assert_called_once()
+
+    def test_apply_fill_transform_uses_combined_delta_for_second_call(self):
+        """On subsequent calls the undo+apply must happen as one combined transform,
+        not two separate calls that risk an intermediate render of the unfilled mesh."""
+        mesh = MagicMock()
+        self._presenter._detector_mesh = mesh
+        self._presenter._original_mesh_bounds = (0, 2, 0, 1, 0, 0)
+        # Simulate a previously-applied non-identity fill transform
         self._presenter._transform = np.diag([2.0, 3.0, 1.0, 1.0])
         self._mock_view.main_plotter.ren_win.GetSize.return_value = (400, 300)
         self._mock_view.main_plotter.camera.parallel_scale = 0.75
 
         self._presenter._apply_fill_transform()
 
-        # First call should be the inverse (undo), second should be the new fill transform
-        self.assertEqual(mesh.transform.call_count, 2)
+        # Must be exactly one transform call (the combined delta), not two.
+        self.assertEqual(mesh.transform.call_count, 1)
 
     def test_apply_fill_transform_updates_interactor_style_defaults(self):
         """_apply_fill_transform should call update_default_camera_state on the interactor style."""
