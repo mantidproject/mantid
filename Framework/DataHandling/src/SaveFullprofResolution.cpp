@@ -174,11 +174,10 @@ void SaveFullprofResolution::parseTableWorkspace() {
   if (rowbankindex < 0) {
     // If there is NO 'BANK', locate first (from left) column starting with
     // 'Value'
-    for (size_t i = 1; i < numcols; ++i) {
-      if (colnames[i].starts_with("Value")) {
-        colindex = static_cast<int>(i);
-        break;
-      }
+    const auto it = std::find_if(colnames.begin() + 1, colnames.end(),
+                                 [](const std::string &colname) { return colname.starts_with("Value"); });
+    if (it != colnames.end()) {
+      colindex = static_cast<int>(std::distance(colnames.begin(), it));
     }
   } else {
     // If there is BANK, Locate first (from left) column starting with 'Value'

@@ -1,0 +1,1 @@
+- `LoadNexusLogs` can once again load string logs from Nexus files as in some old (ca. 2016) CORELLI data files, where the string was stored with `DataType` length of 1, and the `DataSpace` having rank 1 with the correct size in the first dimension.

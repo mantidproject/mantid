@@ -174,13 +174,13 @@ public:
     const double xMax{5000.0};
     const double xStep{10.0};
     const auto nBins = static_cast<size_t>((xMax - xMin) / xStep);
-    HistogramData::BinEdges edges(nBins + 1);
+    std::vector<double> bins(nBins + 1);
     {
-      auto &bins = edges.mutableRawData();
       for (size_t i = 0; i < bins.size(); ++i) {
         bins[i] = xMin + xStep * static_cast<double>(i);
       }
     }
+    HistogramData::BinEdges edges(std::move(bins));
     HistogramData::Counts counts(nBins);
     {
       auto &ys = counts.mutableRawData();

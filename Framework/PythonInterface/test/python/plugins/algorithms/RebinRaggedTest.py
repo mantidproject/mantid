@@ -171,14 +171,24 @@ class RebinRaggedTest(unittest.TestCase):
 
     def test_hist_workspace_fullBinsOnly(self):
         # numpy 1.7 (on rhel7) doesn't have np.full
-        xmins = np.full((200,), 50.0)
+        nbanks = 1
+        npixels = 4
+        nspec = nbanks * npixels * npixels
+        xmins = np.full((nspec,), 50.0)
         xmins[11] = 3000.0
-        xmaxs = np.full((200,), 650.0)
-        xmaxs[12] = 5000.0
-        deltas = np.full(200, -2.0)
-        deltas[13] = 100.0
+        xmaxs = np.full((nspec,), 650.0)
+        xmaxs[11] = 5000.0
+        deltas = np.full(nspec, -2.0)
+        deltas[11] = 100.0
 
-        inputWs = api.CreateSampleWorkspace(OutputWorkspace="RebinRagged_hist", WorkspaceType="Histogram", BinWidth=75, XMin=50)
+        inputWs = api.CreateSampleWorkspace(
+            OutputWorkspace="RebinRagged_hist",
+            WorkspaceType="Histogram",
+            NumBanks=nbanks,
+            BankPixelWidth=npixels,
+            BinWidth=75,
+            XMin=50,
+        )
 
         notFullBinsOnlyWs = api.RebinRagged(
             InputWorkspace=inputWs, OutputWorkspace="NotFullBinsOnly", XMin=xmins, XMax=xmaxs, Delta=deltas, FullBinsOnly=False

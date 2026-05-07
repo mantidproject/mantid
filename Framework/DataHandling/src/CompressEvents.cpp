@@ -124,8 +124,8 @@ void CompressEvents::exec() {
     double tof_min_fixed;
     double tof_max_fixed;
     inputWS->getEventXMinMax(tof_min_fixed, tof_max_fixed);
-    Mantid::Kernel::VectorHelper::createAxisFromRebinParams(
-        {tof_min_fixed, toleranceTof, (tof_max_fixed + std::abs(toleranceTof))}, *histogram_bin_edges, true, true);
+    std::vector<double> const params{tof_min_fixed, toleranceTof, tof_max_fixed + std::abs(toleranceTof)};
+    Mantid::Kernel::VectorHelper::createAxisFromRebinParams(params, *histogram_bin_edges, true, true);
     num_edges = histogram_bin_edges->size();
   }
 

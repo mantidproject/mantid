@@ -12,6 +12,7 @@
 #include "MantidKernel/DllConfig.h"
 #include <cmath>
 #include <functional>
+#include <numeric>
 #include <stdexcept>
 #include <vector>
 
@@ -24,11 +25,15 @@ namespace Kernel {
     @date 16/12/2008
  */
 namespace VectorHelper {
-int MANTID_KERNEL_DLL createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,
-                                                const bool resize_xnew = true, const bool full_bins_only = false,
-                                                const double xMinHint = std::nan(""),
-                                                const double xMaxHint = std::nan(""),
-                                                const bool useReverseLogarithmic = false, const double power = -1);
+
+void MANTID_KERNEL_DLL validateRebinParameters(std::vector<double> const &, bool const = false);
+
+std::size_t MANTID_KERNEL_DLL estimateNumberOfBins(std::vector<double> const &params, double const power = -1);
+
+std::size_t MANTID_KERNEL_DLL createAxisFromRebinParams(
+    const std::vector<double> &params, std::vector<double> &xnew, const bool resize_xnew = true,
+    const bool full_bins_only = false, const double xMinHint = std::nan(""), const double xMaxHint = std::nan(""),
+    const bool useReverseLogarithmic = false, const double power = -1);
 
 void MANTID_KERNEL_DLL rebin(const std::vector<double> &xold, const std::vector<double> &yold,
                              const std::vector<double> &eold, const std::vector<double> &xnew,
@@ -88,6 +93,9 @@ MANTID_KERNEL_DLL void smoothInRange(const std::vector<double> &input, std::vect
                                      std::vector<double> const *const binBndrs = nullptr, size_t startIndex = 0,
                                      size_t endIndex = 0, std::vector<double> *const outBins = nullptr);
 
+// Forward declare SumSquares to use it in lengthVector
+template <class T> struct SumSquares;
+
 //-------------------------------------------------------------------------------------
 /** Return the length of the vector (in the physical sense),
  * the sqrt of the sum of the squares of the components
@@ -96,9 +104,7 @@ MANTID_KERNEL_DLL void smoothInRange(const std::vector<double> &input, std::vect
  * @return length of the vector
  */
 template <typename T> T lengthVector(const std::vector<T> &x) {
-  T total = 0;
-  for (size_t i = 0; i < x.size(); i++)
-    total += x[i] * x[i];
+  T total = std::accumulate(x.cbegin(), x.cend(), static_cast<T>(0), SumSquares<T>());
   // Length is sqrt
   total = sqrt(total);
   return total;

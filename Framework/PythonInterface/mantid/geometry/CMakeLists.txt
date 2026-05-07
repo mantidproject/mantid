@@ -4,6 +4,7 @@ set(MODULE_TEMPLATE src/geometry.cpp.in)
 
 set(EXPORT_FILES
     src/Exports/BoundingBox.cpp
+    src/Exports/ShapeInfo.cpp
     src/Exports/IComponent.cpp
     src/Exports/ICompAssembly.cpp
     src/Exports/IObject.cpp

@@ -84,8 +84,10 @@ Open Slice Viewer
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.
 
-Calculate Monte Carlo Absorption
---------------------------------
+.. _absorption_corrections:
+
+Absorption Corrections
+----------------------
 
 In this tab a Monte Carlo implementation is used to calculate the absorption corrections.
 

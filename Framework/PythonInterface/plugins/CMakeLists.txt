@@ -42,6 +42,7 @@ set(PYTHON_PLUGINS
     algorithms/CreateLeBailFitInput.py
     algorithms/CreatePoleFigureTableWorkspace.py
     algorithms/CropWorkspaceForMDNorm.py
+    algorithms/CylinderAbsorptionCW.py
     algorithms/CylinderPaalmanPingsCorrection2.py
     algorithms/DNSComputeDetEffCorrCoefs.py
     algorithms/DNSFlippingRatioCorr.py

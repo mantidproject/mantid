@@ -1013,7 +1013,8 @@ class FullInstrumentViewWindow(QMainWindow):
     @_skip_if_closing
     def clear_lineplot_overlays(self) -> None:
         for line in self._lineplot_overlays:
-            line.remove()
+            if line in self._detector_spectrum_axes.lines:
+                line.remove()
         self._lineplot_overlays.clear()
         for text in self._detector_spectrum_axes.texts:
             text.remove()

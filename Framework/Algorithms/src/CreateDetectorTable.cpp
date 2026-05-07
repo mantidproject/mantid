@@ -15,7 +15,11 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitConversion.h"
+#include "MantidKernel/V3D.h"
+#include <unordered_map>
+#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -44,9 +48,12 @@ void CreateDetectorTable::init() {
   setPropertySettings("IncludeDetectorPosition",
                       std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
 
-  declareProperty<bool>("PickOneDetectorID", false, "Populate the Detector ID column with only the first of the set.",
+  declareProperty<bool>("OneRowPerDetectorID", false,
+                        "Order rows in table by detector IDs, with each detector ID having its own row. When "
+                        "OneRowPerDetectorID=true the table iterates over all detector IDs, so WorkspaceIndices is "
+                        "ignored and the row count equals the detector count.",
                         Direction::Input);
-  setPropertySettings("PickOneDetectorID",
+  setPropertySettings("OneRowPerDetectorID",
                       std::make_unique<EnabledWhenWorkspaceIsType<MatrixWorkspace>>("InputWorkspace", true));
 
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DetectorTableWorkspace", "", Direction::Output,
@@ -60,7 +67,7 @@ void CreateDetectorTable::exec() {
   includeData = getProperty("IncludeData");
   workspaceIndices = getProperty("WorkspaceIndices");
   includeDetectorPosition = getProperty("IncludeDetectorPosition");
-  PickOneDetectorID = getProperty("PickOneDetectorID");
+  oneRowPerDetectorID = getProperty("OneRowPerDetectorID");
 
   if (auto peaks = std::dynamic_pointer_cast<IPeaksWorkspace>(inputWs)) {
     table = peaks->createDetectorTable();
@@ -74,7 +81,11 @@ void CreateDetectorTable::exec() {
     }
     setup();
     createColumns();
-    populateTable();
+    if (oneRowPerDetectorID) {
+      populateTableByDetID();
+    } else {
+      populateTable();
+    }
     setTableToOutput();
     return;
   }
@@ -123,6 +134,7 @@ void CreateDetectorTable::setup() {
   isScanning = ws->detectorInfo().isScanning();
 
   spectrumInfo = &ws->spectrumInfo();
+  detectorInfo = &ws->detectorInfo();
 
   // check if efixed value is available
   calcQ = true;
@@ -142,23 +154,24 @@ void CreateDetectorTable::setup() {
 
   hasDiffConstants = (ws->getEMode() == DeltaEMode::Elastic);
 
-  nrows = workspaceIndices.empty() ? static_cast<int>(ws->getNumberHistograms())
-                                   : static_cast<int>(workspaceIndices.size());
-
   beamAxisIndex = ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
   sampleDist = ws->getInstrument()->getSample()->getPos()[beamAxisIndex];
   signedThetaParamRetrieved = false;
   showSignedTwoTheta = false; // If true, signedVersion of the two theta
-                              // value should be displayed
+
+  if (workspaceIndices.empty()) {
+    workspaceIndices = std::vector<int>(ws->getNumberHistograms());
+    std::iota(workspaceIndices.begin(), workspaceIndices.end(), 0);
+  }
+
   table = WorkspaceFactory::Instance().createTable("TableWorkspace");
-  table->setRowCount(nrows);
 }
 
 void CreateDetectorTable::createColumns() {
   std::vector<std::pair<std::string, std::string>> colNames;
   colNames.emplace_back("int", "Index");
   colNames.emplace_back("int", "Spectrum No");
-  if (PickOneDetectorID) {
+  if (oneRowPerDetectorID) {
     colNames.emplace_back("int", "Detector ID(s)");
   } else {
     colNames.emplace_back("str", "Detector ID(s)");
@@ -195,150 +208,261 @@ void CreateDetectorTable::createColumns() {
   return;
 }
 
-void CreateDetectorTable::populateTable() {
-  PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
-  for (int row = 0; row < nrows; ++row) {
-    TableRow colValues = table->getRow(row);
-    size_t wsIndex = workspaceIndices.empty() ? static_cast<size_t>(row) : workspaceIndices[row];
-    colValues << static_cast<int>(wsIndex);
-    const double dataY0{ws->y(wsIndex)[0]}, dataE0{ws->e(wsIndex)[0]};
+void CreateDetectorTable::getSphericalCoordinates(size_t wsIndex, double &R, double &theta, double &phi) {
+  // theta used as a dummy variable
+  // Note: phi is the angle around Z, not necessarily the beam direction.
+  spectrumInfo->position(wsIndex).getSpherical(R, theta, phi);
+  // R is actually L2 (same as R if sample is at (0,0,0)), except for
+  // monitors which are handled below.
+  R = spectrumInfo->l2(wsIndex);
+  // Theta is actually 'twoTheta' for detectors (twice the scattering
+  // angle), if Z is the beam direction this corresponds to theta in
+  // spherical coordinates.
+  // For monitors we follow historic behaviour and display theta
+  if (!spectrumInfo->isMonitor(wsIndex)) {
     try {
-      auto &spectrum = ws->getSpectrum(wsIndex);
-      Mantid::specnum_t specNo = spectrum.getSpectrumNo();
+      theta = showSignedTwoTheta ? spectrumInfo->signedTwoTheta(wsIndex) : spectrumInfo->twoTheta(wsIndex);
+      theta *= 180.0 / M_PI; // To degrees
+    } catch (const std::exception &ex) {
+      // Log the error and leave theta as it is
+      g_log.error(ex.what());
+    }
+  } else {
+    const auto dist = spectrumInfo->position(wsIndex)[beamAxisIndex];
+    theta = sampleDist > dist ? 180.0 : 0.0;
 
-      // Geometry
-      if (!spectrumInfo->hasDetectors(wsIndex))
-        throw std::runtime_error("No detectors found.");
-      if (!signedThetaParamRetrieved) {
-        const std::vector<std::string> &parameters =
-            spectrumInfo->detector(wsIndex).getStringParameter("show-signed-theta", true); // recursive
-        showSignedTwoTheta =
-            (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
-        signedThetaParamRetrieved = true;
-      }
+    // If monitors are before the sample in the beam, DetectorInfo
+    // returns a negative l2 distance.
+    R = std::abs(R);
+  }
+}
 
-      double R{0.0}, theta{0.0}, phi{0.0};
-      // theta used as a dummy variable
-      // Note: phi is the angle around Z, not necessarily the beam direction.
-      spectrumInfo->position(wsIndex).getSpherical(R, theta, phi);
-      // R is actually L2 (same as R if sample is at (0,0,0)), except for
-      // monitors which are handled below.
-      R = spectrumInfo->l2(wsIndex);
-      // Theta is actually 'twoTheta' for detectors (twice the scattering
-      // angle), if Z is the beam direction this corresponds to theta in
-      // spherical coordinates.
-      // For monitors we follow historic behaviour and display theta
-      const bool isMonitor = spectrumInfo->isMonitor(wsIndex);
-      if (!isMonitor) {
-        try {
-          theta = showSignedTwoTheta ? spectrumInfo->signedTwoTheta(wsIndex) : spectrumInfo->twoTheta(wsIndex);
-          theta *= 180.0 / M_PI; // To degrees
-        } catch (const std::exception &ex) {
-          // Log the error and leave theta as it is
-          g_log.error(ex.what());
-        }
-      } else {
-        const auto dist = spectrumInfo->position(wsIndex)[beamAxisIndex];
-        theta = sampleDist > dist ? 180.0 : 0.0;
-      }
-      const std::string isMonitorDisplay = isMonitor ? "yes" : "no";
+const std::string CreateDetectorTable::getTimeIndexes(size_t wsIndex) {
+  if (!isScanning) {
+    return "0";
+  }
+  std::set<int> timeIndexSet;
+  for (const auto &def : spectrumInfo->spectrumDefinition(wsIndex)) {
+    timeIndexSet.insert(int(def.second));
+  }
+  const std::string timeIndexes = createTruncatedList(timeIndexSet);
+  return timeIndexes;
+}
 
-      colValues << static_cast<int>(specNo);
+double CreateDetectorTable::getQ(size_t wsIndex) {
+  if (!calcQ) {
+    return std::nan("");
+  }
+  if (spectrumInfo->isMonitor(wsIndex)) {
+    // twoTheta is not defined for monitors.
+    return std::nan("");
+  }
+  try {
+    // Get unsigned theta and efixed value
+    IDetector_const_sptr det{&spectrumInfo->detector(wsIndex), Mantid::NoDeleting()};
+    double efixed = ws->getEFixed(det);
+    double usignTheta = spectrumInfo->twoTheta(wsIndex) * 0.5;
+    double q = UnitConversion::convertToElasticQ(usignTheta, efixed);
+    return q;
+  } catch (std::runtime_error &) {
+    // No Efixed
+    return std::nan("");
+  }
+}
 
-      const auto &ids = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
-      if (PickOneDetectorID) {
-        // Populate detector column with first det id in set
-        colValues << static_cast<int>(*ids.begin());
-      } else {
-        // Populate detector column with a truncated string of all det ids
-        colValues << createTruncatedList(ids);
-      }
-      if (isScanning) {
-        std::set<int> timeIndexSet;
-        for (const auto &def : spectrumInfo->spectrumDefinition(wsIndex)) {
-          timeIndexSet.insert(int(def.second));
-        }
+void CreateDetectorTable::getDiffConst(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero) {
+  if (!hasDiffConstants) {
+    difa = difc = difcUnc = tzero = 0;
+    return;
+  }
+  if (spectrumInfo->isMonitor(wsIndex)) {
+    difa = difc = difcUnc = tzero = 0;
+    return;
+  }
+  auto diffConsts = spectrumInfo->diffractometerConstants(wsIndex);
+  // map will create an entry with zero value if not present already
+  difa = diffConsts[UnitParams::difa];
+  difc = diffConsts[UnitParams::difc];
+  difcUnc = spectrumInfo->difcUncalibrated(wsIndex);
+  tzero = diffConsts[UnitParams::tzero];
+}
 
-        const std::string timeIndexes = createTruncatedList(timeIndexSet);
-        colValues << timeIndexes;
-      }
-      // Y/E
-      if (includeData) {
-        colValues << dataY0 << dataE0; // data
-      }
-      // If monitors are before the sample in the beam, DetectorInfo
-      // returns a negative l2 distance.
-      if (isMonitor) {
-        R = std::abs(R);
-      }
-      colValues << R << theta;
+void CreateDetectorTable::writeRowToTable(const int row, const DetectorRowData &data) {
+  TableRow colValues = table->getRow(static_cast<size_t>(row));
+  colValues << static_cast<int>(data.wsIndex);
+  colValues << data.specNo;
+  if (oneRowPerDetectorID) {
+    // Populate detector column with first det id in set
+    colValues << static_cast<int>(*data.detIds.begin());
+  } else {
+    // Populate detector column with a truncated string of all det ids
+    colValues << createTruncatedList(data.detIds);
+  }
+  if (isScanning) {
+    colValues << data.timeIndexes;
+  }
+  if (includeData) {
+    colValues << data.dataY0 << data.dataE0; // data
+  }
+  colValues << data.R << data.theta;
+  if (calcQ) {
+    colValues << data.q;
+  }
+  colValues << data.phi;       // rtp
+  colValues << data.isMonitor; // monitor
+  if (hasDiffConstants) {
+    colValues << data.difa << data.difc << data.difcUnc << data.tzero;
+  }
+  if (includeDetectorPosition) {
+    colValues << data.detPosition;
+  }
+}
 
-      if (calcQ) {
-        if (isMonitor) {
-          // twoTheta is not defined for monitors.
-          colValues << std::nan("");
-        } else {
-          try {
+CreateDetectorTable::DetectorRowData CreateDetectorTable::calculateWsIdxData(const size_t wsIndex) {
+  DetectorRowData data;
 
-            // Get unsigned theta and efixed value
-            IDetector_const_sptr det{&spectrumInfo->detector(wsIndex), Mantid::NoDeleting()};
-            double efixed = ws->getEFixed(det);
-            double usignTheta = spectrumInfo->twoTheta(wsIndex) * 0.5;
+  // Geometry
+  if (!spectrumInfo->hasDetectors(wsIndex))
+    throw std::runtime_error("No detectors found.");
+  if (!signedThetaParamRetrieved) {
+    const std::vector<std::string> &parameters =
+        spectrumInfo->detector(wsIndex).getStringParameter("show-signed-theta", true); // recursive
+    showSignedTwoTheta =
+        (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
+    signedThetaParamRetrieved = true;
+  }
 
-            double q = UnitConversion::convertToElasticQ(usignTheta, efixed);
-            colValues << q;
-          } catch (std::runtime_error &) {
-            // No Efixed
-            colValues << std::nan("");
-          }
-        }
-      }
+  // wsIndex
+  data.wsIndex = static_cast<int>(wsIndex);
+  // Spec No
+  auto &spectrum = ws->getSpectrum(wsIndex);
+  data.specNo = spectrum.getSpectrumNo();
+  data.detIds = dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
+  // Time indexes
+  data.timeIndexes = getTimeIndexes(wsIndex);
+  // data Y/E
+  data.dataY0 = ws->y(wsIndex)[0];
+  data.dataE0 = ws->e(wsIndex)[0];
+  // R, Theta, Phi
+  getSphericalCoordinates(wsIndex, data.R, data.theta, data.phi);
+  // Q
+  data.q = getQ(wsIndex);
+  // Is monitor
+  data.isMonitor = spectrumInfo->isMonitor(wsIndex) ? "yes" : "no";
+  // Diff consts
+  getDiffConst(wsIndex, data.difa, data.difc, data.difcUnc, data.tzero);
+  // Detector position
+  data.detPosition = spectrumInfo->position(wsIndex);
+  return data;
+}
 
-      colValues << phi               // rtp
-                << isMonitorDisplay; // monitor
+void CreateDetectorTable::populateTable() {
 
-      if (hasDiffConstants) {
-        if (isMonitor) {
-          colValues << 0. << 0. << 0. << 0.;
-        } else {
-          auto diffConsts = spectrumInfo->diffractometerConstants(wsIndex);
-          auto difcValueUncalibrated = spectrumInfo->difcUncalibrated(wsIndex);
-          // map will create an entry with zero value if not present already
-          colValues << diffConsts[UnitParams::difa] << diffConsts[UnitParams::difc] << difcValueUncalibrated
-                    << diffConsts[UnitParams::tzero];
-        }
-      }
-      if (includeDetectorPosition) {
-        const auto &detectorPosition = spectrumInfo->position(wsIndex);
-        colValues << detectorPosition;
-      }
+  table->setRowCount(workspaceIndices.size());
+
+  PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
+  for (int row = 0; row < static_cast<int>(workspaceIndices.size()); row++) {
+    PARALLEL_START_INTERRUPT_REGION
+
+    auto wsIndex = static_cast<size_t>(workspaceIndices[static_cast<size_t>(row)]);
+
+    try {
+      auto data = calculateWsIdxData(wsIndex);
+      writeRowToTable(row, data);
+
     } catch (const std::exception &) {
-      colValues.row(row);
-      colValues << static_cast<int>(wsIndex);
-      // spectrumNo=-1, detID=0
-      colValues << -1;
-      if (PickOneDetectorID) {
-        colValues << 0;
-      } else {
-        colValues << "0";
-      }
-      // Y/E
-      if (includeData) {
-        colValues << dataY0 << dataE0; // data
-      }
-      colValues << 0.0 << 0.0; // rt
-      if (calcQ) {
-        colValues << 0.0; // efixed
-      }
-      colValues << 0.0    // rtp
-                << "n/a"; // monitor
-      if (hasDiffConstants) {
-        colValues << 0.0 << 0.0 << 0.0 << 0.0;
-      }
-      if (includeDetectorPosition) {
-        colValues << V3D(0.0, 0.0, 0.0);
-      }
+      DetectorRowData errorData;
+      errorData.wsIndex = static_cast<int>(wsIndex);
+      errorData.specNo = -1;
+      errorData.detIds = {0};
+      errorData.timeIndexes = "0";
+      errorData.dataY0 = ws->y(wsIndex)[0];
+      errorData.dataE0 = ws->e(wsIndex)[0];
+      errorData.isMonitor = "n/a";
+      writeRowToTable(row, errorData);
     } // End catch for no spectrum
+    PARALLEL_END_INTERRUPT_REGION
+  }
+  PARALLEL_CHECK_INTERRUPT_REGION
+}
+
+void CreateDetectorTable::populateTableByDetID() {
+
+  // Each thread will pick up a workspace index and populate all det ids from that index
+  // Need to find partitions for each workspace index beforehand, since executing in parallel
+  std::vector<size_t> wsIndexToChunkStart(workspaceIndices.size());
+  size_t rowsCounter = 0;
+  for (size_t i = 0; i < workspaceIndices.size(); i++) {
+    wsIndexToChunkStart[i] = rowsCounter;
+    rowsCounter += ws->getSpectrum(static_cast<size_t>(workspaceIndices[i])).getDetectorIDs().size();
+  }
+  std::vector<DetectorRowData> allRowsData(rowsCounter);
+
+  // Executing in parallel, each thread writes to unique chunk in array, avoids contention
+  // NOTE: Attempted a shared dict implementation, too much thread contention for many det ids
+  // Need to stick to an array implementation where each thread writes to unique place in array
+  // NOTE: Iterating variable needs to be signed for omp, can't use size_t
+  PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
+  for (int i = 0; i < static_cast<int>(workspaceIndices.size()); i++) {
+    PARALLEL_START_INTERRUPT_REGION
+
+    auto wsIndex = static_cast<size_t>(workspaceIndices[static_cast<size_t>(i)]);
+
+    DetectorRowData data;
+    // TODO: Not entirely sure this catch is necessary
+    // Only necessary if there is a det id in detectorInfo->detectorIDs()
+    // that somehow triggers the crash, but that seems unlikely
+    try {
+      data = calculateWsIdxData(wsIndex);
+    } catch (const std::exception &) {
+      data.wsIndex = static_cast<int>(wsIndex);
+      data.specNo = -1;
+      data.detIds = {0};
+      data.timeIndexes = "0";
+      data.dataY0 = ws->y(wsIndex)[0];
+      data.dataE0 = ws->e(wsIndex)[0];
+      data.isMonitor = "n/a";
+    } // End catch for no spectrum
+
+    size_t chunkStart = wsIndexToChunkStart[static_cast<size_t>(i)];
+    auto detIds = dynamic_cast<const std::set<int> &>(ws->getSpectrum(wsIndex).getDetectorIDs());
+    for (int detId : detIds) {
+      data.detIds = std::set<int>({detId});
+      allRowsData[chunkStart++] = data;
+    }
+    PARALLEL_END_INTERRUPT_REGION
+  }
+  PARALLEL_CHECK_INTERRUPT_REGION
+
+  // Build detector id map for easy ordering
+  std::unordered_map<int, DetectorRowData> detIdToData;
+  detIdToData.reserve(allRowsData.size());
+  for (auto &rowData : allRowsData) {
+    if (!rowData.detIds.empty()) {
+      detIdToData[*rowData.detIds.begin()] = std::move(rowData);
+    }
+  }
+  // Write rows in order of component index
+  // Number of rows matches number of detectorIDs exactly
+  const auto &workspaceDetectorIds = detectorInfo->detectorIDs();
+  table->setRowCount(workspaceDetectorIds.size());
+  int row = 0;
+  for (int detId : workspaceDetectorIds) {
+    DetectorRowData data;
+    auto it = detIdToData.find(detId);
+    if (it != detIdToData.end()) {
+      data = it->second;
+    } else {
+      // Rows need to match detectorIDs, if not found, pad with invalid flags
+      data.wsIndex = -1;
+      data.specNo = -1;
+      data.detIds = {detId};
+      data.timeIndexes = "0";
+      data.dataY0 = 0;
+      data.dataE0 = 0;
+      data.isMonitor = "n/a";
+    }
+    writeRowToTable(row++, data);
   }
 }
 

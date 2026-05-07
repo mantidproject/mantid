@@ -27,7 +27,7 @@ from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LARMOR)
-class LARMORMultiPeriodAddEventFilesTest_V2(systemtesting.MantidSystemTest):
+class LARMORMultiPeriodAddEventFilesTest(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
         """Requires 2.5Gb"""
         return 2500

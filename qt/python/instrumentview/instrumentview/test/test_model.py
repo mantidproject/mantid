@@ -49,6 +49,10 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self._mock_extract_mask = MagicMock()
         self._mock_extract_mask = mask_patcher.start()
 
+        delete_ws_patcher = mock.patch("instrumentview.FullInstrumentViewModel.DeleteWorkspace")
+        self.addCleanup(delete_ws_patcher.stop)
+        self._mock_delete_ws = delete_ws_patcher.start()
+
     def _setup_mocks(
         self,
         detector_ids: list[int],
@@ -88,6 +92,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_detector_info = MagicMock()
         mock_detector_info.detectorIDs.return_value = np.array(detector_ids)
         mock_detector_info.indexOf.side_effect = lambda det_id: detector_ids.index(det_id)
+        mock_detector_info.isMasked.return_value = False
         mock_workspace.detectorInfo.return_value = mock_detector_info
         mock_workspace.componentInfo.return_value = MagicMock()
         mock_workspace.dataY.return_value = MagicMock()
@@ -644,16 +649,16 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_array_equal(model.detector_positions, expected_positions[1:])
 
     def test_mask_ws(self):
-        model, _ = self._setup_model([1, 2, 3])
-        model._mask_ws = MagicMock()
+        model, mock_ws = self._setup_model([1, 2, 3])
         _ = model.mask_ws
-        model._mask_ws.dataY.assert_called()
+        mock_ws.clone.assert_called_once_with(StoreInADS=True, OutputWorkspace="_tmp")
+        self._mock_extract_mask.assert_called()
 
     def test_roi_ws(self):
-        model, _ = self._setup_model([1, 2, 3])
-        model._roi_ws = MagicMock()
+        model, mock_ws = self._setup_model([1, 2, 3])
         _ = model.roi_ws
-        model._roi_ws.dataY.assert_called()
+        mock_ws.clone.assert_called_once_with(StoreInADS=True, OutputWorkspace="_tmp")
+        self._mock_extract_mask.assert_called()
 
     def test_add_mask(self):
         model, _ = self._setup_model([1, 2, 3])
@@ -752,13 +757,15 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_save_xml_mask(self, mock_save_mask):
         model, _ = self._setup_model([1, 2, 3])
         model.save_mask_to_xml("file")
-        mock_save_mask.assert_called_with(model._mask_ws, OutputFile="file.xml")
+        expected_mask_ws = self._mock_extract_mask.return_value[0]
+        mock_save_mask.assert_called_with(expected_mask_ws, OutputFile="file.xml")
 
     @mock.patch("instrumentview.FullInstrumentViewModel.SaveCalFile")
     def test_save_cal_mask(self, mock_save_cal_file):
         model, _ = self._setup_model([1, 2, 3])
         model.save_mask_to_cal("file")
-        mock_save_cal_file.assert_called_with(MaskWorkspace=model._mask_ws, Filename="file.cal")
+        expected_mask_ws = self._mock_extract_mask.return_value[0]
+        mock_save_cal_file.assert_called_with(MaskWorkspace=expected_mask_ws, Filename="file.cal")
 
     def test_clear_masks(self):
         model, _ = self._setup_model([1, 2, 3])
@@ -823,7 +830,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws2_wdp.detector_peaks = [
             DetectorPeaks([self._create_peak(100, 8), self._create_peak(200, 8)]),
         ]
-        mock_wdp_cls.side_effect = lambda name, _ws, _specnos: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+        mock_wdp_cls.side_effect = lambda name: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
         mock_ws1 = MagicMock()
         mock_ws2 = MagicMock()
         mock_ads.retrieve.side_effect = lambda name: {"ws1": mock_ws1, "ws2": mock_ws2}[name]
@@ -839,7 +846,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model.delete_peaks_on_all_selected_detectors([])
 
     def _create_peak(self, peak_index: int, detector_id: int, x: float = 1.0) -> Peak:
-        return Peak(detector_id, detector_id, peak_index, (0, 0, 0), x, x, x, x)
+        return Peak(detector_id, peak_index, (0, 0, 0), x, x, x, x)
 
     def test_no_selected_workspaces_no_overlay_no_removal(self):
         """When there are no selected workspaces or overlay entries, nothing is removed."""
@@ -902,7 +909,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws1_wdp.detector_peaks = [DetectorPeaks([self._create_peak(201, 7, 2.5), self._create_peak(202, 7, 100.0)])]
         ws2_wdp = MagicMock()
         ws2_wdp.detector_peaks = [DetectorPeaks([self._create_peak(301, 7, 2.3), self._create_peak(302, 7, 50.0)])]
-        mock_wdp_cls.side_effect = lambda name, _ws, _spec_nos: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+        mock_wdp_cls.side_effect = lambda name: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
         mock_ws1 = MagicMock()
         mock_ws2 = MagicMock()
         mock_ads.retrieve.side_effect = lambda name: {"ws1": mock_ws1, "ws2": mock_ws2}[name]
@@ -1164,7 +1171,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws1_wdp.get_positions_and_labels.return_value = (np.array([[1, 1, 1]]), ["hkl_1"])
         ws2_wdp = MagicMock()
         ws2_wdp.get_positions_and_labels.return_value = (np.array([[2, 2, 2], [3, 3, 3]]), ["hkl_2", "hkl_3"])
-        mock_wdp_cls.side_effect = lambda name, _ws, _spec: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+        mock_wdp_cls.side_effect = lambda name: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
 
         positions, labels, ws_names = model.get_peak_overlay_arguments(["ws1", "ws2"])
 
@@ -1218,7 +1225,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws1_wdp.get_x_values_and_labels.return_value = ([100.0], ["hkl_1"])
         ws2_wdp = MagicMock()
         ws2_wdp.get_x_values_and_labels.return_value = ([200.0, 300.0], ["hkl_2", "hkl_3"])
-        mock_wdp_cls.side_effect = lambda name, _ws, _spec: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+        mock_wdp_cls.side_effect = lambda name: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
 
         x_vals, labels, ws_names = model.get_peak_lineplot_overlay_arguments(["ws1", "ws2"])
 
