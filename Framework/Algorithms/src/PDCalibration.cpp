@@ -734,6 +734,9 @@ void PDCalibration::exec() {
         for (size_t ipar = 0; ipar < peakfunc->nParams(); ipar++) {
           peakfunc->setParameter(ipar, fittedTable->getRef<double>(peakfunc->parameterName(ipar), rowIndexInFitTable));
         }
+        // provide instrument geometry so functions like IkedaCarpenterPV can
+        // compute wavelength-dependent quantities (e.g. height())
+        peakfunc->setMatrixWorkspace(m_uncalibratedWS, wkspIndex, 0., 0.);
         centre = peakfunc->centre();
         width = peakfunc->fwhm();
         height = peakfunc->height();

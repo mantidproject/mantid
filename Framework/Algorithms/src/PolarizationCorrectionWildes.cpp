@@ -29,6 +29,7 @@ static const std::string FLIPPERS{"Flippers"};
 static const std::string SPIN_STATES{"SpinStates"};
 static const std::string EFFICIENCIES{"Efficiencies"};
 static const std::string INPUT_WS{"InputWorkspaces"};
+static const std::string INPUT_WS_GROUP{"InputWorkspaceGroup"};
 static const std::string OUTPUT_WS{"OutputWorkspace"};
 static const std::string ADD_SPIN_STATE_LOG{"AddSpinStateToLog"};
 } // namespace Prop
@@ -323,8 +324,12 @@ size_t PolarizationCorrectionWildes::WorkspaceMap::size() const noexcept {
  */
 void PolarizationCorrectionWildes::init() {
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
-                      Prop::INPUT_WS, "", std::make_shared<API::ADSValidator>(), Kernel::Direction::Input),
+                      Prop::INPUT_WS, "", std::make_shared<API::ADSValidator>(true, true), Kernel::Direction::Input),
                   "A list of workspaces to be corrected corresponding to the "
+                  "flipper configurations.");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(
+                      Prop::INPUT_WS_GROUP, "", Kernel::Direction::Input, API::PropertyMode::Optional),
+                  "A group of workspaces to be corrected corresponding to the "
                   "flipper configurations.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),
@@ -412,15 +417,22 @@ std::map<std::string, std::string> PolarizationCorrectionWildes::validateInputs(
     }
   }
   const std::vector<std::string> inputs = getProperty(Prop::INPUT_WS);
+  const API::WorkspaceGroup_sptr inputsGroup = getProperty(Prop::INPUT_WS_GROUP);
+  if (inputs.empty() && !inputsGroup) {
+    issues[Prop::INPUT_WS] = "At least one of the input workspace properties must be provided.";
+  } else if (!inputs.empty() && inputsGroup) {
+    issues[Prop::INPUT_WS] = "Only one of the input workspace properties can be provided.";
+  }
   const auto flipperConfig = Kernel::SpinStateHelpers::splitSpinStateString(getPropertyValue(Prop::FLIPPERS));
   const auto flipperCount = flipperConfig.size();
-  if (inputs.size() != flipperCount) {
+  const size_t inputsCount = (inputsGroup) ? inputsGroup->getNumberOfEntries() : inputs.size();
+  if (inputsCount != flipperCount) {
     issues[Prop::FLIPPERS] = "The number of flipper configurations (" + std::to_string(flipperCount) +
-                             ") does not match the number of input workspaces (" + std::to_string(inputs.size()) + ")";
+                             ") does not match the number of input workspaces (" + std::to_string(inputsCount) + ")";
   }
   // SpinStates checks.
   const auto spinStates = Kernel::SpinStateHelpers::splitSpinStateString(getPropertyValue(Prop::SPIN_STATES));
-  if (inputs.size() == 1 && !spinStates.empty()) {
+  if (inputsCount == 1 && !spinStates.empty()) {
     issues[Prop::SPIN_STATES] = "Output workspace order cannot be set for direct beam calculations.";
   } else if (!spinStates.empty()) {
     if (flipperConfig.front().size() == 1 && spinStates.size() != 2) {
@@ -883,9 +895,11 @@ PolarizationCorrectionWildes::fullCorrections(const WorkspaceMap &inputs, const 
 PolarizationCorrectionWildes::WorkspaceMap
 PolarizationCorrectionWildes::mapInputsToDirections(const std::vector<std::string> &flippers) {
   const std::vector<std::string> inputNames = getProperty(Prop::INPUT_WS);
+  const API::WorkspaceGroup_sptr inputGroup = getProperty(Prop::INPUT_WS_GROUP);
   WorkspaceMap inputs;
   for (size_t i = 0; i < flippers.size(); ++i) {
-    auto ws = (API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(inputNames[i]));
+    auto ws = (inputGroup) ? dynamic_pointer_cast<API::MatrixWorkspace>(inputGroup->getItem(i))
+                           : API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(inputNames[i]);
     if (!ws) {
       throw std::runtime_error("One of the input workspaces doesn't seem to be a MatrixWorkspace.");
     }

@@ -89,17 +89,18 @@ SofQW::setUpOutputWorkspace(const API::MatrixWorkspace &inputWorkspace, const st
                             const SofQCommon &emodeProperties) {
   using Kernel::VectorHelper::createAxisFromRebinParams;
   // Create vector to hold the new X axis values
-  HistogramData::BinEdges xAxis(0);
+  std::vector<double> xnew;
   double eMin{std::nan("")};
   double eMax{std::nan("")};
   if (ebinParams.empty()) {
-    xAxis = inputWorkspace.binEdges(0);
+    xnew = inputWorkspace.binEdges(0).rawData();
   } else if (ebinParams.size() == 1) {
     inputWorkspace.getXMinMax(eMin, eMax);
-    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData(), true, true, eMin, eMax);
+    createAxisFromRebinParams(ebinParams, xnew, true, true, eMin, eMax);
   } else {
-    createAxisFromRebinParams(ebinParams, xAxis.mutableRawData());
+    createAxisFromRebinParams(ebinParams, xnew);
   }
+  HistogramData::BinEdges xAxis(std::move(xnew));
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
   size_t yLength;

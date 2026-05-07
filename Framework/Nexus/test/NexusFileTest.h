@@ -796,6 +796,79 @@ public:
     delete[] val_array;
   }
 
+  void test_data_existing_char_array_len() {
+    // this test protects against a regression that can occur inside LoadNexusLogs
+    // when loading old CORELLI files, in particular CORELLI_25623.nxs.h5
+    // here the data was saved as a rank-1 with len 1 and the correct string length in dim[0]
+    cout << "\ntest dataset read existing -- len 1 char array" << std::endl;
+
+    // create a file and write string data with len 1 and correct length in dim[0]
+    // this has to be done using the hdf5 C library
+    std::string data("this is a string of data");
+
+    // create the temporary file
+    FileResource resource("test_corelli_old.nxs");
+    std::string filename = resource.fullPath();
+
+    { // fill in the file, scoped to ensure closure before trying to read
+      // file permissions
+      Mantid::Nexus::ParameterID fapl = H5Pcreate(H5P_FILE_ACCESS);
+      H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
+      Mantid::Nexus::UniqueFileID fid = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+      // put an initial entry
+      Mantid::Nexus::GroupID groupid = H5Gcreate(fid, "entry", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      // add a NXlog attribute
+      Mantid::Nexus::DataTypeID attrtype = H5Tcopy(H5T_C_S1);
+      H5Tset_size(attrtype, 7);
+      Mantid::Nexus::DataSpaceID attrspce = H5Screate(H5S_SCALAR);
+      Mantid::Nexus::AttributeID attrid = H5Acreate(groupid, "NXlog", attrtype, attrspce, H5P_DEFAULT, H5P_DEFAULT);
+      H5Awrite(attrid, attrtype, "NXpants");
+
+      // make and put the data
+      Mantid::Nexus::DataTypeID datatype = H5Tcopy(H5T_C_S1);
+      H5Tset_size(datatype, 1); // set the length to 1
+      int constexpr rank = 1;
+      hsize_t dims[rank] = {data.size()}; // dims[0] has the correct length
+      Mantid::Nexus::DataSpaceID dataspace = H5Screate_simple(rank, dims, NULL);
+      Mantid::Nexus::DataSetID dataid =
+          H5Dcreate(groupid, "data", datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      H5Dwrite(dataid, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data.c_str());
+
+      // verify the file was setup correctly
+      hsize_t mydim[4] = {4, 5}; // "junk" values
+      int iRank = H5Sget_simple_extent_dims(dataspace, mydim, NULL);
+      TS_ASSERT_EQUALS(iRank, 1);
+      TS_ASSERT_EQUALS(mydim[0], data.size()); // this junk value changed
+      TS_ASSERT_EQUALS(mydim[1], 5);           // this junk value unchanged
+      hsize_t len = H5Tget_size(datatype);
+      TS_ASSERT_EQUALS(len, 1); // length is 1, not the string length
+
+      // cleanup and close file
+      H5Fclose(fid.release());
+    }
+
+    // now open the file and read
+    Mantid::Nexus::File file(filename, NXaccess::READ);
+    if (file.hasAddress("entry/data")) {
+      file.openAddress("entry/data");
+    } else {
+      TS_FAIL("Failed to find the written address");
+    }
+    Mantid::Nexus::Info info = file.getInfo();
+    char *value = new char[data.size() + 1];
+    file.getData<char>(value);
+    std::string actual(value);
+    delete[] value;
+    TS_ASSERT_EQUALS(info.dims[0], data.size());
+    TS_ASSERT_EQUALS(actual, data);
+
+    // cleanup
+    file.closeData();
+    file.closeGroup();
+    file.close();
+  }
+
   // #################################################################################################################
   // TEST ADDRESS METHODS
   // #################################################################################################################

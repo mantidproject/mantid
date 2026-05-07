@@ -198,6 +198,19 @@ public:
     fullFourInputsResultsCheck(outputWS, wsList[0], wsList[1], wsList[2], wsList[3], effWS, counts);
   }
 
+  void test_FullCorrections_workspace_group() {
+    constexpr size_t numClones{4};
+    Counts counts{Y_VAL, Y_VAL, Y_VAL};
+
+    auto [wsGroup, wsList] = createWorkspaceGroup(numClones, counts);
+    setWorkspacesTestData(wsList, NHIST);
+
+    auto effWS = efficiencies(DEFAULT_EDGES);
+    WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsGroup, effWS);
+
+    fullFourInputsResultsCheck(outputWS, wsList[0], wsList[1], wsList[2], wsList[3], effWS, counts);
+  }
+
   void test_ThreeInputsWithMissing01FlipperConfiguration() { threeInputsTest("01"); }
 
   void test_ThreeInputsWithMissing10FlipperConfiguration() { threeInputsTest("10"); }
@@ -408,6 +421,26 @@ public:
   }
 
 private:
+  std::unique_ptr<PolarizationCorrectionWildes> createWildesAlg(const Mantid::API::WorkspaceGroup_sptr &inputWorkspaces,
+                                                                Mantid::API::MatrixWorkspace_sptr effWs,
+                                                                const std::string &flippers = "",
+                                                                const std::string &spinStates = "") {
+    auto alg = std::make_unique<PolarizationCorrectionWildes>();
+    alg->setChild(true);
+    alg->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg->initialize())
+    TS_ASSERT(alg->isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspaceGroup", inputWorkspaces))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", OUTPUT_WS_NAME))
+    if (!flippers.empty())
+      alg->setProperty("Flippers", flippers);
+    if (!spinStates.empty())
+      alg->setProperty("SpinStates", spinStates);
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Efficiencies", effWs))
+    setNonWSProps(*alg, flippers, spinStates, effWs);
+    return alg;
+  }
+
   std::unique_ptr<PolarizationCorrectionWildes> createWildesAlg(const std::vector<std::string> &inputWorkspaces,
                                                                 Mantid::API::MatrixWorkspace_sptr effWs,
                                                                 const std::string &flippers = "",
@@ -417,26 +450,23 @@ private:
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize())
     TS_ASSERT(alg->isInitialized())
-
     if (inputWorkspaces.size() == 1) {
       TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspaces", inputWorkspaces[0]))
     } else {
       TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspaces", inputWorkspaces))
     }
-
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", OUTPUT_WS_NAME))
-
-    if (!flippers.empty()) {
-      alg->setProperty("Flippers", flippers);
-    }
-
-    if (!spinStates.empty()) {
-      alg->setProperty("SpinStates", spinStates);
-    }
-
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Efficiencies", effWs))
-
+    setNonWSProps(*alg, flippers, spinStates, effWs);
     return alg;
+  }
+
+  void setNonWSProps(PolarizationCorrectionWildes &alg, const std::string &flippers, const std::string &spinStates,
+                     Mantid::API::MatrixWorkspace_sptr effWs) {
+    if (!flippers.empty())
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("Flippers", flippers));
+    if (!spinStates.empty())
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpinStates", spinStates));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWs));
   }
 
   Mantid::API::WorkspaceGroup_sptr runAlg(std::unique_ptr<PolarizationCorrectionWildes> alg,
@@ -464,6 +494,15 @@ private:
   }
 
   Mantid::API::WorkspaceGroup_sptr runCorrectionWildes(const std::vector<std::string> &inputWorkspaces,
+                                                       Mantid::API::MatrixWorkspace_sptr effWs,
+                                                       const std::string &flippers = "",
+                                                       const std::string &spinStates = "",
+                                                       const bool expectedToWork = true) {
+    auto alg = createWildesAlg(inputWorkspaces, effWs, flippers, spinStates);
+    return runAlg(std::move(alg), expectedToWork);
+  }
+
+  Mantid::API::WorkspaceGroup_sptr runCorrectionWildes(const Mantid::API::WorkspaceGroup_sptr &inputWorkspaces,
                                                        Mantid::API::MatrixWorkspace_sptr effWs,
                                                        const std::string &flippers = "",
                                                        const std::string &spinStates = "",
@@ -1434,6 +1473,16 @@ private:
     auto baseWorkspace = counts.has_value() ? createWorkspace(2, *counts) : createWorkspace();
 
     return cloneWorkspaces(baseWorkspace, numClones);
+  }
+
+  std::pair<WorkspaceGroup_sptr, std::vector<MatrixWorkspace_sptr>>
+  createWorkspaceGroup(const size_t numClones, const std::optional<Counts> &counts = std::nullopt) {
+    auto wsList = createWorkspaceList(numClones, counts);
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
+    for (const auto &ws : wsList) {
+      group->addWorkspace(ws);
+    }
+    return {group, wsList};
   }
 
   void setupWorkspacesForIdealCasesTwoInput(const Mantid::API::MatrixWorkspace_sptr &ws) {

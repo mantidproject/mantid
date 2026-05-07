@@ -7,7 +7,7 @@
 # pylint: disable=no-init
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from ISISCommandInterface import (
+from sans.command_interface.ISISCommandInterface import (
     AssignCan,
     AssignSample,
     DefaultTrans,
@@ -49,7 +49,7 @@ class SANSLOQCentreNoGrav(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.disableChecking.append("Instrument")
-        return "54431main_1D_3.0_9.0", "LOQCentreNoGravSearchCentreFixed.nxs"
+        return "54431_main_1D_3.0_9.0", "LOQCentreNoGravSearchCentreFixed.nxs"
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)
@@ -78,4 +78,4 @@ class SANSLOQCentreNoGravDefineCentre(systemtesting.MantidSystemTest):
         self.disableChecking.append("Axes")
         self.disableChecking.append("Instrument")
 
-        return "54431main_1D_3.0_9.0", "LOQCentreNoGrav_V2.nxs"
+        return "54431_main_1D_3.0_9.0", "LOQCentreNoGrav_V2.nxs"

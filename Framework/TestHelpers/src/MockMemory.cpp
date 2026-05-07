@@ -56,7 +56,7 @@ extern "C" void disable_mem_override() { g_override_availMem.store(false); }
 // and return the actual memory count
 std::size_t Mantid::Kernel::MemoryStats::availMem() const {
   if (g_override_availMem.load()) {
-    return g_value;
+    return g_value.load();
   } else {
     init_real_availMem();
     if (g_real_availMem.load()) {
@@ -67,6 +67,32 @@ std::size_t Mantid::Kernel::MemoryStats::availMem() const {
     }
   }
 }
+
+std::string Mantid::Kernel::MemoryStats::checkAvailableMemory(std::size_t const requestedMemory) const {
+  if (g_override_availMem.load()) {
+    std::size_t avail = g_value.load();
+    if (requestedMemory > avail) {
+      return "Mock Memory Failure";
+    } else {
+      return "";
+    }
+  } else {
+    init_real_availMem();
+    if (g_real_availMem.load()) {
+      // requestedMemory is in bytes, availMem is in KiB, so multiply
+      std::size_t avail = g_real_availMem.load()(this) * 1024;
+      if (requestedMemory > avail) {
+        return "Requested Memory Failure " + std::to_string(requestedMemory) + " > " + std::to_string(avail);
+      } else {
+        return "";
+      }
+    } else {
+      // if it cannot be thrown, this can cause opaque testing errors; throw an error here instead
+      throw std::runtime_error("Failed to reset the MemoryStats patch by name lookup");
+    }
+  }
+}
+
 #else
 namespace Mantid::TestMemory {
 extern "C" void enable_mem_override(std::size_t value) { (void)value; }

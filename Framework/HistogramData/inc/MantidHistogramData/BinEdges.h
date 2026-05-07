@@ -49,6 +49,10 @@ public:
   BinEdges &operator=(BinEdges &&) & = default;
 
   explicit BinEdges(const Points &points);
+
+  /// Deleted. Would return pointer to the internal data.
+  /// This inherits from FixedLengthVector and so should not allow for length modifications.
+  std::vector<double> &mutableRawData() = delete;
 };
 
 } // namespace HistogramData
