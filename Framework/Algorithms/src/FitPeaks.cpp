@@ -1567,8 +1567,6 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
       if (start_x_iter == stop_x_iter)
         throw std::runtime_error("Range size is zero in calculateFittedPeaks");
 
-      peak_function->setMatrixWorkspace(m_inputMatrixWS, iws, peakwindow.first, peakwindow.second);
-
       FunctionDomain1DVector domain(start_x_iter, stop_x_iter);
       FunctionValues values(domain);
       CompositeFunction_sptr comp_func = std::make_shared<API::CompositeFunction>();
