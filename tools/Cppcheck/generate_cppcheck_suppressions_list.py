@@ -11,7 +11,7 @@ the CppCheck_Suppressions.txt.in template file. Use this when upgrading to
 a new version of cppcheck.
 """
 
-#test
+# test
 
 import argparse
 import sys
