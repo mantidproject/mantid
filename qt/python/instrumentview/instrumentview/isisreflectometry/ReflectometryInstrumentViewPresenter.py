@@ -174,6 +174,13 @@ class ReflectometryInstrumentViewPresenter:
         self._transform = self._scale_matrix_relative_to_centre(centre, visible_width / mesh_width, visible_height / mesh_height)
         self._detector_mesh.transform(self._transform, inplace=True)
 
+        # The fill transform leaves the camera in the correct full-view state.
+        # Update the cached default in CursorZoomInteractorStyle so that right-clicking
+        # resets to this state rather than the stale pre-fill-transform scale.
+        style = plotter.iren.style
+        if hasattr(style, "update_default_camera_state"):
+            style.update_default_camera_state()
+
     @staticmethod
     def _scale_matrix_relative_to_centre(centre, scale_x=1.0, scale_y=1.0) -> np.ndarray:
         # Translate to centre, scale, translate back

@@ -278,6 +278,37 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
         # First call should be the inverse (undo), second should be the new fill transform
         self.assertEqual(mesh.transform.call_count, 2)
 
+    def test_apply_fill_transform_updates_interactor_style_defaults(self):
+        """_apply_fill_transform should call update_default_camera_state on the interactor style."""
+        mesh = MagicMock()
+        mesh.bounds = (0, 2, 0, 1, 0, 0)
+        self._presenter._detector_mesh = mesh
+        self._presenter._original_mesh_bounds = (0, 2, 0, 1, 0, 0)
+        self._presenter._transform = np.eye(4)
+        self._mock_view.main_plotter.ren_win.GetSize.return_value = (400, 300)
+        self._mock_view.main_plotter.camera.parallel_scale = 0.75
+        mock_style = MagicMock(spec=["update_default_camera_state"])
+        self._mock_view.main_plotter.iren.style = mock_style
+
+        self._presenter._apply_fill_transform()
+
+        mock_style.update_default_camera_state.assert_called_once()
+
+    def test_apply_fill_transform_skips_style_update_when_style_has_no_method(self):
+        """_apply_fill_transform should not fail when the style lacks update_default_camera_state."""
+        mesh = MagicMock()
+        mesh.bounds = (0, 2, 0, 1, 0, 0)
+        self._presenter._detector_mesh = mesh
+        self._presenter._original_mesh_bounds = (0, 2, 0, 1, 0, 0)
+        self._presenter._transform = np.eye(4)
+        self._mock_view.main_plotter.ren_win.GetSize.return_value = (400, 300)
+        self._mock_view.main_plotter.camera.parallel_scale = 0.75
+        # Style with no update_default_camera_state attribute
+        self._mock_view.main_plotter.iren.style = object()
+
+        # Should not raise
+        self._presenter._apply_fill_transform()
+
     def test_reset_clears_resize_callback(self):
         self._presenter._model = MagicMock()
         self._presenter.reset()
