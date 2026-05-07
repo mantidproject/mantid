@@ -58,22 +58,23 @@ constexpr size_t NON_MAG_INTENSITY_VAR_NUM = 4;
 constexpr size_t DERIVED_EFFICIENCY_VAR_INDEX = NON_MAG_INTENSITY_VAR_NUM;
 constexpr size_t EFFICIENCY_FROM_DERIVED_INPUT_VAR_NUM = NON_MAG_INTENSITY_VAR_NUM + 1;
 
-auto covarianceMatrixForDerivedEfficiency(
-    const Mantid::Algorithms::Arithmetic::ErrorTypeHelper<EFFICIENCY_FROM_DERIVED_INPUT_VAR_NUM>::InputArray &values,
-    const Mantid::Algorithms::Arithmetic::ErrorTypeHelper<EFFICIENCY_FROM_DERIVED_INPUT_VAR_NUM>::InputArray &errors) {
-  using Types = Mantid::Algorithms::Arithmetic::ErrorTypeHelper<EFFICIENCY_FROM_DERIVED_INPUT_VAR_NUM>;
+using Types = Mantid::Algorithms::Arithmetic::ErrorTypeHelper<EFFICIENCY_FROM_DERIVED_INPUT_VAR_NUM>;
+
+// When one efficiency is supplied and the other is solved from phi = (2p - 1)(2a - 1)
+// we need to account for the covariance between the derived efficiency and the non-magnetic intensities
+auto covarianceMatrixForDerivedEfficiency(const Types::InputArray &values, const Types::InputArray &errors) {
   using PhiTypes = Mantid::Algorithms::Arithmetic::ErrorTypeHelper<NON_MAG_INTENSITY_VAR_NUM>;
 
-  Eigen::Matrix<double, EFFICIENCY_FROM_DERIVED_INPUT_VAR_NUM, EFFICIENCY_FROM_DERIVED_INPUT_VAR_NUM> covariance =
-      Types::InputArray(errors.array().square()).asDiagonal();
+  // Diagonal of the covariance matrix is just the variances of the input intensities
+  Types::CovarianceMatrix covariance = Types::InputArray(errors.array().square()).asDiagonal();
   const auto phiErrorProp = Mantid::Algorithms::Arithmetic::makeErrorPropagation<NON_MAG_INTENSITY_VAR_NUM>(
       [](const auto &x) { return fnPhi(x); });
   const auto phiResult = phiErrorProp.evaluate(PhiTypes::InputArray{{values[0], values[1], values[2], values[3]}},
                                                PhiTypes::InputArray{{errors[0], errors[1], errors[2], errors[3]}});
 
-  // When one efficiency is supplied and the other is solved from phi = (2p - 1)(2a - 1), the supplied efficiency may
-  // have been derived from the same non-magnetic workspaces as phi. The covariance with each intensity is
-  // Cov(I_i, eff) ~= d(eff)/d(I_i) Var(I_i), where d(eff)/d(I_i) = ((eff - 0.5) / phi) d(phi)/d(I_i).
+  // The covariance between the given efficiency and each intensity is Cov(I_i, eff) ~= d(eff)/d(I_i) Var(I_i), derived
+  // from the first order Taylor expansion of the efficiency with respect to the intensities where d(eff)/d(I_i) = ((eff
+  // - 0.5) / phi) d(phi)/d(I_i), derived from rearranging the equation for phi and applying the chain rule
   for (size_t i = 0; i < NON_MAG_INTENSITY_VAR_NUM; ++i) {
     const double covarianceWithDerivedEfficiency = ((values[DERIVED_EFFICIENCY_VAR_INDEX] - 0.5) / phiResult.value) *
                                                    phiResult.derivatives[i] * errors[i] * errors[i];
