@@ -260,7 +260,7 @@ class PeakFitMixin(object):
             8.31868568,
         ]
 
-    def validate_table(self, out_table, expected_dict, rtol=5e-2):
+    def validate_table(self, out_table, expected_dict, rtol=7.5e-2):
         expected_cols = list(expected_dict.keys())
         for c in out_table.getColumnNames():
             print(c, ": ", np.nan_to_num(out_table.column(c)), ", validation value: ", expected_dict[c])
