@@ -84,6 +84,7 @@ public:
   using DerType = Eigen::Matrix<double, N, 1>;
   using InputArray = DerType;
   using ADScalar = Eigen::AutoDiffScalar<DerType>;
+  using CovarianceMatrix = Eigen::Matrix<double, N, N>;
 };
 
 template <size_t N, typename Func> class ErrorPropagation {
@@ -92,7 +93,7 @@ public:
   using DerType = Types::DerType;
   using ADScalar = Types::ADScalar;
   using InputArray = Types::InputArray;
-  using CovarianceMatrix = Eigen::Matrix<double, N, N>;
+  using CovarianceMatrix = Types::CovarianceMatrix;
   ErrorPropagation(Func func) : computeFunc(std::move(func)) {}
 
   struct AutoDevResult {
