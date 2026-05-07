@@ -1027,13 +1027,10 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
   // converted to / above)
   std::list<int64_t> split_pos;
   split_pos.emplace_back(-1);
-  size_t path_size = working_path.size();
-  for (size_t i = 0; i < path_size; i++) {
-    if (working_path[i] == '/') {
-      split_pos.emplace_back(i);
-    }
+  for (size_t pos = working_path.find('/'); pos != std::string::npos; pos = working_path.find('/', pos + 1)) {
+    split_pos.emplace_back(pos);
   }
-  split_pos.emplace_back(path_size);
+  split_pos.emplace_back(working_path.size());
   // allocate target vector to keep folder structure and fill it in
   size_t n_folders = split_pos.size() - 1;
   path_components.resize(n_folders);
@@ -1079,11 +1076,9 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
  */
 int isMember(const std::vector<std::string> &group, const std::string &candidate) {
   int num(-1);
-  for (size_t i = 0; i < group.size(); i++) {
-    if (candidate == group[i]) {
-      num = int(i);
-      return num;
-    }
+  const auto it = std::find(group.cbegin(), group.cend(), candidate);
+  if (it != group.cend()) {
+    num = static_cast<int>(std::distance(group.cbegin(), it));
   }
   return num;
 }

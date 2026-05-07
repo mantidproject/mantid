@@ -1189,21 +1189,44 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
     Geometry::IDetector const *detectorPtr = nullptr;
     size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();
     if (numDetectors > 1) {
-      // If several detectors are on this workspace index, just use the ID of
-      // the first detector
       // Note JZ oct 2011 - I'm not sure why the code uses the first detector
       // and not the group. Ask Roman.
-      auto firstDetectorId = *workspace->getSpectrum(wi).getDetectorIDs().begin();
-
+      // Use the first detector ID that is actually present in the instrument;
+      // a spectrum may reference detector IDs that are absent from the
+      // instrument definition, in which case getDetector() throws.
       const auto &detectorInfo = workspace->detectorInfo();
-      const auto detectorIndex = detectorInfo.indexOf(firstDetectorId);
-      const auto &detector = detectorInfo.detector(detectorIndex);
-      detectorPtr = &detector;
+      const auto &specDef = workspace->spectrumInfo().spectrumDefinition(wi);
+      for (size_t k = 0; k < specDef.size(); ++k) {
+        try {
+          // detector() throws NotFoundError if the ID is absent from the instrument
+          detectorPtr = &detectorInfo.detector(specDef[k].first);
+          break;
+        } catch (const Kernel::Exception::NotFoundError &) {
+          // This detector is not present in the instrument; try the next one
+        }
+      }
+      if (!detectorPtr) {
+        g_log.information() << "MatrixWorkspace has not been set for index: " << std::to_string(wi)
+                            << " as none of the detector ids can be found on the instrument\n";
+        return;
+      }
     } else {
       // Get the detector (single) at this workspace index
       const auto &spectrumInfo = workspace->spectrumInfo();
-      const auto &detector = spectrumInfo.detector(wi);
-      detectorPtr = &detector;
+      if (!spectrumInfo.hasDetectors(wi)) {
+        g_log.information() << "MatrixWorkspace has not been set for index: " << std::to_string(wi)
+                            << " as no detector ids can be found for this workspace on the instrument\n";
+        return;
+      }
+      try {
+        detectorPtr = &spectrumInfo.detector(wi);
+      } catch (const Kernel::Exception::NotFoundError &) {
+        // hasDetectors() does not validate IDs against the instrument;
+        // the detector ID exists in the spectrum but not in the instrument.
+        g_log.information() << "MatrixWorkspace has not been set for index: " << std::to_string(wi)
+                            << " as the detector id for this workspace can't be found on the instrument\n";
+        return;
+      }
     }
 
     for (size_t i = 0; i < nParams(); i++) {

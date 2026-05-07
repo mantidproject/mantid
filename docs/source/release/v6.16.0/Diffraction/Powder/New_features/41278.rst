@@ -1,0 +1,1 @@
+- New algorithm :ref:`CylinderAbsorptionCW <algm-CylinderAbsorptionCW>` for calculating absorption and multiple scattering corrections for cylindrical samples with constant wavelength and in-plane scattering only.

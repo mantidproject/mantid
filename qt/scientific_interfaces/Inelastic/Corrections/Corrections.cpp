@@ -7,25 +7,17 @@
 #include "Corrections.h"
 #include "AbsorptionCorrections.h"
 #include "ApplyAbsorptionCorrections.h"
-#include "ContainerSubtraction.h"
+#include "ContainerSubtractionPresenter.h"
+#include "ContainerSubtractionView.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
+
+#include <MantidQtWidgets/Common/QtJobRunner.h>
 
 namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(Corrections)
 
 Corrections::Corrections(QWidget *parent)
-    : InelasticInterface(parent), m_changeObserver(*this, &Corrections::handleDirectoryChange) {
-  m_uiForm.setupUi(this);
-
-  // Allows us to get a handle on a tab using an enum, for example
-  // "m_tabs[ELWIN]".
-  // All tabs MUST appear here to be shown in interface.
-  // We make the assumption that each map key corresponds to the order in which
-  // the tabs appear.
-  m_tabs.emplace(CONTAINER_SUBTRACTION, new ContainerSubtraction(m_uiForm.twTabs->widget(CONTAINER_SUBTRACTION)));
-  m_tabs.emplace(ABSORPTION_CORRECTIONS, new AbsorptionCorrections(m_uiForm.twTabs->widget(ABSORPTION_CORRECTIONS)));
-  m_tabs.emplace(APPLY_CORRECTIONS, new ApplyAbsorptionCorrections(m_uiForm.twTabs->widget(APPLY_CORRECTIONS)));
-}
+    : InelasticInterface(parent), m_changeObserver(*this, &Corrections::handleDirectoryChange) {}
 
 /**
  * @param :: the detected close event
@@ -50,12 +42,29 @@ void Corrections::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotificat
  * Initialised the layout of the interface.  MUST be called.
  */
 void Corrections::initLayout() {
+  m_uiForm.setupUi(this);
+
+  // If all 3 tabs are MVP'd this can be refined.
+  auto view = new ContainerSubtractionView(m_uiForm.tabContainerSubtraction); // lifetime handled by QWidget
+  auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
+  auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
+  m_csPresenter =
+      std::make_unique<ContainerSubtractionPresenter>(m_uiForm.tabContainerSubtraction, std::move(algorithmRunner),
+                                                      std::make_unique<ContainerSubtractionModel>(), view);
+
+  /* Using this map allows us to get a handle on a tab using an enum, for example "m_tabs[ELWIN]".
+   * All tabs MUST appear here to be shown in the interface.
+   * We make the assumption that each map key corresponds to the order in which the tabs appear.*/
+  m_tabs.emplace(CONTAINER_SUBTRACTION, m_csPresenter.get());
+  m_tabs.emplace(ABSORPTION_CORRECTIONS, new AbsorptionCorrections(m_uiForm.twTabs->widget(ABSORPTION_CORRECTIONS)));
+  m_tabs.emplace(APPLY_CORRECTIONS, new ApplyAbsorptionCorrections(m_uiForm.twTabs->widget(APPLY_CORRECTIONS)));
+
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // Set up all tabs
-  for (auto &tab : m_tabs) {
-    connect(tab.second, &CorrectionsTab::showMessageBox, this, &Corrections::showMessageBox);
+  for (auto &[_, tab] : m_tabs) {
+    connect(tab, &CorrectionsTab::showMessageBox, this, &Corrections::showMessageBox);
   }
 
   m_uiForm.pbSettings->setIcon(Settings::icon());

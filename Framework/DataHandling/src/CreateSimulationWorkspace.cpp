@@ -313,7 +313,7 @@ void CreateSimulationWorkspace::createGroupingsFromTables(const int *specTable, 
 BinEdges CreateSimulationWorkspace::createBinBoundaries() const {
   const std::vector<double> rbparams = getProperty("BinParams");
   MantidVec newBins;
-  const int numBoundaries = Mantid::Kernel::VectorHelper::createAxisFromRebinParams(rbparams, newBins);
+  const size_t numBoundaries = Mantid::Kernel::VectorHelper::createAxisFromRebinParams(rbparams, newBins);
   if (numBoundaries <= 2) {
     throw std::invalid_argument("Error in BinParams - Gave invalid number of bin boundaries: " +
                                 std::to_string(numBoundaries));

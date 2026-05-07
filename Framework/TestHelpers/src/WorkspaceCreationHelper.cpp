@@ -1187,11 +1187,11 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   // Set Q ('y') axis binning
   std::vector<double> qbins{0.0, 1.0, 4.0};
   std::vector<double> qaxis;
-  const auto numY = static_cast<int>(VectorHelper::createAxisFromRebinParams(qbins, qaxis));
+  const size_t numY = VectorHelper::createAxisFromRebinParams(qbins, qaxis);
 
   // Initialize the workspace
-  const int numHist = numY - 1;
-  const int numX = 7;
+  const size_t numHist = numY - 1;
+  const size_t numX = 7;
   outputWS->initialize(numHist, numX, numX - 1);
 
   // Set the normal units
@@ -1206,7 +1206,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   auto verticalAxis = std::make_unique<NumericAxis>(numY);
 
   // Now set the axis values
-  for (int i = 0; i < numHist; ++i) {
+  for (size_t i = 0; i < numHist; ++i) {
     outputWS->setBinEdges(i, x1);
     verticalAxis->setValue(i, qaxis[i]);
   }
@@ -1250,9 +1250,9 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   outputWS->finalize();
 
   // Make errors squared rooted and set sqrd err flag
-  for (int i = 0; i < numHist; ++i) {
+  for (size_t i = 0; i < numHist; ++i) {
     auto &mutableE = outputWS->mutableE(i);
-    for (int j = 0; j < numX - 1; ++j) {
+    for (size_t j = 0; j < numX - 1; ++j) {
       mutableE[j] = std::sqrt(mutableE[j]);
     }
   }

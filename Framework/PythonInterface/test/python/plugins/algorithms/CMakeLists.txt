@@ -35,6 +35,7 @@ set(TEST_PY_FILES
     CreatePoleFigureTableWorkspaceTest.py
     CreateWorkspaceTest.py
     CropWorkspaceForMDNormTest.py
+    CylinderAbsorptionCWTest.py
     CylinderPaalmanPingsCorrection2Test.py
     DakotaChiSquaredTest.py
     DeltaPDF3DTest.py

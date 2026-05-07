@@ -684,16 +684,11 @@ QString FileFinderWidget::createFileFilter() {
     while (sitr.hasNext()) {
       ext = sitr.next();
       QString key = ext.toUpper();
-      bool found(false);
-      const int itemCount = finalIndex.count();
-      for (int i = 0; i < itemCount; ++i) {
-        if (key == finalIndex[i].first) {
-          finalIndex[i].second.append(ext);
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
+      const auto it = std::find_if(finalIndex.begin(), finalIndex.end(),
+                                   [&key](const QPair<QString, QStringList> &pair) { return pair.first == key; });
+      if (it != finalIndex.end()) {
+        it->second.append(ext);
+      } else {
         finalIndex.append(qMakePair(key, QStringList(ext)));
       }
     }

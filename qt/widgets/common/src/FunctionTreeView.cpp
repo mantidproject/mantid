@@ -967,15 +967,12 @@ std::string FunctionTreeView::getAttributeName(QtProperty *prop) const {
  * @return Function property, or NULL if not found
  */
 QtProperty *FunctionTreeView::getFunctionProperty(std::string const &index) const {
-  // Might not be the most efficient way to do it. m_functionManager might be
-  // searched instead,
-  // but it is not being kept up-to-date at the moment (is not cleared).
-  for (const auto &property : m_properties.keys()) {
-    if (isFunction(property) && getIndex(property) == index) {
-      return property;
-    }
-  }
-
+  const auto &keys = m_properties.keys();
+  const auto it = std::find_if(keys.cbegin(), keys.cend(), [&](const auto &property) {
+    return isFunction(property) && getIndex(property) == index;
+  });
+  if (it != keys.cend())
+    return *it;
   // No function with such index
   return nullptr;
 }

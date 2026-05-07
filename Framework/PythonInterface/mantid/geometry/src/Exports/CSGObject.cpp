@@ -92,5 +92,8 @@ void export_Object() {
 
       .def("volume", &CSGObject::volume, arg("self"), "Returns the volume of this shape.")
 
-      .def("getMesh", &wrapMeshWithNDArray, (arg("self")), "Get the vertices, grouped by triangles, from mesh");
+      .def("getMesh", &wrapMeshWithNDArray, (arg("self")), "Get the vertices, grouped by triangles, from mesh")
+      .def("hasValidShape", &CSGObject::hasValidShape, arg("self"), "Check if the shape is valid")
+      .def("shapeInfo", &CSGObject::shapeInfo, arg("self"), return_value_policy<copy_const_reference>(),
+           "Get the shape information for this object");
 }

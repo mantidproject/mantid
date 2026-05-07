@@ -191,9 +191,9 @@ void ResampleX::setOptions(const int numBins, const bool useLogBins, const bool 
 double ResampleX::determineBinning(MantidVec &xValues, const double xmin, const double xmax) {
   xValues.clear(); // clear out the x-values
 
-  int numBoundaries(0);
-  int reqNumBoundaries(m_numBins);
-  int expNumBoundaries(m_numBins);
+  size_t numBoundaries(0);
+  size_t reqNumBoundaries(m_numBins);
+  size_t expNumBoundaries(m_numBins);
   if (m_isDistribution)
     reqNumBoundaries -= 1; // to get the VectorHelper to do the right thing
   else
@@ -324,8 +324,9 @@ void ResampleX::exec() {
 
       if (common_limits) {
         // get the delta from the first since they are all the same
-        BinEdges xValues(0);
-        const double delta = this->determineBinning(xValues.mutableRawData(), xmins[0], xmaxs[0]);
+        std::vector<double> xAxisTmp;
+        const double delta = this->determineBinning(xAxisTmp, xmins[0], xmaxs[0]);
+        BinEdges xValues(std::move(xAxisTmp));
         g_log.debug() << "delta = " << delta << "\n";
         outputEventWS->setAllX(xValues);
       } else {
@@ -336,8 +337,9 @@ void ResampleX::exec() {
         PARALLEL_FOR_IF(Kernel::threadSafe(*inputEventWS, *outputWS))
         for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
           PARALLEL_START_INTERRUPT_REGION
-          BinEdges xValues(0);
-          const double delta = this->determineBinning(xValues.mutableRawData(), xmins[wkspIndex], xmaxs[wkspIndex]);
+          std::vector<double> xAxisTmp;
+          const double delta = this->determineBinning(xAxisTmp, xmins[wkspIndex], xmaxs[wkspIndex]);
+          BinEdges xValues(std::move(xAxisTmp));
           g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta << " xmin=" << xmins[wkspIndex]
                         << " xmax=" << xmaxs[wkspIndex] << "\n";
           outputEventWS->setHistogram(wkspIndex, xValues);

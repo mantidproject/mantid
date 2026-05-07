@@ -372,8 +372,8 @@ template <typename T> void SumEventsByLogValue::createBinnedOutput(const Kernel:
 
   // XValues will be resized in createAxisFromRebinParams()
   std::vector<double> XValues;
-  const int XLength = VectorHelper::createAxisFromRebinParams(m_binningParams, XValues);
-  assert((int)XValues.size() == XLength);
+  const size_t XLength = VectorHelper::createAxisFromRebinParams(m_binningParams, XValues);
+  assert(XValues.size() == XLength);
 
   // Create the output workspace - the factory will give back a Workspace2D
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D", 1, XLength, XLength - 1);
