@@ -74,7 +74,8 @@ class CursorInfoBase(ABC):
 
     @staticmethod
     def consolidate_inverted_table_rows(table_rows):
-        consolidated_rows = CursorInfoBase.create_consolidated_dict(table_rows)
+        unpacked_table_rows = CursorInfoBase.unpack_table_rows(table_rows)
+        consolidated_rows = CursorInfoBase.create_consolidated_dict(unpacked_table_rows)
         new_table_rows = []
         for spec, xvals in consolidated_rows.items():
             starts = set()
@@ -90,7 +91,60 @@ class CursorInfoBase(ABC):
                 if start < stop:
                     new_table_rows.append(TableRow(spec_list=spec, x_min=start, x_max=stop))
 
-        return new_table_rows
+        packed_new_table_rows = CursorInfoBase.pack_table_rows(new_table_rows)
+        return packed_new_table_rows
+
+    @staticmethod
+    def unpack_table_rows(table_rows):
+        unpacked_table_rows = []
+        for row in table_rows:
+            if "-" not in row.spec_list:
+                unpacked_table_rows.append(row)
+                continue
+            start, end = map(int, row.spec_list.split("-", 1))
+            for spec in range(start, end + 1):
+                unpacked_table_rows.append(TableRow(spec_list=str(spec), x_min=row.x_min, x_max=row.x_max))
+        return unpacked_table_rows
+
+    @staticmethod
+    def pack_table_rows(table_rows):
+        packed_table_rows = []
+        packing_summary = {}
+        for row in table_rows:
+            key = (row.x_min, row.x_max)
+            packing_summary.setdefault(key, []).extend([int(row.spec_list)])
+
+        for (x_min, x_max), specs in packing_summary.items():
+            ranges = CursorInfoBase.find_ranges(specs)
+            for spec_list in ranges:
+                packed_table_rows.append(
+                    TableRow(
+                        spec_list=spec_list,
+                        x_min=x_min,
+                        x_max=x_max,
+                    )
+                )
+        return packed_table_rows
+
+    @staticmethod
+    def find_ranges(specs):
+        specs = sorted(set(specs))
+        ranges = []
+        start = prev = specs[0]
+        for spec in specs[1:]:
+            if spec == prev + 1:
+                prev = spec
+                continue
+            if start == prev:
+                ranges.append(str(start))
+            else:
+                ranges.append(f"{start}-{prev}")
+            start = prev = spec
+        if start == prev:
+            ranges.append(str(start))
+        else:
+            ranges.append(f"{start}-{prev}")
+        return ranges
 
     @property
     def table_rows(self):
@@ -133,15 +187,11 @@ class RectCursorInfoBase(CursorInfoBase, ABC):
         y_min, y_max = self.snap_to_bin_centre(y_data[0]), self.snap_to_bin_centre(y_data[-1])
 
         # Mask everything outside selected rectangle
-        rows = []
-        for s in range(spec_min, y_min):
-            rows.append(TableRow(spec_list=f"{s}", x_min=x_min, x_max=x_max))
-        for s in range(y_min, y_max + 1):
-            rows.append(TableRow(spec_list=f"{s}", x_min=x_min, x_max=x_data[0]))
-            rows.append(TableRow(spec_list=f"{s}", x_min=x_data[-1], x_max=x_max))
-        for s in range(y_max + 1, spec_max + 1):
-            rows.append(TableRow(spec_list=f"{s}", x_min=x_min, x_max=x_max))
-        return rows
+        row1 = TableRow(spec_list=f"{spec_min}-{spec_max}", x_min=x_min, x_max=x_data[0])
+        row2 = TableRow(spec_list=f"{spec_min}-{y_min}", x_min=x_data[0], x_max=x_data[-1])
+        row3 = TableRow(spec_list=f"{y_max}-{spec_max}", x_min=x_data[0], x_max=x_data[-1])
+        row4 = TableRow(spec_list=f"{spec_min}-{spec_max}", x_min=x_data[-1], x_max=x_max)
+        return [row1, row2, row3, row4]
 
 
 class RectCursorInfo(RectCursorInfoBase):
@@ -323,10 +373,8 @@ class PolyCursorInfo(CursorInfoBase):
         y_range = [n / 3 for n in range(y_min * 3, (y_max * 3) + 1)]
 
         # Mask the rectangles above and below the polygon
-        for s in range(spec_min, round(y_range[0]) + 1):
-            rows.append(TableRow(spec_list=f"{s}", x_min=x_axis_min, x_max=x_axis_max))
-        for s in range(round(y_range[-1]), spec_max + 1):
-            rows.append(TableRow(spec_list=f"{s}", x_min=x_axis_min, x_max=x_axis_max))
+        rows.append(TableRow(spec_list=f"{spec_min}-{str(round(y_range[0]))}", x_min=x_axis_min, x_max=x_axis_max))
+        rows.append(TableRow(spec_list=f"{str(round(y_range[-1]))}-{spec_max}", x_min=x_axis_min, x_max=x_axis_max))
 
         # Mask the area around the polygon
         for y in y_range:
