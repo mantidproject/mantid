@@ -7,11 +7,9 @@
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import Load
 from mantid.api import FileFinder
 from mantid import config
-import ISISCommandInterface as ici
-import SANSBatchMode as batch
+import sans.command_interface.ISISCommandInterface as ici
 import SANSadd2 as sansadd
 
 import os
@@ -21,7 +19,7 @@ from sans.common.enums import SANSInstrument
 
 @ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSAddBatch(systemtesting.MantidSystemTest):
-    output_file = "99630sannotrans"
+    output_file = "99630sannotrans_main_1D_2.2_10.0"
     csv_file = "input.csv"
     result = ""
 
@@ -41,26 +39,24 @@ class SANSAddBatch(systemtesting.MantidSystemTest):
         # Find the file , this should really be in the BatchReduce reduction step
 
         f = open(self.csv_file, "w")
-        print("sample_sans,99630-add,output_as, %s" % self.output_file, file=f)
+        print("sample_sans,99630-add,output_as, %s" % "99630sannotrans", file=f)
         f.close()
         runnum = "99630"
         sansadd.add_runs((runnum, runnum), "LOQ", ".RAW")
 
         ici.Set1D()
         ici.MaskFile("MASK.094AA")
-        batch.BatchReduce(self.csv_file, "nxs", plotresults=False, saveAlgs={"SaveNexus": "nxs"})
+        ici.BatchReduce(self.csv_file, "nxs", plotresults=False, saveAlgs={"SaveNexus": "nxs"})
 
         print(" reduction without")
 
-        ici._refresh_singleton()
+        ici.Clean()
 
         ici.LOQ()
         ici.Detector("main-detector-bank")
         ici.Set1D()
         ici.MaskFile("MASK.094AA")
-        LOQ99630 = Load(runnum)
-        LOQ99630 += LOQ99630
-        ici.AssignSample(LOQ99630, reload=False)
+        ici.AssignSample("LOQ99630-add")
         self.result = ici.WavRangeReduction()
 
     def validate(self):

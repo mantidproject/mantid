@@ -11,7 +11,7 @@ include details about the ReductionSingleton
 """
 
 import systemtesting
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import config
 from mantid.simpleapi import RenameWorkspace
 from sans.command_interface.ISISCommandInterface import (
@@ -30,11 +30,11 @@ from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DMinimalBatchReductionTest_V2(systemtesting.MantidSystemTest):
+class SANS2DMinimalBatchReductionTest(systemtesting.MantidSystemTest):
     """Minimal script to perform full reduction in batch mode"""
 
     def __init__(self):
-        super(SANS2DMinimalBatchReductionTest_V2, self).__init__()
+        super(SANS2DMinimalBatchReductionTest, self).__init__()
         config["default.instrument"] = "SANS2D"
         self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
@@ -51,11 +51,11 @@ class SANS2DMinimalBatchReductionTest_V2(systemtesting.MantidSystemTest):
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DMinimalSingleReductionTest_V2(systemtesting.MantidSystemTest):
+class SANS2DMinimalSingleReductionTest(systemtesting.MantidSystemTest):
     """Minimal script to perform full reduction in single mode"""
 
     def __init__(self):
-        super(SANS2DMinimalSingleReductionTest_V2, self).__init__()
+        super(SANS2DMinimalSingleReductionTest, self).__init__()
         config["default.instrument"] = "SANS2D"
         self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
@@ -77,11 +77,11 @@ class SANS2DMinimalSingleReductionTest_V2(systemtesting.MantidSystemTest):
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DSearchCentreGUI_V2(systemtesting.MantidSystemTest):
+class SANS2DSearchCentreGUI(systemtesting.MantidSystemTest):
     """Minimal script to perform FindBeamCentre"""
 
     def __init__(self):
-        super(SANS2DSearchCentreGUI_V2, self).__init__()
+        super(SANS2DSearchCentreGUI, self).__init__()
         config["default.instrument"] = "SANS2D"
         self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2

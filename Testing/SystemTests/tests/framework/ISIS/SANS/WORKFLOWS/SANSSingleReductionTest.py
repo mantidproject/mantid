@@ -845,8 +845,8 @@ class SANSReductionRunnerTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(SANSSingleReductionTest, "test"))
-        suite.addTest(unittest.makeSuite(SANSSingleReduction2Test, "test"))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(SANSSingleReductionTest))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(SANSSingleReduction2Test))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)
         if res.wasSuccessful():

@@ -28,7 +28,7 @@ from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DBatchTest_V2(systemtesting.MantidSystemTest):
+class SANS2DBatchTest(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2D()
@@ -50,7 +50,7 @@ class SANS2DBatchTest_V2(systemtesting.MantidSystemTest):
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DNewSettingsCarriedAcrossInBatchModeTest_V2(systemtesting.MantidSystemTest):
+class SANS2DNewSettingsCarriedAcrossInBatchModeTest(systemtesting.MantidSystemTest):
     """
     We want to make sure that any settings saved in the PropertyManager objects
     are used across all iterations of the reduction in Batch mode.  The MASKFILE
@@ -88,7 +88,7 @@ class SANS2DNewSettingsCarriedAcrossInBatchModeTest_V2(systemtesting.MantidSyste
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DTUBESBatchWithZeroErrorCorrectionTest_V2(systemtesting.MantidSystemTest):
+class SANS2DTUBESBatchWithZeroErrorCorrectionTest(systemtesting.MantidSystemTest):
     """
     We want to make sure that the BatchMode can remove zero error values
     and replace them with a large default value.

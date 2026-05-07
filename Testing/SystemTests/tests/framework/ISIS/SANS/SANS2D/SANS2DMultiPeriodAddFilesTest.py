@@ -7,41 +7,51 @@
 # pylint: disable=no-init
 
 import systemtesting
-import mantid  # noqa
+import os
+
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from mantid.kernel import config
 from sans.command_interface.ISISCommandInterface import (
-    LOQ,
-    Set2D,
+    SANS2D,
+    Set1D,
     Detector,
     MaskFile,
-    SetDetectorOffsets,
     Gravity,
     AssignSample,
-    AssignCan,
     WavRangeReduction,
+    DefaultTrans,
     UseCompatibilityMode,
+    AddRuns,
 )
-
-# Test is giving odd results on Linux, but only this 2D one.
 from sans.common.enums import SANSInstrument
 
 
-@ISISSansSystemTest(SANSInstrument.LOQ)
-class SANSLOQCan2DTest_V2(systemtesting.MantidSystemTest):
+@ISISSansSystemTest(SANSInstrument.SANS2D)
+class SANS2DMultiPeriodAddFiles(systemtesting.MantidSystemTest):
+    def requiredMemoryMB(self):
+        """Requires 2.5Gb"""
+        return 2500
+
     def runTest(self):
         UseCompatibilityMode()
-        LOQ()
-        Set2D()
-        Detector("main-detector-bank")
-        MaskFile("MASK.094AA")
-        # apply some small artificial shift
-        SetDetectorOffsets("REAR", -1.0, 1.0, 0.0, 0.0, 0.0, 0.0)
+        SANS2D()
+        Set1D()
+        Detector("rear-detector")
+        MaskFile("MASKSANS2Doptions.091A")
         Gravity(True)
+        AddRuns(("5512", "5512"), "SANS2D", "nxs", lowMem=True)
 
-        AssignSample("99630.RAW")  # They file seems to be named wrongly.
-        AssignCan("99631.RAW")  # The file seems to be named wrongly.
+        # one period of a multi-period Nexus file
+        AssignSample("5512-add.nxs", period=7)
 
-        WavRangeReduction(None, None, False)
+        WavRangeReduction(2, 4, DefaultTrans)
+        paths = [
+            os.path.join(config["defaultsave.directory"], "SANS2D00005512-add.nxs"),
+            os.path.join(config["defaultsave.directory"], "SANS2D00005512.log"),
+        ]
+        for path in paths:
+            if os.path.exists(path):
+                os.remove(path)
 
     def validate(self):
         # Need to disable checking of the Spectra-Detector map because it isn't
@@ -49,6 +59,6 @@ class SANSLOQCan2DTest_V2(systemtesting.MantidSystemTest):
         # are actually present in the saved workspace).
         self.disableChecking.append("SpectraMap")
         self.disableChecking.append("Instrument")
-        # when comparing LOQ files you seem to need the following
         self.disableChecking.append("Axes")
-        return "99630_main_2D_2.2_10.0", "SANSLOQCan2D.nxs"
+
+        return "5512_p7rear_1D_2.0_4.0Phi-45.0_45.0", "SANS2DMultiPeriodAddFiles.nxs"
