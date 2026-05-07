@@ -1,0 +1,3 @@
+- The :ref:`Container Subtraction <container-subtraction>` interface no longer deletes the subtracted workspace from the ADS when the window is closed.
+- The :ref:`Corrections <interface-inelastic-corrections>` interface no longer hangs on close after using a container-subtracted workspace in the :ref:`Apply Absorption corrections <apply_absorp_correct>` tab.
+- The :ref:`Container Subtraction <container-subtraction>` interface now includes an output-name widget for labelling outputs in the ADS.

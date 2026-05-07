@@ -6,14 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1007</width>
-    <height>730</height>
+    <width>699</width>
+    <height>799</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="widgetResizable">
@@ -24,11 +30,11 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>966</width>
-        <height>796</height>
+        <width>658</width>
+        <height>810</height>
        </rect>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QGroupBox" name="fileInput">
          <property name="title">
@@ -275,6 +281,9 @@
         </widget>
        </item>
        <item>
+        <widget class="MantidQt::CustomInterfaces::OutputNameView" name="outputNameWidget" native="true"/>
+       </item>
+       <item>
         <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
        </item>
        <item>
@@ -348,40 +357,13 @@
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/DataSelector.h</header>
   </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::OutputNameView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputNameView.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>ckScaleCan</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spCanScale</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>133</x>
-     <y>143</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>251</x>
-     <y>147</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckShiftCan</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spShift</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>119</x>
-     <y>167</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>324</x>
-     <y>167</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
