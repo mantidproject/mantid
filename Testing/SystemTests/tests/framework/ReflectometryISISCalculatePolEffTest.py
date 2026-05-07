@@ -8,7 +8,6 @@
 from systemtesting import MantidSystemTest
 from abc import abstractmethod, ABCMeta
 from mantid.simpleapi import ReflectometryISISCalculatePolEff, Load
-import platform
 
 
 class ReflectometryISISCalculatePolEffTestBase(MantidSystemTest, metaclass=ABCMeta):
@@ -85,7 +84,7 @@ class ReflectometryISISCalculatePolEffTestBase(MantidSystemTest, metaclass=ABCMe
         ReflectometryISISCalculatePolEff(**args)
 
     def validate(self):
-        self.tolerance = 1e-10
+        self.tolerance = 1e-9
         self.nanEqual = True
         return self._OUTPUT_WS_NAME, self.reference_file
 
@@ -112,10 +111,6 @@ class ReflectometryISISCalculatePolEffAllCorrectionsTest(ReflectometryISISCalcul
     reference_file = "ReflectometryISISCalculatePolEffAllCorrections.nxs"
     all_corrections = True
     include_mag_runs = True
-
-    def skipTests(self):
-        # Numbers are different on ARM architecture so skip test
-        return "arm" in platform.machine()
 
     def __init__(self):
         super(ReflectometryISISCalculatePolEffAllCorrectionsTest, self).__init__()
