@@ -188,7 +188,7 @@ def default_ceria_expected_peak_windows(final=False):
 # Functions in calibration model
 
 
-def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_calib, copy_params_in_calib):
+def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_calib, copy_params_in_calib=True):
     """
     Create a new calibration from a ceria run
     :param calibration: CalibrationInfo object
@@ -316,7 +316,7 @@ def make_diff_consts_table(ws_foc):
         table.removeColumn(col)
 
 
-def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_in_calib):
+def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_in_calib=True):
     """
     Creates Engineering calibration files with PDCalibration
     :param ceria_ws: The workspace with the ceria data.
