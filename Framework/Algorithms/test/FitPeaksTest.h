@@ -223,6 +223,8 @@ public:
 
     const std::string data_ws_name("FitPeaksTest_ws_mPmS");
 
+    const std::string data_ws_name("FitPeaksTest_ws_mPmS");
+
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
@@ -321,6 +323,8 @@ public:
     g_log.notice() << "TEST EFFECTIVE PEAK PARAMS";
     // run serially so values don't depend on no. cores etc.
     FrameworkManager::Instance().setNumOMPThreads(1);
+
+    const std::string data_ws_name("FitPeaksTest_ws_ePP");
 
     const std::string data_ws_name("FitPeaksTest_ws_ePP");
 
