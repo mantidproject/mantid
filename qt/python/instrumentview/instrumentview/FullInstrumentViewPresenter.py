@@ -339,6 +339,7 @@ class FullInstrumentViewPresenter:
 
     def on_flip_beam_check_box_clicked(self) -> None:
         self.update_plotter()
+        self._view.reset_camera()
 
     @property
     def _detector_mesh_bounds(self) -> list[float]:
