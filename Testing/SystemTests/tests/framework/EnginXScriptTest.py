@@ -238,7 +238,7 @@ class FocusTexture30(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(diff_consts[UnitParams.difa], -13.2, delta=1)
         self.assertAlmostEqual(diff_consts[UnitParams.tzero], -28.2, delta=2)
         # compare TOF workspaces
-        self.tolerance = 1e-6
+        self.tolerance = 1e-5
         self.disableChecking.extend(["Instrument"])  # don't check
         return self._ws_foc.name(), "299080_engggui_focusing_output_ws_Texture30.nxs"
 

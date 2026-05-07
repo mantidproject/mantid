@@ -16,6 +16,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/FindPeakBackground.h"
@@ -34,7 +35,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/trim.hpp"
@@ -1511,39 +1511,63 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
   const size_t num_peakfunc_params = m_peakFunction->nParams();
   const size_t num_bkgdfunc_params = m_bkgdFunction->nParams();
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_fittedPeakWS))
-  for (int64_t iiws = m_startWorkspaceIndex; iiws <= static_cast<int64_t>(m_stopWorkspaceIndex); ++iiws) {
-    PARALLEL_START_INTERRUPT_REGION
-    std::size_t iws = static_cast<std::size_t>(iiws);
-    // get a copy of peak function and background function
-    IPeakFunction_sptr peak_function = std::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
-    IBackgroundFunction_sptr bkgd_function = std::dynamic_pointer_cast<IBackgroundFunction>(m_bkgdFunction->clone());
-    std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result_i = fit_results[iws - m_startWorkspaceIndex];
+  // Configure the peak functions before entering the parallel region. Some peak
+  // functions use setMatrixWorkspace() to initialise detector/workspace-derived
+  // state.
+  std::vector<std::vector<IPeakFunction_sptr>> peak_functions(m_numSpectraToFit,
+                                                              std::vector<IPeakFunction_sptr>(m_numPeaksToFit));
+  std::vector<std::vector<IBackgroundFunction_sptr>> bkgd_functions(
+      m_numSpectraToFit, std::vector<IBackgroundFunction_sptr>(m_numPeaksToFit));
+
+  for (size_t iws = m_startWorkspaceIndex; iws <= m_stopWorkspaceIndex; ++iws) {
+    const size_t output_iws = iws - m_startWorkspaceIndex;
+    const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result_i = fit_results[output_iws];
     // FIXME - This is a just a pure check
     if (!fit_result_i)
       throw std::runtime_error("There is something wroing with PeakFitResult vector!");
 
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-      // get and set the peak function parameters
       const double chi2 = fit_result_i->getCost(ipeak);
       if (chi2 > 10.e10)
         continue;
+
+      IPeakFunction_sptr peak_function = std::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
+      IBackgroundFunction_sptr bkgd_function = std::dynamic_pointer_cast<IBackgroundFunction>(m_bkgdFunction->clone());
 
       for (size_t iparam = 0; iparam < num_peakfunc_params; ++iparam)
         peak_function->setParameter(iparam, fit_result_i->getParameterValue(ipeak, iparam));
       for (size_t iparam = 0; iparam < num_bkgdfunc_params; ++iparam)
         bkgd_function->setParameter(iparam, fit_result_i->getParameterValue(ipeak, num_peakfunc_params + iparam));
-      // use domain and function to calcualte
+
+      const std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
+      peak_function->setMatrixWorkspace(m_inputMatrixWS, iws, peakwindow.first, peakwindow.second);
+
+      peak_functions[output_iws][ipeak] = peak_function;
+      bkgd_functions[output_iws][ipeak] = bkgd_function;
+    }
+  }
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_fittedPeakWS))
+  for (int64_t iiws = m_startWorkspaceIndex; iiws <= static_cast<int64_t>(m_stopWorkspaceIndex); ++iiws) {
+    PARALLEL_START_INTERRUPT_REGION
+    const std::size_t iws = static_cast<std::size_t>(iiws);
+    const size_t output_iws = iws - m_startWorkspaceIndex;
+
+    for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
+      const IPeakFunction_sptr &peak_function = peak_functions[output_iws][ipeak];
+      const IBackgroundFunction_sptr &bkgd_function = bkgd_functions[output_iws][ipeak];
+      if (!peak_function || !bkgd_function)
+        continue;
+
+      // use domain and function to calculate
       // get the range of start and stop to construct a function domain
-      const auto &vec_x = m_fittedPeakWS->points(iws);
-      std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
+      const auto vec_x = m_fittedPeakWS->points(iws);
+      const std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
       auto start_x_iter = std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.first);
       auto stop_x_iter = std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.second);
 
       if (start_x_iter == stop_x_iter)
         throw std::runtime_error("Range size is zero in calculateFittedPeaks");
-
-      peak_function->setMatrixWorkspace(m_inputMatrixWS, iws, peakwindow.first, peakwindow.second);
 
       FunctionDomain1DVector domain(start_x_iter, stop_x_iter);
       FunctionValues values(domain);
@@ -1568,7 +1592,7 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
 
 double FitPeaks::calculateSignalToSigmaRatio(const size_t &iws, const std::pair<double, double> &peakWindow,
                                              const API::IPeakFunction_sptr &peakFunction) {
-  const auto &vecX = m_inputMatrixWS->points(iws);
+  const auto vecX = m_inputMatrixWS->points(iws);
   auto startX = std::lower_bound(vecX.begin(), vecX.end(), peakWindow.first);
   auto stopX = std::lower_bound(vecX.begin(), vecX.end(), peakWindow.second);
 
@@ -1651,7 +1675,8 @@ bool FitPeaks::fitBackground(const size_t &ws_index, const std::pair<double, dou
   constexpr size_t MIN_POINTS{10}; // TODO explain why 10
 
   // find out how to fit background
-  const auto &points = m_inputMatrixWS->histogram(ws_index).points();
+  const auto histogram = m_inputMatrixWS->histogram(ws_index);
+  const auto &points = histogram.points();
   size_t start_index = findXIndex(points.rawData(), fit_window.first);
   size_t expected_peak_index = findXIndex(points.rawData(), expected_peak_pos, start_index);
   size_t stop_index = findXIndex(points.rawData(), fit_window.second, expected_peak_index);
@@ -2097,7 +2122,8 @@ void FitPeaks::processOutputs(std::vector<std::shared_ptr<FitPeaksAlgorithm::Pea
  * @return :: total number of counts in the histogram
  */
 double FitPeaks::numberCounts(size_t iws) {
-  const std::vector<double> &vec_y = m_inputMatrixWS->histogram(iws).y().rawData();
+  const auto hist_y = m_inputMatrixWS->histogram(iws).y();
+  const auto &vec_y = hist_y.rawData();
   double total = std::accumulate(vec_y.begin(), vec_y.end(), 0.);
   return total;
 }
@@ -2133,8 +2159,6 @@ size_t FitPeaks::histRangeToDataPointCount(size_t iws, const std::pair<double, d
   return number_dp;
 }
 
-GNU_DIAG_OFF("dangling-reference")
-
 //----------------------------------------------------------------------------------------------
 /** Convert a histogram range to vector index boundaries
  * @param iws :: histogram index in workspace
@@ -2144,7 +2168,8 @@ GNU_DIAG_OFF("dangling-reference")
  */
 void FitPeaks::histRangeToIndexBounds(size_t iws, const std::pair<double, double> &range, size_t &left_index,
                                       size_t &right_index) {
-  const auto &orig_x = m_inputMatrixWS->histogram(iws).x();
+  const auto hist_x = m_inputMatrixWS->histogram(iws).x();
+  const auto &orig_x = hist_x;
   rangeToIndexBounds(orig_x, range.first, range.second, left_index, right_index);
 
   // handle an invalid range case. For the histogram point data, make sure the number of data points is non-zero as
@@ -2176,7 +2201,8 @@ void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &range, 
   size_t num_elements_x = right_index - left_index;
 
   vec_x.resize(num_elements_x);
-  const auto &orig_x = m_inputMatrixWS->histogram(iws).x();
+  const auto hist_x = m_inputMatrixWS->histogram(iws).x();
+  const auto &orig_x = hist_x;
   std::copy(orig_x.begin() + left_index, orig_x.begin() + right_index, vec_x.begin());
 
   size_t num_datapoints = m_inputMatrixWS->isHistogramData() ? num_elements_x - 1 : num_elements_x;
@@ -2188,8 +2214,6 @@ void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &range, 
   std::copy(orig_y.begin() + left_index, orig_y.begin() + left_index + num_datapoints, vec_y.begin());
   std::copy(orig_e.begin() + left_index, orig_e.begin() + left_index + num_datapoints, vec_e.begin());
 }
-
-GNU_DIAG_ON("dangling-reference")
 
 //----------------------------------------------------------------------------------------------
 /** Calculate signal-to-noise ratio in a histogram range
