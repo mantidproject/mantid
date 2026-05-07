@@ -9,6 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiFileValidator.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHelper.h"
@@ -21,6 +22,7 @@
 #include <algorithm>
 #include <cctype>
 #include <functional>
+#include <map>
 #include <numeric>
 
 using namespace Mantid::Kernel;
@@ -342,7 +344,15 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
 
     std::vector<std::string> fullFileNames;
 
-    for (const auto &unresolvedFileName : unresolvedFileNames) {
+    // Separate files into two groups: those with explicit extensions and those
+    // that need default extension resolution.
+    std::vector<std::string> filesToResolveWithExtension;
+    std::vector<size_t> resolutionIndices;               // track original positions
+    std::map<size_t, std::string> directResolutionFiles; // files already resolved
+                                                         // with FileProperty
+
+    for (size_t i = 0; i < unresolvedFileNames.size(); ++i) {
+      const auto &unresolvedFileName = unresolvedFileNames[i];
       bool useDefaultExt;
 
       try {
@@ -356,8 +366,6 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
         useDefaultExt = false;
       }
 
-      std::string fullyResolvedFile;
-
       if (!useDefaultExt) {
         FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts, Direction::Input);
         std::string error = slaveFileProp.setValue(unresolvedFileName);
@@ -367,25 +375,31 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
           throw std::runtime_error(error);
         }
 
-        fullyResolvedFile = slaveFileProp();
+        directResolutionFiles[i] = slaveFileProp();
       } else {
-        // If a default ext has been specified/found, then use it.
-        std::string errors = "";
-        if (!defaultExt.empty()) {
-          auto run = FileFinder::Instance().findRun(unresolvedFileName, std::vector<std::string>(1, defaultExt));
-          if (run)
-            fullyResolvedFile = run.result().string();
-          else
-            errors += run.errors();
+        // Collect files that need extension resolution for batch processing
+        filesToResolveWithExtension.emplace_back(unresolvedFileName);
+        resolutionIndices.emplace_back(i);
+      }
+    }
 
-        } else {
-          auto run = FileFinder::Instance().findRun(unresolvedFileName, m_exts);
-          if (run)
-            fullyResolvedFile = run.result().string();
-          else
-            errors += run.errors();
+    // Batch resolve files with extension using findRuns for better performance.
+    if (!filesToResolveWithExtension.empty()) {
+      std::string batchHint = boost::algorithm::join(filesToResolveWithExtension, ",");
+      std::string errors;
+      try {
+        const auto extsToUse = !defaultExt.empty() ? std::vector<std::string>(1, defaultExt) : m_exts;
+        auto resolvedPaths = FileFinder::Instance().findRuns(batchHint, extsToUse);
+
+        // Map resolved paths back to their original positions
+        for (size_t i = 0; i < resolvedPaths.size(); ++i) {
+          directResolutionFiles[resolutionIndices[i]] = resolvedPaths[i].string();
         }
-        if (fullyResolvedFile.empty()) {
+      } catch (const Kernel::Exception::NotFoundError &ex) {
+        errors = ex.what();
+        // Handle missing files based on allowEmptyTokens setting
+        for (size_t i = 0; i < filesToResolveWithExtension.size(); ++i) {
+          const auto &unresolvedFileName = filesToResolveWithExtension[i];
           bool doThrow = false;
           if (m_allowEmptyTokens) {
             try {
@@ -407,16 +421,16 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
 
             throw std::runtime_error(errorMsg);
           } else {
-            // if the fullyResolvedFile is empty, it means it failed to find the
-            // file so keep the unresolvedFileName as a hint to be displayed
-            // later on in the error message
-            fullyResolvedFile = unresolvedFileName;
+            // Keep the unresolvedFileName as a hint to be displayed later
+            directResolutionFiles[resolutionIndices[i]] = unresolvedFileName;
           }
         }
       }
+    }
 
-      // Append the file name to result.
-      fullFileNames.emplace_back(std::move(fullyResolvedFile));
+    // Populate fullFileNames in original order
+    for (size_t i = 0; i < unresolvedFileNames.size(); ++i) {
+      fullFileNames.emplace_back(directResolutionFiles[i]);
     }
     allFullFileNames.emplace_back(std::move(fullFileNames));
   }
