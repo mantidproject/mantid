@@ -371,6 +371,9 @@ void FrameworkManagerImpl::updateInstrumentDefinitions() {
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "DowndloadInstrument algorithm is not available - cannot "
                      "update instrument definitions.\n";
+  } catch (Kernel::Exception::InternetError &) {
+    g_log.debug() << "Unable to connect to the internet - cannot update "
+                     "instrument definitions.\n";
   }
 }
 
@@ -383,6 +386,9 @@ void FrameworkManagerImpl::checkIfNewerVersionIsAvailable() {
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "CheckMantidVersion algorithm is not available - cannot "
                      "check if a newer version is available.\n";
+  } catch (Kernel::Exception::InternetError &) {
+    g_log.debug() << "Unable to connect to the internet - cannot check if a "
+                     "newer version of Mantid is available.\n";
   }
 }
 
