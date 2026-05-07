@@ -29,6 +29,8 @@ class InstrumentRenderer(ABC):
         ----------
         positions : np.ndarray
             (N, 3) detector centre positions (already projected if 2D).
+        flip_beam : bool
+            If True, mirror the projection along the beam axis, i.e. reflect the projection in the plane with the beam axis as its normal.
         model :
             The FullInstrumentViewModel, used to access workspace/shape data.
 
@@ -46,6 +48,8 @@ class InstrumentRenderer(ABC):
         ----------
         positions : np.ndarray
             (N, 3) detector centre positions.
+        flip_beam : bool
+            If True, mirror the projection along the beam axis, i.e. reflect the projection in the plane with the beam axis as its normal.
 
         Returns
         -------
@@ -61,6 +65,8 @@ class InstrumentRenderer(ABC):
         ----------
         positions : np.ndarray
             (N, 3) masked detector centre positions.
+        flip_beam : bool
+            If True, mirror the projection along the beam axis, i.e. reflect the projection in the plane with the beam axis as its normal.
         model :
             The FullInstrumentViewModel.
 
