@@ -5,26 +5,27 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from ISISCommandInterface import (
-    AssignCan,
-    AssignSample,
-    CompWavRanges,
-    Gravity,
-    MaskFile,
+from sans.command_interface.ISISCommandInterface import (
     SANS2D,
+    MaskFile,
+    Gravity,
     Set1D,
-    TransmissionCan,
+    AssignSample,
     TransmissionSample,
+    AssignCan,
+    TransmissionCan,
+    CompWavRanges,
+    UseCompatibilityMode,
 )
 from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DWaveloops(systemtesting.MantidSystemTest):
+class SANS2DWaveloopsTest(systemtesting.MantidSystemTest):
     def runTest(self):
+        UseCompatibilityMode()
         SANS2D()
         MaskFile("MASKSANS2D.091A")
         Gravity(True)
@@ -34,7 +35,6 @@ class SANS2DWaveloops(systemtesting.MantidSystemTest):
         TransmissionSample("988.raw", "987.raw")
         AssignCan("993.raw")
         TransmissionCan("989.raw", "987.raw")
-
         CompWavRanges([3, 5, 7, 11], False)
 
     def validate(self):
@@ -43,4 +43,4 @@ class SANS2DWaveloops(systemtesting.MantidSystemTest):
         self.disableChecking.append("Instrument")
         # testing one of the workspaces that is produced, best not to choose the
         # first one in produced by the loop as this is the least error prone
-        return "992rear_1D_7.0_11.0", "SANS2DWaveloops.nxs"
+        return "992_rear_1D_7.0_11.0", "SANS2DWaveloops.nxs"

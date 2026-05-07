@@ -186,7 +186,7 @@ def AssignSample(sample_run, reload=True, period=ALL_PERIODS):
     print_message(message)
 
     # Get the full file name of the run
-    file_name = find_sans_file(sample_run)
+    file_name = find_sans_file(sample_run if isinstance(sample_run, str) else str(sample_run))
 
     # Set the command
     data_command = DataCommand(command_id=DataCommandId.SAMPLE_SCATTER, file_name=file_name, period=period)
@@ -709,7 +709,7 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0):
     Adjust detector position away from position defined in IDF. On SANS2D the detector
     banks can be moved around. This method allows fine adjustments of detector bank position
     in the same way as the DET/CORR userfile command works. Hence please see
-    http://www.mantidproject.org/SANS_User_File_Commands#DET for details.
+    https://docs.mantidproject.org/nightly/interfaces/isis_sans/User%20File%20Format.html for details.
 
     The comment below is not true any longer:
         Note, for now, this command will only have an effect on runs loaded

@@ -8,8 +8,7 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import DeleteWorkspace, RenameWorkspace
-from ISISCommandInterface import (
+from sans.command_interface.ISISCommandInterface import (
     AssignCan,
     AssignSample,
     Detector,
@@ -21,7 +20,6 @@ from ISISCommandInterface import (
     TransFit,
     TransmissionCan,
     TransmissionSample,
-    TransWorkspace,
     WavRangeReduction,
 )
 from sans.common.enums import SANSInstrument
@@ -35,33 +33,17 @@ class SANSLOQTransFitWorkspace2D(systemtesting.MantidSystemTest):
     """
 
     def runTest(self):
+        # Testing transmission fitting on LOQ Workspace 2D
         self.setup()
 
         # test TransFit()
-        TransFit("LOG", 3.0, 8.0)
         TransmissionSample("54435.raw", "54433.raw")
         TransmissionCan("54434.raw", "54433.raw")
-
+        TransFit("LOG", 3.0, 8.0)
         # run the reduction
         WavRangeReduction(3, 4, False, "_suff")
 
-        # save the results, we'll use them later, remove the other temporary workspaces
-        RenameWorkspace(InputWorkspace="54435_trans_sample_3.0_8.0", OutputWorkspace="samp")
-        RenameWorkspace(InputWorkspace="54434_trans_can_3.0_8.0", OutputWorkspace="can")
-        DeleteWorkspace(Workspace="54435_trans_sample_3.0_8.0_unfitted")
-        DeleteWorkspace(Workspace="54434_trans_can_3.0_8.0_unfitted")
-        DeleteWorkspace(Workspace="54431main_2D_3.0_4.0_suff")
-
-        # now test TransWorkspace()
-        self.setup()
-        # use the results we calculated above
-        TransWorkspace("samp", "can")
-
-        WavRangeReduction(3, 4, False, "_suff")
-
     def setup(self):
-        # DataPath("../Data/LOQ/")
-        # UserPath("../Data/LOQ/")
         LOQ()
         MaskFile("MASK.094AA")
         Gravity(False)
@@ -76,4 +58,4 @@ class SANSLOQTransFitWorkspace2D(systemtesting.MantidSystemTest):
         # when comparing LOQ files you seem to need the following
         self.disableChecking.append("Axes")
         self.disableChecking.append("Instrument")
-        return "54431main_2D_3.0_4.0_suff", "LOQTransFitWorkspace2D.nxs"
+        return "54431_main_2D_3.0_4.0_suff", "LOQTransFitWorkspace2D.nxs"

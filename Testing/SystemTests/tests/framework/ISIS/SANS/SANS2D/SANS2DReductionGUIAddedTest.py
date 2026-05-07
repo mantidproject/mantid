@@ -18,7 +18,6 @@ from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.api import AnalysisDataService
 from mantid.kernel import config
 from mantid.simpleapi import DeleteWorkspace
-import SANSadd2
 from sans.command_interface.ISISCommandInterface import (
     SANS2DTUBES,
     MaskFile,
@@ -37,7 +36,7 @@ from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DAddedEventFilesWithOverlayTest_V2(systemtesting.MantidSystemTest):
+class SANS2DAddedEventFilesWithOverlayTest(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2DTUBES()
@@ -49,8 +48,8 @@ class SANS2DAddedEventFilesWithOverlayTest_V2(systemtesting.MantidSystemTest):
 
         # add files (SAMPLE and CAN)
         AddRuns(
-            runs=("28827", "28797"),
-            instrument="SANS2DTUBES",
+            ("28827", "28797"),
+            "SANS2DTUBES",
             defType=".nxs",
             rawTypes=(".add", ".raw", ".s*"),
             lowMem=False,
@@ -67,8 +66,8 @@ class SANS2DAddedEventFilesWithOverlayTest_V2(systemtesting.MantidSystemTest):
             isOverlay=True,
         )
 
-        AssignSample(r"SANS2D00028797-add.nxs", reload=True)
-        AssignCan(r"SANS2D00028793-add.nxs", reload=True)
+        AssignSample(r"SANS2D00028797-add.nxs")
+        AssignCan(r"SANS2D00028793-add.nxs")
         TransmissionSample(r"SANS2D00028808.nxs", r"SANS2D00028784.nxs")
         TransmissionCan(r"SANS2D00028823.nxs", r"SANS2D00028784.nxs")
 
@@ -91,7 +90,7 @@ class SANS2DAddedEventFilesWithOverlayTest_V2(systemtesting.MantidSystemTest):
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(systemtesting.MantidSystemTest):
+class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2DTUBES()
@@ -103,20 +102,20 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(systemtesting.MantidSy
 
         # add files (SAMPLE and CAN)
         time_shifts = [1]
-        SANSadd2.add_runs(
+        AddRuns(
             ("28827", "28797"),
             "SANS2DTUBES",
-            ".nxs",
+            defType=".nxs",
             rawTypes=(".add", ".raw", ".s*"),
             lowMem=False,
             saveAsEvent=True,
             isOverlay=True,
             time_shifts=time_shifts,
         )
-        SANSadd2.add_runs(
+        AddRuns(
             ("28823", "28793"),
             "SANS2DTUBES",
-            ".nxs",
+            defType=".nxs",
             rawTypes=(".add", ".raw", ".s*"),
             lowMem=False,
             saveAsEvent=True,
@@ -124,8 +123,8 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(systemtesting.MantidSy
             time_shifts=time_shifts,
         )
 
-        AssignSample(r"SANS2D00028797-add.nxs", reload=True)
-        AssignCan(r"SANS2D00028793-add.nxs", reload=True)
+        AssignSample(r"SANS2D00028797-add.nxs")
+        AssignCan(r"SANS2D00028793-add.nxs")
         TransmissionSample(r"SANS2D00028808.nxs", r"SANS2D00028784.nxs")
         TransmissionCan(r"SANS2D00028823.nxs", r"SANS2D00028784.nxs")
 
@@ -150,7 +149,7 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(systemtesting.MantidSy
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DAddedEventFilesWithoutOverlayTest_V2(systemtesting.MantidSystemTest):
+class SANS2DAddedEventFilesWithoutOverlayTest(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2DTUBES()
@@ -161,15 +160,27 @@ class SANS2DAddedEventFilesWithoutOverlayTest_V2(systemtesting.MantidSystemTest)
         Set1D()
 
         # add files (SAMPLE and CAN)
-        SANSadd2.add_runs(
-            ("28827", "28797"), "SANS2DTUBES", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False, saveAsEvent=True, isOverlay=False
+        AddRuns(
+            ("28827", "28797"),
+            "SANS2DTUBES",
+            defType=".nxs",
+            rawTypes=(".add", ".raw", ".s*"),
+            lowMem=False,
+            saveAsEvent=True,
+            isOverlay=False,
         )
-        SANSadd2.add_runs(
-            ("28823", "28793"), "SANS2DTUBES", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False, saveAsEvent=True, isOverlay=False
+        AddRuns(
+            ("28823", "28793"),
+            "SANS2DTUBES",
+            defType=".nxs",
+            rawTypes=(".add", ".raw", ".s*"),
+            lowMem=False,
+            saveAsEvent=True,
+            isOverlay=False,
         )
 
-        AssignSample(r"SANS2D00028797-add.nxs", reload=True)
-        AssignCan(r"SANS2D00028793-add.nxs", reload=True)
+        AssignSample(r"SANS2D00028797-add.nxs")
+        AssignCan(r"SANS2D00028793-add.nxs")
         TransmissionSample(r"SANS2D00028808.nxs", r"SANS2D00028784.nxs")
         TransmissionCan(r"SANS2D00028823.nxs", r"SANS2D00028784.nxs")
 

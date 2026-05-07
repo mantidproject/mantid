@@ -217,7 +217,7 @@ class SANSBeamCentreCoreRunnerTest(MantidSystemTest):
 
     def runTest(self):
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(SANSBeamCentreFinderCoreTest, "test"))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(SANSBeamCentreFinderCoreTest))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)
         if res.wasSuccessful():
