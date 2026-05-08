@@ -14,11 +14,14 @@
 #include "MantidKernel/MultiThreaded.h"
 #include <Eigen/Dense>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <concepts>
 #include <optional>
+#include <tuple>
 #include <type_traits>
 #include <unsupported/Eigen/AutoDiff>
+#include <utility>
 
 namespace Mantid::Algorithms {
 namespace PolarizationCorrectionsHelpers {
@@ -86,6 +89,94 @@ public:
   using ADScalar = Eigen::AutoDiffScalar<DerType>;
   using CovarianceMatrix = Eigen::Matrix<double, N, N>;
 };
+
+template <size_t IndependentVars, size_t DependentVars, typename... DependentFuncs> class CovarianceMatrixProvider {
+public:
+  static_assert(sizeof...(DependentFuncs) == DependentVars, "Number of dependent functions must match DependentVars");
+
+  static constexpr size_t TotalVars = IndependentVars + DependentVars;
+  using IndependentTypes = ErrorTypeHelper<IndependentVars>;
+  using Types = ErrorTypeHelper<TotalVars>;
+  using InputArray = typename Types::InputArray;
+  using CovarianceMatrix = typename Types::CovarianceMatrix;
+  using ADScalar = typename IndependentTypes::ADScalar;
+  using IndependentDerType = typename IndependentTypes::DerType;
+  using FunctionInput = std::array<ADScalar, TotalVars>;
+
+  explicit CovarianceMatrixProvider(DependentFuncs... dependentFuncs)
+      : m_dependentFuncs(std::move(dependentFuncs)...) {}
+
+  CovarianceMatrix operator()(const InputArray &inputValues, const InputArray &inputErrors) const {
+    CovarianceMatrix covariance = inputErrors.array().square().matrix().asDiagonal();
+    const auto functionInputs = makeFunctionInput(inputValues);
+    const auto derivatives = dependentDerivatives(functionInputs, std::make_index_sequence<DependentVars>{});
+
+    for (size_t dep = 0; dep < DependentVars; ++dep) {
+      const size_t depIndex = IndependentVars + dep;
+      for (size_t independent = 0; independent < IndependentVars; ++independent) {
+        const double covarianceWithIndependent =
+            derivatives[dep][independent] * inputErrors[independent] * inputErrors[independent];
+        covariance(independent, depIndex) = covarianceWithIndependent;
+        covariance(depIndex, independent) = covarianceWithIndependent;
+      }
+    }
+
+    // Preserve supplied dependent variances on the diagonal. Only dependent-dependent off-diagonal terms are inferred.
+    for (size_t depA = 0; depA < DependentVars; ++depA) {
+      const size_t depAIndex = IndependentVars + depA;
+      for (size_t depB = depA + 1; depB < DependentVars; ++depB) {
+        const size_t depBIndex = IndependentVars + depB;
+        double covarianceBetweenDependents = 0.0;
+        for (size_t independent = 0; independent < IndependentVars; ++independent) {
+          covarianceBetweenDependents += derivatives[depA][independent] * derivatives[depB][independent] *
+                                         inputErrors[independent] * inputErrors[independent];
+        }
+        covariance(depAIndex, depBIndex) = covarianceBetweenDependents;
+        covariance(depBIndex, depAIndex) = covarianceBetweenDependents;
+      }
+    }
+
+    return covariance;
+  }
+
+private:
+  FunctionInput makeFunctionInput(const InputArray &inputValues) const {
+    FunctionInput functionInputs;
+    for (size_t i = 0; i < IndependentVars; ++i) {
+      functionInputs[i] = ADScalar(inputValues[i], IndependentDerType::Unit(IndependentVars, i));
+    }
+    for (size_t i = IndependentVars; i < TotalVars; ++i) {
+      functionInputs[i] = ADScalar(inputValues[i], IndependentDerType::Zero());
+    }
+    return functionInputs;
+  }
+
+  template <typename Func>
+  ADScalar evaluateDependentFunction(Func const &func, const FunctionInput &functionInputs) const {
+    static_assert(std::invocable<Func, const FunctionInput &>,
+                  "Dependent functions must accept the covariance provider input values");
+    return func(functionInputs);
+  }
+
+  template <size_t... Indices>
+  std::array<IndependentDerType, DependentVars> dependentDerivatives(const FunctionInput &functionInputs,
+                                                                     std::index_sequence<Indices...>) const {
+    return {evaluateDependentFunction(std::get<Indices>(m_dependentFuncs), functionInputs).derivatives()...};
+  }
+
+  std::tuple<DependentFuncs...> m_dependentFuncs;
+};
+
+// The first IndependentVars inputs are treated as independent. The following DependentVars inputs are treated as
+// quantities derived from the independent variables. If dependent variable d_a has derivatives J_ai = dd_a/dx_i, then
+// Cov(x_i, d_a) = J_ai Var(x_i) and Cov(d_a, d_b) = sum_i J_ai J_bi Var(x_i). Dependent functions must express each
+// dependency directly in terms of the independent variables; if one dependent quantity depends on another, inline that
+// dependency into the function. Use the input values' .value() when a fixed bin value is needed.
+template <size_t IndependentVars, size_t DependentVars, typename... DependentFuncs>
+auto makeCovarianceMatrixProvider(DependentFuncs &&...dependentFuncs) {
+  return CovarianceMatrixProvider<IndependentVars, DependentVars, std::decay_t<DependentFuncs>...>(
+      std::forward<DependentFuncs>(dependentFuncs)...);
+}
 
 template <size_t N, typename Func> class ErrorPropagation {
 public:
