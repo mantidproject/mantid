@@ -73,6 +73,7 @@ class InstrumentConfig:
     group_suffix: Dict[Enum, str]
     group_foc_ws_suffix: Dict[Enum, str]
     interactive_grouping_options: Sequence[Tuple[Enum, str, bool, bool]]  # group, description, has file input, has text input
+    peak_func: str
 
     # PDCalibration defaults
     calibration_tof_binning: Tuple[float, float, float]
@@ -95,6 +96,7 @@ CONFIGS: Dict[str, InstrumentConfig] = {
         },
         texture_groups=(ENGINX_GROUP.TEXTURE20, ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.CUSTOM),
         calibration_tof_binning=(12000, -0.0003, 52000),
+        peak_func="BackToBackExponential",
         prm_header_template="template_ENGINX_prm_header.prm",
         group_bank_args={ENGINX_GROUP.BOTH: "NorthBank,SouthBank", ENGINX_GROUP.NORTH: "NorthBank", ENGINX_GROUP.SOUTH: "SouthBank"},
         group_descriptions={
@@ -158,6 +160,7 @@ CONFIGS: Dict[str, InstrumentConfig] = {
         texture_groups=(IMAT_GROUP.CUSTOM,),
         # initially these are just the same as the ENGINX values, but will be updated in due course
         calibration_tof_binning=(12000, -0.0003, 52000),
+        peak_func="IkedaCarpenterPV",
         prm_header_template="template_IMAT_prm_header.prm",
         group_bank_args={IMAT_GROUP.BOTH: "NorthBank,SouthBank", IMAT_GROUP.NORTH: "NorthBank", IMAT_GROUP.SOUTH: "SouthBank"},
         group_descriptions={

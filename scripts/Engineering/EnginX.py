@@ -35,18 +35,3 @@ class EnginX(BaseEngInstrument):
             spectrum_num=spectrum_num,
             instrument="ENGINX",
         )
-
-    def focus(self, plot_output: bool) -> None:
-        if self.calibration.is_valid() and self.calibration.get_vanadium_path():
-            focus_run(
-                self.focus_runs,
-                plot_output,
-                rb_num=None,
-                calibration=self.calibration,
-                save_dir=self.save_dir,
-                full_calib=self.full_calib_ws,
-            )
-
-    def main(self, plot_cal: bool = False, plot_foc: bool = False):
-        self.calibrate(plot_cal)
-        self.focus(plot_foc)

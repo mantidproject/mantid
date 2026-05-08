@@ -330,7 +330,7 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_i
         TofBinning=calibration.config.calibration_tof_binning,
         PeakWindow=default_ceria_expected_peak_windows(final=True),
         MinimumPeakHeight=0.5,
-        PeakFunction="BackToBackExponential",
+        PeakFunction=calibration.config.peak_func,
         CalibrationParameters="DIFC+TZERO+DIFA",
         UseChiSq=True,
         CopyLastGoodPeakParameters=copy_params_in_calib,

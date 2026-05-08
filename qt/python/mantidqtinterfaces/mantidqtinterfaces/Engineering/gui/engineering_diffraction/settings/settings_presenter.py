@@ -23,7 +23,6 @@ SETTINGS_DICT = {
     "logs": str,
     "primary_log": str,
     "sort_ascending": bool,
-    "default_peak": str,
     "path_to_gsas2": str,
     "timeout": str,
     "dSpacing_min": str,
@@ -51,7 +50,6 @@ DEFAULT_SETTINGS = {
     "logs": ",".join(["Temp_1", "W_position", "X_position", "Y_position", "Z_position", "stress", "strain", "stressrig_go"]),
     "primary_log": "strain",
     "sort_ascending": True,
-    "default_peak": "BackToBackExponential",
     "path_to_gsas2": GSAS2_PATH_ON_IDAAAS if path.exists(GSAS2_PATH_ON_IDAAAS) else "",
     "timeout": "10",  # seconds
     "dSpacing_min": "1.0",  # angstroms
@@ -69,7 +67,9 @@ DEFAULT_SETTINGS = {
 
 for instr in INSTRUMENT_DICT.values():
     SETTINGS_DICT[f"full_calibration_{instr}"] = str
+    SETTINGS_DICT[f"default_peak_{instr}"] = str
     DEFAULT_SETTINGS[f"full_calibration_{instr}"] = path.join(CALIB_DIR, get_instr_config(instr).full_instr_calib)
+    DEFAULT_SETTINGS[f"default_peak_{instr}"] = get_instr_config(instr).peak_func
 
 ALL_LOGS = ",".join(
     [
@@ -143,7 +143,7 @@ ALL_LOGS = ",".join(
     ]
 )
 
-ALL_PEAKS = ",".join(["BackToBackExponential", "Gaussian", "Lorentzian", "Voigt"])
+ALL_PEAKS = ",".join(["BackToBackExponential", "Gaussian", "Lorentzian", "Voigt", "IkedaCarpenterPV"])
 
 
 class SettingsPresenter(object):
@@ -209,7 +209,7 @@ class SettingsPresenter(object):
         self.settings["logs"] = self.view.get_checked_logs()
         self.settings["primary_log"] = self.view.get_primary_log()
         self.settings["sort_ascending"] = self.view.get_ascending_checked()
-        self.settings["default_peak"] = self.view.get_peak_function()
+        self.settings[f"default_peak_{self.instrument}"] = self.view.get_peak_function()
         self.settings["path_to_gsas2"] = self.view.get_path_to_gsas2()
         self.settings["timeout"] = self.view.get_timeout()
         self.settings["dSpacing_min"] = self.view.get_dSpacing_min()
@@ -238,7 +238,7 @@ class SettingsPresenter(object):
         self.view.set_checked_logs(self.settings["logs"])
         self.view.set_primary_log_combobox(self.settings["primary_log"])
         self.view.set_ascending_checked(self.settings["sort_ascending"])
-        self.view.set_peak_function(self.settings["default_peak"])
+        self.view.set_peak_function(self.settings[f"default_peak_{self.instrument}"])
         self.view.set_path_to_gsas2(self.settings["path_to_gsas2"])
         self.view.set_timeout(self.settings["timeout"])
         self.view.set_dSpacing_min(self.settings["dSpacing_min"])
@@ -257,6 +257,10 @@ class SettingsPresenter(object):
     def update_full_calib_with_instrument(self):
         full_calib = self.settings[f"full_calibration_{self.instrument}"]
         self.view.set_full_calibration(full_calib)
+
+    def update_peak_with_instrument(self):
+        peak_func = self.settings[f"default_peak_{self.instrument}"]
+        self.view.set_peak_function(peak_func)
 
     def _find_files(self):
         self.view.find_full_calibration()
@@ -307,6 +311,7 @@ class SettingsPresenter(object):
         self.instrument = instrument
         self._validate_settings()
         self.update_full_calib_with_instrument()
+        self.update_peak_with_instrument()
 
     # -----------------------
     # Observers / Observables

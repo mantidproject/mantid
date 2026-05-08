@@ -126,8 +126,8 @@ class SettingsModel(object):
 
         # value validations
         self.validate_reference_frame(settings)
-        if settings["default_peak"] not in all_peaks:
-            settings["default_peak"] = default_settings["default_peak"]
+        if settings[f"default_peak_{instrument}"] not in all_peaks:
+            settings[f"default_peak_{instrument}"] = default_settings[f"default_peak_{instrument}"]
         if not path.isfile(settings[f"full_calibration_{instrument}"]):
             settings[f"full_calibration_{instrument}"] = default_settings[f"full_calibration_{instrument}"]
         self._validate_convert_to_float(settings, "timeout")
