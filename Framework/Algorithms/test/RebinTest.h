@@ -37,23 +37,15 @@ using Mantid::HistogramData::CountStandardDeviations;
 
 class RebinTest : public CxxTest::TestSuite {
 public:
-  double BIN_DELTA;
-  int NUMPIXELS, NUMBINS;
-
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static RebinTest *createSuite() { return new RebinTest(); }
   static void destroySuite(RebinTest *suite) { delete suite; }
 
-  RebinTest() {
-    BIN_DELTA = 2.0;
-    NUMPIXELS = 20;
-    NUMBINS = 50;
-  }
-
   /* some basic validation tests */
 
   void test_make_three_params_default() {
+    std::cout << "Test make three params default" << std::endl;
     const std::string IN_WKSP("creates_three_params_in");
     const std::string OUT_WKSP("creates_three_params_out");
 
@@ -83,6 +75,7 @@ public:
   }
 
   void test_failure_bad_log_binning_endpoints() {
+    std::cout << "Test failure bad log binning endpoints" << std::endl;
     // ensure that rebinning will fail if log binning from negative to positive
     // this fails fast, due to the rebin param property validator
     Rebin rebin;
@@ -92,6 +85,7 @@ public:
   }
 
   void test_failure_bad_rebin_params() {
+    std::cout << "Test failure bad rebin params" << std::endl;
     // ensure that rebinning will fail if log binning from negative to positive
     // this fails fast, due to the rebin param property validator
     Rebin rebin;
@@ -108,6 +102,7 @@ public:
   }
 
   void test_failure_mixed_power_and_log() {
+    std::cout << "Test failure mixed power and log" << std::endl;
     Rebin rebin;
     rebin.initialize();
     rebin.setProperty("Params", std::vector<double>{1.0, -1.0, 10.0});
@@ -115,12 +110,13 @@ public:
     auto errmsgs = rebin.validateInputs();
     auto errmsg = errmsgs.find("Params");
     TS_ASSERT(errmsg != errmsgs.end());
-    TS_ASSERT(errmsg->second.substr(0, 20) == "Provided width value");
+    TS_ASSERT(strstr(errmsg->second.c_str(), "Bin width was -1"));
   }
 
   // NOTE this test will only run on linux, as it requires the availMem patch to work
   void testIsMocked() {
 #if defined(__linux__) || defined(__gnu_linux__)
+    std::cout << "Test the memory patch is working" << std::endl;
     constexpr std::size_t newMem{25};
     size_t mem1 = Mantid::Kernel::MemoryStats().availMem();
     TS_ASSERT_LESS_THAN(newMem, mem1);
@@ -135,6 +131,7 @@ public:
   }
 
   void test_failure_too_much_memory() {
+    std::cout << "Test failure too much memory on the rebin params" << std::endl;
     Mantid::TestMemory::MockMemory memL; // patch the available memory calculator
     size_t numBins = memL.numberOfFloats();
     // ensure that rebinning will fail if the number of bins requested is expected to exceed available memory
@@ -152,6 +149,38 @@ public:
     end = 10.0;
     TS_ASSERT_LESS_THAN(binWidth, 0.0); // make sure it is negative, to trigger log binning
     TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{start, binWidth, end}));
+  }
+
+  // NOTE this test will only run on linux, as it requires the availMem patch to work
+  void test_failure_too_much_memory_ws() {
+#if defined(__linux__) || defined(__gnu_linux__)
+    std::cout << "Test failure too much memory with a workspace" << std::endl;
+    Mantid::TestMemory::MockMemory memL; // patch the available memory calculator
+    size_t numFloats = memL.numberOfFloats();
+    size_t numSpec = 10;
+    size_t numBins = numFloats / numSpec / 2;
+    // ensure that rebinning will fail if the number of bins requested is expected to exceed available memory
+    Rebin rebin;
+    rebin.initialize();
+    Workspace2D_sptr ws = createWorkspace<Workspace2D>(numSpec, 2, 1);
+    rebin.setProperty("InputWorkspace", ws);
+    rebin.setPropertyValue("OutputWorkspace", "test_out");
+    double binWidth = 1.0;
+    double start = 1.0;
+    double end = start + static_cast<double>(numBins) * binWidth + 1;
+    // this binning is valid on a single spectrum
+    TS_ASSERT_THROWS_NOTHING(rebin.setProperty("Params", std::vector<double>{start, binWidth, end}));
+    // but will fail on the workspace with ten spectra
+    auto errmsgs = rebin.validateInputs();
+    auto errmsg = errmsgs.find("Params");
+    TS_ASSERT(errmsg != errmsgs.end());
+    TS_ASSERT_DIFFERS(errmsg->second.find("This binning is expected to create"), std::string::npos);
+    // this same binning is fine with fewer spectra
+    Workspace2D_sptr ws2 = createWorkspace<Workspace2D>(numSpec - 1, 2, 1);
+    rebin.setProperty("InputWorkspace", ws2);
+    errmsgs = rebin.validateInputs();
+    TS_ASSERT(errmsgs.empty());
+#endif
   }
 
   /* execution tests */
@@ -825,6 +854,7 @@ public:
 
   void test_inversePowerValidateHarmonic() {
     // Test that the validator which forbid creating more than 10000 bins works in a harmonic series case
+    std::cout << "Testing failure with inverse power harmonic series with modeset" << std::endl;
     Workspace2D_sptr test_1D = Create1DWorkspace(51);
     test_1D->setDistribution(false);
     AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
@@ -842,6 +872,7 @@ public:
   void test_inversePowerValidateInverseSquareRoot() {
     // Test that the validator which forbid breating more than 10000 bins works in an inverse square root case
     // We test both because they rely on different formula to compute the expected number of bins.
+    std::cout << "Testing failure with inverse power square root series with modeset" << std::endl;
     Workspace2D_sptr test_1D = Create1DWorkspace(51);
     test_1D->setDistribution(false);
     AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
@@ -883,6 +914,7 @@ public:
 
   void test_failure_bad_log_binning_endpoints_modeset() {
     // ensure failure with log binning from neg to pos with modeset
+    std::cout << "Testing failure with log binning from negative to positive with modeset" << std::endl;
     Rebin rebin;
     rebin.initialize();
     auto ws1 = Create1DWorkspace(10);
@@ -899,9 +931,9 @@ public:
     AnalysisDataService::Instance().remove("ws1");
   }
 
-  void do_test_property_unchanged(
-      // check that certain properties are unchanged by the execution of the algo
-      std::string property, bool propValue, std::string binMode, double step, double power) {
+  void do_test_property_unchanged(std::string property, bool propValue, std::string binMode, double step,
+                                  double power) {
+    // check that certain properties are unchanged by the execution of the algo
 
     const std::string IN_WKSP("properties_unchanged_in");
     const std::string OUT_WKSP("properties_unchanged_out");
