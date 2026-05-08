@@ -66,7 +66,7 @@ namespace Algorithms {
  *
  * @param center Center of the beam
  */
-IBeamProfile::IBeamProfile(const V3D center) : m_beamCenter(center) {}
+IBeamProfile::IBeamProfile(const V3D &center) : m_beamCenter(center) {}
 
 /**
  * @brief Get the intersection of the beam with the sample

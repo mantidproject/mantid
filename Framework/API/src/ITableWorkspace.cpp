@@ -102,7 +102,7 @@ namespace Mantid::Kernel {
 template <>
 MANTID_API_DLL API::ITableWorkspace_sptr
 IPropertyManager::getValue<API::ITableWorkspace_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<API::ITableWorkspace_sptr> *>(getPointerToProperty(name));
+  const auto *prop = dynamic_cast<PropertyWithValue<API::ITableWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {

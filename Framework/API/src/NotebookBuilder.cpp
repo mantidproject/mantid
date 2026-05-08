@@ -144,6 +144,7 @@ const std::string NotebookBuilder::buildAlgorithmString(const AlgorithmHistory_c
   return name + "(" + propStr + ")";
 }
 
+// cppcheck-suppress unknownMacro
 GNU_DIAG_OFF("maybe-uninitialized")
 
 /**

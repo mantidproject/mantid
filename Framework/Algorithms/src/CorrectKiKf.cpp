@@ -263,7 +263,6 @@ void CorrectKiKf::execEvent() {
 template <class T>
 void CorrectKiKf::correctKiKfEventHelper(std::vector<T> &wevector, double efixed, const std::string &emodeStr) {
   double Ei, Ef;
-  float kioverkf;
   typename std::vector<T>::iterator it;
   for (it = wevector.begin(); it < wevector.end();) {
     if (emodeStr == "Direct") // Ei=Efixed
@@ -279,7 +278,7 @@ void CorrectKiKf::correctKiKfEventHelper(std::vector<T> &wevector, double efixed
     if ((Ei <= 0) || (Ef <= 0)) {
       it = wevector.erase(it);
     } else {
-      kioverkf = static_cast<float>(std::sqrt(Ei / Ef));
+      float kioverkf = static_cast<float>(std::sqrt(Ei / Ef));
       it->m_weight *= kioverkf;
       it->m_errorSquared *= kioverkf * kioverkf;
       ++it;
