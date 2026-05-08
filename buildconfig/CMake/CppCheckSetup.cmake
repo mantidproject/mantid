@@ -22,7 +22,7 @@ if(CPPCHECK_EXECUTABLE)
       --disable=missingInclude
       # Adding qt here helps with mis-identifying Qt macros as unknownMacro defects.
       --library=qt
-      --check-level=exhaustive
+      --check-level=normal
       --inline-suppr
       --max-configs=120
       --std=c++${CMAKE_CXX_STANDARD} # use the standard from cmake

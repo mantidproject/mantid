@@ -34,13 +34,13 @@ checkersReport
 class_X_Y
 
 // To suppress 3732 defects reported from 2.20.0
-cstyleCast
+//cstyleCast
 
 // To suppress 1046 defects reported from 2.20.0
-functionStatic
+//functionStatic
 
 // To suppress 694 defects reported from 2.20.0
-variableScope
+//variableScope
 
 // ----------------- Upstream libs ---------------
 
