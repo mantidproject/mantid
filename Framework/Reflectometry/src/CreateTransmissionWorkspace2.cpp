@@ -21,11 +21,6 @@ namespace Mantid::Reflectometry {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateTransmissionWorkspace2)
 
-namespace {
-// Prefix for names of intermediate transmission workspaces in lambda
-std::string const TRANS_LAM_PREFIX("TRANS_LAM_");
-} // namespace
-
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateTransmissionWorkspace2::name() const { return "CreateTransmissionWorkspace"; }
@@ -252,7 +247,7 @@ void CreateTransmissionWorkspace2::setOutputTransmissionRun(int which, const Mat
                              propertyName + std::string(" property."));
   }
 
-  auto const defaultName = TRANS_LAM_PREFIX + runNumber;
+  auto const defaultName = TRANS_LAM_PREFIX + "_" + runNumber;
   setPropertyValue(propertyName, defaultName);
   setProperty(propertyName, ws);
 }
@@ -281,7 +276,7 @@ void CreateTransmissionWorkspace2::setOutputWorkspace(const API::MatrixWorkspace
     }
   }
 
-  std::string outputName = TRANS_LAM_PREFIX;
+  std::string outputName = TRANS_LAM_PREFIX + "_";
   if (!m_firstTransmissionRunNumber.empty()) {
     outputName.append(m_firstTransmissionRunNumber);
   }
