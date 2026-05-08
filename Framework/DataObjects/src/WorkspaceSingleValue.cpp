@@ -77,7 +77,7 @@ namespace Mantid::Kernel {
 template <>
 MANTID_DATAOBJECTS_DLL Mantid::DataObjects::WorkspaceSingleValue_sptr
 IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>(const std::string &name) const {
-  auto *prop =
+  const auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;

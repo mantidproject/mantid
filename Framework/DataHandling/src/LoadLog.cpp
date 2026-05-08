@@ -449,7 +449,7 @@ bool LoadLog::isAscii(const std::string &filename) {
      * Call it a binary file if we find a non-ascii character in the
      * first 256 bytes of the file.
      */
-    for (char *char_pos = data; char_pos < pend; ++char_pos) {
+    for (const char *char_pos = data; char_pos < pend; ++char_pos) {
       auto char_value = static_cast<unsigned long>(*char_pos);
       if (char_value > 0x7F) {
         return false;

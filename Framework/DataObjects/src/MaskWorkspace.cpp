@@ -404,7 +404,8 @@ namespace Mantid::Kernel {
 template <>
 MANTID_DATAOBJECTS_DLL Mantid::DataObjects::MaskWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(getPointerToProperty(name));
+  const auto *prop =
+      dynamic_cast<PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {

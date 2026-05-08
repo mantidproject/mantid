@@ -426,7 +426,7 @@ namespace Mantid::Kernel {
 template <>
 MANTID_DATAOBJECTS_DLL Mantid::DataObjects::SpecialWorkspace2D_sptr
 IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_sptr>(const std::string &name) const {
-  auto *prop =
+  const auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
