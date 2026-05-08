@@ -51,6 +51,7 @@ class CalibrationPresenter(object):
         van_file = self.view.get_vanadium_filename()
         config = get_instr_config(self.instrument)
         self.current_calibration.clear()
+        self.current_calibration.set_fit_peak_shape(self.get_default_fitting_peak())
         if self.view.get_load_checked():
             # loading calibration from path to .prm
             self.current_calibration.set_calibration_from_prm_fname(self.view.get_path_filename(), self.instrument)
@@ -78,7 +79,7 @@ class CalibrationPresenter(object):
             self.start_calibration_worker(self.view.get_plot_output())
         elif self.view.get_load_checked() and self.validate_path():
             self.update_calibration_from_view()
-            self.model.load_existing_calibration_files(self.current_calibration)
+            self.model.load_existing_calibration_files(self.current_calibration, self.instrument)
             self._notify_updated_calibration()
         van_run = self.view.get_vanadium_run()
         set_setting(
@@ -91,7 +92,7 @@ class CalibrationPresenter(object):
         """
         self.worker = AsyncTask(
             self.model.create_new_calibration,
-            (self.current_calibration, self.rb_num, plot_output),
+            (self.current_calibration, self.rb_num, plot_output, self.instrument),
             error_cb=self._on_error,
             success_cb=self._on_success,
         )
@@ -214,6 +215,9 @@ class CalibrationPresenter(object):
 
     def add_prm_gsas2_subscriber(self, obs):
         self.prm_filepath_notifier_gsas2.add_subscriber(obs)
+
+    def get_default_fitting_peak(self):
+        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, f"default_peak_{self.instrument}")
 
     # -----------------------
     # Observers / Observables

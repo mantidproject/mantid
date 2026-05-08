@@ -39,7 +39,7 @@ class BaseEngInstrument:
 
         # Load custom full inst calib if supplied (needs to be in ADS)
         try:
-            self.full_calib_ws = Load(full_inst_calib_path, OutputWorkspace="full_inst_calib")
+            self.full_calib_ws = Load(full_inst_calib_path, OutputWorkspace=f"full_inst_calib_{self.instrument}")
         except ValueError as e:
             logger.error("Unable to load calibration file " + full_inst_calib_path + ". Error: " + str(e))
 

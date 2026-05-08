@@ -3,12 +3,12 @@
 <!-- This is currently just a clone of ENGINX param file for testing the commissioning of IMAT -->
 
 <!DOCTYPE parameter-file [
-          <!ENTITY alpha_0     "0.671635">
-          <!ENTITY beta_0      "0.003134">
-          <!ENTITY beta_1      "0.020802">
-          <!ENTITY sigma_0_sq  "538.955080">
-          <!ENTITY sigma_1_sq  "100.289438">
-          <!ENTITY sigma_2_sq  "90.359905">
+          <!ENTITY alpha_0    "673896.832650">
+          <!ENTITY beta_0     "0.002627">
+          <!ENTITY beta_1     "0.023061">
+          <!ENTITY sigma_0_sq "448.618067">
+          <!ENTITY sigma_1_sq "126.400324">
+          <!ENTITY sigma_2_sq "67.422955">
           <!ENTITY IC_Alpha0     "0.2243268634">
           <!ENTITY IC_Alpha1     "1.000000">
           <!ENTITY IC_Beta0      "392.5451289614">
@@ -16,9 +16,9 @@
           <!ENTITY ICSigma0_sq   "0.0">
           <!ENTITY ICSigma1_sq   "1433.4445616290">
           <!ENTITY ICSigma2_sq   "-23.8830556342">
-    <!ENTITY ICGamma0      "42.7727369688">
-    <!ENTITY ICGamma1      "-30.0017547913">
-    <!ENTITY ICGamma2      "5.7001495874">
+          <!ENTITY ICGamma0      "42.7727369688">
+          <!ENTITY ICGamma1      "-30.0017547913">
+          <!ENTITY ICGamma2      "5.7001495874">
         ]>
 
 <parameter-file instrument="IMAT" valid-from="2026-1-1">

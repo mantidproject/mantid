@@ -31,6 +31,7 @@ class CalibrationInfo:
         self.spectra_list_str = None
         self.calibration_table = None
         self.extra_group_suffix = ""
+        self.fit_peak_shape = "BackToBackExponential"
 
     def clear(self):
         self.group = None
@@ -45,6 +46,7 @@ class CalibrationInfo:
         self.config = None
         self.calibration_table = None
         self.extra_group_suffix = ""
+        self.fit_peak_shape = "BackToBackExponential"
 
     # getters
     def get_foc_ws_suffix(self) -> str:
@@ -96,6 +98,9 @@ class CalibrationInfo:
 
     def get_group(self) -> Enum:
         return self.group
+
+    def get_fit_peak_shape(self) -> str:
+        return self.fit_peak_shape
 
     # setters
     def set_extra_group_suffix(self) -> None:
@@ -157,6 +162,9 @@ class CalibrationInfo:
 
     def set_group(self, group: Enum) -> None:
         self.group = group
+
+    def set_fit_peak_shape(self, peak_shape: str) -> None:
+        self.fit_peak_shape = peak_shape
 
     # functional
     def set_grouping_filepath_from_prm_filepath(self) -> None:

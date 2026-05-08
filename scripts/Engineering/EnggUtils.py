@@ -324,6 +324,13 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_i
     foc_name = focused_ceria.name()  # PDCal invalidates ptr during rebin so keep track of ws name
     cal_table_name = "engggui_calibration_" + calibration.get_group_suffix()
     diag_ws_name = "diag_" + calibration.get_group_suffix()
+    mask_ws_name = cal_table_name + "_mask"
+    # if calibration has already been run PDCalibration will load these wss from the ADS rather than creating new ones
+    for ws in (cal_table_name, diag_ws_name, mask_ws_name):
+        _remove_existing_output_workspaces(ws)
+    # make sure the parameter file for the instrument has been loaded to get better starting values for the peak fit
+    peak_func = calibration.get_fit_peak_shape()
+    logger.notice(f"Running PDCalibration on {foc_name} using {peak_func}")
     cal_table, mask, diag_ws = mantid.PDCalibration(
         InputWorkspace=foc_name,
         OutputCalibrationTable=cal_table_name,
@@ -332,11 +339,12 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_i
         PeakPositions=default_ceria_expected_peaks(final=True),
         TofBinning=calibration.config.calibration_tof_binning,
         PeakWindow=default_ceria_expected_peak_windows(final=True),
-        MinimumPeakHeight=0.1,
-        PeakFunction=calibration.config.peak_func,
+        MinimumPeakHeight=0.5,
+        PeakFunction=peak_func,
         CalibrationParameters="DIFC+TZERO+DIFA",
         UseChiSq=True,
         CopyLastGoodPeakParameters=copy_params_in_calib,
+        ConstrainPeakPositions=False,
     )
     mantid.ApplyDiffCal(InstrumentWorkspace=foc_name, CalibrationWorkspace=cal_table)
 
@@ -351,6 +359,11 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_i
     calibration.set_calibration_table(cal_table_name)
 
     return focused_ceria, cal_table, diag_ws
+
+
+def _remove_existing_output_workspaces(ws_name):
+    if ADS.doesExist(ws_name):
+        ADS.remove(ws_name)
 
 
 def create_output_files(calibration_dir, calibration, ws_foc):

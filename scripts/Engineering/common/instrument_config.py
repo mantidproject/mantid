@@ -157,7 +157,7 @@ CONFIGS: Dict[str, InstrumentConfig] = {
             IMAT_GROUP.ROW1: "IMAT_Row1_grouping.xml",
             IMAT_GROUP.ROW4: "IMAT_Row4_grouping.xml",
         },
-        texture_groups=(IMAT_GROUP.CUSTOM,),
+        texture_groups=(IMAT_GROUP.CUSTOM, IMAT_GROUP.MODULE1, IMAT_GROUP.MODULE4, IMAT_GROUP.ROW1, IMAT_GROUP.ROW4),
         calibration_tof_binning=(10000, -0.0003, 80000),
         peak_func="IkedaCarpenterPV",
         prm_header_template="template_IMAT_prm_header.prm",
