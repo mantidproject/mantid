@@ -231,18 +231,15 @@ namespace { // anonymous namespace
 // Set up the Z table for the specified two theta angle (in degrees).
 vector<double> createZ(const double angle_rad) {
   vector<double> Z(Z_initial, Z_initial + Z_size);
-
   const double theta_rad = angle_rad * .5;
-  int l, J;
-  double sum;
 
   for (int i = 1; i <= 4; i++) {
     for (int j = 1; j <= 4; j++) {
       int iplusj = i + j;
       if (iplusj <= 5) {
-        l = 0;
-        J = 1 + l + 6 * (i - 1) + 6 * 4 * (j - 1);
-        sum = CHEBYSHEV[J - 1];
+        int l = 0;
+        int J = 1 + l + 6 * (i - 1) + 6 * 4 * (j - 1);
+        double sum = CHEBYSHEV[J - 1];
 
         for (l = 1; l <= 5; l++) {
           J = 1 + l + 6 * (i - 1) + 6 * 4 * (j - 1);

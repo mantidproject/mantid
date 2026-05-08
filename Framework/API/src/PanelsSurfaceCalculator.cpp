@@ -85,9 +85,9 @@ PanelsSurfaceCalculator::retrievePanelCorners(const Mantid::Geometry::ComponentI
 
   // Find xmin, xmax, ymin and ymax
   double xmin = corners[0].X();
-  double xmax = corners[0].X();
+  double xmax = xmin;
   double ymin = corners[0].Y();
-  double ymax = corners[0].Y();
+  double ymax = ymin;
 
   for (const auto &corner : corners) {
     xmin = corner.X() < xmin ? corner.X() : xmin;

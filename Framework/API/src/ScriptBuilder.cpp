@@ -261,6 +261,7 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
   return historyEntry;
 }
 
+// cppcheck-suppress unknownMacro
 GNU_DIAG_OFF("maybe-uninitialized")
 
 /**

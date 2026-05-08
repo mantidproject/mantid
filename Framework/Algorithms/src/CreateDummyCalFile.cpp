@@ -94,7 +94,7 @@ void CreateDummyCalFile::exec() {
   sptr_IComp currentIComp;
   sptr_ICompAss currentchild;
 
-  int top_group, child_group;
+  int top_group;
 
   if (current.get()) {
     top_group = group_map[current->getName()]; // Return 0 if not in map
@@ -122,7 +122,7 @@ void CreateDummyCalFile::exec() {
         {
           currentchild = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(currentIComp);
           if (currentchild.get()) {
-            child_group = group_map[currentchild->getName()];
+            int child_group = group_map[currentchild->getName()];
             if (child_group == 0)
               child_group = top_group;
             assemblies.emplace(currentchild, child_group);

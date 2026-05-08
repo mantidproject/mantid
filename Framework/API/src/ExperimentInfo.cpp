@@ -791,11 +791,13 @@ Geometry::DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
  */
 const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
   populateIfNotLoaded();
-  if (!m_spectrumInfoWrapper) {
+  {
     std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
-    if (!m_spectrumInfo) // this should happen only if not MatrixWorkspace
-      cacheDefaultDetectorGrouping();
     if (!m_spectrumInfoWrapper) {
+      if (!m_spectrumInfo) // this should happen only if not MatrixWorkspace
+        cacheDefaultDetectorGrouping();
+      if (!m_spectrumInfo)
+        throw std::runtime_error("cacheDefaultDetectorGrouping failed to init m_spectrumInfo");
       static_cast<void>(detectorInfo());
       m_spectrumInfoWrapper = std::make_unique<SpectrumInfo>(*m_spectrumInfo, *this, m_parmap->mutableDetectorInfo());
     }
@@ -1334,7 +1336,7 @@ namespace Mantid::Kernel {
 template <>
 MANTID_API_DLL Mantid::API::ExperimentInfo_sptr
 IPropertyManager::getValue<Mantid::API::ExperimentInfo_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *>(getPointerToProperty(name));
+  const auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {

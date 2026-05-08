@@ -31,21 +31,18 @@ void IFunction1D::calcNumericalDerivative1D(Jacobian *jacobian, EvaluationMethod
   std::vector<double> minusStep(nData), plusStep(nData);
   eval1D(minusStep.data(), xValues, nData);
 
-  double step;
   const size_t nParam = nParams();
   for (size_t iP = 0; iP < nParam; iP++) {
     if (isActive(iP)) {
       const double val = activeParameter(iP);
-      step = calculateStepSize(val);
-
-      const double paramPstep = val + step;
+      const double paramPstep = val + calculateStepSize(val);
       setActiveParameter(iP, paramPstep);
       applyTies();
       eval1D(plusStep.data(), xValues, nData);
       setActiveParameter(iP, val);
       applyTies();
 
-      step = paramPstep - val;
+      const double step = paramPstep - val;
       for (size_t i = 0; i < nData; i++) {
         jacobian->set(i, iP, (plusStep[i] - minusStep[i]) / step);
       }

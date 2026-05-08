@@ -36,7 +36,7 @@ namespace Mantid::Kernel {
 template <>
 MANTID_API_DLL Mantid::API::IMDHistoWorkspace_sptr
 IPropertyManager::getValue<Mantid::API::IMDHistoWorkspace_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IMDHistoWorkspace_sptr> *>(getPointerToProperty(name));
+  const auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IMDHistoWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {

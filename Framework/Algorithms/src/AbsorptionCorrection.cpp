@@ -420,9 +420,6 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector, std::ve
 /// instruments
 double AbsorptionCorrection::doIntegration(const double linearCoefAbs, const std::vector<double> &L2s,
                                            const size_t startIndex, const size_t endIndex) const {
-  // Seems cppcheck is using the same temporary size_t to evaluate endIndex-startIndex in static analysis,
-  // so it thinks the result of the comparison is always 0<1000. Hence the suppresion.
-  // cppcheck-suppress knownConditionTrueFalse
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     size_t middle = findMiddle(startIndex, endIndex);
 
@@ -448,9 +445,6 @@ double AbsorptionCorrection::doIntegration(const double linearCoefAbsL1, const d
 
   // L2s is initiliazed by m_numVolumeElements which is set to 0 in this class but it is overriden in subclasses
   // like FlatAbsorptionCorrection
-  // Seems cppcheck is using the same temporary size_t to evaluate endIndex-startIndex in static analysis,
-  // so it thinks the result of the comparison is always 0<1000. Hence the suppresion.
-  // cppcheck-suppress knownConditionTrueFalse
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     size_t middle = findMiddle(startIndex, endIndex);
 

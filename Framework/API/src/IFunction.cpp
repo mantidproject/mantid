@@ -301,7 +301,7 @@ void IFunction::removeTie(const std::string &parName) {
 std::string IFunction::writeTies() const {
   std::ostringstream tieStream;
   bool first = true;
-  for (auto &parTie : m_ties) {
+  for (const auto &parTie : m_ties) {
     if (parTie->isDefault())
       continue;
     if (!first) {
@@ -325,7 +325,7 @@ std::pair<std::size_t, std::string> IFunction::insertTie(std::unique_ptr<Paramet
       std::distance(m_ties.begin(), std::find_if(m_ties.begin(), m_ties.end(),
                                                  [&](const auto &m_tie) { return getParameterIndex(*m_tie) == iPar; }));
   std::string oldExp = "";
-  const auto oldTie = getTie(iPar);
+  const auto *oldTie = getTie(iPar);
   if (oldTie) {
     const auto oldTieStr = oldTie->asString();
     oldExp = oldTieStr.substr(oldTieStr.find("=") + 1);
@@ -1124,20 +1124,17 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
     nData = minusStep.size();
   }
 
-  double step;
   for (size_t iP = 0; iP < nParam; iP++) {
     if (isActive(iP)) {
       const double val = activeParameter(iP);
-      step = calculateStepSize(val);
-
-      const double paramPstep = val + step;
+      const double paramPstep = val + calculateStepSize(val);
       setActiveParameter(iP, paramPstep);
       applyTies();
       function(domain, plusStep);
       setActiveParameter(iP, val);
       applyTies();
 
-      step = paramPstep - val;
+      const double step = paramPstep - val;
       for (size_t i = 0; i < nData; i++) {
         jacobian.set(i, iP, (plusStep.getCalculated(i) - minusStep.getCalculated(i)) / step);
       }
@@ -1688,7 +1685,7 @@ void IFunction::sortTies(const bool checkOnly) {
 
   std::list<TieNode> orderedTieNodes;
   for (size_t i = 0; i < nParams(); ++i) {
-    auto const parTie = getTie(i);
+    const auto *parTie = getTie(i);
     if (!parTie || ignoreTie(*parTie)) {
       continue;
     }
@@ -1745,7 +1742,8 @@ namespace Mantid::Kernel {
 template <>
 MANTID_API_DLL std::shared_ptr<Mantid::API::IFunction>
 IPropertyManager::getValue<std::shared_ptr<Mantid::API::IFunction>>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>> *>(getPointerToProperty(name));
+  const auto *prop =
+      dynamic_cast<PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {

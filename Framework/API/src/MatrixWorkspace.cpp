@@ -2215,7 +2215,7 @@ namespace Mantid::Kernel {
 template <>
 MANTID_API_DLL Mantid::API::MatrixWorkspace_sptr
 IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(getPointerToProperty(name));
+  const auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
