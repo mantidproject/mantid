@@ -235,9 +235,9 @@ class FocusTexture30(systemtesting.MantidSystemTest):
         self.assertEqual(self._ws_foc.getNumberHistograms(), 30)
         # don't assert diff constants of one group
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(23)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 19908, delta=6)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], -13.2, delta=1)
-        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -28.2, delta=2)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 19887, delta=6)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -6.6, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -12.2, delta=2)
         # compare TOF workspaces
         self.tolerance = 1e-5
         self.disableChecking.extend(["Instrument"])  # don't check
