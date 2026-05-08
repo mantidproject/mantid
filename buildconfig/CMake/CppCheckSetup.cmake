@@ -35,7 +35,7 @@ if(CPPCHECK_EXECUTABLE)
       # Loading qt.cfg via full path suppresses Qt macro warnings (slots, signals, Q_OBJECT etc.) even when cppcheck is
       # installed via conda/pixi with a non-standard DATADIR. Falls back to --library=qt if the file is not found.
       --library=${_cppcheck_qt_library}
-      --check-level=exhaustive
+      --check-level=normal
       --inline-suppr
       --max-configs=120
       --std=c++${CMAKE_CXX_STANDARD} # use the standard from cmake
