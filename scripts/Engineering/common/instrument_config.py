@@ -147,7 +147,7 @@ CONFIGS: Dict[str, InstrumentConfig] = {
     "IMAT": InstrumentConfig(
         name="IMAT",
         group=IMAT_GROUP,
-        full_instr_calib="IMAT_full_instrument_calibration_33701.nxs",
+        full_instr_calib="IMAT_full_instrument_calibration_36792.nxs",
         grouping_files={
             IMAT_GROUP.BOTH: "IMAT_NorthAndSouth_grouping.xml",
             IMAT_GROUP.NORTH: "IMAT_North_grouping.xml",
@@ -158,8 +158,7 @@ CONFIGS: Dict[str, InstrumentConfig] = {
             IMAT_GROUP.ROW4: "IMAT_Row4_grouping.xml",
         },
         texture_groups=(IMAT_GROUP.CUSTOM,),
-        # initially these are just the same as the ENGINX values, but will be updated in due course
-        calibration_tof_binning=(12000, -0.0003, 52000),
+        calibration_tof_binning=(10000, -0.0003, 80000),
         peak_func="IkedaCarpenterPV",
         prm_header_template="template_IMAT_prm_header.prm",
         group_bank_args={IMAT_GROUP.BOTH: "NorthBank,SouthBank", IMAT_GROUP.NORTH: "NorthBank", IMAT_GROUP.SOUTH: "SouthBank"},

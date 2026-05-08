@@ -31,7 +31,7 @@ class BaseEngInstrument:
         self.calibration = CalibrationInfo()
         self.focus_runs = focus_runs
         self.save_dir = save_dir
-        self.copy_peak_params_in_calib = True
+        self.copy_peak_params_in_calib = False
         self.instrument = instrument
 
         self.config = get_instr_config(self.instrument)

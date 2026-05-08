@@ -99,7 +99,7 @@ def default_ceria_expected_peaks(final=False):
     @param :: final - if true, returns a list better suited to a secondary fitting of focused banks
     @Returns :: a list of peaks in d-spacing as a float list
     """
-    _CERIA_EXPECTED_PEAKS = [1.104598643, 1.352851554, 1.631600313, 1.913220892, 2.705702376]
+    _CERIA_EXPECTED_PEAKS = [1.104598643, 1.352851554, 1.631600313, 1.913220892, 2.705702376, 3.1414]
     _CERIA_EXPECTED_PEAKS_FINAL = [
         0.781069,
         0.855618487,
@@ -115,6 +115,7 @@ def default_ceria_expected_peaks(final=False):
         1.631600313,
         1.913220892,
         2.705702376,
+        3.1414,
     ]
 
     return _CERIA_EXPECTED_PEAKS_FINAL if final else _CERIA_EXPECTED_PEAKS
@@ -126,7 +127,7 @@ def default_ceria_expected_peak_windows(final=False):
     @param :: final - if true, returns a list better suited to a secondary fitting of focused banks
     @Returns :: a list of peak windows in d-spacing as a float list
     """
-    _CERIA_EXPECTED_WINDOW = [1.06515, 1.15210, 1.30425, 1.41292, 1.59224, 1.68462, 1.84763, 1.98891, 2.64097, 2.77186]
+    _CERIA_EXPECTED_WINDOW = [1.06515, 1.15210, 1.30425, 1.41292, 1.59224, 1.68462, 1.84763, 2.02, 2.64097, 2.77186, 3.100, 3.225]
     _CERIA_EXPECTED_WINDOW_FINAL = [
         0.77,
         0.805,
@@ -153,9 +154,11 @@ def default_ceria_expected_peak_windows(final=False):
         1.59224,
         1.68462,
         1.84763,
-        1.98891,
+        2.02,
         2.64097,
-        2.77186,
+        2.80,
+        3.100,
+        3.225,
     ]
 
     return _CERIA_EXPECTED_WINDOW_FINAL if final else _CERIA_EXPECTED_WINDOW
@@ -329,7 +332,7 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_i
         PeakPositions=default_ceria_expected_peaks(final=True),
         TofBinning=calibration.config.calibration_tof_binning,
         PeakWindow=default_ceria_expected_peak_windows(final=True),
-        MinimumPeakHeight=0.5,
+        MinimumPeakHeight=0.1,
         PeakFunction=calibration.config.peak_func,
         CalibrationParameters="DIFC+TZERO+DIFA",
         UseChiSq=True,
