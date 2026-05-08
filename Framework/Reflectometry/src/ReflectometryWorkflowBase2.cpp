@@ -880,4 +880,71 @@ void ReflectometryWorkflowBase2::setWorkspacePropertyFromChild(const Algorithm_s
   MatrixWorkspace_sptr workspace = alg->getProperty(propertyName);
   setProperty(propertyName, workspace);
 }
+
+std::vector<std::string> ReflectometryWorkflowBase2::getTaskExecutionOrderFromProperties(
+    const bool summingInQ, const bool reduced, const std::string &IOMonIndexProp, const std::string &MonBGWaveMinProp,
+    const std::string &MonBGWaveMaxProp, const std::string &firstTransRunProp, const std::string &correctionAlgProp,
+    const std::string &subBGProp) const {
+  std::vector<std::string> teo;
+  std::string sumDetectorsTask;
+  // Select tasks based upon summation type
+  if (summingInQ) {
+    teo = {Tasks::BackgroundSubtraction::name,
+           Tasks::ConvertToWavelength::name,
+           Tasks::NormalizeByMonitor::name,
+           Tasks::NormalizeByTransmission::name,
+           Tasks::SumDetectorsInQ::name,
+           Tasks::CropWavelength::name,
+           Tasks::ConvertToQ::name};
+    sumDetectorsTask = Tasks::SumDetectorsInQ::name;
+  } else {
+    teo = {Tasks::ExtractROI::name,
+           Tasks::BackgroundSubtraction::name,
+           Tasks::SumDetectors::name,
+           Tasks::ConvertToWavelength::name,
+           Tasks::NormalizeByMonitor::name,
+           Tasks::CropWavelength::name,
+           Tasks::NormalizeByTransmission::name,
+           Tasks::ConvertToQ::name};
+    sumDetectorsTask = Tasks::SumDetectors::name;
+  }
+
+  if (reduced) {
+    // Assume already part reduced: lambda workspace already normalized and summed
+    std::erase(teo, Tasks::ExtractROI::name);
+    std::erase(teo, Tasks::BackgroundSubtraction::name);
+    std::erase(teo, Tasks::NormalizeByMonitor::name);
+    std::erase(teo, Tasks::ConvertToWavelength::name);
+    std::erase(teo, Tasks::NormalizeByMonitor::name);
+    std::erase(teo, Tasks::NormalizeByTransmission::name);
+    std::erase(teo, sumDetectorsTask);
+    return teo;
+  }
+
+  // evaluate necessity of monitor normalization
+  const Property *monProperty = getProperty(IOMonIndexProp);
+  const Property *backgroundMinProperty = getProperty(MonBGWaveMinProp);
+  const Property *backgroundMaxProperty = getProperty(MonBGWaveMaxProp);
+  if (monProperty->isDefault() || backgroundMinProperty->isDefault() || backgroundMaxProperty->isDefault()) {
+    std::erase(teo, Tasks::NormalizeByMonitor::name);
+  }
+
+  // evaluate necessity of transmission/alg normalization
+  const Property *transRun = getProperty(firstTransRunProp);
+  const Property *correctionAlg = getProperty(correctionAlgProp);
+  if (!correctionAlg->isDefault()) {
+    auto it = std::find(teo.begin(), teo.end(), Tasks::NormalizeByTransmission::name);
+    if (it != teo.end()) {
+      *it = Tasks::NormalizeByAlgorithm::name;
+    }
+  } else if (transRun->isDefault()) {
+    std::erase(teo, Tasks::NormalizeByTransmission::name);
+  }
+  // evaluate necessity of background subtraction
+  const Property *subtractBackground = getProperty(subBGProp);
+  if (subtractBackground->isDefault()) {
+    std::erase(teo, Tasks::BackgroundSubtraction::name);
+  }
+  return teo;
+}
 } // namespace Mantid::Reflectometry
