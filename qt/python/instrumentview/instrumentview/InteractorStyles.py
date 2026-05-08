@@ -21,11 +21,7 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
         self._pyvista_plotter = _PlotterWrapper(plotter)  # HACK: Wrapper for PyVista compatibility
         self.zoom_factor = 1.1
 
-        # Cache the current camera state, used to reset to this default
-        camera = self.plotter.renderer.camera
-        self._default_position = np.array(camera.position).copy()
-        self._default_focal_point = np.array(camera.focal_point).copy()
-        self._default_parallel_scale = camera.parallel_scale
+        self.update_default_camera_state()
 
         # Cache the current world coordinates under the cursor
         self._cursor_world_pos = None
@@ -120,6 +116,19 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
         camera.position = self._default_position.tolist()
         camera.focal_point = self._default_focal_point.tolist()
         camera.parallel_scale = self._default_parallel_scale
+        renderer.reset_camera_clipping_range()
+        self.plotter.render_window.Render()
+
+    def update_default_camera_state(self):
+        """Re-cache the current camera state as the default (right-click reset) state.
+
+        Must be called after any operation that changes the intended full-view
+        camera state (e.g. after a fill transform is applied on resize).
+        """
+        camera = self.plotter.renderer.camera
+        self._default_position = np.array(camera.position).copy()
+        self._default_focal_point = np.array(camera.focal_point).copy()
+        self._default_parallel_scale = camera.parallel_scale
 
 
 def _display_to_world(renderer, dx, dy):

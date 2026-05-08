@@ -51,6 +51,7 @@ public:
     std::unique_ptr<IPreviewDockedWidgets> dockedWidgets{nullptr};
     std::unique_ptr<MantidQt::Widgets::IRegionSelector> regionSelector{nullptr};
     std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> plotPresenter{nullptr};
+    bool useNewInstrumentView{false};
   };
 
   PreviewPresenter(Dependencies dependencies);
@@ -105,6 +106,7 @@ private:
   std::unique_ptr<MantidQt::Widgets::IRegionSelector> m_regionSelector;
   std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> m_plotPresenter;
   std::shared_ptr<StubRegionObserver> m_stubRegionObserver;
+  bool m_useNewInstrumentView = false;
   bool m_plotExistingROIs = false;
 
   void updateWidgetEnabledState();

@@ -25,8 +25,7 @@ public:
   virtual void setInstViewZoomMode() = 0;
   virtual void setInstViewEditMode() = 0;
   virtual void setInstViewSelectRectMode() = 0;
-  virtual std::vector<size_t> getSelectedDetectors() const = 0;
-  virtual std::vector<Mantid::detid_t> detIndicesToDetIDs(std::vector<size_t> const &detIndices) const = 0;
+  virtual std::vector<Mantid::detid_t> getSelectedDetectorIDs() const = 0;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

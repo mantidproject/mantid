@@ -65,6 +65,7 @@ class MockGeneralSettingsModel:
         self.set_use_opengl = MagicMock()
         self.set_user_layout = MagicMock()
         self.set_apply_dark_theme_enabled = MagicMock()
+        self.get_use_new_instrument_view = MagicMock()
 
 
 @start_qapplication

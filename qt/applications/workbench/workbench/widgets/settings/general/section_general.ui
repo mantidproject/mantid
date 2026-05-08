@@ -398,6 +398,19 @@
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_editorSettings">
             <item>
+             <widget class="QCheckBox" name="use_new_instrument_view">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Use new Instrument View in interfaces?</string>
+              </property>
+             </widget>
+            </item>
+            <item>
                 <widget class="QCheckBox" name="completion_enabled">
                 <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">

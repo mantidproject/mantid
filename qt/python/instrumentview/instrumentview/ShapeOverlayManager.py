@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ShapeOverlayManager - Chart2D overlay and mouse interaction manager.
 
-Manages a single ``SelectionShape`` drawn on a PyVista ``Chart2D``
-overlay, handling drag, resize and rotation via VTK interactor observers.
+Manages one or more ``SelectionShape`` objects drawn on a shared PyVista
+``Chart2D`` overlay, handling drag, resize and rotation via VTK interactor
+observers.
 """
 
 from mantid.kernel import logger
@@ -34,16 +35,20 @@ _STATE_DRAG_OFFSET = "drag_offset"
 
 
 class ShapeOverlayManager:
-    """Manages a Chart2D overlay and mouse interaction for a single selection shape.
+    """Manages a Chart2D overlay and mouse interaction for one or more selection shapes.
 
-    This replaces the VTK-widget-based approach with Chart2D overlay shapes.
-    It is designed to be used by FullInstrumentViewWindow.
+    Shapes are drawn on a shared Chart2D overlay.  ``set_shape`` replaces all
+    existing shapes with a single new one (backward-compatible with
+    FullInstrumentViewWindow); ``add_shape`` appends without removing existing
+    shapes.  Mouse drag, resize and rotation apply to the topmost (most recently
+    added) shape under the cursor.  ``get_shape_mask`` returns the union of all
+    shapes.
     """
 
     def __init__(self, plotter):
         self._plotter = plotter
         self._chart = None
-        self._shape: SelectionShape | None = None
+        self._shapes: list[SelectionShape] = []
         self._state = {_STATE_MODE: None, _STATE_ACTIVE_SHAPE: None}
         self._observer_ids = []
         # Cached PlotTransform parameters (sx, sy, tx, ty).
@@ -54,10 +59,17 @@ class ShapeOverlayManager:
         # Populated on the main thread by project_and_cache_points(),
         # consumed once by get_shape_mask().
         self._cached_projected_points = None  # np.ndarray | None
+        # Optional zero-argument callable invoked after every interactive
+        # shape update (drag / resize / rotate). Set via set_on_shape_changed().
+        self._on_shape_changed = None
 
     @property
     def current_shape(self) -> SelectionShape | None:
-        return self._shape
+        return self._shapes[-1] if self._shapes else None
+
+    def set_on_shape_changed(self, callback) -> None:
+        """Register a zero-argument callable fired after every interactive shape update."""
+        self._on_shape_changed = callback
 
     def _ensure_chart(self):
         if self._chart is not None:
@@ -224,26 +236,36 @@ class ShapeOverlayManager:
             logger.debug(f"Failed to set cursor: {ex}")
 
     def set_shape(self, shape: SelectionShape):
-        """Set (replace) the active selection shape and install observers."""
+        """Set (replace) the active selection shape, removing all existing shapes."""
         self.remove_shape()
+        self._add_shape_internal(shape)
+
+    def add_shape(self, shape: SelectionShape):
+        """Add a new shape to the overlay without removing existing shapes."""
+        self._add_shape_internal(shape)
+
+    def _add_shape_internal(self, shape: SelectionShape):
+        """Add a shape to the chart; install observers when adding the first shape."""
+        was_empty = not self._shapes
         self._ensure_chart()
-        self._shape = shape
+        self._shapes.append(shape)
         self._read_plot_transform()
-        self._shape.set_pixel_aspect(self._shape_pixel_aspect())
+        shape.set_pixel_aspect(self._shape_pixel_aspect())
         shape.create_plots(self._chart)
         # create_plots adds line/area plots which create new sub-charts
         # inside PyVista's _MultiCompChart.  Clear their borders too.
         self._set_all_chart_borders_zero()
-        self._detach_style()
-        self._install_observers()
+        if was_empty:
+            self._detach_style()
+            self._install_observers()
         self._plotter.render()
         self._read_plot_transform()
 
     def remove_shape(self):
-        """Remove the current shape and clean up."""
-        if self._shape is not None:
-            self._shape.cleanup()
-            self._shape = None
+        """Remove all shapes and clean up."""
+        for shape in self._shapes:
+            shape.cleanup()
+        self._shapes = []
         self._uninstall_observers()
         self._restore_style()
         if self._chart is not None:
@@ -297,28 +319,30 @@ class ShapeOverlayManager:
 
     def _on_left_press(self, obj, event):
         try:
-            if self._shape is None:
+            if not self._shapes:
                 return
             npos = self._screen_pos(obj)
             if npos is None:
                 return
-            hit = self._shape.hit_test(*npos)
-            if hit is None:
-                return
-            self._state[_STATE_ACTIVE_SHAPE] = self._shape
-            match hit:
-                case "handle":
-                    self._state[_STATE_MODE] = "rotate"
-                    self._state[_STATE_ROTATE_START_CURSOR] = np.arctan2(npos[1] - self._shape.cy, npos[0] - self._shape.cx)
-                    self._state[_STATE_ROTATE_START_ANGLE] = self._shape.angle
-                case "edge" | "inner_edge":
-                    self._state[_STATE_MODE] = "resize"
-                    self._state[_STATE_RESIZE_START] = npos
-                    self._state[_STATE_RESIZE_SAVED] = self._shape.save_size()
-                    self._state[_STATE_RESIZE_WHICH] = "inner" if hit == "inner_edge" else "outer"
-                case "inside":
-                    self._state[_STATE_MODE] = "drag"
-                    self._state[_STATE_DRAG_OFFSET] = (npos[0] - self._shape.cx, npos[1] - self._shape.cy)
+            for shape in reversed(self._shapes):
+                hit = shape.hit_test(*npos)
+                if hit is None:
+                    continue
+                self._state[_STATE_ACTIVE_SHAPE] = shape
+                match hit:
+                    case "handle":
+                        self._state[_STATE_MODE] = "rotate"
+                        self._state[_STATE_ROTATE_START_CURSOR] = np.arctan2(npos[1] - shape.cy, npos[0] - shape.cx)
+                        self._state[_STATE_ROTATE_START_ANGLE] = shape.angle
+                    case "edge" | "inner_edge":
+                        self._state[_STATE_MODE] = "resize"
+                        self._state[_STATE_RESIZE_START] = npos
+                        self._state[_STATE_RESIZE_SAVED] = shape.save_size()
+                        self._state[_STATE_RESIZE_WHICH] = "inner" if hit == "inner_edge" else "outer"
+                    case "inside":
+                        self._state[_STATE_MODE] = "drag"
+                        self._state[_STATE_DRAG_OFFSET] = (npos[0] - shape.cx, npos[1] - shape.cy)
+                break
         except Exception as ex:
             logger.debug(f"Exception in shape left-press handler: {ex}")
 
@@ -328,16 +352,21 @@ class ShapeOverlayManager:
                 self._state[_STATE_MODE] = None
                 self._state.pop(_STATE_RESIZE_WHICH, None)
                 self._state[_STATE_ACTIVE_SHAPE] = None
+                if self._on_shape_changed is not None:
+                    try:
+                        self._on_shape_changed()
+                    except Exception as ex:
+                        logger.debug(f"Exception in on_shape_changed callback: {ex}")
         except Exception as ex:
             logger.debug(f"Exception in shape left-release handler: {ex}")
 
     def _on_mouse_move(self, obj, event):
         try:
-            s = self._shape
-            if s is None:
+            if not self._shapes:
                 return
             mode = self._state.get(_STATE_MODE)
-            if mode is not None:
+            s = self._state.get(_STATE_ACTIVE_SHAPE)
+            if mode is not None and s is not None:
                 npos = self._screen_pos(obj)
                 if npos is None:
                     return
@@ -362,11 +391,15 @@ class ShapeOverlayManager:
                 self._plotter.render()
                 return
 
-            # Idle: update cursor
+            # Idle: update cursor for the topmost shape under the cursor
             npos = self._screen_pos(obj)
             if npos is not None:
-                hit = s.hit_test(*npos)
-                self._set_cursor(hit)
+                for shape in reversed(self._shapes):
+                    hit = shape.hit_test(*npos)
+                    if hit is not None:
+                        self._set_cursor(hit)
+                        return
+                self._set_cursor(None)
         except Exception as ex:
             logger.debug(f"Exception in shape mouse-move handler. {ex}")
 
@@ -441,14 +474,14 @@ class ShapeOverlayManager:
         return self._project_world_to_data(points)
 
     def get_shape_mask(self, points: np.ndarray) -> np.ndarray:
-        """Return boolean mask for which 3D points are inside the current shape.
+        """Return boolean mask for which 3D points are inside any of the current shapes.
 
         Prefers the pre-projected cache populated by
         ``project_and_cache_points`` (VTK main-thread projection, most
         accurate).  Falls back to ``project_points_to_screen`` if no
         cache is available.
         """
-        if self._shape is None:
+        if not self._shapes:
             return np.zeros(len(points), dtype=bool)
 
         cached = self._cached_projected_points
@@ -459,4 +492,7 @@ class ShapeOverlayManager:
         else:
             proj = self.project_points_to_screen(points)
 
-        return self._shape.indices_in_shape(proj)
+        mask = np.zeros(len(points), dtype=bool)
+        for shape in self._shapes:
+            mask |= shape.indices_in_shape(proj)
+        return mask

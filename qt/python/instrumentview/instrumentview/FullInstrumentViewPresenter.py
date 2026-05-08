@@ -247,9 +247,7 @@ class FullInstrumentViewPresenter:
         self._detector_mesh = renderer.build_detector_mesh(self._model.detector_positions, self._model.flip_z, self._model)
         display_counts = self._transform_counts(self._model.detector_counts)
         renderer.set_detector_scalars(self._detector_mesh, display_counts, self._counts_label)
-        renderer.add_detector_mesh_to_plotter(
-            self._view.main_plotter, self._detector_mesh, is_projection=self._model.is_2d_projection, scalars=self._counts_label
-        )
+        renderer.add_detector_mesh_to_plotter(self._view.main_plotter, self._detector_mesh, scalars=self._counts_label)
 
         self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions, self._model.flip_z)
         renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
