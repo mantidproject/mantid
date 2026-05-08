@@ -879,12 +879,10 @@ std::string FileFinderImpl::toUpper(const std::string &src) const {
 
 std::filesystem::path FileFinderImpl::checkFilename(const std::string &hint) const {
   std::filesystem::path filePath(hint);
-  if (filePath.has_extension()) {
-    auto path = getFullPath(hint);
-    if (!path.empty() && std::filesystem::exists(path)) {
-      g_log.information() << "found path = " << path << '\n';
-      return path;
-    }
+  auto path = getFullPath(hint);
+  if (!path.empty() && std::filesystem::exists(path)) {
+    g_log.information() << "found path = " << path << '\n';
+    return path;
   }
   return std::filesystem::path();
 }
