@@ -368,12 +368,14 @@ void FrameworkManagerImpl::updateInstrumentDefinitions() {
     auto algDownloadInstrument = Mantid::API::AlgorithmManager::Instance().create("DownloadInstrument");
     algDownloadInstrument->setAlgStartupLogging(false);
     algDownloadInstrument->executeAsync();
-  } catch (Kernel::Exception::NotFoundError &) {
+  } catch (Kernel::Exception::NotFoundError const &e) {
     g_log.debug() << "DowndloadInstrument algorithm is not available - cannot "
-                     "update instrument definitions.\n";
-  } catch (Kernel::Exception::InternetError &) {
+                     "update instrument definitions. "
+                  << e.what();
+  } catch (Kernel::Exception::InternetError const &e) {
     g_log.debug() << "Unable to connect to the internet - cannot update "
-                     "instrument definitions.\n";
+                     "instrument definitions. "
+                  << e.what();
   }
 }
 
@@ -383,12 +385,14 @@ void FrameworkManagerImpl::checkIfNewerVersionIsAvailable() {
     auto algCheckVersion = Mantid::API::AlgorithmManager::Instance().create("CheckMantidVersion");
     algCheckVersion->setAlgStartupLogging(false);
     algCheckVersion->executeAsync();
-  } catch (Kernel::Exception::NotFoundError &) {
+  } catch (Kernel::Exception::NotFoundError const &e) {
     g_log.debug() << "CheckMantidVersion algorithm is not available - cannot "
-                     "check if a newer version is available.\n";
-  } catch (Kernel::Exception::InternetError &) {
+                     "check if a newer version is available. "
+                  << e.what();
+  } catch (Kernel::Exception::InternetError const &e) {
     g_log.debug() << "Unable to connect to the internet - cannot check if a "
-                     "newer version of Mantid is available.\n";
+                     "newer version of Mantid is available. "
+                  << e.what();
   }
 }
 
