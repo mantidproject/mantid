@@ -168,6 +168,7 @@ void ConvertHFIRSCDtoMDE::exec() {
   std::string instrument = expInfo.getInstrument()->getName();
 
   std::vector<double> twotheta, azimuthal;
+  std::vector<int> detectorID; // detector ID for each (twotheta, azimuthal), most useful when detector grouping done
   if (instrument == "HB3A" && !expInfo.run().hasProperty("azimuthal")) { // HB3A Load MD
     const auto &di = expInfo.detectorInfo();
     for (size_t x = 0; x < 512; x++) {
@@ -176,12 +177,19 @@ void ConvertHFIRSCDtoMDE::exec() {
         if (!di.isMonitor(n)) {
           twotheta.push_back(di.twoTheta(n));
           azimuthal.push_back(di.azimuthal(n));
+          detectorID.push_back(static_cast<int>(n));
         }
       }
     }
   } else { // HB2C LoadWAND or HB3A HB3AAdjustSampleNorm
     azimuthal = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("azimuthal"))))();
     twotheta = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("twotheta"))))();
+    if (expInfo.run().hasProperty("detector_id")) {
+      detectorID = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<int>> *>(expInfo.getLog("detector_id"))))();
+    } else {
+      // backwards compatibility if sample-log is not present
+      detectorID.assign(azimuthal.size(), 0);
+    }
   }
 
   auto outputWS = DataObjects::MDEventFactory::CreateMDWorkspace(3, "MDEvent");
@@ -240,12 +248,14 @@ void ConvertHFIRSCDtoMDE::exec() {
     for (size_t m = 0; m < azimuthal.size(); m++) {
       size_t idx = n * azimuthal.size() + m;
       coord_t signal = static_cast<coord_t>(inputWS->getSignalAt(idx));
+      auto detectno = static_cast<uint16_t>(detectorID[m]);
       if (signal > 0.f && std::isfinite(signal)) {
         Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
         if (lorentz) {
           factor = lorentz_pre[m];
         }
-        inserter.insertMDEvent(signal * factor, signal * factor * factor, 0, goniometerIndex, 0, q_sample.data());
+        inserter.insertMDEvent(signal * factor, signal * factor * factor, 0, goniometerIndex, detectno,
+                               q_sample.data());
       }
     }
   }

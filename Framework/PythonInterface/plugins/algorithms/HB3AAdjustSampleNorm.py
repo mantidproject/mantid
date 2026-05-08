@@ -16,6 +16,7 @@ from mantid.api import (
     MultipleFileProperty,
     WorkspaceProperty,
 )
+from mantid.dataobjects import GroupingWorkspaceProperty
 from mantid.kernel import (
     Direction,
     EnabledWhenProperty,
@@ -194,6 +195,13 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.declareProperty(
             "Grouping", "None", StringListValidator(["None", "2x2", "4x4"]), "Group pixels (shared by input and normalization)"
         )
+        self.declareProperty(
+            GroupingWorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="Optional: output GroupingWorkspace mapping every detector ID to its group ID. "
+            "Only produced when Grouping is '2x2' or '4x4'.",
+        )
+        self.setPropertyGroup("Grouping", "Grouping")
+        self.setPropertyGroup("OutputGroupingWorkspace", "Grouping")
 
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
@@ -237,6 +245,10 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             if wavelength.value <= 0.0:
                 issues["Wavelength"] = "Wavelength should be greater than zero"
 
+        # OutputGroupingWorkspace requires grouping to be active
+        if self.getProperty("Grouping").value == "None" and not self.getProperty("OutputGroupingWorkspace").isDefault:
+            issues["OutputGroupingWorkspace"] = "OutputGroupingWorkspace can only be produced when Grouping is '2x2' or '4x4'"
+
         return issues
 
     def PyExec(self):
@@ -265,14 +277,19 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         else:
             grouping = 2 if grouping == "2x2" else 4
 
+        # Determine whether to produce a GroupingWorkspace alongside the main output
+        create_grouping_ws = grouping != 1 and not self.getProperty("OutputGroupingWorkspace").isDefault
+        grouping_ws = None
+
         out_ws = self.getPropertyValue("OutputWorkspace")
         out_ws_name = out_ws
 
         if load_van:
             vanws = LoadMD(vanadiumfile, StoreInADS=True)
-            vanws = self.__regroup_and_move(vanws, grouping, height, distance)
+            vanws, _ = self.__regroup_and_move(vanws, grouping, height, distance)
 
         has_multiple = len(datafiles) > 1
+        first_file = True
 
         for in_file in datafiles:
             if load_files:
@@ -286,7 +303,13 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
             self.log().information("Detector adjustments '({},{})m'".format(height, distance))
 
-            scan = self.__regroup_and_move(scan, grouping, height, distance)
+            # It's only necessary to create the grouping workspace in the first iteration of the datafiles loop
+            scan, ws_grouping = self.__regroup_and_move(
+                scan, grouping, height, distance, create_grouping_ws=(create_grouping_ws and first_file)
+            )
+            first_file = False
+            if ws_grouping is not None:
+                grouping_ws = ws_grouping
 
             prog.report()
             self.log().information("Processing '{}'".format(in_file))
@@ -356,8 +379,10 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             DeleteWorkspace(vanws)
 
         self.setProperty("OutputWorkspace", out_ws_name)
+        if grouping_ws is not None:
+            self.setProperty("OutputGroupingWorkspace", grouping_ws)
 
-    def __regroup_and_move(self, scan, grouping, height, distance):
+    def __regroup_and_move(self, scan, grouping, height, distance, create_grouping_ws=False):
         ws = scan.name()
 
         array = mtd[ws].getSignalArray().copy()
@@ -417,7 +442,12 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                         for i in range(grouping):
                             spectra_list.append(str(x + i + (y + j) * 512))
                     detector_list += "," + "+".join(spectra_list)
+            _ungrouped_tmp_ws = _tmp_ws
             _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, GroupingPattern=detector_list, EnableLogging=False)
+            grouping_ws = self._build_grouping_ws(_ungrouped_tmp_ws, grouping) if create_grouping_ws else None
+            DeleteWorkspace(_ungrouped_tmp_ws, EnableLogging=False)
+        else:
+            grouping_ws = None
 
         _tmp_ws = Rebin(InputWorkspace=_tmp_ws, Params="0,1,2", EnableLogging=False)
         _tmp_ws = ConvertToMD(
@@ -429,6 +459,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             run[log.name] = log
         run["twotheta"] = np.array(mtd["_PreprocessedDetectorsWS"].column(2)).reshape(y_dim, x_dim).T.flatten().tolist()
         run["azimuthal"] = np.array(mtd["_PreprocessedDetectorsWS"].column(3)).reshape(y_dim, x_dim).T.flatten().tolist()
+        # Store pixel ID. If grouping, follow Mantid convention by storing the first detector-pixel ID for each group
+        run["detectorID"] = np.array(mtd["_PreprocessedDetectorsWS"].column(4)).reshape(y_dim, x_dim).T.flatten().tolist()
         CopySample(scan, _tmp_ws, CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
 
         donor_workspace = "__scan_grouped" if grouping > 1 else ws
@@ -441,7 +473,44 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             DeleteWorkspace(scan)
             RenameWorkspace("__scan_grouped", OutputWorkspace=ws)
 
-        return mtd[ws]
+        return mtd[ws], grouping_ws
+
+    def _build_grouping_ws(self, instrument_ws, grouping: int):
+        """
+        Build a GroupingWorkspace from an ungrouped HB3A instrument workspace.
+
+        Each detector ID (spectrum index) is mapped to a 1-indexed group ID that
+        matches the order in which groups appear in the ``GroupingPattern`` used by
+        ``GroupDetectors``. For the HB3A detector array (512 columns × 1536 rows across
+        3 banks), the spectrum at column ``x`` and row ``y`` has index ``x + y*512``
+        and belongs to group
+        ``(x // grouping) * ((512 * 3) // grouping) + (y // grouping) + 1``.
+
+        The returned workspace is NOT stored in the ADS; ``PyExec`` publishes it
+        via ``setProperty("OutputGroupingWorkspace", ...)``.
+
+        :param instrument_ws: Ungrouped workspace supplying the HB3A instrument geometry.
+        :param grouping: Pixel-grouping factor (2 for 2×2, 4 for 4×4).
+        :returns: Populated GroupingWorkspace.
+        """
+        # Initialise an empty GroupingWorkspace (all Y = 0) from the instrument
+        createGrp_alg = self.createChildAlgorithm("CreateGroupingWorkspace", enableLogging=False)
+        createGrp_alg.setProperty("InputWorkspace", instrument_ws)
+        createGrp_alg.setProperty("OutputWorkspace", "__hb3a_grouping_ws")
+        createGrp_alg.execute()
+        grouping_ws = createGrp_alg.getProperty("OutputWorkspace").value
+
+        # Assign 1-indexed group IDs to every detector
+        y_groups = (512 * 3) // grouping
+        for x in range(0, 512, grouping):
+            x_idx = x // grouping
+            for y in range(0, 512 * 3, grouping):
+                group_id = float(x_idx * y_groups + y // grouping + 1)
+                for j in range(grouping):
+                    for i in range(grouping):
+                        grouping_ws.setValue(x + i + (y + j) * 512, group_id)
+
+        return grouping_ws
 
     def __normalization(self, data, vanadium, load_files):
         if vanadium:
