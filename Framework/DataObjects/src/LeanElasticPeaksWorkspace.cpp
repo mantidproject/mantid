@@ -699,7 +699,7 @@ namespace Mantid::Kernel {
 template <>
 DLLExport Mantid::DataObjects::LeanElasticPeaksWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::LeanElasticPeaksWorkspace_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::LeanElasticPeaksWorkspace_sptr> *>(
+  const auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::LeanElasticPeaksWorkspace_sptr> *>(
       getPointerToProperty(name));
   if (prop) {
     return *prop;

@@ -76,7 +76,7 @@ namespace Mantid::Kernel {
 template <>
 DLLExport Mantid::DataObjects::SplittersWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_sptr>(const std::string &name) const {
-  auto *prop =
+  const auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
