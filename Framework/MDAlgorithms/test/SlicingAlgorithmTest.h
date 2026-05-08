@@ -204,10 +204,10 @@ public:
       Mantid::TestMemory::MockMemory memL(12);
       // bin counts are chosen so that product * bytesPerBin exceeds the mock memory limit (12 KiB)
       TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 1D",
-                               do_createAlignedTransform("Axis0, 2.0,8.0, 13", "", "", ""), std::runtime_error & e,
+                               do_createAlignedTransform("Axis0, 2.0,8.0, 493", "", "", ""), std::runtime_error & e,
                                strstr(e.what(), "Mock Memory"));
       TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 2D",
-                               do_createAlignedTransform("Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 8", "", ""),
+                               do_createAlignedTransform("Axis0, 2.0,8.0, 23", "Axis1, 2.0,8.0, 22", "", ""),
                                std::runtime_error & e, strstr(e.what(), "Mock Memory"));
     }
 #endif
@@ -596,11 +596,11 @@ public:
       Mantid::TestMemory::MockMemory memL(12);
       // bin counts are chosen so that product * bytesPerBin exceeds the mock memory limit (12 KiB)
       TSM_ASSERT_THROWS_ASSERT("Excessive memory allocation 1D",
-                               do_createGeneralTransform(ws, "x,m,1,0,0", "", "", "", VMD(1, 2, 3), "0,10", "13"),
+                               do_createGeneralTransform(ws, "x,m,1,0,0", "", "", "", VMD(1, 2, 3), "0,10", "493"),
                                std::runtime_error & e, strstr(e.what(), "Mock Memory"));
       TSM_ASSERT_THROWS_ASSERT(
           "Excessive memory allocation 2D",
-          do_createGeneralTransform(ws, "x,m,1,0,0", "y,m,0,1,0", "", "", VMD(1, 2, 3), "0,10,0,10", "6,7"),
+          do_createGeneralTransform(ws, "x,m,1,0,0", "y,m,0,1,0", "", "", VMD(1, 2, 3), "0,10,0,10", "23,22"),
           std::runtime_error & e, strstr(e.what(), "Mock Memory"));
     }
 #endif
