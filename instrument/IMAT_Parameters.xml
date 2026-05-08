@@ -2,9 +2,6 @@
 
 <!-- This is currently just a clone of ENGINX param file for testing the commissioning of IMAT -->
 
-<!--If North and South banks require different Bk2Bk params,
-the create a distinct ENTITY for each bank-->
-
 <!DOCTYPE parameter-file [
           <!ENTITY alpha_0     "0.671635">
           <!ENTITY beta_0      "0.003134">
@@ -12,19 +9,21 @@ the create a distinct ENTITY for each bank-->
           <!ENTITY sigma_0_sq  "538.955080">
           <!ENTITY sigma_1_sq  "100.289438">
           <!ENTITY sigma_2_sq  "90.359905">
-          <!ENTITY PVgamma_0 "0.0">
-          <!ENTITY PVgamma_1 "5.147">
-          <!ENTITY PVgamma_2 "0.0">
-          <!ENTITY PValpha "0.2749">
-          <!ENTITY PVbeta_0 "0.01793">
-          <!ENTITY PVbeta_1 "0.03797">
-          <!ENTITY PVsigma_0_sq "388.24">
-          <!ENTITY PVsigma_1_sq "76.865">
-          <!ENTITY PVsigma_2_sq "43.299">]>
+          <!ENTITY IC_Alpha0     "0.2243268634">
+          <!ENTITY IC_Alpha1     "1.000000">
+          <!ENTITY IC_Beta0      "392.5451289614">
+          <!ENTITY IC_Kappa      "21.9644555081">
+          <!ENTITY ICSigma0_sq   "0.0">
+          <!ENTITY ICSigma1_sq   "1433.4445616290">
+          <!ENTITY ICSigma2_sq   "-23.8830556342">
+    <!ENTITY ICGamma0      "42.7727369688">
+    <!ENTITY ICGamma1      "-30.0017547913">
+    <!ENTITY ICGamma2      "5.7001495874">
+        ]>
 
 <parameter-file instrument="IMAT" valid-from="2026-1-1">
 
-<component-link name="NorthBank" >
+  <component-link name="NorthBank" >
 
   <parameter name="alpha_0" type="number">
     <value val="&alpha_0;" />
@@ -55,22 +54,35 @@ the create a distinct ENTITY for each bank-->
     <formula eq="((&beta_0;)+(&beta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" />
   </parameter>
 
-  <parameter name="Bk2BkExpConvPV:Alpha" type="fitting">
-    <formula eq="((&PValpha;)/centre)" unit="dSpacing" result-unit="1/TOF" />
+  <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+  <formula eq="(&IC_Alpha0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+  <formula eq="(&IC_Alpha1;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+  <formula eq="(&IC_Beta0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Kappa" type="fitting">
+  <formula eq="(&IC_Kappa;)" unit="dSpacing" result-unit=""/><fixed />
+</parameter>
+
+  <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+    <formula eq="(&ICSigma2_sq;)*centre^4 + (&ICSigma1_sq;)*centre^2 + (&ICSigma0_sq;)"
+             unit="dSpacing" result-unit="TOF^2" />
   </parameter>
-  <parameter name="Bk2BkExpConvPV:Beta" type="fitting">
-    <formula eq="((&PVbeta_0;)+(&PVbeta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" />
-  </parameter>
-  <parameter name="Bk2BkExpConvPV:Sigma2" type="fitting">
-    <formula eq="(&PVsigma_2_sq;)*centre^4+(&PVsigma_1_sq;)*centre^2+(&PVsigma_0_sq;)" unit="dSpacing" result-unit="TOF" />
-  </parameter>
-  <parameter name="Bk2BkExpConvPV:Gamma" type="fitting">
-    <formula eq="(&PVgamma_2;)*centre^2+(&PVgamma_1;)*centre+(&PVgamma_0;)" unit="dSpacing" result-unit="TOF" />
+
+  <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+    <formula eq="(&ICGamma2;)*centre^2 + (&ICGamma1;)*centre + (&ICGamma0;)"
+             unit="dSpacing" result-unit="TOF" />
   </parameter>
 
 </component-link>
 
-<component-link name="SouthBank" >
+  <component-link name="SouthBank" >
 
   <parameter name="alpha_0" type="number">
     <value val="&alpha_0;" />
@@ -101,42 +113,93 @@ the create a distinct ENTITY for each bank-->
     <formula eq="((&beta_0;)+(&beta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" />
   </parameter>
 
-  <parameter name="Bk2BkExpConvPV:Alpha" type="fitting">
-    <formula eq="((&PValpha;)/centre)" unit="dSpacing" result-unit="1/TOF" />
+  <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+  <formula eq="(&IC_Alpha0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+  <formula eq="(&IC_Alpha1;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+  <formula eq="(&IC_Beta0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Kappa" type="fitting">
+  <formula eq="(&IC_Kappa;)" unit="dSpacing" result-unit=""/><fixed />
+</parameter>
+
+  <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+    <formula eq="(&ICSigma2_sq;)*centre^4 + (&ICSigma1_sq;)*centre^2 + (&ICSigma0_sq;)"
+             unit="dSpacing" result-unit="TOF^2" />
   </parameter>
-  <parameter name="Bk2BkExpConvPV:Beta" type="fitting">
-    <formula eq="((&PVbeta_0;)+(&PVbeta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" />
-  </parameter>
-  <parameter name="Bk2BkExpConvPV:Sigma2" type="fitting">
-    <formula eq="(&PVsigma_2_sq;)*centre^4+(&PVsigma_1_sq;)*centre^2+(&PVsigma_0_sq;)" unit="dSpacing" result-unit="TOF" />
-  </parameter>
-  <parameter name="Bk2BkExpConvPV:Gamma" type="fitting">
-    <formula eq="(&PVgamma_2;)*centre^2+(&PVgamma_1;)*centre+(&PVgamma_0;)" unit="dSpacing" result-unit="TOF" />
+
+  <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+    <formula eq="(&ICGamma2;)*centre^2 + (&ICGamma1;)*centre + (&ICGamma0;)"
+             unit="dSpacing" result-unit="TOF" />
   </parameter>
 
 </component-link>
 
-<component-link name="ENGIN-X" >
-  <!-- Specify the Inner radius of the collimator as seen from the sample -->
-  <parameter name="col-radius">
-    <value val="0.5"/>
+
+<component-link name="IMAT" >
+
+  <parameter name="alpha_0" type="number">
+    <value val="&alpha_0;" />
+  </parameter>
+  <parameter name="beta_0" type="number">
+    <value val="&beta_0;" />
+  </parameter>
+  <parameter name="beta_1" type="number">
+    <value val="&beta_1;" />
+  </parameter>
+  <parameter name="sigma_0_sq" type="number">
+    <value val="&sigma_0_sq;" />
+  </parameter>
+  <parameter name="sigma_1_sq" type="number">
+    <value val="&sigma_1_sq;" />
+  </parameter>
+  <parameter name="sigma_2_sq" type="number">
+    <value val="&sigma_2_sq;" />
   </parameter>
 
-  <!-- Specify the angular extent of the collimator seen from the sample -->
-  <parameter name="col-angular-extent">
-    <value val="0.034"/>
+  <parameter name="BackToBackExponential:S" type="fitting">
+    <formula eq="sqrt((&sigma_2_sq;)*centre^4+(&sigma_1_sq;)*centre^2+(&sigma_0_sq;))" unit="dSpacing" result-unit="TOF" />
+  </parameter>
+  <parameter name="BackToBackExponential:A" type="fitting">
+    <formula eq="((&alpha_0;)/centre)" unit="dSpacing" result-unit="1/TOF" />
+  </parameter>
+  <parameter name="BackToBackExponential:B" type="fitting">
+    <formula eq="((&beta_0;)+(&beta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" />
   </parameter>
 
-  <!-- Specify the height of the collimator plates -->
-  <parameter name="col-plate-height">
-    <value val="0.2"/>
+  <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+  <formula eq="(&IC_Alpha0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+  <formula eq="(&IC_Alpha1;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+  <formula eq="(&IC_Beta0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Kappa" type="fitting">
+  <formula eq="(&IC_Kappa;)" unit="dSpacing" result-unit=""/><fixed />
+</parameter>
+
+  <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+    <formula eq="(&ICSigma2_sq;)*centre^4 + (&ICSigma1_sq;)*centre^2 + (&ICSigma0_sq;)"
+             unit="dSpacing" result-unit="TOF^2" />
   </parameter>
 
-  <!-- Specify the axis of the collimator, default is assumed pointing upwards -->
-  <parameter name="col-axis" type="string">
-    <value val="0,1,0"/>
+  <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+    <formula eq="(&ICGamma2;)*centre^2 + (&ICGamma1;)*centre + (&ICGamma0;)"
+             unit="dSpacing" result-unit="TOF" />
   </parameter>
 
 </component-link>
+
 
 </parameter-file>
