@@ -85,7 +85,7 @@ class PEARLTransfitV2Test(unittest.TestCase):
     def test_debug_info_output_as_a_table(self):
         debug_params = {
             "Debye Temp. (K)": 252.0,
-            "Eff. Temp. (K)}": 290.3199,
+            "Eff. Temp. (K)": 290.3199,
             "Fit. Min. (meV)": 600.1015,
             "Fit. Max. (meV)": 1700.2284,
             "Gaussian Width at Reference Temp (meV)": 24.7618,

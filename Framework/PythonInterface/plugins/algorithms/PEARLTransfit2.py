@@ -127,7 +127,7 @@ class PEARLTransfit(PythonAlgorithm):
             "If a 'FitParametersTable' is used in calibration runs: 'Bg0', 'Bg1' and 'Bg2' will be used for background estimation",
         )
 
-        self.declareProperty(name="ReferenceTemp", defaultValue="290", direction=Direction.Input, doc="Enter reference temperature in K")
+        self.declareProperty(name="ReferenceTemp", defaultValue=290.0, direction=Direction.Input, doc="Enter reference temperature in K")
 
         self.declareProperty(
             name="EstimateBackground",
@@ -139,7 +139,7 @@ class PEARLTransfit(PythonAlgorithm):
             name="CreateDebugTable",
             defaultValue=False,
             direction=Direction.Input,
-            doc="Create an output table withdebug parameters in non calibration runs",
+            doc="Create an output table with debug parameters in non calibration runs",
         )
 
         self.declareProperty(
@@ -187,7 +187,7 @@ class PEARLTransfit(PythonAlgorithm):
         self.res_params = FoilParameters(foil_type, *RES_PARAMS[foil_type])
         self.is_calib = self.getProperty("Calibration").value
 
-        ref_temp = float(self.getProperty("ReferenceTemp").value)
+        ref_temp = self.getProperty("ReferenceTemp").value
         fit_table = self.getProperty("FitParametersTable").value
         estimate_background = self.getProperty("EstimateBackground").value or not fit_table
 
@@ -328,13 +328,13 @@ class PEARLTransfit(PythonAlgorithm):
         return ws
 
     def _create_debug_info(self, fit_res: dict[str, any], ws: "MatrixWorkspace", gauss_fwhm: float):
-        # calculate effective temperature using fitted widths
-        # get instrument contribution to Gausssian width in calibration
-        if gauss_fwhm > self.gauss_fwhm_ref_temp:
-            # get fwhm d width of resolution (add in quadrature for convolution of Gaussians)
-            gauss_fwhm_inst = np.sqrt(gauss_fwhm**2 - self.gauss_fwhm_ref_temp**2)
-        else:
-            gauss_fwhm_inst = 0  # shouldn't be the case due to calibration fit constraint
+        """
+        Calculates effective temperature using fitted widths
+        Get instrument contribution to Gausssian width in calibration
+        """
+
+        # get fwhm d width of resolution (add in quadrature for convolution of Gaussians), 0 shouldn't be the case due to fit constraint
+        gauss_fwhm_inst = np.sqrt(gauss_fwhm**2 - self.gauss_fwhm_ref_temp**2) if gauss_fwhm > self.gauss_fwhm_ref_temp else 0.0
         final_func = fit_res["Function"]
         fwhm = np.sqrt(final_func["GaussianFWHM"] ** 2 - gauss_fwhm_inst**2)
         fwhm_err = final_func.fun.getError("GaussianFWHM")
@@ -354,7 +354,7 @@ class PEARLTransfit(PythonAlgorithm):
             # Generate Debug Table
             debug_params = {
                 "Debye Temp. (K)": temp_debye,
-                "Eff. Temp. (K)}": (temp_eff, temp_eff_err),
+                "Eff. Temp. (K)": (temp_eff, temp_eff_err),
                 "Fit. Min. (meV)": ws.readX(0)[0],
                 "Fit. Max. (meV)": ws.readX(0)[-1],
                 "Gaussian Width at Reference Temp (meV)": self.gauss_fwhm_ref_temp,

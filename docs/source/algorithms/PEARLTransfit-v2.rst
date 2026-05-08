@@ -24,7 +24,7 @@ the temperature. Note that a recalibration is required for each given sample pre
 
 Version 2
 ---------
-For version 1 of this algorithm, see :ref:`PEARLTransfit-v1. <algm-PEARLTransfit-v1>`.
+For version 1 of this algorithm, see :ref:`PEARLTransfit-v1 <algm-PEARLTransfit-v1>`.
 
 In version 2 of this algorithm:
     - The Output Workspace and Fit Parameters Table are created as output properties and not directly extracted from the fit, this preserves workspace history.
