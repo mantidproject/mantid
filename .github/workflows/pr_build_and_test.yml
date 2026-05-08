@@ -1,4 +1,4 @@
-name: Linux
+name: PR Build and Test
 
 on:
   pull_request:
@@ -37,12 +37,22 @@ jobs:
         name: Build doxygen
         if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
 
+
   build-and-test:
     needs: [doxygen]
+
+    strategy:
+      matrix:
+        include:
+          - os: Linux
+            cmake_preset: linux-64-ci
+          - os: Windows
+            cmake_preset: win-64-ci
+
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
-      - Linux
+      - ${{ matrix.os }}
       - X64
     #
     # If the user who clicked "Run Workflow" button left the RUNNER_LABEL field blank,
@@ -50,12 +60,16 @@ jobs:
     # Otherwise set it to the value the user specified when they clicked "Run Workflow"
     #
 
+    defaults:
+      run:
+        shell: bash
+
     env:
-      CMAKE_PRESET: linux-64-ci
+      CMAKE_PRESET: ${{ matrix.cmake_preset }}
       EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
       ENABLE_BUILD_CODE: true
       ENABLE_UNIT_TESTS: true
-      ENABLE_SYSTEM_TESTS: true # default is false
+      ENABLE_SYSTEM_TESTS: ${{ matrix.os == 'Linux' }}
       ENABLE_DOCS: false
       ENABLE_DOC_TESTS: false
       ENABLE_DEV_DOCS: false
@@ -66,6 +80,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |
           env -0 | while IFS='' read -d '' line ; do printf '%s\t: %s\n' "${line%%=*}" "${line#*=}" | expand -t 30 | sed ':a;N;$!ba;s/\n/ /g'; done | LC_COLLATE=C sort -b
+
       #
       # If this workflow was triggered manually,
       # print a sorted list of all shell environment variables
@@ -105,15 +120,24 @@ jobs:
           # SYSTEM_TESTS UNIT_TESTS DOCS DOC_TESTS
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} false true $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
 
-      - name: Unit test report
+      - name: Unit test report (Linux)
         uses: EnricoMi/publish-unit-test-result-action/linux@v2
-        if: ${{ failure() && steps.testunit.conclusion == 'failure' }}
+        if: ${{ matrix.os == 'Linux' && failure() && steps.testunit.conclusion == 'failure' }}
         with:
-          check_name: "Unit test results"
+          check_name: "Unit test results (${{ matrix.os }})"
+          check_run: false
+          files: build/Testing/*unittest.xml
+
+      - name: Unit test report (Windows)
+        uses: EnricoMi/publish-unit-test-result-action/windows/bash@v2
+        if: ${{ matrix.os == 'Windows' && failure() && steps.testunit.conclusion == 'failure' }}
+        with:
+          check_name: "Unit test results (${{ matrix.os }})"
           check_run: false
           files: build/Testing/*unittest.xml
 
       - name: Run system tests
+        if: matrix.os == 'Linux'
         id: testsystem
         run: |
           cd ${GITHUB_WORKSPACE}
@@ -125,7 +149,7 @@ jobs:
 
       - name: Upload system test mismatch files
         uses: actions/upload-artifact@v7
-        if: ${{ failure() && steps.testsystem.conclusion == 'failure' }}
+        if: ${{ matrix.os == 'Linux' && failure() && steps.testsystem.conclusion == 'failure' }}
         with:
           name: system_test_mismatches
           if-no-files-found: ignore
@@ -133,7 +157,7 @@ jobs:
 
       - name: System test report
         uses: EnricoMi/publish-unit-test-result-action/linux@v2
-        if: ${{ failure() && steps.testsystem.conclusion == 'failure' }}
+        if: ${{ matrix.os == 'Linux' && failure() && steps.testsystem.conclusion == 'failure' }}
         with:
           check_name: "System test results"
           check_run: false
@@ -143,5 +167,6 @@ jobs:
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: test_logs
+          name: test_logs_${{ matrix.os }}
+          if-no-files-found: ignore
           path: ${{ github.workspace }}/build/test_logs/*.log
