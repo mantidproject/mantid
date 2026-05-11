@@ -115,16 +115,11 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
   const auto basename = *basenames.cbegin();
 
   // Validate and parse the basename.
-  boost::smatch result;
-  if (!boost::regex_match(basename, result, FILE_REGEX)) {
+  const auto [instrument, run] = toInstrumentAndRunNumber(basename);
+  if (instrument.empty() || run.empty()) {
     g_log.debug() << "Unexpected input passed to getArchivePath():" << std::endl << basename << std::endl;
     return API::Result<std::filesystem::path>(NOT_FOUND, "Not found.");
-    ;
   }
-
-  assert(result.size() == 3);
-  const std::string instrument = toUpperCase(result[1]);
-  const std::string run = result[2];
 
   const auto &config = Mantid::Kernel::ConfigService::Instance();
   std::string facility;

@@ -687,6 +687,8 @@ void FileFinderImpl::performCacheSearch(std::vector<FileInfo> &fileInfos) const 
         g_log.debug() << "Found file in data cache: " << cacheFilePath.result() << std::endl;
         fileInfo.found = true;
         fileInfo.path = cacheFilePath.result();
+      } else {
+        fileInfo.errorMsg = cacheFilePath.errors();
       }
     }
   } else {

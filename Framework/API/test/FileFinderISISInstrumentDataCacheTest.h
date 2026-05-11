@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#define private public
 #include "MantidAPI/FileFinder.h"
+#undef private
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -125,16 +127,32 @@ public:
                      m_dataCacheDir + "/ZOOM/SUBDIR1/SUBDIR2/ZOOM00004656.RAW");
   }
 
-  // void testDataCacheSkipped() {
-  //   TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"LOQ106084-add"}, {".raw"}).result().string(), "");
-  //   TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BADINSTR1234"}, {".raw"}).result().string(), "");
-  //   TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"path-no-digits"}, {".raw"}).result().string(), "");
-  //   TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"1234BADPATH"}, {".raw"}).result().string(), "");
-  //   TS_ASSERT_EQUALS(FileFinder::Instance().getPath({}, {"BAD1234PATH"}, {".raw"}).result().string(), "");
-  // }
+  void testDataCacheSkipped() {
+    std::vector<FileFinderImpl::FileInfo> fileInfos;
+    auto addFileInfo = [&fileInfos](const std::string &hint) {
+      FileFinderImpl::FileInfo fileInfo;
+      fileInfo.hint = hint;
+      fileInfo.filenames = {hint};
+      if (hint == "GEM90421")
+        fileInfo.extensionsToSearch = {".nxs"};
+      else
+        fileInfo.extensionsToSearch = {".raw"};
+      fileInfos.emplace_back(std::move(fileInfo));
+    };
 
-  // void testDirectoryWithoutPermissin() {
-  //   std::string error = FileFinder::Instance().getPath({}, {"GEM90421"}, {".nxs"}).errors();
-  //   TS_ASSERT(error.find("Permission denied") != std::string::npos);
-  // }
+    addFileInfo("LOQ106084-add");
+    addFileInfo("BADINSTR1234");
+    addFileInfo("path-no-digits");
+    addFileInfo("1234BADPATH");
+    addFileInfo("BAD1234PATH");
+    addFileInfo("GEM90421"); // This one should have an error due to the permissions, not due to the hint being invalid
+    FileFinder::Instance().performCacheSearch(fileInfos);
+
+    for (const auto &fileInfo : fileInfos) {
+      TS_ASSERT(!fileInfo.found);
+      TS_ASSERT_EQUALS(fileInfo.path.string(), "");
+      if (fileInfo.hint == "GEM90421")
+        TS_ASSERT(fileInfo.errorMsg.find("Permission denied") != std::string::npos);
+    }
+  }
 };
