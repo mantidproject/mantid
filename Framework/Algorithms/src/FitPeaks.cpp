@@ -1542,8 +1542,8 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
       const std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
       peak_function->setMatrixWorkspace(m_inputMatrixWS, iws, peakwindow.first, peakwindow.second);
 
-      peak_functions[output_iws][ipeak] = peak_function;
-      bkgd_functions[output_iws][ipeak] = bkgd_function;
+      peak_functions[output_iws][ipeak] = std::move(peak_function);
+      bkgd_functions[output_iws][ipeak] = std::move(bkgd_function);
     }
   }
 
@@ -1554,9 +1554,7 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
     const size_t output_iws = iws - m_startWorkspaceIndex;
 
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-      const IPeakFunction_sptr &peak_function = peak_functions[output_iws][ipeak];
-      const IBackgroundFunction_sptr &bkgd_function = bkgd_functions[output_iws][ipeak];
-      if (!peak_function || !bkgd_function)
+      if (!peak_functions[output_iws][ipeak] || !bkgd_functions[output_iws][ipeak])
         continue;
 
       // use domain and function to calculate
@@ -1572,8 +1570,8 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
       FunctionDomain1DVector domain(start_x_iter, stop_x_iter);
       FunctionValues values(domain);
       CompositeFunction_sptr comp_func = std::make_shared<API::CompositeFunction>();
-      comp_func->addFunction(peak_function);
-      comp_func->addFunction(bkgd_function);
+      comp_func->addFunction(std::move(peak_functions[output_iws][ipeak]));
+      comp_func->addFunction(std::move(bkgd_functions[output_iws][ipeak]));
       comp_func->function(domain, values);
 
       // copy over the values
@@ -2122,8 +2120,8 @@ void FitPeaks::processOutputs(std::vector<std::shared_ptr<FitPeaksAlgorithm::Pea
  * @return :: total number of counts in the histogram
  */
 double FitPeaks::numberCounts(size_t iws) {
-  const auto hist_y = m_inputMatrixWS->histogram(iws).y();
-  const auto &vec_y = hist_y.rawData();
+  const Histogram histogram = m_inputMatrixWS->histogram(iws);
+  const auto &vec_y = histogram.y().rawData();
   double total = std::accumulate(vec_y.begin(), vec_y.end(), 0.);
   return total;
 }
@@ -2168,8 +2166,8 @@ size_t FitPeaks::histRangeToDataPointCount(size_t iws, const std::pair<double, d
  */
 void FitPeaks::histRangeToIndexBounds(size_t iws, const std::pair<double, double> &range, size_t &left_index,
                                       size_t &right_index) {
-  const auto hist_x = m_inputMatrixWS->histogram(iws).x();
-  const auto &orig_x = hist_x;
+  const Histogram histogram = m_inputMatrixWS->histogram(iws);
+  const auto &orig_x = histogram.x();
   rangeToIndexBounds(orig_x, range.first, range.second, left_index, right_index);
 
   // handle an invalid range case. For the histogram point data, make sure the number of data points is non-zero as
@@ -2201,14 +2199,14 @@ void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &range, 
   size_t num_elements_x = right_index - left_index;
 
   vec_x.resize(num_elements_x);
-  const auto hist_x = m_inputMatrixWS->histogram(iws).x();
-  const auto &orig_x = hist_x;
+  const Histogram histogram = m_inputMatrixWS->histogram(iws);
+  const auto &orig_x = histogram.x();
   std::copy(orig_x.begin() + left_index, orig_x.begin() + right_index, vec_x.begin());
 
   size_t num_datapoints = m_inputMatrixWS->isHistogramData() ? num_elements_x - 1 : num_elements_x;
 
-  const std::vector<double> orig_y = m_inputMatrixWS->histogram(iws).y().rawData();
-  const std::vector<double> orig_e = m_inputMatrixWS->histogram(iws).e().rawData();
+  const auto &orig_y = histogram.y().rawData();
+  const auto &orig_e = histogram.e().rawData();
   vec_y.resize(num_datapoints);
   vec_e.resize(num_datapoints);
   std::copy(orig_y.begin() + left_index, orig_y.begin() + left_index + num_datapoints, vec_y.begin());
