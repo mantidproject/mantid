@@ -77,6 +77,14 @@ Bugfixes
 .. amalgamate:: Framework/Dependencies/Bugfixes
 
 
+Nexus
+-----
+
+Bugfixes
+############
+.. amalgamate:: Framework/Nexus/Bugfixes
+
+
 MantidWorkbench
 ---------------
 
