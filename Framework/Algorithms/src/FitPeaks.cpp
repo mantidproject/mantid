@@ -1554,9 +1554,7 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
     const size_t output_iws = iws - m_startWorkspaceIndex;
 
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-      IPeakFunction_sptr peak_function = std::move(peak_functions[output_iws][ipeak]);
-      IBackgroundFunction_sptr bkgd_function = std::move(bkgd_functions[output_iws][ipeak]);
-      if (!peak_function || !bkgd_function)
+      if (!peak_functions[output_iws][ipeak] || !bkgd_functions[output_iws][ipeak])
         continue;
 
       // use domain and function to calculate
@@ -1572,8 +1570,8 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
       FunctionDomain1DVector domain(start_x_iter, stop_x_iter);
       FunctionValues values(domain);
       CompositeFunction_sptr comp_func = std::make_shared<API::CompositeFunction>();
-      comp_func->addFunction(std::move(peak_function));
-      comp_func->addFunction(std::move(bkgd_function));
+      comp_func->addFunction(std::move(peak_functions[output_iws][ipeak]));
+      comp_func->addFunction(std::move(bkgd_functions[output_iws][ipeak]));
       comp_func->function(domain, values);
 
       // copy over the values
