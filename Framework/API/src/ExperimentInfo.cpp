@@ -367,7 +367,10 @@ void ExperimentInfo::populateInstrumentParameters() {
   for (const auto &item : paramInfoFromIDF) {
     const auto &nameComp = item.first;
     const auto &paramInfo = item.second;
-    const std::string &paramN = nameComp.first;
+    // Use the parameter's short name (e.g. "Alpha0"), not the cache key. The cache key may be
+    // function-qualified (e.g. "IkedaCarpenterPV:Alpha0") to keep two functions on the same
+    // component from clobbering each other, but downstream consumers always look up by short name.
+    const std::string &paramN = paramInfo->m_paramName;
 
     try {
       // Special case where user has specified r-position,t-position, and/or
@@ -1311,7 +1314,11 @@ void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
         << paramInfo.m_constraint[0] << " , " << paramInfo.m_constraint[1] << " , " << paramInfo.m_penaltyFactor
         << " , " << paramInfo.m_tie << " , " << paramInfo.m_formula << " , " << paramInfo.m_formulaUnit << " , "
         << paramInfo.m_resultUnit << " , " << (*(paramInfo.m_interpolation));
-    paramMap.add("fitting", paramInfo.m_component, name, str.str(), pDescription, pVisible);
+    // Dedupe by (name, fitting function) — otherwise two functions on the same component sharing
+    // a parameter short name (e.g. Bk2BkExpConvPV:Gamma and IkedaCarpenterPV:Gamma) would clobber
+    // each other in the map.
+    paramMap.addFittingParameter(paramInfo.m_component, name, paramInfo.m_fittingFunction, str.str(), pDescription,
+                                 pVisible);
   } else if (category == "string") {
     paramMap.addString(paramInfo.m_component, name, paramInfo.m_value, pDescription, pVisible);
   } else if (category == "bool") {

@@ -2365,7 +2365,12 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
       description = pDescription->getAttribute("is");
     }
 
-    auto cacheKey = std::make_pair(paramName, comp);
+    // Qualify the cache key with the fitting-function name (when present) so that two functions
+    // attached to the same component sharing a parameter name (e.g. IkedaCarpenterPV:Alpha0 and
+    // IkedaCarpenterMD:Alpha0) do not overwrite each other. The stored XMLInstrumentParameter
+    // still keeps the unqualified paramName so downstream lookups by short name continue to work.
+    const std::string cacheParamKey = fittingFunction.empty() ? paramName : fittingFunction + ":" + paramName;
+    auto cacheKey = std::make_pair(cacheParamKey, comp);
     auto cacheValue = std::make_shared<XMLInstrumentParameter>(
         logfileID, value, interpolation, formula, formulaUnit, resultUnit, paramName, type, tie, constraint,
         penaltyFactor, fittingFunction, extractSingleValueAs, eq, comp, m_angleConvertConst, description, visible);
