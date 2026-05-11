@@ -436,7 +436,7 @@ public:
   void test_workspace_group_with_polarization_analysis_creates_spin_state_sample_logs() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     applyPolarizationEfficiencies(TEST_GROUP_NAME);
-    const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
+    const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0, true, false);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04}, {"PolarizationAnalysis", true}});
 
     alg->execute();
@@ -444,6 +444,7 @@ public:
     check_output_group_contains_sample_logs_for_spin_state_ORSO(retrieveOutWS("IvsQ"), true);
     check_output_group_contains_sample_logs_for_spin_state_ORSO(retrieveOutWS("IvsQ_binned"), true);
     check_output_group_contains_sample_logs_for_spin_state_ORSO(retrieveOutWS("IvsLam"), true);
+    check_process_group_history_for_rro_auto(retrieveOutWS("IvsQ").front());
   }
 
   void test_polarization_correction() {
@@ -1535,5 +1536,19 @@ private:
     for (auto const &ws : wsGroup) {
       TS_ASSERT_EQUALS(ws->mutableRun().hasProperty(SpinStatesORSO::LOG_NAME), has_sample_logs);
     }
+  }
+
+  void check_process_group_history_for_rro_auto(const MatrixWorkspace_sptr &workspace) {
+    auto const &history = workspace->getHistory();
+    TS_ASSERT_EQUALS(history.size(), 1);
+    auto const parentHistory = history.getAlgorithmHistory(0);
+    TS_ASSERT_EQUALS(parentHistory->name(), "ReflectometryReductionOneAuto");
+
+    size_t reflectometryReductionOneCount = 0;
+    for (auto const &childHistory : parentHistory->getChildHistories()) {
+      if (childHistory->name() == "ReflectometryReductionOne")
+        ++reflectometryReductionOneCount;
+    }
+    TS_ASSERT(reflectometryReductionOneCount > 0);
   }
 };

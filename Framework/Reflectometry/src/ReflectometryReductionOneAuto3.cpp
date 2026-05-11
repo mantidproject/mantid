@@ -349,10 +349,8 @@ void ReflectometryReductionOneAuto3::init() {
 }
 
 // Performs the reduction using ReflectometryReductionOne
-ReflectometryReductionOneAuto3::RROOutputs
-ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputWS,
-                                                     const std::vector<std::string> &taskOrder, const bool runAsChild,
-                                                     const bool applyFloodCorrections) {
+ReflectometryReductionOneAuto3::RROOutputs ReflectometryReductionOneAuto3::performCoreReduction(
+    MatrixWorkspace_sptr inputWS, const std::vector<std::string> &taskOrder, const bool applyFloodCorrections) {
   auto instrument = inputWS->getInstrument();
   MatrixWorkspace_sptr flood = (applyFloodCorrections) ? getFloodWorkspace(instrument) : MatrixWorkspace_sptr{};
   if (flood) {
@@ -363,13 +361,6 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
 
   Algorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
-
-  // Run as a non-child to enable workspace history for groups
-  if (!runAsChild) {
-    alg->setChild(runAsChild);
-    alg->setAlwaysStoreInADS(false);
-    alg->setRethrows(true);
-  }
 
   // Task order
   alg->setProperty("TaskExecutionOrder", taskOrder);
@@ -839,7 +830,7 @@ WorkspaceGroup_sptr ReflectometryReductionOneAuto3::groupWorkspaces(const std::v
   if (anyWorkspaceInListExists(workspaceNames)) {
     Algorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
     if (!outputName.empty())
-      groupAlg->setChild(false);
+      groupAlg->setAlwaysStoreInADS(true);
     groupAlg->setProperty("OutputWorkspace", outputName);
     groupAlg->setRethrows(true);
     groupAlg->setProperty("InputWorkspaces", workspaceNames);
@@ -939,10 +930,10 @@ ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReduction
     if (reduced) {
       const auto &origProcessingInstructions = getPropertyValue("ProcessingInstructions");
       setPropertyValue("ProcessingInstructions", convertToSpectrumNumber("0", matrixWs));
-      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false, false));
+      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false));
       setPropertyValue("ProcessingInstructions", origProcessingInstructions);
     } else {
-      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false));
+      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder));
     }
   }
   return {.rroOutputs = allRROOutputs, .outputNames = allOutputNames};
@@ -973,6 +964,7 @@ std::vector<std::string> ReflectometryReductionOneAuto3::getTaskExecutionOrder(c
 bool ReflectometryReductionOneAuto3::processGroups() {
   // this algorithm effectively behaves as MultiPeriodGroupAlgorithm
   m_usingBaseProcessGroups = true;
+  enableHistoryRecordingForProcessGroups(true);
 
   auto const groupName = getPropertyValue("InputWorkspace");
   auto const groupMembers = getGroupMembers(groupName);
@@ -1151,7 +1143,7 @@ WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyPolarizationCorrection(
   CorrectionMethod::validate(correctionMethod);
 
   Algorithm_sptr polAlg = createChildAlgorithm("PolarizationEfficiencyCor");
-  polAlg->setChild(false);
+  polAlg->setAlwaysStoreInADS(true);
   polAlg->setRethrows(true);
   polAlg->setProperty("OutputWorkspace", outputGroupName);
   polAlg->setProperty("Efficiencies", efficiencies);
