@@ -1260,7 +1260,35 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       // pixel positions, but we must also add the parameter below.
       if (isScaleParameter(paramName))
         adjustPositionsFromScaleFactor(compInfo, comp, paramName, getParam<double>(paramType, paramValue));
-      pmap.add(paramType, comp, paramName, paramValue, &paramDescr, paramVisibility);
+      // For fitting parameters, route through addFittingParameter so that two functions on the same
+      // component sharing a parameter short name (e.g. IkedaCarpenterPV:Gamma and
+      // Bk2BkExpConvPV:Gamma) both survive a NeXus save/load round-trip. ParameterMap::add only
+      // dedupes by (component, name) and would silently overwrite the first entry with the second.
+      // The fitting-function name is embedded as the second comma-separated field of the value
+      // string written by populateWithParameter().
+      if (paramType == "fitting") {
+        std::string fittingFunction;
+        const auto firstComma = paramValue.find(',');
+        if (firstComma != std::string::npos) {
+          const auto secondComma = paramValue.find(',', firstComma + 1);
+          if (secondComma != std::string::npos) {
+            fittingFunction = paramValue.substr(firstComma + 1, secondComma - firstComma - 1);
+            const auto firstNonSpace = fittingFunction.find_first_not_of(" \t");
+            const auto lastNonSpace = fittingFunction.find_last_not_of(" \t");
+            if (firstNonSpace != std::string::npos)
+              fittingFunction = fittingFunction.substr(firstNonSpace, lastNonSpace - firstNonSpace + 1);
+            else
+              fittingFunction.clear();
+          }
+        }
+        if (!fittingFunction.empty()) {
+          pmap.addFittingParameter(comp, paramName, fittingFunction, paramValue, &paramDescr, paramVisibility);
+        } else {
+          pmap.add(paramType, comp, paramName, paramValue, &paramDescr, paramVisibility);
+        }
+      } else {
+        pmap.add(paramType, comp, paramName, paramValue, &paramDescr, paramVisibility);
+      }
     }
   }
 }
