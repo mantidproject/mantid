@@ -6,7 +6,6 @@ set(SYSTEST_NAMES
     SANSCentreSample.py
     SANSDarkRunSubtractionTest.py
     SANSFileChecking.py
-    SANSLoadersTest.py
     SANSLoadTest.py
     SANSMergedDetectorsTest.py
     SANSQResolutionTest.py

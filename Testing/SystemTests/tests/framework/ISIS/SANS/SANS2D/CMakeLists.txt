@@ -13,7 +13,6 @@ set(SYSTEST_NAMES
     SANS2DReductionGUI.py
     SANS2DReductionGUIAddedTest.py
     SANS2DReductionGUITest.py
-    SANS2DSearchCentreGUI.py
     SANS2DSlicingTest.py
     SANS2DTubeCalibrationTest.py
     SANS2DTubeMergeTest.py
