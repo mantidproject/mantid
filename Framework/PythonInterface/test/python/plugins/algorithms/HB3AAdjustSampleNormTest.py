@@ -114,8 +114,12 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
 
     def testDetectorGrouping(self):
         data = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", Grouping="None")
-        data_2x2 = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", Grouping="2x2")
-        data_4x4 = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", Grouping="4x4")
+        data_2x2 = HB3AAdjustSampleNorm(
+            "HB3A_data.nxs", OutputWorkspace="data_2x2", OutputType="Detector", NormaliseBy="None", Grouping="2x2"
+        )
+        data_4x4 = HB3AAdjustSampleNorm(
+            "HB3A_data.nxs", OutputWorkspace="data_4x4", OutputType="Detector", NormaliseBy="None", Grouping="4x4"
+        )
 
         ref_sum = data.getSignalArray().sum()
         self.assertAlmostEqual(ref_sum, data_2x2.getSignalArray().sum())
@@ -167,38 +171,9 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         )
 
         # Check specific values for the first four entries of each detectorID log.
-        # The HB3A instrument (HB3A_Definition_20190926_3.xml) has three 512×512 banks:
-        #   Bank 1: idstart=1,      idstepbyrow=512  → detID = 1      + x + y*512
-        #   Bank 2: idstart=262145, idstepbyrow=512  → detID = 262145 + x + y*512
-        #   Bank 3: idstart=524289, idstepbyrow=512  → detID = 524289 + x + y*512
-        # CreateSimulationWorkspace + RewriteSpectraMap=True assigns spectrum k (0-based)
-        # to the kth detector in sorted ID order, so spectrum k maps to detector k+1.
-        # The reshape(y_dim, x_dim).T.flatten() transform maps:
-        #   flat2[c*y_dim + r] = flat_column[r*x_dim + c]
-        #
-        # Ungrouped (y_dim=1536, x_dim=512): flat_column[k] = k+1
-        #   i=0: flat[0]    = 1    (bank1, x=0, y=0)
-        #   i=1: flat[512]  = 513  (bank1, x=0, y=1)
-        #   i=2: flat[1024] = 1025 (bank1, x=0, y=2)
-        #   i=3: flat[1536] = 1537 (bank1, x=0, y=3)
-        np.testing.assert_array_equal(ids[:4], [1, 513, 1025, 1537], err_msg="First four ungrouped detectorIDs are incorrect")
-
-        # 2x2 (y_dim=768, x_dim=256): group at (x_idx, y_idx) has first spectrum 2*x_idx + 1024*y_idx
-        #   → detID = 2*x_idx + 1024*y_idx + 1
-        #   flat2 index i → k = r*256 + c (r = i % 768, c = i // 768):
-        #   i=0: k=0,   x_idx=0, y_idx=0   → 1      (bank1, x=0, y=0)
-        #   i=1: k=256, x_idx=0, y_idx=256  → 262145 (bank2, x=0, y=0 — first pixel of bank 2)
-        #   i=2: k=512, x_idx=0, y_idx=512  → 524289 (bank3, x=0, y=0 — first pixel of bank 3)
-        #   i=3: k=768, x_idx=1, y_idx=0    → 3      (bank1, x=2, y=0)
-        np.testing.assert_array_equal(ids_2x2[:4], [1, 262145, 524289, 3], err_msg="First four 2x2 detectorIDs are incorrect")
-
-        # 4x4 (y_dim=384, x_dim=128): group at (x_idx, y_idx) has first spectrum 4*x_idx + 2048*y_idx
-        #   → detID = 4*x_idx + 2048*y_idx + 1
-        #   i=0: k=0,   x_idx=0, y_idx=0   → 1      (bank1, x=0, y=0)
-        #   i=1: k=128, x_idx=0, y_idx=128  → 262145 (bank2, x=0, y=0)
-        #   i=2: k=256, x_idx=0, y_idx=256  → 524289 (bank3, x=0, y=0)
-        #   i=3: k=384, x_idx=1, y_idx=0    → 5      (bank1, x=4, y=0)
-        np.testing.assert_array_equal(ids_4x4[:4], [1, 262145, 524289, 5], err_msg="First four 4x4 detectorIDs are incorrect")
+        np.testing.assert_array_equal(ids[:4], [1, 513, 1025, 1537])
+        np.testing.assert_array_equal(ids_2x2[:4], [1, 1025, 2049, 3073])
+        np.testing.assert_array_equal(ids_4x4[:4], [1, 2049, 4097, 6145])
 
     def testOutputGroupingWorkspace(self):
 
@@ -213,7 +188,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
                 OutputGroupingWorkspace="__hb3a_grp_fail",
             )
 
-        # --- 2x2: workspace is produced with correct type and size ---
+        # --- 2x2:
         HB3AAdjustSampleNorm(
             "HB3A_data.nxs",
             OutputType="Detector",
@@ -222,29 +197,16 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
             OutputWorkspace="__hb3a_out_2x2",
             OutputGroupingWorkspace="__hb3a_grp_2x2",
         )
-        self.assertTrue(mtd.doesExist("__hb3a_grp_2x2"), "OutputGroupingWorkspace should be stored in the ADS")
         grp_2x2 = mtd["__hb3a_grp_2x2"]
         self.assertIsInstance(grp_2x2, GroupingWorkspace)
-        # One spectrum per ungrouped detector: 512 columns × 1536 rows (3 × 512 banks)
-        self.assertEqual(grp_2x2.getNumberHistograms(), 512 * 1536)
+        # One spectrum per pixel detector. HB3A has three 512x512 detector panels
+        self.assertEqual(grp_2x2.getNumberHistograms(), 512 * 512 * 3)
+        # check the group ID of the first spectra:
+        group_ids = grp_2x2.extractY().astype(int).flatten()  # 1, 1, 2, 2, 3, 3,..
+        self.assertListEqual(group_ids[0:6].tolist(), [1, 1, 2, 2, 3, 3])  # first row along X
+        self.assertListEqual(group_ids[512:518].tolist(), [1, 1, 2, 2, 3, 3])  # second row
 
-        # Group 1: x in [0,1], y in [0,1]
-        #   x_idx=0, y_idx=0, y_groups = 1536//2 = 768  →  group_id = 0*768 + 0 + 1 = 1
-        #   Spectrum indices: x+i + (y+j)*512, i,j ∈ {0,1}  →  0, 1, 512, 513
-        for i in range(2):
-            for j in range(2):
-                spec = i + j * 512
-                self.assertAlmostEqual(grp_2x2.readY(spec)[0], 1.0, msg=f"Spectrum {spec} should belong to group 1 (2x2)")
-
-        # Group 2: x in [0,1], y in [2,3]
-        #   x_idx=0, y_idx=1  →  group_id = 0*768 + 1 + 1 = 2
-        #   Spectrum indices: i + (2+j)*512, i,j ∈ {0,1}  →  1024, 1025, 1536, 1537
-        for i in range(2):
-            for j in range(2):
-                spec = i + (2 + j) * 512
-                self.assertAlmostEqual(grp_2x2.readY(spec)[0], 2.0, msg=f"Spectrum {spec} should belong to group 2 (2x2)")
-
-        # --- 4x4: workspace is produced with correct type and size ---
+        # --- 4x4:
         HB3AAdjustSampleNorm(
             "HB3A_data.nxs",
             OutputType="Detector",
@@ -256,23 +218,12 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist("__hb3a_grp_4x4"), "OutputGroupingWorkspace should be stored in the ADS")
         grp_4x4 = mtd["__hb3a_grp_4x4"]
         self.assertIsInstance(grp_4x4, GroupingWorkspace)
-        self.assertEqual(grp_4x4.getNumberHistograms(), 512 * 1536)
-
-        # Group 1: x in [0,3], y in [0,3]
-        #   x_idx=0, y_idx=0, y_groups = 1536//4 = 384  →  group_id = 0*384 + 0 + 1 = 1
-        #   Spectrum indices: i + j*512, i,j ∈ {0,1,2,3}
-        for i in range(4):
-            for j in range(4):
-                spec = i + j * 512
-                self.assertAlmostEqual(grp_4x4.readY(spec)[0], 1.0, msg=f"Spectrum {spec} should belong to group 1 (4x4)")
-
-        # Group 2: x in [0,3], y in [4,7]
-        #   x_idx=0, y_idx=1  →  group_id = 0*384 + 1 + 1 = 2
-        #   Spectrum indices: i + (4+j)*512, i,j ∈ {0,1,2,3}
-        for i in range(4):
-            for j in range(4):
-                spec = i + (4 + j) * 512
-                self.assertAlmostEqual(grp_4x4.readY(spec)[0], 2.0, msg=f"Spectrum {spec} should belong to group 2 (4x4)")
+        self.assertEqual(grp_4x4.getNumberHistograms(), 512 * 512 * 3)
+        group_ids = grp_4x4.extractY().astype(int).flatten()  # 1, 1, 1, 1, 2, 2, 2, 2,..
+        self.assertListEqual(group_ids[0:8].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # first row along X
+        self.assertListEqual(group_ids[512:520].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # second row
+        self.assertListEqual(group_ids[1024:1032].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # third row
+        self.assertListEqual(group_ids[1536:1544].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # fourth row
 
         DeleteWorkspace("__hb3a_out_2x2", "__hb3a_grp_2x2", "__hb3a_out_4x4", "__hb3a_grp_4x4")
 

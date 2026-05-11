@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (
     AlgorithmFactory,
+    CreateGroupingWorkspace,
     FileAction,
     FileProperty,
     IMDHistoWorkspace,
@@ -195,6 +196,12 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.declareProperty(
             "Grouping", "None", StringListValidator(["None", "2x2", "4x4"]), "Group pixels (shared by input and normalization)"
         )
+
+        self.declareProperty(
+            WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
+            doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.",
+        )
+
         self.declareProperty(
             GroupingWorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
             doc="Optional: output GroupingWorkspace mapping every detector ID to its group ID. "
@@ -202,10 +209,9 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         )
         self.setPropertyGroup("Grouping", "Grouping")
         self.setPropertyGroup("OutputGroupingWorkspace", "Grouping")
-
-        self.declareProperty(
-            WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
-            doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.",
+        self.setPropertySettings(
+            "OutputGroupingWorkspace",
+            EnabledWhenProperty("Grouping", PropertyCriterion.IsNotEqualTo, "None"),
         )
 
     def validateInputs(self):
@@ -246,8 +252,11 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 issues["Wavelength"] = "Wavelength should be greater than zero"
 
         # OutputGroupingWorkspace requires grouping to be active
-        if self.getProperty("Grouping").value == "None" and not self.getProperty("OutputGroupingWorkspace").isDefault:
-            issues["OutputGroupingWorkspace"] = "OutputGroupingWorkspace can only be produced when Grouping is '2x2' or '4x4'"
+        if self.getProperty("Grouping").value == "None" and self.getPropertyValue("OutputGroupingWorkspace") != "":
+            grp_ws_name = self.getPropertyValue("OutputGroupingWorkspace")
+            issues["OutputGroupingWorkspace"] = (
+                f"OutputGroupingWorkspace '{grp_ws_name}' can only be produced when Grouping is '2x2' or '4x4'"
+            )
 
         return issues
 
@@ -277,10 +286,6 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         else:
             grouping = 2 if grouping == "2x2" else 4
 
-        # Determine whether to produce a GroupingWorkspace alongside the main output
-        create_grouping_ws = grouping != 1 and not self.getProperty("OutputGroupingWorkspace").isDefault
-        grouping_ws = None
-
         out_ws = self.getPropertyValue("OutputWorkspace")
         out_ws_name = out_ws
 
@@ -289,8 +294,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             vanws, _ = self.__regroup_and_move(vanws, grouping, height, distance)
 
         has_multiple = len(datafiles) > 1
-        first_file = True
-
+        first_iteration = True
         for in_file in datafiles:
             if load_files:
                 scan = LoadMD(in_file, LoadHistory=False, OutputWorkspace="__scan")
@@ -303,13 +307,13 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
             self.log().information("Detector adjustments '({},{})m'".format(height, distance))
 
-            # It's only necessary to create the grouping workspace in the first iteration of the datafiles loop
-            scan, ws_grouping = self.__regroup_and_move(
-                scan, grouping, height, distance, create_grouping_ws=(create_grouping_ws and first_file)
-            )
-            first_file = False
-            if ws_grouping is not None:
-                grouping_ws = ws_grouping
+            if first_iteration:
+                create_grouping_ws = grouping > 1 and not self.getProperty("OutputGroupingWorkspace").isDefault
+                scan, grouping_ws = self.__regroup_and_move(scan, grouping, height, distance, create_grouping_ws=create_grouping_ws)
+                first_iteration = False
+            else:
+                # no need to recreate the grouping workspace in later iterations
+                scan, _ = self.__regroup_and_move(scan, grouping, height, distance)
 
             prog.report()
             self.log().information("Processing '{}'".format(in_file))
@@ -383,46 +387,79 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             self.setProperty("OutputGroupingWorkspace", grouping_ws)
 
     def __regroup_and_move(self, scan, grouping, height, distance, create_grouping_ws=False):
-        ws = scan.name()
+        output_workspace_name = scan.name()  # the input workspace will be modified or replaced
 
-        array = mtd[ws].getSignalArray().copy()
+        array = mtd[output_workspace_name].getSignalArray().copy()
+        groups = None  # stores detector groupings
+        if grouping > 1:
+            # Layout of the detector IDs
+            #     1,      2,..,   512
+            #   513,    514,..,  1024
+            # ..
+            # 785921, 785922,..,786432
+            idmap = np.arange(1, 512 * 512 * 3 + 1).reshape((512 * 3, 512))  # reproduces the layout of detector IDs
+            if grouping == 2:
+                array = array[0::2, 0::2] + array[1::2, 0::2] + array[0::2, 1::2] + array[1::2, 1::2]
+                # groups[0, 0] = [1, 2, 513, 514]  the very first group of detectors
+                groups = np.stack([idmap[0::2, 0::2], idmap[0::2, 1::2], idmap[1::2, 0::2], idmap[1::2, 1::2]], axis=2)
+            elif grouping == 4:
+                array = (
+                    array[0::4, 0::4]
+                    + array[1::4, 0::4]
+                    + array[2::4, 0::4]
+                    + array[3::4, 0::4]
+                    + array[0::4, 1::4]
+                    + array[1::4, 1::4]
+                    + array[2::4, 1::4]
+                    + array[3::4, 1::4]
+                    + array[0::4, 2::4]
+                    + array[1::4, 2::4]
+                    + array[2::4, 2::4]
+                    + array[3::4, 2::4]
+                    + array[0::4, 3::4]
+                    + array[1::4, 3::4]
+                    + array[2::4, 3::4]
+                    + array[3::4, 3::4]
+                )
+                # groups[0, 0] = [1, 2, 3, 4, 513, 514, 515, 516, 1025, 1026, 1027, 1028, 1537, 1538, 1539, 1540]
+                groups = np.stack(
+                    [
+                        idmap[0::4, 0::4],
+                        idmap[1::4, 0::4],
+                        idmap[2::4, 0::4],
+                        idmap[3::4, 0::4],
+                        idmap[0::4, 1::4],
+                        idmap[1::4, 1::4],
+                        idmap[2::4, 1::4],
+                        idmap[3::4, 1::4],
+                        idmap[0::4, 2::4],
+                        idmap[1::4, 2::4],
+                        idmap[2::4, 2::4],
+                        idmap[3::4, 2::4],
+                        idmap[0::4, 3::4],
+                        idmap[1::4, 3::4],
+                        idmap[2::4, 3::4],
+                        idmap[3::4, 3::4],
+                    ],
+                    axis=2,
+                )
 
-        if grouping == 2:
-            array = array[0::2, 0::2] + array[1::2, 0::2] + array[0::2, 1::2] + array[1::2, 1::2]
-        elif grouping == 4:
-            array = (
-                array[0::4, 0::4]
-                + array[1::4, 0::4]
-                + array[2::4, 0::4]
-                + array[3::4, 0::4]
-                + array[0::4, 1::4]
-                + array[1::4, 1::4]
-                + array[2::4, 1::4]
-                + array[3::4, 1::4]
-                + array[0::4, 2::4]
-                + array[1::4, 2::4]
-                + array[2::4, 2::4]
-                + array[3::4, 2::4]
-                + array[0::4, 3::4]
-                + array[1::4, 3::4]
-                + array[2::4, 3::4]
-                + array[3::4, 3::4]
-            )
+        y_dim, x_dim, number_of_runs = array.shape  # y_dim, x_dim effective dimensions after grouping
+        array = array.T  # shape == (number_of_runs, x_dim, y_dim)
 
-        y_dim, x_dim, number_of_runs = array.shape
-        array = array.T
-
-        run = mtd[ws].getExperimentInfo(0).run()
+        # Create a temporary Workspace2D with the HB3A instrument geometry, using the detector
+        # translation and two-theta values from the scan to correctly position the instrument components.
+        # This workspace serves as a carrier for computing per-detector angles and IDs via ConvertToMD.
+        _tmp_ws = CreateSimulationWorkspace(Instrument="HB3A", BinParams="0,1,2", UnitX="TOF", SetErrors=True)
+        run = mtd[output_workspace_name].getExperimentInfo(0).run()
         det_trans = run.getProperty("det_trans").timeAverageValue()
         two_theta = run.getProperty("2theta").timeAverageValue()
-        logs = run.getLogData()
-
-        _tmp_ws = CreateSimulationWorkspace(Instrument="HB3A", BinParams="0,1,2", UnitX="TOF", SetErrors=True)
         AddSampleLog(Workspace=_tmp_ws, LogName="det_trans", LogText=str(det_trans), LogType="Number Series", NumberType="Double")
         AddSampleLog(Workspace=_tmp_ws, LogName="2theta", LogText=str(two_theta), LogType="Number Series", NumberType="Double")
         LoadInstrument(Workspace=_tmp_ws, RewriteSpectraMap=True, InstrumentName="HB3A")
         self.__move_components(_tmp_ws, height, distance)
 
+        grouping_workspace = None
         if grouping > 1:
             CreateMDHistoWorkspace(
                 SignalInput=array,
@@ -434,83 +471,64 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 Units="bin,bin,number",
                 OutputWorkspace="__scan_grouped",
             )
-            detector_list = ""
-            for x in range(0, 512, grouping):
-                for y in range(0, 512 * 3, grouping):
-                    spectra_list = []
-                    for j in range(grouping):
-                        for i in range(grouping):
-                            spectra_list.append(str(x + i + (y + j) * 512))
-                    detector_list += "," + "+".join(spectra_list)
-            _ungrouped_tmp_ws = _tmp_ws
-            _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, GroupingPattern=detector_list, EnableLogging=False)
-            grouping_ws = self._build_grouping_ws(_ungrouped_tmp_ws, grouping) if create_grouping_ws else None
-            DeleteWorkspace(_ungrouped_tmp_ws, EnableLogging=False)
-        else:
-            grouping_ws = None
+            # Create the grouping workspace, if so required
+            if create_grouping_ws:
+                detector_ids_per_group = groups.reshape(-1, groups.shape[2])
+                # grouping_pattern = '1+2+513+514, 3+4+515+516,..'
+                grouping_pattern = ",".join("+".join(str(idx) for idx in row) for row in detector_ids_per_group)
+                grouping_workspace = CreateGroupingWorkspace(
+                    InputWorkspace=_tmp_ws,
+                    CustomGroupingString=grouping_pattern,
+                    OutputWorkspace=self.getProperty("OutputGroupingWorkspace"),
+                    EnableLogging=False,
+                )
+            # Group spectra
+            workspace_indexes = groups - 1  # for the HB3A instrument, detector IDs start at 1, not 0
+            workspace_indexes = workspace_indexes.reshape(-1, workspace_indexes.shape[2])
+            # grouping_pattern = '0+1+512+513, 2+3+514+515,..'
+            grouping_pattern = ",".join("+".join(str(idx) for idx in row) for row in workspace_indexes)
+            _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, GroupingPattern=grouping_pattern, OutputWorkspace=_tmp_ws, EnableLogging=False)
 
+        # Convert Workspace2D to IMDEventWorkspace
         _tmp_ws = Rebin(InputWorkspace=_tmp_ws, Params="0,1,2", EnableLogging=False)
         _tmp_ws = ConvertToMD(
             InputWorkspace=_tmp_ws, dEAnalysisMode="Elastic", EnableLogging=False, PreprocDetectorsWS="_PreprocessedDetectorsWS"
         )
 
+        # Copy all original scan logs into _tmp_ws, overwriting the scalar "det_trans" and "2theta" logs
+        # added earlier with the full time-series logs from the input scan workspace
         run = _tmp_ws.getExperimentInfo(0).run()
-        for log in logs:
+        scan_logs = mtd[output_workspace_name].getExperimentInfo(0).run().getLogData()
+        for log in scan_logs:
             run[log.name] = log
+
+        # Collect twotheta, azimuthal, and detector ID's from the _PreprocessedDetectorsWS table
         run["twotheta"] = np.array(mtd["_PreprocessedDetectorsWS"].column(2)).reshape(y_dim, x_dim).T.flatten().tolist()
         run["azimuthal"] = np.array(mtd["_PreprocessedDetectorsWS"].column(3)).reshape(y_dim, x_dim).T.flatten().tolist()
-        # Store pixel ID. If grouping, follow Mantid convention by storing the first detector-pixel ID for each group
-        run["detectorID"] = np.array(mtd["_PreprocessedDetectorsWS"].column(4)).reshape(y_dim, x_dim).T.flatten().tolist()
+        # Store detector ID's. If grouping, follow Mantid convention by storing the first ID in each group
+        # The sequence of detector ID's follows an ascending order along the X-dimension first
+        first_detid = np.array(mtd["_PreprocessedDetectorsWS"].column(4))  # 1, 3, 5,..,1025, 1027,.. for 2x2 grouping
+        # sample-log "detectorID" stores ID's in ordering of ascending along the Y-dimension first,
+        # replicating the ordering in which "twotheta" and "azimuthal" are stored
+        run["detectorID"] = first_detid.reshape(y_dim, x_dim).T.flatten().tolist()  # 1, 1025, 2029,..,3,.. for 2x2
+
+        # transfer the UB matrix from the original scan data into _tmp_ws
         CopySample(scan, _tmp_ws, CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
 
-        donor_workspace = "__scan_grouped" if grouping > 1 else ws
-        mtd[donor_workspace].copyExperimentInfos(_tmp_ws)
+        # transfer the experiment info from _tmp_ws to the output workspace
+        if grouping > 1:
+            mtd["__scan_grouped"].copyExperimentInfos(_tmp_ws)
+            # replace the input scan workspace with the grouped workspace
+            DeleteWorkspace(scan)
+            RenameWorkspace("__scan_grouped", OutputWorkspace=output_workspace_name)
+        else:
+            mtd[output_workspace_name].copyExperimentInfos(_tmp_ws)
 
+        # clean up temporary workspaces
         DeleteWorkspace(_tmp_ws, EnableLogging=False)
         DeleteWorkspace("_PreprocessedDetectorsWS", EnableLogging=False)
 
-        if grouping > 1:
-            DeleteWorkspace(scan)
-            RenameWorkspace("__scan_grouped", OutputWorkspace=ws)
-
-        return mtd[ws], grouping_ws
-
-    def _build_grouping_ws(self, instrument_ws, grouping: int):
-        """
-        Build a GroupingWorkspace from an ungrouped HB3A instrument workspace.
-
-        Each detector ID (spectrum index) is mapped to a 1-indexed group ID that
-        matches the order in which groups appear in the ``GroupingPattern`` used by
-        ``GroupDetectors``. For the HB3A detector array (512 columns × 1536 rows across
-        3 banks), the spectrum at column ``x`` and row ``y`` has index ``x + y*512``
-        and belongs to group
-        ``(x // grouping) * ((512 * 3) // grouping) + (y // grouping) + 1``.
-
-        The returned workspace is NOT stored in the ADS; ``PyExec`` publishes it
-        via ``setProperty("OutputGroupingWorkspace", ...)``.
-
-        :param instrument_ws: Ungrouped workspace supplying the HB3A instrument geometry.
-        :param grouping: Pixel-grouping factor (2 for 2×2, 4 for 4×4).
-        :returns: Populated GroupingWorkspace.
-        """
-        # Initialise an empty GroupingWorkspace (all Y = 0) from the instrument
-        createGrp_alg = self.createChildAlgorithm("CreateGroupingWorkspace", enableLogging=False)
-        createGrp_alg.setProperty("InputWorkspace", instrument_ws)
-        createGrp_alg.setProperty("OutputWorkspace", "__hb3a_grouping_ws")
-        createGrp_alg.execute()
-        grouping_ws = createGrp_alg.getProperty("OutputWorkspace").value
-
-        # Assign 1-indexed group IDs to every detector
-        y_groups = (512 * 3) // grouping
-        for x in range(0, 512, grouping):
-            x_idx = x // grouping
-            for y in range(0, 512 * 3, grouping):
-                group_id = float(x_idx * y_groups + y // grouping + 1)
-                for j in range(grouping):
-                    for i in range(grouping):
-                        grouping_ws.setValue(x + i + (y + j) * 512, group_id)
-
-        return grouping_ws
+        return mtd[output_workspace_name], grouping_workspace
 
     def __normalization(self, data, vanadium, load_files):
         if vanadium:
