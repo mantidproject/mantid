@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (
     AlgorithmFactory,
-    CreateGroupingWorkspace,
     FileAction,
     FileProperty,
     IMDHistoWorkspace,
@@ -471,17 +470,21 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 Units="bin,bin,number",
                 OutputWorkspace="__scan_grouped",
             )
-            # Create the grouping workspace, if so required
+            # Create the grouping workspace, if so required.
             if create_grouping_ws:
                 detector_ids_per_group = groups.reshape(-1, groups.shape[2])
-                # grouping_pattern = '1+2+513+514, 3+4+515+516,..'
-                grouping_pattern = ",".join("+".join(str(idx) for idx in row) for row in detector_ids_per_group)
-                grouping_workspace = CreateGroupingWorkspace(
-                    InputWorkspace=_tmp_ws,
-                    CustomGroupingString=grouping_pattern,
-                    OutputWorkspace=self.getProperty("OutputGroupingWorkspace"),
-                    EnableLogging=False,
-                )
+                createGrp_alg = self.createChildAlgorithm("CreateGroupingWorkspace", enableLogging=False)
+                createGrp_alg.setProperty("InputWorkspace", _tmp_ws)
+                createGrp_alg.setProperty("OutputWorkspace", "__hb3a_grouping_ws")
+                createGrp_alg.execute()
+                grouping_workspace = createGrp_alg.getProperty("OutputWorkspace").value
+                # Calling `CreateGroupingWorkspace` while feeding the detID-to-groupID mapping to option
+                # `CustomGroupingString` executes much slower than calling `setValue()` for every detector ID
+                for i, det_ids in enumerate(detector_ids_per_group):
+                    group_id = float(i + 1)
+                    for det_id in det_ids:
+                        grouping_workspace.setValue(int(det_id), group_id)
+
             # Group spectra
             workspace_indexes = groups - 1  # for the HB3A instrument, detector IDs start at 1, not 0
             workspace_indexes = workspace_indexes.reshape(-1, workspace_indexes.shape[2])
