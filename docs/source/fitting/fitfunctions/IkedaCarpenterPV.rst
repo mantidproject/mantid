@@ -77,6 +77,9 @@ The implementation of the IkedaCarpenterPV peakshape function here
 follows the analytical expression for this function as presented in Panels 13-17
 of Ref[3].
 
+For a detailed derivation of the analytical Jacobian used by the implementation, see
+:ref:`func-IkedaCarpenterPV-derivative`.
+
 References:
 
 #. S. Ikeda and J. M. Carpenter, `Nuclear Inst. and Meth. in Phys. Res.

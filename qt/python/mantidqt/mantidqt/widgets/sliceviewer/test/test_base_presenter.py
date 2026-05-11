@@ -58,6 +58,9 @@ class SliceViewerBasePresenterShim(SliceViewerBasePresenter):
     def rect_masking_clicked(self, active):
         pass
 
+    def invert_masking_clicked(self, active):
+        pass
+
 
 class SliceViewerBasePresenterTest(unittest.TestCase):
     def setUp(self):

@@ -15,6 +15,7 @@
 
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/LocalDateTime.h>
+#include <Poco/Path.h>
 
 namespace Mantid::DataHandling {
 
@@ -29,7 +30,7 @@ using namespace API;
 void SaveRKH::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Kernel::Direction::Input),
                   "The name of the workspace to save");
-  const std::vector<std::string> fileExts{".txt", ".Q", ".dat"};
+  const std::vector<std::string> fileExts{".txt", ".Q", ".dat", ".out"};
   declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save, fileExts),
                   "The name to use when saving the file");
   declareProperty("Append", true, "If true and Filename already exists, append, else overwrite");
@@ -55,7 +56,13 @@ void SaveRKH::exec() {
   using std::ios_base;
   ios_base::openmode mode = (getProperty("Append") ? (ios_base::out | ios_base::app) : ios_base::out);
   // Open/create the file
-  const std::string filename = getProperty("Filename");
+  std::string filename = getProperty("Filename");
+  Poco::Path path(filename);
+  std::string ext = path.getExtension();
+  if (ext.empty()) {
+    filename += ".out";
+  }
+
   m_outRKH.open(filename.c_str(), mode);
 
   if (!m_outRKH) {

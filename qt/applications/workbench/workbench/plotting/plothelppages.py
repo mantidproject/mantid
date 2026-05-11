@@ -15,6 +15,8 @@ WATERFALL_PAGE = "WaterfallPlotsHelp.html"
 PLOT3D_PAGE = "3DPlotsHelp.html"
 COLORFILL_PAGE = "ColorfillPlotsHelp.html"
 MESH_PAGE = "MeshPlotHelp.html"
+SUPERPLOT_PAGE = "superplot.html"
+WORKBENCH_PATH = "workbench/"
 
 # Create a plot page for each enumeration in FigureType
 # The values can be edited if there is a more relevant documentation page
@@ -29,12 +31,16 @@ HELP_PAGES = {
     FigureType.Image: BASE_PATH + COLORFILL_PAGE,
     FigureType.Contour: BASE_PATH + COLORFILL_PAGE,
     FigureType.Mesh: BASE_PATH + MESH_PAGE,
+    FigureType.Superplot: WORKBENCH_PATH + SUPERPLOT_PAGE,
 }
 
 
 class PlotHelpPages(object):
     @classmethod
-    def show_help_page_for_figure(cls, figure):
-        fig_type = figure_type(figure)
+    def show_help_page_for_figure(cls, figure, superplot=False):
+        if superplot:
+            fig_type = FigureType.Superplot
+        else:
+            fig_type = figure_type(figure)
         doc_url = HELP_PAGES[fig_type]
         InterfaceManager().showHelpPage(doc_url)

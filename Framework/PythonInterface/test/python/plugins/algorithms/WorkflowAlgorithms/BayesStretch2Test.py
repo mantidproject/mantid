@@ -134,7 +134,7 @@ class BayesStretch2Test(unittest.TestCase):
         x_data = [9]
 
         self._alg.make_results(beta_list, FWHM_list, x_data, "MomentumTransfer", "test")
-        self._alg.group_ws.assert_called_once_with(["test_Stretch_Beta", "test_Stretch_FWHM"], "test")
+        self._alg.group_ws.assert_called_once_with(["test_Beta", "test_FWHM"], "test")
 
         self.assert_mock_called_with(
             self._alg.make_slice_ws,
@@ -143,7 +143,7 @@ class BayesStretch2Test(unittest.TestCase):
             slice_list=beta_list,
             x_data=x_data,
             x_unit="MomentumTransfer",
-            name="test_Stretch_Beta",
+            name="test_Beta",
         )
         self.assert_mock_called_with(
             self._alg.make_slice_ws,
@@ -152,10 +152,10 @@ class BayesStretch2Test(unittest.TestCase):
             slice_list=FWHM_list,
             x_data=x_data,
             x_unit="FWHM",
-            name="test_Stretch_FWHM",
+            name="test_FWHM",
         )
-        self.assert_mock_called_with(self._alg.set_label, N_calls=2, call_number=2, ws_str="test_Stretch_Beta", label="beta", unit="")
-        self.assert_mock_called_with(self._alg.set_label, N_calls=2, call_number=1, ws_str="test_Stretch_FWHM", label="FWHM", unit="eV")
+        self.assert_mock_called_with(self._alg.set_label, N_calls=2, call_number=2, ws_str="test_Beta", label="beta", unit="")
+        self.assert_mock_called_with(self._alg.set_label, N_calls=2, call_number=1, ws_str="test_FWHM", label="FWHM", unit="eV")
 
     def test_do_one_spec(self):
         data = {

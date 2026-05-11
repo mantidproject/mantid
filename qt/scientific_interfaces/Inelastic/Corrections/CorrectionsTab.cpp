@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
+#include <MantidAPI/Run.h>
 #include <QSettings>
 
 using namespace Mantid::API;
@@ -20,10 +21,23 @@ namespace MantidQt::CustomInterfaces {
  *
  * @param parent :: the parent widget
  */
-CorrectionsTab::CorrectionsTab(QWidget *parent) : InelasticTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr) {
-  // Create Editor Factories
-  m_dblEdFac = new DoubleEditorFactory(this);
-  m_blnEdFac = new QtCheckBoxFactory(this);
+CorrectionsTab::CorrectionsTab(QWidget *parent)
+    : InelasticTab(parent), m_dblEdFac(new DoubleEditorFactory(this)), m_blnEdFac(new QtCheckBoxFactory(this)) {}
+
+CorrectionsTab::CorrectionsTab(QWidget *parent, std::unique_ptr<API::IAlgorithmRunner> algoRunner)
+    : InelasticTab(parent), m_dblEdFac(new DoubleEditorFactory(this)), m_blnEdFac(new QtCheckBoxFactory(this)) {
+  // This can be refined when all Corrections tabs are MVP'd
+  if (algoRunner) {
+    m_algorithmRunner = std::move(algoRunner);
+    m_algorithmRunner->subscribe(this);
+  }
+}
+
+void CorrectionsTab::notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) {
+  if (algorithm->algorithm()->name() != "SaveNexusProcessed") {
+    m_runPresenter->setRunEnabled(true);
+    runComplete(algorithm->algorithm(), error);
+  }
 }
 
 void CorrectionsTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
@@ -141,6 +155,23 @@ void CorrectionsTab::displayInvalidWorkspaceTypeError(const std::string &workspa
     log.error() << "Workspace " << workspaceName << " is not a MatrixWorkspace.\n";
   }
   emit showMessageBox(errorMessage);
+}
+
+std::string CorrectionsTab::prepareContainerName(const std::string &containerName) {
+  std::string runNum;
+  if (!doesExistInADS(containerName)) {
+    return runNum;
+  }
+  const auto containerWs = getADSWorkspace(containerName);
+  if (const auto &logs = containerWs->run(); logs.hasProperty("run_number")) {
+    runNum = logs.getProperty("run_number")->value();
+    if (const auto pos = runNum.find_first_of(","); pos != std::string::npos) {
+      runNum = runNum.substr(0, pos) + "-" + runNum.substr(runNum.find_last_of(",") + 1);
+    }
+  } else {
+    runNum = containerName.substr(0, containerName.find_first_of("_"));
+  }
+  return runNum;
 }
 
 } // namespace MantidQt::CustomInterfaces

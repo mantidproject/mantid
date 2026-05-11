@@ -635,9 +635,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(algC.initialize())
     TS_ASSERT(algC.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Dimensions", "3"));
-    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Extents", "-0.5,0.5,-0.5,0.5,-0.5,0.5"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Extents", "-0.5,0.5,-0.5,0.5,0.5,1.5"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "h,k,l"));
-    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", "U,U,U"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", "r.l.u.,r.l.u.,r.l.u."));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", "HKL,HKL,HKL"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("SplitInto", "2"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("MaxRecursionDepth", "5"));
@@ -647,7 +647,7 @@ public:
 
     // Test an ellipsoid against theoretical vol
     size_t numEvents = 200000;
-    V3D pos(0.0, 0.0, 0.0); // peak position
+    V3D pos(0.0, 0.0, 1.0); // peak position
 
     // Major axis along x
     double fail_val = 0.013;
@@ -655,7 +655,7 @@ public:
 
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
-    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5)});
+    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5), std::make_pair(0.5, 1.5)});
     peakWS->addPeak(Peak(inst, 1, 1.0, pos));
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
 
@@ -675,13 +675,13 @@ public:
   void test_exec_EllipsoidRadii_NoBackground_SingleCount_Vol() {
     // Test an ellipsoid against theoretical vol
     size_t numEvents = 2000000;
-    V3D pos(0.0, 0.0, 0.0); // peak position
+    V3D pos(0.0, 1.0, 0.0); // peak position
 
     createMDEW();
 
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
-    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5)});
+    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(0.5, 1.5), std::make_pair(-0.5, 0.5)});
     peakWS->addPeak(Peak(inst, 1, 1.0, pos));
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
 
@@ -724,13 +724,13 @@ public:
   void test_exec_EllipsoidRadii_WithBackground() {
     // Test an ellipsoid against theoretical vol
     size_t numEvents = 1000000;
-    V3D pos(0.0, 0.0, 0.0); // peak position
+    V3D pos(1.0, 0.0, 0.0); // peak position
 
     createMDEW();
 
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
-    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5)});
+    addUniform(numEvents, {std::make_pair(0.5, 1.5), std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5)});
     std::vector<std::vector<double>> eigenvects;
     eigenvects.push_back(std::vector<double>{1.0, 0.0, 0.0});
     eigenvects.push_back(std::vector<double>{0.0, 1.0, 0.0});
@@ -1172,14 +1172,17 @@ public:
   void test_exec_EllipsoidRadii_with_LeanElasticPeaks() {
     // Test an ellipsoid against theoretical vol
     const std::vector<double> radii{0.4, 0.3, 0.2};
-    const V3D pos(0.0, 0.0, 0.0); // peak position
+    const V3D pos(0.0, 0.0, 1.0); // peak position
     const int numEvents = 1000000;
 
     createMDEW();
-    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5)});
+    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5), std::make_pair(0.5, 1.5)});
 
     auto peakWS = std::make_shared<LeanElasticPeaksWorkspace>();
-    peakWS->addPeak(LeanElasticPeak(pos));
+    auto peak = LeanElasticPeak(pos);
+    peak.setHKL(pos);
+    peakWS->addPeak(peak);
+
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
 
     doRun(radii, {0.0}, "IntegratePeaksMD2Test_Leanpeaks_out", {0.0}, true, false, "NoFit", 0.0, true, false);

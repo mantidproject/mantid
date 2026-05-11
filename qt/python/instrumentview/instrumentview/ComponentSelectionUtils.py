@@ -20,10 +20,9 @@ def detector_indices_in_component_subtrees(component_indices: list[int], compone
 
 
 def detector_table_indices_for_parent_subtrees(
-    detector_table_indices: np.ndarray,
+    selected_indices: np.ndarray,
     detector_ids: np.ndarray,
-    detector_ids_by_info_index: np.ndarray,
-    detector_id_to_table_index: dict[int, int],
+    component_idxs: np.ndarray,
     detector_info,
     component_info,
     pickable_mask: np.ndarray | None = None,
@@ -38,25 +37,21 @@ def detector_table_indices_for_parent_subtrees(
         Sorted array of expanded detector-table indices, optionally filtered by
         ``pickable_mask``.
     """
-    detector_table_indices = np.asarray(detector_table_indices, dtype=int)
-    if detector_table_indices.size == 0:
-        return detector_table_indices
+    if selected_indices.size == 0:
+        return np.array([], dtype=int)
 
     expanded_indices: set[int] = set()
-    for table_index in detector_table_indices:
-        detector_id = int(detector_ids[table_index])
-        detector_info_index = detector_info.indexOf(detector_id)
-        if not component_info.hasParent(detector_info_index):
-            expanded_indices.add(int(table_index))
+    for i, cidx in enumerate(component_idxs[selected_indices]):
+        if not component_info.hasParent(int(cidx)):
+            expanded_indices.add(int(selected_indices[i]))
             continue
 
-        parent_index = component_info.parent(detector_info_index)
+        parent_index = component_info.parent(int(cidx))
         subtree_detector_indices = component_info.detectorsInSubtree(parent_index)
-        subtree_detector_ids = detector_ids_by_info_index[subtree_detector_indices]
-        for subtree_detector_id in subtree_detector_ids:
-            mapped_index = detector_id_to_table_index.get(int(subtree_detector_id))
-            if mapped_index is not None:
-                expanded_indices.add(mapped_index)
+
+        sorter = np.argsort(component_idxs)
+        indices = sorter[np.searchsorted(component_idxs, subtree_detector_indices, sorter=sorter)]
+        expanded_indices.update(indices.flatten())
 
     expanded_array = np.array(sorted(expanded_indices), dtype=int)
     if pickable_mask is None:

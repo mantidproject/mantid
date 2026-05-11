@@ -140,6 +140,7 @@ std::map<std::string, std::string> Rebin::validateInputs() {
   MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WKSP);
   std::vector<double> rbParams = getProperty(PropertyNames::PARAMS);
   std::vector<double> validParams;
+  bool paramsWereReset = false;
   if (inputWS == nullptr) {
     // The workspace could exist, but not be a MatrixWorkspace, e.g. it might be
     // a group workspace. In that case we don't want a validation error for the
@@ -154,7 +155,7 @@ std::map<std::string, std::string> Rebin::validateInputs() {
       // if the binmode has been set, force the rebin params to be consistent
       if (binMode != BinningMode::DEFAULT) {
         setProperty(PropertyNames::PARAMS, validParams);
-        rbParams = validParams;
+        paramsWereReset = true;
       }
     } catch (std::exception &err) {
       helpMessages[PropertyNames::PARAMS] = err.what();
@@ -205,7 +206,8 @@ std::map<std::string, std::string> Rebin::validateInputs() {
     }
   } else {
     try {
-      VectorHelper::validateRebinParameters(rbParams, static_cast<bool>(power));
+      const auto &paramsToValidate = paramsWereReset ? validParams : rbParams;
+      VectorHelper::validateRebinParameters(paramsToValidate, static_cast<bool>(power));
     } catch (std::exception &err) {
       helpMessages[PropertyNames::PARAMS] = err.what();
     }

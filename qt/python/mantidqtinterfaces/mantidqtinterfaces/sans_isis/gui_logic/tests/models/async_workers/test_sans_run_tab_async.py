@@ -46,7 +46,6 @@ class SansRunTabAsyncTest(unittest.TestCase):
             get_states_func=get_states_mock,
             use_optimizations=False,
             output_mode=OutputMode.BOTH,
-            plot_results=False,
             output_graph="",
         )
 
@@ -72,7 +71,6 @@ class SansRunTabAsyncTest(unittest.TestCase):
             get_states_func=get_states_mock,
             use_optimizations=False,
             output_mode=OutputMode.BOTH,
-            plot_results=False,
             output_graph="",
         )
 
@@ -91,7 +89,6 @@ class SansRunTabAsyncTest(unittest.TestCase):
             get_states_func=get_states_mock,
             use_optimizations=False,
             output_mode=OutputMode.BOTH,
-            plot_results=False,
             output_graph="",
         )
 
@@ -108,7 +105,6 @@ class SansRunTabAsyncTest(unittest.TestCase):
             get_states_func=get_states_mock,
             use_optimizations=False,
             output_mode=OutputMode.BOTH,
-            plot_results=False,
             output_graph="",
         )
 

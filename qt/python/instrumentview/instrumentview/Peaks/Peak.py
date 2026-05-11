@@ -14,7 +14,6 @@ def _format_hkl(value):
 @dataclass(frozen=True)
 class Peak:
     detector_id: int
-    spectrum_no: int
     peak_index: int
     hkl: tuple[float, float, float]
     tof: float

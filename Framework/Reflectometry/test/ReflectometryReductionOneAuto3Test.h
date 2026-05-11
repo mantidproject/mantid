@@ -28,7 +28,7 @@
 #include "MantidHistogramData/Points.h"
 
 namespace ReflAuto3Test {
-constexpr std::string TEST_GROUP_NAME = "testGroup";
+std::string TEST_GROUP_NAME = "testGroup";
 typedef std::variant<MatrixWorkspace_sptr, double, std::string, bool> propVariant;
 } // namespace ReflAuto3Test
 

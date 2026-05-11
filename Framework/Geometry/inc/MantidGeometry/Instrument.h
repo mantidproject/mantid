@@ -20,7 +20,7 @@
 #include <stdexcept>
 #include <string>
 #include <tuple>
-#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace Mantid {
@@ -55,6 +55,7 @@ public:
   Instrument();
   Instrument(const std::string &name);
   Instrument(const Instrument &);
+  Instrument(const Instrument &, bool copyCache);
 
   Instrument *clone() const override;
 
@@ -100,6 +101,9 @@ public:
 
   /// Remove a detector from the instrument
   void removeDetector(IDetector *);
+  /// Efficiently remove multiple detectors
+  void removeDetectorIncomplete(IDetector const *);
+  void removeDetectorFinalize();
 
   /// return reference to detector cache
   void getDetectors(detid2det_map &out_map) const;
@@ -216,6 +220,7 @@ public:
   void parseTreeAndCacheBeamline();
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeBeamlineNew(ParameterMap &pmap) const;
 
   friend InstrumentVisitor;
 
@@ -271,7 +276,7 @@ private:
     detid_t const &id() const { return std::get<0>(*this); }
     IDetector_const_sptr const &detector() const { return std::get<1>(*this); }
     bool const &isMonitor() const { return std::get<2>(*this); }
-    bool &isMonitor() { return std::get<2>(*this); }
+    void setIsMonitor(bool flag) { std::get<2>(*this) = flag; }
   };
 
   /// @brief A vector of DetectorCacheEntry, which holds the detector cache
@@ -302,6 +307,7 @@ private:
     DetectorCache::const_iterator lower_bound(detid_t id) const;
     DetectorCache::iterator find(detid_t id);
     DetectorCache::const_iterator find(detid_t id) const;
+    std::unordered_set<IDetector const *> m_toRemove;
   } m_detectorCache;
 
   bool isFinalized() const {

@@ -1,0 +1,1 @@
+- :ref:`algm-FitPeaks` and :ref:`algm-PDCalibration` now take a boolean flag to optionally disable inheriting initial peak-shape parameters from the most recently successful peak fit within the same spectrum.

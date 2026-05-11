@@ -245,7 +245,9 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     """
     # check inputs
     _validate_pcolormesh_inputs(workspaces)
-    workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
+    workspaces = _filter_pcolormesh_inputs(workspaces)
+    if len(workspaces) == 0:
+        return None
 
     # create a subplot of the appropriate number of dimensions
     # extend in number of columns if the number of plottables is not a square number
@@ -332,6 +334,18 @@ def pcolormesh_on_axis(ax, ws, color_norm=None, normalize_by_bin_width=None):
 def _validate_pcolormesh_inputs(workspaces):
     """Raises a ValueError if any arguments have the incorrect types"""
     raise_if_not_sequence(workspaces, "workspaces", MatrixWorkspace)
+
+
+def _filter_pcolormesh_inputs(workspaces: list[MatrixWorkspace]):
+    """Returns a list of only MatrixWorkspaces with more than 1 bin from the input list"""
+    filtered_workspaces = []
+    for ws in workspaces:
+        n_bins = len(ws.readX(0)) - 1
+        if n_bins <= 1:
+            LOGGER.error(f"Workspace '{ws.name()}' must contain more than 1 bin for a Colorfill plot (Number of bins found: {n_bins}).")
+        else:
+            filtered_workspaces.append(ws)
+    return filtered_workspaces
 
 
 def _get_colorbar_scale():

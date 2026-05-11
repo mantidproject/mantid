@@ -121,12 +121,18 @@ class CurvesTabWidgetPresenter:
         if waterfall and ax.waterfall_has_fill() and datafunctions.waterfall_fill_is_line_colour(ax):
             check_line_colour = True
 
+        lines = ax.get_lines()
+        if not isinstance(lines, list):
+            return
         if isinstance(curve, Line2D):
-            curve_index = ax.get_lines().index(curve)
+            curve_index = lines.index(curve)
             errorbar = False
         elif isinstance(curve, ErrorbarContainer):
-            curve_index = ax.get_lines().index(curve[0])
-            errorbar = True
+            if isinstance(curve, tuple):
+                curve_index = lines.index(curve[0])
+                errorbar = True
+            else:
+                return
         else:
             return
 

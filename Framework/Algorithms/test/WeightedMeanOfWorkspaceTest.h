@@ -95,6 +95,30 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
+  void testErrorIsInverseSquareRootOfWeightSum() {
+    // create2DWorkspace123 produces uniform Y=2.0, E=3.0 across all bins.
+    // weightSum = nBins * (1/E^2) = 2 * (1/9) = 2/9, so error = 1/sqrt(2/9) = 3/sqrt(2)
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspace123(1, 2);
+    std::string outWSName("WeightedMeanOfWorkspaceTest_ErrorFormula");
+    WeightedMeanOfWorkspace alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName))
+    TS_ASSERT(ws)
+    if (!ws)
+      return;
+
+    TS_ASSERT_EQUALS(ws->y(0)[0], 2.0)
+    TS_ASSERT_DELTA(ws->e(0)[0], 3.0 / std::sqrt(2.0), 1e-6)
+
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
   void testEventWs() {
     // Get input workspace
     EventWorkspace_sptr inputWS = createEventWorkspace();

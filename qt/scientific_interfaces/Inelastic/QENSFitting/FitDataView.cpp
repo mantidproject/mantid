@@ -32,7 +32,6 @@ QStringList defaultHeaders() {
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
-
 FitDataView::FitDataView(QWidget *parent) : FitDataView(defaultHeaders(), parent) {}
 
 FitDataView::FitDataView(const QStringList &headers, QWidget *parent)
@@ -45,6 +44,36 @@ FitDataView::FitDataView(const QStringList &headers, QWidget *parent)
   connect(m_uiForm->pbRemove, &QPushButton::clicked, this, &FitDataView::notifyRemoveClicked);
   connect(m_uiForm->pbUnify, &QPushButton::clicked, this, &FitDataView::notifyUnifyClicked);
   connect(m_uiForm->tbFitData, &QTableWidget::cellChanged, this, &FitDataView::notifyCellChanged);
+  // ADS Observer
+  observeDelete(true);
+  observeRename(true);
+  observeClear(true);
+}
+
+FitDataView::~FitDataView() {
+  observeDelete(false);
+  observeRename(false);
+  observeClear(false);
+}
+
+void FitDataView::clearHandle() { QMetaObject::invokeMethod(this, "notifyADSClear", Qt::AutoConnection); }
+
+void FitDataView::renameHandle(const std::string &oldName, const std::string &newName) {
+  QMetaObject::invokeMethod(this, "notifyADSRename", Qt::AutoConnection, Q_ARG(const std::string &, newName),
+                            Q_ARG(const std::string &, oldName));
+}
+
+void FitDataView::deleteHandle(const std::string &name, const Workspace_sptr &ws) {
+  UNUSED_ARG(ws);
+  QMetaObject::invokeMethod(this, "notifyADSDelete", Qt::AutoConnection, Q_ARG(const std::string &, name));
+}
+
+void FitDataView::notifyADSClear() const { m_presenter->handleADSClear(); }
+
+void FitDataView::notifyADSDelete(const std::string &wsName) const { m_presenter->handleADSDelete(wsName); }
+
+void FitDataView::notifyADSRename(const std::string &oldName, const std::string &newName) const {
+  m_presenter->handleADSRename(oldName, newName);
 }
 
 void FitDataView::subscribePresenter(IFitDataPresenter *presenter) { m_presenter = presenter; }

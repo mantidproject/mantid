@@ -93,6 +93,8 @@ reflections take place at the same silicon crystal analyzers.
 These mask files can be found in the SNS filesystem
 (**/SNS/BSS/shared/autoreduce/new_masks_08_12_2015/**)
 
+If the system is unable to load a mask file, either because an invalid file was passed,
+or because the default file is missing or could not load, then an error will be thrown.
 
 Vanadium Normalization
 ======================

@@ -85,7 +85,11 @@ def specialization_exists(name):
 
     :param name: The name of a possible new function
     """
-    return name in __SPECIALIZED_FUNCTIONS__
+    import builtins
+
+    protected = dir(builtins)
+    protected.append("logger")
+    return name in __SPECIALIZED_FUNCTIONS__ + protected
 
 
 def extract_progress_kwargs(kwargs):

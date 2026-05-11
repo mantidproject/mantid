@@ -557,7 +557,7 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, lo
             plot_fn = ax.errorbar if errors else ax.plot
             if isinstance(ws, MatrixWorkspace):
                 plot_type = ws.getPlotType()
-                _plot_kwargs = get_plot_specific_properties(ws, plot_type, plot_kwargs)
+                _plot_kwargs = get_plot_specific_properties(ws, plot_type, plot_kwargs, errors=errors)
                 if "errorbar" in plot_type or errors:
                     plot_fn = ax.errorbar
 
@@ -574,7 +574,8 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, lo
             plot_fn(ws, **_plot_kwargs)
 
     _set_axes_limits_from_properties(ax)
-    ax.make_legend()
+    if nums:
+        ax.make_legend()
     if set_title:
         workspace_names = [ws.name() for ws in workspaces]
         title = ", ".join(workspace_names)
@@ -590,10 +591,20 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, lo
 
 def _apply_scale_properties(ax_properties, scale_id, axis):
     mod_ax_properties = copy(ax_properties)
-    scale_properties = {"value": mod_ax_properties.pop(f"{scale_id}scale")}
+    scale_value = mod_ax_properties.pop(f"{scale_id}scale")
+    scale_properties = {"value": scale_value}
     add_prop_key = f"{scale_id}scale_opts"
     if add_prop_key in mod_ax_properties:
-        scale_properties.update(mod_ax_properties.pop(add_prop_key))
+        extra_props = mod_ax_properties.pop(add_prop_key)
+        if scale_value == "symlog":
+            allowed = {"linthresh", "linscale", "base", "subs"}
+        elif scale_value == "log":
+            allowed = {"base", "subs", "nonpositive"}
+        elif scale_value == "linear":
+            allowed = set()
+        else:
+            allowed = set(extra_props.keys())
+        scale_properties.update({k: v for k, v in extra_props.items() if k in allowed})
     getattr(axis, f"set_{scale_id}scale")(**scale_properties)
     return mod_ax_properties
 

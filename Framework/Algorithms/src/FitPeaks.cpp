@@ -16,6 +16,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/FindPeakBackground.h"
@@ -34,7 +35,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/trim.hpp"
@@ -78,6 +78,7 @@ const std::string HIGH_BACKGROUND("HighBackground");
 const std::string POSITION_TOL("PositionTolerance");
 const std::string PEAK_MIN_HEIGHT("MinimumPeakHeight");
 const std::string CONSTRAIN_PEAK_POS("ConstrainPeakPositions");
+const std::string COPY_LAST_GOOD_PEAK_PARAMS("CopyLastGoodPeakParameters");
 const std::string OUTPUT_WKSP_MODEL("FittedPeaksWorkspace");
 const std::string OUTPUT_WKSP_PARAMS("OutputPeakParametersWorkspace");
 const std::string OUTPUT_WKSP_PARAM_ERRS("OutputParameterFitErrorsWorkspace");
@@ -400,6 +401,10 @@ void FitPeaks::init() {
                   "(highest Y value position) and "
                   "the peak width either estimted by observation or calculate.");
 
+  declareProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS, true,
+                  "If true, initial peak parameters (with the exception of peak centre) "
+                  "may be copied from the last successfully fit peak in the spectra.");
+
   // additional output for reviewing
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP_MODEL, "",
                                                                        Direction::Output, PropertyMode::Optional),
@@ -585,6 +590,7 @@ void FitPeaks::processInputs() {
   m_fitPeaksFromRight = getProperty(PropertyNames::FIT_FROM_RIGHT);
   m_constrainPeaksPosition = getProperty(PropertyNames::CONSTRAIN_PEAK_POS);
   m_fitIterations = getProperty(PropertyNames::MAX_FIT_ITER);
+  m_copyLastGoodPeakParameters = getProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS);
 
   // Peak centers, tolerance and fitting range
   processInputPeakCenters();
@@ -997,6 +1003,8 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
     // vector to store fit params for last good fit to each peak
     std::vector<std::vector<double>> lastGoodPeakParameters(m_numPeaksToFit,
                                                             std::vector<double>(m_peakFunction->nParams(), 0.0));
+    // track which spectrum index last successfully fitted each peak
+    std::vector<size_t> lastGoodPeakSpectra(m_numPeaksToFit, 0);
 
     for (auto wi = iws_begin; wi < iws_end; ++wi) {
       // peaks to fit
@@ -1011,7 +1019,7 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
           std::make_shared<FitPeaksAlgorithm::PeakFitPreCheckResult>();
 
       fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers, fit_result, lastGoodPeakParameters,
-                       spectrum_pre_check_result);
+                       lastGoodPeakSpectra, spectrum_pre_check_result);
 
       PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
         writeFitResult(static_cast<size_t>(wi), expected_peak_centers, fit_result);
@@ -1139,6 +1147,7 @@ private:
 void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
                                 const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
                                 std::vector<std::vector<double>> &lastGoodPeakParameters,
+                                std::vector<size_t> &lastGoodPeakSpectra,
                                 const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result) {
   assert(fit_result->getNumberPeaks() == m_numPeaksToFit);
   pre_check_result->setNumberOfSubmittedSpectrumPeaks(m_numPeaksToFit);
@@ -1192,7 +1201,6 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
     // set center and calc any parameters from xml)
     auto peakfunction = std::dynamic_pointer_cast<API::IPeakFunction>(m_peakFunction->clone());
     peakfunction->setCentre(expected_peak_pos);
-    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, 0.0, 0.0);
 
     std::map<size_t, double> keep_values;
     for (size_t ipar = 0; ipar < peakfunction->nParams(); ++ipar) {
@@ -1214,14 +1222,13 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
                                                                     lastGoodPeakParameters[peak_index].end(),
                                                                     [&](auto const &val) { return val <= 1e-10; })));
 
-    // Check whether current spectrum's pixel (detector ID) is close to its
-    // previous spectrum's pixel (detector ID).
+    // Check whether current spectrum's pixel (detector ID) is close to the
+    // spectrum that last successfully fitted this peak.
     try {
       if (wi > 0 && samePeakCrossSpectrum) {
-        // First spectrum or discontinuous detector ID: do not start from same
-        // peak of last spectrum
+        size_t lastGoodWi = lastGoodPeakSpectra[peak_index];
         std::shared_ptr<const Geometry::Detector> pdetector =
-            std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi - 1));
+            std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(lastGoodWi));
         std::shared_ptr<const Geometry::Detector> cdetector =
             std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi));
 
@@ -1252,8 +1259,8 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       for (size_t i = 0; i < peakfunction->nParams(); ++i) {
         peakfunction->setParameter(i, lastGoodPeakParameters[peak_index][i]);
       }
-    } else if (neighborPeakSameSpectrum) {
-      // set the peak parameters from last good fit to that peak
+    } else if (neighborPeakSameSpectrum && m_copyLastGoodPeakParameters) {
+      // set the peak parameters from last good fit from ANY peak in the spectrum
       for (size_t i = 0; i < peakfunction->nParams(); ++i) {
         peakfunction->setParameter(i, lastGoodPeakParameters[prev_peak_index][i]);
       }
@@ -1261,6 +1268,9 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
 
     // reset center though - don't know before hand which element this is
     peakfunction->setCentre(expected_peak_pos);
+
+    std::pair<double, double> peak_window_i = m_getPeakFitWindow(wi, peak_index);
+    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window_i.first, peak_window_i.second);
     // reset value of parameters that were fixed (but are now free to vary)
     for (const auto &[ipar, value] : keep_values) {
       peakfunction->setParameter(ipar, value);
@@ -1272,15 +1282,16 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       peakfunction->setIntensity(0);
       number_of_out_of_range_peaks++;
     } else {
-      // find out the peak position to fit
-      std::pair<double, double> peak_window_i = m_getPeakFitWindow(wi, peak_index);
-
       // Decide whether to estimate peak width by observation
       // If no peaks fitted in the same or cross spectrum then the user supplied
       // parameters will be used if present and the width will not be estimated
       // (note this will overwrite parameter values caluclated from
       // Parameters.xml)
-      auto useUserSpecifedIfGiven = !(samePeakCrossSpectrum || neighborPeakSameSpectrum);
+      // When CopyLastGoodPeakParameters is disabled, treat each peak as if it
+      // has no fitted neighbour so that user-specified initial values are
+      // re-applied as the baseline rather than falling back to function defaults.
+      auto useUserSpecifedIfGiven =
+          !(samePeakCrossSpectrum || (neighborPeakSameSpectrum && m_copyLastGoodPeakParameters));
       bool observe_peak_width = decideToEstimatePeakParams(useUserSpecifedIfGiven, peakfunction);
 
       if (observe_peak_width && m_peakWidthEstimateApproach == EstimatePeakWidth::NoEstimation) {
@@ -1318,10 +1329,11 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       // reset the flag such that there is at a peak fit in this spectrum
       neighborPeakSameSpectrum = true;
       prev_peak_index = peak_index;
-      // copy values
+      // copy values and record which spectrum they came from
       for (size_t i = 0; i < lastGoodPeakParameters[peak_index].size(); ++i) {
         lastGoodPeakParameters[peak_index][i] = peakfunction->getParameter(i);
       }
+      lastGoodPeakSpectra[peak_index] = wi;
     }
   }
 
@@ -1499,32 +1511,56 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
   const size_t num_peakfunc_params = m_peakFunction->nParams();
   const size_t num_bkgdfunc_params = m_bkgdFunction->nParams();
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_fittedPeakWS))
-  for (int64_t iiws = m_startWorkspaceIndex; iiws <= static_cast<int64_t>(m_stopWorkspaceIndex); ++iiws) {
-    PARALLEL_START_INTERRUPT_REGION
-    std::size_t iws = static_cast<std::size_t>(iiws);
-    // get a copy of peak function and background function
-    IPeakFunction_sptr peak_function = std::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
-    IBackgroundFunction_sptr bkgd_function = std::dynamic_pointer_cast<IBackgroundFunction>(m_bkgdFunction->clone());
-    std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result_i = fit_results[iws - m_startWorkspaceIndex];
+  // Configure the peak functions before entering the parallel region. Some peak
+  // functions use setMatrixWorkspace() to initialise detector/workspace-derived
+  // state.
+  std::vector<std::vector<IPeakFunction_sptr>> peak_functions(m_numSpectraToFit,
+                                                              std::vector<IPeakFunction_sptr>(m_numPeaksToFit));
+  std::vector<std::vector<IBackgroundFunction_sptr>> bkgd_functions(
+      m_numSpectraToFit, std::vector<IBackgroundFunction_sptr>(m_numPeaksToFit));
+
+  for (size_t iws = m_startWorkspaceIndex; iws <= m_stopWorkspaceIndex; ++iws) {
+    const size_t output_iws = iws - m_startWorkspaceIndex;
+    const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result_i = fit_results[output_iws];
     // FIXME - This is a just a pure check
     if (!fit_result_i)
       throw std::runtime_error("There is something wroing with PeakFitResult vector!");
 
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-      // get and set the peak function parameters
       const double chi2 = fit_result_i->getCost(ipeak);
       if (chi2 > 10.e10)
         continue;
+
+      IPeakFunction_sptr peak_function = std::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
+      IBackgroundFunction_sptr bkgd_function = std::dynamic_pointer_cast<IBackgroundFunction>(m_bkgdFunction->clone());
 
       for (size_t iparam = 0; iparam < num_peakfunc_params; ++iparam)
         peak_function->setParameter(iparam, fit_result_i->getParameterValue(ipeak, iparam));
       for (size_t iparam = 0; iparam < num_bkgdfunc_params; ++iparam)
         bkgd_function->setParameter(iparam, fit_result_i->getParameterValue(ipeak, num_peakfunc_params + iparam));
-      // use domain and function to calcualte
+
+      const std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
+      peak_function->setMatrixWorkspace(m_inputMatrixWS, iws, peakwindow.first, peakwindow.second);
+
+      peak_functions[output_iws][ipeak] = std::move(peak_function);
+      bkgd_functions[output_iws][ipeak] = std::move(bkgd_function);
+    }
+  }
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_fittedPeakWS))
+  for (int64_t iiws = m_startWorkspaceIndex; iiws <= static_cast<int64_t>(m_stopWorkspaceIndex); ++iiws) {
+    PARALLEL_START_INTERRUPT_REGION
+    const std::size_t iws = static_cast<std::size_t>(iiws);
+    const size_t output_iws = iws - m_startWorkspaceIndex;
+
+    for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
+      if (!peak_functions[output_iws][ipeak] || !bkgd_functions[output_iws][ipeak])
+        continue;
+
+      // use domain and function to calculate
       // get the range of start and stop to construct a function domain
-      const auto &vec_x = m_fittedPeakWS->points(iws);
-      std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
+      const auto vec_x = m_fittedPeakWS->points(iws);
+      const std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
       auto start_x_iter = std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.first);
       auto stop_x_iter = std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.second);
 
@@ -1534,8 +1570,8 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
       FunctionDomain1DVector domain(start_x_iter, stop_x_iter);
       FunctionValues values(domain);
       CompositeFunction_sptr comp_func = std::make_shared<API::CompositeFunction>();
-      comp_func->addFunction(peak_function);
-      comp_func->addFunction(bkgd_function);
+      comp_func->addFunction(std::move(peak_functions[output_iws][ipeak]));
+      comp_func->addFunction(std::move(bkgd_functions[output_iws][ipeak]));
       comp_func->function(domain, values);
 
       // copy over the values
@@ -1554,7 +1590,7 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
 
 double FitPeaks::calculateSignalToSigmaRatio(const size_t &iws, const std::pair<double, double> &peakWindow,
                                              const API::IPeakFunction_sptr &peakFunction) {
-  const auto &vecX = m_inputMatrixWS->points(iws);
+  const auto vecX = m_inputMatrixWS->points(iws);
   auto startX = std::lower_bound(vecX.begin(), vecX.end(), peakWindow.first);
   auto stopX = std::lower_bound(vecX.begin(), vecX.end(), peakWindow.second);
 
@@ -1637,7 +1673,8 @@ bool FitPeaks::fitBackground(const size_t &ws_index, const std::pair<double, dou
   constexpr size_t MIN_POINTS{10}; // TODO explain why 10
 
   // find out how to fit background
-  const auto &points = m_inputMatrixWS->histogram(ws_index).points();
+  const auto histogram = m_inputMatrixWS->histogram(ws_index);
+  const auto &points = histogram.points();
   size_t start_index = findXIndex(points.rawData(), fit_window.first);
   size_t expected_peak_index = findXIndex(points.rawData(), expected_peak_pos, start_index);
   size_t stop_index = findXIndex(points.rawData(), fit_window.second, expected_peak_index);
@@ -2083,7 +2120,8 @@ void FitPeaks::processOutputs(std::vector<std::shared_ptr<FitPeaksAlgorithm::Pea
  * @return :: total number of counts in the histogram
  */
 double FitPeaks::numberCounts(size_t iws) {
-  const std::vector<double> &vec_y = m_inputMatrixWS->histogram(iws).y().rawData();
+  const Histogram histogram = m_inputMatrixWS->histogram(iws);
+  const auto &vec_y = histogram.y().rawData();
   double total = std::accumulate(vec_y.begin(), vec_y.end(), 0.);
   return total;
 }
@@ -2119,8 +2157,6 @@ size_t FitPeaks::histRangeToDataPointCount(size_t iws, const std::pair<double, d
   return number_dp;
 }
 
-GNU_DIAG_OFF("dangling-reference")
-
 //----------------------------------------------------------------------------------------------
 /** Convert a histogram range to vector index boundaries
  * @param iws :: histogram index in workspace
@@ -2130,7 +2166,8 @@ GNU_DIAG_OFF("dangling-reference")
  */
 void FitPeaks::histRangeToIndexBounds(size_t iws, const std::pair<double, double> &range, size_t &left_index,
                                       size_t &right_index) {
-  const auto &orig_x = m_inputMatrixWS->histogram(iws).x();
+  const Histogram histogram = m_inputMatrixWS->histogram(iws);
+  const auto &orig_x = histogram.x();
   rangeToIndexBounds(orig_x, range.first, range.second, left_index, right_index);
 
   // handle an invalid range case. For the histogram point data, make sure the number of data points is non-zero as
@@ -2162,20 +2199,19 @@ void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &range, 
   size_t num_elements_x = right_index - left_index;
 
   vec_x.resize(num_elements_x);
-  const auto &orig_x = m_inputMatrixWS->histogram(iws).x();
+  const Histogram histogram = m_inputMatrixWS->histogram(iws);
+  const auto &orig_x = histogram.x();
   std::copy(orig_x.begin() + left_index, orig_x.begin() + right_index, vec_x.begin());
 
   size_t num_datapoints = m_inputMatrixWS->isHistogramData() ? num_elements_x - 1 : num_elements_x;
 
-  const std::vector<double> orig_y = m_inputMatrixWS->histogram(iws).y().rawData();
-  const std::vector<double> orig_e = m_inputMatrixWS->histogram(iws).e().rawData();
+  const auto &orig_y = histogram.y().rawData();
+  const auto &orig_e = histogram.e().rawData();
   vec_y.resize(num_datapoints);
   vec_e.resize(num_datapoints);
   std::copy(orig_y.begin() + left_index, orig_y.begin() + left_index + num_datapoints, vec_y.begin());
   std::copy(orig_e.begin() + left_index, orig_e.begin() + left_index + num_datapoints, vec_e.begin());
 }
-
-GNU_DIAG_ON("dangling-reference")
 
 //----------------------------------------------------------------------------------------------
 /** Calculate signal-to-noise ratio in a histogram range
@@ -2339,6 +2375,9 @@ void FitPeaks::writeFitResult(size_t wi, const std::vector<double> &expected_pos
       // construct the peak function
       for (size_t iparam = 0; iparam < num_peakfunc_params; ++iparam)
         peak_function->setParameter(iparam, fit_result->getParameterValue(ipeak, iparam));
+
+      const std::pair<double, double> peak_window = m_getPeakFitWindow(wi, ipeak);
+      peak_function->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window.first, peak_window.second);
 
       // set the effective peak parameters
       m_fittedParamTable->cell<double>(row_index, 2) = peak_function->centre();

@@ -8,7 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "IPreviewDockedWidgets.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
+#include "IPreviewInstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
@@ -32,14 +32,14 @@ ISIS Reflectometry interface.
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtPreviewDockedWidgets final : public QMainWindow, public IPreviewDockedWidgets {
   Q_OBJECT
 public:
-  QtPreviewDockedWidgets(QWidget *parent = nullptr, QLayout *layout = nullptr);
+  QtPreviewDockedWidgets(QWidget *parent = nullptr, QLayout *layout = nullptr, bool useNewInstrumentView = false);
 
   void subscribe(PreviewDockedWidgetsSubscriber *notifyee) noexcept override;
 
-  // Plotting
+  // Instrument display
+  void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) override;
   void resetInstView() override;
-  void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
-                    Mantid::Kernel::V3D const &axis) override;
+  void plotInstView() override;
   // Instrument viewer toolbar
   void setInstViewZoomState(bool isChecked) override;
   void setInstViewEditState(bool isChecked) override;
@@ -53,17 +53,18 @@ public:
   void setEditROIState(bool state) override;
   void setRectangularROIState(bool state) override;
 
-  std::vector<size_t> getSelectedDetectors() const override;
+  std::vector<Mantid::detid_t> getSelectedDetectorIDs() const override;
   std::string getRegionType() const override;
+  double getLinthresh() const override;
+  bool getSymlogEnabled() const override;
 
   QLayout *getRegionSelectorLayout() const override;
   MantidQt::MantidWidgets::IPlotView *getLinePlotView() const override;
 
 private:
   Ui::PreviewDockedWidgets m_ui;
-  QLayout *m_layout;
   PreviewDockedWidgetsSubscriber *m_notifyee{nullptr};
-  std::unique_ptr<MantidQt::MantidWidgets::InstrumentDisplay> m_instDisplay{nullptr};
+  std::unique_ptr<IPreviewInstrumentDisplay> m_instDisplay;
 
   void connectSignals() const;
   void loadToolbarIcons();
@@ -78,5 +79,8 @@ private slots:
   void onLinePlotExportToAdsClicked() const;
   void onEditROIClicked() const;
   void onAddRectangularROIClicked(QAction *regionType) const;
+  void onYAxisSymlogToggled(bool checked) const;
+  void onLineEditUpdated() const;
+  void onApplyButtonClicked() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

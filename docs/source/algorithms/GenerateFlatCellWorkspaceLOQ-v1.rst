@@ -34,7 +34,7 @@ Output:
 
 .. testoutput:: exGenerateFlatCellWorkspaceLOQ
 
-   The range of the output values is 1390.904.
+   The range of the output values is 1390.913.
 
 .. categories::
 

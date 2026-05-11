@@ -18,7 +18,6 @@ import importlib.util
 from importlib.machinery import SourceFileLoader
 from . import logger, Logger, config
 
-
 # String that separates paths (should be in the ConfigService)
 PATH_SEPARATOR = ";"
 
@@ -48,6 +47,8 @@ class PluginLoader(object):
         self._logger.debug("Loading python plugin %s" % pathname)
         loader = SourceFileLoader(name, pathname)
         spec = importlib.util.spec_from_loader(name, loader)
+        if name == "__main__":
+            raise RuntimeError
         module = importlib.util.module_from_spec(spec)
         loader.exec_module(module)
         # It's better to let import handle editing sys.modules, but this code used to call
@@ -103,6 +104,9 @@ def find_plugins(top_dir):
     all_plugins = []
     algs = []
     for root, dirs, files in _os.walk(top_dir):
+        if _os.path.basename(_os.path.normpath(root)).startswith("."):
+            dirs.clear()
+            files.clear()
         for f in files:
             if f.endswith(PluginLoader.extension):
                 filename = _os.path.join(root, f)
@@ -128,7 +132,7 @@ def load(path):
     all files in each are loaded in turn
 
     @return A list of the loaded modules. Note this
-    will not included modules that will have attempted to be
+    will not include modules that will have attempted to be
     reloaded but had not been changed
     """
     if PATH_SEPARATOR in path:
@@ -160,7 +164,7 @@ def load_from_list(paths):
     for p in paths:
         try:
             loaded += load(p)
-        except RuntimeError:
+        except (RuntimeError, ImportError):
             continue
 
     return loaded
@@ -226,7 +230,7 @@ def sync_attrs(source, attrs, clients):
     """
     Syncs the attribute definitions between the
     given list from the source module & list of client modules such
-    that the function defintions point to the same
+    that the function definitions point to the same
     one
     @param source :: A dictionary containing the real attribute definitions
     @param attrs :: The list of attributes to change in the client modules
@@ -234,10 +238,13 @@ def sync_attrs(source, attrs, clients):
                       should be taken from source
     """
     for func_name in attrs:
-        attr = source[func_name]
-        for plugin in clients:
-            if plugin.__name__ != func_name and hasattr(plugin, func_name):
-                setattr(plugin, func_name, attr)
+        try:
+            attr = source[func_name]
+            for plugin in clients:
+                if plugin.__name__ != func_name and hasattr(plugin, func_name):
+                    setattr(plugin, func_name, attr)
+        except (RuntimeError, ImportError):
+            continue
 
 
 # ======================================================================================================================
