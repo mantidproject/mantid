@@ -636,9 +636,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Run the child algorithm to do the reduction. Return the child algorithm."""
         self.log().information("Running ReflectometryReductionOneAuto on " + input_workspace)
         alg = self.createChildAlgorithm("ReflectometryReductionOneAuto")
-        if input_is_group:
-            alg.setChild(False)  # Run as non-child algorithm to ensure workspace history is output.
-            alg.setAlwaysStoreInADS(False)
+        if input_is_group:  # DISABLE THIS FUNCTIONALITY FOR NOW
+            # alg.setChild(False)  # Run as non-child algorithm to ensure workspace history is output.
+            # alg.setAlwaysStoreInADS(False)
+            pass
         # Set properties that we copied directly from the child
         for property in self._reduction_properties:
             alg.setProperty(property, self.getPropertyValue(property))
