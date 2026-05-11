@@ -193,7 +193,8 @@ std::map<std::string, std::string> Rebin::validateInputs() {
     size_t numBins = VectorHelper::estimateNumberOfBins(validParams, power);
     if (power != 0. && numBins > 10'001) { // this number of bins should only be considered an issue for power binning
       helpMessages[PropertyNames::POWER] = "This binning is expected to give " + std::to_string(numBins) + " bins.";
-    } else { // otherwise compare against available memory
+    } else if (!(std::dynamic_pointer_cast<const EventWorkspace>(inputWS) &&
+                 static_cast<bool>(getProperty(PropertyNames::PRSRV_EVENTS)))) {
       size_t numSpec = inputWS->getNumberHistograms();
       std::size_t binSpaceInBytes = 2 * numSpec * numBins * sizeof(double); // memory required in bytes
       std::string memMsg = MemoryStats().checkAvailableMemory(binSpaceInBytes);
