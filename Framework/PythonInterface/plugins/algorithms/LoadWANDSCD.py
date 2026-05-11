@@ -98,12 +98,6 @@ class LoadWANDSCD(PythonAlgorithm):
         self.declareProperty(
             "Grouping", "None", StringListValidator(["None", "2x2", "4x4"]), "Group pixels (shared by input and normalization)"
         )
-        self.declareProperty(
-            GroupingWorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
-            doc="Optional: output GroupingWorkspace mapping every detector ID to its group ID. "
-            "Only produced when Grouping is '2x2' or '4x4'.",
-        )
-        self.setPropertyGroup("OutputGroupingWorkspace", "Grouping")
 
         # apply goniometer tilt
         self.declareProperty(
@@ -116,6 +110,13 @@ class LoadWANDSCD(PythonAlgorithm):
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output), "Output Workspace"
         )
+
+        self.declareProperty(
+            GroupingWorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="Optional: output GroupingWorkspace mapping every detector ID to its group ID. "
+            "Only produced when Grouping is '2x2' or '4x4'.",
+        )
+        self.setPropertyGroup("OutputGroupingWorkspace", "Grouping")
 
     def validateInputs(self):
         issues = dict()
