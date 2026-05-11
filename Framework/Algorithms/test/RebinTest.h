@@ -196,7 +196,8 @@ public:
     rebin.setProperty("InputWorkspace", ws);
     rebin.setPropertyValue("OutputWorkspace", "test_out");
     rebin.setProperty("PreserveEvents", true);
-    TS_ASSERT_THROWS_NOTHING(rebin.setProperty("Params", std::vector<double>{1.0, 1.0, 1.0 + numBins}));
+    TS_ASSERT_THROWS_NOTHING(
+        rebin.setProperty("Params", std::vector<double>{1.0, 1.0, 1.0 + static_cast<double>(numBins)}));
 
     auto errmsgs = rebin.validateInputs();
     TS_ASSERT(errmsgs.empty());
