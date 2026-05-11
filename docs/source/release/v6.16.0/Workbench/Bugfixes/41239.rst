@@ -1,0 +1,1 @@
+- The text color of the notice log messages in :ref:`Messages Window <WorkbenchMessagesWindow>` has been updated to provide better readability in both light and dark modes.
