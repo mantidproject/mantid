@@ -95,7 +95,7 @@ jobs:
       - name: Install pixi
         run: |
           source ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/pixi-utils
-          install_pixi
+          install_pixi "${GITHUB_WORKSPACE}"
           # Add pixi to path for use in other steps
           echo "$HOME/.pixi/bin" >> $GITHUB_PATH
 
