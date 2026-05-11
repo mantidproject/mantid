@@ -10,6 +10,8 @@
 #include <MantidQtWidgets/Spectroscopy/InterfaceUtils.h>
 #include <MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h>
 
+#include <utility>
+
 namespace {
 Mantid::Kernel::Logger g_log("ContainerSubtraction");
 }
@@ -34,8 +36,8 @@ void ContainerSubtractionPresenter::handleValidation(IUserInputValidator *valida
   m_view->validate(validator);
   if (auto sampleWS = m_model->sampleWS(), canWS = m_model->canWS(); sampleWS && canWS) {
     // Check Sample is of same type as container
-    const auto containerType = canWS->YUnit();
-    const auto sampleType = sampleWS->YUnit();
+    const auto &containerType = canWS->YUnit();
+    const auto &sampleType = sampleWS->YUnit();
 
     g_log.debug() << "Sample Y-Unit is: " << sampleType << '\n';
     g_log.debug() << "Container Y-Unit is: " << containerType << '\n';
@@ -100,7 +102,7 @@ std::string ContainerSubtractionPresenter::createOutputName() {
   for (const auto &qSuffix : InterfaceUtils::getSampleWSSuffixes("ContainerSubtraction")) {
     auto suffix = qSuffix.toStdString();
     if (sampleName.ends_with(suffix)) {
-      sampleNameSuffix = suffix;
+      sampleNameSuffix = std::move(suffix);
       break;
     }
   }

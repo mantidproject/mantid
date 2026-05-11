@@ -1542,8 +1542,8 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
       const std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
       peak_function->setMatrixWorkspace(m_inputMatrixWS, iws, peakwindow.first, peakwindow.second);
 
-      peak_functions[output_iws][ipeak] = peak_function;
-      bkgd_functions[output_iws][ipeak] = bkgd_function;
+      peak_functions[output_iws][ipeak] = std::move(peak_function);
+      bkgd_functions[output_iws][ipeak] = std::move(bkgd_function);
     }
   }
 
