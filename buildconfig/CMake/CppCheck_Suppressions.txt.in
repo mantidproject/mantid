@@ -13,7 +13,7 @@ duplInheritedMember
 
 // Hide unused functions, cppcheck does not consider headers, so many Qt overrides
 // called by Qt will be marked as unused
-unusedFunction
+// unusedFunction
 
 // We have some potentially uninitialized member vars but too many to fix at the moment
 uninitMemberVar
