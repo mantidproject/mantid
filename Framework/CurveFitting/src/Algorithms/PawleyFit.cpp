@@ -91,14 +91,13 @@ void PawleyFit::addHKLsToFunction(Functions::PawleyFunction_sptr &pawleyFn, cons
 
     for (size_t i = 0; i < tableWs->rowCount(); ++i) {
       try {
-        V3D hkl = extractor(hklColumn, i);
-
         double d = (*dColumn)[i];
         double center = getTransformedCenter(d, unit);
         double fwhm = (*fwhmColumn)[i] * center;
         double height = (*intensityColumn)[i];
 
         if (center > startX && center < endX) {
+          V3D hkl = extractor(hklColumn, i);
           pawleyFn->addPeak(hkl, fwhm, height);
         }
       } catch (const std::bad_alloc &) {

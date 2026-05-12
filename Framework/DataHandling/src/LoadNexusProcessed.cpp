@@ -1215,25 +1215,22 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry 
     } else if (str == "column_15") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
-      V3D qlab;
       for (size_t r = 0; r < numberPeaks; ++r) {
-        qlab = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
+        V3D qlab = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setQLabFrame(qlab, 0.0);
       }
     } else if (str == "column_16") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
-      V3D hkl;
       for (size_t r = 0; r < numberPeaks; ++r) {
-        hkl = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
+        V3D hkl = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setIntHKL(hkl);
       }
     } else if (str == "column_17") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
-      V3D mnp;
       for (size_t r = 0; r < numberPeaks; ++r) {
-        mnp = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
+        V3D mnp = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setIntMNP(mnp);
       }
     } else if (str == "column_18") {
@@ -1515,23 +1512,20 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
     } else if (str == "column_19") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
-      V3D hkl;
       for (size_t r = 0; r < numberPeaks; ++r) {
-        hkl = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
+        V3D hkl = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setIntHKL(hkl);
       }
     } else if (str == "column_20") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
-      V3D mnp;
       for (size_t r = 0; r < numberPeaks; ++r) {
-        mnp = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
+        V3D mnp = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setIntMNP(mnp);
       }
     } else if (str == "column_21") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
-
       for (size_t r = 0; r < numberPeaks; r++) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setMonitorCount(val);

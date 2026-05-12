@@ -56,13 +56,12 @@ void LoadOff::readOFFVertices() {
 void LoadOff::readOFFTriangles() {
   std::string line;
   uint32_t t1, t2, t3;
-  size_t nFaceVertices;
   for (uint32_t i = 0; i < m_nTriangles; i++) {
     if (getOFFline(line)) {
       std::vector<std::string> tokens;
       boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
       if (tokens.size() >= 4) {
-        nFaceVertices = boost::lexical_cast<size_t>(tokens[0]);
+        size_t nFaceVertices = boost::lexical_cast<size_t>(tokens[0]);
         if (nFaceVertices == 3) {
           t1 = boost::lexical_cast<uint32_t>(tokens[1]);
           t2 = boost::lexical_cast<uint32_t>(tokens[2]);

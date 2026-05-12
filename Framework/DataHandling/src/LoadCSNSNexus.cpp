@@ -374,15 +374,13 @@ LoadCSNSNexus::getEventData(const std::vector<std::string> &inputList, const std
 void LoadCSNSNexus::loadEventData(EventWorkspace_sptr &workspace, const std::vector<uint32_t> &timeOfFlight,
                                   size_t pidNums, const std::multimap<uint32_t, std::pair<float, int64_t>> &evtData) {
   workspace->initialize(pidNums, 1, 1);
-  float m_tof;
-  uint64_t m_pulseTime;
   int endNum = static_cast<int>(pidNums);
   for (auto i = 0; i != endNum; i++) {
     auto it = evtData.find(i);
     if (it != evtData.end()) {
       for (size_t j = 0; j != evtData.count(i); j++, it++) {
-        m_pulseTime = it->second.second;
-        m_tof = it->second.first;
+        uint64_t m_pulseTime = it->second.second;
+        float m_tof = it->second.first;
         workspace->getSpectrum(i) += Types::Event::TofEvent(m_tof, m_pulseTime);
       }
       workspace->getSpectrum(i).setSpectrumNo(i);
