@@ -13,13 +13,16 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/PeakFunctionIntegrator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/SpecialFunctionSupport.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
@@ -607,6 +610,81 @@ double IkedaCarpenterPV::intensity() const {
   return result.result;
 }
 
+void IkedaCarpenterPV::refixIDFFixedParameters(const std::shared_ptr<const API::MatrixWorkspace> &workspace,
+                                               size_t wi) {
+  if (!workspace)
+    return;
+  const auto instrument = workspace->getInstrument();
+  if (!instrument)
+    return;
+
+  // Resolve the detector for this workspace index the same way as
+  // IFunction::setMatrixWorkspace: prefer a single individual detector from
+  // the spectrum definition rather than MatrixWorkspace::getDetector(), which
+  // for grouped/focussed workspaces returns a DetectorGroup whose null
+  // component ID and null parent would defeat the parameter-map walk.
+  Geometry::IDetector const *detectorPtr = nullptr;
+  try {
+    const size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();
+    if (numDetectors == 0)
+      return;
+    if (numDetectors > 1) {
+      const auto &detectorInfo = workspace->detectorInfo();
+      const auto &specDef = workspace->spectrumInfo().spectrumDefinition(wi);
+      for (size_t k = 0; k < specDef.size(); ++k) {
+        try {
+          detectorPtr = &detectorInfo.detector(specDef[k].first);
+          break;
+        } catch (const Kernel::Exception::NotFoundError &) {
+          // Detector ID absent from instrument; try the next one.
+        }
+      }
+    } else {
+      const auto &spectrumInfo = workspace->spectrumInfo();
+      if (!spectrumInfo.hasDetectors(wi))
+        return;
+      detectorPtr = &spectrumInfo.detector(wi);
+    }
+  } catch (const std::exception &) {
+    return;
+  }
+  if (!detectorPtr)
+    return;
+
+  const auto paramMap = instrument->getParameterMap();
+  if (!paramMap)
+    return;
+
+  // Walk every parameter and re-apply fix() if the IDF entry carries a
+  // <fixed/> tag. Values are intentionally left untouched -- whatever the
+  // current value is (inherited from a previous fit, supplied by the user,
+  // or freshly evaluated from the IDF formula on the first peak) is
+  // preserved. We are only restoring the "calibration constant, do not
+  // refine" half of the IDF contract, not the "use this value" half.
+  for (size_t i = 0; i < nParams(); ++i) {
+    auto param = paramMap->getRecursiveFittingParameter(detectorPtr, parameterName(i), this->name());
+    if (!param)
+      continue;
+
+    Geometry::FitParameter fitParam;
+    try {
+      fitParam = param->value<Geometry::FitParameter>();
+    } catch (...) {
+      continue;
+    }
+    if (fitParam.getTie().empty())
+      continue;
+    if (isFixed(i))
+      continue;
+    try {
+      fix(i);
+    } catch (const std::runtime_error &) {
+      // Status was Tied -- the user has set their own tie expression,
+      // which takes precedence over the IDF default.
+    }
+  }
+}
+
 void IkedaCarpenterPV::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
                                           double startX, double endX) {
   IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
@@ -614,6 +692,12 @@ void IkedaCarpenterPV::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorks
   // Invalidate cached wavelengths so they are recalculated on the next
   // function evaluation using the newly-set workspace and workspace index.
   m_waveLength.clear();
+
+  // Re-fire <fixed/> IDF ties unconditionally. The base class above only
+  // applies them when the parameter is not already marked explicitlySet, so
+  // any prior setParameter() call would suppress the moderator constants'
+  // fix() and leave them free to drift during the subsequent fit.
+  refixIDFFixedParameters(workspace, wi);
 
   if (workspace) {
     // If the instrument definition provided IC parameters the base-class call above handles
