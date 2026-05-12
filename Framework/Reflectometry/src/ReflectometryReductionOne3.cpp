@@ -58,6 +58,8 @@ double getDetectorTwoTheta(const SpectrumInfo *spectrumInfo, const size_t spectr
 /** Get the start/end of the lambda range for the detector associated
  * with the given spectrum
  *
+ * @param xValues : the input spectrum X values
+ * @param xIdx : the index of the bin
  * @return : the lambda range
  */
 double getLambdaRange(const HistogramX &xValues, const int xIdx) {
@@ -74,6 +76,8 @@ double getLambdaRange(const HistogramX &xValues, const int xIdx) {
 /** Get the lambda value at the centre of the detector associated
  * with the given spectrum
  *
+ * @param xValues : the input spectrum X values
+ * @param xIdx : the index of the bin
  * @return : the lambda range
  */
 double getLambda(const HistogramX &xValues, const int xIdx) {
@@ -89,6 +93,7 @@ double getLambda(const HistogramX &xValues, const int xIdx) {
 /**
  * Get the topbottom extent of a detector for the given axis
  *
+ * @param boundingBox [in] : the bounding box to get the extent for
  * @param axis [in] : the axis to get the extent for
  * @param top [in] : if true, get the max extent, or min otherwise
  * @return : the max/min extent on the given axis
@@ -353,8 +358,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne3::backgroundSubtraction(MatrixWor
 /** Perform transmission correction by running 'CreateTransmissionWorkspace' on
  * the input workspace
  * @param detectorWS :: the input workspace
- * @param detectorWSReduced:: whether the input detector workspace has been
- * reduced
  * @return :: the input workspace normalized by transmission
  */
 std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr>
@@ -652,6 +655,7 @@ double ReflectometryReductionOne3::twoThetaR(const std::vector<size_t> &detector
 
 /**
  * Get the spectrum index which defines the twoThetaR reference angle
+ * @param detectors : spectrum indices of the detectors of interest
  * @return : the spectrum index
  */
 size_t ReflectometryReductionOne3::twoThetaRDetectorIdx(const std::vector<size_t> &detectors) {
@@ -790,6 +794,7 @@ void ReflectometryReductionOne3::findIvsLamRange(const MatrixWorkspace_sptr &det
  * The workspace will have the same x values as the input workspace but the y
  * values will all be zero.
  *
+ * @param detectorWS : the input workspace in wavelength
  * @return : a 1D workspace where y values are all zero
  */
 MatrixWorkspace_sptr ReflectometryReductionOne3::constructIvsLamWS(const MatrixWorkspace_sptr &detectorWS) {

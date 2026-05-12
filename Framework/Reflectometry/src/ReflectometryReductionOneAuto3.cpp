@@ -689,7 +689,6 @@ void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(const Instrume
 /** Set algorithmic correction properties
  *
  * @param alg :: ReflectometryReductionOne algorithm
- * @param instrument :: The instrument attached to the workspace
  */
 void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(const IAlgorithm_sptr &alg) {
   if (m_correctionProperties.type == "PolynomialCorrection") {
@@ -752,8 +751,7 @@ std::optional<double> ReflectometryReductionOneAuto3::getQStep(const MatrixWorks
 /** Rebin a workspace in Q.
  *
  * @param inputWS :: the workspace in Q
- * @param params :: A vector containing the three rebin parameters (min, step
- * and max)
+ * @param params :: the rebin parameters
  * @return :: the output workspace
  */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto3::rebin(const MatrixWorkspace_sptr &inputWS,
@@ -792,9 +790,8 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::scale(MatrixWorkspace_sptr 
 
 /** Optionally crop a workspace in Q.
  *
- * @param inputWS :: the workspace to scale
- * @param params :: A vector containing the three rebin parameters (min, step
- * and max)
+ * @param inputWS :: the workspace to crop
+ * @param params :: the rebin parameters containing the crop limits
  * @return :: the rebinned workspace if a min/max was set, or the unchanged
  * input workspace otherwise.
  */
@@ -911,12 +908,13 @@ void ReflectometryReductionOneAuto3::setOutputPropertiesFromChild(const Algorith
 /** This function is used by processGroups to execute the child algorithm over
  * each member in the group
  *
- * @param inputNames : the input workspaces for the child algorithm
- * @param originalNames : the original input group's member workspace names
+ * @param members : the input workspaces for the child algorithm
  * @param runNumber : the run number of the group (our own value is passed in
  * because this is not a property a workspace group has)
- * @param recalculateIvsQ : if true, recalculate IvsQ based on previous IvsLamß
- * outputs; IvsLam outputs must be passed as the new inputNames
+ * @param taskOrder : task execution order to pass to ReflectometryReductionOne
+ * @param workspaceNames : output workspace names to use for the group members
+ * @param reduced : if true, recalculate IvsQ based on previous IvsLam outputs;
+ * IvsLam outputs must be passed as the members
  * @returns : the grouped output workspace names
  */
 ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReductionOneAuto3::processGroupMembers(
@@ -1143,8 +1141,8 @@ ReflectometryReductionOneAuto3::getPolarizationEfficiencies(const WorkspaceGroup
 
 /**
  * Apply a polarization correction to workspaces in lambda.
- * @param outputIvsLam :: Name of a workspace group to apply the correction
- * to.
+ * @param outputIvsLam :: Workspace group to apply the correction to.
+ * @param outputGroupName :: Name of the corrected output workspace group.
  */
 WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyPolarizationCorrection(const WorkspaceGroup_sptr &outputIvsLam,
                                                                                 const std::string &outputGroupName) {
@@ -1248,7 +1246,7 @@ std::string ReflectometryReductionOneAuto3::getSummedWorkspaceName(const std::st
 /**
  * Sum banks for a single data workspace.
  * @param roiDetectorIDs :: The detector IDs to be summed. All are included if an empty string is passed.
- * @param propertyName :: Name of an input property containing a workspace
+ * @param wsPropertyName :: Name of an input property containing a workspace
  *   that should be summed. The summed workspace replaces the old
  *   value of this property.
  * @param isTransWs :: Whether or not this is a transmission workspace.
