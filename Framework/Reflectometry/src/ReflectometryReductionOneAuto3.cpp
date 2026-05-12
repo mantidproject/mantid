@@ -8,6 +8,7 @@
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -303,18 +304,18 @@ void ReflectometryReductionOneAuto3::init() {
   initDebugProperties();
 
   // Output workspace in Q
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspaceBinned", "", Direction::Output,
-                                                                       PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspaceBinned", "", Direction::Output,
+                                                                 PropertyMode::Optional),
                   "Output workspace in Q (rebinned workspace)");
 
   // Output workspace in Q (unbinned)
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output,
-                                                                       PropertyMode::Optional),
-                  "Output workspace in Q (native binning)");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "Output workspace in Q (native binning)");
 
   // Output workspace in wavelength
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspaceWavelength", "",
-                                                                       Direction::Output, PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspaceWavelength", "", Direction::Output,
+                                                                 PropertyMode::Optional),
                   "Output workspace in wavelength");
   setPropertySettings("OutputWorkspaceWavelength",
                       std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
