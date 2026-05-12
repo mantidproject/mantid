@@ -79,6 +79,7 @@ const std::string POSITION_TOL("PositionTolerance");
 const std::string PEAK_MIN_HEIGHT("MinimumPeakHeight");
 const std::string CONSTRAIN_PEAK_POS("ConstrainPeakPositions");
 const std::string COPY_LAST_GOOD_PEAK_PARAMS("CopyLastGoodPeakParameters");
+const std::string RESPECT_FIXED_PEAK_PARAMS("RespectFixedPeakParameters");
 const std::string OUTPUT_WKSP_MODEL("FittedPeaksWorkspace");
 const std::string OUTPUT_WKSP_PARAMS("OutputPeakParametersWorkspace");
 const std::string OUTPUT_WKSP_PARAM_ERRS("OutputParameterFitErrorsWorkspace");
@@ -405,6 +406,12 @@ void FitPeaks::init() {
                   "If true, initial peak parameters (with the exception of peak centre) "
                   "may be copied from the last successfully fit peak in the spectra.");
 
+  declareProperty(PropertyNames::RESPECT_FIXED_PEAK_PARAMS, false,
+                  "If true, peak function parameters that are marked as fixed "
+                  "(e.g. parameters calculated from the instrument geometry, such as A and B "
+                  "of a BackToBackExponential) remain fixed during fitting. "
+                  "If false (default), such parameters are unfixed so they can be refined.");
+
   // additional output for reviewing
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP_MODEL, "",
                                                                        Direction::Output, PropertyMode::Optional),
@@ -591,6 +598,7 @@ void FitPeaks::processInputs() {
   m_constrainPeaksPosition = getProperty(PropertyNames::CONSTRAIN_PEAK_POS);
   m_fitIterations = getProperty(PropertyNames::MAX_FIT_ITER);
   m_copyLastGoodPeakParameters = getProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS);
+  m_respectFixedPeakParameters = getProperty(PropertyNames::RESPECT_FIXED_PEAK_PARAMS);
 
   // Peak centers, tolerance and fitting range
   processInputPeakCenters();
@@ -1212,9 +1220,12 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
         // if they were set to be fixed (e.g. for the B2Bexp this would
         // typically be A and B but not Sigma)
         keep_values[ipar] = peakfunction->getParameter(ipar);
-        // let them be free to fit as these are typically refined from a
-        // focussed bank
-        peakfunction->unfix(ipar);
+        // by default let them be free to fit as these are typically refined
+        // from a focussed bank; otherwise respect the fixed status and keep
+        // the parameter locked at the calculated value.
+        if (!m_respectFixedPeakParameters) {
+          peakfunction->unfix(ipar);
+        }
       }
     }
 

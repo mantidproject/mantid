@@ -330,7 +330,8 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_i
         _remove_existing_output_workspaces(ws)
     # make sure the parameter file for the instrument has been loaded to get better starting values for the peak fit
     peak_func = calibration.get_fit_peak_shape()
-    logger.notice(f"Running PDCalibration on {foc_name} using {peak_func}")
+    keep_moderator_params_fixed = peak_func in calibration.config.funcs_to_keep_fixed
+    logger.notice(f"Running PDCalibration on {foc_name} using {peak_func} (with RespectFixedPeakParameters: {keep_moderator_params_fixed})")
     cal_table, mask, diag_ws = mantid.PDCalibration(
         InputWorkspace=foc_name,
         OutputCalibrationTable=cal_table_name,
@@ -345,6 +346,7 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_i
         UseChiSq=True,
         CopyLastGoodPeakParameters=copy_params_in_calib,
         ConstrainPeakPositions=False,
+        RespectFixedPeakParameters=keep_moderator_params_fixed,
     )
     mantid.ApplyDiffCal(InstrumentWorkspace=foc_name, CalibrationWorkspace=cal_table)
 

@@ -74,6 +74,7 @@ class InstrumentConfig:
     group_foc_ws_suffix: Dict[Enum, str]
     interactive_grouping_options: Sequence[Tuple[Enum, str, bool, bool]]  # group, description, has file input, has text input
     peak_func: str
+    funcs_to_keep_fixed: Sequence[str]
 
     # PDCalibration defaults
     calibration_tof_binning: Tuple[float, float, float]
@@ -97,6 +98,7 @@ CONFIGS: Dict[str, InstrumentConfig] = {
         texture_groups=(ENGINX_GROUP.TEXTURE20, ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.CUSTOM),
         calibration_tof_binning=(12000, -0.0003, 52000),
         peak_func="BackToBackExponential",
+        funcs_to_keep_fixed=("IkedaCarpenterPV",),
         prm_header_template="template_ENGINX_prm_header.prm",
         group_bank_args={ENGINX_GROUP.BOTH: "NorthBank,SouthBank", ENGINX_GROUP.NORTH: "NorthBank", ENGINX_GROUP.SOUTH: "SouthBank"},
         group_descriptions={
@@ -160,6 +162,7 @@ CONFIGS: Dict[str, InstrumentConfig] = {
         texture_groups=(IMAT_GROUP.CUSTOM, IMAT_GROUP.MODULE1, IMAT_GROUP.MODULE4, IMAT_GROUP.ROW1, IMAT_GROUP.ROW4),
         calibration_tof_binning=(10000, -0.0003, 80000),
         peak_func="IkedaCarpenterPV",
+        funcs_to_keep_fixed=("IkedaCarpenterPV",),
         prm_header_template="template_IMAT_prm_header.prm",
         group_bank_args={IMAT_GROUP.BOTH: "NorthBank,SouthBank", IMAT_GROUP.NORTH: "NorthBank", IMAT_GROUP.SOUTH: "SouthBank"},
         group_descriptions={
