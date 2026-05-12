@@ -69,6 +69,7 @@ class FocusEventMode(systemtesting.MantidSystemTest):
             ceria_run="ENGINX371346",
             group=GROUP.BOTH,
         )
+        enginx.set_calibration_to_copy_starting_parameters(False)
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
         self._ws_foc = ADS.retrieve("371871_engggui_focusing_output_ws_bank")
