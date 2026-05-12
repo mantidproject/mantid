@@ -656,11 +656,10 @@ void IkedaCarpenterPV::refixIDFFixedParameters(const std::shared_ptr<const API::
     return;
 
   // Walk every parameter and re-apply fix() if the IDF entry carries a
-  // <fixed/> tag. Values are intentionally left untouched -- whatever the
+  // fixed tag. Values are intentionally left untouched -- whatever the
   // current value is (inherited from a previous fit, supplied by the user,
   // or freshly evaluated from the IDF formula on the first peak) is
-  // preserved. We are only restoring the "calibration constant, do not
-  // refine" half of the IDF contract, not the "use this value" half.
+  // preserved.
   for (size_t i = 0; i < nParams(); ++i) {
     auto param = paramMap->getRecursiveFittingParameter(detectorPtr, parameterName(i), this->name());
     if (!param)
