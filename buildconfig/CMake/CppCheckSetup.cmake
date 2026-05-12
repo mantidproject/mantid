@@ -32,6 +32,7 @@ if(CPPCHECK_EXECUTABLE)
       # 2.12 has missingInclude switched on by default if running with multiple cores but it doesn't appear to work
       # correctly. It was flagging many stl and other external header files as missing.
       --disable=missingInclude
+      --disable=unusedFunction
       # Loading qt.cfg via full path suppresses Qt macro warnings (slots, signals, Q_OBJECT etc.) even when cppcheck is
       # installed via conda/pixi with a non-standard DATADIR. Falls back to --library=qt if the file is not found.
       --library=${_cppcheck_qt_library}
