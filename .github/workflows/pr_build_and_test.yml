@@ -103,8 +103,14 @@ jobs:
         # supplying --clean-build or CLEAN_BUILD=true should be added here
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
 
+      - name: Determine if a PR build
+        if: ${{ github.event_name == 'pull_request' }}
+        # telling jenkins scripts this is a PR build
+        run: echo "JOB_NAME=pull_requests" >> $GITHUB_ENV
+
       - name: Build code
         run: |
+          echo "For Jenkins scripts JOB_NAME=${JOB_NAME}"
           cd ${GITHUB_WORKSPACE}
           echo "::add-matcher::.github/matchers/gcc.json"
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY $EXTRA_CMAKE_FLAGS
