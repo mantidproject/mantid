@@ -134,7 +134,7 @@ std::string PropertyManagerProperty::setValueFromJson(const Json::Value &value) 
 // -----------------------------------------------------------------------------
 template <>
 MANTID_KERNEL_DLL PropertyManager_sptr IPropertyManager::getValue<PropertyManager_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<PropertyManager_sptr> *>(getPointerToProperty(name));
+  const auto *prop = dynamic_cast<PropertyWithValue<PropertyManager_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {

@@ -1149,7 +1149,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_ignore_element(struct soap *soap) {
 #ifndef WITH_NOIDREF
 SOAP_FMAC3 int SOAP_FMAC4 soap_putindependent(struct soap *soap) {
   int i;
-  struct soap_plist *pp;
+  const struct soap_plist *pp;
   if (soap->version == 1 && soap->encodingStyle && !(soap->mode & (SOAP_XML_TREE | SOAP_XML_GRAPH)))
     for (i = 0; i < SOAP_PTRHASH; i++)
       for (pp = soap->pht[i]; pp; pp = pp->next)
