@@ -183,6 +183,33 @@ public:
 #endif
   }
 
+  void test_event_workspace_preserve_events_does_not_use_histogram_memory_check() {
+#if defined(__linux__) || defined(__gnu_linux__)
+    std::cout << "Test event workspace PreserveEvents skips histogram memory check" << std::endl;
+    Mantid::TestMemory::MockMemory memL; // patch the available memory calculator
+    size_t numSpec = 10;
+    size_t numBins = memL.numberOfFloats() / numSpec;
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspace2(static_cast<int>(numSpec), 2);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setProperty("InputWorkspace", ws);
+    rebin.setPropertyValue("OutputWorkspace", "test_out");
+    rebin.setProperty("PreserveEvents", true);
+    TS_ASSERT_THROWS_NOTHING(
+        rebin.setProperty("Params", std::vector<double>{1.0, 1.0, 1.0 + static_cast<double>(numBins)}));
+
+    auto errmsgs = rebin.validateInputs();
+    TS_ASSERT(errmsgs.empty());
+
+    rebin.setProperty("PreserveEvents", false);
+    errmsgs = rebin.validateInputs();
+    auto errmsg = errmsgs.find("Params");
+    TS_ASSERT(errmsg != errmsgs.end());
+    TS_ASSERT_DIFFERS(errmsg->second.find("This binning is expected to create"), std::string::npos);
+#endif
+  }
+
   /* execution tests */
 
   void testworkspace1D_dist() {

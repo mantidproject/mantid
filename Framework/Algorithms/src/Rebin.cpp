@@ -138,6 +138,7 @@ std::map<std::string, std::string> Rebin::validateInputs() {
 
   // validate the rebin params, and outside default mode, reset them
   MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WKSP);
+  const auto eventInputWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   std::vector<double> rbParams = getProperty(PropertyNames::PARAMS);
   std::vector<double> validParams;
   bool paramsWereReset = false;
@@ -192,9 +193,10 @@ std::map<std::string, std::string> Rebin::validateInputs() {
   // estimate the number of bins needed and compare to available memory
   if (inputWS && !validParams.empty()) {
     size_t numBins = VectorHelper::estimateNumberOfBins(validParams, power);
+    const bool preserveEvents = static_cast<bool>(getProperty(PropertyNames::PRSRV_EVENTS));
     if (power != 0. && numBins > 10'001) { // this number of bins should only be considered an issue for power binning
       helpMessages[PropertyNames::POWER] = "This binning is expected to give " + std::to_string(numBins) + " bins.";
-    } else { // otherwise compare against available memory
+    } else if (!(eventInputWS && preserveEvents)) {
       size_t numSpec = inputWS->getNumberHistograms();
       std::size_t binSpaceInBytes = 2 * numSpec * numBins * sizeof(double); // memory required in bytes
       std::string memMsg = MemoryStats().checkAvailableMemory(binSpaceInBytes);
