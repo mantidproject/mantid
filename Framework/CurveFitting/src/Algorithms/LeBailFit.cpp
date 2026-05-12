@@ -832,7 +832,6 @@ void LeBailFit::parseInstrumentParametersTable() {
   std::map<std::string, double>::iterator dbliter;
   std::map<string, string>::iterator striter;
 
-  std::string colname;
   double dblvalue;
   std::string strvalue;
 
@@ -846,7 +845,7 @@ void LeBailFit::parseInstrumentParametersTable() {
 
     // c) Parse each term
     for (size_t icol = 0; icol < numcols; ++icol) {
-      colname = colnames[icol];
+      std::string colname = colnames[icol];
       if (colname != "FitOrTie" && colname != "Name") {
         // double data
         g_log.debug() << "Col-name = " << colname << ", ";

@@ -94,12 +94,11 @@ std::pair<size_t, size_t> DefaultEventLoader::setupChunking(std::vector<std::str
     const size_t total_events = std::accumulate(bankNumEvents.cbegin(), bankNumEvents.cend(), static_cast<size_t>(0));
     eventsPerChunk = total_events / totalChunks;
     // Sort banks by size
-    size_t tmp;
     std::string stmp;
     for (size_t i = 0; i < bankn; i++)
       for (size_t j = 0; j < bankn - 1; j++)
         if (bankNumEvents[j] < bankNumEvents[j + 1]) {
-          tmp = bankNumEvents[j];
+          size_t tmp = bankNumEvents[j];
           bankNumEvents[j] = bankNumEvents[j + 1];
           bankNumEvents[j + 1] = tmp;
           stmp = bankNames[j];
