@@ -13,7 +13,11 @@
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/cow_ptr.h"
 
+#include "MantidTypes/Core/DateAndTime.h"
+
 #include "MantidMDAlgorithms/MDWSDescription.h"
+
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -201,6 +205,20 @@ public:
    */
   virtual void setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWorkspace,
                                        Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const = 0;
+
+  /** Calculates 3D transformation of the variable coordinates depending on 3D coordinates
+   * and rotation angle for a given neutron even pulse time.
+   */
+  virtual bool calcMatrixCoordTime(const double &deltaEOrK0, std::vector<coord_t> &Coord, const DateAndTime &pulseTime,
+                                   double &s, double &err) const {
+    UNUSED_ARG(pulseTime);
+    return calcMatrixCoord(deltaEOrK0, Coord, s, err);
+  }
+
+  /**
+   * Returns if this transformation supports computing Q from log values at a given pulse-time
+   */
+  virtual bool usesPulseTime() const { return false; }
 };
 
 using MDTransf_sptr = std::shared_ptr<MDTransfInterface>;

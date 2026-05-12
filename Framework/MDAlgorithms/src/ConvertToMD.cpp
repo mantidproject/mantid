@@ -219,7 +219,7 @@ void ConvertToMD::exec() {
   std::vector<double> dimMax = getProperty("MaxValues");
 
   // Sanity check some options
-  if (QModReq != MDTransfQ3D().transfID()) {
+  if (!QModReq.starts_with(MDTransfQ3D().transfID())) {
     MDWSTransform transform;
     const std::string autoSelect = transform.getTargetFrames()[CnvrtToMD::AutoSelect];
     if (QFrame != autoSelect) {
@@ -452,7 +452,7 @@ bool ConvertToMD::buildTargetWSDescription(const API::IMDEventWorkspace_sptr &sp
 
   // Set optional projections for Q3D mode
   MDAlgorithms::MDWSTransform MsliceProj;
-  if (QModReq == MDTransfQ3D().transfID()) {
+  if (!QModReq.starts_with(MDTransfQ3D().transfID())) {
     try {
       // otherwise input uv are ignored -> later it can be modified to set ub
       // matrix if no given, but this may over-complicate things.

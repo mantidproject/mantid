@@ -83,6 +83,7 @@ set(SRC_FILES
     src/MDTransfModQ.cpp
     src/MDTransfNoQ.cpp
     src/MDTransfQ3D.cpp
+    src/MDTransfQ3DLog.cpp
     src/MDWSDescription.cpp
     src/MDWSTransform.cpp
     src/MagneticFormFactorCorrectionMD.cpp
@@ -206,6 +207,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/MDTransfModQ.h
     inc/MantidMDAlgorithms/MDTransfNoQ.h
     inc/MantidMDAlgorithms/MDTransfQ3D.h
+    inc/MantidMDAlgorithms/MDTransfQ3DLog.h
     inc/MantidMDAlgorithms/MDWSDescription.h
     inc/MantidMDAlgorithms/MDWSTransform.h
     inc/MantidMDAlgorithms/MagneticFormFactorCorrectionMD.h

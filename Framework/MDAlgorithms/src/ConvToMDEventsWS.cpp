@@ -56,7 +56,13 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
     double val = localUnitConv.convertUnits(it->tof());
     double signal = it->weight();
     double errorSq = it->errorSquared();
-    if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
+    bool ok;
+    if (m_QConverter->usesPulseTime()) {
+      ok = m_QConverter->calcMatrixCoordTime(val, locCoord, it->pulseTime(), signal, errorSq);
+    } else {
+      ok = m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq);
+    }
+    if (!ok)
       continue; // skip ND outside the range
 
     sig_err.emplace_back(static_cast<float>(signal));
