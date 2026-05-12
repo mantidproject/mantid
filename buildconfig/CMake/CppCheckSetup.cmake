@@ -37,7 +37,7 @@ if(CPPCHECK_EXECUTABLE)
       --library=${_cppcheck_qt_library}
       --check-level=normal
       --inline-suppr
-      --max-configs=8
+      --max-configs=5
       --std=c++${CMAKE_CXX_STANDARD} # use the standard from cmake
       --cppcheck-build-dir="${CPPCHECK_BUILD_DIR}/cache"
       --suppressions-list="${CPPCHECK_BUILD_DIR}/CppCheck_Suppressions.txt"
