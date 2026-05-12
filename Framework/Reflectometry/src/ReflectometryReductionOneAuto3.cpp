@@ -114,9 +114,6 @@ void ReflectometryReductionOneAuto3::validateTransmissionRun(std::map<std::strin
     // If it is not a group, we don't need to validate its size
     if (!transmissionGroup)
       return;
-    // Changed this validation, as it looks like we only use the first member of a group, in
-    // juxtaposition to the original error message.
-    // See original implementation of setTransmissionProperties
     g_log.warning("Transmission run provided as a group. Only the first member of the group will be used.");
     if (transmissionGroup->size() < 1) {
       results[transmissionRun] = transmissionRun + " group is empty. ";
@@ -348,7 +345,6 @@ void ReflectometryReductionOneAuto3::init() {
   declareProperty(std::make_unique<PropertyWithValue<bool>>("HideSummedWorkspaces", false, Direction::Input),
                   "Whether to hide the workspaces created from the sum banks step, if performed.");
 
-  // TO DO, do we need this?
   m_correctionProperties = CorrectionProperties{};
 }
 
