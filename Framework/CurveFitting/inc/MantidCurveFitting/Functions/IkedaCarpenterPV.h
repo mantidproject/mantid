@@ -43,11 +43,6 @@ public:
   void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
                           double endX) override;
 
-  /// Use log(parameter) as the active fitting variable for all parameters
-  /// except X0, to keep magnitudes well-scaled and enforce positivity.
-  [[nodiscard]] double activeParameter(size_t i) const override;
-  void setActiveParameter(size_t i, double value) override;
-
 protected:
   void functionLocal(double *out, const double *xValues, const size_t nData) const override;
   void functionDerivLocal(API::Jacobian *out, const double *xValues, const size_t nData) override;

@@ -130,38 +130,6 @@ void IkedaCarpenterPV::init() {
   this->lowerConstraint0("X0");
 }
 
-namespace {
-/// Parameters fit in log space for numerical stability; X0 is excluded because
-/// it is a peak position and may legitimately be at or near zero.
-bool isLogActive(const std::string &name) { return name != "X0"; }
-} // namespace
-
-double IkedaCarpenterPV::activeParameter(size_t i) const {
-  if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
-  }
-  if (isLogActive(parameterName(i))) {
-    const double p = getParameter(i);
-    // Floor protects against log(0) on freshly-initialized functions (e.g. I=0
-    // before setHeight() is called). Once fitting is under way, the boundary
-    // constraint keeps values above zero.
-    const double floor = std::numeric_limits<double>::min();
-    return std::log(p > floor ? p : floor);
-  }
-  return getParameter(i);
-}
-
-void IkedaCarpenterPV::setActiveParameter(size_t i, double value) {
-  if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
-  }
-  if (isLogActive(parameterName(i))) {
-    setParameter(i, std::exp(value), false);
-  } else {
-    setParameter(i, value, false);
-  }
-}
-
 void IkedaCarpenterPV::lowerConstraint0(const std::string &paramName) {
   auto mixingConstraint = std::make_unique<BoundaryConstraint>(this, paramName, 0.0, true);
   mixingConstraint->setPenaltyFactor(1e9);
@@ -608,16 +576,14 @@ void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *jacobian, const double 
     const double df_ddiff = IQ * (one_minus_eta * dG_dd - etaTwoOverPi * dL_dd);
 
     // -- Chain rule to Mantid fit parameters --
-    // All parameters except X0 are fit in log space (see activeParameter), so
-    // their Jacobian columns are df/d(log p) = p * df/dp.
     const double neg_alpha2 = -alpha2;
-    jacobian->set(i, 0, df_dI * I);
-    jacobian->set(i, 1, df_dalpha * neg_alpha2 * alpha0);
-    jacobian->set(i, 2, df_dalpha * neg_alpha2 * lambda * alpha1);
-    jacobian->set(i, 3, df_dbeta * (-beta2) * beta0);
-    jacobian->set(i, 4, df_dR * R * 81.799 * kappa2_inv / lambda2 * kappa);
-    jacobian->set(i, 5, (df_dS * dSdV + df_dH * dHdV + df_deta * deta_dV) * voigtSigmaSq);
-    jacobian->set(i, 6, (df_dS * dSdL + df_dH * dHdL + df_deta * deta_dL) * voigtGamma);
+    jacobian->set(i, 0, df_dI);
+    jacobian->set(i, 1, df_dalpha * neg_alpha2);
+    jacobian->set(i, 2, df_dalpha * neg_alpha2 * lambda);
+    jacobian->set(i, 3, df_dbeta * (-beta2));
+    jacobian->set(i, 4, df_dR * R * 81.799 * kappa2_inv / lambda2);
+    jacobian->set(i, 5, df_dS * dSdV + df_dH * dHdV + df_deta * deta_dV);
+    jacobian->set(i, 6, df_dS * dSdL + df_dH * dHdL + df_deta * deta_dL);
     jacobian->set(i, 7, -df_ddiff);
   }
 }
