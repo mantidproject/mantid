@@ -22,7 +22,7 @@ class CalibrationModel(object):
         if save_dir is None:
             save_dir = output_settings.get_output_path()
         full_calib = load_full_instrument_calibration(instrument)
-        self._saved_prm_file = EnggUtils.create_new_calibration(calibration, rb_num, plot_output, save_dir, full_calib)
+        self._saved_prm_file = EnggUtils.create_new_calibration(calibration, rb_num, plot_output, save_dir, full_calib, False)
 
     def load_existing_calibration_files(self, calibration, instrument):
         load_full_instrument_calibration(instrument)

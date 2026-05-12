@@ -339,7 +339,7 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_i
         PeakPositions=default_ceria_expected_peaks(final=True),
         TofBinning=calibration.config.calibration_tof_binning,
         PeakWindow=default_ceria_expected_peak_windows(final=True),
-        MinimumPeakHeight=0.5,
+        MinimumPeakHeight=0.1,
         PeakFunction=peak_func,
         CalibrationParameters="DIFC+TZERO+DIFA",
         UseChiSq=True,
