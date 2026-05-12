@@ -1256,7 +1256,7 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       samePeakCrossSpectrum = false;
     }
 
-    // Set starting values of the peak function
+    // Set starting values of the peak function.
     if (samePeakCrossSpectrum) { // somePeakFit
       // Get from local best result
       for (size_t i = 0; i < peakfunction->nParams(); ++i) {

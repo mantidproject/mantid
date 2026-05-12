@@ -66,16 +66,6 @@ private:
 
   /// constrain all parameters to be non-negative
   void lowerConstraint0(const std::string &paramName);
-
-  /// Re-apply any fixed tags from the IDF as fix() on the function. The base class
-  /// IFunction::setMatrixWorkspace applies these only for parameters that
-  /// are not already marked explicitlySet, so any earlier setParameter()
-  /// call (from the user, from cross-peak inheritance, etc.) suppresses the
-  /// re-application. Inherited or user-supplied values are preserved; only
-  /// the fixed tag is re-applied so the moderator constants stay locked
-  /// across successive setMatrixWorkspace invocations instead of being left
-  /// active and drifting during the next fit.
-  void refixIDFFixedParameters(const std::shared_ptr<const API::MatrixWorkspace> &workspace, size_t wi);
 };
 
 } // namespace Functions
