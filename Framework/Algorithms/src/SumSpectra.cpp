@@ -333,10 +333,9 @@ specnum_t SumSpectra::getOutputSpecNo(const MatrixWorkspace_const_sptr &localwor
   // the total number of spectra
   size_t totalSpec = localworkspace->getNumberHistograms();
 
-  specnum_t temp;
   for (const auto index : m_indices) {
     if (index < totalSpec) {
-      temp = localworkspace->getSpectrum(index).getSpectrumNo();
+      specnum_t temp = localworkspace->getSpectrum(index).getSpectrumNo();
       if (temp < specId)
         specId = temp;
     }

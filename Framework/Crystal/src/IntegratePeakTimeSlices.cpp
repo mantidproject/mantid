@@ -346,9 +346,6 @@ void IntegratePeakTimeSlices::exec() {
 
     //------------------------------------- Start the Integrating
     //-------------------------------
-    double time;
-    int ncells;
-
     Mantid::API::Progress prog(this, 0.0, 1.0, dChan);
 
     // Set from attributes replace by m_R0
@@ -378,7 +375,7 @@ void IntegratePeakTimeSlices::exec() {
           if (topIndex >= X.size())
             topIndex = X.size() - 1;
 
-          time = (X[xchan] + X[topIndex]) / 2.0;
+          double time = (X[xchan] + X[topIndex]) / 2.0;
 
           double Radius = R;
 
@@ -398,7 +395,7 @@ void IntegratePeakTimeSlices::exec() {
           // if( dir==1 && chan ==0)
           //    origAttributeList= m_AttributeValues;
 
-          ncells = static_cast<int>(m_AttributeValues->StatBaseVals(ISS1));
+          int ncells = static_cast<int>(m_AttributeValues->StatBaseVals(ISS1));
 
           std::vector<double> params;
           std::vector<double> errs;
