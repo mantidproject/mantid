@@ -23,7 +23,7 @@ if(CPPCHECK_EXECUTABLE)
       --disable=unusedFunction
       # Adding qt here helps with mis-identifying Qt macros as unknownMacro defects.
       --library=qt
-      --check-level=normal
+      --check-level=exhaustive
       --inline-suppr
       --max-configs=5
       --std=c++${CMAKE_CXX_STANDARD} # use the standard from cmake
