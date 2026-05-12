@@ -52,10 +52,9 @@ find -name cppcheck.xml -delete
 pixi run --frozen cmake --preset=cppcheck-ci -DCPPCHECK_NUM_THREADS=$BUILD_THREADS ..
 
 # Run cppcheck
-pixi run --frozen cmake --build . --target cppcheck 2>&1 | tee $WORKSPACE/build/cppcheck_build.log
+pixi run --frozen cmake --build . --target cppcheck
 
-echo "=== Slowest files ==="
-grep "Check time:" ${WORKSPACE}/build/cppcheck_build.log
+echo "=== run complete! ==="
 
 # Generate HTML report
 pixi run --frozen cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-report
