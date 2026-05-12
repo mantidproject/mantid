@@ -33,7 +33,7 @@ if(CPPCHECK_EXECUTABLE)
       --checkers-report=${CMAKE_BINARY_DIR}/cppcheck_checkers_reports.txt
       -i"${CMAKE_BINARY_DIR}"
       --max-ctu-depth=2
-      --performance-valueflow-max-if-count=50
+      --performance-valueflow-max-if-count=30
       # Force cppcheck to check when we use project-wide macros
       -DDLLExport=
       -DMANTID_ALGORITHMS_DLL=
