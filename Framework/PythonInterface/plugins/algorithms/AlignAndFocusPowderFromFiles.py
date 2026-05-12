@@ -77,6 +77,43 @@ PROPS_FOR_ALIGN.extend(PROPS_IN_PD_CHARACTER)
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
 PROPS_FOR_PD_CHARACTER = ["FrequencyLogNames", "WaveLengthLogNames"]
 
+# Properties mandatory in AAFPSlim but not in FromFiles
+_SLIM_REQUIRED_PROPS = ["PrimaryFlightPath", "L2", "Polar"]
+# Properties that block use of AAFPSlim entirely
+_SLIM_BLOCKING_PROPS = [
+    "AbsorptionWorkspace",
+    "CalibrationWorkspace",
+    "OffsetsWorkspace",
+    "MaskWorkspace",
+    "MaskBinTable",
+    "ResampleX",
+    "PreserveEvents",
+    "RemovePromptPulseWidth",
+    "ResonanceFilterUnits",
+    "ResonanceFilterLowerLimits",
+    "ResonanceFilterUpperLimits",
+    "CompressWallClockTolerance",
+    "CompressStartTime",
+    "LorentzCorrection",
+    "UnwrapRef",
+    "LowResRef",
+    "LowResSpectrumOffset",
+    "TMin",
+    "TMax",
+    "CropWavelengthMin",
+    "CropWavelengthMax",
+    "UnfocussedWorkspace",
+    # ReductionProperties are not currently supported
+    "ReductionProperties",
+    # Characterizations-driven TOF/wavelength range filtering cannot be mapped yet
+    "Characterizations",
+    "FrequencyLogNames",
+    "WavelengthLogNames",
+]
+
+# Bytes per event (neutron event record size) used for MaxChunkSize → ReadSizeFromDisk conversion
+_BYTES_PER_EVENT = 24
+
 
 def determineCompression(filename, compression, chunking, absorption):
     if compression == 0.0 or chunking > 0.0 or absorption:
@@ -178,6 +215,10 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         self.declareProperty(
             StringArrayProperty(name="LogBlockList"),
             "If specified, these logs will not be loaded from the file. This is passed to LoadEventNexus",
+        )
+
+        self.declareProperty(
+            "AllowSlimProcess", True, doc="Allow using the AlignAndFocusPowderSlim algorithm if the file and properties are compatible"
         )
 
         self.copyProperties("AlignAndFocusPowder", PROPS_FOR_ALIGN)
@@ -636,7 +677,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             self.__mskWksp = self.instr + "_mask"
 
         # check that anything was specified
-        if self.getProperty("CalFileName").isDefault and self.getProperty("GroupFilename").isDefault:
+        if self.getProperty(CAL_FILE).isDefault and self.getProperty(GROUP_FILE).isDefault:
             self.kwargs = self.__getAlignAndFocusArgs()
             return
 
@@ -652,10 +693,15 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
             tmin_val = self.__getAlignAndFocusArgs().get("TMin", 0.0)
 
+            calfile = self.getPropertyValue(CAL_FILE)
+            if not calfile:
+                # LoadDiffCal needs a filename, could have been giving as grouping file
+                calfile = self.getPropertyValue(GROUP_FILE)
+
             LoadDiffCal(
                 InputWorkspace=wksp,
-                Filename=self.getPropertyValue("CalFileName"),
-                GroupFilename=self.getPropertyValue("GroupFilename"),
+                Filename=calfile,
+                GroupFilename=self.getPropertyValue(GROUP_FILE),
                 MakeCalWorkspace=loadCalibration,
                 MakeGroupingWorkspace=loadGrouping,
                 MakeMaskWorkspace=loadMask,
@@ -672,6 +718,123 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             self.__mskWksp = self.instr + "_mask"
             self.setPropertyValue("MaskWorkspace", self.instr + "_mask")
         self.kwargs = self.__getAlignAndFocusArgs()
+
+    def __canUseSlim(self):
+        """Check whether AlignAndFocusPowderSlim can replace the normal processing path."""
+
+        if not self.getProperty("AllowSlimProcess").value:
+            return False
+
+        # Check that all required properties are set
+        for prop in _SLIM_REQUIRED_PROPS:
+            if self.getProperty(prop).isDefault:
+                return False
+
+        # Check hard blockers
+        for prop in _SLIM_BLOCKING_PROPS:
+            if not self.getProperty(prop).isDefault:
+                return False
+
+        # AAFPSlim only accepts a single file
+        if len(self._filenames) != 1:
+            return False
+
+        # Params (TOF rebinning) must be either unset or a simple [xmin, delta, xmax] triple;
+        # multi-range Params (>3 values) cannot be expressed in Slim's per-group arrays simply
+        if not self.getProperty("Params").isDefault:
+            if len(self.getProperty("Params").value) != 3:
+                return False
+
+        return True
+
+    def __runSlim(self, outputname):
+        """Call AlignAndFocusPowderSlim and store the result under *outputname*."""
+        from mantid.simpleapi import AlignAndFocusPowderSlim, LoadDiffCal
+
+        # All properties that are simply mapped
+        kwargs = {
+            "Filename": self._filenames[0],
+            "OutputWorkspace": outputname,
+        }
+        propertyMap = {
+            "CalFileName": CAL_FILE,
+            "L1": "PrimaryFlightPath",
+            "L2": "L2",
+            "Polar": "Polar",
+            "Azimuthal": "Azimuthal",
+            "LogAllowList": "LogAllowList",
+            "LogBlockList": "LogBlockList",
+        }
+        for slimProp, thisProp in propertyMap.items():
+            kwargs[slimProp] = self.getPropertyValue(thisProp)
+
+        # Properties requiring special mapping
+
+        # whether or not to use dSpacing
+        kwargs["BinningUnits"] = "dSpacing" if self.getProperty("Dspacing").value else "TOF"
+
+        # binning ranges: could be per-group arrays, or simple [min, delta, max]
+        if (
+            not self.getProperty("DMin").isDefault
+            or not self.getProperty("DMax").isDefault
+            or not self.getProperty("DeltaRagged").isDefault
+        ):
+            kwargs["BinningUnits"] = "dSpacing"
+            if not self.getProperty("DMin").isDefault:
+                kwargs["XMin"] = list(self.getProperty("DMin").value)
+            if not self.getProperty("DMax").isDefault:
+                kwargs["XMax"] = list(self.getProperty("DMax").value)
+            if not self.getProperty("DeltaRagged").isDefault:
+                kwargs["XDelta"] = list(self.getProperty("DeltaRagged").value)
+        elif not self.getProperty("Params").isDefault:
+            params = self.getProperty("Params").value
+            kwargs["XMin"] = [float(params[0])]
+            kwargs["XDelta"] = [float(params[1])]
+            kwargs["XMax"] = [float(params[2])]
+
+        # grouping: workspace takes priority, or load from file
+        if not self.getProperty(GRP_WKSP).isDefault:
+            print("GROUPING WORKSPACE", self.getPropertyValue(GRP_WKSP))
+            kwargs["GroupingWorkspace"] = self.getPropertyValue(GRP_WKSP)
+        elif not self.getProperty(GROUP_FILE).isDefault:
+            print("GROUPING FILE", self.getPropertyValue(GROUP_FILE))
+            file = self.getPropertyValue(GROUP_FILE)
+            print("GROUPING FILE", file)
+            grp_wksp_name = self.instr + "_slim_group"
+            LoadDiffCal(
+                Filename=self.getPropertyValue(GROUP_FILE),
+                MakeCalWorkspace=False,
+                MakeGroupingWorkspace=True,
+                MakeMaskWorkspace=False,
+                WorkspaceName=self.instr + "_slim",
+            )
+            print("GROUPING WKSP", grp_wksp_name)
+            kwargs["GroupingWorkspace"] = grp_wksp_name
+
+        # chunk size
+        if not self.getProperty("MaxChunkSize").isDefault and self.chunkSize > 0.0:
+            bytes_total = self.chunkSize * 1024**3
+            kwargs["ReadSizeFromDisk"] = int(bytes_total / _BYTES_PER_EVENT)
+
+        # bad pulse filtering
+        if self.filterBadPulses > 0.0:
+            kwargs["FilterBadPulses"] = True
+            kwargs["BadPulsesLowerCutoff"] = self.filterBadPulses
+
+        # TODO Characterizations and ReductionProperties
+
+        AlignAndFocusPowderSlim(**kwargs)
+
+        # post-processing: apply SpectrumIDs renaming if requested ---
+        if not self.getProperty("SpectrumIDs").isDefault:
+            from mantid.simpleapi import EditInstrumentGeometry
+
+            EditInstrumentGeometry(
+                Workspace=outputname,
+                SpectrumIDs=self.getProperty("SpectrumIDs").value,
+            )
+
+        # TODO CacheDir?
 
     def PyExec(self):
         self._filenames = sorted(self.__getLinearizedFilenames("Filename"))
@@ -693,6 +856,22 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         # accumulate the unfocused workspace if it was requested
         # empty string means it is not used
         finalunfocusname = self.getPropertyValue("UnfocussedWorkspace")
+        print("HELLO WORLD")
+        # ------------------------------------------------------------------ #
+        # Fast path: delegate entirely to AlignAndFocusPowderSlim when the   #
+        # inputs are compatible with its more restricted interface.           #
+        # ------------------------------------------------------------------ #
+        if self.__canUseSlim():
+            print("CAN USE SLIM")
+            self.log().notice("AlignAndFocusPowderFromFiles: delegating to AlignAndFocusPowderSlim for faster single-file processing.")
+            self.__runSlim(finalname)
+            self.setProperty("OutputWorkspace", mtd[finalname])
+
+            # TODO CacheDir?
+            print("DID USE SLIM")
+
+            return
+        # ------------------------------------------------------------------ #
 
         # determing compression
         self.do_compression = determineCompression(
