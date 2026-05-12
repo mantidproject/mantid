@@ -29,7 +29,8 @@ class SettingsPresenterTest(unittest.TestCase):
             "contour_kernel": "2.0",
             "cost_func_thresh": "100",
             "dSpacing_min": 1.0,
-            "default_peak": "BackToBackExponential",
+            "default_peak_ENGINX": "BackToBackExponential",
+            "default_peak_IMAT": "IkedaCarpenterPV",
             "euler_angles_scheme": "YZY",
             "euler_angles_sense": "1,-1,1",
             "full_calibration_ENGINX": "cal",
@@ -64,7 +65,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view.get_checked_logs.return_value = self.settings["logs"][:]
         self.view.get_primary_log.return_value = self.settings["primary_log"] if not blank_log else ""
         self.view.get_ascending_checked.return_value = self.settings["sort_ascending"]
-        self.view.get_peak_function.return_value = self.settings["default_peak"]
+        self.view.get_peak_function.return_value = self.settings[f"default_peak_{self.presenter.instrument}"]
         self.view.get_path_to_gsas2.return_value = self.settings["path_to_gsas2"]
         self.view.get_timeout.return_value = self.settings["timeout"]
         self.view.get_dSpacing_min.return_value = self.settings["dSpacing_min"]
@@ -127,7 +128,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view.set_checked_logs.assert_called_with(self.settings["logs"])
         self.view.set_primary_log_combobox.assert_called_with(self.settings["primary_log"])
         self.view.set_ascending_checked.assert_called_with(self.settings["sort_ascending"])
-        self.view.set_peak_function.assert_called_with(self.settings["default_peak"])
+        self.view.set_peak_function.assert_called_with(self.settings[f"default_peak_{self.presenter.instrument}"])
 
     @patch(dir_path + ".path.isfile")
     def test_save_settings_and_close(self, mock_isfile):
@@ -154,6 +155,8 @@ class SettingsPresenterTest(unittest.TestCase):
         self.presenter.model.validate_settings.return_value = {
             "full_calibration_ENGINX": "enginx_calib.nxs",
             "full_calibration_IMAT": "imat_calib.nxs",
+            "default_peak_ENGINX": "BackToBackExponential",
+            "default_peak_IMAT": "IkedaCarpenterPV",
         }
 
         self.presenter.set_instrument_override(0)

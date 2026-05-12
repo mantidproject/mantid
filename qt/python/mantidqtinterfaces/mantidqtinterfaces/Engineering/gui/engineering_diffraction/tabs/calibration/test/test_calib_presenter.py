@@ -198,7 +198,7 @@ class CalibrationPresenterTest(unittest.TestCase):
 
         self.presenter.on_calibrate_clicked()
 
-        self.model.load_existing_calibration_files.assert_called_with(self.presenter.current_calibration)
+        self.model.load_existing_calibration_files.assert_called_with(self.presenter.current_calibration, self.presenter.instrument)
         self.presenter.current_calibration.set_calibration_from_prm_fname.assert_called_with(prm_filepath, self.presenter.instrument)
         self.presenter.calibration_notifier.notify_subscribers.assert_called_once()
         self.assertEqual(2, mock_setting.call_count)
