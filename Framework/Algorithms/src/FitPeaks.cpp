@@ -1253,16 +1253,23 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       samePeakCrossSpectrum = false;
     }
 
-    // Set starting values of the peak function
+    // Set starting values of the peak function. Use explicitlySet=false so
+    // that the subsequent setMatrixWorkspace call still re-evaluates
+    // centre-dependent IDF formulas and re-applies any <fixed/> ties for the
+    // new peak's d-spacing. Marking these as explicit would suppress the
+    // base class's IDF lookup (which only applies to non-explicitly-set
+    // parameters), leaving stale shape parameters and unfixed moderator
+    // constants from the previous peak's fit -- catastrophic for any peak
+    // function that relies on the IDF to pin calibration quantities.
     if (samePeakCrossSpectrum) { // somePeakFit
       // Get from local best result
       for (size_t i = 0; i < peakfunction->nParams(); ++i) {
-        peakfunction->setParameter(i, lastGoodPeakParameters[peak_index][i]);
+        peakfunction->setParameter(i, lastGoodPeakParameters[peak_index][i], false);
       }
     } else if (neighborPeakSameSpectrum && m_copyLastGoodPeakParameters) {
       // set the peak parameters from last good fit from ANY peak in the spectrum
       for (size_t i = 0; i < peakfunction->nParams(); ++i) {
-        peakfunction->setParameter(i, lastGoodPeakParameters[prev_peak_index][i]);
+        peakfunction->setParameter(i, lastGoodPeakParameters[prev_peak_index][i], false);
       }
     }
 
