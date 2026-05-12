@@ -45,7 +45,7 @@ class_X_Y
 // ----------------- Upstream libs ---------------
 
 // All ANN files as they are upstream anyway
-*:*${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ANN/*
+*:**${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ANN/**
 
 // ----------- Internal cppcheck errors from cppcheck 2.18.1 -------------
 internalError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/BitInterleaving.h:169
