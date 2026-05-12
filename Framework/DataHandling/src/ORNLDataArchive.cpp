@@ -19,6 +19,7 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
+#include <map>
 
 using Mantid::Catalog::Exception::CatalogError;
 using Mantid::Catalog::ONCat::ONCat;

@@ -311,6 +311,18 @@ public:
     }
   }
 
+  void testFindFilesFromVectorHintsPreservesOrder() {
+    ConfigService::Instance().setString("default.facility", "ISIS");
+    ConfigService::Instance().setString("datasearch.searcharchive", "Off");
+
+    const auto files = FileFinder::Instance().findRuns(std::vector<std::string>{"MUSR15191", "MUSR15189"});
+    TS_ASSERT_EQUALS(files.size(), 2);
+    TS_ASSERT(std::filesystem::exists(files[0]));
+    TS_ASSERT(std::filesystem::exists(files[1]));
+    TS_ASSERT(files[0].filename().string().find("15191") != std::string::npos);
+    TS_ASSERT(files[1].filename().string().find("15189") != std::string::npos);
+  }
+
   void testThatGetUniqueExtensionsPreservesOrder() {
     auto &fileFinder = FileFinder::Instance();
     fileFinder.setCaseSensitive(false);
