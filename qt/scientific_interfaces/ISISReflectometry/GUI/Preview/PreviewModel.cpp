@@ -189,7 +189,7 @@ std::optional<double> PreviewModel::getThetaFromLogs(const std::string &logName)
   if (!run.hasProperty(logName)) {
     return std::nullopt;
   }
-  Property *logData = run.getLogData(logName);
+  const Property *logData = run.getLogData(logName);
   auto logPWV = dynamic_cast<const PropertyWithValue<double> *>(logData);
   auto logTSP = dynamic_cast<const TimeSeriesProperty<double> *>(logData);
 

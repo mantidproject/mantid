@@ -583,7 +583,7 @@ void QtButtonPropertyBrowser::setExpanded(QtBrowserItem *item, bool expanded) {
 */
 
 bool QtButtonPropertyBrowser::isExpanded(QtBrowserItem *item) const {
-  QtButtonPropertyBrowserPrivate::WidgetItem *itm = d_ptr->m_indexToItem.value(item);
+  const QtButtonPropertyBrowserPrivate::WidgetItem *itm = d_ptr->m_indexToItem.value(item);
   if (itm)
     return itm->expanded;
   return false;

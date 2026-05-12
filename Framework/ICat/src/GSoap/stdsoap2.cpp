@@ -2093,7 +2093,7 @@ void SOAP_FMAC2 soap_update_pointers(struct soap *soap, char *start, char *end, 
 static int soap_has_copies(struct soap *soap, const char *start, const char *end) {
   int i;
   struct soap_ilist *ip = nullptr;
-  struct soap_flist *fp = nullptr;
+  const struct soap_flist *fp = nullptr;
   const char *p;
   for (i = 0; i < SOAP_IDHASH; i++) {
     for (ip = soap->iht[i]; ip; ip = ip->next) {
@@ -2566,7 +2566,7 @@ void SOAP_FMAC2 soap_pop_namespace(struct soap *soap) {
 #ifndef PALM_2
 SOAP_FMAC1
 int SOAP_FMAC2 soap_match_namespace(struct soap *soap, const char *id1, const char *id2, size_t n1, size_t n2) {
-  struct soap_nlist *np = soap->nlist;
+  const struct soap_nlist *np = soap->nlist;
   const char *s;
   while (np && (strncmp(np->id, id1, n1) || np->id[n1]))
     np = np->next;
@@ -2588,7 +2588,7 @@ int SOAP_FMAC2 soap_match_namespace(struct soap *soap, const char *id1, const ch
 #ifndef PALM_2
 SOAP_FMAC1
 const char *SOAP_FMAC2 soap_current_namespace(struct soap *soap, const char *tag) {
-  struct soap_nlist *np;
+  const struct soap_nlist *np;
   const char *s;
   if (!tag || !strncmp(tag, "xml", 3))
     return nullptr;
@@ -3417,7 +3417,8 @@ static const char *tcp_error(struct soap *soap) {
 #ifndef PALM_1
 static int tcp_gethost(struct soap *soap, const char *addr, struct in_addr *inaddr) {
   soap_int32 iadd = -1;
-  struct hostent hostent, *host = &hostent;
+  struct hostent hostent;
+  const struct hostent *host = &hostent;
 #ifdef VXWORKS
   int hostint;
   /* inet_addr(), and hostGetByName() expect "char *"; addr is a "const char *".
@@ -4030,7 +4031,7 @@ again:
                 if (val) {
                   int j;
                   for (j = 0; j < sk_CONF_VALUE_num(val); j++) {
-                    CONF_VALUE *nval = sk_CONF_VALUE_value(val, j);
+                    const CONF_VALUE *nval = sk_CONF_VALUE_value(val, j);
                     if (nval && !strcmp(nval->name, "DNS") && !strcmp(nval->value, host)) {
                       ok = 1;
                       break;
@@ -4053,7 +4054,7 @@ again:
         if (val) {
           int j;
           for (j = 0; j < sk_CONF_VALUE_num(val); j++) {
-            CONF_VALUE *nval = sk_CONF_VALUE_value(val, j);
+            const CONF_VALUE *nval = sk_CONF_VALUE_value(val, j);
             if (nval && !strcmp(nval->name, "DNS") && !strcmp(nval->value, host)) {
               ok = 1;
               break;
@@ -7336,7 +7337,7 @@ int SOAP_FMAC2 soap_unlink(struct soap *soap, const void *p) {
 #ifndef PALM_2
 SOAP_FMAC1
 int SOAP_FMAC2 soap_lookup_type(struct soap *soap, const char *id) {
-  struct soap_ilist *ip;
+  const struct soap_ilist *ip;
   if (id && *id) {
     ip = soap_lookup(soap, id);
     if (ip) {
@@ -8079,7 +8080,8 @@ struct soap *SOAP_FMAC2 soap_copy_context(struct soap *copy, const struct soap *
 #ifndef PALM_1
 SOAP_FMAC1
 void SOAP_FMAC2 soap_copy_stream(struct soap *copy, struct soap *soap) {
-  struct soap_attribute *tp = nullptr, *tq;
+  struct soap_attribute *tp = nullptr;
+  const struct soap_attribute *tq;
   if (copy == soap)
     return;
   copy->mode = soap->mode;
@@ -8761,7 +8763,7 @@ static struct soap_nlist *soap_push_ns(struct soap *soap, const char *id, const 
 
 #ifndef WITH_LEAN
 static void soap_utilize_ns(struct soap *soap, const char *tag) {
-  struct soap_nlist *np;
+  const struct soap_nlist *np;
   size_t n = 0;
   const char *t = strchr(tag, ':');
   if (t)
@@ -9278,7 +9280,7 @@ int SOAP_FMAC2 soap_element_href(struct soap *soap, const char *tag, int id, con
 #ifndef PALM_1
 SOAP_FMAC1
 int SOAP_FMAC2 soap_element_null(struct soap *soap, const char *tag, int id, const char *type) {
-  struct soap_attribute *tp = nullptr;
+  const struct soap_attribute *tp = nullptr;
   for (tp = soap->attributes; tp; tp = tp->next)
     if (tp->visible)
       break;
@@ -9504,7 +9506,7 @@ int SOAP_FMAC2 soap_element_end_in(struct soap *soap, const char *tag) {
 #ifndef PALM_2
 SOAP_FMAC1
 const char *SOAP_FMAC2 soap_attr_value(struct soap *soap, const char *name, int flag) {
-  struct soap_attribute *tp;
+  const struct soap_attribute *tp;
   if (*name == '-')
     return SOAP_STR_EOS;
   for (tp = soap->attributes; tp; tp = tp->next) {
@@ -9554,11 +9556,11 @@ int SOAP_FMAC2 soap_set_attr(struct soap *soap, const char *name, const char *va
           if (strncmp((*tpp)->name, "xmlns", 5) && ((*tpp)->ns || strcmp((*tpp)->name, name) > 0))
             break;
       } else {
-        struct soap_nlist *np = soap_lookup_ns(soap, name, s - name);
+        const struct soap_nlist *np = soap_lookup_ns(soap, name, s - name);
         if (np)
           tp->ns = np->ns;
         else {
-          struct soap_attribute *tq;
+          const struct soap_attribute *tq;
           for (tq = soap->attributes; tq; tq = tq->next) {
             if (!strncmp(tq->name, "xmlns:", 6) && !strncmp(tq->name + 6, name, s - name) && !tq->name[6 + s - name]) {
               tp->ns = tq->ns;
@@ -10247,7 +10249,7 @@ char *SOAP_FMAC2 soap_string_in(struct soap *soap, int flag, long minlen, long m
   DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Reading string content, flag=%d\n", flag));
   if (soap->peeked && *soap->tag) {
 #ifndef WITH_LEAN
-    struct soap_attribute *tp;
+    const struct soap_attribute *tp;
     DBGLOG(TEST, SOAP_MESSAGE(fdebug, "String content includes tag '%s' and attributes\n", soap->tag));
     t = soap->tmpbuf;
     *t = '<';
@@ -10805,7 +10807,7 @@ wchar_t *SOAP_FMAC2 soap_wstring_in(struct soap *soap, int flag, long minlen, lo
   if (soap->peeked) {
     if (*soap->tag) {
 #ifndef WITH_LEAN
-      struct soap_attribute *tp;
+      const struct soap_attribute *tp;
       t = soap->tmpbuf;
       *t = '<';
       t[sizeof(soap->tmpbuf) - 1] = '\0';
@@ -11880,7 +11882,7 @@ int SOAP_FMAC2 soap_s2QName(struct soap *soap, const char *s, char **t, long min
     /* convert (by prefix normalize prefix) all QNames in s */
     for (;;) {
       size_t n;
-      struct soap_nlist *np;
+      const struct soap_nlist *np;
       const char *p;
       /* skip blanks */
       while (*s && soap_blank((soap_wchar)*s))
@@ -12276,7 +12278,8 @@ time_t SOAP_FMAC2 soap_timegm(struct tm *T) {
 #ifndef WITH_LEAN
 SOAP_FMAC1
 const char *SOAP_FMAC2 soap_dateTime2s(struct soap *soap, time_t n) {
-  struct tm T, *pT = &T;
+  struct tm T;
+  const struct tm *pT = &T;
 #if defined(HAVE_GMTIME_R)
   if (gmtime_r(&n, pT))
     strftime(soap->tmpbuf, sizeof(soap->tmpbuf), "%Y-%m-%dT%H:%M:%SZ", pT);
@@ -13568,7 +13571,7 @@ static void soap_select_mime_boundary(struct soap *soap) {
 #ifndef WITH_LEANER
 #ifndef PALM_1
 static int soap_valid_mime_boundary(struct soap *soap) {
-  struct soap_multipart *content;
+  const struct soap_multipart *content;
   size_t k;
   if (soap->fmimeread)
     return SOAP_OK;
@@ -15218,7 +15221,7 @@ int SOAP_FMAC2 soap_set_receiver_error(struct soap *soap, const char *faultstrin
 #ifndef PALM_2
 static int soap_copy_fault(struct soap *soap, const char *faultcode, const char *faultsubcodeQName,
                            const char *faultstring, const char *faultdetailXML) {
-  char *r = nullptr, *s = nullptr, *t = nullptr;
+  const char *r = nullptr, *s = nullptr, *t = nullptr;
   if (faultsubcodeQName)
     r = soap_strdup(soap, faultsubcodeQName);
   if (faultstring)
@@ -15408,7 +15411,7 @@ int SOAP_FMAC2 soap_register_plugin_arg(struct soap *soap, int (*fcreate)(struct
 
 #ifndef PALM_1
 static void *fplugin(struct soap *soap, const char *id) {
-  struct soap_plugin *p;
+  const struct soap_plugin *p;
   for (p = soap->plugins; p; p = p->next)
     if (p->id == id || !strcmp(p->id, id))
       return p->data;

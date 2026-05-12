@@ -790,7 +790,7 @@ double ReflectometryWorkflowBase2::getThetaFromLogs(const MatrixWorkspace_sptr &
                                                     const std::string &logName) const {
   double theta = -1.;
   const Mantid::API::Run &run = inputWs->run();
-  Property *logData = run.getLogData(logName);
+  const Property *logData = run.getLogData(logName);
   auto logPWV = dynamic_cast<const PropertyWithValue<double> *>(logData);
   auto logTSP = dynamic_cast<const TimeSeriesProperty<double> *>(logData);
 
