@@ -704,7 +704,7 @@ class MantidAxes(Axes):
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalization_type, kwargs = datafunctions.get_normalization_type(workspace, self, **kwargs)
-            if hasattr(workspace, "isDistribution") and workspace.isDistribution():
+            if normalization_type == PlotNormalizationType.NONE and hasattr(workspace, "isDistribution") and workspace.isDistribution():
                 normalization_type = PlotNormalizationType.BIN_WIDTH
             if isinstance(workspace, MatrixWorkspace):
                 kwargs = get_plot_specific_properties(workspace, workspace.getPlotType(), kwargs)

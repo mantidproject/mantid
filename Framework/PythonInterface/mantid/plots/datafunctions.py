@@ -66,7 +66,7 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     """
     Determine whether or not the workspace should be plotted as a
     distribution. If the workspace is a distribution return False, else,
-    if there is already a curves on the axes, return according to
+    if there are already curves on the axes, return according to
     whether those curves are distributions. Else go by the global
     setting.
     :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
@@ -104,8 +104,6 @@ def get_normalization_type(workspace, axes, **kwargs):
     2. Else if 'normalize_by_bin_width' in kwargs, convert bool to enum
     3. Else infer via get_normalize_by_bin_width() and convert to enum
 
-    Note: Does NOT pop from kwargs (reader only, idempotent).
-
     :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
     :param axes: The axes being plotted on
     :param kwargs: Plot keyword arguments
@@ -118,14 +116,25 @@ def get_normalization_type(workspace, axes, **kwargs):
             return PlotNormalizationType[norm_type], kwargs
         return norm_type, kwargs
 
-    if "normalize_by_bin_width" in kwargs:
-        normalize_by_bin_width = kwargs["normalize_by_bin_width"]
-        norm_type = PlotNormalizationType.BIN_WIDTH if normalize_by_bin_width else PlotNormalizationType.NONE
-        return norm_type, kwargs
+    # check if there are current artists that are all normalized by inverse Q^4
+    if _all_normalized_by_inverse_q_fourth_power(axes):
+        return PlotNormalizationType.INVERSE_Q_FOURTH_POWER, kwargs
 
     normalize_by_bin_width, _ = get_normalize_by_bin_width(workspace, axes, **kwargs)
     norm_type = PlotNormalizationType.BIN_WIDTH if normalize_by_bin_width else PlotNormalizationType.NONE
     return norm_type, kwargs
+
+
+def _all_normalized_by_inverse_q_fourth_power(axes):
+    try:
+        current_artists = axes.tracked_workspaces.values()
+    except AttributeError:
+        return False
+
+    if not current_artists:
+        return False
+
+    return all(artist[0].normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER for artist in current_artists)
 
 
 def get_spectrum_normalisation(**kwargs):
