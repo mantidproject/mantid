@@ -140,14 +140,14 @@ class CalibrationInfo:
         basepath, fname = path.split(file_path)
         inst_bank = fname.split("_")[:2]
         suffix = (fname[len("_".join(inst_bank)) + 1 :]).split(".")[0]  # string after INSTRUMENT_ceriaRunNo_ minus ext
-        # for GROUP Enum: all_banks, bank_1 and bank_2 require the part after _, Cropped and Custom the part before _
-        ind = suffix.find("_")
-        suffix = suffix[:ind] if ind > 4 else suffix[ind + 1 :]
-        if any(grp.value == suffix for grp in self.config.group):
-            self.group = self.config.group(suffix)
-            self.prm_filepath = file_path
-            self.set_grouping_filepath_from_prm_filepath()
-        else:
+        found_group = False
+        for grp in self.config.group:
+            if grp.value in suffix:
+                self.group = grp
+                self.prm_filepath = file_path
+                self.set_grouping_filepath_from_prm_filepath()
+                found_group = True
+        if not found_group:
             raise ValueError("Group not set: region of interest not recognised from .prm file name")
         self.set_calibration_paths(*inst_bank)
 
