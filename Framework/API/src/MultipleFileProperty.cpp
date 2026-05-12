@@ -385,11 +385,10 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
 
     // Batch resolve files with extension using findRuns for better performance.
     if (!filesToResolveWithExtension.empty()) {
-      std::string batchHint = boost::algorithm::join(filesToResolveWithExtension, ",");
       std::string errors;
       try {
         const auto extsToUse = !defaultExt.empty() ? std::vector<std::string>(1, defaultExt) : m_exts;
-        auto resolvedPaths = FileFinder::Instance().findRuns(batchHint, extsToUse);
+        auto resolvedPaths = FileFinder::Instance().findRuns(filesToResolveWithExtension, extsToUse);
 
         // Map resolved paths back to their original positions
         for (size_t i = 0; i < resolvedPaths.size(); ++i) {

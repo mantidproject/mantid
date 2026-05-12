@@ -58,8 +58,10 @@ public:
   const API::Result<std::filesystem::path>
   findRun(const std::string &hintstr, const std::vector<std::string> &exts = {}, const bool useExtsOnly = false) const;
   std::vector<std::filesystem::path> findRuns(const std::string &hintstr, const std::vector<std::string> &exts = {},
-                                              const bool useExtsOnly = false, const bool singleRun = false,
-                                              const bool throwIfNotFound = true) const;
+                                              const bool useExtsOnly = false) const;
+  std::vector<std::filesystem::path> findRuns(const std::vector<std::string> &hints,
+                                              const std::vector<std::string> &exts = {},
+                                              const bool useExtsOnly = false) const;
 
   std::filesystem::path checkFilename(const std::string &filename) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
@@ -86,6 +88,8 @@ private:
   FileFinderImpl &operator=(const FileFinderImpl &);
   /// A method that returns error messages if the provided runs are invalid
   std::string validateRuns(const std::string &searchText) const;
+  void processFileInfos(std::vector<FileInfo> &fileInfos, const std::vector<std::string> &extensionsProvided,
+                        bool useOnlyExtensionsProvided) const;
   void performFileSearch(std::vector<FileInfo> &fileInfos) const;
   void performCacheSearch(std::vector<FileInfo> &fileInfos) const;
   void performArchiveSearch(std::vector<FileInfo> &fileInfos) const;

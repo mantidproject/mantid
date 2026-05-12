@@ -203,10 +203,7 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
 const API::Result<std::vector<std::filesystem::path>>
 ORNLDataArchive::getArchivePaths(const std::vector<std::string> &hintstrs) const {
 
-  for (const auto &hintstr : hintstrs) {
-    std::cout << hintstr << std::endl;
-  }
-  std::vector<std::filesystem::path> results;
+  std::vector<std::filesystem::path> results(hintstrs.size());
   if (hintstrs.size() == 0) {
     return API::Result<std::vector<std::filesystem::path>>(results, "Not found.");
   }
@@ -276,13 +273,32 @@ ORNLDataArchive::getArchivePaths(const std::vector<std::string> &hintstrs) const
   if (datafiles.size() == 0) {
     g_log.debug() << "ONCat does not know the location of runs \"" << runNumbersStr << "\" for \"" << instrumentName
                   << "\"." << std::endl;
-    return API::Result<std::vector<std::filesystem::path>>(results, "Not found.");
+    return API::Result<std::vector<std::filesystem::path>>(results);
   }
 
   g_log.debug() << "All datafiles returned from ONCat:" << std::endl;
+  std::map<std::string, std::filesystem::path> runToLocation;
   for (const auto &datafile : datafiles) {
     g_log.debug() << datafile.toString() << std::endl;
-    results.push_back(*datafile.get<std::string>("location"));
+    const auto location = *datafile.get<std::string>("location");
+    const auto filename = std::filesystem::path(location).filename().string();
+    const auto [_, run] = toInstrumentAndRunNumber(filename);
+    if (run.empty()) {
+      continue;
+    }
+
+    // Keep the first location returned for each run.
+    // If multiple files exist for the same run, ONCat ordering determines which one we take.
+    if (!runToLocation.contains(run)) {
+      runToLocation.emplace(run, std::filesystem::path(location));
+    }
+  }
+
+  for (size_t i = 0; i < runNumbers.size(); ++i) {
+    const auto it = runToLocation.find(runNumbers[i]);
+    if (it != runToLocation.end()) {
+      results[i] = it->second;
+    }
   }
 
   return API::Result<std::vector<std::filesystem::path>>(results);
