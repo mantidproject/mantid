@@ -55,8 +55,7 @@ pixi run --frozen cmake --preset=cppcheck-ci -DCPPCHECK_NUM_THREADS=$BUILD_THREA
 pixi run --frozen cmake --build . --target cppcheck 2>&1 | tee $WORKSPACE/build/cppcheck_build.log
 
 echo "=== Slowest files ==="
-grep "Check time:" ${WORKSPACE}/build/cppcheck_build.log \
-  | sort -t: -k2 -rn | head -50
+grep "Check time:" ${WORKSPACE}/build/cppcheck_build.log
 
 # Generate HTML report
 pixi run --frozen cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-report
