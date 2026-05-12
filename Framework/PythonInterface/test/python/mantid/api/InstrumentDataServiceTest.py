@@ -47,9 +47,14 @@ class InstrumentDataServiceTest(unittest.TestCase):
         # Add an instrument to the service and check it is there.
         pg3 = LoadEmptyInstrument(InstrumentName="PG3")
         self.assertEqual(InstrumentDataService.size(), 1)
-        objectName = InstrumentDataService.getObjectNames()
-        self.assertEqual(len(objectName), 1)
-        instrument_cache_name = objectName[0]
+        self.assertEqual(len(InstrumentDataService.getObjectNames()), 1)
+
+        # Check contains work for getObjectNames
+        self.assertEqual(len(InstrumentDataService.getObjectNames("TOPAZ")), 0)
+        self.assertEqual(len(InstrumentDataService.getObjectNames("POWGEN")), 1)
+
+        # Check the retrieved instrument
+        instrument_cache_name = InstrumentDataService.getObjectNames()[0]
         self.assertTrue(instrument_cache_name.startswith("POWGEN"))
         self.assertTrue(InstrumentDataService.doesExist(instrument_cache_name))
 

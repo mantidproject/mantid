@@ -7,6 +7,7 @@
 
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Exception.h"
 #include "MantidPythonInterface/core/DataServiceExporter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 
@@ -28,7 +29,7 @@ Mantid::Geometry::Instrument_sptr retrieveOrKeyError(const InstrumentDataService
   // Instrument. So we have to reimplement the same logic here, but returning a shared pointer instead.
   try {
     return self.retrieve(name);
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
     const std::string err = "'" + name + "' does not exist.";
     PyErr_SetString(PyExc_KeyError, err.c_str());
     throw boost::python::error_already_set();
