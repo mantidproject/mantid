@@ -159,7 +159,7 @@ void QtGroupBoxPropertyBrowserPrivate::slotUpdate() {
 
 void QtGroupBoxPropertyBrowserPrivate::updateLater() { QTimer::singleShot(0, q_ptr, SLOT(slotUpdate())); }
 
-void QtGroupBoxPropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex) {
+void QtGroupBoxPropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, const QtBrowserItem *afterIndex) {
   WidgetItem *afterItem = m_indexToItem.value(afterIndex);
   WidgetItem *parentItem = m_indexToItem.value(index->parent());
 
@@ -265,7 +265,7 @@ void QtGroupBoxPropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, Qt
   updateItem(newItem);
 }
 
-void QtGroupBoxPropertyBrowserPrivate::propertyRemoved(QtBrowserItem *index) {
+void QtGroupBoxPropertyBrowserPrivate::propertyRemoved(const QtBrowserItem *index) {
   WidgetItem *item = m_indexToItem.value(index);
 
   m_indexToItem.remove(index);
@@ -372,20 +372,20 @@ void QtGroupBoxPropertyBrowserPrivate::removeRow(QGridLayout *layout, int row) c
   }
 }
 
-bool QtGroupBoxPropertyBrowserPrivate::hasHeader(WidgetItem *item) const {
+bool QtGroupBoxPropertyBrowserPrivate::hasHeader(const WidgetItem *item) const {
   if (item->widget)
     return true;
   return false;
 }
 
-void QtGroupBoxPropertyBrowserPrivate::propertyChanged(QtBrowserItem *index) {
+void QtGroupBoxPropertyBrowserPrivate::propertyChanged(const QtBrowserItem *index) {
   WidgetItem *item = m_indexToItem.value(index);
 
   updateItem(item);
 }
 
 void QtGroupBoxPropertyBrowserPrivate::updateItem(WidgetItem *item) {
-  QtProperty *property = m_itemToIndex[item]->property();
+  const QtProperty *property = m_itemToIndex[item]->property();
   if (item->groupBox) {
     QFont font = item->groupBox->font();
     font.setUnderline(property->isModified());

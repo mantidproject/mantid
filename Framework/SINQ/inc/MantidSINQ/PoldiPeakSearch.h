@@ -36,7 +36,7 @@ namespace Poldi {
 class MANTID_SINQ_DLL PoldiPeakSearch : public API::Algorithm {
 public:
   PoldiPeakSearch();
-  virtual ~PoldiPeakSearch() = default;
+  ~PoldiPeakSearch() override = default;
   int version() const override { return 1; }
   const std::string name() const override { return "PoldiPeakSearch"; }
   /// Summary of algorithms purpose

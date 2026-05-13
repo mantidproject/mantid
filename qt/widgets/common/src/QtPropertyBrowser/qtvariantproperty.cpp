@@ -342,7 +342,7 @@ QtVariantProperty *QtVariantPropertyManagerPrivate::createSubProperty(QtVariantP
 }
 
 void QtVariantPropertyManagerPrivate::removeSubProperty(QtVariantProperty *property) {
-  QtProperty *internChild = wrappedProperty(property);
+  const QtProperty *internChild = wrappedProperty(property);
   bool wasDestroyingSubProperties = m_destroyingSubProperties;
   m_destroyingSubProperties = true;
   delete property;
@@ -351,8 +351,8 @@ void QtVariantPropertyManagerPrivate::removeSubProperty(QtVariantProperty *prope
   propertyToWrappedProperty()->remove(property);
 }
 
-void QtVariantPropertyManagerPrivate::slotPropertyInserted(QtProperty *property, QtProperty *parent,
-                                                           QtProperty *after) {
+void QtVariantPropertyManagerPrivate::slotPropertyInserted(QtProperty *property, const QtProperty *parent,
+                                                           const QtProperty *after) {
   if (m_creatingProperty)
     return;
 
@@ -370,7 +370,7 @@ void QtVariantPropertyManagerPrivate::slotPropertyInserted(QtProperty *property,
   createSubProperty(varParent, varAfter, property);
 }
 
-void QtVariantPropertyManagerPrivate::slotPropertyRemoved(QtProperty *property, QtProperty *parent) {
+void QtVariantPropertyManagerPrivate::slotPropertyRemoved(const QtProperty *property, QtProperty *parent) {
   Q_UNUSED(parent)
 
   QtVariantProperty *varProperty = m_internalToProperty.value(property, 0);
@@ -380,7 +380,7 @@ void QtVariantPropertyManagerPrivate::slotPropertyRemoved(QtProperty *property, 
   removeSubProperty(varProperty);
 }
 
-void QtVariantPropertyManagerPrivate::valueChanged(QtProperty *property, const QVariant &val) {
+void QtVariantPropertyManagerPrivate::valueChanged(const QtProperty *property, const QVariant &val) {
   QtVariantProperty *varProp = m_internalToProperty.value(property, 0);
   if (!varProp)
     return;
@@ -388,147 +388,149 @@ void QtVariantPropertyManagerPrivate::valueChanged(QtProperty *property, const Q
   emit q_ptr->propertyChanged(varProp);
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, int val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, int val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotRangeChanged(QtProperty *property, int min, int max) {
+void QtVariantPropertyManagerPrivate::slotRangeChanged(const QtProperty *property, int min, int max) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0)) {
     emit q_ptr->attributeChanged(varProp, m_minimumAttribute, QVariant(min));
     emit q_ptr->attributeChanged(varProp, m_maximumAttribute, QVariant(max));
   }
 }
 
-void QtVariantPropertyManagerPrivate::slotSingleStepChanged(QtProperty *property, int step) {
+void QtVariantPropertyManagerPrivate::slotSingleStepChanged(const QtProperty *property, int step) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0))
     emit q_ptr->attributeChanged(varProp, m_singleStepAttribute, QVariant(step));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, double val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, double val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotRangeChanged(QtProperty *property, double min, double max) {
+void QtVariantPropertyManagerPrivate::slotRangeChanged(const QtProperty *property, double min, double max) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0)) {
     emit q_ptr->attributeChanged(varProp, m_minimumAttribute, QVariant(min));
     emit q_ptr->attributeChanged(varProp, m_maximumAttribute, QVariant(max));
   }
 }
 
-void QtVariantPropertyManagerPrivate::slotSingleStepChanged(QtProperty *property, double step) {
+void QtVariantPropertyManagerPrivate::slotSingleStepChanged(const QtProperty *property, double step) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0))
     emit q_ptr->attributeChanged(varProp, m_singleStepAttribute, QVariant(step));
 }
 
-void QtVariantPropertyManagerPrivate::slotDecimalsChanged(QtProperty *property, int prec) {
+void QtVariantPropertyManagerPrivate::slotDecimalsChanged(const QtProperty *property, int prec) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0))
     emit q_ptr->attributeChanged(varProp, m_decimalsAttribute, QVariant(prec));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, bool val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, bool val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QString &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QString &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotRegExpChanged(QtProperty *property, const QRegExp &regExp) {
+void QtVariantPropertyManagerPrivate::slotRegExpChanged(const QtProperty *property, const QRegExp &regExp) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0))
     emit q_ptr->attributeChanged(varProp, m_regExpAttribute, QVariant(regExp));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QDate &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QDate &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotRangeChanged(QtProperty *property, const QDate &min, const QDate &max) {
+void QtVariantPropertyManagerPrivate::slotRangeChanged(const QtProperty *property, const QDate &min, const QDate &max) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0)) {
     emit q_ptr->attributeChanged(varProp, m_minimumAttribute, QVariant(min));
     emit q_ptr->attributeChanged(varProp, m_maximumAttribute, QVariant(max));
   }
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QTime &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QTime &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QDateTime &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QDateTime &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QKeySequence &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QKeySequence &val) {
   QVariant v;
   v.setValue(val);
   valueChanged(property, v);
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QChar &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QChar &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QLocale &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QLocale &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QPoint &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QPoint &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QPointF &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QPointF &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QSize &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QSize &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotRangeChanged(QtProperty *property, const QSize &min, const QSize &max) {
+void QtVariantPropertyManagerPrivate::slotRangeChanged(const QtProperty *property, const QSize &min, const QSize &max) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0)) {
     emit q_ptr->attributeChanged(varProp, m_minimumAttribute, QVariant(min));
     emit q_ptr->attributeChanged(varProp, m_maximumAttribute, QVariant(max));
   }
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QSizeF &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QSizeF &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotRangeChanged(QtProperty *property, const QSizeF &min, const QSizeF &max) {
+void QtVariantPropertyManagerPrivate::slotRangeChanged(const QtProperty *property, const QSizeF &min,
+                                                       const QSizeF &max) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0)) {
     emit q_ptr->attributeChanged(varProp, m_minimumAttribute, QVariant(min));
     emit q_ptr->attributeChanged(varProp, m_maximumAttribute, QVariant(max));
   }
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QRect &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QRect &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotConstraintChanged(QtProperty *property, const QRect &constraint) {
+void QtVariantPropertyManagerPrivate::slotConstraintChanged(const QtProperty *property, const QRect &constraint) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0))
     emit q_ptr->attributeChanged(varProp, m_constraintAttribute, QVariant(constraint));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QRectF &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QRectF &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotConstraintChanged(QtProperty *property, const QRectF &constraint) {
+void QtVariantPropertyManagerPrivate::slotConstraintChanged(const QtProperty *property, const QRectF &constraint) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0))
     emit q_ptr->attributeChanged(varProp, m_constraintAttribute, QVariant(constraint));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QColor &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QColor &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotEnumNamesChanged(QtProperty *property, const QStringList &enumNames) {
+void QtVariantPropertyManagerPrivate::slotEnumNamesChanged(const QtProperty *property, const QStringList &enumNames) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0))
     emit q_ptr->attributeChanged(varProp, m_enumNamesAttribute, QVariant(enumNames));
 }
 
-void QtVariantPropertyManagerPrivate::slotEnumIconsChanged(QtProperty *property, const QMap<int, QIcon> &enumIcons) {
+void QtVariantPropertyManagerPrivate::slotEnumIconsChanged(const QtProperty *property,
+                                                           const QMap<int, QIcon> &enumIcons) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0)) {
     QVariant v;
     v.setValue(enumIcons);
@@ -550,7 +552,7 @@ void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, con
 #endif
 }
 
-void QtVariantPropertyManagerPrivate::slotFlagNamesChanged(QtProperty *property, const QStringList &flagNames) {
+void QtVariantPropertyManagerPrivate::slotFlagNamesChanged(const QtProperty *property, const QStringList &flagNames) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0))
     emit q_ptr->attributeChanged(varProp, m_flagNamesAttribute, QVariant(flagNames));
 }

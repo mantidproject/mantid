@@ -72,26 +72,6 @@ ArrayProperty<T>::ArrayProperty(const ArrayProperty<T> &other) : PropertyWithVal
 /// 'Virtual copy constructor'
 template <typename T> ArrayProperty<T> *ArrayProperty<T>::clone() const { return new ArrayProperty<T>(*this); }
 
-/** Returns the values stored in the ArrayProperty
- *  @return The stored values as a comma-separated list
- */
-template <typename T> std::string ArrayProperty<T>::value() const {
-  // Implemented this method for documentation reasons. Just calls base class
-  // method.
-  return PropertyWithValue<std::vector<T>>::value();
-}
-
-/** Sets the values stored in the ArrayProperty from a string representation
- *  @param value :: The values to assign to the property, given as a
- * comma-separated list
- *  @return True if the assignment was successful
- */
-template <typename T> std::string ArrayProperty<T>::setValue(const std::string &value) {
-  // Implemented this method for documentation reasons. Just calls base class
-  // method.
-  return PropertyWithValue<std::vector<T>>::setValue(value);
-}
-
 template <typename T> void ArrayProperty<T>::visualStudioC4661Workaround() {}
 
 /// @cond
