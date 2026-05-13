@@ -72,7 +72,7 @@ do
 done
 
 # pixi
-install_pixi
+install_pixi "$REPO_ROOT_DIR"
 
 echo "pixi package-standalone environment:"
 pixi list --manifest-path $REPO_ROOT_DIR/pixi.toml -e package-standalone --frozen
