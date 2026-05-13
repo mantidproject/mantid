@@ -31,6 +31,7 @@ protected:
 
 private:
   void initLayout();
+  void setOutputOptionControlsEnabled(bool enabled);
   void addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item);
   bool isWorkspaceItem(QModelIndex const &index) const;
   bool handleWorkspaceTreeClick(QMouseEvent const &event);

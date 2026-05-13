@@ -119,6 +119,7 @@ private:
   void ensureAtLeastOneGroupExists();
   void insertEmptyRowInModel(int groupIndex, int beforeRow);
   std::vector<std::string> cellTextFromViewAt(MantidWidgets::Batch::RowLocation const &location) const;
+  void expandAllGroups();
   void showCellsAsInvalidInView(MantidWidgets::Batch::RowLocation const &itemIndex,
                                 std::vector<int> const &invalidColumns);
   void updateGroupName(MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,

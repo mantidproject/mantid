@@ -353,7 +353,7 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
 
   if (m_model.reductionJobs().groups().size() == 0) {
     appendRowAndGroup();
-    notifyExpandAllRequested();
+    expandAllGroups();
     return;
   }
 
@@ -376,14 +376,16 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
   // Insert a new group (and include an expanded row, for usability) and then
   // delete the original "bad" group
   appendRowAndGroup();
-  notifyExpandAllRequested();
+  expandAllGroups();
 
   // After repairing the view and adding the Row and Group
   removeGroupsFromModel({0});
   removeGroupsFromView({0});
 }
 
-void RunsTablePresenter::notifyExpandAllRequested() { m_view->jobs().expandAll(); }
+void RunsTablePresenter::expandAllGroups() { m_view->jobs().expandAll(); }
+
+void RunsTablePresenter::notifyExpandAllRequested() { expandAllGroups(); }
 
 void RunsTablePresenter::notifyCollapseAllRequested() { m_view->jobs().collapseAll(); }
 
