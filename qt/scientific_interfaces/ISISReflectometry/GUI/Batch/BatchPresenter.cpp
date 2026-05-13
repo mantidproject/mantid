@@ -142,6 +142,7 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
   }
   m_jobManager->algorithmComplete(algorithm);
   m_runsPresenter->notifyRowModelChanged(item.value());
+  updatePlottingWorkspaces();
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
@@ -169,6 +170,7 @@ void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr &algorithm, 
   }
   m_jobManager->algorithmError(algorithm, message);
   m_runsPresenter->notifyRowModelChanged(item.value());
+  updatePlottingWorkspaces();
 }
 
 /** Start processing the next batch of algorithms.
@@ -300,15 +302,25 @@ void BatchPresenter::notifyAnyBatchAutoreductionResumed() { m_runsPresenter->not
 
 void BatchPresenter::notifyAnyBatchAutoreductionPaused() { m_runsPresenter->notifyAnyBatchAutoreductionPaused(); }
 
-void BatchPresenter::notifyBatchLoaded() { m_runsPresenter->notifyBatchLoaded(); }
+void BatchPresenter::notifyBatchLoaded() {
+  m_runsPresenter->notifyBatchLoaded();
+  updatePlottingWorkspaces();
+}
 
-void BatchPresenter::notifyRowContentChanged(Row &changedRow) { m_model->updateLookupIndex(changedRow); }
+void BatchPresenter::notifyRowContentChanged(Row &changedRow) {
+  m_model->updateLookupIndex(changedRow);
+  updatePlottingWorkspaces();
+}
 
-void BatchPresenter::notifyGroupNameChanged(Group &changedGroup) { m_model->updateLookupIndexesOfGroup(changedGroup); }
+void BatchPresenter::notifyGroupNameChanged(Group &changedGroup) {
+  m_model->updateLookupIndexesOfGroup(changedGroup);
+  updatePlottingWorkspaces();
+}
 
 void BatchPresenter::notifyRunsTransferred() {
   m_model->updateLookupIndexesOfTable();
   m_runsPresenter->notifyRowModelChanged();
+  updatePlottingWorkspaces();
 }
 
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return m_mainPresenter->instrument(); }
@@ -319,7 +331,10 @@ void BatchPresenter::settingsChanged() {
   setBatchUnsaved();
   m_model->updateLookupIndexesOfTable();
   m_runsPresenter->settingsChanged();
+  updatePlottingWorkspaces();
 }
+
+void BatchPresenter::updatePlottingWorkspaces() { m_plottingPresenter->notifyRunsTableChanged(m_model->runsTable()); }
 
 /**
    Checks whether or not data is currently being processed in this batch
@@ -384,16 +399,19 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> BatchPresenter::rowProcessi
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
   auto const item = m_jobManager->notifyWorkspaceDeleted(wsName);
   m_runsPresenter->notifyRowModelChanged(item);
+  updatePlottingWorkspaces();
 }
 
 void BatchPresenter::renameHandle(const std::string &oldName, const std::string &newName) {
   auto const item = m_jobManager->notifyWorkspaceRenamed(oldName, newName);
   m_runsPresenter->notifyRowModelChanged(item);
+  updatePlottingWorkspaces();
 }
 
 void BatchPresenter::clearADSHandle() {
   m_jobManager->notifyAllWorkspacesDeleted();
   m_runsPresenter->notifyRowModelChanged();
+  updatePlottingWorkspaces();
 }
 
 void BatchPresenter::notifyPreviewApplyRequested() {

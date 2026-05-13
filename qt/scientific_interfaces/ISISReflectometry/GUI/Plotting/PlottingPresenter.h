@@ -21,8 +21,10 @@ public:
   void notifyReductionResumed() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;
+  void notifyRunsTableChanged(RunsTable const &runsTable) override;
 
 private:
+  std::vector<PlottingWorkspaceTreeItem> makeWorkspaceItems(RunsTable const &runsTable) const;
   void updateWidgetEnabledState();
   bool isProcessing() const;
   bool isAutoreducing() const;

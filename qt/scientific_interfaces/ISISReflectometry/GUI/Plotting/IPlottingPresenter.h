@@ -9,6 +9,7 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class IBatchPresenter;
+class RunsTable;
 
 class IPlottingPresenter {
 public:
@@ -19,6 +20,7 @@ public:
   virtual void notifyReductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyAutoreductionResumed() = 0;
+  virtual void notifyRunsTableChanged(RunsTable const &runsTable) = 0;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -215,6 +215,7 @@ public:
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
+  MOCK_METHOD(void, notifyRunsTableChanged, (RunsTable const &), (override));
 };
 
 /**** Progress ****/
