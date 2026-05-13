@@ -139,6 +139,7 @@ qt_main:
 qtconsole:
   - '>5.5.0'
 
+# This is the last version that is both built for Qt5 and compatible with the rest of our pins.
 qscintilla2:
   - '==2.14.1 *_0'
 
