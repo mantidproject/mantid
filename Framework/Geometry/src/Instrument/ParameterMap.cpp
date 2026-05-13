@@ -17,6 +17,7 @@
 #include "MantidNexus/NexusFile.h"
 #include <boost/algorithm/string.hpp>
 #include <cstring>
+#include <numeric>
 
 #ifdef _WIN32
 #define strcasecmp _stricmp
@@ -76,6 +77,45 @@ ParameterMap::ParameterMap(const ParameterMap &other)
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ParameterMap::~ParameterMap() = default;
+
+size_t ParameterMap::getMemorySize() const {
+  size_t total = sizeof(ParameterMap);
+
+  total += m_parameterFileNames.capacity() * sizeof(std::string);
+  total += std::accumulate(m_parameterFileNames.cbegin(), m_parameterFileNames.cend(), static_cast<size_t>(0),
+                           [](size_t sum, const auto &filename) { return sum + filename.size(); });
+
+  total += m_map.size() * sizeof(ParameterMap::pmap::value_type);
+  for (const auto &entry : m_map) {
+    const auto &parameter = entry.second;
+    if (!parameter) {
+      continue;
+    }
+
+    total += sizeof(Parameter);
+    total += parameter->type().size();
+    total += parameter->name().size();
+    total += parameter->asString().size();
+    total += parameter->getDescription().size();
+  }
+
+  if (m_cacheLocMap) {
+    total += sizeof(*m_cacheLocMap);
+  }
+  if (m_cacheRotMap) {
+    total += sizeof(*m_cacheRotMap);
+  }
+
+  if (m_detectorInfo) {
+    total += m_detectorInfo->getMemorySize();
+  }
+
+  if (m_componentInfo) {
+    total += m_componentInfo->getMemorySize();
+  }
+
+  return total;
+}
 
 /**
  * Return string to be inserted into the parameter map

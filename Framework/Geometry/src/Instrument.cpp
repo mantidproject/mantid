@@ -7,15 +7,22 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
@@ -25,6 +32,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <numeric>
 #include <queue>
 #include <utility>
 
@@ -41,6 +49,34 @@ void raiseDuplicateDetectorError(const size_t detectorId) {
   std::stringstream sstream;
   sstream << "Instrument Definition corrupt. Detector with ID " << detectorId << " already exists.";
   throw Exception::InstrumentDefinitionError(sstream.str());
+}
+
+size_t componentMemorySize(const IComponent &component) {
+  if (dynamic_cast<const RectangularDetector *>(&component)) {
+    return sizeof(RectangularDetector);
+  }
+  if (dynamic_cast<const GridDetector *>(&component)) {
+    return sizeof(GridDetector);
+  }
+  if (dynamic_cast<const StructuredDetector *>(&component)) {
+    return sizeof(StructuredDetector);
+  }
+  if (dynamic_cast<const ObjCompAssembly *>(&component)) {
+    return sizeof(ObjCompAssembly);
+  }
+  if (dynamic_cast<const CompAssembly *>(&component)) {
+    return sizeof(CompAssembly);
+  }
+  if (dynamic_cast<const Detector *>(&component)) {
+    return sizeof(Detector);
+  }
+  if (dynamic_cast<const ObjComponent *>(&component)) {
+    return sizeof(ObjComponent);
+  }
+  if (dynamic_cast<const Component *>(&component)) {
+    return sizeof(Component);
+  }
+  return sizeof(IComponent);
 }
 } // namespace
 
@@ -236,6 +272,79 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
   } else {
     return numDetIDs;
   }
+}
+
+size_t Instrument::getMemorySize() const {
+  if (m_map && m_instr) {
+    // Parametrized instruments share base geometry but own parameter overrides.
+    return m_instr->getMemorySize() + (m_map_nonconst ? m_map_nonconst->getMemorySize() : 0);
+  }
+
+  size_t memorySize = sizeof(Instrument);
+  memorySize += m_detectorCache.capacity() * sizeof(DetectorCache::value_type);
+  memorySize += m_logfileCache.size() * sizeof(InstrumentParameterCache::value_type);
+  memorySize += m_logfileUnit.size() * sizeof(std::map<std::string, std::string>::value_type);
+
+  memorySize += std::accumulate(m_logfileCache.cbegin(), m_logfileCache.cend(), static_cast<size_t>(0),
+                                [](size_t sum, const auto &cacheItem) { return sum + cacheItem.first.first.size(); });
+
+  memorySize += std::accumulate(
+      m_logfileUnit.cbegin(), m_logfileUnit.cend(), static_cast<size_t>(0),
+      [](size_t sum, const auto &unitItem) { return sum + unitItem.first.size() + unitItem.second.size(); });
+
+  memorySize += m_defaultView.size() + m_defaultViewAxis.size() + m_filename.size() + m_xmlText.size();
+
+  // Account for DetectorInfo if allocated.
+  if (m_detectorInfo) {
+    memorySize += m_detectorInfo->getMemorySize();
+  }
+
+  // Account for ComponentInfo if allocated.
+  if (m_componentInfo) {
+    memorySize += m_componentInfo->getMemorySize();
+  }
+
+  // Account for ReferenceFrame.
+  if (m_referenceFrame) {
+    memorySize += sizeof(ReferenceFrame);
+  }
+
+  // Account for ParameterMap where present.
+  if (m_map_nonconst) {
+    memorySize += m_map_nonconst->getMemorySize();
+  }
+
+  // Account for physical instrument (indirect geometry only)
+  if (m_physicalInstrument && !m_isPhysicalInstrument) {
+    memorySize += m_physicalInstrument->getMemorySize();
+  }
+
+  std::queue<IComponent_const_sptr> queue;
+  for (int i = 0; i < nelements(); ++i) {
+    queue.emplace(getChild(i));
+  }
+
+  while (!queue.empty()) {
+    auto component = queue.front();
+    queue.pop();
+    if (!component) {
+      continue;
+    }
+
+    memorySize += componentMemorySize(*component);
+    memorySize += component->getName().size();
+
+    const auto assembly = std::dynamic_pointer_cast<const ICompAssembly>(component);
+    if (!assembly) {
+      continue;
+    }
+
+    for (int i = 0; i < assembly->nelements(); ++i) {
+      queue.emplace(assembly->getChild(i));
+    }
+  }
+
+  return memorySize;
 }
 
 /** Get the minimum and maximum (inclusive) detector IDs

@@ -111,6 +111,9 @@ public:
 
   std::size_t getNumberDetectors(bool skipMonitors = false) const;
 
+  /// Get the footprint in memory in bytes.
+  size_t getMemorySize() const;
+
   void getMinMaxDetectorIDs(detid_t &min, detid_t &max) const;
 
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const IComponent &comp) const;

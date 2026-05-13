@@ -75,6 +75,8 @@ public:
                 std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
                 std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes);
   ~ComponentInfo();
+  /// Returns the memory footprint in bytes for the component info and cached state.
+  size_t getMemorySize() const;
   /// Copy assignment is not possible for ComponentInfo
   ComponentInfo &operator=(const ComponentInfo &) = delete;
   std::unique_ptr<ComponentInfo> cloneWithoutDetectorInfo() const;

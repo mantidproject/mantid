@@ -39,6 +39,12 @@ class DetectorInfoTest(unittest.TestCase):
         info = self._ws.detectorInfo()
         self.assertEqual(info.size(), 2)
 
+    def test_getMemorySize(self):
+        info = self._ws.detectorInfo()
+        memory_size = info.getMemorySize()
+        self.assertIsInstance(memory_size, int)
+        self.assertGreater(memory_size, 0)
+
     def test_indexOf(self):
         """Check if detector is a monitor"""
         info = self._ws.detectorInfo()

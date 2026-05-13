@@ -58,6 +58,9 @@ public:
 
   bool isEquivalent(const DetectorInfo &other) const;
 
+  /// Returns the memory footprint in bytes for the detector info and cached state.
+  size_t getMemorySize() const;
+
   size_t size() const;
   size_t scanSize() const;
   bool isScanning() const;

@@ -57,6 +57,8 @@ public:
   inline bool empty() const { return m_map.empty(); }
   /// Return the size of the map
   inline int size() const { return static_cast<int>(m_map.size()); }
+  /// Returns the memory footprint in bytes for the map and related cached state.
+  size_t getMemorySize() const;
   /// Return string to be used in the map
   static const std::string &pos();
   static const std::string &posx();

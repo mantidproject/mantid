@@ -39,6 +39,12 @@ class ComponentInfoTest(unittest.TestCase):
         info = self._ws.componentInfo()
         self.assertEqual(info.size(), 6)
 
+    def test_getMemorySize(self):
+        info = self._ws.componentInfo()
+        memory_size = info.getMemorySize()
+        self.assertIsInstance(memory_size, int)
+        self.assertGreater(memory_size, 0)
+
     def test_isDetector(self):
         """Check which components are detectors"""
         info = self._ws.componentInfo()

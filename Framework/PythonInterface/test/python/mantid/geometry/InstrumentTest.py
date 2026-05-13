@@ -40,6 +40,11 @@ class InstrumentTest(unittest.TestCase):
         num_detectors = self.__testws.getInstrument().getNumberDetectors()
         self.assertEqual(num_detectors, 1)
 
+    def test_getMemorySize(self):
+        memory_size = self.__testws.getInstrument().getMemorySize()
+        self.assertIsInstance(memory_size, int)
+        self.assertGreater(memory_size, 0)
+
     def test_getReferenceFrame(self):
         frame = self.__testws.getInstrument().getReferenceFrame()
         self.assertTrue(isinstance(frame, ReferenceFrame))

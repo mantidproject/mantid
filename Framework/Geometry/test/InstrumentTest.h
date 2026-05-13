@@ -169,6 +169,19 @@ public:
 
   void testBeamDirection() { TS_ASSERT_EQUALS(instrument.getBeamDirection(), V3D(0, 0, 1)); }
 
+  void testGetMemorySizeReturnsPositiveValue() { TS_ASSERT_LESS_THAN(0u, instrument.getMemorySize()); }
+
+  void testGetMemorySizeIncreasesWhenComponentAdded() {
+    Instrument i;
+    const auto baseSize = i.getMemorySize();
+
+    auto *detector = new Detector("det", 1234, nullptr);
+    i.add(detector);
+    i.markAsDetector(detector);
+
+    TS_ASSERT_LESS_THAN(baseSize, i.getMemorySize());
+  }
+
   void testNumberDetectors() { // THIS MUST BE RUN BEFORE testDetector!!!!!!!
     // that test adds a detector to the instrument
     std::size_t ndets(3);
