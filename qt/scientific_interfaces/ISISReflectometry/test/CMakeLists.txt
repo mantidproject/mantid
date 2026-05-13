@@ -41,6 +41,7 @@ set(TEST_FILES
     Experiment/LookupTableValidatorTest.h
     Experiment/ExperimentOptionDefaultsTest.h
     Plotting/PlottingPresenterTest.h
+    Plotting/QtPlottingViewTest.h
     Reduction/BatchLookupIndexTest.h
     Reduction/LookupTableTest.h
     Reduction/ReductionJobsMergeTest.h
