@@ -43,6 +43,7 @@ private:
                                                               const std::string &date, const std::string &searchTerm,
                                                               const std::vector<std::string> &fileFormats,
                                                               const std::string &dirHint = "");
+  static std::string getNormalisedDate(const std::string &date);
 };
 
 } // Namespace Mantid::API

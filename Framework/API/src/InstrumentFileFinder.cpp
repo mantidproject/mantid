@@ -57,26 +57,23 @@ class myContentHandler : public Poco::XML::ContentHandler {
 
 namespace Mantid::API {
 
-/** This method returns a file name which identifies for a given date
- * a file which contains the given instrument name + search term.
+/** This method returns a file name which finds a file which contains the given instrument name + search term
+ *  and is valid at the given date.
  *
- *The filename is required to be of the form InstrumentName + SearchTerm +
- *Identifier + extension.
+ *  The search will look for filenames which start with InstrumentName + SearchTerm and match the provided file formats.
  *
- *  If several files are valid the file with
- *the most recent "from" date is selected. If no such files are found the file
- *with the latest "from" date is selected.
+ *  If several files are found with valid names and valid date ranges, the file with the most recent "valid-from" date
+ * is selected. If files are found with valid names but which do not match the date, the file with the most recent
+ * "valid-from" date is selected.
  *
- *  If no file is found for the given instrument, an empty string is returned.
+ *  If no file is found to have a valid name, an empty string is returned.
  *
  *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
  *  @param date :: ISO 8601 date
  *  @param searchTerm :: Snippet expected as part of filename eg. "_Definition" or "_Parameters"
  *  @param fileFormats :: Acceptable file extensions
  *  @param dirHint :: Any non-standard directory that should be search alongside the Instrument Directories
- *  @return full path of the file
- *
- * @throws Exception::NotFoundError If no valid filename is found
+ *  @return full path of the file or empty string
  */
 std::string InstrumentFileFinder::getFilenameByInstrumentDateAndSearchTerm(const std::string &instrumentName,
                                                                            const std::string &date,
@@ -126,52 +123,44 @@ std::string InstrumentFileFinder::getFilenameByInstrumentDateAndSearchTerm(const
 }
 
 /** A given instrument may have multiple definition files associated with it.
- *This method returns a file name which identifies a given instrument definition
- *for a given instrument.
- *The instrument geometry can be loaded from either a ".xml" file (old-style
- *IDF) or a ".hdf5/.nxs" file (new-style nexus).
- *The filename is required to be of the form InstrumentName + _Definition +
- *Identifier + extension. The identifier then is the part of a filename that
- *identifies the instrument definition valid at a given date.
+ *  This method returns a file name which identifies a given instrument definition
+ *  for a given instrument.
+ *  The instrument geometry can be loaded from either a ".xml" file (old-style
+ *  IDF) or a ".hdf5/.nxs" file (new-style nexus).
  *
- *  If several instrument files files are valid at the given date the file with
- *the most recent from date is selected. If no such files are found the file
- *with the latest from date is selected.
+ *  The search will look for filenames which start with InstrumentName + _Definition and match the above extensions.
  *
- *  If no file is found for the given instrument, an empty string is returned.
+ *  If several files are found with valid names and valid date ranges, the file with the most recent "valid-from" date
+ * is selected. If files are found with valid names but which do not match the date, the file with the most recent
+ * "valid-from" date is selected.
+ *
+ *  If no file is found to have a valid name, an empty string is returned.
  *
  *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
  *  @param date :: ISO 8601 date
  *  @return full path of instrument geometry file
- *
- * @throws Exception::NotFoundError If no valid instrument definition filename
- *is found
  */
 std::string InstrumentFileFinder::getInstrumentFilename(const std::string &instrumentName, const std::string &date) {
   return getFilenameByInstrumentDateAndSearchTerm(instrumentName, date, "_Definition", {"xml", "nxs", "hdf5"});
 }
 
 /** A given instrument may also have multiple parameter files associated with it.
- *This method returns a file name which identifies a parameter file associated with the
- *given date for a given instrument.
- *The parameter can be loaded from either a ".xml" file (old-style
- *IDF) or a ".hdf5/.nxs" file (new-style nexus).
- *The filename is required to be of the form InstrumentName + _Parameters +
- *Identifier + extension.
+ *  This method returns a file name which identifies a parameter file associated with the
+ *  given date for a given instrument.
+ *  The parameter can be loaded from either a ".xml" file (old-style
+ *  IDF) or a ".hdf5/.nxs" file (new-style nexus).
  *
- *  If several parameter files are valid at the given date the file with
- *the most recent from date is selected. If no such files are found the file
- *with the latest from date is selected.
+ *  The search will look for filenames which start with InstrumentName + _Parameters and match the above extensions.
  *
- *  If no file is found for the given instrument, an empty string is returned.
+ *  If several files are found with valid names and valid date ranges, the file with the most recent "valid-from" date
+ *  is selected. If files are found with valid names but which do not match the date, the file with the most recent
+ *  "valid-from" date is selected.
+ *
+ *  If no file is found to have a valid name, an empty string is returned.
  *
  *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
  *  @param date :: ISO 8601 date
- *  @param dirHint :: Any non-standard directory that should be search alongside the Instrument Directories
- *  @return full path of instrument parameter file
- *
- * @throws Exception::NotFoundError If no valid parameter filename
- *is found
+ *  @return full path of instrument geometry file
  */
 std::string InstrumentFileFinder::getParameterFilename(const std::string &instrumentName, const std::string &date,
                                                        const std::string &dirHint) {
@@ -286,13 +275,14 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
   const std::string allFileFormats = ss.str();
 
   const boost::regex regex(prefix + ".*\\." + allFileFormats, boost::regex_constants::icase);
-  // Normalize date: if only YYYY-MM-DD was provided (no time component), append midnight so
+
+  // Normalise date: if only YYYY-MM-DD was provided (no time component), append midnight so
   // DateAndTime can parse it. Parameter files commonly store date-only valid-from attributes.
-  static const boost::regex dateOnlyRegex("\\d{4}-\\d{2}-\\d{2}");
-  const std::string normalizedDate = boost::regex_match(date, dateOnlyRegex) ? date + "T00:00:00" : date;
+  const std::string normalisedDate = getNormalisedDate(date);
+
   DateAndTime d;
   try {
-    d = DateAndTime(normalizedDate);
+    d = DateAndTime(normalisedDate);
   } catch (const std::invalid_argument &) {
     // Some legacy data files store dates in non-ISO8601 formats.
     // In this case fall back to the current time so we select the most recent matching file.
@@ -328,14 +318,13 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
         getValidFromTo(pathName, validFrom, validTo);
         g_log.debug() << "File '" << pathName << " valid dates: from '" << validFrom << "' to '" << validTo << "'\n";
         // Use default valid "from" and "to" dates if none were found.
-        // Normalize date-only strings (YYYY-MM-DD) to full datetimes before parsing.
+        // Normalise date-only strings (YYYY-MM-DD) to full datetimes before parsing.
         // Some legacy instrument files store dates in non-ISO8601 formats; treat them as lowest-priority
         // catch-alls (valid for all time) so they are still considered but ranked last.
         DateAndTime to, from;
         try {
           if (validFrom.length() > 0) {
-            const std::string normFrom =
-                boost::regex_match(validFrom, dateOnlyRegex) ? validFrom + "T00:00:00" : validFrom;
+            const std::string normFrom = getNormalisedDate(validFrom);
             from.setFromISO8601(normFrom);
           } else {
             from = refDate;
@@ -347,7 +336,7 @@ std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::s
         }
         try {
           if (validTo.length() > 0) {
-            const std::string normTo = boost::regex_match(validTo, dateOnlyRegex) ? validTo + "T00:00:00" : validTo;
+            const std::string normTo = getNormalisedDate(validTo);
             to.setFromISO8601(normTo);
           } else {
             to.setFromISO8601("2100-01-01T00:00:00");
@@ -408,5 +397,15 @@ void InstrumentFileFinder::getValidFromTo(const std::string &IDFfilename, std::s
     // should throw some sensible here
   }
 }
+
+/** If date with only YYYY - MM - DD was provided (no time component), append midnight so
+ *   DateAndTime can parse it. Otherwise just return back the same date string
+ *
+ *   @param date :: string of date read from file
+ */
+static const std::string getNormalisedDate(const std::string &date) {
+  static const boost::regex dateOnlyRegex("\\d{4}-\\d{2}-\\d{2}");
+  return boost::regex_match(date, dateOnlyRegex) ? date + "T00:00:00" : date;
+};
 
 } // Namespace Mantid::API
