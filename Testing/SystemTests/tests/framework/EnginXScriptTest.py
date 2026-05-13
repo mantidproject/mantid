@@ -18,8 +18,8 @@ CWDIR = os.path.join(config["datasearch.directories"].split(";")[0], "ENGINX")
 FULL_CALIB = os.path.join(CWDIR, "ENGINX_whole_inst_calib.nxs")
 
 BANK_DIFF_CONSTS = {
-    "North": {UnitParams.difc: 18427, UnitParams.difa: -7.9, UnitParams.tzero: -19.4},
-    "South": {UnitParams.difc: 18434, UnitParams.difa: -10.4, UnitParams.tzero: -24.2},
+    "North": {UnitParams.difc: 18427, UnitParams.difa: -6.5, UnitParams.tzero: -15.9},
+    "South": {UnitParams.difc: 18427, UnitParams.difa: -8.1, UnitParams.tzero: -19.8},
 }
 
 
@@ -33,6 +33,7 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
             ceria_run="ENGINX193749",
             group=ENGINX_GROUP.BOTH,
         )
+        enginx.set_calibration_to_copy_starting_parameters(False)
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
         self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_bank")
@@ -53,9 +54,9 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
         self.disableChecking.extend(["Instrument"])  # don't check
         return self._ws_foc.name(), "299080_engggui_focusing_output_ws_bank.nxs"
 
-    def cleanup(self):
-        ADS.clear()
-        _try_delete_cal_and_focus_dirs(CWDIR)
+    # def cleanup(self):
+    #    ADS.clear()
+    #    _try_delete_cal_and_focus_dirs(CWDIR)
 
 
 class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
@@ -69,6 +70,7 @@ class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
             group=ENGINX_GROUP.CROPPED,
             spectrum_num="1-1200",
         )  # North
+        enginx.set_calibration_to_copy_starting_parameters(False)
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
         self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Cropped_1-1200")
@@ -96,6 +98,7 @@ class TestSwappingCustomCroppingChangesFocussing(systemtesting.MantidSystemTest)
             group=ENGINX_GROUP.CROPPED,
             spectrum_num="1-1200",
         )
+        enginx.set_calibration_to_copy_starting_parameters(False)
         enginx.main()
         self._dataY = ADS.retrieve("305761_engggui_focusing_output_ws_Cropped_1-1200").extractY().max()
 
@@ -193,6 +196,7 @@ class FocusTexture(systemtesting.MantidSystemTest):
             ceria_run="ENGINX193749",
             group=ENGINX_GROUP.TEXTURE20,
         )
+        enginx.set_calibration_to_copy_starting_parameters(False)
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
         self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Texture20")
@@ -235,9 +239,9 @@ class FocusTexture30(systemtesting.MantidSystemTest):
         self.assertEqual(self._ws_foc.getNumberHistograms(), 30)
         # don't assert diff constants of one group
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(23)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 19887, delta=6)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], -6.6, delta=1)
-        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -12.2, delta=2)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 19897, delta=6)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -8.9, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -21.8, delta=2)
         # compare TOF workspaces
         self.tolerance = 1e-5
         self.disableChecking.extend(["Instrument"])  # don't check
