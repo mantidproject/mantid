@@ -176,7 +176,7 @@ class LoadWANDSCD(PythonAlgorithm):
 
         # setup output
         self.setProperty("OutputWorkspace", data)
-        if grouping_ws is not None:
+        if create_grouping_ws:
             self.setProperty("OutputGroupingWorkspace", grouping_ws)
         # cleanup
         DeleteWorkspace(data)
@@ -369,6 +369,7 @@ class LoadWANDSCD(PythonAlgorithm):
 
         SetUB(_tmp_ws, UB=UB, EnableLogging=False)
 
+        grouping_ws = None
         if grouping > 1:
             detector_list = ""
             for x in range(0, 480 * 8, grouping):
@@ -378,12 +379,9 @@ class LoadWANDSCD(PythonAlgorithm):
                         for i in range(grouping):
                             spectra_list.append(str(y + i + (x + j) * 512))
                     detector_list += "," + "+".join(spectra_list)
-            _ungrouped_tmp_ws = _tmp_ws
+            if create_grouping_ws:
+                grouping_ws = self._build_grouping_ws(_tmp_ws, grouping)
             _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, GroupingPattern=detector_list, EnableLogging=False)
-            grouping_ws = self._build_grouping_ws(_ungrouped_tmp_ws, grouping) if create_grouping_ws else None
-            DeleteWorkspace(_ungrouped_tmp_ws, EnableLogging=False)
-        else:
-            grouping_ws = None
 
         progress.report("Adding logs")
 

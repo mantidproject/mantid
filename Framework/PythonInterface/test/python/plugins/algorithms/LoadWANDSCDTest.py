@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid.api import IMDHistoWorkspace
 from mantid.dataobjects import GroupingWorkspace
 from mantid.simpleapi import LoadWANDSCD
 import unittest
@@ -142,7 +143,7 @@ class LoadWANDGroupingWorkspace(unittest.TestCase):
 
     def test_grouping_workspace_2x2(self):
         grouping = 2
-        ws, grp_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2", OutputGroupingWorkspace="grp_ws_2x2")
+        ws, grp_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2", OutputWorkspace="ws_2x2", OutputGroupingWorkspace="grp_ws_2x2")
 
         # Type check
         self.assertIsInstance(grp_ws, GroupingWorkspace)
@@ -196,18 +197,20 @@ class LoadWANDGroupingWorkspace(unittest.TestCase):
         ws.delete()
         grp_ws.delete()
 
-    def test_no_grouping_workspace_without_output_property(self):
-        """OutputGroupingWorkspace must NOT be produced when the property is not set."""
+    def test_simpleapi_wrapper_assigns_workspace_names(self):
+        """simpleapi uses LHS variable names for output workspace properties."""
         ws, grp_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2")
-        self.assertIsNone(grp_ws)
+        self.assertEqual(ws.name(), "ws")
+        self.assertIsInstance(ws, IMDHistoWorkspace)
+        self.assertEqual(grp_ws.name(), "grp_ws")
+        self.assertIsInstance(grp_ws, GroupingWorkspace)
         ws.delete()
+        grp_ws.delete()
 
     def test_validation_rejects_grouping_ws_without_grouping(self):
         """Requesting OutputGroupingWorkspace while Grouping='None' must raise."""
-        import mantid.simpleapi as sapi
-
         with self.assertRaises(Exception):
-            sapi.LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="None", OutputGroupingWorkspace="should_fail")
+            LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="None", OutputGroupingWorkspace="should_fail")
 
 
 if __name__ == "__main__":
