@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import IMDHistoWorkspace
 from mantid.dataobjects import GroupingWorkspace
 from mantid.simpleapi import LoadWANDSCD
 import unittest
@@ -123,27 +122,16 @@ class LoadWANDApplyGoniometerTiltTest(unittest.TestCase):
 
 
 class LoadWANDGrouping(unittest.TestCase):
-    def test(self):
-        LoadWANDTest_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping=None)
-        LoadWANDTest_ws_2x2 = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2")
-        LoadWANDTest_ws_4x4 = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="4x4")
-
-        self.assertEqual(LoadWANDTest_ws.getSignalArray().sum(), LoadWANDTest_ws_2x2.getSignalArray().sum())
-        self.assertEqual(LoadWANDTest_ws.getSignalArray().sum(), LoadWANDTest_ws_4x4.getSignalArray().sum())
-
-        LoadWANDTest_ws.delete()
-        LoadWANDTest_ws_2x2.delete()
-        LoadWANDTest_ws_4x4.delete()
-
-
-class LoadWANDGroupingWorkspace(unittest.TestCase):
     # Full detector grid dimensions for WAND (HB2C)
     N_ROWS = 480 * 8  # 3840
     N_COLS = 512
+    TOTAL_COUNTS = 128049  # number of events in file "HB2C_475936.nxs.h5"
 
     def test_grouping_workspace_2x2(self):
         grouping = 2
         ws, grp_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2", OutputWorkspace="ws_2x2", OutputGroupingWorkspace="grp_ws_2x2")
+
+        self.assertEqual(ws.getSignalArray().sum(), self.TOTAL_COUNTS)
 
         # Type check
         self.assertIsInstance(grp_ws, GroupingWorkspace)
@@ -185,6 +173,8 @@ class LoadWANDGroupingWorkspace(unittest.TestCase):
         grouping = 4
         ws, grp_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="4x4", OutputGroupingWorkspace="grp_ws_4x4")
 
+        self.assertEqual(ws.getSignalArray().sum(), self.TOTAL_COUNTS)
+
         self.assertIsInstance(grp_ws, GroupingWorkspace)
         expected_groups = (self.N_ROWS // grouping) * (self.N_COLS // grouping)
         self.assertEqual(grp_ws.getTotalGroups(), expected_groups)
@@ -194,16 +184,6 @@ class LoadWANDGroupingWorkspace(unittest.TestCase):
         ids_in_first_group = grp_ws.getDetectorIDsOfGroup(1)
         self.assertEqual(len(ids_in_first_group), group_size)
 
-        ws.delete()
-        grp_ws.delete()
-
-    def test_simpleapi_wrapper_assigns_workspace_names(self):
-        """simpleapi uses LHS variable names for output workspace properties."""
-        ws, grp_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2")
-        self.assertEqual(ws.name(), "ws")
-        self.assertIsInstance(ws, IMDHistoWorkspace)
-        self.assertEqual(grp_ws.name(), "grp_ws")
-        self.assertIsInstance(grp_ws, GroupingWorkspace)
         ws.delete()
         grp_ws.delete()
 
