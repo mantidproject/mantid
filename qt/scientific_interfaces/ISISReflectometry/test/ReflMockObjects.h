@@ -23,6 +23,7 @@
 #include "GUI/Instrument/InstrumentOptionDefaults.h"
 #include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "GUI/MainWindow/IMainWindowView.h"
+#include "GUI/Plotting/IPlottingPresenter.h"
 #include "GUI/Preview/ROIType.h"
 #include "GUI/Runs/IRunNotifier.h"
 #include "GUI/Runs/IRunsPresenter.h"
@@ -201,6 +202,15 @@ public:
   MOCK_METHOD2(saveWorkspaces, void(std::vector<std::string> const &, bool const));
   MOCK_CONST_METHOD0(shouldAutosave, bool());
   MOCK_CONST_METHOD0(shouldAutosaveGroupRows, bool());
+  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyReductionResumed, void());
+  MOCK_METHOD0(notifyAutoreductionPaused, void());
+  MOCK_METHOD0(notifyAutoreductionResumed, void());
+};
+
+class MockPlottingPresenter : public IPlottingPresenter {
+public:
+  MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
   MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());

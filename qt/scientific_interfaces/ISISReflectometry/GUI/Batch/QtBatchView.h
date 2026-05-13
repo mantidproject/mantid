@@ -9,6 +9,7 @@
 #include "GUI/Event/QtEventView.h"
 #include "GUI/Experiment/QtExperimentView.h"
 #include "GUI/Instrument/QtInstrumentView.h"
+#include "GUI/Plotting/QtPlottingView.h"
 #include "GUI/Preview/QtPreviewView.h"
 #include "GUI/Runs/QtRunsView.h"
 #include "GUI/Save/QtSaveView.h"
@@ -36,6 +37,7 @@ public:
   IExperimentView *experiment() const override;
   IInstrumentView *instrument() const override;
   IPreviewView *preview() const override;
+  IPlottingView *plotting() const override;
 
 private:
   void initLayout();
@@ -52,6 +54,7 @@ private:
   std::unique_ptr<QtExperimentView> m_experiment;
   std::unique_ptr<QtInstrumentView> m_instrument;
   std::unique_ptr<QtPreviewView> m_preview;
+  std::unique_ptr<QtPlottingView> m_plotting;
 
   friend class Encoder;
   friend class Decoder;

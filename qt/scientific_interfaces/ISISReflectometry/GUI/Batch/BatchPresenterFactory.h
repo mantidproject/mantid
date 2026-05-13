@@ -10,6 +10,7 @@
 #include "GUI/Event/EventPresenterFactory.h"
 #include "GUI/Experiment/ExperimentPresenterFactory.h"
 #include "GUI/Instrument/InstrumentPresenterFactory.h"
+#include "GUI/Plotting/PlottingPresenterFactory.h"
 #include "GUI/Preview/PreviewPresenterFactory.h"
 #include "GUI/Runs/RunsPresenterFactory.h"
 #include "GUI/Save/SavePresenterFactory.h"
@@ -47,6 +48,7 @@ public:
     auto instrumentPresenter = m_instrumentPresenterFactory.make(view->instrument());
     auto eventPresenter = m_eventPresenterFactory.make(view->eventHandling());
     auto savePresenter = m_savePresenterFactory.make(view->save());
+    auto plottingPresenter = m_plottingPresenterFactory.make(view->plotting());
 
     auto batchModel = std::make_unique<Batch>(experimentPresenter->experiment(), instrumentPresenter->instrument(),
                                               runsPresenter->mutableRunsTable(), eventPresenter->slicing());
@@ -54,10 +56,10 @@ public:
     auto previewPresenter = m_previewPresenterFactory.make(view->preview(), std::move(algFactory));
 
     auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
-    return std::make_unique<BatchPresenter>(view, std::move(batchModel), std::move(jobRunner), std::move(runsPresenter),
-                                            std::move(eventPresenter), std::move(experimentPresenter),
-                                            std::move(instrumentPresenter), std::move(savePresenter),
-                                            std::move(previewPresenter), m_messageHandler);
+    return std::make_unique<BatchPresenter>(
+        view, std::move(batchModel), std::move(jobRunner), std::move(runsPresenter), std::move(eventPresenter),
+        std::move(experimentPresenter), std::move(instrumentPresenter), std::move(savePresenter),
+        std::move(previewPresenter), std::move(plottingPresenter), m_messageHandler);
   }
 
 private:
@@ -67,6 +69,7 @@ private:
   InstrumentPresenterFactory m_instrumentPresenterFactory;
   PreviewPresenterFactory m_previewPresenterFactory;
   SavePresenterFactory m_savePresenterFactory;
+  PlottingPresenterFactory m_plottingPresenterFactory;
   MantidQt::MantidWidgets::IMessageHandler *m_messageHandler;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtBatchView.h"
 #include "GUI/Event/QtEventView.h"
+#include "GUI/Plotting/QtPlottingView.h"
 #include "GUI/Preview/QtPreviewView.h"
 #include "GUI/Runs/QtRunsView.h"
 #include "GUI/Save/QtSaveView.h"
@@ -40,6 +41,9 @@ void QtBatchView::initLayout() {
   m_preview = std::make_unique<QtPreviewView>(this);
   m_ui.batchTabs->addTab(m_preview.get(), "Reduction Preview");
 
+  m_plotting = std::make_unique<QtPlottingView>(this);
+  m_ui.batchTabs->addTab(m_plotting.get(), "Plotting");
+
   m_save = createSaveTab();
   m_ui.batchTabs->addTab(m_save.get(), "Save");
 }
@@ -49,6 +53,8 @@ IExperimentView *QtBatchView::experiment() const { return m_experiment.get(); }
 IInstrumentView *QtBatchView::instrument() const { return m_instrument.get(); }
 
 IPreviewView *QtBatchView::preview() const { return m_preview.get(); }
+
+IPlottingView *QtBatchView::plotting() const { return m_plotting.get(); }
 
 IRunsView *QtBatchView::runs() const { return m_runs.get(); }
 

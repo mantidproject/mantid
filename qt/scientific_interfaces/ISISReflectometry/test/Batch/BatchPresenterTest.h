@@ -650,6 +650,7 @@ private:
   NiceMock<MockInstrumentPresenter> *m_instrumentPresenter;
   NiceMock<MockSavePresenter> *m_savePresenter;
   NiceMock<MockPreviewPresenter> *m_previewPresenter;
+  NiceMock<MockPlottingPresenter> *m_plottingPresenter;
   StrictMock<MockMessageHandler> m_messageHandler;
   std::vector<std::string> m_instruments;
   double m_tolerance;
@@ -689,10 +690,12 @@ private:
                          std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                          std::unique_ptr<ISavePresenter> savePresenter,
                          std::unique_ptr<IPreviewPresenter> previewPresenter,
+                         std::unique_ptr<IPlottingPresenter> plottingPresenter,
                          MantidQt::MantidWidgets::IMessageHandler *messageHandler)
         : BatchPresenter(view, std::move(model), std::move(jobRunner), std::move(runsPresenter),
                          std::move(eventPresenter), std::move(experimentPresenter), std::move(instrumentPresenter),
-                         std::move(savePresenter), std::move(previewPresenter), messageHandler) {}
+                         std::move(savePresenter), std::move(previewPresenter), std::move(plottingPresenter),
+                         messageHandler) {}
   };
 
   RunsTable makeRunsTable() { return RunsTable(m_instruments, m_tolerance, ReductionJobs()); }
@@ -711,6 +714,7 @@ private:
     auto instrumentPresenter = std::make_unique<NiceMock<MockInstrumentPresenter>>();
     auto savePresenter = std::make_unique<NiceMock<MockSavePresenter>>();
     auto previewPresenter = std::make_unique<NiceMock<MockPreviewPresenter>>();
+    auto plottingPresenter = std::make_unique<NiceMock<MockPlottingPresenter>>();
     auto jobRunner = std::make_unique<NiceMock<MockJobRunner>>();
     m_runsPresenter = runsPresenter.get();
     m_eventPresenter = eventPresenter.get();
@@ -718,13 +722,14 @@ private:
     m_instrumentPresenter = instrumentPresenter.get();
     m_savePresenter = savePresenter.get();
     m_previewPresenter = previewPresenter.get();
+    m_plottingPresenter = plottingPresenter.get();
     m_jobRunner = jobRunner.get();
     EXPECT_CALL(*m_jobRunner, subscribe(_)).Times(1);
     // Create the batch presenter
     auto presenter = std::make_unique<BatchPresenterFriend>(
         &m_view, std::move(batchModel), std::move(jobRunner), std::move(runsPresenter), std::move(eventPresenter),
         std::move(experimentPresenter), std::move(instrumentPresenter), std::move(savePresenter),
-        std::move(previewPresenter), &m_messageHandler);
+        std::move(previewPresenter), std::move(plottingPresenter), &m_messageHandler);
     presenter->acceptMainPresenter(&m_mainPresenter);
     // Replace the constructed job runner with a mock
     m_jobManager = new NiceMock<MockBatchJobManager>();
@@ -758,6 +763,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_instrumentPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_savePresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_previewPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_plottingPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_jobManager));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
   }
@@ -769,6 +775,7 @@ private:
     EXPECT_CALL(*m_experimentPresenter, notifyReductionResumed()).Times(1);
     EXPECT_CALL(*m_instrumentPresenter, notifyReductionResumed()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(*m_plottingPresenter, notifyReductionResumed()).Times(1);
     EXPECT_CALL(m_mainPresenter, notifyAnyBatchReductionResumed()).Times(1);
   }
 
@@ -779,6 +786,7 @@ private:
     EXPECT_CALL(*m_experimentPresenter, notifyReductionPaused()).Times(1);
     EXPECT_CALL(*m_instrumentPresenter, notifyReductionPaused()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyReductionPaused()).Times(1);
+    EXPECT_CALL(*m_plottingPresenter, notifyReductionPaused()).Times(1);
   }
 
   void expectAutoreductionResumed() {
@@ -788,6 +796,7 @@ private:
     EXPECT_CALL(*m_experimentPresenter, notifyAutoreductionResumed()).Times(1);
     EXPECT_CALL(*m_instrumentPresenter, notifyAutoreductionResumed()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyAutoreductionResumed()).Times(1);
+    EXPECT_CALL(*m_plottingPresenter, notifyAutoreductionResumed()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
     EXPECT_CALL(m_mainPresenter, notifyAnyBatchAutoreductionResumed()).Times(1);
   }
@@ -799,6 +808,7 @@ private:
     EXPECT_CALL(*m_experimentPresenter, notifyAutoreductionPaused()).Times(1);
     EXPECT_CALL(*m_instrumentPresenter, notifyAutoreductionPaused()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyAutoreductionPaused()).Times(1);
+    EXPECT_CALL(*m_plottingPresenter, notifyAutoreductionPaused()).Times(1);
     EXPECT_CALL(m_mainPresenter, notifyAnyBatchAutoreductionPaused()).Times(1);
   }
 

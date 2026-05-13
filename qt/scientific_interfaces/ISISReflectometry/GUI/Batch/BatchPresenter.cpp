@@ -10,6 +10,7 @@
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
 #include "GUI/MainWindow/IMainWindowPresenter.h"
+#include "GUI/Plotting/IPlottingPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchView.h"
@@ -43,12 +44,14 @@ BatchPresenter::BatchPresenter(
     std::unique_ptr<IRunsPresenter> runsPresenter, std::unique_ptr<IEventPresenter> eventPresenter,
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter, std::unique_ptr<ISavePresenter> savePresenter,
-    std::unique_ptr<IPreviewPresenter> previewPresenter, MantidQt::MantidWidgets::IMessageHandler *messageHandler)
+    std::unique_ptr<IPreviewPresenter> previewPresenter, std::unique_ptr<IPlottingPresenter> plottingPresenter,
+    MantidQt::MantidWidgets::IMessageHandler *messageHandler)
     : m_view(view), m_model(std::move(model)), m_mainPresenter(), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
-      m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(std::move(jobRunner)),
-      m_messageHandler(messageHandler), m_jobManager(std::make_unique<BatchJobManager>(*m_model)) {
+      m_previewPresenter(std::move(previewPresenter)), m_plottingPresenter(std::move(plottingPresenter)),
+      m_unsavedBatchFlag(false), m_jobRunner(std::move(jobRunner)), m_messageHandler(messageHandler),
+      m_jobManager(std::make_unique<BatchJobManager>(*m_model)) {
 
   m_jobRunner->subscribe(this);
 
@@ -59,6 +62,7 @@ BatchPresenter::BatchPresenter(
   m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
   m_previewPresenter->acceptMainPresenter(this);
+  m_plottingPresenter->acceptMainPresenter(this);
 
   m_unsavedBatchFlag = false;
 
@@ -206,6 +210,7 @@ void BatchPresenter::notifyReductionResumed() {
   m_experimentPresenter->notifyReductionResumed();
   m_instrumentPresenter->notifyReductionResumed();
   m_runsPresenter->notifyReductionResumed();
+  m_plottingPresenter->notifyReductionResumed();
   m_mainPresenter->notifyAnyBatchReductionResumed();
 }
 
@@ -221,6 +226,7 @@ void BatchPresenter::notifyReductionPaused() {
   m_experimentPresenter->notifyReductionPaused();
   m_instrumentPresenter->notifyReductionPaused();
   m_runsPresenter->notifyReductionPaused();
+  m_plottingPresenter->notifyReductionPaused();
   m_mainPresenter->notifyAnyBatchReductionPaused();
   // If autoreducing, notify
   if (isAutoreducing())
@@ -253,6 +259,7 @@ void BatchPresenter::notifyAutoreductionResumed() {
   m_experimentPresenter->notifyAutoreductionResumed();
   m_instrumentPresenter->notifyAutoreductionResumed();
   m_runsPresenter->notifyAutoreductionResumed();
+  m_plottingPresenter->notifyAutoreductionResumed();
 
   m_runsPresenter->notifyRowStateChanged();
   m_mainPresenter->notifyAnyBatchAutoreductionResumed();
@@ -275,6 +282,7 @@ void BatchPresenter::notifyAutoreductionPaused() {
   m_experimentPresenter->notifyAutoreductionPaused();
   m_instrumentPresenter->notifyAutoreductionPaused();
   m_runsPresenter->notifyAutoreductionPaused();
+  m_plottingPresenter->notifyAutoreductionPaused();
 
   m_mainPresenter->notifyAnyBatchAutoreductionPaused();
 }
