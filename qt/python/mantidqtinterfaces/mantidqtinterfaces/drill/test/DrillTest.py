@@ -160,6 +160,10 @@ class DrillTest(unittest.TestCase):
         self.view.isHidden.return_value = False
 
     def tearDown(self):
+        self.view.close()
+        self.view.deleteLater()
+        self.view = None
+        QApplication.processEvents()
         config["default.facility"] = self.facility
         config["default.instrument"] = self.instrument
 
