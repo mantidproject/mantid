@@ -1,0 +1,1 @@
+- The plotting tab in the :ref:`ISIS Reflectometry Interface <interface-isis-refl>` now shows output workspace groups with their member workspaces as selectable child entries.

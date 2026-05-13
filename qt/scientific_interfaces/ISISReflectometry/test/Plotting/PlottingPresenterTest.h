@@ -11,6 +11,7 @@
 #include "../ReflMockObjects.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -121,6 +122,47 @@ public:
     presenter.notifyRunsTableChanged(runsTable);
   }
 
+  void testRunsTableChangedShowsRowOutputWorkspaceGroupMembers() {
+    NiceMock<MockPlottingView> view;
+    PlottingPresenter presenter(&view);
+    auto runsTable = RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {successfulRow("12345")})}));
+    addWorkspaceGroup("IvsQ_12345", {"IvsQ_12345_1", "IvsQ_12345_2"});
+
+    auto const expected = std::vector<PlottingWorkspaceTreeItem>{
+        {"Group 1", {{"12345", {{"IvsQ_12345", {{"IvsQ_12345_1", {}}, {"IvsQ_12345_2", {}}}}}}}}};
+
+    EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
+
+    presenter.notifyRunsTableChanged(runsTable);
+  }
+
+  void testRunsTableChangedShowsSuccessfulGroupOutputWorkspaceGroupMembers() {
+    NiceMock<MockPlottingView> view;
+    PlottingPresenter presenter(&view);
+    auto group = successfulGroup("Group 1", {successfulRow("12345")}, "stitched_12345");
+    auto runsTable = RunsTable({}, 0.0, ReductionJobs({group}));
+    addWorkspaceGroup("stitched_12345", {"stitched_12345_1", "stitched_12345_2"});
+
+    auto const expected = std::vector<PlottingWorkspaceTreeItem>{
+        {"Group 1", {{"stitched_12345", {{"stitched_12345_1", {}}, {"stitched_12345_2", {}}}}}}};
+
+    EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
+
+    presenter.notifyRunsTableChanged(runsTable);
+  }
+
+  void testRunsTableChangedOmitsEmptyWorkspaceGroupOutput() {
+    NiceMock<MockPlottingView> view;
+    PlottingPresenter presenter(&view);
+    auto group = successfulGroup("Group 1", {successfulRow("12345")}, "stitched_12345");
+    auto runsTable = RunsTable({}, 0.0, ReductionJobs({group}));
+    Mantid::API::AnalysisDataService::Instance().add("stitched_12345", std::make_shared<Mantid::API::WorkspaceGroup>());
+
+    EXPECT_CALL(view, setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem>{})).Times(1);
+
+    presenter.notifyRunsTableChanged(runsTable);
+  }
+
   void testPlotIndividualPlotsSelectedWorkspaces() {
     NiceMock<MockPlottingView> view;
     NiceMock<MockPlotter> plotter;
@@ -204,6 +246,14 @@ private:
   void addWorkspaces(std::vector<std::string> const &workspaceNames) {
     for (auto const &name : workspaceNames) {
       Mantid::API::AnalysisDataService::Instance().addOrReplace(name, WorkspaceCreationHelper::create2DWorkspace(1, 1));
+    }
+  }
+
+  void addWorkspaceGroup(std::string const &groupName, std::vector<std::string> const &workspaceNames) {
+    addWorkspaces(workspaceNames);
+    Mantid::API::AnalysisDataService::Instance().add(groupName, std::make_shared<Mantid::API::WorkspaceGroup>());
+    for (auto const &name : workspaceNames) {
+      Mantid::API::AnalysisDataService::Instance().addToGroup(groupName, name);
     }
   }
 };

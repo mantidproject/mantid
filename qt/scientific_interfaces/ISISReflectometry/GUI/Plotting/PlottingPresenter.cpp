@@ -7,6 +7,7 @@
 #include "PlottingPresenter.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "Reduction/ReductionWorkspaces.h"
 #include "Reduction/RunsTable.h"
 #include <boost/algorithm/string/join.hpp>
@@ -14,14 +15,46 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
-bool workspaceExists(std::string const &workspaceName) {
-  return !workspaceName.empty() && Mantid::API::AnalysisDataService::Instance().doesExist(workspaceName);
+Mantid::API::Workspace_sptr retrieveWorkspaceIfPresent(std::string const &workspaceName) {
+  if (workspaceName.empty()) {
+    return nullptr;
+  }
+
+  return Mantid::API::AnalysisDataService::Instance().doesExist(workspaceName)
+             ? Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::Workspace>(workspaceName)
+             : nullptr;
+}
+
+void addWorkspaceGroupIfPopulated(PlottingWorkspaceTreeItem &parent, std::string const &workspaceName,
+                                  Mantid::API::WorkspaceGroup_const_sptr const &workspaceGroup) {
+  auto workspaceGroupItem = PlottingWorkspaceTreeItem{workspaceName, {}};
+  for (auto index = 0u; index < workspaceGroup->size(); ++index) {
+    auto const memberWorkspace = workspaceGroup->getItem(index);
+    if (memberWorkspace && !memberWorkspace->getName().empty()) {
+      workspaceGroupItem.children.emplace_back(PlottingWorkspaceTreeItem{memberWorkspace->getName(), {}});
+    }
+  }
+
+  if (workspaceGroupItem.children.empty()) {
+    return;
+  }
+
+  parent.children.emplace_back(std::move(workspaceGroupItem));
 }
 
 void addWorkspaceIfPresent(PlottingWorkspaceTreeItem &parent, std::string const &workspaceName) {
-  if (workspaceExists(workspaceName)) {
-    parent.children.emplace_back(PlottingWorkspaceTreeItem{workspaceName, {}});
+  auto const workspace = retrieveWorkspaceIfPresent(workspaceName);
+  if (!workspace) {
+    return;
   }
+
+  if (auto const workspaceGroup = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup const>(workspace);
+      workspaceGroup) {
+    addWorkspaceGroupIfPopulated(parent, workspaceName, workspaceGroup);
+    return;
+  }
+
+  parent.children.emplace_back(PlottingWorkspaceTreeItem{workspaceName, {}});
 }
 } // namespace
 
