@@ -1,0 +1,1 @@
+- A new plotting tab has been added to the :ref:`ISIS Reflectometry Interface <interface-isis-refl>`. It lists successful reduction outputs by group and run, supports plotting selected workspaces individually, overlaid, or tiled, and shows output workspace groups with their member workspaces as selectable child entries.
