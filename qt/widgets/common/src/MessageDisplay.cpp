@@ -432,7 +432,7 @@ void MessageDisplay::initFormats() {
   textFormat.setForeground(Qt::gray);
   m_formats[Message::Priority::PRIO_INFORMATION] = textFormat;
 
-  textFormat.setForeground(Qt::darkBlue);
+  textFormat.setForeground(QColor::fromRgb(65, 105, 225));
   m_formats[Message::Priority::PRIO_NOTICE] = textFormat;
 }
 
