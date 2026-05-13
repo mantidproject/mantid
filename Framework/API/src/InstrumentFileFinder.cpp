@@ -57,6 +57,16 @@ class myContentHandler : public Poco::XML::ContentHandler {
 
 namespace Mantid::API {
 
+/** If date with only YYYY - MM - DD was provided (no time component), append midnight so
+ *   DateAndTime can parse it. Otherwise just return back the same date string
+ *
+ *   @param date :: string of date read from file
+ */
+const std::string InstrumentFileFinder::getNormalisedDate(const std::string &date) {
+  static const boost::regex dateOnlyRegex("\\d{4}-\\d{2}-\\d{2}");
+  return boost::regex_match(date, dateOnlyRegex) ? date + "T00:00:00" : date;
+};
+
 /** This method returns a file name which finds a file which contains the given instrument name + search term
  *  and is valid at the given date.
  *
@@ -398,15 +408,5 @@ void InstrumentFileFinder::getValidFromTo(const std::string &IDFfilename, std::s
     // should throw some sensible here
   }
 }
-
-/** If date with only YYYY - MM - DD was provided (no time component), append midnight so
- *   DateAndTime can parse it. Otherwise just return back the same date string
- *
- *   @param date :: string of date read from file
- */
-static const std::string getNormalisedDate(const std::string &date) {
-  static const boost::regex dateOnlyRegex("\\d{4}-\\d{2}-\\d{2}");
-  return boost::regex_match(date, dateOnlyRegex) ? date + "T00:00:00" : date;
-};
 
 } // Namespace Mantid::API
