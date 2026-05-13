@@ -8,6 +8,7 @@
 
 #include "IPlottingView.h"
 #include "ui_PlottingWidget.h"
+#include <QStandardItemModel>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -18,11 +19,14 @@ public:
 
   void subscribe(PlottingViewSubscriber *notifyee) override;
   void setOutputOptionsEnabled(bool enabled) override;
+  void setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> const &items) override;
 
 private:
   void initLayout();
+  void addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item);
 
   Ui::PlottingWidget m_ui;
+  QStandardItemModel m_workspaceModel;
   PlottingViewSubscriber *m_notifyee;
 };
 

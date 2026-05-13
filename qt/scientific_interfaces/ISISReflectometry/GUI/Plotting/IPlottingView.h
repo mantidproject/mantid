@@ -7,8 +7,20 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include <string>
+#include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+
+struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeItem {
+  std::string label;
+  std::vector<PlottingWorkspaceTreeItem> children;
+};
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PlottingWorkspaceTreeItem const &lhs,
+                                               PlottingWorkspaceTreeItem const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PlottingWorkspaceTreeItem const &lhs,
+                                               PlottingWorkspaceTreeItem const &rhs);
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PlottingViewSubscriber {
 public:
@@ -20,6 +32,7 @@ public:
   virtual ~IPlottingView() = default;
   virtual void subscribe(PlottingViewSubscriber *notifyee) = 0;
   virtual void setOutputOptionsEnabled(bool enabled) = 0;
+  virtual void setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> const &items) = 0;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

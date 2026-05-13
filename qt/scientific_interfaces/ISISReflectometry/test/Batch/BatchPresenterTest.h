@@ -443,6 +443,12 @@ public:
     presenter->postDeleteHandle("");
   }
 
+  void testPlottingWorkspacesUpdatedWhenWorkspaceDeleted() {
+    auto presenter = makePresenter(makeModel());
+    EXPECT_CALL(*m_plottingPresenter, notifyRunsTableChanged(_)).Times(1);
+    presenter->postDeleteHandle("");
+  }
+
   void testModelUpdatedWhenWorkspaceRenamed() {
     auto presenter = makePresenter(makeModel());
     auto oldName = std::string("test_workspace1");
@@ -457,6 +463,12 @@ public:
     presenter->renameHandle("", "");
   }
 
+  void testPlottingWorkspacesUpdatedWhenWorkspaceRenamed() {
+    auto presenter = makePresenter(makeModel());
+    EXPECT_CALL(*m_plottingPresenter, notifyRunsTableChanged(_)).Times(1);
+    presenter->renameHandle("", "");
+  }
+
   void testModelUpdatedWhenWorkspacesCleared() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_jobManager, notifyAllWorkspacesDeleted()).Times(1);
@@ -466,6 +478,12 @@ public:
   void testRowStateUpdatedWhenWorkspacesCleared() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged()).Times(1);
+    presenter->clearADSHandle();
+  }
+
+  void testPlottingWorkspacesUpdatedWhenWorkspacesCleared() {
+    auto presenter = makePresenter(makeModel());
+    EXPECT_CALL(*m_plottingPresenter, notifyRunsTableChanged(_)).Times(1);
     presenter->clearADSHandle();
   }
 
@@ -704,7 +722,11 @@ private:
     return std::make_unique<Batch>(m_experiment, m_instrument, m_runsTable, m_slicing);
   }
 
-  std::unique_ptr<MockBatch> makeMockModel() { return std::make_unique<MockBatch>(); }
+  std::unique_ptr<MockBatch> makeMockModel() {
+    auto model = std::make_unique<MockBatch>();
+    EXPECT_CALL(*model, runsTable()).Times(AtLeast(0)).WillRepeatedly(ReturnRef(m_runsTable));
+    return model;
+  }
 
   std::unique_ptr<BatchPresenterFriend> makePresenter(std::unique_ptr<IBatch> batchModel) {
     // Create pointers to the child presenters and pass them into the batch

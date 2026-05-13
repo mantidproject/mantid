@@ -118,6 +118,7 @@ private:
   void notifyAutoreductionPaused();
   void autoreductionCompleted();
   void settingsChanged();
+  void updatePlottingWorkspaces();
 
   IBatchView *m_view;
   std::unique_ptr<IBatch> m_model;
