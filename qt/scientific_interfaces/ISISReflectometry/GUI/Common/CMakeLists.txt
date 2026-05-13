@@ -1,4 +1,4 @@
-set(COMMON_SRC_FILES Plotter.cpp PlotOptions.cpp Encoder.cpp Decoder.cpp)
+set(COMMON_SRC_FILES Plotter.cpp PlotOptions.cpp PlotOptionsProvider.cpp Encoder.cpp Decoder.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(COMMON_INC_FILES
@@ -7,7 +7,9 @@ set(COMMON_INC_FILES
     IReflMessageHandler.h
     IPythonRunner.h
     IPlotter.h
+    IPlotOptionsProvider.h
     PlotOptions.h
+    PlotOptionsProvider.h
     Plotter.h
     Encoder.h
     Decoder.h
