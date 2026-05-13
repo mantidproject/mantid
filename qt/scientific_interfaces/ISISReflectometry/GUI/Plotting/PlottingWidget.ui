@@ -34,13 +34,6 @@
       <widget class="QComboBox" name="plotPreset"/>
      </item>
      <item>
-      <widget class="QPushButton" name="keepSelected">
-       <property name="text">
-        <string>Keep selected</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="Line" name="line">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -48,23 +41,23 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="plotTiled">
+      <widget class="QPushButton" name="plotIndividual">
        <property name="text">
-        <string>Tiled</string>
+        <string>Plot</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="plotOverplot">
        <property name="text">
-        <string>Overplot</string>
+        <string>Plot over</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="plotIndividual">
+      <widget class="QPushButton" name="plotTiled">
        <property name="text">
-        <string>Individual plots</string>
+        <string>Plot tiled</string>
        </property>
       </widget>
      </item>

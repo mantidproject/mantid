@@ -9,15 +9,36 @@
 #include "../../../ISISReflectometry/GUI/Plotting/QtPlottingView.h"
 
 #include <QApplication>
+#include <QComboBox>
 #include <QItemSelectionModel>
 #include <QMouseEvent>
+#include <QPushButton>
 #include <QTreeView>
+#include <QVBoxLayout>
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class QtPlottingViewTest : public CxxTest::TestSuite {
 public:
+  void testOnlyReflectivityCurvePresetIsAvailable() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+
+    TS_ASSERT_EQUALS(plotPreset->count(), 1);
+    TS_ASSERT_EQUALS(plotPreset->currentText().toStdString(), "Reflectivity Curve");
+    TS_ASSERT_EQUALS(view.selectedPlotOutputType(), PlotOutputType::ReflectivityCurve);
+  }
+
+  void testPlotButtonsHaveExpectedLabelsAndOrder() {
+    QtPlottingView view;
+    auto const optionsLayout = view.findChild<QVBoxLayout *>("optionsLayout");
+
+    assertButton(optionsLayout->itemAt(3)->widget(), "plotIndividual", "Plot");
+    assertButton(optionsLayout->itemAt(4)->widget(), "plotOverplot", "Plot over");
+    assertButton(optionsLayout->itemAt(5)->widget(), "plotTiled", "Plot tiled");
+  }
+
   void testSelectingGroupSelectsChildRunsAndWorkspaces() {
     QtPlottingView view;
     view.setWorkspaceItems(workspaceItems());
@@ -241,7 +262,53 @@ public:
     TS_ASSERT(!tree->selectionModel()->isSelected(workspace2));
   }
 
+  void testSelectedWorkspacesReturnsOnlyWorkspaceItems() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+
+    auto const selectedWorkspaces = view.selectedWorkspaces();
+    TS_ASSERT_EQUALS(selectedWorkspaces.size(), 2);
+    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsLam_12345");
+    TS_ASSERT_EQUALS(selectedWorkspaces[1], "IvsQ_12345");
+  }
+
+  void testPlotButtonsNotifySubscriber() {
+    QtPlottingView view;
+    TestPlottingViewSubscriber subscriber;
+    view.subscribe(&subscriber);
+    view.setOutputOptionsEnabled(true);
+
+    view.findChild<QPushButton *>("plotTiled")->click();
+    view.findChild<QPushButton *>("plotOverplot")->click();
+    view.findChild<QPushButton *>("plotIndividual")->click();
+
+    TS_ASSERT_EQUALS(subscriber.tiledClicked, 1);
+    TS_ASSERT_EQUALS(subscriber.overplotClicked, 1);
+    TS_ASSERT_EQUALS(subscriber.individualClicked, 1);
+  }
+
 private:
+  class TestPlottingViewSubscriber : public PlottingViewSubscriber {
+  public:
+    void notifyPlotTiledClicked() override { ++tiledClicked; }
+    void notifyPlotOverplotClicked() override { ++overplotClicked; }
+    void notifyPlotIndividualClicked() override { ++individualClicked; }
+
+    int tiledClicked{0};
+    int overplotClicked{0};
+    int individualClicked{0};
+  };
+
+  void assertButton(QWidget const *widget, std::string const &objectName, std::string const &text) const {
+    auto const button = dynamic_cast<QPushButton const *>(widget);
+    TS_ASSERT(button);
+    TS_ASSERT_EQUALS(button->objectName().toStdString(), objectName);
+    TS_ASSERT_EQUALS(button->text().toStdString(), text);
+  }
+
   std::vector<PlottingWorkspaceTreeItem> workspaceItems() const {
     return {{"Group 1", {{"12345", {{"IvsLam_12345", {}}, {"IvsQ_12345", {}}}}}}};
   }

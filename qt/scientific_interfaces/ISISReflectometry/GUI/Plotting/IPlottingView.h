@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include "GUI/Common/PlotOptions.h"
 #include <string>
 #include <vector>
 
@@ -25,6 +26,9 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PlottingWorkspaceTreeItem const &
 class MANTIDQT_ISISREFLECTOMETRY_DLL PlottingViewSubscriber {
 public:
   virtual ~PlottingViewSubscriber() = default;
+  virtual void notifyPlotTiledClicked() = 0;
+  virtual void notifyPlotOverplotClicked() = 0;
+  virtual void notifyPlotIndividualClicked() = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IPlottingView {
@@ -33,6 +37,8 @@ public:
   virtual void subscribe(PlottingViewSubscriber *notifyee) = 0;
   virtual void setOutputOptionsEnabled(bool enabled) = 0;
   virtual void setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> const &items) = 0;
+  virtual std::vector<std::string> selectedWorkspaces() const = 0;
+  virtual PlotOutputType selectedPlotOutputType() const = 0;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

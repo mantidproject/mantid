@@ -14,14 +14,13 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class PlotOptionsProviderTest : public CxxTest::TestSuite {
 public:
-  void testAvailableTypesContainsReflectivityCurvesForInstrument() {
+  void testAvailableTypesContainsReflectivityCurveForInstrument() {
     auto provider = PlotOptionsProvider{};
 
     auto const availableTypes = provider.availableTypes("INTER");
 
-    TS_ASSERT_EQUALS(availableTypes.size(), 2);
+    TS_ASSERT_EQUALS(availableTypes.size(), 1);
     TS_ASSERT_EQUALS(availableTypes[0], PlotOutputType::ReflectivityCurve);
-    TS_ASSERT_EQUALS(availableTypes[1], PlotOutputType::StitchedReflectivityCurve);
   }
 
   void testReflectivityCurveOptionsAreConfiguredAsCurrentRunsTabPlot() {
