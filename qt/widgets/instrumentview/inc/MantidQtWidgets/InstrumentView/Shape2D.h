@@ -296,7 +296,7 @@ public:
 protected:
   void drawShape(QPainter &painter) const override;
   void addToPath(QPainterPath & /*path*/) const override {}
-  void refit() override;
+  void refit() override final;
   void resetBoundingRect() override;
   size_t getShapeNControlPoints() const override { return 4; }
   QPointF getShapeControlPoint(size_t i) const override;
@@ -348,7 +348,7 @@ public:
 protected:
   void drawShape(QPainter &painter) const override;
   void addToPath(QPainterPath & /*path*/) const override {}
-  void refit() override;
+  void refit() override final;
   void resetBoundingRect() override;
   size_t getShapeNControlPoints() const override { return 4; }
   QPointF getShapeControlPoint(size_t i) const override;
@@ -390,7 +390,7 @@ public:
 
 protected:
   void drawShape(QPainter &painter) const override;
-  void refit() override;
+  void refit() override final;
   void resetBoundingRect() override;
 
 private:

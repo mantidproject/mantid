@@ -114,7 +114,7 @@ public:
   /// Set a constraint
   void setParameterConstraint(std::string const &parameterName, std::string const &constraint) override;
   /// Set new global parameters.
-  void setGlobalParameters(const std::vector<std::string> &) override;
+  void setGlobalParameters(const std::vector<std::string> &) override final;
   /// Get a list of global parameters
   std::vector<std::string> getGlobalParameters() const;
 
