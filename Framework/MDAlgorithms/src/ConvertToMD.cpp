@@ -115,6 +115,11 @@ void ConvertToMD::init() {
                   "[Default, Indexed], indexed is the experimental type that "
                   "can speedup the conversion process"
                   "for the big files using the indexing.");
+
+  declareProperty("UseLogTimes", false,
+                  "If true, and input is an EventWorkspace, this flag will use the value of "
+                  "logs used to define the sample rotation (Goniometer) and OtherDimensions "
+                  "at the pulse times of the events rather than their average values.");
 }
 //----------------------------------------------------------------------------------------------
 
@@ -139,7 +144,6 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
     if (fileBackEnd)
       result["ConverterType"] += "No file back end implemented "
                                  "for indexed version of algorithm. ";
-
     if (topLevelSplittingChecked)
       result["ConverterType"] += "The usage of top level splitting is "
                                  "not possible for indexed version of algorithm. ";
@@ -264,8 +268,9 @@ void ConvertToMD::exec() {
   this->m_Convertor = AlgoSelector.convSelector(m_InWS2D, this->m_Convertor);
 
   bool ignoreZeros = getProperty("IgnoreZeroSignals");
+  bool useLogTimes = getProperty("UseLogTimes");
   // initiate conversion and estimate amount of job to do
-  size_t n_steps = this->m_Convertor->initialize(targWSDescr, m_OutWSWrapper, ignoreZeros);
+  size_t n_steps = this->m_Convertor->initialize(targWSDescr, m_OutWSWrapper, ignoreZeros, useLogTimes);
 
   // copy the metadata, necessary for resolution corrections
   copyMetaData(spws);

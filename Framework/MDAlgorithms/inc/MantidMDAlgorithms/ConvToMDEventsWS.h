@@ -10,11 +10,15 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEvent.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidMDAlgorithms/ConvToMDBase.h"
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
+
+using Mantid::Kernel::DblMatrix;
 
 namespace Mantid {
 // Forward declarations
@@ -33,9 +37,14 @@ namespace MDAlgorithms {
 
 class ConvToMDEventsWS : public ConvToMDBase {
 public:
-  size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
-                    bool ignoreZeros) override;
+  size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper, bool ignoreZeros,
+                    bool useLogTimes) override;
   void runConversion(API::Progress *pProgress) override;
+  ~ConvToMDEventsWS() {
+    for (size_t i = 0; i < m_Logs.size(); i++) {
+      delete m_Logs[i];
+    }
+  }
 
 protected:
   DataObjects::EventWorkspace_const_sptr m_EventWS;
@@ -50,6 +59,11 @@ private:
   template <class T> size_t convertEventList(size_t workspaceIndex);
 
   virtual void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc);
+  // Variables for getting log values at times and recomputing sample orientation
+  Kernel::DblMatrix m_Wtransf;
+  Geometry::Goniometer m_Goniometer;
+  std::vector<Kernel::TimeSeriesProperty<double> *> m_Logs;
+  std::vector<size_t> m_GonioIndex;
 };
 
 } // namespace MDAlgorithms

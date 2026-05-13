@@ -27,9 +27,10 @@ Kernel::Logger ConvToMDBase::g_Log("MD-Algorithms");
  * events into resulting MD workspace. By false(default), they do.
  */
 size_t ConvToMDBase::initialize(const MDAlgorithms::MDWSDescription &WSD,
-                                std::shared_ptr<MDAlgorithms::MDEventWSWrapper> inWSWrapper, bool ignoreZeros) {
-
+                                std::shared_ptr<MDAlgorithms::MDEventWSWrapper> inWSWrapper, bool ignoreZeros,
+                                bool useLogTimes) {
   m_ignoreZeros = ignoreZeros;
+  m_useLogTimes = useLogTimes;
   m_InWS2D = WSD.getInWS();
   // preprocessed detectors information:
   // check if detector information has been precalculated:

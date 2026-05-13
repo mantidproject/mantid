@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvToMDEventsWS.h"
 
+#include "MantidAPI/Run.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 namespace Mantid::MDAlgorithms {
@@ -56,6 +57,14 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
     double val = localUnitConv.convertUnits(it->tof());
     double signal = it->weight();
     double errorSq = it->errorSquared();
+    if (m_useLogTimes) {
+      for (size_t ii = 0; ii < m_GonioIndex.size(); ii++) {
+        m_Goniometer.setRotationAngle(m_GonioIndex[ii], m_Logs[ii]->getSingleValue(it->pulseTime()));
+      }
+      DblMatrix rotmat = m_Goniometer.getR() * m_Wtransf;
+      rotmat.Invert();
+      m_QConverter->updateRotMat(rotmat.getVector());
+    }
     if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
       continue; // skip ND outside the range
 
@@ -98,8 +107,8 @@ workspaces
 @param ignoreZeros  -- if zero value signals should be rejected
 */
 size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
-                                    bool ignoreZeros) {
-  size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros);
+                                    bool ignoreZeros, bool useLogTimes) {
+  size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros, useLogTimes);
 
   m_EventWS = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_InWS2D);
   if (!m_EventWS)
@@ -107,6 +116,25 @@ size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<
 
   // Record any special coordinate system known to the description.
   m_coordinateSystem = WSD.getCoordinateSystem();
+
+  // Look up required logs is using log times
+  if (m_useLogTimes) {
+    // Saves the Q-cartesian transformation
+    m_Wtransf = WSD.m_Wtransf;
+    // Log values for Gonios
+    Mantid::API::Run run = WSD.getInWS()->run();
+    m_Goniometer = run.getGoniometer();
+    for (size_t n = 0; n < m_Goniometer.getNumberAxes(); n++) {
+      Mantid::Geometry::GoniometerAxis ax = m_Goniometer.getAxis(n);
+      if (run.hasProperty(ax.name)) {
+        Kernel::TimeSeriesProperty<double> *log =
+            dynamic_cast<Kernel::TimeSeriesProperty<double> *>(run.getLogData(ax.name)->clone());
+        m_Logs.push_back(log);
+        m_GonioIndex.push_back(n);
+      }
+    }
+  }
+
   return numSpec;
 }
 
