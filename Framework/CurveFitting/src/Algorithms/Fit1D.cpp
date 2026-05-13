@@ -376,7 +376,6 @@ void Fit1D::exec() {
   // coincides with) it
   if (endX >= XValues.back() || endX < startX) {
     g_log.warning("EndX out of range! Set to end of frame");
-    endX = XValues.back();
     m_maxX = static_cast<int>(YValues.size());
   } else {
     for (m_maxX = m_minX; XValues[m_maxX] < endX; ++m_maxX) {

@@ -139,7 +139,7 @@ void PropertyManager::filterByProperty(Mantid::Kernel::LogFilter *logFilter,
                                        const std::vector<std::string> &excludedFromFiltering) {
   auto filter = logFilter->filter();
   for (auto &orderedProperty : m_orderedProperties) {
-    auto const propName = orderedProperty->name();
+    std::string const propName = orderedProperty->name();
     if (std::find(excludedFromFiltering.cbegin(), excludedFromFiltering.cend(), propName) !=
         excludedFromFiltering.cend()) {
       // this log should be excluded from filtering

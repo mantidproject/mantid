@@ -50,11 +50,7 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Li
 
 // ----------- New list of suppressions after updating to cppcheck 2.18.1 -------------
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:608
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
-derefInvalidIteratorRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ExcludeRangeFinder.cpp:77
-duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldFunction.cpp:120
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:432
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:222
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:223
@@ -70,14 +66,11 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice2D.cpp:4
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:571
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:680
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/MDGeometry/MDImplicitFunction.h:169
-invalidFunctionArgBool:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Surfaces/General.cpp:53
 comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BoundedValidator.h:148
 comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BoundedValidator.h:156
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:167
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:168
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:169
-returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:256
-invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi.cpp:622
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:605
@@ -105,14 +98,9 @@ danglingTempReference:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/datao
 danglingTempReference:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/Workspace2D.cpp:74
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/V3D.cpp:123
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/VMD.cpp:100
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SofTwoThetaTOF.cpp:196
 pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h:47
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ScriptEditor.h:108
-passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptOptionsBrowser.cpp:169
-duplicateAssignExpression:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionBrowser/FunctionBrowserUtils.cpp:20
-iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:161
 publicAllocationError:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp:143
 publicAllocationError:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp:100
 ignoredReturnValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp:306
 ignoredReturnValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp:309
-redundantAssignment:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:349

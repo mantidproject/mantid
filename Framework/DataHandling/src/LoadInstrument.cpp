@@ -143,9 +143,9 @@ void LoadInstrument::exec() {
     std::string instrumentFile = filename.substr(stripPath + 1, filename.size());
 
     // Strip off "_Definition.xml"
-    auto definitionRange = boost::ifind_first(instrumentFile, "_Def");
-    if (definitionRange) {
-      instname = instrumentFile.substr(0, std::distance(instrumentFile.begin(), definitionRange.begin()));
+    std::size_t defPos = instrumentFile.find("_Def");
+    if (defPos != std::string::npos) {
+      instname = instrumentFile.substr(0, defPos);
     } else {
       g_log.warning("The instrument definition filename does not contain "
                     "_Definition. Your instrument name will be set to: " +

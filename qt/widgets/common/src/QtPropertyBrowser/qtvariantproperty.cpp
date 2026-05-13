@@ -343,10 +343,13 @@ QtVariantProperty *QtVariantPropertyManagerPrivate::createSubProperty(QtVariantP
 
 void QtVariantPropertyManagerPrivate::removeSubProperty(QtVariantProperty *property) {
   const QtProperty *internChild = wrappedProperty(property);
-  bool wasDestroyingSubProperties = m_destroyingSubProperties;
-  m_destroyingSubProperties = true;
+  struct RestoreFlag {
+    bool &m_flag;
+    bool m_oldValue;
+    explicit RestoreFlag(bool &flag) : m_flag(flag), m_oldValue(flag) { m_flag = true; }
+    ~RestoreFlag() { m_flag = m_oldValue; }
+  } wasDestroyingSubProperties(m_destroyingSubProperties);
   delete property;
-  m_destroyingSubProperties = wasDestroyingSubProperties;
   m_internalToProperty.remove(internChild);
   propertyToWrappedProperty()->remove(property);
 }
