@@ -146,7 +146,7 @@ class FigureInteractionTest(unittest.TestCase):
                 # 3 actions in Y-Axis submenu
                 self.assertEqual(3, mock_list[2].addAction.call_count)
                 # 3 actions in Normalization submenu
-                self.assertEqual(3, mock_list[3].addAction.call_count)
+                self.assertEqual(2, mock_list[3].addAction.call_count)
                 # 3 actions in Colorbar submenu
                 self.assertEqual(3, mock_list[4].addAction.call_count)
 
