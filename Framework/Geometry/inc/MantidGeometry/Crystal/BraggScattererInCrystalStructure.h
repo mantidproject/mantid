@@ -33,7 +33,7 @@ public:
   BraggScattererInCrystalStructure();
 
   Kernel::V3D getPosition() const;
-  UnitCell getCell() const;
+  UnitCell const &getCell() const;
 
 protected:
   void afterPropertySet(const std::string &propertyName) override;

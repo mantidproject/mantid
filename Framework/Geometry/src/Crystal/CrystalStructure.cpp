@@ -42,7 +42,7 @@ CrystalStructure::CrystalStructure(const std::string &unitCellString, const std:
 }
 
 /// Returns the unit cell of the structure
-UnitCell CrystalStructure::cell() const { return m_cell; }
+UnitCell const &CrystalStructure::cell() const { return m_cell; }
 
 /// Assigns a new unit cell
 void CrystalStructure::setCell(const UnitCell &cell) {
