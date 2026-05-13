@@ -14,6 +14,7 @@
 #include "MantidKernel/Exception.h"
 
 #include <Eigen/Geometry>
+#include <algorithm>
 #include <exception>
 #include <iterator>
 #include <string>
@@ -89,6 +90,41 @@ ComponentInfo::ComponentInfo(const ComponentInfo &other)
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ComponentInfo::~ComponentInfo() = default;
+
+size_t ComponentInfo::getMemorySize() const {
+  size_t total = sizeof(ComponentInfo);
+
+  if (m_componentInfo) {
+    total += sizeof(Beamline::ComponentInfo);
+    const auto componentCount = size();
+    const auto scans = std::max(scanCount(), static_cast<size_t>(1));
+    const auto pointCount = componentCount * scans;
+
+    // Beamline::ComponentInfo stores positions, rotations, scale factors, and component type arrays.
+    total += pointCount * (sizeof(Eigen::Vector3d) + sizeof(Eigen::Quaterniond) + sizeof(Eigen::Vector3d));
+    total += pointCount * sizeof(Beamline::ComponentType);
+    total += scans * sizeof(std::pair<int64_t, int64_t>);
+  }
+
+  if (m_componentIds) {
+    total += m_componentIds->capacity() * sizeof(decltype(m_componentIds)::element_type::value_type);
+  }
+
+  if (m_compIDToIndex) {
+    total += m_compIDToIndex->size() * sizeof(decltype(m_compIDToIndex)::element_type::value_type);
+    total += m_compIDToIndex->bucket_count() * sizeof(void *);
+  }
+
+  if (m_shapes) {
+    total += m_shapes->capacity() * sizeof(decltype(m_shapes)::element_type::value_type);
+  }
+
+  for (size_t i = 0; i < size(); ++i) {
+    total += name(i).size();
+  }
+
+  return total;
+}
 
 std::vector<size_t> ComponentInfo::detectorsInSubtree(size_t componentIndex) const {
   return m_componentInfo->detectorsInSubtree(componentIndex);

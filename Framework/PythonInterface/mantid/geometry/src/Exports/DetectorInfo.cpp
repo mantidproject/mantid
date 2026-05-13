@@ -75,6 +75,9 @@ void export_DetectorInfo() {
            "Returns the size of the DetectorInfo, i.e., the number of "
            "detectors in the instrument.")
 
+      .def("getMemorySize", &DetectorInfo::getMemorySize, arg("self"),
+           "Return the footprint of the detector info in memory in bytes")
+
       .def("indexOf", &DetectorInfo::indexOf, (arg("self"), arg("detId")),
            "Returns the index of the detector with the given id.")
 
