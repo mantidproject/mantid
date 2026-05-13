@@ -23,6 +23,8 @@ public:
   void subscribe(PlottingViewSubscriber *notifyee) override;
   void setOutputOptionsEnabled(bool enabled) override;
   void setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> const &items) override;
+  std::vector<std::string> selectedWorkspaces() const override;
+  PlotOutputType selectedPlotOutputType() const override;
 
 protected:
   bool eventFilter(QObject *watched, QEvent *event) override;
@@ -30,6 +32,7 @@ protected:
 private:
   void initLayout();
   void addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item);
+  bool isWorkspaceItem(QModelIndex const &index) const;
   bool handleWorkspaceTreeClick(QMouseEvent const &event);
   bool isAdditiveSelectionModifier(QMouseEvent const &event) const;
   bool hasSelectedAncestor(QModelIndex const &index) const;

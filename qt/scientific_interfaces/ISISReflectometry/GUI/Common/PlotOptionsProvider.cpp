@@ -10,7 +10,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 std::vector<PlotOutputType> PlotOptionsProvider::availableTypes(std::string const &instrumentName) const {
   (void)instrumentName;
-  return {PlotOutputType::ReflectivityCurve, PlotOutputType::StitchedReflectivityCurve};
+  return {PlotOutputType::ReflectivityCurve};
 }
 
 PlotOptions PlotOptionsProvider::optionsFor(PlotOutputType outputType, PlotLayout layout) const {

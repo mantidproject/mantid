@@ -31,7 +31,16 @@ bool operator==(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTreeItem 
 
 bool operator!=(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTreeItem const &rhs) { return !(lhs == rhs); }
 
-PlottingPresenter::PlottingPresenter(IPlottingView *view) : m_view(view), m_mainPresenter(nullptr) {
+PlottingPresenter::PlottingPresenter(IPlottingView *view)
+    : m_view(view), m_mainPresenter(nullptr), m_plotter(&m_defaultPlotter),
+      m_plotOptionsProvider(&m_defaultPlotOptionsProvider) {
+  m_view->subscribe(this);
+  updateWidgetEnabledState();
+}
+
+PlottingPresenter::PlottingPresenter(IPlottingView *view, IPlotter const &plotter,
+                                     IPlotOptionsProvider const &plotOptionsProvider)
+    : m_view(view), m_mainPresenter(nullptr), m_plotter(&plotter), m_plotOptionsProvider(&plotOptionsProvider) {
   m_view->subscribe(this);
   updateWidgetEnabledState();
 }
@@ -52,6 +61,12 @@ void PlottingPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(
 void PlottingPresenter::notifyRunsTableChanged(RunsTable const &runsTable) {
   m_view->setWorkspaceItems(makeWorkspaceItems(runsTable));
 }
+
+void PlottingPresenter::notifyPlotTiledClicked() { plotSelectedWorkspaces(PlotLayout::Tiled); }
+
+void PlottingPresenter::notifyPlotOverplotClicked() { plotSelectedWorkspaces(PlotLayout::Overplot); }
+
+void PlottingPresenter::notifyPlotIndividualClicked() { plotSelectedWorkspaces(PlotLayout::Individual); }
 
 std::vector<PlottingWorkspaceTreeItem> PlottingPresenter::makeWorkspaceItems(RunsTable const &runsTable) const {
   auto workspaceItems = std::vector<PlottingWorkspaceTreeItem>{};
@@ -83,6 +98,23 @@ std::vector<PlottingWorkspaceTreeItem> PlottingPresenter::makeWorkspaceItems(Run
     }
   }
   return workspaceItems;
+}
+
+void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) const {
+  auto const workspaces = m_view->selectedWorkspaces();
+  if (workspaces.empty()) {
+    return;
+  }
+
+  auto const options = m_plotOptionsProvider->optionsFor(m_view->selectedPlotOutputType(), layout);
+  if (layout == PlotLayout::Individual) {
+    for (auto const &workspace : workspaces) {
+      m_plotter->plot({{workspace}, options});
+    }
+    return;
+  }
+
+  m_plotter->plot({workspaces, options});
 }
 
 void PlottingPresenter::updateWidgetEnabledState() {

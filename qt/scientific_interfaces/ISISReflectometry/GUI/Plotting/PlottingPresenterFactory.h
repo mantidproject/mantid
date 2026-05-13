@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "GUI/Common/PlotOptionsProvider.h"
+#include "GUI/Common/Plotter.h"
 #include "IPlottingPresenter.h"
 #include "IPlottingView.h"
 #include "PlottingPresenter.h"
@@ -16,7 +18,13 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class PlottingPresenterFactory {
 public:
-  std::unique_ptr<IPlottingPresenter> make(IPlottingView *view) { return std::make_unique<PlottingPresenter>(view); }
+  std::unique_ptr<IPlottingPresenter> make(IPlottingView *view) {
+    return std::make_unique<PlottingPresenter>(view, m_plotter, m_plotOptionsProvider);
+  }
+
+private:
+  Plotter m_plotter;
+  PlotOptionsProvider m_plotOptionsProvider;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -5,9 +5,15 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtPlottingView.h"
+#include <QComboBox>
 #include <QMouseEvent>
+#include <QPushButton>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+
+namespace {
+int plotOutputTypeIndex(PlotOutputType outputType) { return static_cast<int>(outputType); }
+} // namespace
 
 QtPlottingView::QtPlottingView(QWidget *parent) : QWidget(parent), m_notifyee(nullptr), m_updatingSelection(false) {
   initLayout();
@@ -26,15 +32,28 @@ void QtPlottingView::initLayout() {
             updateChildSelection(deselected, QItemSelectionModel::Deselect);
             updateChildSelection(selected, QItemSelectionModel::Select);
           });
-  m_ui.plotPreset->addItem("Reflectivity Curve");
-  m_ui.plotPreset->addItem("Stitched Reflectivity Curve");
+  m_ui.plotPreset->addItem("Reflectivity Curve", plotOutputTypeIndex(PlotOutputType::ReflectivityCurve));
+  connect(m_ui.plotTiled, &QPushButton::clicked, this, [this]() {
+    if (m_notifyee) {
+      m_notifyee->notifyPlotTiledClicked();
+    }
+  });
+  connect(m_ui.plotOverplot, &QPushButton::clicked, this, [this]() {
+    if (m_notifyee) {
+      m_notifyee->notifyPlotOverplotClicked();
+    }
+  });
+  connect(m_ui.plotIndividual, &QPushButton::clicked, this, [this]() {
+    if (m_notifyee) {
+      m_notifyee->notifyPlotIndividualClicked();
+    }
+  });
   setOutputOptionsEnabled(false);
 }
 
 void QtPlottingView::subscribe(PlottingViewSubscriber *notifyee) { m_notifyee = notifyee; }
 
 void QtPlottingView::setOutputOptionsEnabled(bool enabled) {
-  m_ui.keepSelected->setEnabled(enabled);
   m_ui.plotTiled->setEnabled(enabled);
   m_ui.plotOverplot->setEnabled(enabled);
   m_ui.plotIndividual->setEnabled(enabled);
@@ -75,6 +94,22 @@ void QtPlottingView::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeIte
     addTreeItem(treeItem, child);
   }
 }
+
+std::vector<std::string> QtPlottingView::selectedWorkspaces() const {
+  auto workspaces = std::vector<std::string>{};
+  for (auto const &index : m_ui.workspaceTree->selectionModel()->selectedRows()) {
+    if (isWorkspaceItem(index)) {
+      workspaces.emplace_back(index.data().toString().toStdString());
+    }
+  }
+  return workspaces;
+}
+
+PlotOutputType QtPlottingView::selectedPlotOutputType() const {
+  return static_cast<PlotOutputType>(m_ui.plotPreset->currentData().toInt());
+}
+
+bool QtPlottingView::isWorkspaceItem(QModelIndex const &index) const { return m_workspaceModel.rowCount(index) == 0; }
 
 bool QtPlottingView::handleWorkspaceTreeClick(QMouseEvent const &event) {
   if (event.button() != Qt::LeftButton) {
