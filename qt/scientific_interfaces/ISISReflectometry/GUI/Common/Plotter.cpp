@@ -85,12 +85,14 @@ void Plotter::plot(PlotRequest const &request) const {
 
   auto const axProperties = axisProperties(options);
   auto const windowTitle = options.windowTitle.empty() ? actualWorkspaces.front() : options.windowTitle;
-  auto const overplot = options.layout == PlotLayout::Overplot;
+  // PlotLayout::Overplot means overlay this request in one fresh figure.
+  // The MplCpp overplot flag instead targets an existing active figure.
+  auto constexpr reuseExistingFigure = false;
   auto const tiled = options.layout == PlotLayout::Tiled;
   const std::vector<int> workspaceIndices = {0};
 
   MantidQt::Widgets::MplCpp::plot(actualWorkspaces, std::nullopt, workspaceIndices, std::nullopt, std::nullopt,
-                                  axProperties, windowTitle, options.showErrors, overplot, tiled);
+                                  axProperties, windowTitle, options.showErrors, reuseExistingFigure, tiled);
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
