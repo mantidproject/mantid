@@ -160,6 +160,7 @@ std::string InstrumentFileFinder::getInstrumentFilename(const std::string &instr
  *
  *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
  *  @param date :: ISO 8601 date
+ *  @param dirHint :: Any non-standard directory that should be search alongside the Instrument Directories
  *  @return full path of instrument geometry file
  */
 std::string InstrumentFileFinder::getParameterFilename(const std::string &instrumentName, const std::string &date,
