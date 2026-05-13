@@ -11,11 +11,10 @@ from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
 from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFactory, PointGroup
 from mantid.kernel import V3D, logger, UnitConversion, DeltaEModeType
-from typing import Optional, Tuple, TYPE_CHECKING, Sequence
+from typing import Optional, TYPE_CHECKING, Sequence, Any
 from scipy.optimize import least_squares
 from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
 from abc import ABC, abstractmethod
-
 
 if TYPE_CHECKING:
     from mantid.dataobjects import Workspace2D
@@ -24,18 +23,18 @@ if TYPE_CHECKING:
 
 class InstrumentParams:
     def __init__(self):
+        self.labels: dict[str, int] = {"scale": 0, "shift": 1}
         self.p: np.ndarray = np.array([1.0, 0.0])
-        self.labels = ("scale", "shift")
         self.default_isfree: np.ndarray = np.zeros_like(self.p, dtype=bool)
 
-    def get_peak_centre(self, dpk: float) -> float:
-        return self.p[0] * dpk + self.p[1]
+    def get_peak_centre(self, dpk: float) -> np.ndarray[Any, np.dtype[Any]]:
+        return self.p[self.labels["scale"]] * dpk + self.p[self.labels["shift"]]
 
 
 class PeakProfile(ABC):
     def __init__(self):
         self.func_name: str
-        self.labels: Tuple[str]
+        self.labels: dict[str, int]
         self.p: np.ndarray
         self.default_isfree: np.ndarray
 
@@ -47,7 +46,7 @@ class PeakProfile(ABC):
 class PVProfile(PeakProfile):
     def __init__(self):
         self.func_name = "PseudoVoigt"
-        self.labels = ("sig0", "sig1", "sig2", "gam0", "gam1", "gam2", "gsize", "dst2", "zeta", "fsz")
+        self.labels = {val: idx for idx, val in enumerate(["sig0", "sig1", "sig2", "gam0", "gam1", "gam2", "gsize", "dst2", "zeta", "fsz"])}
         self.p: np.ndarray = np.array([5.0e-4, 1.0e-3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         self.default_isfree: np.ndarray = np.array([1, 1, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool)
 
@@ -62,12 +61,16 @@ class PVProfile(PeakProfile):
             8
             * np.log(2)
             * (
-                (self.p[0] ** 2)
-                + ((self.p[1] ** 2) + self.p[-3] * ((1 - self.p[-2]) ** 2)) * dpk**2
-                + ((self.p[2] ** 2) + self.p[-4]) * dpk**4
+                (self.p[self.labels["sig0"]] ** 2)
+                + ((self.p[self.labels["sig1"]] ** 2) + self.p[self.labels["dst2"]] * ((1 - self.p[self.labels["fsz"]]) ** 2)) * dpk**2
+                + ((self.p[self.labels["sig2"]] ** 2) + self.p[self.labels["gsize"]]) * dpk**4
             )
         )  # Panel 6 in [2] Hg**2 / (8ln2)
-        fwhm_l = self.p[3] + (self.p[4] + self.p[-2] * np.sqrt(8 * np.log(2) * self.p[-3])) * dpk + (self.p[5] + self.p[-1]) * dpk**2
+        fwhm_l = (
+            self.p[self.labels["gam0"]]
+            + (self.p[self.labels["gam1"]] + self.p[self.labels["zeta"]] * np.sqrt(8 * np.log(2) * self.p[self.labels["dst2"]])) * dpk
+            + (self.p[self.labels["gam2"]] + self.p[self.labels["fsz"]]) * dpk**2
+        )
         fwhm_pv = (
             fwhm_g**5
             + 2.69269 * (fwhm_g**4) * (fwhm_l)
@@ -85,7 +88,7 @@ class PVProfile(PeakProfile):
 class GaussianProfile(PeakProfile):
     def __init__(self):
         self.func_name = "Gaussian"
-        self.labels = ("sig0", "sig1", "sig2")
+        self.labels = {val: idx for idx, val in enumerate(["sig0", "sig1", "sig2"])}
         self.p: np.ndarray = np.array([5.0e-4, 1.0e-3, 0.0])
         self.default_isfree: np.ndarray = np.array([1, 1, 0], dtype=bool)
 
@@ -95,13 +98,19 @@ class GaussianProfile(PeakProfile):
         Note dst2 and gsize perfectly corralated withsig1 and sig2 respectively
         [1] Using FullProf to analyze Time of Flight Neutron Powder Diffraction data (https://www.ill.eu/sites/fullprof/downloads/Docs/TOF_FullProf.pdf)
         """
-        return {"Sigma": np.sqrt((self.p[0] ** 2) + (self.p[1] ** 2) * dpk**2 + (self.p[2] ** 2) * dpk**4)}  # Panel 6 in [1] with zeta=0
+        return {
+            "Sigma": np.sqrt(
+                (self.p[self.labels["sig0"]] ** 2)
+                + (self.p[self.labels["sig1"]] ** 2) * dpk**2
+                + (self.p[self.labels["sig2"]] ** 2) * dpk**4
+            )
+        }  # Panel 6 in [1] with zeta=0
 
 
 class BackToBackGauss(PeakProfile):
     def __init__(self):
         self.func_name = "BackToBackExponential"
-        self.labels = ("sig0", "sig1", "sig2", "alpha_0", "alpha_1", "beta_0", "beta_1")
+        self.labels = {val: idx for idx, val in enumerate(["sig0", "sig1", "sig2", "alpha_0", "alpha_1", "beta_0", "beta_1"])}
         self.p: np.ndarray = np.array([0, 9.06, 6.52, 0, 0.0968, 0.0216, 0.0123])  # for ENGIN-X North Bank
         self.default_isfree: np.ndarray = np.zeros_like(self.p, dtype=bool)
 
@@ -109,13 +118,15 @@ class BackToBackGauss(PeakProfile):
         return {"S": self._calc_sigma(dpk), "A": self._calc_alpha(dpk), "B": self._calc_beta(dpk)}
 
     def _calc_sigma(self, dpk: float) -> float:
-        return np.sqrt((self.p[0] ** 2) + (self.p[1] * dpk) ** 2 + (self.p[2] ** 2) * dpk**4)
+        return np.sqrt(
+            (self.p[self.labels["sig0"]] ** 2) + (self.p[self.labels["sig1"]] * dpk) ** 2 + (self.p[self.labels["sig2"]] ** 2) * dpk**4
+        )
 
     def _calc_alpha(self, dpk: float) -> float:
-        return self.p[3] + self.p[4] / dpk
+        return self.p[self.labels["alpha_0"]] + self.p[self.labels["alpha_1"]] / dpk
 
     def _calc_beta(self, dpk: float) -> float:
-        return self.p[5] + self.p[6] / (dpk**4)
+        return self.p[self.labels["beta_0"]] + self.p[self.labels["beta_1"]] / (dpk**4)
 
 
 class Phase:
