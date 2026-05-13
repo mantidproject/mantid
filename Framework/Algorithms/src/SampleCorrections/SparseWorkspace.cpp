@@ -29,6 +29,7 @@ namespace {
  *  @return True, if all EFixed values match, false otherwise.
  */
 bool constantIndirectEFixed(const Mantid::API::ExperimentInfo &info, const std::vector<Mantid::detid_t> &detIDs) {
+  // cppcheck-suppress containerOutOfBounds
   const auto e = info.getEFixed(detIDs[0]);
   return std::all_of(detIDs.cbegin() + 1, detIDs.cend(), [&](const auto &detID) { return e == info.getEFixed(detID); });
 }

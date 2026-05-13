@@ -33,6 +33,7 @@ class Jacobian;
 class MANTID_API_DLL ParamFunction : public virtual IFunction {
 public:
   /// Default constructor
+  // cppcheck-suppress uninitDerivedMemberVar
   ParamFunction() {}
 
   /// Set i-th parameter

@@ -49,26 +49,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidData
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ListValidator.h:118
 
 // ----------- New list of suppressions after updating to cppcheck 2.18.1 -------------
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IAlgorithmRuntimeProps.h:16
-uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:723
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IPowderDiffPeakFunction.h:41
-uninitDerivedMemberVar:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/ParamFunction.h:36
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/ParameterTie.h:42
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Run.h:39
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Workspace.h:32
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/WorkspaceProperty.hxx:91
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:891
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:156
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:167
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:892
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:999
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1263
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:510
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:517
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:548
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:555
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PaalmanPingsAbsorptionCorrection.cpp:464
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:32
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/ClearUB.h:25
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/PeaksIntersection.h:33
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:239
