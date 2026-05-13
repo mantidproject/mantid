@@ -2661,12 +2661,12 @@ int SOAP_FMAC2 soap_tag_cmp(const char *s, const char *t) {
 SOAP_FMAC1
 int SOAP_FMAC2 soap_match_tag(struct soap *soap, const char *tag1, const char *tag2) {
   const char *s, *t;
-  int err;
   if (!tag1 || !tag2 || !*tag2)
     return SOAP_OK;
   s = strchr(tag1, ':');
   t = strchr(tag2, ':');
   if (t) {
+    int err;
     if (s) {
       if (t[1] && SOAP_STRCMP(s + 1, t + 1))
         return SOAP_TAG_MISMATCH;
@@ -6982,11 +6982,10 @@ struct soap_ilist *SOAP_FMAC2 soap_lookup(struct soap *soap, const char *id) {
 #ifndef PALM_2
 SOAP_FMAC1
 struct soap_ilist *SOAP_FMAC2 soap_enter(struct soap *soap, const char *id) {
-  size_t h;
   struct soap_ilist *ip;
   ip = (struct soap_ilist *)SOAP_MALLOC(soap, sizeof(struct soap_ilist) + strlen(id));
   if (ip) {
-    h = soap_hash(id);
+    size_t h = soap_hash(id);
     strcpy((char *)ip->id, id);
     ip->next = soap->iht[h];
     soap->iht[h] = ip;

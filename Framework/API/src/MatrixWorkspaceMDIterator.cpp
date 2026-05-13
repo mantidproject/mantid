@@ -31,8 +31,8 @@ MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(const MatrixWorkspace *work
                                                      size_t endWI)
     : m_ws(workspace), m_pos(0), m_max(0), m_function(function), m_errorIsCached(false),
       m_spectrumInfo(workspace ? workspace->spectrumInfo()
-                               : throw std::runtime_error("MatrixWorkspaceMDIterator::ctor() NULL MatrixWorkspace")) {
-  m_center = VMD(2);
+                               : throw std::runtime_error("MatrixWorkspaceMDIterator::ctor() NULL MatrixWorkspace")),
+      m_center(VMD(2)) {
   m_isBinnedData = m_ws->isHistogramData();
   m_dimY = m_ws->getDimension(1);
 

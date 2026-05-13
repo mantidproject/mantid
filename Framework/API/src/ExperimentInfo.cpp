@@ -827,7 +827,7 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
     if (!m_spectrumInfoWrapper) {
       if (!m_spectrumInfo) // this should happen only if not MatrixWorkspace
         cacheDefaultDetectorGrouping();
-      if (!m_spectrumInfo)
+      if (!m_spectrumInfo) // cppcheck-suppress duplicateCondition
         throw std::runtime_error("cacheDefaultDetectorGrouping failed to init m_spectrumInfo");
       static_cast<void>(detectorInfo());
       m_spectrumInfoWrapper = std::make_unique<SpectrumInfo>(*m_spectrumInfo, *this, m_parmap->mutableDetectorInfo());
