@@ -292,11 +292,10 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis, const std::ve
   const size_t LR_IN = 1 << 4;
 
   // Step 2 - loop over x, creating one-bin wide strips
-  V2D nll(ll), nul(ul), nur, nlr, l0, r0, l1, r1;
+  V2D nll(ll), nul(ul), nur, nlr;
   double area(0.);
   ConvexPolygon poly;
   areaInfos.reserve(nx * ny);
-  size_t yj0, yj1;
   for (size_t xi = x_start; xi < x_end; ++xi) {
     const size_t xj = xi - x_start;
     // Define new 1-bin wide input quadrilateral
@@ -313,8 +312,8 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis, const std::ve
     }
     // Step 3 - loop over y, find poly. area depending on which vertices are in
     for (size_t yi = y_start; yi < y_end; ++yi) {
-      yj0 = (yi - y_start) * nx;
-      yj1 = (yi - y_start + 1) * nx;
+      size_t yj0 = (yi - y_start) * nx;
+      size_t yj1 = (yi - y_start + 1) * nx;
       // Checks if this bin is completely inside new quadrilateral
       if (yAxis[yi] > std::max(nll.Y(), nlr.Y()) && yAxis[yi + 1] < std::min(nul.Y(), nur.Y())) {
         areaInfos.emplace_back(xi, yi, (nlr.X() - nll.X()) * (yAxis[yi + 1] - yAxis[yi]));
@@ -329,10 +328,10 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis, const std::ve
           vertBits |= UR_IN;
         if (nlr.Y() >= yAxis[yi] && nlr.Y() <= yAxis[yi + 1])
           vertBits |= LR_IN;
-        l0 = V2D(leftLim[xj + yj0], yAxis[yi]);
-        r0 = V2D(rightLim[xj + yj0], yAxis[yi]);
-        l1 = V2D(leftLim[xj + yj1], yAxis[yi + 1]);
-        r1 = V2D(rightLim[xj + yj1], yAxis[yi + 1]);
+        V2D l0 = V2D(leftLim[xj + yj0], yAxis[yi]);
+        V2D r0 = V2D(rightLim[xj + yj0], yAxis[yi]);
+        V2D l1 = V2D(leftLim[xj + yj1], yAxis[yi + 1]);
+        V2D r1 = V2D(rightLim[xj + yj1], yAxis[yi + 1]);
         // Now calculate the area based on which vertices are in this bin.
         // Note that a recursive function is used so it can be unrolled and
         // inlined but it means that the first element has to also be put

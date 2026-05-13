@@ -209,7 +209,6 @@ double Quadratic::distance(const Kernel::V3D &Pt) const
     return -1.0;
 
   double Out = -1;
-  Kernel::V3D xvec;
   std::vector<double>::const_iterator vc;
   for (vc = TRange.begin(); vc != TRange.end(); ++vc) {
     const double daI = 1.0 + 2 * (*vc) * da;
@@ -220,8 +219,8 @@ double Quadratic::distance(const Kernel::V3D &Pt) const
       DI[0][0] = 1.0 / daI;
       DI[1][1] = 1.0 / dbI;
       DI[2][2] = 1.0 / dcI;
-      xvec = R * (DI * (alpha - beta * *vc)); // care here: to avoid 9*9 +9*3 in
-                                              // favour of 9*3+9*3 ops.
+      Kernel::V3D xvec = R * (DI * (alpha - beta * *vc)); // care here: to avoid 9*9 +9*3 in
+                                                          // favour of 9*3+9*3 ops.
       const double Dist = xvec.distance(Pt);
       if (Out < 0 || Out > Dist)
         Out = Dist;

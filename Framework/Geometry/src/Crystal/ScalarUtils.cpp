@@ -339,11 +339,8 @@ ConventionalCell ScalarUtils::GetCellBestError(const std::vector<ConventionalCel
 std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB, double factor, double angle_tolerance) {
   std::vector<DblMatrix> result;
 
-  V3D a, b, c, a_vec, b_vec, c_vec, // vectors for generating reflections
-      m_a_vec, m_b_vec, m_c_vec;    // of pairs of sides
-
-  V3D a_temp, b_temp, c_temp,       // vectors for generating handedness
-      m_a_temp, m_b_temp, m_c_temp; // preserving permutations of sides
+  V3D a_vec, b_vec, c_vec,       // vectors for generating reflections
+      m_a_vec, m_b_vec, m_c_vec; // of pairs of sides
 
   OrientedLattice::GetABC(UB, a_vec, b_vec, c_vec);
 
@@ -370,26 +367,27 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB, double fa
 
   for (size_t row = 0; row < 4; row++) {
     if (fabs(angles[row] - 90.0) < angle_tolerance) // if nearly 90,
-    {                                               // try related cell
-      a_temp = reflections[row][0];                 // +cell <-> -cell
-      b_temp = reflections[row][1];
-      c_temp = reflections[row][2];
+    {                                               // try related cell +cell <-> -cell
+      // vectors for generating handedness preserving permutations of sides
+      V3D a_temp = reflections[row][0];
+      V3D b_temp = reflections[row][1];
+      V3D c_temp = reflections[row][2];
       // for each accepted reflection, try all
       // modified premutations that preserve the
       // handedness AND keep the cell edges
       // nearly ordered as a <= b <= c.
-      m_a_temp = a_temp * (-1.0);
-      m_b_temp = b_temp * (-1.0);
-      m_c_temp = c_temp * (-1.0);
+      V3D m_a_temp = a_temp * (-1.0);
+      V3D m_b_temp = b_temp * (-1.0);
+      V3D m_c_temp = c_temp * (-1.0);
 
       const V3D permutations[6][3] = {{a_temp, b_temp, c_temp}, {m_a_temp, c_temp, b_temp},
                                       {b_temp, c_temp, a_temp}, {m_b_temp, a_temp, c_temp},
                                       {c_temp, a_temp, b_temp}, {m_c_temp, b_temp, a_temp}};
 
       for (V3D const *permutation : permutations) {
-        a = permutation[0];
-        b = permutation[1];
-        c = permutation[2];
+        V3D a = permutation[0];
+        V3D b = permutation[1];
+        V3D c = permutation[2];
         if (a.norm() <= factor * b.norm() && b.norm() <= factor * c.norm()) // could be Niggli within
         {                                                                   // experimental error
           Matrix<double> temp_UB(3, 3, false);

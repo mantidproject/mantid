@@ -1295,12 +1295,8 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB, const std::vector<V3D> &q_vector
 
 size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions, const std::vector<V3D> &q_vectors, double min_d,
                                          double max_d, double required_tolerance, double degrees_per_step) {
-  double error;
   double fit_error;
-  double dot_prod;
-  double nearest_int;
   int max_indexed = 0;
-  V3D q_vec;
   // first, make hemisphere of possible directions
   // with specified resolution.
   int num_steps = boost::math::iround(90.0 / degrees_per_step);
@@ -1322,10 +1318,10 @@ size_t IndexingUtils::ScanFor_Directions(std::vector<V3D> &directions, const std
 
       int num_indexed = 0;
       for (const auto &q_vector : q_vectors) {
-        q_vec = q_vector / (2.0 * M_PI);
-        dot_prod = dir_temp.scalar_prod(q_vec);
-        nearest_int = std::round(dot_prod);
-        error = fabs(dot_prod - nearest_int);
+        V3D q_vec = q_vector / (2.0 * M_PI);
+        double dot_prod = dir_temp.scalar_prod(q_vec);
+        double nearest_int = std::round(dot_prod);
+        double error = fabs(dot_prod - nearest_int);
         if (error <= required_tolerance)
           num_indexed++;
       }
@@ -1480,7 +1476,6 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions, const 
   // FFT to find the cell edge length that
   // corresponds to the max_mag_fft.  Only keep
   // directions with length nearly in bounds
-  V3D temp;
   std::vector<V3D> temp_dirs_2;
 
   for (const auto &temp_dir : temp_dirs) {
@@ -1491,7 +1486,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions, const 
       double q_val = max_mag_Q / position;
       double d_val = 1 / q_val;
       if (d_val >= 0.8 * min_d && d_val <= 1.2 * max_d) {
-        temp = temp_dir * d_val;
+        V3D temp = temp_dir * d_val;
         temp_dirs_2.emplace_back(temp);
       }
     }
@@ -1597,9 +1592,8 @@ double IndexingUtils::GetMagFFT(const std::vector<V3D> &q_vectors, const V3D &cu
     projections[i] = 0.0;
   }
   // project onto direction
-  V3D q_vec;
   for (const auto &q_vector : q_vectors) {
-    q_vec = q_vector / (2.0 * M_PI);
+    V3D q_vec = q_vector / (2.0 * M_PI);
     double dot_prod = current_dir.scalar_prod(q_vec);
     auto index = static_cast<size_t>(fabs(index_factor * dot_prod));
     if (index < N)
@@ -1738,9 +1732,6 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB, const std::vector<V3D
   bool c_found = false;
 
   const V3D perp = normalize(a_dir.cross_prod(b_dir));
-  double perp_ang;
-  double alpha;
-  double beta;
   while (!c_found && index < directions.size()) {
     V3D vec = directions[index];
     int factor = 1;
@@ -1748,9 +1739,9 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB, const std::vector<V3D
     {
       c_dir = vec;
       c_dir *= factor;
-      perp_ang = perp.angle(c_dir) * RAD_TO_DEG;
-      alpha = b_dir.angle(c_dir) * RAD_TO_DEG;
-      beta = a_dir.angle(c_dir) * RAD_TO_DEG;
+      double perp_ang = perp.angle(c_dir) * RAD_TO_DEG;
+      double alpha = b_dir.angle(c_dir) * RAD_TO_DEG;
+      double beta = a_dir.angle(c_dir) * RAD_TO_DEG;
       // keep a,b,c right handed by choosing
       // c in general directiion of a X b
       if (perp_ang < 90. - epsilon && alpha >= min_deg && (180. - alpha) >= min_deg && beta >= min_deg &&
@@ -1810,20 +1801,16 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB, const std::vector<V3D
   V3D a_dir(0, 0, 0);
   V3D b_dir(0, 0, 0);
   V3D c_dir(0, 0, 0);
-  V3D a_temp;
-  V3D b_temp;
-  V3D c_temp;
   V3D acrossb;
-  double vol;
 
   for (size_t i = 0; i < directions.size() - 2; i++) {
-    a_temp = directions[i];
+    V3D a_temp = directions[i];
     for (size_t j = i + 1; j < directions.size() - 1; j++) {
-      b_temp = directions[j];
+      V3D b_temp = directions[j];
       acrossb = a_temp.cross_prod(b_temp);
       for (size_t k = j + 1; k < directions.size(); k++) {
-        c_temp = directions[k];
-        vol = fabs(acrossb.scalar_prod(c_temp));
+        V3D c_temp = directions[k];
+        double vol = fabs(acrossb.scalar_prod(c_temp));
         if (vol > min_vol) {
           const auto num_indexed = NumberIndexed_3D(a_temp, b_temp, c_temp, q_vectors, req_tolerance);
 
@@ -1921,21 +1908,12 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list, std::vector<V3
                                       double ang_tol) {
   new_list.clear();
   std::vector<V3D> temp;
-
-  V3D current_dir;
-  V3D next_dir;
   V3D zero_vec(0, 0, 0);
-
-  double next_length;
-  double length_diff;
-  double angle;
   size_t dir_num = 0;
-  size_t check_index;
-  bool new_dir;
 
   while (dir_num < directions.size()) // put sequence of similar vectors
   {                                   // in list temp
-    current_dir = directions[dir_num];
+    V3D current_dir = directions[dir_num];
     double current_length = current_dir.norm();
     dir_num++;
 
@@ -1943,16 +1921,16 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list, std::vector<V3
     {
       temp.clear();
       temp.emplace_back(current_dir);
-      check_index = dir_num;
-      new_dir = false;
+      size_t check_index = dir_num;
+      bool new_dir = false;
       while (check_index < directions.size() && !new_dir) {
-        next_dir = directions[check_index];
-        next_length = next_dir.norm();
+        V3D next_dir = directions[check_index];
+        double next_length = next_dir.norm();
         if (next_length > 0) {
-          length_diff = fabs(next_dir.norm() - current_length);
+          double length_diff = fabs(next_dir.norm() - current_length);
           if ((length_diff / current_length) < len_tol) // continue scan
           {
-            angle = current_dir.angle(next_dir) * RAD_TO_DEG;
+            double angle = current_dir.angle(next_dir) * RAD_TO_DEG;
             if ((std::isnan)(angle))
               angle = 0;
             if ((angle < ang_tol) || (angle > (180.0 - ang_tol))) {
@@ -2063,17 +2041,14 @@ bool IndexingUtils::ValidIndex(const V3D &hkl, double tolerance) {
 */
 int IndexingUtils::NumberOfValidIndexes(const std::vector<V3D> &hkls, double tolerance, double &average_error) {
 
-  double h_error;
-  double k_error;
-  double l_error;
   double total_error = 0;
   int count = 0;
   for (const auto &hkl : hkls) {
     if (ValidIndex(hkl, tolerance)) {
       count++;
-      h_error = fabs(round(hkl[0]) - hkl[0]);
-      k_error = fabs(round(hkl[1]) - hkl[1]);
-      l_error = fabs(round(hkl[2]) - hkl[2]);
+      double h_error = fabs(round(hkl[0]) - hkl[0]);
+      double k_error = fabs(round(hkl[1]) - hkl[1]);
+      double l_error = fabs(round(hkl[2]) - hkl[2]);
       total_error += h_error + k_error + l_error;
     }
   }
@@ -2100,9 +2075,8 @@ double IndexingUtils::IndexingError(const DblMatrix &UB, const std::vector<V3D> 
   }
 
   double total_error = 0;
-  V3D hkl;
   for (size_t i = 0; i < hkls.size(); i++) {
-    hkl = UB_inverse * q_vectors[i] / (2.0 * M_PI);
+    V3D hkl = UB_inverse * q_vectors[i] / (2.0 * M_PI);
 
     double h_error = fabs(hkl[0] - round(hkl[0]));
     double k_error = fabs(hkl[1] - round(hkl[1]));
@@ -2176,9 +2150,8 @@ int IndexingUtils::NumberIndexed(const DblMatrix &UB, const std::vector<V3D> &q_
     throw std::runtime_error("The UB in NumberIndexed() is not valid");
   }
 
-  V3D hkl;
   for (const auto &q_vector : q_vectors) {
-    hkl = UB_inverse * q_vector / (2.0 * M_PI);
+    V3D hkl = UB_inverse * q_vector / (2.0 * M_PI);
     if (ValidIndex(hkl, tolerance)) {
       count++;
     }
@@ -2527,9 +2500,7 @@ int IndexingUtils::GetIndexedPeaks_3D(const V3D &direction_1, const V3D &directi
  */
 int IndexingUtils::GetIndexedPeaks(const DblMatrix &UB, const std::vector<V3D> &q_vectors, double required_tolerance,
                                    std::vector<V3D> &miller_indices, std::vector<V3D> &indexed_qs, double &fit_error) {
-  double error;
   int num_indexed = 0;
-  V3D hkl;
 
   miller_indices.clear();
   miller_indices.reserve(q_vectors.size());
@@ -2547,11 +2518,11 @@ int IndexingUtils::GetIndexedPeaks(const DblMatrix &UB, const std::vector<V3D> &
   }
 
   for (const auto &q_vector : q_vectors) {
-    hkl = UB_inverse * q_vector / (2.0 * M_PI);
+    V3D hkl = UB_inverse * q_vector / (2.0 * M_PI);
 
     if (ValidIndex(hkl, required_tolerance)) {
       for (int i = 0; i < 3; i++) {
-        error = hkl[i] - std::round(hkl[i]);
+        double error = hkl[i] - std::round(hkl[i]);
         fit_error += error * error;
       }
 

@@ -698,10 +698,9 @@ bool CSGObject::isOnSide(const Kernel::V3D &point) const {
         return true;
     }
   }
-  Kernel::V3D NormPair;
   for (auto xs = Snorms.begin(); xs != Snorms.end(); ++xs)
     for (auto ys = std::next(xs); ys != Snorms.end(); ++ys) {
-      NormPair = (*ys) + (*xs);
+      Kernel::V3D NormPair = (*ys) + (*xs);
       try {
         NormPair.normalize();
         if (!checkSurfaceValid(point, NormPair))
@@ -856,7 +855,6 @@ void CSGObject::print() const {
   std::vector<int> Cells;
   int Rcount(0);
   rst.emplace_back(m_topRule.get());
-  Rule *TA, *TB; // Temp. for storage
 
   while (!rst.empty()) {
     const Rule *T1 = rst.front();
@@ -867,8 +865,8 @@ void CSGObject::print() const {
       if (surface)
         Cells.emplace_back(surface->getKeyN());
       else {
-        TA = T1->leaf(0);
-        TB = T1->leaf(1);
+        Rule *TA = T1->leaf(0);
+        Rule *TB = T1->leaf(1);
         if (TA)
           rst.emplace_back(TA);
         if (TB)
@@ -1212,7 +1210,7 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
   const BoundingBox &boundingBox = getBoundingBox();
   double thetaMax = M_PI;
   bool useBB = false, usePt = false;
-  Kernel::V3D ptInObject, axis;
+  Kernel::V3D ptInObject;
   Quat zToPt;
 
   // Is the bounding box a reasonable one?
@@ -1233,7 +1231,7 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
     ptInObject -= observer;
     double theta0 = -180.0 / M_PI * acos(ptInObject.Z() / ptInObject.norm());
     Kernel::V3D zDir(0.0, 0.0, 1.0);
-    axis = ptInObject.cross_prod(zDir);
+    Kernel::V3D axis = ptInObject.cross_prod(zDir);
     if (axis.nullVector())
       axis = Kernel::V3D(1.0, 0.0, 0.0);
     zToPt(theta0, axis);
