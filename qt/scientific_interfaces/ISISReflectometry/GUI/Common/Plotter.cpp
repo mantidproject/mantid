@@ -13,27 +13,39 @@
 
 #include <QHash>
 #include <QString>
+#include <QStringList>
 #include <QVariant>
 using namespace MantidQt::Widgets::MplCpp;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) const {
-  QHash<QString, QVariant> ax_properties;
-  ax_properties[QString("yscale")] = QVariant("log");
-  ax_properties[QString("xscale")] = QVariant("log");
+namespace {
+QString scaleName(AxisScale scale) { return scale == AxisScale::Log ? QString("log") : QString("linear"); }
 
-  // plot(workspaces, spectrum_nums, wksp_indices, fig, plot_kwargs,
-  // ax_properties, windows_title, errors, overplot)
-  std::string window_title = "ISIS Reflectometry Plot";
-  if (!workspaces.empty()) {
-    window_title = workspaces[0];
-  }
+std::string axisLabel(PlotAxis const &axis) {
+  if (axis.unit.empty())
+    return axis.label;
+  return axis.label + " (" + axis.unit + ")";
+}
 
-  const bool plotErrorBars = true;
-  const std::vector<int> wksp_indices = {0};
+QHash<QString, QVariant> axisProperties(PlotOptions const &options) {
+  QHash<QString, QVariant> properties;
+  properties[QString("xscale")] = QVariant(scaleName(options.xAxis.scale));
+  properties[QString("yscale")] = QVariant(scaleName(options.yAxis.scale));
 
-  std::vector<std::string> actualWorkspaces;
+  auto const xLabel = axisLabel(options.xAxis);
+  if (!xLabel.empty())
+    properties[QString("xlabel")] = QVariant(QString::fromStdString(xLabel));
+
+  auto const yLabel = axisLabel(options.yAxis);
+  if (!yLabel.empty())
+    properties[QString("ylabel")] = QVariant(QString::fromStdString(yLabel));
+
+  return properties;
+}
+
+std::vector<std::string> expandWorkspaceGroups(std::vector<std::string> const &workspaces) {
+  auto actualWorkspaces = std::vector<std::string>{};
   actualWorkspaces.reserve(workspaces.size());
   for (const auto &workspace : workspaces) {
     const Mantid::API::Workspace_sptr workspaceObject =
@@ -46,9 +58,39 @@ void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) cons
       actualWorkspaces.emplace_back(workspace);
     }
   }
+  return actualWorkspaces;
+}
 
-  plot(actualWorkspaces, std::nullopt, wksp_indices, std::nullopt, std::nullopt, ax_properties, window_title,
-       plotErrorBars, false);
+QStringList toQStringList(std::vector<std::string> const &workspaces) {
+  auto result = QStringList{};
+  for (auto const &workspace : workspaces)
+    result.append(QString::fromStdString(workspace));
+  return result;
+}
+} // namespace
+
+void Plotter::plot(PlotRequest const &request) const {
+  if (request.workspaces.empty())
+    return;
+
+  // plot(workspaces, spectrum_nums, wksp_indices, fig, plot_kwargs,
+  // ax_properties, windows_title, errors, overplot)
+  auto const actualWorkspaces = expandWorkspaceGroups(request.workspaces);
+  auto const &options = request.options;
+
+  if (options.plotStyle == PlotStyle::Colorfill) {
+    pcolormesh(toQStringList(actualWorkspaces));
+    return;
+  }
+
+  auto const axProperties = axisProperties(options);
+  auto const windowTitle = options.windowTitle.empty() ? actualWorkspaces.front() : options.windowTitle;
+  auto const overplot = options.layout == PlotLayout::Overplot;
+  auto const tiled = options.layout == PlotLayout::Tiled;
+  const std::vector<int> workspaceIndices = {0};
+
+  MantidQt::Widgets::MplCpp::plot(actualWorkspaces, std::nullopt, workspaceIndices, std::nullopt, std::nullopt,
+                                  axProperties, windowTitle, options.showErrors, overplot, tiled);
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

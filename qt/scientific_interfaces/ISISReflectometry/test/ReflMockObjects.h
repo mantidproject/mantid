@@ -332,7 +332,7 @@ public:
 
 class MockPlotter : public IPlotter {
 public:
-  MOCK_CONST_METHOD1(reflectometryPlot, void(const std::vector<std::string> &));
+  MOCK_CONST_METHOD1(plot, void(PlotRequest const &));
 };
 
 /**** Saver ****/

@@ -10,7 +10,6 @@
 #include "IPlotter.h"
 
 #include <QtGlobal>
-#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -18,7 +17,7 @@ namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Plotter : public IPlotter {
 public:
-  void reflectometryPlot(const std::vector<std::string> &workspaces) const override;
+  void plot(PlotRequest const &request) const override;
 };
 
 } // namespace ISISReflectometry

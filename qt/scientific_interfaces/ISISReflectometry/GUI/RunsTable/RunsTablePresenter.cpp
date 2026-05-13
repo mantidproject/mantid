@@ -833,7 +833,7 @@ void RunsTablePresenter::notifyPlotSelectedPressed() {
   if (workspaces.empty())
     return;
 
-  m_plotter.reflectometryPlot(workspaces);
+  m_plotter.plot({workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Individual)});
 }
 
 void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
@@ -848,6 +848,7 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
   if (workspaces.empty())
     return;
 
-  m_plotter.reflectometryPlot(workspaces);
+  m_plotter.plot(
+      {workspaces, reflectivityCurvePlotOptions(PlotOutputType::StitchedReflectivityCurve, PlotLayout::Individual)});
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

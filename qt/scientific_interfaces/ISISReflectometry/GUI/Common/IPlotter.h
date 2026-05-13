@@ -7,9 +7,7 @@
 #pragma once
 
 #include "Common/DllConfig.h"
-
-#include <string>
-#include <vector>
+#include "PlotOptions.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -17,7 +15,8 @@ namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IPlotter {
 public:
-  virtual void reflectometryPlot(const std::vector<std::string> &workspaces) const = 0;
+  virtual ~IPlotter() = default;
+  virtual void plot(PlotRequest const &request) const = 0;
 };
 
 } // namespace ISISReflectometry

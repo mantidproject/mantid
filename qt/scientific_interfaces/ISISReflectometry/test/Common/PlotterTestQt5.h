@@ -31,6 +31,9 @@ public:
     alg->execute();
 
     MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
-    plotter.reflectometryPlot({"ws1"});
+    plotter.plot({{"ws1"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::reflectivityCurvePlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotOutputType::ReflectivityCurve,
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Individual)});
   }
 };
