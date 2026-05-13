@@ -48,12 +48,14 @@ void QtPlottingView::initLayout() {
       m_notifyee->notifyPlotIndividualClicked();
     }
   });
-  setOutputOptionsEnabled(false);
+  setOutputOptionControlsEnabled(false);
 }
 
 void QtPlottingView::subscribe(PlottingViewSubscriber *notifyee) { m_notifyee = notifyee; }
 
-void QtPlottingView::setOutputOptionsEnabled(bool enabled) {
+void QtPlottingView::setOutputOptionsEnabled(bool enabled) { setOutputOptionControlsEnabled(enabled); }
+
+void QtPlottingView::setOutputOptionControlsEnabled(bool enabled) {
   m_ui.plotTiled->setEnabled(enabled);
   m_ui.plotOverplot->setEnabled(enabled);
   m_ui.plotIndividual->setEnabled(enabled);
