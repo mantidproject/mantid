@@ -103,12 +103,6 @@ _SLIM_BLOCKING_PROPS = [
     "CropWavelengthMin",
     "CropWavelengthMax",
     "UnfocussedWorkspace",
-    # ReductionProperties are not currently supported
-    "ReductionProperties",
-    # Characterizations-driven TOF/wavelength range filtering cannot be mapped yet
-    "Characterizations",
-    "FrequencyLogNames",
-    "WavelengthLogNames",
 ]
 
 # Bytes per event (neutron event record size) used for MaxChunkSize → ReadSizeFromDisk conversion
@@ -694,21 +688,26 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             tmin_val = self.__getAlignAndFocusArgs().get("TMin", 0.0)
 
             calfile = self.getPropertyValue(CAL_FILE)
+            has_calfile = bool(calfile)
             if not calfile:
-                # LoadDiffCal needs a filename, could have been giving as grouping file
+                # LoadDiffCal needs a filename; fall back to grouping file
                 calfile = self.getPropertyValue(GROUP_FILE)
 
-            LoadDiffCal(
+            diffcal_kwargs = dict(
                 InputWorkspace=wksp,
                 Filename=calfile,
                 GroupFilename=self.getPropertyValue(GROUP_FILE),
-                MakeCalWorkspace=loadCalibration,
+                # Grouping-only HDF files (no DIFC columns) must not request a cal workspace;
+                # LoadDiffCal also requires InputWorkspace only when extracting DIFC calibration.
+                MakeCalWorkspace=loadCalibration and has_calfile,
                 MakeGroupingWorkspace=loadGrouping,
                 MakeMaskWorkspace=loadMask,
                 WorkspaceName=self.instr,
                 TofMin=tmin_val,
             )
-        if loadCalibration:
+
+            LoadDiffCal(**diffcal_kwargs)
+        if loadCalibration and has_calfile:
             self.__calWksp = self.instr + "_cal"
             self.setPropertyValue("CalibrationWorkspace", self.instr + "_cal")
         if loadGrouping:
@@ -747,7 +746,69 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
         return True
 
-    def __runSlim(self, outputname):
+    def __getSlimArgsFromPropManager(self):
+        """Read d_min/d_max/delta from the ReductionProperties property manager.
+
+        Returns a dict of extra kwargs for AlignAndFocusPowderSlim, or None if the
+        property manager contains settings that cannot be expressed in Slim
+        (non-zero tof_min/tof_max/wavelength_min/wavelength_max)."""
+        pm_name = self.getProperty("ReductionProperties").valueAsStr
+        if pm_name not in PropertyManagerDataService:
+            return {}
+
+        pm = PropertyManagerDataService[pm_name]
+
+        # check for binning parameters for several possible units
+        key_combos = {
+            "tof": ("tof_min", "tof_max", "delta"),
+            "wavelength": ("wavelength_min", "wavelength_max", "delta"),
+            "dSpacing": ("d_min", "d_max", "delta"),
+        }
+
+        extra = {}
+        for units, key_combo in key_combos.items():
+            keys = [pm.existsProperty(key) for key in key_combo]
+            if any(keys) and not all(keys):
+                continue
+            elif all(keys):
+                extra["BinningUnits"] = units
+                extra["XMin"] = list(pm.getProperty(key_combo[0]).value)
+                extra["XMax"] = list(pm.getProperty(key_combo[1]).value)
+                extra["XDelta"] = list(pm.getProperty(key_combo[2]).value)
+                break  # should only be one set of binning params
+
+        return extra
+
+    def __runCharacterizationsForSlim(self):
+        """Load file metadata and run PDDetermineCharacterizations to populate the
+        ReductionProperties property manager for use by the Slim path."""
+        filename = self._filenames[0]
+        tempname = "__{}_slim_char".format(self.__wkspNameFromFile(filename))
+
+        allowedLogs = list(self.getProperty("FrequencyLogNames").value)
+        allowedLogs.extend(self.getProperty("WaveLengthLogNames").value)
+        try:
+            loader = self.__createLoader(filename, tempname, MetaDataOnly=True, AllowList=allowedLogs)
+            loader.execute()
+            if self.__loaderName == "Load":
+                self.__loaderName = loader.getPropertyValue("LoaderName")
+        except RuntimeError:
+            Load(OutputWorkspace=tempname, Filename=filename)
+
+        args = {
+            "ReductionProperties": self.getProperty("ReductionProperties").valueAsStr,
+            "InputWorkspace": tempname,
+            "Characterizations": self.charac,
+        }
+        for name in PROPS_FOR_PD_CHARACTER:
+            prop = self.getProperty(name)
+            if not prop.isDefault:
+                args[name] = prop.value
+
+        PDDetermineCharacterizations(**args)
+        DeleteWorkspace(Workspace=tempname)
+
+    def __runSlim(self, outputname, pm_args=None):
         """Call AlignAndFocusPowderSlim and store the result under *outputname*."""
         from mantid.simpleapi import AlignAndFocusPowderSlim, LoadDiffCal
 
@@ -773,7 +834,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         # whether or not to use dSpacing
         kwargs["BinningUnits"] = "dSpacing" if self.getProperty("Dspacing").value else "TOF"
 
-        # binning ranges: could be per-group arrays, or simple [min, delta, max]
+        # binning ranges: direct DMin/DMax win, then ReductionProperties PM, then Params
         if (
             not self.getProperty("DMin").isDefault
             or not self.getProperty("DMax").isDefault
@@ -786,7 +847,15 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 kwargs["XMax"] = list(self.getProperty("DMax").value)
             if not self.getProperty("DeltaRagged").isDefault:
                 kwargs["XDelta"] = list(self.getProperty("DeltaRagged").value)
-        elif not self.getProperty("Params").isDefault:
+
+        # Fill any unset binning keys from the ReductionProperties property manager
+        if pm_args:
+            for key, val in pm_args.items():
+                if key not in kwargs:
+                    kwargs[key] = val
+
+        # Fall back to Params if no d-spacing ranges have been set
+        if "XMin" not in kwargs and not self.getProperty("Params").isDefault:
             params = self.getProperty("Params").value
             kwargs["XMin"] = [float(params[0])]
             kwargs["XDelta"] = [float(params[1])]
@@ -794,12 +863,8 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
         # grouping: workspace takes priority, or load from file
         if not self.getProperty(GRP_WKSP).isDefault:
-            print("GROUPING WORKSPACE", self.getPropertyValue(GRP_WKSP))
             kwargs["GroupingWorkspace"] = self.getPropertyValue(GRP_WKSP)
         elif not self.getProperty(GROUP_FILE).isDefault:
-            print("GROUPING FILE", self.getPropertyValue(GROUP_FILE))
-            file = self.getPropertyValue(GROUP_FILE)
-            print("GROUPING FILE", file)
             grp_wksp_name = self.instr + "_slim_group"
             LoadDiffCal(
                 Filename=self.getPropertyValue(GROUP_FILE),
@@ -808,7 +873,6 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 MakeMaskWorkspace=False,
                 WorkspaceName=self.instr + "_slim",
             )
-            print("GROUPING WKSP", grp_wksp_name)
             kwargs["GroupingWorkspace"] = grp_wksp_name
 
         # chunk size
@@ -820,8 +884,6 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         if self.filterBadPulses > 0.0:
             kwargs["FilterBadPulses"] = True
             kwargs["BadPulsesLowerCutoff"] = self.filterBadPulses
-
-        # TODO Characterizations and ReductionProperties
 
         AlignAndFocusPowderSlim(**kwargs)
 
@@ -856,21 +918,39 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         # accumulate the unfocused workspace if it was requested
         # empty string means it is not used
         finalunfocusname = self.getPropertyValue("UnfocussedWorkspace")
-        print("HELLO WORLD")
+
         # ------------------------------------------------------------------ #
         # Fast path: delegate entirely to AlignAndFocusPowderSlim when the   #
         # inputs are compatible with its more restricted interface.           #
         # ------------------------------------------------------------------ #
         if self.__canUseSlim():
-            print("CAN USE SLIM")
-            self.log().notice("AlignAndFocusPowderFromFiles: delegating to AlignAndFocusPowderSlim for faster single-file processing.")
-            self.__runSlim(finalname)
-            self.setProperty("OutputWorkspace", mtd[finalname])
+            # Populate ReductionProperties from Characterizations if provided.
+            if self.charac:
+                self.__runCharacterizationsForSlim()
 
-            # TODO CacheDir?
-            print("DID USE SLIM")
+            # Try to extract d_min/d_max from the ReductionProperties PM.
+            # Returns None if the PM contains tof/wavelength ranges Slim cannot handle;
+            # returns {} (or a dict with XMin/XMax) otherwise.
+            # Binning may also be set via DMin/DMax/DeltaRagged or Params directly —
+            # those are handled inside __runSlim regardless.
+            slim_pm_args = self.__getSlimArgsFromPropManager()
 
-            return
+            if slim_pm_args is None:
+                # PM has settings (tof_min/tof_max/wavelength) that Slim cannot handle;
+                # fall through to the normal processing path.
+                self.log().warning(
+                    "AlignAndFocusPowderFromFiles: characterizations/ReductionProperties set "
+                    "TOF or wavelength ranges not supported by AlignAndFocusPowderSlim; "
+                    "using standard processing."
+                )
+            else:
+                self.log().notice("AlignAndFocusPowderFromFiles: delegating to AlignAndFocusPowderSlim for faster single-file processing.")
+                self.__runSlim(finalname, slim_pm_args)
+                self.setProperty("OutputWorkspace", mtd[finalname])
+
+                # TODO CacheDir?
+
+                return
         # ------------------------------------------------------------------ #
 
         # determing compression
