@@ -177,14 +177,14 @@ void ConvertHFIRSCDtoMDE::exec() {
         if (!di.isMonitor(n)) {
           twotheta.push_back(di.twoTheta(n));
           azimuthal.push_back(di.azimuthal(n));
-          detectorID.push_back(static_cast<int>(n));
+          detectorID.push_back(static_cast<int>(1 + n)); // detector ID's start at 1 in HB3A
         }
       }
     }
   } else { // HB2C LoadWAND or HB3A HB3AAdjustSampleNorm
     azimuthal = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("azimuthal"))))();
     twotheta = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("twotheta"))))();
-    if (expInfo.run().hasProperty("detector_id")) {
+    if (expInfo.run().hasProperty("detectorID")) {
       detectorID = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<int>> *>(expInfo.getLog("detector_id"))))();
     } else {
       // backwards compatibility if sample-log is not present
@@ -248,13 +248,12 @@ void ConvertHFIRSCDtoMDE::exec() {
     for (size_t m = 0; m < azimuthal.size(); m++) {
       size_t idx = n * azimuthal.size() + m;
       coord_t signal = static_cast<coord_t>(inputWS->getSignalAt(idx));
-      auto detectno = static_cast<uint16_t>(detectorID[m]);
       if (signal > 0.f && std::isfinite(signal)) {
         Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
         if (lorentz) {
           factor = lorentz_pre[m];
         }
-        inserter.insertMDEvent(signal * factor, signal * factor * factor, 0, goniometerIndex, detectno,
+        inserter.insertMDEvent(signal * factor, signal * factor * factor, 0, goniometerIndex, detectorID[m],
                                q_sample.data());
       }
     }
