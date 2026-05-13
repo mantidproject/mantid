@@ -117,9 +117,10 @@ void makePastedGroupNamesUnique(Clipboard &clipboard,
 } // namespace
 
 RunsTablePresenter::RunsTablePresenter(IRunsTableView *view, std::vector<std::string> const &instruments,
-                                       double thetaTolerance, ReductionJobs jobs, const IPlotter &plotter)
+                                       double thetaTolerance, ReductionJobs jobs, const IPlotter &plotter,
+                                       const IPlotOptionsProvider &plotOptionsProvider)
     : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)), m_clipboard(),
-      m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
+      m_jobViewUpdater(m_view->jobs()), m_plotter(plotter), m_plotOptionsProvider(plotOptionsProvider) {
   m_view->subscribe(this);
 
   // Add Group to view and model, add row to this group in view and model.
@@ -833,7 +834,8 @@ void RunsTablePresenter::notifyPlotSelectedPressed() {
   if (workspaces.empty())
     return;
 
-  m_plotter.plot({workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Individual)});
+  m_plotter.plot(
+      {workspaces, m_plotOptionsProvider.optionsFor(PlotOutputType::ReflectivityCurve, PlotLayout::Individual)});
 }
 
 void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
@@ -848,7 +850,7 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
   if (workspaces.empty())
     return;
 
-  m_plotter.plot(
-      {workspaces, reflectivityCurvePlotOptions(PlotOutputType::StitchedReflectivityCurve, PlotLayout::Individual)});
+  m_plotter.plot({workspaces,
+                  m_plotOptionsProvider.optionsFor(PlotOutputType::StitchedReflectivityCurve, PlotLayout::Individual)});
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

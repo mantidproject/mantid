@@ -8,6 +8,7 @@
 #include "../Runs/IRunsPresenter.h"
 #include "Common/Clipboard.h"
 #include "Common/DllConfig.h"
+#include "GUI/Common/IPlotOptionsProvider.h"
 #include "GUI/Common/IPlotter.h"
 #include "IRunsTablePresenter.h"
 #include "IRunsTableView.h"
@@ -33,7 +34,8 @@ constexpr const char *CHILDREN_SUCCESS = "#e8f4e8"; // very pale green
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenter : public IRunsTablePresenter, public RunsTableViewSubscriber {
 public:
   RunsTablePresenter(IRunsTableView *view, std::vector<std::string> const &instruments, double thetaTolerance,
-                     ReductionJobs reductionJobs, const IPlotter &plotter);
+                     ReductionJobs reductionJobs, const IPlotter &plotter,
+                     const IPlotOptionsProvider &plotOptionsProvider);
 
   void notifyRemoveAllRowsAndGroupsRequested() override;
 
@@ -154,6 +156,7 @@ private:
   JobsViewUpdater m_jobViewUpdater;
   IRunsPresenter *m_mainPresenter;
   const IPlotter &m_plotter;
+  const IPlotOptionsProvider &m_plotOptionsProvider;
 
   friend class Encoder;
   friend class Decoder;
