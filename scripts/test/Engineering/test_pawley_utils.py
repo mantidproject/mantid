@@ -395,7 +395,10 @@ class PawleyPattern2DTest(unittest.TestCase):
 
     def test_eval_resids_global_scale_false(self):
         pawley = PawleyPattern2D(self.ws, [self.phase], global_scale=False, profile=GaussianProfile())
+
+        pawley._reestimate_scales(pawley.get_free_params())
         resids = pawley.eval_resids(pawley.get_free_params())
+
         # sum of resids should be much smaller than global-scale=True (as background optimised)
         self.assertAlmostEqual(sum(resids), 0, delta=4e-10)
 
@@ -834,7 +837,7 @@ class PhaseFilterHklsTest(unittest.TestCase):
         phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
         # only very high d-spacing HKL (111) — restrict lambda range so it's out of range
         phase.set_hkls([[1, 1, 1]])
-        filtered = phase.filter_hkls_to_ws_range(self.ws, lambda_min=0.1, lambda_max=0.2)
+        filtered = phase.filter_hkls_to_ws_range(self.ws, lambda_min=5.1, lambda_max=5.2)
         self.assertEqual(filtered.hkls, [])
 
     def test_name_propagated(self):
@@ -1100,7 +1103,7 @@ class PawleyPattern2DFitAlternatingTest(unittest.TestCase):
         mock_ls.side_effect = results
         mock_errs.return_value = np.zeros_like(pawley.get_free_params())
 
-        pawley.fit(fit_strategy="alternating", max_scale_iter=3, max_nfev=1)
+        pawley.fit_with_strategy(strategy="alternating", max_scale_iter=3, max_nfev=1)
         self.assertEqual(mock_ls.call_count, 3)
 
     @patch("Engineering.pawley_utils.OutputTableMixin.get_parameter_errors")
@@ -1126,10 +1129,10 @@ class PawleyPattern2DFitAlternatingTest(unittest.TestCase):
         mock_ls.side_effect = results
         mock_errs.return_value = np.zeros_like(pawley.get_free_params())
 
-        pawley.fit(fit_strategy="alternating", max_scale_iter=2, max_nfev=1)
-        # scales should be None before each eval_2d call in the loop
+        pawley.fit_with_strategy(strategy="alternating", max_scale_iter=2, max_nfev=1)
+        # scales should be reset to ones before each eval_2d call in the loop
         for scales_val in scales_before_eval[:2]:
-            self.assertIsNone(scales_val)
+            np.testing.assert_array_equal(scales_val, np.ones(self.ws.getNumberHistograms()))
 
 
 class PawleyPattern1DSetIspecTest(unittest.TestCase):

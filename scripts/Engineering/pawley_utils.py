@@ -16,6 +16,7 @@ from scipy.optimize import least_squares
 from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from enum import Enum
 
 
 if TYPE_CHECKING:
@@ -23,6 +24,44 @@ if TYPE_CHECKING:
     from scipy.optimize import OptimizeResult
 
 _MIN_SCALE = 1e-6  # floor for per-spectrum scale factors (must be positive)
+
+
+class PawleyFitStrategy(Enum):
+    """Available higher-level 2D Pawley fit strategies."""
+
+    SINGLE = "single"
+    ALTERNATING = "alternating"
+
+
+def calculate_scales_and_bg(
+    yobs: np.ndarray[float],
+    ycalc: np.ndarray[float],
+    min_scale: float = _MIN_SCALE,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Estimate per-spectrum scale factors and constant backgrounds.
+
+    Solves ``yobs ~= scale * ycalc + bg`` independently for each
+    spectrum using linear least squares.  Inputs may be one-dimensional
+    arrays (one spectrum) or two-dimensional arrays with shape
+    ``(n_spectra, n_bins)``.
+    """
+    yobs = np.asarray(yobs, dtype=float)
+    ycalc = np.asarray(ycalc, dtype=float)
+    if yobs.shape != ycalc.shape:
+        raise ValueError(f"yobs and ycalc must have matching shapes, got {yobs.shape} and {ycalc.shape}")
+
+    yobs_2d = np.atleast_2d(yobs)
+    ycalc_2d = np.atleast_2d(ycalc)
+    scales = np.zeros(yobs_2d.shape[0], dtype=float)
+    bgs = np.zeros_like(scales)
+
+    for ispec, (yobs_i, ycalc_i) in enumerate(zip(yobs_2d, ycalc_2d)):
+        design = np.column_stack([ycalc_i, np.ones_like(ycalc_i)])
+        result, _, _, _ = np.linalg.lstsq(design, yobs_i, rcond=None)
+        scales[ispec] = float(max(result[0], min_scale))
+        bgs[ispec] = float(result[1])
+
+    return scales, bgs
 
 
 class InstrumentParams:
@@ -236,11 +275,7 @@ class Phase:
             ),
             name=self.name,
         )
-        accessible_hkls = [hkl for hkl in self.hkls if dmin <= self.unit_cell.d(hkl) <= dmax]
-        if accessible_hkls:
-            new_phase.set_hkls(accessible_hkls, do_sort=False)
-        else:
-            new_phase.hkls = []
+        new_phase.set_hkls_from_dspac_limits(dmin, dmax)
         return new_phase
 
     def get_hkl_strings(self) -> Sequence[str]:
@@ -845,17 +880,17 @@ class PawleyPattern1D(PawleyPatternBase):
         self.bg_params = res.x
         return res
 
-    def get_bkg_ws(self, ws_name: str):
-        bg_func = self.comp_func[len(self.comp_func) - 1]
-        self._set_func_params(bg_func, self.bg_params)
+    def get_bkg_ws(self, ws_name: str, bkg_params: np.ndarray[float] = None, **kwargs):
+        if bkg_params is None:
+            bkg_params = self.bg_params
+        bkg_func = self.comp_func[len(self.comp_func) - 1]
+        self._set_func_params(bkg_func, bkg_params)
         return EvaluateFunction(
-            Function=bg_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, OutputWorkspace=ws_name, EnableLogging=False
+            Function=bkg_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, OutputWorkspace=ws_name, EnableLogging=False, **kwargs
         )
 
     def _eval_bg_func(self, p: np.ndarray[float]) -> np.ndarray[float]:
-        bg_func = self.comp_func[len(self.comp_func) - 1]
-        self._set_func_params(bg_func, p)
-        ws = EvaluateFunction(Function=bg_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, StoreInADS=False, EnableLogging=False)
+        ws = self.get_bkg_ws("bkg_ws", bkg_params=p, StoreInADS=False)
         return ws.readY(1).copy()
 
     @staticmethod
@@ -880,35 +915,55 @@ class Poldi2DEvalMixin:
     PawleyPattern2DNoConstraints classes
     """
 
-    def eval_2d(self, params: np.ndarray[float]) -> Workspace2D:
+    def _reset_scales_and_bgs(self):
+        """Reset locked per-spectrum scale/background values to neutral defaults."""
+        n_hist = self.ws.getNumberHistograms()
+        self.scales = np.ones(n_hist, dtype=float)
+        self.bgs = np.zeros(n_hist, dtype=float)
+
+    def _ensure_scales_and_bgs(self):
+        if (
+            getattr(self, "scales", None) is None
+            or getattr(self, "bgs", None) is None
+            or len(self.scales) != self.ws.getNumberHistograms()
+            or len(self.bgs) != self.ws.getNumberHistograms()
+        ):
+            self._reset_scales_and_bgs()
+
+    def _simulate_2d(self, params: np.ndarray[float]) -> Workspace2D:
         self.ws_1d.setY(0, self.eval_profile(params))
         ws_sim = simulate_2d_data(self.ws, self.ws_1d, output_workspace=f"{self.ws.name()}_sim", lambda_max=self.lambda_max)
         if self.apply_lorentz_correction:
             si = ws_sim.spectrumInfo()
             for ispec in range(ws_sim.getNumberHistograms()):
                 ws_sim.setY(ispec, ws_sim.readY(ispec) * np.sin(si.twoTheta(ispec) / 2))
+        return ws_sim
+
+    def _apply_scales_and_bg(self, ws_sim: Workspace2D):
+        self._ensure_scales_and_bgs()
+        for ispec in range(self.ws.getNumberHistograms()):
+            ws_sim.setY(ispec, self.scales[ispec] * ws_sim.readY(ispec) + self.bgs[ispec])
+
+    def _reestimate_scales(self, params: Optional[np.ndarray[float]] = None) -> tuple[np.ndarray, np.ndarray]:
+        """Re-estimate and lock per-spectrum scale/background values.
+
+        In global-scale mode no per-spectrum correction is applied, so the
+        locked values are reset to neutral defaults and returned.
+        """
+        if params is None:
+            params = self.get_free_params()
+        if self.global_scale:
+            self._reset_scales_and_bgs()
+            return self.scales, self.bgs
+
+        ws_sim = self._simulate_2d(params)
+        self.scales, self.bgs = calculate_scales_and_bg(self.ws.extractY(), ws_sim.extractY())
+        return self.scales, self.bgs
+
+    def eval_2d(self, params: np.ndarray[float]) -> Workspace2D:
+        ws_sim = self._simulate_2d(params)
         if not self.global_scale:
-            if self.scales is None:
-                # First call (or after reset by the outer loop): jointly estimate the
-                # per-spectrum scale and background via linear regression on the current ycalc.
-                # Both are then locked for the duration of the inner Pawley optimisation
-                self.scales = np.zeros(self.ws.getNumberHistograms())
-                self.bgs = np.zeros_like(self.scales)
-                ones = np.ones_like(ws_sim.readY(0))
-                for ispec in range(self.ws.getNumberHistograms()):
-                    yobs = self.ws.readY(ispec)
-                    ycalc = ws_sim.readY(ispec)
-                    A = np.column_stack([ycalc, ones])
-                    result, _, _, _ = np.linalg.lstsq(A, yobs, rcond=None)
-                    scale = float(max(result[0], _MIN_SCALE))  # physically non-negative
-                    bg = float(result[1])
-                    self.scales[ispec] = scale
-                    self.bgs[ispec] = bg
-                    ws_sim.setY(ispec, scale * ycalc + bg)
-            else:
-                # Subsequent calls: both scale and bg are locked.
-                for ispec in range(self.ws.getNumberHistograms()):
-                    ws_sim.setY(ispec, self.scales[ispec] * ws_sim.readY(ispec) + self.bgs[ispec])
+            self._apply_scales_and_bg(ws_sim)
         return ws_sim
 
     def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
@@ -931,8 +986,6 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
     ):
         super().__init__(*args, **kwargs)
         self.lambda_max = lambda_max
-        self.scales = None
-        self.bgs = None
         self.apply_lorentz_correction = apply_lorentz_correction
         self.set_global_scale(global_scale)
         # create workspace in d-spacing to contain diffraction pattern
@@ -953,6 +1006,7 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
 
     def set_global_scale(self, global_scale: bool):
         self.global_scale = global_scale
+        self._reset_scales_and_bgs()
         if not self.global_scale:
             # Per-spectrum scales (locked after initialisation of each fit() call) make all
             # peak intensities identifiable without needing to fix any individual intensity.
@@ -1012,14 +1066,13 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
     def _estimate_intensities(self):
         # Compute per-spectrum scales at current intensities and use their median as a global
         # correction factor.
-        self.scales = None  # ensure fresh per-spectrum scale computation
-        _ = self.eval_2d(self.get_free_params())
-        if self.scales is not None and len(self.scales) > 0:
+        self._reestimate_scales(self.get_free_params())
+        if len(self.scales) > 0:
             valid_scales = self.scales[self.scales > 0]
             global_scale = float(np.median(valid_scales)) if len(valid_scales) > 0 else 1.0
             for iphase in range(len(self.phases)):
                 self.intens[iphase] *= global_scale
-        self.scales = None  # reset so fit() recomputes scales at the updated intensities
+        self._reset_scales_and_bgs()  # fit() will explicitly re-estimate after intensities change
 
     def create_no_constraints_fit(self, param_bounds_abs_min: float = 1e-6):
         return PawleyPattern2DNoConstraints(
@@ -1032,53 +1085,79 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
             phases=self.phases,
         )
 
-    def fit(
+    @staticmethod
+    def _parse_fit_strategy(strategy: PawleyFitStrategy | str) -> PawleyFitStrategy:
+        if isinstance(strategy, PawleyFitStrategy):
+            return strategy
+        try:
+            return PawleyFitStrategy(str(strategy).lower())
+        except ValueError as exc:
+            valid = ", ".join(s.value for s in PawleyFitStrategy)
+            raise ValueError(f"Unknown fit strategy '{strategy}'. Options: {valid}.") from exc
+
+    def fit(self, *args, **kwargs) -> OptimizeResult:
+        """Fit the 2D Pawley pattern with a single scale/background estimation.
+
+        Per-spectrum scale/background values are estimated once from the
+        initial parameters, then locked for the least-squares optimisation.
+        Use `fit_with_strategy` for higher-level iterative strategies.
+        """
+        strategy_kwargs = {"fit_strategy", "strategy", "max_scale_iter", "scale_rtol"}.intersection(kwargs)
+        if strategy_kwargs:
+            names = ", ".join(sorted(strategy_kwargs))
+            raise TypeError(
+                f"PawleyPattern2D.fit() only runs a single fit and does not accept strategy options ({names}). "
+                "Use fit_with_strategy(PawleyFitStrategy.ALTERNATING, ...) or fit_alternating(...) instead."
+            )
+        self._reestimate_scales(self.get_free_params())
+        res = super().fit(*args, **kwargs)
+        self.set_free_params(res.x)
+        self.eval_2d(res.x)  # ensure 2D simulated workspace up to date
+        return res
+
+    def fit_with_strategy(
         self,
+        strategy: PawleyFitStrategy | str = PawleyFitStrategy.SINGLE,
         *args,
-        fit_strategy: str = "alternating",
         max_scale_iter: int = 2,
         scale_rtol: float = 1e-3,
         **kwargs,
     ) -> OptimizeResult:
-        """Fit the 2D Pawley pattern.
+        """Fit the 2D Pawley pattern using a named higher-level strategy.
 
         Parameters
         ----------
-        fit_strategy : str
-            ``"alternating"`` — alternate between per-spectrum scale/background
-            estimation (via linear regression) and Bragg-intensity optimisation.
-            ``"single"`` — compute per-spectrum scales once, then run a single
-            least-squares optimisation (no outer iteration).
+        strategy : PawleyFitStrategy or str
+            ``PawleyFitStrategy.SINGLE`` calls :meth:`fit`.
+            ``PawleyFitStrategy.ALTERNATING`` calls :meth:`fit_alternating`.
         max_scale_iter : int
-            Maximum number of outer iterations (only used by ``"alternating"``).
+            Maximum number of scale/background re-estimation outer iterations
+            for ``PawleyFitStrategy.ALTERNATING``.
         scale_rtol : float
             Relative tolerance on the cost function between successive outer
-            iterations.  The loop breaks early when the fractional change in
-            cost drops below this threshold (only used by ``"alternating"``).
+            iterations for ``PawleyFitStrategy.ALTERNATING``.
         """
-        if fit_strategy == "alternating":
-            res = self._fit_alternating(*args, max_scale_iter=max_scale_iter, scale_rtol=scale_rtol, **kwargs)
-        elif fit_strategy == "single":
-            self.scales = None
-            self.eval_2d(self.get_free_params())
-            res = super().fit(*args, **kwargs)
-            self.set_free_params(res.x)
-        else:
-            raise ValueError(f"Unknown fit_strategy '{fit_strategy}'. Options: 'alternating', 'single'.")
-        self.eval_2d(res.x)  # ensure 2D simulated workspace up to date
-        return res
+        strategy = self._parse_fit_strategy(strategy)
+        if strategy == PawleyFitStrategy.SINGLE:
+            return self.fit(*args, **kwargs)
+        if strategy == PawleyFitStrategy.ALTERNATING:
+            return self.fit_alternating(*args, max_scale_iter=max_scale_iter, scale_rtol=scale_rtol, **kwargs)
+        raise AssertionError(f"Unhandled fit strategy: {strategy}")
 
-    def _fit_alternating(self, *args, max_scale_iter: int = 2, scale_rtol: float = 1e-3, **kwargs) -> OptimizeResult:
+    def fit_alternating(self, *args, max_scale_iter: int = 2, scale_rtol: float = 1e-3, **kwargs) -> OptimizeResult:
+        """Alternate per-spectrum scale/background estimation and Pawley fitting."""
+        if max_scale_iter < 1:
+            raise ValueError("max_scale_iter must be at least 1")
         res = None
         prev_cost = None
         for _ in range(max_scale_iter):
-            self.scales = None  # force scale+bg re-estimation from current params
-            self.eval_2d(self.get_free_params())
+            self._reestimate_scales(self.get_free_params())
             res = super().fit(*args, **kwargs)
             self.set_free_params(res.x)
             if prev_cost is not None and abs(prev_cost - res.cost) / max(prev_cost, 1e-12) < scale_rtol:
                 break
             prev_cost = res.cost
+        self.eval_2d(res.x)  # ensure 2D simulated workspace up to date
         return res
 
 
@@ -1100,8 +1179,6 @@ class PawleyPattern2DNoConstraints(BoundsMixin, MtdFuncMixin, Poldi2DEvalMixin, 
         self.intens_par_name = self.get_peak_intensity_param_name()
         self.has_bg = self.comp_func[len(self.comp_func) - 1].name in FunctionFactory.Instance().getBackgroundFunctionNames()
         self.lambda_max = lambda_max
-        self.scales = None
-        self.bgs = None
         self.apply_lorentz_correction = apply_lorentz_correction
         self.set_global_scale(global_scale)
         self.initial_params = None
@@ -1119,6 +1196,7 @@ class PawleyPattern2DNoConstraints(BoundsMixin, MtdFuncMixin, Poldi2DEvalMixin, 
 
     def set_global_scale(self, global_scale: bool):
         self.global_scale = global_scale
+        self._reset_scales_and_bgs()
         if not self.global_scale:
             # Per-spectrum scales (locked after initialisation of each fit() call) make all
             # peak intensities identifiable — no individual intensity needs to be fixed.
@@ -1198,8 +1276,7 @@ class PawleyPattern2DNoConstraints(BoundsMixin, MtdFuncMixin, Poldi2DEvalMixin, 
         if "bounds" not in kwargs:
             kwargs["bounds"] = self.get_bounds()
         # Pre-compute per-spectrum scales at the initial params then lock them.
-        self.scales = None
-        self.eval_2d(self.initial_params)
+        self._reestimate_scales(self.initial_params)
         res = least_squares(lambda p: self.eval_resids(p), self.initial_params, **kwargs)
         # update parameters, errors, and ensure 2D simulated workspace up to date
         self.param_errors = np.full(self.comp_func.nParams(), np.nan)
