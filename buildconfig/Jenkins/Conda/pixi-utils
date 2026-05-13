@@ -10,7 +10,11 @@ install_pixi() {
   fi
 
   # Specify pixi version
-  VERSION_PIXI=0.60.0
+  if [[ -z "$1" || ! -f "$1/.pixi-version" ]]; then
+    echo "ERROR: pixi version cannot be found"
+    exit 1
+  fi
+  VERSION_PIXI=$(cat "$1/.pixi-version")
   # check if pixi is not installed
   if [ "$(command -v pixi)" ]; then
       echo "updating previously installed pixi"
