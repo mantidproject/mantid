@@ -29,13 +29,18 @@ std::vector<PlotOutputType> PlotOptionsProvider::availableTypes(std::string cons
 }
 
 PlotOptions PlotOptionsProvider::optionsFor(PlotOutputType outputType, PlotLayout layout) const {
+  return optionsFor(PlotOutputOptions{outputType}, layout);
+}
+
+PlotOptions PlotOptionsProvider::optionsFor(PlotOutputOptions const &outputOptions, PlotLayout layout) const {
+  auto const outputType = outputOptions.outputType;
   switch (outputType) {
   case PlotOutputType::DetectorMap:
-    return detectorMapPlotOptions(layout);
+    return detectorMapPlotOptions(outputOptions.detectorMapXAxis, outputOptions.detectorMapYAxis, layout);
   case PlotOutputType::SpinAsymmetry:
     return spinAsymmetryPlotOptions(layout);
   case PlotOutputType::Alignment:
-    return alignmentPlotOptions(layout);
+    return alignmentPlotOptions(outputOptions.alignmentXAxis, layout);
   case PlotOutputType::ReflectivityCurve:
     return reflectivityCurvePlotOptions(outputType, layout);
   }

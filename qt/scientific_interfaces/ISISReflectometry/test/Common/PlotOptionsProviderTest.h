@@ -56,6 +56,18 @@ public:
     TS_ASSERT_EQUALS(options.layout, PlotLayout::Tiled);
     TS_ASSERT_EQUALS(options.xAxis.label, "Time of Flight");
     TS_ASSERT_EQUALS(options.yAxis.label, "Detector ID");
+    TS_ASSERT_EQUALS(options.zAxis.label, "Intensity");
+  }
+
+  void testDetectorMapOptionsUseSelectedAxisUnits() {
+    auto provider = PlotOptionsProvider{};
+
+    auto const options = provider.optionsFor(
+        PlotOutputOptions{PlotOutputType::DetectorMap, DetectorMapXAxis::Lambda, DetectorMapYAxis::Theta},
+        PlotLayout::Tiled);
+
+    TS_ASSERT_EQUALS(options.xAxis.label, "Lambda");
+    TS_ASSERT_EQUALS(options.yAxis.label, "Theta");
   }
 
   void testSpinAsymmetryOptionsUseQzAndPercentAxes() {
@@ -80,5 +92,16 @@ public:
     TS_ASSERT_EQUALS(options.layout, PlotLayout::Individual);
     TS_ASSERT_EQUALS(options.xAxis.label, "Detector ID");
     TS_ASSERT_EQUALS(options.yAxis.label, "Integrated Intensity");
+  }
+
+  void testAlignmentOptionsUseSelectedXAxisUnits() {
+    auto provider = PlotOptionsProvider{};
+
+    auto const options =
+        provider.optionsFor(PlotOutputOptions{PlotOutputType::Alignment, DetectorMapXAxis::TimeOfFlight,
+                                              DetectorMapYAxis::DetectorId, AlignmentXAxis::Theta},
+                            PlotLayout::Individual);
+
+    TS_ASSERT_EQUALS(options.xAxis.label, "Theta");
   }
 };

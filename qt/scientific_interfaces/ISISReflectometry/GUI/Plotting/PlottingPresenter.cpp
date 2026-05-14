@@ -182,7 +182,7 @@ void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) const {
     return;
   }
 
-  auto const options = m_plotOptionsProvider->optionsFor(m_view->selectedPlotOutputType(), layout);
+  auto const options = m_plotOptionsProvider->optionsFor(m_view->selectedPlotOutputOptions(), layout);
   if (layout == PlotLayout::Individual) {
     for (auto const &workspace : workspaces) {
       m_plotter->plot({{workspace}, options});

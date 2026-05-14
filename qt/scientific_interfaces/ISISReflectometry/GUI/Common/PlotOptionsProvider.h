@@ -14,6 +14,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptionsProvider : public IPlotOptionsPr
 public:
   std::vector<PlotOutputType> availableTypes(std::string const &instrumentName) const override;
   PlotOptions optionsFor(PlotOutputType outputType, PlotLayout layout) const override;
+  PlotOptions optionsFor(PlotOutputOptions const &outputOptions, PlotLayout layout) const override;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

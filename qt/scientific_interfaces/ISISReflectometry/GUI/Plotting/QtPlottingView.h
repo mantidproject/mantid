@@ -26,6 +26,7 @@ public:
   void setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> const &items) override;
   std::vector<std::string> selectedWorkspaces() const override;
   PlotOutputType selectedPlotOutputType() const override;
+  PlotOutputOptions selectedPlotOutputOptions() const override;
 
 protected:
   bool eventFilter(QObject *watched, QEvent *event) override;
@@ -35,6 +36,7 @@ private:
 
   void initLayout();
   void setOutputOptionControlsEnabled(bool enabled);
+  void updatePlotOutputProperties();
   void addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item);
   QModelIndex itemIndex(QModelIndex const &index) const;
   bool isWorkspaceItem(QModelIndex const &index) const;

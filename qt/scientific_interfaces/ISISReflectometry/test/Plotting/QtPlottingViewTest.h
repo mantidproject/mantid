@@ -51,9 +51,71 @@ public:
     QtPlottingView view;
     auto const optionsLayout = view.findChild<QVBoxLayout *>("optionsLayout");
 
-    assertButton(optionsLayout->itemAt(3)->widget(), "plotIndividual", "Plot");
-    assertButton(optionsLayout->itemAt(4)->widget(), "plotOverplot", "Plot over");
-    assertButton(optionsLayout->itemAt(5)->widget(), "plotTiled", "Plot tiled");
+    assertButton(optionsLayout->itemAt(10)->widget(), "plotIndividual", "Plot");
+    assertButton(optionsLayout->itemAt(11)->widget(), "plotOverplot", "Plot over");
+    assertButton(optionsLayout->itemAt(12)->widget(), "plotTiled", "Plot tiled");
+  }
+
+  void testReflectivityCurveHidesPlotOutputProperties() {
+    QtPlottingView view;
+
+    TS_ASSERT(view.findChild<QWidget *>("plotPropertiesTopSeparator")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("plotPropertiesBottomSeparator")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("detectorMapYAxis")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("detectorMapXAxis")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("alignmentXAxis")->isHidden());
+  }
+
+  void testDetectorMapShowsAxisUnitProperties() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+
+    view.setAvailablePlotOutputTypes(
+        {PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap, PlotOutputType::Alignment});
+    plotPreset->setCurrentIndex(1);
+
+    TS_ASSERT(!view.findChild<QWidget *>("plotPropertiesTopSeparator")->isHidden());
+    TS_ASSERT(!view.findChild<QWidget *>("plotPropertiesBottomSeparator")->isHidden());
+    TS_ASSERT(!view.findChild<QWidget *>("detectorMapYAxis")->isHidden());
+    TS_ASSERT(!view.findChild<QWidget *>("detectorMapXAxis")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("alignmentXAxis")->isHidden());
+
+    auto const options = view.selectedPlotOutputOptions();
+    TS_ASSERT_EQUALS(options.outputType, PlotOutputType::DetectorMap);
+    TS_ASSERT_EQUALS(options.detectorMapYAxis, DetectorMapYAxis::DetectorId);
+    TS_ASSERT_EQUALS(options.detectorMapXAxis, DetectorMapXAxis::TimeOfFlight);
+  }
+
+  void testDetectorMapSelectedAxisUnitPropertiesAreReturned() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+
+    view.setAvailablePlotOutputTypes({PlotOutputType::DetectorMap});
+    plotPreset->setCurrentIndex(0);
+    view.findChild<QComboBox *>("detectorMapYAxis")->setCurrentIndex(1);
+    view.findChild<QComboBox *>("detectorMapXAxis")->setCurrentIndex(1);
+
+    auto const options = view.selectedPlotOutputOptions();
+    TS_ASSERT_EQUALS(options.detectorMapYAxis, DetectorMapYAxis::Theta);
+    TS_ASSERT_EQUALS(options.detectorMapXAxis, DetectorMapXAxis::Lambda);
+  }
+
+  void testAlignmentShowsXAxisUnitProperty() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::Alignment});
+    plotPreset->setCurrentIndex(1);
+
+    TS_ASSERT(!view.findChild<QWidget *>("plotPropertiesTopSeparator")->isHidden());
+    TS_ASSERT(!view.findChild<QWidget *>("plotPropertiesBottomSeparator")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("detectorMapYAxis")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("detectorMapXAxis")->isHidden());
+    TS_ASSERT(!view.findChild<QWidget *>("alignmentXAxis")->isHidden());
+
+    auto const options = view.selectedPlotOutputOptions();
+    TS_ASSERT_EQUALS(options.outputType, PlotOutputType::Alignment);
+    TS_ASSERT_EQUALS(options.alignmentXAxis, AlignmentXAxis::DetectorId);
   }
 
   void testWorkspaceTreeHasExpectedColumnHeaders() {
