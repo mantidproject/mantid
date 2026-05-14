@@ -564,7 +564,7 @@ void FileFinderImpl::processFileInfos(std::vector<FileInfo> &fileInfos,
     const std::vector<std::string> facilityExtensions = facility.extensions();
 
     std::filesystem::path filePath(fileInfo.hint);
-    std::string extension = filePath.extension().string();
+    const auto extension = filePath.extension();
     std::string filename = filePath.replace_extension().string();
 
     if (filePath.parent_path().empty()) {
@@ -607,7 +607,7 @@ void FileFinderImpl::processFileInfos(std::vector<FileInfo> &fileInfos,
       getUniqueExtensions(extensionsProvided, fileInfo.extensionsToSearch);
     } else {
       if (!extension.empty())
-        fileInfo.extensionsToSearch.emplace_back(extension);
+        fileInfo.extensionsToSearch.emplace_back(extension.string());
 
       getUniqueExtensions(extensionsProvided, fileInfo.extensionsToSearch);
       getUniqueExtensions(facilityExtensions, fileInfo.extensionsToSearch);
@@ -722,7 +722,7 @@ void FileFinderImpl::performCacheSearch(std::vector<FileInfo> &fileInfos) const 
         continue;
 
       auto cacheFilePath =
-          getISISInstrumentDataCachePath(cachePathToSearch.string(), fileInfo.filenames, fileInfo.extensionsToSearch);
+          getISISInstrumentDataCachePath(cachePathToSearch, fileInfo.filenames, fileInfo.extensionsToSearch);
 
       if (cacheFilePath) {
         g_log.debug() << "Found file in data cache: " << cacheFilePath.result() << std::endl;
@@ -836,37 +836,33 @@ void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) cons
 }
 
 const API::Result<std::filesystem::path>
-FileFinderImpl::getISISInstrumentDataCachePath(const std::string &cachePathToSearch,
+FileFinderImpl::getISISInstrumentDataCachePath(const std::filesystem::path &cacheDir,
                                                const std::set<std::string> &hintstrs,
                                                const std::vector<std::string> &exts) const {
   std::string errors;
-  auto dataCache = API::ISISInstrumentDataCache(cachePathToSearch);
+  auto dataCache = API::ISISInstrumentDataCache(cacheDir.string());
 
   for (const auto &hint : hintstrs) {
-
-    std::string parentDirPath;
+    std::filesystem::path parentDir;
 
     try {
-      parentDirPath = dataCache.getFileParentDirectoryPath(hint);
-
+      parentDir = dataCache.getFileParentDirectoryPath(hint);
     } catch (const std::invalid_argument &e) {
       errors += "Data cache: " + std::string(e.what());
       return API::Result<std::filesystem::path>("", errors);
-
     } catch (const Json::Exception &e) {
       errors += "Data cache: Failed parsing to JSON: " + std::string(e.what()) +
                 "Error likely due to accessing instrument index file while it was being updated on IDAaaS.";
       return API::Result<std::filesystem::path>("", errors);
     }
 
-    if (!std::filesystem::exists(parentDirPath)) {
-      errors += "Data cache: Directory not found: " + parentDirPath;
+    if (!std::filesystem::exists(parentDir)) {
+      errors += "Data cache: Directory not found: " + parentDir.string();
       return API::Result<std::filesystem::path>("", errors);
     }
 
     for (const auto &ext : exts) {
-      std::filesystem::path filePath(parentDirPath + '/' + hint + ext);
-
+      const auto filePath = parentDir / (hint + ext);
       try { // Catches error for permission denied
         if (std::filesystem::exists(filePath)) {
           return API::Result<std::filesystem::path>(filePath);
@@ -876,7 +872,7 @@ FileFinderImpl::getISISInstrumentDataCachePath(const std::string &cachePathToSea
         return API::Result<std::filesystem::path>("", errors);
       }
     }
-    errors += "Data cache: " + hint + " not found in " + parentDirPath;
+    errors += "Data cache: " + hint + " not found in " + parentDir.string();
   }
   return API::Result<std::filesystem::path>("", errors);
 }

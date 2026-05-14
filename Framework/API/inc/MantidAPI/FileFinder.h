@@ -93,7 +93,7 @@ private:
   void performFileSearch(std::vector<FileInfo> &fileInfos) const;
   void performCacheSearch(std::vector<FileInfo> &fileInfos) const;
   void performArchiveSearch(std::vector<FileInfo> &fileInfos) const;
-  const API::Result<std::filesystem::path> getISISInstrumentDataCachePath(const std::string &cachePathToSearch,
+  const API::Result<std::filesystem::path> getISISInstrumentDataCachePath(const std::filesystem::path &cacheDir,
                                                                           const std::set<std::string> &hintstrs,
                                                                           const std::vector<std::string> &exts) const;
   const API::Result<std::filesystem::path> getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
