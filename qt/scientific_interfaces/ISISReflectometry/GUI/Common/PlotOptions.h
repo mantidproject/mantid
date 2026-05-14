@@ -13,7 +13,7 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-enum class PlotOutputType { ReflectivityCurve, StitchedReflectivityCurve };
+enum class PlotOutputType { ReflectivityCurve, DetectorMap, SpinAsymmetry, Alignment };
 
 enum class PlotStyle { Line, Colorfill };
 
@@ -63,5 +63,8 @@ inline bool operator==(PlotRequest const &lhs, PlotRequest const &rhs) {
 inline bool operator!=(PlotRequest const &lhs, PlotRequest const &rhs) { return !(lhs == rhs); }
 
 MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions reflectivityCurvePlotOptions(PlotOutputType outputType, PlotLayout layout);
+MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions detectorMapPlotOptions(PlotLayout layout);
+MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions spinAsymmetryPlotOptions(PlotLayout layout);
+MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions alignmentPlotOptions(PlotLayout layout);
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

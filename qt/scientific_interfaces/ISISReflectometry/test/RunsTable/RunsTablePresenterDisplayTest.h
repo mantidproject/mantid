@@ -80,26 +80,6 @@ public:
     verifyAndClearExpectations();
   }
 
-  void testPlotSelectedStitchedOutputs() {
-    auto presenter = makePresenter(m_view, oneGroupWithTwoRowsWithOutputNamesModel());
-
-    // Set the group as selected and complete
-    selectedRowLocationsAre(m_jobs, {location(0)});
-    presenter.notifySelectionChanged();
-    getGroup(presenter, 0).setSuccess();
-    getGroup(presenter, 0).setOutputNames(std::vector<std::string>{"stitched_group"});
-
-    auto const expected = std::vector<std::string>{"stitched_group"};
-    EXPECT_CALL(m_plotter,
-                plot(PlotRequest{expected, reflectivityCurvePlotOptions(PlotOutputType::StitchedReflectivityCurve,
-                                                                        PlotLayout::Individual)}))
-        .Times(1);
-
-    presenter.notifyPlotSelectedStitchedOutputPressed();
-
-    verifyAndClearExpectations();
-  }
-
   void testNotifyFillDownRuns() {
     auto presenter = makePresenter(m_view, oneGroupWithTwoSimpleRowsModel());
 

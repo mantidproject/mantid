@@ -84,6 +84,7 @@ public:
     EXPECT_CALL(*m_runsPresenter, notifyInstrumentChanged(instrument)).Times(1);
     EXPECT_CALL(*m_experimentPresenter, notifyInstrumentChanged(instrument)).Times(1);
     EXPECT_CALL(*m_instrumentPresenter, notifyInstrumentChanged(instrument)).Times(1);
+    EXPECT_CALL(*m_plottingPresenter, notifyInstrumentChanged(instrument)).Times(1);
     presenter->notifyInstrumentChanged(instrument);
   }
 

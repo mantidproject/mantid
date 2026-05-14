@@ -33,6 +33,20 @@ public:
     TS_ASSERT_EQUALS(view.selectedPlotOutputType(), PlotOutputType::ReflectivityCurve);
   }
 
+  void testAvailablePlotOutputTypesUpdatesPresetOptions() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap,
+                                      PlotOutputType::SpinAsymmetry, PlotOutputType::Alignment});
+
+    TS_ASSERT_EQUALS(plotPreset->count(), 4);
+    TS_ASSERT_EQUALS(plotPreset->itemText(0).toStdString(), "Reflectivity Curve");
+    TS_ASSERT_EQUALS(plotPreset->itemText(1).toStdString(), "Detector Map");
+    TS_ASSERT_EQUALS(plotPreset->itemText(2).toStdString(), "Spin Asymmetry");
+    TS_ASSERT_EQUALS(plotPreset->itemText(3).toStdString(), "Alignment");
+  }
+
   void testPlotButtonsHaveExpectedLabelsAndOrder() {
     QtPlottingView view;
     auto const optionsLayout = view.findChild<QVBoxLayout *>("optionsLayout");

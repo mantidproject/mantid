@@ -22,6 +22,7 @@ public:
 
   void subscribe(PlottingViewSubscriber *notifyee) override;
   void setOutputOptionsEnabled(bool enabled) override;
+  void setAvailablePlotOutputTypes(std::vector<PlotOutputType> const &outputTypes) override;
   void setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> const &items) override;
   std::vector<std::string> selectedWorkspaces() const override;
   PlotOutputType selectedPlotOutputType() const override;

@@ -45,6 +45,7 @@ public:
   virtual ~IPlottingView() = default;
   virtual void subscribe(PlottingViewSubscriber *notifyee) = 0;
   virtual void setOutputOptionsEnabled(bool enabled) = 0;
+  virtual void setAvailablePlotOutputTypes(std::vector<PlotOutputType> const &outputTypes) = 0;
   virtual void setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> const &items) = 0;
   virtual std::vector<std::string> selectedWorkspaces() const = 0;
   virtual PlotOutputType selectedPlotOutputType() const = 0;
