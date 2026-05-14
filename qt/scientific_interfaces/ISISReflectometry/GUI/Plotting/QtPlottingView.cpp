@@ -13,16 +13,54 @@
 #include <QPushButton>
 #include <QStandardItem>
 #include <QStyledItemDelegate>
+#include <algorithm>
 #include <stdexcept>
+#include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
+auto constexpr itemTypeRole = Qt::UserRole + 1;
+auto constexpr outputTypeRole = Qt::UserRole + 2;
+
+struct PlotSelectionBehaviour {
+  std::vector<PlottingWorkspaceTreeItemType> selectableItemTypes;
+  std::vector<PlottingWorkspaceOutputType> includedWorkspaceOutputTypes;
+};
+
 int plotOutputTypeIndex(PlotOutputType outputType) { return static_cast<int>(outputType); }
 
 auto const metadataTextColour = QColor(112, 112, 112);
 
 template <typename Enum> int enumIndex(Enum value) { return static_cast<int>(value); }
+
+template <typename T> bool contains(std::vector<T> const &values, T value) {
+  return std::find(values.cbegin(), values.cend(), value) != values.cend();
+}
+
+PlotSelectionBehaviour freeSelectionBehaviour() {
+  return {{PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceTreeItemType::Run,
+           PlottingWorkspaceTreeItemType::WorkspaceGroup, PlottingWorkspaceTreeItemType::Workspace},
+          {PlottingWorkspaceOutputType::IvsQ, PlottingWorkspaceOutputType::IvsLambda,
+           PlottingWorkspaceOutputType::IvsQBinned}};
+}
+
+PlotSelectionBehaviour selectionBehaviour(PlotOutputType outputType) {
+  switch (outputType) {
+  case PlotOutputType::SpinAsymmetry:
+    return {{PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceTreeItemType::Run,
+             PlottingWorkspaceTreeItemType::WorkspaceGroup},
+            {PlottingWorkspaceOutputType::IvsQBinned}};
+  case PlotOutputType::ReflectivityCurve:
+    return {{PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceTreeItemType::Run,
+             PlottingWorkspaceTreeItemType::WorkspaceGroup, PlottingWorkspaceTreeItemType::Workspace},
+            {PlottingWorkspaceOutputType::IvsQ, PlottingWorkspaceOutputType::IvsQBinned}};
+  case PlotOutputType::DetectorMap:
+  case PlotOutputType::Alignment:
+    return freeSelectionBehaviour();
+  }
+  throw std::runtime_error("Unexpected reflectometry plot output type.");
+}
 
 QString displayName(PlotOutputType outputType) {
   switch (outputType) {
@@ -181,6 +219,21 @@ void QtPlottingView::updatePlotOutputProperties() {
   m_ui.detectorMapXAxis->setVisible(showDetectorMapProperties);
   m_ui.alignmentXAxisLabel->setVisible(showAlignmentProperties);
   m_ui.alignmentXAxis->setVisible(showAlignmentProperties);
+  setWorkspaceItemsMutedForCurrentPlotOutputType();
+}
+
+void QtPlottingView::setWorkspaceItemsMutedForCurrentPlotOutputType() {
+  setWorkspaceItemsMutedForCurrentPlotOutputType(m_workspaceModel.invisibleRootItem());
+}
+
+void QtPlottingView::setWorkspaceItemsMutedForCurrentPlotOutputType(QStandardItem *parent) {
+  for (auto row = 0; row < parent->rowCount(); ++row) {
+    auto const itemTypeItem = parent->child(row, ItemTypeColumn);
+    auto const itemLabel = parent->child(row, ItemColumn);
+    itemLabel->setForeground(isSelectableForCurrentPlotOutputType(itemTypeItem->index()) ? QBrush()
+                                                                                         : QBrush(metadataTextColour));
+    setWorkspaceItemsMutedForCurrentPlotOutputType(itemTypeItem);
+  }
 }
 
 bool QtPlottingView::eventFilter(QObject *watched, QEvent *event) {
@@ -206,13 +259,19 @@ void QtPlottingView::setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> co
   for (auto const &item : items) {
     addTreeItem(m_workspaceModel.invisibleRootItem(), item);
   }
+  setWorkspaceItemsMutedForCurrentPlotOutputType();
   m_ui.workspaceTree->expandAll();
 }
 
 void QtPlottingView::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item) {
   auto treeItem = createNonEditableItem(displayName(item.itemType), true);
-  parent->appendRow({treeItem, createNonEditableItem(displayName(item.outputType), true),
-                     createNonEditableItem(QString::fromStdString(item.label))});
+  auto outputTypeItem = createNonEditableItem(displayName(item.outputType), true);
+  auto itemLabel = createNonEditableItem(QString::fromStdString(item.label));
+  for (auto *rowItem : {treeItem, outputTypeItem, itemLabel}) {
+    rowItem->setData(enumIndex(item.itemType), itemTypeRole);
+    rowItem->setData(enumIndex(item.outputType), outputTypeRole);
+  }
+  parent->appendRow({treeItem, outputTypeItem, itemLabel});
   for (auto const &child : item.children) {
     addTreeItem(treeItem, child);
   }
@@ -221,7 +280,7 @@ void QtPlottingView::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeIte
 std::vector<std::string> QtPlottingView::selectedWorkspaces() const {
   auto workspaces = std::vector<std::string>{};
   for (auto const &index : m_ui.workspaceTree->selectionModel()->selectedRows()) {
-    if (isWorkspaceItem(index)) {
+    if (isWorkspaceItem(index) && isWorkspaceIncludedForCurrentPlotOutputType(index)) {
       workspaces.emplace_back(index.sibling(index.row(), ItemColumn).data().toString().toStdString());
     }
   }
@@ -240,8 +299,64 @@ PlotOutputOptions QtPlottingView::selectedPlotOutputOptions() const {
 
 bool QtPlottingView::isWorkspaceItem(QModelIndex const &index) const { return m_workspaceModel.rowCount(index) == 0; }
 
+bool QtPlottingView::hasWorkspaceDescendant(QModelIndex const &index) const {
+  if (isWorkspaceItem(index)) {
+    return itemType(index) == PlottingWorkspaceTreeItemType::Workspace;
+  }
+
+  auto const rows = m_workspaceModel.rowCount(index);
+  for (auto row = 0; row < rows; ++row) {
+    if (hasWorkspaceDescendant(m_workspaceModel.index(row, 0, index))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool QtPlottingView::allWorkspaceDescendantsIncludedForCurrentPlotOutputType(QModelIndex const &index) const {
+  if (isWorkspaceItem(index)) {
+    return itemType(index) != PlottingWorkspaceTreeItemType::Workspace ||
+           isWorkspaceIncludedForCurrentPlotOutputType(index);
+  }
+
+  auto const rows = m_workspaceModel.rowCount(index);
+  for (auto row = 0; row < rows; ++row) {
+    if (!allWorkspaceDescendantsIncludedForCurrentPlotOutputType(m_workspaceModel.index(row, 0, index))) {
+      return false;
+    }
+  }
+  return true;
+}
+
 QModelIndex QtPlottingView::itemIndex(QModelIndex const &index) const {
   return index.sibling(index.row(), ItemTypeColumn);
+}
+
+PlottingWorkspaceTreeItemType QtPlottingView::itemType(QModelIndex const &index) const {
+  return static_cast<PlottingWorkspaceTreeItemType>(itemIndex(index).data(itemTypeRole).toInt());
+}
+
+PlottingWorkspaceOutputType QtPlottingView::outputType(QModelIndex const &index) const {
+  return static_cast<PlottingWorkspaceOutputType>(itemIndex(index).data(outputTypeRole).toInt());
+}
+
+bool QtPlottingView::isSelectableForCurrentPlotOutputType(QModelIndex const &index) const {
+  auto const behaviour = selectionBehaviour(selectedPlotOutputType());
+  auto const indexItemType = itemType(index);
+  if (!contains(behaviour.selectableItemTypes, indexItemType)) {
+    return false;
+  }
+  if (indexItemType == PlottingWorkspaceTreeItemType::Workspace) {
+    return isWorkspaceIncludedForCurrentPlotOutputType(index);
+  }
+  if (indexItemType == PlottingWorkspaceTreeItemType::WorkspaceGroup) {
+    return hasWorkspaceDescendant(index) && allWorkspaceDescendantsIncludedForCurrentPlotOutputType(index);
+  }
+  return true;
+}
+
+bool QtPlottingView::isWorkspaceIncludedForCurrentPlotOutputType(QModelIndex const &index) const {
+  return contains(selectionBehaviour(selectedPlotOutputType()).includedWorkspaceOutputTypes, outputType(index));
 }
 
 bool QtPlottingView::handleWorkspaceTreeClick(QMouseEvent const &event) {
@@ -255,6 +370,9 @@ bool QtPlottingView::handleWorkspaceTreeClick(QMouseEvent const &event) {
   }
 
   auto const index = itemIndex(clickedIndex);
+  if (!isSelectableForCurrentPlotOutputType(index)) {
+    return true;
+  }
   if (hasSelectedAncestor(index)) {
     if (!event.modifiers().testFlag(Qt::ShiftModifier)) {
       selectSubtree(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
@@ -338,7 +456,10 @@ void QtPlottingView::updateChildSelection(QModelIndex const &parentIndex,
   auto const rows = m_workspaceModel.rowCount(parentIndex);
   for (auto row = 0; row < rows; ++row) {
     auto const childIndex = m_workspaceModel.index(row, 0, parentIndex);
-    m_ui.workspaceTree->selectionModel()->select(childIndex, selectionFlags | QItemSelectionModel::Rows);
+    if (selectionFlags.testFlag(QItemSelectionModel::Deselect) || isSelectableForCurrentPlotOutputType(childIndex) ||
+        isWorkspaceIncludedForCurrentPlotOutputType(childIndex)) {
+      m_ui.workspaceTree->selectionModel()->select(childIndex, selectionFlags | QItemSelectionModel::Rows);
+    }
     updateChildSelection(childIndex, selectionFlags);
   }
 }
