@@ -27,6 +27,7 @@ class MockPlottingView : public IPlottingView {
 public:
   MOCK_METHOD1(subscribe, void(PlottingViewSubscriber *));
   MOCK_METHOD1(setOutputOptionsEnabled, void(bool));
+  MOCK_METHOD1(setAvailablePlotOutputTypes, void(std::vector<PlotOutputType> const &));
   MOCK_METHOD1(setWorkspaceItems, void(std::vector<PlottingWorkspaceTreeItem> const &));
   MOCK_CONST_METHOD0(selectedWorkspaces, std::vector<std::string>());
   MOCK_CONST_METHOD0(selectedPlotOutputType, PlotOutputType());
@@ -56,6 +57,16 @@ public:
     presenter.notifyReductionResumed();
   }
 
+  void testAcceptMainPresenterDoesNotQueryInstrumentName() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockBatchPresenter> mainPresenter;
+    PlottingPresenter presenter(&view);
+
+    EXPECT_CALL(mainPresenter, instrumentName()).Times(0);
+
+    presenter.acceptMainPresenter(&mainPresenter);
+  }
+
   void testOutputOptionsEnabledWhenReductionPaused() {
     NiceMock<MockPlottingView> view;
     NiceMock<MockBatchPresenter> mainPresenter;
@@ -67,6 +78,17 @@ public:
     EXPECT_CALL(view, setOutputOptionsEnabled(true)).Times(1);
 
     presenter.notifyReductionPaused();
+  }
+
+  void testInstrumentChangedUpdatesAvailablePlotOutputTypes() {
+    NiceMock<MockPlottingView> view;
+    PlottingPresenter presenter(&view);
+    auto const expected = std::vector<PlotOutputType>{PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap,
+                                                      PlotOutputType::SpinAsymmetry, PlotOutputType::Alignment};
+
+    EXPECT_CALL(view, setAvailablePlotOutputTypes(expected)).Times(1);
+
+    presenter.notifyInstrumentChanged("POLREF");
   }
 
   void testRunsTableChangedShowsSuccessfulRowOutputWorkspacesInGroupAndRun() {

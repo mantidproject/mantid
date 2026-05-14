@@ -147,10 +147,6 @@ void QtRunsTableView::addToolbarActions() {
   connect(addToolbarItem(Action::PlotSelected, "mdi.chart-line", "Plot selected rows as graphs"),
           SIGNAL(triggered(bool)), this, SLOT(onPlotSelectedPressed(bool)));
 
-  connect(addToolbarItem(Action::PlotSelectedStitchedOutput, "mdi.chart-areaspline",
-                         "Plot selected rows with stitched outputs as graphs"),
-          SIGNAL(triggered(bool)), this, SLOT(onPlotSelectedStitchedOutputPressed(bool)));
-
   connect(addToolbarItem(Action::InsertRow, "mdi.table-row-plus-after", "Insert row into selected"),
           SIGNAL(triggered(bool)), this, SLOT(onInsertRowPressed(bool)));
 
@@ -221,12 +217,6 @@ void QtRunsTableView::onPlotSelectedPressed(bool) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(Mantid::Kernel::FeatureType::Feature,
                                                                 {"ISIS Reflectometry", "RunsTable", "PlotRows"}, false);
   m_notifyee->notifyPlotSelectedPressed();
-}
-
-void QtRunsTableView::onPlotSelectedStitchedOutputPressed(bool) {
-  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "RunsTable", "PlotGroups"}, false);
-  m_notifyee->notifyPlotSelectedStitchedOutputPressed();
 }
 
 void QtRunsTableView::onFillDownPressed(bool) { m_notifyee->notifyFillDown(); }

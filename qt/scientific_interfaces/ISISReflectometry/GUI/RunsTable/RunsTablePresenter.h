@@ -62,7 +62,6 @@ public:
   void notifyExpandAllRequested() override;
   void notifyCollapseAllRequested() override;
   void notifyPlotSelectedPressed() override;
-  void notifyPlotSelectedStitchedOutputPressed() override;
   void notifyFillDown() override;
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;

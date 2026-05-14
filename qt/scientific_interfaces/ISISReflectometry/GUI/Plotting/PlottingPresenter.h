@@ -24,6 +24,7 @@ public:
   void notifyReductionResumed() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;
+  void notifyInstrumentChanged(std::string const &instrumentName) override;
   void notifyRunsTableChanged(RunsTable const &runsTable) override;
   void notifyPlotTiledClicked() override;
   void notifyPlotOverplotClicked() override;
@@ -32,6 +33,7 @@ public:
 private:
   std::vector<PlottingWorkspaceTreeItem> makeWorkspaceItems(RunsTable const &runsTable) const;
   void plotSelectedWorkspaces(PlotLayout layout) const;
+  void updateAvailablePlotOutputTypes(std::string const &instrumentName);
   void updateWidgetEnabledState();
   bool isProcessing() const;
   bool isAutoreducing() const;

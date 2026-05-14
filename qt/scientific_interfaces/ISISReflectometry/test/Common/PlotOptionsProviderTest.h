@@ -23,6 +23,16 @@ public:
     TS_ASSERT_EQUALS(availableTypes[0], PlotOutputType::ReflectivityCurve);
   }
 
+  void testAvailableTypesIncludesInstrumentSpecificPlotTypesForPolrefOffspecAndCrisp() {
+    auto provider = PlotOptionsProvider{};
+    auto const expected = std::vector<PlotOutputType>{PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap,
+                                                      PlotOutputType::SpinAsymmetry, PlotOutputType::Alignment};
+
+    TS_ASSERT_EQUALS(provider.availableTypes("POLREF"), expected);
+    TS_ASSERT_EQUALS(provider.availableTypes("OFFSPEC"), expected);
+    TS_ASSERT_EQUALS(provider.availableTypes("CRISP"), expected);
+  }
+
   void testReflectivityCurveOptionsAreConfiguredAsCurrentRunsTabPlot() {
     auto provider = PlotOptionsProvider{};
 
@@ -36,13 +46,39 @@ public:
     TS_ASSERT(options.showErrors);
   }
 
-  void testStitchedReflectivityCurveOptionsPreserveRequestedLayout() {
+  void testDetectorMapOptionsUseColorfillPlot() {
     auto provider = PlotOptionsProvider{};
 
-    auto const options = provider.optionsFor(PlotOutputType::StitchedReflectivityCurve, PlotLayout::Tiled);
+    auto const options = provider.optionsFor(PlotOutputType::DetectorMap, PlotLayout::Tiled);
 
-    TS_ASSERT_EQUALS(options.outputType, PlotOutputType::StitchedReflectivityCurve);
+    TS_ASSERT_EQUALS(options.outputType, PlotOutputType::DetectorMap);
+    TS_ASSERT_EQUALS(options.plotStyle, PlotStyle::Colorfill);
     TS_ASSERT_EQUALS(options.layout, PlotLayout::Tiled);
+    TS_ASSERT_EQUALS(options.xAxis.label, "Time of Flight");
+    TS_ASSERT_EQUALS(options.yAxis.label, "Detector ID");
+  }
+
+  void testSpinAsymmetryOptionsUseQzAndPercentAxes() {
+    auto provider = PlotOptionsProvider{};
+
+    auto const options = provider.optionsFor(PlotOutputType::SpinAsymmetry, PlotLayout::Overplot);
+
+    TS_ASSERT_EQUALS(options.outputType, PlotOutputType::SpinAsymmetry);
     TS_ASSERT_EQUALS(options.plotStyle, PlotStyle::Line);
+    TS_ASSERT_EQUALS(options.layout, PlotLayout::Overplot);
+    TS_ASSERT_EQUALS(options.xAxis.label, "Qz");
+    TS_ASSERT_EQUALS(options.yAxis.unit, "%");
+  }
+
+  void testAlignmentOptionsUseDetectorIdAndIntegratedIntensityAxes() {
+    auto provider = PlotOptionsProvider{};
+
+    auto const options = provider.optionsFor(PlotOutputType::Alignment, PlotLayout::Individual);
+
+    TS_ASSERT_EQUALS(options.outputType, PlotOutputType::Alignment);
+    TS_ASSERT_EQUALS(options.plotStyle, PlotStyle::Line);
+    TS_ASSERT_EQUALS(options.layout, PlotLayout::Individual);
+    TS_ASSERT_EQUALS(options.xAxis.label, "Detector ID");
+    TS_ASSERT_EQUALS(options.yAxis.label, "Integrated Intensity");
   }
 };

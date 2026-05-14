@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <string>
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class IBatchPresenter;
@@ -20,6 +22,7 @@ public:
   virtual void notifyReductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyAutoreductionResumed() = 0;
+  virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void notifyRunsTableChanged(RunsTable const &runsTable) = 0;
 };
 

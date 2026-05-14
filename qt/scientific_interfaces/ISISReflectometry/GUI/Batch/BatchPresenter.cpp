@@ -90,6 +90,7 @@ void BatchPresenter::notifyInstrumentChanged(const std::string &instrumentName) 
   m_runsPresenter->notifyInstrumentChanged(instrumentName);
   m_experimentPresenter->notifyInstrumentChanged(instrumentName);
   m_instrumentPresenter->notifyInstrumentChanged(instrumentName);
+  m_plottingPresenter->notifyInstrumentChanged(instrumentName);
 }
 
 void BatchPresenter::notifyUpdateInstrumentRequested() { m_mainPresenter->notifyUpdateInstrumentRequested(); }

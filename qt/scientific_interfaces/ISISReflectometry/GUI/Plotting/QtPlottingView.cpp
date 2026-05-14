@@ -22,6 +22,20 @@ int plotOutputTypeIndex(PlotOutputType outputType) { return static_cast<int>(out
 
 auto const metadataTextColour = QColor(112, 112, 112);
 
+QString displayName(PlotOutputType outputType) {
+  switch (outputType) {
+  case PlotOutputType::ReflectivityCurve:
+    return "Reflectivity Curve";
+  case PlotOutputType::DetectorMap:
+    return "Detector Map";
+  case PlotOutputType::SpinAsymmetry:
+    return "Spin Asymmetry";
+  case PlotOutputType::Alignment:
+    return "Alignment";
+  }
+  throw std::runtime_error("Unexpected reflectometry plot output type.");
+}
+
 QString displayName(PlottingWorkspaceTreeItemType itemType) {
   switch (itemType) {
   case PlottingWorkspaceTreeItemType::Group:
@@ -97,7 +111,7 @@ void QtPlottingView::initLayout() {
             updateChildSelection(deselected, QItemSelectionModel::Deselect);
             updateChildSelection(selected, QItemSelectionModel::Select);
           });
-  m_ui.plotPreset->addItem("Reflectivity Curve", plotOutputTypeIndex(PlotOutputType::ReflectivityCurve));
+  setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve});
   connect(m_ui.plotTiled, &QPushButton::clicked, this, [this]() {
     if (m_notifyee) {
       m_notifyee->notifyPlotTiledClicked();
@@ -119,6 +133,18 @@ void QtPlottingView::initLayout() {
 void QtPlottingView::subscribe(PlottingViewSubscriber *notifyee) { m_notifyee = notifyee; }
 
 void QtPlottingView::setOutputOptionsEnabled(bool enabled) { setOutputOptionControlsEnabled(enabled); }
+
+void QtPlottingView::setAvailablePlotOutputTypes(std::vector<PlotOutputType> const &outputTypes) {
+  auto const previouslySelected = selectedPlotOutputType();
+  m_ui.plotPreset->clear();
+  for (auto const outputType : outputTypes) {
+    m_ui.plotPreset->addItem(displayName(outputType), plotOutputTypeIndex(outputType));
+  }
+  auto const previousIndex = m_ui.plotPreset->findData(plotOutputTypeIndex(previouslySelected));
+  if (previousIndex >= 0) {
+    m_ui.plotPreset->setCurrentIndex(previousIndex);
+  }
+}
 
 void QtPlottingView::setOutputOptionControlsEnabled(bool enabled) {
   m_ui.plotTiled->setEnabled(enabled);

@@ -20,4 +20,39 @@ PlotOptions reflectivityCurvePlotOptions(PlotOutputType outputType, PlotLayout l
   return options;
 }
 
+PlotOptions detectorMapPlotOptions(PlotLayout layout) {
+  auto options = PlotOptions{};
+  options.outputType = PlotOutputType::DetectorMap;
+  options.plotStyle = PlotStyle::Colorfill;
+  options.layout = layout;
+  options.xAxis = PlotAxis{"Time of Flight", "", AxisScale::Linear};
+  options.yAxis = PlotAxis{"Detector ID", "", AxisScale::Linear};
+  options.windowTitle = "ISIS Reflectometry Detector Map";
+  return options;
+}
+
+PlotOptions spinAsymmetryPlotOptions(PlotLayout layout) {
+  auto options = PlotOptions{};
+  options.outputType = PlotOutputType::SpinAsymmetry;
+  options.plotStyle = PlotStyle::Line;
+  options.layout = layout;
+  options.xAxis = PlotAxis{"Qz", "", AxisScale::Linear};
+  options.yAxis = PlotAxis{"", "%", AxisScale::Linear};
+  options.showErrors = true;
+  options.windowTitle = "ISIS Reflectometry Spin Asymmetry";
+  return options;
+}
+
+PlotOptions alignmentPlotOptions(PlotLayout layout) {
+  auto options = PlotOptions{};
+  options.outputType = PlotOutputType::Alignment;
+  options.plotStyle = PlotStyle::Line;
+  options.layout = layout;
+  options.xAxis = PlotAxis{"Detector ID", "", AxisScale::Linear};
+  options.yAxis = PlotAxis{"Integrated Intensity", "", AxisScale::Linear};
+  options.showErrors = true;
+  options.windowTitle = "ISIS Reflectometry Alignment";
+  return options;
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

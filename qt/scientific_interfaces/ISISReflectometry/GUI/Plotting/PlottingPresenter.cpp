@@ -115,6 +115,10 @@ void PlottingPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState()
 
 void PlottingPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
 
+void PlottingPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
+  updateAvailablePlotOutputTypes(instrumentName);
+}
+
 void PlottingPresenter::notifyRunsTableChanged(RunsTable const &runsTable) {
   m_view->setWorkspaceItems(makeWorkspaceItems(runsTable));
 }
@@ -191,6 +195,10 @@ void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) const {
 
 void PlottingPresenter::updateWidgetEnabledState() {
   m_view->setOutputOptionsEnabled(!isProcessing() && !isAutoreducing());
+}
+
+void PlottingPresenter::updateAvailablePlotOutputTypes(std::string const &instrumentName) {
+  m_view->setAvailablePlotOutputTypes(m_plotOptionsProvider->availableTypes(instrumentName));
 }
 
 bool PlottingPresenter::isProcessing() const { return m_mainPresenter && m_mainPresenter->isProcessing(); }
