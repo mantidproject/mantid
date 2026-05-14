@@ -35,7 +35,7 @@ if [ $# -eq 0 ]; then
 fi
 
 # pixi
-install_pixi
+install_pixi "$REPO_ROOT_DIR"
 
 # Shorthand to always set the --repo command for "gh release"
 # All other arguments are passed to the command

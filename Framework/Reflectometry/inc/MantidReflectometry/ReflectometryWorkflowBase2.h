@@ -17,6 +17,9 @@ using namespace Mantid::Geometry;
 namespace Mantid {
 namespace Reflectometry {
 
+// Prefix for names of intermediate transmission workspaces in lambda
+std::string const TRANS_LAM_PREFIX("TRANS_LAM");
+
 struct Tasks {
   struct NormalizeByMonitor {
     static constexpr const char *name = "TaskNormalizeByMonitor";
@@ -139,7 +142,12 @@ protected:
   std::string findProcessingInstructions(const Mantid::Geometry::Instrument_const_sptr &instrument,
                                          const Mantid::API::MatrixWorkspace_sptr &inputWS) const;
   /// Populate transmission properties
-  bool populateTransmissionProperties(const Mantid::API::IAlgorithm_sptr &alg) const;
+  bool populateTransmissionProperties(const Mantid::API::IAlgorithm_sptr &alg,
+                                      const MatrixWorkspace_sptr &flood = nullptr);
+  MatrixWorkspace_sptr runFloodCorrectionAlg(const MatrixWorkspace_sptr &flood, const MatrixWorkspace_sptr &ws);
+  /// Given a algorithm workspace property name return the workspace, or if a group workspace, the first member.
+  MatrixWorkspace_sptr getWorkspaceFromProperty(const std::string &propName) const;
+
   /// Find theta from a named log value
   double getThetaFromLogs(const Mantid::API::MatrixWorkspace_sptr &inputWs, const std::string &logName) const;
   // Retrieve the run number from the logs of the input workspace.

@@ -31,7 +31,7 @@ if $SCRIPT_DIR/../check_for_changes cpp; then
 fi
 
 # install pixi if not already installed
-install_pixi
+install_pixi "$WORKSPACE"
 
 ###############################################################################
 # Run Cppcheck
