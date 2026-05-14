@@ -389,7 +389,7 @@ class MaskingModel:
     def __init__(self, ws_name):
         self._active_mask = None
         self._masks = []
-        self._ws_name = ws_name
+        self._ws_name = ws_name or "ws"
         self._apply_inverted_mask = False
 
     def update_active_mask(self, mask):
