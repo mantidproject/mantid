@@ -5,14 +5,77 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtPlottingView.h"
+#include <QBrush>
+#include <QColor>
 #include <QComboBox>
 #include <QMouseEvent>
+#include <QPainter>
 #include <QPushButton>
+#include <QStandardItem>
+#include <QStyledItemDelegate>
+#include <stdexcept>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
 int plotOutputTypeIndex(PlotOutputType outputType) { return static_cast<int>(outputType); }
+
+auto const metadataTextColour = QColor(112, 112, 112);
+
+QString displayName(PlottingWorkspaceTreeItemType itemType) {
+  switch (itemType) {
+  case PlottingWorkspaceTreeItemType::Group:
+    return "Group";
+  case PlottingWorkspaceTreeItemType::Run:
+    return "Run";
+  case PlottingWorkspaceTreeItemType::WorkspaceGroup:
+    return "WorkspaceGroup";
+  case PlottingWorkspaceTreeItemType::Workspace:
+    return "Workspace";
+  }
+  throw std::runtime_error("Unexpected plotting workspace tree item type.");
+}
+
+QString displayName(PlottingWorkspaceOutputType outputType) {
+  switch (outputType) {
+  case PlottingWorkspaceOutputType::None:
+    return "";
+  case PlottingWorkspaceOutputType::IvsQ:
+    return "IvsQ";
+  case PlottingWorkspaceOutputType::IvsLambda:
+    return "IvsLambda";
+  case PlottingWorkspaceOutputType::IvsQBinned:
+    return "IvsQBinned";
+  }
+  throw std::runtime_error("Unexpected plotting workspace output type.");
+}
+
+QStandardItem *createNonEditableItem(QString const &text, bool muted = false) {
+  auto item = new QStandardItem(text);
+  item->setEditable(false);
+  if (muted) {
+    item->setForeground(QBrush(metadataTextColour));
+  }
+  return item;
+}
+
+class WorkspaceTreeItemDelegate : public QStyledItemDelegate {
+public:
+  explicit WorkspaceTreeItemDelegate(QObject *parent) : QStyledItemDelegate(parent) {
+    setObjectName("workspaceTreeItemDelegate");
+  }
+
+  void paint(QPainter *painter, QStyleOptionViewItem const &option, QModelIndex const &index) const override {
+    QStyledItemDelegate::paint(painter, option, index);
+
+    if (index.column() < index.model()->columnCount(index.parent()) - 1) {
+      painter->save();
+      painter->setPen(QColor(214, 214, 214));
+      painter->drawLine(option.rect.topRight(), option.rect.bottomRight());
+      painter->restore();
+    }
+  }
+};
 } // namespace
 
 QtPlottingView::QtPlottingView(QWidget *parent) : QWidget(parent), m_notifyee(nullptr), m_updatingSelection(false) {
@@ -21,8 +84,10 @@ QtPlottingView::QtPlottingView(QWidget *parent) : QWidget(parent), m_notifyee(nu
 
 void QtPlottingView::initLayout() {
   m_ui.setupUi(this);
-  m_workspaceModel.setHorizontalHeaderLabels({QString("Workspace")});
+  m_workspaceModel.setHorizontalHeaderLabels({QString("Item type"), QString("Output type"), QString("Item")});
   m_ui.workspaceTree->setModel(&m_workspaceModel);
+  m_ui.workspaceTree->setTreePosition(ItemColumn);
+  m_ui.workspaceTree->setItemDelegate(new WorkspaceTreeItemDelegate(m_ui.workspaceTree));
   m_ui.workspaceTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
   m_ui.workspaceTree->setSelectionBehavior(QAbstractItemView::SelectRows);
   m_ui.workspaceTree->setExpandsOnDoubleClick(false);
@@ -89,9 +154,9 @@ void QtPlottingView::setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> co
 }
 
 void QtPlottingView::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item) {
-  auto treeItem = new QStandardItem(QString::fromStdString(item.label));
-  treeItem->setEditable(false);
-  parent->appendRow(treeItem);
+  auto treeItem = createNonEditableItem(displayName(item.itemType), true);
+  parent->appendRow({treeItem, createNonEditableItem(displayName(item.outputType), true),
+                     createNonEditableItem(QString::fromStdString(item.label))});
   for (auto const &child : item.children) {
     addTreeItem(treeItem, child);
   }
@@ -101,7 +166,7 @@ std::vector<std::string> QtPlottingView::selectedWorkspaces() const {
   auto workspaces = std::vector<std::string>{};
   for (auto const &index : m_ui.workspaceTree->selectionModel()->selectedRows()) {
     if (isWorkspaceItem(index)) {
-      workspaces.emplace_back(index.data().toString().toStdString());
+      workspaces.emplace_back(index.sibling(index.row(), ItemColumn).data().toString().toStdString());
     }
   }
   return workspaces;
@@ -113,16 +178,21 @@ PlotOutputType QtPlottingView::selectedPlotOutputType() const {
 
 bool QtPlottingView::isWorkspaceItem(QModelIndex const &index) const { return m_workspaceModel.rowCount(index) == 0; }
 
+QModelIndex QtPlottingView::itemIndex(QModelIndex const &index) const {
+  return index.sibling(index.row(), ItemTypeColumn);
+}
+
 bool QtPlottingView::handleWorkspaceTreeClick(QMouseEvent const &event) {
   if (event.button() != Qt::LeftButton) {
     return false;
   }
 
-  auto const index = m_ui.workspaceTree->indexAt(event.pos());
-  if (!index.isValid()) {
+  auto const clickedIndex = m_ui.workspaceTree->indexAt(event.pos());
+  if (!clickedIndex.isValid()) {
     return false;
   }
 
+  auto const index = itemIndex(clickedIndex);
   if (hasSelectedAncestor(index)) {
     if (!event.modifiers().testFlag(Qt::ShiftModifier)) {
       selectSubtree(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
@@ -194,7 +264,9 @@ void QtPlottingView::updateChildSelection(QItemSelection const &selection,
 
   m_updatingSelection = true;
   for (auto const &index : selection.indexes()) {
-    updateChildSelection(index, selectionFlags);
+    if (index.column() == ItemTypeColumn) {
+      updateChildSelection(index, selectionFlags);
+    }
   }
   m_updatingSelection = false;
 }

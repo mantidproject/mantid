@@ -17,6 +17,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <utility>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using testing::NiceMock;
@@ -74,8 +75,10 @@ public:
     auto runsTable = RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {successfulRow("12345")})}));
     addWorkspaces({"IvsLam_12345", "IvsQ_12345", "IvsQ_binned_12345"});
 
-    auto const expected = std::vector<PlottingWorkspaceTreeItem>{
-        {"Group 1", {{"12345", {{"IvsLam_12345", {}}, {"IvsQ_12345", {}}, {"IvsQ_binned_12345", {}}}}}}};
+    auto const expected = std::vector<PlottingWorkspaceTreeItem>{groupItem(
+        "Group 1", {runItem("12345", {workspaceItem("IvsLam_12345", PlottingWorkspaceOutputType::IvsLambda),
+                                      workspaceItem("IvsQ_12345", PlottingWorkspaceOutputType::IvsQ),
+                                      workspaceItem("IvsQ_binned_12345", PlottingWorkspaceOutputType::IvsQBinned)})})};
 
     EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
 
@@ -101,7 +104,8 @@ public:
     auto runsTable = RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {successfulRow("12345")})}));
     addWorkspaces({"IvsQ_12345"});
 
-    auto const expected = std::vector<PlottingWorkspaceTreeItem>{{"Group 1", {{"12345", {{"IvsQ_12345", {}}}}}}};
+    auto const expected = std::vector<PlottingWorkspaceTreeItem>{
+        groupItem("Group 1", {runItem("12345", {workspaceItem("IvsQ_12345", PlottingWorkspaceOutputType::IvsQ)})})};
 
     EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
 
@@ -115,7 +119,8 @@ public:
     auto runsTable = RunsTable({}, 0.0, ReductionJobs({group}));
     addWorkspaces({"stitched_12345"});
 
-    auto const expected = std::vector<PlottingWorkspaceTreeItem>{{"Group 1", {{"stitched_12345", {}}}}};
+    auto const expected = std::vector<PlottingWorkspaceTreeItem>{
+        groupItem("Group 1", {workspaceItem("stitched_12345", PlottingWorkspaceOutputType::IvsQ)})};
 
     EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
 
@@ -128,8 +133,11 @@ public:
     auto runsTable = RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {successfulRow("12345")})}));
     addWorkspaceGroup("IvsQ_12345", {"IvsQ_12345_1", "IvsQ_12345_2"});
 
-    auto const expected = std::vector<PlottingWorkspaceTreeItem>{
-        {"Group 1", {{"12345", {{"IvsQ_12345", {{"IvsQ_12345_1", {}}, {"IvsQ_12345_2", {}}}}}}}}};
+    auto const expected = std::vector<PlottingWorkspaceTreeItem>{groupItem(
+        "Group 1",
+        {runItem("12345", {workspaceGroupItem("IvsQ_12345",
+                                              {workspaceItem("IvsQ_12345_1", PlottingWorkspaceOutputType::IvsQ),
+                                               workspaceItem("IvsQ_12345_2", PlottingWorkspaceOutputType::IvsQ)})})})};
 
     EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
 
@@ -143,8 +151,10 @@ public:
     auto runsTable = RunsTable({}, 0.0, ReductionJobs({group}));
     addWorkspaceGroup("stitched_12345", {"stitched_12345_1", "stitched_12345_2"});
 
-    auto const expected = std::vector<PlottingWorkspaceTreeItem>{
-        {"Group 1", {{"stitched_12345", {{"stitched_12345_1", {}}, {"stitched_12345_2", {}}}}}}};
+    auto const expected = std::vector<PlottingWorkspaceTreeItem>{groupItem(
+        "Group 1", {workspaceGroupItem("stitched_12345",
+                                       {workspaceItem("stitched_12345_1", PlottingWorkspaceOutputType::IvsQ),
+                                        workspaceItem("stitched_12345_2", PlottingWorkspaceOutputType::IvsQ)})})};
 
     EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
 
@@ -225,6 +235,25 @@ public:
   }
 
 private:
+  PlottingWorkspaceTreeItem groupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) {
+    return {std::move(label), PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceOutputType::None,
+            std::move(children)};
+  }
+
+  PlottingWorkspaceTreeItem runItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) {
+    return {std::move(label), PlottingWorkspaceTreeItemType::Run, PlottingWorkspaceOutputType::None,
+            std::move(children)};
+  }
+
+  PlottingWorkspaceTreeItem workspaceGroupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) {
+    return {std::move(label), PlottingWorkspaceTreeItemType::WorkspaceGroup, PlottingWorkspaceOutputType::None,
+            std::move(children)};
+  }
+
+  PlottingWorkspaceTreeItem workspaceItem(std::string label, PlottingWorkspaceOutputType outputType) {
+    return {std::move(label), PlottingWorkspaceTreeItemType::Workspace, outputType, {}};
+  }
+
   Row successfulRow(std::string const &run) {
     auto row = Row({run}, 0.5, TransmissionRunPair(), RangeInQ(), std::nullopt, ReductionOptionsMap(),
                    ReductionWorkspaces({run}, TransmissionRunPair()));

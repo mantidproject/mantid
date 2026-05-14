@@ -13,8 +13,14 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
+enum class PlottingWorkspaceTreeItemType { Group, Run, WorkspaceGroup, Workspace };
+
+enum class PlottingWorkspaceOutputType { None, IvsQ, IvsLambda, IvsQBinned };
+
 struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeItem {
   std::string label;
+  PlottingWorkspaceTreeItemType itemType;
+  PlottingWorkspaceOutputType outputType;
   std::vector<PlottingWorkspaceTreeItem> children;
 };
 

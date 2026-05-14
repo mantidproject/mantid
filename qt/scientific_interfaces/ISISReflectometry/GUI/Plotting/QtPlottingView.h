@@ -30,9 +30,12 @@ protected:
   bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
+  enum WorkspaceTreeColumn { ItemTypeColumn, OutputTypeColumn, ItemColumn };
+
   void initLayout();
   void setOutputOptionControlsEnabled(bool enabled);
   void addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item);
+  QModelIndex itemIndex(QModelIndex const &index) const;
   bool isWorkspaceItem(QModelIndex const &index) const;
   bool handleWorkspaceTreeClick(QMouseEvent const &event);
   bool isAdditiveSelectionModifier(QMouseEvent const &event) const;

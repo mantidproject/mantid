@@ -26,12 +26,15 @@ Mantid::API::Workspace_sptr retrieveWorkspaceIfPresent(std::string const &worksp
 }
 
 void addWorkspaceGroupIfPopulated(PlottingWorkspaceTreeItem &parent, std::string const &workspaceName,
-                                  Mantid::API::WorkspaceGroup_const_sptr const &workspaceGroup) {
-  auto workspaceGroupItem = PlottingWorkspaceTreeItem{workspaceName, {}};
+                                  Mantid::API::WorkspaceGroup_const_sptr const &workspaceGroup,
+                                  PlottingWorkspaceOutputType outputType) {
+  auto workspaceGroupItem = PlottingWorkspaceTreeItem{
+      workspaceName, PlottingWorkspaceTreeItemType::WorkspaceGroup, PlottingWorkspaceOutputType::None, {}};
   for (auto index = 0u; index < workspaceGroup->size(); ++index) {
     auto const memberWorkspace = workspaceGroup->getItem(index);
     if (memberWorkspace && !memberWorkspace->getName().empty()) {
-      workspaceGroupItem.children.emplace_back(PlottingWorkspaceTreeItem{memberWorkspace->getName(), {}});
+      workspaceGroupItem.children.emplace_back(PlottingWorkspaceTreeItem{
+          memberWorkspace->getName(), PlottingWorkspaceTreeItemType::Workspace, outputType, {}});
     }
   }
 
@@ -42,7 +45,8 @@ void addWorkspaceGroupIfPopulated(PlottingWorkspaceTreeItem &parent, std::string
   parent.children.emplace_back(std::move(workspaceGroupItem));
 }
 
-void addWorkspaceIfPresent(PlottingWorkspaceTreeItem &parent, std::string const &workspaceName) {
+void addWorkspaceIfPresent(PlottingWorkspaceTreeItem &parent, std::string const &workspaceName,
+                           PlottingWorkspaceOutputType outputType) {
   auto const workspace = retrieveWorkspaceIfPresent(workspaceName);
   if (!workspace) {
     return;
@@ -50,16 +54,18 @@ void addWorkspaceIfPresent(PlottingWorkspaceTreeItem &parent, std::string const 
 
   if (auto const workspaceGroup = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup const>(workspace);
       workspaceGroup) {
-    addWorkspaceGroupIfPopulated(parent, workspaceName, workspaceGroup);
+    addWorkspaceGroupIfPopulated(parent, workspaceName, workspaceGroup, outputType);
     return;
   }
 
-  parent.children.emplace_back(PlottingWorkspaceTreeItem{workspaceName, {}});
+  parent.children.emplace_back(
+      PlottingWorkspaceTreeItem{workspaceName, PlottingWorkspaceTreeItemType::Workspace, outputType, {}});
 }
 } // namespace
 
 bool operator==(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTreeItem const &rhs) {
-  return lhs.label == rhs.label && lhs.children == rhs.children;
+  return lhs.label == rhs.label && lhs.itemType == rhs.itemType && lhs.outputType == rhs.outputType &&
+         lhs.children == rhs.children;
 }
 
 bool operator!=(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTreeItem const &rhs) { return !(lhs == rhs); }
@@ -104,9 +110,10 @@ void PlottingPresenter::notifyPlotIndividualClicked() { plotSelectedWorkspaces(P
 std::vector<PlottingWorkspaceTreeItem> PlottingPresenter::makeWorkspaceItems(RunsTable const &runsTable) const {
   auto workspaceItems = std::vector<PlottingWorkspaceTreeItem>{};
   for (auto const &group : runsTable.reductionJobs().groups()) {
-    auto groupItem = PlottingWorkspaceTreeItem{group.name(), {}};
+    auto groupItem = PlottingWorkspaceTreeItem{
+        group.name(), PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceOutputType::None, {}};
     if (group.success()) {
-      addWorkspaceIfPresent(groupItem, group.postprocessedWorkspaceName());
+      addWorkspaceIfPresent(groupItem, group.postprocessedWorkspaceName(), PlottingWorkspaceOutputType::IvsQ);
     }
 
     for (auto const &maybeRow : group.rows()) {
@@ -115,11 +122,14 @@ std::vector<PlottingWorkspaceTreeItem> PlottingPresenter::makeWorkspaceItems(Run
       }
 
       auto const &row = maybeRow.value();
-      auto runItem = PlottingWorkspaceTreeItem{boost::algorithm::join(row.runNumbers(), "+"), {}};
+      auto runItem = PlottingWorkspaceTreeItem{boost::algorithm::join(row.runNumbers(), "+"),
+                                               PlottingWorkspaceTreeItemType::Run,
+                                               PlottingWorkspaceOutputType::None,
+                                               {}};
       auto const &outputs = row.reducedWorkspaceNames();
-      addWorkspaceIfPresent(runItem, outputs.iVsLambda());
-      addWorkspaceIfPresent(runItem, outputs.iVsQ());
-      addWorkspaceIfPresent(runItem, outputs.iVsQBinned());
+      addWorkspaceIfPresent(runItem, outputs.iVsLambda(), PlottingWorkspaceOutputType::IvsLambda);
+      addWorkspaceIfPresent(runItem, outputs.iVsQ(), PlottingWorkspaceOutputType::IvsQ);
+      addWorkspaceIfPresent(runItem, outputs.iVsQBinned(), PlottingWorkspaceOutputType::IvsQBinned);
 
       if (!runItem.children.empty()) {
         groupItem.children.emplace_back(std::move(runItem));
