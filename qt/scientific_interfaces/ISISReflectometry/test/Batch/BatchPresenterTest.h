@@ -550,6 +550,14 @@ public:
     presenter->notifyGroupNameChanged(group);
   }
 
+  void testIndexesAndPlottingUpdatedWhenRunsTableChanged() {
+    auto mock = makeMockModel();
+    EXPECT_CALL(*mock, updateLookupIndexesOfTable()).Times(1);
+    auto presenter = makePresenter(std::move(mock));
+    EXPECT_CALL(*m_plottingPresenter, notifyRunsTableChanged(_)).Times(1);
+    presenter->notifyRunsTableChanged();
+  }
+
   void testIndexesUpdatedWhenRowsTransferred() {
     auto mock = makeMockModel();
     EXPECT_CALL(*mock, updateLookupIndexesOfTable()).Times(1);

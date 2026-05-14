@@ -317,7 +317,10 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
 
 std::string RunsPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }
 
-void RunsPresenter::notifyTableChanged() { m_tableUnsaved = true; }
+void RunsPresenter::notifyTableChanged() {
+  m_tableUnsaved = true;
+  m_mainPresenter->notifyRunsTableChanged();
+}
 
 void RunsPresenter::notifyRowContentChanged(Row &changedRow) { m_mainPresenter->notifyRowContentChanged(changedRow); }
 
