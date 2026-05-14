@@ -83,6 +83,7 @@ _SLIM_REQUIRED_PROPS = ["PrimaryFlightPath", "L2", "Polar"]
 _SLIM_BLOCKING_PROPS = [
     "AbsorptionWorkspace",
     "CalibrationWorkspace",
+    "CalFileName",
     "OffsetsWorkspace",
     "MaskWorkspace",
     "MaskBinTable",
@@ -758,24 +759,22 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
         pm = PropertyManagerDataService[pm_name]
 
-        # check for binning parameters for several possible units
-        key_combos = {
-            "tof": ("tof_min", "tof_max", "delta"),
-            "wavelength": ("wavelength_min", "wavelength_max", "delta"),
-            "dSpacing": ("d_min", "d_max", "delta"),
-        }
+        # Select PM keys that match the requested binning units (driven by the Dspacing property)
+        # to avoid a unit mismatch when the property manager contains both tof and d-spacing keys.
+        if self.getProperty("Dspacing").value:
+            units = "dSpacing"
+            key_combo = ("d_min", "d_max", "delta")
+        else:
+            units = "tof"
+            key_combo = ("tof_min", "tof_max", "delta")
 
         extra = {}
-        for units, key_combo in key_combos.items():
-            keys = [pm.existsProperty(key) for key in key_combo]
-            if any(keys) and not all(keys):
-                continue
-            elif all(keys):
-                extra["BinningUnits"] = units
-                extra["XMin"] = list(pm.getProperty(key_combo[0]).value)
-                extra["XMax"] = list(pm.getProperty(key_combo[1]).value)
-                extra["XDelta"] = list(pm.getProperty(key_combo[2]).value)
-                break  # should only be one set of binning params
+        keys = [pm.existsProperty(key) for key in key_combo]
+        if all(keys):
+            extra["BinningUnits"] = units
+            extra["XMin"] = list(pm.getProperty(key_combo[0]).value)
+            extra["XMax"] = list(pm.getProperty(key_combo[1]).value)
+            extra["XDelta"] = list(pm.getProperty(key_combo[2]).value)
 
         return extra
 
@@ -865,13 +864,14 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         if not self.getProperty(GRP_WKSP).isDefault:
             kwargs["GroupingWorkspace"] = self.getPropertyValue(GRP_WKSP)
         elif not self.getProperty(GROUP_FILE).isDefault:
-            grp_wksp_name = self.instr + "_slim_group"
+            _slim_base = self.instr + "_slim"
+            grp_wksp_name = _slim_base + "_group"
             LoadDiffCal(
                 Filename=self.getPropertyValue(GROUP_FILE),
                 MakeCalWorkspace=False,
                 MakeGroupingWorkspace=True,
                 MakeMaskWorkspace=False,
-                WorkspaceName=self.instr + "_slim",
+                WorkspaceName=_slim_base,
             )
             kwargs["GroupingWorkspace"] = grp_wksp_name
 
