@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <map>
 #include <set>
+#include <type_traits>
 #include <unordered_set>
 #include <vector>
 
@@ -113,10 +114,11 @@ protected:
     if (m_allowedValues.end() != std::find(m_allowedValues.begin(), m_allowedValues.end(), value)) {
       return "";
     } else {
-      // For a generic type, isEmpty always returns false, but if TYPE is std::string,
-      // then the string version of isEmpty will be used, which could be true or false.
-      if (isEmpty(value))
-        return "Select a value";
+      // For non-string types isEmpty always returns false; only check for std::string.
+      if constexpr (std::is_same_v<TYPE, std::string>) {
+        if (isEmpty(value))
+          return "Select a value";
+      }
       if (isAlias(value))
         return "_alias";
       std::ostringstream os;

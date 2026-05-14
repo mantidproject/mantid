@@ -170,10 +170,7 @@ InternetHelper::HTTPStatus GitHubApiHelper::sendRequestAndProcess(HTTPClientSess
 
   if (retStatus == HTTPStatus::OK || (retStatus == HTTPStatus::CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
-    if (m_response)
-      processResponseHeaders(*m_response);
-    else
-      g_log.warning("Response is null pointer");
+    processResponseHeaders(*m_response);
     return retStatus;
   } else if ((retStatus == HTTPStatus::FORBIDDEN && isAuthenticated()) || (retStatus == HTTPStatus::UNAUTHORIZED) ||
              (retStatus == HTTPStatus::NOT_FOUND)) {
