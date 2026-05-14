@@ -23,7 +23,7 @@ LABEL=$4
 shift 4
 
 # pixi
-install_pixi
+install_pixi "$REPO_ROOT_DIR"
 
 for package in "$@"
 do
