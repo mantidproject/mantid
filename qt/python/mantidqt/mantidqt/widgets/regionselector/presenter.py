@@ -12,6 +12,7 @@ from ..sliceviewer.models.dimensions import Dimensions
 from ..sliceviewer.models.workspaceinfo import WorkspaceInfo, WS_TYPE
 from ..sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
+from mantidqt.widgets.sliceviewer.presenters.masking import Masking
 from mantid.api import RegionSelectorObserver
 
 # 3rd party imports
@@ -262,9 +263,18 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
     def is_integer_frame(self):
         return False, False
 
+    def _activate_masking(self) -> None:
+        self._data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
+        self._data_view.deactivate_and_disable_tool(ToolItemText.PAN)
+        self._data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
+        self._data_view.masking = Masking(self._data_view, self.model.ws.name(), auto_update_mask_file=True)
+        self._data_view.masking.new_selector(ToolItemText.RECT_MASKING)  # default to rect masking
+        self._data_view.activate_tool(ToolItemText.RECT_MASKING, True)
+
     def masking(self, active) -> None:
         super().masking(active)
         self._data_view.deactivate_and_disable_tool(ToolItemText.APPLY_MASKING)
+        self._data_view.deactivate_and_disable_tool(ToolItemText.EXPORT_MASKING)
 
     def rect_masking_clicked(self, active):
         self.view.data_view.check_masking_shape_toolbar_icons(ToolItemText.RECT_MASKING)
@@ -287,3 +297,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
     def invert_masking_clicked(self, active) -> None:
         self.view.data_view.masking.invert_masking_clicked(active)
+
+    @property
+    def _is_masking_disabled(self):
+        return False
