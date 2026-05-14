@@ -289,8 +289,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         self.view.data_view.masking.new_selector(ToolItemText.POLY_MASKING)
 
     def export_masking_clicked(self):
-        self.view.data_view.masking.export_selectors()
-        self.view.data_view.canvas.draw_idle()
+        pass
 
     def apply_masking_clicked(self):
         pass
