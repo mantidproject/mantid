@@ -1590,6 +1590,7 @@ void QtCursorEditorFactoryPrivate::slotEditorDestroyed(QObject *object) {
       m_enumToEditors[enumProp].removeAll(editor);
       if (m_enumToEditors[enumProp].isEmpty()) {
         m_enumToEditors.remove(enumProp);
+        // cppcheck-suppress constVariablePointer
         QtProperty *property = m_enumToProperty.value(enumProp);
         m_enumToProperty.remove(enumProp);
         m_propertyToEnum.remove(property);

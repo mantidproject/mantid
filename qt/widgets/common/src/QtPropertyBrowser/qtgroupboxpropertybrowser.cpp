@@ -160,6 +160,7 @@ void QtGroupBoxPropertyBrowserPrivate::slotUpdate() {
 void QtGroupBoxPropertyBrowserPrivate::updateLater() { QTimer::singleShot(0, q_ptr, SLOT(slotUpdate())); }
 
 void QtGroupBoxPropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, const QtBrowserItem *afterIndex) {
+  // cppcheck-suppress constVariablePointer
   WidgetItem *afterItem = m_indexToItem.value(afterIndex);
   WidgetItem *parentItem = m_indexToItem.value(index->parent());
 

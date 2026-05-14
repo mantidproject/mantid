@@ -184,7 +184,7 @@ private:
 
   Q_PRIVATE_SLOT(d_func(), void slotCollapsed(const QModelIndex &))
   Q_PRIVATE_SLOT(d_func(), void slotExpanded(const QModelIndex &))
-  Q_PRIVATE_SLOT(d_func(), void slotCurrentBrowserItemChanged(QtBrowserItem *))
+  Q_PRIVATE_SLOT(d_func(), void slotCurrentBrowserItemChanged(const QtBrowserItem *))
   Q_PRIVATE_SLOT(d_func(), void slotCurrentTreeItemChanged(QTreeWidgetItem *, QTreeWidgetItem *))
 };
 
@@ -277,7 +277,7 @@ public:
   QTreeWidgetItem *getItemWidget(const QtBrowserItem *browserItem);
   void disableItem(const QtBrowserItem *item);
 
-  void slotCurrentBrowserItemChanged(QtBrowserItem *item);
+  void slotCurrentBrowserItemChanged(const QtBrowserItem *item);
   void slotCurrentTreeItemChanged(const QTreeWidgetItem *newItem, QTreeWidgetItem * /*unused*/);
 
   QTreeWidgetItem *editedItem() const;

@@ -194,9 +194,9 @@ private:
   Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QColor &))
   Q_PRIVATE_SLOT(d_func(), void slotEnumNamesChanged(const QtProperty *, const QStringList &))
   Q_PRIVATE_SLOT(d_func(), void slotEnumIconsChanged(const QtProperty *, const QMap<int, QIcon> &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QSizePolicy &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QFont &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QCursor &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QSizePolicy &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QFont &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QCursor &))
   Q_PRIVATE_SLOT(d_func(), void slotFlagNamesChanged(const QtProperty *, const QStringList &))
 
   Q_PRIVATE_SLOT(d_func(), void slotPropertyInserted(QtProperty *, const QtProperty *, const QtProperty *))
@@ -266,9 +266,9 @@ public:
   void slotEnumChanged(QtProperty *property, int val);
   void slotEnumNamesChanged(const QtProperty *property, const QStringList &enumNames);
   void slotEnumIconsChanged(const QtProperty *property, const QMap<int, QIcon> &enumIcons);
-  void slotValueChanged(QtProperty *property, const QSizePolicy &val);
-  void slotValueChanged(QtProperty *property, const QFont &val);
-  void slotValueChanged(QtProperty *property, const QCursor &val);
+  void slotValueChanged(const QtProperty *property, const QSizePolicy &val);
+  void slotValueChanged(const QtProperty *property, const QFont &val);
+  void slotValueChanged(const QtProperty *property, const QCursor &val);
   void slotFlagChanged(QtProperty *property, int val);
   void slotFlagNamesChanged(const QtProperty *property, const QStringList &flagNames);
   void slotPropertyInserted(QtProperty *property, const QtProperty *parent, const QtProperty *after);

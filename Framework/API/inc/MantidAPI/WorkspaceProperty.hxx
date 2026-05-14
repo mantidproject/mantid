@@ -88,7 +88,6 @@ WorkspaceProperty<TYPE>::WorkspaceProperty(const WorkspaceProperty &right)
 
 /// Copy assignment operator. Only copies the value (i.e. the pointer to the
 /// workspace)
-// cppcheck-suppress operatorEqVarError
 template <typename TYPE> WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::operator=(const WorkspaceProperty &right) {
   if (&right == this)
     return *this;

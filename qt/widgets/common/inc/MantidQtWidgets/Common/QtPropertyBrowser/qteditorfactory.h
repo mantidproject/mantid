@@ -574,6 +574,7 @@ template <class Editor> void EditorFactoryPrivate<Editor>::slotEditorDestroyed(c
   for (typename EditorToPropertyMap::iterator itEditor = m_editorToProperty.begin(); itEditor != ecend; ++itEditor) {
     if (itEditor.key() == object) {
       Editor *editor = itEditor.key();
+      // cppcheck-suppress constVariablePointer
       QtProperty *property = itEditor.value();
       const typename PropertyToEditorListMap::iterator pit = m_createdEditors.find(property);
       if (pit != m_createdEditors.end()) {

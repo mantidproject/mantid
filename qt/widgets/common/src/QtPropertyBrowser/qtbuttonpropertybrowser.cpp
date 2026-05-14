@@ -125,7 +125,7 @@ int QtButtonPropertyBrowserPrivate::gridRow(WidgetItem *item) const {
   int row = 0;
   QListIterator<WidgetItem *> it(siblings);
   while (it.hasNext()) {
-    WidgetItem *sibling = it.next();
+    const WidgetItem *sibling = it.next();
     if (sibling == item)
       return row;
     row += gridSpan(sibling);

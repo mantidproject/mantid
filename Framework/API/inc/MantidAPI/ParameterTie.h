@@ -39,7 +39,6 @@ public:
   /// Destructor
   ~ParameterTie() override;
   /// Set the tie expression
-  // cppcheck-suppress virtualCallInConstructor
   virtual void set(const std::string &expr);
   /// Evaluate the expression
   virtual double eval(bool setParameterValue = true);

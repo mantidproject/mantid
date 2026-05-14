@@ -116,6 +116,7 @@ size_t CrystalFieldFunction::getNumberDomains() const {
   if (!m_target) {
     buildTargetFunction();
     // The call to buildTargetFunction() above may have failed to set m_target.
+    // cppcheck-suppress identicalInnerCondition
     if (!m_target) {
       throw std::logic_error("Failed to build target function.");
     }

@@ -541,15 +541,15 @@ void QtVariantPropertyManagerPrivate::slotEnumIconsChanged(const QtProperty *pro
   }
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QSizePolicy &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QSizePolicy &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QFont &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QFont &val) {
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotValueChanged(QtProperty *property, const QCursor &val) {
+void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QCursor &val) {
 #ifndef QT_NO_CURSOR
   valueChanged(property, QVariant(val));
 #endif

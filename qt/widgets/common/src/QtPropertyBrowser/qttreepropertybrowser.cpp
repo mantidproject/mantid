@@ -597,7 +597,7 @@ void QtTreePropertyBrowserPrivate::slotExpanded(const QModelIndex &index) {
     emit q_ptr->expanded(idx);
 }
 
-void QtTreePropertyBrowserPrivate::slotCurrentBrowserItemChanged(QtBrowserItem *item) {
+void QtTreePropertyBrowserPrivate::slotCurrentBrowserItemChanged(const QtBrowserItem *item) {
   if (!m_browserChangedBlocked && item != currentItem())
     setCurrentItem(item, true);
 }
