@@ -99,15 +99,17 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         secondTransRuns = self.getProperty(Prop.SECOND_TRANS_RUNS).value
         secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True)
         # Combine multiple input runs, if required
-        inputWorkspace = self._sumWorkspaces(inputWorkspaces, False)
-        firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
-        secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True)
+        inputWorkspace, input_is_group = self._sumWorkspaces(inputWorkspaces, False)
+        firstTransWorkspace, _ = self._sumWorkspaces(firstTransWorkspaces, True)
+        secondTransWorkspace, _ = self._sumWorkspaces(secondTransWorkspaces, True)
         # Check if we will need to sum banks as part of the reduction
         self._should_sum_banks(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
         # Slice the input workspace, if required
-        inputWorkspace = self._sliceWorkspace(inputWorkspace)
+        if self._slicingEnabled():
+            inputWorkspace = self._sliceWorkspace(inputWorkspace)
+            input_is_group = True
         # Perform the reduction
-        alg = self._reduce(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
+        alg = self._reduce(inputWorkspace, firstTransWorkspace, secondTransWorkspace, input_is_group)
         # Set outputs and tidy TOF workspaces into a group
         self._finalize(alg)
         self._groupTOFWorkspaces(inputWorkspaces)
@@ -550,15 +552,17 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             self.log().information("Loaded event workspace " + workspace_name)
         else:
             self.log().information("Loaded workspace " + workspace_name)
+
         return workspace_name
 
     def _sumWorkspaces(self, workspaces, isTrans):
         """If there are multiple input workspaces, sum them and return the result. Otherwise
-        just return the single input workspace, or None if the list is empty."""
+        just return the single input workspace, or None if the list is empty, alongside an is_group identifier."""
         if len(workspaces) < 1:
-            return None
+            return None, False
         if len(workspaces) < 2:
-            return workspaces[0]
+            ws = AnalysisDataService.retrieve(workspaces[0])
+            return workspaces[0], isinstance(ws, WorkspaceGroup)
         workspaces_without_prefixes = [self._removePrefix(ws, isTrans) for ws in workspaces]
         concatenated_names = "+".join(workspaces_without_prefixes)
         summed_name = self._prefixedName(concatenated_names, isTrans)
@@ -567,13 +571,14 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # The reduction algorithm sets the output workspace names from the run number,
         # which by default is just the first run. Set it to the concatenated name,
         # e.g. 13461+13462
-        if isinstance(summed_ws, WorkspaceGroup):
+        is_group = isinstance(summed_ws, WorkspaceGroup)
+        if is_group:
             for workspaceName in summed_ws.getNames():
                 grouped_ws = AnalysisDataService.retrieve(workspaceName)
                 grouped_ws.run().addProperty("run_number", concatenated_names, True)
         else:
             summed_ws.run().addProperty("run_number", concatenated_names, True)
-        return summed_name
+        return summed_name, is_group
 
     def _slicingEnabled(self):
         return self.getProperty(Prop.SLICE).value
@@ -618,10 +623,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return alg.getProperty("OutputWorkspace").value
 
     def _sliceWorkspace(self, workspace):
-        """If slicing has been requested, slice the input workspace, otherwise
-        return it unchanged"""
-        if not self._slicingEnabled():
-            return workspace
         # Perform the slicing
         sliced_workspace_name = self._getSlicedWorkspaceGroupName(workspace)
         self.log().information("Slicing workspace " + workspace + " into " + sliced_workspace_name)
@@ -631,10 +632,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _getSlicedWorkspaceGroupName(self, workspace):
         return workspace + "_sliced"
 
-    def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace):
+    def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace, input_is_group):
         """Run the child algorithm to do the reduction. Return the child algorithm."""
         self.log().information("Running ReflectometryReductionOneAuto on " + input_workspace)
         alg = self.createChildAlgorithm("ReflectometryReductionOneAuto")
+        if input_is_group:
+            alg.setChild(False)  # Run as non-child algorithm to ensure workspace history is output.
+            alg.setAlwaysStoreInADS(False)
         # Set properties that we copied directly from the child
         for property in self._reduction_properties:
             alg.setProperty(property, self.getPropertyValue(property))
