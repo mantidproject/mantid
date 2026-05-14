@@ -185,7 +185,7 @@ void ConvertHFIRSCDtoMDE::exec() {
     azimuthal = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("azimuthal"))))();
     twotheta = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("twotheta"))))();
     if (expInfo.run().hasProperty("detectorID")) {
-      detectorID = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<int>> *>(expInfo.getLog("detector_id"))))();
+      detectorID = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<int>> *>(expInfo.getLog("detectorID"))))();
     } else {
       // backwards compatibility if sample-log is not present
       detectorID.assign(azimuthal.size(), 0);
