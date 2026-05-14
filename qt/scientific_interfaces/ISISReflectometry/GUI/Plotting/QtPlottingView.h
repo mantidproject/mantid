@@ -37,9 +37,17 @@ private:
   void initLayout();
   void setOutputOptionControlsEnabled(bool enabled);
   void updatePlotOutputProperties();
+  void setWorkspaceItemsMutedForCurrentPlotOutputType();
+  void setWorkspaceItemsMutedForCurrentPlotOutputType(QStandardItem *parent);
   void addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item);
   QModelIndex itemIndex(QModelIndex const &index) const;
+  PlottingWorkspaceTreeItemType itemType(QModelIndex const &index) const;
+  PlottingWorkspaceOutputType outputType(QModelIndex const &index) const;
   bool isWorkspaceItem(QModelIndex const &index) const;
+  bool hasWorkspaceDescendant(QModelIndex const &index) const;
+  bool allWorkspaceDescendantsIncludedForCurrentPlotOutputType(QModelIndex const &index) const;
+  bool isSelectableForCurrentPlotOutputType(QModelIndex const &index) const;
+  bool isWorkspaceIncludedForCurrentPlotOutputType(QModelIndex const &index) const;
   bool handleWorkspaceTreeClick(QMouseEvent const &event);
   bool isAdditiveSelectionModifier(QMouseEvent const &event) const;
   bool hasSelectedAncestor(QModelIndex const &index) const;
