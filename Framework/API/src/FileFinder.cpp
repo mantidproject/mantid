@@ -380,7 +380,7 @@ const API::Result<std::filesystem::path> FileFinderImpl::findRun(const std::stri
 
   auto const error = validateRuns(hintstr);
   if (!error.empty())
-    throw std::invalid_argument(error);
+    return API::Result<std::filesystem::path>(std::filesystem::path(), error);
 
   std::string hintsStr = Kernel::Strings::strip(hintstr);
   auto filePath = checkFilename(hintsStr);
@@ -525,7 +525,7 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
       }
 
       for (auto i = run_start_num; i <= run_end_num; ++i) {
-        fileInfos.emplace_back(std::to_string(i), false, "", cachedInstr);
+        fileInfos.emplace_back(cachedInstr->shortName() + std::to_string(i), false, "", cachedInstr);
       }
     } else {
       cachedInstr = std::make_shared<Kernel::InstrumentInfo>(
@@ -559,8 +559,6 @@ void FileFinderImpl::processFileInfos(std::vector<FileInfo> &fileInfos,
       continue;
     g_log.debug() << "  " << fileInfo.hint << " instrument: " << (fileInfo.instr ? fileInfo.instr->name() : "null")
                   << "\n";
-    if (fileInfo.found)
-      continue;
 
     const Kernel::FacilityInfo &facility = fileInfo.instr->facility();
     const std::vector<std::string> facilityExtensions = facility.extensions();
@@ -744,11 +742,13 @@ void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) cons
     return;
   bool allHaveSingleArch = true;
   IArchiveSearch_sptr firstArch;
-  if (fileInfos[0].archs.empty()) {
+  auto firstUnfound =
+      std::find_if(fileInfos.begin(), fileInfos.end(), [](const FileInfo &fi) { return !fi.found && !fi.error; });
+  if (firstUnfound == fileInfos.end() || firstUnfound->archs.empty()) {
     allHaveSingleArch = false;
   } else {
-    firstArch = fileInfos[0].archs[0];
-    Kernel::InstrumentInfo firstInstr = *fileInfos[0].instr;
+    firstArch = firstUnfound->archs[0];
+    const Kernel::InstrumentInfo &firstInstr = *firstUnfound->instr;
 
     for (const auto &fileInfo : fileInfos) {
       if (fileInfo.found || fileInfo.error)
@@ -761,7 +761,6 @@ void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) cons
         allHaveSingleArch = false;
         break;
       }
-      // Also check if the same instrument
       if (*fileInfo.instr != firstInstr) {
         allHaveSingleArch = false;
         break;
@@ -925,13 +924,14 @@ std::string FileFinderImpl::toUpper(const std::string &src) const {
 }
 
 std::filesystem::path FileFinderImpl::checkFilename(const std::string &hint) const {
-  std::filesystem::path filePath(hint);
+  if (!std::filesystem::path(hint).has_extension())
+    return {};
   auto path = getFullPath(hint);
   if (!path.empty() && std::filesystem::exists(path)) {
     g_log.information() << "found path = " << path << '\n';
     return path;
   }
-  return std::filesystem::path();
+  return {};
 }
 
 } // namespace Mantid::API

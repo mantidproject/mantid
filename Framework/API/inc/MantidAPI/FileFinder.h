@@ -36,18 +36,6 @@ number
 */
 class MANTID_API_DLL FileFinderImpl {
 public:
-  struct FileInfo {
-    std::string hint;
-    bool found{false};
-    std::filesystem::path path;
-    std::shared_ptr<Mantid::Kernel::InstrumentInfo> instr;
-    bool error{false};
-    std::string errorMsg;
-    std::set<std::string> filenames;
-    std::vector<std::string> extensionsToSearch;
-    std::vector<Mantid::API::IArchiveSearch_sptr> archs;
-  };
-
   std::filesystem::path getFullPath(const std::string &filename, const bool ignoreDirs = false) const;
   std::string extractAllowedSuffix(std::string &userString) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
@@ -77,6 +65,18 @@ public:
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;
+
+  struct FileInfo {
+    std::string hint;
+    bool found{false};
+    std::filesystem::path path;
+    std::shared_ptr<Mantid::Kernel::InstrumentInfo> instr;
+    bool error{false};
+    std::string errorMsg;
+    std::set<std::string> filenames;
+    std::vector<std::string> extensionsToSearch;
+    std::vector<Mantid::API::IArchiveSearch_sptr> archs;
+  };
 
   /// a string that is allowed at the end of any run number
   static const std::string ALLOWED_SUFFIX;

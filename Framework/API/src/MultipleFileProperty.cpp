@@ -9,7 +9,6 @@
 #include "MantidAPI/FileProperty.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiFileValidator.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHelper.h"
@@ -394,39 +393,8 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
         for (size_t i = 0; i < resolvedPaths.size(); ++i) {
           directResolutionFiles[resolutionIndices[i]] = resolvedPaths[i].string();
         }
-      } catch (const Kernel::Exception::NotFoundError &ex) {
-        errors = ex.what();
-        // Handle missing files based on allowEmptyTokens setting
-        for (size_t i = 0; i < filesToResolveWithExtension.size(); ++i) {
-          const auto &unresolvedFileName = filesToResolveWithExtension[i];
-          bool doThrow = false;
-          if (m_allowEmptyTokens) {
-            try {
-              const int unresolvedInt = std::stoi(unresolvedFileName);
-              if (unresolvedInt != 0) {
-                doThrow = true;
-              }
-            } catch (std::invalid_argument &) {
-              doThrow = true;
-            }
-          } else {
-            doThrow = true;
-          }
-          if (doThrow) {
-            auto errorMsg = "Unable to find file matching the string \"" + unresolvedFileName +
-                            "\", please check the data search directories.";
-            if (!errors.empty())
-              errorMsg += " " + errors;
-
-            throw std::runtime_error(errorMsg);
-          } else {
-            // Keep the unresolvedFileName as a hint to be displayed later
-            directResolutionFiles[resolutionIndices[i]] = unresolvedFileName;
-          }
-        }
       } catch (const std::invalid_argument &ex) {
         errors = ex.what();
-        // Handle missing files based on allowEmptyTokens setting
         for (size_t i = 0; i < filesToResolveWithExtension.size(); ++i) {
           const auto &unresolvedFileName = filesToResolveWithExtension[i];
           bool doThrow = false;
@@ -447,10 +415,8 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
                             "\", please check the data search directories.";
             if (!errors.empty())
               errorMsg += " " + errors;
-
             throw std::runtime_error(errorMsg);
           } else {
-            // Keep the unresolvedFileName as a hint to be displayed later
             directResolutionFiles[resolutionIndices[i]] = unresolvedFileName;
           }
         }

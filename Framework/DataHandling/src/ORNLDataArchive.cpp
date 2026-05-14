@@ -205,7 +205,7 @@ const API::Result<std::vector<std::filesystem::path>>
 ORNLDataArchive::getArchivePaths(const std::vector<std::string> &hintstrs) const {
 
   std::vector<std::filesystem::path> results(hintstrs.size());
-  if (hintstrs.size() == 0) {
+  if (hintstrs.empty()) {
     return API::Result<std::vector<std::filesystem::path>>(results, "Not found.");
   }
 
