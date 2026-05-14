@@ -7,7 +7,16 @@
 import unittest
 import numpy as np
 from mantid.dataobjects import GroupingWorkspace
-from mantid.simpleapi import CreateMDHistoWorkspace, DeleteWorkspace, HB3AAdjustSampleNorm, LoadMD, SliceMDHisto, AddSampleLog, mtd
+from mantid.simpleapi import (
+    CreateMDHistoWorkspace,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    HB3AAdjustSampleNorm,
+    LoadMD,
+    SliceMDHisto,
+    AddSampleLog,
+    mtd,
+)
 
 
 class HB3AAdjustSampleNormTest(unittest.TestCase):
@@ -41,7 +50,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         # Verify detector adjustment
         self.__checkAdjustments(orig_pos, new_pos, height_adj, dist_adj)
 
-        DeleteWorkspace(orig, result)
+        DeleteWorkspaces([orig, result])
 
     def testDoNotAdjustDetector(self):
         # Ensure detector position does not change when no offsets are given
@@ -53,7 +62,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         # Verify detector adjustment
         self.__checkAdjustments(orig_pos, new_pos, 0.0, 0.0)
 
-        DeleteWorkspace(orig, result)
+        DeleteWorkspaces([orig, result])
 
     def testInputFail(self):
         signal = range(0, 1000)
@@ -175,6 +184,9 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         np.testing.assert_array_equal(ids_2x2[:4], [1, 1025, 2049, 3073])
         np.testing.assert_array_equal(ids_4x4[:4], [1, 2049, 4097, 6145])
 
+        # clean up
+        DeleteWorkspaces([data, data_2x2, data_4x4])
+
     def testOutputGroupingWorkspace(self):
 
         # --- Validation: OutputGroupingWorkspace requires Grouping != 'None' ---
@@ -225,7 +237,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         self.assertListEqual(group_ids[1024:1032].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # third row
         self.assertListEqual(group_ids[1536:1544].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # fourth row
 
-        DeleteWorkspace("__hb3a_out_2x2", "__hb3a_grp_2x2", "__hb3a_out_4x4", "__hb3a_grp_4x4")
+        DeleteWorkspaces(["__hb3a_out_2x2", "__hb3a_grp_2x2", "__hb3a_out_4x4", "__hb3a_grp_4x4"])
 
 
 if __name__ == "__main__":
