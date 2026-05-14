@@ -317,6 +317,11 @@ void BatchPresenter::notifyGroupNameChanged(Group &changedGroup) {
   updatePlottingWorkspaces();
 }
 
+void BatchPresenter::notifyRunsTableChanged() {
+  m_model->updateLookupIndexesOfTable();
+  updatePlottingWorkspaces();
+}
+
 void BatchPresenter::notifyRunsTransferred() {
   m_model->updateLookupIndexesOfTable();
   m_runsPresenter->notifyRowModelChanged();

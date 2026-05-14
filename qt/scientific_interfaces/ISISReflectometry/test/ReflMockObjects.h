@@ -90,6 +90,7 @@ public:
   MOCK_METHOD0(notifyBatchLoaded, void());
   MOCK_METHOD1(notifyRowContentChanged, void(Row &));
   MOCK_METHOD1(notifyGroupNameChanged, void(Group &));
+  MOCK_METHOD0(notifyRunsTableChanged, void());
   MOCK_METHOD0(notifyRunsTransferred, void());
 
   MOCK_CONST_METHOD0(isProcessing, bool());
