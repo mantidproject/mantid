@@ -6,7 +6,41 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PlotOptions.h"
 
+#include <stdexcept>
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+
+namespace {
+PlotAxis detectorMapXAxis(DetectorMapXAxis axis) {
+  switch (axis) {
+  case DetectorMapXAxis::TimeOfFlight:
+    return PlotAxis{"Time of Flight", "", AxisScale::Linear};
+  case DetectorMapXAxis::Lambda:
+    return PlotAxis{"Lambda", "", AxisScale::Linear};
+  }
+  throw std::runtime_error("Unexpected detector map x axis.");
+}
+
+PlotAxis detectorMapYAxis(DetectorMapYAxis axis) {
+  switch (axis) {
+  case DetectorMapYAxis::DetectorId:
+    return PlotAxis{"Detector ID", "", AxisScale::Linear};
+  case DetectorMapYAxis::Theta:
+    return PlotAxis{"Theta", "", AxisScale::Linear};
+  }
+  throw std::runtime_error("Unexpected detector map y axis.");
+}
+
+PlotAxis alignmentXAxis(AlignmentXAxis axis) {
+  switch (axis) {
+  case AlignmentXAxis::DetectorId:
+    return PlotAxis{"Detector ID", "", AxisScale::Linear};
+  case AlignmentXAxis::Theta:
+    return PlotAxis{"Theta", "", AxisScale::Linear};
+  }
+  throw std::runtime_error("Unexpected alignment x axis.");
+}
+} // namespace
 
 PlotOptions reflectivityCurvePlotOptions(PlotOutputType outputType, PlotLayout layout) {
   auto options = PlotOptions{};
@@ -20,13 +54,14 @@ PlotOptions reflectivityCurvePlotOptions(PlotOutputType outputType, PlotLayout l
   return options;
 }
 
-PlotOptions detectorMapPlotOptions(PlotLayout layout) {
+PlotOptions detectorMapPlotOptions(DetectorMapXAxis xAxis, DetectorMapYAxis yAxis, PlotLayout layout) {
   auto options = PlotOptions{};
   options.outputType = PlotOutputType::DetectorMap;
   options.plotStyle = PlotStyle::Colorfill;
   options.layout = layout;
-  options.xAxis = PlotAxis{"Time of Flight", "", AxisScale::Linear};
-  options.yAxis = PlotAxis{"Detector ID", "", AxisScale::Linear};
+  options.xAxis = detectorMapXAxis(xAxis);
+  options.yAxis = detectorMapYAxis(yAxis);
+  options.zAxis = PlotAxis{"Intensity", "", AxisScale::Linear};
   options.windowTitle = "ISIS Reflectometry Detector Map";
   return options;
 }
@@ -43,12 +78,12 @@ PlotOptions spinAsymmetryPlotOptions(PlotLayout layout) {
   return options;
 }
 
-PlotOptions alignmentPlotOptions(PlotLayout layout) {
+PlotOptions alignmentPlotOptions(AlignmentXAxis xAxis, PlotLayout layout) {
   auto options = PlotOptions{};
   options.outputType = PlotOutputType::Alignment;
   options.plotStyle = PlotStyle::Line;
   options.layout = layout;
-  options.xAxis = PlotAxis{"Detector ID", "", AxisScale::Linear};
+  options.xAxis = alignmentXAxis(xAxis);
   options.yAxis = PlotAxis{"Integrated Intensity", "", AxisScale::Linear};
   options.showErrors = true;
   options.windowTitle = "ISIS Reflectometry Alignment";

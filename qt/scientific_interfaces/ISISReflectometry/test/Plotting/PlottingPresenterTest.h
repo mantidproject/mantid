@@ -31,6 +31,7 @@ public:
   MOCK_METHOD1(setWorkspaceItems, void(std::vector<PlottingWorkspaceTreeItem> const &));
   MOCK_CONST_METHOD0(selectedWorkspaces, std::vector<std::string>());
   MOCK_CONST_METHOD0(selectedPlotOutputType, PlotOutputType());
+  MOCK_CONST_METHOD0(selectedPlotOutputOptions, PlotOutputOptions());
 };
 
 class PlottingPresenterTest : public CxxTest::TestSuite {
@@ -221,7 +222,9 @@ public:
     auto const options = reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Individual);
 
     EXPECT_CALL(view, selectedWorkspaces()).Times(1).WillOnce(Return(workspaces));
-    EXPECT_CALL(view, selectedPlotOutputType()).Times(1).WillOnce(Return(PlotOutputType::ReflectivityCurve));
+    EXPECT_CALL(view, selectedPlotOutputOptions())
+        .Times(1)
+        .WillOnce(Return(PlotOutputOptions{PlotOutputType::ReflectivityCurve}));
     EXPECT_CALL(plotter, plot(PlotRequest{{"IvsQ_12345"}, options})).Times(1);
     EXPECT_CALL(plotter, plot(PlotRequest{{"IvsQ_22345"}, options})).Times(1);
 
@@ -236,7 +239,9 @@ public:
     auto const workspaces = std::vector<std::string>{"IvsQ_12345", "IvsQ_22345"};
 
     EXPECT_CALL(view, selectedWorkspaces()).Times(1).WillOnce(Return(workspaces));
-    EXPECT_CALL(view, selectedPlotOutputType()).Times(1).WillOnce(Return(PlotOutputType::ReflectivityCurve));
+    EXPECT_CALL(view, selectedPlotOutputOptions())
+        .Times(1)
+        .WillOnce(Return(PlotOutputOptions{PlotOutputType::ReflectivityCurve}));
     EXPECT_CALL(plotter, plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve,
                                                                                    PlotLayout::Overplot)}))
         .Times(1);
@@ -252,7 +257,9 @@ public:
     auto const workspaces = std::vector<std::string>{"IvsQ_12345", "IvsQ_22345"};
 
     EXPECT_CALL(view, selectedWorkspaces()).Times(1).WillOnce(Return(workspaces));
-    EXPECT_CALL(view, selectedPlotOutputType()).Times(1).WillOnce(Return(PlotOutputType::ReflectivityCurve));
+    EXPECT_CALL(view, selectedPlotOutputOptions())
+        .Times(1)
+        .WillOnce(Return(PlotOutputOptions{PlotOutputType::ReflectivityCurve}));
     EXPECT_CALL(plotter, plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve,
                                                                                    PlotLayout::Tiled)}))
         .Times(1);
@@ -267,7 +274,7 @@ public:
     PlottingPresenter presenter(&view, plotter, plotOptionsProvider);
 
     EXPECT_CALL(view, selectedWorkspaces()).Times(1).WillOnce(Return(std::vector<std::string>{}));
-    EXPECT_CALL(view, selectedPlotOutputType()).Times(0);
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(0);
     EXPECT_CALL(plotter, plot(testing::_)).Times(0);
 
     presenter.notifyPlotIndividualClicked();

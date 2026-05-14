@@ -34,7 +34,44 @@
       <widget class="QComboBox" name="plotPreset"/>
      </item>
      <item>
-      <widget class="Line" name="line">
+      <widget class="Line" name="plotPropertiesTopSeparator">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="detectorMapYAxisLabel">
+       <property name="text">
+        <string>Y axis</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="detectorMapYAxis"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="detectorMapXAxisLabel">
+       <property name="text">
+        <string>X axis</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="detectorMapXAxis"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="alignmentXAxisLabel">
+       <property name="text">
+        <string>X axis</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="alignmentXAxis"/>
+     </item>
+     <item>
+      <widget class="Line" name="plotPropertiesBottomSeparator">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>

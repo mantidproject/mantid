@@ -19,6 +19,7 @@ public:
   virtual ~IPlotOptionsProvider() = default;
   virtual std::vector<PlotOutputType> availableTypes(std::string const &instrumentName) const = 0;
   virtual PlotOptions optionsFor(PlotOutputType outputType, PlotLayout layout) const = 0;
+  virtual PlotOptions optionsFor(PlotOutputOptions const &outputOptions, PlotLayout layout) const = 0;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

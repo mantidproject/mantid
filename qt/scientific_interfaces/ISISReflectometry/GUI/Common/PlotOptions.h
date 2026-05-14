@@ -21,6 +21,19 @@ enum class PlotLayout { Individual, Overplot, Tiled };
 
 enum class AxisScale { Linear, Log };
 
+enum class DetectorMapXAxis { TimeOfFlight, Lambda };
+
+enum class DetectorMapYAxis { DetectorId, Theta };
+
+enum class AlignmentXAxis { DetectorId, Theta };
+
+struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotOutputOptions {
+  PlotOutputType outputType{PlotOutputType::ReflectivityCurve};
+  DetectorMapXAxis detectorMapXAxis{DetectorMapXAxis::TimeOfFlight};
+  DetectorMapYAxis detectorMapYAxis{DetectorMapYAxis::DetectorId};
+  AlignmentXAxis alignmentXAxis{AlignmentXAxis::DetectorId};
+};
+
 struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotAxis {
   std::string label;
   std::string unit;
@@ -33,6 +46,7 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions {
   PlotLayout layout{PlotLayout::Individual};
   PlotAxis xAxis;
   PlotAxis yAxis;
+  PlotAxis zAxis;
   bool showErrors{false};
   std::string windowTitle;
 };
@@ -50,8 +64,8 @@ inline bool operator!=(PlotAxis const &lhs, PlotAxis const &rhs) { return !(lhs 
 
 inline bool operator==(PlotOptions const &lhs, PlotOptions const &rhs) {
   return lhs.outputType == rhs.outputType && lhs.plotStyle == rhs.plotStyle && lhs.layout == rhs.layout &&
-         lhs.xAxis == rhs.xAxis && lhs.yAxis == rhs.yAxis && lhs.showErrors == rhs.showErrors &&
-         lhs.windowTitle == rhs.windowTitle;
+         lhs.xAxis == rhs.xAxis && lhs.yAxis == rhs.yAxis && lhs.zAxis == rhs.zAxis &&
+         lhs.showErrors == rhs.showErrors && lhs.windowTitle == rhs.windowTitle;
 }
 
 inline bool operator!=(PlotOptions const &lhs, PlotOptions const &rhs) { return !(lhs == rhs); }
@@ -63,8 +77,9 @@ inline bool operator==(PlotRequest const &lhs, PlotRequest const &rhs) {
 inline bool operator!=(PlotRequest const &lhs, PlotRequest const &rhs) { return !(lhs == rhs); }
 
 MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions reflectivityCurvePlotOptions(PlotOutputType outputType, PlotLayout layout);
-MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions detectorMapPlotOptions(PlotLayout layout);
+MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions detectorMapPlotOptions(DetectorMapXAxis xAxis, DetectorMapYAxis yAxis,
+                                                                  PlotLayout layout);
 MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions spinAsymmetryPlotOptions(PlotLayout layout);
-MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions alignmentPlotOptions(PlotLayout layout);
+MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions alignmentPlotOptions(AlignmentXAxis xAxis, PlotLayout layout);
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

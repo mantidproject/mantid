@@ -49,6 +49,7 @@ public:
   virtual void setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> const &items) = 0;
   virtual std::vector<std::string> selectedWorkspaces() const = 0;
   virtual PlotOutputType selectedPlotOutputType() const = 0;
+  virtual PlotOutputOptions selectedPlotOutputOptions() const = 0;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -22,6 +22,8 @@ int plotOutputTypeIndex(PlotOutputType outputType) { return static_cast<int>(out
 
 auto const metadataTextColour = QColor(112, 112, 112);
 
+template <typename Enum> int enumIndex(Enum value) { return static_cast<int>(value); }
+
 QString displayName(PlotOutputType outputType) {
   switch (outputType) {
   case PlotOutputType::ReflectivityCurve:
@@ -98,6 +100,12 @@ QtPlottingView::QtPlottingView(QWidget *parent) : QWidget(parent), m_notifyee(nu
 
 void QtPlottingView::initLayout() {
   m_ui.setupUi(this);
+  m_ui.detectorMapYAxis->addItem("Detector ID", enumIndex(DetectorMapYAxis::DetectorId));
+  m_ui.detectorMapYAxis->addItem("Detector angle, theta", enumIndex(DetectorMapYAxis::Theta));
+  m_ui.detectorMapXAxis->addItem("Time of Flight", enumIndex(DetectorMapXAxis::TimeOfFlight));
+  m_ui.detectorMapXAxis->addItem("Lambda", enumIndex(DetectorMapXAxis::Lambda));
+  m_ui.alignmentXAxis->addItem("Detector ID", enumIndex(AlignmentXAxis::DetectorId));
+  m_ui.alignmentXAxis->addItem("Detector angle, theta", enumIndex(AlignmentXAxis::Theta));
   m_workspaceModel.setHorizontalHeaderLabels({QString("Item type"), QString("Output type"), QString("Item")});
   m_ui.workspaceTree->setModel(&m_workspaceModel);
   m_ui.workspaceTree->setTreePosition(ItemColumn);
@@ -111,6 +119,8 @@ void QtPlottingView::initLayout() {
             updateChildSelection(deselected, QItemSelectionModel::Deselect);
             updateChildSelection(selected, QItemSelectionModel::Select);
           });
+  connect(m_ui.plotPreset, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          [this](int) { updatePlotOutputProperties(); });
   setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve});
   connect(m_ui.plotTiled, &QPushButton::clicked, this, [this]() {
     if (m_notifyee) {
@@ -144,6 +154,7 @@ void QtPlottingView::setAvailablePlotOutputTypes(std::vector<PlotOutputType> con
   if (previousIndex >= 0) {
     m_ui.plotPreset->setCurrentIndex(previousIndex);
   }
+  updatePlotOutputProperties();
 }
 
 void QtPlottingView::setOutputOptionControlsEnabled(bool enabled) {
@@ -151,6 +162,25 @@ void QtPlottingView::setOutputOptionControlsEnabled(bool enabled) {
   m_ui.plotOverplot->setEnabled(enabled);
   m_ui.plotIndividual->setEnabled(enabled);
   m_ui.plotPreset->setEnabled(enabled);
+  m_ui.detectorMapYAxis->setEnabled(enabled);
+  m_ui.detectorMapXAxis->setEnabled(enabled);
+  m_ui.alignmentXAxis->setEnabled(enabled);
+}
+
+void QtPlottingView::updatePlotOutputProperties() {
+  auto const outputType = selectedPlotOutputType();
+  auto const showDetectorMapProperties = outputType == PlotOutputType::DetectorMap;
+  auto const showAlignmentProperties = outputType == PlotOutputType::Alignment;
+  auto const showProperties = showDetectorMapProperties || showAlignmentProperties;
+
+  m_ui.plotPropertiesTopSeparator->setVisible(showProperties);
+  m_ui.plotPropertiesBottomSeparator->setVisible(showProperties);
+  m_ui.detectorMapYAxisLabel->setVisible(showDetectorMapProperties);
+  m_ui.detectorMapYAxis->setVisible(showDetectorMapProperties);
+  m_ui.detectorMapXAxisLabel->setVisible(showDetectorMapProperties);
+  m_ui.detectorMapXAxis->setVisible(showDetectorMapProperties);
+  m_ui.alignmentXAxisLabel->setVisible(showAlignmentProperties);
+  m_ui.alignmentXAxis->setVisible(showAlignmentProperties);
 }
 
 bool QtPlottingView::eventFilter(QObject *watched, QEvent *event) {
@@ -200,6 +230,12 @@ std::vector<std::string> QtPlottingView::selectedWorkspaces() const {
 
 PlotOutputType QtPlottingView::selectedPlotOutputType() const {
   return static_cast<PlotOutputType>(m_ui.plotPreset->currentData().toInt());
+}
+
+PlotOutputOptions QtPlottingView::selectedPlotOutputOptions() const {
+  return {selectedPlotOutputType(), static_cast<DetectorMapXAxis>(m_ui.detectorMapXAxis->currentData().toInt()),
+          static_cast<DetectorMapYAxis>(m_ui.detectorMapYAxis->currentData().toInt()),
+          static_cast<AlignmentXAxis>(m_ui.alignmentXAxis->currentData().toInt())};
 }
 
 bool QtPlottingView::isWorkspaceItem(QModelIndex const &index) const { return m_workspaceModel.rowCount(index) == 0; }
