@@ -184,11 +184,11 @@ class Masking:
     Manages Masking
     """
 
-    def __init__(self, dataview, ws_name):
+    def __init__(self, dataview, ws_name, auto_update_mask_file=False):
         self._selectors = []
         self._active_selector = None
         self._dataview = dataview
-        self._model = MaskingModel(ws_name)
+        self._model = MaskingModel(ws_name, auto_update_mask_file)
 
     def _reset_active_selector(self):
         if self._active_selector:
