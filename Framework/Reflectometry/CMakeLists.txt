@@ -10,6 +10,7 @@ set(SRC_FILES
     src/ReflectometryBeamStatistics.cpp
     src/ReflectometryMomentumTransfer.cpp
     src/ReflectometryReductionOne2.cpp
+    src/ReflectometryReductionOne3.cpp
     src/ReflectometryReductionOneAuto2.cpp
     src/ReflectometryReductionOneAuto3.cpp
     src/ReflectometryTransformKiKf.cpp
@@ -37,6 +38,7 @@ set(INC_FILES
     inc/MantidReflectometry/ReflectometryBeamStatistics.h
     inc/MantidReflectometry/ReflectometryMomentumTransfer.h
     inc/MantidReflectometry/ReflectometryReductionOne2.h
+    inc/MantidReflectometry/ReflectometryReductionOne3.h
     inc/MantidReflectometry/ReflectometryReductionOneAuto2.h
     inc/MantidReflectometry/ReflectometryReductionOneAuto3.h
     inc/MantidReflectometry/ReflectometryTransformKiKf.h

@@ -17,8 +17,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RebinRagged)
@@ -166,9 +165,9 @@ void RebinRagged::exec() {
         auto xmax = xmaxs[hist];
         const auto delta = deltas[hist];
 
-        HistogramData::BinEdges XValues_new(0);
-        static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData(),
-                                                                  true, fullBinsOnly));
+        std::vector<double> xAxisTmp;
+        VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, xAxisTmp, true, fullBinsOnly);
+        HistogramData::BinEdges XValues_new(std::move(xAxisTmp));
         EventList &el = eventOutputWS->getSpectrum(hist);
         el.setHistogram(XValues_new);
       }
@@ -191,9 +190,9 @@ void RebinRagged::exec() {
         // Get a const event list reference. eventInputWS->dataY() doesn't work.
         const EventList &el = eventInputWS->getSpectrum(hist);
 
-        HistogramData::BinEdges XValues_new(0);
-        static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData(),
-                                                                  true, fullBinsOnly));
+        std::vector<double> xAxisTmp;
+        VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, xAxisTmp, true, fullBinsOnly);
+        HistogramData::BinEdges XValues_new(std::move(xAxisTmp));
 
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
@@ -246,9 +245,9 @@ void RebinRagged::exec() {
       auto xmax = xmaxs[hist];
       const auto delta = deltas[hist];
 
-      HistogramData::BinEdges XValues_new(0);
-      static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData(), true,
-                                                                fullBinsOnly));
+      std::vector<double> xAxisTmp;
+      VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, xAxisTmp, true, fullBinsOnly);
+      HistogramData::BinEdges XValues_new(std::move(xAxisTmp));
 
       outputWS->setHistogram(hist, HistogramData::rebin(inputWS->histogram(hist), XValues_new));
       prog.report();
@@ -316,5 +315,4 @@ void RebinRagged::extend_value(int histnumber, std::vector<double> &array) {
     array.resize(histnumber, array[0]);
   }
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -28,6 +28,7 @@ class EnginX:
         self.calibration = CalibrationInfo()
         self.focus_runs = focus_runs
         self.save_dir = save_dir
+        self.copy_peak_params_in_calib = True
         # Load custom full inst calib if supplied (needs to be in ADS)
         try:
             self.full_calib_ws = Load(full_inst_calib_path, OutputWorkspace="full_inst_calib")
@@ -46,12 +47,24 @@ class EnginX:
             elif group == GROUP.CROPPED and spectrum_num:
                 self.calibration.set_spectra_list(spectrum_num)
 
+    def set_calibration_to_copy_starting_parameters(self, val: bool):
+        """In the calibration step, currently the algorithm uses PDCalibration
+        this has the option to init peak parameters from the results of previous fits
+        in practise this is very useful, but for testing, where fitting can be OS dependent
+        it is more stable to start from the same starting point"""
+        self.copy_peak_params_in_calib = val
+
     def calibrate(self, plot_output: bool) -> None:
         if self.calibration.get_prm_filepath():
             self.calibration.load_relevant_calibration_files()  # loading existing calibration files
         else:
             create_new_calibration(
-                self.calibration, rb_num=None, plot_output=plot_output, save_dir=self.save_dir, full_calib=self.full_calib_ws
+                self.calibration,
+                rb_num=None,
+                plot_output=plot_output,
+                save_dir=self.save_dir,
+                full_calib=self.full_calib_ws,
+                copy_params_in_calib=self.copy_peak_params_in_calib,
             )
 
     def focus(self, plot_output: bool) -> None:

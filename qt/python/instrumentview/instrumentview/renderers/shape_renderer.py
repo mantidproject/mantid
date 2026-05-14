@@ -178,17 +178,22 @@ class ShapeRenderer(InstrumentRenderer):
         return mesh
 
     def add_detector_mesh_to_plotter(
-        self, plotter: BackgroundPlotter, mesh: pv.PolyData, is_projection: bool, scalars: Optional[str] = None
+        self, plotter: BackgroundPlotter, mesh: pv.PolyData, scalars: Optional[str] = None, show_scalar_bar: bool = True
     ) -> None:
         if mesh.number_of_cells == 0:
             return
-        scalar_bar_args = dict(interactive=True, vertical=False, title_font_size=15, label_font_size=12) if scalars is not None else None
+        scalar_bar_args = (
+            dict(interactive=True, vertical=False, title_font_size=15, label_font_size=12)
+            if scalars is not None and show_scalar_bar
+            else None
+        )
         plotter.add_mesh(
             mesh,
             pickable=False,
             scalars=scalars,
             show_edges=False,
             scalar_bar_args=scalar_bar_args,
+            show_scalar_bar=show_scalar_bar,
         )
 
         if plotter.off_screen:

@@ -72,7 +72,7 @@ function delete_package() {
 ###
 
 # pixi
-install_pixi
+install_pixi "$REPO_ROOT_DIR"
 
 for name in "$@"; do
   delete_package $CHANNEL $name $LABEL

@@ -28,7 +28,7 @@
 #include "MantidHistogramData/Points.h"
 
 namespace ReflAuto3Test {
-std::string TEST_GROUP_NAME = "testGroup";
+constexpr std::string TEST_GROUP_NAME = "testGroup";
 typedef std::variant<MatrixWorkspace_sptr, double, std::string, bool> propVariant;
 } // namespace ReflAuto3Test
 
@@ -115,60 +115,6 @@ public:
     alg.setProperty("InputWorkspace", m_TOF);
     alg.setProperty("FirstTransmissionRun", m_TOF);
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty("SecondTransmissionRun", m_notTOF));
-  }
-
-  void test_bad_first_transmission_group_size() {
-    MatrixWorkspace_sptr first = m_TOF->clone();
-    MatrixWorkspace_sptr second = m_TOF->clone();
-    MatrixWorkspace_sptr third = m_TOF->clone();
-    MatrixWorkspace_sptr fourth = m_TOF->clone();
-
-    WorkspaceGroup_sptr inputWSGroup = std::make_shared<WorkspaceGroup>();
-    inputWSGroup->addWorkspace(first);
-    inputWSGroup->addWorkspace(second);
-    WorkspaceGroup_sptr transWSGroup = std::make_shared<WorkspaceGroup>();
-    transWSGroup->addWorkspace(first);
-    transWSGroup->addWorkspace(second);
-    transWSGroup->addWorkspace(third);
-    transWSGroup->addWorkspace(fourth);
-    AnalysisDataService::Instance().addOrReplace("input", inputWSGroup);
-    AnalysisDataService::Instance().addOrReplace("trans", transWSGroup);
-
-    ReflectometryReductionOneAuto3 alg;
-    alg.initialize();
-    alg.setPropertyValue("InputWorkspace", "input");
-    alg.setPropertyValue("FirstTransmissionRun", "trans");
-    alg.setProperty("PolarizationAnalysis", false);
-    auto results = alg.validateInputs();
-    TS_ASSERT(results.count("FirstTransmissionRun"));
-  }
-
-  void test_bad_second_transmission_group_size() {
-    const MatrixWorkspace_sptr first = m_TOF->clone();
-    const MatrixWorkspace_sptr second = m_TOF->clone();
-    const MatrixWorkspace_sptr third = m_TOF->clone();
-    const MatrixWorkspace_sptr fourth = m_TOF->clone();
-
-    WorkspaceGroup_sptr inputWSGroup = std::make_shared<WorkspaceGroup>();
-    inputWSGroup->addWorkspace(first);
-    WorkspaceGroup_sptr firstWSGroup = std::make_shared<WorkspaceGroup>();
-    firstWSGroup->addWorkspace(second);
-    WorkspaceGroup_sptr secondWSGroup = std::make_shared<WorkspaceGroup>();
-    secondWSGroup->addWorkspace(third);
-    secondWSGroup->addWorkspace(fourth);
-    AnalysisDataService::Instance().addOrReplace("input", inputWSGroup);
-    AnalysisDataService::Instance().addOrReplace("first_trans", firstWSGroup);
-    AnalysisDataService::Instance().addOrReplace("second_trans", secondWSGroup);
-
-    ReflectometryReductionOneAuto3 alg;
-    alg.initialize();
-    alg.setPropertyValue("InputWorkspace", "input");
-    alg.setPropertyValue("FirstTransmissionRun", "first_trans");
-    alg.setPropertyValue("SecondTransmissionRun", "second_trans");
-    alg.setProperty("PolarizationAnalysis", false);
-    const auto results = alg.validateInputs();
-    TS_ASSERT(!results.count("FirstTransmissionRun"));
-    TS_ASSERT(results.count("SecondTransmissionRun"));
   }
 
   void test_correct_detector_position_INTER() {
@@ -1311,6 +1257,50 @@ public:
 
     auto ws_out = ADS.retrieveWS<MatrixWorkspace>("IvsQ");
     check_algorithm_properties_in_child_histories(ws_out, 2, 1, propertiesToAssert);
+  }
+
+  void test_bad_first_transmission_group_empty() {
+    MatrixWorkspace_sptr first = m_TOF->clone();
+    MatrixWorkspace_sptr second = m_TOF->clone();
+
+    WorkspaceGroup_sptr inputWSGroup = std::make_shared<WorkspaceGroup>();
+    inputWSGroup->addWorkspace(first);
+    inputWSGroup->addWorkspace(second);
+    WorkspaceGroup_sptr transWSGroup = std::make_shared<WorkspaceGroup>();
+    AnalysisDataService::Instance().addOrReplace("input", inputWSGroup);
+    AnalysisDataService::Instance().addOrReplace("trans", transWSGroup);
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "input");
+    alg.setPropertyValue("FirstTransmissionRun", "trans");
+    alg.setProperty("PolarizationAnalysis", false);
+    auto results = alg.validateInputs();
+    TS_ASSERT(results.count("FirstTransmissionRun"));
+  }
+
+  void test_bad_second_transmission_group_empty() {
+    const MatrixWorkspace_sptr first = m_TOF->clone();
+    const MatrixWorkspace_sptr second = m_TOF->clone();
+
+    WorkspaceGroup_sptr inputWSGroup = std::make_shared<WorkspaceGroup>();
+    inputWSGroup->addWorkspace(first);
+    WorkspaceGroup_sptr firstWSGroup = std::make_shared<WorkspaceGroup>();
+    firstWSGroup->addWorkspace(second);
+    WorkspaceGroup_sptr secondWSGroup = std::make_shared<WorkspaceGroup>();
+    AnalysisDataService::Instance().addOrReplace("input", inputWSGroup);
+    AnalysisDataService::Instance().addOrReplace("first_trans", firstWSGroup);
+    AnalysisDataService::Instance().addOrReplace("second_trans", secondWSGroup);
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "input");
+    alg.setPropertyValue("FirstTransmissionRun", "first_trans");
+    alg.setPropertyValue("SecondTransmissionRun", "second_trans");
+    alg.setProperty("PolarizationAnalysis", false);
+    const auto results = alg.validateInputs();
+    TS_ASSERT(!results.count("FirstTransmissionRun"));
+    TS_ASSERT(results.count("SecondTransmissionRun"));
   }
 
 private:

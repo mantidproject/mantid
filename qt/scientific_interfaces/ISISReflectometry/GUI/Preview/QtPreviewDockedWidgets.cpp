@@ -9,26 +9,37 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
+#include "PreviewPythonInstrumentView.h"
 #include "QtPreviewInstrumentDisplay.h"
 #include "ROIType.h"
 
 #include <QAction>
 #include <QMainWindow>
 #include <QMenu>
+#include <QVBoxLayout>
 
 using namespace Mantid::Kernel;
 using MantidQt::MantidWidgets::IPlotView;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-QtPreviewDockedWidgets::QtPreviewDockedWidgets(QWidget *parent, QLayout *layout)
-    : QMainWindow(parent), m_layout(layout) {
+QtPreviewDockedWidgets::QtPreviewDockedWidgets(QWidget *parent, QLayout *layout, bool useNewInstrumentView)
+    : QMainWindow(parent) {
   QMainWindow::setWindowFlags(Qt::Widget);
   setDockOptions(QMainWindow::AnimatedDocks);
   m_ui.setupUi(this);
-  m_layout->addWidget(this);
+  if (layout) {
+    layout->addWidget(this);
+  }
 
-  m_instDisplay = std::make_unique<QtPreviewInstrumentDisplay>(
-      m_ui.iv_placeholder, [this]() { onInstViewShapeChanged(); }, std::make_unique<InstViewModel>());
+  if (useNewInstrumentView) {
+    m_ui.iv_placeholder->setLayout(new QVBoxLayout(m_ui.iv_placeholder));
+    auto pythonInstDisplay = std::make_unique<PreviewPythonInstrumentView>(m_ui.iv_placeholder->layout());
+    pythonInstDisplay->setShapeChangedCallback([this]() { onInstViewShapeChanged(); });
+    m_instDisplay = std::move(pythonInstDisplay);
+  } else {
+    m_instDisplay = std::make_unique<QtPreviewInstrumentDisplay>(
+        m_ui.iv_placeholder, [this]() { onInstViewShapeChanged(); }, std::make_unique<InstViewModel>());
+  }
   loadToolbarIcons();
   setupSelectRegionTypes();
   connectSignals();
@@ -165,12 +176,8 @@ void QtPreviewDockedWidgets::setEditROIState(bool state) { m_ui.rs_edit_button->
 
 void QtPreviewDockedWidgets::setRectangularROIState(bool state) { m_ui.rs_rect_select_button->setDown(state); }
 
-std::vector<size_t> QtPreviewDockedWidgets::getSelectedDetectors() const {
-  return m_instDisplay->getSelectedDetectors();
-}
-
-std::vector<Mantid::detid_t> QtPreviewDockedWidgets::detIndicesToDetIDs(std::vector<size_t> const &detIndices) const {
-  return m_instDisplay->detIndicesToDetIDs(detIndices);
+std::vector<Mantid::detid_t> QtPreviewDockedWidgets::getSelectedDetectorIDs() const {
+  return m_instDisplay->getSelectedDetectorIDs();
 }
 
 std::string QtPreviewDockedWidgets::getRegionType() const {

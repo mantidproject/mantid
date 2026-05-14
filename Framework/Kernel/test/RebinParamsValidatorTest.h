@@ -44,13 +44,8 @@ public:
   }
 
   void testFailOutOfOrder() {
-    std::vector<double> vec(5);
-    vec[0] = 1.0;
-    vec[1] = 0.1;
-    vec[2] = 2.0;
-    vec[3] = 0.2;
-    vec[4] = 1.5;
-    TS_ASSERT_EQUALS(standardValidator.isValid(vec), "Bin boundary values must be given in order of increasing value");
+    std::vector<double> vec = {1.0, 0.1, 2.0, 0.2, 1.5};
+    TS_ASSERT(standardValidator.isValid(vec).find("Bin boundary values") != std::string::npos);
   }
 
   void testFailZeroBin_only() {

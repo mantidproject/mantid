@@ -13,6 +13,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
+#include <MantidQtWidgets/Common/AlgorithmRunner.h>
+
 class QSettings;
 class QString;
 
@@ -61,12 +64,13 @@ private:
   double m_numberDensity;
 };
 
-class MANTIDQT_INELASTIC_DLL CorrectionsTab : public InelasticTab {
+class MANTIDQT_INELASTIC_DLL CorrectionsTab : public InelasticTab, public API::IAlgorithmRunnerSubscriber {
   Q_OBJECT
 
 public:
   /// Constructor
   CorrectionsTab(QWidget *parent = nullptr);
+  CorrectionsTab(QWidget *parent, std::unique_ptr<API::IAlgorithmRunner> algoRunner);
   /// Set the active workspaces used in the plotting options
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
   /// Used to clear the workspaces held by the output plotting widget
@@ -78,6 +82,7 @@ public:
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
   void enableLoadHistoryProperty(bool doLoadHistory);
+  void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) override;
 
 protected:
   /// Check the binning between two workspaces match
@@ -90,6 +95,12 @@ protected:
   /// Displays and logs the error for a workspace with an invalid type
   void displayInvalidWorkspaceTypeError(const std::string &workspaceName, Mantid::Kernel::Logger &log);
   static std::string prepareContainerName(const std::string &containerName);
+
+  virtual void runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) {
+    (void)algorithm;
+    (void)error;
+  }
+  std::unique_ptr<MantidQt::API::IAlgorithmRunner> m_algorithmRunner;
 
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;

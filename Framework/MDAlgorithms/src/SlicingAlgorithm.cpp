@@ -14,6 +14,7 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
@@ -290,6 +291,10 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
   m_transformScaling.clear();
 
   // Create the dimensions based on the strings from the user
+  m_binDimensions.clear();
+  m_bases.clear();
+  m_binningScaling.clear();
+  m_transformScaling.clear();
   for (char dimChar : dimChars) {
     std::string propName = "BasisVector0";
     propName[11] = dimChar;
@@ -304,6 +309,20 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
   m_outD = m_binDimensions.size();
   if (m_outD == 0)
     throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
+
+  // ensure we are not asking for more total output bins than can fit into memory
+  // the total number of bins in an N-D workspace is the product (not sum) of bins per dimension
+  std::size_t totalBins =
+      std::accumulate(m_numBins.cbegin(), m_numBins.cend(), std::size_t(1),
+                      [](std::size_t acc, int val) -> std::size_t { return acc * static_cast<std::size_t>(val); });
+  // MDHistoWorkspace allocates signal, error squared, and numEvents (each a double) plus a bool mask per bin
+  constexpr std::size_t bytesPerBin = 3 * sizeof(double) + sizeof(bool);
+  std::string memStr = Kernel::MemoryStats().checkAvailableMemory(totalBins * bytesPerBin);
+  if (!memStr.empty()) {
+    memStr = "You requested a total of " + std::to_string(totalBins) + " bins. " + memStr +
+             " Please reduce the number of bins or output dimensions.";
+    throw std::runtime_error(memStr);
+  }
 
   // Get the Translation parameter
   std::vector<double> translVector;
@@ -476,8 +495,8 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
     // Copy the dimension name, ID and units
     IMDDimension_const_sptr inputDim = m_inWS->getDimension(dim_index);
     const auto &frame = inputDim->getMDFrame();
-    m_binDimensions.emplace_back(MDHistoDimension_sptr(
-        new MDHistoDimension(inputDim->getName(), inputDim->getDimensionId(), frame, min, max, numBins)));
+    m_binDimensions.emplace_back(
+        new MDHistoDimension(inputDim->getName(), inputDim->getDimensionId(), frame, min, max, numBins));
 
     // Add the index from which we're binning to the vector
     this->m_dimensionToBinFrom.emplace_back(dim_index);
@@ -515,6 +534,8 @@ void SlicingAlgorithm::createAlignedTransform() {
                              "exist in the MDEventWorkspace.");
 
   // Create the dimensions based on the strings from the user
+  m_binDimensions.clear();
+  m_dimensionToBinFrom.clear();
   for (size_t i = 0; i < numDims; i++) {
     std::string propName = "AlignedDim0";
     propName[10] = dimChars[i];
@@ -523,6 +544,22 @@ void SlicingAlgorithm::createAlignedTransform() {
 
   // Number of output binning dimensions found
   m_outD = m_binDimensions.size();
+
+  // ensure we are not asking for more total output bins than can fit into memory
+  // the total number of bins in an N-D workspace is the product (not sum) of bins per dimension
+  std::size_t totalBins =
+      std::accumulate(m_binDimensions.cbegin(), m_binDimensions.cend(), std::size_t(1),
+                      [](std::size_t acc, const std::shared_ptr<MDHistoDimension> &dim) -> std::size_t {
+                        return acc * dim->getNBins();
+                      });
+  // MDHistoWorkspace allocates signal, error squared, and numEvents (each a double) plus a bool mask per bin
+  constexpr std::size_t bytesPerBin = 3 * sizeof(double) + sizeof(bool);
+  std::string memStr = Kernel::MemoryStats().checkAvailableMemory(totalBins * bytesPerBin);
+  if (!memStr.empty()) {
+    memStr = "You requested a total of " + std::to_string(totalBins) + " bins. " + memStr +
+             " Please reduce the number of bins or output dimensions.";
+    throw std::runtime_error(memStr);
+  }
 
   // Now we build the coordinate transformation object
   m_translation = VMD(inD);
@@ -639,10 +676,11 @@ void SlicingAlgorithm::createTransform() {
 
   // Create the coordinate transformation
   m_transform = nullptr;
-  if (m_axisAligned)
+  if (m_axisAligned) {
     this->createAlignedTransform();
-  else
+  } else {
     this->createGeneralTransform();
+  }
 
   // Finalize, for binnign MDHistoWorkspace
   if (m_originalWS) {

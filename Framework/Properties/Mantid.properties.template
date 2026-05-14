@@ -348,3 +348,6 @@ performancelog.filename = algotimeregister.out
 
 # Algorithm Profiler Default Status
 performancelog.write = Off
+
+# SANS ISIS Command Interface
+sans.deprecated_command_interface = Off

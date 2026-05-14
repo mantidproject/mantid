@@ -8,9 +8,7 @@ set(SYSTEST_NAMES
     SANSFileChecking.py
     SANSLoadersTest.py
     SANSLoadTest.py
-    SANSLOWCentreNoGrav_V2.py
     SANSMergedDetectorsTest.py
-    SANSMergedDetectorsTest_V2.py
     SANSQResolutionTest.py
     SANSReductionCoreTest.py
     SANSSaveTest.py

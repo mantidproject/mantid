@@ -8,7 +8,7 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from ISISCommandInterface import (
+from sans.command_interface.ISISCommandInterface import (
     AssignSample,
     Detector,
     FindBeamCentre,

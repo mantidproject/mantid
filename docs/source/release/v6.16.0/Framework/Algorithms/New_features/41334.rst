@@ -1,0 +1,1 @@
+- Algorithm :ref:`algm-PolarizationCorrectionWildes` now accepts an input workspace group as an alternative to a string list of workspace names.

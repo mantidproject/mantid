@@ -501,8 +501,8 @@ void LoadBankFromDiskTask::run() {
 
     // make a vector of logorithmic bins
     auto histogram_bin_edges = std::make_shared<std::vector<double>>();
-    Mantid::Kernel::VectorHelper::createAxisFromRebinParams({tof_min_fixed, delta, (tof_max_fixed + std::abs(delta))},
-                                                            *histogram_bin_edges);
+    std::vector<double> const params{tof_min_fixed, delta, tof_max_fixed + std::abs(delta)};
+    Mantid::Kernel::VectorHelper::createAxisFromRebinParams(params, *histogram_bin_edges);
 
     // create the tasks
     std::shared_ptr<Task> newTask1 = std::make_shared<ProcessBankCompressed>(
