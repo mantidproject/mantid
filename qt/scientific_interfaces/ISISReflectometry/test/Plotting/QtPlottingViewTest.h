@@ -9,6 +9,8 @@
 #include "../../../ISISReflectometry/GUI/Plotting/QtPlottingView.h"
 
 #include <QApplication>
+#include <QBrush>
+#include <QColor>
 #include <QComboBox>
 #include <QItemSelectionModel>
 #include <QMouseEvent>
@@ -16,6 +18,7 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 #include <cxxtest/TestSuite.h>
+#include <utility>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
@@ -37,6 +40,46 @@ public:
     assertButton(optionsLayout->itemAt(3)->widget(), "plotIndividual", "Plot");
     assertButton(optionsLayout->itemAt(4)->widget(), "plotOverplot", "Plot over");
     assertButton(optionsLayout->itemAt(5)->widget(), "plotTiled", "Plot tiled");
+  }
+
+  void testWorkspaceTreeHasExpectedColumnHeaders() {
+    QtPlottingView view;
+    auto tree = workspaceTree(view);
+
+    TS_ASSERT_EQUALS(tree->model()->headerData(0, Qt::Horizontal).toString().toStdString(), "Item type");
+    TS_ASSERT_EQUALS(tree->model()->headerData(1, Qt::Horizontal).toString().toStdString(), "Output type");
+    TS_ASSERT_EQUALS(tree->model()->headerData(2, Qt::Horizontal).toString().toStdString(), "Item");
+  }
+
+  void testWorkspaceTreeShowsItemTypeOutputTypeAndItemColumns() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+
+    TS_ASSERT_EQUALS(tree->model()->data(groupIndex(tree)).toString().toStdString(), "Group");
+    TS_ASSERT_EQUALS(tree->model()->data(groupOutputTypeIndex(tree)).toString().toStdString(), "");
+    TS_ASSERT_EQUALS(tree->model()->data(groupItemIndex(tree)).toString().toStdString(), "Group 1");
+    TS_ASSERT_EQUALS(tree->model()->data(workspaceIndex(tree)).toString().toStdString(), "Workspace");
+    TS_ASSERT_EQUALS(tree->model()->data(workspaceOutputTypeIndex(tree)).toString().toStdString(), "IvsLambda");
+    TS_ASSERT_EQUALS(tree->model()->data(workspaceItemIndex(tree)).toString().toStdString(), "IvsLam_12345");
+  }
+
+  void testWorkspaceTreeMetadataColumnsUseMutedText() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+
+    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceIndex(tree)), QColor(112, 112, 112));
+    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceOutputTypeIndex(tree)), QColor(112, 112, 112));
+    TS_ASSERT_DIFFERS(foregroundColour(tree, workspaceItemIndex(tree)), QColor(112, 112, 112));
+  }
+
+  void testWorkspaceTreeUsesDelegateForSubtleColumnDivider() {
+    QtPlottingView view;
+    auto tree = workspaceTree(view);
+
+    TS_ASSERT_EQUALS(tree->itemDelegate()->objectName().toStdString(), "workspaceTreeItemDelegate");
+    TS_ASSERT(tree->styleSheet().isEmpty());
   }
 
   void testSelectingGroupSelectsChildRunsAndWorkspaces() {
@@ -205,6 +248,32 @@ public:
     TS_ASSERT(tree->selectionModel()->isSelected(workspace));
   }
 
+  void testClickingOutputTypeColumnSelectsWorkspaceRow() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto workspace = workspaceIndex(tree);
+
+    click(tree, workspaceOutputTypeIndex(tree));
+
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testClickingItemColumnForGroupSelectsChildRunsAndWorkspaces() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto group = groupIndex(tree);
+    auto run = runIndex(tree);
+    auto workspace = workspaceIndex(tree);
+
+    click(tree, groupItemIndex(tree));
+
+    TS_ASSERT(tree->selectionModel()->isSelected(group));
+    TS_ASSERT(tree->selectionModel()->isSelected(run));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace));
+  }
+
   void testShiftClickingWorkspaceUnderSelectedRunDoesNotChangeSelection() {
     QtPlottingView view;
     view.setWorkspaceItems(workspaceItems());
@@ -310,21 +379,47 @@ private:
   }
 
   std::vector<PlottingWorkspaceTreeItem> workspaceItems() const {
-    return {{"Group 1", {{"12345", {{"IvsLam_12345", {}}, {"IvsQ_12345", {}}}}}}};
+    return {
+        groupItem("Group 1", {runItem("12345", {workspaceItem("IvsLam_12345", PlottingWorkspaceOutputType::IvsLambda),
+                                                workspaceItem("IvsQ_12345", PlottingWorkspaceOutputType::IvsQ)})})};
   }
 
   std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithGroups(int groups) const {
     std::vector<PlottingWorkspaceTreeItem> items;
     for (auto group = 1; group <= groups; ++group) {
       auto const run = std::to_string(group) + "2345";
-      items.emplace_back(PlottingWorkspaceTreeItem{"Group " + std::to_string(group), {{run, {{"IvsLam_" + run, {}}}}}});
+      items.emplace_back(
+          groupItem("Group " + std::to_string(group),
+                    {runItem(run, {workspaceItem("IvsLam_" + run, PlottingWorkspaceOutputType::IvsLambda)})}));
     }
     return items;
   }
 
+  PlottingWorkspaceTreeItem groupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
+    return {std::move(label), PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceOutputType::None,
+            std::move(children)};
+  }
+
+  PlottingWorkspaceTreeItem runItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
+    return {std::move(label), PlottingWorkspaceTreeItemType::Run, PlottingWorkspaceOutputType::None,
+            std::move(children)};
+  }
+
+  PlottingWorkspaceTreeItem workspaceItem(std::string label, PlottingWorkspaceOutputType outputType) const {
+    return {std::move(label), PlottingWorkspaceTreeItemType::Workspace, outputType, {}};
+  }
+
   QTreeView *workspaceTree(QtPlottingView &view) const { return view.findChild<QTreeView *>("workspaceTree"); }
 
+  QColor foregroundColour(QTreeView *tree, QModelIndex const &index) const {
+    return tree->model()->data(index, Qt::ForegroundRole).value<QBrush>().color();
+  }
+
   QModelIndex groupIndex(QTreeView *tree) const { return tree->model()->index(0, 0); }
+
+  QModelIndex groupOutputTypeIndex(QTreeView *tree) const { return tree->model()->index(0, 1); }
+
+  QModelIndex groupItemIndex(QTreeView *tree) const { return tree->model()->index(0, 2); }
 
   QModelIndex runIndex(QTreeView *tree) const { return tree->model()->index(0, 0, groupIndex(tree)); }
 
@@ -333,6 +428,10 @@ private:
   }
 
   QModelIndex workspaceIndex(QTreeView *tree) const { return tree->model()->index(0, 0, runIndex(tree)); }
+
+  QModelIndex workspaceOutputTypeIndex(QTreeView *tree) const { return tree->model()->index(0, 1, runIndex(tree)); }
+
+  QModelIndex workspaceItemIndex(QTreeView *tree) const { return tree->model()->index(0, 2, runIndex(tree)); }
 
   QModelIndex workspaceIndex(QTreeView *tree, int group, int run, int workspace) const {
     auto const groupModelIndex = tree->model()->index(group, 0);
