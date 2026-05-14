@@ -739,11 +739,11 @@ bool QtTreePropertyBrowser::rootIsDecorated() const { return d_ptr->m_treeWidget
 
 void QtTreePropertyBrowser::setRootIsDecorated(bool show) {
   d_ptr->m_treeWidget->setRootIsDecorated(show);
-  QMapIterator<QTreeWidgetItem *, QtBrowserItem *> it(d_ptr->m_itemToIndex);
+  QMapIterator<const QTreeWidgetItem *, QtBrowserItem *> it(d_ptr->m_itemToIndex);
   while (it.hasNext()) {
     const auto property = it.next().value()->property();
     if (!property->hasValue())
-      d_ptr->updateItem(it.key());
+      d_ptr->updateItem(const_cast<QTreeWidgetItem *>(it.key()));
   }
 }
 
@@ -756,7 +756,7 @@ bool QtTreePropertyBrowser::alternatingRowColors() const { return d_ptr->m_treeW
 
 void QtTreePropertyBrowser::setAlternatingRowColors(bool enable) {
   d_ptr->m_treeWidget->setAlternatingRowColors(enable);
-  QMapIterator<QTreeWidgetItem *, QtBrowserItem *> it(d_ptr->m_itemToIndex);
+  QMapIterator<const QTreeWidgetItem *, QtBrowserItem *> it(d_ptr->m_itemToIndex);
 }
 
 /**
@@ -930,7 +930,7 @@ QColor QtTreePropertyBrowser::backgroundColor(QtBrowserItem *item) const {
     \sa backgroundColor(), setBackgroundColor()
 */
 
-QColor QtTreePropertyBrowser::calculatedBackgroundColor(QtBrowserItem *item) const {
+QColor QtTreePropertyBrowser::calculatedBackgroundColor(const QtBrowserItem *item) const {
   return d_ptr->calculatedBackgroundColor(item);
 }
 
@@ -949,11 +949,11 @@ void QtTreePropertyBrowser::setPropertiesWithoutValueMarked(bool mark) {
     return;
 
   d_ptr->m_markPropertiesWithoutValue = mark;
-  QMapIterator<QTreeWidgetItem *, QtBrowserItem *> it(d_ptr->m_itemToIndex);
+  QMapIterator<const QTreeWidgetItem *, QtBrowserItem *> it(d_ptr->m_itemToIndex);
   while (it.hasNext()) {
     const auto property = it.next().value()->property();
     if (!property->hasValue())
-      d_ptr->updateItem(it.key());
+      d_ptr->updateItem(const_cast<QTreeWidgetItem *>(it.key()));
   }
   d_ptr->m_treeWidget->viewport()->update();
 }

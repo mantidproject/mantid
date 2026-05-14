@@ -187,7 +187,6 @@ public:
    *         position in the file
    */
   // NOTE: this cannot return by reference as the referenced address can change
-  // cppcheck-suppress returnByReference
   std::string getAddress() const { return m_address.string(); };
 
   // CHECK ADDRESS EXISTENCE

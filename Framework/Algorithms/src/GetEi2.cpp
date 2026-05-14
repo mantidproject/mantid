@@ -506,7 +506,6 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
   auto nyvals = static_cast<int64_t>(peak_y.size());
   if (peak_y[nyvals - 1] < hby2) {
     int64_t ip1(0), ip2(0);
-    // cppcheck-suppress useStlAlgorithm
     for (int64_t i = ipk_int; i < nyvals; ++i) {
       if (peak_y[i] < hby2) {
         // after this point the intensity starts to go below half-height
@@ -514,7 +513,6 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
         break;
       }
     }
-    // cppcheck-suppress useStlAlgorithm
     for (int64_t i = nyvals - 1; i >= ipk_int; --i) {
       if (peak_y[i] > hby2) {
         ip2 = i + 1; //   ! point closest to peak after which the intensity is
@@ -546,7 +544,6 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
   double xm_hh(0);
   if (peak_y[0] < hby2) {
     int64_t im1(0), im2(0);
-    // cppcheck-suppress useStlAlgorithm
     for (int64_t i = ipk_int; i >= 0; --i) {
       if (peak_y[i] < hby2) {
         im1 = i + 1; // ! before this point the intensity starts to go below
@@ -554,7 +551,6 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
         break;
       }
     }
-    // cppcheck-suppress useStlAlgorithm
     for (int64_t i = 0; i <= ipk_int; ++i) {
       if (peak_y[i] > hby2) {
         im2 = i - 1; // ! point closest to peak before which the intensity is
