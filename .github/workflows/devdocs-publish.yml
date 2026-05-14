@@ -1,0 +1,63 @@
+name: build and publish dev docs 
+on:
+  push:
+    branches: [main]
+
+  pull_request:
+    branches: [main]
+
+# cancel previous job if new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  devsite:
+    if: ${{ github.repository_owner == 'mantidproject' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout Mantid source    
+        uses: actions/checkout@v6
+
+      - name: Detect changes relevant to devsite
+        uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
+      - name: Setup pixi
+        if: steps.changes.outputs.devsite == 'true'
+        uses: prefix-dev/setup-pixi@v0.9.5
+        with:
+          frozen: true
+
+      - name: Checkout developer site repository
+        if: steps.changes.outputs.devsite == 'true'
+        uses: actions/checkout@v6
+        with:
+          repository: mantidproject/developer
+          ref: gh-pages
+          path: build
+          token: ${{ secrets.DEVSITE_REPO_TOKEN }}
+
+      - name: Build devsite
+        if: steps.changes.outputs.devsite == 'true' 
+        uses: ./.github/actions/devsite-build
+
+
+
+      # # publish devsite if on gh-pages branch of mantidproject/developer
+      # - name: Publish developer site
+      #   if: steps.changes.outputs.devsite == 'true'
+      #   working-directory: build
+      #   run: |
+      #     git config user.name "github-actions[bot]"
+      #     git config user.email "github-actions[bot]@users.noreply.github.com"
+      #     git add .
+      #     git diff --cached --quiet && echo "No changes to commit" && exit 0
+      #     git commit -m "Automatic update of developer site from ${{ github.sha }}"
+      #     git push origin gh-pages
