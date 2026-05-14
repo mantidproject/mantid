@@ -120,7 +120,7 @@ public:
     addWorkspaces({"stitched_12345"});
 
     auto const expected = std::vector<PlottingWorkspaceTreeItem>{
-        groupItem("Group 1", {workspaceItem("stitched_12345", PlottingWorkspaceOutputType::IvsQ)})};
+        groupItem("Group 1", {workspaceItem("Group 1", {}, "stitched_12345", PlottingWorkspaceOutputType::IvsQ)})};
 
     EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
 
@@ -152,9 +152,26 @@ public:
     addWorkspaceGroup("stitched_12345", {"stitched_12345_1", "stitched_12345_2"});
 
     auto const expected = std::vector<PlottingWorkspaceTreeItem>{groupItem(
-        "Group 1", {workspaceGroupItem("stitched_12345",
-                                       {workspaceItem("stitched_12345_1", PlottingWorkspaceOutputType::IvsQ),
-                                        workspaceItem("stitched_12345_2", PlottingWorkspaceOutputType::IvsQ)})})};
+        "Group 1",
+        {workspaceGroupItem("Group 1", {}, "stitched_12345",
+                            {workspaceItem("Group 1", {}, "stitched_12345_1", PlottingWorkspaceOutputType::IvsQ),
+                             workspaceItem("Group 1", {}, "stitched_12345_2", PlottingWorkspaceOutputType::IvsQ)})})};
+
+    EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
+
+    presenter.notifyRunsTableChanged(runsTable);
+  }
+
+  void testRunsTableChangedIncludesSelectionContextMetadata() {
+    NiceMock<MockPlottingView> view;
+    PlottingPresenter presenter(&view);
+    auto runsTable = RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {successfulRow("12345")})}));
+    addWorkspaces({"IvsQ_binned_12345"});
+
+    auto const expected = std::vector<PlottingWorkspaceTreeItem>{
+        groupItem("Group 1", {runItem("Group 1", {"12345"}, "12345",
+                                      {workspaceItem("Group 1", {"12345"}, "IvsQ_binned_12345",
+                                                     PlottingWorkspaceOutputType::IvsQBinned)})})};
 
     EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
 
@@ -236,22 +253,56 @@ public:
 
 private:
   PlottingWorkspaceTreeItem groupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) {
-    return {std::move(label), PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceOutputType::None,
-            std::move(children)};
+    return {
+        std::move(label),   PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceOutputType::None, "Group 1", {}, "",
+        std::move(children)};
   }
 
   PlottingWorkspaceTreeItem runItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) {
-    return {std::move(label), PlottingWorkspaceTreeItemType::Run, PlottingWorkspaceOutputType::None,
-            std::move(children)};
+    return runItem("Group 1", {label}, std::move(label), std::move(children));
   }
 
   PlottingWorkspaceTreeItem workspaceGroupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) {
-    return {std::move(label), PlottingWorkspaceTreeItemType::WorkspaceGroup, PlottingWorkspaceOutputType::None,
+    return workspaceGroupItem("Group 1", {"12345"}, std::move(label), std::move(children));
+  }
+
+  PlottingWorkspaceTreeItem workspaceGroupItem(std::string groupName, std::vector<std::string> runNumbers,
+                                               std::string label, std::vector<PlottingWorkspaceTreeItem> children) {
+    auto const workspaceName = label;
+    return {std::move(label),
+            PlottingWorkspaceTreeItemType::WorkspaceGroup,
+            PlottingWorkspaceOutputType::None,
+            std::move(groupName),
+            std::move(runNumbers),
+            workspaceName,
             std::move(children)};
   }
 
   PlottingWorkspaceTreeItem workspaceItem(std::string label, PlottingWorkspaceOutputType outputType) {
-    return {std::move(label), PlottingWorkspaceTreeItemType::Workspace, outputType, {}};
+    return workspaceItem("Group 1", {"12345"}, std::move(label), outputType);
+  }
+
+  PlottingWorkspaceTreeItem runItem(std::string groupName, std::vector<std::string> runNumbers, std::string label,
+                                    std::vector<PlottingWorkspaceTreeItem> children) {
+    return {std::move(label),
+            PlottingWorkspaceTreeItemType::Run,
+            PlottingWorkspaceOutputType::None,
+            std::move(groupName),
+            std::move(runNumbers),
+            "",
+            std::move(children)};
+  }
+
+  PlottingWorkspaceTreeItem workspaceItem(std::string groupName, std::vector<std::string> runNumbers, std::string label,
+                                          PlottingWorkspaceOutputType outputType) {
+    auto const workspaceName = label;
+    return {std::move(label),
+            PlottingWorkspaceTreeItemType::Workspace,
+            outputType,
+            std::move(groupName),
+            std::move(runNumbers),
+            workspaceName,
+            {}};
   }
 
   Row successfulRow(std::string const &run) {

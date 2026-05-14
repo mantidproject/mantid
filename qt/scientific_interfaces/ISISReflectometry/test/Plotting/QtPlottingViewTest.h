@@ -396,17 +396,18 @@ private:
   }
 
   PlottingWorkspaceTreeItem groupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
-    return {std::move(label), PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceOutputType::None,
+    return {std::move(label),   PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceOutputType::None, "", {}, "",
             std::move(children)};
   }
 
   PlottingWorkspaceTreeItem runItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
-    return {std::move(label), PlottingWorkspaceTreeItemType::Run, PlottingWorkspaceOutputType::None,
+    return {std::move(label),   PlottingWorkspaceTreeItemType::Run, PlottingWorkspaceOutputType::None, "", {}, "",
             std::move(children)};
   }
 
   PlottingWorkspaceTreeItem workspaceItem(std::string label, PlottingWorkspaceOutputType outputType) const {
-    return {std::move(label), PlottingWorkspaceTreeItemType::Workspace, outputType, {}};
+    auto const workspaceName = label;
+    return {std::move(label), PlottingWorkspaceTreeItemType::Workspace, outputType, "", {}, workspaceName, {}};
   }
 
   QTreeView *workspaceTree(QtPlottingView &view) const { return view.findChild<QTreeView *>("workspaceTree"); }

@@ -21,6 +21,9 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeItem {
   std::string label;
   PlottingWorkspaceTreeItemType itemType;
   PlottingWorkspaceOutputType outputType;
+  std::string groupName;
+  std::vector<std::string> runNumbers;
+  std::string workspaceName;
   std::vector<PlottingWorkspaceTreeItem> children;
 };
 
