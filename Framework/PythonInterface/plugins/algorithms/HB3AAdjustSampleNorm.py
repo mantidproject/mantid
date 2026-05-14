@@ -513,7 +513,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         first_detid = np.array(mtd["_PreprocessedDetectorsWS"].column(4))  # 1, 3, 5,..,1025, 1027,.. for 2x2 grouping
         # sample-log "detectorID" stores ID's in ordering of ascending along the Y-dimension first,
         # replicating the ordering in which "twotheta" and "azimuthal" are stored
-        run["detectorID"] = first_detid.reshape(y_dim, x_dim).T.flatten().tolist()  # 1, 1025, 2029,..,3,.. for 2x2
+        run["detectorID"] = first_detid.reshape(y_dim, x_dim).T.flatten().tolist()  # 1, 1025, 2049,..,3,.. for 2x2
 
         # transfer the UB matrix from the original scan data into _tmp_ws
         CopySample(scan, _tmp_ws, CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
