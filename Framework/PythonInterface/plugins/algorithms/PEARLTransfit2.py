@@ -146,7 +146,7 @@ class PEARLTransfit(PythonAlgorithm):
             name="Output",
             defaultValue="",
             direction=Direction.Input,
-            doc="Output basename on ADS. If empty, `S_fit` will be the basenamefor calibration runs and `T_fit` for non-calibration",
+            doc="Output basename on ADS. If empty, `S_fit` will be the basename for calibration runs and `T_fit` for non-calibration",
         )
 
         self.setup_property_rules()
