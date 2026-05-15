@@ -75,9 +75,6 @@ void export_DetectorInfo() {
            "Returns the size of the DetectorInfo, i.e., the number of "
            "detectors in the instrument.")
 
-      .def("getMemorySize", &DetectorInfo::getMemorySize, arg("self"),
-           "Return the footprint of the detector info in memory in bytes")
-
       .def("indexOf", &DetectorInfo::indexOf, (arg("self"), arg("detId")),
            "Returns the index of the detector with the given id.")
 
@@ -115,5 +112,7 @@ void export_DetectorInfo() {
       .def("l2", l2, (arg("self"), arg("index")), "Returns the l2 scattering distance")
       .def("l1", &DetectorInfo::l1, arg("self"), "Returns the l1 scattering distance")
       .def("hasMaskedDetectors", &DetectorInfo::hasMaskedDetectors, arg("self"),
-           "Returns if there are masked detectors");
+           "Returns if there are masked detectors")
+      .def("getMemorySize", &DetectorInfo::getMemorySize, arg("self"),
+           "Return the memory footprint of the detector info in bytes.");
 }

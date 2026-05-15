@@ -277,4 +277,20 @@ public:
     detInfo.setComponentInfo(&compInfo);
     TS_ASSERT_EQUALS(detInfo.scanIntervals(), (std::vector<std::pair<int64_t, int64_t>>{{0, 1}}));
   }
+
+  void test_getMemorySize_empty() {
+    const DetectorInfo empty{};
+    TS_ASSERT_EQUALS(empty.getMemorySize(), sizeof(DetectorInfo));
+  }
+
+  void test_getMemorySize_with_data() {
+    const DetectorInfo withData(PosVec(5), RotVec(5));
+    TS_ASSERT_LESS_THAN(sizeof(DetectorInfo), withData.getMemorySize());
+  }
+
+  void test_getMemorySize_scales_with_size() {
+    const DetectorInfo small(PosVec(1), RotVec(1));
+    const DetectorInfo large(PosVec(100), RotVec(100));
+    TS_ASSERT_LESS_THAN(small.getMemorySize(), large.getMemorySize());
+  }
 };

@@ -111,9 +111,6 @@ public:
 
   std::size_t getNumberDetectors(bool skipMonitors = false) const;
 
-  /// Get the footprint in memory in bytes.
-  size_t getMemorySize() const;
-
   void getMinMaxDetectorIDs(detid_t &min, detid_t &max) const;
 
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const IComponent &comp) const;
@@ -219,6 +216,9 @@ public:
   void parseTreeAndCacheBeamline();
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
+
+  /// Get the footprint in memory in bytes.
+  size_t getMemorySize() const;
 
   friend InstrumentVisitor;
 

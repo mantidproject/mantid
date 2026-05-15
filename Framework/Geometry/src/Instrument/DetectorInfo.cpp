@@ -17,8 +17,6 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Unit.h"
 
-#include <algorithm>
-
 namespace Mantid::Geometry {
 /** Construct DetectorInfo based on an Instrument.
  *
@@ -66,36 +64,6 @@ DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 DetectorInfo::~DetectorInfo() = default;
-
-size_t DetectorInfo::getMemorySize() const {
-  size_t total = sizeof(DetectorInfo);
-
-  if (m_detectorInfo) {
-    total += sizeof(Beamline::DetectorInfo);
-    const auto detectorCount = size();
-    const auto scans = std::max(scanCount(), static_cast<size_t>(1));
-    const auto pointCount = detectorCount * scans;
-
-    // Beamline::DetectorInfo stores monitor/mask flags and position/rotation vectors.
-    total += detectorCount * (2 * sizeof(bool));
-    total += pointCount * (sizeof(Eigen::Vector3d) + sizeof(Eigen::Quaterniond));
-    total += scans * sizeof(std::pair<int64_t, int64_t>);
-  }
-
-  if (m_detectorIDs) {
-    total += m_detectorIDs->capacity() * sizeof(detid_t);
-  }
-
-  if (m_detIDToIndex) {
-    total += m_detIDToIndex->size() * sizeof(std::unordered_map<detid_t, size_t>::value_type);
-    total += m_detIDToIndex->bucket_count() * sizeof(void *);
-  }
-
-  total += m_lastDetector.capacity() * sizeof(decltype(m_lastDetector)::value_type);
-  total += m_lastIndex.capacity() * sizeof(decltype(m_lastIndex)::value_type);
-
-  return total;
-}
 
 /** Returns true if the content of this is equivalent to the content of other.
  *
@@ -486,5 +454,23 @@ DetectorInfoIt DetectorInfo::begin() { return DetectorInfoIt(*this, 0, size()); 
 
 // End method for iterator
 DetectorInfoIt DetectorInfo::end() { return DetectorInfoIt(*this, size(), size()); }
+
+/** Return memory used by the detector info, in bytes.
+ * @return bytes used.
+ */
+size_t DetectorInfo::getMemorySize() const {
+  const size_t n = size();
+  // Beamline::DetectorInfo holds the core position/rotation/flag arrays
+  const size_t beamlineMem = m_detectorInfo->getMemorySize();
+  // m_detectorIDs: shared_ptr<const vector<detid_t>>
+  const size_t detectorIDsMem = n * sizeof(detid_t);
+  // m_detIDToIndex: shared_ptr<const unordered_map<detid_t, size_t>>
+  // Each node: key + value + ~2 pointers for chaining and bucket slot
+  const size_t detIDToIndexMem = n * (sizeof(detid_t) + sizeof(size_t) + 2 * sizeof(void *));
+  // m_lastDetector and m_lastIndex: one slot per OpenMP thread
+  const size_t cacheMem = m_lastDetector.capacity() * sizeof(std::shared_ptr<const Geometry::IDetector>) +
+                          m_lastIndex.capacity() * sizeof(size_t);
+  return sizeof(*this) + beamlineMem + detectorIDsMem + detIDToIndexMem + cacheMem;
+}
 
 } // namespace Mantid::Geometry

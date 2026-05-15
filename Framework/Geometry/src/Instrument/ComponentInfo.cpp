@@ -14,7 +14,6 @@
 #include "MantidKernel/Exception.h"
 
 #include <Eigen/Geometry>
-#include <algorithm>
 #include <exception>
 #include <iterator>
 #include <string>
@@ -90,41 +89,6 @@ ComponentInfo::ComponentInfo(const ComponentInfo &other)
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ComponentInfo::~ComponentInfo() = default;
-
-size_t ComponentInfo::getMemorySize() const {
-  size_t total = sizeof(ComponentInfo);
-
-  if (m_componentInfo) {
-    total += sizeof(Beamline::ComponentInfo);
-    const auto componentCount = size();
-    const auto scans = std::max(scanCount(), static_cast<size_t>(1));
-    const auto pointCount = componentCount * scans;
-
-    // Beamline::ComponentInfo stores positions, rotations, scale factors, and component type arrays.
-    total += pointCount * (sizeof(Eigen::Vector3d) + sizeof(Eigen::Quaterniond) + sizeof(Eigen::Vector3d));
-    total += pointCount * sizeof(Beamline::ComponentType);
-    total += scans * sizeof(std::pair<int64_t, int64_t>);
-  }
-
-  if (m_componentIds) {
-    total += m_componentIds->capacity() * sizeof(decltype(m_componentIds)::element_type::value_type);
-  }
-
-  if (m_compIDToIndex) {
-    total += m_compIDToIndex->size() * sizeof(decltype(m_compIDToIndex)::element_type::value_type);
-    total += m_compIDToIndex->bucket_count() * sizeof(void *);
-  }
-
-  if (m_shapes) {
-    total += m_shapes->capacity() * sizeof(decltype(m_shapes)::element_type::value_type);
-  }
-
-  for (size_t i = 0; i < size(); ++i) {
-    total += name(i).size();
-  }
-
-  return total;
-}
 
 std::vector<size_t> ComponentInfo::detectorsInSubtree(size_t componentIndex) const {
   return m_componentInfo->detectorsInSubtree(componentIndex);
@@ -508,6 +472,24 @@ size_t ComponentInfo::findBankParent(size_t index, const std::string &bankPart) 
     }
   }
   return invalidIndex;
+}
+
+/** Return memory used by the component info, in bytes.
+ * @return bytes used.
+ */
+size_t ComponentInfo::getMemorySize() const {
+  const size_t n = size();
+  // Beamline::ComponentInfo holds all the per-component arrays
+  const size_t beamlineMem = m_componentInfo->getMemorySize();
+  // m_componentIds: shared_ptr<const vector<IComponent*>>
+  const size_t componentIdsMem = n * sizeof(Geometry::IComponent *);
+  // m_compIDToIndex: shared_ptr<const unordered_map<IComponent const*, size_t>>
+  // Each node: key + value + ~2 pointers for chaining and bucket slot
+  const size_t compIDToIndexMem = n * (sizeof(Geometry::IComponent const *) + sizeof(size_t) + 2 * sizeof(void *));
+  // m_shapes: shared_ptr<vector<shared_ptr<const IObject>>>
+  // IObject shapes are shared; count only the vector buffer of shared_ptrs, not the shapes themselves
+  const size_t shapesMem = m_shapes ? m_shapes->capacity() * sizeof(std::shared_ptr<const Geometry::IObject>) : 0;
+  return sizeof(*this) + beamlineMem + componentIdsMem + compIDToIndexMem + shapesMem;
 }
 
 } // namespace Mantid::Geometry

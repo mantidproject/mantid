@@ -7,11 +7,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
@@ -32,7 +29,6 @@
 
 #include <algorithm>
 #include <memory>
-#include <numeric>
 #include <queue>
 #include <utility>
 
@@ -51,32 +47,26 @@ void raiseDuplicateDetectorError(const size_t detectorId) {
   throw Exception::InstrumentDefinitionError(sstream.str());
 }
 
-size_t componentMemorySize(const IComponent &component) {
-  if (dynamic_cast<const RectangularDetector *>(&component)) {
+/// Returns the heap size of a single component object, using the most-derived type.
+size_t componentObjectSize(const IComponent *comp) {
+  if (dynamic_cast<const RectangularDetector *>(comp))
     return sizeof(RectangularDetector);
-  }
-  if (dynamic_cast<const GridDetector *>(&component)) {
+  if (const auto *sd = dynamic_cast<const StructuredDetector *>(comp))
+    return sizeof(StructuredDetector) + sd->getXValues().capacity() * sizeof(double) +
+           sd->getYValues().capacity() * sizeof(double);
+  if (dynamic_cast<const GridDetectorPixel *>(comp))
+    return sizeof(GridDetectorPixel);
+  if (dynamic_cast<const GridDetector *>(comp))
     return sizeof(GridDetector);
-  }
-  if (dynamic_cast<const StructuredDetector *>(&component)) {
-    return sizeof(StructuredDetector);
-  }
-  if (dynamic_cast<const ObjCompAssembly *>(&component)) {
-    return sizeof(ObjCompAssembly);
-  }
-  if (dynamic_cast<const CompAssembly *>(&component)) {
-    return sizeof(CompAssembly);
-  }
-  if (dynamic_cast<const Detector *>(&component)) {
+  if (dynamic_cast<const Detector *>(comp))
     return sizeof(Detector);
-  }
-  if (dynamic_cast<const ObjComponent *>(&component)) {
+  if (dynamic_cast<const ObjCompAssembly *>(comp))
+    return sizeof(ObjCompAssembly);
+  if (dynamic_cast<const ObjComponent *>(comp))
     return sizeof(ObjComponent);
-  }
-  if (dynamic_cast<const Component *>(&component)) {
-    return sizeof(Component);
-  }
-  return sizeof(IComponent);
+  if (dynamic_cast<const CompAssembly *>(comp))
+    return sizeof(CompAssembly);
+  return sizeof(Component);
 }
 } // namespace
 
@@ -272,79 +262,6 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
   } else {
     return numDetIDs;
   }
-}
-
-size_t Instrument::getMemorySize() const {
-  if (m_map && m_instr) {
-    // Parametrized instruments share base geometry but own parameter overrides.
-    return m_instr->getMemorySize() + (m_map_nonconst ? m_map_nonconst->getMemorySize() : 0);
-  }
-
-  size_t memorySize = sizeof(Instrument);
-  memorySize += m_detectorCache.capacity() * sizeof(DetectorCache::value_type);
-  memorySize += m_logfileCache.size() * sizeof(InstrumentParameterCache::value_type);
-  memorySize += m_logfileUnit.size() * sizeof(std::map<std::string, std::string>::value_type);
-
-  memorySize += std::accumulate(m_logfileCache.cbegin(), m_logfileCache.cend(), static_cast<size_t>(0),
-                                [](size_t sum, const auto &cacheItem) { return sum + cacheItem.first.first.size(); });
-
-  memorySize += std::accumulate(
-      m_logfileUnit.cbegin(), m_logfileUnit.cend(), static_cast<size_t>(0),
-      [](size_t sum, const auto &unitItem) { return sum + unitItem.first.size() + unitItem.second.size(); });
-
-  memorySize += m_defaultView.size() + m_defaultViewAxis.size() + m_filename.size() + m_xmlText.size();
-
-  // Account for DetectorInfo if allocated.
-  if (m_detectorInfo) {
-    memorySize += m_detectorInfo->getMemorySize();
-  }
-
-  // Account for ComponentInfo if allocated.
-  if (m_componentInfo) {
-    memorySize += m_componentInfo->getMemorySize();
-  }
-
-  // Account for ReferenceFrame.
-  if (m_referenceFrame) {
-    memorySize += sizeof(ReferenceFrame);
-  }
-
-  // Account for ParameterMap where present.
-  if (m_map_nonconst) {
-    memorySize += m_map_nonconst->getMemorySize();
-  }
-
-  // Account for physical instrument (indirect geometry only)
-  if (m_physicalInstrument && !m_isPhysicalInstrument) {
-    memorySize += m_physicalInstrument->getMemorySize();
-  }
-
-  std::queue<IComponent_const_sptr> queue;
-  for (int i = 0; i < nelements(); ++i) {
-    queue.emplace(getChild(i));
-  }
-
-  while (!queue.empty()) {
-    auto component = queue.front();
-    queue.pop();
-    if (!component) {
-      continue;
-    }
-
-    memorySize += componentMemorySize(*component);
-    memorySize += component->getName().size();
-
-    const auto assembly = std::dynamic_pointer_cast<const ICompAssembly>(component);
-    if (!assembly) {
-      continue;
-    }
-
-    for (int i = 0; i < assembly->nelements(); ++i) {
-      queue.emplace(assembly->getChild(i));
-    }
-  }
-
-  return memorySize;
 }
 
 /** Get the minimum and maximum (inclusive) detector IDs
@@ -1477,6 +1394,59 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
       std::shared_ptr<const Instrument>(this, NoDeleting()), std::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
   detInfo->m_instrument = parInstrument;
   return {std::move(compInfo), std::move(detInfo)};
+}
+
+/** Return memory used by the instrument, in bytes.
+ * @return bytes used.
+ */
+size_t Instrument::getMemorySize() const {
+  // A parametrized instrument is a thin wrapper around a base instrument: it holds a shared_ptr to
+  // the base (m_instr) but owns none of the component tree, detector cache, or beamline objects.
+  // Delegate to the base and add only the ParameterMap overhead.
+  if (m_instr) {
+    const size_t paramMapMem = m_map_nonconst ? m_map_nonconst->getMemorySize() : 0;
+    return sizeof(*this) + m_instr->getMemorySize() + paramMapMem;
+  }
+
+  // Each std::map node carries ~4 pointers of red-black-tree overhead beyond the stored value_type.
+  const size_t mapNodeOverhead = 4 * sizeof(void *);
+
+  const size_t logfileCacheMem =
+      m_logfileCache.size() * (sizeof(InstrumentParameterCache::value_type) + mapNodeOverhead);
+  const size_t logfileUnitMem = m_logfileUnit.size() * (sizeof(decltype(m_logfileUnit)::value_type) + mapNodeOverhead);
+
+  const size_t detectorInfoMem = m_detectorInfo ? m_detectorInfo->getMemorySize() : 0;
+  const size_t componentInfoMem = m_componentInfo ? m_componentInfo->getMemorySize() : 0;
+
+  // BFS over the component tree. The Instrument root is already counted via sizeof(*this),
+  // so start the traversal from the root and add each child's type-accurate object size plus
+  // the IComponent* slot it occupies in its parent's m_children buffer.
+  size_t componentTreeMem = 0;
+  std::queue<const ICompAssembly *> bfsQueue;
+  bfsQueue.push(this);
+  while (!bfsQueue.empty()) {
+    const auto *assembly = bfsQueue.front();
+    bfsQueue.pop();
+    const int n = assembly->nelements();
+    componentTreeMem += static_cast<size_t>(n) * sizeof(IComponent *);
+    for (int i = 0; i < n; ++i) {
+      auto child = assembly->getChild(i);
+      const IComponent *raw = child.get();
+      componentTreeMem += componentObjectSize(raw);
+      if (const auto *sub = dynamic_cast<const ICompAssembly *>(raw))
+        bfsQueue.push(sub);
+    }
+  }
+
+  // m_referenceFrame: heap-allocated ReferenceFrame object
+  const size_t referenceFrameMem = m_referenceFrame ? sizeof(ReferenceFrame) : 0;
+
+  // Indirect-geometry instruments hold a second full instrument for the physical geometry.
+  const size_t physicalInstrumentMem = m_physicalInstrument ? m_physicalInstrument->getMemorySize() : 0;
+
+  return sizeof(*this) + componentTreeMem + m_detectorCache.capacity() * sizeof(DetectorCacheEntry) + logfileCacheMem +
+         logfileUnitMem + m_defaultView.capacity() + m_defaultViewAxis.capacity() + m_xmlText.capacity() +
+         m_filename.capacity() + detectorInfoMem + componentInfoMem + referenceFrameMem + physicalInstrumentMem;
 }
 
 namespace Conversion {

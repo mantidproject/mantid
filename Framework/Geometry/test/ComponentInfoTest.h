@@ -636,4 +636,19 @@ public:
     TS_ASSERT(!componentInfo->hasDetectors(componentInfo->source()));
     TS_ASSERT(componentInfo->hasDetectors(componentInfo->indexOfAny("bank1")));
   }
+
+  void test_getMemorySize_nonzero() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+    TS_ASSERT_LESS_THAN(static_cast<size_t>(0), componentInfo->getMemorySize());
+  }
+
+  void test_getMemorySize_scales_with_instrument_size() {
+    auto smallInstr = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    auto largeInstr = ComponentCreationHelper::createTestInstrumentCylindrical(10);
+    auto smallWrappers = InstrumentVisitor::makeWrappers(*smallInstr);
+    auto largeWrappers = InstrumentVisitor::makeWrappers(*largeInstr);
+    TS_ASSERT_LESS_THAN(std::get<0>(smallWrappers)->getMemorySize(), std::get<0>(largeWrappers)->getMemorySize());
+  }
 };
