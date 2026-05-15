@@ -50,9 +50,6 @@ void export_ComponentInfo() {
 
       .def("size", &ComponentInfo::size, arg("self"), "Returns the number of components.")
 
-      .def("getMemorySize", &ComponentInfo::getMemorySize, arg("self"),
-           "Return the footprint of the component info in memory in bytes")
-
       .def("isDetector", &ComponentInfo::isDetector, (arg("self"), arg("index")),
            "Checks if the component is a detector.")
 
@@ -147,5 +144,7 @@ void export_ComponentInfo() {
       .def("uniqueName", &ComponentInfo::uniqueName, (arg("self"), arg("name")),
            "Returns True if the name is a unique single occurance. Zero occurances yields False.")
 
-      .def("root", &ComponentInfo::root, arg("self"), "Returns the index of the root component");
+      .def("root", &ComponentInfo::root, arg("self"), "Returns the index of the root component")
+      .def("getMemorySize", &ComponentInfo::getMemorySize, arg("self"),
+           "Return the memory footprint of the component info in bytes.");
 }

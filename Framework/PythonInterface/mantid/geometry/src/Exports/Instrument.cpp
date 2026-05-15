@@ -62,9 +62,6 @@ void export_Instrument() {
       .def("getNumberDetectors", &Instrument::getNumberDetectors,
            Instrument_getNumberDetectors((arg("self"), arg("skipMonitors") = false)))
 
-      .def("getMemorySize", &Instrument::getMemorySize, arg("self"),
-           "Return the footprint of the instrument in memory in bytes")
-
       .def("getReferenceFrame", (std::shared_ptr<const ReferenceFrame> (Instrument::*)())&Instrument::getReferenceFrame,
            arg("self"), return_value_policy<RemoveConstSharedPtr>(),
            "Returns the :class:`~mantid.geometry.ReferenceFrame` attached that "
@@ -89,5 +86,7 @@ void export_Instrument() {
            "Return reference to the base instrument")
 
       .def("findRectDetectors", &Instrument::findRectDetectors, arg("self"), "Return a list of rectangular detectors.")
-      .def("findGridDetectors", &Instrument::findGridDetectors, arg("self"), "Return a list of grid detectors.");
+      .def("findGridDetectors", &Instrument::findGridDetectors, arg("self"), "Return a list of grid detectors.")
+      .def("getMemorySize", &Instrument::getMemorySize, arg("self"),
+           "Return the memory footprint of the instrument in bytes.");
 }

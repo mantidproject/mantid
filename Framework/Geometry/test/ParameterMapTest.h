@@ -691,7 +691,22 @@ private:
     auto origParameter = pmap.get(m_testInstrument.get(), name);
     TS_ASSERT_EQUALS(origTypedValue, origParameter->value<ValueType>());
   }
-  // private instrument
+
+public:
+  void test_getMemorySize_nonzero() {
+    const ParameterMap empty;
+    TS_ASSERT_LESS_THAN(static_cast<size_t>(0), empty.getMemorySize());
+  }
+
+  void test_getMemorySize_grows_with_parameters() {
+    ParameterMap pmap;
+    const size_t before = pmap.getMemorySize();
+    auto comp = m_testInstrument->getChild(0);
+    pmap.addDouble(comp.get(), "testparam", 3.14);
+    TS_ASSERT_LESS_THAN(before, pmap.getMemorySize());
+  }
+
+private:
   Instrument_sptr m_testInstrument;
 };
 

@@ -40,11 +40,6 @@ class InstrumentTest(unittest.TestCase):
         num_detectors = self.__testws.getInstrument().getNumberDetectors()
         self.assertEqual(num_detectors, 1)
 
-    def test_getMemorySize(self):
-        memory_size = self.__testws.getInstrument().getMemorySize()
-        self.assertIsInstance(memory_size, int)
-        self.assertGreater(memory_size, 0)
-
     def test_getReferenceFrame(self):
         frame = self.__testws.getInstrument().getReferenceFrame()
         self.assertTrue(isinstance(frame, ReferenceFrame))
@@ -75,6 +70,11 @@ class InstrumentTest(unittest.TestCase):
         inst = self.__testws.getInstrument()
         base_inst = inst.getBaseInstrument()
         self.assertEqual("testInst", base_inst.getName())
+
+    def test_getMemorySize(self):
+        mem = self.__testws.getInstrument().getMemorySize()
+        self.assertIsInstance(mem, int)
+        self.assertGreater(mem, 0)
 
 
 if __name__ == "__main__":

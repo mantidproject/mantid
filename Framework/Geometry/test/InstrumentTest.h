@@ -169,19 +169,6 @@ public:
 
   void testBeamDirection() { TS_ASSERT_EQUALS(instrument.getBeamDirection(), V3D(0, 0, 1)); }
 
-  void testGetMemorySizeReturnsPositiveValue() { TS_ASSERT_LESS_THAN(0u, instrument.getMemorySize()); }
-
-  void testGetMemorySizeIncreasesWhenComponentAdded() {
-    Instrument i;
-    const auto baseSize = i.getMemorySize();
-
-    auto *detector = new Detector("det", 1234, nullptr);
-    i.add(detector);
-    i.markAsDetector(detector);
-
-    TS_ASSERT_LESS_THAN(baseSize, i.getMemorySize());
-  }
-
   void testNumberDetectors() { // THIS MUST BE RUN BEFORE testDetector!!!!!!!
     // that test adds a detector to the instrument
     std::size_t ndets(3);
@@ -719,6 +706,21 @@ public:
     instrument->add(det);
     instrument->markAsDetectorIncomplete(det);
     TSM_ASSERT_THROWS("Duplicate ID, should throw", instrument->markAsDetectorFinalize(), std::runtime_error &);
+  }
+
+  void test_getMemorySize_nonzero() { TS_ASSERT_LESS_THAN(static_cast<size_t>(0), instrument.getMemorySize()); }
+
+  void test_getMemorySize_scales_with_instrument_size() {
+    auto small = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    auto large = ComponentCreationHelper::createTestInstrumentCylindrical(10);
+    TS_ASSERT_LESS_THAN(small->getMemorySize(), large->getMemorySize());
+  }
+
+  void test_getMemorySize_parametrized_larger_than_base() {
+    auto base = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    auto pmap = std::make_shared<ParameterMap>();
+    auto parametrized = std::make_shared<Instrument>(base, pmap);
+    TS_ASSERT_LESS_THAN(base->getMemorySize(), parametrized->getMemorySize());
   }
 
 private:

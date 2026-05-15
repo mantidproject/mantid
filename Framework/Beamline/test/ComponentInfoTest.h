@@ -1208,4 +1208,15 @@ public:
     // has not gone through any merge operations.
     TS_ASSERT(!d.isEquivalent(f));
   }
+
+  void test_getMemorySize_nonzero() {
+    auto [compInfo, detInfo] = makeFlatTree(PosVec(1), RotVec(1));
+    TS_ASSERT_LESS_THAN(static_cast<size_t>(0), compInfo->getMemorySize());
+  }
+
+  void test_getMemorySize_scales_with_size() {
+    auto [compSmall, detSmall] = makeFlatTree(PosVec(2), RotVec(2));
+    auto [compLarge, detLarge] = makeFlatTree(PosVec(100), RotVec(100));
+    TS_ASSERT_LESS_THAN(compSmall->getMemorySize(), compLarge->getMemorySize());
+  }
 };
