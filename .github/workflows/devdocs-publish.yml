@@ -30,7 +30,7 @@ jobs:
 
       - name: Read pixi version
         id: pixi-version
-        run: echo "version=$(cat .pixi-version)" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(tr -d '[:space:]' < .pixi-version)" >> "$GITHUB_OUTPUT"
 
       - name: Setup pixi
         if: steps.changes.outputs.devsite == 'true'
@@ -41,7 +41,7 @@ jobs:
 
       - name: Build dev-docs
         if: steps.changes.outputs.devsite == 'true'
-        uses: ./.github/actions/devsite-build
+        run: pixi run --manifest-path pixi.toml -e devsite build-devdocs
 
       - name: Checkout developer site repository
         if: ${{ steps.changes.outputs.devsite == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}

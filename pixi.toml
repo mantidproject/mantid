@@ -50,6 +50,9 @@ sphinx = "*"
 mantid-sphinx-theme = "*"
 myst-parser = "*"
 
+[feature.devsite.tasks.build-devdocs]
+cmd = "mkdir -p build_devsite_html && LC_ALL=C && python -m sphinx dev-docs/source build_devsite_html"
+description = "Build developer documentation"
 
 [feature.publish-gh.target.linux-64.dependencies]
 gh = "*"
