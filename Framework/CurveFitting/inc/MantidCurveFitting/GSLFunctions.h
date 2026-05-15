@@ -17,6 +17,8 @@
 
 namespace Mantid {
 namespace CurveFitting {
+
+template <typename T> int sgn(T val) { return (T(0) < val) - (val < T(0)); }
 /**
 Various GSL specific functions used GSL specific minimizers
 
@@ -27,7 +29,7 @@ Various GSL specific functions used GSL specific minimizers
 /// Structure to contain least squares data and used by GSL
 struct GSL_FitData {
   /// Constructor
-  GSL_FitData(const std::shared_ptr<CostFunctions::CostFuncLeastSquares> &cf);
+  GSL_FitData(const std::shared_ptr<CostFunctions::CostFuncFitting> &cf);
   /// Destructor
   ~GSL_FitData();
   /// number of points to be fitted (size of X, Y and sqrtWeightData arrays)
@@ -36,11 +38,12 @@ struct GSL_FitData {
   size_t p;
   /// Pointer to the function
   API::IFunction_sptr function;
-  std::shared_ptr<CostFunctions::CostFuncLeastSquares> costFunction;
-  /// Initial function parameters
+  std::shared_ptr<CostFunctions::CostFuncFitting> costFunction;
+  /// Initial function parameters∫
   gsl_vector *initFuncParams;
   /// Jacobi matrix interface
   JacobianImpl1<EigenMatrix> J;
+  bool isPoisson;
 
   // this is presently commented out in the implementation
   // gsl_matrix *holdCalculatedJacobian; ///< cache of the calculated jacobian
