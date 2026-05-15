@@ -19,12 +19,11 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 
-#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/MultiFileNameParser.h"
 #include <boost/lexical_cast.hpp>
 
 #include <algorithm>
 #include <cctype>
-#include <regex>
 
 #include <boost/algorithm/string.hpp>
 
@@ -468,88 +467,32 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
   if (!error.empty())
     throw std::invalid_argument(error);
 
-  std::vector<FileInfo> fileInfos;
+  const std::string stripped = Kernel::Strings::strip(hintstr);
 
-  std::string hintsStr = Kernel::Strings::strip(hintstr);
+  // Use MultiFileNameParser to split on commas, expand run ranges and step
+  // sequences, and normalise instrument prefixes — the same parser that
+  // MultipleFileProperty uses, so both paths through the system agree on what
+  // e.g. "CNCS10-15" or "CNCS10:20:2" means.
+  Kernel::MultiFileNameParsing::Parser parser;
+  parser.setTrimWhiteSpaces(true);
 
-  // split the hint string into individual hints, then expand any ranges.
-  // first splits based on common separators, the expands any range as defined by dash
-  std::shared_ptr<Kernel::InstrumentInfo> cachedInstr;
-
-  Mantid::Kernel::StringTokenizer hints(
-      hintsStr, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-
-  auto h = hints.begin();
-  for (; h != hints.end(); ++h) {
-
-    // First check if the hint looks like a filename (has an extension) and check if it exists. If so, add it to the
-    // list and move on to the next hint.
-    auto filePath = checkFilename(*h);
-    if (!filePath.empty()) {
-      fileInfos.emplace_back(*h, true, filePath);
-      continue;
-    }
-
-    // Quick check for a filename
-    bool fileSuspected = false;
-    // Assume if the hint contains either a "/" or "\" it is a filename..
-    if ((*h).find("\\") != std::string::npos) {
-      fileSuspected = true;
-    }
-    if ((*h).find("/") != std::string::npos) {
-      fileSuspected = true;
-    }
-    if ((*h).find(ALLOWED_SUFFIX) != std::string::npos) {
-      fileSuspected = true;
-    }
-
-    Mantid::Kernel::StringTokenizer range(
-        *h, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-    if ((range.count() > 2) && (!fileSuspected)) {
-      throw std::invalid_argument("Malformed range of runs: " + *h);
-    } else if ((range.count() == 2) && (!fileSuspected)) {
-      if (range[0].empty() || range[1].empty()) {
-        throw std::invalid_argument("Malformed range of runs: " + *h);
-      }
-
-      if (!std::regex_match(range[1], std::regex("\\d+"))) {
-        throw std::invalid_argument("Malformed range of runs: " + *h + ". The end of the range should be a number.");
-      }
-      cachedInstr = std::make_shared<Kernel::InstrumentInfo>(
-          this->getInstrument(range[0], true, cachedInstr ? cachedInstr->shortName() : std::string()));
-      std::pair<std::string, std::string> p1 = toInstrumentAndNumber(range[0], *cachedInstr);
-      auto run_start_num = boost::lexical_cast<unsigned int>(p1.second);
-      auto run_end_num = boost::lexical_cast<unsigned int>(range[1]);
-      if (run_end_num < run_start_num) {
-        throw std::invalid_argument("Malformed range of runs: " + *h);
-      }
-
-      for (auto i = run_start_num; i <= run_end_num; ++i) {
-        fileInfos.emplace_back(cachedInstr->shortName() + std::to_string(i), false, "", cachedInstr);
-      }
-    } else {
-      cachedInstr = std::make_shared<Kernel::InstrumentInfo>(
-          this->getInstrument(*h, true, cachedInstr ? cachedInstr->shortName() : std::string()));
-      fileInfos.emplace_back(*h, false, "", cachedInstr);
-    }
+  std::vector<std::string> hints;
+  try {
+    parser.parse(stripped);
+    for (const auto &group : parser.fileNames())
+      for (const auto &name : group)
+        hints.emplace_back(name);
+  } catch (...) {
+    // Parser couldn't handle the input (e.g. a bare file path or a hint with
+    // a suffix like "-add").  Pass the whole string through as a single hint
+    // and let findRuns(vector) deal with it.
   }
 
-  processFileInfos(fileInfos, extensionsProvided, useOnlyExtensionsProvided);
+  if (hints.empty())
+    hints.emplace_back(stripped);
 
-  // Now gather the results and log any failures
-  std::vector<std::filesystem::path> res;
-  for (const auto &fileInfo : fileInfos) {
-    if (!fileInfo.found) {
-      g_log.warning() << "Failed to find file for hint '" << fileInfo.hint << "'\n";
-      throw std::invalid_argument("Unable to find file: search object " + fileInfo.hint);
-    }
-    if (fileInfo.error) {
-      g_log.error() << "Error finding file for hint '" << fileInfo.hint << "': " << fileInfo.errorMsg << "\n";
-    }
-    res.emplace_back(fileInfo.path);
-  }
-  return res;
-};
+  return findRuns(hints, extensionsProvided, useOnlyExtensionsProvided);
+}
 
 void FileFinderImpl::processFileInfos(std::vector<FileInfo> &fileInfos,
                                       const std::vector<std::string> &extensionsProvided,

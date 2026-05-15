@@ -600,8 +600,7 @@ public:
     std::string startOfRange = boost::lexical_cast<std::string>(m_filesInDir - 10);
     std::string accidentalEndOfRange = "99999";
     range << startOfRange << "-" << accidentalEndOfRange;
-    TS_ASSERT_THROWS(files = fileFinder.findRuns(range.str().c_str()),
-                     const Mantid::Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(files = fileFinder.findRuns(range.str().c_str()), const std::invalid_argument &);
 
     fileFinder.setCaseSensitive(startingCaseOption);
   }
