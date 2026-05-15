@@ -17,6 +17,7 @@
 #include "MantidNexus/NexusFile.h"
 #include <boost/algorithm/string.hpp>
 #include <cstring>
+#include <numeric>
 
 #ifdef _WIN32
 #define strcasecmp _stricmp
@@ -1144,13 +1145,19 @@ size_t ParameterMap::getMemorySize() const {
       parameterObjectsMem += param->m_description.capacity();
     }
   }
-  // m_cacheLocMap and m_cacheRotMap: position/rotation caches; count the heap objects
+  // m_parameterFileNames: vector of strings; sizeof(*this) covers the vector object, count the heap buffer
+  const size_t fileNamesMem = m_parameterFileNames.size() * sizeof(std::string) +
+                              std::accumulate(m_parameterFileNames.cbegin(), m_parameterFileNames.cend(), size_t{0},
+                                              [](size_t acc, const auto &s) { return acc + s.capacity(); });
+  // m_cacheLocMap and m_cacheRotMap: count the heap Cache objects; the internal std::map entries are not
+  // counted because Kernel::Cache::size() is non-const and cannot be called here.
   const size_t cacheLocMem = m_cacheLocMap ? sizeof(*m_cacheLocMap) : 0;
   const size_t cacheRotMem = m_cacheRotMap ? sizeof(*m_cacheRotMap) : 0;
   // m_detectorInfo and m_componentInfo: owned by ParameterMap for parametrized instruments
   const size_t detectorInfoMem = m_detectorInfo ? m_detectorInfo->getMemorySize() : 0;
   const size_t componentInfoMem = m_componentInfo ? m_componentInfo->getMemorySize() : 0;
-  return sizeof(*this) + mapMem + parameterObjectsMem + cacheLocMem + cacheRotMem + detectorInfoMem + componentInfoMem;
+  return sizeof(*this) + mapMem + parameterObjectsMem + fileNamesMem + cacheLocMem + cacheRotMem + detectorInfoMem +
+         componentInfoMem;
 }
 
 } // namespace Mantid::Geometry
