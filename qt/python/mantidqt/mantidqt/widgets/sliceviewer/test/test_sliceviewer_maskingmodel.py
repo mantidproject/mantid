@@ -128,7 +128,7 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
 
     def test_invert_masking_clicked(self):
         self.model._auto_update_mask_file = True
-        self.model._masks = ["test_mask"]
+        self.model._active_mask = "test_mask"
         export_selectors = MagicMock()
         self.model.export_selectors = export_selectors
 
