@@ -604,8 +604,12 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec, const std::vector<std::vecto
     for (i = 1; i < spectra[id].size(); ++i)
       if (TOF < time[id][i])
         break;
-    spect = spectra[id][i - 1] +
-            (TOF - time[id][i - 1]) / (time[id][i] - time[id][i - 1]) * (spectra[id][i] - spectra[id][i - 1]);
+    if (i < spectra[id].size()) {
+      spect = spectra[id][i - 1] +
+              (TOF - time[id][i - 1]) / (time[id][i] - time[id][i - 1]) * (spectra[id][i] - spectra[id][i - 1]);
+    } else {
+      spect = spectra[id].back();
+    }
   }
 
   return spect;

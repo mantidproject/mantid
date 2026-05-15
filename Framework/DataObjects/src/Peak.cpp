@@ -674,23 +674,18 @@ bool Peak::findDetector(const Mantid::Kernel::V3D &beam, const InstrumentRayTrac
         V3D beam1 = beam + gapDir;
         tracer.traceFromSample(normalize(beam1));
         IDetector_const_sptr det1 = tracer.getDetectorResult();
+        if (!det1)
+          continue;
         V3D beam2 = beam - gapDir;
         tracer.traceFromSample(normalize(beam2));
         IDetector_const_sptr det2 = tracer.getDetectorResult();
-        if (det1 && det2) {
-          // compute the cosAngle to select the detector closes to beam
-          if (beam1.cosAngle(beam) > beam2.cosAngle(beam)) {
-            // det1 is closer, use det1
-            this->setDetectorID(static_cast<int>(det1->getID()));
-            detPos = det1->getPos();
-          } else {
-            // det2 is closer, let's use det2
-            this->setDetectorID(static_cast<int>(det2->getID()));
-            detPos = det2->getPos();
-          }
-          found = true;
-          break;
-        }
+        if (!det2)
+          continue;
+        const auto &det = beam1.cosAngle(beam) > beam2.cosAngle(beam) ? det1 : det2;
+        this->setDetectorID(static_cast<int>(det->getID()));
+        detPos = det->getPos();
+        found = true;
+        break;
       }
     }
   }
