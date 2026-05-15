@@ -33,8 +33,28 @@ In version 2 of this algorithm:
     - There is no rebin in constant energy.
     - In non-calibration fits, a debug table with information about sample temperature can be output if `CreateDebugTable` is set to `True`.
 
-See usage script below.
 
+If no `FitParametersTable` is provided on a calibration run, the background parameters will be estimated from the data.
+This generates an output with the suffix `_Parameters` on the ADS containing, among others, background estimation parameters.
+This table can be used on successive calls to input background parameters. If custom background parameters need to be provided in a calibration run,
+a table workspace with the appropriate parameters can be created from the following script.
+
+.. code:: python
+
+    def create_fit_parameters_table(bg0, bg1, bg2, name="FitParametersTable"):
+        table = CreateEmptyTableWorkspace(OutputWorkspace=name)
+
+        table.addColumn("str","Name")
+        table.addColumn("float","Value")
+
+        for idx, bg in enumerate([bg0, bg1, bg2]):
+            table.addRow({"Name":f"Bg{idx}", "Value": bg})
+        return table
+
+    table = create_fit_parameters_table(10, 0.01, 0.000004)
+    cal_ws, params_table = PEARLTransfit(Files='PEARL00112777', FoilType="Hf01", Calibration=True, FitParametersTable=table, Output='pearl_cal')
+
+See script below for usage.
 
 .. testcode:: PEARLTransfitV2Example
 
