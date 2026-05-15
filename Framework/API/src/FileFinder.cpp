@@ -393,12 +393,7 @@ const API::Result<std::filesystem::path> FileFinderImpl::findRun(const std::stri
   auto fileInfo = FileInfo{.hint = hintsStr,
                            .found = !filePath.empty(),
                            .path = filePath,
-                           .instr = std::make_shared<Kernel::InstrumentInfo>(this->getInstrument(hintsStr, true)),
-                           .error = false,
-                           .errorMsg = "",
-                           .filenames = {},
-                           .extensionsToSearch = {},
-                           .archs = {}};
+                           .instr = std::make_shared<Kernel::InstrumentInfo>(this->getInstrument(hintsStr, true))};
 
   std::vector<FileInfo> fileInfos{fileInfo};
   processFileInfos(fileInfos, extensionsProvided, useOnlyExtensionsProvided);
@@ -522,7 +517,7 @@ void FileFinderImpl::processFileInfos(std::vector<FileInfo> &fileInfos,
                                       const std::vector<std::string> &extensionsProvided,
                                       bool useOnlyExtensionsProvided) const {
   for (auto &fileInfo : fileInfos) {
-    if (fileInfo.found)
+    if (fileInfo.found || fileInfo.error)
       continue;
     g_log.debug() << "  " << fileInfo.hint << " instrument: " << (fileInfo.instr ? fileInfo.instr->name() : "null")
                   << "\n";
@@ -600,12 +595,12 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::vector<st
   for (const auto &hint : hints) {
     auto filePath = checkFilename(hint);
     if (!filePath.empty()) {
-      fileInfos.emplace_back(hint, true, filePath);
+      fileInfos.emplace_back(FileInfo{.hint = hint, .found = true, .path = filePath});
       continue;
     }
     cachedInstr = std::make_shared<Kernel::InstrumentInfo>(
         this->getInstrument(hint, true, cachedInstr ? cachedInstr->shortName() : std::string()));
-    fileInfos.emplace_back(hint, false, "", cachedInstr);
+    fileInfos.emplace_back(FileInfo{.hint = hint, .instr = cachedInstr});
   }
 
   processFileInfos(fileInfos, extensionsProvided, useOnlyExtensionsProvided);
@@ -692,7 +687,7 @@ void FileFinderImpl::performCacheSearch(std::vector<FileInfo> &fileInfos) const 
           getISISInstrumentDataCachePath(cachePathToSearch, fileInfo.filenames, fileInfo.extensionsToSearch);
 
       if (cacheFilePath) {
-        g_log.debug() << "Found file in data cache: " << cacheFilePath.result() << std::endl;
+        g_log.debug() << "Found file in data cache: " << cacheFilePath.result() << "\n";
         fileInfo.found = true;
         fileInfo.path = cacheFilePath.result();
       } else {
@@ -700,7 +695,7 @@ void FileFinderImpl::performCacheSearch(std::vector<FileInfo> &fileInfos) const 
       }
     }
   } else {
-    g_log.debug() << "Data cache directory not found, proceeding with the search." << std::endl;
+    g_log.debug() << "Data cache directory not found, proceeding with the search." << "\n";
   }
 }
 
