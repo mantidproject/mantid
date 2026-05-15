@@ -10,6 +10,9 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
+namespace PoissonLoss {
+double calculatePoissonLossLM(double observedCounts, double predicted);
+}
 namespace Mantid {
 namespace CurveFitting {
 namespace CostFunctions {
