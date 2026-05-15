@@ -9,6 +9,7 @@
 #include "../../../ISISReflectometry/GUI/Plotting/PlottingPresenter.h"
 #include "../../../ISISReflectometry/Reduction/RunsTable.h"
 #include "../ReflMockObjects.h"
+#include "PlottingTestHelpers.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -29,9 +30,15 @@ public:
   MOCK_METHOD1(setOutputOptionsEnabled, void(bool));
   MOCK_METHOD1(setAvailablePlotOutputTypes, void(std::vector<PlotOutputType> const &));
   MOCK_METHOD1(setWorkspaceItems, void(std::vector<PlottingWorkspaceTreeItem> const &));
-  MOCK_CONST_METHOD0(selectedWorkspaces, std::vector<std::string>());
+  MOCK_CONST_METHOD0(selectedWorkspaceItems, std::vector<PlottingWorkspaceSelection>());
   MOCK_CONST_METHOD0(selectedPlotOutputType, PlotOutputType());
   MOCK_CONST_METHOD0(selectedPlotOutputOptions, PlotOutputOptions());
+};
+
+class MockPlottingModel : public IPlottingModel {
+public:
+  MOCK_CONST_METHOD2(workspacesForPlotting, std::vector<std::string>(std::vector<PlottingWorkspaceSelection> const &,
+                                                                     PlotOutputOptions const &));
 };
 
 class PlottingPresenterTest : public CxxTest::TestSuite {
@@ -217,14 +224,18 @@ public:
     NiceMock<MockPlottingView> view;
     NiceMock<MockPlotter> plotter;
     PlotOptionsProvider plotOptionsProvider;
-    PlottingPresenter presenter(&view, plotter, plotOptionsProvider);
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
     auto const workspaces = std::vector<std::string>{"IvsQ_12345", "IvsQ_22345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
     auto const options = reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Individual);
 
-    EXPECT_CALL(view, selectedWorkspaces()).Times(1).WillOnce(Return(workspaces));
-    EXPECT_CALL(view, selectedPlotOutputOptions())
+    EXPECT_CALL(view, selectedWorkspaceItems()).Times(1).WillOnce(Return(selectedWorkspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
         .Times(1)
-        .WillOnce(Return(PlotOutputOptions{PlotOutputType::ReflectivityCurve}));
+        .WillOnce(Return(workspaces));
     EXPECT_CALL(plotter, plot(PlotRequest{{"IvsQ_12345"}, options})).Times(1);
     EXPECT_CALL(plotter, plot(PlotRequest{{"IvsQ_22345"}, options})).Times(1);
 
@@ -235,13 +246,17 @@ public:
     NiceMock<MockPlottingView> view;
     NiceMock<MockPlotter> plotter;
     PlotOptionsProvider plotOptionsProvider;
-    PlottingPresenter presenter(&view, plotter, plotOptionsProvider);
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
     auto const workspaces = std::vector<std::string>{"IvsQ_12345", "IvsQ_22345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
 
-    EXPECT_CALL(view, selectedWorkspaces()).Times(1).WillOnce(Return(workspaces));
-    EXPECT_CALL(view, selectedPlotOutputOptions())
+    EXPECT_CALL(view, selectedWorkspaceItems()).Times(1).WillOnce(Return(selectedWorkspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
         .Times(1)
-        .WillOnce(Return(PlotOutputOptions{PlotOutputType::ReflectivityCurve}));
+        .WillOnce(Return(workspaces));
     EXPECT_CALL(plotter, plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve,
                                                                                    PlotLayout::Overplot)}))
         .Times(1);
@@ -253,13 +268,17 @@ public:
     NiceMock<MockPlottingView> view;
     NiceMock<MockPlotter> plotter;
     PlotOptionsProvider plotOptionsProvider;
-    PlottingPresenter presenter(&view, plotter, plotOptionsProvider);
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
     auto const workspaces = std::vector<std::string>{"IvsQ_12345", "IvsQ_22345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
 
-    EXPECT_CALL(view, selectedWorkspaces()).Times(1).WillOnce(Return(workspaces));
-    EXPECT_CALL(view, selectedPlotOutputOptions())
+    EXPECT_CALL(view, selectedWorkspaceItems()).Times(1).WillOnce(Return(selectedWorkspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
         .Times(1)
-        .WillOnce(Return(PlotOutputOptions{PlotOutputType::ReflectivityCurve}));
+        .WillOnce(Return(workspaces));
     EXPECT_CALL(plotter, plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve,
                                                                                    PlotLayout::Tiled)}))
         .Times(1);
@@ -271,16 +290,47 @@ public:
     NiceMock<MockPlottingView> view;
     NiceMock<MockPlotter> plotter;
     PlotOptionsProvider plotOptionsProvider;
-    PlottingPresenter presenter(&view, plotter, plotOptionsProvider);
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
 
-    EXPECT_CALL(view, selectedWorkspaces()).Times(1).WillOnce(Return(std::vector<std::string>{}));
+    EXPECT_CALL(view, selectedWorkspaceItems()).Times(1).WillOnce(Return(std::vector<PlottingWorkspaceSelection>{}));
     EXPECT_CALL(view, selectedPlotOutputOptions()).Times(0);
+    EXPECT_CALL(plottingModel, workspacesForPlotting(testing::_, testing::_)).Times(0);
     EXPECT_CALL(plotter, plot(testing::_)).Times(0);
 
     presenter.notifyPlotIndividualClicked();
   }
 
+  void testPlotDoesNothingWhenModelReturnsNoWorkspaces() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    auto const workspaces = std::vector<std::string>{"IvsQ_binned_group"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::SpinAsymmetry};
+
+    EXPECT_CALL(view, selectedWorkspaceItems()).Times(1).WillOnce(Return(selectedWorkspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
+        .Times(1)
+        .WillOnce(Return(std::vector<std::string>{}));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(0);
+
+    presenter.notifyPlotOverplotClicked();
+  }
+
 private:
+  std::vector<PlottingWorkspaceSelection> workspaceSelections(std::vector<std::string> const &workspaceNames) {
+    auto selections = std::vector<PlottingWorkspaceSelection>{};
+    selections.reserve(workspaceNames.size());
+    for (auto const &workspaceName : workspaceNames) {
+      selections.push_back({workspaceName, PlottingWorkspaceOutputType::IvsQ, "Group 1", {"12345"}, ""});
+    }
+    return selections;
+  }
+
   PlottingWorkspaceTreeItem groupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) {
     return {
         std::move(label),   PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceOutputType::None, "Group 1", {}, "",

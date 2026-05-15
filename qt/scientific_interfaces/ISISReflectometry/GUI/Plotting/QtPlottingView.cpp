@@ -12,6 +12,7 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QStandardItem>
+#include <QStringList>
 #include <QStyledItemDelegate>
 #include <algorithm>
 #include <stdexcept>
@@ -22,6 +23,9 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace {
 auto constexpr itemTypeRole = Qt::UserRole + 1;
 auto constexpr outputTypeRole = Qt::UserRole + 2;
+auto constexpr workspaceNameRole = Qt::UserRole + 3;
+auto constexpr groupNameRole = Qt::UserRole + 4;
+auto constexpr runNumbersRole = Qt::UserRole + 5;
 
 struct PlotSelectionBehaviour {
   std::vector<PlottingWorkspaceTreeItemType> selectableItemTypes;
@@ -36,6 +40,23 @@ template <typename Enum> int enumIndex(Enum value) { return static_cast<int>(val
 
 template <typename T> bool contains(std::vector<T> const &values, T value) {
   return std::find(values.cbegin(), values.cend(), value) != values.cend();
+}
+
+QStringList toQStringList(std::vector<std::string> const &values) {
+  auto result = QStringList{};
+  for (auto const &value : values) {
+    result.push_back(QString::fromStdString(value));
+  }
+  return result;
+}
+
+std::vector<std::string> toVector(QStringList const &values) {
+  auto result = std::vector<std::string>{};
+  result.reserve(values.size());
+  for (auto const &value : values) {
+    result.emplace_back(value.toStdString());
+  }
+  return result;
 }
 
 PlotSelectionBehaviour freeSelectionBehaviour() {
@@ -270,6 +291,9 @@ void QtPlottingView::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeIte
   for (auto *rowItem : {treeItem, outputTypeItem, itemLabel}) {
     rowItem->setData(enumIndex(item.itemType), itemTypeRole);
     rowItem->setData(enumIndex(item.outputType), outputTypeRole);
+    rowItem->setData(QString::fromStdString(item.workspaceName), workspaceNameRole);
+    rowItem->setData(QString::fromStdString(item.groupName), groupNameRole);
+    rowItem->setData(toQStringList(item.runNumbers), runNumbersRole);
   }
   parent->appendRow({treeItem, outputTypeItem, itemLabel});
   for (auto const &child : item.children) {
@@ -277,11 +301,15 @@ void QtPlottingView::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeIte
   }
 }
 
-std::vector<std::string> QtPlottingView::selectedWorkspaces() const {
-  auto workspaces = std::vector<std::string>{};
+std::vector<PlottingWorkspaceSelection> QtPlottingView::selectedWorkspaceItems() const {
+  auto workspaces = std::vector<PlottingWorkspaceSelection>{};
   for (auto const &index : m_ui.workspaceTree->selectionModel()->selectedRows()) {
-    if (isWorkspaceItem(index) && isWorkspaceIncludedForCurrentPlotOutputType(index)) {
-      workspaces.emplace_back(index.sibling(index.row(), ItemColumn).data().toString().toStdString());
+    auto const selectedIndex = itemIndex(index);
+    if (itemType(selectedIndex) == PlottingWorkspaceTreeItemType::Workspace &&
+        isWorkspaceIncludedForCurrentPlotOutputType(selectedIndex)) {
+      workspaces.emplace_back(PlottingWorkspaceSelection{workspaceName(selectedIndex), outputType(selectedIndex),
+                                                         groupName(selectedIndex), runNumbers(selectedIndex),
+                                                         workspaceGroupName(selectedIndex)});
     }
   }
   return workspaces;
@@ -338,6 +366,29 @@ PlottingWorkspaceTreeItemType QtPlottingView::itemType(QModelIndex const &index)
 
 PlottingWorkspaceOutputType QtPlottingView::outputType(QModelIndex const &index) const {
   return static_cast<PlottingWorkspaceOutputType>(itemIndex(index).data(outputTypeRole).toInt());
+}
+
+std::string QtPlottingView::groupName(QModelIndex const &index) const {
+  return itemIndex(index).data(groupNameRole).toString().toStdString();
+}
+
+std::vector<std::string> QtPlottingView::runNumbers(QModelIndex const &index) const {
+  return toVector(itemIndex(index).data(runNumbersRole).toStringList());
+}
+
+std::string QtPlottingView::workspaceName(QModelIndex const &index) const {
+  return itemIndex(index).data(workspaceNameRole).toString().toStdString();
+}
+
+std::string QtPlottingView::workspaceGroupName(QModelIndex const &index) const {
+  auto ancestor = itemIndex(index).parent();
+  while (ancestor.isValid()) {
+    if (itemType(ancestor) == PlottingWorkspaceTreeItemType::WorkspaceGroup) {
+      return workspaceName(ancestor);
+    }
+    ancestor = ancestor.parent();
+  }
+  return "";
 }
 
 bool QtPlottingView::isSelectableForCurrentPlotOutputType(QModelIndex const &index) const {

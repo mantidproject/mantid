@@ -24,6 +24,8 @@ public:
 
   PlotterTestQt5() { Mantid::API::FrameworkManager::Instance(); }
 
+  void tearDown() override { closeAllFigures(); }
+
   void testReflectometryPlot() {
     // Just test that it doesn't segfault when plotting as nothing is returned
     // or accessible from here to test
@@ -57,7 +59,6 @@ public:
                       MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Overplot)});
 
     TS_ASSERT_EQUALS(figureCount(), 2);
-    closeAllFigures();
   }
 
 private:
