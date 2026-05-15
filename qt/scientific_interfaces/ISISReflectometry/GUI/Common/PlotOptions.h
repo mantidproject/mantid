@@ -56,26 +56,6 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotRequest {
   PlotOptions options;
 };
 
-inline bool operator==(PlotAxis const &lhs, PlotAxis const &rhs) {
-  return lhs.label == rhs.label && lhs.unit == rhs.unit && lhs.scale == rhs.scale;
-}
-
-inline bool operator!=(PlotAxis const &lhs, PlotAxis const &rhs) { return !(lhs == rhs); }
-
-inline bool operator==(PlotOptions const &lhs, PlotOptions const &rhs) {
-  return lhs.outputType == rhs.outputType && lhs.plotStyle == rhs.plotStyle && lhs.layout == rhs.layout &&
-         lhs.xAxis == rhs.xAxis && lhs.yAxis == rhs.yAxis && lhs.zAxis == rhs.zAxis &&
-         lhs.showErrors == rhs.showErrors && lhs.windowTitle == rhs.windowTitle;
-}
-
-inline bool operator!=(PlotOptions const &lhs, PlotOptions const &rhs) { return !(lhs == rhs); }
-
-inline bool operator==(PlotRequest const &lhs, PlotRequest const &rhs) {
-  return lhs.workspaces == rhs.workspaces && lhs.options == rhs.options;
-}
-
-inline bool operator!=(PlotRequest const &lhs, PlotRequest const &rhs) { return !(lhs == rhs); }
-
 MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions reflectivityCurvePlotOptions(PlotOutputType outputType, PlotLayout layout);
 MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions detectorMapPlotOptions(DetectorMapXAxis xAxis, DetectorMapYAxis yAxis,
                                                                   PlotLayout layout);
