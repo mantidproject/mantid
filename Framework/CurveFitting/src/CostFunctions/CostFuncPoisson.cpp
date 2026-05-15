@@ -21,10 +21,24 @@
 
 using namespace Mantid::API;
 
-namespace {
+namespace PoissonLoss {
 // predicted < 0 is forbidden as it causes inf cost
 const double absoluteCutOff = 0.0;
 const double effectiveCutOff = 0.0001;
+
+// calculate loss for the LM minimizer of gsl
+double calculatePoissonLossLM(double observedCounts, double predicted) {
+  double retVal = (predicted - observedCounts);
+  if (predicted <= absoluteCutOff) {
+    return std::numeric_limits<double>::infinity();
+  }
+  // at observed = 0 the Poisson function reduces to predicted - observed
+  if (observedCounts != 0.0) {
+    retVal += observedCounts * (log(observedCounts) - log(predicted));
+  }
+
+  return retVal;
+}
 
 double calculatePoissonLoss(double observedCounts, double predicted) {
   double retVal = (predicted - observedCounts);
@@ -32,9 +46,10 @@ double calculatePoissonLoss(double observedCounts, double predicted) {
   return retVal;
 }
 
-} // namespace
+} // namespace PoissonLoss
 
 namespace Mantid::CurveFitting::CostFunctions {
+using namespace PoissonLoss;
 
 DECLARE_COSTFUNCTION(CostFuncPoisson, Poisson)
 //----------------------------------------------------------------------------------------------
