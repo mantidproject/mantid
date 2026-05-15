@@ -930,7 +930,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         # empty string means it is not used
         finalunfocusname = self.getPropertyValue("UnfocussedWorkspace")
 
-        # determing compression (needed by __createLoader, called from __runCharacterizationsForSlim)
+        # determining compression (needed by __createLoader, called from __runCharacterizationsForSlim)
         self.do_compression = determineCompression(
             filename=self._filenames[0], compression=self.compression_threshold, chunking=self.chunkSize, absorption=self.absorption
         )
