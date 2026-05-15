@@ -26,6 +26,7 @@
 #include <cctype>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 
 #include <filesystem>
 #include <json/value.h>
@@ -43,6 +44,12 @@ Mantid::Kernel::Logger g_log("FileFinder");
  * @returns true if extension contains a "*", else false.
  */
 bool containsWildCard(const std::string &ext) { return std::string::npos != ext.find('*'); }
+
+// Commas that act as separators between tokens: digit→non-digit or
+// non-digit→non-digit.  Digit→digit commas (e.g. "15196,15197") are left
+// for the MultiFileNameParsing::Parser to handle as run-number lists.
+// Mirrors MultipleFileProperty's REGEX_COMMA_OPERATORS.
+const boost::regex COMMA_OPERATORS(R"((?<=\d)\s*,\s*(?=\D)|(?<=\D)\s*,\s*(?=\D))");
 
 bool isASCII(const std::string &str) {
   return !std::any_of(str.cbegin(), str.cend(), [](char c) { return static_cast<unsigned char>(c) > 127; });
@@ -469,27 +476,44 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
 
   const std::string stripped = Kernel::Strings::strip(hintstr);
 
-  // Use MultiFileNameParser to split on commas, expand run ranges and step
-  // sequences, and normalise instrument prefixes — the same parser that
-  // MultipleFileProperty uses, so both paths through the system agree on what
-  // e.g. "CNCS10-15" or "CNCS10:20:2" means.
+  // Pre-split on comma operators (digit→non-digit or non-digit→non-digit)
+  // before calling the parser, mirroring MultipleFileProperty's behaviour.
+  // This ensures that comma-separated filenames with extensions (e.g.
+  // "A.nxs, B.nxs") are split into separate tokens rather than being
+  // misidentified as a single filename by the parser's extension detection.
+  // Digit→digit commas (e.g. "INST15196,15197") are left intact so the
+  // parser can expand them as run-number lists.
+  std::vector<std::string> commaTokens;
+  boost::sregex_token_iterator end;
+  boost::sregex_token_iterator commaIt(stripped.begin(), stripped.end(), COMMA_OPERATORS, -1);
+  for (; commaIt != end; ++commaIt)
+    commaTokens.emplace_back(commaIt->str());
+
   Kernel::MultiFileNameParsing::Parser parser;
   parser.setTrimWhiteSpaces(true);
 
   std::vector<std::string> hints;
-  try {
-    parser.parse(stripped);
-    for (const auto &group : parser.fileNames())
-      for (const auto &name : group)
-        hints.emplace_back(name);
-  } catch (...) {
-    // Parser couldn't handle the input (e.g. a bare file path or a hint with
-    // a suffix like "-add").  Pass the whole string through as a single hint
-    // and let findRuns(vector) deal with it.
+  for (const auto &token : commaTokens) {
+    // Tokens that are already full filenames (have an extension) must not go
+    // through the parser: the parser reformats the instrument prefix and
+    // applies zero-padding, producing a name that differs from the file on
+    // disk. Pass them straight through to findRuns(vector).
+    if (std::filesystem::path(token).has_extension()) {
+      hints.emplace_back(token);
+      continue;
+    }
+    try {
+      parser.parse(token);
+      for (const auto &group : parser.fileNames())
+        for (const auto &name : group)
+          hints.emplace_back(name);
+    } catch (...) {
+      // Parser couldn't handle this token (e.g. a hint with a suffix like
+      // "-add"). Pass it through as-is.
+      if (!token.empty())
+        hints.emplace_back(token);
+    }
   }
-
-  if (hints.empty())
-    hints.emplace_back(stripped);
 
   return findRuns(hints, extensionsProvided, useOnlyExtensionsProvided);
 }
