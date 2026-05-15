@@ -34,7 +34,7 @@ from mantid.api import (
 from scipy import constants
 import numpy as np
 from mantid.fitfunctions import FunctionWrapper
-from typing import Sequence, TYPE_CHECKING, Union
+from typing import Sequence, TYPE_CHECKING
 from dataclasses import dataclass
 
 if TYPE_CHECKING:
@@ -64,14 +64,14 @@ eV_TO_meV: float = 1000.0
 
 @dataclass(frozen=True)
 class FoilParameters:
-    Foil: str = "Hf01"
-    Mass: float = 177.0
-    En: float = 1.098
-    TD: float = 252.0
-    TwogG: float = 0.00192
-    Gg: float = 0.0662
-    StartE: float = 2.0
-    EndE: float = 2.7
+    Foil: str
+    Mass: float
+    En: float
+    TD: float
+    TwogG: float
+    Gg: float
+    StartE: float
+    EndE: float
 
 
 class PEARLTransfit(PythonAlgorithm):
@@ -94,7 +94,7 @@ class PEARLTransfit(PythonAlgorithm):
     def summary(self):
         return (
             "Reads high-energy neutron resonances from the downstream monitor data on the PEARL instrument,"
-            "then fits a Voigt function to them to determine the sample temperature. A calibration must be run for"
+            " then fits a Voigt function to them to determine the sample temperature. A calibration must be run for"
             " each sample pressure. Can be used on a single file, or multiple files, in which case workspaces"
             " are summed and the average taken."
         )
@@ -234,7 +234,7 @@ class PEARLTransfit(PythonAlgorithm):
 
         return func
 
-    def _prepare_outputs(self, ws: "MatrixWorkspace", table: ITableWorkspace, debug_table: Union[ITableWorkspace, None]):
+    def _prepare_outputs(self, ws: "MatrixWorkspace", table: ITableWorkspace, debug_table: ITableWorkspace | None):
         if self.getProperty("Output").isDefault:
             self.setPropertyValue("Output", "S_fit" if self.is_calib else "T_fit")
 
