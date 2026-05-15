@@ -54,9 +54,9 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
         self.disableChecking.extend(["Instrument"])  # don't check
         return self._ws_foc.name(), "299080_engggui_focusing_output_ws_bank.nxs"
 
-    # def cleanup(self):
-    #    ADS.clear()
-    #    _try_delete_cal_and_focus_dirs(CWDIR)
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
 
 
 class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
