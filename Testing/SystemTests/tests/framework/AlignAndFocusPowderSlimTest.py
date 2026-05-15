@@ -44,6 +44,7 @@ class PG3_compare_AlignAndFocusPowderFromFiles_with_FilterBadPulses_and_LogBinni
             Azimuthal=characterizations.Azimuthal,
             PreserveEvents=False,
             FilterBadPulses=95,
+            AllowSlimProcess=False,
         )
 
         AlignAndFocusPowderSlim(
@@ -102,6 +103,7 @@ class SNAP_compare_AlignAndFocusPowderFromFiles_with_LogBinning_and_GroupingWork
             Azimuthal=Azimuthal,
             PreserveEvents=False,
             OutputWorkspace=self.aafpff,
+            AllowSlimProcess=False,
         )
 
         AlignAndFocusPowderSlim(
@@ -162,6 +164,7 @@ class VULCAN_compare_AlignAndFocusPowderFromFiles_with_RaggedBinning(systemtesti
             Polar=Polar,
             Azimuthal=Azimuthal,
             OutputWorkspace=self.aafpff,
+            AllowSlimProcess=False,
         )
 
         AlignAndFocusPowderSlim(

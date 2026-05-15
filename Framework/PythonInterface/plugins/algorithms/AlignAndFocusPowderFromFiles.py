@@ -88,7 +88,6 @@ _SLIM_BLOCKING_PROPS = [
     "MaskWorkspace",
     "MaskBinTable",
     "ResampleX",
-    "PreserveEvents",
     "RemovePromptPulseWidth",
     "ResonanceFilterUnits",
     "ResonanceFilterLowerLimits",
@@ -728,21 +727,33 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         # Check that all required properties are set
         for prop in _SLIM_REQUIRED_PROPS:
             if self.getProperty(prop).isDefault:
+                self.log().debug("AlignAndFocusPowderFromFiles: cannot use slim path - required property '%s' is not set" % prop)
                 return False
 
         # Check hard blockers
         for prop in _SLIM_BLOCKING_PROPS:
             if not self.getProperty(prop).isDefault:
+                self.log().debug("AlignAndFocusPowderFromFiles: cannot use slim path - property '%s' is set" % prop)
                 return False
+
+        # AAFPSlim does not preserve events; require the caller to explicitly opt in to that behaviour
+        if self.getProperty("PreserveEvents").value:
+            self.log().debug(
+                "AlignAndFocusPowderFromFiles: cannot use slim path - PreserveEvents=True "
+                "(AlignAndFocusPowderSlim always produces histograms; set PreserveEvents=False to allow the slim path)"
+            )
+            return False
 
         # AAFPSlim only accepts a single file
         if len(self._filenames) != 1:
+            self.log().debug("AlignAndFocusPowderFromFiles: cannot use slim path - more than one file provided")
             return False
 
         # Params (TOF rebinning) must be either unset or a simple [xmin, delta, xmax] triple;
         # multi-range Params (>3 values) cannot be expressed in Slim's per-group arrays simply
         if not self.getProperty("Params").isDefault:
             if len(self.getProperty("Params").value) != 3:
+                self.log().debug("AlignAndFocusPowderFromFiles: cannot use slim path - Params has more than 3 values")
                 return False
 
         return True
@@ -919,6 +930,11 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         # empty string means it is not used
         finalunfocusname = self.getPropertyValue("UnfocussedWorkspace")
 
+        # determing compression (needed by __createLoader, called from __runCharacterizationsForSlim)
+        self.do_compression = determineCompression(
+            filename=self._filenames[0], compression=self.compression_threshold, chunking=self.chunkSize, absorption=self.absorption
+        )
+
         # ------------------------------------------------------------------ #
         # Fast path: delegate entirely to AlignAndFocusPowderSlim when the   #
         # inputs are compatible with its more restricted interface.           #
@@ -953,10 +969,6 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 return
         # ------------------------------------------------------------------ #
 
-        # determing compression
-        self.do_compression = determineCompression(
-            filename=self._filenames[0], compression=self.compression_threshold, chunking=self.chunkSize, absorption=self.absorption
-        )
         if self.useCaching:
             # unfocus check only matters if caching is requested
             if finalunfocusname != "":
