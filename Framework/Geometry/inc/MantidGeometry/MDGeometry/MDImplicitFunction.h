@@ -155,13 +155,10 @@ public:
    */
   bool isBoxTouching(const std::vector<std::vector<coord_t>> &vertexes) {
     // The first plane with NO points inside it means the box does NOT touch.
-    return std::all_of(m_planes.cbegin(), m_planes.cbegin() + m_numPlanes,
-                       [&vertexes](const MDPlane &plane) {
-                         return std::any_of(vertexes.cbegin(), vertexes.cend(),
-                                            [&plane](const std::vector<coord_t> &vertex) {
-                                              return plane.isPointBounded(vertex);
-                                            });
-                       });
+    return std::all_of(m_planes.cbegin(), m_planes.cbegin() + m_numPlanes, [&vertexes](const MDPlane &plane) {
+      return std::any_of(vertexes.cbegin(), vertexes.cend(),
+                         [&plane](const std::vector<coord_t> &vertex) { return plane.isPointBounded(vertex); });
+    });
   }
 
   //----------------------------------------------------------------------------------------------

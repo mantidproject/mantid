@@ -312,9 +312,7 @@ void vaxf_to_local(float *val, const int *n, int *errcode) {
   }
 #elif defined(IEEEFP)
   for (i = 0; i < *n; i++) {
-    if (vax_to_ieee_float(i + val) != 0) {
-      *errcode = 1;
-    }
+    vax_to_ieee_float(i + val);
   }
 #else
 #error Unknown floating point format
@@ -327,9 +325,7 @@ void local_to_vaxf(float *val, const int *n, int *errcode) {
 /* nothing required */
 #elif defined(IEEEFP)
   for (int i = 0; i < *n; i++) {
-    if (ieee_to_vax_float(i + val) != 0) {
-      *errcode = 1;
-    }
+    ieee_to_vax_float(i + val);
   }
 #else
 #error Unknown floating point format
