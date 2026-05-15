@@ -1,8 +1,21 @@
-cpp:
+cpp: &files_cpp
+ - '**/*.cxx'
  - '**/*.cpp'
  - '**/*.h'
  - '**/*.hxx'
+ - '**/*.tcc'
+py: &files_py
+ - '**/*.py'
+configuration: &files_config
+ - 'Framework/**'
+ - CMakePresets.json
+ - .pixi-version
+ - pixi.lock
+ - pixi.toml
+ - pyproject.toml
+ - setup.py
 doxygen:
+ - *files_cpp
  - 'Framework/Doxygen/**'
  - 'conda/recipes/mantid-developer/**'
  - 'conda/recipes/conda_build_config.yaml'
@@ -18,3 +31,17 @@ devsite:
  - '.github/actions/devsite-build/**'
  - '.github/workflows/devdocs-publish.yml'
  - 'pixi.toml'
+code_changes:
+ - *files_cpp
+ - *files_py
+ - *files_config
+ - 'buildconfig/**'
+ - '.github/**'
+ # not conda
+ # not docs
+ # not images
+ # not installers
+ - 'instrument/**'
+ - 'qt/**'
+ - 'scripts/**'
+ - 'tools/**'
