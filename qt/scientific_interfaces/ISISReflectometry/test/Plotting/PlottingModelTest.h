@@ -10,6 +10,8 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -84,6 +86,41 @@ public:
     TS_ASSERT(workspacesForPlotting.empty());
   }
 
+  void testAlignmentCreatesPlotWorkspaceGroupForSelectedWorkspace() {
+    createAlignmentInputWorkspace("alignment_input", {1.0, 3.0, 6.0, 3.0, 1.0});
+    auto model = PlottingModel{};
+    auto const workspaces = workspaceSelections({"alignment_input"});
+
+    auto const workspacesForPlotting =
+        model.workspacesForPlotting(workspaces, PlotOutputOptions{PlotOutputType::Alignment});
+
+    TS_ASSERT_EQUALS(workspacesForPlotting.size(), 1);
+    TS_ASSERT_EQUALS(workspacesForPlotting[0], "__isis_reflectometry_alignment_0");
+    auto group = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(
+        "__isis_reflectometry_alignment_0");
+    TS_ASSERT_EQUALS(group->size(), 3);
+    assertYValue("__isis_reflectometry_alignment_0_raw", 6.0, 2);
+    assertXValue("__isis_reflectometry_alignment_0_raw", 102.0, 2);
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_reflectometry_alignment_0_fitted_peak"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_reflectometry_alignment_0_peak_centre"));
+  }
+
+  void testAlignmentCreatesOnePlotWorkspaceGroupPerSelectedWorkspace() {
+    createAlignmentInputWorkspace("alignment_input_1", {1.0, 3.0, 6.0, 3.0, 1.0});
+    createAlignmentInputWorkspace("alignment_input_2", {2.0, 5.0, 8.0, 5.0, 2.0});
+    auto model = PlottingModel{};
+    auto const workspaces = workspaceSelections({"alignment_input_1", "alignment_input_2"});
+
+    auto const workspacesForPlotting =
+        model.workspacesForPlotting(workspaces, PlotOutputOptions{PlotOutputType::Alignment});
+
+    auto const expected =
+        std::vector<std::string>{"__isis_reflectometry_alignment_0", "__isis_reflectometry_alignment_1"};
+    TS_ASSERT_EQUALS(workspacesForPlotting, expected);
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_reflectometry_alignment_0"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_reflectometry_alignment_1"));
+  }
+
 private:
   std::vector<PlottingWorkspaceSelection> workspaceSelections(std::vector<std::string> workspaceNames,
                                                               std::string const &workspaceGroupName = "") {
@@ -101,9 +138,27 @@ private:
         name, WorkspaceCreationHelper::create1DWorkspaceConstant(1, yValue, 0.0, false));
   }
 
-  void assertYValue(std::string const &workspaceName, double expected) {
+  void createAlignmentInputWorkspace(std::string const &name, std::vector<double> const &yValues) {
+    auto workspace = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", yValues.size(), 2, 1);
+    for (size_t workspaceIndex = 0; workspaceIndex < yValues.size(); ++workspaceIndex) {
+      workspace->dataX(workspaceIndex)[0] = 0.0;
+      workspace->dataX(workspaceIndex)[1] = 1.0;
+      workspace->dataY(workspaceIndex)[0] = yValues[workspaceIndex];
+      workspace->dataE(workspaceIndex)[0] = 1.0;
+      workspace->getSpectrum(workspaceIndex).addDetectorID(static_cast<int>(100 + workspaceIndex));
+    }
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(name, workspace);
+  }
+
+  void assertYValue(std::string const &workspaceName, double expected, size_t const workspaceIndex = 0) {
     auto workspace =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
-    TS_ASSERT_DELTA(workspace->y(0).front(), expected, 1e-12);
+    TS_ASSERT_DELTA(workspace->y(0)[workspaceIndex], expected, 1e-12);
+  }
+
+  void assertXValue(std::string const &workspaceName, double expected, size_t const workspaceIndex) {
+    auto workspace =
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
+    TS_ASSERT_DELTA(workspace->x(0)[workspaceIndex], expected, 1e-12);
   }
 };
