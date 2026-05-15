@@ -93,7 +93,7 @@ class PEARLTransfit(PythonAlgorithm):
 
     def summary(self):
         return (
-            "Reads high-energy neutron resonances from the downstream monitor data on the PEARL instrument,"
+            " Version 2 of PEARLTransfit. Reads high-energy neutron resonances from the downstream monitor data on the PEARL instrument,"
             " then fits a Voigt function to them to determine the sample temperature. A calibration must be run for"
             " each sample pressure. Can be used on a single file, or multiple files, in which case workspaces"
             " are summed and the average taken."
