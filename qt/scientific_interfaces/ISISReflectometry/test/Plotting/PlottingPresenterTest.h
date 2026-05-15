@@ -149,8 +149,8 @@ public:
     auto runsTable = RunsTable({}, 0.0, ReductionJobs({group}));
     addWorkspaces({"stitched_12345"});
 
-    auto const expected = std::vector<PlottingWorkspaceTreeItem>{
-        groupItem("Group 1", {workspaceItem("Group 1", {}, "stitched_12345", PlottingWorkspaceOutputType::IvsQ)})};
+    auto const expected = std::vector<PlottingWorkspaceTreeItem>{groupItem(
+        "Group 1", {workspaceItem("Group 1", {}, "stitched_12345", PlottingWorkspaceOutputType::IvsQBinned)})};
 
     EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
 
@@ -182,10 +182,10 @@ public:
     addWorkspaceGroup("stitched_12345", {"stitched_12345_1", "stitched_12345_2"});
 
     auto const expected = std::vector<PlottingWorkspaceTreeItem>{groupItem(
-        "Group 1",
-        {workspaceGroupItem("Group 1", {}, "stitched_12345",
-                            {workspaceItem("Group 1", {}, "stitched_12345_1", PlottingWorkspaceOutputType::IvsQ),
-                             workspaceItem("Group 1", {}, "stitched_12345_2", PlottingWorkspaceOutputType::IvsQ)})})};
+        "Group 1", {workspaceGroupItem(
+                       "Group 1", {}, "stitched_12345",
+                       {workspaceItem("Group 1", {}, "stitched_12345_1", PlottingWorkspaceOutputType::IvsQBinned),
+                        workspaceItem("Group 1", {}, "stitched_12345_2", PlottingWorkspaceOutputType::IvsQBinned)})})};
 
     EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
 

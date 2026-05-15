@@ -134,7 +134,7 @@ std::vector<PlottingWorkspaceTreeItem> PlottingPresenter::makeWorkspaceItems(Run
                                                "",
                                                {}};
     if (group.success()) {
-      addWorkspaceIfPresent(groupItem, group.postprocessedWorkspaceName(), PlottingWorkspaceOutputType::IvsQ,
+      addWorkspaceIfPresent(groupItem, group.postprocessedWorkspaceName(), PlottingWorkspaceOutputType::IvsQBinned,
                             group.name(), {});
     }
 

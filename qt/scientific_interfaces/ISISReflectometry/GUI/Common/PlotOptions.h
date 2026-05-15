@@ -8,6 +8,7 @@
 
 #include "Common/DllConfig.h"
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -48,6 +49,7 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions {
   PlotAxis yAxis;
   PlotAxis zAxis;
   bool showErrors{false};
+  std::optional<double> horizontalMarker;
   std::string windowTitle;
 };
 
