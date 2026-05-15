@@ -773,10 +773,34 @@ void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) cons
       }
     }
   } else {
-    // Search the archive separately for each file, as they don't all share the same single archive to search
+    // Search the archive separately for each file, as they don't all share the same single archive to search.
+    // Cache the directory and extension of the last archive hit so consecutive runs in a range can be resolved
+    // with a local existence check rather than another network call.
+    std::filesystem::path lastFoundDir;
+    std::string lastFoundExt;
+
     for (auto &fileInfo : fileInfos) {
       if (fileInfo.found || fileInfo.error)
         continue;
+
+      if (!lastFoundDir.empty() && !lastFoundExt.empty()) {
+        try {
+          for (const auto &filename : fileInfo.filenames) {
+            const auto candidate = lastFoundDir / (filename + lastFoundExt);
+            if (std::filesystem::exists(candidate)) {
+              fileInfo.found = true;
+              fileInfo.path = candidate;
+              break;
+            }
+          }
+        } catch (...) {
+          lastFoundDir.clear();
+          lastFoundExt.clear();
+        }
+        if (fileInfo.found)
+          continue;
+      }
+
       if (!fileInfo.archs.empty()) {
         g_log.debug() << "Search the archives for file: " << fileInfo.hint << "\n";
         const auto archivePath = getArchivePath(fileInfo.archs, fileInfo.filenames, fileInfo.extensionsToSearch);
@@ -792,6 +816,11 @@ void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) cons
             fileInfo.errorMsg = "Cannot open file from archive: " + std::string(e.what());
           }
         }
+      }
+
+      if (fileInfo.found) {
+        lastFoundDir = fileInfo.path.parent_path();
+        lastFoundExt = fileInfo.path.extension().string();
       }
     }
   }
