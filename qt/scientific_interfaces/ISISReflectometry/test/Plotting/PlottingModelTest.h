@@ -54,6 +54,7 @@ public:
     TS_ASSERT_EQUALS(workspacesForPlotting.size(), 1);
     TS_ASSERT_EQUALS(workspacesForPlotting[0], "__isis_reflectometry_spin_asymmetry_0");
     assertYValue("__isis_reflectometry_spin_asymmetry_0", 0.5);
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_reflectometry_spin_asymmetry_0"));
   }
 
   void testSpinAsymmetryUsesFirstAndLastSelectedChildrenFromWorkspaceGroup() {

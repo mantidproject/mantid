@@ -74,6 +74,7 @@ PlotOptions spinAsymmetryPlotOptions(PlotLayout layout) {
   options.xAxis = PlotAxis{"Qz", "", AxisScale::Linear};
   options.yAxis = PlotAxis{"Spin Asymmetry", "", AxisScale::Linear};
   options.showErrors = true;
+  options.horizontalMarker = 0.0;
   options.windowTitle = "ISIS Reflectometry Spin Asymmetry";
   return options;
 }

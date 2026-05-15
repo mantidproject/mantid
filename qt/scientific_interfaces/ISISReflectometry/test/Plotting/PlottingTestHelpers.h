@@ -27,7 +27,8 @@ inline bool operator!=(PlotAxis const &lhs, PlotAxis const &rhs) { return !(lhs 
 inline bool operator==(PlotOptions const &lhs, PlotOptions const &rhs) {
   return lhs.outputType == rhs.outputType && lhs.plotStyle == rhs.plotStyle && lhs.layout == rhs.layout &&
          lhs.xAxis == rhs.xAxis && lhs.yAxis == rhs.yAxis && lhs.zAxis == rhs.zAxis &&
-         lhs.showErrors == rhs.showErrors && lhs.windowTitle == rhs.windowTitle;
+         lhs.showErrors == rhs.showErrors && lhs.horizontalMarker == rhs.horizontalMarker &&
+         lhs.windowTitle == rhs.windowTitle;
 }
 
 inline bool operator!=(PlotOptions const &lhs, PlotOptions const &rhs) { return !(lhs == rhs); }

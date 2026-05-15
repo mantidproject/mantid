@@ -81,6 +81,9 @@ public:
     TS_ASSERT_EQUALS(options.xAxis.label, "Qz");
     TS_ASSERT_EQUALS(options.yAxis.label, "Spin Asymmetry");
     TS_ASSERT_EQUALS(options.yAxis.unit, "");
+    TS_ASSERT(options.showErrors);
+    TS_ASSERT(options.horizontalMarker);
+    TS_ASSERT_EQUALS(*options.horizontalMarker, 0.0);
   }
 
   void testAlignmentOptionsUseDetectorIdAndIntegratedIntensityAxes() {

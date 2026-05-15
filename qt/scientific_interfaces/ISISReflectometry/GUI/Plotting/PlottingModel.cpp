@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <algorithm>
 #include <optional>
@@ -22,17 +23,21 @@ auto constexpr spinAsymmetryWorkspacePrefix = "__isis_reflectometry_spin_asymmet
 Mantid::API::IAlgorithm_sptr createAlgorithm(std::string const &name) {
   auto algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name);
   algorithm->initialize();
+  algorithm->setChild(true);
   algorithm->setLogging(false);
+  algorithm->setRethrows(true);
   return algorithm;
 }
 
-void executeBinaryAlgorithm(std::string const &algorithmName, std::string const &lhsWorkspace,
-                            std::string const &rhsWorkspace, std::string const &outputWorkspace) {
+Mantid::API::MatrixWorkspace_sptr executeBinaryAlgorithm(std::string const &algorithmName,
+                                                         Mantid::API::MatrixWorkspace_sptr const &lhsWorkspace,
+                                                         Mantid::API::MatrixWorkspace_sptr const &rhsWorkspace) {
   auto algorithm = createAlgorithm(algorithmName);
-  algorithm->setPropertyValue("LHSWorkspace", lhsWorkspace);
-  algorithm->setPropertyValue("RHSWorkspace", rhsWorkspace);
-  algorithm->setPropertyValue("OutputWorkspace", outputWorkspace);
+  algorithm->setProperty("LHSWorkspace", lhsWorkspace);
+  algorithm->setProperty("RHSWorkspace", rhsWorkspace);
+  algorithm->setProperty("OutputWorkspace", "__NotUsed__");
   algorithm->execute();
+  return algorithm->getProperty("OutputWorkspace");
 }
 
 std::optional<std::pair<std::string, std::string>>
@@ -53,16 +58,14 @@ std::string createSpinAsymmetryWorkspace(std::vector<std::string> const &workspa
   }
 
   auto const outputWorkspace = std::string{spinAsymmetryWorkspacePrefix} + std::to_string(index);
-  auto const numeratorWorkspace = outputWorkspace + "_numerator";
-  auto const denominatorWorkspace = outputWorkspace + "_denominator";
-
-  executeBinaryAlgorithm("Minus", upDownWorkspaces->first, upDownWorkspaces->second, numeratorWorkspace);
-  executeBinaryAlgorithm("Plus", upDownWorkspaces->first, upDownWorkspaces->second, denominatorWorkspace);
-  executeBinaryAlgorithm("Divide", numeratorWorkspace, denominatorWorkspace, outputWorkspace);
-
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  ads.remove(numeratorWorkspace);
-  ads.remove(denominatorWorkspace);
+  auto const upWorkspace = ads.retrieveWS<Mantid::API::MatrixWorkspace>(upDownWorkspaces->first);
+  auto const downWorkspace = ads.retrieveWS<Mantid::API::MatrixWorkspace>(upDownWorkspaces->second);
+
+  auto const numeratorWorkspace = executeBinaryAlgorithm("Minus", upWorkspace, downWorkspace);
+  auto const denominatorWorkspace = executeBinaryAlgorithm("Plus", upWorkspace, downWorkspace);
+  auto const spinAsymmetryWorkspace = executeBinaryAlgorithm("Divide", numeratorWorkspace, denominatorWorkspace);
+  ads.addOrReplace(outputWorkspace, spinAsymmetryWorkspace);
   return outputWorkspace;
 }
 

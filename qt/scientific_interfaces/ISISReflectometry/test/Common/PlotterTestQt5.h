@@ -13,6 +13,7 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/WrapPython.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
+#include <boost/python/extract.hpp>
 #include <cxxtest/TestSuite.h>
 
 class PlotterTestQt5 : public CxxTest::TestSuite {
@@ -61,6 +62,18 @@ public:
     TS_ASSERT_EQUALS(figureCount(), 2);
   }
 
+  void testSpinAsymmetryPlotUsesConfiguredYAxisLabel() {
+    closeAllFigures();
+    createWorkspace("ws1");
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    plotter.plot({{"ws1"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::spinAsymmetryPlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Individual)});
+
+    TS_ASSERT_EQUALS(currentFigureYAxisLabel(), "Spin Asymmetry");
+  }
+
 private:
   void createWorkspace(std::string const &name) {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
@@ -75,6 +88,16 @@ private:
         MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
     auto const figureNumbers = pyplot.attr("get_fignums")();
     return static_cast<int>(PySequence_Size(figureNumbers.ptr()));
+  }
+
+  std::string currentFigureYAxisLabel() {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    MantidQt::Widgets::Common::Python::Object pyplot{
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
+    auto const figure = MantidQt::Widgets::Common::Python::Object(pyplot.attr("gcf")());
+    auto const axes = figure.attr("axes");
+    auto const axis = MantidQt::Widgets::Common::Python::Object(axes[0]);
+    return boost::python::extract<std::string>(axis.attr("get_ylabel")());
   }
 
   void closeAllFigures() {
