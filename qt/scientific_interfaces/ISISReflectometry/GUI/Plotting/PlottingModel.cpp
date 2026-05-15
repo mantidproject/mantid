@@ -42,6 +42,8 @@ Mantid::API::MatrixWorkspace_sptr executeBinaryAlgorithm(std::string const &algo
 
 std::optional<std::pair<std::string, std::string>>
 spinAsymmetryUpDownWorkspaces(std::vector<std::string> const &workspaces) {
+  // Reflectometry polarization correction algorithms output workspace groups in canonical spin-state order,
+  // regardless of the user-specified input order. PNR outputs U then D; PA outputs UU first and DD last.
   if (workspaces.size() == 2) {
     return std::make_pair(workspaces.front(), workspaces.back());
   }
