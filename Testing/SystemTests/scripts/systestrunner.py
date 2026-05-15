@@ -117,7 +117,7 @@ def main():
     #########################################################################
 
     # Put the configuration back to its original state
-    mtdconf.restoreconfig()
+    # mtdconf.restoreconfig()
 
     if failure:
         results_string = f"FAILURE REPORT FOR TESTS IN {test_file_name}:\n"
