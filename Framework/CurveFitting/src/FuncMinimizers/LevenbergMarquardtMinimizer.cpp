@@ -46,7 +46,7 @@ LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
 
 void LevenbergMarquardtMinimizer::initialize(API::ICostFunction_sptr costFunction, size_t /*maxIterations*/) {
   // set-up GSL container to be used with GSL simplex algorithm
-  auto leastSquares = std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(costFunction);
+  auto leastSquares = std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(costFunction);
   if (leastSquares) {
     m_data = std::make_unique<GSL_FitData>(leastSquares);
   } else {
@@ -61,7 +61,6 @@ void LevenbergMarquardtMinimizer::initialize(API::ICostFunction_sptr costFunctio
   gslContainer.f = &gsl_f;
   gslContainer.df = &gsl_df;
   gslContainer.fdf = &gsl_fdf;
-
   gslContainer.n = m_data->n;
   gslContainer.p = m_data->p;
   gslContainer.params = m_data.get();
