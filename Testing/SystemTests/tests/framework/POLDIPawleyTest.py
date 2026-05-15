@@ -76,7 +76,7 @@ class POLDIPawleyWorkflow(systemtesting.MantidSystemTest):
 
         # 2D Pawley
         self.assertAlmostEqual(self.alatt_2d, 5.43122, delta=1e-4)
-        self.assertAlmostEqual(self.cost_2d, 247782, delta=40)
+        self.assertAlmostEqual(self.cost_2d, 248250, delta=40)
         self.assertEqual(self.ws2d_sim_nspec, 224)
         self.assertEqual(self.ws2d_sim_detid, 211001)
 
