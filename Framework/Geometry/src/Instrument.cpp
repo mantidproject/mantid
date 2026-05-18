@@ -49,24 +49,27 @@ void raiseDuplicateDetectorError(const size_t detectorId) {
 
 /// Returns the heap size of a single component object, using the most-derived type.
 size_t componentObjectSize(const IComponent *comp) {
+  size_t result;
   if (dynamic_cast<const RectangularDetector *>(comp))
-    return sizeof(RectangularDetector);
-  if (const auto *sd = dynamic_cast<const StructuredDetector *>(comp))
-    return sizeof(StructuredDetector) + sd->getXValues().capacity() * sizeof(double) +
-           sd->getYValues().capacity() * sizeof(double);
-  if (dynamic_cast<const GridDetectorPixel *>(comp))
-    return sizeof(GridDetectorPixel);
-  if (dynamic_cast<const GridDetector *>(comp))
-    return sizeof(GridDetector);
-  if (dynamic_cast<const Detector *>(comp))
-    return sizeof(Detector);
-  if (dynamic_cast<const ObjCompAssembly *>(comp))
-    return sizeof(ObjCompAssembly);
-  if (dynamic_cast<const ObjComponent *>(comp))
-    return sizeof(ObjComponent);
-  if (dynamic_cast<const CompAssembly *>(comp))
-    return sizeof(CompAssembly);
-  return sizeof(Component);
+    result = sizeof(RectangularDetector);
+  else if (const auto *sd = dynamic_cast<const StructuredDetector *>(comp))
+    result = sizeof(StructuredDetector) + sd->getXValues().capacity() * sizeof(double) +
+             sd->getYValues().capacity() * sizeof(double);
+  else if (dynamic_cast<const GridDetectorPixel *>(comp))
+    result = sizeof(GridDetectorPixel);
+  else if (dynamic_cast<const GridDetector *>(comp))
+    result = sizeof(GridDetector);
+  else if (dynamic_cast<const Detector *>(comp))
+    result = sizeof(Detector);
+  else if (dynamic_cast<const ObjCompAssembly *>(comp))
+    result = sizeof(ObjCompAssembly);
+  else if (dynamic_cast<const ObjComponent *>(comp))
+    result = sizeof(ObjComponent);
+  else if (dynamic_cast<const CompAssembly *>(comp))
+    result = sizeof(CompAssembly);
+  else
+    result = sizeof(Component);
+  return result;
 }
 } // namespace
 

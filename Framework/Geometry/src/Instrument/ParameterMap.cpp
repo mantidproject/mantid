@@ -1130,8 +1130,8 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
 size_t ParameterMap::getMemorySize() const {
   // m_map: tbb::concurrent_unordered_multimap<ComponentID, shared_ptr<Parameter>>
   // Each node: key + value + ~2 pointers for chaining and bucket slot
-  const size_t n = static_cast<size_t>(m_map.size());
-  const size_t mapMem = n * (sizeof(ComponentID) + sizeof(std::shared_ptr<Parameter>) + 2 * sizeof(void *));
+  const size_t n = m_map.size();
+  const size_t mapMem = n * (sizeof(pmap::value_type) + 2 * sizeof(void *));
   // Count the heap-allocated Parameter objects the shared_ptrs point to.
   // ParameterMap is a friend of Parameter so private string members are accessible.
   size_t parameterObjectsMem = 0;
@@ -1156,6 +1156,8 @@ size_t ParameterMap::getMemorySize() const {
   // m_detectorInfo and m_componentInfo: owned by ParameterMap for parametrized instruments
   const size_t detectorInfoMem = m_detectorInfo ? m_detectorInfo->getMemorySize() : 0;
   const size_t componentInfoMem = m_componentInfo ? m_componentInfo->getMemorySize() : 0;
+  // m_instrument is a non-owning raw pointer to the base Instrument; its memory is counted in
+  // Instrument::getMemorySize() and excluded here to avoid double-counting.
   return sizeof(*this) + mapMem + parameterObjectsMem + fileNamesMem + cacheLocMem + cacheRotMem + detectorInfoMem +
          componentInfoMem;
 }

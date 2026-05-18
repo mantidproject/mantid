@@ -758,11 +758,10 @@ size_t ComponentInfo::getMemorySize() const {
   mem += sharedVecMem(m_parentIndices);
 
   // m_children: outer vector buffer + all inner child-index buffers
-  if (m_children) {
-    mem += sizeof(*m_children) + m_children->size() * sizeof(std::vector<size_t>);
+  mem += sharedVecMem(m_children);
+  if (m_children)
     mem += std::accumulate(m_children->cbegin(), m_children->cend(), size_t{0},
                            [](size_t acc, const auto &v) { return acc + v.capacity() * sizeof(size_t); });
-  }
 
   // cow_ptr'd per-component arrays (positions/rotations are scan-multiplied)
   if (m_positions)

@@ -708,12 +708,15 @@ public:
     TSM_ASSERT_THROWS("Duplicate ID, should throw", instrument->markAsDetectorFinalize(), std::runtime_error &);
   }
 
-  void test_getMemorySize_nonzero() { TS_ASSERT_LESS_THAN(static_cast<size_t>(0), instrument.getMemorySize()); }
+  void test_getMemorySize_nonzero() { TS_ASSERT_LESS_THAN(size_t{0}, instrument.getMemorySize()); }
 
   void test_getMemorySize_scales_with_instrument_size() {
     auto small = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    auto medium = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     auto large = ComponentCreationHelper::createTestInstrumentCylindrical(10);
-    TS_ASSERT_LESS_THAN(small->getMemorySize(), large->getMemorySize());
+    // check the the memory size increases with the number of detectors
+    TS_ASSERT_LESS_THAN(small->getMemorySize(), medium->getMemorySize());
+    TS_ASSERT_LESS_THAN(medium->getMemorySize(), large->getMemorySize());
   }
 
   void test_getMemorySize_parametrized_larger_than_base() {
