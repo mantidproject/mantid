@@ -20,7 +20,18 @@ runs:
       shell: bash
       working-directory: ${{ github.workspace }}
       run: echo "version=$(cat .pixi-version)" >> "$GITHUB_OUTPUT"
+    # branch based on whether or not windows
     - name: Set up pixi
+      if: ${{ runner.os == 'Windows' }}
+      uses: prefix-dev/setup-pixi@v0.9.5
+      with:
+        pixi-version: v${{ steps.pixi-version.outputs.version }}
+        pixi-bin-path: ${{ runner.temp }}/bin/pixi
+        run-install: ${{ inputs.run-install }}
+        frozen: ${{ inputs.run-install }}
+        activate-environment: ${{ inputs.activate-environment }}
+    - name: Set up pixi
+      if: ${{ runner.os != 'Windows' }}
       uses: prefix-dev/setup-pixi@v0.9.5
       with:
         pixi-version: v${{ steps.pixi-version.outputs.version }}
