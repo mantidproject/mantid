@@ -20,10 +20,10 @@ from mantid.api import (
     Progress,
     PropertyMode,
     PythonAlgorithm,
+    WorkspaceFactory,
     WorkspaceProperty,
     mtd,
 )
-from mantid.dataobjects import GroupingWorkspaceProperty
 from mantid.kernel import (
     Direction,
     Property,
@@ -112,8 +112,8 @@ class LoadWANDSCD(PythonAlgorithm):
         )
 
         self.declareProperty(
-            GroupingWorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
-            doc="Optional: output GroupingWorkspace mapping every detector ID to its group ID. "
+            WorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="Optional: output Workspace2D mapping every detector's workspace index to its group ID. "
             "Only produced when Grouping is '2x2' or '4x4'.",
         )
         self.setPropertyGroup("OutputGroupingWorkspace", "Grouping")
@@ -442,37 +442,36 @@ class LoadWANDSCD(PythonAlgorithm):
 
     def _build_grouping_ws(self, instrument_ws, grouping: int):
         """
-        Build a GroupingWorkspace from an ungrouped instrument workspace.
+        Build a Workspace2D from an ungrouped instrument workspace mapping workspace indices to group IDs.
 
-        Each detector ID is mapped to a 1-indexed group ID that matches the
+        Each workspace index is mapped to a 1-indexed group ID that matches the
         order in which groups appear in the ``GroupingPattern`` used by
         ``GroupDetectors``. For the WAND detector array (480×8 rows, 512 columns),
-        detector ``y + x*512`` belongs to group
+        workspace index ``y + x*512`` belongs to group
         ``(x // grouping) * (512 // grouping) + (y // grouping) + 1``.
+
+        A ``Workspace2D`` is used instead of a ``GroupingWorkspace`` for performance reasons.
+        ``GroupingWorkspace`` inherits from ``SpecialWorkspace2D``, which maintains a
+        detector-ID-to-workspace-index map (``detID_to_WI``) built by iterating over every
+        spectrum and querying the instrument geometry. For the WAND array (~2 million detectors)
+        this takes tens of seconds. Because WAND detector IDs map one-to-one onto workspace
+        indices, the map is unnecessary: group IDs can be written directly via ``dataY(wi)``
+        without any detector lookup.
 
         The returned workspace is NOT stored in the ADS; ``PyExec`` publishes it
         via ``setProperty("OutputGroupingWorkspace", ...)``.
 
-        :param instrument_ws: Ungrouped workspace supplying the instrument geometry.
+        :param instrument_ws: Ungrouped workspace supplying the number of histograms.
         :param grouping: Pixel-grouping factor (2 for 2×2, 4 for 4×4).
-        :returns: Populated GroupingWorkspace.
+        :returns: Populated Workspace2D.
         """
-        # Initialise an empty GroupingWorkspace (all Y = 0) from the instrument
-        createGrp_alg = self.createChildAlgorithm("CreateGroupingWorkspace", enableLogging=False)
-        createGrp_alg.setProperty("InputWorkspace", instrument_ws)
-        createGrp_alg.setProperty("OutputWorkspace", "__wand_grouping_ws")
-        createGrp_alg.execute()
-        grouping_ws = createGrp_alg.getProperty("OutputWorkspace").value
-
-        # Assign 1-indexed group IDs to every detector
-        y_groups = 512 // grouping
-        for x in range(0, 480 * 8, grouping):
-            x_idx = x // grouping
-            for y in range(0, 512, grouping):
-                group_id = float(x_idx * y_groups + y // grouping + 1)
-                for j in range(grouping):
-                    for i in range(grouping):
-                        grouping_ws.setValue(y + i + (x + j) * 512, group_id)
+        grouping_ws = WorkspaceFactory.create("Workspace2D", instrument_ws.getNumberHistograms(), 1, 1)
+        # For WAND, the correspondence between detector ID and workspace index is one-to-one
+        nHist = instrument_ws.getNumberHistograms()
+        wi = np.arange(nHist)
+        group_ids = (wi // 512 // grouping) * (512 // grouping) + (wi % 512 // grouping) + 1.0
+        for i in range(nHist):
+            grouping_ws.dataY(i)[0] = group_ids[i]
 
         return grouping_ws
 

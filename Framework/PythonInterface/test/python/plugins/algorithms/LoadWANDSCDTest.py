@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.dataobjects import GroupingWorkspace
+from mantid.dataobjects import Workspace2D
 from mantid.simpleapi import LoadWANDSCD
 import unittest
 import numpy as np
@@ -134,28 +134,27 @@ class LoadWANDGrouping(unittest.TestCase):
         self.assertEqual(ws.getSignalArray().sum(), self.TOTAL_COUNTS)
 
         # Type check
-        self.assertIsInstance(grp_ws, GroupingWorkspace)
+        self.assertIsInstance(grp_ws, Workspace2D)
 
         # Total number of groups must equal (N_ROWS // g) * (N_COLS // g)
         expected_groups = (self.N_ROWS // grouping) * (self.N_COLS // grouping)
-        self.assertEqual(grp_ws.getTotalGroups(), expected_groups)
-
-        # Every detector lies in a valid group (1 .. expected_groups)
-        self.assertEqual(grp_ws.getNumberHistograms(), self.N_ROWS * self.N_COLS)
         y_values = grp_ws.extractY().flatten()
-        self.assertEqual(int(y_values.min()), 1)
         self.assertEqual(int(y_values.max()), expected_groups)
 
-        # Spot-check: detector 0  → pixel (x=0, y=0) → group 1
-        self.assertEqual(int(grp_ws.getValue(0)), 1)
-        # Spot-check: detector 1  → pixel (x=0, y=1) → group 1  (same 2×2 block as detector 0)
-        self.assertEqual(int(grp_ws.getValue(1)), 1)
-        # Spot-check: detector 2  → pixel (x=0, y=2) → group 2  (next 2×2 block along y)
-        self.assertEqual(int(grp_ws.getValue(2)), 2)
-        # Spot-check: detector 512 → pixel (x=1, y=0) → shares 2×2 block with detector 0 → group 1
-        self.assertEqual(int(grp_ws.getValue(512)), 1)
-        # Spot-check: detector 1024 → pixel (x=2, y=0) → first group of x_idx=1 row → group (512//2)+1 = 257
-        self.assertEqual(int(grp_ws.getValue(1024)), (self.N_COLS // grouping) + 1)
+        # Every workspace index lies in a valid group (1 .. expected_groups)
+        self.assertEqual(grp_ws.getNumberHistograms(), self.N_ROWS * self.N_COLS)
+        self.assertEqual(int(y_values.min()), 1)
+
+        # Spot-check: workspace index 0  → pixel (x=0, y=0) → group 1
+        self.assertEqual(int(grp_ws.readY(0)[0]), 1)
+        # Spot-check: workspace index 1  → pixel (x=0, y=1) → group 1  (same 2×2 block as index 0)
+        self.assertEqual(int(grp_ws.readY(1)[0]), 1)
+        # Spot-check: workspace index 2  → pixel (x=0, y=2) → group 2  (next 2×2 block along y)
+        self.assertEqual(int(grp_ws.readY(2)[0]), 2)
+        # Spot-check: workspace index 512 → pixel (x=1, y=0) → shares 2×2 block with index 0 → group 1
+        self.assertEqual(int(grp_ws.readY(512)[0]), 1)
+        # Spot-check: workspace index 1024 → pixel (x=2, y=0) → first group of x_idx=1 row → group (512//2)+1 = 257
+        self.assertEqual(int(grp_ws.readY(1024)[0]), (self.N_COLS // grouping) + 1)
 
         # detectorID log must have one entry per group (same length as twotheta/azimuthal)
         run = ws.getExperimentInfo(0).run()
@@ -163,8 +162,8 @@ class LoadWANDGrouping(unittest.TestCase):
         twotheta = run.getProperty("twotheta").value
         self.assertEqual(len(detectorID), expected_groups)
         self.assertEqual(len(detectorID), len(twotheta))
-        # each stored detector ID must be a valid key in the GroupingWorkspace
-        self.assertTrue(all(grp_ws.getValue(int(d)) >= 1 for d in detectorID))
+        # each stored detector ID maps to a valid group (det_id == workspace index for WAND)
+        self.assertTrue(all(grp_ws.readY(int(d))[0] >= 1 for d in detectorID))
 
         ws.delete()
         grp_ws.delete()
@@ -175,14 +174,15 @@ class LoadWANDGrouping(unittest.TestCase):
 
         self.assertEqual(ws.getSignalArray().sum(), self.TOTAL_COUNTS)
 
-        self.assertIsInstance(grp_ws, GroupingWorkspace)
+        self.assertIsInstance(grp_ws, Workspace2D)
         expected_groups = (self.N_ROWS // grouping) * (self.N_COLS // grouping)
-        self.assertEqual(grp_ws.getTotalGroups(), expected_groups)
+        y_values = grp_ws.extractY().flatten()
+        self.assertEqual(int(y_values.max()), expected_groups)
 
         # Group size: each group spans g×g = 16 detectors
         group_size = grouping * grouping
-        ids_in_first_group = grp_ws.getDetectorIDsOfGroup(1)
-        self.assertEqual(len(ids_in_first_group), group_size)
+        indices_in_first_group = np.where(y_values == 1.0)[0]
+        self.assertEqual(len(indices_in_first_group), group_size)
 
         ws.delete()
         grp_ws.delete()
