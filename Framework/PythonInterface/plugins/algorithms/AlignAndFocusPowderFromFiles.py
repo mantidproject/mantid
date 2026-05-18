@@ -770,15 +770,15 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                         nx_class = nx_class.decode("ascii", errors="ignore")
                     if nx_class == "NXevent_data":
                         found.append(True)
-                        return True  # non-None return stops visitation
+                        return True  # returning True stops visitation
 
             with h5py.File(self._filenames[0], "r") as f:
                 f.visititems(_check_event_data)
             if not found:
                 self.log().debug("AlignAndFocusPowderFromFiles: cannot use slim path - file has no NXevent_data entries")
                 return False
-        except Exception:
-            pass  # if we cannot inspect the file, let Slim try and fall back if needed
+        except Exception as e:
+            self.log().debug("AlignAndFocusPowderFromFiles: could not inspect file for NXevent_data (%s); letting Slim try" % str(e))
 
         return True
 
@@ -924,7 +924,9 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             AlignAndFocusPowderSlim(**kwargs)
         except RuntimeError as e:
             if "No NXevent_data entries found in file" in str(e):
-                self.log().warning("AlignAndFocusPowderFromFiles: file does not contain NXevent_data entries; slim processing skipped.")
+                self.log().warning(
+                    "AlignAndFocusPowderFromFiles: file does not contain NXevent_data entries; falling back to standard processing."
+                )
                 return
             raise
 
