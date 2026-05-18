@@ -83,7 +83,6 @@ _SLIM_REQUIRED_PROPS = ["PrimaryFlightPath", "L2", "Polar"]
 _SLIM_BLOCKING_PROPS = [
     "AbsorptionWorkspace",
     "CalibrationWorkspace",
-    "CalFileName",
     "OffsetsWorkspace",
     "MaskWorkspace",
     "MaskBinTable",
