@@ -3,7 +3,7 @@
 # Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+# SPDX-License-Identifier: GPL-3.0+
 import os
 import tempfile
 import unittest
@@ -19,7 +19,7 @@ class AlignAndFocusPowderFromFilesTest(unittest.TestCase):
         mtd.clear()
         self._tmp_dir.cleanup()
 
-    def test_non_event_nexus_should_not_be_slim_eligible(self):
+    def _make_non_event_slim_setup(self):
         from AlignAndFocusPowderFromFiles import AlignAndFocusPowderFromFiles
 
         input_ws = "aafpff_non_event_input"
@@ -42,15 +42,21 @@ class AlignAndFocusPowderFromFilesTest(unittest.TestCase):
         alg.setProperty("Params", [0.5, -0.004, 7.0])
 
         alg._filenames = [filename]
+        return alg, output_ws
+
+    def test_non_event_nexus_should_not_be_slim_eligible(self):
+        alg, _ = self._make_non_event_slim_setup()
         can_use_slim = alg._AlignAndFocusPowderFromFiles__canUseSlim()
-        if can_use_slim:
-            with self.assertRaisesRegex(RuntimeError, "No NXevent_data entries found in file"):
-                alg._AlignAndFocusPowderFromFiles__runSlim(output_ws)
 
         self.assertFalse(
             can_use_slim,
             "Expected __canUseSlim() to reject non-event Nexus input to avoid: No NXevent_data entries found in file",
         )
+
+    def test_forced_slim_on_non_event_nexus_raises_expected_runtime_error(self):
+        alg, output_ws = self._make_non_event_slim_setup()
+        with self.assertRaisesRegex(RuntimeError, "No NXevent_data entries found in file"):
+            alg._AlignAndFocusPowderFromFiles__runSlim(output_ws)
 
 
 if __name__ == "__main__":
