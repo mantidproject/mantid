@@ -21,20 +21,21 @@ runs:
       working-directory: ${{ github.workspace }}
       run: echo "version=$(cat .pixi-version)" >> "$GITHUB_OUTPUT"
     # branch based on whether or not windows
+    - name: Determine pixi executable
+      id: pixi-exe
+      run: |
+        if [ ${{ runner.os == 'Windows' }} ]; then
+          echo "On windows"
+          echo "pixi_path=${{ runner.temp }}\Scripts\pixi.exe" >> "$GITHUB_OUTPUT"
+        else;
+          echo "Not on windows"
+          echo "pixi_path=${{ runner.temp }}/bin/pixi" >> "$GITHUB_OUTPUT"
+        fi
     - name: Set up pixi
-      if: ${{ runner.os == 'Windows' }}
       uses: prefix-dev/setup-pixi@v0.9.5
       with:
         pixi-version: v${{ steps.pixi-version.outputs.version }}
-        pixi-bin-path: ${{ runner.temp }}/bin/pixi
-        run-install: ${{ inputs.run-install }}
-        frozen: ${{ inputs.run-install }}
-        activate-environment: ${{ inputs.activate-environment }}
-    - name: Set up pixi
-      if: ${{ runner.os != 'Windows' }}
-      uses: prefix-dev/setup-pixi@v0.9.5
-      with:
-        pixi-version: v${{ steps.pixi-version.outputs.version }}
+        pixi-bin-path: ${{ steps.pixi-exe.outputs.pixi_path }}
         run-install: ${{ inputs.run-install }}
         frozen: ${{ inputs.run-install }}
         activate-environment: ${{ inputs.activate-environment }}
