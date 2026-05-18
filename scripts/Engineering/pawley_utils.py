@@ -350,32 +350,54 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         if len(self.bg_params) > 0:
             self.bg_params = params[iend:]
 
-    def _validate_profile_params(self, param_name: str, phase: int):
-        if phase > ((plen := len(self.phases)) - 1):
-            raise ValueError(f"Phase with index: {phase} does not exists. Number of phases is {plen}")
+    def _validate_profile_params(self, param_name: str, iphase: int):
+        if iphase > ((plen := len(self.phases)) - 1):
+            raise ValueError(f"Phase with index: {iphase} does not exists. Number of phases is {plen}")
         elif param_name not in self.profile.labels.keys():
             raise ValueError(f"Invalid profile parameter name: {param_name}, for profile {self.profile.func_name}")
+
+    def _validate_phase_params(self, param_name: str, iphase: int):
+        if iphase > ((plen := len(self.phases)) - 1):
+            raise ValueError(f"Phase with index: {iphase} does not exists. Number of phases is {plen}")
+        elif param_name not in self.phases[iphase].get_param_names():
+            raise ValueError(f"Parameter {param_name} is not a parameter of Phase")
 
     def set_free_params(self, free_params: np.ndarray[float]):
         params = self.get_params()
         params[self.get_isfree()] = free_params
         self.set_params(params)
 
-    def set_profile_free_param(self, param_value: bool, param_name: str, phase: int):
-        self._validate_profile_params(param_name, phase)
-        self.profile_isfree[phase][self.profile.labels[param_name]] = param_value
+    def set_profile_free_param(self, is_free: bool, param_name: str, iphase: int):
+        self._validate_profile_params(param_name, iphase)
+        self.profile_isfree[iphase][self.profile.labels[param_name]] = is_free
 
-    def get_profile_free_param(self, param_name: str, phase: int) -> bool:
-        self._validate_profile_params(param_name, phase)
-        return self.profile_isfree[phase][self.profile.labels[param_name]]
+    def get_profile_free_param(self, param_name: str, iphase: int) -> bool:
+        self._validate_profile_params(param_name, iphase)
+        return self.profile_isfree[iphase][self.profile.labels[param_name]]
 
-    def set_profile_param(self, param_value: float, param_name: str, phase: int):
-        self._validate_profile_params(param_name, phase)
-        self.profile_params[phase][self.profile.labels[param_name]] = param_value
+    def set_profile_param(self, param_value: float, param_name: str, iphase: int):
+        self._validate_profile_params(param_name, iphase)
+        self.profile_params[iphase][self.profile.labels[param_name]] = param_value
 
-    def get_profile_param(self, param_name: str, phase: int) -> float:
-        self._validate_profile_params(param_name, phase)
-        return self.profile_params[phase][self.profile.labels[param_name]]
+    def get_profile_param(self, param_name: str, iphase: int) -> float:
+        self._validate_profile_params(param_name, iphase)
+        return self.profile_params[iphase][self.profile.labels[param_name]]
+
+    def set_phase_param(self, param_value: float, param_name: str, iphase: int):
+        self._validate_phase_params(param_name, iphase)
+        self.alatt_params[iphase][self.phases[iphase].labels[param_name]] = param_value
+
+    def get_phase_param(self, param_name: str, iphase: int) -> float:
+        self._validate_phase_params(param_name, iphase)
+        return self.alatt_params[iphase][self.phases[iphase].labels[param_name]]
+
+    def set_phase_free_param(self, is_free: float, param_name: str, iphase: int):
+        self._validate_phase_params(param_name, iphase)
+        self.alatt_isfree[iphase][self.phases[iphase].labels[param_name]] = is_free
+
+    def get_phase_free_param(self, param_name: str, iphase: int) -> float:
+        self._validate_phase_params(param_name, iphase)
+        return self.alatt_isfree[iphase][self.phases[iphase].labels[param_name]]
 
     def fit(self, **kwargs) -> OptimizeResult:
         default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
