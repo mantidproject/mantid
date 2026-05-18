@@ -23,11 +23,12 @@ runs:
     # branch based on whether or not windows
     - name: Determine pixi executable
       id: pixi-exe
+      shell: bash
       run: |
-        if [ ${{ runner.os == 'Windows' }} ]; then
+        if [ "${{ runner.os }}" = "Windows" ]; then
           echo "On windows"
           echo "pixi_path=${{ runner.temp }}\Scripts\pixi.exe" >> "$GITHUB_OUTPUT"
-        else;
+        else
           echo "Not on windows"
           echo "pixi_path=${{ runner.temp }}/bin/pixi" >> "$GITHUB_OUTPUT"
         fi
