@@ -1063,6 +1063,14 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin, const double &
       if (sum > 0 && sum < m_DataPositiveMinValue)
         m_DataPositiveMinValue = sum;
     }
+
+    // All detectors were masked or had invalid values — use a safe fallback so
+    // the colorbar never receives DBL_MAX/-DBL_MAX as its range.
+    if (m_DataMinValue == DBL_MAX) {
+      m_DataMinValue = 0.0;
+      m_DataMaxValue = 1.0;
+      m_DataPositiveMinValue = 1.0;
+    }
   }
 
   if (m_autoscaling) {
