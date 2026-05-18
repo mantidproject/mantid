@@ -289,8 +289,17 @@ public:
   }
 
   void test_getMemorySize_scales_with_size() {
-    const DetectorInfo small(PosVec(1), RotVec(1));
-    const DetectorInfo large(PosVec(100), RotVec(100));
-    TS_ASSERT_LESS_THAN(small.getMemorySize(), large.getMemorySize());
+    const DetectorInfo a(PosVec(10), RotVec(10));
+    const DetectorInfo b(PosVec(20), RotVec(20));
+    const DetectorInfo c(PosVec(30), RotVec(30));
+    TS_ASSERT_LESS_THAN(a.getMemorySize(), b.getMemorySize());
+    TS_ASSERT_LESS_THAN(b.getMemorySize(), c.getMemorySize());
+
+    // check that the increase in memory size grows linear with the number of components
+    auto sizeA = a.getMemorySize(); // 10
+    auto sizeB = b.getMemorySize(); // 20
+    auto sizeC = c.getMemorySize(); // 30
+    // 20 - 10 == 30 - 20
+    TS_ASSERT_EQUALS(sizeB - sizeA, sizeC - sizeB);
   }
 };

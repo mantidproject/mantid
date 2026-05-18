@@ -471,6 +471,8 @@ size_t DetectorInfo::getMemorySize() const {
   // m_lastDetector and m_lastIndex: one slot per OpenMP thread
   const size_t cacheMem = m_lastDetector.capacity() * sizeof(std::shared_ptr<const Geometry::IDetector>) +
                           m_lastIndex.capacity() * sizeof(size_t);
+  // m_instrument is a shared_ptr to an Instrument owned by the workspace; its memory is counted in
+  // Instrument::getMemorySize() and excluded here to avoid double-counting.
   return sizeof(*this) + beamlineMem + detectorIDsMem + detIDToIndexMem + cacheMem;
 }
 
