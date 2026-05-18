@@ -961,12 +961,20 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 )
             else:
                 self.log().notice("AlignAndFocusPowderFromFiles: delegating to AlignAndFocusPowderSlim for faster single-file processing.")
-                self.__runSlim(finalname, slim_pm_args)
-                self.setProperty("OutputWorkspace", mtd[finalname])
+                try:
+                    self.__runSlim(finalname, slim_pm_args)
+                    self.setProperty("OutputWorkspace", mtd[finalname])
 
-                # TODO CacheDir?
+                    # TODO CacheDir?
 
-                return
+                    return
+                except RuntimeError as e:
+                    if "No NXevent_data entries found in file" in str(e):
+                        self.log().warning(
+                            "AlignAndFocusPowderFromFiles: file does not contain NXevent_data entries; falling back to standard processing."
+                        )
+                    else:
+                        raise
         # ------------------------------------------------------------------ #
 
         if self.useCaching:
