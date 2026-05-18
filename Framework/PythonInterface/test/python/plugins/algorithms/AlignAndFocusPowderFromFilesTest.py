@@ -55,7 +55,10 @@ class AlignAndFocusPowderFromFilesTest(unittest.TestCase):
 
     def test_forced_slim_on_non_event_nexus_raises_expected_runtime_error(self):
         alg, output_ws = self._make_non_event_slim_setup()
-        with self.assertRaisesRegex(RuntimeError, "No NXevent_data entries found in file"):
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "^AlignAndFocusPowderSlim-v1: No NXevent_data entries found in file$",
+        ):
             alg._AlignAndFocusPowderFromFiles__runSlim(output_ws)
 
 
