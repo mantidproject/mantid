@@ -756,6 +756,30 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 self.log().debug("AlignAndFocusPowderFromFiles: cannot use slim path - Params has more than 3 values")
                 return False
 
+        # AlignAndFocusPowderSlim requires NXevent_data; reject non-event nexus files early
+        # to avoid the unhelpful "No NXevent_data entries found in file" error at run time.
+        try:
+            import h5py
+
+            found = []
+
+            def _check_event_data(name, obj):
+                if isinstance(obj, h5py.Group):
+                    nx_class = obj.attrs.get("NX_class", b"")
+                    if isinstance(nx_class, bytes):
+                        nx_class = nx_class.decode("ascii", errors="ignore")
+                    if nx_class == "NXevent_data":
+                        found.append(True)
+                        return True  # non-None return stops visitation
+
+            with h5py.File(self._filenames[0], "r") as f:
+                f.visititems(_check_event_data)
+            if not found:
+                self.log().debug("AlignAndFocusPowderFromFiles: cannot use slim path - file has no NXevent_data entries")
+                return False
+        except Exception:
+            pass  # if we cannot inspect the file, let Slim try and fall back if needed
+
         return True
 
     def __getSlimArgsFromPropManager(self):
@@ -896,7 +920,13 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             kwargs["FilterBadPulses"] = True
             kwargs["BadPulsesLowerCutoff"] = self.filterBadPulses
 
-        AlignAndFocusPowderSlim(**kwargs)
+        try:
+            AlignAndFocusPowderSlim(**kwargs)
+        except RuntimeError as e:
+            if "No NXevent_data entries found in file" in str(e):
+                self.log().warning("AlignAndFocusPowderFromFiles: file does not contain NXevent_data entries; slim processing skipped.")
+                return
+            raise
 
         # post-processing: apply SpectrumIDs renaming if requested ---
         if not self.getProperty("SpectrumIDs").isDefault:
@@ -961,20 +991,14 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 )
             else:
                 self.log().notice("AlignAndFocusPowderFromFiles: delegating to AlignAndFocusPowderSlim for faster single-file processing.")
-                try:
-                    self.__runSlim(finalname, slim_pm_args)
+                self.__runSlim(finalname, slim_pm_args)
+                if finalname in mtd:
                     self.setProperty("OutputWorkspace", mtd[finalname])
 
                     # TODO CacheDir?
 
                     return
-                except RuntimeError as e:
-                    if "No NXevent_data entries found in file" in str(e):
-                        self.log().warning(
-                            "AlignAndFocusPowderFromFiles: file does not contain NXevent_data entries; falling back to standard processing."
-                        )
-                    else:
-                        raise
+                # __runSlim returned without output (e.g. non-event nexus); fall through to standard processing
         # ------------------------------------------------------------------ #
 
         if self.useCaching:
