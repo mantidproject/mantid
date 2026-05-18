@@ -384,7 +384,6 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
 
     // Batch resolve files with extension using findRuns for better performance.
     if (!filesToResolveWithExtension.empty()) {
-      std::string errors;
       try {
         const auto extsToUse = !defaultExt.empty() ? std::vector<std::string>(1, defaultExt) : m_exts;
         auto resolvedPaths = FileFinder::Instance().findRuns(filesToResolveWithExtension, extsToUse);
@@ -394,7 +393,7 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
           directResolutionFiles[resolutionIndices[i]] = resolvedPaths[i].string();
         }
       } catch (const std::invalid_argument &ex) {
-        errors = ex.what();
+        const std::string errors = ex.what();
         for (size_t i = 0; i < filesToResolveWithExtension.size(); ++i) {
           const auto &unresolvedFileName = filesToResolveWithExtension[i];
           bool doThrow = false;

@@ -500,8 +500,7 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
     try {
       parser.parse(token);
       for (const auto &group : parser.fileNames())
-        for (const auto &name : group)
-          hints.emplace_back(name);
+        hints.insert(hints.end(), group.cbegin(), group.cend());
     } catch (...) {
       // Parser couldn't handle this token (e.g. a hint with a suffix like
       // "-add"). Pass it through as-is.
