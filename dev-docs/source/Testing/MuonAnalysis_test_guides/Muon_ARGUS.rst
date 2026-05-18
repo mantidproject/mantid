@@ -30,7 +30,7 @@ Single Pulse Test
 - Load run ``71799``
 - Go to the **Grouping** tab
      - click **Guess Alpha**, should get ``0.95``
-- Load the next run by changing the run number to ``71799-800``
+- Load the next run by clicking the ``>`` button (the run number should now be ``71800``)
 - Go to the **Fitting** tab
      - Add a **StaticKuboToyabeTimesExpDecay** and **FlatBackground**
      - Click the **Fit** button
@@ -50,7 +50,7 @@ This users the same sample as the single pulse test
 - Set to **Double Pulse**
 - Go to the **Grouping** tab
      - Click **Guess Alpha**, should get ``0.93``
-- Load the next run by changing the run number to ``71796-7``
+- Load the next run by clicking the ``>`` button (the run number should now be ``71797``)
 - Go to the **Fitting** tab
      - Add a **StaticKuboToyabeTimesExpDecay** and **FlatBackground**
      - Click the **Fit** button
