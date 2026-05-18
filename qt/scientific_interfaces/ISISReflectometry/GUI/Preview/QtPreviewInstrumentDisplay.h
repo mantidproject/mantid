@@ -33,8 +33,7 @@ public:
   void setInstViewZoomMode() override;
   void setInstViewEditMode() override;
   void setInstViewSelectRectMode() override;
-  std::vector<size_t> getSelectedDetectors() const override;
-  std::vector<Mantid::detid_t> detIndicesToDetIDs(std::vector<size_t> const &detIndices) const override;
+  std::vector<Mantid::detid_t> getSelectedDetectorIDs() const override;
 
 private:
   QWidget *m_placeholder;

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/Memory.h"
+#include "MantidKernel/VectorHelper.h"
 #include <cmath>
 
 namespace Mantid::Kernel {
@@ -50,48 +51,16 @@ std::string RebinParamsValidator::checkValidity(const std::vector<double> &value
   default: {
     if (value.size() % 2 == 0) { // even
       error = "The number of bin boundary parameters provided must be odd";
-    } else { // odd
-      // for checking memory allocation
-      size_t numBins = 0;
-      // ensure all bin widths are non-zero
-      double previousBoundary = value[0];
-      for (size_t i = 1; i < value.size() - 1; i += 2) {
-        double binWidth = value[i];
-        double nextBoundary = value[i + 1];
-        // first validate the bins and boundaries
-        if (binWidth == 0.0) {
-          error = "Cannot have a zero bin width";
-          break;
-        } else {
-          if (nextBoundary <= previousBoundary) { // check bin boundaries are in increasing order
-            error = "Bin boundary values must be given in order of increasing value";
-            break;
-          } else if (binWidth < 0.0 &&
-                     previousBoundary <=
-                         0.0) { // if bin width is negative (log binning) check boundaries are positive-definite
-            error = "Bin boundaries must be positive for logarithmic binning";
-            break;
-          }
-        }
-        // the bins and bounds are okay, accumulate memory
-        if (binWidth < 0.0) {
-          // logarithmic binning
-          numBins += static_cast<size_t>(std::log(nextBoundary / previousBoundary) / std::log(1. - binWidth));
-        } else {
-          // linear binning
-          numBins += static_cast<size_t>((nextBoundary - previousBoundary) / binWidth);
-        }
-        previousBoundary = nextBoundary;
-      } // end for checking bins/boundaries
-      double memInBytes = static_cast<double>(MemoryStats().availMem() * 1024);
-      double binSpaceInBytes = static_cast<double>(numBins * sizeof(double));
-      if (binSpaceInBytes > memInBytes) {
-        double bytesInGB = 1e9;
-        error = "The number of bins requested is expected to exceed available memory. "
-                "This binning requires approximately " +
-                std::to_string(binSpaceInBytes / bytesInGB) + " GB of memory, but only " +
-                std::to_string(memInBytes / bytesInGB) + " GB is available.";
+    } else {                   // odd
+      std::size_t numBins = 0; // defensively init to 0
+      try {
+        numBins = VectorHelper::estimateNumberOfBins(value);
+      } catch (std::runtime_error &e) {
+        error = e.what();
+        break;
       }
+      std::size_t binSpaceInBytes = numBins * sizeof(double);
+      error = MemoryStats().checkAvailableMemory(binSpaceInBytes);
     } // end else odd
   } // end default case
   }

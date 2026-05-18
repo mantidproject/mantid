@@ -18,7 +18,7 @@ REPO_ROOT_DIR=$SCRIPT_DIR/../../..
 . $SCRIPT_DIR/pixi-utils
 
 # pixi
-install_pixi
+install_pixi "$REPO_ROOT_DIR"
 
 pixi run --manifest-path $REPO_ROOT_DIR/pixi.toml --frozen -e docs-build rattler-index fs $LOCAL_CHANNEL
 

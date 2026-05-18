@@ -49,7 +49,6 @@ public:
   virtual void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
   virtual void resetInstView() = 0;
   virtual void plotInstView() = 0;
-  virtual std::vector<Mantid::detid_t> detIndicesToDetIDs(std::vector<size_t> const &detIndices) const = 0;
   //  Instrument viewer toolbar
   virtual void setInstViewZoomState(bool on) = 0;
   virtual void setInstViewEditState(bool on) = 0;
@@ -63,7 +62,7 @@ public:
   virtual void setEditROIState(bool state) = 0;
   virtual void setRectangularROIState(bool state) = 0;
 
-  virtual std::vector<size_t> getSelectedDetectors() const = 0;
+  virtual std::vector<Mantid::detid_t> getSelectedDetectorIDs() const = 0;
   virtual std::string getRegionType() const = 0;
   virtual double getLinthresh() const = 0;
   virtual bool getSymlogEnabled() const = 0;

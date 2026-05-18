@@ -38,9 +38,10 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
     : m_view(dependencies.view), m_model(std::move(dependencies.model)),
       m_jobManager(std::move(dependencies.jobManager)), m_dockedWidgets(std::move(dependencies.dockedWidgets)),
       m_regionSelector(std::move(dependencies.regionSelector)), m_plotPresenter(std::move(dependencies.plotPresenter)),
-      m_stubRegionObserver{new StubRegionObserver} {
+      m_stubRegionObserver{new StubRegionObserver}, m_useNewInstrumentView(dependencies.useNewInstrumentView) {
   if (!m_dockedWidgets) {
-    m_dockedWidgets = std::make_unique<QtPreviewDockedWidgets>(nullptr, m_view->getDockedWidgetsLayout());
+    m_dockedWidgets =
+        std::make_unique<QtPreviewDockedWidgets>(nullptr, m_view->getDockedWidgetsLayout(), m_useNewInstrumentView);
   }
 
   if (!m_regionSelector) {
@@ -202,9 +203,8 @@ void PreviewPresenter::notifyInstViewZoomRequested() {
 void PreviewPresenter::notifyInstViewShapeChanged() {
   // Change to shape editing after a selection has been done to match instrument viewer default behaviour
   notifyInstViewEditRequested();
-  // Get the masked workspace indices
   std::optional<ProcessingInstructions> detIDs = std::nullopt;
-  auto indices = m_dockedWidgets->detIndicesToDetIDs(m_dockedWidgets->getSelectedDetectors());
+  auto indices = m_dockedWidgets->getSelectedDetectorIDs();
   if (indices.size() > 0) {
     auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");
     detIDs = ProcessingInstructions{detIDsStr};
@@ -336,7 +336,7 @@ void PreviewPresenter::runSumBanks(bool const addExistingROIsToPlot) {
 
   auto const &expSettingsDetectorROI = m_mainPresenter->getMatchingROIDetectorIDsForPreviewRow();
   if (m_plotExistingROIs) {
-    auto const selectedDetectorsOnPlot = m_dockedWidgets->getSelectedDetectors();
+    auto const selectedDetectorsOnPlot = m_dockedWidgets->getSelectedDetectorIDs();
     if (selectedDetectorsOnPlot.empty()) {
       // Update the model with any detector ROIs from the experiment settings.
       // At the moment we only plot existing ROIs on the slice viewer plot, not the instrument view plot.

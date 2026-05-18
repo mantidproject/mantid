@@ -266,10 +266,14 @@ class SliceViewerSelectionMaskingTest(unittest.TestCase):
             selector, mocks = self._set_up_selector_test(ToolItemText.POLY_MASKING, images=["test"])
             cursor_info_mock = [Mock() for _ in range(3)]
             cursor_info_fn.side_effect = cursor_info_mock
+            mocks["dataview"].ax.get_xlim.return_value = (0, 10)
+            mocks["dataview"].ax.get_ylim.return_value = (0, 20)
 
             selector._on_selected([self.Click(0, 0), self.Click(5, 5), self.Click(0, 10)])
             mocks["dataview"].mpl_toolbar.set_action_checked.assert_called_once_with(ToolItemText.POLY_MASKING, False, trigger=False)
-            mocks["model"].add_poly_cursor_info.assert_called_with(nodes=cursor_info_mock, transpose=False)
+            mocks["model"].add_poly_cursor_info.assert_called_with(
+                nodes=cursor_info_mock, transpose=False, x_limits=(0, 10), y_limits=(0, 20)
+            )
 
     def test_on_selected_poly_error(self):
         with (
@@ -285,9 +289,13 @@ class SliceViewerSelectionMaskingTest(unittest.TestCase):
             cursor_info_mock = [Mock() for _ in range(3)]
             cursor_info_fn.side_effect = cursor_info_mock
             mocks["model"].add_poly_cursor_info.side_effect = RuntimeError("test")
+            mocks["dataview"].ax.get_xlim.return_value = (0, 20)
+            mocks["dataview"].ax.get_ylim.return_value = (0, 30)
 
             selector._on_selected([self.Click(0, 0), self.Click(5, 5), self.Click(0, 10)])
-            mocks["model"].add_poly_cursor_info.assert_called_with(nodes=cursor_info_mock, transpose=False)
+            mocks["model"].add_poly_cursor_info.assert_called_with(
+                nodes=cursor_info_mock, transpose=False, x_limits=(0, 20), y_limits=(0, 30)
+            )
             selector.clear.assert_called_once()
             selector.disconnect.assert_called_once()
             selector.set_active.assert_called_once_with(False)

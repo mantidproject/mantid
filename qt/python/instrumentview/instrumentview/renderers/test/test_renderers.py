@@ -59,7 +59,7 @@ class TestPointCloudRenderer(unittest.TestCase):
         plotter = MagicMock()
         plotter.off_screen = True
         mesh = self.renderer.build_detector_mesh(self.positions, False)
-        self.renderer.add_detector_mesh_to_plotter(plotter, mesh, is_projection=False, scalars="Counts")
+        self.renderer.add_detector_mesh_to_plotter(plotter, mesh, scalars="Counts")
         plotter.add_mesh.assert_called_once()
         call_kwargs = plotter.add_mesh.call_args[1]
         self.assertTrue(call_kwargs["render_points_as_spheres"])
@@ -253,7 +253,7 @@ class TestShapeRenderer(unittest.TestCase):
         plotter.off_screen = True
         mesh = pv.Sphere()  # A valid surface mesh
         self.renderer._faces_per_detector = np.array([96])  # sphere has ~96 faces
-        self.renderer.add_detector_mesh_to_plotter(plotter, mesh, is_projection=False, scalars="Counts")
+        self.renderer.add_detector_mesh_to_plotter(plotter, mesh, scalars="Counts")
         plotter.add_mesh.assert_called_once()
         call_kwargs = plotter.add_mesh.call_args[1]
         # Shape renderer should NOT use render_points_as_spheres

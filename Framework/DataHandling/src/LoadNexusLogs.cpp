@@ -224,7 +224,8 @@ std::unique_ptr<Kernel::Property> createTimeSeries(Nexus::File &file, const std:
     const int64_t item_length = (info.dims.size() > 1 ? info.dims[1] : info.dims[0]);
     try {
       const std::size_t total_length =
-          std::accumulate(info.dims.cbegin(), info.dims.cend(), 1, std::multiplies<int64_t>());
+          std::accumulate(info.dims.cbegin(), info.dims.cend(), std::size_t(1),
+                          [](std::size_t acc, int64_t x) { return acc * static_cast<std::size_t>(x); });
       boost::scoped_array<char> val_array(new char[total_length + 1]);
       file.getData(val_array.get());
       file.closeData();

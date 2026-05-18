@@ -5,6 +5,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService, AlgorithmManager
 from sys import float_info
 from numpy import inf
 
+
 ALLOWABLE_ERROR_SIG_FIGS = 8
 
 
@@ -25,31 +26,38 @@ class CursorInfoBase(ABC):
     def generate_table_rows(self):
         pass
 
+    @abstractmethod
+    def generate_inverted_table_rows(self):
+        pass
+
     @staticmethod
-    def consolidate_table_rows(table_rows):
+    def create_consolidated_dict(table_rows):
         @dataclass()
         class XVal:
             start: bool
             val: float
 
+        consolidated_rows = {}
+        for row in table_rows:
+            consolidated_rows.setdefault(row.spec_list, []).extend([XVal(start=True, val=row.x_min), XVal(start=False, val=row.x_max)])
+        return consolidated_rows
+
+    @staticmethod
+    def consolidate_table_rows(table_rows):
+        consolidated_rows = CursorInfoBase.create_consolidated_dict(table_rows)
+
         def sort_fn(e):
             return e.val
 
-        consolidated_rows = {}
-        for row in table_rows:
-            if row.spec_list not in consolidated_rows:
-                consolidated_rows[row.spec_list] = []
-            consolidated_rows[row.spec_list].extend([XVal(start=True, val=row.x_min), XVal(start=False, val=row.x_max)])
-
         new_table_rows = []
-        for row in consolidated_rows.items():
-            row[1].sort(key=sort_fn)
-            x_mins = [row[1][0].val]
+        for spec, xvals in consolidated_rows.items():
+            xvals.sort(key=sort_fn)
+            x_mins = [xvals[0].val]
             x_maxs = []
             found_end = False
             x_max = None
-            if len(row[1]) > 2:
-                for val in row[1][1:-1]:
+            if len(xvals) > 2:
+                for val in xvals[1:-1]:
                     if not found_end and not val.start:
                         found_end = True
                         x_max = val.val
@@ -59,10 +67,84 @@ class CursorInfoBase(ABC):
                         x_maxs.append(x_max)
                         x_mins.append(val.val)
                         found_end = False
-            x_maxs.append(row[1][-1].val)
+            x_maxs.append(xvals[-1].val)
             for i in range(len(x_mins)):
-                new_table_rows.append(TableRow(spec_list=row[0], x_min=x_mins[i], x_max=x_maxs[i]))
+                new_table_rows.append(TableRow(spec_list=spec, x_min=x_mins[i], x_max=x_maxs[i]))
         return new_table_rows
+
+    @staticmethod
+    def consolidate_inverted_table_rows(table_rows):
+        unpacked_table_rows = CursorInfoBase.unpack_table_rows(table_rows)
+        consolidated_rows = CursorInfoBase.create_consolidated_dict(unpacked_table_rows)
+        new_table_rows = []
+        for spec, xvals in consolidated_rows.items():
+            starts = set()
+            stops = set()
+            for val in xvals:
+                if val.start:
+                    starts.add(val.val)
+                else:
+                    stops.add(val.val)
+            starts = sorted(starts)
+            stops = sorted(stops)
+            for start, stop in zip(starts, stops):
+                if start < stop:
+                    new_table_rows.append(TableRow(spec_list=spec, x_min=start, x_max=stop))
+
+        packed_new_table_rows = CursorInfoBase.pack_table_rows(new_table_rows)
+        return packed_new_table_rows
+
+    @staticmethod
+    def unpack_table_rows(table_rows):
+        unpacked_table_rows = []
+        for row in table_rows:
+            if "-" not in row.spec_list:
+                unpacked_table_rows.append(row)
+                continue
+            start, end = map(int, row.spec_list.split("-", 1))
+            for spec in range(start, end + 1):
+                unpacked_table_rows.append(TableRow(spec_list=str(spec), x_min=row.x_min, x_max=row.x_max))
+        return unpacked_table_rows
+
+    @staticmethod
+    def pack_table_rows(table_rows):
+        packed_table_rows = []
+        packing_summary = {}
+        for row in table_rows:
+            key = (row.x_min, row.x_max)
+            packing_summary.setdefault(key, []).extend([int(row.spec_list)])
+
+        for (x_min, x_max), specs in packing_summary.items():
+            ranges = CursorInfoBase.find_ranges(specs)
+            for spec_list in ranges:
+                packed_table_rows.append(
+                    TableRow(
+                        spec_list=spec_list,
+                        x_min=x_min,
+                        x_max=x_max,
+                    )
+                )
+        return packed_table_rows
+
+    @staticmethod
+    def find_ranges(specs):
+        specs = sorted(set(specs))
+        ranges = []
+        start = prev = specs[0]
+        for spec in specs[1:]:
+            if spec == prev + 1:
+                prev = spec
+                continue
+            if start == prev:
+                ranges.append(str(start))
+            else:
+                ranges.append(f"{start}-{prev}")
+            start = prev = spec
+        if start == prev:
+            ranges.append(str(start))
+        else:
+            ranges.append(f"{start}-{prev}")
+        return ranges
 
     @property
     def table_rows(self):
@@ -91,6 +173,26 @@ class RectCursorInfoBase(CursorInfoBase, ABC):
         x_data = sorted([self._click.data[0], self._release.data[0]])
         return (x_data, y_data) if not self._transpose else (y_data, x_data)
 
+    def get_image_axis_boundaries(self, click):
+        x_min, x_max, spec_min, spec_max = click.extent
+        # Round the spec min and max
+        spec_min = int(ceil(spec_min))
+        spec_max = self.snap_to_bin_centre((spec_max))
+        return x_min, x_max, spec_min, spec_max
+
+    def get_rows_outside_rect(self):
+        # Get the axis limits
+        x_min, x_max, spec_min, spec_max = self.get_image_axis_boundaries(self._click)
+        x_data, y_data = self.get_xy_data()
+        y_min, y_max = self.snap_to_bin_centre(y_data[0]), self.snap_to_bin_centre(y_data[-1])
+
+        # Mask everything outside selected rectangle
+        row1 = TableRow(spec_list=f"{spec_min}-{spec_max}", x_min=x_min, x_max=x_data[0])
+        row2 = TableRow(spec_list=f"{spec_min}-{y_min}", x_min=x_data[0], x_max=x_data[-1])
+        row3 = TableRow(spec_list=f"{y_max}-{spec_max}", x_min=x_data[0], x_max=x_data[-1])
+        row4 = TableRow(spec_list=f"{spec_min}-{spec_max}", x_min=x_data[-1], x_max=x_max)
+        return [row1, row2, row3, row4]
+
 
 class RectCursorInfo(RectCursorInfoBase):
     def __init__(self, click, release, transpose):
@@ -102,6 +204,9 @@ class RectCursorInfo(RectCursorInfoBase):
         row = TableRow(spec_list=f"{y_min}-{y_max}", x_min=x_data[0], x_max=x_data[-1])
         return [row]
 
+    def generate_inverted_table_rows(self):
+        return self.get_rows_outside_rect()
+
 
 class ElliCursorInfo(RectCursorInfoBase):
     def __init__(self, click, release, transpose):
@@ -109,18 +214,10 @@ class ElliCursorInfo(RectCursorInfoBase):
 
     def generate_table_rows(self):
         x_data, y_data = self.get_xy_data()
-        y_min = self.snap_to_bin_centre(y_data[0])
-        y_max = self.snap_to_bin_centre(y_data[1])
-        y_range = [n / 3 for n in range(y_min * 3, (y_max * 3) + 1)]  # inclusive range with 1/3 step for greater resolution
-
-        x_min, x_max = x_data[0], x_data[-1]
-        a = (x_max - x_min) / 2
-        b = (y_max - y_min) / 2
-        h = x_min + a
-        k = y_min + b
+        y_range, a, b, h, k = self._process_elli_parameters(x_data, y_data)
 
         rows = []
-        for index, y in enumerate(y_range):
+        for y in y_range:
             x_min, x_max = self._calc_x_val(y, a, b, h, k)
             x_min = x_min - 10**-ALLOWABLE_ERROR_SIG_FIGS if x_min == x_max else x_min  # slightly adjust min value so x vals are different.
             rows.append(TableRow(spec_list=str(round(y)), x_min=x_min, x_max=x_max))
@@ -133,10 +230,40 @@ class ElliCursorInfo(RectCursorInfoBase):
     def _calc_sqrt_portion(y, a, b, k):
         return sqrt(round((a**2) * (1 - ((y - k) ** 2) / (b**2)), ALLOWABLE_ERROR_SIG_FIGS))
 
+    def _process_elli_parameters(self, x_data, y_data):
+        y_min = self.snap_to_bin_centre(y_data[0])
+        y_max = self.snap_to_bin_centre(y_data[1])
+        y_range = [n / 3 for n in range(y_min * 3, (y_max * 3) + 1)]  # inclusive range with 1/3 step for greater resolution
+
+        x_min, x_max = x_data[0], x_data[-1]
+        a = (x_max - x_min) / 2
+        b = (y_max - y_min) / 2
+        h = x_min + a
+        k = y_min + b
+        return y_range, a, b, h, k
+
+    def generate_inverted_table_rows(self):
+        rect_rows = self.get_rows_outside_rect()
+
+        x_data, y_data = self.get_xy_data()
+        y_range, a, b, h, k = self._process_elli_parameters(x_data, y_data)
+
+        rows = []
+        for y in y_range:
+            x_min, x_max = self._calc_x_val(y, a, b, h, k)
+            # slightly adjust min value so x vals are different.
+            x_min = x_min - 10**-ALLOWABLE_ERROR_SIG_FIGS if x_min == x_max else x_min
+            rows.append(TableRow(spec_list=str(round(y)), x_min=x_data[0], x_max=x_min))
+            rows.append(TableRow(spec_list=str(round(y)), x_min=x_max, x_max=x_data[-1]))
+        rows = self.consolidate_table_rows(rows)
+        return rect_rows + rows
+
 
 class PolyCursorInfo(CursorInfoBase):
-    def __init__(self, nodes, transpose):
+    def __init__(self, nodes, transpose, x_limits, y_limits):
         super().__init__(transpose)
+        self._x_limits = x_limits
+        self._y_limits = y_limits
 
         self._lines = self._generate_lines(nodes)
         if not self._check_intersecting_lines():
@@ -232,12 +359,38 @@ class PolyCursorInfo(CursorInfoBase):
             return False
         return True
 
+    def generate_inverted_table_rows(self):
+        rows = []
+
+        # Get the axis limits to mask eveything outside the selected polygon
+        x_axis_min, x_axis_max = self._x_limits
+        spec_min, spec_max = self._y_limits
+        spec_min = int(ceil(spec_min))
+        spec_max = self.snap_to_bin_centre((spec_max))
+        y_min, y_max = self._extract_global_y_limits()
+
+        # inclusive range with 1/3 step for greater resolution
+        y_range = [n / 3 for n in range(y_min * 3, (y_max * 3) + 1)]
+
+        # Mask the rectangles above and below the polygon
+        rows.append(TableRow(spec_list=f"{spec_min}-{str(round(y_range[0]))}", x_min=x_axis_min, x_max=x_axis_max))
+        rows.append(TableRow(spec_list=f"{str(round(y_range[-1]))}-{spec_max}", x_min=x_axis_min, x_max=x_axis_max))
+
+        # Mask the area around the polygon
+        for y in y_range:
+            x_val_pairs = self._calculate_relevant_x_value_pairs(y)
+            for x_min, x_max in x_val_pairs:
+                rows.append(TableRow(spec_list=str(round(y)), x_min=x_axis_min, x_max=x_min))
+                rows.append(TableRow(spec_list=str(round(y)), x_min=x_max, x_max=x_axis_max))
+        return self.consolidate_table_rows(rows)
+
 
 class MaskingModel:
     def __init__(self, ws_name):
         self._active_mask = None
         self._masks = []
         self._ws_name = ws_name
+        self._apply_inverted_mask = False
 
     def update_active_mask(self, mask):
         self._active_mask = mask
@@ -259,8 +412,8 @@ class MaskingModel:
     def add_elli_cursor_info(self, click, release, transpose):
         self.update_active_mask(ElliCursorInfo(click=click, release=release, transpose=transpose))
 
-    def add_poly_cursor_info(self, nodes, transpose):
-        self.update_active_mask(PolyCursorInfo(nodes=nodes, transpose=transpose))
+    def add_poly_cursor_info(self, nodes, transpose, x_limits, y_limits):
+        self.update_active_mask(PolyCursorInfo(nodes=nodes, transpose=transpose, x_limits=x_limits, y_limits=y_limits))
 
     def create_table_workspace_from_rows(self, table_rows, store_in_ads):
         # create table ws_from rows
@@ -277,7 +430,12 @@ class MaskingModel:
     def generate_mask_table_ws(self, store_in_ads=True):
         table_rows = []
         for info in self._masks:
-            table_rows.extend(info.generate_table_rows())
+            if self._apply_inverted_mask:
+                table_rows.extend(info.generate_inverted_table_rows())
+            else:
+                table_rows.extend(info.generate_table_rows())
+        if self._apply_inverted_mask and len(self._masks) > 1:
+            table_rows = self._masks[0].consolidate_inverted_table_rows(table_rows)
         return self.create_table_workspace_from_rows(table_rows, store_in_ads)
 
     def export_selectors(self):
@@ -293,3 +451,6 @@ class MaskingModel:
         alg.setProperty("MaskingInformation", mask_ws)
         alg.setProperty("InputWorkspaceIndexType", "SpectrumNumber")
         alg.execute()
+
+    def invert_masking_clicked(self, active):
+        self._apply_inverted_mask = active

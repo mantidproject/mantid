@@ -15,7 +15,7 @@ of a particle undergoing continuous diffusion but confined to a spherical volume
 
 .. math::
 
-   S(Q,E\equiv \hbar \omega) = (3 \frac{j_1(QR)}{QR})^2(Q\cdot R) \delta (\omega)
+   S(Q,E\equiv \hbar \omega) = \left(3 \frac{j_1(QR)}{QR}\right)^2 \delta (\omega)
 
 Because of the spherical symmetry of the problem, the structure factor
 is expressed in terms of the :math:`j_l(z)`

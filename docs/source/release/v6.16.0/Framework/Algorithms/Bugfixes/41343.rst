@@ -1,1 +1,3 @@
 - The algorithm `BinMD` will throw an error if the total number of bins requested is larger than the available memory.
+- The algorithm `SliceMD` will throw an error if the total number of bins requested is larger than the available memory.
+- The algorithm `MDNorm` will throw an error if the total number of bins requested is larger than the available memory.
