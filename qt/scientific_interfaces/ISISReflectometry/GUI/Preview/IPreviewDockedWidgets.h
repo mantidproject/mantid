@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 
 #include <QLayout>
@@ -35,6 +37,7 @@ public:
 
   virtual void notifyEditROIModeRequested() = 0;
   virtual void notifyRectangularROIModeRequested() = 0;
+  virtual void notifySetYAxisSymlogChanged() = 0;
 };
 
 class IPreviewDockedWidgets {
@@ -42,10 +45,10 @@ public:
   virtual ~IPreviewDockedWidgets() = default;
   virtual void subscribe(PreviewDockedWidgetsSubscriber *notifyee) noexcept = 0;
 
-  // Plotting
+  // Instrument display
+  virtual void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
   virtual void resetInstView() = 0;
-  virtual void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
-                            Mantid::Kernel::V3D const &axis) = 0;
+  virtual void plotInstView() = 0;
   //  Instrument viewer toolbar
   virtual void setInstViewZoomState(bool on) = 0;
   virtual void setInstViewEditState(bool on) = 0;
@@ -59,8 +62,10 @@ public:
   virtual void setEditROIState(bool state) = 0;
   virtual void setRectangularROIState(bool state) = 0;
 
-  virtual std::vector<size_t> getSelectedDetectors() const = 0;
+  virtual std::vector<Mantid::detid_t> getSelectedDetectorIDs() const = 0;
   virtual std::string getRegionType() const = 0;
+  virtual double getLinthresh() const = 0;
+  virtual bool getSymlogEnabled() const = 0;
 
   virtual QLayout *getRegionSelectorLayout() const = 0;
   virtual MantidQt::MantidWidgets::IPlotView *getLinePlotView() const = 0;

@@ -17,9 +17,10 @@
 
 #include <map>
 #include <queue>
+#include <stdexcept>
 #include <string>
 #include <tuple>
-#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace Mantid {
@@ -54,6 +55,7 @@ public:
   Instrument();
   Instrument(const std::string &name);
   Instrument(const Instrument &);
+  Instrument(const Instrument &, bool copyCache);
 
   Instrument *clone() const override;
 
@@ -78,38 +80,38 @@ public:
   /// Returns a list of Detectors for the given detectors ids
   std::vector<IDetector_const_sptr> getDetectors(const std::set<detid_t> &det_ids) const;
 
-  /// mark a Component which has already been added to the Instrument (as a
-  /// child comp.)
-  /// to be 'the' samplePos Component. For now it is assumed that we have
-  /// at most one of these.
+  /// mark a Component which has already been added to the Instrument (as a child comp.)
+  /// to be 'the' samplePos Component. For now it is assumed that we have at most one of these.
   void markAsSamplePos(const IComponent *);
 
-  /// mark a Component which has already been added to the Instrument (as a
-  /// child comp.)
-  /// to be 'the' source Component. For now it is assumed that we have
-  /// at most one of these.
+  /// mark a Component which has already been added to the Instrument (as a child comp.)
+  /// to be 'the' source Component. For now it is assumed that we have at most one of these.
   void markAsSource(const IComponent *);
 
-  /// mark a Component which has already been added to the Instrument (as a
-  /// child comp.)
+  /// mark a Component which has already been added to the Instrument (as a child comp.)
   /// to be a Detector component by adding it to _detectorCache
   void markAsDetector(const IDetector *);
   void markAsDetectorIncomplete(const IDetector *);
   void markAsDetectorFinalize();
 
-  /// mark a Component which has already been added to the Instrument (as a
-  /// child comp.)
-  /// to be a monitor and also add it to _detectorCache for possible later
-  /// retrieval
-  void markAsMonitor(const IDetector *);
+  /// mark a Component which has already been added to the Instrument (as a child comp.)
+  /// to be a monitor and also add it to _detectorCache for possible later retrieval
+  void markAsMonitor(IDetector const *);
+  void markAsMonitorIncomplete(IDetector const *);
 
   /// Remove a detector from the instrument
   void removeDetector(IDetector *);
+  /// Efficiently remove multiple detectors
+  void removeDetectorIncomplete(IDetector const *);
+  void removeDetectorFinalize();
 
   /// return reference to detector cache
   void getDetectors(detid2det_map &out_map) const;
 
+  /// Returns a list containing the detector ids of all detectors, optionally skipping monitors
   std::vector<detid_t> getDetectorIDs(bool skipMonitors = false) const;
+  /// Returns a list containing the detector ids of monitors
+  std::vector<detid_t> getMonitorIDs() const;
 
   std::size_t getNumberDetectors(bool skipMonitors = false) const;
 
@@ -118,9 +120,6 @@ public:
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const IComponent &comp) const;
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const std::string &bankName) const;
   std::set<detid_t> getDetectorIDsInBank(const std::string &bankName) const;
-
-  /// Returns a list containing the detector ids of monitors
-  std::vector<detid_t> getMonitors() const;
 
   /// Get the bounding box for this component and store it in the given argument
   void getBoundingBox(BoundingBox &assemblyBox) const override;
@@ -221,6 +220,7 @@ public:
   void parseTreeAndCacheBeamline();
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeBeamlineNew(ParameterMap &pmap) const;
 
   friend InstrumentVisitor;
 
@@ -266,9 +266,57 @@ private:
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo, const DetectorInfo &detectorInfo) const;
 
-  /// Map which holds detector-IDs and pointers to detector components, and
-  /// monitor flags.
-  std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
+  /// @brief Tuple which holds detector-IDs and pointers to detector components, and monitor flags.
+  /// This is the type of the elements in the detector cache vector.
+  /// Provides a more convenient interface to the elements of the detector cache vector than a raw tuple.
+  /// @extends std::tuple<detid_t, IDetector_const_sptr, bool>
+  struct DetectorCacheEntry : public std::tuple<detid_t, IDetector_const_sptr, bool> {
+    DetectorCacheEntry(detid_t id, IDetector_const_sptr det, bool isMonitorFlag)
+        : std::tuple<detid_t, IDetector_const_sptr, bool>(id, det, isMonitorFlag) {}
+    detid_t const &id() const { return std::get<0>(*this); }
+    IDetector_const_sptr const &detector() const { return std::get<1>(*this); }
+    bool const &isMonitor() const { return std::get<2>(*this); }
+    void setIsMonitor(bool flag) { std::get<2>(*this) = flag; }
+  };
+
+  /// @brief A vector of DetectorCacheEntry, which holds the detector cache
+  /// This is implemented as a vector rather than an ordered map to facilitate
+  /// faster (unsorted) insertion some hotpaths requiring access by index.
+  /// This vector otherwise should act like an ordered map.
+  /// @note this class anticipates future extension by optimizing the lower_bound and find methods
+  struct DetectorCache : public std::vector<DetectorCacheEntry> {
+    bool m_isFinalized{true};
+    bool isFinalized() const { return m_isFinalized; }
+    void setIncomplete() { m_isFinalized = false; }
+    void setFinalized(bool const flag = true) { m_isFinalized = flag; }
+    detid_t minID() const {
+      if (isFinalized() && !empty()) {
+        return front().id();
+      } else {
+        throw std::runtime_error("minID() called on non-finalized or empty DetectorCache");
+      }
+    }
+    detid_t maxID() const {
+      if (isFinalized() && !empty()) {
+        return back().id();
+      } else {
+        throw std::runtime_error("maxID() called on non-finalized or empty DetectorCache");
+      }
+    }
+    DetectorCache::iterator lower_bound(detid_t id);
+    DetectorCache::const_iterator lower_bound(detid_t id) const;
+    DetectorCache::iterator find(detid_t id);
+    DetectorCache::const_iterator find(detid_t id) const;
+    std::unordered_set<IDetector const *> m_toRemove;
+  } m_detectorCache;
+
+  bool isFinalized() const {
+    if (m_map) {
+      return m_instr->isFinalized();
+    } else {
+      return m_detectorCache.isFinalized();
+    }
+  }
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component

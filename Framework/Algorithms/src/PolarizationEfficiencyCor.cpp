@@ -167,13 +167,17 @@ void PolarizationEfficiencyCor::exec() {
 //----------------------------------------------------------------------------------------------
 void PolarizationEfficiencyCor::execWildes() {
   checkWildesProperties();
-  std::vector<std::string> workspaces = getWorkspaceNameList();
-
-  MatrixWorkspace_sptr efficiencies = getEfficiencies();
   auto alg = createChildAlgorithm("PolarizationCorrectionWildes");
   alg->initialize();
-  alg->setProperty("InputWorkspaces", workspaces);
-  alg->setProperty("Efficiencies", efficiencies);
+  if (!isDefault(Prop::INPUT_WORKSPACES)) {
+    std::vector<std::string> workspaces = getWorkspaceNameList();
+    alg->setProperty(Prop::INPUT_WORKSPACES, workspaces);
+  } else {
+    auto group = getWorkspaceGroup();
+    alg->setProperty(Prop::INPUT_WORKSPACE_GROUP, group);
+  }
+  MatrixWorkspace_sptr efficiencies = getEfficiencies();
+  alg->setProperty(Prop::EFFICIENCIES, efficiencies);
   if (!isDefault(Prop::FLIPPERS)) {
     alg->setPropertyValue("Flippers", getPropertyValue(Prop::FLIPPERS));
   }
@@ -275,18 +279,6 @@ std::vector<std::string> PolarizationEfficiencyCor::getWorkspaceNameList() const
       throw std::invalid_argument(
           "Only Matrix Workspaces can be added in InputWorkspace property list. If the input is a group, "
           "use the InputWorkspaceGroup property");
-    }
-  } else {
-    WorkspaceGroup_sptr group = getProperty(Prop::INPUT_WORKSPACE_GROUP);
-    auto const n = group->size();
-    for (size_t i = 0; i < n; ++i) {
-      auto ws = group->getItem(i);
-      auto const wsName = ws->getName();
-      if (wsName.empty()) {
-        throw std::invalid_argument("Workspace from the input workspace group is not stored in the "
-                                    "Analysis Data Service which is required by the Wildes method.");
-      }
-      wsNames.emplace_back(wsName);
     }
   }
   return wsNames;

@@ -21,10 +21,23 @@ namespace MantidQt::CustomInterfaces {
  *
  * @param parent :: the parent widget
  */
-CorrectionsTab::CorrectionsTab(QWidget *parent) : InelasticTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr) {
-  // Create Editor Factories
-  m_dblEdFac = new DoubleEditorFactory(this);
-  m_blnEdFac = new QtCheckBoxFactory(this);
+CorrectionsTab::CorrectionsTab(QWidget *parent)
+    : InelasticTab(parent), m_dblEdFac(new DoubleEditorFactory(this)), m_blnEdFac(new QtCheckBoxFactory(this)) {}
+
+CorrectionsTab::CorrectionsTab(QWidget *parent, std::unique_ptr<API::IAlgorithmRunner> algoRunner)
+    : InelasticTab(parent), m_dblEdFac(new DoubleEditorFactory(this)), m_blnEdFac(new QtCheckBoxFactory(this)) {
+  // This can be refined when all Corrections tabs are MVP'd
+  if (algoRunner) {
+    m_algorithmRunner = std::move(algoRunner);
+    m_algorithmRunner->subscribe(this);
+  }
+}
+
+void CorrectionsTab::notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) {
+  if (algorithm->algorithm()->name() != "SaveNexusProcessed") {
+    m_runPresenter->setRunEnabled(true);
+    runComplete(algorithm->algorithm(), error);
+  }
 }
 
 void CorrectionsTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
@@ -146,6 +159,9 @@ void CorrectionsTab::displayInvalidWorkspaceTypeError(const std::string &workspa
 
 std::string CorrectionsTab::prepareContainerName(const std::string &containerName) {
   std::string runNum;
+  if (!doesExistInADS(containerName)) {
+    return runNum;
+  }
   const auto containerWs = getADSWorkspace(containerName);
   if (const auto &logs = containerWs->run(); logs.hasProperty("run_number")) {
     runNum = logs.getProperty("run_number")->value();

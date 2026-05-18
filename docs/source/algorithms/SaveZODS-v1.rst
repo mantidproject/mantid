@@ -11,7 +11,7 @@ Description
 
 Saves a HDF5 file to the ZODS (Zurich Oak Ridge Disorder Simulation
 program) format. This format consists of a slice of a
-:ref:`MDHistoWorkspace <MDHistoWorkspace>` and some information about its
+:py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` and some information about its
 location.
 
 **You must be in HKL space for the output of this algorithm to make
@@ -73,7 +73,7 @@ Description of data fields
 Usage
 -----
 
-This algorithm can be run on a pre-existing :ref:`MDEventWorkspace <MDWorkspace>`
+This algorithm can be run on a pre-existing :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`
 or a newly created one. The example below will be done with newly created one
 using :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>`.
 

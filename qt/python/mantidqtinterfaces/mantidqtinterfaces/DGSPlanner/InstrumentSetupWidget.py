@@ -210,7 +210,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.signaldict["DetZ"] = self.DetZ
         self.validatorS2 = QtGui.QDoubleValidator(-90.0, 90.0, 5, self)
         self.validatorDetZ = QtGui.QDoubleValidator(-999999.0, 999999.0, 5, self)
-        self.validatorEi = QtGui.QDoubleValidator(1.0, 10000.0, 5, self)
+        self.validatorEi = QtGui.QDoubleValidator(0.1, 10000.0, 5, self)
         self.labelS2 = QtWidgets.QLabel("S2")
         self.labelDetZ = QtWidgets.QLabel("DetZ")
         self.labelEi = QtWidgets.QLabel("Incident Energy")

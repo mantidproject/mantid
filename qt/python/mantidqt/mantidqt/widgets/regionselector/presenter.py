@@ -279,3 +279,6 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
     def apply_masking_clicked(self):
         pass
+
+    def invert_masking_clicked(self, active) -> None:
+        pass

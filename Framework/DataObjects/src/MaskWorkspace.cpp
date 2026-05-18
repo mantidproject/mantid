@@ -87,17 +87,13 @@ size_t MaskWorkspace::getNumberMasked() const {
   size_t numMasked(0);
   const size_t numWksp(this->getNumberHistograms());
   for (size_t i = 0; i < numWksp; i++) {
-    if (this->isMaskedIndex(i)) // quick check the value
-    {
+    if (this->isMaskedIndex(i)) { // quick check the value
+
       numMasked++;
-    } else if (this->hasInstrument()) {
+    } else {
       const set<detid_t> ids = this->getDetectorIDs(i);
       if (this->isMasked(ids)) // slow and correct check with the real method
         numMasked += ids.size();
-    } else {
-      std::stringstream errss;
-      errss << "No instrument is associated with mask workspace " << this->getName();
-      throw std::runtime_error(errss.str());
     }
   }
   return numMasked;
@@ -114,13 +110,11 @@ set<detid_t> MaskWorkspace::getMaskedDetectors() const {
    * This test originally just checked if there was an instrument and ignored
    * the number of detectors
    */
-  if (this->hasInstrument()) {
-    size_t numHist(this->getNumberHistograms());
-    for (size_t i = 0; i < numHist; i++) {
-      if (this->isMaskedIndex(i)) {
-        set<detid_t> temp = this->getDetectorIDs(i);
-        detIDs.insert(temp.begin(), temp.end());
-      }
+  size_t numHist(this->getNumberHistograms());
+  for (size_t i = 0; i < numHist; i++) {
+    if (this->isMaskedIndex(i)) {
+      set<detid_t> temp = this->getDetectorIDs(i);
+      detIDs.insert(temp.begin(), temp.end());
     }
   }
 
@@ -172,16 +166,6 @@ bool MaskWorkspace::containsDetIDs(const std::vector<detid_t> &detectorIDs) cons
  * @return True if the data should be deleted.
  */
 bool MaskWorkspace::isMasked(const detid_t detectorID) const {
-  if (!this->hasInstrument()) {
-    std::stringstream msg;
-    if (!this->getInstrument())
-      msg << "There is no instrument associated with workspace \'" << this->getName() << "\'";
-    else
-      msg << "There is no proper instrument associated with workspace \'" << this->getName()
-          << "\'.  Number of detectors = " << this->getInstrument()->getNumberDetectors();
-    throw std::runtime_error(msg.str());
-  }
-
   // return true if the value isn't zero
   // TODO: remove this case
   //       and refactor code that depends on non-existence = masked

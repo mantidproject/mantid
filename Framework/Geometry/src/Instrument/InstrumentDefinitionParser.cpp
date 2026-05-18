@@ -266,14 +266,16 @@ Instrument_sptr InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progr
   // <component-link> XML elements
   setComponentLinks(m_instrument, pRootElem);
 
-  if (m_indirectPositions)
-    createNeutronicInstrument();
-
   // Instrument::markAsDetector is slow unless the detector IDs in the IDF are
   // sorted. To circumvent this we use the 2-part interface,
   // markAsDetectorIncomplete (which does not sort) and markAsDetectorFinalize
   // (which does the final sorting).
   m_instrument->markAsDetectorFinalize();
+
+  if (m_indirectPositions) {
+    // NOTE this MUST be called on a finalized instrument, as it calls the copy constructor
+    createNeutronicInstrument();
+  }
 
   // And give back what we created
   return m_instrument;
@@ -1290,15 +1292,16 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(Geometry::ICompAssembly
   }
 
   try {
-    if (category == "Monitor" || category == "monitor")
-      m_instrument->markAsMonitor(detector);
-    else {
+    if (category == "Monitor" || category == "monitor") {
+      m_instrument->markAsMonitorIncomplete(detector);
+    } else {
       // for backwards compatibility look for mark-as="monitor"
       if ((pCompElem->hasAttribute("mark-as") && pCompElem->getAttribute("mark-as") == "monitor") ||
           (pLocElem->hasAttribute("mark-as") && pLocElem->getAttribute("mark-as") == "monitor")) {
-        m_instrument->markAsMonitor(detector);
-      } else
+        m_instrument->markAsMonitorIncomplete(detector);
+      } else {
         m_instrument->markAsDetectorIncomplete(detector);
+      }
     }
 
   } catch (Kernel::Exception::ExistsError &) {
@@ -2602,8 +2605,7 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
           throw Exception::InstrumentDefinitionError("Requested type " + shapeName + " not defined in IDF");
         }
       }
-    } else // We have a null Element*, which signals a detector with no
-           // neutronic position
+    } else // We have a null Element*, which signals a detector with no neutronic position
     {
       // This should only happen for detectors
       auto *det = dynamic_cast<Detector *>(component.first);

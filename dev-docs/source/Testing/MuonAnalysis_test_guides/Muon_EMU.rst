@@ -3,8 +3,6 @@
 Muon Unscripted Testing: EMU
 ============================
 
-.. contents:: Table of Contents
-   :local:
 
 Introduction
 ------------

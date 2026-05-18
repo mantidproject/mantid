@@ -3,8 +3,6 @@
 Create Back To Back Parameters
 ==============================
 
-.. contents:: Table of Contents
-  :local:
 
 Introduction
 ------------

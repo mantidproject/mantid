@@ -87,6 +87,8 @@ class GeneralSettings(SettingsPresenterBase):
         self._view.window_behaviour.currentTextChanged.connect(self.action_window_behaviour_changed)
         self._view.main_font.clicked.connect(self.action_main_font_button_clicked)
         self._view.completion_enabled.stateChanged.connect(self.action_completion_enabled_modified)
+        self._view.apply_dark_theme_enabled.stateChanged.connect(self.action_apply_dark_theme_enabled_modified)
+        self._view.use_new_instrument_view.stateChanged.connect(self.action_use_new_instrument_view_modified)
         filter_out_mousewheel_events_from_combo_or_spin_box(self._view.window_behaviour)
 
     def action_main_font_button_clicked(self):
@@ -113,6 +115,14 @@ class GeneralSettings(SettingsPresenterBase):
 
     def action_completion_enabled_modified(self, state):
         self._model.set_completion_enabled(bool(state))
+        self.notify_changes()
+
+    def action_apply_dark_theme_enabled_modified(self, state):
+        self._model.set_apply_dark_theme_enabled(str(bool(state)))
+        self.notify_changes()
+
+    def action_use_new_instrument_view_modified(self, state):
+        self._model.set_use_new_instrument_view(bool(state))
         self.notify_changes()
 
     def setup_checkbox_signals(self):
@@ -173,6 +183,8 @@ class GeneralSettings(SettingsPresenterBase):
         use_open_gl = "on" == self._model.get_use_opengl().lower()
         invisible_workspaces = "1" == self._model.get_show_invisible_workspaces().lower()
         completion_enabled = self._model.get_completion_enabled()
+        apply_dark_theme_enabled = "true" == self._model.get_apply_dark_theme_enabled().lower()
+        use_new_instrument_view = self._model.get_use_new_instrument_view()
 
         self._view.project_recovery_enabled.setChecked(pr_enabled)
         self._view.time_between_recovery.setValue(pr_time_between_recovery)
@@ -182,6 +194,8 @@ class GeneralSettings(SettingsPresenterBase):
         self._view.use_open_gl.setChecked(use_open_gl)
         self._view.show_invisible_workspaces.setChecked(invisible_workspaces)
         self._view.completion_enabled.setChecked(completion_enabled)
+        self._view.apply_dark_theme_enabled.setChecked(apply_dark_theme_enabled)
+        self._view.use_new_instrument_view.setChecked(use_new_instrument_view)
 
     def action_project_recovery_enabled(self, state):
         self._model.set_project_recovery_enabled(str(bool(state)))

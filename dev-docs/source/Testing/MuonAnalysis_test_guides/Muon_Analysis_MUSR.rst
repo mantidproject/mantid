@@ -3,8 +3,6 @@
 Muon Unscripted Testing: MUSR
 =============================
 
-.. contents:: Table of Contents
-   :local:
 
 Introduction
 ------------

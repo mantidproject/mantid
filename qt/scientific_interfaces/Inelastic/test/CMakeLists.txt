@@ -6,6 +6,7 @@ set(ALL_TEST_FILES)
 set(ALL_TEST_HELPERS)
 
 add_subdirectory(BayesFitting)
+add_subdirectory(Corrections)
 add_subdirectory(Processor)
 add_subdirectory(QENSFitting)
 

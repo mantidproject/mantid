@@ -188,7 +188,7 @@ def default_ceria_expected_peak_windows(final=False):
 # Functions in calibration model
 
 
-def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_calib):
+def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_calib, copy_params_in_calib=True):
     """
     Create a new calibration from a ceria run
     :param calibration: CalibrationInfo object
@@ -196,13 +196,15 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
     :param plot_output: create plot of TOF vs dSpacing (with residuals)
     :param save_dir: top level director for saving files
     :param full_calib: full instrument calibration workspace
+    :param copy_params_in_calib: Whether parameter values should start from those of previous fits
+                                 (see PDCalibration: CopyLastGoodPeakParameters)
     :return:
     """
     # load ceria data
     ceria_workspace = path_handling.load_workspace(calibration.get_ceria_path())
 
     # run mantid.PDCalibration
-    focused_ceria, cal_table, diag_ws = run_calibration(ceria_workspace, calibration, full_calib)
+    focused_ceria, cal_table, diag_ws = run_calibration(ceria_workspace, calibration, full_calib, copy_params_in_calib)
 
     # extract diffractometer constants from calibration and write to table
     make_diff_consts_table(focused_ceria)
@@ -314,12 +316,14 @@ def make_diff_consts_table(ws_foc):
         table.removeColumn(col)
 
 
-def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
+def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_in_calib=True):
     """
     Creates Engineering calibration files with PDCalibration
     :param ceria_ws: The workspace with the ceria data.
     :param calibration: CalibrationInfo object with details of calibration and grouping
     :param full_instrument_cal_ws: The workspace with the full instrument calibration
+    :param copy_params_in_calib: Whether parameter values should start from those of previous fits
+                                 (see PDCalibration: CopyLastGoodPeakParameters)
     """
 
     # initial process of ceria ws
@@ -353,6 +357,7 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
         PeakFunction="BackToBackExponential",
         CalibrationParameters="DIFC+TZERO+DIFA",
         UseChiSq=True,
+        CopyLastGoodPeakParameters=copy_params_in_calib,
     )
     mantid.ApplyDiffCal(InstrumentWorkspace=foc_name, CalibrationWorkspace=cal_table)
 

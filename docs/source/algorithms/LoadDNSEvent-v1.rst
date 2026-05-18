@@ -10,11 +10,11 @@ Description
 -----------
 
 
-This algorithm loads a DNS mesytec psd listmode file into an :ref:`EventWorkspace <EventWorkspace>`, it does not load the instrument definition.
+This algorithm loads a DNS mesytec psd listmode file into an :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`, it does not load the instrument definition.
 
 **Output**
 
-    :ref:`EventWorkspace <EventWorkspace>` with the X-axis in the Time-of-flight units.
+    :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` with the X-axis in the Time-of-flight units.
 
 **ChopperChannel**
 The chopper input channel as set in mesydaq gui.

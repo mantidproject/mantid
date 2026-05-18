@@ -4,8 +4,6 @@
 Instrument Viewer Widget
 ========================
 
-.. contents::
-  :local:
 
 Overview
 --------

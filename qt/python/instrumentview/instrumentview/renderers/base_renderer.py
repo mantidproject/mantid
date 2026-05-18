@@ -72,7 +72,7 @@ class InstrumentRenderer(ABC):
 
     @abstractmethod
     def add_detector_mesh_to_plotter(
-        self, plotter: BackgroundPlotter, mesh: pv.PolyData, is_projection: bool, scalars: Optional[str] = None
+        self, plotter: BackgroundPlotter, mesh: pv.PolyData, scalars: Optional[str] = None, show_scalar_bar: bool = True
     ) -> None:
         """Add the detector mesh to the plotter with appropriate visual settings."""
 

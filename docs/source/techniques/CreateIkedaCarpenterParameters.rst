@@ -3,8 +3,6 @@
 Create Ikeda Carpenter Parameters
 =================================
 
-.. contents:: Table of Contents
-  :local:
 
 Example of how a parameter can be determined on a beamline
 ----------------------------------------------------------

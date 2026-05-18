@@ -9,7 +9,6 @@
 #include "Common/DllConfig.h"
 #include "GUI/Batch/IBatchView.h"
 #include "GUI/Common/IJobManager.h"
-#include "IInstViewModel.h"
 #include "IPreviewDockedWidgets.h"
 #include "IPreviewModel.h"
 #include "IPreviewPresenter.h"
@@ -49,10 +48,10 @@ public:
     IPreviewView *view{nullptr};
     std::unique_ptr<IPreviewModel> model;
     std::unique_ptr<IJobManager> jobManager;
-    std::unique_ptr<IInstViewModel> instViewModel;
     std::unique_ptr<IPreviewDockedWidgets> dockedWidgets{nullptr};
     std::unique_ptr<MantidQt::Widgets::IRegionSelector> regionSelector{nullptr};
     std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> plotPresenter{nullptr};
+    bool useNewInstrumentView{false};
   };
 
   PreviewPresenter(Dependencies dependencies);
@@ -79,6 +78,7 @@ public:
 
   void notifyEditROIModeRequested() override;
   void notifyRectangularROIModeRequested() override;
+  void notifySetYAxisSymlogChanged() override;
 
   void notifyApplyRequested() override;
 
@@ -101,12 +101,12 @@ private:
   IBatchPresenter *m_mainPresenter{nullptr};
   std::unique_ptr<IPreviewModel> m_model;
   std::unique_ptr<IJobManager> m_jobManager;
-  std::unique_ptr<IInstViewModel> m_instViewModel;
   std::unique_ptr<IPreviewDockedWidgets> m_dockedWidgets{nullptr};
   std::unique_ptr<MantidQt::MantidWidgets::IImageInfoWidget> m_imageInfo;
   std::unique_ptr<MantidQt::Widgets::IRegionSelector> m_regionSelector;
   std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> m_plotPresenter;
   std::shared_ptr<StubRegionObserver> m_stubRegionObserver;
+  bool m_useNewInstrumentView = false;
   bool m_plotExistingROIs = false;
 
   void updateWidgetEnabledState();
@@ -122,5 +122,6 @@ private:
   void clearReductionPlot();
   bool isRegionSelectionChanged();
   bool isRegionChanged(ROIType type);
+  void updatePlotAxes();
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

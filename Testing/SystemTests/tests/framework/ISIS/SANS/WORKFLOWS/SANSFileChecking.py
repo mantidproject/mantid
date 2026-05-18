@@ -17,17 +17,7 @@ from mantid.api import ExperimentInfo
 from mantid.kernel import config
 import SANSUtility as su
 import os
-from ISISCommandInterface import (
-    AssignSample,
-    Clean,
-    LARMOR,
-    LOQ,
-    MaskFile,
-    ReductionSingleton,
-    SANS2D,
-    SANS2DTUBES,
-    Set1D,
-)
+from sans.command_interface.ISISCommandInterface import AssignSample, Clean, LARMOR, LOQ, MaskFile, SANS2DTUBES, Set1D, director
 from sans.common.enums import SANSInstrument
 
 
@@ -100,7 +90,7 @@ class SANSFileCheckingTest(unittest.TestCase):
         self._do_test(file_name, expected_time)
 
 
-class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
+class SANSIDFLoadFromFileTest(unittest.TestCase):
     def _get_idf_path_for_workspace(self, filename, instrument_name):
         exists, full_path = get_full_path_SANS_system_test(filename)
         idf_path_workspace = None
@@ -112,25 +102,11 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
             self.fail()
         return idf_path_workspace
 
-    def test_that_reducer_for_SANS2D_switches_to_correct_IDF_when_outdated(self):
-        # Arrange
-        Clean()
-        SANS2D()
-        MaskFile("MASKSANS2D.091A")
-        Set1D()
-        instrument_name = "SANS2D"
-        filename = "SANS2D00029089.nxs"
-        idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
-        idf_reducer_before = ReductionSingleton().get_idf_file_path()
-        # Act
-        AssignSample(filename)
-        # Assert
-        idf_reducer_after = ReductionSingleton().get_idf_file_path()
+    def _get_idf_from_sans_state(self):
+        state = director.process_commands()
+        return state.instrument_info.idf_path
 
-        self.assertNotEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
-        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
-
-    def test_that_reducer_for_SANS2D_stays_when_already_the_same_as_in_workspace(self):
+    def test_that_command_state_director_loads_correct_idf_for_SANS2D(self):
         # Arrange
         Clean()
         SANS2DTUBES()
@@ -139,33 +115,13 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         instrument_name = "SANS2D"
         filename = "SANS2D00029089.nxs"
         idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
-        idf_reducer_before = ReductionSingleton().get_idf_file_path()
         # Act
         AssignSample(filename)
+
         # Assert
-        idf_reducer_after = ReductionSingleton().get_idf_file_path()
+        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(self._get_idf_from_sans_state()))
 
-        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
-        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
-
-    def test_that_reducer_for_LARMOR_switches_to_correct_IDF_when_outdated(self):
-        # Arrange
-        Clean()
-        LARMOR()
-        MaskFile("USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt")
-        Set1D()
-        instrument_name = "LARMOR"
-        filename = "LARMOR00000063.nxs"
-        idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
-        idf_reducer_before = ReductionSingleton().get_idf_file_path()
-        # Act
-        AssignSample(filename)
-        # Assert
-        idf_reducer_after = ReductionSingleton().get_idf_file_path()
-        self.assertNotEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
-        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
-
-    def test_that_reducer_for_LARMOR_stays_when_already_the_same_as_in_workspace(self):
+    def test_that_command_state_director_loads_correct_idf_for_LARMOR(self):
         # Arrange
         Clean()
         LARMOR("LARMOR_Definition_19000000-20150317.xml")
@@ -174,32 +130,13 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         instrument_name = "LARMOR"
         filename = "LARMOR00000063.nxs"
         idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
-        idf_reducer_before = ReductionSingleton().get_idf_file_path()
         # Act
         AssignSample(filename)
-        # Assert
-        idf_reducer_after = ReductionSingleton().get_idf_file_path()
-        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
-        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
 
-    def test_that_reducer_for_LARMOR_switches_to_correct_IDF_when_outdated_V2(self):
-        # Arrange
-        Clean()
-        LARMOR()
-        MaskFile("USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt")
-        Set1D()
-        instrument_name = "LARMOR"
-        filename = "LARMOR00002260.nxs"
-        idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
-        idf_reducer_before = ReductionSingleton().get_idf_file_path()
-        # Act
-        AssignSample(filename)
         # Assert
-        idf_reducer_after = ReductionSingleton().get_idf_file_path()
-        self.assertNotEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
-        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
+        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(self._get_idf_from_sans_state()))
 
-    def test_that_reducer_for_LOQ_stays_when_already_the_same_as_in_workspace(self):
+    def test_that_command_state_director_loads_correct_idf_for_LOQ(self):
         # Arrange
         Clean()
         LOQ()
@@ -208,30 +145,11 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         instrument_name = "LOQ"
         filename = "LOQ54431.raw"
         idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
-        idf_reducer_before = ReductionSingleton().get_idf_file_path()
         # Act
         AssignSample(filename)
-        # Assert
-        idf_reducer_after = ReductionSingleton().get_idf_file_path()
-        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
-        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
 
-    def test_that_reducer_for_LOQ_switches_to_correct_IDF_when_outdated(self):
-        # Arrange
-        Clean()
-        LOQ("LOQ_Definition_20121016-.xml")
-        MaskFile("MASK.094AA")
-        Set1D()
-        instrument_name = "LOQ"
-        filename = "LOQ54431.raw"
-        idf_workspace = self._get_idf_path_for_workspace(filename, instrument_name)
-        idf_reducer_before = ReductionSingleton().get_idf_file_path()
-        # Act
-        AssignSample(filename)
         # Assert
-        idf_reducer_after = ReductionSingleton().get_idf_file_path()
-        self.assertNotEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_before))
-        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
+        self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(self._get_idf_from_sans_state()))
 
 
 @ISISSansSystemTest(SANSInstrument.LARMOR, SANSInstrument.LOQ, SANSInstrument.SANS2D)
@@ -243,8 +161,8 @@ class SANSSwitchIDFTestRunner(systemtesting.MantidSystemTest):
     def runTest(self):
         self._success = False
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(SANSFileCheckingTest, "test"))
-        suite.addTest(unittest.makeSuite(SANSMatchIDFInReducerAndWorkspaceTest, "test"))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(SANSFileCheckingTest))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(SANSIDFLoadFromFileTest))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)
         if res.wasSuccessful():

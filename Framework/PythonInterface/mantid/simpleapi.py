@@ -31,7 +31,7 @@ Importing this module starts the FrameworkManager instance.
 # std libs
 from collections import OrderedDict, namedtuple
 from contextlib import contextmanager
-from datetime import datetime
+import datetime
 import os
 import sys
 
@@ -85,7 +85,11 @@ def specialization_exists(name):
 
     :param name: The name of a possible new function
     """
-    return name in __SPECIALIZED_FUNCTIONS__
+    import builtins
+
+    protected = dir(builtins)
+    protected.append("logger")
+    return name in __SPECIALIZED_FUNCTIONS__ + protected
 
 
 def extract_progress_kwargs(kwargs):
@@ -1008,7 +1012,7 @@ def _create_algorithm_function(name, version, algm_object):  # noqa: C901
                 deprecated = algm_object.aliasDeprecated()  # non-empty string when alias set to be deprecated
                 if deprecated:
                     try:
-                        datetime.fromisoformat(deprecated)
+                        datetime.datetime.fromisoformat(deprecated)
                     except ValueError:
                         deprecated = ""
                         logger.error(f"Alias deprecation date {deprecated} must be in ISO8601 format")
@@ -1041,7 +1045,7 @@ def _create_algorithm_function(name, version, algm_object):  # noqa: C901
 
                 # Check at runtime whether to throw upon alias deprecation.
                 if self._alias and self._alias.deprecated:
-                    deprecated = datetime.fromisoformat(self._alias.deprecated) < datetime.today()
+                    deprecated = datetime.datetime.fromisoformat(self._alias.deprecated) < datetime.datetime.today()
                     deprecated_action = ConfigService.Instance().get("algorithms.alias.deprecated", "Log").lower()
                     if deprecated and deprecated_action == "raise":
                         raise RuntimeError(f"Use of algorithm alias {self._alias.name} not allowed. Use {name} instead")

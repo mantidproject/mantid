@@ -42,21 +42,30 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
         except KeyError:
             # Handle the case where the workspace name does not exist
             mantid.kernel.logger.warning(f"Workspace '{name}' does not exist.")
-            result = False
+            has_multiple_bins.append(False)
+            continue
+
         if isinstance(ws, WorkspaceGroup):
             result = all(_validate_workspaces(ws.getNames()))
         elif isinstance(ws, MatrixWorkspace):
             try:
                 result = ws.blocksize() > 1
+                if not result:
+                    mantid.kernel.logger.warning(f"Cannot overplot '{name}', it does not have multiple bins.")
             except RuntimeError:
                 # blocksize() implementation in Workspace2D and EventWorkspace can throw an error if histograms are not equal
+                result = False
                 for i in range(ws.getNumberHistograms()):
                     if ws.y(i).size() > 1:
                         result = True
                         break
+                if not result:
+                    mantid.kernel.logger.warning(f"Cannot overplot '{name}', it does not have multiple bins.")
+        else:
+            mantid.kernel.logger.warning(f"Workspace '{name}' is neither a MatrixWorkspace or WorkspaceGroup.")
+            result = False
 
-        if result is not None:
-            has_multiple_bins.append(result)
+        has_multiple_bins.append(result)
 
     return has_multiple_bins
 
@@ -165,7 +174,6 @@ class FigureWindow(QMainWindow, ObservingView):
         if len(names) == 0:
             return
         if not all(_validate_workspaces(names)):
-            mantid.kernel.logger.warning("To overplot, workspace(s) must have multiple bins")
             return
         # local import to avoid circular import with FigureManager
         from mantidqt.plotting.functions import pcolormesh, plot_from_names, plot_surface, plot_wireframe, plot_contour

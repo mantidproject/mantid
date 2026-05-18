@@ -3,8 +3,6 @@
 Inelastic Data Processor
 ========================
 
-.. contents:: Table of Contents
-  :local:
 
 Overview
 --------

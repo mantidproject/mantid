@@ -11,9 +11,9 @@ Description
 
 This algorithm will predict the position of single-crystal diffraction
 peaks (both in detector position/TOF and Q-space) and create an output
-:ref:`PeaksWorkspace <PeaksWorkspace>` containing the result when
+:py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>` containing the result when
 `OutputType` is set to `Peak`, otherwise a
-:ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>` will be
+:py:obj:`LeanElasticPeaksWorkspace <mantid.dataobjects.LeanElasticPeaksWorkspace>` will be
 created that only has the Q-space positions.
 
 This algorithm uses the InputWorkspace to determine the instrument in

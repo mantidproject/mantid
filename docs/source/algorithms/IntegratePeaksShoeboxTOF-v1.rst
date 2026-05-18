@@ -25,7 +25,7 @@ to account for the instrument resolution.
 Description
 -----------
 
-This is an algorithm to integrate single-crystal Bragg peaks in a :ref:`MatrixWorkspace <MatrixWorkspace>`.
+This is an algorithm to integrate single-crystal Bragg peaks in a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 An initial integration is performed by summing up the counts in a fixed shoebox of user specified size ``NRows`` and
 ``NCols`` on the detector and ``NBins`` along the TOF direction. The dimensions of the shoebox are then optionally
 optimised to maximise I/sigma.

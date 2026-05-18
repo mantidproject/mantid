@@ -62,7 +62,7 @@ public:
     // Instrument::getMonitors will then cause a segmentation fault, so this
     // test must run before we have invalid pointers.
     Instrument pinstrument(instrument, pmap);
-    TS_ASSERT_EQUALS(pinstrument.getMonitors().size(), 1)
+    TS_ASSERT_EQUALS(pinstrument.getMonitorIDs().size(), 1)
   }
 
   void testDetector() {

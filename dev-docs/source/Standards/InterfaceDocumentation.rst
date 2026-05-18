@@ -4,8 +4,6 @@
 Interface Documentation
 =======================
 
-.. contents::
-  :local:
 
 Summary
 =======

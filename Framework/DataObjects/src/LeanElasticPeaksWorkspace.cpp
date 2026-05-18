@@ -380,9 +380,10 @@ void LeanElasticPeaksWorkspace::addPeakColumn(const std::string &name) {
 //---------------------------------------------------------------------------------------------
 /// @return the index of the column with the given name.
 size_t LeanElasticPeaksWorkspace::getColumnIndex(const std::string &name) const {
-  for (size_t i = 0; i < m_columns.size(); i++)
-    if (m_columns[i]->name() == name)
-      return i;
+  const auto it = std::find(m_columnNames.cbegin(), m_columnNames.cend(), name);
+  if (it != m_columnNames.cend()) {
+    return std::distance(m_columnNames.cbegin(), it);
+  }
   throw std::invalid_argument("Column named " + name + " was not found in the LeanElasticPeaksWorkspace.");
 }
 

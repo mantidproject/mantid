@@ -22,10 +22,10 @@ anyway, then you probably shouldn't be using this algorithm!).
 Restrictions on the input workspace
 ###################################
 
-For :ref:`EventWorkspaces <EventWorkspace>`, there are no restrictions on
+For an :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`, there are no restrictions on
 the input workspaces if ValidateInputs=false.
 
-For :ref:`Workspace2Ds <Workspace2D>`, the number of bins must be the same
+For :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`, the number of bins must be the same
 in both inputs.
 
 If ValidateInputs is selected, then the input workspaces must also:

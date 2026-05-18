@@ -1337,7 +1337,7 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
 /// Creates a monitor workspace sized to the number of monitors, with the
 /// monitor IDs set
 void SNSLiveEventDataListener::initMonitorWorkspace() {
-  auto monitors = m_eventBuffer->getInstrument()->getMonitors();
+  auto monitors = m_eventBuffer->getInstrument()->getMonitorIDs();
 
   // don't create monitor workspace if there are no monitors
   if (monitors.size() == 0)

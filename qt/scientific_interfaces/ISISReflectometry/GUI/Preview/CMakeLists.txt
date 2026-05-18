@@ -1,5 +1,12 @@
-set(PREVIEW_SRC_FILES InstViewModel.cpp PreviewJobManager.cpp PreviewPresenter.cpp QtPreviewView.cpp
-                      QtPreviewDockedWidgets.cpp PreviewModel.cpp
+set(PREVIEW_SRC_FILES
+    InstViewModel.cpp
+    PreviewPythonInstrumentView.cpp
+    PreviewJobManager.cpp
+    PreviewPresenter.cpp
+    QtPreviewView.cpp
+    QtPreviewDockedWidgets.cpp
+    PreviewModel.cpp
+    QtPreviewInstrumentDisplay.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
@@ -8,6 +15,7 @@ set(PREVIEW_INC_FILES
     InstViewModel.h
     IInstViewModel.h
     IPreviewModel.h
+    PreviewPythonInstrumentView.h
     PreviewModel.h
     PreviewJobManager.h
     IPreviewPresenter.h
@@ -15,11 +23,14 @@ set(PREVIEW_INC_FILES
     PreviewPresenter.h
     IPreviewView.h
     IPreviewDockedWidgets.h
+    IPreviewInstrumentDisplay.h
+    QtPreviewInstrumentDisplay.h
     ROIType.h
     QtPreviewView.h
+    ShapeChangedRelay.h
 )
 
-set(PREVIEW_MOC_FILES QtPreviewView.h QtPreviewDockedWidgets.h)
+set(PREVIEW_MOC_FILES QtPreviewView.h QtPreviewDockedWidgets.h ShapeChangedRelay.h)
 
 set(PREVIEW_UI_FILES PreviewWidget.ui PreviewDockedWidgets.ui)
 

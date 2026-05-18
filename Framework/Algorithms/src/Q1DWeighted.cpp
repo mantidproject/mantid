@@ -135,7 +135,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   // Calculate the output binning
   const std::vector<double> binParams = getProperty("OutputBinning");
 
-  m_nQ = static_cast<size_t>(VectorHelper::createAxisFromRebinParams(binParams, m_qBinEdges)) - 1;
+  m_nQ = VectorHelper::createAxisFromRebinParams(binParams, m_qBinEdges) - 1;
 
   m_isMonochromatic = inputWS->getAxis(0)->unit()->unitID() != "Wavelength";
   // number of spectra in the input

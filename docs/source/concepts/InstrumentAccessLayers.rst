@@ -7,13 +7,13 @@ Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo
 Introduction
 ------------
 
-There are three layers to access instrument information, :py:obj:`~mantid.api.SpectrumInfo`, :py:obj:`~mantid.geometry.DetectorInfo`, and :py:obj:`~mantid.geometry.ComponentInfo`, which are introduced to Mantid as part of Instrument 2.0. These classes  store all commonly accessed information about spectra and detectors, components, and the relationships between them. Masking, monitor flags, L1, L2, 2-theta and position are stored as part of :py:obj:`~mantid.geometry.DetectorInfo`. In addition, :py:obj:`~mantid.geometry.ComponentInfo` provides the API to tree and shape related operations historically performed by :ref:`Instrument` type.
+There are three layers to access instrument information, :py:obj:`~mantid.api.SpectrumInfo`, :py:obj:`~mantid.geometry.DetectorInfo`, and :py:obj:`~mantid.geometry.ComponentInfo`, which are introduced to Mantid as part of Instrument 2.0. These classes  store all commonly accessed information about spectra and detectors, components, and the relationships between them. Masking, monitor flags, L1, L2, 2-theta and position are stored as part of :py:obj:`~mantid.geometry.DetectorInfo`. In addition, :py:obj:`~mantid.geometry.ComponentInfo` provides the API to tree and shape related operations historically performed by :py:obj:`Instrument <mantid.geometry.Instrument>` type.
 
 A spectrum corresponds to (a group of) one or more detectors. Most algorithms work with spectra and thus :py:obj:`~mantid.api.SpectrumInfo` would be used. Some algorithms work on a lower level (with individual detectors) and thus :py:obj:`~mantid.geometry.DetectorInfo` would be used.
 
-The legacy :ref:`Instrument` largely consists of ``Detectors`` and ``Components`` - all detectors are also components. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` are the respective replacements for these. :py:obj:`~mantid.geometry.ComponentInfo` introduces a **component index** for access, and :py:obj:`~mantid.geometry.DetectorInfo` introduces a **detector index**, these will be discussed further below. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` share in-memory data. The difference between the two is best thought about in terms of their interfaces. The interface for :py:obj:`~mantid.geometry.DetectorInfo` is designed for working with detectors, and the interface for :py:obj:`~mantid.geometry.ComponentInfo` is designed for working with generic components.
+The legacy :py:obj:`Instrument <mantid.geometry.Instrument>` largely consists of ``Detectors`` and ``Components`` - all detectors are also components. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` are the respective replacements for these. :py:obj:`~mantid.geometry.ComponentInfo` introduces a **component index** for access, and :py:obj:`~mantid.geometry.DetectorInfo` introduces a **detector index**, these will be discussed further below. :py:obj:`~mantid.geometry.DetectorInfo` and :py:obj:`~mantid.geometry.ComponentInfo` share in-memory data. The difference between the two is best thought about in terms of their interfaces. The interface for :py:obj:`~mantid.geometry.DetectorInfo` is designed for working with detectors, and the interface for :py:obj:`~mantid.geometry.ComponentInfo` is designed for working with generic components.
 
-In many cases direct access to legacy :ref:`Instrument` can be removed by using these layers. This will also help in moving to using indexes for enumeration, and only working with IDs for user-facing input.
+In many cases direct access to legacy :py:obj:`Instrument <mantid.geometry.Instrument>` can be removed by using these layers. This will also help in moving to using indexes for enumeration, and only working with IDs for user-facing input.
 
 Current Status
 ##############
@@ -36,7 +36,7 @@ There is also a near-complete implementation of the "real" ``DetectorInfo`` clas
 
 The python interface to ``DetectorInfo`` has matured, and includes widespread immutable access via iterators. The iterators can also be used to set masking flags.
 
-See :ref:`DetectorInfo <DetectorInfo>` for more information.
+See :py:obj:`DetectorInfo <mantid.geometry.DetectorInfo>` for more information.
 
 ComponentInfo
 ______________
@@ -46,7 +46,7 @@ For writing to the component tree. You can extract a non-const ``ComponentInfo``
 
 The python interface to ``ComponentInfo`` has matured, and now provides equal, if not better support than the ``Instrument`` API for navigating the high-level instrument. Iterator support has also been provided for ``ComponentInfo``.
 
-See :ref:`ComponentInfo <ComponentInfo>` for more information.
+See :py:obj:`ComponentInfo <mantid.geometry.ComponentInfo>` for more information.
 
 Changes for Rollout
 -------------------

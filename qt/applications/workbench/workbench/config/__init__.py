@@ -20,7 +20,7 @@ and use it to access the settings
 # std imports
 from collections import namedtuple
 import os
-import sys
+import mantid.kernel.environment as mtd_env
 
 # third-party imports
 from qtpy.QtCore import Qt, QSettings
@@ -67,9 +67,9 @@ WINDOW_STANDARD_FLAGS = Qt.WindowFlags(Qt.Window)
 # Flags defining our meaning of keeping figure windows on top.
 # On Windows the standard Qt.Window flags + setting a parent keeps the widget on top
 # Other OSs use the Qt.Tool type with a close button
-if sys.platform == "win32":
+if mtd_env.is_windows():
     WINDOW_ONTOP_FLAGS = WINDOW_STANDARD_FLAGS
-elif sys.platform == "darwin":
+elif mtd_env.is_mac():
     WINDOW_ONTOP_FLAGS = Qt.Tool | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint
 else:
     WINDOW_ONTOP_FLAGS = Qt.Tool | Qt.CustomizeWindowHint | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint
@@ -90,6 +90,7 @@ DEFAULTS = {
     },
     "Editors": {
         "completion_enabled": True,
+        "apply_dark_theme": False,
     },
 }
 

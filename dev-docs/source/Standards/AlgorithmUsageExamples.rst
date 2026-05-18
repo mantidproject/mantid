@@ -4,8 +4,6 @@
 Algorithm Usage Examples
 ========================
 
-.. contents::
-  :local:
 
 Introduction
 ============

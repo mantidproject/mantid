@@ -12,6 +12,7 @@ set(SRC_FILES
     src/LoggingCleaner.cpp
     src/MDAlgorithmsTestHelper.cpp
     src/MDEventsTestHelper.cpp
+    src/MockMemory.cpp
     src/MultiDomainFunctionHelper.cpp
     src/MuonGroupingXMLHelper.cpp
     src/MuonWorkspaceCreationHelper.cpp
@@ -42,6 +43,7 @@ set(INC_FILES
     inc/MantidFrameworkTestHelpers/MDAlgorithmsTestHelper.h
     inc/MantidFrameworkTestHelpers/MDEventsTestHelper.h
     inc/MantidFrameworkTestHelpers/MockAlgorithm.h
+    inc/MantidFrameworkTestHelpers/MockMemory.h
     inc/MantidFrameworkTestHelpers/MultiDomainFunctionHelper.h
     inc/MantidFrameworkTestHelpers/MuonGroupingXMLHelper.h
     inc/MantidFrameworkTestHelpers/MuonWorkspaceCreationHelper.h

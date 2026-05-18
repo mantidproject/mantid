@@ -3,8 +3,6 @@
 Sample Transmission Calculator Testing
 ======================================
 
-.. contents::
-   :local:
 
 Introduction
 ------------

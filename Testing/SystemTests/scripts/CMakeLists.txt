@@ -4,7 +4,7 @@
 # Data search directories
 set(DATA_DIRS "")
 # Input data
-set(SYSTEM_TEST_DATA_DIR ${ExternalData_BINARY_ROOT}/Testing/Data/SystemTest)
+set(SYSTEM_TEST_DATA_DIR "${ExternalData_BINARY_ROOT}/Testing/Data/SystemTest")
 list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR})
 list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/INTER)
 # Reference results

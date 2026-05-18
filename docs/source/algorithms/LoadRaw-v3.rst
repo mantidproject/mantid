@@ -10,10 +10,10 @@ Description
 -----------
 
 The LoadRaw algorithm stores data from the :ref:`RAW file <RAW File>` in a
-:ref:`Workspace2D <Workspace2D>`, which will naturally contain histogram
+:py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>`, which will naturally contain histogram
 data with each spectrum going into a separate histogram. The time bin
 boundaries (X values) will be common to all histograms and will have
-their :ref:`units <Unit Factory>` set to time-of-flight. The Y values will contain
+their :py:obj:`Units <mantid.kernel.UnitFactoryImpl>` set to time-of-flight. The Y values will contain
 the counts and will be unit-less (i.e. no division by bin width or
 normalisation of any kind). The errors, currently assumed Gaussian, will
 be set to be the square root of the number of counts in the bin.
@@ -34,7 +34,7 @@ If the RAW file contains multiple periods of data this will be detected
 and the different periods will be output as separate workspaces, which
 after the first one will have the period number appended (e.g.
 OutputWorkspace\_period). Each workspace will share the same
-:ref:`Instrument <Instrument>`, SpectraToDetectorMap and
+:py:obj:`Instrument <mantid.geometry.Instrument>`, SpectraToDetectorMap and
 :py:obj:`sample objects <mantid.api.Sample>`. If the optional 'spectrum'
 properties are set for a multiperiod dataset, then they will ignored.
 
@@ -45,7 +45,7 @@ Subalgorithms used
 ##################
 
 LoadRaw runs the following algorithms as child algorithms to populate
-aspects of the output :ref:`Workspace <Workspace>`:
+aspects of the output :py:obj:`~mantid.api.Workspace`:
 
 -  :ref:`algm-LoadInstrument` - Looks for an instrument
    definition file named XXX\_Definition.xml, where XXX is the 3 letter
@@ -57,7 +57,7 @@ aspects of the output :ref:`Workspace <Workspace>`:
    run instead.
 -  :ref:`algm-LoadMappingTable` - To build up the mapping
    between the spectrum numbers and the Detectors of the attached
-   :ref:`Instrument <Instrument>`.
+   :py:obj:`Instrument <mantid.geometry.Instrument>`.
 -  :ref:`algm-LoadLog` - Will look for any log files in the same
    directory as the RAW file and load their data into the workspace's
    :py:obj:`sample objects <mantid.api.Sample>`.

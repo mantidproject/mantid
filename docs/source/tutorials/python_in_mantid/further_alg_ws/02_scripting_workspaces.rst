@@ -9,10 +9,6 @@ The :ref:`Workspaces Toolbox<WorkbenchWorkspaceToolbox>` is used to store and ma
 
 Below are some examples of how to control workspaces with a script.
 
-.. contents:: Table of contents
-    :local:
-
-
 
 Relevant Algorithms
 ===================
@@ -41,7 +37,7 @@ Required import:
 
     DeleteWorkspace(ws)
 
-:ref:`Group Workspaces <WorkspaceGroup>`:
+:py:obj:`Group Workspaces <mantid.api.WorkspaceGroup>`:
 
 .. code-block:: python
 
@@ -137,8 +133,7 @@ Useful links
 ============
 
 * :ref:`WorkingWithWorkspaces`
-* :ref:`More ADS options <mantid.api.AnalysisDataServiceImpl>`
-* :ref:`Analysis Data Service Explained <Analysis Data Service>`
+* :py:obj:`Analysis Data Service <mantid.api.AnalysisDataServiceImpl>`
 
 
 Overall Example

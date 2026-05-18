@@ -9,8 +9,8 @@
 Description
 -----------
 
-Integration sums up spectra in a :ref:`Workspace <Workspace>` and outputs a
-:ref:`Workspace <Workspace>` that contains only 1 value per spectrum (i.e.
+Integration sums up spectra in a :py:obj:`~mantid.api.Workspace` and outputs a
+:py:obj:`~mantid.api.Workspace` that contains only 1 value per spectrum (i.e.
 the sum). The associated errors are added in quadrature. The two X
 values per spectrum are set to the limits of the range over which the
 spectrum has been integrated. By default, the entire range is integrated
@@ -47,8 +47,8 @@ integration limits set will not contribute to the output workspace.
 EventWorkspaces
 ###############
 
-If an :ref:`EventWorkspace <EventWorkspace>` is used as the input, the
-output will be a :ref:`MatrixWorkspace <MatrixWorkspace>`.
+If an :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` is used as the input, the
+output will be a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 :ref:`algm-Rebin` is recommended if you want to keep the workspace as an
 EventWorkspace.
 
@@ -87,7 +87,7 @@ these now represent counts (not counts per :math:`x`-bin-width).
 Fractional Rebinning
 ####################
 
-Some algorithms create a special type of :ref:`Workspace2D <Workspace2D>` called a ``RebinnedOutput`` workspace,
+Some algorithms create a special type of :py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` called a ``RebinnedOutput`` workspace,
 in which each bin contains both a value and the fractional overlap area of this bin over
 that of the original data. There is more discussion of this in the :ref:`FractionalRebinning <FractionalRebinning>`
 concepts page.

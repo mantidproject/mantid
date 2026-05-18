@@ -3,8 +3,6 @@ Mantid Timers
 
 This page provides an introduction to measuring execution time of the Mantid C++ code.
 
-.. contents:: Context
-   :local:
 
 Wall-clock timers
 ------------------------

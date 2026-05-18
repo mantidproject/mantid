@@ -3,8 +3,6 @@
 Error Reporter Testing
 ======================
 
-.. contents::
-  :local:
 
 Error Reporter test
 -------------------

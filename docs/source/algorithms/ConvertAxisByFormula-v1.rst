@@ -15,7 +15,7 @@ defined math formula. It will adjust the data values
 reverse the spectra if needed to keep the X values increasing across the workspace.
 This only works for MatrixWorkspaces, so will not work on
 Multi Dimensional Workspaces or Table Workspaces. If you specify one of the
-known :ref:`Units <Unit Factory>` then that will be the resulting unit,
+known :py:obj:`Units <mantid.kernel.UnitFactoryImpl>` then that will be the resulting unit,
 otherwise like the
 :ref:`algm-ConvertSpectrumAxis` algorithm the result of
 this algorithm will have custom units defined for the axis you have

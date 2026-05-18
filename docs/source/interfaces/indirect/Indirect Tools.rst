@@ -1,8 +1,6 @@
 Indirect Tools
 ==============
 
-.. contents:: Table of Contents
-  :local:
 
 Overview
 --------

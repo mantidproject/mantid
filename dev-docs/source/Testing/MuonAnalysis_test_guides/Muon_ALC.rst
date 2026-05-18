@@ -3,8 +3,6 @@
 Muon Unscripted Testing: ALC
 ============================
 
-.. contents:: Table of Contents
-   :local:
 
 Introduction
 ------------

@@ -1,0 +1,1 @@
+- Sample Shapes generated from ``.STL`` mesh files can now be saved and loaded from nexus files.

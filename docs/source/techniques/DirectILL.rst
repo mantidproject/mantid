@@ -4,8 +4,6 @@
 Data reduction for ILL's direct geometry instruments
 ====================================================
 
-.. contents:: Table of contents
-    :local:
 
 There are seven workflow algorithms supporting data reduction at ILL's time-of-flight instruments. These algorithms are:
 

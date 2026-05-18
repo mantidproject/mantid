@@ -9,8 +9,8 @@
 Description
 -----------
 
-The algorithm looks through the :ref:`Instrument <Instrument>` to find all
-the :ref:`RectangularDetectors <RectangularDetector>` defined. For each
+The algorithm looks through the :py:obj:`Instrument <mantid.geometry.Instrument>` to find all
+the :py:obj:`~mantid.geometry.RectangularDetector` defined. For each
 detector, the SumX\*SumY neighboring event lists are summed together and
 saved in the output workspace as a single spectrum. Therefore, the
 output workspace will have 1/(SumX\*SumY) \* the original number of

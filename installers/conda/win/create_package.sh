@@ -24,6 +24,7 @@ function usage() {
 # Optional arguments
 CONDA_CHANNEL=mantid
 SUFFIX=""
+MANTID_VERSION=""
 while [ ! $# -eq 0 ]
 do
     case "$1" in
@@ -33,6 +34,10 @@ do
             ;;
         -s)
             SUFFIX="$2"
+            shift
+            ;;
+        -v)
+            MANTID_VERSION="$2"
             shift
             ;;
         -h)
@@ -80,11 +85,16 @@ if [[ "$SUFFIX" == "Unstable" ]] || [[ "$SUFFIX" == "Nightly" ]]; then
   MANTID_CHANNEL=mantid/label/nightly
 fi
 
-echo "Creating conda env from mantidworkbench and jq"
+if [ -z "$MANTID_VERSION" ]; then
+  echo "Error: Mantid version must be specified with -v flag"
+  exit 1
+fi
+
+echo "Creating conda env from mantidworkbench==${MANTID_VERSION} and jq"
 "$CONDA_EXE" create --prefix $CONDA_ENV_PATH \
   --copy --channel $CONDA_CHANNEL --channel conda-forge --channel $MANTID_CHANNEL -y \
-  mantidworkbench \
-  mantiddocs \
+  "mantidworkbench==${MANTID_VERSION}" \
+  "mantiddocs==${MANTID_VERSION}" \
   mslice \
   m2w64-jq
 echo "Conda env created"
@@ -126,11 +136,7 @@ mv $CONDA_ENV_PATH/Library/instrument $COPY_DIR/
 
 echo "Constructing package/lib/qt5"
 mkdir -p $COPY_DIR/lib/qt5/bin
-mv $CONDA_ENV_PATH/Library/bin/QtWebEngineProcess.exe $COPY_DIR/lib/qt5/bin
 cp $THIS_SCRIPT_DIR/../common/qt.conf $COPY_DIR/lib/qt5/bin
-mv $CONDA_ENV_PATH/Library/resources $COPY_DIR/lib/qt5/
-mkdir -p $COPY_DIR/lib/qt5/translations/qtwebengine_locales
-mv $CONDA_ENV_PATH/Library/translations/qtwebengine_locales/en*.pak $COPY_DIR/lib/qt5/translations/qtwebengine_locales/
 
 echo "Copy plugins to the package"
 mkdir $COPY_DIR/plugins

@@ -6,8 +6,6 @@
 MSlice Testing
 ===================
 
-.. contents::
-   :local:
 
 Introduction
 ------------

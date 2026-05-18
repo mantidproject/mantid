@@ -3,19 +3,17 @@
 BinMD Coordinate Transformations
 ================================
 
-.. contents:: Table of Contents
-  :local:
 
 Introduction
 ------------
 
-The algorithms :ref:`algm-BinMD` and :ref:`algm-SliceMD` allow an :ref:`MDWorkspace` to be binned into a new coordinate
+The algorithms :ref:`algm-BinMD` and :ref:`algm-SliceMD` allow an :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` to be binned into a new coordinate
 system. This guide describes the coordinate transformations and relations between binned workspaces.
 
 Binning an MDWorkspace
 ----------------------
 
-- Begin with an initial :ref:`MDWorkspace` called ``original_ws`` with two dimensions, ``Qx`` and ``Qy``.
+- Begin with an initial :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` called ``original_ws`` with two dimensions, ``Qx`` and ``Qy``.
 - The :ref:`algm-BinMD` algorithm can transform these coordinates into a new coordinate space with, for example, a
   rotation and a translation:
 
@@ -23,7 +21,7 @@ Binning an MDWorkspace
    :alt: Coordinate transform line example
    :align: center
 
-- The output :ref:`MDHistoWorkspace`, called ``binned_ws`` still has two dimensions, now called ``H`` and ``K``.
+- The output :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`, called ``binned_ws`` still has two dimensions, now called ``H`` and ``K``.
 - The ``binned_ws`` workspace holds a reference to the original workspace.
 
   - This can be seen in the details of the workspace in the Workspaces widget (``Binned from 'original_ws'``).
@@ -44,7 +42,7 @@ Binning an MDWorkspace
 Binning a Line From an MDHistoWorkspace
 ---------------------------------------
 
-It is possible to call :ref:`algm-BinMD` on an :ref:`MDHistoWorkspace` that has already been binned.
+It is possible to call :ref:`algm-BinMD` on an :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` that has already been binned.
 For example, if you are viewing ``binned_ws`` in the :ref:`sliceviewer`, you can use the
 :ref:`Non-axis aligned cutting tool <sliceviewer_nonaxiscuts>` to bin a line from that.
 

@@ -286,13 +286,14 @@ def convert_color_to_hex(color):
         return colors.rgb2hex(rgb)
 
 
-def get_plot_specific_properties(ws, plot_type, plot_kwargs):
+def get_plot_specific_properties(ws, plot_type, plot_kwargs, errors=False):
     """
     Set plot specific properties from the workspace
     :param ws:
-    :param ax:
-    :param errors:
+    :param plot_type:
     :param plot_kwargs:
+    :param errors: If True, errorbar kwargs (capsize, capthick, etc.) will not be stripped even for
+                   non-errorbar workspace types. This is needed when errors=True is passed to plot().
     """
 
     if plot_type in ["errorbar_x", "errorbar_y", "errorbar_xy"]:
@@ -315,9 +316,10 @@ def get_plot_specific_properties(ws, plot_type, plot_kwargs):
             plot_kwargs["markersize"] = (
                 marker_size if marker_size != 6 else float(ConfigService.getString("plots.markerworkspace.MarkerSize"))
             )
-        plot_kwargs.pop("capsize", None)
-        plot_kwargs.pop("capthick", None)
-        plot_kwargs.pop("errorevery", None)
-        plot_kwargs.pop("elinewidth", None)
+        if not errors:
+            plot_kwargs.pop("capsize", None)
+            plot_kwargs.pop("capthick", None)
+            plot_kwargs.pop("errorevery", None)
+            plot_kwargs.pop("elinewidth", None)
 
     return plot_kwargs

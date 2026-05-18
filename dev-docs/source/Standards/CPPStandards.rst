@@ -4,8 +4,6 @@
 C++ Coding Standards
 ====================
 
-.. contents:: Contents
-   :local:
 
 References
 ^^^^^^^^^^

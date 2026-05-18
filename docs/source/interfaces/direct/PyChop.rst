@@ -3,8 +3,6 @@
 PyChop
 ======
 
-.. contents:: Table of Contents
-  :local:
 
 .. figure:: /images/PyChopGui.png
    :alt: PyChopGui.png

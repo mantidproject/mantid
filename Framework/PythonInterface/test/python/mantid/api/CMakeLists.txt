@@ -28,6 +28,7 @@ set(TEST_PY_FILES
     IMaskWorkspaceTest.py
     IPeakFunctionTest.py
     IPeaksWorkspaceTest.py
+    InstrumentDataServiceTest.py
     ITableWorkspaceTest.py
     JacobianTest.py
     MatrixWorkspaceTest.py

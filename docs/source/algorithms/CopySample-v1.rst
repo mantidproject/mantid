@@ -26,7 +26,7 @@ CopyLattice and CopyOrientationOnly. If only CopyOrientationOnly is
 true, the algorithm will throw an error.
 
 A common use for this algorithm is for single crystal measurements.
-Finding the :ref:`UB matrix <Lattice>` occurs on a :ref:`PeaksWorkspace <PeaksWorkspace>`.
+Finding the :ref:`UB matrix <Lattice>` occurs on a :py:obj:`PeaksWorkspace <mantid.dataobjectsPeaksWorkspace>`.
 In order to convertthe data to HKL space, one needs to copy the oriented lattice
 to the individual data workspaces.
 

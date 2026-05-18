@@ -7,7 +7,7 @@ What is it?
 -----------
 
 The Instrument Data Service (IDS) is a :ref:`Data Service <Data Service>`
-that is specialized to hold all of the :ref:`instruments <Instrument>` that
+that is specialized to hold all of the :py:obj:`instruments <mantid.geometry.Instrument>` that
 are created during a user session. Whenever an instrument definition is
 loaded it is saved in the IDS and further workspaces that refer to the
 same instrument share the same definition.

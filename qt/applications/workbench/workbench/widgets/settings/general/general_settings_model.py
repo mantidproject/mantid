@@ -23,6 +23,7 @@ class GeneralProperties(Enum):
     PR_TIME_BETWEEN_RECOVERY = "projectRecovery.secondsBetween"
     PR_RECOVERY_ENABLED = "projectRecovery.enabled"
     USE_NOTIFICATIONS = "Notifications.Enabled"
+    APPLY_DARK_THEME_ENABLED = "editors.apply_dark_theme"
 
 
 class GeneralUserConfigProperties(Enum):
@@ -33,6 +34,7 @@ class GeneralUserConfigProperties(Enum):
     USER_LAYOUT = "MainWindow/user_layouts"
     WINDOW_BEHAVIOUR = "AdditionalWindows/behaviour"
     COMPLETION_ENABLED = "Editors/completion_enabled"
+    USE_NEW_INSTRUMENT_VIEW = "InstrumentView/use_new_instrument_view"
 
 
 class GeneralSettingsModel(ConfigSettingsChangesModel):
@@ -136,6 +138,15 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
     def get_completion_enabled() -> str:
         return CONF.get(GeneralUserConfigProperties.COMPLETION_ENABLED.value, type=bool)
 
+    def get_apply_dark_theme_enabled(self) -> str:
+        return self.get_saved_value(GeneralProperties.APPLY_DARK_THEME_ENABLED.value)
+
+    @staticmethod
+    def get_use_new_instrument_view() -> bool:
+        if CONF.has(GeneralUserConfigProperties.USE_NEW_INSTRUMENT_VIEW.value):
+            return CONF.get(GeneralUserConfigProperties.USE_NEW_INSTRUMENT_VIEW.value, type=bool)
+        return False
+
     def set_crystallography_convention(self, value: str) -> None:
         self.add_change(GeneralProperties.CRYSTALLOGRAPY_CONV.value, value)
 
@@ -150,6 +161,9 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
 
     def set_completion_enabled(self, value: bool) -> None:
         self.add_change(GeneralUserConfigProperties.COMPLETION_ENABLED.value, value)
+
+    def set_use_new_instrument_view(self, value: bool) -> None:
+        self.add_change(GeneralUserConfigProperties.USE_NEW_INSTRUMENT_VIEW.value, value)
 
     def set_prompt_save_on_close(self, value: bool) -> None:
         self.add_change(GeneralUserConfigProperties.PROMPT_SAVE_ON_CLOSE.value, value)
@@ -183,3 +197,6 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
 
     def set_user_layout(self, value: dict) -> None:
         self.add_change(GeneralUserConfigProperties.USER_LAYOUT.value, value)
+
+    def set_apply_dark_theme_enabled(self, value: str) -> None:
+        self.add_change(GeneralProperties.APPLY_DARK_THEME_ENABLED.value, value)

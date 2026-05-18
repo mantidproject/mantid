@@ -9,8 +9,8 @@
 Description
 -----------
 
-This algorithm sums two :ref:`MDHistoWorkspaces <MDHistoWorkspace>` or
-merges two :ref:`MDEventWorkspaces <MDWorkspace>` together.
+This algorithm sums two :py:obj:`MDHistoWorkspace <mantid.daaobjects.MDHistoWorkspace>` or
+merges two :py:obj:`MDEventWorkspace <mantid.daaobjects.MDEventWorkspace>` together.
 
 MDHistoWorkspaces
 #################
@@ -28,7 +28,7 @@ MDEventWorkspaces
 #################
 
 This algorithm operates similarly to calling Plus on two
-:ref:`EventWorkspaces <EventWorkspace>`: it combines the events from the
+:py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`: it combines the events from the
 two workspaces together to form one large workspace.
 
 Note for file-backed workspaces
@@ -37,7 +37,7 @@ Note for file-backed workspaces
 The algorithm uses :ref:`algm-CloneMDWorkspace` to create the
 output workspace, except when adding in place (e.g. :math:`A = A + B` ).
 See :ref:`algm-CloneMDWorkspace` for details, but note that a
-file-backed :ref:`MDEventWorkspace <MDWorkspace>` will have its file
+file-backed :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` will have its file
 copied.
 
 -  If A is in memory and B is file-backed, the operation

@@ -3,8 +3,6 @@
 Muon Feature Flags
 ==================
 
-.. contents:: Table of Contents
-  :local:
 
 Overview
 --------

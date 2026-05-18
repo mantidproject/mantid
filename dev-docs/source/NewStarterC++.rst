@@ -4,8 +4,6 @@
 New Starter C++
 =====================
 
-.. contents::
-   :local:
 
 -------------
 Prerequisites

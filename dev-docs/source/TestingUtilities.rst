@@ -4,8 +4,6 @@
 Testing Utilities
 =================
 
-.. contents::
-  :local:
 
 Summary
 #######

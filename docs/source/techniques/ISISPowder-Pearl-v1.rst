@@ -4,8 +4,6 @@
 ISIS Powder Diffraction Scripts - PEARL Reference
 =====================================================
 
-.. contents:: Table of Contents
-    :local:
 
 .. _creating_pearl_object-isis-powder-diffraction-ref:
 

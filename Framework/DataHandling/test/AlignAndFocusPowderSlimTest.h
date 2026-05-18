@@ -40,6 +40,7 @@ using Mantid::DataObjects::TableWorkspace_sptr;
 namespace {
 // used in most tests
 const std::string VULCAN_218062("VULCAN_218062.nxs.h5");
+const std::string VULCAN_INSTRUMENT("VULCAN_Definition_2022-05-15.xml");
 
 // place where the disabled tests at the bottom are
 // test_exec1GB, test_exec10GB, test_exec18GB
@@ -83,7 +84,7 @@ public:
     // CreateGroupingWorkspace(InstrumentName="VULCAN", GroupDetectorsBy="bank", OutputWorkspace="groups")
     auto gen = AlgorithmManager::Instance().createUnmanaged("CreateGroupingWorkspace");
     gen->initialize();
-    gen->setProperty("InstrumentName", "VULCAN");
+    gen->setProperty("InstrumentFilename", VULCAN_INSTRUMENT);
     gen->setProperty("GroupDetectorsBy", "bank");
     gen->setProperty("OutputWorkspace", "bank_groups");
     gen->execute();
@@ -1066,7 +1067,7 @@ public:
     // load VULCAN instrument
     auto load = AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
     load->initialize();
-    load->setProperty("InstrumentName", "VULCAN");
+    load->setProperty("Filename", VULCAN_INSTRUMENT);
     load->setProperty("OutputWorkspace", "instrument");
     load->execute();
 
@@ -1113,7 +1114,7 @@ public:
     // load VULCAN instrument
     auto load = AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
     load->initialize();
-    load->setProperty("InstrumentName", "VULCAN");
+    load->setProperty("Filename", VULCAN_INSTRUMENT);
     load->setProperty("OutputWorkspace", "instrument");
     load->execute();
 

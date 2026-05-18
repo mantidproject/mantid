@@ -10,6 +10,7 @@
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidIndexing/IndexInfo.h"
@@ -28,6 +29,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 namespace {
+
 int convertStringNumToInt(const std::string &string) {
   try {
     auto returnValue = std::stoi(string.c_str());
@@ -757,16 +759,17 @@ std::string ReflectometryWorkflowBase2::findProcessingInstructions(const Instrum
  * @param alg :: The algorithm to populate parameters for
  * @return Boolean, whether or not any transmission runs were found
  */
-bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm_sptr &alg) const {
-
+bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm_sptr &alg,
+                                                                const MatrixWorkspace_sptr &flood) {
   bool transRunsExist = false;
-
-  MatrixWorkspace_sptr firstWS = getProperty("FirstTransmissionRun");
+  auto firstWS = getWorkspaceFromProperty("FirstTransmissionRun");
   if (firstWS) {
     transRunsExist = true;
+    firstWS = (flood) ? runFloodCorrectionAlg(flood, firstWS) : firstWS;
     alg->setProperty("FirstTransmissionRun", firstWS);
-    MatrixWorkspace_sptr secondWS = getProperty("SecondTransmissionRun");
+    auto secondWS = getWorkspaceFromProperty("SecondTransmissionRun");
     if (secondWS) {
+      secondWS = (flood) ? runFloodCorrectionAlg(flood, secondWS) : secondWS;
       alg->setProperty("SecondTransmissionRun", secondWS);
       alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
       alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
@@ -776,6 +779,32 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm
   }
 
   return transRunsExist;
+}
+
+MatrixWorkspace_sptr ReflectometryWorkflowBase2::runFloodCorrectionAlg(const MatrixWorkspace_sptr &flood,
+                                                                       const MatrixWorkspace_sptr &ws) {
+  auto alg = createChildAlgorithm("ApplyFloodWorkspace");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", ws);
+  alg->setProperty("FloodWorkspace", flood);
+  alg->execute();
+  MatrixWorkspace_sptr out = alg->getProperty("OutputWorkspace");
+  return out;
+}
+
+MatrixWorkspace_sptr ReflectometryWorkflowBase2::getWorkspaceFromProperty(const std::string &propName) const {
+  const std::string str = getPropertyValue(propName);
+  WorkspaceGroup_sptr transmissionGroup;
+  if (!str.empty())
+    transmissionGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(str);
+
+  MatrixWorkspace_sptr ws;
+  if (transmissionGroup) {
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(transmissionGroup->getItem(0));
+  } else {
+    ws = getProperty(propName);
+  }
+  return ws;
 }
 
 /**
@@ -880,4 +909,72 @@ void ReflectometryWorkflowBase2::setWorkspacePropertyFromChild(const Algorithm_s
   MatrixWorkspace_sptr workspace = alg->getProperty(propertyName);
   setProperty(propertyName, workspace);
 }
+
+std::vector<std::string> ReflectometryWorkflowBase2::getTaskExecutionOrderFromProperties(
+    const bool summingInQ, const bool reduced, const std::string &IOMonIndexProp, const std::string &MonBGWaveMinProp,
+    const std::string &MonBGWaveMaxProp, const std::string &firstTransRunProp, const std::string &correctionAlgProp,
+    const std::string &subBGProp) const {
+  std::vector<std::string> teo;
+  std::string sumDetectorsTask;
+  // Select tasks based upon summation type
+  if (summingInQ) {
+    teo = {Tasks::BackgroundSubtraction::name,
+           Tasks::ConvertToWavelength::name,
+           Tasks::NormalizeByMonitor::name,
+           Tasks::NormalizeByTransmission::name,
+           Tasks::SumDetectorsInQ::name,
+           Tasks::CropWavelength::name,
+           Tasks::ConvertToQ::name};
+    sumDetectorsTask = Tasks::SumDetectorsInQ::name;
+  } else {
+    teo = {Tasks::ExtractROI::name,
+           Tasks::BackgroundSubtraction::name,
+           Tasks::SumDetectors::name,
+           Tasks::ConvertToWavelength::name,
+           Tasks::NormalizeByMonitor::name,
+           Tasks::CropWavelength::name,
+           Tasks::NormalizeByTransmission::name,
+           Tasks::ConvertToQ::name};
+    sumDetectorsTask = Tasks::SumDetectors::name;
+  }
+
+  if (reduced) {
+    // Assume already part reduced: lambda workspace already normalised and summed
+    std::erase(teo, Tasks::ExtractROI::name);
+    std::erase(teo, Tasks::BackgroundSubtraction::name);
+    std::erase(teo, Tasks::NormalizeByMonitor::name);
+    std::erase(teo, Tasks::ConvertToWavelength::name);
+    std::erase(teo, Tasks::NormalizeByMonitor::name);
+    std::erase(teo, Tasks::NormalizeByTransmission::name);
+    std::erase(teo, sumDetectorsTask);
+    return teo;
+  }
+
+  // evaluate necessity of monitor normalization
+  const Property *monProperty = getProperty(IOMonIndexProp);
+  const Property *backgroundMinProperty = getProperty(MonBGWaveMinProp);
+  const Property *backgroundMaxProperty = getProperty(MonBGWaveMaxProp);
+  if (monProperty->isDefault() || backgroundMinProperty->isDefault() || backgroundMaxProperty->isDefault()) {
+    std::erase(teo, Tasks::NormalizeByMonitor::name);
+  }
+
+  // evaluate necessity of transmission/alg normalization
+  const Property *transRun = getProperty(firstTransRunProp);
+  const Property *correctionAlg = getProperty(correctionAlgProp);
+  if (!correctionAlg->isDefault()) {
+    auto it = std::find(teo.begin(), teo.end(), Tasks::NormalizeByTransmission::name);
+    if (it != teo.end()) {
+      *it = Tasks::NormalizeByAlgorithm::name;
+    }
+  } else if (transRun->isDefault()) {
+    std::erase(teo, Tasks::NormalizeByTransmission::name);
+  }
+  // evaluate necessity of background subtraction
+  const Property *subtractBackground = getProperty(subBGProp);
+  if (subtractBackground->isDefault()) {
+    std::erase(teo, Tasks::BackgroundSubtraction::name);
+  }
+  return teo;
+}
+
 } // namespace Mantid::Reflectometry

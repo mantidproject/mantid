@@ -76,10 +76,10 @@ numpy:
   - '2.1.*'
 
 matplotlib:
-  - '3.9.*'
+  - '3.10.*'
 
 mslice:
-  - '2.15.*'
+  - '>=2.14'
 
 ninja:
   - '>=1.10.2'
@@ -116,7 +116,7 @@ pip:
   - '>=21.0.1'
 
 pystog:
-  - '>=0.5.0'
+  - '>=0.6.3'
 
 pyqt:
   - '>=5.15,<6'
@@ -139,8 +139,9 @@ qt_main:
 qtconsole:
   - '>5.5.0'
 
+# This is the last version that is both built for Qt5 and compatible with the rest of our pins.
 qscintilla2:
-  - '>=2.14.1'
+  - '==2.14.1 *_0'
 
 # 2.4.2 fails workbench.test_mainwindow.test_mainwindow which uses isinstance()
 qtpy:
@@ -173,7 +174,7 @@ euphonic:
   - '>=1.6.0,<2.0'
 
 librdkafka:
-  - '>=1.6.0'
+  - '>=1.6.0,<2.14'
 
 versioningit:
   - '>=2.1'

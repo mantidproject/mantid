@@ -6,8 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 import unittest
+import tempfile
+import os
 from unittest.mock import patch, MagicMock, call, mock_open
 from mantid.api import AnalysisDataService as ADS
+from mantid.simpleapi import CreateWorkspace, ConjoinWorkspaces
 from Engineering.texture.texture_helper import (
     load_all_orientations,
     _read_xml,
@@ -20,6 +23,8 @@ from Engineering.texture.texture_helper import (
     plot_pole_figure,
     _retrieve_ws_object,
     get_debug_info,
+    save_texture_ws_ascii,
+    generous_rebin,
 )
 import numpy as np
 from os import path
@@ -446,6 +451,205 @@ class TestDebugInfo(unittest.TestCase):
         self.assertEqual(len(labels), 2)
         self.assertEqual("Alpha: 1.0, Beta: 2.0, I: 1.0", labels[0])
         self.assertEqual("Alpha: 1.0, Beta: 0.0, I: 2.0", labels[1])
+
+
+class TestSaveTextureWsAscii(unittest.TestCase):
+    def setUp(self):
+        self.ws_name = "test_ws"
+
+    @patch(texture_utils_path + ".SaveAscii")
+    def test_save_calls_save_ascii_with_correct_args(self, mock_save_ascii):
+        save_texture_ws_ascii(self.ws_name, "/some/dir")
+        mock_save_ascii.assert_called_once_with(
+            InputWorkspace=self.ws_name,
+            Filename=path.join("/some/dir", self.ws_name + ".txt"),
+            Separator="Tab",
+        )
+
+    @patch(texture_utils_path + ".SaveAscii")
+    def test_save_does_not_rebin_on_success(self, mock_save_ascii):
+        with patch(texture_utils_path + ".generous_rebin") as mock_rebin:
+            save_texture_ws_ascii(self.ws_name, "/some/dir")
+            mock_rebin.assert_not_called()
+
+    @patch(texture_utils_path + ".logger")
+    @patch(texture_utils_path + ".generous_rebin")
+    @patch(texture_utils_path + ".SaveAscii")
+    def test_save_calls_generous_rebin_and_retries_on_runtime_error(self, mock_save_ascii, mock_rebin, mock_logger):
+        mock_save_ascii.side_effect = [RuntimeError("bin mismatch"), None]
+        mock_ascii_ws = MagicMock()
+        mock_rebin.return_value = mock_ascii_ws
+
+        save_texture_ws_ascii(self.ws_name, "/some/dir")
+
+        mock_rebin.assert_called_once_with(self.ws_name, "ascii_ws", False)
+        self.assertEqual(mock_save_ascii.call_count, 2)
+        mock_save_ascii.assert_called_with(
+            InputWorkspace=mock_ascii_ws,
+            Filename=path.join("/some/dir", self.ws_name + ".txt"),
+            Separator="Tab",
+        )
+
+    @patch(texture_utils_path + ".logger")
+    @patch(texture_utils_path + ".generous_rebin", return_value=MagicMock())
+    @patch(texture_utils_path + ".SaveAscii", side_effect=[RuntimeError("bin mismatch"), None])
+    def test_save_passes_store_in_ads_to_generous_rebin(self, mock_save_ascii, mock_rebin, mock_logger):
+        save_texture_ws_ascii(self.ws_name, "/some/dir", StoreInADS=True)
+        mock_rebin.assert_called_once_with(self.ws_name, "ascii_ws", True)
+
+    @patch(texture_utils_path + ".logger")
+    @patch(texture_utils_path + ".generous_rebin", return_value=MagicMock())
+    @patch(texture_utils_path + ".SaveAscii", side_effect=[RuntimeError("bin mismatch"), None])
+    def test_save_logs_notice_on_runtime_error(self, mock_save_ascii, mock_rebin, mock_logger):
+        save_texture_ws_ascii(self.ws_name, "/some/dir")
+        mock_logger.notice.assert_called_once()
+        self.assertIn(self.ws_name, mock_logger.notice.call_args[0][0])
+
+
+class TestGenerousRebin(unittest.TestCase):
+    def _make_mock_ws(self, x_arrays, instrument_name="ENGIN-X"):
+        mock_ws = MagicMock()
+        mock_ws.getNumberHistograms.return_value = len(x_arrays)
+        mock_ws.readX.side_effect = lambda i: np.array(x_arrays[i])
+        mock_ws.getInstrument.return_value.getName.return_value = instrument_name
+        return mock_ws
+
+    @patch(texture_utils_path + ".Rebin")
+    @patch(texture_utils_path + "._retrieve_ws_object")
+    def test_generous_rebin_calls_rebin_with_correct_params(self, mock_retrieve, mock_rebin):
+        x_arrays = [[1.0, 2.0, 4.0], [1.5, 2.5, 3.5]]
+        mock_ws = self._make_mock_ws(x_arrays)
+        mock_retrieve.return_value = mock_ws
+        mock_rebin.return_value = MagicMock()
+
+        generous_rebin(mock_ws, "out_ws")
+
+        expected_min = 1.0
+        expected_max = 4.0
+        expected_diff = 1.0
+        mock_rebin.assert_called_once_with(
+            InputWorkspace=mock_ws,
+            Params=(expected_min, expected_diff, expected_max),
+            OutputWorkspace="out_ws",
+            StoreInADS=True,
+        )
+
+    @patch(texture_utils_path + ".logger")
+    @patch(texture_utils_path + ".Rebin", return_value=MagicMock())
+    @patch(texture_utils_path + "._retrieve_ws_object")
+    def test_generous_rebin_warns_for_non_enginx_imat_instrument(self, mock_retrieve, mock_rebin, mock_logger):
+        mock_ws = self._make_mock_ws([[1.0, 2.0, 3.0]], instrument_name="WISH")
+        mock_retrieve.return_value = mock_ws
+
+        generous_rebin(mock_ws, "out_ws")
+
+        mock_logger.warning.assert_called_once()
+
+    @patch(texture_utils_path + ".logger")
+    @patch(texture_utils_path + ".Rebin", return_value=MagicMock())
+    @patch(texture_utils_path + "._retrieve_ws_object")
+    def test_generous_rebin_does_not_warn_for_enginx(self, mock_retrieve, mock_rebin, mock_logger):
+        mock_ws = self._make_mock_ws([[1.0, 2.0, 3.0]], instrument_name="ENGIN-X")
+        mock_retrieve.return_value = mock_ws
+
+        generous_rebin(mock_ws, "out_ws")
+
+        mock_logger.warning.assert_not_called()
+
+    @patch(texture_utils_path + ".logger")
+    @patch(texture_utils_path + ".Rebin", return_value=MagicMock())
+    @patch(texture_utils_path + "._retrieve_ws_object")
+    def test_generous_rebin_does_not_warn_for_imat(self, mock_retrieve, mock_rebin, mock_logger):
+        mock_ws = self._make_mock_ws([[1.0, 2.0, 3.0]], instrument_name="IMAT")
+        mock_retrieve.return_value = mock_ws
+
+        generous_rebin(mock_ws, "out_ws")
+
+        mock_logger.warning.assert_not_called()
+
+    @patch(texture_utils_path + ".Rebin")
+    @patch(texture_utils_path + "._retrieve_ws_object")
+    def test_generous_rebin_passes_store_in_ads(self, mock_retrieve, mock_rebin):
+        mock_ws = self._make_mock_ws([[1.0, 2.0, 3.0]])
+        mock_retrieve.return_value = mock_ws
+        mock_rebin.return_value = MagicMock()
+
+        generous_rebin(mock_ws, "out_ws", StoreInADS=False)
+
+        _, kwargs = mock_rebin.call_args
+        self.assertFalse(kwargs["StoreInADS"])
+
+
+class TestGenerousRebinSystem(unittest.TestCase):
+    def tearDown(self):
+        for name in ["__spec_a", "__spec_b", "rebinned_ws"]:
+            if ADS.doesExist(name):
+                ADS.remove(name)
+
+    def test_generous_rebin_produces_uniform_bins_spanning_full_x_range(self):
+        # spec 0: X=[1, 2, 3]      -> min_diff=1.0, range=[1,3]
+        # spec 1: X=[1.5, 2.0, 2.5, 3.0] -> min_diff=0.5, range=[1.5,3.0]
+        # expected: step=0.5, range=[1.0, 3.0] -> bins [1.0,1.5,2.0,2.5,3.0]
+        CreateWorkspace(DataX=[1.0, 2.0, 3.0], DataY=[1.0, 2.0], NSpec=1, OutputWorkspace="__spec_a")
+        CreateWorkspace(DataX=[1.5, 2.0, 2.5, 3.0], DataY=[1.0, 2.0, 3.0], NSpec=1, OutputWorkspace="__spec_b")
+        ConjoinWorkspaces(
+            InputWorkspace1="__spec_a",
+            InputWorkspace2="__spec_b",
+            CheckOverlapping=False,
+            CheckMatchingBins=False,
+        )
+        ws_in = ADS.retrieve("__spec_a")
+
+        result = generous_rebin(ws_in, "rebinned_ws", StoreInADS=True)
+
+        self.assertEqual(result.getNumberHistograms(), 2)
+        x0 = result.readX(0)
+        x1 = result.readX(1)
+        np.testing.assert_array_equal(x0, x1)
+        self.assertAlmostEqual(x0[0], 1.0)
+        self.assertAlmostEqual(x0[-1], 3.0)
+        np.testing.assert_allclose(np.diff(x0), 0.5, rtol=1e-6)
+
+
+class TestSaveTextureWsAsciiSystem(unittest.TestCase):
+    def setUp(self):
+        self.save_dir = tempfile.mkdtemp()
+        self.ws_name = "test_ws"
+
+    def tearDown(self):
+        for name in [self.ws_name, "ascii_ws", "__spec_a", "__spec_b"]:
+            if ADS.doesExist(name):
+                ADS.remove(name)
+        for f in os.listdir(self.save_dir):
+            os.remove(os.path.join(self.save_dir, f))
+        os.rmdir(self.save_dir)
+
+    def test_save_uniform_bins_creates_file(self):
+        # Workspace with matching X bins on all spectra — SaveAscii succeeds directly.
+        x = [1.0, 2.0, 3.0, 1.0, 2.0, 3.0]
+        y = [1.0, 2.0, 1.0, 2.0]
+        CreateWorkspace(DataX=x, DataY=y, NSpec=2, OutputWorkspace=self.ws_name)
+
+        save_texture_ws_ascii(self.ws_name, self.save_dir)
+
+        expected = os.path.join(self.save_dir, self.ws_name + ".txt")
+        self.assertTrue(os.path.isfile(expected), f"Expected output file not found: {expected}")
+
+    def test_save_ragged_bins_creates_file_via_rebin_fallback(self):
+        # Workspace with mismatched bin counts triggers generous_rebin
+        CreateWorkspace(DataX=[1.0, 2.0, 3.0], DataY=[1.0, 2.0], NSpec=1, OutputWorkspace="__spec_a")
+        CreateWorkspace(DataX=[1.0, 2.0, 3.0, 4.0], DataY=[1.0, 2.0, 3.0], NSpec=1, OutputWorkspace="__spec_b")
+        ConjoinWorkspaces(
+            InputWorkspace1="__spec_a",
+            InputWorkspace2="__spec_b",
+            CheckOverlapping=False,
+            CheckMatchingBins=False,
+        )
+
+        save_texture_ws_ascii("__spec_a", self.save_dir)
+
+        expected = os.path.join(self.save_dir, "__spec_a.txt")
+        self.assertTrue(os.path.isfile(expected), f"Expected output file not found: {expected}")
 
 
 if __name__ == "__main__":

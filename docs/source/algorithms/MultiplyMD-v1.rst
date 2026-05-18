@@ -9,7 +9,7 @@
 Description
 -----------
 
-Multiply two :ref:`MDHistoWorkspace <MDHistoWorkspace>`'s or a
+Multiply two :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`'s or a
 MDHistoWorkspace and a scalar.
 
 The error of :math:`f = a * b` is propagated with
@@ -23,7 +23,7 @@ The error of :math:`f = a * b` is propagated with
 
    -  Every element of the MDHistoWorkspace is multiplied by the scalar.
 
--  **:ref:`MDEventWorkspace <MDWorkspace>`'s**
+-  **:py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`'s**
 
    -  This operation is not supported, as it is not clear what its
       meaning would be.

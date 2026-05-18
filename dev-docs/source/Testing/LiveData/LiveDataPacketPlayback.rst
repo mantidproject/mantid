@@ -3,8 +3,6 @@
 Working With Real Instruments
 =============================
 
-.. contents::
-   :local:
 
 Introduction
 ------------

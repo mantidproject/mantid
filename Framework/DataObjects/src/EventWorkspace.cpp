@@ -659,12 +659,11 @@ private:
  * If any 2 have different order type, then be unsorted
  */
 EventSortType EventWorkspace::getSortType() const {
-  size_t dataSize = this->data.size();
   EventSortType order = data[0]->getSortType();
-  for (size_t i = 1; i < dataSize; i++) {
-    if (order != data[i]->getSortType())
-      return UNSORTED;
-  }
+  const auto it =
+      std::find_if(data.cbegin(), data.cend(), [&order](const auto &list) { return list->getSortType() != order; });
+  if (it != data.cend())
+    return UNSORTED;
   return order;
 }
 

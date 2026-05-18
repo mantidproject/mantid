@@ -19,6 +19,16 @@ the create a distinct ENTITY for each bank-->
     <!ENTITY PVsigma_0_sq "388.24">
     <!ENTITY PVsigma_1_sq "76.865">
     <!ENTITY PVsigma_2_sq "43.299">
+    <!ENTITY IC_Alpha0     "3.4260502028">
+    <!ENTITY IC_Alpha1     "1.000000">
+    <!ENTITY IC_Beta0      "42.0136114099">
+    <!ENTITY IC_Kappa      "19.3056535472">
+    <!ENTITY ICSigma0_sq   "0.0">
+    <!ENTITY ICSigma1_sq   "348.7712476986">
+    <!ENTITY ICSigma2_sq   "0.5142500722">
+    <!ENTITY ICGamma0      "32.5486387979">
+    <!ENTITY ICGamma1      "-44.3414632818">
+    <!ENTITY ICGamma2      "15.0730714280">
 ]>
 
 <parameter-file instrument="ENGIN-X" valid-from="2020-10-23">
@@ -66,6 +76,33 @@ the create a distinct ENTITY for each bank-->
   <parameter name="Bk2BkExpConvPV:Gamma" type="fitting">
     <formula eq="(&PVgamma_2;)*centre^2+(&PVgamma_1;)*centre+(&PVgamma_0;)" unit="dSpacing" result-unit="TOF" />
   </parameter>
+
+      <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+  <formula eq="(&IC_Alpha0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+    <formula eq="(&IC_Alpha1;)" unit="dSpacing" result-unit="TOF"/><fixed />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+    <formula eq="(&IC_Beta0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Kappa" type="fitting">
+    <formula eq="(&IC_Kappa;)" unit="dSpacing" result-unit=""/><fixed />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+    <formula eq="(&ICSigma2_sq;)*centre^4 + (&ICSigma1_sq;)*centre^2 + (&ICSigma0_sq;)"
+             unit="dSpacing" result-unit="TOF^2" />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+    <formula eq="(&ICGamma2;)*centre^2 + (&ICGamma1;)*centre + (&ICGamma0;)"
+             unit="dSpacing" result-unit="TOF" />
+  </parameter>
+
   
 </component-link>
 
@@ -113,6 +150,33 @@ the create a distinct ENTITY for each bank-->
     <formula eq="(&PVgamma_2;)*centre^2+(&PVgamma_1;)*centre+(&PVgamma_0;)" unit="dSpacing" result-unit="TOF" />
   </parameter>
 
+      <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+  <formula eq="(&IC_Alpha0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+    <formula eq="(&IC_Alpha1;)" unit="dSpacing" result-unit="TOF"/><fixed />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+    <formula eq="(&IC_Beta0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Kappa" type="fitting">
+    <formula eq="(&IC_Kappa;)" unit="dSpacing" result-unit=""/><fixed />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+    <formula eq="(&ICSigma2_sq;)*centre^4 + (&ICSigma1_sq;)*centre^2 + (&ICSigma0_sq;)"
+             unit="dSpacing" result-unit="TOF^2" />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+    <formula eq="(&ICGamma2;)*centre^2 + (&ICGamma1;)*centre + (&ICGamma0;)"
+             unit="dSpacing" result-unit="TOF" />
+  </parameter>
+
+
 </component-link>
 
 <component-link name="ENGIN-X" >
@@ -135,6 +199,33 @@ the create a distinct ENTITY for each bank-->
   <parameter name="col-axis" type="string">
     <value val="0,1,0"/>
   </parameter>
+
+      <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+  <formula eq="(&IC_Alpha0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+    <formula eq="(&IC_Alpha1;)" unit="dSpacing" result-unit="TOF"/><fixed />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+    <formula eq="(&IC_Beta0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Kappa" type="fitting">
+    <formula eq="(&IC_Kappa;)" unit="dSpacing" result-unit=""/><fixed />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+    <formula eq="(&ICSigma2_sq;)*centre^4 + (&ICSigma1_sq;)*centre^2 + (&ICSigma0_sq;)"
+             unit="dSpacing" result-unit="TOF^2" />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+    <formula eq="(&ICGamma2;)*centre^2 + (&ICGamma1;)*centre + (&ICGamma0;)"
+             unit="dSpacing" result-unit="TOF" />
+  </parameter>
+
 
 </component-link>
 

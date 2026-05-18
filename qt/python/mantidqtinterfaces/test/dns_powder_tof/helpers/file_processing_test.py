@@ -126,11 +126,15 @@ class DNSfile_processingTest(unittest.TestCase):
 
     @staticmethod
     @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.subprocess.call")
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.sys")
+    @patch("mantid.kernel.environment.is_mac")
+    @patch("mantid.kernel.environment.is_linux")
+    @patch("mantid.kernel.environment.is_windows")
     @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.os.path.exists")
-    def test_open_editor(mock_path_exist, mock_sys, mock_subprocess):
+    def test_open_editor(mock_path_exist, mock_is_windows, mock_is_linux, mock_is_mac, mock_subprocess):
         mock_path_exist.return_value = False
-        mock_sys.platform = "win32"
+        mock_is_windows.side_effect = [True, False, False, False]
+        mock_is_linux.side_effect = [True, False, False]
+        mock_is_mac.side_effect = [True, False]
         open_editor("123.d_dat", current_dir=None)
         mock_subprocess.assert_not_called()
         mock_path_exist.assert_called_once_with("123.d_dat")
@@ -140,14 +144,11 @@ class DNSfile_processingTest(unittest.TestCase):
         mock_path_exist.assert_called_once_with("d/123.d_dat")
         mock_subprocess.assert_called_once_with(["cmd.exe", "/c", "d/123.d_dat"])
         mock_subprocess.reset_mock()
-        mock_sys.platform = "linux2"
         open_editor("123.d_dat", current_dir="d")
         mock_subprocess.assert_called_with(["xdg-open", "d/123.d_dat"])
-        mock_sys.platform = "darwin"
         open_editor("123.d_dat", current_dir="d")
         mock_subprocess.assert_called_with(["open", "d/123.d_dat"])
         mock_subprocess.reset_mock()
-        mock_sys.platform = "nonsense"
         open_editor("123.d_dat", current_dir="d")
         mock_subprocess.assert_not_called()
 

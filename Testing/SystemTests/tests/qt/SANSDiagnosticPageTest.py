@@ -154,7 +154,7 @@ class SANSDiagnosticPageRunnerTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(SANSDiagnosticPageTest, "test"))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(SANSDiagnosticPageTest))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)
         if res.wasSuccessful():

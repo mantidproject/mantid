@@ -4,8 +4,6 @@
 Conda Package Manager
 =====================
 
-.. contents::
-   :local:
 
 Mantid uses `conda <https://docs.conda.io/en/latest/>`_ as its package management system. This document gives a
 developer overview on how we use the conda package manager, including tips on how to debug dependency issues, and

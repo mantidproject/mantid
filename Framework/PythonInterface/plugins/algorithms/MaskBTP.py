@@ -28,6 +28,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         "BIOSANS",
         "CG2",
         "CG3",
+        "CG4D",
         "CHESS",
         "CNCS",
         "CORELLI",
@@ -48,6 +49,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         "IN5",
         "IN6",
         "MANDI",
+        "MIDAS",
         "NOMAD",
         "PANTHER",
         "POWGEN",
@@ -63,12 +65,14 @@ class MaskBTP(mantid.api.PythonAlgorithm):
 
     instname = None
     instrument = None
-    bankmin = defaultdict(lambda: 1, {"D33": 0, "IMAGINE": 11, "SEQUOIA": 23, "TOPAZ": 10})  # default is one
+    # default `bankmin` is one
+    bankmin = defaultdict(lambda: 1, {"CG4D": 11, "D33": 0, "IMAGINE": 11, "SEQUOIA": 23, "TOPAZ": 10})
     bankmax = {
         "ARCS": 115,
         "BIOSANS": 104,
         "CG2": 48,
         "CG3": 104,
+        "CG4D": 108,
         "CHESS": 163,
         "CNCS": 50,
         "CORELLI": 91,
@@ -89,6 +93,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         "IN5": 1,
         "IN6": 3,
         "MANDI": 59,
+        "MIDAS": 7,
         "NOMAD": 99,
         "PANTHER": 1,
         "POWGEN": 300,
@@ -241,6 +246,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             "EQ-SANS",
             "GPSANS",
             "HYSPEC",
+            "MIDAS",
             "NOMAD",
             "SEQUOIA",
             "WAND",

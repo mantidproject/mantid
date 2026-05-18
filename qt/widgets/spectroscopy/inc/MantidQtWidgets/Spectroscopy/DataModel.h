@@ -39,6 +39,7 @@ public:
   std::vector<std::string> getWorkspaceNames() const override;
   WorkspaceID getNumberOfWorkspaces() const override;
   bool hasWorkspace(std::string const &workspaceName) const override;
+  WorkspaceID getWorkspaceID(std::string const &workspaceName) const override;
 
   void setSpectra(const std::string &spectra, WorkspaceID workspaceID) override;
   void setSpectra(FunctionModelSpectra &&spectra, WorkspaceID workspaceID) override;
@@ -55,6 +56,7 @@ public:
   std::pair<WorkspaceID, WorkspaceIndex> getSubIndices(FitDomainIndex) const override;
   std::vector<double> getQValuesForData() const override;
   std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const override;
+  std::string getResolutionName(const WorkspaceID &wsID, const WorkspaceIndex &index) const override;
   std::string createDisplayName(WorkspaceID workspaceID) const override;
 
   void removeWorkspace(WorkspaceID workspaceID) override;
@@ -68,8 +70,11 @@ public:
   void setEndX(double startX, FitDomainIndex fitDomainIndex) override;
   void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
   void setExcludeRegion(const std::string &exclude, FitDomainIndex index) override;
-  bool setResolution(const std::string &name) override;
-  bool setResolution(const std::string &name, WorkspaceID workspaceID) override;
+  bool setResolution(const std::string &resName, const std::string &wsName,
+                     const FunctionModelSpectra &spectra) override;
+  bool setResolution(const std::string &resName, WorkspaceID workspaceID, const FunctionModelSpectra &spectra) override;
+  void removeResolution(const std::string &resName) override;
+  std::set<std::string> getResolutionNames() override;
   std::pair<double, double> getFittingRange(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   std::pair<double, double> getFittingRange(FitDomainIndex index) const override;
   std::string getExcludeRegion(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
@@ -77,6 +82,12 @@ public:
   std::vector<double> getExcludeRegionVector(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   std::vector<double> getExcludeRegionVector(FitDomainIndex index) const override;
   void removeSpecialValues(const std::string &name) override;
+  void removeWorkspaceByName(const std::string &name) override;
+  void clearModel() override;
+  void updateWorkspaceNames() override;
+
+  std::set<std::string> const &resolutionNames() const override;
+  std::set<std::string> const &workspaceNames() const override;
 
 protected:
   void addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra);
@@ -84,7 +95,8 @@ protected:
 private:
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
   std::unique_ptr<std::vector<FitData>> m_fittingData;
-  std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutions;
+  std::set<std::string> m_uniqueWsNames;
+  std::set<std::string> m_uniqueResWsNames;
 };
 
 } // namespace Inelastic

@@ -2,8 +2,6 @@
 Architecture
 ============
 
-.. contents::
-   :local:
 
 Summary
 -------
@@ -16,7 +14,7 @@ Context
 -------
 
 People and other systems interact with the Mantid software package
-as decribed by the following context diagram.
+as described by the following context diagram.
 
 
 .. figure:: /images/architecture-context.png

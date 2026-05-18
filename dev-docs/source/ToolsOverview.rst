@@ -9,8 +9,6 @@ Tools Overview
 
    AlgorithmProfiler
 
-.. contents:: Contents
-   :local:
 
 .. _class_maker_py:
 

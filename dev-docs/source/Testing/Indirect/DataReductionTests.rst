@@ -3,8 +3,6 @@
 Indirect Data Reduction Testing
 ===============================
 
-.. contents::
-   :local:
 
 *Prerequisites*
 

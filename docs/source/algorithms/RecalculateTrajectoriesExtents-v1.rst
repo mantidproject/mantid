@@ -12,11 +12,11 @@ Description
 
 This algorithm is part of the new workflow for :ref:`normalizing <MDNorm>` multi-dimensional event workspaces.
 
-Once the ends of detector trajectories are stored in the original :ref:`EventWorkspace <EventWorkspace>` using
+Once the ends of detector trajectories are stored in the original :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` using
 the :ref:`CropWorkspaceForMDNorm <algm-CropWorkspaceForMDNorm>` algorithm, one has to run the
 :ref:`ConvertToMD <algm-ConvertToMD>` algorithm and convert it to **Q_sample**. During this conversion
 some of the trajectories might be truncated. This recalculates the ends such as all the trajectory is
-completely contained within the outside box of the :ref:`MDEventWorkspace <MDWorkspace>`
+completely contained within the outside box of the :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`
 
 The master equation for transforming from lab coordinate system to HKL units is given by
 

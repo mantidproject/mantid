@@ -3,8 +3,6 @@
 ALFView GUI Testing
 ===================
 
-.. contents::
-   :local:
 
 Introduction
 ------------

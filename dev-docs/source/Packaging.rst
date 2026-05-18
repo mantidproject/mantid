@@ -4,8 +4,6 @@
 Packaging
 =========
 
-.. contents::
-  :local:
 
 This page gives an overview of the different packaging mechanisms used to deliver
 Mantid to users.
@@ -49,7 +47,9 @@ Conda requires `recipes <conda-recipes-docs_>`_ as input for producing packages.
 The recipes are stored in the `main codebase <mantid-conda-recipes_>`_ so that
 they can evolve as the code develops. The packages are built as part of the
 `CI pipeline <ci-pipeline_>`_ using a `script <package-conda_>`_ to encapsulate
-the steps.
+the steps. That script installs pixi if needed, activates the environment backed
+by the ``rattler-builder`` feature from ``pixi.toml``, and runs ``rattler-build``
+from there.
 
 To build the packages locally it is recommended that you use a separate
 clone of the repository as the build copies the repository content to a temporary
@@ -181,14 +181,15 @@ Building a custom ``mantid-developer`` environment
 
 This is useful if you need to change a pinned version of one of Mantid's dependencies and test the change locally.
 
-1. One can create a new environment specifically for building the package (with ``rattler-build``, and ``versioningit``), but the build itself happens in a separate sandbox which makes this unneccesary.
+1. The required tooling lives in the pixi environment backed by the ``rattler-builder`` feature.
 2. Make your changes to the conda recipe files.
 3. Change directory to ``mantid/conda/recipes``
-4. With ``mantid_dev_builder`` active, run
+4. Activate the environment and run
 
    .. code-block:: sh
 
-       MANTID_VERSION=$(versioningit ../../) rattler-build build -r ./mantid-developer -m ./conda_build_config.yaml --output-dir=/home/me/tmp/rattler
+        pixi shell -e rattler-builder --frozen
+        MANTID_VERSION=$(versioningit ../../) rattler-build build -r ./mantid-developer -m ./conda_build_config.yaml --output-dir=/home/me/tmp/rattler
 
    This will build a local version of ``mantid-developer`` with your changes and place it in the directory ``/home/me/tmp/rattler``. **This must be outside of the buildtree** because rattler will recursively copy everything.
 5. Index the new packages

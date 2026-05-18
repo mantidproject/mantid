@@ -4,8 +4,6 @@
 ISIS Powder Diffraction Scripts - OSIRIS Reference
 =====================================================
 
-.. contents:: Table of Contents
-    :local:
 
 .. _creating_osiris_object_isis-powder-diffraction-ref:
 

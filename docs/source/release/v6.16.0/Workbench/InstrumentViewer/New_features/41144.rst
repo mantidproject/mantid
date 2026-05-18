@@ -1,0 +1,1 @@
+- In the new Instrument View, the "Draw Shapes" option is now stored in the Mantid properties file, and the option is applied when the view is opened. This means that if you check "Draw Shapes", close the view, and open it again, it will still be checked and shapes will be drawn. The option is stored under the key "InstrumentView.DrawShapes".

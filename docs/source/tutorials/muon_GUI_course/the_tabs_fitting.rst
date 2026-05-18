@@ -6,8 +6,6 @@ The Tabs - Fitting
 
 .. index:: The Tabs - Fitting
 
-.. contents:: Table of Contents
-  :local:
 
 Fitting
 =======

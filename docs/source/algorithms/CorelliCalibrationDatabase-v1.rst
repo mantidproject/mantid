@@ -17,7 +17,7 @@ goal is to combine this recent calibration with previous calibrations in order t
 in the recent calibration.
 
 The recent calibration is the output of algorithm :ref:`algm-CORELLIPowderCalibrationCreate`,
-a :ref:`TableWorkspace <Table Workspaces>` with the following columns:
+a :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` with the following columns:
 
  | ComponentName | Xposition | Yposition| Zposition| XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
 
@@ -57,7 +57,7 @@ Files for the moderator and the other components (*corelli_sample-position.csv*,
 are all located under the directory specified in property `DatabaseDirectory`
 
 After the first goal is accomplished (store the recent calibration), the algorithm proceeds to produce a
-calibration file and :ref:`TableWorkspace <Table Workspaces>` for the whole instrument. The last line of
+calibration file and :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` for the whole instrument. The last line of
 *corelli_moderator.csv*, *corelli_sample-position.csv*, and each of *corelli_bankXXX.csv* is
 collected, the day-stamp stripped, and lines are gathered into file *corelli_instrument_20201025.csv*,
 bearing in mind that 20201025 is the day-stamp of our recent calibration. The first few lines of the file:
@@ -70,7 +70,7 @@ bank7/sixteenpack, 0.9678, 0.0056, 0.0003, 0.4563, -0.9999, 0.3424, 5.67
 bank8/sixteenpack, 0.9650, 0.0050, 0.0002, 0.4513, -0.9998, 0.3921, 9.03
 ```
 
-In addition, a :ref:`TableWorkspace <Table Workspaces>` similar to the table of `InputCalibrationPatchWorkspace` is
+In addition, a :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` similar to the table of `InputCalibrationPatchWorkspace` is
 produced with (hopefully) a row for each bank.
 
 

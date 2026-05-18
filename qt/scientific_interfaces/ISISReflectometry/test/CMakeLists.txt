@@ -47,6 +47,7 @@ set(TEST_FILES
     Reduction/ValidateLookupRowTest.h
     Reduction/GroupTest.h
     Reduction/ValidateRowTest.h
+    Preview/PreviewPythonInstrumentViewTest.h
     Preview/InstViewModelTest.h
     Preview/PreviewJobManagerTest.h
     Preview/PreviewModelTest.h

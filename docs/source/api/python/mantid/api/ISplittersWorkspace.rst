@@ -5,7 +5,7 @@ Splitters Workspace
 ===================
 
 SplittersWorkspaces stores a vector of SplittingIntervals. It
-inherits from :ref:`TableWorkspace <Table Workspaces>`.
+inherits from :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>`.
 
 A SplittersWorkspace object has 3 columns, ``start`` with type as
 ``int64``, ``stop`` with type as ``int64`` and ``workspacegroup`` as

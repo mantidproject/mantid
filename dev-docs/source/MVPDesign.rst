@@ -4,8 +4,6 @@
 MVP Design
 =====================
 
-.. contents::
-   :local:
 
 Summary
 #######

@@ -249,10 +249,10 @@ std::unique_ptr<IPeak> PeaksWorkspace::createPeakQSample(const V3D &position) co
 
   LogManager_const_sptr props = getLogs();
   // See if we can get a wavelength/energy
-  // Then assume constant wavelenth
+  // Then assume constant wavelength
   double wavelength(0);
   if (props->hasProperty("wavelength")) {
-    wavelength = props->getPropertyValueAsType<double>("wavelength");
+    wavelength = props->getLogAsSingleValue("wavelength");
   } else if (props->hasProperty("energy")) {
     wavelength = Kernel::UnitConversion::run("Energy", "Wavelength", props->getPropertyValueAsType<double>("energy"), 0,
                                              0, 0, Kernel::DeltaEMode::Elastic, 0);
@@ -623,9 +623,9 @@ void PeaksWorkspace::addPeakColumn(const std::string &name) {
 //---------------------------------------------------------------------------------------------
 /// @return the index of the column with the given name.
 size_t PeaksWorkspace::getColumnIndex(const std::string &name) const {
-  for (size_t i = 0; i < m_columns.size(); i++)
-    if (m_columns[i]->name() == name)
-      return i;
+  const auto it = std::find(m_columnNames.cbegin(), m_columnNames.cend(), name);
+  if (it != m_columnNames.cend())
+    return std::distance(m_columnNames.cbegin(), it);
   throw std::invalid_argument("Column named " + name + " was not found in the PeaksWorkspace.");
 }
 

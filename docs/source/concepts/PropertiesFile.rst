@@ -221,6 +221,9 @@ Mantid Graphical User Interface Properties
 | ``InstrumentView.MaintainAspectRatio``             |Value of the "Maintain Aspect Ratio" option in the  | ``Yes``, ``No`` |
 |                                                    |Instrument View                                     |                 |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``InstrumentView.DrawShapes``                      |Value of the "Draw Shapes" option in the Instrument | ``Yes``, ``No`` |
+|                                                    |View                                                |                 |
++----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``MantidOptions.InvisibleWorkspaces``              |Do not show 'invisible' workspaces                  | ``0``, ``1``    |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``PeakColumn.hklPrec``                             |Precision of hkl values shown in tables             | ``2``           |
@@ -414,14 +417,14 @@ Plotting Settings
 |``plots.images.ColorBarScale``       |Default colorbar scale for image plots                            |``Linear``            |
 +-------------------------------------+------------------------------------------------------------------+----------------------+
 
-ISIS SANS Interface GUI Settings
-*********************************
+ISIS SANS Interface Settings
+****************************
 
-+---------------------------------+------------------------------------------------------------------+---------------------+
-|Property                         |Description                                                       |Example value        |
-+=================================+==================================================================+=====================+
-|``sans.isis_sans.plotResults``   |Whether to show or hide plot results checkbox                     | ``On``, ``Off``     |
-+---------------------------------+------------------------------------------------------------------+---------------------+
++----------------------------------------+------------------------------------------------------------------+---------------------+
+|Property                                |Description                                                       |Example value        |
++========================================+==================================================================+=====================+
+|``sans.deprecated_command_interface``   |Whether allow usage of old SANS ISIS Command Interface            | ``On``, ``Off``     |
++----------------------------------------+------------------------------------------------------------------+---------------------+
 
 Algorithm Profiling Settings
 ****************************

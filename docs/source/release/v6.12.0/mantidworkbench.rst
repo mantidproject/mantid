@@ -31,7 +31,7 @@ Bugfixes
 - Custom ``colormaps`` registered with ``matplotlib`` are now available in the :ref:`SliceViewer <sliceviewer>`.
 - Transposed data in the non-orthogonal view will now show with the correct ranges.
 - ``MDHistoWorkspaces`` open in :ref:`SliceViewer <sliceviewer>` will no longer produce ``Variable invalidated`` error messages if the underlying workspace is changed.
-- Normalisation is now correctly preserved when moving the slider with :ref:`MD workspaces <MDWorkspace>` that contain more than one dimension.
+- Normalisation is now correctly preserved when moving the slider with :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` that contain more than one dimension.
 
 
 :ref:`Release 6.12.0 <v6.12.0>`

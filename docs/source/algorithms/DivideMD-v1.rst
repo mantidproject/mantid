@@ -9,7 +9,7 @@
 Description
 -----------
 
-Divide two :ref:`MDHistoWorkspace <MDHistoWorkspace>`'s or a
+Divide two :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>`'s or a
 MDHistoWorkspace and a scalar.
 
 The error of :math:`f = a / b` is propagated with
@@ -27,7 +27,7 @@ The error of :math:`f = a / b` is propagated with
 
    -  This is not allowed.
 
--  :ref:`MDEventWorkspace <MDWorkspace>`'s
+-  :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`'s
 
    -  This operation is not supported, as it is not clear what its
       meaning would be.

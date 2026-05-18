@@ -13,7 +13,7 @@ This kind of **Workspace2D** that contains information of the areas used during 
 is called a **RebinnedOutput**. Some algorithms, such as
 :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`
 and :ref:`ConvertToReflectometryQ <algm-ConvertToReflectometryQ>`, create this special type of
-:ref:`Workspace2D <Workspace2D>` workspace in which
+:py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` workspace in which
 each bin contains both a value and the fractional overlap area of this bin over
 that of the original data. This fractional overlap area value is referred to as
 a fractional weight, since it has the role of controlling the proportion of the counts

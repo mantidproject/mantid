@@ -9,8 +9,8 @@
 Description
 -----------
 
-The algorithm converts from a :ref:`MatrixWorkspace <MatrixWorkspace>` (in
-any input units) into a :ref:`MDWorkspace <MDWorkspace>` containing
+The algorithm converts from a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` (in
+any input units) into a :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>` containing
 3D events in reciprocal space.
 
 The calculations apply only to elastic diffraction experiments. The

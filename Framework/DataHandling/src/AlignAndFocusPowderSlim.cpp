@@ -672,16 +672,11 @@ void AlignAndFocusPowderSlim::initializeOutputWorkspace(const MatrixWorkspace_sp
   constexpr bool full_bins_only{false};
 
   // always use the first histogram x-values for initialization
-  HistogramData::BinEdges XValues(0);
-  if (linearBins) {
-    const std::vector<double> params{x_min[0], x_delta[0], x_max[0]};
-    UNUSED_ARG(
-        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
-  } else {
-    const std::vector<double> params{x_min[0], -1. * std::abs(x_delta[0]), x_max[0]};
-    UNUSED_ARG(
-        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues.mutableRawData(), resize_xnew, full_bins_only));
-  }
+  double const binWidth = linearBins ? x_delta[0] : -1. * std::abs(x_delta[0]);
+  std::vector<double> xAxisTmp;
+  Kernel::VectorHelper::createAxisFromRebinParams({x_min[0], binWidth, x_max[0]}, xAxisTmp, resize_xnew,
+                                                  full_bins_only);
+  HistogramData::BinEdges XValues(std::move(xAxisTmp));
   wksp->initialize(num_hist, HistogramData::Histogram(XValues, HistogramData::Counts(XValues.size() - 1, 0.0)));
 
   if (raggedBins) {
@@ -694,17 +689,11 @@ void AlignAndFocusPowderSlim::initializeOutputWorkspace(const MatrixWorkspace_sp
       x_max.resize(num_hist, x_max[0]);
 
     for (size_t i = 1; i < num_hist; ++i) {
-      HistogramData::BinEdges XValues_new(0);
-
-      if (linearBins) {
-        const std::vector<double> params{x_min[i], x_delta[i], x_max[i]};
-        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
-                                                        full_bins_only);
-      } else {
-        const std::vector<double> params{x_min[i], -1. * std::abs(x_delta[i]), x_max[i]};
-        Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), resize_xnew,
-                                                        full_bins_only);
-      }
+      double const raggedBinWidth = linearBins ? x_delta[i] : -1. * std::abs(x_delta[i]);
+      std::vector<double> const params{x_min[i], raggedBinWidth, x_max[i]};
+      std::vector<double> xtmpragged;
+      Kernel::VectorHelper::createAxisFromRebinParams(params, xtmpragged, resize_xnew, full_bins_only);
+      HistogramData::BinEdges XValues_new(std::move(xtmpragged));
       wksp->setHistogram(i, HistogramData::Histogram(XValues_new, HistogramData::Counts(XValues_new.size() - 1, 0.0)));
     }
   }
@@ -771,14 +760,19 @@ void AlignAndFocusPowderSlim::initCalibrationConstantsFromCalWS(const std::vecto
   }
 }
 
-const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS,
+const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const API::Workspace_sptr &inputWS,
                                                                 const std::string &filename,
                                                                 GroupingWorkspace_sptr &groupingWS) {
   const bool load_grouping = !groupingWS;
 
   auto alg = createChildAlgorithm("LoadDiffCal");
-  alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("Filename", filename);
+  if (filename.ends_with(".cal")) {
+    alg->setProperty("InputWorkspace", inputWS);
+  } else {
+    // intentionally do not supply the input workspace because h5 version can work without
+    g_log.debug("Not supplying instrument information to LoadDifCal");
+  }
   alg->setProperty<bool>("MakeCalWorkspace", true);
   alg->setProperty<bool>("MakeGroupingWorkspace", load_grouping);
   alg->setProperty<bool>("MakeMaskWorkspace", true);

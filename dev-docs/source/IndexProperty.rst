@@ -3,8 +3,6 @@
 Index Property
 ==============
 
-.. contents::
-  :local:
 
 Why IndexProperty?
 ------------------

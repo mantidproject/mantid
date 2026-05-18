@@ -28,6 +28,7 @@ using namespace Mantid::DataObjects;
 
 struct LoqMeta {
   static constexpr int histograms() { return 17776; }
+  static constexpr int monitors() { return 8; }
   static constexpr int LABIndexStart() { return 0; }
   static constexpr int LABTotalBanks() { return 16384; }
   static constexpr int HABTotalBanks() { return 1392; }
@@ -46,13 +47,17 @@ void GenerateFlatCellWorkspaceLOQ::init() {
   declareProperty("CreateMaskWorkspace", true, "Determines if masked workspace needs to be created.");
   declareProperty("LABThresholdMultiplier", 1.0,
                   "The parameter that is used to scale the standard deviation in order to set the masking threshold of "
-                  "the low angle bank.");
+                  "the low angle bank. The masking threshold is calculated by the equation "
+                  "maskingThreshold = 1.0 + (LABThresholdMultiplier x standard deviation of the normalized LAB data);");
   declareProperty("HABThresholdMultiplier", 0.5,
                   "The parameter that is used to scale the standard deviation in order to set the masking threshold of "
-                  "the high angle bank.");
+                  "the high angle bank. The masking threshold is calculated by the equation "
+                  "maskingThreshold = 1.0 + (HABThresholdMultiplier x standard deviation of the normalized HAB data);");
   declareProperty("ApplyMaskDirectlyToWorkspace", false, "Determines if mask is directly applied to workspace.");
   declareProperty("OutputMaskFilePath", "",
-                  "Path to the detector mask XML file. It must be provided for the algorithm to create the xml file.");
+                  "Path to the detector mask XML file. It must be provided for the algorithm to create the .xml file.");
+  declareProperty("OutputFlatCellFilePath", "",
+                  "Path to the RKH file. It must be provided for the algorithm to create the .out file.");
 }
 
 /** Computes the mean of the input span
@@ -112,8 +117,7 @@ void GenerateFlatCellWorkspaceLOQ::exec() {
   FlatCellStats stats = normalizeBanks(valuesSpan);
 
   // Save the Y data into the output WS
-  const size_t nHist = inputWS->getNumberHistograms();
-  for (size_t i = 0; i < nHist; ++i) {
+  for (size_t i = 0; i < LoqMeta::histograms(); ++i) {
     auto &Y = outputWS->mutableY(i);
     Y[0] = valuesSpan[i];
   }
@@ -222,14 +226,71 @@ void GenerateFlatCellWorkspaceLOQ::createAndSaveMaskWorkspace(const MatrixWorksp
     saveMask->execute();
   }
 
-  bool applyMaskDirectlyToWorkspace = getProperty("ApplyMaskDirectlyToWorkspace");
-  if (applyMaskDirectlyToWorkspace) {
-    setProperty("OutputWorkspace", directMaskWS);
-  }
   bool createMaskWorkspace = getProperty("CreateMaskWorkspace");
   if (createMaskWorkspace) {
-    AnalysisDataService::Instance().addOrReplace(maskName, extractedmaskWS);
+    createDetectorMaskWorkspace(extractedmaskWS);
   }
+  createFlatcellWorkspace(directMaskWS);
+  if (!isDefault("OutputFlatCellFilePath")) {
+    saveRKH();
+  }
+}
+
+void GenerateFlatCellWorkspaceLOQ::createDetectorMaskWorkspace(const API::MatrixWorkspace_sptr &ws) {
+  // Create the monitor workspace
+  MatrixWorkspace_sptr monitor_ws = WorkspaceFactory::Instance().create(ws, LoqMeta::monitors(), 1, 1);
+
+  // Prepend the mask with the monitors
+  auto conjoin = createChildAlgorithm("ConjoinWorkspaces");
+  conjoin->initialize();
+  conjoin->setProperty("InputWorkspace1", monitor_ws);
+  conjoin->setProperty("InputWorkspace2", ws);
+  conjoin->setProperty("CheckOverlapping", false);
+  conjoin->execute();
+  MatrixWorkspace_sptr conjoinedWS = conjoin->getProperty("InputWorkspace1");
+
+  // Save the conjoined mask workspace
+  const std::string maskName = getPropertyValue("OutputWorkspace") + "_MASK";
+  AnalysisDataService::Instance().addOrReplace(maskName, conjoinedWS);
+}
+
+void GenerateFlatCellWorkspaceLOQ::createFlatcellWorkspace(const API::MatrixWorkspace_sptr &ws) {
+  // Retrieve the properties
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  bool applyMaskDirectlyToWorkspace = getProperty("ApplyMaskDirectlyToWorkspace");
+
+  // Create the monitor workspace
+  MatrixWorkspace_sptr monitor_ws = WorkspaceFactory::Instance().create(ws, LoqMeta::monitors(), 1, 1);
+
+  // Prepend the mask with the monitors
+  auto conjoin = createChildAlgorithm("ConjoinWorkspaces");
+  conjoin->initialize();
+  conjoin->setProperty("InputWorkspace1", monitor_ws);
+  if (applyMaskDirectlyToWorkspace) {
+    conjoin->setProperty("InputWorkspace2", ws);
+  } else {
+    conjoin->setProperty("InputWorkspace2", outputWS);
+  }
+  conjoin->setProperty("CheckOverlapping", false);
+  conjoin->execute();
+  MatrixWorkspace_sptr conjoinedWS = conjoin->getProperty("InputWorkspace1");
+
+  // Set the flatcell workspace as the OutputWorkspace
+  setProperty("OutputWorkspace", conjoinedWS);
+}
+
+void GenerateFlatCellWorkspaceLOQ::saveRKH() {
+  // Retrieve the properties
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  std::string outputFlatCellFilePath = getProperty("OutputFlatCellFilePath");
+
+  // Save the RKH file
+  auto saveRKH = createChildAlgorithm("SaveRKH");
+  saveRKH->initialize();
+  saveRKH->setProperty("InputWorkspace", outputWS);
+  saveRKH->setProperty("Filename", outputFlatCellFilePath);
+  saveRKH->setProperty("Append", false);
+  saveRKH->execute();
 }
 
 /** Execution code for EventWorkspaces

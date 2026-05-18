@@ -69,6 +69,99 @@ public:
     TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, 0.8), 2);
   }
 
+  void test_validateRebinParameters() {
+    // fails if not enough parameters
+    std::vector<double> rbParams = {1};
+    TS_ASSERT_THROWS(VectorHelper::validateRebinParameters(rbParams), std::runtime_error &);
+    rbParams = {1, 2};
+    TS_ASSERT_THROWS(VectorHelper::validateRebinParameters(rbParams), std::runtime_error &);
+    // fail if more than three, but not odd parameters
+    rbParams = {1, 2, 3, 4};
+    TS_ASSERT_THROWS(VectorHelper::validateRebinParameters(rbParams), std::runtime_error &);
+    // fail backwards parameters
+    rbParams = {1, 1, 3, 1, 2};
+    TS_ASSERT_THROWS(VectorHelper::validateRebinParameters(rbParams), std::runtime_error &);
+    // fail zero step
+    rbParams = {1, 1, 4, 0, 7};
+    TS_ASSERT_THROWS(VectorHelper::validateRebinParameters(rbParams), std::runtime_error &);
+    // fail log binning with negative step
+    rbParams = {-5, 1, -2, -1, 10};
+    TS_ASSERT_THROWS(VectorHelper::validateRebinParameters(rbParams), std::runtime_error &);
+    // fail powerBinning with negative step
+    rbParams = {5, 1, 10, -0.5, 100};
+    TS_ASSERT_THROWS(VectorHelper::validateRebinParameters(rbParams, true), std::runtime_error &);
+    // good bins are good
+    rbParams = {1, 1, 10};
+    TS_ASSERT_THROWS_NOTHING(VectorHelper::validateRebinParameters(rbParams));
+  }
+
+  void test_estimateNumberOfBins_fails() {
+    // fails if not enough parameters
+    std::vector<double> rbParams = {1};
+    TS_ASSERT_THROWS(VectorHelper::estimateNumberOfBins(rbParams), std::runtime_error &);
+    rbParams = {1, 2};
+    TS_ASSERT_THROWS(VectorHelper::estimateNumberOfBins(rbParams), std::runtime_error &);
+    // fail if more than three, but not odd parameters
+    rbParams = {1, 2, 3, 4};
+    TS_ASSERT_THROWS(VectorHelper::estimateNumberOfBins(rbParams), std::runtime_error &);
+    // fail backwards parameters
+    rbParams = {1, 1, 3, 1, 2};
+    TS_ASSERT_THROWS(VectorHelper::estimateNumberOfBins(rbParams), std::runtime_error &);
+    // fail zero step
+    rbParams = {1, 1, 4, 0, 7};
+    TS_ASSERT_THROWS(VectorHelper::estimateNumberOfBins(rbParams), std::runtime_error &);
+    // fail log binning with negative step
+    rbParams = {-5, 1, -2, -1, 10};
+    TS_ASSERT_THROWS(VectorHelper::estimateNumberOfBins(rbParams), std::runtime_error &);
+    // fail powerBinning with negative step
+    rbParams = {5, 1, 10, -0.5, 100};
+    TS_ASSERT_THROWS(VectorHelper::estimateNumberOfBins(rbParams, 0.5), std::runtime_error &);
+    // fail excessive number of bins
+    rbParams = {1, 1, 100};
+    TS_ASSERT_THROWS(VectorHelper::estimateNumberOfBins(rbParams, 1.0), std::runtime_error &);
+  }
+
+  void test_estimateNumberOfBins_linear() {
+    std::vector<double> rbParams(3);
+    rbParams[0] = 1.;
+    rbParams[1] = 1.;
+    rbParams[2] = 10.;
+
+    const size_t memFootprint = VectorHelper::estimateNumberOfBins(rbParams);
+    const size_t expectedFootprint = static_cast<size_t>(1 + (rbParams[2] - rbParams[0]) / rbParams[1]);
+    TS_ASSERT_EQUALS(memFootprint, expectedFootprint);
+  }
+
+  void test_estimateNumberOfBins_log() {
+    std::vector<double> rbParams(3);
+    rbParams[0] = 1.;
+    rbParams[1] = -0.5;
+    rbParams[2] = 10.;
+
+    const size_t memFootprint = VectorHelper::estimateNumberOfBins(rbParams);
+    const size_t expectedFootprint =
+        static_cast<size_t>(1 + std::ceil(std::log(rbParams[2] / rbParams[0]) / std::log(1. - rbParams[1])));
+    TS_ASSERT_EQUALS(memFootprint, expectedFootprint);
+  }
+
+  void test_estimateNumberOfBins_multistep() {
+    std::vector<double> rbParams = {1, 1, 10, -0.5, 100};
+
+    const size_t memFootprint = VectorHelper::estimateNumberOfBins(rbParams);
+    const size_t expectedFootprintStep1 = static_cast<size_t>((rbParams[2] - rbParams[0]) / rbParams[1]);
+    const size_t expectedFootprintStep2 =
+        static_cast<size_t>(1 + std::ceil(std::log(rbParams[4] / rbParams[2]) / std::log(1. - rbParams[3])));
+    TS_ASSERT_EQUALS(memFootprint, expectedFootprintStep1 + expectedFootprintStep2);
+  }
+
+  void test_CreateAxisFromRebinParams_FailsTooLarge() {
+    double power = 1.0;
+    std::vector<double> rbParams = {1, 1, 100}; // this creates an astronomical number of bins
+    std::vector<double> axis;
+    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(rbParams, axis, true, false, 0, 0, false, power),
+                     std::runtime_error &);
+  }
+
   void test_CreateAxisFromRebinParams_Gives_Expected_Number_Bins() {
     std::vector<double> rbParams(3);
     rbParams[0] = 1;
@@ -76,7 +169,7 @@ public:
     rbParams[2] = 10;
 
     std::vector<double> axis;
-    const int numBoundaries = VectorHelper::createAxisFromRebinParams(rbParams, axis);
+    const size_t numBoundaries = VectorHelper::createAxisFromRebinParams(rbParams, axis);
 
     TS_ASSERT_EQUALS(numBoundaries, 10);
     TS_ASSERT_EQUALS(axis.size(), 10);
@@ -89,7 +182,7 @@ public:
     rbParams[2] = 10;
 
     std::vector<double> axis;
-    const int numBoundaries = VectorHelper::createAxisFromRebinParams(rbParams, axis, false);
+    const size_t numBoundaries = VectorHelper::createAxisFromRebinParams(rbParams, axis, false);
 
     TS_ASSERT_EQUALS(numBoundaries, 10);
     TS_ASSERT_EQUALS(axis.size(), 0);
@@ -129,7 +222,7 @@ public:
     std::vector<double> rbParams = {1, -1, 37};
 
     std::vector<double> axis;
-    VectorHelper::createAxisFromRebinParams(rbParams, axis, true, false, 1, 37, true);
+    VectorHelper::createAxisFromRebinParams(rbParams, axis, true, true, 1, 37, true);
 
     std::vector<double> expectedAxis = {1, 22, 30, 34, 36, 37};
     TS_ASSERT_EQUALS(axis, expectedAxis);
@@ -211,6 +304,14 @@ public:
     const std::vector<double> params = {1.0, NAN};
     std::vector<double> axis;
     TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis), const std::runtime_error &);
+  }
+
+  void test_CreateAxisFromRebinParams_throwsRangeBackwards() {
+    const std::vector<double> goodParams = {1.0, 1.0, 5.0};
+    const std::vector<double> badParams = {5.0, 1.0, 1.0}; // backwards
+    std::vector<double> axis;
+    TS_ASSERT_THROWS_NOTHING(VectorHelper::createAxisFromRebinParams(goodParams, axis));
+    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(badParams, axis), const std::runtime_error &);
   }
 
   void test_CreateAxisFromRebinParams_xMinXMaxHints() {

@@ -61,18 +61,20 @@ def check(label, modest, axes, thresh=2.0e-5):
 
     modest.figure.canvas.draw()
     axes.figure.canvas.draw()
-    str1 = modest.figure.canvas.tostring_rgb()
-    str2 = axes.figure.canvas.tostring_rgb()
+    buf1 = modest.figure.canvas.buffer_rgba()
+    buf2 = axes.figure.canvas.buffer_rgba()
 
-    if str1 == str2:
+    if buf1 == buf2:
         return
 
-    # convert to array
-    shp = modest.figure.canvas.get_width_height()[::-1] + (3,)
-    data1 = np.fromstring(str1, dtype=np.uint8, sep="")
-    data2 = np.fromstring(str2, dtype=np.uint8, sep="")
-    data1.shape = shp
-    data2.shape = shp
+    # convert to array and reshape
+    shp = modest.figure.canvas.get_width_height()[::-1] + (4,)  # (4,) for RGBA
+    data1 = np.frombuffer(buf1, dtype=np.uint8).reshape(shp)
+    data2 = np.frombuffer(buf2, dtype=np.uint8).reshape(shp)
+
+    # drop alpha channel:
+    data1 = data1[:, :, :3]
+    data2 = data2[:, :, :3]
 
     # Here we need to convert to float to avoid underflow
     rms = np.mean(np.abs(data1.astype(float) - data2.astype(float)))

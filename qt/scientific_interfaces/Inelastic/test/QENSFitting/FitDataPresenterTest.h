@@ -117,7 +117,7 @@ public:
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_table.get()));
     m_presenter = std::make_unique<FitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
     m_workspace = createWorkspace(5);
-    m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
+    m_ads = std::make_unique<SetUpADSWithWorkspace>("TestWs", m_workspace);
   }
 
   void tearDown() override {
@@ -145,27 +145,8 @@ public:
 
   void test_addWorkspace_with_spectra_calls_to_model() {
     auto workpaceIndices = FunctionModelSpectra("0-3");
-    EXPECT_CALL(*m_model, addWorkspace("WorkspaceName", workpaceIndices)).Times(Exactly(1));
-    m_presenter->addWorkspace("WorkspaceName", workpaceIndices);
-  }
-
-  void test_setResolution_calls_to_model() {
-    ON_CALL(*m_model, setResolution("WorkspaceName")).WillByDefault(Return(true));
-    EXPECT_CALL(*m_model, setResolution("WorkspaceName")).Times(Exactly(1));
-    m_presenter->setResolution("WorkspaceName");
-    EXPECT_CALL(*m_model, removeSpecialValues("WorkspaceName")).Times(Exactly(0));
-    EXPECT_CALL(*m_view, displayWarning("Replaced the NaN's and infinities in WorkspaceName with zeros"))
-        .Times(Exactly(0));
-  }
-
-  void test_setResolution_has_bad_values() {
-    ON_CALL(*m_model, setResolution("WorkspaceName")).WillByDefault(Return(false));
-    EXPECT_CALL(*m_model, setResolution("WorkspaceName")).Times(Exactly(1));
-    EXPECT_CALL(*m_model, removeSpecialValues("WorkspaceName")).Times(Exactly(1));
-    EXPECT_CALL(*m_view, displayWarning("Replaced the NaN's and infinities in WorkspaceName with zeros"))
-        .Times(Exactly(1));
-
-    m_presenter->setResolution("WorkspaceName");
+    EXPECT_CALL(*m_model, addWorkspace("TestWs", workpaceIndices)).Times(Exactly(1));
+    m_presenter->addWorkspace("TestWs", workpaceIndices);
   }
 
   void test_getResolutionsForFit_calls_from_model() {
@@ -180,6 +161,7 @@ public:
     EXPECT_CALL(*m_model, getWorkspace(FitDomainIndex(0))).Times(Exactly(1)).WillOnce(Return(m_workspace));
     EXPECT_CALL(*m_model, getWorkspace(FitDomainIndex(1))).Times(Exactly(1)).WillOnce(Return(m_workspace));
     EXPECT_CALL(*m_model, getWorkspace(FitDomainIndex(2))).Times(Exactly(1)).WillOnce(Return(m_workspace));
+    EXPECT_CALL(*m_model, updateWorkspaceNames()).Times(Exactly(1));
     FitDataRow newRow;
     EXPECT_CALL(*m_view, addTableEntry(0, _)).Times(Exactly(1));
     EXPECT_CALL(*m_view, addTableEntry(1, _)).Times(Exactly(1));

@@ -4,8 +4,6 @@
 Running Sanitizers
 ##################
 
-.. contents::
-   :local:
 
 Overview
 =========

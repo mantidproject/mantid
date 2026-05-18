@@ -6,8 +6,6 @@ The Tabs - Results
 
 .. index:: The Tabs - Results
 
-.. contents:: Table of Contents
-  :local:
 
 Results
 =======

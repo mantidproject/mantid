@@ -2,8 +2,6 @@
 Load Algorithm Hook
 ===================
 
-.. contents::
-  :local:
 
 The Load Algorithm
 ##################

@@ -7,8 +7,6 @@ ALFView
    :align: right
    :height: 400px
 
-.. contents:: Table of Contents
-  :local:
 
 .. |export| image:: /images/icons/download.png
 .. |externalplot| image:: /images/icons/open-in-new.png

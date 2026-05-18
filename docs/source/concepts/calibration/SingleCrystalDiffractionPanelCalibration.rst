@@ -11,12 +11,12 @@ Notes
 #####
 
 * This approach has been imported from ISAW (SCD Calibration)
-* Only works for :ref:`RectangularDetector`
+* Only works for :py:obj:`RectangularDetector <mantid.geometry.RectangularDetector>`
 
 Data Required
 #############
 
-You will need :ref:`PeaksWorkspace` with indexed peaks from multiple orientations.
+You will need :py:obj:`PeaksWorkspace <mantid.dataobjects.PeaksWorkspace>` with indexed peaks from multiple orientations.
 
 Steps for rectangular detector based instruments
 ################################################

@@ -10,8 +10,8 @@ Description
 -----------
 
 This algorithm loads all monitors found in a NeXus file into a single
-:ref:`Workspace2D <Workspace2D>` (if there is no event data or if
-``LoadOnly='Histogram'``) or into an :ref:`EventWorkspace
+:py:obj:`Workspace2D <mantid.dataobjects.Workspace2D>` (if there is no event data or if
+``LoadOnly='Histogram'``) or into an :py:obj:`EventWorkspace
 <EventWorkspace>` (if there is event monitor data or
 ``LoadOnly='Events'``).  The algorithm assumes that all of the
 monitors are histograms and have the same bin boundaries. **NOTE:**

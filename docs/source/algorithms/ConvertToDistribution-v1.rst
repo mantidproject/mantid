@@ -16,7 +16,7 @@ Restrictions on the input workspace
 
 The workspace to convert must contain histogram data which is not already
 flagged as a distribution.
-It cannot be an :ref:`EventWorkspace <EventWorkspace>`.
+It cannot be an :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`.
 
 Usage
 -----

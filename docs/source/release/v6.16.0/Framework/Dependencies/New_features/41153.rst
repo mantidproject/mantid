@@ -1,0 +1,1 @@
+- Updated Matplotlib from version 3.9 to version 3.10. The release notes for `version 3.10 can be found in <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.10.0.html>`_.

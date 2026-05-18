@@ -4,8 +4,6 @@
 Work flows algorithm profiling
 ==============================
 
-.. contents:: Contents
-   :local:
 
 .. figure:: images/MantidProfiler.png
    :alt: Example output after rendering

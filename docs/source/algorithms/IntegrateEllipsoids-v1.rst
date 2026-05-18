@@ -26,7 +26,7 @@ from :ref:`algm-IntegratePeaksMD` in several critical ways.
 
 -  This algorithm works directly with raw or weighted events
    while :ref:`algm-IntegratePeaksMD` uses **MDEvents** from
-   :ref:`MDEventWorkspace <MDWorkspace>`.
+   :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`.
 -  This algorithm uses 3D ellipsoidal regions with aspect ratios that
    are adapted to the set of events that are near the peak center, while
    :ref:`algm-IntegratePeaksMD` uses spherical regions.
@@ -46,7 +46,7 @@ Explanation of Inputs
 #####################
 
 -  The event data to be integrated is obtained from an ordinary
-   :ref:`EventWorkspace <EventWorkspace>`
+   :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`
    with an X-axis in time-of-flight, as loaded from a
    NeXus event file. This algorithm maps the events to reciprocal space
    using *PeaksWorkwpace* with indexed peaks to determine the parameters
@@ -118,7 +118,7 @@ Detailed Algorithm Description
 
 This algorithm will integrate a list of indexed single-crystal
 diffraction peaks from a *PeaksWorkspace*, using events from an
-( :ref:`EventWorkspace <EventWorkspace>` ).
+( :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>` ).
 The indexed peaks are first used to determine a :ref:`UB matrix <Lattice>`.
 The inverse of that :ref:`UB matrix <Lattice>` is then used to form lists of
 events that are close to peaks in reciprocal space. An event will be

@@ -14,6 +14,7 @@ from qtpy.QtGui import QFont
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.codeeditor.codecommenter import CodeCommenter
 from mantidqt.widgets.codeeditor.editor import CodeEditor
+from mantid.kernel import ConfigService
 
 
 @start_qapplication
@@ -34,7 +35,7 @@ class CodeCommenterTest(unittest.TestCase):
             "   do_something()",
             "do_something_else()",
         ]
-
+        ConfigService.Instance().setString("editors.apply_dark_theme", "False")
         self.editor = CodeEditor("AlternateCSPython", QFont())
         self.editor.setText("\n".join(self.lines))
         self.commenter = CodeCommenter(self.editor)

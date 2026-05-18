@@ -24,8 +24,6 @@ Basic 1D and Tiled Plots
 |
 |
 
-.. contents:: Basic 1D and Tiled Plots - Table of contents
-    :local:
 
 Single 1D Plots
 ===============

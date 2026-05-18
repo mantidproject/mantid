@@ -23,9 +23,9 @@ be run *before* converting to multidimensional workspace. Optionally, in aadditi
 using the :ref:`RecalculateTrajectoriesExtents  <algm-RecalculateTrajectoriesExtents>` algorithm after convering to the
 multidimensional workspace.
 
-The solid angle workspace is a :ref:`MatrixWorkspace <MatrixWorkspace>` that contains the solid angle/efficiency of the detectors.
+The solid angle workspace is a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` that contains the solid angle/efficiency of the detectors.
 One can just integrate a vanadium file between some appropriate limits. For diffraction measurements, the flux workspace
-is a mandatory input. It is a :ref:`MatrixWorkspace <MatrixWorkspace>`
+is a mandatory input. It is a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`
 that contains the indefinite integral of the incident flux. It contains one or more spectra, each of them corresponding to
 detectors that have the same energy response. The algorithm :ref:`MDNormSCDPreprocessIncoherent
 <algm-MDNormSCDPreprocessIncoherent>` can be used to process Vanadium
@@ -71,8 +71,8 @@ a space group name, a point group name, or a list of symmetry operations. More i
 Using Background
 ----------------
 Starting with Mantid 6.1, the algorithm allows efficient processing of the background. In previous versions one used to
-create a background :ref:`MD Event workspaces <MDWorkspace>` by replicating data for each goniometer setting in the input workspace.
-The current implementation uses instead an :ref:`MD Event workspace<MDWorkspace>` in the sample frame of the laboratory, so no need
+create a background :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` by replicating data for each goniometer setting in the input workspace.
+The current implementation uses instead a :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` in the sample frame of the laboratory, so no need
 to replicate the background data.
 
 Similar to the case without background, temporary histogram workspaces are created for the background data and background normalization.

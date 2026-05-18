@@ -7,7 +7,7 @@ The calibration workspace contains information to convert data to/from
 time-of-flight and d-space using the `GSAS
 <https://subversion.xor.aps.anl.gov/trac/pyGSAS>`_ parameters
 ``DIFC``, ``DIFA``, ``TZERO``.  The workspace itself is a
-:ref:`TableWorkspace <Table Workspaces>` with the columns
+:py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` with the columns
 
 +-------+-----------+
 | name  | type      |
@@ -23,10 +23,9 @@ time-of-flight and d-space using the `GSAS
 
 
 The order of the rows and columns will not matter to algorithms that
-use the workspace. Algorithms that create the :ref:`TableWorkspace
-<Table Workspaces>` will use this column order with the rows sorted by
-``detid`` (smallest first). Any missing column, other than ``detid``,
-will be assumed to be all zeros.
+use the workspace. Algorithms that create the :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>`
+will use this column order with the rows sorted by ``detid`` (smallest first).
+Any missing column, other than ``detid``, will be assumed to be all zeros.
 
 Diffraction Calibration File
 ============================

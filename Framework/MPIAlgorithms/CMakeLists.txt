@@ -23,6 +23,12 @@ set_target_properties(MPIAlgorithms PROPERTIES OUTPUT_NAME MantidMPIAlgorithms)
 # Add to the 'Framework' group in VS
 set_property(TARGET MPIAlgorithms PROPERTY FOLDER "MantidFramework")
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set_target_properties(MPIAlgorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+else()
+  message(STATUS "Only linux builds are currently supported")
+endif()
+
 target_link_libraries(
   MPIAlgorithms
   PUBLIC Mantid::API Mantid::DataObjects
@@ -31,7 +37,7 @@ target_link_libraries(
 if(MPI_BUILD)
   target_sources(MPIAlgorithms PRIVATE src/MPILifetime.cpp)
   message(STATUS "Boost_MPI_LIBRARY = ${Boost_MPI_LIBRARY}")
-  target_compile_definitions(MPIAlgorithms PRIVATE MPI_BUILD)
+  target_compile_definitions(MPIAlgorithms PUBLIC MPI_BUILD)
   target_link_libraries(
     MPIAlgorithms
     PUBLIC ${Boost_MPI_LIBRARY} ${Boost_SERIALIZATION_LIBRARY}
@@ -40,7 +46,8 @@ if(MPI_BUILD)
   # Add the unit tests directory
   add_subdirectory(test)
   # libMantidMPIAlgorithms.so is always built so documentation for the algorithms can be built
-  mtd_install_targets(TARGETS MPIAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
+  message(STATUS "Installing MPIAlgorithms")
+  mtd_install_framework_lib(TARGETS MPIAlgorithms PLUGIN_LIB)
 endif()
 
 target_include_directories(

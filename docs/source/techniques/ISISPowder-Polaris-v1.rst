@@ -4,8 +4,6 @@
 ISIS Powder Diffraction Scripts - POLARIS Reference
 =====================================================
 
-.. contents:: Table of Contents
-    :local:
 
 .. _creating_polaris_object_isis-powder-diffraction-ref:
 

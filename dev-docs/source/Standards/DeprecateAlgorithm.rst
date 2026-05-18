@@ -4,8 +4,6 @@
 Deprecating an Algorithm
 ========================
 
-.. contents::
-  :local:
 
 When the lifetime of an algorithm reaches its limit, it is good practice to signal developers and users of this
 fact. This signal gives them time to make arrangements for their scripts, either to stop using the algorithm or

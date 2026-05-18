@@ -4,8 +4,6 @@
 ISIS Powder Diffraction Scripts - GEM Reference
 ================================================
 
-.. contents:: Table of Contents
-    :local:
 
 .. _creating_gem_object-isis-powder-diffraction-ref:
 
