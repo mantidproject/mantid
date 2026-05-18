@@ -42,6 +42,7 @@ class AlignAndFocusPowderFromFilesTest(unittest.TestCase):
         alg.setProperty("Params", [0.5, -0.004, 7.0])
 
         alg._filenames = [filename]
+        alg.filterBadPulses = 0.0
         return alg, output_ws
 
     def test_non_event_nexus_should_not_be_slim_eligible(self):
