@@ -143,7 +143,9 @@ void LoadInstrument::exec() {
     std::string instrumentFile = filename.substr(stripPath + 1, filename.size());
 
     // Strip off "_Definition.xml"
-    std::size_t defPos = instrumentFile.find("_Def");
+    std::string instrumentFileUpper = instrumentFile;
+    std::transform(instrumentFileUpper.begin(), instrumentFileUpper.end(), instrumentFileUpper.begin(), ::toupper);
+    std::size_t defPos = instrumentFileUpper.find("_DEF");
     if (defPos != std::string::npos) {
       instname = instrumentFile.substr(0, defPos);
     } else {
