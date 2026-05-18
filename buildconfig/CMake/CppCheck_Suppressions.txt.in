@@ -46,6 +46,9 @@ nullPointerArithmeticOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/n
 // ----------- Intentional dead code / known deferred bugs -----------
 // fitresult is shadowed by a local variable and never updated; fixing it breaks tests (issue #13950)
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp
+// det1 and det2 are both assigned from tracer.getDetectorResult(); cppcheck treats them as the same value
+// but they are from separate traceFromSample() calls on a mutated tracer object
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp
 
 // ----------- Internal cppcheck errors from cppcheck 2.18.1 -------------
 internalError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/BitInterleaving.h:169
@@ -66,11 +69,13 @@ unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Export
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ScriptEditor.h
 
 // pureVirtualCall: SLOT(runDialog()) expands to runDialog() via qt.cfg; this is a signal connection, not a real call
-pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/StringDialogEditor.cpp
+// primary cppcheck location is the pure virtual declaration in the header
+pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h
 
 // virtualCallInConstructor: detectorSetHook() is called indirectly from the constructor via setDecoratedDetector();
 // PoldiDetectorDecorator::detectorSetHook() is empty and the call during construction is intentional hook design
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiUtilities/PoldiDetectorDecorator.cpp
+// primary cppcheck location is the virtual function declaration in the header
+virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h
 
 // cstyleCast: using declaration for a pointer-to-member-function type is misidentified as a C-style cast
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/CloneMatrixWorkspace.cpp
