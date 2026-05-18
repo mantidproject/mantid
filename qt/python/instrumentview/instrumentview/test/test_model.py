@@ -415,6 +415,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
             InputWorkspace=model._workspace, WorkspaceIndexList=[1, 2], EnableLogging=False, StoreInADS=False
         )
         self.assertEqual(mock_convert_units.return_value, model.line_plot_workspace)
+        self.assertEqual(model._current_linplot_unit, "TOF")
 
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
     @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
@@ -864,7 +865,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._match_workspace_unit")
     def test_no_matching_detector_peaks_no_removal(self, mock_match_units, mock_wdp_cls, mock_ads):
         """If overlay contains no groups with the picked detector_id, nothing is removed."""
-        mock_match_units.side_effect = lambda base_ws, converted_ws, ws_idx, x: x
+        mock_match_units.side_effect = lambda ws_from, idx, x_from, ws_to: x_from
         model, _ = self._setup_model([7])
         model._detector_is_picked = [True]
         # Only detector_id=3 in overlay; model expects detector_id=7
@@ -881,7 +882,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._match_workspace_unit")
     def test_removes_closest_peak_in_single_workspace(self, mock_match_units, mock_wdp_cls, mock_ads):
         """Selects and removes the closest peak within a single workspace."""
-        mock_match_units.side_effect = lambda base_ws, converted_ws, ws_idx, x: x
+        mock_match_units.side_effect = lambda ws_from, idx, x_from, ws_to: x_from
         model, _ = self._setup_model([7])
         model._spectrum_nos = np.array([7])
         model._detector_is_picked = [True]
@@ -901,7 +902,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._match_workspace_unit")
     def test_selects_workspace_with_overall_min_distance(self, mock_match_units, mock_wdp_cls, mock_ads):
         """Among multiple workspaces, chooses the peak with the smallest distance overall."""
-        mock_match_units.side_effect = lambda base_ws, converted_ws, ws_idx, x: x
+        mock_match_units.side_effect = lambda ws_from, idx, x_from, ws_to: x_from
         model, _ = self._setup_model([1, 2, 3, 7])
         model._spectrum_nos = np.array([1, 2, 3, 7])
         model._detector_is_picked = [False, False, False, True]
@@ -955,27 +956,42 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_match_units.return_value = 2500
         peak_x = 1500
         ws = model.add_peak(peak_x, ["my_peaks_ws"])
-        mock_match_units.assert_called_once_with(model._lineplot_ws_in_base_units, model.line_plot_workspace, 0, peak_x)
+        mock_match_units.assert_called_once_with(model.line_plot_workspace, 0, peak_x, model._lineplot_ws_in_base_units)
         mock_add_peak.assert_called_once_with("my_peaks_ws", model._workspace, 2500, 3)
         self.assertEqual("my_peaks_ws", ws)
 
     def test_match_workspace_unit(self):
-        """_match_workspace_unit returns the base_ws x value
-        corresponding to the closest converted_ws x value."""
+        """_match_workspace_unit returns the ws_to x value
+        corresponding to the closest ws_from x value."""
         model, _ = self._setup_model([1, 2, 3])
-        base_ws = MagicMock()
-        converted_ws = MagicMock()
-        workspace_x = np.array([100.0, 200.0, 300.0, 400.0, 500.0])
+        ws_from = MagicMock()
+        ws_to = MagicMock()
         integration_x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
-        base_ws.dataX.return_value = workspace_x
-        converted_ws.dataX.return_value = integration_x
+        workspace_x = np.array([100.0, 200.0, 300.0, 400.0, 500.0])
+        ws_from.dataX.return_value = integration_x
+        ws_to.dataX.return_value = workspace_x
 
         # 1.1 is closest to integration_x[0]=1.0 -> workspace_x[0]=100.0
-        self.assertEqual(model._match_workspace_unit(base_ws, converted_ws, 0, 1.1), 100.0)
+        self.assertEqual(model._match_workspace_unit(ws_from, 0, 1.1, ws_to), 100.0)
         # 4.6 is closest to integration_x[4]=5.0 -> workspace_x[4]=500.0
-        self.assertEqual(model._match_workspace_unit(base_ws, converted_ws, 0, 4.6), 500.0)
+        self.assertEqual(model._match_workspace_unit(ws_from, 0, 4.6, ws_to), 500.0)
         # 2.9 is closest to integration_x[2]=3.0 -> workspace_x[2]=300.0
-        self.assertEqual(model._match_workspace_unit(base_ws, converted_ws, 0, 2.9), 300.0)
+        self.assertEqual(model._match_workspace_unit(ws_from, 0, 2.9, ws_to), 300.0)
+
+    def test_match_workspace_unit_reverses_for_momentum_transfer(self):
+        """When ws_from unit is momentum transfer, data is reversed before searching."""
+        model, _ = self._setup_model([1])
+        ws_from = MagicMock()
+        ws_to = MagicMock()
+        # Q values decrease (high to low); ws_to values increase
+        ws_from.dataX.return_value = np.array([5.0, 4.0, 3.0, 2.0, 1.0])
+        ws_to.dataX.return_value = np.array([100.0, 200.0, 300.0, 400.0, 500.0])
+        ws_from.getAxis.return_value.getUnit.return_value.name.return_value = "MomentumTransfer"
+        ws_to.getAxis.return_value.getUnit.return_value.name.return_value = "TOF"
+
+        # Without reversal: 4.7 closest to 5.0 at original index 0 -> ws_to[0]=100.0
+        # With reversal of ws_from [1,2,3,4,5]: 4.7 closest to 5.0 at reversed index 4 -> ws_to[4]=500.0
+        self.assertEqual(model._match_workspace_unit(ws_from, 0, 4.7, ws_to), 500.0)
 
     def test_component_tree_no_matching_detector_ids(self):
         """If no detector_table_indices match, all values become True."""
@@ -1190,7 +1206,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         """Workspaces that don't exist in ADS are filtered out."""
         model, _ = self._setup_model([1, 2, 3])
         mock_ads.doesExist.side_effect = lambda name: name == "ws1"
-        mock_match_unit.side_effect = lambda base_ws, converted_ws, ws_idx, x: x
+        mock_match_unit.side_effect = lambda ws_from, idx, x_from, ws_to: x_from
         mock_wdp = MagicMock()
         mock_wdp.get_x_values_and_labels.return_value = ([1.5], ["label1"])
         mock_wdp_cls.return_value = mock_wdp
@@ -1221,7 +1237,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         """Returns separate x-values and labels per workspace."""
         model, _ = self._setup_model([1, 2, 3])
         mock_ads.doesExist.return_value = True
-        mock_match_unit.side_effect = lambda base_ws, converted_ws, ws_idx, x: x
+        mock_match_unit.side_effect = lambda ws_from, idx, x_from, ws_to: x_from
 
         ws1_wdp = MagicMock()
         ws1_wdp.get_x_values_and_labels.return_value = ([100.0], ["hkl_1"])
@@ -1245,7 +1261,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([True, False, False])
         mock_ads.doesExist.return_value = True
-        mock_match_unit.side_effect = lambda base_ws, converted_ws, ws_idx, x: x
+        mock_match_unit.side_effect = lambda ws_from, idx, x_from, ws_to: x_from
         mock_wdp = MagicMock()
         mock_wdp.get_x_values_and_labels.return_value = ([], [])
         mock_wdp_cls.return_value = mock_wdp

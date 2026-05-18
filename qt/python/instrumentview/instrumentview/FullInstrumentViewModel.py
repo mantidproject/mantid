@@ -258,13 +258,13 @@ class FullInstrumentViewModel:
             return None
 
         limits_in_base_units = [
-            self._match_workspace_unit(self._workspace, self._integration_workspace, self.picked_workspace_indices[0], x)
+            self._match_workspace_unit(self._integration_workspace, self.picked_workspace_indices[0], x, self._workspace)
             for x in self.integration_limits
         ]
         limits_in_lineplot_units = [
-            self._match_workspace_unit(self.line_plot_workspace, self._lineplot_ws_in_base_units, 0, x) for x in limits_in_base_units
+            self._match_workspace_unit(self._lineplot_ws_in_base_units, 0, x, self.line_plot_workspace) for x in limits_in_base_units
         ]
-        return limits_in_lineplot_units
+        return [min(limits_in_lineplot_units), max(limits_in_lineplot_units)]
 
     def calculate_and_set_full_integration_range(self) -> None:
         self._calculate_and_set_full_integration_range(self.is_pickable)
@@ -472,6 +472,7 @@ class FullInstrumentViewModel:
         return projection
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
+        self._current_linplot_unit = unit
         workspace_indices = np.unique(self.picked_workspace_indices)
         if len(workspace_indices) == 0:
             self.line_plot_workspace = None
@@ -534,7 +535,7 @@ class FullInstrumentViewModel:
         labels_by_pws = [pair[1] for pair in x_and_labels_by_pws]
         # Convert peak units to currently plotted units
         converted_x = [
-            [self._match_workspace_unit(self.line_plot_workspace, self._lineplot_ws_in_base_units, 0, x) for x in x_values]
+            [self._match_workspace_unit(self._lineplot_ws_in_base_units, 0, x, self.line_plot_workspace) for x in x_values]
             for x_values in x_by_pws
         ]
         return converted_x, labels_by_pws, selected_peaks_workspaces
@@ -543,14 +544,28 @@ class FullInstrumentViewModel:
         peaks_ws = self._get_peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)
         detector_id = self.picked_detector_ids[0]
         x_in_workspace_unit = self._match_workspace_unit(
-            self._lineplot_ws_in_base_units, self.line_plot_workspace, 0, x_in_integration_unit
+            self.line_plot_workspace, 0, x_in_integration_unit, self._lineplot_ws_in_base_units
         )
         AddPeak(peaks_ws, self._workspace, x_in_workspace_unit, int(detector_id))
         return peaks_ws
 
-    def _match_workspace_unit(self, base_ws, converted_ws, ws_idx, x_in_integration_units: float):
+    def _match_workspace_unit(self, ws_from, idx, x_from: float, ws_to):
         # Find closest dataX cell in integration workspace and get the value of that cell in self._workspace
-        return base_ws.dataX(int(ws_idx))[np.argmin(np.abs(converted_ws.dataX(int(ws_idx))[:] - x_in_integration_units))]
+        data_x_from = ws_from.dataX(int(idx))[:]
+        data_x_to = ws_to.dataX(int(idx))[:]
+
+        # ConvertUnits does not output one-to-one dataX for momentum transfer
+        # Need to use inverse of dataX to get correct one-to-one match of dataX
+        unit_from = ws_from.getAxis(0).getUnit().name().casefold()
+        unit_to = ws_to.getAxis(0).getUnit().name().casefold()
+
+        if unit_from == "q" or unit_from == "momentumtransfer":
+            data_x_from = data_x_from[::-1]
+
+        if unit_to == "q" or unit_to == "momentumtransfer":
+            data_x_to = data_x_to[::-1]
+
+        return data_x_to[np.argmin(np.abs(data_x_from - x_from))]
 
     def _get_peaks_workspace_for_adding_new_peak(self, selected_peaks_workspaces: list[str]) -> PeaksWorkspace:
         # If exactly one Peaks workspace in selected, add the peak to that workspace, otherwise
@@ -567,7 +582,7 @@ class FullInstrumentViewModel:
             return
 
         x_in_workspace_unit = self._match_workspace_unit(
-            self._lineplot_ws_in_base_units, self.line_plot_workspace, 0, x_in_integration_unit
+            self.line_plot_workspace, 0, x_in_integration_unit, self._lineplot_ws_in_base_units
         )
         closest_peak_by_ws = []
         for ws_name in selected_peaks_workspaces:
