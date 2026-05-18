@@ -8,6 +8,7 @@ set(TEST_PY_FILES
     Abins2DBasicTest.py
     AbinsAdvancedParametersTest.py
     AlignComponentsTest.py
+    AlignAndFocusPowderFromFilesTest.py
     AngularAutoCorrelationsSingleAxisTest.py
     AngularAutoCorrelationsTwoAxesTest.py
     AnstoCommonFractionalTest.py
