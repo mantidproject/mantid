@@ -14,9 +14,9 @@ from mantid.api import (
     Progress,
     PropertyMode,
     MultipleFileProperty,
+    WorkspaceFactory,
     WorkspaceProperty,
 )
-from mantid.dataobjects import GroupingWorkspaceProperty
 from mantid.kernel import (
     Direction,
     EnabledWhenProperty,
@@ -202,8 +202,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         )
 
         self.declareProperty(
-            GroupingWorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
-            doc="Optional: output GroupingWorkspace mapping every detector ID to its group ID. "
+            WorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="Optional: output Workspace2D mapping every detector's workspace index to its group ID. "
             "Only produced when Grouping is '2x2' or '4x4'.",
         )
         self.setPropertyGroup("Grouping", "Grouping")
@@ -473,17 +473,15 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             # Create the grouping workspace, if so required.
             if create_grouping_ws:
                 detector_ids_per_group = groups.reshape(-1, groups.shape[2])
-                createGrp_alg = self.createChildAlgorithm("CreateGroupingWorkspace", enableLogging=False)
-                createGrp_alg.setProperty("InputWorkspace", _tmp_ws)
-                createGrp_alg.setProperty("OutputWorkspace", "__hb3a_grouping_ws")
-                createGrp_alg.execute()
-                grouping_workspace = createGrp_alg.getProperty("OutputWorkspace").value
-                # Calling `CreateGroupingWorkspace` while feeding the detID-to-groupID mapping to option
-                # `CustomGroupingString` executes much slower than calling `setValue()` for every detector ID
+                # Use Workspace2D instead of GroupingWorkspace: building the detector-ID-to-workspace-index
+                # map in GroupingWorkspace is prohibitively slow for HB3A's ~786k detectors. Since HB3A
+                # detector IDs start at 1, workspace_index = det_id - 1, so dataY can be written directly.
+                grouping_workspace = WorkspaceFactory.create("Workspace2D", _tmp_ws.getNumberHistograms(), 1, 1)
                 for i, det_ids in enumerate(detector_ids_per_group):
                     group_id = float(i + 1)
                     for det_id in det_ids:
-                        grouping_workspace.setValue(int(det_id), group_id)
+                        grouping_workspace.dataY(int(det_id) - 1)[0] = group_id
+                        grouping_workspace.getSpectrum(int(det_id) - 1).setDetectorID(int(det_id))
 
             # Group spectra
             workspace_indexes = groups - 1  # for the HB3A instrument, detector IDs start at 1, not 0

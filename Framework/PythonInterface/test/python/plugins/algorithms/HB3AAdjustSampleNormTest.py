@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
-from mantid.dataobjects import GroupingWorkspace
+from mantid.dataobjects import Workspace2D
 from mantid.simpleapi import (
     CreateMDHistoWorkspace,
     DeleteWorkspace,
@@ -210,13 +210,17 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
             OutputGroupingWorkspace="__hb3a_grp_2x2",
         )
         grp_2x2 = mtd["__hb3a_grp_2x2"]
-        self.assertIsInstance(grp_2x2, GroupingWorkspace)
+        self.assertIsInstance(grp_2x2, Workspace2D)
         # One spectrum per pixel detector. HB3A has three 512x512 detector panels
         self.assertEqual(grp_2x2.getNumberHistograms(), 512 * 512 * 3)
         # check the group ID of the first spectra:
         group_ids = grp_2x2.extractY().astype(int).flatten()  # 1, 1, 2, 2, 3, 3,..
         self.assertListEqual(group_ids[0:6].tolist(), [1, 1, 2, 2, 3, 3])  # first row along X
         self.assertListEqual(group_ids[512:518].tolist(), [1, 1, 2, 2, 3, 3])  # second row
+        # detector ID stored
+        histogram_count = grp_2x2.getNumberHistograms()
+        self.assertEqual(grp_2x2.getSpectrum(0).getDetectorIDs()[0], 1)
+        self.assertEqual(grp_2x2.getSpectrum(histogram_count - 1).getDetectorIDs()[0], histogram_count)
 
         # --- 4x4:
         HB3AAdjustSampleNorm(
@@ -229,14 +233,19 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         )
         self.assertTrue(mtd.doesExist("__hb3a_grp_4x4"), "OutputGroupingWorkspace should be stored in the ADS")
         grp_4x4 = mtd["__hb3a_grp_4x4"]
-        self.assertIsInstance(grp_4x4, GroupingWorkspace)
+        self.assertIsInstance(grp_4x4, Workspace2D)
         self.assertEqual(grp_4x4.getNumberHistograms(), 512 * 512 * 3)
         group_ids = grp_4x4.extractY().astype(int).flatten()  # 1, 1, 1, 1, 2, 2, 2, 2,..
         self.assertListEqual(group_ids[0:8].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # first row along X
         self.assertListEqual(group_ids[512:520].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # second row
         self.assertListEqual(group_ids[1024:1032].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # third row
         self.assertListEqual(group_ids[1536:1544].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # fourth row
+        # detector ID stored
+        histogram_count = grp_4x4.getNumberHistograms()
+        self.assertEqual(grp_4x4.getSpectrum(0).getDetectorIDs()[0], 1)
+        self.assertEqual(grp_4x4.getSpectrum(histogram_count - 1).getDetectorIDs()[0], histogram_count)
 
+        # clean up
         DeleteWorkspaces(["__hb3a_out_2x2", "__hb3a_grp_2x2", "__hb3a_out_4x4", "__hb3a_grp_4x4"])
 
 

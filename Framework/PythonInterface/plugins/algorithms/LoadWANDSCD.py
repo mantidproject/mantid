@@ -238,7 +238,7 @@ class LoadWANDSCD(PythonAlgorithm):
 
         :param runs: A list of file paths to the run files to be loaded and grouped.
         :param create_grouping_ws: When True and grouping is applied, also build a
-            GroupingWorkspace mapping every detector ID to its 1-indexed group ID.
+            Workspace2D mapping every detector ID to its 1-indexed group ID.
         :returns: A tuple ``(outWS, grouping_ws)`` where ``grouping_ws`` is ``None``
             when ``create_grouping_ws`` is False or no grouping was requested.
         """
@@ -472,6 +472,7 @@ class LoadWANDSCD(PythonAlgorithm):
         group_ids = (wi // 512 // grouping) * (512 // grouping) + (wi % 512 // grouping) + 1.0
         for i in range(nHist):
             grouping_ws.dataY(i)[0] = group_ids[i]
+            grouping_ws.getSpectrum(i).setDetectorID(i)
 
         return grouping_ws
 

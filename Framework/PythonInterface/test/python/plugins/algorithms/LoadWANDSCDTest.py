@@ -142,7 +142,8 @@ class LoadWANDGrouping(unittest.TestCase):
         self.assertEqual(int(y_values.max()), expected_groups)
 
         # Every workspace index lies in a valid group (1 .. expected_groups)
-        self.assertEqual(grp_ws.getNumberHistograms(), self.N_ROWS * self.N_COLS)
+        histogram_count = grp_ws.getNumberHistograms()
+        self.assertEqual(histogram_count, self.N_ROWS * self.N_COLS)
         self.assertEqual(int(y_values.min()), 1)
 
         # Spot-check: workspace index 0  → pixel (x=0, y=0) → group 1
@@ -155,6 +156,10 @@ class LoadWANDGrouping(unittest.TestCase):
         self.assertEqual(int(grp_ws.readY(512)[0]), 1)
         # Spot-check: workspace index 1024 → pixel (x=2, y=0) → first group of x_idx=1 row → group (512//2)+1 = 257
         self.assertEqual(int(grp_ws.readY(1024)[0]), (self.N_COLS // grouping) + 1)
+
+        # detector ID stored
+        self.assertEqual(grp_ws.getSpectrum(0).getDetectorIDs()[0], 0)
+        self.assertEqual(grp_ws.getSpectrum(histogram_count - 1).getDetectorIDs()[0], histogram_count - 1)
 
         # detectorID log must have one entry per group (same length as twotheta/azimuthal)
         run = ws.getExperimentInfo(0).run()
