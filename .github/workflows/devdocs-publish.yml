@@ -41,7 +41,7 @@ jobs:
 
       - name: Build dev-docs
         if: steps.changes.outputs.devsite == 'true'
-        run: pixi run --manifest-path pixi.toml -e devsite build-devdocs
+        run: pixi run --manifest-path pixi.toml build-devdocs
 
       - name: Checkout developer site repository
         if: ${{ steps.changes.outputs.devsite == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
