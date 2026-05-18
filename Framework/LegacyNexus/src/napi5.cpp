@@ -602,19 +602,15 @@ NXstatus NX5closegroup(NXhandle fid) {
       char *uname = strdup(pFile->name_ref);
       char *u1name = NULL;
       u1name = static_cast<char *>(malloc((ii + 1) * sizeof(char)));
-      // cppcheck-suppress nullPointerOutOfMemory
       memset(u1name, 0, ii);
       for (i = 0; i < ii; i++) {
-        // cppcheck-suppress nullPointerArithmeticOutOfMemory
         *(u1name + i) = *(uname + i);
       }
       *(u1name + i) = '\0';
       /*
          strncpy(u1name, uname, ii);
        */
-      // cppcheck-suppress nullPointerOutOfMemory
       strcpy(pFile->name_ref, u1name);
-      // cppcheck-suppress nullPointerOutOfMemory
       strcpy(pFile->name_tmp, u1name);
       free(uname);
       free(u1name);

@@ -57,9 +57,9 @@ struct TCPStreamEventHeader {
   bool isValid() const {
     // minor_version is currently 0, so this comparison is always true for any unsigned value.
     // The check is kept to enforce forward-compatibility if minor_version is ever incremented.
-    // cppcheck-suppress unsignedPositive
     return marker1 == marker && marker2 == marker && length >= sizeof(TCPStreamEventHeader) &&
            majorVersion() == TCPStreamEventHeader::major_version &&
+           // cppcheck-suppress unsignedPositive
            minorVersion() >= TCPStreamEventHeader::minor_version && type != InvalidStream;
   }
 

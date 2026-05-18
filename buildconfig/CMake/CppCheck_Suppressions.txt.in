@@ -38,5 +38,14 @@ class_X_Y
 // All ANN files as they are upstream anyway
 *:*${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ANN/*
 
+// LegacyNexus - quarantined C code, not to be modified
+nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi.cpp
+nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp
+nullPointerArithmeticOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp
+
+// ----------- Intentional dead code / known deferred bugs -----------
+// fitresult is shadowed by a local variable and never updated; fixing it breaks tests (issue #13950)
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp
+
 // ----------- Internal cppcheck errors from cppcheck 2.18.1 -------------
 internalError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/BitInterleaving.h:169

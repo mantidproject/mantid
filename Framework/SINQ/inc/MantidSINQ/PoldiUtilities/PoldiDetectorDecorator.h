@@ -45,7 +45,6 @@ public:
   std::pair<double, double> qLimits(double lambdaMin, double lambdaMax) override;
 
 protected:
-  // cppcheck-suppress virtualCallInConstructor
   virtual void detectorSetHook();
 
   std::shared_ptr<PoldiAbstractDetector> m_decoratedDetector;

@@ -619,7 +619,6 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
   if ((type == NXnumtype::CHAR) && (nexusFuncs.stripFlag == 1) && (rank == 1)) {
     char *pPtr;
     pPtr = static_cast<char *>(malloc((size_t)iDim[0] + 5));
-    // cppcheck-suppress nullPointerOutOfMemory
     memset(pPtr, 0, (size_t)iDim[0] + 5);
     status = LOCKED_CALL(nexusFuncs.nxgetdata(nexusFuncs.pNexusData, pPtr));
     char const *pPtr2;

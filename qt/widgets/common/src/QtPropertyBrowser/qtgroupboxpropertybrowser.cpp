@@ -97,8 +97,7 @@ QT_BEGIN_NAMESPACE
 #endif
 
 void QtGroupBoxPropertyBrowserPrivate::init(QWidget *parent) {
-  m_mainLayout = new QGridLayout();
-  parent->setLayout(m_mainLayout);
+  m_mainLayout = new QGridLayout(parent);
   QLayoutItem *item = new QSpacerItem(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
   m_mainLayout->addItem(item, 0, 0);
 }
@@ -300,12 +299,7 @@ void QtGroupBoxPropertyBrowserPrivate::propertyRemoved(const QtBrowserItem *inde
     removeRow(parentItem->layout, row);
   } else {
     WidgetItem *par = parentItem->parent;
-    QGridLayout *l = nullptr;
-    if (!par) {
-      l = m_mainLayout;
-    } else {
-      l = par->layout;
-    }
+    QGridLayout *const l = !par ? m_mainLayout : par->layout;
 
     if (parentItem->widget) {
       parentItem->widget->hide();

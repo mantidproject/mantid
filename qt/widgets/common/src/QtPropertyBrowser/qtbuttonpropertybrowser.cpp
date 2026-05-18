@@ -140,8 +140,7 @@ int QtButtonPropertyBrowserPrivate::gridSpan(const WidgetItem *item) const {
 }
 
 void QtButtonPropertyBrowserPrivate::init(QWidget *parent) {
-  m_mainLayout = new QGridLayout();
-  parent->setLayout(m_mainLayout);
+  m_mainLayout = new QGridLayout(parent);
   QLayoutItem *item = new QSpacerItem(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
   m_mainLayout->addItem(item, 0, 0);
 }

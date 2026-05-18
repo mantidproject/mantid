@@ -921,7 +921,6 @@ void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input, const int 
   m_peakFunction->setHeight(est_height);
   m_peakFunction->setFwhm(est_fwhm);
 
-  // cppcheck-suppress knownConditionTrueFalse
   if (usefpdresult < 0) {
     // Estimate peak range based on estimated linear background and peak
     // parameter estimated from observation
