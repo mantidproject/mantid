@@ -49,3 +49,42 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.c
 
 // ----------- Internal cppcheck errors from cppcheck 2.18.1 -------------
 internalError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/BitInterleaving.h:169
+
+// ----------- False positives from cppcheck analysis limitations -----------
+
+// syntaxError: cppcheck cannot parse boost::python pointer-to-member-function operator syntax (&Class::operator+)
+syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/V3D.cpp
+syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/VMD.cpp
+
+// templateRecursion: cppcheck hits its template instantiation depth limit for MDEvent slice templates
+templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp
+
+// unknownMacro: BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS is a boost.python macro cppcheck does not know
+unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Run.cpp
+
+// unknownMacro: Qt 'slots' keyword in ScriptEditor.h; defined empty in qt.cfg but still triggers unknownMacro
+unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ScriptEditor.h
+
+// pureVirtualCall: SLOT(runDialog()) expands to runDialog() via qt.cfg; this is a signal connection, not a real call
+pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/StringDialogEditor.cpp
+
+// virtualCallInConstructor: detectorSetHook() is called indirectly from the constructor via setDecoratedDetector();
+// PoldiDetectorDecorator::detectorSetHook() is empty and the call during construction is intentional hook design
+virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiUtilities/PoldiDetectorDecorator.cpp
+
+// cstyleCast: using declaration for a pointer-to-member-function type is misidentified as a C-style cast
+cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/CloneMatrixWorkspace.cpp
+
+// publicAllocationError: m_mainLayout is owned by the Qt parent widget (QGridLayout(parent) transfers ownership);
+// cppcheck does not model Qt parent-child memory management
+publicAllocationError:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp
+publicAllocationError:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp
+
+// operatorEqVarError: WorkspaceProperty::operator= intentionally copies only the workspace pointer value;
+// m_optional and m_locking are property metadata (descriptors) and are not part of the assigned value
+operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/WorkspaceProperty.hxx
+
+// constVariablePointer / constParameterPointer: these pointers are passed to QList/QMap methods that require
+// non-const pointer arguments (indexOf, find); making them pointer-to-const would not compile
+constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp
+constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp

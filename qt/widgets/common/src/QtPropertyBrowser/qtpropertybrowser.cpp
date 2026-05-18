@@ -1056,7 +1056,6 @@ public:
   QList<QtBrowserItem *> m_children;
 };
 
-// cppcheck-suppress constParameterPointer
 void QtBrowserItemPrivate::addChild(QtBrowserItem *index, QtBrowserItem *after) {
   if (m_children.contains(index))
     return;
@@ -1210,7 +1209,6 @@ void QtAbstractPropertyBrowserPrivate::removeSubTree(QtProperty *property, QtPro
   }
 }
 
-// cppcheck-suppress constParameterPointer
 void QtAbstractPropertyBrowserPrivate::createBrowserIndexes(QtProperty *property, QtProperty *parentProperty,
                                                             QtProperty *afterProperty) {
   QMap<QtBrowserItem *, QtBrowserItem *> parentToAfter;
@@ -1270,7 +1268,6 @@ QtBrowserItem *QtAbstractPropertyBrowserPrivate::createBrowserIndex(QtProperty *
   return newIndex;
 }
 
-// cppcheck-suppress constParameterPointer
 void QtAbstractPropertyBrowserPrivate::removeBrowserIndexes(QtProperty *property, QtProperty *parentProperty) {
   QList<QtBrowserItem *> toRemove;
   QMap<QtProperty *, QList<QtBrowserItem *>>::ConstIterator it = m_propertyToIndexes.find(property);
@@ -1350,7 +1347,6 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDestroyed(QtProperty *propert
   q_ptr->removeProperty(property);
 }
 
-// cppcheck-suppress constParameterPointer
 void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *property) {
   if (!m_propertyToParents.contains(property))
     return;
