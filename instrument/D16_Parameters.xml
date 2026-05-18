@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<parameter-file instrument = "D16">
+<parameter-file instrument = "D16" valid-from = "2020-01-01 00:00:00" valid-to = "2100-01-31 23:59:59">
 
     <component-link name="D16">
       <!-- Logs to sum when merging the runs -->

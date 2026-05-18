@@ -126,12 +126,19 @@ class DrillTest(unittest.TestCase):
     # tests                                                                   #
     ###########################################################################
 
-    def setUp(self):
-        self.facility = config["default.facility"]
-        self.instrument = config["default.instrument"]
+    @classmethod
+    def setUpClass(cls):
+        cls._facility = config["default.facility"]
+        cls._instrument = config["default.instrument"]
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D11"
 
+    @classmethod
+    def tearDownClass(cls):
+        config["default.facility"] = cls._facility
+        config["default.instrument"] = cls._instrument
+
+    def setUp(self):
         # avoid popup messages
         patch = mock.patch("mantidqtinterfaces.drill.view.DrillView.QMessageBox")
         self.mMessageBox = patch.start()
@@ -158,10 +165,6 @@ class DrillTest(unittest.TestCase):
         # shown window
         self.view.isHidden = mock.Mock()
         self.view.isHidden.return_value = False
-
-    def tearDown(self):
-        config["default.facility"] = self.facility
-        config["default.instrument"] = self.instrument
 
     def test_changeInstrument(self):
         for i in range(self.view.instrumentselector.count()):

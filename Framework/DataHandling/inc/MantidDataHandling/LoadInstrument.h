@@ -79,7 +79,7 @@ private:
   void exec() override;
 
   /// Run the Child Algorithm LoadParameters
-  void runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws, const std::string &filename);
+  void runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws);
 
   /// Mutex to avoid simultaneous access
   static std::recursive_mutex m_mutex;
