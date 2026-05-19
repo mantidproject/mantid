@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceGroupProperty
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, WorkspaceGroupProperty, WorkspaceProperty
 from mantid.kernel import DateAndTime, Direction
 from mantid.simpleapi import AddSampleLog
 
@@ -24,8 +24,9 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
 
     def PyInit(self):
         # Add properties from child algorithm
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "", direction=Direction.Input), "An input event workspace.")
+
         self._filter_properties = [
-            "InputWorkspace",
             "StartTime",
             "StopTime",
             "TimeInterval",
@@ -39,7 +40,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         self.copyProperties("GenerateEventsFilter", self._filter_properties)
 
         # Add our own properties
-        self.declareProperty(MatrixWorkspaceProperty("MonitorWorkspace", "", direction=Direction.Input), "Input monitor workspace")
+        self.declareProperty(WorkspaceProperty("MonitorWorkspace", "", direction=Direction.Input), "Input monitor workspace")
         self.declareProperty(
             WorkspaceGroupProperty("OutputWorkspace", "", direction=Direction.Output), doc="Group name for the output workspace(s)."
         )
@@ -48,12 +49,21 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
     def validateInputs(self):
         issues = {}
         workspace = self.getProperty("InputWorkspace").value
+
+        if workspace.isGroup():
+            return self._validate_group_inputs(workspace, issues)
+
         # Skip check for workspace groups
         if not workspace:
             return issues
         if workspace.run().getProtonCharge() < 1e-9:
             issues["InputWorkspace"] = "Cannot slice workspace with zero proton charge"
         return issues
+
+    def _validate_group_inputs(self, ws_group, issues_dict: dict):
+        monitors = self.getProperty("MonitorWorkspace").value
+        if monitors.isGroup() and not len(monitors) != len(ws_group):
+            issues_dict["InputWorkspace"] = "Monitor and Input workspace groups must be the same length."
 
     def PyExec(self):
         self._input_ws = self.getProperty("InputWorkspace").value
