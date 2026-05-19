@@ -752,7 +752,6 @@ template bool loadNXDataSet<double>(const Nexus::NXEntry &entry, const std::stri
 template bool loadNXDataSet<int>(const Nexus::NXEntry &entry, const std::string &path, int &value, int index);
 template bool loadNXDataSet<int64_t>(const Nexus::NXEntry &entry, const std::string &path, int64_t &value, int index);
 template bool loadNXDataSet<uint64_t>(const Nexus::NXEntry &entry, const std::string &path, uint64_t &value, int index);
-template bool loadNXDataSet<int64_t>(const Nexus::NXEntry &entry, const std::string &path, int64_t &value, int index);
 template uint64_t extractTimedDataSet<float>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
                                              uint64_t endTime, std::vector<uint64_t> &times, std::vector<float> &events,
                                              std::string &units);
