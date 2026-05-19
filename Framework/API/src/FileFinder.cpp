@@ -718,7 +718,13 @@ void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) cons
         allHaveSingleArch = false;
         break;
       }
-      if (!fileInfo.archs[0] || !firstArch || typeid(*fileInfo.archs[0]) != typeid(*firstArch)) {
+      if (!fileInfo.archs[0] || !firstArch) {
+        allHaveSingleArch = false;
+        break;
+      }
+      const auto &arch0 = *fileInfo.archs[0];
+      const auto &arch1 = *firstArch;
+      if (typeid(arch0) != typeid(arch1)) {
         allHaveSingleArch = false;
         break;
       }
