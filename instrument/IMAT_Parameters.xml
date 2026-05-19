@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- This is currently just a clone of ENGINX param file for testing the commissioning of IMAT -->
+
+<!DOCTYPE parameter-file [
+          <!ENTITY alpha_0    "673896.832650">
+          <!ENTITY beta_0     "0.002627">
+          <!ENTITY beta_1     "0.023061">
+          <!ENTITY sigma_0_sq "448.618067">
+          <!ENTITY sigma_1_sq "126.400324">
+          <!ENTITY sigma_2_sq "67.422955">
+          <!ENTITY IC_Alpha0     "0.2243268634">
+          <!ENTITY IC_Alpha1     "1.000000">
+          <!ENTITY IC_Beta0      "392.5451289614">
+          <!ENTITY IC_Kappa      "21.9644555081">
+          <!ENTITY ICSigma0_sq   "0.0">
+          <!ENTITY ICSigma1_sq   "1433.4445616290">
+          <!ENTITY ICSigma2_sq   "-23.8830556342">
+          <!ENTITY ICGamma0      "42.7727369688">
+          <!ENTITY ICGamma1      "-30.0017547913">
+          <!ENTITY ICGamma2      "5.7001495874">
+        ]>
+
+<parameter-file instrument="IMAT" valid-from="2026-1-1">
+
+  <component-link name="NorthBank" >
+
+  <parameter name="alpha_0" type="number">
+    <value val="&alpha_0;" />
+  </parameter>
+  <parameter name="beta_0" type="number">
+    <value val="&beta_0;" />
+  </parameter>
+  <parameter name="beta_1" type="number">
+    <value val="&beta_1;" />
+  </parameter>
+  <parameter name="sigma_0_sq" type="number">
+    <value val="&sigma_0_sq;" />
+  </parameter>
+  <parameter name="sigma_1_sq" type="number">
+    <value val="&sigma_1_sq;" />
+  </parameter>
+  <parameter name="sigma_2_sq" type="number">
+    <value val="&sigma_2_sq;" />
+  </parameter>
+
+  <parameter name="BackToBackExponential:S" type="fitting">
+    <formula eq="sqrt((&sigma_2_sq;)*centre^4+(&sigma_1_sq;)*centre^2+(&sigma_0_sq;))" unit="dSpacing" result-unit="TOF" />
+  </parameter>
+  <parameter name="BackToBackExponential:A" type="fitting">
+    <formula eq="((&alpha_0;)/centre)" unit="dSpacing" result-unit="1/TOF" />
+  </parameter>
+  <parameter name="BackToBackExponential:B" type="fitting">
+    <formula eq="((&beta_0;)+(&beta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+  <formula eq="(&IC_Alpha0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+  <formula eq="(&IC_Alpha1;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+  <formula eq="(&IC_Beta0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Kappa" type="fitting">
+  <formula eq="(&IC_Kappa;)" unit="dSpacing" result-unit=""/><fixed />
+</parameter>
+
+  <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+    <formula eq="(&ICSigma2_sq;)*centre^4 + (&ICSigma1_sq;)*centre^2 + (&ICSigma0_sq;)"
+             unit="dSpacing" result-unit="TOF^2" />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+    <formula eq="(&ICGamma2;)*centre^2 + (&ICGamma1;)*centre + (&ICGamma0;)"
+             unit="dSpacing" result-unit="TOF" />
+  </parameter>
+
+</component-link>
+
+  <component-link name="SouthBank" >
+
+  <parameter name="alpha_0" type="number">
+    <value val="&alpha_0;" />
+  </parameter>
+  <parameter name="beta_0" type="number">
+    <value val="&beta_0;" />
+  </parameter>
+  <parameter name="beta_1" type="number">
+    <value val="&beta_1;" />
+  </parameter>
+  <parameter name="sigma_0_sq" type="number">
+    <value val="&sigma_0_sq;" />
+  </parameter>
+  <parameter name="sigma_1_sq" type="number">
+    <value val="&sigma_1_sq;" />
+  </parameter>
+  <parameter name="sigma_2_sq" type="number">
+    <value val="&sigma_2_sq;" />
+  </parameter>
+
+  <parameter name="BackToBackExponential:S" type="fitting">
+    <formula eq="sqrt((&sigma_2_sq;)*centre^4+(&sigma_1_sq;)*centre^2+(&sigma_0_sq;))" unit="dSpacing" result-unit="TOF" />
+  </parameter>
+  <parameter name="BackToBackExponential:A" type="fitting">
+    <formula eq="((&alpha_0;)/centre)" unit="dSpacing" result-unit="1/TOF" />
+  </parameter>
+  <parameter name="BackToBackExponential:B" type="fitting">
+    <formula eq="((&beta_0;)+(&beta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+  <formula eq="(&IC_Alpha0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+  <formula eq="(&IC_Alpha1;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+  <formula eq="(&IC_Beta0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Kappa" type="fitting">
+  <formula eq="(&IC_Kappa;)" unit="dSpacing" result-unit=""/><fixed />
+</parameter>
+
+  <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+    <formula eq="(&ICSigma2_sq;)*centre^4 + (&ICSigma1_sq;)*centre^2 + (&ICSigma0_sq;)"
+             unit="dSpacing" result-unit="TOF^2" />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+    <formula eq="(&ICGamma2;)*centre^2 + (&ICGamma1;)*centre + (&ICGamma0;)"
+             unit="dSpacing" result-unit="TOF" />
+  </parameter>
+
+</component-link>
+
+
+<component-link name="IMAT" >
+
+  <parameter name="alpha_0" type="number">
+    <value val="&alpha_0;" />
+  </parameter>
+  <parameter name="beta_0" type="number">
+    <value val="&beta_0;" />
+  </parameter>
+  <parameter name="beta_1" type="number">
+    <value val="&beta_1;" />
+  </parameter>
+  <parameter name="sigma_0_sq" type="number">
+    <value val="&sigma_0_sq;" />
+  </parameter>
+  <parameter name="sigma_1_sq" type="number">
+    <value val="&sigma_1_sq;" />
+  </parameter>
+  <parameter name="sigma_2_sq" type="number">
+    <value val="&sigma_2_sq;" />
+  </parameter>
+
+  <parameter name="BackToBackExponential:S" type="fitting">
+    <formula eq="sqrt((&sigma_2_sq;)*centre^4+(&sigma_1_sq;)*centre^2+(&sigma_0_sq;))" unit="dSpacing" result-unit="TOF" />
+  </parameter>
+  <parameter name="BackToBackExponential:A" type="fitting">
+    <formula eq="((&alpha_0;)/centre)" unit="dSpacing" result-unit="1/TOF" />
+  </parameter>
+  <parameter name="BackToBackExponential:B" type="fitting">
+    <formula eq="((&beta_0;)+(&beta_1;)/(centre^4))" unit="dSpacing" result-unit="1/TOF" />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
+  <formula eq="(&IC_Alpha0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
+  <formula eq="(&IC_Alpha1;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Beta0" type="fitting">
+  <formula eq="(&IC_Beta0;)" unit="dSpacing" result-unit="TOF"/><fixed />
+</parameter>
+
+<parameter name="IkedaCarpenterPV:Kappa" type="fitting">
+  <formula eq="(&IC_Kappa;)" unit="dSpacing" result-unit=""/><fixed />
+</parameter>
+
+  <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
+    <formula eq="(&ICSigma2_sq;)*centre^4 + (&ICSigma1_sq;)*centre^2 + (&ICSigma0_sq;)"
+             unit="dSpacing" result-unit="TOF^2" />
+  </parameter>
+
+  <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
+    <formula eq="(&ICGamma2;)*centre^2 + (&ICGamma1;)*centre + (&ICGamma0;)"
+             unit="dSpacing" result-unit="TOF" />
+  </parameter>
+
+</component-link>
+
+
+</parameter-file>

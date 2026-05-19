@@ -1,0 +1,42 @@
+name: 'Setup Pixi'
+description: 'Setup Pixi executable after detecting version from .pixi-version. Most variables are forwarded directly setup-pixi'
+inputs: # copied from prefix-dev/setup-pixi
+  run-install:
+    description: Whether to run `pixi install` after installing pixi.
+    required: false
+    default: false
+  activate-environment:
+    description: |
+      If the installed environment should be "activated" for the current job, modifying `$GITHUB_ENV` and
+      `$GITHUB_PATH`. If more than one environment is specified in `environments`, this must be the name of the
+      environment. Defaults to `false`. Requires at least pixi v0.21.0.
+    required: false
+    default: false
+runs:
+  using: "composite"
+  steps:
+    - name: Read pixi version
+      id: pixi-version
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      run: echo "version=$(cat .pixi-version)" >> "$GITHUB_OUTPUT"
+    # branch based on whether or not windows
+    - name: Determine pixi executable
+      id: pixi-exe
+      shell: bash
+      run: |
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          echo "On windows"
+          echo "pixi_path=${{ runner.temp }}\Scripts\pixi.exe" >> "$GITHUB_OUTPUT"
+        else
+          echo "Not on windows"
+          echo "pixi_path=${{ runner.temp }}/bin/pixi" >> "$GITHUB_OUTPUT"
+        fi
+    - name: Set up pixi
+      uses: prefix-dev/setup-pixi@v0.9.5
+      with:
+        pixi-version: v${{ steps.pixi-version.outputs.version }}
+        pixi-bin-path: ${{ steps.pixi-exe.outputs.pixi_path }}
+        run-install: ${{ inputs.run-install }}
+        frozen: ${{ inputs.run-install }}
+        activate-environment: ${{ inputs.activate-environment }}

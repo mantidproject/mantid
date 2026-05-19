@@ -12,22 +12,24 @@ from mantid.simpleapi import AnalysisDataService
 
 
 class WorkspaceDetectorPeaks:
-    def __init__(self, pws_name):
+    def __init__(self, pws_name, unit, limits):
+        # Read peaks from workspace in a given unit range
         pws = AnalysisDataService.retrieve(pws_name)
         self.detector_peaks = []
-        peaks = []
         peaks_dict = pws.toDict()
         detector_ids = peaks_dict["DetID"]
         hkls = zip(peaks_dict["h"], peaks_dict["k"], peaks_dict["l"], strict=True)
         tofs = peaks_dict["TOF"]
         dspacings = peaks_dict["DSpacing"]
         wavelengths = peaks_dict["Wavelength"]
-        peaks += [
-            Peak(det_id, peak_idx, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
-            for (det_id, peak_idx, hkl, tof, dspacing, wavelength) in zip(
-                detector_ids, range(len(tofs)), hkls, tofs, dspacings, wavelengths, strict=True
-            )
-        ]
+        peaks = []
+        for det_id, peak_idx, hkl, tof, dspacing, wavelength in zip(
+            detector_ids, range(len(tofs)), hkls, tofs, dspacings, wavelengths, strict=True
+        ):
+            p = Peak(det_id, peak_idx, hkl, tof, dspacing, wavelength, 2 * np.pi / dspacing)
+            if self._is_within_limits(p.location_in_unit(unit), limits):
+                peaks.append(p)
+
         # groupby groups consecutive matches, so must be sorted
         peaks.sort(key=lambda x: x.detector_id)
         for _, peaks_for_spec in groupby(peaks, lambda x: x.detector_id):
@@ -56,3 +58,6 @@ class WorkspaceDetectorPeaks:
         x_values = [p.location_in_unit(unit) for p in picked_peaks]
         labels = [p.label for p in picked_peaks]
         return x_values, labels
+
+    def _is_within_limits(self, x, limits):
+        return x >= min(limits) and x <= max(limits)

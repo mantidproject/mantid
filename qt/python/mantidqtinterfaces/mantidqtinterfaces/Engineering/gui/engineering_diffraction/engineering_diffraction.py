@@ -63,6 +63,8 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         # Calibration Tab
         self.set_on_instrument_changed(self.presenter.calibration_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.calibration_presenter.set_rb_num)
+        # Cropping Widget
+        self.set_on_instrument_changed(self.presenter.calibration_presenter.cropping_widget.set_instrument_override)
         # Absorption Correction Tab
         self.set_on_instrument_changed(self.presenter.correction_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.correction_presenter.set_rb_num)
@@ -77,6 +79,8 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         # GSAS Tab
         # self.set_on_instrument_changed(self.presenter.gsas2_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.gsas2_presenter.set_rb_num)
+        # Settings Tab
+        self.set_on_instrument_changed(self.presenter.settings_presenter.set_instrument_override)
 
         # load most recent calibration, if one saved
         self.presenter.calibration_presenter.load_last_calibration()
