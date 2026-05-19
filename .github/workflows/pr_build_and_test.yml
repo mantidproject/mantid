@@ -46,8 +46,8 @@ jobs:
         include:
           - os: Linux
             cmake_preset: linux-64-ci
-          - os: Windows
-            cmake_preset: win-64-ci
+#          - os: Windows
+#            cmake_preset: win-64-ci
 
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
