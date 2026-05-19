@@ -103,9 +103,6 @@ class FullInstrumentViewPresenter:
         self._view.show_axes()
         self._setup_component_tree()
 
-        if self._model.workspace_x_unit in self._UNIT_OPTIONS:
-            self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_x_unit))
-
         self._ads_observer = InstrumentViewADSObserver(
             delete_callback=self.delete_workspace_callback,
             rename_callback=self.rename_workspace_callback,
@@ -116,6 +113,9 @@ class FullInstrumentViewPresenter:
         self._view.hide_status_box()
         self._select_bank_tube = self._view.is_select_bank_tube_checked()
         self.update_plotter()
+
+        if self._model.workspace_base_unit in self._UNIT_OPTIONS:
+            self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_base_unit))
 
     def _setup_component_tree(self) -> None:
         component_tree_model = ComponentTreeModel(self._model.workspace)
@@ -136,7 +136,7 @@ class FullInstrumentViewPresenter:
         self._model.save_line_plot_workspace_to_ads()
 
     def on_sum_spectra_checkbox_clicked(self) -> None:
-        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+        self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
     def available_unit_options(self) -> list[str]:
         if self._model.has_unit:
@@ -150,10 +150,7 @@ class FullInstrumentViewPresenter:
         return ""
 
     def integration_limits_in_current_unit(self) -> tuple[float, float]:
-        limits = self._model.integration_limits
-        min_in_workspace_unit = self._model.convert_units(self._model.workspace_x_unit, self._view.current_selected_unit(), 0, limits[0])
-        max_in_workspace_unit = self._model.convert_units(self._model.workspace_x_unit, self._view.current_selected_unit(), 0, limits[1])
-        return min_in_workspace_unit, max_in_workspace_unit
+        return self._model.integration_limits
 
     def on_integration_limits_updated(self) -> None:
         """When integration limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
@@ -171,7 +168,8 @@ class FullInstrumentViewPresenter:
         display_counts = self._transform_counts(self._model.detector_counts)
         self._renderer.set_detector_scalars(self._detector_mesh, display_counts, self._counts_label)
         self.on_contour_range_reset_clicked()
-        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+        self.refresh_plotter_peaks()
+        self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
     def on_contour_limits_updated(self) -> None:
         """When contour limits are changed, read the new limits and tell the presenter to update the colours accordingly"""
@@ -357,7 +355,7 @@ class FullInstrumentViewPresenter:
     def update_picked_detectors_on_view(self) -> None:
         # Update to visibility shows up in real time
         self._renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
-        self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+        self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
     def _on_clear_point_picked_detectors_clicked(self) -> None:
         self._model.clear_point_picked_detectors()
@@ -391,7 +389,7 @@ class FullInstrumentViewPresenter:
         if kind is CurrentTab.Masking:
             self.update_plotter()
             self.on_integration_limits_reset_clicked()
-            self._update_line_plot_ws_and_draw(self._view.current_selected_unit())
+            self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
         else:
             self.update_picked_detectors_on_view()
             # NOTE: This is required explicitly
@@ -486,7 +484,7 @@ class FullInstrumentViewPresenter:
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
-        self._view.show_plot_for_detectors(self._model.line_plot_workspace)
+        self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
         self._update_relative_detector_angle()
         self.refresh_lineplot_peaks()
@@ -580,7 +578,12 @@ class FullInstrumentViewPresenter:
         if hasattr(self, "_callback_queue"):
             self._callback_queue.put(self._callback_stop_sentinel)
 
-    def on_unit_option_selected(self, value) -> None:
+    def on_sliders_unit_selected(self, value) -> None:
+        self._model.set_integration_units(self._UNIT_OPTIONS[value])
+        self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
+        self.on_integration_limits_reset_clicked()
+
+    def on_lineplot_unit_selected(self, value) -> None:
         self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
 
     def peaks_workspaces_in_ads(self) -> list[str]:
@@ -599,9 +602,7 @@ class FullInstrumentViewPresenter:
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
         self._view.clear_lineplot_overlays()
-        self._view.plot_lineplot_peak_overlays(
-            *self._model.get_peak_lineplot_overlay_arguments(self._view.current_selected_unit(), self._view.selected_peaks_workspaces())
-        )
+        self._view.plot_lineplot_peak_overlays(*self._model.get_peak_lineplot_overlay_arguments(self._view.selected_peaks_workspaces()))
         self._view.redraw_lineplot()
 
     def on_start_adding_peaks_toggled(self, checked) -> None:
@@ -621,14 +622,12 @@ class FullInstrumentViewPresenter:
     def on_peak_selected_in_lineplot(self, x: float, mouse_click: Literal["right", "left"]) -> None:
         if len(self._model.picked_detector_ids) == 0:
             return
-        # First convert to workspace x unit
-        x_in_workspace_unit = self._model.convert_units(self._view.current_selected_unit(), self._model.workspace_x_unit, 0, x)
         if mouse_click == "left":
-            peaks_ws = self._model.add_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
+            peaks_ws = self._model.add_peak(x, self._view.selected_peaks_workspaces())
             # Trigger selection of peak ws must happen after the callbacks from add peak are complete
             self._callback_queue.put((self._view.select_peaks_workspace, (peaks_ws,)))
         elif mouse_click == "right":
-            self._model.delete_peak(x_in_workspace_unit, self._view.selected_peaks_workspaces())
+            self._model.delete_peak(x, self._view.selected_peaks_workspaces())
 
     def on_delete_all_selected_peaks_clicked(self) -> None:
         self._model.delete_peaks_on_all_selected_detectors(self._view.selected_peaks_workspaces())

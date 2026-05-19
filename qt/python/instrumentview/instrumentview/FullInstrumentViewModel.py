@@ -8,7 +8,6 @@ from instrumentview.Detectors import DetectorInfo
 from instrumentview.Globals import CurrentTab
 from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
-from instrumentview.ConvertUnitsCalculator import ConvertUnitsCalculator
 from instrumentview.ComponentSelectionUtils import detector_table_indices_for_parent_subtrees
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
@@ -50,6 +49,7 @@ class FullInstrumentViewModel:
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
     line_plot_workspace = None
+    _lineplot_ws_in_base_units = None
     _workspace_x_unit: str
     _workspace_x_unit_display: str
     _peak_picking_status: PeakPickingStatus = PeakPickingStatus.Off
@@ -71,7 +71,6 @@ class FullInstrumentViewModel:
         self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
         self._selected_peaks_workspaces = []
         self._instrument_view_peaks_ws_name = f"instrument_view_peaks_{self._workspace.name()}"
-        self._unit_converter = ConvertUnitsCalculator(self._workspace)
 
         component_info = self._workspace.componentInfo()
         self._sample_position = np.array(component_info.samplePosition()) if component_info.hasSample() else np.zeros(3)
@@ -110,10 +109,10 @@ class FullInstrumentViewModel:
         self._current_detector_groupings = np.zeros_like(self._detector_ids)
         self._point_picked_detectors = np.full(len(self._detector_ids), False)
 
+        self._integration_workspace = self._workspace.clone(StoreInADS=False)
         self._calculate_and_set_full_integration_range(self._is_valid)
-
         # Update counts with default total range
-        self.update_integration_range(self._integration_limits, True)
+        self.update_integration_range(True)
         self.full_counts_limits = self._counts_limits
 
     @property
@@ -125,7 +124,7 @@ class FullInstrumentViewModel:
         return self._workspace_x_unit != "Empty"
 
     @property
-    def workspace_x_unit(self) -> str:
+    def workspace_base_unit(self) -> str:
         return self._workspace_x_unit
 
     @property
@@ -235,14 +234,17 @@ class FullInstrumentViewModel:
             return
         self._integration_limits = limits
         # Update the counts
-        self.update_integration_range(self._integration_limits)
+        self.update_integration_range(entire_range=False)
 
-    def update_integration_range(self, integration_limits: tuple[float, float], entire_range: bool = False) -> None:
-        integration_min, integration_max = integration_limits
+    def update_integration_range(self, entire_range: bool = False) -> None:
         workspace_indices = self._workspace_indices[self.is_pickable]
         new_detector_counts = np.array(
-            self._workspace.getIntegratedCountsForWorkspaceIndices(
-                workspace_indices, len(workspace_indices), float(integration_min), float(integration_max), entire_range
+            self._integration_workspace.getIntegratedCountsForWorkspaceIndices(
+                workspace_indices,
+                len(workspace_indices),
+                float(self.integration_limits[0]),
+                float(self.integration_limits[1]),
+                entire_range,
             ),
             dtype=int,
         )
@@ -250,23 +252,49 @@ class FullInstrumentViewModel:
         self.full_counts_limits = self._counts_limits
         self._counts[self.is_pickable] = new_detector_counts
 
+    @property
+    def lineplot_limits(self) -> None | list[float]:
+        if self._lineplot_ws_in_base_units is None or self.line_plot_workspace is None:
+            return None
+
+        limits_in_base_units = [
+            self._match_workspace_unit(self._integration_workspace, self.picked_workspace_indices[0], x, self._workspace)
+            for x in self.integration_limits
+        ]
+        limits_in_lineplot_units = [
+            self._match_workspace_unit(self._lineplot_ws_in_base_units, 0, x, self.line_plot_workspace) for x in limits_in_base_units
+        ]
+        return [min(limits_in_lineplot_units), max(limits_in_lineplot_units)]
+
     def calculate_and_set_full_integration_range(self) -> None:
         self._calculate_and_set_full_integration_range(self.is_pickable)
         self.integration_limits = self.full_integration_limits
 
     def _calculate_and_set_full_integration_range(self, valid_indices: np.ndarray) -> None:
         workspace_indices = self._workspace_indices[valid_indices]
-        if self._workspace.isRaggedWorkspace():
-            first_last = np.array([self._workspace.readX(i)[[0, -1]] for i in workspace_indices])
+        if self._integration_workspace.isRaggedWorkspace():
+            first_last = np.array([self._integration_workspace.readX(i)[[0, -1]] for i in workspace_indices])
             self._integration_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
 
-        elif self._workspace.isCommonBins():
-            self._integration_limits = tuple(self._workspace.dataX(int(workspace_indices[0]))[[0, -1]])
+        elif self._integration_workspace.isCommonBins():
+            self._integration_limits = tuple(self._integration_workspace.dataX(int(workspace_indices[0]))[[0, -1]])
 
         else:
-            data_x = self._workspace.extractX()[workspace_indices]
+            data_x = self._integration_workspace.extractX()[workspace_indices]
             self._integration_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
         self.full_integration_limits = self._integration_limits
+
+    def set_integration_units(self, unit):
+        if self.has_unit and unit != self.workspace_base_unit:
+            self._integration_workspace = ConvertUnits(
+                InputWorkspace=self._workspace, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False
+            )
+            self.calculate_and_set_full_integration_range()
+        else:
+            self._integration_workspace = self._workspace.clone(EnableLogging=False, StoreInADS=False)
+
+    def get_integration_units(self):
+        return self._integration_workspace.getAxis(0).getUnit().unitID()
 
     def _detector_table_indices_for_parent_subtree(self, selected_indices: np.ndarray, pickable_only: bool) -> np.ndarray:
         pickable_mask = self.is_pickable if pickable_only else None
@@ -444,13 +472,18 @@ class FullInstrumentViewModel:
         return projection
 
     def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
+        self._current_linplot_unit = unit
         workspace_indices = np.unique(self.picked_workspace_indices)
         if len(workspace_indices) == 0:
             self.line_plot_workspace = None
+            self._lineplot_ws_in_base_units = None
             return
 
-        ws = ExtractSpectra(InputWorkspace=self._workspace, WorkspaceIndexList=workspace_indices, EnableLogging=False, StoreInADS=False)
-        if self.has_unit and unit != self.workspace_x_unit:
+        self._lineplot_ws_in_base_units = ExtractSpectra(
+            InputWorkspace=self._workspace, WorkspaceIndexList=workspace_indices.tolist(), EnableLogging=False, StoreInADS=False
+        )
+        ws = self._lineplot_ws_in_base_units
+        if self.has_unit and unit != self.workspace_base_unit:
             ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
 
         if sum_spectra and len(workspace_indices) > 1:
@@ -481,7 +514,9 @@ class FullInstrumentViewModel:
 
     def get_peak_overlay_arguments(self, selected_peaks_workspaces: list[str]) -> tuple:
         selected_peaks_workspaces = [ws for ws in selected_peaks_workspaces if AnalysisDataService.doesExist(ws)]
-        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
+        wrapped_workspaces = [
+            WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self.integration_limits) for ws_name in selected_peaks_workspaces
+        ]
         positions_and_labels_by_pws = [
             wws.get_positions_and_labels(self.detector_positions, self.pickable_detector_ids) for wws in wrapped_workspaces
         ]
@@ -489,19 +524,48 @@ class FullInstrumentViewModel:
         labels_by_pws = [pair[1] for pair in positions_and_labels_by_pws]
         return positions_by_pws, labels_by_pws, selected_peaks_workspaces
 
-    def get_peak_lineplot_overlay_arguments(self, unit: str, selected_peaks_workspaces: list[str]):
+    def get_peak_lineplot_overlay_arguments(self, selected_peaks_workspaces: list[str]):
         selected_peaks_workspaces = [ws for ws in selected_peaks_workspaces if AnalysisDataService.doesExist(ws)]
-        wrapped_workspaces = [WorkspaceDetectorPeaks(ws_name) for ws_name in selected_peaks_workspaces]
-        x_and_labels_by_pws = [wws.get_x_values_and_labels(unit, self.picked_detector_ids) for wws in wrapped_workspaces]
+        wrapped_workspaces = [
+            WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self._integration_limits) for ws_name in selected_peaks_workspaces
+        ]
+        # NOTE: Need to get x coords in workspace unit for better acuracy
+        x_and_labels_by_pws = [wws.get_x_values_and_labels(self._workspace_x_unit, self.picked_detector_ids) for wws in wrapped_workspaces]
         x_by_pws = [pair[0] for pair in x_and_labels_by_pws]
         labels_by_pws = [pair[1] for pair in x_and_labels_by_pws]
-        return x_by_pws, labels_by_pws, selected_peaks_workspaces
+        # Convert peak units to currently plotted units
+        converted_x = [
+            [self._match_workspace_unit(self._lineplot_ws_in_base_units, 0, x, self.line_plot_workspace) for x in x_values]
+            for x_values in x_by_pws
+        ]
+        return converted_x, labels_by_pws, selected_peaks_workspaces
 
-    def add_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> str:
+    def add_peak(self, x_in_integration_unit: float, selected_peaks_workspaces: list[str]) -> str:
         peaks_ws = self._get_peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)
         detector_id = self.picked_detector_ids[0]
+        x_in_workspace_unit = self._match_workspace_unit(
+            self.line_plot_workspace, 0, x_in_integration_unit, self._lineplot_ws_in_base_units
+        )
         AddPeak(peaks_ws, self._workspace, x_in_workspace_unit, int(detector_id))
         return peaks_ws
+
+    def _match_workspace_unit(self, ws_from, idx, x_from: float, ws_to):
+        # Find closest dataX cell in integration workspace and get the value of that cell in self._workspace
+        data_x_from = ws_from.dataX(int(idx))[:]
+        data_x_to = ws_to.dataX(int(idx))[:]
+
+        # ConvertUnits does not output one-to-one dataX for momentum transfer
+        # Need to use inverse of dataX to get correct one-to-one match of dataX
+        unit_from = ws_from.getAxis(0).getUnit().name().casefold()
+        unit_to = ws_to.getAxis(0).getUnit().name().casefold()
+
+        if unit_from == "q" or unit_from == "momentumtransfer":
+            data_x_from = data_x_from[::-1]
+
+        if unit_to == "q" or unit_to == "momentumtransfer":
+            data_x_to = data_x_to[::-1]
+
+        return data_x_to[np.argmin(np.abs(data_x_from - x_from))]
 
     def _get_peaks_workspace_for_adding_new_peak(self, selected_peaks_workspaces: list[str]) -> PeaksWorkspace:
         # If exactly one Peaks workspace in selected, add the peak to that workspace, otherwise
@@ -513,7 +577,13 @@ class FullInstrumentViewModel:
         CreatePeaksWorkspace(self._workspace, 0, OutputWorkspace=self._instrument_view_peaks_ws_name)
         return self._instrument_view_peaks_ws_name
 
-    def delete_peak(self, x_in_workspace_unit: float, selected_peaks_workspaces: list[str]) -> None:
+    def delete_peak(self, x_in_integration_unit: float, selected_peaks_workspaces: list[str]) -> None:
+        if len(selected_peaks_workspaces) == 0:
+            return
+
+        x_in_workspace_unit = self._match_workspace_unit(
+            self.line_plot_workspace, 0, x_in_integration_unit, self._lineplot_ws_in_base_units
+        )
         closest_peak_by_ws = []
         for ws_name in selected_peaks_workspaces:
             peaks_by_detector = WorkspaceDetectorPeaks(ws_name).detector_peaks
@@ -523,7 +593,7 @@ class FullInstrumentViewModel:
             peaks = sum([p.peaks for p in picked_detector_peaks], [])
             # Now we have all the peaks on the selected detector, so we need to find the
             # closest peak to where the mouse was clicked
-            distance_to_click = np.abs([p.location_in_unit(self.workspace_x_unit) - x_in_workspace_unit for p in peaks])
+            distance_to_click = np.abs([p.location_in_unit(self.workspace_base_unit) - x_in_workspace_unit for p in peaks])
             index_of_closest = np.argmin(distance_to_click)
             closest_peak = peaks[index_of_closest]
             closest_peak_by_ws.append((ws_name, closest_peak.peak_index, distance_to_click[index_of_closest]))
@@ -727,15 +797,6 @@ class FullInstrumentViewModel:
             OutputWorkspace=grouping_name,
         )
         return AnalysisDataService.retrieve(grouping_name)
-
-    def convert_units(self, source_unit: str, target_unit: str, picked_detector_index: int, value: float) -> float:
-        return self._unit_converter.convert(
-            source_unit,
-            target_unit,
-            self.picked_spectrum_nos[picked_detector_index],
-            self.picked_detector_ids[picked_detector_index],
-            value,
-        )
 
     @property
     def bank_groups_by_detector_id(self) -> list[tuple[list[int], str]] | None:
