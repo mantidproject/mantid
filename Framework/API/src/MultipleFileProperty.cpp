@@ -415,9 +415,7 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
     }
 
     // Populate fullFileNames in original order
-    for (auto &resolved : resolvedFiles) {
-      fullFileNames.emplace_back(std::move(resolved));
-    }
+    std::move(resolvedFiles.begin(), resolvedFiles.end(), std::back_inserter(fullFileNames));
     allFullFileNames.emplace_back(std::move(fullFileNames));
   }
 
