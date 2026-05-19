@@ -74,11 +74,46 @@ public:
     TS_ASSERT_EQUALS(currentFigureYAxisLabel(), "Spin Asymmetry");
   }
 
+  void testTiledPlotKeepsWorkspaceGroupMembersOnSameAxis() {
+    closeAllFigures();
+    createWorkspaceGroup("alignment_1", {"alignment_1_raw", "alignment_1_calc", "alignment_1_peak"});
+    createWorkspaceGroup("alignment_2", {"alignment_2_raw", "alignment_2_calc", "alignment_2_peak"});
+    createWorkspaceGroup("alignment_3", {"alignment_3_raw", "alignment_3_calc", "alignment_3_peak"});
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    plotter.plot({{"alignment_1", "alignment_2", "alignment_3"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::alignmentPlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::AlignmentXAxis::DetectorId,
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Tiled)});
+
+    auto const lineCounts = populatedAxisLineCounts();
+    TS_ASSERT_EQUALS(lineCounts.size(), 3);
+    for (auto const lineCount : lineCounts) {
+      TS_ASSERT_EQUALS(lineCount, 3);
+    }
+  }
+
 private:
   void createWorkspace(std::string const &name) {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     alg->initialize();
     alg->setProperty("OutputWorkspace", name);
+    alg->execute();
+  }
+
+  void createWorkspaceGroup(std::string const &groupName, std::vector<std::string> const &workspaceNames) {
+    auto inputWorkspaces = std::string{};
+    for (auto const &workspaceName : workspaceNames) {
+      createWorkspace(workspaceName);
+      if (!inputWorkspaces.empty()) {
+        inputWorkspaces += ",";
+      }
+      inputWorkspaces += workspaceName;
+    }
+    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    alg->initialize();
+    alg->setProperty("InputWorkspaces", inputWorkspaces);
+    alg->setProperty("OutputWorkspace", groupName);
     alg->execute();
   }
 
@@ -98,6 +133,24 @@ private:
     auto const axes = figure.attr("axes");
     auto const axis = MantidQt::Widgets::Common::Python::Object(axes[0]);
     return boost::python::extract<std::string>(axis.attr("get_ylabel")());
+  }
+
+  std::vector<int> populatedAxisLineCounts() {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    MantidQt::Widgets::Common::Python::Object pyplot{
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
+    auto const figure = MantidQt::Widgets::Common::Python::Object(pyplot.attr("gcf")());
+    auto const axes = figure.attr("axes");
+    auto const axesCount = MantidQt::Widgets::Common::Python::Len(axes);
+    auto lineCounts = std::vector<int>{};
+    for (auto index = 0; index < axesCount; ++index) {
+      auto const axis = MantidQt::Widgets::Common::Python::Object(axes[index]);
+      auto const lineCount = static_cast<int>(MantidQt::Widgets::Common::Python::Len(axis.attr("get_lines")()));
+      if (lineCount > 0) {
+        lineCounts.emplace_back(lineCount);
+      }
+    }
+    return lineCounts;
   }
 
   void closeAllFigures() {
