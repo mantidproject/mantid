@@ -44,6 +44,10 @@ From which you can solve for the polarizer efficiency (:math:`p`) and then solve
 Alternatively, previously calculated polarizer and/or analyser efficiency workspaces can be passed to the ``InputPolarizerEfficiency`` and ``InputAnalyserEfficiency`` properties respectively.
 If workspaces are provided for both then they are used directly as the output polarizer and analyser efficiencies. If only one is provided then it is used to solve for the other efficiency.
 
+Both types of input workspace group should contain four child workspaces. A flipper configuration must be passed to the ``Flippers`` property to identify which child workspaces in the input group(s) correspond to which instrument configurations.
+The ``Flippers`` property takes a string in the form :literal:`'00, 01, 10, 11'`, which would indicate both flippers off, analyzer flipper on, polarizer flipper on, both flippers on. The flipper configuration can be provided in any order that matches the child workspaces in the input group(s).
+
+
 Error propagation
 #################
 
@@ -83,8 +87,6 @@ with:
 The same approach is used when calculating :math:`a` from a provided polarizer efficiency :math:`p`.
 The covariance matrix is calculated independently for each wavelength bin and is not stored on the output workspace.
 
-Both types of input workspace group should contain four child workspaces. A flipper configuration must be passed to the ``Flippers`` property to identify which child workspaces in the input group(s) correspond to which instrument configurations.
-The ``Flippers`` property takes a string in the form :literal:`'00, 01, 10, 11'`, which would indicate both flippers off, analyzer flipper on, polarizer flipper on, both flippers on. The flipper configuration can be provided in any order that matches the child workspaces in the input group(s).
 
 Outputs
 #######
