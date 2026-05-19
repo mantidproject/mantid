@@ -896,8 +896,8 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 10.05)
         self.assertAlmostEqual(x.max(), 39.95)
-        self.assertAlmostEqual(y.min(), 1.11411325)
-        self.assertAlmostEqual(y.max(), 9.35056910)
+        self.assertAlmostEqual(y.min(), 1.11418334)
+        self.assertAlmostEqual(y.max(), 9.35101736)
         self.assertAlmostEqual(x[0, y.argmax()], 29.95)
 
         # data and calibration, limited range
@@ -920,8 +920,8 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 10.05)
         self.assertAlmostEqual(x.max(), 39.95)
-        self.assertAlmostEqual(y.min(), 1.11411325)
-        self.assertAlmostEqual(y.max(), 9.35056910)
+        self.assertAlmostEqual(y.min(), 1.11418334)
+        self.assertAlmostEqual(y.max(), 9.35101736)
         self.assertAlmostEqual(x[0, y.argmax()], 29.95)
 
         # data, cal and background, normalised by time
@@ -944,8 +944,8 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 8.09946893)
         self.assertAlmostEqual(x.max(), 50.80113407)
-        self.assertAlmostEqual(y.min(), -31.86583900)
-        self.assertAlmostEqual(y.max(), -2.22813349)
+        self.assertAlmostEqual(y.min(), -31.86668266)
+        self.assertAlmostEqual(y.max(), -2.22827513)
         self.assertAlmostEqual(x[0, y.argmax()], 8.09946893)
         # data, cal and background, normalised by time
         # NOTE:
@@ -969,8 +969,8 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 8.09946893)
         self.assertAlmostEqual(x.max(), 50.80113407)
-        self.assertAlmostEqual(y.min(), -31.86583900)
-        self.assertAlmostEqual(y.max(), -2.22813349)
+        self.assertAlmostEqual(y.min(), -31.86668266)
+        self.assertAlmostEqual(y.max(), -2.22827513)
         self.assertAlmostEqual(x[0, y.argmax()], 8.09946893)
 
         # data, cal and background. To d spacing
@@ -991,8 +991,8 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 2.05)
         self.assertAlmostEqual(x.max(), 9.95)
-        self.assertAlmostEqual(y.min(), -15.49898298)
-        self.assertAlmostEqual(y.max(), -2.22819874)
+        self.assertAlmostEqual(y.min(), -15.49971787)
+        self.assertAlmostEqual(y.max(), -2.22833933)
         self.assertAlmostEqual(x[0, y.argmax()], 9.95)
 
         pd_out4_multi = HFIRPowderReduction(
@@ -1013,8 +1013,8 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 2.05)
         self.assertAlmostEqual(x.max(), 9.95)
-        self.assertAlmostEqual(y.min(), -15.49898298)
-        self.assertAlmostEqual(y.max(), -2.22819874)
+        self.assertAlmostEqual(y.min(), -15.49971787)
+        self.assertAlmostEqual(y.max(), -2.22833933)
         self.assertAlmostEqual(x[0, y.argmax()], 9.95)
 
         # data, cal and background with mask angle, to Q.
@@ -1037,8 +1037,8 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 1.0006, places=4)
         self.assertAlmostEqual(x.max(), 3.1994, places=4)
-        self.assertAlmostEqual(y.min(), -31.99775, places=4)
-        self.assertAlmostEqual(y.max(), -2.22856, places=4)
+        self.assertAlmostEqual(y.min(), -31.99860, places=4)
+        self.assertAlmostEqual(y.max(), -2.22870, places=4)
         self.assertAlmostEqual(x[0, y.argmax()], 1.0006, places=4)
 
         # NOTE:
@@ -1063,8 +1063,8 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 1.0006, places=4)
         self.assertAlmostEqual(x.max(), 3.1994, places=4)
-        self.assertAlmostEqual(y.min(), -31.99775, places=4)
-        self.assertAlmostEqual(y.max(), -2.22856, places=4)
+        self.assertAlmostEqual(y.min(), -31.99860, places=4)
+        self.assertAlmostEqual(y.max(), -2.22870, places=4)
         self.assertAlmostEqual(x[0, y.argmax()], 1.0006, places=4)
 
         # data, cal and background, scale background
@@ -1087,8 +1087,8 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 8.09952728)
         self.assertAlmostEqual(x.max(), 49.94993970)
-        self.assertAlmostEqual(y.min(), -15.78839201)
-        self.assertAlmostEqual(y.max(), -1.11406631)
+        self.assertAlmostEqual(y.min(), -15.78880883)
+        self.assertAlmostEqual(y.max(), -1.11413713)
         self.assertAlmostEqual(x[0, y.argmax()], 8.09952728)
 
         pd_out4_multi = HFIRPowderReduction(
@@ -1111,8 +1111,8 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 8.09952728)
         self.assertAlmostEqual(x.max(), 49.94993970)
-        self.assertAlmostEqual(y.min(), -15.78839201)
-        self.assertAlmostEqual(y.max(), -1.11406631)
+        self.assertAlmostEqual(y.min(), -15.78880883)
+        self.assertAlmostEqual(y.max(), -1.11413713)
         self.assertAlmostEqual(x[0, y.argmax()], 8.09952728)
 
     def test_event(self):

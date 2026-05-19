@@ -1042,6 +1042,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 Radius=radius,
                 Height=vanadium_height,
                 Wavelength=wavelength,
+                AbsorptionCorrectionMethod="Sabine",
                 AbsorptionWorkspace="__vanadium_absorption",
                 MultipleScatteringWorkspace="__vanadium_ms",
             )
@@ -1131,6 +1132,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 Height=sample_height if sample_height > 0 else 3.0,
                 Wavelength=wavelength,
                 MultipleScattering=do_ms,
+                AbsorptionCorrectionMethod="Sabine",
                 AbsorptionWorkspace="__sample_absorption",
                 MultipleScatteringWorkspace="__sample_ms",
             )
@@ -1164,47 +1166,59 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         """
         Compute the absolute intensity normalization factor fnorm.
 
-        fnorm = (σ_V_scatter / 4π) * (n_V * r_V² * h_V) / (n_S * r_S² * h_S) * 1000
+        fnorm = 1000/4π * (Ms * sigma_V_scatter * roV * hV *rV^2)/(Mv * fS * roS * hS * rS^2)
 
-        Returns fnorm in mb/sr/f.u.
         """
         # Vanadium constants
-        sigma_V_scatter = 5.1  # barn (total scattering cross-section of V)
-        n_V = 0.0723  # atoms/Å³ (number density of V at 6.1172 g/cm³)
+        sigma_V_scatter = 5.08  # barn (total scattering cross-section of V)
+        roV = 6.1172  # g/cm³ (mass density of V)
+        Mv = 50.94  # g/mol (molar mass of V)
 
         vanadium_diameter = self.getProperty("VanadiumDiameter").value
-        vanadium_height = self.getProperty("VanadiumHeight").value
-        r_V = 0.5 * vanadium_diameter  # cm
+        hV = self.getProperty("VanadiumHeight").value
+        rV = 0.5 * vanadium_diameter  # cm
 
         # Sample parameters
         sample_diameter = self.getProperty("SampleDiameter").value
-        sample_height = self.getProperty("SampleHeight").value
+        hS = self.getProperty("SampleHeight").value
         sample_formula = self.getProperty("SampleChemicalFormula").value
-        crystal_density = self.getProperty("SampleCrystalDensity").value
-        packing_fraction = self.getProperty("SamplePackingFraction").value
-        r_S = 0.5 * sample_diameter  # cm
+        roS = self.getProperty("SampleCrystalDensity").value
+        fS = self.getProperty("SamplePackingFraction").value
+        rS = 0.5 * sample_diameter  # cm
 
-        # Get sample number density from material (formula units per Å³)
-        sample_mass_density = crystal_density * packing_fraction
         # Use a temporary workspace to get the material number density
         from mantid.kernel import MaterialBuilder
 
         builder = MaterialBuilder()
         builder.setFormula(sample_formula)
-        builder.setMassDensity(sample_mass_density)
+        builder.setMassDensity(roS)
         material = builder.build()
-        n_S = material.numberDensity  # formula units/Å³
+        # n_S = material.numberDensity  # formula units/Å³
+        Ms = material.relativeMolecularMass()  # g/mol
 
-        # fnorm in barn/sr/f.u., convert to mb/sr/f.u.
-        fnorm = (sigma_V_scatter / (4 * np.pi)) * (n_V * r_V**2 * vanadium_height) / (n_S * r_S**2 * sample_height)
-        fnorm_mb = fnorm * 1000  # barn → mb
+        wavelength = self.getProperty("Wavelength").value
+        sigma_S_scatter = material.totalScatterXSection()  # barn
+        sigma_S_absorb = material.absorbXSection(wavelength)  # barn (at given λ)
 
         logger.information(
-            f"Absolute intensity normalization: fnorm = {fnorm_mb:.4f} mb/sr/f.u. "
-            f"(n_V={n_V}, r_V={r_V}, h_V={vanadium_height}, n_S={n_S:.6f}, r_S={r_S}, h_S={sample_height})"
+            f"Sample parameters: roS = {roS:.4f} g/cm^3, fS = {fS:.4f}, hS = {hS:.4f} cm, rS = {rS:.4f} cm, Ms = {Ms:.4f} g/mol"
+        )
+        logger.information(
+            f"Sample cross-sections (barn): total scatter = {sigma_S_scatter:.4f}, "
+            f"absorption (lambda = {wavelength:.4f} A) = {sigma_S_absorb:.4f}"
+        )
+        logger.information(
+            f"Vanadium parameters: roV = {roV:.4f} g/cm^3, hV = {hV:.4f} cm, "
+            f"rV = {rV:.4f} cm, Mv = {Mv:.4f} g/mol, sigma_V_scatter = {sigma_V_scatter:.4f} barn"
         )
 
-        return fnorm_mb
+        # fnorm in barn/sr/f.u., convert to mb/sr/f.u.
+        # fnorm = (sigma_V_scatter / (4 * np.pi)) * (n_V * rV**2 * hV) / (n_S * rS**2 * hS)
+        fnorm = 1000 / (4 * np.pi) * (Ms * sigma_V_scatter * roV * hV * rV**2) / (Mv * fS * roS * hS * rS**2)
+
+        logger.information(f"Absolute intensity normalization: fnorm = {fnorm:.4f} ")
+
+        return fnorm
 
     def _process_vanadium_calibration(self, vanadium_ws, vanadium_bg_ws):
         """
@@ -1234,15 +1248,14 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         """
         Apply final corrections to sample data.
 
-        When DoAttenuationCorrection=True:
-            BG subtraction and absorption already applied pre-conversion.
-            This method applies fnorm (if absolute units) and divides by Vcorr.
-            Soutput = F * fnorm * Scorr / Vcorr (absolute) or F * Scorr / Vcorr (relative)
+        Soutput = s * fnorm * Scorr / Vcorr,
+        where s is the user-supplied Scale (default 1), and fnorm is the
+        absolute-intensity normalization factor if AbsoluteIntensityUnits=True,
+        otherwise fnorm = 1.
 
-        When DoAttenuationCorrection=False:
-            Legacy behavior: subtract BG, scale by F, divide by Vcorr.
+        When DoAttenuationCorrection=False, BG subtraction is applied here
         """
-        F = self.getProperty("Scale").value
+        s = self.getProperty("Scale").value
         do_attenuation = self.getProperty("DoAttenuationCorrection").value
         absolute_units = self.getProperty("AbsoluteIntensityUnits").value
 
@@ -1256,23 +1269,14 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                     EnableLogging=False,
                 )
 
-        # Apply output scale factor
+        fnorm = self._compute_fnorm() if absolute_units else 1.0
+
         Scale(
             InputWorkspace=sample_ws,
             OutputWorkspace=sample_ws,
-            Factor=F,
+            Factor=s * fnorm,
             EnableLogging=False,
         )
-
-        # Apply absolute intensity normalization if requested
-        if absolute_units and do_attenuation:
-            fnorm = self._compute_fnorm()
-            Scale(
-                InputWorkspace=sample_ws,
-                OutputWorkspace=sample_ws,
-                Factor=fnorm,
-                EnableLogging=False,
-            )
 
         # Divide by corrected vanadium
         if vanadium_corrected is not None:
