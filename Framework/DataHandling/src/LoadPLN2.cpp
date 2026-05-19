@@ -314,7 +314,7 @@ public:
         m_framesValid(0), m_maxEvents(maxEvents), m_processedEvents(0), m_droppedEvents(0),
         m_timeBoundary(timeBoundary) {}
 
-  void newFrame() {
+  void newFrame() override {
     if (m_maxEvents == 0 || m_processedEvents < m_maxEvents) {
       m_frames++;
       if (validFrame())
@@ -344,7 +344,7 @@ public:
 
   size_t processedEvents() const { return m_processedEvents; }
 
-  void addEvent(size_t x, size_t p, double tof) {
+  void addEvent(size_t x, size_t p, double tof) override {
 
     // check if in time boundaries
     if (!validFrame())
