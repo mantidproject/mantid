@@ -77,51 +77,56 @@ public:
     }
 
     // Remove permissions to test for unauthorized access to instrument folder
+    // std::filesystem::permissions does not enforce access denial on Windows
+#ifndef _WIN32
     std::filesystem::permissions(m_dataCacheDir + '/' + "GEM/SUBDIR1/SUBDIR2", std::filesystem::perms::none,
                                  std::filesystem::perm_options::replace);
+#endif
   }
 
   ~FileFinderISISInstrumentDataCacheTest() override {
     // Change permissions again to allow delete
+#ifndef _WIN32
     std::filesystem::permissions(m_dataCacheDir + '/' + "GEM/SUBDIR1/SUBDIR2", std::filesystem::perms::owner_all,
                                  std::filesystem::perm_options::add);
+#endif
     // Destroy dummy folder and files.
     std::filesystem::remove_all(m_dataCacheDir);
   }
 
 public:
   void testNormalInput() {
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"MAR26045"}, {".raw", ".nxs", ".s01"}).result().string(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"MAR26045"}, {".raw", ".nxs", ".s01"}).result().generic_string(),
                      m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"MER40871"}, {".raw", ".nxs", ".s01"}).result().string(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"MER40871"}, {".raw", ".nxs", ".s01"}).result().generic_string(),
                      m_dataCacheDir + "/MERLIN/SUBDIR1/SUBDIR2/MER40871.nxs");
   }
 
   void testInstrWithLowercase() {
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"mar26045"}, {".raw", ".nxs", ".s01"}).result().string(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"mar26045"}, {".raw", ".nxs", ".s01"}).result().generic_string(),
                      m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"mAr26045"}, {".raw", ".nxs", ".s01"}).result().string(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"mAr26045"}, {".raw", ".nxs", ".s01"}).result().generic_string(),
                      m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"Mer40871"}, {".raw", ".nxs", ".s01"}).result().string(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"Mer40871"}, {".raw", ".nxs", ".s01"}).result().generic_string(),
                      m_dataCacheDir + "/MERLIN/SUBDIR1/SUBDIR2/MER40871.nxs");
   }
 
   void testMissingInstr() {
     ConfigService::Instance().setString("default.instrument", "MAR");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"26045"}, {".raw", ".nxs", ".s01"}).result().string(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"26045"}, {".raw", ".nxs", ".s01"}).result().generic_string(),
                      m_dataCacheDir + "/MARI/SUBDIR1/SUBDIR2/MAR26045.raw");
 
     ConfigService::Instance().setString("default.instrument", "MER");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"40871"}, {".raw", ".nxs", ".s01"}).result().string(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"40871"}, {".raw", ".nxs", ".s01"}).result().generic_string(),
                      m_dataCacheDir + "/MERLIN/SUBDIR1/SUBDIR2/MER40871.nxs");
   }
 
   void testZeroPadding() {
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"WISH39495"}, {".raw", ".nxs", ".s01"}).result().string(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"WISH39495"}, {".raw", ".nxs", ".s01"}).result().generic_string(),
                      m_dataCacheDir + "/WISH/SUBDIR1/SUBDIR2/WISH00039495.s01");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"LOQ106084"}, {".raw", ".nxs"}).result().string(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"LOQ106084"}, {".raw", ".nxs"}).result().generic_string(),
                      m_dataCacheDir + "/LOQ/SUBDIR1/SUBDIR2/LOQ00106084.nxs");
-    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"ZOOM4656"}, {".RAW"}).result().string(),
+    TS_ASSERT_EQUALS(FileFinder::Instance().findRun({"ZOOM4656"}, {".RAW"}).result().generic_string(),
                      m_dataCacheDir + "/ZOOM/SUBDIR1/SUBDIR2/ZOOM00004656.RAW");
   }
 
@@ -143,12 +148,15 @@ public:
     addFileInfo("path-no-digits");
     addFileInfo("1234BADPATH");
     addFileInfo("BAD1234PATH");
+    // std::filesystem::permissions does not enforce access denial on Windows
+#ifndef _WIN32
     addFileInfo("GEM90421"); // This one should have an error due to the permissions, not due to the hint being invalid
+#endif
     FileFinder::Instance().performCacheSearch(fileInfos);
 
     for (const auto &fileInfo : fileInfos) {
       TS_ASSERT(!fileInfo.found);
-      TS_ASSERT_EQUALS(fileInfo.path.string(), "");
+      TS_ASSERT_EQUALS(fileInfo.path.generic_string(), "");
       if (fileInfo.hint == "GEM90421")
         TS_ASSERT(fileInfo.errorMsg.find("Permission denied") != std::string::npos);
     }
