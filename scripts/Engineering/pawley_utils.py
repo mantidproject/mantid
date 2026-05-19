@@ -150,16 +150,19 @@ class Phase:
         match ptgr.getLatticeSystem():
             case PointGroup.LatticeSystem.Cubic:
                 # a=b=c, alpha=beta=gamma=90
-                self.ipars = [self.labels["a"]]
+                self.ipars = [slice(self.labels["a"], self.labels["c"] + 1)]  # a:c
             case PointGroup.LatticeSystem.Tetragonal | PointGroup.LatticeSystem.Hexagonal:
                 # a=b!=c (tetrag has alpha=beta=gamma=90, hexag has alpha=beta=90, gamma= 120)
-                self.ipars = [self.labels["a"], self.labels["c"]]
+                self.ipars = [slice(self.labels["a"], self.labels["b"] + 1), self.labels["c"]]  # a:b, c
             case PointGroup.LatticeSystem.Orthorhombic:
                 # alpha=beta=gamma=90
                 self.ipars = [self.labels["a"], self.labels["b"], self.labels["c"]]
             case PointGroup.LatticeSystem.Rhombohedral:
                 # a=b=c, alpha=beta=gamma
-                self.ipars = [self.labels["a"], self.labels["alpha"]]
+                self.ipars = [
+                    slice(self.labels["a"], self.labels["c"] + 1),
+                    slice(self.labels["alpha"], self.labels["gamma"] + 1),
+                ]  # a:c, alpha:gamma
             case PointGroup.LatticeSystem.Monoclinic:
                 # a!=b!=c, alpha=gamma=90
                 self.ipars = [self.labels["a"], self.labels["b"], self.labels["c"], self.labels["beta"]]
@@ -182,10 +185,12 @@ class Phase:
         return np.array([getattr(self.unit_cell, method)() for method in self.labels.keys()])
 
     def get_params(self) -> np.ndarray[float]:
-        return np.array([self.alatt[ipar] for _, ipar in self.labels.items() if ipar in self.ipars])
+        return np.array([self.alatt[ipar][0] if isinstance(ipar, slice) else self.alatt[ipar] for ipar in self.ipars])
 
     def get_param_names(self) -> np.ndarray[str]:
-        return np.array([key for key, value in self.labels.items() if value in self.ipars])
+        return np.array(
+            [key for key, value in self.labels.items() if value in [idx.start if isinstance(idx, slice) else idx for idx in self.ipars]]
+        )
 
     def set_params(self, pars: np.ndarray[float]):
         for ipar, par in enumerate(pars):
