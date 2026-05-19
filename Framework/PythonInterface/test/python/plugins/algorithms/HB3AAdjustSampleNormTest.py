@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
-from mantid.dataobjects import Workspace2D
+from mantid.dataobjects import GroupingWorkspace
 from mantid.simpleapi import (
     CreateMDHistoWorkspace,
     DeleteWorkspace,
@@ -210,7 +210,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
             OutputGroupingWorkspace="__hb3a_grp_2x2",
         )
         grp_2x2 = mtd["__hb3a_grp_2x2"]
-        self.assertIsInstance(grp_2x2, Workspace2D)
+        self.assertIsInstance(grp_2x2, GroupingWorkspace)
         # One spectrum per pixel detector. HB3A has three 512x512 detector panels
         self.assertEqual(grp_2x2.getNumberHistograms(), 512 * 512 * 3)
         # check the group ID of the first spectra:
@@ -233,7 +233,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         )
         self.assertTrue(mtd.doesExist("__hb3a_grp_4x4"), "OutputGroupingWorkspace should be stored in the ADS")
         grp_4x4 = mtd["__hb3a_grp_4x4"]
-        self.assertIsInstance(grp_4x4, Workspace2D)
+        self.assertIsInstance(grp_4x4, GroupingWorkspace)
         self.assertEqual(grp_4x4.getNumberHistograms(), 512 * 512 * 3)
         group_ids = grp_4x4.extractY().astype(int).flatten()  # 1, 1, 1, 1, 2, 2, 2, 2,..
         self.assertListEqual(group_ids[0:8].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # first row along X

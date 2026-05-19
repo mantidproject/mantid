@@ -203,7 +203,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         self.declareProperty(
             WorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
-            doc="Optional: output Workspace2D mapping every detector's workspace index to its group ID. "
+            doc="Optional: output GroupingWorkspace mapping every detector's workspace index to its group ID. "
             "Only produced when Grouping is '2x2' or '4x4'.",
         )
         self.setPropertyGroup("Grouping", "Grouping")
@@ -473,10 +473,11 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             # Create the grouping workspace, if so required.
             if create_grouping_ws:
                 detector_ids_per_group = groups.reshape(-1, groups.shape[2])
-                # Use Workspace2D instead of GroupingWorkspace: building the detector-ID-to-workspace-index
-                # map in GroupingWorkspace is prohibitively slow for HB3A's ~786k detectors. Since HB3A
-                # detector IDs start at 1, workspace_index = det_id - 1, so dataY can be written directly.
-                grouping_workspace = WorkspaceFactory.create("Workspace2D", _tmp_ws.getNumberHistograms(), 1, 1)
+                # WorkspaceFactory.create is used directly rather than CreateGroupingWorkspace to avoid
+                # building the detector-ID-to-workspace-index map (detID_to_WI), which is prohibitively
+                # slow for HB3A's ~786k detectors. Since HB3A detector IDs start at 1,
+                # workspace_index = det_id - 1, so dataY can be written directly.
+                grouping_workspace = WorkspaceFactory.create("GroupingWorkspace", _tmp_ws.getNumberHistograms(), 1, 1)
                 for i, det_ids in enumerate(detector_ids_per_group):
                     group_id = float(i + 1)
                     for det_id in det_ids:

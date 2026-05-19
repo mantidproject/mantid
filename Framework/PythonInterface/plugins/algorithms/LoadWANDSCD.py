@@ -113,7 +113,7 @@ class LoadWANDSCD(PythonAlgorithm):
 
         self.declareProperty(
             WorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
-            doc="Optional: output Workspace2D mapping every detector's workspace index to its group ID. "
+            doc="Optional: output GroupingWorkspace mapping every detector's workspace index to its group ID. "
             "Only produced when Grouping is '2x2' or '4x4'.",
         )
         self.setPropertyGroup("OutputGroupingWorkspace", "Grouping")
@@ -442,7 +442,7 @@ class LoadWANDSCD(PythonAlgorithm):
 
     def _build_grouping_ws(self, instrument_ws, grouping: int):
         """
-        Build a Workspace2D from an ungrouped instrument workspace mapping workspace indices to group IDs.
+        Build a GroupingWorkspace from an ungrouped instrument workspace mapping workspace indices to group IDs.
 
         Each workspace index is mapped to a 1-indexed group ID that matches the
         order in which groups appear in the ``GroupingPattern`` used by
@@ -450,22 +450,14 @@ class LoadWANDSCD(PythonAlgorithm):
         workspace index ``y + x*512`` belongs to group
         ``(x // grouping) * (512 // grouping) + (y // grouping) + 1``.
 
-        A ``Workspace2D`` is used instead of a ``GroupingWorkspace`` for performance reasons.
-        ``GroupingWorkspace`` inherits from ``SpecialWorkspace2D``, which maintains a
-        detector-ID-to-workspace-index map (``detID_to_WI``) built by iterating over every
-        spectrum and querying the instrument geometry. For the WAND array (~2 million detectors)
-        this takes tens of seconds. Because WAND detector IDs map one-to-one onto workspace
-        indices, the map is unnecessary: group IDs can be written directly via ``dataY(wi)``
-        without any detector lookup.
-
         The returned workspace is NOT stored in the ADS; ``PyExec`` publishes it
         via ``setProperty("OutputGroupingWorkspace", ...)``.
 
         :param instrument_ws: Ungrouped workspace supplying the number of histograms.
         :param grouping: Pixel-grouping factor (2 for 2×2, 4 for 4×4).
-        :returns: Populated Workspace2D.
+        :returns: Populated GroupingWorkspace.
         """
-        grouping_ws = WorkspaceFactory.create("Workspace2D", instrument_ws.getNumberHistograms(), 1, 1)
+        grouping_ws = WorkspaceFactory.create("GroupingWorkspace", instrument_ws.getNumberHistograms(), 1, 1)
         # For WAND, the correspondence between detector ID and workspace index is one-to-one
         nHist = instrument_ws.getNumberHistograms()
         wi = np.arange(nHist)

@@ -40,15 +40,6 @@ usage and speed up the later reduction steps.
 In most cases you will not see a difference in reduced data with 4x4 pixel grouping.
 Also, both input data and the Vanadium data will share the same grouping scheme.
 
-When ``OutputGroupingWorkspace`` is specified alongside a ``2x2`` or ``4x4`` grouping, the algorithm
-produces an additional ``Workspace2D`` with one spectrum per detector. The Y value of each spectrum
-holds the 1-indexed group ID that the corresponding detector belongs to. Since WAND detector IDs map
-directly to workspace indices, the group ID for detector ``d`` can be read as
-``grouping_ws.readY(d)[0]``. A ``Workspace2D`` is used instead of a ``GroupingWorkspace`` for
-performance reasons: constructing a ``GroupingWorkspace`` from the WAND instrument requires building
-the detector-ID-to-workspace-index map, which takes tens of seconds for the ~2 million detectors in
-the WAND array.
-
 The loaded workspace is designed to be the input to
 :ref:`algm-ConvertWANDSCDtoQ`.
 

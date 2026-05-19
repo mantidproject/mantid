@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.dataobjects import Workspace2D
+from mantid.dataobjects import GroupingWorkspace
 from mantid.simpleapi import LoadWANDSCD
 import unittest
 import numpy as np
@@ -134,7 +134,7 @@ class LoadWANDGrouping(unittest.TestCase):
         self.assertEqual(ws.getSignalArray().sum(), self.TOTAL_COUNTS)
 
         # Type check
-        self.assertIsInstance(grp_ws, Workspace2D)
+        self.assertIsInstance(grp_ws, GroupingWorkspace)
 
         # Total number of groups must equal (N_ROWS // g) * (N_COLS // g)
         expected_groups = (self.N_ROWS // grouping) * (self.N_COLS // grouping)
@@ -179,7 +179,7 @@ class LoadWANDGrouping(unittest.TestCase):
 
         self.assertEqual(ws.getSignalArray().sum(), self.TOTAL_COUNTS)
 
-        self.assertIsInstance(grp_ws, Workspace2D)
+        self.assertIsInstance(grp_ws, GroupingWorkspace)
         expected_groups = (self.N_ROWS // grouping) * (self.N_COLS // grouping)
         y_values = grp_ws.extractY().flatten()
         self.assertEqual(int(y_values.max()), expected_groups)
