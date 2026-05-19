@@ -332,6 +332,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     def test_on_flip_beam_calls_update_plotter(self):
         self._mock_view.is_flip_beam_checkbox_checked.return_value = True
+        self._mock_view.get_contour_limits.return_value = (0, 100)
         self._presenter.on_flip_beam_check_box_clicked()
         self._presenter._renderer.add_detector_mesh_to_plotter.assert_called_once()
         self.assertTrue(self._model.flip_beam)
@@ -498,13 +499,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._create_and_add_monitor_mesh")
     def test_monitor_mesh_added(self, mock_create_monitor_mesh):
         mock_create_monitor_mesh.return_value = None
-        self._presenter._update_view_main_plotter()
+        self._presenter._update_view_main_plotter(refresh_limits=True)
         mock_create_monitor_mesh.assert_called_once()
         mock_create_monitor_mesh.reset_mock()
 
         mock_mesh = MagicMock()
         mock_create_monitor_mesh.return_value = mock_mesh
-        self._presenter._update_view_main_plotter()
+        self._presenter._update_view_main_plotter(refresh_limits=True)
         mock_create_monitor_mesh.assert_called_once()
         mock_mesh.transform.assert_called_once()
 

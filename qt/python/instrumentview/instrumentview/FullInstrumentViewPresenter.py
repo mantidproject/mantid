@@ -209,13 +209,13 @@ class FullInstrumentViewPresenter:
     def on_projection_option_changed(self) -> None:
         self._callback_queue.put((self._on_projection_option_changed, ()))
 
-    def update_plotter(self) -> None:
+    def update_plotter(self, refresh_limits=True) -> None:
         if self._closing:
             return
         self._model.projection_type = self._view.current_selected_projection()
         self._model.flip_beam = self._view.is_flip_beam_checkbox_checked()
         with SuppressRendering(self._view.main_plotter):
-            self._update_view_main_plotter()
+            self._update_view_main_plotter(refresh_limits=refresh_limits)
             self.update_detector_picker()
             self.refresh_plotter_peaks()
 
@@ -238,7 +238,7 @@ class FullInstrumentViewPresenter:
         with np.errstate(divide="ignore", invalid="ignore"):
             return np.log10(counts + 1)
 
-    def _update_view_main_plotter(self):
+    def _update_view_main_plotter(self, refresh_limits: bool) -> None:
         self._view.cache_current_camera_position()
 
         self._view.clear_main_plotter()
@@ -272,7 +272,13 @@ class FullInstrumentViewPresenter:
         self._view.enable_or_disable_mask_widgets()
         self._view.enable_or_disable_aspect_ratio_box()
         self._view.enable_or_disable_flip_beam_box()
-        self.on_integration_limits_reset_clicked()
+        # If refreshing the limits we reset both the contour and integration sliders.
+        # If not, we need to manually update the contour limits to what they were set to before we added the
+        # meshes above, because adding the meshes resets the contour limits in the plotter.
+        if refresh_limits:
+            self.on_integration_limits_reset_clicked()
+        else:
+            self.on_contour_limits_updated()
 
         self._view.cache_default_camera_position()
         self._view.reset_camera()
@@ -337,7 +343,7 @@ class FullInstrumentViewPresenter:
 
     def on_flip_beam_check_box_clicked(self) -> None:
         self._view.store_flip_beam_option()
-        self.update_plotter()
+        self.update_plotter(refresh_limits=False)
         self._view.reset_camera()
 
     @property
