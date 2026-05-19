@@ -74,6 +74,22 @@ public:
     TS_ASSERT_EQUALS(currentFigureYAxisLabel(), "Spin Asymmetry");
   }
 
+  void testDetectorMapPlotUsesConfiguredAxisLabels() {
+    closeAllFigures();
+    createWorkspace("ws1");
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    plotter.plot({{"ws1"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::detectorMapPlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::DetectorMapXAxis::Lambda,
+                      MantidQt::CustomInterfaces::ISISReflectometry::DetectorMapYAxis::Theta,
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Individual)});
+
+    TS_ASSERT_EQUALS(currentFigureXAxisLabel(), "Lambda");
+    TS_ASSERT_EQUALS(currentFigureYAxisLabel(), "Theta");
+    TS_ASSERT_EQUALS(currentFigureColorbarLabel(), "Intensity");
+  }
+
   void testTiledPlotKeepsWorkspaceGroupMembersOnSameAxis() {
     closeAllFigures();
     createWorkspaceGroup("alignment_1", {"alignment_1_raw", "alignment_1_calc", "alignment_1_peak"});
@@ -125,14 +141,20 @@ private:
     return static_cast<int>(PySequence_Size(figureNumbers.ptr()));
   }
 
-  std::string currentFigureYAxisLabel() {
+  std::string currentFigureYAxisLabel() { return currentFigureAxisLabel(0, "get_ylabel"); }
+
+  std::string currentFigureXAxisLabel() { return currentFigureAxisLabel(0, "get_xlabel"); }
+
+  std::string currentFigureColorbarLabel() { return currentFigureAxisLabel(1, "get_ylabel"); }
+
+  std::string currentFigureAxisLabel(int const axisIndex, char const *labelGetter) {
     Mantid::PythonInterface::GlobalInterpreterLock lock;
     MantidQt::Widgets::Common::Python::Object pyplot{
         MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
     auto const figure = MantidQt::Widgets::Common::Python::Object(pyplot.attr("gcf")());
     auto const axes = figure.attr("axes");
-    auto const axis = MantidQt::Widgets::Common::Python::Object(axes[0]);
-    return boost::python::extract<std::string>(axis.attr("get_ylabel")());
+    auto const axis = MantidQt::Widgets::Common::Python::Object(axes[axisIndex]);
+    return boost::python::extract<std::string>(axis.attr(labelGetter)());
   }
 
   std::vector<int> populatedAxisLineCounts() {

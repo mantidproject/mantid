@@ -24,7 +24,7 @@ PlotAxis detectorMapXAxis(DetectorMapXAxis axis) {
 PlotAxis detectorMapYAxis(DetectorMapYAxis axis) {
   switch (axis) {
   case DetectorMapYAxis::DetectorId:
-    return PlotAxis{"Detector ID", "", AxisScale::Linear};
+    return PlotAxis{"Detector Index", "", AxisScale::Linear};
   case DetectorMapYAxis::Theta:
     return PlotAxis{"Theta", "", AxisScale::Linear};
   }

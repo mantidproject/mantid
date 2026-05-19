@@ -141,7 +141,7 @@ QtPlottingView::QtPlottingView(QWidget *parent)
 
 void QtPlottingView::initLayout() {
   m_ui.setupUi(this);
-  m_ui.detectorMapYAxis->addItem("Detector ID", enumIndex(DetectorMapYAxis::DetectorId));
+  m_ui.detectorMapYAxis->addItem("Detector Index", enumIndex(DetectorMapYAxis::DetectorId));
   m_ui.detectorMapYAxis->addItem("Detector angle, theta", enumIndex(DetectorMapYAxis::Theta));
   m_ui.detectorMapXAxis->addItem("Time of Flight", enumIndex(DetectorMapXAxis::TimeOfFlight));
   m_ui.detectorMapXAxis->addItem("Lambda", enumIndex(DetectorMapXAxis::Lambda));

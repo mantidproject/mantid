@@ -9,6 +9,7 @@
 #include "../../../ISISReflectometry/GUI/Plotting/PlottingModel.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -180,9 +181,111 @@ public:
                      std::invalid_argument const &);
   }
 
+  void testDetectorMapCreatesPlotWorkspaceFromSelectedWorkspacesRawTOFWorkspace() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
+    createTOFGroup({"raw_input_name"});
+    auto model = PlottingModel{};
+    auto const workspaces = workspaceSelections({"IvsQ_12345"});
+
+    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputOptions());
+
+    auto const expected = std::vector<std::string>{"__isis_refl_det_map_IvsQ_12345"};
+    TS_ASSERT_EQUALS(workspacesForPlotting, expected);
+    auto outputWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_det_map_IvsQ_12345");
+    TS_ASSERT_EQUALS(outputWorkspace->getNumberHistograms(), 640);
+    TS_ASSERT_DELTA(outputWorkspace->y(0)[0], 14.0, 1e-12);
+    TS_ASSERT_DELTA((*(outputWorkspace->getAxis(1)))(0), 0.0, 1e-12);
+  }
+
+  void testDetectorMapCreatesOnePlotWorkspacePerSelectedWorkspace() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createConstantWorkspace("IvsQ_22345", -100.0);
+    createDetectorMapInputWorkspace("raw_input_name_1", "12345", 10.0);
+    createDetectorMapInputWorkspace("raw_input_name_2", "22345", 20.0);
+    createTOFGroup({"raw_input_name_1", "raw_input_name_2"});
+    auto model = PlottingModel{};
+    auto const workspaces = std::vector<PlottingWorkspaceSelection>{workspaceSelection("IvsQ_12345", {"12345"}),
+                                                                    workspaceSelection("IvsQ_22345", {"22345"})};
+
+    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputOptions());
+
+    auto const expected = std::vector<std::string>{"__isis_refl_det_map_IvsQ_12345", "__isis_refl_det_map_IvsQ_22345"};
+    TS_ASSERT_EQUALS(workspacesForPlotting, expected);
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_det_map_IvsQ_12345"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_det_map_IvsQ_22345"));
+  }
+
+  void testDetectorMapFindsPeriodSpecificTOFWorkspaceInTOFGroup() {
+    createConstantWorkspace("IvsQ_12345_2", -100.0);
+    createDetectorMapInputWorkspace("period_1_raw_input_name", "12345", 10.0, 1);
+    createDetectorMapInputWorkspace("period_2_raw_input_name", "12345", 20.0, 2);
+    createTOFGroup({"period_1_raw_input_name", "period_2_raw_input_name"});
+    auto model = PlottingModel{};
+    auto const workspaces = std::vector<PlottingWorkspaceSelection>{workspaceSelection("IvsQ_12345_2", {"12345"}, 2)};
+
+    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputOptions());
+
+    auto const expected = std::vector<std::string>{"__isis_refl_det_map_IvsQ_12345_2"};
+    TS_ASSERT_EQUALS(workspacesForPlotting, expected);
+    auto outputWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_det_map_IvsQ_12345_2");
+    TS_ASSERT_DELTA(outputWorkspace->y(0)[0], 24.0, 1e-12);
+  }
+
+  void testDetectorMapCanConvertXAxisToLambda() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
+    createTOFGroup({"raw_input_name"});
+    auto model = PlottingModel{};
+
+    auto const workspacesForPlotting =
+        model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}),
+                                    detectorMapOutputOptions(DetectorMapXAxis::Lambda, DetectorMapYAxis::DetectorId));
+
+    TS_ASSERT_EQUALS(workspacesForPlotting.size(), 1);
+    auto outputWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_det_map_IvsQ_12345");
+    TS_ASSERT_EQUALS(outputWorkspace->getAxis(0)->unit()->unitID(), "Wavelength");
+  }
+
+  void testDetectorMapCanUseThetaYAxis() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
+    createTOFGroup({"raw_input_name"});
+    auto model = PlottingModel{};
+
+    model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}),
+                                detectorMapOutputOptions(DetectorMapXAxis::TimeOfFlight, DetectorMapYAxis::Theta));
+
+    auto outputWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_det_map_IvsQ_12345");
+    TS_ASSERT_DIFFERS((*(outputWorkspace->getAxis(1)))(0), 0.0);
+  }
+
+  void testDetectorMapThrowsForUnsupportedInstrument() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
+    createTOFGroup({"raw_input_name"});
+    auto model = PlottingModel{};
+    auto outputOptions = detectorMapOutputOptions();
+    outputOptions.instrumentName = "UNKNOWN";
+
+    TS_ASSERT_THROWS(model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}), outputOptions),
+                     std::invalid_argument const &);
+  }
+
 private:
   PlotOutputOptions alignmentOutputOptions() {
     auto outputOptions = PlotOutputOptions{PlotOutputType::Alignment};
+    outputOptions.instrumentName = "POLREF";
+    return outputOptions;
+  }
+
+  PlotOutputOptions detectorMapOutputOptions(DetectorMapXAxis xAxis = DetectorMapXAxis::TimeOfFlight,
+                                             DetectorMapYAxis yAxis = DetectorMapYAxis::DetectorId) {
+    auto outputOptions = PlotOutputOptions{PlotOutputType::DetectorMap, xAxis, yAxis};
     outputOptions.instrumentName = "POLREF";
     return outputOptions;
   }
@@ -237,6 +340,22 @@ private:
       workspace->dataY(workspaceIndex)[0] = yValues[workspaceIndex];
       workspace->dataE(workspaceIndex)[0] = 1.0;
       workspace->getSpectrum(workspaceIndex).addDetectorID(static_cast<int>(100 + workspaceIndex));
+    }
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(name, workspace);
+  }
+
+  void createDetectorMapInputWorkspace(std::string const &name, std::string const &runNumber, double const yOffset,
+                                       std::optional<int> const currentPeriod = std::nullopt) {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(644, 3, false, false, true, "POLREF");
+    workspace->mutableRun().addProperty("run_number", runNumber);
+    if (currentPeriod) {
+      workspace->mutableRun().addProperty("current_period", *currentPeriod);
+    }
+    for (size_t workspaceIndex = 0; workspaceIndex < workspace->getNumberHistograms(); ++workspaceIndex) {
+      for (size_t bin = 0; bin < workspace->y(workspaceIndex).size(); ++bin) {
+        workspace->dataY(workspaceIndex)[bin] = yOffset + static_cast<double>(workspaceIndex);
+        workspace->dataE(workspaceIndex)[bin] = 1.0;
+      }
     }
     Mantid::API::AnalysisDataService::Instance().addOrReplace(name, workspace);
   }

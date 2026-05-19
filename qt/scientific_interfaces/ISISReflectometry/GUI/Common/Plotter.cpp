@@ -112,6 +112,33 @@ void applyAxisLabels(MantidQt::Widgets::Common::Python::Object const &figure, Pl
   }
 }
 
+void applyColorfillAxisLabels(MantidQt::Widgets::Common::Python::Object const &figure, PlotOptions const &options) {
+  using namespace MantidQt::Widgets::Common;
+
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  try {
+    auto const axes = figure.attr("axes");
+    if (Python::Len(axes) == 0)
+      return;
+
+    auto const xLabel = axisLabel(options.xAxis);
+    auto const yLabel = axisLabel(options.yAxis);
+    auto const zLabel = axisLabel(options.zAxis);
+    auto const mainAxis = Python::Object(axes[0]);
+    if (!xLabel.empty())
+      mainAxis.attr("set_xlabel")(xLabel);
+    if (!yLabel.empty())
+      mainAxis.attr("set_ylabel")(yLabel);
+    for (auto index = 1; index < Python::Len(axes); ++index) {
+      auto const axis = Python::Object(axes[index]);
+      if (!zLabel.empty())
+        axis.attr("set_ylabel")(zLabel);
+    }
+  } catch (Python::ErrorAlreadySet &) {
+    throw Mantid::PythonInterface::PythonException();
+  }
+}
+
 void addHorizontalMarkers(MantidQt::Widgets::Common::Python::Object const &figure, double position) {
   using namespace MantidQt::Widgets::Common;
 
@@ -197,7 +224,8 @@ void Plotter::plot(PlotRequest const &request) const {
   auto const &options = request.options;
 
   if (options.plotStyle == PlotStyle::Colorfill) {
-    pcolormesh(toQStringList(actualWorkspaces));
+    auto const figure = pcolormesh(toQStringList(actualWorkspaces));
+    applyColorfillAxisLabels(figure, options);
     return;
   }
 

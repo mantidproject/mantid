@@ -55,7 +55,7 @@ public:
     TS_ASSERT_EQUALS(options.plotStyle, PlotStyle::Colorfill);
     TS_ASSERT_EQUALS(options.layout, PlotLayout::Tiled);
     TS_ASSERT_EQUALS(options.xAxis.label, "Time of Flight");
-    TS_ASSERT_EQUALS(options.yAxis.label, "Detector ID");
+    TS_ASSERT_EQUALS(options.yAxis.label, "Detector Index");
     TS_ASSERT_EQUALS(options.zAxis.label, "Intensity");
   }
 

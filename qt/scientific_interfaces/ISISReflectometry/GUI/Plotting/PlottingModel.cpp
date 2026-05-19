@@ -11,6 +11,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -22,6 +23,7 @@
 #include <cmath>
 #include <exception>
 #include <iterator>
+#include <memory>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -33,6 +35,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace {
 auto constexpr spinAsymmetryWorkspacePrefix = "__isis_refl_spin_asym_";
 auto constexpr alignmentWorkspacePrefix = "__isis_refl_align_";
+auto constexpr detectorMapWorkspacePrefix = "__isis_refl_det_map_";
 
 struct GaussianParameters {
   double height;
@@ -99,6 +102,16 @@ Mantid::API::MatrixWorkspace_sptr extractDetectorSpectra(Mantid::API::MatrixWork
   return algorithm->getProperty("OutputWorkspace");
 }
 
+Mantid::API::MatrixWorkspace_sptr convertToWavelength(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  auto algorithm = createAlgorithm("ConvertUnits");
+  algorithm->setProperty("InputWorkspace", workspace);
+  algorithm->setProperty("Target", "Wavelength");
+  algorithm->setProperty("EMode", "Elastic");
+  algorithm->setProperty("OutputWorkspace", "__NotUsed__");
+  algorithm->execute();
+  return algorithm->getProperty("OutputWorkspace");
+}
+
 Mantid::API::MatrixWorkspace_sptr transpose(Mantid::API::MatrixWorkspace_sptr const &workspace) {
   auto algorithm = createAlgorithm("Transpose");
   algorithm->setProperty("InputWorkspace", workspace);
@@ -124,6 +137,20 @@ double theta(Mantid::API::MatrixWorkspace const &workspace, size_t const workspa
 double xValueForWorkspaceIndex(Mantid::API::MatrixWorkspace const &workspace, size_t const workspaceIndex,
                                AlignmentXAxis const xAxis) {
   return xAxis == AlignmentXAxis::Theta ? theta(workspace, workspaceIndex) : static_cast<double>(workspaceIndex);
+}
+
+double detectorMapYAxisValue(Mantid::API::MatrixWorkspace const &workspace, size_t const workspaceIndex,
+                             DetectorMapYAxis const yAxis) {
+  return yAxis == DetectorMapYAxis::Theta ? theta(workspace, workspaceIndex) : static_cast<double>(workspaceIndex);
+}
+
+void setDetectorMapYAxisValues(Mantid::API::MatrixWorkspace_sptr const &workspace, DetectorMapYAxis const yAxis) {
+  auto values = std::vector<double>{};
+  values.reserve(workspace->getNumberHistograms());
+  for (size_t workspaceIndex = 0; workspaceIndex < workspace->getNumberHistograms(); ++workspaceIndex) {
+    values.emplace_back(detectorMapYAxisValue(*workspace, workspaceIndex, yAxis));
+  }
+  workspace->replaceAxis(1, std::make_unique<Mantid::API::NumericAxis>(std::move(values)));
 }
 
 Mantid::API::MatrixWorkspace_sptr createPointWorkspace(size_t const numberOfPoints) {
@@ -362,6 +389,10 @@ std::string alignmentWorkspaceName(PlottingWorkspaceSelection const &workspace) 
   return std::string{alignmentWorkspacePrefix} + safeWorkspaceName(workspace.workspaceName);
 }
 
+std::string detectorMapWorkspaceName(PlottingWorkspaceSelection const &workspace) {
+  return std::string{detectorMapWorkspacePrefix} + safeWorkspaceName(workspace.workspaceName);
+}
+
 std::string createAlignmentWorkspace(PlottingWorkspaceSelection const &workspace, AlignmentXAxis const xAxis,
                                      std::string const &instrumentName) {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
@@ -408,6 +439,38 @@ std::vector<std::string> createAlignmentWorkspaces(std::vector<PlottingWorkspace
   }
   return outputWorkspaces;
 }
+
+std::string createDetectorMapWorkspace(PlottingWorkspaceSelection const &workspace, DetectorMapXAxis const xAxis,
+                                       DetectorMapYAxis const yAxis, std::string const &instrumentName) {
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  auto const rawWorkspace = rawTOFWorkspaceForSelection(workspace);
+  if (!rawWorkspace) {
+    return "";
+  }
+
+  auto detectorMapWorkspace = extractDetectorSpectra(rawWorkspace, instrumentName);
+  if (xAxis == DetectorMapXAxis::Lambda) {
+    detectorMapWorkspace = convertToWavelength(detectorMapWorkspace);
+  }
+  setDetectorMapYAxisValues(detectorMapWorkspace, yAxis);
+
+  auto const outputWorkspace = detectorMapWorkspaceName(workspace);
+  ads.addOrReplace(outputWorkspace, detectorMapWorkspace);
+  return outputWorkspace;
+}
+
+std::vector<std::string> createDetectorMapWorkspaces(std::vector<PlottingWorkspaceSelection> const &workspaces,
+                                                     DetectorMapXAxis const xAxis, DetectorMapYAxis const yAxis,
+                                                     std::string const &instrumentName) {
+  auto outputWorkspaces = std::vector<std::string>{};
+  for (auto const &workspace : workspaces) {
+    auto outputWorkspace = createDetectorMapWorkspace(workspace, xAxis, yAxis, instrumentName);
+    if (!outputWorkspace.empty()) {
+      outputWorkspaces.emplace_back(std::move(outputWorkspace));
+    }
+  }
+  return outputWorkspaces;
+}
 } // namespace
 
 std::vector<std::string> PlottingModel::workspacesForPlotting(std::vector<PlottingWorkspaceSelection> const &workspaces,
@@ -417,6 +480,10 @@ std::vector<std::string> PlottingModel::workspacesForPlotting(std::vector<Plotti
   }
   if (options.outputType == PlotOutputType::Alignment) {
     return createAlignmentWorkspaces(workspaces, options.alignmentXAxis, options.instrumentName);
+  }
+  if (options.outputType == PlotOutputType::DetectorMap) {
+    return createDetectorMapWorkspaces(workspaces, options.detectorMapXAxis, options.detectorMapYAxis,
+                                       options.instrumentName);
   }
   return selectedWorkspaceNames(workspaces);
 }
