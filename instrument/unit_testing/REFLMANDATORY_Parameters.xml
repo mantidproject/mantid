@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="REFLMANDATORY" valid-from="forever">
+<parameter-file instrument="REFLMANDATORY" valid-from="1900-01-01 00:00:00">
 
 <component-link name="REFLMANDATORY" >
 

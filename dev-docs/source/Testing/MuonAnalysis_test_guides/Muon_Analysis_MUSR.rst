@@ -92,7 +92,7 @@ This test will look at transverse field data.
 	- Add ``GuasOsc``
 	- Set ``Frequency = 1.3``
 	- Add a ``FlatBackground``
-	- Do a fit, notice that the value for the background is non-zero, when it should be
+	- Do a fit, the value for the background should be non-zero
 	- Remove the flat background
 	- Change the ``Fitting type`` from "Normal" to "TF Asymmetry"
 	- Press Fit

@@ -73,7 +73,9 @@ private:
   void exec() override;
   /// Load Parameter File specified by full pathname into given workspace,
   /// return success
-  bool loadParameterFile(const std::string &fullPathName, const API::MatrixWorkspace_sptr &localWorkspace);
+  bool runLoadParameterFile(const std::string &fullPathName, const API::MatrixWorkspace_sptr &localWorkspace);
+  /// Search for and then load parameter file
+  void loadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws);
 };
 
 } // namespace DataHandling

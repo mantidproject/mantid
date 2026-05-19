@@ -517,8 +517,9 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_set_all_defaults_from_instrument(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
         # idf_dir = config.getString('instrumentDefinition.directory')
-        idf_file = api.ExperimentInfo.getInstrumentFilename("LET", "2014-05-03 23:59:59")
-        ws = LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=ws)
+        idf_file = api.ExperimentInfo.getInstrumentFilename("LET", "2014-05-02 23:59:59")
+        print(idf_file)
+        LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=ws)
 
         # Propman was defined for MARI but reduction parameters are all the
         # same, so testing on LET
@@ -526,6 +527,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman.ei_mon1_spec, 2)
 
         ws = mtd["ws"]
+
         changed_prop = propman.update_defaults_from_instrument(ws.getInstrument(), False)
         self.assertTrue("ei-mon1-spec" in changed_prop)
         self.assertEqual(propman.ei_mon1_spec, 65542)
@@ -1074,20 +1076,21 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         api.AnalysisDataService.clear()
 
-        propman.monovan_run = 11002
+        propman.monovan_run = 00000
         propman.mask_run = None
         propman.wb_for_monovan_run = 11001
         propman.map_file = "some_missing_map"
 
         ok, fail_list = propman._check_file_properties()
         self.assertFalse(ok)
+        print(fail_list)
         self.assertEqual(len(fail_list), 2)
         self.assertTrue("monovan_run" in fail_list)
         self.assertTrue("map_file" in fail_list)
 
     def test_find_files2sum(self):
         propman = self.prop_man
-        propman.sample_run = [11001, 11111]
+        propman.sample_run = [11001, 00000]
 
         propman.sum_runs = False
         ok, not_found, found = propman.find_files_to_sum()
@@ -1100,7 +1103,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertFalse(ok)
         self.assertEqual(len(not_found), 1)
         self.assertEqual(len(found), 1)
-        self.assertEqual(not_found[0], 11111)
+        self.assertEqual(not_found[0], 00000)
         self.assertEqual(found[0], 11001)
 
         ok1, not_found1, found1 = propman.find_files_to_sum()
@@ -1111,7 +1114,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertFalse(ok)
         self.assertEqual(len(err_list), 2)
         self.assertTrue("missing_runs_toSum" in err_list)
-        self.assertEqual(err_list["missing_runs_toSum"], "[11111]")
+        self.assertEqual(err_list["missing_runs_toSum"], "[0]")
 
     def test_custom_print(self):
         propman = self.prop_man

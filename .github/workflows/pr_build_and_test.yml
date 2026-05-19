@@ -28,10 +28,8 @@ jobs:
         with:
           filters: .github/filters.yaml
 
-      - uses: prefix-dev/setup-pixi@v0.9.5
+      - uses: ./.github/actions/setup-pixi
         if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
-        with:
-          frozen: true
 
       - uses: ./.github/actions/doxygen-build
         name: Build doxygen
@@ -93,11 +91,7 @@ jobs:
           fetch-tags: true
 
       - name: Install pixi
-        run: |
-          source ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/pixi-utils
-          install_pixi "${GITHUB_WORKSPACE}"
-          # Add pixi to path for use in other steps
-          echo "$HOME/.pixi/bin" >> $GITHUB_PATH
+        uses: ./.github/actions/setup-pixi
 
       - name: Clean build tree
         # supplying --clean-build or CLEAN_BUILD=true should be added here

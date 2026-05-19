@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="REFLMULTI" valid-from="forever">
+<parameter-file instrument="REFLMULTI" valid-from="1900-01-01 00:00:00">
 
     <component-link name="REFLMULTI" >
 
