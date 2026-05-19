@@ -63,7 +63,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     ):
         self._mock_view.get_integration_limits.return_value = (0, 100)
         self._presenter.on_integration_limits_updated()
-        mock_update_integration_range.assert_called_with((0, 100))
+        mock_update_integration_range.assert_called_with(entire_range=False)
         mock_set_view_integration_limits.assert_called_once()
         mock_on_contour_range_reset_clicked.assert_called_once()
 
@@ -77,7 +77,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_contour_range_reset_clicked")
     def test_set_view_integration_limits(self, mock_on_contour_range_reset_clicked, mock_update_line_plot):
-        self._mock_view.current_selected_unit.return_value = "MyUnit"
+        self._mock_view.current_selected_lineplot_unit.return_value = "MyUnit"
         self._model._counts = np.zeros(200)
         mesh = MagicMock()
         mesh.point_data = {}
@@ -110,13 +110,17 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._model.update_point_picked_detectors.assert_called_once_with(3, select_bank_tube)
         self._presenter.update_picked_detectors_on_view.assert_called_once()
 
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_integration_limits_reset_clicked")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_integration_units")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
-    def test_unit_option_selected(self, mock_extract_spectra):
+    def test_unit_option_selected(self, mock_extract_spectra, mock_set_integration_units, mock_reset_integration):
         self._mock_view.sum_spectra_selected.return_value = True
-        self._presenter.on_unit_option_selected(1)
+        self._presenter.on_sliders_unit_selected(1)
+        mock_set_integration_units.assert_called_once_with(self._presenter._UNIT_OPTIONS[1])
         self._mock_view.show_plot_for_detectors.assert_called_once()
         self._mock_view.set_selected_detector_info.assert_called_once()
         mock_extract_spectra.assert_called_once_with(self._presenter._UNIT_OPTIONS[1], True)
+        mock_reset_integration.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.save_line_plot_workspace_to_ads")
     def test_export_workspace_clicked(self, mock_save_line_plot_workspace_to_ads):
@@ -125,7 +129,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
     def test_on_sum_spectra_checkbox_clicked(self, mock_update_line_plot_ws_and_draw):
-        self._mock_view.current_selected_unit.return_value = "dSpacing"
+        self._mock_view.current_selected_lineplot_unit.return_value = "dSpacing"
         self._presenter.on_sum_spectra_checkbox_clicked()
         mock_update_line_plot_ws_and_draw.assert_called_once_with("dSpacing")
 
@@ -176,13 +180,13 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._pickable_mesh = MagicMock()
         self._presenter._pickable_mesh.point_data = {}
         self._presenter._renderer.set_pickable_scalars.side_effect = lambda m, visibility, label: m.point_data.update({label: visibility})
-        self._mock_view.current_selected_unit.return_value = "TOF"
+        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
         self._mock_view.sum_spectra_selected.return_value = True
         self._presenter.update_picked_detectors_on_view()
         np.testing.assert_allclose(
             self._presenter._pickable_mesh.point_data[self._presenter._visible_label], self._model._detector_is_picked
         )
-        self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace)
+        self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace, self._model.lineplot_limits)
         self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
         self._model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
 
@@ -270,7 +274,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
     def test_refresh_lineplot_peaks(self, mock_get_lineplot_args):
         mock_get_lineplot_args.return_value = ([[100]], [["(1, 1, 1)"]], ["ws1"])
-        self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
         self._presenter.refresh_lineplot_peaks()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
@@ -279,7 +282,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
     def test_refresh_lineplot_peaks_no_peaks(self, mock_get_lineplot_args):
         mock_get_lineplot_args.return_value = ([], [], [])
-        self._mock_view.current_selected_unit.return_value = self._presenter._TIME_OF_FLIGHT
         self._presenter.refresh_lineplot_peaks()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.redraw_lineplot.assert_called_once()
@@ -288,7 +290,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
     def test_refresh_lineplot_peaks_wrong_unit(self, mock_get_lineplot_args):
         mock_get_lineplot_args.side_effect = RuntimeError("Unknown unit Light Years for peak location")
-        self._mock_view.current_selected_unit.return_value = "Light Years"
         with self.assertRaises(RuntimeError):
             self._presenter.refresh_lineplot_peaks()
 
@@ -434,31 +435,25 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     def _setup_on_peak_selected_tests(self):
         self._presenter._model = MagicMock()
-        self._presenter._model.workspace_x_unit = "workspace-unit"
-        self._presenter._model.picked_spectrum_nos = [42]
         self._presenter._model.picked_detector_ids = [42]
-        self._presenter._view.current_selected_unit.return_value = "view-unit"
         self._presenter._view.selected_peaks_workspaces.return_value = ["wsA", "wsB"]
-        self._presenter._model.convert_units.return_value = 123.456
 
     def test_left_click_calls_add_peak_and_selects_workspace(self):
-        """Left click: convert -> add_peak -> queue select_peaks_workspace."""
+        """Left click: add_peak -> queue select_peaks_workspace."""
         self._setup_on_peak_selected_tests()
         self._presenter._callback_queue = MagicMock()
         returned_ws = "ReturnedWorkspace"
         self._presenter._model.add_peak.return_value = returned_ws
         self._presenter.on_peak_selected_in_lineplot(3.14, "left")
-        self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 3.14)
-        self._presenter._model.add_peak.assert_called_once_with(123.456, ["wsA", "wsB"])
+        self._presenter._model.add_peak.assert_called_once_with(3.14, ["wsA", "wsB"])
         self._presenter._callback_queue.put.assert_called_once_with((self._presenter._view.select_peaks_workspace, (returned_ws,)))
         self._presenter._model.delete_peak.assert_not_called()
 
     def test_right_click_calls_delete_peak(self):
-        """Right click: convert -> delete_peak."""
+        """Right click: delete_peak."""
         self._setup_on_peak_selected_tests()
         self._presenter.on_peak_selected_in_lineplot(9.81, "right")
-        self._presenter._model.convert_units.assert_called_once_with("view-unit", "workspace-unit", 0, 9.81)
-        self._presenter._model.delete_peak.assert_called_once_with(123.456, ["wsA", "wsB"])
+        self._presenter._model.delete_peak.assert_called_once_with(9.81, ["wsA", "wsB"])
         self._presenter._model.add_peak.assert_not_called()
         self._presenter._view.select_peaks_workspace.assert_not_called()
 
@@ -470,7 +465,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         returned_ws = "WS"
         self._presenter._model.add_peak.return_value = returned_ws
         self._presenter.on_peak_selected_in_lineplot(2.0, "left")
-        self._presenter._model.add_peak.assert_called_once_with(123.456, ["ws1"])
+        self._presenter._model.add_peak.assert_called_once_with(2.0, ["ws1"])
         self._presenter._callback_queue.put.assert_called_once_with((self._presenter._view.select_peaks_workspace, (returned_ws,)))
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._on_list_item_selected")
@@ -549,7 +544,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_on_list_item_selected_masking_resets_integration_limits(self, mock_apply, mock_update_plotter, mock_reset_integration):
         """Test that selecting a mask list item triggers an integration range reset."""
         self._mock_view.selected_items_in_list.return_value = ["Mask 1"]
-        self._mock_view.current_selected_unit.return_value = "TOF"
+        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
         self._mock_view.sum_spectra_selected.return_value = False
         self._presenter._on_list_item_selected(CurrentTab.Masking)
         mock_apply.assert_called_once_with(["Mask 1"], CurrentTab.Masking)
@@ -557,46 +552,11 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_reset_integration.assert_called_once()
 
     @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
-    @mock.patch.object(FullInstrumentViewModel, "workspace_x_unit", new_callable=PropertyMock)
-    def test_integration_limits_in_current_unit_converts_from_workspace_to_view_unit(self, mock_workspace_x_unit, mock_integration_limits):
-        """Test that integration_limits_in_current_unit converts limits from workspace unit to view unit."""
-        mock_workspace_x_unit.return_value = "TOF"
+    def test_integration_limits_in_current_unit_converts_from_workspace_to_view_unit(self, mock_integration_limits):
+        """Test that integration_limits_in_current_unit returns model limits directly."""
         mock_integration_limits.return_value = (1000.0, 5000.0)
-        self._mock_view.current_selected_unit.return_value = "dSpacing"
-        self._presenter._model.convert_units = MagicMock(side_effect=[2.0, 10.0])
         result = self._presenter.integration_limits_in_current_unit()
-        self.assertEqual(self._presenter._model.convert_units.call_count, 2)
-        self._presenter._model.convert_units.assert_any_call("TOF", "dSpacing", 0, 1000.0)
-        self._presenter._model.convert_units.assert_any_call("TOF", "dSpacing", 0, 5000.0)
-        self.assertEqual(result, (2.0, 10.0))
-
-    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
-    @mock.patch.object(FullInstrumentViewModel, "workspace_x_unit", new_callable=PropertyMock)
-    def test_integration_limits_in_current_unit_with_same_units(self, mock_workspace_x_unit, mock_integration_limits):
-        """Test that integration_limits_in_current_unit works when workspace and view units are the same."""
-        mock_workspace_x_unit.return_value = "TOF"
-        mock_integration_limits.return_value = (1000.0, 5000.0)
-        self._mock_view.current_selected_unit.return_value = "TOF"
-        self._presenter._model.convert_units = MagicMock(side_effect=[1000.0, 5000.0])
-        result = self._presenter.integration_limits_in_current_unit()
-        self.assertEqual(self._presenter._model.convert_units.call_count, 2)
-        self._presenter._model.convert_units.assert_any_call("TOF", "TOF", 0, 1000.0)
-        self._presenter._model.convert_units.assert_any_call("TOF", "TOF", 0, 5000.0)
         self.assertEqual(result, (1000.0, 5000.0))
-
-    @mock.patch.object(FullInstrumentViewModel, "integration_limits", new_callable=PropertyMock)
-    @mock.patch.object(FullInstrumentViewModel, "workspace_x_unit", new_callable=PropertyMock)
-    def test_integration_limits_in_current_unit_wavelength_conversion(self, mock_workspace_x_unit, mock_integration_limits):
-        """Test that integration_limits_in_current_unit correctly converts TOF to Wavelength."""
-        mock_workspace_x_unit.return_value = "TOF"
-        mock_integration_limits.return_value = (2000.0, 8000.0)
-        self._mock_view.current_selected_unit.return_value = "Wavelength"
-        self._presenter._model.convert_units = MagicMock(side_effect=[1.5, 6.0])
-        result = self._presenter.integration_limits_in_current_unit()
-        self.assertEqual(self._presenter._model.convert_units.call_count, 2)
-        self._presenter._model.convert_units.assert_any_call("TOF", "Wavelength", 0, 2000.0)
-        self._presenter._model.convert_units.assert_any_call("TOF", "Wavelength", 0, 8000.0)
-        self.assertEqual(result, (1.5, 6.0))
 
     def test_count_scale_selection_by_index_uses_view_item_text(self):
         # Ensure selecting by index queries the view combo box when available

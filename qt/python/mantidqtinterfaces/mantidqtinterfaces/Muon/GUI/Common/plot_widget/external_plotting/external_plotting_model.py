@@ -21,7 +21,7 @@ class ExternalPlottingModel(object):
         for i, axis in enumerate(axes):
             artists = axis.get_tracked_artists()
             for artist in artists:
-                is_normalised = axis.get_artist_normalization_state(artist)
+                is_normalised = axis.get_artist_normalized_by_bin_width(artist)
                 workspace, index = axis.get_artists_workspace_and_spec_num(artist)
                 plotted_data.append(PlotInformation(workspace=workspace, specNum=index, axis=i, normalised=is_normalised))
         return plotted_data
