@@ -8,10 +8,8 @@
 #include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
 #include <boost/algorithm/string/join.hpp>
 #include <boost/python/class.hpp>
-#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/return_value_policy.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -34,6 +32,8 @@ std::vector<std::string> getScatterers(const CrystalStructure &self) {
 
   return scattererStrings;
 }
+
+UnitCell getCell(const CrystalStructure &self) { return self.cell(); }
 
 std::string __str__implementation(const CrystalStructure &self) {
   std::stringstream ss;
@@ -86,7 +86,7 @@ void export_CrystalStructure() {
   class_<CrystalStructure>("CrystalStructure", no_init)
       .def(init<const std::string &, const std::string &, const std::string &>(
           (arg("unitCell"), arg("spaceGroup"), arg("scatterers"))))
-      .def("getUnitCell", &CrystalStructure::cell, arg("self"), return_value_policy<copy_const_reference>())
+      .def("getUnitCell", &getCell, arg("self"))
       .def("getSpaceGroup", &getSpaceGroup, arg("self"))
       .def("getScatterers", &getScatterers, arg("self"))
       .def("__str__", &__str__implementation)

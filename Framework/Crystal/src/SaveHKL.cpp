@@ -579,6 +579,13 @@ double SaveHKL::absorbSphere(double radius, double twoth, double wl, double &tba
 
 double SaveHKL::spectrumCalc(double TOF, int iSpec, const std::vector<std::vector<double>> &time,
                              const std::vector<std::vector<double>> &spectra, size_t id) {
+  if (spectra[id].size() < 11) {
+    throw std::runtime_error("Not enough spectral coefficients for GSAS Type 2 spectrum.");
+  }
+  if (time[id].size() < spectra[id].size()) {
+    throw std::runtime_error("Not enough time points for the spectrum.");
+  }
+
   double spect = 0;
   if (iSpec == 1) {
     //"Calculate the spectrum using spectral coefficients for the GSAS Type 2
