@@ -58,8 +58,8 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_figure_canvas_created(self):
         self._mock_figure_canvas.assert_called_once()
 
-    def test_select_single_pixel_button_is_checkable(self):
-        self.assertTrue(self._view._select_single_pixel.isCheckable())
+    def test_hover_pick_button_is_checkable(self):
+        self.assertTrue(self._view._hover_pick.isCheckable())
 
     def test_update_scalar_range(self):
         self._view.set_plotter_scalar_bar_range((0, 100), "label")

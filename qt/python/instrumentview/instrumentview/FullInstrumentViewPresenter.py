@@ -72,7 +72,7 @@ class FullInstrumentViewPresenter:
         self._shape_renderer = ShapeRenderer(self._model.workspace)
         self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
         self._renderer = self._shape_renderer if view.is_show_shapes_checkbox_checked() else self._point_cloud_renderer
-        self._single_pixel_mode = False
+        self._hover_pick_mode = False
         self._last_hovered_workspace_index: Optional[int] = None
         self._select_bank_tube = False
         self.setup()
@@ -216,15 +216,15 @@ class FullInstrumentViewPresenter:
             return
         self._model.projection_type = self._view.current_selected_projection()
         self._model.flip_z = self._view.is_flip_z_axis_checkbox_checked()
-        if not self._model.is_2d_projection and self._single_pixel_mode:
-            self._single_pixel_mode = False
+        if not self._model.is_2d_projection and self._hover_pick_mode:
+            self._hover_pick_mode = False
             self._last_hovered_workspace_index = None
-            self._view.set_select_single_pixel_checked(False)
-        self._view.set_select_single_pixel_available(self._model.is_2d_projection)
-        self._view.set_single_pixel_mode_enabled(self._single_pixel_mode)
+            self._view.set_hover_pick_checked(False)
+        self._view.set_hover_pick_available(self._model.is_2d_projection)
+        self._view.set_hover_pick_mode_enabled(self._hover_pick_mode)
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter()
-            self._view.set_single_pixel_mode_enabled(self._single_pixel_mode)
+            self._view.set_hover_pick_mode_enabled(self._hover_pick_mode)
             self.update_detector_picker()
             self.refresh_plotter_peaks()
 
@@ -357,7 +357,7 @@ class FullInstrumentViewPresenter:
         return [x for pair in zip(min_point, max_point) for x in pair]
 
     def update_detector_picker(self) -> None:
-        if self._single_pixel_mode:
+        if self._hover_pick_mode:
 
             def point_hovered(point_index: int | None) -> None:
                 if point_index is None:
@@ -367,7 +367,7 @@ class FullInstrumentViewPresenter:
                     return
 
                 self._last_hovered_workspace_index = workspace_index
-                self._update_single_pixel_plot(workspace_index)
+                self._update_hover_pick_plot(workspace_index)
 
             self._renderer.enable_picking(self._view.main_plotter, callback=point_hovered, hover=True)
             return
@@ -378,12 +378,12 @@ class FullInstrumentViewPresenter:
 
         self._renderer.enable_picking(self._view.main_plotter, callback=detector_picked)
 
-    def on_select_single_pixel_toggled(self, checked: bool) -> None:
+    def on_hover_pick_toggled(self, checked: bool) -> None:
         enabled = checked and self._model.is_2d_projection
-        self._single_pixel_mode = enabled
+        self._hover_pick_mode = enabled
         self._last_hovered_workspace_index = None
 
-        self._view.set_single_pixel_mode_enabled(enabled)
+        self._view.set_hover_pick_mode_enabled(enabled)
         self.update_detector_picker()
 
         if enabled:
@@ -396,7 +396,7 @@ class FullInstrumentViewPresenter:
 
         self.update_picked_detectors_on_view()
 
-    def _update_single_pixel_plot(self, workspace_index: int) -> None:
+    def _update_hover_pick_plot(self, workspace_index: int) -> None:
         unit = self._view.current_selected_unit()
         spectrum = self._model.single_spectrum_for_workspace_index(workspace_index, unit)
         if spectrum is None:
@@ -544,9 +544,9 @@ class FullInstrumentViewPresenter:
         return self._model.cached_keys(kind)
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
-        if self._single_pixel_mode:
+        if self._hover_pick_mode:
             if self._last_hovered_workspace_index is not None:
-                self._update_single_pixel_plot(self._last_hovered_workspace_index)
+                self._update_hover_pick_plot(self._last_hovered_workspace_index)
             return
 
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())

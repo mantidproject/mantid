@@ -224,9 +224,9 @@ class FullInstrumentViewWindow(QMainWindow):
         self._reset_projection.setToolTip("Resets the projection to default.")
         self._reset_projection.clicked.connect(self.reset_camera)
         self._clear_point_picked_detectors = QPushButton("Clear Mouse Picking")
-        self._select_single_pixel = QPushButton("Select Single Pixel")
-        self._select_single_pixel.setCheckable(True)
-        self._select_single_pixel.setToolTip("Use mouse hover to preview a single detector spectrum (2D projections only).")
+        self._hover_pick = QPushButton("Hover Pick")
+        self._hover_pick.setCheckable(True)
+        self._hover_pick.setToolTip("Use mouse hover to preview a single detector spectrum (2D projections only).")
         self._aspect_ratio_check_box = QCheckBox()
         self._aspect_ratio_check_box.setText("Maintain Aspect Ratio")
         self._aspect_ratio_check_box.setToolTip(
@@ -259,7 +259,7 @@ class FullInstrumentViewWindow(QMainWindow):
         projection_first_row.addWidget(self._projection_combo_box)
         projection_first_row.addWidget(self._reset_projection)
         projection_first_row.addWidget(self._clear_point_picked_detectors)
-        projection_second_row.addWidget(self._select_single_pixel)
+        projection_second_row.addWidget(self._hover_pick)
         projection_second_row.addWidget(self._aspect_ratio_check_box)
         projection_second_row.addWidget(self._show_monitors_check_box)
         projection_second_row.addWidget(self._count_scale_combo_box)
@@ -381,7 +381,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self._overlay_meshes = []
         self._lineplot_overlays = []
-        self._single_pixel_line = None
+        self._hover_pick_line = None
 
         screen_geometry = self.screen().geometry()
         self.resize(int(screen_geometry.width() * 0.8), int(screen_geometry.height() * 0.8))
@@ -596,7 +596,7 @@ class FullInstrumentViewWindow(QMainWindow):
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_changed)
         self._clear_point_picked_detectors.clicked.connect(self._presenter.on_clear_point_picked_detectors_clicked)
-        self._select_single_pixel.toggled.connect(self._presenter.on_select_single_pixel_toggled)
+        self._hover_pick.toggled.connect(self._presenter.on_hover_pick_toggled)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._contour_range_reset.clicked.connect(self._presenter.on_contour_range_reset_clicked)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
@@ -684,7 +684,7 @@ class FullInstrumentViewWindow(QMainWindow):
                 btn.setDisabled(checked)
 
     def enable_or_disable_mask_widgets(self):
-        if self.is_select_single_pixel_checked():
+        if self.is_hover_pick_checked():
             for btn in self._shape_buttons:
                 if btn.isChecked():
                     btn.toggle()
@@ -698,7 +698,7 @@ class FullInstrumentViewWindow(QMainWindow):
                 btn.toggle()
             btn.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
-    def set_single_pixel_mode_enabled(self, enabled: bool) -> None:
+    def set_hover_pick_mode_enabled(self, enabled: bool) -> None:
         if enabled:
             self.delete_current_widget()
 
@@ -712,16 +712,16 @@ class FullInstrumentViewWindow(QMainWindow):
                 btn.toggle()
             btn.setDisabled(enabled or self.current_selected_projection() == ProjectionType.THREE_D)
 
-    def set_select_single_pixel_available(self, is_available: bool) -> None:
-        self._select_single_pixel.setEnabled(is_available)
+    def set_hover_pick_available(self, is_available: bool) -> None:
+        self._hover_pick.setEnabled(is_available)
 
-    def set_select_single_pixel_checked(self, checked: bool) -> None:
-        old_state = self._select_single_pixel.blockSignals(True)
-        self._select_single_pixel.setChecked(checked)
-        self._select_single_pixel.blockSignals(old_state)
+    def set_hover_pick_checked(self, checked: bool) -> None:
+        old_state = self._hover_pick.blockSignals(True)
+        self._hover_pick.setChecked(checked)
+        self._hover_pick.blockSignals(old_state)
 
-    def is_select_single_pixel_checked(self) -> bool:
-        return self._select_single_pixel.isChecked()
+    def is_hover_pick_checked(self) -> bool:
+        return self._hover_pick.isChecked()
 
     def delete_current_widget(self):
         if self._shape_overlay_manager is not None:
@@ -977,7 +977,7 @@ class FullInstrumentViewWindow(QMainWindow):
     @_skip_if_closing
     def show_plot_for_detectors(self, workspace: Workspace2D) -> None:
         """Plot all the given spectra, where they are defined by their workspace indices, not the spectra numbers"""
-        self._single_pixel_line = None
+        self._hover_pick_line = None
         self._detector_spectrum_axes.clear()
         sum_spectra = self.sum_spectra_selected()
         if workspace is not None and workspace.getNumberHistograms() > 0:
@@ -994,13 +994,13 @@ class FullInstrumentViewWindow(QMainWindow):
         self.redraw_lineplot()
 
     def show_single_detector_spectrum(self, x: np.ndarray, y: np.ndarray, label: str, unit: str) -> None:
-        if self._single_pixel_line is None:
+        if self._hover_pick_line is None:
             self._detector_spectrum_axes.clear()
-            (self._single_pixel_line,) = self._detector_spectrum_axes.plot(x, y)
+            (self._hover_pick_line,) = self._detector_spectrum_axes.plot(x, y)
         else:
-            self._single_pixel_line.set_data(x, y)
+            self._hover_pick_line.set_data(x, y)
 
-        self._single_pixel_line.set_label(label)
+        self._hover_pick_line.set_label(label)
         self._detector_spectrum_axes.set_title(label)
         self._detector_spectrum_axes.set_xlabel(unit)
         self._detector_spectrum_axes.relim()
