@@ -14,6 +14,8 @@
 #include "IPlottingView.h"
 #include "PlottingModel.h"
 
+#include <unordered_map>
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PlottingPresenter : public IPlottingPresenter, public PlottingViewSubscriber {
@@ -34,7 +36,8 @@ public:
   void notifyPlotIndividualClicked() override;
 
 private:
-  std::vector<PlottingWorkspaceTreeItem> makeWorkspaceItems(RunsTable const &runsTable) const;
+  std::vector<PlottingWorkspaceTreeItem> makeWorkspaceItems(RunsTable const &runsTable);
+  std::vector<PlottingWorkspaceSelection> selectedWorkspacesFor(std::vector<std::string> const &workspaceNames) const;
   void plotSelectedWorkspaces(PlotLayout layout) const;
   void updateAvailablePlotOutputTypes(std::string const &instrumentName);
   void updateWidgetEnabledState();
@@ -49,6 +52,7 @@ private:
   IPlotter const *m_plotter;
   IPlotOptionsProvider const *m_plotOptionsProvider;
   IPlottingModel const *m_plottingModel;
+  std::unordered_map<std::string, PlottingWorkspaceSelection> m_workspaceSelections;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

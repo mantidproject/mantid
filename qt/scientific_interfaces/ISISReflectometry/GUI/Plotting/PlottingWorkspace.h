@@ -8,6 +8,7 @@
 
 #include "Common/DllConfig.h"
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -33,6 +34,7 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceSelection {
   std::string groupName;
   std::vector<std::string> runNumbers;
   std::string workspaceGroupName;
+  std::optional<int> period;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

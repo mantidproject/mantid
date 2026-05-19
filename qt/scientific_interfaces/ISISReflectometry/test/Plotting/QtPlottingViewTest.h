@@ -414,10 +414,10 @@ public:
 
     click(tree, groupIndex(tree));
 
-    auto const selectedWorkspaces = view.selectedWorkspaceItems();
+    auto const selectedWorkspaces = view.selectedWorkspaceNames();
     TS_ASSERT_EQUALS(selectedWorkspaces.size(), 2);
-    TS_ASSERT_EQUALS(selectedWorkspaces[0].workspaceName, "IvsQ_12345");
-    TS_ASSERT_EQUALS(selectedWorkspaces[1].workspaceName, "IvsQ_binned_12345");
+    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsQ_12345");
+    TS_ASSERT_EQUALS(selectedWorkspaces[1], "IvsQ_binned_12345");
   }
 
   void testReflectivityMutesIvsLambdaWorkspaceItems() {
@@ -483,10 +483,10 @@ public:
 
     click(tree, runIndex(tree));
 
-    auto const selectedWorkspaces = view.selectedWorkspaceItems();
+    auto const selectedWorkspaces = view.selectedWorkspaceNames();
     TS_ASSERT(tree->selectionModel()->isSelected(runIndex(tree)));
     TS_ASSERT_EQUALS(selectedWorkspaces.size(), 1);
-    TS_ASSERT_EQUALS(selectedWorkspaces[0].workspaceName, "IvsQ_binned_12345");
+    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsQ_binned_12345");
   }
 
   void testSpinAsymmetryCanSelectWorkspaceGroupWithIvsQBinnedChildren() {
@@ -498,14 +498,13 @@ public:
 
     click(tree, workspaceGroup);
 
-    auto const selectedWorkspaces = view.selectedWorkspaceItems();
+    auto const selectedWorkspaces = view.selectedWorkspaceNames();
     TS_ASSERT(tree->selectionModel()->isSelected(workspaceGroup));
     TS_ASSERT_EQUALS(selectedWorkspaces.size(), 1);
-    TS_ASSERT_EQUALS(selectedWorkspaces[0].workspaceName, "IvsQ_binned_group_1");
-    TS_ASSERT_EQUALS(selectedWorkspaces[0].workspaceGroupName, "IvsQ_binned_group");
+    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsQ_binned_group_1");
   }
 
-  void testSelectedWorkspaceItemsReturnsWorkspaceGroupChildrenWithParentMetadata() {
+  void testSelectedWorkspaceNamesReturnsWorkspaceGroupChildren() {
     QtPlottingView view;
     view.setWorkspaceItems(workspaceItemsWithWorkspaceGroups());
     auto tree = workspaceTree(view);
@@ -513,11 +512,9 @@ public:
 
     click(tree, workspaceGroup);
 
-    auto const selectedWorkspaces = view.selectedWorkspaceItems();
+    auto const selectedWorkspaces = view.selectedWorkspaceNames();
     TS_ASSERT_EQUALS(selectedWorkspaces.size(), 1);
-    TS_ASSERT_EQUALS(selectedWorkspaces[0].workspaceName, "IvsQ_binned_group_1");
-    TS_ASSERT_EQUALS(selectedWorkspaces[0].outputType, PlottingWorkspaceOutputType::IvsQBinned);
-    TS_ASSERT_EQUALS(selectedWorkspaces[0].workspaceGroupName, "IvsQ_binned_group");
+    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsQ_binned_group_1");
   }
 
   void testPlotButtonsNotifySubscriber() {

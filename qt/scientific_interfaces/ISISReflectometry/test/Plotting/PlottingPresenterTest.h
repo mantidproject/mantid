@@ -18,6 +18,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <optional>
 #include <utility>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
@@ -30,7 +31,7 @@ public:
   MOCK_METHOD1(setOutputOptionsEnabled, void(bool));
   MOCK_METHOD1(setAvailablePlotOutputTypes, void(std::vector<PlotOutputType> const &));
   MOCK_METHOD1(setWorkspaceItems, void(std::vector<PlottingWorkspaceTreeItem> const &));
-  MOCK_CONST_METHOD0(selectedWorkspaceItems, std::vector<PlottingWorkspaceSelection>());
+  MOCK_CONST_METHOD0(selectedWorkspaceNames, std::vector<std::string>());
   MOCK_CONST_METHOD0(selectedPlotOutputType, PlotOutputType());
   MOCK_CONST_METHOD0(selectedPlotOutputOptions, PlotOutputOptions());
 };
@@ -208,6 +209,140 @@ public:
     presenter.notifyRunsTableChanged(runsTable);
   }
 
+  void testPlotPassesPeriodMetadataToModelForPeriodWorkspaces() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    addWorkspaceWithPeriod("IvsQ_binned_12345_2", 2, 2);
+    auto row = successfulRow("12345");
+    row.setOutputNames({"", "", "IvsQ_binned_12345_2"});
+    auto const expectedSelections = std::vector<PlottingWorkspaceSelection>{
+        {"IvsQ_binned_12345_2", PlottingWorkspaceOutputType::IvsQBinned, "Group 1", {"12345"}, "", 2}};
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::Alignment};
+
+    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
+    EXPECT_CALL(view, selectedWorkspaceNames())
+        .Times(1)
+        .WillOnce(Return(std::vector<std::string>{"IvsQ_binned_12345_2"}));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(expectedSelections, outputOptions))
+        .Times(1)
+        .WillOnce(Return(std::vector<std::string>{}));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(0);
+
+    presenter.notifyPlotIndividualClicked();
+  }
+
+  void testPlotPassesPeriodMetadataToModelForWorkspaceGroupChildren() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    addWorkspaceWithRunNumberAndPeriod("IvsQ_binned_12345_1", "12345", 2, 1);
+    addWorkspaceWithRunNumberAndPeriod("IvsQ_binned_12345_2", "12345", 2, 2);
+    groupExistingWorkspaces("IvsQ_binned_12345", {"IvsQ_binned_12345_1", "IvsQ_binned_12345_2"});
+    auto row = successfulRow("12345");
+    row.setOutputNames({"", "", "IvsQ_binned_12345"});
+    auto const selectedWorkspaceNames = std::vector<std::string>{"IvsQ_binned_12345_1", "IvsQ_binned_12345_2"};
+    auto const expectedSelections = std::vector<PlottingWorkspaceSelection>{
+        {"IvsQ_binned_12345_1", PlottingWorkspaceOutputType::IvsQBinned, "Group 1", {"12345"}, "IvsQ_binned_12345", 1},
+        {"IvsQ_binned_12345_2", PlottingWorkspaceOutputType::IvsQBinned, "Group 1", {"12345"}, "IvsQ_binned_12345", 2}};
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::Alignment};
+
+    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(selectedWorkspaceNames));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(expectedSelections, outputOptions))
+        .Times(1)
+        .WillOnce(Return(std::vector<std::string>{}));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(0);
+
+    presenter.notifyPlotIndividualClicked();
+  }
+
+  void testPlotDoesNotUsePeriodsLogForPeriodMetadata() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    addWorkspaceWithPeriodsLog("IvsQ_binned_12345_2", 2, 2);
+    auto row = successfulRow("12345");
+    row.setOutputNames({"", "", "IvsQ_binned_12345_2"});
+    auto const expectedSelections = std::vector<PlottingWorkspaceSelection>{
+        {"IvsQ_binned_12345_2", PlottingWorkspaceOutputType::IvsQBinned, "Group 1", {"12345"}, "", std::nullopt}};
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::Alignment};
+
+    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
+    EXPECT_CALL(view, selectedWorkspaceNames())
+        .Times(1)
+        .WillOnce(Return(std::vector<std::string>{"IvsQ_binned_12345_2"}));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(expectedSelections, outputOptions))
+        .Times(1)
+        .WillOnce(Return(std::vector<std::string>{}));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(0);
+
+    presenter.notifyPlotIndividualClicked();
+  }
+
+  void testPlotUsesRunNumberSampleLogForSelectionMetadata() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    addWorkspaceWithRunNumber("IvsQ_POLREF12345", "12345");
+    auto row = successfulRow("POLREF12345");
+    row.setOutputNames({"", "IvsQ_POLREF12345", ""});
+    auto const expectedSelections = std::vector<PlottingWorkspaceSelection>{
+        {"IvsQ_POLREF12345", PlottingWorkspaceOutputType::IvsQ, "Group 1", {"12345"}, "", std::nullopt}};
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::Alignment};
+
+    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(std::vector<std::string>{"IvsQ_POLREF12345"}));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(expectedSelections, outputOptions))
+        .Times(1)
+        .WillOnce(Return(std::vector<std::string>{}));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(0);
+
+    presenter.notifyPlotIndividualClicked();
+  }
+
+  void testPlotDoesNotUseRunsTableRunNumberAsSelectionMetadataFallback() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("IvsQ_12345",
+                                                              WorkspaceCreationHelper::create2DWorkspace(1, 1));
+    auto row = successfulRow("12345");
+    row.setOutputNames({"", "IvsQ_12345", ""});
+    auto const expectedSelections = std::vector<PlottingWorkspaceSelection>{
+        {"IvsQ_12345", PlottingWorkspaceOutputType::IvsQ, "Group 1", {}, "", std::nullopt}};
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::Alignment};
+
+    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(std::vector<std::string>{"IvsQ_12345"}));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(expectedSelections, outputOptions))
+        .Times(1)
+        .WillOnce(Return(std::vector<std::string>{}));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(0);
+
+    presenter.notifyPlotIndividualClicked();
+  }
+
   void testRunsTableChangedOmitsEmptyWorkspaceGroupOutput() {
     NiceMock<MockPlottingView> view;
     PlottingPresenter presenter(&view);
@@ -231,7 +366,8 @@ public:
     auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
     auto const options = reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Individual);
 
-    EXPECT_CALL(view, selectedWorkspaceItems()).Times(1).WillOnce(Return(selectedWorkspaces));
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
         .Times(1)
@@ -252,7 +388,8 @@ public:
     auto const selectedWorkspaces = workspaceSelections(workspaces);
     auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
 
-    EXPECT_CALL(view, selectedWorkspaceItems()).Times(1).WillOnce(Return(selectedWorkspaces));
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
         .Times(1)
@@ -274,7 +411,8 @@ public:
     auto const selectedWorkspaces = workspaceSelections(workspaces);
     auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
 
-    EXPECT_CALL(view, selectedWorkspaceItems()).Times(1).WillOnce(Return(selectedWorkspaces));
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
         .Times(1)
@@ -293,7 +431,7 @@ public:
     NiceMock<MockPlottingModel> plottingModel;
     PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
 
-    EXPECT_CALL(view, selectedWorkspaceItems()).Times(1).WillOnce(Return(std::vector<PlottingWorkspaceSelection>{}));
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(std::vector<std::string>{}));
     EXPECT_CALL(view, selectedPlotOutputOptions()).Times(0);
     EXPECT_CALL(plottingModel, workspacesForPlotting(testing::_, testing::_)).Times(0);
     EXPECT_CALL(plotter, plot(testing::_)).Times(0);
@@ -308,10 +446,12 @@ public:
     NiceMock<MockPlottingModel> plottingModel;
     PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
     auto const workspaces = std::vector<std::string>{"IvsQ_binned_group"};
-    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const selectedWorkspaces = std::vector<PlottingWorkspaceSelection>{
+        {"IvsQ_binned_group", PlottingWorkspaceOutputType::IvsQBinned, "Group 1", {"12345"}, "", std::nullopt}};
     auto const outputOptions = PlotOutputOptions{PlotOutputType::SpinAsymmetry};
 
-    EXPECT_CALL(view, selectedWorkspaceItems()).Times(1).WillOnce(Return(selectedWorkspaces));
+    populateSelectionsForBinnedWorkspace(presenter, view, workspaces.front());
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
         .Times(1)
@@ -326,9 +466,41 @@ private:
     auto selections = std::vector<PlottingWorkspaceSelection>{};
     selections.reserve(workspaceNames.size());
     for (auto const &workspaceName : workspaceNames) {
-      selections.push_back({workspaceName, PlottingWorkspaceOutputType::IvsQ, "Group 1", {"12345"}, ""});
+      selections.push_back({workspaceName,
+                            PlottingWorkspaceOutputType::IvsQ,
+                            "Group 1",
+                            {runNumberFromWorkspaceName(workspaceName)},
+                            "",
+                            std::nullopt});
     }
     return selections;
+  }
+
+  std::string runNumberFromWorkspaceName(std::string const &workspaceName) {
+    auto const separator = workspaceName.find_last_of('_');
+    return separator == std::string::npos ? workspaceName : workspaceName.substr(separator + 1);
+  }
+
+  void populateSelections(PlottingPresenter &presenter, MockPlottingView &view,
+                          std::vector<std::string> const &workspaceNames) {
+    addWorkspaces(workspaceNames);
+    auto rows = std::vector<std::optional<Row>>{};
+    for (auto const &workspaceName : workspaceNames) {
+      rows.emplace_back(successfulRow(runNumberFromWorkspaceName(workspaceName)));
+    }
+
+    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", std::move(rows))})));
+  }
+
+  void populateSelectionsForBinnedWorkspace(PlottingPresenter &presenter, MockPlottingView &view,
+                                            std::string const &workspaceName) {
+    addWorkspaceWithRunNumber(workspaceName, "12345");
+    auto row = successfulRow("12345");
+    row.setOutputNames({"", "", workspaceName});
+
+    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
   }
 
   PlottingWorkspaceTreeItem groupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) {
@@ -404,15 +576,50 @@ private:
 
   void addWorkspaces(std::vector<std::string> const &workspaceNames) {
     for (auto const &name : workspaceNames) {
-      Mantid::API::AnalysisDataService::Instance().addOrReplace(name, WorkspaceCreationHelper::create2DWorkspace(1, 1));
+      addWorkspaceWithRunNumber(name, runNumberFromWorkspaceName(name));
+    }
+  }
+
+  void addWorkspaceWithPeriod(std::string const &workspaceName, int const periods, int const currentPeriod) {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    workspace->mutableRun().addProperty("run_number", std::string{"12345"});
+    workspace->mutableRun().addProperty("nperiods", periods);
+    workspace->mutableRun().addProperty("current_period", currentPeriod);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName, workspace);
+  }
+
+  void addWorkspaceWithRunNumberAndPeriod(std::string const &workspaceName, std::string const &runNumber,
+                                          int const periods, int const currentPeriod) {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    workspace->mutableRun().addProperty("run_number", runNumber);
+    workspace->mutableRun().addProperty("nperiods", periods);
+    workspace->mutableRun().addProperty("current_period", currentPeriod);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName, workspace);
+  }
+
+  void addWorkspaceWithPeriodsLog(std::string const &workspaceName, int const periods, int const currentPeriod) {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    workspace->mutableRun().addProperty("run_number", std::string{"12345"});
+    workspace->mutableRun().addProperty("periods", periods);
+    workspace->mutableRun().addProperty("current_period", currentPeriod);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName, workspace);
+  }
+
+  void addWorkspaceWithRunNumber(std::string const &workspaceName, std::string const &runNumber) {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    workspace->mutableRun().addProperty("run_number", runNumber);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName, workspace);
+  }
+
+  void groupExistingWorkspaces(std::string const &groupName, std::vector<std::string> const &workspaceNames) {
+    Mantid::API::AnalysisDataService::Instance().add(groupName, std::make_shared<Mantid::API::WorkspaceGroup>());
+    for (auto const &name : workspaceNames) {
+      Mantid::API::AnalysisDataService::Instance().addToGroup(groupName, name);
     }
   }
 
   void addWorkspaceGroup(std::string const &groupName, std::vector<std::string> const &workspaceNames) {
     addWorkspaces(workspaceNames);
-    Mantid::API::AnalysisDataService::Instance().add(groupName, std::make_shared<Mantid::API::WorkspaceGroup>());
-    for (auto const &name : workspaceNames) {
-      Mantid::API::AnalysisDataService::Instance().addToGroup(groupName, name);
-    }
+    groupExistingWorkspaces(groupName, workspaceNames);
   }
 };

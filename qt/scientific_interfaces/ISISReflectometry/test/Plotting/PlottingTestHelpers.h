@@ -51,7 +51,8 @@ inline bool operator!=(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTr
 
 inline bool operator==(PlottingWorkspaceSelection const &lhs, PlottingWorkspaceSelection const &rhs) {
   return lhs.workspaceName == rhs.workspaceName && lhs.outputType == rhs.outputType && lhs.groupName == rhs.groupName &&
-         lhs.runNumbers == rhs.runNumbers && lhs.workspaceGroupName == rhs.workspaceGroupName;
+         lhs.runNumbers == rhs.runNumbers && lhs.workspaceGroupName == rhs.workspaceGroupName &&
+         lhs.period == rhs.period;
 }
 
 inline bool operator!=(PlottingWorkspaceSelection const &lhs, PlottingWorkspaceSelection const &rhs) {

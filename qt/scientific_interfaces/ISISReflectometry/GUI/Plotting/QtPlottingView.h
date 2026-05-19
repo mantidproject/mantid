@@ -24,7 +24,7 @@ public:
   void setOutputOptionsEnabled(bool enabled) override;
   void setAvailablePlotOutputTypes(std::vector<PlotOutputType> const &outputTypes) override;
   void setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> const &items) override;
-  std::vector<PlottingWorkspaceSelection> selectedWorkspaceItems() const override;
+  std::vector<std::string> selectedWorkspaceNames() const override;
   PlotOutputType selectedPlotOutputType() const override;
   PlotOutputOptions selectedPlotOutputOptions() const override;
 
@@ -43,10 +43,7 @@ private:
   QModelIndex itemIndex(QModelIndex const &index) const;
   PlottingWorkspaceTreeItemType itemType(QModelIndex const &index) const;
   PlottingWorkspaceOutputType outputType(QModelIndex const &index) const;
-  std::string groupName(QModelIndex const &index) const;
-  std::vector<std::string> runNumbers(QModelIndex const &index) const;
   std::string workspaceName(QModelIndex const &index) const;
-  std::string workspaceGroupName(QModelIndex const &index) const;
   bool isWorkspaceItem(QModelIndex const &index) const;
   bool hasWorkspaceDescendant(QModelIndex const &index) const;
   bool allWorkspaceDescendantsIncludedForCurrentPlotOutputType(QModelIndex const &index) const;

@@ -12,7 +12,6 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QStandardItem>
-#include <QStringList>
 #include <QStyledItemDelegate>
 #include <algorithm>
 #include <stdexcept>
@@ -24,8 +23,6 @@ namespace {
 auto constexpr itemTypeRole = Qt::UserRole + 1;
 auto constexpr outputTypeRole = Qt::UserRole + 2;
 auto constexpr workspaceNameRole = Qt::UserRole + 3;
-auto constexpr groupNameRole = Qt::UserRole + 4;
-auto constexpr runNumbersRole = Qt::UserRole + 5;
 
 struct PlotSelectionBehaviour {
   std::vector<PlottingWorkspaceTreeItemType> selectableItemTypes;
@@ -40,23 +37,6 @@ template <typename Enum> int enumIndex(Enum value) { return static_cast<int>(val
 
 template <typename T> bool contains(std::vector<T> const &values, T value) {
   return std::find(values.cbegin(), values.cend(), value) != values.cend();
-}
-
-QStringList toQStringList(std::vector<std::string> const &values) {
-  auto result = QStringList{};
-  for (auto const &value : values) {
-    result.push_back(QString::fromStdString(value));
-  }
-  return result;
-}
-
-std::vector<std::string> toVector(QStringList const &values) {
-  auto result = std::vector<std::string>{};
-  result.reserve(values.size());
-  for (auto const &value : values) {
-    result.emplace_back(value.toStdString());
-  }
-  return result;
 }
 
 PlotSelectionBehaviour freeSelectionBehaviour() {
@@ -163,7 +143,7 @@ void QtPlottingView::initLayout() {
   m_ui.detectorMapYAxis->addItem("Detector angle, theta", enumIndex(DetectorMapYAxis::Theta));
   m_ui.detectorMapXAxis->addItem("Time of Flight", enumIndex(DetectorMapXAxis::TimeOfFlight));
   m_ui.detectorMapXAxis->addItem("Lambda", enumIndex(DetectorMapXAxis::Lambda));
-  m_ui.alignmentXAxis->addItem("Detector ID", enumIndex(AlignmentXAxis::DetectorId));
+  m_ui.alignmentXAxis->addItem("Detector Index", enumIndex(AlignmentXAxis::DetectorId));
   m_ui.alignmentXAxis->addItem("Detector angle, theta", enumIndex(AlignmentXAxis::Theta));
   m_workspaceModel.setHorizontalHeaderLabels({QString("Item type"), QString("Output type"), QString("Item")});
   m_ui.workspaceTree->setModel(&m_workspaceModel);
@@ -292,8 +272,6 @@ void QtPlottingView::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeIte
     rowItem->setData(enumIndex(item.itemType), itemTypeRole);
     rowItem->setData(enumIndex(item.outputType), outputTypeRole);
     rowItem->setData(QString::fromStdString(item.workspaceName), workspaceNameRole);
-    rowItem->setData(QString::fromStdString(item.groupName), groupNameRole);
-    rowItem->setData(toQStringList(item.runNumbers), runNumbersRole);
   }
   parent->appendRow({treeItem, outputTypeItem, itemLabel});
   for (auto const &child : item.children) {
@@ -301,15 +279,13 @@ void QtPlottingView::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeIte
   }
 }
 
-std::vector<PlottingWorkspaceSelection> QtPlottingView::selectedWorkspaceItems() const {
-  auto workspaces = std::vector<PlottingWorkspaceSelection>{};
+std::vector<std::string> QtPlottingView::selectedWorkspaceNames() const {
+  auto workspaces = std::vector<std::string>{};
   for (auto const &index : m_ui.workspaceTree->selectionModel()->selectedRows()) {
     auto const selectedIndex = itemIndex(index);
     if (itemType(selectedIndex) == PlottingWorkspaceTreeItemType::Workspace &&
         isWorkspaceIncludedForCurrentPlotOutputType(selectedIndex)) {
-      workspaces.emplace_back(PlottingWorkspaceSelection{workspaceName(selectedIndex), outputType(selectedIndex),
-                                                         groupName(selectedIndex), runNumbers(selectedIndex),
-                                                         workspaceGroupName(selectedIndex)});
+      workspaces.emplace_back(workspaceName(selectedIndex));
     }
   }
   return workspaces;
@@ -368,27 +344,8 @@ PlottingWorkspaceOutputType QtPlottingView::outputType(QModelIndex const &index)
   return static_cast<PlottingWorkspaceOutputType>(itemIndex(index).data(outputTypeRole).toInt());
 }
 
-std::string QtPlottingView::groupName(QModelIndex const &index) const {
-  return itemIndex(index).data(groupNameRole).toString().toStdString();
-}
-
-std::vector<std::string> QtPlottingView::runNumbers(QModelIndex const &index) const {
-  return toVector(itemIndex(index).data(runNumbersRole).toStringList());
-}
-
 std::string QtPlottingView::workspaceName(QModelIndex const &index) const {
   return itemIndex(index).data(workspaceNameRole).toString().toStdString();
-}
-
-std::string QtPlottingView::workspaceGroupName(QModelIndex const &index) const {
-  auto ancestor = itemIndex(index).parent();
-  while (ancestor.isValid()) {
-    if (itemType(ancestor) == PlottingWorkspaceTreeItemType::WorkspaceGroup) {
-      return workspaceName(ancestor);
-    }
-    ancestor = ancestor.parent();
-  }
-  return "";
 }
 
 bool QtPlottingView::isSelectableForCurrentPlotOutputType(QModelIndex const &index) const {
