@@ -26,7 +26,7 @@ XVFB_SERVER_NUM=101
 if [[ -z "$BUILD_THREADS_SYSTEM_TESTS" ]]; then
   if [[ "$OSTYPE" == linux* ]]; then
     ram_gb=$(awk '/MemTotal/ {print int($2/1024/1024)}' /proc/meminfo)
-    BUILD_THREADS_SYSTEM_TESTS=$(( ram_gb / 10 ))
+    BUILD_THREADS_SYSTEM_TESTS=$(( ram_gb / 20 ))
     if (( BUILD_THREADS_SYSTEM_TESTS < 3 )); then
       BUILD_THREADS_SYSTEM_TESTS=3
     fi
