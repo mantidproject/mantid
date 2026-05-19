@@ -386,14 +386,19 @@ class PolyCursorInfo(CursorInfoBase):
 
 
 class MaskingModel:
-    def __init__(self, ws_name):
+    def __init__(self, ws_name, auto_update_mask_file=False):
         self._active_mask = None
         self._masks = []
-        self._ws_name = ws_name
+        self._ws_name = ws_name or "ws"
         self._apply_inverted_mask = False
+        self._auto_update_mask_file = auto_update_mask_file
 
     def update_active_mask(self, mask):
         self._active_mask = mask
+        if self._auto_update_mask_file:
+            self._masks.append(self._active_mask)
+            self.export_selectors()
+            self._masks.remove(self._active_mask)
 
     def clear_active_mask(self):
         self._active_mask = None
@@ -454,3 +459,7 @@ class MaskingModel:
 
     def invert_masking_clicked(self, active):
         self._apply_inverted_mask = active
+        if self._auto_update_mask_file and self._active_mask:
+            self._masks.append(self._active_mask)
+            self.export_selectors()
+            self._masks.remove(self._active_mask)
