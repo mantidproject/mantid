@@ -277,11 +277,22 @@ void Parser::split() {
   if (lastSeparator != std::string::npos)
     m_dirString = m_multiFileName.substr(0, lastSeparator + 1);
 
-  // Get the extension, if there is one. For multi-part extensions like
-  // ".nxs.h5", keep everything from the first dot in the filename part.
-  const size_t firstDotAfterDir = m_multiFileName.find('.', m_dirString.size());
-  if (firstDotAfterDir != std::string::npos)
-    m_extString = m_multiFileName.substr(firstDotAfterDir);
+  // Get the extension. Support known compound extensions (e.g. ".nxs.h5") by
+  // checking whether the segment before the final dot is itself a known extension.
+  // This avoids misidentifying stems that contain dots (e.g. "run.v2.nxs").
+  static const std::vector<std::string> knownMiddleExts = {".nxs"};
+  const size_t lastDot = m_multiFileName.find_last_of('.');
+  if (lastDot != std::string::npos && lastDot > m_dirString.size()) {
+    const size_t prevDot = m_multiFileName.find_last_of('.', lastDot - 1);
+    if (prevDot != std::string::npos && prevDot >= m_dirString.size()) {
+      const std::string midExt = m_multiFileName.substr(prevDot, lastDot - prevDot);
+      if (std::find(knownMiddleExts.begin(), knownMiddleExts.end(), midExt) != knownMiddleExts.end()) {
+        m_extString = m_multiFileName.substr(prevDot);
+      }
+    }
+    if (m_extString.empty())
+      m_extString = m_multiFileName.substr(lastDot);
+  }
 
   // If the directory contains an instance of a comma, then the string is
   // a comma separated list of single *full* file names to load.

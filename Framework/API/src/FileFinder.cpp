@@ -608,11 +608,14 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::vector<st
   res.reserve(fileInfos.size());
   for (const auto &fileInfo : fileInfos) {
     if (!fileInfo.found) {
-      g_log.warning() << "Failed to find file for hint '" << fileInfo.hint << "'\n";
+      if (fileInfo.error)
+        g_log.warning() << "Error while searching for '" << fileInfo.hint << "': " << fileInfo.errorMsg << "\n";
+      else
+        g_log.warning() << "Failed to find file for hint '" << fileInfo.hint << "'\n";
       throw std::invalid_argument("Unable to find file: search object " + fileInfo.hint);
     }
     if (fileInfo.error) {
-      g_log.error() << "Error finding file for hint '" << fileInfo.hint << "': " << fileInfo.errorMsg << "\n";
+      g_log.debug() << "Non-fatal error during search for '" << fileInfo.hint << "': " << fileInfo.errorMsg << "\n";
     }
     res.emplace_back(fileInfo.path);
   }

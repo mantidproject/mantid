@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <cctype>
 #include <functional>
-#include <map>
 #include <numeric>
 
 using namespace Mantid::Kernel;
@@ -346,9 +345,8 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
     // Separate files into two groups: those with explicit extensions and those
     // that need default extension resolution.
     std::vector<std::string> filesToResolveWithExtension;
-    std::vector<size_t> resolutionIndices;               // track original positions
-    std::map<size_t, std::string> directResolutionFiles; // files already resolved
-                                                         // with FileProperty
+    std::vector<size_t> resolutionIndices;                              // track original positions
+    std::vector<std::string> resolvedFiles(unresolvedFileNames.size()); // indexed by original position
 
     for (size_t i = 0; i < unresolvedFileNames.size(); ++i) {
       const auto &unresolvedFileName = unresolvedFileNames[i];
@@ -374,7 +372,7 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
           throw std::runtime_error(error);
         }
 
-        directResolutionFiles[i] = slaveFileProp();
+        resolvedFiles[i] = slaveFileProp();
       } else {
         // Collect files that need extension resolution for batch processing
         filesToResolveWithExtension.emplace_back(unresolvedFileName);
@@ -390,41 +388,35 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
 
         // Map resolved paths back to their original positions
         for (size_t i = 0; i < resolvedPaths.size(); ++i) {
-          directResolutionFiles[resolutionIndices[i]] = resolvedPaths[i].string();
+          resolvedFiles[resolutionIndices[i]] = resolvedPaths[i].string();
         }
       } catch (const std::invalid_argument &ex) {
-        const std::string errors = ex.what();
+        // findRuns identifies the actual failing hint in its exception message;
+        // use that directly so the error names the file that actually failed.
+        if (!m_allowEmptyTokens) {
+          throw std::runtime_error(ex.what());
+        }
         for (size_t i = 0; i < filesToResolveWithExtension.size(); ++i) {
           const auto &unresolvedFileName = filesToResolveWithExtension[i];
           bool doThrow = false;
-          if (m_allowEmptyTokens) {
-            try {
-              const int unresolvedInt = std::stoi(unresolvedFileName);
-              if (unresolvedInt != 0) {
-                doThrow = true;
-              }
-            } catch (std::invalid_argument &) {
+          try {
+            const int unresolvedInt = std::stoi(unresolvedFileName);
+            if (unresolvedInt != 0)
               doThrow = true;
-            }
-          } else {
+          } catch (std::invalid_argument &) {
             doThrow = true;
           }
-          if (doThrow) {
-            auto errorMsg = "Unable to find file matching the string \"" + unresolvedFileName +
-                            "\", please check the data search directories.";
-            if (!errors.empty())
-              errorMsg += " " + errors;
-            throw std::runtime_error(errorMsg);
-          } else {
-            directResolutionFiles[resolutionIndices[i]] = unresolvedFileName;
-          }
+          if (doThrow)
+            throw std::runtime_error(ex.what());
+          else
+            resolvedFiles[resolutionIndices[i]] = unresolvedFileName;
         }
       }
     }
 
     // Populate fullFileNames in original order
-    for (size_t i = 0; i < unresolvedFileNames.size(); ++i) {
-      fullFileNames.emplace_back(directResolutionFiles[i]);
+    for (auto &resolved : resolvedFiles) {
+      fullFileNames.emplace_back(std::move(resolved));
     }
     allFullFileNames.emplace_back(std::move(fullFileNames));
   }
