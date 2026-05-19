@@ -46,6 +46,8 @@ class PeakPickingStatus(Enum):
 class FullInstrumentViewModel:
     """Model for the Instrument View Window. Will calculate detector positions, indices, and integrated counts that give the colours"""
 
+    MAX_DET_INFO_SHOWN = 3
+
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
     _beam_axis = np.array([0, 0, 1])
@@ -372,16 +374,16 @@ class FullInstrumentViewModel:
         picked_spherical_positions = self._spherical_positions[self._detector_is_picked]
         picked_counts = self._counts[self._detector_is_picked]
 
-        picked_info = []
-        for i, ws_index in enumerate(picked_ws_indices):
-            ws_detector = self._workspace.getDetector(int(ws_index))
-            name = ws_detector.getName()
-            component_path = ws_detector.getFullName()
-            det_info = DetectorInfo(
-                name, picked_ids[i], ws_index, picked_xyz_positions[i], picked_spherical_positions[i], component_path, int(picked_counts[i])
+        if len(picked_ws_indices) > self.MAX_DET_INFO_SHOWN:
+            return []
+
+        return [
+            DetectorInfo(det.getName(), det_id, ws_index, xyz, spherical, det.getFullName(), int(count))
+            for ws_index, det_id, xyz, spherical, count in zip(
+                picked_ws_indices, picked_ids, picked_xyz_positions, picked_spherical_positions, picked_counts
             )
-            picked_info.append(det_info)
-        return picked_info
+            for det in (self._workspace.getDetector(int(ws_index)),)
+        ]
 
     def get_default_projection_index_and_options(self) -> tuple[int, list[str]]:
         possible_returns_map = {

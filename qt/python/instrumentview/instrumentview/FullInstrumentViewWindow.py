@@ -999,7 +999,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self, edit_box: QTextEdit, detector_infos: list[DetectorInfo], property_lambda: Callable[[DetectorInfo], str]
     ) -> None:
         """Set the text in one of the detector info boxes"""
-        edit_box.setPlainText(",".join(property_lambda(d) for d in detector_infos))
+        edit_box.setPlainText("; ".join(property_lambda(d) for d in detector_infos))
 
     def selected_peaks_workspaces(self) -> list[str]:
         return [

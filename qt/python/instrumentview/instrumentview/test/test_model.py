@@ -148,6 +148,24 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(mock_args[5], "Full_2")
         self.assertEqual(mock_args[6], 30000)
 
+    def test_picked_detectors_info_text_exceeds_max_returns_empty(self):
+        model, mock_workspace = self._setup_model([1, 20, 300, 4000])
+        model._detector_is_picked = np.array([True, True, True, True])
+        result = model.picked_detectors_info_text()
+        self.assertEqual(result, [])
+        mock_workspace.getDetector.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.DetectorInfo")
+    def test_picked_detectors_info_text_at_max_returns_all(self, det_info_mock):
+        model, mock_workspace = self._setup_model([1, 20, 300])
+        mock_workspace.getDetector.side_effect = lambda i: MagicMock(
+            getName=mock.Mock(return_value=str(i)), getFullName=mock.Mock(return_value=f"Full_{i}")
+        )
+        model._detector_is_picked = np.array([True, True, True])
+        result = model.picked_detectors_info_text()
+        self.assertEqual(det_info_mock.call_count, 3)
+        self.assertEqual(len(result), 3)
+
     def test_negate_picked_visibility(self):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([False, False, False])
