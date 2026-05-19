@@ -155,6 +155,7 @@ class TestPointCloudRenderer(unittest.TestCase):
         mock_picker = MagicMock()
         mock_picker_cls.return_value = mock_picker
         mock_picker.GetPointId.return_value = 3
+        mock_picker.Pick.return_value = 3
         plotter = self._make_mock_plotter()
         callback = MagicMock()
         self.renderer.enable_picking(plotter, callback, hover=True)
@@ -167,6 +168,7 @@ class TestPointCloudRenderer(unittest.TestCase):
         mock_picker = MagicMock()
         mock_picker_cls.return_value = mock_picker
         mock_picker.GetPointId.return_value = -1
+        mock_picker.Pick.return_value = -1
         plotter = self._make_mock_plotter()
         callback = MagicMock()
         self.renderer.enable_picking(plotter, callback, hover=True)
