@@ -929,25 +929,23 @@ private:
 
   void expectSumBanksCalledOnSelectedDetectors(MockPreviewModel &mockModel, MockPreviewDockedWidgets &mockDockedWidgets,
                                                MockJobManager &mockJobManager) {
-    auto detIndices = std::vector<size_t>{44, 45, 46};
     auto detIDs = std::vector<Mantid::detid_t>{2, 3, 4};
     auto previousDetIDsStr = std::optional<ProcessingInstructions>{};
     auto detIDsStr = std::optional<ProcessingInstructions>{"2-4"};
     auto ws = createRectangularDetectorWorkspace();
     EXPECT_CALL(mockModel, getLoadedWs()).Times(AtLeast(1)).WillOnce(Return(ws));
-    expectInstViewShapeChanged(mockDockedWidgets, mockModel, detIndices, detIDs, previousDetIDsStr, detIDsStr);
+    expectInstViewShapeChanged(mockDockedWidgets, mockModel, detIDs, previousDetIDsStr, detIDsStr);
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
   }
 
   void expectSumBanksCalledNoSelectedDetectors(MockPreviewModel &mockModel, MockPreviewDockedWidgets &mockDockedWidgets,
                                                MockJobManager &mockJobManager, MockBatchPresenter &mockMainPresenter) {
     auto ws = createRectangularDetectorWorkspace();
-    auto detIndices = std::vector<size_t>{};
     auto detIDs = std::vector<Mantid::detid_t>{};
     auto previousDetIDsStr = std::optional<ProcessingInstructions>{"2-4"};
     auto detIDsStr = std::nullopt;
 
-    expectInstViewShapeChanged(mockDockedWidgets, mockModel, detIndices, detIDs, previousDetIDsStr, detIDsStr);
+    expectInstViewShapeChanged(mockDockedWidgets, mockModel, detIDs, previousDetIDsStr, detIDsStr);
     EXPECT_CALL(mockMainPresenter, getMatchingROIDetectorIDsForPreviewRow()).WillOnce(Return(std::nullopt));
     EXPECT_CALL(mockModel, getLoadedWs()).Times(3).WillOnce(Return(ws)).WillOnce(Return(ws)).WillOnce(Return(nullptr));
     EXPECT_CALL(mockModel, setSummedWs(Eq(ws))).Times(1);
@@ -959,12 +957,11 @@ private:
                                                               MockJobManager &mockJobManager,
                                                               MockBatchPresenter &mockMainPresenter) {
     auto ws = createRectangularDetectorWorkspace();
-    auto detIndices = std::vector<size_t>{};
     auto detIDs = std::vector<Mantid::detid_t>{};
     auto previousDetIDsStr = std::optional<ProcessingInstructions>{"2-4"};
     auto detIDsStr = std::nullopt;
 
-    expectInstViewShapeChanged(mockDockedWidgets, mockModel, detIndices, detIDs, previousDetIDsStr, detIDsStr);
+    expectInstViewShapeChanged(mockDockedWidgets, mockModel, detIDs, previousDetIDsStr, detIDsStr);
     EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(mockMainPresenter, getMatchingROIDetectorIDsForPreviewRow()).WillOnce(Return(previousDetIDsStr));
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
@@ -973,17 +970,15 @@ private:
   void expectSumBanksCalledOnUnchangedDetectors(MockPreviewModel &mockModel,
                                                 MockPreviewDockedWidgets &mockDockedWidgets,
                                                 MockJobManager &mockJobManager, bool hasSelectedDetectors = true) {
-    auto detIndices = std::vector<size_t>{};
     auto detIDs = std::vector<Mantid::detid_t>{};
     std::optional<ProcessingInstructions> detIDsStr = std::nullopt;
 
     if (hasSelectedDetectors) {
-      detIndices = std::vector<size_t>{44, 45, 46};
       detIDs = std::vector<Mantid::detid_t>{44, 45, 46};
       detIDsStr = ProcessingInstructions{"44-46"};
     }
 
-    expectInstViewShapeChanged(mockDockedWidgets, mockModel, detIndices, detIDs, detIDsStr, detIDsStr);
+    expectInstViewShapeChanged(mockDockedWidgets, mockModel, detIDs, detIDsStr, detIDsStr);
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(0);
   }
 
@@ -1012,11 +1007,12 @@ private:
                                              bool const hasSelectedDetectors) {
     auto const ws = createRectangularDetectorWorkspace();
     auto const detIDsStr = std::optional<ProcessingInstructions>{"2-4"};
-    auto const detIDs = hasSelectedDetectors ? std::vector<size_t>{44, 45, 46} : std::vector<size_t>{};
+    auto const detIDs =
+        hasSelectedDetectors ? std::vector<Mantid::detid_t>{44, 45, 46} : std::vector<Mantid::detid_t>{};
 
     EXPECT_CALL(mockModel, getLoadedWs()).Times(AtLeast(1)).WillOnce(Return(ws));
     EXPECT_CALL(mockMainPresenter, getMatchingROIDetectorIDsForPreviewRow()).WillOnce(Return(detIDsStr));
-    EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).WillOnce(Return(detIDs));
+    EXPECT_CALL(mockDockedWidgets, getSelectedDetectorIDs()).WillOnce(Return(detIDs));
     if (hasSelectedDetectors) {
       EXPECT_CALL(mockModel, setSelectedBanks(detIDsStr)).Times(0);
     } else {
@@ -1031,22 +1027,21 @@ private:
     auto const ws = createRectangularDetectorWorkspace();
     auto const theta = 0.3;
     auto const detIDsStr = std::optional<ProcessingInstructions>{"2-4"};
-    auto const detIDs = std::vector<size_t>{};
+    auto const detIDs = std::vector<Mantid::detid_t>{};
 
     EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillRepeatedly(Return(ws));
     EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(theta));
     EXPECT_CALL(mockModel, setTheta(theta)).Times(1);
     EXPECT_CALL(mockMainPresenter, getMatchingROIDetectorIDsForPreviewRow()).WillOnce(Return(detIDsStr));
-    EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).WillOnce(Return(detIDs));
+    EXPECT_CALL(mockDockedWidgets, getSelectedDetectorIDs()).WillOnce(Return(detIDs));
     EXPECT_CALL(mockModel, setSelectedBanks(detIDsStr)).Times(1);
   }
 
   void expectInstViewShapeChanged(MockPreviewDockedWidgets &mockDockedWidgets, MockPreviewModel &mockModel,
-                                  std::vector<size_t> detIndices, std::vector<Mantid::detid_t> detIDs,
+                                  std::vector<Mantid::detid_t> detIDs,
                                   std::optional<ProcessingInstructions> previousDetIDsStr,
                                   std::optional<ProcessingInstructions> detIDsStr) {
-    EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
-    EXPECT_CALL(mockDockedWidgets, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
+    EXPECT_CALL(mockDockedWidgets, getSelectedDetectorIDs()).Times(1).WillOnce(Return(detIDs));
     EXPECT_CALL(mockModel, getSelectedBanks())
         .Times(AtLeast(1))
         .WillOnce(Return(previousDetIDsStr))

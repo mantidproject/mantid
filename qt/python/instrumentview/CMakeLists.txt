@@ -26,6 +26,8 @@ set(PYTHON_TEST_FILES
     instrumentview/Projections/test/test_spherical_projection.py
     instrumentview/renderers/test/test_renderers.py
     instrumentview/renderers/test/test_side_by_side_shape_renderer.py
+    instrumentview/isisreflectometry/test/test_reflectometry_instrument_view_presenter.py
+    instrumentview/isisreflectometry/test/test_reflectometry_instrument_view_view.py
 )
 
 # Tests

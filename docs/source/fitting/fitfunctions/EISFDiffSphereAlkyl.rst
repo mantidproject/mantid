@@ -20,9 +20,13 @@ value :math:`R` [1]_.
 
 .. math::
 
-   R_i = (R -r) * (i/M) + r
+   EISF(Q) = \frac{1}{M} \sum_{i=1}^{M} \left(\frac{3 j_1(QR_i)}{QR_i}\right)^2
 
-   EISF(Q) = \frac{1}{M} \sum_{i=1}^{M} (3 \frac{j_1(QR_i)}{QR_i})^2(Q\cdot R_i)
+where
+
+.. math::
+
+   R_i = \frac{i-1}{M-1} (R -r) + r
 
 :math:`r` and :math:`R` units are inverse of :math:`Q` units.
 Because of the spherical symmetry of the problem, the structure factor is

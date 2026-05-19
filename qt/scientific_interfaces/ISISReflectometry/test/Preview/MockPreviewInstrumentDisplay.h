@@ -25,8 +25,7 @@ public:
   MOCK_METHOD(void, setInstViewZoomMode, (), (override));
   MOCK_METHOD(void, setInstViewEditMode, (), (override));
   MOCK_METHOD(void, setInstViewSelectRectMode, (), (override));
-  MOCK_METHOD(std::vector<size_t>, getSelectedDetectors, (), (const, override));
-  MOCK_METHOD(std::vector<Mantid::detid_t>, detIndicesToDetIDs, (std::vector<size_t> const &), (const, override));
+  MOCK_METHOD(std::vector<Mantid::detid_t>, getSelectedDetectorIDs, (), (const, override));
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from ISISReflectometryWorkflowBase import reduceRun, setupInstrument, ISISReflectometryWorkflowBase
-from mantid.simpleapi import DeleteWorkspace, SaveNexus
+from mantid.simpleapi import SaveNexus
 import systemtesting
 
 
@@ -35,10 +35,6 @@ class ISISReflectometryWorkflowSlicingTest(systemtesting.MantidSystemTest, ISISR
     def runTest(self):
         self.setupTest()
         reduceRun(self.run_numbers[0], 0.5, self.first_transmission_runs, self.second_transmission_runs, time_interval=60)
-        # Delete the interim transmission workspaces. These are currently output
-        # for input groups (i.e. when we're slicing) even when Debug is not on.
-        DeleteWorkspace("TRANS_LAM_45226")
-        DeleteWorkspace("TRANS_LAM_45227")
         self.finaliseResults()
 
     def regenerateReferenceFileByReducing(self):

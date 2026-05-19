@@ -41,7 +41,7 @@ using namespace Mantid::API;
 
 namespace {
 
-std::string const PDF_GROUP_NAME = "__PDF_Workspace";
+std::string const DEFAULT_PDF_GROUP_NAME = "__PDF_Workspace";
 
 // static logger object
 Kernel::Logger g_log("FABADAMinimizer");
@@ -104,7 +104,8 @@ FABADAMinimizer::FABADAMinimizer()
                   " constant during the convergence period)."
                   " Useful to find the exact minimum.");
   // Output Properties
-  declareProperty("PDF", true, "If the PDF's should be calculated or not.");
+  declareProperty("PDF", DEFAULT_PDF_GROUP_NAME,
+                  "Name for the output PDF workspace group. Default is " + DEFAULT_PDF_GROUP_NAME);
   declareProperty("NumberBinsPDF", 20, "Number of bins used for the output PDFs");
   declareProperty(std::make_unique<API::WorkspaceProperty<>>("Chains", "", Kernel::Direction::Output),
                   "The name to give the output workspace for the"
@@ -791,8 +792,7 @@ double FABADAMinimizer::outputPDF(std::size_t const &convLength, std::vector<std
 
     mostPchi2 = getMostProbableChiSquared(convLength, reducedChain, pdfLength, xValues, yValues, PDFYAxis, start, bin);
 
-    if (getProperty("PDF"))
-      outputPDF(xValues, yValues, reducedChain, convLength, pdfLength);
+    outputPDF(xValues, yValues, reducedChain, convLength, pdfLength);
 
   } // if convLength > 0
   else {
@@ -811,14 +811,15 @@ void FABADAMinimizer::outputPDF(std::vector<double> &xValues, std::vector<double
   parameterNames.emplace_back("Chi Squared");
   auto const workspace = createWorkspace(xValues, yValues, int(m_nParams) + 1, parameterNames);
 
-  if (AnalysisDataService::Instance().doesExist(PDF_GROUP_NAME)) {
-    auto groupPDF = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(PDF_GROUP_NAME);
+  const auto pdfName = getPropertyValue("PDF");
+  if (AnalysisDataService::Instance().doesExist(pdfName)) {
+    auto groupPDF = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(pdfName);
     groupPDF->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(PDF_GROUP_NAME, groupPDF);
+    AnalysisDataService::Instance().addOrReplace(pdfName, groupPDF);
   } else {
     auto groupPDF = std::make_shared<WorkspaceGroup>();
     groupPDF->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(PDF_GROUP_NAME, groupPDF);
+    AnalysisDataService::Instance().addOrReplace(pdfName, groupPDF);
   }
 }
 

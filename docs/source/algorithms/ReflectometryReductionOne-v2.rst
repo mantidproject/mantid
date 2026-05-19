@@ -231,7 +231,8 @@ Usage
 
    run = Load(Filename='INTER00013460.nxs')
    # Basic reduction with no transmission run
-   IvsQ, IvsLam = ReflectometryReductionOne(InputWorkspace=run,
+   IvsQ, IvsLam = ReflectometryReductionOne(Version = 2,
+                                            InputWorkspace=run,
                                             WavelengthMin=1.0,
                                             WavelengthMax=17.0,
                                             ProcessingInstructions='4',
@@ -265,7 +266,8 @@ Output:
    trans1 = Load(Filename='INTER00013463.nxs')
    trans2 = Load(Filename='INTER00013464.nxs')
    # Basic reduction with two transmission runs
-   IvsQ, IvsLam, TRANS = ReflectometryReductionOne(InputWorkspace=run,
+   IvsQ, IvsLam, TRANS = ReflectometryReductionOne(Version = 2,
+                                                   InputWorkspace=run,
                                                    WavelengthMin=1.0,
                                                    WavelengthMax=17.0,
                                                    ProcessingInstructions='4',
