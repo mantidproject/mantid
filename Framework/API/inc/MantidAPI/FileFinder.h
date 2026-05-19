@@ -63,9 +63,7 @@ public:
   std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hintstr,
                                                             const Kernel::InstrumentInfo &instrument) const;
 
-private:
-  friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;
-
+  /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   struct FileInfo {
     std::string hint{};
     bool found{false};
@@ -77,6 +75,12 @@ private:
     std::vector<std::string> extensionsToSearch{};
     std::vector<Mantid::API::IArchiveSearch_sptr> archs{};
   };
+
+  /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
+  void performCacheSearch(std::vector<FileInfo> &fileInfos) const;
+
+private:
+  friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;
 
   /// a string that is allowed at the end of any run number
   static const std::string ALLOWED_SUFFIX;
@@ -91,7 +95,6 @@ private:
   void processFileInfos(std::vector<FileInfo> &fileInfos, const std::vector<std::string> &extensionsProvided,
                         bool useOnlyExtensionsProvided) const;
   void performFileSearch(std::vector<FileInfo> &fileInfos) const;
-  void performCacheSearch(std::vector<FileInfo> &fileInfos) const;
   void performArchiveSearch(std::vector<FileInfo> &fileInfos) const;
   const API::Result<std::filesystem::path> getISISInstrumentDataCachePath(const std::filesystem::path &cacheDir,
                                                                           const std::set<std::string> &hintstrs,
