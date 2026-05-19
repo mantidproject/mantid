@@ -85,7 +85,7 @@ class InstrumentRenderer(ABC):
         """Add the masked detector mesh to the plotter."""
 
     @abstractmethod
-    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None]) -> None:
+    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover=False) -> None:
         """Set up picking interaction on the plotter.
 
         Parameters

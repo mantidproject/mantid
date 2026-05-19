@@ -34,7 +34,6 @@ from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.widgets import Cursor
-from vtkmodules.vtkRenderingCore import vtkPointPicker
 
 import numpy as np
 import pyvista as pv
@@ -383,8 +382,6 @@ class FullInstrumentViewWindow(QMainWindow):
         self._overlay_meshes = []
         self._lineplot_overlays = []
         self._single_pixel_line = None
-        self._hover_point_picker = vtkPointPicker()
-        self._hover_pick_observer_id = None
 
         screen_geometry = self.screen().geometry()
         self.resize(int(screen_geometry.width() * 0.8), int(screen_geometry.height() * 0.8))
@@ -879,7 +876,6 @@ class FullInstrumentViewWindow(QMainWindow):
         """When closing, make sure to close the plotters and figure correctly to prevent errors"""
         self._closing = True
         super().closeEvent(QCloseEvent)
-        self.disable_hover_point_picking()
         with suppress(TypeError):
             self._contour_range_max_edit.disconnect()
             self._contour_range_min_edit.disconnect()

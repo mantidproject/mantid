@@ -25,6 +25,11 @@ class PointCloudRenderer(InstrumentRenderer):
     _PICKABLE_POINT_SIZE = 30
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
 
+    def __init__(self) -> None:
+        super().__init__()
+        self._mouse_move_observer_id = None
+        self._left_button_observer_id = None
+
     # ------------------------------------------------------------------ build
     def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
         return pv.PolyData(positions)
@@ -82,7 +87,7 @@ class PointCloudRenderer(InstrumentRenderer):
         )
 
     # --------------------------------------------------------------- picking
-    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None]) -> None:
+    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover=False) -> None:
         """Set up left-click point picking.  *callback* receives ``(detector_index: int)``."""
         plotter.disable_picking()
 
@@ -94,20 +99,40 @@ class PointCloudRenderer(InstrumentRenderer):
         picker.SetTolerance(picking_tolerance)
         interactor = plotter.iren
 
-        def _on_left_button_press(obj, event):
-            """Handle left mouse button press for picking."""
-            # Get the current mouse position from the interactor
-            x, y = interactor.get_event_position()
-            # Perform the pick operation
-            pick_result = picker.Pick(x, y, 0, plotter.renderer)
-            if pick_result > 0:
-                # Get the picked point ID
+        if self._mouse_move_observer_id is not None:
+            plotter.iren.style.RemoveObserver(self._mouse_move_observer_id)
+            self._mouse_move_observer_id = None
+
+        if self._left_button_observer_id is not None:
+            plotter.iren.style.RemoveObserver(self._left_button_observer_id)
+            self._left_button_observer_id = None
+
+        if hover:
+
+            def _on_mouse_move(_obj, _event):
+                x, y = interactor.get_event_position()
+                picker.Pick(x, y, 0, plotter.renderer)
                 point_id = picker.GetPointId()
                 if point_id >= 0:
                     callback(point_id)
 
-        # Register callback for left button press
-        plotter.iren.style.AddObserver("LeftButtonPressEvent", _on_left_button_press)
+            self._mouse_move_observer_id = plotter.iren.style.AddObserver("MouseMoveEvent", _on_mouse_move)
+        else:
+
+            def _on_left_button_press(obj, event):
+                """Handle left mouse button press for picking."""
+                # Get the current mouse position from the interactor
+                x, y = interactor.get_event_position()
+                # Perform the pick operation
+                pick_result = picker.Pick(x, y, 0, plotter.renderer)
+                if pick_result > 0:
+                    # Get the picked point ID
+                    point_id = picker.GetPointId()
+                    if point_id >= 0:
+                        callback(point_id)
+
+            # Register callback for left button press
+            self._left_button_observer_id = plotter.iren.style.AddObserver("LeftButtonPressEvent", _on_left_button_press)
 
     # -------------------------------------------------------------- scalars
     def set_detector_scalars(self, mesh: pv.PolyData, counts: np.ndarray, label: str) -> None:

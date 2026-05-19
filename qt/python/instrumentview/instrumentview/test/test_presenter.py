@@ -117,7 +117,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._presenter.update_detector_picker()
 
-        hover_callback = self._mock_view.enable_hover_point_picking.call_args.kwargs["callback"]
+        self._presenter._renderer.enable_picking.assert_called_once_with(self._mock_view.main_plotter, callback=mock.ANY, hover=True)
+        hover_callback = self._presenter._renderer.enable_picking.call_args.kwargs["callback"]
         hover_callback(3)
         hover_callback(3)
 
@@ -132,7 +133,11 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertTrue(self._presenter._single_pixel_mode)
         self._mock_view.set_single_pixel_mode_enabled.assert_called_once_with(True)
         self._presenter.update_detector_picker.assert_called_once()
+        self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.show_plot_for_detectors.assert_called_once_with(None)
+        self._mock_view.set_selected_detector_info.assert_called_once_with([])
+        self._mock_view.set_relative_detector_angle.assert_called_once_with(None)
+        self._mock_view.remove_peak_cursor_from_lineplot.assert_called_once()
 
     def test_on_select_single_pixel_toggled_off_restores_regular_plotting(self):
         self._presenter._single_pixel_mode = True

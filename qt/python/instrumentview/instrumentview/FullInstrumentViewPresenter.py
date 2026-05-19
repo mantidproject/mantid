@@ -369,7 +369,7 @@ class FullInstrumentViewPresenter:
                 self._last_hovered_workspace_index = workspace_index
                 self._update_single_pixel_plot(workspace_index)
 
-            self._view.enable_hover_point_picking(callback=point_hovered)
+            self._renderer.enable_picking(self._view.main_plotter, callback=point_hovered, hover=True)
             return
 
         def detector_picked(detector_index: int) -> None:
