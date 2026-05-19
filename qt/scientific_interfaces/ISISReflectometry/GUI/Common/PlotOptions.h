@@ -29,10 +29,20 @@ enum class DetectorMapYAxis { DetectorId, Theta };
 enum class AlignmentXAxis { DetectorId, Theta };
 
 struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotOutputOptions {
+  PlotOutputOptions() = default;
+  explicit PlotOutputOptions(PlotOutputType outputType) : outputType(outputType) {}
+  PlotOutputOptions(PlotOutputType outputType, DetectorMapXAxis detectorMapXAxis, DetectorMapYAxis detectorMapYAxis)
+      : outputType(outputType), detectorMapXAxis(detectorMapXAxis), detectorMapYAxis(detectorMapYAxis) {}
+  PlotOutputOptions(PlotOutputType outputType, DetectorMapXAxis detectorMapXAxis, DetectorMapYAxis detectorMapYAxis,
+                    AlignmentXAxis alignmentXAxis)
+      : outputType(outputType), detectorMapXAxis(detectorMapXAxis), detectorMapYAxis(detectorMapYAxis),
+        alignmentXAxis(alignmentXAxis) {}
+
   PlotOutputType outputType{PlotOutputType::ReflectivityCurve};
   DetectorMapXAxis detectorMapXAxis{DetectorMapXAxis::TimeOfFlight};
   DetectorMapYAxis detectorMapYAxis{DetectorMapYAxis::DetectorId};
   AlignmentXAxis alignmentXAxis{AlignmentXAxis::DetectorId};
+  std::string instrumentName;
 };
 
 struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotAxis {

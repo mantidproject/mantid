@@ -166,6 +166,7 @@ void PlottingPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState()
 void PlottingPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
 
 void PlottingPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
+  m_instrumentName = instrumentName;
   updateAvailablePlotOutputTypes(instrumentName);
 }
 
@@ -247,7 +248,8 @@ void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) const {
     return;
   }
 
-  auto const outputOptions = m_view->selectedPlotOutputOptions();
+  auto outputOptions = m_view->selectedPlotOutputOptions();
+  outputOptions.instrumentName = m_instrumentName;
   auto const workspacesToPlot = m_plottingModel->workspacesForPlotting(selectedWorkspaces, outputOptions);
   if (workspacesToPlot.empty()) {
     return;

@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <optional>
 
@@ -101,44 +102,42 @@ public:
 
   void testAlignmentCreatesPlotWorkspaceGroupWithDetectorIndexXAxisForSelectedWorkspace() {
     createConstantWorkspace("IvsQ_12345", -100.0);
-    createAlignmentInputWorkspace("raw_input_name", "12345", {1.0, 3.0, 6.0, 3.0, 1.0});
+    createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100, 7.0));
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
     auto const workspaces = workspaceSelections({"IvsQ_12345"});
 
-    auto const workspacesForPlotting =
-        model.workspacesForPlotting(workspaces, PlotOutputOptions{PlotOutputType::Alignment});
+    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputOptions());
 
     TS_ASSERT_EQUALS(workspacesForPlotting.size(), 1);
-    TS_ASSERT_EQUALS(workspacesForPlotting[0], "__isis_refl_align_0");
-    auto group =
-        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("__isis_refl_align_0");
+    TS_ASSERT_EQUALS(workspacesForPlotting[0], "__isis_refl_align_IvsQ_12345");
+    auto group = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(
+        "__isis_refl_align_IvsQ_12345");
     TS_ASSERT_EQUALS(group->size(), 3);
-    assertYValue("__isis_refl_align_0_raw", 6.0, 2);
-    assertXValue("__isis_refl_align_0_raw", 2.0, 2);
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_0_fitted_peak"));
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_0_peak_centre"));
+    assertYValue("__isis_refl_align_IvsQ_12345_raw_sub_bg", 6.0, 96);
+    assertXValue("__isis_refl_align_IvsQ_12345_raw_sub_bg", 96.0, 96);
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_fitted_peak"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_peak_centre"));
   }
 
   void testAlignmentCreatesOnePlotWorkspaceGroupPerSelectedWorkspace() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createConstantWorkspace("IvsQ_22345", -100.0);
-    createAlignmentInputWorkspace("raw_input_name_1", "12345", {1.0, 3.0, 6.0, 3.0, 1.0});
-    createAlignmentInputWorkspace("raw_input_name_2", "22345", {2.0, 5.0, 8.0, 5.0, 2.0});
+    createAlignmentInputWorkspace("raw_input_name_1", "12345", alignmentYValues(100, 7.0));
+    createAlignmentInputWorkspace("raw_input_name_2", "22345", alignmentYValues(110, 9.0));
     createTOFGroup({"raw_input_name_1", "raw_input_name_2"});
     auto model = PlottingModel{};
     auto const workspaces = std::vector<PlottingWorkspaceSelection>{workspaceSelection("IvsQ_12345", {"12345"}),
                                                                     workspaceSelection("IvsQ_22345", {"22345"})};
 
-    auto const workspacesForPlotting =
-        model.workspacesForPlotting(workspaces, PlotOutputOptions{PlotOutputType::Alignment});
+    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputOptions());
 
-    auto const expected = std::vector<std::string>{"__isis_refl_align_0", "__isis_refl_align_1"};
+    auto const expected = std::vector<std::string>{"__isis_refl_align_IvsQ_12345", "__isis_refl_align_IvsQ_22345"};
     TS_ASSERT_EQUALS(workspacesForPlotting, expected);
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_0"));
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_1"));
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_0_raw"));
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_1_raw"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_22345"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_raw_sub_bg"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_22345_raw_sub_bg"));
   }
 
   void testAlignmentDoesNotCreateWorkspaceForAddedRuns() {
@@ -149,29 +148,55 @@ public:
     auto const workspaces =
         std::vector<PlottingWorkspaceSelection>{workspaceSelection("IvsQ_12345+12346", {"12345", "12346"})};
 
-    auto const workspacesForPlotting =
-        model.workspacesForPlotting(workspaces, PlotOutputOptions{PlotOutputType::Alignment});
+    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputOptions());
 
     TS_ASSERT(workspacesForPlotting.empty());
   }
 
   void testAlignmentFindsPeriodSpecificTOFWorkspaceInTOFGroup() {
     createConstantWorkspace("IvsQ_12345_2", -100.0);
-    createAlignmentInputWorkspace("period_1_raw_input_name", "12345", {1.0, 3.0, 6.0, 3.0, 1.0}, 1);
-    createAlignmentInputWorkspace("period_2_raw_input_name", "12345", {2.0, 6.0, 9.0, 6.0, 2.0}, 2);
+    createAlignmentInputWorkspace("period_1_raw_input_name", "12345", alignmentYValues(100, 7.0), 1);
+    createAlignmentInputWorkspace("period_2_raw_input_name", "12345", alignmentYValues(100, 10.0), 2);
     createTOFGroup({"period_1_raw_input_name", "period_2_raw_input_name"});
     auto model = PlottingModel{};
     auto const workspaces = std::vector<PlottingWorkspaceSelection>{workspaceSelection("IvsQ_12345_2", {"12345"}, 2)};
 
-    auto const workspacesForPlotting =
-        model.workspacesForPlotting(workspaces, PlotOutputOptions{PlotOutputType::Alignment});
+    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputOptions());
 
-    auto const expected = std::vector<std::string>{"__isis_refl_align_0"};
+    auto const expected = std::vector<std::string>{"__isis_refl_align_IvsQ_12345_2"};
     TS_ASSERT_EQUALS(workspacesForPlotting, expected);
-    assertYValue("__isis_refl_align_0_raw", 9.0, 2);
+    assertYValue("__isis_refl_align_IvsQ_12345_2_raw_sub_bg", 9.0, 96);
+  }
+
+  void testAlignmentThrowsForUnsupportedInstrument() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100, 7.0));
+    createTOFGroup({"raw_input_name"});
+    auto model = PlottingModel{};
+    auto outputOptions = PlotOutputOptions{PlotOutputType::Alignment};
+    outputOptions.instrumentName = "UNKNOWN";
+
+    TS_ASSERT_THROWS(model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}), outputOptions),
+                     std::invalid_argument const &);
   }
 
 private:
+  PlotOutputOptions alignmentOutputOptions() {
+    auto outputOptions = PlotOutputOptions{PlotOutputType::Alignment};
+    outputOptions.instrumentName = "POLREF";
+    return outputOptions;
+  }
+
+  std::vector<double> alignmentYValues(size_t const peakWorkspaceIndex, double const peakHeight) {
+    auto values = std::vector<double>(644, 1.0);
+    auto const sigma = 4.0;
+    for (size_t index = 0; index < values.size(); ++index) {
+      auto const offset = static_cast<double>(index) - static_cast<double>(peakWorkspaceIndex);
+      values[index] += (peakHeight - 1.0) * std::exp(-0.5 * offset * offset / (sigma * sigma));
+    }
+    return values;
+  }
+
   PlottingWorkspaceSelection workspaceSelection(std::string workspaceName, std::vector<std::string> runNumbers,
                                                 std::optional<int> period = std::nullopt,
                                                 std::string const &workspaceGroupName = "") {

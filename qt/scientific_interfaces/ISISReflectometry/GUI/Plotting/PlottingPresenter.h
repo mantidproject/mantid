@@ -14,6 +14,7 @@
 #include "IPlottingView.h"
 #include "PlottingModel.h"
 
+#include <string>
 #include <unordered_map>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -53,6 +54,7 @@ private:
   IPlotOptionsProvider const *m_plotOptionsProvider;
   IPlottingModel const *m_plottingModel;
   std::unordered_map<std::string, PlottingWorkspaceSelection> m_workspaceSelections;
+  std::string m_instrumentName;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

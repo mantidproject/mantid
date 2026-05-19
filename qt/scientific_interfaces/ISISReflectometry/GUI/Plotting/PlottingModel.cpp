@@ -24,6 +24,8 @@
 #include <iterator>
 #include <optional>
 #include <sstream>
+#include <stdexcept>
+#include <unordered_map>
 #include <utility>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -47,6 +49,15 @@ const std::unordered_map<std::string, std::pair<int, int>> instrumentBackgroundI
 const std::unordered_map<std::string, std::pair<int, int>> instrumentDetectorIndexRegions{
     {"INTER", {0, 0}}, {"POLREF", {4, 643}}, {"OFFSPEC", {0, 0}}, {"SURF", {0, 0}}, {"CRISP", {0, 0}},
 };
+
+std::pair<int, int> regionForInstrument(std::unordered_map<std::string, std::pair<int, int>> const &regions,
+                                        std::string const &instrumentName) {
+  auto const region = regions.find(instrumentName);
+  if (region == regions.cend()) {
+    throw std::invalid_argument("Alignment plotting is not configured for instrument '" + instrumentName + "'.");
+  }
+  return region->second;
+}
 
 Mantid::API::IAlgorithm_sptr createAlgorithm(std::string const &name) {
   auto algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name);
@@ -76,12 +87,11 @@ Mantid::API::MatrixWorkspace_sptr integrateSpectra(Mantid::API::MatrixWorkspace_
   return algorithm->getProperty("OutputWorkspace");
 }
 
-Mantid::API::MatrixWorkspace_sptr extractDetectorSpectra(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+Mantid::API::MatrixWorkspace_sptr extractDetectorSpectra(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                                         std::string const &instrumentName) {
   auto algorithm = createAlgorithm("ExtractSpectra");
   algorithm->setProperty("InputWorkspace", workspace);
-  const auto &instrumentName = workspace->getInstrument()->getName();
-  const auto &idxMin = instrumentDetectorIndexRegions.at(instrumentName).first;
-  const auto &idxMax = instrumentDetectorIndexRegions.at(instrumentName).second;
+  auto const [idxMin, idxMax] = regionForInstrument(instrumentDetectorIndexRegions, instrumentName);
   algorithm->setProperty("StartWorkspaceIndex", idxMin);
   algorithm->setProperty("EndWorkspaceIndex", idxMax);
   algorithm->setProperty("OutputWorkspace", "__NotUsed__");
@@ -172,12 +182,11 @@ GaussianParameters findPeaks(Mantid::API::MatrixWorkspace_sptr const &workspace)
 
 Mantid::API::MatrixWorkspace_sptr subtractBackground(Mantid::API::MatrixWorkspace_sptr const &workspace,
                                                      Mantid::API::MatrixWorkspace_sptr const &rawWorkspace,
-                                                     AlignmentXAxis const xAxis) {
+                                                     AlignmentXAxis const xAxis, std::string const &instrumentName) {
   auto algorithm = createAlgorithm("CalculateFlatBackground");
   algorithm->setProperty("InputWorkspace", workspace);
   algorithm->setProperty("OutputWorkspace", "__NotUsed__");
-  const int idxMin = instrumentBackgroundIndexRegions.at(rawWorkspace->getInstrument()->getName()).first;
-  const int idxMax = instrumentBackgroundIndexRegions.at(rawWorkspace->getInstrument()->getName()).second;
+  auto const [idxMin, idxMax] = regionForInstrument(instrumentBackgroundIndexRegions, instrumentName);
   algorithm->setProperty("StartX", xValueForWorkspaceIndex(*rawWorkspace, idxMin, xAxis));
   algorithm->setProperty("EndX", xValueForWorkspaceIndex(*rawWorkspace, idxMax, xAxis));
   algorithm->execute();
@@ -353,7 +362,8 @@ std::string alignmentWorkspaceName(PlottingWorkspaceSelection const &workspace) 
   return std::string{alignmentWorkspacePrefix} + safeWorkspaceName(workspace.workspaceName);
 }
 
-std::string createAlignmentWorkspace(PlottingWorkspaceSelection const &workspace, AlignmentXAxis const xAxis) {
+std::string createAlignmentWorkspace(PlottingWorkspaceSelection const &workspace, AlignmentXAxis const xAxis,
+                                     std::string const &instrumentName) {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   auto const rawWorkspace = rawTOFWorkspaceForSelection(workspace);
   if (!rawWorkspace) {
@@ -365,11 +375,11 @@ std::string createAlignmentWorkspace(PlottingWorkspaceSelection const &workspace
   auto const fittedPeakWorkspace = outputWorkspace + "_fitted_peak";
   auto const peakCentreWorkspace = outputWorkspace + "_peak_centre";
 
-  auto detectorSpectraWorkspace = extractDetectorSpectra(rawWorkspace);
+  auto detectorSpectraWorkspace = extractDetectorSpectra(rawWorkspace, instrumentName);
   auto integratedWorkspace = integrateSpectra(detectorSpectraWorkspace);
   auto profileWorkspace = transpose(integratedWorkspace);
   setAlignmentXAxisValues(profileWorkspace, *detectorSpectraWorkspace, xAxis);
-  auto profileWorkspaceNoBG = subtractBackground(profileWorkspace, rawWorkspace, xAxis);
+  auto profileWorkspaceNoBG = subtractBackground(profileWorkspace, rawWorkspace, xAxis, instrumentName);
   auto fitParameters = findPeaks(profileWorkspaceNoBG);
   auto fitOutputWorkspace = fitGaussian(profileWorkspaceNoBG, fitParameters);
   auto fittedWorkspace = extractSpectrum(fitOutputWorkspace, 1);
@@ -388,10 +398,10 @@ std::string createAlignmentWorkspace(PlottingWorkspaceSelection const &workspace
 }
 
 std::vector<std::string> createAlignmentWorkspaces(std::vector<PlottingWorkspaceSelection> const &workspaces,
-                                                   AlignmentXAxis const xAxis) {
+                                                   AlignmentXAxis const xAxis, std::string const &instrumentName) {
   auto outputWorkspaces = std::vector<std::string>{};
   for (auto const &workspace : workspaces) {
-    auto outputWorkspace = createAlignmentWorkspace(workspace, xAxis);
+    auto outputWorkspace = createAlignmentWorkspace(workspace, xAxis, instrumentName);
     if (!outputWorkspace.empty()) {
       outputWorkspaces.emplace_back(std::move(outputWorkspace));
     }
@@ -406,7 +416,7 @@ std::vector<std::string> PlottingModel::workspacesForPlotting(std::vector<Plotti
     return createSpinAsymmetryWorkspaces(workspaces);
   }
   if (options.outputType == PlotOutputType::Alignment) {
-    return createAlignmentWorkspaces(workspaces, options.alignmentXAxis);
+    return createAlignmentWorkspaces(workspaces, options.alignmentXAxis, options.instrumentName);
   }
   return selectedWorkspaceNames(workspaces);
 }

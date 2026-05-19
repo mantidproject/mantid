@@ -100,6 +100,31 @@ public:
     presenter.notifyInstrumentChanged("POLREF");
   }
 
+  void testPlotPassesSelectedInstrumentToModel() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    auto const workspaces = std::vector<std::string>{"IvsQ_12345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const viewOutputOptions = PlotOutputOptions{PlotOutputType::Alignment};
+    auto expectedOutputOptions = viewOutputOptions;
+    expectedOutputOptions.instrumentName = "POLREF";
+
+    EXPECT_CALL(view, setAvailablePlotOutputTypes(testing::_)).Times(1);
+    presenter.notifyInstrumentChanged("POLREF");
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(viewOutputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, expectedOutputOptions))
+        .Times(1)
+        .WillOnce(Return(std::vector<std::string>{}));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(0);
+
+    presenter.notifyPlotIndividualClicked();
+  }
+
   void testRunsTableChangedShowsSuccessfulRowOutputWorkspacesInGroupAndRun() {
     NiceMock<MockPlottingView> view;
     PlottingPresenter presenter(&view);

@@ -13,7 +13,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 inline bool operator==(PlotOutputOptions const &lhs, PlotOutputOptions const &rhs) {
   return lhs.outputType == rhs.outputType && lhs.detectorMapXAxis == rhs.detectorMapXAxis &&
-         lhs.detectorMapYAxis == rhs.detectorMapYAxis && lhs.alignmentXAxis == rhs.alignmentXAxis;
+         lhs.detectorMapYAxis == rhs.detectorMapYAxis && lhs.alignmentXAxis == rhs.alignmentXAxis &&
+         lhs.instrumentName == rhs.instrumentName;
 }
 
 inline bool operator!=(PlotOutputOptions const &lhs, PlotOutputOptions const &rhs) { return !(lhs == rhs); }
