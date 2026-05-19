@@ -336,6 +336,7 @@ class FullInstrumentViewPresenter:
         self._view.reset_camera()
 
     def on_flip_beam_check_box_clicked(self) -> None:
+        self._view.store_flip_beam_option()
         self.update_plotter()
         self._view.reset_camera()
 
