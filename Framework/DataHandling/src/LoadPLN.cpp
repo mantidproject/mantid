@@ -30,7 +30,6 @@
 namespace Mantid::DataHandling {
 
 using namespace Kernel;
-using namespace ANSTO;
 
 namespace {
 
@@ -748,7 +747,7 @@ void LoadPLN::loadParameters(const std::string &hdfFile, API::LogManager &logm) 
 
   auto baseTime = GetNeXusValue<int32_t>(entry, "instrument/detector/start_time", 0, m_datasetIndex);
   uint64_t baseTimeNSec = static_cast<uint64_t>(baseTime) * 1'000'000'000;
-  m_startRun = Types::Core::DateAndTime(Anxs::epochRelDateTimeBase(baseTimeNSec)).toISO8601String();
+  m_startRun = Types::Core::DateAndTime(ANSTO::Anxs::epochRelDateTimeBase(baseTimeNSec)).toISO8601String();
 
   // Add support for instrument running in lambda on two mode.
   // Added as UI option as the available instrument parameters
