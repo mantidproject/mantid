@@ -206,9 +206,14 @@ def seq_to_list(iseqn: str) -> List[int]:
 
 def datasets_in_file(file_path: str) -> List[int]:
     # return an array with the dataset indexes
-    tags = [HdfKey("ds", "/entry1/instrument/detector/dataset_number/", None)]
-    values, _ = extract_hdf_params(file_path, tags)
-    return list(values["ds"])
+    if file_path.endswith(".nxs"):
+        tags = [HdfKey("ds", "/entry1/scan_dataset/value", None)]
+        values, _ = extract_hdf_params(file_path, tags)
+        return list(range(len(values["ds"])))
+    else:
+        tags = [HdfKey("ds", "/entry1/instrument/detector/dataset_number/", None)]
+        values, _ = extract_hdf_params(file_path, tags)
+        return list(values["ds"])
 
 
 def dataset_indexes(fpath: str, ds_seqn: str) -> List[int]:
@@ -709,7 +714,8 @@ class ScratchFolder:
                 del full_opts["SelectDetectorTubes"]
             except KeyError:
                 pass
-            full_opts["BinaryEventPath"] = find_event_folder(run, event_dirs)[0]
+            if "BinaryEventPath" in full_opts:
+                full_opts["BinaryEventPath"] = find_event_folder(run, event_dirs)[0]
             loader(Filename=run, OutputWorkspace=nxs_ws, **full_opts)
             SaveNexusProcessed(InputWorkspace=nxs_ws, Filename=fpath, CompressNexus=False)
 
@@ -783,7 +789,8 @@ def load_merge(
         if scratch:
             scratch.load_run_from_scratch(source, ds_index, loader, run_opts, tmp_ws, params, event_dirs, filter)
         else:
-            run_opts["BinaryEventPath"] = find_event_folder(source, event_dirs)[0]
+            if "BinaryEventPath" in run_opts:
+                run_opts["BinaryEventPath"] = find_event_folder(source, event_dirs)[0]
             loader(Filename=source, OutputWorkspace=tmp_ws, **run_opts)
         if check_file:
             try:
