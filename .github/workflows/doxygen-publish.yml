@@ -24,10 +24,8 @@ jobs:
         with:
           filters: .github/filters.yaml
 
-      - uses: prefix-dev/setup-pixi@v0.9.5
+      - uses: ./.github/actions/setup-pixi
         if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
-        with:
-          frozen: true
 
       - uses: ./.github/actions/doxygen-build
         name: build doxygen
