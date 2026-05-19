@@ -10,6 +10,7 @@
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
+#include "GUI/Plotting/IPlottingPresenter.h"
 #include "GUI/Preview/IPreviewPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
@@ -44,6 +45,7 @@ public:
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                  std::unique_ptr<ISavePresenter> savePresenter, std::unique_ptr<IPreviewPresenter> previewPresenter,
+                 std::unique_ptr<IPlottingPresenter> plottingPresenter,
                  MantidQt::MantidWidgets::IMessageHandler *messageHandler);
   BatchPresenter(BatchPresenter const &rhs) = delete;
   BatchPresenter(BatchPresenter &&rhs) = delete;
@@ -79,6 +81,7 @@ public:
   void notifyBatchLoaded() override;
   void notifyRowContentChanged(Row &changedRow) override;
   void notifyGroupNameChanged(Group &changedGroup) override;
+  void notifyRunsTableChanged() override;
   void notifyRunsTransferred() override;
   bool requestClose() const override;
   bool isProcessing() const override;
@@ -116,6 +119,7 @@ private:
   void notifyAutoreductionPaused();
   void autoreductionCompleted();
   void settingsChanged();
+  void updatePlottingWorkspaces();
 
   IBatchView *m_view;
   std::unique_ptr<IBatch> m_model;
@@ -126,6 +130,7 @@ private:
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   std::unique_ptr<ISavePresenter> m_savePresenter;
   std::unique_ptr<IPreviewPresenter> m_previewPresenter;
+  std::unique_ptr<IPlottingPresenter> m_plottingPresenter;
   bool m_unsavedBatchFlag;
   std::unique_ptr<MantidQt::API::IJobRunner> m_jobRunner;
   MantidQt::MantidWidgets::IMessageHandler *m_messageHandler;

@@ -35,10 +35,14 @@ set(TEST_FILES
     Common/DecoderTest.h
     Common/DetectorTest.h
     Common/EncoderTest.h
+    Common/PlotOptionsProviderTest.h
     Common/PlotterTestQt5.h
     Experiment/ExperimentPresenterTest.h
     Experiment/LookupTableValidatorTest.h
     Experiment/ExperimentOptionDefaultsTest.h
+    Plotting/PlottingModelTest.h
+    Plotting/PlottingPresenterTest.h
+    Plotting/QtPlottingViewTest.h
     Reduction/BatchLookupIndexTest.h
     Reduction/LookupTableTest.h
     Reduction/ReductionJobsMergeTest.h

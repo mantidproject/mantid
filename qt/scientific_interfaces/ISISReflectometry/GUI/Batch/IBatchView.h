@@ -9,6 +9,7 @@
 #include "GUI/Event/IEventView.h"
 #include "GUI/Experiment/IExperimentView.h"
 #include "GUI/Instrument/IInstrumentView.h"
+#include "GUI/Plotting/IPlottingView.h"
 #include "GUI/Preview/IPreviewView.h"
 #include "GUI/Runs/IRunsView.h"
 #include "GUI/Save/ISaveView.h"
@@ -33,6 +34,7 @@ public:
   virtual IExperimentView *experiment() const = 0;
   virtual IInstrumentView *instrument() const = 0;
   virtual IPreviewView *preview() const = 0;
+  virtual IPlottingView *plotting() const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

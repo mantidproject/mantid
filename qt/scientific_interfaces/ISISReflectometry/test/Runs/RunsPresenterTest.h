@@ -250,6 +250,12 @@ public:
     presenter->resumeAutoreduction();
   }
 
+  void testNotifyTableChangedNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifyRunsTableChanged()).Times(1);
+    presenter->notifyTableChanged();
+  }
+
   void testCheckDiscardChangesOnAutoreductionResumedIfUnsavedTableAndSearchResults() {
     auto presenter = makePresenter();
     presenter->notifyTableChanged();

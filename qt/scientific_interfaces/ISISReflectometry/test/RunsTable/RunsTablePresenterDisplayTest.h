@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
+#include "../Plotting/PlottingTestHelpers.h"
 #include "RunsTablePresenterTest.h"
 
 #include <cxxtest/TestSuite.h>
@@ -71,26 +72,11 @@ public:
     getRow(presenter, 0, 1)->setSuccess();
 
     auto const expected = std::vector<std::string>{"IvsQ_binned_2"};
-    EXPECT_CALL(m_plotter, reflectometryPlot(expected)).Times(1);
+    EXPECT_CALL(m_plotter, plot(PlotRequest{expected, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve,
+                                                                                   PlotLayout::Individual)}))
+        .Times(1);
 
     presenter.notifyPlotSelectedPressed();
-
-    verifyAndClearExpectations();
-  }
-
-  void testPlotSelectedStitchedOutputs() {
-    auto presenter = makePresenter(m_view, oneGroupWithTwoRowsWithOutputNamesModel());
-
-    // Set the group as selected and complete
-    selectedRowLocationsAre(m_jobs, {location(0)});
-    presenter.notifySelectionChanged();
-    getGroup(presenter, 0).setSuccess();
-    getGroup(presenter, 0).setOutputNames(std::vector<std::string>{"stitched_group"});
-
-    auto const expected = std::vector<std::string>{"stitched_group"};
-    EXPECT_CALL(m_plotter, reflectometryPlot(expected)).Times(1);
-
-    presenter.notifyPlotSelectedStitchedOutputPressed();
 
     verifyAndClearExpectations();
   }

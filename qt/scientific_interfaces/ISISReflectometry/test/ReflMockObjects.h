@@ -23,6 +23,7 @@
 #include "GUI/Instrument/InstrumentOptionDefaults.h"
 #include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "GUI/MainWindow/IMainWindowView.h"
+#include "GUI/Plotting/IPlottingPresenter.h"
 #include "GUI/Preview/ROIType.h"
 #include "GUI/Runs/IRunNotifier.h"
 #include "GUI/Runs/IRunsPresenter.h"
@@ -89,6 +90,7 @@ public:
   MOCK_METHOD0(notifyBatchLoaded, void());
   MOCK_METHOD1(notifyRowContentChanged, void(Row &));
   MOCK_METHOD1(notifyGroupNameChanged, void(Group &));
+  MOCK_METHOD0(notifyRunsTableChanged, void());
   MOCK_METHOD0(notifyRunsTransferred, void());
 
   MOCK_CONST_METHOD0(isProcessing, bool());
@@ -205,6 +207,17 @@ public:
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
+};
+
+class MockPlottingPresenter : public IPlottingPresenter {
+public:
+  MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
+  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyReductionResumed, void());
+  MOCK_METHOD0(notifyAutoreductionPaused, void());
+  MOCK_METHOD0(notifyAutoreductionResumed, void());
+  MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
+  MOCK_METHOD(void, notifyRunsTableChanged, (RunsTable const &), (override));
 };
 
 /**** Progress ****/
@@ -332,7 +345,7 @@ public:
 
 class MockPlotter : public IPlotter {
 public:
-  MOCK_CONST_METHOD1(reflectometryPlot, void(const std::vector<std::string> &));
+  MOCK_CONST_METHOD1(plot, void(PlotRequest const &));
 };
 
 /**** Saver ****/

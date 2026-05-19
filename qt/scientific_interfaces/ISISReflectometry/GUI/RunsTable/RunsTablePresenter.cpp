@@ -117,9 +117,10 @@ void makePastedGroupNamesUnique(Clipboard &clipboard,
 } // namespace
 
 RunsTablePresenter::RunsTablePresenter(IRunsTableView *view, std::vector<std::string> const &instruments,
-                                       double thetaTolerance, ReductionJobs jobs, const IPlotter &plotter)
+                                       double thetaTolerance, ReductionJobs jobs, const IPlotter &plotter,
+                                       const IPlotOptionsProvider &plotOptionsProvider)
     : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)), m_clipboard(),
-      m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
+      m_jobViewUpdater(m_view->jobs()), m_plotter(plotter), m_plotOptionsProvider(plotOptionsProvider) {
   m_view->subscribe(this);
 
   // Add Group to view and model, add row to this group in view and model.
@@ -352,7 +353,7 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
 
   if (m_model.reductionJobs().groups().size() == 0) {
     appendRowAndGroup();
-    notifyExpandAllRequested();
+    expandAllGroups();
     return;
   }
 
@@ -375,14 +376,16 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
   // Insert a new group (and include an expanded row, for usability) and then
   // delete the original "bad" group
   appendRowAndGroup();
-  notifyExpandAllRequested();
+  expandAllGroups();
 
   // After repairing the view and adding the Row and Group
   removeGroupsFromModel({0});
   removeGroupsFromView({0});
 }
 
-void RunsTablePresenter::notifyExpandAllRequested() { m_view->jobs().expandAll(); }
+void RunsTablePresenter::expandAllGroups() { m_view->jobs().expandAll(); }
+
+void RunsTablePresenter::notifyExpandAllRequested() { expandAllGroups(); }
 
 void RunsTablePresenter::notifyCollapseAllRequested() { m_view->jobs().collapseAll(); }
 
@@ -833,21 +836,7 @@ void RunsTablePresenter::notifyPlotSelectedPressed() {
   if (workspaces.empty())
     return;
 
-  m_plotter.reflectometryPlot(workspaces);
-}
-
-void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
-  std::vector<std::string> workspaces;
-  const auto groups = m_model.selectedGroups();
-
-  for (const auto *group : groups) {
-    if (group->state() == State::ITEM_SUCCESS)
-      workspaces.emplace_back(group->postprocessedWorkspaceName());
-  }
-
-  if (workspaces.empty())
-    return;
-
-  m_plotter.reflectometryPlot(workspaces);
+  m_plotter.plot(
+      {workspaces, m_plotOptionsProvider.optionsFor(PlotOutputType::ReflectivityCurve, PlotLayout::Individual)});
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
