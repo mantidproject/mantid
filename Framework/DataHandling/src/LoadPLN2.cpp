@@ -692,10 +692,7 @@ void LoadPLN2::loadDetectorL2Values() {
 void LoadPLN2::setupDetectorMasks(const std::vector<bool> &roi) {
 
   // count total number of masked bins
-  size_t maskedBins = 0;
-  for (size_t i = 0; i != roi.size(); i++)
-    if (!roi[i])
-      maskedBins++;
+  size_t maskedBins = std::count(roi.begin(), roi.end(), false);
 
   if (maskedBins > 0) {
     // create list of masked bins
