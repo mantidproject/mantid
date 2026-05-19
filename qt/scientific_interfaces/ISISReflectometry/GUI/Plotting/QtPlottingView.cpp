@@ -134,7 +134,8 @@ public:
 };
 } // namespace
 
-QtPlottingView::QtPlottingView(QWidget *parent) : QWidget(parent), m_notifyee(nullptr), m_updatingSelection(false) {
+QtPlottingView::QtPlottingView(QWidget *parent)
+    : QWidget(parent), m_notifyee(nullptr), m_outputOptionsEnabled(false), m_updatingSelection(false) {
   initLayout();
 }
 
@@ -158,6 +159,7 @@ void QtPlottingView::initLayout() {
           [this](QItemSelection const &selected, QItemSelection const &deselected) {
             updateChildSelection(deselected, QItemSelectionModel::Deselect);
             updateChildSelection(selected, QItemSelectionModel::Select);
+            updatePlotButtonEnabledStates();
           });
   connect(m_ui.plotPreset, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, [this](int) {
     clearWorkspaceSelection();
@@ -204,13 +206,19 @@ void QtPlottingView::setAvailablePlotOutputTypes(std::vector<PlotOutputType> con
 }
 
 void QtPlottingView::setOutputOptionControlsEnabled(bool enabled) {
-  m_ui.plotTiled->setEnabled(enabled);
-  m_ui.plotOverplot->setEnabled(enabled);
-  m_ui.plotIndividual->setEnabled(enabled);
+  m_outputOptionsEnabled = enabled;
+  updatePlotButtonEnabledStates();
   m_ui.plotPreset->setEnabled(enabled);
   m_ui.detectorMapYAxis->setEnabled(enabled);
   m_ui.detectorMapXAxis->setEnabled(enabled);
   m_ui.alignmentXAxis->setEnabled(enabled);
+}
+
+void QtPlottingView::updatePlotButtonEnabledStates() {
+  auto const selectedWorkspaceCount = selectedWorkspaceNames().size();
+  m_ui.plotIndividual->setEnabled(m_outputOptionsEnabled && selectedWorkspaceCount > 0);
+  m_ui.plotOverplot->setEnabled(m_outputOptionsEnabled && selectedWorkspaceCount > 1);
+  m_ui.plotTiled->setEnabled(m_outputOptionsEnabled && selectedWorkspaceCount > 1);
 }
 
 void QtPlottingView::updatePlotOutputProperties() {
@@ -234,6 +242,7 @@ void QtPlottingView::clearWorkspaceSelection() {
   m_updatingSelection = true;
   m_ui.workspaceTree->selectionModel()->clearSelection();
   m_updatingSelection = false;
+  updatePlotButtonEnabledStates();
 }
 
 void QtPlottingView::setWorkspaceItemsMutedForCurrentPlotOutputType() {
@@ -275,6 +284,7 @@ void QtPlottingView::setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> co
   }
   setWorkspaceItemsMutedForCurrentPlotOutputType();
   m_ui.workspaceTree->expandAll();
+  updatePlotButtonEnabledStates();
 }
 
 void QtPlottingView::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item) {
@@ -454,6 +464,7 @@ void QtPlottingView::selectSubtree(QModelIndex const &parentIndex, QItemSelectio
   m_ui.workspaceTree->selectionModel()->select(parentIndex, selectionFlags);
   updateChildSelection(parentIndex, selectionFlags);
   m_updatingSelection = false;
+  updatePlotButtonEnabledStates();
 }
 
 void QtPlottingView::updateChildSelection(QItemSelection const &selection,

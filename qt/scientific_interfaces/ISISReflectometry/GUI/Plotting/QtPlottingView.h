@@ -36,6 +36,7 @@ private:
 
   void initLayout();
   void setOutputOptionControlsEnabled(bool enabled);
+  void updatePlotButtonEnabledStates();
   void updatePlotOutputProperties();
   void clearWorkspaceSelection();
   void setWorkspaceItemsMutedForCurrentPlotOutputType();
@@ -61,6 +62,7 @@ private:
   Ui::PlottingWidget m_ui;
   QStandardItemModel m_workspaceModel;
   PlottingViewSubscriber *m_notifyee;
+  bool m_outputOptionsEnabled;
   bool m_updatingSelection;
 };
 

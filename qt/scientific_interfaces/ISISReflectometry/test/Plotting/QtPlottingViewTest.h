@@ -93,6 +93,73 @@ public:
     assertButton(optionsLayout->itemAt(12)->widget(), "plotTiled", "Plot tiled");
   }
 
+  void testPlotButtonsAreDisabledWhenNothingIsSelected() {
+    QtPlottingView view;
+
+    view.setOutputOptionsEnabled(true);
+
+    assertPlotButtonsEnabled(view, false, false, false);
+  }
+
+  void testPlotButtonIsEnabledForASingleSelectedWorkspace() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(1));
+    view.setOutputOptionsEnabled(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, workspaceIndex(tree));
+
+    assertPlotButtonsEnabled(view, true, false, false);
+  }
+
+  void testPlotButtonIsEnabledForAParentWithOneWorkspaceDescendant() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(1));
+    view.setOutputOptionsEnabled(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+
+    assertPlotButtonsEnabled(view, true, false, false);
+  }
+
+  void testAllPlotButtonsAreEnabledForMultipleSelectedWorkspaces() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    view.setOutputOptionsEnabled(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+
+    assertPlotButtonsEnabled(view, true, true, true);
+  }
+
+  void testPlotButtonsAreDisabledWhenOutputOptionsAreDisabled() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    view.setOutputOptionsEnabled(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+    view.setOutputOptionsEnabled(false);
+
+    assertPlotButtonsEnabled(view, false, false, false);
+  }
+
+  void testChangingPlotOutputTypeClearsSelectionAndDisablesPlotButtons() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::SpinAsymmetry});
+    view.setWorkspaceItems(workspaceItems());
+    view.setOutputOptionsEnabled(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+    plotPreset->setCurrentIndex(1);
+
+    assertPlotButtonsEnabled(view, false, false, false);
+  }
+
   void testReflectivityCurveHidesPlotOutputProperties() {
     QtPlottingView view;
 
@@ -558,7 +625,10 @@ public:
     QtPlottingView view;
     TestPlottingViewSubscriber subscriber;
     view.subscribe(&subscriber);
+    view.setWorkspaceItems(workspaceItems());
     view.setOutputOptionsEnabled(true);
+    auto tree = workspaceTree(view);
+    click(tree, groupIndex(tree));
 
     view.findChild<QPushButton *>("plotTiled")->click();
     view.findChild<QPushButton *>("plotOverplot")->click();
@@ -586,6 +656,12 @@ private:
     TS_ASSERT(button);
     TS_ASSERT_EQUALS(button->objectName().toStdString(), objectName);
     TS_ASSERT_EQUALS(button->text().toStdString(), text);
+  }
+
+  void assertPlotButtonsEnabled(QtPlottingView &view, bool individual, bool overplot, bool tiled) const {
+    TS_ASSERT_EQUALS(view.findChild<QPushButton *>("plotIndividual")->isEnabled(), individual);
+    TS_ASSERT_EQUALS(view.findChild<QPushButton *>("plotOverplot")->isEnabled(), overplot);
+    TS_ASSERT_EQUALS(view.findChild<QPushButton *>("plotTiled")->isEnabled(), tiled);
   }
 
   std::vector<PlottingWorkspaceTreeItem> workspaceItems() const {
