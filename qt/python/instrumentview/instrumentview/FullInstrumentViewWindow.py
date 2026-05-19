@@ -240,7 +240,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._count_scale_combo_box = NoWheelComboBox(self)
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
         self._flip_beam_check_box = QCheckBox()
-        self._flip_beam_check_box.setText("Flip Beam?")
+        self._flip_beam_check_box.setText("Flip Beam")
         self._flip_beam_check_box.setToolTip(
             "If checked, 2D projections are mirrored across the plane perpendicular to the beam direction."
         )
