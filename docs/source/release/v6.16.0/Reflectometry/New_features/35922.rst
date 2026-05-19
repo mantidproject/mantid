@@ -1,0 +1,1 @@
+- :ref:`algm-ReflectometryReductionOneAuto` has been refactored to make use of the new version of :ref:`algm-ReflectometryReductionOne`. In particular, the ``TaskExecutionOrder`` property is used to control the flow of the algorithm so that tasks are not repeated as part of the Polarization Correction workflow.

@@ -49,7 +49,11 @@ public:
   void setUp() override {
     // Needs other algorithms and functions to be registered
     FrameworkManager::Instance();
+    // Run serially so test values don't depend on number of cores
+    FrameworkManager::Instance().setNumOMPThreads(1);
   }
+
+  void tearDown() override { FrameworkManager::Instance().setNumOMPThreadsToConfigValue(); }
 
   void test_Init() {
     // Initialize FitPeak
@@ -218,8 +222,6 @@ public:
    */
   void test_multiPeaksMultiSpectra() {
     g_log.notice() << "TEST MULTIPLE PEAKS MULTI SPECTRA";
-    // run serially so values don't depend on no. cores etc.
-    FrameworkManager::Instance().setNumOMPThreads(1);
 
     const std::string data_ws_name("FitPeaksTest_ws_mPmS");
 
@@ -319,8 +321,6 @@ public:
    */
   void test_effectivePeakParameters() {
     g_log.notice() << "TEST EFFECTIVE PEAK PARAMS";
-    // run serially so values don't depend on no. cores etc.
-    FrameworkManager::Instance().setNumOMPThreads(1);
 
     const std::string data_ws_name("FitPeaksTest_ws_ePP");
 
@@ -816,8 +816,6 @@ public:
    */
   void test_multiPeaksMultiSpectraBackToBackExp_with_Param_xml() {
     g_log.notice() << "TEST MULTI PEAKS SPECTRA BACK TO BACK WITH PARAM XML";
-    // run serially so values don't depend on no. cores etc.
-    FrameworkManager::Instance().setNumOMPThreads(1);
 
     // Generate input workspace
     std::string input_ws_name =
@@ -920,8 +918,6 @@ public:
     AnalysisDataService::Instance().remove(param_ws_name);
     AnalysisDataService::Instance().remove(model_ws_name);
 
-    FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
-
     return;
   }
 
@@ -979,20 +975,28 @@ public:
     API::MatrixWorkspace_sptr main_out_ws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("PeakPositionsWS_oFE"));
     TS_ASSERT(main_out_ws);
+    if (!main_out_ws)
+      return;
     TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
 
     API::MatrixWorkspace_sptr plot_ws =
         std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("FittedPeaksWS_oFE"));
     TS_ASSERT(plot_ws);
+    if (!plot_ws)
+      return;
     TS_ASSERT_EQUALS(plot_ws->getNumberHistograms(), 3);
 
     API::ITableWorkspace_sptr param_ws = std::dynamic_pointer_cast<API::ITableWorkspace>(
         AnalysisDataService::Instance().retrieve("PeakParametersWS_oFE"));
     TS_ASSERT(param_ws);
+    if (!param_ws)
+      return;
     TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
     API::ITableWorkspace_sptr error_table =
         std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve("FitErrorsWS_oFE"));
     TS_ASSERT(error_table);
+    if (!error_table)
+      return;
     // shall be same number of rows to OutputPeakParametersWorkspace
     // (PeakParametersWS)
     TS_ASSERT_EQUALS(error_table->rowCount(), param_ws->rowCount());

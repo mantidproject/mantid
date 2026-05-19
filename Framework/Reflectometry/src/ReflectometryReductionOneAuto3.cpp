@@ -60,29 +60,9 @@ static const std::string DEFAULT_FLIPPERS_NO_ANALYSER{"0, 1"};
 static const std::string DEFAULT_FLIPPERS_FULL{"00, 01, 10, 11"};
 } // namespace CorrectionOption
 
-std::vector<std::string> getGroupMemberNames(const std::string &groupName) {
+Algorithm::WorkspaceVector getGroupMembers(const std::string &groupName) {
   auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
-  return group->getNames();
-}
-
-std::string vectorToString(const std::vector<std::string> &vec) {
-  std::string result;
-  for (const auto &item : vec) {
-    if (!result.empty())
-      result += ",";
-    result += item;
-  }
-  return result;
-}
-
-void removeAllWorkspacesFromGroup(const std::string &groupName) {
-  auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
-  group->removeAll();
-}
-
-void removeWorkspacesFromADS(const std::vector<std::string> &workspaceNames) {
-  for (const auto &workspaceName : workspaceNames)
-    AnalysisDataService::Instance().remove(workspaceName);
+  return group->getAllItems();
 }
 
 bool anyWorkspaceInListExists(std::vector<std::string> const &names) {
@@ -126,24 +106,17 @@ const std::string ReflectometryReductionOneAuto3::summary() const {
  *
  * @return :: void
  */
-void ReflectometryReductionOneAuto3::getTransmissionRun(std::map<std::string, std::string> &results,
-                                                        WorkspaceGroup_sptr &workspaceGroup,
-                                                        const std::string &transmissionRun) {
+void ReflectometryReductionOneAuto3::validateTransmissionRun(std::map<std::string, std::string> &results,
+                                                             const std::string &transmissionRun) {
   const std::string str = getPropertyValue(transmissionRun);
   if (!str.empty()) {
     auto transmissionGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(str);
     // If it is not a group, we don't need to validate its size
     if (!transmissionGroup)
       return;
-
-    const bool polarizationCorrections = getProperty("PolarizationAnalysis");
-
-    if (workspaceGroup->size() != transmissionGroup->size() && !polarizationCorrections) {
-      // If they are not the same size then we cannot associate a transmission
-      // group member with every input group member.
-      results[transmissionRun] = transmissionRun + " group must be the "
-                                                   "same size as the InputWorkspace group "
-                                                   "when polarization analysis is false.";
+    g_log.warning("Transmission run provided as a group. Only the first member of the group will be used.");
+    if (transmissionGroup->size() < 1) {
+      results[transmissionRun] = transmissionRun + " group is empty. ";
     }
   }
 }
@@ -164,8 +137,8 @@ std::map<std::string, std::string> ReflectometryReductionOneAuto3::validateInput
     return results;
 
   // First and second transmission runs
-  getTransmissionRun(results, group, "FirstTransmissionRun");
-  getTransmissionRun(results, group, "SecondTransmissionRun");
+  validateTransmissionRun(results, "FirstTransmissionRun");
+  validateTransmissionRun(results, "SecondTransmissionRun");
 
   return results;
 }
@@ -221,6 +194,20 @@ auto ReflectometryReductionOneAuto3::getOutputWorkspaceNames() -> WorkspaceNames
   else
     result.iVsLam = getPropertyValue("OutputWorkspaceWavelength");
 
+  const MatrixWorkspace_const_sptr &firstTransRun = getWorkspaceFromProperty("FirstTransmissionRun");
+  const MatrixWorkspace_const_sptr &secondTransRun = getWorkspaceFromProperty("SecondTransmissionRun");
+  if (firstTransRun != nullptr && firstTransRun->getAxis(0)->unit()->unitID() != "TOF") {
+    result.trans = firstTransRun->getName();
+  } else if (firstTransRun != nullptr && secondTransRun != nullptr) {
+    const std::string &firstTransRunNo = getRunNumber(*firstTransRun);
+    const std::string &secondTransRunNo = getRunNumber(*secondTransRun);
+    result.trans = TRANS_LAM_PREFIX + firstTransRunNo + secondTransRunNo;
+    result.trans1 = TRANS_LAM_PREFIX + firstTransRunNo;
+    result.trans2 = TRANS_LAM_PREFIX + secondTransRunNo;
+  } else if (firstTransRun != nullptr) {
+    const std::string &firstTransRunNo = getRunNumber(*firstTransRun);
+    result.trans = TRANS_LAM_PREFIX + firstTransRunNo;
+  }
   return result;
 }
 
@@ -229,15 +216,20 @@ void ReflectometryReductionOneAuto3::setDefaultOutputWorkspaceNames() {
   const bool isDebug = getProperty("Debug");
   auto outputNames = getOutputWorkspaceNames();
 
-  if (isDefault("OutputWorkspaceBinned")) {
+  if (isDefault("OutputWorkspaceBinned"))
     setPropertyValue("OutputWorkspaceBinned", outputNames.iVsQBinned);
-  }
-  if (isDefault("OutputWorkspace")) {
+  if (isDefault("OutputWorkspace"))
     setPropertyValue("OutputWorkspace", outputNames.iVsQ);
-  }
-  if (isDebug && isDefault("OutputWorkspaceWavelength")) {
+  if (isDebug && isDefault("OutputWorkspaceWavelength"))
     setPropertyValue("OutputWorkspaceWavelength", outputNames.iVsLam);
-  }
+
+  // If no output transmission workspace name is provided, used the default
+  if (!isDefault("FirstTransmissionRun") && getPropertyValue("OutputWorkspaceTransmission").empty())
+    setPropertyValue("OutputWorkspaceTransmission", outputNames.trans);
+  if (isDebug && !isDefault("FirstTransmissionRun") && getPropertyValue("OutputWorkspaceFirstTransmission").empty())
+    setPropertyValue("OutputWorkspaceFirstTransmission", outputNames.trans1);
+  if (isDebug && !isDefault("SecondTransmissionRun") && getPropertyValue("OutputWorkspaceSecondTransmission").empty())
+    setPropertyValue("OutputWorkspaceSecondTransmission", outputNames.trans2);
 }
 
 /** Initialize the algorithm's properties.
@@ -352,21 +344,36 @@ void ReflectometryReductionOneAuto3::init() {
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("HideSummedWorkspaces", false, Direction::Input),
                   "Whether to hide the workspaces created from the sum banks step, if performed.");
+
+  m_correctionProperties = CorrectionProperties{};
 }
 
-/** Execute the algorithm.
- */
-void ReflectometryReductionOneAuto3::exec() {
-  applyFloodCorrections();
-  sumBanks();
-  setDefaultOutputWorkspaceNames();
-
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+// Performs the reduction using ReflectometryReductionOne
+ReflectometryReductionOneAuto3::RROOutputs
+ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputWS,
+                                                     const std::vector<std::string> &taskOrder, const bool runAsChild,
+                                                     const bool applyFloodCorrections) {
   auto instrument = inputWS->getInstrument();
+  MatrixWorkspace_sptr flood = (applyFloodCorrections) ? getFloodWorkspace(instrument) : MatrixWorkspace_sptr{};
+  if (flood) {
+    inputWS = runFloodCorrectionAlg(flood, inputWS);
+  }
+
   bool const isDebug = getProperty("Debug");
 
   Algorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
+
+  // Run as a non-child to enable workspace history for groups
+  if (!runAsChild) {
+    alg->setChild(runAsChild);
+    alg->setAlwaysStoreInADS(false);
+    alg->setRethrows(true);
+  }
+
+  // Task order
+  alg->setProperty("TaskExecutionOrder", taskOrder);
+
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
   alg->setProperty("ReductionType", getPropertyValue("ReductionType"));
@@ -379,6 +386,7 @@ void ReflectometryReductionOneAuto3::exec() {
   alg->setProperty("WavelengthMax", wavMax);
 
   convertProcessingInstructions(instrument, inputWS);
+
   alg->setProperty("ProcessingInstructions", m_processingInstructions);
   // Now that we know the detectors of interest, we can move them if
   // necessary (i.e. if theta is given). If not, we calculate theta from the
@@ -399,19 +407,18 @@ void ReflectometryReductionOneAuto3::exec() {
 
   // Pass theta to the child algorithm
   alg->setProperty("ThetaIn", theta);
-
-  if (correctDetectors) {
+  if (correctDetectors)
     inputWS = correctDetectorPositions(inputWS, 2 * theta);
-  }
 
   // Optional properties
 
   alg->setPropertyValue("TransmissionProcessingInstructions", getPropertyValue("TransmissionProcessingInstructions"));
   populateMonitorProperties(alg, instrument);
   alg->setPropertyValue("NormalizeByIntegratedMonitors", getPropertyValue("NormalizeByIntegratedMonitors"));
-  bool transRunsFound = populateTransmissionProperties(alg);
+
+  bool transRunsFound = populateTransmissionProperties(alg, flood);
   if (!transRunsFound)
-    populateAlgorithmicCorrectionProperties(alg, instrument);
+    populateAlgorithmicCorrectionProperties(alg);
 
   alg->setPropertyValue("SubtractBackground", getPropertyValue("SubtractBackground"));
   alg->setPropertyValue("BackgroundProcessingInstructions", getPropertyValue("BackgroundProcessingInstructions"));
@@ -420,44 +427,103 @@ void ReflectometryReductionOneAuto3::exec() {
   alg->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
 
   alg->setProperty("InputWorkspace", inputWS);
+  alg->setPropertyValue("OutputWorkspace", "MainOutputWorkspace");
+  alg->setPropertyValue("OutputWorkspaceWavelength", "WavelengthOutputWorkspace");
+  alg->setPropertyValue("OutputWorkspaceQ", "QOutputWorkspace");
+
   alg->execute();
 
-  // Set the unbinned output workspace in Q, scaled and cropped if necessary
-  MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
-  IvsQ = scale(IvsQ);
-  const auto params = getRebinParams(IvsQ, theta);
-  auto IvsQC = cropQ(IvsQ, params);
-  setProperty("OutputWorkspace", IvsQC);
+  return {.IvsQ = alg->getProperty("OutputWorkspaceQ"),
+          .IvsLam = alg->getProperty("OutputWorkspaceWavelength"),
+          .trans = alg->getProperty("OutputWorkspaceTransmission"),
+          .trans1 = alg->getProperty("OutputWorkspaceFirstTransmission"),
+          .trans2 = alg->getProperty("OutputWorkspaceSecondTransmission"),
+          .out = alg->getProperty("OutputWorkspace"),
+          .theta = theta};
+}
 
-  // Set the binned output workspace in Q
-  if (params.hasQStep()) {
-    MatrixWorkspace_sptr IvsQB = rebin(IvsQ, params);
-    setProperty("OutputWorkspaceBinned", IvsQB);
-  } else {
-    g_log.error("NRCalculateSlitResolution failed. Workspace in Q will not be "
-                "rebinned. Please provide dQ/Q.");
-    setProperty("OutputWorkspaceBinned", IvsQC);
+void ReflectometryReductionOneAuto3::postReductionProcessingGroups(std::vector<RROOutputs> &outputs,
+                                                                   std::vector<WorkspaceNames> const &outputNames,
+                                                                   const WorkspaceNames &groupedOutputNames,
+                                                                   const bool outputIvsLam) {
+  RebinParams params;
+  for (std::size_t i = 0; i < outputs.size(); ++i) {
+    auto &out = outputs[i];
+    params = getRebinParams(out.IvsQ, out.theta);
+    const auto binnedWS = postReductionProcessing(out, params);
+    AnalysisDataService::Instance().addOrReplace(outputNames[i].iVsQBinned, binnedWS);
+    AnalysisDataService::Instance().addOrReplace(outputNames[i].iVsQ, out.IvsQ);
+    if (outputIvsLam) // If polarization analysis is off, add iVsLam to ADS here. Otherwise it is done inside the
+                      // polarization correction algorithms.
+      AnalysisDataService::Instance().addOrReplace(outputNames[i].iVsLam, out.IvsLam);
+    if (out.trans)
+      AnalysisDataService::Instance().addOrReplace(outputNames[i].trans, out.trans);
+    if (out.trans1)
+      AnalysisDataService::Instance().addOrReplace(outputNames[i].trans1, out.trans1);
+    if (out.trans2)
+      AnalysisDataService::Instance().addOrReplace(outputNames[i].trans2, out.trans2);
   }
+  setOutputGroupedWorkspaces(outputNames, groupedOutputNames, outputIvsLam, outputs.front().trans != nullptr,
+                             outputs.front().trans1 != nullptr, outputs.front().trans2 != nullptr);
+  // Update properties using last run
+  updatePropertiesAfterReduction(outputs.back(), params);
+  // Doesn't look like we set transmission workspaces for groups.
+}
 
-  // Set the output workspace in wavelength, if debug outputs are enabled
-  if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
-    MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
-    setProperty("OutputWorkspaceWavelength", IvsLam);
-  }
+void ReflectometryReductionOneAuto3::setOutputWorkspaces(const RROOutputs &out, const MatrixWorkspace_sptr &binnedWS) {
+  // Set the output workspace in wavelength
+  if (!isDefault("OutputWorkspaceWavelength") || isChild())
+    setProperty("OutputWorkspaceWavelength", out.IvsLam);
+  setProperty("OutputWorkspaceBinned", binnedWS);
+  setProperty("OutputWorkspaceTransmission", out.trans);
+  setProperty("OutputWorkspaceFirstTransmission", out.trans1);
+  setProperty("OutputWorkspaceSecondTransmission", out.trans2);
+}
 
-  // Set the output transmission workspaces
-  setWorkspacePropertyFromChild(alg, "OutputWorkspaceTransmission");
-  setWorkspacePropertyFromChild(alg, "OutputWorkspaceFirstTransmission");
-  setWorkspacePropertyFromChild(alg, "OutputWorkspaceSecondTransmission");
-
+void ReflectometryReductionOneAuto3::updatePropertiesAfterReduction(RROOutputs &out, const RebinParams &params) {
+  // Currently we only do this on the last group
   // Set other properties so they can be updated in the Reflectometry interface
-  setProperty("ThetaIn", theta);
+  setProperty("ThetaIn", out.theta);
   setProperty("MomentumTransferMin", params.qMin);
   setProperty("MomentumTransferMax", params.qMax);
   if (params.hasQStep())
     setProperty("MomentumTransferStep", -(*params.qStep));
   if (getPointerToProperty("ScaleFactor")->isDefault())
     setProperty("ScaleFactor", 1.0);
+}
+
+MatrixWorkspace_sptr ReflectometryReductionOneAuto3::postReductionProcessing(const RROOutputs &out,
+                                                                             const RebinParams &params) {
+  // Set the unbinned output workspace in Q, scaled and cropped if necessary
+  MatrixWorkspace_sptr IvsQ = scale(out.IvsQ);
+  auto IvsQC = cropQ(IvsQ, params);
+  setProperty("OutputWorkspace", IvsQC);
+
+  MatrixWorkspace_sptr binnedWS;
+  // Generate the binned output workspace in Q
+  if (params.hasQStep()) {
+    binnedWS = rebin(IvsQ, params);
+  } else {
+    g_log.error("NRCalculateSlitResolution failed. Workspace in Q will not be "
+                "rebinned. Please provide dQ/Q.");
+    binnedWS = IvsQC;
+  }
+  return binnedWS;
+}
+
+/** Execute the algorithm.
+ */
+void ReflectometryReductionOneAuto3::exec() {
+  sumBanks();
+  setDefaultOutputWorkspaceNames();
+
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  determineCorrectionAlgorithm(inputWS->getInstrument());
+  RROOutputs out = performCoreReduction(inputWS);
+  const auto params = getRebinParams(out.IvsQ, out.theta);
+  const auto binnedWS = postReductionProcessing(out, params);
+  setOutputWorkspaces(out, binnedWS);
+  updatePropertiesAfterReduction(out, params);
 }
 
 /** Returns the detectors of interest, specified via processing instructions.
@@ -471,7 +537,7 @@ void ReflectometryReductionOneAuto3::exec() {
 std::vector<std::string> ReflectometryReductionOneAuto3::getDetectorNames(const MatrixWorkspace_sptr &inputWS) {
   std::vector<std::string> wsIndices;
   boost::split(wsIndices, m_processingInstructionsWorkspaceIndex, boost::is_any_of(":,-+"));
-  // vector of comopnents
+  // vector of components
   std::vector<std::string> detectors;
 
   try {
@@ -556,27 +622,24 @@ double ReflectometryReductionOneAuto3::calculateTheta(const MatrixWorkspace_sptr
   return theta * 0.5;
 }
 
-/** Set algorithmic correction properties
- *
- * @param alg :: ReflectometryReductionOne algorithm
- * @param instrument :: The instrument attached to the workspace
- */
-void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(const IAlgorithm_sptr &alg,
-                                                                             const Instrument_const_sptr &instrument) {
+void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(const Instrument_const_sptr &instrument) {
+  CorrectionProperties corrProps;
+  // if a trans workspace is provided, algorithmic correction not performed.
+  const auto &firstWS = getWorkspaceFromProperty("FirstTransmissionRun");
+  if (firstWS) {
+    corrProps.type = "None";
+    m_correctionProperties = corrProps;
+    return;
+  }
 
-  // With algorithmic corrections, monitors should not be integrated, see below
   const std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");
   if (correctionAlgorithm == "PolynomialCorrection") {
-    alg->setProperty("NormalizeByIntegratedMonitors", false);
-    alg->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
-    alg->setPropertyValue("Polynomial", getPropertyValue("Polynomial"));
-
+    corrProps.type = correctionAlgorithm;
+    corrProps.polynomial = getPropertyValue("Polynomial");
   } else if (correctionAlgorithm == "ExponentialCorrection") {
-    alg->setProperty("NormalizeByIntegratedMonitors", false);
-    alg->setProperty("CorrectionAlgorithm", "ExponentialCorrection");
-    alg->setProperty("C0", getPropertyValue("C0"));
-    alg->setProperty("C1", getPropertyValue("C1"));
-
+    corrProps.type = correctionAlgorithm;
+    corrProps.c0 = getPropertyValue("C0");
+    corrProps.c1 = getPropertyValue("C1");
   } else if (correctionAlgorithm == "AutoDetect") {
     // Figure out what to do from the instrument
     try {
@@ -594,8 +657,8 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(con
           throw std::runtime_error("Could not find parameter 'polystring' in "
                                    "parameter file. Cannot apply polynomial "
                                    "correction.");
-        alg->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
-        alg->setProperty("Polynomial", polyVec[0]);
+        corrProps.type = "PolynomialCorrection";
+        corrProps.polynomial = polyVec[0];
       } else if (correctionStr == "exponential") {
         const auto c0Vec = instrument->getNumberParameter("C0");
         if (c0Vec.empty())
@@ -605,16 +668,34 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(con
         if (c1Vec.empty())
           throw std::runtime_error("Could not find parameter 'C1' in parameter "
                                    "file. Cannot apply exponential correction.");
-
-        alg->setProperty("CorrectionAlgorithm", "ExponentialCorrection");
-        alg->setProperty("C0", c0Vec[0]);
-        alg->setProperty("C1", c1Vec[0]);
+        corrProps.type = "ExponentialCorrection";
+        corrProps.c0 = std::to_string(c0Vec[0]);
+        corrProps.c1 = std::to_string(c1Vec[0]);
       }
-      alg->setProperty("NormalizeByIntegratedMonitors", false);
     } catch (std::runtime_error &e) {
       g_log.error() << e.what() << ". Algorithmic correction will not be performed.";
-      alg->setProperty("CorrectionAlgorithm", "None");
+      corrProps.type = "None";
     }
+  } else {
+    corrProps.type = "None";
+  }
+  m_correctionProperties = corrProps;
+}
+
+/** Set algorithmic correction properties
+ *
+ * @param alg :: ReflectometryReductionOne algorithm
+ */
+void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(const IAlgorithm_sptr &alg) {
+  if (m_correctionProperties.type == "PolynomialCorrection") {
+    alg->setProperty("NormalizeByIntegratedMonitors", false);
+    alg->setProperty("CorrectionAlgorithm", m_correctionProperties.type);
+    alg->setPropertyValue("Polynomial", m_correctionProperties.polynomial);
+  } else if (m_correctionProperties.type == "ExponentialCorrection") {
+    alg->setProperty("NormalizeByIntegratedMonitors", false);
+    alg->setProperty("CorrectionAlgorithm", m_correctionProperties.type);
+    alg->setProperty("C0", m_correctionProperties.c0);
+    alg->setProperty("C1", m_correctionProperties.c1);
   } else {
     alg->setProperty("CorrectionAlgorithm", "None");
   }
@@ -666,8 +747,7 @@ std::optional<double> ReflectometryReductionOneAuto3::getQStep(const MatrixWorks
 /** Rebin a workspace in Q.
  *
  * @param inputWS :: the workspace in Q
- * @param params :: A vector containing the three rebin parameters (min, step
- * and max)
+ * @param params :: the rebin parameters
  * @return :: the output workspace
  */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto3::rebin(const MatrixWorkspace_sptr &inputWS,
@@ -706,9 +786,8 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::scale(MatrixWorkspace_sptr 
 
 /** Optionally crop a workspace in Q.
  *
- * @param inputWS :: the workspace to scale
- * @param params :: A vector containing the three rebin parameters (min, step
- * and max)
+ * @param inputWS :: the workspace to crop
+ * @param params :: the rebin parameters containing the crop limits
  * @return :: the rebinned workspace if a min/max was set, or the unchanged
  * input workspace otherwise.
  */
@@ -755,117 +834,28 @@ bool ReflectometryReductionOneAuto3::checkGroups() {
           AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName));
 } // namespace Algorithms
 
-/** Set up the transmission properties on the child algorithm when processing
- * workspace groups.
- *
- * If a transmission input is a matrix workspace, it is applied to all of the
- * workspaces in the input workspace group. If it is a workspace group, then
- * only the first workspace in the group is used, and again is applied to all
- * of the workspaces in the input workspace group.
- */
-void ReflectometryReductionOneAuto3::setTransmissionProperties(const Algorithm_sptr &alg,
-                                                               std::string const &propertyName) {
-
-  // Get the input transmission workspace. Note that we have to get it by name
-  // and retrieve it from the ADS because the property type is MatrixWorkspace
-  // so we can't access it using getProperty if it is a WorkspaceGroup.
-  const auto inputName = getPropertyValue(propertyName);
-  if (inputName.empty())
-    return;
-
-  auto inputWS = AnalysisDataService::Instance().retrieveWS<Workspace>(inputName);
-  if (!inputWS)
-    return;
-
-  MatrixWorkspace_sptr transWS;
-  if (inputWS->isGroup()) {
-    g_log.information(std::string("A group has been passed as ") + propertyName +
-                      std::string("; only the first workspace in the group will be used"));
-    auto groupWS = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
-    transWS = std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(0));
-  } else {
-    transWS = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
-  }
-
-  alg->setProperty(propertyName, transWS);
-}
-
-/** Used by processGroups to set up the algorithm to run on each group member.
- *
- * @param inputName : the input workspace name
- * @param outputNames : a struct holding the names to be set for the output
- * workspaces
- * @param recalculateIvsQ : set to true if recalculating IvsQ from existing
- * IvsLam outputs
- */
-Algorithm_sptr ReflectometryReductionOneAuto3::createAlgorithmForGroupMember(std::string const &inputName,
-                                                                             WorkspaceNames const &outputNames,
-                                                                             bool recalculateIvsQ) {
-  // Create a copy of ourselves
-  Algorithm_sptr alg = createChildAlgorithm(name(), -1, -1, isLogging(), version());
-  alg->setChild(false);
-  alg->setRethrows(true);
-
-  // Copy all the non-workspace properties over
-  const std::vector<Property *> props = getProperties();
-  for (const auto &prop : props) {
-    if (prop) {
-      IWorkspaceProperty const *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
-      if (!wsProp)
-        alg->setPropertyValue(prop->name(), prop->value());
-    }
-  }
-
-  alg->setProperty("InputWorkspace", inputName);
-  alg->setProperty("Debug", true);
-  alg->setProperty("OutputWorkspace", outputNames.iVsQ);
-  alg->setProperty("OutputWorkspaceBinned", outputNames.iVsQBinned);
-  alg->setProperty("OutputWorkspaceWavelength", outputNames.iVsLam);
-
-  if (!recalculateIvsQ) {
-    setTransmissionProperties(alg, "FirstTransmissionRun");
-    setTransmissionProperties(alg, "SecondTransmissionRun");
-
-    if (!isDefault("FloodWorkspace")) {
-      MatrixWorkspace_sptr flood = getProperty("FloodWorkspace");
-      alg->setProperty("FloodWorkspace", flood);
-    }
-  } else {
-    // A correction algorithm may be applied by default so if we don't want to
-    // apply corrections explicitly set it to None
-    alg->setProperty("CorrectionAlgorithm", "None");
-    // Change the processing instructions because the input has already been
-    // summed, so only has a single spectrum
-    auto currentWorkspace =
-        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputNames.iVsLam));
-    auto newProcInst = convertToSpectrumNumber("0", currentWorkspace);
-    alg->setProperty("ProcessingInstructions", newProcInst);
-    // We only want to recalculate IvsQ, so we should not perform the sum banks or background subtraction steps
-    alg->setProperty("SubtractBackground", false);
-    alg->setProperty("BackgroundProcessingInstructions", "");
-    alg->setProperty("ROIDetectorIDs", "");
-  }
-
-  return alg;
-}
-
-void ReflectometryReductionOneAuto3::groupWorkspaces(const std::vector<std::string> &workspaceNames,
-                                                     std::string const &outputName) {
+WorkspaceGroup_sptr ReflectometryReductionOneAuto3::groupWorkspaces(const std::vector<std::string> &workspaceNames,
+                                                                    std::string const &outputName) {
   if (anyWorkspaceInListExists(workspaceNames)) {
     Algorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
-    groupAlg->setChild(false);
+    if (!outputName.empty())
+      groupAlg->setChild(false);
+    groupAlg->setProperty("OutputWorkspace", outputName);
     groupAlg->setRethrows(true);
     groupAlg->setProperty("InputWorkspaces", workspaceNames);
-    groupAlg->setProperty("OutputWorkspace", outputName);
     groupAlg->execute();
+    return groupAlg->getProperty("OutputWorkspace");
   }
+  return nullptr;
 }
 
 /** Set the output workspaces for the main algorithm based on the grouped
- * outputs of the child algorihms from processGroups
+ * outputs of the child algorithms from processGroups
  */
 void ReflectometryReductionOneAuto3::setOutputGroupedWorkspaces(std::vector<WorkspaceNames> const &outputNames,
-                                                                WorkspaceNames const &outputGroupNames) {
+                                                                WorkspaceNames const &outputGroupNames,
+                                                                const bool outputIvsLam, bool outputTrans,
+                                                                bool outputTrans1, bool outputTrans2) {
   // Extract each type of output workspaces as a string list for grouping
   std::vector<std::string> IvsQGroup, IvsQBinnedGroup, IvsLamGroup;
   std::for_each(outputNames.cbegin(), outputNames.cend(),
@@ -877,11 +867,22 @@ void ReflectometryReductionOneAuto3::setOutputGroupedWorkspaces(std::vector<Work
 
   groupWorkspaces(IvsQGroup, outputGroupNames.iVsQ);
   groupWorkspaces(IvsQBinnedGroup, outputGroupNames.iVsQBinned);
-  groupWorkspaces(IvsLamGroup, outputGroupNames.iVsLam);
+  if (outputIvsLam)
+    groupWorkspaces(IvsLamGroup, outputGroupNames.iVsLam);
 
   setPropertyValue("OutputWorkspace", outputGroupNames.iVsQ);
   setPropertyValue("OutputWorkspaceBinned", outputGroupNames.iVsQBinned);
   setPropertyValue("OutputWorkspaceWavelength", outputGroupNames.iVsLam);
+
+  // Use the first set of output names, as for trans workspaces they are all the same across group members
+  // as we only use the first transmission run provided in a group
+  // this is consistent with historic algorithm behaviour
+  if (outputTrans && getPropertyValue("OutputWorkspaceTransmission").empty())
+    setPropertyValue("OutputWorkspaceTransmission", outputNames.front().trans);
+  if (outputTrans1 && getPropertyValue("OutputWorkspaceFirstTransmission").empty())
+    setPropertyValue("OutputWorkspaceFirstTransmission", outputNames.front().trans1);
+  if (outputTrans2 && getPropertyValue("OutputWorkspaceSecondTransmission").empty())
+    setPropertyValue("OutputWorkspaceSecondTransmission", outputNames.front().trans2);
 }
 
 /** Set an output property from a child algorithm
@@ -903,39 +904,67 @@ void ReflectometryReductionOneAuto3::setOutputPropertiesFromChild(const Algorith
 /** This function is used by processGroups to execute the child algorithm over
  * each member in the group
  *
- * @param inputNames : the input workspaces for the child algorithm
- * @param originalNames : the original input group's member workspace names
+ * @param members : the input workspaces for the child algorithm
  * @param runNumber : the run number of the group (our own value is passed in
  * because this is not a property a workspace group has)
- * @param recalculateIvsQ : if true, recalculate IvsQ based on previous IvsLam
- * outputs; IvsLam outputs must be passed as the new inputNames
+ * @param taskOrder : task execution order to pass to ReflectometryReductionOne
+ * @param workspaceNames : output workspace names to use for the group members
+ * @param reduced : if true, recalculate IvsQ based on previous IvsLam outputs;
+ * IvsLam outputs must be passed as the members
  * @returns : the grouped output workspace names
  */
-auto ReflectometryReductionOneAuto3::processGroupMembers(std::vector<std::string> const &inputNames,
-                                                         std::vector<std::string> const &originalNames,
-                                                         std::string const &runNumber, bool recalculateIvsQ) {
+ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReductionOneAuto3::processGroupMembers(
+    const Algorithm::WorkspaceVector &members, std::string const &runNumber, std::vector<std::string> const &taskOrder,
+    const std::vector<WorkspaceNames> &workspaceNames, const bool reduced) {
   // Compile a list of output workspace names for each group member
+  // No need to compile list if the output names are already provided, e.g. from a previous run of RRO
+  bool populateOutputNames = workspaceNames.empty();
+
   std::vector<WorkspaceNames> allOutputNames;
+  if (!populateOutputNames)
+    allOutputNames = workspaceNames;
   // Process each group member
-  for (size_t i = 0; i < inputNames.size(); ++i) {
-    // Get the default output workspace names
-    allOutputNames.emplace_back(getOutputNamesForGroupMember(originalNames, runNumber, i));
-    auto &outputNames = allOutputNames.back();
-    // If recalculating IvsQ, the output IvsLam is the same as the input
-    if (recalculateIvsQ)
-      outputNames.iVsLam = inputNames[i];
-    // Create and execute the child algorithm
-    auto alg = createAlgorithmForGroupMember(inputNames[i], outputNames, recalculateIvsQ);
-    alg->execute();
-    // Update the parent algorithm outputs from the child - use the last run
-    // through the loop, but don't overwrite them if recalculating IvsQ
-    if (!recalculateIvsQ)
-      setOutputPropertiesFromChild(alg);
+  std::vector<RROOutputs> allRROOutputs;
+  for (size_t i = 0; i < members.size(); i++) {
+    auto ws = members[i];
+    MatrixWorkspace_sptr matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    if (!matrixWs) {
+      throw std::runtime_error("Group Member is not a MatrixWorkspace");
+    }
+    if (populateOutputNames)
+      allOutputNames.emplace_back(getOutputNamesForGroupMember(matrixWs->getName(), runNumber, i));
+
+    // If data has already been reduced, as workspace is summed we need to change processing instructions.
+    // Also, do not perform flood corrections as these will have been performed upon initial reduction
+    if (reduced) {
+      const auto &origProcessingInstructions = getPropertyValue("ProcessingInstructions");
+      setPropertyValue("ProcessingInstructions", convertToSpectrumNumber("0", matrixWs));
+      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false, false));
+      setPropertyValue("ProcessingInstructions", origProcessingInstructions);
+    } else {
+      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false));
+    }
   }
-  // Set the grouped output workspace properties
-  const auto groupedOutputNames = getOutputWorkspaceNames();
-  setOutputGroupedWorkspaces(allOutputNames, groupedOutputNames);
-  return groupedOutputNames;
+  return {.rroOutputs = allRROOutputs, .outputNames = allOutputNames};
+}
+
+std::vector<std::string> ReflectometryReductionOneAuto3::getTaskExecutionOrder(const bool reduced,
+                                                                               const bool summingInQ) const {
+  const std::vector<std::string> taskOrderReduced = getTaskExecutionOrderFromProperties(
+      summingInQ, true, "I0MonitorIndex", "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
+      "FirstTransmissionRun", "CorrectionAlgorithm", "SubtractBackground");
+  if (reduced)
+    return taskOrderReduced;
+  auto taskOrder = getTaskExecutionOrderFromProperties(
+      summingInQ, false, "I0MonitorIndex", "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
+      "FirstTransmissionRun", "CorrectionAlgorithm", "SubtractBackground");
+  // For the first non-reduced run, remove all tasks that will be performed as part of the subsequent reduced run
+  // apart from TaskCropWavelength which is repeated as per pre-existing behaviour.
+  for (const auto &task : taskOrderReduced) {
+    if (task != "TaskCropWavelength")
+      std::erase(taskOrder, task);
+  }
+  return taskOrder;
 }
 
 /** Process groups. Groups are processed differently depending on transmission
@@ -946,22 +975,32 @@ bool ReflectometryReductionOneAuto3::processGroups() {
   m_usingBaseProcessGroups = true;
 
   auto const groupName = getPropertyValue("InputWorkspace");
-  auto const inputNames = getGroupMemberNames(groupName);
+  auto const groupMembers = getGroupMembers(groupName);
   std::string const runNumber = getRunNumberForWorkspaceGroup(groupName);
+  determineCorrectionAlgorithm(std::dynamic_pointer_cast<MatrixWorkspace>(groupMembers[0])->getInstrument());
 
-  auto outputNames = processGroupMembers(inputNames, inputNames, runNumber);
-
-  // If not doing polarization correction, reduction stops here
   const bool polarizationAnalysisOn = getProperty("PolarizationAnalysis");
-  if (!polarizationAnalysisOn)
-    return true;
-
-  // Correct the IvsLam workspaces
-  applyPolarizationCorrection(outputNames.iVsLam);
-  // Recalculate IvsQ based on the new IvsLam
-  auto const recalculateIvsQ = true;
-  auto const correctedIvsLamNames = getGroupMemberNames(outputNames.iVsLam);
-  processGroupMembers(correctedIvsLamNames, inputNames, runNumber, recalculateIvsQ);
+  std::vector<std::string> taskOrder;
+  const bool summingInQ = getPropertyValue("SummationType") == "SumInQ";
+  // isDefault might not work on some of these, alg corr?
+  if (polarizationAnalysisOn)
+    taskOrder = getTaskExecutionOrder(false, summingInQ);
+  processGroupMembersOutput processGroupsOutput = processGroupMembers(groupMembers, runNumber, taskOrder);
+  const auto groupedOutputNames = getOutputWorkspaceNames();
+  if (polarizationAnalysisOn) {
+    // Correct the IvsLam workspaces
+    WorkspaceGroup_sptr groupIvsLam = std::make_shared<WorkspaceGroup>();
+    for (const auto &output : processGroupsOutput.rroOutputs) {
+      groupIvsLam->addWorkspace(output.out); // Generic output ws will be IvsLam at this point due specified task order
+    }
+    const auto corrected = applyPolarizationCorrection(groupIvsLam, groupedOutputNames.iVsLam);
+    taskOrder = getTaskExecutionOrder(true, summingInQ);
+    // finish the processing using RRO
+    processGroupsOutput =
+        processGroupMembers(corrected->getAllItems(), runNumber, taskOrder, processGroupsOutput.outputNames, true);
+  }
+  postReductionProcessingGroups(processGroupsOutput.rroOutputs, processGroupsOutput.outputNames, groupedOutputNames,
+                                !polarizationAnalysisOn);
   return true;
 }
 
@@ -970,10 +1009,9 @@ bool ReflectometryReductionOneAuto3::processGroups() {
  * TOF_<runNumber>_<otherInfo> then the output workspaces will be of the same
  * format otherwise they are numbered according to the wsGroupNumber
  */
-auto ReflectometryReductionOneAuto3::getOutputNamesForGroupMember(const std::vector<std::string> &inputNames,
+auto ReflectometryReductionOneAuto3::getOutputNamesForGroupMember(const std::string &inputName,
                                                                   const std::string &runNumber,
                                                                   const size_t wsGroupNumber) -> WorkspaceNames {
-  auto const &inputName = inputNames[wsGroupNumber];
   const auto output = getOutputWorkspaceNames();
   std::string informativeName = "TOF" + runNumber + "_";
 
@@ -991,7 +1029,9 @@ auto ReflectometryReductionOneAuto3::getOutputNamesForGroupMember(const std::vec
     outputNames.iVsQBinned = output.iVsQBinned + "_" + std::to_string(wsGroupNumber + 1);
     outputNames.iVsLam = output.iVsLam + "_" + std::to_string(wsGroupNumber + 1);
   }
-
+  outputNames.trans = output.trans;
+  outputNames.trans1 = output.trans1;
+  outputNames.trans2 = output.trans2;
   return outputNames;
 }
 
@@ -1028,9 +1068,8 @@ ReflectometryReductionOneAuto3::findPolarizationCorrectionMethod(const API::Matr
  * For Wildes the correction option is the flipper configuration. There are more than two possible flipper
  * configurations, but this is mainly intended for use by POLREF initially so we only need to support two for now.
  */
-std::string ReflectometryReductionOneAuto3::findPolarizationCorrectionOption(const std::string &correctionMethod) {
-  auto groupIvsLam =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("OutputWorkspaceWavelength"));
+std::string ReflectometryReductionOneAuto3::findPolarizationCorrectionOption(const std::string &correctionMethod,
+                                                                             const WorkspaceGroup_sptr &groupIvsLam) {
   auto numWorkspacesInGrp = groupIvsLam->size();
   if (numWorkspacesInGrp != 4 && numWorkspacesInGrp != 2) {
     throw std::runtime_error("Only input workspace groups with two or four periods are supported");
@@ -1070,7 +1109,7 @@ std::string ReflectometryReductionOneAuto3::getFredrikzeInputSpinStateOrder(cons
  * properties.
  */
 std::tuple<API::MatrixWorkspace_sptr, std::string, std::string, std::string>
-ReflectometryReductionOneAuto3::getPolarizationEfficiencies() {
+ReflectometryReductionOneAuto3::getPolarizationEfficiencies(const WorkspaceGroup_sptr &groupIvsLam) {
   MatrixWorkspace_sptr efficiencies;
   std::string correctionMethod;
   std::string correctionOption;
@@ -1080,15 +1119,11 @@ ReflectometryReductionOneAuto3::getPolarizationEfficiencies() {
     // Get the efficiencies from the provided workspace
     efficiencies = getProperty("PolarizationEfficiencies");
     correctionMethod = findPolarizationCorrectionMethod(efficiencies);
-    correctionOption = findPolarizationCorrectionOption(correctionMethod);
+    correctionOption = findPolarizationCorrectionOption(correctionMethod, groupIvsLam);
     fredrikzeInputOrder = getFredrikzeInputSpinStateOrder(correctionMethod);
   } else {
     // Get the efficiencies from the parameter file
-    auto groupIvsLam =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("OutputWorkspaceWavelength"));
-
     Workspace_sptr workspace = groupIvsLam->getItem(0);
-
     auto effAlg = createChildAlgorithm("ExtractPolarizationEfficiencies");
     effAlg->setProperty("InputWorkspace", workspace);
     effAlg->execute();
@@ -1102,43 +1137,31 @@ ReflectometryReductionOneAuto3::getPolarizationEfficiencies() {
 
 /**
  * Apply a polarization correction to workspaces in lambda.
- * @param outputIvsLam :: Name of a workspace group to apply the correction
- * to.
+ * @param outputIvsLam :: Workspace group to apply the correction to.
+ * @param outputGroupName :: Name of the corrected output workspace group.
  */
-void ReflectometryReductionOneAuto3::applyPolarizationCorrection(const std::string &outputIvsLam) {
+WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyPolarizationCorrection(const WorkspaceGroup_sptr &outputIvsLam,
+                                                                                const std::string &outputGroupName) {
   MatrixWorkspace_sptr efficiencies;
   std::string correctionMethod;
   std::string correctionOption;
   std::string fredrikzeInputOrder;
-  std::tie(efficiencies, correctionMethod, correctionOption, fredrikzeInputOrder) = getPolarizationEfficiencies();
+  std::tie(efficiencies, correctionMethod, correctionOption, fredrikzeInputOrder) =
+      getPolarizationEfficiencies(outputIvsLam);
   CorrectionMethod::validate(correctionMethod);
 
   Algorithm_sptr polAlg = createChildAlgorithm("PolarizationEfficiencyCor");
   polAlg->setChild(false);
   polAlg->setRethrows(true);
-  polAlg->setProperty("OutputWorkspace", outputIvsLam);
+  polAlg->setProperty("OutputWorkspace", outputGroupName);
   polAlg->setProperty("Efficiencies", efficiencies);
   polAlg->setProperty("CorrectionMethod", correctionMethod);
   polAlg->setProperty("SpinStatesInFredrikze", fredrikzeInputOrder);
   polAlg->setProperty(CorrectionMethod::OPTION_NAME.at(correctionMethod), correctionOption);
   polAlg->setProperty("AddSpinStateToLog", true);
-
-  if (correctionMethod == "Fredrikze") {
-    polAlg->setProperty("InputWorkspaceGroup", outputIvsLam);
-    polAlg->execute();
-  } else {
-    // The Wildes algorithm doesn't handle things well if the input workspaces
-    // are in the same group that you specify as the output group, so move the
-    // input workspaces out of the group first and delete them when finished
-    auto inputNames = getGroupMemberNames(outputIvsLam);
-    auto inputNamesString = vectorToString(inputNames);
-    removeAllWorkspacesFromGroup(outputIvsLam);
-
-    polAlg->setProperty("InputWorkspaces", inputNamesString);
-    polAlg->execute();
-
-    removeWorkspacesFromADS(inputNames);
-  }
+  polAlg->setProperty("InputWorkspaceGroup", outputIvsLam);
+  polAlg->execute();
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputGroupName);
 }
 
 /**
@@ -1146,7 +1169,7 @@ void ReflectometryReductionOneAuto3::applyPolarizationCorrection(const std::stri
  * FloodWorkspace property return it. Otherwise create it using parameters
  * in the instrument parameter file.
  */
-MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace() {
+MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace(const Instrument_const_sptr &instrument) {
   const std::string method = getProperty("FloodCorrection");
   if (method == "None") {
     return MatrixWorkspace_sptr();
@@ -1160,8 +1183,6 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace() {
                          "ignored."
                       << std::endl;
     }
-    MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-    const auto instrument = inputWS->getInstrument();
     const auto floodRunParam = instrument->getParameterAsString("Flood_Run");
     if (floodRunParam.empty()) {
       throw std::invalid_argument("Instrument parameter file doesn't have the Flood_Run parameter.");
@@ -1197,42 +1218,6 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace() {
 }
 
 /**
- * Apply flood correction to a single data workspace.
- * @param flood :: The flood workspace.
- * @param propertyName :: Name of an input property containing a workspace
- *   that should be corrected. The corrected workspace replaces the old
- *   value of this property.
- */
-void ReflectometryReductionOneAuto3::applyFloodCorrection(const MatrixWorkspace_sptr &flood,
-                                                          const std::string &propertyName) {
-  MatrixWorkspace_sptr ws = getProperty(propertyName);
-  auto alg = createChildAlgorithm("ApplyFloodWorkspace");
-  alg->initialize();
-  alg->setProperty("InputWorkspace", ws);
-  alg->setProperty("FloodWorkspace", flood);
-  alg->execute();
-  MatrixWorkspace_sptr out = alg->getProperty("OutputWOrkspace");
-  setProperty(propertyName, out);
-}
-
-/**
- * Apply flood correction to all workspaces that need to be corrected:
- * the input data and the transmission runs.
- */
-void ReflectometryReductionOneAuto3::applyFloodCorrections() {
-  MatrixWorkspace_sptr flood = getFloodWorkspace();
-  if (flood) {
-    applyFloodCorrection(flood, "InputWorkspace");
-    if (!isDefault("FirstTransmissionRun")) {
-      applyFloodCorrection(flood, "FirstTransmissionRun");
-    }
-    if (!isDefault("SecondTransmissionRun")) {
-      applyFloodCorrection(flood, "SecondTransmissionRun");
-    }
-  }
-}
-
-/**
  * Gets the name to use for the summed workspace.
  * @param wsPropertyName :: Name of the workspace to be summed.
  * @param isTransWs :: Whether or not this is a transmission workspace.
@@ -1257,7 +1242,7 @@ std::string ReflectometryReductionOneAuto3::getSummedWorkspaceName(const std::st
 /**
  * Sum banks for a single data workspace.
  * @param roiDetectorIDs :: The detector IDs to be summed. All are included if an empty string is passed.
- * @param propertyName :: Name of an input property containing a workspace
+ * @param wsPropertyName :: Name of an input property containing a workspace
  *   that should be summed. The summed workspace replaces the old
  *   value of this property.
  * @param isTransWs :: Whether or not this is a transmission workspace.
