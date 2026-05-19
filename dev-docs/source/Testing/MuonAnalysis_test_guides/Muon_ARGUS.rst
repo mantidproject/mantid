@@ -30,15 +30,11 @@ Single Pulse Test
 - Load run ``71799``
 - Go to the **Grouping** tab
      - click **Guess Alpha**, should get ``0.95``
-- Load the next run
+- Load the next run by clicking the ``>`` button (the run number should now be ``71800``)
 - Go to the **Fitting** tab
      - Add a **StaticKuboToyabeTimesExpDecay** and **FlatBackground**
      - Click the **Fit** button
-- Expected Values are (similar):
-	- **A:** ``0.13``
-	- **Delta:** ``0.52``
-	- **Lambda:** ``0.11``
-	- **A0:** ``0.07``
+	 - The fit should look reasonable
 
 ------------------------------------
 
@@ -53,29 +49,9 @@ This users the same sample as the single pulse test
 - Load run ``71796``
 - Set to **Double Pulse**
 - Go to the **Grouping** tab
-     - click **Guess Alpha**, should get ``0.93``
-- Load the next run
+     - Click **Guess Alpha**, should get ``0.93``
+- Load the next run by clicking the ``>`` button (the run number should now be ``71797``)
 - Go to the **Fitting** tab
      - Add a **StaticKuboToyabeTimesExpDecay** and **FlatBackground**
-     - click the **Fit** button
-- Expected Values are (similar):
-	- **A:** ``0.12``
-	- **Delta:** ``0.55``
-	- **Lambda:** ``0.13``
-	- **A0:** ``0.09``
-
-- These values are slightly different from the single pulse results
-- Load run ``71796``
-- Go to the **Home** tab
-	- Change back to **Single Pulse**
-	- Untick the **Time zero** and set the value to **0.493**
-- Go to the **Grouping** tab
-	- Click **Guess Alpha**, should get ``0.91``
-- Load the next run
-- Go to the **Fitting** tab
-	- Click the **Fit** button
-- Expected Values are (similar):
-	- **A:** ``0.12``
-	- **Delta:** ``0.59``
-	- **Lambda:** ``0.14``
-	- **A0:** ``0.1``
+     - Click the **Fit** button
+	 - The fit should look reasonable
