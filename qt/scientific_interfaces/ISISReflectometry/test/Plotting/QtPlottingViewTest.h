@@ -47,6 +47,43 @@ public:
     TS_ASSERT_EQUALS(plotPreset->itemText(3).toStdString(), "Alignment");
   }
 
+  void testChangingPlotOutputTypeClearsWorkspaceSelection() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::SpinAsymmetry});
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+    plotPreset->setCurrentIndex(1);
+
+    TS_ASSERT(tree->selectionModel()->selectedRows().empty());
+  }
+
+  void testUpdatingAvailablePlotOutputTypesPreservesSelectionWhenOutputTypeDoesNotChange() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap});
+
+    TS_ASSERT(tree->selectionModel()->isSelected(groupIndex(tree)));
+    TS_ASSERT(tree->selectionModel()->isSelected(runIndex(tree)));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspaceIndex(tree)));
+  }
+
+  void testUpdatingAvailablePlotOutputTypesClearsSelectionWhenCurrentOutputTypeIsRemoved() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+    view.setAvailablePlotOutputTypes({PlotOutputType::DetectorMap});
+
+    TS_ASSERT(tree->selectionModel()->selectedRows().empty());
+  }
+
   void testPlotButtonsHaveExpectedLabelsAndOrder() {
     QtPlottingView view;
     auto const optionsLayout = view.findChild<QVBoxLayout *>("optionsLayout");

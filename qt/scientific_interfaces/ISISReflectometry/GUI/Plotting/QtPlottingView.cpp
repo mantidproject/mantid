@@ -11,6 +11,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPushButton>
+#include <QSignalBlocker>
 #include <QStandardItem>
 #include <QStyledItemDelegate>
 #include <algorithm>
@@ -158,8 +159,10 @@ void QtPlottingView::initLayout() {
             updateChildSelection(deselected, QItemSelectionModel::Deselect);
             updateChildSelection(selected, QItemSelectionModel::Select);
           });
-  connect(m_ui.plotPreset, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
-          [this](int) { updatePlotOutputProperties(); });
+  connect(m_ui.plotPreset, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, [this](int) {
+    clearWorkspaceSelection();
+    updatePlotOutputProperties();
+  });
   setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve});
   connect(m_ui.plotTiled, &QPushButton::clicked, this, [this]() {
     if (m_notifyee) {
@@ -185,6 +188,7 @@ void QtPlottingView::setOutputOptionsEnabled(bool enabled) { setOutputOptionCont
 
 void QtPlottingView::setAvailablePlotOutputTypes(std::vector<PlotOutputType> const &outputTypes) {
   auto const previouslySelected = selectedPlotOutputType();
+  QSignalBlocker blocker(m_ui.plotPreset);
   m_ui.plotPreset->clear();
   for (auto const outputType : outputTypes) {
     m_ui.plotPreset->addItem(displayName(outputType), plotOutputTypeIndex(outputType));
@@ -192,6 +196,9 @@ void QtPlottingView::setAvailablePlotOutputTypes(std::vector<PlotOutputType> con
   auto const previousIndex = m_ui.plotPreset->findData(plotOutputTypeIndex(previouslySelected));
   if (previousIndex >= 0) {
     m_ui.plotPreset->setCurrentIndex(previousIndex);
+  }
+  if (previousIndex < 0 && !outputTypes.empty()) {
+    clearWorkspaceSelection();
   }
   updatePlotOutputProperties();
 }
@@ -221,6 +228,12 @@ void QtPlottingView::updatePlotOutputProperties() {
   m_ui.alignmentXAxisLabel->setVisible(showAlignmentProperties);
   m_ui.alignmentXAxis->setVisible(showAlignmentProperties);
   setWorkspaceItemsMutedForCurrentPlotOutputType();
+}
+
+void QtPlottingView::clearWorkspaceSelection() {
+  m_updatingSelection = true;
+  m_ui.workspaceTree->selectionModel()->clearSelection();
+  m_updatingSelection = false;
 }
 
 void QtPlottingView::setWorkspaceItemsMutedForCurrentPlotOutputType() {
@@ -283,8 +296,7 @@ std::vector<std::string> QtPlottingView::selectedWorkspaceNames() const {
   auto workspaces = std::vector<std::string>{};
   for (auto const &index : m_ui.workspaceTree->selectionModel()->selectedRows()) {
     auto const selectedIndex = itemIndex(index);
-    if (itemType(selectedIndex) == PlottingWorkspaceTreeItemType::Workspace &&
-        isWorkspaceIncludedForCurrentPlotOutputType(selectedIndex)) {
+    if (itemType(selectedIndex) == PlottingWorkspaceTreeItemType::Workspace) {
       workspaces.emplace_back(workspaceName(selectedIndex));
     }
   }

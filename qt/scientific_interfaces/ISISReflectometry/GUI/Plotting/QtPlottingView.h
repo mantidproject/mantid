@@ -37,6 +37,7 @@ private:
   void initLayout();
   void setOutputOptionControlsEnabled(bool enabled);
   void updatePlotOutputProperties();
+  void clearWorkspaceSelection();
   void setWorkspaceItemsMutedForCurrentPlotOutputType();
   void setWorkspaceItemsMutedForCurrentPlotOutputType(QStandardItem *parent);
   void addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item);
