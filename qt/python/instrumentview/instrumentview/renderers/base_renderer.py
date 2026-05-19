@@ -21,6 +21,20 @@ class InstrumentRenderer(ABC):
     or shape-based rendering (slower, geometrically accurate).
     """
 
+    def __init__(self) -> None:
+        super().__init__()
+        self._mouse_move_observer_id = None
+        self._left_button_observer_id = None
+
+    def _clear_observers(self, plotter):
+        style = plotter.iren.style
+        if self._mouse_move_observer_id is not None:
+            style.RemoveObserver(self._mouse_move_observer_id)
+        if self._left_button_observer_id is not None:
+            style.RemoveObserver(self._left_button_observer_id)
+        self._mouse_move_observer_id = None
+        self._left_button_observer_id = None
+
     @abstractmethod
     def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model) -> pv.PolyData:
         """Build the visual mesh for unmasked detectors.

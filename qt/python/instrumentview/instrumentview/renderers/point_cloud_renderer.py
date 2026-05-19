@@ -25,11 +25,6 @@ class PointCloudRenderer(InstrumentRenderer):
     _PICKABLE_POINT_SIZE = 30
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
 
-    def __init__(self) -> None:
-        super().__init__()
-        self._mouse_move_observer_id = None
-        self._left_button_observer_id = None
-
     # ------------------------------------------------------------------ build
     def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
         return pv.PolyData(positions)
@@ -99,11 +94,7 @@ class PointCloudRenderer(InstrumentRenderer):
         picker.SetTolerance(picking_tolerance)
         interactor = plotter.iren
 
-        for id in [self._mouse_move_observer_id, self._left_button_observer_id]:
-            if id is not None:
-                plotter.iren.style.RemoveObserver(id)
-        self._mouse_move_observer_id = None
-        self._left_button_observer_id = None
+        self._clear_observers(plotter)
 
         def _on_pick(_obj, _event):
             x, y = interactor.get_event_position()

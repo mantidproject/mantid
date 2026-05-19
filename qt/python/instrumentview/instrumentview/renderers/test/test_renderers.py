@@ -533,6 +533,114 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertTrue(np.all(z_flip < 0), f"Expected negative z with flip, got {z_flip}")
         np.testing.assert_allclose(z_flip, -z_no_flip)
 
+    def _make_shape_mock_plotter(self, off_screen=False):
+        plotter = MagicMock()
+        plotter.off_screen = off_screen
+        plotter.iren.get_event_position.return_value = (100, 200)
+        return plotter
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_enable_picking_off_screen_skips_observer(self, mock_picker_cls):
+        plotter = self._make_shape_mock_plotter(off_screen=True)
+        self.renderer.enable_picking(plotter, MagicMock())
+        plotter.disable_picking.assert_called_once()
+        plotter.iren.style.AddObserver.assert_not_called()
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_enable_picking_click_registers_left_button_observer(self, mock_picker_cls):
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.enable_picking(plotter, MagicMock())
+        plotter.iren.style.AddObserver.assert_called_once_with("LeftButtonPressEvent", ANY)
+        self.assertIsNotNone(self.renderer._left_button_observer_id)
+        self.assertIsNone(self.renderer._mouse_move_observer_id)
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_enable_picking_hover_registers_mouse_move_observer(self, mock_picker_cls):
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.enable_picking(plotter, MagicMock(), hover=True)
+        plotter.iren.style.AddObserver.assert_called_once_with("MouseMoveEvent", ANY)
+        self.assertIsNotNone(self.renderer._mouse_move_observer_id)
+        self.assertIsNone(self.renderer._left_button_observer_id)
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_enable_picking_reinit_clears_and_removes_previous_observer(self, mock_picker_cls):
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.enable_picking(plotter, MagicMock())
+        old_id = self.renderer._left_button_observer_id
+        self.renderer.enable_picking(plotter, MagicMock(), hover=True)
+        plotter.iren.style.RemoveObserver.assert_called_with(old_id)
+        # _clear_observers resets both IDs; only the new hover ID should be set
+        self.assertIsNotNone(self.renderer._mouse_move_observer_id)
+        self.assertIsNone(self.renderer._left_button_observer_id)
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_enable_picking_click_fires_callback_via_cell_to_detector(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.Pick.return_value = 1
+        mock_picker.GetCellId.return_value = 1
+        self.renderer._cell_to_detector = np.array([0, 7, 2])
+        plotter = self._make_shape_mock_plotter()
+        callback = MagicMock()
+        self.renderer.enable_picking(plotter, callback)
+        observer_fn = plotter.iren.style.AddObserver.call_args[0][1]
+        observer_fn(None, None)
+        callback.assert_called_once_with(7)
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_enable_picking_click_does_not_fire_on_miss(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.Pick.return_value = 0
+        self.renderer._cell_to_detector = np.array([0, 1, 2])
+        plotter = self._make_shape_mock_plotter()
+        callback = MagicMock()
+        self.renderer.enable_picking(plotter, callback)
+        observer_fn = plotter.iren.style.AddObserver.call_args[0][1]
+        observer_fn(None, None)
+        callback.assert_not_called()
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_enable_picking_does_not_fire_when_c2d_is_none(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.Pick.return_value = 1
+        mock_picker.GetCellId.return_value = 0
+        self.renderer._cell_to_detector = None
+        plotter = self._make_shape_mock_plotter()
+        callback = MagicMock()
+        self.renderer.enable_picking(plotter, callback)
+        observer_fn = plotter.iren.style.AddObserver.call_args[0][1]
+        observer_fn(None, None)
+        callback.assert_not_called()
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_enable_picking_hover_fires_callback_when_cell_found(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.Pick.return_value = 1
+        mock_picker.GetCellId.return_value = 2
+        self.renderer._cell_to_detector = np.array([4, 5, 9])
+        plotter = self._make_shape_mock_plotter()
+        callback = MagicMock()
+        self.renderer.enable_picking(plotter, callback, hover=True)
+        observer_fn = plotter.iren.style.AddObserver.call_args[0][1]
+        observer_fn(None, None)
+        callback.assert_called_once_with(9)
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_enable_picking_hover_does_not_fire_when_no_cell(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.Pick.return_value = 0
+        self.renderer._cell_to_detector = np.array([0, 1, 2])
+        plotter = self._make_shape_mock_plotter()
+        callback = MagicMock()
+        self.renderer.enable_picking(plotter, callback, hover=True)
+        observer_fn = plotter.iren.style.AddObserver.call_args[0][1]
+        observer_fn(None, None)
+        callback.assert_not_called()
+
     # ------------------------------------------------------------------
     # Helper methods to create mock objects
     # ------------------------------------------------------------------

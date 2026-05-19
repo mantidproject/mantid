@@ -42,6 +42,7 @@ class ShapeRenderer(InstrumentRenderer):
     _PICKING_TOLERANCE = 0.0001
 
     def __init__(self, workspace):
+        super().__init__()
         self._workspace = workspace
         # Populated by ``precompute``.
         self._precomputed = False
@@ -240,8 +241,9 @@ class ShapeRenderer(InstrumentRenderer):
         picker.SetTolerance(self._PICKING_TOLERANCE)
         interactor = plotter.iren
 
-        def _on_left_button_press(obj, event):
-            """Handle left mouse button press for picking."""
+        self._clear_observers(plotter)
+
+        def _on_pick(_obj, _event):
             if c2d is None:
                 return
             # Get the current mouse position from the interactor
@@ -254,8 +256,10 @@ class ShapeRenderer(InstrumentRenderer):
                 if cell_id >= 0:
                     callback(int(c2d[cell_id]))
 
-        # Register callback for left button press
-        plotter.iren.style.AddObserver("LeftButtonPressEvent", _on_left_button_press)
+        if hover:
+            self._mouse_move_observer_id = plotter.iren.style.AddObserver("MouseMoveEvent", _on_pick)
+        else:
+            self._left_button_observer_id = plotter.iren.style.AddObserver("LeftButtonPressEvent", _on_pick)
 
     def set_detector_scalars(self, mesh: pv.PolyData, counts: np.ndarray, label: str) -> None:
         if self._cell_to_detector is not None and len(counts) > 0:
