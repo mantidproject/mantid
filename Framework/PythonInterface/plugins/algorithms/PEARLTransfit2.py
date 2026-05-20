@@ -81,6 +81,7 @@ class PEARLTransfit(PythonAlgorithm):
     default_peak_amplitude: float = 1.6
     is_calib: bool = True
     gauss_fwhm_ref_temp: float = 0.0
+    run_numbers: list[str] = None
 
     def version(self):
         return 2
@@ -102,7 +103,7 @@ class PEARLTransfit(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(
             MultipleFileProperty("Files", extensions=[".raw", ".s0x", ".nxs"]),
-            doc="Files of calibration runs (numors). Must be detector scans",
+            doc="Files or run numbers for calibration runs (numors). Must be detector scans.",
         )
 
         self.declareProperty(
@@ -123,8 +124,9 @@ class PEARLTransfit(PythonAlgorithm):
         self.declareProperty(
             ITableWorkspaceProperty(name="FitParametersTable", defaultValue="", direction=Direction.Input, optional=PropertyMode.Optional),
             doc="Table with fit parameters for 'PEARLTransVoigt' function: 'Position', 'LorentzianFWHM', 'GaussianFWHM', 'Amplitude', 'Bg0'"
-            "'Bg1', 'Bg2'. Mandatory when calibration is set to False. "
-            "If a 'FitParametersTable' is used in calibration runs: 'Bg0', 'Bg1' and 'Bg2' will be used for background estimation",
+            "'Bg1', 'Bg2'. The calculated temperature is added in non-calibration runs. This property is mandatory when calibration"
+            " is set to False. If a 'FitParametersTable' is used in calibration runs: 'Bg0', 'Bg1' and 'Bg2' will "
+            " be used for background estimation",
         )
 
         self.declareProperty(name="ReferenceTemp", defaultValue=290.0, direction=Direction.Input, doc="Enter reference temperature in K")
@@ -135,6 +137,7 @@ class PEARLTransfit(PythonAlgorithm):
             direction=Direction.Input,
             doc="Estimate background parameters from data.",
         )
+
         self.declareProperty(
             name="CreateDebugTable",
             defaultValue=False,
@@ -146,7 +149,9 @@ class PEARLTransfit(PythonAlgorithm):
             name="Output",
             defaultValue="",
             direction=Direction.Input,
-            doc="Output basename on ADS. If empty, `S_fit` will be the basename for calibration runs and `T_fit` for non-calibration",
+            doc="Output basename on ADS. If empty, `S_fit` will be the basename for calibration runs and `T_fit` for non-calibration, "
+            "adding"
+            " the foil type and run numbers as suffixes.",
         )
 
         self.setup_property_rules()
@@ -181,6 +186,7 @@ class PEARLTransfit(PythonAlgorithm):
 
     def PyExec(self):
         files = self.get_file_list(self.getProperty("Files").value)
+        self.run_numbers = []
 
         # Imports resonance parameters from ResParam dictionary depending on the selected foil type.
         foil_type = self.getProperty("FoilType").value
@@ -230,14 +236,21 @@ class PEARLTransfit(PythonAlgorithm):
             # retrieve parameters from previous calibration
             for i_par in range(func.nParams()):
                 row = fit_table.row(i_par)
-                func[row["Name"]] = row["Value"]
+                if (name := row["Name"]) in FIT_TABLE_PARAMS:
+                    func[name] = row["Value"]
 
         return func
 
+    def _create_output_basename(self):
+        run_numbers = ""
+        if self.run_numbers:
+            run_numbers = f"_{self.run_numbers[0]}" if len(self.run_numbers) == 1 else f"_{self.run_numbers[0]}_{self.run_numbers[-1]}"
+        suffix = f"_{self.res_params.Foil}{run_numbers}"
+        self.setPropertyValue("Output", "S_fit" + suffix if self.is_calib else "T_fit" + suffix)
+
     def _prepare_outputs(self, ws: "MatrixWorkspace", table: ITableWorkspace, debug_table: ITableWorkspace | None):
         if self.getProperty("Output").isDefault:
-            self.setPropertyValue("Output", "S_fit" if self.is_calib else "T_fit")
-
+            self._create_output_basename()
         out_name = self.getPropertyValue("Output")
         prop_names = ["OutputWorkspace", "OutputFitParameters", "OutputDebugTable"]
         prop_callers = [MatrixWorkspaceProperty, ITableWorkspaceProperty, ITableWorkspaceProperty]
@@ -248,7 +261,8 @@ class PEARLTransfit(PythonAlgorithm):
         p_len = len(prop_names)
         props_len = p_len if debug_table else p_len - 1
         for idx in range(props_len):
-            self.declareProperty(prop_callers[idx](name=prop_names[idx], defaultValue="", direction=Direction.Output), doc=docs[idx])
+            if not self.existsProperty(propName := prop_names[idx]):
+                self.declareProperty(prop_callers[idx](name=propName, defaultValue="", direction=Direction.Output), doc=docs[idx])
             self.setPropertyValue(prop_names[idx], f"{out_name}{suffixes[idx]}")
             self.setProperty(prop_names[idx], data_items[idx])
 
@@ -312,6 +326,9 @@ class PEARLTransfit(PythonAlgorithm):
         ws = self._exec_child_alg("CropWorkspace", InputWorkspace=ws, XMin=self.x_range[0], XMax=self.x_range[1])
         ws = self._exec_child_alg("NormaliseByCurrent", InputWorkspace=ws)
         ws = self._exec_child_alg("ConvertUnits", InputWorkspace=ws, Target="Energy")
+
+        if (runno := ws.getRunNumber()) and str(runno) not in self.run_numbers:
+            self.run_numbers.append(str(runno))
         return ws
 
     def _load_and_average_monitors_from_files(self, filepaths: Sequence[str]):
@@ -348,6 +365,7 @@ class PEARLTransfit(PythonAlgorithm):
         temp_debye = self.res_params.TD  # Debye temp.
         temp_sample, temp_sample_err = self._calc_sample_temp_and_error_from_effective(temp_eff, temp_eff_err, temp_debye)
         self.log().information(f"Sample temperature is: {temp_sample:.2f} +/- {temp_sample_err:.2f} K")
+        fit_res["OutputTable"].addRow({"Name": "Sample Temperature", "Value": temp_sample, "Error": temp_sample_err})
 
         debug_table = None
         if self.getProperty("CreateDebugTable").value:
