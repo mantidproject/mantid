@@ -49,7 +49,7 @@ class FocusModel(object):
     ) -> None:
         if save_dir is None:
             save_dir = output_settings.get_output_path()
-        full_calib = load_full_instrument_calibration()
+        full_calib = load_full_instrument_calibration(calibration.get_instrument())
         focused_files, focused_files_gsas2, focused_files_combined = EnggUtils.focus_run(
             sample_paths, plot_output, rb_num, calibration, save_dir, full_calib
         )

@@ -12,14 +12,14 @@ from mantid import config
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import UnitParams
 from Engineering.EnginX import EnginX
-from Engineering.EnggUtils import GROUP
+from Engineering.common.instrument_config import ENGINX_GROUP
 
 CWDIR = os.path.join(config["datasearch.directories"].split(";")[0], "ENGINX")
 FULL_CALIB = os.path.join(CWDIR, "ENGINX_whole_inst_calib.nxs")
 
 BANK_DIFF_CONSTS = {
-    "North": {UnitParams.difc: 18427, UnitParams.difa: -7.9, UnitParams.tzero: -19.4},
-    "South": {UnitParams.difc: 18434, UnitParams.difa: -10.4, UnitParams.tzero: -24.2},
+    "North": {UnitParams.difc: 18427, UnitParams.difa: -6.5, UnitParams.tzero: -15.9},
+    "South": {UnitParams.difc: 18427, UnitParams.difa: -8.1, UnitParams.tzero: -19.8},
 }
 
 
@@ -31,8 +31,9 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX193749",
-            group=GROUP.BOTH,
+            group=ENGINX_GROUP.BOTH,
         )
+        enginx.set_calibration_to_copy_starting_parameters(False)
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
         self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_bank")
@@ -66,9 +67,10 @@ class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX193749",
-            group=GROUP.CROPPED,
+            group=ENGINX_GROUP.CROPPED,
             spectrum_num="1-1200",
         )  # North
+        enginx.set_calibration_to_copy_starting_parameters(False)
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
         self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Cropped_1-1200")
@@ -93,9 +95,10 @@ class TestSwappingCustomCroppingChangesFocussing(systemtesting.MantidSystemTest)
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX305738",
-            group=GROUP.CROPPED,
+            group=ENGINX_GROUP.CROPPED,
             spectrum_num="1-1200",
         )
+        enginx.set_calibration_to_copy_starting_parameters(False)
         enginx.main()
         self._dataY = ADS.retrieve("305761_engggui_focusing_output_ws_Cropped_1-1200").extractY().max()
 
@@ -123,7 +126,7 @@ class TestCustomGroupWithDifferentNumHistogramsThrowsError(systemtesting.MantidS
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX305738",
-            group=GROUP.CUSTOM,
+            group=ENGINX_GROUP.CUSTOM,
             groupingfile_path=grouping_path_1,
         )
         enginx.main()
@@ -135,7 +138,7 @@ class TestCustomGroupWithDifferentNumHistogramsThrowsError(systemtesting.MantidS
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX305738",
-            group=GROUP.CUSTOM,
+            group=ENGINX_GROUP.CUSTOM,
             groupingfile_path=grouping_path_2,
         )
         self.assertRaises(AssertionError, enginx.main)
@@ -158,7 +161,7 @@ class TestCustomGroupWithSameNumHistogramDifferentDetGroupsThrowsError(systemtes
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX305738",
-            group=GROUP.CUSTOM,
+            group=ENGINX_GROUP.CUSTOM,
             groupingfile_path=grouping_path_1,
         )
         enginx.main()
@@ -170,7 +173,7 @@ class TestCustomGroupWithSameNumHistogramDifferentDetGroupsThrowsError(systemtes
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX305738",
-            group=GROUP.CUSTOM,
+            group=ENGINX_GROUP.CUSTOM,
             groupingfile_path=grouping_path_2,
         )
         self.assertRaises(AssertionError, enginx.main)
@@ -191,8 +194,9 @@ class FocusTexture(systemtesting.MantidSystemTest):
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX193749",
-            group=GROUP.TEXTURE20,
+            group=ENGINX_GROUP.TEXTURE20,
         )
+        enginx.set_calibration_to_copy_starting_parameters(False)
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
         self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Texture20")
@@ -223,7 +227,7 @@ class FocusTexture30(systemtesting.MantidSystemTest):
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX193749",
-            group=GROUP.TEXTURE30,
+            group=ENGINX_GROUP.TEXTURE30,
         )
         enginx.set_calibration_to_copy_starting_parameters(False)
         enginx.main(plot_cal=False, plot_foc=False)
@@ -235,9 +239,9 @@ class FocusTexture30(systemtesting.MantidSystemTest):
         self.assertEqual(self._ws_foc.getNumberHistograms(), 30)
         # don't assert diff constants of one group
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(23)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 19887, delta=6)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], -6.6, delta=1)
-        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -12.2, delta=2)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 19897, delta=6)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -8.9, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -21.8, delta=2)
         # compare TOF workspaces
         self.tolerance = 1e-5
         self.disableChecking.extend(["Instrument"])  # don't check

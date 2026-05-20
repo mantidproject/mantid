@@ -37,7 +37,7 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
             mock_ads.retrieve.return_value = mock_pws
             mock_workspace = mock.MagicMock()
             mock_workspace.getIndicesFromDetectorIDs.return_value = np.array([], dtype=int)
-            wdp = WorkspaceDetectorPeaks("dummy")
+            wdp = WorkspaceDetectorPeaks("dummy", "TOF", (0, 1e10))
         wdp.detector_peaks = detector_peaks
         return wdp
 
@@ -96,7 +96,7 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         }
         peaks_mock_ads.retrieve.return_value = mock_peaks_ws
 
-        wdp = WorkspaceDetectorPeaks("dummy")
+        wdp = WorkspaceDetectorPeaks("dummy", "TOF", (0, 100))
         self.assertEqual(1, len(wdp.detector_peaks))
         detector_peak = wdp.detector_peaks[0]
         self.assertEqual(1, len(detector_peak.peaks))
@@ -104,6 +104,24 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         self.assertEqual("(2, 2, 2)", detector_peak.label)
         single_peak = detector_peak.peaks[0]
         self.assertEqual(test_detector_id, single_peak.detector_id)
+
+    @mock.patch("instrumentview.Peaks.WorkspaceDetectorPeaks.AnalysisDataService")
+    def test_peaks_outside_limits_are_excluded(self, peaks_mock_ads):
+        mock_peaks_ws = mock.MagicMock()
+        mock_peaks_ws.toDict.return_value = {
+            "DetID": [1, 2],
+            "h": [1, 2],
+            "k": [0, 0],
+            "l": [0, 0],
+            "DSpacing": [5, 5],
+            "Wavelength": [5, 5],
+            "TOF": [50, 200],
+        }
+        peaks_mock_ads.retrieve.return_value = mock_peaks_ws
+
+        wdp = WorkspaceDetectorPeaks("dummy", "TOF", (0, 100))
+        self.assertEqual(1, len(wdp.detector_peaks))
+        self.assertEqual(1, wdp.detector_peaks[0].detector_id)
 
 
 if __name__ == "__main__":

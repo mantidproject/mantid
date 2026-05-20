@@ -699,7 +699,7 @@ class PropertyManager(NonIDF_Properties):
         if len(runs) == 0:
             return (True, [], [])
 
-        ok, not_found_list, found_list = PropertyManager.sample_run.find_run_files(runs)
+        ok, not_found_list, found_list = PropertyManager.sample_run.find_run_files(run_list=runs)
         return (ok, not_found_list, found_list)
 
     #

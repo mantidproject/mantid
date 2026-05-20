@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileFinder.h"
@@ -38,6 +39,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
+using Mantid::Types::Core::DateAndTime;
 
 class LoadInstrumentTest : public CxxTest::TestSuite {
 public:
@@ -491,7 +493,7 @@ public:
   void testExecHRP2() {
     // Test Parameter file in instrument folder is used by an IDF file not in
     // the instrument folder
-    doTestParameterFileSelection("unit_testing/HRPD_Definition.xml", "HRPD_Parameters.xml", "S");
+    doTestParameterFileSelection("unit_testing/HRPD_Definition.xml", "HRPD_Parameters.xml", "S", "2005-01-01 00:00:00");
   }
 
   void testExecHRP3() {
@@ -499,41 +501,15 @@ public:
     // the instrument folder and
     // with an extension of its name after the 'Definition' not present in a
     // parameter file.
-    doTestParameterFileSelection("unit_testing/HRPD_Definition_Test3.xml", "HRPD_Parameters.xml", "S");
+    doTestParameterFileSelection("unit_testing/HRPD_Definition_Test3.xml", "HRPD_Parameters.xml", "S",
+                                 "2005-01-01 00:00:00");
   }
 
   void testExecHRP4() {
     // Test Parameter file outside of instrument folder is used by an IDF file
-    // in the same folder and
-    // with the same extension ('_Test4') of its name after the 'Definition' or
-    // 'Parameter'.
+    // in the same folder preferentially if the date ranges are the valid
     doTestParameterFileSelection("unit_testing/HRPD_Definition_Test4.xml", "unit_testing/HRPD_Parameters_Test4.xml",
-                                 "T");
-  }
-
-  void testExecHRP5() {
-    // Test Parameter file outside instrument folder is used by an IDF file in
-    // the same folder
-    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition.xml", "unit_testing/HRPDTEST_Parameters.xml", "U");
-  }
-
-  void testExecHRP6() {
-    // Test Parameter file outside of instrument folder is used by an IDF file
-    // in the same folder and
-    // with the same extension ('_Test6') of its name after the 'Definition' or
-    // 'Parameter'
-    // even though there is a definition file without an extension in the same
-    // folder.
-    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition_Test6.xml",
-                                 "unit_testing/HRPDTEST_Parameters_Test6.xml", "V");
-  }
-
-  void testExecHRP7() {
-    // Test Parameter file outside instrument folder is used by an IDF file in
-    // same instrument folder and
-    // with an extension of its name after the 'Definition' not present in a
-    // parameter file.
-    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition_Test7.xml", "HRPDTEST_Parameters.xml", "U");
+                                 "T", "1925-01-01 00:00:00");
   }
 
   void testNeutronicPositions() {
@@ -794,12 +770,25 @@ public:
   }
 
 private:
+  // Adds a log to the workspace
+  void addLog(const Workspace_sptr &ws, const std::string &logName, const std::string &logValue) {
+    auto alg = AlgorithmManager::Instance().create("AddSampleLog");
+    alg->setChild(true);
+    alg->setLogging(false);
+    alg->setRethrows(true);
+    alg->setProperty("Workspace", ws);
+    alg->setPropertyValue("LogName", logName);
+    alg->setPropertyValue("LogText", logValue);
+    alg->execute();
+  }
+
   // @param filename Filename to an IDF
   // @param paramFilename Expected parameter file to be loaded as part of
   // LoadInstrument
   // @param par A specific parameter to check if have been loaded
+  // @param runStart specific date and time info to mark the workpsace with
   void doTestParameterFileSelection(const std::string &filename, const std::string &paramFilename,
-                                    const std::string &par) {
+                                    const std::string &par, const std::string &runStart) {
     InstrumentDataService::Instance().clear();
 
     LoadInstrument loader;
@@ -808,6 +797,7 @@ private:
 
     // create a workspace with some sample data
     MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    addLog(ws2D, "run_start", runStart);
 
     // load IDF
     loader.setPropertyValue("Filename", filename);

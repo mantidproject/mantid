@@ -236,7 +236,7 @@ void LoadInstrument::exec() {
     // must also be protected by the lock until LoadParameterFile is fixed.
     // check if default parameter file is also present, unless loading from
     if (!filename.empty() && (loader_type < LoaderType::Nxs))
-      runLoadParameterFile(ws, filename);
+      runLoadParameterFile(ws);
   } // end of mutex scope
 
   // Set the monitors output property
@@ -254,14 +254,26 @@ void LoadInstrument::exec() {
 
 //-----------------------------------------------------------------------------------------------------------------------
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
-void LoadInstrument::runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws,
-                                          const std::string &filename) {
+void LoadInstrument::runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws) {
   g_log.debug("Loading the parameter definition...");
 
-  // First search for XML parameter file in same folder as IDF file
-  const std::string::size_type dir_end = filename.find_last_of("\\/");
-  std::string directoryName = filename.substr(0, dir_end + 1); // include final '/'.
-  std::string fullPathParamIDF = InstrumentFileFinder::getParameterPath(filename, directoryName);
+  // Pass the IDF directory as a hint so that parameter files co-located with
+  // the IDF (e.g. in unit_testing/) are found before standard instrument dirs.
+  const std::string idfFilename = getPropertyValue("Filename");
+  const auto pathSep = idfFilename.find_last_of("/\\");
+  const std::string idfDir = (pathSep != std::string::npos) ? idfFilename.substr(0, pathSep) : "";
+
+  const std::string instName = ws->getInstrument()->getName();
+  std::string runDate = ws->getAvailableWorkspaceStartDate();
+  // When the workspace has no run date (e.g. LoadEmptyInstrument), fall back to
+  // the IDF's own valid-from date so that a specific versioned IDF selects its
+  // matching parameter file rather than whichever file is valid today.
+  if (runDate.empty()) {
+    std::string validFrom, validTo;
+    InstrumentFileFinder::getValidFromTo(idfFilename, validFrom, validTo);
+    runDate = validFrom;
+  }
+  std::string fullPathParamIDF = InstrumentFileFinder::getParameterFilename(instName, runDate, idfDir);
 
   if (!fullPathParamIDF.empty()) {
 
