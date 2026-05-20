@@ -1,0 +1,6 @@
+- :ref:`algm-HB3AAdjustSampleNorm` now supports an optional ``OutputGroupingWorkspace`` property
+  that produces a ``GroupingWorkspace`` mapping each ungrouped detector to its pixel group
+  when ``Grouping`` is set to ``2x2`` or ``4x4``.
+- :ref:`algm-LoadWANDSCD` now supports an optional ``OutputGroupingWorkspace`` property
+  that produces a ``GroupingWorkspace`` mapping each ungrouped detector to its pixel group
+  when ``Grouping`` is set to ``2x2`` or ``4x4``.

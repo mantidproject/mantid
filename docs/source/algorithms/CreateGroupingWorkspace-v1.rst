@@ -30,9 +30,11 @@ the number of groups specified, detectors will be left ungrouped in
 the event that the number of detectors does not divide equally into
 the number of groups.
 
-If both the ``CustomGroupingString`` and ``ComponentName`` property are
+If both ``CustomGroupingString`` and ``ComponentName`` properties are
 given, then the detectors for the given component will be grouped using
-this grouping string. The syntax of the ``CustomGroupingString`` is the
+this grouping string.
+Passing ``CustomGroupingString`` alone will result in no grouping.
+The syntax of the ``CustomGroupingString`` is the
 same as used in the :ref:`GroupDetectors <algm-GroupDetectors>` algorithm,
 and is explained below:
 
