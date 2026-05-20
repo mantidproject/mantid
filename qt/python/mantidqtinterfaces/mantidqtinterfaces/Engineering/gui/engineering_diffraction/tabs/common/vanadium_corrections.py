@@ -57,12 +57,14 @@ def create_vanadium_corrections(vanadium_path: str, instrument: str):  # -> Work
         )
         raise RuntimeError
     # get full instrument calibration for instrument processing calculation
-    if Ads.doesExist("full_inst_calib"):
-        full_calib_ws = Ads.retrieve("full_inst_calib")
+    if Ads.doesExist(f"full_inst_calib_{instrument}"):
+        full_calib_ws = Ads.retrieve(f"full_inst_calib_{instrument}")
     else:
-        full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "full_calibration")
+        full_calib_path = get_setting(
+            output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, f"full_calibration_{instrument}"
+        )
         try:
-            full_calib_ws = Load(full_calib_path, OutputWorkspace="full_inst_calib")
+            full_calib_ws = Load(full_calib_path, OutputWorkspace=f"full_inst_calib_{instrument}")
         except ValueError:
             logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
             return
