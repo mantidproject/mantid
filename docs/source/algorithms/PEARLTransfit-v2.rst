@@ -67,13 +67,17 @@ See script below for usage.
     non_cal_ws, params_table, debug_table= PEARLTransfit(Files='PEARL00112777', FoilType="Hf01", Calibration=False, FitParametersTable=params_table, CreateDebugTable=True)
 
     # Debug table contains temperature and fitting information.
-    row_temp = debug_table.row(debug_table.rowCount()-1)
-    print(f"Sample Temperature (K) {row_temp['Value']:.3f} +- {row_temp['Error']:.3f}")
+    row_temp_debug = debug_table.row(debug_table.rowCount()-1)
+    print(f"Sample Temperature (K) {row_temp_debug['Value']:.3f} +- {row_temp_debug['Error']:.3f}")
+    # Fit Parameters table also includes calculated temperature
+    row_temp_fit_table = params_table.row(params_table.rowCount()-1)
+    print(f"Sample Temperature (K) {row_temp_fit_table['Value']:.3f} +- {row_temp_fit_table['Error']:.3f}")
 
 Output:
 
 .. testoutput:: PEARLTransfitV2Example
 
+   Sample Temperature (K) 279.760 +- 14.717
    Sample Temperature (K) 279.760 +- 14.717
 
 References
