@@ -1,0 +1,1 @@
+- The matplotlib figure manager will no longer close the figure whenever a workspace is deleted.
