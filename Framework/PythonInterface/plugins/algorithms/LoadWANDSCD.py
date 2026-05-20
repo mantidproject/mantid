@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import numpy as np
 import h5py
@@ -20,6 +20,7 @@ from mantid.api import (
     Progress,
     PropertyMode,
     PythonAlgorithm,
+    WorkspaceFactory,
     WorkspaceProperty,
     mtd,
 )
@@ -110,6 +111,13 @@ class LoadWANDSCD(PythonAlgorithm):
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output), "Output Workspace"
         )
 
+        self.declareProperty(
+            WorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="Optional: output GroupingWorkspace mapping every detector's workspace index to its group ID. "
+            "Only produced when Grouping is '2x2' or '4x4'.",
+        )
+        self.setPropertyGroup("OutputGroupingWorkspace", "Grouping")
+
     def validateInputs(self):
         issues = dict()
 
@@ -126,14 +134,20 @@ class LoadWANDSCD(PythonAlgorithm):
         if (va_useIPTS and va_noRunNumber) or (va_noIPTS and va_useRunNumber):
             issues["VanadiumIPTS"] = "VanadiumIPTS and VanadiumRunNumber must be specified together"
 
+        # case 3: OutputGroupingWorkspace requires Grouping to be set
+        if self.getProperty("Grouping").value == "None" and not self.getProperty("OutputGroupingWorkspace").isDefault:
+            issues["OutputGroupingWorkspace"] = "OutputGroupingWorkspace can only be produced when Grouping is '2x2' or '4x4'"
+
         return issues
 
     def PyExec(self):
         # Process input data
         # get the list of input filenames
         runs = self.get_intput_filenames()
+        # determine whether to produce a GroupingWorkspace alongside the main output
+        create_grouping_ws = self.getProperty("Grouping").value != "None" and not self.getProperty("OutputGroupingWorkspace").isDefault
         # load and group
-        data = self.load_and_group(runs)
+        data, grouping_ws = self.load_and_group(runs, create_grouping_ws=create_grouping_ws)
 
         # check if normalization need to be performed
         # NOTE: the normalization will be skipped if no information regarding Vanadium is provided
@@ -152,7 +166,7 @@ class LoadWANDSCD(PythonAlgorithm):
                 # try to load from memory
                 norm = self.getProperty("VanadiumWorkspace").value
             else:
-                norm = self.load_and_group([van_filename])
+                norm, _ = self.load_and_group([van_filename])
             # normalize
             data = self.normalize(data, norm, self.getProperty("NormalizedBy").value.lower())
             # cleanup
@@ -162,6 +176,8 @@ class LoadWANDSCD(PythonAlgorithm):
 
         # setup output
         self.setProperty("OutputWorkspace", data)
+        if create_grouping_ws:
+            self.setProperty("OutputGroupingWorkspace", grouping_ws)
         # cleanup
         DeleteWorkspace(data)
 
@@ -211,7 +227,7 @@ class LoadWANDSCD(PythonAlgorithm):
             va_filename = None
         return va_filename
 
-    def load_and_group(self, runs: List[str]) -> IMDHistoWorkspace:  # noqa: C901
+    def load_and_group(self, runs: List[str], create_grouping_ws: bool = False) -> Tuple[IMDHistoWorkspace, Optional[object]]:  # noqa: C901
         """
         Loads and groups data from the provided list of run files.
 
@@ -221,7 +237,10 @@ class LoadWANDSCD(PythonAlgorithm):
         workspace.
 
         :param runs: A list of file paths to the run files to be loaded and grouped.
-        :returns: An MDHistoWorkspace containing the grouped data and associated metadata.
+        :param create_grouping_ws: When True and grouping is applied, also build a
+            Workspace2D mapping every detector ID to its 1-indexed group ID.
+        :returns: A tuple ``(outWS, grouping_ws)`` where ``grouping_ws`` is ``None``
+            when ``create_grouping_ws`` is False or no grouping was requested.
         """
         # grouping config
         grouping = self.getProperty("Grouping").value
@@ -350,6 +369,7 @@ class LoadWANDSCD(PythonAlgorithm):
 
         SetUB(_tmp_ws, UB=UB, EnableLogging=False)
 
+        grouping_ws = None
         if grouping > 1:
             detector_list = ""
             for x in range(0, 480 * 8, grouping):
@@ -359,6 +379,8 @@ class LoadWANDSCD(PythonAlgorithm):
                         for i in range(grouping):
                             spectra_list.append(str(y + i + (x + j) * 512))
                     detector_list += "," + "+".join(spectra_list)
+            if create_grouping_ws:
+                grouping_ws = self._build_grouping_ws(_tmp_ws, grouping)
             _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, GroupingPattern=detector_list, EnableLogging=False)
 
         progress.report("Adding logs")
@@ -372,6 +394,7 @@ class LoadWANDSCD(PythonAlgorithm):
         preprocWS = mtd["__PreprocessedDetectorsWS"]
         twotheta = preprocWS.column(2)
         azimuthal = preprocWS.column(3)
+        detectorID = preprocWS.column(4)
 
         outWS.copyExperimentInfos(_tmp_ws)
         DeleteWorkspace(_tmp_ws, EnableLogging=False)
@@ -396,6 +419,8 @@ class LoadWANDSCD(PythonAlgorithm):
         # Log the detector/group orientations with respect to the sample's position
         run.addProperty("twotheta", twotheta, True)
         run.addProperty("azimuthal", azimuthal, True)
+        # Store pixel ID. If grouping, follow Mantid convention by storing the first detector-pixel ID for each group
+        run.addProperty("detectorID", detectorID, True)
 
         # Add SE logs to the output workspace
         for log_name, log_values in SE_logs.items():
@@ -413,7 +438,35 @@ class LoadWANDSCD(PythonAlgorithm):
         setGoniometer_alg.setProperty("Average", False)
         setGoniometer_alg.execute()
 
-        return outWS
+        return outWS, grouping_ws
+
+    def _build_grouping_ws(self, instrument_ws, grouping: int):
+        """
+        Build a GroupingWorkspace from an ungrouped instrument workspace mapping workspace indices to group IDs.
+
+        Each workspace index is mapped to a 1-indexed group ID that matches the
+        order in which groups appear in the ``GroupingPattern`` used by
+        ``GroupDetectors``. For the WAND detector array (480×8 rows, 512 columns),
+        workspace index ``y + x*512`` belongs to group
+        ``(x // grouping) * (512 // grouping) + (y // grouping) + 1``.
+
+        The returned workspace is NOT stored in the ADS; ``PyExec`` publishes it
+        via ``setProperty("OutputGroupingWorkspace", ...)``.
+
+        :param instrument_ws: Ungrouped workspace supplying the number of histograms.
+        :param grouping: Pixel-grouping factor (2 for 2×2, 4 for 4×4).
+        :returns: Populated GroupingWorkspace.
+        """
+        grouping_ws = WorkspaceFactory.create("GroupingWorkspace", instrument_ws.getNumberHistograms(), 1, 1)
+        # For WAND, the correspondence between detector ID and workspace index is one-to-one
+        nHist = instrument_ws.getNumberHistograms()
+        wi = np.arange(nHist)
+        group_ids = (wi // 512 // grouping) * (512 // grouping) + (wi % 512 // grouping) + 1.0
+        for i in range(nHist):
+            grouping_ws.dataY(i)[0] = group_ids[i]
+            grouping_ws.getSpectrum(i).setDetectorID(i)
+
+        return grouping_ws
 
     def normalize(
         self,
