@@ -391,9 +391,11 @@ def get_spectrum(workspace, wkspIndex, normalization: PlotNormalizationType, wit
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])
         elif normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER:
-            y = y / (boundary_points**-4)
+            # multiply by x^4 instead of dividing by x^-4 for efficiency's sake
+            normalization_factor = boundary_points**4
+            y = y * normalization_factor
             if dy is not None:
-                dy = dy / (boundary_points**-4)
+                dy = dy * normalization_factor
         x = boundary_points
     try:
         specInfo = workspace.spectrumInfo()
