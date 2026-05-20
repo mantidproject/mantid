@@ -43,9 +43,8 @@ jobs:
 
     strategy:
       matrix:
-        os: [Linux, Windows]
         # Skip Windows when the PR targets ornl-next (ORNL-specific branch, Linux only)
-        exclude: ${{ fromJson(github.base_ref == 'ornl-next' && '[{"os":"Windows"}]' || '[]') }}
+        include: ${{ fromJson(github.base_ref == 'ornl-next' && '[{"os":"Linux","cmake_preset":"linux-64-ci"}]' || '[{"os":"Linux","cmake_preset":"linux-64-ci"},{"os":"Windows","cmake_preset":"win-64-ci"}]') }}
 
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
@@ -63,7 +62,7 @@ jobs:
         shell: bash
 
     env:
-      CMAKE_PRESET: ${{ matrix.os == 'Linux' && 'linux-64-ci' || 'win-64-ci' }}
+      CMAKE_PRESET: ${{ matrix.cmake_preset }}
       EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
       ENABLE_BUILD_CODE: true
       ENABLE_UNIT_TESTS: true
