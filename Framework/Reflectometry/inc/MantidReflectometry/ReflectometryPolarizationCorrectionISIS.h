@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidReflectometry/DllConfig.h"
 
 #include <functional>
@@ -22,11 +23,12 @@ public:
   using StringPropertyGetter = std::function<std::string(const std::string &)>;
   using MatrixWorkspacePropertyGetter = std::function<API::MatrixWorkspace_sptr(const std::string &)>;
 
-  ReflectometryPolarizationCorrectionISIS(ChildAlgorithmFactory childAlgorithmFactory, IsDefault isDefault,
+  ReflectometryPolarizationCorrectionISIS(const API::WorkspaceGroup_sptr &inputWorkspaces,
+                                          ChildAlgorithmFactory childAlgorithmFactory, IsDefault isDefault,
                                           StringPropertyGetter getPropertyValue,
                                           MatrixWorkspacePropertyGetter getMatrixWorkspaceProperty);
 
-  WorkspaceGroup_sptr apply(const WorkspaceGroup_sptr &outputIvsLam, const std::string &outputGroupName) const;
+  API::WorkspaceGroup_sptr apply(const std::string &outputGroupName) const;
 
 private:
   struct Correction {
@@ -44,6 +46,7 @@ private:
   void validateInputSpinStateOrderFamily(const std::string &correctionMethod, const std::string &spinStates) const;
   Correction getCorrection() const;
 
+  API::WorkspaceGroup_sptr m_inputWorkspaces;
   ChildAlgorithmFactory m_childAlgorithmFactory;
   IsDefault m_isDefault;
   StringPropertyGetter m_getPropertyValue;

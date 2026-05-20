@@ -85,40 +85,13 @@ SpinStateFamily spinStateFamily(const std::string &spinStates) {
   }
   return SpinStateFamily::Invalid;
 }
-
-std::vector<std::string> getGroupMemberNames(const std::string &groupName) {
-  auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
-  return group->getNames();
-}
-
-std::string vectorToString(const std::vector<std::string> &vec) {
-  std::string result;
-  for (const auto &item : vec) {
-    if (!result.empty()) {
-      result += ",";
-    }
-    result += item;
-  }
-  return result;
-}
-
-void removeAllWorkspacesFromGroup(const std::string &groupName) {
-  auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
-  group->removeAll();
-}
-
-void removeWorkspacesFromADS(const std::vector<std::string> &workspaceNames) {
-  for (const auto &workspaceName : workspaceNames) {
-    AnalysisDataService::Instance().remove(workspaceName);
-  }
-}
 } // namespace
 
 ReflectometryPolarizationCorrectionISIS::ReflectometryPolarizationCorrectionISIS(
-    ChildAlgorithmFactory childAlgorithmFactory, IsDefault isDefault, StringPropertyGetter getPropertyValue,
-    MatrixWorkspacePropertyGetter getMatrixWorkspaceProperty)
-    : m_childAlgorithmFactory(std::move(childAlgorithmFactory)), m_isDefault(std::move(isDefault)),
-      m_getPropertyValue(std::move(getPropertyValue)),
+    const API::WorkspaceGroup_sptr &inputWorkspaces, ChildAlgorithmFactory childAlgorithmFactory, IsDefault isDefault,
+    StringPropertyGetter getPropertyValue, MatrixWorkspacePropertyGetter getMatrixWorkspaceProperty)
+    : m_inputWorkspaces(inputWorkspaces), m_childAlgorithmFactory(std::move(childAlgorithmFactory)),
+      m_isDefault(std::move(isDefault)), m_getPropertyValue(std::move(getPropertyValue)),
       m_getMatrixWorkspaceProperty(std::move(getMatrixWorkspaceProperty)) {}
 
 std::string
@@ -144,15 +117,13 @@ ReflectometryPolarizationCorrectionISIS::findCorrectionMethod(const MatrixWorksp
 }
 
 std::string ReflectometryPolarizationCorrectionISIS::findCorrectionOption(const std::string &correctionMethod) const {
-  auto groupIvsLam =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_getPropertyValue("OutputWorkspaceWavelength"));
-  auto numWorkspacesInGrp = groupIvsLam->size();
+  auto numWorkspacesInGrp = m_inputWorkspaces->size();
   if (numWorkspacesInGrp != 4 && numWorkspacesInGrp != 2) {
     throw std::runtime_error("Only input workspace groups with two or four periods are supported");
   }
 
   if (correctionMethod == CorrectionMethod::WILDES) {
-    auto const &correctionOption = std::dynamic_pointer_cast<MatrixWorkspace>(groupIvsLam->getItem(0))
+    auto const &correctionOption = std::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces->getItem(0))
                                        ->getInstrument()
                                        ->getParameterAsString(ParameterFile::WILDES_FLIPPER_CONFIG);
 
@@ -184,12 +155,10 @@ ReflectometryPolarizationCorrectionISIS::findFredrikzeInputSpinStateOrder(const 
     return "";
   }
 
-  auto groupIvsLam =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_getPropertyValue("OutputWorkspaceWavelength"));
   auto const parameterName = correctionOption == CorrectionOption::PNR
                                  ? ParameterFile::FREDRIKZE_INPUT_SPIN_STATE_ORDER_PNR
                                  : ParameterFile::FREDRIKZE_INPUT_SPIN_STATE_ORDER_PA;
-  auto const inputSpinStateOrder = std::dynamic_pointer_cast<MatrixWorkspace>(groupIvsLam->getItem(0))
+  auto const inputSpinStateOrder = std::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces->getItem(0))
                                        ->getInstrument()
                                        ->getParameterAsString(parameterName);
   if (inputSpinStateOrder.empty()) {
@@ -240,9 +209,7 @@ ReflectometryPolarizationCorrectionISIS::Correction ReflectometryPolarizationCor
     correction.option = findCorrectionOption(correction.method);
     correction.fredrikzeInputSpinStateOrder = findFredrikzeInputSpinStateOrder(correction.method, correction.option);
   } else {
-    auto groupIvsLam =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_getPropertyValue("OutputWorkspaceWavelength"));
-    Workspace_sptr workspace = groupIvsLam->getItem(0);
+    Workspace_sptr workspace = m_inputWorkspaces->getItem(0);
 
     auto effAlg = m_childAlgorithmFactory("ExtractPolarizationEfficiencies");
     effAlg->setProperty("InputWorkspace", workspace);
@@ -268,7 +235,7 @@ ReflectometryPolarizationCorrectionISIS::Correction ReflectometryPolarizationCor
   return correction;
 }
 
-WorkspaceGroup_sptr ReflectometryPolarizationCorrectionISIS::apply(const WorkspaceGroup_sptr &outputIvsLam, std::string &outputGroupName) const {
+API::WorkspaceGroup_sptr ReflectometryPolarizationCorrectionISIS::apply(const std::string &outputGroupName) const {
   auto correction = getCorrection();
   CorrectionMethod::validate(correction.method);
 
@@ -281,7 +248,7 @@ WorkspaceGroup_sptr ReflectometryPolarizationCorrectionISIS::apply(const Workspa
   polAlg->setProperty("SpinStatesInFredrikze", correction.fredrikzeInputSpinStateOrder);
   polAlg->setProperty(CorrectionMethod::OPTION_NAME.at(correction.method), correction.option);
   polAlg->setProperty("AddSpinStateToLog", true);
-  polAlg->setProperty("InputWorkspaceGroup", outputIvsLam);
+  polAlg->setProperty("InputWorkspaceGroup", m_inputWorkspaces);
   polAlg->execute();
   return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputGroupName);
 }

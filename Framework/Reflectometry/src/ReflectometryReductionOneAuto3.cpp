@@ -1007,13 +1007,14 @@ auto ReflectometryReductionOneAuto3::getOutputNamesForGroupMember(const std::str
  * @param outputIvsLam :: Workspace group to apply the correction to.
  * @param outputGroupName :: Name of the corrected output workspace group.
  */
-WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyPolarizationCorrection(const WorkspaceGroup_sptr &outputIvsLam, const std::string &outputGroupName) {
+WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyPolarizationCorrection(const WorkspaceGroup_sptr &outputIvsLam,
+                                                                                const std::string &outputGroupName) {
   ReflectometryPolarizationCorrectionISIS polarization(
-      [this](const auto &name) { return createChildAlgorithm(name); },
+      outputIvsLam, [this](const auto &name) { return createChildAlgorithm(name); },
       [this](const auto &propertyName) { return isDefault(propertyName); },
       [this](const auto &propertyName) { return getPropertyValue(propertyName); },
       [this](const auto &propertyName) -> MatrixWorkspace_sptr { return getProperty(propertyName); });
-  return polarization.apply(outputIvsLam, outputGroupName);
+  return polarization.apply(outputGroupName);
 }
 
 /**
