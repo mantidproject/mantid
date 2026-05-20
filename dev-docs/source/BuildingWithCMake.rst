@@ -11,7 +11,7 @@ For a "how is it used version" of this guide, see the `build script <https://git
 Environment
 ###########
 
-The :ref:`getting started <GettingStarted>` page describes how to set up your environment to build Mantid. Follow those instructions and install the Mantid dependencies first.
+The :ref:`getting started <GettingSarted>` page describes how to set up your environment to build Mantid. Follow those instructions and install the Mantid dependencies first.
 
 Also, if you use the `Ninja <https://ninja-build.org/>`_ generator then the executable is called ``ninja-build`` on many systems (e.g. RHEL) rather than ``ninja``.
 
