@@ -186,8 +186,6 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
 File::File(File const &f)
     : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_fileID(f.m_fileID), m_current_group_id(0),
       m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
-  // NOTE warning to future devs
-  // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   if (!m_fileID.isValid())
     throw NXEXCEPTION("Error reopening file");
 }
@@ -1229,8 +1227,9 @@ void File::writeData(std::string const &name, vector<NumT> const &value, DimVect
 }
 
 template <typename NumT> void File::writeExtendibleData(std::string const &name, vector<NumT> const &value) {
-  // Use a default chunk size of 4096 bytes. TODO: Is this optimal?
-  writeExtendibleData(name, value, 4096);
+  constexpr dimsize_t TARGET_CHUNK_BYTES = 4096;
+  dimsize_t const chunk = std::max(dimsize_t(1), TARGET_CHUNK_BYTES / static_cast<dimsize_t>(sizeof(NumT)));
+  writeExtendibleData(name, value, chunk);
 }
 
 template <typename NumT>
@@ -1343,14 +1342,9 @@ Info File::getInfo() {
 
   // Trim 1D CHAR arrays to the actual string length
   if ((info.type == NXnumtype::CHAR) && (rank == 1)) {
-    char *buf = static_cast<char *>(malloc(static_cast<size_t>((info.dims[0] + 1) * sizeof(char))));
-    if (buf == nullptr) {
-      throw NXEXCEPTION("Unable to allocate memory for CHAR buffer");
-    }
-    memset(buf, 0, static_cast<size_t>((info.dims[0] + 1) * sizeof(char)));
-    this->getData<char>(buf);
-    info.dims[0] = static_cast<int64_t>(strlen(buf));
-    free(buf);
+    std::vector<char> buf(static_cast<size_t>(info.dims[0] + 1), '\0');
+    this->getData<char>(buf.data());
+    info.dims[0] = static_cast<int64_t>(strlen(buf.data()));
   }
   return info;
 }
