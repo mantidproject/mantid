@@ -195,6 +195,62 @@ static const struct sgl_limits_struct {
 #define mmax sgl_limits[0]
 #define mmin sgl_limits[1]
 
+#if WORDS_BIGENDIAN
+
+/* What IEEE double precision floating point looks like */
+struct ieee_double {
+  unsigned int mantissa2 : 32;
+  unsigned int sign : 1;
+  unsigned int exp : 11;
+  unsigned int mantissa1 : 20;
+};
+
+/* Vax double precision floating point */
+struct vax_double {
+  //	unsigned int	mantissa4 : 16;
+  //	unsigned int	mantissa3 : 16;
+  unsigned int mantissa2 : 16;
+  unsigned int sign : 1;
+  unsigned int exp : 8;
+  unsigned int mantissa1 : 7;
+};
+
+#else
+
+/** What IEEE double precision floating point looks like */
+struct ieee_double {
+  unsigned int mantissa1 : 20; ///< mantissa 1
+  unsigned int exp : 11;       ///< exponential
+  unsigned int sign : 1;       ///< sign
+  unsigned int mantissa2 : 32; ///< mantissa 2
+};
+
+/** Vax double precision floating point */
+struct vax_double {
+  unsigned int mantissa1 : 7;  ///< mantissa 1
+  unsigned int exp : 8;        ///< exponential
+  unsigned int sign : 1;       ///< sign
+  unsigned int mantissa2 : 16; ///< mantissa 2
+                               //	unsigned int	mantissa3 : 16;  ///<mantissa 3
+                               //	unsigned int	mantissa4 : 16;  ///<mantissa 4
+};
+
+#endif /* WORDS_BIGENDIAN */
+
+#define VAX_DBL_BIAS 0x81
+#define IEEE_DBL_BIAS 0x3ff
+#define MASK(nbits) ((1 << nbits) - 1)
+
+// static struct dbl_limits {
+//	struct	vax_double d;
+//	struct	ieee_double ieee;
+//} dbl_limits[2] = {
+//	{{ 0x7f, 0xff, 0x0, 0xffff, 0xffff, 0xffff },	/* Max Vax */
+//	{ 0x0, 0x7ff, 0x0, 0x0 }},			/* Max IEEE */
+//	{{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0},		/* Min Vax */
+//	{ 0x0, 0x0, 0x0, 0x0 }}				/* Min IEEE */
+//};
+
 /* VAX is little endian, so we may need to flip */
 #if WORDS_BIGENDIAN
 static int maybe_flip_bytes(void *p, size_t n) {
@@ -312,7 +368,9 @@ void vaxf_to_local(float *val, const int *n, int *errcode) {
   }
 #elif defined(IEEEFP)
   for (i = 0; i < *n; i++) {
-    vax_to_ieee_float(i + val);
+    if (vax_to_ieee_float(i + val) != 0) {
+      *errcode = 1;
+    }
   }
 #else
 #error Unknown floating point format
@@ -325,7 +383,9 @@ void local_to_vaxf(float *val, const int *n, int *errcode) {
 /* nothing required */
 #elif defined(IEEEFP)
   for (int i = 0; i < *n; i++) {
-    ieee_to_vax_float(i + val);
+    if (ieee_to_vax_float(i + val) != 0) {
+      *errcode = 1;
+    }
   }
 #else
 #error Unknown floating point format

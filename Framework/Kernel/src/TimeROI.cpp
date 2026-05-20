@@ -94,7 +94,7 @@ void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Cor
     m_roi.clear();
     m_roi.push_back(startTime);
     m_roi.push_back(stopTime);
-  } else if (stopTime < m_roi.front()) {
+  } else if (stopTime < m_roi.front() || startTime > m_roi.back()) {
     m_roi.insert(m_roi.begin(), stopTime);
     m_roi.insert(m_roi.begin(), startTime);
   } else {
