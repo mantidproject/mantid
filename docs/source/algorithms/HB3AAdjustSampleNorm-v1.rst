@@ -44,7 +44,7 @@ Grouping
 --------
 
 A grouping option is available group pixels by either 2x2 or 4x4 which reduces memory
-usage and improves the performance of subsequent reduction steps. The default is the original detetor pixelation.
+usage and improves the performance of subsequent reduction steps. The default is the original detector pixelation.
 
 See :ref:`HB3AIntegratePeaks <algm-HB3AIntegratePeaks>` for complete examples of the HB3A workflow.
 

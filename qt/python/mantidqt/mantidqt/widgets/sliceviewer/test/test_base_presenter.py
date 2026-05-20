@@ -7,7 +7,9 @@
 import unittest
 
 from unittest import mock
+from unittest.mock import call, patch, MagicMock
 from mantidqt.widgets.sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
+from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 
 
 class SliceViewerBasePresenterShim(SliceViewerBasePresenter):
@@ -71,6 +73,35 @@ class SliceViewerBasePresenterTest(unittest.TestCase):
 
     def tearDown(self) -> None:
         self._ws_info_patcher.stop()
+
+    @patch("mantidqt.widgets.sliceviewer.presenters.base_presenter.Masking")
+    def test_activate_masking(self, mock_masking_cls):
+        presenter = SliceViewerBasePresenterShim(None, model=mock.Mock(), data_view=mock.Mock())
+        presenter._data_view = MagicMock()
+        presenter.model = MagicMock()
+        presenter.model.ws.name.return_value = "test_ws"
+        mock_masking = MagicMock()
+        mock_masking_cls.return_value = mock_masking
+
+        presenter._activate_masking()
+        presenter._data_view.deactivate_and_disable_tool.assert_has_calls(
+            [
+                call(ToolItemText.ZOOM),
+                call(ToolItemText.PAN),
+                call(ToolItemText.REGIONSELECTION),
+            ]
+        )
+        mock_masking_cls.assert_called_once_with(
+            presenter._data_view,
+            "test_ws",
+            auto_update_mask_file=False,
+        )
+        self.assertEqual(presenter._data_view.masking, mock_masking)
+        mock_masking.new_selector.assert_called_once_with(ToolItemText.RECT_MASKING)
+        presenter._data_view.activate_tool.assert_called_once_with(
+            ToolItemText.RECT_MASKING,
+            True,
+        )
 
     def test_data_limits_changed_creates_new_plot_if_dynamic_rebinning_supported(self):
         presenter = SliceViewerBasePresenterShim(None, model=mock.Mock(), data_view=mock.Mock())
