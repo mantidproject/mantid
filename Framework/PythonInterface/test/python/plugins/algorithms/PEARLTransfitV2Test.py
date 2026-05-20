@@ -12,16 +12,19 @@ import numpy as np
 
 
 class PEARLTransfitV2Test(unittest.TestCase):
+    test_calib_output_name = "S_fit_Hf01_112777"
+    test_temp_output_name = "T_fit_Hf01_112777"
+
     def tearDown(self):
         ADS.clear()
 
     def test_calibration_run_single_run(self):
         # Test that the calibration run produces the correct workspaces for a single run
         PEARLTransfit(Files="PEARL00112777", Calibration=True)
-        self._assert_output_workspaces_exist("S_fit")
-        self._assert_fit_parameters("S_fit", cost=1.02511, peak_cen=1096.79, peak_cen_err=0.20729)
+        self._assert_output_workspaces_exist(self.test_calib_output_name)
+        self._assert_fit_parameters(self.test_calib_output_name, cost=1.02511, peak_cen=1096.79, peak_cen_err=0.20729)
         # assert number energy bins
-        self.assertEqual(ADS.retrieve("S_fit_Workspace").blocksize(), 509)
+        self.assertEqual(ADS.retrieve(f"{self.test_calib_output_name}_Workspace").blocksize(), 509)
 
     def test_custom_output_name_and_history(self):
         PEARLTransfit(Files="PEARL00112777", Calibration=True, Output="Test")
@@ -49,38 +52,42 @@ class PEARLTransfitV2Test(unittest.TestCase):
         params_dict = {"Bg0": 0.0, "Bg1": -1.0, "Bg2": 1.0}
         table = _PEARLTransfit.generate_table(params_dict)
         PEARLTransfit(Files="PEARL00112777", Calibration=True, FitParametersTable=table)
-        self._assert_output_workspaces_exist("S_fit")
-        self._assert_fit_parameters("S_fit", cost=1.02511, peak_cen=1096.79, peak_cen_err=0.20729)
+        self._assert_output_workspaces_exist(self.test_calib_output_name)
+        self._assert_fit_parameters(self.test_calib_output_name, cost=1.02511, peak_cen=1096.79, peak_cen_err=0.20729)
 
     def test_calibration_run_multi_run(self):
         # Test that the calibration run produces the correct workspaces for multiple runs
         PEARLTransfit(Files="PEARL00073987-00073990", Calibration=True)
-        self._assert_output_workspaces_exist("S_fit")
+        self._assert_output_workspaces_exist("S_fit_Hf01_73987_73990")
 
     def test_measure_run_single_run(self):
         # Test that the measurement run produces the correct workspaces for a single run
         PEARLTransfit(Files="PEARL00112777", Calibration=True)
-        PEARLTransfit(Files="PEARL00112777", FitParametersTable=ADS.retrieve("S_fit_Parameters"), Calibration=False)
-        self._assert_output_workspaces_exist("S_fit")
-        self._assert_output_workspaces_exist("T_fit")
+        PEARLTransfit(
+            Files="PEARL00112777", FitParametersTable=ADS.retrieve(f"{self.test_calib_output_name}_Parameters"), Calibration=False
+        )
+        self._assert_output_workspaces_exist(self.test_calib_output_name)
+        self._assert_output_workspaces_exist(self.test_temp_output_name)
 
     def test_measure_run_multi_run(self):
         # Test that the measurement run produces the correct workspaces for multiple runs
         PEARLTransfit(Files="PEARL00073987-00073990", Calibration=True)
-        PEARLTransfit(Files="PEARL00073987-00073990", FitParametersTable=ADS.retrieve("S_fit_Parameters"), Calibration=False)
-        self._assert_output_workspaces_exist("S_fit")
-        self._assert_output_workspaces_exist("T_fit")
+        PEARLTransfit(
+            Files="PEARL00073987-00073990", FitParametersTable=ADS.retrieve("S_fit_Hf01_73987_73990_Parameters"), Calibration=False
+        )
+        self._assert_output_workspaces_exist("S_fit_Hf01_73987_73990")
+        self._assert_output_workspaces_exist("T_fit_Hf01_73987_73990")
 
     def test_calibration_run_single_run_with_nexus_file(self):
         # Test that the calibration run produces the correct workspaces for a single run
         PEARLTransfit(Files="PEARL00112777.nxs", Calibration=True)
-        self._assert_output_workspaces_exist("S_fit")
+        self._assert_output_workspaces_exist(self.test_calib_output_name)
 
     def test_calibration_run_non_default_foil_no_rebin(self):
         PEARLTransfit(Files="PEARL00112777", Calibration=True, FoilType="Hf02")
-        self._assert_output_workspaces_exist("S_fit")
-        self._assert_fit_parameters("S_fit", cost=0.89391, peak_cen=2380.03, peak_cen_err=0.31927)
-        self.assertEqual(ADS.retrieve("S_fit_Workspace").blocksize(), 96)
+        self._assert_output_workspaces_exist("S_fit_Hf02_112777")
+        self._assert_fit_parameters("S_fit_Hf02_112777", cost=0.89391, peak_cen=2380.03, peak_cen_err=0.31927)
+        self.assertEqual(ADS.retrieve("S_fit_Hf02_112777_Workspace").blocksize(), 96)
 
     def test_debug_info_output_as_a_table(self):
         debug_params = {
@@ -97,11 +104,11 @@ class PEARLTransfitV2Test(unittest.TestCase):
         out_calib = PEARLTransfit(Files="PEARL00112777", Calibration=True)
         PEARLTransfit(Files="PEARL00112777", Calibration=False, FitParametersTable=out_calib[1], CreateDebugTable=True)
 
-        self._assert_output_workspaces_exist("S_fit")
-        self._assert_output_workspaces_exist("T_fit")
-        self.assertTrue(ADS.doesExist("T_fit_DebugParameters"))
+        self._assert_output_workspaces_exist(self.test_calib_output_name)
+        self._assert_output_workspaces_exist(self.test_temp_output_name)
+        self.assertTrue(ADS.doesExist(f"{self.test_temp_output_name}_DebugParameters"))
 
-        table = ADS.retrieve("T_fit_DebugParameters")
+        table = ADS.retrieve(f"{self.test_temp_output_name}_DebugParameters")
         self.assertEqual(table.column("Name"), list(debug_params.keys()))
         np.testing.assert_almost_equal(table.column("Value"), list(debug_params.values()), 4)
 
