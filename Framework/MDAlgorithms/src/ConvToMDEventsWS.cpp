@@ -100,11 +100,13 @@ size_t ConvToMDEventsWS::conversionChunk(size_t workspaceIndex) {
 
 /** method sets up all internal variables necessary to convert from Event
 Workspace to MDEvent workspace
-@param WSD         -- the class describing the target MD workspace, sorurce
+@param WSD         -- the class describing the target MD workspace, source
 Event workspace and the transformations, necessary to perform on these
 workspaces
 @param inWSWrapper -- the class wrapping the target MD workspace
 @param ignoreZeros  -- if zero value signals should be rejected
+@param useLogTimes -- if log values at event pulse time should be used
+for computing Goniometer matrix or additional dimensions
 */
 size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                                     bool ignoreZeros, bool useLogTimes) {
