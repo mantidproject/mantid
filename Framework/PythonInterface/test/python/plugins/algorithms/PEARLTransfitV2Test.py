@@ -39,19 +39,19 @@ class PEARLTransfitV2Test(unittest.TestCase):
     def test_validation_error_for_wrong_table_format_in_calibration(self):
         params_dict = {"Bg0": 0.0, "Bg1": -1.0, "Bg3": 1.0}
         table = _PEARLTransfit.generate_table(params_dict)
-        err_msg = "Parameter Bg2 missing from FitParametersTable."
+        err_msg = "Parameter Bg2 missing from InputCalibrationParameters."
         with self.assertRaisesRegex(RuntimeError, err_msg):
-            PEARLTransfit(Files="PEARL00112777", Calibration=True, FitParametersTable=table)
+            PEARLTransfit(Files="PEARL00112777", Calibration=True, InputCalibrationParameters=table)
 
     def test_validation_error_if_missing_params_table_in_non_calibration_call(self):
-        err_msg = "FitParametersTable is missing."
+        err_msg = "InputCalibrationParameters is missing."
         with self.assertRaisesRegex(RuntimeError, err_msg):
             PEARLTransfit(Files="PEARL00112777", Calibration=False)
 
     def test_calibration_run_single_run_background_table_provided(self):
         params_dict = {"Bg0": 0.0, "Bg1": -1.0, "Bg2": 1.0}
         table = _PEARLTransfit.generate_table(params_dict)
-        PEARLTransfit(Files="PEARL00112777", Calibration=True, FitParametersTable=table)
+        PEARLTransfit(Files="PEARL00112777", Calibration=True, InputCalibrationParameters=table)
         self._assert_output_workspaces_exist(self.test_calib_output_name)
         self._assert_fit_parameters(self.test_calib_output_name, cost=1.02511, peak_cen=1096.79, peak_cen_err=0.20729)
 
@@ -64,7 +64,7 @@ class PEARLTransfitV2Test(unittest.TestCase):
         # Test that the measurement run produces the correct workspaces for a single run
         PEARLTransfit(Files="PEARL00112777", Calibration=True)
         PEARLTransfit(
-            Files="PEARL00112777", FitParametersTable=ADS.retrieve(f"{self.test_calib_output_name}_Parameters"), Calibration=False
+            Files="PEARL00112777", InputCalibrationParameters=ADS.retrieve(f"{self.test_calib_output_name}_Parameters"), Calibration=False
         )
         self._assert_output_workspaces_exist(self.test_calib_output_name)
         self._assert_output_workspaces_exist(self.test_temp_output_name)
@@ -73,7 +73,7 @@ class PEARLTransfitV2Test(unittest.TestCase):
         # Test that the measurement run produces the correct workspaces for multiple runs
         PEARLTransfit(Files="PEARL00073987-00073990", Calibration=True)
         PEARLTransfit(
-            Files="PEARL00073987-00073990", FitParametersTable=ADS.retrieve("S_fit_Hf01_73987_73990_Parameters"), Calibration=False
+            Files="PEARL00073987-00073990", InputCalibrationParameters=ADS.retrieve("S_fit_Hf01_73987_73990_Parameters"), Calibration=False
         )
         self._assert_output_workspaces_exist("S_fit_Hf01_73987_73990")
         self._assert_output_workspaces_exist("T_fit_Hf01_73987_73990")
@@ -102,7 +102,7 @@ class PEARLTransfitV2Test(unittest.TestCase):
         }
 
         out_calib = PEARLTransfit(Files="PEARL00112777", Calibration=True)
-        PEARLTransfit(Files="PEARL00112777", Calibration=False, FitParametersTable=out_calib[1], CreateDebugTable=True)
+        PEARLTransfit(Files="PEARL00112777", Calibration=False, InputCalibrationParameters=out_calib[1], CreateDebugTable=True)
 
         self._assert_output_workspaces_exist(self.test_calib_output_name)
         self._assert_output_workspaces_exist(self.test_temp_output_name)

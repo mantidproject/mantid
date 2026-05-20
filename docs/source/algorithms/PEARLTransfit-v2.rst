@@ -27,21 +27,21 @@ Version 2
 For version 1 of this algorithm, see :ref:`PEARLTransfit-v1 <algm-PEARLTransfit-v1>`.
 
 In version 2 of this algorithm:
-    - The Output Workspace and Fit Parameters Table are created as output properties and not directly extracted from the fit, this preserves workspace history.
+    - The Output Workspace and Parameters Table are created as output properties and not directly extracted from the fit, this preserves workspace history.
     - The `Output` property is a string that sets the basename for outputs in the ADS.
-    - There are no inputs for background parameter estimation, these can be provided in the `FitParametersTable`.
+    - There are no inputs for background parameter estimation, these can be provided in the `InputCalibrationParameters`.
     - There is no rebin in constant energy.
-    - In non-calibration fits, a debug table with information about sample temperature can be output if `CreateDebugTable` is set to `True`.
+    - In non-calibration fits, a debug table with information about sample temperature can be output if `CreateDebugTable` is set to `True`. The output table also contains the computed sample temperature.
 
 
-If no `FitParametersTable` is provided on a calibration run, the background parameters will be estimated from the data.
+If no `InputCalibrationParameters` is provided on a calibration run, the background parameters will be estimated from the data.
 This generates an output with the suffix `_Parameters` on the ADS containing, among others, background estimation parameters.
 This table can be used on successive calls to input background parameters. If custom background parameters need to be provided in a calibration run,
 a table workspace with the appropriate parameters can be created from the following script.
 
 .. code:: python
 
-    def create_fit_parameters_table(bg0, bg1, bg2, name="FitParametersTable"):
+    def create_input_calibration_table(bg0, bg1, bg2, name="InputCalibrationParameters"):
         table = CreateEmptyTableWorkspace(OutputWorkspace=name)
 
         table.addColumn("str","Name")
@@ -51,8 +51,8 @@ a table workspace with the appropriate parameters can be created from the follow
             table.addRow({"Name":f"Bg{idx}", "Value": bg})
         return table
 
-    table = create_fit_parameters_table(10, 0.01, 0.000004)
-    cal_ws, params_table = PEARLTransfit(Files='PEARL00112777', FoilType="Hf01", Calibration=True, FitParametersTable=table, Output='pearl_cal')
+    table = create_input_calibration_table(10, 0.01, 0.000004)
+    cal_ws, params_table = PEARLTransfit(Files='PEARL00112777', FoilType="Hf01", Calibration=True, InputCalibrationParameters=table, Output='pearl_cal')
 
 See script below for usage.
 
@@ -64,7 +64,7 @@ See script below for usage.
     cal_ws, params_table = PEARLTransfit(Files='PEARL00112777', FoilType="Hf01", Calibration=True, EstimateBackground=True, Output='pearl_cal')
 
     # Using results from calibration
-    non_cal_ws, params_table, debug_table= PEARLTransfit(Files='PEARL00112777', FoilType="Hf01", Calibration=False, FitParametersTable=params_table, CreateDebugTable=True)
+    non_cal_ws, params_table, debug_table= PEARLTransfit(Files='PEARL00112777', FoilType="Hf01", Calibration=False, InputCalibrationParameters=params_table, CreateDebugTable=True)
 
     # Debug table contains temperature and fitting information.
     row_temp_debug = debug_table.row(debug_table.rowCount()-1)

@@ -103,7 +103,7 @@ class PEARLTransfit(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(
             MultipleFileProperty("Files", extensions=[".raw", ".s0x", ".nxs"]),
-            doc="Files or run numbers for calibration runs (numors). Must be detector scans.",
+            doc="File paths or comma separated run numbers for target runs (numors). Must be detector scans.",
         )
 
         self.declareProperty(
@@ -122,10 +122,12 @@ class PEARLTransfit(PythonAlgorithm):
         )
 
         self.declareProperty(
-            ITableWorkspaceProperty(name="FitParametersTable", defaultValue="", direction=Direction.Input, optional=PropertyMode.Optional),
+            ITableWorkspaceProperty(
+                name="InputCalibrationParameters", defaultValue="", direction=Direction.Input, optional=PropertyMode.Optional
+            ),
             doc="Table with fit parameters for 'PEARLTransVoigt' function: 'Position', 'LorentzianFWHM', 'GaussianFWHM', 'Amplitude', 'Bg0'"
             "'Bg1', 'Bg2'. The calculated temperature is added in non-calibration runs. This property is mandatory when calibration"
-            " is set to False. If a 'FitParametersTable' is used in calibration runs: 'Bg0', 'Bg1' and 'Bg2' will "
+            " is set to False. If a 'InputCalibrationParameters' is used in calibration runs: 'Bg0', 'Bg1' and 'Bg2' will "
             " be used for background estimation",
         )
 
@@ -159,12 +161,12 @@ class PEARLTransfit(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
         is_calib = self.getProperty("Calibration").value
-        fit_table = self.getProperty("FitParametersTable").value
+        fit_table = self.getProperty("InputCalibrationParameters").value
         if not (is_calib or fit_table):
-            issues["FitParametersTable"] = "FitParametersTable is missing."
+            issues["InputCalibrationParameters"] = "InputCalibrationParameters is missing."
         elif fit_table:
             if "Name" not in fit_table.getColumnNames():
-                issues["FitParametersTable"] = "'Name' column for parameter names is missing in FitParametersTable."
+                issues["InputCalibrationParameters"] = "'Name' column for parameter names is missing in InputCalibrationParameters."
             else:
                 parameters = fit_table.column("Name")
                 missing = []
@@ -172,9 +174,9 @@ class PEARLTransfit(PythonAlgorithm):
                 fit_params = FIT_TABLE_PARAMS if not is_calib else FIT_TABLE_PARAMS[-3:]
                 for param in fit_params:
                     if param not in parameters:
-                        missing.append(f"Parameter {param} missing from FitParametersTable.")
+                        missing.append(f"Parameter {param} missing from InputCalibrationParameters.")
                 if missing:
-                    issues["FitParametersTable"] = "\n".join(missing)
+                    issues["InputCalibrationParameters"] = "\n".join(missing)
         return issues
 
     def setup_property_rules(self):
@@ -194,7 +196,7 @@ class PEARLTransfit(PythonAlgorithm):
         self.is_calib = self.getProperty("Calibration").value
 
         ref_temp = self.getProperty("ReferenceTemp").value
-        fit_table = self.getProperty("FitParametersTable").value
+        fit_table = self.getProperty("InputCalibrationParameters").value
         estimate_background = self.getProperty("EstimateBackground").value or not fit_table
 
         ws = self._load_and_average_monitors_from_files(files)
