@@ -721,7 +721,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 f"to save as ORSO ASCII or {MantidORSOSaver.NEXUS_FILE_EXT} to save as ORSO Nexus."
             )
 
-        if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID:
+        if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID and not ws_issue:
             check_dataset = self._create_and_sort_refl_datasets()[0]
             missing_meta = check_dataset.get_missing_metadata_list()
             for prop in missing_meta:

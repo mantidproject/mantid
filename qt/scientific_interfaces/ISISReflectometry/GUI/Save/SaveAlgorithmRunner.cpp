@@ -42,12 +42,25 @@ void SaveAlgorithmRunner::runSaveORSOAlgorithm(std::vector<std::string> const &w
   alg->setProperty("IncludeAdditionalColumns", includeAdditionalColumns);
   alg->setProperty("ModelDescription", modelDescription);
   alg->setProperty("ValidateModel", validateModel);
+  alg->setProperty("MetadataSource", metaSource);
   if (metaSource == "History") {
     alg->execute();
     return;
   }
   API::InterfaceManager interfaceManager;
-  auto dialog = dynamic_cast<MantidQt::API::AlgorithmDialog *>(interfaceManager.createDialog(alg));
+  QHash<QString, QString> presets;
+  QStringList disabled;
+  const std::vector<Mantid::Kernel::Property *> props = alg->getProperties();
+  std::vector<Mantid::Kernel::Property *>::const_iterator p = props.cbegin();
+  for (; p != props.cend(); ++p) {
+    if (!(**p).isDefault()) {
+      QString property_name = QString::fromStdString((**p).name());
+      presets.insert(property_name, QString::fromStdString((**p).value()));
+      disabled.append(property_name);
+    }
+  }
+  auto dialog = dynamic_cast<MantidQt::API::AlgorithmDialog *>(
+      interfaceManager.createDialog(alg, nullptr, false, presets, QString(), QStringList(), disabled));
   dialog->setModal(true);
   dialog->show();
   dialog->raise();
