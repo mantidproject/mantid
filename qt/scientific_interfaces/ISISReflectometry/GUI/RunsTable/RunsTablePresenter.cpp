@@ -839,4 +839,20 @@ void RunsTablePresenter::notifyPlotSelectedPressed() {
   m_plotter.plot(
       {workspaces, m_plotOptionsProvider.optionsFor(PlotOutputType::ReflectivityCurve, PlotLayout::Individual)});
 }
+
+void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
+  std::vector<std::string> workspaces;
+  const auto groups = m_model.selectedGroups();
+
+  for (const auto *group : groups) {
+    if (group->state() == State::ITEM_SUCCESS)
+      workspaces.emplace_back(group->postprocessedWorkspaceName());
+  }
+
+  if (workspaces.empty())
+    return;
+
+  m_plotter.plot(
+      {workspaces, m_plotOptionsProvider.optionsFor(PlotOutputType::ReflectivityCurve, PlotLayout::Individual)});
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

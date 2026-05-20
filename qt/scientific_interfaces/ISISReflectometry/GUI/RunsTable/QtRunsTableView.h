@@ -56,6 +56,7 @@ private slots:
   void onFilterChanged(QString const &);
   void onInstrumentChanged(int index);
   void onPlotSelectedPressed(bool);
+  void onPlotSelectedStitchedOutputPressed(bool);
   void onFillDownPressed(bool);
 
 private:
