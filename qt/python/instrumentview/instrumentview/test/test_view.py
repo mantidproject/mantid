@@ -285,6 +285,22 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.set_delete_all_selected_peaks_button_enabled(False)
         self._view._delete_all_selected_peaks_button.setEnabled.assert_called_once_with(False)
 
+    def test_set_detector_edit_text_joins_with_semicolon_separator(self):
+        mock_edit = MagicMock()
+        det_1 = MagicMock()
+        det_1.detector_id = 1
+        det_2 = MagicMock()
+        det_2.detector_id = 2
+        self._view._set_detector_edit_text(mock_edit, [det_1, det_2], lambda d: str(d.detector_id))
+        mock_edit.setPlainText.assert_called_once_with("1; 2")
+
+    def test_set_detector_edit_text_single_item_no_separator(self):
+        mock_edit = MagicMock()
+        det = MagicMock()
+        det.detector_id = 42
+        self._view._set_detector_edit_text(mock_edit, [det], lambda d: str(d.detector_id))
+        mock_edit.setPlainText.assert_called_once_with("42")
+
 
 if __name__ == "__main__":
     unittest.main()

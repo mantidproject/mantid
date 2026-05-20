@@ -192,8 +192,8 @@ class FullInstrumentViewWindow(QMainWindow):
 
         pyvista_vertical_layout.addWidget(vsplitter)
 
-        detector_group_box = QGroupBox("Detector Info")
-        detector_info_layout = QVBoxLayout(detector_group_box)
+        self._detector_group_box = QGroupBox("Detector Info")
+        detector_info_layout = QVBoxLayout(self._detector_group_box)
         self._detector_name_edit = self._add_detector_info_boxes(detector_info_layout, "Name")
         self._detector_id_edit = self._add_detector_info_boxes(detector_info_layout, "Detector ID")
         self._detector_workspace_index_edit = self._add_detector_info_boxes(detector_info_layout, "Workspace Index")
@@ -359,7 +359,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         options_vertical_widget = QWidget()
         options_vertical_layout = QVBoxLayout(options_vertical_widget)
-        options_vertical_layout.addWidget(detector_group_box)
         options_vertical_layout.addWidget(self._integration_limit_group_box)
         options_vertical_layout.addWidget(self._contour_range_group_box)
         options_vertical_layout.addWidget(projection_group_box)
@@ -380,13 +379,25 @@ class FullInstrumentViewWindow(QMainWindow):
         lineplot_layout.addWidget(self._sum_spectra_checkbox)
 
         options_vertical_layout.addWidget(lineplot_group_box)
-        options_vertical_layout.addWidget(peak_ws_group_box)
-        options_vertical_layout.addWidget(grouping_masking_group_box)
-        options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
+
+        vsplitter = QSplitter(Qt.Vertical)
+        vsplitter.addWidget(peak_ws_group_box)
+        vsplitter.addWidget(grouping_masking_group_box)
+        vsplitter.addWidget(self._detector_group_box)
+        self._detector_group_box.setMaximumHeight(self._detector_group_box.sizeHint().height())
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        vsplitter.addWidget(spacer)
+        vsplitter.setStretchFactor(0, 1)  # peak_ws_group_box stretches
+        vsplitter.setStretchFactor(1, 1)  # grouping_masking_group_box stretches
+        vsplitter.setStretchFactor(2, 0)  # detector_group_box fixed
+        vsplitter.setStretchFactor(3, 1)  # spacer absorbs extra space
+        vsplitter.setChildrenCollapsible(False)
+
+        options_vertical_layout.addWidget(vsplitter)
 
         options_vertical_layout.addWidget(self.status_group_box)
         left_column_layout.addWidget(options_vertical_widget)
-        left_column_layout.addStretch()
 
         component_tree_tab = QWidget()
         component_layout = QVBoxLayout(component_tree_tab)
@@ -975,6 +986,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def set_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
         """For a list of detectors, with their info wrapped up in a class, update all of the info text boxes"""
+        self._detector_group_box.setVisible(bool(detector_infos))
         self._set_detector_edit_text(self._detector_name_edit, detector_infos, lambda d: d.name)
         self._set_detector_edit_text(self._detector_id_edit, detector_infos, lambda d: str(d.detector_id))
         self._set_detector_edit_text(self._detector_workspace_index_edit, detector_infos, lambda d: str(d.workspace_index))
@@ -999,7 +1011,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self, edit_box: QTextEdit, detector_infos: list[DetectorInfo], property_lambda: Callable[[DetectorInfo], str]
     ) -> None:
         """Set the text in one of the detector info boxes"""
-        edit_box.setPlainText(",".join(property_lambda(d) for d in detector_infos))
+        edit_box.setPlainText("; ".join(property_lambda(d) for d in detector_infos))
 
     def selected_peaks_workspaces(self) -> list[str]:
         return [
