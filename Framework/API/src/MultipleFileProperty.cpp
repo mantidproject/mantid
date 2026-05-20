@@ -9,6 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiFileValidator.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHelper.h"
@@ -390,7 +391,7 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
         for (size_t i = 0; i < resolvedPaths.size(); ++i) {
           resolvedFiles[resolutionIndices[i]] = resolvedPaths[i].string();
         }
-      } catch (const std::invalid_argument &ex) {
+      } catch (const Exception::NotFoundError &ex) {
         // findRuns identifies the actual failing hint in its exception message;
         // use that directly so the error names the file that actually failed.
         if (!m_allowEmptyTokens) {

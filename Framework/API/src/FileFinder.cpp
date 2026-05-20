@@ -612,7 +612,7 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::vector<st
         g_log.warning() << "Error while searching for '" << fileInfo.hint << "': " << fileInfo.errorMsg << "\n";
       else
         g_log.warning() << "Failed to find file for hint '" << fileInfo.hint << "'\n";
-      throw std::invalid_argument("Unable to find file: search object " + fileInfo.hint);
+      throw Kernel::Exception::NotFoundError("Unable to find file:", fileInfo.hint);
     }
     if (fileInfo.error) {
       g_log.debug() << "Non-fatal error during search for '" << fileInfo.hint << "': " << fileInfo.errorMsg << "\n";
