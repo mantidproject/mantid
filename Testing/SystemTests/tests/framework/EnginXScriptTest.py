@@ -67,7 +67,7 @@ class FocusEventMode(systemtesting.MantidSystemTest):
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX371346",
-            group=GROUP.BOTH,
+            group=ENGINX_GROUP.BOTH,
         )
         enginx.set_calibration_to_copy_starting_parameters(False)
         enginx.main(plot_cal=False, plot_foc=False)
