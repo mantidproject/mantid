@@ -69,6 +69,11 @@ public:
 
   ~ReflectometryReductionOneAuto3Test() override = default;
 
+  MatrixWorkspace_sptr getMatrixOutput(const IAlgorithm_sptr &alg, const std::string &propertyName) {
+    Workspace_sptr output = alg->getProperty(propertyName);
+    return std::dynamic_pointer_cast<MatrixWorkspace>(output);
+  }
+
   void test_init() {
     ReflectometryReductionOneAuto3 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -124,7 +129,7 @@ public:
     // Use the default correction type, which is a vertical shift
     const auto alg = create_refl_algorithm(inter, theta, "4");
     alg->execute();
-    MatrixWorkspace_sptr out = alg->getProperty("OutputWorkspaceBinned");
+    MatrixWorkspace_sptr out = getMatrixOutput(alg, "OutputWorkspaceBinned");
 
     // Check default rebin params
     const double qStep = alg->getProperty("MomentumTransferStep");
@@ -150,7 +155,7 @@ public:
                                     {"AnalysisMode", "MultiDetectorAnalysis"},
                                     {"MomentumTransferStep", 0.01}});
     alg->execute();
-    MatrixWorkspace_sptr out = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr out = getMatrixOutput(alg, "OutputWorkspace");
     // Compare instrument components before and after
     compare_detectors_in_out(polref->getInstrument(), out->getInstrument(),
                              {"monitor1", "monitor2", "monitor3", "point-detector", "lineardetector"}, "OSMOND",
@@ -168,7 +173,7 @@ public:
     setup_optional_properties(
         alg, {{"DetectorCorrectionType", "VerticalShift"}, {"CorrectDetectors", "1"}, {"MomentumTransferStep", 0.01}});
     alg->execute();
-    MatrixWorkspace_sptr out = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr out = getMatrixOutput(alg, "OutputWorkspace");
 
     // Compare instrument components before and after
     compare_detectors_in_out(crisp->getInstrument(), out->getInstrument(), {"monitor1", "monitor2", "linear-detector"},
@@ -182,7 +187,7 @@ public:
     const auto alg = create_refl_algorithm(inter);
     setup_optional_properties(alg, {{"ThetaLogName", "theta"}, {"CorrectDetectors", "1"}});
     alg->execute();
-    MatrixWorkspace_sptr corrected = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr corrected = getMatrixOutput(alg, "OutputWorkspace");
 
     // Compare instrument components before and after
     compare_detectors_in_out(inter->getInstrument(), corrected->getInstrument(),
@@ -196,7 +201,7 @@ public:
     const auto alg = create_refl_algorithm(inter, 10.0, "4");
     alg->setProperty("CorrectDetectors", "0");
     alg->execute();
-    MatrixWorkspace_sptr corrected = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr corrected = getMatrixOutput(alg, "OutputWorkspace");
     // Compare instrument components before and after
     compare_detectors_in_out(inter->getInstrument(), corrected->getInstrument(), {"point-detector"});
   }
@@ -207,7 +212,7 @@ public:
         alg, {{"MomentumTransferMin", 1.0}, {"MomentumTransferMax", 10.0}, {"MomentumTransferStep", -0.04}});
 
     alg->execute();
-    MatrixWorkspace_sptr outQbinned = alg->getProperty("OutputWorkspaceBinned");
+    MatrixWorkspace_sptr outQbinned = getMatrixOutput(alg, "OutputWorkspaceBinned");
     // Check the rebin params have not changed
     const double qStep = alg->getProperty("MomentumTransferStep");
     const double qMin = alg->getProperty("MomentumTransferMin");
@@ -229,7 +234,7 @@ public:
         alg, {{"MomentumTransferMin", 1.0}, {"MomentumTransferMax", 10.0}, {"MomentumTransferStep", 0.04}});
 
     alg->execute();
-    MatrixWorkspace_sptr outQbinned = alg->getProperty("OutputWorkspaceBinned");
+    MatrixWorkspace_sptr outQbinned = getMatrixOutput(alg, "OutputWorkspaceBinned");
     TS_ASSERT_EQUALS(outQbinned->getNumberHistograms(), 1);
     TS_ASSERT_DIFFERS(outQbinned->blocksize(), 8);
     TS_ASSERT_DELTA(outQbinned->x(0)[1] - outQbinned->x(0)[0], 0.04, 1e-6);
@@ -241,8 +246,8 @@ public:
     alg->setProperty("MomentumTransferStep", 0.04);
 
     alg->execute();
-    MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr outLam = alg->getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = getMatrixOutput(alg, "OutputWorkspace");
+    MatrixWorkspace_sptr outLam = getMatrixOutput(alg, "OutputWorkspaceWavelength");
 
     TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outQ->binEdges(0).size(), 15);
@@ -255,8 +260,8 @@ public:
     alg->setProperty("MomentumTransferStep", 0.04);
 
     alg->execute();
-    MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr outLam = alg->getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = getMatrixOutput(alg, "OutputWorkspace");
+    MatrixWorkspace_sptr outLam = getMatrixOutput(alg, "OutputWorkspaceWavelength");
 
     assert_size(outQ, 1, std::nullopt, 15);
     // X range in outLam
@@ -270,8 +275,8 @@ public:
     setup_optional_properties(
         alg, {{"MomentumTransferMin", 0.5}, {"MomentumTransferMax", 1.5}, {"MomentumTransferStep", 0.04}});
     alg->execute();
-    MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr outLam = alg->getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outQ = getMatrixOutput(alg, "OutputWorkspace");
+    MatrixWorkspace_sptr outLam = getMatrixOutput(alg, "OutputWorkspaceWavelength");
 
     // X range in outQ is cropped to momentum transfer limits
     assert_size(outQ, 1, std::nullopt, 7);
@@ -281,7 +286,7 @@ public:
   void test_IvsQ_values() {
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     alg->execute();
-    MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outQ = getMatrixOutput(alg, "OutputWorkspace");
 
     assert_size(outQ, 1, std::nullopt, 14, false);
     // Y values in outQ
@@ -292,7 +297,7 @@ public:
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     setup_optional_properties(alg, {{"ScaleFactor", 0.1}});
     alg->execute();
-    MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outQ = getMatrixOutput(alg, "OutputWorkspace");
 
     assert_size(outQ, 1, std::nullopt, 14, false);
     // Y values in outQ
@@ -304,7 +309,7 @@ public:
     setup_optional_properties(
         alg, {{"MomentumTransferMin", 0.0}, {"MomentumTransferMax", 7.0}, {"MomentumTransferStep", -1.0}});
     alg->execute();
-    MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspaceBinned");
+    MatrixWorkspace_sptr outQ = getMatrixOutput(alg, "OutputWorkspaceBinned");
 
     assert_size(outQ, 1, std::nullopt, 7, false);
     // Y values in outQ
@@ -319,7 +324,7 @@ public:
                                     {"MomentumTransferStep", -1.0},
                                     {"ScaleFactor", 0.1}});
     alg->execute();
-    MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspaceBinned");
+    MatrixWorkspace_sptr outQ = getMatrixOutput(alg, "OutputWorkspaceBinned");
 
     assert_size(outQ, 1, std::nullopt, 7, false);
     // Y values in outQ
@@ -330,7 +335,7 @@ public:
 
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     alg->execute();
-    MatrixWorkspace_sptr outLam = alg->getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outLam = getMatrixOutput(alg, "OutputWorkspaceWavelength");
 
     assert_size(outLam, 1, std::nullopt, 14, false);
     // Y values in outLam
@@ -342,7 +347,7 @@ public:
     const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "3");
     setup_optional_properties(alg, {{"ScaleFactor", 0.1}});
     alg->execute();
-    MatrixWorkspace_sptr outLam = alg->getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outLam = getMatrixOutput(alg, "OutputWorkspaceWavelength");
 
     assert_size(outLam, 1, std::nullopt, 14, false);
     // Y values in outQ
@@ -436,7 +441,7 @@ public:
   void test_workspace_group_with_polarization_analysis_creates_spin_state_sample_logs() {
     prepareInputGroup(TEST_GROUP_NAME, "Wildes");
     applyPolarizationEfficiencies(TEST_GROUP_NAME);
-    const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0);
+    const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 10.0, "2", 1.0, 15.0, true, false);
     setup_optional_properties(alg, {{"MomentumTransferStep", 0.04}, {"PolarizationAnalysis", true}});
 
     alg->execute();
@@ -444,6 +449,7 @@ public:
     check_output_group_contains_sample_logs_for_spin_state_ORSO(retrieveOutWS("IvsQ"), true);
     check_output_group_contains_sample_logs_for_spin_state_ORSO(retrieveOutWS("IvsQ_binned"), true);
     check_output_group_contains_sample_logs_for_spin_state_ORSO(retrieveOutWS("IvsLam"), true);
+    check_process_group_history_for_rro_auto(retrieveOutWS("IvsQ").front());
   }
 
   void test_polarization_correction() {
@@ -951,7 +957,7 @@ public:
 
     alg->execute();
 
-    MatrixWorkspace_sptr outQBin = alg->getProperty("OutputWorkspaceBinned");
+    MatrixWorkspace_sptr outQBin = getMatrixOutput(alg, "OutputWorkspaceBinned");
 
     const auto &outX = outQBin->x(0);
     const auto &outY = outQBin->y(0);
@@ -973,7 +979,7 @@ public:
 
     alg->execute();
 
-    MatrixWorkspace_sptr outQbinned = alg->getProperty("OutputWorkspaceBinned");
+    MatrixWorkspace_sptr outQbinned = getMatrixOutput(alg, "OutputWorkspaceBinned");
 
     const auto &outX = outQbinned->x(0);
     const auto &outY = outQbinned->y(0);
@@ -994,7 +1000,7 @@ public:
 
     alg->execute();
 
-    MatrixWorkspace_sptr outQBin = alg->getProperty("OutputWorkspaceBinned");
+    MatrixWorkspace_sptr outQBin = getMatrixOutput(alg, "OutputWorkspaceBinned");
 
     const auto &outX = outQBin->x(0);
     const auto &outY = outQBin->y(0);
@@ -1017,7 +1023,7 @@ public:
 
     alg->execute();
 
-    MatrixWorkspace_sptr outQBin = alg->getProperty("OutputWorkspaceBinned");
+    MatrixWorkspace_sptr outQBin = getMatrixOutput(alg, "OutputWorkspaceBinned");
 
     const auto &outX = outQBin->x(0);
     const auto &outY = outQBin->y(0);
@@ -1039,7 +1045,7 @@ public:
 
     alg->execute();
 
-    MatrixWorkspace_sptr outQBin = alg->getProperty("OutputWorkspaceBinned");
+    MatrixWorkspace_sptr outQBin = getMatrixOutput(alg, "OutputWorkspaceBinned");
 
     const auto &outX = outQBin->x(0);
     const auto &outY = outQBin->y(0);
@@ -1062,7 +1068,7 @@ public:
 
     alg->execute();
 
-    MatrixWorkspace_sptr outQBin = alg->getProperty("OutputWorkspaceBinned");
+    MatrixWorkspace_sptr outQBin = getMatrixOutput(alg, "OutputWorkspaceBinned");
 
     const auto &outX = outQBin->x(0);
     const auto &outY = outQBin->y(0);
@@ -1084,7 +1090,7 @@ public:
 
     alg->execute();
 
-    MatrixWorkspace_sptr outQBin = alg->getProperty("OutputWorkspaceBinned");
+    MatrixWorkspace_sptr outQBin = getMatrixOutput(alg, "OutputWorkspaceBinned");
 
     const auto &outX = outQBin->x(0);
     const auto &outY = outQBin->y(0);
@@ -1112,7 +1118,7 @@ public:
 
     alg->execute();
 
-    MatrixWorkspace_sptr out = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr out = getMatrixOutput(alg, "OutputWorkspace");
     TS_ASSERT_DELTA(out->y(0)[0], 4.5, 0.000001);
   }
 
@@ -1136,7 +1142,7 @@ public:
 
     alg->execute();
 
-    MatrixWorkspace_sptr out = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr out = getMatrixOutput(alg, "OutputWorkspace");
     TS_ASSERT_DELTA(out->y(0)[0], 0.0782608695, 0.000001);
   }
 
@@ -1535,5 +1541,19 @@ private:
     for (auto const &ws : wsGroup) {
       TS_ASSERT_EQUALS(ws->mutableRun().hasProperty(SpinStatesORSO::LOG_NAME), has_sample_logs);
     }
+  }
+
+  void check_process_group_history_for_rro_auto(const MatrixWorkspace_sptr &workspace) {
+    auto const &history = workspace->getHistory();
+    TS_ASSERT_EQUALS(history.size(), 1);
+    auto const parentHistory = history.getAlgorithmHistory(0);
+    TS_ASSERT_EQUALS(parentHistory->name(), "ReflectometryReductionOneAuto");
+
+    size_t reflectometryReductionOneCount = 0;
+    for (auto const &childHistory : parentHistory->getChildHistories()) {
+      if (childHistory->name() == "ReflectometryReductionOne")
+        ++reflectometryReductionOneCount;
+    }
+    TS_ASSERT(reflectometryReductionOneCount > 0);
   }
 };
