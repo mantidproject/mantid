@@ -224,6 +224,9 @@ Mantid Graphical User Interface Properties
 | ``InstrumentView.DrawShapes``                      |Value of the "Draw Shapes" option in the Instrument | ``Yes``, ``No`` |
 |                                                    |View                                                |                 |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``InstrumentView.FlipBeam``                        |Value of the "Flip Beam" option in the Instrument   | ``Yes``, ``No`` |
+|                                                    |View                                                |                 |
++----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``MantidOptions.InvisibleWorkspaces``              |Do not show 'invisible' workspaces                  | ``0``, ``1``    |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``PeakColumn.hklPrec``                             |Precision of hkl values shown in tables             | ``2``           |

@@ -8,7 +8,7 @@ from instrumentview.Detectors import DetectorInfo
 from instrumentview.Globals import CurrentTab
 from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
-from instrumentview.ComponentSelectionUtils import detector_table_indices_for_parent_subtrees
+from instrumentview.ComponentSelectionUtils import detector_table_indices_for_parent_subtrees, get_beam_axis, reflect_points_in_axis
 from instrumentview.Peaks.WorkspaceDetectorPeaks import WorkspaceDetectorPeaks
 
 from mantid.dataobjects import Workspace2D, PeaksWorkspace, MaskWorkspace, GroupingWorkspace
@@ -48,13 +48,14 @@ class FullInstrumentViewModel:
 
     _sample_position = np.array([0, 0, 0])
     _source_position = np.array([0, 0, 0])
+    _beam_axis = np.array([0, 0, 1])
     line_plot_workspace = None
     _lineplot_ws_in_base_units = None
     _workspace_x_unit: str
     _workspace_x_unit_display: str
     _peak_picking_status: PeakPickingStatus = PeakPickingStatus.Off
     _projection_type: ProjectionType = ProjectionType.THREE_D
-    _flip_z: bool = False
+    _flip_beam: bool = False
 
     def __init__(self, workspace: Workspace2D):
         """For the given workspace, calculate detector positions, the map from detector indices to workspace indices, and integrated
@@ -77,6 +78,7 @@ class FullInstrumentViewModel:
         has_source = self._workspace.getInstrument().getSource() is not None
         self._source_position = np.array(component_info.sourcePosition()) if has_source else np.array([0, 0, 0])
         self._root_position = np.array(component_info.position(0))
+        self._beam_axis = get_beam_axis(self._workspace)
 
         detector_info_table = CreateDetectorTable(
             self._workspace, IncludeDetectorPosition=True, OneRowPerDetectorID=True, StoreInADS=False, EnableLogging=False
@@ -422,26 +424,25 @@ class FullInstrumentViewModel:
         return self._calculate_projection()[(self._is_masked | ~self._is_selected_in_tree) & self._is_valid]
 
     @property
-    def flip_z(self) -> bool:
+    def flip_beam(self) -> bool:
         if self._projection_type in (ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE):
             return False
-        return self._flip_z
+        return self._flip_beam
 
-    @flip_z.setter
-    def flip_z(self, value: bool) -> None:
-        self._flip_z = value
+    @flip_beam.setter
+    def flip_beam(self, value: bool) -> None:
+        self._flip_beam = value
 
     def _cache_key_for_projection(self, projection_type: ProjectionType) -> str:
-        return f"{projection_type.name}_flip_{self._flip_z}"
+        return f"{projection_type.name}_flip_{self.flip_beam}"
 
     def _calculate_projection(self) -> np.ndarray:
         """Calculate the 2D projection with the specified axis. Can be either cylindrical or spherical."""
         cache_key = self._cache_key_for_projection(self._projection_type)
         if cache_key not in self._cached_projection_objects.keys():
             detector_positions = self._detector_positions_3d
-            if self._flip_z:
-                detector_positions = detector_positions.copy()
-                detector_positions[:, 2] *= -1
+            if self.flip_beam:
+                detector_positions = reflect_points_in_axis(detector_positions, axis=self._beam_axis)
 
             projection = Projection(
                 type=self._projection_type,

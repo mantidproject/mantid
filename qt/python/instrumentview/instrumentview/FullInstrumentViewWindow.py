@@ -126,6 +126,7 @@ class FullInstrumentViewWindow(QMainWindow):
     _detector_spectrum_fig = None
     _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRatio"
     _DRAW_SHAPES_SETTING_STRING = "InstrumentView.DrawShapes"
+    _FLIP_BEAM_SETTING_STRING = "InstrumentView.FlipBeam"
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     def __init__(self, parent=None, off_screen=False):
@@ -245,10 +246,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self._show_monitors_check_box.setText("Show Monitors?")
         self._count_scale_combo_box = NoWheelComboBox(self)
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
-        self._flip_z_axis_check_box = QCheckBox()
-        self._flip_z_axis_check_box.setText("Flip Z Axis")
-        self._flip_z_axis_check_box.setToolTip(
-            "If checked, the Z axis will be flipped in 2D projections, mirroring the instrument along the beam axis."
+        self._flip_beam_check_box = QCheckBox()
+        self._flip_beam_check_box.setText("Flip Beam")
+        self._flip_beam_check_box.setChecked(is_config_setting_true(self._FLIP_BEAM_SETTING_STRING))
+        self._flip_beam_check_box.setToolTip(
+            "If checked, 2D projections are mirrored across the plane perpendicular to the beam direction."
         )
         self._select_bank_tube = QPushButton("Select Bank/Tube")
         self._select_bank_tube.setCheckable(True)
@@ -266,7 +268,7 @@ class FullInstrumentViewWindow(QMainWindow):
         projection_second_row.addWidget(self._show_monitors_check_box)
         projection_second_row.addWidget(self._count_scale_combo_box)
         projection_second_row.addWidget(self._show_shapes_check_box)
-        projection_second_row.addWidget(self._flip_z_axis_check_box)
+        projection_second_row.addWidget(self._flip_beam_check_box)
         projection_second_row.addWidget(self._select_bank_tube)
         projection_layout.addLayout(projection_first_row)
         projection_layout.addLayout(projection_second_row)
@@ -427,6 +429,9 @@ class FullInstrumentViewWindow(QMainWindow):
     def store_draw_shapes_option(self) -> None:
         self._store_checkbox_option(self._show_shapes_check_box, self._DRAW_SHAPES_SETTING_STRING)
 
+    def store_flip_beam_option(self) -> None:
+        self._store_checkbox_option(self._flip_beam_check_box, self._FLIP_BEAM_SETTING_STRING)
+
     def _store_checkbox_option(self, checkbox: QCheckBox, config_key: str) -> None:
         option = "Yes" if checkbox.isChecked() else "No"
         ConfigService.Instance()[config_key] = option
@@ -434,11 +439,11 @@ class FullInstrumentViewWindow(QMainWindow):
     def enable_or_disable_aspect_ratio_box(self) -> None:
         self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
-    def is_flip_z_axis_checkbox_checked(self) -> bool:
-        return self._flip_z_axis_check_box.isChecked()
+    def is_flip_beam_checkbox_checked(self) -> bool:
+        return self._flip_beam_check_box.isChecked()
 
-    def enable_or_disable_flip_z_axis_box(self) -> None:
-        self._flip_z_axis_check_box.setDisabled(self.current_selected_projection() in [ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE])
+    def enable_or_disable_flip_beam_box(self) -> None:
+        self._flip_beam_check_box.setDisabled(self.current_selected_projection() in [ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE])
 
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
@@ -632,7 +637,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._start_adding_peaks_button.toggled.connect(self._presenter.on_start_adding_peaks_toggled)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
-        self._flip_z_axis_check_box.clicked.connect(self._presenter.on_flip_z_axis_check_box_clicked)
+        self._flip_beam_check_box.clicked.connect(self._presenter.on_flip_beam_check_box_clicked)
         self._show_shapes_check_box.clicked.connect(self._presenter.on_show_shapes_toggled)
         self._select_bank_tube.toggled.connect(self._presenter.on_select_bank_tube_toggled)
 
