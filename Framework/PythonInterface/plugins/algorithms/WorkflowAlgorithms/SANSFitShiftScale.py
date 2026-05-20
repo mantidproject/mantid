@@ -83,6 +83,14 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         if fit_max > max(lab.dataX(0)):
             fit_max = max(lab.dataX(0))
 
+        if not mode == Mode.NoneFit and fit_max <= fit_min:
+            raise RuntimeError(
+                "SANSFitShiftScale: fit range collapsed to [{0:g}, {1:g}] after clamping to "
+                "the HAB/LAB workspace bounds. The input workspace likely contains no usable "
+                "data in the requested Q range (for example because the time slice fell within "
+                "a beam-off period).".format(fit_min, fit_max)
+            )
+
         if not mode == Mode.NoneFit:
             shift_factor, scale_factor = self._determine_factors(
                 hab, lab, mode, scale=scale_factor, shift=shift_factor, fit_min=fit_min, fit_max=fit_max
@@ -151,6 +159,14 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
 
         # Determine the StartQ and EndQ values
         q_min, q_max = self._get_start_q_and_end_q_values(rear_data=q_low_angle, front_data=q_high_angle, fit_min=fit_min, fit_max=fit_max)
+
+        if q_max <= q_min:
+            raise RuntimeError(
+                "SANSFitShiftScale: resolved fit Q range is empty (q_min={0:g}, q_max={1:g}). "
+                "The HAB and LAB workspaces share no overlap inside the requested fit window; "
+                "this typically happens when one of the workspaces contains no data, e.g. a "
+                "time slice that falls within a beam-off period.".format(q_min, q_max)
+            )
 
         # We need to transfer the errors from the front data to the rear data, as we are using the front data as a model, but
         # we want to take into account the errors of both workspaces.
