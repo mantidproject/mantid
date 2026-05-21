@@ -51,6 +51,8 @@ private:
                                          const API::ITableWorkspace_sptr calibrationWS);
   const API::ITableWorkspace_sptr loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
                                               DataObjects::GroupingWorkspace_sptr &groupingWS);
+  DataObjects::GroupingWorkspace_sptr loadGroupingFile(const API::MatrixWorkspace_sptr &wksp,
+                                                       const std::string &filename);
   void initScaleAtSample(const API::MatrixWorkspace_sptr &wksp);
   std::vector<std::pair<size_t, size_t>> determinePulseIndices(const Kernel::TimeROI &filterROI);
   std::vector<std::pair<int, std::pair<size_t, size_t>>>
@@ -83,6 +85,7 @@ const std::string CAL_FILE("CalFileName");
 const std::string FILTER_TIMESTART("FilterByTimeStart");
 const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string GROUPING_WS("GroupingWorkspace");
+const std::string GROUP_FILE("GroupFilename");
 const std::string SPLITTER_WS("SplitterWorkspace");
 const std::string SPLITTER_RELATIVE("RelativeTime");
 const std::string CORRECTION_TO_SAMPLE("CorrectionToSample");

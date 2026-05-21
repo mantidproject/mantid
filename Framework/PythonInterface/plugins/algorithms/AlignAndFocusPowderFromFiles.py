@@ -843,7 +843,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
     def __runSlim(self, outputname, pm_args=None):
         """Call AlignAndFocusPowderSlim and store the result under *outputname*."""
-        from mantid.simpleapi import AlignAndFocusPowderSlim, LoadDiffCal
+        from mantid.simpleapi import AlignAndFocusPowderSlim
 
         # All properties that are simply mapped
         kwargs = {
@@ -894,20 +894,11 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             kwargs["XDelta"] = [float(params[1])]
             kwargs["XMax"] = [float(params[2])]
 
-        # grouping: workspace takes priority, or load from file
+        # grouping: workspace takes priority, then pass file directly to AAFPSlim
         if not self.getProperty(GRP_WKSP).isDefault:
             kwargs["GroupingWorkspace"] = self.getPropertyValue(GRP_WKSP)
         elif not self.getProperty(GROUP_FILE).isDefault:
-            _slim_base = self.instr + "_slim"
-            grp_wksp_name = _slim_base + "_group"
-            LoadDiffCal(
-                Filename=self.getPropertyValue(GROUP_FILE),
-                MakeCalWorkspace=False,
-                MakeGroupingWorkspace=True,
-                MakeMaskWorkspace=False,
-                WorkspaceName=_slim_base,
-            )
-            kwargs["GroupingWorkspace"] = grp_wksp_name
+            kwargs["GroupFilename"] = self.getPropertyValue(GROUP_FILE)
 
         # chunk size
         if not self.getProperty("MaxChunkSize").isDefault and self.chunkSize > 0.0:

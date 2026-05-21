@@ -1199,6 +1199,31 @@ public:
     TS_ASSERT_EQUALS(outputWS->readY(0).back(), 60723);
   }
 
+  void test_grouping_filename_xml() {
+    // vulcangroup.xml defines 2 non-zero groups for the VULCAN instrument
+    using namespace Mantid::DataHandling::AlignAndFocusPowderSlim::PropertyNames;
+
+    AlignAndFocusPowderSlim alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILENAME, VULCAN_218062));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(OUTPUT_WKSP, "unused"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(GROUP_FILE, "vulcangroup.xml"));
+    // 2 groups in vulcangroup.xml
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L1, 43.755));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L2, std::vector<double>{2.296, 2.296}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(POLARS, std::vector<double>{90.0, 90.0}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(AZIMUTHALS, std::vector<double>{180.0, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    Workspace_sptr outputWS = alg.getProperty(OUTPUT_WKSP);
+    TS_ASSERT(outputWS);
+    auto matWS = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+    TS_ASSERT(matWS);
+    TS_ASSERT_EQUALS(matWS->getNumberHistograms(), 2);
+  }
+
   // ==================================
   // TODO things below this point are for benchmarking and will be removed later
   // ==================================
