@@ -54,6 +54,7 @@ public:
   bool isEquivalent(const DetectorInfo &other) const;
 
   size_t size() const;
+  size_t getMemorySize() const;
   bool isScanning() const;
 
   bool isMonitor(const size_t index) const;
