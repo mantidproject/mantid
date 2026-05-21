@@ -1,0 +1,1 @@
+- Fixed polarized ISIS reflectometry reductions so the ``IvsQ``, ``IvsQ_binned`` and stitched output workspaces use consistent spin-state suffixes.
