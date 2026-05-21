@@ -74,30 +74,6 @@ std::vector<std::string> suffixesFromFirstInputWorkspaceGroup(Group const &group
   return {};
 }
 
-void renameStitchedWorkspaceGroupMembers(std::string const &stitchedWorkspaceName, Group const &group) {
-  auto &ads = AnalysisDataService::Instance();
-  if (!ads.doesExist(stitchedWorkspaceName))
-    return;
-
-  auto const stitchedWorkspaceGroup = ads.retrieveWS<WorkspaceGroup>(stitchedWorkspaceName);
-  if (!stitchedWorkspaceGroup)
-    return;
-
-  auto const suffixes = suffixesFromFirstInputWorkspaceGroup(group);
-  if (suffixes.empty() || suffixes.size() != stitchedWorkspaceGroup->size())
-    return;
-
-  auto const memberNames = stitchedWorkspaceGroup->getNames();
-  for (auto i = 0u; i < memberNames.size(); ++i) {
-    auto const newName = stitchedWorkspaceName + "_" + suffixes[i];
-    if (memberNames[i] != newName) {
-      if (ads.doesExist(newName))
-        ads.remove(newName);
-      ads.rename(memberNames[i], newName);
-    }
-  }
-}
-
 void updateWorkspaceProperties(AlgorithmRuntimeProps &properties, Group const &group) {
   // There must be more than workspace to stitch
   if (group.rows().size() < 2)
@@ -121,12 +97,14 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties, Group const &g
     outputName += separator + name;
   }
   AlgorithmProperties::update("OutputWorkspace", outputName, properties);
+
+  auto const suffixes = suffixesFromFirstInputWorkspaceGroup(group);
+  if (!suffixes.empty())
+    AlgorithmProperties::update("OutputWorkspaceSuffixes", suffixes, properties);
 }
 
 void updateGroupFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item) {
   auto const stitched = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
-  auto const &group = dynamic_cast<Group const &>(item);
-  renameStitchedWorkspaceGroupMembers(stitched, group);
   item.setOutputNames(std::vector<std::string>{stitched});
 }
 

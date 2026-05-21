@@ -1006,6 +1006,37 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_two_groups_with_two_workspaces_and_output_suffixes() {
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2");
+    doGroupWorkspaces("ws1, ws2", "group1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3");
+    createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4");
+    doGroupWorkspaces("ws3, ws4", "group2");
+
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "group1, group2");
+    alg.setProperty("Params", "0.1");
+    alg.setProperty("StartOverlaps", "0.8");
+    alg.setProperty("EndOverlaps", "1.1");
+    alg.setProperty("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspaceSuffixes", "++,--");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(outws);
+    TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("outws_++"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("outws_--"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("outws_1"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("outws_2"));
+
+    AnalysisDataService::Instance().clear();
+  }
+
   void test_two_groups_with_three_workspaces_scale_factor_from_period() {
     // Three groups with two matrix workspaces each.
     // Each matrix workspace has two spectra.
