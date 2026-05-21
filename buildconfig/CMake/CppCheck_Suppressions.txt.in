@@ -43,17 +43,35 @@ nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi.cpp
 nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp
 nullPointerArithmeticOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp
 
+// vms_convert.cpp: legacy VMS/VAX floating-point format conversion; struct members are bit-field layout
+// definitions required for correct binary interpretation even when not individually named in expressions;
+// vax_to_ieee_float/ieee_to_vax_float return types confuse cppcheck's const-propagation across bit-field unions
+unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp
+
 // ----------- Intentional dead code / known deferred bugs -----------
 // fitresult is shadowed by a local variable and never updated; fixing it breaks tests (issue #13950)
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp
 // det1 and det2 are both assigned from tracer.getDetectorResult(); cppcheck treats them as the same value
 // but they are from separate traceFromSample() calls on a mutated tracer object
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp
+// startTime>m_roi.back() at line 97 is always false given the matching guard at line 86; the condition
+// is retained in the else-if chain for clarity alongside the preceding front() and back() bounds checks
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
+// endX is reassigned to XValues.back() in the out-of-range branch but m_maxX is set directly afterward;
+// the assignment is dead in that branch but kept for consistency with the warning message
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
 
 // ----------- Internal cppcheck errors from cppcheck 2.18.1 -------------
 internalError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/BitInterleaving.h:169
 
 // ----------- False positives from cppcheck analysis limitations -----------
+
+// m_response is populated by session.receiveResponse() before lines 167-169 and is not null at those points;
+// the later if (m_response) guard at line 173 is a defensive check that cppcheck treats as evidence of possible null
+nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:167
+nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:168
+nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:169
 
 // syntaxError: cppcheck cannot parse boost::python pointer-to-member-function operator syntax (&Class::operator+)
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/V3D.cpp
