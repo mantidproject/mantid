@@ -38,11 +38,6 @@ public:
   size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper, bool ignoreZeros,
                     bool useLogTimes) override;
   void runConversion(API::Progress *pProgress) override;
-  ~ConvToMDEventsWS() {
-    for (size_t i = 0; i < m_Logs.size(); i++) {
-      delete m_Logs[i];
-    }
-  }
 
 protected:
   DataObjects::EventWorkspace_const_sptr m_EventWS;
@@ -60,7 +55,7 @@ private:
   // Variables for getting log values at times and recomputing sample orientation
   Kernel::DblMatrix m_Wtransf;
   Geometry::Goniometer m_Goniometer;
-  std::vector<Kernel::TimeSeriesProperty<double> *> m_Logs;
+  std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<double>>> m_Logs;
   std::vector<size_t> m_GonioIndex;
 };
 

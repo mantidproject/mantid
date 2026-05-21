@@ -129,9 +129,8 @@ size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<
     for (size_t n = 0; n < m_Goniometer.getNumberAxes(); n++) {
       Mantid::Geometry::GoniometerAxis ax = m_Goniometer.getAxis(n);
       if (run.hasProperty(ax.name)) {
-        Kernel::TimeSeriesProperty<double> *log =
-            dynamic_cast<Kernel::TimeSeriesProperty<double> *>(run.getLogData(ax.name)->clone());
-        m_Logs.push_back(log);
+        m_Logs.push_back(
+            std::unique_ptr<Kernel::TimeSeriesProperty<double>>(run.getTimeSeriesProperty<double>(ax.name)->clone()));
         m_GonioIndex.push_back(n);
       }
     }
