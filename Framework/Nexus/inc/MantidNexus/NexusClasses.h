@@ -15,6 +15,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <numeric>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -182,8 +183,9 @@ protected:
     m_fileID->closeData();
   }
 
-private:
   NXInfo m_info; ///< Holds the data info
+
+private:
   void getAttributes();
 };
 
@@ -279,16 +281,8 @@ public:
       throw std::runtime_error("Cannot load dataset of rank greater than 4");
     }
     // determine total size in memory and allocate it
-    auto num_ele = this->dim0();
-    if (rank_local > 1) {
-      num_ele *= this->dim1();
-      if (rank_local > 2) {
-        num_ele *= this->dim2();
-        if (rank_local > 3) {
-          num_ele *= this->dim3();
-        }
-      }
-    }
+    std::size_t num_ele = std::accumulate(this->m_info.dims.cbegin(), this->m_info.dims.cbegin() + rank_local,
+                                          static_cast<std::size_t>(1), std::multiplies<std::size_t>());
     if constexpr (std::is_same_v<T, char>) {
       // For char type we need to add one for the null terminator
       num_ele += 1;

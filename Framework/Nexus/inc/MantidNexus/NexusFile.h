@@ -564,9 +564,9 @@ public:
    */
   void getEntries(Entries &result) const;
 
-  /** Return the string name of the top-level entry
+  /** Return the absolute address of the top-level entry
    *
-   * \return a string with the name (not abs address) of the top-level entry
+   * \return a string with the absolute address of the top-level entry (e.g. "/entry")
    */
   std::string getTopLevelEntryName() const;
 
