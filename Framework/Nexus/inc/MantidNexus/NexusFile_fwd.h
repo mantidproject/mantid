@@ -84,6 +84,7 @@ public:
   // & will be true (nonzero) if it is of type indicated; false (zero) else
   static unsigned short constexpr FLOAT_TYPE = 0x20u;
   static unsigned short constexpr SPECIAL_TYPE = 0x80u;
+  static unsigned short constexpr NOT_CHAR = 0xD0u;
 
 private:
   int m_val;
@@ -97,7 +98,7 @@ public:
   operator std::string() const;
 
   // Will return true if the type is a float
-  bool isFloat() { return m_val & FLOAT_TYPE; }
+  bool isFloat() { return (m_val & FLOAT_TYPE) && !isSpecial(); }
   // Will return true if the type is a special (char, binary, or bad)
   bool isSpecial() { return m_val & SPECIAL_TYPE; }
 };
