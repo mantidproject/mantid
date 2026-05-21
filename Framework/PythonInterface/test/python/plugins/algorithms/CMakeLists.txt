@@ -163,6 +163,7 @@ set(TEST_PY_FILES
     VesuvioThicknessTest.py
     VesuvioTOFFitTest.py
     PEARLTransfitTest.py
+    PEARLTransfitV2Test.py
     PoldiCreatePeaksFromFileTest.py
     LoadCIFTest.py
     SaveYDATest.py

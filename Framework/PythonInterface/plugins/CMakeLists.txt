@@ -159,6 +159,7 @@ set(PYTHON_PLUGINS
     algorithms/PeakMatching.py
     algorithms/PearlMCAbsorption.py
     algorithms/PEARLTransfit.py
+    algorithms/PEARLTransfit2.py
     algorithms/PelicanReduction.py
     algorithms/PelicanCrystalProcessing.py
     algorithms/PoldiAutoCorrelation6.py
