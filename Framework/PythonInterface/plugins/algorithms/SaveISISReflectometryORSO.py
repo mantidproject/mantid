@@ -725,8 +725,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             check_dataset = self._create_and_sort_refl_datasets()[0]
             missing_meta = check_dataset.get_missing_metadata_list()
             for prop in missing_meta:
-                manual_entry = self.getProperty(prop).value
-                if manual_entry is None:
+                if self.getProperty(prop).isDefault:
                     issues[prop] = "Metadata could not be found in the workspace history. Please provide some."
 
         angle_files = self.getProperty(Prop.ANGLE_FILES).value
