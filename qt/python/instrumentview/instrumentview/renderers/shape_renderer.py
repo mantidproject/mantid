@@ -229,7 +229,7 @@ class ShapeRenderer(InstrumentRenderer):
             show_edges=False,
         )
 
-    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover=False) -> None:
+    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False) -> None:
         """Set up left-click cell picking on the shape surface.  *callback* receives ``(detector_index: int)``."""
         plotter.disable_picking()
 

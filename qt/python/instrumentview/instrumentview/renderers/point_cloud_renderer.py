@@ -82,7 +82,7 @@ class PointCloudRenderer(InstrumentRenderer):
         )
 
     # --------------------------------------------------------------- picking
-    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover=False) -> None:
+    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False) -> None:
         """Set up left-click point picking.  *callback* receives ``(detector_index: int)``."""
         plotter.disable_picking()
 
