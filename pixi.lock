@@ -54,7 +54,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorlog-6.10.1-pyh707e725_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.3-pyhe01879c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/contourpy-1.3.3-py312h0a2e395_4.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/cppcheck-2.18.1-py312h014360a_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/cppcheck-2.20.0-py312h014360a_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.12.13-py312hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cycler-0.12.1-pyhcf101f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cyclopts-4.14.0-pyhcf101f3_0.conda
@@ -479,7 +479,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/compiler-rt-18.1.8-h855ad52_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/compiler-rt_osx-arm64-18.1.8-he32a8d3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/contourpy-1.3.3-py312h3093aea_4.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cppcheck-2.18.1-py312hcf425eb_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cppcheck-2.20.0-py312hc058c1b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.12.13-py312hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cycler-0.12.1-pyhcf101f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cyclopts-4.14.0-pyhcf101f3_0.conda
@@ -804,7 +804,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.3-pyhe01879c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/conda-wrappers-1.1.3-py312h2e8e312_7.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/contourpy-1.3.3-py312h78d62e6_4.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/cppcheck-2.18.1-py312h9df87ca_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/cppcheck-2.20.0-py312h9df87ca_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.12.13-py312hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cycler-0.12.1-pyhcf101f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cyclopts-4.14.0-pyhcf101f3_0.conda
@@ -3506,58 +3506,54 @@ packages:
   license_family: BSD
   size: 244035
   timestamp: 1769155978578
-- conda: https://conda.anaconda.org/conda-forge/linux-64/cppcheck-2.18.1-py312h014360a_0.conda
-  sha256: 0464c13c0bfb22c39493d89c600fa62b19c9fb0bb402014ff127bce27e6e26d9
-  md5: 6f10d93aa2d8f8755afae5a18b71b8ab
+- conda: https://conda.anaconda.org/conda-forge/linux-64/cppcheck-2.20.0-py312h014360a_0.conda
+  sha256: 7f7c16c20c296f9527b45a114152d4a7dd29d6504bbd2830346a6f26f3df5bec
+  md5: f65ae40ce08e9d666e3a590e04979b06
   depends:
   - pygments
   - python
-  - libstdcxx >=14
   - libgcc >=14
   - __glibc >=2.17,<3.0.a0
-  - libgcc >=14
-  - python_abi 3.12.* *_cp312
+  - libstdcxx >=14
   - tinyxml2 >=11.0.0,<11.1.0a0
   - pcre >=8.45,<9.0a0
+  - python_abi 3.12.* *_cp312
   license: GPL-3.0-or-later
   license_family: GPL
-  size: 3065914
-  timestamp: 1755438333024
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/cppcheck-2.18.1-py312hcf425eb_0.conda
-  sha256: af0193b060f80ce9fa77dab874d0e2a3e4cf9ec00baae1abec16600de85fbaf7
-  md5: 99f0fbc3a776299dffb60220e85652d1
+  size: 3100256
+  timestamp: 1772702948382
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/cppcheck-2.20.0-py312hc058c1b_0.conda
+  sha256: a0c734c1d57deacbc33ef6c6cdb11acba504ac754cea064a62d073503115af6d
+  md5: ee84887cc50fb5e158fa92abf3d065e4
   depends:
   - pygments
   - python
   - python 3.12.* *_cpython
-  - libcxx >=19
   - __osx >=11.0
+  - libcxx >=19
   - tinyxml2 >=11.0.0,<11.1.0a0
   - python_abi 3.12.* *_cp312
   - pcre >=8.45,<9.0a0
   license: GPL-3.0-or-later
   license_family: GPL
-  size: 2584976
-  timestamp: 1755438404815
-- conda: https://conda.anaconda.org/conda-forge/win-64/cppcheck-2.18.1-py312h9df87ca_0.conda
-  sha256: fa40491ec68c6e78cfec59f2f73dff0c51bbabe6423ed71bb2d07da637a73767
-  md5: f1dfb11b67fcc8bdaa5d3db73b53595b
+  size: 2615872
+  timestamp: 1772703164268
+- conda: https://conda.anaconda.org/conda-forge/win-64/cppcheck-2.20.0-py312h9df87ca_0.conda
+  sha256: 3df3c53f45f9fb9efa105327bbe86d2f74c2ed32b265a81baa8b6c45d496f362
+  md5: 4381b4769c0c5d4b3bb1546decb1f3a7
   depends:
   - pygments
   - python
   - vc >=14.3,<15
   - vc14_runtime >=14.44.35208
   - ucrt >=10.0.20348.0
-  - vc >=14.3,<15
-  - vc14_runtime >=14.44.35208
-  - ucrt >=10.0.20348.0
-  - python_abi 3.12.* *_cp312
   - tinyxml2 >=11.0.0,<11.1.0a0
   - pcre >=8.45,<9.0a0
+  - python_abi 3.12.* *_cp312
   license: GPL-3.0-or-later
   license_family: GPL
-  size: 20887
-  timestamp: 1755438359559
+  size: 2417719
+  timestamp: 1772702945541
 - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.12.13-py312hd8ed1ab_0.conda
   noarch: generic
   sha256: d3e9bbd7340199527f28bbacf947702368f31de60c433a16446767d3c6aaf6fe

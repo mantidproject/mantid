@@ -54,6 +54,8 @@ pixi run --frozen cmake --preset=cppcheck-ci -DCPPCHECK_NUM_THREADS=$BUILD_THREA
 # Run cppcheck
 pixi run --frozen cmake --build . --target cppcheck
 
+echo "=== run complete! ==="
+
 # Generate HTML report
 pixi run --frozen cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-report
 

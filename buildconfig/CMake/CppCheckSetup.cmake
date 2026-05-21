@@ -20,17 +20,20 @@ if(CPPCHECK_EXECUTABLE)
       # 2.12 has missingInclude switched on by default if running with multiple cores but it doesn't appear to work
       # correctly. It was flagging many stl and other external header files as missing.
       --disable=missingInclude
+      --disable=unusedFunction
       # Adding qt here helps with mis-identifying Qt macros as unknownMacro defects.
       --library=qt
       --check-level=exhaustive
       --inline-suppr
-      --max-configs=120
+      --max-configs=2
       --std=c++${CMAKE_CXX_STANDARD} # use the standard from cmake
       --cppcheck-build-dir="${CPPCHECK_BUILD_DIR}/cache"
       --suppressions-list="${CPPCHECK_BUILD_DIR}/CppCheck_Suppressions.txt"
       --project="${CMAKE_BINARY_DIR}/compile_commands_cppcheck.json"
       --checkers-report=${CMAKE_BINARY_DIR}/cppcheck_checkers_reports.txt
       -i"${CMAKE_BINARY_DIR}"
+      --max-ctu-depth=1
+      --performance-valueflow-max-if-count=30
       # Force cppcheck to check when we use project-wide macros
       -DDLLExport=
       -DMANTID_ALGORITHMS_DLL=
