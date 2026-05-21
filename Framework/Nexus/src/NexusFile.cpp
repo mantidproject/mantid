@@ -755,7 +755,7 @@ string File::getStrData() {
     throw NXEXCEPTION(msg.str());
   }
   // validate rank
-  int rank = H5Sget_simple_extent_ndims(m_current_space_id);
+  int const rank = H5Sget_simple_extent_ndims(m_current_space_id);
   if (rank > 1) {
     stringstream msg;
     msg << "getStrData() only understands rank<=1 data. Found rank=" << rank;

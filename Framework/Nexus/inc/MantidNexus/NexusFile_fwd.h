@@ -98,7 +98,7 @@ public:
   operator std::string() const;
 
   // Will return true if the type is a float
-  bool isFloat() { return (m_val & FLOAT_TYPE) && !(m_val & NOT_CHAR); }
+  bool isFloat() { return (m_val & FLOAT_TYPE) && !isSpecial(); }
   // Will return true if the type is a special (char, binary, or bad)
   bool isSpecial() { return m_val & SPECIAL_TYPE; }
 };
