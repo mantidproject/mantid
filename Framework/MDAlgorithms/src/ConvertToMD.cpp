@@ -117,7 +117,7 @@ void ConvertToMD::init() {
                   "for the big files using the indexing.");
 
   declareProperty("UseLogTimes", false,
-                  "If true, and input is an EventWorkspace, this flag will use the value of "
+                  "If true, and the input workspace is an EventWorkspace, this flag will use the value of "
                   "logs used to define the sample rotation (Goniometer) and OtherDimensions "
                   "at the pulse times of the events rather than their average values.");
 }

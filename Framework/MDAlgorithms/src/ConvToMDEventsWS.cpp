@@ -58,10 +58,10 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
     double signal = it->weight();
     double errorSq = it->errorSquared();
     if (m_useLogTimes) {
-      for (size_t ii = 0; ii < m_GonioIndex.size(); ii++) {
+      for (size_t axIdx = 0; ii < m_GonioIndex.size(); axIdx++) {
         m_Goniometer.setRotationAngle(m_GonioIndex[ii], m_Logs[ii]->getSingleValue(it->pulseTime()));
       }
-      DblMatrix rotmat = m_Goniometer.getR() * m_Wtransf;
+      rotmat = m_Goniometer.getR() * m_Wtransf;
       rotmat.Invert();
       m_QConverter->updateRotMat(rotmat.getVector());
     }
@@ -124,7 +124,7 @@ size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<
     // Saves the Q-cartesian transformation
     m_Wtransf = WSD.m_Wtransf;
     // Log values for Gonios
-    Mantid::API::Run run = WSD.getInWS()->run();
+    const Mantid::API::Run &run = WSD.getInWS()->run();
     m_Goniometer = run.getGoniometer();
     for (size_t n = 0; n < m_Goniometer.getNumberAxes(); n++) {
       Mantid::Geometry::GoniometerAxis ax = m_Goniometer.getAxis(n);

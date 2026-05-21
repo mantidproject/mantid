@@ -18,8 +18,6 @@
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 
-using Mantid::Kernel::DblMatrix;
-
 namespace Mantid {
 // Forward declarations
 namespace API {
