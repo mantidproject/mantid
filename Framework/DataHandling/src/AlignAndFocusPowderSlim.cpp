@@ -42,6 +42,7 @@
 #include "MantidNexus/H5Util.h"
 
 #include <H5Cpp.h>
+#include <cctype>
 #include <numbers>
 #include <ranges>
 #include <regex>
@@ -810,10 +811,15 @@ const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const API::Works
 GroupingWorkspace_sptr AlignAndFocusPowderSlim::loadGroupingFile(const API::MatrixWorkspace_sptr &wksp,
                                                                  const std::string &filename) {
   g_log.debug() << "Loading grouping from file: " << filename << '\n';
+
+  // case-insensitive extension check
+  std::string lowerFilename = filename;
+  std::transform(lowerFilename.begin(), lowerFilename.end(), lowerFilename.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+
   GroupingWorkspace_sptr groupingWS;
-  const bool isXml = filename.ends_with(".xml") || filename.ends_with(".XML");
-  if (isXml) {
-    // XML grouping file — use LoadDetectorsGroupingFile
+  if (lowerFilename.ends_with(".xml")) {
+    // XML grouping file -- use LoadDetectorsGroupingFile
     auto grpWS = std::make_shared<DataObjects::GroupingWorkspace>(wksp->getInstrument());
     auto alg = createChildAlgorithm("LoadDetectorsGroupingFile");
     alg->setProperty("InputWorkspace", std::dynamic_pointer_cast<API::Workspace>(grpWS));
@@ -821,10 +827,10 @@ GroupingWorkspace_sptr AlignAndFocusPowderSlim::loadGroupingFile(const API::Matr
     alg->executeAsChildAlg();
     groupingWS = alg->getProperty("OutputWorkspace");
   } else {
-    // HDF5 or .cal grouping file — use LoadDiffCal as the Filename (cal file) parameter
+    // HDF5 or .cal grouping file -- use LoadDiffCal as the Filename (cal file) parameter
     auto alg = createChildAlgorithm("LoadDiffCal");
     alg->setPropertyValue("Filename", filename);
-    if (filename.ends_with(".cal") || filename.ends_with(".CAL")) {
+    if (lowerFilename.ends_with(".cal")) {
       // .cal format requires an instrument to be provided
       alg->setProperty("InputWorkspace", std::dynamic_pointer_cast<API::Workspace>(wksp));
     }
