@@ -91,6 +91,7 @@ void Fit::initConcrete() {
                   "workspace(s) with the calculated values\n"
                   "(default is false, ignored if CreateOutput is false and "
                   "Output is an empty string).");
+  declareProperty("CustomStepSizes", std::vector<double>{}, "Custom step sizes for numerical derivatives.");
 }
 
 std::map<std::string, std::string> Fit::validateInputs() {
@@ -112,6 +113,15 @@ std::map<std::string, std::string> Fit::validateInputs() {
     }
   }
 
+  const std::string stepSizeMethod = getPropertyValue("StepSizeMethod");
+  const std::vector<double> customStepSizes = getProperty("CustomStepSizes");
+  if (stepSizeMethod == "Custom" && customStepSizes.empty()) {
+    issues["CustomStepSizes"] = "CustomStepSizes must be provided when StepSizeMethod is set to Custom.";
+  }
+  if (stepSizeMethod != "Custom" && !customStepSizes.empty()) {
+    issues["CustomStepSizes"] = "CustomStepSizes can only be provided when StepSizeMethod is set to Custom.";
+  }
+
   return issues;
 }
 
@@ -130,6 +140,12 @@ void Fit::readProperties() {
   // Try to retrieve optional properties
   int intMaxIterations = getProperty("MaxIterations");
   m_maxIterations = static_cast<size_t>(intMaxIterations);
+
+  const std::string stepSizeMethod = getPropertyValue("StepSizeMethod");
+  if (stepSizeMethod == "Custom") {
+    const std::vector<double> customStepSizes = getProperty("CustomStepSizes");
+    m_function->setCustomStepSizes(customStepSizes);
+  }
 }
 
 /// Initialize the minimizer for this fit.
