@@ -62,6 +62,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _REDUCTION_HEADING = "# reduction:\n"
     _REDUCTION_CALL_HEADING = "#   call:"
     _DATA_SET_HEADING = "# data_set:"
+    _REDUCTION_TIMESTAMP_HEADING = "#   timestamp:"
 
     # Error messages
     _WS_UNITS_ERROR = "must have units of"
@@ -613,6 +614,35 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             with self.subTest(test_case=state):
                 self._check_file_header([f"#       polarization: {state}"])
 
+    def test_manual_source_exludes_non_entered_metadata_from_header(self):
+        ws = self._create_sample_workspace()
+        alg_kwargs = {"MetadataSource": "Manual"}
+        self._run_save_alg(ws, **alg_kwargs)
+
+        blank_entries = [f"{self._REDUCTION_CALL_HEADING} ''", f"{self._REDUCTION_TIMESTAMP_HEADING} ''", f"{self._DATA_FILES_HEADING} []"]
+
+        self._check_file_header(included_header_values=blank_entries)
+
+    def test_manual_source_allows_manual_setting_of_metadata(self):
+        ws = self._create_sample_workspace()
+        timestamp = datetime.combine(date(2024, 2, 13), time(12, 14, 36)).replace(tzinfo=timezone.utc).astimezone(tz=None)
+        alg_kwargs = {"MetadataSource": "Manual", "ReductionTimestamp": str(timestamp.isoformat()), "ReductionScript": "example():"}
+        self._run_save_alg(ws, **alg_kwargs)
+
+        expected_manual_entries = [
+            f"{self._REDUCTION_CALL_HEADING} 'example():'",
+            f"{self._REDUCTION_TIMESTAMP_HEADING} {str(timestamp.isoformat())}",
+            f"{self._DATA_FILES_HEADING} []",
+        ]
+
+        self._check_file_header(included_header_values=expected_manual_entries)
+
+    def test_hybrid_source_requests_missing_metadata(self):
+        ws = self._create_sample_workspace()
+        alg_kwargs = {"MetadataSource": "HistoryWherePossible"}
+        with self.assertRaisesRegex(RuntimeError, "AngleFileList: Metadata could not be found"):
+            self._run_save_alg(ws, **alg_kwargs)
+
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
         # Create a single spectrum workspace in units of momentum transfer
         ws = CreateSampleWorkspace(
@@ -751,12 +781,13 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self.assertEqual(1, spectrum_info.size())
         return float(np.rad2deg(spectrum_info.signedTwoTheta(0))) / 2.0
 
-    def _run_save_alg(self, ws_list, write_resolution=True, include_extra_cols=False, filename=None):
+    def _run_save_alg(self, ws_list, write_resolution=True, include_extra_cols=False, filename=None, **kwargs):
         SaveISISReflectometryORSO(
             WorkspaceList=ws_list,
             WriteResolution=write_resolution,
             IncludeAdditionalColumns=include_extra_cols,
             Filename=self._output_filename if filename is None else os.path.join(self._temp_dir.name, filename),
+            **kwargs,
         )
 
 
