@@ -28,7 +28,7 @@ namespace Poldi {
   */
 class MANTID_SINQ_DLL PoldiCreatePeaksFromCell : public API::Algorithm {
 public:
-  virtual ~PoldiCreatePeaksFromCell() = default;
+  ~PoldiCreatePeaksFromCell() override = default;
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"PoldiCreatePeaksFromFile"}; }

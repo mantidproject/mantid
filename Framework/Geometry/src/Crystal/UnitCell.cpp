@@ -29,7 +29,7 @@ UnitCell::UnitCell() : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), 
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] = 0.0;
   MaxOrder = 0;
   CrossTerm = false;
-  recalculate();
+  UnitCell::recalculate();
 }
 
 /** Constructor
@@ -45,7 +45,7 @@ UnitCell::UnitCell(double _a, double _b, double _c)
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] = 0.0;
   MaxOrder = 0;
   CrossTerm = false;
-  recalculate();
+  UnitCell::recalculate();
 }
 
 /** Constructor
@@ -70,7 +70,7 @@ UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta,
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] = 0.0;
   MaxOrder = 0;
   CrossTerm = false;
-  recalculate();
+  UnitCell::recalculate();
 }
 
 /** Get lattice parameter

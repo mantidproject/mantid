@@ -39,11 +39,11 @@ public:
   /// Destructor
   ~ParameterTie() override;
   /// Set the tie expression
-  virtual void set(const std::string &expr);
+  void set(const std::string &expr);
   /// Evaluate the expression
-  virtual double eval(bool setParameterValue = true);
+  double eval(bool setParameterValue = true);
   /// Return the string that can be used to recreate this tie
-  virtual std::string asString(const IFunction *fun = nullptr) const;
+  std::string asString(const IFunction *fun = nullptr) const;
 
   /// Check if the tie has any references to certain parameters
   bool findParametersOf(const IFunction *fun) const;

@@ -95,7 +95,6 @@ protected:
   PeakMarker2D::Style getScaledMarker(double intensity, const PeakMarker2D::Style &baseStyle) const override;
 
 private:
-  // cppcheck-suppress unusedPrivateFunction
   int getIntensityLevel(double intensity) const;
 
   // Scaling to weak < 0.1 <= medium <= 0.6 <= strong <= 0.9 <= very strong

@@ -19,7 +19,7 @@ namespace CxxTest
         virtual bool tearDown();
 
         GlobalFixture();
-        ~GlobalFixture();
+        ~GlobalFixture() override;
 
         static GlobalFixture *firstGlobalFixture();
         static GlobalFixture *lastGlobalFixture();

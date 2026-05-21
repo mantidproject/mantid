@@ -27,7 +27,7 @@ namespace {
  * @param direction An output/input/inout property
  * @return A pointer to a new AlgorithmProperty object
  */
-AlgorithmProperty *createPropertyWithValidatorAndDirection(const std::string &name, IValidator *validator,
+AlgorithmProperty *createPropertyWithValidatorAndDirection(const std::string &name, IValidator const *validator,
                                                            unsigned int direction) {
   return new AlgorithmProperty(name, validator->clone(), direction);
 }
@@ -39,7 +39,7 @@ AlgorithmProperty *createPropertyWithValidatorAndDirection(const std::string &na
  * when passed to the framework
  * @return A pointer to a new AlgorithmProperty object
  */
-AlgorithmProperty *createPropertyWithValidator(const std::string &name, IValidator *validator) {
+AlgorithmProperty *createPropertyWithValidator(const std::string &name, IValidator const *validator) {
   return createPropertyWithValidatorAndDirection(name, validator, Mantid::Kernel::Direction::Input);
 }
 } // namespace

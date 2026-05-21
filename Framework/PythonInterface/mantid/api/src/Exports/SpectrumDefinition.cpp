@@ -37,5 +37,5 @@ void export_SpectrumDefinition() {
            "Adds a pair of detector index and time index to the spectrum "
            "definition.")
 
-      .def("equals", &SpectrumDefinition::operator==, (arg("self"), arg("other")), "Compare spectrum definitions.");
+      .def("equals", (&SpectrumDefinition::operator==), (arg("self"), arg("other")), "Compare spectrum definitions.");
 }

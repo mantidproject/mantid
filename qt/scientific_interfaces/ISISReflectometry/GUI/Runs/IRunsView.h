@@ -63,7 +63,7 @@ contains no QT specific functionality as that should be handled by a subclass.
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IRunsView : public MantidQt::MantidWidgets::ProgressableView {
 public:
-  virtual ~IRunsView() = default;
+  ~IRunsView() override = default;
 
   virtual void subscribe(RunsViewSubscriber *notifyee) = 0;
   virtual void subscribeTimer(RunsViewTimerSubscriber *notifyee) = 0;

@@ -77,7 +77,7 @@ public:
   /// MCNPX format
   void setTanAngle(double const);
   /// This method generates the quadratic equation for cone
-  void setBaseEqn() override;
+  void setBaseEqn() override final;
   /// This method will write the cone equation in MCNP geometry format
   void write(std::ostream &) const override;
 

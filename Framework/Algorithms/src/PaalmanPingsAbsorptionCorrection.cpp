@@ -461,6 +461,7 @@ void PaalmanPingsAbsorptionCorrection::doIntegration(double &integral, double &c
                                                      const double linearCoefAbs2, const double linearCoefTotScatt2,
                                                      const std::vector<double> &L1s2, const std::vector<double> &L2s2,
                                                      const size_t startIndex, const size_t endIndex) const {
+  // cppcheck-suppress knownConditionTrueFalse
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     size_t middle = findMiddle(startIndex, endIndex);
 

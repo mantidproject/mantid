@@ -36,7 +36,7 @@ public:
   FitScriptGeneratorModel();
   FitScriptGeneratorModel(FitScriptGeneratorModel const &model) = delete;
   FitScriptGeneratorModel &operator=(FitScriptGeneratorModel const &model) = delete;
-  ~FitScriptGeneratorModel();
+  ~FitScriptGeneratorModel() override;
 
   void subscribePresenter(IFitScriptGeneratorPresenter *presenter) override;
 

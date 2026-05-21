@@ -158,7 +158,7 @@ const std::set<double> MantidWSIndexWidget::getCustomLogValues() const {
   std::set<double> logValues;
   if (m_logSelector->currentText() == CUSTOM) {
     QStringList values = m_logValues->lineEdit()->text().split(',');
-    foreach (QString value, values) {
+    for (QString const &value : values) {
       bool ok = false;
       double number = value.toDouble(&ok);
       if (ok) {
