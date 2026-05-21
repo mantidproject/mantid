@@ -22,7 +22,7 @@ eggfiles = [
 pathdirs = []
 for filename in eggfiles:
     with open(filename) as handle:
-        for line in handle.readlines():
+        for line in handle:
             line = line.strip()
             if (not line) or (line == "."):  # don't add current directory
                 continue
