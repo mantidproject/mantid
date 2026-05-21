@@ -51,17 +51,17 @@ std::vector<std::string> suffixesFromFirstInputWorkspaceGroup(Group const &group
     if (!row)
       continue;
 
-    auto const groupName = row->reducedWorkspaceNames().iVsQ();
-    if (!ads.doesExist(groupName))
+    auto const groupWSName = row->reducedWorkspaceNames().iVsQ();
+    if (!ads.doesExist(groupWSName))
       continue;
 
-    auto const workspaceGroup = ads.retrieveWS<WorkspaceGroup>(groupName);
+    auto const workspaceGroup = ads.retrieveWS<WorkspaceGroup>(groupWSName);
     if (!workspaceGroup)
       continue;
 
     auto suffixes = std::vector<std::string>();
     for (auto const &memberName : workspaceGroup->getNames()) {
-      auto const suffix = suffixForWorkspaceGroupMember(memberName, groupName);
+      auto const suffix = suffixForWorkspaceGroupMember(memberName, groupWSName);
       if (!suffix)
         return {};
 
