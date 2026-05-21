@@ -949,6 +949,8 @@ public:
     auto outQGroup = retrieveOutWS("IvsQ");
     auto outLamGroup = retrieveOutWS("IvsLam");
 
+    assert_ads_exists({"IvsLam_++", "IvsQ_++", "IvsQ_binned_++", "IvsLam_--", "IvsQ_--", "IvsQ_binned_--"});
+
     TS_ASSERT_EQUALS(outQGroup.size(), 2);
     TS_ASSERT_EQUALS(outLamGroup.size(), 2);
 
