@@ -17,8 +17,8 @@ using namespace Mantid::API;
 
 std::pair<std::string, std::string> splitParameterName(std::string const &paramName) {
   QString functionIndex;
-  QString initialParamName = QString::fromStdString(paramName);
-  QString parameterName = QString::fromStdString(paramName);
+  QString const initialParamName = QString::fromStdString(paramName);
+  QString parameterName = initialParamName;
   int j = initialParamName.lastIndexOf('.');
   if (j > 0) {
     ++j;

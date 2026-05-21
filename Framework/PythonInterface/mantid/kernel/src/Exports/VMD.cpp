@@ -97,10 +97,10 @@ void export_VMD() {
       .def(self == self)
       .def(self != self) // must define != as Python's default is to compare
                          // object address
-      .def("__add__", &VMD::operator+, (arg("left"), arg("right")))
-      .def("__iadd__", &VMD::operator+=, return_self<>(), (arg("self"), arg("other")))
-      .def("__sub__", &VMD::operator-, (arg("left"), arg("right")))
-      .def("__isub__", &VMD::operator-=, return_self<>(), (arg("self"), arg("other")))
+      .def("__add__", (&VMD::operator+), (arg("left"), arg("right")))
+      .def("__iadd__", (&VMD::operator+=), return_self<>(), (arg("self"), arg("other")))
+      .def("__sub__", (&VMD::operator-), (arg("left"), arg("right")))
+      .def("__isub__", (&VMD::operator-=), return_self<>(), (arg("self"), arg("other")))
       .def(self * self)
       .def(self *= self)
       .def(self / self)

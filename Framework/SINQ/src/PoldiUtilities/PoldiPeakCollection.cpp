@@ -102,7 +102,7 @@ PointGroup_sptr PoldiPeakCollection::pointGroup() const { return m_pointGroup; }
 
 void PoldiPeakCollection::setUnitCell(const UnitCell &unitCell) { m_unitCell = unitCell; }
 
-UnitCell PoldiPeakCollection::unitCell() const { return m_unitCell; }
+UnitCell const &PoldiPeakCollection::unitCell() const { return m_unitCell; }
 
 TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace() {
   TableWorkspace_sptr peaksws = std::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());

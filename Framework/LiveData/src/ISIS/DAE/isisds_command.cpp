@@ -291,7 +291,9 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data, ISI
    * isisds_type_name[comm.type], comm.ndims); */
   if (do_alloc) {
     *data = malloc(len_data + 1);
-    (reinterpret_cast<char *>(*data))[len_data] = '\0';
+    if (*data == nullptr)
+      return -1;
+    static_cast<char *>(*data)[len_data] = '\0';
   } else {
     int size_in = 1;
     for (i = 0; i < *ndims; i++) {
@@ -304,7 +306,7 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data, ISI
     }
     if (size_in > len_data) /* only NULL terminate if space */
     {
-      (reinterpret_cast<char *>(*data))[len_data] = '\0';
+      static_cast<char *>(*data)[len_data] = '\0';
     }
   }
   n = recv_all(s, *data, len_data, 0);

@@ -14,7 +14,7 @@ namespace MantidQt::MantidWidgets {
 
 class EXPORT_OPT_MANTIDQT_COMMON MessageHandler final : public IMessageHandler {
 public:
-  ~MessageHandler() = default;
+  ~MessageHandler() override = default;
   void giveUserCritical(const std::string &prompt, const std::string &title) override;
   void giveUserWarning(const std::string &prompt, const std::string &title) override;
   void giveUserInfo(const std::string &prompt, const std::string &title) override;
