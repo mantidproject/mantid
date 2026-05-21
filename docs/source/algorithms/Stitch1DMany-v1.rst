@@ -45,6 +45,11 @@ The reference workspace will not be scaled, and the other workspaces will be sca
 to match the reference. Note that this property should be used instead of
 :literal:`ScaleRHSWorkspace`, which no longer has any effect and will eventually be removed.
 
+When stitching workspace groups, the child workspaces in the output group use
+1-based numeric suffixes by default. :literal:`OutputWorkspaceSuffixes` can be
+provided to use custom suffixes for these child workspaces instead. The number
+of suffixes must match the number of child workspaces in each input group.
+
 Workflow
 --------
 

@@ -80,6 +80,17 @@ public:
     TS_ASSERT_EQUALS(result->getPropertyValue("OutputWorkspace"), "IvsQ_testQ1_testQ2");
   }
 
+  void testOutputWorkspaceSuffixesForRowsWithSpinStateChildGroups() {
+    createWorkspaceGroup("IvsQ_12345", {"IvsQ_12345_++", "IvsQ_12345_--"});
+
+    auto model = Batch(makeEmptyExperiment(), m_instrument, m_runsTable, m_slicing);
+    auto group = makeGroupWithTwoRows();
+    group.mutableRows()[0]->setOutputNames({"IvsLam_12345", "IvsQ_12345", "IvsQ_binned_12345"});
+    auto result = createAlgorithmRuntimeProps(model, group);
+
+    TS_ASSERT_EQUALS(result->getPropertyValue("OutputWorkspaceSuffixes"), "++, --");
+  }
+
   void testStitchedWorkspaceGroupMembersUseSpinStateSuffixes() {
     createWorkspaceGroup("IvsQ_12345", {"IvsQ_12345_++", "IvsQ_12345_--"});
     createWorkspaceGroup("IvsQ_23456", {"IvsQ_23456_++", "IvsQ_23456_--"});
