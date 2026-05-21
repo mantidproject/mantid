@@ -37,7 +37,7 @@ using namespace Nexus;
 using namespace ANSTO;
 using ANSTO::EventVector_pt;
 
-// Algorithm parameter names
+// algorithm parameter names
 constexpr char FilenameStr[] = "Filename";
 constexpr char MaskStr[] = "Mask";
 constexpr char SelectDetectorTubesStr[] = "SelectDetectorTubes";
