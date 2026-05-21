@@ -57,7 +57,7 @@ public:
   Geometry::PointGroup_sptr pointGroup() const;
 
   void setUnitCell(const Geometry::UnitCell &unitCell);
-  Geometry::UnitCell unitCell() const;
+  Geometry::UnitCell const &unitCell() const;
 
   DataObjects::TableWorkspace_sptr asTableWorkspace();
 

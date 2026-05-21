@@ -29,7 +29,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtCatalogSearcher : public QObject,
   Q_OBJECT
 public:
   explicit QtCatalogSearcher(IRunsView *view);
-  virtual ~QtCatalogSearcher() = default;
+  ~QtCatalogSearcher() override = default;
 
   // ISearcher overrides
   void subscribe(SearcherSubscriber *notifyee) override;

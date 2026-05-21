@@ -28,7 +28,7 @@ public:
   explicit Group(std::string name);
   Group(std::string name, std::vector<std::optional<Row>> rows);
 
-  ~Group() = default;
+  ~Group() override = default;
 
   Group(Group &&group) noexcept;
   Group(const Group &old_group);

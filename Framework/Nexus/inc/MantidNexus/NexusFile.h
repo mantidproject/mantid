@@ -186,6 +186,7 @@ public:
    * \return A unix like address string pointing to the current
    *         position in the file
    */
+  // NOTE: this cannot return by reference as the referenced address can change
   std::string getAddress() const { return m_address.string(); };
 
   // CHECK ADDRESS EXISTENCE
