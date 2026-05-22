@@ -117,7 +117,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 empty_axes.append(MantidAxes.is_empty(ax))
             redraw = redraw | to_redraw
 
-        if all(empty_axes):
+        if all(empty_axes) and redraw:
             self.window.emit_close()
         elif redraw:
             self.canvas.draw_idle()

@@ -277,4 +277,29 @@ public:
     detInfo.setComponentInfo(&compInfo);
     TS_ASSERT_EQUALS(detInfo.scanIntervals(), (std::vector<std::pair<int64_t, int64_t>>{{0, 1}}));
   }
+
+  void test_getMemorySize_empty() {
+    const DetectorInfo empty{};
+    TS_ASSERT_EQUALS(empty.getMemorySize(), sizeof(DetectorInfo));
+  }
+
+  void test_getMemorySize_with_data() {
+    const DetectorInfo withData(PosVec(5), RotVec(5));
+    TS_ASSERT_LESS_THAN(sizeof(DetectorInfo), withData.getMemorySize());
+  }
+
+  void test_getMemorySize_scales_with_size() {
+    const DetectorInfo a(PosVec(10), RotVec(10));
+    const DetectorInfo b(PosVec(20), RotVec(20));
+    const DetectorInfo c(PosVec(30), RotVec(30));
+    TS_ASSERT_LESS_THAN(a.getMemorySize(), b.getMemorySize());
+    TS_ASSERT_LESS_THAN(b.getMemorySize(), c.getMemorySize());
+
+    // check that the increase in memory size grows linear with the number of components
+    auto sizeA = a.getMemorySize(); // 10
+    auto sizeB = b.getMemorySize(); // 20
+    auto sizeC = c.getMemorySize(); // 30
+    // 20 - 10 == 30 - 20
+    TS_ASSERT_EQUALS(sizeB - sizeA, sizeC - sizeB);
+  }
 };

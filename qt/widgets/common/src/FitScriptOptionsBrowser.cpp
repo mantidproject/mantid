@@ -166,8 +166,8 @@ void FitScriptOptionsBrowser::createPlotOutputProperty() {
   m_propertyNameMap["Plot Output"] = m_plotOutput;
 }
 
-void FitScriptOptionsBrowser::addProperty(std::string const &name, QtProperty *prop, PropertyGetter getter,
-                                          PropertySetter setter) {
+void FitScriptOptionsBrowser::addProperty(std::string const &name, QtProperty *prop, PropertyGetter const &getter,
+                                          PropertySetter const &setter) {
   m_propertyNameMap[name] = prop;
   m_getters[prop] = getter;
   m_setters[prop] = setter;

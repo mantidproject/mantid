@@ -144,7 +144,7 @@ private:
   WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaceNames,
                                       std::string const &outputName = "");
   RROOutputs performCoreReduction(MatrixWorkspace_sptr inputWS, const std::vector<std::string> &taskOrder = {},
-                                  const bool runAsChild = true, const bool applyFloodCorrections = true);
+                                  const bool applyFloodCorrections = true);
   MatrixWorkspace_sptr postReductionProcessing(const RROOutputs &out, const RebinParams &params);
   void postReductionProcessingGroups(std::vector<RROOutputs> &outputs, std::vector<WorkspaceNames> const &outputNames,
                                      const WorkspaceNames &groupedOutputNames, const bool outputIvsLam);

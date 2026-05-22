@@ -76,6 +76,14 @@ class AlgorithmHistoryTest(unittest.TestCase):
         self.assertEqual(history.size(), 1)
         self.assertEqual(len(alg_hists), 1)
 
+    def test_process_groups_history_recording_flag_is_exposed_to_python(self):
+        alg = AlgorithmManager.createUnmanaged("Rebin")
+        alg.initialize()
+
+        self.assertTrue(hasattr(alg, "enableHistoryRecordingForProcessGroups"))
+        alg.enableHistoryRecordingForProcessGroups(True)
+        alg.enableHistoryRecordingForProcessGroups(False)
+
     def test_storeInADSFalse_workspace(self):
         ws = CreateWorkspace([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [1, 2, 3, 4, 5, 6, 7, 8, 9], StoreInADS=False)
         result = Rebin(ws, "1, 3, 10", Power=0.5)

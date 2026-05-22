@@ -741,4 +741,55 @@ size_t ComponentInfo::nonDetectorSize() const {
     return 0;
 }
 
+/** Return memory used by the component info, in bytes.
+ * @return bytes used.
+ */
+size_t ComponentInfo::getMemorySize() const {
+  size_t mem = sizeof(*this);
+
+  // Shared sorted-index and range vectors
+  const auto sharedVecMem = [](const auto &ptr) -> size_t {
+    return ptr ? sizeof(*ptr) + ptr->size() * sizeof(typename std::decay_t<decltype(*ptr)>::value_type) : 0;
+  };
+  mem += sharedVecMem(m_assemblySortedDetectorIndices);
+  mem += sharedVecMem(m_assemblySortedComponentIndices);
+  mem += sharedVecMem(m_detectorRanges);
+  mem += sharedVecMem(m_componentRanges);
+  mem += sharedVecMem(m_parentIndices);
+
+  // m_children: outer vector buffer + all inner child-index buffers
+  mem += sharedVecMem(m_children);
+  if (m_children)
+    mem += std::accumulate(m_children->cbegin(), m_children->cend(), size_t{0},
+                           [](size_t acc, const auto &v) { return acc + v.capacity() * sizeof(size_t); });
+
+  // cow_ptr'd per-component arrays (positions/rotations are scan-multiplied)
+  if (m_positions)
+    mem += sizeof(*m_positions) + m_positions->size() * sizeof(Eigen::Vector3d);
+  if (m_rotations)
+    mem += sizeof(*m_rotations) + m_rotations->size() * sizeof(Eigen::Quaterniond);
+  if (m_scaleFactors)
+    mem += sizeof(*m_scaleFactors) + m_scaleFactors->size() * sizeof(Eigen::Vector3d);
+  if (m_componentType)
+    mem += sizeof(*m_componentType) + m_componentType->size() * sizeof(ComponentType);
+
+  // m_names: string objects in the vector buffer + any heap-spilled content
+  if (m_names) {
+    mem += sizeof(*m_names) + m_names->size() * sizeof(std::string);
+    mem += std::accumulate(m_names->cbegin(), m_names->cend(), size_t{0},
+                           [](size_t acc, const auto &str) { return acc + str.capacity(); });
+  }
+
+  // m_scanIntervals: inline vector's heap buffer
+  mem += m_scanIntervals.capacity() * sizeof(std::pair<int64_t, int64_t>);
+
+  // Scanning index structures (null for non-scanning instruments)
+  if (m_indexMap)
+    mem += sizeof(*m_indexMap) + m_indexMap->size() * sizeof(std::vector<size_t>);
+  if (m_indices)
+    mem += sizeof(*m_indices) + m_indices->size() * sizeof(std::pair<size_t, size_t>);
+
+  return mem;
+}
+
 } // namespace Mantid::Beamline

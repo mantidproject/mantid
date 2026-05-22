@@ -38,6 +38,7 @@ public:
   /// Set peak's height
   virtual void setHeight(const double h);
   /// Set peak's radius
+  // cppcheck-suppress virtualCallInConstructor
   virtual void setPeakRadius(const int &r);
 
   //--------------- ThermalNeutron peak function special

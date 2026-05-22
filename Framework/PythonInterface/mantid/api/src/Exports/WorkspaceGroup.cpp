@@ -80,6 +80,7 @@ void removeItem(WorkspaceGroup &self, const std::string &name) {
   self.remove(name);
 }
 
+// cppcheck-suppress constParameterCallback
 PyObject *getItem(WorkspaceGroup &self, const int &index) {
   if (index < 0) {
     if (static_cast<size_t>(-index) > self.size())

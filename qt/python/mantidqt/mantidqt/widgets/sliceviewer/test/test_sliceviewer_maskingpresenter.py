@@ -30,6 +30,17 @@ class SliceViewerMaskingPresenterTest(unittest.TestCase):
             "active_selector": active_selector,
         }
 
+    @patch("mantidqt.widgets.sliceviewer.presenters.masking.MaskingModel")
+    def test_masking_initialization(self, mock_masking_model_fn):
+        presenter = Masking(dataview="dataview", ws_name="ws")
+        self.assertEqual(presenter._selectors, [])
+        self.assertEqual(presenter._active_selector, None)
+        self.assertEqual(presenter._dataview, "dataview")
+        mock_masking_model_fn.assert_called_once_with("ws", False)
+        mock_masking_model_fn.reset_mock()
+        presenter = Masking(dataview="dataview", ws_name="ws", auto_update_mask_file=True)
+        mock_masking_model_fn.assert_called_once_with("ws", True)
+
     @patch("mantidqt.widgets.sliceviewer.presenters.masking.MaskingModel", autospec=True)
     def test_new_selector_no_active_selector(self, mock_masking_model_fn):
         mock_model = mock_masking_model_fn.return_value

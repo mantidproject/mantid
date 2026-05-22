@@ -1,0 +1,1 @@
+- In new Instrument View, flip the projection along the beam axis (from the instrument) instead of the z-axis.

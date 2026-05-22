@@ -55,7 +55,7 @@ namespace {
  * @param numberDetectors
  * @return
  */
-bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
+void makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
                   std::vector<int32_t> &out_detector_index, std::vector<int32_t> &out_detector_count,
                   std::vector<int32_t> &out_detector_list, int &numberSpec, size_t &numberDetectors) {
 
@@ -64,10 +64,6 @@ bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
       std::accumulate(ws_indices.cbegin(), ws_indices.cend(), size_t(0), [&ws](size_t sum, const auto &index) {
         return sum + ws.getSpectrum(static_cast<size_t>(index)).getDetectorIDs().size();
       });
-  if (numberDetectors < 1) {
-    return false;
-  }
-  // Start the detector group
 
   numberSpec = int(ws_indices.size());
   // allocate space for the Nexus Muon format of spectra-detector mapping
@@ -99,7 +95,6 @@ bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
   }
   // Cut the extra entry at the end of detector_index
   out_detector_index.resize(numberSpec);
-  return true;
 }
 
 } // namespace
@@ -566,9 +561,8 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(const MatrixWorkspace &ws, 
   int numberSpec = 0;
   size_t nDetectors = 0;
   /*Make the mappings needed for writing to disk*/
-  const bool mappingsToWrite =
-      makeMappings(ws, wsIndices, detector_index, detector_count, detector_list, numberSpec, nDetectors);
-  if (!mappingsToWrite)
+  makeMappings(ws, wsIndices, detector_index, detector_count, detector_list, numberSpec, nDetectors);
+  if (nDetectors == 0)
     return;
 
   // write data as Nexus sections detector{index,count,list}

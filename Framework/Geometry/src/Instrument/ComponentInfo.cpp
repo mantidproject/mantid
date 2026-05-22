@@ -474,4 +474,24 @@ size_t ComponentInfo::findBankParent(size_t index, const std::string &bankPart) 
   return invalidIndex;
 }
 
+/** Return memory used by the component info, in bytes.
+ * @return bytes used.
+ */
+size_t ComponentInfo::getMemorySize() const {
+  const size_t n = size();
+  // Beamline::ComponentInfo holds all the per-component arrays
+  const size_t beamlineMem = m_componentInfo->getMemorySize();
+  // m_componentIds: shared_ptr<const vector<IComponent*>> — count the heap-allocated vector object + its buffer
+  const size_t componentIdsMem = sizeof(std::vector<Geometry::IComponent *>) + n * sizeof(Geometry::IComponent *);
+  // m_compIDToIndex: shared_ptr<const unordered_map<IComponent const*, size_t>>
+  // Count the heap-allocated map object + each node (key + value + ~2 pointers for bucket/chain overhead)
+  const size_t compIDToIndexMem = sizeof(std::unordered_map<Geometry::IComponent const *, size_t>) +
+                                  n * (sizeof(Geometry::IComponent const *) + sizeof(size_t) + 2 * sizeof(void *));
+  // m_shapes: shared_ptr<vector<shared_ptr<const IObject>>>
+  // IObject shapes are shared; count the vector object + buffer of shared_ptrs, not the shapes themselves
+  const size_t shapesMem =
+      m_shapes ? sizeof(*m_shapes) + m_shapes->capacity() * sizeof(std::shared_ptr<const Geometry::IObject>) : 0;
+  return sizeof(*this) + beamlineMem + componentIdsMem + compIDToIndexMem + shapesMem;
+}
+
 } // namespace Mantid::Geometry

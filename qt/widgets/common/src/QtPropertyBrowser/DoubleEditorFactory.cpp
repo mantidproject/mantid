@@ -22,7 +22,7 @@ DoubleEditor::DoubleEditor(QtProperty *property, QWidget *parent) : QLineEdit(pa
 
   m_decimals = mgr->decimals(property);
   setValidator(new QDoubleValidator(mgr->minimum(property), mgr->maximum(property), 20, this));
-  connect(this, SIGNAL(editingFinished()), this, SLOT(updateProperty()));
+  connect(this, &QLineEdit::editingFinished, this, &DoubleEditor::updateProperty);
   setValue(mgr->value(property));
 }
 

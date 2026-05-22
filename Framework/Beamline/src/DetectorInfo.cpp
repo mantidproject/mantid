@@ -226,4 +226,23 @@ void DetectorInfo::checkSizes(const DetectorInfo &other) const {
   // TODO If we make masking time-independent we need to check masking here.
 }
 
+/** Return memory used by the detector info, in bytes.
+ * @return bytes used.
+ */
+size_t DetectorInfo::getMemorySize() const {
+  const size_t n = size();
+  // Each cow_ptr holds a separately heap-allocated vector. Add sizeof(vector) + buffer.
+  // vector<bool> is bit-packed: ceil(n/8) bytes of data.
+  size_t mem = sizeof(*this);
+  if (m_isMonitor)
+    mem += sizeof(*m_isMonitor) + (n + 7) / 8;
+  if (m_isMasked)
+    mem += sizeof(*m_isMasked) + (n + 7) / 8;
+  if (m_positions)
+    mem += sizeof(*m_positions) + m_positions->size() * sizeof(Eigen::Vector3d);
+  if (m_rotations)
+    mem += sizeof(*m_rotations) + m_rotations->size() * sizeof(Eigen::Quaterniond);
+  return mem;
+}
+
 } // namespace Mantid::Beamline

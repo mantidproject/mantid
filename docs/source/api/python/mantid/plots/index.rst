@@ -306,7 +306,7 @@ Functions to use when **mantid3d** projection is not available
 Helper functions
 ----------------
 .. automodule:: mantid.plots.datafunctions
-   :members: get_distribution, get_normalization,
+   :members: get_distribution, get_md_normalization,
              points_from_boundaries, boundaries_from_points,
              get_wksp_index_dist_and_label, get_md_data, get_md_data1d,
              get_md_data2d_bin_bounds, get_md_data2d_bin_centers,

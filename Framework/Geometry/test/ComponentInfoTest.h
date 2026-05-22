@@ -636,4 +636,37 @@ public:
     TS_ASSERT(!componentInfo->hasDetectors(componentInfo->source()));
     TS_ASSERT(componentInfo->hasDetectors(componentInfo->indexOfAny("bank1")));
   }
+
+  void test_getMemorySize_nonzero() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+    const auto &detectorInfo = std::get<1>(wrappers);
+    TS_ASSERT_LESS_THAN(size_t{0}, componentInfo->getMemorySize());
+    TS_ASSERT_LESS_THAN(size_t{0}, detectorInfo->getMemorySize());
+  }
+
+  void test_getMemorySize_scales_with_instrument_size() {
+    auto instr1 = ComponentCreationHelper::createTestInstrumentCylindrical(2);
+    auto instr2 = ComponentCreationHelper::createTestInstrumentCylindrical(4);
+    auto instr3 = ComponentCreationHelper::createTestInstrumentCylindrical(6);
+    auto wrappers1 = InstrumentVisitor::makeWrappers(*instr1);
+    auto wrappers2 = InstrumentVisitor::makeWrappers(*instr2);
+    auto wrappers3 = InstrumentVisitor::makeWrappers(*instr3);
+    TS_ASSERT_LESS_THAN(std::get<0>(wrappers1)->getMemorySize(), std::get<0>(wrappers2)->getMemorySize());
+    TS_ASSERT_LESS_THAN(std::get<0>(wrappers2)->getMemorySize(), std::get<0>(wrappers3)->getMemorySize());
+    TS_ASSERT_LESS_THAN(std::get<1>(wrappers1)->getMemorySize(), std::get<1>(wrappers2)->getMemorySize());
+    TS_ASSERT_LESS_THAN(std::get<1>(wrappers2)->getMemorySize(), std::get<1>(wrappers3)->getMemorySize());
+
+    // check that increase in memory size is linear with number of components/detectors
+    auto memSize1 = std::get<0>(wrappers1)->getMemorySize();
+    auto memSize2 = std::get<0>(wrappers2)->getMemorySize();
+    auto memSize3 = std::get<0>(wrappers3)->getMemorySize();
+    // 4 - 2 == 6 - 4
+    TS_ASSERT_EQUALS(memSize2 - memSize1, memSize3 - memSize2);
+    auto detMemSize1 = std::get<1>(wrappers1)->getMemorySize();
+    auto detMemSize2 = std::get<1>(wrappers2)->getMemorySize();
+    auto detMemSize3 = std::get<1>(wrappers3)->getMemorySize();
+    TS_ASSERT_EQUALS(detMemSize2 - detMemSize1, detMemSize3 - detMemSize2);
+  }
 };

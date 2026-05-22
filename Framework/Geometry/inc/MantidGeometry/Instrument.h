@@ -222,6 +222,12 @@ public:
   makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeBeamlineNew(ParameterMap &pmap) const;
 
+  /// Get the footprint in memory in bytes.
+  size_t getMemorySize() const;
+
+  /// Get the footprint in memory in bytes.
+  size_t getMemorySize() const;
+
   friend InstrumentVisitor;
 
 private:

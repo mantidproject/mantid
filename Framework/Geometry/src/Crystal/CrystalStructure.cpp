@@ -41,9 +41,6 @@ CrystalStructure::CrystalStructure(const std::string &unitCellString, const std:
   setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup(spaceGroupString));
 }
 
-/// Returns the unit cell of the structure
-UnitCell CrystalStructure::cell() const { return m_cell; }
-
 /// Assigns a new unit cell
 void CrystalStructure::setCell(const UnitCell &cell) {
   m_cell = cell;

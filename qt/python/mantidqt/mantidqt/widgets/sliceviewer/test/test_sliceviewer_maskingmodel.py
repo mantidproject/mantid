@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from unittest.mock import patch, Mock, call
+from unittest.mock import patch, Mock, call, MagicMock
 from collections import namedtuple
 from functools import partial
 
@@ -31,6 +31,24 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
     @staticmethod
     def _set_up_model_test(text, transpose=False, images=None):
         pass
+
+    def test_masking_model_initialization(self):
+        model = MaskingModel("")
+        self.assertEqual(model._active_mask, None)
+        self.assertEqual(model._masks, [])
+        self.assertEqual(model._ws_name, "ws")
+        self.assertEqual(model._apply_inverted_mask, False)
+        self.assertEqual(model._auto_update_mask_file, False)
+        model = MaskingModel("", auto_update_mask_file=True)
+        self.assertEqual(model._auto_update_mask_file, True)
+
+    def test_update_active_mask(self):
+        self.model._auto_update_mask_file = True
+        export_selectors = MagicMock()
+        self.model.export_selectors = export_selectors
+        self.model.update_active_mask("test_mask")
+        self.assertEqual(self.model._active_mask, "test_mask")
+        self.model.export_selectors.assert_called_once()
 
     def test_clear_active_mask(self):
         self.model._active_mask = "test"
@@ -109,10 +127,18 @@ class SliceViewerMaskingModelTest(unittest.TestCase):
         create_tbl_mock.assert_called_once_with(["consolidated"], False)
 
     def test_invert_masking_clicked(self):
+        self.model._auto_update_mask_file = True
+        self.model._active_mask = "test_mask"
+        export_selectors = MagicMock()
+        self.model.export_selectors = export_selectors
+
         self.model.invert_masking_clicked(True)
         self.assertTrue(self.model._apply_inverted_mask)
+        self.model.export_selectors.assert_called_once()
+        self.model.export_selectors.reset_mock()
         self.model.invert_masking_clicked(False)
         self.assertFalse(self.model._apply_inverted_mask)
+        self.model.export_selectors.assert_called_once()
 
     def test_export_selectors(self):
         with (
