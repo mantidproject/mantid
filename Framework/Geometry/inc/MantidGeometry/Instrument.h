@@ -225,9 +225,6 @@ public:
   /// Get the footprint in memory in bytes.
   size_t getMemorySize() const;
 
-  /// Get the footprint in memory in bytes.
-  size_t getMemorySize() const;
-
   friend InstrumentVisitor;
 
 private:
