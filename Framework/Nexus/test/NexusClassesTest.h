@@ -122,4 +122,16 @@ public:
     std::string absAddr = "/data_scan/scanned_variables/data";
     TS_ASSERT_THROWS_NOTHING(firstEntry.openNXData(absAddr));
   }
+
+  void test_scalar_dataset() {
+    std::cout << "test scalar dataset\n" << std::flush;
+    // this ensures scalar datasets can be read, and that their rank is correctly reported as 0, not 1
+    std::string filename = NexusTest::getFullPath("PLN0136193.nxs");
+    Mantid::Nexus::NXRoot root(filename);
+    auto entry = root.openEntry("entry1");
+    std::string radiusPath = "instrument/detector/radius";
+    auto radius = entry.openNXDouble(radiusPath);
+    TS_ASSERT_EQUALS(radius.rank(), 0);
+    TS_ASSERT_DELTA(entry.getDouble(radiusPath), 2400.0, 0.1);
+  }
 };
