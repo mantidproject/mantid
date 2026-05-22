@@ -777,7 +777,6 @@ private:
   std::string m_savePath;
   // file format options for ascii saver
   NamedFormat m_fileFormat;
-  ORSOMetaSource m_metaSource;
   std::string m_prefix;
   bool m_includeHeader;
   std::string m_separator;
@@ -785,4 +784,5 @@ private:
   bool m_includeAdditionalColumns;
   std::string m_model;
   bool m_validation;
+  ORSOMetaSource m_metaSource;
 };
