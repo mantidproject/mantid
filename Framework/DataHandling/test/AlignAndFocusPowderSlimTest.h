@@ -1221,11 +1221,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILENAME, VULCAN_218062));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(OUTPUT_WKSP, "unused"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(GROUP_FILE, groupingFilename));
-    // bank-grouping workspace has 6 groups
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L1, 43.755));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L2, std::vector<double>{2.296, 2.296, 2.070, 2.070, 2.070, 2.530}));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(POLARS, std::vector<double>{90.0, 90.0, 120.0, 150.0, 157.0, 65.5}));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(AZIMUTHALS, std::vector<double>{180.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
+    // bank-grouping workspace has 6 groups; use the same focus geometry defaults used
+    // throughout this test suite for VULCAN.
+    const TestConfig defaults;
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L1, defaults.l1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L2, defaults.l2s));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(POLARS, defaults.twoTheta));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(AZIMUTHALS, defaults.phi));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
