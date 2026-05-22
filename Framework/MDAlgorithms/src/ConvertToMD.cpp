@@ -115,11 +115,6 @@ void ConvertToMD::init() {
                   "[Default, Indexed], indexed is the experimental type that "
                   "can speedup the conversion process"
                   "for the big files using the indexing.");
-
-  declareProperty("UseLogTimes", false,
-                  "If true, and the input workspace is an EventWorkspace, this flag will use the value of "
-                  "logs used to define the sample rotation (Goniometer) and OtherDimensions "
-                  "at the pulse times of the events rather than their average values.");
 }
 //----------------------------------------------------------------------------------------------
 
@@ -135,6 +130,7 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
   std::vector<int> split_into = this->getProperty("SplitInto");
   const std::string filename = this->getProperty("Filename");
   const bool fileBackEnd = this->getProperty("FileBackEnd");
+  const bool useLogTimes = this->getProperty("UseLogTimes");
 
   if (fileBackEnd && filename.empty()) {
     result["Filename"] = "Filename must be given if FileBackEnd is required.";
@@ -180,6 +176,14 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
     if (!msg.str().empty()) {
       result["MinValues"] = msg.str();
       result["MaxValues"] = msg.str();
+    }
+  }
+
+  if (useLogTimes) {
+    API::MatrixWorkspace_const_sptr inWS = this->getProperty("InputWorkspace");
+    const auto evWs = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inWS);
+    if (!bool(evWs)) {
+      result["UseLogTimes"] = "UseLogTimes requires an input EventWorkspace.";
     }
   }
 

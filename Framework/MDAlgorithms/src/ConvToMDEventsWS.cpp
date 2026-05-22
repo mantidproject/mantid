@@ -57,14 +57,7 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
     double val = localUnitConv.convertUnits(it->tof());
     double signal = it->weight();
     double errorSq = it->errorSquared();
-    if (m_useLogTimes) {
-      for (size_t axIdx = 0; ii < m_GonioIndex.size(); axIdx++) {
-        m_Goniometer.setRotationAngle(m_GonioIndex[ii], m_Logs[ii]->getSingleValue(it->pulseTime()));
-      }
-      rotmat = m_Goniometer.getR() * m_Wtransf;
-      rotmat.Invert();
-      m_QConverter->updateRotMat(rotmat.getVector());
-    }
+    m_useLogTimes &&setGoniometersFromLogs(it);
     if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
       continue; // skip ND outside the range
 
@@ -80,6 +73,17 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   size_t n_added_events = expInfoIndex.size();
   m_OutWSWrapper->addMDData(sig_err, expInfoIndex, goniometer_index, det_ids, allCoord, n_added_events);
   return n_added_events;
+}
+
+/* Private method to update rotation matrix for a single event from log values */
+template <class T> int ConvToMDEventsWS::setGoniometersFromLogs(T &ev) {
+  for (size_t axIdx = 0; axIdx < m_GonioIndex.size(); axIdx++) {
+    m_Goniometer.setRotationAngle(m_GonioIndex[axIdx], m_Logs[axIdx]->getSingleValue(ev->pulseTime()));
+  }
+  Mantid::Kernel::DblMatrix rotmat = m_Goniometer.getR() * m_Wtransf;
+  rotmat.Invert();
+  m_QConverter->updateRotMat(rotmat.getVector());
+  return 1;
 }
 
 /** The method runs conversion for a single event list, corresponding to a

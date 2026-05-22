@@ -205,7 +205,7 @@ public:
   /**
    * Updates the internal rotation matrix for classes which support this
    */
-  virtual void updateRotMat(std::vector<double> newMat) { UNUSED_ARG(newMat); }
+  virtual void updateRotMat(const std::vector<double> &newMat) { UNUSED_ARG(newMat); }
 };
 
 using MDTransf_sptr = std::shared_ptr<MDTransfInterface>;

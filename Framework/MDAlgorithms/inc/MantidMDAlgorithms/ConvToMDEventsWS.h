@@ -57,6 +57,8 @@ private:
   Geometry::Goniometer m_Goniometer;
   std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<double>>> m_Logs;
   std::vector<size_t> m_GonioIndex;
+  // Private functions to update values from logs
+  template <class T> int setGoniometersFromLogs(T &ev);
 };
 
 } // namespace MDAlgorithms
