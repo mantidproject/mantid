@@ -11,7 +11,7 @@ import numpy
 
 from mantid.plots.datafunctions import (
     get_axes_labels,
-    get_normalization,
+    get_md_normalization,
     get_distribution,
     get_md_data2d_bin_centers,
     get_matrix_2d_data,
@@ -20,6 +20,7 @@ from mantid.plots.datafunctions import (
     get_spectrum,
     get_indices,
 )
+from mantid.plots.utility import PlotNormalizationType
 import mantid.dataobjects
 
 
@@ -27,7 +28,7 @@ def _set_labels_3d(axes, workspace, indices=None):
     """
     Helper function to automatically set axis labels for 3D plots
     """
-    labels = get_axes_labels(workspace, indices, normalize_by_bin_width=False)
+    labels = get_axes_labels(workspace, indices, PlotNormalizationType.NONE)
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[2])
     axes.set_zlabel(labels[0])
@@ -35,7 +36,7 @@ def _set_labels_3d(axes, workspace, indices=None):
 
 def _extract_3d_data(workspace, **kwargs):
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        normalization, kwargs = get_normalization(workspace, **kwargs)
+        normalization, kwargs = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         x_temp, y_temp, z = get_md_data2d_bin_centers(workspace, normalization, indices)
         x, y = numpy.meshgrid(x_temp, y_temp)
@@ -65,12 +66,13 @@ def plot(axes, workspace, *args, **kwargs):
                        the dimension selected for the other 2 axes.
     """
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (normalization, kwargs) = get_md_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         (x, y, z) = get_md_data1d(workspace, normalization, indices)
     else:
         (wksp_index, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
-        (x, z, _, _) = get_spectrum(workspace, wksp_index, distribution, withDy=False, withDx=False)
+        normalization = PlotNormalizationType.BIN_WIDTH if distribution else PlotNormalizationType.NONE
+        (x, z, _, _) = get_spectrum(workspace, wksp_index, normalization, withDy=False, withDx=False)
         y_val = workspace.getAxis(1).extractValues()[wksp_index]
         y = [y_val for _ in range(len(x))]  # fill x size array with y value
         _set_labels_3d(axes, workspace)

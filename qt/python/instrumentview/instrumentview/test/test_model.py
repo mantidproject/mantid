@@ -101,6 +101,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.readX.return_value = np.arange(len(detector_ids))
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100 * i for i in detector_ids]
         mock_workspace.clone.return_value = mock_workspace
+        mock_workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = [0, 0, 1]
         return mock_workspace
 
     def _setup_model(
@@ -146,6 +147,24 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_equal(mock_args[4], [2, 2, 2])
         self.assertEqual(mock_args[5], "Full_2")
         self.assertEqual(mock_args[6], 30000)
+
+    def test_picked_detectors_info_text_exceeds_max_returns_empty(self):
+        model, mock_workspace = self._setup_model([1, 20, 300, 4000])
+        model._detector_is_picked = np.array([True, True, True, True])
+        result = model.picked_detectors_info_text()
+        self.assertEqual(result, [])
+        mock_workspace.getDetector.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.DetectorInfo")
+    def test_picked_detectors_info_text_at_max_returns_all(self, det_info_mock):
+        model, mock_workspace = self._setup_model([1, 20, 300])
+        mock_workspace.getDetector.side_effect = lambda i: MagicMock(
+            getName=mock.Mock(return_value=str(i)), getFullName=mock.Mock(return_value=f"Full_{i}")
+        )
+        model._detector_is_picked = np.array([True, True, True])
+        result = model.picked_detectors_info_text()
+        self.assertEqual(det_info_mock.call_count, 3)
+        self.assertEqual(len(result), 3)
 
     def test_negate_picked_visibility(self):
         model, _ = self._setup_model([1, 2, 3])
@@ -266,15 +285,15 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertTrue(all(all(point == [1, 2, 0]) for point in points))
 
     @mock.patch("instrumentview.FullInstrumentViewModel.Projection")
-    def test_flip_z_negates_z_in_projection(self, mock_projection_cls):
-        """When flip_z is True, detector positions passed to projection should have negated Z coordinates"""
+    def test_flip_beam_negates_z_in_projection(self, mock_projection_cls):
+        """When flip_beam is True, detector positions passed to projection should have negated Z coordinates"""
         model, _ = self._setup_model([1, 2, 3])
         mock_projection = MagicMock()
         mock_projection.positions.return_value = [[1, 2], [1, 2], [1, 2]]
         mock_projection_cls.return_value = mock_projection
         original_positions = model._detector_positions_3d.copy()
         model._projection_type = ProjectionType.CYLINDRICAL_Y
-        model.flip_z = True
+        model.flip_beam = True
         model._calculate_projection()
         call_args = mock_projection_cls.call_args
         passed_positions = call_args.kwargs["detector_positions"]
@@ -283,40 +302,40 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_array_equal(passed_positions, expected_positions)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.Projection")
-    def test_flip_z_false_passes_original_positions(self, mock_projection_cls):
-        """When flip_z is False, detector positions passed to projection should be unchanged"""
+    def test_flip_beam_false_passes_original_positions(self, mock_projection_cls):
+        """When flip_beam is False, detector positions passed to projection should be unchanged"""
         model, _ = self._setup_model([1, 2, 3])
         mock_projection = MagicMock()
         mock_projection.positions.return_value = [[1, 2], [1, 2], [1, 2]]
         mock_projection_cls.return_value = mock_projection
         original_positions = model._detector_positions_3d.copy()
         model._projection_type = ProjectionType.CYLINDRICAL_Y
-        model.flip_z = False
+        model.flip_beam = False
         model._calculate_projection()
         call_args = mock_projection_cls.call_args
         passed_positions = call_args.kwargs["detector_positions"]
         np.testing.assert_array_equal(passed_positions, original_positions)
 
-    def test_flip_z_same_value_preserves_cache(self):
-        """Setting flip_z to its current value should not clear the cache"""
+    def test_flip_beam_same_value_preserves_cache(self):
+        """Setting flip_beam to its current value should not clear the cache"""
         model, _ = self._setup_model([1, 2, 3])
-        original_flip_z = model.flip_z
+        original_flip_beam = model.flip_beam
         model._cached_projection_objects["dummy_key"] = "cached_value"
-        model.flip_z = original_flip_z
+        model.flip_beam = original_flip_beam
         self.assertEqual(len(model._cached_projection_objects), 1)
 
     @mock.patch("instrumentview.FullInstrumentViewModel.Projection")
-    def test_flip_z_uses_separate_cache_keys(self, mock_projection_cls):
+    def test_flip_beam_uses_separate_cache_keys(self, mock_projection_cls):
         """Flipped and non-flipped projections should use different cache keys"""
         model, _ = self._setup_model([1, 2, 3])
         mock_projection = MagicMock()
         mock_projection.positions.return_value = [[1, 2], [1, 2], [1, 2]]
         mock_projection_cls.return_value = mock_projection
         model._projection_type = ProjectionType.CYLINDRICAL_Y
-        model.flip_z = False
+        model.flip_beam = False
         model._calculate_projection()
         self.assertEqual(mock_projection_cls.call_count, 1)
-        model.flip_z = True
+        model.flip_beam = True
         model._calculate_projection()
         self.assertEqual(mock_projection_cls.call_count, 2)
 

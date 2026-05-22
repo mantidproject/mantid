@@ -51,7 +51,7 @@ public:
   BackgroundSubtraction const &backgroundSubtraction() const;
   PolarizationCorrections const &polarizationCorrections() const;
   FloodCorrections const &floodCorrections() const;
-  TransmissionStitchOptions transmissionStitchOptions() const;
+  TransmissionStitchOptions const &transmissionStitchOptions() const;
   const std::map<std::string, std::string> &stitchParameters() const;
   std::string stitchParametersString() const;
   std::vector<LookupRow> const &lookupTableRows() const;

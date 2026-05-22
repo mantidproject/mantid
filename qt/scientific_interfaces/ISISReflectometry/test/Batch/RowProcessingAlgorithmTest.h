@@ -10,6 +10,7 @@
 #include "../../../ISISReflectometry/Reduction/Batch.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -309,7 +310,8 @@ private:
   public:
     StubbedReduction() {
       this->setChild(true);
-      auto prop = std::make_unique<Mantid::API::WorkspaceProperty<>>(m_propName, "", Mantid::Kernel::Direction::Output);
+      auto prop = std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
+          m_propName, "", Mantid::Kernel::Direction::Output);
       declareProperty(std::move(prop));
     }
 

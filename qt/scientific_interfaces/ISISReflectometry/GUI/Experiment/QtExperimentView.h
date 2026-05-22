@@ -27,10 +27,10 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtExperimentView : public QWidget, public I
 public:
   QtExperimentView(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips, QWidget *parent = nullptr);
   void subscribe(ExperimentViewSubscriber *notifyee) override;
-  void connectExperimentSettingsWidgets() override;
+  void connectExperimentSettingsWidgets() override final;
   void disconnectExperimentSettingsWidgets() override;
 
-  void createStitchHints(const std::vector<MantidWidgets::Hint> &hints) override;
+  void createStitchHints(const std::vector<MantidWidgets::Hint> &hints) override final;
 
   std::string getAnalysisMode() const override;
   void setAnalysisMode(std::string const &analysisMode) override;

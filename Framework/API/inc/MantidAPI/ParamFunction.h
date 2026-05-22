@@ -33,7 +33,7 @@ class Jacobian;
 class MANTID_API_DLL ParamFunction : public virtual IFunction {
 public:
   /// Default constructor
-  ParamFunction() {}
+  ParamFunction() : IFunction() {}
 
   /// Set i-th parameter
   void setParameter(size_t, const double &value, bool explicitlySet = true) override;

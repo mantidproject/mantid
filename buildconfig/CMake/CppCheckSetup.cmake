@@ -11,6 +11,18 @@ if(CPPCHECK_EXECUTABLE)
     "${CPPCHECK_BUILD_DIR}/CppCheck_Suppressions.txt"
   )
 
+  # Cppcheck bundled in conda/pixi environments is compiled with a hardcoded DATADIR that typically does not match the
+  # actual installation prefix, so --library=qt may fail to load qt.cfg. Resolve the full path to qt.cfg from the binary
+  # location and pass it directly to --library so cppcheck can find it regardless of DATADIR.
+  get_filename_component(_cppcheck_bin_dir "${CPPCHECK_EXECUTABLE}" DIRECTORY)
+  set(_cppcheck_qt_cfg "${_cppcheck_bin_dir}/../share/Cppcheck/cfg/qt.cfg")
+  get_filename_component(_cppcheck_qt_cfg "${_cppcheck_qt_cfg}" ABSOLUTE)
+  if(EXISTS "${_cppcheck_qt_cfg}")
+    set(_cppcheck_qt_library "${_cppcheck_qt_cfg}")
+  else()
+    set(_cppcheck_qt_library "qt")
+  endif()
+
   # Set up the standard arguments --inline-suppr appears to be ignored if --suppressions-list is specified. Cppcheck >=
   # 2.10 requires all "file" entries within a compile_commands.json to exist whereas previously only a warning was
   # emitted if an entry didn't exist. Files such as qrc_*, moc_* files from Qt are listed but don't exist as they are
@@ -20,8 +32,9 @@ if(CPPCHECK_EXECUTABLE)
       # 2.12 has missingInclude switched on by default if running with multiple cores but it doesn't appear to work
       # correctly. It was flagging many stl and other external header files as missing.
       --disable=missingInclude
-      # Adding qt here helps with mis-identifying Qt macros as unknownMacro defects.
-      --library=qt
+      # Loading qt.cfg via full path suppresses Qt macro warnings (slots, signals, Q_OBJECT etc.) even when cppcheck is
+      # installed via conda/pixi with a non-standard DATADIR. Falls back to --library=qt if the file is not found.
+      --library=${_cppcheck_qt_library}
       --check-level=exhaustive
       --inline-suppr
       --max-configs=120

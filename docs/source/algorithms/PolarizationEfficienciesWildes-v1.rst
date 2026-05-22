@@ -44,8 +44,49 @@ From which you can solve for the polarizer efficiency (:math:`p`) and then solve
 Alternatively, previously calculated polarizer and/or analyser efficiency workspaces can be passed to the ``InputPolarizerEfficiency`` and ``InputAnalyserEfficiency`` properties respectively.
 If workspaces are provided for both then they are used directly as the output polarizer and analyser efficiencies. If only one is provided then it is used to solve for the other efficiency.
 
-Both types of input workspace group should contain four child workspaces. A flipper configuration must be passed to the ``Flippers`` property to identify which child workspaces in the input group(s) correspond to which instrument configurations.
-The ``Flippers`` property takes a string in the form :literal:`'00, 01, 10, 11'`, which would indicate both flippers off, analyzer flipper on, polarizer flipper on, both flippers on. The flipper configuration can be provided in any order that matches the child workspaces in the input group(s).
+A flipper configuration must be passed to the ``Flippers`` property to identify which child workspaces in the input group(s) correspond to which instrument configuration. Each input workspace group should therefore contain an appropriate number of child workspaces, corresponding to the number relevant instrument configurations.
+The ``Flippers`` property takes a string in a form such as :literal:`'00, 01, 10, 11'` (Polarization Analysis (PA)), or :literal:`'0, 1'` Polarized Neutron Reflectivity (PNR). For PA, :literal:`'00, 01, 10, 11'` indicates: flippers off, analyzer flipper on, polarizer flipper on, both flippers on. The flipper configuration can be provided in any order that matches the child workspaces in the input group(s).
+
+
+Error propagation
+#################
+
+Errors are propagated with a first-order Taylor expansion. For independent input quantities this is equivalent to:
+
+.. math::
+
+   \sigma_f^2 = \sum_i \left(\frac{\partial f}{\partial x_i}\right)^2 \sigma_i^2
+
+When only one of ``InputPolarizerEfficiency`` or ``InputAnalyserEfficiency`` is provided, the missing efficiency is solved from :math:`\phi = (2p-1)(2a-1)`.
+The provided efficiency may itself have been derived from the same non-magnetic transmission workspaces that are used to calculate :math:`\phi`.
+In this case the inputs are correlated, so the algorithm uses the covariance form of first-order error propagation:
+
+.. math::
+
+   \sigma_f^2 = J C J^T
+
+where :math:`J` is the vector of partial derivatives of the calculated output with respect to the apparent inputs and :math:`C` is their covariance matrix for a single wavelength bin.
+For example, when calculating :math:`p` from a provided analyser efficiency :math:`a`, the apparent input vector is:
+
+.. math::
+
+   x = [I^{00}_{1}, I^{01}_{1}, I^{10}_{1}, I^{11}_{1}, a]
+
+The diagonal terms of :math:`C` contain the variances of these quantities. The off-diagonal terms account for the shared dependence of :math:`a` and :math:`\phi` on the non-magnetic intensities:
+
+.. math::
+
+   \mathrm{Cov}(I_i, a) \simeq \frac{\partial a}{\partial I_i}\sigma_{I_i}^2
+
+with:
+
+.. math::
+
+   \frac{\partial a}{\partial I_i} = \frac{a - 0.5}{\phi}\frac{\partial \phi}{\partial I_i}
+
+The same approach is used when calculating :math:`a` from a provided polarizer efficiency :math:`p`.
+The covariance matrix is calculated independently for each wavelength bin and is not stored on the output workspace.
+
 
 Outputs
 #######

@@ -52,8 +52,8 @@ int byte_rel_comp(const int *data_in, int n_in, char *data_out, int max_out, int
     // Trap out ridiculously large numbers. They could cause problems in
     // subtraction,
     // so force them to be stored absolutely
-    if ((data_in[i] > LARGE_NUMBER) || (data_in[i] < -LARGE_NUMBER) || (icurrent > LARGE_NUMBER) ||
-        (icurrent < -LARGE_NUMBER)) {
+    if ((data_in[i] > LARGE_NUMBER) || (data_in[i] < -LARGE_NUMBER + 1) || (icurrent > LARGE_NUMBER) ||
+        (icurrent < -LARGE_NUMBER + 1)) {
       irel = 128; // Force absolute mode
     } else {
       irel = data_in[i] - icurrent; // Calc relative offset

@@ -23,7 +23,7 @@ class EXPORT_OPT_MANTIDQT_COMMON AddWorkspaceDialog : public QDialog, public IAd
 public:
   explicit AddWorkspaceDialog(QWidget *parent);
 
-  std::string workspaceName() const override;
+  std::string workspaceName() const override final;
   FunctionModelSpectra workspaceIndices() const;
 
   void setWSSuffices(const QStringList &suffices) override;

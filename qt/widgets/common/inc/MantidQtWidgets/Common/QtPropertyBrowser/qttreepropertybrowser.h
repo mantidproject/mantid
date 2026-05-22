@@ -150,7 +150,7 @@ public:
 
   void setBackgroundColor(QtBrowserItem *item, const QColor &color);
   QColor backgroundColor(QtBrowserItem *item) const;
-  QColor calculatedBackgroundColor(QtBrowserItem *item) const;
+  QColor calculatedBackgroundColor(const QtBrowserItem *item) const;
 
   void setPropertiesWithoutValueMarked(bool mark);
   bool propertiesWithoutValueMarked() const;
@@ -184,7 +184,7 @@ private:
 
   Q_PRIVATE_SLOT(d_func(), void slotCollapsed(const QModelIndex &))
   Q_PRIVATE_SLOT(d_func(), void slotExpanded(const QModelIndex &))
-  Q_PRIVATE_SLOT(d_func(), void slotCurrentBrowserItemChanged(QtBrowserItem *))
+  Q_PRIVATE_SLOT(d_func(), void slotCurrentBrowserItemChanged(const QtBrowserItem *))
   Q_PRIVATE_SLOT(d_func(), void slotCurrentTreeItemChanged(QTreeWidgetItem *, QTreeWidgetItem *))
 };
 
@@ -249,9 +249,9 @@ public:
   QtTreePropertyBrowserPrivate();
   void init(QWidget *parent, const QStringList &options, bool darkTopLevel);
 
-  void propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex);
-  void propertyRemoved(QtBrowserItem *index);
-  void propertyChanged(QtBrowserItem *index);
+  void propertyInserted(QtBrowserItem *index, const QtBrowserItem *afterIndex);
+  void propertyRemoved(const QtBrowserItem *index);
+  void propertyChanged(const QtBrowserItem *index);
   QWidget *createEditor(QtProperty *property, QWidget *parent) const { return q_ptr->createEditor(property, parent); }
   QtProperty *indexToProperty(const QModelIndex &index) const;
   QTreeWidgetItem *indexToItem(const QModelIndex &index) const;
@@ -259,26 +259,26 @@ public:
   bool lastColumn(int column) const;
   void disableItem(QTreeWidgetItem *item) const;
   void enableItem(QTreeWidgetItem *item) const;
-  bool hasValue(QTreeWidgetItem *item) const;
+  bool hasValue(const QTreeWidgetItem *item) const;
   void hideColumn(int col);
   void showColumn(int col);
 
   void slotCollapsed(const QModelIndex &index);
   void slotExpanded(const QModelIndex &index);
 
-  QColor calculatedBackgroundColor(QtBrowserItem *item) const;
+  QColor calculatedBackgroundColor(const QtBrowserItem *item) const;
 
   QtPropertyEditorView *treeWidget() const { return m_treeWidget; }
   bool markPropertiesWithoutValue() const { return m_markPropertiesWithoutValue; }
 
   QtBrowserItem *currentItem() const;
-  void setCurrentItem(QtBrowserItem *browserItem, bool block);
-  void editItem(QtBrowserItem *browserItem);
-  QTreeWidgetItem *getItemWidget(QtBrowserItem *browserItem);
-  void disableItem(QtBrowserItem *item);
+  void setCurrentItem(const QtBrowserItem *browserItem, bool block);
+  void editItem(const QtBrowserItem *browserItem);
+  QTreeWidgetItem *getItemWidget(const QtBrowserItem *browserItem);
+  void disableItem(const QtBrowserItem *item);
 
-  void slotCurrentBrowserItemChanged(QtBrowserItem *item);
-  void slotCurrentTreeItemChanged(QTreeWidgetItem *newItem, QTreeWidgetItem * /*unused*/);
+  void slotCurrentBrowserItemChanged(const QtBrowserItem *item);
+  void slotCurrentTreeItemChanged(const QTreeWidgetItem *newItem, QTreeWidgetItem * /*unused*/);
 
   QTreeWidgetItem *editedItem() const;
   void closeEditor();
@@ -290,10 +290,10 @@ public:
 private:
   void updateItem(QTreeWidgetItem *item);
 
-  QMap<QtBrowserItem *, QTreeWidgetItem *> m_indexToItem;
-  QMap<QTreeWidgetItem *, QtBrowserItem *> m_itemToIndex;
+  QMap<const QtBrowserItem *, QTreeWidgetItem *> m_indexToItem;
+  QMap<const QTreeWidgetItem *, QtBrowserItem *> m_itemToIndex;
 
-  QMap<QtBrowserItem *, QColor> m_indexToBackgroundColor;
+  QMap<const QtBrowserItem *, QColor> m_indexToBackgroundColor;
 
   QtPropertyEditorView *m_treeWidget;
 

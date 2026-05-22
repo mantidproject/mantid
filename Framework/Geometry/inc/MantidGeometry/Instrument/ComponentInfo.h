@@ -82,6 +82,7 @@ public:
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   const std::vector<size_t> &children(size_t componentIndex) const;
   size_t size() const;
+  size_t getMemorySize() const;
   QuadrilateralComponent quadrilateralComponent(const size_t componentIndex) const;
   size_t indexOf(Geometry::IComponent const *id) const;
   size_t indexOfAny(const std::string &name) const;

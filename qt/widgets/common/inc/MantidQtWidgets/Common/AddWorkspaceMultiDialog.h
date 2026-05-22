@@ -45,7 +45,7 @@ signals:
   void addData(MantidWidgets::IAddWorkspaceDialog *dialog);
 
 private slots:
-  void updateSelectedSpectra() override;
+  void updateSelectedSpectra() override final;
   void selectAllSpectra();
   void unifyRange();
   void handleFilesFound();

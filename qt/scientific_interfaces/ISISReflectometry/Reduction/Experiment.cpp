@@ -47,7 +47,7 @@ BackgroundSubtraction const &Experiment::backgroundSubtraction() const { return 
 PolarizationCorrections const &Experiment::polarizationCorrections() const { return m_polarizationCorrections; }
 FloodCorrections const &Experiment::floodCorrections() const { return m_floodCorrections; }
 
-TransmissionStitchOptions Experiment::transmissionStitchOptions() const { return m_transmissionStitchOptions; }
+TransmissionStitchOptions const &Experiment::transmissionStitchOptions() const { return m_transmissionStitchOptions; }
 
 const std::map<std::string, std::string> &Experiment::stitchParameters() const { return m_stitchParameters; }
 

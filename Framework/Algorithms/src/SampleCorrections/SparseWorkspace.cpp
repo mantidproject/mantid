@@ -29,6 +29,8 @@ namespace {
  *  @return True, if all EFixed values match, false otherwise.
  */
 bool constantIndirectEFixed(const Mantid::API::ExperimentInfo &info, const std::vector<Mantid::detid_t> &detIDs) {
+  if (detIDs.empty())
+    return true;
   const auto e = info.getEFixed(detIDs[0]);
   return std::all_of(detIDs.cbegin() + 1, detIDs.cend(), [&](const auto &detID) { return e == info.getEFixed(detID); });
 }
@@ -134,6 +136,9 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size
       const auto &specDetIDs = spec.getDetectorIDs();
       if (!modelInstrument->isMonitor(specDetIDs))
         detIDs.insert(detIDs.end(), specDetIDs.begin(), specDetIDs.end());
+    }
+    if (detIDs.empty()) {
+      throw std::runtime_error("Sparse instrument: no non-monitor detectors found for Indirect mode.");
     }
     if (!constantIndirectEFixed(modelWS, detIDs)) {
       throw std::runtime_error("Sparse instrument with variable EFixed not supported.");

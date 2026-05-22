@@ -15,7 +15,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class SaveAlgorithmRunner : public ISaveAlgorithmRunner {
 public:
-  virtual ~SaveAlgorithmRunner() = default;
+  ~SaveAlgorithmRunner() override = default;
 
   void runSaveAsciiAlgorithm(const Mantid::API::Workspace_sptr &workspace, std::string const &savePath,
                              std::string const &extension, std::vector<std::string> const &logParameters,

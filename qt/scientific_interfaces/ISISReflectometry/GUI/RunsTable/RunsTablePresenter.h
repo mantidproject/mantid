@@ -57,7 +57,7 @@ public:
   void notifyDeleteGroupRequested() override;
   void notifyFilterChanged(std::string const &filterValue) override;
   void notifyChangeInstrumentRequested() override;
-  void notifyExpandAllRequested() override;
+  void notifyExpandAllRequested() override final;
   void notifyCollapseAllRequested() override;
   void notifyPlotSelectedPressed() override;
   void notifyPlotSelectedStitchedOutputPressed() override;

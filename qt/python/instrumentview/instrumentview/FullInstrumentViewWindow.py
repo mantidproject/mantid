@@ -126,6 +126,7 @@ class FullInstrumentViewWindow(QMainWindow):
     _detector_spectrum_fig = None
     _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRatio"
     _DRAW_SHAPES_SETTING_STRING = "InstrumentView.DrawShapes"
+    _FLIP_BEAM_SETTING_STRING = "InstrumentView.FlipBeam"
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     def __init__(self, parent=None, off_screen=False):
@@ -191,8 +192,8 @@ class FullInstrumentViewWindow(QMainWindow):
 
         pyvista_vertical_layout.addWidget(vsplitter)
 
-        detector_group_box = QGroupBox("Detector Info")
-        detector_info_layout = QVBoxLayout(detector_group_box)
+        self._detector_group_box = QGroupBox("Detector Info")
+        detector_info_layout = QVBoxLayout(self._detector_group_box)
         self._detector_name_edit = self._add_detector_info_boxes(detector_info_layout, "Name")
         self._detector_id_edit = self._add_detector_info_boxes(detector_info_layout, "Detector ID")
         self._detector_workspace_index_edit = self._add_detector_info_boxes(detector_info_layout, "Workspace Index")
@@ -245,10 +246,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self._show_monitors_check_box.setText("Show Monitors?")
         self._count_scale_combo_box = NoWheelComboBox(self)
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
-        self._flip_z_axis_check_box = QCheckBox()
-        self._flip_z_axis_check_box.setText("Flip Z Axis")
-        self._flip_z_axis_check_box.setToolTip(
-            "If checked, the Z axis will be flipped in 2D projections, mirroring the instrument along the beam axis."
+        self._flip_beam_check_box = QCheckBox()
+        self._flip_beam_check_box.setText("Flip Beam")
+        self._flip_beam_check_box.setChecked(is_config_setting_true(self._FLIP_BEAM_SETTING_STRING))
+        self._flip_beam_check_box.setToolTip(
+            "If checked, 2D projections are mirrored across the plane perpendicular to the beam direction."
         )
         self._select_bank_tube = QPushButton("Select Bank/Tube")
         self._select_bank_tube.setCheckable(True)
@@ -266,7 +268,7 @@ class FullInstrumentViewWindow(QMainWindow):
         projection_second_row.addWidget(self._show_monitors_check_box)
         projection_second_row.addWidget(self._count_scale_combo_box)
         projection_second_row.addWidget(self._show_shapes_check_box)
-        projection_second_row.addWidget(self._flip_z_axis_check_box)
+        projection_second_row.addWidget(self._flip_beam_check_box)
         projection_second_row.addWidget(self._select_bank_tube)
         projection_layout.addLayout(projection_first_row)
         projection_layout.addLayout(projection_second_row)
@@ -357,7 +359,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         options_vertical_widget = QWidget()
         options_vertical_layout = QVBoxLayout(options_vertical_widget)
-        options_vertical_layout.addWidget(detector_group_box)
         options_vertical_layout.addWidget(self._integration_limit_group_box)
         options_vertical_layout.addWidget(self._contour_range_group_box)
         options_vertical_layout.addWidget(projection_group_box)
@@ -378,13 +379,25 @@ class FullInstrumentViewWindow(QMainWindow):
         lineplot_layout.addWidget(self._sum_spectra_checkbox)
 
         options_vertical_layout.addWidget(lineplot_group_box)
-        options_vertical_layout.addWidget(peak_ws_group_box)
-        options_vertical_layout.addWidget(grouping_masking_group_box)
-        options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
+
+        vsplitter = QSplitter(Qt.Vertical)
+        vsplitter.addWidget(peak_ws_group_box)
+        vsplitter.addWidget(grouping_masking_group_box)
+        vsplitter.addWidget(self._detector_group_box)
+        self._detector_group_box.setMaximumHeight(self._detector_group_box.sizeHint().height())
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        vsplitter.addWidget(spacer)
+        vsplitter.setStretchFactor(0, 1)  # peak_ws_group_box stretches
+        vsplitter.setStretchFactor(1, 1)  # grouping_masking_group_box stretches
+        vsplitter.setStretchFactor(2, 0)  # detector_group_box fixed
+        vsplitter.setStretchFactor(3, 1)  # spacer absorbs extra space
+        vsplitter.setChildrenCollapsible(False)
+
+        options_vertical_layout.addWidget(vsplitter)
 
         options_vertical_layout.addWidget(self.status_group_box)
         left_column_layout.addWidget(options_vertical_widget)
-        left_column_layout.addStretch()
 
         component_tree_tab = QWidget()
         component_layout = QVBoxLayout(component_tree_tab)
@@ -427,6 +440,9 @@ class FullInstrumentViewWindow(QMainWindow):
     def store_draw_shapes_option(self) -> None:
         self._store_checkbox_option(self._show_shapes_check_box, self._DRAW_SHAPES_SETTING_STRING)
 
+    def store_flip_beam_option(self) -> None:
+        self._store_checkbox_option(self._flip_beam_check_box, self._FLIP_BEAM_SETTING_STRING)
+
     def _store_checkbox_option(self, checkbox: QCheckBox, config_key: str) -> None:
         option = "Yes" if checkbox.isChecked() else "No"
         ConfigService.Instance()[config_key] = option
@@ -434,11 +450,11 @@ class FullInstrumentViewWindow(QMainWindow):
     def enable_or_disable_aspect_ratio_box(self) -> None:
         self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
-    def is_flip_z_axis_checkbox_checked(self) -> bool:
-        return self._flip_z_axis_check_box.isChecked()
+    def is_flip_beam_checkbox_checked(self) -> bool:
+        return self._flip_beam_check_box.isChecked()
 
-    def enable_or_disable_flip_z_axis_box(self) -> None:
-        self._flip_z_axis_check_box.setDisabled(self.current_selected_projection() in [ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE])
+    def enable_or_disable_flip_beam_box(self) -> None:
+        self._flip_beam_check_box.setDisabled(self.current_selected_projection() in [ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE])
 
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
@@ -632,7 +648,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._start_adding_peaks_button.toggled.connect(self._presenter.on_start_adding_peaks_toggled)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
-        self._flip_z_axis_check_box.clicked.connect(self._presenter.on_flip_z_axis_check_box_clicked)
+        self._flip_beam_check_box.clicked.connect(self._presenter.on_flip_beam_check_box_clicked)
         self._show_shapes_check_box.clicked.connect(self._presenter.on_show_shapes_toggled)
         self._select_bank_tube.toggled.connect(self._presenter.on_select_bank_tube_toggled)
 
@@ -970,6 +986,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def set_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
         """For a list of detectors, with their info wrapped up in a class, update all of the info text boxes"""
+        self._detector_group_box.setVisible(bool(detector_infos))
         self._set_detector_edit_text(self._detector_name_edit, detector_infos, lambda d: d.name)
         self._set_detector_edit_text(self._detector_id_edit, detector_infos, lambda d: str(d.detector_id))
         self._set_detector_edit_text(self._detector_workspace_index_edit, detector_infos, lambda d: str(d.workspace_index))
@@ -994,7 +1011,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self, edit_box: QTextEdit, detector_infos: list[DetectorInfo], property_lambda: Callable[[DetectorInfo], str]
     ) -> None:
         """Set the text in one of the detector info boxes"""
-        edit_box.setPlainText(",".join(property_lambda(d) for d in detector_infos))
+        edit_box.setPlainText("; ".join(property_lambda(d) for d in detector_infos))
 
     def selected_peaks_workspaces(self) -> list[str]:
         return [

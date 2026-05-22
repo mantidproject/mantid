@@ -1208,4 +1208,39 @@ public:
     // has not gone through any merge operations.
     TS_ASSERT(!d.isEquivalent(f));
   }
+
+  void test_getMemorySize_empty() {
+    const ComponentInfo empty;
+    // Default constructor sets m_assemblySortedDetectorIndices (one shared_ptr → empty vector) and
+    // default-constructs the four cow_ptrs (m_positions, m_rotations, m_scaleFactors, m_componentType),
+    // each of which allocates an empty heap vector. m_scanIntervals is initialized to {{0,1}}, capacity=1.
+    const size_t expected =
+        sizeof(ComponentInfo) + sizeof(std::vector<size_t>) + // m_assemblySortedDetectorIndices
+        sizeof(std::vector<Eigen::Vector3d>) +                // m_positions
+        sizeof(std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>) + // m_rotations
+        sizeof(std::vector<Eigen::Vector3d>) +                                                  // m_scaleFactors
+        sizeof(std::vector<ComponentType>) +                                                    // m_componentType
+        sizeof(std::pair<int64_t, int64_t>);                                                    // m_scanIntervals[0]
+    TS_ASSERT_EQUALS(empty.getMemorySize(), expected);
+  }
+
+  void test_getMemorySize_nonzero() {
+    auto [compInfo, detInfo] = makeFlatTree(PosVec(1), RotVec(1));
+    TS_ASSERT_LESS_THAN(size_t{0}, compInfo->getMemorySize());
+  }
+
+  void test_getMemorySize_scales_with_size() {
+    auto [comp1, det1] = makeFlatTree(PosVec(10), RotVec(10));
+    auto [comp2, det2] = makeFlatTree(PosVec(20), RotVec(20));
+    auto [comp3, det3] = makeFlatTree(PosVec(30), RotVec(30));
+    TS_ASSERT_LESS_THAN(comp1->getMemorySize(), comp2->getMemorySize());
+    TS_ASSERT_LESS_THAN(comp2->getMemorySize(), comp3->getMemorySize());
+
+    // check that the increase in memory size grows linear with the number of components
+    auto size1 = comp1->getMemorySize(); // 10
+    auto size2 = comp2->getMemorySize(); // 20
+    auto size3 = comp3->getMemorySize(); // 30
+    // 20 - 10 == 30 - 20
+    TS_ASSERT_EQUALS(size2 - size1, size3 - size2);
+  }
 };

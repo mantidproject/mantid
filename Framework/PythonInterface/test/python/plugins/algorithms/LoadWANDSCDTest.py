@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid.dataobjects import GroupingWorkspace
 from mantid.simpleapi import LoadWANDSCD
 import unittest
 import numpy as np
@@ -92,6 +93,15 @@ class LoadWANDTest(unittest.TestCase):
         self.assertAlmostEqual(run.getGoniometer(1).getEulerAngles("YXZ")[2], -4.4)  # sgu from HB2C_7001
         self.assertAlmostEqual(run.getGoniometer(0).getEulerAngles("YXZ")[1], 4.6995)  # sgl from HB2C_7000
         self.assertAlmostEqual(run.getGoniometer(1).getEulerAngles("YXZ")[1], 4.6995)  # sgl from HB2C_7001
+
+        # check detectorID log: length must match twotheta/azimuthal, values must be non-negative
+        twotheta = run.getProperty("twotheta").value
+        azimuthal = run.getProperty("azimuthal").value
+        detectorID = run.getProperty("detectorID").value
+        self.assertEqual(len(detectorID), len(twotheta))
+        self.assertEqual(len(detectorID), len(azimuthal))
+        self.assertTrue(all(d >= 0 for d in detectorID))
+
         LoadWANDTest_ws.delete()
 
 
@@ -112,17 +122,80 @@ class LoadWANDApplyGoniometerTiltTest(unittest.TestCase):
 
 
 class LoadWANDGrouping(unittest.TestCase):
-    def test(self):
-        LoadWANDTest_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping=None)
-        LoadWANDTest_ws_2x2 = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2")
-        LoadWANDTest_ws_4x4 = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="4x4")
+    # Full detector grid dimensions for WAND (HB2C)
+    N_ROWS = 480 * 8  # 3840
+    N_COLS = 512
+    TOTAL_COUNTS = 128049  # number of events in file "HB2C_475936.nxs.h5"
 
-        self.assertEqual(LoadWANDTest_ws.getSignalArray().sum(), LoadWANDTest_ws_2x2.getSignalArray().sum())
-        self.assertEqual(LoadWANDTest_ws.getSignalArray().sum(), LoadWANDTest_ws_4x4.getSignalArray().sum())
+    def test_grouping_workspace_2x2(self):
+        grouping = 2
+        ws, grp_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2", OutputWorkspace="ws_2x2", OutputGroupingWorkspace="grp_ws_2x2")
 
-        LoadWANDTest_ws.delete()
-        LoadWANDTest_ws_2x2.delete()
-        LoadWANDTest_ws_4x4.delete()
+        self.assertEqual(ws.getSignalArray().sum(), self.TOTAL_COUNTS)
+
+        # Type check
+        self.assertIsInstance(grp_ws, GroupingWorkspace)
+
+        # Total number of groups must equal (N_ROWS // g) * (N_COLS // g)
+        expected_groups = (self.N_ROWS // grouping) * (self.N_COLS // grouping)
+        y_values = grp_ws.extractY().flatten()
+        self.assertEqual(int(y_values.max()), expected_groups)
+
+        # Every workspace index lies in a valid group (1 .. expected_groups)
+        histogram_count = grp_ws.getNumberHistograms()
+        self.assertEqual(histogram_count, self.N_ROWS * self.N_COLS)
+        self.assertEqual(int(y_values.min()), 1)
+
+        # Spot-check: workspace index 0  → pixel (x=0, y=0) → group 1
+        self.assertEqual(int(grp_ws.readY(0)[0]), 1)
+        # Spot-check: workspace index 1  → pixel (x=0, y=1) → group 1  (same 2×2 block as index 0)
+        self.assertEqual(int(grp_ws.readY(1)[0]), 1)
+        # Spot-check: workspace index 2  → pixel (x=0, y=2) → group 2  (next 2×2 block along y)
+        self.assertEqual(int(grp_ws.readY(2)[0]), 2)
+        # Spot-check: workspace index 512 → pixel (x=1, y=0) → shares 2×2 block with index 0 → group 1
+        self.assertEqual(int(grp_ws.readY(512)[0]), 1)
+        # Spot-check: workspace index 1024 → pixel (x=2, y=0) → first group of x_idx=1 row → group (512//2)+1 = 257
+        self.assertEqual(int(grp_ws.readY(1024)[0]), (self.N_COLS // grouping) + 1)
+
+        # detector ID stored
+        self.assertEqual(grp_ws.getSpectrum(0).getDetectorIDs()[0], 0)
+        self.assertEqual(grp_ws.getSpectrum(histogram_count - 1).getDetectorIDs()[0], histogram_count - 1)
+
+        # detectorID log must have one entry per group (same length as twotheta/azimuthal)
+        run = ws.getExperimentInfo(0).run()
+        detectorID = run.getProperty("detectorID").value
+        twotheta = run.getProperty("twotheta").value
+        self.assertEqual(len(detectorID), expected_groups)
+        self.assertEqual(len(detectorID), len(twotheta))
+        # each stored detector ID maps to a valid group (det_id == workspace index for WAND)
+        self.assertTrue(all(grp_ws.readY(int(d))[0] >= 1 for d in detectorID))
+
+        ws.delete()
+        grp_ws.delete()
+
+    def test_grouping_workspace_4x4(self):
+        grouping = 4
+        ws, grp_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="4x4", OutputGroupingWorkspace="grp_ws_4x4")
+
+        self.assertEqual(ws.getSignalArray().sum(), self.TOTAL_COUNTS)
+
+        self.assertIsInstance(grp_ws, GroupingWorkspace)
+        expected_groups = (self.N_ROWS // grouping) * (self.N_COLS // grouping)
+        y_values = grp_ws.extractY().flatten()
+        self.assertEqual(int(y_values.max()), expected_groups)
+
+        # Group size: each group spans g×g = 16 detectors
+        group_size = grouping * grouping
+        indices_in_first_group = np.where(y_values == 1.0)[0]
+        self.assertEqual(len(indices_in_first_group), group_size)
+
+        ws.delete()
+        grp_ws.delete()
+
+    def test_validation_rejects_grouping_ws_without_grouping(self):
+        """Requesting OutputGroupingWorkspace while Grouping='None' must raise."""
+        with self.assertRaises(Exception):
+            LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="None", OutputGroupingWorkspace="should_fail")
 
 
 if __name__ == "__main__":

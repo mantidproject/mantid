@@ -207,13 +207,13 @@ class FullInstrumentViewPresenter:
     def on_projection_option_changed(self) -> None:
         self._callback_queue.put((self._on_projection_option_changed, ()))
 
-    def update_plotter(self) -> None:
+    def update_plotter(self, refresh_limits=True) -> None:
         if self._closing:
             return
         self._model.projection_type = self._view.current_selected_projection()
-        self._model.flip_z = self._view.is_flip_z_axis_checkbox_checked()
+        self._model.flip_beam = self._view.is_flip_beam_checkbox_checked()
         with SuppressRendering(self._view.main_plotter):
-            self._update_view_main_plotter()
+            self._update_view_main_plotter(refresh_limits=refresh_limits)
             self.update_detector_picker()
             self.refresh_plotter_peaks()
 
@@ -236,22 +236,22 @@ class FullInstrumentViewPresenter:
         with np.errstate(divide="ignore", invalid="ignore"):
             return np.log10(counts + 1)
 
-    def _update_view_main_plotter(self):
+    def _update_view_main_plotter(self, refresh_limits: bool) -> None:
         self._view.cache_current_camera_position()
 
         self._view.clear_main_plotter()
         renderer = self._renderer
 
-        self._detector_mesh = renderer.build_detector_mesh(self._model.detector_positions, self._model.flip_z, self._model)
+        self._detector_mesh = renderer.build_detector_mesh(self._model.detector_positions, self._model.flip_beam, self._model)
         display_counts = self._transform_counts(self._model.detector_counts)
         renderer.set_detector_scalars(self._detector_mesh, display_counts, self._counts_label)
         renderer.add_detector_mesh_to_plotter(self._view.main_plotter, self._detector_mesh, scalars=self._counts_label)
 
-        self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions, self._model.flip_z)
+        self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions, self._model.flip_beam)
         renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
         renderer.add_pickable_mesh_to_plotter(self._view.main_plotter, self._pickable_mesh, scalars=self._visible_label)
 
-        self._masked_mesh = renderer.build_masked_mesh(self._model.masked_positions, self._model.flip_z, self._model)
+        self._masked_mesh = renderer.build_masked_mesh(self._model.masked_positions, self._model.flip_beam, self._model)
         renderer.add_masked_mesh_to_plotter(self._view.main_plotter, self._masked_mesh)
 
         monitor_mesh = self._create_and_add_monitor_mesh()
@@ -269,8 +269,14 @@ class FullInstrumentViewPresenter:
 
         self._view.enable_or_disable_mask_widgets()
         self._view.enable_or_disable_aspect_ratio_box()
-        self._view.enable_or_disable_flip_z_axis_box()
-        self.on_integration_limits_reset_clicked()
+        self._view.enable_or_disable_flip_beam_box()
+        # If refreshing the limits we reset both the contour and integration sliders.
+        # If not, we need to manually update the contour limits to what they were set to before we added the
+        # meshes above, because adding the meshes resets the contour limits in the plotter.
+        if refresh_limits:
+            self.on_integration_limits_reset_clicked()
+        else:
+            self.on_contour_limits_updated()
 
         self._view.cache_default_camera_position()
         self._view.reset_camera()
@@ -333,8 +339,10 @@ class FullInstrumentViewPresenter:
         self.update_plotter()
         self._view.reset_camera()
 
-    def on_flip_z_axis_check_box_clicked(self) -> None:
-        self.update_plotter()
+    def on_flip_beam_check_box_clicked(self) -> None:
+        self._view.store_flip_beam_option()
+        self.update_plotter(refresh_limits=False)
+        self._view.reset_camera()
 
     @property
     def _detector_mesh_bounds(self) -> list[float]:

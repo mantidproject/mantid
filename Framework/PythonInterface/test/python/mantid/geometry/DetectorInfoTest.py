@@ -136,6 +136,12 @@ class DetectorInfoTest(unittest.TestCase):
         det_info = self._ws.detectorInfo()
         self.assertEqual(det_info.l1(), l1_calc)
 
+    def test_getMemorySize(self):
+        info = self._ws.detectorInfo()
+        mem = info.getMemorySize()
+        self.assertIsInstance(mem, int)
+        self.assertGreater(mem, 0)
+
     """
     ---------------
     Iteration

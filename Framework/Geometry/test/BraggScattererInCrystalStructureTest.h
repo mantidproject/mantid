@@ -71,6 +71,35 @@ public:
     TS_ASSERT_EQUALS(scatterer->getCell().getG(), cell.getG());
   }
 
+  void testGetCellLvalueReferenceIdentity() {
+    // getCell() const & returns a reference to the internal member, not a copy.
+    BraggScattererInCrystalStructure_sptr scatterer = getInitializedScatterer();
+    UnitCell cell(5.43, 5.43, 5.43);
+    scatterer->setProperty("UnitCell", unitCellToStr(cell));
+
+    UnitCell const &ref = scatterer->getCell();
+    TS_ASSERT_DELTA(ref.a(), 5.43, 1e-10);
+    TS_ASSERT_DELTA(ref.b(), 5.43, 1e-10);
+    TS_ASSERT_DELTA(ref.c(), 5.43, 1e-10);
+    TS_ASSERT_DELTA(ref.alpha(), 90.0, 1e-10);
+    TS_ASSERT_DELTA(ref.beta(), 90.0, 1e-10);
+    TS_ASSERT_DELTA(ref.gamma(), 90.0, 1e-10);
+    TS_ASSERT_EQUALS(&ref, &scatterer->getCell());
+  }
+
+  void testGetCellRvalueReturnsByValue() {
+    // getCell() const && returns UnitCell by value, so callers with only a
+    // temporary scatterer get a safe copy rather than a dangling reference.
+    BraggScattererInCrystalStructure_sptr scatterer = getInitializedScatterer();
+    UnitCell cell(5.43, 5.43, 5.43);
+    scatterer->setProperty("UnitCell", unitCellToStr(cell));
+
+    UnitCell copied = std::move(*scatterer).getCell();
+    TS_ASSERT_DELTA(copied.a(), 5.43, 1e-10);
+    TS_ASSERT_DELTA(copied.b(), 5.43, 1e-10);
+    TS_ASSERT_DELTA(copied.c(), 5.43, 1e-10);
+  }
+
   void testUnitCellStringValidator() {
     IValidator_sptr validator = std::make_shared<UnitCellStringValidator>();
 

@@ -133,11 +133,10 @@ void export_V3D() {
       .def("norm", &V3D::norm, arg("self"), "Calculates the length of the vector")
       .def("norm2", &V3D::norm2, arg("self"), "Calculates the squared length of the vector")
       .def("getSpherical", &getSpherical, arg("self"), "Return the vector's position in spherical coordinates")
-      // cppcheck-suppress syntaxError
-      .def("__add__", &V3D::operator+, (arg("left"), arg("right")))
-      .def("__iadd__", &V3D::operator+=, return_self<>(), (arg("self"), arg("other")))
+      .def("__add__", (&V3D::operator+), (arg("left"), arg("right")))
+      .def("__iadd__", (&V3D::operator+=), return_self<>(), (arg("self"), arg("other")))
       .def("__sub__", static_cast<V3D (V3D::*)(const V3D &) const>(&V3D::operator-), (arg("left"), arg("right")))
-      .def("__isub__", &V3D::operator-=, return_self<>(), (arg("self"), arg("other")))
+      .def("__isub__", (&V3D::operator-=), return_self<>(), (arg("self"), arg("other")))
       .def("__neg__", static_cast<V3D (V3D::*)() const>(&V3D::operator-), (arg("self")))
       .def("__len__", &getV3DLength, (arg("self")),
            "Returns the length of the vector for list-like interface. Always "

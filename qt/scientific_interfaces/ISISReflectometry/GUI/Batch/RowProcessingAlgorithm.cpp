@@ -14,12 +14,14 @@
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using Mantid::API::AlgorithmRuntimeProps;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::Workspace_sptr;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
@@ -237,6 +239,15 @@ std::optional<double> getDouble(const IAlgorithm_sptr &algorithm, std::string co
   return result;
 }
 
+MatrixWorkspace_sptr getMatrixWorkspaceOutput(const IAlgorithm_sptr &algorithm, std::string const &property) {
+  Workspace_sptr outputWs = algorithm->getProperty(property);
+  auto matrixOutputWs = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWs);
+  if (!matrixOutputWs) {
+    throw std::runtime_error("Expected output property " + property + " to be a MatrixWorkspace.");
+  }
+  return matrixOutputWs;
+}
+
 void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<Row &>(item);
 
@@ -355,7 +366,7 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
 
 void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<PreviewRow &>(item);
-  MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspaceBinned");
+  auto outputWs = getMatrixWorkspaceOutput(algorithm, "OutputWorkspaceBinned");
   row.setReducedWs(outputWs);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction

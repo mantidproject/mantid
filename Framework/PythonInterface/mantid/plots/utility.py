@@ -79,6 +79,12 @@ class MantidAxType(Enum):
     SPECTRUM = 1
 
 
+class PlotNormalizationType(Enum):
+    NONE = 0
+    BIN_WIDTH = 1
+    INVERSE_Q_FOURTH_POWER = 2  # Q^-4
+
+
 @contextmanager
 def artists_hidden(artists):
     """Context manager that hides matplotlib artists."""

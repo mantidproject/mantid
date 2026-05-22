@@ -186,6 +186,7 @@ public:
    * \return A unix like address string pointing to the current
    *         position in the file
    */
+  // NOTE: this cannot return by reference as the referenced address can change
   std::string getAddress() const { return m_address.string(); };
 
   // CHECK ADDRESS EXISTENCE
@@ -563,9 +564,9 @@ public:
    */
   void getEntries(Entries &result) const;
 
-  /** Return the string name of the top-level entry
+  /** Return the absolute address of the top-level entry
    *
-   * \return a string with the name (not abs address) of the top-level entry
+   * \return a string with the absolute address of the top-level entry (e.g. "/entry")
    */
   std::string getTopLevelEntryName() const;
 
