@@ -242,45 +242,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(model.workspace_index_from_pickable_index(1), 22)
         self.assertIsNone(model.workspace_index_from_pickable_index(4))
 
-    def test_single_spectrum_for_workspace_index_cached(self):
-        model, mock_workspace = self._setup_model([1, 2, 3])
-        mock_workspace.readX.return_value = np.array([0.0, 1.0, 2.0])
-        mock_workspace.readY.return_value = np.array([10.0, 20.0, 30.0])
-        model._workspace_x_unit = "TOF"
-
-        x1, y1 = model.single_spectrum_for_workspace_index(1, "TOF")
-        x2, y2 = model.single_spectrum_for_workspace_index(1, "TOF")
-
-        np.testing.assert_equal(x1, [0.0, 1.0, 2.0])
-        np.testing.assert_equal(y1, [10.0, 20.0, 30.0])
-        np.testing.assert_equal(x2, [0.0, 1.0, 2.0])
-        np.testing.assert_equal(y2, [10.0, 20.0, 30.0])
-        mock_workspace.readX.assert_called_once_with(1)
-        mock_workspace.readY.assert_called_once_with(1)
-
-    def test_single_spectrum_for_workspace_index_unit_conversion(self):
-        model, mock_workspace = self._setup_model([1, 2, 3])
-        mock_workspace.readX.return_value = np.array([1.0, 2.0, 3.0])
-        mock_workspace.readY.return_value = np.array([10.0, 20.0, 30.0])
-        model._workspace_x_unit = "TOF"
-        model.convert_units = MagicMock(side_effect=[2.0, 4.0, 6.0])
-
-        x_values, _ = model.single_spectrum_for_workspace_index(1, "dSpacing")
-
-        np.testing.assert_equal(x_values, [2.0, 4.0, 6.0])
-        self.assertEqual(model.convert_units.call_count, 3)
-
-    def test_single_spectrum_for_workspace_index_histogram_bin_edges(self):
-        model, mock_workspace = self._setup_model([1, 2, 3])
-        mock_workspace.readX.return_value = np.array([0.0, 1.0, 2.0, 3.0])
-        mock_workspace.readY.return_value = np.array([10.0, 20.0, 30.0])
-        model._workspace_x_unit = "TOF"
-
-        x_values, y_values = model.single_spectrum_for_workspace_index(1, "TOF")
-
-        np.testing.assert_equal(x_values, [0.5, 1.5, 2.5])
-        np.testing.assert_equal(y_values, [10.0, 20.0, 30.0])
-
     def test_detectors_with_no_spectra(self):
         self._setup_mocks([1, 20, 300, 400], monitors=np.array(["no", "no", "n/a", "yes"]))
         mock_workspace = self._create_mock_workspace([1, 20, 300, 400])

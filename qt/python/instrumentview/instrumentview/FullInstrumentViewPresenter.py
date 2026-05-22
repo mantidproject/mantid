@@ -386,7 +386,7 @@ class FullInstrumentViewPresenter:
 
         if enabled:
             self._view.clear_lineplot_overlays()
-            self._view.show_plot_for_detectors(None)
+            self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
             self._view.set_selected_detector_info([])
             self._view.set_relative_detector_angle(None)
             self._view.remove_peak_cursor_from_lineplot()
@@ -395,19 +395,11 @@ class FullInstrumentViewPresenter:
         self.update_picked_detectors_on_view()
 
     def _update_hover_pick_plot(self, workspace_index: int) -> None:
-        unit = self._view.current_selected_unit()
-        spectrum = self._model.single_spectrum_for_workspace_index(workspace_index, unit)
-        if spectrum is None:
-            return
-
-        x_values, y_values = spectrum
+        self._model.extract_spectra_for_line_plot(self._view.current_selected_lineplot_unit(), False, np.array([workspace_index]))
         detector_info = self._model.detector_info_text_for_workspace_index(workspace_index)
         if len(detector_info) == 0:
             return
-
-        detector = detector_info[0]
-        line_label = f"Spectrum {detector.workspace_index} (Det {detector.detector_id})"
-        self._view.show_single_detector_spectrum(x_values, y_values, line_label, unit)
+        self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
         self._view.set_selected_detector_info(detector_info)
         self._view.set_relative_detector_angle(None)
 

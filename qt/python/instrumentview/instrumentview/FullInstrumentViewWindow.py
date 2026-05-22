@@ -1009,20 +1009,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self.redraw_lineplot()
 
-    def show_single_detector_spectrum(self, x: np.ndarray, y: np.ndarray, label: str, unit: str) -> None:
-        if self._hover_pick_line is None:
-            self._detector_spectrum_axes.clear()
-            (self._hover_pick_line,) = self._detector_spectrum_axes.plot(x, y)
-        else:
-            self._hover_pick_line.set_data(x, y)
-
-        self._hover_pick_line.set_label(label)
-        self._detector_spectrum_axes.set_title(label)
-        self._detector_spectrum_axes.set_xlabel(unit)
-        self._detector_spectrum_axes.relim()
-        self._detector_spectrum_axes.autoscale_view()
-        self.redraw_lineplot()
-
     def set_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
         """For a list of detectors, with their info wrapped up in a class, update all of the info text boxes"""
         self._set_detector_edit_text(self._detector_name_edit, detector_infos, lambda d: d.name)

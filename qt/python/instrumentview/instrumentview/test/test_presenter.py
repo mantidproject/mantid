@@ -134,7 +134,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.set_hover_pick_mode_enabled.assert_called_once_with(True)
         self._presenter.update_detector_picker.assert_called_once()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
-        self._mock_view.show_plot_for_detectors.assert_called_once_with(None)
+        self._mock_view.show_plot_for_detectors.assert_called_once_with(None, None)
         self._mock_view.set_selected_detector_info.assert_called_once_with([])
         self._mock_view.set_relative_detector_angle.assert_called_once_with(None)
         self._mock_view.remove_peak_cursor_from_lineplot.assert_called_once()

@@ -34,8 +34,8 @@ from mantid.simpleapi import (
 from mantid.api import MatrixWorkspace
 from pathlib import Path
 import numpy as np
-
 from enum import Enum
+from typing import Optional
 
 
 class PeakPickingStatus(Enum):
@@ -108,7 +108,6 @@ class FullInstrumentViewModel:
         self._detector_is_picked = np.full(len(self._detector_ids), False)
         self._current_detector_groupings = np.zeros_like(self._detector_ids)
         self._point_picked_detectors = np.full(len(self._detector_ids), False)
-        self._hover_spectrum_cache: dict[tuple[int, str], tuple[np.ndarray, np.ndarray]] = {}
 
         self._integration_workspace = self._workspace.clone(StoreInADS=False)
         self._calculate_and_set_full_integration_range(self._is_valid)
@@ -259,7 +258,7 @@ class FullInstrumentViewModel:
             return None
 
         limits_in_base_units = [
-            self._match_workspace_unit(self._integration_workspace, self.picked_workspace_indices[0], x, self._workspace)
+            self._match_workspace_unit(self._integration_workspace, self._workspace_indices[0], x, self._workspace)
             for x in self.integration_limits
         ]
         limits_in_lineplot_units = [
@@ -389,31 +388,6 @@ class FullInstrumentViewModel:
             )
         ]
 
-    def single_spectrum_for_workspace_index(self, workspace_index: int, unit: str) -> tuple[np.ndarray, np.ndarray] | None:
-        cache_key = (int(workspace_index), unit)
-        if cache_key in self._hover_spectrum_cache:
-            return self._hover_spectrum_cache[cache_key]
-
-        if workspace_index < 0 or workspace_index >= self._workspace.getNumberHistograms():
-            return None
-
-        x_values = np.array(self._workspace.readX(int(workspace_index)), dtype=float)
-        y_values = np.array(self._workspace.readY(int(workspace_index)), dtype=float)
-
-        # Histogram workspaces provide bin-edge X values with length len(Y) + 1.
-        # Matplotlib line plotting needs matching lengths, so use bin centres.
-        if len(x_values) == len(y_values) + 1:
-            x_values = 0.5 * (x_values[:-1] + x_values[1:])
-
-        if self.has_unit and unit != self.workspace_x_unit:
-            x_values = np.array(
-                [self.convert_units(self.workspace_x_unit, unit, 0, float(x)) for x in x_values],
-                dtype=float,
-            )
-
-        self._hover_spectrum_cache[cache_key] = (x_values, y_values)
-        return self._hover_spectrum_cache[cache_key]
-
     def clear_point_picked_detectors(self) -> None:
         self._detector_is_picked[self._point_picked_detectors] = False
         self._point_picked_detectors.fill(False)
@@ -528,9 +502,10 @@ class FullInstrumentViewModel:
             projection = self._cached_projection_objects.get(cache_key)
         return projection
 
-    def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
+    def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool, workspace_indices: Optional[np.ndarray] = None) -> None:
         self._current_linplot_unit = unit
-        workspace_indices = np.unique(self.picked_workspace_indices)
+        if workspace_indices is None:
+            workspace_indices = np.unique(self.picked_workspace_indices)
         if len(workspace_indices) == 0:
             self.line_plot_workspace = None
             self._lineplot_ws_in_base_units = None
