@@ -37,9 +37,9 @@ public:
   static void destroySuite(SavePresenterTest *suite) { delete suite; }
 
   SavePresenterTest()
-      : m_view(), m_savePath("/foo/bar/"), m_fileFormat(NamedFormat::Custom), m_prefix("testoutput_"),
-        m_includeHeader(true), m_separator(","), m_includeQResolution(true), m_includeAdditionalColumns(false),
-        m_model(""), m_validation(false) {}
+      : m_view(), m_savePath("/foo/bar/"), m_fileFormat(NamedFormat::Custom), m_metaSource(ORSOMetaSource::History),
+        m_prefix("testoutput_"), m_includeHeader(true), m_separator(","), m_includeQResolution(true),
+        m_includeAdditionalColumns(false), m_model(""), m_validation(false) {}
 
   void tearDown() override {
     // Verifying and clearing of expectations happens when mock variables are destroyed.

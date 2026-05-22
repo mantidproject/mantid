@@ -1,0 +1,6 @@
+- The :ref:`ISIS Reflectometry Interface <interface-isis-refl>` polarization input spin state order field can now be
+  used to specify the :ref:`algm-PolarizationCorrectionWildes` flipper configuration as well as the
+  :ref:`algm-PolarizationCorrectionFredrikze` input spin state order. Leaving the field empty continues to use the
+  defaults from the instrument parameter file or correction algorithm.
+- :ref:`algm-ReflectometryReductionOneAuto` now reports when a Fredrikze spin state order is supplied for a Wildes
+  correction, or a Wildes flipper configuration is supplied for a Fredrikze correction.

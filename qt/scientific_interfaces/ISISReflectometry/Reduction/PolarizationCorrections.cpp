@@ -18,10 +18,4 @@ std::optional<std::string> PolarizationCorrections::workspace() const { return m
 
 std::string const &PolarizationCorrections::inputSpinStateOrder() const { return m_inputSpinStateOrder; }
 
-bool operator!=(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs) { return !(lhs == rhs); }
-
-bool operator==(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs) {
-  return lhs.correctionType() == rhs.correctionType() && lhs.workspace() == rhs.workspace() &&
-         lhs.inputSpinStateOrder() == rhs.inputSpinStateOrder();
-}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

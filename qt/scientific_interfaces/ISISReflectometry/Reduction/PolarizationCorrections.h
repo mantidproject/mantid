@@ -59,9 +59,6 @@ private:
   std::optional<std::string> m_workspace;
   std::string m_inputSpinStateOrder;
 };
-
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
