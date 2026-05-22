@@ -548,7 +548,7 @@ public:
 
   Editor *createEditor(QtProperty *property, QWidget *parent);
   void initializeEditor(QtProperty *property, Editor *e);
-  void slotEditorDestroyed(QObject *object);
+  void slotEditorDestroyed(const QObject *object);
 
   PropertyToEditorListMap m_createdEditors;
   EditorToPropertyMap m_editorToProperty;
@@ -560,6 +560,7 @@ template <class Editor> Editor *EditorFactoryPrivate<Editor>::createEditor(QtPro
   return editor;
 }
 
+// cppcheck-suppress constParameterPointer
 template <class Editor> void EditorFactoryPrivate<Editor>::initializeEditor(QtProperty *property, Editor *editor) {
   typename PropertyToEditorListMap::iterator it = m_createdEditors.find(property);
   if (it == m_createdEditors.end())
@@ -568,11 +569,12 @@ template <class Editor> void EditorFactoryPrivate<Editor>::initializeEditor(QtPr
   m_editorToProperty.insert(editor, property);
 }
 
-template <class Editor> void EditorFactoryPrivate<Editor>::slotEditorDestroyed(QObject *object) {
+template <class Editor> void EditorFactoryPrivate<Editor>::slotEditorDestroyed(const QObject *object) {
   const typename EditorToPropertyMap::iterator ecend = m_editorToProperty.end();
   for (typename EditorToPropertyMap::iterator itEditor = m_editorToProperty.begin(); itEditor != ecend; ++itEditor) {
     if (itEditor.key() == object) {
       Editor *editor = itEditor.key();
+      // cppcheck-suppress constVariablePointer
       QtProperty *property = itEditor.value();
       const typename PropertyToEditorListMap::iterator pit = m_createdEditors.find(property);
       if (pit != m_createdEditors.end()) {
@@ -830,7 +832,7 @@ void QtSpinBoxFactoryPrivateBase<SpinBox>::slotRangeChanged(QtProperty *property
   if (!this->m_createdEditors.contains(property))
     return;
 
-  QtIntPropertyManager *manager = q_ptr->propertyManager(property);
+  const QtIntPropertyManager *manager = q_ptr->propertyManager(property);
   if (!manager)
     return;
 
@@ -858,7 +860,7 @@ void QtSpinBoxFactoryPrivateBase<SpinBox>::slotSingleStepChanged(QtProperty *pro
 }
 
 template <class SpinBox> void QtSpinBoxFactoryPrivateBase<SpinBox>::slotSetValue(int value) {
-  QObject *object = q_ptr->sender();
+  const QObject *object = q_ptr->sender();
   typename QMap<SpinBox *, QtProperty *>::ConstIterator ecend = this->m_editorToProperty.constEnd();
   for (typename QMap<SpinBox *, QtProperty *>::ConstIterator itEditor = this->m_editorToProperty.constBegin();
        itEditor != ecend; ++itEditor) {

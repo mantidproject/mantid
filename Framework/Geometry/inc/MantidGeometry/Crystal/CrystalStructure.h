@@ -71,7 +71,8 @@ public:
   CrystalStructure(const std::string &unitCellString, const std::string &spaceGroupString,
                    const std::string &scattererString);
 
-  UnitCell cell() const;
+  UnitCell const &cell() const & { return m_cell; };
+  UnitCell cell() const && { return m_cell; }; // cppcheck-suppress returnByReference
   void setCell(const UnitCell &cell);
 
   SpaceGroup_const_sptr spaceGroup() const;

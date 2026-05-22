@@ -190,7 +190,7 @@ void QtSliderFactoryPrivate::slotRangeChanged(QtProperty *property, int min, int
   if (!m_createdEditors.contains(property))
     return;
 
-  QtIntPropertyManager *manager = q_ptr->propertyManager(property);
+  const QtIntPropertyManager *manager = q_ptr->propertyManager(property);
   if (!manager)
     return;
 
@@ -217,7 +217,7 @@ void QtSliderFactoryPrivate::slotSingleStepChanged(QtProperty *property, int ste
 }
 
 void QtSliderFactoryPrivate::slotSetValue(int value) {
-  QObject *object = q_ptr->sender();
+  const QObject *object = q_ptr->sender();
   const QMap<QSlider *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
   for (QMap<QSlider *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend;
        ++itEditor) {
@@ -317,7 +317,7 @@ void QtScrollBarFactoryPrivate::slotRangeChanged(QtProperty *property, int min, 
   if (!m_createdEditors.contains(property))
     return;
 
-  QtIntPropertyManager *manager = q_ptr->propertyManager(property);
+  const QtIntPropertyManager *manager = q_ptr->propertyManager(property);
   if (!manager)
     return;
 
@@ -344,7 +344,7 @@ void QtScrollBarFactoryPrivate::slotSingleStepChanged(QtProperty *property, int 
 }
 
 void QtScrollBarFactoryPrivate::slotSetValue(int value) {
-  QObject *object = q_ptr->sender();
+  const QObject *object = q_ptr->sender();
   const QMap<QScrollBar *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
   for (QMap<QScrollBar *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend;
        ++itEditor)
@@ -440,7 +440,7 @@ void QtCheckBoxFactoryPrivate::slotPropertyChanged(QtProperty *property, bool va
 }
 
 void QtCheckBoxFactoryPrivate::slotSetValue(bool value) {
-  QObject *object = q_ptr->sender();
+  const QObject *object = q_ptr->sender();
 
   const QMap<QtBoolEdit *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
   for (QMap<QtBoolEdit *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend;
@@ -1559,6 +1559,7 @@ void QtCursorEditorFactoryPrivate::slotPropertyChanged(QtProperty *const propert
   m_updatingEnum = false;
 }
 
+// cppcheck-suppress constParameterPointer
 void QtCursorEditorFactoryPrivate::slotEnumChanged(QtProperty *property, int value) {
   if (m_updatingEnum)
     return;
@@ -1574,6 +1575,7 @@ void QtCursorEditorFactoryPrivate::slotEnumChanged(QtProperty *property, int val
 #endif
 }
 
+// cppcheck-suppress constParameterPointer
 void QtCursorEditorFactoryPrivate::slotEditorDestroyed(QObject *object) {
   // remove from m_editorToEnum map;
   // remove from m_enumToEditors map;
@@ -1588,6 +1590,7 @@ void QtCursorEditorFactoryPrivate::slotEditorDestroyed(QObject *object) {
       m_enumToEditors[enumProp].removeAll(editor);
       if (m_enumToEditors[enumProp].isEmpty()) {
         m_enumToEditors.remove(enumProp);
+        // cppcheck-suppress constVariablePointer
         QtProperty *property = m_enumToProperty.value(enumProp);
         m_enumToProperty.remove(enumProp);
         m_propertyToEnum.remove(property);

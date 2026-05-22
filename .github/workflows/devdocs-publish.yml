@@ -1,0 +1,71 @@
+name: Build developer docs
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main, release-next]
+
+# cancel previous job if new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  devsite:
+    if: ${{ github.repository_owner == 'mantidproject' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout Mantid source
+        uses: actions/checkout@v6
+
+      - name: Detect changes relevant to developer site
+        uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
+      - name: Read pixi version
+        id: pixi-version
+        run: echo "version=$(tr -d '[:space:]' < .pixi-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Setup pixi
+        if: steps.changes.outputs.devsite == 'true'
+        uses: prefix-dev/setup-pixi@v0.9.5
+        with:
+          pixi-version: v${{ steps.pixi-version.outputs.version }}
+          frozen: true
+
+      - name: Build dev-docs
+        if: steps.changes.outputs.devsite == 'true'
+        run: pixi run --manifest-path pixi.toml build-devdocs
+
+      - name: Checkout developer site repository
+        if: ${{ steps.changes.outputs.devsite == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: actions/checkout@v6
+        with:
+          repository: mantidproject/developer
+          ref: gh-pages
+          path: developer_repo
+          token: ${{ secrets.DEVELOPER_REPO_TOKEN }}
+
+      - name: Copy generated site
+        if: ${{ steps.changes.outputs.devsite == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+          rm -rf developer_repo/*
+          cp -r build_devsite_html/* developer_repo/
+
+      # publish devsite to mantidproject/developer repo when merged to main branch
+      - name: Publish developer site
+        if: ${{ steps.changes.outputs.devsite == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        working-directory: developer_repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "Automatic update of developer site from ${{ github.sha }}"
+          git push origin gh-pages

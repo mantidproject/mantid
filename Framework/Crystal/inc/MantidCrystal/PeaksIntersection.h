@@ -30,7 +30,7 @@ public:
   virtual int numberOfFaces() const = 0;
 
 protected:
-  ~PeaksIntersection() = default;
+  ~PeaksIntersection() override = default;
   /// Initalize the common properties.
   void initBaseProperties();
 

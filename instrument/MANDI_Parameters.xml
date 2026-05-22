@@ -4,8 +4,8 @@
 <component-link name = "MANDI">
 
 <!-- Specify that any banks not in NeXus file are to be removed -->
-<parameter name="remove-unused-banks">
-  <value val="1"/>
+<parameter name="remove-unused-banks" type="bool">
+  <value val="true"/>
 </parameter>
 
 <!-- Need to fill in gaps for peak profile fitting -->

@@ -93,7 +93,8 @@ void export_MDGeometry() {
            "Returns an XML representation, as a string, of the geometry of the "
            "workspace")
 
-      .def("getBasisVector", (const Mantid::Kernel::VMD &(MDGeometry::*)(size_t) const) & MDGeometry::getBasisVector,
+      .def("getBasisVector",
+           static_cast<const Mantid::Kernel::VMD &(MDGeometry::*)(size_t) const>(&MDGeometry::getBasisVector),
            (arg("self"), arg("index")), return_value_policy<copy_const_reference>(),
            "Returns a :class:`~mantid.kernel.VMD` object defining the basis "
            "vector for the specified "

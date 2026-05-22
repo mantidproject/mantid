@@ -36,7 +36,7 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
    */
   static TypedWorkspaceProperty *createPropertyWithValidator(const std::string &name, const std::string &wsName,
                                                              const unsigned int direction,
-                                                             Kernel::IValidator *validator) {
+                                                             Kernel::IValidator const *validator) {
     return new TypedWorkspaceProperty(name, wsName, direction, validator->clone());
   }
 
@@ -53,7 +53,7 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
   static TypedWorkspaceProperty *createPropertyWithOptionalFlag(const std::string &name, const std::string &wsName,
                                                                 const unsigned int direction,
                                                                 API::PropertyMode::Type optional,
-                                                                Kernel::IValidator *validator) {
+                                                                Kernel::IValidator const *validator) {
     return new TypedWorkspaceProperty(name, wsName, direction, optional, validator->clone());
   }
 
@@ -73,7 +73,7 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
                                                             const unsigned int direction,
                                                             API::PropertyMode::Type optional,
                                                             API::LockMode::Type locking,
-                                                            Kernel::IValidator *validator) {
+                                                            Kernel::IValidator const *validator) {
     return new TypedWorkspaceProperty(name, wsName, direction, optional, locking, validator->clone());
   }
 

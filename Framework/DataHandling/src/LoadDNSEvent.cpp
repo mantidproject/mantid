@@ -83,11 +83,11 @@ void LoadDNSEvent::init() {
   declareProperty<uint32_t>("NumberOfTubes", 128, std::make_shared<BoundedValidator<uint32_t>>(1, 128),
                             "The number of tubes, each tube has 1024 pixels (1 to 128)", Kernel::Direction::Input);
 
-  declareProperty<bool>("DiscardPreChopperEvents", true, std::make_shared<BoundedValidator<bool>>(0, 1),
+  declareProperty<bool>("DiscardPreChopperEvents", true,
                         "Discards events before first chopper trigger (turn off for elastic)",
                         Kernel::Direction::Input);
 
-  declareProperty<bool>("SetBinBoundary", true, std::make_shared<BoundedValidator<bool>>(0, 1),
+  declareProperty<bool>("SetBinBoundary", true,
                         "Sets all bin boundaries to include all events (can be turned off to save time).",
                         Kernel::Direction::Input);
 
