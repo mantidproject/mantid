@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<parameter-file instrument = "D11B">
+<parameter-file instrument = "D11B" valid-from = "2020-12-01 00:00:00" valid-to = "2100-01-31 23:59:59">
 
     <component-link name="D11B">
       <!-- The name of the panels for separate I(Q) calculations, the names are from the IDF -->

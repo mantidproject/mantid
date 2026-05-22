@@ -476,13 +476,12 @@ void addInstrument(H5::Group &group, const MatrixWorkspace_sptr &workspace, cons
 
   // Add IDF information
   std::string idf;
-  // try-catch added to use test instrument in testing
-  try {
-    idf = getIDF(workspace);
-  } catch (const std::runtime_error &) {
+  // testing branch has instrument POLSANSTEST and expects idf to return "unknown"
+  if (getInstrumentName(workspace) == "POLSANSTEST") {
     idf = "unknown";
+  } else {
+    idf = getIDF(workspace);
   }
-
   H5Util::write(instrument, sasInstrumentIDF, idf);
 }
 

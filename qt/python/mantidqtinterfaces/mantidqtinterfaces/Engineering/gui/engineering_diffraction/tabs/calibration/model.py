@@ -18,25 +18,29 @@ class CalibrationModel(object):
     def get_last_prm_file_gsas2(self):
         return self._saved_prm_file
 
-    def create_new_calibration(self, calibration, rb_num, plot_output, save_dir=None):
+    def create_new_calibration(self, calibration, rb_num, plot_output, instrument, save_dir=None):
         if save_dir is None:
             save_dir = output_settings.get_output_path()
-        full_calib = load_full_instrument_calibration()
-        self._saved_prm_file = EnggUtils.create_new_calibration(calibration, rb_num, plot_output, save_dir, full_calib)
+        full_calib = load_full_instrument_calibration(instrument)
+        self._saved_prm_file = EnggUtils.create_new_calibration(calibration, rb_num, plot_output, save_dir, full_calib, False)
 
-    def load_existing_calibration_files(self, calibration):
-        load_full_instrument_calibration()
+    def load_existing_calibration_files(self, calibration, instrument):
+        load_full_instrument_calibration(instrument)
         self._saved_prm_file = EnggUtils.load_existing_calibration_files(calibration)
 
 
-def load_full_instrument_calibration():
-    if ADS.doesExist("full_inst_calib"):
-        full_calib = ADS.retrieve("full_inst_calib")
+def load_full_instrument_calibration(instrument):
+    if ADS.doesExist(f"full_inst_calib_{instrument}"):
+        full_calib = ADS.retrieve(f"full_inst_calib_{instrument}")
     else:
-        full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "full_calibration")
+        full_calib_path = get_setting(
+            output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, f"full_calibration_{instrument}"
+        )
         try:
-            full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
+            full_calib = Load(full_calib_path, OutputWorkspace=f"full_inst_calib_{instrument}")
         except ValueError:
-            logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
+            logger.error(
+                f"Error loading Full instrument calibration from path: `{full_calib_path}` - this is set in the interface settings."
+            )
             return
     return full_calib

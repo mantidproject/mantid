@@ -54,22 +54,23 @@ struct TCPStreamEventHeader {
   TCPStreamEventHeader(uint32_t type_)
       : marker1(marker), marker2(marker), version(current_version), length(sizeof(TCPStreamEventHeader)), type(type_) {}
 
-  GNU_DIAG_OFF("tautological-compare")
   bool isValid() const {
+    // minor_version is currently 0, so this comparison is always true for any unsigned value.
+    // The check is kept to enforce forward-compatibility if minor_version is ever incremented.
     return marker1 == marker && marker2 == marker && length >= sizeof(TCPStreamEventHeader) &&
            majorVersion() == TCPStreamEventHeader::major_version &&
+           // cppcheck-suppress unsignedPositive
            minorVersion() >= TCPStreamEventHeader::minor_version && type != InvalidStream;
   }
-  GNU_DIAG_ON("tautological-compare")
 
   static const uint32_t major_version = 1; ///< starts at 1, then incremented whenever layout of this or further
   /// packets changes in a non backward compatible way
   static const uint32_t minor_version = 0; ///< reset to 0 in major version change, then incremented whenever
-  /// layout of this or further packets changes in a backward compatible
-  /// way
-  static const uint32_t current_version = (major_version << 16) | minor_version; ///< starts at 1, then incremented
-  /// whenever layout of this or
-  /// further packets changes
+  /// layout of this or further packets changes in a backward compatible way
+  // minor_version is currently 0, so the OR is a no-op. The packing is kept so the constant
+  // remains correct if minor_version is ever incremented.
+  // cppcheck-suppress badBitmaskCheck
+  static const uint32_t current_version = (major_version << 16) | minor_version; ///< packed major<<16 | minor
   uint32_t majorVersion() const { return version >> 16; }
   uint32_t minorVersion() const { return version & 0xffff; }
 };

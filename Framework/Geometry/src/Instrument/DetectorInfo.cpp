@@ -462,4 +462,25 @@ DetectorInfoIt DetectorInfo::begin() { return DetectorInfoIt(*this, 0, size()); 
 // End method for iterator
 DetectorInfoIt DetectorInfo::end() { return DetectorInfoIt(*this, size(), size()); }
 
+/** Return memory used by the detector info, in bytes.
+ * @return bytes used.
+ */
+size_t DetectorInfo::getMemorySize() const {
+  const size_t n = size();
+  // Beamline::DetectorInfo holds the core position/rotation/flag arrays
+  const size_t beamlineMem = m_detectorInfo->getMemorySize();
+  // m_detectorIDs: shared_ptr<const vector<detid_t>> — count the heap-allocated vector object + its buffer
+  const size_t detectorIDsMem = sizeof(std::vector<detid_t>) + n * sizeof(detid_t);
+  // m_detIDToIndex: shared_ptr<const unordered_map<detid_t, size_t>>
+  // Count the heap-allocated map object + each node (key + value + ~2 pointers for bucket/chain overhead)
+  const size_t detIDToIndexMem =
+      sizeof(std::unordered_map<detid_t, size_t>) + n * (sizeof(detid_t) + sizeof(size_t) + 2 * sizeof(void *));
+  // m_lastDetector and m_lastIndex: one slot per OpenMP thread
+  const size_t cacheMem = m_lastDetector.capacity() * sizeof(std::shared_ptr<const Geometry::IDetector>) +
+                          m_lastIndex.capacity() * sizeof(size_t);
+  // m_instrument is a shared_ptr to an Instrument owned by the workspace; its memory is counted in
+  // Instrument::getMemorySize() and excluded here to avoid double-counting.
+  return sizeof(*this) + beamlineMem + detectorIDsMem + detIDToIndexMem + cacheMem;
+}
+
 } // namespace Mantid::Geometry

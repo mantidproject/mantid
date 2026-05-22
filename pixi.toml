@@ -50,6 +50,10 @@ sphinx = "*"
 mantid-sphinx-theme = "*"
 myst-parser = "*"
 
+[feature.devsite.tasks.build-devdocs]
+args = [{ arg = "output_dir", default = "build_devsite_html" }]
+cmd = "mkdir -p {{output_dir}} && LC_ALL=C && python -m sphinx -W dev-docs/source {{output_dir}}"
+description = "Build developer documentation"
 
 [feature.publish-gh.target.linux-64.dependencies]
 gh = "*"
@@ -113,7 +117,7 @@ python = "3.12.*"
 pyvista = ">=0.46"
 pyvistaqt = ">=0.11.3,<0.12"
 pyyaml = ">=5.4.1"
-qscintilla2 = ">=2.14.1"
+qscintilla2 = { version = "==2.14.1", build = "*_0" }
 qt-main = "5.15.*"
 qtconsole = ">5.5.0"
 qtpy = ">=2.4,!=2.4.2"

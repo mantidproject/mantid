@@ -154,8 +154,10 @@ class PolygonSelectionMasking(SelectionMaskingBase):
         self._clear = False
         self._dataview.mpl_toolbar.set_action_checked(SELECTOR_TO_TOOL_ITEM_TEXT[self.__class__], False, trigger=False)
         nodes = [cursor_info(self._img, node[0], node[1]) for node in eclick]
+        x_limits = self._dataview.ax.get_xlim()
+        y_limits = self._dataview.ax.get_ylim()
         try:
-            self._model.add_poly_cursor_info(nodes=nodes, transpose=self._transpose)
+            self._model.add_poly_cursor_info(nodes=nodes, transpose=self._transpose, x_limits=x_limits, y_limits=y_limits)
         except RuntimeError as e:
             self.clear()
             self._mask_drawn = False
@@ -182,11 +184,11 @@ class Masking:
     Manages Masking
     """
 
-    def __init__(self, dataview, ws_name):
+    def __init__(self, dataview, ws_name, auto_update_mask_file=False):
         self._selectors = []
         self._active_selector = None
         self._dataview = dataview
-        self._model = MaskingModel(ws_name)
+        self._model = MaskingModel(ws_name, auto_update_mask_file)
 
     def _reset_active_selector(self):
         if self._active_selector:
@@ -229,3 +231,6 @@ class Masking:
     def clear_model(self):
         self._model.clear_active_mask()
         self._model.clear_stored_masks()
+
+    def invert_masking_clicked(self, active):
+        self._model.invert_masking_clicked(active)

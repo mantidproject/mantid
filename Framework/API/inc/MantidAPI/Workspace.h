@@ -29,7 +29,7 @@ class WorkspaceHistory;
 class MANTID_API_DLL Workspace : public Kernel::DataItem {
 public:
   Workspace();
-  ~Workspace();
+  ~Workspace() override;
 
   /** Returns a clone (copy) of the workspace with covariant return type in all
    * derived classes.

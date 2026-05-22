@@ -35,6 +35,8 @@ set(TEST_PY_FILES
     engineering_diffraction/tabs/gsas2/test/test_gsas2_presenter.py
     # IO
     engineering_diffraction/test/engineering_diffraction_io_test.py
+    # general
+    engineering_diffraction/test/presenter_test.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

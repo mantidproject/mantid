@@ -9,6 +9,7 @@
 #
 import datetime
 from itertools import tee
+import re
 
 import numpy as np
 from matplotlib.collections import PolyCollection, QuadMesh
@@ -22,7 +23,7 @@ import mantid.api
 import mantid.kernel
 from mantid.api import MultipleExperimentInfos, MatrixWorkspace
 from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
-from mantid.plots.utility import convert_color_to_hex, MantidAxType
+from mantid.plots.utility import convert_color_to_hex, MantidAxType, PlotNormalizationType
 
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
@@ -65,7 +66,7 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     """
     Determine whether or not the workspace should be plotted as a
     distribution. If the workspace is a distribution return False, else,
-    if there is already a curves on the axes, return according to
+    if there are already curves on the axes, return according to
     whether those curves are distributions. Else go by the global
     setting.
     :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
@@ -87,11 +88,53 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
             current_artists = None
 
         if current_artists:
-            current_normalization = any([artist[0].is_normalized for artist in current_artists])
+            current_normalization = any([artist[0].is_normalized_by_bin_width() for artist in current_artists])
             normalization = current_normalization
         else:
             normalization = mantid.kernel.config["graph1d.autodistribution"].lower() == "on"
     return normalization, kwargs
+
+
+def get_normalization_type(workspace, axes, **kwargs):
+    """
+    Infer PlotNormalizationType from kwargs or workspace state.
+
+    Priority (in order):
+    1. If 'normalization_type' in kwargs, use it (may be enum or string)
+    2. Else if 'normalize_by_bin_width' in kwargs, convert bool to enum
+    3. Else infer via get_normalize_by_bin_width() and convert to enum
+
+    :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
+    :param axes: The axes being plotted on
+    :param kwargs: Plot keyword arguments
+    :return: PlotNormalizationType enum
+    """
+    if "normalization_type" in kwargs:
+        norm_type = kwargs.pop("normalization_type")
+        # Handle string form (from plot restoration)
+        if isinstance(norm_type, str):
+            return PlotNormalizationType[norm_type], kwargs
+        return norm_type, kwargs
+
+    # check if there are current artists that are all normalized by inverse Q^4
+    if _all_normalized_by_inverse_q_fourth_power(axes):
+        return PlotNormalizationType.INVERSE_Q_FOURTH_POWER, kwargs
+
+    normalize_by_bin_width, _ = get_normalize_by_bin_width(workspace, axes, **kwargs)
+    norm_type = PlotNormalizationType.BIN_WIDTH if normalize_by_bin_width else PlotNormalizationType.NONE
+    return norm_type, kwargs
+
+
+def _all_normalized_by_inverse_q_fourth_power(axes):
+    try:
+        current_artists = axes.tracked_workspaces.values()
+    except AttributeError:
+        return False
+
+    if not current_artists:
+        return False
+
+    return all(artist[0].normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER for artist in current_artists)
 
 
 def get_spectrum_normalisation(**kwargs):
@@ -107,7 +150,7 @@ def get_spectrum_normalisation(**kwargs):
     return norm, kwargs
 
 
-def get_normalization(md_workspace, **kwargs):
+def get_md_normalization(md_workspace, **kwargs):
     """
     Gets the normalization flag of an MDHistoWorkspace. For workspaces
     derived similar to MSlice/Horace, one needs to average data, the so-called
@@ -266,24 +309,24 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     return workspace_index, spectrum_number, kwargs
 
 
-def get_md_data1d(workspace, normalization, indices=None):
+def get_md_data1d(workspace, md_normalization, indices=None):
     """
     Function to transform data in an MDHisto workspace with exactly
     one non-integrated dimension into arrays of bin centers, data,
     and error, to be used in 1D plots (plot, scatter, errorbar)
     """
-    coordinate, data, err = get_md_data(workspace, normalization, indices, withError=True)
+    coordinate, data, err = get_md_data(workspace, md_normalization, indices, withError=True)
     assert len(coordinate) == 1, "The workspace is not 1D"
     coordinate = points_from_boundaries(coordinate[0])
     return coordinate, data, err
 
 
-def get_md_data(workspace, normalization, indices=None, withError=False):
+def get_md_data(workspace, md_normalization, indices=None, withError=False):
     """
     Generic function to extract data from an MDHisto workspace
 
     :param workspace: :class:`mantid.api.IMDHistoWorkspace` containing data
-    :param normalization: if :class:`mantid.api.MDNormalization.NumEventsNormalization`
+    :param md_normalization: if :class:`mantid.api.MDNormalization.NumEventsNormalization`
         it will divide intensity by the number of corresponding MDEvents
     :param indices: slice indices to select data
     :param withError: flag for if the error is calculated. If False, err is returned as None
@@ -299,13 +342,13 @@ def get_md_data(workspace, normalization, indices=None, withError=False):
     dim_arrays = [_dim2array(d) for d in dims]
     # get data
     data = workspace.getSignalArray()[indices].copy()
-    if normalization == mantid.api.MDNormalization.NumEventsNormalization:
+    if md_normalization == mantid.api.MDNormalization.NumEventsNormalization:
         nev = workspace.getNumEventsArray()[indices]
         data /= nev
     err = None
     if withError:
         err2 = workspace.getErrorSquaredArray()[indices].copy()
-        if normalization == mantid.api.MDNormalization.NumEventsNormalization:
+        if md_normalization == mantid.api.MDNormalization.NumEventsNormalization:
             err2 /= nev * nev
         err = np.sqrt(err2)
     data = data.squeeze().T
@@ -316,15 +359,13 @@ def get_md_data(workspace, normalization, indices=None, withError=False):
     return dim_arrays, data, err
 
 
-def get_spectrum(workspace, wkspIndex, normalize_by_bin_width, withDy=False, withDx=False):
+def get_spectrum(workspace, wkspIndex, normalization: PlotNormalizationType, withDy=False, withDx=False):
     """
     Extract a single spectrum and process the data into a frequency
 
     :param workspace: a Workspace2D or an EventWorkspace
     :param wkspIndex: workspace index
-    :param normalize_by_bin_width: flag to divide the data by bin width. The same
-        effect can be obtained by running the :ref:`algm-ConvertToDistribution`
-        algorithm
+    :param normalization: PlotNormalizationType, the type of normalization to apply
     :param withDy: if True, it will return the error in the "counts", otherwise None
     :param with Dx: if True, and workspace has them, it will return errors
         in the x coordinate, otherwise None
@@ -344,11 +385,18 @@ def get_spectrum(workspace, wkspIndex, normalize_by_bin_width, withDy=False, wit
         dx = workspace.readDx(wkspIndex)
 
     if workspace.isHistogramData():
-        if normalize_by_bin_width and not workspace.isDistribution():
+        boundary_points = points_from_boundaries(x)
+        if normalization == PlotNormalizationType.BIN_WIDTH and not workspace.isDistribution():
             y = y / (x[1:] - x[0:-1])
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])
-        x = points_from_boundaries(x)
+        elif normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER:
+            # multiply by x^4 instead of dividing by x^-4 for efficiency's sake
+            normalization_factor = boundary_points**4
+            y = y * normalization_factor
+            if dy is not None:
+                dy = dy * normalization_factor
+        x = boundary_points
     try:
         specInfo = workspace.spectrumInfo()
         if specInfo.isMasked(wkspIndex):
@@ -430,7 +478,7 @@ def get_bins(workspace, bin_index, withDy=False, withDx=False):
     return x_values, y_values, dy, dx
 
 
-def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=False):
+def get_md_data2d_bin_bounds(workspace, md_normalization, indices=None, transpose=False):
     """
     Function to transform data in an MDHisto workspace with exactly
     two non-integrated dimension into arrays of bin boundaries in each
@@ -438,7 +486,7 @@ def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=F
 
     Note: return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     """
-    coordinate, data, _ = get_md_data(workspace, normalization, indices, withError=False)
+    coordinate, data, _ = get_md_data(workspace, md_normalization, indices, withError=False)
     assert len(coordinate) == 2, "The workspace is not 2D"
     if transpose:
         return coordinate[1], coordinate[0], data.T
@@ -446,7 +494,7 @@ def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=F
         return coordinate[0], coordinate[1], data
 
 
-def get_md_data2d_bin_centers(workspace, normalization, indices=None, transpose=False):
+def get_md_data2d_bin_centers(workspace, md_normalization, indices=None, transpose=False):
     """
     Function to transform data in an MDHisto workspace with exactly
     two non-integrated dimension into arrays of bin centers in each
@@ -455,7 +503,7 @@ def get_md_data2d_bin_centers(workspace, normalization, indices=None, transpose=
 
     Note: return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     """
-    x, y, data = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
+    x, y, data = get_md_data2d_bin_bounds(workspace, md_normalization, indices, transpose)
     x = points_from_boundaries(x)
     y = points_from_boundaries(y)
     return x, y, data
@@ -627,9 +675,8 @@ def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=No
             continue
         previous_index = workspace_index
         if not (spectrum_info and spectrum_info.hasDetectors(workspace_index) and spectrum_info.isMonitor(workspace_index)):
-            centers, ztmp, _, _ = get_spectrum(
-                workspace, workspace_index, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False
-            )
+            normalization = PlotNormalizationType.BIN_WIDTH if normalize_by_bin_width else PlotNormalizationType.NONE
+            centers, ztmp, _, _ = get_spectrum(workspace, workspace_index, normalization=normalization, withDy=False, withDx=False)
             interpolation_function = interp1d(centers, ztmp, kind="nearest", bounds_error=False, fill_value="extrapolate")
             # only set values in the range of workspace
             x_range = np.where((x >= workspace.readX(workspace_index)[0]) & (x <= workspace.readX(workspace_index)[-1]))
@@ -862,7 +909,7 @@ def get_sample_log(workspace, **kwargs):
 # ====================================================
 
 
-def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_latex=True):
+def get_axes_labels(workspace, indices=None, normalization=PlotNormalizationType.BIN_WIDTH, use_latex=True):
     """
     Get axis labels from a Workspace2D or an MDHistoWorkspace
     Returns a tuple. The first element is the quantity label, such as "Intensity" or "Counts".
@@ -899,7 +946,7 @@ def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_la
         axes_labels.append(title.strip())
     else:
         # For matrix workspaces, return a tuple of ``(YUnit, <other units>)``
-        axes_labels = [workspace.YUnitLabel(useLatex=use_latex, plotAsDistribution=normalize_by_bin_width)]
+        axes_labels = [_get_y_axes_label(workspace, normalization, use_latex)]
         for index in range(workspace.axes()):
             axis = workspace.getAxis(index)
             unit = axis.getUnit()
@@ -909,6 +956,33 @@ def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_la
                 unit = unit.caption()
             axes_labels.append(unit)
     return tuple(axes_labels)
+
+
+def _get_y_axes_label(workspace, normalization, use_latex):
+    y_unit = workspace.YUnitLabel(use_latex)
+    if normalization == PlotNormalizationType.NONE:
+        return y_unit
+    x_label = ""
+    if normalization == PlotNormalizationType.BIN_WIDTH and not workspace.isDistribution():
+        x_label = workspace.getAxis(0).getUnit().symbol().latex() if use_latex else workspace.getAxis(0).getUnit().symbol().ascii()
+    elif normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER:
+        x_label = "Q^{-4}"
+    return _add_denominator_to_y_label(y_unit, x_label, use_latex)
+
+
+def _add_denominator_to_y_label(y_label, x_label, use_latex):
+    if use_latex:
+        if x_label:
+            label_expression = re.compile(r"(.*)\((.*)\)(\$\^\{-1\}\$)")
+            # if already normalised by a unit
+            if match := label_expression.match(y_label):
+                y_label = f"{match.group(1)}({match.group(2)} ${x_label}$){match.group(3)}"
+            else:
+                y_label += f" (${x_label}$)" + "$^{-1}$"
+    else:
+        y_label += f" per {x_label}"
+
+    return y_label
 
 
 def get_data_from_errorbar_container(err_cont):

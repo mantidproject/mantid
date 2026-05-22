@@ -59,6 +59,7 @@ public:
 
   MOCK_METHOD1(setChild, void(const bool));
   MOCK_METHOD1(enableHistoryRecordingForChild, void(const bool));
+  MOCK_METHOD1(enableHistoryRecordingForProcessGroups, void(const bool));
   MOCK_METHOD1(setAlwaysStoreInADS, void(const bool));
   MOCK_METHOD1(setRethrows, void(const bool));
 

@@ -35,12 +35,14 @@ from mantid.simpleapi import (
     Transpose,
     ResampleX,
     CopyInstrumentParameters,
+    CylinderAbsorptionCW,
     Divide,
     DeleteWorkspace,
     Scale,
     MaskAngle,
     ExtractMask,
     Minus,
+    SetSample,
     SumSpectra,
     ExtractUnmaskedSpectra,
     mtd,
@@ -129,6 +131,62 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             doc="Vanadium rod diamter (cm)",
         )
         self.declareProperty(
+            "VanadiumHeight",
+            3.0,  # cm
+            FloatBoundedValidator(lower=0.0),
+            doc="Vanadium rod height (cm)",
+        )
+        self.declareProperty(
+            "DoAttenuationCorrection",
+            False,
+            doc="If True, apply sample attenuation (absorption) correction using CylinderAbsorptionCW",
+        )
+        self.declareProperty(
+            "DoMultipleScatteringCorrection",
+            False,
+            doc="If True, calculate and apply multiple scattering correction for the sample",
+        )
+        self.declareProperty(
+            "AbsoluteIntensityUnits",
+            False,
+            doc="If True, output in absolute intensity units (mb/sr/f.u.)",
+        )
+        self.declareProperty(
+            "SampleChemicalFormula",
+            "",
+            doc="Chemical formula of the sample (e.g. 'Fe2O3')",
+        )
+        self.declareProperty(
+            "SampleCrystalDensity",
+            Property.EMPTY_DBL,
+            FloatBoundedValidator(lower=0.0),
+            doc="Crystal density of the sample (g/cm3)",
+        )
+        self.declareProperty(
+            "SamplePackingFraction",
+            0.5,
+            FloatBoundedValidator(lower=0.0, upper=1.0),
+            doc="Packing fraction for the sample powder (default 0.5)",
+        )
+        self.declareProperty(
+            "SampleDiameter",
+            Property.EMPTY_DBL,
+            FloatBoundedValidator(lower=0.0),
+            doc="Sample diameter (cm)",
+        )
+        self.declareProperty(
+            "SampleHeight",
+            0.0,
+            FloatBoundedValidator(lower=0.0),
+            doc="Sample height (cm). Required for multiple scattering and absolute intensity units.",
+        )
+        self.declareProperty(
+            "SampleBackgroundScaleFactor",
+            1.0,
+            FloatBoundedValidator(lower=0.0),
+            doc="Scale factor (fB) applied to sample background before subtraction",
+        )
+        self.declareProperty(
             "XUnits",
             "2Theta",
             StringListValidator(["2Theta", "d-spacing", "Q"]),
@@ -168,11 +226,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             "MaskAngle",
             Property.EMPTY_DBL,
             "Out of plane (phi) angle above which data will be masked",
-        )
-        self.declareProperty(
-            "AttenuationmuR",
-            Property.EMPTY_DBL,
-            doc="muR for sample attenuation correction",
         )
         self.declareProperty(
             "Sum",
@@ -535,6 +588,32 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         if vanadiumDiameter == Property.EMPTY_DBL:
             issues["VanadiumDiameter"] = "VanadiumDiameter must be provided"
 
+        # Validate sample absorption correction properties
+        doAttenuation = self.getProperty("DoAttenuationCorrection").value
+        doMS = self.getProperty("DoMultipleScatteringCorrection").value
+        absoluteUnits = self.getProperty("AbsoluteIntensityUnits").value
+        sampleHeight = self.getProperty("SampleHeight").value
+
+        if doMS and sampleHeight <= 0:
+            issues["SampleHeight"] = "SampleHeight must be provided when DoMultipleScatteringCorrection is True"
+
+        if absoluteUnits:
+            if vanadiumDiameter == Property.EMPTY_DBL or vanadiumDiameter <= 0:
+                issues["VanadiumDiameter"] = "VanadiumDiameter must be provided and > 0 for absolute intensity units"
+            vanadiumHeight = self.getProperty("VanadiumHeight").value
+            if vanadiumHeight <= 0:
+                issues["VanadiumHeight"] = "VanadiumHeight must be provided and > 0 for absolute intensity units"
+            if sampleHeight <= 0:
+                issues["SampleHeight"] = "SampleHeight must be provided for absolute intensity units"
+
+        if doAttenuation:
+            if not self.getProperty("SampleChemicalFormula").value:
+                issues["SampleChemicalFormula"] = "SampleChemicalFormula is required when DoAttenuationCorrection is True"
+            if self.getProperty("SampleCrystalDensity").value == Property.EMPTY_DBL:
+                issues["SampleCrystalDensity"] = "SampleCrystalDensity is required when DoAttenuationCorrection is True"
+            if self.getProperty("SampleDiameter").value == Property.EMPTY_DBL:
+                issues["SampleDiameter"] = "SampleDiameter is required when DoAttenuationCorrection is True"
+
         # Check metadata consistency for multiple sample runs
         files = []
         filenames = self.getProperty("SampleFilename").value
@@ -573,8 +652,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             logger.warning("MaskWorkspace is not set.")
         if self.getProperty("MaskAngle").value == Property.EMPTY_DBL:
             logger.warning("MaskAngle is not set.")
-        if self.getProperty("AttenuationmuR").value == Property.EMPTY_DBL:
-            logger.warning("AttenuationmuR is not set.")
 
     def _loadMIDASData(self, filename, ws):
         # Check if the file has the expected fields
@@ -678,6 +755,11 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         self.vanadium_background_ws = self._load_vanadium_background_data()
         self.sample_background_ws = self._load_sample_background_data()
 
+        # Step 2b: Apply sample absorption correction (before axis conversion, needs detector geometry)
+        if self.getProperty("DoAttenuationCorrection").value:
+            logger.information("Step 2b: Applying sample absorption correction")
+            self._apply_sample_corrections_pre_conversion(sample_workspaces)
+
         # Step 3: Axis Conversion & Masking
         logger.information("Step 3: Converting axes and applying masks")
         sample_workspaces, sample_masks = self._convert_data(sample_workspaces)
@@ -727,6 +809,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 DeleteWorkspace(ws, EnableLogging=False)
 
     def _resample_inputs(self, sample_workspaces, sample_masks, xMin, xMax, binWidth, summing):
+        # Apply vanadium absorption correction and background subtraction on raw workspace
+        self._apply_vanadium_absorption_correction()
+
         # Keep original raw workspace names so they can be re-used each iteration
         raw_vanadium_background_ws = self.vanadium_background_ws
         raw_sample_background_ws = self.sample_background_ws
@@ -764,12 +849,13 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
             # Calibration & Normalization (vanadium correction)
             logger.information("Processing calibration (vanadium) data")
+            vanadium_corrected = None
             if self.vanadium_ws is not None:
                 vanadium_corrected = self._process_vanadium_calibration(
                     self.vanadium_ws,
                     self.vanadium_background_ws,
                 )
-                ws_name = self._apply_sample_absorption_correction(ws_name, vanadium_corrected, self.sample_background_ws)
+            ws_name = self._apply_sample_absorption_correction(ws_name, vanadium_corrected, self.sample_background_ws)
 
             if summing:
                 # conjoin
@@ -905,15 +991,243 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         result = self._general_load_data("SampleBackground")
         return result[0] if result else None
 
+    def _apply_vanadium_absorption_correction(self):
+        """
+        Apply absorption correction and background subtraction to the raw vanadium workspace.
+
+        Implements: Vcorr = (V - VB) * (1 - Δ) / A
+        where V and VB are separately normalised to Time or Monitor (unless NormaliseBy=None).
+
+        If VanadiumDiameter == 0, Δ = 0 and A = 1 so Vcorr = V - VB.
+
+        This modifies the raw vanadium workspace in-place before resampling.
+        """
+        if self.vanadium_ws is None:
+            return
+
+        vanadium_ws_name = self.vanadium_ws
+        vanadium_bg_ws_name = self.vanadium_background_ws
+        vanadium_diameter = self.getProperty("VanadiumDiameter").value
+
+        # Subtract normalised background: Scale VB by V_scale/VB_scale then subtract
+        if vanadium_bg_ws_name is not None:
+            Scale(
+                InputWorkspace=vanadium_bg_ws_name,
+                OutputWorkspace=vanadium_bg_ws_name,
+                Factor=self._get_scale(vanadium_ws_name) / self._get_scale(vanadium_bg_ws_name),
+                EnableLogging=False,
+            )
+            Minus(
+                LHSWorkspace=vanadium_ws_name,
+                RHSWorkspace=vanadium_bg_ws_name,
+                OutputWorkspace=vanadium_ws_name,
+                EnableLogging=False,
+            )
+
+        # Apply absorption correction if vanadium diameter is given (> 0)
+        if vanadium_diameter > 0:
+            wavelength = self.getProperty("Wavelength").value
+            vanadium_height = self.getProperty("VanadiumHeight").value
+            radius = 0.5 * vanadium_diameter  # cm
+
+            # Set sample material for vanadium
+            SetSample(
+                InputWorkspace=vanadium_ws_name,
+                Material={"ChemicalFormula": "V", "SampleMassDensity": 6.1172},
+            )
+
+            # Compute absorption (A) and multiple scattering (Δ) workspaces
+            CylinderAbsorptionCW(
+                InputWorkspace=vanadium_ws_name,
+                Radius=radius,
+                Height=vanadium_height,
+                Wavelength=wavelength,
+                AbsorptionCorrectionMethod="Sabine",
+                AbsorptionWorkspace="__vanadium_absorption",
+                MultipleScatteringWorkspace="__vanadium_ms",
+            )
+
+            # Extract correction values
+            A_values = mtd["__vanadium_absorption"].extractY().flatten()
+            delta = mtd["__vanadium_ms"].extractY()[0][0]
+
+            logger.information(f"Vanadium absorption correction: Δ = {delta:.6f}, A range = [{A_values.min():.6f}, {A_values.max():.6f}]")
+
+            # Apply correction: V = V * (1 - Δ) / A
+            # First scale by (1 - Δ)
+            Scale(
+                InputWorkspace=vanadium_ws_name,
+                OutputWorkspace=vanadium_ws_name,
+                Factor=(1 - delta),
+                EnableLogging=False,
+            )
+            # Then divide by absorption workspace A
+            Divide(
+                LHSWorkspace=vanadium_ws_name,
+                RHSWorkspace="__vanadium_absorption",
+                OutputWorkspace=vanadium_ws_name,
+                EnableLogging=False,
+            )
+
+            # Cleanup temporary workspaces
+            DeleteWorkspace("__vanadium_absorption", EnableLogging=False)
+            DeleteWorkspace("__vanadium_ms", EnableLogging=False)
+
+        # Mark background as already processed
+        self.vanadium_background_ws = None
+
+    def _apply_sample_corrections_pre_conversion(self, sample_workspaces):
+        """
+        Apply sample absorption correction before axis conversion.
+
+        Implements: Scorr = (S - fB*SB) * (1 - ΔS) / AS
+
+        This must be called before axis conversion because CylinderAbsorptionCW
+        needs detector 2theta angles from the instrument geometry.
+        """
+        fB = self.getProperty("SampleBackgroundScaleFactor").value
+        do_ms = self.getProperty("DoMultipleScatteringCorrection").value
+        wavelength = self.getProperty("Wavelength").value
+        sample_formula = self.getProperty("SampleChemicalFormula").value
+        crystal_density = self.getProperty("SampleCrystalDensity").value
+        packing_fraction = self.getProperty("SamplePackingFraction").value
+        sample_diameter = self.getProperty("SampleDiameter").value
+        sample_height = self.getProperty("SampleHeight").value
+
+        sample_mass_density = crystal_density * packing_fraction
+        sample_radius = 0.5 * sample_diameter  # cm
+
+        sample_bg_ws_name = self.sample_background_ws
+
+        for ws_name in sample_workspaces:
+            # Subtract normalised background: S = S - fB * (S_scale/SB_scale) * SB
+            if sample_bg_ws_name is not None:
+                bg_factor = fB * self._get_scale(ws_name) / self._get_scale(sample_bg_ws_name)
+                Scale(
+                    InputWorkspace=sample_bg_ws_name,
+                    OutputWorkspace="__sample_bg_scaled",
+                    Factor=bg_factor,
+                    EnableLogging=False,
+                )
+                self.temp_workspace_list.append("__sample_bg_scaled")
+                Minus(
+                    LHSWorkspace=ws_name,
+                    RHSWorkspace="__sample_bg_scaled",
+                    OutputWorkspace=ws_name,
+                    EnableLogging=False,
+                )
+                if mtd.doesExist("__sample_bg_scaled"):
+                    DeleteWorkspace("__sample_bg_scaled", EnableLogging=False)
+
+            # Set sample material
+            SetSample(
+                InputWorkspace=ws_name,
+                Material={"ChemicalFormula": sample_formula, "SampleMassDensity": sample_mass_density},
+            )
+
+            # Compute absorption (AS) and multiple scattering (ΔS) using CylinderAbsorptionCW
+            CylinderAbsorptionCW(
+                InputWorkspace=ws_name,
+                Radius=sample_radius,
+                Height=sample_height if sample_height > 0 else 3.0,
+                Wavelength=wavelength,
+                MultipleScattering=do_ms,
+                AbsorptionCorrectionMethod="Sabine",
+                AbsorptionWorkspace="__sample_absorption",
+                MultipleScatteringWorkspace="__sample_ms",
+            )
+
+            delta_S = mtd["__sample_ms"].extractY()[0][0] if do_ms else 0.0
+
+            logger.information(f"Sample absorption correction for {ws_name}: ΔS = {delta_S:.6f}")
+
+            # Apply correction: S = S * (1 - ΔS) / AS
+            Scale(
+                InputWorkspace=ws_name,
+                OutputWorkspace=ws_name,
+                Factor=(1 - delta_S),
+                EnableLogging=False,
+            )
+            Divide(
+                LHSWorkspace=ws_name,
+                RHSWorkspace="__sample_absorption",
+                OutputWorkspace=ws_name,
+                EnableLogging=False,
+            )
+
+            # Cleanup temporary workspaces
+            DeleteWorkspace("__sample_absorption", EnableLogging=False)
+            DeleteWorkspace("__sample_ms", EnableLogging=False)
+
+        # Mark sample background as already processed
+        self.sample_background_ws = None
+
+    def _compute_fnorm(self):
+        """
+        Compute the absolute intensity normalization factor fnorm.
+
+        fnorm = 1000/4π * (Ms * sigma_V_scatter * roV * hV *rV^2)/(Mv * fS * roS * hS * rS^2)
+
+        """
+        # Vanadium constants
+        sigma_V_scatter = 5.08  # barn (total scattering cross-section of V)
+        roV = 6.1172  # g/cm³ (mass density of V)
+        Mv = 50.94  # g/mol (molar mass of V)
+
+        vanadium_diameter = self.getProperty("VanadiumDiameter").value
+        hV = self.getProperty("VanadiumHeight").value
+        rV = 0.5 * vanadium_diameter  # cm
+
+        # Sample parameters
+        sample_diameter = self.getProperty("SampleDiameter").value
+        hS = self.getProperty("SampleHeight").value
+        sample_formula = self.getProperty("SampleChemicalFormula").value
+        roS = self.getProperty("SampleCrystalDensity").value
+        fS = self.getProperty("SamplePackingFraction").value
+        rS = 0.5 * sample_diameter  # cm
+
+        # Use a temporary workspace to get the material number density
+        from mantid.kernel import MaterialBuilder
+
+        builder = MaterialBuilder()
+        builder.setFormula(sample_formula)
+        builder.setMassDensity(roS)
+        material = builder.build()
+        # n_S = material.numberDensity  # formula units/Å³
+        Ms = material.relativeMolecularMass()  # g/mol
+
+        wavelength = self.getProperty("Wavelength").value
+        sigma_S_scatter = material.totalScatterXSection()  # barn
+        sigma_S_absorb = material.absorbXSection(wavelength)  # barn (at given λ)
+
+        logger.information(
+            f"Sample parameters: roS = {roS:.4f} g/cm^3, fS = {fS:.4f}, hS = {hS:.4f} cm, rS = {rS:.4f} cm, Ms = {Ms:.4f} g/mol"
+        )
+        logger.information(
+            f"Sample cross-sections (barn): total scatter = {sigma_S_scatter:.4f}, "
+            f"absorption (lambda = {wavelength:.4f} A) = {sigma_S_absorb:.4f}"
+        )
+        logger.information(
+            f"Vanadium parameters: roV = {roV:.4f} g/cm^3, hV = {hV:.4f} cm, "
+            f"rV = {rV:.4f} cm, Mv = {Mv:.4f} g/mol, sigma_V_scatter = {sigma_V_scatter:.4f} barn"
+        )
+
+        # fnorm in barn/sr/f.u., convert to mb/sr/f.u.
+        # fnorm = (sigma_V_scatter / (4 * np.pi)) * (n_V * rV**2 * hV) / (n_S * rS**2 * hS)
+        fnorm = 1000 / (4 * np.pi) * (Ms * sigma_V_scatter * roV * hV * rV**2) / (Mv * fS * roS * hS * rS**2)
+
+        logger.information(f"Absolute intensity normalization: fnorm = {fnorm:.4f} ")
+
+        return fnorm
+
     def _process_vanadium_calibration(self, vanadium_ws, vanadium_bg_ws):
         """
         Process vanadium calibration with background subtraction and absorption correction.
-        VCORR = (V - V_B)/(T_0*sigma_inc + sigma_mult)
-        """
-        T_0 = 1.0  # Placeholder for transmission factor
-        sigma_inc = 1  # Placeholder for incoherent scattering cross-section
-        sigma_mult = 0  # Placeholder for multiple scattering cross-section
+        Vcorr = (V - VB) * (1 - Δ) / A
 
+        Note: If _apply_vanadium_absorption_correction was called on the raw workspace,
+        the correction has already been applied and vanadium_bg_ws will be None.
+        """
         if vanadium_bg_ws is not None:
             Scale(
                 InputWorkspace=vanadium_bg_ws,
@@ -927,56 +1241,48 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 OutputWorkspace=vanadium_ws,
                 EnableLogging=False,
             )
-        denominator = (T_0 * sigma_inc) + sigma_mult
-
-        Scale(
-            InputWorkspace=vanadium_ws,
-            OutputWorkspace=vanadium_ws,
-            Factor=1.0 / denominator,
-            EnableLogging=False,
-        )
 
         return vanadium_ws
 
     def _apply_sample_absorption_correction(self, sample_ws, vanadium_corrected, sample_bg_ws):
         """
-        Apply absorption correction.
-        CORR = F*(SF)/(T*VCORR)
-        """
-        F = self.getProperty("Scale").value
-        T = 1.0  # Placeholder for transmission factor
+        Apply final corrections to sample data.
 
-        if sample_bg_ws is not None:
-            Minus(
-                LHSWorkspace=sample_ws,
-                RHSWorkspace=sample_bg_ws,
-                OutputWorkspace=sample_ws,
-                EnableLogging=False,
-            )
+        Soutput = s * fnorm * Scorr / Vcorr,
+        where s is the user-supplied Scale (default 1), and fnorm is the
+        absolute-intensity normalization factor if AbsoluteIntensityUnits=True,
+        otherwise fnorm = 1.
+
+        When DoAttenuationCorrection=False, BG subtraction is applied here
+        """
+        s = self.getProperty("Scale").value
+        do_attenuation = self.getProperty("DoAttenuationCorrection").value
+        absolute_units = self.getProperty("AbsoluteIntensityUnits").value
+
+        if not do_attenuation:
+            # Legacy behavior
+            if sample_bg_ws is not None:
+                Minus(
+                    LHSWorkspace=sample_ws,
+                    RHSWorkspace=sample_bg_ws,
+                    OutputWorkspace=sample_ws,
+                    EnableLogging=False,
+                )
+
+        fnorm = self._compute_fnorm() if absolute_units else 1.0
 
         Scale(
             InputWorkspace=sample_ws,
             OutputWorkspace=sample_ws,
-            Factor=F,
+            Factor=s * fnorm,
             EnableLogging=False,
         )
+
+        # Divide by corrected vanadium
         if vanadium_corrected is not None:
-            Scale(
-                InputWorkspace=vanadium_corrected,
-                OutputWorkspace=vanadium_corrected,
-                Factor=T,
-                EnableLogging=False,
-            )
             Divide(
                 LHSWorkspace=sample_ws,
                 RHSWorkspace=vanadium_corrected,
-                OutputWorkspace=sample_ws,
-                EnableLogging=False,
-            )
-        else:
-            Divide(
-                LHSWorkspace=sample_ws,
-                RHSWorkspace=T,
                 OutputWorkspace=sample_ws,
                 EnableLogging=False,
             )

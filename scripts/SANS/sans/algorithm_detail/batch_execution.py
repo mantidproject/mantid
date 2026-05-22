@@ -7,8 +7,9 @@
 from typing import Dict, Any
 from copy import deepcopy
 
-from mantid.api import AnalysisDataService, WorkspaceGroup
+from mantid.api import AnalysisDataService, WorkspaceGroup, IEventWorkspace
 from mantid.dataobjects import Workspace2D
+from mantid.kernel import Logger
 from sans.algorithm_detail.move_workspaces import move_component
 from sans.common.general_functions import (
     create_managed_non_child_algorithm,
@@ -47,6 +48,71 @@ if "workbench.app" in sys.modules:
         import mantidqt.plotting.functions as plotting_module
     except ImportError:
         pass
+
+
+sanslog = Logger("SANS")
+
+
+DAE_BEAM_CURRENT_LOG = "dae_beam_current"
+
+
+def empty_slice_warning(state_slice, workspace):
+    """Return a warning string when ``dae_beam_current`` shows the beam off
+    throughout the requested slice, otherwise ``None``. Inconclusive cases
+    (non-event workspace, log missing, multi-slice state, malformed log) fall
+    through.
+    """
+    if state_slice is None or workspace is None:
+        return None
+    if not isinstance(workspace, IEventWorkspace):
+        return None
+
+    starts = getattr(state_slice, "start_time", None) or []
+    ends = getattr(state_slice, "end_time", None) or []
+    if len(starts) != 1 or len(ends) != 1:
+        return None
+
+    start, end = starts[0], ends[0]
+    if start < 0 or end <= start:
+        return None
+
+    run = workspace.getRun()
+    if not run.hasProperty(DAE_BEAM_CURRENT_LOG):
+        return None
+
+    try:
+        import numpy as np
+
+        bc = run.getProperty(DAE_BEAM_CURRENT_LOG)
+
+        origin = workspace.getPulseTimeMin()
+        offsets_s = (np.asarray(bc.times) - origin.to_datetime64()) / np.timedelta64(1, "s")
+        values = np.asarray(bc.value)
+
+        if offsets_s.size == 0 or offsets_s.size != values.size:
+            return None
+
+        order = np.argsort(offsets_s)
+        offsets_s = offsets_s[order]
+        values = values[order]
+
+        start_index = np.searchsorted(offsets_s, start, side="right") - 1
+        if start_index < 0:
+            return None
+
+        change_indices = np.flatnonzero((offsets_s > start) & (offsets_s < end))
+        if change_indices.size == 0:
+            return None
+
+        active = values[np.concatenate(([start_index], change_indices))]
+
+        if not np.all(active == 0):
+            return None
+    except Exception:  # pylint: disable=broad-except
+        return None
+
+    run_no = run.getProperty("run_number").value if run.hasProperty("run_number") else "?"
+    return "Run {0}: time slice [{1:g}s, {2:g}s] skipped (beam off throughout).".format(run_no, start, end)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -127,6 +193,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     )
 
     scaled_background_ws = None
+    skipped_slices = []
     # ------------------------------------------------------------------------------------------------------------------
     # Run reductions (one at a time)
     # ------------------------------------------------------------------------------------------------------------------
@@ -138,6 +205,17 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     reduction_alg.setAlwaysStoreInADS(False)
     # Perform the data reduction
     for reduction_package in reduction_packages:
+        # Preflight skip for beam-off slices (not applicable to v2 optimisation path).
+        if not event_slice_optimisation:
+            sample_ws = reduction_package.workspaces.get(SANSDataType.SAMPLE_SCATTER)
+            if isinstance(sample_ws, list):
+                sample_ws = sample_ws[0] if sample_ws else None
+            msg = empty_slice_warning(getattr(reduction_package.state, "slice", None), sample_ws)
+            if msg is not None:
+                sanslog.warning(msg)
+                skipped_slices.append(msg)
+                continue
+
         # -----------------------------------
         # Set the properties on the algorithm
         # -----------------------------------
@@ -178,6 +256,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
         group_workspaces_if_required(reduction_package, output_mode, save_can, event_slice_optimisation=event_slice_optimisation)
+
+    if skipped_slices:
+        sanslog.notice("{0} slice(s) skipped due to empty time windows: {1}".format(len(skipped_slices), "; ".join(skipped_slices)))
 
     data = state.data
     additional_run_numbers = {
@@ -222,6 +303,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     out_scale_factors = []
     out_shift_factors = []
     for reduction_package in reduction_packages:
+        # None when the slice was skipped (beam-off preflight).
+        if reduction_package.out_scale_factor is None:
+            continue
         out_scale_factors.extend(reduction_package.out_scale_factor)
         out_shift_factors.extend(reduction_package.out_shift_factor)
 

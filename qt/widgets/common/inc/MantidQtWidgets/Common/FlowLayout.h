@@ -65,7 +65,7 @@ public:
   QSize minimumSize() const override;
   void setGeometry(const QRect &rect) override;
   QSize sizeHint() const override;
-  QLayoutItem *takeAt(int index) override;
+  QLayoutItem *takeAt(int index) override final;
 
 private:
   int doLayout(const QRect &rect, bool testOnly) const;

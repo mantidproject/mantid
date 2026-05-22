@@ -13,9 +13,13 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
@@ -41,6 +45,31 @@ void raiseDuplicateDetectorError(const size_t detectorId) {
   std::stringstream sstream;
   sstream << "Instrument Definition corrupt. Detector with ID " << detectorId << " already exists.";
   throw Exception::InstrumentDefinitionError(sstream.str());
+}
+
+/// Returns the heap size of a single component object, using the most-derived type.
+size_t componentObjectSize(const IComponent *comp) {
+  size_t result;
+  if (dynamic_cast<const RectangularDetector *>(comp))
+    result = sizeof(RectangularDetector);
+  else if (const auto *sd = dynamic_cast<const StructuredDetector *>(comp))
+    result = sizeof(StructuredDetector) + sd->getXValues().capacity() * sizeof(double) +
+             sd->getYValues().capacity() * sizeof(double);
+  else if (dynamic_cast<const GridDetectorPixel *>(comp))
+    result = sizeof(GridDetectorPixel);
+  else if (dynamic_cast<const GridDetector *>(comp))
+    result = sizeof(GridDetector);
+  else if (dynamic_cast<const Detector *>(comp))
+    result = sizeof(Detector);
+  else if (dynamic_cast<const ObjCompAssembly *>(comp))
+    result = sizeof(ObjCompAssembly);
+  else if (dynamic_cast<const ObjComponent *>(comp))
+    result = sizeof(ObjComponent);
+  else if (dynamic_cast<const CompAssembly *>(comp))
+    result = sizeof(CompAssembly);
+  else
+    result = sizeof(Component);
+  return result;
 }
 } // namespace
 
@@ -1461,6 +1490,59 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
       std::shared_ptr<const Instrument>(this, NoDeleting()), std::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
   detInfo->m_instrument = parInstrument;
   return {std::move(compInfo), std::move(detInfo)};
+}
+
+/** Return memory used by the instrument, in bytes.
+ * @return bytes used.
+ */
+size_t Instrument::getMemorySize() const {
+  // A parametrized instrument is a thin wrapper around a base instrument: it holds a shared_ptr to
+  // the base (m_instr) but owns none of the component tree, detector cache, or beamline objects.
+  // Delegate to the base and add only the ParameterMap overhead.
+  if (m_instr) {
+    const size_t paramMapMem = m_map_nonconst ? m_map_nonconst->getMemorySize() : 0;
+    return sizeof(*this) + m_instr->getMemorySize() + paramMapMem;
+  }
+
+  // Each std::map node carries ~4 pointers of red-black-tree overhead beyond the stored value_type.
+  const size_t mapNodeOverhead = 4 * sizeof(void *);
+
+  const size_t logfileCacheMem =
+      m_logfileCache.size() * (sizeof(InstrumentParameterCache::value_type) + mapNodeOverhead);
+  const size_t logfileUnitMem = m_logfileUnit.size() * (sizeof(decltype(m_logfileUnit)::value_type) + mapNodeOverhead);
+
+  const size_t detectorInfoMem = m_detectorInfo ? m_detectorInfo->getMemorySize() : 0;
+  const size_t componentInfoMem = m_componentInfo ? m_componentInfo->getMemorySize() : 0;
+
+  // BFS over the component tree. The Instrument root is already counted via sizeof(*this),
+  // so start the traversal from the root and add each child's type-accurate object size plus
+  // the IComponent* slot it occupies in its parent's m_children buffer.
+  size_t componentTreeMem = 0;
+  std::queue<const ICompAssembly *> bfsQueue;
+  bfsQueue.push(this);
+  while (!bfsQueue.empty()) {
+    const auto *assembly = bfsQueue.front();
+    bfsQueue.pop();
+    const int n = assembly->nelements();
+    componentTreeMem += static_cast<size_t>(n) * sizeof(IComponent *);
+    for (int i = 0; i < n; ++i) {
+      auto child = assembly->getChild(i);
+      const IComponent *raw = child.get();
+      componentTreeMem += componentObjectSize(raw);
+      if (const auto *sub = dynamic_cast<const ICompAssembly *>(raw))
+        bfsQueue.push(sub);
+    }
+  }
+
+  // m_referenceFrame: heap-allocated ReferenceFrame object
+  const size_t referenceFrameMem = m_referenceFrame ? sizeof(ReferenceFrame) : 0;
+
+  // Indirect-geometry instruments hold a second full instrument for the physical geometry.
+  const size_t physicalInstrumentMem = m_physicalInstrument ? m_physicalInstrument->getMemorySize() : 0;
+
+  return sizeof(*this) + componentTreeMem + m_detectorCache.capacity() * sizeof(DetectorCacheEntry) + logfileCacheMem +
+         logfileUnitMem + m_defaultView.capacity() + m_defaultViewAxis.capacity() + m_xmlText.capacity() +
+         m_filename.capacity() + detectorInfoMem + componentInfoMem + referenceFrameMem + physicalInstrumentMem;
 }
 
 namespace Conversion {

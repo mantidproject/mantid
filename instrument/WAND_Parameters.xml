@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="WAND" valid-from="2017-12-01 00:00:00">
+<parameter-file instrument="WAND" valid-from="2017-12-01 00:00:00" valid-to = "2100-01-31 23:59:59">
   <component-link name="WAND">
     <parameter name="wavelength" type="float">
       <value val="1.488" />

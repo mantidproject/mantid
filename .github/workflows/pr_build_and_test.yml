@@ -28,10 +28,8 @@ jobs:
         with:
           filters: .github/filters.yaml
 
-      - uses: prefix-dev/setup-pixi@v0.9.5
+      - uses: ./.github/actions/setup-pixi
         if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
-        with:
-          frozen: true
 
       - uses: ./.github/actions/doxygen-build
         name: Build doxygen
@@ -93,18 +91,20 @@ jobs:
           fetch-tags: true
 
       - name: Install pixi
-        run: |
-          source ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/pixi-utils
-          install_pixi
-          # Add pixi to path for use in other steps
-          echo "$HOME/.pixi/bin" >> $GITHUB_PATH
+        uses: ./.github/actions/setup-pixi
 
       - name: Clean build tree
         # supplying --clean-build or CLEAN_BUILD=true should be added here
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
 
+      - name: Determine if a PR build
+        if: ${{ github.event_name == 'pull_request' }}
+        # telling jenkins scripts this is a PR build
+        run: echo "JOB_NAME=pull_requests" >> $GITHUB_ENV
+
       - name: Build code
         run: |
+          echo "For Jenkins scripts JOB_NAME=${JOB_NAME}"
           cd ${GITHUB_WORKSPACE}
           echo "::add-matcher::.github/matchers/gcc.json"
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY $EXTRA_CMAKE_FLAGS

@@ -18,6 +18,7 @@ set(EXPORT_FILES
     src/Exports/AlgorithmFactoryObserver.cpp
     src/Exports/AlgorithmManager.cpp
     src/Exports/AnalysisDataService.cpp
+    src/Exports/InstrumentDataService.cpp
     src/Exports/FileProperty.cpp
     src/Exports/InstrumentFileFinder.cpp
     src/Exports/MultipleFileProperty.cpp

@@ -325,6 +325,7 @@ def pcolormesh_on_axis(ax, ws, color_norm=None, normalize_by_bin_width=None):
         # remove normalize_by_bin_width from cargs if present so that this can be toggled in future
         for cargs in pcm.axes.creation_args:
             cargs.pop("normalize_by_bin_width")
+            cargs.pop("normalizeation_type", None)
     else:
         pcm = ax.pcolormesh(ws, cmap=ConfigService.getString("plots.images.Colormap"), norm=scale)
 

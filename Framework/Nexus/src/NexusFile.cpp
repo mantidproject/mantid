@@ -63,6 +63,31 @@ template <typename NumT> static string toString(const vector<NumT> &data) {
   return result.str();
 }
 
+static herr_t getEntriesCallback(hid_t gid, const char *name, const H5L_info2_t *, void *data) {
+  H5O_info2_t oinfo;
+  if (H5Oget_info_by_name3(gid, name, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+    return 0;
+  using namespace Mantid::Nexus;
+  auto &res = *static_cast<Entries *>(data);
+  std::string classStr(UNKNOWN_GROUP_SPEC);
+  if (oinfo.type == H5O_TYPE_GROUP) {
+    GroupID child{H5Gopen2(gid, name, H5P_DEFAULT)};
+    if (child.isValid()) {
+      H5::Group grp(child);
+      if (grp.attrExists(GROUP_CLASS_SPEC)) {
+        std::string className;
+        H5::Attribute attr = grp.openAttribute(GROUP_CLASS_SPEC);
+        attr.read(attr.getDataType(), className);
+        classStr = className.empty() ? UNKNOWN_GROUP_SPEC : std::move(className);
+      }
+    }
+  } else if (oinfo.type == H5O_TYPE_DATASET) {
+    classStr = SCIENTIFIC_DATA_SET;
+  }
+  res[name] = classStr;
+  return 0;
+}
+
 } // end of anonymous namespace
 
 namespace Mantid::Nexus {
@@ -186,8 +211,6 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
 File::File(File const &f)
     : m_filename(f.m_filename), m_access(f.m_access), m_address(), m_fileID(f.m_fileID), m_current_group_id(0),
       m_current_data_id(0), m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(f.m_descriptor) {
-  // NOTE warning to future devs
-  // if you change this method, please run the systemtest VanadiumAndFocusWithSolidAngleTest
   if (!m_fileID.isValid())
     throw NXEXCEPTION("Error reopening file");
 }
@@ -618,7 +641,7 @@ template <typename NumT> void File::putData(NumT const *data) {
       DimVector vecStart(rank, 0), vecSize(rank, 0);
       for (int i = 0; i < rank; i++) {
         if (maxdims[i] == H5S_UNLIMITED) {
-          vecStart[i] = thedims[i] + 1;
+          vecStart[i] = thedims[i];
           vecSize[i] = 1;
         } else {
           vecStart[i] = 0;
@@ -722,21 +745,44 @@ template <> void File::getData<char>(char *data) {
 }
 
 string File::getStrData() {
-  Info info = this->getInfo();
-  if (info.type != NXnumtype::CHAR) {
+  if (!isDataSetOpen()) {
+    throw NXEXCEPTION("No dataset open");
+  }
+  H5T_class_t tclass = H5Tget_class(m_current_type_id);
+  if (tclass != H5T_STRING) {
     stringstream msg;
-    msg << "Cannot use getStrData() on non-character data. Found type=" << info.type;
+    msg << "Cannot use getStrData() on non-character data. Found type=" << hdf5ToNXType(tclass, m_current_type_id);
     throw NXEXCEPTION(msg.str());
   }
-  if (info.dims.size() != 1) {
+  // validate rank
+  int const rank = H5Sget_simple_extent_ndims(m_current_space_id);
+  if (rank > 1) {
     stringstream msg;
-    msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
+    msg << "getStrData() only understands rank<=1 data. Found rank=" << rank;
     throw NXEXCEPTION(msg.str());
   }
-  std::vector<char> value(static_cast<size_t>(info.dims[0]) + 1, '\0');
+  // determine storage size: type_size × npoints (mirrors H5Cpp's getInMemDataSize approach)
+  dimsize_t storage_size;
+  if (H5Tis_variable_str(m_current_type_id)) {
+    if (rank == 0) {
+      // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
+      char *vbuf = nullptr;
+      if (H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0 || !vbuf)
+        throw NXEXCEPTION("Failed to read scalar variable-length string");
+      storage_size = strlen(vbuf);
+      H5free_memory(vbuf);
+    } else if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &storage_size) < 0) {
+      throw NXEXCEPTION("Failed to read string length for variable-length string");
+    }
+  } else {
+    hssize_t npoints = H5Sget_simple_extent_npoints(m_current_space_id);
+    if (npoints < 0)
+      throw NXEXCEPTION("Failed to get dataspace extent");
+    storage_size = H5Tget_size(m_current_type_id) * static_cast<dimsize_t>(npoints);
+  }
+  std::vector<char> value(static_cast<size_t>(storage_size) + 1, '\0');
   this->getData(value.data());
-  std::string res(value.data(), strlen(value.data()));
-  return res;
+  return std::string(value.data(), strlen(value.data()));
 }
 
 // GET DATA -- NUMERIC
@@ -1229,8 +1275,9 @@ void File::writeData(std::string const &name, vector<NumT> const &value, DimVect
 }
 
 template <typename NumT> void File::writeExtendibleData(std::string const &name, vector<NumT> const &value) {
-  // Use a default chunk size of 4096 bytes. TODO: Is this optimal?
-  writeExtendibleData(name, value, 4096);
+  constexpr dimsize_t TARGET_CHUNK_BYTES = 4096;
+  dimsize_t const chunk = std::max(dimsize_t(1), TARGET_CHUNK_BYTES / static_cast<dimsize_t>(sizeof(NumT)));
+  writeExtendibleData(name, value, chunk);
 }
 
 template <typename NumT>
@@ -1320,22 +1367,42 @@ Info File::getInfo() {
   if (rank < 0) {
     throw NXEXCEPTION("Cannot get rank for current dataset");
   } else if (rank == 0) {
-    rank = 1; // we pretend
-    info.dims = {1};
+    // HDF5 scalars have no dataspace dimensions.
+    // String scalars: promote to rank-1 so the sizing and CHAR-trim blocks below
+    // operate uniformly on dims[0].
+    // Non-string scalars: leave dims empty (rank stays 0).  NXInfo::rank = 0, which
+    // is the correct physical rank.  getData/load use std::accumulate with identity 1,
+    // so they correctly read exactly one element for an empty dims vector.
+    if (tclass == H5T_STRING) {
+      rank = 1;
+      info.dims = {1};
+    }
   } else {
     info.dims.resize(rank);
     H5Sget_simple_extent_dims(m_current_space_id, info.dims.data(), nullptr);
   }
-  // for string data, determine size, depending on if variable length or not
-  if (tclass == H5T_STRING && info.dims.back() == 1) {
+  // For string datasets the last dimension is an element count, but callers expect
+  // it to hold the byte length of the string.  Only apply when dims.back()==1
+  // (scalar or single-element 1D); multi-element 2D CHAR blocks already carry the
+  // correct shape and must not be collapsed.
+  // String scalars (rank=0 in HDF5) were promoted to rank=1 with dims={1} above,
+  // so they fall into this branch uniformly.
+  if (tclass == H5T_STRING && !info.dims.empty() && info.dims.back() == 1) {
     dimsize_t length;
     if (H5Tis_variable_str(m_current_type_id)) {
-      // get the needed size for variable length data
-      if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &length) < 0) {
+      if (H5Sget_simple_extent_ndims(m_current_space_id) == 0) {
+        // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
+        // Read the single vlen string and measure directly.
+        char *vbuf = nullptr;
+        if (H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0 || !vbuf)
+          throw NXEXCEPTION("Failed to read scalar variable-length string length");
+        length = strlen(vbuf);
+        H5free_memory(vbuf);
+      } else if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &length) < 0) {
         throw NXEXCEPTION("Failed to read string length for variable-length string");
       }
     } else {
-      // the size of string data in bytes is stored in the string datatypes
+      // fixed-length: byte width is encoded in the datatype itself
       length = H5Tget_size(m_current_type_id);
     }
     info.dims.back() = length;
@@ -1343,14 +1410,9 @@ Info File::getInfo() {
 
   // Trim 1D CHAR arrays to the actual string length
   if ((info.type == NXnumtype::CHAR) && (rank == 1)) {
-    char *buf = static_cast<char *>(malloc(static_cast<size_t>((info.dims[0] + 1) * sizeof(char))));
-    if (buf == nullptr) {
-      throw NXEXCEPTION("Unable to allocate memory for CHAR buffer");
-    }
-    memset(buf, 0, static_cast<size_t>((info.dims[0] + 1) * sizeof(char)));
-    this->getData<char>(buf);
-    info.dims[0] = static_cast<int64_t>(strlen(buf));
-    free(buf);
+    std::vector<char> buf(static_cast<size_t>(info.dims[0] + 1), '\0');
+    this->getData<char>(buf.data());
+    info.dims[0] = static_cast<int64_t>(strlen(buf.data()));
   }
   return info;
 }
@@ -1363,25 +1425,8 @@ Entries File::getEntries() const {
 
 void File::getEntries(Entries &result) const {
   result.clear();
-  auto current = getCurrentObject();
-  for (size_t i = 0; i < current->getNumObjs(); i++) {
-    std::string name = current->getObjnameByIdx(i);
-    std::string className;
-    H5G_obj_t type = current->getObjTypeByIdx(i);
-    if (type == H5G_GROUP) {
-      H5::Group grp = current->openGroup(name);
-      if (grp.attrExists(GROUP_CLASS_SPEC)) {
-        H5::Attribute attr = grp.openAttribute(GROUP_CLASS_SPEC);
-        attr.read(attr.getDataType(), className);
-      } else {
-        className = UNKNOWN_GROUP_SPEC;
-      }
-    } else if (type == H5G_DATASET) {
-      className = SCIENTIFIC_DATA_SET;
-    }
-    if (!className.empty())
-      result[name] = std::move(className);
-  }
+  hid_t parent_id = getCurrentObject()->getId();
+  H5Literate(parent_id, H5_INDEX_NAME, H5_ITER_NATIVE, nullptr, &getEntriesCallback, &result);
 }
 
 std::string File::getTopLevelEntryName() const {

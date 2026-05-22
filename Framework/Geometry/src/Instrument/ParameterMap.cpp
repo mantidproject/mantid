@@ -17,6 +17,7 @@
 #include "MantidNexus/NexusFile.h"
 #include <boost/algorithm/string.hpp>
 #include <cstring>
+#include <numeric>
 
 #ifdef _WIN32
 #define strcasecmp _stricmp
@@ -1125,6 +1126,44 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
   } else {
     std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamline(*this);
   }
+}
+
+/** Return memory used by the parameter map, in bytes.
+ * @return bytes used.
+ */
+size_t ParameterMap::getMemorySize() const {
+  // m_map: tbb::concurrent_unordered_multimap<ComponentID, shared_ptr<Parameter>>
+  // Each node: key + value + ~2 pointers for chaining and bucket slot
+  const size_t n = m_map.size();
+  const size_t mapMem = n * (sizeof(pmap::value_type) + 2 * sizeof(void *));
+  // Count the heap-allocated Parameter objects the shared_ptrs point to.
+  // ParameterMap is a friend of Parameter so private string members are accessible.
+  size_t parameterObjectsMem = 0;
+  for (const auto &entry : m_map) {
+    const auto &param = entry.second;
+    if (param) {
+      parameterObjectsMem += sizeof(Parameter);
+      parameterObjectsMem += param->m_name.capacity();
+      parameterObjectsMem += param->m_type.capacity();
+      parameterObjectsMem += param->m_str_value.capacity();
+      parameterObjectsMem += param->m_description.capacity();
+    }
+  }
+  // m_parameterFileNames: vector of strings; sizeof(*this) covers the vector object, count the heap buffer
+  const size_t fileNamesMem = m_parameterFileNames.size() * sizeof(std::string) +
+                              std::accumulate(m_parameterFileNames.cbegin(), m_parameterFileNames.cend(), size_t{0},
+                                              [](size_t acc, const auto &s) { return acc + s.capacity(); });
+  // m_cacheLocMap and m_cacheRotMap: count the heap Cache objects; the internal std::map entries are not
+  // counted because Kernel::Cache::size() is non-const and cannot be called here.
+  const size_t cacheLocMem = m_cacheLocMap ? sizeof(*m_cacheLocMap) : 0;
+  const size_t cacheRotMem = m_cacheRotMap ? sizeof(*m_cacheRotMap) : 0;
+  // m_detectorInfo and m_componentInfo: owned by ParameterMap for parametrized instruments
+  const size_t detectorInfoMem = m_detectorInfo ? m_detectorInfo->getMemorySize() : 0;
+  const size_t componentInfoMem = m_componentInfo ? m_componentInfo->getMemorySize() : 0;
+  // m_instrument is a non-owning raw pointer to the base Instrument; its memory is counted in
+  // Instrument::getMemorySize() and excluded here to avoid double-counting.
+  return sizeof(*this) + mapMem + parameterObjectsMem + fileNamesMem + cacheLocMem + cacheRotMem + detectorInfoMem +
+         componentInfoMem;
 }
 
 } // namespace Mantid::Geometry

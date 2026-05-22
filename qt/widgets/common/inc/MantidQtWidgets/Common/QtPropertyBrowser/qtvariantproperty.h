@@ -164,43 +164,43 @@ protected:
 
 private:
   QtVariantPropertyManagerPrivate *d_ptr;
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, int))
-  Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(QtProperty *, int, int))
-  Q_PRIVATE_SLOT(d_func(), void slotSingleStepChanged(QtProperty *, int))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, double))
-  Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(QtProperty *, double, double))
-  Q_PRIVATE_SLOT(d_func(), void slotSingleStepChanged(QtProperty *, double))
-  Q_PRIVATE_SLOT(d_func(), void slotDecimalsChanged(QtProperty *, int))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, bool))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QString &))
-  Q_PRIVATE_SLOT(d_func(), void slotRegExpChanged(QtProperty *, const QRegExp &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QDate &))
-  Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(QtProperty *, const QDate &, const QDate &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QTime &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QDateTime &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QKeySequence &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QChar &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QLocale &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QPoint &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QPointF &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QSize &))
-  Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(QtProperty *, const QSize &, const QSize &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QSizeF &))
-  Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(QtProperty *, const QSizeF &, const QSizeF &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QRect &))
-  Q_PRIVATE_SLOT(d_func(), void slotConstraintChanged(QtProperty *, const QRect &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QRectF &))
-  Q_PRIVATE_SLOT(d_func(), void slotConstraintChanged(QtProperty *, const QRectF &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QColor &))
-  Q_PRIVATE_SLOT(d_func(), void slotEnumNamesChanged(QtProperty *, const QStringList &))
-  Q_PRIVATE_SLOT(d_func(), void slotEnumIconsChanged(QtProperty *, const QMap<int, QIcon> &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QSizePolicy &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QFont &))
-  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, const QCursor &))
-  Q_PRIVATE_SLOT(d_func(), void slotFlagNamesChanged(QtProperty *, const QStringList &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, int))
+  Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(const QtProperty *, int, int))
+  Q_PRIVATE_SLOT(d_func(), void slotSingleStepChanged(const QtProperty *, int))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, double))
+  Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(const QtProperty *, double, double))
+  Q_PRIVATE_SLOT(d_func(), void slotSingleStepChanged(const QtProperty *, double))
+  Q_PRIVATE_SLOT(d_func(), void slotDecimalsChanged(const QtProperty *, int))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, bool))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QString &))
+  Q_PRIVATE_SLOT(d_func(), void slotRegExpChanged(const QtProperty *, const QRegExp &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QDate &))
+  Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(const QtProperty *, const QDate &, const QDate &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QTime &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QDateTime &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QKeySequence &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QChar &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QLocale &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QPoint &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QPointF &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QSize &))
+  Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(const QtProperty *, const QSize &, const QSize &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QSizeF &))
+  Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(const QtProperty *, const QSizeF &, const QSizeF &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QRect &))
+  Q_PRIVATE_SLOT(d_func(), void slotConstraintChanged(const QtProperty *, const QRect &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QRectF &))
+  Q_PRIVATE_SLOT(d_func(), void slotConstraintChanged(const QtProperty *, const QRectF &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QColor &))
+  Q_PRIVATE_SLOT(d_func(), void slotEnumNamesChanged(const QtProperty *, const QStringList &))
+  Q_PRIVATE_SLOT(d_func(), void slotEnumIconsChanged(const QtProperty *, const QMap<int, QIcon> &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QSizePolicy &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QFont &))
+  Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QCursor &))
+  Q_PRIVATE_SLOT(d_func(), void slotFlagNamesChanged(const QtProperty *, const QStringList &))
 
-  Q_PRIVATE_SLOT(d_func(), void slotPropertyInserted(QtProperty *, QtProperty *, QtProperty *))
-  Q_PRIVATE_SLOT(d_func(), void slotPropertyRemoved(QtProperty *, QtProperty *))
+  Q_PRIVATE_SLOT(d_func(), void slotPropertyInserted(QtProperty *, const QtProperty *, const QtProperty *))
+  Q_PRIVATE_SLOT(d_func(), void slotPropertyRemoved(const QtProperty *, QtProperty *))
   Q_DECLARE_PRIVATE(QtVariantPropertyManager)
   Q_DISABLE_COPY(QtVariantPropertyManager)
 };
@@ -235,46 +235,46 @@ public:
   bool m_destroyingSubProperties;
   int m_propertyType;
 
-  void slotValueChanged(QtProperty *property, int val);
-  void slotRangeChanged(QtProperty *property, int min, int max);
-  void slotSingleStepChanged(QtProperty *property, int step);
-  void slotValueChanged(QtProperty *property, double val);
-  void slotRangeChanged(QtProperty *property, double min, double max);
-  void slotSingleStepChanged(QtProperty *property, double step);
-  void slotDecimalsChanged(QtProperty *property, int prec);
-  void slotValueChanged(QtProperty *property, bool val);
-  void slotValueChanged(QtProperty *property, const QString &val);
-  void slotRegExpChanged(QtProperty *property, const QRegExp &regExp);
-  void slotValueChanged(QtProperty *property, const QDate &val);
-  void slotRangeChanged(QtProperty *property, const QDate &min, const QDate &max);
-  void slotValueChanged(QtProperty *property, const QTime &val);
-  void slotValueChanged(QtProperty *property, const QDateTime &val);
-  void slotValueChanged(QtProperty *property, const QKeySequence &val);
-  void slotValueChanged(QtProperty *property, const QChar &val);
-  void slotValueChanged(QtProperty *property, const QLocale &val);
-  void slotValueChanged(QtProperty *property, const QPointF &val);
-  void slotValueChanged(QtProperty *property, const QPoint &val);
-  void slotValueChanged(QtProperty *property, const QSize &val);
-  void slotRangeChanged(QtProperty *property, const QSize &min, const QSize &max);
-  void slotValueChanged(QtProperty *property, const QSizeF &val);
-  void slotRangeChanged(QtProperty *property, const QSizeF &min, const QSizeF &max);
-  void slotValueChanged(QtProperty *property, const QRect &val);
-  void slotConstraintChanged(QtProperty *property, const QRect &val);
-  void slotValueChanged(QtProperty *property, const QRectF &val);
-  void slotConstraintChanged(QtProperty *property, const QRectF &val);
-  void slotValueChanged(QtProperty *property, const QColor &val);
+  void slotValueChanged(const QtProperty *property, int val);
+  void slotRangeChanged(const QtProperty *property, int min, int max);
+  void slotSingleStepChanged(const QtProperty *property, int step);
+  void slotValueChanged(const QtProperty *property, double val);
+  void slotRangeChanged(const QtProperty *property, double min, double max);
+  void slotSingleStepChanged(const QtProperty *property, double step);
+  void slotDecimalsChanged(const QtProperty *property, int prec);
+  void slotValueChanged(const QtProperty *property, bool val);
+  void slotValueChanged(const QtProperty *property, const QString &val);
+  void slotRegExpChanged(const QtProperty *property, const QRegExp &regExp);
+  void slotValueChanged(const QtProperty *property, const QDate &val);
+  void slotRangeChanged(const QtProperty *property, const QDate &min, const QDate &max);
+  void slotValueChanged(const QtProperty *property, const QTime &val);
+  void slotValueChanged(const QtProperty *property, const QDateTime &val);
+  void slotValueChanged(const QtProperty *property, const QKeySequence &val);
+  void slotValueChanged(const QtProperty *property, const QChar &val);
+  void slotValueChanged(const QtProperty *property, const QLocale &val);
+  void slotValueChanged(const QtProperty *property, const QPointF &val);
+  void slotValueChanged(const QtProperty *property, const QPoint &val);
+  void slotValueChanged(const QtProperty *property, const QSize &val);
+  void slotRangeChanged(const QtProperty *property, const QSize &min, const QSize &max);
+  void slotValueChanged(const QtProperty *property, const QSizeF &val);
+  void slotRangeChanged(const QtProperty *property, const QSizeF &min, const QSizeF &max);
+  void slotValueChanged(const QtProperty *property, const QRect &val);
+  void slotConstraintChanged(const QtProperty *property, const QRect &val);
+  void slotValueChanged(const QtProperty *property, const QRectF &val);
+  void slotConstraintChanged(const QtProperty *property, const QRectF &val);
+  void slotValueChanged(const QtProperty *property, const QColor &val);
   void slotEnumChanged(QtProperty *property, int val);
-  void slotEnumNamesChanged(QtProperty *property, const QStringList &enumNames);
-  void slotEnumIconsChanged(QtProperty *property, const QMap<int, QIcon> &enumIcons);
-  void slotValueChanged(QtProperty *property, const QSizePolicy &val);
-  void slotValueChanged(QtProperty *property, const QFont &val);
-  void slotValueChanged(QtProperty *property, const QCursor &val);
+  void slotEnumNamesChanged(const QtProperty *property, const QStringList &enumNames);
+  void slotEnumIconsChanged(const QtProperty *property, const QMap<int, QIcon> &enumIcons);
+  void slotValueChanged(const QtProperty *property, const QSizePolicy &val);
+  void slotValueChanged(const QtProperty *property, const QFont &val);
+  void slotValueChanged(const QtProperty *property, const QCursor &val);
   void slotFlagChanged(QtProperty *property, int val);
-  void slotFlagNamesChanged(QtProperty *property, const QStringList &flagNames);
-  void slotPropertyInserted(QtProperty *property, QtProperty *parent, QtProperty *after);
-  void slotPropertyRemoved(QtProperty *property, QtProperty *parent);
+  void slotFlagNamesChanged(const QtProperty *property, const QStringList &flagNames);
+  void slotPropertyInserted(QtProperty *property, const QtProperty *parent, const QtProperty *after);
+  void slotPropertyRemoved(const QtProperty *property, QtProperty *parent);
 
-  void valueChanged(QtProperty *property, const QVariant &val);
+  void valueChanged(const QtProperty *property, const QVariant &val);
 
   int internalPropertyToType(const QtProperty *property) const;
   QtVariantProperty *createSubProperty(QtVariantProperty *parent, QtVariantProperty *after, QtProperty *internal);
@@ -287,7 +287,7 @@ public:
 
   QMap<int, int> m_typeToValueType;
 
-  QMap<QtProperty *, QtVariantProperty *> m_internalToProperty;
+  QMap<const QtProperty *, QtVariantProperty *> m_internalToProperty;
 
   const QString m_constraintAttribute;
   const QString m_singleStepAttribute;

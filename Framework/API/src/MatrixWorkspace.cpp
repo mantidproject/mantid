@@ -1031,30 +1031,21 @@ void MatrixWorkspace::setYUnit(const std::string &newUnit) { m_YUnit = newUnit; 
 /**
  * Returns a caption for the units of the data in the workspace.
  * @param useLatex :: Return label using Latex syntax
- * @param plotAsDistribution :: If true, the Y-axis has been divided by bin
  * width
  */
-std::string MatrixWorkspace::YUnitLabel(bool useLatex /* = false */, bool plotAsDistribution /* = false */) const {
+std::string MatrixWorkspace::YUnitLabel(bool useLatex /* = false */) const {
   std::string retVal;
   if (!m_YUnitLabel.empty()) {
     retVal = m_YUnitLabel;
-    // If a custom label has been set and we are dividing by bin width when
-    // plotting (i.e. plotAsDistribution = true and the workspace is not a
-    // distribution), we must append the x-unit as a divisor. We assume the
-    // custom label contains the correct units for the data.
-    if (plotAsDistribution && !this->isDistribution())
-      retVal = appendUnitDenominatorUsingPer(retVal, *this, useLatex);
   } else {
     retVal = m_YUnit;
-    // If no custom label is set and the workspace is a distribution we need to
-    // append the divisor's unit to the label. If the workspace is not a
-    // distribution, but we are plotting it as a distribution, we must append
-    // the divisor's unit.
-    if (plotAsDistribution || this->isDistribution())
+    if (this->isDistribution()) {
       retVal = appendUnitDenominatorUsingPer(retVal, *this, useLatex);
+    }
   }
-  if (useLatex)
+  if (useLatex) {
     retVal = replacePerWithLatex(retVal);
+  }
   return retVal;
 }
 

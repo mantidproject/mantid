@@ -79,6 +79,7 @@ const std::string POSITION_TOL("PositionTolerance");
 const std::string PEAK_MIN_HEIGHT("MinimumPeakHeight");
 const std::string CONSTRAIN_PEAK_POS("ConstrainPeakPositions");
 const std::string COPY_LAST_GOOD_PEAK_PARAMS("CopyLastGoodPeakParameters");
+const std::string RESPECT_FIXED_PEAK_PARAMS("RespectFixedPeakParameters");
 const std::string OUTPUT_WKSP_MODEL("FittedPeaksWorkspace");
 const std::string OUTPUT_WKSP_PARAMS("OutputPeakParametersWorkspace");
 const std::string OUTPUT_WKSP_PARAM_ERRS("OutputParameterFitErrorsWorkspace");
@@ -405,6 +406,12 @@ void FitPeaks::init() {
                   "If true, initial peak parameters (with the exception of peak centre) "
                   "may be copied from the last successfully fit peak in the spectra.");
 
+  declareProperty(PropertyNames::RESPECT_FIXED_PEAK_PARAMS, false,
+                  "If true, peak function parameters that are marked as fixed "
+                  "(e.g. parameters calculated from the instrument geometry, such as A and B "
+                  "of a BackToBackExponential) remain fixed during fitting. "
+                  "If false (default), such parameters are unfixed so they can be refined.");
+
   // additional output for reviewing
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP_MODEL, "",
                                                                        Direction::Output, PropertyMode::Optional),
@@ -591,6 +598,7 @@ void FitPeaks::processInputs() {
   m_constrainPeaksPosition = getProperty(PropertyNames::CONSTRAIN_PEAK_POS);
   m_fitIterations = getProperty(PropertyNames::MAX_FIT_ITER);
   m_copyLastGoodPeakParameters = getProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS);
+  m_respectFixedPeakParameters = getProperty(PropertyNames::RESPECT_FIXED_PEAK_PARAMS);
 
   // Peak centers, tolerance and fitting range
   processInputPeakCenters();
@@ -1202,6 +1210,9 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
     auto peakfunction = std::dynamic_pointer_cast<API::IPeakFunction>(m_peakFunction->clone());
     peakfunction->setCentre(expected_peak_pos);
 
+    std::pair<double, double> peak_window_i = m_getPeakFitWindow(wi, peak_index);
+    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window_i.first, peak_window_i.second);
+
     std::map<size_t, double> keep_values;
     for (size_t ipar = 0; ipar < peakfunction->nParams(); ++ipar) {
       if (peakfunction->isFixed(ipar)) {
@@ -1209,9 +1220,12 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
         // if they were set to be fixed (e.g. for the B2Bexp this would
         // typically be A and B but not Sigma)
         keep_values[ipar] = peakfunction->getParameter(ipar);
-        // let them be free to fit as these are typically refined from a
-        // focussed bank
-        peakfunction->unfix(ipar);
+        // by default let them be free to fit as these are typically refined
+        // from a focussed bank; otherwise respect the fixed status and keep
+        // the parameter locked at the calculated value.
+        if (!m_respectFixedPeakParameters) {
+          peakfunction->unfix(ipar);
+        }
       }
     }
 
@@ -1253,7 +1267,7 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       samePeakCrossSpectrum = false;
     }
 
-    // Set starting values of the peak function
+    // Set starting values of the peak function.
     if (samePeakCrossSpectrum) { // somePeakFit
       // Get from local best result
       for (size_t i = 0; i < peakfunction->nParams(); ++i) {
@@ -1269,8 +1283,6 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
     // reset center though - don't know before hand which element this is
     peakfunction->setCentre(expected_peak_pos);
 
-    std::pair<double, double> peak_window_i = m_getPeakFitWindow(wi, peak_index);
-    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, peak_window_i.first, peak_window_i.second);
     // reset value of parameters that were fixed (but are now free to vary)
     for (const auto &[ipar, value] : keep_values) {
       peakfunction->setParameter(ipar, value);
@@ -1542,8 +1554,8 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
       const std::pair<double, double> peakwindow = m_getPeakFitWindow(iws, ipeak);
       peak_function->setMatrixWorkspace(m_inputMatrixWS, iws, peakwindow.first, peakwindow.second);
 
-      peak_functions[output_iws][ipeak] = peak_function;
-      bkgd_functions[output_iws][ipeak] = bkgd_function;
+      peak_functions[output_iws][ipeak] = std::move(peak_function);
+      bkgd_functions[output_iws][ipeak] = std::move(bkgd_function);
     }
   }
 
@@ -1554,9 +1566,7 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
     const size_t output_iws = iws - m_startWorkspaceIndex;
 
     for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-      const IPeakFunction_sptr &peak_function = peak_functions[output_iws][ipeak];
-      const IBackgroundFunction_sptr &bkgd_function = bkgd_functions[output_iws][ipeak];
-      if (!peak_function || !bkgd_function)
+      if (!peak_functions[output_iws][ipeak] || !bkgd_functions[output_iws][ipeak])
         continue;
 
       // use domain and function to calculate
@@ -1572,8 +1582,8 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
       FunctionDomain1DVector domain(start_x_iter, stop_x_iter);
       FunctionValues values(domain);
       CompositeFunction_sptr comp_func = std::make_shared<API::CompositeFunction>();
-      comp_func->addFunction(peak_function);
-      comp_func->addFunction(bkgd_function);
+      comp_func->addFunction(std::move(peak_functions[output_iws][ipeak]));
+      comp_func->addFunction(std::move(bkgd_functions[output_iws][ipeak]));
       comp_func->function(domain, values);
 
       // copy over the values
@@ -2122,8 +2132,8 @@ void FitPeaks::processOutputs(std::vector<std::shared_ptr<FitPeaksAlgorithm::Pea
  * @return :: total number of counts in the histogram
  */
 double FitPeaks::numberCounts(size_t iws) {
-  const auto hist_y = m_inputMatrixWS->histogram(iws).y();
-  const auto &vec_y = hist_y.rawData();
+  const Histogram histogram = m_inputMatrixWS->histogram(iws);
+  const auto &vec_y = histogram.y().rawData();
   double total = std::accumulate(vec_y.begin(), vec_y.end(), 0.);
   return total;
 }
@@ -2168,8 +2178,8 @@ size_t FitPeaks::histRangeToDataPointCount(size_t iws, const std::pair<double, d
  */
 void FitPeaks::histRangeToIndexBounds(size_t iws, const std::pair<double, double> &range, size_t &left_index,
                                       size_t &right_index) {
-  const auto hist_x = m_inputMatrixWS->histogram(iws).x();
-  const auto &orig_x = hist_x;
+  const Histogram histogram = m_inputMatrixWS->histogram(iws);
+  const auto &orig_x = histogram.x();
   rangeToIndexBounds(orig_x, range.first, range.second, left_index, right_index);
 
   // handle an invalid range case. For the histogram point data, make sure the number of data points is non-zero as
@@ -2201,14 +2211,14 @@ void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &range, 
   size_t num_elements_x = right_index - left_index;
 
   vec_x.resize(num_elements_x);
-  const auto hist_x = m_inputMatrixWS->histogram(iws).x();
-  const auto &orig_x = hist_x;
+  const Histogram histogram = m_inputMatrixWS->histogram(iws);
+  const auto &orig_x = histogram.x();
   std::copy(orig_x.begin() + left_index, orig_x.begin() + right_index, vec_x.begin());
 
   size_t num_datapoints = m_inputMatrixWS->isHistogramData() ? num_elements_x - 1 : num_elements_x;
 
-  const std::vector<double> orig_y = m_inputMatrixWS->histogram(iws).y().rawData();
-  const std::vector<double> orig_e = m_inputMatrixWS->histogram(iws).e().rawData();
+  const auto &orig_y = histogram.y().rawData();
+  const auto &orig_e = histogram.e().rawData();
   vec_y.resize(num_datapoints);
   vec_e.resize(num_datapoints);
   std::copy(orig_y.begin() + left_index, orig_y.begin() + left_index + num_datapoints, vec_y.begin());

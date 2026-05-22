@@ -65,9 +65,12 @@ public:
     for (decltype(spectra) i = 0; i < spectra; ++i) {
       const auto &histo = ws.histogram(i);
 
-      const auto &spectraData = histo.counts().data().rawData();
-      const auto &errorData = histo.countStandardDeviations().rawData();
-      const auto &binEdges = histo.binEdges().rawData();
+      const auto counts = histo.counts();
+      const auto &spectraData = counts.rawData();
+      const auto sdev = histo.countStandardDeviations();
+      const auto &errorData = sdev.rawData();
+      const auto edges = histo.binEdges();
+      const auto &binEdges = edges.rawData();
 
       spectraList.append(object(handle<>(VectorToNDArray<double, WrapReadOnly>()(spectraData))));
       errorList.append(object(handle<>(VectorToNDArray<double, WrapReadOnly>()(errorData))));

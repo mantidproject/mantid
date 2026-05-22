@@ -229,6 +229,9 @@ void export_leaf_classes() {
            declarePropertyType1_Overload((arg("self"), arg("prop"), arg("doc") = "")))
       .def("enableHistoryRecordingForChild", &Algorithm::enableHistoryRecordingForChild, (arg("self"), arg("on")),
            "Turns history recording on or off for an algorithm.")
+      .def("enableHistoryRecordingForProcessGroups", &Algorithm::enableHistoryRecordingForProcessGroups,
+           (arg("self"), arg("on")),
+           "Turns parent history recording on or off for algorithms that handle group outputs directly.")
       .def("declareProperty", (declarePropertyType2)&PythonAlgorithm::declarePyAlgProperty,
            declarePropertyType2_Overload((arg("self"), arg("name"), arg("defaultValue"), arg("validator") = object(),
                                           arg("doc") = "", arg("direction") = Direction::Input),

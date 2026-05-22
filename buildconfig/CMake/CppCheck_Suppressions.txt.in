@@ -38,222 +38,76 @@ class_X_Y
 // All ANN files as they are upstream anyway
 *:*${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ANN/*
 
+// LegacyNexus - quarantined C code, not to be modified
+nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi.cpp
+nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp
+nullPointerArithmeticOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp
+
+// vms_convert.cpp: legacy VMS/VAX floating-point format conversion; struct members are bit-field layout
+// definitions required for correct binary interpretation even when not individually named in expressions;
+// vax_to_ieee_float/ieee_to_vax_float return types confuse cppcheck's const-propagation across bit-field unions
+unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp
+
+// ----------- Intentional dead code / known deferred bugs -----------
+// fitresult is shadowed by a local variable and never updated; fixing it breaks tests (issue #13950)
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp
+// det1 and det2 are both assigned from tracer.getDetectorResult(); cppcheck treats them as the same value
+// but they are from separate traceFromSample() calls on a mutated tracer object
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp
+// startTime>m_roi.back() at line 97 is always false given the matching guard at line 86; the condition
+// is retained in the else-if chain for clarity alongside the preceding front() and back() bounds checks
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
+// endX is reassigned to XValues.back() in the out-of-range branch but m_maxX is set directly afterward;
+// the assignment is dead in that branch but kept for consistency with the warning message
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
+
 // ----------- Internal cppcheck errors from cppcheck 2.18.1 -------------
 internalError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/BitInterleaving.h:169
 
-// ---- Known false positives, but for some reason inline suppressions do not work in 2.18.1 ----
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:74
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:77
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:88
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:91
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ListValidator.h:118
+// ----------- False positives from cppcheck analysis limitations -----------
 
-// ----------- New list of suppressions after updating to cppcheck 2.18.1 -------------
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IAlgorithmRuntimeProps.h:16
-uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:723
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IPowderDiffPeakFunction.h:41
-uninitDerivedMemberVar:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/ParamFunction.h:36
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/ParameterTie.h:42
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Run.h:39
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Workspace.h:32
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/WorkspaceProperty.hxx:91
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:891
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:156
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:167
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:892
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:999
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1263
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:510
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:517
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:548
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:555
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PaalmanPingsAbsorptionCorrection.cpp:464
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:32
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/ClearUB.h:25
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/PeaksIntersection.h:33
-variableScope:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:239
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:608
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
-derefInvalidIteratorRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ExcludeRangeFinder.cpp:77
-duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldFunction.cpp:120
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:432
-mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
-integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:222
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:223
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:224
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:225
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:230
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:231
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:232
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:233
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:371
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:386
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice2D.cpp:417
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:571
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:680
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h:36
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/CrystalStructure.h:74
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/UnitCell.h:212
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/MDGeometry/MDImplicitFunction.h:169
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Surfaces/Cone.h:80
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Surfaces/Plane.h:75
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Surfaces/Sphere.h:72
-invalidFunctionArgBool:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Surfaces/General.cpp:53
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ArrayProperty.h:47
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ArrayProperty.h:49
-comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BoundedValidator.h:148
-comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BoundedValidator.h:156
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ConfigPropertyObserver.h:20
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h:26
+// m_response is populated by session.receiveResponse() before lines 167-169 and is not null at those points;
+// the later if (m_response) guard at line 173 is a defensive check that cppcheck treats as evidence of possible null
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:167
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:168
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:169
-returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:256
-invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142
-variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:59
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
-nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi.cpp:622
-nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:605
-nullPointerArithmeticOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:609
-nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:613
-nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LegacyNexus/src/napi5.cpp:614
-unsignedPositive:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ISIS/TCPEventStreamDefs.h:61
-badBitmaskCheck:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ISIS/TCPEventStreamDefs.h:70
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/LiveDataAlgorithm.h:38
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/LoadLiveData.h:24
-nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/idc.cpp:72
-nullPointerOutOfMemory:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisds_command.cpp:294
-unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/FakeISISHistoDAE.cpp:27
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h:27
-templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFile.h:193
-constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/inc/MantidPythonInterface/api/WorkspacePropertyExporter.h:39
-constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/inc/MantidPythonInterface/api/WorkspacePropertyExporter.h:56
-constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/inc/MantidPythonInterface/api/WorkspacePropertyExporter.h:76
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/CloneMatrixWorkspace.cpp:45
-constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmProperty.cpp:30
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/MDGeometry.cpp:96
-syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Run.cpp:258
-syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/SpectrumDefinition.cpp:40
-constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceGroup.cpp:83
-syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/EventList.cpp:37
-danglingTempReference:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/Workspace2D.cpp:72
-danglingTempReference:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/Workspace2D.cpp:73
-danglingTempReference:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/Workspace2D.cpp:74
-syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/V3D.cpp:123
-syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/VMD.cpp:100
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiAnalyseResiduals.h:29
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiCreatePeaksFromCell.h:31
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiFitPeaks1D.h:28
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiFitPeaks1D2.h:65
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiIndexKnownCompounds.h:48
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiPeakSearch.h:39
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiPeakSummary.h:30
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiTruncateData.h:36
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h:44
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h:48
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiUtilities/PoldiPeakCollection.h:60
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SofTwoThetaTOF.cpp:196
-missingOverride:${CMAKE_SOURCE_DIR}/Testing/Tools/cxxtest/cxxtest/GlobalFixture.h:22
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/IReflMessageHandler.h:21
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Experiment/QtExperimentView.h:30
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Experiment/QtExperimentView.h:33
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Options/OptionsDialogModel.h:20
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Runs/IRunsView.h:66
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Runs/QtCatalogSearcher.h:32
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/IRunsTableView.h:31
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h:60
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Save/SaveAlgorithmRunner.h:18
-returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Experiment.h:54
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Group.h:31
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AddWorkspaceDialog.h:26
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.h:48
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h:34
-missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FitScriptGeneratorModel.h:39
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FlowLayout.h:68
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FunctionTreeView.h:117
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ManageUserDirectories.h:39
-missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/MessageHandler.h:17
-missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ProgressPresenter.h:35
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h:52
-pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h:47
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h:563
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h:571
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h:576
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h:833
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h:861
-unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ScriptEditor.h:108
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/SequentialFitDialog.h:57
-missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h:65
-missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h:35
-passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptOptionsBrowser.cpp:169
-duplicateAssignExpression:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionBrowser/FunctionBrowserUtils.cpp:20
-iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:161
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/ParameterPropertyManager.cpp:54
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp:136
-publicAllocationError:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp:143
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp:233
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp:322
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp:431
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp:438
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:193
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:220
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:320
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:347
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:443
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:1562
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:1577
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:1591
-publicAllocationError:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp:100
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp:162
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp:163
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp:268
-ignoredReturnValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp:306
-ignoredReturnValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp:309
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp:375
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp:381
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp:388
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1059
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1212
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1213
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1271
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1350
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:423
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:428
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:439
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:447
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:487
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:494
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:513
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:527
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:575
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:587
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:594
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:605
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:620
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:627
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:631
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:345
-redundantAssignment:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:349
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:354
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:355
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:373
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:383
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:395
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:402
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:411
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:418
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:423
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:436
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:445
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:486
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:497
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:508
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:517
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:526
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:531
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:553
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:300
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:352
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:394
+
+// syntaxError: cppcheck cannot parse boost::python pointer-to-member-function operator syntax (&Class::operator+)
+syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/V3D.cpp
+syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/VMD.cpp
+
+// templateRecursion: cppcheck hits its template instantiation depth limit for MDEvent slice templates
+templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp
+
+// unknownMacro: BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS is a boost.python macro cppcheck does not know
+unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Run.cpp
+
+// unknownMacro: Qt 'slots' keyword in ScriptEditor.h; defined empty in qt.cfg but still triggers unknownMacro
+unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ScriptEditor.h
+
+// pureVirtualCall: SLOT(runDialog()) expands to runDialog() via qt.cfg; this is a signal connection, not a real call
+// primary cppcheck location is the pure virtual declaration in the header
+pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h
+
+// virtualCallInConstructor: detectorSetHook() is called indirectly from the constructor via setDecoratedDetector();
+// PoldiDetectorDecorator::detectorSetHook() is empty and the call during construction is intentional hook design
+// primary cppcheck location is the virtual function declaration in the header
+virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h
+
+// cstyleCast: using declaration for a pointer-to-member-function type is misidentified as a C-style cast
+cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/CloneMatrixWorkspace.cpp
+
+// publicAllocationError: m_mainLayout is owned by the Qt parent widget (QGridLayout(parent) transfers ownership);
+// cppcheck does not model Qt parent-child memory management
+publicAllocationError:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp
+publicAllocationError:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp
+
+// operatorEqVarError: WorkspaceProperty::operator= intentionally copies only the workspace pointer value;
+// m_optional and m_locking are property metadata (descriptors) and are not part of the assigned value
+operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/WorkspaceProperty.hxx
+
+// constVariablePointer / constParameterPointer: these pointers are passed to QList/QMap methods that require
+// non-const pointer arguments (indexOf, find); making them pointer-to-const would not compile
+constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp
+constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp

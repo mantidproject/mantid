@@ -278,6 +278,12 @@ void PDCalibration::init() {
       "If true, for a given peak in a spectrum the initial peak parameters (with the exception of peak centre) "
       "may be copied from the last successfully fit peak in that spectrum.");
 
+  declareProperty("RespectFixedPeakParameters", false,
+                  "If true, peak function parameters that are marked as fixed "
+                  "(e.g. parameters calculated from the instrument geometry, such as A and B "
+                  "of a BackToBackExponential) remain fixed during fitting. "
+                  "If false (default), such parameters are unfixed so they can be refined.");
+
   declareProperty("MinimumSignalToNoiseRatio", 0.,
                   "Used for validating peaks before fitting. If the signal-to-noise ratio is under this value, "
                   "the peak will be excluded from fitting and calibration. This check does not apply to peaks for "
@@ -350,6 +356,7 @@ void PDCalibration::init() {
   setPropertyGroup("MaxChiSq", fitPeaksGroup);
   setPropertyGroup("ConstrainPeakPositions", fitPeaksGroup);
   setPropertyGroup("CopyLastGoodPeakParameters", fitPeaksGroup);
+  setPropertyGroup("RespectFixedPeakParameters", fitPeaksGroup);
 
   // make group for type of calibration
   std::string calGroup("Calibration Type");
@@ -503,6 +510,7 @@ void PDCalibration::exec() {
   const double minSignalToSigmaRatio = getProperty("MinimumSignalToSigmaRatio");
   const double maxChiSquared = getProperty("MaxChiSq");
   const bool copyLastGoodPeakParameters = getProperty("CopyLastGoodPeakParameters");
+  const bool respectFixedPeakParameters = getProperty("RespectFixedPeakParameters");
 
   const std::string calParams = getPropertyValue("CalibrationParameters");
   if (calParams == std::string("DIFC"))
@@ -630,6 +638,7 @@ void PDCalibration::exec() {
   // whether, for a given peak in each spectrum, the initial peak parameters (with the exception of peak centre)
   // may be copied from the last successfully fit peak in that spectrum.
   algFitPeaks->setProperty("CopyLastGoodPeakParameters", copyLastGoodPeakParameters);
+  algFitPeaks->setProperty("RespectFixedPeakParameters", respectFixedPeakParameters);
 
   // run and get the result
   algFitPeaks->executeAsChildAlg();

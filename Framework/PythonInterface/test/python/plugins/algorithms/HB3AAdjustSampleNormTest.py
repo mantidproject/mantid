@@ -6,7 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
-from mantid.simpleapi import CreateMDHistoWorkspace, DeleteWorkspace, HB3AAdjustSampleNorm, LoadMD, SliceMDHisto, AddSampleLog
+from mantid.dataobjects import GroupingWorkspace
+from mantid.simpleapi import (
+    CreateMDHistoWorkspace,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    HB3AAdjustSampleNorm,
+    LoadMD,
+    SliceMDHisto,
+    AddSampleLog,
+    mtd,
+)
 
 
 class HB3AAdjustSampleNormTest(unittest.TestCase):
@@ -40,7 +50,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         # Verify detector adjustment
         self.__checkAdjustments(orig_pos, new_pos, height_adj, dist_adj)
 
-        DeleteWorkspace(orig, result)
+        DeleteWorkspaces([orig, result])
 
     def testDoNotAdjustDetector(self):
         # Ensure detector position does not change when no offsets are given
@@ -52,7 +62,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         # Verify detector adjustment
         self.__checkAdjustments(orig_pos, new_pos, 0.0, 0.0)
 
-        DeleteWorkspace(orig, result)
+        DeleteWorkspaces([orig, result])
 
     def testInputFail(self):
         signal = range(0, 1000)
@@ -113,8 +123,12 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
 
     def testDetectorGrouping(self):
         data = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", Grouping="None")
-        data_2x2 = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", Grouping="2x2")
-        data_4x4 = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", Grouping="4x4")
+        data_2x2 = HB3AAdjustSampleNorm(
+            "HB3A_data.nxs", OutputWorkspace="data_2x2", OutputType="Detector", NormaliseBy="None", Grouping="2x2"
+        )
+        data_4x4 = HB3AAdjustSampleNorm(
+            "HB3A_data.nxs", OutputWorkspace="data_4x4", OutputType="Detector", NormaliseBy="None", Grouping="4x4"
+        )
 
         ref_sum = data.getSignalArray().sum()
         self.assertAlmostEqual(ref_sum, data_2x2.getSignalArray().sum())
@@ -123,6 +137,116 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         ref_shape = data.getSignalArray().shape
         self.assertEqual(ref_shape, tuple([2 * val if i < 2 else val for i, val in enumerate(data_2x2.getSignalArray().shape)]))
         self.assertEqual(ref_shape, tuple([4 * val if i < 2 else val for i, val in enumerate(data_4x4.getSignalArray().shape)]))
+
+        # --- detectorID log checks ---
+        run = data.getExperimentInfo(0).run()
+        run_2x2 = data_2x2.getExperimentInfo(0).run()
+        run_4x4 = data_4x4.getExperimentInfo(0).run()
+
+        # Log must exist for all grouping modes
+        for r, label in [(run, "ungrouped"), (run_2x2, "2x2"), (run_4x4, "4x4")]:
+            self.assertTrue(r.hasProperty("detectorID"), f"detectorID log missing for {label}")
+
+        ids = np.array(run.getProperty("detectorID").value, dtype=int)
+        ids_2x2 = np.array(run_2x2.getProperty("detectorID").value, dtype=int)
+        ids_4x4 = np.array(run_4x4.getProperty("detectorID").value, dtype=int)
+
+        # One entry per detector / grouped pixel (y_dim * x_dim)
+        self.assertEqual(len(ids), 1536 * 512)
+        self.assertEqual(len(ids_2x2), 768 * 256)
+        self.assertEqual(len(ids_4x4), 384 * 128)
+
+        # All IDs must be unique within each grouping
+        self.assertEqual(len(np.unique(ids)), len(ids), "ungrouped detectorIDs should all be unique")
+        self.assertEqual(len(np.unique(ids_2x2)), len(ids_2x2), "2x2 detectorIDs should all be unique")
+        self.assertEqual(len(np.unique(ids_4x4)), len(ids_4x4), "4x4 detectorIDs should all be unique")
+
+        # Each grouped ID must be a valid single-pixel ID (group leader is a real detector)
+        ungrouped_set = set(ids.tolist())
+        self.assertTrue(
+            set(ids_2x2.tolist()).issubset(ungrouped_set),
+            "Every 2x2 group-leader ID should also appear in the ungrouped detectorID list",
+        )
+        self.assertTrue(
+            set(ids_4x4.tolist()).issubset(ungrouped_set),
+            "Every 4x4 group-leader ID should also appear in the ungrouped detectorID list",
+        )
+
+        # 4x4 group leaders must also be 2x2 group leaders (coarser grouping is a subset of finer)
+        grouped_2x2_set = set(ids_2x2.tolist())
+        self.assertTrue(
+            set(ids_4x4.tolist()).issubset(grouped_2x2_set),
+            "Every 4x4 group-leader ID should also be a 2x2 group-leader ID",
+        )
+
+        # Check specific values for the first four entries of each detectorID log.
+        np.testing.assert_array_equal(ids[:4], [1, 513, 1025, 1537])
+        np.testing.assert_array_equal(ids_2x2[:4], [1, 1025, 2049, 3073])
+        np.testing.assert_array_equal(ids_4x4[:4], [1, 2049, 4097, 6145])
+
+        # clean up
+        DeleteWorkspaces([data, data_2x2, data_4x4])
+
+    def testOutputGroupingWorkspace(self):
+
+        # --- Validation: OutputGroupingWorkspace requires Grouping != 'None' ---
+        with self.assertRaisesRegex(RuntimeError, "OutputGroupingWorkspace"):
+            HB3AAdjustSampleNorm(
+                "HB3A_data.nxs",
+                OutputType="Detector",
+                NormaliseBy="None",
+                Grouping="None",
+                OutputWorkspace="__hb3a_out_fail",
+                OutputGroupingWorkspace="__hb3a_grp_fail",
+            )
+
+        # --- 2x2:
+        HB3AAdjustSampleNorm(
+            "HB3A_data.nxs",
+            OutputType="Detector",
+            NormaliseBy="None",
+            Grouping="2x2",
+            OutputWorkspace="__hb3a_out_2x2",
+            OutputGroupingWorkspace="__hb3a_grp_2x2",
+        )
+        grp_2x2 = mtd["__hb3a_grp_2x2"]
+        self.assertIsInstance(grp_2x2, GroupingWorkspace)
+        # One spectrum per pixel detector. HB3A has three 512x512 detector panels
+        self.assertEqual(grp_2x2.getNumberHistograms(), 512 * 512 * 3)
+        # check the group ID of the first spectra:
+        group_ids = grp_2x2.extractY().astype(int).flatten()  # 1, 1, 2, 2, 3, 3,..
+        self.assertListEqual(group_ids[0:6].tolist(), [1, 1, 2, 2, 3, 3])  # first row along X
+        self.assertListEqual(group_ids[512:518].tolist(), [1, 1, 2, 2, 3, 3])  # second row
+        # detector ID stored
+        histogram_count = grp_2x2.getNumberHistograms()
+        self.assertEqual(grp_2x2.getSpectrum(0).getDetectorIDs()[0], 1)
+        self.assertEqual(grp_2x2.getSpectrum(histogram_count - 1).getDetectorIDs()[0], histogram_count)
+
+        # --- 4x4:
+        HB3AAdjustSampleNorm(
+            "HB3A_data.nxs",
+            OutputType="Detector",
+            NormaliseBy="None",
+            Grouping="4x4",
+            OutputWorkspace="__hb3a_out_4x4",
+            OutputGroupingWorkspace="__hb3a_grp_4x4",
+        )
+        self.assertTrue(mtd.doesExist("__hb3a_grp_4x4"), "OutputGroupingWorkspace should be stored in the ADS")
+        grp_4x4 = mtd["__hb3a_grp_4x4"]
+        self.assertIsInstance(grp_4x4, GroupingWorkspace)
+        self.assertEqual(grp_4x4.getNumberHistograms(), 512 * 512 * 3)
+        group_ids = grp_4x4.extractY().astype(int).flatten()  # 1, 1, 1, 1, 2, 2, 2, 2,..
+        self.assertListEqual(group_ids[0:8].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # first row along X
+        self.assertListEqual(group_ids[512:520].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # second row
+        self.assertListEqual(group_ids[1024:1032].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # third row
+        self.assertListEqual(group_ids[1536:1544].tolist(), [1, 1, 1, 1, 2, 2, 2, 2])  # fourth row
+        # detector ID stored
+        histogram_count = grp_4x4.getNumberHistograms()
+        self.assertEqual(grp_4x4.getSpectrum(0).getDetectorIDs()[0], 1)
+        self.assertEqual(grp_4x4.getSpectrum(histogram_count - 1).getDetectorIDs()[0], histogram_count)
+
+        # clean up
+        DeleteWorkspaces(["__hb3a_out_2x2", "__hb3a_grp_2x2", "__hb3a_out_4x4", "__hb3a_grp_4x4"])
 
 
 if __name__ == "__main__":

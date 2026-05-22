@@ -162,24 +162,36 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double *xValues, const
     // first argument then could avoid copying above plus only have to resize
     // m_wavelength when its size smaller than nData
     API::MatrixWorkspace_const_sptr mws = getMatrixWorkspace();
+    // Single-point evaluations (nData == 1) are shape probes coming from
+    // height(), IPeakFunction::getDomainInterval()'s findBound, or the
+    // PeakFunctionIntegrator's GSL wrapper. They are routinely invoked --
+    // including via getCentreParameterName() / intensity() / setIntensity() --
+    // on freshly-constructed peak functions that have no workspace attached
+    // yet, and the wavelength default is harmless for a 1-point probe. The
+    // missing-workspace warnings are demoted to debug in that case so they
+    // don't drown the log; full-spectrum evaluations (nData > 1) keep the
+    // warning so a genuinely missing workspace during fitting is still flagged.
+    const bool singlePointProbe = (nData == 1);
     if (mws) {
       Instrument_const_sptr instrument = mws->getInstrument();
       Geometry::IComponent_const_sptr sample = instrument->getSample();
       if (sample != nullptr) {
         convertValue(m_waveLength, wavelength, mws, m_workspaceIndex);
       } else {
-        g_log.warning() << "No sample set for instrument in workspace.\n"
-                        << "Can't calculate wavelength in IkedaCarpenter.\n"
-                        << "Default all wavelengths to one.\n"
-                        << "Solution is to load appropriate instrument into workspace.\n";
+        auto &noSample = singlePointProbe ? g_log.debug() : g_log.warning();
+        noSample << "No sample set for instrument in workspace.\n"
+                 << "Can't calculate wavelength in IkedaCarpenter.\n"
+                 << "Default all wavelengths to one.\n"
+                 << "Solution is to load appropriate instrument into workspace.\n";
         for (size_t i = 0; i < nData; i++)
           m_waveLength[i] = 1.0;
       }
     } else {
-      g_log.warning() << "Workspace not set.\n"
-                      << "Can't calculate wavelength in IkedaCarpenter.\n"
-                      << "Default all wavelengths to one.\n"
-                      << "Solution call setMatrixWorkspace() for function.\n";
+      auto &noWs = singlePointProbe ? g_log.debug() : g_log.warning();
+      noWs << "Workspace not set.\n"
+           << "Can't calculate wavelength in IkedaCarpenter.\n"
+           << "Default all wavelengths to one.\n"
+           << "Solution call setMatrixWorkspace() for function.\n";
       for (size_t i = 0; i < nData; i++)
         m_waveLength[i] = 1.0;
     }
@@ -219,7 +231,12 @@ void IkedaCarpenterPV::constFunction(double *out, const double *xValues, const i
   // height()) do not invalidate the full-spectrum cache used by functionLocal.
   auto savedWaveLength = std::move(m_waveLength);
   m_waveLength.clear();
-  functionLocal(out, xValues, static_cast<size_t>(nData));
+  try {
+    functionLocal(out, xValues, static_cast<size_t>(nData));
+  } catch (...) {
+    m_waveLength = std::move(savedWaveLength);
+    throw;
+  }
   m_waveLength = std::move(savedWaveLength);
 }
 

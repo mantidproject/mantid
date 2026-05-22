@@ -12,6 +12,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "AnalysisDataService.h"
@@ -67,7 +68,7 @@ protected:
     void setExpectedOutputs(const std::vector<std::string> &expectedOutputs) { m_expectedOutputs = expectedOutputs; }
     const std::string &name() const { return m_name; }
     void initAsFirstTask(std::shared_ptr<MatrixWorkspace> inputWS) {
-      addDependantTaskOutput("InputWorkspace", inputWS, 0);
+      addDependantTaskOutput("InputWorkspace", std::move(inputWS), 0);
       m_firstTaskFlag = true;
     }
     void setTaskExecutionOrder(const std::vector<std::string> *taskExecutionOrder) {
@@ -80,7 +81,7 @@ protected:
     T *m_parent;
     void outputWorkspace(std::shared_ptr<MatrixWorkspace> ws, const std::string &outputName) {
       setSelectedOutput(outputName);
-      m_parent->m_algorithmTaskOutputs[m_name][outputName] = ws;
+      m_parent->m_algorithmTaskOutputs[m_name][outputName] = std::move(ws);
     }
 
     std::shared_ptr<MatrixWorkspace> getDependantWorkspace(const std::string &outputAlias) {
@@ -213,12 +214,14 @@ protected:
           missingTasksAll.insert(missingTasksAll.cend(), missingTasks.cbegin(), missingTasks.cend());
         }
       }
-      return (m_fulfilledDependantTaskSets.empty() ? missingTasksAll : std::vector<std::string>{});
+      if (m_fulfilledDependantTaskSets.empty())
+        return missingTasksAll;
+      return {};
     }
 
     void addDependantTaskOutput(const std::string &outputName, std::shared_ptr<MatrixWorkspace> ws,
                                 const size_t taskSetIndex) {
-      m_dependantOutputs[taskSetIndex][outputName] = ws;
+      m_dependantOutputs[taskSetIndex][outputName] = std::move(ws);
     }
   };
 
@@ -234,8 +237,8 @@ protected:
       Workspace_sptr clone = cloneAlg->getProperty("OutputWorkspace");
       inputWS = std::dynamic_pointer_cast<MatrixWorkspace>(clone);
     }
-    tasks[0]->initAsFirstTask(inputWS);
-    m_stagedAlgorithmTasks = tasks;
+    tasks[0]->initAsFirstTask(std::move(inputWS));
+    m_stagedAlgorithmTasks = std::move(tasks);
   }
 
   void configureAlgorithmTasks() {
@@ -251,7 +254,7 @@ protected:
         tasksToStage[index] = task;
       }
     }
-    stageAlgorithmTasks(tasksToStage);
+    stageAlgorithmTasks(std::move(tasksToStage));
   }
 
   void validateTaskExecutionOrder() {

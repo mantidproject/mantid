@@ -9,6 +9,7 @@ import unittest
 from mantid.simpleapi import (
     HFIRPowderReduction,
     CreateSampleWorkspace,
+    EditInstrumentGeometry,
     ExtractMask,
     RotateInstrumentComponent,
     MoveInstrumentComponent,
@@ -339,8 +340,7 @@ class WarnUnsetOptionalFieldsTests(unittest.TestCase):
             self.assertIn("SampleBackground is not set.", messages)
             self.assertIn("MaskWorkspace is not set.", messages)
             self.assertIn("MaskAngle is not set.", messages)
-            self.assertIn("AttenuationmuR is not set.", messages)
-            self.assertEqual(mock_warning.call_count, 6)
+            self.assertEqual(mock_warning.call_count, 5)
 
     def test_no_vanadium_warning_when_vanadium_filename_set(self):
         """Test that no vanadium warning is logged when VanadiumFilename is provided."""
@@ -382,14 +382,6 @@ class WarnUnsetOptionalFieldsTests(unittest.TestCase):
             messages = [call.args[0] for call in mock_warning.call_args_list]
             self.assertNotIn("MaskAngle is not set.", messages)
 
-    def test_no_attenuation_warning_when_set(self):
-        """Test that no AttenuationmuR warning is logged when it is provided."""
-        algo = _create_algo(Instrument="WAND^2", AttenuationmuR=1.5)
-        with patch.object(Logger, "warning") as mock_warning:
-            algo._warn_unset_optional_fields()
-            messages = [call.args[0] for call in mock_warning.call_args_list]
-            self.assertNotIn("AttenuationmuR is not set.", messages)
-
     def test_no_warnings_when_all_optional_fields_set(self):
         """Test that no warnings are logged when all optional fields are provided."""
         sample_ws = CreateSampleWorkspace()
@@ -401,7 +393,6 @@ class WarnUnsetOptionalFieldsTests(unittest.TestCase):
             SampleBackgroundFilename="HB2C_7000.nxs.h5",
             MaskWorkspace=mask_workspace,
             MaskAngle=60.0,
-            AttenuationmuR=1.5,
         )
         with patch.object(Logger, "warning") as mock_warning:
             algo._warn_unset_optional_fields()
@@ -905,8 +896,8 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 10.05)
         self.assertAlmostEqual(x.max(), 39.95)
-        self.assertAlmostEqual(y.min(), 1.5)
-        self.assertAlmostEqual(y.max(), 12.57768805)
+        self.assertAlmostEqual(y.min(), 1.11418334)
+        self.assertAlmostEqual(y.max(), 9.35101736)
         self.assertAlmostEqual(x[0, y.argmax()], 29.95)
 
         # data and calibration, limited range
@@ -929,8 +920,8 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 10.05)
         self.assertAlmostEqual(x.max(), 39.95)
-        self.assertAlmostEqual(y.min(), 1.5)
-        self.assertAlmostEqual(y.max(), 12.57768805)
+        self.assertAlmostEqual(y.min(), 1.11418334)
+        self.assertAlmostEqual(y.max(), 9.35101736)
         self.assertAlmostEqual(x[0, y.argmax()], 29.95)
 
         # data, cal and background, normalised by time
@@ -953,9 +944,9 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 8.09946893)
         self.assertAlmostEqual(x.max(), 50.80113407)
-        self.assertAlmostEqual(y.min(), -42.8104874)
-        self.assertAlmostEqual(y.max(), -3.0)
-        np.testing.assert_allclose(x[0, y.argmax()], 36.900592, rtol=1e-1, atol=1e-1)
+        self.assertAlmostEqual(y.min(), -31.86668266)
+        self.assertAlmostEqual(y.max(), -2.22827513)
+        self.assertAlmostEqual(x[0, y.argmax()], 8.09946893)
         # data, cal and background, normalised by time
         # NOTE:
         # still needs to check physics
@@ -978,9 +969,9 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 8.09946893)
         self.assertAlmostEqual(x.max(), 50.80113407)
-        self.assertAlmostEqual(y.min(), -42.8104874)
-        self.assertAlmostEqual(y.max(), -3.0)
-        np.testing.assert_allclose(x[0, y.argmax()], 36.900592, rtol=1e-1, atol=1e-1)
+        self.assertAlmostEqual(y.min(), -31.86668266)
+        self.assertAlmostEqual(y.max(), -2.22827513)
+        self.assertAlmostEqual(x[0, y.argmax()], 8.09946893)
 
         # data, cal and background. To d spacing
         pd_out4 = HFIRPowderReduction(
@@ -1000,9 +991,9 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 2.05)
         self.assertAlmostEqual(x.max(), 9.95)
-        self.assertAlmostEqual(y.min(), -20.84743178)
-        self.assertAlmostEqual(y.max(), -3.0)
-        self.assertAlmostEqual(x[0, y.argmax()], 2.55)
+        self.assertAlmostEqual(y.min(), -15.49971787)
+        self.assertAlmostEqual(y.max(), -2.22833933)
+        self.assertAlmostEqual(x[0, y.argmax()], 9.95)
 
         pd_out4_multi = HFIRPowderReduction(
             SampleFileName=(f"{data},{data}"),
@@ -1022,9 +1013,9 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 2.05)
         self.assertAlmostEqual(x.max(), 9.95)
-        self.assertAlmostEqual(y.min(), -20.84743178)
-        self.assertAlmostEqual(y.max(), -3.0)
-        self.assertAlmostEqual(x[0, y.argmax()], 2.55)
+        self.assertAlmostEqual(y.min(), -15.49971787)
+        self.assertAlmostEqual(y.max(), -2.22833933)
+        self.assertAlmostEqual(x[0, y.argmax()], 9.95)
 
         # data, cal and background with mask angle, to Q.
         pd_out4 = HFIRPowderReduction(
@@ -1046,9 +1037,9 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 1.0006, places=4)
         self.assertAlmostEqual(x.max(), 3.1994, places=4)
-        self.assertAlmostEqual(y.min(), -42.98771, places=4)
-        self.assertAlmostEqual(y.max(), -3.0, places=4)
-        np.testing.assert_allclose(x[0, y.argmax()], 1.07258, rtol=1e-6, atol=1e-1)
+        self.assertAlmostEqual(y.min(), -31.99860, places=4)
+        self.assertAlmostEqual(y.max(), -2.22870, places=4)
+        self.assertAlmostEqual(x[0, y.argmax()], 1.0006, places=4)
 
         # NOTE:
         # Need to check the physics
@@ -1072,9 +1063,9 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 1.0006, places=4)
         self.assertAlmostEqual(x.max(), 3.1994, places=4)
-        self.assertAlmostEqual(y.min(), -42.98771, places=4)
-        self.assertAlmostEqual(y.max(), -3.0, places=4)
-        np.testing.assert_allclose(x[0, y.argmax()], 1.07258, rtol=1e-6, atol=1e-1)
+        self.assertAlmostEqual(y.min(), -31.99860, places=4)
+        self.assertAlmostEqual(y.max(), -2.22870, places=4)
+        self.assertAlmostEqual(x[0, y.argmax()], 1.0006, places=4)
 
         # data, cal and background, scale background
         pd_out4 = HFIRPowderReduction(
@@ -1096,9 +1087,9 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 8.09952728)
         self.assertAlmostEqual(x.max(), 49.94993970)
-        self.assertAlmostEqual(y.min(), -21.21099623)
-        self.assertAlmostEqual(y.max(), -1.5)
-        self.assertAlmostEqual(x[0, y.argmax()], 36.53377878)
+        self.assertAlmostEqual(y.min(), -15.78880883)
+        self.assertAlmostEqual(y.max(), -1.11413713)
+        self.assertAlmostEqual(x[0, y.argmax()], 8.09952728)
 
         pd_out4_multi = HFIRPowderReduction(
             SampleFileName=(f"{data},{data}"),
@@ -1120,9 +1111,9 @@ class ReductionExecutionTests(unittest.TestCase):
 
         self.assertAlmostEqual(x.min(), 8.09952728)
         self.assertAlmostEqual(x.max(), 49.94993970)
-        self.assertAlmostEqual(y.min(), -21.21099623)
-        self.assertAlmostEqual(y.max(), -1.5)
-        np.testing.assert_allclose(x[0, y.argmax()], 37.43486421, rtol=1e-1, atol=1e-1)
+        self.assertAlmostEqual(y.min(), -15.78880883)
+        self.assertAlmostEqual(y.max(), -1.11413713)
+        self.assertAlmostEqual(x[0, y.argmax()], 8.09952728)
 
     def test_event(self):
         # check that the workflow runs with event workspaces as input, junk data
@@ -1324,6 +1315,485 @@ class ReductionExecutionTests(unittest.TestCase):
         # Load the output file and check it contains a workspace
         output_ws = Load(output_file_name)
         self.assertIsInstance(output_ws, MatrixWorkspace)
+
+
+class VanadiumAbsorptionCorrectionTests(unittest.TestCase):
+    """Tests for the vanadium absorption correction via CylinderAbsorptionCW."""
+
+    def _create_vanadium_workspace(self, name, counts=100.0, monitor=200.0, duration=20.0):
+        """Create a simple workspace with 4 spectra at known 2theta angles."""
+        ws = CreateSampleWorkspace(NumBanks=4, BankPixelWidth=1, BinWidth=20000, OutputWorkspace=name)
+        EditInstrumentGeometry(
+            ws,
+            PrimaryFlightPath=5.0,
+            SpectrumIDs=[1, 2, 3, 4],
+            L2=[2.0, 2.0, 2.0, 2.0],
+            Polar=[45.0, 90.0, 135.0, 90.0],
+            Azimuthal=[0.0, 0.0, 0.0, 0.0],
+            DetectorIDs=[1, 2, 3, 4],
+            InstrumentName="TestInstrument",
+        )
+        for i in range(ws.getNumberHistograms()):
+            ws.setY(i, [counts])
+            ws.setE(i, [np.sqrt(counts)])
+        AddSampleLog(ws, LogName="gd_prtn_chrg", LogType="Number", NumberType="Double", LogText=str(monitor))
+        AddSampleLog(ws, LogName="duration", LogType="Number", NumberType="Double", LogText=str(duration))
+        return ws
+
+    def tearDown(self):
+        # Clean up any workspaces left in the ADS
+        for name in list(mtd.getObjectNames()):
+            if mtd.doesExist(name):
+                mtd.remove(name)
+
+    def test_no_correction_when_vanadium_ws_is_none(self):
+        """When vanadium_ws is None, the method should be a no-op."""
+        algo = _create_algo(Instrument="WAND^2", Wavelength=1.7982, VanadiumDiameter=0.5, VanadiumHeight=3.0)
+        algo.vanadium_ws = None
+        algo.vanadium_background_ws = None
+
+        # Should not raise
+        algo._apply_vanadium_absorption_correction()
+
+        # vanadium_ws remains None
+        self.assertIsNone(algo.vanadium_ws)
+
+    def test_no_absorption_when_diameter_zero(self):
+        """When VanadiumDiameter=0, Δ=0 and A=1 so Vcorr = V - VB."""
+        self._create_vanadium_workspace("van_ws", counts=100.0, monitor=200.0)
+        self._create_vanadium_workspace("van_bg_ws", counts=20.0, monitor=100.0)
+
+        algo = _create_algo(Instrument="WAND^2", Wavelength=1.7982, VanadiumDiameter=0.0, VanadiumHeight=3.0, NormaliseBy="Monitor")
+        algo.vanadium_ws = "van_ws"
+        algo.vanadium_background_ws = "van_bg_ws"
+
+        algo._apply_vanadium_absorption_correction()
+
+        # V_scale/VB_scale = 200/100 = 2.0, so VB is scaled by 2: VB_scaled = 20*2 = 40
+        # Vcorr = 100 - 40 = 60
+        ws = mtd["van_ws"]
+        for i in range(ws.getNumberHistograms()):
+            self.assertAlmostEqual(ws.readY(i)[0], 60.0, places=5)
+
+        # Background should be marked as processed
+        self.assertIsNone(algo.vanadium_background_ws)
+
+    def test_no_absorption_no_background_when_diameter_zero(self):
+        """When VanadiumDiameter=0 and no background, Vcorr = V (unchanged)."""
+        self._create_vanadium_workspace("van_ws", counts=100.0, monitor=200.0)
+
+        algo = _create_algo(Instrument="WAND^2", Wavelength=1.7982, VanadiumDiameter=0.0, VanadiumHeight=3.0, NormaliseBy="Monitor")
+        algo.vanadium_ws = "van_ws"
+        algo.vanadium_background_ws = None
+
+        algo._apply_vanadium_absorption_correction()
+
+        ws = mtd["van_ws"]
+        for i in range(ws.getNumberHistograms()):
+            self.assertAlmostEqual(ws.readY(i)[0], 100.0, places=5)
+
+    def test_absorption_correction_applied_with_nonzero_diameter(self):
+        """When VanadiumDiameter > 0, absorption correction should modify data."""
+        self._create_vanadium_workspace("van_ws", counts=100.0, monitor=200.0)
+
+        algo = _create_algo(Instrument="WAND^2", Wavelength=1.7982, VanadiumDiameter=1.0, VanadiumHeight=3.0, NormaliseBy="Monitor")
+        algo.vanadium_ws = "van_ws"
+        algo.vanadium_background_ws = None
+
+        algo._apply_vanadium_absorption_correction()
+
+        ws = mtd["van_ws"]
+        # After correction, values should be V * (1 - Δ) / A
+        # Since A < 1 for absorption, corrected values should be > original values
+        for i in range(ws.getNumberHistograms()):
+            self.assertGreater(ws.readY(i)[0], 100.0)
+            # Errors should also be scaled
+            self.assertGreater(ws.readE(i)[0], np.sqrt(100.0))
+
+    def test_absorption_correction_with_background(self):
+        """Verify Vcorr = (V - VB) * (1 - Δ) / A when both are given."""
+        self._create_vanadium_workspace("van_ws", counts=100.0, monitor=200.0)
+        self._create_vanadium_workspace("van_bg_ws", counts=20.0, monitor=200.0)
+
+        algo = _create_algo(Instrument="WAND^2", Wavelength=1.7982, VanadiumDiameter=1.0, VanadiumHeight=3.0, NormaliseBy="Monitor")
+        algo.vanadium_ws = "van_ws"
+        algo.vanadium_background_ws = "van_bg_ws"
+
+        algo._apply_vanadium_absorption_correction()
+
+        # After BG subtraction (same monitor so scale=1): V - VB = 100 - 20 = 80
+        # Then (80) * (1-Δ)/A should give values > 80 since A < 1
+        ws = mtd["van_ws"]
+        for i in range(ws.getNumberHistograms()):
+            self.assertGreater(ws.readY(i)[0], 80.0)
+
+        self.assertIsNone(algo.vanadium_background_ws)
+
+    def test_absorption_correction_per_spectrum_varies(self):
+        """Verify that per-spectrum absorption correction values differ for different 2theta."""
+        self._create_vanadium_workspace("van_ws", counts=100.0, monitor=200.0)
+
+        algo = _create_algo(Instrument="WAND^2", Wavelength=1.7982, VanadiumDiameter=1.0, VanadiumHeight=3.0, NormaliseBy="None")
+        algo.vanadium_ws = "van_ws"
+        algo.vanadium_background_ws = None
+
+        algo._apply_vanadium_absorption_correction()
+
+        ws = mtd["van_ws"]
+        # Spectra at 45° and 135° should have different correction than 90°
+        val_45 = ws.readY(0)[0]
+        val_90 = ws.readY(1)[0]
+        val_90_2 = ws.readY(3)[0]
+
+        # 90° spectra should give the same result
+        self.assertAlmostEqual(val_90, val_90_2, places=5)
+        # Different angles should give different corrections
+        self.assertNotAlmostEqual(val_45, val_90, places=2)
+
+    def test_vanadium_height_property_default(self):
+        """Test that VanadiumHeight property defaults to 3.0 cm."""
+        algo = _create_algo(Instrument="WAND^2")
+        height = algo.getProperty("VanadiumHeight").value
+        self.assertEqual(height, 3.0)
+
+    def test_vanadium_height_property_custom(self):
+        """Test that VanadiumHeight property can be set to a custom value."""
+        algo = _create_algo(Instrument="WAND^2", VanadiumHeight=5.0)
+        height = algo.getProperty("VanadiumHeight").value
+        self.assertEqual(height, 5.0)
+
+    def test_normalise_by_time_scaling(self):
+        """When NormaliseBy=Time, background should be scaled by duration ratio."""
+        self._create_vanadium_workspace("van_ws", counts=100.0, duration=20.0)
+        self._create_vanadium_workspace("van_bg_ws", counts=50.0, duration=10.0)
+
+        algo = _create_algo(Instrument="WAND^2", Wavelength=1.7982, VanadiumDiameter=0.0, VanadiumHeight=3.0, NormaliseBy="Time")
+        algo.vanadium_ws = "van_ws"
+        algo.vanadium_background_ws = "van_bg_ws"
+
+        algo._apply_vanadium_absorption_correction()
+
+        # V_scale/VB_scale = 20/10 = 2.0, so VB_scaled = 50*2 = 100
+        # Vcorr = 100 - 100 = 0
+        ws = mtd["van_ws"]
+        for i in range(ws.getNumberHistograms()):
+            self.assertAlmostEqual(ws.readY(i)[0], 0.0, places=5)
+
+    def test_normalise_by_none_no_scaling(self):
+        """When NormaliseBy=None, background scale factor is 1 (no scaling)."""
+        self._create_vanadium_workspace("van_ws", counts=100.0, monitor=200.0, duration=20.0)
+        self._create_vanadium_workspace("van_bg_ws", counts=30.0, monitor=100.0, duration=10.0)
+
+        algo = _create_algo(Instrument="WAND^2", Wavelength=1.7982, VanadiumDiameter=0.0, VanadiumHeight=3.0, NormaliseBy="None")
+        algo.vanadium_ws = "van_ws"
+        algo.vanadium_background_ws = "van_bg_ws"
+
+        algo._apply_vanadium_absorption_correction()
+
+        # With NormaliseBy=None, scale factor = 1/1 = 1, so VB not scaled
+        # Vcorr = 100 - 30 = 70
+        ws = mtd["van_ws"]
+        for i in range(ws.getNumberHistograms()):
+            self.assertAlmostEqual(ws.readY(i)[0], 70.0, places=5)
+
+
+class SampleAbsorptionCorrectionTests(unittest.TestCase):
+    """Tests for sample absorption correction via CylinderAbsorptionCW."""
+
+    def _create_workspace(self, name, counts=100.0, monitor=200.0, duration=20.0):
+        """Create a simple workspace with 4 spectra at known 2theta angles."""
+        ws = CreateSampleWorkspace(NumBanks=4, BankPixelWidth=1, BinWidth=20000, OutputWorkspace=name)
+        EditInstrumentGeometry(
+            ws,
+            PrimaryFlightPath=5.0,
+            SpectrumIDs=[1, 2, 3, 4],
+            L2=[2.0, 2.0, 2.0, 2.0],
+            Polar=[45.0, 90.0, 135.0, 90.0],
+            Azimuthal=[0.0, 0.0, 0.0, 0.0],
+            DetectorIDs=[1, 2, 3, 4],
+            InstrumentName="TestInstrument",
+        )
+        for i in range(ws.getNumberHistograms()):
+            ws.setY(i, [counts])
+            ws.setE(i, [np.sqrt(counts)])
+        AddSampleLog(ws, LogName="gd_prtn_chrg", LogType="Number", NumberType="Double", LogText=str(monitor))
+        AddSampleLog(ws, LogName="duration", LogType="Number", NumberType="Double", LogText=str(duration))
+        return ws
+
+    def tearDown(self):
+        for name in list(mtd.getObjectNames()):
+            if mtd.doesExist(name):
+                mtd.remove(name)
+
+    def test_validate_do_ms_requires_sample_height(self):
+        """DoMultipleScatteringCorrection=True requires SampleHeight > 0."""
+        algo = _create_algo(
+            Instrument="WAND^2",
+            Wavelength=1.7982,
+            VanadiumDiameter=0.5,
+            DoAttenuationCorrection=True,
+            DoMultipleScatteringCorrection=True,
+            SampleChemicalFormula="Fe2 O3",
+            SampleCrystalDensity=5.24,
+            SampleDiameter=0.8,
+            SampleHeight=0.0,
+        )
+        issues = algo.validateInputs()
+        self.assertIn("SampleHeight", issues)
+
+    def test_validate_absolute_units_requires_vanadium_and_height(self):
+        """AbsoluteIntensityUnits=True requires VanadiumDiameter>0, VanadiumHeight>0, SampleHeight>0."""
+        algo = _create_algo(
+            Instrument="WAND^2",
+            Wavelength=1.7982,
+            VanadiumDiameter=0.0,
+            VanadiumHeight=3.0,
+            DoAttenuationCorrection=True,
+            AbsoluteIntensityUnits=True,
+            SampleChemicalFormula="Fe2 O3",
+            SampleCrystalDensity=5.24,
+            SampleDiameter=0.8,
+            SampleHeight=0.0,
+        )
+        issues = algo.validateInputs()
+        self.assertIn("VanadiumDiameter", issues)
+        self.assertIn("SampleHeight", issues)
+
+    def test_validate_do_attenuation_requires_fields(self):
+        """DoAttenuationCorrection=True requires formula, density, diameter."""
+        algo = _create_algo(
+            Instrument="WAND^2",
+            Wavelength=1.7982,
+            VanadiumDiameter=0.5,
+            DoAttenuationCorrection=True,
+        )
+        issues = algo.validateInputs()
+        self.assertIn("SampleChemicalFormula", issues)
+        self.assertIn("SampleCrystalDensity", issues)
+        self.assertIn("SampleDiameter", issues)
+
+    def test_no_validation_errors_when_attenuation_off(self):
+        """When DoAttenuationCorrection=False, sample fields are not validated."""
+        algo = _create_algo(
+            Instrument="WAND^2",
+            Wavelength=1.7982,
+            VanadiumDiameter=0.5,
+        )
+        issues = algo.validateInputs()
+        self.assertNotIn("SampleChemicalFormula", issues)
+        self.assertNotIn("SampleCrystalDensity", issues)
+        self.assertNotIn("SampleDiameter", issues)
+
+    def test_sample_absorption_correction_applied(self):
+        """When DoAttenuationCorrection=True, sample absorption is applied."""
+        self._create_workspace("sample_ws", counts=100.0, monitor=200.0)
+
+        algo = _create_algo(
+            Instrument="WAND^2",
+            Wavelength=1.7982,
+            VanadiumDiameter=0.5,
+            VanadiumHeight=3.0,
+            DoAttenuationCorrection=True,
+            SampleChemicalFormula="Fe2 O3",
+            SampleCrystalDensity=5.24,
+            SamplePackingFraction=0.5,
+            SampleDiameter=0.8,
+            SampleHeight=3.0,
+            NormaliseBy="Monitor",
+        )
+        algo.vanadium_ws = None
+        algo.vanadium_background_ws = None
+        algo.sample_background_ws = None
+
+        algo._apply_sample_corrections_pre_conversion(["sample_ws"])
+
+        ws = mtd["sample_ws"]
+        # After absorption correction (dividing by A < 1), values should increase
+        for i in range(ws.getNumberHistograms()):
+            self.assertGreater(ws.readY(i)[0], 100.0)
+
+    def test_sample_correction_with_background_subtraction(self):
+        """Background is subtracted (with fB and normalization) before absorption."""
+        self._create_workspace("sample_ws", counts=100.0, monitor=200.0)
+        self._create_workspace("sample_bg", counts=20.0, monitor=100.0)
+
+        algo = _create_algo(
+            Instrument="WAND^2",
+            Wavelength=1.7982,
+            VanadiumDiameter=0.5,
+            VanadiumHeight=3.0,
+            DoAttenuationCorrection=True,
+            SampleChemicalFormula="Fe2 O3",
+            SampleCrystalDensity=5.24,
+            SamplePackingFraction=0.5,
+            SampleDiameter=0.8,
+            SampleHeight=3.0,
+            SampleBackgroundScaleFactor=1.0,
+            NormaliseBy="Monitor",
+        )
+        algo.vanadium_ws = None
+        algo.vanadium_background_ws = None
+        algo.sample_background_ws = "sample_bg"
+
+        algo._apply_sample_corrections_pre_conversion(["sample_ws"])
+
+        # BG scaled by fB * (S_monitor/BG_monitor) = 1.0 * (200/100) = 2.0
+        # BG_scaled = 20 * 2 = 40
+        # S - BG_scaled = 100 - 40 = 60
+        # Then divided by A (< 1) and multiplied by (1-Δ), so result > 60
+        ws = mtd["sample_ws"]
+        for i in range(ws.getNumberHistograms()):
+            self.assertGreater(ws.readY(i)[0], 60.0)
+
+        # Sample background should be marked as processed
+        self.assertIsNone(algo.sample_background_ws)
+
+    def test_sample_background_scale_factor(self):
+        """SampleBackgroundScaleFactor (fB) scales the background before subtraction."""
+        self._create_workspace("sample_ws", counts=100.0, monitor=200.0)
+        self._create_workspace("sample_bg", counts=20.0, monitor=200.0)
+
+        algo = _create_algo(
+            Instrument="WAND^2",
+            Wavelength=1.7982,
+            VanadiumDiameter=0.5,
+            VanadiumHeight=3.0,
+            DoAttenuationCorrection=True,
+            SampleChemicalFormula="Fe2 O3",
+            SampleCrystalDensity=5.24,
+            SamplePackingFraction=0.5,
+            SampleDiameter=0.8,
+            SampleHeight=3.0,
+            SampleBackgroundScaleFactor=0.5,
+            NormaliseBy="Monitor",
+        )
+        algo.vanadium_ws = None
+        algo.vanadium_background_ws = None
+        algo.sample_background_ws = "sample_bg"
+
+        algo._apply_sample_corrections_pre_conversion(["sample_ws"])
+
+        # BG scaled by fB * (S_monitor/BG_monitor) = 0.5 * (200/200) = 0.5
+        # BG_scaled = 20 * 0.5 = 10
+        # S - BG_scaled = 100 - 10 = 90
+        # Then corrected (> 90 because A < 1)
+        ws = mtd["sample_ws"]
+        for i in range(ws.getNumberHistograms()):
+            self.assertGreater(ws.readY(i)[0], 90.0)
+
+    def test_no_multiple_scattering_when_disabled(self):
+        """When DoMultipleScatteringCorrection=False, ΔS=0."""
+        self._create_workspace("sample_ws", counts=100.0, monitor=200.0)
+
+        algo = _create_algo(
+            Instrument="WAND^2",
+            Wavelength=1.7982,
+            VanadiumDiameter=0.5,
+            VanadiumHeight=3.0,
+            DoAttenuationCorrection=True,
+            DoMultipleScatteringCorrection=False,
+            SampleChemicalFormula="V",
+            SampleCrystalDensity=6.1172,
+            SamplePackingFraction=1.0,
+            SampleDiameter=1.0,
+            SampleHeight=3.0,
+            NormaliseBy="None",
+        )
+        algo.vanadium_ws = None
+        algo.vanadium_background_ws = None
+        algo.sample_background_ws = None
+
+        algo._apply_sample_corrections_pre_conversion(["sample_ws"])
+        val_no_ms = mtd["sample_ws"].readY(0)[0]
+
+        # Now with MS
+        self._create_workspace("sample_ws2", counts=100.0, monitor=200.0)
+        algo2 = _create_algo(
+            Instrument="WAND^2",
+            Wavelength=1.7982,
+            VanadiumDiameter=0.5,
+            VanadiumHeight=3.0,
+            DoAttenuationCorrection=True,
+            DoMultipleScatteringCorrection=True,
+            SampleChemicalFormula="V",
+            SampleCrystalDensity=6.1172,
+            SamplePackingFraction=1.0,
+            SampleDiameter=1.0,
+            SampleHeight=3.0,
+            NormaliseBy="None",
+        )
+        algo2.vanadium_ws = None
+        algo2.vanadium_background_ws = None
+        algo2.sample_background_ws = None
+
+        algo2._apply_sample_corrections_pre_conversion(["sample_ws2"])
+        val_with_ms = mtd["sample_ws2"].readY(0)[0]
+
+        # With MS correction (Δ > 0), (1-Δ) < 1, so result should be smaller
+        self.assertGreater(val_no_ms, val_with_ms)
+
+    def test_sample_correction_per_spectrum_varies(self):
+        """Per-spectrum absorption values differ for different 2theta angles."""
+        self._create_workspace("sample_ws", counts=100.0, monitor=200.0)
+
+        algo = _create_algo(
+            Instrument="WAND^2",
+            Wavelength=1.7982,
+            VanadiumDiameter=0.5,
+            VanadiumHeight=3.0,
+            DoAttenuationCorrection=True,
+            SampleChemicalFormula="Fe2 O3",
+            SampleCrystalDensity=5.24,
+            SamplePackingFraction=0.5,
+            SampleDiameter=0.8,
+            SampleHeight=3.0,
+            NormaliseBy="None",
+        )
+        algo.vanadium_ws = None
+        algo.vanadium_background_ws = None
+        algo.sample_background_ws = None
+
+        algo._apply_sample_corrections_pre_conversion(["sample_ws"])
+
+        ws = mtd["sample_ws"]
+        val_45 = ws.readY(0)[0]
+        val_90 = ws.readY(1)[0]
+        val_90_2 = ws.readY(3)[0]
+
+        # Same angle should give same correction
+        self.assertAlmostEqual(val_90, val_90_2, places=5)
+        # Different angles should give different corrections
+        self.assertNotAlmostEqual(val_45, val_90, places=2)
+
+    def test_default_property_values(self):
+        """Test that new properties have correct defaults."""
+        algo = _create_algo(Instrument="WAND^2")
+        self.assertFalse(algo.getProperty("DoAttenuationCorrection").value)
+        self.assertFalse(algo.getProperty("DoMultipleScatteringCorrection").value)
+        self.assertFalse(algo.getProperty("AbsoluteIntensityUnits").value)
+        self.assertEqual(algo.getProperty("SamplePackingFraction").value, 0.5)
+        self.assertEqual(algo.getProperty("SampleHeight").value, 0.0)
+        self.assertEqual(algo.getProperty("SampleBackgroundScaleFactor").value, 1.0)
+
+    def test_compute_fnorm(self):
+        """Test that fnorm computation returns a positive value."""
+        algo = _create_algo(
+            Instrument="WAND^2",
+            Wavelength=1.7982,
+            VanadiumDiameter=1.0,
+            VanadiumHeight=3.0,
+            DoAttenuationCorrection=True,
+            AbsoluteIntensityUnits=True,
+            SampleChemicalFormula="Fe2 O3",
+            SampleCrystalDensity=5.24,
+            SamplePackingFraction=0.5,
+            SampleDiameter=0.8,
+            SampleHeight=3.0,
+        )
+        fnorm = algo._compute_fnorm()
+        self.assertGreater(fnorm, 0)
+        # fnorm should be in mb/sr/f.u. range (typically order of magnitude ~1-1000)
+        self.assertLess(fnorm, 10000)
 
 
 if __name__ == "__main__":

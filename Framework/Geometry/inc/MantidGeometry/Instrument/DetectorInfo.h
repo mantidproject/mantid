@@ -60,6 +60,7 @@ public:
 
   size_t size() const;
   size_t scanSize() const;
+  size_t getMemorySize() const;
   bool isScanning() const;
 
   bool isMonitor(const size_t index) const;

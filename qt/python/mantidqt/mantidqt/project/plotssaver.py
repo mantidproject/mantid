@@ -148,7 +148,7 @@ class PlotsSaver(object):
 
         # add value to determine if ax has been normalised
         ws_artists = [art for art in ax.tracked_workspaces.values()]
-        is_norm = all(art[0].is_normalized for art in ws_artists)
+        is_norm = all(art[0].is_normalized_by_bin_width() for art in ws_artists)
         ax_dict["_is_norm"] = is_norm
 
         return ax_dict
