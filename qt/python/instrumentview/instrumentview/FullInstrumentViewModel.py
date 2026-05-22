@@ -377,7 +377,7 @@ class FullInstrumentViewModel:
     ) -> list[DetectorInfo]:
         return [
             DetectorInfo(det.getName(), det_id, ws_index, xyz, spherical, det.getFullName(), int(count))
-            for ws_index, det_id, xyz, spherical, count in zip(ws_indices, det_ids, xyz_positions, spherical_positions, counts)
+            for ws_index, det_id, xyz, spherical, count in zip(ws_indices, det_ids, xyz_positions, spherical_positions, counts, strict=True)
             for det in (self._workspace.getDetector(int(ws_index)),)
         ]
 
