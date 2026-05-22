@@ -361,14 +361,8 @@ class FullInstrumentViewModel:
             self._point_picked_detectors[:] = False
             self._point_picked_detectors[global_index] = True
 
-    def global_index_from_pickable_index(self, pickable_index: int) -> int | None:
-        global_indices = np.flatnonzero(self.is_pickable)
-        if pickable_index < 0 or pickable_index >= len(global_indices):
-            return None
-        return int(global_indices[pickable_index])
-
     def workspace_index_from_pickable_index(self, pickable_index: int) -> int | None:
-        global_index = self.global_index_from_pickable_index(pickable_index)
+        global_index = np.argwhere(self.is_pickable).flatten()[pickable_index]
         if global_index is None:
             return None
         return int(self._workspace_indices[global_index])

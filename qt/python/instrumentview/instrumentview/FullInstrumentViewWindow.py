@@ -412,7 +412,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self._overlay_meshes = []
         self._lineplot_overlays = []
-        self._hover_pick_line = None
 
         screen_geometry = self.screen().geometry()
         self.resize(int(screen_geometry.width() * 0.8), int(screen_geometry.height() * 0.8))
@@ -1010,7 +1009,6 @@ class FullInstrumentViewWindow(QMainWindow):
     @_skip_if_closing
     def show_plot_for_detectors(self, workspace: Workspace2D, integration_limits) -> None:
         """Plot all the given spectra, where they are defined by their workspace indices, not the spectra numbers"""
-        self._hover_pick_line = None
         self._detector_spectrum_axes.clear()
         sum_spectra = self.sum_spectra_selected()
         if workspace is not None and workspace.getNumberHistograms() > 0:

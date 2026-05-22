@@ -73,7 +73,7 @@ class FullInstrumentViewPresenter:
         self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
         self._renderer = self._shape_renderer if view.is_show_shapes_checkbox_checked() else self._point_cloud_renderer
         self._hover_pick_mode = False
-        self._last_hovered_workspace_index: Optional[int] = None
+        self._last_hovered_point_index: Optional[int] = None
         self._select_bank_tube = False
         self.setup()
         self._callback_queue = Queue()
@@ -216,7 +216,7 @@ class FullInstrumentViewPresenter:
         self._model.flip_beam = self._view.is_flip_beam_checkbox_checked()
         if not self._model.is_2d_projection and self._hover_pick_mode:
             self._hover_pick_mode = False
-            self._last_hovered_workspace_index = None
+            self._last_hovered_point_index = None
             self._view.set_hover_pick_checked(False)
         self._view.set_hover_pick_available(self._model.is_2d_projection)
         self._view.set_hover_pick_mode_enabled(self._hover_pick_mode)
@@ -366,14 +366,11 @@ class FullInstrumentViewPresenter:
         if self._hover_pick_mode:
 
             def point_hovered(point_index: int | None) -> None:
-                if point_index is None:
-                    return
-                workspace_index = self._model.workspace_index_from_pickable_index(point_index)
-                if workspace_index is None or workspace_index == self._last_hovered_workspace_index:
+                if point_index is None or point_index == self._last_hovered_point_index:
                     return
 
-                self._last_hovered_workspace_index = workspace_index
-                self._update_hover_pick_plot(workspace_index)
+                self._last_hovered_point_index = point_index
+                self._update_hover_pick_plot(point_index)
 
             self._renderer.enable_picking(self._view.main_plotter, callback=point_hovered, hover=True)
             return
@@ -387,7 +384,7 @@ class FullInstrumentViewPresenter:
     def on_hover_pick_toggled(self, checked: bool) -> None:
         enabled = checked and self._model.is_2d_projection
         self._hover_pick_mode = enabled
-        self._last_hovered_workspace_index = None
+        self._last_hovered_point_index = None
 
         self._view.set_hover_pick_mode_enabled(enabled)
         self.update_detector_picker()
@@ -402,7 +399,10 @@ class FullInstrumentViewPresenter:
 
         self.update_picked_detectors_on_view()
 
-    def _update_hover_pick_plot(self, workspace_index: int) -> None:
+    def _update_hover_pick_plot(self, point_index: int) -> None:
+        workspace_index = self._model.workspace_index_from_pickable_index(point_index)
+        if workspace_index is None:
+            return
         self._model.extract_spectra_for_line_plot(self._view.current_selected_lineplot_unit(), False, np.array([workspace_index]))
         detector_info = self._model.detector_info_text_for_workspace_index(workspace_index)
         if len(detector_info) == 0:
@@ -543,8 +543,8 @@ class FullInstrumentViewPresenter:
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
         if self._hover_pick_mode:
-            if self._last_hovered_workspace_index is not None:
-                self._update_hover_pick_plot(self._last_hovered_workspace_index)
+            if self._last_hovered_point_index is not None:
+                self._update_hover_pick_plot(self._last_hovered_point_index)
             return
 
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
