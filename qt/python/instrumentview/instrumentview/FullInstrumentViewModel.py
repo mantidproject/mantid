@@ -362,29 +362,38 @@ class FullInstrumentViewModel:
             self._point_picked_detectors[global_index] = True
 
     def workspace_index_from_pickable_index(self, pickable_index: int) -> int | None:
-        global_index = np.argwhere(self.is_pickable).flatten()[pickable_index]
-        if global_index is None:
+        pickable_indices = np.argwhere(self.is_pickable).flatten()
+        if pickable_index >= len(pickable_indices):
             return None
-        return int(self._workspace_indices[global_index])
+        return int(self._workspace_indices[pickable_indices[pickable_index]])
+
+    def _build_detector_info_list(
+        self,
+        ws_indices: np.ndarray,
+        det_ids: np.ndarray,
+        xyz_positions: np.ndarray,
+        spherical_positions: np.ndarray,
+        counts: np.ndarray,
+    ) -> list[DetectorInfo]:
+        return [
+            DetectorInfo(det.getName(), det_id, ws_index, xyz, spherical, det.getFullName(), int(count))
+            for ws_index, det_id, xyz, spherical, count in zip(ws_indices, det_ids, xyz_positions, spherical_positions, counts)
+            for det in (self._workspace.getDetector(int(ws_index)),)
+        ]
 
     def detector_info_text_for_workspace_index(self, workspace_index: int) -> list[DetectorInfo]:
         matching_indices = np.argwhere(self._workspace_indices == workspace_index)
         if len(matching_indices) == 0:
             return []
 
-        index = int(matching_indices[0, 0])
-        ws_detector = self._workspace.getDetector(int(workspace_index))
-        return [
-            DetectorInfo(
-                ws_detector.getName(),
-                self._detector_ids[index],
-                self._workspace_indices[index],
-                self._detector_positions_3d[index],
-                self._spherical_positions[index],
-                ws_detector.getFullName(),
-                int(self._counts[index]),
-            )
-        ]
+        index = [int(matching_indices[0, 0])]
+        return self._build_detector_info_list(
+            self._workspace_indices[index],
+            self._detector_ids[index],
+            self._detector_positions_3d[index],
+            self._spherical_positions[index],
+            self._counts[index],
+        )
 
     def clear_point_picked_detectors(self) -> None:
         self._detector_is_picked[self._point_picked_detectors] = False
@@ -392,23 +401,18 @@ class FullInstrumentViewModel:
 
     def picked_detectors_info_text(self) -> list[DetectorInfo]:
         """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
-
         picked_ws_indices = self._workspace_indices[self._detector_is_picked]
-        picked_ids = self._detector_ids[self._detector_is_picked]
-        picked_xyz_positions = self._detector_positions_3d[self._detector_is_picked]
-        picked_spherical_positions = self._spherical_positions[self._detector_is_picked]
-        picked_counts = self._counts[self._detector_is_picked]
 
         if len(picked_ws_indices) > self.MAX_DET_INFO_SHOWN:
             return []
 
-        return [
-            DetectorInfo(det.getName(), det_id, ws_index, xyz, spherical, det.getFullName(), int(count))
-            for ws_index, det_id, xyz, spherical, count in zip(
-                picked_ws_indices, picked_ids, picked_xyz_positions, picked_spherical_positions, picked_counts
-            )
-            for det in (self._workspace.getDetector(int(ws_index)),)
-        ]
+        return self._build_detector_info_list(
+            picked_ws_indices,
+            self._detector_ids[self._detector_is_picked],
+            self._detector_positions_3d[self._detector_is_picked],
+            self._spherical_positions[self._detector_is_picked],
+            self._counts[self._detector_is_picked],
+        )
 
     def get_default_projection_index_and_options(self) -> tuple[int, list[str]]:
         possible_returns_map = {
