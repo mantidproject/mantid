@@ -30,7 +30,8 @@ FileFormatOptions::FileFormatOptions(NamedFormat format, std::string prefix, boo
     : m_format(format), m_prefix(std::move(prefix)), m_model(std::move(model)),
       m_model_validation(std::move(model_validation)), m_includeHeader(includeHeader),
       m_separator(std::move(separator)), m_includeQResolution(includeQResolution),
-      m_includeAdditionalCols(includeAdditionalColumns), m_saveToSingleFile(saveToSingleFile), m_metaSource(metaSource) {}
+      m_includeAdditionalCols(includeAdditionalColumns), m_saveToSingleFile(saveToSingleFile),
+      m_metaSource(metaSource) {}
 bool FileFormatOptions::shouldIncludeHeader() const { return m_includeHeader; }
 bool FileFormatOptions::shouldIncludeQResolution() const { return m_includeQResolution; }
 bool FileFormatOptions::shouldIncludeAdditionalColumns() const { return m_includeAdditionalCols; }
