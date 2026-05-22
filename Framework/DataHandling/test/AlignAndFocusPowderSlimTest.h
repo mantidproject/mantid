@@ -15,12 +15,14 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim.h"
+#include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 
+#include <Poco/TemporaryFile.h>
 #include <gtest/gtest.h>
 #include <numbers>
 
@@ -1200,20 +1202,30 @@ public:
   }
 
   void test_grouping_filename_xml() {
-    // vulcangroup.xml defines 2 non-zero groups for the VULCAN instrument
+    // Generate an XML grouping from the current VULCAN grouping workspace to avoid
+    // brittle dependencies on a static grouping XML that may not match the loaded IDF.
     using namespace Mantid::DataHandling::AlignAndFocusPowderSlim::PropertyNames;
+    auto groupingFilename = Poco::TemporaryFile::tempName() + ".xml";
+    Poco::TemporaryFile::registerForDeletion(groupingFilename);
+
+    Mantid::DataHandling::SaveDetectorsGrouping saveGrouping;
+    TS_ASSERT_THROWS_NOTHING(saveGrouping.initialize());
+    TS_ASSERT_THROWS_NOTHING(saveGrouping.setProperty("InputWorkspace", bank_grouping_ws));
+    TS_ASSERT_THROWS_NOTHING(saveGrouping.setProperty("OutputFile", groupingFilename));
+    TS_ASSERT_THROWS_NOTHING(saveGrouping.execute());
+    TS_ASSERT(saveGrouping.isExecuted());
 
     AlignAndFocusPowderSlim alg;
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILENAME, VULCAN_218062));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(OUTPUT_WKSP, "unused"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(GROUP_FILE, "vulcangroup.xml"));
-    // 2 groups in vulcangroup.xml
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(GROUP_FILE, groupingFilename));
+    // bank-grouping workspace has 6 groups
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(L1, 43.755));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L2, std::vector<double>{2.296, 2.296}));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(POLARS, std::vector<double>{90.0, 90.0}));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(AZIMUTHALS, std::vector<double>{180.0, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L2, std::vector<double>{2.296, 2.296, 2.070, 2.070, 2.070, 2.530}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(POLARS, std::vector<double>{90.0, 90.0, 120.0, 150.0, 157.0, 65.5}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(AZIMUTHALS, std::vector<double>{180.0, 0.0, 0.0, 0.0, 0.0, 0.0}));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -1221,7 +1233,7 @@ public:
     TS_ASSERT(outputWS);
     auto matWS = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
     TS_ASSERT(matWS);
-    TS_ASSERT_EQUALS(matWS->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(matWS->getNumberHistograms(), 6);
   }
 
   // ==================================
