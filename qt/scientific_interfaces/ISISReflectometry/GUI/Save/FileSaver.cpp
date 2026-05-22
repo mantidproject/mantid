@@ -65,6 +65,8 @@ std::string FileSaver::propertyForMetaSource(ORSOMetaSource metaSource) {
     return MetaSourcePropStrings::HYBRID;
   case ORSOMetaSource::Manual:
     return MetaSourcePropStrings::MANUAL;
+  default:
+    throw std::runtime_error("Unknown metadata source.");
   }
 }
 
