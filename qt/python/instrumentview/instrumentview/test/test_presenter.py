@@ -122,7 +122,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         hover_callback(3)
         hover_callback(3)
 
-        self._presenter._update_hover_pick_plot.assert_called_once_with(7)
+        self._presenter._update_hover_pick_plot.assert_called_once_with(3)
 
     def test_on_hover_pick_toggled_enables_hover_mode(self):
         self._model.projection_type = ProjectionType.CYLINDRICAL_X
