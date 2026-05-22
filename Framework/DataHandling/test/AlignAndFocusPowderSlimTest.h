@@ -15,10 +15,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/AlignAndFocusPowderSlim.h"
-#include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
@@ -38,7 +36,6 @@ using Mantid::DataHandling::AlignAndFocusPowderSlim::AlignAndFocusPowderSlim;
 using Mantid::DataObjects::GroupingWorkspace;
 using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::TableWorkspace_sptr;
-using ScopedFileHelper::ScopedFile;
 
 namespace {
 // used in most tests
@@ -1203,32 +1200,20 @@ public:
   }
 
   void test_grouping_filename_xml() {
-    // Generate an XML grouping from the current VULCAN grouping workspace to avoid
-    // brittle dependencies on a static grouping XML that may not match the loaded IDF.
+    // vulcangroup.xml defines 2 non-zero groups for the VULCAN instrument
     using namespace Mantid::DataHandling::AlignAndFocusPowderSlim::PropertyNames;
-    ScopedFile groupingFile("", "AlignAndFocusPowderSlimTest_grouping.xml");
-    const auto &groupingFilename = groupingFile.getFileName();
-
-    Mantid::DataHandling::SaveDetectorsGrouping saveGrouping;
-    TS_ASSERT_THROWS_NOTHING(saveGrouping.initialize());
-    TS_ASSERT_THROWS_NOTHING(saveGrouping.setProperty("InputWorkspace", bank_grouping_ws));
-    TS_ASSERT_THROWS_NOTHING(saveGrouping.setProperty("OutputFile", groupingFilename));
-    TS_ASSERT_THROWS_NOTHING(saveGrouping.execute());
-    TS_ASSERT(saveGrouping.isExecuted());
 
     AlignAndFocusPowderSlim alg;
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(FILENAME, VULCAN_218062));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(OUTPUT_WKSP, "unused"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(GROUP_FILE, groupingFilename));
-    // bank-grouping workspace has 6 groups; use the same focus geometry defaults used
-    // throughout this test suite for VULCAN.
-    const TestConfig vulcanConfig;
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L1, vulcanConfig.l1));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L2, vulcanConfig.l2s));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(POLARS, vulcanConfig.twoTheta));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(AZIMUTHALS, vulcanConfig.phi));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(GROUP_FILE, "vulcangroup.xml"));
+    // 2 groups in vulcangroup.xml
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L1, 43.755));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L2, std::vector<double>{2.296, 2.296}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(POLARS, std::vector<double>{90.0, 90.0}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(AZIMUTHALS, std::vector<double>{180.0, 0.0}));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -1236,7 +1221,7 @@ public:
     TS_ASSERT(outputWS);
     auto matWS = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
     TS_ASSERT(matWS);
-    TS_ASSERT_EQUALS(matWS->getNumberHistograms(), 6);
+    TS_ASSERT_EQUALS(matWS->getNumberHistograms(), 2);
   }
 
   // ==================================

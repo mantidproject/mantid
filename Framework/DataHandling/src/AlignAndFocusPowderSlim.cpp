@@ -819,10 +819,10 @@ GroupingWorkspace_sptr AlignAndFocusPowderSlim::loadGroupingFile(const API::Matr
 
   GroupingWorkspace_sptr groupingWS;
   if (lowerFilename.ends_with(".xml")) {
-    // XML grouping file -- use LoadDetectorsGroupingFile
-    auto grpWS = std::make_shared<DataObjects::GroupingWorkspace>(wksp->getInstrument());
+    // XML grouping files can carry their own instrument/date metadata. Do not
+    // supply InputWorkspace here because LoadDetectorsGroupingFile treats that
+    // as an override of the grouping file instrument selection.
     auto alg = createChildAlgorithm("LoadDetectorsGroupingFile");
-    alg->setProperty("InputWorkspace", std::dynamic_pointer_cast<API::Workspace>(grpWS));
     alg->setPropertyValue("InputFile", filename);
     alg->executeAsChildAlg();
     groupingWS = alg->getProperty("OutputWorkspace");
