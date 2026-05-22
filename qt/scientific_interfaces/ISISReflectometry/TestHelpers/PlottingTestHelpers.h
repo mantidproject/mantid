@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "../../../ISISReflectometry/GUI/Common/PlotOptions.h"
-#include "../../../ISISReflectometry/GUI/Plotting/PlottingWorkspace.h"
+#include "../../ISISReflectometry/GUI/Common/PlotOptions.h"
+#include "../../ISISReflectometry/GUI/Plotting/PlottingWorkspace.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 

@@ -8,8 +8,8 @@
 
 #include "../../../ISISReflectometry/GUI/Plotting/PlottingPresenter.h"
 #include "../../../ISISReflectometry/Reduction/RunsTable.h"
+#include "../../../ISISReflectometry/TestHelpers/PlottingTestHelpers.h"
 #include "../ReflMockObjects.h"
-#include "PlottingTestHelpers.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"

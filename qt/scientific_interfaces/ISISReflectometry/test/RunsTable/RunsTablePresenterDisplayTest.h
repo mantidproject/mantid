@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
-#include "../Plotting/PlottingTestHelpers.h"
+#include "../../../ISISReflectometry/TestHelpers/PlottingTestHelpers.h"
 #include "RunsTablePresenterTest.h"
 
 #include <cxxtest/TestSuite.h>
