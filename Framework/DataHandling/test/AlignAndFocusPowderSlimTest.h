@@ -18,11 +18,11 @@
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 
-#include <Poco/TemporaryFile.h>
 #include <gtest/gtest.h>
 #include <numbers>
 
@@ -38,6 +38,7 @@ using Mantid::DataHandling::AlignAndFocusPowderSlim::AlignAndFocusPowderSlim;
 using Mantid::DataObjects::GroupingWorkspace;
 using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::TableWorkspace_sptr;
+using ScopedFileHelper::ScopedFile;
 
 namespace {
 // used in most tests
@@ -1205,8 +1206,8 @@ public:
     // Generate an XML grouping from the current VULCAN grouping workspace to avoid
     // brittle dependencies on a static grouping XML that may not match the loaded IDF.
     using namespace Mantid::DataHandling::AlignAndFocusPowderSlim::PropertyNames;
-    auto groupingFilename = Poco::TemporaryFile::tempName() + ".xml";
-    Poco::TemporaryFile::registerForDeletion(groupingFilename);
+    ScopedFile groupingFile("", "AlignAndFocusPowderSlimTest_grouping.xml");
+    const auto &groupingFilename = groupingFile.getFileName();
 
     Mantid::DataHandling::SaveDetectorsGrouping saveGrouping;
     TS_ASSERT_THROWS_NOTHING(saveGrouping.initialize());
@@ -1223,11 +1224,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(GROUP_FILE, groupingFilename));
     // bank-grouping workspace has 6 groups; use the same focus geometry defaults used
     // throughout this test suite for VULCAN.
-    const TestConfig defaults;
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L1, defaults.l1));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L2, defaults.l2s));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(POLARS, defaults.twoTheta));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(AZIMUTHALS, defaults.phi));
+    const TestConfig vulcanConfig;
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L1, vulcanConfig.l1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(L2, vulcanConfig.l2s));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(POLARS, vulcanConfig.twoTheta));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(AZIMUTHALS, vulcanConfig.phi));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
