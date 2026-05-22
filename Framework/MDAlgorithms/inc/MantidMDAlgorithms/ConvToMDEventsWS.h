@@ -58,7 +58,7 @@ private:
   std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<double>>> m_Logs;
   std::vector<size_t> m_GonioIndex;
   // Private functions to update values from logs
-  template <class T> int setGoniometersFromLogs(T &ev);
+  template <class T> bool setGoniometersFromLogs(T &ev);
 };
 
 } // namespace MDAlgorithms

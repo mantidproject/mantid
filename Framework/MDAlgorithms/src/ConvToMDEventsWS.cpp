@@ -57,7 +57,8 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
     double val = localUnitConv.convertUnits(it->tof());
     double signal = it->weight();
     double errorSq = it->errorSquared();
-    m_useLogTimes &&setGoniometersFromLogs(it);
+    if (!setGoniometersFromLogs(it))
+      continue; // skip if log value is NaN
     if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
       continue; // skip ND outside the range
 
@@ -76,14 +77,19 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
 }
 
 /* Private method to update rotation matrix for a single event from log values */
-template <class T> int ConvToMDEventsWS::setGoniometersFromLogs(T &ev) {
+template <class T> bool ConvToMDEventsWS::setGoniometersFromLogs(T &ev) {
+  if (!m_useLogTimes)
+    return true;
   for (size_t axIdx = 0; axIdx < m_GonioIndex.size(); axIdx++) {
-    m_Goniometer.setRotationAngle(m_GonioIndex[axIdx], m_Logs[axIdx]->getSingleValue(ev->pulseTime()));
+    double logval = m_Logs[axIdx]->getSingleValue(ev->pulseTime());
+    if (std::isnan(logval))
+      return false;
+    m_Goniometer.setRotationAngle(m_GonioIndex[axIdx], logval);
   }
   Mantid::Kernel::DblMatrix rotmat = m_Goniometer.getR() * m_Wtransf;
   rotmat.Invert();
   m_QConverter->updateRotMat(rotmat.getVector());
-  return 1;
+  return true;
 }
 
 /** The method runs conversion for a single event list, corresponding to a
