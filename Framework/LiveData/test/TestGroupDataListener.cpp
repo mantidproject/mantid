@@ -3,7 +3,7 @@
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #include "TestGroupDataListener.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
@@ -20,7 +20,7 @@ namespace Mantid::LiveData {
 DECLARE_LISTENER(TestGroupDataListener)
 
 /// Constructor
-TestGroupDataListener::TestGroupDataListener() : ILiveListener(), m_buffer() {
+TestGroupDataListener::TestGroupDataListener() : LiveListener(), m_buffer() {
   // Set up the first workspace buffer
   this->createWorkspace();
 }
@@ -37,7 +37,9 @@ bool TestGroupDataListener::dataReset() {
   return false;
 }
 
-ILiveListener::RunStatus TestGroupDataListener::runStatus() { return Running; }
+ILiveListener::RunStatus TestGroupDataListener::runState() const { return Running; }
+
+API::ListenerState TestGroupDataListener::listenerState() const { return API::ListenerState::Connected; }
 
 int TestGroupDataListener::runNumber() const { return 0; }
 
@@ -54,7 +56,7 @@ void TestGroupDataListener::createWorkspace() {
   API::AnalysisDataService::Instance().deepRemoveGroup("tst");
 }
 
-std::shared_ptr<Workspace> TestGroupDataListener::extractData() {
+std::shared_ptr<Workspace> TestGroupDataListener::doExtractData() {
   // Copy the workspace pointer to a temporary variable
   API::WorkspaceGroup_sptr extracted = m_buffer;
   this->createWorkspace();

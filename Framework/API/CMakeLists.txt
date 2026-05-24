@@ -76,6 +76,7 @@ set(SRC_FILES
     src/IFunctionMW.cpp
     src/IJournal.cpp
     src/ILatticeFunction.cpp
+    src/ILiveListener.cpp
     src/IMDEventWorkspace.cpp
     src/IMDHistoWorkspace.cpp
     src/IMDIterator.cpp

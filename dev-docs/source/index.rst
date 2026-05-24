@@ -293,12 +293,14 @@ Component Overviews
    ISISReflectometryInterface
    ISISSANSReductionBackend
    LoadAlgorithmHook
+   LiveListenerMigration
    Logging
    MatplotlibInCpp
    MultiThreadingInMantid
    PythonVSCppAlgorithms
    SampleLogsDev
    ScriptRepository
+   SNSLiveEventDataListenerRefactoring
    TaskBasedAlgorithms
    Widgets/Plotting
    WritingAnAlgorithm

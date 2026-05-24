@@ -3,7 +3,7 @@
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #include "MantidLiveData/ISIS/ISISHistoDataListener.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -145,9 +145,13 @@ bool ISISHistoDataListener::isConnected() {
   return stat == 0;
 }
 
-ILiveListener::RunStatus ISISHistoDataListener::runStatus() {
+ILiveListener::RunStatus ISISHistoDataListener::runState() const {
   // In a run by default
   return Running;
+}
+
+API::ListenerState ISISHistoDataListener::listenerState() const {
+  return m_daeHandle ? API::ListenerState::Connected : API::ListenerState::Disconnected;
 }
 
 int ISISHistoDataListener::runNumber() const {
@@ -162,7 +166,7 @@ void ISISHistoDataListener::start(Types::Core::DateAndTime /*startTime*/) // Ign
  * Read the data from the DAE.
  * @return :: A workspace with the data.
  */
-std::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
+std::shared_ptr<Workspace> ISISHistoDataListener::doExtractData() {
 
   if (m_timeRegime < 0) {
     m_timeRegime = getTimeRegimeToLoad();

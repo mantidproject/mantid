@@ -3,7 +3,7 @@
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #include "MantidLiveData/Kafka/KafkaHistoListener.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
@@ -65,9 +65,9 @@ void KafkaHistoListener::start(Types::Core::DateAndTime startTime) {
 }
 
 /// @copydoc ILiveListener::extractData
-std::shared_ptr<API::Workspace> KafkaHistoListener::extractData() {
+std::shared_ptr<API::Workspace> KafkaHistoListener::doExtractData() {
   if (!m_decoder) {
-    g_log.error("KafkaHistoListener::extractData(): Kafka is not connected");
+    g_log.error("KafkaHistoListener::doExtractData(): Kafka is not connected");
     throw Kernel::Exception::InternetError("Kafka is not connected");
   }
 
@@ -82,14 +82,13 @@ std::shared_ptr<API::Workspace> KafkaHistoListener::extractData() {
 /// @copydoc ILiveListener::isConnected
 bool KafkaHistoListener::isConnected() { return (m_decoder ? m_decoder->isCapturing() : false); }
 
-/// @copydoc ILiveListener::runStatus
-API::ILiveListener::RunStatus KafkaHistoListener::runStatus() {
-  if (!m_decoder) {
-    g_log.warning("KafkaHistoListener::runStatus(): Kafka is not connected");
-    return NoRun;
-  }
+/// @copydoc ILiveListener::runState
+API::ILiveListener::RunStatus KafkaHistoListener::runState() const {
+  return (m_decoder && m_decoder->hasReachedEndOfRun()) ? EndRun : Running;
+}
 
-  return m_decoder->hasReachedEndOfRun() ? EndRun : Running;
+API::ListenerState KafkaHistoListener::listenerState() const {
+  return (m_decoder && m_decoder->isCapturing()) ? API::ListenerState::Connected : API::ListenerState::Disconnected;
 }
 
 /// @copydoc ILiveListener::runNumber
