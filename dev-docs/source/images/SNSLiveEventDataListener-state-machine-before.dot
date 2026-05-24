@@ -1,0 +1,149 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright © 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX-License-Identifier: GPL-3.0+
+//
+// SNSLiveEventDataListener-state-machine-before.dot
+//
+// Pre-refactor state-machine diagram for SNSLiveEventDataListener.
+//
+// The dashed crimson cluster encloses the two transitions (BeginRun->Running
+// and EndRun->NoRun) that are committed as hidden side effects inside the
+// runStatus() getter.  Steelblue dashed arrows are the background-thread
+// queuing steps; solid crimson arrows are the commit steps that fire when
+// runStatus() is called.
+//
+// Three axes are modelled:
+//   * Primary:  runState  (NoRun / BeginRun / Running / EndRun)
+//   * Separate: isPaused  (self-loop on Running; orthogonal; applied
+//                          immediately in the background thread)
+//   * Separate: listenerState  (Disconnected / Connected / ReadWait / Error)
+//
+// Regenerate PNG:
+//   dot -Tpng -o SNSLiveEventDataListener-state-machine-before.png \
+//             SNSLiveEventDataListener-state-machine-before.dot
+
+digraph SNSLiveEventDataListener_before {
+
+    graph [
+        label    = "SNSLiveEventDataListener — state machine (pre-refactor)\nCommit boundary: runStatus() getter"
+        labelloc = "t"
+        fontname = "Helvetica"
+        fontsize = 13
+        rankdir  = "LR"
+        nodesep  = 0.8
+        ranksep  = 1.4
+        compound = true
+    ]
+
+    node [fontname="Helvetica" fontsize=11 shape=ellipse style=filled fillcolor=white]
+    edge [fontname="Helvetica" fontsize=9]
+
+    // ── Initial pseudostate ──────────────────────────────────────────────
+    _init_ [shape=point style=filled color=black width=0.2 label=""]
+    _init_ -> NoRun [arrowhead=normal]
+
+    // ── runState nodes outside the commit cluster ────────────────────────
+    NoRun   [label="NoRun"   fillcolor=white]
+    Running [label="Running" fillcolor=lightblue]
+
+    // ── Commit boundary: ALL mutations that occur inside runStatus() ──────
+    subgraph cluster_committed_runstatus {
+        label    = "committed inside runStatus()\n* consume m_deferredRunDetailsPkt  [BeginRun only]\n* clear m_instrumentXML, m_instrumentName, m_nameMap\n* initWorkspacePart1()\n* advance m_status  (BeginRun->Running  or  EndRun->NoRun)\n* m_pauseNetRead = false   <- releases background reader"
+        style    = "dashed"
+        color    = "crimson"
+        fontname = "Helvetica"
+        fontsize = 9
+
+        BeginRun [label="BeginRun" fillcolor="#ffe8e8"]
+        EndRun   [label="EndRun"   fillcolor="#ffe8e8"]
+    }
+
+    // ── Background-thread queuing transitions (dashed steel-blue) ────────
+    // These set m_pendingTransition and m_pauseNetRead=true; the commit
+    // step does NOT happen yet — it is deferred until runStatus() is called.
+    NoRun -> BeginRun [
+        label = "rxPacket(RunStatusPkt [NEW_RUN])\nm_adaraRunStatus = BeginRun\nm_pendingTransition = BeginRun\nm_pauseNetRead = true"
+        style = dashed
+        color = "steelblue"
+    ]
+    Running -> EndRun [
+        label = "rxPacket(RunStatusPkt [END_RUN])\nm_adaraRunStatus = EndRun\nm_pendingTransition = EndRun\nm_pauseNetRead = true"
+        style = dashed
+        color = "steelblue"
+    ]
+
+    // ── Commit transitions — side effects of calling runStatus() ─────────
+    BeginRun -> Running [
+        label    = "runStatus():\nm_status = Running"
+        color    = "crimson"
+        penwidth = 2
+    ]
+    EndRun -> NoRun [
+        label    = "runStatus():\nm_status = NoRun"
+        color    = "crimson"
+        penwidth = 2
+    ]
+
+    // ── isPaused axis — separate small subgraph ───────────────────────────
+    // Orthogonal to runState.  Applied immediately in the background thread
+    // via rxPacket(AnnotationPkt); does NOT use m_pendingTransition.
+    subgraph cluster_ispaused {
+        label    = "isPaused axis  (orthogonal to runState)"
+        style    = "rounded"
+        color    = "darkorange"
+        fontsize = 10
+
+        Running_p [
+            label    = "Running\n(m_isDasPaused)"
+            fillcolor = "#fff4e0"
+            style    = "filled,dashed"
+        ]
+
+        Running_p -> Running_p [
+            label  = "AnnotationPkt(PAUSE)\n-> m_isDasPaused = true"
+            color  = "darkorange"
+            style  = "dashed"
+        ]
+    }
+
+    Running   -> Running_p [
+        label = "AnnotationPkt(PAUSE)\n-> m_isDasPaused = true\n(background thread, immediate)"
+        color = "darkorange"
+        style = "dashed"
+    ]
+    Running_p -> Running [
+        label = "AnnotationPkt(RESUME)\n-> m_isDasPaused = false\n(background thread, immediate)"
+        color = "darkorange"
+        style = "dashed"
+    ]
+
+    // ── listenerState axis — separate small subgraph ──────────────────────
+    subgraph cluster_listenerstate {
+        label    = "listenerState axis"
+        style    = "rounded"
+        color    = "gray50"
+        fontsize = 10
+
+        Disconnected [label="Disconnected"                    fillcolor=white]
+        Connected    [label="Connected"                       fillcolor=lightgreen]
+        ReadWait     [label="ReadWait\n(m_pauseNetRead=true)" fillcolor=lightyellow]
+        Error        [label="Error"                           fillcolor=lightsalmon]
+    }
+
+    Disconnected -> Connected [label="connect()\nsocket open"]
+    Connected    -> ReadWait  [label="RunStatusPkt\n-> m_pauseNetRead=true"]
+    ReadWait     -> Connected [label="runStatus() commits:\n-> m_pauseNetRead=false"]
+    Connected    -> Error     [label="background\nexception"]
+    ReadWait     -> Error     [label="background\nexception"]
+
+    // ── Layout anchors ────────────────────────────────────────────────────
+    // Invisible constraint=false edges that share rank columns with the main
+    // nodes (same x-rank) to pull the listenerState cluster to the bottom of
+    // the rendered image without disturbing the runState layout.
+    NoRun     -> Disconnected [style=invis constraint=false weight=5]
+    Running   -> Connected    [style=invis constraint=false weight=5]
+    Running_p -> ReadWait     [style=invis constraint=false weight=5]
+}

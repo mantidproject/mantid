@@ -3,7 +3,7 @@
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 /*
  * SINQHMListener.cpp
  *
@@ -36,7 +36,7 @@ using namespace Poco::XML;
 
 DECLARE_LISTENER(SINQHMListener)
 
-SINQHMListener::SINQHMListener() : LiveListener(), httpcon(), response(), oldStatus() {
+SINQHMListener::SINQHMListener() : LiveListener(), httpcon(), response(), m_cachedRunState(NoRun), oldStatus() {
   connected = false;
   dimDirty = true;
   rank = 0;
@@ -57,7 +57,23 @@ bool SINQHMListener::connect(const Poco::Net::SocketAddress &address) {
 
 bool SINQHMListener::isConnected() { return connected; }
 
-ILiveListener::RunStatus SINQHMListener::runStatus() {
+ILiveListener::RunStatus SINQHMListener::runState() const { return m_cachedRunState; }
+
+API::ListenerState SINQHMListener::listenerState() const {
+  return connected ? API::ListenerState::Connected : API::ListenerState::Disconnected;
+}
+
+void SINQHMListener::onBeforeExtract() {
+  // C1 note: this listener writes oldStatus / m_cachedRunState / dimDirty
+  // inside onBeforeExtract() rather than onAfterExtract() because
+  // doExtractData() reads dimDirty and hmhost to build the workspace and must
+  // see them current before the build. This placement is safe only because
+  // doExtractData() never throws NotYet. If a NotYet path is ever added — or
+  // if this listener ever overrides lastTransition() — the NoRun→Running side
+  // effects (dimDirty set, oldStatus advance) MUST move to onAfterExtract(),
+  // otherwise a LoadLiveData retry will silently drop the dimension reload.
+  // See LiveListenerMigration.rst (Pattern C) and the C1 invariant section of
+  // SNSLiveEventDataListenerRefactoring.rst for the full explanation.
   std::istream &istr = httpRequest("/admin/textstatus.egi");
   std::stringstream oss;
   Poco::StreamCopier::copyStream(istr, oss);
@@ -88,20 +104,21 @@ ILiveListener::RunStatus SINQHMListener::runStatus() {
       dimDirty = true;
     }
     oldStatus = Running;
-    return Running;
+    m_cachedRunState = Running;
   } else if (status == 0) {
     oldStatus = NoRun;
-    return NoRun;
+    m_cachedRunState = NoRun;
   } else {
     throw std::runtime_error("Invalid DAQ status code " + daq["DAQ"] + "detected");
   }
 }
 
-std::shared_ptr<Workspace> SINQHMListener::extractData() {
+std::shared_ptr<Workspace> SINQHMListener::doExtractData() {
   static const char *dimNames[] = {"x", "y", "z", "t"};
 
   if (dimDirty) {
-    runStatus(); // make sure that hmhost is initialized
+    // hmhost and dimDirty were set by onBeforeExtract() before this call.
+    // See the C1 note on onBeforeExtract() for why that placement is safe.
     loadDimensions();
   }
 

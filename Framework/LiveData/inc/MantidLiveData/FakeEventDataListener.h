@@ -3,7 +3,7 @@
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #pragma once
 
 //----------------------------------------------------------------------
@@ -15,6 +15,7 @@
 #include "MantidKernel/MersenneTwister.h"
 #include <Poco/Timer.h>
 #include <mutex>
+#include <optional>
 
 namespace Mantid {
 namespace LiveData {
@@ -32,11 +33,16 @@ public:
 
   bool connect(const Poco::Net::SocketAddress &address) override;
   void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
-  std::shared_ptr<API::Workspace> extractData() override;
+  std::shared_ptr<API::Workspace> doExtractData() override;
 
   bool isConnected() override;
-  ILiveListener::RunStatus runStatus() override;
+  ILiveListener::RunStatus runState() const override;
+  API::ListenerState listenerState() const override;
+  std::optional<ILiveListener::RunStatus> lastTransition() const override;
   int runNumber() const override;
+
+protected:
+  void onAfterExtract() override;
 
 private:
   void generateEvents(Poco::Timer &);
@@ -57,6 +63,11 @@ private:
 
   /// Fake run number to give
   int m_runNumber;
+
+  /// Current DAS run state, updated by onAfterExtract().
+  RunStatus m_runState{Running};
+  /// The run-state edge committed by the most recent extractData() call.
+  std::optional<RunStatus> m_lastTransition;
 
   /// Mutex to exclude generateEvents() and extractData().
   std::mutex m_mutex;

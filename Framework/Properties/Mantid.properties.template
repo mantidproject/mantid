@@ -126,7 +126,14 @@ ISISDAE.Timeout = 120
 
 # Default values for SNS DAE (live data)
 SNSLiveEventDataListener.keepPausedEvents = false
+SNSLiveEventDataListener.startupTimeout = 10
 SNSLiveEventDataListener.testAddress = 127.0.0.1:12345
+
+# Interval in seconds that LoadLiveData waits between retries when the listener
+# returns NotYet (e.g. while the background thread is still parsing the initial
+# packet burst).  10 s is the production default; integration tests may override
+# this key to a shorter value to avoid serialising on the full retry sleep.
+LiveData.readRetryInterval = 10
 
 
 # Defines the precision of h, k, and l when output in peak workspace table

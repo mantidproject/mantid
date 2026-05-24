@@ -3,7 +3,7 @@
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #include "MantidLiveData/FakeEventDataListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/Run.h"
@@ -28,8 +28,8 @@ FakeEventDataListener::FakeEventDataListener()
   m_datarate = datarateConfigVal.value_or(200); // Default data rate. Low so that our lowest-powered
                                                 // buildserver can cope.
                                                 // For auto-ending and restarting runs
-  auto endRunEveryConfigVal = ConfigService::Instance().getValue<int>("fakeeventdatalistener.endrunevery");
-  m_endRunEvery = endRunEveryConfigVal.value_or(0);
+  auto endRunEveryConfigVal = ConfigService::Instance().getValue<double>("fakeeventdatalistener.endrunevery");
+  m_endRunEvery = endRunEveryConfigVal.value_or(0.0);
 
   auto notyettimesConfigVal = ConfigService::Instance().getValue<int>("fakeeventdatalistener.notyettimes");
   m_notyettimes = notyettimesConfigVal.value_or(0);
@@ -47,15 +47,27 @@ bool FakeEventDataListener::isConnected() {
   return true; // For the time being at least
 }
 
-ILiveListener::RunStatus FakeEventDataListener::runStatus() {
+ILiveListener::RunStatus FakeEventDataListener::runState() const { return m_runState; }
+
+API::ListenerState FakeEventDataListener::listenerState() const { return API::ListenerState::Connected; }
+
+std::optional<ILiveListener::RunStatus> FakeEventDataListener::lastTransition() const { return m_lastTransition; }
+
+void FakeEventDataListener::onAfterExtract() {
+  // C1 invariant: m_lastTransition is cleared only on the success path of
+  // doExtractData(). All end-of-run side effects (counter bump, deadline
+  // advance, state mutation) are deferred here for the same reason — otherwise
+  // a NotYet retry from LoadLiveData would erase the edge in the next
+  // onBeforeExtract() call and the EndRun boundary would be silently dropped.
+  m_lastTransition.reset();
   if (m_endRunEvery > 0 && DateAndTime::getCurrentTime() > m_nextEndRunTime) {
-    // End a run once every m_endRunEvery seconds
     m_nextEndRunTime = DateAndTime::getCurrentTime() + m_endRunEvery;
     m_runNumber++;
-    return EndRun;
-  } else
-    // Never end a run
-    return Running;
+    m_runState = EndRun;
+    m_lastTransition = EndRun;
+  } else {
+    m_runState = Running;
+  }
 }
 
 int FakeEventDataListener::runNumber() const { return m_runNumber; }
@@ -89,7 +101,7 @@ void FakeEventDataListener::start(Types::Core::DateAndTime /*startTime*/) // Ign
   m_nextEndRunTime = DateAndTime::getCurrentTime() + m_endRunEvery;
 }
 
-std::shared_ptr<Workspace> FakeEventDataListener::extractData() {
+std::shared_ptr<Workspace> FakeEventDataListener::doExtractData() {
   // This is here to test the LoadLiveData side of the 'NotYet' exception
   // Note the post-increment of the call count in the comparison
   if (m_numExtractDataCalls++ < m_notyettimes)

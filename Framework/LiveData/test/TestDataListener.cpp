@@ -3,7 +3,7 @@
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #include "TestDataListener.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
@@ -71,14 +71,15 @@ bool TestDataListener::dataReset() {
   return false;
 }
 
-ILiveListener::RunStatus TestDataListener::runStatus() {
-  // For testing
-  if (m_changeStatusAfter > 0 && m_timesCalled == m_changeStatusAfter) {
+ILiveListener::RunStatus TestDataListener::runState() const {
+  // For testing: emit m_newStatus after the configured number of extractData calls
+  if (m_changeStatusAfter > 0 && m_timesCalled == m_changeStatusAfter)
     return m_newStatus;
-  } else
-    // In a run by default
-    return Running;
+  // In a run by default
+  return Running;
 }
+
+API::ListenerState TestDataListener::listenerState() const { return API::ListenerState::Connected; }
 
 int TestDataListener::runNumber() const { return 999; }
 
@@ -108,7 +109,7 @@ void TestDataListener::createEmptyWorkspace() {
   m_buffer->setMonitorWorkspace(monitorWS);
 }
 
-std::shared_ptr<Workspace> TestDataListener::extractData() {
+std::shared_ptr<Workspace> TestDataListener::doExtractData() {
   m_dataReset = false;
   // Add a small number of uniformly distributed events to each event list.
   using namespace DataObjects;

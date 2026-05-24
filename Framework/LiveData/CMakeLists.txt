@@ -3,6 +3,7 @@ set(LIVEDATA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(SRC_FILES
     src/ADARA/ADARAPackets.cpp
     src/ADARA/ADARAParser.cpp
+    src/Exception.cpp
     src/FakeEventDataListener.cpp
     src/FileEventDataListener.cpp
     src/ISIS/DAE/idc.cpp
@@ -40,7 +41,6 @@ set(INC_FILES
 )
 
 set(TEST_FILES
-    # Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
     ADARAPacketTest.h
     FakeEventDataListenerTest.h
     FileEventDataListenerTest.h
@@ -48,8 +48,19 @@ set(TEST_FILES
     LiveDataAlgorithmTest.h
     LoadLiveDataTest.h
     MonitorLiveDataTest.h
+    SNSLiveEventDataListenerNoNetworkTest.h
     StartLiveDataTest.h
 )
+
+# These integration tests rely on Unix-domain sockets via Poco::Net::AddressFamily::UNIX_LOCAL and an in-process
+# MockSMSServer.  Each header guards its body with `#ifndef _WIN32`, but cxxtestgen's regex-based parser does NOT honour
+# preprocessor directives — it would still emit registrations for the test_* methods, which then fail to resolve against
+# the empty Windows stub class (MSVC C2039).  Exclude the headers from TEST_FILES on Windows.
+if(NOT WIN32)
+  list(APPEND TEST_FILES SNSLiveEventDataListenerAlgorithmIntegrationTest.h SNSLiveEventDataListenerTest.h
+       # (SNSLiveEventDataListenerLegacyTest.h is intentionally NOT registered — retained as historical reference.)
+  )
+endif()
 
 find_package(LibRDKafka 0.11)
 if(LIBRDKAFKA_FOUND)

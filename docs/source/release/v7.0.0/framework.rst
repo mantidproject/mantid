@@ -53,6 +53,18 @@ Bugfixes
 .. amalgamate:: Framework/Data_Objects/Bugfixes
 
 
+Live Data
+---------
+
+New features
+############
+.. amalgamate:: Framework/LiveData/New_features
+
+Bugfixes
+############
+.. amalgamate:: Framework/LiveData/Bugfixes
+
+
 Python
 ------
 

@@ -3,13 +3,15 @@
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidLiveData/DllConfig.h"
 #include <stdexcept>
+#include <string>
 
 namespace Mantid {
 namespace LiveData {
@@ -21,13 +23,18 @@ namespace Exception {
     or if the instrument from which data is being read is not in a run.
     LoadLiveData will ask for data again after a short delay.  Other exceptions
     thrown by the listener will have the effect of stopping the algorithm.
+
+    This class has an out-of-line constructor and destructor (key function)
+    defined in Exception.cpp and is exported with MANTID_LIVEDATA_DLL.  That
+    pins its typeinfo and vtable to a single translation unit inside
+    libMantidLiveData, which is required for @c catch(NotYet&) to work across
+    dylib boundaries on macOS (libc++abi matches catch clauses by typeinfo
+    pointer equality).
 */
-class NotYet : public std::runtime_error {
+class MANTID_LIVEDATA_DLL NotYet : public std::runtime_error {
 public:
-  /** Constructor
-   *  @param message A description of the exceptional condition
-   */
-  explicit NotYet(const std::string &message) : std::runtime_error(message) {}
+  explicit NotYet(const std::string &message);
+  ~NotYet() override;
 };
 
 } // namespace Exception
