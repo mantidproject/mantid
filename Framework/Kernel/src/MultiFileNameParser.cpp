@@ -13,11 +13,13 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Strings.h"
 
+#include <boost/algorithm/string.hpp>
+
+#include <array>
 #include <numeric>
 #include <regex>
 #include <sstream>
-
-#include <boost/algorithm/string.hpp>
+#include <string_view>
 #include <utility>
 
 namespace Mantid::Kernel::MultiFileNameParsing {
@@ -54,6 +56,12 @@ const std::string LIST = "(" + ANY + "(" + COMMA + ANY + ")*" + ")";
 /////////////////////////////////////////////////////////////////////////////
 
 namespace {
+// Leading extensions that may form a compound extension when followed by
+// another suffix (e.g. ".nxs.h5"). Adding an entry here teaches split() to
+// keep the inner extension as part of m_extString instead of treating it as
+// part of the file stem.
+const std::array<std::string_view, 1> KNOWN_COMPOUND_LEAD_EXTENSIONS = {".nxs"};
+
 // Anonymous helper functions.
 void parseToken(std::vector<std::vector<unsigned int>> &parsedRuns, const std::string &token);
 std::vector<std::vector<unsigned int>> generateRange(const unsigned int from, const unsigned int to,
@@ -277,16 +285,17 @@ void Parser::split() {
   if (lastSeparator != std::string::npos)
     m_dirString = m_multiFileName.substr(0, lastSeparator + 1);
 
-  // Get the extension. Support known compound extensions (e.g. ".nxs.h5") by
-  // checking whether the segment before the final dot is itself a known extension.
-  // This avoids misidentifying stems that contain dots (e.g. "run.v2.nxs").
-  static const std::vector<std::string> knownMiddleExts = {".nxs"};
+  // Get the extension. Compound extensions like ".nxs.h5" are kept whole when
+  // the leading half appears in KNOWN_COMPOUND_LEAD_EXTENSIONS; otherwise just
+  // the final dot's suffix is taken. This avoids misidentifying stems that
+  // contain dots (e.g. "run.v2.nxs") as compound-extension files.
   const size_t lastDot = m_multiFileName.find_last_of('.');
   if (lastDot != std::string::npos && lastDot > m_dirString.size()) {
     const size_t prevDot = m_multiFileName.find_last_of('.', lastDot - 1);
     if (prevDot != std::string::npos && prevDot >= m_dirString.size()) {
-      const std::string midExt = m_multiFileName.substr(prevDot, lastDot - prevDot);
-      if (std::find(knownMiddleExts.begin(), knownMiddleExts.end(), midExt) != knownMiddleExts.end()) {
+      const std::string_view midExt(m_multiFileName.data() + prevDot, lastDot - prevDot);
+      if (std::find(KNOWN_COMPOUND_LEAD_EXTENSIONS.begin(), KNOWN_COMPOUND_LEAD_EXTENSIONS.end(), midExt) !=
+          KNOWN_COMPOUND_LEAD_EXTENSIONS.end()) {
         m_extString = m_multiFileName.substr(prevDot);
       }
     }

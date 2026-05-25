@@ -4,9 +4,6 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -17,32 +14,20 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/MultiFileNameParser.h"
 #include "MantidKernel/Strings.h"
 
-#include "MantidKernel/MultiFileNameParser.h"
 #include <boost/lexical_cast.hpp>
+#include <json/value.h>
 
 #include <algorithm>
 #include <cctype>
-
-#include <boost/algorithm/string.hpp>
-
 #include <filesystem>
-#include <json/value.h>
 #include <regex>
 
 namespace {
-/// static logger object
 Mantid::Kernel::Logger g_log("FileFinder");
 
-/**
- * Unary predicate for use with remove_if.  Checks for the existance of
- * a "*" wild card in the file extension string passed to it.
- *
- * @param ext :: the extension to check.
- *
- * @returns true if extension contains a "*", else false.
- */
 bool containsWildCard(const std::string &ext) { return std::string::npos != ext.find('*'); }
 
 std::string toUpper(const std::string &src) {
@@ -108,12 +93,7 @@ namespace Mantid::API {
 // this allowed string could be made into an array of allowed, currently used
 // only by the ISIS SANS group
 const std::string FileFinderImpl::ALLOWED_SUFFIX = "-add";
-//----------------------------------------------------------------------
-// Public member functions
-//----------------------------------------------------------------------
-/**
- * Default constructor
- */
+
 FileFinderImpl::FileFinderImpl() {
   // Make sure plugins are loaded
   FrameworkManager::Instance().loadPlugins();
@@ -310,9 +290,6 @@ std::string FileFinderImpl::makeFileName(const std::string &hintstr, const Kerne
       }
     } catch (const std::exception &ex) {
       g_log.debug() << "Failed to resolve instrument from hint '" << hintstr << "' in makeFileName: " << ex.what();
-    } catch (...) {
-      g_log.debug() << "Failed to resolve instrument from hint '" << hintstr
-                    << "' in makeFileName due to an unknown exception.";
     }
   }
 
@@ -435,17 +412,14 @@ const API::Result<std::filesystem::path> FileFinderImpl::findRun(const std::stri
   processFileInfos(fileInfos, extensionsProvided, useOnlyExtensionsProvided);
   const auto &resolvedFileInfo = fileInfos[0];
 
-  // Now gather the results and log any failures
-  if (resolvedFileInfo.found) {
+  if (resolvedFileInfo.found)
     return API::Result<std::filesystem::path>(resolvedFileInfo.path);
-  } else {
-    g_log.debug() << "Failed to find file for hint: " << hintstr << "\n";
-    if (resolvedFileInfo.error) {
-      g_log.debug() << "Error message: " << resolvedFileInfo.errorMsg << "\n";
-    }
-    return API::Result<std::filesystem::path>(
-        std::filesystem::path(), resolvedFileInfo.errorMsg.empty() ? "Not found." : resolvedFileInfo.errorMsg);
-  }
+
+  g_log.debug() << "Failed to find file for hint: " << hintstr << "\n";
+  if (resolvedFileInfo.error)
+    g_log.debug() << "Error message: " << resolvedFileInfo.errorMsg << "\n";
+  return API::Result<std::filesystem::path>(
+      std::filesystem::path(), resolvedFileInfo.errorMsg.empty() ? "Not found." : resolvedFileInfo.errorMsg);
 }
 
 /**

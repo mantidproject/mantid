@@ -4,13 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include <sstream>
-
-#include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidDataHandling/ORNLDataArchive.h"
+#include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -18,8 +13,10 @@
 #include "MantidKernel/Logger.h"
 
 #include <boost/algorithm/string/join.hpp>
+
 #include <map>
 #include <regex>
+#include <sstream>
 
 using Mantid::Catalog::Exception::CatalogError;
 using Mantid::Catalog::ONCat::ONCat;
@@ -29,6 +26,10 @@ using Mantid::Catalog::ONCat::QueryParameter;
 using Mantid::Catalog::ONCat::QueryParameters;
 
 namespace {
+Mantid::Kernel::Logger g_log("ORNLDataArchive");
+
+const static std::regex FILE_REGEX("^(.*?)_(\\d+).*$");
+const static std::string NOT_FOUND("");
 
 std::string toUpperCase(const std::string &s) {
   std::string result(s);
@@ -36,21 +37,15 @@ std::string toUpperCase(const std::string &s) {
   return result;
 }
 
-const static std::regex FILE_REGEX("^(.*?)_(\\d+).*$");
-const static std::string NOT_FOUND("");
-
+/// Parse a basename like "HB2C_7000" into ("HB2C", "7000"). Returns empty
+/// strings if the basename does not match the expected pattern.
 std::pair<std::string, std::string> toInstrumentAndRunNumber(const std::string &filename) {
-  // Validate and parse the basename.
   std::smatch result;
-  if (!std::regex_match(filename, result, FILE_REGEX)) {
+  if (!std::regex_match(filename, result, FILE_REGEX))
     return {"", ""};
-  }
   assert(result.size() == 3);
-  const std::string instrument = toUpperCase(result[1]);
-  const std::string run = result[2];
-  return {instrument, run};
+  return {toUpperCase(result[1]), result[2]};
 }
-Mantid::Kernel::Logger g_log("ORNLDataArchive");
 } // namespace
 
 namespace Mantid::DataHandling {

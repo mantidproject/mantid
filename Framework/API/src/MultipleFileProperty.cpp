@@ -15,11 +15,9 @@
 #include "MantidKernel/PropertyHelper.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/algorithm/string.hpp>
-#include <filesystem>
-
 #include <algorithm>
 #include <cctype>
+#include <filesystem>
 #include <functional>
 #include <numeric>
 #include <regex>
@@ -27,15 +25,9 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace // anonymous
-{
-/// static logger
+namespace {
 Mantid::Kernel::Logger g_log("MultipleFileProperty");
 
-/**
- * Unary predicate for use with copy_if.  Checks for the existance of
- * a "*" wild card in the file extension string passed to it.
- */
 bool doesNotContainWildCard(const std::string &ext) { return std::string::npos == ext.find('*'); }
 
 static const std::string SUCCESS("");
@@ -344,18 +336,17 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
   // Cycle through each vector of unresolvedFileNames in allUnresolvedFileNames.
   // Remember, each vector contains files that are to be added together.
   for (const auto &unresolvedFileNames : allUnresolvedFileNames) {
-    // Check for the existance of wild cards. (Instead of iterating over all the
-    // filenames just join them together and search for "*" in the result.)
-    if (std::string::npos != boost::algorithm::join(unresolvedFileNames, "").find("*"))
+    const auto hasWildCard = [](const std::string &name) { return name.find('*') != std::string::npos; };
+    if (std::any_of(unresolvedFileNames.cbegin(), unresolvedFileNames.cend(), hasWildCard))
       return "Searching for files by wildcards is not currently supported.";
 
-    std::vector<std::string> fullFileNames;
-
     // Separate files into two groups: those with explicit extensions and those
-    // that need default extension resolution.
+    // that need default extension resolution. resolvedFiles is sized up-front
+    // and indexed by the original position so the input order survives the
+    // batched resolution path below.
     std::vector<std::string> filesToResolveWithExtension;
-    std::vector<size_t> resolutionIndices;                              // track original positions
-    std::vector<std::string> resolvedFiles(unresolvedFileNames.size()); // indexed by original position
+    std::vector<size_t> resolutionIndices;
+    std::vector<std::string> resolvedFiles(unresolvedFileNames.size());
 
     for (size_t i = 0; i < unresolvedFileNames.size(); ++i) {
       const auto &unresolvedFileName = unresolvedFileNames[i];
@@ -436,18 +427,12 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
       }
     }
 
-    // Populate fullFileNames in original order
-    std::move(resolvedFiles.begin(), resolvedFiles.end(), std::back_inserter(fullFileNames));
-    allFullFileNames.emplace_back(std::move(fullFileNames));
+    allFullFileNames.emplace_back(std::move(resolvedFiles));
   }
 
-  // Now re-set the value using the full paths found.
   PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(allFullFileNames);
-
-  // cache the new version of things
   m_oldPropValue = propValue;
   m_oldFoundValue = std::move(allFullFileNames);
-
   return SUCCESS;
 }
 
