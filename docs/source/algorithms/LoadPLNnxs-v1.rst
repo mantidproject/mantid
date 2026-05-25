@@ -20,7 +20,7 @@ Usage
 
 .. testcode:: ExSimple
 
-   ws =  LoadPLN2('PLN0136193.nxs')
+   ws =  LoadPLNnxs('PLN0136193.nxs')
 
    print("Number of spectra: {}".format(ws.getNumberHistograms()))
 

@@ -36,7 +36,7 @@ from mantid.simpleapi import (
     Rebin,
     ConvertUnits,
     LoadPLN,
-    LoadPLN2,
+    LoadPLNnxs,
     AlgorithmFactory,
     logger,
 )
@@ -584,7 +584,7 @@ class PelicanReduction(PythonAlgorithm):
         else:
             params.append(("TimeOfFlightBias", "TOFCorrection", 1.0))
 
-        loader = LoadPLN2 if self._file_extn.endswith(".nxs") else LoadPLN
+        loader = LoadPLNnxs if self._file_extn.endswith(".nxs") else LoadPLN
 
         load_merge(
             loader,

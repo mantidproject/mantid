@@ -36,7 +36,7 @@ Loads an ANSTO Pelican event file and stores it in an event workspace.
 @author Geish Miladinovic (ANSTO)
 */
 
-/** LoadPLN2 : Loads an ANSTO PLN nxs and linked event file into a workspace.
+/** LoadPLNnxs : Loads an ANSTO PLN nxs and linked event file into a workspace.
 
 Required Properties:
 <UL>
@@ -55,7 +55,7 @@ Optional Properties:
 </UL>
 
 */
-class MANTID_DATAHANDLING_DLL LoadPLN2 : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
+class MANTID_DATAHANDLING_DLL LoadPLNnxs : public API::IFileLoader<Nexus::NexusDescriptorLazy> {
 
 public:
   int version() const override;

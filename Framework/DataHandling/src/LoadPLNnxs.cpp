@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidDataHandling/LoadPLN2.h"
+#include "MantidDataHandling/LoadPLNnxs.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -50,7 +50,7 @@ constexpr char LambdaOnTwoStr[] = "LambdaOnTwoMode";
 constexpr char UseHMScanTimeStr[] = "UseHMScanTime";
 
 // register the algorithm
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadPLN2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadPLNnxs)
 
 static const std::map<std::string, Anxs::ScanLog> ScanLogMap = {
     {"end", Anxs::ScanLog::End}, {"mean", Anxs::ScanLog::Mean}, {"start", Anxs::ScanLog::Start}};
@@ -474,7 +474,7 @@ public:
 
 /// Initialise the algorithm and declare the properties for the
 /// nexus descriptor.
-void LoadPLN2::init() {
+void LoadPLNnxs::init() {
 
   // Specify file extensions which can be associated with a specific file.
   std::vector<std::string> exts;
@@ -523,7 +523,7 @@ void LoadPLN2::init() {
 }
 
 /// Creates an event workspace and sets the \p title.
-void LoadPLN2::createWorkspace(const std::string &title) {
+void LoadPLNnxs::createWorkspace(const std::string &title) {
 
   // Create the workspace
   m_localWorkspace = std::make_shared<DataObjects::EventWorkspace>();
@@ -540,7 +540,7 @@ void LoadPLN2::createWorkspace(const std::string &title) {
 /// Execute the algorithm. Establishes the filepath to the event file
 /// from the HDF link and the path provided and invokes the common
 // exec() function that works with the two files.
-void LoadPLN2::exec() {
+void LoadPLNnxs::exec() {
 
   namespace fs = std::filesystem;
 
@@ -567,7 +567,7 @@ void LoadPLN2::exec() {
     std::tie(startTime, endTime) = Anxs::getTimeScanLimits(nxsEntry, m_datasetIndex);
   if (startTime >= endTime) {
     g_log.error() << "Invalid time window from hmscan" << "\n";
-    throw std::runtime_error("LoadPLN2: invalid or missing scan time range.");
+    throw std::runtime_error("LoadPLNnxs: invalid or missing scan time range.");
   }
   m_startRun = Types::Core::DateAndTime(Anxs::epochRelDateTimeBase(startTime)).toISO8601String();
 
@@ -676,7 +676,7 @@ void LoadPLN2::exec() {
 }
 
 /// Recovers the L2 neutronic distance for each detector.
-void LoadPLN2::loadDetectorL2Values() {
+void LoadPLNnxs::loadDetectorL2Values() {
 
   m_detectorL2.resize(HISTOGRAMS, 0.0);
   const auto &detectorInfo = m_localWorkspace->detectorInfo();
@@ -689,7 +689,7 @@ void LoadPLN2::loadDetectorL2Values() {
 }
 
 /// Set up the detector masks to the region of interest \p roi.
-void LoadPLN2::setupDetectorMasks(const std::vector<bool> &roi) {
+void LoadPLNnxs::setupDetectorMasks(const std::vector<bool> &roi) {
 
   // count total number of masked bins
   size_t maskedBins = std::count(roi.begin(), roi.end(), false);
@@ -712,8 +712,8 @@ void LoadPLN2::setupDetectorMasks(const std::vector<bool> &roi) {
 
 /// Allocate space for the event storage in \p eventVectors after the
 /// \p eventCounts have been determined.
-void LoadPLN2::prepareEventStorage(ANSTO::ProgressTracker &progTracker, std::vector<size_t> &eventCounts,
-                                   std::vector<EventVector_pt> &eventVectors) {
+void LoadPLNnxs::prepareEventStorage(ANSTO::ProgressTracker &progTracker, std::vector<size_t> &eventCounts,
+                                     std::vector<EventVector_pt> &eventVectors) {
 
   size_t numberHistograms = eventCounts.size();
   for (size_t i = 0; i != numberHistograms; ++i) {
@@ -734,7 +734,7 @@ void LoadPLN2::prepareEventStorage(ANSTO::ProgressTracker &progTracker, std::vec
 
 /// Region of interest is defined by the \p selected detectors and the
 /// \p maskfile.
-std::vector<bool> LoadPLN2::createRoiVector(const std::string &selected, const std::string &maskfile) {
+std::vector<bool> LoadPLNnxs::createRoiVector(const std::string &selected, const std::string &maskfile) {
 
   std::vector<bool> result(HISTOGRAMS, true);
 
@@ -776,8 +776,8 @@ std::vector<bool> LoadPLN2::createRoiVector(const std::string &selected, const s
 }
 
 /// Load parameters from input \p nxsFile and save to the log manager, \p logm.
-void LoadPLN2::loadParameters(const Nexus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
-                              API::LogManager &logm) {
+void LoadPLNnxs::loadParameters(const Nexus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
+                                API::LogManager &logm) {
 
   MapNeXusToProperty<std::string>(entry, "sample/name", "unknown", logm, "SampleName", "", 0);
   MapNeXusToProperty<std::string>(entry, "sample/description", "unknown", logm, "SampleDescription", "", 0);
@@ -808,8 +808,8 @@ void LoadPLN2::loadParameters(const Nexus::NXEntry &entry, uint64_t startTime, u
 
 /// Load the environment variables from the \p nxsFile and save as
 /// time series to the log manager, \p logm.
-void LoadPLN2::loadEnvironParameters(const Nexus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
-                                     API::LogManager &logm) {
+void LoadPLNnxs::loadEnvironParameters(const Nexus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
+                                       API::LogManager &logm) {
 
   // load the environment variables for the dataset loaded
   auto tags = ANSTO::filterGroups(entry, "control/", "^[A-Z]{1,3}[0-9]{1,3}[A-Za-z]{1,9}[0-9]{0,3}$");
@@ -820,7 +820,7 @@ void LoadPLN2::loadEnvironParameters(const Nexus::NXEntry &entry, uint64_t start
 }
 
 /// Load the instrument definition.
-void LoadPLN2::loadInstrument() {
+void LoadPLNnxs::loadInstrument() {
 
   // loads the IDF and parameter file
   auto loadInstrumentAlg = createChildAlgorithm("LoadInstrument");
@@ -831,22 +831,22 @@ void LoadPLN2::loadInstrument() {
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadPLN2::version() const { return 1; }
+int LoadPLNnxs::version() const { return 1; }
 
 /// Similar algorithms. @see Algorithm::seeAlso
-const std::vector<std::string> LoadPLN2::seeAlso() const { return {"Load", "LoadEMU"}; }
+const std::vector<std::string> LoadPLNnxs::seeAlso() const { return {"Load", "LoadEMU"}; }
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadPLN2::category() const { return "DataHandling\\ANSTO"; }
+const std::string LoadPLNnxs::category() const { return "DataHandling\\ANSTO"; }
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string LoadPLN2::name() const { return "LoadPLN2"; }
+const std::string LoadPLNnxs::name() const { return "LoadPLNnxs"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string LoadPLN2::summary() const { return "Loads a PLN2 Hdf and linked event file into a workspace."; }
+const std::string LoadPLNnxs::summary() const { return "Loads a PLN2 Hdf and linked event file into a workspace."; }
 
 /// Return the confidence as an integer value that this algorithm can
 /// load the file \p descriptor.
-int LoadPLN2::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
+int LoadPLNnxs::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   if (descriptor.extension() != ".nxs")
     return 0;
 

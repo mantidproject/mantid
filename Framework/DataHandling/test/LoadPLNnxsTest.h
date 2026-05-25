@@ -10,29 +10,29 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
-#include "MantidDataHandling/LoadPLN2.h"
+#include "MantidDataHandling/LoadPLNnxs.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
-class LoadPLN2Test : public CxxTest::TestSuite {
+class LoadPLNnxsTest : public CxxTest::TestSuite {
 public:
   void test_load_pln2_algorithm_init() {
-    LoadPLN2 algToBeTested;
+    LoadPLNnxs algToBeTested;
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
     TS_ASSERT(algToBeTested.isInitialized());
   }
 
   void test_load_pln2_algorithm() {
-    LoadPLN2 algToBeTested;
+    LoadPLNnxs algToBeTested;
 
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();
 
-    std::string outputSpace = "LoadPLN2Test";
+    std::string outputSpace = "LoadPLNnxsTest";
 
     algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
 
@@ -79,12 +79,12 @@ public:
   }
 
   void test_lambda_on_two_mode() {
-    LoadPLN2 algToBeTested;
+    LoadPLNnxs algToBeTested;
 
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();
 
-    std::string outputSpace = "LoadPLN2Test";
+    std::string outputSpace = "LoadPLNnxsTest";
     algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
 
     // set lambda on two to confirm data is processed using half wavelength
