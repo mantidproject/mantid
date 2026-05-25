@@ -229,6 +229,18 @@ std::string MultipleFileProperty::setValueAsSingleFile(const std::string &propVa
  *An empty string indicates success.
  */
 std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
+  // Empty input (for optional properties — required ones are rejected upstream
+  // in setValue) means "no files selected". Short-circuit so we don't generate
+  // a spurious empty hint that would later fail file resolution. Boost's
+  // sregex_token_iterator used to silently yield zero tokens here; std::regex
+  // yields one empty token, hence the explicit guard.
+  if (propValue.empty()) {
+    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(std::vector<std::vector<std::string>>{});
+    m_oldPropValue = propValue;
+    m_oldFoundValue.clear();
+    return SUCCESS;
+  }
+
   // if value is unchanged use the cached version
   if ((propValue == m_oldPropValue) && (!m_oldFoundValue.empty())) {
     PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(m_oldFoundValue);
