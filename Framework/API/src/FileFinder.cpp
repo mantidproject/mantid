@@ -701,69 +701,59 @@ void FileFinderImpl::performCacheSearch(std::vector<FileInfo> &fileInfos) const 
   }
 }
 
+namespace {
+/// If every unfound FileInfo has the same single archive and instrument, and
+/// that archive supports batched multi-hint lookups, return it. Otherwise
+/// return nullptr. Two unfound entries with equal InstrumentInfo always have
+/// the same archive list because getArchiveSearch() is deterministic per
+/// facility, so we only need to compare instruments rather than archive types.
+IArchiveSearch_sptr batchableArchive(const std::vector<Mantid::API::FileFinderImpl::FileInfo> &fileInfos) {
+  const auto isUnfound = [](const auto &fi) { return !fi.found && !fi.error; };
+  const auto first = std::find_if(fileInfos.cbegin(), fileInfos.cend(), isUnfound);
+  if (first == fileInfos.cend() || first->archs.size() != 1)
+    return nullptr;
+  const auto &arch = first->archs[0];
+  if (!arch || !arch->supportsMultipleHints())
+    return nullptr;
+  const Mantid::Kernel::InstrumentInfo &refInstr = *first->instr;
+  for (auto it = std::next(first); it != fileInfos.cend(); ++it) {
+    if (!isUnfound(*it))
+      continue;
+    if (it->archs.size() != 1 || *it->instr != refInstr)
+      return nullptr;
+  }
+  return arch;
+}
+} // namespace
+
 void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) const {
   if (fileInfos.empty())
     return;
-  bool allHaveSingleArch = true;
-  IArchiveSearch_sptr firstArch;
-  auto firstUnfound =
-      std::find_if(fileInfos.begin(), fileInfos.end(), [](const FileInfo &fi) { return !fi.found && !fi.error; });
-  if (firstUnfound == fileInfos.end() || firstUnfound->archs.empty()) {
-    allHaveSingleArch = false;
-  } else {
-    firstArch = firstUnfound->archs[0];
-    const Kernel::InstrumentInfo &firstInstr = *firstUnfound->instr;
 
-    for (const auto &fileInfo : fileInfos) {
-      if (fileInfo.found || fileInfo.error)
-        continue;
-      if (fileInfo.archs.size() != 1) {
-        allHaveSingleArch = false;
-        break;
-      }
-      if (!fileInfo.archs[0] || !firstArch) {
-        allHaveSingleArch = false;
-        break;
-      }
-      const auto &arch0 = *fileInfo.archs[0];
-      const auto &arch1 = *firstArch;
-      if (typeid(arch0) != typeid(arch1)) {
-        allHaveSingleArch = false;
-        break;
-      }
-      if (*fileInfo.instr != firstInstr) {
-        allHaveSingleArch = false;
-        break;
-      }
-    }
-  }
-
-  if (allHaveSingleArch && firstArch->supportsMultipleHints()) {
+  if (const auto sharedArch = batchableArchive(fileInfos)) {
     g_log.debug() << "performArchiveSearch: all files share the same single archive to search and it supports multiple "
                      "hints, all the same instrument, so searching together\n";
-    // All files share the same single archive to search with the same instrument, so we can search them together in one
-    // call to getArchivePaths. Make a vector of sets of hints to pass to the archive, one set for each file, as they
-    // may have different hints.
-    std::vector<std::string> hintSets;
+    // One hint per file (archive search is case-insensitive so the first
+    // filename in the set is sufficient).
+    std::vector<std::string> hints;
     for (const auto &fileInfo : fileInfos) {
       if (fileInfo.found || fileInfo.error)
         continue;
-      hintSets.push_back(*fileInfo.filenames.cbegin()); // take only the first filename as a hint, as the archive search
-                                                        // will be case insensitive
+      hints.push_back(*fileInfo.filenames.cbegin());
     }
-    const auto archivePaths = firstArch->getArchivePaths(hintSets);
+    const auto archivePaths = sharedArch->getArchivePaths(hints);
     if (!archivePaths) {
       g_log.error() << "Archive search failed: " << archivePaths.errors() << "\n";
       return;
     }
 
-    if (archivePaths.result().size() != hintSets.size()) {
-      g_log.error() << "Archive search returned a different number of paths than hints. Expected " << hintSets.size()
+    if (archivePaths.result().size() != hints.size()) {
+      g_log.error() << "Archive search returned a different number of paths than hints. Expected " << hints.size()
                     << " but got " << archivePaths.result().size() << ".\n";
       return;
     }
 
-    const auto paths = archivePaths.result();
+    const auto &paths = archivePaths.result();
     size_t index = 0;
     for (auto &fileInfo : fileInfos) {
       if (fileInfo.found || fileInfo.error)
