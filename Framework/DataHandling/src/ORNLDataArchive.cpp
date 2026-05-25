@@ -18,8 +18,8 @@
 #include "MantidKernel/Logger.h"
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/regex.hpp>
 #include <map>
+#include <regex>
 
 using Mantid::Catalog::Exception::CatalogError;
 using Mantid::Catalog::ONCat::ONCat;
@@ -36,13 +36,13 @@ std::string toUpperCase(const std::string &s) {
   return result;
 }
 
-const static boost::regex FILE_REGEX("^(.*?)_(\\d+).*$");
+const static std::regex FILE_REGEX("^(.*?)_(\\d+).*$");
 const static std::string NOT_FOUND("");
 
 std::pair<std::string, std::string> toInstrumentAndRunNumber(const std::string &filename) {
   // Validate and parse the basename.
-  boost::smatch result;
-  if (!boost::regex_match(filename, result, FILE_REGEX)) {
+  std::smatch result;
+  if (!std::regex_match(filename, result, FILE_REGEX)) {
     return {"", ""};
   }
   assert(result.size() == 3);

@@ -14,10 +14,10 @@
 #include "MantidKernel/Strings.h"
 
 #include <numeric>
+#include <regex>
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 #include <utility>
 
 namespace Mantid::Kernel::MultiFileNameParsing {
@@ -637,14 +637,9 @@ void validateToken(const std::string &token) {
  * @returns true if the string matches fully, or false otherwise.
  */
 bool matchesFully(const std::string &stringToMatch, const std::string &regexString, const bool caseless) {
-  boost::regex regex;
-
-  if (caseless)
-    regex = boost::regex("^(" + regexString + "$)", boost::regex::icase);
-  else
-    regex = boost::regex("^(" + regexString + "$)");
-
-  return boost::regex_match(stringToMatch, regex);
+  const auto flags = caseless ? std::regex::ECMAScript | std::regex::icase : std::regex::ECMAScript;
+  const std::regex regex("^(" + regexString + "$)", flags);
+  return std::regex_match(stringToMatch, regex);
 }
 
 /**
@@ -657,16 +652,11 @@ bool matchesFully(const std::string &stringToMatch, const std::string &regexStri
  * @returns the part (if any) of the given string that matches the given regex
  */
 std::string getMatchingString(const std::string &regexString, const std::string &toParse, const bool caseless) {
-  boost::regex regex;
-  if (caseless) {
-    regex = boost::regex(regexString, boost::regex::icase);
-  } else {
-    regex = boost::regex(regexString);
-  }
+  const auto flags = caseless ? std::regex::ECMAScript | std::regex::icase : std::regex::ECMAScript;
+  const std::regex regex(regexString, flags);
 
-  boost::sregex_iterator it(toParse.begin(), toParse.end(), regex);
-
-  if (it == boost::sregex_iterator())
+  std::sregex_iterator it(toParse.begin(), toParse.end(), regex);
+  if (it == std::sregex_iterator())
     return "";
 
   return it->str();

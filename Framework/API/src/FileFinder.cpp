@@ -26,10 +26,10 @@
 #include <cctype>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 
 #include <filesystem>
 #include <json/value.h>
+#include <regex>
 
 namespace {
 /// static logger object
@@ -45,11 +45,12 @@ Mantid::Kernel::Logger g_log("FileFinder");
  */
 bool containsWildCard(const std::string &ext) { return std::string::npos != ext.find('*'); }
 
-// Commas that act as separators between tokens: digit→non-digit or
-// non-digit→non-digit.  Digit→digit commas (e.g. "15196,15197") are left
-// for the MultiFileNameParsing::Parser to handle as run-number lists.
-// Mirrors MultipleFileProperty's REGEX_COMMA_OPERATORS.
-const boost::regex COMMA_OPERATORS(R"((?<=\d)\s*,\s*(?=\D)|(?<=\D)\s*,\s*(?=\D))");
+// Commas that act as separators between tokens: any character followed by a
+// comma followed by a non-digit. Digit→digit commas (e.g. "15196,15197") are
+// left for the MultiFileNameParsing::Parser to handle as run-number lists.
+// Mirrors MultipleFileProperty's REGEX_COMMA_OPERATORS without the redundant
+// left-side lookbehind (which std::regex does not support).
+const std::regex COMMA_OPERATORS(R"(\s*,\s*(?=\D))");
 
 bool isASCII(const std::string &str) {
   return !std::any_of(str.cbegin(), str.cend(), [](char c) { return static_cast<unsigned char>(c) > 127; });
@@ -479,8 +480,8 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
   // Digit→digit commas (e.g. "INST15196,15197") are left intact so the
   // parser can expand them as run-number lists.
   std::vector<std::string> commaTokens;
-  boost::sregex_token_iterator end;
-  boost::sregex_token_iterator commaIt(stripped.begin(), stripped.end(), COMMA_OPERATORS, -1);
+  std::sregex_token_iterator end;
+  std::sregex_token_iterator commaIt(stripped.begin(), stripped.end(), COMMA_OPERATORS, -1);
   for (; commaIt != end; ++commaIt)
     commaTokens.emplace_back(commaIt->str());
 

@@ -16,13 +16,13 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 #include <filesystem>
 
 #include <algorithm>
 #include <cctype>
 #include <functional>
 #include <numeric>
+#include <regex>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -41,20 +41,16 @@ bool doesNotContainWildCard(const std::string &ext) { return std::string::npos =
 static const std::string SUCCESS("");
 
 // Regular expressions for any adjacent + or , operators
-const std::string INVALID = R"(\+\+|,,|\+,|,\+)";
-static const boost::regex REGEX_INVALID(INVALID);
+static const std::regex REGEX_INVALID(R"(\+\+|,,|\+,|,\+)");
 
-// Regular expressions that represent the allowed instances of , operators
-const std::string NUM_COMMA_ALPHA(R"((?<=\d)\s*,\s*(?=\D))");
-const std::string ALPHA_COMMA_ALPHA(R"((?<=\D)\s*,\s*(?=\D))");
-const std::string COMMA_OPERATORS = NUM_COMMA_ALPHA + "|" + ALPHA_COMMA_ALPHA;
-static const boost::regex REGEX_COMMA_OPERATORS(COMMA_OPERATORS);
-
-// Regular expressions that represent the allowed instances of + operators
-const std::string NUM_PLUS_ALPHA(R"((?<=\d)\s*\+\s*(?=\D))");
-const std::string ALPHA_PLUS_ALPHA(R"((?<=\D)\s*\+\s*(?=\D))");
-const std::string PLUS_OPERATORS = NUM_PLUS_ALPHA + "|" + ALPHA_PLUS_ALPHA;
-static const boost::regex REGEX_PLUS_OPERATORS(PLUS_OPERATORS, boost::regex_constants::perl);
+// Comma/plus operators that act as token separators: any char on the left,
+// non-digit on the right (after optional whitespace). The digit→digit case
+// is left for the run-number list parser to handle. The original Boost
+// patterns used left-side lookbehinds that std::regex does not support, but
+// the alternation digit-or-non-digit on the left is equivalent to "any
+// preceding char" and so can be dropped.
+static const std::regex REGEX_COMMA_OPERATORS(R"(\s*,\s*(?=\D))");
+static const std::regex REGEX_PLUS_OPERATORS(R"(\s*\+\s*(?=\D))");
 
 bool isASCII(const std::string &str) {
   return !std::any_of(str.cbegin(), str.cend(), [](char c) { return static_cast<unsigned char>(c) > 127; });
@@ -240,8 +236,8 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
   }
 
   // Return error if there are any adjacent + or , operators.
-  boost::smatch invalid_substring;
-  if (!m_allowEmptyTokens && boost::regex_search(propValue.begin(), propValue.end(), invalid_substring, REGEX_INVALID))
+  std::smatch invalid_substring;
+  if (!m_allowEmptyTokens && std::regex_search(propValue, invalid_substring, REGEX_INVALID))
     return "Unable to parse filename due to an empty token.";
   if (!isASCII(propValue))
     return "Unable to parse filename due to an unsupported non-ASCII character being found.";
@@ -249,14 +245,14 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
   std::vector<std::vector<std::string>> fileNames;
 
   // Tokenise on allowed comma operators, and iterate over each token.
-  boost::sregex_token_iterator end;
-  boost::sregex_token_iterator commaToken(propValue.begin(), propValue.end(), REGEX_COMMA_OPERATORS, -1);
+  std::sregex_token_iterator end;
+  std::sregex_token_iterator commaToken(propValue.begin(), propValue.end(), REGEX_COMMA_OPERATORS, -1);
 
   for (; commaToken != end; ++commaToken) {
     const std::string commaTokenString = commaToken->str();
 
     // Tokenise on allowed plus operators.
-    boost::sregex_token_iterator plusToken(commaTokenString.begin(), commaTokenString.end(), REGEX_PLUS_OPERATORS, -1);
+    std::sregex_token_iterator plusToken(commaTokenString.begin(), commaTokenString.end(), REGEX_PLUS_OPERATORS, -1);
 
     std::vector<std::vector<std::string>> temp;
 
