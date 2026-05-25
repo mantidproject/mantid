@@ -92,6 +92,8 @@ private:
   FileFinderImpl &operator=(const FileFinderImpl &);
   /// A method that returns error messages if the provided runs are invalid
   std::string validateRuns(const std::string &searchText) const;
+  void prepareFileInfo(FileInfo &fileInfo, const std::vector<std::string> &extensionsProvided,
+                       bool useOnlyExtensionsProvided) const;
   void processFileInfos(std::vector<FileInfo> &fileInfos, const std::vector<std::string> &extensionsProvided,
                         bool useOnlyExtensionsProvided) const;
   void performFileSearch(std::vector<FileInfo> &fileInfos) const;

@@ -512,70 +512,75 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
   return findRuns(hints, extensionsProvided, useOnlyExtensionsProvided);
 }
 
+void FileFinderImpl::prepareFileInfo(FileInfo &fileInfo, const std::vector<std::string> &extensionsProvided,
+                                     bool useOnlyExtensionsProvided) const {
+  if (fileInfo.found || fileInfo.error)
+    return;
+
+  g_log.debug() << "  " << fileInfo.hint << " instrument: " << (fileInfo.instr ? fileInfo.instr->name() : "null")
+                << "\n";
+
+  const Kernel::FacilityInfo &facility = fileInfo.instr->facility();
+  const std::vector<std::string> facilityExtensions = facility.extensions();
+
+  std::filesystem::path filePath(fileInfo.hint);
+  const auto extension = filePath.extension();
+  std::string filename = filePath.replace_extension().string();
+
+  if (filePath.parent_path().empty()) {
+    try {
+      if (!facility.noFilePrefix()) {
+        filename = makeFileName(filename, *fileInfo.instr);
+      }
+    } catch (std::invalid_argument &) {
+      if (filename.length() >= fileInfo.hint.length()) {
+        g_log.information() << "Could not form filename from standard rules '" << filename << "'\n";
+      }
+    }
+  }
+
+  if (filename.empty()) {
+    g_log.warning() << "Unable to determine filename for hint '" << fileInfo.hint << "\n";
+    fileInfo.error = true;
+    fileInfo.errorMsg = "Unable to determine filename from hint.";
+    return;
+  }
+
+  g_log.debug() << "filename to search for: " << filename << " with extension: " << extension << "\n";
+
+  // Look first at the original filename then for case variations. This is important
+  // on platforms where file names ARE case sensitive.
+  fileInfo.filenames.insert(filename);
+  if (!getCaseSensitive()) {
+    std::string transformed(filename);
+    std::transform(filename.begin(), filename.end(), transformed.begin(), toupper);
+    fileInfo.filenames.insert(transformed);
+    std::transform(filename.begin(), filename.end(), transformed.begin(), tolower);
+    fileInfo.filenames.insert(transformed);
+  }
+
+  // Merge the extensions & throw out duplicates
+  // On Windows throw out ones that only vary in case
+  fileInfo.extensionsToSearch.reserve(1 + extensionsProvided.size() + facilityExtensions.size());
+
+  if (useOnlyExtensionsProvided) {
+    getUniqueExtensions(extensionsProvided, fileInfo.extensionsToSearch);
+  } else {
+    if (!extension.empty())
+      fileInfo.extensionsToSearch.emplace_back(extension.string());
+
+    getUniqueExtensions(extensionsProvided, fileInfo.extensionsToSearch);
+    getUniqueExtensions(facilityExtensions, fileInfo.extensionsToSearch);
+  }
+
+  fileInfo.archs = getArchiveSearch(facility);
+}
+
 void FileFinderImpl::processFileInfos(std::vector<FileInfo> &fileInfos,
                                       const std::vector<std::string> &extensionsProvided,
                                       bool useOnlyExtensionsProvided) const {
-  for (auto &fileInfo : fileInfos) {
-    if (fileInfo.found || fileInfo.error)
-      continue;
-    g_log.debug() << "  " << fileInfo.hint << " instrument: " << (fileInfo.instr ? fileInfo.instr->name() : "null")
-                  << "\n";
-
-    const Kernel::FacilityInfo &facility = fileInfo.instr->facility();
-    const std::vector<std::string> facilityExtensions = facility.extensions();
-
-    std::filesystem::path filePath(fileInfo.hint);
-    const auto extension = filePath.extension();
-    std::string filename = filePath.replace_extension().string();
-
-    if (filePath.parent_path().empty()) {
-      try {
-        if (!facility.noFilePrefix()) {
-          filename = makeFileName(filename, *fileInfo.instr);
-        }
-      } catch (std::invalid_argument &) {
-        if (filename.length() >= fileInfo.hint.length()) {
-          g_log.information() << "Could not form filename from standard rules '" << filename << "'\n";
-        }
-      }
-    }
-
-    if (filename.empty()) {
-      g_log.warning() << "Unable to determine filename for hint '" << fileInfo.hint << "\n";
-      fileInfo.error = true;
-      fileInfo.errorMsg = "Unable to determine filename from hint.";
-      continue;
-    }
-
-    g_log.debug() << "filename to search for: " << filename << " with extension: " << extension << "\n";
-
-    // Look first at the original filename then for case variations. This is important
-    // on platforms where file names ARE case sensitive.
-    fileInfo.filenames.insert(filename);
-    if (!getCaseSensitive()) {
-      std::string transformed(filename);
-      std::transform(filename.begin(), filename.end(), transformed.begin(), toupper);
-      fileInfo.filenames.insert(transformed);
-      std::transform(filename.begin(), filename.end(), transformed.begin(), tolower);
-      fileInfo.filenames.insert(transformed);
-    }
-
-    // Merge the extensions & throw out duplicates
-    // On Windows throw out ones that only vary in case
-    fileInfo.extensionsToSearch.reserve(1 + extensionsProvided.size() + facilityExtensions.size());
-
-    if (useOnlyExtensionsProvided) {
-      getUniqueExtensions(extensionsProvided, fileInfo.extensionsToSearch);
-    } else {
-      if (!extension.empty())
-        fileInfo.extensionsToSearch.emplace_back(extension.string());
-
-      getUniqueExtensions(extensionsProvided, fileInfo.extensionsToSearch);
-      getUniqueExtensions(facilityExtensions, fileInfo.extensionsToSearch);
-    }
-
-    fileInfo.archs = getArchiveSearch(facility);
-  }
+  for (auto &fileInfo : fileInfos)
+    prepareFileInfo(fileInfo, extensionsProvided, useOnlyExtensionsProvided);
 
   performFileSearch(fileInfos);
   performCacheSearch(fileInfos);
