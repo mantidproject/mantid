@@ -106,6 +106,8 @@ private:
                         bool useOnlyExtensionsProvided) const;
   void performFileSearch(std::vector<FileInfo> &fileInfos) const;
   void performArchiveSearch(std::vector<FileInfo> &fileInfos) const;
+  void performBatchedArchiveSearch(std::vector<FileInfo> &fileInfos, const IArchiveSearch_sptr &sharedArch) const;
+  void performPerFileArchiveSearch(std::vector<FileInfo> &fileInfos) const;
   /// If every unfound FileInfo shares a single archive (and instrument) that
   /// supports batched multi-hint lookups, return that archive. Otherwise
   /// nullptr — caller falls back to per-file archive lookups.
@@ -116,7 +118,6 @@ private:
   const API::Result<std::filesystem::path> getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
                                                           const std::set<std::string> &hintstrs,
                                                           const std::vector<std::string> &exts) const;
-  std::string toUpper(const std::string &src) const;
   /// glob option - set to case sensitive or insensitive
   int m_globOption;
 };

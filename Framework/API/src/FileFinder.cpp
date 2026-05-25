@@ -45,6 +45,18 @@ Mantid::Kernel::Logger g_log("FileFinder");
  */
 bool containsWildCard(const std::string &ext) { return std::string::npos != ext.find('*'); }
 
+std::string toUpper(const std::string &src) {
+  std::string out(src);
+  std::transform(out.begin(), out.end(), out.begin(), ::toupper);
+  return out;
+}
+
+std::string toLower(const std::string &src) {
+  std::string out(src);
+  std::transform(out.begin(), out.end(), out.begin(), ::tolower);
+  return out;
+}
+
 // Commas that act as separators between tokens: any character followed by a
 // comma followed by a non-digit. Digit→digit commas (e.g. "15196,15197") are
 // left for the MultiFileNameParsing::Parser to handle as run-number lists.
@@ -56,10 +68,42 @@ bool isASCII(const std::string &str) {
   return !std::any_of(str.cbegin(), str.cend(), [](char c) { return static_cast<unsigned char>(c) > 127; });
 }
 
+/// Split an input string on comma operators (those where the comma separates
+/// distinct tokens rather than appearing inside a digit-list like "15196,15197").
+std::vector<std::string> splitOnCommaOperators(const std::string &input) {
+  std::vector<std::string> tokens;
+  std::sregex_token_iterator end;
+  std::sregex_token_iterator it(input.begin(), input.end(), COMMA_OPERATORS, -1);
+  for (; it != end; ++it)
+    tokens.emplace_back(it->str());
+  return tokens;
+}
+
+/// Expand a single comma-token into one or more file hints by feeding it
+/// through the multi-file-name parser. Tokens that already carry an extension
+/// bypass the parser (it would reformat the instrument prefix and apply
+/// zero-padding, producing a name that no longer matches the file on disk).
+/// Tokens the parser refuses (e.g. those with a "-add" suffix) pass through
+/// unchanged.
+std::vector<std::string> expandHint(const std::string &token, Mantid::Kernel::MultiFileNameParsing::Parser &parser) {
+  if (std::filesystem::path(token).has_extension())
+    return {token};
+  try {
+    parser.parse(token);
+    std::vector<std::string> out;
+    for (const auto &group : parser.fileNames())
+      out.insert(out.end(), group.cbegin(), group.cend());
+    return out;
+  } catch (const std::exception &) {
+    if (token.empty())
+      return {};
+    return {token};
+  }
+}
+
 } // namespace
 
 namespace Mantid::API {
-using std::string;
 
 // this allowed string could be made into an array of allowed, currently used
 // only by the ISIS SANS group
@@ -162,9 +206,8 @@ const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const std::string &hi
       return Kernel::ConfigService::Instance().getInstrument(instrName);
     } catch (Kernel::Exception::NotFoundError &e) {
       g_log.debug() << e.what() << "\n";
-      if (!returnDefaultIfNotFound) {
-        throw e;
-      }
+      if (!returnDefaultIfNotFound)
+        throw;
     }
   }
   return Kernel::ConfigService::Instance().getInstrument(defaultInstrument);
@@ -331,41 +374,33 @@ std::string FileFinderImpl::getExtension(const std::string &filename, const std:
   return "";
 }
 
+namespace {
+/// Decide whether the archive search should be enabled for `facilityName`,
+/// given the user's `datasearch.searcharchive` configuration value.
+/// The setting accepts: "off"/empty (never), "all" (every facility),
+/// "on" (only the default facility), or a substring-matched facility list.
+/// All comparisons are case-insensitive (caller passes pre-lowered strings).
+bool shouldUseArchiveForFacility(const std::string &archiveOpt, const std::string &facilityName) {
+  if (archiveOpt == "all")
+    return true;
+  if (archiveOpt == "on")
+    return facilityName == toLower(Mantid::Kernel::ConfigService::Instance().getString("default.facility"));
+  return archiveOpt.find(facilityName) != std::string::npos;
+}
+} // namespace
+
 std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) {
-  std::vector<IArchiveSearch_sptr> archs;
-
-  // get the searchive option from config service and format it
-  std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
-  std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(), tolower);
-
-  // if it is turned off, not specified, or the facility doesn't have
-  // IArchiveSearch defined, return an empty vector
+  const auto archiveOpt = toLower(Kernel::ConfigService::Instance().getString("datasearch.searcharchive"));
   if (archiveOpt.empty() || archiveOpt == "off" || facility.archiveSearch().empty())
-    return archs;
+    return {};
+  if (!shouldUseArchiveForFacility(archiveOpt, toLower(facility.name())))
+    return {};
 
-  // determine if the user wants archive search for this facility
-  auto createArchiveSearch = bool(archiveOpt == "all");
-
-  // then see if the facility name appears in the list or if we just want the
-  // default facility
-  if (!createArchiveSearch) {
-    std::string faciltyName = facility.name();
-    std::transform(faciltyName.begin(), faciltyName.end(), faciltyName.begin(), tolower);
-    if (archiveOpt == "on") { // only default facilty
-      std::string defaultFacility = Kernel::ConfigService::Instance().getString("default.facility");
-      std::transform(defaultFacility.begin(), defaultFacility.end(), defaultFacility.begin(), tolower);
-      createArchiveSearch = bool(faciltyName == defaultFacility);
-    } else { // everything in the list
-      createArchiveSearch = bool(archiveOpt.find(faciltyName) != std::string::npos);
-    }
-  }
-
-  // put together the list of IArchiveSearch to use
-  if (createArchiveSearch) {
-    for (const auto &facilityname : facility.archiveSearch()) {
-      g_log.debug() << "get archive search for the facility..." << facilityname << "\n";
-      archs.emplace_back(ArchiveSearchFactory::Instance().create(facilityname));
-    }
+  std::vector<IArchiveSearch_sptr> archs;
+  archs.reserve(facility.archiveSearch().size());
+  for (const auto &name : facility.archiveSearch()) {
+    g_log.debug() << "get archive search for the facility..." << name << "\n";
+    archs.emplace_back(ArchiveSearchFactory::Instance().create(name));
   }
   return archs;
 }
@@ -424,15 +459,10 @@ const API::Result<std::filesystem::path> FileFinderImpl::findRun(const std::stri
 void FileFinderImpl::getUniqueExtensions(const std::vector<std::string> &extensionsToAdd,
                                          std::vector<std::string> &uniqueExts) const {
   const bool isCaseSensitive = getCaseSensitive();
-  for (const auto &cit : extensionsToAdd) {
-    std::string transformed(cit);
-    if (!isCaseSensitive) {
-      std::transform(cit.begin(), cit.end(), transformed.begin(), tolower);
-    }
-    const auto searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
-    if (searchItr == uniqueExts.end()) {
-      uniqueExts.emplace_back(transformed);
-    }
+  for (const auto &ext : extensionsToAdd) {
+    const auto normalized = isCaseSensitive ? ext : toLower(ext);
+    if (std::find(uniqueExts.begin(), uniqueExts.end(), normalized) == uniqueExts.end())
+      uniqueExts.emplace_back(normalized);
   }
 }
 
@@ -449,19 +479,23 @@ std::string FileFinderImpl::validateRuns(const std::string &searchText) const {
 }
 
 /**
- * Find a list of files file given a hint. Calls findRun internally.
- * @param hintstr :: Comma separated list of hints to findRun method.
- *  Can also include ranges of runs, e.g. 123-135 or equivalently 123-35.
- *  Only the beginning of a range can contain an instrument name.
- * @param extensionsProvided :: Vector of allowed file extensions. Optional.
- *                If provided, this provides the only extensions searched for.
- *                If not provided, facility extensions used.
- * @param useOnlyExtensionsProvided:: Optional bool. If it's true (and exts is not empty),
-                           search the for the file using exts only.
-                           If it's false, use exts AND facility extensions.
- * @return A vector of full paths or empty vector
- * @throw std::invalid_argument if the argument is malformed
- * @throw Exception::NotFoundError if a file could not be found
+ * Find a list of files from a comma- and range-separated hint string.
+ *
+ * The hint is split on comma operators, then each token is expanded by the
+ * multi-file-name parser (which understands ranges like "123-135" or
+ * "123:135:2", instrument prefixes, and zero padding). The resulting flat
+ * list of file hints is resolved via findRuns(vector).
+ *
+ * @param hintstr :: Comma-separated hint string. Only the first token of a
+ *                   range may carry an instrument name.
+ * @param extensionsProvided :: Optional file extensions. If empty the
+ *                              facility extensions are used.
+ * @param useOnlyExtensionsProvided :: If true, search using only
+ *                                     extensionsProvided; otherwise combine
+ *                                     with facility extensions.
+ * @return One full path per resolved file, in input order.
+ * @throw std::invalid_argument if any token is malformed.
+ * @throw Exception::NotFoundError if any file cannot be found.
  */
 std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &hintstr,
                                                             const std::vector<std::string> &extensionsProvided,
@@ -470,44 +504,18 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
   if (!error.empty())
     throw std::invalid_argument(error);
 
-  const std::string stripped = Kernel::Strings::strip(hintstr);
-
-  // Pre-split on comma operators (digit→non-digit or non-digit→non-digit)
-  // before calling the parser, mirroring MultipleFileProperty's behaviour.
-  // This ensures that comma-separated filenames with extensions (e.g.
-  // "A.nxs, B.nxs") are split into separate tokens rather than being
-  // misidentified as a single filename by the parser's extension detection.
-  // Digit→digit commas (e.g. "INST15196,15197") are left intact so the
-  // parser can expand them as run-number lists.
-  std::vector<std::string> commaTokens;
-  std::sregex_token_iterator end;
-  std::sregex_token_iterator commaIt(stripped.begin(), stripped.end(), COMMA_OPERATORS, -1);
-  for (; commaIt != end; ++commaIt)
-    commaTokens.emplace_back(commaIt->str());
+  // Pre-split on comma operators (any-char→non-digit commas), mirroring
+  // MultipleFileProperty. Digit→digit commas (e.g. "INST15196,15197") stay
+  // intact so the parser can expand them as run-number lists.
+  const auto tokens = splitOnCommaOperators(Kernel::Strings::strip(hintstr));
 
   Kernel::MultiFileNameParsing::Parser parser;
   parser.setTrimWhiteSpaces(true);
 
   std::vector<std::string> hints;
-  for (const auto &token : commaTokens) {
-    // Tokens that are already full filenames (have an extension) must not go
-    // through the parser: the parser reformats the instrument prefix and
-    // applies zero-padding, producing a name that differs from the file on
-    // disk. Pass them straight through to findRuns(vector).
-    if (std::filesystem::path(token).has_extension()) {
-      hints.emplace_back(token);
-      continue;
-    }
-    try {
-      parser.parse(token);
-      for (const auto &group : parser.fileNames())
-        hints.insert(hints.end(), group.cbegin(), group.cend());
-    } catch (...) {
-      // Parser couldn't handle this token (e.g. a hint with a suffix like
-      // "-add"). Pass it through as-is.
-      if (!token.empty())
-        hints.emplace_back(token);
-    }
+  for (const auto &token : tokens) {
+    const auto expanded = expandHint(token, parser);
+    hints.insert(hints.end(), expanded.cbegin(), expanded.cend());
   }
 
   return findRuns(hints, extensionsProvided, useOnlyExtensionsProvided);
@@ -553,11 +561,8 @@ void FileFinderImpl::prepareFileInfo(FileInfo &fileInfo, const std::vector<std::
   // on platforms where file names ARE case sensitive.
   fileInfo.filenames.insert(filename);
   if (!getCaseSensitive()) {
-    std::string transformed(filename);
-    std::transform(filename.begin(), filename.end(), transformed.begin(), toupper);
-    fileInfo.filenames.insert(transformed);
-    std::transform(filename.begin(), filename.end(), transformed.begin(), tolower);
-    fileInfo.filenames.insert(transformed);
+    fileInfo.filenames.insert(toUpper(filename));
+    fileInfo.filenames.insert(toLower(filename));
   }
 
   // Merge the extensions & throw out duplicates
@@ -740,96 +745,112 @@ void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) cons
   if (fileInfos.empty())
     return;
 
-  if (const auto sharedArch = batchableArchive(fileInfos)) {
-    g_log.debug() << "performArchiveSearch: all files share the same single archive to search and it supports multiple "
-                     "hints, all the same instrument, so searching together\n";
-    // One hint per file (archive search is case-insensitive so the first
-    // filename in the set is sufficient).
-    std::vector<std::string> hints;
-    for (const auto &fileInfo : fileInfos) {
-      if (fileInfo.found || fileInfo.error)
-        continue;
-      hints.push_back(*fileInfo.filenames.cbegin());
-    }
-    const auto archivePaths = sharedArch->getArchivePaths(hints);
-    if (!archivePaths) {
-      g_log.error() << "Archive search failed: " << archivePaths.errors() << "\n";
-      return;
-    }
+  if (const auto sharedArch = batchableArchive(fileInfos))
+    performBatchedArchiveSearch(fileInfos, sharedArch);
+  else
+    performPerFileArchiveSearch(fileInfos);
+}
 
-    if (archivePaths.result().size() != hints.size()) {
-      g_log.error() << "Archive search returned a different number of paths than hints. Expected " << hints.size()
-                    << " but got " << archivePaths.result().size() << ".\n";
-      return;
-    }
+void FileFinderImpl::performBatchedArchiveSearch(std::vector<FileInfo> &fileInfos,
+                                                 const IArchiveSearch_sptr &sharedArch) const {
+  g_log.debug() << "performArchiveSearch: batching unfound hints through a single archive call\n";
 
-    const auto &paths = archivePaths.result();
-    size_t index = 0;
-    for (auto &fileInfo : fileInfos) {
-      if (fileInfo.found || fileInfo.error)
-        continue;
-      const auto &archivePath = paths[index++];
-      try {
-        if (std::filesystem::exists(archivePath)) {
+  // One hint per unfound file (archive search is case-insensitive so the
+  // first filename in the set is sufficient).
+  std::vector<std::string> hints;
+  for (const auto &fileInfo : fileInfos) {
+    if (fileInfo.found || fileInfo.error)
+      continue;
+    hints.push_back(*fileInfo.filenames.cbegin());
+  }
+
+  const auto archivePaths = sharedArch->getArchivePaths(hints);
+  if (!archivePaths) {
+    g_log.error() << "Archive search failed: " << archivePaths.errors() << "\n";
+    return;
+  }
+  if (archivePaths.result().size() != hints.size()) {
+    g_log.error() << "Archive search returned a different number of paths than hints. Expected " << hints.size()
+                  << " but got " << archivePaths.result().size() << ".\n";
+    return;
+  }
+
+  // Walk the unfound entries in the same order the hints were collected and
+  // assign each archive result back.
+  const auto &paths = archivePaths.result();
+  size_t index = 0;
+  for (auto &fileInfo : fileInfos) {
+    if (fileInfo.found || fileInfo.error)
+      continue;
+    const auto &archivePath = paths[index++];
+    try {
+      if (std::filesystem::exists(archivePath)) {
+        fileInfo.found = true;
+        fileInfo.path = archivePath;
+      }
+    } catch (std::exception &e) {
+      g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';
+      fileInfo.error = true;
+      fileInfo.errorMsg = "Cannot open file from archive: " + std::string(e.what());
+    }
+  }
+}
+
+void FileFinderImpl::performPerFileArchiveSearch(std::vector<FileInfo> &fileInfos) const {
+  // Cache the directory and extension of the last archive hit so consecutive
+  // runs in a range can be resolved with a local existence check rather than
+  // another network call.
+  std::filesystem::path lastFoundDir;
+  std::string lastFoundExt;
+
+  const auto tryLastFoundShortcut = [&](FileInfo &fileInfo) {
+    if (lastFoundDir.empty() || lastFoundExt.empty())
+      return false;
+    try {
+      for (const auto &filename : fileInfo.filenames) {
+        const auto candidate = lastFoundDir / (filename + lastFoundExt);
+        if (std::filesystem::exists(candidate)) {
           fileInfo.found = true;
-          fileInfo.path = archivePath;
+          fileInfo.path = candidate;
+          return true;
         }
-      } catch (std::exception &e) {
-        g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';
-        fileInfo.error = true;
-        fileInfo.errorMsg = "Cannot open file from archive: " + std::string(e.what());
+      }
+    } catch (...) {
+      lastFoundDir.clear();
+      lastFoundExt.clear();
+    }
+    return false;
+  };
+
+  for (auto &fileInfo : fileInfos) {
+    if (fileInfo.found || fileInfo.error)
+      continue;
+
+    if (tryLastFoundShortcut(fileInfo)) {
+      // Shortcut hit: lastFoundDir/Ext already point at this fileInfo's parent.
+      continue;
+    }
+
+    if (!fileInfo.archs.empty()) {
+      g_log.debug() << "Search the archives for file: " << fileInfo.hint << "\n";
+      const auto archivePath = getArchivePath(fileInfo.archs, fileInfo.filenames, fileInfo.extensionsToSearch);
+      if (archivePath) {
+        try {
+          if (std::filesystem::exists(archivePath.result())) {
+            fileInfo.found = true;
+            fileInfo.path = archivePath.result();
+          }
+        } catch (std::exception &e) {
+          g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';
+          fileInfo.error = true;
+          fileInfo.errorMsg = "Cannot open file from archive: " + std::string(e.what());
+        }
       }
     }
-  } else {
-    // Search the archive separately for each file, as they don't all share the same single archive to search.
-    // Cache the directory and extension of the last archive hit so consecutive runs in a range can be resolved
-    // with a local existence check rather than another network call.
-    std::filesystem::path lastFoundDir;
-    std::string lastFoundExt;
 
-    for (auto &fileInfo : fileInfos) {
-      if (fileInfo.found || fileInfo.error)
-        continue;
-
-      if (!lastFoundDir.empty() && !lastFoundExt.empty()) {
-        try {
-          for (const auto &filename : fileInfo.filenames) {
-            const auto candidate = lastFoundDir / (filename + lastFoundExt);
-            if (std::filesystem::exists(candidate)) {
-              fileInfo.found = true;
-              fileInfo.path = candidate;
-              break;
-            }
-          }
-        } catch (...) {
-          lastFoundDir.clear();
-          lastFoundExt.clear();
-        }
-        if (fileInfo.found)
-          continue;
-      }
-
-      if (!fileInfo.archs.empty()) {
-        g_log.debug() << "Search the archives for file: " << fileInfo.hint << "\n";
-        const auto archivePath = getArchivePath(fileInfo.archs, fileInfo.filenames, fileInfo.extensionsToSearch);
-        if (archivePath) {
-          try {
-            if (std::filesystem::exists(archivePath.result())) {
-              fileInfo.found = true;
-              fileInfo.path = archivePath.result();
-            }
-          } catch (std::exception &e) {
-            g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';
-            fileInfo.error = true;
-            fileInfo.errorMsg = "Cannot open file from archive: " + std::string(e.what());
-          }
-        }
-      }
-
-      if (fileInfo.found) {
-        lastFoundDir = fileInfo.path.parent_path();
-        lastFoundExt = fileInfo.path.extension().string();
-      }
+    if (fileInfo.found) {
+      lastFoundDir = fileInfo.path.parent_path();
+      lastFoundExt = fileInfo.path.extension().string();
     }
   }
 }
@@ -897,7 +918,7 @@ const API::Result<std::filesystem::path> FileFinderImpl::getArchivePath(const st
     g_log.debug() << iter << " ";
   g_log.debug() << "])\n";
 
-  string errors = "";
+  std::string errors;
   for (const auto &arch : archs) {
     try {
       g_log.debug() << "Getting archive path for requested files\n";
@@ -910,12 +931,6 @@ const API::Result<std::filesystem::path> FileFinderImpl::getArchivePath(const st
     }
   }
   return API::Result<std::filesystem::path>("", errors);
-}
-
-std::string FileFinderImpl::toUpper(const std::string &src) const {
-  std::string result = src;
-  std::transform(result.begin(), result.end(), result.begin(), toupper);
-  return result;
 }
 
 std::filesystem::path FileFinderImpl::tryResolvePathWithExtension(const std::string &hint) const {
