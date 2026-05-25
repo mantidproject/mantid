@@ -382,35 +382,48 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
     }
 
     // Batch resolve files with extension using findRuns for better performance.
+    // When the batch succeeds we get a single call into the archive search,
+    // which lets back-ends like ONCat resolve all runs in one network round
+    // trip. If the batch throws (any one file is missing) we fall back to
+    // per-file findRun so the error names the actually missing file rather
+    // than whichever hint findRuns happened to report first.
     if (!filesToResolveWithExtension.empty()) {
+      const auto extsToUse = !defaultExt.empty() ? std::vector<std::string>(1, defaultExt) : m_exts;
+      bool batchSucceeded = false;
       try {
-        const auto extsToUse = !defaultExt.empty() ? std::vector<std::string>(1, defaultExt) : m_exts;
         auto resolvedPaths = FileFinder::Instance().findRuns(filesToResolveWithExtension, extsToUse);
-
-        // Map resolved paths back to their original positions
         for (size_t i = 0; i < resolvedPaths.size(); ++i) {
           resolvedFiles[resolutionIndices[i]] = resolvedPaths[i].string();
         }
-      } catch (const Exception::NotFoundError &ex) {
-        // findRuns identifies the actual failing hint in its exception message;
-        // use that directly so the error names the file that actually failed.
-        if (!m_allowEmptyTokens) {
-          throw std::runtime_error(ex.what());
-        }
+        batchSucceeded = true;
+      } catch (const Exception::NotFoundError &) {
+        // Fall through to per-file resolution below.
+      }
+
+      if (!batchSucceeded) {
         for (size_t i = 0; i < filesToResolveWithExtension.size(); ++i) {
           const auto &unresolvedFileName = filesToResolveWithExtension[i];
-          bool doThrow = false;
-          try {
-            const int unresolvedInt = std::stoi(unresolvedFileName);
-            if (unresolvedInt != 0)
+          auto run = FileFinder::Instance().findRun(unresolvedFileName, extsToUse);
+          if (run) {
+            resolvedFiles[resolutionIndices[i]] = run.result().string();
+            continue;
+          }
+
+          bool doThrow = !m_allowEmptyTokens;
+          if (m_allowEmptyTokens) {
+            try {
+              if (std::stoi(unresolvedFileName) != 0)
+                doThrow = true;
+            } catch (std::invalid_argument &) {
               doThrow = true;
-          } catch (std::invalid_argument &) {
-            doThrow = true;
+            }
           }
           if (doThrow)
-            throw std::runtime_error(ex.what());
-          else
-            resolvedFiles[resolutionIndices[i]] = unresolvedFileName;
+            throw Exception::NotFoundError("Unable to find file:", unresolvedFileName);
+
+          // Empty token allowed: keep the hint as the resolved value so it
+          // surfaces in any downstream error message.
+          resolvedFiles[resolutionIndices[i]] = unresolvedFileName;
         }
       }
     }

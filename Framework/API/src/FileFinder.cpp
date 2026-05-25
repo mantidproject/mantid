@@ -389,7 +389,7 @@ const API::Result<std::filesystem::path> FileFinderImpl::findRun(const std::stri
     return API::Result<std::filesystem::path>(std::filesystem::path(), error);
 
   std::string hintsStr = Kernel::Strings::strip(hintstr);
-  auto filePath = checkFilename(hintsStr);
+  auto filePath = tryResolvePathWithExtension(hintsStr);
   auto fileInfo = FileInfo{.hint = hintsStr,
                            .found = !filePath.empty(),
                            .path = filePath,
@@ -593,11 +593,17 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::vector<st
   if (hints.empty())
     return {};
 
+  for (const auto &hint : hints) {
+    auto const error = validateRuns(hint);
+    if (!error.empty())
+      throw std::invalid_argument(error);
+  }
+
   std::vector<FileInfo> fileInfos;
   fileInfos.reserve(hints.size());
   std::shared_ptr<Kernel::InstrumentInfo> cachedInstr;
   for (const auto &hint : hints) {
-    auto filePath = checkFilename(hint);
+    auto filePath = tryResolvePathWithExtension(hint);
     if (!filePath.empty()) {
       fileInfos.emplace_back(FileInfo{.hint = hint, .found = true, .path = filePath});
       continue;
@@ -706,13 +712,12 @@ void FileFinderImpl::performCacheSearch(std::vector<FileInfo> &fileInfos) const 
   }
 }
 
-namespace {
 /// If every unfound FileInfo has the same single archive and instrument, and
 /// that archive supports batched multi-hint lookups, return it. Otherwise
 /// return nullptr. Two unfound entries with equal InstrumentInfo always have
 /// the same archive list because getArchiveSearch() is deterministic per
 /// facility, so we only need to compare instruments rather than archive types.
-IArchiveSearch_sptr batchableArchive(const std::vector<Mantid::API::FileFinderImpl::FileInfo> &fileInfos) {
+IArchiveSearch_sptr FileFinderImpl::batchableArchive(const std::vector<FileInfo> &fileInfos) {
   const auto isUnfound = [](const auto &fi) { return !fi.found && !fi.error; };
   const auto first = std::find_if(fileInfos.cbegin(), fileInfos.cend(), isUnfound);
   if (first == fileInfos.cend() || first->archs.size() != 1)
@@ -720,7 +725,7 @@ IArchiveSearch_sptr batchableArchive(const std::vector<Mantid::API::FileFinderIm
   const auto &arch = first->archs[0];
   if (!arch || !arch->supportsMultipleHints())
     return nullptr;
-  const Mantid::Kernel::InstrumentInfo &refInstr = *first->instr;
+  const Kernel::InstrumentInfo &refInstr = *first->instr;
   for (auto it = std::next(first); it != fileInfos.cend(); ++it) {
     if (!isUnfound(*it))
       continue;
@@ -729,7 +734,6 @@ IArchiveSearch_sptr batchableArchive(const std::vector<Mantid::API::FileFinderIm
   }
   return arch;
 }
-} // namespace
 
 void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) const {
   if (fileInfos.empty())
@@ -913,15 +917,14 @@ std::string FileFinderImpl::toUpper(const std::string &src) const {
   return result;
 }
 
-std::filesystem::path FileFinderImpl::checkFilename(const std::string &hint) const {
+std::filesystem::path FileFinderImpl::tryResolvePathWithExtension(const std::string &hint) const {
   if (!std::filesystem::path(hint).has_extension())
     return {};
+  // getFullPath already verifies existence and returns empty on miss.
   auto path = getFullPath(hint);
-  if (!path.empty() && std::filesystem::exists(path)) {
-    g_log.information() << "found path = " << path << '\n';
-    return path;
-  }
-  return {};
+  if (!path.empty())
+    g_log.debug() << "found path = " << path << '\n';
+  return path;
 }
 
 } // namespace Mantid::API

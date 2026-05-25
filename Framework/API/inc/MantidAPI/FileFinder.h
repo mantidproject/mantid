@@ -17,6 +17,10 @@
 #include <set>
 #include <vector>
 
+// Forward declaration so the test class can be granted friend access without
+// pulling its header into this one.
+class FileFinderISISInstrumentDataCacheTest;
+
 namespace Mantid {
 //---------------------------------------------------------------------------
 // Forward declarations
@@ -35,6 +39,8 @@ number
 @date 23/07/2010
 */
 class MANTID_API_DLL FileFinderImpl {
+  friend class ::FileFinderISISInstrumentDataCacheTest;
+
 public:
   std::filesystem::path getFullPath(const std::string &filename, const bool ignoreDirs = false) const;
   std::string extractAllowedSuffix(std::string &userString) const;
@@ -51,7 +57,10 @@ public:
                                               const std::vector<std::string> &exts = {},
                                               const bool useExtsOnly = false) const;
 
-  std::filesystem::path checkFilename(const std::string &filename) const;
+  /// If the hint already carries an extension, return its resolved full path
+  /// in the data search dirs (or empty if not found). Returns empty for hints
+  /// without an extension (which are treated as run-number hints elsewhere).
+  std::filesystem::path tryResolvePathWithExtension(const std::string &filename) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   const Kernel::InstrumentInfo getInstrument(const std::string &hintstr, const bool returnDefaultIfNotFound = true,
                                              const std::string &defaultInstrument = "") const;
@@ -63,7 +72,10 @@ public:
   std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hintstr,
                                                             const Kernel::InstrumentInfo &instrument) const;
 
-  /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
+private:
+  friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;
+
+  /// Per-hint state threaded through the file-search pipeline.
   struct FileInfo {
     std::string hint{};
     bool found{false};
@@ -76,11 +88,7 @@ public:
     std::vector<Mantid::API::IArchiveSearch_sptr> archs{};
   };
 
-  /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   void performCacheSearch(std::vector<FileInfo> &fileInfos) const;
-
-private:
-  friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;
 
   /// a string that is allowed at the end of any run number
   static const std::string ALLOWED_SUFFIX;
@@ -98,6 +106,10 @@ private:
                         bool useOnlyExtensionsProvided) const;
   void performFileSearch(std::vector<FileInfo> &fileInfos) const;
   void performArchiveSearch(std::vector<FileInfo> &fileInfos) const;
+  /// If every unfound FileInfo shares a single archive (and instrument) that
+  /// supports batched multi-hint lookups, return that archive. Otherwise
+  /// nullptr — caller falls back to per-file archive lookups.
+  static IArchiveSearch_sptr batchableArchive(const std::vector<FileInfo> &fileInfos);
   const API::Result<std::filesystem::path> getISISInstrumentDataCachePath(const std::filesystem::path &cacheDir,
                                                                           const std::set<std::string> &hintstrs,
                                                                           const std::vector<std::string> &exts) const;
