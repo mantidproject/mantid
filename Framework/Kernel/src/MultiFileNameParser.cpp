@@ -293,7 +293,7 @@ void Parser::split() {
   if (lastDot != std::string::npos && lastDot > m_dirString.size()) {
     const size_t prevDot = m_multiFileName.find_last_of('.', lastDot - 1);
     if (prevDot != std::string::npos && prevDot >= m_dirString.size()) {
-      const std::string_view midExt(m_multiFileName.data() + prevDot, lastDot - prevDot);
+      const auto midExt = std::string_view(m_multiFileName).substr(prevDot, lastDot - prevDot);
       if (std::find(KNOWN_COMPOUND_LEAD_EXTENSIONS.begin(), KNOWN_COMPOUND_LEAD_EXTENSIONS.end(), midExt) !=
           KNOWN_COMPOUND_LEAD_EXTENSIONS.end()) {
         m_extString = m_multiFileName.substr(prevDot);
