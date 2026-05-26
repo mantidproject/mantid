@@ -29,6 +29,7 @@ requirements:
     - libboost-devel ${{ libboost }}
     - libboost-python-devel ${{ libboost }}
     - eigen ${{ eigen }}
+    - fontconfig ${{ fontconfig }}
     - mantid == ${{ version }}
     - python ${{ python }}
     - pip ${{ pip }}
