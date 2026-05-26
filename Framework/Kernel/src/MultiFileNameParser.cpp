@@ -15,11 +15,9 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <array>
 #include <numeric>
 #include <regex>
 #include <sstream>
-#include <string_view>
 #include <utility>
 
 namespace Mantid::Kernel::MultiFileNameParsing {
@@ -56,12 +54,6 @@ const std::string LIST = "(" + ANY + "(" + COMMA + ANY + ")*" + ")";
 /////////////////////////////////////////////////////////////////////////////
 
 namespace {
-// Leading extensions that may form a compound extension when followed by
-// another suffix (e.g. ".nxs.h5"). Adding an entry here teaches split() to
-// keep the inner extension as part of m_extString instead of treating it as
-// part of the file stem.
-const std::array<std::string_view, 1> KNOWN_COMPOUND_LEAD_EXTENSIONS = {".nxs"};
-
 // Anonymous helper functions.
 void parseToken(std::vector<std::vector<unsigned int>> &parsedRuns, const std::string &token);
 std::vector<std::vector<unsigned int>> generateRange(const unsigned int from, const unsigned int to,
@@ -145,16 +137,27 @@ bool ReverseCaselessCompare::operator()(const std::string &a, const std::string 
 /// Constructor.
 Parser::Parser()
     : m_runs(), m_fileNames(), m_multiFileName(), m_dirString(), m_instString(), m_underscoreString(), m_runString(),
-      m_extString(), m_validInstNames(), m_trimWhiteSpaces(true) {
+      m_extString(), m_validInstNames(), m_compoundLeadExtensions(), m_trimWhiteSpaces(true) {
   const ConfigServiceImpl &config = ConfigService::Instance();
 
   const auto facilities = config.getFacilities();
   for (const auto facility : facilities) {
-    const std::vector<InstrumentInfo> instruments = facility->instruments();
-
-    for (const auto &instrument : instruments) {
+    for (const auto &instrument : facility->instruments()) {
       m_validInstNames.insert(instrument.name());
       m_validInstNames.insert(instrument.shortName());
+    }
+
+    // Derive compound-extension leads from FileExtensions. For a two-component
+    // entry like ".nxs.h5" the lead is ".nxs"; the parser uses this set in
+    // split() to keep the inner extension out of the file stem. Entries with
+    // a single dot (e.g. ".nxs", "_event.nxs") or more than two dots are
+    // skipped — the parser only models two-component compounds.
+    for (const auto &ext : facility->extensions()) {
+      if (std::count(ext.cbegin(), ext.cend(), '.') != 2)
+        continue;
+      auto lead = ext.substr(0, ext.find_last_of('.'));
+      if (!lead.empty() && lead.front() == '.')
+        m_compoundLeadExtensions.insert(std::move(lead));
     }
   }
 }
@@ -286,18 +289,17 @@ void Parser::split() {
     m_dirString = m_multiFileName.substr(0, lastSeparator + 1);
 
   // Get the extension. Compound extensions like ".nxs.h5" are kept whole when
-  // the leading half appears in KNOWN_COMPOUND_LEAD_EXTENSIONS; otherwise just
-  // the final dot's suffix is taken. This avoids misidentifying stems that
-  // contain dots (e.g. "run.v2.nxs") as compound-extension files.
+  // the leading half (".nxs") matches a known compound lead derived from the
+  // facility FileExtensions in Facilities.xml. Otherwise just the final dot's
+  // suffix is taken. This avoids misidentifying stems that contain dots
+  // (e.g. "run.v2.nxs") as compound-extension files.
   const size_t lastDot = m_multiFileName.find_last_of('.');
   if (lastDot != std::string::npos && lastDot > m_dirString.size()) {
     const size_t prevDot = m_multiFileName.find_last_of('.', lastDot - 1);
     if (prevDot != std::string::npos && prevDot >= m_dirString.size()) {
-      const auto midExt = std::string_view(m_multiFileName).substr(prevDot, lastDot - prevDot);
-      if (std::find(KNOWN_COMPOUND_LEAD_EXTENSIONS.begin(), KNOWN_COMPOUND_LEAD_EXTENSIONS.end(), midExt) !=
-          KNOWN_COMPOUND_LEAD_EXTENSIONS.end()) {
+      const auto midExt = m_multiFileName.substr(prevDot, lastDot - prevDot);
+      if (m_compoundLeadExtensions.contains(midExt))
         m_extString = m_multiFileName.substr(prevDot);
-      }
     }
     if (m_extString.empty())
       m_extString = m_multiFileName.substr(lastDot);
