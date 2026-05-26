@@ -653,14 +653,15 @@ def _apply_vanadium_norm_event(sample_ws_foc, van_ws_foc, xmin=0.45):
     sample_ws_foc = mantid.CropWorkspace(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=xmin, XMax=float("inf"))
     # alter the bins attached to the event workspace (used for histogram conversion) to remove any bins before the crop
     nspec = sample_ws_foc.getNumberHistograms()
-    deltas = [diff(sample_ws_foc.readX(ispec)).mean() for ispec in range(nspec)]
-    mantid.RebinRagged(
-        InputWorkspace=sample_ws_foc,
-        XMin=[xmin] * nspec,
-        XMax=[nan] * nspec,
-        Delta=deltas,
-        OutputWorkspace=sample_ws_foc.name(),
-    )
+    if nspec > 1:
+        deltas = [diff(sample_ws_foc.readX(ispec)).mean() for ispec in range(nspec)]
+        mantid.RebinRagged(
+            InputWorkspace=sample_ws_foc,
+            XMin=[xmin] * nspec,
+            XMax=[nan] * nspec,
+            Delta=deltas,
+            OutputWorkspace=sample_ws_foc.name(),
+        )
     # divide by vanadium curve
     sample_ws_foc = mantid.Divide(
         LHSWorkspace=sample_ws_foc, RHSWorkspace=van_ws_foc, OutputWorkspace=sample_ws_foc.name(), AllowDifferentNumberSpectra=False

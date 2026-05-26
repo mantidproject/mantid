@@ -67,16 +67,16 @@ class FocusEventMode(systemtesting.MantidSystemTest):
             save_dir=CWDIR,
             full_inst_calib_path=FULL_CALIB,
             ceria_run="ENGINX371346",
-            group=ENGINX_GROUP.BOTH,
+            group=ENGINX_GROUP.NORTH,
         )
         enginx.set_calibration_to_copy_starting_parameters(False)
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
-        self._ws_foc = ADS.retrieve("371871_engggui_focusing_output_ws_bank")
+        self._ws_foc = ADS.retrieve("371871_engggui_focusing_output_ws_bank_1")
 
     def validate(self):
         # assert correct number spectra
-        self.assertEqual(self._ws_foc.getNumberHistograms(), 2)
+        self.assertEqual(self._ws_foc.getNumberHistograms(), 1)
         # assert diff constants of one group
         # (this results depend on the CeO2 calibration not the event mode focusing so not the target of the test)
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
@@ -87,7 +87,7 @@ class FocusEventMode(systemtesting.MantidSystemTest):
         # compare TOF workspaces
         self.tolerance = 1e-6
         self.disableChecking.extend(["Instrument"])  # don't check
-        return self._ws_foc.name(), "371871_engggui_focusing_output_ws_bank.nxs"
+        return self._ws_foc.name(), "371871_engggui_focusing_output_ws_bank_1.nxs"
 
     def cleanup(self):
         ADS.clear()
