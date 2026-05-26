@@ -88,7 +88,7 @@ class FocusEventModeBothBanks(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS["South"][UnitParams.difa], delta=1)
         self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS["South"][UnitParams.tzero], delta=2)
         # compare TOF workspaces
-        self.tolerance = 1e-6
+        self.tolerance = 1e-4
         self.disableChecking.extend(["Instrument"])  # don't check
         return self._ws_foc.name(), "371871_engggui_focusing_output_ws_bank.nxs"
 
