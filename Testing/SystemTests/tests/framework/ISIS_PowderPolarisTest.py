@@ -11,9 +11,13 @@ import shutil
 
 import mantid.simpleapi as mantid
 from mantid import config
+from mantid.kernel import logger
 
 from isis_powder import Polaris, SampleDetails
+from mantid.simpleapi import SaveNexus
 from mantid.api import AnalysisDataService
+from Engineering.texture.TextureUtils import mk
+
 
 DIRS = config["datasearch.directories"].split(";")
 
@@ -94,6 +98,12 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
         splined_ws, unsplined_ws = self.calibration_results
         for ws in splined_ws + unsplined_ws:
             self.assertEqual(ws.sample().getMaterial().name(), "V")
+
+        save_names = ("ISIS_Powder-POLARIS00098532_unsplined.nxs", "ISIS_Powder-POLARIS00098532_splined.nxs")
+        for i, ws in enumerate((unsplined_ws, splined_ws)):
+            save_dir = r"C:\Users\kcd17618\Documents\MantidScripts\POLARIS_Parameters\test-files"
+            mk(save_dir)
+            SaveNexus(InputWorkspace=ws.name(), Filename=rf"{save_dir}\{save_names[i]}")
         return (
             unsplined_ws.name(),
             "ISIS_Powder-POLARIS00098532_unsplined.nxs",
@@ -127,6 +137,13 @@ class CreateVanadiumPerDetectorTest(systemtesting.MantidSystemTest):
         splined_ws, unsplined_ws = self.calibration_results
         ws = splined_ws + unsplined_ws
         self.assertEqual(ws.sample().getMaterial().name(), "V")
+
+        save_names = ("ISIS_Powder-POLARIS00098532_unsplined_per_det.nxs", "ISIS_Powder-POLARIS00098532_splined_per_det.nxs")
+        for i, ws in enumerate((unsplined_ws, splined_ws)):
+            save_dir = r"C:\Users\kcd17618\Documents\MantidScripts\POLARIS_Parameters\test-files"
+            mk(save_dir)
+            SaveNexus(InputWorkspace=ws.name(), Filename=rf"{save_dir}\{save_names[i]}")
+
         return (
             unsplined_ws.name(),
             "ISIS_Powder-POLARIS00098532_unsplined_per_det.nxs",
@@ -157,6 +174,10 @@ class FocusTestNoAbsorptionWithRelativeNormalisation(systemtesting.MantidSystemT
     def validate(self):
         self.validate_focus_files_exist("98533")
         self.validate_focus_material(self.focus_results)
+        for i, ws in enumerate((self.focus_results,)):
+            save_dir = r"C:\Users\kcd17618\Documents\MantidScripts\POLARIS_Parameters\test-files"
+            mk(save_dir)
+            SaveNexus(InputWorkspace=ws.name(), Filename=rf"{save_dir}\ISIS_Powder-POLARIS98533_FocusSempty.nxs")
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
 
     def cleanup(self):
@@ -180,6 +201,10 @@ class FocusTestNoAbsorptionWithAbsoluteNormalisation(systemtesting.MantidSystemT
     def validate(self):
         self.validate_focus_files_exist("98534")
         self.validate_focus_material(self.focus_results)
+        for i, ws in enumerate((self.focus_results,)):
+            save_dir = r"C:\Users\kcd17618\Documents\MantidScripts\POLARIS_Parameters\test-files"
+            mk(save_dir)
+            SaveNexus(InputWorkspace=ws.name(), Filename=rf"{save_dir}\ISIS_Powder-POLARIS98534_FocusSempty.nxs")
         return self.focus_results.name(), "ISIS_Powder-POLARIS98534_FocusSempty.nxs"
 
     def cleanup(self):
@@ -206,6 +231,10 @@ class TestFocusNoAbsorptionIndividual(systemtesting.MantidSystemTest, HelperClas
     def validate(self):
         self.validate_focus_files_exist("98533")
         self.validate_focus_files_exist("98534")
+        for i, ws in enumerate((self.focus_results,)):
+            save_dir = r"C:\Users\kcd17618\Documents\MantidScripts\POLARIS_Parameters\test-files"
+            mk(save_dir)
+            SaveNexus(InputWorkspace=ws.name(), Filename=rf"{save_dir}\ISIS_Powder-POLARIS98534_focussed.nxs")
         return self.focus_results.name(), "ISIS_Powder-POLARIS98534_focussed.nxs"
 
     def cleanup(self):
@@ -231,6 +260,10 @@ class TestFocusNoAbsorptionSummed(systemtesting.MantidSystemTest, HelperClass):
 
     def validate(self):
         self.validate_focus_files_exist("98533,98534")
+        for i, ws in enumerate((self.focus_results,)):
+            save_dir = r"C:\Users\kcd17618\Documents\MantidScripts\POLARIS_Parameters\test-files"
+            mk(save_dir)
+            SaveNexus(InputWorkspace=ws.name(), Filename=rf"{save_dir}\ISIS_Powder-POLARIS98533and98534_focussed.nxs")
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533and98534_focussed.nxs"
 
     def cleanup(self):
@@ -256,6 +289,10 @@ class FocusTestAbsorptionPaalmanPings(systemtesting.MantidSystemTest, HelperClas
 
         self.validate_focus_files_exist("98533")
         self.validate_focus_material(self.focus_results)
+        for i, ws in enumerate((self.focus_results,)):
+            save_dir = r"C:\Users\kcd17618\Documents\MantidScripts\POLARIS_Parameters\test-files"
+            mk(save_dir)
+            SaveNexus(InputWorkspace=ws.name(), Filename=rf"{save_dir}\ISIS_Powder-POLARIS98533_FocusPaalmanPings.nxs")
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusPaalmanPings.nxs"
 
     def cleanup(self):
@@ -284,6 +321,10 @@ class FocusTestAbsorptionMayers(systemtesting.MantidSystemTest, HelperClass):
         self.validate_focus_material(self.focus_results)
         self.tolerance = 1e-5
         # MayersSampleCorrection involves a fit that may give slightly different results on different OS
+        for i, ws in enumerate((self.focus_results,)):
+            save_dir = r"C:\Users\kcd17618\Documents\MantidScripts\POLARIS_Parameters\test-files"
+            mk(save_dir)
+            SaveNexus(InputWorkspace=ws.name(), Filename=rf"{save_dir}\ISIS_Powder-POLARIS98533_FocusMayers.nxs")
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusMayers.nxs"
 
     def cleanup(self):
@@ -314,6 +355,10 @@ class FocusTestChopperMode(systemtesting.MantidSystemTest):
         # this needs to be put in due to rounding errors between OS' for the proton_charge_by_period log
         self.disableChecking.append("Sample")
         self.tolerance = 1e-7
+        for i, ws in enumerate((self.focus_results,)):
+            save_dir = r"C:\Users\kcd17618\Documents\MantidScripts\POLARIS_Parameters\test-files"
+            mk(save_dir)
+            SaveNexus(InputWorkspace=ws.name(), Filename=rf"{save_dir}\ISIS_Powder-POLARIS98533_Auto_chopper.nxs")
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_Auto_chopper.nxs"
 
     def cleanup(self):
@@ -341,6 +386,10 @@ class FocusTestRunTwice(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-5  # same tolused in FocusTestAbsorptionMayers
+        for i, ws in enumerate((self.focus_results,)):
+            save_dir = r"C:\Users\kcd17618\Documents\MantidScripts\POLARIS_Parameters\test-files"
+            mk(save_dir)
+            SaveNexus(InputWorkspace=ws.name(), Filename=rf"{save_dir}\ISIS_Powder-POLARIS98533_FocusMayers.nxs")
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusMayers.nxs"
 
     def cleanup(self):
@@ -368,6 +417,10 @@ class FocusTestPerDetector(systemtesting.MantidSystemTest, HelperClass):
         self.validate_focus_files_exist("98533")
         self.validate_focus_material(self.focus_results)
         self.tolerance = 1e-5
+        for i, ws in enumerate((self.focus_results,)):
+            save_dir = r"C:\Users\kcd17618\Documents\MantidScripts\POLARIS_Parameters\test-files"
+            mk(save_dir)
+            SaveNexus(InputWorkspace=ws.name(), Filename=rf"{save_dir}\ISIS_Powder-POLARIS98533_FocusPerDet.nxs")
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusPerDet.nxs"
 
     def cleanup(self):
@@ -775,14 +828,16 @@ def setup_inst_object(mode, with_container=False):
 
 
 def _try_delete(path):
-    try:
-        # Use this instead of os.remove as we could be passed a non-empty dir
-        if os.path.isdir(path):
-            shutil.rmtree(path)
-        else:
-            os.remove(path)
-    except OSError:
-        print("Could not delete output file at: ", path)
+    pass
+    logger.notice(f"deleting path: {path}")
+    # try:
+    #    # Use this instead of os.remove as we could be passed a non-empty dir
+    #    if os.path.isdir(path):
+    #        shutil.rmtree(path)
+    #    else:
+    #        os.remove(path)
+    # except OSError:
+    #    print("Could not delete output file at: ", path)
 
 
 def get_bin_number_at_given_r(r_data, r):
