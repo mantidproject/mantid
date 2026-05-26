@@ -262,4 +262,14 @@ public:
 
     TS_ASSERT(mockAPI->allResponsesCalled());
   }
+
+  // Empty input should be treated as a successful no-op (matching
+  // FileFinder::findRuns(vector)) rather than a "Not found." failure.
+  void testGetArchivePathsEmptyInputIsSuccess() {
+    ORNLDataArchive arch;
+    const auto result = arch.getArchivePaths({});
+    TS_ASSERT(result);
+    TS_ASSERT_EQUALS(result.errors(), "");
+    TS_ASSERT(result.result().empty());
+  }
 };

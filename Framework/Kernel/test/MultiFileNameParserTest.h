@@ -500,4 +500,39 @@ public:
     TS_ASSERT_EQUALS(filenames[1][1], "TST00000000300");
     TS_ASSERT_EQUALS(filenames[1][2], "TST00000000301");
   }
+
+  // The compound-extension lead set is derived from each facility's
+  // FileExtensions in Facilities.xml. HFIR and SNS both list ".nxs.h5", so
+  // ".nxs" should be recognised as a compound lead and ".nxs.h5" kept whole
+  // rather than split as ".h5".
+  void test_compoundExtensionFromFacility() {
+    Parser parser;
+    parser.parse("CNCS123.nxs.h5");
+    TS_ASSERT_EQUALS(parser.extString(), ".nxs.h5");
+    TS_ASSERT_EQUALS(parser.runString(), "123");
+  }
+
+  // A range token with a compound extension should expand to one filename
+  // per run, all keeping the compound extension intact. ":" produces one
+  // group per run (as opposed to "-" which produces a single summed group).
+  void test_compoundExtensionRangeExpands() {
+    Parser parser;
+    parser.parse("CNCS100:102.nxs.h5");
+    TS_ASSERT_EQUALS(parser.extString(), ".nxs.h5");
+    const auto names = parser.fileNames();
+    TS_ASSERT_EQUALS(names.size(), 3);
+    TS_ASSERT_EQUALS(names[0][0], "CNCS_100.nxs.h5");
+    TS_ASSERT_EQUALS(names[1][0], "CNCS_101.nxs.h5");
+    TS_ASSERT_EQUALS(names[2][0], "CNCS_102.nxs.h5");
+  }
+
+  // Conversely a leading segment that is NOT a known compound lead (e.g.
+  // ".v2") must not be glued onto the trailing extension. Here ".nxs" is the
+  // extension and "CNCS_123.v2" becomes the stem (which will then fail run-
+  // number parsing — we only need extString to be correctly identified).
+  void test_extensionStemWithDot_notTreatedAsCompound() {
+    Parser parser;
+    TS_ASSERT_THROWS_ANYTHING(parser.parse("CNCS_123.v2.nxs"));
+    TS_ASSERT_EQUALS(parser.extString(), ".nxs");
+  }
 };

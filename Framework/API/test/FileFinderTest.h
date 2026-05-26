@@ -454,6 +454,32 @@ public:
     TS_ASSERT(paths.size() == 2);
   }
 
+  // findRuns(vector) treats an empty input as a successful no-op so callers
+  // (e.g. MultipleFileProperty's batched path) don't need to special-case it.
+  void testFindRunsEmptyVectorReturnsEmpty() {
+    std::vector<std::filesystem::path> paths;
+    TS_ASSERT_THROWS_NOTHING(paths = FileFinder::Instance().findRuns(std::vector<std::string>{}));
+    TS_ASSERT(paths.empty());
+  }
+
+  // A token whose expansion exceeds MultiFileNameParser's MAX_RANGE_SIZE
+  // (range_error from the parser) must surface as std::invalid_argument, not
+  // as a NotFoundError after a literal-hint fallback.
+  void testFindRunsHugeRangeThrowsInvalidArgument() {
+    ConfigService::Instance().setString("default.instrument", "MUSR");
+    std::vector<std::filesystem::path> paths;
+    TS_ASSERT_THROWS(paths = FileFinder::Instance().findRuns("1-999999"), const std::invalid_argument &);
+  }
+
+  // A non-ASCII byte in the hint string must surface as std::invalid_argument
+  // from the validateRuns ASCII check (matches the string overload).
+  void testFindRunsVectorRejectsNonAscii() {
+    std::vector<std::filesystem::path> paths;
+    const std::string nonAscii = std::string("MUSR\xC3\xA9");
+    TS_ASSERT_THROWS(paths = FileFinder::Instance().findRuns(std::vector<std::string>{nonAscii}),
+                     const std::invalid_argument &);
+  }
+
   // test to see if case sensitive on/off works
   void testFindFileCaseSensitive() {
     auto &fileFinder = FileFinder::Instance();
