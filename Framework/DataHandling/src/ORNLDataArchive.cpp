@@ -201,7 +201,9 @@ ORNLDataArchive::getArchivePaths(const std::vector<std::string> &hintstrs) const
 
   std::vector<std::filesystem::path> results(hintstrs.size());
   if (hintstrs.empty()) {
-    return API::Result<std::vector<std::filesystem::path>>(results, "Not found.");
+    // No hints to look up — return an empty success rather than a failure so
+    // callers don't need to special-case empty input.
+    return API::Result<std::vector<std::filesystem::path>>(results);
   }
 
   std::string instrumentName;

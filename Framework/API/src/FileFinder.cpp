@@ -65,25 +65,43 @@ std::vector<std::string> splitOnCommaOperators(const std::string &input) {
 }
 
 /// Expand a single comma-token into one or more file hints by feeding it
-/// through the multi-file-name parser. Tokens that already carry an extension
-/// bypass the parser (it would reformat the instrument prefix and apply
-/// zero-padding, producing a name that no longer matches the file on disk).
-/// Tokens the parser refuses (e.g. those with a "-add" suffix) pass through
-/// unchanged.
+/// through the multi-file-name parser.
+///
+/// A range/list token like "CNCS10-15" or "CNCS10-15.nxs.h5" expands to one
+/// entry per run. A single-file token that already carries an extension is
+/// returned literally (the parser would otherwise apply instrument-prefix
+/// zero-padding that may not match the user's on-disk filename). Tokens the
+/// parser cannot handle (e.g. a hint with a "-add" suffix) pass through
+/// unchanged. A std::range_error from the parser (a range too large to load)
+/// is propagated so callers can surface it as std::invalid_argument.
 std::vector<std::string> expandHint(const std::string &token, Mantid::Kernel::MultiFileNameParsing::Parser &parser) {
-  if (std::filesystem::path(token).has_extension())
-    return {token};
+  if (token.empty())
+    return {};
+
   try {
     parser.parse(token);
-    std::vector<std::string> out;
-    for (const auto &group : parser.fileNames())
-      out.insert(out.end(), group.cbegin(), group.cend());
-    return out;
+  } catch (const std::range_error &) {
+    throw;
   } catch (const std::exception &) {
-    if (token.empty())
-      return {};
     return {token};
   }
+
+  std::vector<std::string> expanded;
+  for (const auto &group : parser.fileNames())
+    expanded.insert(expanded.end(), group.cbegin(), group.cend());
+
+  // Parser produced nothing — fall back to the literal token.
+  if (expanded.empty())
+    return {token};
+
+  // Single-file token with an explicit extension: prefer the user's exact
+  // filename, as the parser may have applied zero-padding that won't match
+  // the on-disk filename. Ranges/lists (size > 1) keep the parser's output
+  // since expansion was the whole point of the token.
+  if (expanded.size() == 1 && std::filesystem::path(token).has_extension())
+    return {token};
+
+  return expanded;
 }
 
 } // namespace
@@ -468,8 +486,12 @@ std::string FileFinderImpl::validateRuns(const std::string &searchText) const {
  *                                     extensionsProvided; otherwise combine
  *                                     with facility extensions.
  * @return One full path per resolved file, in input order.
- * @throw std::invalid_argument if any token is malformed.
- * @throw Exception::NotFoundError if any file cannot be found.
+ * @throw std::invalid_argument if the input fails ASCII validation, or if a
+ *        token expands into a range too large for the parser to load. Tokens
+ *        the parser does not understand are passed through as literal hints
+ *        and surface as Exception::NotFoundError if they don't exist on disk.
+ * @throw Exception::NotFoundError if any (literal or expanded) file cannot
+ *        be found.
  */
 std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &hintstr,
                                                             const std::vector<std::string> &extensionsProvided,
@@ -488,8 +510,14 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
 
   std::vector<std::string> hints;
   for (const auto &token : tokens) {
-    const auto expanded = expandHint(token, parser);
-    hints.insert(hints.end(), expanded.cbegin(), expanded.cend());
+    try {
+      const auto expanded = expandHint(token, parser);
+      hints.insert(hints.end(), expanded.cbegin(), expanded.cend());
+    } catch (const std::range_error &re) {
+      // The parser refused this range as too large. Surface as invalid_argument
+      // so callers see a validation error rather than a NotFoundError.
+      throw std::invalid_argument(re.what());
+    }
   }
 
   return findRuns(hints, extensionsProvided, useOnlyExtensionsProvided);
@@ -633,11 +661,15 @@ void FileFinderImpl::performFileSearch(std::vector<FileInfo> &fileInfos) const {
     // Remove wild cards.
     extensions.erase(std::remove_if(extensions.begin(), extensions.end(), containsWildCard), extensions.end());
 
+    // Use the std::error_code overloads of exists() so a single unreadable
+    // search path (permission denied, dangling symlink, dead network mount)
+    // doesn't abort the search for every other path.
+    std::error_code ec;
     for (const auto &extension : extensions) {
       for (const auto &filename : fileInfo.filenames) {
         for (const auto &searchPath : searchPaths) {
           const auto filePath = std::filesystem::path(searchPath) / (filename + extension);
-          if (std::filesystem::exists(filePath)) {
+          if (std::filesystem::exists(filePath, ec)) {
             fileInfo.found = true;
             fileInfo.path = filePath;
             break;
@@ -654,7 +686,7 @@ void FileFinderImpl::performFileSearch(std::vector<FileInfo> &fileInfos) const {
       for (const auto &extension : extensions) {
         for (const auto &filename : fileInfo.filenames) {
           const auto filepath = getFullPath(filename + extension);
-          if (!filepath.empty() && std::filesystem::exists(filepath)) {
+          if (!filepath.empty() && std::filesystem::exists(filepath, ec)) {
             g_log.debug() << "path returned from getFullPath() = " << filepath << '\n';
             fileInfo.found = true;
             fileInfo.path = filepath;
