@@ -58,9 +58,9 @@ Calculating the Rotation angle
 - The number of tubes on the right-hand side should reflect the number of selected tubes i.e. 2 tubes.
 - The Two theta value should read 40.4584.
 - Click the Fit button.
-- The peak centre should read approximately 0.877078.
+- The peak centre should read approximately 0.877092.
 - A red line labelled Fitted Data should appear on the plot above.
-- The rotation angle should read 1.26828.
+- The rotation angle should read 1.26829.
 
 Clear when new load happens
 ---------------------------
