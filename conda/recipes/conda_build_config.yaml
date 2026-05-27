@@ -37,6 +37,10 @@ doxygen:
 eigen:
   - '3.4.*'
 
+# Not a primary dependency, but we pin it to avoid 2.18, which breaks button icons on Linux.
+fontconfig:
+  - '2.17.*'
+
 hdf4:
   - '4.2.*'
 
