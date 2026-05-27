@@ -38,6 +38,7 @@ requirements:
         - xorg-libx11
         - xorg-xorgproto
   run:
+    - fontconfig ${{ fontconfig }}
     - ipykernel
     - mantidqt == ${{ version }}
     - psutil ${{ psutil }}
