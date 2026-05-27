@@ -88,7 +88,7 @@ public:
     algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
 
     // set lambda on two to confirm data is processed using half wavelength
-    // the file is not lambda on two data so the TOF calibration is not
+    // as the file is not lambda on two data so the TOF calibration is not
     // meaningful
     std::string inputFile = "PLN0136193.nxs";
     algToBeTested.setPropertyValue("Filename", inputFile);
