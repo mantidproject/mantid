@@ -80,7 +80,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-inconsolata-3.000-h77eed37_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-source-code-pro-2.038-h77eed37_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-ubuntu-0.83-h77eed37_3.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/fontconfig-2.18.0-h27c8c51_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/fontconfig-2.17.1-h27c8c51_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/fonts-conda-ecosystem-1-0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/fonts-conda-forge-1-hc364b38_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/fonttools-4.63.0-py312h8a5da7c_0.conda
@@ -502,7 +502,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-inconsolata-3.000-h77eed37_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-source-code-pro-2.038-h77eed37_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-ubuntu-0.83-h77eed37_3.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/fontconfig-2.18.0-h2b252f5_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/fontconfig-2.17.1-h2b252f5_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/fonts-conda-ecosystem-1-0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/fonts-conda-forge-1-hc364b38_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/fonttools-4.63.0-py312h04c11ed_0.conda
@@ -830,7 +830,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-inconsolata-3.000-h77eed37_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-source-code-pro-2.038-h77eed37_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-ubuntu-0.83-h77eed37_3.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/fontconfig-2.18.0-hd47e2ca_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/fontconfig-2.17.1-hd47e2ca_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/fonts-conda-ecosystem-1-0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/fonts-conda-forge-1-hc364b38_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/fonttools-4.63.0-py312h05f76fc_0.conda
@@ -4201,49 +4201,50 @@ packages:
   license_family: Other
   size: 1620504
   timestamp: 1727511233259
-- conda: https://conda.anaconda.org/conda-forge/linux-64/fontconfig-2.18.0-h27c8c51_0.conda
-  sha256: e798086d8a65d55dc4c51f5746705639c9a5f2eeb0b8fc50e6152cfc0d69a4e8
-  md5: 06965b2f9854d0b15e0443ee81fe83dc
+- conda: https://conda.anaconda.org/conda-forge/linux-64/fontconfig-2.17.1-h27c8c51_0.conda
+  sha256: aa4a44dba97151221100a637c7f4bde619567afade9c0265f8e1c8eed8d7bd8c
+  md5: 867127763fbe935bab59815b6e0b7b5c
   depends:
   - __glibc >=2.17,<3.0.a0
-  - libexpat >=2.8.1,<3.0a0
-  - libfreetype >=2.14.3
-  - libfreetype6 >=2.14.3
+  - libexpat >=2.7.4,<3.0a0
+  - libfreetype >=2.14.1
+  - libfreetype6 >=2.14.1
   - libgcc >=14
-  - libuuid >=2.42.1,<3.0a0
-  - libzlib >=1.3.2,<2.0a0
+  - libuuid >=2.41.3,<3.0a0
+  - libzlib >=1.3.1,<2.0a0
   license: MIT
-  size: 280882
-  timestamp: 1779421631622
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/fontconfig-2.18.0-h2b252f5_0.conda
-  sha256: 938d18fca474d5a7ed716b88dbc4f962f9a44ac9f2fe29393d7d9d04ac6cbf15
-  md5: cf31c25b5770548a394478bb6180ddbc
+  license_family: MIT
+  size: 270705
+  timestamp: 1771382710863
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/fontconfig-2.17.1-h2b252f5_0.conda
+  sha256: 851e9c778bfc54645dcab7038c0383445cbebf16f6bb2d3f62ce422b1605385a
+  md5: d06ae1a11b46cc4c74177ecd28de7c7a
   depends:
   - __osx >=11.0
-  - libexpat >=2.8.1,<3.0a0
-  - libfreetype >=2.14.3
-  - libfreetype6 >=2.14.3
-  - libintl >=0.25.1,<1.0a0
-  - libzlib >=1.3.2,<2.0a0
+  - libexpat >=2.7.4,<3.0a0
+  - libfreetype >=2.14.1
+  - libfreetype6 >=2.14.1
+  - libzlib >=1.3.1,<2.0a0
   license: MIT
-  size: 247593
-  timestamp: 1779422088582
-- conda: https://conda.anaconda.org/conda-forge/win-64/fontconfig-2.18.0-hd47e2ca_0.conda
-  sha256: b1bd6a9a15517d32ffa3165f3562808c6b02319ffed0b49d39a7d15381fb0527
-  md5: ea543431a836ea08ccdce00bb55c8585
+  license_family: MIT
+  size: 237308
+  timestamp: 1771382999247
+- conda: https://conda.anaconda.org/conda-forge/win-64/fontconfig-2.17.1-hd47e2ca_0.conda
+  sha256: ff2db9d305711854de430f946dc59bd40167940a1de38db29c5a78659f219d9c
+  md5: a0b1b87e871011ca3b783bbf410bc39f
   depends:
-  - libexpat >=2.8.1,<3.0a0
-  - libfreetype >=2.14.3
-  - libfreetype6 >=2.14.3
+  - libexpat >=2.7.4,<3.0a0
+  - libfreetype >=2.14.1
+  - libfreetype6 >=2.14.1
   - libiconv >=1.18,<2.0a0
-  - libintl >=0.22.5,<1.0a0
-  - libzlib >=1.3.2,<2.0a0
+  - libzlib >=1.3.1,<2.0a0
   - ucrt >=10.0.20348.0
   - vc >=14.3,<15
   - vc14_runtime >=14.44.35208
   license: MIT
-  size: 201700
-  timestamp: 1779421777219
+  license_family: MIT
+  size: 195332
+  timestamp: 1771382820659
 - conda: https://conda.anaconda.org/conda-forge/noarch/fonts-conda-ecosystem-1-0.tar.bz2
   sha256: a997f2f1921bb9c9d76e6fa2f6b408b7fa549edd349a77639c9fe7a23ea93e61
   md5: fee5683a3f04bd15cbd8318b096a27ab
