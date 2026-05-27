@@ -6,11 +6,12 @@ set(SRC_FILES
     ALFInstrumentModel.cpp
     ALFInstrumentPresenter.cpp
     ALFInstrumentView.cpp
+    ALFInstrumentViewBase.cpp
     ALFInstrumentWidget.cpp
     ALFView.cpp
 )
 
-set(MOC_FILES ALFAnalysisView.h ALFInstrumentView.h ALFInstrumentWidget.h ALFView.h)
+set(MOC_FILES ALFAnalysisView.h ALFInstrumentView.h ALFInstrumentViewBase.h ALFInstrumentWidget.h ALFView.h)
 
 set(INC_FILES
     ALFAlgorithmManager.h
@@ -22,6 +23,7 @@ set(INC_FILES
     DetectorTube.h
     DllConfig.h
     IALFAlgorithmManagerSubscriber.h
+    IALFInstrumentView.h
 )
 
 # Target
