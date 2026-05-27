@@ -76,22 +76,6 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   return n_added_events;
 }
 
-/* Private method to update rotation matrix for a single event from log values */
-template <class T> bool ConvToMDEventsWS::setGoniometersFromLogs(T &ev) {
-  if (!m_useLogTimes)
-    return true;
-  for (size_t axIdx = 0; axIdx < m_GonioIndex.size(); axIdx++) {
-    double logval = m_Logs[axIdx]->getSingleValue(ev->pulseTime());
-    if (std::isnan(logval))
-      return false;
-    m_Goniometer.setRotationAngle(m_GonioIndex[axIdx], logval);
-  }
-  Mantid::Kernel::DblMatrix rotmat = m_Goniometer.getR() * m_Wtransf;
-  rotmat.Invert();
-  m_QConverter->updateRotMat(rotmat.getVector());
-  return true;
-}
-
 /** The method runs conversion for a single event list, corresponding to a
  * particular workspace index */
 size_t ConvToMDEventsWS::conversionChunk(size_t workspaceIndex) {
@@ -144,6 +128,7 @@ size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<
         m_GonioIndex.push_back(n);
       }
     }
+    m_tmpRot = Kernel::DblMatrix(3, 3);
   }
 
   return numSpec;

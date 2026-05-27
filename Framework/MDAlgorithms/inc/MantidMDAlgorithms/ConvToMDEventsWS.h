@@ -54,11 +54,25 @@ private:
   virtual void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc);
   // Variables for getting log values at times and recomputing sample orientation
   Kernel::DblMatrix m_Wtransf;
+  Kernel::DblMatrix m_tmpRot;
   Geometry::Goniometer m_Goniometer;
   std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<double>>> m_Logs;
   std::vector<size_t> m_GonioIndex;
-  // Private functions to update values from logs
-  template <class T> bool setGoniometersFromLogs(const T &ev);
+  // Private method to update rotation matrix for a single event from log values
+  template <class T> bool setGoniometersFromLogs(const T &ev) {
+    if (!m_useLogTimes)
+      return true;
+    for (size_t axIdx = 0; axIdx < m_GonioIndex.size(); axIdx++) {
+      double logval = m_Logs[axIdx]->getSingleValue(ev->pulseTime());
+      if (std::isnan(logval))
+        return false;
+      m_Goniometer.setRotationAngle(m_GonioIndex[axIdx], logval);
+    }
+    m_tmpRot = m_Goniometer.getR() * m_Wtransf;
+    m_tmpRot.Invert();
+    m_QConverter->updateRotMat(m_tmpRot.getVector());
+    return true;
+  }
 };
 
 } // namespace MDAlgorithms
