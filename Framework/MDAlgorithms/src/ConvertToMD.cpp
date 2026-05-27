@@ -182,8 +182,8 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
   if (useLogTimes) {
     API::MatrixWorkspace_const_sptr inWS = this->getProperty("InputWorkspace");
     const auto evWs = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inWS);
-    if (!bool(evWs)) {
-      result["UseLogTimes"] = "UseLogTimes requires an input EventWorkspace.";
+    if (!evWs) {
+      result["UseLogTimes"] = "UseLogTimes requires the input to be an EventWorkspace.";
     }
   }
 
