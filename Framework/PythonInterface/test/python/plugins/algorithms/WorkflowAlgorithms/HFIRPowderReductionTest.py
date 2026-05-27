@@ -679,6 +679,206 @@ class AutoPopulateTests(unittest.TestCase):
             compareResult = val == 987
             self.assertTrue(compareResult)
 
+    def test_auto_populate_sample_chemical_formula_from_filename(self):
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+        fp = os.path.join(os.getcwd(), "../../ExternalData/Testing/Data/UnitTest/HB2C_456.nxs.h5")
+        algo.setProperty("SampleFilename", fp)
+        prop = algo.getProperty("SampleChemicalFormula")
+        if isinstance(prop.settings, list):
+            for setting in prop.settings:
+                if hasattr(setting, "_applyChanges"):
+                    setting._applyChanges(algo, "SampleChemicalFormula")
+        else:
+            if hasattr(prop.settings, "_applyChanges"):
+                prop.settings._applyChanges(algo, "SampleChemicalFormula")
+        formula = prop.value
+        self.assertEqual(formula, "Fe2 O3")
+
+    def test_auto_populate_sample_crystal_density_from_filename(self):
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+        fp = os.path.join(os.getcwd(), "../../ExternalData/Testing/Data/UnitTest/HB2C_456.nxs.h5")
+        algo.setProperty("SampleFilename", fp)
+        prop = algo.getProperty("SampleCrystalDensity")
+        if isinstance(prop.settings, list):
+            for setting in prop.settings:
+                if hasattr(setting, "_applyChanges"):
+                    setting._applyChanges(algo, "SampleCrystalDensity")
+        else:
+            if hasattr(prop.settings, "_applyChanges"):
+                prop.settings._applyChanges(algo, "SampleCrystalDensity")
+        density = prop.value
+        self.assertEqual(density, 5.24)
+
+    def test_auto_populate_sample_packing_fraction_from_filename(self):
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+        fp = os.path.join(os.getcwd(), "../../ExternalData/Testing/Data/UnitTest/HB2C_456.nxs.h5")
+        algo.setProperty("SampleFilename", fp)
+        prop = algo.getProperty("SamplePackingFraction")
+        if isinstance(prop.settings, list):
+            for setting in prop.settings:
+                if hasattr(setting, "_applyChanges"):
+                    setting._applyChanges(algo, "SamplePackingFraction")
+        else:
+            if hasattr(prop.settings, "_applyChanges"):
+                prop.settings._applyChanges(algo, "SamplePackingFraction")
+        fraction = prop.value
+        self.assertEqual(fraction, 0.6)
+
+    def test_auto_populate_sample_diameter_from_filename(self):
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+        fp = os.path.join(os.getcwd(), "../../ExternalData/Testing/Data/UnitTest/HB2C_456.nxs.h5")
+        algo.setProperty("SampleFilename", fp)
+        prop = algo.getProperty("SampleDiameter")
+        if isinstance(prop.settings, list):
+            for setting in prop.settings:
+                if hasattr(setting, "_applyChanges"):
+                    setting._applyChanges(algo, "SampleDiameter")
+        else:
+            if hasattr(prop.settings, "_applyChanges"):
+                prop.settings._applyChanges(algo, "SampleDiameter")
+        diameter = prop.value
+        self.assertEqual(diameter, 0.8)
+
+    def test_auto_populate_sample_height_from_filename(self):
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+        fp = os.path.join(os.getcwd(), "../../ExternalData/Testing/Data/UnitTest/HB2C_456.nxs.h5")
+        algo.setProperty("SampleFilename", fp)
+        prop = algo.getProperty("SampleHeight")
+        if isinstance(prop.settings, list):
+            for setting in prop.settings:
+                if hasattr(setting, "_applyChanges"):
+                    setting._applyChanges(algo, "SampleHeight")
+        else:
+            if hasattr(prop.settings, "_applyChanges"):
+                prop.settings._applyChanges(algo, "SampleHeight")
+        height = prop.value
+        self.assertEqual(height, 3.0)
+
+    def test_auto_populate_sample_chemical_formula_from_run_numbers(self):
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+
+        existing_file = os.path.join(os.getcwd(), "../../ExternalData/Testing/Data/UnitTest/HB2C_456.nxs.h5")
+        original_h5py_File = h5py.File
+
+        def mock_file_func(path, mode="r"):
+            return original_h5py_File(existing_file, mode)
+
+        with patch("h5py.File", side_effect=mock_file_func):
+            algo.setProperty("SampleIPTS", 123)
+            algo.setProperty("SampleRunNumbers", [456])
+            algo.setProperty("Instrument", "WAND^2")
+            prop = algo.getProperty("SampleChemicalFormula")
+            if isinstance(prop.settings, list):
+                for setting in prop.settings:
+                    if hasattr(setting, "_applyChanges"):
+                        setting._applyChanges(algo, "SampleChemicalFormula")
+            else:
+                if hasattr(prop.settings, "_applyChanges"):
+                    prop.settings._applyChanges(algo, "SampleChemicalFormula")
+            self.assertEqual(prop.value, "Fe2 O3")
+
+    def test_auto_populate_sample_crystal_density_from_run_numbers(self):
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+
+        existing_file = os.path.join(os.getcwd(), "../../ExternalData/Testing/Data/UnitTest/HB2C_456.nxs.h5")
+        original_h5py_File = h5py.File
+
+        def mock_file_func(path, mode="r"):
+            return original_h5py_File(existing_file, mode)
+
+        with patch("h5py.File", side_effect=mock_file_func):
+            algo.setProperty("SampleIPTS", 123)
+            algo.setProperty("SampleRunNumbers", [456])
+            algo.setProperty("Instrument", "WAND^2")
+            prop = algo.getProperty("SampleCrystalDensity")
+            if isinstance(prop.settings, list):
+                for setting in prop.settings:
+                    if hasattr(setting, "_applyChanges"):
+                        setting._applyChanges(algo, "SampleCrystalDensity")
+            else:
+                if hasattr(prop.settings, "_applyChanges"):
+                    prop.settings._applyChanges(algo, "SampleCrystalDensity")
+            self.assertEqual(prop.value, 5.24)
+
+    def test_auto_populate_sample_packing_fraction_from_run_numbers(self):
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+
+        existing_file = os.path.join(os.getcwd(), "../../ExternalData/Testing/Data/UnitTest/HB2C_456.nxs.h5")
+        original_h5py_File = h5py.File
+
+        def mock_file_func(path, mode="r"):
+            return original_h5py_File(existing_file, mode)
+
+        with patch("h5py.File", side_effect=mock_file_func):
+            algo.setProperty("SampleIPTS", 123)
+            algo.setProperty("SampleRunNumbers", [456])
+            algo.setProperty("Instrument", "WAND^2")
+            prop = algo.getProperty("SamplePackingFraction")
+            if isinstance(prop.settings, list):
+                for setting in prop.settings:
+                    if hasattr(setting, "_applyChanges"):
+                        setting._applyChanges(algo, "SamplePackingFraction")
+            else:
+                if hasattr(prop.settings, "_applyChanges"):
+                    prop.settings._applyChanges(algo, "SamplePackingFraction")
+            self.assertEqual(prop.value, 0.6)
+
+    def test_auto_populate_sample_diameter_from_run_numbers(self):
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+
+        existing_file = os.path.join(os.getcwd(), "../../ExternalData/Testing/Data/UnitTest/HB2C_456.nxs.h5")
+        original_h5py_File = h5py.File
+
+        def mock_file_func(path, mode="r"):
+            return original_h5py_File(existing_file, mode)
+
+        with patch("h5py.File", side_effect=mock_file_func):
+            algo.setProperty("SampleIPTS", 123)
+            algo.setProperty("SampleRunNumbers", [456])
+            algo.setProperty("Instrument", "WAND^2")
+            prop = algo.getProperty("SampleDiameter")
+            if isinstance(prop.settings, list):
+                for setting in prop.settings:
+                    if hasattr(setting, "_applyChanges"):
+                        setting._applyChanges(algo, "SampleDiameter")
+            else:
+                if hasattr(prop.settings, "_applyChanges"):
+                    prop.settings._applyChanges(algo, "SampleDiameter")
+            self.assertEqual(prop.value, 0.8)
+
+    def test_auto_populate_sample_height_from_run_numbers(self):
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+
+        existing_file = os.path.join(os.getcwd(), "../../ExternalData/Testing/Data/UnitTest/HB2C_456.nxs.h5")
+        original_h5py_File = h5py.File
+
+        def mock_file_func(path, mode="r"):
+            return original_h5py_File(existing_file, mode)
+
+        with patch("h5py.File", side_effect=mock_file_func):
+            algo.setProperty("SampleIPTS", 123)
+            algo.setProperty("SampleRunNumbers", [456])
+            algo.setProperty("Instrument", "WAND^2")
+            prop = algo.getProperty("SampleHeight")
+            if isinstance(prop.settings, list):
+                for setting in prop.settings:
+                    if hasattr(setting, "_applyChanges"):
+                        setting._applyChanges(algo, "SampleHeight")
+            else:
+                if hasattr(prop.settings, "_applyChanges"):
+                    prop.settings._applyChanges(algo, "SampleHeight")
+            self.assertEqual(prop.value, 3.0)
+
 
 class MetadataConsistencyTests(unittest.TestCase):
     def test_metadata_consistency_single_file(self):
@@ -763,6 +963,38 @@ class MetadataConsistencyTests(unittest.TestCase):
 
         finally:
             # Clean up temporary directory
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_metadata_consistency_detects_mismatched_sample_diameter(self):
+        """Test that mismatched sample diameter is detected between multiple files"""
+        existing_file = os.path.join(os.getcwd(), "../../ExternalData/Testing/Data/UnitTest/HB2C_456.nxs.h5")
+
+        temp_dir = tempfile.mkdtemp()
+        try:
+            modified_file = os.path.join(temp_dir, "HB2C_457.nxs.h5")
+            shutil.copy(existing_file, modified_file)
+
+            with h5py.File(modified_file, "a") as f:
+                if "/entry/sample_diameter" in f:
+                    del f["/entry/sample_diameter"]
+                    f["/entry/sample_diameter"] = np.array([b"1.2"])  # Different from original 0.8
+
+            algo = AlgorithmManager.create("HFIRPowderReduction")
+            algo.initialize()
+
+            algo.setProperty("SampleFilename", f"{existing_file},{modified_file}")
+            algo.setProperty("Instrument", "WAND^2")
+            algo.setProperty("XMin", [1.0])
+            algo.setProperty("XMax", [10.0])
+            algo.setProperty("Wavelength", 2.5)
+            algo.setProperty("VanadiumDiameter", 0.5)
+
+            with patch.object(Logger, "warning") as mock_warning:
+                algo.validateInputs()
+
+                self.assertEqual(mock_warning.call_count, 1)
+
+        finally:
             shutil.rmtree(temp_dir, ignore_errors=True)
 
 
