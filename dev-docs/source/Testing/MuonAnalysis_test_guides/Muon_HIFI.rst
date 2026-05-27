@@ -90,5 +90,5 @@ HIFI MultiPeriod Data
 	- Tick the ``Analyse`` box in the grouping table for "fwd1"
 	- Untick all of the ``Analyse`` boxes in the pair table
 	- This will leave you with 3 lines (one for each run)
-	- In the ``Periods`` column you can sum periods byusing a comma seperated list or a range using a dash
+	- In the ``Periods`` column you can sum periods by using a comma seperated list or a range using a dash
 	- When you change the periods summed the plot will change
