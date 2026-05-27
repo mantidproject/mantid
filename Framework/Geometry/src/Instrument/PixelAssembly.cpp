@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/PixelAssembly.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -17,255 +17,365 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/Matrix.h"
-#include <algorithm>
 #include <boost/regex.hpp>
-#include <memory>
 #include <ostream>
+#include <sstream>
 #include <stdexcept>
-#include <utility>
 
 namespace Mantid::Geometry {
 
-using Kernel::Matrix;
 using Kernel::V3D;
 
-/** Constructor for a parametrized PixelAssembly
- * @param base: the base (un-parametrized) PixelAssembly
- * @param map: pointer to the ParameterMap
- * */
-PixelAssembly::PixelAssembly(const PixelAssembly *base, const ParameterMap *map)
-    : CompAssembly(base, map), IObjComponent(nullptr), m_gridBase(base), m_minDetId(0), m_maxDetId(0) {
-  init();
-  setGeometryHandler(new GeometryHandler(this));
+namespace {
+
+bool checkValidOrderString(const std::string &order) {
+  static const boost::regex exp("xyz|xzy|yzx|yxz|zyx|zxy");
+  return boost::regex_match(order, exp);
 }
 
-/** Valued constructor
- *  @param n :: name of the assembly
- *  @param reference :: the parent Component
- *
- * 	If the reference is an object of class Component,
- *  normal parenting apply. If the reference object is
- *  an assembly itself, then in addition to parenting
- *  this is registered as a children of reference.
+} // anonymous namespace
+
+// ---------------------------------------------------------------------------
+// Constructors / clone
+// ---------------------------------------------------------------------------
+
+/** Valued constructor.
+ *  @param name       Name of the assembly.
+ *  @param reference  Optional parent component.
  */
-PixelAssembly::PixelAssembly(const std::string &n, IComponent *reference)
-    : CompAssembly(n, reference), IObjComponent(nullptr), m_gridBase(nullptr), m_minDetId(0), m_maxDetId(0) {
+PixelAssembly::PixelAssembly(const std::string &name, IComponent *reference)
+    : Component(name, reference), IObjComponent(nullptr), m_gridBase(nullptr) {
   init();
-  this->setName(n);
   setGeometryHandler(new GeometryHandler(this));
 }
 
+/** Parametrized constructor — wraps an existing PixelAssembly with a ParameterMap.
+ *  @param base  The base (un-parametrized) PixelAssembly.
+ *  @param map   Pointer to the ParameterMap.
+ */
+PixelAssembly::PixelAssembly(const PixelAssembly *base, const ParameterMap *map)
+    : Component(base, map), IObjComponent(nullptr), m_gridBase(base) {
+  init();
+  setGeometryHandler(new GeometryHandler(this));
+}
+
+/** Returns true when the proposed name matches the PixelAssembly naming convention. */
 bool PixelAssembly::compareName(const std::string &proposedMatch) {
-  static const boost::regex exp("grid_?detector", boost::regex::icase);
+  static const boost::regex exp("pixel_?assembly", boost::regex::icase);
   return boost::regex_match(proposedMatch, exp);
 }
 
 void PixelAssembly::init() {
-  m_minDetId = m_maxDetId = 0;
+  m_xpixels = m_ypixels = m_zpixels = 0;
+  m_xstart = m_ystart = m_zstart = 0.0;
+  m_xstep = m_ystep = m_zstep = 0.0;
   m_idstart = 0;
+  m_idFillOrder = {'x', 'y', 'z'};
   m_idstep = 0;
 }
 
-/** Clone method
- *  Make a copy of the component assembly
- *  @return new(*this)
- */
 PixelAssembly *PixelAssembly::clone() const { return new PixelAssembly(*this); }
 
-//-------------------------------------------------------------------------------------------------
-/** Return a pointer to the component in the assembly at the
- * (X,Y) pixel position.
- *
- * @param x :: index from 0..m_xpixels-1
- * @param y :: index from 0..m_ypixels-1
- * @param z :: index from 0..m_zpixels-1
- * @return a pointer to the component in the assembly at the (x,y,z) pixel
- *position
- * @throw runtime_error if the x/y/z pixel width is not set, or x/y/z are out of
- *range
- */
-std::shared_ptr<Detector> PixelAssembly::getAtXYZ(const int x, const int y, const int z) const {
-  if ((xpixels() <= 0) || (ypixels() <= 0))
-    throw std::runtime_error("PixelAssembly::getAtXY: invalid X or Y "
-                             "width set in the object.");
-  if ((x < 0) || (x >= xpixels()))
-    throw std::runtime_error("PixelAssembly::getAtXYZ: x specified is out of range.");
-  if ((y < 0) || (y >= ypixels()))
-    throw std::runtime_error("PixelAssembly::getAtXYZ: y specified is out of range.");
-  if (zpixels() > 0) {
-    if ((z < 0) || (z >= zpixels()))
-      throw std::runtime_error("PixelAssembly::getAtXYZ: z specified is out of range.");
-  }
+// ---------------------------------------------------------------------------
+// IVirtualBank: pixel-count accessors
+// ---------------------------------------------------------------------------
 
-  // Find the index and return that.
-  std::shared_ptr<ICompAssembly> xCol;
-  // Get to layer
-  if (this->zpixels() > 0) {
-    auto zLayer = std::dynamic_pointer_cast<ICompAssembly>(this->getChild(z));
-    if (!zLayer)
-      throw std::runtime_error("PixelAssembly::getAtXYZ: z specified is out of range.");
+size_t PixelAssembly::xpixels() const { return isParametrized() ? m_gridBase->m_xpixels : m_xpixels; }
+size_t PixelAssembly::ypixels() const { return isParametrized() ? m_gridBase->m_ypixels : m_ypixels; }
+size_t PixelAssembly::zpixels() const { return isParametrized() ? m_gridBase->m_zpixels : m_zpixels; }
 
-    xCol = std::dynamic_pointer_cast<ICompAssembly>(zLayer->getChild(x));
-  } else
-    xCol = std::dynamic_pointer_cast<ICompAssembly>(this->getChild(x));
+// ---------------------------------------------------------------------------
+// IVirtualBank: step-size accessors (scale-factor aware)
+// ---------------------------------------------------------------------------
 
-  if (!xCol)
-    throw std::runtime_error("PixelAssembly::getAtXYZ: x specified is out of range.");
-  return std::dynamic_pointer_cast<Detector>(xCol->getChild(y));
-}
-
-//-------------------------------------------------------------------------------------------------
-/** Return the detector ID corresponding to the component in the assembly at the
- * (X,Y) pixel position. No bounds check is made!
- *
- * @param x :: index from 0..m_xpixels-1
- * @param y :: index from 0..m_ypixels-1
- * @param z :: index from 0..m_zpixels-1
- * @return detector ID int
- * @throw runtime_error if the x/y/z pixel width is not set, or X/Y are out of
- *range
- */
-detid_t PixelAssembly::getDetectorIDAtXYZ(const int x, const int y, const int z) const {
-  const PixelAssembly *me = this;
-  if (isParametrized())
-    me = this->m_gridBase;
-
-  if (me->idFillOrder()[0] == 'z')
-    return getFillFirstZ(me, x, y, z);
-  else if (me->idFillOrder()[0] == 'y')
-    return getFillFirstY(me, x, y, z);
-  else
-    return getFillFirstX(me, x, y, z);
-}
-
-//-------------------------------------------------------------------------------------------------
-/** Given a detector ID, return the X,Y,Z coords into the grid detector
- *
- * @param detectorID :: detectorID
- * @return tuple of (x,y,z)
- */
-std::tuple<int, int, int> PixelAssembly::getXYZForDetectorID(const detid_t detectorID) const {
-  const PixelAssembly *me = this;
-  if (isParametrized())
-    me = this->m_gridBase;
-
-  int id = detectorID - me->m_idstart;
-  if ((me->m_idstepbyrow == 0) || (me->m_idstep == 0))
-    return std::tuple<int, int, int>(-1, -1, -1);
-  int col = (id % me->m_idstepbyrow) / me->m_idstep;
-
-  if (me->m_idFillOrder[0] == 'z')
-    return getXYZFillFirstZ(me, col, id);
-  else if (me->m_idFillOrder[0] == 'y')
-    return getXYZFillFirstY(me, col, id);
-  else
-    return getXYZFillFirstX(me, col, id);
-}
-
-//-------------------------------------------------------------------------------------------------
-/// Returns the idstep
-int PixelAssembly::idstep() const {
-  if (isParametrized())
-    return m_gridBase->idstep();
-  else
-    return this->m_idstep;
-}
-
-//-------------------------------------------------------------------------------------------------
-/** Returns the position of the center of the pixel at x,y, relative to the
- * center
- * of the PixelAssembly, in the plain X,Y coordinates of the
- * pixels (i.e. unrotated).
- * @param x :: x pixel integer
- * @param y :: y pixel integer
- * @param z :: z pixel integer
- * @return a V3D vector of the relative position
- */
-V3D PixelAssembly::getRelativePosAtXYZ(int x, int y, int z) const {
+double PixelAssembly::xstep() const {
   if (isParametrized()) {
-    double scalex = 1.0;
+    double scaling = 1.0;
     if (m_map->contains(m_gridBase, "scalex"))
-      scalex = m_map->get(m_gridBase, "scalex")->value<double>();
-    double scaley = 1.0;
-    if (m_map->contains(m_gridBase, "scaley"))
-      scaley = m_map->get(m_gridBase, "scaley")->value<double>();
-    double scalez = 1.0;
-    if (m_map->contains(m_gridBase, "scalez"))
-      scalez = m_map->get(m_gridBase, "scalez")->value<double>();
-    return m_gridBase->getRelativePosAtXYZ(x, y, z) * V3D(scalex, scaley, scalez);
-  } else
-    return V3D(m_xstart + m_xstep * x, m_ystart + m_ystep * y, m_zstart + m_zstep * z);
-}
-
-void PixelAssembly::createLayer(const std::string &name, CompAssembly *parent, int iz, int &minDetID, int &maxDetID) {
-  const double z = m_zstart + iz * m_zstep;
-  const std::string z_pixel_str = (m_zpixels > 0) ? "," + std::to_string(iz) + ")" : ")";
-  const std::string z_layer_str = (m_zpixels > 0) ? name + "(z=" + std::to_string(iz) + ",x=" : name + "(x=";
-  for (int ix = 0; ix < m_xpixels; ++ix) {
-    const std::string x_pixel_str = name + "(" + std::to_string(ix) + ",";
-    const std::string name_layer = z_layer_str + std::to_string(ix) + ")";
-
-    // Create an ICompAssembly for each x-column
-    auto *xColumn = new CompAssembly(name_layer, parent);
-
-    const double x = m_xstart + ix * m_xstep;
-    for (int iy = 0; iy < m_ypixels; ++iy) {
-      // Make the name
-      const std::string name_pixel = x_pixel_str + std::to_string(iy) + z_pixel_str;
-
-      // Calculate its id and set it.
-      const auto id = this->getDetectorIDAtXYZ(ix, iy, iz);
-
-      // minimum grid detector id
-      if (id < minDetID) {
-        minDetID = id;
-      }
-      // maximum grid detector id
-      if (id > maxDetID) {
-        maxDetID = id;
-      }
-      // Create the detector from the given id & shape and with xColumn as the parent
-      auto *detector =
-          new GridDetectorPixel(name_pixel, id, m_shape, xColumn, this, size_t(ix), size_t(iy), size_t(iz));
-
-      const double y = m_ystart + iy * m_ystep;
-      // Translate (relative to parent). This gives the un-parametrized position
-      detector->translate(x, y, z);
-
-      // Add it to the x-column
-      xColumn->add(detector);
-    }
+      scaling = m_map->get(m_gridBase, "scalex")->value<double>();
+    return m_gridBase->m_xstep * scaling;
   }
+  return m_xstep;
 }
 
-bool checkValidOrderString(const std::string &order) {
-  static const boost::regex exp("xyz|xzy|yzx|yxz|zyx|zxy");
-
-  return boost::regex_match(order, exp);
+double PixelAssembly::ystep() const {
+  if (isParametrized()) {
+    double scaling = 1.0;
+    if (m_map->contains(m_gridBase, "scaley"))
+      scaling = m_map->get(m_gridBase, "scaley")->value<double>();
+    return m_gridBase->m_ystep * scaling;
+  }
+  return m_ystep;
 }
+
+double PixelAssembly::zstep() const {
+  if (isParametrized()) {
+    double scaling = 1.0;
+    if (m_map->contains(m_gridBase, "scalez"))
+      scaling = m_map->get(m_gridBase, "scalez")->value<double>();
+    return m_gridBase->m_zstep * scaling;
+  }
+  return m_zstep;
+}
+
+// ---------------------------------------------------------------------------
+// IVirtualBank: start-position accessors (scale-factor aware)
+// ---------------------------------------------------------------------------
+
+double PixelAssembly::xstart() const {
+  if (isParametrized()) {
+    double scaling = 1.0;
+    if (m_map->contains(m_gridBase, "scalex"))
+      scaling = m_map->get(m_gridBase, "scalex")->value<double>();
+    return m_gridBase->m_xstart * scaling;
+  }
+  return m_xstart;
+}
+
+double PixelAssembly::ystart() const {
+  if (isParametrized()) {
+    double scaling = 1.0;
+    if (m_map->contains(m_gridBase, "scaley"))
+      scaling = m_map->get(m_gridBase, "scaley")->value<double>();
+    return m_gridBase->m_ystart * scaling;
+  }
+  return m_ystart;
+}
+
+double PixelAssembly::zstart() const {
+  if (isParametrized()) {
+    double scaling = 1.0;
+    if (m_map->contains(m_gridBase, "scalez"))
+      scaling = m_map->get(m_gridBase, "scalez")->value<double>();
+    return m_gridBase->m_zstart * scaling;
+  }
+  return m_zstart;
+}
+
+// ---------------------------------------------------------------------------
+// IVirtualBank: ID-scheme accessors
+// ---------------------------------------------------------------------------
+
+detid_t PixelAssembly::referentDetectorID() const { return isParametrized() ? m_gridBase->m_idstart : m_idstart; }
+
+std::array<char, 3> PixelAssembly::idFillOrder() const {
+  return isParametrized() ? m_gridBase->m_idFillOrder : m_idFillOrder;
+}
+
+int PixelAssembly::idstep() const { return isParametrized() ? m_gridBase->m_idstep : m_idstep; }
+
+// ---------------------------------------------------------------------------
+// IVirtualBank: referent detector
+// ---------------------------------------------------------------------------
+
+/** Constructs and returns a Detector for the referent pixel (0,0,0) on demand.
+ *  The returned object is independent (no parent link) and is positioned at
+ *  the pixel's absolute world position.
+ */
+std::shared_ptr<Detector> PixelAssembly::referentDetector() const {
+  std::shared_ptr<IObject> const &pxShape = isParametrized() ? m_gridBase->m_shape : m_shape;
+  if (!pxShape)
+    return nullptr;
+  std::string const name = this->getName() + "(0,0,0)";
+  auto det = std::make_shared<Detector>(name, static_cast<int>(referentDetectorID()), pxShape, nullptr);
+  det->setPos(getPosAtXYZ(0, 0, 0));
+  det->setRot(this->getRotation());
+  return det;
+}
+
+// ---------------------------------------------------------------------------
+// Position helpers
+// ---------------------------------------------------------------------------
+
+/** Absolute position of pixel (x, y, z) in the instrument frame.
+ *
+ *  NOTE: consistent with GridDetector::getPosAtXYZ — the relative position is
+ *  added directly to the bank position without rotating by the bank orientation.
+ *  This matches the existing behavior for unrotated banks.
+ */
+V3D PixelAssembly::getPosAtXYZ(int x, int y, int z) const { return this->getPos() + getRelativePosAtXYZ(x, y, z); }
+
+// ---------------------------------------------------------------------------
+// Per-pixel bounding box
+// ---------------------------------------------------------------------------
+
+/** Compute the axis-aligned world-space bounding box for pixel (x, y, z).
+ *
+ *  Replicates the ObjComponent::getBoundingBox pattern:
+ *    1. Start from the pixel shape's local bounding box.
+ *    2. Rotate by the bank's orientation.
+ *    3. Translate to the pixel's absolute position.
+ */
+void PixelAssembly::getBoundingBoxAtXYZ(int const x, int const y, int const z, BoundingBox &box) const {
+  std::shared_ptr<IObject> const &pxShape = isParametrized() ? m_gridBase->m_shape : m_shape;
+  if (!pxShape || !pxShape->hasValidShape()) {
+    box = BoundingBox();
+    return;
+  }
+  BoundingBox const &shapeBox = pxShape->getBoundingBox();
+  if (shapeBox.isNull()) {
+    box = BoundingBox();
+    return;
+  }
+  // 1. Copy the pixel shape's local bounding box.
+  box = BoundingBox(shapeBox);
+  // 2. Rotate into world axes using the bank's orientation.
+  this->getRotation().rotateBB(box.xMin(), box.yMin(), box.zMin(), box.xMax(), box.yMax(), box.zMax());
+  // 3. Translate to the pixel's absolute position.
+  V3D const pos = getPosAtXYZ(x, y, z);
+  box.xMin() += pos.X();
+  box.xMax() += pos.X();
+  box.yMin() += pos.Y();
+  box.yMax() += pos.Y();
+  box.zMin() += pos.Z();
+  box.zMax() += pos.Z();
+}
+
+// ---------------------------------------------------------------------------
+// Component lookup
+// ---------------------------------------------------------------------------
+
+/** Find a component by name.  PixelAssembly has no children, so only the
+ *  assembly itself can be found.
+ *
+ *  NOTE: This is NOT an override of IComponent::getComponentByName (which does
+ *  not exist); it is a freestanding convenience method for direct callers that
+ *  hold a PixelAssembly*.
+ */
+std::shared_ptr<const IComponent> PixelAssembly::getComponentByName(const std::string &cname) const {
+  if (cname == this->getName())
+    return std::shared_ptr<const IComponent>(this, NoDeleting());
+  return {};
+}
+
+// ---------------------------------------------------------------------------
+// Visitor registration
+// ---------------------------------------------------------------------------
+
+size_t PixelAssembly::registerContents(ComponentVisitor &componentVisitor) const {
+  return componentVisitor.registerVirtualBank(*this);
+}
+
+// ---------------------------------------------------------------------------
+// Pixel shape accessor
+// ---------------------------------------------------------------------------
+
+std::shared_ptr<const IObject> PixelAssembly::pixelShape() const {
+  return isParametrized() ? m_gridBase->m_shape : m_shape;
+}
+
+// ---------------------------------------------------------------------------
+// IObjComponent methods
+// ---------------------------------------------------------------------------
+
+bool PixelAssembly::isValid(const V3D & /*point*/) const {
+  throw Kernel::Exception::NotImplementedError("PixelAssembly::isValid() is not implemented.");
+}
+
+bool PixelAssembly::isOnSide(const V3D & /*point*/) const {
+  throw Kernel::Exception::NotImplementedError("PixelAssembly::isOnSide() is not implemented.");
+}
+
+int PixelAssembly::interceptSurface(Track & /*track*/) const {
+  throw Kernel::Exception::NotImplementedError("PixelAssembly::interceptSurface() is not implemented.");
+}
+
+double PixelAssembly::solidAngle(const Geometry::SolidAngleParams & /*params*/) const {
+  throw Kernel::Exception::NotImplementedError("PixelAssembly::solidAngle() is not implemented.");
+}
+
+int PixelAssembly::getPointInObject(V3D & /*point*/) const {
+  throw Kernel::Exception::NotImplementedError("PixelAssembly::getPointInObject() is not implemented.");
+}
+
+/** Compute the overall bounding box for this assembly.
+ *
+ *  If the ComponentInfo cache is available (parametrized path), use it.
+ *  Otherwise sample the 8 corners of the pixel grid.
+ */
+void PixelAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
+  if (isParametrized() && hasComponentInfo()) {
+    assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
+    return;
+  }
+  BoundingBox bb;
+  BoundingBox compBox;
+  int const nx = static_cast<int>(xpixels()) - 1;
+  int const ny = static_cast<int>(ypixels()) - 1;
+  int const nz = static_cast<int>(zpixels()) - 1;
+  getBoundingBoxAtXYZ(0, 0, 0, compBox);
+  bb.grow(compBox);
+  getBoundingBoxAtXYZ(nx, 0, 0, compBox);
+  bb.grow(compBox);
+  getBoundingBoxAtXYZ(nx, ny, 0, compBox);
+  bb.grow(compBox);
+  getBoundingBoxAtXYZ(0, ny, 0, compBox);
+  bb.grow(compBox);
+  getBoundingBoxAtXYZ(0, 0, nz, compBox);
+  bb.grow(compBox);
+  getBoundingBoxAtXYZ(nx, 0, nz, compBox);
+  bb.grow(compBox);
+  getBoundingBoxAtXYZ(nx, ny, nz, compBox);
+  bb.grow(compBox);
+  getBoundingBoxAtXYZ(0, ny, nz, compBox);
+  bb.grow(compBox);
+  assemblyBox = bb;
+}
+
+void PixelAssembly::draw() const {
+  if (Handle() == nullptr)
+    return;
+  Handle()->render();
+}
+
+void PixelAssembly::drawObject() const { draw(); }
+
+void PixelAssembly::initDraw() const {
+  if (Handle() == nullptr)
+    return;
+  Handle()->initialize();
+}
+
+/** Returns a cuboid representing the whole assembly extent (used for rendering). */
+const std::shared_ptr<const IObject> PixelAssembly::shape() const {
+  double const szX = static_cast<double>(xpixels());
+  double const szY = static_cast<double>(ypixels());
+  double const szZ = static_cast<double>(zpixels());
+  std::ostringstream xml;
+  xml << " <cuboid id=\"detector-shape\"> "
+      << "<left-front-bottom-point x=\"" << szX << "\" y=\"" << -szY << "\" z=\"" << -szZ << "\"  /> "
+      << "<left-front-top-point  x=\"" << szX << "\" y=\"" << -szY << "\" z=\"" << szZ << "\"  /> "
+      << "<left-back-bottom-point  x=\"" << -szX << "\" y=\"" << -szY << "\" z=\"" << -szZ << "\"  /> "
+      << "<right-front-bottom-point  x=\"" << szX << "\" y=\"" << szY << "\" z=\"" << -szZ << "\"  /> "
+      << "</cuboid>";
+  Geometry::ShapeFactory shapeCreator;
+  return std::static_pointer_cast<const IObject>(shapeCreator.createShape(xml.str()));
+}
+
+const Kernel::Material PixelAssembly::material() const { return Kernel::Material(); }
+
+// ---------------------------------------------------------------------------
+// initialize / validateInput / initializeValues
+// ---------------------------------------------------------------------------
 
 void PixelAssembly::validateInput() const {
-  // Some safety checks
-  if (!checkValidOrderString(m_idFillOrder))
-    throw std::invalid_argument(
-        "PixelAssembly::initialize(): order string should only comprise exactly 3 letters x, y, and z in any order.");
-  if (m_xpixels <= 0)
-    throw std::invalid_argument("PixelAssembly::initialize(): xpixels should be > 0");
-  if (m_ypixels <= 0)
-    throw std::invalid_argument("PixelAssembly::initialize(): ypixels should be > 0");
+  if (!checkValidOrderString(std::string{m_idFillOrder.begin(), m_idFillOrder.end()}))
+    throw std::invalid_argument("PixelAssembly::initialize(): idFillOrder must be a permutation of 'xyz'.");
+  if (m_xpixels == 0)
+    throw std::invalid_argument("PixelAssembly::initialize(): xpixels must be > 0.");
+  if (m_ypixels == 0)
+    throw std::invalid_argument("PixelAssembly::initialize(): ypixels must be > 0.");
+  if (m_zpixels == 0)
+    throw std::invalid_argument("PixelAssembly::initialize(): zpixels must be > 0 (pass 1 for a flat bank).");
 }
 
-void PixelAssembly::initializeValues(std::shared_ptr<IObject> shape, int xpixels, double xstart, double xstep,
-                                     int ypixels, double ystart, double ystep, int zpixels, double zstart, double zstep,
-                                     int idstart, const std::string &idFillOrder, int idstepbyrow, int idstep) {
-
+void PixelAssembly::initializeValues(std::shared_ptr<IObject> shape, size_t xpixels, double xstart, double xstep,
+                                     size_t ypixels, double ystart, double ystep, size_t zpixels, double zstart,
+                                     double zstep, detid_t idstart, const std::string &idFillOrder, int idstep) {
   m_xpixels = xpixels;
   m_ypixels = ypixels;
-  m_zpixels = zpixels;
-  m_xsize = xpixels * xstep;
-  m_ysize = ypixels * ystep;
-  m_zsize = zpixels * zstep;
+  // Normalise: 0 layers means flat bank (treat as 1 layer).
+  m_zpixels = (zpixels == 0) ? size_t(1) : zpixels;
   m_xstart = xstart;
   m_ystart = ystart;
   m_zstart = zstart;
@@ -273,337 +383,29 @@ void PixelAssembly::initializeValues(std::shared_ptr<IObject> shape, int xpixels
   m_ystep = ystep;
   m_zstep = zstep;
   m_shape = std::move(shape);
-
-  /// IDs start here
   m_idstart = idstart;
-  /// IDs are filled in Y fastest
-  m_idfillbyfirst_y = idFillOrder[0] == 'y';
-  /// IDs are filled by Y fastest
-  m_idFillOrder = idFillOrder;
-  /// Step size in ID in each row
-  m_idstepbyrow = idstepbyrow;
-  /// Step size in ID in each col
+  m_idFillOrder = {idFillOrder[0], idFillOrder[1], idFillOrder[2]};
   m_idstep = idstep;
-
   validateInput();
 }
 
-//-------------------------------------------------------------------------------------------------
-/** Initialize a PixelAssembly by creating all of the pixels
- * contained within it. You should have set the name, position
- * and rotation and facing of this object BEFORE calling this.
- *
- * @param shape :: a geometry Object containing the shape of each (individual)
- *pixel in the assembly.
- *              All pixels must have the same shape.
- * @param xpixels :: number of pixels in X
- * @param xstart :: x-position of the 0-th pixel (in length units, normally
- *meters)
- * @param xstep :: step size between pixels in the horizontal direction (in
- *length units, normally meters)
- * @param ypixels :: number of pixels in Y
- * @param ystart :: y-position of the 0-th pixel (in length units, normally
- *meters)
- * @param ystep :: step size between pixels in the vertical direction (in length
- *units, normally meters)
- * @param zpixels :: number of pixels in Z
- * @param zstart :: z-position of the 0-th pixel (in length units, normally
- *meters)
- * @param zstep :: step size between pixels in the beam direction (in length
- *units, normally meters)
- * @param idstart :: detector ID of the first pixel
- * @param idFillOrder :: string of size 3 which contains axis order e.g "xyz"
- * @param idstepbyrow :: amount to increase the ID number on each row. e.g, if
- *you fill by Y first,
- *            and set  idstepbyrow = 100, and have 50 Y pixels, you would get:
- *            (0,0)=0; (0,1)=1; ... (0,49)=49; (1,0)=100; (1,1)=101; etc.
- * @param idstep :: amount to increase each individual ID number with a row.
- *e.g, if you fill by Y first,
- *            and idstep=100 and idstart=1 then (0,0)=1; (0,1)=101; and so on
- *
- */
-void PixelAssembly::initialize(std::shared_ptr<IObject> shape, int xpixels, double xstart, double xstep, int ypixels,
-                               double ystart, double ystep, int zpixels, double zstart, double zstep, int idstart,
-                               const std::string &idFillOrder, int idstepbyrow, int idstep) {
-
+/** Store the grid parameters.  No child Detector objects are created. */
+void PixelAssembly::initialize(std::shared_ptr<IObject> shape, size_t xpixels, double xstart, double xstep,
+                               size_t ypixels, double ystart, double ystep, size_t zpixels, double zstart, double zstep,
+                               detid_t idstart, const std::string &idFillOrder, int idstep) {
   if (isParametrized())
-    throw std::runtime_error("PixelAssembly::initialize() called for a parametrized PixelAssembly");
-
+    throw std::runtime_error("PixelAssembly::initialize() called on a parametrized PixelAssembly.");
   initializeValues(std::move(shape), xpixels, xstart, xstep, ypixels, ystart, ystep, zpixels, zstart, zstep, idstart,
-                   idFillOrder, idstepbyrow, idstep);
-
-  std::string name = this->getName();
-  int minDetId = idstart, maxDetId = idstart;
-  // Loop through all the pixels
-  if (m_zpixels > 0) {
-    for (int iz = 0; iz < m_zpixels; ++iz) {
-      // Create an ICompAssembly for each z-layer
-      std::ostringstream oss_layer;
-      oss_layer << name << "(z=" << iz << ")";
-      createLayer(name, new CompAssembly(oss_layer.str(), this), iz, minDetId, maxDetId);
-    }
-  } else
-    createLayer(name, this, 0, minDetId, maxDetId);
-
-  m_minDetId = minDetId;
-  m_maxDetId = maxDetId;
+                   idFillOrder, idstep);
 }
 
-//-------------------------------------------------------------------------------------------------
-/** Returns the minimum detector id
- * @return minimum detector id
- */
-detid_t PixelAssembly::minDetectorID() const {
-  if (isParametrized())
-    return m_gridBase->minDetectorID();
-  return m_minDetId;
-}
+// ---------------------------------------------------------------------------
+// Stream operator
+// ---------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------------------------------
-/** Returns the maximum detector id
- * @return maximum detector id
- */
-detid_t PixelAssembly::maxDetectorID() const {
-  if (isParametrized())
-    return m_gridBase->maxDetectorID();
-  return m_maxDetId;
-}
-
-//-------------------------------------------------------------------------------------------------
-/// @copydoc Mantid::Geometry::CompAssembly::getComponentByName
-std::shared_ptr<const IComponent> PixelAssembly::getComponentByName(const std::string &cname, int nlevels) const {
-  // exact matches
-  if (cname == this->getName())
-    return std::shared_ptr<const IComponent>(this);
-
-  // cache the detector's name as all the other names are longer
-  // The extra ( is because all children of this have that as the next character
-  // and this prevents Bank11 matching Bank 1
-  const std::string MEMBER_NAME = this->getName() + "(";
-
-  // check that the searched for name starts with the detector's
-  // name as they are generated
-  if (cname.substr(0, MEMBER_NAME.length()) != MEMBER_NAME) {
-    return std::shared_ptr<const IComponent>();
-  } else {
-    return CompAssembly::getComponentByName(cname, nlevels);
-  }
-}
-
-//------------------------------------------------------------------------------------------------
-/** Test the intersection of the ray with the children of the component
- *assembly, for InstrumentRayTracer.
- * Uses the knowledge of the PixelAssembly shape to significantly speed up
- *tracking.
- *
- * @param testRay :: Track under test. The results are stored here.
- * @param searchQueue :: If a child is a sub-assembly then it is appended for
- *later searching. Unused.
- */
-void PixelAssembly::testIntersectionWithChildren(Track &testRay,
-                                                 std::deque<IComponent_const_sptr> & /*searchQueue*/) const {
-  /// Base point (x,y,z) = position of pixel 0,0
-  V3D const basePoint = getRelativePosAtXYZ(0, 0, 0);
-
-  /// Vertical (y-axis) basis vector of the detector
-  V3D const vertical = getRelativePosAtXYZ(0, ypixels() - 1, 0) - basePoint;
-
-  /// Horizontal (x-axis) basis vector of the detector
-  V3D horizontal = getRelativePosAtXYZ(xpixels() - 1, 0, 0) - basePoint;
-
-  // The beam direction
-  V3D const beam = testRay.direction() * (-1.0);
-
-  // From: http://en.wikipedia.org/wiki/Line-plane_intersection (taken on May 4,
-  // 2011),
-  // We build a matrix to solve the linear equation:
-  Matrix<double> mat(3, 3);
-  mat.setColumn(0, beam);
-  mat.setColumn(1, horizontal);
-  mat.setColumn(2, vertical);
-  mat.Invert();
-
-  // Multiply by the inverted matrix to find t,u,v
-  V3D const tuv = mat * (testRay.startPoint() - basePoint);
-  //  std::cout << tuv << "\n";
-
-  // Intersection point
-  V3D const intersec = beam * (tuv[0] * -1.0);
-
-  // t = coordinate along the line
-  // u,v = coordinates along horizontal, vertical
-  // (and correct for it being between 0, xpixels-1).  The +0.5 is because the
-  // base point is at the CENTER of pixel 0,0.
-  double u = (double(xpixels() - 1) * tuv[1] + 0.5);
-  double v = (double(ypixels() - 1) * tuv[2] + 0.5);
-
-  //  std::cout << u << ", " << v << "\n";
-
-  // In indices
-  auto xIndex = int(u);
-  auto yIndex = int(v);
-
-  // Out of range?
-  if (xIndex < 0)
-    return;
-  if (yIndex < 0)
-    return;
-  if (xIndex >= xpixels())
-    return;
-  if (yIndex >= ypixels())
-    return;
-
-  // TODO: Do I need to put something smart here for the first 3 parameters?
-  auto comp = getAtXYZ(xIndex, yIndex, 0);
-  testRay.addLink(intersec, intersec, 0.0, *(comp->shape()), comp->getComponentID());
-}
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-// ------------ IObjComponent methods ----------------
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
-//-------------------------------------------------------------------------------------------------
-/// Does the point given lie within this object component?
-bool PixelAssembly::isValid(const V3D & /*point*/) const {
-  throw Kernel::Exception::NotImplementedError("PixelAssembly::isValid() is not implemented.");
-}
-
-//-------------------------------------------------------------------------------------------------
-/// Does the point given lie on the surface of this object component?
-bool PixelAssembly::isOnSide(const V3D & /*point*/) const {
-  throw Kernel::Exception::NotImplementedError("PixelAssembly::isOnSide() is not implemented.");
-}
-
-//-------------------------------------------------------------------------------------------------
-/// Checks whether the track given will pass through this Component.
-int PixelAssembly::interceptSurface(Track & /*track*/) const {
-  throw Kernel::Exception::NotImplementedError("PixelAssembly::interceptSurface() is not implemented.");
-}
-
-//-------------------------------------------------------------------------------------------------
-/// Finds the approximate solid angle covered by the component when viewed from
-/// the point given
-double PixelAssembly::solidAngle(const Geometry::SolidAngleParams & /*params*/) const {
-  throw Kernel::Exception::NotImplementedError("PixelAssembly::solidAngle() is not implemented.");
-}
-
-//-------------------------------------------------------------------------------------------------
-/// Try to find a point that lies within (or on) the object
-int PixelAssembly::getPointInObject(V3D & /*point*/) const {
-  throw Kernel::Exception::NotImplementedError("PixelAssembly::getPointInObject() is not implemented.");
-}
-
-//-------------------------------------------------------------------------------------------------
-/**
- * Get the bounding box and store it in the given object. This is cached after
- * the first call.
- * @param assemblyBox :: A BoundingBox object that will be overwritten
- */
-void PixelAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
-  if (isParametrized()) {
-    if (hasComponentInfo()) {
-      assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
-      return;
-    }
-  }
-  BoundingBox bb;
-  BoundingBox compBox;
-  getAtXYZ(0, 0, 0)->getBoundingBox(compBox);
-  bb.grow(compBox);
-  getAtXYZ(this->xpixels() - 1, 0, 0)->getBoundingBox(compBox);
-  bb.grow(compBox);
-  getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, 0)->getBoundingBox(compBox);
-  bb.grow(compBox);
-  getAtXYZ(0, this->ypixels() - 1, 0)->getBoundingBox(compBox);
-  bb.grow(compBox);
-  getAtXYZ(0, 0, this->zpixels() - 1)->getBoundingBox(compBox);
-  bb.grow(compBox);
-  getAtXYZ(this->xpixels() - 1, 0, this->zpixels() - 1)->getBoundingBox(compBox);
-  bb.grow(compBox);
-  getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, this->zpixels() - 1)->getBoundingBox(compBox);
-  bb.grow(compBox);
-  getAtXYZ(0, this->ypixels() - 1, this->zpixels() - 1)->getBoundingBox(compBox);
-  bb.grow(compBox);
-
-  assemblyBox = bb;
-}
-
-/**
- * Draws the objcomponent, If the handler is not set then this function does
- * nothing.
- */
-void PixelAssembly::draw() const {
-  if (Handle() == nullptr)
-    return;
-  Handle()->render();
-}
-
-/**
- * Draws the Object
- */
-void PixelAssembly::drawObject() const { draw(); }
-
-/**
- * Initializes the ObjComponent for rendering, this function should be called
- * before rendering.
- */
-void PixelAssembly::initDraw() const {
-  if (Handle() == nullptr)
-    return;
-  Handle()->initialize();
-}
-
-//-------------------------------------------------------------------------------------------------
-/// Returns the shape of the Object
-const std::shared_ptr<const IObject> PixelAssembly::shape() const {
-  // --- Create a cuboid shape for your pixels ----
-  double szX = xpixels();
-  double szY = ypixels();
-  double szZ = zpixels() == 0 ? 0.5 : zpixels();
-  std::ostringstream xmlShapeStream;
-  xmlShapeStream << " <cuboid id=\"detector-shape\"> "
-                 << "<left-front-bottom-point x=\"" << szX << "\" y=\"" << -szY << "\" z=\"" << -szZ << "\"  /> "
-                 << "<left-front-top-point  x=\"" << szX << "\" y=\"" << -szY << "\" z=\"" << szZ << "\"  /> "
-                 << "<left-back-bottom-point  x=\"" << -szX << "\" y=\"" << -szY << "\" z=\"" << -szZ << "\"  /> "
-                 << "<right-front-bottom-point  x=\"" << szX << "\" y=\"" << szY << "\" z=\"" << -szZ << "\"  /> "
-                 << "</cuboid>";
-
-  std::string xmlCuboidShape(xmlShapeStream.str());
-  Geometry::ShapeFactory shapeCreator;
-  std::shared_ptr<Geometry::IObject> cuboidShape = shapeCreator.createShape(xmlCuboidShape);
-
-  return cuboidShape;
-}
-
-const Kernel::Material PixelAssembly::material() const { return Kernel::Material(); }
-
-size_t PixelAssembly::registerContents(ComponentVisitor &componentVisitor) const {
-  return componentVisitor.registerGridBank(*this);
-}
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-// ------------ END OF IObjComponent methods ----------------
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
-/** Print information about elements in the assembly to a stream
- *  Overload the operator <<
- * @param os :: output stream
- * @param ass :: component assembly
- * @return stream representation of grid detector
- *
- *  Loops through all components in the assembly
- *  and call printSelf(os).
- *  Also output the number of children
- */
 std::ostream &operator<<(std::ostream &os, const PixelAssembly &assm) {
-  ass.printSelf(os);
-  os << "************************\n";
-  os << "Number of children :" << assm.nelements() << '\n';
-  ass.printChildren(os);
+  assm.printSelf(os);
+  os << "PixelAssembly: " << assm.xpixels() << " x " << assm.ypixels() << " x " << assm.zpixels() << " pixels\n";
   return os;
 }
 

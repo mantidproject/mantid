@@ -32,6 +32,7 @@ class IObjComponent;
 class Instrument;
 class IObject;
 class ParameterMap;
+class PixelAssembly;
 class RectangularDetector;
 class ObjCompAssembly;
 
@@ -145,6 +146,8 @@ public:
   virtual size_t registerGenericObjComponent(const Mantid::Geometry::IObjComponent &objComponent) override;
 
   virtual size_t registerGridBank(const Mantid::Geometry::ICompAssembly &bank) override;
+
+  virtual size_t registerVirtualBank(const Mantid::Geometry::PixelAssembly &bank) override;
 
   virtual size_t registerRectangularBank(const Mantid::Geometry::ICompAssembly &bank) override;
 

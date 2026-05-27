@@ -1,141 +1,199 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/IVirtualBank.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include <array>
+#include <memory>
 #include <string>
-#include <tuple>
-#include <vector>
 
 namespace Mantid {
 namespace Geometry {
 
+class BoundingBox;
 class ComponentVisitor;
-/**
- *  GridDetector is a type of CompAssembly, an assembly of components.
- *  It is designed to be an easy way to specify a 3D grid (XYZ) array of
- *  Detector pixels. Ragged grids are not allowed, pixels are uniform in each
- *  dimension.
- *
- * @class PixelAssembly
- * @brief Assembly of Detector objects in a 3D grid shape
- * @author Lamar Moore, ISIS
- * @date 2018-Jul-24
- */
+class Detector;
+class Track;
 
-class MANTID_GEOMETRY_DLL PixelAssembly : public CompAssembly, public IObjComponent {
+/**
+ * PixelAssembly — a detector bank for regular 3-D grids of pixels.
+ *
+ * Inherits from Component (not CompAssembly) and creates NO per-pixel child
+ * Detector objects.  All pixel properties (detector ID, relative position,
+ * bounding box) are computed on demand from the grid parameters stored via
+ * IVirtualBank.
+ *
+ * Intended for large-pixel-count instruments (e.g. IMAGINE with ~20 M pixels)
+ * where allocating one Detector object per pixel would be prohibitive.
+ *
+ * Constraints vs GridDetector:
+ *  - IDs must be packed (no gaps): the row stride equals
+ *    idstep * pixels_along_fastest_axis.
+ *  - zpixels must be >= 1 (a flat bank uses zpixels = 1).
+ *
+ * @class  PixelAssembly
+ * @brief  Virtual-pixel 3D detector bank
+ * @author rboston628
+ */
+class MANTID_GEOMETRY_DLL PixelAssembly : public Component, public IObjComponent, public IVirtualBank {
 
 public:
   /// String description of the type of component
   std::string type() const override { return "PixelAssembly"; }
 
-  //! Constructor with a name and parent reference
-  PixelAssembly(const std::string &name, IComponent *reference = nullptr);
+  //! Constructor with a name and optional parent reference
+  explicit PixelAssembly(const std::string &name, IComponent *reference = nullptr);
 
   //! Parametrized constructor
   PixelAssembly(const PixelAssembly *base, const ParameterMap *map);
 
-  /// Matches name to Structured Detector
+  /// Returns true if the proposed name matches the PixelAssembly naming convention.
   static bool compareName(const std::string &proposedMatch);
 
-  /// Create all the detector pixels of this grid detector.
-  void initialize(std::shared_ptr<IObject> shape, int xpixels, double xstart, double xstep, int ypixels, double ystart,
-                  double ystep, int zpixels, double zstart, double zstep, int idstart, const std::string &idFillOrder,
-                  int idstepbyrow, int idstep = 1);
+  /**
+   * Store the grid parameters.  No child Detector objects are created.
+   * Call this after setting the assembly's name, position and rotation.
+   *
+   * @param shape      Shape shared by every pixel.
+   * @param xpixels    Number of pixels in X.
+   * @param xstart     X coordinate of the referent pixel (0,0,0), local frame.
+   * @param xstep      Step between adjacent pixels in X, local frame.
+   * @param ypixels    Number of pixels in Y.
+   * @param ystart     Y coordinate of the referent pixel, local frame.
+   * @param ystep      Step between adjacent pixels in Y, local frame.
+   * @param zpixels    Number of pixels in Z (pass 0 or 1 for a flat bank).
+   * @param zstart     Z coordinate of the referent pixel, local frame.
+   * @param zstep      Step between adjacent pixels in Z, local frame.
+   * @param idstart    Detector ID of the referent pixel (0,0,0).
+   * @param idFillOrder Three-character string: e.g. "xyz" means X varies fastest.
+   * @param idstep     ID increment between adjacent pixels along the fastest axis.
+   */
+  void initialize(std::shared_ptr<IObject> shape, size_t xpixels, double xstart, double xstep, size_t ypixels,
+                  double ystart, double ystep, size_t zpixels, double zstart, double zstep, detid_t idstart,
+                  const std::string &idFillOrder, int idstep = 1);
 
   //! Make a clone of the present component
   PixelAssembly *clone() const override;
 
-  int idstart() const;
-  int idstep() const;
+  // ---- IVirtualBank pure virtuals ----
 
-  /// minimum detector id
-  detid_t minDetectorID() const;
-  /// maximum detector id
-  detid_t maxDetectorID() const;
-  std::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const override;
+  size_t xpixels() const override;
+  size_t ypixels() const override;
+  size_t zpixels() const override;
 
-  // This should inherit the getBoundingBox implementation from  CompAssembly
-  // but the multiple inheritance seems to confuse it so we'll explicityly tell
-  // it that here
-  using CompAssembly::getBoundingBox;
+  double xstep() const override;
+  double ystep() const override;
+  double zstep() const override;
 
-  void testIntersectionWithChildren(Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const override;
+  double xstart() const override;
+  double ystart() const override;
+  double zstart() const override;
 
-  // ------------ IObjComponent methods ----------------
+  detid_t referentDetectorID() const override;
+  std::array<char, 3> idFillOrder() const override;
+  int idstep() const override;
 
-  /// Does the point given lie within this object component?
+  /// Returns a Detector object for the referent pixel (0,0,0), constructed on demand.
+  std::shared_ptr<Detector> referentDetector() const override;
+
+  // ---- Position helpers ----
+
+  /// Absolute position of pixel (x,y,z) in the instrument frame.
+  Kernel::V3D getPosAtXYZ(int x, int y, int z) const;
+
+  // ---- Per-pixel bounding box ----
+
+  void getBoundingBoxAtXYZ(int x, int y, int z, BoundingBox &box) const;
+
+  // ---- Component lookup ----
+  // NOTE: IComponent does not declare getComponentByName; only ICompAssembly does.
+  // PixelAssembly intentionally does not inherit ICompAssembly, so this method
+  // is not available through the standard IComponent pointer interface.
+  // Direct callers (e.g. InstrumentDefinitionParser) should hold a PixelAssembly*.
+  std::shared_ptr<const IComponent> getComponentByName(const std::string &cname) const;
+
+  // ---- Visitor registration ----
+
+  size_t registerContents(class ComponentVisitor &componentVisitor) const override;
+
+  // ---- Pixel shape (separate from the overall rendering shape) ----
+
+  std::shared_ptr<const IObject> pixelShape() const;
+
+  // ---- IObjComponent methods ----
+
+  /// Does the point lie within this component?  (Not implemented — throws.)
   bool isValid(const Kernel::V3D &point) const override;
-
-  /// Does the point given lie on the surface of this object component?
+  /// Does the point lie on the surface?  (Not implemented — throws.)
   bool isOnSide(const Kernel::V3D &point) const override;
-
-  /// Checks whether the track given will pass through this Component.
+  /// Check whether a track passes through this component.  (Not implemented — throws.)
   int interceptSurface(Track &track) const override;
-
-  /// Finds the approximate solid angle covered by the component when viewed
-  /// from the point given
+  /// Approximate solid angle.  (Not implemented — throws.)
   double solidAngle(const Geometry::SolidAngleParams &params) const override;
-  /// Retrieve the cached bounding box
+  /// Retrieve or compute the bounding box for the whole assembly.
   void getBoundingBox(BoundingBox &assemblyBox) const override;
-
-  /// Try to find a point that lies within (or on) the object
+  /// Find a point inside the object.  (Not implemented — throws.)
   int getPointInObject(Kernel::V3D &point) const override;
 
-  // Rendering member functions
-  /// Draws the objcomponent.
+  // Rendering
   void draw() const override;
-
-  /// Draws the Object.
   void drawObject() const override;
-
-  /// Initializes the ObjComponent for rendering, this function should be called
-  /// before rendering.
   void initDraw() const override;
 
-  /// Returns the shape of the Object
+  /// Returns a cuboid representing the whole assembly (for rendering).
   const std::shared_ptr<const IObject> shape() const override;
-  /// Returns the material of the detector
+  /// Returns an empty material.
   const Kernel::Material material() const override;
 
-  virtual size_t registerContents(class ComponentVisitor &componentVisitor) const override;
+  // ---- End of IObjComponent methods ----
 
-  // ------------ End of IObjComponent methods ----------------
 protected:
-  /// initialize members to bare defaults
+  /// Initialise all members to safe defaults.
   void init();
-  void createLayer(const std::string &name, CompAssembly *parent, int iz, int &minDetID, int &maxDetID);
 
 private:
-  void initializeValues(std::shared_ptr<IObject> shape, int xpixels, double xstart, double xstep, int ypixels,
-                        double ystart, double ystep, int zpixels, double zstart, double zstep, int idstart,
-                        const std::string &idFillOrder, int idstepbyrow, int idstep);
-
   void validateInput() const;
-  /// Pointer to the base GridDetector, for parametrized instruments
-  const GridDetector *m_gridBase;
+  void initializeValues(std::shared_ptr<IObject> shape, size_t xpixels, double xstart, double xstep, size_t ypixels,
+                        double ystart, double ystep, size_t zpixels, double zstart, double zstep, detid_t idstart,
+                        const std::string &idFillOrder, int idstep);
+
+  /// True when this is a parametrized view of m_gridBase.
   bool isParametrized() const override { return m_map && m_gridBase; }
-  /// Private copy assignment operator
-  PixelAssembly &operator=(const ICompAssembly &);
 
-  /// Pointer to the shape of the pixels in this detector array.
+  /// Pointer to the base (unparametrized) assembly; nullptr when not parametrized.
+  const PixelAssembly *m_gridBase;
+
+  /// Deleted copy-assignment.
+  PixelAssembly &operator=(const PixelAssembly &) = delete;
+
+  // ---- Grid geometry ----
+  size_t m_xpixels; ///< Number of pixels in X
+  size_t m_ypixels; ///< Number of pixels in Y
+  size_t m_zpixels; ///< Number of pixels in Z (always >= 1)
+
+  double m_xstart; ///< X coordinate of the referent pixel, local frame
+  double m_ystart; ///< Y coordinate of the referent pixel, local frame
+  double m_zstart; ///< Z coordinate of the referent pixel, local frame
+
+  double m_xstep; ///< Step between adjacent pixels in X, local frame
+  double m_ystep; ///< Step between adjacent pixels in Y, local frame
+  double m_zstep; ///< Step between adjacent pixels in Z, local frame
+
+  /// Shape shared by every pixel in this assembly.
   std::shared_ptr<IObject> m_shape;
-  /// minimum detector id
-  detid_t m_minDetId;
-  /// maximum detector id
-  detid_t m_maxDetId;
 
-  /// IDs start here
-  int m_idstart;
-  /// Step size in ID in each col
-  int m_idstep;
+  // ---- ID scheme ----
+  detid_t m_idstart;                 ///< ID of the referent pixel (0,0,0)
+  std::array<char, 3> m_idFillOrder; ///< Fill order, e.g. {'x','y','z'}
+  int m_idstep;                      ///< ID increment per pixel along fastest axis
 };
 
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &, const PixelAssembly &);
@@ -143,5 +201,5 @@ MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &, const PixelAssembly
 using PixelAssembly_sptr = std::shared_ptr<PixelAssembly>;
 using PixelAssembly_const_sptr = std::shared_ptr<const PixelAssembly>;
 
-} // Namespace Geometry
-} // Namespace Mantid
+} // namespace Geometry
+} // namespace Mantid

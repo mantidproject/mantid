@@ -17,6 +17,7 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/PixelAssembly.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 
@@ -239,6 +240,60 @@ size_t InstrumentVisitor::registerRectangularBank(const ICompAssembly &bank) {
   size_t rangesIndex = index - m_orderedDetectorIds->size();
   (*m_componentType)[rangesIndex] = Beamline::ComponentType::Rectangular;
   return index;
+}
+
+/**
+ * Register a virtual bank (PixelAssembly) — no per-pixel child objects exist.
+ *
+ * Iterates over the grid parameters to fill detector positions and rotations
+ * directly, without creating Detector objects for each pixel.
+ *
+ * NOTE: m_componentIds[detectorIndex] remains nullptr for virtual-bank pixels
+ * (there are no heap-allocated IComponent objects for them).  Code that uses
+ * the legacy ComponentID pointer for virtual pixels must handle null.
+ *
+ * @param bank : PixelAssembly being registered
+ * @return component index assigned to the bank
+ */
+size_t InstrumentVisitor::registerVirtualBank(const PixelAssembly &bank) {
+  const size_t detectorStart = m_assemblySortedDetectorIndices->size();
+  const size_t componentStart = m_assemblySortedComponentIndices->size();
+
+  // All pixels share the same shape and rotation.
+  auto const pxShape = bank.pixelShape() ? bank.pixelShape() : m_nullShape;
+  Eigen::Quaterniond const eigenRot = Kernel::toQuaterniond(bank.getRotation());
+
+  // Iterate fill-order: Z is outermost, then X, then Y (arbitrary; all are covered).
+  for (size_t iz = 0; iz < bank.zpixels(); ++iz) {
+    for (size_t ix = 0; ix < bank.xpixels(); ++ix) {
+      for (size_t iy = 0; iy < bank.ypixels(); ++iy) {
+        detid_t const id = bank.getDetectorIDAtXYZ(static_cast<int>(ix), static_cast<int>(iy), static_cast<int>(iz));
+        size_t const detectorIndex = m_detectorIdToIndexMap->at(id);
+        m_assemblySortedDetectorIndices->emplace_back(detectorIndex);
+        (*m_detectorPositions)[detectorIndex] =
+            Kernel::toVector3d(bank.getPosAtXYZ(static_cast<int>(ix), static_cast<int>(iy), static_cast<int>(iz)));
+        (*m_detectorRotations)[detectorIndex] = eigenRot;
+        (*m_shapes)[detectorIndex] = pxShape;
+        (*m_names)[detectorIndex] = bank.getName() + "(" + std::to_string(ix) + "," + std::to_string(iy) +
+                                    (bank.zpixels() > 1 ? "," + std::to_string(iz) : "") + ")";
+        // ComponentID stays nullptr — no per-pixel IComponent object exists.
+        // Scale factors stay at default {1,1,1}.
+      }
+    }
+  }
+
+  const size_t detectorStop = m_assemblySortedDetectorIndices->size();
+  const size_t componentIndex = commonRegistration(bank);
+  m_componentType->emplace_back(Beamline::ComponentType::Grid);
+  m_assemblySortedComponentIndices->emplace_back(componentIndex);
+  m_parentComponentIndices->emplace_back(componentIndex);
+  const size_t componentStop = m_assemblySortedComponentIndices->size();
+
+  m_detectorRanges->emplace_back(detectorStart, detectorStop);
+  m_componentRanges->emplace_back(componentStart, componentStop);
+  m_children->emplace_back(); // PixelAssembly has no child IComponent objects.
+
+  return componentIndex;
 }
 
 /**
