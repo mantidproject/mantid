@@ -162,23 +162,12 @@ void AlgorithmPropertiesWidget::initLayout() {
   if (!getAlgorithm())
     return;
 
-  // Delete PropertyWidgets first. Each PropertyWidget holds a `destroyed`-signal
-  // connection that calls `deleteLater()` on its associated `infoWidget` (the small
-  // icon strip added to column 4 of the grid). Those infoWidgets are children of
-  // this widget's grid layout parent, NOT of the PropertyWidget itself, so they
-  // appear separately in the grid.
-  //
-  // The lambda must fire while the infoWidget is still alive; if we drain the grid
-  // first the infoWidgets are freed before the PropertyWidgets, and the lambda
-  // subsequently calls deleteLater() on already-freed memory — resulting in a
-  // use-after-free / pure-virtual-call crash when the event loop later delivers
-  // the stale DeferredDelete event.
+  // Delete PropertyWidgets first. This prevents a use-after-free / pure-virtual-call crash
+  // when the event loop later delivers a stale DeferredDelete event
   for (auto &propWidget : m_propWidgets)
     propWidget->deleteLater();
 
-  // Now drain the grid. Any infoWidgets that reach this point are queued for
-  // deletion here; Qt handles multiple deleteLater() calls on the same object
-  // safely (the second DeferredDelete event is discarded after the first fires).
+  // Now drain the grid of any remaining widgets and layouts
   QLayoutItem *child;
   while ((child = m_inputGrid->takeAt(0)) != nullptr) {
     if (child->widget())
