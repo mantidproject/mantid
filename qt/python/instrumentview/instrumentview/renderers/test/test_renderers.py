@@ -8,13 +8,22 @@
 
 import unittest
 from unittest.mock import MagicMock
+import unittest.mock as mock
 
 import numpy as np
 import pyvista as pv
 
 from instrumentview.renderers.base_renderer import InstrumentRenderer
 from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
-from instrumentview.renderers.shape_renderer import ShapeRenderer, _triangles_to_verts_faces, _make_fallback_shape
+from instrumentview.renderers.shape_renderer import (
+    ShapeRenderer,
+    _triangles_to_verts_faces,
+    _make_fallback_shape,
+    _try_extract_rect_quad,
+    _is_cuboid_xml,
+    _is_cylinder_xml,
+    _extract_quad_from_cylinder_xml,
+)
 from instrumentview.Projections.ProjectionType import ProjectionType
 
 
@@ -130,9 +139,267 @@ class TestTrianglesToVertsFaces(unittest.TestCase):
 
 class TestFallbackShape(unittest.TestCase):
     def test_returns_tetrahedron(self):
-        verts, faces = _make_fallback_shape()
+        verts, faces, face_size = _make_fallback_shape()
         self.assertEqual(verts.shape, (4, 3))
         self.assertEqual(faces.shape, (4, 3))
+        self.assertEqual(face_size, 3)
+
+
+class TestTryExtractRectQuad(unittest.TestCase):
+    def _make_cuboid_mesh(self, w=0.01, h=0.01, d=0.001):
+        """Return a (verts, faces) pair for a cuboid of given half-extents."""
+        hw, hh, hd = w / 2, h / 2, d / 2
+        corners = np.array(
+            [
+                [-hw, -hh, -hd],
+                [hw, -hh, -hd],
+                [hw, hh, -hd],
+                [-hw, hh, -hd],
+                [-hw, -hh, hd],
+                [hw, -hh, hd],
+                [hw, hh, hd],
+                [-hw, hh, hd],
+            ],
+            dtype=np.float64,
+        )
+        triangles = np.array(
+            [
+                [corners[0], corners[1], corners[2]],
+                [corners[0], corners[2], corners[3]],
+                [corners[4], corners[6], corners[5]],
+                [corners[4], corners[7], corners[6]],
+                [corners[0], corners[4], corners[5]],
+                [corners[0], corners[5], corners[1]],
+                [corners[2], corners[6], corners[7]],
+                [corners[2], corners[7], corners[3]],
+                [corners[0], corners[3], corners[7]],
+                [corners[0], corners[7], corners[4]],
+                [corners[1], corners[5], corners[6]],
+                [corners[1], corners[6], corners[2]],
+            ]
+        )
+        from instrumentview.renderers.shape_renderer import _triangles_to_verts_faces
+
+        return _triangles_to_verts_faces(triangles)
+
+    def test_rectangular_cuboid_returns_quad(self):
+        verts, faces = self._make_cuboid_mesh(w=0.01, h=0.01, d=0.001)
+        result = _try_extract_rect_quad(verts)
+        self.assertIsNotNone(result)
+        quad_verts, quad_faces = result
+        self.assertEqual(quad_verts.shape, (4, 3))
+        self.assertEqual(quad_faces.shape, (1, 4))
+
+    def test_quad_corners_match_bounding_box_face(self):
+        verts, faces = self._make_cuboid_mesh(w=0.02, h=0.01, d=0.001)
+        result = _try_extract_rect_quad(verts)
+        self.assertIsNotNone(result)
+        quad_verts, _ = result
+        np.testing.assert_allclose(np.sort(np.unique(quad_verts[:, 0])), [-0.01, 0.01], atol=1e-10)
+        np.testing.assert_allclose(np.sort(np.unique(quad_verts[:, 1])), [-0.005, 0.005], atol=1e-10)
+        np.testing.assert_allclose(quad_verts[:, 2], 0.0, atol=1e-10)
+
+    def test_cube_shaped_detector_uses_xy_face(self):
+        # Equal extents on all axes: argmin would pick axis 0, but we must use Z (axis 2).
+        verts, faces = self._make_cuboid_mesh(w=0.0254, h=0.0254, d=0.0254)
+        result = _try_extract_rect_quad(verts)
+        self.assertIsNotNone(result)
+        quad_verts, _ = result
+        # All corners must share the same Z (mid-depth), not X or Y.
+        np.testing.assert_allclose(quad_verts[:, 2], 0.0, atol=1e-10)
+        np.testing.assert_allclose(np.sort(np.unique(quad_verts[:, 0])), [-0.0127, 0.0127], atol=1e-6)
+        np.testing.assert_allclose(np.sort(np.unique(quad_verts[:, 1])), [-0.0127, 0.0127], atol=1e-6)
+
+    def test_too_few_verts_returns_none(self):
+        result = _try_extract_rect_quad(np.zeros((2, 3)))
+        self.assertIsNone(result)
+
+    def test_is_cuboid_xml_detects_cuboid(self):
+        self.assertTrue(_is_cuboid_xml('<type name="pixel"><cuboid id="pixel"><left-front-bottom-point x="0"/></cuboid></type>'))
+
+    def test_is_cuboid_xml_detects_namespaced_cuboid(self):
+        self.assertTrue(_is_cuboid_xml('<ns1:cuboid id="pixel-shape"><left-front-bottom-point x="0"/></ns1:cuboid>'))
+
+    def test_is_cuboid_xml_rejects_cylinder(self):
+        self.assertFalse(_is_cuboid_xml('<type name="det"><cylinder id="det"><centre-of-bottom-base x="0"/></cylinder></type>'))
+
+    def test_is_cuboid_xml_rejects_empty(self):
+        self.assertFalse(_is_cuboid_xml(""))
+
+    def test_is_cylinder_xml_detects_cylinder(self):
+        self.assertTrue(_is_cylinder_xml('<cylinder id="cyl"><centre-of-bottom-base x="0"/></cylinder>'))
+
+    def test_is_cylinder_xml_detects_namespaced_cylinder(self):
+        self.assertTrue(_is_cylinder_xml('<ns1:cylinder id="cyl-approx"><ns1:axis x="0" y="1" z="0"/></ns1:cylinder>'))
+
+    def test_is_cylinder_xml_rejects_cuboid(self):
+        self.assertFalse(_is_cylinder_xml('<cuboid id="pixel"><left-front-bottom-point x="0"/></cuboid>'))
+
+    def test_is_cylinder_xml_rejects_empty(self):
+        self.assertFalse(_is_cylinder_xml(""))
+
+    def test_use_optimised_shapes_flag_produces_quad_faces(self):
+        """ShapeRenderer with use_optimised_shapes=True should cache quad shapes."""
+        ws = self._make_mock_workspace()
+        renderer = ShapeRenderer(ws, use_optimised_shapes=True)
+        renderer.precompute()
+        for _verts, _faces, face_size in renderer._shape_cache.values():
+            # All rectangular shapes should have been converted to quads (face_size=4),
+            # non-rectangular ones stay as triangles (face_size=3).
+            self.assertIn(face_size, (3, 4))
+
+    def _make_mock_workspace(self):
+        ws = mock.MagicMock()
+        det_info = mock.MagicMock()
+        comp_info = mock.MagicMock()
+        ws.detectorInfo.return_value = det_info
+        ws.componentInfo.return_value = comp_info
+        det_info.size.return_value = 1
+        pos = mock.MagicMock()
+        pos.X.return_value = 0.0
+        pos.Y.return_value = 0.0
+        pos.Z.return_value = 1.0
+        det_info.position.return_value = pos
+        q = mock.MagicMock()
+        q.real.return_value = 1.0
+        q.imagI.return_value = 0.0
+        q.imagJ.return_value = 0.0
+        q.imagK.return_value = 0.0
+        comp_info.rotation.return_value = q
+        sc = mock.MagicMock()
+        sc.X.return_value = 1.0
+        sc.Y.return_value = 1.0
+        sc.Z.return_value = 1.0
+        comp_info.scaleFactor.return_value = sc
+        comp_info.hasValidShape.return_value = True
+        shape_obj = mock.MagicMock()
+        shape_obj.getShapeXML.return_value = "<cuboid/>"
+        comp_info.shape.return_value = shape_obj
+        hw, hh, hd = 0.005, 0.005, 0.0005
+        corners = np.array(
+            [
+                [-hw, -hh, -hd],
+                [hw, -hh, -hd],
+                [hw, hh, -hd],
+                [-hw, hh, -hd],
+                [-hw, -hh, hd],
+                [hw, -hh, hd],
+                [hw, hh, hd],
+                [-hw, hh, hd],
+            ]
+        )
+        raw_mesh = np.array(
+            [
+                [corners[0], corners[1], corners[2]],
+                [corners[0], corners[2], corners[3]],
+                [corners[4], corners[6], corners[5]],
+                [corners[4], corners[7], corners[6]],
+            ],
+            dtype=np.float64,
+        )
+        shape_obj.getMesh.return_value = raw_mesh
+        beam_dir = mock.MagicMock()
+        beam_dir.X.return_value = 0.0
+        beam_dir.Y.return_value = 0.0
+        beam_dir.Z.return_value = 1.0
+        comp_info.samplePosition.return_value = beam_dir
+        ws.getInstrument.return_value = mock.MagicMock()
+        ws.getInstrument().getReferenceFrame.return_value = mock.MagicMock()
+        ws.getInstrument().getReferenceFrame().pointingAlongBeam.return_value = beam_dir
+        ws.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = [0.0, 0.0, 1.0]
+        return ws
+
+
+class TestExtractQuadFromCylinderXml(unittest.TestCase):
+    """Tests for _extract_quad_from_cylinder_xml and _is_cylinder_xml."""
+
+    # WISH-like namespaced cylinder: axis along local Y, bottom base at origin
+    WISH_XML = (
+        '<ns1:type is="detector" name="pixel" xmlns:ns1="http://www.mantidproject.org/IDF/1.0">\n'
+        '    <ns1:cylinder id="cyl-approx">\n'
+        '      <ns1:centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>\n'
+        '      <ns1:axis x="0.0" y="0.2" z="0.0"/>\n'
+        '      <ns1:radius val="0.004"/>\n'
+        '      <ns1:height val="0.00203320"/>\n'
+        "    </ns1:cylinder>\n"
+        '    <ns1:algebra val="cyl-approx"/>\n'
+        "  </ns1:type>"
+    )
+
+    # Simple cylinder with axis along Z (Cartesian bottom base)
+    Z_AXIS_XML = """
+    <cylinder id="cyl">
+      <centre-of-bottom-base x="0.0" y="0.0" z="-0.05"/>
+      <axis x="0.0" y="0.0" z="1.0"/>
+      <radius val="0.01"/>
+      <height val="0.1"/>
+    </cylinder>
+    """
+
+    def test_wish_cylinder_returns_quad(self):
+        result = _extract_quad_from_cylinder_xml(self.WISH_XML)
+        self.assertIsNotNone(result)
+        quad_verts, quad_faces = result
+        self.assertEqual(quad_verts.shape, (4, 3))
+        self.assertEqual(quad_faces.shape, (1, 4))
+
+    def test_wish_cylinder_quad_spans_correct_height(self):
+        """Quad height (along Y axis) should equal cylinder height."""
+        result = _extract_quad_from_cylinder_xml(self.WISH_XML)
+        quad_verts, _ = result
+        height = 0.00203320
+        y_min, y_max = quad_verts[:, 1].min(), quad_verts[:, 1].max()
+        self.assertAlmostEqual(y_max - y_min, height, places=8)
+
+    def test_wish_cylinder_quad_spans_correct_width(self):
+        """Quad width (along X, the s_hat direction) should equal 2*radius."""
+        result = _extract_quad_from_cylinder_xml(self.WISH_XML)
+        quad_verts, _ = result
+        radius = 0.004
+        x_min, x_max = quad_verts[:, 0].min(), quad_verts[:, 0].max()
+        self.assertAlmostEqual(x_max - x_min, 2 * radius, places=8)
+
+    def test_wish_cylinder_quad_lies_in_xy_plane(self):
+        """For Y-axis cylinder, quad should lie in the local XY plane (z=0)."""
+        result = _extract_quad_from_cylinder_xml(self.WISH_XML)
+        quad_verts, _ = result
+        np.testing.assert_allclose(quad_verts[:, 2], 0.0, atol=1e-12)
+
+    def test_wish_cylinder_normal_faces_negative_z(self):
+        """Normal = a_hat × s_hat should point in (0, 0, -1) direction for WISH."""
+        result = _extract_quad_from_cylinder_xml(self.WISH_XML)
+        quad_verts, _ = result
+        # Edge vectors of the quad
+        e1 = quad_verts[1] - quad_verts[0]  # along s_hat (width)
+        e2 = quad_verts[3] - quad_verts[0]  # along a_hat (height)
+        normal = np.cross(e1, e2)
+        normal /= np.linalg.norm(normal)
+        # Normal should point roughly toward (0, 0, -1)
+        self.assertAlmostEqual(abs(normal[2]), 1.0, places=6)
+
+    def test_z_axis_cylinder_falls_back_gracefully(self):
+        """Cylinder with axis parallel to sample dir should still return a quad."""
+        result = _extract_quad_from_cylinder_xml(self.Z_AXIS_XML)
+        self.assertIsNotNone(result)
+        quad_verts, quad_faces = result
+        self.assertEqual(quad_verts.shape, (4, 3))
+
+    def test_missing_axis_returns_none(self):
+        xml = '<cylinder id="c"><radius val="0.01"/><height val="0.1"/></cylinder>'
+        self.assertIsNone(_extract_quad_from_cylinder_xml(xml))
+
+    def test_missing_radius_returns_none(self):
+        xml = '<cylinder id="c"><axis x="0" y="1" z="0"/><height val="0.1"/></cylinder>'
+        self.assertIsNone(_extract_quad_from_cylinder_xml(xml))
+
+    def test_missing_height_returns_none(self):
+        xml = '<cylinder id="c"><axis x="0" y="1" z="0"/><radius val="0.01"/></cylinder>'
+        self.assertIsNone(_extract_quad_from_cylinder_xml(xml))
+
+    def test_quad_faces_correct_vertex_indices(self):
+        result = _extract_quad_from_cylinder_xml(self.WISH_XML)
+        _, quad_faces = result
+        np.testing.assert_array_equal(quad_faces[0], [0, 1, 2, 3])
 
 
 class TestShapeRenderer(unittest.TestCase):

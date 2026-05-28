@@ -299,7 +299,7 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         ws = self._create_mock_workspace(n_detectors=1)
         self.renderer = SideBySideShapeRenderer(ws)
         self.renderer._precomputed = True
-        self.renderer._shape_cache = {0: (np.empty((0, 3)), np.empty((0, 3)))}
+        self.renderer._shape_cache = {0: (np.empty((0, 3)), np.empty((0, 3)), 3)}
         self.renderer._det_shape_keys = np.array([0])
         self.renderer._det_scales = np.array([[1.0, 1.0, 1.0]])
         self.renderer._det_rotations = np.eye(3).reshape(1, 3, 3)
@@ -350,7 +350,7 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         ws = self._create_mock_workspace(n_detectors=1)
         self.renderer = SideBySideShapeRenderer(ws)
         self.renderer._precomputed = True
-        self.renderer._shape_cache = {0: (np.empty((0, 3)), np.empty((0, 3)))}
+        self.renderer._shape_cache = {0: (np.empty((0, 3)), np.empty((0, 3)), 3)}
         self.renderer._det_shape_keys = np.array([0])
         self.renderer._det_scales = np.array([[1.0, 1.0, 1.0]])
         self.renderer._det_rotations = np.eye(3).reshape(1, 3, 3)
