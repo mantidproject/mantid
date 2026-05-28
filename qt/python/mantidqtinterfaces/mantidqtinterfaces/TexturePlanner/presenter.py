@@ -60,6 +60,7 @@ class TexturePlannerPresenter(object):
         self.view.set_on_output_sscanss_clicked(self.to_sscanss)
         self.view.set_on_output_euler_clicked(self.to_euler)
         self.view.set_on_output_matrix_clicked(self.to_matrix)
+        self.view.set_on_output_reference_ws_clicked(self.to_reference_workspace)
         self.view.set_on_save_dir_changed(self.enable_outputs)
         self.view.set_on_save_file_changed(self.enable_outputs)
         self.view.set_on_show_mu_toggled(self.set_show_mu)
@@ -208,11 +209,11 @@ class TexturePlannerPresenter(object):
 
     def load_stl(self):
         self.model.load_stl(self.view.get_stl_string())
-        self.update_plots()
+        self.set_initial_shape()
 
     def load_xml(self):
         self.model.load_xml(self.view.get_xml_string())
-        self.update_plots()
+        self.set_initial_shape()
 
     def load_orientation_file(self):
         num_gonios = self.model.load_orientation_file(self.view.get_orientation_file())
@@ -260,6 +261,9 @@ class TexturePlannerPresenter(object):
 
     def to_matrix(self):
         self.model.output_as_matrix(self.view.get_save_dir(), self.view.get_save_filename())
+
+    def to_reference_workspace(self):
+        self.model.output_as_reference_workspace(self.view.get_save_dir(), self.view.get_save_filename())
 
     def set_show_mu(self):
         self.update_custom_shape_finder_enabled()
