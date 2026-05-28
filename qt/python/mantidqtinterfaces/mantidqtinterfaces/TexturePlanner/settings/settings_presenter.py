@@ -79,11 +79,11 @@ class TexturePlannerSettingsPresenter(object):
         self.texture_model.vis_settings["ks"] = settings["ks"]
         self.texture_model.vis_settings["scattered"] = settings["scattered"]
 
-        self.texture_model.stl_kwargs["Scale"] = settings["stl_scale"]
-        self.texture_model.stl_kwargs["XDegrees"] = settings["stl_x_degrees"]
-        self.texture_model.stl_kwargs["YDegrees"] = settings["stl_y_degrees"]
-        self.texture_model.stl_kwargs["ZDegrees"] = settings["stl_z_degrees"]
-        self.texture_model.stl_kwargs["TranslationVector"] = settings["stl_translation_vector"]
+        self.texture_model.workspaces.stl_kwargs["Scale"] = settings["stl_scale"]
+        self.texture_model.workspaces.stl_kwargs["XDegrees"] = settings["stl_x_degrees"]
+        self.texture_model.workspaces.stl_kwargs["YDegrees"] = settings["stl_y_degrees"]
+        self.texture_model.workspaces.stl_kwargs["ZDegrees"] = settings["stl_z_degrees"]
+        self.texture_model.workspaces.stl_kwargs["TranslationVector"] = settings["stl_translation_vector"]
 
         self.texture_model.orientation_kwargs["Axes"] = settings["orientation_axes"]
         self.texture_model.orientation_kwargs["Senses"] = settings["orientation_senses"]
@@ -93,9 +93,9 @@ class TexturePlannerSettingsPresenter(object):
         self.texture_model.mc_kwargs["SimulateScatteringPointIn"] = settings["mc_simulate_in"]
         self.texture_model.mc_kwargs["ResimulateTracksForDifferentWavelengths"] = settings["mc_resimulate"]
 
-        self.texture_model.attenuation_kwargs["point"] = settings["att_point"]
-        self.texture_model.attenuation_kwargs["unit"] = settings["att_unit"]
-        self.texture_model.set_material_string(settings["att_material"])
+        self.texture_model.workspaces.attenuation_kwargs["point"] = settings["att_point"]
+        self.texture_model.workspaces.attenuation_kwargs["unit"] = settings["att_unit"]
+        self.texture_model.workspaces.set_material_string(settings["att_material"])
 
     def _populate_view_from_texture_model(self):
         """Populate the settings dialog fields from the current state of the texture model."""
@@ -106,7 +106,7 @@ class TexturePlannerSettingsPresenter(object):
         self.view.set_show_ks(vis["ks"])
         self.view.set_show_scattered_beam(vis["scattered"])
 
-        stl = self.texture_model.stl_kwargs
+        stl = self.texture_model.workspaces.stl_kwargs
         self.view.set_stl_scale(stl["Scale"])
         self.view.set_stl_x_deg(stl["XDegrees"])
         self.view.set_stl_y_deg(stl["YDegrees"])
@@ -123,7 +123,7 @@ class TexturePlannerSettingsPresenter(object):
         self.view.set_mc_simulate_in(mc["SimulateScatteringPointIn"])
         self.view.set_mc_resimulate(mc["ResimulateTracksForDifferentWavelengths"])
 
-        att = self.texture_model.attenuation_kwargs
+        att = self.texture_model.workspaces.attenuation_kwargs
         self.view.set_att_point(att["point"])
         self.view.set_att_unit(att["unit"])
         self.view.set_att_material(att["material"])
