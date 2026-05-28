@@ -33,6 +33,7 @@ from mantid.plots.resampling_image import samplingimage
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from mantidqt.widgets.sliceviewer.presenters.imageinfowidget import ImageInfoWidget, ImageInfoTracker
 from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots
+from mantidqt.widgets.sliceviewer.presenters.selector import cursor_info
 from mantidqt.widgets.sliceviewer.views.dataviewsubscriber import IDataViewSubscriber
 from mantidqt.widgets.sliceviewer.views.dimensionwidget import DimensionWidget
 from mantidqt.widgets.sliceviewer.views.toolbar import SliceViewerNavigationToolbar, ToolItemText
@@ -451,6 +452,9 @@ class SliceViewerDataView(QWidget):
         else:
             self.image.set_data(data.T)
         self.colorbar.update_clim()
+        if self.line_plots_active and self._line_plots is not None:
+            cursor_info.cache_clear()
+            self._line_plots.on_data_updated()
 
     def track_cursor_checked(self):
         return self.track_cursor.isChecked() if self.track_cursor else False
