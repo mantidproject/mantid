@@ -246,43 +246,72 @@ class TexturePlannerModel(object):
         SetSampleShape(self.updated_mesh_ws, xml_string)
         self.set_material()
 
+    # Returned by load_orientation_file when the file is not in Euler-angles format
+    # (matrix format, or an error path). Falls back to a 3-axis (YXY) goniometer view.
+    _DEFAULT_NUM_AXES = 3
+
     def load_orientation_file(self, txt_file):
+        """Load orientations from a whitespace/comma-separated text file.
+
+        Each line is one orientation, with values separated by tabs or commas.
+        Two formats are auto-detected from the number of values per line:
+
+        * Euler-angle format: up to 6 angles per line, interpreted against the
+          axes/senses currently configured in ``orientation_kwargs``. Returns the
+          number of axes used.
+        * Rotation-matrix format: 9 (or more) values per line forming a 3x3 row-major
+          matrix; converted internally to YXY Euler angles. Returns
+          ``_DEFAULT_NUM_AXES``.
+
+        On error (empty file, axis/sense count mismatch) logs a message and returns
+        ``_DEFAULT_NUM_AXES`` without modifying state.
+        """
         logger.notice("Loading Orientations from file")
         with open(txt_file, "r") as f:
             goniometer_strings = [line.strip().replace("\t", ",") for line in f]
             goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
         if len(goniometer_lists) == 0:
             logger.warning("No orientations found in file provided")
-            return 3
+            return self._DEFAULT_NUM_AXES
         num_entries = len(goniometer_lists[0])
-        euler_angles = num_entries <= 6
-        if not euler_angles:
-            for goniometer_list in goniometer_lists:
-                R_mat = np.asarray(goniometer_list[:9]).reshape((3, 3))
-                R = Rotation.from_matrix(R_mat)
-                vecs = [(0, 1, 0), (1, 0, 0), (0, 1, 0)]
-                senses = [1, 1, 1]
-                angles = R.as_euler("YXY", degrees=True)
-                self.add_orientation()
-                self.update_gonio_string(vecs, senses, np.round(angles, 2), self.get_num_orientations() - 1)
-                self.update_gRs(vecs, senses, np.round(angles, 2), self.get_num_orientations() - 1)
-            return 3
-        msg = ""
-        axes, senses = self.orientation_kwargs["Axes"], self.orientation_kwargs["Senses"].split(",")
+        # Heuristic: rotation matrices contribute 9 values per row, anything <= 6 is treated as Euler angles.
+        is_matrix_format = num_entries > 6
+        if is_matrix_format:
+            self._load_matrix_orientations(goniometer_lists)
+            return self._DEFAULT_NUM_AXES
+        return self._load_euler_orientations(goniometer_lists, num_entries)
+
+    def _load_matrix_orientations(self, goniometer_lists):
+        # Decompose each 3x3 rotation matrix into a YXY Euler triplet for display.
+        vecs = [(0, 1, 0), (1, 0, 0), (0, 1, 0)]
+        senses = [1, 1, 1]
+        for goniometer_list in goniometer_lists:
+            R_mat = np.asarray(goniometer_list[:9]).reshape((3, 3))
+            angles = np.round(Rotation.from_matrix(R_mat).as_euler("YXY", degrees=True), 2)
+            self.add_orientation()
+            new_index = self.get_num_orientations() - 1
+            self.update_gonio_string(vecs, senses, angles, new_index)
+            self.update_gRs(vecs, senses, angles, new_index)
+
+    def _load_euler_orientations(self, goniometer_lists, num_entries):
+        axes = self.orientation_kwargs["Axes"]
+        senses = self.orientation_kwargs["Senses"].split(",")
         num_ax, num_senses = len(axes), len(senses)
+        errors = []
         if num_entries != num_ax:
-            msg += f"Number of Angles ({num_entries}) does not match number of goniometer axes ({num_ax})\n"
+            errors.append(f"Number of Angles ({num_entries}) does not match number of goniometer axes ({num_ax})")
         if num_entries != num_senses:
-            msg += f"Number of Angles ({num_entries}) does not match number of goniometer senses ({num_senses})\n"
-        if msg != "":
-            logger.error(msg)
-            return 3
+            errors.append(f"Number of Angles ({num_entries}) does not match number of goniometer senses ({num_senses})")
+        if errors:
+            logger.error("\n".join(errors) + "\n")
+            return self._DEFAULT_NUM_AXES
         vecs = [self.axis_dict[ax.lower()] for ax in axes]
-        senses = [int(sense) for sense in senses]
+        sense_ints = [int(sense) for sense in senses]
         for angles in goniometer_lists:
             self.add_orientation()
-            self.update_gonio_string(vecs, senses, angles, self.get_num_orientations() - 1)
-            self.update_gRs(vecs, senses, np.round(angles, 2), self.get_num_orientations() - 1)
+            new_index = self.get_num_orientations() - 1
+            self.update_gonio_string(vecs, sense_ints, angles, new_index)
+            self.update_gRs(vecs, sense_ints, np.round(angles, 2), new_index)
         return num_ax
 
     def set_n_gonio(self, val):
