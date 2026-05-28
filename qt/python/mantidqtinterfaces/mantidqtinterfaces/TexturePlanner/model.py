@@ -822,14 +822,15 @@ class TexturePlannerModel(object):
             # to the sample object rather than a stale gauge volume
             DeleteLog(Workspace=self.ws, Name="GaugeVolume")
 
+    # Per-instrument detector grouping presets. Add a new instrument by adding a row here.
+    _SUPPORTED_GROUPS_BY_INSTRUMENT = {
+        "ENGINX": ("Texture20", "Texture30", "banks"),
+        "IMAT": ("Module1", "Module4", "Row1", "Row4", "banks"),
+    }
+    _DEFAULT_SUPPORTED_GROUPS = ("banks",)
+
     def update_supported_groups(self):
-        match self.instr:
-            case "ENGINX":
-                self.supported_groups = ("Texture20", "Texture30", "banks")
-            case "IMAT":
-                self.supported_groups = ("Module1", "Module4", "Row1", "Row4", "banks")
-            case _:
-                self.supported_groups = ("banks",)
+        self.supported_groups = self._SUPPORTED_GROUPS_BY_INSTRUMENT.get(self.instr, self._DEFAULT_SUPPORTED_GROUPS)
 
     def _create_new_ws_with_copied_sample(self, new_wsname, sample_to_copy, clone=False):
         # if the new_wsname is the same as the existing sample_to_copy name, need to clone the shape ws first
