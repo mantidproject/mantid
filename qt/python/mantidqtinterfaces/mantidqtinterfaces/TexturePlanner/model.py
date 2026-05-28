@@ -854,12 +854,25 @@ def ring(axis, r=1, res=100, offset=(0, 0, 0)):
 
 
 def get_alpha_beta_from_cart(q_sample_cart: np.ndarray) -> np.ndarray:
+    """Convert cartesian unit vectors to spherical angles (alpha, beta).
+
+    alpha is the angle from positive x towards positive z.
+    beta is the angle from positive y (polar angle).
+
+    Parameters
+    ----------
+    q_sample_cart : np.ndarray of shape (3, N)
+        Stacked cartesian coordinates; row 0 = x, row 1 = y, row 2 = z.
+
+    Returns
+    -------
+    np.ndarray of shape (N, 2)
+        Columns are (alpha, beta) in radians.
     """
-    get spherical angles from cartesian coordinates
-    alpha is angle from positive x towards positive z
-    beta is angle from positive y
-    """
-    q_sample_cart = np.clip(q_sample_cart.copy(), -1.0, 1.0)  # numerical inaccuracies outside this range will give nan in the trig funcs
+    if q_sample_cart.ndim != 2 or q_sample_cart.shape[0] != 3:
+        raise ValueError(f"q_sample_cart must have shape (3, N); got {q_sample_cart.shape}")
+    # numerical inaccuracies outside this range will give nan in the trig funcs
+    q_sample_cart = np.clip(q_sample_cart.copy(), -1.0, 1.0)
     q_sample_cart = np.where(q_sample_cart[1] < 0, -q_sample_cart, q_sample_cart)  # invert the southern points
     alphas = np.arctan2(q_sample_cart[2], q_sample_cart[0])
     betas = np.arccos(q_sample_cart[1])
