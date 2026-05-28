@@ -1,0 +1,1 @@
+- Dialog menus will no longer crash when populating algorithms.
