@@ -56,7 +56,7 @@ repos:
     rev: v6.2.5
     hooks:
       - id: rstcheck
-        additional_dependencies: [sphinx]
+        additional_dependencies: [sphinx, "rstcheck-core<1.3"]
         args: ["--config", ".rstcheck.project.cfg"]
         exclude: |
           (?x)^(
