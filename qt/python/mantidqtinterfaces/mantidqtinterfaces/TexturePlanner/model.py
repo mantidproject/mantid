@@ -74,11 +74,22 @@ class Orientation:
 
 
 class TexturePlannerModel(object):
+    # Workspace names used by the planner. All start with "__" so the ADS treats them as hidden.
+    WS_DATA = "__texture_planning_ws"
+    WS_INSTR = "__texture_planning_instr"
+    WS_UNGROUPED = "__texture_planning_ws_ungrouped"
+    WS_MESH_RAW = "__texture_planning_raw_sample_mesh"
+    WS_MESH_NEUTRAL = "__texture_planning_neutral_sample_mesh"
+    WS_REFERENCE = "__texture_planning_reference_ws"
+    WS_MC_INPUT = "__mc_ws"
+    WS_MC_OUTPUT = "__abs_ws"
+    WS_TMP = "__tmp_ws"
+
     def __init__(self, instrument="ENGINX", projection="azimuthal"):
         # probably static
-        self.wsname = "__texture_planning_ws"
-        self.instr_wsname = "__texture_planning_instr"
-        self.ungrouped_wsname = "__texture_planning_ws_ungrouped"
+        self.wsname = self.WS_DATA
+        self.instr_wsname = self.WS_INSTR
+        self.ungrouped_wsname = self.WS_UNGROUPED
         self.sense_vals = {"Clockwise": -1, "Counterclockwise": 1}  # mantid convention
         self.sense_names = {"-1": "Clockwise", "1": "Counterclockwise"}
         self.supported_groups = ("Texture20", "Texture30", "banks")
@@ -138,8 +149,8 @@ class TexturePlannerModel(object):
         self.orientation_kwargs = {"Axes": "YXY", "Senses": "-1,-1,-1"}
 
         self.mc_kwargs = {
-            "InputWorkspace": "__mc_ws",
-            "OutputWorkspace": "__abs_ws",
+            "InputWorkspace": self.WS_MC_INPUT,
+            "OutputWorkspace": self.WS_MC_OUTPUT,
             "EventsPerPoint": 50,
             "MaxScatterPtAttempts": int(1e4),
             "SimulateScatteringPointIn": "SampleOnly",
@@ -161,16 +172,14 @@ class TexturePlannerModel(object):
         if self.ws:
             # clone the relevant workspaces to prevent them being overwritten and the samples lost
             ws = self._create_new_ws_with_copied_sample(self.wsname, self.ws, clone=True)
-            mesh_ws = self._create_new_ws_with_copied_sample("__texture_planning_raw_sample_mesh", self.mesh_ws, clone=True)
-            updated_mesh_ws = self._create_new_ws_with_copied_sample(
-                "__texture_planning_neutral_sample_mesh", self.updated_mesh_ws, clone=True
-            )
+            mesh_ws = self._create_new_ws_with_copied_sample(self.WS_MESH_RAW, self.mesh_ws, clone=True)
+            updated_mesh_ws = self._create_new_ws_with_copied_sample(self.WS_MESH_NEUTRAL, self.updated_mesh_ws, clone=True)
         else:
             ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0,0.1,5", OutputWorkspace=self.wsname, UnitX="dSpacing")
             for ispec in range(ws.getNumberHistograms()):
                 ws.setY(ispec, np.ones_like(ws.readY(ispec)))
-            mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="__texture_planning_raw_sample_mesh")
-            updated_mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="__texture_planning_neutral_sample_mesh")
+            mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace=self.WS_MESH_RAW)
+            updated_mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace=self.WS_MESH_NEUTRAL)
             SetSampleShape(ws, get_cube_xml("default_cube", 0.01))
             SetSampleShape(mesh_ws, get_cube_xml("default_cube", 0.01))
             SetSampleShape(updated_mesh_ws, get_cube_xml("default_cube", 0.01))
@@ -216,8 +225,8 @@ class TexturePlannerModel(object):
             self.attenuation_kwargs["material"] = prev_material
             self.ws = ADS.retrieve(self.wsname)
             self.ungrouped_ws = ADS.retrieve(self.ungrouped_wsname)
-            self.mesh_ws = ADS.retrieve("__texture_planning_raw_sample_mesh")
-            self.updated_mesh_ws = ADS.retrieve("__texture_planning_neutral_sample_mesh")
+            self.mesh_ws = ADS.retrieve(self.WS_MESH_RAW)
+            self.updated_mesh_ws = ADS.retrieve(self.WS_MESH_NEUTRAL)
             try:
                 self.set_material()
             except Exception:
@@ -326,7 +335,7 @@ class TexturePlannerModel(object):
             TranslateSampleShape(InputWorkspace=ws, TranslationVector=f"{x_pos},{y_pos},{z_pos}")
 
     def update_initial_shape(self, x_rot, y_rot, z_rot, x_pos, y_pos, z_pos):
-        _tmp_ws = self._create_new_ws_with_copied_sample("__tmp_ws", self.mesh_ws)
+        _tmp_ws = self._create_new_ws_with_copied_sample(self.WS_TMP, self.mesh_ws)
         self.offset = (x_pos, y_pos, z_pos)
         self.translate_shape(_tmp_ws, *self.offset)
 
@@ -350,7 +359,7 @@ class TexturePlannerModel(object):
             RotateSampleShape(self.wsname, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
             RotateSampleShape(self.updated_mesh_ws, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
         finally:
-            ADS.remove("__tmp_ws")
+            ADS.remove(self.WS_TMP)
 
     def update_gonio_index(self, num_gonios):
         max_ind = num_gonios - 1
@@ -510,11 +519,11 @@ class TexturePlannerModel(object):
         return [[list(v.gonio_strings), v.include, v.select] for v in self.saved_orientations.values()]
 
     def calc_monte_carlo_absorption_val_for_index(self, index):
-        mc_ws = ConvertUnits(InputWorkspace=self.wsname, Target="Wavelength", OutputWorkspace="__mc_ws")
+        mc_ws = ConvertUnits(InputWorkspace=self.wsname, Target="Wavelength", OutputWorkspace=self.WS_MC_INPUT)
         mc_ws.run().getGoniometer().setR(np.eye(3))
         CopySample(
             InputWorkspace=self.mesh_ws,
-            OutputWorkspace="__mc_ws",
+            OutputWorkspace=self.WS_MC_INPUT,
             CopyShape=True,
             CopyMaterial=True,
             CopyEnvironment=False,
@@ -530,14 +539,14 @@ class TexturePlannerModel(object):
         ang = np.linalg.norm(rotvec)
         if ang != 0:
             vec = rotvec / ang
-            RotateSampleShape("__mc_ws", f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
+            RotateSampleShape(self.WS_MC_INPUT, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
 
         define_gauge_volume(mc_ws, self.gauge_volume_str)
         try:
             MonteCarloAbsorption(**self.mc_kwargs)
-            mu = read_attenuation_coefficient_at_value("__abs_ws", self.attenuation_kwargs["point"], self.attenuation_kwargs["unit"])[
-                self.starting_ind :
-            ]
+            mu = read_attenuation_coefficient_at_value(
+                self.WS_MC_OUTPUT, self.attenuation_kwargs["point"], self.attenuation_kwargs["unit"]
+            )[self.starting_ind :]
         except RuntimeError:
             logger.warning("MonteCarloAbsorption has failed, sample is assumed to be outside the gauge volume ")
             mu = np.zeros(mc_ws.getNumberHistograms() - self.starting_ind)
@@ -726,7 +735,7 @@ class TexturePlannerModel(object):
         return (o for o in self.saved_orientations.values() if o.include)
 
     def output_as_reference_workspace(self, save_dir, filename):
-        ref_wsname = "__texture_planning_reference_ws"
+        ref_wsname = self.WS_REFERENCE
         try:
             LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=ref_wsname)
             # Source from updated_mesh_ws (always identity goniometer) rather than wsname
