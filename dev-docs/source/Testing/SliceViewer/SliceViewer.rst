@@ -322,9 +322,9 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 18. Drag the top white marker of the cut representation up to L~2
 
     - u1 ~ [0,0,1]  and u2 ~ [0,1,0]
-    - There should be a peak in the 1D plot at x~1
+    - There should be a peak in the 1D plot at x~-1
 
-19. For u1 set b*=0 and c* = -1 and start=-2 - check that u2 = [0,-1,0] and there is a peak at x~-1
+19. For u1 set b*=0 and c* = -1 and start=-2 - check that u2 = [0,-1,0] and the peak is still at x~-1
 20. To change the centre of the cut move the central white marker of the cut representation to (K,L) ~ (2,0),
 
     - The entire cut representation should move
