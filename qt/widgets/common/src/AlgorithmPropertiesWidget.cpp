@@ -162,7 +162,12 @@ void AlgorithmPropertiesWidget::initLayout() {
   if (!getAlgorithm())
     return;
 
-  // Delete all widgets in the layout
+  // Delete PropertyWidgets first. This prevents a use-after-free / pure-virtual-call crash
+  // when the event loop later delivers a stale DeferredDelete event
+  for (auto &propWidget : m_propWidgets)
+    propWidget->deleteLater();
+
+  // Now drain the grid of any remaining widgets and layouts
   QLayoutItem *child;
   while ((child = m_inputGrid->takeAt(0)) != nullptr) {
     if (child->widget())
@@ -171,10 +176,6 @@ void AlgorithmPropertiesWidget::initLayout() {
     delete child;
   }
 
-  // This also deletes the PropertyWidget, which does not actually
-  // contain the sub-widgets because they are shared in the grid layout
-  for (auto &propWidget : m_propWidgets)
-    propWidget->deleteLater();
   QCoreApplication::processEvents();
   m_propWidgets.clear();
 
