@@ -378,4 +378,10 @@ NexusDescriptorLazy::getEntryValue(const std::string &entryName) const {
 template std::pair<std::string, NexusDescriptorLazy::CacheReturnStatus_t>
 NexusDescriptorLazy::getEntryValue<std::string>(const std::string &) const;
 
+template std::pair<int, NexusDescriptorLazy::CacheReturnStatus_t>
+NexusDescriptorLazy::getEntryValue<int>(const std::string &) const;
+
+template std::pair<float, NexusDescriptorLazy::CacheReturnStatus_t>
+NexusDescriptorLazy::getEntryValue<float>(const std::string &) const;
+
 } // namespace Mantid::Nexus
