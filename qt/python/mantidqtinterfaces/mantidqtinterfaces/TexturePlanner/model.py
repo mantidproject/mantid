@@ -39,8 +39,38 @@ from Engineering.texture.TextureUtils import convert_to_sscanss_frame
 from Engineering.texture.correction.correction_model import read_attenuation_coefficient_at_value
 from Engineering.texture.texture_helper import get_gauge_vol_str
 from mantid.dataobjects import Workspace2D
-from typing import Optional
+from typing import List, Optional
+from dataclasses import dataclass, field
 from Engineering.common.instrument_config import get_instr_config, SUPPORTED_INSTRUMENTS
+
+
+MAX_GONIOMETERS = 6
+_DEFAULT_GONIO_STRING = "0,1.0,0.0,0.0,-1"  # angle=0, vec=(1,0,0), sense=-1
+
+
+@dataclass
+class Orientation:
+    """One row in the orientation table: goniometer settings, the resulting
+    rotation(s), inclusion/selection flags, and any cached projection / MC results."""
+
+    gonio_strings: List[str] = field(default_factory=lambda: [_DEFAULT_GONIO_STRING] * MAX_GONIOMETERS)
+    gRs: List[Rotation] = field(default_factory=lambda: [Rotation.identity()])
+    R: Rotation = field(default_factory=Rotation.identity)
+    include: bool = True
+    select: bool = True
+    pf_points: Optional[np.ndarray] = None
+    mu: Optional[np.ndarray] = None
+
+    def copy(self) -> "Orientation":
+        return Orientation(
+            gonio_strings=list(self.gonio_strings),
+            gRs=list(self.gRs),
+            R=self.R,
+            include=self.include,
+            select=self.select,
+            pf_points=self.pf_points,
+            mu=self.mu,
+        )
 
 
 class TexturePlannerModel(object):
@@ -121,7 +151,7 @@ class TexturePlannerModel(object):
         self.settings = (self.stl_kwargs, self.orientation_kwargs, self.mc_kwargs, self.attenuation_kwargs)
 
         # data structure
-        self.saved_orientations = {0: self.get_default_info_dict()}
+        self.saved_orientations = {0: self._make_default_orientation()}
 
         # init func calls
         self.update_instrument(self.instr)
@@ -338,78 +368,57 @@ class TexturePlannerModel(object):
 
     def update_gRs(self, vecs, senses, angles, current_index):
         gRs, R = self.calc_gRs(vecs, senses, angles)
-        self.saved_orientations[current_index]["gRs"] = gRs
-        self.saved_orientations[current_index]["R"] = R
+        self.saved_orientations[current_index].gRs = gRs
+        self.saved_orientations[current_index].R = R
 
     def update_selected(self, selected_inds):
         for k, v in self.saved_orientations.items():
-            v["select"] = k in selected_inds
+            v.select = k in selected_inds
 
     def update_included(self, included_inds):
         for k, v in self.saved_orientations.items():
-            v["include"] = k in included_inds
+            v.include = k in included_inds
 
     def select_all(self):
-        for k, v in self.saved_orientations.items():
-            v["select"] = True
+        for v in self.saved_orientations.values():
+            v.select = True
 
     def deselect_all(self):
-        for k, v in self.saved_orientations.items():
-            v["select"] = False
+        for v in self.saved_orientations.values():
+            v.select = False
 
     def delete_selected(self):
         # iterate through the table and find which orientations are being kept
-        to_keep = []
-        new_orientations = {}
-        for k, v in self.saved_orientations.items():
-            if not v.get("select", True):
-                to_keep.append(k)
+        to_keep = [k for k, v in self.saved_orientations.items() if not v.select]
         # if nothing is kept instantiate new table
         if len(to_keep) == 0:
-            self.saved_orientations = {0: self.get_default_info_dict()}
+            self.saved_orientations = {0: self._make_default_orientation()}
         # otherwise copy across
         else:
-            for i, k in enumerate(to_keep):
-                new_orientations[i] = self.saved_orientations[k]
-            self.saved_orientations = new_orientations
+            self.saved_orientations = {i: self.saved_orientations[k] for i, k in enumerate(to_keep)}
         # if the orientation corresponding to the current index has been kept, update the index, otherwise 0
         new_orientation_index = to_keep.index(self.orientation_index) if self.orientation_index in to_keep else 0
         self.set_orientation_index(new_orientation_index)
 
-    def get_default_info_dict(self):
-        info = {}
-        vecs, senses, angles = (
-            [
-                (1, 0, 0),
-            ]
-            * 6,
-            [
-                -1,
-            ]
-            * 6,
-            [
-                0.0,
-            ]
-            * 6,
-        )
-        gRs, R = self.calc_gRs(vecs[: self.n_gonio], senses[: self.n_gonio], angles[: self.n_gonio])  # number of GRs controls the plot size
-        for i, vec in enumerate(vecs):
-            info[f"g{i}"] = self.get_goniometer_string(vec, senses[i], angles[i])
-        info["gRs"] = gRs
-        info["R"] = R
-        info["include"] = True
-        info["select"] = True
-        return info
+    def _make_default_orientation(self) -> Orientation:
+        vecs = [(1, 0, 0)] * MAX_GONIOMETERS
+        senses = [-1] * MAX_GONIOMETERS
+        angles = [0.0] * MAX_GONIOMETERS
+        # number of gRs controls the plot size, so size it to the current n_gonio
+        gRs, R = self.calc_gRs(vecs[: self.n_gonio], senses[: self.n_gonio], angles[: self.n_gonio])
+        gonio_strings = [self.get_goniometer_string(vecs[i], senses[i], angles[i]) for i in range(MAX_GONIOMETERS)]
+        return Orientation(gonio_strings=gonio_strings, gRs=gRs, R=R)
 
     def get_goniometer_string(self, vec, sense, angle):
         return f"{angle},{np.round(vec[0], 3)},{np.round(vec[1], 3)},{np.round(vec[2], 3)},{sense}"
 
     def update_gonio_string(self, vecs, senses, angles, index):
+        orientation = self.saved_orientations[index]
         for i, vec in enumerate(vecs):
-            self.saved_orientations[index][f"g{i}"] = self.get_goniometer_string(vec, senses[i], angles[i])
-        for i in range(len(vecs), 6):
+            orientation.gonio_strings[i] = self.get_goniometer_string(vec, senses[i], angles[i])
+        for i in range(len(vecs), MAX_GONIOMETERS):
             # for the extra goniometers, just set to default axis and null transformations
-            self.saved_orientations[index][f"g{i}"] = self.get_goniometer_string((1, 0, 0), 1, 0)
+            orientation.gonio_strings[i] = self.get_goniometer_string((1, 0, 0), 1, 0)
 
     def read_goniometer_string(self, goniometer_string):
         angle, v1, v2, v3, sense = goniometer_string.split(",")
@@ -417,24 +426,9 @@ class TexturePlannerModel(object):
 
     def get_goniometer_values(self, index):
         info = self.saved_orientations[index]
-        if "g0" not in info.keys():
-            return (
-                [
-                    "1,0,0",
-                ]
-                * 6,
-                [
-                    "Clockwise",
-                ]
-                * 6,
-                [
-                    0.0,
-                ]
-                * 6,
-            )
         vecs, senses, angles = [], [], []
-        for i in range(6):
-            vec, sense, angle = self.read_goniometer_string(info[f"g{i}"])
+        for gonio_string in info.gonio_strings:
+            vec, sense, angle = self.read_goniometer_string(gonio_string)
             vecs.append(vec)
             senses.append(sense)
             angles.append(angle)
@@ -498,12 +492,10 @@ class TexturePlannerModel(object):
             self.update_projected_data(i)
 
     def update_projected_data(self, index):
-        R = self.saved_orientations[index]["R"]
-
-        rot_pos = R.inv().apply(self.detQs_lab) @ self.ax_transform
-
+        orientation = self.saved_orientations[index]
+        rot_pos = orientation.R.inv().apply(self.detQs_lab) @ self.ax_transform
         cart_pos = get_alpha_beta_from_cart(rot_pos.T)
-        self.saved_orientations[index]["pf_points"] = ster_proj(*cart_pos.T) if self.projection == "ster" else azim_proj(*cart_pos.T)
+        orientation.pf_points = ster_proj(*cart_pos.T) if self.projection == "ster" else azim_proj(*cart_pos.T)
         if self.plot_attenuation:
             self.calc_monte_carlo_absorption_val_for_index(index)
 
@@ -515,14 +507,7 @@ class TexturePlannerModel(object):
         return len(self.saved_orientations.keys())
 
     def get_table_info(self):
-        table_info = []
-        for index, val in self.saved_orientations.items():
-            row_info = []
-            row_info.append([val[f"g{x}"] for x in range(6)])
-            row_info.append(val.get("include", True))
-            row_info.append(val.get("select", True))
-            table_info.append(row_info)
-        return table_info
+        return [[list(v.gonio_strings), v.include, v.select] for v in self.saved_orientations.values()]
 
     def calc_monte_carlo_absorption_val_for_index(self, index):
         mc_ws = ConvertUnits(InputWorkspace=self.wsname, Target="Wavelength", OutputWorkspace="__mc_ws")
@@ -538,7 +523,7 @@ class TexturePlannerModel(object):
 
         self.translate_shape(mc_ws, *self.offset)
 
-        R = self.saved_orientations[index]["R"]
+        R = self.saved_orientations[index].R
 
         shapeR = R * self.init_R
         rotvec = shapeR.as_rotvec(degrees=True)
@@ -556,7 +541,7 @@ class TexturePlannerModel(object):
         except RuntimeError:
             logger.warning("MonteCarloAbsorption has failed, sample is assumed to be outside the gauge volume ")
             mu = np.zeros(mc_ws.getNumberHistograms() - self.starting_ind)
-        self.saved_orientations[index]["mu"] = mu
+        self.saved_orientations[index].mu = mu
 
     def calc_all_monte_carlo_absorption_vals(self):
         for i in self.saved_orientations.keys():
@@ -566,44 +551,44 @@ class TexturePlannerModel(object):
         lab_ax.clear()
         proj_ax.clear()
 
-        gRs = self.saved_orientations[current_index]["gRs"]
-        R = self.saved_orientations[current_index]["R"]
+        gRs = self.saved_orientations[current_index].gRs
+        R = self.saved_orientations[current_index].R
         nGon = len(gRs)
-
-        gVecs = []
-
-        detQs_lab = self.detQs_lab
-        ax_transform = self.ax_transform
 
         self.ws.run().getGoniometer().setR(R.as_matrix())
 
         shape_mesh = self.updated_mesh_ws.sample().getShape().getMesh().copy()
         extent = (np.linalg.norm(shape_mesh, axis=(1, 2)).max() / 2) * 1.2
-
         rot_mesh = R.apply(shape_mesh.reshape((-1, 3))).reshape(shape_mesh.shape)
-
         scat_centre = _get_scattering_centre(self.ws)
 
-        # code to add goniometers to plot
+        gVecs = self._draw_goniometers(lab_ax, vecs, senses, angles, gRs, nGon, extent)
+        self._draw_sample_and_axes(fig, lab_ax, rot_mesh, extent, nGon)
+        self._draw_beam_and_detectors(lab_ax, scat_centre, extent, nGon)
+        lab_ax.set_axis_off()
+
+        gPole_xy = self._project_goniometer_poles(R, gVecs)
+        self._draw_pole_figure(proj_ax, gPole_xy, current_index)
+        self._decorate_pole_figure(proj_ax)
+
+        fig.canvas.draw_idle()
+        proj_ax.figure.canvas.draw_idle()
+
+    def _draw_goniometers(self, lab_ax, vecs, senses, angles, gRs, nGon, extent):
+        gVecs = []
         for i, vec in enumerate(vecs):
             gR = gRs[i]
             gVec = gR.apply(vec)
             gVecs.append(gVec)
 
             gon_scale = (1 + ((nGon - i) / 2)) * extent
-
             _ring_res = 360
             gon_ring = gR.apply(ring(vec, gon_scale, res=_ring_res).T).T
 
-            sense = senses[i]
-            angle = angles[i] * sense
-
+            angle = angles[i] * senses[i]
             if angle <= 0:
                 gon_ring = np.flip(gon_ring, axis=1)  # reverse the ring if the angle is negative
-
             pos_ind = int(np.abs(angle) / 360 * _ring_res)
-
-            # 3D goniometer plot
 
             if self.vis_settings["goniometers"]:
                 lab_ax.plot(*gon_ring[:, : pos_ind + 1], color=self.gon_colors[i])
@@ -617,12 +602,9 @@ class TexturePlannerModel(object):
                 )
         if self.vis_settings["goniometers"]:
             lab_ax.legend()
+        return gVecs
 
-        gPole = R.inv().apply(np.array(gVecs)) @ ax_transform
-        cart_gPole = get_alpha_beta_from_cart(gPole.T)
-        gPole_xy = ster_proj(*cart_gPole.T) if self.projection == "ster" else azim_proj(*cart_gPole.T)
-
-        # 3D plot
+    def _draw_sample_and_axes(self, fig, lab_ax, rot_mesh, extent, nGon):
         sample_model = ShowSampleModel()
         sample_model.fig = fig
         sample_model.ws_name = self.wsname
@@ -630,61 +612,52 @@ class TexturePlannerModel(object):
         fig.sca(lab_ax)
         plot_sample_only(fig, rot_mesh, 0.5, "grey")
         if self.vis_settings["directions"]:
-            sample_model.plot_sample_directions(ax_transform, self.dir_names)
-        lab_ax.set_xlim([-extent * nGon / 1.5, extent * nGon / 1.5])
-        lab_ax.set_ylim([-extent * nGon / 1.5, extent * nGon / 1.5])
-        lab_ax.set_zlim([-extent * nGon / 1.5, extent * nGon / 1.5])
+            sample_model.plot_sample_directions(self.ax_transform, self.dir_names)
+        lim = extent * nGon / 1.5
+        lab_ax.set_xlim([-lim, lim])
+        lab_ax.set_ylim([-lim, lim])
+        lab_ax.set_zlim([-lim, lim])
         lab_ax.set_aspect("equal")
         if self.gauge_volume_str:
             sample_model.plot_gauge_vol()
 
-        # plot incident beam
+    def _draw_beam_and_detectors(self, lab_ax, scat_centre, extent, nGon):
         comp_info = self.ws.componentInfo()
         ki = scat_centre - np.array(comp_info.sourcePosition())
-        ki_norm = ki / np.linalg.norm(ki)
-        ki = ki_norm * extent * nGon / 0.75
-        beam = -ki
+        ki = (ki / np.linalg.norm(ki)) * extent * nGon / 0.75
         if self.vis_settings["incident"]:
-            lab_ax.quiver(*beam, *ki, arrow_length_ratio=0.05, color="black", alpha=0.25)
+            lab_ax.quiver(*(-ki), *ki, arrow_length_ratio=0.05, color="black", alpha=0.25)
 
-        # plot detector Qs
         if self.vis_settings["ks"]:
-            ks_scaled = detQs_lab * (1.25 * extent)
-            ks_point = ks_scaled + scat_centre[None, :]
-            n = len(ks_scaled)
-            lab_ax.quiver(
-                np.ones(n) * scat_centre[0],
-                np.ones(n) * scat_centre[1],
-                np.ones(n) * scat_centre[2],
-                ks_scaled[:, 0],
-                ks_scaled[:, 1],
-                ks_scaled[:, 2],
-                arrow_length_ratio=0.05,
-                color="grey",
-                alpha=0.25,
-                linestyle="--",
-            )
-            lab_ax.scatter(ks_point[:, 0], ks_point[:, 1], ks_point[:, 2], color="dodgerblue", s=2)
-
+            self._draw_quiver_bundle(lab_ax, self.detQs_lab, scat_centre, extent, "dodgerblue", linestyle="--")
         if self.vis_settings["scattered"]:
-            scat_scaled = np.asarray(self.det_k) * (1.25 * extent)
-            scat_tips = scat_scaled + scat_centre[None, :]
-            n = len(scat_scaled)
-            lab_ax.quiver(
-                np.ones(n) * scat_centre[0],
-                np.ones(n) * scat_centre[1],
-                np.ones(n) * scat_centre[2],
-                scat_scaled[:, 0],
-                scat_scaled[:, 1],
-                scat_scaled[:, 2],
-                arrow_length_ratio=0.05,
-                color="grey",
-                alpha=0.25,
-            )
-            lab_ax.scatter(scat_tips[:, 0], scat_tips[:, 1], scat_tips[:, 2], color="grey", s=2)
-        lab_ax.set_axis_off()
+            self._draw_quiver_bundle(lab_ax, np.asarray(self.det_k), scat_centre, extent, "grey")
 
-        # 2D plot
+    @staticmethod
+    def _draw_quiver_bundle(lab_ax, dirs, scat_centre, extent, tip_color, linestyle="-"):
+        scaled = dirs * (1.25 * extent)
+        tips = scaled + scat_centre[None, :]
+        n = len(scaled)
+        lab_ax.quiver(
+            np.ones(n) * scat_centre[0],
+            np.ones(n) * scat_centre[1],
+            np.ones(n) * scat_centre[2],
+            scaled[:, 0],
+            scaled[:, 1],
+            scaled[:, 2],
+            arrow_length_ratio=0.05,
+            color="grey",
+            alpha=0.25,
+            linestyle=linestyle,
+        )
+        lab_ax.scatter(tips[:, 0], tips[:, 1], tips[:, 2], color=tip_color, s=2)
+
+    def _project_goniometer_poles(self, R, gVecs):
+        gPole = R.inv().apply(np.array(gVecs)) @ self.ax_transform
+        cart_gPole = get_alpha_beta_from_cart(gPole.T)
+        return ster_proj(*cart_gPole.T) if self.projection == "ster" else azim_proj(*cart_gPole.T)
+
+    def _draw_pole_figure(self, proj_ax, gPole_xy, current_index):
         for i, gP in enumerate(gPole_xy):
             pc = self.gon_colors[i]
             fc = "None" if i != self.gonio_index else pc
@@ -694,37 +667,34 @@ class TexturePlannerModel(object):
                 proj_ax.scatter(gP[1], gP[0], s=30, edgecolor=pc, facecolor=fc)
 
         if not self.plot_attenuation:
-            for i in self.saved_orientations.keys():
-                if self.saved_orientations[i].get("include", True):
-                    pf_xy = self.saved_orientations[i]["pf_points"]
+            for i, orientation in self.saved_orientations.items():
+                if orientation.include:
+                    pf_xy = orientation.pf_points
                     if i == current_index:
                         proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, c="dodgerblue")
                     else:
                         proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="dodgerblue")
                 elif i == current_index:
-                    pf_xy = self.saved_orientations[i]["pf_points"]
+                    pf_xy = orientation.pf_points
                     proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="grey", alpha=0.5)
         else:
-            all_pf_xy = np.concatenate(
-                [info["pf_points"] for info in self.saved_orientations.values() if info.get("include", True)], axis=0
-            )
-            all_mus = np.concatenate([info["mu"] for info in self.saved_orientations.values() if info.get("include", True)], axis=0)
+            included = [o for o in self.saved_orientations.values() if o.include]
+            all_pf_xy = np.concatenate([o.pf_points for o in included], axis=0)
+            all_mus = np.concatenate([o.mu for o in included], axis=0)
             scatt = proj_ax.scatter(all_pf_xy[:, 1], all_pf_xy[:, 0], s=20, c=all_mus, vmin=0, vmax=1, cmap="jet")
             cax = proj_ax.inset_axes([0.9, 0.15, 0.05, 0.7])
             proj_ax.figure.colorbar(scatt, cax=cax)
 
+    def _decorate_pole_figure(self, proj_ax):
         proj_ax.set_aspect("equal")
         proj_ax.set_xlim(-1.5, 1.5)
         proj_ax.set_ylim(-1.5, 1.5)
-        [proj_ax.quiver(*np.array((-1, -1)), *bv, color=self.dir_cols[-1 + i], scale=5) for i, bv in enumerate(np.eye(2))]
-        circle = plt.Circle((0, 0), 1, color="grey", fill=False, linestyle="-")
-        proj_ax.add_patch(circle)
+        for i, bv in enumerate(np.eye(2)):
+            proj_ax.quiver(*np.array((-1, -1)), *bv, color=self.dir_cols[-1 + i], scale=5)
+        proj_ax.add_patch(plt.Circle((0, 0), 1, color="grey", fill=False, linestyle="-"))
         proj_ax.annotate(self.dir_names[0], (-0.95, -0.8))
         proj_ax.annotate(self.dir_names[2], (-0.8, -0.95))
         proj_ax.set_axis_off()
-
-        fig.canvas.draw_idle()
-        proj_ax.figure.canvas.draw_idle()
 
     def output_as_sscanss(self, save_dir, filename):
         header = [
@@ -732,11 +702,10 @@ class TexturePlannerModel(object):
         ]
         sscanss_lines = []
         save_file = os.path.join(save_dir, filename + ".angles")
-        for i in self.saved_orientations.keys():
-            if self.saved_orientations[i].get("include", True):
-                angs = convert_to_sscanss_frame(self.saved_orientations[i]["R"].as_matrix())
-                for _ in range(self.n_output_points):
-                    sscanss_lines.append(f"{np.round(angs[0], 2)}\t{np.round(angs[1], 2)}\t{np.round(angs[2], 2)}\n")
+        for orientation in self._included_orientations():
+            angs = convert_to_sscanss_frame(orientation.R.as_matrix())
+            for _ in range(self.n_output_points):
+                sscanss_lines.append(f"{np.round(angs[0], 2)}\t{np.round(angs[1], 2)}\t{np.round(angs[2], 2)}\n")
 
         with open(save_file, "w") as f:
             f.writelines(header + sscanss_lines)
@@ -745,14 +714,16 @@ class TexturePlannerModel(object):
     def output_as_matrix(self, save_dir, filename):
         lines = []
         save_file = os.path.join(save_dir, filename + ".txt")
-        for i in self.saved_orientations.keys():
-            if self.saved_orientations[i].get("include", True):
-                rot_mat = self.saved_orientations[i]["R"].as_matrix().reshape(-1)
-                for _ in range(self.n_output_points):
-                    lines.append("\t".join([str(x) for x in rot_mat]) + "\n")
+        for orientation in self._included_orientations():
+            rot_mat = orientation.R.as_matrix().reshape(-1)
+            for _ in range(self.n_output_points):
+                lines.append("\t".join([str(x) for x in rot_mat]) + "\n")
         with open(save_file, "w") as f:
             f.writelines(lines)
         logger.notice(f"Orientation data written to '{save_file}' as Rotation Matrices")
+
+    def _included_orientations(self):
+        return (o for o in self.saved_orientations.values() if o.include)
 
     def output_as_reference_workspace(self, save_dir, filename):
         ref_wsname = "__texture_planning_reference_ws"
@@ -792,12 +763,11 @@ class TexturePlannerModel(object):
     def output_as_euler(self, save_dir, filename):
         lines = []
         save_file = os.path.join(save_dir, filename + ".txt")
-        for i in self.saved_orientations.keys():
-            if self.saved_orientations[i].get("include", True):
-                angles = self.saved_orientations[i]["R"].as_euler(self.orientation_kwargs["Axes"], degrees=True)
-                angles = [str(float(sense) * angles[i]) for i, sense in enumerate(self.orientation_kwargs["Senses"].split(","))]
-                for _ in range(self.n_output_points):
-                    lines.append("\t".join(angles) + "\n")
+        for orientation in self._included_orientations():
+            angles = orientation.R.as_euler(self.orientation_kwargs["Axes"], degrees=True)
+            angles = [str(float(sense) * angles[i]) for i, sense in enumerate(self.orientation_kwargs["Senses"].split(","))]
+            for _ in range(self.n_output_points):
+                lines.append("\t".join(angles) + "\n")
         with open(save_file, "w") as f:
             f.writelines(lines)
         logger.notice(
