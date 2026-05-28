@@ -35,6 +35,21 @@ std::vector<std::string> filterDatasets(const Nexus::NXEntry &entry, const std::
   return fvalues;
 }
 
+// Extract groups from the group that match a regex filter
+std::vector<std::string> filterGroups(const Nexus::NXEntry &entry, const std::string &groupAddress,
+                                      const std::string &regexFilter) {
+  std::vector<std::string> fvalues;
+  auto group = entry.openNXGroup(groupAddress);
+  auto groups = group.groups();
+  for (auto nxi : groups) {
+    if (std::regex_match(nxi.nxname, std::regex(regexFilter))) {
+      fvalues.emplace_back(nxi.nxname);
+    }
+  }
+
+  return fvalues;
+}
+
 // ProgressTracker
 ProgressTracker::ProgressTracker(API::Progress &progBar, const char *msg, int64_t target, size_t count)
     : m_msg(msg), m_count(count), m_step(target / count), m_next(m_step), m_progBar(progBar) {
@@ -520,13 +535,18 @@ template <class T> bool loadNXDataSet(const Nexus::NXEntry &entry, const std::st
     dataSet.load();
 
     // if negative index go from the end
-    if (index < 0) {
-      auto N = dataSet.dim0();
-      value = dataSet[N + index];
+    if (dataSet.rank() == 0) {
+      value = dataSet[0];
+      return true;
     } else {
-      value = dataSet[index];
+      if (index < 0) {
+        auto N = dataSet.dim0();
+        value = dataSet[N + index];
+      } else {
+        value = dataSet[index];
+      }
+      return true;
     }
-    return true;
   } catch (std::runtime_error &) {
     return false;
   }
@@ -606,27 +626,39 @@ template <typename T>
 uint64_t extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
                              std::vector<uint64_t> &times, std::vector<T> &events, std::string &units) {
 
-  auto timeStamp = entry.openNXDataSet<uint64_t>(path + "/time");
-  timeStamp.load();
-  size_t maxn = timeStamp.size();
-  uint64_t startIx{0}, endIx{0};
-  auto itt = timeStamp();
-  for (size_t i = 0; i < maxn; i++) {
-    auto v = itt[i];
-    if (v <= startTime)
-      startIx = i;
-    if (v < endTime)
-      endIx = i + 1;
+  // Check if entry is a group and contains the expected datasets
+  // otherwise extract the dataset value at the start time and return 1
+  if (isTimedDataSet(entry, path)) {
+    auto timeStamp = entry.openNXDataSet<uint64_t>(path + "/time");
+    timeStamp.load();
+    size_t maxn = timeStamp.size();
+    uint64_t startIx{0}, endIx{0};
+    auto itt = timeStamp();
+    for (size_t i = 0; i < maxn; i++) {
+      auto v = itt[i];
+      if (v <= startTime)
+        startIx = i;
+      if (v < endTime)
+        endIx = i + 1;
+    }
+    times.assign(itt + startIx, itt + endIx);
+
+    auto values = entry.openNXDataSet<T>(path + "/value");
+    units = values.attributes("units");
+    values.load();
+    auto itv = values();
+    events.assign(itv + startIx, itv + endIx);
+
+    return endIx - startIx;
+  } else {
+    T value{0};
+    if (loadNXDataSet<T>(entry, path, value, -1)) {
+      times.push_back(startTime);
+      events.push_back(value);
+      return 1;
+    }
   }
-  times.assign(itt + startIx, itt + endIx);
-
-  auto values = entry.openNXDataSet<T>(path + "/value");
-  units = values.attributes("units");
-  values.load();
-  auto itv = values();
-  events.assign(itv + startIx, itv + endIx);
-
-  return endIx - startIx;
+  return 0;
 }
 
 template <typename T>
@@ -660,7 +692,7 @@ bool extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, u
   return retn;
 }
 
-void ReadEventData(ProgressTracker &prog, const Nexus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec,
+void ReadEventData(ProgressTracker &prog, const Nexus::NXEntry &entry, BaseEventProcessor *handler, uint64_t start_nsec,
                    uint64_t end_nsec, const std::string &neutron_path, int tube_resolution) {
 
   // the detector event time zero is the actual chopper time and all the events are
@@ -718,14 +750,17 @@ void ReadEventData(ProgressTracker &prog, const Nexus::NXEntry &entry, EventProc
 template bool loadNXDataSet<float>(const Nexus::NXEntry &entry, const std::string &path, float &value, int index);
 template bool loadNXDataSet<double>(const Nexus::NXEntry &entry, const std::string &path, double &value, int index);
 template bool loadNXDataSet<int>(const Nexus::NXEntry &entry, const std::string &path, int &value, int index);
-template bool loadNXDataSet<uint64_t>(const Nexus::NXEntry &entry, const std::string &path, uint64_t &value, int index);
 template bool loadNXDataSet<int64_t>(const Nexus::NXEntry &entry, const std::string &path, int64_t &value, int index);
+template bool loadNXDataSet<uint64_t>(const Nexus::NXEntry &entry, const std::string &path, uint64_t &value, int index);
 template uint64_t extractTimedDataSet<float>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
                                              uint64_t endTime, std::vector<uint64_t> &times, std::vector<float> &events,
                                              std::string &units);
 template uint64_t extractTimedDataSet<double>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
                                               uint64_t endTime, std::vector<uint64_t> &times,
                                               std::vector<double> &events, std::string &units);
+template uint64_t extractTimedDataSet<int>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                           uint64_t endTime, std::vector<uint64_t> &times, std::vector<int> &events,
+                                           std::string &units);
 
 template bool extractTimedDataSet<float>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
                                          uint64_t endTime, ScanLog valueOption, uint64_t &eventTime, float &eventValue,
@@ -733,6 +768,12 @@ template bool extractTimedDataSet<float>(const Nexus::NXEntry &entry, const std:
 template bool extractTimedDataSet<double>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
                                           uint64_t endTime, ScanLog valueOption, uint64_t &eventTime,
                                           double &eventValue, std::string &units);
+template bool extractTimedDataSet<int>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                       uint64_t endTime, ScanLog valueOption, uint64_t &eventTime, int &eventValue,
+                                       std::string &units);
+template bool extractTimedDataSet<int64_t>(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime,
+                                           uint64_t endTime, ScanLog valueOption, uint64_t &eventTime,
+                                           int64_t &eventValue, std::string &units);
 
 } // namespace Anxs
 

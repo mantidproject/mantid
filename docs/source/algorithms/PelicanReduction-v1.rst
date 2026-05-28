@@ -34,7 +34,7 @@ Usage
 .. testoutput::  PelicanReductionExample
 
     Workspaces in group = 3
-    First workspace: test_qw1_1D_dE
+    First workspace: test_qw3_1D_dE
 
 References
 ----------

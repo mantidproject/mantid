@@ -21,13 +21,34 @@ class PelicanReductionSOFQWTest(systemtesting.MantidSystemTest):
             OutputWorkspace="test",
             EnergyTransfer="-2,0.05,2",
             MomentumTransfer="0,0.05,2",
-            Processing="SOFQW1-Centre",
+            Processing="SOFQW3-NormalisedPolygon",
             ConfigurationFile="pelican_doctest.ini",
         )
 
     def validate(self):
         self.disableChecking.append("Instrument")
-        return "test_qw1_2D", "PelicanReductionExampleSOFQW.nxs"
+        return "test_qw3_2D", "PelicanReductionExampleSOFQW.nxs"
+
+
+class Pelican2ReductionSOFQWTest(systemtesting.MantidSystemTest):
+    def __init__(self):
+        systemtesting.MantidSystemTest.__init__(self)
+        self.tolerance = 1e-6
+
+    def runTest(self):
+        PelicanReduction(
+            "136193",
+            OutputWorkspace="test",
+            EnergyTransfer="-2,0.04,3",
+            MomentumTransfer="0,0.05,2.5",
+            Processing="SOFQW3-NormalisedPolygon",
+            CalibrateTOF=True,
+            ConfigurationFile="pelican_doctest2.ini",
+        )
+
+    def validate(self):
+        self.disableChecking.append("Instrument")
+        return "test_qw3_2D", "Pelican2ReductionExampleSOFQW.nxs"
 
 
 class PelicanReductionNXSPETest(systemtesting.MantidSystemTest):
@@ -57,12 +78,16 @@ class PelicanReductionAutoQTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         PelicanReduction(
-            "44464", OutputWorkspace="test", EnergyTransfer="-2,0.05,2", Processing="SOFQW1-Centre", ConfigurationFile="pelican_doctest.ini"
+            "44464",
+            OutputWorkspace="test",
+            EnergyTransfer="-2,0.05,2",
+            Processing="SOFQW3-NormalisedPolygon",
+            ConfigurationFile="pelican_doctest.ini",
         )
-        self.assertTrue("test_qw1" in mtd, "Expected output workspace group in ADS")
-        wg = mtd["test_qw1"]
+        self.assertTrue("test_qw3" in mtd, "Expected output workspace group in ADS")
+        wg = mtd["test_qw3"]
         index = dict([(tag, i) for i, tag in enumerate(wg.getNames())])
-        ws = wg.getItem(index["test_qw1_2D"])
+        ws = wg.getItem(index["test_qw3_2D"])
         xv = ws.dataX(0)
         self.assertDelta(xv[0], 0.0, 0.01, "Unexpected minimum Q value")
         self.assertDelta(xv[-1], 2.7, 0.01, "Unexpected maximum Q value")
@@ -81,7 +106,7 @@ class PelicanReductionDebugFilesTest(systemtesting.MantidSystemTest):
             "44464",
             OutputWorkspace="test",
             EnergyTransfer="-2,0.05,2",
-            Processing="SOFQW1-Centre",
+            Processing="SOFQW3-NormalisedPolygon",
             KeepIntermediateWorkspaces=True,
             ConfigurationFile="pelican_doctest.ini",
         )

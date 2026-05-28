@@ -5,7 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidDataHandling/LoadPLN.h"
+#include "MantidDataHandling/LoadPLNnxs.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LogManager.h"
@@ -30,15 +31,37 @@
 namespace Mantid::DataHandling {
 
 using namespace Kernel;
+using namespace API;
+using namespace Nexus;
 
-namespace {
+using namespace ANSTO;
+using ANSTO::EventVector_pt;
+
+// algorithm parameter names
+constexpr char FilenameStr[] = "Filename";
+constexpr char MaskStr[] = "Mask";
+constexpr char SelectDetectorTubesStr[] = "SelectDetectorTubes";
+constexpr char SelectDatasetStr[] = "SelectDataset";
+constexpr char FilterByTimeStartStr[] = "FilterByTimeStart";
+constexpr char FilterByTimeStopStr[] = "FilterByTimeStop";
+constexpr char TOFBiasStr[] = "TimeOfFlightBias";
+constexpr char CalibrateTOFStr[] = "CalibrateTOFBias";
+constexpr char LambdaOnTwoStr[] = "LambdaOnTwoMode";
+constexpr char UseHMScanTimeStr[] = "UseHMScanTime";
+
+// register the algorithm
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadPLNnxs)
+
+static const std::map<std::string, Anxs::ScanLog> ScanLogMap = {
+    {"end", Anxs::ScanLog::End}, {"mean", Anxs::ScanLog::Mean}, {"start", Anxs::ScanLog::Start}};
 
 // number of physical detectors
 constexpr size_t MONITORS = 8;
 constexpr size_t DETECTOR_TUBES = 200;
 constexpr size_t HISTO_BINS_X = DETECTOR_TUBES + MONITORS;
 constexpr size_t HISTO_BINS_Y_DENUMERATOR = 16;
-constexpr size_t PIXELS_PER_TUBE = 1024 / HISTO_BINS_Y_DENUMERATOR;
+constexpr size_t TUBE_DETECTOR_RESOLUTION = 1024;
+constexpr size_t PIXELS_PER_TUBE = TUBE_DETECTOR_RESOLUTION / HISTO_BINS_Y_DENUMERATOR;
 constexpr size_t DETECTOR_SPECTRA = DETECTOR_TUBES * PIXELS_PER_TUBE;
 constexpr size_t HISTOGRAMS = DETECTOR_SPECTRA + MONITORS;
 
@@ -47,20 +70,16 @@ constexpr size_t Progress_LoadBinFile = 48;
 constexpr size_t Progress_ReserveMemory = 4;
 constexpr size_t Progress_Total = 2 * Progress_LoadBinFile + Progress_ReserveMemory;
 
-// Algorithm parameter names
-constexpr char FilenameStr[] = "Filename";
-constexpr char MaskStr[] = "Mask";
-constexpr char SelectDetectorTubesStr[] = "SelectDetectorTubes";
-constexpr char SelectDatasetStr[] = "SelectDataset";
-constexpr char FilterByTimeStartStr[] = "FilterByTimeStart";
-constexpr char FilterByTimeStopStr[] = "FilterByTimeStop";
-constexpr char PathToBinaryStr[] = "BinaryEventPath";
-constexpr char TOFBiasStr[] = "TimeOfFlightBias";
-constexpr char CalibrateTOFStr[] = "CalibrateTOFBias";
-constexpr char LambdaOnTwoStr[] = "LambdaOnTwoMode";
-
 // Common pairing of limits
 using TimeLimits = std::pair<double, double>;
+
+struct DatasetTime {
+  DatasetTime(int32_t index, int64_t start, int64_t end) : index(index), start(start), end(end) {}
+
+  int32_t index;
+  int64_t start;
+  int64_t end;
+};
 
 template <typename Type>
 void AddSinglePointTimeSeriesProperty(API::LogManager &logManager, const std::string &time, const std::string &name,
@@ -71,6 +90,13 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager, const std::st
 
   // add to log manager
   logManager.addProperty(p);
+}
+
+template <typename T>
+void AddSinglePointTimeSeriesProperty(API::LogManager &logManager, std::int64_t eventTime, const std::string &name,
+                                      const T value) {
+  std::string strEventTime = Types::Core::DateAndTime(Anxs::epochRelDateTimeBase(eventTime)).toISO8601String();
+  AddSinglePointTimeSeriesProperty<T>(logManager, strEventTime, name, value);
 }
 
 // Utility functions for loading values with defaults
@@ -131,12 +157,19 @@ void MapNeXusToProperty<std::string>(const Nexus::NXEntry &entry, const std::str
 }
 
 template <typename T>
-void MapNeXusToSeries(const Nexus::NXEntry &entry, const std::string &address, const T &defval,
-                      API::LogManager &logManager, const std::string &time, const std::string &name, const T &factor,
-                      int32_t index) {
+void MapNeXusToSeries(const Nexus::NXEntry &entry, const std::string &nxsPath, uint64_t startTime, uint64_t endTime,
+                      Anxs::ScanLog valueOption, const T &defval, API::LogManager &logManager,
+                      const std::string &logName, const T &factor) {
 
-  auto value = GetNeXusValue<T>(entry, address, defval, index);
-  AddSinglePointTimeSeriesProperty<T>(logManager, time, name, value * factor);
+  std::string units;
+  uint64_t eventTime{0};
+  T eventValue{0};
+  if (!Anxs::extractTimedDataSet(entry, nxsPath, startTime, endTime, valueOption, eventTime, eventValue, units)) {
+    eventValue = defval;
+    eventTime = startTime;
+  }
+  std::string strEventTime = Types::Core::DateAndTime(Anxs::epochRelDateTimeBase(eventTime)).toISO8601String();
+  AddSinglePointTimeSeriesProperty<T>(logManager, strEventTime, logName, eventValue * factor);
 }
 
 // map the comma separated range of indexes to the vector via a lambda function
@@ -174,6 +207,20 @@ template <typename T, typename F> void mapRangeToIndex(const std::string &line, 
   }
 }
 
+void loadEvents(API::Progress &prog, const char *progMsg, ANSTO::BaseEventProcessor *eventProcessor,
+                const Nexus::NXEntry &entry, uint64_t start_nsec, uint64_t end_nsec) {
+
+  prog.doReport(progMsg);
+
+  // for progress notifications
+  ANSTO::ProgressTracker progTracker(prog, progMsg, Progress_LoadBinFile, Progress_LoadBinFile);
+
+  const std::string neutronPath{"instrument/detector_events"};
+  Anxs::ReadEventData(progTracker, entry, eventProcessor, start_nsec, end_nsec, neutronPath, TUBE_DETECTOR_RESOLUTION);
+}
+
+namespace PLN2 {
+
 // Simple reader that is compatible with the ASNTO event file loader
 class FileLoader {
   std::ifstream _ifs;
@@ -197,10 +244,6 @@ public:
 
   size_t selected_position() { return _ifs.tellg(); }
 };
-
-} // anonymous namespace
-
-namespace PLN {
 
 //
 // In the future the ANSTO helper and event file loader will be generalized to
@@ -242,7 +285,7 @@ public:
   inline size_t count() const { return m_count; }
 };
 
-class EventProcessor {
+class EventProcessor : public ANSTO::BaseEventProcessor {
 protected:
   // fields
   const std::vector<bool> &m_roi;
@@ -271,7 +314,7 @@ public:
         m_framesValid(0), m_maxEvents(maxEvents), m_processedEvents(0), m_droppedEvents(0),
         m_timeBoundary(timeBoundary) {}
 
-  void newFrame() {
+  void newFrame() override {
     if (m_maxEvents == 0 || m_processedEvents < m_maxEvents) {
       m_frames++;
       if (validFrame())
@@ -301,7 +344,7 @@ public:
 
   size_t processedEvents() const { return m_processedEvents; }
 
-  void addEvent(size_t x, size_t p, double tof, double /*taux*/) {
+  void addEvent(size_t x, size_t p, double tof) override {
 
     // check if in time boundaries
     if (!validFrame())
@@ -427,25 +470,11 @@ public:
   double tofMax() const { return m_tofMin <= m_tofMax ? m_tofMax : 0.0; }
 };
 
-template <typename EP>
-void loadEvents(API::Progress &prog, const char *progMsg, const std::string &eventFile, EP &eventProcessor) {
-
-  using namespace ANSTO;
-
-  prog.doReport(progMsg);
-
-  FileLoader loader(eventFile.c_str());
-
-  // for progress notifications
-  ANSTO::ProgressTracker progTracker(prog, progMsg, loader.size(), Progress_LoadBinFile);
-
-  ReadEventFile(loader, eventProcessor, progTracker, 100, false);
-}
-} // namespace PLN
+} // namespace PLN2
 
 /// Initialise the algorithm and declare the properties for the
 /// nexus descriptor.
-void LoadPLN::init() {
+void LoadPLNnxs::init() {
 
   // Specify file extensions which can be associated with a specific file.
   std::vector<std::string> exts;
@@ -453,13 +482,9 @@ void LoadPLN::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
   exts.clear();
-  exts.emplace_back(".hdf");
+  exts.emplace_back(".nxs");
   declareProperty(std::make_unique<API::FileProperty>(FilenameStr, "", API::FileProperty::Load, exts),
                   "The input filename of the stored data");
-
-  declareProperty(PathToBinaryStr, "./", std::make_shared<Kernel::MandatoryValidator<std::string>>(),
-                  "Relative or absolute path to the compressed binary\n"
-                  "event file linked to the HDF file, eg /storage/data/");
 
   // mask
   exts.clear();
@@ -490,13 +515,15 @@ void LoadPLN::init() {
                   "Only include events before the provided stop time, in "
                   "seconds (relative to the start of the run).");
 
+  declareProperty(UseHMScanTimeStr, false, "Use hmscan time rather than scan_dataset.");
+
   std::string grpOptional = "Filters";
   setPropertyGroup(FilterByTimeStartStr, grpOptional);
   setPropertyGroup(FilterByTimeStopStr, grpOptional);
 }
 
 /// Creates an event workspace and sets the \p title.
-void LoadPLN::createWorkspace(const std::string &title) {
+void LoadPLNnxs::createWorkspace(const std::string &title) {
 
   // Create the workspace
   m_localWorkspace = std::make_shared<DataObjects::EventWorkspace>();
@@ -510,31 +537,48 @@ void LoadPLN::createWorkspace(const std::string &title) {
   m_localWorkspace->setTitle(title);
 }
 
-/// Execute the algorithm using the \p hdfFile and \p eventFile.
-/// The steps involved are:
-///   Create the workspace
-///   Get the instrument properties and load options
-///   Load the instrument from the IDF
-///   Load the data values and adjust TOF
-///   Set up the masks
-
-void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
+/// Execute the algorithm. Establishes the filepath to the event file
+/// from the HDF link and the path provided and invokes the common
+// exec() function that works with the two files.
+void LoadPLNnxs::exec() {
 
   namespace fs = std::filesystem;
 
-  // Create workspace
-  // ----------------
-  fs::path p = hdfFile;
-  for (; !p.extension().empty();)
-    p = p.stem();
-  std::string title = p.generic_string();
-  createWorkspace(title);
+  // Delete the output workspace name if it existed
+  std::string outName = getPropertyValue("OutputWorkspace");
+  if (API::AnalysisDataService::Instance().doesExist(outName))
+    API::AnalysisDataService::Instance().remove(outName);
+
+  std::string nxsFile = getPropertyValue(FilenameStr);
+
+  // choose sics or hms dataset timing
+  bool const useHMScanTime = getProperty(UseHMScanTimeStr);
+
+  // dataset index to be loaded
+  m_datasetIndex = getProperty(SelectDatasetStr);
+
+  // get the root entry and time period
+  Nexus::NXRoot root(nxsFile);
+  Nexus::NXEntry nxsEntry = root.openFirstEntry();
+  uint64_t startTime, endTime;
+  if (useHMScanTime)
+    std::tie(startTime, endTime) = Anxs::getHMScanLimits(nxsEntry, m_datasetIndex);
+  else
+    std::tie(startTime, endTime) = Anxs::getTimeScanLimits(nxsEntry, m_datasetIndex);
+  if (startTime >= endTime) {
+    g_log.error() << "Invalid time window from hmscan" << "\n";
+    throw std::runtime_error("LoadPLNnxs: invalid or missing scan time range.");
+  }
+  m_startRun = Types::Core::DateAndTime(Anxs::epochRelDateTimeBase(startTime)).toISO8601String();
+
+  // Create workspace and initiate progress bar
+  createWorkspace(Anxs::extractWorkspaceTitle(nxsFile));
   API::LogManager &logManager = m_localWorkspace->mutableRun();
   API::Progress prog(this, 0.0, 1.0, Progress_Total);
 
   // Load instrument and workspace properties
   logManager.addProperty(SelectDatasetStr, m_datasetIndex);
-  loadParameters(hdfFile, logManager);
+  loadParameters(nxsEntry, startTime, endTime, logManager);
   prog.doReport("creating instrument");
   loadInstrument();
 
@@ -572,30 +616,25 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
   AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "GatePeriod", gatePeriod);
 
   // count total events per pixel and reserve necessary memory
-  size_t hdfCounts = static_cast<size_t>(logManager.getTimeSeriesProperty<int>("TotalCounts")->firstValue());
+  // size_t hdfCounts = static_cast<size_t>(logManager.getTimeSeriesProperty<int64_t>("TotalCounts")->firstValue());
   loadDetectorL2Values();
   double sourceSample = fabs(instr->getSource()->getPos().Z());
   double wavelength = logManager.getTimeSeriesProperty<double>("Wavelength")->firstValue();
   double velocity = PhysicalConstants::h / (PhysicalConstants::NeutronMass * wavelength * 1e-10);
   double sampleTime = 1.0e6 * sourceSample / velocity;
-  PLN::EventCounter eventCounter(roi, detMapIndex, framePeriod, gatePeriod, timeBoundary, eventCounts, sourceSample,
-                                 velocity, m_detectorL2, hdfCounts);
-  PLN::loadEvents(prog, "loading neutron counts", eventFile, eventCounter);
+  PLN2::EventCounter eventCounter(roi, detMapIndex, framePeriod, gatePeriod, timeBoundary, eventCounts, sourceSample,
+                                  velocity, m_detectorL2, 0);
+  loadEvents(prog, "loading neutron counts", &eventCounter, nxsEntry, startTime, endTime);
   ANSTO::ProgressTracker progTracker(prog, "creating neutron event lists", numberHistograms, Progress_ReserveMemory);
   prepareEventStorage(progTracker, eventCounts, eventVectors);
 
-  // log a message if the number of events in the event file does not match
-  // the total counts in the hdf
-  if (hdfCounts != eventCounter.availableEvents()) {
-    g_log.error("HDF and event counts differ: " + std::to_string(hdfCounts) + ", " +
-                std::to_string(eventCounter.availableEvents()));
-  }
+  AddSinglePointTimeSeriesProperty<int64_t>(logManager, m_startRun, "TotalCounts", eventCounter.availableEvents());
 
-  // now perform the actual event collection and TOF convert if necessary
+  // perform the actual event collection and TOF convert if necessary
   // if a phase calibration is required then load it as raw doppler time
   // perform the calibration and then convert to TOF
-  Types::Core::DateAndTime startTime(m_startRun);
-  auto const start_nanosec = startTime.totalNanoseconds();
+  Types::Core::DateAndTime startDateTime(m_startRun);
+  auto const start_nanosec = startDateTime.totalNanoseconds();
   bool const calibrateTOF = getProperty(CalibrateTOFStr);
   double tofCorrection = getProperty(TOFBiasStr);
   if (calibrateTOF) {
@@ -603,9 +642,9 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
   }
   logManager.addProperty("CalibrateTOF", (calibrateTOF ? 1 : 0));
   AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "TOFCorrection", tofCorrection);
-  PLN::EventAssigner eventAssigner(roi, detMapIndex, framePeriod, gatePeriod, timeBoundary, eventVectors, start_nanosec,
-                                   tofCorrection, sampleTime, hdfCounts);
-  PLN::loadEvents(prog, "loading neutron events (TOF)", eventFile, eventAssigner);
+  PLN2::EventAssigner eventAssigner(roi, detMapIndex, framePeriod, gatePeriod, timeBoundary, eventVectors,
+                                    start_nanosec, tofCorrection, sampleTime, 0);
+  loadEvents(prog, "loading neutron events (TOF)", &eventAssigner, nxsEntry, startTime, endTime);
 
   // perform a calibration and then TOF conversion if necessary
   // and update the tof limits
@@ -625,19 +664,19 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
 
   Types::Core::time_duration duration =
       boost::posix_time::microseconds(static_cast<boost::int64_t>(eventCounter.duration() * 1.0e6));
-  Types::Core::DateAndTime endTime(startTime + duration);
-  logManager.addProperty("start_time", startTime.toISO8601String());
-  logManager.addProperty("end_time", endTime.toISO8601String());
+  Types::Core::DateAndTime endDateTime(startDateTime + duration);
+  logManager.addProperty("start_time", startDateTime.toISO8601String());
+  logManager.addProperty("end_time", endDateTime.toISO8601String());
   logManager.addProperty<double>("dur", eventCounter.duration());
 
   // Finally add the time-series evironment parameters explicitly
-  loadEnvironParameters(hdfFile, logManager);
+  loadEnvironParameters(nxsEntry, startTime, endTime, logManager);
 
   setProperty("OutputWorkspace", m_localWorkspace);
 }
 
 /// Recovers the L2 neutronic distance for each detector.
-void LoadPLN::loadDetectorL2Values() {
+void LoadPLNnxs::loadDetectorL2Values() {
 
   m_detectorL2.resize(HISTOGRAMS, 0.0);
   const auto &detectorInfo = m_localWorkspace->detectorInfo();
@@ -650,10 +689,10 @@ void LoadPLN::loadDetectorL2Values() {
 }
 
 /// Set up the detector masks to the region of interest \p roi.
-void LoadPLN::setupDetectorMasks(const std::vector<bool> &roi) {
+void LoadPLNnxs::setupDetectorMasks(const std::vector<bool> &roi) {
 
   // count total number of masked bins
-  const size_t maskedBins = std::count_if(roi.cbegin(), roi.cend(), [](bool v) { return !v; });
+  size_t maskedBins = std::count(roi.begin(), roi.end(), false);
 
   if (maskedBins > 0) {
     // create list of masked bins
@@ -673,8 +712,8 @@ void LoadPLN::setupDetectorMasks(const std::vector<bool> &roi) {
 
 /// Allocate space for the event storage in \p eventVectors after the
 /// \p eventCounts have been determined.
-void LoadPLN::prepareEventStorage(ANSTO::ProgressTracker &progTracker, std::vector<size_t> &eventCounts,
-                                  std::vector<EventVector_pt> &eventVectors) {
+void LoadPLNnxs::prepareEventStorage(ANSTO::ProgressTracker &progTracker, std::vector<size_t> &eventCounts,
+                                     std::vector<EventVector_pt> &eventVectors) {
 
   size_t numberHistograms = eventCounts.size();
   for (size_t i = 0; i != numberHistograms; ++i) {
@@ -695,7 +734,7 @@ void LoadPLN::prepareEventStorage(ANSTO::ProgressTracker &progTracker, std::vect
 
 /// Region of interest is defined by the \p selected detectors and the
 /// \p maskfile.
-std::vector<bool> LoadPLN::createRoiVector(const std::string &selected, const std::string &maskfile) {
+std::vector<bool> LoadPLNnxs::createRoiVector(const std::string &selected, const std::string &maskfile) {
 
   std::vector<bool> result(HISTOGRAMS, true);
 
@@ -736,18 +775,12 @@ std::vector<bool> LoadPLN::createRoiVector(const std::string &selected, const st
   return result;
 }
 
-/// Load parameters from input \p hdfFile and save to the log manager, \p logm.
-void LoadPLN::loadParameters(const std::string &hdfFile, API::LogManager &logm) {
-
-  Nexus::NXRoot root(hdfFile);
-  Nexus::NXEntry entry = root.openFirstEntry();
+/// Load parameters from input \p nxsFile and save to the log manager, \p logm.
+void LoadPLNnxs::loadParameters(const Nexus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
+                                API::LogManager &logm) {
 
   MapNeXusToProperty<std::string>(entry, "sample/name", "unknown", logm, "SampleName", "", 0);
   MapNeXusToProperty<std::string>(entry, "sample/description", "unknown", logm, "SampleDescription", "", 0);
-
-  auto baseTime = GetNeXusValue<int32_t>(entry, "instrument/detector/start_time", 0, m_datasetIndex);
-  uint64_t baseTimeNSec = static_cast<uint64_t>(baseTime) * 1'000'000'000;
-  m_startRun = Types::Core::DateAndTime(ANSTO::Anxs::epochRelDateTimeBase(baseTimeNSec)).toISO8601String();
 
   // Add support for instrument running in lambda on two mode.
   // Added as UI option as the available instrument parameters
@@ -757,37 +790,37 @@ void LoadPLN::loadParameters(const std::string &hdfFile, API::LogManager &logm) 
   double lambdaFactor = (lambdaOnTwoMode ? 0.5 : 1.0);
   logm.addProperty("LambdaOnTwoMode", (lambdaOnTwoMode ? 1 : 0));
 
-  MapNeXusToSeries<double>(entry, "instrument/fermi_chopper/mchs", 0.0, logm, m_startRun, "FermiChopperFreq", 1.0 / 60,
-                           m_datasetIndex);
-  MapNeXusToSeries<double>(entry, "instrument/fermi_chopper/schs", 0.0, logm, m_startRun, "OverlapChopperFreq",
-                           1.0 / 60, m_datasetIndex);
-  MapNeXusToSeries<double>(entry, "instrument/crystal/wavelength", 0.0, logm, m_startRun, "Wavelength", lambdaFactor,
-                           m_datasetIndex);
-  MapNeXusToSeries<double>(entry, "instrument/detector/stth", 0.0, logm, m_startRun, "DetectorTankAngle", 1.0,
-                           m_datasetIndex);
-  MapNeXusToSeries<int32_t>(entry, "monitor/bm1_counts", 0, logm, m_startRun, "MonitorCounts", 1, m_datasetIndex);
-  MapNeXusToSeries<int32_t>(entry, "data/total_counts", 0, logm, m_startRun, "TotalCounts", 1, m_datasetIndex);
-  MapNeXusToSeries<double>(entry, "data/tofw", 5.0, logm, m_startRun, "ChannelWidth", 1, m_datasetIndex);
-  MapNeXusToSeries<double>(entry, "sample/mscor", 0.0, logm, m_startRun, "SampleRotation", 1, m_datasetIndex);
+  MapNeXusToSeries<double>(entry, "instrument/fermi_chopper/mchs", startTime, endTime, Anxs::ScanLog::End, 0.0, logm,
+                           "FermiChopperFreq", 1.0 / 60);
+  MapNeXusToSeries<double>(entry, "instrument/fermi_chopper/schs", startTime, endTime, Anxs::ScanLog::End, 0.0, logm,
+                           "OverlapChopperFreq", 1.0 / 60);
+  MapNeXusToSeries<double>(entry, "instrument/crystal/wavelength", startTime, endTime, Anxs::ScanLog::End, 0.0, logm,
+                           "Wavelength", lambdaFactor);
+  MapNeXusToSeries<double>(entry, "instrument/detector/stth", startTime, endTime, Anxs::ScanLog::End, 0.0, logm,
+                           "DetectorTankAngle", 1.0);
+  MapNeXusToSeries<int64_t>(entry, "monitor/bm1_counts", startTime, endTime, Anxs::ScanLog::End, 0, logm,
+                            "MonitorCounts", 1);
+  MapNeXusToSeries<double>(entry, "instrument/detector/tofw", startTime, endTime, Anxs::ScanLog::End, 5.0, logm,
+                           "ChannelWidth", 1);
+  MapNeXusToSeries<double>(entry, "sample/mscor", startTime, endTime, Anxs::ScanLog::End, 0.0, logm, "SampleRotation",
+                           1);
 }
 
-/// Load the environment variables from the \p hdfFile and save as
+/// Load the environment variables from the \p nxsFile and save as
 /// time series to the log manager, \p logm.
-void LoadPLN::loadEnvironParameters(const std::string &hdfFile, API::LogManager &logm) {
-
-  Nexus::NXRoot root(hdfFile);
-  Nexus::NXEntry entry = root.openFirstEntry();
-  auto time_str = logm.getPropertyValueAsType<std::string>("end_time");
+void LoadPLNnxs::loadEnvironParameters(const Nexus::NXEntry &entry, uint64_t startTime, uint64_t endTime,
+                                       API::LogManager &logm) {
 
   // load the environment variables for the dataset loaded
-  auto tags = ANSTO::filterDatasets(entry, "data/", "^[A-Z]{1,3}[0-9]{1,3}[A-Za-z]{1,9}[0-9]{0,3}$");
+  auto tags = ANSTO::filterGroups(entry, "control/", "^[A-Z]{1,3}[0-9]{1,3}[A-Za-z]{1,9}[0-9]{0,3}$");
   for (const auto &tag : tags) {
-    MapNeXusToSeries<double>(entry, "data/" + tag, 0.0, logm, time_str, "env_" + tag, 1.0, m_datasetIndex);
+    MapNeXusToSeries<double>(entry, "control/" + tag, startTime, endTime, Anxs::ScanLog::End, 0.0, logm, "env_" + tag,
+                             1.0);
   }
 }
 
 /// Load the instrument definition.
-void LoadPLN::loadInstrument() {
+void LoadPLNnxs::loadInstrument() {
 
   // loads the IDF and parameter file
   auto loadInstrumentAlg = createChildAlgorithm("LoadInstrument");
@@ -798,111 +831,35 @@ void LoadPLN::loadInstrument() {
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadPLN::version() const { return 1; }
+int LoadPLNnxs::version() const { return 1; }
 
 /// Similar algorithms. @see Algorithm::seeAlso
-const std::vector<std::string> LoadPLN::seeAlso() const { return {"Load", "LoadEMU"}; }
+const std::vector<std::string> LoadPLNnxs::seeAlso() const { return {"Load", "LoadEMU"}; }
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadPLN::category() const { return "DataHandling\\ANSTO"; }
+const std::string LoadPLNnxs::category() const { return "DataHandling\\ANSTO"; }
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string LoadPLN::name() const { return "LoadPLN"; }
+const std::string LoadPLNnxs::name() const { return "LoadPLNnxs"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string LoadPLN::summary() const { return "Loads a PLN Hdf and linked event file into a workspace."; }
+const std::string LoadPLNnxs::summary() const { return "Loads a PLN2 Hdf and linked event file into a workspace."; }
 
 /// Return the confidence as an integer value that this algorithm can
 /// load the file \p descriptor.
-int LoadPLN::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
-  if (descriptor.extension() != ".hdf")
+int LoadPLNnxs::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
+  if (descriptor.extension() != ".nxs")
     return 0;
 
-  if (descriptor.isEntry("/entry1/site_name") && descriptor.isEntry("/entry1/instrument/fermi_chopper") &&
-      descriptor.isEntry("/entry1/instrument/aperture/sh1") &&
-      descriptor.isEntry("/entry1/instrument/ag1010/MEAS/Temperature") &&
-      descriptor.isEntry("/entry1/instrument/detector/daq_dirname") &&
-      descriptor.isEntry("/entry1/instrument/detector/dataset_number") && descriptor.isEntry("/entry1/data/hmm") &&
-      descriptor.isEntry("/entry1/data/time_of_flight") && descriptor.isEntry("/entry1/data/total_counts")) {
+  if (descriptor.isEntry("/entry1/instrument/fermi_chopper/schs/value") &&
+      descriptor.isEntry("/entry1/instrument/aperture/sh1/value") &&
+      descriptor.isEntry("/entry1/instrument/ag1010/MEAS/Temperature/value") &&
+      descriptor.isEntry("/entry1/instrument/detector/stth/value") &&
+      descriptor.isEntry("/entry1/instrument/detector_events/event_id") &&
+      descriptor.isEntry("/entry1/scan_dataset/time") && descriptor.isEntry("/entry1/scan_dataset/value")) {
     return 80;
   } else {
     return 0;
   }
 }
-
-/// Execute the algorithm. Establishes the filepath to the event file
-/// from the HDF link and the path provided and invokes the common
-// exec() function that works with the two files.
-void LoadPLN::exec() {
-
-  namespace fs = std::filesystem;
-
-  // Open the hdf file and find the dirname and dataset number
-  std::string hdfFile = getPropertyValue(FilenameStr);
-  std::string evtPath = getPropertyValue(PathToBinaryStr);
-  if (evtPath.empty())
-    evtPath = "./";
-
-  // if relative ./ or ../ then append to the directory for the hdf file
-  if (evtPath.rfind("./") == 0 || evtPath.rfind("../") == 0) {
-    fs::path hp(hdfFile);
-    evtPath = fs::canonical(hp.parent_path() / evtPath).string();
-  }
-
-  // dataset index to be loaded
-  m_datasetIndex = getProperty(SelectDatasetStr);
-  if (m_datasetIndex < 0) {
-    std::string message("Negative dataset index provided, reset to zero!");
-    g_log.warning(message);
-    m_datasetIndex = 0;
-  }
-
-  // if path provided build the file path from the directory name and dataset
-  // number from the hdf file, however if this is not a valid path then try
-  // the basename with a '.bin' extension
-  if (fs::is_directory(evtPath)) {
-    Nexus::NXRoot root(hdfFile);
-    Nexus::NXEntry entry = root.openFirstEntry();
-    auto eventDir = GetNeXusValue<std::string>(entry, "instrument/detector/daq_dirname", "./", 0);
-    auto dataset = GetNeXusValue<int32_t>(entry, "instrument/detector/dataset_number", 0, m_datasetIndex);
-    if (dataset < 0) {
-      std::string message("Negative dataset index recorded in HDF, reset to zero!");
-      g_log.error(message);
-      dataset = 0;
-    }
-
-    // build the path to the event file using the standard storage convention at ansto:
-    //   'relpath/[daq_dirname]/DATASET_[n]/EOS.bin'
-    // but if the file is missing, try relpath/{source}.bin
-    std::stringstream buffer;
-    buffer << eventDir.c_str() << "/DATASET_" << dataset << "/EOS.bin";
-    fs::path filePath = evtPath;
-    filePath /= buffer.str();
-    filePath = fs::absolute(filePath);
-    std::string nomPath = filePath.generic_string();
-    if (fs::is_regular_file(nomPath)) {
-      evtPath = nomPath;
-    } else {
-      fs::path hp = hdfFile;
-      buffer.str("");
-      buffer.clear();
-      buffer << hp.stem().generic_string().c_str() << ".bin";
-      fs::path path = evtPath;
-      path /= buffer.str();
-      path = fs::absolute(path);
-      evtPath = path.generic_string();
-    }
-  }
-
-  // finally check that the event file exists
-  if (!fs::is_regular_file(evtPath)) {
-    std::string msg = "Check path, cannot open binary event file: " + evtPath;
-    throw std::runtime_error(msg);
-  }
-
-  exec(hdfFile, evtPath);
-}
-
-// register the algorithms into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadPLN)
 
 } // namespace Mantid::DataHandling
