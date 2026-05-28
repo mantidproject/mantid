@@ -21,6 +21,7 @@ from mantid.simpleapi import (
     Load,
 )
 import platform
+import sys
 import systemtesting
 from testhelpers import assertRaisesNothing, create_algorithm
 
