@@ -22,6 +22,7 @@ from mantid.simpleapi import (
     LoadDetectorsGroupingFile,
     EstimateScatteringVolumeCentreOfMass,
     SaveNexus,
+    DeleteLog,
 )
 from mantid.api import AnalysisDataService as ADS
 from Engineering.EnggUtils import CALIB_DIR
@@ -708,13 +709,28 @@ class TexturePlannerModel(object):
         ref_wsname = "__texture_planning_reference_ws"
         try:
             LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=ref_wsname)
+            # Source from updated_mesh_ws (always identity goniometer) rather than wsname
+            # (which carries the current orientation R on its goniometer).
             CopySample(
-                InputWorkspace=self.wsname,
+                InputWorkspace=self.updated_mesh_ws,
                 OutputWorkspace=ref_wsname,
                 CopyName=False,
                 CopyEnvironment=False,
                 CopyLattice=False,
             )
+            # CopySample bakes the *destination* goniometer matrix into the shape XML
+            # for CSG shapes, which strips the initial-orientation tag that
+            # RotateSampleShape added in update_initial_shape. Re-apply the initial
+            # rotation so it is baked into the saved shape. Mesh shapes already had
+            # their vertices transformed in update_initial_shape and were copied
+            # as-is, so no extra rotation is needed.
+            shape = ADS.retrieve(ref_wsname).sample().getShape()
+            if type(shape).__name__ == "CSGObject":
+                rotvec = self.init_R.as_rotvec(degrees=True)
+                ang = float(np.linalg.norm(rotvec))
+                if ang > 0:
+                    vec = rotvec / ang
+                    RotateSampleShape(ref_wsname, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
             # ensure the saved sample is in its initial orientation, not under any current goniometer rotation
             ADS.retrieve(ref_wsname).run().getGoniometer().setR(np.eye(3))
             save_file = os.path.join(save_dir, filename + ".nxs")
@@ -744,6 +760,10 @@ class TexturePlannerModel(object):
         self.gauge_volume_str = get_gauge_vol_str(preset, custom)
         if self.gauge_volume_str:
             define_gauge_volume(self.ws, self.gauge_volume_str)
+        elif self.ws.run().hasProperty("GaugeVolume"):
+            # remove any previously-defined gauge volume so the scattering centre falls back
+            # to the sample object rather than a stale gauge volume
+            DeleteLog(Workspace=self.ws, Name="GaugeVolume")
 
     def update_supported_groups(self):
         match self.instr:
