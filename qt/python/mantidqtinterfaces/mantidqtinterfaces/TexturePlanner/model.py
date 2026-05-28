@@ -159,8 +159,6 @@ class TexturePlannerModel(object):
 
         self.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing", "material": "Fe"}
 
-        self.settings = (self.stl_kwargs, self.orientation_kwargs, self.mc_kwargs, self.attenuation_kwargs)
-
         # data structure
         self.saved_orientations = {0: self._make_default_orientation()}
 
