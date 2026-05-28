@@ -167,12 +167,12 @@ class TexturePlannerPresenter(object):
     def add_orientation(self):
         # add an orientation to the dictionary
         self.model.add_orientation()
-        new_index = self.model.get_num_orientations()
+        new_orientation_index = self.model.get_num_orientations() - 1
 
         # update the orientation selector
-        self.update_orientation_selector(new_index)
-        # update the goniometer bookkeeping
-        self.on_goniometer_updated(new_index)
+        self.update_orientation_selector(new_orientation_index)
+        # refresh goniometer bookkeeping for the newly-selected orientation
+        self.on_goniometer_updated(self.model.gonio_index)
 
     def update_orientation_selector(self, new_index):
         self.view.spnIndex.setMaximum(self.model.get_num_orientations())

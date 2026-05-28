@@ -387,8 +387,8 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_show_mu(self, val):
         return self.chkMu.setChecked(val)
 
-    def set_material(self):
-        return self.edtMaterial.setText()
+    def set_material(self, text):
+        self.edtMaterial.setText(text)
 
     def _setup_pf_plot(self):
         self.pf_figure = Figure(layout="constrained")

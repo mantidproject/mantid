@@ -173,7 +173,6 @@ class TexturePlannerModel(object):
         with open(txt_file, "r") as f:
             goniometer_strings = [line.strip().replace("\t", ",") for line in f]
             goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
-        print(goniometer_lists)
         if len(goniometer_lists) == 0:
             logger.warning("No orientations found in file provided")
             return 3
@@ -194,9 +193,9 @@ class TexturePlannerModel(object):
         axes, senses = self.orientation_kwargs["Axes"], self.orientation_kwargs["Senses"].split(",")
         num_ax, num_senses = len(axes), len(senses)
         if num_entries != num_ax:
-            msg += f"Number of Angles ({num_entries}) does not match number of goniometer axes ({num_ax} \n"
+            msg += f"Number of Angles ({num_entries}) does not match number of goniometer axes ({num_ax})\n"
         if num_entries != num_senses:
-            msg += f"Number of Angles ({num_entries}) does not match number of goniometer senses ({num_senses} \n"
+            msg += f"Number of Angles ({num_entries}) does not match number of goniometer senses ({num_senses})\n"
         if msg != "":
             logger.error(msg)
             return 3
@@ -262,28 +261,27 @@ class TexturePlannerModel(object):
         self.offset = (x_pos, y_pos, z_pos)
         self.translate_shape(_tmp_ws, *self.offset)
 
-        if x_rot == 0.0 and y_rot == 0.0 and z_rot == 0.0:
+        try:
             CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
             CopySample(
                 InputWorkspace=_tmp_ws, OutputWorkspace=self.updated_mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False
             )
-            self.init_R = Rotation.identity()
-            return None
 
-        self.init_R = Rotation.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=True)
+            if x_rot == 0.0 and y_rot == 0.0 and z_rot == 0.0:
+                self.init_R = Rotation.identity()
+                return None
 
-        rotvec = self.init_R.as_rotvec(degrees=True)
+            self.init_R = Rotation.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=True)
+            rotvec = self.init_R.as_rotvec(degrees=True)
+            ang = np.linalg.norm(rotvec)
+            if ang == 0:
+                return None  # rotation is effectively identity
+            vec = rotvec / ang
 
-        ang = np.linalg.norm(rotvec)
-        vec = rotvec / ang
-
-        CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
-        CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=self.updated_mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
-
-        RotateSampleShape(self.wsname, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
-        RotateSampleShape(self.updated_mesh_ws, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
-
-        ADS.remove("_tmp_ws")
+            RotateSampleShape(self.wsname, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
+            RotateSampleShape(self.updated_mesh_ws, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
+        finally:
+            ADS.remove("__tmp_ws")
 
     def update_gonio_index(self, num_gonios):
         max_ind = num_gonios - 1
@@ -431,10 +429,7 @@ class TexturePlannerModel(object):
 
         # if the sample is partially illuminated the scattering vectors should be taken from the centre of mass of the
         # illuminated region
-        try:
-            scattering_centre = np.asarray(EstimateScatteringVolumeCentreOfMass(InputWorkspace=self.ws))
-        except:
-            scattering_centre = np.array((0.0, 0.0, 0.0))  # if the estimate scattering centre fails, assume origin
+        scattering_centre = _get_scattering_centre(self.ws)
 
         self.det_k = np.asarray(
             [
@@ -536,10 +531,7 @@ class TexturePlannerModel(object):
 
         rot_mesh = R.apply(shape_mesh.reshape((-1, 3))).reshape(shape_mesh.shape)
 
-        try:
-            scat_centre = np.asarray(EstimateScatteringVolumeCentreOfMass(InputWorkspace=self.ws))
-        except:
-            scat_centre = np.array((0.0, 0.0, 0.0))  # if the estimate scattering centre fails, assume origin
+        scat_centre = _get_scattering_centre(self.ws)
 
         # code to add goniometers to plot
         for i, vec in enumerate(vecs):
@@ -738,6 +730,8 @@ class TexturePlannerModel(object):
                 self.supported_groups = ("Texture20", "Texture30", "banks")
             case "IMAT":
                 self.supported_groups = ("Module1", "Module4", "Row1", "Row4", "banks")
+            case _:
+                self.supported_groups = ("banks",)
 
     def _create_new_ws_with_copied_sample(self, new_wsname, sample_to_copy, clone=False):
         # if the new_wsname is the same as the existing sample_to_copy name, need to clone the shape ws first
@@ -819,3 +813,12 @@ def vec_string_to_norm_array(vec_string):
 def define_gauge_volume(ws: Workspace2D, gauge_str: Optional[str]) -> None:
     if gauge_str:
         DefineGaugeVolume(ws, gauge_str)
+
+
+def _get_scattering_centre(ws) -> np.ndarray:
+    """Return the centre of mass of the illuminated sample volume, or the origin
+    if the estimate fails (e.g. when the sample lies outside the gauge volume)."""
+    try:
+        return np.asarray(EstimateScatteringVolumeCentreOfMass(InputWorkspace=ws))
+    except RuntimeError:
+        return np.array((0.0, 0.0, 0.0))
