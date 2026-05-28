@@ -52,6 +52,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.finder_gauge_vol.setLabelText("Custom Gauge Volume File")
         self.finder_gauge_vol.allowMultipleFiles(False)
         self.finder_gauge_vol.setFileExtensions([".xml"])
+        self.finder_gauge_vol.isOptional(True)
 
         self.gonio_axes = (self.axis0, self.axis1, self.axis2, self.axis3, self.axis4, self.axis5)
         self.gonio_angles = (self.spnAngle0, self.spnAngle1, self.spnAngle2, self.spnAngle3, self.spnAngle4, self.spnAngle5)
@@ -66,7 +67,6 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.set_load_orientation_enabled(False)
         self.set_outputs_enabled(False)
         self.set_show_mu(False)
-        self.set_material_visible(False)
 
         self.set_angle_limits()
         self.set_translation_step(0.001)  # setup 1mm translational steps
@@ -79,6 +79,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.make_box_toggleable(self.initPosition, self.set_init_position_visible)
         self.make_box_toggleable(self.grpDirectionWidgets, self.set_sample_directions_visible)
         self.make_box_toggleable(self.grpOrientationFile)  # finder widget has some hidden features that toggling messes with
+        self.make_box_toggleable(self.grpGaugeVol, self.set_gauge_vol_visible)
 
         self._setup_settings_toolbar()
 
@@ -191,9 +192,6 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_show_mu_toggled(self, slot):
         self.chkMu.toggled.connect(slot)
 
-    def set_on_material_changed(self, slot):
-        self.edtMaterial.editingFinished.connect(slot)
-
     def set_on_init_x_changed(self, slot):
         self.spnInitX.valueChanged.connect(slot)
 
@@ -303,9 +301,6 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def get_show_mu(self):
         return self.chkMu.isChecked()
 
-    def get_material(self):
-        return self.edtMaterial.text()
-
     def get_init_x(self):
         return self.spnInitX.value()
 
@@ -389,9 +384,6 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_show_mu(self, val):
         return self.chkMu.setChecked(val)
-
-    def set_material(self, text):
-        self.edtMaterial.setText(text)
 
     def _setup_pf_plot(self):
         self.pf_figure = Figure(layout="constrained")
@@ -539,18 +531,25 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         for widget in children:
             widget.setVisible(vis)
 
-    def set_material_visible(self, vis):
-        self.edtMaterial.setVisible(vis)
-        self.lblMaterial.setVisible(vis)
+    def set_gauge_vol_visible(self, vis):
+        # only toggle the gauge-volume controls we own; recursing into FileFinderWidget
+        # would override its internally-hidden widgets (live button, multi-entry box, etc.)
         self.combo_shapeMethod.setVisible(vis)
-        self.finder_gauge_vol.setVisible(vis)
         self.setGV.setVisible(vis)
+        self.clearGV.setVisible(vis)
+        self.finder_gauge_vol.setVisible(vis and self.get_shape_method() == "Custom Shape")
 
-    def set_finder_gauge_vol_enabled(self, enabled):
-        self.finder_gauge_vol.setEnabled(enabled)
+    def set_finder_gauge_vol_visible(self, visible):
+        self.finder_gauge_vol.setVisible(visible and self.grpGaugeVol.isChecked())
 
     def set_set_gauge_vol_enabled(self, enabled):
         self.setGV.setEnabled(enabled)
+
+    def set_on_clear_gauge_volume_clicked(self, slot):
+        self.clearGV.clicked.connect(slot)
+
+    def set_on_gauge_vol_group_toggled(self, slot):
+        self.grpGaugeVol.toggled.connect(slot)
 
     def set_on_gauge_vol_state_changed(self, slot):
         self.combo_shapeMethod.currentIndexChanged.connect(slot)

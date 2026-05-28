@@ -1063,7 +1063,7 @@
         <item>
           <widget class="QLabel" name="lblShowMu">
             <property name="text">
-              <string>Show Attenuation Values (demo):</string>
+              <string>Approximate Attenuation Values:</string>
             </property>
           </widget>
         </item>
@@ -1072,82 +1072,65 @@
           <widget class="QCheckBox" name="chkMu"/>
         </item>
 
-        <item>
-          <spacer name="spGroupStretch">
-            <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-              <size>
-                <width>40</width>
-                <height>20</height>
-              </size>
-            </property>
-          </spacer>
-        </item>
-
-        <item>
-          <widget class="QLabel" name="lblMaterial">
-            <property name="text">
-              <string>Material:</string>
-            </property>
-          </widget>
-        </item>
-
-        <item>
-          <widget class="QLineEdit" name="edtMaterial">
-            <property name="text">
-              <string>Fe</string>
-            </property>
-          </widget>
-        </item>
-
       </layout>
     </item>
 
     <item>
-      <layout class="QVBoxLayout" name="gaugeVolBox">
-        <item>
-          <widget class="QComboBox" name="combo_shapeMethod">
-            <item>
-              <property name="text">
-                <string>4mmCube</string>
-              </property>
-            </item>
-            <item>
-              <property name="text">
-                <string>Custom Shape</string>
-              </property>
-            </item>
-            <item>
-              <property name="text">
-                <string>No Gauge Volume</string>
-              </property>
-            </item>
-          </widget>
-        </item>
-
-        <item>
-          <layout class="QHBoxLayout">
-            <item>
-              <widget class="FileFinderWidget" name="finder_gauge_vol" native="true"/>
-            </item>
-          </layout>
-        </item>
-        <item>
-          <layout class="QGridLayout" name="gaugeVolBox">
-
-          <item row="3" column="1">
-            <widget class="QPushButton" name="setGV">
-             <property name="text">
-              <string>Set Gauge Volume</string>
-             </property>
+      <widget class="QGroupBox" name="grpGaugeVol">
+        <property name="title">
+          <string>Gauge Volume Options</string>
+        </property>
+        <layout class="QVBoxLayout" name="gaugeVolLayout">
+          <item>
+            <widget class="QComboBox" name="combo_shapeMethod">
+              <item>
+                <property name="text">
+                  <string>4mmCube</string>
+                </property>
+              </item>
+              <item>
+                <property name="text">
+                  <string>Custom Shape</string>
+                </property>
+              </item>
+              <item>
+                <property name="text">
+                  <string>No Gauge Volume</string>
+                </property>
+              </item>
             </widget>
-           </item>
-          </layout>
           </item>
 
-      </layout>
+          <item>
+            <layout class="QHBoxLayout">
+              <item>
+                <widget class="FileFinderWidget" name="finder_gauge_vol" native="true"/>
+              </item>
+            </layout>
+          </item>
+          <item>
+            <layout class="QHBoxLayout" name="gaugeVolButtons">
+              <item>
+                <widget class="QPushButton" name="setGV">
+                  <property name="text">
+                    <string>Set Gauge Volume</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QPushButton" name="clearGV">
+                  <property name="text">
+                    <string>Clear Gauge Volume</string>
+                  </property>
+                  <property name="toolTip">
+                    <string>Remove any active gauge volume (equivalent to selecting "No Gauge Volume" and pressing Set Gauge Volume).</string>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </item>
+        </layout>
+      </widget>
     </item>
 
   </layout>
