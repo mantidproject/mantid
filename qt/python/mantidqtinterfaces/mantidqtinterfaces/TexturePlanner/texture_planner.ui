@@ -1248,6 +1248,16 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QPushButton" name="toRefWs">
+           <property name="text">
+            <string>Save Reference Workspace</string>
+           </property>
+           <property name="toolTip">
+            <string>Save the sample (shape, position, initial orientation and material) as a NeXus reference workspace compatible with the EngDiff "Load Reference Workspace" option.</string>
+           </property>
+          </widget>
+         </item>
         </layout>
            </item>
            </layout>

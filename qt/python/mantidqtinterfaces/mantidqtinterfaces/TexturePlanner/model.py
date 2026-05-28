@@ -21,6 +21,7 @@ from mantid.simpleapi import (
     DefineGaugeVolume,
     LoadDetectorsGroupingFile,
     EstimateScatteringVolumeCentreOfMass,
+    SaveNexus,
 )
 from mantid.api import AnalysisDataService as ADS
 from Engineering.EnggUtils import CALIB_DIR
@@ -702,6 +703,26 @@ class TexturePlannerModel(object):
         with open(save_file, "w") as f:
             f.writelines(lines)
         logger.notice(f"Orientation data written to '{save_file}' as Rotation Matrices")
+
+    def output_as_reference_workspace(self, save_dir, filename):
+        ref_wsname = "__texture_planning_reference_ws"
+        try:
+            LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=ref_wsname)
+            CopySample(
+                InputWorkspace=self.wsname,
+                OutputWorkspace=ref_wsname,
+                CopyName=False,
+                CopyEnvironment=False,
+                CopyLattice=False,
+            )
+            # ensure the saved sample is in its initial orientation, not under any current goniometer rotation
+            ADS.retrieve(ref_wsname).run().getGoniometer().setR(np.eye(3))
+            save_file = os.path.join(save_dir, filename + ".nxs")
+            SaveNexus(InputWorkspace=ref_wsname, Filename=save_file)
+            logger.notice(f"Reference workspace saved to '{save_file}'")
+        finally:
+            if ADS.doesExist(ref_wsname):
+                ADS.remove(ref_wsname)
 
     def output_as_euler(self, save_dir, filename):
         lines = []

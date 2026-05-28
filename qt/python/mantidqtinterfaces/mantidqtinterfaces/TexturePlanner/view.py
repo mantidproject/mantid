@@ -185,6 +185,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_output_matrix_clicked(self, slot):
         self.toMatrix.clicked.connect(slot)
 
+    def set_on_output_reference_ws_clicked(self, slot):
+        self.toRefWs.clicked.connect(slot)
+
     def set_on_show_mu_toggled(self, slot):
         self.chkMu.toggled.connect(slot)
 
@@ -501,6 +504,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.toSscanss.setEnabled(enabled)
         self.toEuler.setEnabled(enabled)
         self.toMatrix.setEnabled(enabled)
+        self.toRefWs.setEnabled(enabled)
 
     def _read_checkbox_column_states(self, col):
         checked = []
