@@ -12,9 +12,11 @@
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
 #include "ALFInstrumentWidget.h"
+#include "ALFPythonInstrumentView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 
+#include <QSettings>
 #include <QSplitter>
 #include <QString>
 #include <QVBoxLayout>
@@ -30,8 +32,18 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
   auto jobRunnerInst = std::make_unique<MantidQt::API::QtJobRunner>();
   auto algorithmManagerInst = std::make_unique<ALFAlgorithmManager>(std::move(jobRunnerInst));
 
+  QSettings settings(QSettings::IniFormat, QSettings::UserScope, "mantidproject", "mantidworkbench");
+  const bool useNewInstrumentView = settings.value("InstrumentView/use_new_instrument_view", false).toBool();
+
+  IALFInstrumentView *view;
+  if (useNewInstrumentView) {
+    view = new ALFPythonInstrumentView(this);
+  } else {
+    view = new ALFInstrumentView(this);
+  }
+
   m_instrumentPresenter = std::make_unique<ALFInstrumentPresenter>(
-      new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>(), std::move(algorithmManagerInst));
+      std::move(view), std::make_unique<ALFInstrumentModel>(), std::move(algorithmManagerInst));
 
   // Algorithm manager for the analysis presenter
   auto jobRunnerAnalysis = std::make_unique<MantidQt::API::QtJobRunner>();

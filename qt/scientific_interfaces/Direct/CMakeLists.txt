@@ -6,12 +6,15 @@ set(SRC_FILES
     ALFInstrumentModel.cpp
     ALFInstrumentPresenter.cpp
     ALFInstrumentView.cpp
+    ALFPythonInstrumentView.cpp
     ALFInstrumentViewBase.cpp
     ALFInstrumentWidget.cpp
     ALFView.cpp
 )
 
-set(MOC_FILES ALFAnalysisView.h ALFInstrumentView.h ALFInstrumentViewBase.h ALFInstrumentWidget.h ALFView.h)
+set(MOC_FILES ALFAnalysisView.h ALFInstrumentView.h ALFPythonInstrumentView.h ALFInstrumentViewBase.h
+              ALFInstrumentWidget.h ALFView.h
+)
 
 set(INC_FILES
     ALFAlgorithmManager.h
