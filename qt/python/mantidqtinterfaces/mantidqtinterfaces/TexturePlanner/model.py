@@ -230,6 +230,9 @@ class TexturePlannerModel(object):
             try:
                 self.set_material()
             except Exception:
+                # Restoring the previous material is best-effort: the first SetSampleMaterial
+                # failure was already logged above, and any second failure here means the
+                # workspaces are in an unrecoverable state. Swallowing keeps the GUI usable.
                 pass
 
     def load_stl(self, stl_file):
