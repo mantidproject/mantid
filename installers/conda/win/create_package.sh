@@ -15,6 +15,7 @@ function usage() {
   echo "Options:"
   echo "  -c Optional conda channel overriding the default mantid"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
+  echo "  -f Optional Use flexible mantiddocs version constraint (for branches without mantiddocs builds)"
   echo
   echo "Positional Arguments"
   echo "  package_name: The name of the package exe, i.e. the final name will be '${package_name}.exe'"
@@ -25,6 +26,7 @@ function usage() {
 CONDA_CHANNEL=mantid
 SUFFIX=""
 MANTID_VERSION=""
+FLEXIBLE_DOCS=false
 while [ ! $# -eq 0 ]
 do
     case "$1" in
@@ -39,6 +41,9 @@ do
         -v)
             MANTID_VERSION="$2"
             shift
+            ;;
+        -f)
+            FLEXIBLE_DOCS=true
             ;;
         -h)
             usage 0
@@ -90,11 +95,24 @@ if [ -z "$MANTID_VERSION" ]; then
   exit 1
 fi
 
+# Determine mantiddocs version constraint
+if [ "$FLEXIBLE_DOCS" = true ]; then
+  # For ornl-next and similar branches, use a flexible constraint
+  # Extract major version from MANTID_VERSION (e.g., 6.11.0 -> 6)
+  major_version=$(echo "$MANTID_VERSION" | cut -d. -f1)
+  mantiddocs_constraint="mantiddocs>=${major_version}.0"
+  echo "Using flexible mantiddocs version constraint: ${mantiddocs_constraint}"
+else
+  # For main and release-next, require exact version match
+  mantiddocs_constraint="mantiddocs==${MANTID_VERSION}"
+  echo "Using strict mantiddocs version constraint: ${mantiddocs_constraint}"
+fi
+
 echo "Creating conda env from mantidworkbench==${MANTID_VERSION} and jq"
 "$CONDA_EXE" create --prefix $CONDA_ENV_PATH \
   --copy --channel $CONDA_CHANNEL --channel conda-forge --channel $MANTID_CHANNEL -y \
   "mantidworkbench==${MANTID_VERSION}" \
-  "mantiddocs==${MANTID_VERSION}" \
+  "${mantiddocs_constraint}" \
   mslice \
   m2w64-jq
 echo "Conda env created"
