@@ -47,8 +47,14 @@ private:
   /// Map of component ids to indexes
   std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> m_compIDToIndex;
 
-  /// Shapes for each component
+  /// Shapes for each component (compact for virtual-bank instruments: virtual
+  /// pixel slots are omitted; use m_virtualPixelShapes for those).
   std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> m_shapes;
+
+  /// For virtual-bank instruments: one pixel shape per bank, ordered to match
+  /// the VirtualBankSegments in the inner Beamline::ComponentInfo.
+  /// Empty for instruments without PixelAssembly banks.
+  std::vector<std::shared_ptr<const Geometry::IObject>> m_virtualPixelShapes;
 
   BoundingBox componentBoundingBox(const size_t index, const BoundingBox *reference,
                                    const bool excludeMonitors = false) const;
@@ -73,7 +79,8 @@ public:
   ComponentInfo(std::unique_ptr<Beamline::ComponentInfo> componentInfo,
                 std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
                 std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
-                std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes);
+                std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes,
+                std::vector<std::shared_ptr<const Geometry::IObject>> virtualPixelShapes = {});
   ~ComponentInfo();
   /// Copy assignment is not possible for ComponentInfo
   ComponentInfo &operator=(const ComponentInfo &) = delete;
@@ -118,7 +125,7 @@ public:
   void setScaleFactor(const size_t componentIndex, const Kernel::V3D &scaleFactor);
   size_t root() const;
 
-  const IComponent *componentID(const size_t componentIndex) const { return (*m_componentIds)[componentIndex]; }
+  const IComponent *componentID(const size_t componentIndex) const;
   bool hasValidShape(const size_t componentIndex) const;
 
   const Geometry::IObject &shape(const size_t componentIndex) const;

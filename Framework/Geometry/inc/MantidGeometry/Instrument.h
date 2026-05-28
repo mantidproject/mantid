@@ -10,6 +10,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/GridDetector.h"
+#include "MantidGeometry/Instrument/IVirtualBank.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
@@ -98,6 +99,12 @@ public:
   /// to be a monitor and also add it to _detectorCache for possible later retrieval
   void markAsMonitor(IDetector const *);
   void markAsMonitorIncomplete(IDetector const *);
+  /// Register all detector IDs from a virtual pixel bank (PixelAssembly /
+  /// IVirtualBank) into the detector cache.  No per-pixel IDetector objects
+  /// are created; the cache entries carry null IDetector_const_sptr.  This is
+  /// sufficient for InstrumentVisitor / DetectorInfo; legacy getDetector(id)
+  /// calls for virtual pixels will return nullptr.
+  void markAsVirtualBankDetectors(const IVirtualBank &bank);
 
   /// Remove a detector from the instrument
   void removeDetector(IDetector *);
@@ -381,6 +388,12 @@ private:
 
   /// Pointer to the ComponentInfo object. May be NULL.
   std::shared_ptr<const ComponentInfo> m_componentInfo{nullptr};
+
+  /// Sorted (ascending) list of all virtual (PixelAssembly) pixel detector
+  /// IDs.  Replaces null entries formerly kept in m_detectorCache for these
+  /// pixels.  Empty for non-PA instruments.
+  /// Memory: 4 bytes per pixel (vs. ~24–32 bytes per DetectorCacheEntry).
+  std::vector<detid_t> m_virtualDetectorIDs;
 
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};

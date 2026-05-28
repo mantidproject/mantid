@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidBeamline/ComponentType.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include <Eigen/Geometry>
@@ -15,12 +16,13 @@
 #include <memory>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 namespace Mantid {
 using detid_t = int32_t;
 namespace Beamline {
 class ComponentInfo;
-class DetectorInfo;
+// DetectorInfo is fully included above; forward declaration not needed.
 } // namespace Beamline
 namespace Geometry {
 class ComponentInfo;
@@ -124,6 +126,14 @@ private:
 
   /// Component names
   std::shared_ptr<std::vector<std::string>> m_names;
+
+  /// Virtual bank segments registered by registerVirtualBank().
+  /// Passed to Beamline::DetectorInfo so it can compute pixel positions on demand.
+  std::vector<Beamline::VirtualBankSegment> m_virtualBankSegments;
+
+  /// One pixel shape per virtual (PixelAssembly) bank, in registration order.
+  /// Stored separately so m_shapes can be compacted (virtual pixel slots omitted).
+  std::vector<std::shared_ptr<const Mantid::Geometry::IObject>> m_virtualPixelShapes;
 
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId, const size_t componentIndex);
 

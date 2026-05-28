@@ -14,6 +14,7 @@
 #include "MantidKernel/Exception.h"
 
 #include <Eigen/Geometry>
+#include <algorithm>
 #include <exception>
 #include <iterator>
 #include <string>
@@ -55,18 +56,26 @@ ComponentInfo::ComponentInfo(
     std::unique_ptr<Beamline::ComponentInfo> componentInfo,
     std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
     std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
-    std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes)
+    std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes,
+    std::vector<std::shared_ptr<const Geometry::IObject>> virtualPixelShapes)
     : m_componentInfo(std::move(componentInfo)), m_componentIds(std::move(componentIds)),
-      m_compIDToIndex(std::move(componentIdToIndexMap)), m_shapes(std::move(shapes)) {
+      m_compIDToIndex(std::move(componentIdToIndexMap)), m_shapes(std::move(shapes)),
+      m_virtualPixelShapes(std::move(virtualPixelShapes)) {
 
+  // All entries in m_componentIds must be non-null (compact: virtual pixel
+  // entries have been omitted) and must match the map size.
   if (m_componentIds->size() != m_compIDToIndex->size()) {
     throw std::invalid_argument("Inconsistent ID and Mapping input containers "
                                 "for Geometry::ComponentInfo");
   }
-  if (m_componentIds->size() != m_componentInfo->size()) {
-    throw std::invalid_argument("Inconsistent ID and base "
-                                "Beamline::ComponentInfo sizes for "
-                                "Geometry::ComponentInfo");
+  // For virtual-bank instruments the arrays are compact (size < total logical
+  // size).  For standard instruments the arrays span the full component count.
+  if (!m_componentInfo->hasVirtualBanks()) {
+    if (m_componentIds->size() != m_componentInfo->size()) {
+      throw std::invalid_argument("Inconsistent ID and base "
+                                  "Beamline::ComponentInfo sizes for "
+                                  "Geometry::ComponentInfo");
+    }
   }
 }
 
@@ -85,7 +94,8 @@ std::unique_ptr<Geometry::ComponentInfo> ComponentInfo::cloneWithoutDetectorInfo
  * ComponentInfo must be set up. */
 ComponentInfo::ComponentInfo(const ComponentInfo &other)
     : m_componentInfo(other.m_componentInfo->cloneWithoutDetectorInfo()), m_componentIds(other.m_componentIds),
-      m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes) {}
+      m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes),
+      m_virtualPixelShapes(other.m_virtualPixelShapes) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ComponentInfo::~ComponentInfo() = default;
@@ -136,8 +146,27 @@ bool ComponentInfo::isDetector(const size_t componentIndex) const {
   return m_componentInfo->isDetector(componentIndex);
 }
 
+const IComponent *ComponentInfo::componentID(const size_t componentIndex) const {
+  if (m_componentInfo->hasVirtualBanks()) {
+    if (m_componentInfo->findVirtualSegment(componentIndex) != nullptr)
+      return nullptr; // virtual pixels have no IComponent object
+    return (*m_componentIds)[m_componentInfo->compactComponentIndex(componentIndex)];
+  }
+  return (*m_componentIds)[componentIndex];
+}
+
 bool ComponentInfo::hasValidShape(const size_t componentIndex) const {
-  const auto *shapeAtIndex = (*m_shapes)[componentIndex].get();
+  const Geometry::IObject *shapeAtIndex = nullptr;
+  if (m_componentInfo->hasVirtualBanks()) {
+    if (const auto *seg = m_componentInfo->findVirtualSegment(componentIndex)) {
+      const auto bankIdx = m_componentInfo->virtualBankIndex(seg);
+      shapeAtIndex = m_virtualPixelShapes[bankIdx].get();
+    } else {
+      shapeAtIndex = (*m_shapes)[m_componentInfo->compactComponentIndex(componentIndex)].get();
+    }
+  } else {
+    shapeAtIndex = (*m_shapes)[componentIndex].get();
+  }
   return shapeAtIndex != nullptr && shapeAtIndex->hasValidShape();
 }
 
@@ -242,7 +271,16 @@ void ComponentInfo::setRotation(const size_t componentIndex, const Kernel::Quat 
   m_componentInfo->setRotation(componentIndex, Kernel::toQuaterniond(newRotation));
 }
 
-const IObject &ComponentInfo::shape(const size_t componentIndex) const { return *(*m_shapes)[componentIndex]; }
+const IObject &ComponentInfo::shape(const size_t componentIndex) const {
+  if (m_componentInfo->hasVirtualBanks()) {
+    if (const auto *seg = m_componentInfo->findVirtualSegment(componentIndex)) {
+      const auto bankIdx = m_componentInfo->virtualBankIndex(seg);
+      return *m_virtualPixelShapes[bankIdx];
+    }
+    return *(*m_shapes)[m_componentInfo->compactComponentIndex(componentIndex)];
+  }
+  return *(*m_shapes)[componentIndex];
+}
 
 Kernel::V3D ComponentInfo::scaleFactor(const size_t componentIndex) const {
   return Kernel::toV3D(m_componentInfo->scaleFactor(componentIndex));
@@ -478,20 +516,30 @@ size_t ComponentInfo::findBankParent(size_t index, const std::string &bankPart) 
  * @return bytes used.
  */
 size_t ComponentInfo::getMemorySize() const {
-  const size_t n = size();
   // Beamline::ComponentInfo holds all the per-component arrays
   const size_t beamlineMem = m_componentInfo->getMemorySize();
-  // m_componentIds: shared_ptr<const vector<IComponent*>> — count the heap-allocated vector object + its buffer
-  const size_t componentIdsMem = sizeof(std::vector<Geometry::IComponent *>) + n * sizeof(Geometry::IComponent *);
-  // m_compIDToIndex: shared_ptr<const unordered_map<IComponent const*, size_t>>
-  // Count the heap-allocated map object + each node (key + value + ~2 pointers for bucket/chain overhead)
+
+  // m_componentIds is compact for virtual-bank instruments (only non-virtual
+  // entries).  Use the actual vector size rather than the logical total.
+  const size_t nCompact = m_componentIds->size();
+  const size_t componentIdsMem =
+      sizeof(std::vector<Geometry::IComponent *>) + nCompact * sizeof(Geometry::IComponent *);
+
+  // m_compIDToIndex: use the actual map entry count, not the logical n.
+  // Virtual pixels have no IComponent* and therefore no map entry.
+  const size_t nMap = m_compIDToIndex->size();
   const size_t compIDToIndexMem = sizeof(std::unordered_map<Geometry::IComponent const *, size_t>) +
-                                  n * (sizeof(Geometry::IComponent const *) + sizeof(size_t) + 2 * sizeof(void *));
-  // m_shapes: shared_ptr<vector<shared_ptr<const IObject>>>
-  // IObject shapes are shared; count the vector object + buffer of shared_ptrs, not the shapes themselves
+                                  nMap * (sizeof(Geometry::IComponent const *) + sizeof(size_t) + 2 * sizeof(void *));
+
+  // m_shapes is compact for virtual-bank instruments (virtual pixel slots
+  // omitted).  IObject shapes are shared; count the vector + shared_ptr slots.
   const size_t shapesMem =
       m_shapes ? sizeof(*m_shapes) + m_shapes->capacity() * sizeof(std::shared_ptr<const Geometry::IObject>) : 0;
-  return sizeof(*this) + beamlineMem + componentIdsMem + compIDToIndexMem + shapesMem;
+
+  // m_virtualPixelShapes: one shared_ptr per PA bank (negligible for typical instruments)
+  const size_t virtualShapesMem = m_virtualPixelShapes.capacity() * sizeof(std::shared_ptr<const Geometry::IObject>);
+
+  return sizeof(*this) + beamlineMem + componentIdsMem + compIDToIndexMem + shapesMem + virtualShapesMem;
 }
 
 } // namespace Mantid::Geometry

@@ -1,0 +1,284 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Mantid Repository : https://github.com/mantidproject/mantid
+     Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+       NScD Oak Ridge National Laboratory, European Spallation Source,
+       Institut Laue-Langevin & CSNS, Institute of High Energy Physics, CAS
+     SPDX-License-Identifier: GPL-3.0+
+
+     Mini SNAP-like instrument used to exercise the pixel_assembly IDF path.
+
+     Topology: two panels (West / East), each with three columns, each column
+     holding three banks — 18 banks total, matching real SNAP.
+
+     Differences from SNAP_Definition.xml:
+       • Each bank is 256x256 pixels — identical to the real SNAP detector.
+       • xstep = ystep = 0.000618 m; physical span +/-0.078795 m per bank.
+       • Bank type is "pixel_assembly" (vs "rectangular_detector").
+       • Panel positions are hard-coded (not logfile-driven) for testability.
+       • Detector IDs are 0 – 1179647 (18 banks x 65536 pixels, stride 65536).
+-->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="SNAP_mini"
+            valid-from="2025-01-01 00:00:00"
+            valid-to  ="2100-01-01 00:00:00"
+            last-modified="2026-05-27 00:00:00">
+
+  <!-- ================================================================
+       DEFAULTS
+       ================================================================ -->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam   axis="z"/>
+      <pointing-up  axis="y"/>
+      <handedness   val="right"/>
+      <theta-sign   axis="x"/>
+    </reference-frame>
+  </defaults>
+
+  <!-- ================================================================
+       SOURCE
+       ================================================================ -->
+  <component type="moderator">
+    <location z="-15.0"/>
+  </component>
+  <type name="moderator" is="Source"/>
+
+  <!-- ================================================================
+       SAMPLE
+       ================================================================ -->
+  <component type="sample-position">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type name="sample-position" is="SamplePos"/>
+
+  <!-- ================================================================
+       MONITORS
+       ================================================================ -->
+  <idlist idname="monitors">
+    <id val="-1"/>
+    <id val="-2"/>
+  </idlist>
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+  <type is="monitor" name="monitors">
+    <component type="monitor">
+      <location x="0.0" y="0.0" z="-3.0" name="monitor1"/>
+    </component>
+    <component type="monitor">
+      <location x="0.0" y="0.0" z="1.95" name="monitor2"/>
+    </component>
+  </type>
+
+  <!-- ================================================================
+       DETECTOR PANELS
+       West panel:  x = -2 m, rotated +90deg about Y so the face points toward +x
+       East panel:  x = +2 m, rotated -90deg about Y so the face points toward -x
+       ================================================================ -->
+
+  <component type="West">
+    <location x="-2.0" y="0.0" z="0.0">
+      <rot val="90" axis-x="0" axis-y="1" axis-z="0"/>
+    </location>
+  </component>
+
+  <component type="East">
+    <location x="2.0" y="0.0" z="0.0">
+      <rot val="-90" axis-x="0" axis-y="1" axis-z="0"/>
+    </location>
+  </component>
+
+  <!-- West panel: three columns (mirrors SNAP Column1/2/3) -->
+  <type name="West">
+    <component type="WColumn1"><location/></component>
+    <component type="WColumn2"><location/></component>
+    <component type="WColumn3"><location/></component>
+  </type>
+
+  <!-- WColumn1 - left column, same offsets as SNAP Column1
+       bank11 idstart=0       (pixels   0 –  65535)
+       bank12 idstart=65536   (pixels  65536 – 131071)
+       bank13 idstart=131072  (pixels 131072 – 196607) -->
+  <type name="WColumn1">
+    <component type="mini_panel" idstart="131072" idfillorder="yxz" idstep="1">
+      <location name="bank13">
+        <trans x="-0.167548" y="0.167548"/>
+      </location>
+    </component>
+    <component type="mini_panel" idstart="65536" idfillorder="yxz" idstep="1">
+      <location name="bank12">
+        <trans x="-0.167548" y="0.0"/>
+      </location>
+    </component>
+    <component type="mini_panel" idstart="0" idfillorder="yxz" idstep="1">
+      <location name="bank11">
+        <trans x="-0.167548" y="-0.167548"/>
+      </location>
+    </component>
+  </type>
+
+  <!-- WColumn2 - centre column, same offsets as SNAP Column2
+       bank21 idstart=196608  (pixels 196608 – 262143)
+       bank22 idstart=262144  (pixels 262144 – 327679)
+       bank23 idstart=327680  (pixels 327680 – 393215) -->
+  <type name="WColumn2">
+    <component type="mini_panel" idstart="327680" idfillorder="yxz" idstep="1">
+      <location name="bank23">
+        <trans x="0.0" y="0.167548"/>
+      </location>
+    </component>
+    <component type="mini_panel" idstart="262144" idfillorder="yxz" idstep="1">
+      <location name="bank22">
+        <trans x="0.0" y="0.0"/>
+      </location>
+    </component>
+    <component type="mini_panel" idstart="196608" idfillorder="yxz" idstep="1">
+      <location name="bank21">
+        <trans x="0.0" y="-0.167548"/>
+      </location>
+    </component>
+  </type>
+
+  <!-- WColumn3 - right column, same offsets as SNAP Column3
+       bank31 idstart=393216  (pixels 393216 – 458751)
+       bank32 idstart=458752  (pixels 458752 – 524287)
+       bank33 idstart=524288  (pixels 524288 – 589823) -->
+  <type name="WColumn3">
+    <component type="mini_panel" idstart="524288" idfillorder="yxz" idstep="1">
+      <location name="bank33">
+        <trans x="0.167548" y="0.167548"/>
+      </location>
+    </component>
+    <component type="mini_panel" idstart="458752" idfillorder="yxz" idstep="1">
+      <location name="bank32">
+        <trans x="0.167548" y="0.0"/>
+      </location>
+    </component>
+    <component type="mini_panel" idstart="393216" idfillorder="yxz" idstep="1">
+      <location name="bank31">
+        <trans x="0.167548" y="-0.167548"/>
+      </location>
+    </component>
+  </type>
+
+  <!-- East panel: three columns (mirrors SNAP Column4/5/6) -->
+
+  <type name="East">
+    <component type="EColumn1"><location/></component>
+    <component type="EColumn2"><location/></component>
+    <component type="EColumn3"><location/></component>
+  </type>
+
+  <!-- EColumn1 - mirrors SNAP Column4
+       bank61 idstart=589824  (pixels  589824 –  655359)
+       bank62 idstart=655360  (pixels  655360 –  720895)
+       bank63 idstart=720896  (pixels  720896 –  786431) -->
+  <type name="EColumn1">
+    <component type="mini_panel" idstart="720896" idfillorder="yxz" idstep="1">
+      <location name="bank63">
+        <trans x="0.167548" y="0.167548"/>
+      </location>
+    </component>
+    <component type="mini_panel" idstart="655360" idfillorder="yxz" idstep="1">
+      <location name="bank62">
+        <trans x="0.167548" y="0.0"/>
+      </location>
+    </component>
+    <component type="mini_panel" idstart="589824" idfillorder="yxz" idstep="1">
+      <location name="bank61">
+        <trans x="0.167548" y="-0.167548"/>
+      </location>
+    </component>
+  </type>
+
+  <!-- EColumn2 - mirrors SNAP Column5
+       bank51 idstart=786432  (pixels  786432 –  851967)
+       bank52 idstart=851968  (pixels  851968 –  917503)
+       bank53 idstart=917504  (pixels  917504 –  983039) -->
+  <type name="EColumn2">
+    <component type="mini_panel" idstart="917504" idfillorder="yxz" idstep="1">
+      <location name="bank53">
+        <trans x="0.0" y="0.167548"/>
+      </location>
+    </component>
+    <component type="mini_panel" idstart="851968" idfillorder="yxz" idstep="1">
+      <location name="bank52">
+        <trans x="0.0" y="0.0"/>
+      </location>
+    </component>
+    <component type="mini_panel" idstart="786432" idfillorder="yxz" idstep="1">
+      <location name="bank51">
+        <trans x="0.0" y="-0.167548"/>
+      </location>
+    </component>
+  </type>
+
+  <!-- EColumn3 - mirrors SNAP Column6
+       bank41 idstart=983040  (pixels  983040 – 1048575)
+       bank42 idstart=1048576 (pixels 1048576 – 1114111)
+       bank43 idstart=1114112 (pixels 1114112 – 1179647) -->
+  <type name="EColumn3">
+    <component type="mini_panel" idstart="1114112" idfillorder="yxz" idstep="1">
+      <location name="bank43">
+        <trans x="-0.167548" y="0.167548"/>
+      </location>
+    </component>
+    <component type="mini_panel" idstart="1048576" idfillorder="yxz" idstep="1">
+      <location name="bank42">
+        <trans x="-0.167548" y="0.0"/>
+      </location>
+    </component>
+    <component type="mini_panel" idstart="983040" idfillorder="yxz" idstep="1">
+      <location name="bank41">
+        <trans x="-0.167548" y="-0.167548"/>
+      </location>
+    </component>
+  </type>
+
+  <!-- ================================================================
+       BANK TYPE — 256x256 pixel_assembly, same physical span as SNAP
+       (+/-0.078795 m in x and y)
+
+       With 256 pixels: xstep = 0.15759 / 255 = 0.000618 m (real SNAP value)
+                        xstart = -0.078795 m  (centre of pixel 0)
+       Fill order: Y-fastest ("yxz"), matching SNAP's idfillbyfirst="y".
+       ================================================================ -->
+  <type name="mini_panel" is="pixel_assembly" type="mini_pixel"
+        xpixels="256" xstart="-0.078795" xstep="+0.000618"
+        ypixels="256" ystart="-0.078795" ystep="+0.000618">
+    <properties/>
+  </type>
+
+  <!-- ================================================================
+       PIXEL SHAPE
+       Half-size matches xstep/2 = 0.000309 m in x and y.
+       Z depth kept at 0.1 mm (same as SNAP) for realistic solid angles.
+       ================================================================ -->
+  <type is="detector" name="mini_pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point  y="-0.000309" x="-0.000309" z="0.0"    />
+      <left-front-top-point     y=" 0.000309" x="-0.000309" z="0.0"    />
+      <left-back-bottom-point   y="-0.000309" x="-0.000309" z="-0.0001"/>
+      <right-front-bottom-point y="-0.000309" x=" 0.000309" z="0.0"    />
+    </cuboid>
+    <algebra val="pixel-shape"/>
+  </type>
+
+  <!-- ================================================================
+       MONITOR SHAPE
+       ================================================================ -->
+  <type is="monitor" name="monitor">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="0.0" x="0.0" z="1.0"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="some-shape"/>
+  </type>
+
+</instrument>

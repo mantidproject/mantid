@@ -8,6 +8,7 @@
 
 #include "MantidBeamline/ComponentType.h"
 #include "MantidBeamline/DllConfig.h"
+#include "MantidBeamline/VirtualBankSegment.h"
 #include "MantidKernel/cow_ptr.h"
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
@@ -15,6 +16,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace Mantid {
 namespace Beamline {
@@ -77,7 +79,7 @@ public:
       std::shared_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> rotations,
       std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
       std::shared_ptr<std::vector<ComponentType>> componentType, std::shared_ptr<const std::vector<std::string>> names,
-      int64_t sourceIndex, int64_t sampleIndex);
+      int64_t sourceIndex, int64_t sampleIndex, std::vector<VirtualBankSegment> virtualBanks = {});
   /// Copy assignment not permitted because of the way DetectorInfo stored
   ComponentInfo &operator=(const ComponentInfo &other) = delete;
   /// Clone method
@@ -111,7 +113,27 @@ public:
       f((*m_assemblySortedDetectorIndices)[i]);
   }
 
-  const Eigen::Vector3d &position(const size_t componentIndex) const;
+  /// Whether this instrument has any PixelAssembly (virtual) banks.
+  bool hasVirtualBanks() const noexcept { return !m_virtualBanks.empty(); }
+
+  /// Returns the VirtualBankSegment owning @p detectorIndex, or nullptr if
+  /// that index is not a virtual pixel.
+  const VirtualBankSegment *findVirtualSegment(size_t detectorIndex) const noexcept;
+
+  /// Maps a logical component index to its offset in the compact arrays
+  /// (m_names, m_scaleFactors, m_parentIndices, etc.).
+  /// For virtual-bank instruments only; behaviour is undefined otherwise.
+  size_t compactComponentIndex(size_t componentIndex) const noexcept;
+
+  /// Given a pointer returned by findVirtualSegment(), returns the
+  /// zero-based index of that segment within m_virtualBanks.  O(1).
+  size_t virtualBankIndex(const VirtualBankSegment *seg) const noexcept {
+    return static_cast<size_t>(seg - m_virtualBanks.data());
+  }
+
+  // Returns by value: for virtual-bank detector indices the position is computed
+  // on demand and has no backing storage to reference.
+  Eigen::Vector3d position(const size_t componentIndex) const;
   const Eigen::Vector3d &position(const std::pair<size_t, size_t> &index) const;
   Eigen::Quaterniond rotation(const size_t componentIndex) const;
   Eigen::Quaterniond rotation(const std::pair<size_t, size_t> &index) const;
@@ -182,13 +204,25 @@ private:
   void doScaleComponent(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newScaling,
                         const ComponentInfo::Range &detectorRange);
 
-  /// Returns realDetectors.size() + sum(virtual pixels) + detRanges.size().
-  /// Used to initialise the const m_size in the constructor initialiser list,
-  /// before m_virtualBanks has been moved into place.
-  static size_t computeTotalSize(const std::vector<size_t> &realDetectors,
-                                 const std::vector<std::pair<size_t, size_t>> &detRanges) noexcept {
-    return realDetectors.size() + detRanges.size();
-  }
+  // --- Virtual-bank compaction helpers ------------------------------------
+  /// Sorted (ascending firstIndex) virtual-bank segments for PA instruments.
+  /// Empty for instruments with no PixelAssembly banks.
+  std::vector<VirtualBankSegment> m_virtualBanks;
+
+  /// Number of non-virtual detectors (= monitors for a pure-PA instrument).
+  /// Equals m_assemblySortedDetectorIndices->size() when m_virtualBanks is empty.
+  size_t m_nNonVirtualDetectors{0};
+
+  /// Maps compact detector index k → logical detector index, for non-virtual
+  /// detectors only.  Size == m_nNonVirtualDetectors.
+  std::vector<size_t> m_nonVirtualDetectorLogicalIndices;
+
+  /// Inverse of compactComponentIndex: maps a compact array offset to the
+  /// corresponding logical component index.
+  size_t logicalComponentIndex(size_t compactIdx) const noexcept;
+
+  /// Precomputes m_nNonVirtualDetectors and m_nonVirtualDetectorLogicalIndices.
+  void buildNonVirtualDetectorTable();
 };
 } // namespace Beamline
 } // namespace Mantid
