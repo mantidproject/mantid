@@ -48,6 +48,7 @@ class TexturePlannerModel(object):
         # probably static
         self.wsname = "__texture_planning_ws"
         self.instr_wsname = "__texture_planning_instr"
+        self.ungrouped_wsname = "__texture_planning_ws_ungrouped"
         self.sense_vals = {"Clockwise": -1, "Counterclockwise": 1}  # mantid convention
         self.sense_names = {"-1": "Clockwise", "1": "Counterclockwise"}
         self.supported_groups = ("Texture20", "Texture30", "banks")
@@ -56,9 +57,26 @@ class TexturePlannerModel(object):
         self.axis_dict = {"x": (1, 0, 0), "y": (0, 1, 0), "z": (0, 0, 1)}
 
         # properties which will be updated
+        # The "working" data workspace. After a group is selected this is the GroupDetectors output
+        # (one spectrum per detector group), carries the current sample shape/material/gauge volume,
+        # and is the workspace fed to MonteCarloAbsorption and other per-orientation calcs.
         self.ws = None
+        # Pristine ungrouped clone of self.ws (one spectrum per detector) kept so that swapping
+        # groups can always regroup from the original mapping rather than from an already-grouped
+        # workspace. Regrouping an already-grouped ws by raw detector IDs is very slow because
+        # GroupDetectors has to locate each ID inside the previously merged spectra.
+        self.ungrouped_ws = None
+        # Sample-mesh workspace in its raw (as-loaded) orientation. Used as the source of truth for
+        # the sample shape before any goniometer rotation is applied (e.g. when re-deriving the
+        # rotated mesh for a given orientation).
         self.mesh_ws = None
+        # Sample-mesh workspace held at the "neutral" (identity goniometer) orientation. Used by
+        # rendering / export paths that need a shape independent of the currently selected
+        # orientation (see e.g. output_as_reference_workspace).
         self.updated_mesh_ws = None
+        # Bare LoadEmptyInstrument workspace for the current instrument. Acts as the unchanging
+        # geometry source for grouping (group_ws in get_detQ_lab) so detector positions / source
+        # position are taken from a clean instrument rather than the user-modified self.ws.
         self.instr_ws = None
         self.instr = instrument
         self.calib_info = None
@@ -118,7 +136,7 @@ class TexturePlannerModel(object):
                 "__texture_planning_neutral_sample_mesh", self.updated_mesh_ws, clone=True
             )
         else:
-            ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="1,0.5,2", OutputWorkspace=self.wsname, UnitX="dSpacing")
+            ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0,0.1,5", OutputWorkspace=self.wsname, UnitX="dSpacing")
             for ispec in range(ws.getNumberHistograms()):
                 ws.setY(ispec, np.ones_like(ws.readY(ispec)))
             mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace="__texture_planning_raw_sample_mesh")
@@ -129,6 +147,9 @@ class TexturePlannerModel(object):
         self.ws = ws
         self.mesh_ws = mesh_ws
         self.updated_mesh_ws = updated_mesh_ws
+        # Snapshot the ungrouped ws so subsequent group swaps regroup from raw detectors, not
+        # from an already-grouped workspace (see ungrouped_ws annotation in __init__).
+        self.ungrouped_ws = CloneWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ungrouped_wsname)
         self.set_material()
         if self.gauge_volume_str:
             define_gauge_volume(self.ws, self.gauge_volume_str)
@@ -148,13 +169,29 @@ class TexturePlannerModel(object):
         SetSampleMaterial(self.ws, self.attenuation_kwargs["material"])
         SetSampleMaterial(self.mesh_ws, self.attenuation_kwargs["material"])
         SetSampleMaterial(self.updated_mesh_ws, self.attenuation_kwargs["material"])
+        if self.ungrouped_ws is not None:
+            SetSampleMaterial(self.ungrouped_ws, self.attenuation_kwargs["material"])
 
     def set_material_string(self, material):
+        prev_material = self.attenuation_kwargs["material"]
         try:
             self.attenuation_kwargs["material"] = material
             self.set_material()
         except Exception:
             logger.error("Invalid Material 'ChemicalFormula' - see SetSampleMaterial docs for more info")
+            # A failed SetSampleMaterial leaves the cached Python workspace handles
+            # pointing at invalidated data ("Variable invalidated, data has been
+            # deleted." on subsequent use). Restore the previous material and
+            # re-bind the handles from the ADS so the model stays usable.
+            self.attenuation_kwargs["material"] = prev_material
+            self.ws = ADS.retrieve(self.wsname)
+            self.ungrouped_ws = ADS.retrieve(self.ungrouped_wsname)
+            self.mesh_ws = ADS.retrieve("__texture_planning_raw_sample_mesh")
+            self.updated_mesh_ws = ADS.retrieve("__texture_planning_neutral_sample_mesh")
+            try:
+                self.set_material()
+            except Exception:
+                pass
 
     def load_stl(self, stl_file):
         LoadSampleShape(InputWorkspace=self.ws, Filename=stl_file, OutputWorkspace=self.ws, **self.stl_kwargs)
@@ -411,8 +448,20 @@ class TexturePlannerModel(object):
             OutputWorkspace="group_ws",
             StoreInADS=False,
         )
+        # Always regroup from the pristine ungrouped workspace; grouping the previously grouped
+        # self.ws by a new MapFile is very slow because each detector ID has to be located inside
+        # the already-merged spectra. Sync the current sample (shape + material) onto the
+        # ungrouped baseline first so the regrouped ws inherits the user's latest sample state.
+        if self.ws is not None:
+            CopySample(
+                InputWorkspace=self.ws,
+                OutputWorkspace=self.ungrouped_ws,
+                CopyName=False,
+                CopyEnvironment=False,
+                CopyLattice=False,
+            )
         self.ws = GroupDetectors(
-            InputWorkspace=self.ws,
+            InputWorkspace=self.ungrouped_ws,
             MapFile=grouping_path,
             OutputWorkspace=self.wsname,
         )
@@ -780,7 +829,7 @@ class TexturePlannerModel(object):
             shape_ws = CloneWorkspace(InputWorkspace=sample_to_copy, OutputWorkspace="__shape_ws")
         else:
             shape_ws = sample_to_copy
-        new_ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="1,0.5,2", OutputWorkspace=new_wsname, UnitX="dSpacing")
+        new_ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0,0.1,5", OutputWorkspace=new_wsname, UnitX="dSpacing")
         CopySample(InputWorkspace=shape_ws, OutputWorkspace=new_wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
         return new_ws
 

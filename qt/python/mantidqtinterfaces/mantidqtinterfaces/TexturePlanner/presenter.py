@@ -16,7 +16,7 @@ class TexturePlannerPresenter(object):
 
         self.settings_presenter = TexturePlannerSettingsPresenter(model, TexturePlannerSettingsView(parent=view))
         self.settings_presenter.load_settings_from_file_or_default()
-        self.settings_presenter.set_on_settings_applied(self.update_plots)
+        self.settings_presenter.set_on_settings_applied(self.on_settings_applied)
         self.view.set_on_settings_clicked(self.open_settings)
 
         self.set_instrument_options()
@@ -149,6 +149,11 @@ class TexturePlannerPresenter(object):
         self.model.update_instrument(self.view.get_instrument())
         self.setup_group_options()
         self.on_group_changed()
+        self.update_plots()
+
+    def on_settings_applied(self):
+        if self.model.plot_attenuation:
+            self.model.update_all_projected_data()
         self.update_plots()
 
     def update_plots(self):

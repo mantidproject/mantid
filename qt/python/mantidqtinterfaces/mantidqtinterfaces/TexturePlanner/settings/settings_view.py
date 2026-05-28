@@ -161,7 +161,7 @@ class TexturePlannerSettingsView(QDialog):
         form = QFormLayout()
 
         self.att_point = QDoubleSpinBox()
-        self.att_point.setRange(0.001, 100.0)
+        self.att_point.setRange(0.001, 1.0e6)
         self.att_point.setDecimals(4)
         form.addRow("Point:", self.att_point)
 
