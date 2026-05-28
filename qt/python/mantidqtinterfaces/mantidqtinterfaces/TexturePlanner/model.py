@@ -585,7 +585,7 @@ class TexturePlannerModel(object):
         lab_ax.set_ylim([-extent * nGon / 1.5, extent * nGon / 1.5])
         lab_ax.set_zlim([-extent * nGon / 1.5, extent * nGon / 1.5])
         lab_ax.set_aspect("equal")
-        if self.plot_attenuation:
+        if self.gauge_volume_str:
             sample_model.plot_gauge_vol()
 
         # plot incident beam
