@@ -12,6 +12,7 @@ import numpy as np
 
 from instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter import ReflectometryInstrumentViewPresenter
 from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 
 
 def _make_presenter():
@@ -359,7 +360,7 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
         ``flip_z`` would therefore raise AttributeError, catching the
         regression introduced by that typo.
         """
-        mock_model = MagicMock(spec=["detector_positions", "flip_beam", "detector_counts", "is_2d_projection"])
+        mock_model = mock.create_autospec(FullInstrumentViewModel, instance=True)
         mock_model.detector_positions = np.zeros((10, 3))
         mock_model.flip_beam = False
         mock_model.detector_counts = np.zeros(10)
