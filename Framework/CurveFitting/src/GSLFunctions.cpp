@@ -144,11 +144,11 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   }
 
   EigenMatrix m_tr = m.tr();
-  double weight = 1.0;
   std::copy(&m_tr.mutator().data()[0], &m_tr.mutator().data()[J_tr->size1 * J_tr->size2], &J->data[0]);
   for (size_t iY = 0; iY < p->n; iY++) {
-    weight = p->isPoisson ? PoissonLoss::calculateJacobianScaleFactor(values->getFitData(iY), values->getCalculated(iY))
-                          : values->getFitWeight(iY);
+    const double weight =
+        p->isPoisson ? PoissonLoss::calculateJacobianScaleFactor(values->getFitData(iY), values->getCalculated(iY))
+                     : values->getFitWeight(iY);
     for (size_t iP = 0; iP < p->p; iP++) {
       J->data[iY * p->p + iP] *= weight;
     }
