@@ -117,7 +117,7 @@ pushd $WORKSPACE
 install_pixi "$WORKSPACE"
 
 # Check whether this is an incremental build that only changes rst files
-if [ -d $BUILD_DIR ]; then
+if [ -d $BUILD_DIR/Framework ]; then
     if ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
       ENABLE_BUILD_CODE=false
       ENABLE_UNIT_TESTS=false
