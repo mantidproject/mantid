@@ -12,6 +12,7 @@ import numpy as np
 
 from instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter import ReflectometryInstrumentViewPresenter
 from instrumentview.Projections.ProjectionType import ProjectionType
+from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 
 
 def _make_presenter():
@@ -349,6 +350,30 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
         result = matrix @ origin
         # Origin is 1 unit away from centre; after 2x scale it should be 2 units away
         np.testing.assert_allclose(result[:2], [-1.0, -1.0])
+
+    def test_render_does_not_raise(self):
+        """_render must complete without raising.
+
+        The model mock is spec-restricted to only the attributes that
+        FullInstrumentViewModel actually exposes (including ``flip_beam``).
+        Accessing a non-existent attribute such as the formerly incorrect
+        ``flip_z`` would therefore raise AttributeError, catching the
+        regression introduced by that typo.
+        """
+        mock_model = mock.create_autospec(FullInstrumentViewModel, instance=True)
+        mock_model.detector_positions = np.zeros((10, 3))
+        mock_model.flip_beam = False
+        mock_model.detector_counts = np.zeros(10)
+        mock_model.is_2d_projection = True
+
+        mock_renderer = MagicMock()
+        mock_renderer.build_detector_mesh.return_value = MagicMock(bounds=(0, 1, 0, 1, 0, 1))
+
+        self._presenter._model = mock_model
+        self._presenter._renderer = mock_renderer
+
+        # Should not raise
+        self._presenter._render()
 
 
 if __name__ == "__main__":
