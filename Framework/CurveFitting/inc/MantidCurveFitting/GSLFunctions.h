@@ -18,7 +18,6 @@
 namespace Mantid {
 namespace CurveFitting {
 
-template <typename T> int sgn(T val) { return (T(0) < val) - (val < T(0)); }
 /**
 Various GSL specific functions used GSL specific minimizers
 
