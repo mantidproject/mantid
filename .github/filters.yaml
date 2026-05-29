@@ -20,7 +20,10 @@ configuration: &files_config
 # files that affect CI
 workflows: &files_workflow
  - 'buildconfig/Jenkins/**'
- - '.github/**'
+ - '.github/actions/**'
+ - '.github/matchers/**'
+ - '.github/workflows/**'
+ - '.github/filters.yaml'
 ### filters used in individual jobs and steps
 doxygen:
  - *files_config
