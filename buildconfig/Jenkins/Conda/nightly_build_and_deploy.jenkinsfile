@@ -681,9 +681,9 @@ def package_standalone_options(platform) {
     package_options += " --package-suffix ${PACKAGE_SUFFIX}"
   }
   package_options += " --git-tag ${GIT_TAG}"
-  // For branches that don't build mantiddocs (e.g., ornl-next), use flexible version constraint
+  // For branches that don't build mantiddocs (e.g., ornl-next), skip docs installation
   if(!buildMantiddocs) {
-    package_options += " --flexible-docs"
+    package_options += " --skip-docs"
   }
   return package_options.trim() + " --platform ${platform}"
 }

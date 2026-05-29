@@ -68,7 +68,7 @@ function usage() {
   echo "Options:"
   echo "  -c Optional conda channel overriding the default mantid"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
-  echo "  -f Optional Use flexible mantiddocs version constraint (for branches without mantiddocs builds)"
+  echo "  --skip-docs Optional Skip mantiddocs installation (uses online documentation only)"
   echo
   exit $exitcode
 }
@@ -78,7 +78,7 @@ function usage() {
 conda_channel=mantid
 suffix=
 mantid_version=
-flexible_docs=false
+skip_docs=false
 while [ ! $# -eq 0 ]
 do
   case "$1" in
@@ -94,8 +94,8 @@ do
         mantid_version="$2"
         shift
         ;;
-    -f)
-        flexible_docs=true
+    --skip-docs)
+        skip_docs=true
         ;;
     -h)
         usage 0
@@ -155,26 +155,20 @@ if [ -z "$mantid_version" ]; then
   exit 1
 fi
 
-# Determine mantiddocs version constraint
-if [ "$flexible_docs" = true ]; then
-  # For ornl-next and similar branches, use a flexible constraint
-  # Extract major version from mantid_version (e.g., 6.11.0 -> 6)
-  major_version=$(echo "$mantid_version" | cut -d. -f1)
-  mantiddocs_constraint="mantiddocs>=${major_version}.0"
-  echo "Using flexible mantiddocs version constraint: ${mantiddocs_constraint}"
+# Build conda packages list
+conda_packages=("mantidworkbench==${mantid_version}")
+if [ "$skip_docs" = false ]; then
+  conda_packages+=("mantiddocs==${mantid_version}")
+  echo "Installing mantiddocs ${mantid_version}"
 else
-  # For main and release-next, require exact version match
-  mantiddocs_constraint="mantiddocs==${mantid_version}"
-  echo "Using strict mantiddocs version constraint: ${mantiddocs_constraint}"
+  echo "Skipping mantiddocs installation (will use online documentation)"
 fi
+conda_packages+=(mslice jq)
 
 echo "Creating conda environment in '$bundle_conda_prefix'"
 "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
   --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
-  "mantidworkbench==${mantid_version}" \
-  "${mantiddocs_constraint}" \
-  mslice \
-  jq  # used for processing the version string
+  "${conda_packages[@]}"
 echo
 
 # Determine version information
