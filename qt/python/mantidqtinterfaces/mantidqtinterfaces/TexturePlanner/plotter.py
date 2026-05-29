@@ -13,7 +13,6 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show
 from Engineering.texture.texture_helper import (
     azim_proj_xy,
     get_alpha_beta_from_cart,
-    get_scattering_centre,
     ring,
     ster_proj_xy,
 )
@@ -45,10 +44,12 @@ class TexturePlotter:
         shape_mesh = m.workspaces.updated_mesh_ws.sample().getShape().getMesh().copy()
         extent = (np.linalg.norm(shape_mesh, axis=(1, 2)).max() / 2) * 1.2
         rot_mesh = R.apply(shape_mesh.reshape((-1, 3))).reshape(shape_mesh.shape)
-        scat_centre = get_scattering_centre(m.workspaces.ws)
+
+        m.workspaces.update_scattering_centre()
+        scat_centre = m.workspaces.scattering_centre
 
         g_vecs = self._draw_goniometers(lab_ax, vecs, senses, angles, gRs, n_gon, extent)
-        self._draw_sample_and_axes(fig, lab_ax, rot_mesh, extent, n_gon)
+        self._draw_sample_and_axes(fig, lab_ax, rot_mesh, extent, n_gon, scat_centre)
         self._draw_beam_and_detectors(lab_ax, scat_centre, extent, n_gon)
         lab_ax.set_axis_off()
 
@@ -90,7 +91,7 @@ class TexturePlotter:
             lab_ax.legend()
         return g_vecs
 
-    def _draw_sample_and_axes(self, fig, lab_ax, rot_mesh, extent, n_gon):
+    def _draw_sample_and_axes(self, fig, lab_ax, rot_mesh, extent, n_gon, scat_centre):
         m = self._model
         sample_model = ShowSampleModel()
         sample_model.fig = fig
@@ -99,7 +100,7 @@ class TexturePlotter:
         fig.sca(lab_ax)
         plot_sample_only(fig, rot_mesh, 0.5, "grey")
         if m.vis_settings["directions"]:
-            sample_model.plot_sample_directions(m.ax_transform, m.dir_names)
+            sample_model.plot_sample_directions(m.ax_transform, m.dir_names, scat_centre=scat_centre)
         lim = extent * n_gon / 1.5
         lab_ax.set_xlim([-lim, lim])
         lab_ax.set_ylim([-lim, lim])

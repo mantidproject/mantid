@@ -10,7 +10,6 @@ import numpy as np
 
 from mantid.simpleapi import CopySample, GroupDetectors, LoadDetectorsGroupingFile
 from Engineering.EnggUtils import CALIB_DIR
-from Engineering.texture.texture_helper import define_gauge_volume, get_scattering_centre
 
 
 class DetectorGeometry:
@@ -54,8 +53,6 @@ class DetectorGeometry:
             MapFile=grouping_path,
             OutputWorkspace=wsm.wsname,
         )
-        if wsm.gauge_volume_str:
-            define_gauge_volume(wsm.ws, wsm.gauge_volume_str)
 
         tmp_grp = LoadDetectorsGroupingFile(InputFile=grouping_path, OutputWorkspace="tmp_grp", StoreInADS=False)
         ydat = tmp_grp.extractY()
@@ -67,7 +64,8 @@ class DetectorGeometry:
 
         # if the sample is partially illuminated the scattering vectors should be taken from the centre of mass of the
         # illuminated region
-        scattering_centre = get_scattering_centre(wsm.ws)
+        wsm.update_scattering_centre()
+        scattering_centre = wsm.scattering_centre
 
         self.det_k = np.asarray(
             [

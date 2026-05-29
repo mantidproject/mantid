@@ -94,9 +94,10 @@ class TestShowSampleModel_PlotSampleDirections(unittest.TestCase):
         self.model.fig = fig
         self.ax = ax
 
+    @patch(model_path + ".get_scattering_centre", return_value=np.array((0.0, 0.0, 0.0)))
     @patch(model_path + ".get_scaled_intrinsic_sample_directions_in_lab_frame")
     @patch(model_path + ".ADS")
-    def test_plot_sample_directions_uses_goniometer_when_fixed(self, mock_ads, mock_get_dirs):
+    def test_plot_sample_directions_uses_goniometer_when_fixed(self, mock_ads, mock_get_dirs, mock_get_centre):
         # workspace chain
         ws = MagicMock()
         mock_ads.retrieve.return_value = ws
@@ -144,9 +145,10 @@ class TestShowSampleModel_PlotSampleDirections(unittest.TestCase):
         # run/goniometer must have been accessed
         ws.getRun.assert_called_once()
 
+    @patch(model_path + ".get_scattering_centre", return_value=np.array((0.0, 0.0, 0.0)))
     @patch(model_path + ".get_scaled_intrinsic_sample_directions_in_lab_frame")
     @patch(model_path + ".ADS")
-    def test_plot_sample_directions_uses_identity_when_not_fixed(self, mock_ads, mock_get_dirs):
+    def test_plot_sample_directions_uses_identity_when_not_fixed(self, mock_ads, mock_get_dirs, mock_get_centre):
         # workspace chain (ensure getRun is not called when not fixed)
         ws = MagicMock()
         mock_ads.retrieve.return_value = ws
