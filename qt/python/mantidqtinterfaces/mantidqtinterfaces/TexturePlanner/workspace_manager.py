@@ -23,7 +23,7 @@ from mantid.simpleapi import (
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import logger
 from Engineering.common.xml_shapes import get_cube_xml
-from Engineering.texture.texture_helper import define_gauge_volume, get_gauge_vol_str
+from Engineering.texture.texture_helper import define_gauge_volume, get_gauge_vol_str, get_scattering_centre
 
 
 class WorkspaceManager:
@@ -56,6 +56,7 @@ class WorkspaceManager:
         self.init_R = Rotation.identity()
         self.offset = (0, 0, 0)
         self.gauge_volume_str = None
+        self.scattering_centre = (0, 0, 0)
         # stl_settings
         self.stl_kwargs = {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": "0", "TranslationVector": "0,0,0"}
         # material + attenuation-point settings; the material is applied here, the
@@ -88,6 +89,7 @@ class WorkspaceManager:
         self.set_material()
         if self.gauge_volume_str:
             define_gauge_volume(self.ws, self.gauge_volume_str)
+        self.update_scattering_centre()
 
     def set_material(self):
         SetSampleMaterial(self.ws, self.attenuation_kwargs["material"])
@@ -165,6 +167,10 @@ class WorkspaceManager:
             define_gauge_volume(self.ws, self.gauge_volume_str)
         elif self.ws.run().hasProperty("GaugeVolume"):
             DeleteLog(Workspace=self.ws, Name="GaugeVolume")
+        self.update_scattering_centre()
+
+    def update_scattering_centre(self):
+        self.scattering_centre = get_scattering_centre(self.ws)
 
     def _create_new_ws_with_copied_sample(self, new_wsname, sample_to_copy, clone=False):
         if clone:
