@@ -77,24 +77,11 @@ class ShapeRenderer(InstrumentRenderer):
 
         shape_cache: dict[int, tuple[np.ndarray, np.ndarray]] = {}
         det_shape_keys = np.empty(n_det, dtype=np.int64)
-        det_rotations = np.empty((n_det, 3, 3), dtype=np.float64)
-        det_scales = np.empty((n_det, 3), dtype=np.float64)
-        all_positions = np.empty((n_det, 3), dtype=np.float64)
+        det_rotations = Rotation.from_quat(det_info.allRotations()).as_matrix()
+        det_scales = det_info.allScaleFactors()
+        all_positions = det_info.allPositions()
 
         for i in range(n_det):
-            # Position (V3D → array)
-            pos = det_info.position(i)
-            all_positions[i] = [pos.X(), pos.Y(), pos.Z()]
-
-            # Rotation (Quat → scipy rotation matrix)
-            q = comp_info.rotation(i)
-            # Mantid Quat: (w, x, y, z); scipy wants (x, y, z, w)
-            rot = Rotation.from_quat([q.imagI(), q.imagJ(), q.imagK(), q.real()])
-            det_rotations[i] = rot.as_matrix()
-
-            sc = comp_info.scaleFactor(i)
-            det_scales[i] = [sc.X(), sc.Y(), sc.Z()]
-
             # Shape — hash the XML string for fast deduplication
             if not comp_info.hasValidShape(i):
                 det_shape_keys[i] = 0
