@@ -99,7 +99,7 @@ if [ -z "${GIT_TAG}" ]; then
 fi
 # Strip leading 'v' to match the version format used by versioningit in package-conda
 MANTID_VERSION="${GIT_TAG#v}"
-echo "Pinning mantidworkbench and mantiddocs to version: ${MANTID_VERSION}"
+echo "Pinning mantidworkbench to version: ${MANTID_VERSION}"
 
 PACKAGING_ARGS="-c ${LOCAL_CHANNEL} -v ${MANTID_VERSION}"
 if [ -n "${STANDALONE_PACKAGE_SUFFIX}" ]; then
