@@ -87,6 +87,7 @@ public:
   Kernel::Quat rotation(const size_t index) const;
   Kernel::Quat rotation(const std::pair<size_t, size_t> &index) const;
   std::vector<Kernel::Quat> allRotations() const;
+  std::vector<Kernel::V3D> allScaleFactors() const;
 
   void setMasked(const size_t index, bool masked);
   void setMasked(const std::pair<size_t, size_t> &index, bool masked);

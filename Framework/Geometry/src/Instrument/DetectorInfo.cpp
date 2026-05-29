@@ -356,6 +356,16 @@ std::vector<Kernel::Quat> DetectorInfo::allRotations() const {
   return rotations;
 }
 
+std::vector<Kernel::V3D> DetectorInfo::allScaleFactors() const {
+  std::vector<Kernel::V3D> scaleFactors;
+  scaleFactors.reserve(size());
+  for (size_t i = 0; i < size(); ++i) {
+    const auto scale = m_detectorInfo->scaleFactor(i);
+    scaleFactors.push_back(Kernel::toV3D(scale));
+  }
+  return scaleFactors;
+}
+
 /// Set the mask flag of the detector with given index. Not thread safe.
 void DetectorInfo::setMasked(const size_t index, bool masked) { m_detectorInfo->setMasked(index, masked); }
 

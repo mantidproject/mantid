@@ -43,20 +43,29 @@ DetectorInfoPythonIterator make_pyiterator(DetectorInfo &detectorInfo) {
 /// return_value_policy for read-only numpy array
 using return_readonly_numpy = return_value_policy<Policies::VectorRefToNumpy<Converters::WrapReadOnly>>;
 
-PyObject *allPositions(const DetectorInfo &self) {
-  const std::vector<V3D> positions = self.allPositions();
-  const size_t n_detectors = positions.size();
+PyObject *numpyArrayFromVector(const std::vector<V3D> &vec) {
+  const size_t n_detectors = vec.size();
   const size_t vec_size = 3;
   npy_intp dims[2] = {static_cast<npy_intp>(n_detectors), vec_size};
-  PyObject *numpy_positions_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
-  double *data = static_cast<double *>(PyArray_DATA(reinterpret_cast<PyArrayObject *>(numpy_positions_array)));
+  PyObject *numpy_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+  double *data = static_cast<double *>(PyArray_DATA(reinterpret_cast<PyArrayObject *>(numpy_array)));
   for (size_t i = 0; i < n_detectors; ++i) {
     const size_t base_index = i * vec_size;
-    data[base_index + 0] = positions[i].X();
-    data[base_index + 1] = positions[i].Y();
-    data[base_index + 2] = positions[i].Z();
+    data[base_index + 0] = vec[i].X();
+    data[base_index + 1] = vec[i].Y();
+    data[base_index + 2] = vec[i].Z();
   }
-  return numpy_positions_array;
+  return numpy_array;
+}
+
+PyObject *allPositions(const DetectorInfo &self) {
+  const std::vector<V3D> positions = self.allPositions();
+  return numpyArrayFromVector(positions);
+}
+
+PyObject *allScaleFactors(const DetectorInfo &self) {
+  const std::vector<V3D> positions = self.allScaleFactors();
+  return numpyArrayFromVector(positions);
 }
 
 PyObject *allRotations(const DetectorInfo &self) {
@@ -148,6 +157,8 @@ void export_DetectorInfo() {
            "is identified by 'index'.")
       .def("allRotations", &allRotations, (arg("self")),
            "Returns the absolute rotations of all detectors as a numpy array of quarternions, [i, j, k, w].")
+      .def("allScaleFactors", &allScaleFactors, (arg("self")),
+           "Returns the scale factors of all detectors as a numpy array.")
       .def("detectorIDs", &DetectorInfo::detectorIDs, return_readonly_numpy(),
            "Returns all detector ids sorted by detector index")
       .def("l2", l2, (arg("self"), arg("index")), "Returns the l2 scattering distance")
