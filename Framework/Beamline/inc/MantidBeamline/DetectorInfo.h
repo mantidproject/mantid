@@ -111,9 +111,11 @@ public:
    */
   friend class ComponentInfo;
 
+  /// Returns the segment owning @p index, or nullptr if not virtual.
+  const VirtualBankSegment *findVirtualSegment(size_t index) const noexcept;
   /// Maps a logical detector index to its compact array offset, skipping virtual pixel ranges.
-  /// Only valid for non-virtual indices. Identity for non-virtual-bank instruments.
-  size_t compactDetectorIndex(size_t index) const noexcept { return index; }
+  /// Only valid for non-virtual indices.
+  size_t compactDetectorIndex(size_t index) const noexcept;
 
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
@@ -133,11 +135,6 @@ private:
   std::vector<VirtualBankSegment> m_virtualBanks;
 
   ComponentInfo *m_componentInfo = nullptr; // Geometry::ComponentInfo owner
-
-  /// Returns the segment owning @p index, or nullptr if not virtual.
-  const VirtualBankSegment *findVirtualSegment(size_t index) const noexcept;
-  /// Maps a logical detector index to a compact array offset, skipping virtual pixel ranges.
-  size_t compactDetectorIndex(size_t index) const noexcept;
 };
 
 /** Returns the number of detectors in the instrument.

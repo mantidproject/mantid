@@ -59,8 +59,9 @@ ComponentInfo::ComponentInfo(
       m_parentIndices(std::move(parentIndices)), m_children(std::move(children)), m_positions(std::move(positions)),
       m_rotations(std::move(rotations)), m_scaleFactors(std::move(scaleFactors)),
       m_componentType(std::move(componentType)), m_names(std::move(names)),
-      m_size(m_assemblySortedDetectorIndices->size() + m_detectorRanges->size()), m_sourceIndex(sourceIndex),
-      m_sampleIndex(sampleIndex), m_detectorInfo(nullptr), m_virtualBanks(std::move(virtualBanks)) {
+      m_size(ComponentInfo::computeTotalSize(*m_assemblySortedDetectorIndices, virtualBanks, *m_detectorRanges)),
+      m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex), m_detectorInfo(nullptr),
+      m_virtualBanks(std::move(virtualBanks)) {
   if (m_rotations->size() != m_positions->size()) {
     throw std::invalid_argument("ComponentInfo should have been provided same "
                                 "number of postions and rotations");
@@ -98,7 +99,7 @@ ComponentInfo::ComponentInfo(
                                   "of names as number of components");
     }
     // Non-virtual: m_nNonVirtualDetectors == all detectors.
-    m_nNonVirtualDetectors = m_assemblySortedDetectorIndices->size();
+    m_nNonVirtualDetectors = totalDetectorCount();
   } else {
     // Virtual-bank path: names, scaleFactors, and parentIndices are compact
     // (non-virtual detectors + non-detector components only).
@@ -145,18 +146,9 @@ std::unique_ptr<ComponentInfo> ComponentInfo::cloneWithoutDetectorInfo() const {
 }
 
 std::vector<size_t> ComponentInfo::detectorsInSubtree(const size_t componentIndex) const {
-  if (isDetector(componentIndex)) {
-    /* This is a single detector. Just return the corresponding index.
-     * detectorIndex == componentIndex
-     */
-    return std::vector<size_t>{componentIndex};
-  }
-  // Calculate index into our ranges (non-detector) component items.
-  const auto rangesIndex = compOffsetIndex(componentIndex);
-  const auto range = (*m_detectorRanges)[rangesIndex];
-  // Extract as a block
-  return std::vector<size_t>(m_assemblySortedDetectorIndices->begin() + range.first,
-                             m_assemblySortedDetectorIndices->begin() + range.second);
+  std::vector<size_t> result;
+  forEachDetectorInSubtree(componentIndex, [&result](size_t idx) { result.push_back(idx); });
+  return result;
 }
 
 std::vector<size_t> ComponentInfo::componentsInSubtree(const size_t componentIndex) const {
@@ -169,8 +161,6 @@ std::vector<size_t> ComponentInfo::componentsInSubtree(const size_t componentInd
   // Non-detector components.
   const auto rangesIndex = compOffsetIndex(componentIndex);
   const auto compRange = (*m_componentRanges)[rangesIndex];
-
-  // Extract as a block
   indices.insert(indices.end(), m_assemblySortedComponentIndices->begin() + compRange.first,
                  m_assemblySortedComponentIndices->begin() + compRange.second);
   return indices;
@@ -194,6 +184,15 @@ size_t ComponentInfo::numberOfDetectorsInSubtree(const size_t componentIndex) co
   const auto rangesIndex = compOffsetIndex(componentIndex);
   const auto detRange = (*m_detectorRanges)[rangesIndex];
   size_t count = detRange.second - detRange.first;
+  // Virtual pixels from VirtualAssembly segments in this subtree.
+  if (hasVirtualBanks()) {
+    const auto compRange = (*m_componentRanges)[rangesIndex];
+    for (size_t j = compRange.first; j < compRange.second; ++j) {
+      const size_t compIdx = (*m_assemblySortedComponentIndices)[j];
+      if (const auto *seg = findVirtualBankByCompIdx(compIdx))
+        count += seg->lastIndex - seg->firstIndex + 1;
+    }
+  }
   return count;
 }
 
@@ -297,13 +296,9 @@ void ComponentInfo::doSetPosition(const std::pair<size_t, size_t> &index, const 
   const auto componentIndex = index.first;
   const auto timeIndex = index.second;
   const Eigen::Vector3d offset = newPosition - position(componentIndex);
-  for (const auto &subIndex : detectorRange) {
-    // Virtual pixels have no stored position entry; skip them here and update
-    // their VirtualBankSegments below.
-    if (!m_virtualBanks.empty() && findVirtualSegment(subIndex))
-      continue;
+  // detectorRange contains only real (non-virtual) detector indices.
+  for (const auto &subIndex : detectorRange)
     m_detectorInfo->setPosition({subIndex, timeIndex}, m_detectorInfo->position({subIndex, timeIndex}) + offset);
-  }
 
   const auto compRange = componentRangeInSubtree(componentIndex);
   for (const auto &subIndex : compRange) {
@@ -337,11 +332,8 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index, const 
   const Eigen::Quaterniond rotDelta = (newRotation * currentRotInv).normalized();
   auto transform = Eigen::Matrix3d(rotDelta);
 
+  // detectorRange contains only real (non-virtual) detector indices.
   for (const auto &subDetIndex : detectorRange) {
-    // Virtual pixels have no stored position entry; skip them here and update
-    // their VirtualBankSegments below.
-    if (!m_virtualBanks.empty() && findVirtualSegment(subDetIndex))
-      continue;
     auto oldPos = m_detectorInfo->position({subDetIndex, timeIndex});
     auto newPos = transform * (oldPos - compPos) + compPos;
     auto newRot = rotDelta * m_detectorInfo->rotation({subDetIndex, timeIndex});
@@ -882,7 +874,7 @@ const VirtualBankSegment *ComponentInfo::findVirtualSegment(size_t index) const 
  * Behaviour is undefined if @p componentIndex is a virtual pixel.
  */
 size_t ComponentInfo::compactComponentIndex(const size_t componentIndex) const noexcept {
-  const size_t nDetectors = m_assemblySortedDetectorIndices->size();
+  const size_t nDetectors = totalDetectorCount();
   if (componentIndex >= nDetectors) {
     // Non-detector component: offset past all compact detector entries.
     return m_nNonVirtualDetectors + (componentIndex - nDetectors);
@@ -908,7 +900,7 @@ size_t ComponentInfo::logicalComponentIndex(const size_t compactIdx) const noexc
   if (compactIdx < m_nNonVirtualDetectors)
     return m_nonVirtualDetectorLogicalIndices[compactIdx];
   // Non-detector component.
-  return m_assemblySortedDetectorIndices->size() + (compactIdx - m_nNonVirtualDetectors);
+  return totalDetectorCount() + (compactIdx - m_nNonVirtualDetectors);
 }
 
 /**
@@ -917,7 +909,7 @@ size_t ComponentInfo::logicalComponentIndex(const size_t compactIdx) const noexc
  * detector logical indices.  Called once from the constructor.
  */
 void ComponentInfo::buildNonVirtualDetectorTable() {
-  const size_t nDetectors = m_assemblySortedDetectorIndices->size();
+  const size_t nDetectors = totalDetectorCount();
   m_nonVirtualDetectorLogicalIndices.clear();
   size_t i = 0;
   for (const auto &seg : m_virtualBanks) {

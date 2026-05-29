@@ -100,7 +100,9 @@ public:
   size_t totalDetectorCount() const noexcept { return m_detectorRanges ? m_size - m_detectorRanges->size() : 0; }
 
   /// Call @p f(detectorIndex) for every detector in the subtree rooted at
-  /// @p componentIndex.  Real detector indices come from the flat array.
+  /// @p componentIndex.  Real detector indices come from the flat array;
+  /// virtual pixel indices are generated on the fly from VirtualBankSegment
+  /// ranges — no heap allocation is required for the enumeration itself.
   template <typename Callable> void forEachDetectorInSubtree(size_t componentIndex, Callable &&f) const {
     if (isDetector(componentIndex)) {
       f(componentIndex);
@@ -111,6 +113,16 @@ public:
     const auto detRange = (*m_detectorRanges)[rangesIndex];
     for (size_t i = detRange.first; i < detRange.second; ++i)
       f((*m_assemblySortedDetectorIndices)[i]);
+    // Virtual pixels synthesised from VirtualAssembly segments.
+    if (hasVirtualBanks()) {
+      const auto compRange = (*m_componentRanges)[rangesIndex];
+      for (size_t j = compRange.first; j < compRange.second; ++j) {
+        const size_t compIdx = (*m_assemblySortedComponentIndices)[j];
+        if (const auto *seg = findVirtualBankByCompIdx(compIdx))
+          for (size_t k = seg->firstIndex; k <= seg->lastIndex; ++k)
+            f(k);
+      }
+    }
   }
 
   /// Whether this instrument has any PixelAssembly (virtual) banks.
@@ -232,6 +244,18 @@ private:
 
   /// Precomputes m_nNonVirtualDetectors and m_nonVirtualDetectorLogicalIndices.
   void buildNonVirtualDetectorTable();
+
+  /// Returns realDetectors.size() + sum(virtual pixels) + detRanges.size().
+  /// Used to initialise the const m_size in the constructor initialiser list,
+  /// before m_virtualBanks has been moved into place.
+  static size_t computeTotalSize(const std::vector<size_t> &realDetectors,
+                                 const std::vector<VirtualBankSegment> &vbanks,
+                                 const std::vector<std::pair<size_t, size_t>> &detRanges) noexcept {
+    size_t nVirtual = 0;
+    for (const auto &seg : vbanks)
+      nVirtual += seg.lastIndex - seg.firstIndex + 1;
+    return realDetectors.size() + nVirtual + detRanges.size();
+  }
 };
 } // namespace Beamline
 } // namespace Mantid
