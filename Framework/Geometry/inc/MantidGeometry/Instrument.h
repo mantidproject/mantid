@@ -389,11 +389,14 @@ private:
   /// Pointer to the ComponentInfo object. May be NULL.
   std::shared_ptr<const ComponentInfo> m_componentInfo{nullptr};
 
-  /// Sorted (ascending) list of all virtual (PixelAssembly) pixel detector
-  /// IDs.  Replaces null entries formerly kept in m_detectorCache for these
-  /// pixels.  Empty for non-PA instruments.
-  /// Memory: 4 bytes per pixel (vs. ~24–32 bytes per DetectorCacheEntry).
-  std::vector<detid_t> m_virtualDetectorIDs;
+  /// One entry per PixelAssembly bank; replaces the O(n_pixels) sorted ID
+  /// vector.  Empty for non-PA instruments.
+  struct VirtualBankInfo {
+    detid_t idstart; ///< detector ID at grid position (0, 0, 0)
+    int idstep;      ///< ID increment per pixel along the fastest fill axis
+    size_t npixels;  ///< total pixel count in this bank
+  };
+  std::vector<VirtualBankInfo> m_virtualBankInfos;
 
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};

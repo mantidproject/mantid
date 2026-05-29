@@ -69,6 +69,28 @@ struct MANTID_BEAMLINE_DLL VirtualBankSegment {
     return firstIndex + local;
   }
 
+  /** Return the detector ID for logical index @p logicalIndex.
+   *
+   *  Inverse of indexOf(): decodes (iz, ix, iy) from the iteration-order offset
+   *  (z-outer, x-middle, y-inner), maps through idFillOrder, and computes the ID. */
+  int32_t idAtIndex(size_t logicalIndex) const noexcept {
+    const size_t local = logicalIndex - firstIndex;
+    const size_t nxy = static_cast<size_t>(nx) * static_cast<size_t>(ny);
+    const int iz = static_cast<int>(local / nxy);
+    const int ix = static_cast<int>((local % nxy) / static_cast<size_t>(ny));
+    const int iy = static_cast<int>(local % static_cast<size_t>(ny));
+    // Map (ix, iy, iz) → fill-order coordinates (reverse of what indexOf does).
+    const int coords[3] = {ix, iy, iz}; // 0=x, 1=y, 2=z
+    const auto axisIdx = [](char axis) noexcept { return axis == 'x' ? 0 : axis == 'y' ? 1 : 2; };
+    const int c0 = coords[axisIdx(idFillOrder[0])];
+    const int c1 = coords[axisIdx(idFillOrder[1])];
+    const int c2 = coords[axisIdx(idFillOrder[2])];
+    const int n0 = idFillOrder[0] == 'x' ? nx : idFillOrder[0] == 'y' ? ny : nz;
+    const int n1 = idFillOrder[1] == 'x' ? nx : idFillOrder[1] == 'y' ? ny : nz;
+    const int fill_index = c0 + n0 * (c1 + n1 * c2);
+    return idstart + static_cast<int32_t>(fill_index) * static_cast<int32_t>(idstep);
+  }
+
   /** Return the logical detector index for detector ID @p id.
    *
    *  Precondition: id is a valid pixel ID in this bank (no bounds check performed).

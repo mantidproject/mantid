@@ -273,7 +273,7 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
 /** Return a vector of detector IDs in this instrument */
 std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
-  const auto &vids = m_map ? m_instr->m_virtualDetectorIDs : m_virtualDetectorIDs;
+  const auto &vbanks = m_map ? m_instr->m_virtualBankInfos : m_virtualBankInfos;
 
   // Collect real (non-virtual) detector IDs from the cache (already sorted).
   std::vector<detid_t> realIDs;
@@ -284,13 +284,23 @@ std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
   }
 
   // Virtual pixels are never monitors; include them regardless of skipMonitors.
-  if (vids.empty())
+  if (vbanks.empty())
     return realIDs;
 
-  // Merge real IDs and virtual IDs — both are sorted — into one sorted result.
+  // Generate virtual IDs on demand (O(n_pixels) temporary), sort, then merge.
+  size_t totalVirtual = 0;
+  for (const auto &info : vbanks)
+    totalVirtual += info.npixels;
+  std::vector<detid_t> virtualIDs;
+  virtualIDs.reserve(totalVirtual);
+  for (const auto &info : vbanks)
+    for (size_t k = 0; k < info.npixels; ++k)
+      virtualIDs.push_back(info.idstart + static_cast<detid_t>(static_cast<int64_t>(k) * info.idstep));
+  std::sort(virtualIDs.begin(), virtualIDs.end());
+
   std::vector<detid_t> out;
-  out.reserve(realIDs.size() + vids.size());
-  std::merge(realIDs.begin(), realIDs.end(), vids.begin(), vids.end(), std::back_inserter(out));
+  out.reserve(realIDs.size() + virtualIDs.size());
+  std::merge(realIDs.begin(), realIDs.end(), virtualIDs.begin(), virtualIDs.end(), std::back_inserter(out));
   return out;
 }
 
@@ -312,15 +322,18 @@ std::vector<detid_t> Instrument::getMonitorIDs() const {
 /// @return The total number of detector IDs in the instrument */
 std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
-  const auto &vids = m_map ? m_instr->m_virtualDetectorIDs : m_virtualDetectorIDs;
+  const auto &vbanks = m_map ? m_instr->m_virtualBankInfos : m_virtualBankInfos;
+  size_t nVirtual = 0;
+  for (const auto &info : vbanks)
+    nVirtual += info.npixels;
 
   if (skipMonitors) {
     // Virtual pixels are never monitors; count only non-monitor real entries.
     const std::size_t monitors =
         std::count_if(in_dets.cbegin(), in_dets.cend(), [](const auto &in_det) { return in_det.isMonitor(); });
-    return (in_dets.size() - monitors) + vids.size();
+    return (in_dets.size() - monitors) + nVirtual;
   } else {
-    return in_dets.size() + vids.size();
+    return in_dets.size() + nVirtual;
   }
 }
 
@@ -608,9 +621,15 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
   if (it == in_dets.end()) {
     // Virtual pixels are not stored in the cache; return null sptr so callers
     // can distinguish "virtual pixel" from a genuine "not found" error.
-    const auto &vids = m_map ? m_instr->m_virtualDetectorIDs : m_virtualDetectorIDs;
-    if (std::binary_search(vids.begin(), vids.end(), detector_id))
-      return IDetector_const_sptr{};
+    const auto &vbanks = m_map ? m_instr->m_virtualBankInfos : m_virtualBankInfos;
+    for (const auto &info : vbanks) {
+      const int64_t delta = static_cast<int64_t>(detector_id) - static_cast<int64_t>(info.idstart);
+      if (info.idstep != 0 && delta % info.idstep == 0) {
+        const int64_t q = delta / info.idstep;
+        if (q >= 0 && q < static_cast<int64_t>(info.npixels))
+          return IDetector_const_sptr{};
+      }
+    }
     std::stringstream readInt;
     readInt << detector_id;
     throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.", "");
@@ -849,26 +868,8 @@ void Instrument::markAsVirtualBankDetectors(const IVirtualBank &bank) {
   if (m_map)
     throw std::runtime_error("Instrument::markAsVirtualBankDetectors() called on a parametrized Instrument object.");
 
-  // Collect this bank's pixel IDs and merge them into the sorted m_virtualDetectorIDs.
-  // Storing IDs as a plain sorted vector uses ~4 bytes/pixel vs. ~24–32 bytes/pixel
-  // in m_detectorCache, saving ~20–28 MB for a 1.18M-pixel instrument.
-  std::vector<detid_t> bankIDs;
-  bankIDs.reserve(bank.npixels());
-  for (size_t iz = 0; iz < bank.zpixels(); ++iz) {
-    for (size_t iy = 0; iy < bank.ypixels(); ++iy) {
-      for (size_t ix = 0; ix < bank.xpixels(); ++ix) {
-        bankIDs.push_back(bank.getDetectorIDAtXYZ(static_cast<int>(ix), static_cast<int>(iy), static_cast<int>(iz)));
-      }
-    }
-  }
-  std::sort(bankIDs.begin(), bankIDs.end());
-
-  // Merge into the existing sorted list.
-  std::vector<detid_t> merged;
-  merged.reserve(m_virtualDetectorIDs.size() + bankIDs.size());
-  std::merge(m_virtualDetectorIDs.begin(), m_virtualDetectorIDs.end(), bankIDs.begin(), bankIDs.end(),
-             std::back_inserter(merged));
-  m_virtualDetectorIDs = std::move(merged);
+  // Store just the bank parameters (O(1) per bank) instead of O(n_pixels) IDs.
+  m_virtualBankInfos.push_back({bank.referentDetectorID(), bank.idstep(), bank.npixels()});
 }
 
 /** Mark a Component which has already been added to the Instrument class
@@ -1601,8 +1602,8 @@ size_t Instrument::getMemorySize() const {
   // Indirect-geometry instruments hold a second full instrument for the physical geometry.
   const size_t physicalInstrumentMem = m_physicalInstrument ? m_physicalInstrument->getMemorySize() : 0;
 
-  // m_virtualDetectorIDs: sorted vector of PA pixel IDs (~4 bytes each).
-  const size_t virtualIDsMem = m_virtualDetectorIDs.capacity() * sizeof(detid_t);
+  // m_virtualBankInfos: one entry per PA bank (O(n_banks), not O(n_pixels)).
+  const size_t virtualIDsMem = m_virtualBankInfos.capacity() * sizeof(VirtualBankInfo);
 
   return sizeof(*this) + componentTreeMem + m_detectorCache.capacity() * sizeof(DetectorCacheEntry) + logfileCacheMem +
          logfileUnitMem + m_defaultView.capacity() + m_defaultViewAxis.capacity() + m_xmlText.capacity() +
