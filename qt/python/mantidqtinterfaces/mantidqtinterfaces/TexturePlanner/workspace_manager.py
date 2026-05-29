@@ -33,6 +33,25 @@ class WorkspaceManager:
     """
 
     # Workspace names used by the planner. All start with "__" so the ADS treats them as hidden.
+    # Each holds a distinct view of the sample needed by a specific consumer:
+    #   WS_DATA          live workspace driving plots/exports: holds the translated shape with init_R
+    #                    baked into its XML goniometer tag, and carries the current orientation R on
+    #                    its run goniometer. Read by get_scattering_centre, GroupDetectors, etc.
+    #   WS_INSTR         empty-instrument reference used by DetectorGeometry to read raw detector
+    #                    positions without sample/group/orientation state contaminating it.
+    #   WS_UNGROUPED     pre-group clone of WS_DATA; detector_geometry re-runs GroupDetectors against
+    #                    this whenever the group pattern changes (can't ungroup an already-grouped ws).
+    #   WS_MESH_RAW      pristine sample (no init_R, no translation, identity goniometer). Source of
+    #                    truth for absorption (which composes R*init_R itself) and for rebuilding
+    #                    WS_DATA in update_initial_shape.
+    #   WS_MESH_NEUTRAL  init_R baked in, no translation, identity goniometer. Used by the plotter
+    #                    (which applies R itself to the mesh vertices) and by the reference-ws export.
+    #   WS_REFERENCE     transient name for output_as_reference_workspace; created and removed inside
+    #                    the export call, never persists across calls.
+    #   WS_MC_INPUT      per-orientation MonteCarloAbsorption input. Rebuilt each calc_for_index with
+    #                    R*init_R baked into the shape and identity goniometer.
+    #   WS_MC_OUTPUT     MonteCarloAbsorption output (transmission factors).
+    #   WS_TMP           transient name for update_initial_shape's working copy; removed in finally.
     WS_DATA = "__texture_planning_ws"
     WS_INSTR = "__texture_planning_instr"
     WS_UNGROUPED = "__texture_planning_ws_ungrouped"
@@ -42,6 +61,7 @@ class WorkspaceManager:
     WS_MC_INPUT = "__mc_ws"
     WS_MC_OUTPUT = "__abs_ws"
     WS_TMP = "__tmp_ws"
+    _SHAPE_TMP = "__shape_ws"
 
     def __init__(self, model):
         self._model = model
@@ -142,6 +162,13 @@ class WorkspaceManager:
         self.translate_shape(_tmp_ws, *self.offset)
 
         try:
+            # CopySample bakes the *destination* workspace's current goniometer R into the new
+            # shape's XML (see CopySample::copyParameters -> addGoniometerTag), and the plotter
+            # leaves a non-identity R on self.ws on every redraw. Reset to identity *before* the
+            # CopySamples so the shape we hand on carries only init_R - otherwise the identity
+            # branch below would silently leave the previous goniometer R baked into the shape
+            # and the plotter's next setR would compose it again on top, doubling the rotation.
+            self.ws.run().getGoniometer().setR(np.eye(3))
             CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
             CopySample(
                 InputWorkspace=_tmp_ws, OutputWorkspace=self.updated_mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False
@@ -158,11 +185,6 @@ class WorkspaceManager:
                 return None
             vec = rotvec / ang
 
-            # RotateSampleShape folds the workspace's current goniometer R into the new shape's
-            # XML (newSampleShapeRot = init_R * oldRotation). The plotter sets a non-identity R
-            # on self.ws on every redraw, so without this reset we would silently bake the current
-            # orientation into the sample shape and self.ws / self.updated_mesh_ws would diverge.
-            self.ws.run().getGoniometer().setR(np.eye(3))
             RotateSampleShape(self.wsname, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
             RotateSampleShape(self.updated_mesh_ws, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
         finally:
@@ -177,9 +199,13 @@ class WorkspaceManager:
 
     def _create_new_ws_with_copied_sample(self, new_wsname, sample_to_copy, clone=False):
         if clone:
-            shape_ws = CloneWorkspace(InputWorkspace=sample_to_copy, OutputWorkspace="__shape_ws")
+            shape_ws = CloneWorkspace(InputWorkspace=sample_to_copy, OutputWorkspace=self._SHAPE_TMP)
         else:
             shape_ws = sample_to_copy
-        new_ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0,0.1,5", OutputWorkspace=new_wsname, UnitX="dSpacing")
-        CopySample(InputWorkspace=shape_ws, OutputWorkspace=new_wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+        try:
+            new_ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0,0.1,5", OutputWorkspace=new_wsname, UnitX="dSpacing")
+            CopySample(InputWorkspace=shape_ws, OutputWorkspace=new_wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+        finally:
+            if clone and ADS.doesExist(self._SHAPE_TMP):
+                ADS.remove(self._SHAPE_TMP)
         return new_ws
