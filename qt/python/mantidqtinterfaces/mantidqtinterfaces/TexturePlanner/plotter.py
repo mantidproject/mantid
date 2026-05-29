@@ -45,7 +45,6 @@ class TexturePlotter:
         extent = (np.linalg.norm(shape_mesh, axis=(1, 2)).max() / 2) * 1.2
         rot_mesh = R.apply(shape_mesh.reshape((-1, 3))).reshape(shape_mesh.shape)
 
-        m.workspaces.update_scattering_centre()
         scat_centre = m.workspaces.scattering_centre
 
         g_vecs = self._draw_goniometers(lab_ax, vecs, senses, angles, gRs, n_gon, extent)
@@ -157,7 +156,7 @@ class TexturePlotter:
             else:
                 proj_ax.scatter(gP[1], gP[0], s=30, edgecolor=pc, facecolor=fc)
 
-        if not m.plot_attenuation:
+        if not m.plot_transmission:
             for i, orientation in m.orientations.items():
                 if orientation.include:
                     pf_xy = orientation.pf_points
@@ -171,8 +170,8 @@ class TexturePlotter:
         else:
             included = [o for o in m.orientations.values() if o.include]
             all_pf_xy = np.concatenate([o.pf_points for o in included], axis=0)
-            all_mus = np.concatenate([o.mu for o in included], axis=0)
-            scatt = proj_ax.scatter(all_pf_xy[:, 1], all_pf_xy[:, 0], s=20, c=all_mus, vmin=0, vmax=1, cmap="jet")
+            all_transmissions = np.concatenate([o.transmission for o in included], axis=0)
+            scatt = proj_ax.scatter(all_pf_xy[:, 1], all_pf_xy[:, 0], s=20, c=all_transmissions, vmin=0, vmax=1, cmap="jet")
             cax = proj_ax.inset_axes([0.9, 0.15, 0.05, 0.7])
             proj_ax.figure.colorbar(scatt, cax=cax)
 

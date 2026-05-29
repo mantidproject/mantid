@@ -63,7 +63,7 @@ class TexturePlannerPresenter(object):
         self.view.set_on_output_reference_ws_clicked(self.to_reference_workspace)
         self.view.set_on_save_dir_changed(self.enable_outputs)
         self.view.set_on_save_file_changed(self.enable_outputs)
-        self.view.set_on_show_mu_toggled(self.set_show_mu)
+        self.view.set_on_show_transmission_toggled(self.set_show_transmission)
         self.view.set_on_gauge_vol_state_changed(self.update_gauge_volume_state)
         self.view.set_on_gauge_vol_file_changed(self.update_set_gauge_vol_enabled)
         self.view.set_on_set_gauge_volume_clicked(self.set_gauge_volume)
@@ -122,6 +122,12 @@ class TexturePlannerPresenter(object):
         self.model.set_gonio_index(goniometer_index)
         orientation_index = self.view.get_current_index()
         self.model.orientations.update_gRs(self.get_vecs(), self.get_senses(), self.get_angles(), orientation_index)
+        # Apply this orientation's R to the workspace so the scattering centre (which depends on
+        # how the sample sits in the gauge volume) is recomputed for it, then refresh the
+        # lab-frame detector Qs against that fresh centre.
+        R = self.model.orientations[orientation_index].R
+        self.model.workspaces.ws.run().getGoniometer().setR(R.as_matrix())
+        self.model.geometry.recompute_scattering_geometry()
         self.model.update_projected_data(orientation_index)
         self.model.orientations.update_gonio_string(self.get_vecs(), self.get_senses(), self.get_angles(), orientation_index)
         self.update_plots()
@@ -152,7 +158,7 @@ class TexturePlannerPresenter(object):
         self.update_plots()
 
     def on_settings_applied(self):
-        if self.model.plot_attenuation:
+        if self.model.plot_transmission:
             self.model.update_all_projected_data()
         self.update_plots()
 
@@ -272,10 +278,10 @@ class TexturePlannerPresenter(object):
     def to_reference_workspace(self):
         self.model.exporter.output_as_reference_workspace(self.view.get_save_dir(), self.view.get_save_filename())
 
-    def set_show_mu(self):
+    def set_show_transmission(self):
         self.update_custom_shape_finder_enabled()
         self.update_set_gauge_vol_enabled()
-        self.model.set_plot_attenuation(self.view.get_show_mu())
+        self.model.set_plot_transmission(self.view.get_show_transmission())
         self.model.update_all_projected_data()
         self.update_plots()
 

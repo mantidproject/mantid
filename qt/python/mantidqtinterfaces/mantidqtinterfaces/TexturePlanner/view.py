@@ -66,7 +66,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.set_load_xml_enabled(False)
         self.set_load_orientation_enabled(False)
         self.set_outputs_enabled(False)
-        self.set_show_mu(False)
+        self.set_show_transmission(False)
 
         self.set_angle_limits()
         self.set_translation_step(0.001)  # setup 1mm translational steps
@@ -189,8 +189,8 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_output_reference_ws_clicked(self, slot):
         self.toRefWs.clicked.connect(slot)
 
-    def set_on_show_mu_toggled(self, slot):
-        self.chkMu.toggled.connect(slot)
+    def set_on_show_transmission_toggled(self, slot):
+        self.chkTransmission.toggled.connect(slot)
 
     def set_on_init_x_changed(self, slot):
         self.spnInitX.valueChanged.connect(slot)
@@ -298,8 +298,8 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def get_select_indices(self):
         return self._read_checkbox_column_states(7)
 
-    def get_show_mu(self):
-        return self.chkMu.isChecked()
+    def get_show_transmission(self):
+        return self.chkTransmission.isChecked()
 
     def get_init_x(self):
         return self.spnInitX.value()
@@ -382,8 +382,8 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         for i in range(6):
             self.gonio_angles[i].setValue(angles[i])
 
-    def set_show_mu(self, val):
-        return self.chkMu.setChecked(val)
+    def set_show_transmission(self, val):
+        return self.chkTransmission.setChecked(val)
 
     def _setup_pf_plot(self):
         self.pf_figure = Figure(layout="constrained")

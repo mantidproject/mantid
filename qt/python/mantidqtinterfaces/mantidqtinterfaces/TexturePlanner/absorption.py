@@ -14,7 +14,7 @@ from Engineering.texture.texture_helper import define_gauge_volume
 
 
 class AbsorptionCalculator:
-    """Runs MonteCarloAbsorption per orientation and stores the resulting mu values.
+    """Runs MonteCarloAbsorption per orientation and stores the resulting transmission factors.
 
     Holds a back-reference to the TexturePlannerModel so it can pull the live
     workspace / mesh / gauge-volume / orientation state at call time.
@@ -50,14 +50,23 @@ class AbsorptionCalculator:
 
         define_gauge_volume(mc_ws, wsm.gauge_volume_str)
         try:
+            bb = mc_ws.sample().getShape().getBoundingBox()
+            gv_str = mc_ws.run().getProperty("GaugeVolume").value if mc_ws.run().hasProperty("GaugeVolume") else "<none>"
+            print(
+                f"[abs idx={index}] R={R.as_euler('xyz', degrees=True)}  init_R={wsm.init_R.as_euler('xyz', degrees=True)}\n"
+                f"  sample bbox  min={bb.minPoint()}  max={bb.maxPoint()}\n"
+                f"  gauge_volume={gv_str}"
+            )
+
             MonteCarloAbsorption(**m.mc_kwargs)
-            mu = read_attenuation_coefficient_at_value(wsm.WS_MC_OUTPUT, wsm.attenuation_kwargs["point"], wsm.attenuation_kwargs["unit"])[
-                m.geometry.starting_ind :
-            ]
+            # MonteCarloAbsorption outputs A = exp(-mu*L), the transmission factor (bounded [0, 1]).
+            transmission = read_attenuation_coefficient_at_value(
+                wsm.WS_MC_OUTPUT, wsm.attenuation_kwargs["point"], wsm.attenuation_kwargs["unit"]
+            )[m.geometry.starting_ind :]
         except RuntimeError:
             logger.warning("MonteCarloAbsorption has failed, sample is assumed to be outside the gauge volume ")
-            mu = np.zeros(mc_ws.getNumberHistograms() - m.geometry.starting_ind)
-        m.orientations[index].mu = mu
+            transmission = np.zeros(mc_ws.getNumberHistograms() - m.geometry.starting_ind)
+        m.orientations[index].transmission = transmission
 
     def calc_all(self):
         for i in self._model.orientations.keys():

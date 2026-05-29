@@ -1061,15 +1061,15 @@
       <layout class="QHBoxLayout">
 
         <item>
-          <widget class="QLabel" name="lblShowMu">
+          <widget class="QLabel" name="lblShowTransmission">
             <property name="text">
-              <string>Approximate Attenuation Values:</string>
+              <string>Approximate Transmission Values:</string>
             </property>
           </widget>
         </item>
 
         <item>
-          <widget class="QCheckBox" name="chkMu"/>
+          <widget class="QCheckBox" name="chkTransmission"/>
         </item>
 
       </layout>

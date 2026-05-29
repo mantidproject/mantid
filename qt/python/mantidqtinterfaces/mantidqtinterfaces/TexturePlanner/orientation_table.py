@@ -28,7 +28,7 @@ class Orientation:
     include: bool = True
     select: bool = True
     pf_points: Optional[np.ndarray] = None
-    mu: Optional[np.ndarray] = None
+    transmission: Optional[np.ndarray] = None
 
     def copy(self) -> "Orientation":
         return Orientation(
@@ -38,7 +38,7 @@ class Orientation:
             include=self.include,
             select=self.select,
             pf_points=self.pf_points,
-            mu=self.mu,
+            transmission=self.transmission,
         )
 
 
