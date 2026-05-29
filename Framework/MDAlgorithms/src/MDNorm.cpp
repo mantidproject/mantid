@@ -978,6 +978,7 @@ inline DblMatrix MDNorm::buildSymmetryMatrix(const Geometry::SymmetryOperation &
   soMatrix.setColumn(1, v);
   v = so.transformHKL(V3D(0, 0, 1));
   soMatrix.setColumn(2, v);
+  soMatrix.Invert();
 
   return soMatrix;
 }
