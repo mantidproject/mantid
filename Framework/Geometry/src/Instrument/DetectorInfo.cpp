@@ -36,7 +36,9 @@ DetectorInfo::DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
   if (!m_instrument)
     throw std::invalid_argument("DetectorInfo::DetectorInfo Workspace does not contain an instrument!");
 
-  if (m_detectorIDs->size() != m_detIDToIndex->size()) {
+  // For virtual-bank instruments the map is compact (real detectors only) while
+  // m_detectorIDs holds all logical IDs.  Allow the size mismatch in that case.
+  if (!m_detectorInfo->hasVirtualBanks() && m_detectorIDs->size() != m_detIDToIndex->size()) {
     throw std::invalid_argument("DetectorInfo::DetectorInfo: ID and ID->index map do not match");
   }
 }
@@ -326,6 +328,11 @@ Kernel::V3D DetectorInfo::position(const size_t index) const { return Kernel::to
 
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
+  // The Beamline pair overload goes straight to the compact array and bypasses
+  // virtual-bank segment lookup.  Virtual-bank instruments are non-scanning so
+  // index.second is always 0; delegate to the scalar overload which is correct.
+  if (m_detectorInfo->hasVirtualBanks())
+    return Kernel::toV3D(m_detectorInfo->position(index.first));
   return Kernel::toV3D(m_detectorInfo->position(index));
 }
 
@@ -336,6 +343,9 @@ Kernel::Quat DetectorInfo::rotation(const size_t index) const {
 
 /// Returns the rotation of the detector with given index.
 Kernel::Quat DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
+  // Same virtual-bank bypass issue as position(pair); fix with scalar overload.
+  if (m_detectorInfo->hasVirtualBanks())
+    return Kernel::toQuat(m_detectorInfo->rotation(index.first));
   return Kernel::toQuat(m_detectorInfo->rotation(index));
 }
 
@@ -405,6 +415,12 @@ double DetectorInfo::l1() const { return m_detectorInfo->l1(); }
 const std::vector<detid_t> &DetectorInfo::detectorIDs() const { return *m_detectorIDs; }
 
 std::size_t DetectorInfo::indexOf(const detid_t id) const {
+  // Fast path for virtual-bank (PixelAssembly) pixels: compute index from the
+  // bank's ID formula rather than looking up in the (now-compact) map.
+  if (m_detectorInfo->hasVirtualBanks()) {
+    if (const auto *seg = m_detectorInfo->findVirtualSegmentByDetId(static_cast<int32_t>(id)))
+      return seg->indexOf(static_cast<int32_t>(id));
+  }
   try {
     return m_detIDToIndex->at(id);
   } catch (const std::out_of_range &) {
@@ -476,9 +492,11 @@ size_t DetectorInfo::getMemorySize() const {
   // m_detectorIDs: shared_ptr<const vector<detid_t>> — count the heap-allocated vector object + its buffer
   const size_t detectorIDsMem = sizeof(std::vector<detid_t>) + n * sizeof(detid_t);
   // m_detIDToIndex: shared_ptr<const unordered_map<detid_t, size_t>>
-  // Count the heap-allocated map object + each node (key + value + ~2 pointers for bucket/chain overhead)
-  const size_t detIDToIndexMem =
-      sizeof(std::unordered_map<detid_t, size_t>) + n * (sizeof(detid_t) + sizeof(size_t) + 2 * sizeof(void *));
+  // For virtual-bank instruments the map is compact (real detectors only), so use
+  // the actual entry count rather than the logical total n.
+  const size_t nMapEntries = m_detIDToIndex ? m_detIDToIndex->size() : 0;
+  const size_t detIDToIndexMem = sizeof(std::unordered_map<detid_t, size_t>) +
+                                 nMapEntries * (sizeof(detid_t) + sizeof(size_t) + 2 * sizeof(void *));
   // m_lastDetector and m_lastIndex: one slot per OpenMP thread
   const size_t cacheMem = m_lastDetector.capacity() * sizeof(std::shared_ptr<const Geometry::IDetector>) +
                           m_lastIndex.capacity() * sizeof(size_t);

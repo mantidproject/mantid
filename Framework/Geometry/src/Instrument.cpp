@@ -283,8 +283,8 @@ std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
       realIDs.emplace_back(in_det.id());
   }
 
-  // Virtual pixels are never monitors; skip them when skipMonitors is true.
-  if (vids.empty() || skipMonitors)
+  // Virtual pixels are never monitors; include them regardless of skipMonitors.
+  if (vids.empty())
     return realIDs;
 
   // Merge real IDs and virtual IDs — both are sorted — into one sorted result.

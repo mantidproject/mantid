@@ -61,6 +61,16 @@ DetectorInfo::DetectorInfo(
 // Virtual-bank helpers
 // ---------------------------------------------------------------------------
 
+/** Returns the VirtualBankSegment whose ID range contains @p detId, or nullptr if not virtual.
+ *  Performs a linear scan; O(N_banks), which is negligible for typical instruments. */
+const VirtualBankSegment *DetectorInfo::findVirtualSegmentByDetId(const int32_t detId) const noexcept {
+  for (const auto &seg : m_virtualBanks) {
+    if (detId >= seg.idstart && detId <= seg.lastDetId)
+      return &seg;
+  }
+  return nullptr;
+}
+
 /** Returns the VirtualBankSegment owning @p index, or nullptr if not virtual.
  *  Segments are stored sorted by firstIndex, so we can break early. */
 const VirtualBankSegment *DetectorInfo::findVirtualSegment(const size_t index) const noexcept {
@@ -110,7 +120,8 @@ Eigen::Vector3d DetectorInfo::position(const size_t index) const {
     const Eigen::Vector3d localOffset{seg->xstart + ix * seg->xstep, seg->ystart + iy * seg->ystep, 0.0};
     return seg->bankPos + seg->bankRot * localOffset;
   }
-  return (*m_positions)[compactDetectorIndex(index)];
+  const size_t compactIdx = compactDetectorIndex(index);
+  return (*m_positions)[compactIdx];
 }
 
 /** Returns the rotation of the detector with given detector index.

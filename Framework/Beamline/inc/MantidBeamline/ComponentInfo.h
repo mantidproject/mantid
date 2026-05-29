@@ -131,6 +131,15 @@ public:
     return static_cast<size_t>(seg - m_virtualBanks.data());
   }
 
+  /// Returns the VirtualBankSegment whose bankCompIdx equals @p compIdx,
+  /// or nullptr if no VirtualAssembly bank has that component index.
+  const VirtualBankSegment *findVirtualBankByCompIdx(size_t compIdx) const noexcept {
+    for (const auto &seg : m_virtualBanks)
+      if (seg.bankCompIdx == compIdx)
+        return &seg;
+    return nullptr;
+  }
+
   // Returns by value: for virtual-bank detector indices the position is computed
   // on demand and has no backing storage to reference.
   Eigen::Vector3d position(const size_t componentIndex) const;

@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/IVirtualBank.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
@@ -536,6 +537,18 @@ std::map<detid_t, int> makeGroupingByNames(std::string GroupNames, const Instrum
           {
             if (top_group > 0) {
               detIDtoGroup[currentDet->getID()] = top_group;
+            }
+          } else if (const auto vbank = std::dynamic_pointer_cast<const Geometry::IVirtualBank>(currentIComp)) {
+            // PixelAssembly: resolve group from bank name first, fall back to parent group
+            child_group = group_map[currentIComp->getName()];
+            if (child_group == 0)
+              child_group = top_group;
+            if (child_group > 0) {
+              for (size_t iz = 0; iz < vbank->zpixels(); ++iz)
+                for (size_t ix = 0; ix < vbank->xpixels(); ++ix)
+                  for (size_t iy = 0; iy < vbank->ypixels(); ++iy)
+                    detIDtoGroup[vbank->getDetectorIDAtXYZ(static_cast<int>(ix), static_cast<int>(iy),
+                                                           static_cast<int>(iz))] = child_group;
             }
           } else // Is an assembly, push in the queue
           {

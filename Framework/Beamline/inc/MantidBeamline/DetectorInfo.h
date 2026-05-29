@@ -95,6 +95,13 @@ public:
   const Eigen::Vector3d &sourcePosition() const;
   const Eigen::Vector3d &samplePosition() const;
 
+  /// Whether this instrument has any PixelAssembly (virtual) banks.
+  bool hasVirtualBanks() const noexcept { return !m_virtualBanks.empty(); }
+
+  /// Returns the VirtualBankSegment whose ID range contains @p detId,
+  /// or nullptr if @p detId is not a virtual pixel in any bank.
+  const VirtualBankSegment *findVirtualSegmentByDetId(int32_t detId) const noexcept;
+
   /** The `merge()` operation was made private in `DetectorInfo`, and only
    * accessible through `ComponentInfo` (via this `friend` declaration)
    * because we need to avoid merging `DetectorInfo` without merging

@@ -122,11 +122,16 @@ ComponentInfo::ComponentInfo(
   }
 
   // Calculate total size of all assemblies (uses m_children, unchanged).
+  // VirtualAssembly banks deliberately store empty children lists: their
+  // pixels are not materialised in the tree.  Account for them separately.
   auto assemTotalSize =
       std::accumulate(m_children->begin(), m_children->end(), static_cast<size_t>(1),
                       [](size_t size, const std::vector<size_t> &assem) { return size += assem.size(); });
+  size_t virtualPixels = 0;
+  for (const auto &seg : m_virtualBanks)
+    virtualPixels += seg.lastIndex - seg.firstIndex + 1;
 
-  if (assemTotalSize != m_size) {
+  if (assemTotalSize + virtualPixels != m_size) {
     throw std::invalid_argument("ComponentInfo should be provided an "
                                 "instrument tree which contains same number "
                                 "components");
@@ -293,6 +298,10 @@ void ComponentInfo::doSetPosition(const std::pair<size_t, size_t> &index, const 
   const auto timeIndex = index.second;
   const Eigen::Vector3d offset = newPosition - position(componentIndex);
   for (const auto &subIndex : detectorRange) {
+    // Virtual pixels have no stored position entry; skip them here and update
+    // their VirtualBankSegments below.
+    if (!m_virtualBanks.empty() && findVirtualSegment(subIndex))
+      continue;
     m_detectorInfo->setPosition({subIndex, timeIndex}, m_detectorInfo->position({subIndex, timeIndex}) + offset);
   }
 
@@ -300,6 +309,21 @@ void ComponentInfo::doSetPosition(const std::pair<size_t, size_t> &index, const 
   for (const auto &subIndex : compRange) {
     size_t offsetIndex = compOffsetIndex(subIndex);
     m_positions.access()[offsetIndex] += offset;
+  }
+
+  // Propagate the translation into any VirtualBankSegments whose bank
+  // component lies in this subtree.
+  if (!m_virtualBanks.empty()) {
+    for (size_t i = 0; i < m_virtualBanks.size(); ++i) {
+      for (const auto compIdx : compRange) {
+        if (compIdx == m_virtualBanks[i].bankCompIdx) {
+          m_virtualBanks[i].bankPos += offset;
+          if (m_detectorInfo)
+            m_detectorInfo->m_virtualBanks[i].bankPos += offset;
+          break;
+        }
+      }
+    }
   }
 }
 
@@ -314,6 +338,10 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index, const 
   auto transform = Eigen::Matrix3d(rotDelta);
 
   for (const auto &subDetIndex : detectorRange) {
+    // Virtual pixels have no stored position entry; skip them here and update
+    // their VirtualBankSegments below.
+    if (!m_virtualBanks.empty() && findVirtualSegment(subDetIndex))
+      continue;
     auto oldPos = m_detectorInfo->position({subDetIndex, timeIndex});
     auto newPos = transform * (oldPos - compPos) + compPos;
     auto newRot = rotDelta * m_detectorInfo->rotation({subDetIndex, timeIndex});
@@ -329,6 +357,28 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index, const 
     const size_t childCompIndexOffset = compOffsetIndex(subCompIndex);
     m_positions.access()[linearIndex({childCompIndexOffset, timeIndex})] = newPos;
     m_rotations.access()[linearIndex({childCompIndexOffset, timeIndex})] = newRot.normalized();
+  }
+
+  // After updating sub-component positions/rotations, copy the new bank
+  // positions/rotations into any VirtualBankSegments in this subtree so that
+  // DetectorInfo::position(virtualPixelIndex) returns the correct world position.
+  if (!m_virtualBanks.empty()) {
+    for (size_t i = 0; i < m_virtualBanks.size(); ++i) {
+      for (const auto compIdx : compRange) {
+        if (compIdx == m_virtualBanks[i].bankCompIdx) {
+          const size_t bankOffset = compOffsetIndex(m_virtualBanks[i].bankCompIdx);
+          Eigen::Vector3d newBankPos = m_positions.access()[linearIndex({bankOffset, timeIndex})];
+          Eigen::Quaterniond newBankRot = m_rotations.access()[linearIndex({bankOffset, timeIndex})];
+          m_virtualBanks[i].bankPos = newBankPos;
+          m_virtualBanks[i].bankRot = newBankRot;
+          if (m_detectorInfo) {
+            m_detectorInfo->m_virtualBanks[i].bankPos = newBankPos;
+            m_detectorInfo->m_virtualBanks[i].bankRot = newBankRot;
+          }
+          break;
+        }
+      }
+    }
   }
 }
 

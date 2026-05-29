@@ -116,6 +116,23 @@ size_t ComponentInfo::size() const { return m_componentInfo->size(); }
 
 ComponentInfo::QuadrilateralComponent ComponentInfo::quadrilateralComponent(const size_t componentIndex) const {
   auto type = componentType(componentIndex);
+
+  // VirtualAssembly: corners are computed analytically from the bank segment.
+  if (type == Beamline::ComponentType::VirtualAssembly) {
+    const auto *seg = m_componentInfo->findVirtualBankByCompIdx(componentIndex);
+    if (!seg)
+      throw std::runtime_error("ComponentInfo::quadrilateralComponent: "
+                               "VirtualAssembly bank has no VirtualBankSegment.");
+    QuadrilateralComponent corners;
+    corners.nX = static_cast<size_t>(seg->nx);
+    corners.nY = static_cast<size_t>(seg->ny);
+    corners.bottomLeft = seg->indexAtXYZ(0, 0);
+    corners.topLeft = seg->indexAtXYZ(0, seg->ny - 1);
+    corners.bottomRight = seg->indexAtXYZ(seg->nx - 1, 0);
+    corners.topRight = seg->indexAtXYZ(seg->nx - 1, seg->ny - 1);
+    return corners;
+  }
+
   auto parentType = componentType(parent(componentIndex));
   if (!(type == Beamline::ComponentType::Structured || type == Beamline::ComponentType::Rectangular ||
         parentType == Beamline::ComponentType::Grid))
@@ -469,6 +486,10 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex, const Boundi
 
 Beamline::ComponentType ComponentInfo::componentType(const size_t componentIndex) const {
   return m_componentInfo->componentType(componentIndex);
+}
+
+const Beamline::VirtualBankSegment *ComponentInfo::findVirtualBankByCompIdx(const size_t componentIndex) const {
+  return m_componentInfo->findVirtualBankByCompIdx(componentIndex);
 }
 
 void ComponentInfo::setScanInterval(const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval) {

@@ -242,5 +242,94 @@ class PixelAssemblyVsRectangularDetectorTest(unittest.TestCase):
         )
 
 
+class PixelAssemblyIndexOfTest(unittest.TestCase):
+    """
+    Validate DetectorInfo.indexOf() for virtual (PixelAssembly) pixel IDs.
+
+    Phase 4a compacted the detId→index map so it no longer stores entries for
+    virtual pixels.  DetectorInfo.indexOf() now computes the index analytically
+    from the VirtualBankSegment formula.  These tests verify that the returned
+    index is correct by cross-checking against the index derived from iterating
+    detectorIDs() (the ground-truth ordering).
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        _load_once()
+        cls.di_pa = _PA_WS.detectorInfo()
+        # Build ground-truth ID→index map by iterating the ordered ID vector.
+        # This path does NOT go through indexOf(), so it is independent of it.
+        cls.gt_id_to_idx = {int(cls.di_pa.detectorIDs()[i]): i for i in range(cls.di_pa.size())}
+
+    def _check_indexOf(self, det_id):
+        """indexOf(id) must return the same index as the ground-truth iteration map."""
+        expected = self.gt_id_to_idx[det_id]
+        got = self.di_pa.indexOf(det_id)
+        self.assertEqual(
+            got,
+            expected,
+            msg=f"indexOf({det_id}): expected index {expected}, got {got}",
+        )
+
+    def _check_position_via_indexOf(self, det_id, di_rd):
+        """Position looked up via indexOf(id) must match the RD ground truth."""
+        idx_pa = self.di_pa.indexOf(det_id)
+        idx_rd = di_rd.indexOf(det_id)
+        pos_pa = self.di_pa.position(idx_pa)
+        pos_rd = di_rd.position(idx_rd)
+        for axis, vpa, vrd in zip("XYZ", pos_pa, pos_rd):
+            self.assertAlmostEqual(
+                vpa,
+                vrd,
+                delta=1e-9,
+                msg=f"indexOf({det_id}) → position {axis} mismatch (PA={vpa:.9f}, RD={vrd:.9f})",
+            )
+
+    # ---- index correctness for a representative sample ----------------------
+
+    def test_indexOf_first_pixel_bank11(self):
+        """bank11 idstart=0: indexOf(0) must give the index for ID 0."""
+        self._check_indexOf(0)
+
+    def test_indexOf_mid_pixel_bank11(self):
+        """bank11: a pixel in the middle of the bank."""
+        self._check_indexOf(255)  # last pixel of first row (ix=0, iy=255)
+
+    def test_indexOf_second_row_bank11(self):
+        """bank11: first pixel of second row (ix=1, iy=0)."""
+        self._check_indexOf(256)
+
+    def test_indexOf_last_pixel_bank11(self):
+        """bank11: last pixel (ix=255, iy=255) = ID 65535."""
+        self._check_indexOf(65535)
+
+    def test_indexOf_first_pixel_bank12(self):
+        """bank12 idstart=65536: first pixel must map correctly."""
+        self._check_indexOf(65536)
+
+    def test_indexOf_last_pixel_all_banks(self):
+        """Last pixel of each bank: ID = idstart + 65535."""
+        for bank_idx in range(18):
+            det_id = bank_idx * 65536 + 65535
+            with self.subTest(bank=bank_idx, det_id=det_id):
+                self._check_indexOf(det_id)
+
+    def test_indexOf_sampled_positions_match_rd(self):
+        """Positions fetched via indexOf() match the RD ground truth for a sample."""
+        di_rd = _RD_WS.detectorInfo()
+        # Sample every 10 000th pixel ID (118 pixels across all 18 banks).
+        for det_id in range(0, _N_PIXELS, 10_000):
+            with self.subTest(det_id=det_id):
+                self._check_position_via_indexOf(det_id, di_rd)
+
+    def test_indexOf_monitor_ids_still_work(self):
+        """Real detectors (monitors) must still resolve via the compact map."""
+        di = self.di_pa
+        for i in range(di.size()):
+            if di.isMonitor(i):
+                det_id = int(di.detectorIDs()[i])
+                self.assertEqual(di.indexOf(det_id), i, msg=f"monitor ID {det_id}")
+
+
 if __name__ == "__main__":
     unittest.main()

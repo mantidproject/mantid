@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidBeamline/ComponentType.h"
+#include "MantidBeamline/VirtualBankSegment.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentInfoIterator.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
@@ -134,6 +135,7 @@ public:
   BoundingBox boundingBox(const size_t componentIndex, const BoundingBox *reference = nullptr,
                           const bool excludeMonitors = false) const;
   Beamline::ComponentType componentType(const size_t componentIndex) const;
+  const Beamline::VirtualBankSegment *findVirtualBankByCompIdx(size_t componentIndex) const;
   void setScanInterval(const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval);
   size_t scanCount() const;
   void merge(const ComponentInfo &other);
