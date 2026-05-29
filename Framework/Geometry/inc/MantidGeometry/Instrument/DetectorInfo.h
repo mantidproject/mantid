@@ -83,8 +83,10 @@ public:
   std::pair<double, double> geographicalAngles(const std::pair<size_t, size_t> &index) const;
   Kernel::V3D position(const size_t index) const;
   Kernel::V3D position(const std::pair<size_t, size_t> &index) const;
+  std::vector<Kernel::V3D> allPositions() const;
   Kernel::Quat rotation(const size_t index) const;
   Kernel::Quat rotation(const std::pair<size_t, size_t> &index) const;
+  std::vector<Kernel::Quat> allRotations() const;
 
   void setMasked(const size_t index, bool masked);
   void setMasked(const std::pair<size_t, size_t> &index, bool masked);
