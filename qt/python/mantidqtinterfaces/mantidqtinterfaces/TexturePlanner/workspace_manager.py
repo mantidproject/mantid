@@ -56,7 +56,6 @@ class WorkspaceManager:
         self.init_R = Rotation.identity()
         self.offset = (0, 0, 0)
         self.gauge_volume_str = None
-        self.scattering_centre = (0, 0, 0)
         # stl_settings
         self.stl_kwargs = {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": "0", "TranslationVector": "0,0,0"}
         # material + attenuation-point settings; the material is applied here, the
@@ -66,6 +65,10 @@ class WorkspaceManager:
     @property
     def instr(self):
         return self._model.instr
+
+    @property
+    def scattering_centre(self):
+        return get_scattering_centre(self.ws)
 
     def update_ws(self):
         self.instr_ws = LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=self.instr_wsname)
@@ -89,7 +92,6 @@ class WorkspaceManager:
         self.set_material()
         if self.gauge_volume_str:
             define_gauge_volume(self.ws, self.gauge_volume_str)
-        self.update_scattering_centre()
 
     def set_material(self):
         SetSampleMaterial(self.ws, self.attenuation_kwargs["material"])
@@ -156,6 +158,11 @@ class WorkspaceManager:
                 return None
             vec = rotvec / ang
 
+            # RotateSampleShape folds the workspace's current goniometer R into the new shape's
+            # XML (newSampleShapeRot = init_R * oldRotation). The plotter sets a non-identity R
+            # on self.ws on every redraw, so without this reset we would silently bake the current
+            # orientation into the sample shape and self.ws / self.updated_mesh_ws would diverge.
+            self.ws.run().getGoniometer().setR(np.eye(3))
             RotateSampleShape(self.wsname, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
             RotateSampleShape(self.updated_mesh_ws, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
         finally:
@@ -167,10 +174,6 @@ class WorkspaceManager:
             define_gauge_volume(self.ws, self.gauge_volume_str)
         elif self.ws.run().hasProperty("GaugeVolume"):
             DeleteLog(Workspace=self.ws, Name="GaugeVolume")
-        self.update_scattering_centre()
-
-    def update_scattering_centre(self):
-        self.scattering_centre = get_scattering_centre(self.ws)
 
     def _create_new_ws_with_copied_sample(self, new_wsname, sample_to_copy, clone=False):
         if clone:

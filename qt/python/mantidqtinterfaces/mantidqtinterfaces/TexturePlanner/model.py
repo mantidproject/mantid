@@ -47,7 +47,7 @@ class TexturePlannerModel(object):
 
         # output / plot toggles
         self.n_output_points = 1
-        self.plot_attenuation = False
+        self.plot_transmission = False
 
         # euler_file_settings (used by orientation loader + exporter)
         self.orientation_kwargs = {"Axes": "YXY", "Senses": "-1,-1,-1"}
@@ -122,8 +122,8 @@ class TexturePlannerModel(object):
         max_ind = num_gonios - 1
         return min(self.gonio_index, max_ind)
 
-    def set_plot_attenuation(self, val):
-        self.plot_attenuation = val
+    def set_plot_transmission(self, val):
+        self.plot_transmission = val
 
     # projection orchestration -----------------------------------------
     def update_all_projected_data(self):
@@ -133,5 +133,5 @@ class TexturePlannerModel(object):
     def update_projected_data(self, index):
         orientation = self.orientations[index]
         orientation.pf_points = project_orientation(orientation.R, self.geometry.detQs_lab, self.ax_transform, self.projection)
-        if self.plot_attenuation:
+        if self.plot_transmission:
             self.absorption.calc_for_index(index)
