@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -14,11 +14,7 @@ from Engineering.texture.texture_helper import define_gauge_volume
 
 
 class AbsorptionCalculator:
-    """Runs MonteCarloAbsorption per orientation and stores the resulting transmission factors.
-
-    Holds a back-reference to the TexturePlannerModel so it can pull the live
-    workspace / mesh / gauge-volume / orientation state at call time.
-    """
+    """Runs MonteCarloAbsorption per orientation and stores the resulting transmission factors."""
 
     def __init__(self, model):
         self._model = model
@@ -59,7 +55,6 @@ class AbsorptionCalculator:
             )
 
             MonteCarloAbsorption(**m.mc_kwargs)
-            # MonteCarloAbsorption outputs A = exp(-mu*L), the transmission factor (bounded [0, 1]).
             transmission = read_attenuation_coefficient_at_value(
                 wsm.WS_MC_OUTPUT, wsm.attenuation_kwargs["point"], wsm.attenuation_kwargs["unit"]
             )[m.geometry.starting_ind :]

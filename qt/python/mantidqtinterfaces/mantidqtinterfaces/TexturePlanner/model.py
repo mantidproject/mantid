@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -20,10 +20,8 @@ from mantidqtinterfaces.TexturePlanner.workspace_manager import WorkspaceManager
 
 
 class TexturePlannerModel(object):
-    """Thin orchestrator wiring together the workspace, orientation, geometry,
-    absorption, plotter, and exporter collaborators. Owns cross-cutting
-    settings (projection, ax_transform, dir_names, mc_kwargs, vis_settings,
-    direction colours, sense maps).
+    """Thin wrapper class mainly holding setting state and few cross-cutting methods and acting as a bridge between
+    functionality contained in separate collaborators classes.
     """
 
     # Per-instrument detector grouping presets. Add a new instrument by adding a row here.

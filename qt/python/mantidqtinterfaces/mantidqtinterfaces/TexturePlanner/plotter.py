@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -22,8 +22,7 @@ class TexturePlotter:
     """Renders the lab-frame 3D scene and the 2D pole-figure projection.
 
     Reads model state at draw time (workspace, detector Qs, sample mesh,
-    orientation table, visualisation settings) via a back-reference. Owns no
-    persistent state of its own — `update_plot` is a pure function of the model.
+    orientation table, visualisation settings) via back-reference.
     """
 
     def __init__(self, model):
