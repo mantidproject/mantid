@@ -92,9 +92,7 @@
 #include <QSet>
 #include <QTimer>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 void QtGroupBoxPropertyBrowserPrivate::init(QWidget *parent) {
   m_mainLayout = new QGridLayout(parent);
@@ -488,6 +486,4 @@ void QtGroupBoxPropertyBrowser::itemRemoved(QtBrowserItem *item) { d_ptr->proper
 */
 void QtGroupBoxPropertyBrowser::itemChanged(QtBrowserItem *item) { d_ptr->propertyChanged(item); }
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif
