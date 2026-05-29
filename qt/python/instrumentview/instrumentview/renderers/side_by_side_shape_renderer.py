@@ -34,8 +34,8 @@ class SideBySideShapeRenderer(ShapeRenderer):
     no shape extends past half the inter-detector spacing.
     """
 
-    def __init__(self, workspace: Workspace2D) -> None:
-        super().__init__(workspace)
+    def __init__(self, workspace: Workspace2D, use_optimised_shapes: bool = True) -> None:
+        super().__init__(workspace, use_optimised_shapes=use_optimised_shapes)
 
     def precompute(self):
         super().precompute()
