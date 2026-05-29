@@ -224,11 +224,7 @@ namespace CxxTest
 
         void setIcon( QMessageBox::Icon icon )
         {
-#if QT_VERSION >= 0x030000
             _mainWindow->setIcon( QMessageBox::standardIcon( icon ) );
-#else // Qt version < 3.0.0
-            _mainWindow->setIcon( QMessageBox::standardIcon( icon, QApplication::style().guiStyle() ) );
-#endif // QT_VERSION
         }
 
         void processEvents()
