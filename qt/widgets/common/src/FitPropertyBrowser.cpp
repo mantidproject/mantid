@@ -486,7 +486,8 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
-  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this, SLOT(currentItemChanged(QtBrowserItem *)));
+  connect(m_browser, SIGNAL(currentItemChanged(const QtBrowserItem *)), this,
+          SLOT(currentItemChanged(const QtBrowserItem *)));
   connect(this, SIGNAL(multifitFinished()), this, SLOT(processMultiBGResults()));
 
   connect(m_wsListWidget, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this,
@@ -2039,7 +2040,7 @@ QtBrowserItem *FitPropertyBrowser::findItem(QtBrowserItem *parent, QtProperty *p
 /**
  * Slot. Responds to changing the current item
  */
-void FitPropertyBrowser::currentItemChanged(QtBrowserItem *current) {
+void FitPropertyBrowser::currentItemChanged(const QtBrowserItem *current) {
   if (current) {
     m_currentHandler = getHandler()->findHandler(current->property());
   } else {
