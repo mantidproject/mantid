@@ -12,7 +12,9 @@
 
 namespace PoissonLoss {
 double calculatePoissonLossLM(double observedCounts, double predicted);
-}
+double calculateJacobianScaleFactor(double observedCounts, double predicted);
+template <typename T> int sgn(T val) { return (T(0) < val) - (val < T(0)); }
+} // namespace PoissonLoss
 namespace Mantid {
 namespace CurveFitting {
 namespace CostFunctions {

@@ -25,19 +25,29 @@ namespace PoissonLoss {
 // predicted < 0 is forbidden as it causes inf cost
 const double absoluteCutOff = 0.0;
 const double effectiveCutOff = 0.0001;
+const double tolDiff = 1e-9;
 
-// calculate loss for the LM minimizer of gsl
-double calculatePoissonLossLM(double observedCounts, double predicted) {
+double calculatePoissonResidualLM(double observedCounts, double predicted) {
   double retVal = (predicted - observedCounts);
   if (predicted <= absoluteCutOff) {
-    return std::numeric_limits<double>::infinity();
+    return std::numeric_limits<double>::max();
   }
   // at observed = 0 the Poisson function reduces to predicted - observed
   if (observedCounts != 0.0) {
     retVal += observedCounts * (log(observedCounts) - log(predicted));
   }
-
   return retVal;
+}
+double calculateJacobianScaleFactor(double observedCounts, double predicted) {
+  if (std::abs(observedCounts - predicted) < tolDiff) {
+    return 1;
+  }
+  return sgn(predicted - observedCounts) * (1 - observedCounts / predicted) * 1 /
+         std::sqrt(2 * calculatePoissonResidualLM(observedCounts, predicted));
+}
+// calculate loss for the LM minimizer as needed for gsl minimizer, taking the root of the residual.
+double calculatePoissonLossLM(double observedCounts, double predicted) {
+  return sgn(predicted - observedCounts) * std::sqrt(2 * calculatePoissonResidualLM(observedCounts, predicted));
 }
 
 double calculatePoissonLoss(double observedCounts, double predicted) {

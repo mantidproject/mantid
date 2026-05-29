@@ -72,10 +72,7 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
 
   for (size_t i = 0; i < p->n; i++) {
     if (p->isPoisson) {
-      const auto &y = values->getFitData(i);
-      const auto &mu = values->getCalculated(i);
-      auto loss = sgn(mu - y) * std::sqrt(2 * PoissonLoss::calculatePoissonLossLM(y, mu));
-      f->data[i] = loss;
+      f->data[i] = PoissonLoss::calculatePoissonLossLM(values->getFitData(i), values->getCalculated(i));
     } else {
       f->data[i] = (values->getCalculated(i) - values->getFitData(i)) * values->getFitWeight(i);
     }
@@ -147,12 +144,13 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   }
 
   EigenMatrix m_tr = m.tr();
+  double weight = 1.0;
   std::copy(&m_tr.mutator().data()[0], &m_tr.mutator().data()[J_tr->size1 * J_tr->size2], &J->data[0]);
   for (size_t iY = 0; iY < p->n; iY++) {
+    weight = p->isPoisson ? PoissonLoss::calculateJacobianScaleFactor(values->getFitData(iY), values->getCalculated(iY))
+                          : values->getFitWeight(iY);
     for (size_t iP = 0; iP < p->p; iP++) {
-      if (!p->isPoisson) {
-        J->data[iY * p->p + iP] *= values->getFitWeight(iY);
-      }
+      J->data[iY * p->p + iP] *= weight;
     }
   }
 
