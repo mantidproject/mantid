@@ -21,7 +21,7 @@ from mantid.simpleapi import (
     mtd,
 )
 from mantid.api import AlgorithmManager, MatrixWorkspace, WorkspaceGroup
-from mantid.kernel import Logger, V3D
+from mantid.kernel import Logger, Property, V3D
 from plugins.algorithms.WorkflowAlgorithms.HFIRPowderReduction import HFIRPowderReduction as _HFIRPowderReduction
 import h5py
 import os
@@ -878,6 +878,95 @@ class AutoPopulateTests(unittest.TestCase):
                 if hasattr(prop.settings, "_applyChanges"):
                     prop.settings._applyChanges(algo, "SampleHeight")
             self.assertEqual(prop.value, 3.0)
+
+    # ---- Bad / corrupt file handling for sample auto-population ----
+    SAMPLE_PROPS = ["SampleChemicalFormula", "SampleCrystalDensity", "SamplePackingFraction", "SampleDiameter", "SampleHeight"]
+
+    def _apply_sample_settings(self, algo):
+        """Trigger every registered _applyChanges for the 5 sample auto-pop properties."""
+        for name in self.SAMPLE_PROPS:
+            prop = algo.getProperty(name)
+            settings = prop.settings if isinstance(prop.settings, list) else [prop.settings]
+            for setting in settings:
+                if hasattr(setting, "_applyChanges"):
+                    setting._applyChanges(algo, name)
+
+    def _assert_sample_defaults_unchanged(self, algo):
+        """Assert all 5 sample properties remain at their declared defaults."""
+        self.assertEqual(algo.getProperty("SampleChemicalFormula").value, "")
+        self.assertEqual(algo.getProperty("SampleCrystalDensity").value, Property.EMPTY_DBL)
+        self.assertEqual(algo.getProperty("SamplePackingFraction").value, 0.5)
+        self.assertEqual(algo.getProperty("SampleDiameter").value, Property.EMPTY_DBL)
+        self.assertEqual(algo.getProperty("SampleHeight").value, 0.0)
+
+    def test_sample_auto_populate_nonexistent_file_does_not_crash(self):
+        """Auto-pop should gracefully skip when SampleFilename points to a missing file."""
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+        temp_dir = tempfile.mkdtemp()
+        try:
+            missing_file = os.path.join(temp_dir, "does_not_exist.nxs.h5")
+            algo.setProperty("SampleFilename", missing_file)
+            self._apply_sample_settings(algo)
+            self._assert_sample_defaults_unchanged(algo)
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_sample_auto_populate_corrupted_file_does_not_crash(self):
+        """Auto-pop should gracefully skip when SampleFilename points to a non-HDF5 file."""
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+        temp_dir = tempfile.mkdtemp()
+        try:
+            corrupt_file = os.path.join(temp_dir, "HB2C_999.nxs.h5")
+            with open(corrupt_file, "wb") as f:
+                f.write(b"not a valid HDF5 file - just garbage bytes")
+            algo.setProperty("SampleFilename", corrupt_file)
+            self._apply_sample_settings(algo)
+            self._assert_sample_defaults_unchanged(algo)
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_sample_auto_populate_missing_datasets_does_not_crash(self):
+        """Auto-pop should gracefully skip when the HDF5 file is valid but lacks the sample datasets."""
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+        temp_dir = tempfile.mkdtemp()
+        try:
+            stripped_file = os.path.join(temp_dir, "HB2C_999.nxs.h5")
+            with h5py.File(stripped_file, "w") as f:
+                # valid HDF5, but missing the sample_* datasets the auto-pop reads
+                f.create_dataset("/entry/instrument/name", data=[b"WAND^2"])
+                f.create_dataset("/entry/wavelength", data=[b"2.5"])
+            algo.setProperty("SampleFilename", stripped_file)
+            self._apply_sample_settings(algo)
+            self._assert_sample_defaults_unchanged(algo)
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_sample_auto_populate_from_run_numbers_corrupted_file_does_not_crash(self):
+        """Run-number-driven auto-pop should gracefully skip when the resolved path is a corrupted file."""
+        algo = AlgorithmManager.create("HFIRPowderReduction")
+        algo.initialize()
+        temp_dir = tempfile.mkdtemp()
+        try:
+            corrupt_file = os.path.join(temp_dir, "HB2C_999.nxs.h5")
+            with open(corrupt_file, "wb") as f:
+                f.write(b"not a valid HDF5 file - just garbage bytes")
+
+            original_h5py_File = h5py.File
+
+            def mock_file_func(path, mode="r"):
+                return original_h5py_File(corrupt_file, mode)
+
+            with patch("h5py.File", side_effect=mock_file_func):
+                algo.setProperty("SampleIPTS", 123)
+                algo.setProperty("SampleRunNumbers", [456])
+                algo.setProperty("Instrument", "WAND^2")
+                self._apply_sample_settings(algo)
+                self._assert_sample_defaults_unchanged(algo)
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 class MetadataConsistencyTests(unittest.TestCase):
