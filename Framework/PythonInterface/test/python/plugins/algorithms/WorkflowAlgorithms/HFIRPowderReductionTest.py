@@ -879,7 +879,7 @@ class AutoPopulateTests(unittest.TestCase):
                     prop.settings._applyChanges(algo, "SampleHeight")
             self.assertEqual(prop.value, 3.0)
 
-    # ---- Bad / corrupt file handling for sample auto-population ----
+    # Bad / corrupt file handling for sample auto-population
     SAMPLE_PROPS = ["SampleChemicalFormula", "SampleCrystalDensity", "SamplePackingFraction", "SampleDiameter", "SampleHeight"]
 
     def _apply_sample_settings(self, algo):
@@ -899,18 +899,24 @@ class AutoPopulateTests(unittest.TestCase):
         self.assertEqual(algo.getProperty("SampleDiameter").value, Property.EMPTY_DBL)
         self.assertEqual(algo.getProperty("SampleHeight").value, 0.0)
 
-    def test_sample_auto_populate_nonexistent_file_does_not_crash(self):
-        """Auto-pop should gracefully skip when SampleFilename points to a missing file."""
+    def test_sample_auto_populate_from_run_numbers_nonexistent_file_does_not_crash(self):
+        """Run-number-driven auto-pop should gracefully skip when the constructed path doesn't exist.
+
+        Note: SampleFilename itself validates existence at set-time, so this scenario is
+        only reachable via the SampleIPTS + SampleRunNumbers path that constructs file paths.
+        """
         algo = AlgorithmManager.create("HFIRPowderReduction")
         algo.initialize()
-        temp_dir = tempfile.mkdtemp()
-        try:
-            missing_file = os.path.join(temp_dir, "does_not_exist.nxs.h5")
-            algo.setProperty("SampleFilename", missing_file)
+
+        def mock_file_func(path, mode="r"):
+            raise FileNotFoundError(f"No such file: {path}")
+
+        with patch("h5py.File", side_effect=mock_file_func):
+            algo.setProperty("SampleIPTS", 123)
+            algo.setProperty("SampleRunNumbers", [456])
+            algo.setProperty("Instrument", "WAND^2")
             self._apply_sample_settings(algo)
             self._assert_sample_defaults_unchanged(algo)
-        finally:
-            shutil.rmtree(temp_dir, ignore_errors=True)
 
     def test_sample_auto_populate_corrupted_file_does_not_crash(self):
         """Auto-pop should gracefully skip when SampleFilename points to a non-HDF5 file."""
