@@ -16,6 +16,7 @@ from mantid.api import (
 from mantid.kernel import Direction, PropertyManagerDataService, StringArrayProperty
 from mantid.simpleapi import (
     AlignAndFocusPowder,
+    AlignAndFocusPowderSlim,
     CompressEvents,
     ConvertDiffCal,
     ConvertUnits,
@@ -40,6 +41,8 @@ from mantid.simpleapi import (
 )
 import os
 import numpy as np
+import h5py
+import math
 
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 PROPS_FOR_INSTR = ["PrimaryFlightPath", "SpectrumIDs", "L2", "Polar", "Azimuthal"]
@@ -758,8 +761,6 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         # AlignAndFocusPowderSlim requires NXevent_data; reject non-event nexus files early
         # to avoid the unhelpful "No NXevent_data entries found in file" error at run time.
         try:
-            import h5py
-
             found = []
 
             def _check_event_data(name, obj):
@@ -843,7 +844,6 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
     def __runSlim(self, outputname, pm_args=None):
         """Call AlignAndFocusPowderSlim and store the result under *outputname*."""
-        from mantid.simpleapi import AlignAndFocusPowderSlim
 
         # All properties that are simply mapped
         kwargs = {
@@ -922,8 +922,6 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
         # post-processing: apply SpectrumIDs renaming if requested ---
         if not self.getProperty("SpectrumIDs").isDefault:
-            from mantid.simpleapi import EditInstrumentGeometry
-
             EditInstrumentGeometry(
                 Workspace=outputname,
                 SpectrumIDs=self.getProperty("SpectrumIDs").value,
@@ -988,11 +986,16 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                     self.setProperty("OutputWorkspace", mtd[finalname])
 
                     # TODO CacheDir?
-
-                    return
-                # __runSlim returned without output (e.g. non-event nexus); fall through to standard processing
+                else:
+                    # __runSlim returned without output (e.g. non-event nexus); fall through to standard processing
+                    self.__slowPath(finalname, finalunfocusname)
         # ------------------------------------------------------------------ #
+        # Slower path: load needed workspaces and call AlignAndFocusPowder   #
+        # ------------------------------------------------------------------ #
+        else:
+            self.__slowPath(finalname, finalunfocusname)
 
+    def __slowPath(self, finalname, finalunfocusname):
         if self.useCaching:
             # unfocus check only matters if caching is requested
             if finalunfocusname != "":
@@ -1111,8 +1114,6 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
     def __processFiles(self, files, finalname, finalunfocusname, hasAccumulated):
         """process given files, separate them to "grains". Sum each grain, and add the grain sum to final sum"""
         numberFilesToProcess = len(files)
-        import math
-
         if numberFilesToProcess > 3:
             grain_size = int(math.sqrt(numberFilesToProcess))  # grain size
         else:

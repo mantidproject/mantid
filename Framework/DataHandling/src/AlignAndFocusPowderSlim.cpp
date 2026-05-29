@@ -821,7 +821,8 @@ GroupingWorkspace_sptr AlignAndFocusPowderSlim::loadGroupingFile(const API::Matr
   if (lowerFilename.ends_with(".xml")) {
     // XML grouping files can carry their own instrument/date metadata. Do not
     // supply InputWorkspace here because LoadDetectorsGroupingFile treats that
-    // as an override of the grouping file instrument selection.
+    // as an override; without it, the child algorithm will use the instrument
+    // information embedded in the XML file.
     auto alg = createChildAlgorithm("LoadDetectorsGroupingFile");
     alg->setPropertyValue("InputFile", filename);
     alg->executeAsChildAlg();
