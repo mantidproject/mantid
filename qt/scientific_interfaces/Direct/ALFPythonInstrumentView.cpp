@@ -43,23 +43,12 @@ Python::Object newPresenterWithLogging() {
 namespace MantidQt::CustomInterfaces {
 
 ALFPythonInstrumentView::ALFPythonInstrumentView(QWidget *parent)
-    : ALFInstrumentViewBase(parent), Python::InstanceHolder(newPresenterWithLogging()) {
-  try {
-    GlobalInterpreterLock lock;
-    pyobj().attr("initialise")();
-  } catch (boost::python::error_already_set &) {
-    g_log.error() << PythonException(true).what() << "\n";
-  } catch (std::exception const &ex) {
-    g_log.error() << ex.what() << "\n";
-  } catch (...) {
-    g_log.error("Unknown exception while initialising ALF Python instrument view");
-  }
-}
+    : ALFInstrumentViewBase(parent), Python::InstanceHolder(newPresenterWithLogging()) {}
 
 QWidget *ALFPythonInstrumentView::getInstrumentView() {
   try {
     GlobalInterpreterLock lock;
-    return Python::extract<QWidget>(pyobj().attr("view"));
+    return Python::extract<QWidget>(pyobj().attr("_view"));
   } catch (boost::python::error_already_set &) {
     g_log.error() << PythonException(true).what() << "\n";
     return nullptr;

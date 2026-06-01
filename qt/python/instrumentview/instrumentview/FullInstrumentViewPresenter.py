@@ -556,11 +556,14 @@ class FullInstrumentViewPresenter:
         elif isinstance(ws, GroupingWorkspace):
             self._reload_grouping_workspaces()
         elif ws_name == self._model.workspace.name():
-            self._model._workspace = AnalysisDataService.retrieve(ws_name)
-            self._model.setup()
-            self._setup_component_tree()
-            self._reload_renderers()  # Clear cached renderers before rendering
-            self.update_plotter()
+            self._reset_model_workspace(ws_name)
+
+    def _reset_model_workspace(self, ws_name):
+        self._model._workspace = AnalysisDataService.retrieve(ws_name)
+        self._model.setup()
+        self._setup_component_tree()
+        self._reload_renderers()  # Clear cached renderers before rendering
+        self.update_plotter()
 
     def replace_workspace_callback(self, ws_name, ws):
         self._callback_queue.put((self._replace_workspace_callback, (ws_name, ws)))

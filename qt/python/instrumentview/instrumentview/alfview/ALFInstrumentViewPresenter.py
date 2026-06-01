@@ -6,10 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from instrumentview.alfview.ALFInstrumentViewView import ALFInstrumentViewView
-from qtpy.QtWidgets import QWidget
+from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
+from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
+
+from mantid.simpleapi import CreateSampleWorkspace
 
 
-class ALFInstrumentViewPresenter:
+class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
     """Minimal presenter used by the C++ ALF python bridge.
 
     This keeps the import and construction path lightweight so the C++ side can
@@ -17,20 +20,8 @@ class ALFInstrumentViewPresenter:
     """
 
     def __init__(self, view=None):
-        self.view = view or self._safe_create_view()
-
-    @staticmethod
-    def _safe_create_view():
-        try:
-            return ALFInstrumentViewView()
-        except Exception:
-            # Fallback keeps the C++ bridge alive if optional rendering deps fail.
-            return QWidget()
-
-    def initialise(self):
-        initialise = getattr(self.view, "initialise", None)
-        if callable(initialise):
-            initialise()
+        _placeholder_ws = CreateSampleWorkspace(InstrumentName="ALF", StoreInADS=False)
+        super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(_placeholder_ws))
 
     def selected_detector_ids(self):
         return []

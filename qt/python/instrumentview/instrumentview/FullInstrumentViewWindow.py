@@ -158,10 +158,10 @@ class FullInstrumentViewView(QWidget):
         parent_horizontal_layout = QHBoxLayout(self)
 
         pyvista_vertical_widget = QWidget()
-        left_column_widget = QWidget()
-        tab_widget.addTab(left_column_widget, "Home")
+        self.left_column_widget = QWidget()
+        tab_widget.addTab(self.left_column_widget, "Home")
         pyvista_vertical_layout = QVBoxLayout(pyvista_vertical_widget)
-        left_column_layout = QVBoxLayout(left_column_widget)
+        left_column_layout = QVBoxLayout(self.left_column_widget)
 
         left_column_scroll = QScrollArea()
         left_column_scroll.setWidgetResizable(True)
@@ -454,7 +454,10 @@ class FullInstrumentViewView(QWidget):
 
     def close_window(self) -> None:
         # NOTE: Triggers window close, which in turn calls close_view()
-        self.window().close()
+        try:
+            self.window().close()
+        except RuntimeError:
+            pass  # Already deleted
 
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
