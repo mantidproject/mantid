@@ -278,7 +278,7 @@ void MuonFitPropertyBrowser::init() {
     parentLayout->insertWidget(index, m_mainSplitter, stretchFactor);
 
     parentLayout->setSpacing(0);
-    parentLayout->setMargin(0);
+    parentLayout->setContentsMargins(0, 0, 0, 0);
     parentLayout->setContentsMargins(0, 0, 0, 0);
     parentLayout->insertWidget(index + 1, m_btnGroup);
   }

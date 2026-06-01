@@ -175,7 +175,7 @@ RangeLimitBox::RangeLimitBox(LimitType type, QWidget *parent) : QWidget(parent),
   d_spin_box->setEnabled(false);
 
   auto *l = new QHBoxLayout(this);
-  l->setMargin(0);
+  l->setContentsMargins(0, 0, 0, 0);
   l->setSpacing(0);
   l->addWidget(d_checkbox);
   l->addWidget(d_spin_box);
