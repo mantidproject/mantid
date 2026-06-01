@@ -1,0 +1,1 @@
+- :ref:`algm-HFIRPowderReduction` now attempts to autopopulate the sample absorption parameters if correct data is found in sample run files
