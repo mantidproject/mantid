@@ -56,12 +56,6 @@ class DetectorGeometry:
 
     @staticmethod
     def _apply_grouping_to_wss(wsm, grouping_path):
-        group_ws = GroupDetectors(
-            InputWorkspace=wsm.instr_ws,
-            MapFile=grouping_path,
-            OutputWorkspace="group_ws",
-            StoreInADS=False,
-        )
         # Always regroup from the pristine ungrouped workspace; grouping the previously grouped
         # ws by a new MapFile is very slow because each detector ID has to be located inside
         # the already-merged spectra. Sync current sample (shape + material) onto the
@@ -83,7 +77,7 @@ class DetectorGeometry:
         # log, so re-apply it from the source-of-truth python state.
         if wsm.gauge_volume_str:
             define_gauge_volume(wsm.ws, wsm.gauge_volume_str)
-        return group_ws
+        return wsm.ws
 
     def recompute_scattering_geometry(self):
         """Recompute det_k / detQs_lab for the current goniometer orientation.

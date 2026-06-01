@@ -30,13 +30,11 @@ class TestWorkspaceManager_Init(unittest.TestCase):
         wm = _make_manager("ENGINX")
 
         self.assertEqual(wm.wsname, WorkspaceManager.WS_DATA)
-        self.assertEqual(wm.instr_wsname, WorkspaceManager.WS_INSTR)
         self.assertEqual(wm.ungrouped_wsname, WorkspaceManager.WS_UNGROUPED)
         self.assertIsNone(wm.ws)
         self.assertIsNone(wm.ungrouped_ws)
         self.assertIsNone(wm.mesh_ws)
         self.assertIsNone(wm.updated_mesh_ws)
-        self.assertIsNone(wm.instr_ws)
         self.assertIsNone(wm.gauge_volume_str)
         self.assertEqual(wm.offset, (0, 0, 0))
         np.testing.assert_array_equal(wm.init_R.as_matrix(), np.eye(3))
@@ -62,7 +60,6 @@ class TestWorkspaceManager_Init(unittest.TestCase):
 
 @patch(file_path + ".define_gauge_volume")
 @patch(file_path + ".CloneWorkspace")
-@patch(file_path + ".LoadEmptyInstrument")
 class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
     def _make_manager_with_mock_model(self):
         wm = _make_manager("ENGINX")
@@ -71,16 +68,7 @@ class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
         wm.set_material = MagicMock()
         return wm
 
-    def test_loads_instrument(self, mock_load_instr, mock_clone, mock_define_gv):
-        wm = self._make_manager_with_mock_model()
-        mock_load_instr.return_value = "instr_ws"
-
-        wm.update_ws()
-
-        mock_load_instr.assert_called_once_with(InstrumentName="ENGINX", OutputWorkspace=WorkspaceManager.WS_INSTR)
-        self.assertEqual(wm.instr_ws, "instr_ws")
-
-    def test_delegates_to_init_when_no_existing_ws(self, mock_load_instr, mock_clone, mock_define_gv):
+    def test_delegates_to_init_when_no_existing_ws(self, mock_clone, mock_define_gv):
         wm = self._make_manager_with_mock_model()
         wm.ws = None
 
@@ -89,7 +77,7 @@ class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
         wm._init_wss.assert_called_once_with()
         wm._update_existing_wss.assert_not_called()
 
-    def test_delegates_to_update_when_ws_exists(self, mock_load_instr, mock_clone, mock_define_gv):
+    def test_delegates_to_update_when_ws_exists(self, mock_clone, mock_define_gv):
         wm = self._make_manager_with_mock_model()
         wm.ws = MagicMock()
 
@@ -98,7 +86,7 @@ class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
         wm._update_existing_wss.assert_called_once_with()
         wm._init_wss.assert_not_called()
 
-    def test_clones_ungrouped_and_sets_material(self, mock_load_instr, mock_clone, mock_define_gv):
+    def test_clones_ungrouped_and_sets_material(self, mock_clone, mock_define_gv):
         wm = self._make_manager_with_mock_model()
         wm.ws = MagicMock()
         mock_clone.return_value = "ungrouped"
@@ -109,7 +97,7 @@ class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
         self.assertEqual(wm.ungrouped_ws, "ungrouped")
         wm.set_material.assert_called_once_with()
 
-    def test_does_not_define_gauge_volume_when_unset(self, mock_load_instr, mock_clone, mock_define_gv):
+    def test_does_not_define_gauge_volume_when_unset(self, mock_clone, mock_define_gv):
         wm = self._make_manager_with_mock_model()
         wm.gauge_volume_str = None
 
@@ -117,7 +105,7 @@ class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
 
         mock_define_gv.assert_not_called()
 
-    def test_defines_gauge_volume_when_set(self, mock_load_instr, mock_clone, mock_define_gv):
+    def test_defines_gauge_volume_when_set(self, mock_clone, mock_define_gv):
         wm = self._make_manager_with_mock_model()
         wm.ws = MagicMock()
         wm.gauge_volume_str = "<xml/>"

@@ -8,7 +8,7 @@ import os
 import unittest
 import numpy as np
 
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 
 from mantidqtinterfaces.TexturePlanner.helpers.detector_geometry import DetectorGeometry
 
@@ -17,11 +17,10 @@ file_path = "mantidqtinterfaces.TexturePlanner.helpers.detector_geometry"
 COPY_KWARGS = dict(CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
 
-def _make_wsm(ws="ws", ungrouped_ws="ungrouped_ws", instr_ws="instr_ws", gauge_volume_str=None, scattering_centre=(0, 0, 0)):
+def _make_wsm(ws="ws", ungrouped_ws="ungrouped_ws", gauge_volume_str=None, scattering_centre=(0, 0, 0)):
     wsm = MagicMock()
     wsm.ws = ws
     wsm.ungrouped_ws = ungrouped_ws
-    wsm.instr_ws = instr_ws
     wsm.wsname = "__texture_planning_ws"
     wsm.gauge_volume_str = gauge_volume_str
     wsm.scattering_centre = np.asarray(scattering_centre, dtype=float)
@@ -60,28 +59,9 @@ class TestDetectorGeometry_GetGroupingPath(unittest.TestCase):
 @patch(file_path + ".CopySample")
 @patch(file_path + ".GroupDetectors")
 class TestDetectorGeometry_ApplyGroupingToWss(unittest.TestCase):
-    def test_groups_instr_ws_to_temporary_group_ws(self, mock_group, mock_copy, mock_define_gv):
-        wsm = _make_wsm()
-        mock_group.side_effect = ["group_ws", "new_ws"]
-
-        result = DetectorGeometry._apply_grouping_to_wss(wsm, "/path/grp.xml")
-
-        # first call groups the instrument ws into the helper "group_ws" (not stored in ADS)
-        first = mock_group.call_args_list[0]
-        self.assertEqual(
-            first,
-            call(
-                InputWorkspace="instr_ws",
-                MapFile="/path/grp.xml",
-                OutputWorkspace="group_ws",
-                StoreInADS=False,
-            ),
-        )
-        self.assertEqual(result, "group_ws")
-
     def test_syncs_ws_into_ungrouped_before_regroup_when_ws_present(self, mock_group, mock_copy, mock_define_gv):
         wsm = _make_wsm(ws="ws", ungrouped_ws="ungrouped_ws")
-        mock_group.side_effect = ["group_ws", "new_ws"]
+        mock_group.return_value = "new_ws"
 
         DetectorGeometry._apply_grouping_to_wss(wsm, "/path/grp.xml")
 
@@ -89,7 +69,7 @@ class TestDetectorGeometry_ApplyGroupingToWss(unittest.TestCase):
 
     def test_skips_copysample_when_ws_is_none(self, mock_group, mock_copy, mock_define_gv):
         wsm = _make_wsm(ws=None)
-        mock_group.side_effect = ["group_ws", "new_ws"]
+        mock_group.return_value = "new_ws"
 
         DetectorGeometry._apply_grouping_to_wss(wsm, "/path/grp.xml")
 
@@ -97,24 +77,21 @@ class TestDetectorGeometry_ApplyGroupingToWss(unittest.TestCase):
 
     def test_regroups_from_ungrouped_into_wsname_and_assigns_back_to_wsm(self, mock_group, mock_copy, mock_define_gv):
         wsm = _make_wsm()
-        mock_group.side_effect = ["group_ws", "new_ws"]
+        mock_group.return_value = "new_ws"
 
-        DetectorGeometry._apply_grouping_to_wss(wsm, "/path/grp.xml")
+        result = DetectorGeometry._apply_grouping_to_wss(wsm, "/path/grp.xml")
 
-        second = mock_group.call_args_list[1]
-        self.assertEqual(
-            second,
-            call(
-                InputWorkspace="ungrouped_ws",
-                MapFile="/path/grp.xml",
-                OutputWorkspace=wsm.wsname,
-            ),
+        mock_group.assert_called_once_with(
+            InputWorkspace="ungrouped_ws",
+            MapFile="/path/grp.xml",
+            OutputWorkspace=wsm.wsname,
         )
         self.assertEqual(wsm.ws, "new_ws")
+        self.assertEqual(result, "new_ws")
 
     def test_reapplies_gauge_volume_when_set(self, mock_group, mock_copy, mock_define_gv):
         wsm = _make_wsm(gauge_volume_str="<gv/>")
-        mock_group.side_effect = ["group_ws", "new_ws"]
+        mock_group.return_value = "new_ws"
 
         DetectorGeometry._apply_grouping_to_wss(wsm, "/path/grp.xml")
 
@@ -122,7 +99,7 @@ class TestDetectorGeometry_ApplyGroupingToWss(unittest.TestCase):
 
     def test_does_not_define_gauge_volume_when_unset(self, mock_group, mock_copy, mock_define_gv):
         wsm = _make_wsm(gauge_volume_str=None)
-        mock_group.side_effect = ["group_ws", "new_ws"]
+        mock_group.return_value = "new_ws"
 
         DetectorGeometry._apply_grouping_to_wss(wsm, "/path/grp.xml")
 

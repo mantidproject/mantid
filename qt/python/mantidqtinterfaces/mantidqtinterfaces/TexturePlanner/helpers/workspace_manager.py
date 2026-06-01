@@ -13,7 +13,6 @@ from mantid.simpleapi import (
     CopySample,
     CreateSimulationWorkspace,
     DeleteLog,
-    LoadEmptyInstrument,
     LoadSampleShape,
     RotateSampleShape,
     SetSampleMaterial,
@@ -37,8 +36,6 @@ class WorkspaceManager:
     #   WS_DATA          live workspace driving plots/exports: holds the translated shape with init_R
     #                    baked into its XML goniometer tag, and carries the current orientation R on
     #                    its run goniometer. Read by get_scattering_centre, GroupDetectors, etc.
-    #   WS_INSTR         empty-instrument reference used by DetectorGeometry to read raw detector
-    #                    positions without sample/group/orientation state contaminating it.
     #   WS_UNGROUPED     pre-group clone of WS_DATA; detector_geometry re-runs GroupDetectors against
     #                    this whenever the group pattern changes (can't ungroup an already-grouped ws).
     #   WS_MESH_RAW      pristine sample (no init_R, no translation, identity goniometer). Source of
@@ -53,7 +50,6 @@ class WorkspaceManager:
     #   WS_MC_OUTPUT     MonteCarloAbsorption output (transmission factors).
     #   WS_TMP           transient name for update_initial_shape's working copy; removed in finally.
     WS_DATA = "__texture_planning_ws"
-    WS_INSTR = "__texture_planning_instr"
     WS_UNGROUPED = "__texture_planning_ws_ungrouped"
     WS_MESH_RAW = "__texture_planning_raw_sample_mesh"
     WS_MESH_NEUTRAL = "__texture_planning_neutral_sample_mesh"
@@ -66,7 +62,6 @@ class WorkspaceManager:
     def __init__(self, model):
         self._model = model
         self.wsname = self.WS_DATA
-        self.instr_wsname = self.WS_INSTR
         self.ungrouped_wsname = self.WS_UNGROUPED
         self.ws = None  # holds the translated shape with init_R
         # baked in and current orientation R on its run goniometer
@@ -75,7 +70,6 @@ class WorkspaceManager:
         # reference for absorption and for rebuilding WS_DATA when initial shape is updated.
         self.updated_mesh_ws = None  # sample with init_R baked in, no translation, identity goniometer
         # Used by the plotter and by the reference-ws export.
-        self.instr_ws = None
         self.init_R = Rotation.identity()
         self.offset = (0, 0, 0)
         self.gauge_volume_str = None
@@ -94,7 +88,6 @@ class WorkspaceManager:
         return get_scattering_centre(self.ws)
 
     def update_ws(self):
-        self.instr_ws = LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=self.instr_wsname)
         if self.ws:
             self._update_existing_wss()
         else:
