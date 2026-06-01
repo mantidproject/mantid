@@ -267,6 +267,13 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 array = f[dataset][()]
             return array
 
+        def readStringFromFile(filename, dataset):
+            with h5py.File(filename, "r") as f:
+                value = f[dataset][0]
+                if isinstance(value, bytes):
+                    return value.decode("utf-8")
+                return str(value)
+
         def checkFilenameforInstrument(algo, currentProp, watchedProp):
             run = watchedProp.value
             instrumentName = ""
@@ -304,6 +311,76 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             return True
 
         self.setPropertySettings("VanadiumDiameter", SetDefaultWhenProperty("SampleFilename", checkFilenameforVanadiumDiameter))
+
+        def checkFilenameforSampleChemicalFormula(algo, currentProp, watchedProp):
+            run = watchedProp.value
+            if not run:
+                return False
+            try:
+                formula = readStringFromFile(run[0], "/entry/sample_chemical_formula")
+                logger.information(f"Auto-populating SampleChemicalFormula: {formula} from file: {run[0]}")
+                self.setProperty("SampleChemicalFormula", formula)
+                return True
+            except (OSError, KeyError):
+                return False
+
+        self.setPropertySettings("SampleChemicalFormula", SetDefaultWhenProperty("SampleFilename", checkFilenameforSampleChemicalFormula))
+
+        def checkFilenameforSampleCrystalDensity(algo, currentProp, watchedProp):
+            run = watchedProp.value
+            if not run:
+                return False
+            try:
+                density = readFloatFromFile(run[0], "/entry/sample_crystal_density")
+                logger.information(f"Auto-populating SampleCrystalDensity: {density} from file: {run[0]}")
+                currentProp.value = density
+                return True
+            except (OSError, KeyError):
+                return False
+
+        self.setPropertySettings("SampleCrystalDensity", SetDefaultWhenProperty("SampleFilename", checkFilenameforSampleCrystalDensity))
+
+        def checkFilenameforSamplePackingFraction(algo, currentProp, watchedProp):
+            run = watchedProp.value
+            if not run:
+                return False
+            try:
+                fraction = readFloatFromFile(run[0], "/entry/sample_packing_fraction")
+                logger.information(f"Auto-populating SamplePackingFraction: {fraction} from file: {run[0]}")
+                currentProp.value = fraction
+                return True
+            except (OSError, KeyError):
+                return False
+
+        self.setPropertySettings("SamplePackingFraction", SetDefaultWhenProperty("SampleFilename", checkFilenameforSamplePackingFraction))
+
+        def checkFilenameforSampleDiameter(algo, currentProp, watchedProp):
+            run = watchedProp.value
+            if not run:
+                return False
+            try:
+                diameter = readFloatFromFile(run[0], "/entry/sample_diameter")
+                logger.information(f"Auto-populating SampleDiameter: {diameter} from file: {run[0]}")
+                currentProp.value = diameter
+                return True
+            except (OSError, KeyError):
+                return False
+
+        self.setPropertySettings("SampleDiameter", SetDefaultWhenProperty("SampleFilename", checkFilenameforSampleDiameter))
+
+        def checkFilenameforSampleHeight(algo, currentProp, watchedProp):
+            run = watchedProp.value
+            if not run:
+                return False
+            try:
+                height = readFloatFromFile(run[0], "/entry/sample_height")
+                logger.information(f"Auto-populating SampleHeight: {height} from file: {run[0]}")
+                currentProp.value = height
+                return True
+            except (OSError, KeyError):
+                return False
+
+        self.setPropertySettings("SampleHeight", SetDefaultWhenProperty("SampleFilename", checkFilenameforSampleHeight))
 
         def checkInstrumentforNormaliseBy(algo, currentProp, watchedProp):
             instrument = watchedProp.value
@@ -408,6 +485,90 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         self.setPropertySettings("VanadiumDiameter", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforVanadiumDiameter))
         self.setPropertySettings("VanadiumDiameter", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforVanadiumDiameter))
 
+        def checkRunNumbersforSampleChemicalFormula(algo, currentProp, watchedProp):
+            runs = getRuns()
+            if len(runs) == 0:
+                return False
+            try:
+                formula = readStringFromFile(runs[0], "/entry/sample_chemical_formula")
+                logger.information(f"Auto-populating SampleChemicalFormula: {formula} from run numbers: {runs[0]}")
+                self.setProperty("SampleChemicalFormula", formula)
+                return True
+            except (OSError, KeyError):
+                return False
+
+        self.setPropertySettings("SampleChemicalFormula", SetDefaultWhenProperty("Instrument", checkRunNumbersforSampleChemicalFormula))
+        self.setPropertySettings("SampleChemicalFormula", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforSampleChemicalFormula))
+        self.setPropertySettings(
+            "SampleChemicalFormula", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforSampleChemicalFormula)
+        )
+
+        def checkRunNumbersforSampleCrystalDensity(algo, currentProp, watchedProp):
+            runs = getRuns()
+            if len(runs) == 0:
+                return False
+            try:
+                density = readFloatFromFile(runs[0], "/entry/sample_crystal_density")
+                logger.information(f"Auto-populating SampleCrystalDensity: {density} from run numbers: {runs[0]}")
+                currentProp.value = density
+                return True
+            except (OSError, KeyError):
+                return False
+
+        self.setPropertySettings("SampleCrystalDensity", SetDefaultWhenProperty("Instrument", checkRunNumbersforSampleCrystalDensity))
+        self.setPropertySettings("SampleCrystalDensity", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforSampleCrystalDensity))
+        self.setPropertySettings("SampleCrystalDensity", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforSampleCrystalDensity))
+
+        def checkRunNumbersforSamplePackingFraction(algo, currentProp, watchedProp):
+            runs = getRuns()
+            if len(runs) == 0:
+                return False
+            try:
+                fraction = readFloatFromFile(runs[0], "/entry/sample_packing_fraction")
+                logger.information(f"Auto-populating SamplePackingFraction: {fraction} from run numbers: {runs[0]}")
+                currentProp.value = fraction
+                return True
+            except (OSError, KeyError):
+                return False
+
+        self.setPropertySettings("SamplePackingFraction", SetDefaultWhenProperty("Instrument", checkRunNumbersforSamplePackingFraction))
+        self.setPropertySettings("SamplePackingFraction", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforSamplePackingFraction))
+        self.setPropertySettings(
+            "SamplePackingFraction", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforSamplePackingFraction)
+        )
+
+        def checkRunNumbersforSampleDiameter(algo, currentProp, watchedProp):
+            runs = getRuns()
+            if len(runs) == 0:
+                return False
+            try:
+                diameter = readFloatFromFile(runs[0], "/entry/sample_diameter")
+                logger.information(f"Auto-populating SampleDiameter: {diameter} from run numbers: {runs[0]}")
+                currentProp.value = diameter
+                return True
+            except (OSError, KeyError):
+                return False
+
+        self.setPropertySettings("SampleDiameter", SetDefaultWhenProperty("Instrument", checkRunNumbersforSampleDiameter))
+        self.setPropertySettings("SampleDiameter", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforSampleDiameter))
+        self.setPropertySettings("SampleDiameter", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforSampleDiameter))
+
+        def checkRunNumbersforSampleHeight(algo, currentProp, watchedProp):
+            runs = getRuns()
+            if len(runs) == 0:
+                return False
+            try:
+                height = readFloatFromFile(runs[0], "/entry/sample_height")
+                logger.information(f"Auto-populating SampleHeight: {height} from run numbers: {runs[0]}")
+                currentProp.value = height
+                return True
+            except (OSError, KeyError):
+                return False
+
+        self.setPropertySettings("SampleHeight", SetDefaultWhenProperty("Instrument", checkRunNumbersforSampleHeight))
+        self.setPropertySettings("SampleHeight", SetDefaultWhenProperty("SampleIPTS", checkRunNumbersforSampleHeight))
+        self.setPropertySettings("SampleHeight", SetDefaultWhenProperty("SampleRunNumbers", checkRunNumbersforSampleHeight))
+
         def checkRunNumbersforVanadiumRunNumbers(algo, currentProp, watchedProp):
             runs = getRuns()
             if len(runs) == 0:
@@ -488,6 +649,11 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             "/entry/vanadium_ipts",
             "/entry/vanadium_background_ipts",
             "/entry/vanadium_background_run_numbers",
+            "/entry/sample_chemical_formula",
+            "/entry/sample_crystal_density",
+            "/entry/sample_packing_fraction",
+            "/entry/sample_diameter",
+            "/entry/sample_height",
         ]
 
         inconsistencies = []
