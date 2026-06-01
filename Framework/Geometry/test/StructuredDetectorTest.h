@@ -209,9 +209,9 @@ public:
     TS_ASSERT_THROWS(det->getAtXY(0, 6), const std::runtime_error &);
 
     // Check some ids
-    TS_ASSERT_EQUALS(det->getAtXY(0, 0)->getID(), 0);
-    TS_ASSERT_EQUALS(det->getAtXY(0, 1)->getID(), 1);
-    TS_ASSERT_EQUALS(det->getAtXY(1, 1)->getID(), 3);
+    TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0, 0), 0);
+    TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0, 1), 1);
+    TS_ASSERT_EQUALS(det->getDetectorIDAtXY(1, 1), 3);
 
     std::pair<size_t, size_t> xy;
     size_t x;

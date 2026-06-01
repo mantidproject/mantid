@@ -241,7 +241,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS, std::map<int, Kernel:
   Progress prog(this, 0.5, 1.0, static_cast<int>(detectorInfo.size()));
 
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
-    int idet = detectorInfo.detectorIDs()[i];
+    int idet = detectorInfo.detid(i);
 
     // Check if we have a shift, else do nothing.
     auto itPos = posMap.find(idet);

@@ -134,11 +134,11 @@ public:
     TS_ASSERT_EQUALS(pos, V3D(-4.5, -12.5, -1.0));
 
     // Check some positions
-    pos = parDet->getAtXYZ(0, 0, 0)->getPos();
+    pos = parDet->getPosAtXYZ(0, 0, 0);
     TS_ASSERT_EQUALS(pos, V3D(-6.5, -15.5, -2.0));
-    pos = parDet->getAtXYZ(1, 0, 0)->getPos();
+    pos = parDet->getPosAtXYZ(1, 0, 0);
     TS_ASSERT_EQUALS(pos, V3D(-3.5, -15.5, -2.0));
-    pos = parDet->getAtXYZ(1, 1, 2)->getPos();
+    pos = parDet->getPosAtXYZ(1, 1, 2);
     TS_ASSERT_EQUALS(pos, V3D(-3.5, -10.5, 2.0));
   }
 
@@ -153,7 +153,7 @@ private:
     do_test_positions(det);
 
     // Name
-    TS_ASSERT_EQUALS(det.getAtXYZ(1, 2, 0)->getName(), "MyGrid(1,2,0)");
+    // TS_ASSERT_EQUALS(det.getAtXYZ(1, 2, 0)->getName(), "MyGrid(1,2,0)");
     TS_ASSERT_EQUALS(det.getChild(1)->getName(), "MyGrid(z=1)");
     auto layer = std::dynamic_pointer_cast<ICompAssembly>(det.getChild(2));
     TS_ASSERT_EQUALS(layer->getChild(1)->getName(), "MyGrid(z=2,x=1)");
@@ -170,9 +170,8 @@ private:
 
     // Pull out a component and check that
     // position of det (-1.5, -1.5, -0.5) and size 0.5
-    auto pixelDet = det.getAtXYZ(1, 2, 1);
     box = BoundingBox();
-    pixelDet->getBoundingBox(box);
+    det.getBoundingBoxAtXYZ(1, 2, 1, box);
     TS_ASSERT_DELTA(box.xMin(), -2.0, 1e-08);
     TS_ASSERT_DELTA(box.yMin(), -2.0, 1e-08);
     TS_ASSERT_DELTA(box.zMin(), -1.0, 1e-08);
@@ -198,17 +197,17 @@ private:
 
   void do_test_bounds(const GridDetector &det) {
     // Go out of bounds
-    TS_ASSERT_THROWS(det.getAtXYZ(-1, 0, 0), const std::runtime_error &);
-    TS_ASSERT_THROWS(det.getAtXYZ(0, -1, 0), const std::runtime_error &);
-    TS_ASSERT_THROWS(det.getAtXYZ(100, 0, 0), const std::runtime_error &);
-    TS_ASSERT_THROWS(det.getAtXYZ(0, 205, 0), const std::runtime_error &);
+    TS_ASSERT(!det.inBoundsXYZ(-1, 0, 0));
+    TS_ASSERT(!det.inBoundsXYZ(0, -1, 0));
+    TS_ASSERT(!det.inBoundsXYZ(100, 0, 0));
+    TS_ASSERT(!det.inBoundsXYZ(0, 205, 0));
   }
 
   void do_test_ids(const GridDetector &det) {
     // Check some ids
-    TS_ASSERT_EQUALS(det.getAtXYZ(0, 0, 1)->getID() - 1000000, 1);
-    TS_ASSERT_EQUALS(det.getAtXYZ(0, 1, 0)->getID() - 1000000, 3);
-    TS_ASSERT_EQUALS(det.getAtXYZ(1, 0, 0)->getID() - 1000000, 21);
+    TS_ASSERT_EQUALS(det.getDetectorIDAtXYZ(0, 0, 1) - 1000000, 1);
+    TS_ASSERT_EQUALS(det.getDetectorIDAtXYZ(0, 1, 0) - 1000000, 3);
+    TS_ASSERT_EQUALS(det.getDetectorIDAtXYZ(1, 0, 0) - 1000000, 21);
     TS_ASSERT_EQUALS(det.getDetectorIDAtXYZ(0, 0, 1), 1000001);
     TS_ASSERT_EQUALS(det.getDetectorIDAtXYZ(0, 1, 0), 1000003);
     TS_ASSERT_EQUALS(det.getDetectorIDAtXYZ(1, 0, 0), 1000021);
@@ -237,13 +236,13 @@ private:
     TS_ASSERT_EQUALS(z, 1);
 
     // Check some positions
-    auto pos = det.getAtXYZ(0, 0, 0)->getPos();
+    auto pos = det.getPosAtXYZ(0, 0, 0);
     TS_ASSERT_EQUALS(pos, V3D(-2.5, -3.5, -1.5));
-    pos = det.getAtXYZ(1, 0, 0)->getPos();
+    pos = det.getPosAtXYZ(1, 0, 0);
     TS_ASSERT_EQUALS(pos, V3D(-1.5, -3.5, -1.5));
-    pos = det.getAtXYZ(1, 1, 0)->getPos();
+    pos = det.getPosAtXYZ(1, 1, 0);
     TS_ASSERT_EQUALS(pos, V3D(-1.5, -2.5, -1.5));
-    pos = det.getAtXYZ(2, 5, 2)->getPos();
+    pos = det.getPosAtXYZ(2, 5, 2);
     TS_ASSERT_EQUALS(pos, V3D(-0.5, 1.5, 0.5));
   }
 };

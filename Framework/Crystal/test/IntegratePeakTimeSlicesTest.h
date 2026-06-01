@@ -96,9 +96,9 @@ public:
     std::shared_ptr<const Geometry::RectangularDetector> bankR =
         std::dynamic_pointer_cast<const Geometry::RectangularDetector>(bankC);
 
-    std::shared_ptr<Geometry::Detector> pixelp = bankR->getAtXY(PeakCol, PeakRow);
+    detid_t pixelID = bankR->getDetectorIDAtXY(PeakCol, PeakRow);
     const auto &detectorInfo = wsPtr->detectorInfo();
-    const auto detInfoIndex = detectorInfo.indexOf(pixelp->getID());
+    const auto detInfoIndex = detectorInfo.indexOf(pixelID);
 
     // Now get Peak.
     double PeakTime = 18000 + (PeakChan + .5) * 100;
@@ -113,7 +113,7 @@ public:
     wl.fromTOF(x, x, L1, 0, {{Kernel::UnitParams::l2, L2}, {Kernel::UnitParams::twoTheta, ScatAng}});
     double wavelength = x[0];
 
-    Peak peak(instP, pixelp->getID(), wavelength);
+    Peak peak(instP, pixelID, wavelength);
 
     // Now set up data in workspace2D
     double dQ = 0;
@@ -122,10 +122,7 @@ public:
 
     for (int row = 0; row < NRC; row++)
       for (int col = 0; col < NRC; col++) {
-
-        std::shared_ptr<Detector> detP = bankR->getAtXY(col, row);
-
-        detid2index_map::const_iterator it = map.find(detP->getID());
+        detid2index_map::const_iterator it = map.find(bankR->getDetectorIDAtXY(col, row));
         size_t wsIndex = (*it).second;
 
         double MaxR = max<double>(0.0, MaxPeakIntensity * (1 - abs(row - PeakRow) / MaxPeakRCSpan));
@@ -220,8 +217,7 @@ private:
    */
   double calcQ(const RectangularDetector_const_sptr &bankP, const DetectorInfo &detectorInfo, int row, int col,
                double time) {
-    std::shared_ptr<Detector> detP = bankP->getAtXY(col, row);
-    const auto detInfoIndex = detectorInfo.indexOf(detP->getID());
+    const auto detInfoIndex = detectorInfo.indexOf(bankP->getDetectorIDAtXY(col, row));
     const auto L1 = detectorInfo.l1();
     const auto L2 = detectorInfo.l2(detInfoIndex);
 

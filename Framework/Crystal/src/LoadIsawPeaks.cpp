@@ -354,9 +354,7 @@ int LoadIsawPeaks::findPixelID(const PeaksWorkspace_sptr &ws, const std::string 
 
   if (parent->type() == "RectangularDetector") {
     std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
-
-    std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
-    return pixel->getID();
+    return RDet->getDetectorIDAtXY(col, row);
   } else {
     const auto &componentInfo = ws->componentInfo();
     const size_t parentIndex = componentInfo.indexOfAny(bankName);

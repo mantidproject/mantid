@@ -320,7 +320,7 @@ double ConvertSpectrumAxis2::getEfixed(const size_t detectorIndex, const Geometr
                                        const Mantid::API::MatrixWorkspace &inputWS, const int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");
-  Mantid::detid_t detectorID = detectorInfo.detectorIDs()[detectorIndex];
+  Mantid::detid_t detectorID = detectorInfo.detid(detectorIndex);
   if (efixedProp != EMPTY_DBL()) {
     efixed = efixedProp;
     g_log.debug() << "Detector: " << detectorID << " Efixed: " << efixed << "\n";

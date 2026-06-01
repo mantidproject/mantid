@@ -54,14 +54,12 @@ public:
   //! Make a clone of the present component
   GridDetector *clone() const override;
 
-  std::shared_ptr<Detector> getAtXYZ(const int x, const int y, const int z) const;
-
   detid_t getDetectorIDAtXYZ(const int x, const int y, const int z) const;
   std::tuple<int, int, int> getXYZForDetectorID(const detid_t detectorID) const;
 
-  int xpixels() const;
-  int ypixels() const;
-  int zpixels() const;
+  int const &xpixels() const;
+  int const &ypixels() const;
+  int const &zpixels() const;
 
   double xstep() const;
   double ystep() const;
@@ -78,18 +76,20 @@ public:
   /// Size in Z of the detector
   double zsize() const;
 
-  int idstart() const;
-  bool idfillbyfirst_y() const;
-  std::string idFillOrder() const;
-  int idstepbyrow() const;
-  int idstep() const;
+  int const &idstart() const;
+  int const &idstepbyrow() const;
+  int const &idstep() const;
+  /// returns if IDs are filled along y direction first
+  bool const &idfillbyfirst_y() const;
 
-  Kernel::V3D getRelativePosAtXYZ(int x, int y, int z) const;
+  Kernel::V3D getRelativePosAtXYZ(int const x, int const y, int const z) const;
   /// minimum detector id
-  detid_t minDetectorID() const;
+  detid_t const &minDetectorID() const;
   /// maximum detector id
-  detid_t maxDetectorID() const;
+  detid_t const &maxDetectorID() const;
   std::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const override;
+
+  Kernel::V3D getPosAtXYZ(int const x, int const y, int const z) const;
 
   // This should inherit the getBoundingBox implementation from  CompAssembly
   // but the multiple inheritance seems to confuse it so we'll explicityly tell
@@ -115,6 +115,8 @@ public:
   /// Retrieve the cached bounding box
   void getBoundingBox(BoundingBox &assemblyBox) const override;
 
+  void getBoundingBoxAtXYZ(int const x, int const y, int const z, BoundingBox &box) const;
+
   /// Try to find a point that lies within (or on) the object
   int getPointInObject(Kernel::V3D &point) const override;
 
@@ -136,11 +138,18 @@ public:
 
   virtual size_t registerContents(class ComponentVisitor &componentVisitor) const override;
 
+  /// returns dimensions of filling in order
+  std::array<char, 3UL> const &idFillOrder() const;
+
+  bool inBoundsXYZ(const int x, const int y, const int z) const;
+
   // ------------ End of IObjComponent methods ----------------
 protected:
   /// initialize members to bare defaults
   void init();
   void createLayer(const std::string &name, CompAssembly *parent, int iz, int &minDetID, int &maxDetID);
+
+  std::shared_ptr<Detector> getAtXYZ(const int x, const int y, const int z) const;
 
 private:
   void initializeValues(std::shared_ptr<IObject> shape, int xpixels, double xstart, double xstep, int ypixels,
@@ -194,7 +203,7 @@ private:
   /// IDs are filled in Y fastest
   bool m_idfillbyfirst_y;
   /// The order in which to fill IDs
-  std::string m_idFillOrder;
+  std::array<char, 3UL> m_idFillOrder;
   /// Step size in ID in each row
   int m_idstepbyrow;
   /// Step size in ID in each col

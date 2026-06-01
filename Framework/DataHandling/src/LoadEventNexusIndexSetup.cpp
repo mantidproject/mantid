@@ -112,7 +112,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(const std::vector<std::string>
       dets = componentInfo.detectorsInSubtree(bankIndex);
       for (const auto detIndex : dets) {
         spectrumDefinitions.emplace_back(detIndex);
-        spectrumNumbers.emplace_back(detectorInfo.detectorIDs()[detIndex]);
+        spectrumNumbers.emplace_back(detectorInfo.detid(detIndex));
       }
     }
     if (dets.empty())

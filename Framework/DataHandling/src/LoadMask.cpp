@@ -402,7 +402,7 @@ void LoadMask::componentToDetectors(const std::vector<std::string> &componentnam
     detid_t id_max(0);
 
     for (const auto &detIndex : detectorIndices) {
-      detid_t detid = detectorInfo.detectorIDs()[detIndex];
+      detid_t detid = detectorInfo.detid(detIndex);
       detectors.emplace_back(detid);
       numdets++;
       if (detid < id_min)

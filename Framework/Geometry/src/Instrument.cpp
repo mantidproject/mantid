@@ -297,13 +297,12 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
 
   std::size_t numDetIDs = in_dets.size();
 
-  if (skipMonitors) // this slow, but gets the right answer
-  {
-    std::size_t monitors(0);
-    monitors = std::count_if(in_dets.cbegin(), in_dets.cend(), [](const auto &in_det) { return in_det.isMonitor(); });
-    return (numDetIDs - monitors);
+  if (skipMonitors) {
+    const std::size_t monitors =
+        std::count_if(in_dets.cbegin(), in_dets.cend(), [](const auto &in_det) { return in_det.isMonitor(); });
+    return (in_dets.size() - monitors);
   } else {
-    return numDetIDs;
+    return in_dets.size();
   }
 }
 

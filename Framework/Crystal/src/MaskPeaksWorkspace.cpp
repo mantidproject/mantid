@@ -195,7 +195,7 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, cons
       return EMPTY_INT();
     }
 
-    int pixelID = det->getAtXY(x, y)->getID();
+    int pixelID = det->getDetectorIDAtXY(x, y);
 
     // Find the corresponding workspace index, if any
     auto wiEntry = pixel_to_wi.find(pixelID);
@@ -278,9 +278,7 @@ int MaskPeaksWorkspace::findPixelID(const std::string &bankName, int col, int ro
 
   if (parent->type() == "RectangularDetector") {
     std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
-
-    std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
-    return pixel->getID();
+    return RDet->getDetectorIDAtXY(col, row);
   } else if (Iptr->getName().compare("CORELLI") == 0) {
     // Checking for CORELLI
     // pixel full name example

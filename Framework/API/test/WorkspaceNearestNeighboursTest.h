@@ -145,8 +145,8 @@ public:
 
     RectangularDetector_const_sptr bank1 =
         std::dynamic_pointer_cast<const RectangularDetector>(m_instrument->getComponentByName("bank1"));
-    std::shared_ptr<const Detector> det = bank1->getAtXY(2, 3);
-    TS_ASSERT(det);
+    auto id = bank1->getDetectorIDAtXY(2, 3);
+    TS_ASSERT_DIFFERS(id, -1);
     std::map<specnum_t, V3D> nb;
 
     // Too close!

@@ -52,7 +52,7 @@ DetectorInfo::DetectorInfo(const DetectorInfo &other)
 
 /// Assigns the contents of the non-wrapping part of `rhs` to this.
 DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
-  if (detectorIDs() != rhs.detectorIDs())
+  if (*m_detectorIDs != *rhs.m_detectorIDs)
     throw std::runtime_error("DetectorInfo::operator=: Detector IDs in "
                              "assignment do not match. Assignment not "
                              "possible");
@@ -79,8 +79,8 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 }
 
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the
-/// instrument.
-size_t DetectorInfo::size() const { return m_detectorIDs->size(); }
+/// instrument
+size_t DetectorInfo::size() const { return m_detectorInfo->size(); }
 
 /// Returns true if the beamline has scanning detectors.
 bool DetectorInfo::isScanning() const { return m_detectorInfo->isScanning(); }
@@ -271,12 +271,13 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
 std::tuple<double, double, double> DetectorInfo::diffractometerConstants(const size_t index,
                                                                          std::vector<detid_t> &calibratedDets,
                                                                          std::vector<detid_t> &uncalibratedDets) const {
-  auto det = m_instrument->getDetector((*m_detectorIDs)[index]);
+  const detid_t detectorId = detid(index);
+  auto det = m_instrument->getDetector(detectorId);
   auto pmap = m_instrument->getParameterMap();
   auto par = pmap->get(det.get(), "DIFC");
   if (par) {
     double difc = par->value<double>();
-    calibratedDets.push_back((*m_detectorIDs)[index]);
+    calibratedDets.push_back(detectorId);
     double difa = 0., tzero = 0.;
     par = pmap->get(det.get(), "DIFA");
     if (par)
@@ -288,7 +289,7 @@ std::tuple<double, double, double> DetectorInfo::diffractometerConstants(const s
   } else {
     // if calibrated difc not available, revert to uncalibrated difc with other
     // two constants=0
-    uncalibratedDets.push_back((*m_detectorIDs)[index]);
+    uncalibratedDets.push_back(detectorId);
     double difc = difcUncalibrated(index);
     return {0., difc, 0.};
   }
@@ -371,7 +372,7 @@ void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index, const Ker
 // Clear any parameters whose value is only valid for specific positions
 // Currently diffractometer constants
 void DetectorInfo::clearPositionDependentParameters(const size_t index) {
-  auto det = m_instrument->getDetector((*m_detectorIDs)[index]);
+  auto det = m_instrument->getDetector(detid(index));
   auto pmap = m_instrument->getParameterMap();
   pmap->clearParametersByName("DIFA", det.get());
   pmap->clearParametersByName("DIFC", det.get());
@@ -407,14 +408,17 @@ std::size_t DetectorInfo::indexOf(const detid_t id) const {
   try {
     return m_detIDToIndex->at(id);
   } catch (const std::out_of_range &) {
-    // customize the error message
     std::stringstream msg;
     msg << "Failed to find detector with id=" << id;
     throw std::out_of_range(msg.str());
   }
 }
 
-detid_t DetectorInfo::detid(const size_t index) const { return getDetector(index).getID(); }
+/// Returns the detector ID for the given logical detector index.
+/// Works without allocating the full ID vector.
+detid_t DetectorInfo::detid(const size_t index) const {
+  return (*m_detectorIDs)[m_detectorInfo->compactDetectorIndex(index)];
+}
 
 /// Returns the scan count of the detector with given detector index.
 size_t DetectorInfo::scanCount() const { return m_detectorInfo->scanCount(); }
@@ -437,7 +441,7 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   if (m_lastIndex[thread] != index) {
     m_lastIndex[thread] = index;
     try {
-      m_lastDetector[thread] = m_instrument->getDetector((*m_detectorIDs)[index]);
+      m_lastDetector[thread] = m_instrument->getDetector(detid(index));
     } catch (...) {
       // Reset so a future call for this index retries rather than returning
       // whatever stale pointer m_lastDetector holds from a previous access.

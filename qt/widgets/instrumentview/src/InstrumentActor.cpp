@@ -405,8 +405,11 @@ std::vector<Mantid::detid_t> InstrumentActor::getDetIDs(const std::vector<size_t
 Mantid::Geometry::ComponentID InstrumentActor::getComponentID(size_t pickID) const {
   auto compID = Mantid::Geometry::ComponentID();
   const auto &compInfo = componentInfo();
-  if (pickID < compInfo.size())
-    compID = compInfo.componentID(pickID)->getComponentID();
+  if (pickID < compInfo.size()) {
+    const auto *comp = compInfo.componentID(pickID);
+    if (comp)
+      compID = comp->getComponentID();
+  }
   return compID;
 }
 

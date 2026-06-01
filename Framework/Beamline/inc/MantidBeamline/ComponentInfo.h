@@ -88,9 +88,7 @@ public:
   size_t size() const;
   size_t getMemorySize() const;
   size_t numberOfDetectorsInSubtree(const size_t componentIndex) const;
-  bool isDetector(const size_t componentIndex) const {
-    return componentIndex < m_assemblySortedDetectorIndices->size();
-  }
+  bool isDetector(const size_t componentIndex) const { return componentIndex < totalDetectorCount(); }
   bool isMonitor(const size_t componentIndex) const;
   size_t compOffsetIndex(const size_t componentIndex) const {
     return componentIndex - m_assemblySortedDetectorIndices->size();
