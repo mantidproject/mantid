@@ -15,7 +15,7 @@
 #include <QMessageBox>
 #include <QPalette>
 #include <QPushButton>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QtAlgorithms>
 
 #include <algorithm>
@@ -898,13 +898,13 @@ Interval::Interval(const QString &intervalString) {
   // An interval can either be "n" or "n-m" where n and m are integers
   const QString patternSingle("^\\d+$");     // E.g. "2" or "712"
   const QString patternRange("^\\d+-\\d+$"); // E.g. "2-4" or "214-200"
-  const QRegExp regExpSingle(patternSingle);
-  const QRegExp regExpRange(patternRange);
+  const QRegularExpression regExpSingle(patternSingle);
+  const QRegularExpression regExpRange(patternRange);
 
-  if (regExpSingle.exactMatch(intervalString)) {
+  if (regExpSingle.match(intervalString).hasMatch()) {
     int single = intervalString.toInt();
     init(single, single);
-  } else if (regExpRange.exactMatch(intervalString)) {
+  } else if (regExpRange.match(intervalString).hasMatch()) {
     QStringList range = intervalString.split("-");
     int first = range[0].toInt();
     int last = range[1].toInt();
@@ -1222,9 +1222,9 @@ QValidator::State IntervalListValidator::validate(QString &input, int &pos) cons
     return QValidator::Acceptable;
 
   const QString pattern("^(\\d|-|,)*$");
-  const QRegExp regExp(pattern);
+  const QRegularExpression regExp(pattern);
 
-  if (regExp.exactMatch(input))
+  if (regExp.match(input).hasMatch())
     return QValidator::Intermediate;
 
   return QValidator::Invalid;

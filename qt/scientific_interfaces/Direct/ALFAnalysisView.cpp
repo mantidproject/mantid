@@ -17,9 +17,9 @@
 #include <tuple>
 #include <utility>
 
+#include <QDoubleValidator>
 #include <QLabel>
 #include <QMessageBox>
-#include <QRegExpValidator>
 #include <QSizePolicy>
 #include <QSpacerItem>
 #include <QSplitter>

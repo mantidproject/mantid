@@ -11,6 +11,8 @@
 
 #include <QMenu>
 #include <QMessageBox>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <QSettings>
 #include <QSignalBlocker>
 
@@ -240,7 +242,7 @@ void OutputPlotOptionsView::setIndicesRegex(QString const &regex) {
 }
 
 QValidator *OutputPlotOptionsView::createValidator(QString const &regex) {
-  return new QRegExpValidator(QRegExp(regex), this);
+  return new QRegularExpressionValidator(QRegularExpression(regex), this);
 }
 
 QString OutputPlotOptionsView::selectedWorkspace() const { return m_plotOptions->cbWorkspace->currentText(); }

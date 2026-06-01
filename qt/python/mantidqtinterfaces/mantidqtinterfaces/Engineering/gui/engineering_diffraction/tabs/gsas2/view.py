@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
-from qtpy.QtGui import QRegExpValidator
+from qtpy.QtGui import QRegularExpressionValidator
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QDockWidget, QMainWindow, QSizePolicy
 from os import path
@@ -76,11 +76,13 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.x_min_line_edit.editingFinished.connect(self.set_min_line_from_line_edit)
         self.x_max_line_edit.editingFinished.connect(self.set_max_line_from_line_edit)
 
-        none_one_many_int_float_comma_separated = QRegExpValidator(
-            QtCore.QRegExp(r"^(?:\d+(?:\.\d*)?|\.\d+)(?:,(?:\d+(?:\.\d*)?|\.\d+))*$"), self.override_unitcell_length
+        none_one_many_int_float_comma_separated = QRegularExpressionValidator(
+            QtCore.QRegularExpression(r"^(?:\d+(?:\.\d*)?|\.\d+)(?:,(?:\d+(?:\.\d*)?|\.\d+))*$"), self.override_unitcell_length
         )
         self.override_unitcell_length.setValidator(none_one_many_int_float_comma_separated)
-        valid_file_name = QRegExpValidator(QtCore.QRegExp(r'^[^<>:;,"@£$%&\'^!?"*|\\\/]+$'), self.project_name_line_edit)
+        valid_file_name = QRegularExpressionValidator(
+            QtCore.QRegularExpression(r'^[^<>:;,"@£$%&\'^!?"*|\\\/]+$'), self.project_name_line_edit
+        )
         self.project_name_line_edit.setValidator(valid_file_name)
         self.x_min_line_edit.setValidator(LineEditDoubleValidator(self.x_min_line_edit, 0))
         self.x_max_line_edit.setValidator(LineEditDoubleValidator(self.x_max_line_edit, 1))
