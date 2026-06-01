@@ -39,17 +39,6 @@
       }
     },
     {
-      "name": "osx-debug",
-      "description": "Inherited by macOS presets for debugging. Disables optimization from conda compiler flags",
-      "hidden": true,
-      "cacheVariables": {
-        "CMAKE_C_FLAGS_DEBUG": "-O0 -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fstandalone-debug -fno-limit-debug-info",
-        "CMAKE_CXX_FLAGS_DEBUG": "-O0 -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fstandalone-debug -fno-limit-debug-info",
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_DISABLE_PRECOMPILE_HEADERS": "ON"
-      }
-    },
-    {
       "name": "osx-default",
       "description": "Inherited by all macOS configurations",
       "hidden": true,
@@ -133,10 +122,15 @@
       "name": "osx-debug-max",
       "description": "Build options for a developer macOS build, with maximum debugging information",
       "inherits": [
-        "osx-debug",
         "osx-default",
         "conda"
-      ]
+      ],
+      "cacheVariables": {
+        "CMAKE_C_FLAGS_DEBUG": "-O0 -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fstandalone-debug -fno-limit-debug-info",
+        "CMAKE_CXX_FLAGS_DEBUG": "-O0 -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fstandalone-debug -fno-limit-debug-info",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_DISABLE_PRECOMPILE_HEADERS": "ON"
+      }
     },
     {
       "name": "linux",
