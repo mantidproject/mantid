@@ -16,7 +16,8 @@ If you have not, please do so before hand by following [this guide](GettingStart
 
 At any point in these instructions where `DebugWithRelRuntime` is used (including in file paths),
 you can replace it with any other build type such as `Debug` or `Release`.
-We use `DebugWithRelRuntime` for conda specific builds to allow debugging due to `Debug` not being functional with the `Release ABIs`.
+`DebugWithRelRuntime` is used for Windows conda builds because `Debug` is not compatible with the release runtime ABI.
+On Linux and macOS, use `Debug`.
 
 - Open PyCharm
 
