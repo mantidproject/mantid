@@ -18,17 +18,18 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
-#include <QDesktopWidget>
 #include <QDir>
 #include <QFileInfo>
 #include <QGridLayout>
 #include <QGroupBox>
+#include <QGuiApplication>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPalette>
 #include <QPushButton>
+#include <QScreen>
 #include <QScrollArea>
 #include <QSignalMapper>
 #include <QVBoxLayout>
@@ -100,7 +101,7 @@ void GenericDialog::initLayout() {
 
   QCoreApplication::processEvents();
 
-  int screenHeight = QApplication::desktop()->height();
+  int screenHeight = QGuiApplication::primaryScreen()->geometry().height();
   int dialogHeight = viewport->sizeHint().height();
 
   // If the thing won't end up too big compared to the screen height,
