@@ -441,8 +441,8 @@ int const &GridDetector::idstep() const {
  */
 V3D GridDetector::getPosAtXYZ(int x, int y, int z) const {
   V3D relPos = getRelativePosAtXYZ(x, y, z);
-  V3D anchorPos = this->getPos();
-  return (anchorPos + relPos);
+  this->getRotation().rotate(relPos);
+  return this->getPos() + relPos;
 }
 
 //-------------------------------------------------------------------------------------------------
