@@ -97,6 +97,11 @@ class OrientationTable:
         # delegates to the model so the gonio_index lives in one place
         return self._model.update_gonio_index(num_gonios)
 
+    # setting values from elsewhere ---------------------------------------
+
+    def set_transmission_at_index(self, transmission, index):
+        self.saved_orientations[index].transmission = transmission
+
     # rotation maths -----------------------------------------------------
     def calc_gRs(self, vecs, senses, angles):
         gRs = [Rotation.identity()]

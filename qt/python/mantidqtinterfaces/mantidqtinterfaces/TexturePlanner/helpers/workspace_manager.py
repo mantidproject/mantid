@@ -68,10 +68,13 @@ class WorkspaceManager:
         self.wsname = self.WS_DATA
         self.instr_wsname = self.WS_INSTR
         self.ungrouped_wsname = self.WS_UNGROUPED
-        self.ws = None
-        self.ungrouped_ws = None
-        self.mesh_ws = None
-        self.updated_mesh_ws = None
+        self.ws = None  # holds the translated shape with init_R
+        # baked in and current orientation R on its run goniometer
+        self.ungrouped_ws = None  # ungrouped clone of self.ws for changing groups quickly
+        self.mesh_ws = None  # pristine sample (no init_R, no translation, identity goniometer)
+        # reference for absorption and for rebuilding WS_DATA when initial shape is updated.
+        self.updated_mesh_ws = None  # sample with init_R baked in, no translation, identity goniometer
+        # Used by the plotter and by the reference-ws export.
         self.instr_ws = None
         self.init_R = Rotation.identity()
         self.offset = (0, 0, 0)
@@ -93,25 +96,37 @@ class WorkspaceManager:
     def update_ws(self):
         self.instr_ws = LoadEmptyInstrument(InstrumentName=self.instr, OutputWorkspace=self.instr_wsname)
         if self.ws:
-            ws = self._create_new_ws_with_copied_sample(self.wsname, self.ws, clone=True)
-            mesh_ws = self._create_new_ws_with_copied_sample(self.WS_MESH_RAW, self.mesh_ws, clone=True)
-            updated_mesh_ws = self._create_new_ws_with_copied_sample(self.WS_MESH_NEUTRAL, self.updated_mesh_ws, clone=True)
+            self._update_existing_wss()
         else:
-            ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0,0.1,5", OutputWorkspace=self.wsname, UnitX="dSpacing")
-            for ispec in range(ws.getNumberHistograms()):
-                ws.setY(ispec, np.ones_like(ws.readY(ispec)))
-            mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace=self.WS_MESH_RAW)
-            updated_mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace=self.WS_MESH_NEUTRAL)
-            SetSampleShape(ws, get_cube_xml("default_cube", 0.01))
-            SetSampleShape(mesh_ws, get_cube_xml("default_cube", 0.01))
-            SetSampleShape(updated_mesh_ws, get_cube_xml("default_cube", 0.01))
-        self.ws = ws
-        self.mesh_ws = mesh_ws
-        self.updated_mesh_ws = updated_mesh_ws
+            self._init_wss()
         self.ungrouped_ws = CloneWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ungrouped_wsname)
         self.set_material()
         if self.gauge_volume_str:
             define_gauge_volume(self.ws, self.gauge_volume_str)
+
+    def _update_existing_wss(self):
+        ws = self._create_new_ws_with_copied_sample(self.wsname, self.ws, clone=True)
+        mesh_ws = self._create_new_ws_with_copied_sample(self.WS_MESH_RAW, self.mesh_ws, clone=True)
+        updated_mesh_ws = self._create_new_ws_with_copied_sample(self.WS_MESH_NEUTRAL, self.updated_mesh_ws, clone=True)
+        self.ws = ws
+        self.mesh_ws = mesh_ws
+        self.updated_mesh_ws = updated_mesh_ws
+
+    def _init_wss(self):
+        ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0,0.1,5", OutputWorkspace=self.wsname, UnitX="dSpacing")
+        for ispec in range(ws.getNumberHistograms()):
+            ws.setY(ispec, np.ones_like(ws.readY(ispec)))
+        mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace=self.WS_MESH_RAW)
+        updated_mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace=self.WS_MESH_NEUTRAL)
+        self.ws = ws
+        self.mesh_ws = mesh_ws
+        self.updated_mesh_ws = updated_mesh_ws
+        self._set_default_shape_on_wss()
+
+    def _set_default_shape_on_wss(self):
+        SetSampleShape(self.ws, get_cube_xml("default_cube", 0.01))
+        SetSampleShape(self.mesh_ws, get_cube_xml("default_cube", 0.01))
+        SetSampleShape(self.updated_mesh_ws, get_cube_xml("default_cube", 0.01))
 
     def set_material(self):
         SetSampleMaterial(self.ws, self.attenuation_kwargs["material"])
@@ -162,33 +177,39 @@ class WorkspaceManager:
         self.translate_shape(_tmp_ws, *self.offset)
 
         try:
-            # CopySample bakes the *destination* workspace's current goniometer R into the new
+            # CopySample bakes the destination workspace's current goniometer R into the new
             # shape's XML (see CopySample::copyParameters -> addGoniometerTag), and the plotter
-            # leaves a non-identity R on self.ws on every redraw. Reset to identity *before* the
-            # CopySamples so the shape we hand on carries only init_R - otherwise the identity
-            # branch below would silently leave the previous goniometer R baked into the shape
-            # and the plotter's next setR would compose it again on top, doubling the rotation.
+            # leaves a non-identity R on self.ws on every redraw.
+            #
+            # Reset to identity *before* the CopySamples so the shape we hand on carries only init_R
             self.ws.run().getGoniometer().setR(np.eye(3))
             CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=self.wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
             CopySample(
                 InputWorkspace=_tmp_ws, OutputWorkspace=self.updated_mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False
             )
 
-            if x_rot == 0.0 and y_rot == 0.0 and z_rot == 0.0:
+            if self._all_rots_zero(x_rot, y_rot, z_rot):
                 self.init_R = Rotation.identity()
-                return None
 
-            self.init_R = Rotation.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=True)
-            rotvec = self.init_R.as_rotvec(degrees=True)
-            ang = np.linalg.norm(rotvec)
-            if ang == 0:
-                return None
-            vec = rotvec / ang
-
-            RotateSampleShape(self.wsname, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
-            RotateSampleShape(self.updated_mesh_ws, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
+            else:
+                self.init_R = Rotation.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=True)
+                self.rotate_samples_by_initial_goniometer()
         finally:
             ADS.remove(self.WS_TMP)
+
+    @staticmethod
+    def _all_rots_zero(x_rot, y_rot, z_rot):
+        return np.isclose(x_rot, 0) and np.isclose(y_rot, 0) and np.isclose(z_rot, 0)
+
+    def rotate_samples_by_initial_goniometer(self):
+        rot_vec = self.init_R.as_rotvec(degrees=True)
+        ang = np.linalg.norm(rot_vec)
+        if ang == 0:
+            return None
+        vec = rot_vec / ang
+
+        RotateSampleShape(self.wsname, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
+        RotateSampleShape(self.updated_mesh_ws, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
 
     def set_gauge_volume_str(self, preset, custom):
         self.gauge_volume_str = get_gauge_vol_str(preset, custom)

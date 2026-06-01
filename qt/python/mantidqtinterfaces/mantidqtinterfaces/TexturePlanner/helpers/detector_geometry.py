@@ -32,9 +32,30 @@ class DetectorGeometry:
         self._source_position = None
 
     def recompute(self):
-        m = self._model
-        wsm = m.workspaces
-        grouping_path = os.path.join(CALIB_DIR, m.calib_info.get_group_file())
+        wsm = self._model.workspaces
+        grouping_path = self._get_grouping_path()
+        group_ws = self._apply_grouping_to_wss(wsm, grouping_path)
+
+        # get grouping file to handle null group
+        tmp_grp = LoadDetectorsGroupingFile(InputFile=grouping_path, OutputWorkspace="tmp_grp", StoreInADS=False)
+        ydat = tmp_grp.extractY()
+        # if there is a null group (label 0), start the indexing at 1 to ignore it, otherwise start from 0
+        self.starting_ind = int(ydat.min() == 0)
+
+        # extract the detector positions for each spectrum in the group and the source position
+        spec_info = group_ws.spectrumInfo()
+        comp_info = group_ws.componentInfo()
+        self._det_positions = np.asarray([spec_info.position(i) for i in range(self.starting_ind, group_ws.getNumberHistograms())])
+        self._source_position = np.asarray(comp_info.sourcePosition())
+
+        # calculate the required det_k and detQs_lab
+        self.recompute_scattering_geometry()
+
+    def _get_grouping_path(self):
+        return os.path.join(CALIB_DIR, self._model.calib_info.get_group_file())
+
+    @staticmethod
+    def _apply_grouping_to_wss(wsm, grouping_path):
         group_ws = GroupDetectors(
             InputWorkspace=wsm.instr_ws,
             MapFile=grouping_path,
@@ -62,17 +83,7 @@ class DetectorGeometry:
         # log, so re-apply it from the source-of-truth python state.
         if wsm.gauge_volume_str:
             define_gauge_volume(wsm.ws, wsm.gauge_volume_str)
-
-        tmp_grp = LoadDetectorsGroupingFile(InputFile=grouping_path, OutputWorkspace="tmp_grp", StoreInADS=False)
-        ydat = tmp_grp.extractY()
-        self.starting_ind = int(ydat.min() == 0)
-
-        spec_info = group_ws.spectrumInfo()
-        comp_info = group_ws.componentInfo()
-        self._det_positions = np.asarray([spec_info.position(i) for i in range(self.starting_ind, group_ws.getNumberHistograms())])
-        self._source_position = np.asarray(comp_info.sourcePosition())
-
-        self.recompute_scattering_geometry()
+        return group_ws
 
     def recompute_scattering_geometry(self):
         """Recompute det_k / detQs_lab for the current goniometer orientation.
@@ -83,10 +94,17 @@ class DetectorGeometry:
         """
         if self._det_positions is None:
             return
+        # get the current scattering centre from the workspace manager
         scattering_centre = self._model.workspaces.scattering_centre
+
+        # calculate the normalised vector from scattering centre to detector position: K_d
         det_vecs = self._det_positions - scattering_centre
         self.det_k = det_vecs / np.linalg.norm(det_vecs, axis=1)[:, None]
+
+        # calculate the normalised beam vector: K_i
         ki = scattering_centre - self._source_position
         ki_norm = ki / np.linalg.norm(ki)
+
+        # calculate the normalised Q vectors in lab reference frame Q = K_d - K_i
         detQs_lab = self.det_k - ki_norm
         self.detQs_lab = detQs_lab / np.linalg.norm(detQs_lab, axis=1)[:, None]
