@@ -16,6 +16,6 @@ template class MANTID_NEXUS_DLL UniqueID<&H5Sclose>;
 template class MANTID_NEXUS_DLL UniqueID<&H5Aclose>;
 template class MANTID_NEXUS_DLL UniqueID<&H5Pclose>;
 // this will be used in Nexus::File
-template class MANTID_NEXUS_DLL SharedID<&H5Fclose>;
+template class SharedID<&H5Fclose>;
 
 } // namespace Mantid::Nexus
