@@ -295,11 +295,11 @@ public:
   void testFindFiles() {
     ConfigService::Instance().setString("default.facility", "ISIS");
     std::vector<std::filesystem::path> files;
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-n15193"), const Exception::NotFoundError &);
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189n-15193"), const Exception::NotFoundError &);
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-15193n"), const Exception::NotFoundError &);
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-151n93"), const Exception::NotFoundError &);
-    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15n189-151n93"), const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-n15193"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189n-15193"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-15193n"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15189-151n93"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(files = FileFinder::Instance().findRuns("MUSR15n189-151n93"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(files = FileFinder::Instance().findRuns("MUSR15189-15193"));
     TS_ASSERT_EQUALS(files.size(), 5);
     std::vector<std::filesystem::path>::iterator it = files.begin();
@@ -469,6 +469,16 @@ public:
     ConfigService::Instance().setString("default.instrument", "MUSR");
     std::vector<std::filesystem::path> paths;
     TS_ASSERT_THROWS(paths = FileFinder::Instance().findRuns("1-999999"), const std::invalid_argument &);
+  }
+
+  // A token that looks like a run range but the parser cannot interpret (e.g.
+  // more than one '-' separator) must surface as a "Malformed range of runs"
+  // std::invalid_argument so the user can rule out a genuine file-not-found,
+  // rather than failing later as a NotFoundError after a literal-hint fallback.
+  void testFindRunsMalformedRangeThrowsInvalidArgument() {
+    ConfigService::Instance().setString("default.instrument", "MUSR");
+    std::vector<std::filesystem::path> paths;
+    TS_ASSERT_THROWS(paths = FileFinder::Instance().findRuns("1-2-3"), const std::invalid_argument &);
   }
 
   // A non-ASCII byte in the hint string must surface as std::invalid_argument

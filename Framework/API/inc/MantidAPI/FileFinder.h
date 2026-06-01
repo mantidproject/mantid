@@ -100,6 +100,9 @@ private:
   FileFinderImpl &operator=(const FileFinderImpl &);
   /// A method that returns error messages if the provided runs are invalid
   std::string validateRuns(const std::string &searchText) const;
+  /// Decide whether a token the parser could not expand is a malformed run
+  /// range rather than a literal file hint.
+  bool isMalformedRange(const std::string &token) const;
   void prepareFileInfo(FileInfo &fileInfo, const std::vector<std::string> &extensionsProvided,
                        bool useOnlyExtensionsProvided) const;
   void processFileInfos(std::vector<FileInfo> &fileInfos, const std::vector<std::string> &extensionsProvided,

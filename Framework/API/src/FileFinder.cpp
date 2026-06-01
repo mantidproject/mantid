@@ -15,6 +15,7 @@
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/MultiFileNameParser.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 
 #include <boost/lexical_cast.hpp>
@@ -70,21 +71,18 @@ std::vector<std::string> splitOnCommaOperators(const std::string &input) {
 /// A range/list token like "CNCS10-15" or "CNCS10-15.nxs.h5" expands to one
 /// entry per run. A single-file token that already carries an extension is
 /// returned literally (the parser would otherwise apply instrument-prefix
-/// zero-padding that may not match the user's on-disk filename). Tokens the
-/// parser cannot handle (e.g. a hint with a "-add" suffix) pass through
-/// unchanged. A std::range_error from the parser (a range too large to load)
-/// is propagated so callers can surface it as std::invalid_argument.
+/// zero-padding that may not match the user's on-disk filename).
+///
+/// Any exception from the parser is propagated so the caller can decide how to
+/// handle a token the parser could not interpret: a too-large range surfaces a
+/// std::range_error, while a malformed/unrecognised token surfaces some other
+/// std::exception. The caller distinguishes a genuine literal hint (e.g. a
+/// "-add" group) from a malformed run range.
 std::vector<std::string> expandHint(const std::string &token, Mantid::Kernel::MultiFileNameParsing::Parser &parser) {
   if (token.empty())
     return {};
 
-  try {
-    parser.parse(token);
-  } catch (const std::range_error &) {
-    throw;
-  } catch (const std::exception &) {
-    return {token};
-  }
+  parser.parse(token);
 
   std::vector<std::string> expanded;
   for (const auto &group : parser.fileNames())
@@ -471,6 +469,33 @@ std::string FileFinderImpl::validateRuns(const std::string &searchText) const {
 }
 
 /**
+ * Decide whether a token the multi-file parser could not expand is a malformed
+ * run range rather than a genuine literal file hint.
+ *
+ * This mirrors the historical "fileSuspected" heuristic: a token containing a
+ * path separator or the "-add" suffix, or one carrying a file extension, is
+ * treated as a literal file and passed through unchanged. Any other token that
+ * looks like a run range (i.e. splitting on '-' yields two or more parts, e.g.
+ * "MUSR15189-n15193" or "1-2-3") but that the parser could not expand is
+ * reported as malformed, restoring the old "Malformed range of runs" diagnostic
+ * so the user can rule out a genuine file-not-found. Note this is only consulted
+ * after the parser has already rejected the token, so well-formed ranges (which
+ * the parser expands successfully) never reach here.
+ *
+ * @param token :: A single, already comma-split hint token.
+ * @return true if the token should be reported as a malformed run range.
+ */
+bool FileFinderImpl::isMalformedRange(const std::string &token) const {
+  if (token.find('/') != std::string::npos || token.find('\\') != std::string::npos ||
+      token.find(ALLOWED_SUFFIX) != std::string::npos || std::filesystem::path(token).has_extension())
+    return false;
+
+  const Kernel::StringTokenizer parts(token, "-",
+                                      Kernel::StringTokenizer::TOK_TRIM | Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return parts.count() >= 2;
+}
+
+/**
  * Find a list of files from a comma- and range-separated hint string.
  *
  * The hint is split on comma operators, then each token is expanded by the
@@ -486,10 +511,12 @@ std::string FileFinderImpl::validateRuns(const std::string &searchText) const {
  *                                     extensionsProvided; otherwise combine
  *                                     with facility extensions.
  * @return One full path per resolved file, in input order.
- * @throw std::invalid_argument if the input fails ASCII validation, or if a
- *        token expands into a range too large for the parser to load. Tokens
- *        the parser does not understand are passed through as literal hints
- *        and surface as Exception::NotFoundError if they don't exist on disk.
+ * @throw std::invalid_argument if the input fails ASCII validation, if a
+ *        token expands into a range too large for the parser to load, or if a
+ *        token looks like a malformed run range (see isMalformedRange). Tokens
+ *        the parser does not understand but that look like literal files are
+ *        passed through as literal hints and surface as Exception::NotFoundError
+ *        if they don't exist on disk.
  * @throw Exception::NotFoundError if any (literal or expanded) file cannot
  *        be found.
  */
@@ -517,6 +544,14 @@ std::vector<std::filesystem::path> FileFinderImpl::findRuns(const std::string &h
       // The parser refused this range as too large. Surface as invalid_argument
       // so callers see a validation error rather than a NotFoundError.
       throw std::invalid_argument(re.what());
+    } catch (const std::exception &) {
+      // The parser could not interpret the token. If it looks like a malformed
+      // run range, report that explicitly (so the user can rule out a genuine
+      // file-not-found); otherwise pass it through as a literal file hint to be
+      // resolved, or surfaced as a NotFoundError, downstream.
+      if (isMalformedRange(token))
+        throw std::invalid_argument("Malformed range of runs: " + token);
+      hints.push_back(token);
     }
   }
 
@@ -534,6 +569,10 @@ void FileFinderImpl::prepareFileInfo(FileInfo &fileInfo, const std::vector<std::
   const Kernel::FacilityInfo &facility = fileInfo.instr->facility();
   const std::vector<std::string> facilityExtensions = facility.extensions();
 
+  // NB: std::filesystem::path::extension() only returns the *final* extension,
+  // so a hint like "INST_123.nxs.h5" is split into filename "INST_123.nxs" and
+  // extension ".h5". This matches how such double-extension files are searched
+  // for on disk (the leading ".nxs" stays part of the stem).
   std::filesystem::path filePath(fileInfo.hint);
   const auto extension = filePath.extension();
   std::string filename = filePath.replace_extension().string();
@@ -574,6 +613,8 @@ void FileFinderImpl::prepareFileInfo(FileInfo &fileInfo, const std::vector<std::
   if (useOnlyExtensionsProvided) {
     getUniqueExtensions(extensionsProvided, fileInfo.extensionsToSearch);
   } else {
+    // Search the hint's own extension first (highest priority), then the
+    // provided and facility extensions.
     if (!extension.empty())
       fileInfo.extensionsToSearch.emplace_back(extension.string());
 
@@ -720,7 +761,8 @@ void FileFinderImpl::performCacheSearch(std::vector<FileInfo> &fileInfos) const 
       }
     }
   } else {
-    g_log.debug() << "Data cache directory not found, proceeding with the search." << "\n";
+    g_log.debug() << "Data cache directory not found, proceeding with the search."
+                  << "\n";
   }
 }
 
@@ -751,10 +793,20 @@ void FileFinderImpl::performArchiveSearch(std::vector<FileInfo> &fileInfos) cons
   if (fileInfos.empty())
     return;
 
-  if (const auto sharedArch = batchableArchive(fileInfos))
+  if (const auto sharedArch = batchableArchive(fileInfos)) {
     performBatchedArchiveSearch(fileInfos, sharedArch);
-  else
+    // The batched call may have failed outright, returned a mismatched number
+    // of paths, or only resolved some of the hints. Fall back to a per-file
+    // search for anything still unfound so a partial batch result doesn't doom
+    // files that an individual lookup could locate. Entries already found (or
+    // flagged with an error) are skipped by the per-file search.
+    const auto stillUnfound =
+        std::any_of(fileInfos.cbegin(), fileInfos.cend(), [](const auto &fi) { return !fi.found && !fi.error; });
+    if (stillUnfound)
+      performPerFileArchiveSearch(fileInfos);
+  } else {
     performPerFileArchiveSearch(fileInfos);
+  }
 }
 
 void FileFinderImpl::performBatchedArchiveSearch(std::vector<FileInfo> &fileInfos,
