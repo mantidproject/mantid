@@ -122,8 +122,8 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = std::unique_ptr<Axis>(other.m_axes[i]->clone(this));
-  m_isCommonBinsFlag.store(other.m_isCommonBinsFlag.load());
-  m_isCommonBinsFlagValid.store(other.m_isCommonBinsFlagValid.load());
+  m_isCommonBinsFlag.store(false, std::memory_order_relaxed);
+  m_isCommonBinsFlagValid.store(false, std::memory_order_relaxed);
   // TODO: Do we need to init m_monitorWorkspace?
 }
 
