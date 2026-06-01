@@ -295,8 +295,6 @@ std::vector<detid_t> Instrument::getMonitorIDs() const {
 std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
 
-  std::size_t numDetIDs = in_dets.size();
-
   if (skipMonitors) {
     const std::size_t monitors =
         std::count_if(in_dets.cbegin(), in_dets.cend(), [](const auto &in_det) { return in_det.isMonitor(); });
