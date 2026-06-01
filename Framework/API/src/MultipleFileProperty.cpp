@@ -44,14 +44,14 @@ const std::string INVALID = R"(\+\+|,,|\+,|,\+)";
 static const boost::regex REGEX_INVALID(INVALID);
 
 // Regular expressions that represent the allowed instances of , operators
-const std::string NUM_COMMA_ALPHA(R"((?<=\d)\s*,\s*(?=\D))");
-const std::string ALPHA_COMMA_ALPHA(R"((?<=\D)\s*,\s*(?=\D))");
+const std::string NUM_COMMA_ALPHA(R"((?<=\d)\s*,\s*(?=[a-zA-Z]))");
+const std::string ALPHA_COMMA_ALPHA(R"((?<=\D)\s*,\s*(?=[a-zA-Z]))");
 const std::string COMMA_OPERATORS = NUM_COMMA_ALPHA + "|" + ALPHA_COMMA_ALPHA;
 static const boost::regex REGEX_COMMA_OPERATORS(COMMA_OPERATORS);
 
 // Regular expressions that represent the allowed instances of + operators
-const std::string NUM_PLUS_ALPHA(R"((?<=\d)\s*\+\s*(?=\D))");
-const std::string ALPHA_PLUS_ALPHA(R"((?<=\D)\s*\+\s*(?=\D))");
+const std::string NUM_PLUS_ALPHA(R"((?<=\d)\s*\+\s*(?=[a-zA-Z]))");
+const std::string ALPHA_PLUS_ALPHA(R"((?<=\D)\s*\+\s*(?=[a-zA-Z]))");
 const std::string PLUS_OPERATORS = NUM_PLUS_ALPHA + "|" + ALPHA_PLUS_ALPHA;
 static const boost::regex REGEX_PLUS_OPERATORS(PLUS_OPERATORS, boost::regex_constants::perl);
 
@@ -253,6 +253,7 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
 
   for (; commaToken != end; ++commaToken) {
     const std::string commaTokenString = commaToken->str();
+    g_log.debug() << "1: commaTokenString: " << commaTokenString << "\n";
 
     // Tokenise on allowed plus operators.
     boost::sregex_token_iterator plusToken(commaTokenString.begin(), commaTokenString.end(), REGEX_PLUS_OPERATORS, -1);
@@ -267,6 +268,7 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
 
     m_parser.setTrimWhiteSpaces(autoTrim()); // keep trimming whitespaces in parser consistent with this property
     for (auto &plusTokenString : plusTokenStrings) {
+      g_log.debug() << "2: plusTokenString: " << plusTokenString << "\n";
       try {
         m_parser.parse(plusTokenString);
       } catch (const std::range_error &re) {
@@ -278,6 +280,12 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
       }
 
       std::vector<std::vector<std::string>> f = m_parser.fileNames();
+      for (const auto &f1 : f) {
+        for (const auto &f2 : f1) {
+          g_log.debug() << "f: " << f2 << "\n";
+        }
+        g_log.debug() << "f:\n";
+      }
 
       // If there are no files, then we should keep this token as it was passed
       // to the property, in its untampered form. This will enable us to deal
@@ -309,6 +317,13 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
 
     fileNames.insert(fileNames.end(), std::make_move_iterator(temp.begin()), std::make_move_iterator(temp.end()));
   }
+
+  g_log.debug() << "2: filenames " << fileNames.size() << "\n";
+  for (const auto &fileName1 : fileNames) {
+    for (const auto &fileName : fileName1)
+      g_log.debug() << ">    " << fileName << "\n";
+    g_log.debug() << ">\n";
+  };
 
   std::vector<std::vector<std::string>> allUnresolvedFileNames = fileNames;
   std::vector<std::vector<std::string>> allFullFileNames;

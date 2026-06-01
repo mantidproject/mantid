@@ -184,6 +184,7 @@ public:
     p.setValue(dummyFile("TSC1.raw"));
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
   }
 
@@ -192,6 +193,7 @@ public:
     p.setValue(dummyFile("1.raw"));
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
   }
 
@@ -200,6 +202,7 @@ public:
     p.setValue(dummyFile("TSC1"));
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
   }
 
@@ -208,6 +211,7 @@ public:
     p.setValue(dummyFile("1"));
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
   }
 
@@ -216,6 +220,7 @@ public:
     p.setValue("TSC1.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
   }
 
@@ -224,6 +229,7 @@ public:
     p.setValue("1.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
   }
 
@@ -232,6 +238,7 @@ public:
     p.setValue("TSC1");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
   }
 
@@ -240,6 +247,7 @@ public:
     p.setValue("1");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
   }
 
@@ -248,6 +256,7 @@ public:
     p.setValue("TSC001.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
   }
 
@@ -256,6 +265,7 @@ public:
     p.setValue("TSC000000000001.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
   }
 
@@ -264,6 +274,7 @@ public:
     p.setValue("TSC9999999.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC9999999.raw"));
   }
 
@@ -289,6 +300,7 @@ public:
     p.setValue("IRS10001-10005_graphite002_info.nxs");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("IRS10001-10005_graphite002_info.nxs"));
   }
 
@@ -297,6 +309,7 @@ public:
     p.setValue("bl6_flux_at_sample");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("bl6_flux_at_sample"));
   }
 
@@ -305,6 +318,7 @@ public:
     p.setValue("TSC1,2,3,4,5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 5);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[2][0]), dummyFile("TSC00003.raw"));
@@ -317,6 +331,7 @@ public:
     p.setValue("TSC1+2+3+4+5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00003.raw"));
@@ -324,11 +339,25 @@ public:
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][4]), dummyFile("TSC00005.raw"));
   }
 
+  void test_multipleFiles_shortForm_plusList_different_instrument_and_space() {
+    MultipleFileProperty p("Filename");
+    p.setValue("IRS1+2+3+4+ 5.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
+    TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("IRS00001.raw"));
+    TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("IRS00002.raw"));
+    TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("IRS00003.raw"));
+    TS_ASSERT_EQUALS(normalizePath(fileNames[0][3]), dummyFile("IRS00004.raw"));
+    TS_ASSERT_EQUALS(normalizePath(fileNames[0][4]), dummyFile("IRS00005.raw"));
+  }
+
   void test_multipleFiles_shortForm_range() {
     MultipleFileProperty p("Filename");
     p.setValue("TSC1:5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 5);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[2][0]), dummyFile("TSC00003.raw"));
@@ -341,6 +370,7 @@ public:
     p.setValue("TSC1-5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00003.raw"));
@@ -353,6 +383,7 @@ public:
     p.setValue("TSC1:5:2.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 3);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00003.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[2][0]), dummyFile("TSC00005.raw"));
@@ -363,6 +394,7 @@ public:
     p.setValue("TSC1-5:2.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00003.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00005.raw"));
@@ -373,6 +405,7 @@ public:
     p.setValue("TSC1,2:5,1+2+3,2-4.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 7);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[2][0]), dummyFile("TSC00003.raw"));
@@ -391,6 +424,7 @@ public:
     p.setValue("TSC1-2+4-5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00004.raw"));
@@ -402,6 +436,7 @@ public:
     p.setValue("TSC2+4-5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00004.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00005.raw"));
@@ -412,6 +447,7 @@ public:
     p.setValue("TSC1-2+5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00005.raw"));
@@ -422,6 +458,7 @@ public:
     p.setValue("TSC1.raw,TSC2.raw,TSC3.raw,TSC4.raw,TSC5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 5);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[2][0]), dummyFile("TSC00003.raw"));
@@ -434,6 +471,7 @@ public:
     p.setValue("TSC1.raw+TSC2.raw+TSC3.raw+TSC4.raw+TSC5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00003.raw"));
@@ -447,6 +485,7 @@ public:
                "IRS10003_graphite002_info.nxs");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 2);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("IRS10001_graphite002_info.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("IRS10002_graphite002_info.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("IRS10003_graphite002_info.nxs"));
@@ -457,6 +496,7 @@ public:
     p.setValue("TSC1,2.raw,TSC3,4,5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 5);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[2][0]), dummyFile("TSC00003.raw"));
@@ -469,6 +509,7 @@ public:
     p.setValue("TSC1,2.raw,TSC3:5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 5);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[2][0]), dummyFile("TSC00003.raw"));
@@ -485,6 +526,7 @@ public:
     p.setValue("TSC1-5:1.raw,IRS1-5:1.nxs");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 2);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00003.raw"));
@@ -503,6 +545,7 @@ public:
     p.setValue("TSC1-5:1,IRS1-5:1");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 2);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00003.raw"));
@@ -520,6 +563,7 @@ public:
     p.setValue("IRS1-5:1,TSC1-5:1.nxs");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 2);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("IRS00001.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("IRS00002.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("IRS00003.nxs"));
@@ -537,6 +581,7 @@ public:
     p.setValue("TSC1,2:5.raw,TSC1+2+3,2-4.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 7);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[2][0]), dummyFile("TSC00003.raw"));
@@ -555,6 +600,7 @@ public:
     p.setValue("TSC1,2:5.raw,IRS10001_graphite002_info.nxs,TSC1+2+3,2-4.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 8);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[2][0]), dummyFile("TSC00003.raw"));
@@ -582,6 +628,7 @@ public:
     p.setValue("TSC1+2.raw+TSC3+4.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00003.raw"));
@@ -619,6 +666,7 @@ public:
 
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 5);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00002.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[2][0]), dummyFile("TSC00003.nxs"));
@@ -632,6 +680,7 @@ public:
 
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 5);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00002.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[2][0]), dummyFile("TSC00003.nxs"));
@@ -645,6 +694,7 @@ public:
 
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 5);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00002.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[2][0]), dummyFile("TSC00003.nxs"));
@@ -657,6 +707,7 @@ public:
     p.setValue("1-5, 3-4");
     std::vector<std::vector<std::string>> fileNames = p();
 
+    TS_ASSERT_EQUALS(fileNames.size(), 2);
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00002.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00003.nxs"));
@@ -664,6 +715,26 @@ public:
     TS_ASSERT_EQUALS(normalizePath(fileNames[0][4]), dummyFile("TSC00005.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00003.nxs"));
     TS_ASSERT_EQUALS(normalizePath(fileNames[1][1]), dummyFile("TSC00004.nxs"));
+  }
+
+  void test_multipleFiles_ranges_instrument_consistent_with_spaces() {
+    g_config.setString("default.facility", "ISIS");
+    g_config.setString("default.instrument", "IRS");
+    for (auto &file_string : {"TSC1-3,3-4", "TSC1-3, 3-4"}) {
+      MultipleFileProperty p("Filename");
+      p.setValue(file_string);
+      std::vector<std::vector<std::string>> fileNames = p();
+
+      TS_ASSERT_EQUALS(fileNames.size(), 2);
+      TS_ASSERT_EQUALS(normalizePath(fileNames[0][0]), dummyFile("TSC00001.nxs"));
+      TS_ASSERT_EQUALS(normalizePath(fileNames[0][1]), dummyFile("TSC00002.nxs"));
+      TS_ASSERT_EQUALS(normalizePath(fileNames[0][2]), dummyFile("TSC00003.nxs"));
+      TS_ASSERT_EQUALS(normalizePath(fileNames[1][0]), dummyFile("TSC00003.nxs"));
+      TS_ASSERT_EQUALS(normalizePath(fileNames[1][1]), dummyFile("TSC00004.nxs"));
+    }
+
+    g_config.setString("default.facility", "ISIS");
+    g_config.setString("default.instrument", "TOSCA");
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////
