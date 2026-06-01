@@ -407,7 +407,7 @@ float MatrixWorkspace::getMarkerSize() const { return m_marker_size; }
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
   for (size_t j = 0; j < getNumberHistograms(); ++j) {
-    auto &spec = getSpectrum(j);
+    auto &spec = getSpectrumWithoutInvalidation(j);
     try {
       if (map.indexIsSpecNumber())
         spec.setDetectorIDs(map.getDetectorIDsForSpectrumNo(spec.getSpectrumNo()));
@@ -448,7 +448,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors, const sp
       const auto specNo = specnum_t(index + specNumOffset);
 
       if (index < NUM_HIST) {
-        auto &spec = getSpectrum(index);
+        auto &spec = getSpectrumWithoutInvalidation(index);
         spec.setSpectrumNo(specNo);
         spec.setDetectorID(detId);
       }
@@ -1068,7 +1068,7 @@ void MatrixWorkspace::setDistribution(bool newValue) {
   HistogramData::Histogram::YMode ymode =
       newValue ? HistogramData::Histogram::YMode::Frequencies : HistogramData::Histogram::YMode::Counts;
   for (size_t i = 0; i < getNumberHistograms(); ++i)
-    getSpectrum(i).setYMode(ymode);
+    getSpectrumWithoutInvalidation(i).setYMode(ymode);
 }
 
 /**
@@ -2168,7 +2168,7 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
   std::atomic<ErrorCode> errorValue(ErrorCode::None);
 #pragma omp parallel for
   for (int64_t i = 0; i < indexInfoSize; ++i) {
-    auto &spec = getSpectrum(i);
+    auto &spec = getSpectrumWithoutInvalidation(i);
     // Prevent setting flags that require spectrum definition updates
     spec.setMatrixWorkspace(nullptr, i);
     spec.setSpectrumNo(static_cast<specnum_t>(m_indexInfo->spectrumNumber(i)));
