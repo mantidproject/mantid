@@ -6,10 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/EstimateScatteringVolumeCentreOfMass.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
@@ -148,6 +150,53 @@ public:
     TS_ASSERT_DELTA(result.X(), 0.0, 0.00001);
     TS_ASSERT_DELTA(result.Y(), 0.0, 0.00001);
     TS_ASSERT_DELTA(result.Z(), 0.0, 0.00001);
+  }
+  void testGoniometerRotatedGaugeClipsSampleCorrectly() {
+    // Regression test for the gauge-volume / goniometer composition bug.
+    //
+    // Previously the algorithm rotated the gauge volume into the sample frame via R.inv() and
+    // rasterised it there. For a non-axis-aligned rotation that inflated the gauge's
+    // axis-aligned bounding box and silently admitted voxels that lay outside the actual
+    // (rotated) gauge - whenever the sample asymmetrically intersected the inflated bbox the
+    // resulting COM was wrong by a factor that depended on the geometry. The fix rasterises
+    // the gauge in its own (lab) frame and only transforms candidate voxels into the sample
+    // frame to test sample inclusion.
+    //
+    // Setup: sample cuboid centred at (0, 0.02, 0) with half-widths 0.02 (occupies 0<y<0.04
+    // in the workspace's sample frame); gauge cube of full extent 0.02 at origin; goniometer
+    // R = Rx(45 deg). In the lab frame the sample's y=0 face becomes the half-plane y+z=0;
+    // the gauge cube |y|,|z|<0.01 is cut by y+z>=0 into a right triangle with vertices
+    // (0.01, -0.01), (-0.01, 0.01), (0.01, 0.01). Centroid in (y, z) is (0.01/3, 0.01/3); X
+    // is unaffected by the rotation so it averages to 0 over the cube's x-extent.
+    MatrixWorkspace_sptr testWS = createTestWorkspace();
+    IObject_sptr shape_sptr =
+        ComponentCreationHelper::createCuboid(0.02, 0.02, 0.02, V3D(0.0, 0.02, 0.0), "asymmSample");
+    testWS->mutableSample().setShape(shape_sptr);
+    const std::string gaugeXML = " \
+        <cuboid id='gv'> \
+        <height val='0.02' /> \
+        <width val='0.02' /> \
+        <depth val='0.02' /> \
+        <centre x='0.0' y='0.0' z='0.0' /> \
+        </cuboid> \
+        <algebra val='gv' /> \
+        ";
+    testWS->mutableRun().addProperty("GaugeVolume", gaugeXML);
+    Mantid::Geometry::Goniometer gonio;
+    gonio.pushAxis("phi", 1.0, 0.0, 0.0, 45.0, 1);
+    testWS->mutableRun().setGoniometer(gonio, false);
+
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass centerOfMass;
+    centerOfMass.initialize();
+    centerOfMass.setProperty("InputWorkspace", testWS);
+    centerOfMass.setProperty("ElementSize", 0.5); // 0.5mm cubes, ~40 slices across the gauge
+    TS_ASSERT_THROWS_NOTHING(centerOfMass.execute());
+    TS_ASSERT(centerOfMass.isExecuted());
+    std::vector<double> resultVec = centerOfMass.getProperty("CentreOfMass");
+    V3D result(resultVec[0], resultVec[1], resultVec[2]);
+    TS_ASSERT_DELTA(result.X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(result.Y(), 0.01 / 3.0, 0.0002);
+    TS_ASSERT_DELTA(result.Z(), 0.01 / 3.0, 0.0002);
   }
   void testBadElementUnitsThrowsError() {
     // Create a test workspace with cylinder sample
