@@ -244,6 +244,17 @@ void ComponentInfo::setRotation(const size_t componentIndex, const Kernel::Quat 
 
 const IObject &ComponentInfo::shape(const size_t componentIndex) const { return *(*m_shapes)[componentIndex]; }
 
+std::unordered_map<std::shared_ptr<const IObject>, std::vector<size_t>> ComponentInfo::shapeToComponentIndices() const {
+  std::unordered_map<std::shared_ptr<const IObject>, std::vector<size_t>> result;
+  const auto &shapes = *m_shapes;
+  for (size_t i = 0; i < shapes.size(); ++i) {
+    const auto &currentShape = shapes[i];
+    if (currentShape != nullptr && currentShape->hasValidShape())
+      result[currentShape].emplace_back(i);
+  }
+  return result;
+}
+
 Kernel::V3D ComponentInfo::scaleFactor(const size_t componentIndex) const {
   return Kernel::toV3D(m_componentInfo->scaleFactor(componentIndex));
 }

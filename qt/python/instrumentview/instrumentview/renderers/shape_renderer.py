@@ -75,26 +75,23 @@ class ShapeRenderer(InstrumentRenderer):
         det_info = self._workspace.detectorInfo()
         n_det = det_info.size()
 
-        shape_cache: dict[int, tuple[np.ndarray, np.ndarray]] = {}
-        det_shape_keys = np.empty(n_det, dtype=np.int64)
-        det_rotations = Rotation.from_quat(det_info.allRotations()).as_matrix()
-        det_scales = det_info.allScaleFactors()
-        all_positions = det_info.allPositions()
+        shape_cache: dict[int, tuple[np.ndarray, np.ndarray, int]] = {}
+        # 0 is reserved for the fallback shape (no valid shape).
+        det_shape_keys = np.zeros(n_det, dtype=np.int64)
+        shape_cache[0] = _make_fallback_shape()
 
-        for i in range(n_det):
-            # Shape — hash the XML string for fast deduplication
-            if not comp_info.hasValidShape(i):
-                det_shape_keys[i] = 0
-                if 0 not in shape_cache:
-                    shape_cache[0] = _make_fallback_shape()
+        # The returned indices cover all components; we only care about
+        # detector indices (0 .. n_det-1).
+        shape_map = comp_info.shapeToComponentIndices()
+        for xml, component_indices in shape_map.items():
+            det_indices = np.asarray(component_indices, dtype=np.int64)
+            det_indices = det_indices[det_indices < n_det]
+            if len(det_indices) == 0:
                 continue
 
-            shape_obj = comp_info.shape(i)
-            xml = shape_obj.getShapeXML()
             key = hash(xml)
-            det_shape_keys[i] = key
-
             if key not in shape_cache:
+                shape_obj = comp_info.shape(int(det_indices[0]))
                 try:
                     si = shape_obj.shapeInfo()
                     shape_type = si.shape()
@@ -129,13 +126,18 @@ class ShapeRenderer(InstrumentRenderer):
                             shape_cache[key] = (verts, faces, 3)
                 except Exception:
                     shape_cache[key] = _make_fallback_shape()
-                    logger.information(f"ShapeRenderer: failed to get mesh for shape for detector {i}, using fallback")
+                    logger.information("ShapeRenderer: failed to get mesh for shape, using fallback")
+
+            # Assign key to all detectors sharing this shape in one vectorised step.
+            det_shape_keys[det_indices] = key
+
+        # Detectors remaining at key=0 have no valid CSG shape; the fallback is already set.
 
         self._shape_cache = shape_cache
         self._det_shape_keys = det_shape_keys
-        self._det_rotations = det_rotations
-        self._det_scales = det_scales
-        self._all_positions_3d = all_positions
+        self._det_rotations = Rotation.from_quat(det_info.allRotations()).as_matrix()
+        self._det_scales = det_info.allScaleFactors()
+        self._all_positions_3d = det_info.allPositions()
         self._beam_axis = get_beam_axis(self._workspace)
         self._precomputed = True
         logger.information(f"ShapeRenderer: precomputed {n_det} detectors, {len(shape_cache)} unique shapes")
