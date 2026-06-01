@@ -75,6 +75,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.create_workspace_table()
         self.hide_axis_columns()
 
+        self.make_box_toggleable(self.grpLoadShape, self.set_load_shape_visible, initial_state=True)
         self.make_box_toggleable(self.initOrientation, self.set_init_rotations_visible)
         self.make_box_toggleable(self.initPosition, self.set_init_position_visible)
         self.make_box_toggleable(self.grpDirectionWidgets, self.set_sample_directions_visible)
@@ -515,6 +516,11 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         if slot:
             slot(initial_state)
             box.toggled.connect(slot)
+
+    def set_load_shape_visible(self, vis):
+        # only toggle our own widgets; FileFinderWidget has internally-hidden children
+        for w in (self.finder_stl, self.btnSTL, self.label_or, self.finder_xml, self.btnXML):
+            w.setVisible(vis)
 
     def set_init_rotations_visible(self, vis):
         self.set_box_children_visible(self.initOrientation, vis)
