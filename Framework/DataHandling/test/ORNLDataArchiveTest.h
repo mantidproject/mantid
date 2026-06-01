@@ -132,4 +132,144 @@ public:
     std::shared_ptr<IArchiveSearch> arch = ArchiveSearchFactory::Instance().create("ORNLDataSearch");
     TS_ASSERT(arch);
   }
+
+  void testGetArchivePathsPreservesInputOrderAndMissingRuns() {
+    ORNLDataArchive arch;
+
+    const auto generateRunsUrl = [](const std::string &facility, const std::string &instrument,
+                                    const std::string &runsCsv) {
+      return std::string("https://oncat.ornl.gov/api/datafiles"
+                         "?facility=") +
+             facility + "&instrument=" + instrument +
+             "&projection=location"
+             "&tags=type/raw"
+             "&sort_by=run_number"
+             "&sort_direction=ASCENDING"
+             "&ranges_q=indexed.run_number:" +
+             runsCsv;
+    };
+
+    auto mockAPI = make_mock_oncat_api(
+        {{generateRunsUrl("HFIR", "HB2C", "7001,7000,9999"),
+          {InternetHelper::HTTPStatus::OK, "["
+                                           "  {"
+                                           "    \"location\": \"/HFIR/HB2C/IPTS-7776/nexus/HB2C_7000.nxs.h5\","
+                                           "    \"id\": \"id-7000\","
+                                           "    \"type\": \"datafile\""
+                                           "  },"
+                                           "  {"
+                                           "    \"location\": \"/HFIR/HB2C/IPTS-7776/nexus/HB2C_7001.nxs.h5\","
+                                           "    \"id\": \"id-7001\","
+                                           "    \"type\": \"datafile\""
+                                           "  }"
+                                           "]"}}});
+
+    auto oncat = make_oncat_with_mock_api(mockAPI);
+    arch.setONCat(std::move(oncat));
+
+    const auto result = arch.getArchivePaths({"HB2C_7001", "HB2C_7000", "HB2C_9999"});
+    TS_ASSERT(result);
+    TS_ASSERT_EQUALS(result.result().size(), 3);
+    TS_ASSERT_EQUALS(result.result()[0].filename().string(), "HB2C_7001.nxs.h5");
+    TS_ASSERT_EQUALS(result.result()[1].filename().string(), "HB2C_7000.nxs.h5");
+    TS_ASSERT(result.result()[2].empty());
+
+    TS_ASSERT(mockAPI->allResponsesCalled());
+  }
+
+  void testGetArchivePathsSupportsDuplicateHints() {
+    ORNLDataArchive arch;
+
+    const auto generateRunsUrl = [](const std::string &facility, const std::string &instrument,
+                                    const std::string &runsCsv) {
+      return std::string("https://oncat.ornl.gov/api/datafiles"
+                         "?facility=") +
+             facility + "&instrument=" + instrument +
+             "&projection=location"
+             "&tags=type/raw"
+             "&sort_by=run_number"
+             "&sort_direction=ASCENDING"
+             "&ranges_q=indexed.run_number:" +
+             runsCsv;
+    };
+
+    auto mockAPI = make_mock_oncat_api(
+        {{generateRunsUrl("HFIR", "HB2C", "7001,7001,7000"),
+          {InternetHelper::HTTPStatus::OK, "["
+                                           "  {"
+                                           "    \"location\": \"/HFIR/HB2C/IPTS-7776/nexus/HB2C_7000.nxs.h5\","
+                                           "    \"id\": \"id-7000\","
+                                           "    \"type\": \"datafile\""
+                                           "  },"
+                                           "  {"
+                                           "    \"location\": \"/HFIR/HB2C/IPTS-7776/nexus/HB2C_7001.nxs.h5\","
+                                           "    \"id\": \"id-7001\","
+                                           "    \"type\": \"datafile\""
+                                           "  }"
+                                           "]"}}});
+
+    auto oncat = make_oncat_with_mock_api(mockAPI);
+    arch.setONCat(std::move(oncat));
+
+    const auto result = arch.getArchivePaths({"HB2C_7001", "HB2C_7001", "HB2C_7000"});
+    TS_ASSERT(result);
+    TS_ASSERT_EQUALS(result.result().size(), 3);
+    TS_ASSERT_EQUALS(result.result()[0].filename().string(), "HB2C_7001.nxs.h5");
+    TS_ASSERT_EQUALS(result.result()[1].filename().string(), "HB2C_7001.nxs.h5");
+    TS_ASSERT_EQUALS(result.result()[2].filename().string(), "HB2C_7000.nxs.h5");
+
+    TS_ASSERT(mockAPI->allResponsesCalled());
+  }
+
+  void testGetArchivePathsRejectsMixedInstruments() {
+    ORNLDataArchive arch;
+
+    const auto result = arch.getArchivePaths({"HB2C_7001", "CNCS_7860"});
+    TS_ASSERT(!result);
+    TS_ASSERT_EQUALS(result.errors(), "Not found.");
+    TS_ASSERT_EQUALS(result.result().size(), 2);
+    TS_ASSERT(result.result()[0].empty());
+    TS_ASSERT(result.result()[1].empty());
+  }
+
+  void testGetArchivePathsReturnsPlaceholdersWhenAllRunsAreMissing() {
+    ORNLDataArchive arch;
+
+    const auto generateRunsUrl = [](const std::string &facility, const std::string &instrument,
+                                    const std::string &runsCsv) {
+      return std::string("https://oncat.ornl.gov/api/datafiles"
+                         "?facility=") +
+             facility + "&instrument=" + instrument +
+             "&projection=location"
+             "&tags=type/raw"
+             "&sort_by=run_number"
+             "&sort_direction=ASCENDING"
+             "&ranges_q=indexed.run_number:" +
+             runsCsv;
+    };
+
+    auto mockAPI =
+        make_mock_oncat_api({{generateRunsUrl("HFIR", "HB2C", "9998,9999"), {InternetHelper::HTTPStatus::OK, "[]"}}});
+
+    auto oncat = make_oncat_with_mock_api(mockAPI);
+    arch.setONCat(std::move(oncat));
+
+    const auto result = arch.getArchivePaths({"HB2C_9998", "HB2C_9999"});
+    TS_ASSERT(result);
+    TS_ASSERT_EQUALS(result.result().size(), 2);
+    TS_ASSERT(result.result()[0].empty());
+    TS_ASSERT(result.result()[1].empty());
+
+    TS_ASSERT(mockAPI->allResponsesCalled());
+  }
+
+  // Empty input should be treated as a successful no-op (matching
+  // FileFinder::findRuns(vector)) rather than a "Not found." failure.
+  void testGetArchivePathsEmptyInputIsSuccess() {
+    ORNLDataArchive arch;
+    const auto result = arch.getArchivePaths({});
+    TS_ASSERT(result);
+    TS_ASSERT_EQUALS(result.errors(), "");
+    TS_ASSERT(result.result().empty());
+  }
 };

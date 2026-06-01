@@ -13,11 +13,11 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Strings.h"
 
-#include <numeric>
-#include <sstream>
-
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
+
+#include <numeric>
+#include <regex>
+#include <sstream>
 #include <utility>
 
 namespace Mantid::Kernel::MultiFileNameParsing {
@@ -137,16 +137,27 @@ bool ReverseCaselessCompare::operator()(const std::string &a, const std::string 
 /// Constructor.
 Parser::Parser()
     : m_runs(), m_fileNames(), m_multiFileName(), m_dirString(), m_instString(), m_underscoreString(), m_runString(),
-      m_extString(), m_validInstNames(), m_trimWhiteSpaces(true) {
+      m_extString(), m_validInstNames(), m_compoundLeadExtensions(), m_trimWhiteSpaces(true) {
   const ConfigServiceImpl &config = ConfigService::Instance();
 
   const auto facilities = config.getFacilities();
   for (const auto facility : facilities) {
-    const std::vector<InstrumentInfo> instruments = facility->instruments();
-
-    for (const auto &instrument : instruments) {
+    for (const auto &instrument : facility->instruments()) {
       m_validInstNames.insert(instrument.name());
       m_validInstNames.insert(instrument.shortName());
+    }
+
+    // Derive compound-extension leads from FileExtensions. For a two-component
+    // entry like ".nxs.h5" the lead is ".nxs"; the parser uses this set in
+    // split() to keep the inner extension out of the file stem. Entries with
+    // a single dot (e.g. ".nxs", "_event.nxs") or more than two dots are
+    // skipped — the parser only models two-component compounds.
+    for (const auto &ext : facility->extensions()) {
+      if (std::count(ext.cbegin(), ext.cend(), '.') != 2)
+        continue;
+      auto lead = ext.substr(0, ext.find_last_of('.'));
+      if (!lead.empty() && lead.front() == '.')
+        m_compoundLeadExtensions.insert(std::move(lead));
     }
   }
 }
@@ -272,15 +283,27 @@ void Parser::split() {
                               m_multiFileName.begin(), m_multiFileName.end(), isspace),
                           m_multiFileName.end());
   }
-  // Get the extension, if there is one.
-  const size_t lastDot = m_multiFileName.find_last_of('.');
-  if (lastDot != std::string::npos)
-    m_extString = m_multiFileName.substr(lastDot);
-
   // Get the directory, if there is one.
   const size_t lastSeparator = m_multiFileName.find_last_of("/\\");
   if (lastSeparator != std::string::npos)
     m_dirString = m_multiFileName.substr(0, lastSeparator + 1);
+
+  // Get the extension. Compound extensions like ".nxs.h5" are kept whole when
+  // the leading half (".nxs") matches a known compound lead derived from the
+  // facility FileExtensions in Facilities.xml. Otherwise just the final dot's
+  // suffix is taken. This avoids misidentifying stems that contain dots
+  // (e.g. "run.v2.nxs") as compound-extension files.
+  const size_t lastDot = m_multiFileName.find_last_of('.');
+  if (lastDot != std::string::npos && lastDot > m_dirString.size()) {
+    const size_t prevDot = m_multiFileName.find_last_of('.', lastDot - 1);
+    if (prevDot != std::string::npos && prevDot >= m_dirString.size()) {
+      const auto midExt = m_multiFileName.substr(prevDot, lastDot - prevDot);
+      if (m_compoundLeadExtensions.contains(midExt))
+        m_extString = m_multiFileName.substr(prevDot);
+    }
+    if (m_extString.empty())
+      m_extString = m_multiFileName.substr(lastDot);
+  }
 
   // If the directory contains an instance of a comma, then the string is
   // a comma separated list of single *full* file names to load.
@@ -625,14 +648,9 @@ void validateToken(const std::string &token) {
  * @returns true if the string matches fully, or false otherwise.
  */
 bool matchesFully(const std::string &stringToMatch, const std::string &regexString, const bool caseless) {
-  boost::regex regex;
-
-  if (caseless)
-    regex = boost::regex("^(" + regexString + "$)", boost::regex::icase);
-  else
-    regex = boost::regex("^(" + regexString + "$)");
-
-  return boost::regex_match(stringToMatch, regex);
+  const auto flags = caseless ? std::regex::ECMAScript | std::regex::icase : std::regex::ECMAScript;
+  const std::regex regex("^(" + regexString + "$)", flags);
+  return std::regex_match(stringToMatch, regex);
 }
 
 /**
@@ -645,16 +663,11 @@ bool matchesFully(const std::string &stringToMatch, const std::string &regexStri
  * @returns the part (if any) of the given string that matches the given regex
  */
 std::string getMatchingString(const std::string &regexString, const std::string &toParse, const bool caseless) {
-  boost::regex regex;
-  if (caseless) {
-    regex = boost::regex(regexString, boost::regex::icase);
-  } else {
-    regex = boost::regex(regexString);
-  }
+  const auto flags = caseless ? std::regex::ECMAScript | std::regex::icase : std::regex::ECMAScript;
+  const std::regex regex(regexString, flags);
 
-  boost::sregex_iterator it(toParse.begin(), toParse.end(), regex);
-
-  if (it == boost::sregex_iterator())
+  std::sregex_iterator it(toParse.begin(), toParse.end(), regex);
+  if (it == std::sregex_iterator())
     return "";
 
   return it->str();

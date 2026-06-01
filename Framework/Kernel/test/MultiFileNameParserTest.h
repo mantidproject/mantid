@@ -458,33 +458,33 @@ public:
   void test_complexFileNameString_SNS() {
     Parser parser;
 
-    parser.parse("CNCS10-15, 30:40:2, 50+51+52.nxs");
+    parser.parse("CNCS10-15, 30:40:2, 50+51+52.nxs.h5");
 
     TS_ASSERT_EQUALS(parser.dirString(), "");
     TS_ASSERT_EQUALS(parser.instString(), "CNCS");
     TS_ASSERT_EQUALS(parser.underscoreString(), "");
     TS_ASSERT_EQUALS(parser.runString(), "10-15,30:40:2,50+51+52");
-    TS_ASSERT_EQUALS(parser.extString(), ".nxs");
+    TS_ASSERT_EQUALS(parser.extString(), ".nxs.h5");
 
     std::vector<std::vector<std::string>> filenames = parser.fileNames();
 
-    TS_ASSERT_EQUALS(filenames[0][0], "CNCS_10.nxs");
-    TS_ASSERT_EQUALS(filenames[0][1], "CNCS_11.nxs");
-    TS_ASSERT_EQUALS(filenames[0][2], "CNCS_12.nxs");
-    TS_ASSERT_EQUALS(filenames[0][3], "CNCS_13.nxs");
-    TS_ASSERT_EQUALS(filenames[0][4], "CNCS_14.nxs");
-    TS_ASSERT_EQUALS(filenames[0][5], "CNCS_15.nxs");
+    TS_ASSERT_EQUALS(filenames[0][0], "CNCS_10.nxs.h5");
+    TS_ASSERT_EQUALS(filenames[0][1], "CNCS_11.nxs.h5");
+    TS_ASSERT_EQUALS(filenames[0][2], "CNCS_12.nxs.h5");
+    TS_ASSERT_EQUALS(filenames[0][3], "CNCS_13.nxs.h5");
+    TS_ASSERT_EQUALS(filenames[0][4], "CNCS_14.nxs.h5");
+    TS_ASSERT_EQUALS(filenames[0][5], "CNCS_15.nxs.h5");
 
-    TS_ASSERT_EQUALS(filenames[1][0], "CNCS_30.nxs");
-    TS_ASSERT_EQUALS(filenames[2][0], "CNCS_32.nxs");
-    TS_ASSERT_EQUALS(filenames[3][0], "CNCS_34.nxs");
-    TS_ASSERT_EQUALS(filenames[4][0], "CNCS_36.nxs");
-    TS_ASSERT_EQUALS(filenames[5][0], "CNCS_38.nxs");
-    TS_ASSERT_EQUALS(filenames[6][0], "CNCS_40.nxs");
+    TS_ASSERT_EQUALS(filenames[1][0], "CNCS_30.nxs.h5");
+    TS_ASSERT_EQUALS(filenames[2][0], "CNCS_32.nxs.h5");
+    TS_ASSERT_EQUALS(filenames[3][0], "CNCS_34.nxs.h5");
+    TS_ASSERT_EQUALS(filenames[4][0], "CNCS_36.nxs.h5");
+    TS_ASSERT_EQUALS(filenames[5][0], "CNCS_38.nxs.h5");
+    TS_ASSERT_EQUALS(filenames[6][0], "CNCS_40.nxs.h5");
 
-    TS_ASSERT_EQUALS(filenames[7][0], "CNCS_50.nxs");
-    TS_ASSERT_EQUALS(filenames[7][1], "CNCS_51.nxs");
-    TS_ASSERT_EQUALS(filenames[7][2], "CNCS_52.nxs");
+    TS_ASSERT_EQUALS(filenames[7][0], "CNCS_50.nxs.h5");
+    TS_ASSERT_EQUALS(filenames[7][1], "CNCS_51.nxs.h5");
+    TS_ASSERT_EQUALS(filenames[7][2], "CNCS_52.nxs.h5");
   }
 
   void test_instrument_with_multiple_padding() {
@@ -499,5 +499,40 @@ public:
     TS_ASSERT_EQUALS(filenames[1][0], "TESTHISTOLISTENER00000299");
     TS_ASSERT_EQUALS(filenames[1][1], "TST00000000300");
     TS_ASSERT_EQUALS(filenames[1][2], "TST00000000301");
+  }
+
+  // The compound-extension lead set is derived from each facility's
+  // FileExtensions in Facilities.xml. HFIR and SNS both list ".nxs.h5", so
+  // ".nxs" should be recognised as a compound lead and ".nxs.h5" kept whole
+  // rather than split as ".h5".
+  void test_compoundExtensionFromFacility() {
+    Parser parser;
+    parser.parse("CNCS123.nxs.h5");
+    TS_ASSERT_EQUALS(parser.extString(), ".nxs.h5");
+    TS_ASSERT_EQUALS(parser.runString(), "123");
+  }
+
+  // A range token with a compound extension should expand to one filename
+  // per run, all keeping the compound extension intact. ":" produces one
+  // group per run (as opposed to "-" which produces a single summed group).
+  void test_compoundExtensionRangeExpands() {
+    Parser parser;
+    parser.parse("CNCS100:102.nxs.h5");
+    TS_ASSERT_EQUALS(parser.extString(), ".nxs.h5");
+    const auto names = parser.fileNames();
+    TS_ASSERT_EQUALS(names.size(), 3);
+    TS_ASSERT_EQUALS(names[0][0], "CNCS_100.nxs.h5");
+    TS_ASSERT_EQUALS(names[1][0], "CNCS_101.nxs.h5");
+    TS_ASSERT_EQUALS(names[2][0], "CNCS_102.nxs.h5");
+  }
+
+  // Conversely a leading segment that is NOT a known compound lead (e.g.
+  // ".v2") must not be glued onto the trailing extension. Here ".nxs" is the
+  // extension and "CNCS_123.v2" becomes the stem (which will then fail run-
+  // number parsing — we only need extString to be correctly identified).
+  void test_extensionStemWithDot_notTreatedAsCompound() {
+    Parser parser;
+    TS_ASSERT_THROWS_ANYTHING(parser.parse("CNCS_123.v2.nxs"));
+    TS_ASSERT_EQUALS(parser.extString(), ".nxs");
   }
 };

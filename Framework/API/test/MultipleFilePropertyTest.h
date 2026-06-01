@@ -726,6 +726,23 @@ public:
     TS_ASSERT(p.isValid().empty());
   }
 
+  // Pass an empty string. The early-return guard in setValueAsMultipleFiles must
+  // succeed silently rather than fall through to file resolution (which
+  // would surface a NotFoundError with an empty hint name).
+  void test_setValueEmpty_returnsSuccess_forOptional() {
+    MultipleFileProperty p("Filename", FileProperty::OptionalLoad);
+    const std::string result = p.setValue("");
+    TS_ASSERT_EQUALS(result, "");
+    TS_ASSERT(p().empty());
+  }
+
+  void test_setValueEmpty_returnsError_forRequiredLoad() {
+    MultipleFileProperty p("Filename", FileProperty::Load);
+    const std::string result = p.setValue("");
+    TS_ASSERT_DIFFERS(result, "");
+    TS_ASSERT(result.find("No file(s) specified.") != std::string::npos);
+  }
+
 private:
   //////////////////////////////////////////////////////////////////////////////////////////////
   // Private helper functions.
