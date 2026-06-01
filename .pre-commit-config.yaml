@@ -56,7 +56,7 @@ repos:
     rev: v6.2.5
     hooks:
       - id: rstcheck
-        additional_dependencies: [sphinx, "rstcheck-core<1.3"]
+        additional_dependencies: [sphinx]
         args: ["--config", ".rstcheck.project.cfg"]
         exclude: |
           (?x)^(
@@ -76,7 +76,7 @@ repos:
         - mdformat-ruff # ruff format code snippets
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.13
+    rev: v0.15.14
     # ruff must appear before black in the list of hooks
     hooks:
       - id: ruff-check
