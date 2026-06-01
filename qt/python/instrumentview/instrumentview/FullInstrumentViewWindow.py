@@ -118,11 +118,29 @@ class NoWheelComboBox(QComboBox):
         event.ignore()
 
 
-@run_on_qapp_thread()
 class FullInstrumentViewWindow(QMainWindow):
     """View for the Instrument View window. Contains the 3D view, the projection view, boxes showing information about the selected
     detector, and a line plot of selected detector(s)"""
 
+    def __init__(self, parent=None, off_screen=False):
+        """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
+        e.g. in a script."""
+        super(FullInstrumentViewWindow, self).__init__(parent)
+        self.setWindowTitle("Instrument View")
+        self._instrument_view_widget = FullInstrumentViewView(self, off_screen)
+        self.setCentralWidget(self._instrument_view_widget)
+
+    def get_instrument_view_widget(self) -> "FullInstrumentViewView":
+        return self._instrument_view_widget
+
+    def closeEvent(self, QCloseEvent: QEvent) -> None:
+        """When closing, make sure to close the plotters and figure correctly to prevent errors"""
+        super().closeEvent(QCloseEvent)
+        self.get_instrument_view_widget().close_view()
+
+
+@run_on_qapp_thread()
+class FullInstrumentViewView(QWidget):
     _detector_spectrum_fig = None
     _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRatio"
     _DRAW_SHAPES_SETTING_STRING = "InstrumentView.DrawShapes"
@@ -130,20 +148,14 @@ class FullInstrumentViewWindow(QMainWindow):
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     def __init__(self, parent=None, off_screen=False):
-        """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
-        e.g. in a script."""
 
         pv.global_theme.background = "black"
         pv.global_theme.font.color = "white"
 
-        super(FullInstrumentViewWindow, self).__init__(parent)
-        self.setWindowTitle("Instrument View")
+        super().__init__(parent)
         self._off_screen = off_screen
-
-        central_widget = QWidget(self)
-        self.setCentralWidget(central_widget)
         tab_widget = QTabWidget()
-        parent_horizontal_layout = QHBoxLayout(central_widget)
+        parent_horizontal_layout = QHBoxLayout(self)
 
         pyvista_vertical_widget = QWidget()
         left_column_widget = QWidget()
@@ -426,6 +438,23 @@ class FullInstrumentViewWindow(QMainWindow):
         self._last_parallel_scale = None
 
         UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
+
+    def close_view(self) -> None:
+        """Closes view, not window"""
+        self._closing = True
+        with suppress(TypeError):
+            self._contour_range_max_edit.disconnect()
+            self._contour_range_min_edit.disconnect()
+            self._integration_limit_max_edit.disconnect()
+            self._integration_limit_min_edit.disconnect()
+        # Shut down any callbacks before closing the plotter and the figure
+        if hasattr(self, "_presenter") and self._presenter is not None:
+            self._presenter.handle_close()
+        self.main_plotter.close()
+
+    def close_window(self) -> None:
+        # NOTE: Triggers window close, which in turn calls close_view()
+        self.window().close()
 
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
@@ -864,20 +893,6 @@ class FullInstrumentViewWindow(QMainWindow):
             return
 
         self.main_plotter.scalar_bars[self._presenter._counts_label].SetTitle(display_title)
-
-    def closeEvent(self, QCloseEvent: QEvent) -> None:
-        """When closing, make sure to close the plotters and figure correctly to prevent errors"""
-        self._closing = True
-        super().closeEvent(QCloseEvent)
-        with suppress(TypeError):
-            self._contour_range_max_edit.disconnect()
-            self._contour_range_min_edit.disconnect()
-            self._integration_limit_max_edit.disconnect()
-            self._integration_limit_min_edit.disconnect()
-        # Shut down any callbacks before closing the plotter and the figure
-        if hasattr(self, "_presenter") and self._presenter is not None:
-            self._presenter.handle_close()
-        self.main_plotter.close()
 
     def set_projection_combo_options(self, default_index: int, options: list[str]) -> None:
         self._projection_combo_box.addItems(options)

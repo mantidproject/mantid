@@ -304,10 +304,10 @@ class WorkspaceWidget(PluginWidget):
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             if ws.getInstrument().getName():
                 try:
-                    view = FullInstrumentViewWindow(parent=parent, off_screen=off_screen)
-                    view.show()
+                    window = FullInstrumentViewWindow(parent=parent, off_screen=off_screen)
+                    window.show()
                     model = FullInstrumentViewModel(ws)
-                    FullInstrumentViewPresenter(view, model)
+                    FullInstrumentViewPresenter(window.get_instrument_view_widget(), model)
                     logger.warning(
                         "This Instrument View interface is available for testing purposes and evaluation, but is still "
                         "under active development. There may be bugs, and several features from the older Instrument View "

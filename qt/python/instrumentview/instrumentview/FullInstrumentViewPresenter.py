@@ -17,7 +17,7 @@ from mantid.simpleapi import AnalysisDataService
 from mantid.dataobjects import MaskWorkspace, GroupingWorkspace, PeaksWorkspace
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
-from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.ComponentTreeModel import ComponentTreeModel
 from instrumentview.ComponentTreePresenter import ComponentTreePresenter
@@ -57,7 +57,7 @@ class FullInstrumentViewPresenter:
     _XML_FILE_FILTER = "XML files (*xml)"
     _CAL_FILE_FILTER = "CAL files (*cal)"
 
-    def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
+    def __init__(self, view: FullInstrumentViewView, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
         self._view = view
@@ -525,7 +525,7 @@ class FullInstrumentViewPresenter:
 
     def _delete_workspace_callback(self, ws_name):
         if self._model.workspace.name() == ws_name:
-            self._view.close()
+            self._view.close_window()
             logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
         else:
             self._reload_everything()
@@ -546,7 +546,7 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._rename_workspace_callback, (ws_old_name, ws_new_name)))
 
     def clear_workspace_callback(self):
-        self._view.close()
+        self._view.close_window()
 
     def _replace_workspace_callback(self, ws_name, ws):
         if isinstance(ws, PeaksWorkspace):
@@ -585,6 +585,8 @@ class FullInstrumentViewPresenter:
             del self._ads_observer
         if hasattr(self, "_callback_queue"):
             self._callback_queue.put(self._callback_stop_sentinel)
+
+        print("Reached close presenter")
 
     def on_sliders_unit_selected(self, value) -> None:
         self._model.set_integration_units(self._UNIT_OPTIONS[value])
