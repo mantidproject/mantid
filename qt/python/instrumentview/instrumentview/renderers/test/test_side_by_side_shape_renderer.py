@@ -371,6 +371,9 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         det_info.position.side_effect = self._make_position_side_effect(n_detectors)
         det_info.indexOf.side_effect = lambda did: int(did)
         det_info.detectorIDs.return_value = list(range(n_detectors))
+        det_info.allPositions.return_value = np.array([[float(i), 0.0, 0.0] for i in range(n_detectors)])
+        det_info.allRotations.return_value = np.array([Rotation.identity().as_quat() for _ in range(n_detectors)])
+        det_info.allScaleFactors.return_value = np.array([[1.0, 1.0, 1.0] for _ in range(n_detectors)])
 
         comp_info = MagicMock()
         comp_info.hasValidShape.return_value = True
