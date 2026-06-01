@@ -20,7 +20,6 @@ surface can be translated back to a logical detector index.
 import numpy as np
 import pyvista as pv
 from pyvistaqt import BackgroundPlotter
-import re
 from scipy.spatial.transform import Rotation
 from typing import Callable, Optional
 from vtkmodules.vtkRenderingCore import vtkCellPicker
@@ -29,6 +28,7 @@ from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.renderers.base_renderer import InstrumentRenderer
 from instrumentview.ComponentSelectionUtils import get_beam_axis, reflect_points_in_axis
+from mantid.geometry import GeometryShape
 from mantid.kernel import logger
 
 
@@ -96,24 +96,36 @@ class ShapeRenderer(InstrumentRenderer):
 
             if key not in shape_cache:
                 try:
-                    raw_mesh = shape_obj.getMesh()  # (N_tri, 3, 3)
-                    if raw_mesh.size == 0:
-                        shape_cache[key] = _make_fallback_shape()
-                    else:
-                        verts, faces = _triangles_to_verts_faces(raw_mesh)
-                        if self._use_optimised_shapes and _is_cuboid_xml(xml):
-                            quad = _try_extract_rect_quad(verts)
-                            if quad is not None:
-                                shape_cache[key] = (quad[0], quad[1], 4)
-                            else:
-                                shape_cache[key] = (verts, faces, 3)
-                        elif self._use_optimised_shapes and _is_cylinder_xml(xml):
-                            quad = _extract_quad_from_cylinder_xml(xml)
-                            if quad is not None:
-                                shape_cache[key] = (quad[0], quad[1], 4)
-                            else:
-                                shape_cache[key] = (verts, faces, 3)
+                    si = shape_obj.shapeInfo()
+                    shape_type = si.shape()
+                    if self._use_optimised_shapes and shape_type == GeometryShape.CYLINDER:
+                        quad = _extract_quad_from_cylinder_shapeinfo(si)
+                        if quad is not None:
+                            shape_cache[key] = (quad[0], quad[1], 4)
                         else:
+                            raw_mesh = shape_obj.getMesh()
+                            if raw_mesh.size == 0:
+                                shape_cache[key] = _make_fallback_shape()
+                            else:
+                                verts, faces = _triangles_to_verts_faces(raw_mesh)
+                                shape_cache[key] = (verts, faces, 3)
+                    elif self._use_optimised_shapes and shape_type == GeometryShape.CUBOID:
+                        quad = _extract_quad_from_cuboid_shapeinfo(si)
+                        if quad is not None:
+                            shape_cache[key] = (quad[0], quad[1], 4)
+                        else:
+                            raw_mesh = shape_obj.getMesh()
+                            if raw_mesh.size == 0:
+                                shape_cache[key] = _make_fallback_shape()
+                            else:
+                                verts, faces = _triangles_to_verts_faces(raw_mesh)
+                                shape_cache[key] = (verts, faces, 3)
+                    else:
+                        raw_mesh = shape_obj.getMesh()
+                        if raw_mesh.size == 0:
+                            shape_cache[key] = _make_fallback_shape()
+                        else:
+                            verts, faces = _triangles_to_verts_faces(raw_mesh)
                             shape_cache[key] = (verts, faces, 3)
                 except Exception:
                     shape_cache[key] = _make_fallback_shape()
@@ -505,17 +517,7 @@ def _make_fallback_shape() -> tuple[np.ndarray, np.ndarray, int]:
     return verts, faces, 3
 
 
-def _is_cuboid_xml(xml: str) -> bool:
-    """Return ``True`` if the shape XML describes a cuboid."""
-    return bool(re.search(r"<(?:\w+:)?cuboid[\s>]", xml))
-
-
-def _is_cylinder_xml(xml: str) -> bool:
-    """Return ``True`` if the shape XML describes a cylinder."""
-    return bool(re.search(r"<(?:\w+:)?cylinder[\s>]", xml))
-
-
-def _extract_quad_from_cylinder_xml(xml: str) -> tuple[np.ndarray, np.ndarray] | None:
+def _extract_quad_from_cylinder_shapeinfo(si) -> tuple[np.ndarray, np.ndarray] | None:
     """Extract a 4-vertex quad approximating the face of a cylindrical detector.
 
     The quad has width ``2 * radius`` (across the cylinder) and height equal to
@@ -526,79 +528,22 @@ def _extract_quad_from_cylinder_xml(xml: str) -> tuple[np.ndarray, np.ndarray] |
     The per-detector rotation applied during mesh assembly then maps that local
     direction to the correct sample-facing orientation in the global frame.
 
-    Handles optional XML namespace prefixes and both Cartesian (``x y z``) and
-    spherical (``r t p``) specifications for ``centre-of-bottom-base``.
-
-    Returns ``None`` on parse failure so the caller falls back to the full mesh.
+    Returns ``None`` on failure so the caller falls back to the full mesh.
     """
-
-    def _parse_val(local_name: str) -> float | None:
-        m = re.search(r"<(?:\w+:)?" + re.escape(local_name) + r"[^>]+>", xml, re.IGNORECASE)
-        if m is None:
-            return None
-        v = re.search(r'\bval\s*=\s*["\']([^"\']+)["\']', m.group(0))
-        if v is None:
-            return None
-        try:
-            return float(v.group(1))
-        except ValueError:
-            return None
-
-    def _parse_axis() -> np.ndarray | None:
-        m = re.search(r"<(?:\w+:)?axis[^>]+>", xml, re.IGNORECASE)
-        if m is None:
-            return None
-        tag = m.group(0)
-        try:
-            x = float(re.search(r'\bx\s*=\s*["\']([^"\']+)["\']', tag).group(1))
-            y = float(re.search(r'\by\s*=\s*["\']([^"\']+)["\']', tag).group(1))
-            z = float(re.search(r'\bz\s*=\s*["\']([^"\']+)["\']', tag).group(1))
-        except (AttributeError, ValueError):
-            return None
-        return np.array([x, y, z], dtype=np.float64)
-
-    def _parse_bottom_base() -> np.ndarray:
-        m = re.search(r"<(?:\w+:)?centre-of-bottom-base[^>]+>", xml, re.IGNORECASE)
-        if m is None:
-            return np.zeros(3)
-        tag = m.group(0)
-        # Try Cartesian (x, y, z) first
-        mx = re.search(r'\bx\s*=\s*["\']([^"\']+)["\']', tag)
-        my = re.search(r'\by\s*=\s*["\']([^"\']+)["\']', tag)
-        mz = re.search(r'\bz\s*=\s*["\']([^"\']+)["\']', tag)
-        if mx and my and mz:
-            try:
-                return np.array([float(mx.group(1)), float(my.group(1)), float(mz.group(1))], dtype=np.float64)
-            except ValueError:
-                pass
-        # Fall back to spherical (p=azimuthal deg, r=radius, t=polar deg from Z)
-        mp = re.search(r'\bp\s*=\s*["\']([^"\']+)["\']', tag)
-        mr = re.search(r'\br\s*=\s*["\']([^"\']+)["\']', tag)
-        mt = re.search(r'\bt\s*=\s*["\']([^"\']+)["\']', tag)
-        if mp and mr and mt:
-            try:
-                r = float(mr.group(1))
-                t = np.radians(float(mt.group(1)))
-                p = np.radians(float(mp.group(1)))
-                return np.array([r * np.sin(t) * np.cos(p), r * np.sin(t) * np.sin(p), r * np.cos(t)], dtype=np.float64)
-            except ValueError:
-                pass
-        return np.zeros(3)
-
-    axis_raw = _parse_axis()
-    if axis_raw is None:
+    try:
+        cg = si.cylinderGeometry()
+        bottom_base = np.array([cg["centreOfBottomBase"].X(), cg["centreOfBottomBase"].Y(), cg["centreOfBottomBase"].Z()])
+        axis_raw = np.array([cg["axis"].X(), cg["axis"].Y(), cg["axis"].Z()])
+        radius = cg["radius"]
+        height = cg["height"]
+    except Exception:
         return None
+
     axis_norm = np.linalg.norm(axis_raw)
     if axis_norm < 1e-12:
         return None
     a_hat = axis_raw / axis_norm
 
-    radius = _parse_val("radius")
-    height = _parse_val("height")
-    if radius is None or height is None:
-        return None
-
-    bottom_base = _parse_bottom_base()
     cylinder_centre = bottom_base + a_hat * (height / 2.0)
 
     # Local "toward sample" convention: (0, 0, -1).
@@ -634,34 +579,44 @@ def _extract_quad_from_cylinder_xml(xml: str) -> tuple[np.ndarray, np.ndarray] |
     return quad_verts, quad_faces
 
 
-def _try_extract_rect_quad(verts: np.ndarray) -> tuple[np.ndarray, np.ndarray] | None:
-    """Extract a compact 4-vertex, 1-quad-face representation from cuboid vertices.
+def _extract_quad_from_cuboid_shapeinfo(si) -> tuple[np.ndarray, np.ndarray] | None:
+    """Extract a compact 4-vertex, 1-quad-face representation from cuboid ShapeInfo.
 
     Places four corners in the local XY plane (the detector face plane) at the
-    mid-depth Z coordinate.  Mantid cuboids always define width along local X,
-    height along local Y, and depth along local Z, so Z is used as the depth
-    axis unconditionally rather than relying on the minimum bounding-box extent
-    (which fails for cube-shaped detectors where all extents are equal).
+    mid-depth Z coordinate, derived directly from the ShapeInfo corner points
+    rather than from a triangulated mesh.
 
-    Returns ``None`` when *verts* has insufficient extent to form a valid quad.
-    Detection of whether the shape is a cuboid should be done separately via
-    :func:`_is_cuboid_xml` before calling this function.
+    The Mantid cuboid convention stores corners as:
+    ``leftFrontBottom`` (x_min, y_min, z_front),
+    ``leftFrontTop`` (x_min, y_max, z_front),
+    ``leftBackBottom`` (x_min, y_min, z_back),
+    ``rightFrontBottom`` (x_max, y_min, z_front).
+
+    Returns ``None`` when the corners have insufficient extent to form a valid quad.
     """
-    if len(verts) < 4:
-        return None
-    bbox_min = verts.min(axis=0)
-    bbox_max = verts.max(axis=0)
-    if np.max(bbox_max - bbox_min) < 1e-12:
+    try:
+        cg = si.cuboidGeometry()
+        lfb = cg["leftFrontBottom"]
+        lft = cg["leftFrontTop"]
+        lbb = cg["leftBackBottom"]
+        rfb = cg["rightFrontBottom"]
+    except Exception:
         return None
 
-    # Mantid cuboids: width in local X, height in local Y, depth in local Z.
-    mid_z = (bbox_min[2] + bbox_max[2]) * 0.5
+    x_min, x_max = lfb.X(), rfb.X()
+    y_min, y_max = lfb.Y(), lft.Y()
+    z_front, z_back = lfb.Z(), lbb.Z()
+
+    if abs(x_max - x_min) < 1e-12 and abs(y_max - y_min) < 1e-12:
+        return None
+
+    mid_z = (z_front + z_back) * 0.5
     quad_verts = np.array(
         [
-            [bbox_min[0], bbox_min[1], mid_z],
-            [bbox_max[0], bbox_min[1], mid_z],
-            [bbox_max[0], bbox_max[1], mid_z],
-            [bbox_min[0], bbox_max[1], mid_z],
+            [x_min, y_min, mid_z],
+            [x_max, y_min, mid_z],
+            [x_max, y_max, mid_z],
+            [x_min, y_max, mid_z],
         ],
         dtype=np.float64,
     )
