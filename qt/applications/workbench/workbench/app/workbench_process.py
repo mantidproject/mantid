@@ -177,7 +177,7 @@ def create_and_launch_workbench(app, command_line_options):
                 AboutPresenter(main_window).show()
 
         # lift-off!
-        exit_value = app.exec_()
+        exit_value = app.exec()
     except BaseException:
         # We count this as a crash
         import traceback

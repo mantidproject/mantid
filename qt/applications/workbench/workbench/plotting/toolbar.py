@@ -157,7 +157,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
         printer.setOrientation(QtPrintSupport.QPrinter.Landscape)
         print_dlg = QtPrintSupport.QPrintDialog(printer)
-        if print_dlg.exec_() == QtWidgets.QDialog.Accepted:
+        if print_dlg.exec() == QtWidgets.QDialog.Accepted:
             painter = QtGui.QPainter(printer)
             page_size = printer.pageRect()
             pixmap = self.canvas.grab().scaled(page_size.width(), page_size.height(), QtCore.Qt.KeepAspectRatio)

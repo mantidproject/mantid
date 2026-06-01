@@ -68,7 +68,7 @@ class ModalTester(object):
             self._qapp.exit(0)
         if self.widget is not None:
             if hasattr(self.widget, "exec_"):
-                self.widget.exec_()
+                self.widget.exec()
             else:
                 self.widget.show()
 
@@ -101,4 +101,4 @@ class ModalTester(object):
         # This calls __call__() method
         QTimer.singleShot(0, self)
         # Start the event loop
-        self._qapp.exec_()
+        self._qapp.exec()

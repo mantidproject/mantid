@@ -29,4 +29,4 @@ if Shiver is not None:
     s = Shiver()
     s.show()
     if not within_mantid:
-        sys.exit(app.exec_())
+        sys.exit(app.exec())

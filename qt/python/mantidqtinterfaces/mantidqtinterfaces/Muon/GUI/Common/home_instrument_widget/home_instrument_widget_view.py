@@ -155,7 +155,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         msg.setText("Changing instrument will reset the interface, continue?")
         msg.setWindowTitle("Changing Instrument")
         msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
-        retval = msg.exec_()
+        retval = msg.exec()
         if retval == 1024:
             # The "OK" code
             return 1

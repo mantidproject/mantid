@@ -33,6 +33,6 @@ app_dir = os.path.dirname(__file__)
 view.show()
 if not within_mantid:
     app.setWindowIcon(QtGui.QIcon(f"{app_dir}/dns_powder_tof/dns_icon.png"))
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 else:
     app.setWindowIcon(QtGui.QIcon(":/images/MantidIcon.ico"))

@@ -516,4 +516,4 @@ class RunSetupWidget(BaseWidget):
                 self.ui = load_ui(__file__, "../../../ui/diffraction/diffraction_info.ui", baseinstance=self)
 
         dialog = HelpDialog(self)
-        dialog.exec_()
+        dialog.exec()

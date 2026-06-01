@@ -726,7 +726,7 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.setDefaultButton(QMessageBox.Ok)
         msg.setEscapeButton(QMessageBox.Ok)
-        msg.exec_()
+        msg.exec()
 
     def display_save_file_box(self, title, default_path, file_filter):
         filename = QFileDialog.getSaveFileName(self, title, default_path, filter=file_filter)

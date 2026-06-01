@@ -18,4 +18,4 @@
 # window = ColorbarWidget()
 # window.set_mappable(ax)
 # window.show()
-# app.exec_()
+# app.exec()

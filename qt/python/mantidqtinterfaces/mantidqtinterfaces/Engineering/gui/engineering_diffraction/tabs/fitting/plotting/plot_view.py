@@ -91,7 +91,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         if event.button == event.canvas.buttond.get(Qt.RightButton):
             menu = QMenu()
             self.fit_browser.add_to_menu(menu)
-            menu.exec_(QCursor.pos())
+            menu.exec(QCursor.pos())
 
     def resizeEvent(self, QResizeEvent):
         self.update_axes_position()

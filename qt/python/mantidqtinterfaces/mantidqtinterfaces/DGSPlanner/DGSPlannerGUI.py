@@ -504,4 +504,4 @@ if __name__ == "__main__":
     orl = mantid.geometry.OrientedLattice(2, 3, 4, 90, 90, 90)
     mainForm = DGSPlannerGUI()
     mainForm.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
