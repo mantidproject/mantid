@@ -11,12 +11,12 @@ from Engineering.common.calibration_info import CalibrationInfo
 from Engineering.common.instrument_config import get_instr_config, SUPPORTED_INSTRUMENTS
 from Engineering.texture.texture_helper import project_orientation, vec_string_to_norm_array
 
-from mantidqtinterfaces.TexturePlanner.absorption import AbsorptionCalculator
-from mantidqtinterfaces.TexturePlanner.detector_geometry import DetectorGeometry
-from mantidqtinterfaces.TexturePlanner.exporter import OrientationExporter
-from mantidqtinterfaces.TexturePlanner.orientation_table import OrientationTable
-from mantidqtinterfaces.TexturePlanner.plotter import TexturePlotter
-from mantidqtinterfaces.TexturePlanner.workspace_manager import WorkspaceManager
+from mantidqtinterfaces.TexturePlanner.helpers.absorption import AbsorptionCalculator
+from mantidqtinterfaces.TexturePlanner.helpers.detector_geometry import DetectorGeometry
+from mantidqtinterfaces.TexturePlanner.helpers.exporter import OrientationExporter
+from mantidqtinterfaces.TexturePlanner.helpers.orientation_table import OrientationTable
+from mantidqtinterfaces.TexturePlanner.helpers.plotter import TexturePlotter
+from mantidqtinterfaces.TexturePlanner.helpers.workspace_manager import WorkspaceManager
 
 
 class TexturePlannerModel(object):
