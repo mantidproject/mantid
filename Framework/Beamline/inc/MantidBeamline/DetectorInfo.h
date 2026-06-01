@@ -91,6 +91,10 @@ public:
    */
   friend class ComponentInfo;
 
+  /// Maps a logical detector index to its compact array offset, skipping virtual pixel ranges.
+  /// Only valid for non-virtual indices.
+  size_t compactDetectorIndex(size_t index) const noexcept;
+
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
   void checkNoTimeDependence() const;
@@ -119,16 +123,10 @@ inline size_t DetectorInfo::size() const {
 inline bool DetectorInfo::isScanning() const {
   if (!m_positions)
     return false;
-  return size() != m_positions->size();
-}
-
-/** Returns the position of the detector with given detector index.
- *
- * Convenience method for beamlines with static (non-moving) detectors.
- * Throws if there are time-dependent detectors. */
-inline const Eigen::Vector3d &DetectorInfo::position(const size_t index) const {
-  checkNoTimeDependence();
-  return (*m_positions)[index];
+  // Scanning instruments hold N * T positions (T scan points, T > 1).
+  // Compact virtual-bank instruments hold N_real < N_total positions.
+  // Only the scanning case has *more* positions than total detectors.
+  return m_positions->size() > size();
 }
 
 /// Returns the position of the detector with given index.
@@ -150,16 +148,7 @@ inline const Eigen::Quaterniond &DetectorInfo::rotation(const std::pair<size_t, 
   return (*m_rotations)[linearIndex(index)];
 }
 
-/** Set the position of the detector with given detector index.
- *
- * Convenience method for beamlines with static (non-moving) detectors.
- * Throws if there are time-dependent detectors. */
-inline void DetectorInfo::setPosition(const size_t index, const Eigen::Vector3d &position) {
-  checkNoTimeDependence();
-  m_positions.access()[index] = position;
-}
-
-/// Set the position of the detector with given index.
+/// Set the position of the detector with given index (scanning pair overload).
 inline void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &position) {
   m_positions.access()[linearIndex(index)] = position;
 }

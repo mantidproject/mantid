@@ -159,7 +159,7 @@ int const &pixelsXYZ(char const order, GridDetector const *const me) {
   case 'z':
     return me->zpixels();
   default:
-    throw std::runtime_error("Not a dimensional label: " + std::to_string(order));
+    throw std::runtime_error(std::string("Not a dimensional label: ") + order);
   }
 }
 } // namespace

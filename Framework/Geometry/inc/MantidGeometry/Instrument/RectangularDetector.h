@@ -68,8 +68,8 @@ public:
 
   bool inBoundsXY(int x, int y) const;
 
-  // This should inherit the getBoundingBox implementation from  CompAssembly but
-  // the multiple inheritance seems to confuse it so we'll explicityly tell it that here
+  // This should inherit the getBoundingBox implementation from CompAssembly but
+  // the multiple inheritance seems to confuse it so we'll explicitly tell it that here
   using CompAssembly::getBoundingBox;
 
   void testIntersectionWithChildren(Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const override;
