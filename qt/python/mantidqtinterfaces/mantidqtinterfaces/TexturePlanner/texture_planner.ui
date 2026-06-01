@@ -24,13 +24,18 @@
        <number>8</number>
       </property>
       <item>
-       <widget class="QGroupBox" name="grpSampleShape">
-        <property name="title">
-         <string>Sample Setup</string>
-        </property>
-        <layout class="QVBoxLayout" name="laySampleShape">
+       <widget class="QTabWidget" name="tabSetup">
+        <widget class="QWidget" name="tabSample">
+         <attribute name="title">
+          <string>Sample Setup</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="laySampleShape">
          <item>
-          <layout class="QVBoxLayout">
+          <widget class="QGroupBox" name="grpLoadShape">
+           <property name="title">
+            <string>Load Sample Shape</string>
+           </property>
+          <layout class="QVBoxLayout" name="layLoadShape">
            <item>
                <layout class="QHBoxLayout">
                    <item>
@@ -79,6 +84,7 @@
 
 
           </layout>
+          </widget>
          </item>
             <item>
               <widget class="QGroupBox" name="initOrientation">
@@ -162,7 +168,7 @@
     <property name="sizeHint" stdset="0">
      <size>
       <width>40</width>
-      <height>20</height>
+      <height>0</height>
      </size>
     </property>
    </spacer>
@@ -191,7 +197,7 @@
     <property name="sizeHint" stdset="0">
      <size>
       <width>40</width>
-      <height>20</height>
+      <height>0</height>
      </size>
     </property>
    </spacer>
@@ -476,7 +482,7 @@
              <property name="sizeHint" stdset="0">
               <size>
                <width>40</width>
-               <height>20</height>
+               <height>0</height>
               </size>
              </property>
             </spacer>
@@ -496,7 +502,7 @@
              <property name="sizeHint" stdset="0">
               <size>
                <width>40</width>
-               <height>20</height>
+               <height>0</height>
               </size>
              </property>
             </spacer>
@@ -507,14 +513,25 @@
         </layout>
        </widget>
       </item>
+      <item>
+       <spacer name="spSampleStretch">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
         </layout>
        </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="grpExperimentalSetup">
-        <property name="title">
-         <string>Experimental Setup</string>
-        </property>
+        <widget class="QWidget" name="tabExperiment">
+         <attribute name="title">
+          <string>Experimental Setup</string>
+         </attribute>
         <layout class="QVBoxLayout" name="layExperimentalSetup">
          <item>
           <layout class="QHBoxLayout" name="laySampleGroupRow">
@@ -713,8 +730,23 @@
          </item>
          <item>
           <widget class="QScrollArea" name="scrollAxes">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>500</height>
+            </size>
+           </property>
            <property name="widgetResizable">
             <bool>true</bool>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAsNeeded</enum>
            </property>
            <widget class="QWidget" name="scrollAxesContents">
             <property name="geometry">
@@ -1087,7 +1119,21 @@
         </layout>
        </widget>
       </item>
+      <item>
+       <spacer name="spExperimentStretch">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
         </layout>
+       </widget>
        </widget>
       </item>
      </layout>
