@@ -92,8 +92,8 @@ public:
   friend class ComponentInfo;
 
   /// Maps a logical detector index to its compact array offset, skipping virtual pixel ranges.
-  /// Only valid for non-virtual indices.
-  size_t compactDetectorIndex(size_t index) const noexcept;
+  /// Only valid for non-virtual indices. Identity for non-virtual-bank instruments.
+  size_t compactDetectorIndex(size_t index) const noexcept { return index; }
 
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
@@ -123,10 +123,16 @@ inline size_t DetectorInfo::size() const {
 inline bool DetectorInfo::isScanning() const {
   if (!m_positions)
     return false;
-  // Scanning instruments hold N * T positions (T scan points, T > 1).
-  // Compact virtual-bank instruments hold N_real < N_total positions.
-  // Only the scanning case has *more* positions than total detectors.
-  return m_positions->size() > size();
+  return size() != m_positions->size();
+}
+
+/** Returns the position of the detector with given detector index.
+ *
+ * Convenience method for beamlines with static (non-moving) detectors.
+ * Throws if there are time-dependent detectors. */
+inline const Eigen::Vector3d &DetectorInfo::position(const size_t index) const {
+  checkNoTimeDependence();
+  return (*m_positions)[index];
 }
 
 /// Returns the position of the detector with given index.
@@ -146,6 +152,15 @@ inline const Eigen::Quaterniond &DetectorInfo::rotation(const size_t index) cons
 /// Returns the rotation of the detector with given index.
 inline const Eigen::Quaterniond &DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
   return (*m_rotations)[linearIndex(index)];
+}
+
+/** Set the position of the detector with given detector index.
+ *
+ * Convenience method for beamlines with static (non-moving) detectors.
+ * Throws if there are time-dependent detectors. */
+inline void DetectorInfo::setPosition(const size_t index, const Eigen::Vector3d &position) {
+  checkNoTimeDependence();
+  m_positions.access()[index] = position;
 }
 
 /// Set the position of the detector with given index (scanning pair overload).
