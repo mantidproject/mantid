@@ -9,19 +9,13 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 PolarizationCorrections::PolarizationCorrections(PolarizationCorrectionType correctionType,
                                                  std::optional<std::string> workspace,
-                                                 std::string const &fredrikzeSpinStateOrder)
-    : m_correctionType(correctionType), m_workspace(workspace), m_fredrikzeSpinStateOrder(fredrikzeSpinStateOrder) {}
+                                                 std::string const &inputSpinStateOrder)
+    : m_correctionType(correctionType), m_workspace(workspace), m_inputSpinStateOrder(inputSpinStateOrder) {}
 
 PolarizationCorrectionType PolarizationCorrections::correctionType() const { return m_correctionType; }
 
 std::optional<std::string> PolarizationCorrections::workspace() const { return m_workspace; }
 
-std::string const &PolarizationCorrections::fredrikzeSpinStateOrder() const { return m_fredrikzeSpinStateOrder; }
+std::string const &PolarizationCorrections::inputSpinStateOrder() const { return m_inputSpinStateOrder; }
 
-bool operator!=(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs) { return !(lhs == rhs); }
-
-bool operator==(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs) {
-  return lhs.correctionType() == rhs.correctionType() && lhs.workspace() == rhs.workspace() &&
-         lhs.fredrikzeSpinStateOrder() == rhs.fredrikzeSpinStateOrder();
-}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

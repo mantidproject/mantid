@@ -83,8 +83,7 @@ private:
                      map[QString("polCorrEfficienciesWsSelector")].toString());
     TS_ASSERT_EQUALS(gui->m_polCorrEfficienciesLineEdit->text(),
                      map[QString("polCorrEfficienciesLineEdit")].toString());
-    TS_ASSERT_EQUALS(gui->m_ui.polCorrFredrikzeSpinStateEdit->text(),
-                     map[QString("polCorrFredrikzeSpinStateEdit")].toString());
+    TS_ASSERT_EQUALS(gui->m_ui.polCorrSpinStateEdit->text(), map[QString("polCorrSpinStateEdit")].toString());
     TS_ASSERT_EQUALS(gui->m_ui.floodCorComboBox->currentIndex(), map[QString("floodCorComboBox")].toInt());
     TS_ASSERT_EQUALS(gui->m_floodCorrWsSelector->currentText(), map[QString("floodWorkspaceWsSelector")].toString());
     TS_ASSERT_EQUALS(gui->m_floodCorrLineEdit->text(), map[QString("floodWorkspaceFilePath")].toString());
@@ -331,7 +330,7 @@ public:
     declareProperty("ScaleRHSWorkspace", "");
     declareProperty("PolarizationAnalysis", "");
     declareProperty("PolarizationEfficiencies", "");
-    declareProperty("FredrikzePolarizationSpinStateOrder", "");
+    declareProperty("PolarizationCorrectionInputSpinStateOrder", "");
     declareProperty("ReductionType", "");
     declareProperty("SummationType", "");
     declareProperty("IncludePartialBins", "");

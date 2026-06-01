@@ -48,20 +48,17 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections {
 public:
   explicit PolarizationCorrections(PolarizationCorrectionType correctionType,
                                    std::optional<std::string> workspace = std::nullopt,
-                                   std::string const &fredrikzeSpinStateOrder = "");
+                                   std::string const &inputSpinStateOrder = "");
 
   PolarizationCorrectionType correctionType() const;
   std::optional<std::string> workspace() const;
-  std::string const &fredrikzeSpinStateOrder() const;
+  std::string const &inputSpinStateOrder() const;
 
 private:
   PolarizationCorrectionType m_correctionType;
   std::optional<std::string> m_workspace;
-  std::string m_fredrikzeSpinStateOrder;
+  std::string m_inputSpinStateOrder;
 };
-
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

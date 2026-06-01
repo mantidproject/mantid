@@ -724,7 +724,7 @@
       </widget>
      </item>
      <item row="13" column="2">
-      <widget class="QLabel" name="polCorrFredrikzeSpinStateLabel">
+      <widget class="QLabel" name="polCorrSpinStateLabel">
        <property name="minimumSize">
         <size>
          <width>117</width>
@@ -732,12 +732,12 @@
         </size>
        </property>
        <property name="text">
-        <string>Fredrikze Input SpinState Order</string>
+        <string>Input Flipper/SpinState Order</string>
        </property>
       </widget>
      </item>
      <item row="13" column="3">
-      <widget class="QLineEdit" name="polCorrFredrikzeSpinStateEdit">
+      <widget class="QLineEdit" name="polCorrSpinStateEdit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>

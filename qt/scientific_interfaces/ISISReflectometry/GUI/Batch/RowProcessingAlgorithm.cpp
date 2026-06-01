@@ -111,9 +111,9 @@ void updatePolarizationCorrectionProperties(AlgorithmRuntimeProps &properties,
   // Use the supplied workspace.
   if (corrections.correctionType() == PolarizationCorrectionType::Workspace) {
     AlgorithmProperties::update("PolarizationEfficiencies", corrections.workspace(), properties);
-    AlgorithmProperties::update("FredrikzePolarizationSpinStateOrder", corrections.fredrikzeSpinStateOrder(),
-                                properties);
   }
+  AlgorithmProperties::update("PolarizationCorrectionInputSpinStateOrder", corrections.inputSpinStateOrder(),
+                              properties);
 }
 
 void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties, FloodCorrections const &corrections) {
