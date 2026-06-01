@@ -1,0 +1,1 @@
+- ENGIN-X data collected in Event Mode no longer throws exceptions upon focusing.

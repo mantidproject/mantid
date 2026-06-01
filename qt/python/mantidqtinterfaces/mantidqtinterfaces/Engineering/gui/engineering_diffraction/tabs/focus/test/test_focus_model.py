@@ -38,6 +38,7 @@ class FocusModelTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
+    @patch(enggutils_path + ".ADS")
     @patch(enggutils_path + ".mantid.DeleteWorkspace")
     @patch(enggutils_path + ".mantid.ConvertUnits")
     @patch(enggutils_path + "._save_output_files")
@@ -60,6 +61,7 @@ class FocusModelTest(unittest.TestCase):
         mock_save_out,
         mock_conv_units,
         mock_del_ws,
+        mock_ads,
     ):
         mock_proc_van.return_value = ("van_ws_foc", "123456")
         mock_load_run.return_value = MagicMock()
@@ -67,6 +69,7 @@ class FocusModelTest(unittest.TestCase):
         sample_foc_ws.name.return_value = "foc_name"
         mock_conv_units.return_value = sample_foc_ws  # last alg called before ws name appended to plotting list
         mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
+        mock_ads.doesExist.return_value = True
 
         # plotting focused runs
         self.model.focus_run(["305761"], plot_output=True, rb_num=None, calibration=self.calibration)
