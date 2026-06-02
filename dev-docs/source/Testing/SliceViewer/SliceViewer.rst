@@ -285,8 +285,8 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 
 4. Open the cut tool and check that:
 
-    - Disabled ROI tool
-    - Disabled line plots
+    - Toggle lineplot is off
+    - Toggle region selection is off
     - Sliceviewer should look like
 
 .. figure:: ../../images/SliceViewer/CutViewer_HKplane.png
