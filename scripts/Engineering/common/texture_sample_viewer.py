@@ -35,14 +35,21 @@ def get_xml_mesh(xml: str) -> np.ndarray:
 
 
 def get_scaled_intrinsic_sample_directions_in_lab_frame(
-    ax_transform: np.ndarray, rotation_matrix: np.ndarray, sample_mesh: np.ndarray, scale: float = 1.2
+    ax_transform: np.ndarray,
+    rotation_matrix: np.ndarray,
+    sample_mesh: np.ndarray,
+    scale: float = 1.2,
+    scat_centre: np.ndarray = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Sequence[float]]:
+    if scat_centre is None:
+        scat_centre = np.zeros(3)
     # apply the rotation matrix to the axes
     rotated_ax_transform = rotation_matrix @ ax_transform
     # transform the mesh vertices into new axes frame
     rot_vert = get_mesh_vertices_in_intrinsic_sample_axes(rotated_ax_transform, sample_mesh)
-    # find the furthest vertex projected along each axis
-    arrow_lens = rot_vert.max(axis=0) * scale
+    # find the furthest vertex projected along each axis, measured from the arrow origin (scat_centre)
+    scat_centre_intrinsic = rotated_ax_transform.T @ np.asarray(scat_centre)
+    arrow_lens = (rot_vert - scat_centre_intrinsic).max(axis=0) * scale
     rd = rotated_ax_transform[:, 0]
     nd = rotated_ax_transform[:, 1]
     td = rotated_ax_transform[:, 2]

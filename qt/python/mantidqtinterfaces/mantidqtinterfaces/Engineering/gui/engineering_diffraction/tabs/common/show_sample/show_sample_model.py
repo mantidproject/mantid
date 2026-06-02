@@ -57,7 +57,9 @@ class ShowSampleModel(object):
 
         rotation_matrix = ws.getRun().getGoniometer().getR() if fix_axes_to_sample else np.eye(3)
         sample_mesh = ws.sample().getShape().getMesh()
-        rd, nd, td, arrow_lens = get_scaled_intrinsic_sample_directions_in_lab_frame(ax_transform, rotation_matrix, sample_mesh, scale=1.2)
+        rd, nd, td, arrow_lens = get_scaled_intrinsic_sample_directions_in_lab_frame(
+            ax_transform, rotation_matrix, sample_mesh, scale=1.2, scat_centre=scat_centre
+        )
         s_rd, s_nd, s_td = rd * arrow_lens[0], nd * arrow_lens[1], td * arrow_lens[2]
         ax.quiver(*scat_centre, *s_rd, color="red", length=arrow_lens[0], normalize=True, arrow_length_ratio=0.05)
         ax.quiver(*scat_centre, *s_nd, color="green", length=arrow_lens[1], normalize=True, arrow_length_ratio=0.05)
