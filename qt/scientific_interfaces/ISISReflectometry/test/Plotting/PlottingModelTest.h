@@ -17,6 +17,7 @@
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <limits>
 #include <optional>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
@@ -119,6 +120,26 @@ public:
     assertXValue("__isis_refl_align_IvsQ_12345_raw_sub_bg", 96.0, 96);
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_fitted_peak"));
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_peak_centre"));
+  }
+
+  void testAlignmentCreatesRawProfileWorkspaceWhenGaussianFitFails() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createAlignmentInputWorkspace("raw_input_name", "12345",
+                                  std::vector<double>(644, std::numeric_limits<double>::quiet_NaN()));
+    createTOFGroup({"raw_input_name"});
+    auto model = PlottingModel{};
+    auto const workspaces = workspaceSelections({"IvsQ_12345"});
+
+    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputOptions());
+
+    TS_ASSERT_EQUALS(workspacesForPlotting.size(), 1);
+    TS_ASSERT_EQUALS(workspacesForPlotting[0], "__isis_refl_align_IvsQ_12345");
+    auto group = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(
+        "__isis_refl_align_IvsQ_12345");
+    TS_ASSERT_EQUALS(group->size(), 1);
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_raw_sub_bg"));
+    TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_fitted_peak"));
+    TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_peak_centre"));
   }
 
   void testAlignmentCreatesOnePlotWorkspaceGroupPerSelectedWorkspace() {
