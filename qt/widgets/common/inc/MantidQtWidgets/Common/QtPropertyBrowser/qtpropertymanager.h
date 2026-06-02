@@ -91,9 +91,7 @@
 
 #include <utility>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 class QDate;
 class QTime;
@@ -1415,6 +1413,4 @@ private:
   QtMetaEnumWrapper(QObject *parent) : QObject(parent) {}
 };
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

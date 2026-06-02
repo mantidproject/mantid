@@ -93,9 +93,7 @@
 #include <QTimer>
 #include <QToolButton>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 QToolButton *QtButtonPropertyBrowserPrivate::createButton(QWidget *parent) const {
   auto *button = new QToolButton(parent);
@@ -588,6 +586,4 @@ bool QtButtonPropertyBrowser::isExpanded(QtBrowserItem *item) const {
   return false;
 }
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

@@ -90,9 +90,7 @@
 #include "qtpropertybrowser.h"
 #include <QMap>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 class QtButtonPropertyBrowserPrivate;
 class QLabel;
@@ -177,6 +175,4 @@ private:
   QList<WidgetItem *> m_recreateQueue;
 };
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

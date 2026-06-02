@@ -98,9 +98,7 @@
 #include <QSpinBox>
 #include <QTimerEvent>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 class QColor;
 class QLabel;
@@ -883,6 +881,4 @@ public:
   void slotSetValue(const QTime &value);
 };
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif
