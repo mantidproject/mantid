@@ -53,6 +53,7 @@ class FullInstrumentViewModel:
     _beam_axis = np.array([0, 0, 1])
     line_plot_workspace = None
     _lineplot_ws_in_base_units = None
+    _lineplot_limits = None
     _workspace_x_unit: str
     _workspace_x_unit_display: str
     _peak_picking_status: PeakPickingStatus = PeakPickingStatus.Off
@@ -258,17 +259,7 @@ class FullInstrumentViewModel:
 
     @property
     def lineplot_limits(self) -> None | list[float]:
-        if self._lineplot_ws_in_base_units is None or self.line_plot_workspace is None:
-            return None
-
-        limits_in_base_units = [
-            self._match_workspace_unit(self._integration_workspace, self._workspace_indices[0], x, self._workspace)
-            for x in self.integration_limits
-        ]
-        limits_in_lineplot_units = [
-            self._match_workspace_unit(self._lineplot_ws_in_base_units, 0, x, self.line_plot_workspace) for x in limits_in_base_units
-        ]
-        return [min(limits_in_lineplot_units), max(limits_in_lineplot_units)]
+        return self._lineplot_limits
 
     def calculate_and_set_full_integration_range(self) -> None:
         self._calculate_and_set_full_integration_range(self.is_pickable)
@@ -510,6 +501,7 @@ class FullInstrumentViewModel:
         if len(workspace_indices) == 0:
             self.line_plot_workspace = None
             self._lineplot_ws_in_base_units = None
+            self._lineplot_limits = None
             return
 
         self._lineplot_ws_in_base_units = ExtractSpectra(
@@ -538,6 +530,14 @@ class FullInstrumentViewModel:
             ws = SumSpectra(InputWorkspace=ws, EnableLogging=False, StoreInADS=False)
 
         self.line_plot_workspace = ws
+        limits_in_base_units = [
+            self._match_workspace_unit(self._integration_workspace, workspace_indices[0], x, self._workspace)
+            for x in self.integration_limits
+        ]
+        limits_in_lineplot_units = [
+            self._match_workspace_unit(self._lineplot_ws_in_base_units, 0, x, self.line_plot_workspace) for x in limits_in_base_units
+        ]
+        self._lineplot_limits = [min(limits_in_lineplot_units), max(limits_in_lineplot_units)]
 
     def save_line_plot_workspace_to_ads(self) -> None:
         if self.line_plot_workspace is None or len(self.picked_workspace_indices) == 0:
