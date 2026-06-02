@@ -1,0 +1,1 @@
+- In :ref:`algm-SaveNexusProcessed`:ref:`algm-SaveNexusProcessed` the saving for Event Data now correctly uses the ``WorkspaceIndexList`` when one is provided.
