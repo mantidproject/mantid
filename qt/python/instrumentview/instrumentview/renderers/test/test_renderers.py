@@ -264,7 +264,7 @@ class TestExtractQuadFromCylinderShapeinfo(unittest.TestCase):
         np.testing.assert_allclose(quad_verts[:, 2], 0.0, atol=1e-12)
 
     def test_wish_cylinder_normal_faces_negative_z(self):
-        """Normal = e1 × e2 should point in the (0, 0, ±1) direction for Y-axis cylinder."""
+        """Normal = e1 x e2 should point in the (0, 0, ±1) direction for Y-axis cylinder."""
         si = self._make_cylinder_si(axis=(0.0, 1.0, 0.0))
         quad_verts, _ = _extract_quad_from_cylinder_shapeinfo(si)
         e1 = quad_verts[1] - quad_verts[0]
@@ -280,7 +280,7 @@ class TestExtractQuadFromCylinderShapeinfo(unittest.TestCase):
         si = self._make_cylinder_si(axis=(0.0, 0.0, 1.0), bottom_base=(0.0, 0.0, -0.05), height=0.1)
         result = _extract_quad_from_cylinder_shapeinfo(si)
         self.assertIsNotNone(result)
-        quad_verts, quad_faces = result
+        quad_verts, _ = result
         self.assertEqual(quad_verts.shape, (4, 3))
 
     # --- Error / degenerate cases ---

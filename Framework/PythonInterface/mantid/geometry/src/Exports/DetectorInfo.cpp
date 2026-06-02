@@ -48,6 +48,10 @@ PyObject *numpyArrayFromVector(const std::vector<V3D> &vec) {
   const size_t vec_size = 3;
   npy_intp dims[2] = {static_cast<npy_intp>(n_detectors), vec_size};
   PyObject *numpy_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+  if (!numpy_array) {
+    PyErr_SetString(PyExc_RuntimeError, "Failed to create numpy array");
+    throw boost::python::error_already_set();
+  }
   double *data = static_cast<double *>(PyArray_DATA(reinterpret_cast<PyArrayObject *>(numpy_array)));
   for (size_t i = 0; i < n_detectors; ++i) {
     const size_t base_index = i * vec_size;
@@ -74,6 +78,10 @@ PyObject *allRotations(const DetectorInfo &self) {
   const size_t quat_size = 4;
   npy_intp dims[2] = {static_cast<npy_intp>(n_detectors), quat_size};
   PyObject *numpy_rotations_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+  if (!numpy_rotations_array) {
+    PyErr_SetString(PyExc_RuntimeError, "Failed to create numpy array");
+    throw boost::python::error_already_set();
+  }
   double *data = static_cast<double *>(PyArray_DATA(reinterpret_cast<PyArrayObject *>(numpy_rotations_array)));
   for (size_t i = 0; i < n_detectors; ++i) {
     const size_t base_index = i * quat_size;

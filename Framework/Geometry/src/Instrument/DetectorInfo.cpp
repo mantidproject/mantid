@@ -328,6 +328,7 @@ Kernel::V3D DetectorInfo::position(const std::pair<size_t, size_t> &index) const
   return Kernel::toV3D(m_detectorInfo->position(index));
 }
 
+/// Returns the absolute positions of all detectors in a vector ordered by index.
 std::vector<Kernel::V3D> DetectorInfo::allPositions() const {
   std::vector<Kernel::V3D> positions;
   positions.reserve(size());
@@ -347,6 +348,7 @@ Kernel::Quat DetectorInfo::rotation(const std::pair<size_t, size_t> &index) cons
   return Kernel::toQuat(m_detectorInfo->rotation(index));
 }
 
+/// Returns the absolute rotations of all detectors in a vector ordered by index.
 std::vector<Kernel::Quat> DetectorInfo::allRotations() const {
   std::vector<Kernel::Quat> rotations;
   rotations.reserve(size());
@@ -356,6 +358,7 @@ std::vector<Kernel::Quat> DetectorInfo::allRotations() const {
   return rotations;
 }
 
+/// Returns the scale factors of all detectors in a vector ordered by index.
 std::vector<Kernel::V3D> DetectorInfo::allScaleFactors() const {
   std::vector<Kernel::V3D> scaleFactors;
   scaleFactors.reserve(size());

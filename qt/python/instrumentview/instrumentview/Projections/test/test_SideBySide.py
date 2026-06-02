@@ -74,7 +74,7 @@ class TestSideBySideProjection(unittest.TestCase):
         mock_detector_info = MagicMock()
         all_ids = detector_ids + [100] if has_other_detectors else detector_ids
         mock_detector_info.detectorIDs.return_value = all_ids
-        mock_detector_info.allPositions.return_value = np.array([[float(id), 0.0, 0.0] for id in all_ids])
+        mock_detector_info.allPositions.return_value = np.array([[float(det_id), 0.0, 0.0] for det_id in all_ids])
         mock_detector_info.allRotations.return_value = np.array([Rotation.identity().as_quat() for _ in all_ids])
         mock_detector_info.allScaleFactors.return_value = np.array([[1.0, 1.0, 1.0] for _ in all_ids])
         mock_workspace.detectorInfo.return_value = mock_detector_info
