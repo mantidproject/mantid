@@ -319,12 +319,12 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
     - The thickness along u2 should be adjusted to ~2
 
 16. Set the step of u2 = 2 in the table, check that it sets (start,stop) = (-1,1)
-17. Drag the top white marker of the cut representation up to L~2
+17. Drag the top white marker of the cut representation up to L~2 such that
 
     - u1 ~ [0,0,1]  and u2 ~ [0,1,0]
-    - There should be a peak in the 1D plot at x~-1
+    - Verify that the peak in the 1D plot is at x~1
 
-18. For u1 set b*=0 and c* = -1 and start=-2 - check that u2 = [0,-1,0] and the peak is still at x~-1
+18. For u1 set b*=0 and c* = -1 and start=-2 - check that u2 = [0,-1,0] and now the peak should be at x~-1
 19. To change the centre of the cut move the central white marker of the cut representation to (K,L) ~ (2,0),
 
     - The entire cut representation should move
