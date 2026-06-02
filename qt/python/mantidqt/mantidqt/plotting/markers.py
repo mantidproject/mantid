@@ -14,6 +14,13 @@ from matplotlib.patches import PathPatch
 MARKER_SENSITIVITY = 5
 
 
+def _remove_marker_patch(patch):
+    try:
+        patch.remove()
+    except (ValueError, NotImplementedError):
+        pass
+
+
 class HorizontalMarker(QObject):
     """
     An interactive marker displayed as a horizontal line.
@@ -71,10 +78,7 @@ class HorizontalMarker(QObject):
         """
         Remove this marker from the canvas.
         """
-        try:
-            self.patch.remove()
-        except ValueError:
-            pass
+        _remove_marker_patch(self.patch)
 
     def redraw(self):
         """
@@ -257,7 +261,7 @@ class VerticalMarker(QObject):
         """
         Remove this marker from the canvas.
         """
-        self.patch.remove()
+        _remove_marker_patch(self.patch)
 
     def redraw(self):
         """
