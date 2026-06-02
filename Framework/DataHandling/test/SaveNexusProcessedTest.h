@@ -819,14 +819,18 @@ public:
   }
 
   void test_event_workspace_ragged_bins_with_workspace_index_list() {
-    std::vector<std::vector<int>> groups(2);
+    std::vector<std::vector<int>> groups(4);
     groups[0].emplace_back(10);
     groups[1].emplace_back(20);
+    groups[2].emplace_back(30);
+    groups[3].emplace_back(40);
     EventWorkspace_sptr ws = WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 50, 1.0, 1.0);
 
     // Different bin edges per spectrum forces the ragged (non-shared-bins) path in LoadNexusProcessed
     ws->setX(0, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 1.0, 2.0}));
     ws->setX(1, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 2.0, 4.0}));
+    ws->setX(2, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 3.0, 6.0}));
+    ws->setX(3, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 4.0, 8.0}));
 
     AnalysisDataService::Instance().add("testEventRagged", ws);
 
@@ -835,7 +839,7 @@ public:
     saveAlg.setPropertyValue("InputWorkspace", "testEventRagged");
     FileResource file("SaveNexusProcessedTest_event_ragged_index_list.nxs", !clearfiles);
     saveAlg.setPropertyValue("Filename", file.fullPath());
-    saveAlg.setPropertyValue("WorkspaceIndexList", "1"); // save only 2nd spectrum
+    saveAlg.setPropertyValue("WorkspaceIndexList", "1,3"); // save only 2nd and 4th spectra
     saveAlg.setProperty("PreserveEvents", true);
     TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
     TS_ASSERT(saveAlg.isExecuted());
@@ -851,11 +855,13 @@ public:
         std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("testEventRaggedReloaded"));
     TS_ASSERT(wsReloaded);
     if (wsReloaded) {
-      TS_ASSERT_EQUALS(wsReloaded->getNumberHistograms(), 1);
-      // Verify bin edges from spectrum 1 were saved, not spectrum 0
+      TS_ASSERT_EQUALS(wsReloaded->getNumberHistograms(), 2);
+      // Verify bin edges from spectra 1 and 3 were saved, not 0 or 2
       TS_ASSERT_EQUALS(wsReloaded->readX(0), ws->readX(1));
-      // Verify events from spectrum 1 were saved, not spectrum 0
+      TS_ASSERT_EQUALS(wsReloaded->readX(1), ws->readX(3));
+      // Verify events from spectra 1 and 3 were saved, not 0 or 2
       TS_ASSERT_EQUALS(wsReloaded->getSpectrum(0).getNumberEvents(), ws->getSpectrum(1).getNumberEvents());
+      TS_ASSERT_EQUALS(wsReloaded->getSpectrum(1).getNumberEvents(), ws->getSpectrum(3).getNumberEvents());
     }
 
     AnalysisDataService::Instance().remove("testEventRagged");

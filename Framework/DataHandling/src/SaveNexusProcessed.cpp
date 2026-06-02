@@ -128,7 +128,7 @@ void SaveNexusProcessed::init() {
                   "Index of last spectrum to write, only for single period\n"
                   "data.");
   declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
-                  "List of spectrum numbers to read, only for single period\n"
+                  "List of spectrum numbers to write, only for single period\n"
                   "data.");
 
   declareProperty("Append", false,
