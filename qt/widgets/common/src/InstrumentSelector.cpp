@@ -39,7 +39,7 @@ InstrumentSelector::InstrumentSelector(QWidget *parent, bool init)
     config.addObserver(m_changeObserver);
   }
 
-  connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateInstrument(const QString &)));
+  connect(this, SIGNAL(currentTextChanged(const QString &)), this, SLOT(updateInstrument(const QString &)));
 }
 
 /**

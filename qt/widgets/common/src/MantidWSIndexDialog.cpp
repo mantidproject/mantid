@@ -494,7 +494,7 @@ void MantidWSIndexWidget::initOptionsBoxes() {
     if (m_advanced && isSuitableForContourOrSurfacePlot()) {
       m_plotOptions->addItem(SURFACE_PLOT);
       m_plotOptions->addItem(CONTOUR_PLOT);
-      connect(m_plotOptions, SIGNAL(currentIndexChanged(const QString &)), this,
+      connect(m_plotOptions, SIGNAL(currentTextChanged(const QString &)), this,
               SLOT(onPlotOptionChanged(const QString &)));
     }
     m_optionsBox->addWidget(m_plotOptionLabel);
@@ -541,7 +541,7 @@ void MantidWSIndexWidget::initLogs() {
 
   m_outer->addWidget(m_logOptionsGroup);
 
-  connect(m_logSelector, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(onLogSelected(const QString &)));
+  connect(m_logSelector, SIGNAL(currentTextChanged(const QString &)), this, SLOT(onLogSelected(const QString &)));
 }
 
 /**
