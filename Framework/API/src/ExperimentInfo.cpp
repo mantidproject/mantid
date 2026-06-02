@@ -1274,10 +1274,10 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
           if (secondComma != std::string::npos) {
             fittingFunction = paramValue.substr(firstComma + 1, secondComma - firstComma - 1);
             const auto firstNonSpace = fittingFunction.find_first_not_of(" \t");
-            const auto lastNonSpace = fittingFunction.find_last_not_of(" \t");
-            if (firstNonSpace != std::string::npos)
+            if (firstNonSpace != std::string::npos) {
+              const auto lastNonSpace = fittingFunction.find_last_not_of(" \t");
               fittingFunction = fittingFunction.substr(firstNonSpace, lastNonSpace - firstNonSpace + 1);
-            else
+            } else
               fittingFunction.clear();
           }
         }
