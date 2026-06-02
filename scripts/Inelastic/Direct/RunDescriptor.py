@@ -373,7 +373,7 @@ class RunList(object):
                 self._file_path[index] = fpath
                 # self._last_ind2sum = index
                 found.append(run)
-            except RuntimeError:
+            except (RuntimeError, ValueError):
                 not_found.append(run)
         return not_found, found
 
@@ -1141,7 +1141,7 @@ class RunDescriptor(PropDescriptor):
             file_name = FileFinder.findRuns(file_hint)[0]
             _check_ext(file_name)
             return (True, file_name)
-        except RuntimeError as Err:
+        except (RuntimeError, ValueError) as Err:
             if "force_extension" in kwargs:
                 return (False, str(Err))
             else:
@@ -1151,7 +1151,7 @@ class RunDescriptor(PropDescriptor):
                     file_name = FileFinder.findRuns(file_hint)[0]
                     _check_ext(file_name)
                     return (True, file_name)
-                except RuntimeError:
+                except (RuntimeError, ValueError):
                     message = "*** Cannot find file matching hint {0} on Mantid search paths ".format(file_hint)
                     if "be_quet" not in kwargs:
                         RunDescriptor._logger(message, "warning")

@@ -48,6 +48,14 @@ public:
    */
   virtual const Result<std::filesystem::path> getArchivePath(const std::set<std::string> &hintstrs,
                                                              const std::vector<std::string> &exts) const = 0;
+  /// Whether the archive can resolve multiple hints in a single call. If true,
+  /// FileFinder will batch unfound hints via getArchivePaths instead of calling
+  /// getArchivePath once per hint.
+  virtual bool supportsMultipleHints() const { return false; }
+  virtual const Result<std::vector<std::filesystem::path>>
+  getArchivePaths(const std::vector<std::string> & /*hintstrs*/) const {
+    return Result<std::vector<std::filesystem::path>>({}, "Not implemented.");
+  }
 };
 
 /// Typedef for a shared pointer to an IArchiveSearch
