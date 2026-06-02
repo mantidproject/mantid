@@ -9,15 +9,30 @@
 Description
 -----------
 
-The algorithm is used transform existing :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`
+The algorithm is used to transform existing :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`
 or :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` into :py:obj:`MDWorkspace <mantid.api.IMDWorkspace>`.
 
-If  the target workspace does not exist, the algorithm creates :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`
-with selected dimensions, e.g. the reciprocal space of momentums **(Qx, Qy, Qz)** or momentums modules **\|Q|**, energy transfer **dE** if available
-and any other user specified log values which can be treated as dimensions. If the target workspace do exist,
-the **MD Events** are added to this workspace.
+If the target workspace does not exist, the algorithm creates a :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>`
+whose dimensions are determined by the settings of `QDimensions`, `dEAnalysisMode` and `OtherDimensions` properties:
 
-Using the FileBackEnd and Filename properties the algorithm can produce a file-backed workspace.
+* If `QDimensions='CopyToMD'` then the existing workspace units (e.g. ToF, or ToF and :math:`\mathbf{2 \theta}`
+  if `ConvertSpectrumAxis` was run on the input workspace) are kept.
+* If `QDimensions='Q3D'` or `QDimensions='|Q|'` then the ToF, detector position, Goniometer angles, and lattice
+  information will be used to transform the bins or neutron events into momentum transfer coordinates
+  **(Qx, Qy, Qz)** (for `'Q3D'`) or momentum transfer modulus **|Q|**.
+* If `dEAnalysisMode='Direct'` or `dEAnalysisMode='Indirect'` then an additional energy-transfer dimension will be added.
+* If `OtherDimensions` is not empty then any corresponding log values will be added as extra dimensions.
+
+By default, the algorithm uses the average values of a time series log to compute the sample orientation
+(from the :py:obj:`Goniometer <mantid.geometry.Goniometer>`), or for extra `OtherDimensions`.
+However, if the input is an :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`,
+setting the `UseLogTimes` property to `True` uses the value of the sample log at the pulse-times
+of each neutron event in computing sample orientation and for `OtherDimensions`.
+
+If the target workspace does exist and the property `OverwriteExisting=False` is set,
+then **MD Events** are added to this workspace.
+
+Using `FileBackEnd=True` and setting a non-empty `Filename` produces a file-backed workspace.
 Note that this will significantly increase the execution time of the algorithm.
 
 Used Subalgorithms
@@ -30,8 +45,7 @@ for transformation into correspondent **MD Event workspace**. It also uses
 :ref:`algm-PreprocessDetectorsToMD` algorithm to help
 with transformation to reciprocal space.
 
-If min, max or both lists of values (properties 12 and 13) for the
-algorithm are not specified,
+If either of the `MinValues` or `MaxValues` properties are not specified,
 :ref:`algm-ConvertToMDMinMaxLocal` is used to estimate
 missing min-max values. This algorithm is also used to calculate min-max
 values if specified min-max values are deemed incorrect (e.g. less
