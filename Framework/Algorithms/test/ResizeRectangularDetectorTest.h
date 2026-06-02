@@ -65,6 +65,7 @@ public:
     const auto &pixel = spectrumInfo.detector(11);
     detid_t recDetPixID = det->getDetectorIDAtXY(1, 1);
     TSM_ASSERT("getDetectorIDAtXY() returns a valid detector ID", recDetPixID > 0);
+    TS_ASSERT_EQUALS(recDetPixID, pixel.getID());
     pos = pixel.getPos();
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 2, 0.008 * 0.5, 5.0));
 

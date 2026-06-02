@@ -176,6 +176,9 @@ int const &pixelsXYZ(char const order, GridDetector const *const me) {
  *range
  */
 detid_t GridDetector::getDetectorIDAtXYZ(const int x, const int y, const int z) const {
+  if (!inBoundsXYZ(x, y, z))
+    throw std::out_of_range("GridDetector::getDetectorIDAtXYZ: pixel indices are out of range.");
+
   auto order = idFillOrder();
 
   int const &first = orderXYZ(order[0], x, y, z);
@@ -440,6 +443,8 @@ int const &GridDetector::idstep() const {
  * @return a V3D vector of the relative position
  */
 V3D GridDetector::getPosAtXYZ(int x, int y, int z) const {
+  if (!inBoundsXYZ(x, y, z))
+    throw std::out_of_range("GridDetector::getPosAtXYZ: pixel indices are out of range.");
   V3D relPos = getRelativePosAtXYZ(x, y, z);
   this->getRotation().rotate(relPos);
   return this->getPos() + relPos;
@@ -791,6 +796,24 @@ void GridDetector::getBoundingBoxAtXYZ(int const x, int const y, int const z, Bo
 
   // 1. Copy the shape's axis-aligned bounding box in the local (pixel) frame.
   box = BoundingBox(shapeBox);
+
+  // 1a. For parametrized detectors, scale the shape extents by scalex/scaley/scalez
+  //     so the per-pixel box matches the scaled pixel size (consistent with getPosAtXYZ).
+  if (isParametrized()) {
+    double scalex = 1.0, scaley = 1.0, scalez = 1.0;
+    if (m_map->contains(m_gridBase, "scalex"))
+      scalex = m_map->get(m_gridBase, "scalex")->value<double>();
+    if (m_map->contains(m_gridBase, "scaley"))
+      scaley = m_map->get(m_gridBase, "scaley")->value<double>();
+    if (m_map->contains(m_gridBase, "scalez"))
+      scalez = m_map->get(m_gridBase, "scalez")->value<double>();
+    box.xMin() *= scalex;
+    box.xMax() *= scalex;
+    box.yMin() *= scaley;
+    box.yMax() *= scaley;
+    box.zMin() *= scalez;
+    box.zMax() *= scalez;
+  }
 
   // 2. Rotate: pixels have the same orientation as the parent GridDetector; there
   //    is no additional per-pixel rotation, so we apply the detector's own rotation.

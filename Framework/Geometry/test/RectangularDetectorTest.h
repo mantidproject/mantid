@@ -117,6 +117,12 @@ public:
     TS_ASSERT_EQUALS(det->inBoundsXY(100, 0), false);
     TS_ASSERT_EQUALS(det->inBoundsXY(0, 205), false);
 
+    // Out-of-bounds coordinates throw for getDetectorIDAtXY and getPosAtXY
+    TS_ASSERT_THROWS(det->getDetectorIDAtXY(-1, 0), std::out_of_range);
+    TS_ASSERT_THROWS(det->getDetectorIDAtXY(0, -1), std::out_of_range);
+    TS_ASSERT_THROWS(det->getDetectorIDAtXY(100, 0), std::out_of_range);
+    TS_ASSERT_THROWS(det->getDetectorIDAtXY(0, 205), std::out_of_range);
+
     // Check some ids
     TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0, 0) - 1000000, 0);
     TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0, 12) - 1000000, 12);

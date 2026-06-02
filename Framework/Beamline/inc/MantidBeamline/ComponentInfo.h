@@ -111,11 +111,6 @@ public:
       f((*m_assemblySortedDetectorIndices)[i]);
   }
 
-  /// Maps a logical component index to its offset in the compact arrays
-  /// (m_names, m_scaleFactors, m_parentIndices, etc.).
-  /// For virtual-bank instruments only; behaviour is undefined otherwise.
-  size_t compactComponentIndex(size_t componentIndex) const noexcept;
-
   const Eigen::Vector3d &position(const size_t componentIndex) const;
   const Eigen::Vector3d &position(const std::pair<size_t, size_t> &index) const;
   Eigen::Quaterniond rotation(const size_t componentIndex) const;
@@ -186,13 +181,6 @@ private:
                      const ComponentInfo::Range &detectorRange);
   void doScaleComponent(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newScaling,
                         const ComponentInfo::Range &detectorRange);
-
-  /// Inverse of compactComponentIndex: maps a compact array offset to the
-  /// corresponding logical component index.
-  size_t logicalComponentIndex(size_t compactIdx) const noexcept;
-
-  /// Precomputes m_nNonVirtualDetectors and m_nonVirtualDetectorLogicalIndices.
-  void buildNonVirtualDetectorTable();
 
   /// Returns realDetectors.size() + sum(virtual pixels) + detRanges.size().
   /// Used to initialise the const m_size in the constructor initialiser list,

@@ -140,6 +140,19 @@ public:
     TS_ASSERT_EQUALS(pos, V3D(-3.5, -15.5, -2.0));
     pos = parDet->getPosAtXYZ(1, 1, 2);
     TS_ASSERT_EQUALS(pos, V3D(-3.5, -10.5, 2.0));
+
+    // Pixel bounding box for parametrized detector: shape extents should be
+    // scaled by (scalex, scaley, scalez). Cuboid half-size 0.5 becomes
+    // (1.5, 2.5, 1.0). Pixel (1,1,1) is at getPosAtXYZ(1,1,1) =
+    // (1,2,1) + (-4.5,-12.5,-1.0) = (-3.5,-10.5, 0.0) (no rotation).
+    BoundingBox bbox;
+    parDet->getBoundingBoxAtXYZ(1, 1, 1, bbox);
+    TS_ASSERT_DELTA(bbox.xMin(), -5.0, 1e-08);
+    TS_ASSERT_DELTA(bbox.xMax(), -2.0, 1e-08);
+    TS_ASSERT_DELTA(bbox.yMin(), -13.0, 1e-08);
+    TS_ASSERT_DELTA(bbox.yMax(), -8.0, 1e-08);
+    TS_ASSERT_DELTA(bbox.zMin(), -1.0, 1e-08);
+    TS_ASSERT_DELTA(bbox.zMax(), 1.0, 1e-08);
   }
 
 private:
