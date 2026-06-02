@@ -227,6 +227,7 @@ Mantid::API::MatrixWorkspace_sptr fitGaussian(Mantid::API::MatrixWorkspace_sptr 
   algorithm->setProperty("InputWorkspace", workspace);
   algorithm->setProperty("WorkspaceIndex", 0);
   algorithm->setProperty("Output", "__NotUsed__");
+  algorithm->setProperty("IgnoreInvalidData", true);
   algorithm->execute();
   return algorithm->getProperty("OutputWorkspace");
 }
