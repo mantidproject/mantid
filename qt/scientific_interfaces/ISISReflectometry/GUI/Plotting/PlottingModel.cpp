@@ -429,6 +429,8 @@ std::string createAlignmentWorkspace(PlottingWorkspaceSelection const &workspace
   auto fitOutputWorkspace = fitGaussian(profileWorkspaceNoBG, fitParameters);
 
   auto group = std::make_shared<Mantid::API::WorkspaceGroup>();
+  ads.addOrReplace(rawProfileWorkspace, profileWorkspaceNoBG);
+  group->addWorkspace(profileWorkspaceNoBG);
   if (fitOutputWorkspace) {
     auto fittedWorkspace = extractSpectrum(fitOutputWorkspace, 1);
     auto centreWorkspace = createPeakCentreWorkspace(profileWorkspaceNoBG, fitParameters.centre);
@@ -437,8 +439,7 @@ std::string createAlignmentWorkspace(PlottingWorkspaceSelection const &workspace
     group->addWorkspace(fittedWorkspace);
     group->addWorkspace(centreWorkspace);
   }
-  ads.addOrReplace(rawProfileWorkspace, profileWorkspaceNoBG);
-  group->addWorkspace(profileWorkspaceNoBG);
+
   ads.addOrReplace(outputWorkspace, group);
   return outputWorkspace;
 }
