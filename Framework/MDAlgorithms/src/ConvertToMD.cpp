@@ -130,6 +130,7 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
   std::vector<int> split_into = this->getProperty("SplitInto");
   const std::string filename = this->getProperty("Filename");
   const bool fileBackEnd = this->getProperty("FileBackEnd");
+  const bool useLogTimes = this->getProperty("UseLogTimes");
 
   if (fileBackEnd && filename.empty()) {
     result["Filename"] = "Filename must be given if FileBackEnd is required.";
@@ -139,7 +140,6 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
     if (fileBackEnd)
       result["ConverterType"] += "No file back end implemented "
                                  "for indexed version of algorithm. ";
-
     if (topLevelSplittingChecked)
       result["ConverterType"] += "The usage of top level splitting is "
                                  "not possible for indexed version of algorithm. ";
@@ -176,6 +176,14 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
     if (!msg.str().empty()) {
       result["MinValues"] = msg.str();
       result["MaxValues"] = msg.str();
+    }
+  }
+
+  if (useLogTimes) {
+    API::MatrixWorkspace_const_sptr inWS = this->getProperty("InputWorkspace");
+    const auto evWs = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inWS);
+    if (!evWs) {
+      result["UseLogTimes"] = "UseLogTimes requires the input to be an EventWorkspace.";
     }
   }
 
@@ -264,8 +272,9 @@ void ConvertToMD::exec() {
   this->m_Convertor = AlgoSelector.convSelector(m_InWS2D, this->m_Convertor);
 
   bool ignoreZeros = getProperty("IgnoreZeroSignals");
+  bool useLogTimes = getProperty("UseLogTimes");
   // initiate conversion and estimate amount of job to do
-  size_t n_steps = this->m_Convertor->initialize(targWSDescr, m_OutWSWrapper, ignoreZeros);
+  size_t n_steps = this->m_Convertor->initialize(targWSDescr, m_OutWSWrapper, ignoreZeros, useLogTimes);
 
   // copy the metadata, necessary for resolution corrections
   copyMetaData(spws);

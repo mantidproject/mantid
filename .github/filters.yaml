@@ -1,8 +1,30 @@
-cpp:
+# extensions associated with c++
+cpp: &files_cpp
+ - '**/*.cxx'
  - '**/*.cpp'
  - '**/*.h'
  - '**/*.hxx'
+ - '**/*.tcc'
+# extensions associated with python
+py: &files_py
+ - '**/*.py'
+# extensions associated with python
+configuration: &files_config
+ - CMakePresets.json
+ - 'buildconfig/CMake/**'
+ - .pixi-version
+ - pixi.lock
+ - pixi.toml
+ - pyproject.toml
+ - setup.py
+# files that affect CI
+workflows: &files_workflow
+ - 'buildconfig/Jenkins/**'
+ - '.github/**'
+### filters used in individual jobs and steps
 doxygen:
+ - *files_config
+ - *files_cpp
  - 'Framework/Doxygen/**'
  - 'conda/recipes/mantid-developer/**'
  - 'conda/recipes/conda_build_config.yaml'
@@ -11,6 +33,7 @@ doxygen:
  - '.github/workflows/doxygen-publish.yml'
  - 'pixi.toml'
 devsite:
+ - *files_config
  - 'dev-docs/**'
  - 'conda/recipes/mantid-developer/**'
  - 'conda/recipes/conda_build_config.yaml'
@@ -18,3 +41,13 @@ devsite:
  - '.github/actions/devsite-build/**'
  - '.github/workflows/devdocs-publish.yml'
  - 'pixi.toml'
+code_changes:
+ - *files_cpp
+ - *files_py
+ - *files_config
+ - *files_workflow
+ - 'Framework/**'
+ - 'instrument/**'
+ - 'qt/**'
+ - 'scripts/**'
+ - 'tools/**'

@@ -114,11 +114,6 @@ private:
   /// Populate algorithmic correction properties
   void determineCorrectionAlgorithm(const Instrument_const_sptr &instrument);
   void populateAlgorithmicCorrectionProperties(const Mantid::API::IAlgorithm_sptr &alg);
-  std::string findPolarizationCorrectionMethod(const API::MatrixWorkspace_sptr &efficiencies);
-  std::string findPolarizationCorrectionOption(const std::string &correctionMethod,
-                                               const WorkspaceGroup_sptr &groupIvsLam);
-  std::string getFredrikzeInputSpinStateOrder(const std::string &correctionMethod);
-  /// Get a polarization efficiencies workspace.
   std::tuple<API::MatrixWorkspace_sptr, std::string, std::string, std::string>
   getPolarizationEfficiencies(const WorkspaceGroup_sptr &groupIvsLam);
   WorkspaceGroup_sptr applyPolarizationCorrection(const WorkspaceGroup_sptr &outputIvsLam,

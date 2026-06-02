@@ -9,51 +9,40 @@
 #include "MantidAPI/FileProperty.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiFileValidator.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHelper.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
-#include <filesystem>
-
 #include <algorithm>
 #include <cctype>
+#include <filesystem>
 #include <functional>
 #include <numeric>
+#include <regex>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace // anonymous
-{
-/// static logger
+namespace {
 Mantid::Kernel::Logger g_log("MultipleFileProperty");
 
-/**
- * Unary predicate for use with copy_if.  Checks for the existance of
- * a "*" wild card in the file extension string passed to it.
- */
 bool doesNotContainWildCard(const std::string &ext) { return std::string::npos == ext.find('*'); }
 
 static const std::string SUCCESS("");
 
 // Regular expressions for any adjacent + or , operators
-const std::string INVALID = R"(\+\+|,,|\+,|,\+)";
-static const boost::regex REGEX_INVALID(INVALID);
+static const std::regex REGEX_INVALID(R"(\+\+|,,|\+,|,\+)");
 
-// Regular expressions that represent the allowed instances of , operators
-const std::string NUM_COMMA_ALPHA(R"((?<=\d)\s*,\s*(?=\D))");
-const std::string ALPHA_COMMA_ALPHA(R"((?<=\D)\s*,\s*(?=\D))");
-const std::string COMMA_OPERATORS = NUM_COMMA_ALPHA + "|" + ALPHA_COMMA_ALPHA;
-static const boost::regex REGEX_COMMA_OPERATORS(COMMA_OPERATORS);
-
-// Regular expressions that represent the allowed instances of + operators
-const std::string NUM_PLUS_ALPHA(R"((?<=\d)\s*\+\s*(?=\D))");
-const std::string ALPHA_PLUS_ALPHA(R"((?<=\D)\s*\+\s*(?=\D))");
-const std::string PLUS_OPERATORS = NUM_PLUS_ALPHA + "|" + ALPHA_PLUS_ALPHA;
-static const boost::regex REGEX_PLUS_OPERATORS(PLUS_OPERATORS, boost::regex_constants::perl);
+// Comma/plus operators that act as token separators: any char on the left,
+// non-digit on the right (after optional whitespace). The digit→digit case
+// is left for the run-number list parser to handle. The original Boost
+// patterns used left-side lookbehinds that std::regex does not support, but
+// the alternation digit-or-non-digit on the left is equivalent to "any
+// preceding char" and so can be dropped.
+static const std::regex REGEX_COMMA_OPERATORS(R"(\s*,\s*(?=\D))");
+static const std::regex REGEX_PLUS_OPERATORS(R"(\s*\+\s*(?=\D))");
 
 bool isASCII(const std::string &str) {
   return !std::any_of(str.cbegin(), str.cend(), [](char c) { return static_cast<unsigned char>(c) > 127; });
@@ -232,6 +221,18 @@ std::string MultipleFileProperty::setValueAsSingleFile(const std::string &propVa
  *An empty string indicates success.
  */
 std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
+  // Empty input (for optional properties — required ones are rejected upstream
+  // in setValue) means "no files selected". Short-circuit so we don't generate
+  // a spurious empty hint that would later fail file resolution. Boost's
+  // sregex_token_iterator used to silently yield zero tokens here; std::regex
+  // yields one empty token, hence the explicit guard.
+  if (propValue.empty()) {
+    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(std::vector<std::vector<std::string>>{});
+    m_oldPropValue = propValue;
+    m_oldFoundValue.clear();
+    return SUCCESS;
+  }
+
   // if value is unchanged use the cached version
   if ((propValue == m_oldPropValue) && (!m_oldFoundValue.empty())) {
     PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(m_oldFoundValue);
@@ -239,8 +240,8 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
   }
 
   // Return error if there are any adjacent + or , operators.
-  boost::smatch invalid_substring;
-  if (!m_allowEmptyTokens && boost::regex_search(propValue.begin(), propValue.end(), invalid_substring, REGEX_INVALID))
+  std::smatch invalid_substring;
+  if (!m_allowEmptyTokens && std::regex_search(propValue, invalid_substring, REGEX_INVALID))
     return "Unable to parse filename due to an empty token.";
   if (!isASCII(propValue))
     return "Unable to parse filename due to an unsupported non-ASCII character being found.";
@@ -248,14 +249,14 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
   std::vector<std::vector<std::string>> fileNames;
 
   // Tokenise on allowed comma operators, and iterate over each token.
-  boost::sregex_token_iterator end;
-  boost::sregex_token_iterator commaToken(propValue.begin(), propValue.end(), REGEX_COMMA_OPERATORS, -1);
+  std::sregex_token_iterator end;
+  std::sregex_token_iterator commaToken(propValue.begin(), propValue.end(), REGEX_COMMA_OPERATORS, -1);
 
   for (; commaToken != end; ++commaToken) {
     const std::string commaTokenString = commaToken->str();
 
     // Tokenise on allowed plus operators.
-    boost::sregex_token_iterator plusToken(commaTokenString.begin(), commaTokenString.end(), REGEX_PLUS_OPERATORS, -1);
+    std::sregex_token_iterator plusToken(commaTokenString.begin(), commaTokenString.end(), REGEX_PLUS_OPERATORS, -1);
 
     std::vector<std::vector<std::string>> temp;
 
@@ -335,14 +336,20 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
   // Cycle through each vector of unresolvedFileNames in allUnresolvedFileNames.
   // Remember, each vector contains files that are to be added together.
   for (const auto &unresolvedFileNames : allUnresolvedFileNames) {
-    // Check for the existance of wild cards. (Instead of iterating over all the
-    // filenames just join them together and search for "*" in the result.)
-    if (std::string::npos != boost::algorithm::join(unresolvedFileNames, "").find("*"))
+    const auto hasWildCard = [](const std::string &name) { return name.find('*') != std::string::npos; };
+    if (std::any_of(unresolvedFileNames.cbegin(), unresolvedFileNames.cend(), hasWildCard))
       return "Searching for files by wildcards is not currently supported.";
 
-    std::vector<std::string> fullFileNames;
+    // Separate files into two groups: those with explicit extensions and those
+    // that need default extension resolution. resolvedFiles is sized up-front
+    // and indexed by the original position so the input order survives the
+    // batched resolution path below.
+    std::vector<std::string> filesToResolveWithExtension;
+    std::vector<size_t> resolutionIndices;
+    std::vector<std::string> resolvedFiles(unresolvedFileNames.size());
 
-    for (const auto &unresolvedFileName : unresolvedFileNames) {
+    for (size_t i = 0; i < unresolvedFileNames.size(); ++i) {
+      const auto &unresolvedFileName = unresolvedFileNames[i];
       bool useDefaultExt;
 
       try {
@@ -356,8 +363,6 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
         useDefaultExt = false;
       }
 
-      std::string fullyResolvedFile;
-
       if (!useDefaultExt) {
         FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts, Direction::Input);
         std::string error = slaveFileProp.setValue(unresolvedFileName);
@@ -367,67 +372,67 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
           throw std::runtime_error(error);
         }
 
-        fullyResolvedFile = slaveFileProp();
+        resolvedFiles[i] = slaveFileProp();
       } else {
-        // If a default ext has been specified/found, then use it.
-        std::string errors = "";
-        if (!defaultExt.empty()) {
-          auto run = FileFinder::Instance().findRun(unresolvedFileName, std::vector<std::string>(1, defaultExt));
-          if (run)
-            fullyResolvedFile = run.result().string();
-          else
-            errors += run.errors();
+        // Collect files that need extension resolution for batch processing
+        filesToResolveWithExtension.emplace_back(unresolvedFileName);
+        resolutionIndices.emplace_back(i);
+      }
+    }
 
-        } else {
-          auto run = FileFinder::Instance().findRun(unresolvedFileName, m_exts);
-          if (run)
-            fullyResolvedFile = run.result().string();
-          else
-            errors += run.errors();
+    // Batch resolve files with extension using findRuns for better performance.
+    // When the batch succeeds we get a single call into the archive search,
+    // which lets back-ends like ONCat resolve all runs in one network round
+    // trip. If the batch throws (any one file is missing) we fall back to
+    // per-file findRun so the error names the actually missing file rather
+    // than whichever hint findRuns happened to report first.
+    if (!filesToResolveWithExtension.empty()) {
+      const auto extsToUse = !defaultExt.empty() ? std::vector<std::string>(1, defaultExt) : m_exts;
+      bool batchSucceeded = false;
+      try {
+        auto resolvedPaths = FileFinder::Instance().findRuns(filesToResolveWithExtension, extsToUse);
+        for (size_t i = 0; i < resolvedPaths.size(); ++i) {
+          resolvedFiles[resolutionIndices[i]] = resolvedPaths[i].string();
         }
-        if (fullyResolvedFile.empty()) {
-          bool doThrow = false;
+        batchSucceeded = true;
+      } catch (const Exception::NotFoundError &) {
+        // Fall through to per-file resolution below.
+      }
+
+      if (!batchSucceeded) {
+        for (size_t i = 0; i < filesToResolveWithExtension.size(); ++i) {
+          const auto &unresolvedFileName = filesToResolveWithExtension[i];
+          auto run = FileFinder::Instance().findRun(unresolvedFileName, extsToUse);
+          if (run) {
+            resolvedFiles[resolutionIndices[i]] = run.result().string();
+            continue;
+          }
+
+          bool doThrow = !m_allowEmptyTokens;
           if (m_allowEmptyTokens) {
             try {
-              const int unresolvedInt = std::stoi(unresolvedFileName);
-              if (unresolvedInt != 0) {
+              if (std::stoi(unresolvedFileName) != 0)
                 doThrow = true;
-              }
             } catch (std::invalid_argument &) {
               doThrow = true;
             }
-          } else {
-            doThrow = true;
           }
-          if (doThrow) {
-            auto errorMsg = "Unable to find file matching the string \"" + unresolvedFileName +
-                            "\", please check the data search directories.";
-            if (!errors.empty())
-              errorMsg += " " + errors;
+          if (doThrow)
+            throw Exception::NotFoundError("Unable to find file:", unresolvedFileName);
 
-            throw std::runtime_error(errorMsg);
-          } else {
-            // if the fullyResolvedFile is empty, it means it failed to find the
-            // file so keep the unresolvedFileName as a hint to be displayed
-            // later on in the error message
-            fullyResolvedFile = unresolvedFileName;
-          }
+          // Empty token allowed: keep the hint as the resolved value so it
+          // surfaces in any downstream error message.
+          resolvedFiles[resolutionIndices[i]] = unresolvedFileName;
         }
       }
-
-      // Append the file name to result.
-      fullFileNames.emplace_back(std::move(fullyResolvedFile));
     }
-    allFullFileNames.emplace_back(std::move(fullFileNames));
+
+    allFullFileNames.emplace_back(std::move(resolvedFiles));
   }
 
-  // Now re-set the value using the full paths found.
   PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(allFullFileNames);
-
-  // cache the new version of things
   m_oldPropValue = propValue;
   m_oldFoundValue = std::move(allFullFileNames);
-
   return SUCCESS;
 }
 

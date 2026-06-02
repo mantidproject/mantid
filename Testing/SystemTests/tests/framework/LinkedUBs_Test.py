@@ -14,9 +14,9 @@ import numpy as np
 
 class LinkedUBs_Test(systemtesting.MantidSystemTest):
     def runTest(self):
-        ws1 = LoadRaw(Filename="SXD30904.raw.md5", OutputWorkspace="SXD30904")
+        ws1 = LoadRaw(Filename="SXD30904.raw", OutputWorkspace="SXD30904")
 
-        ws2 = LoadRaw(Filename="SXD30905.raw.md5", OutputWorkspace="SXD30905")
+        ws2 = LoadRaw(Filename="SXD30905.raw", OutputWorkspace="SXD30905")
 
         UB1 = np.array(
             [[0.00099434, 0.17716870, -0.00397909], [0.17703120, -0.00117345, -0.00800899], [-0.00803319, -0.00393000, -0.17699037]]

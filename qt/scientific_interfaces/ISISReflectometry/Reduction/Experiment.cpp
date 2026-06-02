@@ -79,17 +79,4 @@ std::optional<size_t> Experiment::getLookupRowIndexFromRow(Row const &row, doubl
   }
   return std::nullopt;
 }
-
-bool operator!=(Experiment const &lhs, Experiment const &rhs) { return !operator==(lhs, rhs); }
-
-bool operator==(Experiment const &lhs, Experiment const &rhs) {
-  return lhs.analysisMode() == rhs.analysisMode() && lhs.reductionType() == rhs.reductionType() &&
-         lhs.summationType() == rhs.summationType() && lhs.includePartialBins() == rhs.includePartialBins() &&
-         lhs.debug() == rhs.debug() && lhs.backgroundSubtraction() == rhs.backgroundSubtraction() &&
-         lhs.polarizationCorrections() == rhs.polarizationCorrections() &&
-         lhs.floodCorrections() == rhs.floodCorrections() &&
-         lhs.transmissionStitchOptions() == rhs.transmissionStitchOptions() &&
-         lhs.stitchParameters() == rhs.stitchParameters() && lhs.m_lookupTable == rhs.m_lookupTable &&
-         lhs.diagnostics() == rhs.diagnostics();
-}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

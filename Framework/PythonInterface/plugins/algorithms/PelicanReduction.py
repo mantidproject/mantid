@@ -36,6 +36,7 @@ from mantid.simpleapi import (
     Rebin,
     ConvertUnits,
     LoadPLN,
+    LoadPLNnxs,
     AlgorithmFactory,
     logger,
 )
@@ -135,9 +136,9 @@ class PelicanReduction(PythonAlgorithm):
 
         self.declareProperty(
             name="Processing",
-            defaultValue="SOFQW1-Centre",
-            validator=StringListValidator(["SOFQW1-Centre", "SOFQW3-NormalisedPolygon", "NXSPE"]),
-            doc="Convert to SOFQW or save file as NXSPE, note SOFQW3 is more accurate but much slower than SOFQW1.",
+            defaultValue="SOFQW3-NormalisedPolygon",
+            validator=StringListValidator(["SOFQW3-NormalisedPolygon", "NXSPE"]),
+            doc="Convert to SOFQW or save file as NXSPE",
         )
 
         self.declareProperty(name="LambdaOnTwoMode", defaultValue=False, doc="Set if instrument running in lambda on two mode.")
@@ -329,7 +330,13 @@ class PelicanReduction(PythonAlgorithm):
         # the instrument offers a lambda on two mode which effectively
         # halves the neutron wavelength, the captured raw data stores the
         # nominal wavelength so it needs to be divided by 2
-        tags = [HdfKey("wavelength", "/entry1/instrument/crystal/wavelength", None), HdfKey("mscor", "/entry1/sample/mscor", [0.0])]
+        if sample_path.endswith(".nxs"):
+            tags = [
+                HdfKey("wavelength", "/entry1/instrument/crystal/wavelength/value", None),
+                HdfKey("mscor", "/entry1/sample/mscor/value", [0.0]),
+            ]
+        else:
+            tags = [HdfKey("wavelength", "/entry1/instrument/crystal/wavelength", None), HdfKey("mscor", "/entry1/sample/mscor", [0.0])]
         values, _ = extract_hdf_params(sample_path, tags)
         if self._lambda_on_two:
             wavelength = 0.5 * float(values["wavelength"][0])
@@ -376,7 +383,7 @@ class PelicanReduction(PythonAlgorithm):
         processing = self.getPropertyValue("Processing").split("-")
         self._processing = processing[0]
         self._sofqw_mode = processing[1] if len(processing) > 1 else ""
-        self._process_suffix = {"SOFQW1": "_qw1", "SOFQW3": "_qw3", "NXSPE": "_spe"}
+        self._process_suffix = {"SOFQW3": "_qw3", "NXSPE": "_spe"}
 
         # from the configuration (ini) file and then
         # from the run properties for the sample
@@ -445,6 +452,9 @@ class PelicanReduction(PythonAlgorithm):
             "TimeOfFlightBias": self._tof_correction,
             "LambdaOnTwoMode": self._lambda_on_two,
         }
+        # if it is an nxs file then remove the BinaryEventPath option as it is not needed
+        if self._file_extn.endswith(".nxs"):
+            del self._analyse_load_opts["BinaryEventPath"]
 
         self._filter_ws = FilterPixelsTubes(self._analyse_tubes, self._pixel_range, self._pixels_per_tube, 0)
 
@@ -574,8 +584,10 @@ class PelicanReduction(PythonAlgorithm):
         else:
             params.append(("TimeOfFlightBias", "TOFCorrection", 1.0))
 
+        loader = LoadPLNnxs if self._file_extn.endswith(".nxs") else LoadPLN
+
         load_merge(
-            LoadPLN,
+            loader,
             runs,
             output_ws,
             lopts,

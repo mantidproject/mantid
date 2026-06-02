@@ -96,8 +96,8 @@ public:
   virtual void disablePolarizationCorrections() = 0;
   virtual void enablePolarizationEfficiencies() = 0;
   virtual void disablePolarizationEfficiencies() = 0;
-  virtual void enableFredrikzeSpinStateOrder() = 0;
-  virtual void disableFredrikzeSpinStateOrder() = 0;
+  virtual void enableInputSpinStateOrder() = 0;
+  virtual void disableInputSpinStateOrder() = 0;
   virtual void enableFloodCorrectionInputs() = 0;
   virtual void disableFloodCorrectionInputs() = 0;
 
@@ -122,8 +122,8 @@ public:
   virtual std::string getPolarizationEfficienciesFilePath() const = 0;
   virtual void setPolarizationEfficienciesWorkspace(std::string const &workspace) = 0;
   virtual void setPolarizationEfficienciesFilePath(std::string const &filePath) = 0;
-  virtual std::string getFredrikzeSpinStateOrder() const = 0;
-  virtual void setFredrikzeSpinStateOrder(std::string const &spinStates) = 0;
+  virtual std::string getInputSpinStateOrder() const = 0;
+  virtual void setInputSpinStateOrder(std::string const &spinStates) = 0;
 
   virtual std::string getFloodCorrectionType() const = 0;
   virtual void setFloodCorrectionType(std::string const &correction) = 0;

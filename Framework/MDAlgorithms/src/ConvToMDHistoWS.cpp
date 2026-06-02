@@ -25,11 +25,12 @@ matrtix workspace and the transformations, necessary to perform on these
 workspaces
 @param inWSWrapper -- the class wrapping the target MD workspace
 @param ignoreZeros  -- if zero value signals should be rejected
+@param useLogTimes -- if log values at event pulse time are used (ignored in this method)
 */
 size_t ConvToMDHistoWS::initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
-                                   bool ignoreZeros) {
+                                   bool ignoreZeros, bool useLogTimes) {
 
-  size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros);
+  size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros, useLogTimes);
 
   // check if we indeed have matrix workspace as input.
   DataObjects::Workspace2D_const_sptr pWS2D = std::dynamic_pointer_cast<const DataObjects::Workspace2D>(m_InWS2D);

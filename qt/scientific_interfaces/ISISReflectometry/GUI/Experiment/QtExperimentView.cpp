@@ -299,7 +299,7 @@ void QtExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.transScaleRHSCheckBox->setEnabled(enabled);
   m_polCorrEfficienciesWsSelector->setEnabled(enabled);
   m_polCorrEfficienciesLineEdit->setEnabled(enabled);
-  m_ui.polCorrFredrikzeSpinStateEdit->setEnabled(enabled);
+  m_ui.polCorrSpinStateEdit->setEnabled(enabled);
   stitchOptionsLineEdit().setEnabled(enabled);
   m_ui.reductionTypeComboBox->setEnabled(enabled);
   m_ui.summationTypeComboBox->setEnabled(enabled);
@@ -334,7 +334,7 @@ void QtExperimentView::registerExperimentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
   registerSettingWidget(*m_polCorrEfficienciesWsSelector, "PolarizationEfficiencies", alg);
   registerSettingWidget(*m_polCorrEfficienciesLineEdit, "PolarizationEfficiencies", alg);
-  registerSettingWidget(*m_ui.polCorrFredrikzeSpinStateEdit, "FredrikzePolarizationSpinStateOrder", alg);
+  registerSettingWidget(*m_ui.polCorrSpinStateEdit, "PolarizationCorrectionInputSpinStateOrder", alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
   registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins", alg);
@@ -365,7 +365,7 @@ void QtExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.polCorrComboBox);
   connectSettingsChange(*m_polCorrEfficienciesWsSelector);
   connectSettingsChange(*m_polCorrEfficienciesLineEdit);
-  connectSettingsChange(*m_ui.polCorrFredrikzeSpinStateEdit);
+  connectSettingsChange(*m_ui.polCorrSpinStateEdit);
   connectSettingsChange(stitchOptionsLineEdit());
   connectSettingsChange(*m_ui.reductionTypeComboBox);
   connectSettingsChange(*m_ui.includePartialBinsCheckBox);
@@ -391,7 +391,7 @@ void QtExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.polCorrComboBox);
   disconnectSettingsChange(*m_polCorrEfficienciesWsSelector);
   disconnectSettingsChange(*m_polCorrEfficienciesLineEdit);
-  disconnectSettingsChange(*m_ui.polCorrFredrikzeSpinStateEdit);
+  disconnectSettingsChange(*m_ui.polCorrSpinStateEdit);
   disconnectSettingsChange(stitchOptionsLineEdit());
   disconnectSettingsChange(*m_ui.reductionTypeComboBox);
   disconnectSettingsChange(*m_ui.includePartialBinsCheckBox);
@@ -588,14 +588,14 @@ void QtExperimentView::disablePolarizationEfficiencies() {
   m_ui.polCorrEfficienciesLabel->setEnabled(false);
 }
 
-void QtExperimentView::enableFredrikzeSpinStateOrder() {
-  m_ui.polCorrFredrikzeSpinStateLabel->setEnabled(true);
-  m_ui.polCorrFredrikzeSpinStateEdit->setEnabled(true);
+void QtExperimentView::enableInputSpinStateOrder() {
+  m_ui.polCorrSpinStateLabel->setEnabled(true);
+  m_ui.polCorrSpinStateEdit->setEnabled(true);
 }
 
-void QtExperimentView::disableFredrikzeSpinStateOrder() {
-  m_ui.polCorrFredrikzeSpinStateLabel->setEnabled(false);
-  m_ui.polCorrFredrikzeSpinStateEdit->setEnabled(false);
+void QtExperimentView::disableInputSpinStateOrder() {
+  m_ui.polCorrSpinStateLabel->setEnabled(false);
+  m_ui.polCorrSpinStateEdit->setEnabled(false);
 }
 
 void QtExperimentView::disableFloodCorrectionInputs() {
@@ -851,12 +851,10 @@ void QtExperimentView::setPolarizationEfficienciesFilePath(std::string const &fi
   setText(*m_polCorrEfficienciesLineEdit, filePath);
 }
 
-std::string QtExperimentView::getFredrikzeSpinStateOrder() const {
-  return getText(*m_ui.polCorrFredrikzeSpinStateEdit);
-}
+std::string QtExperimentView::getInputSpinStateOrder() const { return getText(*m_ui.polCorrSpinStateEdit); }
 
-void QtExperimentView::setFredrikzeSpinStateOrder(std::string const &spinStates) {
-  setText(*m_ui.polCorrFredrikzeSpinStateEdit, spinStates);
+void QtExperimentView::setInputSpinStateOrder(std::string const &spinStates) {
+  setText(*m_ui.polCorrSpinStateEdit, spinStates);
 }
 
 std::string QtExperimentView::getStitchOptions() const { return getText(stitchOptionsLineEdit()); }

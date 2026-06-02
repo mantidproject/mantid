@@ -1,0 +1,6 @@
+.. note::
+
+   To run these usage examples please first download the
+   `usage data <https://sourceforge.net/projects/mantid/files/Sample%20Data/UsageData.zip/download>`_,
+   and add these to your path.
+   In Mantid this is done using :ref:`ManageUserDirectories`.

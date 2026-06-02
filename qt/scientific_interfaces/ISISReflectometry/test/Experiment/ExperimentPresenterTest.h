@@ -1055,8 +1055,8 @@ private:
                      PolarizationCorrectionType::Workspace);
   }
 
-  void assertFredrikzeSpinStateOrder(ExperimentPresenter const &presenter, std::string const &expected = "") {
-    TS_ASSERT_EQUALS(presenter.experiment().polarizationCorrections().fredrikzeSpinStateOrder(), expected);
+  void assertInputSpinStateOrder(ExperimentPresenter const &presenter, std::string const &expected = "") {
+    TS_ASSERT_EQUALS(presenter.experiment().polarizationCorrections().inputSpinStateOrder(), expected);
   }
 
   void assertFloodCorrectionUsesParameterFile(ExperimentPresenter const &presenter) {
@@ -1106,13 +1106,13 @@ private:
 
     EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("ParameterFile"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(0);
-    EXPECT_CALL(m_view, getFredrikzeSpinStateOrder()).Times(0);
+    EXPECT_CALL(m_view, getInputSpinStateOrder()).Times(1).WillOnce(Return("00,01,10,11"));
     EXPECT_CALL(m_view, disablePolarizationEfficiencies()).Times(1);
 
     presenter.notifySettingsChanged();
 
     assertPolarizationAnalysisParameterFile(presenter);
-    assertFredrikzeSpinStateOrder(presenter, "");
+    assertInputSpinStateOrder(presenter, "00,01,10,11");
   }
 
   void runTestThatPolarizationCorrectionsUsesWorkspace() {
@@ -1120,14 +1120,14 @@ private:
 
     EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("Workspace"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return("test_ws"));
-    EXPECT_CALL(m_view, getFredrikzeSpinStateOrder()).Times(1).WillOnce(Return("aa,pp,pa,ap"));
+    EXPECT_CALL(m_view, getInputSpinStateOrder()).Times(1).WillOnce(Return("aa,pp,pa,ap"));
     EXPECT_CALL(m_view, setPolarizationEfficienciesWorkspaceMode()).Times(1);
     EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
 
     presenter.notifySettingsChanged();
 
     assertPolarizationAnalysisWorkspace(presenter);
-    assertFredrikzeSpinStateOrder(presenter, "aa,pp,pa,ap");
+    assertInputSpinStateOrder(presenter, "aa,pp,pa,ap");
   }
 
   void runTestThatPolarizationCorrectionsUsesFilePath() {
@@ -1135,14 +1135,14 @@ private:
 
     EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("FilePath"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesFilePath()).Times(1).WillOnce(Return("path/to/test_ws.nxs"));
-    EXPECT_CALL(m_view, getFredrikzeSpinStateOrder()).Times(1).WillOnce(Return("pp,aa,ap,pa"));
+    EXPECT_CALL(m_view, getInputSpinStateOrder()).Times(1).WillOnce(Return("pp,aa,ap,pa"));
     EXPECT_CALL(m_view, setPolarizationEfficienciesFilePathMode()).Times(1);
     EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
 
     presenter.notifySettingsChanged();
 
     assertPolarizationAnalysisWorkspace(presenter);
-    assertFredrikzeSpinStateOrder(presenter, "pp,aa,ap,pa");
+    assertInputSpinStateOrder(presenter, "pp,aa,ap,pa");
   }
 
   void runWithFloodCorrectionInputsDisabled(std::string const &type) {

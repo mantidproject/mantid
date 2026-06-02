@@ -1,0 +1,1 @@
+- :ref:`LoadPLNnxs <algm-LoadPLNnxs>` supports loading ANSTO PELICAN data collected with the AESS framework.

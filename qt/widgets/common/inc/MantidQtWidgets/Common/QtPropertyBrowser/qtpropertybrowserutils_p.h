@@ -103,9 +103,7 @@
 #include <QStringList>
 #include <QWidget>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 class QMouseEvent;
 class QCheckBox;
@@ -198,6 +196,4 @@ private:
   QLineEdit *m_lineEdit;
 };
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

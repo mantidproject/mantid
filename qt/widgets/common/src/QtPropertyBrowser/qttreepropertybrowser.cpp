@@ -107,9 +107,7 @@ QString translateUtf8Encoded(const char *context, const char *key, const char *d
 }
 } // namespace
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 class QtPropertyEditorView;
 
@@ -996,6 +994,4 @@ QTreeWidget *QtTreePropertyBrowser::treeWidget() { return d_ptr->treeWidget(); }
 
 void QtTreePropertyBrowser::closeEditor() { d_ptr->closeEditor(); }
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

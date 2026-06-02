@@ -86,8 +86,8 @@ public:
   std::string getPolarizationEfficienciesFilePath() const override;
   void setPolarizationEfficienciesWorkspace(std::string const &workspace) override;
   void setPolarizationEfficienciesFilePath(std::string const &filePath) override;
-  std::string getFredrikzeSpinStateOrder() const override;
-  void setFredrikzeSpinStateOrder(std::string const &spinStates) override;
+  std::string getInputSpinStateOrder() const override;
+  void setInputSpinStateOrder(std::string const &spinStates) override;
 
   std::string getFloodCorrectionType() const override;
   void setFloodCorrectionType(std::string const &correction) override;
@@ -128,8 +128,8 @@ public:
   void disablePolarizationCorrections() override;
   void enablePolarizationEfficiencies() override;
   void disablePolarizationEfficiencies() override;
-  void enableFredrikzeSpinStateOrder() override;
-  void disableFredrikzeSpinStateOrder() override;
+  void enableInputSpinStateOrder() override;
+  void disableInputSpinStateOrder() override;
 
   void enableFloodCorrectionInputs() override;
   void disableFloodCorrectionInputs() override;

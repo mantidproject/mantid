@@ -224,6 +224,10 @@ class KeyHandler:
         """Called to disconnect from the axes events"""
         self.plotter.image_axes.figure.canvas.mpl_disconnect(self._key_cid)
 
+    def on_data_updated(self):
+        """Called when the underlying image data changes. Subclasses override to refresh line plots."""
+        pass
+
     def status_message(self):
         """
         Return a status message to display when this tool is active
@@ -302,6 +306,10 @@ class PixelLinePlot(CursorTracker, KeyHandler):
         self._plotter.delete_line_plot_lines()
         self._cursor_pos = None
 
+    def on_data_updated(self):
+        if self._cursor_pos is not None:
+            self.on_cursor_at(*self._cursor_pos)
+
     # KeyHandler interface
     def handle_key(self, key):
         """
@@ -372,21 +380,30 @@ class RectangleSelectionLinePlot(KeyHandler):
         if key in ("c", "x", "y"):
             self.exporter.export_cut(limits, cut_type=key)
 
+    def on_data_updated(self):
+        if not self._selector.artists[0].get_visible():
+            return
+        rect = self._selector._selection_artist
+        ll_x, ll_y = rect.get_xy()
+        self._plot_from_corners(ll_x, ll_y, ll_x + rect.get_width(), ll_y + rect.get_height())
+
     # private api
     def _on_rectangle_selected(self, eclick, erelease):
         """
-        Callback when a rectangle has been draw on the axes
+        Callback when a rectangle has been drawn on the axes
         :param eclick: Event marking where the mouse was clicked
         :param erelease: Event marking where the mouse was released
         """
+        self._plot_from_corners(eclick.xdata, eclick.ydata, erelease.xdata, erelease.ydata)
+
+    def _plot_from_corners(self, x1, y1, x2, y2):
         plotter = self.plotter
-        cinfo_click = cursor_info(plotter.image, eclick.xdata, eclick.ydata)
+        cinfo_click = cursor_info(plotter.image, x1, y1)
         if cinfo_click is None:
             return
-        cinfo_release = cursor_info(plotter.image, erelease.xdata, erelease.ydata)
+        cinfo_release = cursor_info(plotter.image, x2, y2)
         if cinfo_release is None:
             return
-
         arr, (xmin, xmax, ymin, ymax), (imin, jmin), _ = cinfo_click
         imax, jmax = cinfo_release.point
         plotter.plot_x_line(np.linspace(xmin, xmax, arr.shape[1])[jmin:jmax], np.sum(arr[imin:imax, jmin:jmax], axis=0))

@@ -59,6 +59,77 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
         _try_delete_cal_and_focus_dirs(CWDIR)
 
 
+class FocusEventModeBothBanks(systemtesting.MantidSystemTest):
+    def runTest(self):
+        enginx = EnginX(
+            vanadium_run="ENGINX236516",
+            focus_runs=["ENGINX371871"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX193749",
+            group=ENGINX_GROUP.BOTH,
+        )
+        enginx.set_calibration_to_copy_starting_parameters(False)
+        enginx.main(plot_cal=False, plot_foc=False)
+        # store workspaces for validation
+        self._ws_foc = ADS.retrieve("371871_engggui_focusing_output_ws_bank")
+
+    def validate(self):
+        # assert correct number spectra
+        self.assertEqual(self._ws_foc.getNumberHistograms(), 2)
+        # bank 1
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS["North"][UnitParams.difc], delta=6)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS["North"][UnitParams.difa], delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS["North"][UnitParams.tzero], delta=2)
+        # bank 2
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(1)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS["South"][UnitParams.difc], delta=6)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS["South"][UnitParams.difa], delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS["South"][UnitParams.tzero], delta=2)
+        # compare TOF workspaces
+        self.tolerance = 1e-4
+        self.disableChecking.extend(["Instrument"])  # don't check
+        return self._ws_foc.name(), "371871_engggui_focusing_output_ws_bank.nxs"
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
+
+
+class FocusEventModeOneBank(systemtesting.MantidSystemTest):
+    def runTest(self):
+        enginx = EnginX(
+            vanadium_run="ENGINX236516",
+            focus_runs=["ENGINX371871"],
+            save_dir=CWDIR,
+            full_inst_calib_path=FULL_CALIB,
+            ceria_run="ENGINX193749",
+            group=ENGINX_GROUP.NORTH,
+        )
+        enginx.set_calibration_to_copy_starting_parameters(False)
+        enginx.main(plot_cal=False, plot_foc=False)
+        # store workspaces for validation
+        self._ws_foc = ADS.retrieve("371871_engggui_focusing_output_ws_bank_1")
+
+    def validate(self):
+        # assert correct number spectra
+        self.assertEqual(self._ws_foc.getNumberHistograms(), 1)
+        # bank 1
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS["North"][UnitParams.difc], delta=6)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS["North"][UnitParams.difa], delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS["North"][UnitParams.tzero], delta=2)
+        # compare TOF workspaces
+        self.tolerance = 1e-6
+        self.disableChecking.extend(["Instrument"])  # don't check
+        return self._ws_foc.name(), "371871_engggui_focusing_output_ws_bank_1.nxs"
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
+
+
 class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
     def runTest(self):
         enginx = EnginX(
