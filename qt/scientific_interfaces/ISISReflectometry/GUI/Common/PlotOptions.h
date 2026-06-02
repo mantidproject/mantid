@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+class QWidget;
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 enum class PlotOutputType { ReflectivityCurve, DetectorMap, SpinAsymmetry, Alignment };
@@ -66,6 +68,7 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions {
 struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotRequest {
   std::vector<std::string> workspaces;
   PlotOptions options;
+  QWidget *parentWidget{nullptr};
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions reflectivityCurvePlotOptions(PlotOutputType outputType, PlotLayout layout);

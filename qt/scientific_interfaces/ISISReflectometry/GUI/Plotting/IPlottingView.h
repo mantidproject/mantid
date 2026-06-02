@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+class QWidget;
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PlottingViewSubscriber {
@@ -32,6 +34,8 @@ public:
   virtual std::vector<std::string> selectedWorkspaceNames() const = 0;
   virtual PlotOutputType selectedPlotOutputType() const = 0;
   virtual PlotOutputOptions selectedPlotOutputOptions() const = 0;
+  virtual QWidget *plotParent() = 0;
+  virtual bool confirmPlottingMultipleItems(size_t plotCount) const = 0;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -5,9 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtPlottingView.h"
+#include "WorkspaceTreeView.h"
 #include <QBrush>
 #include <QColor>
 #include <QComboBox>
+#include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPushButton>
@@ -62,6 +64,40 @@ PlotSelectionBehaviour selectionBehaviour(PlotOutputType outputType) {
     return freeSelectionBehaviour();
   }
   throw std::runtime_error("Unexpected reflectometry plot output type.");
+}
+
+bool plotOutputTypeSupportsOverplot(PlotOutputType outputType) { return outputType != PlotOutputType::DetectorMap; }
+
+bool plotOutputTypeRequiresWorkspaceGroupsForMultiPlot(PlotOutputType outputType) {
+  return outputType == PlotOutputType::SpinAsymmetry;
+}
+
+size_t minimumSelectedItemsForMultiPlot(PlotOutputType /* outputType */) { return 2; }
+
+bool hasSelectedItems(size_t selectedItemCount) { return selectedItemCount > 0; }
+
+bool hasEnoughSelectedItemsForMultiPlot(size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
+                                        PlotOutputType outputType) {
+  if (plotOutputTypeRequiresWorkspaceGroupsForMultiPlot(outputType)) {
+    return selectedWorkspaceGroupCount >= minimumSelectedItemsForMultiPlot(outputType);
+  }
+  return selectedItemCount >= minimumSelectedItemsForMultiPlot(outputType);
+}
+
+bool shouldEnablePlotIndividual(bool outputOptionsEnabled, size_t selectedItemCount) {
+  return outputOptionsEnabled && hasSelectedItems(selectedItemCount);
+}
+
+bool shouldEnablePlotOverplot(bool outputOptionsEnabled, size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
+                              PlotOutputType outputType) {
+  return outputOptionsEnabled && plotOutputTypeSupportsOverplot(outputType) &&
+         hasEnoughSelectedItemsForMultiPlot(selectedItemCount, selectedWorkspaceGroupCount, outputType);
+}
+
+bool shouldEnablePlotTiled(bool outputOptionsEnabled, size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
+                           PlotOutputType outputType) {
+  return outputOptionsEnabled &&
+         hasEnoughSelectedItemsForMultiPlot(selectedItemCount, selectedWorkspaceGroupCount, outputType);
 }
 
 QString displayName(PlotOutputType outputType) {
@@ -216,9 +252,13 @@ void QtPlottingView::setOutputOptionControlsEnabled(bool enabled) {
 
 void QtPlottingView::updatePlotButtonEnabledStates() {
   auto const selectedWorkspaceCount = selectedWorkspaceNames().size();
-  m_ui.plotIndividual->setEnabled(m_outputOptionsEnabled && selectedWorkspaceCount > 0);
-  m_ui.plotOverplot->setEnabled(m_outputOptionsEnabled && selectedWorkspaceCount > 1);
-  m_ui.plotTiled->setEnabled(m_outputOptionsEnabled && selectedWorkspaceCount > 1);
+  auto const selectedWorkspaceGroupCount = selectedWorkspaceGroupCountForCurrentPlotOutputType();
+  auto const plotOutputType = selectedPlotOutputType();
+  m_ui.plotIndividual->setEnabled(shouldEnablePlotIndividual(m_outputOptionsEnabled, selectedWorkspaceCount));
+  m_ui.plotOverplot->setEnabled(shouldEnablePlotOverplot(m_outputOptionsEnabled, selectedWorkspaceCount,
+                                                         selectedWorkspaceGroupCount, plotOutputType));
+  m_ui.plotTiled->setEnabled(shouldEnablePlotTiled(m_outputOptionsEnabled, selectedWorkspaceCount,
+                                                   selectedWorkspaceGroupCount, plotOutputType));
 }
 
 void QtPlottingView::updatePlotOutputProperties() {
@@ -252,11 +292,21 @@ void QtPlottingView::setWorkspaceItemsMutedForCurrentPlotOutputType() {
 void QtPlottingView::setWorkspaceItemsMutedForCurrentPlotOutputType(QStandardItem *parent) {
   for (auto row = 0; row < parent->rowCount(); ++row) {
     auto const itemTypeItem = parent->child(row, ItemTypeColumn);
-    auto const itemLabel = parent->child(row, ItemColumn);
-    itemLabel->setForeground(isSelectableForCurrentPlotOutputType(itemTypeItem->index()) ? QBrush()
-                                                                                         : QBrush(metadataTextColour));
+    setWorkspaceItemMuted(parent, row, !isSelectableForCurrentPlotOutputType(itemTypeItem->index()));
     setWorkspaceItemsMutedForCurrentPlotOutputType(itemTypeItem);
   }
+}
+
+void QtPlottingView::setWorkspaceItemMuted(QStandardItem *parent, int row, bool muted) {
+  auto const background = muted ? QBrush(WorkspaceTree::mutedBackgroundColour()) : QBrush();
+  for (auto column = 0; column < parent->columnCount(); ++column) {
+    auto *item = parent->child(row, column);
+    item->setBackground(background);
+    item->setData(muted, WorkspaceTree::mutedRole);
+  }
+
+  auto const itemLabel = parent->child(row, ItemColumn);
+  itemLabel->setForeground(muted ? QBrush(metadataTextColour) : QBrush());
 }
 
 bool QtPlottingView::eventFilter(QObject *watched, QEvent *event) {
@@ -302,6 +352,18 @@ void QtPlottingView::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeIte
   }
 }
 
+size_t QtPlottingView::selectedWorkspaceGroupCountForCurrentPlotOutputType() const {
+  auto count = size_t{0};
+  for (auto const &index : m_ui.workspaceTree->selectionModel()->selectedRows()) {
+    auto const selectedIndex = itemIndex(index);
+    if (itemType(selectedIndex) == PlottingWorkspaceTreeItemType::WorkspaceGroup &&
+        isSelectableForCurrentPlotOutputType(selectedIndex)) {
+      ++count;
+    }
+  }
+  return count;
+}
+
 std::vector<std::string> QtPlottingView::selectedWorkspaceNames() const {
   auto workspaces = std::vector<std::string>{};
   for (auto const &index : m_ui.workspaceTree->selectionModel()->selectedRows()) {
@@ -321,6 +383,14 @@ PlotOutputOptions QtPlottingView::selectedPlotOutputOptions() const {
   return {selectedPlotOutputType(), static_cast<DetectorMapXAxis>(m_ui.detectorMapXAxis->currentData().toInt()),
           static_cast<DetectorMapYAxis>(m_ui.detectorMapYAxis->currentData().toInt()),
           static_cast<AlignmentXAxis>(m_ui.alignmentXAxis->currentData().toInt())};
+}
+
+QWidget *QtPlottingView::plotParent() { return window(); }
+
+bool QtPlottingView::confirmPlottingMultipleItems(size_t plotCount) const {
+  auto const message = QString("This will plot %1 items. Continue?").arg(plotCount);
+  return QMessageBox::warning(const_cast<QtPlottingView *>(this), "Create multiple plots", message,
+                              QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Ok;
 }
 
 bool QtPlottingView::isWorkspaceItem(QModelIndex const &index) const { return m_workspaceModel.rowCount(index) == 0; }

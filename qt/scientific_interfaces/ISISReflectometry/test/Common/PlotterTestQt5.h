@@ -13,6 +13,7 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/WrapPython.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
+#include <QWidget>
 #include <boost/python/extract.hpp>
 #include <cxxtest/TestSuite.h>
 
@@ -60,6 +61,19 @@ public:
                       MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Overplot)});
 
     TS_ASSERT_EQUALS(figureCount(), 2);
+  }
+
+  void testReflectometryPlotWithParentWindowDoesNotThrow() {
+    createWorkspace("ws1");
+    QWidget parent;
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    TS_ASSERT_THROWS_NOTHING(
+        plotter.plot({{"ws1"},
+                      MantidQt::CustomInterfaces::ISISReflectometry::reflectivityCurvePlotOptions(
+                          MantidQt::CustomInterfaces::ISISReflectometry::PlotOutputType::ReflectivityCurve,
+                          MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Individual),
+                      &parent}));
   }
 
   void testSpinAsymmetryPlotUsesConfiguredYAxisLabel() {

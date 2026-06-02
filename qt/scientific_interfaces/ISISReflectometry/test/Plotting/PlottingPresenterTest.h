@@ -15,6 +15,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
+#include <QWidget>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -34,6 +35,8 @@ public:
   MOCK_CONST_METHOD0(selectedWorkspaceNames, std::vector<std::string>());
   MOCK_CONST_METHOD0(selectedPlotOutputType, PlotOutputType());
   MOCK_CONST_METHOD0(selectedPlotOutputOptions, PlotOutputOptions());
+  MOCK_METHOD0(plotParent, QWidget *());
+  MOCK_CONST_METHOD1(confirmPlottingMultipleItems, bool(size_t));
 };
 
 class MockPlottingModel : public IPlottingModel {
@@ -403,6 +406,78 @@ public:
     presenter.notifyPlotIndividualClicked();
   }
 
+  void testPlotIndividualPassesPlotParentToPlotter() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    QWidget plotParent;
+    auto const workspaces = std::vector<std::string>{"IvsQ_12345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
+    auto const options = reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Individual);
+
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(view, plotParent()).Times(1).WillOnce(Return(&plotParent));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
+        .Times(1)
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(plotter, plot(PlotRequest{{"IvsQ_12345"}, options, &plotParent})).Times(1);
+
+    presenter.notifyPlotIndividualClicked();
+  }
+
+  void testPlotIndividualWarnsAndCancelsWhenPlottingFiveItems() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    auto const workspaces =
+        std::vector<std::string>{"IvsQ_12345", "IvsQ_22345", "IvsQ_32345", "IvsQ_42345", "IvsQ_52345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
+
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(view, plotParent()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
+        .Times(1)
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(view, confirmPlottingMultipleItems(5)).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(0);
+
+    presenter.notifyPlotIndividualClicked();
+  }
+
+  void testPlotIndividualContinuesWhenFiveItemWarningIsAccepted() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    auto const workspaces =
+        std::vector<std::string>{"IvsQ_12345", "IvsQ_22345", "IvsQ_32345", "IvsQ_42345", "IvsQ_52345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
+
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(view, plotParent()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
+        .Times(1)
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(view, confirmPlottingMultipleItems(5)).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(5);
+
+    presenter.notifyPlotIndividualClicked();
+  }
+
   void testPlotOverplotPlotsSelectedWorkspaces() {
     NiceMock<MockPlottingView> view;
     NiceMock<MockPlotter> plotter;
@@ -426,6 +501,30 @@ public:
     presenter.notifyPlotOverplotClicked();
   }
 
+  void testPlotOverplotWarnsAndCancelsWhenPlottingFiveItems() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    auto const workspaces =
+        std::vector<std::string>{"IvsQ_12345", "IvsQ_22345", "IvsQ_32345", "IvsQ_42345", "IvsQ_52345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
+
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(view, plotParent()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
+        .Times(1)
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(view, confirmPlottingMultipleItems(5)).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(0);
+
+    presenter.notifyPlotOverplotClicked();
+  }
+
   void testPlotTiledPlotsSelectedWorkspaces() {
     NiceMock<MockPlottingView> view;
     NiceMock<MockPlotter> plotter;
@@ -445,6 +544,30 @@ public:
     EXPECT_CALL(plotter, plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve,
                                                                                    PlotLayout::Tiled)}))
         .Times(1);
+
+    presenter.notifyPlotTiledClicked();
+  }
+
+  void testPlotTiledWarnsAndCancelsWhenPlottingFiveItems() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    auto const workspaces =
+        std::vector<std::string>{"IvsQ_12345", "IvsQ_22345", "IvsQ_32345", "IvsQ_42345", "IvsQ_52345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
+
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(view, plotParent()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
+        .Times(1)
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(view, confirmPlottingMultipleItems(5)).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(plotter, plot(testing::_)).Times(0);
 
     presenter.notifyPlotTiledClicked();
   }

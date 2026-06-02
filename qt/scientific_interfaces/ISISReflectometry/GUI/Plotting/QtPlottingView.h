@@ -27,6 +27,8 @@ public:
   std::vector<std::string> selectedWorkspaceNames() const override;
   PlotOutputType selectedPlotOutputType() const override;
   PlotOutputOptions selectedPlotOutputOptions() const override;
+  QWidget *plotParent() override;
+  bool confirmPlottingMultipleItems(size_t plotCount) const override;
 
 protected:
   bool eventFilter(QObject *watched, QEvent *event) override;
@@ -41,7 +43,9 @@ private:
   void clearWorkspaceSelection();
   void setWorkspaceItemsMutedForCurrentPlotOutputType();
   void setWorkspaceItemsMutedForCurrentPlotOutputType(QStandardItem *parent);
+  void setWorkspaceItemMuted(QStandardItem *parent, int row, bool muted);
   void addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item);
+  size_t selectedWorkspaceGroupCountForCurrentPlotOutputType() const;
   QModelIndex itemIndex(QModelIndex const &index) const;
   PlottingWorkspaceTreeItemType itemType(QModelIndex const &index) const;
   PlottingWorkspaceOutputType outputType(QModelIndex const &index) const;

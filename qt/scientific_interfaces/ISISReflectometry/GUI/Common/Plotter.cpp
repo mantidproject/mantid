@@ -14,12 +14,15 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
+#include "MantidQtWidgets/Common/Python/Sip.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
 
 #include <QHash>
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#include <QWidget>
+#include <QWindow>
 
 #include <algorithm>
 #include <functional>
@@ -161,6 +164,36 @@ void addHorizontalMarkers(MantidQt::Widgets::Common::Python::Object const &figur
   }
 }
 
+void setPlotWindowParent(MantidQt::Widgets::Common::Python::Object const &figure, QWidget *parent) {
+  using namespace MantidQt::Widgets::Common;
+
+  if (!parent)
+    return;
+
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  try {
+    auto const canvas = Python::Object(figure.attr("canvas"));
+    auto const manager = Python::Object(canvas.attr("manager"));
+    if (PyObject_HasAttrString(manager.ptr(), "window") == 0)
+      return;
+
+    auto const window = Python::Object(manager.attr("window"));
+    auto *plotWindow = Python::address<QWidget>(window);
+    if (!plotWindow)
+      return;
+
+    auto *plotWindowHandle = plotWindow->windowHandle();
+    auto *parentWindowHandle = parent->windowHandle();
+    if (!plotWindowHandle || !parentWindowHandle)
+      return;
+
+    plotWindowHandle->setTransientParent(parentWindowHandle);
+    plotWindow->raise();
+  } catch (Python::ErrorAlreadySet &) {
+    throw Mantid::PythonInterface::PythonException();
+  }
+}
+
 MantidQt::Widgets::Common::Python::Object createSubplots(size_t const plotCount) {
   using namespace MantidQt::Widgets::Common;
 
@@ -226,6 +259,7 @@ void Plotter::plot(PlotRequest const &request) const {
   if (options.plotStyle == PlotStyle::Colorfill) {
     auto const figure = pcolormesh(toQStringList(actualWorkspaces));
     applyColorfillAxisLabels(figure, options);
+    setPlotWindowParent(figure, request.parentWidget);
     return;
   }
 
@@ -245,6 +279,7 @@ void Plotter::plot(PlotRequest const &request) const {
   applyAxisLabels(figure, options);
   if (options.horizontalMarker)
     addHorizontalMarkers(figure, *options.horizontalMarker);
+  setPlotWindowParent(figure, request.parentWidget);
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

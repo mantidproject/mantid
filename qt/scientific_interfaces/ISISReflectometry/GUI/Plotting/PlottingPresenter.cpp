@@ -21,6 +21,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
 using SelectionMap = std::unordered_map<std::string, PlottingWorkspaceSelection>;
+auto constexpr multiplePlotItemWarningThreshold = 5;
 
 Mantid::API::Workspace_sptr retrieveWorkspaceIfPresent(std::string const &workspaceName) {
   if (workspaceName.empty()) {
@@ -256,14 +257,20 @@ void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) const {
   }
 
   auto const options = m_plotOptionsProvider->optionsFor(outputOptions, layout);
+  auto *plotParent = m_view->plotParent();
+  if (workspacesToPlot.size() >= multiplePlotItemWarningThreshold &&
+      !m_view->confirmPlottingMultipleItems(workspacesToPlot.size())) {
+    return;
+  }
+
   if (layout == PlotLayout::Individual) {
     for (auto const &workspace : workspacesToPlot) {
-      m_plotter->plot({{workspace}, options});
+      m_plotter->plot({{workspace}, options, plotParent});
     }
     return;
   }
 
-  m_plotter->plot({workspacesToPlot, options});
+  m_plotter->plot({workspacesToPlot, options, plotParent});
 }
 
 void PlottingPresenter::updateWidgetEnabledState() {

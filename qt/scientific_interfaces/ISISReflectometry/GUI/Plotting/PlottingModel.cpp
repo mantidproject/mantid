@@ -45,6 +45,11 @@ struct GaussianParameters {
   double sigma;
 };
 
+struct WorkspaceGroupSelection {
+  std::string key;
+  std::vector<std::string> workspaceNames;
+};
+
 // Update these - only set for POLREF
 const std::unordered_map<std::string, std::pair<int, int>> instrumentBackgroundIndexRegions{
     {"INTER", {0, 0}}, {"POLREF", {360, 450}}, {"OFFSPEC", {0, 0}}, {"SURF", {0, 0}}, {"CRISP", {0, 0}},
@@ -327,13 +332,22 @@ spinAsymmetryUpDownWorkspaces(std::vector<std::string> const &workspaces) {
   return std::nullopt;
 }
 
-std::string createSpinAsymmetryWorkspace(std::vector<std::string> const &workspaces, size_t index) {
+bool workspaceExists(std::string const &workspaceName) {
+  return Mantid::API::AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+std::string createSpinAsymmetryWorkspace(WorkspaceGroupSelection const &workspaceGroup) {
+  auto const &workspaces = workspaceGroup.workspaceNames;
   auto const upDownWorkspaces = spinAsymmetryUpDownWorkspaces(workspaces);
   if (!upDownWorkspaces) {
     return "";
   }
 
-  auto const outputWorkspace = std::string{spinAsymmetryWorkspacePrefix} + std::to_string(index);
+  auto const outputWorkspace = std::string{spinAsymmetryWorkspacePrefix} + workspaceGroup.key;
+  if (workspaceExists(outputWorkspace)) {
+    return outputWorkspace;
+  }
+
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   auto const upWorkspace = ads.retrieveWS<Mantid::API::MatrixWorkspace>(upDownWorkspaces->first);
   auto const downWorkspace = ads.retrieveWS<Mantid::API::MatrixWorkspace>(upDownWorkspaces->second);
@@ -349,13 +363,13 @@ std::optional<std::string> groupingKey(PlottingWorkspaceSelection const &workspa
   if (workspace.workspaceGroupName.empty()) {
     return std::nullopt;
   }
-  return std::string{"workspace-group:"} + workspace.workspaceGroupName;
+  return workspace.workspaceGroupName;
 }
 
-std::vector<std::vector<std::string>>
+std::vector<WorkspaceGroupSelection>
 workspaceGroups(std::vector<PlottingWorkspaceSelection> const &selectedWorkspaces) {
   auto keys = std::vector<std::string>{};
-  auto groupedWorkspaces = std::vector<std::vector<std::string>>{};
+  auto groupedWorkspaces = std::vector<WorkspaceGroupSelection>{};
   for (auto const &workspace : selectedWorkspaces) {
     auto const key = groupingKey(workspace);
     if (!key) {
@@ -364,9 +378,9 @@ workspaceGroups(std::vector<PlottingWorkspaceSelection> const &selectedWorkspace
     auto const keyIter = std::find(keys.cbegin(), keys.cend(), *key);
     if (keyIter == keys.cend()) {
       keys.emplace_back(*key);
-      groupedWorkspaces.push_back({workspace.workspaceName});
+      groupedWorkspaces.push_back({*key, {workspace.workspaceName}});
     } else {
-      groupedWorkspaces[std::distance(keys.cbegin(), keyIter)].emplace_back(workspace.workspaceName);
+      groupedWorkspaces[std::distance(keys.cbegin(), keyIter)].workspaceNames.emplace_back(workspace.workspaceName);
     }
   }
   return groupedWorkspaces;
@@ -384,7 +398,7 @@ std::vector<std::string> selectedWorkspaceNames(std::vector<PlottingWorkspaceSel
 std::vector<std::string> createSpinAsymmetryWorkspaces(std::vector<PlottingWorkspaceSelection> const &workspaces) {
   auto outputWorkspaces = std::vector<std::string>{};
   for (auto const &workspaceGroup : workspaceGroups(workspaces)) {
-    auto outputWorkspace = createSpinAsymmetryWorkspace(workspaceGroup, outputWorkspaces.size());
+    auto outputWorkspace = createSpinAsymmetryWorkspace(workspaceGroup);
     if (!outputWorkspace.empty()) {
       outputWorkspaces.emplace_back(std::move(outputWorkspace));
     }
@@ -392,19 +406,28 @@ std::vector<std::string> createSpinAsymmetryWorkspaces(std::vector<PlottingWorks
   return outputWorkspaces;
 }
 
-std::string safeWorkspaceName(std::string workspaceName) {
-  std::replace_if(
-      workspaceName.begin(), workspaceName.end(),
-      [](unsigned char const character) { return !std::isalnum(character) && character != '_'; }, '_');
-  return workspaceName;
+std::string alignmentXAxisSuffix(AlignmentXAxis const xAxis) {
+  return xAxis == AlignmentXAxis::DetectorId ? "" : "_theta";
 }
 
-std::string alignmentWorkspaceName(PlottingWorkspaceSelection const &workspace) {
-  return std::string{alignmentWorkspacePrefix} + safeWorkspaceName(workspace.workspaceName);
+std::string detectorMapAxisSuffix(DetectorMapXAxis const xAxis, DetectorMapYAxis const yAxis) {
+  auto suffix = std::string{};
+  if (xAxis == DetectorMapXAxis::Lambda) {
+    suffix += "_lambda";
+  }
+  if (yAxis == DetectorMapYAxis::Theta) {
+    suffix += "_theta";
+  }
+  return suffix;
 }
 
-std::string detectorMapWorkspaceName(PlottingWorkspaceSelection const &workspace) {
-  return std::string{detectorMapWorkspacePrefix} + safeWorkspaceName(workspace.workspaceName);
+std::string alignmentWorkspaceName(PlottingWorkspaceSelection const &workspace, AlignmentXAxis const xAxis) {
+  return std::string{alignmentWorkspacePrefix} + workspace.workspaceName + alignmentXAxisSuffix(xAxis);
+}
+
+std::string detectorMapWorkspaceName(PlottingWorkspaceSelection const &workspace, DetectorMapXAxis const xAxis,
+                                     DetectorMapYAxis const yAxis) {
+  return std::string{detectorMapWorkspacePrefix} + workspace.workspaceName + detectorMapAxisSuffix(xAxis, yAxis);
 }
 
 std::string createAlignmentWorkspace(PlottingWorkspaceSelection const &workspace, AlignmentXAxis const xAxis,
@@ -415,7 +438,11 @@ std::string createAlignmentWorkspace(PlottingWorkspaceSelection const &workspace
     return "";
   }
 
-  auto const outputWorkspace = alignmentWorkspaceName(workspace);
+  auto const outputWorkspace = alignmentWorkspaceName(workspace, xAxis);
+  if (workspaceExists(outputWorkspace)) {
+    return outputWorkspace;
+  }
+
   auto const rawProfileWorkspace = outputWorkspace + "_raw_sub_bg";
   auto const fittedPeakWorkspace = outputWorkspace + "_fitted_peak";
   auto const peakCentreWorkspace = outputWorkspace + "_peak_centre";
@@ -464,13 +491,17 @@ std::string createDetectorMapWorkspace(PlottingWorkspaceSelection const &workspa
     return "";
   }
 
+  auto const outputWorkspace = detectorMapWorkspaceName(workspace, xAxis, yAxis);
+  if (workspaceExists(outputWorkspace)) {
+    return outputWorkspace;
+  }
+
   auto detectorMapWorkspace = extractDetectorSpectra(rawWorkspace, instrumentName);
   if (xAxis == DetectorMapXAxis::Lambda) {
     detectorMapWorkspace = convertToWavelength(detectorMapWorkspace);
   }
   setDetectorMapYAxisValues(detectorMapWorkspace, yAxis);
 
-  auto const outputWorkspace = detectorMapWorkspaceName(workspace);
   ads.addOrReplace(outputWorkspace, detectorMapWorkspace);
   return outputWorkspace;
 }

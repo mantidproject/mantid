@@ -12,7 +12,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
-    <widget class="QTreeView" name="workspaceTree">
+    <widget class="MantidQt::CustomInterfaces::ISISReflectometry::WorkspaceTreeView" name="workspaceTree">
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>
      </property>
@@ -115,6 +115,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::ISISReflectometry::WorkspaceTreeView</class>
+   <extends>QTreeView</extends>
+   <header>GUI/Plotting/WorkspaceTreeView.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

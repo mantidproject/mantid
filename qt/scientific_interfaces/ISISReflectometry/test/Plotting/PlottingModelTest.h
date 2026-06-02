@@ -58,9 +58,9 @@ public:
         model.workspacesForPlotting(workspaces, PlotOutputOptions{PlotOutputType::SpinAsymmetry});
 
     TS_ASSERT_EQUALS(workspacesForPlotting.size(), 1);
-    TS_ASSERT_EQUALS(workspacesForPlotting[0], "__isis_refl_spin_asym_0");
-    assertYValue("__isis_refl_spin_asym_0", 0.5);
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_spin_asym_0"));
+    TS_ASSERT_EQUALS(workspacesForPlotting[0], "__isis_refl_spin_asym_polarized_group");
+    assertYValue("__isis_refl_spin_asym_polarized_group", 0.5);
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_spin_asym_polarized_group"));
   }
 
   void testSpinAsymmetryIgnoresWorkspacesWithoutWorkspaceGroupContext() {
@@ -87,8 +87,24 @@ public:
         model.workspacesForPlotting(workspaces, PlotOutputOptions{PlotOutputType::SpinAsymmetry});
 
     TS_ASSERT_EQUALS(workspacesForPlotting.size(), 1);
-    TS_ASSERT_EQUALS(workspacesForPlotting[0], "__isis_refl_spin_asym_0");
-    assertYValue("__isis_refl_spin_asym_0", 0.6);
+    TS_ASSERT_EQUALS(workspacesForPlotting[0], "__isis_refl_spin_asym_polarized_group");
+    assertYValue("__isis_refl_spin_asym_polarized_group", 0.6);
+  }
+
+  void testSpinAsymmetryReusesExistingGeneratedWorkspace() {
+    createConstantWorkspace("up", 6.0);
+    createConstantWorkspace("down", 2.0);
+    auto model = PlottingModel{};
+    auto const workspaces = workspaceSelections({"up", "down"}, "polarized_group");
+
+    model.workspacesForPlotting(workspaces, PlotOutputOptions{PlotOutputType::SpinAsymmetry});
+    auto const firstWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_spin_asym_polarized_group");
+    model.workspacesForPlotting(workspaces, PlotOutputOptions{PlotOutputType::SpinAsymmetry});
+    auto const secondWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_spin_asym_polarized_group");
+
+    TS_ASSERT_EQUALS(firstWorkspace.get(), secondWorkspace.get());
   }
 
   void testSpinAsymmetryReturnsNoWorkspacesForUnsupportedSelectionSize() {
@@ -190,6 +206,23 @@ public:
     assertYValue("__isis_refl_align_IvsQ_12345_2_raw_sub_bg", 9.0, 96);
   }
 
+  void testAlignmentReusesExistingGeneratedWorkspace() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100, 7.0));
+    createTOFGroup({"raw_input_name"});
+    auto model = PlottingModel{};
+    auto const workspaces = workspaceSelections({"IvsQ_12345"});
+
+    model.workspacesForPlotting(workspaces, alignmentOutputOptions());
+    auto const firstWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(
+        "__isis_refl_align_IvsQ_12345");
+    model.workspacesForPlotting(workspaces, alignmentOutputOptions());
+    auto const secondWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(
+        "__isis_refl_align_IvsQ_12345");
+
+    TS_ASSERT_EQUALS(firstWorkspace.get(), secondWorkspace.get());
+  }
+
   void testAlignmentThrowsForUnsupportedInstrument() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100, 7.0));
@@ -267,7 +300,7 @@ public:
 
     TS_ASSERT_EQUALS(workspacesForPlotting.size(), 1);
     auto outputWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
-        "__isis_refl_det_map_IvsQ_12345");
+        "__isis_refl_det_map_IvsQ_12345_lambda");
     TS_ASSERT_EQUALS(outputWorkspace->getAxis(0)->unit()->unitID(), "Wavelength");
   }
 
@@ -281,8 +314,44 @@ public:
                                 detectorMapOutputOptions(DetectorMapXAxis::TimeOfFlight, DetectorMapYAxis::Theta));
 
     auto outputWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
-        "__isis_refl_det_map_IvsQ_12345");
+        "__isis_refl_det_map_IvsQ_12345_theta");
     TS_ASSERT_DIFFERS((*(outputWorkspace->getAxis(1)))(0), 0.0);
+  }
+
+  void testDetectorMapReusesExistingGeneratedWorkspace() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
+    createTOFGroup({"raw_input_name"});
+    auto model = PlottingModel{};
+    auto const workspaces = workspaceSelections({"IvsQ_12345"});
+
+    model.workspacesForPlotting(workspaces, detectorMapOutputOptions());
+    auto const firstWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_det_map_IvsQ_12345");
+    model.workspacesForPlotting(workspaces, detectorMapOutputOptions());
+    auto const secondWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_det_map_IvsQ_12345");
+
+    TS_ASSERT_EQUALS(firstWorkspace.get(), secondWorkspace.get());
+  }
+
+  void testGeneratedWorkspaceNamesPreservePlusPlusAndMinusMinusSuffixes() {
+    createConstantWorkspace("IvsQ_12345++", -100.0);
+    createConstantWorkspace("IvsQ_12345--", -100.0);
+    createDetectorMapInputWorkspace("raw_input_name_plus", "12345++", 10.0);
+    createDetectorMapInputWorkspace("raw_input_name_minus", "12345--", 20.0);
+    createTOFGroup({"raw_input_name_plus", "raw_input_name_minus"});
+    auto model = PlottingModel{};
+    auto const workspaces = std::vector<PlottingWorkspaceSelection>{workspaceSelection("IvsQ_12345++", {"12345++"}),
+                                                                    workspaceSelection("IvsQ_12345--", {"12345--"})};
+
+    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputOptions());
+
+    auto const expected =
+        std::vector<std::string>{"__isis_refl_det_map_IvsQ_12345++", "__isis_refl_det_map_IvsQ_12345--"};
+    TS_ASSERT_EQUALS(workspacesForPlotting, expected);
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(expected[0]));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(expected[1]));
   }
 
   void testDetectorMapThrowsForUnsupportedInstrument() {
