@@ -67,7 +67,7 @@ class ModalTester(object):
             traceback.print_exc()
             self._qapp.exit(0)
         if self.widget is not None:
-            if hasattr(self.widget, "exec_"):
+            if hasattr(self.widget, "exec"):
                 self.widget.exec()
             else:
                 self.widget.show()
