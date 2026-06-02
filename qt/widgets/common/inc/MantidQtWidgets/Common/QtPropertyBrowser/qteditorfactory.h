@@ -324,7 +324,7 @@ private:
   Q_DECLARE_PRIVATE(QtLineEditFactory)
   Q_DISABLE_COPY(QtLineEditFactory)
   Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QString &))
-  Q_PRIVATE_SLOT(d_func(), void slotRegExpChanged(QtProperty *, const QRegExp &))
+  Q_PRIVATE_SLOT(d_func(), void slotRegExpChanged(QtProperty *, const QRegularExpression &))
   Q_PRIVATE_SLOT(d_func(), void slotSetValue(const QString &))
   Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
 };
@@ -765,7 +765,7 @@ class QtLineEditFactoryPrivate : public EditorFactoryPrivate<QLineEdit> {
   Q_DECLARE_PUBLIC(QtLineEditFactory)
 public:
   void slotPropertyChanged(QtProperty *property, const QString &value);
-  void slotRegExpChanged(QtProperty *property, const QRegExp &regExp);
+  void slotRegExpChanged(QtProperty *property, const QRegularExpression &regExp);
   void slotSetValue(const QString &value);
 };
 
