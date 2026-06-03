@@ -79,6 +79,21 @@ void GridDetector::init() {
  */
 GridDetector *GridDetector::clone() const { return new GridDetector(*this); }
 
+bool GridDetector::inBoundsXYZ(const int x, const int y, const int z) const {
+  if ((xpixels() <= 0) || (ypixels() <= 0))
+    throw std::runtime_error("GridDetector::inBoundsXYZ: invalid X or Y "
+                             "width set in the object.");
+  if ((x < 0) || (x >= xpixels()))
+    return false;
+  if ((y < 0) || (y >= ypixels()))
+    return false;
+  if (zpixels() > 0) {
+    if ((z < 0) || (z >= zpixels()))
+      return false;
+  }
+  return true;
+}
+
 //-------------------------------------------------------------------------------------------------
 /** Return a pointer to the component in the assembly at the
  * (X,Y) pixel position.
@@ -122,27 +137,32 @@ std::shared_ptr<Detector> GridDetector::getAtXYZ(const int x, const int y, const
 }
 
 namespace {
-detid_t getFillFirstZ(const GridDetector *me, int x, int y, int z) {
-  if (me->idFillOrder()[1] == 'y')
-    return me->idstart() + z * me->idstep() + y * me->idstepbyrow() + x * (me->ypixels() * me->idstepbyrow());
-  else
-    return me->idstart() + z * me->idstep() + x * me->idstepbyrow() + y * (me->xpixels() * me->idstepbyrow());
+int const &orderXYZ(char const order, int const &x, int const &y, int const &z) {
+  switch (order) {
+  case 'x':
+    return x;
+  case 'y':
+    return y;
+  case 'z':
+    return z;
+  default:
+    throw std::runtime_error("Not a dimensional label: " + std::to_string(order));
+  }
 }
 
-detid_t getFillFirstY(const GridDetector *me, int x, int y, int z) {
-  if (me->idFillOrder()[1] == 'x')
-    return me->idstart() + y * me->idstep() + x * me->idstepbyrow() + z * (me->xpixels() * me->idstepbyrow());
-  else
-    return me->idstart() + y * me->idstep() + z * me->idstepbyrow() + x * (me->zpixels() * me->idstepbyrow());
+int const &pixelsXYZ(char const order, GridDetector const *const me) {
+  switch (order) {
+  case 'x':
+    return me->xpixels();
+  case 'y':
+    return me->ypixels();
+  case 'z':
+    return me->zpixels();
+  default:
+    throw std::runtime_error(std::string("Not a dimensional label: ") + order);
+  }
 }
-
-detid_t getFillFirstX(const GridDetector *me, int x, int y, int z) {
-  if (me->idFillOrder()[1] == 'y')
-    return me->idstart() + x * me->idstep() + y * me->idstepbyrow() + z * (me->ypixels() * me->idstepbyrow());
-  else
-    return me->idstart() + x * me->idstep() + z * me->idstepbyrow() + y * (me->zpixels() * me->idstepbyrow());
-}
-} // end namespace
+} // namespace
 
 //-------------------------------------------------------------------------------------------------
 /** Return the detector ID corresponding to the component in the assembly at the
@@ -156,16 +176,16 @@ detid_t getFillFirstX(const GridDetector *me, int x, int y, int z) {
  *range
  */
 detid_t GridDetector::getDetectorIDAtXYZ(const int x, const int y, const int z) const {
-  const GridDetector *me = this;
-  if (isParametrized())
-    me = this->m_gridBase;
+  if (!inBoundsXYZ(x, y, z))
+    throw std::out_of_range("GridDetector::getDetectorIDAtXYZ: pixel indices are out of range.");
 
-  if (me->idFillOrder()[0] == 'z')
-    return getFillFirstZ(me, x, y, z);
-  else if (me->idFillOrder()[0] == 'y')
-    return getFillFirstY(me, x, y, z);
-  else
-    return getFillFirstX(me, x, y, z);
+  auto order = idFillOrder();
+
+  int const &first = orderXYZ(order[0], x, y, z);
+  int const &second = orderXYZ(order[1], x, y, z);
+  int const &third = orderXYZ(order[2], x, y, z);
+
+  return idstart() + first * idstep() + second * idstepbyrow() + third * (pixelsXYZ(order[1], this) * idstepbyrow());
 }
 
 namespace {
@@ -233,7 +253,7 @@ std::tuple<int, int, int> GridDetector::getXYZForDetectorID(const detid_t detect
 //-------------------------------------------------------------------------------------------------
 /// Returns the number of pixels in the X direction.
 /// @return number of X pixels
-int GridDetector::xpixels() const {
+int const &GridDetector::xpixels() const {
   if (isParametrized())
     return m_gridBase->xpixels();
   else
@@ -243,7 +263,7 @@ int GridDetector::xpixels() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the number of pixels in the Y direction.
 /// @return number of y pixels
-int GridDetector::ypixels() const {
+int const &GridDetector::ypixels() const {
   if (isParametrized())
     return m_gridBase->ypixels();
   else
@@ -253,7 +273,7 @@ int GridDetector::ypixels() const {
 //-------------------------------------------------------------------------------------------------
 /// Returns the number of pixels in the Z direction.
 /// @return number of z pixels
-int GridDetector::zpixels() const {
+int const &GridDetector::zpixels() const {
   if (isParametrized())
     return m_gridBase->zpixels();
   else
@@ -370,7 +390,7 @@ double GridDetector::zsize() const {
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the idstart
-int GridDetector::idstart() const {
+int const &GridDetector::idstart() const {
   if (isParametrized())
     return m_gridBase->idstart();
   else
@@ -379,7 +399,7 @@ int GridDetector::idstart() const {
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the idfillbyfirst_y
-bool GridDetector::idfillbyfirst_y() const {
+bool const &GridDetector::idfillbyfirst_y() const {
   if (isParametrized())
     return m_gridBase->idfillbyfirst_y();
   else
@@ -387,7 +407,7 @@ bool GridDetector::idfillbyfirst_y() const {
 }
 
 /// Returns the id fill order
-std::string GridDetector::idFillOrder() const {
+std::array<char, 3UL> const &GridDetector::idFillOrder() const {
   if (isParametrized())
     return m_gridBase->idFillOrder();
   else
@@ -396,7 +416,7 @@ std::string GridDetector::idFillOrder() const {
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the idstepbyrow
-int GridDetector::idstepbyrow() const {
+int const &GridDetector::idstepbyrow() const {
   if (isParametrized())
     return m_gridBase->idstepbyrow();
   else
@@ -405,11 +425,29 @@ int GridDetector::idstepbyrow() const {
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the idstep
-int GridDetector::idstep() const {
+int const &GridDetector::idstep() const {
   if (isParametrized())
     return m_gridBase->idstep();
   else
     return this->m_idstep;
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Returns the position of the center of the pixel at x,y, relative to the
+ * center
+ * of the GridDetector, in the plain X,Y coordinates of the
+ * pixels (i.e. unrotated).
+ * @param x :: x pixel integer
+ * @param y :: y pixel integer
+ * @param z :: z pixel integer
+ * @return a V3D vector of the relative position
+ */
+V3D GridDetector::getPosAtXYZ(int x, int y, int z) const {
+  if (!inBoundsXYZ(x, y, z))
+    throw std::out_of_range("GridDetector::getPosAtXYZ: pixel indices are out of range.");
+  V3D relPos = getRelativePosAtXYZ(x, y, z);
+  this->getRotation().rotate(relPos);
+  return this->getPos() + relPos;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -479,11 +517,11 @@ void GridDetector::createLayer(const std::string &name, CompAssembly *parent, in
   }
 }
 
-bool checkValidOrderString(const std::string &order) {
-  static const boost::regex exp("xyz|xzy|yzx|yxz|zyx|zxy");
-
-  return boost::regex_match(order, exp);
+namespace {
+bool checkValidOrderString(std::array<char, 3UL> const &order) {
+  return std::all_of(order.cbegin(), order.cend(), [](char const &c) { return (c >= 'x') && (c <= 'z'); });
 }
+} // end namespace
 
 void GridDetector::validateInput() const {
   // Some safety checks
@@ -519,7 +557,7 @@ void GridDetector::initializeValues(std::shared_ptr<IObject> shape, int xpixels,
   /// IDs are filled in Y fastest
   m_idfillbyfirst_y = idFillOrder[0] == 'y';
   /// IDs are filled by Y fastest
-  m_idFillOrder = idFillOrder;
+  m_idFillOrder = std::array<char, 3>{idFillOrder[0], idFillOrder[1], idFillOrder[2]};
   /// Step size in ID in each row
   m_idstepbyrow = idstepbyrow;
   /// Step size in ID in each col
@@ -593,7 +631,7 @@ void GridDetector::initialize(std::shared_ptr<IObject> shape, int xpixels, doubl
 /** Returns the minimum detector id
  * @return minimum detector id
  */
-detid_t GridDetector::minDetectorID() const {
+detid_t const &GridDetector::minDetectorID() const {
   if (isParametrized())
     return m_gridBase->minDetectorID();
   return m_minDetId;
@@ -603,7 +641,7 @@ detid_t GridDetector::minDetectorID() const {
 /** Returns the maximum detector id
  * @return maximum detector id
  */
-detid_t GridDetector::maxDetectorID() const {
+detid_t const &GridDetector::maxDetectorID() const {
   if (isParametrized())
     return m_gridBase->maxDetectorID();
   return m_maxDetId;
@@ -693,9 +731,12 @@ void GridDetector::testIntersectionWithChildren(Track &testRay,
   if (yIndex >= ypixels())
     return;
 
-  // TODO: Do I need to put something smart here for the first 3 parameters?
+  // All pixels share the same pixel shape stored on the detector.
+  // The parametrized form delegates to the base detector's shape.
+  std::shared_ptr<IObject> const &pixelShape = isParametrized() ? m_gridBase->m_shape : m_shape;
+
   auto comp = getAtXYZ(xIndex, yIndex, 0);
-  testRay.addLink(intersec, intersec, 0.0, *(comp->shape()), comp->getComponentID());
+  testRay.addLink(intersec, intersec, 0.0, *pixelShape, comp->getComponentID());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -735,6 +776,59 @@ int GridDetector::getPointInObject(V3D & /*point*/) const {
   throw Kernel::Exception::NotImplementedError("GridDetector::getPointInObject() is not implemented.");
 }
 
+void GridDetector::getBoundingBoxAtXYZ(int const x, int const y, int const z, BoundingBox &box) const {
+  // Compute the pixel bounding box analytically, replicating ObjComponent::getBoundingBox
+  // without needing an actual child Detector object.  Each pixel shares the same shape
+  // (m_shape) and inherits the GridDetector's rotation with no additional per-pixel rotation.
+
+  // For a parametrized detector the shape lives on the base.
+  std::shared_ptr<IObject> const &pixelShape = isParametrized() ? m_gridBase->m_shape : m_shape;
+  if (!pixelShape || !pixelShape->hasValidShape()) {
+    box = BoundingBox();
+    return;
+  }
+
+  const BoundingBox &shapeBox = pixelShape->getBoundingBox();
+  if (shapeBox.isNull()) {
+    box = BoundingBox();
+    return;
+  }
+
+  // 1. Copy the shape's axis-aligned bounding box in the local (pixel) frame.
+  box = BoundingBox(shapeBox);
+
+  // 1a. For parametrized detectors, scale the shape extents by scalex/scaley/scalez
+  //     so the per-pixel box matches the scaled pixel size (consistent with getPosAtXYZ).
+  if (isParametrized()) {
+    double scalex = 1.0, scaley = 1.0, scalez = 1.0;
+    if (m_map->contains(m_gridBase, "scalex"))
+      scalex = m_map->get(m_gridBase, "scalex")->value<double>();
+    if (m_map->contains(m_gridBase, "scaley"))
+      scaley = m_map->get(m_gridBase, "scaley")->value<double>();
+    if (m_map->contains(m_gridBase, "scalez"))
+      scalez = m_map->get(m_gridBase, "scalez")->value<double>();
+    box.xMin() *= scalex;
+    box.xMax() *= scalex;
+    box.yMin() *= scaley;
+    box.yMax() *= scaley;
+    box.zMin() *= scalez;
+    box.zMax() *= scalez;
+  }
+
+  // 2. Rotate: pixels have the same orientation as the parent GridDetector; there
+  //    is no additional per-pixel rotation, so we apply the detector's own rotation.
+  this->getRotation().rotateBB(box.xMin(), box.yMin(), box.zMin(), box.xMax(), box.yMax(), box.zMax());
+
+  // 3. Translate to the pixel's absolute position in the instrument frame.
+  Kernel::V3D const pixelPos = getPosAtXYZ(x, y, z);
+  box.xMin() += pixelPos.X();
+  box.xMax() += pixelPos.X();
+  box.yMin() += pixelPos.Y();
+  box.yMax() += pixelPos.Y();
+  box.zMin() += pixelPos.Z();
+  box.zMax() += pixelPos.Z();
+}
+
 //-------------------------------------------------------------------------------------------------
 /**
  * Get the bounding box and store it in the given object. This is cached after
@@ -750,21 +844,21 @@ void GridDetector::getBoundingBox(BoundingBox &assemblyBox) const {
   }
   BoundingBox bb;
   BoundingBox compBox;
-  getAtXYZ(0, 0, 0)->getBoundingBox(compBox);
+  getBoundingBoxAtXYZ(0, 0, 0, compBox);
   bb.grow(compBox);
-  getAtXYZ(this->xpixels() - 1, 0, 0)->getBoundingBox(compBox);
+  getBoundingBoxAtXYZ(this->xpixels() - 1, 0, 0, compBox);
   bb.grow(compBox);
-  getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, 0)->getBoundingBox(compBox);
+  getBoundingBoxAtXYZ(this->xpixels() - 1, this->ypixels() - 1, 0, compBox);
   bb.grow(compBox);
-  getAtXYZ(0, this->ypixels() - 1, 0)->getBoundingBox(compBox);
+  getBoundingBoxAtXYZ(0, this->ypixels() - 1, 0, compBox);
   bb.grow(compBox);
-  getAtXYZ(0, 0, this->zpixels() - 1)->getBoundingBox(compBox);
+  getBoundingBoxAtXYZ(0, 0, this->zpixels() - 1, compBox);
   bb.grow(compBox);
-  getAtXYZ(this->xpixels() - 1, 0, this->zpixels() - 1)->getBoundingBox(compBox);
+  getBoundingBoxAtXYZ(this->xpixels() - 1, 0, this->zpixels() - 1, compBox);
   bb.grow(compBox);
-  getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, this->zpixels() - 1)->getBoundingBox(compBox);
+  getBoundingBoxAtXYZ(this->xpixels() - 1, this->ypixels() - 1, this->zpixels() - 1, compBox);
   bb.grow(compBox);
-  getAtXYZ(0, this->ypixels() - 1, this->zpixels() - 1)->getBoundingBox(compBox);
+  getBoundingBoxAtXYZ(0, this->ypixels() - 1, this->zpixels() - 1, compBox);
   bb.grow(compBox);
 
   assemblyBox = bb;

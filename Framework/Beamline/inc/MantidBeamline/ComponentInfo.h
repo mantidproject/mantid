@@ -88,12 +88,27 @@ public:
   size_t size() const;
   size_t getMemorySize() const;
   size_t numberOfDetectorsInSubtree(const size_t componentIndex) const;
-  bool isDetector(const size_t componentIndex) const {
-    return componentIndex < m_assemblySortedDetectorIndices->size();
-  }
+  bool isDetector(const size_t componentIndex) const { return componentIndex < totalDetectorCount(); }
   bool isMonitor(const size_t componentIndex) const;
-  size_t compOffsetIndex(const size_t componentIndex) const {
-    return componentIndex - m_assemblySortedDetectorIndices->size();
+  size_t compOffsetIndex(const size_t componentIndex) const { return componentIndex - totalDetectorCount(); }
+
+  /// Total number of detectors (real + virtual pixels).  Real detectors are
+  /// stored in m_assemblySortedDetectorIndices; virtual pixels are synthesised
+  /// on demand from m_virtualBanks.
+  size_t totalDetectorCount() const noexcept { return m_detectorRanges ? m_size - m_detectorRanges->size() : 0; }
+
+  /// Call @p f(detectorIndex) for every detector in the subtree rooted at
+  /// @p componentIndex.  Real detector indices come from the flat array.
+  template <typename Callable> void forEachDetectorInSubtree(size_t componentIndex, Callable &&f) const {
+    if (isDetector(componentIndex)) {
+      f(componentIndex);
+      return;
+    }
+    const auto rangesIndex = compOffsetIndex(componentIndex);
+    // Real detectors stored in the flat array.
+    const auto detRange = (*m_detectorRanges)[rangesIndex];
+    for (size_t i = detRange.first; i < detRange.second; ++i)
+      f((*m_assemblySortedDetectorIndices)[i]);
   }
 
   const Eigen::Vector3d &position(const size_t componentIndex) const;
@@ -166,6 +181,14 @@ private:
                      const ComponentInfo::Range &detectorRange);
   void doScaleComponent(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newScaling,
                         const ComponentInfo::Range &detectorRange);
+
+  /// Returns realDetectors.size() + sum(virtual pixels) + detRanges.size().
+  /// Used to initialise the const m_size in the constructor initialiser list,
+  /// before m_virtualBanks has been moved into place.
+  static size_t computeTotalSize(const std::vector<size_t> &realDetectors,
+                                 const std::vector<std::pair<size_t, size_t>> &detRanges) noexcept {
+    return realDetectors.size() + detRanges.size();
+  }
 };
 } // namespace Beamline
 } // namespace Mantid

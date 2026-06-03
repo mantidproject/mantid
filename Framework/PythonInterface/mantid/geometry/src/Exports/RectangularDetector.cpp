@@ -8,7 +8,9 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/StlExportDefinitions.h"
 #include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_value_policy.hpp>
 
 using Mantid::PythonInterface::std_vector_exporter;
 using namespace Mantid::Geometry;
@@ -28,18 +30,26 @@ void export_RectangularDetector() {
   std_vector_exporter<RectangularDetector_const_sptr, /*NoProxy=*/true>::wrap("std_vector_rectangular_detector");
 
   class_<RectangularDetector, bases<GridDetector>, boost::noncopyable>("RectangularDetector", no_init)
-      .def("xpixels", &RectangularDetector::xpixels, arg("self"), "Returns the number of pixels in the X direction")
-      .def("ypixels", &RectangularDetector::ypixels, arg("self"), "Returns the number of pixels in the Y direction")
+      .def("xpixels", &RectangularDetector::xpixels, arg("self"), return_value_policy<copy_const_reference>(),
+           "Returns the number of pixels in the X direction")
+      .def("ypixels", &RectangularDetector::ypixels, arg("self"), return_value_policy<copy_const_reference>(),
+           "Returns the number of pixels in the Y direction")
       .def("xstep", &RectangularDetector::xstep, arg("self"), "Returns the step size in the X direction")
       .def("ystep", &RectangularDetector::ystep, arg("self"), "Returns the step size in the Y direction")
       .def("xsize", &RectangularDetector::xsize, arg("self"), "Returns the size in the X direction")
       .def("ysize", &RectangularDetector::ysize, arg("self"), "Returns the size in the Y direction")
       .def("xstart", &RectangularDetector::xstart, arg("self"), "Returns the start position in the X direction")
       .def("ystart", &RectangularDetector::ystart, arg("self"), "Returns the start position in the Y direction")
-      .def("idstart", &RectangularDetector::idstart, arg("self"), "Returns the idstart")
-      .def("idfillbyfirst_y", &RectangularDetector::idfillbyfirst_y, arg("self"), "Returns the idfillbyfirst_y")
-      .def("idstepbyrow", &RectangularDetector::idstepbyrow, arg("self"), "Returns the idstepbyrow")
-      .def("idstep", &RectangularDetector::idstep, arg("self"), "Returns the idstep")
-      .def("minDetectorID", &RectangularDetector::minDetectorID, arg("self"), "Returns the minimum detector id")
-      .def("maxDetectorID", &RectangularDetector::maxDetectorID, arg("self"), "Returns the maximum detector id");
+      .def("idstart", &RectangularDetector::idstart, arg("self"), return_value_policy<copy_const_reference>(),
+           "Returns the idstart")
+      .def("idfillbyfirst_y", &RectangularDetector::idfillbyfirst_y, arg("self"),
+           return_value_policy<copy_const_reference>(), "Returns the idfillbyfirst_y")
+      .def("idstepbyrow", &RectangularDetector::idstepbyrow, arg("self"), return_value_policy<copy_const_reference>(),
+           "Returns the idstepbyrow")
+      .def("idstep", &RectangularDetector::idstep, arg("self"), return_value_policy<copy_const_reference>(),
+           "Returns the idstep")
+      .def("minDetectorID", &RectangularDetector::minDetectorID, arg("self"),
+           return_value_policy<copy_const_reference>(), "Returns the minimum detector id")
+      .def("maxDetectorID", &RectangularDetector::maxDetectorID, arg("self"),
+           return_value_policy<copy_const_reference>(), "Returns the maximum detector id");
 }

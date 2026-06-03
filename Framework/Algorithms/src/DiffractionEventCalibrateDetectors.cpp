@@ -479,14 +479,14 @@ void DiffractionEventCalibrateDetectors::exec() {
     int pixmax = detList[det]->xpixels() - 1;
     int pixmid = (detList[det]->ypixels() - 1) / 2;
     BoundingBox box;
-    detList[det]->getAtXY(pixmax, pixmid)->getBoundingBox(box);
+    detList[det]->getBoundingBoxAtXY(pixmax, pixmid, box);
     double baseX = box.xMax();
     double baseY = box.yMax();
     double baseZ = box.zMax();
     Kernel::V3D Base = V3D(baseX, baseY, baseZ) + CalCenter;
     pixmid = (detList[det]->xpixels() - 1) / 2;
     pixmax = detList[det]->ypixels() - 1;
-    detList[det]->getAtXY(pixmid, pixmax)->getBoundingBox(box);
+    detList[det]->getBoundingBoxAtXY(pixmid, pixmax, box);
     double upX = box.xMax();
     double upY = box.yMax();
     double upZ = box.zMax();

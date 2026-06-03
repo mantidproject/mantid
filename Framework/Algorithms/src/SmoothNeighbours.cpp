@@ -250,7 +250,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
   std::vector<std::pair<int, int>> idToIndexMap;
   idToIndexMap.reserve(detList.size());
   for (int i = 0; i < static_cast<int>(detList.size()); i++)
-    idToIndexMap.emplace_back(detList[i]->getAtXY(0, 0)->getID(), i);
+    idToIndexMap.emplace_back(detList[i]->getDetectorIDAtXY(0, 0), i);
 
   // To sort in descending order
   if (sum)
@@ -277,7 +277,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
               continue;
             if (k + iy >= det->ypixels() - m_edge || k + iy < m_edge)
               continue;
-            int pixelID = det->getAtXY(j + ix, k + iy)->getID();
+            int pixelID = det->getDetectorIDAtXY(j + ix, k + iy);
 
             // Find the corresponding workspace index, if any
             auto mapEntry = pixel_to_wi.find(pixelID);

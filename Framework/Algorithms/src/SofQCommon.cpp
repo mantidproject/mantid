@@ -218,7 +218,7 @@ std::pair<double, double> SofQCommon::qBinHintsIndirect(const API::MatrixWorkspa
     if (!std::isfinite(Q1) || !std::isfinite(Q2)) {
       throw std::invalid_argument("Cannot compute Q binning range: non-finite "
                                   "Q found for detector ID " +
-                                  std::to_string(detectorInfo.detectorIDs()[i]));
+                                  std::to_string(detectorInfo.detid(i)));
     }
     const auto minmaxQ = std::minmax(Q1, Q2);
     minQ = std::min(minQ, minmaxQ.first);
