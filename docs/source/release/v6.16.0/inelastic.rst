@@ -23,7 +23,7 @@ New features
 
 Bugfixes
 ############
-- (`#41121 <https://github.com/mantidproject/mantid/pull/41121>`_) The :ref:`BayesStretch <algm-BayesStretch>` algorithm now appends each workspace name in the fit workspaces group of the ``Stretch`` tab of the :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` with the selected backend option of either ``quickbayes`` or ``quasielasticbayes``.
+- (`#41121 <https://github.com/mantidproject/mantid/pull/41121>`_) The :ref:`BayesStretch <algm-BayesStretch>` algorithm now appends each workspace name in the fit workspaces group with the selected backend option of either ``quickbayes`` or ``quasielasticbayes`` from the ``Stretch`` tab of the :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>`.
 - (`#41121 <https://github.com/mantidproject/mantid/pull/41121>`_) Additionally, a duplicate ``Stretch`` word has been removed from the names of workspaces in the fit workspace group created by the :ref:`BayesStretch2 <algm-BayesStretch2>` algorithm when the selected backend option is ``quickbayes`` in the ``Stretch`` tab.
 
 :ref:`Release 6.16.0 <v6.16.0>`
