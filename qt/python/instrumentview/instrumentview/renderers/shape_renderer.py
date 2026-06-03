@@ -40,10 +40,11 @@ class ShapeRenderer(InstrumentRenderer):
     """
 
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
-    _PICKING_TOLERANCE = 0.0001
+    _DEFAULT_PICKING_TOLERANCE = 0.0001
 
     def __init__(self, workspace):
         super().__init__()
+        self._picking_tolerance = self._DEFAULT_PICKING_TOLERANCE
         self._workspace = workspace
         # Populated by ``precompute``.
         self._precomputed = False
@@ -239,7 +240,7 @@ class ShapeRenderer(InstrumentRenderer):
 
         c2d = self._cell_to_detector
         picker = vtkCellPicker()
-        picker.SetTolerance(self._PICKING_TOLERANCE)
+        picker.SetTolerance(self._effective_picking_tolerance(hover))
         interactor = plotter.iren
 
         self._clear_observers(plotter)

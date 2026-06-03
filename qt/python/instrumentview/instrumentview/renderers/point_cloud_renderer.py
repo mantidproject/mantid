@@ -24,6 +24,11 @@ class PointCloudRenderer(InstrumentRenderer):
     _DETECTOR_POINT_SIZE = 15
     _PICKABLE_POINT_SIZE = 30
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
+    _DEFAULT_PICKING_TOLERANCE = 0.01
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._picking_tolerance = self._DEFAULT_PICKING_TOLERANCE
 
     # ------------------------------------------------------------------ build
     def build_detector_mesh(self, positions: np.ndarray, flip_beam: bool, model=None) -> pv.PolyData:
@@ -89,9 +94,8 @@ class PointCloudRenderer(InstrumentRenderer):
         if plotter.off_screen:
             return
 
-        picking_tolerance = 0.01
         picker = vtkPointPicker()
-        picker.SetTolerance(picking_tolerance)
+        picker.SetTolerance(self._effective_picking_tolerance(hover))
         interactor = plotter.iren
 
         self._clear_observers(plotter)

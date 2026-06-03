@@ -25,6 +25,7 @@ class InstrumentRenderer(ABC):
         super().__init__()
         self._mouse_move_observer_id = None
         self._left_button_observer_id = None
+        self._picking_tolerance: float = 0.01
 
     def _clear_observers(self, plotter):
         style = plotter.iren.style
@@ -143,6 +144,15 @@ class InstrumentRenderer(ABC):
         label : str
             Scalar array name.
         """
+
+    def _effective_picking_tolerance(self, hover: bool) -> float:
+        """Return the tolerance to pass to the VTK picker.
+
+        Hover picking uses a 25 % larger tolerance so that moving the mouse
+        over nearby detectors feels responsive without sacrificing click
+        precision.
+        """
+        return self._picking_tolerance * 1.25 if hover else self._picking_tolerance
 
     def set_parallel_view(self, plotter):
         plotter.view_xy()
