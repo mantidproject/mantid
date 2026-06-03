@@ -7,12 +7,17 @@
 
 from mantidqtinterfaces.TexturePlanner.settings.settings_view import TexturePlannerSettingsView
 from mantidqtinterfaces.TexturePlanner.settings.settings_presenter import TexturePlannerSettingsPresenter
+from mantidqtinterfaces.TexturePlanner.helpers.instrument import CUSTOM_GROUP
 
 
 class TexturePlannerPresenter(object):
     def __init__(self, model, view):
         self.model = model
         self.view = view
+        # cached result of the (expensive) "does the custom grouping file fit the instrument" check,
+        # so the Update Instrument enable rule stays cheap and is not run on every name keystroke.
+        # True for preset groups, which never need the check.
+        self._grouping_applicable = True
 
         self.settings_presenter = TexturePlannerSettingsPresenter(model, TexturePlannerSettingsView(parent=view))
         self.settings_presenter.load_settings_from_file_or_default()
@@ -49,7 +54,6 @@ class TexturePlannerPresenter(object):
         self.view.set_on_gonio_angle_updated(self.on_goniometer_updated)
         self.view.set_on_num_gonio_updated(self.on_num_gonio_updated)
         self.view.set_on_step_updated(self.update_angle_steps)
-        self.view.set_on_group_changed(self.on_group_changed)
         self.view.set_on_add_orientation_clicked(self.add_orientation)
         self.view.set_on_current_index_changed(self.on_index_changed)
         self.view.sig_select_state_changed.connect(self.update_selected)
@@ -71,6 +75,13 @@ class TexturePlannerPresenter(object):
         self.view.set_on_gauge_vol_group_toggled(self.update_custom_shape_finder_enabled)
         self.update_custom_shape_finder_enabled()
         self.view.set_on_instrument_changed(self.on_instrument_changed)
+        self.view.set_on_group_changed(self.on_group_selection_changed)
+        self.view.set_on_custom_instrument_name_changed(self.on_custom_instrument_name_changed)
+        self.view.set_on_custom_instrument_name_committed(self.on_custom_instrument_name_committed)
+        self.view.set_on_grouping_file_changed(self.on_grouping_file_changed)
+        self.view.set_on_update_instrument_clicked(self.update_instrument_and_group)
+        self.update_custom_widgets_visibility()
+        self.refresh_update_instrument_enabled()
 
     def open_settings(self):
         self.settings_presenter.show()
@@ -146,16 +157,107 @@ class TexturePlannerPresenter(object):
         self.model.update_all_projected_data()
         self.update_plots()
 
-    def on_group_changed(self):
+    # ----------------------------------------------------------------------------------
+    # Instrument / group selection.
+    #
+    # Changing the instrument or group combos (and the custom name / grouping file fields)
+    # only updates widget visibility and the Update Instrument button's enabled state - none
+    # of it touches the model. The model is rebuilt in one place, update_instrument_and_group,
+    # when the user clicks Update Instrument (only enabled for a valid, complete selection).
+    # This keeps the interface out of half-applied states (e.g. a custom instrument with no
+    # grouping file yet, or an unrecognised instrument name).
+    # ----------------------------------------------------------------------------------
+
+    def on_instrument_changed(self):
+        if self.view.is_custom_instrument():
+            # a custom instrument has no presets, so its group is fixed to the custom file
+            self.view.setup_group_options((CUSTOM_GROUP,))
+            self.view.set_group_enabled(False)
+        else:
+            self.view.setup_group_options(self.model.instrument.groups_for_instrument(self.view.get_instrument()))
+            self.view.set_group_enabled(True)
+        # switching instrument invalidates any previously chosen grouping file (it belongs to a
+        # different detector layout); make the user pick a fresh one before they can apply
+        self.view.clear_grouping_file()
+        self.update_custom_widgets_visibility()
+        self.revalidate_grouping()
+
+    def on_group_selection_changed(self):
+        self.update_custom_widgets_visibility()
+        self.revalidate_grouping()
+
+    def on_custom_instrument_name_changed(self):
+        # cheap, per-keystroke feedback only: red border + button state. Editing the name
+        # invalidates any earlier applicability result until the name is committed (see
+        # on_custom_instrument_name_committed), which is where the expensive check runs.
+        self.view.set_custom_instrument_valid(self._custom_instrument_name_valid())
+        if self.view.is_custom_instrument() and self._group_is_custom():
+            self._grouping_applicable = False
+            self.view.set_grouping_file_problem("")
+        self.refresh_update_instrument_enabled()
+
+    def on_custom_instrument_name_committed(self):
+        # name finalised (focus lost / Enter): now safe to run the applicability check
+        self.revalidate_grouping()
+
+    def on_grouping_file_changed(self):
+        self.revalidate_grouping()
+
+    def update_instrument_and_group(self):
+        """Apply the current instrument + group selection to the model and recompute (button slot).
+
+        The button is only enabled for a valid, complete and applicable selection, so no further
+        validation is needed here."""
+        self.model.instrument.update_instrument(self._selected_instrument_name())
+        if self._group_is_custom():
+            self.model.instrument.set_custom_grouping_file(self.view.get_grouping_file())
         self.set_model_group()
         self.model.update_all_projected_data()
         self.update_plots()
 
-    def on_instrument_changed(self):
-        self.model.instrument.update_instrument(self.view.get_instrument())
-        self.setup_group_options()
-        self.on_group_changed()
-        self.update_plots()
+    def revalidate_grouping(self):
+        """Recompute (and cache) whether the chosen custom grouping file fits the selected
+        instrument, surface a problem on the finder when it does not, and refresh the button.
+
+        Called only on the infrequent triggers (file chosen, instrument changed, group changed,
+        custom name committed) - never on every name keystroke - because the check builds a
+        throwaway instrument workspace."""
+        applicable = True
+        if self._group_is_custom():
+            name = self._selected_instrument_name()
+            grouping_file = self.view.get_grouping_file()
+            name_ok = not self.view.is_custom_instrument() or self._custom_instrument_name_valid()
+            applicable = bool(grouping_file) and name_ok and self.model.instrument.is_grouping_file_applicable(name, grouping_file)
+            unfit = bool(grouping_file) and name_ok and not applicable
+            self.view.set_grouping_file_problem("Grouping file is not applicable to this instrument" if unfit else "")
+        self._grouping_applicable = applicable
+        self.refresh_update_instrument_enabled()
+
+    def refresh_update_instrument_enabled(self):
+        self.view.set_update_instrument_enabled(self._selection_is_applicable())
+
+    def _selection_is_applicable(self):
+        """The Update Instrument button is enabled only for a valid, complete selection:
+        a known instrument (or valid custom IDF name) paired with an available group (a preset,
+        or - for the custom group - a chosen grouping file confirmed applicable to the instrument)."""
+        instrument_ok = not self.view.is_custom_instrument() or self._custom_instrument_name_valid()
+        group_ok = not self._group_is_custom() or self._grouping_applicable
+        return instrument_ok and group_ok
+
+    def _custom_instrument_name_valid(self):
+        return self.model.instrument.is_valid_instrument(self.view.get_custom_instrument_name())
+
+    def _selected_instrument_name(self):
+        if self.view.is_custom_instrument():
+            return self.view.get_custom_instrument_name()
+        return self.view.get_instrument()
+
+    def update_custom_widgets_visibility(self):
+        self.view.set_custom_instrument_name_visible(self.view.is_custom_instrument())
+        self.view.set_grouping_finder_visible(self._group_is_custom())
+
+    def _group_is_custom(self):
+        return self.view.get_group() == CUSTOM_GROUP
 
     def on_settings_applied(self):
         if self.model.plot_transmission:

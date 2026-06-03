@@ -571,6 +571,60 @@
           </layout>
          </item>
          <item>
+          <layout class="QHBoxLayout" name="layCustomInstrRow">
+           <item>
+            <widget class="QLabel" name="lblCustomInstr">
+             <property name="text">
+              <string>Custom Instrument:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="edt_custom_instr"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="FileFinderWidget" name="finder_grouping" native="true"/>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="layUpdateInstrRow">
+           <item>
+            <spacer name="spUpdateInstrLeft">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnUpdateInstr">
+             <property name="text">
+              <string>Update Instrument</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="spUpdateInstrRight">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
        <widget class="QGroupBox" name="grpGaugeVol">
         <property name="title">
          <string>Gauge Volume Options</string>

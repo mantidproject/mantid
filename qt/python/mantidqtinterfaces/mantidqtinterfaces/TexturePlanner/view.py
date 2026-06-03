@@ -20,6 +20,9 @@ from functools import partial
 
 Ui_texplan, _ = load_ui(__file__, "texture_planner.ui")
 
+# Label shown in the instrument combo for the user-defined instrument option.
+CUSTOM_INSTRUMENT = "Custom"
+
 
 class TexturePlannerView(QMainWindow, Ui_texplan):
     sig_select_state_changed = QtCore.Signal()
@@ -53,6 +56,16 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.finder_gauge_vol.allowMultipleFiles(False)
         self.finder_gauge_vol.setFileExtensions([".xml"])
         self.finder_gauge_vol.isOptional(True)
+
+        self.finder_grouping.setLabelText("Grouping File")
+        self.finder_grouping.allowMultipleFiles(False)
+        self.finder_grouping.setFileExtensions([".xml"])
+        self.finder_grouping.isOptional(True)
+
+        # custom instrument / grouping controls are only shown when the relevant
+        # custom option is selected (see presenter.update_custom_widgets_visibility)
+        self.set_custom_instrument_name_visible(False)
+        self.set_grouping_finder_visible(False)
 
         self.gonio_axes = (self.axis0, self.axis1, self.axis2, self.axis3, self.axis4, self.axis5)
         self.gonio_angles = (self.spnAngle0, self.spnAngle1, self.spnAngle2, self.spnAngle3, self.spnAngle4, self.spnAngle5)
@@ -214,6 +227,19 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_instrument_changed(self, slot):
         self.cmbInstr.currentTextChanged.connect(slot)
 
+    def set_on_custom_instrument_name_changed(self, slot):
+        self.edt_custom_instr.textChanged.connect(slot)
+
+    def set_on_custom_instrument_name_committed(self, slot):
+        # fires when editing finishes (focus lost / Enter), gating the expensive grouping check
+        self.edt_custom_instr.editingFinished.connect(slot)
+
+    def set_on_grouping_file_changed(self, slot):
+        self.finder_grouping.fileFindingFinished.connect(slot)
+
+    def set_on_update_instrument_clicked(self, slot):
+        self.btnUpdateInstr.clicked.connect(slot)
+
     @QtCore.Slot(bool)
     def _on_any_include_toggled(self):
         self.sig_include_state_changed.emit()
@@ -289,6 +315,13 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def get_instrument(self):
         return self.cmbInstr.currentText()
+
+    def get_custom_instrument_name(self):
+        return self.edt_custom_instr.text().strip()
+
+    def get_grouping_file(self):
+        fnames = self.finder_grouping.getFilenames()
+        return fnames[0] if len(fnames) > 0 else ""
 
     def get_current_index(self):
         return int(self.spnIndex.value()) - 1
@@ -412,6 +445,10 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_instrument_options(self, instrs):
         self.cmbInstr.insertItems(0, instrs)
+        self.cmbInstr.addItem(CUSTOM_INSTRUMENT)
+
+    def is_custom_instrument(self):
+        return self.cmbInstr.currentText() == CUSTOM_INSTRUMENT
 
     @staticmethod
     def set_gonio_axis_enabled(gonio, val):
@@ -449,6 +486,31 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
             self.cmbGroup.addItems(groups)
         finally:
             self.cmbGroup.blockSignals(False)
+
+    def set_group_enabled(self, enabled):
+        # disabled when a custom instrument locks the group to its only (custom) option
+        self.cmbGroup.setEnabled(enabled)
+
+    def set_custom_instrument_name_visible(self, visible):
+        self.lblCustomInstr.setVisible(visible)
+        self.edt_custom_instr.setVisible(visible)
+
+    def set_grouping_finder_visible(self, visible):
+        self.finder_grouping.setVisible(visible)
+
+    def clear_grouping_file(self):
+        self.finder_grouping.clear()
+
+    def set_grouping_file_problem(self, message):
+        # empty message clears the problem indicator on the finder
+        self.finder_grouping.setFileProblem(message)
+
+    def set_custom_instrument_valid(self, valid):
+        # red border while the typed name does not match a known IDF
+        self.edt_custom_instr.setStyleSheet("" if valid else "QLineEdit { border: 1px solid red; }")
+
+    def set_update_instrument_enabled(self, enabled):
+        self.btnUpdateInstr.setEnabled(enabled)
 
     def create_workspace_table(self):
         table_column_headers = ("Axis0", "Axis1", "Axis2", "Axis3", "Axis4", "Axis5", "Include", "Select")
