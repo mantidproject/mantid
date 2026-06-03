@@ -203,7 +203,7 @@ void MuonFitPropertyBrowser::init() {
   m_settingsGroup = m_browser->addProperty(settingsGroup);
   m_multiFitSettingsGroup = m_browser->addProperty(multiFitSettingsGroup);
   connect(m_browser, SIGNAL(currentItemChanged(const QtBrowserItem *)), this,
-          SLOT(currentItemChanged(QtBrowserItem *)));
+          SLOT(currentItemChanged(const QtBrowserItem *)));
 
   m_btnGroup = new QGroupBox(tr("Reselect Data"));
   auto *btnLayout = new QHBoxLayout;
