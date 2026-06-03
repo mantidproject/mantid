@@ -4,7 +4,7 @@ Inelastic Changes
 
 New Features
 ------------
-- (`#41228 <https://github.com/mantidproject/mantid/pull/41228>`_) The :ref:`Absorption Corrections<absorption_corrections>` tab now has an improved UI layout which displays existing elements better and adds new features.
+- (`#41228 <https://github.com/mantidproject/mantid/pull/41228>`_) The :ref:`Absorption Corrections<absorption_corrections>` tab now has an improved UI which displays existing elements better and adds new features.
 
 
 Bugfixes
