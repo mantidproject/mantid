@@ -327,6 +327,7 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
                 # We want the last call to the stitch algorithm in the history
                 # (we would normally expect there to be only one)
                 self._stitch_history = history
+                self._is_stitched = True
 
         # Get the last occurrence of the reduction algorithm in the workspace history
         for history in reversed(ws_history.getAlgorithmHistories()):
@@ -519,12 +520,12 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
             except ValueError:
                 logger.debug("Resolution could not be found in stitch history.")
         if self.reduction_history:
-            rebin_alg = self.reduction_history.getChildHistories()[-1]
-            if rebin_alg.name() == self._REBIN_ALG:
-                rebin_params = rebin_alg.getPropertyValue("Params").split(",")
-                if len(rebin_params) == 3:
-                    # The absolute value of the middle rebin parameter is the resolution
-                    return abs(float(rebin_params[1]))
+            for reduction_history_child in reversed(self.reduction_history.getChildHistories()):
+                if reduction_history_child.name() == self._REBIN_ALG:
+                    rebin_params = reduction_history_child.getPropertyValue("Params").split(",")
+                    if len(rebin_params) == 3:
+                        # The absolute value of the middle rebin parameter is the resolution
+                        return abs(float(rebin_params[1]))
 
         logger.debug("Unable to find resolution from workspace history.")
         return None
