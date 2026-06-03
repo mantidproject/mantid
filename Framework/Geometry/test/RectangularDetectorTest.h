@@ -111,17 +111,23 @@ public:
     TS_ASSERT_EQUALS(det->ystep(), 1.0);
     TS_ASSERT_EQUALS(det->ysize(), 200.0);
 
-    // Go out of bounds
-    TS_ASSERT_THROWS(det->getAtXY(-1, 0), const std::runtime_error &);
-    TS_ASSERT_THROWS(det->getAtXY(0, -1), const std::runtime_error &);
-    TS_ASSERT_THROWS(det->getAtXY(100, 0), const std::runtime_error &);
-    TS_ASSERT_THROWS(det->getAtXY(0, 205), const std::runtime_error &);
+    // Out-of-bounds coordinates return false (inBoundsXY is a predicate, not a guard)
+    TS_ASSERT_EQUALS(det->inBoundsXY(-1, 0), false);
+    TS_ASSERT_EQUALS(det->inBoundsXY(0, -1), false);
+    TS_ASSERT_EQUALS(det->inBoundsXY(100, 0), false);
+    TS_ASSERT_EQUALS(det->inBoundsXY(0, 205), false);
+
+    // Out-of-bounds coordinates throw for getDetectorIDAtXY and getPosAtXY
+    TS_ASSERT_THROWS(det->getDetectorIDAtXY(-1, 0), std::out_of_range const &);
+    TS_ASSERT_THROWS(det->getDetectorIDAtXY(0, -1), std::out_of_range const &);
+    TS_ASSERT_THROWS(det->getDetectorIDAtXY(100, 0), std::out_of_range const &);
+    TS_ASSERT_THROWS(det->getDetectorIDAtXY(0, 205), std::out_of_range const &);
 
     // Check some ids
-    TS_ASSERT_EQUALS(det->getAtXY(0, 0)->getID() - 1000000, 0);
-    TS_ASSERT_EQUALS(det->getAtXY(0, 12)->getID() - 1000000, 12);
-    TS_ASSERT_EQUALS(det->getAtXY(0, 112)->getID() - 1000000, 112);
-    TS_ASSERT_EQUALS(det->getAtXY(1, 12)->getID() - 1000000, 1012);
+    TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0, 0) - 1000000, 0);
+    TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0, 12) - 1000000, 12);
+    TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0, 112) - 1000000, 112);
+    TS_ASSERT_EQUALS(det->getDetectorIDAtXY(1, 12) - 1000000, 1012);
     TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0, 0), 1000000);
     TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0, 12), 1000012);
     TS_ASSERT_EQUALS(det->getDetectorIDAtXY(0, 112), 1000112);
@@ -156,9 +162,9 @@ public:
     TS_ASSERT_EQUALS(y, 12);
 
     // Check some positions
-    TS_ASSERT_EQUALS(det->getAtXY(0, 0)->getPos(), V3D(1000 - 50., 2000 - 100., 3000.));
-    TS_ASSERT_EQUALS(det->getAtXY(1, 0)->getPos(), V3D(1000 - 50. + 1., 2000 - 100., 3000.));
-    TS_ASSERT_EQUALS(det->getAtXY(1, 1)->getPos(), V3D(1000 - 50. + 1., 2000 - 100. + 1., 3000.));
+    TS_ASSERT_EQUALS(det->getPosAtXY(0, 0), V3D(1000 - 50., 2000 - 100., 3000.));
+    TS_ASSERT_EQUALS(det->getPosAtXY(1, 0), V3D(1000 - 50. + 1., 2000 - 100., 3000.));
+    TS_ASSERT_EQUALS(det->getPosAtXY(1, 1), V3D(1000 - 50. + 1., 2000 - 100. + 1., 3000.));
 
     // Name
     TS_ASSERT_EQUALS(det->getAtXY(1, 2)->getName(), "MyRectangle(1,2)");
@@ -213,9 +219,9 @@ public:
     TS_ASSERT_EQUALS(pos, V3D((-50 + 1) * 12., (-100 + 1) * 23., 0.));
 
     // Check some positions
-    TS_ASSERT_EQUALS(parDet->getAtXY(0, 0)->getPos(), V3D(1000 - (50) * 12., 2000 - (100 * 23.), 3000.));
-    TS_ASSERT_EQUALS(parDet->getAtXY(1, 0)->getPos(), V3D(1000 + (-50. + 1) * 12., 2000 - (100 * 23.), 3000.));
-    TS_ASSERT_EQUALS(parDet->getAtXY(1, 1)->getPos(), V3D(1000 + (-50. + 1) * 12., 2000 + (-100. + 1) * 23., 3000.));
+    TS_ASSERT_EQUALS(parDet->getPosAtXY(0, 0), V3D(1000 - (50) * 12., 2000 - (100 * 23.), 3000.));
+    TS_ASSERT_EQUALS(parDet->getPosAtXY(1, 0), V3D(1000 + (-50. + 1) * 12., 2000 - (100 * 23.), 3000.));
+    TS_ASSERT_EQUALS(parDet->getPosAtXY(1, 1), V3D(1000 + (-50. + 1) * 12., 2000 + (-100. + 1) * 23., 3000.));
 
     delete det;
     delete parDet;

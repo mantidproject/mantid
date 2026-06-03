@@ -508,16 +508,16 @@ public:
     TS_ASSERT_EQUALS(bank1->nelements(), 100);
 
     // Positions according to formula
-    TS_ASSERT_DELTA(bank1->getAtXY(0, 0)->getPos().X(), -0.1, 1e-4);
-    TS_ASSERT_DELTA(bank1->getAtXY(0, 0)->getPos().Y(), -0.2, 1e-4);
-    TS_ASSERT_DELTA(bank1->getAtXY(1, 0)->getPos().X(), -0.098, 1e-4);
-    TS_ASSERT_DELTA(bank1->getAtXY(1, 1)->getPos().Y(), -0.198, 1e-4);
+    TS_ASSERT_DELTA(bank1->getPosAtXY(0, 0).X(), -0.1, 1e-4);
+    TS_ASSERT_DELTA(bank1->getPosAtXY(0, 0).Y(), -0.2, 1e-4);
+    TS_ASSERT_DELTA(bank1->getPosAtXY(1, 0).X(), -0.098, 1e-4);
+    TS_ASSERT_DELTA(bank1->getPosAtXY(1, 1).Y(), -0.198, 1e-4);
 
     // Some IDs
-    TS_ASSERT_EQUALS(bank1->getAtXY(0, 0)->getID(), 1000);
-    TS_ASSERT_EQUALS(bank1->getAtXY(0, 1)->getID(), 1001);
-    TS_ASSERT_EQUALS(bank1->getAtXY(1, 0)->getID(), 1300);
-    TS_ASSERT_EQUALS(bank1->getAtXY(1, 1)->getID(), 1301);
+    TS_ASSERT_EQUALS(bank1->getDetectorIDAtXY(0, 0), 1000);
+    TS_ASSERT_EQUALS(bank1->getDetectorIDAtXY(0, 1), 1001);
+    TS_ASSERT_EQUALS(bank1->getDetectorIDAtXY(1, 0), 1300);
+    TS_ASSERT_EQUALS(bank1->getDetectorIDAtXY(1, 1), 1301);
 
     // The total number of detectors
     detid2det_map dets;
