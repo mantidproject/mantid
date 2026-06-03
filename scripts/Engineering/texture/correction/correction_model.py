@@ -374,7 +374,7 @@ class TextureCorrectionModel:
 
 
 def read_attenuation_coefficient_at_value(ws: str, val: float, unit: str) -> Sequence[float]:
-    conv_ws = ConvertUnits(ADS.retrieve(ws), Target=unit)
+    conv_ws = ConvertUnits(ADS.retrieve(ws), Target=unit, StoreInADS=False)
     coefs = []
     xbins = conv_ws.readX(0)
     xdat = np.convolve(xbins, np.ones(2), "valid") / 2  # this gets the bin centres
@@ -383,5 +383,4 @@ def read_attenuation_coefficient_at_value(ws: str, val: float, unit: str) -> Seq
         f = interpolate.interp1d(xdat, ydat)
         interp_val = f([val])[0]
         coefs.append(interp_val)
-    ADS.remove("conv_ws")
     return coefs
