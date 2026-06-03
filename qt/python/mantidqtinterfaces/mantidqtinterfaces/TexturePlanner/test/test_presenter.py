@@ -28,6 +28,10 @@ def _make_view():
     view.get_vecs.return_value = ["vecs"]
     view.get_senses.return_value = ["senses"]
     view.get_angles.return_value = ["angles"]
+    view.get_instrument.return_value = "ENGINX"
+    view.is_custom_instrument.return_value = False
+    view.get_custom_instrument_name.return_value = ""
+    view.get_grouping_file.return_value = ""
     return view
 
 
@@ -37,6 +41,7 @@ def _make_model():
     model.plot_transmission = False
     model.instrument.supported_groups = ("banks",)
     model.instrument.get_supported_instruments.return_value = ("ENGINX", "IMAT")
+    model.instrument.get_instrument.return_value = "ENGINX"
     model.get_default_texture_directions.return_value = (
         ("RD", "ND", "TD"),
         ((1, 0, 0), (0, 1, 0), (0, 0, 1)),
@@ -271,39 +276,231 @@ class TestTexturePlannerPresenter_DirectionsUpdated(unittest.TestCase):
 
 @patch(file_path + ".TexturePlannerSettingsPresenter")
 @patch(file_path + ".TexturePlannerSettingsView")
-class TestTexturePlannerPresenter_GroupAndInstrumentChanged(unittest.TestCase):
-    def test_on_group_changed_sets_group_and_refreshes(self, mock_settings_view, mock_settings_presenter):
+class TestTexturePlannerPresenter_InstrumentGroupSelection(unittest.TestCase):
+    def test_selecting_instrument_repopulates_groups_without_applying(self, mock_settings_view, mock_settings_presenter):
         model = _make_model()
         view = _make_view()
+        view.get_instrument.return_value = "IMAT"
+        model.instrument.groups_for_instrument.return_value = ("Module1", "banks", "Custom")
+        presenter = TexturePlannerPresenter(model, view)
+        view.setup_group_options.reset_mock()
+        view.set_group_enabled.reset_mock()
+        view.clear_grouping_file.reset_mock()
+        model.instrument.update_instrument.reset_mock()
+
+        presenter.on_instrument_changed()
+
+        model.instrument.groups_for_instrument.assert_called_once_with("IMAT")
+        view.setup_group_options.assert_called_once_with(("Module1", "banks", "Custom"))
+        view.set_group_enabled.assert_called_once_with(True)
+        view.clear_grouping_file.assert_called_once_with()
+        # nothing is applied to the model until the Update Instrument button is clicked
+        model.instrument.update_instrument.assert_not_called()
+
+    def test_selecting_custom_instrument_locks_group_to_custom(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.is_custom_instrument.return_value = True
+        presenter = TexturePlannerPresenter(model, view)
+        view.setup_group_options.reset_mock()
+        view.set_group_enabled.reset_mock()
+
+        presenter.on_instrument_changed()
+
+        view.setup_group_options.assert_called_once_with(("Custom",))
+        view.set_group_enabled.assert_called_once_with(False)
+        view.set_custom_instrument_name_visible.assert_any_call(True)
+
+    def test_group_selection_refreshes_visibility_and_button(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.get_group.return_value = "Custom"
+        view.get_grouping_file.return_value = ""
+        presenter = TexturePlannerPresenter(model, view)
+        view.set_grouping_finder_visible.reset_mock()
+        view.set_update_instrument_enabled.reset_mock()
+
+        presenter.on_group_selection_changed()
+
+        view.set_grouping_finder_visible.assert_called_with(True)
+        # custom group with no file yet -> cannot apply
+        view.set_update_instrument_enabled.assert_called_with(False)
+
+    def test_custom_name_change_sets_validity_and_button(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.is_custom_instrument.return_value = True
+        view.get_custom_instrument_name.return_value = "NOTREAL"
+        view.get_group.return_value = "Custom"
+        view.get_grouping_file.return_value = "/abs/grouping.xml"
+        model.instrument.is_valid_instrument.return_value = False
+        presenter = TexturePlannerPresenter(model, view)
+        view.set_custom_instrument_valid.reset_mock()
+        view.set_update_instrument_enabled.reset_mock()
+
+        presenter.on_custom_instrument_name_changed()
+
+        view.set_custom_instrument_valid.assert_called_once_with(False)
+        view.set_update_instrument_enabled.assert_called_with(False)
+
+    def test_grouping_file_change_validates_and_enables(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.get_group.return_value = "Custom"
+        view.get_grouping_file.return_value = "/abs/grouping.xml"
+        model.instrument.is_grouping_file_applicable.return_value = True
+        presenter = TexturePlannerPresenter(model, view)
+        view.set_update_instrument_enabled.reset_mock()
+        model.instrument.is_grouping_file_applicable.reset_mock()
+
+        presenter.on_grouping_file_changed()
+
+        model.instrument.is_grouping_file_applicable.assert_called_once_with("ENGINX", "/abs/grouping.xml")
+        view.set_grouping_file_problem.assert_called_with("")
+        view.set_update_instrument_enabled.assert_called_with(True)
+
+    def test_grouping_file_change_disables_and_warns_when_not_applicable(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.get_group.return_value = "Custom"
+        view.get_grouping_file.return_value = "/abs/wrong.xml"
+        model.instrument.is_grouping_file_applicable.return_value = False
+        presenter = TexturePlannerPresenter(model, view)
+        view.set_update_instrument_enabled.reset_mock()
+
+        presenter.on_grouping_file_changed()
+
+        # the file does not fit the instrument: warn on the finder and keep the button disabled
+        view.set_grouping_file_problem.assert_called_with("Grouping file is not applicable to this instrument")
+        view.set_update_instrument_enabled.assert_called_with(False)
+
+
+@patch(file_path + ".TexturePlannerSettingsPresenter")
+@patch(file_path + ".TexturePlannerSettingsView")
+class TestTexturePlannerPresenter_UpdateInstrumentButton(unittest.TestCase):
+    def test_applies_preset_instrument_and_group(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.is_custom_instrument.return_value = False
+        view.get_instrument.return_value = "IMAT"
+        view.get_group.return_value = "banks"
         presenter = TexturePlannerPresenter(model, view)
         presenter.update_plots = MagicMock()
+        model.instrument.update_instrument.reset_mock()
         model.instrument.set_group.reset_mock()
+        model.instrument.set_custom_grouping_file.reset_mock()
         model.geometry.recompute.reset_mock()
         model.update_all_projected_data.reset_mock()
 
-        presenter.on_group_changed()
+        presenter.update_instrument_and_group()
 
+        model.instrument.update_instrument.assert_called_once_with("IMAT")
+        model.instrument.set_custom_grouping_file.assert_not_called()
         model.instrument.set_group.assert_called_once_with("banks")
         model.geometry.recompute.assert_called_once_with()
         model.update_all_projected_data.assert_called_once_with()
         presenter.update_plots.assert_called_once_with()
 
-    def test_on_instrument_changed_updates_instrument_and_groups(self, mock_settings_view, mock_settings_presenter):
+    def test_applies_custom_instrument_and_grouping_file(self, mock_settings_view, mock_settings_presenter):
         model = _make_model()
         view = _make_view()
-        view.get_instrument.return_value = "IMAT"
+        view.is_custom_instrument.return_value = True
+        view.get_custom_instrument_name.return_value = "WISH"
+        view.get_group.return_value = "Custom"
+        view.get_grouping_file.return_value = "/abs/grouping.xml"
+        model.instrument.is_grouping_file_applicable.return_value = True
         presenter = TexturePlannerPresenter(model, view)
         presenter.update_plots = MagicMock()
-        presenter.on_group_changed = MagicMock()
-        view.setup_group_options.reset_mock()
         model.instrument.update_instrument.reset_mock()
+        model.instrument.set_custom_grouping_file.reset_mock()
+        model.instrument.set_group.reset_mock()
 
-        presenter.on_instrument_changed()
+        presenter.update_instrument_and_group()
 
-        model.instrument.update_instrument.assert_called_once_with("IMAT")
-        view.setup_group_options.assert_called_once_with(model.instrument.supported_groups)
-        presenter.on_group_changed.assert_called_once_with()
-        presenter.update_plots.assert_called_once_with()
+        model.instrument.update_instrument.assert_called_once_with("WISH")
+        model.instrument.set_custom_grouping_file.assert_called_once_with("/abs/grouping.xml")
+        model.instrument.set_group.assert_called_once_with("Custom")
+
+    def test_button_reflects_cached_applicability(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        presenter = TexturePlannerPresenter(model, view)
+
+        # preset instrument + preset group -> applicable (cache is irrelevant for preset groups)
+        view.is_custom_instrument.return_value = False
+        view.get_group.return_value = "banks"
+        view.set_update_instrument_enabled.reset_mock()
+        presenter.refresh_update_instrument_enabled()
+        view.set_update_instrument_enabled.assert_called_with(True)
+
+        # custom group, grouping not (yet) confirmed applicable -> disabled
+        view.get_group.return_value = "Custom"
+        presenter._grouping_applicable = False
+        view.set_update_instrument_enabled.reset_mock()
+        presenter.refresh_update_instrument_enabled()
+        view.set_update_instrument_enabled.assert_called_with(False)
+
+        # custom group, grouping confirmed applicable -> enabled
+        presenter._grouping_applicable = True
+        view.set_update_instrument_enabled.reset_mock()
+        presenter.refresh_update_instrument_enabled()
+        view.set_update_instrument_enabled.assert_called_with(True)
+
+        # custom instrument with an invalid name -> disabled regardless of grouping cache
+        view.is_custom_instrument.return_value = True
+        view.get_custom_instrument_name.return_value = "NOTREAL"
+        model.instrument.is_valid_instrument.return_value = False
+        view.set_update_instrument_enabled.reset_mock()
+        presenter.refresh_update_instrument_enabled()
+        view.set_update_instrument_enabled.assert_called_with(False)
+
+    def test_committing_custom_name_revalidates_grouping(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.is_custom_instrument.return_value = True
+        view.get_custom_instrument_name.return_value = "WISH"
+        view.get_group.return_value = "Custom"
+        view.get_grouping_file.return_value = "/abs/grouping.xml"
+        model.instrument.is_valid_instrument.return_value = True
+        model.instrument.is_grouping_file_applicable.return_value = True
+        presenter = TexturePlannerPresenter(model, view)
+        model.instrument.is_grouping_file_applicable.reset_mock()
+        view.set_update_instrument_enabled.reset_mock()
+
+        presenter.on_custom_instrument_name_committed()
+
+        model.instrument.is_grouping_file_applicable.assert_called_once_with("WISH", "/abs/grouping.xml")
+        view.set_update_instrument_enabled.assert_called_with(True)
+
+    def test_editing_custom_name_defers_expensive_check(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.is_custom_instrument.return_value = True
+        view.get_custom_instrument_name.return_value = "WIS"
+        view.get_group.return_value = "Custom"
+        view.get_grouping_file.return_value = "/abs/grouping.xml"
+        model.instrument.is_valid_instrument.return_value = False
+        presenter = TexturePlannerPresenter(model, view)
+        model.instrument.is_grouping_file_applicable.reset_mock()
+        view.set_update_instrument_enabled.reset_mock()
+
+        presenter.on_custom_instrument_name_changed()
+
+        # per-keystroke handler must not run the expensive grouping check
+        model.instrument.is_grouping_file_applicable.assert_not_called()
+        view.set_update_instrument_enabled.assert_called_with(False)
+
+    def test_update_custom_widgets_visibility_tracks_selection(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        view.is_custom_instrument.return_value = True
+        view.get_group.return_value = "Custom"
+        presenter = TexturePlannerPresenter(model, view)
+
+        presenter.update_custom_widgets_visibility()
+
+        view.set_custom_instrument_name_visible.assert_called_with(True)
+        view.set_grouping_finder_visible.assert_called_with(True)
 
 
 @patch(file_path + ".TexturePlannerSettingsPresenter")

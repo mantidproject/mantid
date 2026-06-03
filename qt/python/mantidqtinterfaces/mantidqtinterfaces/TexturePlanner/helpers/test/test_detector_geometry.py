@@ -170,6 +170,21 @@ class TestDetectorGeometry_Recompute(unittest.TestCase):
         # positions captured for spec 1,2,3 (skipping null group at 0)
         np.testing.assert_array_equal(dg._det_positions, np.array([[1.0, 0.0, 0.0], [2.0, 0.0, 0.0], [3.0, 0.0, 0.0]]))
 
+    def test_skips_leading_spectra_without_detectors(self, mock_load_grp):
+        # a custom grouping file can leave the leading group empty (no detectors); these must be
+        # skipped so spectrumInfo.position is never asked for a detector-less spectrum
+        dg, group_ws = self._make_dg_with_stubs(n_hist=4)
+        group_ws.spectrumInfo.return_value.hasDetectors.side_effect = lambda i: i != 0
+        tmp_grp = MagicMock()
+        tmp_grp.extractY.return_value = np.array([[1], [2], [3]])  # no null group -> base starting_ind=0
+        mock_load_grp.return_value = tmp_grp
+
+        dg.recompute()
+
+        # advanced past the empty leading spectrum at index 0
+        self.assertEqual(dg.starting_ind, 1)
+        np.testing.assert_array_equal(dg._det_positions, np.array([[1.0, 0.0, 0.0], [2.0, 0.0, 0.0], [3.0, 0.0, 0.0]]))
+
     def test_captures_source_position_from_component_info(self, mock_load_grp):
         dg, _ = self._make_dg_with_stubs()
         tmp_grp = MagicMock()

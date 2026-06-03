@@ -43,7 +43,14 @@ class DetectorGeometry:
         # extract the detector positions for each spectrum in the group and the source position
         spec_info = group_ws.spectrumInfo()
         comp_info = group_ws.componentInfo()
-        self._det_positions = np.asarray([spec_info.position(i) for i in range(self.starting_ind, group_ws.getNumberHistograms())])
+        n_hist = group_ws.getNumberHistograms()
+        # a user-supplied (custom) grouping file can leave the leading spectrum/spectra with no
+        # detectors (an empty group); skip these so spectrumInfo.position does not raise. Keeping
+        # starting_ind a contiguous prefix offset preserves the slice AbsorptionCalculator uses to
+        # line transmission factors up with these detector positions.
+        while self.starting_ind < n_hist and not spec_info.hasDetectors(self.starting_ind):
+            self.starting_ind += 1
+        self._det_positions = np.asarray([spec_info.position(i) for i in range(self.starting_ind, n_hist)])
         self._source_position = np.asarray(comp_info.sourcePosition())
 
         # calculate the required det_k and detQs_lab
