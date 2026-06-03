@@ -281,7 +281,7 @@ QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
   m_fitMapper = new QSignalMapper(this);
   m_fitMenu = new QMenu(this);
   populateFitMenuButton(m_fitMapper, m_fitMenu);
-  connect(m_fitMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeFitMenu(const QString &)));
+  connect(m_fitMapper, SIGNAL(mappedString(const QString &)), this, SLOT(executeFitMenu(const QString &)));
   btnFit->setMenu(m_fitMenu);
   return btnFit;
 }
@@ -374,7 +374,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   connect(m_displayActionPlotGuess, SIGNAL(triggered()), displayMapper, SLOT(map()));
   connect(m_displayActionQuality, SIGNAL(triggered()), displayMapper, SLOT(map()));
   connect(m_displayActionClearAll, SIGNAL(triggered()), displayMapper, SLOT(map()));
-  connect(displayMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeDisplayMenu(const QString &)));
+  connect(displayMapper, SIGNAL(mappedString(const QString &)), this, SLOT(executeDisplayMenu(const QString &)));
   displayMenu->addAction(m_displayActionPlotGuess);
   displayMenu->addAction(m_displayActionClearAll);
   displayMenu->addAction(m_displayActionQuality);
@@ -420,7 +420,8 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   connect(setupActionCopyToClipboard, SIGNAL(triggered()), setupManageMapper, SLOT(map()));
   connect(setupActionLoadFromString, SIGNAL(triggered()), setupManageMapper, SLOT(map()));
   connect(setupActionClear, SIGNAL(triggered()), setupManageMapper, SLOT(map()));
-  connect(setupManageMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeSetupManageMenu(const QString &)));
+  connect(setupManageMapper, SIGNAL(mappedString(const QString &)), this,
+          SLOT(executeSetupManageMenu(const QString &)));
   setupSubMenuManage->addAction(setupActionSave);
   setupSubMenuManage->addAction(m_setupActionRemove);
   setupSubMenuManage->addAction(setupActionClear);
@@ -438,13 +439,13 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   PeakFindingAlgMapper->setMapping(setupActionFindPeaksConvolve, "FindPeaksConvolve");
   connect(setupActionFindPeaks, SIGNAL(triggered()), PeakFindingAlgMapper, SLOT(map()));
   connect(setupActionFindPeaksConvolve, SIGNAL(triggered()), PeakFindingAlgMapper, SLOT(map()));
-  connect(PeakFindingAlgMapper, SIGNAL(mapped(const QString &)), this,
+  connect(PeakFindingAlgMapper, SIGNAL(mappedString(const QString &)), this,
           SLOT(executePeakFindingAlgMenu(const QString &)));
 
   QSignalMapper *setupMapper = new QSignalMapper(this);
   setupMapper->setMapping(setupActionClearFit, "ClearFit");
   connect(setupActionClearFit, SIGNAL(triggered()), setupMapper, SLOT(map()));
-  connect(setupMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeSetupMenu(const QString &)));
+  connect(setupMapper, SIGNAL(mappedString(const QString &)), this, SLOT(executeSetupMenu(const QString &)));
 
   QMenu *setupSubMenuPeakFindingAgls = new QMenu(this);
   setupSubMenuPeakFindingAgls->addAction(setupActionFindPeaks);
@@ -602,8 +603,8 @@ void FitPropertyBrowser::updateSetupMenus() {
     menuLoad->addAction(itemLoad);
     menuRemove->addAction(itemRemove);
   }
-  connect(mapperLoad, SIGNAL(mapped(const QString &)), this, SLOT(executeCustomSetupLoad(const QString &)));
-  connect(mapperRemove, SIGNAL(mapped(const QString &)), this, SLOT(executeCustomSetupRemove(const QString &)));
+  connect(mapperLoad, SIGNAL(mappedString(const QString &)), this, SLOT(executeCustomSetupLoad(const QString &)));
+  connect(mapperRemove, SIGNAL(mappedString(const QString &)), this, SLOT(executeCustomSetupRemove(const QString &)));
 }
 
 void FitPropertyBrowser::executeCustomSetupLoad(const QString &name) {

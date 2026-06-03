@@ -68,6 +68,7 @@ if(PYRCC5_CMD)
       add_custom_command(
         OUTPUT ${_output_res_py}
         COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file} ${_paths_qrc_file}
+        COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/buildconfig/CMake/rewrite_resources_import.py ${_output_res_py}
         COMMENT "Generating workbench resources module for ${BUILD_TYPE}: ${_output_res_py}"
         DEPENDS ${_images_qrc_file} ${_paths_qrc_file}
       )
@@ -107,6 +108,7 @@ if(PYRCC5_CMD)
     add_custom_command(
       OUTPUT ${_output_res_py}
       COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file}
+      COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/buildconfig/CMake/rewrite_resources_import.py ${_output_res_py}
       COMMENT "Generating workbench resources module"
       DEPENDS ${_images_qrc_file}
     )

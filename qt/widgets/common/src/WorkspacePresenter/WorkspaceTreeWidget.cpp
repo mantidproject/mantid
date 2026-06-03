@@ -1326,7 +1326,8 @@ void WorkspaceTreeWidget::popupContextMenu() {
     // Tell the button what to listen for and what to do once clicked (if there
     // is anything to connect it will be set to false)
     if (!firstPass)
-      connect(m_programMapper, SIGNAL(mapped(const QString &)), this, SLOT(onClickSaveToProgram(const QString &)));
+      connect(m_programMapper, SIGNAL(mappedString(const QString &)), this,
+              SLOT(onClickSaveToProgram(const QString &)));
 
     // Rename is valid for all workspace types
     menu->addAction(m_rename);
