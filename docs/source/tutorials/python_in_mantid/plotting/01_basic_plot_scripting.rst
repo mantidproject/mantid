@@ -107,7 +107,7 @@ To overplot on the same window:
     # IMPORTANT to set origin to lower
     c = axes.imshow(data, origin = 'lower', cmap='viridis', aspect='auto', norm=LogNorm())
     cbar=fig.colorbar(c)
-    cbar.set_label('Counts ($\mu s$)$^{-1}$') #add text to colorbar
+    cbar.set_label(r'Counts ($\mu s$)$^{-1}$') #add text to colorbar
     #fig.show()
 
 
@@ -154,7 +154,7 @@ To overplot on the same window:
     axes.contour(data, levels=np.linspace(10, 60, 6), colors='yellow', alpha=0.5)
 
     cbar=fig.colorbar(c)
-    cbar.set_label('Counts ($\mu s$)$^{-1}$') #add text to colorbar
+    cbar.set_label(r'Counts ($\mu s$)$^{-1}$') #add text to colorbar
     #fig.show()
 
 
