@@ -27,6 +27,7 @@ Current limitations compared to ``AlignAndFocusPowderFromFiles``
 Child algorithms used are
 
 - :ref:`algm-LoadDiffCal`
+- :ref:`algm-LoadDetectorsGroupingFile`
 - :ref:`algm-LoadIDFFromNexus-v1`
 - :ref:`algm-EditInstrumentGeometry`
 - :ref:`algm-LoadNexusLogs`
@@ -155,6 +156,30 @@ The example done here is using :ref:`GenerateGroupingPowder <algm-GenerateGroupi
                                  Polar=[90]*3)
 
     print(ws.getNumberHistograms())  # should be 3 histograms in the output workspace
+
+
+**Example - using a GroupFilename**
+
+Alternatively, you can provide a ``GroupFilename`` pointing directly to an XML or HDF5/cal grouping file.
+XML files (e.g. from :ref:`algm-SaveDetectorsGrouping`) are loaded via :ref:`algm-LoadDetectorsGroupingFile`.
+HDF5 and ``.cal`` files are loaded via :ref:`algm-LoadDiffCal`.
+``GroupFilename`` overrides any grouping that would otherwise be extracted from ``CalFileName``.
+
+.. code-block:: python
+
+    # XML grouping file
+    ws = AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5",
+                                 GroupFilename="mygroups.xml",
+                                 L1=43.755,
+                                 L2=[2.296, 2.296],
+                                 Polar=[90, 90])
+
+    # HDF5 grouping file
+    ws = AlignAndFocusPowderSlim("VULCAN_218062.nxs.h5",
+                                 GroupFilename="mygroups.hdf",
+                                 L1=43.755,
+                                 L2=[2.296, 2.296],
+                                 Polar=[90, 90])
 
 .. categories::
 
