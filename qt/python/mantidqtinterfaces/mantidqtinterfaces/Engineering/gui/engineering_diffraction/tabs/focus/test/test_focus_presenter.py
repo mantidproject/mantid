@@ -25,7 +25,7 @@ class FocusPresenterTest(unittest.TestCase):
     @patch(tab_path + ".presenter.FocusPresenter._validate")
     def test_worker_started_with_correct_params(self, mock_validate, mock_worker):
         self.view.get_focus_filenames.return_value = "305738"
-        self.view.get_plot_output.return_value = True
+        self.view.get_focus_plot_output.return_value = True
         mock_validate.return_value = True
 
         self.presenter.on_focus_clicked()
