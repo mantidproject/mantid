@@ -340,6 +340,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
+        self.copyProperties("AlignAndFocusPowderFromFiles", ["AllowSlimProcess"])
         self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.")
         self.copyProperties("AlignAndFocusPowderFromFiles", ["CompressBinningMode"])
 
@@ -963,6 +964,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             LogAllowList=self.getPropertyValue("LogAllowList").strip(),
             LogBlockList=self.getPropertyValue("LogBlockList").strip(),
             MinSizeCompressOnLoad=self._compressionThreshold,
+            AllowSlimProcess=self.getProperty("AllowSlimProcess").value,
             **otherArgs,
         )
 
