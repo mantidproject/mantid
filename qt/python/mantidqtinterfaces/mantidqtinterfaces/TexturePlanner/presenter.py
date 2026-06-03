@@ -88,11 +88,11 @@ class TexturePlannerPresenter(object):
         self.model.set_dir_names(self.view.get_rd_name(), self.view.get_nd_name(), self.view.get_td_name())
 
     def set_model_group(self):
-        self.model.set_group(self.view.get_group())
+        self.model.instrument.set_group(self.view.get_group())
         self.model.geometry.recompute()
 
     def set_instrument_options(self):
-        self.view.set_instrument_options(self.model.get_supported_instruments())
+        self.view.set_instrument_options(self.model.instrument.get_supported_instruments())
 
     def set_view_with_default_texture_directions(self):
         names, vecs = self.model.get_default_texture_directions()
@@ -152,7 +152,7 @@ class TexturePlannerPresenter(object):
         self.update_plots()
 
     def on_instrument_changed(self):
-        self.model.update_instrument(self.view.get_instrument())
+        self.model.instrument.update_instrument(self.view.get_instrument())
         self.setup_group_options()
         self.on_group_changed()
         self.update_plots()
@@ -193,7 +193,7 @@ class TexturePlannerPresenter(object):
         self.view.set_current_index(new_index)
 
     def setup_group_options(self):
-        self.view.setup_group_options(self.model.supported_groups)
+        self.view.setup_group_options(self.model.instrument.supported_groups)
 
     def update_goniometer_values_from_index(self, index):
         vecs, senses, angles = self.model.orientations.get_goniometer_values(index)
