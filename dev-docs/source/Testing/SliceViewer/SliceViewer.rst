@@ -285,66 +285,66 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 
 4. Open the cut tool and check that:
 
-    - Disabled ROI tool
-    - Disabled line plots
+    - Toggle lineplot is off
+    - Toggle region selection is off
     - Sliceviewer should look like
 
 .. figure:: ../../images/SliceViewer/CutViewer_HKplane.png
    :class: screenshot
    :align: center
 
-6. Check that transposing the axes (X <-> Y) will swap the u1 and u2 vectors in the table
-7. Set the axes to (X,Y) = (L, K) - check u1 = [0,0,1] and u2 = [0,1,0]
-8. Change the slice point of H to be 0 - it should look like this
+5. Check that transposing the axes (X <-> Y) will swap the u1 and u2 vectors in the table
+6. Set the axes to (X,Y) = (L, K) - check u1 = [0,0,1] and u2 = [0,1,0]
+7. Change the slice point of H to be 0 - it should look like this
 
 .. figure:: ../../images/SliceViewer/CutViewer_KLplane.png
    :class: screenshot
    :align: center
 
-9.  In the table double the step along u1 (i.e. set step to 0.12) - this should change nbins = 25 along u1
-10. Set the nbins = 50 along u1 - the step should go back to it's original value (0.06)
-11. Set the stop for u1 to 0 and check that
+8.  In the table double the step along u1 (i.e. set step to 0.12) - this should change nbins = 25 along u1
+9. Set the nbins = 50 along u1 - the step should go back to it's original value (0.06)
+10. Set the stop for u1 to 0 and check that
 
     - step size = 0.03
     - the cut representation line on the colorfill plot has the correct start/stop
     - the 1D plot in the cut viewer pane has the correct axes limits
 
-12. Set step of u1 to be 2 (i.e. greater than the extent of the cut) - this should set nbins=1 and step = 1.5 and put the cut along u2 with nbins = 50.
-13. Transpose the axes so now (X,Y) = (K,L) - the cut should have 50 bins along K (default value)
-14. Change the nbins of u2 to 50 (it should set nbins=1 for u1 and change the step=4). Check the white line of the cut representation on the colorfill plot is now vertical.
-15. Try to change the a* column of the u1 to 1 (this would take u1 out of the plane of the slice, i.e. not orthogonal to u3) - it should reset to 0 - i.e. u1 = [0,1,0].
-16. Click and hold down on one of the red markers with white face on the colorfill plot and drag, release at ~K=1.
+11. Set step of u1 to be 2 (i.e. greater than the extent of the cut) - this should set nbins=1 and step = 1.5 and put the cut along u2 with nbins = 50.
+12. Transpose the axes so now (X,Y) = (K,L) - the cut should have 50 bins along K (default value)
+13. Change the nbins of u2 to 50 (it should set nbins=1 for u1 and change the step=4). Check the white line of the cut representation on the colorfill plot is now vertical.
+14. Try to change the a* column of the u1 to 1 (this would take u1 out of the plane of the slice, i.e. not orthogonal to u3) - it should reset to 0 - i.e. u1 = [0,1,0].
+15. Click and hold down on one of the red markers with white face on the colorfill plot and drag, release at ~K=1.
 
     - This should reset the vectors in the table such that the cut is along u1 = [0,0,1] - i.e. u1 and u2 are swapped
     - The thickness along u2 should be adjusted to ~2
 
-17. Set the step of u2 = 2 in the table, check that it sets (start,stop) = (-1,1)
-18. Drag the top white marker of the cut representation up to L~2
+16. Set the step of u2 = 2 in the table, check that it sets (start,stop) = (-1,1)
+17. Drag the top white marker of the cut representation up to L~2 such that
 
     - u1 ~ [0,0,1]  and u2 ~ [0,1,0]
-    - There should be a peak in the 1D plot at x~1
+    - Verify that the peak in the 1D plot is at x~1
 
-19. For u1 set b*=0 and c* = -1 and start=-2 - check that u2 = [0,-1,0] and there is a peak at x~-1
-20. To change the centre of the cut move the central white marker of the cut representation to (K,L) ~ (2,0),
+18. For u1 set b*=0 and c* = -1 and start=-2 - check that u2 = [0,-1,0] and now the peak should be at x~-1
+19. To change the centre of the cut move the central white marker of the cut representation to (K,L) ~ (2,0),
 
     - The entire cut representation should move
     - The axes label of the 1D plot should be similar to :math:`(0.0, 2.0,0.0-1.0x) \ in \ 3.14 \AA^{-1}`
     - There should be no peak on the 1D plot
 
-21. Increase the thickness by dragging the left red marker of the cut representation to encompass the peak in the data - check the peak appears in the 1D plot at the right thickness.
-22. Play around with the direction of the cut by dragging the white markers at the end points of the white line - the vectors u1 and u3 should be orthogonal unit vectors.
-23. Reset the cut by transposing the axes so (X,Y) = (L,K)
-24. Double the slice thickness along H from 0.1 -> 0.2 (the counts of the peak in the 1D plot should double from ~1750 -> ~3500)
-25. Change c* of u1 from 1 -> -1
+20. Increase the thickness by dragging the left red marker of the cut representation to encompass the peak in the data - check the peak appears in the 1D plot at the right thickness.
+21. Play around with the direction of the cut by dragging the white markers at the end points of the white line - the vectors u1 and u3 should be orthogonal unit vectors.
+22. Reset the cut by transposing the axes so (X,Y) = (L,K)
+23. Double the slice thickness along H from 0.1 -> 0.2 (the counts of the peak in the 1D plot should double from ~1750 -> ~3500)
+24. Change c* of u1 from 1 -> -1
 
     - The peak in the 1D plot should move from x= 1 -> -1
     - Check u2 = [0,-1,0]
 
-26. Turn on non-orthogonal view and play around with the cut tool representation
+25. Turn on non-orthogonal view and play around with the cut tool representation
 
     - Check that the table values are updated correctly (use the HKL in the cursor info table to help determine this)
 
-27. Produce a non-axis aligned cut as shown below where the peak is not in the center of the x-range. Take the x-value at the peak maximum and plug it into the axis label - it should produce the HKL of the peak (0,0,1).
+26. Produce a non-axis aligned cut as shown below where the peak is not in the center of the x-range. Take the x-value at the peak maximum and plug it into the axis label - it should produce the HKL of the peak (0,0,1).
 
     - In the example below, the x axis label is :math:`(0.0, -0.24 + 0.97x, 0.93 + 0.25x) \ in \ 7.07 \AA^{-1}`. So if we plug in the value of x at the peak centre we get ``(0.0, -0.24 + 0.97*0.25, 0.93 + 0.25*0.25)`` = ``(0.0, 0.0025, 0.9925)``, which is very close to actual peak HKL = ``(0,0,1)``
 
