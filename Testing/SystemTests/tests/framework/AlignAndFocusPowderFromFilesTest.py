@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init
+# ruff: noqa S108
 import systemtesting
 from mantid.api import mtd, AnalysisDataService, WorkspaceFactory
 from mantid.kernel import PropertyManagerDataService
@@ -24,6 +25,7 @@ from mantid.simpleapi import (
     PDDetermineCharacterizations,
     PDLoadCharacterizations,
     RebinRagged,
+    SaveNexus,
     SetSample,
     SortEvents,
 )
@@ -230,6 +232,49 @@ class ChunkingCompare(systemtesting.MantidSystemTest):
 
     def validate(self):
         return ("with_chunks", "no_chunks")
+
+
+class SavedNexusWithAllowSlimProcess(systemtesting.MantidSystemTest):
+    data_file = "SNAP_45874"
+
+    def cleanup(self):
+        if hasattr(self, "tmp_file") and os.path.exists(self.tmp_file):
+            os.remove(self.tmp_file)
+        return True
+
+    def requiredMemoryMB(self):
+        return 1024
+
+    def requiredFiles(self):
+        return [self.data_file]
+
+    def runTest(self):
+        input_ws = "saved_nexus_input"
+        grouping_ws = "saved_nexus_grouping"
+        output_ws = "saved_nexus_output"
+        self.tmp_file = f"/tmp/aafpff_saved_nexus_{int(time.time() * 1e6)}.nxs"
+
+        LoadEventNexus(Filename=self.data_file, OutputWorkspace=input_ws)
+        SaveNexus(InputWorkspace=input_ws, Filename=self.tmp_file)
+
+        CreateGroupingWorkspace(InstrumentFilename="SNAP_Definition.xml", GroupDetectorsBy="Group", OutputWorkspace=grouping_ws)
+
+        AlignAndFocusPowderFromFiles(
+            Filename=self.tmp_file,
+            OutputWorkspace=output_ws,
+            Params=(0.5, -0.004, 7),
+            GroupingWorkspace=grouping_ws,
+            AllowSlimProcess=True,
+        )
+
+        self.assertTrue(AnalysisDataService.doesExist(output_ws), f"Expected output workspace '{output_ws}' to be created")
+        self.assertGreaterThan(mtd[output_ws].getNumberHistograms(), 0, "Expected output workspace to contain spectra")
+
+    def validateMethod(self):
+        return None
+
+    def validate(self):
+        return None
 
 
 class CompressedCompare(systemtesting.MantidSystemTest):
