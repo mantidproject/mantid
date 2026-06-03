@@ -737,6 +737,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_mask.setDisabled(True)
         self._add_selection.setDisabled(True)
         self._sum_spectra_checkbox.setDisabled(enabled)
+        self._select_bank_tube.setDisabled(enabled)
 
         for btn in self._shape_buttons:
             if btn.isChecked():
