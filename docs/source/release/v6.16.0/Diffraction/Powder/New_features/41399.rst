@@ -1,0 +1,4 @@
+- :ref:`algm-AlignAndFocusPowderFromFiles` has a new ``AllowSlimProcess`` property (default ``True``).
+  When enabled and the inputs are compatible, the algorithm delegates the reduction to
+  :ref:`algm-AlignAndFocusPowderSlim` for significantly faster processing (seconds versus tens of minutes
+  for large datasets). Set ``AllowSlimProcess=False`` to always use the standard reduction path.
