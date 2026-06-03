@@ -158,13 +158,14 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
         issues["InputWorkspaces"] = "All input workspaces must be groups";
       } else { // only group workspaces
         m_outputWorkspaceSuffixes = this->getProperty("OutputWorkspaceSuffixes");
-        if (!m_outputWorkspaceSuffixes.empty() && m_outputWorkspaceSuffixes.size() != m_inputWSMatrix.front().size())
-          issues["OutputWorkspaceSuffixes"] =
-              "Expected " + std::to_string(m_inputWSMatrix.front().size()) + " suffix(es)";
         const std::unordered_set<std::string> suffixSet(m_outputWorkspaceSuffixes.cbegin(),
                                                         m_outputWorkspaceSuffixes.cend());
-        if (suffixSet.size() != m_outputWorkspaceSuffixes.size())
+        if (!m_outputWorkspaceSuffixes.empty() && m_outputWorkspaceSuffixes.size() != m_inputWSMatrix.front().size()) {
+          issues["OutputWorkspaceSuffixes"] =
+              "Expected " + std::to_string(m_inputWSMatrix.front().size()) + " suffix(es)";
+        } else if (suffixSet.size() != m_outputWorkspaceSuffixes.size()) {
           issues["OutputWorkspaceSuffixes"] = "Suffixes must be unique";
+        }
 
         // Each row of matrix workspaces will be stitched
         for (size_t spec = 1; spec < m_inputWSMatrix.front().size(); ++spec) {
