@@ -501,7 +501,6 @@ DetectorInfoIt DetectorInfo::end() { return DetectorInfoIt(*this, size(), size()
  * @return bytes used.
  */
 size_t DetectorInfo::getMemorySize() const {
-  const size_t n = size();
   // Beamline::DetectorInfo holds the core position/rotation/flag arrays
   const size_t beamlineMem = m_detectorInfo->getMemorySize();
   // m_detectorIDs: compact (real detectors only for PA instruments); count its actual buffer.
