@@ -145,12 +145,12 @@ public:
 
     RectangularDetector_const_sptr bank1 =
         std::dynamic_pointer_cast<const RectangularDetector>(m_instrument->getComponentByName("bank1"));
-    std::shared_ptr<const Detector> det = bank1->getAtXY(2, 3);
-    TS_ASSERT(det);
+    specnum_t spec = 256 + 2 * 16 + 3; // This gives the spectrum number for this detector
+    auto id = bank1->getDetectorIDAtXY(2, 3);
+    TS_ASSERT_EQUALS(id, spec); // bank1 idstart=256, idFillOrder=yxz: id = 256 + y + x*16
     std::map<specnum_t, V3D> nb;
 
     // Too close!
-    specnum_t spec = 256 + 2 * 16 + 3; // This gives the spectrum number for this detector
     nb = nn.neighboursInRadius(spec, 0.003);
     TS_ASSERT_EQUALS(nb.size(), 0);
 

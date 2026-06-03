@@ -91,6 +91,10 @@ public:
    */
   friend class ComponentInfo;
 
+  /// Maps a logical detector index to its compact array offset, skipping virtual pixel ranges.
+  /// Only valid for non-virtual indices. Identity for non-virtual-bank instruments.
+  size_t compactDetectorIndex(size_t index) const noexcept { return index; }
+
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
   void checkNoTimeDependence() const;
@@ -159,7 +163,7 @@ inline void DetectorInfo::setPosition(const size_t index, const Eigen::Vector3d 
   m_positions.access()[index] = position;
 }
 
-/// Set the position of the detector with given index.
+/// Set the position of the detector with given index (scanning pair overload).
 inline void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &position) {
   m_positions.access()[linearIndex(index)] = position;
 }

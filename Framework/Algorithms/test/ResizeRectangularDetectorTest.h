@@ -54,24 +54,24 @@ public:
 
     // Bank 1 got scaled
     V3D pos;
-    pos = det->getAtXY(1, 1)->getPos();
+    pos = det->getPosAtXY(1, 1);
     TS_ASSERT(ws->constInstrumentParameters().contains(det.get(), "scalex"));
     TS_ASSERT(ws->constInstrumentParameters().contains(det.get(), "scaley"));
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 2, 0.008 * 0.5, 5.0));
     TS_ASSERT_DELTA(det->xstep(), 0.008 * 2, 1e-6);
 
     // Check that accessing through spectrumInfo.detector() also works
-    const GridDetectorPixel *recDetPix;
     const auto &spectrumInfo = ws->spectrumInfo();
     const auto &pixel = spectrumInfo.detector(11);
-    recDetPix = dynamic_cast<const GridDetectorPixel *>(det->getAtXY(1, 1).get());
-    TSM_ASSERT("getDetector() returns a GridDetectorPixel", recDetPix);
+    detid_t recDetPixID = det->getDetectorIDAtXY(1, 1);
+    TSM_ASSERT("getDetectorIDAtXY() returns a valid detector ID", recDetPixID > 0);
+    TS_ASSERT_EQUALS(recDetPixID, pixel.getID());
     pos = pixel.getPos();
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 2, 0.008 * 0.5, 5.0));
 
     // Bank 2 did not get scaled
     det = std::dynamic_pointer_cast<const RectangularDetector>(inst->getComponentByName("bank2"));
-    pos = det->getAtXY(1, 1)->getPos();
+    pos = det->getPosAtXY(1, 1);
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 1.0, 0.008 * 1.0, 10.0));
     TS_ASSERT_DELTA(det->xstep(), 0.008 * 1, 1e-6);
   }
