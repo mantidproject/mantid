@@ -3,21 +3,21 @@
 #
 # The function creates an imported target prefixed in a similar manner to the Qt5 targets.
 function(find_qscintilla qt_version)
-  if(NOT Qt5_FOUND)
-    message(FATAL_ERROR "find_package ( Qt5 ...) must be called first")
+  if(NOT Qt${qt_version}_FOUND)
+    message(FATAL_ERROR "find_package ( Qt${qt_version} ...) must be called first")
   endif()
   set(_qsci_lib_names
-      qscintilla2_qt5
-      qscintilla2-qt5
-      libqt5scintilla2
-      libqscintilla2-qt5
-      qt5scintilla2
-      libqscintilla2_qt5
+      qscintilla2_qt${qt_version}
+      qscintilla2-qt${qt_version}
+      libqt${qt_version}scintilla2
+      libqscintilla2-qt${qt_version}
+      qt${qt_version}scintilla2
+      libqscintilla2_qt${qt_version}
       qscintilla2
       libqscintilla2
   )
-  set(_qsci_lib_names_debug qscintilla2_qt5d)
-  set(_qsci_include_paths ${Qt5Core_INCLUDE_DIRS})
+  set(_qsci_lib_names_debug qscintilla2_qt${qt_version}d)
+  set(_qsci_include_paths ${Qt${qt_version}Core_INCLUDE_DIRS})
 
   set(_include_var QSCINTILLA_QT${qt_version}_INCLUDE_DIR)
   find_path(

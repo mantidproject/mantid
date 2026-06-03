@@ -27,7 +27,7 @@ set(INC_FILES
 # Target
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesDirect
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}

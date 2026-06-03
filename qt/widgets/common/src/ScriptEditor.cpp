@@ -495,9 +495,9 @@ QByteArray ScriptEditor::fromMimeData(const QMimeData *source, bool &rectangular
  */
 void ScriptEditor::dropEvent(QDropEvent *de) {
   if (!de->mimeData()->hasUrls()) {
-    QDropEvent localDrop(*de);
-    // pass to base class - This handles text appropriately
-    QsciScintilla::dropEvent(&localDrop);
+    // pass to base class - This handles text appropriately. (QDropEvent's copy
+    // constructor is protected in Qt6, so forward the event directly.)
+    QsciScintilla::dropEvent(de);
   }
 }
 
@@ -550,7 +550,9 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event) {
   // This does that for you!
   if (event->text() == "(") {
     auto *backspEvent = new QKeyEvent(QEvent::KeyPress, Qt::Key_Backspace, Qt::NoModifier);
-    auto *bracketEvent = new QKeyEvent(*event);
+    // QKeyEvent's copy constructor is protected in Qt6; rebuild from the original's fields
+    auto *bracketEvent = new QKeyEvent(event->type(), event->key(), event->modifiers(), event->text(),
+                                       event->isAutoRepeat(), static_cast<ushort>(event->count()));
     QsciScintilla::keyPressEvent(bracketEvent);
     QsciScintilla::keyPressEvent(backspEvent);
 

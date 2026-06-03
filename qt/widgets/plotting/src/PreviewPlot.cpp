@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"
 
 #include <QAction>
+#include <QActionGroup>
 #include <QContextMenuEvent>
 #include <QEvent>
 #include <QMenu>

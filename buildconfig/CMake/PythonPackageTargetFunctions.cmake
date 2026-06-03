@@ -74,9 +74,10 @@ function(add_python_package pkg_name)
   if(_parsed_arg_GENERATE_SITECUSTOMIZE)
     add_custom_command(
       OUTPUT ${_egg_link_dir}/sitecustomize.py
-      COMMAND ${CMAKE_COMMAND} -DSITECUSTOMIZE_DIR=${_egg_link_dir} -P ${CMAKE_MODULE_PATH}/WriteSiteCustomize.cmake
+      COMMAND ${CMAKE_COMMAND} -DSITECUSTOMIZE_DIR=${_egg_link_dir} -P
+              ${CMAKE_SOURCE_DIR}/buildconfig/CMake/WriteSiteCustomize.cmake
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      DEPENDS ${_setup_py} ${CMAKE_MODULE_PATH}/WriteSiteCustomize.cmake
+      DEPENDS ${_setup_py} ${CMAKE_SOURCE_DIR}/buildconfig/CMake/WriteSiteCustomize.cmake
     )
     set(_pkg_depends ${_pkg_depends} ${_egg_link_dir}/sitecustomize.py)
   endif()

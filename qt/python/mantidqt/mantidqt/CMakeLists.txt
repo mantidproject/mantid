@@ -21,25 +21,25 @@ set(_header_depends
 
 list(APPEND common_link_libs ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} Mantid::PythonInterfaceCore)
 
-# Wrapper module linked against Qt5
+# Wrapper module linked against Qt${MANTID_QT_VERSION}
 mtd_add_sip_module(
-  MODULE_NAME _commonqt5
-  TARGET_NAME mantidqt_commonqt5
+  MODULE_NAME _commonqt${MANTID_QT_VERSION}
+  TARGET_NAME mantidqt_commonqt${MANTID_QT_VERSION}
   HEADER_DEPS ${_header_depends}
-  SIP_SRC _common.sip
-  PYQT_VERSION 5
+  SIP_SRC _common.sip.in
+  PYQT_VERSION ${MANTID_QT_VERSION}
   INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR} ${COMMON_SIP_DIR}
-  LINK_LIBS MantidQtWidgetsCommonQt5
+  LINK_LIBS MantidQtWidgetsCommonQt${MANTID_QT_VERSION}
             ${common_link_libs}
-            Qt5::Core
-            Qt5::Widgets
-            Qt5::Gui
-            Qt5::Qscintilla
+            Qt${MANTID_QT_VERSION}::Core
+            Qt${MANTID_QT_VERSION}::Widgets
+            Qt${MANTID_QT_VERSION}::Gui
+            Qt${MANTID_QT_VERSION}::Qscintilla
             Mantid::API
   INSTALL_DIR ${Python_SITELIB_RELPATH}/mantidqt
   LINUX_INSTALL_RPATH "\$ORIGIN/.."
   OSX_INSTALL_RPATH "@loader_path/..;@loader_path/../../Frameworks"
-  FOLDER Qt5
+  FOLDER Qt${MANTID_QT_VERSION}
 )
 
 add_subdirectory(icons)

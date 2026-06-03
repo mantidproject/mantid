@@ -20,6 +20,7 @@
 #include <QImage>
 #include <QList>
 #include <QMap>
+#include <QObject>
 #include <QPoint>
 #include <QSize>
 #include <QStack>

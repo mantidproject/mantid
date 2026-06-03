@@ -84,7 +84,7 @@ if(CPPCHECK_EXECUTABLE)
   if(NOT TARGET cppcheck)
     add_custom_target(
       cppcheck
-      COMMAND ${Python_EXECUTABLE} ${CMAKE_MODULE_PATH}/cppcheck-clean-compile-commands.py
+      COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/buildconfig/CMake/cppcheck-clean-compile-commands.py
               ${CMAKE_BINARY_DIR}/compile_commands.json --outfile ${CMAKE_BINARY_DIR}/compile_commands_cppcheck.json
       COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} ${_cppcheck_xml_args}
       WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"

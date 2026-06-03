@@ -25,7 +25,10 @@ add_custom_command(
 )
 add_custom_target(mantidqt_resources ALL DEPENDS ${_output_res_py})
 
-add_dependencies(mantidqt mantidqt_resources mantidqt_commonqt5 mantidqt_instrumentviewqt5 mantidqt_iconsqt5)
+add_dependencies(
+  mantidqt mantidqt_resources mantidqt_commonqt${MANTID_QT_VERSION} mantidqt_instrumentviewqt${MANTID_QT_VERSION}
+  mantidqt_iconsqt${MANTID_QT_VERSION}
+)
 if(MSVC)
   # Debug builds need libraries that are linked with MSVC debug runtime
   add_custom_command(
@@ -187,5 +190,5 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
 )
 
 # Tests
-set(PYUNITTEST_QT_API pyqt5)
+set(PYUNITTEST_QT_API pyqt${MANTID_QT_VERSION})
 pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt5 ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_QT5_ONLY_TESTS})

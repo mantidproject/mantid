@@ -132,7 +132,7 @@ set(UI_FILES inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui)
 # Target
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsInstrumentView
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
@@ -142,7 +142,7 @@ mtd_add_qt_library(
   INCLUDE_DIRS inc
   LINK_LIBS Mantid::DataObjects ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES} ${OPENGL_gl_LIBRARY}
             ${OPENGL_glu_LIBRARY}
-  QT5_LINK_LIBS Qt5::OpenGL
+  QT5_LINK_LIBS Qt5::OpenGL QT6_LINK_LIBS Qt6::OpenGL Qt6::OpenGLWidgets
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks

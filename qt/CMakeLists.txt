@@ -1,8 +1,13 @@
 # Utilities for defining targets
 include(QtTargetFunctions)
 
-# Resource compiler for PyQt5
-if((ENABLE_WORKBENCH OR BUILD_MANTIDQT) AND NOT PYRCC5_CMD)
+# Resource compiler for PyQt5. PyQt6 does not ship a Python resource compiler (pyrcc was removed in Qt6), so this is
+# only wired up for the Qt5 build; the Qt6 workbench resource story is a separate follow-up (see
+# qt/applications/workbench).
+if((ENABLE_WORKBENCH OR BUILD_MANTIDQT)
+   AND NOT PYRCC5_CMD
+   AND MANTID_QT_VERSION EQUAL 5
+)
   # Newer versions of PyQt5 have a pyrcc_main python module, whereas older versions have a pyrcc5 executable. We prefer
   # calling the python module.
   execute_process(COMMAND ${Python_EXECUTABLE} -c "import PyQt5.pyrcc_main" RESULT_VARIABLE _status)

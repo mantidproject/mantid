@@ -30,5 +30,5 @@ set(PYTHON_TEST_FILES
 )
 
 # Tests
-set(PYUNITTEST_QT_API pyqt5)
+set(PYUNITTEST_QT_API pyqt${MANTID_QT_VERSION})
 pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.instrumentview ${PYTHON_TEST_FILES})

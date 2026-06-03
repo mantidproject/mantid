@@ -19,7 +19,8 @@ using MantidQt::MantidWidgets::WorkspaceSelector;
 class QLineEdit;
 class QLabel;
 class QString;
-class QStringList;
+// QStringList is a typedef (QList<QString>) in Qt6 and cannot be forward-declared as a class
+#include <QStringList>
 
 namespace MantidQt {
 namespace CustomInterfaces {

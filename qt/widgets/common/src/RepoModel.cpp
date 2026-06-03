@@ -420,7 +420,11 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int rol
       downloading_path = QString::fromStdString(path);
       download_index = index;
       emit executingThread(true);
-      download_threads = QtConcurrent::run(download_thread, repo_ptr, path);
+      // Wrap in a lambda: Qt6 QtConcurrent::run mis-deduces a bare function pointer with
+      // by-reference args as the QPromise overload. The lambda works for both Qt5 and Qt6.
+      // repo_ptr is a member, so copy it to a local for capture.
+      auto repo = repo_ptr;
+      download_threads = QtConcurrent::run([repo, path]() mutable { return download_thread(repo, path); });
       download_watcher.setFuture(download_threads);
       ret = true;
     } else if (action == "Upload") {
@@ -460,8 +464,11 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int rol
         uploading_path = QString::fromStdString(path);
         upload_index = index;
         emit executingThread(true);
-        upload_threads =
-            QtConcurrent::run(upload_thread, repo_ptr, path, form->email(), form->author(), form->comment());
+        auto repo = repo_ptr;
+        upload_threads = QtConcurrent::run(
+            [repo, path, email = form->email(), author = form->author(), comment = form->comment()]() mutable {
+              return upload_thread(repo, path, email, author, comment);
+            });
         upload_watcher.setFuture(upload_threads);
         ret = true;
       } else {
@@ -545,7 +552,10 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int rol
     upload_index = index;
     uploading_path = QString::fromStdString(path);
     emit executingThread(true);
-    upload_threads = QtConcurrent::run(delete_thread, repo_ptr, path, email, uploadAuthor, comment);
+    auto repo = repo_ptr;
+    upload_threads = QtConcurrent::run([repo, path, email, uploadAuthor, comment]() mutable {
+      return delete_thread(repo, path, email, uploadAuthor, comment);
+    });
     upload_watcher.setFuture(upload_threads);
     ret = true;
   } // end delete action

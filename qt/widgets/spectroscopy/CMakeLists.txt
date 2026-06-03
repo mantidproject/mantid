@@ -60,7 +60,7 @@ set(RES_FILES inc/MantidQtWidgets/Spectroscopy/InterfaceResources.qrc)
 
 # XML is required to parse the settings file
 find_package(
-  Qt5 ${QT_MIN_VERSION}
+  Qt${MANTID_QT_VERSION}
   COMPONENTS Concurrent Xml
   REQUIRED
 )
@@ -68,7 +68,7 @@ find_package(
 # Target
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsSpectroscopy
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
@@ -81,8 +81,8 @@ mtd_add_qt_library(
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
             Python::Python
-            Qt5::Concurrent
-            Qt5::Xml
+            Qt${MANTID_QT_VERSION}::Concurrent
+            Qt${MANTID_QT_VERSION}::Xml
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp MantidQtIcons
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks

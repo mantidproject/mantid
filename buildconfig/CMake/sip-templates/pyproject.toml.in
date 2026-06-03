@@ -8,6 +8,9 @@ name = "@MODULE_NAME@"
 [tool.sip.project]
 sip-module = "PyQt@PYQT_MAJOR_VERSION@.sip"
 abi-version = "@PYQT_SIP_ABI_VERSION@"
+# Search the original source directory for relative %Include files, since the
+# module spec is configured into the build directory (see mtd_add_sip_module).
+sip-include-dirs = ["@SIP_INCLUDE_DIR@"]
 
 [tool.sip.bindings.@MODULE_NAME@]
 concatenate = 1
@@ -17,4 +20,8 @@ internal = true
 # so we have to strip those manually ourselves. See tools/sip/sipwrapper.py.
 exceptions = true
 protected-is-public = false
+# The Qt6Bindings sip %Feature is enabled by default (PyQt6); disabled for the
+# PyQt5 build so version-specific %MappedTypes select the right implementation.
+# (Qt5/Qt6 sip timelines share no version tag, so a custom feature is used.)
+disabled-features = @SIP_DISABLED_FEATURES@
 sip-file = "@MODULE_SPEC_FILE@"

@@ -4,7 +4,7 @@ set(INC_FILES inc/MantidQtIcons/CharIconPainter.h inc/MantidQtIcons/CharIconEngi
 
 mtd_add_qt_library(
   TARGET_NAME MantidQtIcons
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${SRC_FILES}
   NOMOC ${INC_FILES}
   RES ${CMAKE_CURRENT_LIST_DIR}/resources/icons.qrc
@@ -16,7 +16,9 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
 # We require just the headers for system.h
-target_include_directories(MantidQtIconsQt5 PUBLIC $<TARGET_PROPERTY:Mantid::Kernel,INTERFACE_INCLUDE_DIRECTORIES>)
+target_include_directories(
+  MantidQtIconsQt${MANTID_QT_VERSION} PUBLIC $<TARGET_PROPERTY:Mantid::Kernel,INTERFACE_INCLUDE_DIRECTORIES>
+)
 
 set(QT5_TEST_FILES test/IconTest.h)
 
@@ -33,7 +35,7 @@ mtd_add_qt_tests(
 
 if(TARGET GTest::gmock AND TARGET GTest::gtest)
 
-  target_link_libraries(MantidQtIconsTestQt5 PRIVATE GTest::gmock GTest::gtest)
+  target_link_libraries(MantidQtIconsTestQt${MANTID_QT_VERSION} PRIVATE GTest::gmock GTest::gtest)
 else()
-  target_link_libraries(MantidQtIconsTestQt5 PRIVATE gmock gtest)
+  target_link_libraries(MantidQtIconsTestQt${MANTID_QT_VERSION} PRIVATE gmock gtest)
 endif()
