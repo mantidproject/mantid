@@ -69,7 +69,6 @@ class TexturePlannerSettingsPresenter(object):
             "mc_resimulate": self.view.get_mc_resimulate(),
             "att_point": self.view.get_att_point(),
             "att_unit": self.view.get_att_unit(),
-            "att_material": self.view.get_att_material(),
         }
 
     def _apply_settings_to_texture_model(self, settings):
@@ -95,7 +94,6 @@ class TexturePlannerSettingsPresenter(object):
 
         self.texture_model.workspaces.attenuation_kwargs["point"] = settings["att_point"]
         self.texture_model.workspaces.attenuation_kwargs["unit"] = settings["att_unit"]
-        self.texture_model.workspaces.set_material_string(settings["att_material"])
 
     def _populate_view_from_texture_model(self):
         """Populate the settings dialog fields from the current state of the texture model."""
@@ -126,4 +124,3 @@ class TexturePlannerSettingsPresenter(object):
         att = self.texture_model.workspaces.attenuation_kwargs
         self.view.set_att_point(att["point"])
         self.view.set_att_unit(att["unit"])
-        self.view.set_att_material(att["material"])

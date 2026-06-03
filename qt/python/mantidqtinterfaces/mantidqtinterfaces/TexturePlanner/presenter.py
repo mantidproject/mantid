@@ -5,13 +5,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from mantid.api import AlgorithmObserver
+from mantidqt.interfacemanager import InterfaceManager
+
 from mantidqtinterfaces.TexturePlanner.settings.settings_view import TexturePlannerSettingsView
 from mantidqtinterfaces.TexturePlanner.settings.settings_presenter import TexturePlannerSettingsPresenter
 from mantidqtinterfaces.TexturePlanner.helpers.instrument import CUSTOM_GROUP
 
 
-class TexturePlannerPresenter(object):
+class TexturePlannerPresenter(AlgorithmObserver):
     def __init__(self, model, view):
+        super().__init__()
         self.model = model
         self.view = view
         # cached result of the (expensive) "does the custom grouping file fit the instrument" check,
@@ -41,6 +45,8 @@ class TexturePlannerPresenter(object):
         self.view.set_on_orient_file_changed(self.enable_load_orient)
         self.view.set_on_load_stl_clicked(self.load_stl)
         self.view.set_on_load_xml_clicked(self.load_xml)
+        self.view.set_on_set_material_clicked(self.open_set_material_dialog)
+        self.view.set_on_material_set(self.on_material_set)
         self.view.set_on_load_orient_clicked(self.load_orientation_file)
         self.view.set_on_init_x_changed(self.set_initial_shape)
         self.view.set_on_init_y_changed(self.set_initial_shape)
@@ -329,6 +335,31 @@ class TexturePlannerPresenter(object):
     def load_xml(self):
         self.model.workspaces.load_xml(self.view.get_xml_string())
         self.set_initial_shape()
+
+    def open_set_material_dialog(self):
+        """Open the standard SetSampleMaterial dialog against the (hidden) raw mesh workspace.
+
+        InputWorkspace is preset and therefore locked by the dialog, so the user never has to pick
+        one of the planner's internal "__"-prefixed workspaces. The material is set for this session
+        only - it is not persisted to the settings file."""
+        manager = InterfaceManager()
+        preset = {"InputWorkspace": self.model.workspaces.WS_MESH_RAW}
+        dialog = manager.createDialogFromName("SetSampleMaterial", -1, self.view, False, preset, "", (), ("InputWorkspace",))
+        dialog.addAlgorithmObserver(self)
+        dialog.setModal(True)
+        dialog.show()
+
+    def finishHandle(self):
+        # AlgorithmObserver callback: fires on the algorithm worker thread when the SetSampleMaterial
+        # dialog's algorithm finishes. Hop to the GUI thread via a Qt signal before touching
+        # workspaces / redrawing plots.
+        self.view.signal_material_set()
+
+    def on_material_set(self):
+        # the dialog only set the material on WS_MESH_RAW; share it with the other workspaces, then
+        # recompute transmission (if shown) and refresh the plots
+        self.model.workspaces.propagate_material()
+        self.on_settings_applied()
 
     def load_orientation_file(self):
         num_gonios = self.model.orientations.load_orientation_file(self.view.get_orientation_file())

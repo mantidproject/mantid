@@ -169,9 +169,6 @@ class TexturePlannerSettingsView(QDialog):
         self.att_unit.addItems(["dSpacing", "Wavelength", "TOF"])
         form.addRow("Unit:", self.att_unit)
 
-        self.att_material = QLineEdit()
-        form.addRow("Material:", self.att_material)
-
         group.setLayout(form)
         return group
 
@@ -221,7 +218,6 @@ class TexturePlannerSettingsView(QDialog):
 
         self.att_point.setToolTip("Value at which to read the attenuation coefficient from the absorption workspace")
         self.att_unit.setToolTip("Unit of the attenuation point value")
-        self.att_material.setToolTip("Chemical formula of the sample material (see SetSampleMaterial documentation), e.g. 'Fe'")
 
     # ================
     # Slot Connectors
@@ -294,9 +290,6 @@ class TexturePlannerSettingsView(QDialog):
     def get_att_unit(self):
         return self.att_unit.currentText()
 
-    def get_att_material(self):
-        return self.att_material.text()
-
     # ================
     # Setters
     # ================
@@ -354,6 +347,3 @@ class TexturePlannerSettingsView(QDialog):
 
     def set_att_unit(self, text):
         self.att_unit.setCurrentText(str(text))
-
-    def set_att_material(self, text):
-        self.att_material.setText(str(text))

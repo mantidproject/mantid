@@ -20,7 +20,6 @@ from mantid.simpleapi import (
     TranslateSampleShape,
 )
 from mantid.api import AnalysisDataService as ADS
-from mantid.kernel import logger
 from Engineering.common.xml_shapes import get_cube_xml
 from Engineering.texture.texture_helper import define_gauge_volume, get_gauge_vol_str, get_scattering_centre
 
@@ -89,11 +88,15 @@ class WorkspaceManager:
 
     def update_ws(self):
         if self.ws:
+            # rebuilding for a new instrument: _update_existing_wss copies the sample (including
+            # whatever material the user set via the SetSampleMaterial dialog) onto the new
+            # workspaces, so we must not reset the material here
             self._update_existing_wss()
         else:
+            # brand-new workspaces have no material; seed the default so absorption works out of the box
             self._init_wss()
+            self.set_material()
         self.ungrouped_ws = CloneWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ungrouped_wsname)
-        self.set_material()
         if self.gauge_volume_str:
             define_gauge_volume(self.ws, self.gauge_volume_str)
 
@@ -128,22 +131,23 @@ class WorkspaceManager:
         if self.ungrouped_ws is not None:
             SetSampleMaterial(self.ungrouped_ws, self.attenuation_kwargs["material"])
 
-    def set_material_string(self, material):
-        prev_material = self.attenuation_kwargs["material"]
-        try:
-            self.attenuation_kwargs["material"] = material
-            self.set_material()
-        except Exception:
-            logger.error("Invalid Material 'ChemicalFormula' - see SetSampleMaterial docs for more info")
-            self.attenuation_kwargs["material"] = prev_material
-            self.ws = ADS.retrieve(self.wsname)
-            self.ungrouped_ws = ADS.retrieve(self.ungrouped_wsname)
-            self.mesh_ws = ADS.retrieve(self.WS_MESH_RAW)
-            self.updated_mesh_ws = ADS.retrieve(self.WS_MESH_NEUTRAL)
-            try:
-                self.set_material()
-            except Exception:
-                pass
+    def propagate_material(self):
+        """Copy the material onto the other workspaces after the user has set it on the raw mesh ws
+        via the SetSampleMaterial dialog. All workspaces must share the same sample material; the
+        dialog only writes to WS_MESH_RAW (the source of truth for absorption)."""
+        targets = [self.ws, self.updated_mesh_ws]
+        if self.ungrouped_ws is not None:
+            targets.append(self.ungrouped_ws)
+        for target in targets:
+            CopySample(
+                InputWorkspace=self.mesh_ws,
+                OutputWorkspace=target,
+                CopyName=False,
+                CopyMaterial=True,
+                CopyShape=False,
+                CopyEnvironment=False,
+                CopyLattice=False,
+            )
 
     def load_stl(self, stl_file):
         LoadSampleShape(InputWorkspace=self.ws, Filename=stl_file, OutputWorkspace=self.ws, **self.stl_kwargs)

@@ -68,7 +68,7 @@ class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
         wm.set_material = MagicMock()
         return wm
 
-    def test_delegates_to_init_when_no_existing_ws(self, mock_clone, mock_define_gv):
+    def test_delegates_to_init_and_seeds_material_when_no_existing_ws(self, mock_clone, mock_define_gv):
         wm = self._make_manager_with_mock_model()
         wm.ws = None
 
@@ -76,8 +76,10 @@ class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
 
         wm._init_wss.assert_called_once_with()
         wm._update_existing_wss.assert_not_called()
+        # brand-new workspaces have no material, so the default is seeded
+        wm.set_material.assert_called_once_with()
 
-    def test_delegates_to_update_when_ws_exists(self, mock_clone, mock_define_gv):
+    def test_delegates_to_update_and_preserves_material_when_ws_exists(self, mock_clone, mock_define_gv):
         wm = self._make_manager_with_mock_model()
         wm.ws = MagicMock()
 
@@ -85,8 +87,11 @@ class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
 
         wm._update_existing_wss.assert_called_once_with()
         wm._init_wss.assert_not_called()
+        # _update_existing_wss copies the (possibly user-set) material onto the new workspaces, so
+        # update_ws must not reset it
+        wm.set_material.assert_not_called()
 
-    def test_clones_ungrouped_and_sets_material(self, mock_clone, mock_define_gv):
+    def test_clones_ungrouped_from_ws(self, mock_clone, mock_define_gv):
         wm = self._make_manager_with_mock_model()
         wm.ws = MagicMock()
         mock_clone.return_value = "ungrouped"
@@ -95,7 +100,6 @@ class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
 
         mock_clone.assert_called_once_with(InputWorkspace=wm.ws, OutputWorkspace=WorkspaceManager.WS_UNGROUPED)
         self.assertEqual(wm.ungrouped_ws, "ungrouped")
-        wm.set_material.assert_called_once_with()
 
     def test_does_not_define_gauge_volume_when_unset(self, mock_clone, mock_define_gv):
         wm = self._make_manager_with_mock_model()
@@ -326,65 +330,61 @@ class TestWorkspaceManager_SetMaterial(unittest.TestCase):
         )
 
 
-@patch(file_path + ".ADS")
-@patch(file_path + ".logger")
-@patch(file_path + ".SetSampleMaterial")
-class TestWorkspaceManager_SetMaterialString(unittest.TestCase):
-    def test_success_updates_material_kwarg_and_does_not_log(self, mock_set_mat, mock_logger, mock_ads):
+@patch(file_path + ".CopySample")
+class TestWorkspaceManager_PropagateMaterial(unittest.TestCase):
+    def test_copies_material_from_mesh_to_other_wss(self, mock_copy):
         wm = _make_manager()
         wm.ws = "ws"
         wm.mesh_ws = "mesh"
         wm.updated_mesh_ws = "neutral"
-        wm.ungrouped_ws = None
+        wm.ungrouped_ws = "ungrouped"
 
-        wm.set_material_string("Cu")
+        wm.propagate_material()
 
-        self.assertEqual(wm.attenuation_kwargs["material"], "Cu")
-        mock_set_mat.assert_called_with("neutral", "Cu")
-        mock_logger.error.assert_not_called()
-        mock_ads.retrieve.assert_not_called()
-
-    def test_failure_reverts_material_and_retrieves_wss_from_ads(self, mock_set_mat, mock_logger, mock_ads):
-        wm = _make_manager()
-        wm.ws = "old_ws"
-        wm.mesh_ws = "old_mesh"
-        wm.updated_mesh_ws = "old_neutral"
-        wm.ungrouped_ws = "old_ungrouped"
-        # First set_material (with bad material) fails; retry with reverted material succeeds
-        mock_set_mat.side_effect = [Exception("bad"), None, None, None, None]
-        mock_ads.retrieve.side_effect = lambda name: f"retrieved_{name}"
-
-        wm.set_material_string("garbage")
-
-        self.assertEqual(wm.attenuation_kwargs["material"], "Fe")
-        mock_logger.error.assert_called_once()
         self.assertEqual(
-            mock_ads.retrieve.call_args_list,
+            mock_copy.call_args_list,
             [
-                call(WorkspaceManager.WS_DATA),
-                call(WorkspaceManager.WS_UNGROUPED),
-                call(WorkspaceManager.WS_MESH_RAW),
-                call(WorkspaceManager.WS_MESH_NEUTRAL),
+                call(
+                    InputWorkspace="mesh",
+                    OutputWorkspace="ws",
+                    CopyName=False,
+                    CopyMaterial=True,
+                    CopyShape=False,
+                    CopyEnvironment=False,
+                    CopyLattice=False,
+                ),
+                call(
+                    InputWorkspace="mesh",
+                    OutputWorkspace="neutral",
+                    CopyName=False,
+                    CopyMaterial=True,
+                    CopyShape=False,
+                    CopyEnvironment=False,
+                    CopyLattice=False,
+                ),
+                call(
+                    InputWorkspace="mesh",
+                    OutputWorkspace="ungrouped",
+                    CopyName=False,
+                    CopyMaterial=True,
+                    CopyShape=False,
+                    CopyEnvironment=False,
+                    CopyLattice=False,
+                ),
             ],
         )
-        self.assertEqual(wm.ws, f"retrieved_{WorkspaceManager.WS_DATA}")
-        self.assertEqual(wm.ungrouped_ws, f"retrieved_{WorkspaceManager.WS_UNGROUPED}")
-        self.assertEqual(wm.mesh_ws, f"retrieved_{WorkspaceManager.WS_MESH_RAW}")
-        self.assertEqual(wm.updated_mesh_ws, f"retrieved_{WorkspaceManager.WS_MESH_NEUTRAL}")
 
-    def test_failure_swallows_retry_error(self, mock_set_mat, mock_logger, mock_ads):
+    def test_skips_ungrouped_when_absent(self, mock_copy):
         wm = _make_manager()
         wm.ws = "ws"
         wm.mesh_ws = "mesh"
         wm.updated_mesh_ws = "neutral"
         wm.ungrouped_ws = None
-        mock_set_mat.side_effect = Exception("always-bad")
-        mock_ads.retrieve.return_value = "retrieved"
 
-        wm.set_material_string("garbage")  # must not raise
+        wm.propagate_material()
 
-        self.assertEqual(wm.attenuation_kwargs["material"], "Fe")
-        mock_logger.error.assert_called_once()
+        targets = [c.kwargs["OutputWorkspace"] for c in mock_copy.call_args_list]
+        self.assertEqual(targets, ["ws", "neutral"])
 
 
 @patch(file_path + ".SetSampleMaterial")

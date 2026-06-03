@@ -71,10 +71,10 @@ class TestTexturePlannerSettingsModel_SetSetting(unittest.TestCase):
         qs = MagicMock()
         mock_qsettings.return_value = qs
 
-        TexturePlannerSettingsModel._set_setting("att_material", "Cu")
+        TexturePlannerSettingsModel._set_setting("att_unit", "Wavelength")
 
         qs.beginGroup.assert_called_once_with(INTERFACES_SETTINGS_GROUP)
-        qs.setValue.assert_called_once_with(TEXTURE_PLANNER_PREFIX + "att_material", "Cu")
+        qs.setValue.assert_called_once_with(TEXTURE_PLANNER_PREFIX + "att_unit", "Wavelength")
         qs.endGroup.assert_called_once_with()
 
 
@@ -108,7 +108,7 @@ class TestTexturePlannerSettingsModel_GetSettingsDict(unittest.TestCase):
 class TestTexturePlannerSettingsModel_SetSettingsDict(unittest.TestCase):
     def test_writes_each_known_setting_via_set_setting(self):
         model = TexturePlannerSettingsModel()
-        payload = {"directions": False, "att_material": "Cu", "att_point": 2.0}
+        payload = {"directions": False, "att_unit": "Wavelength", "att_point": 2.0}
 
         with patch.object(TexturePlannerSettingsModel, "_set_setting") as mock_set:
             model.set_settings_dict(payload)
@@ -118,7 +118,7 @@ class TestTexturePlannerSettingsModel_SetSettingsDict(unittest.TestCase):
             sorted(
                 [
                     call("directions", False),
-                    call("att_material", "Cu"),
+                    call("att_unit", "Wavelength"),
                     call("att_point", 2.0),
                 ]
             ),

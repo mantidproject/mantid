@@ -673,6 +673,47 @@ class TestTexturePlannerPresenter_LoadFiles(unittest.TestCase):
 
 @patch(file_path + ".TexturePlannerSettingsPresenter")
 @patch(file_path + ".TexturePlannerSettingsView")
+class TestTexturePlannerPresenter_SetMaterial(unittest.TestCase):
+    @patch(file_path + ".InterfaceManager")
+    def test_open_dialog_presets_and_locks_input_workspace(self, mock_mgr_cls, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        model.workspaces.WS_MESH_RAW = "__raw"
+        presenter = TexturePlannerPresenter(model, view)
+        dialog = mock_mgr_cls.return_value.createDialogFromName.return_value
+
+        presenter.open_set_material_dialog()
+
+        mock_mgr_cls.return_value.createDialogFromName.assert_called_once_with(
+            "SetSampleMaterial", -1, view, False, {"InputWorkspace": "__raw"}, "", (), ("InputWorkspace",)
+        )
+        dialog.addAlgorithmObserver.assert_called_once_with(presenter)
+        dialog.setModal.assert_called_once_with(True)
+        dialog.show.assert_called_once_with()
+
+    def test_finish_handle_emits_material_set_signal_on_gui_thread(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        presenter = TexturePlannerPresenter(model, view)
+
+        presenter.finishHandle()
+
+        view.signal_material_set.assert_called_once_with()
+
+    def test_on_material_set_propagates_then_refreshes(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        presenter = TexturePlannerPresenter(model, view)
+        presenter.on_settings_applied = MagicMock()
+
+        presenter.on_material_set()
+
+        model.workspaces.propagate_material.assert_called_once_with()
+        presenter.on_settings_applied.assert_called_once_with()
+
+
+@patch(file_path + ".TexturePlannerSettingsPresenter")
+@patch(file_path + ".TexturePlannerSettingsView")
 class TestTexturePlannerPresenter_SelectionAndDeletion(unittest.TestCase):
     def test_update_selected_pushes_view_selection(self, mock_settings_view, mock_settings_presenter):
         model = _make_model()
