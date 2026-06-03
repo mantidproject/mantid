@@ -14,6 +14,7 @@ set(TEST_PY_FILES
     helpers/test/test_orientation_table.py
     helpers/test/test_plotter.py
     helpers/test/test_workspace_manager.py
+    helpers/test/test_instrument.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

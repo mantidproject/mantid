@@ -84,7 +84,7 @@ class OrientationExporter:
                 ADS.remove(ref_wsname)
 
     def _build_reference_ws(self, ref_wsname):
-        LoadEmptyInstrument(InstrumentName=self._model.instr, OutputWorkspace=ref_wsname)
+        LoadEmptyInstrument(InstrumentName=self._model.instrument.get_instrument(), OutputWorkspace=ref_wsname)
         # Source from updated_mesh_ws (always identity goniometer) rather than wsname
         # (which carries the current orientation R on its goniometer).
         CopySample(

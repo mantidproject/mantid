@@ -35,8 +35,8 @@ def _make_model():
     model = MagicMock()
     model.gonio_index = 0
     model.plot_transmission = False
-    model.supported_groups = ("banks",)
-    model.get_supported_instruments.return_value = ("ENGINX", "IMAT")
+    model.instrument.supported_groups = ("banks",)
+    model.instrument.get_supported_instruments.return_value = ("ENGINX", "IMAT")
     model.get_default_texture_directions.return_value = (
         ("RD", "ND", "TD"),
         ((1, 0, 0), (0, 1, 0), (0, 0, 1)),
@@ -116,7 +116,7 @@ class TestTexturePlannerPresenter_Init(unittest.TestCase):
 
     def test_pushes_supported_groups_to_view(self, mock_settings_view, mock_settings_presenter):
         model = _make_model()
-        model.supported_groups = ("Texture20", "banks")
+        model.instrument.supported_groups = ("Texture20", "banks")
         view = _make_view()
 
         TexturePlannerPresenter(model, view)
@@ -277,13 +277,13 @@ class TestTexturePlannerPresenter_GroupAndInstrumentChanged(unittest.TestCase):
         view = _make_view()
         presenter = TexturePlannerPresenter(model, view)
         presenter.update_plots = MagicMock()
-        model.set_group.reset_mock()
+        model.instrument.set_group.reset_mock()
         model.geometry.recompute.reset_mock()
         model.update_all_projected_data.reset_mock()
 
         presenter.on_group_changed()
 
-        model.set_group.assert_called_once_with("banks")
+        model.instrument.set_group.assert_called_once_with("banks")
         model.geometry.recompute.assert_called_once_with()
         model.update_all_projected_data.assert_called_once_with()
         presenter.update_plots.assert_called_once_with()
@@ -296,12 +296,12 @@ class TestTexturePlannerPresenter_GroupAndInstrumentChanged(unittest.TestCase):
         presenter.update_plots = MagicMock()
         presenter.on_group_changed = MagicMock()
         view.setup_group_options.reset_mock()
-        model.update_instrument.reset_mock()
+        model.instrument.update_instrument.reset_mock()
 
         presenter.on_instrument_changed()
 
-        model.update_instrument.assert_called_once_with("IMAT")
-        view.setup_group_options.assert_called_once_with(model.supported_groups)
+        model.instrument.update_instrument.assert_called_once_with("IMAT")
+        view.setup_group_options.assert_called_once_with(model.instrument.supported_groups)
         presenter.on_group_changed.assert_called_once_with()
         presenter.update_plots.assert_called_once_with()
 

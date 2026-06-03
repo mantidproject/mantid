@@ -81,7 +81,7 @@ class WorkspaceManager:
 
     @property
     def instr(self):
-        return self._model.instr
+        return self._model.instrument.get_instrument()
 
     @property
     def scattering_centre(self):

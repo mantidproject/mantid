@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import os
 import unittest
 import numpy as np
 
@@ -27,10 +26,10 @@ def _make_wsm(ws="ws", ungrouped_ws="ungrouped_ws", gauge_volume_str=None, scatt
     return wsm
 
 
-def _make_model(wsm=None, group_file="ENGINX_grouping.xml"):
+def _make_model(wsm=None, grouping_path="/calib/ENGINX_grouping.xml"):
     model = MagicMock()
     model.workspaces = wsm if wsm is not None else _make_wsm()
-    model.calib_info.get_group_file.return_value = group_file
+    model.instrument.get_grouping_path.return_value = grouping_path
     return model
 
 
@@ -45,14 +44,13 @@ class TestDetectorGeometry_Init(unittest.TestCase):
         self.assertIsNone(dg._source_position)
 
 
-@patch(file_path + ".CALIB_DIR", "/calib")
 class TestDetectorGeometry_GetGroupingPath(unittest.TestCase):
-    def test_joins_calib_dir_and_group_file_from_model(self):
-        model = _make_model(group_file="GRP.xml")
+    def test_delegates_to_instrument_helper(self):
+        model = _make_model(grouping_path="/calib/GRP.xml")
         dg = DetectorGeometry(model)
 
-        self.assertEqual(dg._get_grouping_path(), os.path.join("/calib", "GRP.xml"))
-        model.calib_info.get_group_file.assert_called_once_with()
+        self.assertEqual(dg._get_grouping_path(), "/calib/GRP.xml")
+        model.instrument.get_grouping_path.assert_called_once_with()
 
 
 @patch(file_path + ".define_gauge_volume")

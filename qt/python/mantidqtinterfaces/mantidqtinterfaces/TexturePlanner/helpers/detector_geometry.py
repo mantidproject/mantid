@@ -5,11 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import os
 import numpy as np
 
 from mantid.simpleapi import CopySample, GroupDetectors, LoadDetectorsGroupingFile
-from Engineering.EnggUtils import CALIB_DIR
 from Engineering.texture.texture_helper import define_gauge_volume
 
 
@@ -52,7 +50,7 @@ class DetectorGeometry:
         self.recompute_scattering_geometry()
 
     def _get_grouping_path(self):
-        return os.path.join(CALIB_DIR, self._model.calib_info.get_group_file())
+        return self._model.instrument.get_grouping_path()
 
     @staticmethod
     def _apply_grouping_to_wss(wsm, grouping_path):

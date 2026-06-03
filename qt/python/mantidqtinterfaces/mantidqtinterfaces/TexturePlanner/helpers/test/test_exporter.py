@@ -33,7 +33,7 @@ def _make_model(orientations=None, n_output_points=1, instr="ENGINX", axes="xyz"
         orientations = {0: _make_orientation()}
     model.orientations.values.return_value = list(orientations.values())
     model.n_output_points = n_output_points
-    model.instr = instr
+    model.instrument.get_instrument.return_value = instr
     model.orientation_kwargs = {"Axes": axes, "Senses": senses}
     model.workspaces.WS_REFERENCE = WS_REFERENCE
     model.workspaces.updated_mesh_ws = updated_mesh_ws

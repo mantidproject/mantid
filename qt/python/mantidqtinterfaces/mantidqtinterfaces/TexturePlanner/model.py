@@ -7,13 +7,12 @@
 
 import numpy as np
 
-from Engineering.common.calibration_info import CalibrationInfo
-from Engineering.common.instrument_config import get_instr_config, SUPPORTED_INSTRUMENTS
 from Engineering.texture.texture_helper import project_orientation, vec_string_to_norm_array
 
 from mantidqtinterfaces.TexturePlanner.helpers.absorption import AbsorptionCalculator
 from mantidqtinterfaces.TexturePlanner.helpers.detector_geometry import DetectorGeometry
 from mantidqtinterfaces.TexturePlanner.helpers.exporter import OrientationExporter
+from mantidqtinterfaces.TexturePlanner.helpers.instrument import InstrumentHelper
 from mantidqtinterfaces.TexturePlanner.helpers.orientation_table import OrientationTable
 from mantidqtinterfaces.TexturePlanner.helpers.plotter import TexturePlotter
 from mantidqtinterfaces.TexturePlanner.helpers.workspace_manager import WorkspaceManager
@@ -23,13 +22,6 @@ class TexturePlannerModel(object):
     """Thin wrapper class mainly holding setting state and few cross-cutting methods and acting as a bridge between
     functionality contained in separate collaborators classes.
     """
-
-    # Per-instrument detector grouping presets. Add a new instrument by adding a row here.
-    _SUPPORTED_GROUPS_BY_INSTRUMENT = {
-        "ENGINX": ("Texture20", "Texture30", "banks"),
-        "IMAT": ("Module1", "Module4", "Row1", "Row4", "banks"),
-    }
-    _DEFAULT_SUPPORTED_GROUPS = ("banks",)
 
     def __init__(self, instrument="ENGINX", projection="azimuthal"):
         # cross-cutting visual / display settings
@@ -53,13 +45,6 @@ class TexturePlannerModel(object):
         # MonteCarloAbsorption settings (filled in once workspaces collaborator exists)
         self.mc_kwargs = None
 
-        # instrument config
-        self.instr = instrument
-        self.calib_info = None
-        self.config = None
-        self.group = None
-        self.supported_groups = ("Texture20", "Texture30", "banks")
-
         # collaborators
         self.workspaces = WorkspaceManager(self)
         self.mc_kwargs = {
@@ -75,31 +60,10 @@ class TexturePlannerModel(object):
         self.absorption = AbsorptionCalculator(self)
         self.exporter = OrientationExporter(self)
         self.plotter = TexturePlotter(self)
-
-        # init func calls
-        self.update_instrument(self.instr)
-
-    # instrument config -------------------------------------------------
-    def update_instrument(self, instrument):
-        self.instr = instrument
-        self.config = get_instr_config(self.instr)
-        self.workspaces.update_ws()
-        self.update_calib_info()
-        self.update_supported_groups()
-
-    @staticmethod
-    def get_supported_instruments():
-        return SUPPORTED_INSTRUMENTS
-
-    def set_group(self, group_str):
-        self.group = self.config.group(group_str)
-        self.update_calib_info()
-
-    def update_calib_info(self):
-        self.calib_info = CalibrationInfo(instrument=self.instr, group=self.group)
-
-    def update_supported_groups(self):
-        self.supported_groups = self._SUPPORTED_GROUPS_BY_INSTRUMENT.get(self.instr, self._DEFAULT_SUPPORTED_GROUPS)
+        self.instrument = InstrumentHelper(self, instrument)
+        # bootstrap instrument config now the helper is bound to the model (update_ws reads
+        # the instrument name back through self.instrument, so it must be assigned first)
+        self.instrument.update_instrument(instrument)
 
     @staticmethod
     def get_default_texture_directions():

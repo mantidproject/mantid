@@ -21,7 +21,7 @@ COPY_KWARGS = dict(CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
 def _make_manager(instr="ENGINX"):
     model = MagicMock()
-    model.instr = instr
+    model.instrument.get_instrument.return_value = instr
     return WorkspaceManager(model)
 
 
