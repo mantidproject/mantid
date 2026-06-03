@@ -105,13 +105,12 @@ qt6-main = "6.*"
 qscintilla2 = ">=2.14.1"
 # qtconsole-base does not force a Qt binding (qtconsole would pull PyQt5).
 qtconsole-base = ">5.5.0"
-# NOTE: pyvista/pyvistaqt are intentionally omitted. They pull vtk-base, and
-# the only vtk-base 9.6.x builds that support qt6-main 6.11 (what qscintilla2
-# build 4 / pyqt6 6.11 require) are built against eigen 5.0.1 - incompatible
-# with Mantid's eigen 3.4 pin. (Older, eigen-3.4-compatible vtk-base builds only
-# support qt6-main <=6.10.) Unpinning jsoncpp gets past an earlier wedge but not
-# this one. Re-add when conda-forge ships a qt6-main 6.11 vtk-base for eigen 3.4,
-# or qscintilla2/pyqt6 become available for an older qt6-main.
+# NOTE: pyvista/pyvistaqt are provided from PyPI for the qt6 env (see
+# [feature.qt6.pypi-dependencies]) rather than conda. The conda vtk-base builds
+# cannot satisfy this env: eigen-3.4-compatible vtk needs qt6-main <=6.10, the
+# 6.11-capable vtk needs eigen 5.0.1 (vs Mantid's eigen 3.4), and conda pyqt6 only
+# exists at 6.8 or 6.11 for py312. The self-contained PyPI vtk wheel sidesteps all
+# of that (it uses the active Qt binding via qtpy and does not pull conda vtk-base).
 # --- shared build + framework deps (mirror of [dependencies]) ---
 cmake = ">=3.21.0"
 ccache = ">=4.11.3,<5"
@@ -162,6 +161,12 @@ myst-parser = ">=5.0.0,<6"
 sphinx = ">=9.0,<10"
 agent-skill-rattler-build = ">=0.0.2,<0.0.3"
 fontconfig = "2.17.*"
+
+# pyvista/pyvistaqt from PyPI (with their self-contained vtk wheel) - see the note
+# in [feature.qt6.dependencies] for why conda's vtk-base cannot be used here.
+[feature.qt6.pypi-dependencies]
+pyvista = ">=0.46"
+pyvistaqt = ">=0.11.3,<0.12"
 
 # qtpy resolves the binding from QT_API; force PyQt6 in this environment.
 [feature.qt6.activation.env]
