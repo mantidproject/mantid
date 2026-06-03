@@ -32,7 +32,6 @@ SETTINGS_FIXTURE = {
     "mc_resimulate": True,
     "att_point": 2.5,
     "att_unit": "Wavelength",
-    "att_material": "Cu",
 }
 
 
@@ -47,7 +46,7 @@ def _make_texture_model():
         "SimulateScatteringPointIn": "SampleOnly",
         "ResimulateTracksForDifferentWavelengths": False,
     }
-    m.workspaces.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing", "material": "Fe"}
+    m.workspaces.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing"}
     return m
 
 
@@ -71,7 +70,6 @@ def _make_view_returning(settings):
     view.get_mc_resimulate.return_value = settings["mc_resimulate"]
     view.get_att_point.return_value = settings["att_point"]
     view.get_att_unit.return_value = settings["att_unit"]
-    view.get_att_material.return_value = settings["att_material"]
     return view
 
 
@@ -117,10 +115,9 @@ class TestTexturePlannerSettingsPresenter_LoadFromFileOrDefault(unittest.TestCas
         self.assertEqual(texture_model.mc_kwargs["MaxScatterPtAttempts"], 5000)
         self.assertEqual(texture_model.mc_kwargs["SimulateScatteringPointIn"], "Container")
         self.assertIs(texture_model.mc_kwargs["ResimulateTracksForDifferentWavelengths"], True)
-        # attenuation_kwargs partially updated; material set via set_material_string
+        # attenuation point/unit updated (material is no longer a persistent setting)
         self.assertEqual(texture_model.workspaces.attenuation_kwargs["point"], 2.5)
         self.assertEqual(texture_model.workspaces.attenuation_kwargs["unit"], "Wavelength")
-        texture_model.workspaces.set_material_string.assert_called_once_with("Cu")
 
 
 @patch(file_path + ".TexturePlannerSettingsModel")
@@ -154,7 +151,6 @@ class TestTexturePlannerSettingsPresenter_Show(unittest.TestCase):
 
         view.set_att_point.assert_called_once_with(1.5)
         view.set_att_unit.assert_called_once_with("dSpacing")
-        view.set_att_material.assert_called_once_with("Fe")
 
         view.show.assert_called_once_with()
 
@@ -192,7 +188,6 @@ class TestTexturePlannerSettingsPresenter_SaveSettings(unittest.TestCase):
         self.assertEqual(texture_model.workspaces.stl_kwargs["TranslationVector"], "1,2,3")
         self.assertEqual(texture_model.orientation_kwargs["Senses"], "1,-1,1")
         self.assertIs(texture_model.mc_kwargs["ResimulateTracksForDifferentWavelengths"], True)
-        texture_model.workspaces.set_material_string.assert_called_once_with("Cu")
 
     def test_invokes_on_settings_applied_callback_if_registered(self, mock_model_cls):
         view = _make_view_returning(SETTINGS_FIXTURE)

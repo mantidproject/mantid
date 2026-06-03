@@ -27,6 +27,9 @@ CUSTOM_INSTRUMENT = "Custom"
 class TexturePlannerView(QMainWindow, Ui_texplan):
     sig_select_state_changed = QtCore.Signal()
     sig_include_state_changed = QtCore.Signal()
+    # emitted from the SetSampleMaterial dialog's algorithm-finished callback (which runs on the
+    # algorithm worker thread) to hop back onto the GUI thread before touching workspaces/plots
+    sig_material_set = QtCore.Signal()
 
     def __init__(self, parent=None, presenter=None):
         super().__init__(parent)
@@ -89,6 +92,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.hide_axis_columns()
 
         self.make_box_toggleable(self.grpLoadShape, self.set_load_shape_visible, initial_state=True)
+        self.make_box_toggleable(self.grpSetMaterial, self.set_set_material_visible)
         self.make_box_toggleable(self.initOrientation, self.set_init_rotations_visible)
         self.make_box_toggleable(self.initPosition, self.set_init_position_visible)
         self.make_box_toggleable(self.grpDirectionWidgets, self.set_sample_directions_visible)
@@ -175,6 +179,15 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_on_load_xml_clicked(self, slot):
         self.btnXML.clicked.connect(slot)
+
+    def set_on_set_material_clicked(self, slot):
+        self.btnSetMaterial.clicked.connect(slot)
+
+    def set_on_material_set(self, slot):
+        self.sig_material_set.connect(slot)
+
+    def signal_material_set(self):
+        self.sig_material_set.emit()
 
     def set_on_load_orient_clicked(self, slot):
         self.btnOrient.clicked.connect(slot)
@@ -583,6 +596,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         # only toggle our own widgets; FileFinderWidget has internally-hidden children
         for w in (self.finder_stl, self.btnSTL, self.label_or, self.finder_xml, self.btnXML):
             w.setVisible(vis)
+
+    def set_set_material_visible(self, vis):
+        self.set_box_children_visible(self.grpSetMaterial, vis)
 
     def set_init_rotations_visible(self, vis):
         self.set_box_children_visible(self.initOrientation, vis)
