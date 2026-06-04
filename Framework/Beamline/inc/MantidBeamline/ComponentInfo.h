@@ -12,8 +12,10 @@
 #include "MantidKernel/cow_ptr.h"
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
+#include <algorithm>
 #include <cstddef>
 #include <memory>
+#include <numeric>
 #include <string>
 #include <utility>
 #include <vector>
@@ -146,10 +148,9 @@ public:
   /// Returns the VirtualBankSegment whose bankCompIdx equals @p compIdx,
   /// or nullptr if no VirtualAssembly bank has that component index.
   const VirtualBankSegment *findVirtualBankByCompIdx(size_t compIdx) const noexcept {
-    for (const auto &seg : m_virtualBanks)
-      if (seg.bankCompIdx == compIdx)
-        return &seg;
-    return nullptr;
+    auto it = std::find_if(m_virtualBanks.cbegin(), m_virtualBanks.cend(),
+                           [compIdx](const auto &seg) { return seg.bankCompIdx == compIdx; });
+    return it != m_virtualBanks.cend() ? &*it : nullptr;
   }
 
   // Returns by value: for virtual-bank detector indices the position is computed
@@ -251,9 +252,9 @@ private:
   static size_t computeTotalSize(const std::vector<size_t> &realDetectors,
                                  const std::vector<VirtualBankSegment> &vbanks,
                                  const std::vector<std::pair<size_t, size_t>> &detRanges) noexcept {
-    size_t nVirtual = 0;
-    for (const auto &seg : vbanks)
-      nVirtual += seg.lastIndex - seg.firstIndex + 1;
+    const size_t nVirtual = std::accumulate(vbanks.cbegin(), vbanks.cend(), size_t{0}, [](size_t acc, const auto &seg) {
+      return acc + seg.lastIndex - seg.firstIndex + 1;
+    });
     return realDetectors.size() + nVirtual + detRanges.size();
   }
 };

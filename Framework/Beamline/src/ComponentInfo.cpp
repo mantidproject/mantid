@@ -103,9 +103,9 @@ ComponentInfo::ComponentInfo(
   } else {
     // Virtual-bank path: names, scaleFactors, and parentIndices are compact
     // (non-virtual detectors + non-detector components only).
-    size_t nVirtual = 0;
-    for (const auto &seg : m_virtualBanks)
-      nVirtual += seg.lastIndex - seg.firstIndex + 1;
+    const size_t nVirtual =
+        std::accumulate(m_virtualBanks.cbegin(), m_virtualBanks.cend(), size_t{0},
+                        [](size_t acc, const auto &seg) { return acc + seg.lastIndex - seg.firstIndex + 1; });
     const size_t expectedCompact = m_size - nVirtual;
     if (m_scaleFactors->size() != expectedCompact) {
       throw std::invalid_argument("ComponentInfo (virtual-bank): compact scaleFactors "
@@ -128,9 +128,9 @@ ComponentInfo::ComponentInfo(
   auto assemTotalSize =
       std::accumulate(m_children->begin(), m_children->end(), static_cast<size_t>(1),
                       [](size_t size, const std::vector<size_t> &assem) { return size += assem.size(); });
-  size_t virtualPixels = 0;
-  for (const auto &seg : m_virtualBanks)
-    virtualPixels += seg.lastIndex - seg.firstIndex + 1;
+  const size_t virtualPixels =
+      std::accumulate(m_virtualBanks.cbegin(), m_virtualBanks.cend(), size_t{0},
+                      [](size_t acc, const auto &seg) { return acc + seg.lastIndex - seg.firstIndex + 1; });
 
   if (assemTotalSize + virtualPixels != m_size) {
     throw std::invalid_argument("ComponentInfo should be provided an "
@@ -310,13 +310,11 @@ void ComponentInfo::doSetPosition(const std::pair<size_t, size_t> &index, const 
   // component lies in this subtree.
   if (!m_virtualBanks.empty()) {
     for (size_t i = 0; i < m_virtualBanks.size(); ++i) {
-      for (const auto compIdx : compRange) {
-        if (compIdx == m_virtualBanks[i].bankCompIdx) {
-          m_virtualBanks[i].bankPos += offset;
-          if (m_detectorInfo)
-            m_detectorInfo->m_virtualBanks[i].bankPos += offset;
-          break;
-        }
+      if (std::any_of(compRange.begin(), compRange.end(),
+                      [&](size_t compIdx) { return compIdx == m_virtualBanks[i].bankCompIdx; })) {
+        m_virtualBanks[i].bankPos += offset;
+        if (m_detectorInfo)
+          m_detectorInfo->m_virtualBanks[i].bankPos += offset;
       }
     }
   }
@@ -356,18 +354,16 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index, const 
   // DetectorInfo::position(virtualPixelIndex) returns the correct world position.
   if (!m_virtualBanks.empty()) {
     for (size_t i = 0; i < m_virtualBanks.size(); ++i) {
-      for (const auto compIdx : compRange) {
-        if (compIdx == m_virtualBanks[i].bankCompIdx) {
-          const size_t bankOffset = compOffsetIndex(m_virtualBanks[i].bankCompIdx);
-          Eigen::Vector3d newBankPos = m_positions.access()[linearIndex({bankOffset, timeIndex})];
-          Eigen::Quaterniond newBankRot = m_rotations.access()[linearIndex({bankOffset, timeIndex})];
-          m_virtualBanks[i].bankPos = newBankPos;
-          m_virtualBanks[i].bankRot = newBankRot;
-          if (m_detectorInfo) {
-            m_detectorInfo->m_virtualBanks[i].bankPos = newBankPos;
-            m_detectorInfo->m_virtualBanks[i].bankRot = newBankRot;
-          }
-          break;
+      if (std::any_of(compRange.begin(), compRange.end(),
+                      [&](size_t compIdx) { return compIdx == m_virtualBanks[i].bankCompIdx; })) {
+        const size_t bankOffset = compOffsetIndex(m_virtualBanks[i].bankCompIdx);
+        Eigen::Vector3d newBankPos = m_positions.access()[linearIndex({bankOffset, timeIndex})];
+        Eigen::Quaterniond newBankRot = m_rotations.access()[linearIndex({bankOffset, timeIndex})];
+        m_virtualBanks[i].bankPos = newBankPos;
+        m_virtualBanks[i].bankRot = newBankRot;
+        if (m_detectorInfo) {
+          m_detectorInfo->m_virtualBanks[i].bankPos = newBankPos;
+          m_detectorInfo->m_virtualBanks[i].bankRot = newBankRot;
         }
       }
     }

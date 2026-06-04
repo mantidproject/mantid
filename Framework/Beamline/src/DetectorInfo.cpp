@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <exception>
+#include <numeric>
 
 namespace Mantid::Beamline {
 
@@ -39,9 +40,9 @@ DetectorInfo::DetectorInfo(
     const std::vector<size_t> &monitorIndices, std::vector<VirtualBankSegment> virtualBanks)
     : m_virtualBanks(std::move(virtualBanks)) {
   // Total logical size = compact real detectors + all virtual pixel slots.
-  size_t totalVirtual = 0;
-  for (const auto &seg : m_virtualBanks)
-    totalVirtual += seg.lastIndex - seg.firstIndex + 1;
+  const size_t totalVirtual =
+      std::accumulate(m_virtualBanks.cbegin(), m_virtualBanks.cend(), size_t{0},
+                      [](size_t acc, const auto &seg) { return acc + seg.lastIndex - seg.firstIndex + 1; });
   const size_t totalSize = compactPositions.size() + totalVirtual;
 
   m_isMonitor = Kernel::make_cow<std::vector<bool>>(totalSize);
@@ -64,11 +65,9 @@ DetectorInfo::DetectorInfo(
 /** Returns the VirtualBankSegment whose ID range contains @p detId, or nullptr if not virtual.
  *  Performs a linear scan; O(N_banks), which is negligible for typical instruments. */
 const VirtualBankSegment *DetectorInfo::findVirtualSegmentByDetId(const int32_t detId) const noexcept {
-  for (const auto &seg : m_virtualBanks) {
-    if (detId >= seg.idstart && detId <= seg.lastDetId)
-      return &seg;
-  }
-  return nullptr;
+  auto it = std::find_if(m_virtualBanks.cbegin(), m_virtualBanks.cend(),
+                         [detId](const auto &seg) { return detId >= seg.idstart && detId <= seg.lastDetId; });
+  return it != m_virtualBanks.cend() ? &*it : nullptr;
 }
 
 /** Returns the VirtualBankSegment owning @p index, or nullptr if not virtual.

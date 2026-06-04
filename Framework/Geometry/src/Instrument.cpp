@@ -30,6 +30,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <numeric>
 #include <queue>
 #include <utility>
 
@@ -288,9 +289,8 @@ std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
     return realIDs;
 
   // Generate virtual IDs on demand (O(n_pixels) temporary), sort, then merge.
-  size_t totalVirtual = 0;
-  for (const auto &info : vbanks)
-    totalVirtual += info.npixels;
+  const size_t totalVirtual = std::accumulate(vbanks.cbegin(), vbanks.cend(), size_t{0},
+                                              [](size_t acc, const auto &info) { return acc + info.npixels; });
   std::vector<detid_t> virtualIDs;
   virtualIDs.reserve(totalVirtual);
   for (const auto &info : vbanks)
@@ -323,9 +323,8 @@ std::vector<detid_t> Instrument::getMonitorIDs() const {
 std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
   const auto &vbanks = m_map ? m_instr->m_virtualBankInfos : m_virtualBankInfos;
-  size_t nVirtual = 0;
-  for (const auto &info : vbanks)
-    nVirtual += info.npixels;
+  const size_t nVirtual = std::accumulate(vbanks.cbegin(), vbanks.cend(), size_t{0},
+                                          [](size_t acc, const auto &info) { return acc + info.npixels; });
 
   if (skipMonitors) {
     // Virtual pixels are never monitors; count only non-monitor real entries.
