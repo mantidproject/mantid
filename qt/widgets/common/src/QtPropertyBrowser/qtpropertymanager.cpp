@@ -993,10 +993,10 @@ void QtStringPropertyManager::setValue(QtProperty *property, const QString &val)
   if (data.val == val)
     return;
 
-  // Replicate QRegExp::exactMatch: the value must match the pattern over its whole length.
-  const QRegularExpressionMatch regExpMatch = data.regExp.match(val);
-  if (data.regExp.isValid() &&
-      !(regExpMatch.hasMatch() && regExpMatch.capturedStart() == 0 && regExpMatch.capturedLength() == val.length()))
+  // Use an anchored regular expression to ensure that the whole string matches the pattern, not just a substring.
+  const QRegularExpression anchoredRegExp(QRegularExpression::anchoredPattern(data.regExp.pattern()),
+                                          data.regExp.patternOptions());
+  if (data.regExp.isValid() && !anchoredRegExp.match(val).hasMatch())
     return;
 
   data.val = val;
