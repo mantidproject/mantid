@@ -33,9 +33,9 @@ public:
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
 
-  /// Helper typedef. For storing indexes of special values per spectra per
-  /// workspace.
+  /// Helper typedef for storing special-value indexes per spectrum.
   using SpecialTypeIndexes = std::vector<std::vector<size_t>>;
+  /// Indexes of Y and E values that were NaN or infinite before processing.
   struct SpecialValueIndexes {
     SpecialTypeIndexes nanE;
     SpecialTypeIndexes nanY;
@@ -63,7 +63,7 @@ private:
   /// Get the rebin parameters
   std::vector<double> getRebinParams(Mantid::API::MatrixWorkspace_const_sptr &lhsWS,
                                      Mantid::API::MatrixWorkspace_const_sptr &rhsWS, const bool scaleRHS) const;
-  /// Perform rebin
+  /// Perform rebin and record special values that are masked to zero
   Mantid::API::MatrixWorkspace_sptr rebin(Mantid::API::MatrixWorkspace_sptr &input, const std::vector<double> &params,
                                           SpecialValueIndexes &specialValues);
   /// Perform integration
@@ -83,14 +83,14 @@ private:
   Mantid::API::MatrixWorkspace_sptr maskAllBut(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
   /// Mask out everything but the data in the ranges, but do it inplace.
   void maskInPlace(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
-  /// Add back in any special values
+  /// Add back all special values recorded from the LHS and RHS workspaces
   void reinsertSpecialValues(const Mantid::API::MatrixWorkspace_sptr &ws, const SpecialValueIndexes &lhsSpecialValues,
                              const SpecialValueIndexes &rhsSpecialValues);
-  /// Add back any special values from bins without valid data coverage
+  /// Add back special values only where no valid data contributes to the output
   void reinsertSpecialValuesWithoutValidData(const Mantid::API::MatrixWorkspace_sptr &ws,
                                              const SpecialValueIndexes &lhsSpecialValues,
                                              const SpecialValueIndexes &rhsSpecialValues, const int a1, const int a2);
-  /// Use valid overlap values where one workspace has invalid values
+  /// Use valid overlap values where exactly one workspace has an invalid signal value
   void useValidOverlapData(const Mantid::API::MatrixWorkspace_sptr &overlap,
                            const Mantid::API::MatrixWorkspace_sptr &lhs, const Mantid::API::MatrixWorkspace_sptr &rhs,
                            const SpecialValueIndexes &lhsSpecialValues, const SpecialValueIndexes &rhsSpecialValues,
