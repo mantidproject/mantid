@@ -13,6 +13,8 @@ Settings
 The settings menu in workbench can be used to change your personal user defaults
 and modify some of the functionality of workbench.
 
+.. _GeneralSettings:
+
 General
 =======
 
@@ -59,6 +61,8 @@ Categories
 |
 |
 |
+
+.. _PlotSettings:
 
 Plots
 =====
