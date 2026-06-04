@@ -4,6 +4,7 @@ set(TEST_PY_FILES
     # Core
     test/test_model.py
     test/test_presenter.py
+    test/test_view_functional.py
     # Settings
     settings/test/test_settings_model.py
     settings/test/test_settings_presenter.py
