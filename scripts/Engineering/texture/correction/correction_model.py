@@ -96,7 +96,7 @@ class TextureCorrectionModel:
                 abs_corr = "_abs_corr"
                 if self.include_atten:
                     val, units = atten_args["atten_val"], atten_args["atten_units"]
-                    atten_vals = self.read_attenuation_coefficient_at_value(abs_corr, val, units)
+                    atten_vals = read_attenuation_coefficient_at_value(abs_corr, val, units)
                     self.write_atten_val_table(
                         ws,
                         atten_vals,
@@ -303,10 +303,6 @@ class TextureCorrectionModel:
             return string
 
     # ~~~~~ Attenuation Table Functions ~~~~~~~~~~~~~
-
-    @staticmethod
-    def read_attenuation_coefficient_at_value(ws: str, val: float, unit: str) -> Sequence[float]:
-        return read_attenuation_coefficient_at_value(ws, val, unit)
 
     @staticmethod
     def get_atten_table_name(ws_str: str, eval_val: float, unit: str) -> str:
