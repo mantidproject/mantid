@@ -1,0 +1,1 @@
+- ISIS Reflectometry GUI stitching now uses the updated stitch algorithms so invalid values do not overwrite valid data from other workspaces in stitched overlap regions.

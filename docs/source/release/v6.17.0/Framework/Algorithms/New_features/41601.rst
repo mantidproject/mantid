@@ -1,0 +1,1 @@
+- Added a ``UseValidDataOnly`` option to :ref:`Stitch1D <algm-Stitch1D>` and :ref:`Stitch1DMany <algm-Stitch1DMany>` so invalid signal values do not contribute to overlap bins when another workspace has valid data in the same bin.
