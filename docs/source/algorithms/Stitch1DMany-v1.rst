@@ -50,11 +50,14 @@ When stitching workspace groups, the child workspaces in the output group use
 provided to use custom suffixes for these child workspaces instead. The number
 of suffixes must match the number of child workspaces in each input group.
 
+<<<<<<< handle_invalid_values_in_stitch_algorithms
 If :literal:`UseValidDataOnly` is true, invalid signal values do not contribute
 to stitched overlap bins when another workspace has a valid signal value in the
 same bin. This can be used when input workspaces collectively provide full data
 coverage but individual workspaces contain NaN or infinite signal values.
 
+=======
+>>>>>>> main
 Workflow
 --------
 

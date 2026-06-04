@@ -101,9 +101,7 @@ QString translateUtf8Encoded(const char *context, const char *key, const char *d
 }
 } // namespace
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 QtCursorDatabase::QtCursorDatabase() {
   appendCursor(Qt::ArrowCursor, translateUtf8Encoded("QtCursorDatabase", "Arrow", nullptr),
@@ -428,6 +426,4 @@ bool QtKeySequenceEdit::event(QEvent *e) {
   return QWidget::event(e);
 }
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

@@ -68,6 +68,7 @@ function usage() {
   echo "Options:"
   echo "  -c Optional conda channel overriding the default mantid"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
+  echo "  --skip-docs Optional Skip mantiddocs installation (uses online documentation only)"
   echo
   exit $exitcode
 }
@@ -77,6 +78,7 @@ function usage() {
 conda_channel=mantid
 suffix=
 mantid_version=
+skip_docs=false
 while [ ! $# -eq 0 ]
 do
   case "$1" in
@@ -91,6 +93,9 @@ do
     -v)
         mantid_version="$2"
         shift
+        ;;
+    --skip-docs)
+        skip_docs=true
         ;;
     -h)
         usage 0
@@ -150,13 +155,20 @@ if [ -z "$mantid_version" ]; then
   exit 1
 fi
 
+# Build conda packages list
+conda_packages=("mantidworkbench==${mantid_version}")
+if [ "$skip_docs" = false ]; then
+  conda_packages+=("mantiddocs==${mantid_version}")
+  echo "Installing mantiddocs ${mantid_version}"
+else
+  echo "Skipping mantiddocs installation (will use online documentation)"
+fi
+conda_packages+=(mslice jq)
+
 echo "Creating conda environment in '$bundle_conda_prefix'"
 "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
   --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
-  "mantidworkbench==${mantid_version}" \
-  "mantiddocs==${mantid_version}" \
-  mslice \
-  jq  # used for processing the version string
+  "${conda_packages[@]}"
 echo
 
 # Determine version information

@@ -33,8 +33,8 @@ public:
   ConvToMDBase();
 
   /// method which initiates all main class variables
-  virtual size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
-                            bool ignoreZeros);
+  virtual size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper, bool ignoreZeros,
+                            bool useLogTimes = false);
   /// method which starts the conversion procedure
   virtual void runConversion(API::Progress *) = 0;
   /// virtual destructor
@@ -84,6 +84,8 @@ protected:
   bool m_ignoreZeros;
   /// Any special coordinate system used.
   Mantid::Kernel::SpecialCoordinateSystem m_coordinateSystem;
+  /// Flag to use log values corresponding to event pulse time instead of average values
+  bool m_useLogTimes;
 
 private:
   /** internal function which do one peace of work, which should be performed by

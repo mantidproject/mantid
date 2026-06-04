@@ -333,7 +333,7 @@ int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name, int x
 
   outputW->getSpectrum(idet).clearDetectorIDs();
   // Find the pixel ID at that XY position on the rectangular detector
-  int pixelID = peak.getDetectorID(); // det->getAtXY(x0,y0)->getID();
+  int pixelID = peak.getDetectorID();
 
   // Find the corresponding workspace index, if any
   auto wiEntry = pixel_to_wi.find(pixelID);

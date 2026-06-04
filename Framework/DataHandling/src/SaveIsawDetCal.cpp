@@ -212,9 +212,7 @@ V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col, int row, 
   std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
     std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
-
-    std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
-    return pixel->getPos();
+    return RDet->getPosAtXY(col, row);
   } else {
     const size_t parentIndex = componentInfo.indexOfAny(bankName);
     auto children = componentInfo.children(parentIndex);

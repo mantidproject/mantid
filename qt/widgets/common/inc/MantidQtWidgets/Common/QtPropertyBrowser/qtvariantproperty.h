@@ -91,9 +91,7 @@
 #include <QIcon>
 #include <QVariant>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 using QtIconMap = QMap<int, QIcon>;
 
@@ -300,9 +298,7 @@ public:
   const QString m_regExpAttribute;
 };
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif
 
 Q_DECLARE_METATYPE(QIcon)
 Q_DECLARE_METATYPE(QtIconMap)

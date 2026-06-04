@@ -225,7 +225,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
 
       for (const auto &detIndex : detectorIndices) {
         // c) get detector ID
-        const auto detid = detectorInfo.detectorIDs()[detIndex];
+        const auto detid = detectorInfo.detid(detIndex);
         auto itx = indexmap.find(detid);
         if (itx != indexmap.end()) {
           size_t wsindex = itx->second;

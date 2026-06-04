@@ -223,7 +223,7 @@ void FunctionTreeView::createBrowser() {
   connect(m_constraintManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(constraintChanged(QtProperty *)));
   connect(m_parameterManager, SIGNAL(valueChanged(QtProperty *, double)), SLOT(parameterPropertyChanged(QtProperty *)));
 
-  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), SLOT(updateCurrentFunctionIndex()));
+  connect(m_browser, SIGNAL(currentItemChanged(const QtBrowserItem *)), SLOT(updateCurrentFunctionIndex()));
 
   m_browser->setFocusPolicy(Qt::StrongFocus);
 }

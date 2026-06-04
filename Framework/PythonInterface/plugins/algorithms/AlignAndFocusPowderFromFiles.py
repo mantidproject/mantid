@@ -16,6 +16,7 @@ from mantid.api import (
 from mantid.kernel import Direction, PropertyManagerDataService, StringArrayProperty
 from mantid.simpleapi import (
     AlignAndFocusPowder,
+    AlignAndFocusPowderSlim,
     CompressEvents,
     ConvertDiffCal,
     ConvertUnits,
@@ -40,6 +41,8 @@ from mantid.simpleapi import (
 )
 import os
 import numpy as np
+import h5py
+import math
 
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 PROPS_FOR_INSTR = ["PrimaryFlightPath", "SpectrumIDs", "L2", "Polar", "Azimuthal"]
@@ -76,6 +79,36 @@ PROPS_FOR_ALIGN = [
 PROPS_FOR_ALIGN.extend(PROPS_IN_PD_CHARACTER)
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
 PROPS_FOR_PD_CHARACTER = ["FrequencyLogNames", "WaveLengthLogNames"]
+
+# Properties mandatory in AAFPSlim but not in FromFiles
+_SLIM_REQUIRED_PROPS = ["PrimaryFlightPath", "L2", "Polar"]
+# Properties that block use of AAFPSlim entirely
+_SLIM_BLOCKING_PROPS = [
+    "AbsorptionWorkspace",
+    "CalibrationWorkspace",
+    "OffsetsWorkspace",
+    "MaskWorkspace",
+    "MaskBinTable",
+    "ResampleX",
+    "RemovePromptPulseWidth",
+    "ResonanceFilterUnits",
+    "ResonanceFilterLowerLimits",
+    "ResonanceFilterUpperLimits",
+    "CompressWallClockTolerance",
+    "CompressStartTime",
+    "LorentzCorrection",
+    "UnwrapRef",
+    "LowResRef",
+    "LowResSpectrumOffset",
+    "TMin",
+    "TMax",
+    "CropWavelengthMin",
+    "CropWavelengthMax",
+    "UnfocussedWorkspace",
+]
+
+# Bytes per event (neutron event record size) used for MaxChunkSize → ReadSizeFromDisk conversion
+_BYTES_PER_EVENT = 24
 
 
 def determineCompression(filename, compression, chunking, absorption):
@@ -178,6 +211,10 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         self.declareProperty(
             StringArrayProperty(name="LogBlockList"),
             "If specified, these logs will not be loaded from the file. This is passed to LoadEventNexus",
+        )
+
+        self.declareProperty(
+            "AllowSlimProcess", True, doc="Allow using the AlignAndFocusPowderSlim algorithm if the file and properties are compatible"
         )
 
         self.copyProperties("AlignAndFocusPowder", PROPS_FOR_ALIGN)
@@ -636,7 +673,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             self.__mskWksp = self.instr + "_mask"
 
         # check that anything was specified
-        if self.getProperty("CalFileName").isDefault and self.getProperty("GroupFilename").isDefault:
+        if self.getProperty(CAL_FILE).isDefault and self.getProperty(GROUP_FILE).isDefault:
             self.kwargs = self.__getAlignAndFocusArgs()
             return
 
@@ -652,17 +689,27 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
             tmin_val = self.__getAlignAndFocusArgs().get("TMin", 0.0)
 
-            LoadDiffCal(
+            calfile = self.getPropertyValue(CAL_FILE)
+            has_calfile = bool(calfile)
+            if not calfile:
+                # LoadDiffCal needs a filename; fall back to grouping file
+                calfile = self.getPropertyValue(GROUP_FILE)
+
+            diffcal_kwargs = dict(
                 InputWorkspace=wksp,
-                Filename=self.getPropertyValue("CalFileName"),
-                GroupFilename=self.getPropertyValue("GroupFilename"),
-                MakeCalWorkspace=loadCalibration,
+                Filename=calfile,
+                GroupFilename=self.getPropertyValue(GROUP_FILE),
+                # Grouping-only HDF files (no DIFC columns) must not request a cal workspace;
+                # LoadDiffCal also requires InputWorkspace only when extracting DIFC calibration.
+                MakeCalWorkspace=loadCalibration and has_calfile,
                 MakeGroupingWorkspace=loadGrouping,
                 MakeMaskWorkspace=loadMask,
                 WorkspaceName=self.instr,
                 TofMin=tmin_val,
             )
-        if loadCalibration:
+
+            LoadDiffCal(**diffcal_kwargs)
+        if loadCalibration and has_calfile:
             self.__calWksp = self.instr + "_cal"
             self.setPropertyValue("CalibrationWorkspace", self.instr + "_cal")
         if loadGrouping:
@@ -672,6 +719,215 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             self.__mskWksp = self.instr + "_mask"
             self.setPropertyValue("MaskWorkspace", self.instr + "_mask")
         self.kwargs = self.__getAlignAndFocusArgs()
+
+    def __canUseSlim(self):
+        """Check whether AlignAndFocusPowderSlim can replace the normal processing path."""
+
+        if not self.getProperty("AllowSlimProcess").value:
+            return False
+
+        # Check that all required properties are set
+        for prop in _SLIM_REQUIRED_PROPS:
+            if self.getProperty(prop).isDefault:
+                self.log().debug("AlignAndFocusPowderFromFiles: cannot use slim path - required property '%s' is not set" % prop)
+                return False
+
+        # Check hard blockers
+        for prop in _SLIM_BLOCKING_PROPS:
+            if not self.getProperty(prop).isDefault:
+                self.log().debug("AlignAndFocusPowderFromFiles: cannot use slim path - property '%s' is set" % prop)
+                return False
+
+        # AAFPSlim does not preserve events; require the caller to explicitly opt in to that behaviour
+        if self.getProperty("PreserveEvents").value:
+            self.log().debug(
+                "AlignAndFocusPowderFromFiles: cannot use slim path - PreserveEvents=True "
+                "(AlignAndFocusPowderSlim always produces histograms; set PreserveEvents=False to allow the slim path)"
+            )
+            return False
+
+        # AAFPSlim only accepts a single file
+        if len(self._filenames) != 1:
+            self.log().debug("AlignAndFocusPowderFromFiles: cannot use slim path - more than one file provided")
+            return False
+
+        # Params (TOF rebinning) must be either unset or a simple [xmin, delta, xmax] triple;
+        # multi-range Params (>3 values) cannot be expressed in Slim's per-group arrays simply
+        if not self.getProperty("Params").isDefault:
+            if len(self.getProperty("Params").value) != 3:
+                self.log().debug("AlignAndFocusPowderFromFiles: cannot use slim path - Params has more than 3 values")
+                return False
+
+        # AlignAndFocusPowderSlim requires NXevent_data; reject non-event nexus files early
+        # to avoid the unhelpful "No NXevent_data entries found in file" error at run time.
+        try:
+            found = []
+
+            def _check_event_data(name, obj):
+                if isinstance(obj, h5py.Group):
+                    nx_class = obj.attrs.get("NX_class", b"")
+                    if isinstance(nx_class, bytes):
+                        nx_class = nx_class.decode("ascii", errors="ignore")
+                    if nx_class == "NXevent_data":
+                        found.append(True)
+                        return True  # returning True stops visitation
+
+            with h5py.File(self._filenames[0], "r") as f:
+                f.visititems(_check_event_data)
+            if not found:
+                self.log().debug("AlignAndFocusPowderFromFiles: cannot use slim path - file has no NXevent_data entries")
+                return False
+        except Exception as e:
+            self.log().debug("AlignAndFocusPowderFromFiles: could not inspect file for NXevent_data (%s); letting Slim try" % str(e))
+
+        return True
+
+    def __getSlimArgsFromPropManager(self):
+        """Read d_min/d_max/delta from the ReductionProperties property manager.
+
+        Returns a dict of extra kwargs for AlignAndFocusPowderSlim, or None if the
+        property manager contains settings that cannot be expressed in Slim
+        (non-zero tof_min/tof_max/wavelength_min/wavelength_max)."""
+        pm_name = self.getProperty("ReductionProperties").valueAsStr
+        if pm_name not in PropertyManagerDataService:
+            return {}
+
+        pm = PropertyManagerDataService[pm_name]
+
+        # Select PM keys that match the requested binning units (driven by the Dspacing property)
+        # to avoid a unit mismatch when the property manager contains both tof and d-spacing keys.
+        if self.getProperty("Dspacing").value:
+            units = "dSpacing"
+            key_combo = ("d_min", "d_max", "delta")
+        else:
+            units = "tof"
+            key_combo = ("tof_min", "tof_max", "delta")
+
+        extra = {}
+        keys = [pm.existsProperty(key) for key in key_combo]
+        if all(keys):
+            extra["BinningUnits"] = units
+            extra["XMin"] = list(pm.getProperty(key_combo[0]).value)
+            extra["XMax"] = list(pm.getProperty(key_combo[1]).value)
+            extra["XDelta"] = list(pm.getProperty(key_combo[2]).value)
+
+        return extra
+
+    def __runCharacterizationsForSlim(self):
+        """Load file metadata and run PDDetermineCharacterizations to populate the
+        ReductionProperties property manager for use by the Slim path."""
+        filename = self._filenames[0]
+        tempname = "__{}_slim_char".format(self.__wkspNameFromFile(filename))
+
+        allowedLogs = list(self.getProperty("FrequencyLogNames").value)
+        allowedLogs.extend(self.getProperty("WaveLengthLogNames").value)
+        try:
+            loader = self.__createLoader(filename, tempname, MetaDataOnly=True, AllowList=allowedLogs)
+            loader.execute()
+            if self.__loaderName == "Load":
+                self.__loaderName = loader.getPropertyValue("LoaderName")
+        except RuntimeError:
+            Load(OutputWorkspace=tempname, Filename=filename)
+
+        args = {
+            "ReductionProperties": self.getProperty("ReductionProperties").valueAsStr,
+            "InputWorkspace": tempname,
+            "Characterizations": self.charac,
+        }
+        for name in PROPS_FOR_PD_CHARACTER:
+            prop = self.getProperty(name)
+            if not prop.isDefault:
+                args[name] = prop.value
+
+        PDDetermineCharacterizations(**args)
+        DeleteWorkspace(Workspace=tempname)
+
+    def __runSlim(self, outputname, pm_args=None):
+        """Call AlignAndFocusPowderSlim and store the result under *outputname*."""
+
+        # All properties that are simply mapped
+        kwargs = {
+            "Filename": self._filenames[0],
+            "OutputWorkspace": outputname,
+        }
+        propertyMap = {
+            "CalFileName": CAL_FILE,
+            "L1": "PrimaryFlightPath",
+            "L2": "L2",
+            "Polar": "Polar",
+            "Azimuthal": "Azimuthal",
+            "LogAllowList": "LogAllowList",
+            "LogBlockList": "LogBlockList",
+        }
+        for slimProp, thisProp in propertyMap.items():
+            kwargs[slimProp] = self.getPropertyValue(thisProp)
+
+        # Properties requiring special mapping
+
+        # whether or not to use dSpacing
+        kwargs["BinningUnits"] = "dSpacing" if self.getProperty("Dspacing").value else "TOF"
+
+        # binning ranges: direct DMin/DMax win, then ReductionProperties PM, then Params
+        if (
+            not self.getProperty("DMin").isDefault
+            or not self.getProperty("DMax").isDefault
+            or not self.getProperty("DeltaRagged").isDefault
+        ):
+            kwargs["BinningUnits"] = "dSpacing"
+            if not self.getProperty("DMin").isDefault:
+                kwargs["XMin"] = list(self.getProperty("DMin").value)
+            if not self.getProperty("DMax").isDefault:
+                kwargs["XMax"] = list(self.getProperty("DMax").value)
+            if not self.getProperty("DeltaRagged").isDefault:
+                kwargs["XDelta"] = list(self.getProperty("DeltaRagged").value)
+
+        # Fill any unset binning keys from the ReductionProperties property manager
+        if pm_args:
+            for key, val in pm_args.items():
+                if key not in kwargs:
+                    kwargs[key] = val
+
+        # Fall back to Params if no d-spacing ranges have been set
+        if "XMin" not in kwargs and not self.getProperty("Params").isDefault:
+            params = self.getProperty("Params").value
+            kwargs["XMin"] = [float(params[0])]
+            kwargs["XDelta"] = [float(params[1])]
+            kwargs["XMax"] = [float(params[2])]
+
+        # grouping: workspace takes priority, then pass file directly to AAFPSlim
+        if not self.getProperty(GRP_WKSP).isDefault:
+            kwargs["GroupingWorkspace"] = self.getPropertyValue(GRP_WKSP)
+        elif not self.getProperty(GROUP_FILE).isDefault:
+            kwargs["GroupFilename"] = self.getPropertyValue(GROUP_FILE)
+
+        # chunk size
+        if not self.getProperty("MaxChunkSize").isDefault and self.chunkSize > 0.0:
+            bytes_total = self.chunkSize * 1024**3
+            kwargs["ReadSizeFromDisk"] = int(bytes_total / _BYTES_PER_EVENT)
+
+        # bad pulse filtering
+        if self.filterBadPulses > 0.0:
+            kwargs["FilterBadPulses"] = True
+            kwargs["BadPulsesLowerCutoff"] = self.filterBadPulses
+
+        try:
+            AlignAndFocusPowderSlim(**kwargs)
+        except RuntimeError as e:
+            if "No NXevent_data entries found in file" in str(e):
+                self.log().warning(
+                    "AlignAndFocusPowderFromFiles: file does not contain NXevent_data entries; falling back to standard processing."
+                )
+                return
+            raise
+
+        # post-processing: apply SpectrumIDs renaming if requested ---
+        if not self.getProperty("SpectrumIDs").isDefault:
+            EditInstrumentGeometry(
+                Workspace=outputname,
+                SpectrumIDs=self.getProperty("SpectrumIDs").value,
+            )
+
+        # TODO CacheDir?
 
     def PyExec(self):
         self._filenames = sorted(self.__getLinearizedFilenames("Filename"))
@@ -694,10 +950,52 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         # empty string means it is not used
         finalunfocusname = self.getPropertyValue("UnfocussedWorkspace")
 
-        # determing compression
+        # determining compression (needed by __createLoader, called from __runCharacterizationsForSlim)
         self.do_compression = determineCompression(
             filename=self._filenames[0], compression=self.compression_threshold, chunking=self.chunkSize, absorption=self.absorption
         )
+
+        # ------------------------------------------------------------------ #
+        # Fast path: delegate entirely to AlignAndFocusPowderSlim when the   #
+        # inputs are compatible with its more restricted interface.           #
+        # ------------------------------------------------------------------ #
+        if self.__canUseSlim():
+            # Populate ReductionProperties from Characterizations if provided.
+            if self.charac:
+                self.__runCharacterizationsForSlim()
+
+            # Try to extract d_min/d_max from the ReductionProperties PM.
+            # Returns None if the PM contains tof/wavelength ranges Slim cannot handle;
+            # returns {} (or a dict with XMin/XMax) otherwise.
+            # Binning may also be set via DMin/DMax/DeltaRagged or Params directly —
+            # those are handled inside __runSlim regardless.
+            slim_pm_args = self.__getSlimArgsFromPropManager()
+
+            if slim_pm_args is None:
+                # PM has settings (tof_min/tof_max/wavelength) that Slim cannot handle;
+                # fall through to the normal processing path.
+                self.log().warning(
+                    "AlignAndFocusPowderFromFiles: characterizations/ReductionProperties set "
+                    "TOF or wavelength ranges not supported by AlignAndFocusPowderSlim; "
+                    "using standard processing."
+                )
+            else:
+                self.log().notice("AlignAndFocusPowderFromFiles: delegating to AlignAndFocusPowderSlim for faster single-file processing.")
+                self.__runSlim(finalname, slim_pm_args)
+                if finalname in mtd:
+                    self.setProperty("OutputWorkspace", mtd[finalname])
+
+                    # TODO CacheDir?
+                else:
+                    # __runSlim returned without output (e.g. non-event nexus); fall through to standard processing
+                    self.__slowPath(finalname, finalunfocusname)
+        # ------------------------------------------------------------------ #
+        # Slower path: load needed workspaces and call AlignAndFocusPowder   #
+        # ------------------------------------------------------------------ #
+        else:
+            self.__slowPath(finalname, finalunfocusname)
+
+    def __slowPath(self, finalname, finalunfocusname):
         if self.useCaching:
             # unfocus check only matters if caching is requested
             if finalunfocusname != "":
@@ -816,8 +1114,6 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
     def __processFiles(self, files, finalname, finalunfocusname, hasAccumulated):
         """process given files, separate them to "grains". Sum each grain, and add the grain sum to final sum"""
         numberFilesToProcess = len(files)
-        import math
-
         if numberFilesToProcess > 3:
             grain_size = int(math.sqrt(numberFilesToProcess))  # grain size
         else:

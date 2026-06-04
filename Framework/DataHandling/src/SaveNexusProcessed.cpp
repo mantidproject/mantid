@@ -123,7 +123,7 @@ void SaveNexusProcessed::init() {
                   "Index of last spectrum to write, only for single period\n"
                   "data.");
   declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
-                  "List of spectrum numbers to read, only for single period\n"
+                  "List of spectrum numbers to write, only for single period\n"
                   "data.");
 
   declareProperty("Append", false,
@@ -401,22 +401,22 @@ void SaveNexusProcessed::appendEventListData(const std::vector<T> &events, size_
  * */
 void SaveNexusProcessed::execEvent(const Mantid::Nexus::NexusFileIO *nexusFile, const bool uniformSpectra,
                                    const bool raggedSpectra, const std::vector<int> &spec) {
-  m_progress = std::make_unique<Progress>(this, m_timeProgInit, 1.0, m_eventWorkspace->getNumberEvents() * 2);
+  std::vector<int64_t> indices;
+  indices.reserve(spec.size() + 1);
+  // First we need to index the events in each spectrum
+  size_t index = 0;
+  for (auto s : spec) {
+    indices.emplace_back(index);
+    index += m_eventWorkspace->getSpectrum(s).getNumberEvents();
+  }
+  indices.emplace_back(index);
+
+  m_progress = std::make_unique<Progress>(this, m_timeProgInit, 1.0, index * 2);
 
   // Start by writing out the axes and crap
   nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, raggedSpectra, spec, "event_workspace", false);
 
   // Make a super long list of tofs, weights, etc.
-  std::vector<int64_t> indices;
-  indices.reserve(m_eventWorkspace->getNumberHistograms() + 1);
-  // First we need to index the events in each spectrum
-  size_t index = 0;
-  for (int wi = 0; wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++) {
-    indices.emplace_back(index);
-    // Track the total # of events
-    index += m_eventWorkspace->getSpectrum(wi).getNumberEvents();
-  }
-  indices.emplace_back(index);
 
   // Initialize all the arrays
   int64_t num = index;
@@ -459,9 +459,9 @@ void SaveNexusProcessed::execEvent(const Mantid::Nexus::NexusFileIO *nexusFile, 
 
   // --- Fill in the combined event arrays ----
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int wi = 0; wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++) {
+  for (int wi = 0; wi < static_cast<int>(spec.size()); wi++) {
     PARALLEL_START_INTERRUPT_REGION
-    const DataObjects::EventList &el = m_eventWorkspace->getSpectrum(wi);
+    const DataObjects::EventList &el = m_eventWorkspace->getSpectrum(spec[wi]);
 
     // This is where it will land in the output array.
     // It is okay to write in parallel since none should step on each other.

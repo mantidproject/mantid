@@ -97,6 +97,10 @@ else()
   message(WARNING "Unknown platform detected: ${CMAKE_SYSTEM_NAME}")
 endif()
 
+# Turn this on to set compiler warnings as errors REMEMBER: unchanged files don't necessarily get recompiled so the
+# issues might hide unless a clean build
+option(CMAKE_COMPILE_WARNING_AS_ERROR "Compile warnings as errors" OFF)
+
 # Cross-platform setup
 include(CommonSetup)
 

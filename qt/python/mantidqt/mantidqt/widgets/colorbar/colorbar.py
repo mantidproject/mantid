@@ -161,7 +161,6 @@ class ColorbarWidget(QWidget):
         Adds axes to the figure. If axes already exist then these are removed and replaced with new ones.
         """
         if self.ax:
-            self.ax.clear()
             self.canvas.figure.delaxes(self.ax)
         self.ax = self.canvas.figure.add_axes([0.0, 0.02, 0.2, 0.97])
 

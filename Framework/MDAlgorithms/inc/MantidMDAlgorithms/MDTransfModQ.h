@@ -73,6 +73,8 @@ public:
   void setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWorkspace,
                                Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const override;
 
+  void updateRotMat(const std::vector<double> &newMat) override { m_RotMat = newMat; }
+
 protected:
   //  directions to the detectors
   double m_ex, m_ey, m_ez;

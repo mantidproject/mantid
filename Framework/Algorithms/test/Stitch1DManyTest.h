@@ -1137,6 +1137,26 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_output_suffix_validation_provided_for_non_group_workspaces() {
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.1, 0.1, 1.5, 2.5, "ws2");
+
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2");
+    alg.setProperty("Params", "0.1");
+    alg.setProperty("StartOverlaps", "0.8");
+    alg.setProperty("EndOverlaps", "1.1");
+    alg.setProperty("OutputWorkspace", "outws");
+    alg.setProperty("OutputWorkspaceSuffixes", "++, --");
+
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
+                            "Some invalid Properties found: \n OutputWorkspaceSuffixes: OutputWorkspaceSuffixes can "
+                            "only be used with group workspaces");
+    AnalysisDataService::Instance().clear();
+  }
+
   void test_two_groups_with_three_workspaces_scale_factor_from_period() {
     // Three groups with two matrix workspaces each.
     // Each matrix workspace has two spectra.
