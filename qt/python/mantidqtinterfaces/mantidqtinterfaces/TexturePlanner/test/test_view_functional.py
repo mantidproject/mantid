@@ -47,7 +47,14 @@ from Engineering.common.instrument_config import SUPPORTED_INSTRUMENTS
 from Engineering.common.xml_shapes import get_cube_xml
 
 from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
-from mantidqtinterfaces.TexturePlanner.view import TexturePlannerView, CUSTOM_INSTRUMENT
+from mantidqtinterfaces.TexturePlanner.view import (
+    TexturePlannerView,
+    CUSTOM_INSTRUMENT,
+    EXPORT_SSCANSS,
+    EXPORT_MATRIX,
+    EXPORT_REFERENCE_WS,
+    EXPORT_TRANSMISSION_WEIGHTING,
+)
 from mantidqtinterfaces.TexturePlanner.presenter import TexturePlannerPresenter
 
 app = QApplication.instance() or QApplication(sys.argv)
@@ -178,8 +185,11 @@ class TestInitialState(_FunctionalTestBase):
         self.assertFalse(self.view.btnSTL.isEnabled())
         self.assertFalse(self.view.btnXML.isEnabled())
         self.assertFalse(self.view.btnOrient.isEnabled())
-        for btn in (self.view.toSscanss, self.view.toEuler, self.view.toMatrix, self.view.toRefWs):
-            self.assertFalse(btn.isEnabled())
+        self.assertFalse(self.view.btnExport.isEnabled())
+
+    def test_export_combo_lists_base_formats_without_transmission_weighting(self):
+        items = [self.view.cmbExportFormat.itemText(i) for i in range(self.view.cmbExportFormat.count())]
+        self.assertEqual(items, [EXPORT_SSCANSS, "Euler Orientation File", EXPORT_MATRIX, EXPORT_REFERENCE_WS])
 
     def test_starts_with_one_orientation(self):
         self.assertEqual(self.model.orientations.get_num_orientations(), 1)
@@ -453,22 +463,53 @@ class TestExports(_FunctionalTestBase):
         self.view.get_save_dir = lambda: self._tmpdir
         QTest.keyClicks(self.view.saveFileLine, "run")
 
-    def test_outputs_enable_once_dir_and_filename_present(self):
-        self._enable_outputs()
-        for btn in (self.view.toSscanss, self.view.toEuler, self.view.toMatrix, self.view.toRefWs):
-            self.assertTrue(btn.isEnabled())
+    def _export_as(self, fmt):
+        self.view.cmbExportFormat.setCurrentText(fmt)
+        self._click(self.view.btnExport)
 
-    def test_export_buttons_write_files(self):
+    def test_export_button_enables_once_dir_and_filename_present(self):
+        self.assertFalse(self.view.btnExport.isEnabled())
+        self._enable_outputs()
+        self.assertTrue(self.view.btnExport.isEnabled())
+
+    def test_selected_format_writes_matching_file(self):
         self._enable_outputs()
 
-        self._click(self.view.toSscanss)
+        self._export_as(EXPORT_SSCANSS)
         self.assertTrue(os.path.exists(os.path.join(self._tmpdir, "run.angles")))
 
-        self._click(self.view.toMatrix)
+        self._export_as(EXPORT_MATRIX)
         self.assertTrue(os.path.exists(os.path.join(self._tmpdir, "run.txt")))
 
-        self._click(self.view.toRefWs)
+        self._export_as(EXPORT_REFERENCE_WS)
         self.assertTrue(os.path.exists(os.path.join(self._tmpdir, "run.nxs")))
+
+    def test_transmission_weighting_option_tracks_estimate_toggle(self):
+        def combo_items():
+            return [self.view.cmbExportFormat.itemText(i) for i in range(self.view.cmbExportFormat.count())]
+
+        self.assertNotIn(EXPORT_TRANSMISSION_WEIGHTING, combo_items())
+
+        self._click_checkbox(self.view.chkTransmission)
+        self.assertIn(EXPORT_TRANSMISSION_WEIGHTING, combo_items())
+
+        self._click_checkbox(self.view.chkTransmission)
+        self.assertNotIn(EXPORT_TRANSMISSION_WEIGHTING, combo_items())
+
+    def test_transmission_weighting_export_writes_file(self):
+        self._enable_outputs()
+        self._click_checkbox(self.view.chkTransmission)
+        # seed deterministic, positive factors so the write does not depend on the absorption calc
+        # landing the (unloaded) sample inside a gauge volume; the real exporter still does the work
+        self.model.orientations[0].transmission = np.array([0.4, 0.9])
+
+        self._export_as(EXPORT_TRANSMISSION_WEIGHTING)
+
+        out_file = os.path.join(self._tmpdir, "run_transmission_weighting.txt")
+        self.assertTrue(os.path.exists(out_file))
+        with open(out_file) as f:
+            # one orientation, normalised against itself -> weight of 1.0
+            self.assertEqual(f.read().splitlines(), ["1.0"])
 
 
 class TestMaterialAndSettings(_FunctionalTestBase):

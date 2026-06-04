@@ -23,6 +23,24 @@ Ui_texplan, _ = load_ui(__file__, "texture_planner.ui")
 # Label shown in the instrument combo for the user-defined instrument option.
 CUSTOM_INSTRUMENT = "Custom"
 
+# Export-format labels shown in the output combo (the presenter dispatches on these strings).
+EXPORT_SSCANSS = "Sscanss2 Angles"
+EXPORT_EULER = "Euler Orientation File"
+EXPORT_MATRIX = "Matrix Orientation File"
+EXPORT_REFERENCE_WS = "Reference Workspace"
+EXPORT_TRANSMISSION_WEIGHTING = "Transmission Weighting"
+# Always-available formats; the transmission weighting option is added/removed dynamically
+# depending on whether transmission values have been estimated.
+BASE_EXPORT_FORMATS = (EXPORT_SSCANSS, EXPORT_EULER, EXPORT_MATRIX, EXPORT_REFERENCE_WS)
+_REFERENCE_WS_TOOLTIP = (
+    "Save the sample (shape, position, initial orientation and material) as a NeXus reference "
+    'workspace compatible with the EngDiff "Load Reference Workspace" option.'
+)
+_TRANSMISSION_WEIGHTING_TOOLTIP = (
+    "One weighting per included orientation: the smallest transmission factor of each orientation "
+    "normalised against the largest across all orientations (least absorbing = 1.0, more absorbing > 1.0)."
+)
+
 
 class TexturePlannerView(QMainWindow, Ui_texplan):
     sig_select_state_changed = QtCore.Signal()
@@ -81,6 +99,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.set_load_stl_enabled(False)
         self.set_load_xml_enabled(False)
         self.set_load_orientation_enabled(False)
+        self.populate_export_formats()
         self.set_outputs_enabled(False)
         self.set_show_transmission(False)
 
@@ -208,17 +227,28 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_delete_selected_clicked(self, slot):
         self.deleteSelected.clicked.connect(slot)
 
-    def set_on_output_sscanss_clicked(self, slot):
-        self.toSscanss.clicked.connect(slot)
+    def populate_export_formats(self):
+        self.cmbExportFormat.addItems(BASE_EXPORT_FORMATS)
+        # keep the explanatory hint the old "Save Reference Workspace" button carried
+        ref_idx = self.cmbExportFormat.findText(EXPORT_REFERENCE_WS)
+        self.cmbExportFormat.setItemData(ref_idx, _REFERENCE_WS_TOOLTIP, QtCore.Qt.ToolTipRole)
 
-    def set_on_output_euler_clicked(self, slot):
-        self.toEuler.clicked.connect(slot)
+    def get_export_format(self):
+        return self.cmbExportFormat.currentText()
 
-    def set_on_output_matrix_clicked(self, slot):
-        self.toMatrix.clicked.connect(slot)
+    def set_transmission_weighting_available(self, available):
+        # the transmission weighting export only makes sense once transmission has been estimated,
+        # so its entry is added to / removed from the combo as the estimate is toggled
+        idx = self.cmbExportFormat.findText(EXPORT_TRANSMISSION_WEIGHTING)
+        if available and idx == -1:
+            self.cmbExportFormat.addItem(EXPORT_TRANSMISSION_WEIGHTING)
+            new_idx = self.cmbExportFormat.findText(EXPORT_TRANSMISSION_WEIGHTING)
+            self.cmbExportFormat.setItemData(new_idx, _TRANSMISSION_WEIGHTING_TOOLTIP, QtCore.Qt.ToolTipRole)
+        elif not available and idx != -1:
+            self.cmbExportFormat.removeItem(idx)
 
-    def set_on_output_reference_ws_clicked(self, slot):
-        self.toRefWs.clicked.connect(slot)
+    def set_on_export_clicked(self, slot):
+        self.btnExport.clicked.connect(slot)
 
     def set_on_show_transmission_toggled(self, slot):
         self.chkTransmission.toggled.connect(slot)
@@ -573,10 +603,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.btnOrient.setEnabled(enabled)
 
     def set_outputs_enabled(self, enabled):
-        self.toSscanss.setEnabled(enabled)
-        self.toEuler.setEnabled(enabled)
-        self.toMatrix.setEnabled(enabled)
-        self.toRefWs.setEnabled(enabled)
+        self.btnExport.setEnabled(enabled)
 
     def _read_checkbox_column_states(self, col):
         checked = []

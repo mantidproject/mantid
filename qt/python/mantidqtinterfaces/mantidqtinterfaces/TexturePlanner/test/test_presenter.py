@@ -32,6 +32,7 @@ def _make_view():
     view.is_custom_instrument.return_value = False
     view.get_custom_instrument_name.return_value = ""
     view.get_grouping_file.return_value = ""
+    view.get_export_format.return_value = "Sscanss2 Angles"
     return view
 
 
@@ -800,49 +801,36 @@ class TestTexturePlannerPresenter_SelectionAndDeletion(unittest.TestCase):
 @patch(file_path + ".TexturePlannerSettingsPresenter")
 @patch(file_path + ".TexturePlannerSettingsView")
 class TestTexturePlannerPresenter_Exports(unittest.TestCase):
-    def test_to_sscanss_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
+    def _export_with_format(self, fmt):
         model = _make_model()
         view = _make_view()
         view.get_save_dir.return_value = "/out"
         view.get_save_filename.return_value = "name"
+        view.get_export_format.return_value = fmt
         presenter = TexturePlannerPresenter(model, view)
 
-        presenter.to_sscanss()
+        presenter.on_export_clicked()
+        return model
 
-        model.exporter.output_as_sscanss.assert_called_with("/out", "name")
+    def test_export_sscanss_format_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
+        model = self._export_with_format("Sscanss2 Angles")
+        model.exporter.output_as_sscanss.assert_called_once_with("/out", "name")
 
-    def test_to_euler_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
-        model = _make_model()
-        view = _make_view()
-        view.get_save_dir.return_value = "/out"
-        view.get_save_filename.return_value = "name"
-        presenter = TexturePlannerPresenter(model, view)
+    def test_export_euler_format_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
+        model = self._export_with_format("Euler Orientation File")
+        model.exporter.output_as_euler.assert_called_once_with("/out", "name")
 
-        presenter.to_euler()
+    def test_export_matrix_format_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
+        model = self._export_with_format("Matrix Orientation File")
+        model.exporter.output_as_matrix.assert_called_once_with("/out", "name")
 
-        model.exporter.output_as_euler.assert_called_with("/out", "name")
+    def test_export_reference_workspace_format_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
+        model = self._export_with_format("Reference Workspace")
+        model.exporter.output_as_reference_workspace.assert_called_once_with("/out", "name")
 
-    def test_to_matrix_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
-        model = _make_model()
-        view = _make_view()
-        view.get_save_dir.return_value = "/out"
-        view.get_save_filename.return_value = "name"
-        presenter = TexturePlannerPresenter(model, view)
-
-        presenter.to_matrix()
-
-        model.exporter.output_as_matrix.assert_called_with("/out", "name")
-
-    def test_to_reference_workspace_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
-        model = _make_model()
-        view = _make_view()
-        view.get_save_dir.return_value = "/out"
-        view.get_save_filename.return_value = "name"
-        presenter = TexturePlannerPresenter(model, view)
-
-        presenter.to_reference_workspace()
-
-        model.exporter.output_as_reference_workspace.assert_called_with("/out", "name")
+    def test_export_transmission_weighting_format_delegates_to_exporter(self, mock_settings_view, mock_settings_presenter):
+        model = self._export_with_format("Transmission Weighting")
+        model.exporter.output_transmission_weighting.assert_called_once_with("/out", "name")
 
 
 @patch(file_path + ".TexturePlannerSettingsPresenter")
@@ -864,6 +852,8 @@ class TestTexturePlannerPresenter_TransmissionAndShape(unittest.TestCase):
         presenter.update_plots.assert_called_with()
         presenter.update_custom_shape_finder_enabled.assert_called_with()
         presenter.update_set_gauge_vol_enabled.assert_called_with()
+        # turning the estimate on makes the transmission weighting export available
+        view.set_transmission_weighting_available.assert_called_with(True)
 
     def test_set_initial_shape_pushes_dimensions_and_refreshes(self, mock_settings_view, mock_settings_presenter):
         model = _make_model()

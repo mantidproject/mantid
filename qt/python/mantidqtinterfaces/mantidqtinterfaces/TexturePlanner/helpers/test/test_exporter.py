@@ -20,10 +20,11 @@ WS_REFERENCE = "__texture_planning_reference_ws"
 COPY_KWARGS = dict(CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
 
-def _make_orientation(R=None, include=True):
+def _make_orientation(R=None, include=True, transmission=None):
     orient = MagicMock()
     orient.R = R if R is not None else Rotation.identity()
     orient.include = include
+    orient.transmission = transmission
     return orient
 
 
@@ -181,6 +182,104 @@ class TestOrientationExporter_OutputAsEuler(unittest.TestCase):
         content, _ = self._run(model)
 
         self.assertEqual(len(content.splitlines()), 2 * 2)
+
+
+@patch(file_path + ".logger")
+class TestOrientationExporter_OutputTransmissionWeighting(unittest.TestCase):
+    def _run(self, model, filename="out"):
+        with tempfile.TemporaryDirectory() as tmp:
+            exp = OrientationExporter(model)
+            exp.output_transmission_weighting(tmp, filename)
+            save_file = os.path.join(tmp, filename + "_transmission_weighting.txt")
+            content = None
+            if os.path.exists(save_file):
+                with open(save_file) as f:
+                    content = f.read()
+            return content, save_file
+
+    def test_writes_one_row_per_included_orientation(self, mock_logger):
+        orientations = {
+            0: _make_orientation(transmission=np.array([0.5, 0.8])),
+            1: _make_orientation(transmission=np.array([0.4, 0.9])),
+            2: _make_orientation(transmission=np.array([0.2, 0.6])),
+        }
+        model = _make_model(orientations=orientations)
+
+        content, _ = self._run(model)
+
+        self.assertEqual(len(content.splitlines()), 3)
+
+    def test_normalises_per_orientation_minima_against_the_largest(self, mock_logger):
+        # per-orientation minima: 0.5, 0.4, 0.2 -> largest is 0.5 -> weights 0.5/min
+        orientations = {
+            0: _make_orientation(transmission=np.array([0.5, 0.8])),
+            1: _make_orientation(transmission=np.array([0.4, 0.9])),
+            2: _make_orientation(transmission=np.array([0.2, 0.6])),
+        }
+        model = _make_model(orientations=orientations)
+
+        content, _ = self._run(model)
+
+        weights = [float(line) for line in content.splitlines()]
+        np.testing.assert_allclose(weights, [0.5 / 0.5, 0.5 / 0.4, 0.5 / 0.2])
+
+    def test_least_absorbing_orientation_has_weight_one(self, mock_logger):
+        orientations = {
+            0: _make_orientation(transmission=np.array([0.4])),
+            1: _make_orientation(transmission=np.array([0.7])),  # least absorbing
+        }
+        model = _make_model(orientations=orientations)
+
+        content, _ = self._run(model)
+
+        weights = [float(line) for line in content.splitlines()]
+        self.assertEqual(min(weights), 1.0)
+        self.assertTrue(all(w >= 1.0 for w in weights))
+
+    def test_excludes_orientations_with_include_false(self, mock_logger):
+        orientations = {
+            0: _make_orientation(transmission=np.array([0.5]), include=True),
+            1: _make_orientation(transmission=np.array([0.1]), include=False),
+        }
+        model = _make_model(orientations=orientations)
+
+        content, _ = self._run(model)
+
+        # only the single included orientation contributes -> one row, normalised to itself
+        self.assertEqual(content.splitlines(), ["1.0"])
+
+    def test_skips_and_warns_when_transmission_missing(self, mock_logger):
+        orientations = {
+            0: _make_orientation(transmission=np.array([0.5])),
+            1: _make_orientation(transmission=None),
+        }
+        model = _make_model(orientations=orientations)
+
+        content, _ = self._run(model)
+
+        self.assertIsNone(content)
+        mock_logger.warning.assert_called_once()
+        mock_logger.notice.assert_not_called()
+
+    def test_skips_and_warns_when_an_orientation_has_zero_transmission(self, mock_logger):
+        orientations = {
+            0: _make_orientation(transmission=np.array([0.5, 0.8])),
+            1: _make_orientation(transmission=np.array([0.0, 0.0])),  # outside gauge volume
+        }
+        model = _make_model(orientations=orientations)
+
+        content, _ = self._run(model)
+
+        self.assertIsNone(content)
+        mock_logger.warning.assert_called_once()
+
+    def test_logs_notice_with_save_file_on_success(self, mock_logger):
+        model = _make_model(orientations={0: _make_orientation(transmission=np.array([0.5]))})
+
+        _, save_file = self._run(model)
+
+        mock_logger.notice.assert_called_once()
+        self.assertIn(save_file, mock_logger.notice.call_args.args[0])
 
 
 @patch(file_path + ".ADS")

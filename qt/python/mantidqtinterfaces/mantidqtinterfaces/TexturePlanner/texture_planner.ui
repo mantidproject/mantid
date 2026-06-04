@@ -1352,33 +1352,32 @@
            <item>
         <layout class="QHBoxLayout" name="outputButtons">
          <item>
-          <widget class="QPushButton" name="toSscanss">
+          <widget class="QLabel" name="lblExportFormat">
            <property name="text">
-            <string>Output As Sscanss2 Angles</string>
+            <string>Export:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="toEuler">
-           <property name="text">
-            <string>Output As Euler Orientation File</string>
-           </property>
-          </widget>
+          <widget class="QComboBox" name="cmbExportFormat"/>
          </item>
          <item>
-          <widget class="QPushButton" name="toMatrix">
-           <property name="text">
-            <string>Output As Matrix Orientation File</string>
+          <spacer name="exportSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
-          </widget>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="toRefWs">
+          <widget class="QPushButton" name="btnExport">
            <property name="text">
-            <string>Save Reference Workspace</string>
-           </property>
-           <property name="toolTip">
-            <string>Save the sample (shape, position, initial orientation and material) as a NeXus reference workspace compatible with the EngDiff "Load Reference Workspace" option.</string>
+            <string>Export</string>
            </property>
           </widget>
          </item>

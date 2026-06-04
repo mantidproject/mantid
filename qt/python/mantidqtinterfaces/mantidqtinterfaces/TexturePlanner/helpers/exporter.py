@@ -70,6 +70,40 @@ class OrientationExporter:
             f.writelines(lines)
         logger.notice(f"Orientation data written to '{save_file}' as Euler Angles with Scheme ({axes}) and Senses ({','.join(senses)})")
 
+    def output_transmission_weighting(self, save_dir, filename):
+        """Write one transmission-weighting value per included orientation.
+
+        For each included orientation we take the smallest transmission factor it produced, then
+        normalise those per-orientation minima against the largest value across all orientations,
+        so the least strongly absorbing orientation is 1.0 and the more absorbing ones are > 1.0
+        (i.e. they would need proportionally longer counting). Requires the transmission factors to
+        have been estimated (Estimate Transmission Values).
+        """
+        included = list(self._included())
+        per_orientation_min = []
+        for orientation in included:
+            transmission = orientation.transmission
+            if transmission is None or len(transmission) == 0:
+                logger.warning(
+                    "Transmission weighting export skipped: transmission values have not been estimated for all included orientations"
+                )
+                return
+            per_orientation_min.append(float(np.min(transmission)))
+        if not per_orientation_min:
+            logger.warning("Transmission weighting export skipped: no orientations are included")
+            return
+        if min(per_orientation_min) <= 0:
+            logger.warning(
+                "Transmission weighting export skipped: at least one included orientation has zero "
+                "transmission (sample likely outside the gauge volume)"
+            )
+            return
+        global_max = max(per_orientation_min)
+        save_file = os.path.join(save_dir, filename + "_transmission_weighting.txt")
+        with open(save_file, "w") as f:
+            f.writelines(f"{global_max / per_min}\n" for per_min in per_orientation_min)
+        logger.notice(f"Transmission weighting written to '{save_file}'")
+
     def output_as_reference_workspace(self, save_dir, filename):
         ref_wsname = self._model.workspaces.WS_REFERENCE
         try:
