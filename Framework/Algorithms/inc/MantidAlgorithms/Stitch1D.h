@@ -63,7 +63,7 @@ private:
   /// Get the rebin parameters
   std::vector<double> getRebinParams(Mantid::API::MatrixWorkspace_const_sptr &lhsWS,
                                      Mantid::API::MatrixWorkspace_const_sptr &rhsWS, const bool scaleRHS) const;
-  /// Perform rebin and record special values that are masked to zero
+  /// Perform rebin and record special values that are zeroed
   Mantid::API::MatrixWorkspace_sptr rebin(Mantid::API::MatrixWorkspace_sptr &input, const std::vector<double> &params,
                                           SpecialValueIndexes &specialValues);
   /// Perform integration
