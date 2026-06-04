@@ -142,6 +142,8 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
 
       if (m_inputWSMatrix.empty()) { // no group workspaces
         // A column of matrix workspaces will be stitched
+        if (!isDefault("OutputWorkspaceSuffixes"))
+          issues["OutputWorkspaceSuffixes"] = "OutputWorkspaceSuffixes can only be used with group workspaces";
         RunCombinationHelper combHelper;
         combHelper.setReferenceProperties(column.front());
         for (const auto &ws : column) {
@@ -191,12 +193,6 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
           expectedRange << m_inputWSMatrix.front().size() + 1;
           issues["ScaleFactorFromPeriod"] = "Period index out of range, must be smaller than " + expectedRange.str();
         }
-      }
-
-      if (m_inputWSMatrix.size() == 1) {
-        m_outputWorkspaceSuffixes = this->getProperty("OutputWorkspaceSuffixes");
-        if (!m_outputWorkspaceSuffixes.empty())
-          issues["OutputWorkspaceSuffixes"] = "OutputWorkspaceSuffixes can only be used with group workspaces";
       }
 
       m_startOverlaps = this->getProperty("StartOverlaps");
