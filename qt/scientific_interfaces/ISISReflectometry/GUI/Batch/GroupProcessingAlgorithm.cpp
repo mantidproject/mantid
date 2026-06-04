@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "GroupProcessingAlgorithm.h"
 
+#include <optional>
 #include <utility>
 
 #include "../../Reduction/Batch.h"
@@ -15,8 +16,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IAlgorithmRuntimeProps.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing {
@@ -32,6 +35,43 @@ std::string removePrefix(std::string const &value, std::string const &prefix) {
     return value;
 
   return value.substr(prefix.size());
+}
+
+std::optional<std::string> suffixForWorkspaceGroupMember(std::string const &memberName, std::string const &groupName) {
+  auto const prefix = groupName + "_";
+  if (memberName.size() <= prefix.size() || memberName.substr(0, prefix.size()) != prefix)
+    return std::nullopt;
+
+  return memberName.substr(prefix.size());
+}
+
+std::vector<std::string> suffixesFromFirstInputWorkspaceGroup(Group const &group) {
+  auto const &ads = AnalysisDataService::Instance();
+  for (auto const &row : group.rows()) {
+    if (!row)
+      continue;
+
+    auto const groupWSName = row->reducedWorkspaceNames().iVsQ();
+    if (!ads.doesExist(groupWSName))
+      continue;
+
+    auto const workspaceGroup = ads.retrieveWS<WorkspaceGroup>(groupWSName);
+    if (!workspaceGroup)
+      continue;
+
+    auto suffixes = std::vector<std::string>();
+    for (auto const &memberName : workspaceGroup->getNames()) {
+      auto const suffix = suffixForWorkspaceGroupMember(memberName, groupWSName);
+      if (!suffix)
+        return {};
+
+      suffixes.emplace_back(suffix.value());
+    }
+
+    return suffixes;
+  }
+
+  return {};
 }
 
 void updateWorkspaceProperties(AlgorithmRuntimeProps &properties, Group const &group) {
@@ -57,11 +97,15 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties, Group const &g
     outputName += separator + name;
   }
   AlgorithmProperties::update("OutputWorkspace", outputName, properties);
+
+  auto const suffixes = suffixesFromFirstInputWorkspaceGroup(group);
+  if (!suffixes.empty())
+    AlgorithmProperties::update("OutputWorkspaceSuffixes", suffixes, properties);
 }
 
-void updateGroupFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &group) {
+void updateGroupFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item) {
   auto const stitched = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
-  group.setOutputNames(std::vector<std::string>{stitched});
+  item.setOutputNames(std::vector<std::string>{stitched});
 }
 
 void updateParamsFromResolution(AlgorithmRuntimeProps &properties, std::optional<double> const &resolution) {

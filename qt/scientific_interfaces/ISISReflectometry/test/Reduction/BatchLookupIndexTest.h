@@ -47,7 +47,9 @@ public:
   void test_update_lookup_index_single_row_no_match() {
     constexpr auto angle = 0.1;
     auto row = ModelCreationHelper::makeRow(angle);
-    auto model = Batch(ModelCreationHelper::makeEmptyExperiment(), m_instrument, m_runsTable, m_slicing);
+
+    const auto experiment = ModelCreationHelper::makeEmptyExperiment();
+    auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     TS_ASSERT_EQUALS(row.lookupIndex(), std::nullopt);
     model.updateLookupIndex(row);
     TS_ASSERT(!row.lookupIndex().has_value());

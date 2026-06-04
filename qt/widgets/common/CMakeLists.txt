@@ -43,6 +43,7 @@ set(SRC_FILES
     src/HelpWindow.cpp
     src/Hint.cpp
     src/HintingLineEdit.cpp
+    src/IConfiguredAlgorithm.cpp
     # todo: move this to the instrument view library when the slice viewer library is removed
     src/IFunctionModel.cpp
     src/ImageInfoModel.cpp
