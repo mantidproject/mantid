@@ -11,6 +11,13 @@ from mantidqt.interfacemanager import InterfaceManager
 from mantidqtinterfaces.TexturePlanner.settings.settings_view import TexturePlannerSettingsView
 from mantidqtinterfaces.TexturePlanner.settings.settings_presenter import TexturePlannerSettingsPresenter
 from mantidqtinterfaces.TexturePlanner.helpers.instrument import CUSTOM_GROUP
+from mantidqtinterfaces.TexturePlanner.view import (
+    EXPORT_SSCANSS,
+    EXPORT_EULER,
+    EXPORT_MATRIX,
+    EXPORT_REFERENCE_WS,
+    EXPORT_TRANSMISSION_WEIGHTING,
+)
 
 
 class TexturePlannerPresenter(AlgorithmObserver):
@@ -67,10 +74,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.view.set_on_select_all_clicked(self.select_all)
         self.view.set_on_deselect_all_clicked(self.deselect_all)
         self.view.set_on_delete_selected_clicked(self.delete_selected)
-        self.view.set_on_output_sscanss_clicked(self.to_sscanss)
-        self.view.set_on_output_euler_clicked(self.to_euler)
-        self.view.set_on_output_matrix_clicked(self.to_matrix)
-        self.view.set_on_output_reference_ws_clicked(self.to_reference_workspace)
+        self.view.set_on_export_clicked(self.on_export_clicked)
         self.view.set_on_save_dir_changed(self.enable_outputs)
         self.view.set_on_save_file_changed(self.enable_outputs)
         self.view.set_on_show_transmission_toggled(self.set_show_transmission)
@@ -406,22 +410,24 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.update_table()
         self.update_plots()
 
-    def to_sscanss(self):
-        self.model.exporter.output_as_sscanss(self.view.get_save_dir(), self.view.get_save_filename())
-
-    def to_euler(self):
-        self.model.exporter.output_as_euler(self.view.get_save_dir(), self.view.get_save_filename())
-
-    def to_matrix(self):
-        self.model.exporter.output_as_matrix(self.view.get_save_dir(), self.view.get_save_filename())
-
-    def to_reference_workspace(self):
-        self.model.exporter.output_as_reference_workspace(self.view.get_save_dir(), self.view.get_save_filename())
+    def on_export_clicked(self):
+        exporter = self.model.exporter
+        handlers = {
+            EXPORT_SSCANSS: exporter.output_as_sscanss,
+            EXPORT_EULER: exporter.output_as_euler,
+            EXPORT_MATRIX: exporter.output_as_matrix,
+            EXPORT_REFERENCE_WS: exporter.output_as_reference_workspace,
+            EXPORT_TRANSMISSION_WEIGHTING: exporter.output_transmission_weighting,
+        }
+        handlers[self.view.get_export_format()](self.view.get_save_dir(), self.view.get_save_filename())
 
     def set_show_transmission(self):
         self.update_custom_shape_finder_enabled()
         self.update_set_gauge_vol_enabled()
-        self.model.set_plot_transmission(self.view.get_show_transmission())
+        show_transmission = self.view.get_show_transmission()
+        self.model.set_plot_transmission(show_transmission)
+        # the transmission weighting export is only offered once transmission has been estimated
+        self.view.set_transmission_weighting_available(show_transmission)
         self.model.update_all_projected_data()
         self.update_plots()
 
