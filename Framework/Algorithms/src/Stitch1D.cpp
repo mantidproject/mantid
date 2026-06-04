@@ -313,10 +313,11 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS, 
   return result;
 }
 
-/** Runs the Rebin Algorithm as a child and replaces special values
+/** Runs the Rebin Algorithm as a child and masks special values.
  @param input :: The input workspace
  @param params :: a vector<double> containing rebinning parameters
- @param specialValues :: A struct to hold the indexes of special values so they can be replaced post processing
+ @param specialValues :: Stores the rebinned Y and E indexes that contained
+ NaN or infinite values before they were masked to zero for processing.
  @return A shared pointer to the resulting MatrixWorkspace
  */
 MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input, const std::vector<double> &params,
@@ -616,8 +617,10 @@ void Stitch1D::exec() {
     AnalysisDataService::Instance().addOrReplace(scalingWsName, singleWS);
   }
 }
-/** Put special values back.
- * @param ws : MatrixWorkspace to resinsert special values into.
+/** Put all special values back into the output workspace.
+ * @param ws :: MatrixWorkspace to reinsert special values into.
+ * @param lhsSpecialValues :: Special value indexes recorded from the LHS workspace.
+ * @param rhsSpecialValues :: Special value indexes recorded from the RHS workspace.
  */
 void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws, const SpecialValueIndexes &lhsSpecialValues,
                                      const SpecialValueIndexes &rhsSpecialValues) {
@@ -651,6 +654,13 @@ void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws, const Speci
   PARALLEL_CHECK_INTERRUPT_REGION
 }
 
+/** Put special values back only where the output has no valid data coverage.
+ * @param ws :: MatrixWorkspace to reinsert special values into.
+ * @param lhsSpecialValues :: Special value indexes recorded from the LHS workspace.
+ * @param rhsSpecialValues :: Special value indexes recorded from the RHS workspace.
+ * @param a1 :: Index of the bin containing the start of the overlap region.
+ * @param a2 :: Index of the bin containing the end of the overlap region.
+ */
 void Stitch1D::reinsertSpecialValuesWithoutValidData(const MatrixWorkspace_sptr &ws,
                                                      const SpecialValueIndexes &lhsSpecialValues,
                                                      const SpecialValueIndexes &rhsSpecialValues, const int a1,
@@ -698,6 +708,15 @@ void Stitch1D::reinsertSpecialValuesWithoutValidData(const MatrixWorkspace_sptr 
   PARALLEL_CHECK_INTERRUPT_REGION
 }
 
+/** Use valid overlap values where only one input workspace has an invalid signal value.
+ * @param overlap :: Workspace containing the calculated overlap values to update.
+ * @param lhs :: LHS workspace masked to contain only overlap-region values.
+ * @param rhs :: RHS workspace masked to contain only overlap-region values.
+ * @param lhsSpecialValues :: Special value indexes recorded from the LHS workspace.
+ * @param rhsSpecialValues :: Special value indexes recorded from the RHS workspace.
+ * @param a1 :: Index of the bin containing the start of the overlap region.
+ * @param a2 :: Index of the bin containing the end of the overlap region.
+ */
 void Stitch1D::useValidOverlapData(const MatrixWorkspace_sptr &overlap, const MatrixWorkspace_sptr &lhs,
                                    const MatrixWorkspace_sptr &rhs, const SpecialValueIndexes &lhsSpecialValues,
                                    const SpecialValueIndexes &rhsSpecialValues, const int a1, const int a2) {
