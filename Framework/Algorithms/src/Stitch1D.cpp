@@ -313,7 +313,7 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS, 
   return result;
 }
 
-/** Runs the Rebin Algorithm as a child and masks special values.
+/** Runs the Rebin Algorithm as a child and replaces special values.
  @param input :: The input workspace
  @param params :: a vector<double> containing rebinning parameters
  @param specialValues :: Stores the rebinned Y and E indexes that contained
