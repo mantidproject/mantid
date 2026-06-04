@@ -1,0 +1,1 @@
+- Added a ``UseValidDataOnly`` option to :ref:`Stitch1DMany <algm-Stitch1DMany>` and enabled it for ISIS Reflectometry GUI stitching so invalid signal values do not overwrite valid data from other workspaces in stitched overlap regions.
