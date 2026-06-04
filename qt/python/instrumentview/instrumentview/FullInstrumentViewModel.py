@@ -243,6 +243,12 @@ class FullInstrumentViewModel:
 
     def update_integration_range(self, entire_range: bool = False) -> None:
         workspace_indices = self._workspace_indices[self.is_pickable]
+        if len(workspace_indices) == 0:
+            self._counts[self.is_pickable] = 0
+            self._counts_limits = (0, 0)
+            self.full_counts_limits = self._counts_limits
+            return
+
         new_detector_counts = np.array(
             self._integration_workspace.getIntegratedCountsForWorkspaceIndices(
                 workspace_indices,
@@ -267,6 +273,11 @@ class FullInstrumentViewModel:
 
     def _calculate_and_set_full_integration_range(self, valid_indices: np.ndarray) -> None:
         workspace_indices = self._workspace_indices[valid_indices]
+        if len(workspace_indices) == 0:
+            self._integration_limits = (0, 0)
+            self.full_integration_limits = self._integration_limits
+            return
+
         if self._integration_workspace.isRaggedWorkspace():
             first_last = np.array([self._integration_workspace.readX(int(i))[[0, -1]] for i in workspace_indices])
             self._integration_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))

@@ -899,10 +899,12 @@ class FullInstrumentViewWindow(QMainWindow):
     @_skip_if_closing
     def set_plotter_scalar_bar_range(self, clim: tuple[int, int], label: str, display_title: str | None = None) -> None:
         """Set the range of the colours displayed, i.e. the legend"""
+        if clim[0] >= clim[1]:
+            return
         self.main_plotter.update_scalar_bar_range(clim, label)
+
         if display_title is None:
             return
-
         self.main_plotter.scalar_bars[self._presenter._counts_label].SetTitle(display_title)
 
     def closeEvent(self, QCloseEvent: QEvent) -> None:
