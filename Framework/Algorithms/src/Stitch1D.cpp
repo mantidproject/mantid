@@ -40,6 +40,27 @@ using MinMaxTuple = boost::tuple<double, double>;
 MinMaxTuple calculateXIntersection(MatrixWorkspace_const_sptr &lhsWS, MatrixWorkspace_const_sptr &rhsWS) {
   return MinMaxTuple(rhsWS->x(0).front(), lhsWS->x(0).back());
 }
+
+bool hasSpecialValue(const Mantid::Algorithms::Stitch1D::SpecialTypeIndexes &specialIndexes, const size_t spectrumIndex,
+                     const size_t binIndex) {
+  const auto &indexes = specialIndexes[spectrumIndex];
+  return std::binary_search(indexes.cbegin(), indexes.cend(), binIndex);
+}
+
+bool hasInvalidY(const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &specialValues, const size_t spectrumIndex,
+                 const size_t binIndex) {
+  return hasSpecialValue(specialValues.nanY, spectrumIndex, binIndex) ||
+         hasSpecialValue(specialValues.infY, spectrumIndex, binIndex);
+}
+
+double specialYValue(const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &lhsSpecialValues,
+                     const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &rhsSpecialValues,
+                     const size_t spectrumIndex, const size_t binIndex) {
+  if (hasSpecialValue(lhsSpecialValues.infY, spectrumIndex, binIndex) ||
+      hasSpecialValue(rhsSpecialValues.infY, spectrumIndex, binIndex))
+    return std::numeric_limits<double>::infinity();
+  return std::numeric_limits<double>::quiet_NaN();
+}
 } // namespace
 
 namespace Mantid::Algorithms {
@@ -146,6 +167,9 @@ void Stitch1D::init() {
                   "Provided value for the scale factor.");
   declareProperty(std::make_unique<PropertyWithValue<double>>("OutScaleFactor", Mantid::EMPTY_DBL(), Direction::Output),
                   "The actual used value for the scaling factor.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("UseValidDataOnly", false, Direction::Input),
+                  "If true, invalid signal values do not contribute to overlap bins where the other workspace has "
+                  "valid signal values.");
 }
 
 /** Validate the algorithm's properties.
@@ -294,7 +318,8 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS, 
  @param params :: a vector<double> containing rebinning parameters
  @return A shared pointer to the resulting MatrixWorkspace
  */
-MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input, const std::vector<double> &params) {
+MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input, const std::vector<double> &params,
+                                     SpecialValueIndexes &specialValues) {
   auto rebin = this->createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", input);
   rebin->setProperty("Params", params);
@@ -311,10 +336,10 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input, const std::vec
   PARALLEL_FOR_IF(Kernel::threadSafe(*outWS))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERRUPT_REGION
-    std::vector<size_t> &nanEIndexes = m_nanEIndexes[i];
-    std::vector<size_t> &nanYIndexes = m_nanYIndexes[i];
-    std::vector<size_t> &infEIndexes = m_infEIndexes[i];
-    std::vector<size_t> &infYIndexes = m_infYIndexes[i];
+    std::vector<size_t> &nanEIndexes = specialValues.nanE[i];
+    std::vector<size_t> &nanYIndexes = specialValues.nanY[i];
+    std::vector<size_t> &infEIndexes = specialValues.infE[i];
+    std::vector<size_t> &infYIndexes = specialValues.infY[i];
     // Copy over the data
     auto &sourceY = outWS->mutableY(i);
     auto &sourceE = outWS->mutableE(i);
@@ -467,10 +492,9 @@ void Stitch1D::exec() {
   const MinMaxTuple intesectionXRegion = calculateXIntersection(lhsWS, rhsWS);
 
   const size_t histogramCount = rhsWS->getNumberHistograms();
-  m_nanYIndexes.resize(histogramCount);
-  m_infYIndexes.resize(histogramCount);
-  m_nanEIndexes.resize(histogramCount);
-  m_infEIndexes.resize(histogramCount);
+  m_lhsSpecialValues.resize(histogramCount);
+  m_rhsSpecialValues.resize(histogramCount);
+  m_useValidDataOnly = this->getProperty("UseValidDataOnly");
 
   const double intersectionMin = intesectionXRegion.get<0>();
   const double intersectionMax = intesectionXRegion.get<1>();
@@ -510,8 +534,8 @@ void Stitch1D::exec() {
                                        endOverlap % xMax);
       throw std::runtime_error(message);
     }
-    lhs = rebin(lhs, params);
-    rhs = rebin(rhs, params);
+    lhs = rebin(lhs, params, m_lhsSpecialValues);
+    rhs = rebin(rhs, params, m_rhsSpecialValues);
   }
 
   m_scaleFactor = this->getProperty("ManualScaleFactor");
@@ -559,8 +583,13 @@ void Stitch1D::exec() {
       MatrixWorkspace_sptr sum = overlap1 + overlap2;
       overlapave = sum * 0.5;
     }
+    if (m_useValidDataOnly)
+      useValidOverlapData(overlapave, overlap1, overlap2, m_lhsSpecialValues, m_rhsSpecialValues, a1, a2);
     result = lhs + overlapave + rhs;
-    reinsertSpecialValues(result);
+    if (m_useValidDataOnly)
+      reinsertSpecialValuesWithoutValidData(result, m_lhsSpecialValues, m_rhsSpecialValues, a1, a2);
+    else
+      reinsertSpecialValues(result, m_lhsSpecialValues, m_rhsSpecialValues);
   } else { // The input workspaces are point data ... join & sort
     result = conjoinXAxis(lhs, rhs);
     if (!result)
@@ -589,28 +618,112 @@ void Stitch1D::exec() {
 /** Put special values back.
  * @param ws : MatrixWorkspace to resinsert special values into.
  */
-void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws) {
+void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws, const SpecialValueIndexes &lhsSpecialValues,
+                                     const SpecialValueIndexes &rhsSpecialValues) {
   auto histogramCount = static_cast<int>(ws->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERRUPT_REGION
-    // Copy over the data
     auto &sourceY = ws->mutableY(i);
+    auto &sourceE = ws->mutableE(i);
 
-    for (auto j : m_nanYIndexes[i]) {
+    for (auto j : lhsSpecialValues.nanY[i])
       sourceY[j] = std::numeric_limits<double>::quiet_NaN();
-    }
-
-    for (auto j : m_infYIndexes[i]) {
-      sourceY[j] = std::numeric_limits<double>::infinity();
-    }
-
-    for (auto j : m_nanEIndexes[i]) {
+    for (auto j : rhsSpecialValues.nanY[i])
       sourceY[j] = std::numeric_limits<double>::quiet_NaN();
+    for (auto j : lhsSpecialValues.nanE[i])
+      sourceE[j] = std::numeric_limits<double>::quiet_NaN();
+    for (auto j : rhsSpecialValues.nanE[i])
+      sourceE[j] = std::numeric_limits<double>::quiet_NaN();
+
+    for (auto j : lhsSpecialValues.infY[i])
+      sourceY[j] = std::numeric_limits<double>::infinity();
+    for (auto j : rhsSpecialValues.infY[i])
+      sourceY[j] = std::numeric_limits<double>::infinity();
+    for (auto j : lhsSpecialValues.infE[i])
+      sourceE[j] = std::numeric_limits<double>::infinity();
+    for (auto j : rhsSpecialValues.infE[i])
+      sourceE[j] = std::numeric_limits<double>::infinity();
+
+    PARALLEL_END_INTERRUPT_REGION
+  }
+  PARALLEL_CHECK_INTERRUPT_REGION
+}
+
+void Stitch1D::reinsertSpecialValuesWithoutValidData(const MatrixWorkspace_sptr &ws,
+                                                     const SpecialValueIndexes &lhsSpecialValues,
+                                                     const SpecialValueIndexes &rhsSpecialValues, const int a1,
+                                                     const int a2) {
+  auto histogramCount = static_cast<int>(ws->getNumberHistograms());
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
+  for (int i = 0; i < histogramCount; ++i) {
+    PARALLEL_START_INTERRUPT_REGION
+    auto &sourceY = ws->mutableY(i);
+    auto &sourceE = ws->mutableE(i);
+
+    for (auto j : lhsSpecialValues.nanY[i])
+      if (static_cast<int>(j) <= a1)
+        sourceY[j] = std::numeric_limits<double>::quiet_NaN();
+    for (auto j : lhsSpecialValues.infY[i])
+      if (static_cast<int>(j) <= a1)
+        sourceY[j] = std::numeric_limits<double>::infinity();
+    for (auto j : rhsSpecialValues.nanY[i])
+      if (static_cast<int>(j) >= a2)
+        sourceY[j] = std::numeric_limits<double>::quiet_NaN();
+    for (auto j : rhsSpecialValues.infY[i])
+      if (static_cast<int>(j) >= a2)
+        sourceY[j] = std::numeric_limits<double>::infinity();
+
+    for (auto j : lhsSpecialValues.nanE[i])
+      if (static_cast<int>(j) <= a1)
+        sourceE[j] = std::numeric_limits<double>::quiet_NaN();
+    for (auto j : lhsSpecialValues.infE[i])
+      if (static_cast<int>(j) <= a1)
+        sourceE[j] = std::numeric_limits<double>::infinity();
+    for (auto j : rhsSpecialValues.nanE[i])
+      if (static_cast<int>(j) >= a2)
+        sourceE[j] = std::numeric_limits<double>::quiet_NaN();
+    for (auto j : rhsSpecialValues.infE[i])
+      if (static_cast<int>(j) >= a2)
+        sourceE[j] = std::numeric_limits<double>::infinity();
+
+    for (size_t j = static_cast<size_t>(a1 + 1); j < static_cast<size_t>(a2); ++j) {
+      if (hasInvalidY(lhsSpecialValues, i, j) && hasInvalidY(rhsSpecialValues, i, j))
+        sourceY[j] = specialYValue(lhsSpecialValues, rhsSpecialValues, i, j);
     }
 
-    for (auto j : m_infEIndexes[i]) {
-      sourceY[j] = std::numeric_limits<double>::infinity();
+    PARALLEL_END_INTERRUPT_REGION
+  }
+  PARALLEL_CHECK_INTERRUPT_REGION
+}
+
+void Stitch1D::useValidOverlapData(const MatrixWorkspace_sptr &overlap, const MatrixWorkspace_sptr &lhs,
+                                   const MatrixWorkspace_sptr &rhs, const SpecialValueIndexes &lhsSpecialValues,
+                                   const SpecialValueIndexes &rhsSpecialValues, const int a1, const int a2) {
+  auto histogramCount = static_cast<int>(overlap->getNumberHistograms());
+  PARALLEL_FOR_IF(Kernel::threadSafe(*overlap, *lhs, *rhs))
+  for (int i = 0; i < histogramCount; ++i) {
+    PARALLEL_START_INTERRUPT_REGION
+    auto &overlapY = overlap->mutableY(i);
+    auto &overlapE = overlap->mutableE(i);
+    const auto &lhsY = lhs->y(i);
+    const auto &lhsE = lhs->e(i);
+    const auto &rhsY = rhs->y(i);
+    const auto &rhsE = rhs->e(i);
+
+    for (size_t j = static_cast<size_t>(a1 + 1); j < static_cast<size_t>(a2); ++j) {
+      const bool lhsInvalid = hasInvalidY(lhsSpecialValues, i, j);
+      const bool rhsInvalid = hasInvalidY(rhsSpecialValues, i, j);
+      if (lhsInvalid && !rhsInvalid) {
+        overlapY[j] = rhsY[j];
+        overlapE[j] = rhsE[j];
+      } else if (!lhsInvalid && rhsInvalid) {
+        overlapY[j] = lhsY[j];
+        overlapE[j] = lhsE[j];
+      } else if (lhsInvalid && rhsInvalid) {
+        overlapY[j] = specialYValue(lhsSpecialValues, rhsSpecialValues, i, j);
+        overlapE[j] = 0.0;
+      }
     }
 
     PARALLEL_END_INTERRUPT_REGION
