@@ -68,6 +68,10 @@ PlotSelectionBehaviour selectionBehaviour(PlotOutputType outputType) {
 
 bool plotOutputTypeSupportsOverplot(PlotOutputType outputType) { return outputType != PlotOutputType::DetectorMap; }
 
+bool plotOutputTypeExcludesPostprocessedGroupOutputs(PlotOutputType outputType) {
+  return outputType == PlotOutputType::Alignment || outputType == PlotOutputType::DetectorMap;
+}
+
 bool plotOutputTypeRequiresWorkspaceGroupsForMultiPlot(PlotOutputType outputType) {
   return outputType == PlotOutputType::SpinAsymmetry;
 }
@@ -443,6 +447,9 @@ std::string QtPlottingView::workspaceName(QModelIndex const &index) const {
 bool QtPlottingView::isSelectableForCurrentPlotOutputType(QModelIndex const &index) const {
   auto const behaviour = selectionBehaviour(selectedPlotOutputType());
   auto const indexItemType = itemType(index);
+  if (isPostprocessedGroupOutputExcludedForCurrentPlotOutputType(index)) {
+    return false;
+  }
   if (!contains(behaviour.selectableItemTypes, indexItemType)) {
     return false;
   }
@@ -456,7 +463,35 @@ bool QtPlottingView::isSelectableForCurrentPlotOutputType(QModelIndex const &ind
 }
 
 bool QtPlottingView::isWorkspaceIncludedForCurrentPlotOutputType(QModelIndex const &index) const {
+  if (isPostprocessedGroupOutputExcludedForCurrentPlotOutputType(index)) {
+    return false;
+  }
   return contains(selectionBehaviour(selectedPlotOutputType()).includedWorkspaceOutputTypes, outputType(index));
+}
+
+bool QtPlottingView::isPostprocessedGroupOutputExcludedForCurrentPlotOutputType(QModelIndex const &index) const {
+  return plotOutputTypeExcludesPostprocessedGroupOutputs(selectedPlotOutputType()) &&
+         isPostprocessedGroupOutputItem(index);
+}
+
+bool QtPlottingView::isPostprocessedGroupOutputItem(QModelIndex const &index) const {
+  auto const indexItemType = itemType(index);
+  if (indexItemType != PlottingWorkspaceTreeItemType::WorkspaceGroup &&
+      indexItemType != PlottingWorkspaceTreeItemType::Workspace) {
+    return false;
+  }
+
+  auto const parentIndex = itemIndex(index).parent();
+  if (!parentIndex.isValid()) {
+    return false;
+  }
+  if (itemType(parentIndex) == PlottingWorkspaceTreeItemType::Group) {
+    return true;
+  }
+
+  auto const grandparentIndex = parentIndex.parent();
+  return grandparentIndex.isValid() && itemType(parentIndex) == PlottingWorkspaceTreeItemType::WorkspaceGroup &&
+         itemType(grandparentIndex) == PlottingWorkspaceTreeItemType::Group;
 }
 
 bool QtPlottingView::handleWorkspaceTreeClick(QMouseEvent const &event) {

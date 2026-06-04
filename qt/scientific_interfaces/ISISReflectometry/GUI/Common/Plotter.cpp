@@ -24,6 +24,8 @@
 #include <QWidget>
 #include <QWindow>
 
+#include <boost/python/extract.hpp>
+
 #include <algorithm>
 #include <functional>
 #include <vector>
@@ -120,23 +122,23 @@ void applyColorfillAxisLabels(MantidQt::Widgets::Common::Python::Object const &f
 
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   try {
-    auto const axes = figure.attr("axes");
-    if (Python::Len(axes) == 0)
-      return;
-
     auto const xLabel = axisLabel(options.xAxis);
     auto const yLabel = axisLabel(options.yAxis);
     auto const zLabel = axisLabel(options.zAxis);
-    auto const mainAxis = Python::Object(axes[0]);
-    if (!xLabel.empty())
-      mainAxis.attr("set_xlabel")(xLabel);
-    if (!yLabel.empty())
-      mainAxis.attr("set_ylabel")(yLabel);
-    for (auto index = 1; index < Python::Len(axes); ++index) {
-      auto const axis = Python::Object(axes[index]);
-      if (!zLabel.empty())
-        axis.attr("set_ylabel")(zLabel);
-    }
+
+    forEachAxis(figure, [&xLabel, &yLabel, &zLabel](Python::Object const &axis) {
+      auto const axisLabel = boost::python::extract<std::string>(axis.attr("get_label")())();
+      if (axisLabel == "<colorbar>") {
+        if (!zLabel.empty())
+          axis.attr("set_ylabel")(zLabel);
+        return;
+      }
+
+      if (!xLabel.empty())
+        axis.attr("set_xlabel")(xLabel);
+      if (!yLabel.empty())
+        axis.attr("set_ylabel")(yLabel);
+    });
   } catch (Python::ErrorAlreadySet &) {
     throw Mantid::PythonInterface::PythonException();
   }

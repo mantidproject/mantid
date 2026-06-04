@@ -55,6 +55,8 @@ private:
   bool allWorkspaceDescendantsIncludedForCurrentPlotOutputType(QModelIndex const &index) const;
   bool isSelectableForCurrentPlotOutputType(QModelIndex const &index) const;
   bool isWorkspaceIncludedForCurrentPlotOutputType(QModelIndex const &index) const;
+  bool isPostprocessedGroupOutputExcludedForCurrentPlotOutputType(QModelIndex const &index) const;
+  bool isPostprocessedGroupOutputItem(QModelIndex const &index) const;
   bool handleWorkspaceTreeClick(QMouseEvent const &event);
   bool isAdditiveSelectionModifier(QMouseEvent const &event) const;
   bool hasSelectedAncestor(QModelIndex const &index) const;

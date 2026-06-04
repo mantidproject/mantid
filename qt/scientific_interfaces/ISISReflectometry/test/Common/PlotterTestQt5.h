@@ -104,6 +104,25 @@ public:
     TS_ASSERT_EQUALS(currentFigureColorbarLabel(), "Intensity");
   }
 
+  void testTiledDetectorMapPlotUsesConfiguredYAxisLabelOnEveryPlotAxis() {
+    closeAllFigures();
+    createWorkspace("ws1");
+    createWorkspace("ws2");
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    plotter.plot({{"ws1", "ws2"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::detectorMapPlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::DetectorMapXAxis::Lambda,
+                      MantidQt::CustomInterfaces::ISISReflectometry::DetectorMapYAxis::Theta,
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Tiled)});
+
+    auto const yAxisLabels = currentFigureYAxisLabelsExcludingColorbars();
+    TS_ASSERT_EQUALS(yAxisLabels.size(), 2);
+    for (auto const &yAxisLabel : yAxisLabels) {
+      TS_ASSERT_EQUALS(yAxisLabel, "Theta");
+    }
+  }
+
   void testTiledPlotKeepsWorkspaceGroupMembersOnSameAxis() {
     closeAllFigures();
     createWorkspaceGroup("alignment_1", {"alignment_1_raw", "alignment_1_calc", "alignment_1_peak"});
@@ -160,6 +179,24 @@ private:
   std::string currentFigureXAxisLabel() { return currentFigureAxisLabel(0, "get_xlabel"); }
 
   std::string currentFigureColorbarLabel() { return currentFigureAxisLabel(1, "get_ylabel"); }
+
+  std::vector<std::string> currentFigureYAxisLabelsExcludingColorbars() {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    MantidQt::Widgets::Common::Python::Object pyplot{
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
+    auto const figure = MantidQt::Widgets::Common::Python::Object(pyplot.attr("gcf")());
+    auto const axes = figure.attr("axes");
+    auto const axesCount = MantidQt::Widgets::Common::Python::Len(axes);
+    auto labels = std::vector<std::string>{};
+    for (auto index = 0; index < axesCount; ++index) {
+      auto const axis = MantidQt::Widgets::Common::Python::Object(axes[index]);
+      auto const axisLabel = boost::python::extract<std::string>(axis.attr("get_label")())();
+      if (axisLabel != "<colorbar>") {
+        labels.emplace_back(boost::python::extract<std::string>(axis.attr("get_ylabel")())());
+      }
+    }
+    return labels;
+  }
 
   std::string currentFigureAxisLabel(int const axisIndex, char const *labelGetter) {
     Mantid::PythonInterface::GlobalInterpreterLock lock;
