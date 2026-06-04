@@ -9,8 +9,8 @@ New Features
 
 Bugfixes
 --------
-- (`#41028 <https://github.com/mantidproject/mantid/pull/41028>`_) Fix a bug in the :ref:`Container Subtraction <container-subtraction>`  and :ref:`Apply Absorbtion corrections <apply_absorp_correct>` tabs of the :ref:`Corrections <interface-inelastic-corrections>` interface where the output name of the corrected workspace when a container with multiple runs is used contains commas.
-- (`#41323 <https://github.com/mantidproject/mantid/pull/41323>`_) In documentation for :ref:`DiffSphere <func-DiffSphere>`, :ref:`EISFDiffSphere <func-EISFDiffSphere>`, :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>` and :ref:`ElasticDiffSphere <func-ElasticDiffSphere>` fix typos in function formula. And code cleanups in :ref:`EISFDiffSphere <func-EISFDiffSphere>`.
+- (`#41028 <https://github.com/mantidproject/mantid/pull/41028>`_) The :ref:`Container Subtraction <container-subtraction>` and :ref:`Apply Absorbtion corrections <apply_absorp_correct>` tabs of the :ref:`Corrections <interface-inelastic-corrections>` interface now create a corrected workspace with an updated naming convention that excludes commas when a container with multiple runs is used.
+- (`#41323 <https://github.com/mantidproject/mantid/pull/41323>`_) The documentation for :ref:`DiffSphere <func-DiffSphere>`, :ref:`EISFDiffSphere <func-EISFDiffSphere>`, :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>` and :ref:`ElasticDiffSphere <func-ElasticDiffSphere>` has been updated to fix transcription errors in the fitting function formulae.
 
 
 Algorithms
