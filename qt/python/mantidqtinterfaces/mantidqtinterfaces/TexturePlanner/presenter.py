@@ -88,6 +88,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.view.set_on_update_instrument_clicked(self.update_instrument_and_group)
         self.update_custom_widgets_visibility()
         self.refresh_update_instrument_enabled()
+        self.update_material_display()
 
     def open_settings(self):
         self.settings_presenter.show()
@@ -331,10 +332,15 @@ class TexturePlannerPresenter(AlgorithmObserver):
     def load_stl(self):
         self.model.workspaces.load_stl(self.view.get_stl_string())
         self.set_initial_shape()
+        self.update_material_display()
 
     def load_xml(self):
         self.model.workspaces.load_xml(self.view.get_xml_string())
         self.set_initial_shape()
+        self.update_material_display()
+
+    def update_material_display(self):
+        self.view.set_current_material(self.model.workspaces.get_material_name())
 
     def open_set_material_dialog(self):
         """Open the standard SetSampleMaterial dialog against the (hidden) raw mesh workspace.
@@ -359,6 +365,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         # the dialog only set the material on WS_MESH_RAW; share it with the other workspaces, then
         # recompute transmission (if shown) and refresh the plots
         self.model.workspaces.propagate_material()
+        self.update_material_display()
         self.on_settings_applied()
 
     def load_orientation_file(self):

@@ -48,15 +48,22 @@ class WorkspaceManager:
     #                    R*init_R baked into the shape and identity goniometer.
     #   WS_MC_OUTPUT     MonteCarloAbsorption output (transmission factors).
     #   WS_TMP           transient name for update_initial_shape's working copy; removed in finally.
+    #   WS_MATERIAL      dedicated holder for the ground-truth sample material. Its shape is never
+    #                    reloaded, so it survives shape changes and lets set_material re-apply the
+    #                    full material (formula + number/mass density) via CopySample rather than a
+    #                    lossy formula-only round-trip through SetSampleMaterial.
     WS_DATA = "__texture_planning_ws"
     WS_UNGROUPED = "__texture_planning_ws_ungrouped"
     WS_MESH_RAW = "__texture_planning_raw_sample_mesh"
     WS_MESH_NEUTRAL = "__texture_planning_neutral_sample_mesh"
+    WS_MATERIAL = "__texture_planning_material"
     WS_REFERENCE = "__texture_planning_reference_ws"
     WS_MC_INPUT = "__mc_ws"
     WS_MC_OUTPUT = "__abs_ws"
     WS_TMP = "__tmp_ws"
     _SHAPE_TMP = "__shape_ws"
+
+    DEFAULT_MATERIAL = "Fe"
 
     def __init__(self, model):
         self._model = model
@@ -69,14 +76,15 @@ class WorkspaceManager:
         # reference for absorption and for rebuilding WS_DATA when initial shape is updated.
         self.updated_mesh_ws = None  # sample with init_R baked in, no translation, identity goniometer
         # Used by the plotter and by the reference-ws export.
+        self.material_ws = None  # ground-truth material holder; never has its shape reloaded
         self.init_R = Rotation.identity()
         self.offset = (0, 0, 0)
         self.gauge_volume_str = None
         # stl_settings
         self.stl_kwargs = {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": "0", "TranslationVector": "0,0,0"}
-        # material + attenuation-point settings; the material is applied here, the
-        # point/unit are read by AbsorptionCalculator
-        self.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing", "material": "Fe"}
+        # attenuation-point settings read by AbsorptionCalculator. The material itself lives on
+        # material_ws (the ground truth), not here.
+        self.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing"}
 
     @property
     def instr(self):
@@ -118,36 +126,56 @@ class WorkspaceManager:
         self.mesh_ws = mesh_ws
         self.updated_mesh_ws = updated_mesh_ws
         self._set_default_shape_on_wss()
+        # ground-truth material holder, seeded with the default. Cloned after the default shape is
+        # set so it owns a shape to hang the material on. set_material copies from here, so the
+        # default is applied to the other wss in the brand-new branch of update_ws.
+        self.material_ws = CloneWorkspace(InputWorkspace=self.mesh_ws, OutputWorkspace=self.WS_MATERIAL)
+        SetSampleMaterial(self.material_ws, self.DEFAULT_MATERIAL)
 
     def _set_default_shape_on_wss(self):
         SetSampleShape(self.ws, get_cube_xml("default_cube", 0.01))
         SetSampleShape(self.mesh_ws, get_cube_xml("default_cube", 0.01))
         SetSampleShape(self.updated_mesh_ws, get_cube_xml("default_cube", 0.01))
 
+    @staticmethod
+    def _copy_material(source, target):
+        # copy only the material (not shape/orientation/etc.), preserving its full definition
+        # including the number/mass density
+        CopySample(
+            InputWorkspace=source,
+            OutputWorkspace=target,
+            CopyName=False,
+            CopyMaterial=True,
+            CopyShape=False,
+            CopyEnvironment=False,
+            CopyLattice=False,
+        )
+
     def set_material(self):
-        SetSampleMaterial(self.ws, self.attenuation_kwargs["material"])
-        SetSampleMaterial(self.mesh_ws, self.attenuation_kwargs["material"])
-        SetSampleMaterial(self.updated_mesh_ws, self.attenuation_kwargs["material"])
+        """Apply the ground-truth material (material_ws) onto the shape workspaces"""
+        targets = [self.ws, self.mesh_ws, self.updated_mesh_ws]
         if self.ungrouped_ws is not None:
-            SetSampleMaterial(self.ungrouped_ws, self.attenuation_kwargs["material"])
+            targets.append(self.ungrouped_ws)
+        for target in targets:
+            self._copy_material(self.material_ws, target)
+
+    def get_material_name(self):
+        """Chemical formula / name of the ground-truth material. Returns "" when no material is set."""
+        try:
+            return self.material_ws.sample().getMaterial().name()
+        except (AttributeError, RuntimeError):
+            return ""
 
     def propagate_material(self):
-        """Copy the material onto the other workspaces after the user has set it on the raw mesh ws
-        via the SetSampleMaterial dialog. All workspaces must share the same sample material; the
-        dialog only writes to WS_MESH_RAW (the source of truth for absorption)."""
+        """Share the material the user just set via the SetSampleMaterial dialog (which only writes to
+        WS_MESH_RAW) with the other workspaces. The raw mesh ws becomes the new ground truth, so it is
+        captured onto material_ws as well, ensuring later shape reloads re-apply this exact material."""
+        self._copy_material(self.mesh_ws, self.material_ws)
         targets = [self.ws, self.updated_mesh_ws]
         if self.ungrouped_ws is not None:
             targets.append(self.ungrouped_ws)
         for target in targets:
-            CopySample(
-                InputWorkspace=self.mesh_ws,
-                OutputWorkspace=target,
-                CopyName=False,
-                CopyMaterial=True,
-                CopyShape=False,
-                CopyEnvironment=False,
-                CopyLattice=False,
-            )
+            self._copy_material(self.mesh_ws, target)
 
     def load_stl(self, stl_file):
         LoadSampleShape(InputWorkspace=self.ws, Filename=stl_file, OutputWorkspace=self.ws, **self.stl_kwargs)

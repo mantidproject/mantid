@@ -189,6 +189,10 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def signal_material_set(self):
         self.sig_material_set.emit()
 
+    def set_current_material(self, material):
+        # material is the chemical formula / name currently set on the sample, or "" if unset
+        self.lblCurrentMaterialValue.setText(material or "Not set")
+
     def set_on_load_orient_clicked(self, slot):
         self.btnOrient.clicked.connect(slot)
 

@@ -17,6 +17,7 @@ from mantidqtinterfaces.TexturePlanner.helpers.workspace_manager import Workspac
 file_path = "mantidqtinterfaces.TexturePlanner.helpers.workspace_manager"
 
 COPY_KWARGS = dict(CopyName=False, CopyEnvironment=False, CopyLattice=False)
+COPY_MATERIAL_KWARGS = dict(CopyName=False, CopyMaterial=True, CopyShape=False, CopyEnvironment=False, CopyLattice=False)
 
 
 def _make_manager(instr="ENGINX"):
@@ -35,10 +36,11 @@ class TestWorkspaceManager_Init(unittest.TestCase):
         self.assertIsNone(wm.ungrouped_ws)
         self.assertIsNone(wm.mesh_ws)
         self.assertIsNone(wm.updated_mesh_ws)
+        self.assertIsNone(wm.material_ws)
         self.assertIsNone(wm.gauge_volume_str)
         self.assertEqual(wm.offset, (0, 0, 0))
         np.testing.assert_array_equal(wm.init_R.as_matrix(), np.eye(3))
-        self.assertEqual(wm.attenuation_kwargs, {"point": 1.5, "unit": "dSpacing", "material": "Fe"})
+        self.assertEqual(wm.attenuation_kwargs, {"point": 1.5, "unit": "dSpacing"})
         self.assertEqual(
             wm.stl_kwargs,
             {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": "0", "TranslationVector": "0,0,0"},
@@ -119,11 +121,12 @@ class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
         mock_define_gv.assert_called_once_with(wm.ws, "<xml/>")
 
 
+@patch(file_path + ".SetSampleMaterial")
 @patch(file_path + ".SetSampleShape")
 @patch(file_path + ".CloneWorkspace")
 @patch(file_path + ".CreateSimulationWorkspace")
 class TestWorkspaceManager_InitWss(unittest.TestCase):
-    def test_creates_sim_workspace_with_expected_args(self, mock_create_sim, mock_clone, mock_set_shape):
+    def test_creates_sim_workspace_with_expected_args(self, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
         wm = _make_manager("ENGINX")
         sim_ws = MagicMock()
         sim_ws.getNumberHistograms.return_value = 0
@@ -139,7 +142,7 @@ class TestWorkspaceManager_InitWss(unittest.TestCase):
         )
         self.assertIs(wm.ws, sim_ws)
 
-    def test_fills_y_with_ones_for_each_histogram(self, mock_create_sim, mock_clone, mock_set_shape):
+    def test_fills_y_with_ones_for_each_histogram(self, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
         wm = _make_manager("ENGINX")
         sim_ws = MagicMock()
         sim_ws.getNumberHistograms.return_value = 3
@@ -154,12 +157,12 @@ class TestWorkspaceManager_InitWss(unittest.TestCase):
         for c in sim_ws.setY.call_args_list:
             np.testing.assert_array_equal(c.args[1], np.ones(4))
 
-    def test_clones_mesh_and_neutral_from_sim_ws(self, mock_create_sim, mock_clone, mock_set_shape):
+    def test_clones_mesh_neutral_and_material_from_sim_ws(self, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
         wm = _make_manager("ENGINX")
         sim_ws = MagicMock()
         sim_ws.getNumberHistograms.return_value = 0
         mock_create_sim.return_value = sim_ws
-        mock_clone.side_effect = ["mesh", "neutral"]
+        mock_clone.side_effect = ["mesh", "neutral", "material"]
 
         wm._init_wss()
 
@@ -168,17 +171,31 @@ class TestWorkspaceManager_InitWss(unittest.TestCase):
             [
                 call(InputWorkspace=sim_ws, OutputWorkspace=WorkspaceManager.WS_MESH_RAW),
                 call(InputWorkspace=sim_ws, OutputWorkspace=WorkspaceManager.WS_MESH_NEUTRAL),
+                # material holder is cloned from the (cube-shaped) mesh ws so it owns a shape
+                call(InputWorkspace="mesh", OutputWorkspace=WorkspaceManager.WS_MATERIAL),
             ],
         )
         self.assertEqual(wm.mesh_ws, "mesh")
         self.assertEqual(wm.updated_mesh_ws, "neutral")
+        self.assertEqual(wm.material_ws, "material")
 
-    def test_sets_default_cube_shape_on_all_three_wss(self, mock_create_sim, mock_clone, mock_set_shape):
+    def test_seeds_material_holder_with_default(self, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
         wm = _make_manager("ENGINX")
         sim_ws = MagicMock()
         sim_ws.getNumberHistograms.return_value = 0
         mock_create_sim.return_value = sim_ws
-        mock_clone.side_effect = ["mesh", "neutral"]
+        mock_clone.side_effect = ["mesh", "neutral", "material"]
+
+        wm._init_wss()
+
+        mock_set_mat.assert_called_once_with("material", WorkspaceManager.DEFAULT_MATERIAL)
+
+    def test_sets_default_cube_shape_on_all_three_wss(self, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
+        wm = _make_manager("ENGINX")
+        sim_ws = MagicMock()
+        sim_ws.getNumberHistograms.return_value = 0
+        mock_create_sim.return_value = sim_ws
+        mock_clone.side_effect = ["mesh", "neutral", "material"]
 
         wm._init_wss()
 
@@ -271,72 +288,49 @@ class TestWorkspaceManager_CreateNewWsWithCopiedSample(unittest.TestCase):
         self.assertEqual(result, "new_ws")
 
 
-@patch(file_path + ".SetSampleMaterial")
+@patch(file_path + ".CopySample")
 class TestWorkspaceManager_SetMaterial(unittest.TestCase):
-    def test_applies_material_to_ws_mesh_and_updated_mesh(self, mock_set_mat):
+    def test_copies_material_holder_onto_ws_mesh_and_updated_mesh(self, mock_copy):
         wm = _make_manager()
         wm.ws = "ws"
         wm.mesh_ws = "mesh"
         wm.updated_mesh_ws = "neutral"
+        wm.material_ws = "material"
         wm.ungrouped_ws = None
 
         wm.set_material()
 
         self.assertEqual(
-            mock_set_mat.call_args_list,
+            mock_copy.call_args_list,
             [
-                call("ws", "Fe"),
-                call("mesh", "Fe"),
-                call("neutral", "Fe"),
+                call(InputWorkspace="material", OutputWorkspace="ws", **COPY_MATERIAL_KWARGS),
+                call(InputWorkspace="material", OutputWorkspace="mesh", **COPY_MATERIAL_KWARGS),
+                call(InputWorkspace="material", OutputWorkspace="neutral", **COPY_MATERIAL_KWARGS),
             ],
         )
 
-    def test_also_applies_to_ungrouped_when_present(self, mock_set_mat):
+    def test_also_applies_to_ungrouped_when_present(self, mock_copy):
         wm = _make_manager()
         wm.ws = "ws"
         wm.mesh_ws = "mesh"
         wm.updated_mesh_ws = "neutral"
+        wm.material_ws = "material"
         wm.ungrouped_ws = "ungrouped"
 
         wm.set_material()
 
-        self.assertEqual(
-            mock_set_mat.call_args_list,
-            [
-                call("ws", "Fe"),
-                call("mesh", "Fe"),
-                call("neutral", "Fe"),
-                call("ungrouped", "Fe"),
-            ],
-        )
-
-    def test_uses_current_material_kwarg(self, mock_set_mat):
-        wm = _make_manager()
-        wm.ws = "ws"
-        wm.mesh_ws = "mesh"
-        wm.updated_mesh_ws = "neutral"
-        wm.ungrouped_ws = None
-        wm.attenuation_kwargs["material"] = "Cu"
-
-        wm.set_material()
-
-        self.assertEqual(
-            mock_set_mat.call_args_list,
-            [
-                call("ws", "Cu"),
-                call("mesh", "Cu"),
-                call("neutral", "Cu"),
-            ],
-        )
+        targets = [c.kwargs["OutputWorkspace"] for c in mock_copy.call_args_list]
+        self.assertEqual(targets, ["ws", "mesh", "neutral", "ungrouped"])
 
 
 @patch(file_path + ".CopySample")
 class TestWorkspaceManager_PropagateMaterial(unittest.TestCase):
-    def test_copies_material_from_mesh_to_other_wss(self, mock_copy):
+    def test_captures_ground_truth_then_copies_to_other_wss(self, mock_copy):
         wm = _make_manager()
         wm.ws = "ws"
         wm.mesh_ws = "mesh"
         wm.updated_mesh_ws = "neutral"
+        wm.material_ws = "material"
         wm.ungrouped_ws = "ungrouped"
 
         wm.propagate_material()
@@ -344,33 +338,11 @@ class TestWorkspaceManager_PropagateMaterial(unittest.TestCase):
         self.assertEqual(
             mock_copy.call_args_list,
             [
-                call(
-                    InputWorkspace="mesh",
-                    OutputWorkspace="ws",
-                    CopyName=False,
-                    CopyMaterial=True,
-                    CopyShape=False,
-                    CopyEnvironment=False,
-                    CopyLattice=False,
-                ),
-                call(
-                    InputWorkspace="mesh",
-                    OutputWorkspace="neutral",
-                    CopyName=False,
-                    CopyMaterial=True,
-                    CopyShape=False,
-                    CopyEnvironment=False,
-                    CopyLattice=False,
-                ),
-                call(
-                    InputWorkspace="mesh",
-                    OutputWorkspace="ungrouped",
-                    CopyName=False,
-                    CopyMaterial=True,
-                    CopyShape=False,
-                    CopyEnvironment=False,
-                    CopyLattice=False,
-                ),
+                # the just-set material on the raw mesh ws becomes the new ground truth
+                call(InputWorkspace="mesh", OutputWorkspace="material", **COPY_MATERIAL_KWARGS),
+                call(InputWorkspace="mesh", OutputWorkspace="ws", **COPY_MATERIAL_KWARGS),
+                call(InputWorkspace="mesh", OutputWorkspace="neutral", **COPY_MATERIAL_KWARGS),
+                call(InputWorkspace="mesh", OutputWorkspace="ungrouped", **COPY_MATERIAL_KWARGS),
             ],
         )
 
@@ -379,12 +351,28 @@ class TestWorkspaceManager_PropagateMaterial(unittest.TestCase):
         wm.ws = "ws"
         wm.mesh_ws = "mesh"
         wm.updated_mesh_ws = "neutral"
+        wm.material_ws = "material"
         wm.ungrouped_ws = None
 
         wm.propagate_material()
 
         targets = [c.kwargs["OutputWorkspace"] for c in mock_copy.call_args_list]
-        self.assertEqual(targets, ["ws", "neutral"])
+        self.assertEqual(targets, ["material", "ws", "neutral"])
+
+
+class TestWorkspaceManager_GetMaterialName(unittest.TestCase):
+    def test_returns_name_from_material_ws_sample_material(self):
+        wm = _make_manager()
+        wm.material_ws = MagicMock()
+        wm.material_ws.sample.return_value.getMaterial.return_value.name.return_value = "Al2O3"
+
+        self.assertEqual(wm.get_material_name(), "Al2O3")
+
+    def test_returns_empty_string_when_unavailable(self):
+        wm = _make_manager()
+        wm.material_ws = None
+
+        self.assertEqual(wm.get_material_name(), "")
 
 
 @patch(file_path + ".SetSampleMaterial")
@@ -411,17 +399,13 @@ class TestWorkspaceManager_LoadStl(unittest.TestCase):
         wm.mesh_ws = "mesh"
         wm.updated_mesh_ws = "neutral"
         wm.ungrouped_ws = None
+        wm.set_material = MagicMock()
 
         wm.load_stl("file.stl")
 
-        self.assertEqual(
-            mock_set_mat.call_args_list,
-            [
-                call("ws", "Fe"),
-                call("mesh", "Fe"),
-                call("neutral", "Fe"),
-            ],
-        )
+        # loading a shape wipes the material off the shape object; set_material re-applies the
+        # ground-truth material (preserving its full definition, e.g. number/mass density)
+        wm.set_material.assert_called_once_with()
 
 
 @patch(file_path + ".SetSampleMaterial")
@@ -458,20 +442,16 @@ class TestWorkspaceManager_LoadXml(unittest.TestCase):
         wm.mesh_ws = "mesh"
         wm.updated_mesh_ws = "neutral"
         wm.ungrouped_ws = None
+        wm.set_material = MagicMock()
         fname = self._write_tmp_xml("<cube/>")
         try:
             wm.load_xml(fname)
         finally:
             os.unlink(fname)
 
-        self.assertEqual(
-            mock_set_mat.call_args_list,
-            [
-                call("ws", "Fe"),
-                call("mesh", "Fe"),
-                call("neutral", "Fe"),
-            ],
-        )
+        # loading a shape wipes the material off the shape object; set_material re-applies the
+        # ground-truth material (preserving its full definition, e.g. number/mass density)
+        wm.set_material.assert_called_once_with()
 
 
 @patch(file_path + ".TranslateSampleShape")
