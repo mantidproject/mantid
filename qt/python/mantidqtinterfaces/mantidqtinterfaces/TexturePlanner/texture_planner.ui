@@ -93,6 +93,37 @@
            </property>
            <layout class="QVBoxLayout" name="laySetMaterial">
             <item>
+             <layout class="QHBoxLayout" name="layCurrentMaterial">
+              <item>
+               <widget class="QLabel" name="lblCurrentMaterial">
+                <property name="text">
+                 <string>Current Material:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lblCurrentMaterialValue">
+                <property name="text">
+                 <string>Not set</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="spacerCurrentMaterial">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
              <widget class="QPushButton" name="btnSetMaterial">
               <property name="text">
                <string>Update Material</string>

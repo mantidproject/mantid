@@ -711,6 +711,27 @@ class TestTexturePlannerPresenter_SetMaterial(unittest.TestCase):
         model.workspaces.propagate_material.assert_called_once_with()
         presenter.on_settings_applied.assert_called_once_with()
 
+    def test_on_material_set_refreshes_material_display(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        model.workspaces.get_material_name.return_value = "Cu"
+        presenter = TexturePlannerPresenter(model, view)
+        presenter.on_settings_applied = MagicMock()
+
+        presenter.on_material_set()
+
+        view.set_current_material.assert_called_with("Cu")
+
+    def test_update_material_display_reads_from_workspaces(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+        model.workspaces.get_material_name.return_value = "Al2O3"
+        presenter = TexturePlannerPresenter(model, view)
+
+        presenter.update_material_display()
+
+        view.set_current_material.assert_called_with("Al2O3")
+
 
 @patch(file_path + ".TexturePlannerSettingsPresenter")
 @patch(file_path + ".TexturePlannerSettingsView")
