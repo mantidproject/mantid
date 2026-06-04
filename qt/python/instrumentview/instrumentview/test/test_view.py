@@ -71,6 +71,16 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view.set_hover_pick_mode_enabled(False)
         self.assertTrue(self._view._select_bank_tube.isEnabled())
 
+    def test_set_hover_pick_mode_enabled_disables_export_spectra(self):
+        self._view._export_workspace_button.setEnabled(True)
+        self._view.set_hover_pick_mode_enabled(True)
+        self.assertFalse(self._view._export_workspace_button.isEnabled())
+
+    def test_set_hover_pick_mode_disabled_enables_export_spectra(self):
+        self._view.set_hover_pick_mode_enabled(True)
+        self._view.set_hover_pick_mode_enabled(False)
+        self.assertTrue(self._view._export_workspace_button.isEnabled())
+
     def test_update_scalar_range(self):
         self._view.set_plotter_scalar_bar_range((0, 100), "label")
         self._view.main_plotter.update_scalar_bar_range.assert_has_calls([mock.call((0, 100), "label")])
