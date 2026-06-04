@@ -57,6 +57,10 @@ from mantidqtinterfaces.TexturePlanner.view import (
 )
 from mantidqtinterfaces.TexturePlanner.presenter import TexturePlannerPresenter
 
+# render off-screen so the test run never pops up real windows; must be set before the
+# QApplication is constructed. setdefault leaves an externally-chosen platform untouched.
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
 app = QApplication.instance() or QApplication(sys.argv)
 
 PRESENTER = "mantidqtinterfaces.TexturePlanner.presenter"
@@ -116,8 +120,6 @@ class _FunctionalTestBase(unittest.TestCase):
         self.presenter = TexturePlannerPresenter(self.model, self.view)
         self.view.presenter = self.presenter
 
-        # showing the window gives widgets real visibility/geometry so QTest mouse clicks
-        # hit-test correctly; processEvents flushes the queued show events.
         self.view.show()
         QApplication.processEvents()
         self.addCleanup(self.view.close)
