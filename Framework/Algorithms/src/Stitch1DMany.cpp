@@ -33,6 +33,10 @@ void Stitch1DMany::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "Stitched workspace.");
 
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("OutputWorkspaceSuffixes", Direction::Input),
+                  "Optional suffixes to use for child output workspaces when stitching workspace groups. "
+                  "The default is to use 1-based numeric suffixes.");
+
   declareProperty(
       std::make_unique<ArrayProperty<double>>("Params", std::make_shared<RebinParamsValidator>(true), Direction::Input),
       "Rebinning Parameters, see Rebin algorithm for format.");
@@ -157,6 +161,16 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
       } else if (m_inputWSMatrix.size() != inputWorkspacesStr.size()) { // not only group workspaces
         issues["InputWorkspaces"] = "All input workspaces must be groups";
       } else { // only group workspaces
+        m_outputWorkspaceSuffixes = this->getProperty("OutputWorkspaceSuffixes");
+        const std::unordered_set<std::string> suffixSet(m_outputWorkspaceSuffixes.cbegin(),
+                                                        m_outputWorkspaceSuffixes.cend());
+        if (!m_outputWorkspaceSuffixes.empty() && m_outputWorkspaceSuffixes.size() != m_inputWSMatrix.front().size()) {
+          issues["OutputWorkspaceSuffixes"] =
+              "Expected " + std::to_string(m_inputWSMatrix.front().size()) + " suffix(es)";
+        } else if (suffixSet.size() != m_outputWorkspaceSuffixes.size()) {
+          issues["OutputWorkspaceSuffixes"] = "Suffixes must be unique";
+        }
+
         // Each row of matrix workspaces will be stitched
         for (size_t spec = 1; spec < m_inputWSMatrix.front().size(); ++spec) {
           for (const auto &ws : m_inputWSMatrix) {
@@ -181,6 +195,12 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
           expectedRange << m_inputWSMatrix.front().size() + 1;
           issues["ScaleFactorFromPeriod"] = "Period index out of range, must be smaller than " + expectedRange.str();
         }
+      }
+
+      if (m_inputWSMatrix.size() == 1) {
+        m_outputWorkspaceSuffixes = this->getProperty("OutputWorkspaceSuffixes");
+        if (!m_outputWorkspaceSuffixes.empty())
+          issues["OutputWorkspaceSuffixes"] = "OutputWorkspaceSuffixes can only be used with group workspaces";
       }
 
       m_startOverlaps = this->getProperty("StartOverlaps");
@@ -390,6 +410,9 @@ void Stitch1DMany::doStitch1DMany(const size_t period, const bool useManualScale
  * @param periodIndex :: The period index for the child workspace
  */
 std::string Stitch1DMany::createChildWorkspaceName(const std::string &groupName, const size_t periodIndex) {
+  if (!m_outputWorkspaceSuffixes.empty())
+    return groupName + "_" + m_outputWorkspaceSuffixes[periodIndex];
+
   return groupName + "_" + std::to_string(periodIndex + 1);
 }
 

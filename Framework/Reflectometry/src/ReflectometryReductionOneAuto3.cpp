@@ -875,21 +875,17 @@ void ReflectometryReductionOneAuto3::setOutputPropertiesFromChild(const Algorith
  * @param runNumber : the run number of the group (our own value is passed in
  * because this is not a property a workspace group has)
  * @param taskOrder : task execution order to pass to ReflectometryReductionOne
- * @param workspaceNames : output workspace names to use for the group members
  * @param reduced : if true, recalculate IvsQ based on previous IvsLam outputs;
  * IvsLam outputs must be passed as the members
  * @returns : the grouped output workspace names
  */
-ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReductionOneAuto3::processGroupMembers(
-    const Algorithm::WorkspaceVector &members, std::string const &runNumber, std::vector<std::string> const &taskOrder,
-    const std::vector<WorkspaceNames> &workspaceNames, const bool reduced) {
+ReflectometryReductionOneAuto3::processGroupMembersOutput
+ReflectometryReductionOneAuto3::processGroupMembers(const Algorithm::WorkspaceVector &members,
+                                                    std::string const &runNumber,
+                                                    std::vector<std::string> const &taskOrder, const bool reduced) {
   // Compile a list of output workspace names for each group member
   // No need to compile list if the output names are already provided, e.g. from a previous run of RRO
-  bool populateOutputNames = workspaceNames.empty();
-
   std::vector<WorkspaceNames> allOutputNames;
-  if (!populateOutputNames)
-    allOutputNames = workspaceNames;
   // Process each group member
   std::vector<RROOutputs> allRROOutputs;
   for (size_t i = 0; i < members.size(); i++) {
@@ -898,9 +894,7 @@ ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReduction
     if (!matrixWs) {
       throw std::runtime_error("Group Member is not a MatrixWorkspace");
     }
-    if (populateOutputNames)
-      allOutputNames.emplace_back(getOutputNamesForGroupMember(matrixWs->getName(), runNumber, i));
-
+    allOutputNames.emplace_back(getOutputNamesForGroupMember(matrixWs->getName(), runNumber, i));
     // If data has already been reduced, as workspace is summed we need to change processing instructions.
     // Also, do not perform flood corrections as these will have been performed upon initial reduction
     if (reduced) {
@@ -964,8 +958,7 @@ bool ReflectometryReductionOneAuto3::processGroups() {
     const auto corrected = applyPolarizationCorrection(groupIvsLam, groupedOutputNames.iVsLam);
     taskOrder = getTaskExecutionOrder(true, summingInQ);
     // finish the processing using RRO
-    processGroupsOutput =
-        processGroupMembers(corrected->getAllItems(), runNumber, taskOrder, processGroupsOutput.outputNames, true);
+    processGroupsOutput = processGroupMembers(corrected->getAllItems(), runNumber, taskOrder, true);
   }
   postReductionProcessingGroups(processGroupsOutput.rroOutputs, processGroupsOutput.outputNames, groupedOutputNames,
                                 !polarizationAnalysisOn);
@@ -982,12 +975,21 @@ auto ReflectometryReductionOneAuto3::getOutputNamesForGroupMember(const std::str
                                                                   const size_t wsGroupNumber) -> WorkspaceNames {
   const auto output = getOutputWorkspaceNames();
   std::string informativeName = "TOF" + runNumber + "_";
+  std::string outputIvsLamName = output.iVsLam + "_";
 
   WorkspaceNames outputNames;
   const auto inputNameSize = inputName.size();
   const auto informativeNameSize = informativeName.size();
-  if (inputNameSize >= informativeNameSize && equal(informativeName.begin(), informativeName.end(), inputName.begin(),
-                                                    inputName.begin() + informativeNameSize)) {
+  const auto outputIvsLamNameSize = outputIvsLamName.size();
+  if (inputNameSize > outputIvsLamNameSize && equal(outputIvsLamName.begin(), outputIvsLamName.end(), inputName.begin(),
+                                                    inputName.begin() + outputIvsLamNameSize)) {
+    auto spinState = inputName.substr(outputIvsLamName.length());
+    outputNames.iVsQ = output.iVsQ + "_" + spinState;
+    outputNames.iVsQBinned = output.iVsQBinned + "_" + spinState;
+    outputNames.iVsLam = inputName;
+  } else if (inputNameSize >= informativeNameSize &&
+             equal(informativeName.begin(), informativeName.end(), inputName.begin(),
+                   inputName.begin() + informativeNameSize)) {
     auto informativeTest = inputName.substr(informativeName.length());
     outputNames.iVsQ = output.iVsQ + "_" + informativeTest;
     outputNames.iVsQBinned = output.iVsQBinned + "_" + informativeTest;
