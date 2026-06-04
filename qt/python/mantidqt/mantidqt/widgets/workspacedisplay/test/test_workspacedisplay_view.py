@@ -16,10 +16,9 @@ from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDi
 
 from qtpy.QtWidgets import QApplication
 
-# Import sip after Qt. Modern versions of PyQt ship an internal sip module
-# located at PyQt5X.sip. Importing PyQt first sets a shim sip module to point
-# to the correct place
-import sip
+# Modern PyQt ships sip as a private module (PyQt5.sip / PyQt6.sip); qtpy.sip
+# re-exports the correct one for the active binding.
+from qtpy import sip
 
 
 def create_test_workspace(workspace_name, ragged=False):
