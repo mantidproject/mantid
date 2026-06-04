@@ -268,7 +268,7 @@ class FullInstrumentViewModel:
     def _calculate_and_set_full_integration_range(self, valid_indices: np.ndarray) -> None:
         workspace_indices = self._workspace_indices[valid_indices]
         if self._integration_workspace.isRaggedWorkspace():
-            first_last = np.array([self._integration_workspace.readX(i)[[0, -1]] for i in workspace_indices])
+            first_last = np.array([self._integration_workspace.readX(int(i))[[0, -1]] for i in workspace_indices])
             self._integration_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
 
         elif self._integration_workspace.isCommonBins():

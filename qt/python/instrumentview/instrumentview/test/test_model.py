@@ -415,6 +415,19 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._integration_workspace = mock_workspace
         self.assertEqual(model.integration_limits, (1, 50))
 
+    def test_integration_limits_ragged_workspace_calls_read_x_with_python_int(self):
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.isRaggedWorkspace.return_value = True
+
+        def read_x_rejecting_numpy_int(i):
+            if isinstance(i, np.integer):
+                raise TypeError(f"No to-python (by-value) converter found for C++ type: {type(i)}")
+            return np.array([0.0, 1.0, 2.0])
+
+        mock_workspace.readX.side_effect = read_x_rejecting_numpy_int
+        model._integration_workspace = mock_workspace
+        model._calculate_and_set_full_integration_range(model._is_valid)
+
     def test_integration_limits_on_non_ragged_workspace(self):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = False
