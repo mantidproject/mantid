@@ -9,6 +9,7 @@ from unittest import mock
 from mantid.api import WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget, QTableWidgetItem
 
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model import EAGroupingTabModel
@@ -138,7 +139,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 4)
         self.assertEqual(len(self.model.groups), 4)
         analyse_checkbox = self.view.get_table_item(0, 4)
-        self.assertEqual(analyse_checkbox.checkState(), 0)
+        self.assertEqual(analyse_checkbox.checkState(), Qt.CheckState.Unchecked)
 
         self.presenter.plot_default_case()
         self.assertCountEqual(self.context.group_context.selected_groups, ["9999; Detector 3", "9998; Detector 3"])
@@ -164,7 +165,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 4)
         self.assertEqual(len(self.model.groups), 4)
         analyse_checkbox = self.view.get_table_item(0, 4)
-        self.assertEqual(analyse_checkbox.checkState(), 0)
+        self.assertEqual(analyse_checkbox.checkState(), Qt.CheckState.Unchecked)
 
         self.presenter.plot_default_case()
         self.assertCountEqual(self.context.group_context.selected_groups, ["9999; Detector 1", "9998; Detector 1"])
@@ -188,7 +189,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 3)
         self.assertEqual(len(self.model.groups), 3)
         analyse_checkbox = self.view.get_table_item(0, 3)
-        self.assertEqual(analyse_checkbox.checkState(), 0)
+        self.assertEqual(analyse_checkbox.checkState(), Qt.CheckState.Unchecked)
 
         self.presenter.plot_default_case()
         self.assertCountEqual(self.context.group_context.selected_groups, ["9999; Detector 4", "9998; Detector 4"])
@@ -206,7 +207,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 1)
         self.assertEqual(len(self.model.groups), 1)
         analyse_checkbox = self.view.get_table_item(0, 1)
-        self.assertEqual(analyse_checkbox.checkState(), 0)
+        self.assertEqual(analyse_checkbox.checkState(), Qt.CheckState.Unchecked)
 
         self.presenter.plot_default_case()
         self.assertCountEqual(self.context.group_context.selected_groups, ["9998; Detector 2"])

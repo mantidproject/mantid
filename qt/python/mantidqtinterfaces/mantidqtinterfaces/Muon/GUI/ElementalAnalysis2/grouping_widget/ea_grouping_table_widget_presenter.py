@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
+from qtpy.QtCore import Qt
 from mantidqtinterfaces.Muon.GUI.Common.utilities import run_string_utils as run_utils
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from mantidqt.utils.observer_pattern import GenericObservable
@@ -164,7 +165,9 @@ class EAGroupingTablePresenter(object):
         self._view.enable_updates()
 
     def to_analyse_data_checkbox_changed(self, state, group_name):
-        group_added = True if state == 2 else False
+        # checkState() returns a Qt.CheckState enum; under PyQt6 this no longer
+        # compares equal to the raw int 2, so compare against the enum member.
+        group_added = state == Qt.CheckState.Checked
         if group_added:
             self._model.add_group_to_analysis(group_name)
         else:
