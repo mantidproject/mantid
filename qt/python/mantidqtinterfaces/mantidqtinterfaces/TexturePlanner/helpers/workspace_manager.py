@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from uuid import uuid4
+
 import numpy as np
 from scipy.spatial.transform import Rotation
 
@@ -63,10 +65,33 @@ class WorkspaceManager:
     WS_TMP = "__tmp_ws"
     _SHAPE_TMP = "__shape_ws"
 
+    # The class constants above are base names. Each instance shadows them with per-instance copies
+    # carrying a unique suffix (see __init__) so that several planner windows open at once don't
+    # collide on the ADS. Listed here once so __init__ can suffix them and cleanup() can remove them.
+    _OWNED_WS_NAME_ATTRS = (
+        "WS_DATA",
+        "WS_UNGROUPED",
+        "WS_MESH_RAW",
+        "WS_MESH_NEUTRAL",
+        "WS_MATERIAL",
+        "WS_REFERENCE",
+        "WS_MC_INPUT",
+        "WS_MC_OUTPUT",
+        "WS_TMP",
+        "_SHAPE_TMP",
+    )
+
     DEFAULT_MATERIAL = "Fe"
 
     def __init__(self, model):
         self._model = model
+        # Several planner windows can be open simultaneously, so suffix every workspace name with a
+        # token unique to this instance. All consumers read these names off the instance (e.g.
+        # self.workspaces.WS_MC_INPUT, wsm.wsname), so shadowing the class constants here is
+        # transparent to them - no consumer needs to know about the suffix.
+        self._suffix = f"_{uuid4().hex[:8]}"
+        for attr in self._OWNED_WS_NAME_ATTRS:
+            setattr(self, attr, getattr(self, attr) + self._suffix)
         self.wsname = self.WS_DATA
         self.ungrouped_wsname = self.WS_UNGROUPED
         self.ws = None  # holds the translated shape with init_R
@@ -85,6 +110,15 @@ class WorkspaceManager:
         # attenuation-point settings read by AbsorptionCalculator. The material itself lives on
         # material_ws (the ground truth), not here.
         self.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing"}
+
+    def cleanup(self):
+        """Remove every workspace this instance owns from the ADS. Called when the planner window
+        closes so the (hidden) workspaces don't accumulate across open/close cycles now that their
+        names are unique per instance."""
+        for attr in self._OWNED_WS_NAME_ATTRS:
+            wsname = getattr(self, attr)
+            if ADS.doesExist(wsname):
+                ADS.remove(wsname)
 
     @property
     def instr(self):

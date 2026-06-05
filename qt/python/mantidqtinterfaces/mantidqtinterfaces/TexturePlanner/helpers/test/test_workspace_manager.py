@@ -30,8 +30,8 @@ class TestWorkspaceManager_Init(unittest.TestCase):
     def test_default_attributes(self):
         wm = _make_manager("ENGINX")
 
-        self.assertEqual(wm.wsname, WorkspaceManager.WS_DATA)
-        self.assertEqual(wm.ungrouped_wsname, WorkspaceManager.WS_UNGROUPED)
+        self.assertEqual(wm.wsname, wm.WS_DATA)
+        self.assertEqual(wm.ungrouped_wsname, wm.WS_UNGROUPED)
         self.assertIsNone(wm.ws)
         self.assertIsNone(wm.ungrouped_ws)
         self.assertIsNone(wm.mesh_ws)
@@ -50,6 +50,20 @@ class TestWorkspaceManager_Init(unittest.TestCase):
         wm = _make_manager("IMAT")
         self.assertEqual(wm.instr, "IMAT")
 
+    def test_workspace_names_are_suffixed_from_class_base_names(self):
+        # each owned name shadows its class constant with an instance-unique suffix so several
+        # planner windows can be open at once without colliding on the ADS
+        wm = _make_manager()
+        for attr in WorkspaceManager._OWNED_WS_NAME_ATTRS:
+            base = getattr(WorkspaceManager, attr)
+            self.assertTrue(getattr(wm, attr).startswith(base + "_"))
+
+    def test_two_managers_get_distinct_workspace_names(self):
+        wm1 = _make_manager()
+        wm2 = _make_manager()
+        for attr in WorkspaceManager._OWNED_WS_NAME_ATTRS:
+            self.assertNotEqual(getattr(wm1, attr), getattr(wm2, attr))
+
     @patch(file_path + ".get_scattering_centre")
     def test_scattering_centre_property_delegates_to_helper(self, mock_gsc):
         wm = _make_manager()
@@ -58,6 +72,27 @@ class TestWorkspaceManager_Init(unittest.TestCase):
 
         self.assertEqual(wm.scattering_centre, (1.0, 2.0, 3.0))
         mock_gsc.assert_called_once_with(wm.ws)
+
+
+@patch(file_path + ".ADS")
+class TestWorkspaceManager_Cleanup(unittest.TestCase):
+    def test_removes_every_owned_ws_that_exists(self, mock_ads):
+        wm = _make_manager()
+        mock_ads.doesExist.return_value = True
+
+        wm.cleanup()
+
+        removed = [c.args[0] for c in mock_ads.remove.call_args_list]
+        expected = [getattr(wm, attr) for attr in WorkspaceManager._OWNED_WS_NAME_ATTRS]
+        self.assertEqual(removed, expected)
+
+    def test_skips_owned_ws_that_do_not_exist(self, mock_ads):
+        wm = _make_manager()
+        mock_ads.doesExist.return_value = False
+
+        wm.cleanup()
+
+        mock_ads.remove.assert_not_called()
 
 
 @patch(file_path + ".define_gauge_volume")
@@ -100,7 +135,7 @@ class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
 
         wm.update_ws()
 
-        mock_clone.assert_called_once_with(InputWorkspace=wm.ws, OutputWorkspace=WorkspaceManager.WS_UNGROUPED)
+        mock_clone.assert_called_once_with(InputWorkspace=wm.ws, OutputWorkspace=wm.WS_UNGROUPED)
         self.assertEqual(wm.ungrouped_ws, "ungrouped")
 
     def test_does_not_define_gauge_volume_when_unset(self, mock_clone, mock_define_gv):
@@ -137,7 +172,7 @@ class TestWorkspaceManager_InitWss(unittest.TestCase):
         mock_create_sim.assert_called_once_with(
             Instrument="ENGINX",
             BinParams="0,0.1,5",
-            OutputWorkspace=WorkspaceManager.WS_DATA,
+            OutputWorkspace=wm.WS_DATA,
             UnitX="dSpacing",
         )
         self.assertIs(wm.ws, sim_ws)
@@ -169,10 +204,10 @@ class TestWorkspaceManager_InitWss(unittest.TestCase):
         self.assertEqual(
             mock_clone.call_args_list,
             [
-                call(InputWorkspace=sim_ws, OutputWorkspace=WorkspaceManager.WS_MESH_RAW),
-                call(InputWorkspace=sim_ws, OutputWorkspace=WorkspaceManager.WS_MESH_NEUTRAL),
+                call(InputWorkspace=sim_ws, OutputWorkspace=wm.WS_MESH_RAW),
+                call(InputWorkspace=sim_ws, OutputWorkspace=wm.WS_MESH_NEUTRAL),
                 # material holder is cloned from the (cube-shaped) mesh ws so it owns a shape
-                call(InputWorkspace="mesh", OutputWorkspace=WorkspaceManager.WS_MATERIAL),
+                call(InputWorkspace="mesh", OutputWorkspace=wm.WS_MATERIAL),
             ],
         )
         self.assertEqual(wm.mesh_ws, "mesh")
@@ -219,9 +254,9 @@ class TestWorkspaceManager_UpdateExistingWss(unittest.TestCase):
         self.assertEqual(
             wm._create_new_ws_with_copied_sample.call_args_list,
             [
-                call(WorkspaceManager.WS_DATA, "old_ws", clone=True),
-                call(WorkspaceManager.WS_MESH_RAW, "old_mesh", clone=True),
-                call(WorkspaceManager.WS_MESH_NEUTRAL, "old_neutral", clone=True),
+                call(wm.WS_DATA, "old_ws", clone=True),
+                call(wm.WS_MESH_RAW, "old_mesh", clone=True),
+                call(wm.WS_MESH_NEUTRAL, "old_neutral", clone=True),
             ],
         )
         self.assertEqual(wm.ws, "new_ws")
@@ -243,7 +278,7 @@ class TestWorkspaceManager_CreateNewWsWithCopiedSample(unittest.TestCase):
 
         wm._create_new_ws_with_copied_sample("dest_ws", sample, clone=True)
 
-        mock_clone.assert_called_once_with(InputWorkspace=sample, OutputWorkspace=WorkspaceManager._SHAPE_TMP)
+        mock_clone.assert_called_once_with(InputWorkspace=sample, OutputWorkspace=wm._SHAPE_TMP)
 
     def test_clone_true_copies_from_shape_tmp_into_new_ws(self, mock_clone, mock_create_sim, mock_copy, mock_ads):
         wm = _make_manager("ENGINX")
@@ -264,8 +299,8 @@ class TestWorkspaceManager_CreateNewWsWithCopiedSample(unittest.TestCase):
 
         wm._create_new_ws_with_copied_sample("dest_ws", MagicMock(), clone=True)
 
-        mock_ads.doesExist.assert_called_once_with(WorkspaceManager._SHAPE_TMP)
-        mock_ads.remove.assert_called_once_with(WorkspaceManager._SHAPE_TMP)
+        mock_ads.doesExist.assert_called_once_with(wm._SHAPE_TMP)
+        mock_ads.remove.assert_called_once_with(wm._SHAPE_TMP)
 
     def test_clone_true_skips_remove_if_shape_tmp_missing(self, mock_clone, mock_create_sim, mock_copy, mock_ads):
         wm = _make_manager("ENGINX")
@@ -383,6 +418,7 @@ class TestWorkspaceManager_LoadStl(unittest.TestCase):
         wm.ws = "ws"
         wm.mesh_ws = "mesh"
         wm.updated_mesh_ws = "neutral"
+        wm.set_material = MagicMock()
 
         wm.load_stl("file.stl")
 
@@ -421,6 +457,7 @@ class TestWorkspaceManager_LoadXml(unittest.TestCase):
         wm.ws = "ws"
         wm.mesh_ws = "mesh"
         wm.updated_mesh_ws = "neutral"
+        wm.set_material = MagicMock()
         fname = self._write_tmp_xml("<cube/>")
         try:
             wm.load_xml(fname)
@@ -503,7 +540,7 @@ class TestWorkspaceManager_RotateSamplesByInitialGoniometer(unittest.TestCase):
         wm.rotate_samples_by_initial_goniometer()
 
         targets = [c.args[0] for c in mock_rotate.call_args_list]
-        self.assertEqual(targets, [WorkspaceManager.WS_DATA, "neutral"])
+        self.assertEqual(targets, [wm.WS_DATA, "neutral"])
         for c in mock_rotate.call_args_list:
             parts = c.args[1].split(",")
             self.assertAlmostEqual(float(parts[0]), 90.0)
@@ -531,7 +568,7 @@ class TestWorkspaceManager_UpdateInitialShape(unittest.TestCase):
 
         wm.update_initial_shape(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
-        wm._create_new_ws_with_copied_sample.assert_called_once_with(WorkspaceManager.WS_TMP, wm.mesh_ws)
+        wm._create_new_ws_with_copied_sample.assert_called_once_with(wm.WS_TMP, wm.mesh_ws)
 
     def test_stores_offset_and_translates_tmp_ws(self, mock_copy, mock_ads):
         wm, _ = self._make_wm_with_ws()
@@ -557,7 +594,7 @@ class TestWorkspaceManager_UpdateInitialShape(unittest.TestCase):
         self.assertEqual(
             mock_copy.call_args_list,
             [
-                call(InputWorkspace="tmp_ws", OutputWorkspace=WorkspaceManager.WS_DATA, **COPY_KWARGS),
+                call(InputWorkspace="tmp_ws", OutputWorkspace=wm.WS_DATA, **COPY_KWARGS),
                 call(InputWorkspace="tmp_ws", OutputWorkspace="neutral", **COPY_KWARGS),
             ],
         )
@@ -584,7 +621,7 @@ class TestWorkspaceManager_UpdateInitialShape(unittest.TestCase):
 
         wm.update_initial_shape(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
-        mock_ads.remove.assert_called_once_with(WorkspaceManager.WS_TMP)
+        mock_ads.remove.assert_called_once_with(wm.WS_TMP)
 
     def test_tmp_workspace_removed_even_when_copy_raises(self, mock_copy, mock_ads):
         wm, _ = self._make_wm_with_ws()
@@ -593,7 +630,7 @@ class TestWorkspaceManager_UpdateInitialShape(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             wm.update_initial_shape(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
-        mock_ads.remove.assert_called_once_with(WorkspaceManager.WS_TMP)
+        mock_ads.remove.assert_called_once_with(wm.WS_TMP)
 
 
 @patch(file_path + ".DeleteLog")

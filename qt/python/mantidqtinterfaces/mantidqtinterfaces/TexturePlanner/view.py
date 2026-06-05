@@ -53,6 +53,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         super().__init__(parent)
         self.setupUi(self)
         self.presenter = presenter
+        # invoked from closeEvent so the presenter can tear down (e.g. remove this instance's
+        # workspaces); set via set_on_close
+        self._on_close = None
 
         self.finder_stl.setLabelText("STL File")
         self.finder_stl.allowMultipleFiles(False)
@@ -133,6 +136,14 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_on_settings_clicked(self, slot):
         self.btn_settings.clicked.connect(slot)
+
+    def set_on_close(self, slot):
+        self._on_close = slot
+
+    def closeEvent(self, event):
+        if self._on_close is not None:
+            self._on_close()
+        super().closeEvent(event)
 
     def init_tool_tips(self):
         self.lineedit_RD.setToolTip("Label for the first (PF: in-plane) intrinsic sample direction")
