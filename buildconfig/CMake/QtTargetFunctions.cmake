@@ -178,6 +178,7 @@ function(mtd_add_qt_target)
   endif()
   set_target_properties(${_target} PROPERTIES CXX_CLANG_TIDY "")
   _disable_suggest_override(${PARSED_QT_VERSION} ${_target})
+  _disable_deprecation_warnings(${PARSED_QT_VERSION} ${_target})
   # Use public headers to populate the INTERFACE_INCLUDE_DIRECTORIES target property
   target_include_directories(${_target} PUBLIC ${_ui_dir} ${_other_ui_dirs} ${PARSED_INCLUDE_DIRS})
   if(PARSED_SYSTEM_INCLUDE_DIRS)
@@ -302,6 +303,7 @@ function(mtd_add_qt_test_executable)
 
   # Warning suppression
   _disable_suggest_override(${PARSED_QT_VERSION} ${_target_name})
+  _disable_deprecation_warnings(${PARSED_QT_VERSION} ${_target_name})
 
   # libraries
   set(_link_libs ${PARSED_LINK_LIBS} ${_mtd_qt_libs})
@@ -404,6 +406,16 @@ function(_internal_qt_wrap_cpp qtversion moc_generated)
       ${${moc_generated}}
       PARENT_SCOPE
   )
+endfunction()
+
+# Silences -Wdeprecated-declarations for Qt6 GUI targets. The Qt5->Qt6 migration surfaces many warnings from Qt APIs
+# that were deprecated in Qt6 (QMouseEvent::x()/y(), QLocale::country(), QVariant::type(), ...). We suppress them only
+# for the Qt6 build so that Qt5 builds still report deprecations and Mantid's own deprecation markers are unaffected.
+# Note: the global -Wno-deprecated does not cover -Wdeprecated-declarations; they are independent gcc/clang flags.
+function(_disable_deprecation_warnings _qt_version _target)
+  if(_qt_version EQUAL 6 AND (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang"))
+    target_compile_options(${_target} PRIVATE -Wno-deprecated-declarations)
+  endif()
 endfunction()
 
 # Disables suggest override for versions of Qt < 5.6.2 as Q_OBJECT produces them and the cannot be avoided.
