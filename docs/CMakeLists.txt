@@ -76,6 +76,9 @@ function(add_sphinx_build_target builder)
 
   if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
     set(target_dependencies ${target_dependencies} Framework)
+    if(MPI_BUILD)
+      set(target_dependencies ${target_dependencies} MPIAlgorithms)
+    endif()
   endif()
 
   if(MANTID_QT_LIB STREQUAL "BUILD")
