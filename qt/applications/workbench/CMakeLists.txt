@@ -115,8 +115,36 @@ if(PYRCC5_CMD)
     add_custom_target(workbench_resources ALL DEPENDS ${_output_res_py})
   endif()
 else()
-  message(STATUS "PYRCC5_CMD not set (Qt${MANTID_QT_VERSION}): skipping workbench resource compilation (Qt6 follow-up)")
-  add_custom_target(workbench_resources ALL)
+  # PyQt6 has no Python resource compiler, so resources.py cannot be generated. Instead compile resources.qrc to a
+  # binary .rcc with Qt's own rcc (QT_RCC_CMD, set in qt/CMakeLists.txt) and register it at runtime via
+  # QResource.registerResource - see workbench/app/resource_loader.py.
+  if(CONDA_BUILD)
+    set(_output_rcc ${WORKBENCH_SITE_PACKAGES}/workbench/app/workbench.rcc)
+  else()
+    set(_output_rcc ${CMAKE_CURRENT_LIST_DIR}/workbench/app/workbench.rcc)
+  endif()
+  if(QT_RCC_CMD)
+    add_custom_command(
+      OUTPUT ${_output_rcc}
+      COMMAND ${QT_RCC_CMD} --binary -o ${_output_rcc} ${_images_qrc_file}
+      COMMENT "Generating workbench binary resources (Qt${MANTID_QT_VERSION}): ${_output_rcc}"
+      DEPENDS ${_images_qrc_file}
+    )
+    add_custom_target(workbench_resources ALL DEPENDS ${_output_rcc})
+  else()
+    message(STATUS "QT_RCC_CMD not set (Qt${MANTID_QT_VERSION}): skipping workbench resource compilation")
+    add_custom_target(workbench_resources ALL)
+  endif()
+
+  # Safety net: the runtime loader prefers the .rcc above, but a resources.py left over from a previous Qt5 build
+  # hard-codes `from PyQt5 import QtCore` and would crash if it were ever imported as the fallback. Rewrite a stale
+  # module's import to qtpy so that path stays loadable too.
+  set(_stale_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
+  if(EXISTS ${_stale_res_py})
+    execute_process(
+      COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/buildconfig/CMake/rewrite_resources_import.py ${_stale_res_py}
+    )
+  endif()
 endif()
 
 # Dependency chain
