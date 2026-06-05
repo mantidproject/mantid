@@ -28,9 +28,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view = MagicMock()
         self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
         self._mock_view.get_render_mode_option.return_value = "Points"
-        self._mock_view._RENDER_MODE_POINTS = "Points"
-        self._mock_view._RENDER_MODE_SHAPES_FAST = "Shapes (Fast)"
-        self._mock_view._RENDER_MODE_FULL_SHAPES = "Full Shapes"
+        self._mock_view._RENDER_MODE_POINTS = "Points (Fastest)"
+        self._mock_view._RENDER_MODE_SHAPES_FAST = "Approximated Shapes (Fast)"
+        self._mock_view._RENDER_MODE_RAW_SHAPES = "Raw Shapes (Slowest)"
         self._mock_view.is_select_bank_tube_checked.return_value = False
         self._mock_view.selected_peaks_workspaces.return_value = []
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter", EnableLogging=False)
@@ -615,14 +615,14 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_on_render_mode_changed_full_shapes_uses_full_renderer(self, mock_update_plotter):
         """Test that Full Shapes mode switches to the full ShapeRenderer."""
         self._model.projection_type = ProjectionType.CYLINDRICAL_Y
-        self._presenter._on_render_mode_changed("Full Shapes")
+        self._presenter._on_render_mode_changed(self._mock_view._RENDER_MODE_RAW_SHAPES)
         self.assertIs(self._presenter._renderer, self._presenter._shape_renderer_full)
         mock_update_plotter.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
     def test_on_render_mode_changed_points_uses_point_cloud(self, mock_update_plotter):
         """Test that Points mode switches to PointCloudRenderer."""
-        self._presenter._on_render_mode_changed("Points")
+        self._presenter._on_render_mode_changed(self._mock_view._RENDER_MODE_POINTS)
         self.assertIs(self._presenter._renderer, self._presenter._point_cloud_renderer)
         mock_update_plotter.assert_called_once()
 
@@ -630,7 +630,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_on_render_mode_changed_side_by_side_fast_uses_sbs_renderer(self, mock_update_plotter):
         """Test that Shapes (Fast) with SIDE_BY_SIDE projection uses SideBySideShapeRenderer."""
         self._model.projection_type = ProjectionType.SIDE_BY_SIDE
-        self._presenter._on_render_mode_changed("Shapes (Fast)")
+        self._presenter._on_render_mode_changed(self._mock_view._RENDER_MODE_SHAPES_FAST)
         self.assertIsInstance(self._presenter._renderer, SideBySideShapeRenderer)
         self.assertIs(self._presenter._renderer, self._presenter._sbs_shape_renderer)
         mock_update_plotter.assert_called_once()
@@ -639,18 +639,18 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_on_render_mode_changed_side_by_side_full_uses_sbs_full_renderer(self, mock_update_plotter):
         """Test that Full Shapes with SIDE_BY_SIDE projection uses the full SideBySideShapeRenderer."""
         self._model.projection_type = ProjectionType.SIDE_BY_SIDE
-        self._presenter._on_render_mode_changed("Full Shapes")
+        self._presenter._on_render_mode_changed(self._mock_view._RENDER_MODE_RAW_SHAPES)
         self.assertIs(self._presenter._renderer, self._presenter._sbs_shape_renderer_full)
         mock_update_plotter.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
     def test_reload_renderers_sets_active_renderer(self, mock_update_plotter):
         """Test that _reload_renderers sets the active renderer based on render mode combo."""
-        self._mock_view.get_render_mode_option.return_value = "Points"
+        self._mock_view.get_render_mode_option.return_value = self._mock_view._RENDER_MODE_POINTS
         self._presenter._reload_renderers()
         self.assertIs(self._presenter._renderer, self._presenter._point_cloud_renderer)
 
-        self._mock_view.get_render_mode_option.return_value = "Shapes (Fast)"
+        self._mock_view.get_render_mode_option.return_value = self._mock_view._RENDER_MODE_SHAPES_FAST
         self._model.projection_type = ProjectionType.CYLINDRICAL_Y
         self._presenter._reload_renderers()
         self.assertIs(self._presenter._renderer, self._presenter._shape_renderer)
@@ -659,7 +659,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_on_projection_option_changed_syncs_model(self, mock_update_plotter):
         """Test that changing projection updates model and enables the render mode combo."""
         self._mock_view.current_selected_projection.return_value = ProjectionType.SPHERICAL_X
-        self._mock_view.get_render_mode_option.return_value = "Points"
+        self._mock_view.get_render_mode_option.return_value = self._mock_view._RENDER_MODE_POINTS
         self._presenter._on_projection_option_changed()
         self.assertEqual(self._model.projection_type, ProjectionType.SPHERICAL_X)
         self._mock_view.set_render_mode_combo_enabled.assert_called_once_with(True)
@@ -669,7 +669,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_on_projection_option_changed_side_by_side_enables_combo(self, mock_update_plotter):
         """Test that side-by-side projection enables the render mode combo."""
         self._mock_view.current_selected_projection.return_value = ProjectionType.SIDE_BY_SIDE
-        self._mock_view.get_render_mode_option.return_value = "Points"
+        self._mock_view.get_render_mode_option.return_value = self._mock_view._RENDER_MODE_POINTS
         self._presenter._on_projection_option_changed()
         self.assertEqual(self._model.projection_type, ProjectionType.SIDE_BY_SIDE)
         self._mock_view.set_render_mode_combo_enabled.assert_called_once_with(True)
@@ -681,11 +681,11 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         """Test that renderers are reused when switching render modes."""
         self._model.projection_type = ProjectionType.CYLINDRICAL_Y
         pc_renderer1 = self._presenter._renderer
-        self._presenter._on_render_mode_changed("Shapes (Fast)")
+        self._presenter._on_render_mode_changed(self._mock_view._RENDER_MODE_SHAPES_FAST)
         shape_renderer1 = self._presenter._renderer
-        self._presenter._on_render_mode_changed("Points")
+        self._presenter._on_render_mode_changed(self._mock_view._RENDER_MODE_POINTS)
         pc_renderer2 = self._presenter._renderer
-        self._presenter._on_render_mode_changed("Shapes (Fast)")
+        self._presenter._on_render_mode_changed(self._mock_view._RENDER_MODE_SHAPES_FAST)
         shape_renderer2 = self._presenter._renderer
         # Should reuse cached instances
         self.assertIs(pc_renderer1, pc_renderer2)
@@ -696,7 +696,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_on_render_mode_changed_side_by_side_uses_sbs_renderer(self, mock_update_plotter):
         """Test that Shapes (Fast) with SIDE_BY_SIDE projection uses SideBySideShapeRenderer."""
         self._model.projection_type = ProjectionType.SIDE_BY_SIDE
-        self._presenter._on_render_mode_changed("Shapes (Fast)")
+        self._presenter._on_render_mode_changed(self._mock_view._RENDER_MODE_SHAPES_FAST)
         self.assertIsInstance(self._presenter._renderer, SideBySideShapeRenderer)
         self.assertIs(self._presenter._renderer, self._presenter._sbs_shape_renderer)
         mock_update_plotter.assert_called_once()
