@@ -117,6 +117,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view._detector_spectrum_axes.texts = [mock_text]
         self.assertEqual(0, len(self._view._lineplot_overlays))
         self._view._lineplot_overlays.append(mock_line)
+        self._view._detector_spectrum_axes.lines = [mock_line]
         self._view.clear_lineplot_overlays()
         mock_line.remove.assert_called_once()
         self.assertEqual(0, len(self._view._lineplot_overlays))
@@ -283,6 +284,22 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view._delete_all_selected_peaks_button = MagicMock()
         self._view.set_delete_all_selected_peaks_button_enabled(False)
         self._view._delete_all_selected_peaks_button.setEnabled.assert_called_once_with(False)
+
+    def test_set_detector_edit_text_joins_with_semicolon_separator(self):
+        mock_edit = MagicMock()
+        det_1 = MagicMock()
+        det_1.detector_id = 1
+        det_2 = MagicMock()
+        det_2.detector_id = 2
+        self._view._set_detector_edit_text(mock_edit, [det_1, det_2], lambda d: str(d.detector_id))
+        mock_edit.setPlainText.assert_called_once_with("1; 2")
+
+    def test_set_detector_edit_text_single_item_no_separator(self):
+        mock_edit = MagicMock()
+        det = MagicMock()
+        det.detector_id = 42
+        self._view._set_detector_edit_text(mock_edit, [det], lambda d: str(d.detector_id))
+        mock_edit.setPlainText.assert_called_once_with("42")
 
 
 if __name__ == "__main__":

@@ -9,7 +9,9 @@ import unittest
 from unittest.mock import call, DEFAULT, Mock, patch, MagicMock
 
 from mantidqt.widgets.regionselector.presenter import RegionSelector
+from mantidqt.widgets.sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 from mantidqt.widgets.sliceviewer.models.workspaceinfo import WS_TYPE
+from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from mantid.api import MatrixWorkspace
 
 
@@ -85,6 +87,10 @@ class RegionSelectorTest(unittest.TestCase):
         self.assertEqual(1, len(region_selector._selectors))
         self.assertTrue(region_selector._selectors[0].active)
         self.assertEqual("test", region_selector._selectors[0].region_type())
+
+    def test_is_masking_disabled_returns_false(self):
+        region_selector = RegionSelector(view=self.mock_view)
+        self.assertFalse(region_selector._is_masking_disabled)
 
     def test_add_second_rectangular_region_deactivates_first_selector(self):
         region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self.mock_view)
@@ -319,6 +325,113 @@ class RegionSelectorTest(unittest.TestCase):
 
         self.assertEqual(1, len(region_selector._selectors))
         self._check_rectangular_region(region_selector._selectors[0], region_type, expected_extents)
+
+    def test_invert_masking_clicked(self):
+        mock_masking = MagicMock()
+        mock_data_view = MagicMock()
+        mock_data_view.masking = mock_masking
+        self.mock_view.data_view = mock_data_view
+
+        region_selector = RegionSelector(view=self.mock_view)
+
+        region_selector.invert_masking_clicked(True)
+        mock_masking.invert_masking_clicked.assert_called_once_with(True)
+        mock_masking.reset_mock()
+        region_selector.invert_masking_clicked(False)
+        mock_masking.invert_masking_clicked.assert_called_once_with(False)
+
+    def test_rect_masking_clicked(self):
+        mock_masking = MagicMock()
+        mock_data_view = MagicMock()
+        mock_data_view.masking = mock_masking
+        self.mock_view.data_view = mock_data_view
+
+        region_selector = RegionSelector(view=self.mock_view)
+
+        region_selector.rect_masking_clicked(True)
+        mock_masking.new_selector.assert_called_once_with(ToolItemText.RECT_MASKING)
+        mock_data_view.check_masking_shape_toolbar_icons.assert_called_once_with(ToolItemText.RECT_MASKING)
+        mock_masking.reset_mock()
+        mock_data_view.reset_mock()
+        region_selector.rect_masking_clicked(False)
+        mock_masking.new_selector.assert_called_once_with(ToolItemText.RECT_MASKING)
+        mock_data_view.check_masking_shape_toolbar_icons.assert_called_once_with(ToolItemText.RECT_MASKING)
+
+    def test_elli_masking_clicked(self):
+        mock_masking = MagicMock()
+        mock_data_view = MagicMock()
+        mock_data_view.masking = mock_masking
+        self.mock_view.data_view = mock_data_view
+
+        region_selector = RegionSelector(view=self.mock_view)
+
+        region_selector.elli_masking_clicked(True)
+        mock_masking.new_selector.assert_called_once_with(ToolItemText.ELLI_MASKING)
+        mock_data_view.check_masking_shape_toolbar_icons.assert_called_once_with(ToolItemText.ELLI_MASKING)
+        mock_masking.reset_mock()
+        mock_data_view.reset_mock()
+        region_selector.elli_masking_clicked(False)
+        mock_masking.new_selector.assert_called_once_with(ToolItemText.ELLI_MASKING)
+        mock_data_view.check_masking_shape_toolbar_icons.assert_called_once_with(ToolItemText.ELLI_MASKING)
+
+    def test_poly_masking_clicked(self):
+        mock_masking = MagicMock()
+        mock_data_view = MagicMock()
+        mock_data_view.masking = mock_masking
+        self.mock_view.data_view = mock_data_view
+
+        region_selector = RegionSelector(view=self.mock_view)
+
+        region_selector.poly_masking_clicked(True)
+        mock_masking.new_selector.assert_called_once_with(ToolItemText.POLY_MASKING)
+        mock_data_view.check_masking_shape_toolbar_icons.assert_called_once_with(ToolItemText.POLY_MASKING)
+        mock_masking.reset_mock()
+        mock_data_view.reset_mock()
+        region_selector.poly_masking_clicked(False)
+        mock_masking.new_selector.assert_called_once_with(ToolItemText.POLY_MASKING)
+        mock_data_view.check_masking_shape_toolbar_icons.assert_called_once_with(ToolItemText.POLY_MASKING)
+
+    @patch.object(SliceViewerBasePresenter, "masking")
+    def test_masking(self, mock_super_masking):
+        region_selector = RegionSelector(view=self.mock_view)
+        region_selector._data_view = MagicMock()
+        region_selector.masking(True)
+        mock_super_masking.assert_called_once_with(True)
+        region_selector._data_view.deactivate_and_disable_tool.assert_has_calls(
+            [
+                call(ToolItemText.APPLY_MASKING),
+                call(ToolItemText.EXPORT_MASKING),
+            ]
+        )
+
+    @patch("mantidqt.widgets.regionselector.presenter.Masking")
+    def test_activate_masking(self, mock_masking_cls):
+        region_selector = RegionSelector(view=self.mock_view)
+        region_selector._data_view = MagicMock()
+        region_selector.model = MagicMock()
+        region_selector.model.ws.name.return_value = "test_ws"
+        mock_masking = MagicMock()
+        mock_masking_cls.return_value = mock_masking
+
+        region_selector._activate_masking()
+        region_selector._data_view.deactivate_and_disable_tool.assert_has_calls(
+            [
+                call(ToolItemText.ZOOM),
+                call(ToolItemText.PAN),
+                call(ToolItemText.REGIONSELECTION),
+            ]
+        )
+        mock_masking_cls.assert_called_once_with(
+            region_selector._data_view,
+            "test_ws",
+            auto_update_mask_file=True,
+        )
+        self.assertEqual(region_selector._data_view.masking, mock_masking)
+        mock_masking.new_selector.assert_called_once_with(ToolItemText.RECT_MASKING)
+        region_selector._data_view.activate_tool.assert_called_once_with(
+            ToolItemText.RECT_MASKING,
+            True,
+        )
 
     def test_display_rectangular_region_y1_out_of_bounds_does_not_add_selector(self):
         y_limits = (200, 500)

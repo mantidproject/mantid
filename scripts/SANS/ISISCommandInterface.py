@@ -6,17 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, redefined-builtin, protected-access, too-many-arguments
 """
-Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
+Enables the SANS commands (listed at https://www.mantidproject.org/SANS) to
 be run
 """
 
+from mantid.kernel import config, Logger
 import isis_instrument
 from reducer_singleton import ReductionSingleton
 import isis_reduction_steps
 import isis_reducer
 from centre_finder import is_workspace_which_requires_angle, BeamCenterLogger, CentreFinder, CentrePositioner, FindDirectionEnum
 from mantid.api import mtd, AnalysisDataService, ExperimentInfo, WorkspaceGroup
-from mantid.kernel import config, Logger
 from mantid.simpleapi import AddSampleLog, CloneWorkspace, DeleteWorkspace, GroupWorkspaces, RenameWorkspace, Scale
 import copy
 import os
@@ -27,17 +27,29 @@ import SANSUserFileParser as UserFileParser
 
 import warnings
 
+allow_import = config.getString("sans.deprecated_command_interface")
+sanslog = Logger("SANS")
+err_msgs = [
+    "This ISIS Command Interface is deprecated and will be removed in Mantid v6.17.",
+    "Please import using 'import sans.command_interface.ISISCommandInterface' instead of 'import ISISCommandInterface' "
+    "or 'from ISISCommandInterface'.",
+    "Contact us on Mantid Support `mantid-help@mantidproject.org` if you have any questions or concerns about this change.",
+    "If you cannot port your script to the new command interface yet, set the flag 'sans.deprecated_command_interface=On'"
+    " in the 'Mantid.user.properties' file to allow temporary usage of this command interface until is removed.",
+]
+
+if str.lower(allow_import) not in ["on", "true", "1"]:
+    err_msg = "\n".join(err_msgs)
+    sanslog.error(err_msg)
+    raise ImportError(err_msg)
+
 warnings.simplefilter("default", category=DeprecationWarning)
 warnings.warn(
-    "This ISIS Command Interface is deprecated.\n"
-    "Please import using 'sans.command_interface.ISISCommandInterface'"
-    "instead of 'import ISISCommandInterface' or 'from ISISCommandInterface'.",
+    "\n".join(err_msgs[:-1]),
     DeprecationWarning,
     stacklevel=2,
 )
 warnings.simplefilter("ignore", category=DeprecationWarning)
-
-sanslog = Logger("SANS")
 
 try:
     from qtpy.QtWidgets import qApp

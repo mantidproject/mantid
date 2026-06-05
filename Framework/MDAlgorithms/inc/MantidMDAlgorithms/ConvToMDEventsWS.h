@@ -10,7 +10,9 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEvent.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidMDAlgorithms/ConvToMDBase.h"
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
@@ -33,8 +35,8 @@ namespace MDAlgorithms {
 
 class ConvToMDEventsWS : public ConvToMDBase {
 public:
-  size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
-                    bool ignoreZeros) override;
+  size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper, bool ignoreZeros,
+                    bool useLogTimes) override;
   void runConversion(API::Progress *pProgress) override;
 
 protected:
@@ -50,6 +52,27 @@ private:
   template <class T> size_t convertEventList(size_t workspaceIndex);
 
   virtual void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc);
+  // Variables for getting log values at times and recomputing sample orientation
+  Kernel::DblMatrix m_Wtransf;
+  Kernel::DblMatrix m_tmpRot;
+  Geometry::Goniometer m_Goniometer;
+  std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<double>>> m_Logs;
+  std::vector<size_t> m_GonioIndex;
+  // Private method to update rotation matrix for a single event from log values
+  template <class T> bool setGoniometersFromLogs(const T &ev) {
+    if (!m_useLogTimes)
+      return true;
+    for (size_t axIdx = 0; axIdx < m_GonioIndex.size(); axIdx++) {
+      double logval = m_Logs[axIdx]->getSingleValue(ev->pulseTime());
+      if (std::isnan(logval))
+        return false;
+      m_Goniometer.setRotationAngle(m_GonioIndex[axIdx], logval);
+    }
+    m_tmpRot = m_Goniometer.getR() * m_Wtransf;
+    m_tmpRot.Invert();
+    m_QConverter->updateRotMat(m_tmpRot.getVector());
+    return true;
+  }
 };
 
 } // namespace MDAlgorithms

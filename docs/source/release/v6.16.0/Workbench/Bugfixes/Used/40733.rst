@@ -1,0 +1,1 @@
+- When attempting to over plot a Table Workspace onto a colour fill plot, a warning will now be raised instead of an exception.

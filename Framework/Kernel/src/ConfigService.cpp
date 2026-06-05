@@ -597,7 +597,10 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
                "instrument views\n";
     filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off\n\n";
     filestr << "## Muon GUI settings\n";
-    filestr << "#muon.GUI = \n";
+    filestr << "#muon.GUI = \n\n";
+    filestr << "## SANS ISIS Command Interface\n";
+    filestr << "## Uncomment below line to allow usage of deprecated ISIS Command Interface\n";
+    filestr << "#sans.deprecated_command_interface=On\n\n";
 
     filestr.close();
   } catch (std::runtime_error &ex) {

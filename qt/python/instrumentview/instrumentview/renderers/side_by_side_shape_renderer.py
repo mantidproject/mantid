@@ -40,7 +40,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
     def precompute(self):
         super().precompute()
 
-    def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model) -> pv.PolyData:
+    def build_detector_mesh(self, positions: np.ndarray, flip_beam: bool, model) -> pv.PolyData:
         if not self._precomputed:
             self.precompute()
 
@@ -65,7 +65,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
         self._detector_mesh_ref = mesh
         return mesh
 
-    def build_masked_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
+    def build_masked_mesh(self, positions: np.ndarray, flip_beam: bool, model=None) -> pv.PolyData:
         if len(positions) == 0:
             return pv.PolyData()
 

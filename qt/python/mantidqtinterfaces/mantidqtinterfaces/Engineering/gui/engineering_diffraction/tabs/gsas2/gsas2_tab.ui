@@ -196,7 +196,7 @@ QGroupBox:title {
                  <widget class="FileFinderWidget" name="phase_file_finder" native="true"/>
                 </item>
                 <item row="2" column="0">
-                 <widget class="FileFinderWidget" name="focused_data_file_finder" native="true"/>
+                 <widget class="FilteredFileFinderWidget" name="focused_data_file_finder" native="true"/>
                 </item>
                 <item row="0" column="0">
                  <widget class="FileFinderWidget" name="instrument_group_file_finder" native="true"/>
@@ -698,6 +698,12 @@ QGroupBox:title {
    <class>FileFinderWidget</class>
    <extends>QWidget</extends>
    <header>mantidqt.widgets.filefinderwidget</header>
+   <container>1</container>
+  </customwidget>
+   <customwidget>
+   <class>FilteredFileFinderWidget</class>
+   <extends>QWidget</extends>
+   <header>mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.filtered_file_finder</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

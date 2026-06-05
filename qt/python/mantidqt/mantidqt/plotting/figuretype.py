@@ -45,6 +45,8 @@ class FigureType(Enum):
     Contour = 7
     # A 3D Mesh plot
     Mesh = 8
+    # A super plot
+    Superplot = 9
     # Any other type of plot
     Other = 100
 

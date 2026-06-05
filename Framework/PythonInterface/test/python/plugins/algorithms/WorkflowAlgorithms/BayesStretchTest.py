@@ -111,11 +111,15 @@ class BayesStretchTest(unittest.TestCase):
         self.assertAlmostEqual(fit_ws_sigma.dataY(0)[14], 0.0, places=tol_places)
         self.assertAlmostEqual(fit_ws_sigma.dataY(0)[48], 0.0, places=tol_places)
         self.assertAlmostEqual(fit_ws_sigma.dataY(0)[49], 0.0, places=tol_places)
+        self.assertEqual(fit_ws_sigma.name().split("_")[-1], "Sigma")
+        self.assertEqual(fit_ws_sigma.name().split("_")[-2], fit_group.name().split("_")[-1])
         fit_ws_beta = fit_group.getItem(1)
         self.assertAlmostEqual(fit_ws_beta.dataY(0)[11], 0.0, places=tol_places)
         self.assertAlmostEqual(fit_ws_beta.dataY(0)[12], 0.0, places=tol_places)
         self.assertAlmostEqual(fit_ws_beta.dataY(0)[21], 0.0, places=tol_places)
         self.assertAlmostEqual(fit_ws_beta.dataY(0)[22], 0.0, places=tol_places)
+        self.assertEqual(fit_ws_beta.name().split("_")[-1], "Beta")
+        self.assertEqual(fit_ws_beta.name().split("_")[-2], fit_group.name().split("_")[-1])
 
 
 if __name__ == "__main__":

@@ -75,6 +75,35 @@ public:
 };
 DECLARE_ALGORITHM(StubbedWorkspaceAlgorithm)
 
+class ProcessGroupsHistoryAlgorithm : public Algorithm {
+public:
+  const std::string name() const override { return "ProcessGroupsHistoryAlgorithm"; }
+  int version() const override { return 1; }
+  const std::string summary() const override { return "Test processGroups history recording"; }
+
+  void init() override {
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output));
+  }
+
+  void exec() override {}
+
+  bool processGroups() override {
+    m_usingBaseProcessGroups = true;
+    enableHistoryRecordingForProcessGroups(true);
+
+    auto outputGroup = std::make_shared<WorkspaceGroup>();
+    for (size_t i = 0; i < m_groupSize; ++i) {
+      auto output = std::make_shared<WorkspaceTester>();
+      output->initialize(1, 1, 1);
+      outputGroup->addWorkspace(output);
+    }
+    AnalysisDataService::Instance().addOrReplace(getPropertyValue("OutputWorkspace"), outputGroup);
+    return true;
+  }
+};
+DECLARE_ALGORITHM(ProcessGroupsHistoryAlgorithm)
+
 class StubbedWorkspaceAlgorithm2 : public Algorithm {
 public:
   StubbedWorkspaceAlgorithm2() : Algorithm() {}
@@ -875,6 +904,24 @@ public:
 
   void test_InputWorkspaceGroupHistoryCopiedToReplacedOutputWorkspaceGroup() {
     doHistoryCopyOnGroupsTest("copyHistoryGroupInOut", "copyHistoryGroupInOut");
+  }
+
+  void test_overriddenProcessGroupsCanOptInToParentHistoryRecording() {
+    makeWorkspaceGroup("processGroupsHistoryIn", "processGroupsHistoryIn_1,processGroupsHistoryIn_2");
+
+    ProcessGroupsHistoryAlgorithm alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "processGroupsHistoryIn");
+    alg.setPropertyValue("OutputWorkspace", "processGroupsHistoryOut");
+    alg.execute();
+
+    auto outputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("processGroupsHistoryOut");
+    TS_ASSERT(outputGroup);
+    for (auto &item : *outputGroup) {
+      const auto &history = item->history();
+      TS_ASSERT_EQUALS(1, history.size());
+      TS_ASSERT_EQUALS("ProcessGroupsHistoryAlgorithm", history.getAlgorithmHistory(0)->name());
+    }
   }
 
   /**

@@ -38,7 +38,8 @@ public:
 
   SavePresenterTest()
       : m_view(), m_savePath("/foo/bar/"), m_fileFormat(NamedFormat::Custom), m_prefix("testoutput_"),
-        m_includeHeader(true), m_separator(","), m_includeQResolution(true), m_includeAdditionalColumns(false) {}
+        m_includeHeader(true), m_separator(","), m_includeQResolution(true), m_includeAdditionalColumns(false),
+        m_model(""), m_validation(false) {}
 
   void tearDown() override {
     // Verifying and clearing of expectations happens when mock variables are destroyed.
@@ -606,6 +607,8 @@ private:
     EXPECT_CALL(m_view, getSeparator()).Times(1).WillOnce(Return(m_separator));
     EXPECT_CALL(m_view, getQResolutionCheck()).Times(1).WillOnce(Return(m_includeQResolution));
     EXPECT_CALL(m_view, getAdditionalColumnsCheck()).Times(1).WillOnce(Return(m_includeAdditionalColumns));
+    EXPECT_CALL(m_view, getModel()).Times(1).WillOnce(Return(m_model));
+    EXPECT_CALL(m_view, getValidateModelCheck()).Times(1).WillOnce(Return(m_validation));
     if (isAutoSave) {
       EXPECT_CALL(m_view, getSaveToSingleFileCheck()).Times(1).WillOnce(Return(saveToSingleFile));
     } else {
@@ -618,8 +621,9 @@ private:
     EXPECT_CALL(m_view, getSelectedParameters()).Times(1).WillOnce(Return(logs));
     expectGetValidSaveDirectory();
     expectGetSaveParametersFromView(false, false);
-    auto fileFormatOptions = FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator,
-                                               m_includeQResolution, m_includeAdditionalColumns, false);
+    auto fileFormatOptions =
+        FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
+                          m_includeAdditionalColumns, false, m_model, m_validation);
     EXPECT_CALL(*m_fileSaver, save(m_savePath, workspaceNames, logs, fileFormatOptions)).Times(1);
   }
 
@@ -629,7 +633,7 @@ private:
     expectGetSaveParametersFromView(isSingleFileRequested, isAutoSave);
     auto fileFormatOptions =
         FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
-                          m_includeAdditionalColumns, expectedSingleFileOption);
+                          m_includeAdditionalColumns, expectedSingleFileOption, m_model, m_validation);
     EXPECT_CALL(*m_fileSaver, save(m_savePath, workspaceNames, _, fileFormatOptions)).Times(1);
   }
 
@@ -778,4 +782,6 @@ private:
   std::string m_separator;
   bool m_includeQResolution;
   bool m_includeAdditionalColumns;
+  std::string m_model;
+  bool m_validation;
 };

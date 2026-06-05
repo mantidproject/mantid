@@ -32,7 +32,14 @@ from mantid.api import MatrixWorkspace
 from mantid.plots import datafunctions, axesfunctions, axesfunctions3D
 from mantid.plots.legend import LegendProperties
 from mantid.plots.datafunctions import get_normalize_by_bin_width
-from mantid.plots.utility import artists_hidden, autoscale_on_update, legend_set_draggable, MantidAxType, get_plot_specific_properties
+from mantid.plots.utility import (
+    artists_hidden,
+    autoscale_on_update,
+    legend_set_draggable,
+    MantidAxType,
+    get_plot_specific_properties,
+    PlotNormalizationType,
+)
 
 
 WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
@@ -250,12 +257,12 @@ class MantidAxes(Axes):
                             return None
         raise ValueError("Artist: '{}' not tracked by axes.".format(artist))
 
-    def get_artist_normalization_state(self, artist):
+    def get_artist_normalized_by_bin_width(self, artist):
         for ws_name, ws_artists_list in self.tracked_workspaces.items():
             for ws_artists in ws_artists_list:
                 for ws_artist in ws_artists._artists:
                     if artist == ws_artist:
-                        return ws_artists.is_normalized
+                        return ws_artists.is_normalized_by_bin_width()
 
     def get_is_mdhisto_workspace_for_artist(self, artist) -> bool:
         workspace, _ = self.get_artists_workspace_and_workspace_index(artist)
@@ -267,7 +274,7 @@ class MantidAxes(Axes):
         artists,
         data_replace_cb=None,
         spec_num=None,
-        is_normalized=None,
+        normalization=None,
         is_spec=True,
         log_name=None,
         filtered=True,
@@ -281,9 +288,7 @@ class MantidAxes(Axes):
         :param data_replace_cb: A function to call when the data is replaced to update
         the artist (optional)
         :param spec_num: The spectrum number associated with the artist (optional)
-        :param is_normalized: bool. The line being plotted is normalized by bin width
-            This can be from either a distribution workspace or a workspace being
-            plotted as a distribution
+        :param normalization: PlotNormalizationType.
         :param is_spec: bool. True if spec_num represents a spectrum, and False if it is a bin index
         :param log_name: string. The name of the plotted log
         :param filtered: bool. True if log plotted was filtered, and False if unfiltered.
@@ -305,7 +310,7 @@ class MantidAxes(Axes):
             artist_info = self.tracked_workspaces.setdefault(name, [])
 
             artist_info.append(
-                _WorkspaceArtists(artists, data_replace_cb, is_normalized, name, spec_num, is_spec, log_name, filtered, expt_info_index)
+                _WorkspaceArtists(artists, data_replace_cb, normalization, name, spec_num, is_spec, log_name, filtered, expt_info_index)
             )
             self.check_axes_distribution_consistency()
         return artists
@@ -318,8 +323,7 @@ class MantidAxes(Axes):
         tracked_ws_distributions = []
         for artists in self.tracked_workspaces.values():
             for artist in artists:
-                if artist.is_normalized is not None:
-                    tracked_ws_distributions.append(artist.is_normalized)
+                tracked_ws_distributions.append(artist.is_normalized_by_bin_width())
 
         if len(tracked_ws_distributions) > 0:
             num_normalized = sum(tracked_ws_distributions)
@@ -503,7 +507,7 @@ class MantidAxes(Axes):
         For keywords related to workspaces, see :func:`plotfunctions.plot` or
         :func:`plotfunctions.errorbar`
         """
-        kwargs["distribution"] = not self.get_artist_normalization_state(artist)
+        kwargs["distribution"] = not self.get_artist_normalized_by_bin_width(artist)
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
 
         # deal with MDHisto workspace
@@ -699,17 +703,18 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
-            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or (hasattr(workspace, "isDistribution") and workspace.isDistribution())
+            normalization_type, kwargs = datafunctions.get_normalization_type(workspace, self, **kwargs)
+            if normalization_type == PlotNormalizationType.NONE and hasattr(workspace, "isDistribution") and workspace.isDistribution():
+                normalization_type = PlotNormalizationType.BIN_WIDTH
             if isinstance(workspace, MatrixWorkspace):
                 kwargs = get_plot_specific_properties(workspace, workspace.getPlotType(), kwargs)
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(
                     workspace,
-                    axesfunctions.plot(self, normalize_by_bin_width=is_normalized, *args, **kwargs),
+                    axesfunctions.plot(self, normalization_type=normalization_type, *args, **kwargs),
                     _data_update,
                     spec_num,
-                    is_normalized,
+                    normalization_type,
                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs),
                     kwargs.get("LogName", None),
                     kwargs.get("Filtered", None),
@@ -827,15 +832,16 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
-            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or (hasattr(workspace, "isDistribution") and workspace.isDistribution())
+            normalization_type, kwargs = datafunctions.get_normalization_type(workspace, self, **kwargs)
+            if hasattr(workspace, "isDistribution") and workspace.isDistribution():
+                normalization_type = PlotNormalizationType.BIN_WIDTH
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(
                     workspace,
-                    axesfunctions.errorbar(self, normalize_by_bin_width=is_normalized, *args, **kwargs),
+                    axesfunctions.errorbar(self, normalization_type=normalization_type, *args, **kwargs),
                     _data_update,
                     spec_num,
-                    is_normalized,
+                    normalization_type,
                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs),
                 )
             return artist
@@ -963,9 +969,10 @@ class MantidAxes(Axes):
             workspace = args[0]
             normalize_by_bin_width, _ = get_normalize_by_bin_width(workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or (hasattr(workspace, "isDistribution") and workspace.isDistribution())
+            normalization = PlotNormalizationType.BIN_WIDTH if is_normalized else PlotNormalizationType.NONE
             # We return the last mesh so the return type is a single artist like the standard Axes
             artists = self.track_workspace_artist(
-                workspace, plotfunctions_func(self, *args, **kwargs), _update_data, is_normalized=is_normalized
+                workspace, plotfunctions_func(self, *args, **kwargs), _update_data, normalization=normalization
             )
             try:
                 return artists[-1]
@@ -1625,7 +1632,7 @@ class _WorkspaceArtists(object):
         self,
         artists,
         data_replace_cb,
-        is_normalized,
+        normalization,
         workspace_name=None,
         spec_num=None,
         is_spec=True,
@@ -1637,7 +1644,7 @@ class _WorkspaceArtists(object):
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
         :param data_replace_cb: A reference to a callable with signature (artists, workspace) -> new_artists
-        :param is_normalized: bool specifying whether the line being plotted is a distribution
+        :param normalization: bool specifying whether the line being plotted is a distribution
         :param workspace_name: String. The name of the associated workspace
         :param spec_num: The spectrum number of the spectrum used to plot the artist
         :param is_spec: True if spec_num represents a spectrum rather than a bin
@@ -1653,7 +1660,7 @@ class _WorkspaceArtists(object):
         self.spec_num = spec_num
         self.is_spec = is_spec
         self.workspace_index = self._get_workspace_index()
-        self.is_normalized = is_normalized
+        self.normalization = normalization
         self.log_name = log_name
         self.filtered = filtered
         self.expt_info_index = expt_info_index
@@ -1750,3 +1757,6 @@ class _WorkspaceArtists(object):
                 hiddenChar = "⁪"
                 new_workspace_name = hiddenChar + new_workspace_name
             artist.set_label(re.sub(rf"\b{old_workspace_name}\b", new_workspace_name, prev_label))
+
+    def is_normalized_by_bin_width(self):
+        return self.normalization == PlotNormalizationType.BIN_WIDTH

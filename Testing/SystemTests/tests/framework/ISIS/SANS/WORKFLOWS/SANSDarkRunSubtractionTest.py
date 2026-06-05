@@ -644,7 +644,7 @@ class DarkRunSubtractionTestSystemTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(DarkRunSubtractionTest, "test"))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(DarkRunSubtractionTest))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)
         if res.wasSuccessful():

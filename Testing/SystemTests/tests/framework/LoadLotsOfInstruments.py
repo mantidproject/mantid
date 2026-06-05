@@ -16,8 +16,7 @@ EXPECTED_EXT = ".expected"
 
 
 class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
-    @staticmethod
-    def _test_clones():
+    def _test_clones(self):
         r"""Test latest definition files for certain sets of instrument names are actually the same
         Example: we test that CG2_Definition.xml and GPSANS_Definition.xml have the same contents except for
         strings 'CG2' and 'GPSANS'.
@@ -26,10 +25,25 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         for file_type in ("_Definition.xml", "_Parameters.xml"):
             for clone_set in (("CG2", "GPSANS"), ("CG3", "BIOSANS")):
                 original = clone_set[0]  # first item to which we compare the rest of the clones
-                original_file = open(os.path.join(instrument_directory, original + file_type)).read()
+                with open(os.path.join(instrument_directory, original + file_type)) as f:
+                    original_file = f.read()
                 for clone in clone_set[1:]:
-                    clone_file = open(os.path.join(instrument_directory, clone + file_type)).read()
-                    assert original_file == clone_file.replace(clone, original)
+                    with open(os.path.join(instrument_directory, clone + file_type)) as f:
+                        clone_file = f.read()
+                    self.assertEqual(
+                        self._remove_file_def_tags(original_file).replace(original, clone), self._remove_file_def_tags(clone_file)
+                    )
+
+    @staticmethod
+    def _remove_tag(txt, tag):
+        tag_start = txt.find(f"<{tag}")
+        tag_end = tag_start + txt[tag_start:].find(">") + 1
+        return txt[:tag_start] + txt[tag_end:]
+
+    def _remove_file_def_tags(self, txt):
+        # remove the <instrument ...> block and
+        # <parameter-file ...>
+        return self._remove_tag(self._remove_tag(txt, "instrument"), "parameter-file")
 
     def __getInstrumentsToSkip__(self):
         """

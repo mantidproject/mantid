@@ -44,10 +44,10 @@ class TextureCorrectionPresenter(AlgorithmObserver):
 
         self.ws_names = []
         self.ws_info = {}
+        self.instrument = "ENGINX"
 
         self.calibration_observer = CalibrationObserver(self)
-        self.current_calibration = CalibrationInfo()
-        self.instrument = "ENGINX"
+        self.current_calibration = CalibrationInfo(instrument=self.instrument)
         self.rb_num = None
 
         self.correction_notifier = GenericObservable()
@@ -242,6 +242,7 @@ class TextureCorrectionPresenter(AlgorithmObserver):
         instrument = INSTRUMENT_DICT[instrument]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
+        self.current_calibration = CalibrationInfo(instrument=self.instrument)
 
     def update_custom_shape_finder_vis(self):
         self.view.set_finder_gauge_vol_visible(self.view.get_shape_method() == "Custom Shape")

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "OFFSPEC" valid-from = "2017-01-31T00:00:00">
+<parameter-file instrument = "OFFSPEC" valid-from = "1900-01-31 23:59:59" valid-to = "2100-01-31 23:59:59">
 <component-link name = "OFFSPEC">
   <parameter name="show-signed-theta" type="string">
     <value val="Always" />
@@ -74,6 +74,14 @@
 
   <parameter name="polarization_correction_option" type="string">
     <value val="PA" />
+  </parameter>
+
+  <parameter name="FredrikzeInputSpinStateOrderPA" type="string">
+    <value val="pp, pa, ap, aa" />
+  </parameter>
+
+  <parameter name="FredrikzeInputSpinStateOrderPNR" type="string">
+    <value val="p, a" />
   </parameter>
 
   <parameter name="efficiency_lambda" type="string">

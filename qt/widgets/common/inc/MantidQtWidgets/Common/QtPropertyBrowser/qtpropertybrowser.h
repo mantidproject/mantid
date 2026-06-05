@@ -330,7 +330,7 @@ public:
   void setCurrentItem(QtBrowserItem * /*item*/);
 
 Q_SIGNALS:
-  void currentItemChanged(QtBrowserItem * /*_t1*/);
+  void currentItemChanged(const QtBrowserItem * /*_t1*/);
 
 public Q_SLOTS:
 

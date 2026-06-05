@@ -16,11 +16,10 @@ from mantidqt.widgets.sliceviewer.presenters.masking import Masking
 
 
 class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
-    def __init__(self, ws, data_view: SliceViewerDataView, model: SliceViewerBaseModel = None, disable_masking_override=False):
+    def __init__(self, ws, data_view: SliceViewerDataView, model: SliceViewerBaseModel = None):
         self.model = model or SliceViewerBaseModel(ws)
         self._data_view: SliceViewerDataView = data_view
         self.normalization = False
-        self._disable_masking_override = disable_masking_override
 
         if self._is_masking_disabled:
             self._data_view.deactivate_and_disable_tool(ToolItemText.MASKING)
@@ -129,15 +128,18 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
             data_view.extents_set_enabled(True)
             data_view.switch_line_plots_tool(PixelLinePlot, self)
 
+    def _activate_masking(self) -> None:
+        self._data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
+        self._data_view.deactivate_and_disable_tool(ToolItemText.PAN)
+        self._data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
+        self._data_view.masking = Masking(self._data_view, self.model.ws.name(), auto_update_mask_file=False)
+        self._data_view.masking.new_selector(ToolItemText.RECT_MASKING)  # default to rect masking
+        self._data_view.activate_tool(ToolItemText.RECT_MASKING, True)
+
     def masking(self, active) -> None:
         self._toggle_masking_options(active)
         if active:
-            self._data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
-            self._data_view.deactivate_and_disable_tool(ToolItemText.PAN)
-            self._data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
-            self._data_view.masking = Masking(self._data_view, self.model.ws.name())
-            self._data_view.masking.new_selector(ToolItemText.RECT_MASKING)  # default to rect masking
-            self._data_view.activate_tool(ToolItemText.RECT_MASKING, True)
+            self._activate_masking()
             return
         self._data_view.enable_tool_button(ToolItemText.ZOOM)
         self._data_view.enable_tool_button(ToolItemText.PAN)
@@ -153,11 +155,6 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
 
     @property
     def _is_masking_disabled(self):
-        #  Disable masking if not supported.
-        #  If a use case arises, we could extend support to these areas
-        if self._disable_masking_override:
-            return True
-
         # if not histo workspace
         ws_type = None if not self.model.ws else WorkspaceInfo.get_ws_type(self.model.ws)
         if not ws_type == WS_TYPE.MATRIX:

@@ -705,8 +705,8 @@ QtTreePropertyBrowser::QtTreePropertyBrowser(QWidget *parent, const QStringList 
   d_ptr->q_ptr = this;
 
   d_ptr->init(this, options, darkTopLevel);
-  connect(this, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
-          SLOT(slotCurrentBrowserItemChanged(QtBrowserItem *)));
+  connect(this, SIGNAL(currentItemChanged(const QtBrowserItem *)), this,
+          SLOT(slotCurrentBrowserItemChanged(const QtBrowserItem *)));
 }
 
 /**

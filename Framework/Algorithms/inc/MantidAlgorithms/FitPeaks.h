@@ -276,6 +276,10 @@ private:
   int m_fitIterations;
   // Copy the peak parameters from the last successfully fit peak
   bool m_copyLastGoodPeakParameters;
+  // If true, parameters marked as fixed on the peak function (e.g. parameters
+  // calculated from the instrument geometry) remain fixed during fitting.
+  // If false (default), such parameters are unfixed so they can be refined.
+  bool m_respectFixedPeakParameters;
 
   //-------- Input param init values --------------------------------
   /// input starting parameters' indexes in peak function

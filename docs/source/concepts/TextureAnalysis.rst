@@ -496,7 +496,7 @@ If using a standard grouping, no ``grouping_filepath`` or ``prm_filepath`` is re
    import numpy as np
    from Engineering.texture.TextureUtils import find_all_files, run_focus_script, mk
    from Engineering.common.calibration_info import CalibrationInfo
-   from Engineering.EnggUtils import GROUP
+   from Engineering.common.instrument_config import get_instr_config
    import os
    import shutil
    import string
@@ -507,6 +507,8 @@ If using a standard grouping, no ``grouping_filepath`` or ``prm_filepath`` is re
 
    # First, you need to specify your file directories, If you are happy to use the same root, from experiment
    # to experiment, you can just change this experiment name.
+
+   instr = "ENGINX"
 
    exp_name = "Example"
 
@@ -522,6 +524,7 @@ If using a standard grouping, no ``grouping_filepath`` or ``prm_filepath`` is re
    ceria_run = "305738"
 
    # set the path to the grouping file created by calibration
+   GROUP = get_instr_config(instr).group
    prm_path = None # fr"{root}\Calibration\ENGINX_305738_Texture30.prm"
    grouping = "Texture30" # use "Custom" if you want to provide custom grouping
    groupingfile_path = None # r"C:\Users\Name\block.cal" # if a custom cal/xml grouping file is desired
@@ -538,7 +541,7 @@ If using a standard grouping, no ``grouping_filepath`` or ``prm_filepath`` is re
 
 
    # Define some file paths, can be found in the interface settings
-   full_instr_calib = r"C:\mantid\scripts\Engineering\calib\ENGINX_full_instrument_calibration_193749.nxs"
+   full_instr_calib = get_instr_config(instr).full_instr_calib
 
    ######################### RUN SCRIPT ########################################
 
@@ -593,7 +596,7 @@ Additionally to fitting the peak, the table will also contain a numerical integr
    from os import path, makedirs, scandir
    from Engineering.texture.TextureUtils import find_all_files, fit_all_peaks, mk
    from Engineering.common.calibration_info import CalibrationInfo
-   from Engineering.EnggUtils import GROUP
+   from Engineering.common.instrument_config import get_instr_config
 
    ############### ENGINEERING DIFFRACTION INTERFACE FITTING ANALOGUE #######################
 
@@ -601,6 +604,8 @@ Additionally to fitting the peak, the table will also contain a numerical integr
 
    # First, you need to specify your file directories, If you are happy to use the same root, from experiment
    # to experiment, you can just change this experiment name.
+   instr = "ENGINX"
+
    exp_name = "Example"
 
    # otherwise set root directory here:
@@ -609,6 +614,7 @@ Additionally to fitting the peak, the table will also contain a numerical integr
    # Next the folder contraining the workspaces you want to fit
    file_folder = "Focus"
    # These are likely within a sub-folder specified by the detector grouping
+   GROUP = get_instr_config(instr).group
    grouping = "Texture30"
    prm_path = None
    groupingfile_path = None
@@ -674,7 +680,7 @@ of pole figures over a set of different peaks and parameters.
    from mantid.api import AnalysisDataService as ADS
    from Engineering.texture.TextureUtils import find_all_files, create_pf_loop, get_xtal_structure, mk
    from Engineering.common.calibration_info import CalibrationInfo
-   from Engineering.EnggUtils import GROUP
+   from Engineering.common.instrument_config import get_instr_config
    import os
 
    ############### ENGINEERING DIFFRACTION INTERFACE POLE FIGURE ANALOGUE #######################
@@ -682,6 +688,8 @@ of pole figures over a set of different peaks and parameters.
    ######################### EXPERIMENTAL INFORMATION ########################################
    # First, you need to specify your file directories, If you are happy to use the same root, from experiment
    # to experiment, you can just change this experiment name.
+   instr = "ENGINX"
+
    exp_name = "PostExp-SteelCentre"
 
    # otherwise set root directory here:
@@ -696,6 +704,7 @@ of pole figures over a set of different peaks and parameters.
    # define the columns you would like to create pole figures for
    readout_columns = ["I", "X0"]
    # you need to specify the detector grouping
+   GROUP = get_instr_config(instr).group
    grouping = "Texture30"
    # and some grouping path if not using a standard
    prm_path = None

@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright © 2025 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright ï¿½ 2025 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -232,6 +232,12 @@ void TranslateSampleShape::exec() {
   } else {
     // CSG shapes need to translate XML definition, then use this to set a new shape
     auto csgShape = std::dynamic_pointer_cast<CSGObject>(ei->sample().getShapePtr());
+
+    // add a explicit check that csgShape is not null before dereferencing
+    // (this should already be the case anyway)
+    if (!csgShape) {
+      throw std::runtime_error("Input sample does not have a valid CSG shape!");
+    }
 
     // get shape xml
     const std::string &origXML = csgShape->getShapeXML();

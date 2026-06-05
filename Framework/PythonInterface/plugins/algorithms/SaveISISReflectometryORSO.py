@@ -29,6 +29,8 @@ class Prop:
     WRITE_RESOLUTION = "WriteResolution"
     INCLUDE_EXTRA_COLS = "IncludeAdditionalColumns"
     FILENAME = "Filename"
+    MODEL = "ModelDescription"
+    VALIDATION = "ValidateModel"
 
 
 class ReflectometryDataset:
@@ -230,6 +232,20 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             "save into the Nexus format",
         )
 
+        self.declareProperty(
+            name=Prop.MODEL,
+            defaultValue="",
+            direction=Direction.Input,
+            doc="The model description of the sample.",
+        )
+
+        self.declareProperty(
+            name=Prop.VALIDATION,
+            defaultValue=False,
+            direction=Direction.Input,
+            doc="Whether or not to validate the model provided to `ModelDescription`.",
+        )
+
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
@@ -271,7 +287,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         # Create the file contents
         for refl_dataset in self._create_and_sort_refl_datasets():
-            orso_saver.add_dataset(self._create_orso_dataset(refl_dataset))
+            data = self._create_orso_dataset(refl_dataset)
+            if data is None:
+                return
+            orso_saver.add_dataset(data)
 
         # Write the file to disk in the relevant ORSO format
         save_filepath = Path(orso_saver.filename)
@@ -325,6 +344,9 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     def _create_orso_dataset(self, refl_dataset: ReflectometryDataset) -> MantidORSODataset:
         data_columns = self._create_data_columns(refl_dataset)
         dataset = self._create_dataset_with_mandatory_header(data_columns, refl_dataset)
+        if dataset.dataset is None:
+            self.log().error("An ORSO file cannot be saved because there was an issue while validating the model description.")
+            return None
         self._add_optional_header_info(dataset, refl_dataset)
         return dataset
 
@@ -414,6 +436,8 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             creator_name=self.name(),
             creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
             enable_instrument_settings=refl_dataset.is_polarized,  # instrument settings only for polarization data
+            model=self.getProperty(Prop.MODEL).value,
+            validate=self.getProperty(Prop.VALIDATION).value,
         )
 
     def _add_optional_header_info(self, dataset: MantidORSODataset, refl_dataset: ReflectometryDataset) -> None:

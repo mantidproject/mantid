@@ -7,16 +7,29 @@
 # pylint: disable=no-init
 
 import systemtesting
+import mantid  # noqa
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from ISISCommandInterface import AssignCan, AssignSample, Detector, Gravity, LOQ, MaskFile, Set2D, SetDetectorOffsets, WavRangeReduction
+from sans.command_interface.ISISCommandInterface import (
+    LOQ,
+    Set2D,
+    Detector,
+    MaskFile,
+    SetDetectorOffsets,
+    Gravity,
+    AssignSample,
+    AssignCan,
+    WavRangeReduction,
+    UseCompatibilityMode,
+)
 
 # Test is giving odd results on Linux, but only this 2D one.
 from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)
-class SANSLOQCan2D(systemtesting.MantidSystemTest):
+class SANSLOQCan2DTest(systemtesting.MantidSystemTest):
     def runTest(self):
+        UseCompatibilityMode()
         LOQ()
         Set2D()
         Detector("main-detector-bank")
@@ -25,8 +38,8 @@ class SANSLOQCan2D(systemtesting.MantidSystemTest):
         SetDetectorOffsets("REAR", -1.0, 1.0, 0.0, 0.0, 0.0, 0.0)
         Gravity(True)
 
-        AssignSample("99630.RAW")
-        AssignCan("99631.RAW")
+        AssignSample("99630.RAW")  # They file seems to be named wrongly.
+        AssignCan("99631.RAW")  # The file seems to be named wrongly.
 
         WavRangeReduction(None, None, False)
 
@@ -38,5 +51,4 @@ class SANSLOQCan2D(systemtesting.MantidSystemTest):
         self.disableChecking.append("Instrument")
         # when comparing LOQ files you seem to need the following
         self.disableChecking.append("Axes")
-
-        return "99630main_2D_2.2_10.0", "SANSLOQCan2D.nxs"
+        return "99630_main_2D_2.2_10.0", "SANSLOQCan2D.nxs"

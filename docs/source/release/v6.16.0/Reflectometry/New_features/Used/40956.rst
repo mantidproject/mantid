@@ -1,0 +1,1 @@
+- The :ref:`Reduction Preview <refl_preview>` tab in the ``ISIS Reflectometry`` interface now has a checkbox to toggle the Y-axis scale between log and symlog. A line edit has also been added to set the linthresh value.

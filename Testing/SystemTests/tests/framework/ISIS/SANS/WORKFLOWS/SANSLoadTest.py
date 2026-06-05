@@ -543,8 +543,8 @@ class SANSLoadDataRunnerTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(SANSLoadFactoryTest, "test"))
-        suite.addTest(unittest.makeSuite(SANSLoadTest, "test"))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(SANSLoadFactoryTest))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(SANSLoadTest))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)
         if res.wasSuccessful():

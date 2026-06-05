@@ -304,7 +304,7 @@ class SANSBatchReductionRunnerTest(MantidSystemTest):
 
     def runTest(self):
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(SANSBatchReductionTest, "test"))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(SANSBatchReductionTest))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)
         if res.wasSuccessful():

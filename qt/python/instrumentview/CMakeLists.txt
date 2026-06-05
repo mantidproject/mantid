@@ -9,7 +9,6 @@ set(PYTHON_TEST_FILES
     instrumentview/test/test_component_selection_utils.py
     instrumentview/test/test_component_tree_model.py
     instrumentview/test/test_component_tree_presenter.py
-    instrumentview/test/test_convert_units_calculator.py
     instrumentview/test/test_presenter.py
     instrumentview/test/test_model.py
     instrumentview/test/test_view.py
@@ -26,6 +25,8 @@ set(PYTHON_TEST_FILES
     instrumentview/Projections/test/test_spherical_projection.py
     instrumentview/renderers/test/test_renderers.py
     instrumentview/renderers/test/test_side_by_side_shape_renderer.py
+    instrumentview/isisreflectometry/test/test_reflectometry_instrument_view_presenter.py
+    instrumentview/isisreflectometry/test/test_reflectometry_instrument_view_view.py
 )
 
 # Tests

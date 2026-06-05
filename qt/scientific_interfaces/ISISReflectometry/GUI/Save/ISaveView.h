@@ -45,11 +45,13 @@ public:
   virtual void setSavePath(const std::string &path) const = 0;
   virtual std::string getPrefix() const = 0;
   virtual std::string getFilter() const = 0;
+  virtual std::string getModel() const = 0;
   virtual bool getRegexCheck() const = 0;
   virtual std::string getCurrentWorkspaceName() const = 0;
   virtual std::vector<std::string> getSelectedWorkspaces() const = 0;
   virtual std::vector<std::string> getSelectedParameters() const = 0;
   virtual int getFileFormatIndex() const = 0;
+  virtual bool getValidateModelCheck() const = 0;
   virtual bool getHeaderCheck() const = 0;
   virtual bool getQResolutionCheck() const = 0;
   virtual bool getAdditionalColumnsCheck() const = 0;
@@ -84,6 +86,8 @@ public:
   virtual void disableSaveToSingleFileCheckBox() = 0;
   virtual void enableSaveIndividualRowsCheckbox() = 0;
   virtual void disableSaveIndividualRowsCheckbox() = 0;
+  virtual void showModelEditTextBox() = 0;
+  virtual void hideModelEditTextBox() = 0;
 
   virtual void showFilterEditValid() = 0;
   virtual void showFilterEditInvalid() = 0;

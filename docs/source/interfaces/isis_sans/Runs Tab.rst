@@ -199,8 +199,3 @@ Save Options
 | **Use optimizations**    | (Strongly Recommended) This will reuse already loaded data rather than reloading it     |
 |                          | for each run in the table, speeding up processing considerably.                         |
 +--------------------------+-----------------------------------------------------------------------------------------+
-| **Plot results**         | If enabled, data is automatically plotted on a graph as it is processed.                |
-|                          | The check box is hidden by default, and can be enabled by adding                        |
-|                          | `sans.isis_sans.plotResults=On` in your mantid.user.properties, see                     |
-|                          | :ref:`Properties File` for more information                                             |
-+--------------------------+-----------------------------------------------------------------------------------------+

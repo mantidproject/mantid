@@ -207,6 +207,50 @@
          </property>
         </widget>
        </item>
+       <item>
+            <layout class="QVBoxLayout" name="symlog_controls_layout">
+                <item>
+                    <widget class="QCheckBox" name="set_yaxis_symlog_checkbox">
+                        <property name="text">
+                            <string>Set Y-Axis Symlog</string>
+                        </property>
+                        <property name="checked">
+                            <bool>false</bool>
+                        </property>
+                    </widget>
+                </item>
+                <item>
+                    <widget class="QWidget" name="linthresh_container">
+                        <property name="visible">
+                            <bool>false</bool>
+                        </property>
+                        <layout class="QHBoxLayout" name="linthresh_layout">
+                            <item>
+                                <widget class="QLabel" name="linthresh_label">
+                                    <property name="text">
+                                        <string>Linthresh:</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QLineEdit" name="linthresh_line_edit">
+                                    <property name="placeholderText">
+                                        <string>1e-4</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QPushButton" name="apply_button">
+                                    <property name="text">
+                                        <string>Apply</string>
+                                    </property>
+                                </widget>
+                            </item>
+                        </layout>
+                    </widget>
+                </item>
+            </layout>
+        </item>
       </layout>
      </item>
     </layout>

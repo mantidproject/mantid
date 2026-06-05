@@ -1,0 +1,1 @@
+- The :ref:`Reduction Preview <refl_preview>` tab in the ``ISIS Reflectometry`` interface now supports creating mask and inverted mask tables using rectangular, elliptical and polygonal selectors.

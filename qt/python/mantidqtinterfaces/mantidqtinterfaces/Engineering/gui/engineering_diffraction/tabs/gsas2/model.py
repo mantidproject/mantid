@@ -280,6 +280,7 @@ class GSAS2Model:
 
     def set_components_from_inputs(self, load_params: list, refinement_params: list, project: str, rb_number: Optional[str] = None) -> None:
         self.config.path_to_gsas2 = output_settings.get_path_to_gsas2()
+        self.config.timeout = output_settings.get_timeout()
         self.save_directories.project_name = project
         self.organize_save_directories(rb_number)
 

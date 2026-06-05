@@ -16,6 +16,7 @@ from contextlib import contextmanager
 from collections import OrderedDict
 from copy import copy
 from functools import partial
+import operator
 
 # third party imports
 from matplotlib.container import ErrorbarContainer
@@ -30,7 +31,7 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 # mantid imports
 from mantid.api import AnalysisDataService as ads
 from mantid.plots import datafunctions, MantidAxes, axesfunctions, MantidAxes3D, LegendProperties
-from mantid.plots.utility import zoom, MantidAxType, legend_set_draggable
+from mantid.plots.utility import zoom, MantidAxType, legend_set_draggable, PlotNormalizationType
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties
@@ -486,24 +487,38 @@ class FigureInteraction(object):
             menu.addMenu(axes_menu)
 
     def _add_normalization_option_menu(self, menu, ax):
-        # Check if toggling normalization makes sense
-        can_toggle_normalization = self._can_toggle_normalization(ax)
-        if not can_toggle_normalization:
+        can_toggle_normalize_by_bin_width = self._can_toggle_normalize_by_bin_width(ax)
+        can_normalise_by_inverse_q = self._can_normalize_by_q(ax)
+        if not can_toggle_normalize_by_bin_width and not can_normalise_by_inverse_q:
             return None
 
         # Create menu
+        actions = []
         norm_menu = QMenu("Normalization", menu)
         norm_actions_group = QActionGroup(norm_menu)
-        none_action = norm_menu.addAction("None", lambda: self._set_normalization_none(ax))
-        norm_action = norm_menu.addAction("Bin Width", lambda: self._set_normalization_bin_width(ax))
-        for action in [none_action, norm_action]:
+        none_action = norm_menu.addAction("None", lambda: self._normalization_type_changed(ax, PlotNormalizationType.NONE))
+        actions.append(none_action)
+        bin_width_action = None
+        inverse_q_action = None
+        if can_toggle_normalize_by_bin_width:
+            bin_width_action = norm_menu.addAction(
+                "Bin Width", lambda: self._normalization_type_changed(ax, PlotNormalizationType.BIN_WIDTH)
+            )
+            actions.append(bin_width_action)
+        if can_normalise_by_inverse_q:
+            inverse_q_action = norm_menu.addAction(
+                "Q^-4", lambda: self._normalization_type_changed(ax, PlotNormalizationType.INVERSE_Q_FOURTH_POWER)
+            )
+            actions.append(inverse_q_action)
+        for action in actions:
             norm_actions_group.addAction(action)
             action.setCheckable(True)
 
-        # Update menu state
-        is_normalized = self._is_normalized(ax)
-        if is_normalized:
-            norm_action.setChecked(True)
+        normalization = self._get_normalization_from_artists(ax)
+        if normalization == PlotNormalizationType.BIN_WIDTH and can_toggle_normalize_by_bin_width:
+            bin_width_action.setChecked(True)
+        elif normalization == PlotNormalizationType.INVERSE_Q_FOURTH_POWER and can_normalise_by_inverse_q:
+            inverse_q_action.setChecked(True)
         else:
             none_action.setChecked(True)
 
@@ -793,21 +808,22 @@ class FigureInteraction(object):
         if hasattr(event, "button") and event.button is not None:
             self.redraw_annotations()
 
-    def _is_normalized(self, ax):
+    def _normalization_type_changed(self, ax, norm_type: PlotNormalizationType):
+        if norm_type == self._get_normalization_from_artists(ax):
+            return
+        self._toggle_normalization(ax, norm_type)
+
+    @staticmethod
+    def _get_normalization_from_artists(ax):
         artists = [art for art in ax.tracked_workspaces.values()]
-        return all(art[0].is_normalized for art in artists)
+        normalizations = [art[0].normalization for art in artists]
+        if normalizations:
+            all_the_same = all(map(operator.eq, normalizations[1:], normalizations[:-1]))
+            if all_the_same:
+                return normalizations[0]
+        return PlotNormalizationType.NONE
 
-    def _set_normalization_bin_width(self, ax):
-        if self._is_normalized(ax):
-            return
-        self._toggle_normalization(ax)
-
-    def _set_normalization_none(self, ax):
-        if not self._is_normalized(ax):
-            return
-        self._toggle_normalization(ax)
-
-    def _toggle_normalization(self, selected_ax):
+    def _toggle_normalization(self, selected_ax, normalization: PlotNormalizationType):
         if figure_type(self.canvas.figure) == FigureType.Image and len(self.canvas.figure.get_axes()) > 1:
             axes = datafunctions.get_axes_from_figure(self.canvas.figure)
         else:
@@ -839,7 +855,7 @@ class FigureInteraction(object):
                 if colorbar_log:
                     self._change_colorbar_axes(Normalize)
 
-            self._change_plot_normalization(ax)
+            self._change_plot_normalization(ax, normalization)
 
             if ax.lines:  # Relim causes issues with colour plots, which have no lines.
                 ax.relim()
@@ -869,14 +885,14 @@ class FigureInteraction(object):
 
         self.canvas.draw()
 
-    def _change_plot_normalization(self, ax):
-        is_normalized = self._is_normalized(ax)
+    def _change_plot_normalization(self, ax, normalization: PlotNormalizationType):
+        current_normalization = self._get_normalization_from_artists(ax)
         for arg_set in ax.creation_args:
             if arg_set["function"] == "contour":
                 continue
             if "workspaces" in arg_set and arg_set["workspaces"] in ax.tracked_workspaces:
                 workspace = ads.retrieve(arg_set["workspaces"])
-                arg_set["distribution"] = is_normalized
+                arg_set["distribution"] = current_normalization == PlotNormalizationType.BIN_WIDTH
                 if "specNum" not in arg_set:
                     if "wkspIndex" in arg_set:
                         arg_set["specNum"] = workspace.getSpectrum(arg_set.pop("wkspIndex")).getSpectrumNo()
@@ -894,7 +910,10 @@ class FigureInteraction(object):
                     arg_set_copy.pop("specNum")
                 for ws_artist in ax.tracked_workspaces[workspace.name()]:
                     if ws_artist.spec_num == arg_set_copy.get("specNum"):
-                        ws_artist.is_normalized = not is_normalized
+                        ws_artist.normalization = normalization
+
+                        if "normalization_type" not in arg_set_copy:
+                            arg_set_copy["normalization_type"] = normalization
 
                         # This check is to prevent the contour lines being re-plotted using the colorfill plot args.
                         if isinstance(ws_artist._artists[0], QuadContourSet):
@@ -907,7 +926,7 @@ class FigureInteraction(object):
                         else:
                             ws_artist.replace_data(workspace, arg_set_copy)
 
-    def _can_toggle_normalization(self, ax):
+    def _can_toggle_normalize_by_bin_width(self, ax):
         """
         Return True if no plotted workspaces are distributions, all curves
         on the figure are either distributions or non-distributions,
@@ -916,7 +935,7 @@ class FigureInteraction(object):
         :param ax: A MantidAxes object
         :return: bool
         """
-        plotted_normalized = []
+        plotted_normalized_by_bin_width = []
         if not ax.creation_args:
             return False
         axis = ax.creation_args[0].get("axis", None)
@@ -926,12 +945,24 @@ class FigureInteraction(object):
             else:
                 is_dist = True
             if axis != MantidAxType.BIN and not is_dist and ax.data_replaced:
-                plotted_normalized += [a.is_normalized for a in artists]
+                plotted_normalized_by_bin_width += [a.normalization == PlotNormalizationType.BIN_WIDTH for a in artists]
             else:
                 return False
-        if all(plotted_normalized) or not any(plotted_normalized):
+        if all(plotted_normalized_by_bin_width) or not any(plotted_normalized_by_bin_width):
             return True
         return False
+
+    def _can_normalize_by_q(self, ax):
+        fig_type = figure_type(self.canvas.figure)
+        if fig_type not in [FigureType.Line, FigureType.Errorbar, FigureType.Waterfall]:
+            return False
+
+        plotted_x_is_q = []
+        for workspace_name, _ in ax.tracked_workspaces.items():
+            ws = ads.retrieve(workspace_name)
+            plotted_x_is_q.append(ws.getAxis(0).getUnit().unitID() == "MomentumTransfer")
+
+        return all(plotted_x_is_q)
 
     def _quick_change_axes(self, ax, x_scale_type=None, y_scale_type=None):
         """

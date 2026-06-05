@@ -10,7 +10,7 @@ from typing import List, Sequence, Tuple, Optional
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.kernel import SpecialCoordinateSystem
-from mantid.plots.datafunctions import get_indices, get_normalization, get_md_data2d_bin_bounds
+from mantid.plots.datafunctions import get_indices, get_md_normalization, get_md_data2d_bin_bounds
 from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
 
 from .base_model import SliceViewerBaseModel
@@ -181,7 +181,7 @@ class SliceViewerModel(SliceViewerBaseModel):
 
     def get_data_MDH(self, slicepoint, transpose=False):
         indices, _ = get_indices(self.get_ws(), slicepoint=slicepoint)
-        mdh_normalization, _ = get_normalization(self.get_ws())
+        mdh_normalization, _ = get_md_normalization(self.get_ws())
         _, _, z = get_md_data2d_bin_bounds(self.get_ws(), mdh_normalization, indices, not (transpose))
         return z
 
@@ -196,7 +196,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         :param transpose: If true then transpose the data before returning
         """
         mdh = self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices)
-        mdh_normalization, _ = get_normalization(mdh)
+        mdh_normalization, _ = get_md_normalization(mdh)
         _, _, z = get_md_data2d_bin_bounds(mdh, mdh_normalization, transpose=not (transpose))
         return z
 

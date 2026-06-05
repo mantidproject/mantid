@@ -1,0 +1,1 @@
+- Fixed a bug where error bar settings (CapSize, Cap Thickness, Width, Error Every) from :menuselection:`File --> Settings --> Plots --> Error Bars` were not applied when plotting a spectrum with errors.

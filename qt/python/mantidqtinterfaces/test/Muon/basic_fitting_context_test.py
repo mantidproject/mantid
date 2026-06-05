@@ -95,6 +95,15 @@ class BasicFittingContextTest(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.fitting_context.single_fit_functions = self.single_fit_functions
 
+    def test_that_single_fit_functions_with_composite_does_not_assert_false_when_num_of_datasets_equal_nfunctions(self):
+        comp_function = FunctionFactory.createFunction("CompositeFunction")
+        comp_function.add(FunctionFactory.createFunction("FlatBackground"))
+        comp_function.add(FunctionFactory.createFunction("FlatBackground"))
+        self.fitting_context.dataset_names = ["Name1", "Name2"]
+        self.single_fit_functions = [comp_function]
+        self.fitting_context.single_fit_functions = self.single_fit_functions
+        self.assertEqual(self.fitting_context.single_fit_functions, self.single_fit_functions)
+
     def test_that_fit_statuses_will_raise_if_the_number_of_datasets_is_smaller_than_the_provided_list_size(self):
         self.fitting_context.dataset_names = self.dataset_names
         with self.assertRaises(AssertionError):

@@ -6,20 +6,32 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-few-public-methods
 
-# test batch mode with sans2d and selecting a period in batch mode
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from ISISCommandInterface import AssignSample, Detector, Gravity, MaskFile, SANS2D, Set1D, WavRangeReduction
-from SANSBatchMode import BatchReduce
+
+from mantid.api import AnalysisDataService, FileFinder
+from sans.command_interface.ISISCommandInterface import (
+    SANS2D,
+    Set1D,
+    Detector,
+    MaskFile,
+    Gravity,
+    UseCompatibilityMode,
+    AssignSample,
+    WavRangeReduction,
+    BatchReduce,
+)
+
+# test batch mode with sans2d and selecting a period in batch mode
 from sans.common.enums import SANSInstrument
-from mantid.api import mtd, FileFinder
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DMultiPeriodSingle(systemtesting.MantidSystemTest):
+class SANS2DMultiPeriodSingleTest(systemtesting.MantidSystemTest):
     reduced = ""
 
     def runTest(self):
+        UseCompatibilityMode()
         SANS2D()
         Set1D()
         Detector("rear-detector")
@@ -36,12 +48,13 @@ class SANS2DMultiPeriodSingle(systemtesting.MantidSystemTest):
         self.disableChecking.append("SpectraMap")
         self.disableChecking.append("Axes")
         self.disableChecking.append("Instrument")
+        return AnalysisDataService[self.reduced][6].name(), "SANS2DBatch.nxs"
 
-        return mtd[self.reduced][6].name(), "SANS2DBatch.nxs"
 
-
-class SANS2DMultiPeriodBatch(SANS2DMultiPeriodSingle):
+@ISISSansSystemTest(SANSInstrument.SANS2D)
+class SANS2DMultiPeriodBatchTest(SANS2DMultiPeriodSingleTest):
     def runTest(self):
+        UseCompatibilityMode()
         SANS2D()
         Set1D()
         Detector("rear-detector")
@@ -51,4 +64,4 @@ class SANS2DMultiPeriodBatch(SANS2DMultiPeriodSingle):
         csv_file = FileFinder.getFullPath("SANS2D_multiPeriodTests.csv")
 
         BatchReduce(csv_file, "nxs", saveAlgs={})
-        self.reduced = "5512_SANS2DBatch"
+        self.reduced = "5512_SANS2DBatch_rear_1DPhi-45.0_45.0"

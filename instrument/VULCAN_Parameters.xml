@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="VULCAN" valid-from="2021-02-11">
+<parameter-file instrument="VULCAN" valid-from="2006-01-31 23:59:59" valid-to = "2100-01-31 23:59:59">
 <!--Rough estimates based on diamond test data (with only 3 peaks!)-->
 <!--DO NOT USE FOR REFINEMENTS-->
 

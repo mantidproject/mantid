@@ -37,6 +37,9 @@ from mantidqt.plotting.functions import (
     pcolormesh_from_names,
     plot_surface,
     plot_wireframe,
+    pcolormesh,
+    _filter_pcolormesh_inputs,
+    _validate_pcolormesh_inputs,
 )
 
 IMAGE_PLOT_OPTIONS = {
@@ -434,6 +437,24 @@ class FunctionsTest(TestCase):
         # the colorbar limits default to +-0.1 when it can't find max and min of array
         self.assertNotEqual(cmax, 0.1)
         self.assertNotEqual(cmin, -0.1)
+
+    def test_filter_pcolormesh_inputs(self):
+        ws1 = CreateWorkspace(DataX=[1, 2, 3], DataY=[2] * 3, NSpec=1)
+        ws2 = CreateWorkspace(DataX=[1, 2, 3], DataY=[2] * 3, NSpec=1)
+        ws3 = CreateWorkspace(DataX=[1, 2], DataY=[2] * 2, NSpec=1)
+        workspaces = [ws1, ws2, ws3]
+        filtered_workspaces = _filter_pcolormesh_inputs(workspaces)
+        self.assertEqual(filtered_workspaces, [ws1, ws2])
+
+    def test_validate_pcolormesh_inputs(self):
+        ws = CreateWorkspace(DataX=[1, 2, 3], DataY=[2] * 3, NSpec=1)
+        table = WorkspaceFactory.Instance().createTable()
+        workspaces = [ws, table]
+        self.assertRaises(ValueError, _validate_pcolormesh_inputs, workspaces)
+
+    def test_pcolormesh_returns_none_with_invalid_inputs(self):
+        ws = CreateWorkspace(DataX=[1, 2], DataY=[2] * 2, NSpec=1)
+        self.assertEqual(pcolormesh([ws, ws]), None)
 
 
 if __name__ == "__main__":

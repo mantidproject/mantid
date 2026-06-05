@@ -4,58 +4,59 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, QtCore, QtGui
+from qtpy import QtWidgets, QtCore
 from os import path
 
 from mantidqt.utils.qt import load_ui
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
-from fnmatch import fnmatch
-from os.path import splitext
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.filtered_file_finder import FilteredFileFinderWidget
 
 Ui_data, _ = load_ui(__file__, "data_widget.ui")
 
+_unit_filter_values = {
+    "No Unit Filter": "",
+    "TOF": "TOF",
+    "dSpacing": "dSpacing",
+}
 
-class FileFilterProxyModel(QtCore.QSortFilterProxyModel):
-    text_filter = None
+_region_filter_values = {
+    "No Region Filter": "",
+    "1 (North)": "bank_1",
+    "2 (South)": "bank_2",
+    "Both Banks": "bank_",
+    "Custom": "Custom",
+    "Cropped": "Cropped",
+    "Texture": "Texture",
+}
 
-    def __init__(self, parent=None):
-        super(FileFilterProxyModel, self).__init__(parent)
 
-    def filterAcceptsRow(self, source_row, source_parent):
-        model = self.sourceModel()
-        index0 = model.index(source_row, 0, source_parent)
-        fname = model.fileName(index0)
-        fname = splitext(fname)[0]
-
-        if self.text_filter is None:
-            return True
-        else:
-            return model.isDir(index0) or fnmatch(fname, self.text_filter)
-
-    def sort(self, column, order):
-        self.sourceModel().sort(column, order)
+def _file_filter_generator(filter_options: dict[str, str]) -> str:
+    region_option = filter_options["Region"]
+    xunit = filter_options["Unit"]
+    if xunit == "No Unit Filter":
+        return f"*{_region_filter_values[region_option]}*"
+    else:
+        return f"*{_region_filter_values[region_option]}*_{_unit_filter_values[xunit]}*"
 
 
 class FittingDataView(QtWidgets.QWidget, Ui_data):
     sig_enable_load_button = QtCore.Signal(bool)
     sig_enable_inspect_bg_button = QtCore.Signal(bool)
-    proxy_model = None
+    finder_data: FilteredFileFinderWidget
 
     def __init__(self, parent=None):
         super(FittingDataView, self).__init__(parent)
         self.setupUi(self)
         # file finder
         self.finder_data.readSettings(output_settings.INTERFACES_SETTINGS_GROUP + "/" + output_settings.ENGINEERING_PREFIX)
-        self.finder_data.setUseNativeWidget(False)
-        self.proxy_model = FileFilterProxyModel()
-        self.finder_data.setProxyModel(self.proxy_model)
         self.finder_data.setLabelText("")
         self.finder_data.isForRunFiles(False)
         self.finder_data.allowMultipleFiles(True)
         self.finder_data.setFileExtensions([".nxs"])
-        # xunit combo box
-        self.setup_combo_boxes()
-        self.update_file_filter(self.combo_region.currentText(), self.combo_xunit.currentText())
+        self.finder_data.add_filter("Unit", _unit_filter_values.keys())
+        self.finder_data.add_filter("Region", _region_filter_values.keys())
+        self.finder_data.set_filter_option("Unit", "TOF")
+        self.finder_data.set_filter_generator(_file_filter_generator)
 
     def saveSettings(self):
         self.finder_data.saveSettings(output_settings.INTERFACES_SETTINGS_GROUP + "/" + output_settings.ENGINEERING_PREFIX)
@@ -66,12 +67,6 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
     def set_on_load_clicked(self, slot):
         self.button_load.clicked.connect(slot)
-
-    def set_on_region_changed(self, slot):
-        self.combo_region.currentIndexChanged.connect(lambda: slot(self.combo_region.currentText(), self.combo_xunit.currentText()))
-
-    def set_on_xunit_changed(self, slot):
-        self.combo_xunit.currentIndexChanged.connect(lambda: slot(self.combo_region.currentText(), self.combo_xunit.currentText()))
 
     def set_enable_load_button_connection(self, slot):
         self.sig_enable_load_button.connect(slot)
@@ -190,32 +185,6 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_table_column(self, row, col, value):
         self.get_table_item(row, col).setData(QtCore.Qt.EditRole, int(value))
 
-    def update_file_filter(self, region, xunit):
-        self.proxy_model.text_filter = "*"
-        if region == "1 (North)":
-            self.proxy_model.text_filter += "bank_1"
-        elif region == "2 (South)":
-            self.proxy_model.text_filter += "bank_2"
-        elif region == "Cropped" or region == "Custom":
-            self.proxy_model.text_filter += region
-        elif region == "Texture":
-            self.proxy_model.text_filter += "Texture*"
-        elif region == "Both Banks":
-            self.proxy_model.text_filter += "bank*"
-        if xunit != "No Unit Filter":
-            self.proxy_model.text_filter += "_" + xunit
-        self.proxy_model.text_filter += "*"  # Allows browse for '(No Unit Filter)' with a specified region
-
-        # Keep "No Region/Unit Filter" text grey and other text black
-        for combo_box, current_text in ((self.combo_region, region), (self.combo_xunit, xunit)):
-            if current_text[0:2] == "No":  # No Unit or Region Filter
-                combo_box.setStyleSheet("color: grey")
-                for index in range(1, combo_box.count()):
-                    combo_box.setItemData(index, QtGui.QColor("black"), QtCore.Qt.ForegroundRole)
-            else:
-                combo_box.setStyleSheet("color: black")
-                combo_box.setItemData(0, QtGui.QColor("grey"), QtCore.Qt.ForegroundRole)
-
     # =================
     # Component Getters
     # =================
@@ -251,23 +220,6 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
     def is_searching(self):
         return self.finder_data.isSearching()
-
-    # =================
-    # Internal Setup
-    # =================
-
-    def setup_combo_boxes(self):
-        # set "No Region/Unit Filter" text grey and other text black
-        for combo_box, type_name in ((self.combo_region, "Region"), (self.combo_xunit, "Unit")):
-            combo_box.setEditable(True)
-            combo_box.lineEdit().setReadOnly(True)
-            combo_box.lineEdit().setEnabled(False)
-            no_filter_index = combo_box.findText("No " + type_name + " Filter")
-            combo_box.setItemData(no_filter_index, QtGui.QColor("grey"), QtCore.Qt.ForegroundRole)
-
-        # make TOF default for combo_xunit
-        index = self.combo_xunit.findText("TOF")
-        self.combo_xunit.setCurrentIndex(index)
 
 
 def create_workspace_table(table_column_headers, table_loaded_data, row_count):

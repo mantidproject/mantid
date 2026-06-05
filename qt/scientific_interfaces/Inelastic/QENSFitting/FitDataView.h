@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include <MantidAPI/AnalysisDataServiceObserver.h>
 #include <QTabWidget>
 
 namespace MantidQt {
@@ -25,11 +26,11 @@ namespace Inelastic {
 
 class IFitDataPresenter;
 
-class MANTIDQT_INELASTIC_DLL FitDataView : public QTabWidget, public IFitDataView {
+class MANTIDQT_INELASTIC_DLL FitDataView : public QTabWidget, public IFitDataView, public AnalysisDataServiceObserver {
   Q_OBJECT
 public:
   FitDataView(QWidget *parent);
-  ~FitDataView() override = default;
+  ~FitDataView() override;
 
   void subscribePresenter(IFitDataPresenter *presenter) override;
 
@@ -46,6 +47,9 @@ public:
   bool columnContains(std::string const &columnHeader, std::string const &text) const override;
 
   void displayWarning(const std::string &warning) override;
+  void clearHandle() override;
+  void deleteHandle(const std::string &name, const Workspace_sptr &ws) override;
+  void renameHandle(const std::string &oldName, const std::string &newName) override;
 
 protected slots:
   void notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog);
@@ -65,6 +69,9 @@ private slots:
   void notifyRemoveClicked();
   void notifyUnifyClicked();
   void notifyCellChanged(int row, int column);
+  void notifyADSDelete(const std::string &wsName) const;
+  void notifyADSRename(const std::string &oldName, const std::string &newName) const;
+  void notifyADSClear() const;
 
 private:
   QStringList m_HeaderLabels;

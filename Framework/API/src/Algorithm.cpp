@@ -175,6 +175,11 @@ void Algorithm::setChild(const bool isChild) {
  */
 void Algorithm::enableHistoryRecordingForChild(const bool on) { m_recordHistoryForChild = on; }
 
+/** Change the state of the processGroups history recording flag.
+ * @param on :: The new state of the flag
+ */
+void Algorithm::enableHistoryRecordingForProcessGroups(const bool on) { m_recordHistoryForProcessGroups = on; }
+
 /** Do we ALWAYS store in the AnalysisDataService? This is set to true
  * for python algorithms' child algorithms
  *
@@ -1298,13 +1303,20 @@ bool Algorithm::doCallProcessGroups(Mantid::Types::Core::DateAndTime &startTime)
     // Get how long this algorithm took to run
     const float duration = timer.elapsed();
 
-    m_history = std::make_shared<AlgorithmHistory>(this, startTime, duration, ++g_execCount);
-    if (trackingHistory() && m_history) {
+    if (trackingHistory()) {
+      if (m_recordHistoryForProcessGroups && m_history) {
+        m_history->fillAlgorithmHistory(this, startTime, duration, g_execCount);
+      } else {
+        m_history = std::make_shared<AlgorithmHistory>(this, startTime, duration, ++g_execCount);
+      }
       // find any further outputs created by the execution
       WorkspaceVector outputWorkspaces;
       const bool checkADS{true};
       findWorkspaces(outputWorkspaces, Direction::Output, checkADS);
       fillHistory(outputWorkspaces);
+      if (m_recordHistoryForProcessGroups) {
+        linkHistoryWithLastChild();
+      }
     }
 
     // in the base processGroups each individual exec stores its outputs

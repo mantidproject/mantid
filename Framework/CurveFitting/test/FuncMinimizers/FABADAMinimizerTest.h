@@ -27,7 +27,7 @@ using namespace Mantid::CurveFitting::Functions;
 
 namespace {
 
-std::string const PDF_GROUP_NAME = "__PDF_Workspace";
+std::string const DEFAULT_PDF_GROUP_NAME = "__PDF_Workspace";
 
 MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2, size_t XYLength = 20) {
   MatrixWorkspace_sptr ws2(new WorkspaceTester);
@@ -78,8 +78,8 @@ void doTestExpDecay(const MatrixWorkspace_sptr &ws2) {
 
   size_t n = fun->nParams();
 
-  TS_ASSERT(AnalysisDataService::Instance().doesExist(PDF_GROUP_NAME));
-  auto const pdfGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(PDF_GROUP_NAME);
+  TS_ASSERT(AnalysisDataService::Instance().doesExist(DEFAULT_PDF_GROUP_NAME));
+  auto const pdfGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(DEFAULT_PDF_GROUP_NAME);
   TS_ASSERT(pdfGroup);
   auto const wsPDF = std::dynamic_pointer_cast<MatrixWorkspace>(pdfGroup->getItem(0));
   TS_ASSERT_EQUALS(wsPDF->getNumberHistograms(), n + 1);
@@ -190,7 +190,7 @@ public:
     size_t nParams = fun->nParams();
 
     // Test PDF workspace
-    auto const PDFGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(PDF_GROUP_NAME);
+    auto const PDFGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(DEFAULT_PDF_GROUP_NAME);
     TS_ASSERT(PDFGroup);
     auto const PDF = std::dynamic_pointer_cast<MatrixWorkspace>(PDFGroup->getItem(0));
     TS_ASSERT_EQUALS(PDF->getNumberHistograms(), nParams + 1);

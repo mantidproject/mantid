@@ -420,6 +420,9 @@ void export_ialgorithm() {
       .def("enableHistoryRecordingForChild", &IAlgorithm::enableHistoryRecordingForChild, (arg("self"), arg("on")),
            "If true then history will be recorded regardless of the child "
            "status")
+      .def("enableHistoryRecordingForProcessGroups", &IAlgorithm::enableHistoryRecordingForProcessGroups,
+           (arg("self"), arg("on")),
+           "If true then parent history will be recorded for algorithms that handle group outputs directly")
       .def("setAlgStartupLogging", &IAlgorithm::setAlgStartupLogging, (arg("self"), arg("enabled")),
            "If true then allow logging of start and end messages")
       .def("getAlgStartupLogging", &IAlgorithm::getAlgStartupLogging, arg("self"),

@@ -2035,34 +2035,26 @@ public:
 
   void test_YUnitLabel_Correct_For_Distribution_Workspace_Custom_m_YUnitLabel_Not_Set() {
     auto testWS = generateTestWorkspaceWithDistributionAndLabelSet(true, "");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Counts per microsecond");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Counts per microsecond");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Counts ($\\mu s$)$^{-1}$");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "Counts ($\\mu s$)$^{-1}$");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false), "Counts per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true), "Counts ($\\mu s$)$^{-1}$");
   }
 
   void test_YUnitLabel_Correct_For_Distribution_Workspace_Custom_m_YUnitLabel_Set() {
     auto testWS = generateTestWorkspaceWithDistributionAndLabelSet(true, "Custom Label");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Custom Label");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Custom Label");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Custom Label");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true), "Custom Label");
   }
 
   void test_YUnitLabel_Correct_For_Non_Distribution_Workspace_Custom_m_YUnitLabel_Not_Set() {
     auto testWS = generateTestWorkspaceWithDistributionAndLabelSet(false, "");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Counts");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Counts per microsecond");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Counts");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "Counts ($\\mu s$)$^{-1}$");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false), "Counts");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true), "Counts");
   }
 
   void test_YUnitLabel_Correct_For_Non_Distribution_Workspace_Custom_m_YUnitLabel_Set() {
     auto testWS = generateTestWorkspaceWithDistributionAndLabelSet(false, "Custom Label");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Custom Label");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Custom Label per microsecond");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Custom Label");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "Custom Label ($\\mu s$)$^{-1}$");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true), "Custom Label");
   }
 
   void test_YUnitLabel_Correct_For_Empty_Y_Labels() {
@@ -2070,20 +2062,16 @@ public:
     testWS->initialize(1, 2, 1);
     testWS->setDistribution(false);
     testWS->getAxis(0)->setUnit("TOF");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), " per microsecond");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "($\\mu s$)$^{-1}$");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true), "");
   }
 
   void test_YUnitLabel_Correct_For_Empty_X_And_Y_Labels() {
     auto testWS = std::make_shared<WorkspaceTester>();
     testWS->initialize(1, 2, 1);
     testWS->setDistribution(false);
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "");
-    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true), "");
   }
 
   void test_findY() {

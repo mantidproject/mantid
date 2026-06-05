@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveSESANS.h"
+#include "MantidDataHandling/FormattingHelpers.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -138,10 +139,10 @@ void SaveSESANS::exec() {
   outfile << "SpinEchoLength Depolarisation Depolarisation_error Wavelength\n";
 
   for (size_t i = 0; i < spinEchoLength.size(); ++i) {
-    outfile << spinEchoLength[i] << " ";
-    outfile << depolarisation[i] << " ";
-    outfile << error[i] << " ";
-    outfile << wavelength[i] << "\n";
+    outfile << formatDouble(spinEchoLength[i]) << " ";
+    outfile << formatDouble(depolarisation[i]) << " ";
+    outfile << formatDouble(error[i]) << " ";
+    outfile << formatDouble(wavelength[i]) << "\n";
   }
 
   outfile.close();

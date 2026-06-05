@@ -12,41 +12,39 @@ class MaskDetectorsIfInputTest(unittest.TestCase):
     def testValidateStartWorkspaceIndexInputs(self):
         # StartWorkspaceIndex > Number of Histograms
         ws = CreateWorkspace(DataX=[0, 1], DataY=[1] * 10, NSpec=10)
-        with self.assertRaises(ValueError) as context:
-            MaskDetectorsIf(
-                InputWorkspace=ws,
-                OutputWorkspace=ws,
-                StartWorkspaceIndex=80,
-            )
-        self.assertIn(
-            "StartWorkspaceIndex should be greater than or equal to 0 and less than 9. Value provided is invalid.", str(context.exception)
+        self.assertRaisesRegex(
+            ValueError,
+            r"StartWorkspaceIndex should be greater than or equal to 0 and less than 9\. Value provided is invalid\.",
+            MaskDetectorsIf,
+            InputWorkspace=ws,
+            OutputWorkspace=ws,
+            StartWorkspaceIndex=80,
         )
 
     def testValidateEndWorkspaceIndexInputs(self):
         # EndWorkspaceIndex > Number of Histograms
         ws = CreateWorkspace(DataX=[0, 1], DataY=[1] * 10, NSpec=10)
-        with self.assertRaises(ValueError) as context:
-            MaskDetectorsIf(
-                InputWorkspace=ws,
-                OutputWorkspace=ws,
-                StartWorkspaceIndex=8,
-                EndWorkspaceIndex=50,
-            )
-        self.assertIn("EndWorkspaceIndex should be greater than 0 and less than 10. Value provided is invalid.", str(context.exception))
+        self.assertRaisesRegex(
+            ValueError,
+            r"EndWorkspaceIndex should be greater than 0 and less than 10\. Value provided is invalid\.",
+            MaskDetectorsIf,
+            InputWorkspace=ws,
+            OutputWorkspace=ws,
+            StartWorkspaceIndex=8,
+            EndWorkspaceIndex=50,
+        )
 
     def testValidateInputs(self):
         # EndWorkspaceIndex < StartWorkspaceIndex
         ws = CreateWorkspace(DataX=[0, 1], DataY=[1] * 10, NSpec=10)
-        with self.assertRaises(RuntimeError) as context:
-            MaskDetectorsIf(
-                InputWorkspace=ws,
-                OutputWorkspace=ws,
-                StartWorkspaceIndex=8,
-                EndWorkspaceIndex=5,
-            )
-        self.assertIn(
-            "EndWorkspaceIndex: EndWorkspaceIndex should be more than StartWorkspaceIndex. Specify a value greater than 8.",
-            str(context.exception),
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"EndWorkspaceIndex: EndWorkspaceIndex should be more than StartWorkspaceIndex\. Specify a value greater than 8\.",
+            MaskDetectorsIf,
+            InputWorkspace=ws,
+            OutputWorkspace=ws,
+            StartWorkspaceIndex=8,
+            EndWorkspaceIndex=5,
         )
 
 

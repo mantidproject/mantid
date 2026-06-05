@@ -26,20 +26,24 @@ class PointCloudRenderer(InstrumentRenderer):
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
 
     # ------------------------------------------------------------------ build
-    def build_detector_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
+    def build_detector_mesh(self, positions: np.ndarray, flip_beam: bool, model=None) -> pv.PolyData:
         return pv.PolyData(positions)
 
-    def build_pickable_mesh(self, positions: np.ndarray, flip_z: bool) -> pv.PolyData:
+    def build_pickable_mesh(self, positions: np.ndarray, flip_beam: bool) -> pv.PolyData:
         return pv.PolyData(positions)
 
-    def build_masked_mesh(self, positions: np.ndarray, flip_z: bool, model=None) -> pv.PolyData:
+    def build_masked_mesh(self, positions: np.ndarray, flip_beam: bool, model=None) -> pv.PolyData:
         return pv.PolyData(positions)
 
     # ------------------------------------------------------------ add to plot
     def add_detector_mesh_to_plotter(
-        self, plotter: BackgroundPlotter, mesh: pv.PolyData, is_projection: bool, scalars: Optional[str] = None
+        self, plotter: BackgroundPlotter, mesh: pv.PolyData, scalars: Optional[str] = None, show_scalar_bar: bool = True
     ) -> None:
-        scalar_bar_args = dict(interactive=True, vertical=False, title_font_size=15, label_font_size=12) if scalars is not None else None
+        scalar_bar_args = (
+            dict(interactive=True, vertical=False, title_font_size=15, label_font_size=12)
+            if scalars is not None and show_scalar_bar
+            else None
+        )
         plotter.add_mesh(
             mesh,
             pickable=False,
@@ -47,6 +51,7 @@ class PointCloudRenderer(InstrumentRenderer):
             render_points_as_spheres=True,
             point_size=self._DETECTOR_POINT_SIZE,
             scalar_bar_args=scalar_bar_args,
+            show_scalar_bar=show_scalar_bar,
         )
 
         if plotter.off_screen:

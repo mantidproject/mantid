@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadIDFFromNexus.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
@@ -121,7 +122,7 @@ void LoadIDFFromNexus::exec() {
     } else {
       g_log.notice() << "Using correction parameter file: " << corrParamFile.string() << " to replace parameters.\n";
     }
-    loadParameterFile(corrParamFile.string(), localWorkspace);
+    runLoadParameterFile(corrParamFile.string(), localWorkspace);
   } else {
     g_log.notice() << "No correction parameter file applies to the date for "
                       "correction file.\n";
@@ -248,20 +249,7 @@ void LoadIDFFromNexus::LoadParameters(Nexus::File *nxfile, const MatrixWorkspace
   localWorkspace->populateInstrumentParameters();
 
   if (parameterString.empty()) {
-    // No parameters have been found in Nexus file, so we look for them in a
-    // parameter file.
-    std::vector<std::string> directoryNames = ConfigService::Instance().getInstrumentDirectories();
-    const std::string instrParameterFileName = localWorkspace->getInstrument()->getName() + "_Parameters.xml";
-    for (const auto &directoryName : directoryNames) {
-      // This will iterate around the directories from user->etc->install, and find the first appropriate file
-      const std::filesystem::path direc(directoryName);
-      const std::string paramFile = (direc / instrParameterFileName).string();
-
-      // Attempt to load specified file, if successful, use file and stop
-      // search.
-      if (loadParameterFile(paramFile, localWorkspace))
-        break;
-    }
+    loadParameterFile(localWorkspace);
   } else { // We do have parameters from the Nexus file
     g_log.notice() << "Found Instrument parameter map entry in Nexus file, "
                       "which is loaded.\n\n";
@@ -270,9 +258,27 @@ void LoadIDFFromNexus::LoadParameters(Nexus::File *nxfile, const MatrixWorkspace
   }
 }
 
-// Private function to load parameter file specified by a full path name into
+// Private function to load best parameter file associated with a workspace
+void LoadIDFFromNexus::loadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws) {
+  g_log.debug("Loading the parameter definition...");
+
+  // Search for XML parameter file which matches instrument and date
+  const std::string instName = ws->getInstrument()->getName();
+  const std::string runDate = ws->getWorkspaceStartDate();
+  std::string fullPathParamIDF = InstrumentFileFinder::getParameterFilename(instName, runDate);
+  if (!fullPathParamIDF.empty()) {
+    g_log.debug() << "Parameter file: " << fullPathParamIDF << '\n';
+    bool paramLoaded = runLoadParameterFile(fullPathParamIDF, ws);
+    if (!paramLoaded) {
+      g_log.notice() << "No Instrument parameter map entry found.\n\n";
+    }
+  }
+}
+
+// Private function to execute LoadParameterFile specified by a full path name into
 // given workspace, returning success.
-bool LoadIDFFromNexus::loadParameterFile(const std::string &fullPathName, const MatrixWorkspace_sptr &localWorkspace) {
+bool LoadIDFFromNexus::runLoadParameterFile(const std::string &fullPathName,
+                                            const MatrixWorkspace_sptr &localWorkspace) {
   try {
     // load and also populate instrument parameters from this 'fallback'
     // parameter file

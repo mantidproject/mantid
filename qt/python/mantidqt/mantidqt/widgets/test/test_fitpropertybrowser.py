@@ -42,7 +42,8 @@ class FitPropertyBrowserTest(unittest.TestCase):
     @patch("mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.normaliseData")
     def test_normalise_data_set_on_fit_menu_shown(self, normaliseData_mock):
         for normalised in [True, False]:
-            ws_artist_mock = Mock(is_normalized=normalised, workspace_index=0)
+            ws_artist_mock = Mock(workspace_index=0)
+            ws_artist_mock.is_normalized_by_bin_width.return_value = normalised
             axes_mock = Mock(tracked_workspaces={"ws_name": [ws_artist_mock]})
             property_browser = self._create_widget()
             with patch.object(property_browser, "get_axes", lambda: axes_mock):

@@ -1,0 +1,1 @@
+- Loading :ref:`Python extensions<04_loading_extensions_on_startup>` does not allow to import hidden folders or Python files with protected names to avoid crashing Mantid on startup.

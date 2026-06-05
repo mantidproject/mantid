@@ -1,0 +1,1 @@
+- Version 2 of :ref:`PEARLTransfit <algm-PEARLTransfit-v2>` algorithm, with improvements in input/output properties management.

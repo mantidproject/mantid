@@ -31,6 +31,7 @@ public:
   virtual ~IDataModel() = default;
   virtual std::vector<FitData> *getFittingData() = 0;
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
+  virtual WorkspaceID getWorkspaceID(const std::string &wsName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const = 0;
   virtual FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const = 0;
   virtual FunctionModelDataset getDataset(WorkspaceID workspaceID) const = 0;
@@ -40,6 +41,7 @@ public:
   virtual FitDomainIndex getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
   virtual std::vector<double> getQValuesForData() const = 0;
   virtual std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const = 0;
+  virtual std::string getResolutionName(const WorkspaceID &wsID, const WorkspaceIndex &index) const = 0;
 
   virtual std::vector<std::string> getWorkspaceNames() const = 0;
   virtual std::string createDisplayName(WorkspaceID workspaceID) const = 0;
@@ -63,17 +65,27 @@ public:
   virtual void setEndX(double endX, WorkspaceID workspaceID) = 0;
   virtual void setEndX(double startX, FitDomainIndex fitDomainIndex) = 0;
   virtual void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
-  virtual bool setResolution(const std::string &name) = 0;
-  virtual bool setResolution(const std::string &name, WorkspaceID workspaceID) = 0;
+  virtual bool setResolution(const std::string &resName, const std::string &wsName,
+                             const FunctionModelSpectra &spectra) = 0;
+  virtual bool setResolution(const std::string &resName, WorkspaceID workspaceID,
+                             const FunctionModelSpectra &spectra) = 0;
+  virtual void removeResolution(const std::string &resName) = 0;
+  virtual std::set<std::string> getResolutionNames() = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(FitDomainIndex index) const = 0;
   virtual std::pair<double, double> getFittingRange(FitDomainIndex index) const = 0;
   virtual size_t getSpectrum(FitDomainIndex index) const = 0;
   virtual std::vector<double> getExcludeRegionVector(FitDomainIndex index) const = 0;
   virtual std::string getExcludeRegion(FitDomainIndex index) const = 0;
   virtual void setExcludeRegion(const std::string &exclude, FitDomainIndex index) = 0;
+  virtual void updateWorkspaceNames() = 0;
 
   virtual std::pair<WorkspaceID, WorkspaceIndex> getSubIndices(FitDomainIndex) const = 0;
   virtual void removeSpecialValues(const std::string &name) = 0;
+  virtual void removeWorkspaceByName(const std::string &name) = 0;
+  virtual void clearModel() = 0;
+
+  virtual const std::set<std::string> &resolutionNames() const = 0;
+  virtual const std::set<std::string> &workspaceNames() const = 0;
 };
 
 } // namespace Inelastic

@@ -6,12 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import uuid
+from types import SimpleNamespace
 from unittest import mock
 
 from SANS.sans.common.enums import CanonicalCoordinates
 from mantid.api import WorkspaceGroup, AnalysisDataService
-from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
+from mantid.simpleapi import AddSampleLog, AddTimeSeriesLog, CreateSampleWorkspace, DeleteWorkspace, GroupWorkspaces
 from sans.algorithm_detail.batch_execution import (
+    empty_slice_warning,
     get_all_names_to_save,
     get_transmission_names_to_save,
     ReductionPackage,
@@ -772,6 +774,66 @@ class DeleteMethodsTest(unittest.TestCase):
 
         for i in package.calculated_transmission_can.getNames():
             self.assertFalse(i)
+
+
+def _make_slice(start, end):
+    return SimpleNamespace(start_time=[start], end_time=[end])
+
+
+class EmptySliceWarningTest(unittest.TestCase):
+    def setUp(self):
+        self._created = []
+
+    def tearDown(self):
+        for name in self._created:
+            try:
+                DeleteWorkspace(name)
+            except (RuntimeError, ValueError):
+                pass
+
+    def _make_workspace(self, name, beam_current=None, run_number=None):
+        """``beam_current`` is a list of ``(offset_seconds_from_run_start, value)`` tuples."""
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, WorkspaceType="Event", OutputWorkspace=name)
+        self._created.append(name)
+        if beam_current:
+            origin = ws.getPulseTimeMin()
+            for offset_s, value in beam_current:
+                t = origin + int(offset_s * 1_000_000_000)
+                AddTimeSeriesLog(Workspace=ws, Name="dae_beam_current", Type="double", Time=str(t), Value=float(value))
+        if run_number is not None:
+            AddSampleLog(Workspace=ws, LogName="run_number", LogText=str(run_number), LogType="String")
+        return ws
+
+    def test_returns_warning_when_beam_fully_off(self):
+        ws = self._make_workspace("ws_off", beam_current=[(0, 0.0), (5, 0.0), (8, 0.0)], run_number=12345)
+        msg = empty_slice_warning(_make_slice(0, 10), ws)
+        self.assertIsNotNone(msg)
+        self.assertIn("12345", msg)
+        self.assertIn("beam off", msg.lower())
+
+    def test_returns_none_when_beam_partially_on(self):
+        # Any non-zero sample in the active set means the slice has data.
+        ws = self._make_workspace("ws_partial", beam_current=[(0, 0.0), (5, 2.0), (9, 0.0)])
+        self.assertIsNone(empty_slice_warning(_make_slice(0, 10), ws))
+
+    def test_returns_none_when_prior_sample_is_beam_on(self):
+        # Step-function semantics: only sample inside window says 0 at t=5,
+        # but the prior sample at t=0 is 1.0 — beam was on from start to 5s.
+        ws = self._make_workspace("ws_prior_on", beam_current=[(0, 1.0), (5, 0.0)])
+        self.assertIsNone(empty_slice_warning(_make_slice(2, 6), ws))
+
+    def test_returns_none_when_only_startup_zero_before_window(self):
+        ws = self._make_workspace("ws_startup", beam_current=[(0, 0.0)])
+        self.assertIsNone(empty_slice_warning(_make_slice(1, 3), ws))
+
+    def test_returns_none_when_log_missing(self):
+        ws = self._make_workspace("ws_no_log")
+        self.assertIsNone(empty_slice_warning(_make_slice(0, 10), ws))
+
+    def test_returns_none_for_multi_slice_state(self):
+        ws = self._make_workspace("ws_multi", beam_current=[(1, 0.0)])
+        state_slice = SimpleNamespace(start_time=[0, 5], end_time=[5, 10])
+        self.assertIsNone(empty_slice_warning(state_slice, ws))
 
 
 if __name__ == "__main__":

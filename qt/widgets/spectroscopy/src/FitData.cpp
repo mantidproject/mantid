@@ -15,7 +15,10 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+#include <ranges>
 
+#include <MantidAPI/AnalysisDataService.h>
+#include <MantidQtWidgets/Common/FunctionModel.h>
 #include <sstream>
 
 using namespace Mantid::API;
@@ -171,7 +174,22 @@ std::string createExcludeRegionString(std::string regionString) {
 namespace MantidQt::CustomInterfaces::Inelastic {
 
 FitData::FitData(const MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra)
-    : m_workspace(workspace), m_spectra(FunctionModelSpectra("")) {
+    : m_workspace(workspace), m_spectra(FunctionModelSpectra("")),
+      m_resolutions(std::map<WorkspaceIndex, std::string>()) {
+
+  if (const auto &name = m_workspace->getName(); !name.empty()) {
+    m_name = name;
+  }
+  setupFitData(spectra, workspace);
+}
+
+FitData::FitData(const MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra, const std::string &wsName)
+    : m_workspace(workspace), m_spectra(FunctionModelSpectra("")),
+      m_resolutions(std::map<WorkspaceIndex, std::string>()), m_name(std::move(wsName)) {
+  setupFitData(spectra, workspace);
+}
+
+void FitData::setupFitData(FunctionModelSpectra const &spectra, MatrixWorkspace_sptr const &workspace) {
   setSpectra(spectra);
   auto const range = !spectra.empty() ? getBinRange(workspace) : std::make_pair(0.0, 0.0);
   for (auto const &spectrum : spectra) {
@@ -191,6 +209,8 @@ std::string FitData::displayName(const std::string &formatString, const std::str
   std::replace(name.begin(), name.end(), ',', '+');
   return name;
 }
+
+const std::string &FitData::getWsName() const { return m_name; }
 
 std::string FitData::displayName(const std::string &formatString, WorkspaceIndex spectrum) const {
   const auto workspaceName = getBasename();
@@ -318,6 +338,55 @@ void FitData::setEndX(double const &endX) {
   for (auto const &spectrum : m_spectra) {
     setEndX(endX, spectrum);
   }
+}
+
+void FitData::setResolution(std::string const &wsName, WorkspaceIndex const &spectrum) {
+  if (m_ranges.contains(spectrum)) {
+    m_resolutions[spectrum] = wsName;
+  }
+}
+
+void FitData::setResolution(std::string const &wsName, FunctionModelSpectra const &spectra) {
+  for (const auto &spectrum : spectra) {
+    setResolution(wsName, spectrum);
+  }
+}
+
+void FitData::removeResolution(std::string const &resName) {
+  std::vector<WorkspaceIndex> indexesToRemove;
+  for (const auto &[wsIndex, name] : m_resolutions) {
+    if (name == resName) {
+      indexesToRemove.push_back(wsIndex);
+    }
+  }
+  for (const auto &wsIndex : indexesToRemove) {
+    m_resolutions.erase(wsIndex);
+    m_ranges.erase(wsIndex);
+    m_excludeRegions.erase(wsIndex);
+    m_spectra.erase(wsIndex);
+  }
+}
+
+std::string FitData::getResolutionFromWsIndex(const WorkspaceIndex &index) const {
+  return m_resolutions.contains(index) ? m_resolutions.at(index) : "";
+}
+
+void FitData::removeResolutionEntry(const WorkspaceIndex &index) {
+  if (const auto it = m_resolutions.find(index); it != m_resolutions.cend()) {
+    m_resolutions.erase(it);
+  }
+}
+
+const std::map<WorkspaceIndex, std::string> &FitData::getResolutions() const { return m_resolutions; }
+
+std::set<std::string> FitData::getResolutionNames() const {
+  auto resNames = std::set<std::string>();
+  if (!m_resolutions.empty()) {
+    for (const auto &value : m_resolutions | std::views::values) {
+      resNames.emplace(value);
+    }
+  }
+  return resNames;
 }
 
 void FitData::setExcludeRegionString(std::string const &excludeRegionString, WorkspaceIndex const &spectrum) {

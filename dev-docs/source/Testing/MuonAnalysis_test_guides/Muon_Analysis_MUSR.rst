@@ -89,10 +89,10 @@ This test will look at transverse field data.
 - In the **grouping tab** you will see four groups and no pairs (you may need to press ``Default``)
 - Go to the **fitting tab**
 	- Right click the empty table area; Select ``Add Function``
-	- Add ``GuasOsc``
+	- Add ``GausOsc``
 	- Set ``Frequency = 1.3``
 	- Add a ``FlatBackground``
-	- Do a fit, notice that the value for the background is non-zero, when it should be
+	- Do a fit, the value for the background should be non-zero
 	- Remove the flat background
 	- Change the ``Fitting type`` from "Normal" to "TF Asymmetry"
 	- Press Fit

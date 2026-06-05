@@ -65,8 +65,8 @@ public:
     auto run = output->run();
 
     // test start and end time
-    TS_ASSERT(run.getProperty("start_time")->value().compare("2018-11-12T10:45:06") == 0)
-    TS_ASSERT(run.getProperty("end_time")->value().find("2018-11-12T11:45:06.6") == 0)
+    TS_ASSERT(run.getProperty("start_time")->value().compare("2018-11-11T21:44:46") == 0)
+    TS_ASSERT(run.getProperty("end_time")->value().find("2018-11-11T22:44:46.6") == 0)
 
     // test some data properties
     auto logpm = [&run](const std::string &tag) {
@@ -119,8 +119,8 @@ public:
     auto run = output->run();
 
     // test start and end time
-    TS_ASSERT(run.getProperty("start_time")->value().compare("2018-11-12T10:45:06") == 0)
-    TS_ASSERT(run.getProperty("end_time")->value().find("2018-11-12T11:45:06.6") == 0)
+    TS_ASSERT(run.getProperty("start_time")->value().compare("2018-11-11T21:44:46") == 0)
+    TS_ASSERT(run.getProperty("end_time")->value().find("2018-11-11T22:44:46.6") == 0)
 
     // test some data properties
     auto logpm = [&run](const std::string &tag) {

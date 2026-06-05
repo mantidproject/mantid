@@ -6,23 +6,25 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-few-public-methods
 
-# test batch mode with sans2d and selecting a period in batch mode
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+
 from mantid.api import AnalysisDataService
-from ISISCommandInterface import AssignSample, Detector, LARMOR, MaskFile, Set1D
+from sans.command_interface.ISISCommandInterface import Set1D, Detector, MaskFile, AssignSample, WavRangeReduction, LARMOR
+
+# test batch mode with sans2d and selecting a period in batch mode
 from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LARMOR)
-class LARMORMultiPeriodEventModeLoading(systemtesting.MantidSystemTest):
+class LARMORMultiPeriodEventModeLoadingTest(systemtesting.MantidSystemTest):
     """
     This test checks if the positioning of all workspaces of a
     multi-period event-type file are the same.
     """
 
     def __init__(self):
-        super(LARMORMultiPeriodEventModeLoading, self).__init__()
+        super(LARMORMultiPeriodEventModeLoadingTest, self).__init__()
         self.success = True
 
     def _get_position_and_rotation(self, workspace):
@@ -57,6 +59,7 @@ class LARMORMultiPeriodEventModeLoading(systemtesting.MantidSystemTest):
         Detector("DetectorBench")
         MaskFile("USER_Larmor_163F_HePATest_r13038.txt")
         AssignSample("13038")
+        WavRangeReduction()
         base_name = "13038_sans_nxs_"
         number_of_workspaces = 4
         self._check_if_all_multi_period_workspaces_have_the_same_position(base_name, number_of_workspaces)

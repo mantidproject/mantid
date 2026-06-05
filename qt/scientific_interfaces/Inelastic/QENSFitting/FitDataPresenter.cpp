@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitDataPresenter.h"
 #include "FitTab.h"
+#include "MantidAPI/AnalysisDataService.h"
 
+#include <algorithm>
 #include <map>
 #include <utility>
 
@@ -17,10 +19,50 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 FitDataPresenter::FitDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view)
     : m_tab(tab), m_model(model), m_view(view) {
   m_view->subscribePresenter(this);
-  observeReplace(true);
 }
 
-FitDataPresenter::~FitDataPresenter() { observeReplace(false); }
+void FitDataPresenter::handleADSDelete(const std::string &wsName) {
+  if (removeADSWorkspace(wsName)) {
+    updateTab();
+    displayWarning("Data " + wsName + " was removed from the ADS.");
+  }
+}
+
+void FitDataPresenter::handleADSRename(const std::string &oldName, const std::string &newName) {
+  if (const auto removedNew = removeADSWorkspace(newName), removedOld = removeADSWorkspace(oldName);
+      removedNew || removedOld) {
+    updateTab();
+    auto names = removedNew ? newName : "";
+    names = removedOld ? names + " , " + oldName : names;
+    names = names.starts_with(",") ? names.substr(1) : names;
+    displayWarning("Data " + names + " was removed from the ADS.");
+  }
+}
+
+void FitDataPresenter::handleADSClear() {
+  if (!m_model->getFittingData()->empty()) {
+    m_model->clearModel();
+    updateTab();
+  }
+}
+
+void FitDataPresenter::updateTab() {
+  updateTableFromModel();
+  m_tab->handleDataRemoved();
+  m_tab->handleDataChanged();
+}
+
+bool FitDataPresenter::removeADSWorkspace(const std::string &wsName) const {
+  const auto containsWs = m_model->workspaceNames().contains(wsName);
+  const auto containsResWs = m_model->resolutionNames().contains(wsName);
+  if (containsWs) {
+    m_model->removeWorkspaceByName(wsName);
+  }
+  if (containsResWs) {
+    m_model->removeResolution(wsName);
+  }
+  return containsWs || containsResWs;
+}
 
 IFitDataView const *FitDataPresenter::getView() const { return m_view; }
 
@@ -36,13 +78,6 @@ bool FitDataPresenter::addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog
 
 void FitDataPresenter::addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &workspaceIndices) {
   m_model->addWorkspace(workspaceName, workspaceIndices);
-}
-
-void FitDataPresenter::setResolution(const std::string &name) {
-  if (m_model->setResolution(name) == false) {
-    m_model->removeSpecialValues(name);
-    displayWarning("Replaced the NaN's and infinities in " + name + " with zeros");
-  }
 }
 
 void FitDataPresenter::setStartX(double startX, WorkspaceID workspaceID) {
@@ -93,6 +128,7 @@ void FitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *d
 
 void FitDataPresenter::updateTableFromModel() {
   m_view->clearTable();
+  m_model->updateWorkspaceNames();
   for (auto domainIndex = FitDomainIndex{0}; domainIndex < getNumberOfDomains(); domainIndex++) {
     addTableEntry(domainIndex);
   }
@@ -223,6 +259,8 @@ void FitDataPresenter::handleRemoveClicked() {
   m_tab->handleDataRemoved();
   m_tab->handleDataChanged();
 }
+
+std::vector<std::string> FitDataPresenter::getWorkspaceNames() const { return m_model->getWorkspaceNames(); }
 
 void FitDataPresenter::handleUnifyClicked() {
   auto selectedIndices = m_view->getSelectedIndexes();

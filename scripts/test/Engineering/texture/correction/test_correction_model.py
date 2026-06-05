@@ -292,13 +292,15 @@ class TextureCorrectionModelTest(unittest.TestCase):
     def test_apply_corrections_applies_default_normalisation_with_default_vals(self, mock_ads, mock_clone, mock_convert, mock_save):
         mock_calib = mock.MagicMock()
         self.model.set_calibration(mock_calib)
+        mock_calib.group = "group"
+        mock_calib.texture_groups = ("1", "2")
         mock_ads.retrieve.return_value = self.mock_ws
         mock_convert.return_value = mock.MagicMock()
         self.model.apply_corrections("ws1", "out_ws", "dir", abs_corr=1.0, div_corr=1.0)
 
         mock_convert.assert_called_once_with(self.mock_ws, Target="dSpacing", StoreInADS=False)
         mock_clone.assert_called()
-        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, mock_calib.group)
+        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, False)
 
     @patch(correction_model_path + ".TextureCorrectionModel._save_corrected_files")
     @patch(correction_model_path + ".ConvertUnits")
@@ -308,6 +310,8 @@ class TextureCorrectionModelTest(unittest.TestCase):
         # Arrange
         mock_calib = MagicMock()
         self.model.set_calibration(mock_calib)
+        mock_calib.group = "group"
+        mock_calib.texture_groups = ("1", "2")
         ws = MagicMock()
         abs_ws = MagicMock()
         div_ws = MagicMock()
@@ -323,7 +327,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(mock_convert.call_count, 2)
-        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, mock_calib.group)
+        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", None, False)
         mock_ads.remove.assert_any_call(abs_ws.name())
         mock_ads.remove.assert_any_call(div_ws.name())
 
@@ -351,6 +355,8 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_calib = MagicMock()
         self.model.set_calibration(mock_calib)
         self.model.set_rb_num("rb123")
+        mock_calib.group = "group"
+        mock_calib.texture_groups = ("1", "2")
         ws = MagicMock()
         mock_ads.retrieve.return_value = ws
         mock_convert.return_value = ws
@@ -358,7 +364,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
 
         self.model.apply_corrections("ws1", "out_ws", "dir", abs_corr=1.0, div_corr=1.0)
 
-        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", "rb123", mock_calib.group)
+        mock_save.assert_called_once_with("out_ws", "dir", "AbsorptionCorrection", "rb123", False)
 
     @patch(correction_model_path + ".SaveNexus")
     @patch(correction_model_path + ".CreateEmptyTableWorkspace")

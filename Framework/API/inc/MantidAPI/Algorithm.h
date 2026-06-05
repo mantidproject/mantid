@@ -222,6 +222,7 @@ public:
   bool isChild() const override;
   void setChild(const bool isChild) override;
   void enableHistoryRecordingForChild(const bool on) override;
+  void enableHistoryRecordingForProcessGroups(const bool on) override;
   bool isRecordingHistoryForChild() { return m_recordHistoryForChild; }
   void setAlwaysStoreInADS(const bool doStore) override;
   bool getAlwaysStoreInADS() const override;
@@ -432,6 +433,9 @@ protected:
   /// distinguish between base processGroups() and overriden/algorithm specific
   /// versions
   bool m_usingBaseProcessGroups = false;
+  /// Opt-in for overridden processGroups() implementations that want the parent
+  /// algorithm history recorded on group outputs.
+  bool m_recordHistoryForProcessGroups = false;
 
   template <typename T, const int AllowedIndexTypes = static_cast<int>(IndexType::WorkspaceIndex),
             typename... WSPropArgs,

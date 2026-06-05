@@ -7,7 +7,6 @@
 from mantid.simpleapi import (
     logger,
     SaveNexus,
-    SaveAscii,
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
@@ -15,7 +14,7 @@ from typing import Optional, Sequence, Tuple
 from os import path, makedirs
 from Engineering.common.texture_sample_viewer import has_valid_shape
 from Engineering.texture.xtal_helper import get_xtal_structure
-from Engineering.texture.texture_helper import plot_pole_figure, create_pole_figure_tables
+from Engineering.texture.texture_helper import plot_pole_figure, create_pole_figure_tables, save_texture_ws_ascii
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
@@ -112,10 +111,7 @@ class TextureProjection:
         for save_dir in save_dirs:
             SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
             if ascii:
-                try:
-                    SaveAscii(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")
-                except RuntimeError as e:
-                    logger.warning(f"Failed to save {ws} as a txt file: " + str(e) + "Try Rebinning and calling SaveAscii manually")
+                save_texture_ws_ascii(ws, save_dir)
 
     def get_ws_info(self, ws_name: str, parameter_file: str, select: bool = True) -> dict:
         return {

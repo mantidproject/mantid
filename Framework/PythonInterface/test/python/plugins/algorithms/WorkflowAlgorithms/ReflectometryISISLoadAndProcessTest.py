@@ -8,7 +8,16 @@ import unittest
 
 from mantid import config, FileFinder
 from mantid.api import AnalysisDataService
-from mantid.simpleapi import AddSampleLog, AddTimeSeriesLog, CreateSampleWorkspace, CropWorkspace, GroupWorkspaces, Rebin
+from mantid.simpleapi import (
+    AddSampleLog,
+    AddTimeSeriesLog,
+    CreateSampleWorkspace,
+    CreateWorkspace,
+    CropWorkspace,
+    GroupWorkspaces,
+    JoinISISPolarizationEfficiencies,
+    Rebin,
+)
 from testhelpers import assertRaisesNothing, create_algorithm
 
 
@@ -758,12 +767,57 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args["PolarizationAnalysis"] = "1"
         self._assert_run_algorithm_throws_with_correct_msg(args, "Efficiencies workspace is not in a supported format")
 
+    def test_group_outputs_record_history_with_polarization_analysis(self):
+        self._create_polarization_efficiencies_workspace("efficiencies")
+        args = self._default_options
+        args["InputRunList"] = "POLREF14966"
+        args["ProcessingInstructions"] = "4"
+        args["PolarizationAnalysis"] = "1"
+        args["PolarizationEfficiencies"] = "efficiencies"
+        outputs = [
+            "Alpha",
+            "Ap",
+            "efficiencies",
+            "IvsLam_14966",
+            "IvsLam_14966_1",
+            "IvsLam_14966_2",
+            "IvsQ_14966",
+            "IvsQ_14966_1",
+            "IvsQ_14966_2",
+            "IvsQ_binned_14966",
+            "IvsQ_binned_14966_1",
+            "IvsQ_binned_14966_2",
+            "Pp",
+            "Rho",
+            "TOF_14966_1",
+            "TOF_14966_2",
+            "TOF",
+        ]
+
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+        self._check_polarized_group_history(AnalysisDataService.retrieve("IvsQ_binned_14966_1"))
+        self._check_polarized_group_history(AnalysisDataService.retrieve("IvsQ_14966_1"))
+        self._check_polarized_group_history(AnalysisDataService.retrieve("IvsLam_14966_1"))
+
     # TODO test if no runNumber is on the WS
 
     def _create_workspace(self, run_number, prefix="", suffix=""):
         name = prefix + str(run_number) + suffix
         ws = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=1, NumMonitors=2, BankPixelWidth=1, XMin=200, OutputWorkspace=name)
         AddSampleLog(Workspace=ws, LogName="run_number", LogText=str(run_number))
+
+    def _create_polarization_efficiencies_workspace(self, output_workspace):
+        wavelength = [0, 3, 6, 10, 15, 20]
+        efficiencies = {
+            "Pp": [0.1] * 6,
+            "Ap": [0.8] * 6,
+            "Rho": [0.778] * 6,
+            "Alpha": [0.75] * 6,
+        }
+        for name, values in efficiencies.items():
+            CreateWorkspace(DataX=wavelength, DataY=values, DataE=[0] * len(values), NSpec=1, OutputWorkspace=name)
+        JoinISISPolarizationEfficiencies(Pp="Pp", Ap="Ap", Rho="Rho", Alpha="Alpha", OutputWorkspace=output_workspace)
 
     def _create_2D_detector_workspace(self, run_number, prefix="", suffix=""):
         name = prefix + str(run_number) + suffix
@@ -817,6 +871,16 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             algNames = [alg.name() for alg in history.getAlgorithmHistories()]
 
         self.assertEqual(algNames.sort(), expected.sort())
+
+    def _check_polarized_group_history(self, ws):
+        history = ws.getHistory()
+        self.assertGreater(history.size(), 0)
+        parent_history = history.getAlgorithmHistory(history.size() - 1)
+        self.assertEqual(parent_history.name(), "ReflectometryISISLoadAndProcess")
+        reduction_histories = [alg for alg in parent_history.getChildHistories() if alg.name() == "ReflectometryReductionOneAuto"]
+        self.assertGreater(len(reduction_histories), 0)
+        core_reduction_histories = [alg for alg in reduction_histories[-1].getChildHistories() if alg.name() == "ReflectometryReductionOne"]
+        self.assertGreater(len(core_reduction_histories), 0)
 
     def _check_calibration(self, ws, is_calibrated):
         """Check whether the calibration algorithm has run by checking the workspace history"""

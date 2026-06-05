@@ -35,6 +35,7 @@ GNU_DIAG_OFF("conversion")
 /// Overload generator for getInstrumentFilename
 // cppcheck-suppress unknownMacro
 BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload, InstrumentFileFinder::getInstrumentFilename, 1, 2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(getParameterFilename_Overload, InstrumentFileFinder::getParameterFilename, 1, 3)
 BOOST_PYTHON_FUNCTION_OVERLOADS(getParameterPath_Overload, InstrumentFileFinder::getParameterPath, 1, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
@@ -47,6 +48,11 @@ void exportInstrumentFileFinder() {
       .def("getInstrumentFilename", &InstrumentFileFinder::getInstrumentFilename,
            getInstrumentFilename_Overload("Returns IDF filename", (arg("instrument"), arg("date") = "")))
       .staticmethod("getInstrumentFilename")
+      //
+      .def("getParameterFilename", &InstrumentFileFinder::getParameterFilename,
+           getParameterFilename_Overload("Returns Instrument Parameter filename",
+                                         (arg("instrument"), arg("date") = "", arg("dirHint") = "")))
+      .staticmethod("getParameterFilename")
       // -
       .def("getParameterPath", &InstrumentFileFinder::getParameterPath,
            getParameterPath_Overload("Returns the full path to the given instrument parameter file "

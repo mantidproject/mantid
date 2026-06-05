@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="POLDI" valid-from="2015-05-15 07:41:00">
+<parameter-file instrument="POLDI" valid-from="2015-05-15 07:41:00" valid-to = "2100-01-01 00:00:00">
     
     <component-link name="chopper">
         <parameter name="t0" type="number">

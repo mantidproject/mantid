@@ -8649,6 +8649,7 @@ packages:
   md5: 530ef68b7f9f7bee04f67db8d435f872
   depends:
   - __osx >=11.0
+  - icu >=78.3,<79.0a0
   - libzlib >=1.3.2,<2.0a0
   license: blessing
   size: 923664

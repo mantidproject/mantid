@@ -622,16 +622,6 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="0">
-                    <widget class="QCheckBox" name="plot_results_checkbox">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the 0th spectrum of each reduced workspace will be plotted as it is reduced.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="text">
-                      <string>Plot Results</string>
-                     </property>
-                    </widget>
-                   </item>
                   </layout>
                  </item>
                 </layout>
@@ -2483,7 +2473,6 @@ QGroupBox::title {
   <tabstop>rkh_checkbox</tabstop>
   <tabstop>save_zero_error_free</tabstop>
   <tabstop>use_optimizations_checkbox</tabstop>
-  <tabstop>plot_results_checkbox</tabstop>
   <tabstop>help_button</tabstop>
   <tabstop>event_binning_line_edit</tabstop>
   <tabstop>mask_file_input_line_edit</tabstop>

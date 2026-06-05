@@ -145,6 +145,7 @@ public:
   MOCK_CONST_METHOD0(getWorkspaceNames, std::vector<std::string>());
   MOCK_CONST_METHOD0(getNumberOfWorkspaces, WorkspaceID());
   MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
+  MOCK_CONST_METHOD1(getWorkspaceID, WorkspaceID(const std::string &name));
 
   MOCK_METHOD2(setSpectra, void(const std::string &spectra, WorkspaceID workspaceID));
   MOCK_METHOD2(setSpectra, void(FunctionModelSpectra &&spectra, WorkspaceID workspaceID));
@@ -155,6 +156,7 @@ public:
   MOCK_CONST_METHOD1(getNumberOfSpectra, size_t(WorkspaceID workspaceID));
 
   MOCK_METHOD0(clear, void());
+  MOCK_METHOD0(clearModel, void());
 
   MOCK_CONST_METHOD0(getNumberOfDomains, size_t());
   MOCK_CONST_METHOD2(getDomainIndex, FitDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum));
@@ -162,10 +164,12 @@ public:
 
   MOCK_CONST_METHOD0(getQValuesForData, std::vector<double>());
   MOCK_CONST_METHOD0(getResolutionsForFit, std::vector<std::pair<std::string, size_t>>());
+  MOCK_CONST_METHOD2(getResolutionName, std::string(const WorkspaceID &wsID, const WorkspaceIndex &index));
   MOCK_CONST_METHOD1(createDisplayName, std::string(WorkspaceID workspaceID));
 
   MOCK_METHOD1(removeWorkspace, void(WorkspaceID workspaceID));
   MOCK_METHOD1(removeDataByIndex, void(FitDomainIndex fitDomainIndex));
+  MOCK_METHOD1(removeWorkspaceByName, void(const std::string &name));
 
   MOCK_METHOD3(setStartX, void(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_METHOD2(setStartX, void(double startX, WorkspaceID workspaceID));
@@ -176,14 +180,21 @@ public:
   MOCK_METHOD3(setExcludeRegion, void(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_METHOD2(setExcludeRegion, void(const std::string &exclude, FitDomainIndex index));
   MOCK_METHOD1(removeSpecialValues, void(const std::string &name));
-  MOCK_METHOD1(setResolution, bool(const std::string &name));
-  MOCK_METHOD2(setResolution, bool(const std::string &name, WorkspaceID workspaceID));
+  MOCK_METHOD3(setResolution,
+               bool(const std::string &name, WorkspaceID workspaceID, const FunctionModelSpectra &spectra));
+  MOCK_METHOD3(setResolution,
+               bool(const std::string &name, const std::string &wsName, const FunctionModelSpectra &spectra));
   MOCK_CONST_METHOD2(getFittingRange, std::pair<double, double>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
+  MOCK_METHOD1(removeResolution, void(const std::string &resName));
+  MOCK_METHOD0(getResolutionNames, std::set<std::string>());
   MOCK_CONST_METHOD1(getFittingRange, std::pair<double, double>(FitDomainIndex index));
   MOCK_CONST_METHOD2(getExcludeRegion, std::string(WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_CONST_METHOD1(getExcludeRegion, std::string(FitDomainIndex index));
   MOCK_CONST_METHOD2(getExcludeRegionVector, std::vector<double>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_CONST_METHOD1(getExcludeRegionVector, std::vector<double>(FitDomainIndex index));
+  MOCK_METHOD0(updateWorkspaceNames, void());
+  MOCK_CONST_METHOD0(resolutionNames, const std::set<std::string> &());
+  MOCK_CONST_METHOD0(workspaceNames, const std::set<std::string> &());
 };
 
 class MockSettingsModel : public SettingsModel {

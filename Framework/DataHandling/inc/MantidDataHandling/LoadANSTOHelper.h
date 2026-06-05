@@ -35,6 +35,10 @@ namespace ANSTO {
 std::vector<std::string> filterDatasets(const Nexus::NXEntry &entry, const std::string &groupAddress,
                                         const std::string &regexFilter);
 
+/// extract groups from a group that match a regex filter
+std::vector<std::string> filterGroups(const Nexus::NXEntry &entry, const std::string &groupAddress,
+                                      const std::string &regexFilter);
+
 /// pointer to the vector of events
 using EventVector_pt = std::vector<Types::Event::TofEvent> *;
 
@@ -60,7 +64,15 @@ public:
   void setTarget(int64_t target);
 };
 
-class EventProcessor {
+/// abstract base class for processing events as they are read from the file
+class BaseEventProcessor {
+public:
+  virtual ~BaseEventProcessor() = default;
+  virtual void newFrame() = 0;
+  virtual void addEvent(size_t x, size_t y, double tof) = 0;
+};
+
+class EventProcessor : public BaseEventProcessor {
 protected:
   // fields
   const std::vector<bool> &m_roi;
@@ -89,8 +101,8 @@ public:
                  const double timeMinBoundary, const double timeMaxBoundary);
 
   // methods
-  void newFrame();
-  void addEvent(size_t x, size_t y, double tof);
+  void newFrame() override;
+  void addEvent(size_t x, size_t y, double tof) override;
 };
 
 class EventCounter : public EventProcessor {
@@ -272,7 +284,7 @@ template <typename T>
 bool extractTimedDataSet(const Nexus::NXEntry &entry, const std::string &path, uint64_t startTime, uint64_t endTime,
                          ScanLog valueOption, uint64_t &eventTime, T &eventValue, std::string &units);
 
-void ReadEventData(ProgressTracker &prog, const Nexus::NXEntry &entry, EventProcessor *handler, uint64_t start_nsec,
+void ReadEventData(ProgressTracker &prog, const Nexus::NXEntry &entry, BaseEventProcessor *handler, uint64_t start_nsec,
                    uint64_t end_nsec, const std::string &neutron_path, int tube_resolution = 1024);
 
 } // namespace Anxs

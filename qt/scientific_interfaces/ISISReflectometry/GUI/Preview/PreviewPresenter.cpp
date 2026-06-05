@@ -36,12 +36,14 @@ Mantid::Kernel::Logger g_log("Reflectometry Preview Presenter");
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(Dependencies dependencies)
     : m_view(dependencies.view), m_model(std::move(dependencies.model)),
-      m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)),
-      m_dockedWidgets(std::move(dependencies.dockedWidgets)), m_regionSelector(std::move(dependencies.regionSelector)),
-      m_plotPresenter(std::move(dependencies.plotPresenter)), m_stubRegionObserver{new StubRegionObserver} {
+      m_jobManager(std::move(dependencies.jobManager)), m_dockedWidgets(std::move(dependencies.dockedWidgets)),
+      m_regionSelector(std::move(dependencies.regionSelector)), m_plotPresenter(std::move(dependencies.plotPresenter)),
+      m_stubRegionObserver{new StubRegionObserver}, m_useNewInstrumentView(dependencies.useNewInstrumentView) {
   if (!m_dockedWidgets) {
-    m_dockedWidgets = std::make_unique<QtPreviewDockedWidgets>(nullptr, m_view->getDockedWidgetsLayout());
+    m_dockedWidgets =
+        std::make_unique<QtPreviewDockedWidgets>(nullptr, m_view->getDockedWidgetsLayout(), m_useNewInstrumentView);
   }
+
   if (!m_regionSelector) {
     m_regionSelector =
         std::make_unique<RegionSelector>(nullptr, m_dockedWidgets->getRegionSelectorLayout(), m_view->getImageInfo());
@@ -61,8 +63,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_dockedWidgets->setInstViewToolbarEnabled(false);
   m_dockedWidgets->setRegionSelectorEnabled(false);
 
-  m_plotPresenter->setScaleSymLog(AxisID::YLeft, 1e-4);
-  m_plotPresenter->setAxisLimit(AxisID::YLeft, -1e-5, 2.0);
+  m_plotPresenter->setScaleLog(AxisID::YLeft);
   m_plotPresenter->setScaleLog(AxisID::XBottom);
   m_plotPresenter->setPlotErrorBars(true);
 }
@@ -77,12 +78,27 @@ void PreviewPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState()
 
 void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
 
+void PreviewPresenter::notifySetYAxisSymlogChanged() { updatePlotAxes(); }
+
 void PreviewPresenter::updateWidgetEnabledState() {
   if (m_mainPresenter->isProcessing() || m_mainPresenter->isAutoreducing()) {
     m_view->disableMainWidget();
   } else {
     m_view->enableMainWidget();
   }
+}
+
+void PreviewPresenter::updatePlotAxes() {
+  bool checked = m_dockedWidgets->getSymlogEnabled();
+  if (checked) {
+    double linthresh = m_dockedWidgets->getLinthresh();
+    m_plotPresenter->setScaleSymLog(AxisID::YLeft, linthresh);
+    m_plotPresenter->setAxisLimit(AxisID::YLeft, -1e-5, 2.0);
+  } else {
+    m_plotPresenter->setScaleLog(AxisID::YLeft);
+    m_plotPresenter->setAxisLimit(AxisID::YLeft, 1e-5, 2.0);
+  }
+  m_plotPresenter->plot();
 }
 
 /** Notification received when the user has requested to load a workspace. If it already exists in the ADS
@@ -123,8 +139,8 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   // Clear the region selector to ensure all spectra are shown.
   m_regionSelector->clearWorkspace();
 
-  // Notify the instrument view model that the workspace has changed before we get the surface
-  m_instViewModel->updateWorkspace(ws);
+  // Notify the instrument display that the workspace has changed before we plot
+  m_dockedWidgets->updateWorkspace(ws);
   plotInstView();
   // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
   m_dockedWidgets->setInstViewToolbarEnabled(true);
@@ -187,9 +203,8 @@ void PreviewPresenter::notifyInstViewZoomRequested() {
 void PreviewPresenter::notifyInstViewShapeChanged() {
   // Change to shape editing after a selection has been done to match instrument viewer default behaviour
   notifyInstViewEditRequested();
-  // Get the masked workspace indices
   std::optional<ProcessingInstructions> detIDs = std::nullopt;
-  auto indices = m_instViewModel->detIndicesToDetIDs(m_dockedWidgets->getSelectedDetectors());
+  auto indices = m_dockedWidgets->getSelectedDetectorIDs();
   if (indices.size() > 0) {
     auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");
     detIDs = ProcessingInstructions{detIDsStr};
@@ -267,10 +282,7 @@ void PreviewPresenter::notifyApplyRequested() {
   }
 }
 
-void PreviewPresenter::plotInstView() {
-  m_dockedWidgets->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
-                                m_instViewModel->getAxis());
-}
+void PreviewPresenter::plotInstView() { m_dockedWidgets->plotInstView(); }
 
 void PreviewPresenter::plotRegionSelector() {
   if (!m_plotExistingROIs) {
@@ -324,7 +336,7 @@ void PreviewPresenter::runSumBanks(bool const addExistingROIsToPlot) {
 
   auto const &expSettingsDetectorROI = m_mainPresenter->getMatchingROIDetectorIDsForPreviewRow();
   if (m_plotExistingROIs) {
-    auto const selectedDetectorsOnPlot = m_dockedWidgets->getSelectedDetectors();
+    auto const selectedDetectorsOnPlot = m_dockedWidgets->getSelectedDetectorIDs();
     if (selectedDetectorsOnPlot.empty()) {
       // Update the model with any detector ROIs from the experiment settings.
       // At the moment we only plot existing ROIs on the slice viewer plot, not the instrument view plot.

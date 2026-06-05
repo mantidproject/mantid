@@ -115,4 +115,4 @@ def _get_mantid_specific_plot_kwargs(artist):
     ax = artist.axes
     if artist not in ax.get_tracked_artists():
         return dict()
-    return {"distribution": not ax.get_artist_normalization_state(artist)}
+    return {"distribution": not ax.get_artist_normalized_by_bin_width(artist)}

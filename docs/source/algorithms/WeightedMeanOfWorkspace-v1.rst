@@ -38,7 +38,7 @@ Output:
 .. testoutput:: ExWorkspace
 
     Weighted Mean of Workspace: [1.93826376]
-    Weighted Mean Error of Workspace: [1.2482116]
+    Weighted Mean Error of Workspace: [0.80114622]
 
 .. categories::
 

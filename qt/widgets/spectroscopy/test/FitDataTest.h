@@ -25,8 +25,11 @@ using namespace MantidQt::CustomInterfaces;
 
 namespace {
 
-std::unique_ptr<FitData> getFitData(int const &numberOfSpectra) {
+std::unique_ptr<FitData> getFitData(int const &numberOfSpectra, const std::string &adsName = "") {
   auto const workspace = createWorkspace(numberOfSpectra);
+  if (!adsName.empty()) {
+    SetUpADSWithWorkspace(adsName, workspace);
+  }
   FunctionModelSpectra const spec =
       FunctionModelSpectra(WorkspaceIndex{0}, WorkspaceIndex{workspace->getNumberHistograms() - 1});
   FitData data(workspace, spec);
@@ -460,5 +463,47 @@ public:
     double usignTheta = 0.5 * spectrumInfo.twoTheta(0);
     double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta, efixed);
     TS_ASSERT_EQUALS(data->getQValues()[0], q);
+  }
+
+  void test_that_fit_Data_stores_name_field_when_is_ads_ws() {
+    const auto testName = "testADSName";
+    auto fitData = getFitData(10, testName);
+    TS_ASSERT_EQUALS(fitData->getWsName(), testName);
+
+    // Name should be kept even if it disappears from ads
+    AnalysisDataService::Instance().remove(testName);
+    TS_ASSERT_EQUALS(fitData->getWsName(), testName);
+  }
+
+  void test_set_resolution_from_spectrum() {
+    auto fitData = getFitData(10);
+    fitData->setResolution("resWs", WorkspaceIndex{0});
+    TS_ASSERT(fitData->getResolutionFromWsIndex(WorkspaceIndex{0}) == "resWs");
+  }
+
+  void test_set_resolution_from_spectra() {
+    auto fitData = getFitData(10);
+    fitData->setResolution("resWs", FunctionModelSpectra("0-9"));
+    TS_ASSERT(fitData->getResolutionFromWsIndex(WorkspaceIndex{0}) == "resWs");
+    TS_ASSERT(fitData->getResolutionFromWsIndex(WorkspaceIndex{9}) == "resWs");
+    TS_ASSERT(fitData->getResolutionFromWsIndex(WorkspaceIndex{10}) == "");
+  }
+
+  void test_remove_resolution_from_fit_Data() {
+    auto fitData = getFitData(10);
+    fitData->setResolution("resWs", FunctionModelSpectra("0-9"));
+
+    fitData->removeResolution("resWs");
+    // As there was only one resolution associated with the fit data, all spectra are removed
+    TS_ASSERT(fitData->zeroSpectra());
+  }
+
+  void test_remove_resolution_entry() {
+    auto fitData = getFitData(10);
+    fitData->setResolution("resWs", FunctionModelSpectra("0-9"));
+
+    fitData->removeResolutionEntry(WorkspaceIndex(1));
+    // As there was only one resolution associated with the fit data, all spectra are removed
+    TS_ASSERT(fitData->getResolutionFromWsIndex(WorkspaceIndex{1}).empty());
   }
 };

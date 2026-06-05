@@ -152,7 +152,7 @@ def _get_mantid_specific_plot_kwargs(artist):
         plot_kwargs = dict()
         if not ax.get_is_mdhisto_workspace_for_artist(artist):
             plot_kwargs["wkspIndex"] = ax.get_artists_workspace_and_workspace_index(artist)[1]
-        plot_kwargs["distribution"] = not ax.get_artist_normalization_state(artist)
+        plot_kwargs["distribution"] = not ax.get_artist_normalized_by_bin_width(artist)
         ax_type = ax.creation_args[0].get("axis", None)
         if ax_type:
             plot_kwargs["axis"] = ax_type

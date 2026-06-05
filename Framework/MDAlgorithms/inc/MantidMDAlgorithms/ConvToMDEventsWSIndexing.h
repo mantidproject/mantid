@@ -29,8 +29,8 @@ namespace MDAlgorithms {
 class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
   enum MD_EVENT_TYPE { LEAN, REGULAR, NONE };
 
-  size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
-                    bool ignoreZeros) override;
+  size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper, bool ignoreZeros,
+                    bool useLogTimes) override;
   // Interface function
   void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) override;
 

@@ -9,24 +9,17 @@ from os import path, scandir
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
-from mantid.simpleapi import (
-    ConvertUnits,
-    Rebunch,
-    Rebin,
-    SumSpectra,
-    AppendSpectra,
-    CloneWorkspace,
-    CropWorkspace,
-)
+from mantid.simpleapi import ConvertUnits, Rebunch, Rebin, SumSpectra, AppendSpectra, CloneWorkspace, CropWorkspace, Load
 from pathlib import Path
-from Engineering.EnggUtils import GROUP
 from Engineering.EnginX import EnginX
+from Engineering.IMAT import IMAT
 from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
 from typing import Optional, Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from plugins.algorithms.IntegratePeaks1DProfile import get_eval_ws, calc_sigma_from_summation
 from Engineering.texture.xtal_helper import get_xtal_structure
 from Engineering.EnggUtils import convert_TOFerror_to_derror
+from Engineering.common.instrument_config import get_instr_config
 
 # import texture helper functions so they can be accessed by users through the TextureUtils namespace
 from Engineering.texture.texture_helper import plot_pole_figure
@@ -72,11 +65,6 @@ def mk(dir_path: str):
         p.mkdir()
 
 
-class TextureInstrument(EnginX):
-    # for now, just a wrapper to set up for inheriting from different instruments
-    pass
-
-
 # -------- Focus Script Logic--------------------------------
 
 
@@ -106,7 +94,15 @@ def run_focus_script(
     spectrum_num: optional string of spectra numbers if desired to define custom grouping by specifying the spectra
     groupingfile_path: optional path to a grouping ".cal" or ".xml" file, alternative to prm_path
     """
-    group = GROUP(grouping) if grouping else None
+    instrument = _get_instrument_from_ws_list(wss)
+    config = get_instr_config(instrument)
+    group = config.group(grouping) if grouping else None
+    match instrument:
+        case "IMAT":
+            TextureInstrument = IMAT
+        case _:
+            # default to ENGINX
+            TextureInstrument = EnginX
     model = TextureInstrument(
         vanadium_run=van_run,
         ceria_run=ceria_run,
@@ -121,6 +117,26 @@ def run_focus_script(
 
     mk(focus_dir)
     model.main()
+
+
+def _get_instrument_from_ws_list(wss):
+    instruments = set()
+    for ws_str in wss:
+        if ADS.doesExist(ws_str):
+            ws = ADS.retrieve(ws_str)
+        else:
+            try:
+                ws = Load(Filename=ws_str)
+            except:
+                logger.error(f"Could not find or load '{ws_str}'")
+                return None
+        instruments.add(ws.getInstrument().getName())
+    instruments = list(instruments)
+    if len(instruments) == 1:
+        return instruments[0]
+    else:
+        logger.error("Workspaces provided have multiple different instruments attached: " + ", ".join(instruments))
+        return None
 
 
 # -------- Absorption Script Logic--------------------------------

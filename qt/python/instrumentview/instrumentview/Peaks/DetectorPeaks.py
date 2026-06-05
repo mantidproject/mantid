@@ -12,7 +12,6 @@ class DetectorPeaks:
         if not peaks:
             raise ValueError("peaks list cannot be empty")
         self.peaks = peaks
-        self.spectrum_no = peaks[0].spectrum_no
         self.detector_id = peaks[0].detector_id
         if len(self.peaks) > 1:
             # Find peak with highest d-spacing for label

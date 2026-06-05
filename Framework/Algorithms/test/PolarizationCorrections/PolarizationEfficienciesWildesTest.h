@@ -337,8 +337,8 @@ public:
   void test_all_calculations_are_correct_using_input_P_ws() {
     const std::pair expectedPEfficiency = {0.98, 0.9899494934};
     const std::pair expectedTPMO = {0.96, 1.9798989879};
-    const std::pair expectedAEfficiency = {0.9855226, 1.0315912829};
-    const std::pair expectedTAMO = {0.9710452, 2.0631825648};
+    const std::pair expectedAEfficiency = {0.9855226, 0.9701443732};
+    const std::pair expectedTAMO = {0.9710452, 1.9402887465};
 
     const auto polarizerEffWs = generateFunctionDefinedWorkspace(TestWorkspaceParameters(
         EFF_WS, "name=UserFunction, Formula=x*0 +" + std::to_string(expectedPEfficiency.first)));
@@ -349,8 +349,8 @@ public:
   }
 
   void test_all_calculations_are_correct_using_input_A_ws() {
-    const std::pair expectedPEfficiency = {0.99, 1.0479338884};
-    const std::pair expectedTPMO = {0.98, 2.0958677778};
+    const std::pair expectedPEfficiency = {0.99, 0.9863498081};
+    const std::pair expectedTPMO = {0.98, 1.9726996162};
     const std::pair expectedAEfficiency = {0.975614, 0.9877317447};
     const std::pair expectedTAMO = {0.9512279, 1.9754634895};
 

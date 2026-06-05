@@ -841,6 +841,13 @@ if the latter are not specified then the ``ROI`` will also be used for
 the transmission runs. If both a First and Second tranmission input is
 specified, then they will be stitched using the options specified.
 
+When polarization corrections are enabled, the **Input SpinState Order** field can be used to specify the
+order of the input workspace group. For Fredrikze corrections use spin states such as ``pa, ap, pp, aa``.
+For Wildes corrections use the flipper configuration, such as ``00, 01, 10, 11`` or ``0, 1``. Leave the
+field empty to use the default from the instrument parameter file or correction algorithm. If the input uses
+Fredrikze spin states while Wildes correction is selected, or Wildes spin states while Fredrikze correction is
+selected, the reduction reports this mismatch.
+
 .. figure:: /images/ISISReflectometryInterface/transmission_runs.png
   :class: screenshot
   :width: 600px

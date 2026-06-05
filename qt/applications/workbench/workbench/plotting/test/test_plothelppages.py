@@ -11,7 +11,17 @@ from matplotlib import use as mpl_use
 
 mpl_use("Agg")
 import numpy as np
-from workbench.plotting.plothelppages import BASE_PATH, COLORFILL_PAGE, INDEX_PAGE, PLOT1D_PAGE, PLOT3D_PAGE, WATERFALL_PAGE, PlotHelpPages
+from workbench.plotting.plothelppages import (
+    BASE_PATH,
+    COLORFILL_PAGE,
+    INDEX_PAGE,
+    PLOT1D_PAGE,
+    PLOT3D_PAGE,
+    WATERFALL_PAGE,
+    SUPERPLOT_PAGE,
+    WORKBENCH_PATH,
+    PlotHelpPages,
+)
 from matplotlib.pyplot import figure
 
 
@@ -76,6 +86,11 @@ class PlotHelpPagesTest(unittest.TestCase):
         PlotHelpPages.show_help_page_for_figure(fig)
 
         mock_show_page.assert_called_once_with(BASE_PATH + COLORFILL_PAGE)
+
+    @patch("workbench.plotting.plothelppages.InterfaceManager.showHelpPage")
+    def test_show_help_page_correctly_returns_superplot_plot_page(self, mock_show_page):
+        PlotHelpPages.show_help_page_for_figure(None, superplot=True)
+        mock_show_page.assert_called_once_with(WORKBENCH_PATH + SUPERPLOT_PAGE)
 
 
 if __name__ == "__main__":

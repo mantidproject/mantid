@@ -33,6 +33,7 @@ from mantid.plots.resampling_image import samplingimage
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from mantidqt.widgets.sliceviewer.presenters.imageinfowidget import ImageInfoWidget, ImageInfoTracker
 from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots
+from mantidqt.widgets.sliceviewer.presenters.selector import cursor_info
 from mantidqt.widgets.sliceviewer.views.dataviewsubscriber import IDataViewSubscriber
 from mantidqt.widgets.sliceviewer.views.dimensionwidget import DimensionWidget
 from mantidqt.widgets.sliceviewer.views.toolbar import SliceViewerNavigationToolbar, ToolItemText
@@ -44,7 +45,7 @@ SCALENORM = "SliceViewer/scale_norm"
 POWERSCALE = "SliceViewer/scale_norm_power"
 
 MASK_SHAPE_OPTIONS = [ToolItemText.RECT_MASKING, ToolItemText.ELLI_MASKING, ToolItemText.POLY_MASKING]
-MASK_PROCESS_OPTIONS = [ToolItemText.APPLY_MASKING, ToolItemText.EXPORT_MASKING]
+MASK_PROCESS_OPTIONS = [ToolItemText.APPLY_MASKING, ToolItemText.EXPORT_MASKING, ToolItemText.INVERTED_MASKING]
 MASK_OPTIONS = MASK_SHAPE_OPTIONS + MASK_PROCESS_OPTIONS
 
 
@@ -159,6 +160,7 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.polyMaskingClicked.connect(self.on_poly_masking_clicked)
         self.mpl_toolbar.exportMaskingClicked.connect(self.on_export_masking_clicked)
         self.mpl_toolbar.applyMaskingClicked.connect(self.on_apply_masking_clicked)
+        self.mpl_toolbar.invertMaskingClicked.connect(self.on_invert_masking_clicked)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
 
         # Status bar
@@ -450,6 +452,9 @@ class SliceViewerDataView(QWidget):
         else:
             self.image.set_data(data.T)
         self.colorbar.update_clim()
+        if self.line_plots_active and self._line_plots is not None:
+            cursor_info.cache_clear()
+            self._line_plots.on_data_updated()
 
     def track_cursor_checked(self):
         return self.track_cursor.isChecked() if self.track_cursor else False
@@ -546,6 +551,12 @@ class SliceViewerDataView(QWidget):
         React to apply masking selected
         """
         self.presenter.apply_masking_clicked()
+
+    def on_invert_masking_clicked(self, state):
+        """
+        React to invert masking clicked
+        """
+        self.presenter.invert_masking_clicked(state)
 
     def deactivate_and_disable_tool(self, tool_text):
         """Deactivate a tool as if the control had been pressed and disable the functionality"""

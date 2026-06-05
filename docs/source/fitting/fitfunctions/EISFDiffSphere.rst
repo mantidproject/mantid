@@ -15,7 +15,7 @@ undergoing continuous diffusion but confined to a spherical volume [1]_,
 
 .. math::
 
-   EISF(Q) = (3 \frac{j_1(QR)}{QR})^2(Q\cdot R)
+   EISF(Q) = \left(3 \frac{j_1(QR)}{QR}\right)^2
 
 :math:`R` units are inverse of :math:`Q` units. Because of the spherical
 symmetry of the problem, the structure factor is expressed in terms of the

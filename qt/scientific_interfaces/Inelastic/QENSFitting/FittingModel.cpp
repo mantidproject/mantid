@@ -608,7 +608,9 @@ IAlgorithm_sptr FittingModel::createSimultaneousFit(const MultiDomainFunction_sp
   fitAlgorithm->setProperty("OutputWorkspace", *outputName);
   return fitAlgorithm;
 }
+
 std::string FittingModel::getResultsSuffix() const { return isMultiFit() ? "_Results" : "_Result"; }
+
 std::string FittingModel::singleFitOutputName(std::string workspaceName, WorkspaceIndex spectrum) const {
   std::string inputWorkspace = isMultiFit() ? "Multi" : workspaceName;
   std::string spectra = std::to_string(spectrum.value);

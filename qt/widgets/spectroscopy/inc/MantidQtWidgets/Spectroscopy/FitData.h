@@ -32,10 +32,15 @@ using namespace MantidWidgets;
 class MANTID_SPECTROSCOPY_DLL FitData {
 public:
   FitData(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra);
+  FitData(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra,
+          const std::string &wsName);
+
+  void setupFitData(FunctionModelSpectra const &spectra, Mantid::API::MatrixWorkspace_sptr const &workspace);
 
   std::string displayName(const std::string &formatString, const std::string &rangeDelimiter) const;
   std::string displayName(const std::string &formatString, WorkspaceIndex spectrum) const;
   std::string getBasename() const;
+  const std::string &getWsName() const;
 
   Mantid::API::MatrixWorkspace_sptr workspace() const;
   const FunctionModelSpectra &spectra() const;
@@ -49,6 +54,10 @@ public:
 
   std::vector<double> excludeRegionsVector(WorkspaceIndex spectrum) const;
   std::vector<double> getQValues() const;
+  const std::map<WorkspaceIndex, std::string> &getResolutions() const;
+  void removeResolutionEntry(const WorkspaceIndex &index);
+  std::set<std::string> getResolutionNames() const;
+  std::string getResolutionFromWsIndex(const WorkspaceIndex &index) const;
 
   template <typename F> void applySpectra(F &&functor) const { ApplySpectra<F>(std::forward<F>(functor))(m_spectra); }
 
@@ -60,6 +69,9 @@ public:
   void setSpectra(std::string const &spectra);
   void setSpectra(FunctionModelSpectra &&spectra);
   void setSpectra(FunctionModelSpectra const &spectra);
+  void setResolution(std::string const &wsName, WorkspaceIndex const &spectrum);
+  void setResolution(std::string const &wsName, FunctionModelSpectra const &spectra);
+  void removeResolution(std::string const &resName);
   void setStartX(double const &startX, WorkspaceIndex const &spectrum);
   void setStartX(double const &startX);
   void setEndX(double const &endX, WorkspaceIndex const &spectrum);
@@ -72,7 +84,9 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   FunctionModelSpectra m_spectra;
   std::map<WorkspaceIndex, std::string> m_excludeRegions;
+  std::map<WorkspaceIndex, std::string> m_resolutions;
   std::map<WorkspaceIndex, std::pair<double, double>> m_ranges;
+  std::string m_name;
 };
 
 } // namespace Inelastic

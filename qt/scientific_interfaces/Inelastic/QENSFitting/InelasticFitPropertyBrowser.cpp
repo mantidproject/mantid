@@ -425,12 +425,17 @@ FitDomainIndex InelasticFitPropertyBrowser::currentDataset() const {
 void InelasticFitPropertyBrowser::updateFunctionBrowserData(
     int nData, const QList<FunctionModelDataset> &datasets, const std::vector<double> &qValues,
     const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
-  m_functionBrowser->setNumberOfDatasets(nData);
-  m_functionBrowser->setDatasets(datasets);
-  m_templatePresenter->setNumberOfDatasets(nData);
-  m_templatePresenter->setDatasets(datasets);
-  m_templatePresenter->setQValues(qValues);
-  m_templatePresenter->setResolution(fitResolutions);
+  try {
+    m_functionBrowser->setNumberOfDatasets(nData);
+    m_functionBrowser->setDatasets(datasets);
+
+    m_templatePresenter->setNumberOfDatasets(nData);
+    m_templatePresenter->setDatasets(datasets);
+    m_templatePresenter->setQValues(qValues);
+    m_templatePresenter->setResolution(fitResolutions);
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+    // Convolution Function may have tried to access non-existent ADS workspaces
+  }
 }
 
 void InelasticFitPropertyBrowser::setFitEnabled(bool) {}

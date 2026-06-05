@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "LOQ" valid-from = "2025-02-26 13:50:00">
+<parameter-file instrument = "LOQ" valid-from = "2025-02-26 13:50:00" valid-to = "2100-10-17 09:29:59">
 
 <component-link name = "LOQ">
 

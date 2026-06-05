@@ -621,6 +621,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self.view.data_view.masking.apply_selectors()
             self.replace_workspace(self.model.ws.name(), self.model.ws)
 
+    def invert_masking_clicked(self, active) -> None:
+        self.view.data_view.masking.invert_masking_clicked(active)
+
 
 class SliceViewXAxisEditor(XAxisEditor):
     def __init__(self, canvas, axes, dimensions_changed):

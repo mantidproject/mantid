@@ -24,7 +24,7 @@ class ExternalPlottingModelTest(unittest.TestCase):
         mock_axes = []
         for i in range(NUM_AXES):
             mock_axis = mock.Mock(spec=MantidAxes)
-            mock_axis.get_artist_normalization_state.return_value = NORMALISATION_STATE
+            mock_axis.get_artist_normalized_by_bin_width.return_value = NORMALISATION_STATE
             mock_axis.get_artists_workspace_and_spec_num.return_value = EXAMPLE_DATA[i]
             mock_axis.get_tracked_artists.return_value = [self.mock_artist]
             mock_axes.append(mock_axis)

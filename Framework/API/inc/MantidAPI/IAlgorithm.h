@@ -152,6 +152,8 @@ public:
 
   /// If true history will be recorded for a child
   virtual void enableHistoryRecordingForChild(const bool on) = 0;
+  /// If true parent history will be recorded for algorithms that handle group outputs directly
+  virtual void enableHistoryRecordingForProcessGroups(const bool on) = 0;
 
   /// Set whether we always store the output in the analysis data service
   virtual void setAlwaysStoreInADS(const bool doStore) = 0;

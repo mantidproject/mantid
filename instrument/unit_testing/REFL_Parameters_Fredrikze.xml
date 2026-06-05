@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="REFL" valid-from="forever">
+<parameter-file instrument="REFL" valid-from="1900-01-01 00:00:00">
 
 <component-link name="REFL" >
 
@@ -9,6 +9,14 @@
 
   <parameter name="polarization_correction_option" type="string">
     <value val="PA" />
+  </parameter>
+
+  <parameter name="FredrikzeInputSpinStateOrderPA" type="string">
+    <value val="pp, pa, ap, aa" />
+  </parameter>
+
+  <parameter name="FredrikzeInputSpinStateOrderPNR" type="string">
+    <value val="p, a" />
   </parameter>
 
   <parameter name="efficiency_lambda" type="string">

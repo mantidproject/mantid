@@ -49,6 +49,9 @@ private:
   void createAndSaveMaskWorkspace(const API::MatrixWorkspace_sptr &ws, double normStdLAB, double normStdHAB);
   API::MatrixWorkspace_sptr integrateInput(const API::Workspace_sptr &ws);
   std::vector<double> extractIntegratedValues(const API::MatrixWorkspace_sptr &ws) const;
+  void createDetectorMaskWorkspace(const API::MatrixWorkspace_sptr &ws);
+  void createFlatcellWorkspace(const API::MatrixWorkspace_sptr &ws);
+  void saveRKH();
   FlatCellStats normalizeBanks(std::span<double> values) const;
 };
 

@@ -53,6 +53,28 @@ constexpr auto fnNumerator = [](const auto &x, const auto &fa) {
 constexpr auto fnDenominator = [](const auto &x, const auto &fp) {
   return (1 - 2 * fp) * x[4] + (2 * fp - 1) * x[5] - x[6] + x[7];
 };
+
+constexpr size_t INDEPENDENT_INTENSITY_VAR_COUNT = 4;
+constexpr size_t DERIVED_EFFICIENCY_VAR_COUNT = 1;
+constexpr size_t DERIVED_EFFICIENCY_INPUT_INDEX = INDEPENDENT_INTENSITY_VAR_COUNT;
+constexpr size_t EFFICIENCY_FROM_DERIVED_INPUT_VAR_COUNT =
+    INDEPENDENT_INTENSITY_VAR_COUNT + DERIVED_EFFICIENCY_VAR_COUNT;
+
+// When one efficiency is supplied and the other is solved from phi = (2p - 1)(2a - 1)
+// we need to account for the covariance between the derived efficiency and the non-magnetic intensities.
+// We provide the covariance matrix provider with a function to calculate the derived efficiency from the provided
+// intensities so the differential can be calculated. This function includes the unknown value of the efficiency to be
+// calculated, so for each bin we solve for this from the known values.
+auto covarianceMatrixProviderForDerivedEfficiency() {
+  return Mantid::Algorithms::Arithmetic::makeCovarianceMatrixProvider<INDEPENDENT_INTENSITY_VAR_COUNT,
+                                                                      DERIVED_EFFICIENCY_VAR_COUNT>(
+      [](const auto &inputs) {
+        const auto phi = fnPhi(inputs);
+        const double suppliedEfficiency = inputs[DERIVED_EFFICIENCY_INPUT_INDEX].value();
+        const double unknownEfficiency = 0.5 + (1 / (4 * suppliedEfficiency - 2)) * phi.value();
+        return 0.5 + (1 / (4 * unknownEfficiency - 2)) * phi;
+      });
+}
 } // namespace
 
 namespace Mantid::Algorithms {
@@ -340,15 +362,14 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
     if (const MatrixWorkspace_sptr inWsP = getProperty(PropNames::INPUT_P_EFF_WS)) {
       m_wsP = inWsP->clone();
     } else {
-      g_log.warning("The analyser efficiency workspace provided has been used to calculate the polarizer efficiency."
-                    "This could lead to inflated errors as the analyser efficiency is a derived quantity.");
       const MatrixWorkspace_sptr inWsA = getProperty(PropNames::INPUT_A_EFF_WS);
-      constexpr int var_num = 5;
-      const auto errorProp = Arithmetic::makeErrorPropagation<var_num>([](const auto &x) {
-        const auto TXMO = (2 * x[4]) - 1;
-        return (fnPhi(x) / (2 * TXMO)) + 0.5;
-      });
-      m_wsP = errorProp.evaluateWorkspaces(true, ws00, ws01, ws10, ws11, inWsA);
+      const auto errorProp =
+          Arithmetic::makeErrorPropagation<EFFICIENCY_FROM_DERIVED_INPUT_VAR_COUNT>([](const auto &inputValues) {
+            const auto suppliedEfficiencyFactor = (2 * inputValues[DERIVED_EFFICIENCY_INPUT_INDEX]) - 1;
+            return (fnPhi(inputValues) / (2 * suppliedEfficiencyFactor)) + 0.5;
+          });
+      m_wsP = errorProp.evaluateWorkspacesWithCovariance(true, covarianceMatrixProviderForDerivedEfficiency(), ws00,
+                                                         ws01, ws10, ws11, inWsA);
     }
   }
 
@@ -356,15 +377,14 @@ void PolarizationEfficienciesWildes::calculatePolarizerAndAnalyserEfficiencies(c
     if (const MatrixWorkspace_sptr inWsA = getProperty(PropNames::INPUT_A_EFF_WS)) {
       m_wsA = inWsA->clone();
     } else {
-      g_log.warning("The polarizer efficiency workspace provided has been used to calculate the analyser efficiency. "
-                    "This could lead to inflated errors as the polarizer efficiency is a derived quantity.");
       const MatrixWorkspace_sptr inWsP = getProperty(PropNames::INPUT_P_EFF_WS);
-      constexpr int var_num = 5;
-      const auto errorProp = Arithmetic::makeErrorPropagation<var_num>([](const auto &x) {
-        const auto TXMO = (2 * x[4]) - 1;
-        return (fnPhi(x) / (2 * TXMO)) + 0.5;
-      });
-      m_wsA = errorProp.evaluateWorkspaces(true, ws00, ws01, ws10, ws11, inWsP);
+      const auto errorProp =
+          Arithmetic::makeErrorPropagation<EFFICIENCY_FROM_DERIVED_INPUT_VAR_COUNT>([](const auto &inputValues) {
+            const auto suppliedEfficiencyFactor = (2 * inputValues[DERIVED_EFFICIENCY_INPUT_INDEX]) - 1;
+            return (fnPhi(inputValues) / (2 * suppliedEfficiencyFactor)) + 0.5;
+          });
+      m_wsA = errorProp.evaluateWorkspacesWithCovariance(true, covarianceMatrixProviderForDerivedEfficiency(), ws00,
+                                                         ws01, ws10, ws11, inWsP);
     }
   }
 }

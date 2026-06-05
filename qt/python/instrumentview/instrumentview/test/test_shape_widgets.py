@@ -423,7 +423,7 @@ class TestShapeOverlayManager(unittest.TestCase):
 
         # Install a simple circle shape at (0.5, 0.5) with radius 0.2
         shape = CircleSelectionShape(0.5, 0.5, 0.1)
-        mgr._shape = shape
+        mgr._shapes = [shape]
 
         # Provide pre-projected points (simulating project_and_cache_points)
         # Point at (0.5, 0.5) is at centre → inside
@@ -475,7 +475,7 @@ class TestShapeOverlayManager(unittest.TestCase):
     def test_mouse_move_does_not_resync_pixel_aspect(self):
         plotter = self._make_mock_plotter()
         mgr = ShapeOverlayManager(plotter)
-        mgr._shape = CircleSelectionShape(0.5, 0.5, 0.1)
+        mgr._shapes = [CircleSelectionShape(0.5, 0.5, 0.1)]
         mgr._shape_pixel_aspect = MagicMock(return_value=1.0)
         mgr._on_mouse_move(None, None)
         mgr._shape_pixel_aspect.assert_not_called()
@@ -483,7 +483,7 @@ class TestShapeOverlayManager(unittest.TestCase):
     def test_get_shape_mask_does_not_resync_pixel_aspect(self):
         plotter = self._make_mock_plotter()
         mgr = ShapeOverlayManager(plotter)
-        mgr._shape = CircleSelectionShape(0.5, 0.5, 0.1)
+        mgr._shapes = [CircleSelectionShape(0.5, 0.5, 0.1)]
         mgr._shape_pixel_aspect = MagicMock(return_value=1.0)
 
         points = np.array([[0.0, 0.0, 0.0]])

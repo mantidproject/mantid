@@ -99,6 +99,37 @@ class TestCursorZoomInteractorStyle(unittest.TestCase):
         self.assertEqual(camera.focal_point, [4, 5, 6])
         self.assertAlmostEqual(camera.parallel_scale, 2.5)
 
+    def test_reset_camera_calls_render(self):
+        style, plotter = self._create_style()
+        style._reset_camera()
+        plotter.renderer.reset_camera_clipping_range.assert_called_once()
+        plotter.render_window.Render.assert_called_once()
+
+    def test_update_default_camera_state_recaches_current_state(self):
+        style, plotter = self._create_style(position=(1, 2, 3), focal_point=(4, 5, 6), parallel_scale=2.5)
+        # Simulate camera changing after construction (e.g. fill transform)
+        plotter.renderer.camera.position = [7, 8, 9]
+        plotter.renderer.camera.focal_point = [10, 11, 12]
+        plotter.renderer.camera.parallel_scale = 5.0
+        style.update_default_camera_state()
+        assert_array_almost_equal(style._default_position, [7, 8, 9])
+        assert_array_almost_equal(style._default_focal_point, [10, 11, 12])
+        self.assertAlmostEqual(style._default_parallel_scale, 5.0)
+
+    def test_update_default_camera_state_affects_subsequent_reset(self):
+        style, plotter = self._create_style(position=(1, 2, 3), focal_point=(4, 5, 6), parallel_scale=2.5)
+        # Move camera and update defaults to new position
+        plotter.renderer.camera.position = [7, 8, 9]
+        plotter.renderer.camera.focal_point = [10, 11, 12]
+        plotter.renderer.camera.parallel_scale = 5.0
+        style.update_default_camera_state()
+        # Now change camera again and reset — should go to the updated defaults
+        plotter.renderer.camera.position = [99, 99, 99]
+        plotter.renderer.camera.parallel_scale = 99.0
+        style._reset_camera()
+        self.assertEqual(plotter.renderer.camera.position, [7, 8, 9])
+        self.assertAlmostEqual(plotter.renderer.camera.parallel_scale, 5.0)
+
     def test_wheel_forward_calls_zoom_in(self):
         style, plotter = self._create_style()
         with mock.patch.object(style, "_zoom") as zoom_mock:

@@ -1,0 +1,1 @@
+- For ``TextureUtils.create_pf`` with ``save_ascii = True`` and ``create_combined_output = True`` an error is no longer thrown when spectra contain different sized histograms

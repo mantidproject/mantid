@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<detector-grouping idf-date="2026-02-05T23:59:59" instrument="IMAT">
+	<group ID="1">
+		<detids>14256-14511</detids>
+	</group>
+	<group ID="2">
+		<detids>14000-14255</detids>
+	</group>
+	<group ID="3">
+		<detids>13256-13511</detids>
+	</group>
+	<group ID="4">
+		<detids>13000-13255</detids>
+	</group>
+	<group ID="5">
+		<detids>12256-12511</detids>
+	</group>
+	<group ID="6">
+		<detids>12000-12255</detids>
+	</group>
+	<group ID="7">
+		<detids>11256-11511</detids>
+	</group>
+	<group ID="8">
+		<detids>11000-11255</detids>
+	</group>
+	<group ID="9">
+		<detids>10256-10511</detids>
+	</group>
+	<group ID="10">
+		<detids>10000-10255</detids>
+	</group>
+	<group ID="11">
+		<detids>9256-9511</detids>
+	</group>
+	<group ID="12">
+		<detids>9000-9255</detids>
+	</group>
+	<group ID="13">
+		<detids>8256-8511</detids>
+	</group>
+	<group ID="14">
+		<detids>8000-8255</detids>
+	</group>
+	<group ID="15">
+		<detids>7256-7511</detids>
+	</group>
+	<group ID="16">
+		<detids>7000-7255</detids>
+	</group>
+	<group ID="17">
+		<detids>6256-6511</detids>
+	</group>
+	<group ID="18">
+		<detids>6000-6255</detids>
+	</group>
+	<group ID="19">
+		<detids>5256-5511</detids>
+	</group>
+	<group ID="20">
+		<detids>5000-5255</detids>
+	</group>
+	<group ID="21">
+		<detids>4256-4511</detids>
+	</group>
+	<group ID="22">
+		<detids>4000-4255</detids>
+	</group>
+	<group ID="23">
+		<detids>3256-3511</detids>
+	</group>
+	<group ID="24">
+		<detids>3000-3255</detids>
+	</group>
+	<group ID="25">
+		<detids>2256-2511</detids>
+	</group>
+	<group ID="26">
+		<detids>2000-2255</detids>
+	</group>
+	<group ID="27">
+		<detids>1256-1511</detids>
+	</group>
+	<group ID="28">
+		<detids>1000-1255</detids>
+	</group>
+</detector-grouping>

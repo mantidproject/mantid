@@ -11,11 +11,10 @@ from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
 from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFactory, PointGroup
 from mantid.kernel import V3D, logger, UnitConversion, DeltaEModeType
-from typing import Optional, Tuple, TYPE_CHECKING, Sequence
+from typing import Optional, TYPE_CHECKING, Sequence, Any
 from scipy.optimize import least_squares
 from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
 from abc import ABC, abstractmethod
-
 
 if TYPE_CHECKING:
     from mantid.dataobjects import Workspace2D
@@ -24,18 +23,21 @@ if TYPE_CHECKING:
 
 class InstrumentParams:
     def __init__(self):
+        self.labels: dict[str, int] = {"scale": 0, "shift": 1}
         self.p: np.ndarray = np.array([1.0, 0.0])
-        self.labels = ("scale", "shift")
         self.default_isfree: np.ndarray = np.zeros_like(self.p, dtype=bool)
 
-    def get_peak_centre(self, dpk: float) -> float:
-        return self.p[0] * dpk + self.p[1]
+    def get_peak_centre(self, dpk: float) -> np.ndarray[Any, np.dtype[Any]]:
+        return self.p[self.labels["scale"]] * dpk + self.p[self.labels["shift"]]
+
+    def set_param(self, param_name: str, param_value: float):
+        self.p[self.labels[param_name]] = param_value
 
 
 class PeakProfile(ABC):
     def __init__(self):
         self.func_name: str
-        self.labels: Tuple[str]
+        self.labels: dict[str, int]
         self.p: np.ndarray
         self.default_isfree: np.ndarray
 
@@ -47,7 +49,7 @@ class PeakProfile(ABC):
 class PVProfile(PeakProfile):
     def __init__(self):
         self.func_name = "PseudoVoigt"
-        self.labels = ("sig0", "sig1", "sig2", "gam0", "gam1", "gam2", "gsize", "dst2", "zeta", "fsz")
+        self.labels = {val: idx for idx, val in enumerate(["sig0", "sig1", "sig2", "gam0", "gam1", "gam2", "gsize", "dst2", "zeta", "fsz"])}
         self.p: np.ndarray = np.array([5.0e-4, 1.0e-3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         self.default_isfree: np.ndarray = np.array([1, 1, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool)
 
@@ -62,12 +64,16 @@ class PVProfile(PeakProfile):
             8
             * np.log(2)
             * (
-                (self.p[0] ** 2)
-                + ((self.p[1] ** 2) + self.p[-3] * ((1 - self.p[-2]) ** 2)) * dpk**2
-                + ((self.p[2] ** 2) + self.p[-4]) * dpk**4
+                (self.p[self.labels["sig0"]] ** 2)
+                + ((self.p[self.labels["sig1"]] ** 2) + self.p[self.labels["dst2"]] * ((1 - self.p[self.labels["fsz"]]) ** 2)) * dpk**2
+                + ((self.p[self.labels["sig2"]] ** 2) + self.p[self.labels["gsize"]]) * dpk**4
             )
         )  # Panel 6 in [2] Hg**2 / (8ln2)
-        fwhm_l = self.p[3] + (self.p[4] + self.p[-2] * np.sqrt(8 * np.log(2) * self.p[-3])) * dpk + (self.p[5] + self.p[-1]) * dpk**2
+        fwhm_l = (
+            self.p[self.labels["gam0"]]
+            + (self.p[self.labels["gam1"]] + self.p[self.labels["zeta"]] * np.sqrt(8 * np.log(2) * self.p[self.labels["dst2"]])) * dpk
+            + (self.p[self.labels["gam2"]] + self.p[self.labels["fsz"]]) * dpk**2
+        )
         fwhm_pv = (
             fwhm_g**5
             + 2.69269 * (fwhm_g**4) * (fwhm_l)
@@ -85,7 +91,7 @@ class PVProfile(PeakProfile):
 class GaussianProfile(PeakProfile):
     def __init__(self):
         self.func_name = "Gaussian"
-        self.labels = ("sig0", "sig1", "sig2")
+        self.labels = {val: idx for idx, val in enumerate(["sig0", "sig1", "sig2"])}
         self.p: np.ndarray = np.array([5.0e-4, 1.0e-3, 0.0])
         self.default_isfree: np.ndarray = np.array([1, 1, 0], dtype=bool)
 
@@ -95,13 +101,19 @@ class GaussianProfile(PeakProfile):
         Note dst2 and gsize perfectly corralated withsig1 and sig2 respectively
         [1] Using FullProf to analyze Time of Flight Neutron Powder Diffraction data (https://www.ill.eu/sites/fullprof/downloads/Docs/TOF_FullProf.pdf)
         """
-        return {"Sigma": np.sqrt((self.p[0] ** 2) + (self.p[1] ** 2) * dpk**2 + (self.p[2] ** 2) * dpk**4)}  # Panel 6 in [1] with zeta=0
+        return {
+            "Sigma": np.sqrt(
+                (self.p[self.labels["sig0"]] ** 2)
+                + (self.p[self.labels["sig1"]] ** 2) * dpk**2
+                + (self.p[self.labels["sig2"]] ** 2) * dpk**4
+            )
+        }  # Panel 6 in [1] with zeta=0
 
 
 class BackToBackGauss(PeakProfile):
     def __init__(self):
         self.func_name = "BackToBackExponential"
-        self.labels = ("sig0", "sig1", "sig2", "alpha_0", "alpha_1", "beta_0", "beta_1")
+        self.labels = {val: idx for idx, val in enumerate(["sig0", "sig1", "sig2", "alpha_0", "alpha_1", "beta_0", "beta_1"])}
         self.p: np.ndarray = np.array([0, 9.06, 6.52, 0, 0.0968, 0.0216, 0.0123])  # for ENGIN-X North Bank
         self.default_isfree: np.ndarray = np.zeros_like(self.p, dtype=bool)
 
@@ -109,13 +121,15 @@ class BackToBackGauss(PeakProfile):
         return {"S": self._calc_sigma(dpk), "A": self._calc_alpha(dpk), "B": self._calc_beta(dpk)}
 
     def _calc_sigma(self, dpk: float) -> float:
-        return np.sqrt((self.p[0] ** 2) + (self.p[1] * dpk) ** 2 + (self.p[2] ** 2) * dpk**4)
+        return np.sqrt(
+            (self.p[self.labels["sig0"]] ** 2) + (self.p[self.labels["sig1"]] * dpk) ** 2 + (self.p[self.labels["sig2"]] ** 2) * dpk**4
+        )
 
     def _calc_alpha(self, dpk: float) -> float:
-        return self.p[3] + self.p[4] / dpk
+        return self.p[self.labels["alpha_0"]] + self.p[self.labels["alpha_1"]] / dpk
 
     def _calc_beta(self, dpk: float) -> float:
-        return self.p[5] + self.p[6] / (dpk**4)
+        return self.p[self.labels["beta_0"]] + self.p[self.labels["beta_1"]] / (dpk**4)
 
 
 class Phase:
@@ -128,28 +142,32 @@ class Phase:
         # add hkls - check if compatible wth spacegorup
         if hkls is not None:
             self.set_hkls(hkls)
-        # set free parameters beased on lattice system
-        self.param_names = np.array(["a", "b", "c", "alpha", "beta", "gamma"])
+        # set free parameters based on lattice system
+        self.labels = {val: idx for idx, val in enumerate(["a", "b", "c", "alpha", "beta", "gamma"])}
         self.alatt = self._get_alatt()
         ptgr = PointGroupFactory.createPointGroupFromSpaceGroup(self.spgr)
+
         match ptgr.getLatticeSystem():
             case PointGroup.LatticeSystem.Cubic:
                 # a=b=c, alpha=beta=gamma=90
-                self.ipars = [slice(0, 3)]  # a
+                self.ipars = [slice(self.labels["a"], self.labels["c"] + 1)]  # a:c
             case PointGroup.LatticeSystem.Tetragonal | PointGroup.LatticeSystem.Hexagonal:
                 # a=b!=c (tetrag has alpha=beta=gamma=90, hexag has alpha=beta=90, gamma= 120)
-                self.ipars = [slice(0, 2), 2]  # a, c
+                self.ipars = [slice(self.labels["a"], self.labels["b"] + 1), self.labels["c"]]  # a:b, c
             case PointGroup.LatticeSystem.Orthorhombic:
                 # alpha=beta=gamma=90
-                self.ipars = range(3)  # a, b, c
+                self.ipars = [self.labels["a"], self.labels["b"], self.labels["c"]]
             case PointGroup.LatticeSystem.Rhombohedral:
                 # a=b=c, alpha=beta=gamma
-                self.ipars = [slice(0, 3), slice(3, 6)]  # a, alpha
+                self.ipars = [
+                    slice(self.labels["a"], self.labels["c"] + 1),
+                    slice(self.labels["alpha"], self.labels["gamma"] + 1),
+                ]  # a:c, alpha:gamma
             case PointGroup.LatticeSystem.Monoclinic:
                 # a!=b!=c, alpha=gamma=90
-                self.ipars = [0, 1, 2, 4]  # a, b, c, beta
+                self.ipars = [self.labels["a"], self.labels["b"], self.labels["c"], self.labels["beta"]]
             case _:  # Triclinic
-                self.ipars = range(len(self.alatt))  # a, b, c, alpha, beta, gamma
+                self.ipars = range(len(self.labels.keys()))  # a, b, c, alpha, beta, gamma
 
     @classmethod
     def from_cif(cls, cif_file: str):
@@ -164,13 +182,15 @@ class Phase:
         return Phase(xtal)
 
     def _get_alatt(self) -> np.ndarray[float]:
-        return np.array([getattr(self.unit_cell, method)() for method in self.param_names])
+        return np.array([getattr(self.unit_cell, method)() for method in self.labels.keys()])
 
     def get_params(self) -> np.ndarray[float]:
         return np.array([self.alatt[ipar][0] if isinstance(ipar, slice) else self.alatt[ipar] for ipar in self.ipars])
 
     def get_param_names(self) -> np.ndarray[str]:
-        return np.array([self.param_names[ipar][0] if isinstance(ipar, slice) else self.param_names[ipar] for ipar in self.ipars])
+        return np.array(
+            [key for key, value in self.labels.items() if value in [idx.start if isinstance(idx, slice) else idx for idx in self.ipars]]
+        )
 
     def set_params(self, pars: np.ndarray[float]):
         for ipar, par in enumerate(pars):
@@ -214,6 +234,9 @@ class MtdFuncMixin:
     PawleyPattern2DNoConstraints (although the getters may also be helpful for debugging PawleyPattern2D fits
     """
 
+    def __init__(self):
+        self.comp_func: CompositeFunctionWrapper = None
+
     def get_peak_centres(self) -> np.ndarray[float]:
         cen_par_name = self.comp_func[0].function.getCentreParameterName()
         return self.get_peak_params(cen_par_name)
@@ -234,7 +257,7 @@ class MtdFuncMixin:
         # relevant only for subsequent unconstrained fits - not used in Pawley fits
         bg_func_names = FunctionFactory.Instance().getBackgroundFunctionNames()
         if isinstance(param_names, str):
-            param_names = [param_names]  #  force ot be list with single element
+            param_names = [param_names]  # force ot be list with single element
         for func in self.comp_func:
             if func.name not in bg_func_names:
                 for param_name in param_names:
@@ -245,7 +268,7 @@ class MtdFuncMixin:
 
 
 class PawleyPatternBase(MtdFuncMixin, ABC):
-    def __init__(self, ws: Workspace2D, phases: Phase, profile: PeakProfile, bg_func: Optional[FunctionWrapper] = None):
+    def __init__(self, ws: Workspace2D, phases: Phase | Sequence[Phase], profile: PeakProfile, bg_func: Optional[FunctionWrapper] = None):
         self.ws = ws
         self.phases = phases
         self.alatt_params = [phase.get_params() for phase in self.phases]
@@ -332,10 +355,54 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         if len(self.bg_params) > 0:
             self.bg_params = params[iend:]
 
+    def _validate_profile_params(self, param_name: str, iphase: int):
+        if iphase > ((plen := len(self.phases)) - 1):
+            raise ValueError(f"Phase with index: {iphase} does not exists. Number of phases is {plen}")
+        elif param_name not in self.profile.labels.keys():
+            raise ValueError(f"Invalid profile parameter name: {param_name}, for profile {self.profile.func_name}")
+
+    def _validate_phase_params(self, param_name: str, iphase: int):
+        if iphase > ((plen := len(self.phases)) - 1):
+            raise ValueError(f"Phase with index: {iphase} does not exists. Number of phases is {plen}")
+        elif param_name not in self.phases[iphase].get_param_names():
+            raise ValueError(f"Parameter {param_name} is not a parameter of Phase")
+
     def set_free_params(self, free_params: np.ndarray[float]):
         params = self.get_params()
         params[self.get_isfree()] = free_params
         self.set_params(params)
+
+    def set_profile_free_param(self, is_free: bool, param_name: str, iphase: int):
+        self._validate_profile_params(param_name, iphase)
+        self.profile_isfree[iphase][self.profile.labels[param_name]] = is_free
+
+    def get_profile_free_param(self, param_name: str, iphase: int) -> bool:
+        self._validate_profile_params(param_name, iphase)
+        return self.profile_isfree[iphase][self.profile.labels[param_name]]
+
+    def set_profile_param(self, param_value: float, param_name: str, iphase: int):
+        self._validate_profile_params(param_name, iphase)
+        self.profile_params[iphase][self.profile.labels[param_name]] = param_value
+
+    def get_profile_param(self, param_name: str, iphase: int) -> float:
+        self._validate_profile_params(param_name, iphase)
+        return self.profile_params[iphase][self.profile.labels[param_name]]
+
+    def set_phase_param(self, param_value: float, param_name: str, iphase: int):
+        self._validate_phase_params(param_name, iphase)
+        self.alatt_params[iphase][self.phases[iphase].labels[param_name]] = param_value
+
+    def get_phase_param(self, param_name: str, iphase: int) -> float:
+        self._validate_phase_params(param_name, iphase)
+        return self.alatt_params[iphase][self.phases[iphase].labels[param_name]]
+
+    def set_phase_free_param(self, is_free: float, param_name: str, iphase: int):
+        self._validate_phase_params(param_name, iphase)
+        self.alatt_isfree[iphase][self.phases[iphase].labels[param_name]] = is_free
+
+    def get_phase_free_param(self, param_name: str, iphase: int) -> float:
+        self._validate_phase_params(param_name, iphase)
+        return self.alatt_isfree[iphase][self.phases[iphase].labels[param_name]]
 
     def fit(self, **kwargs) -> OptimizeResult:
         default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}

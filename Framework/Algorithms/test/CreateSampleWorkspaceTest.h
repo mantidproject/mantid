@@ -11,6 +11,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -555,5 +556,76 @@ public:
         outWSName, "Event", "Flat background", "", 2, 1, 1000, false, "DeltaE", -10., 19., 0.5, 1, name));
     TS_ASSERT_EQUALS(ws->getInstrument()->getName(), name)
     AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  // --- RunStart / RunEnd log tests ---
+
+  void test_run_start_end_defaults() {
+    // Neither RunStart nor RunEnd supplied: hardcoded defaults should be used.
+    CreateSampleWorkspace alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outWS->run().getLogData("run_start")->value(), "2010-01-01T00:00:00");
+    TS_ASSERT_EQUALS(outWS->run().getLogData("run_end")->value(), "2010-01-01T01:00:00");
+  }
+
+  void test_run_start_only_sets_end_plus_one_hour() {
+    // Providing RunStart only: run_end should be RunStart + 1 hour.
+    CreateSampleWorkspace alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("RunStart", "2024-06-15T12:00:00"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outWS->run().getLogData("run_start")->value(), "2024-06-15T12:00:00");
+    TS_ASSERT_EQUALS(outWS->run().getLogData("run_end")->value(), "2024-06-15T13:00:00");
+  }
+
+  void test_run_end_only_sets_start_minus_one_hour() {
+    // Providing RunEnd only: run_start should be RunEnd - 1 hour.
+    CreateSampleWorkspace alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("RunEnd", "2024-06-15T12:00:00"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outWS->run().getLogData("run_start")->value(), "2024-06-15T11:00:00");
+    TS_ASSERT_EQUALS(outWS->run().getLogData("run_end")->value(), "2024-06-15T12:00:00");
+  }
+
+  void test_run_start_and_end_both_used() {
+    // Both RunStart and RunEnd supplied: both values should appear in the logs.
+    CreateSampleWorkspace alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("RunStart", "2024-06-15T08:00:00"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("RunEnd", "2024-06-15T20:00:00"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outWS->run().getLogData("run_start")->value(), "2024-06-15T08:00:00");
+    TS_ASSERT_EQUALS(outWS->run().getLogData("run_end")->value(), "2024-06-15T20:00:00");
+  }
+
+  void test_invalid_run_start_rejected() {
+    // A non-ISO string should be rejected by the validator before execution.
+    CreateSampleWorkspace alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("RunStart", "not-a-date"));
+  }
+
+  void test_invalid_run_end_rejected() {
+    CreateSampleWorkspace alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("RunEnd", "not-a-date"));
   }
 };

@@ -1028,9 +1028,6 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
     def set_background_subtraction_mode(self, mode):
         self.background_subtraction_checkbox.setChecked(mode)
 
-    def set_plot_results_checkbox_visibility(self, visibility):
-        self.plot_results_checkbox.setVisible(visibility)
-
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # START ACCESSORS
@@ -1126,14 +1123,6 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
     @use_optimizations.setter
     def use_optimizations(self, value):
         self.use_optimizations_checkbox.setChecked(value)
-
-    @property
-    def plot_results(self):
-        return self.plot_results_checkbox.isChecked()
-
-    @plot_results.setter
-    def plot_results(self, value):
-        self.plot_results_checkbox.setChecked(value)
 
     @property
     def output_mode(self):

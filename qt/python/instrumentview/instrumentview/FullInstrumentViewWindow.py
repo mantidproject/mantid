@@ -126,6 +126,7 @@ class FullInstrumentViewWindow(QMainWindow):
     _detector_spectrum_fig = None
     _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRatio"
     _DRAW_SHAPES_SETTING_STRING = "InstrumentView.DrawShapes"
+    _FLIP_BEAM_SETTING_STRING = "InstrumentView.FlipBeam"
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     def __init__(self, parent=None, off_screen=False):
@@ -191,8 +192,8 @@ class FullInstrumentViewWindow(QMainWindow):
 
         pyvista_vertical_layout.addWidget(vsplitter)
 
-        detector_group_box = QGroupBox("Detector Info")
-        detector_info_layout = QVBoxLayout(detector_group_box)
+        self._detector_group_box = QGroupBox("Detector Info")
+        detector_info_layout = QVBoxLayout(self._detector_group_box)
         self._detector_name_edit = self._add_detector_info_boxes(detector_info_layout, "Name")
         self._detector_id_edit = self._add_detector_info_boxes(detector_info_layout, "Detector ID")
         self._detector_workspace_index_edit = self._add_detector_info_boxes(detector_info_layout, "Workspace Index")
@@ -203,16 +204,22 @@ class FullInstrumentViewWindow(QMainWindow):
         self._detector_relative_angle_edit = self._add_detector_info_boxes(detector_info_layout, "Relative Angle (degrees)")
         self.set_relative_detector_angle(None)
 
-        self._integration_limit_group_box = QGroupBox("Time of Flight")
+        self._integration_limit_group_box = QGroupBox("Units")
+        integration_box_layout = QVBoxLayout(self._integration_limit_group_box)
+        self._units_combo_box_sliders = NoWheelComboBox(self)
+        self._units_combo_box_sliders.setToolTip("Select the units for the detectors shown.")
+        integration_box_layout.addWidget(self._units_combo_box_sliders)
         (
             self._integration_limit_min_edit,
             self._integration_limit_max_edit,
             self._integration_limit_slider,
             self._integration_limit_reset,
-        ) = self._add_min_max_group_box(self._integration_limit_group_box)
+        ) = self._add_min_max_group_box(integration_box_layout)
+
         self._contour_range_group_box = QGroupBox("Contour Range")
+        contour_box_layout = QVBoxLayout(self._contour_range_group_box)
         self._contour_range_min_edit, self._contour_range_max_edit, self._contour_range_slider, self._contour_range_reset = (
-            self._add_min_max_group_box(self._contour_range_group_box)
+            self._add_min_max_group_box(contour_box_layout)
         )
 
         projection_group_box = QGroupBox("Projection")
@@ -239,10 +246,11 @@ class FullInstrumentViewWindow(QMainWindow):
         self._show_monitors_check_box.setText("Show Monitors?")
         self._count_scale_combo_box = NoWheelComboBox(self)
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
-        self._flip_z_axis_check_box = QCheckBox()
-        self._flip_z_axis_check_box.setText("Flip Z Axis")
-        self._flip_z_axis_check_box.setToolTip(
-            "If checked, the Z axis will be flipped in 2D projections, mirroring the instrument along the beam axis."
+        self._flip_beam_check_box = QCheckBox()
+        self._flip_beam_check_box.setText("Flip Beam")
+        self._flip_beam_check_box.setChecked(is_config_setting_true(self._FLIP_BEAM_SETTING_STRING))
+        self._flip_beam_check_box.setToolTip(
+            "If checked, 2D projections are mirrored across the plane perpendicular to the beam direction."
         )
         self._select_bank_tube = QPushButton("Select Bank/Tube")
         self._select_bank_tube.setCheckable(True)
@@ -260,7 +268,7 @@ class FullInstrumentViewWindow(QMainWindow):
         projection_second_row.addWidget(self._show_monitors_check_box)
         projection_second_row.addWidget(self._count_scale_combo_box)
         projection_second_row.addWidget(self._show_shapes_check_box)
-        projection_second_row.addWidget(self._flip_z_axis_check_box)
+        projection_second_row.addWidget(self._flip_beam_check_box)
         projection_second_row.addWidget(self._select_bank_tube)
         projection_layout.addLayout(projection_first_row)
         projection_layout.addLayout(projection_second_row)
@@ -351,22 +359,45 @@ class FullInstrumentViewWindow(QMainWindow):
 
         options_vertical_widget = QWidget()
         options_vertical_layout = QVBoxLayout(options_vertical_widget)
-        options_vertical_layout.addWidget(detector_group_box)
         options_vertical_layout.addWidget(self._integration_limit_group_box)
         options_vertical_layout.addWidget(self._contour_range_group_box)
         options_vertical_layout.addWidget(projection_group_box)
-        units_group_box = QGroupBox("Units")
-        units_vbox = QVBoxLayout()
-        self._setup_units_options(units_vbox)
-        units_group_box.setLayout(units_vbox)
-        options_vertical_layout.addWidget(units_group_box)
-        options_vertical_layout.addWidget(peak_ws_group_box)
-        options_vertical_layout.addWidget(grouping_masking_group_box)
-        options_vertical_layout.addWidget(QSplitter(Qt.Horizontal))
+
+        lineplot_group_box = QGroupBox("Line Plot")
+        lineplot_layout = QHBoxLayout(lineplot_group_box)
+        self._units_combo_box_lineplot = NoWheelComboBox(self)
+        self._units_combo_box_lineplot.setToolTip("Select the units for the lineplot.")
+        self._export_workspace_button = QPushButton("Export Spectra to ADS", self)
+        self._sum_spectra_checkbox = QCheckBox(self)
+        self._sum_spectra_checkbox.setChecked(True)
+        self._sum_spectra_checkbox.setText("Sum Selected Spectra")
+        self._sum_spectra_checkbox.setToolTip(
+            "Selected spectra will be converted to d-Spacing, summed, then converted back to the desired unit."
+        )
+        lineplot_layout.addWidget((self._units_combo_box_lineplot))
+        lineplot_layout.addWidget(self._export_workspace_button)
+        lineplot_layout.addWidget(self._sum_spectra_checkbox)
+
+        options_vertical_layout.addWidget(lineplot_group_box)
+
+        vsplitter = QSplitter(Qt.Vertical)
+        vsplitter.addWidget(peak_ws_group_box)
+        vsplitter.addWidget(grouping_masking_group_box)
+        vsplitter.addWidget(self._detector_group_box)
+        self._detector_group_box.setMaximumHeight(self._detector_group_box.sizeHint().height())
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        vsplitter.addWidget(spacer)
+        vsplitter.setStretchFactor(0, 1)  # peak_ws_group_box stretches
+        vsplitter.setStretchFactor(1, 1)  # grouping_masking_group_box stretches
+        vsplitter.setStretchFactor(2, 0)  # detector_group_box fixed
+        vsplitter.setStretchFactor(3, 1)  # spacer absorbs extra space
+        vsplitter.setChildrenCollapsible(False)
+
+        options_vertical_layout.addWidget(vsplitter)
 
         options_vertical_layout.addWidget(self.status_group_box)
         left_column_layout.addWidget(options_vertical_widget)
-        left_column_layout.addStretch()
 
         component_tree_tab = QWidget()
         component_layout = QVBoxLayout(component_tree_tab)
@@ -409,6 +440,9 @@ class FullInstrumentViewWindow(QMainWindow):
     def store_draw_shapes_option(self) -> None:
         self._store_checkbox_option(self._show_shapes_check_box, self._DRAW_SHAPES_SETTING_STRING)
 
+    def store_flip_beam_option(self) -> None:
+        self._store_checkbox_option(self._flip_beam_check_box, self._FLIP_BEAM_SETTING_STRING)
+
     def _store_checkbox_option(self, checkbox: QCheckBox, config_key: str) -> None:
         option = "Yes" if checkbox.isChecked() else "No"
         ConfigService.Instance()[config_key] = option
@@ -416,11 +450,11 @@ class FullInstrumentViewWindow(QMainWindow):
     def enable_or_disable_aspect_ratio_box(self) -> None:
         self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
 
-    def is_flip_z_axis_checkbox_checked(self) -> bool:
-        return self._flip_z_axis_check_box.isChecked()
+    def is_flip_beam_checkbox_checked(self) -> bool:
+        return self._flip_beam_check_box.isChecked()
 
-    def enable_or_disable_flip_z_axis_box(self) -> None:
-        self._flip_z_axis_check_box.setDisabled(self.current_selected_projection() in [ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE])
+    def enable_or_disable_flip_beam_box(self) -> None:
+        self._flip_beam_check_box.setDisabled(self.current_selected_projection() in [ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE])
 
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
@@ -466,7 +500,7 @@ class FullInstrumentViewWindow(QMainWindow):
             self.main_plotter.reset_camera()
         return
 
-    def _add_min_max_group_box(self, parent_box: QGroupBox) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider, QPushButton]:
+    def _add_min_max_group_box(self, parent_vbox_layout: QVBoxLayout) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider, QPushButton]:
         """Creates a minimum and a maximum box (with labels) inside the given group box. The callbacks will be attached to textEdited
         signal of the boxes"""
         min_hbox = QHBoxLayout()
@@ -484,7 +518,7 @@ class FullInstrumentViewWindow(QMainWindow):
         reset_button = QPushButton("Reset")
         reset_hbox.addWidget(reset_button)
 
-        slider = QDoubleRangeSlider(Qt.Orientation.Horizontal, parent=parent_box)
+        slider = QDoubleRangeSlider(Qt.Orientation.Horizontal)
         slider.setRange(0, 1)
         slider_hbox = QHBoxLayout()
         slider_hbox.addWidget(slider)
@@ -494,11 +528,8 @@ class FullInstrumentViewWindow(QMainWindow):
         root_hbox.addLayout(max_hbox)
         root_hbox.addLayout(reset_hbox)
 
-        root_vbox = QVBoxLayout()
-        root_vbox.addLayout(slider_hbox)
-        root_vbox.addLayout(root_hbox)
-        parent_box.setLayout(root_vbox)
-
+        parent_vbox_layout.addLayout(slider_hbox)
+        parent_vbox_layout.addLayout(root_hbox)
         return (min_edit, max_edit, slider, reset_button)
 
     def set_contour_min_max_boxes(self, limits: tuple[float, float]) -> None:
@@ -581,8 +612,8 @@ class FullInstrumentViewWindow(QMainWindow):
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
         for unit in self._presenter.available_unit_options():
-            self._units_combo_box.addItem(unit)
-        self._integration_limit_group_box.setTitle(self._presenter.workspace_display_unit)
+            self._units_combo_box_sliders.addItem(unit)
+            self._units_combo_box_lineplot.addItem(unit)
         self._count_scale_combo_box.addItems(self._presenter.count_scale_combo_options())
         self.refresh_peaks_ws_list()
         self.refresh_workspaces_in_list(CurrentTab.Masking)
@@ -595,7 +626,8 @@ class FullInstrumentViewWindow(QMainWindow):
         self._contour_range_reset.clicked.connect(self._presenter.on_contour_range_reset_clicked)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
         self._integration_limit_reset.clicked.connect(self._presenter.on_integration_limits_reset_clicked)
-        self._units_combo_box.currentIndexChanged.connect(self._presenter.on_unit_option_selected)
+        self._units_combo_box_sliders.currentIndexChanged.connect(self._presenter.on_sliders_unit_selected)
+        self._units_combo_box_lineplot.currentIndexChanged.connect(self._presenter.on_lineplot_unit_selected)
         self._export_workspace_button.clicked.connect(self._presenter.on_export_workspace_clicked)
         self._sum_spectra_checkbox.clicked.connect(self._presenter.on_sum_spectra_checkbox_clicked)
         self._peak_ws_list.itemChanged.connect(self._presenter.on_peaks_workspace_selected)
@@ -616,7 +648,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._start_adding_peaks_button.toggled.connect(self._presenter.on_start_adding_peaks_toggled)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
-        self._flip_z_axis_check_box.clicked.connect(self._presenter.on_flip_z_axis_check_box_clicked)
+        self._flip_beam_check_box.clicked.connect(self._presenter.on_flip_beam_check_box_clicked)
         self._show_shapes_check_box.clicked.connect(self._presenter.on_show_shapes_toggled)
         self._select_bank_tube.toggled.connect(self._presenter.on_select_bank_tube_toggled)
 
@@ -691,9 +723,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def _setup_units_options(self, parent: QVBoxLayout):
         """Add widgets for the units options"""
-        self._units_combo_box = NoWheelComboBox(self)
-        self._units_combo_box.setToolTip("Select the units for the spectra line plot")
-        parent.addWidget(self._units_combo_box)
         hBox = QHBoxLayout()
         self._export_workspace_button = QPushButton("Export Spectra to ADS", self)
         hBox.addWidget(self._export_workspace_button)
@@ -784,11 +813,15 @@ class FullInstrumentViewWindow(QMainWindow):
         self._delete_all_selected_peaks_button.setEnabled(is_enabled)
 
     def set_unit_combo_box_index(self, index: int) -> None:
-        self._units_combo_box.setCurrentIndex(index)
+        self._units_combo_box_sliders.setCurrentIndex(index)
 
-    def current_selected_unit(self) -> str:
+    def current_selected_sliders_unit(self) -> str:
         """Get the currently selected unit from the combo box"""
-        return self._units_combo_box.currentText()
+        return self._units_combo_box_sliders.currentText()
+
+    def current_selected_lineplot_unit(self) -> str:
+        """Get the currently selected unit from the combo box"""
+        return self._units_combo_box_lineplot.currentText()
 
     def current_selected_count_scale(self) -> str:
         """Get the currently selected display scale for integrated counts"""
@@ -935,7 +968,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self.main_plotter.camera.focal_point = focal_point
 
     @_skip_if_closing
-    def show_plot_for_detectors(self, workspace: Workspace2D) -> None:
+    def show_plot_for_detectors(self, workspace: Workspace2D, integration_limits) -> None:
         """Plot all the given spectra, where they are defined by their workspace indices, not the spectra numbers"""
         self._detector_spectrum_axes.clear()
         sum_spectra = self.sum_spectra_selected()
@@ -947,13 +980,13 @@ class FullInstrumentViewWindow(QMainWindow):
                 self._detector_spectrum_axes.legend(fontsize=8.0).set_draggable(True)
             for line in self._lineplot_overlays:
                 self._detector_spectrum_axes.add_line(line)
-            integration_limits = self._presenter.integration_limits_in_current_unit()
             self._detector_spectrum_axes.set_xlim(integration_limits[0], integration_limits[1])
 
         self.redraw_lineplot()
 
     def set_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
         """For a list of detectors, with their info wrapped up in a class, update all of the info text boxes"""
+        self._detector_group_box.setVisible(bool(detector_infos))
         self._set_detector_edit_text(self._detector_name_edit, detector_infos, lambda d: d.name)
         self._set_detector_edit_text(self._detector_id_edit, detector_infos, lambda d: str(d.detector_id))
         self._set_detector_edit_text(self._detector_workspace_index_edit, detector_infos, lambda d: str(d.workspace_index))
@@ -978,7 +1011,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self, edit_box: QTextEdit, detector_infos: list[DetectorInfo], property_lambda: Callable[[DetectorInfo], str]
     ) -> None:
         """Set the text in one of the detector info boxes"""
-        edit_box.setPlainText(",".join(property_lambda(d) for d in detector_infos))
+        edit_box.setPlainText("; ".join(property_lambda(d) for d in detector_infos))
 
     def selected_peaks_workspaces(self) -> list[str]:
         return [
@@ -997,7 +1030,8 @@ class FullInstrumentViewWindow(QMainWindow):
     @_skip_if_closing
     def clear_lineplot_overlays(self) -> None:
         for line in self._lineplot_overlays:
-            line.remove()
+            if line in self._detector_spectrum_axes.lines:
+                line.remove()
         self._lineplot_overlays.clear()
         for text in self._detector_spectrum_axes.texts:
             text.remove()

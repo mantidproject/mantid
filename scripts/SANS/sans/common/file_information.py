@@ -1043,7 +1043,7 @@ class SANSFileInformationISISAdded(SANSFileInformation):
             first_entry = h5_file[keys[0]]
             logs = first_entry["logs"]
             # Start time
-            start_time = logs["start_time"]
+            start_time = logs["start_time"] if "start_time" in logs.keys() else logs["run_start"]
             start_time_value = DateAndTime(start_time["value"][0])
             # Run number
             run_number = logs["run_number"]

@@ -21,6 +21,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/UnitFactory.h"
@@ -129,6 +130,17 @@ void CreateSampleWorkspace::init() {
                   "non-scanning workspace.");
 
   declareProperty("InstrumentName", "basic_rect", Direction::Input);
+
+  auto dateTimeValidator = std::make_shared<Kernel::DateTimeValidator>();
+  dateTimeValidator->allowEmpty(true);
+  declareProperty("RunStart", "", dateTimeValidator,
+                  "An optional ISO 8601 date-time string (e.g. \"2010-01-01T00:00:00\") for the start of the run. "
+                  "If omitted, defaults to 2010-01-01T00:00:00. If only RunStart is given, RunEnd is set to +1 hour.");
+  auto dateTimeValidator2 = std::make_shared<Kernel::DateTimeValidator>();
+  dateTimeValidator2->allowEmpty(true);
+  declareProperty("RunEnd", "", dateTimeValidator2,
+                  "An optional ISO 8601 date-time string (e.g. \"2010-01-01T01:00:00\") for the end of the run. "
+                  "If omitted, defaults to 2010-01-01T01:00:00. If only RunEnd is given, RunStart is set to -1 hour.");
   declareProperty("NumBanks", 2, std::make_shared<BoundedValidator<int>>(0, 100),
                   "The Number of banks in the instrument (default:2)");
   declareProperty("NumMonitors", 0, std::make_shared<BoundedValidator<int>>(0, 100),
@@ -266,8 +278,23 @@ void CreateSampleWorkspace::exec() {
 
   ws->setYUnit("Counts");
   ws->setTitle("Test Workspace");
+
+  const std::string runStartInput = getPropertyValue("RunStart");
+  const std::string runEndInput = getPropertyValue("RunEnd");
+  const double oneHourInSeconds = 3600.0;
   DateAndTime run_start("2010-01-01T00:00:00");
   DateAndTime run_end("2010-01-01T01:00:00");
+  if (!runStartInput.empty() && !runEndInput.empty()) {
+    run_start = DateAndTime(runStartInput);
+    run_end = DateAndTime(runEndInput);
+  } else if (!runStartInput.empty()) {
+    run_start = DateAndTime(runStartInput);
+    run_end = run_start + oneHourInSeconds;
+  } else if (!runEndInput.empty()) {
+    run_end = DateAndTime(runEndInput);
+    run_start = run_end - oneHourInSeconds;
+  }
+
   Run &theRun = ws->mutableRun();
   // belt and braces use both approaches for setting start and end times
   theRun.setStartAndEndTime(run_start, run_end);

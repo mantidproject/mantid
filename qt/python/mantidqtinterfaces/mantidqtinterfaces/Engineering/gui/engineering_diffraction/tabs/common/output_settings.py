@@ -25,6 +25,11 @@ def get_path_to_gsas2() -> str:
     return str(location) if location is not None else ""
 
 
+def get_timeout() -> int:
+    timeout = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "timeout")
+    return int(timeout) if timeout else 100
+
+
 def get_texture_axes_transform():
     rd_str = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "rd_dir")
     nd_str = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "nd_dir")

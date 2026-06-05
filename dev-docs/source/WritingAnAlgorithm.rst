@@ -290,6 +290,40 @@ This call will also initialise the algorithm, so the algorithm's properties can 
 
 Because ``Property`` is generic to input **and** output, the workspace pointers cannot be ``const`` when shared with a child algorithm.
 
+WorkspaceGroup history from processGroups
+-----------------------------------------
+
+When an algorithm is executed with a ``WorkspaceGroup`` input, the base ``Algorithm::processGroups()`` implementation normally executes the algorithm again on each group member.
+Those per-member executions record the output workspace history, so the history from the initial group call is not added to the outputs.
+
+Algorithms that override ``processGroups()`` may need different behaviour.
+For example, a group reduction may run a linked workflow across all group members and call child algorithms internally.
+In this case the override can opt in to recording the parent algorithm history by calling ``enableHistoryRecordingForProcessGroups(true)``:
+
+.. code-block:: cpp
+
+   bool MyAlgorithm::processGroups() {
+     m_usingBaseProcessGroups = true;
+     enableHistoryRecordingForProcessGroups(true);
+
+     auto child = createChildAlgorithm("ChildAlgorithm");
+     child->setProperty("InputWorkspace", input);
+     child->setProperty("OutputWorkspace", output);
+     child->execute();
+
+     setProperty("OutputWorkspace", output);
+     return true;
+   }
+
+This is opt-in only.
+Existing ``processGroups()`` behaviour is unchanged unless the override calls ``enableHistoryRecordingForProcessGroups(true)``.
+Python algorithms can use the same opt-in by calling ``self.enableHistoryRecordingForProcessGroups(True)``.
+When the flag is enabled, the parent algorithm is recorded on the output workspaces and any child algorithms run during ``processGroups()`` remain nested under it in the workspace history.
+
+Keep algorithms that should appear beneath the parent history as child algorithms.
+If a child algorithm must still place its output in the ``AnalysisDataService``, prefer ``setAlwaysStoreInADS(true)`` over making it a non-child algorithm with ``setChild(false)``.
+Running it as non-child creates a separate top-level history entry instead of nesting it under the parent algorithm.
+
 Enhancing asynchronous running
 ------------------------------
 

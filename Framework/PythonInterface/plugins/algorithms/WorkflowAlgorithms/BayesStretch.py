@@ -209,11 +209,21 @@ class BayesStretch(PythonAlgorithm):
         # create workspaces for sigma and beta
         workflow_prog.report("Creating OutputWorkspace")
 
-        self._create_workspace(fname + "_Sigma", [xSig, ySig, eSig], nsam, Qaxis)
-        self._create_workspace(fname + "_Beta", [xBet, yBet, eBet], nsam, Qaxis)
+        if not self.getProperty("OutputWorkspaceFit").isDefault:
+            # include the backend name i.e. QuickBayes or QuasiElasticBayes to individual ws names
+            backendName = self.getPropertyValue("OutputWorkspaceFit").split("_")[-1]
+            sigma_ws_name = f"{fname}_{backendName}_Sigma"
+            beta_ws_name = f"{fname}_{backendName}_Beta"
+            fit_ws = self.getPropertyValue("OutputWorkspaceFit")
+        else:
+            sigma_ws_name = f"{fname}_Sigma"
+            beta_ws_name = f"{fname}_Beta"
+            fit_ws = fname + "_Fit"
 
-        group = fname + "_Sigma," + fname + "_Beta"
-        fit_ws = fname + "_Fit" if self.getProperty("OutputWorkspaceFit").isDefault else self.getPropertyValue("OutputWorkspaceFit")
+        self._create_workspace(sigma_ws_name, [xSig, ySig, eSig], nsam, Qaxis)
+        self._create_workspace(beta_ws_name, [xBet, yBet, eBet], nsam, Qaxis)
+
+        group = f"{sigma_ws_name},{beta_ws_name}"
         contour_ws = (
             fname + "_Contour" if self.getProperty("OutputWorkspaceContour").isDefault else self.getPropertyValue("OutputWorkspaceContour")
         )

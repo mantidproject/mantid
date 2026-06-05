@@ -396,7 +396,7 @@ public:
 
   const std::string &YUnit() const { return m_YUnit; }
   void setYUnit(const std::string &newUnit);
-  std::string YUnitLabel(bool useLatex = false, bool plotAsDistribution = false) const;
+  std::string YUnitLabel(bool useLatex = false) const;
   void setYUnitLabel(const std::string &newLabel);
 
   /// Are the Y-values dimensioned?

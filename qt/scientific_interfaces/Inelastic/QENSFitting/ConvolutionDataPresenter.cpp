@@ -7,8 +7,6 @@
 #include "ConvolutionDataPresenter.h"
 #include "ConvolutionAddWorkspaceDialog.h"
 
-#include "MantidAPI/AnalysisDataService.h"
-
 namespace MantidQt::CustomInterfaces::Inelastic {
 
 ConvolutionDataPresenter::ConvolutionDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view)
@@ -16,20 +14,29 @@ ConvolutionDataPresenter::ConvolutionDataPresenter(IFitTab *tab, IDataModel *mod
 
 bool ConvolutionDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
   if (const auto convDialog = dynamic_cast<ConvolutionAddWorkspaceDialog const *>(dialog)) {
-    addWorkspace(convDialog->workspaceName(), convDialog->workspaceIndices());
-    setResolution(convDialog->resolutionName());
+    const auto &wsName = convDialog->workspaceName();
+    const auto &spectra = convDialog->workspaceIndices();
+    addWorkspace(wsName, spectra);
+    setResolution(convDialog->resolutionName(), wsName, spectra);
     return true;
   }
   return false;
 }
 
+void ConvolutionDataPresenter::setResolution(const std::string &resName, const std::string &wsName,
+                                             const FunctionModelSpectra &spectra) {
+  if (!m_model->setResolution(resName, wsName, spectra)) {
+    m_model->removeSpecialValues(resName);
+    displayWarning("Replaced the NaN's and infinities in " + resName + " with zeros");
+  }
+}
+
 void ConvolutionDataPresenter::addTableEntry(FitDomainIndex row) {
   const auto &name = m_model->getWorkspace(row)->getName();
-  auto resolutionVector = m_model->getResolutionsForFit();
-  const auto &resolution = resolutionVector.at(row.value).first;
   const auto workspaceIndex = m_model->getSpectrum(row);
   const auto range = m_model->getFittingRange(row);
   const auto exclude = m_model->getExcludeRegion(row);
+  const auto resolution = m_model->getResolutionName(m_model->getWorkspaceID(name), workspaceIndex);
 
   FitDataRow newRow;
   newRow.name = name;
@@ -38,7 +45,6 @@ void ConvolutionDataPresenter::addTableEntry(FitDomainIndex row) {
   newRow.startX = range.first;
   newRow.endX = range.second;
   newRow.exclude = exclude;
-
   m_view->addTableEntry(row.value, newRow);
 }
 

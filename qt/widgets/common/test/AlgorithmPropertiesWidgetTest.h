@@ -12,6 +12,8 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
 #include <QCoreApplication>
+#include <QEventLoop>
+#include <QMetaObject>
 #include <QWidget>
 
 #include <cxxtest/TestSuite.h>
@@ -521,6 +523,95 @@ public:
     //   due to `ctest`, `gtest` and `Qt` interactions during shutdown.
     Mock::VerifyAndClearExpectations(settings_b);
     Mock::VerifyAndClearExpectations(settings_c);
+  }
+
+  /// Regression test for a use-after-free / pure-virtual crash that occurred when
+  /// `initLayout()` was called a second time on a widget that already had
+  /// PropertyWidgets and their associated infoWidgets (icon-strip QWidgets living
+  /// in column 4 of the grid).
+  ///
+  /// Root cause: `initLayout()` removed items from the grid layout first (queuing
+  /// infoWidget deletions), then queued PropertyWidget deletions, then called
+  /// `processEvents()`. Since infoWidgets were processed (freed) before their
+  /// PropertyWidgets, the `destroyed`-signal lambda on each PropertyWidget
+  /// subsequently called `deleteLater()` on already-freed memory. The stale
+  /// DeferredDelete event caused a pure-virtual call via the freed vtable when
+  /// next processed, triggering `std::terminate()` via Mantid's terminate handler.
+  ///
+  /// Fix: PropertyWidgets must be queued for deletion before grid widgets so that
+  /// the lambda fires while the infoWidget is still alive.
+  ///
+  /// See: https://github.com/mantidproject/mantid/issues/41471
+  void testInitLayout_ReinitializationDoesNotUseAfterFree() {
+    // The bug is a deletion-order violation introduced in PR #40132.
+    // initLayout() must queue PropertyWidget deletions BEFORE grid-widget deletions
+    // (which include the infoWidgets at column 4). If the order is reversed:
+    //
+    //   1. infoWidgets get deleteLater() first.
+    //   2. PropWidgets get deleteLater() second.
+    //   3. processEvents() fires DeferredDelete events FIFO.
+    //   4. infoWidget is freed; its memory may be reused.
+    //   5. propWidget's `destroyed`-signal lambda calls infoWidget->deleteLater()
+    //      on freed / reused memory.
+    //   6. The stale DeferredDelete reaches a garbage vtable → pure-virtual crash.
+    //
+    // Fix: propWidgets queued first → lambda fires while infoWidget is still alive.
+    //
+    // Test strategy: connect to the `destroyed` signals of both the OLD infoWidgets
+    // and OLD propWidgets. Count how many infoWidgets fire `destroyed` before any
+    // propWidget does. With the bug that count will be > 0; with the fix it is 0.
+    //
+    // Important: Qt only processes DeferredDelete events when the event-loop level
+    // is exactly (post_level + 1). Because tests run outside any event loop
+    // (loopLevel = 0), QCoreApplication::processEvents() alone cannot drain them.
+    // Running a brief QEventLoop bumps the level to 1 and lets Qt flush the queue
+    // while this stack frame — and therefore the shared_ptr captures — is still alive.
+
+    QGridLayout *inputGrid = m_widget->m_propWidgets.begin().value()->getGridLayout();
+
+    // Count OLD infoWidgets (column 4) that have already fired `destroyed` by the
+    // time the first OLD propWidget fires `destroyed`.
+    auto infoWidgetsDestroyedCount = std::make_shared<int>(0);
+    int totalInfoWidgets = 0;
+    for (int row = 0; row < inputGrid->rowCount(); ++row) {
+      auto *item = inputGrid->itemAtPosition(row, 4);
+      if (item && item->widget()) {
+        ++totalInfoWidgets;
+        QObject::connect(item->widget(), &QObject::destroyed,
+                         [infoWidgetsDestroyedCount]() { (*infoWidgetsDestroyedCount)++; });
+      }
+    }
+    TS_ASSERT_LESS_THAN(0, totalInfoWidgets);
+
+    // Bug present  → infoWidgets freed first → count > 0 when propWidget fires → flag set.
+    // Bug fixed    → propWidgets freed first → count == 0 when propWidget fires → flag clear.
+    auto infoWidgetDestroyedBeforePropWidget = std::make_shared<bool>(false);
+    for (auto *propWidget : m_widget->m_propWidgets) {
+      QObject::connect(propWidget, &QObject::destroyed,
+                       [infoWidgetsDestroyedCount, infoWidgetDestroyedBeforePropWidget]() {
+                         if (*infoWidgetsDestroyedCount > 0)
+                           *infoWidgetDestroyedBeforePropWidget = true;
+                       });
+    }
+
+    // Trigger the cleanup.
+    m_widget->setAlgorithm(m_algorithm);
+
+    // Flush DeferredDelete events. QEventLoop::exec() raises the loopLevel to 1,
+    // which satisfies Qt's condition for processing events posted at level 0.
+    // The invokeMethod queues the quit *after* the deletions so the loop exits
+    // only once all DeferredDelete events have been dispatched.
+    {
+      QEventLoop loop;
+      QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
+      loop.exec();
+    }
+
+    // Sanity check: all OLD infoWidgets must have been destroyed.
+    // If this fails, the event-loop flush above did not process DeferredDelete events.
+    TS_ASSERT_EQUALS(*infoWidgetsDestroyedCount, totalInfoWidgets);
+
+    TS_ASSERT(!*infoWidgetDestroyedBeforePropWidget);
   }
 
   /// Verifies that `hideOrDisableProperties()` computes the enabled state
