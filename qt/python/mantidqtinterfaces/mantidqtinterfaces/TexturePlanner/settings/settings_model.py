@@ -29,6 +29,7 @@ SETTINGS_DICT = {
     "mc_resimulate": bool,
     "att_point": float,
     "att_unit": str,
+    "att_use_data_range": bool,
 }
 
 DEFAULT_SETTINGS = {
@@ -50,6 +51,7 @@ DEFAULT_SETTINGS = {
     "mc_resimulate": False,
     "att_point": 1.5,
     "att_unit": "dSpacing",
+    "att_use_data_range": False,
 }
 
 
