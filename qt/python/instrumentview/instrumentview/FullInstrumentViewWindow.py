@@ -127,10 +127,10 @@ class FullInstrumentViewWindow(QMainWindow):
     _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRatio"
     _RENDER_MODE_SETTING_STRING = "InstrumentView.RenderMode"
     _FLIP_BEAM_SETTING_STRING = "InstrumentView.FlipBeam"
-    _RENDER_MODE_POINTS = "Points"
-    _RENDER_MODE_SHAPES_FAST = "Shapes (Fast)"
-    _RENDER_MODE_FULL_SHAPES = "Full Shapes"
-    _RENDER_MODE_OPTIONS = (_RENDER_MODE_POINTS, _RENDER_MODE_SHAPES_FAST, _RENDER_MODE_FULL_SHAPES)
+    _RENDER_MODE_POINTS = "Points (Fastest)"
+    _RENDER_MODE_SHAPES_FAST = "Approximated Shapes (Fast)"
+    _RENDER_MODE_RAW_SHAPES = "Raw Shapes (Slowest)"
+    _RENDER_MODE_OPTIONS = (_RENDER_MODE_POINTS, _RENDER_MODE_SHAPES_FAST, _RENDER_MODE_RAW_SHAPES)
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     def __init__(self, parent=None, off_screen=False):

@@ -192,9 +192,11 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
     def test_store_render_mode_option_stores_current_text(self, mock_config):
-        self._view._render_mode_combo_box.setCurrentText("Full Shapes")
+        self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_RAW_SHAPES)
         self._view.store_render_mode_option()
-        mock_config.Instance.return_value.__setitem__.assert_called_once_with(self._view._RENDER_MODE_SETTING_STRING, "Full Shapes")
+        mock_config.Instance.return_value.__setitem__.assert_called_once_with(
+            self._view._RENDER_MODE_SETTING_STRING, self._view._RENDER_MODE_RAW_SHAPES
+        )
 
     def test_on_axes_click_left_calls_presenter_with_left(self):
         event = MagicMock()
@@ -206,8 +208,8 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
     def test_get_render_mode_option_returns_current_text(self, mock_config):
-        self._view._render_mode_combo_box.setCurrentText("Points")
-        self.assertEqual(self._view.get_render_mode_option(), "Points")
+        self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_POINTS)
+        self.assertEqual(self._view.get_render_mode_option(), self._view._RENDER_MODE_POINTS)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
     @mock.patch("qtpy.QtWidgets.QHBoxLayout.addWidget")
@@ -221,7 +223,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         mock_config.Instance.return_value.__getitem__.return_value = "UnknownValue"
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
             view = FullInstrumentViewWindow()
-        self.assertEqual(view.get_render_mode_option(), "Points")
+        self.assertEqual(view.get_render_mode_option(), view._RENDER_MODE_POINTS)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
     @mock.patch("qtpy.QtWidgets.QHBoxLayout.addWidget")
@@ -232,10 +234,10 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_render_mode_combo_initialised_to_full_shapes_when_config_is_full_shapes(
         self, mock_config, mock_plotter, mock_splitter, mock_v_layout, mock_h_layout, mock_canvas
     ):
-        mock_config.Instance.return_value.__getitem__.return_value = "Full Shapes"
+        mock_config.Instance.return_value.__getitem__.return_value = self._view._RENDER_MODE_RAW_SHAPES
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
             view = FullInstrumentViewWindow()
-        self.assertEqual(view.get_render_mode_option(), "Full Shapes")
+        self.assertEqual(view.get_render_mode_option(), self._view._RENDER_MODE_RAW_SHAPES)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
     @mock.patch("qtpy.QtWidgets.QHBoxLayout.addWidget")
@@ -246,10 +248,10 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_render_mode_combo_initialised_to_shapes_fast_when_config_is_shapes_fast(
         self, mock_config, mock_plotter, mock_splitter, mock_v_layout, mock_h_layout, mock_canvas
     ):
-        mock_config.Instance.return_value.__getitem__.return_value = "Shapes (Fast)"
+        mock_config.Instance.return_value.__getitem__.return_value = self._view._RENDER_MODE_SHAPES_FAST
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
             view = FullInstrumentViewWindow()
-        self.assertEqual(view.get_render_mode_option(), "Shapes (Fast)")
+        self.assertEqual(view.get_render_mode_option(), self._view._RENDER_MODE_SHAPES_FAST)
 
     def test_on_axes_click_right_calls_presenter_with_right(self):
         event = MagicMock()

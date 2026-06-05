@@ -654,7 +654,7 @@ class FullInstrumentViewPresenter:
             return self._point_cloud_renderer
 
         is_sbs = self._model.projection_type == ProjectionType.SIDE_BY_SIDE
-        if mode == self._view._RENDER_MODE_FULL_SHAPES:
+        if mode == self._view._RENDER_MODE_RAW_SHAPES:
             return self._sbs_shape_renderer_full if is_sbs else self._shape_renderer_full
 
         return self._sbs_shape_renderer if is_sbs else self._shape_renderer
