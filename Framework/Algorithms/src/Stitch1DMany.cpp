@@ -199,12 +199,6 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
         }
       }
 
-      if (m_inputWSMatrix.size() == 1) {
-        m_outputWorkspaceSuffixes = this->getProperty("OutputWorkspaceSuffixes");
-        if (!m_outputWorkspaceSuffixes.empty())
-          issues["OutputWorkspaceSuffixes"] = "OutputWorkspaceSuffixes can only be used with group workspaces";
-      }
-
       m_startOverlaps = this->getProperty("StartOverlaps");
       m_endOverlaps = this->getProperty("EndOverlaps");
       m_params = this->getProperty("Params");
