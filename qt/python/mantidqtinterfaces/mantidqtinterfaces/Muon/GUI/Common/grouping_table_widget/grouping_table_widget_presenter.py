@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
+from qtpy.QtCore import Qt
 from mantidqtinterfaces.Muon.GUI.Common.utilities import run_string_utils as run_utils
 from mantidqtinterfaces.Muon.GUI.Common.muon_group import MuonGroup
 from mantidqt.utils.observer_pattern import GenericObservable
@@ -255,7 +256,7 @@ class GroupingTablePresenter(object):
         self._model.remove_groups_by_name(invalid_groups)
 
     def to_analyse_data_checkbox_changed(self, state, row, group_name):
-        group_added = True if state == 2 else False
+        group_added = state == Qt.CheckState.Checked
 
         if group_added:
             self._model.add_group_to_analysis(group_name)

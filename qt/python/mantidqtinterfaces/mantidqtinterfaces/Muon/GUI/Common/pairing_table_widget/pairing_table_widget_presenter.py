@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
+from qtpy.QtCore import Qt
 from contextlib import contextmanager
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import valid_name_regex, valid_alpha_regex
@@ -179,7 +180,7 @@ class PairingTablePresenter(object):
         self._view.update_group_selections(groups)
 
     def to_analyse_data_checkbox_changed(self, state, row, pair_name):
-        pair_added = True if state == 2 else False
+        pair_added = state == Qt.CheckState.Checked
         if pair_added:
             self._model.add_pair_to_analysis(pair_name)
         else:

@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
+from qtpy.QtCore import Qt
 
 from mantidqtinterfaces.Muon.GUI.Common.muon_diff import MuonDiff
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import valid_name_regex
@@ -115,7 +116,7 @@ class DifferenceTablePresenter(object):
         self._view.update_group_selections(groups)
 
     def to_analyse_data_checkbox_changed(self, state, row, diff_name):
-        diff_added = True if state == 2 else False
+        diff_added = state == Qt.CheckState.Checked
         if diff_added:
             self._model.add_diff_to_analysis(diff_name)
         else:
