@@ -124,6 +124,9 @@ clean_build_and_staging() {
         # Windows can leave handles open in rattler work/cache dirs; clean them before reuse.
         rm -rf "$CONDA_BLD_PATH"/bld/rattler-build_* "$CONDA_BLD_PATH"/build_cache/staging_*
         rm -rf "$RATTLER_CACHE_DIR"
+        rm -rf "$PIXI_CACHE_DIR"
+        rm -rf "$TMP"
+        mkdir -p "$RATTLER_CACHE_DIR" "$PIXI_CACHE_DIR" "$TMP"
     fi
 }
 
@@ -142,8 +145,16 @@ if [[ $OSTYPE == "msys"* ]]; then
     branch_name="${BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
     branch_slug="$(printf '%s' "$branch_name" | tr '[:upper:]' '[:lower:]' | tr '/\\:*?"<>| ' '-' | tr -cd 'a-z0-9._-')"
 
-    # Use a dedicated package cache on Windows to avoid temp-directory rename failures.
-    export RATTLER_CACHE_DIR=$WORKSPACE/rattler-cache-$branch_slug
+    short_root_win="C:/Users/jenkins/mantid-ci/${branch_slug}"
+    short_root_bash="/c/Users/jenkins/mantid-ci/${branch_slug}"
+
+    # Use short external cache and temp paths on Windows to reduce file locking and path issues.
+    export RATTLER_CACHE_DIR="${short_root_win}/rattler-cache"
+    export PIXI_CACHE_DIR="${short_root_win}/pixi-cache"
+    export TMP="${short_root_win}/tmp"
+    export TEMP="${short_root_win}/tmp"
+
+    mkdir -p "${short_root_bash}/rattler-cache" "${short_root_bash}/pixi-cache" "${short_root_bash}/tmp"
 fi
 
 clean_build_and_staging # clean build tree before everything
