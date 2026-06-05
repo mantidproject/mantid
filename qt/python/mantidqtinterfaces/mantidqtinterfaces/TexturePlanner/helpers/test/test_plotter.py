@@ -24,6 +24,7 @@ def _make_model(
     projection="ster",
     gonio_index=0,
     plot_transmission=False,
+    transmission_use_data_range=False,
     orientations=None,
     detQs_lab=None,
     det_k=None,
@@ -46,6 +47,7 @@ def _make_model(
     model.projection = projection
     model.gonio_index = gonio_index
     model.plot_transmission = plot_transmission
+    model.transmission_use_data_range = transmission_use_data_range
     if orientations is None:
         orient = MagicMock()
         orient.gRs = [Rotation.identity()]
@@ -523,6 +525,22 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
         self.assertEqual(scatter_call.kwargs["cmap"], "jet")
         proj_ax.inset_axes.assert_called_once_with([0.9, 0.15, 0.05, 0.7])
         proj_ax.figure.colorbar.assert_called_once_with(scatt_obj, cax=proj_ax.inset_axes.return_value)
+
+    def test_transmission_mode_uses_data_range_when_enabled(self):
+        a = MagicMock()
+        a.include = True
+        a.pf_points = np.array([[0.1, 0.2]])
+        a.transmission = np.array([0.3])
+        model = _make_model(orientations={0: a}, plot_transmission=True, transmission_use_data_range=True)
+        plotter = TexturePlotter(model)
+        proj_ax = MagicMock()
+
+        plotter._draw_pole_figure(proj_ax, [], current_index=0)
+
+        scatter_call = proj_ax.scatter.call_args
+        self.assertNotIn("vmin", scatter_call.kwargs)
+        self.assertNotIn("vmax", scatter_call.kwargs)
+        self.assertEqual(scatter_call.kwargs["cmap"], "jet")
 
 
 @patch(file_path + ".plt")

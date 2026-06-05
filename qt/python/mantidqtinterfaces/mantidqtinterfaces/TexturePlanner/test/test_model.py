@@ -53,6 +53,7 @@ class TestTexturePlannerModel_Init(unittest.TestCase):
         self.assertEqual(model.gonio_index, 0)
         self.assertEqual(model.n_output_points, 1)
         self.assertFalse(model.plot_transmission)
+        self.assertFalse(model.transmission_use_data_range)
         self.assertEqual(model.orientation_kwargs, {"Axes": "YXY", "Senses": "-1,-1,-1"})
 
     def test_custom_instrument_and_projection(self, mock_instr, mock_wsm, mock_ot, mock_dg, mock_abs, mock_exp, mock_plot):

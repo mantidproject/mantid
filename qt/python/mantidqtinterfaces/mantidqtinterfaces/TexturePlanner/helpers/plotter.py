@@ -170,7 +170,8 @@ class TexturePlotter:
             included = [o for o in m.orientations.values() if o.include]
             all_pf_xy = np.concatenate([o.pf_points for o in included], axis=0)
             all_transmissions = np.concatenate([o.transmission for o in included], axis=0)
-            scatt = proj_ax.scatter(all_pf_xy[:, 1], all_pf_xy[:, 0], s=20, c=all_transmissions, vmin=0, vmax=1, cmap="jet")
+            clim_kwargs = {} if m.transmission_use_data_range else {"vmin": 0, "vmax": 1}
+            scatt = proj_ax.scatter(all_pf_xy[:, 1], all_pf_xy[:, 0], s=20, c=all_transmissions, cmap="jet", **clim_kwargs)
             cax = proj_ax.inset_axes([0.9, 0.15, 0.05, 0.7])
             proj_ax.figure.colorbar(scatt, cax=cax)
 

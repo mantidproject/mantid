@@ -169,6 +169,9 @@ class TexturePlannerSettingsView(QDialog):
         self.att_unit.addItems(["dSpacing", "Wavelength", "TOF"])
         form.addRow("Unit:", self.att_unit)
 
+        self.att_use_data_range = QCheckBox()
+        form.addRow("Use Data Range Scale:", self.att_use_data_range)
+
         group.setLayout(form)
         return group
 
@@ -218,6 +221,9 @@ class TexturePlannerSettingsView(QDialog):
 
         self.att_point.setToolTip("Value at which to read the attenuation coefficient from the absorption workspace")
         self.att_unit.setToolTip("Unit of the attenuation point value")
+        self.att_use_data_range.setToolTip(
+            "If checked, the estimated transmission plot colour scale spans the data range; if unchecked, it is fixed between 0 and 1"
+        )
 
     # ================
     # Slot Connectors
@@ -290,6 +296,9 @@ class TexturePlannerSettingsView(QDialog):
     def get_att_unit(self):
         return self.att_unit.currentText()
 
+    def get_att_use_data_range(self):
+        return self.att_use_data_range.isChecked()
+
     # ================
     # Setters
     # ================
@@ -347,3 +356,6 @@ class TexturePlannerSettingsView(QDialog):
 
     def set_att_unit(self, text):
         self.att_unit.setCurrentText(str(text))
+
+    def set_att_use_data_range(self, val):
+        self.att_use_data_range.setChecked(bool(val))

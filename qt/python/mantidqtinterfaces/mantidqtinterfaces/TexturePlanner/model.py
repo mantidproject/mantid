@@ -38,6 +38,8 @@ class TexturePlannerModel(object):
         # output / plot toggles
         self.n_output_points = 1
         self.plot_transmission = False
+        # when True the transmission plot colour scale spans the data range; otherwise it is fixed to [0, 1]
+        self.transmission_use_data_range = False
 
         # euler_file_settings (used by orientation loader + exporter)
         self.orientation_kwargs = {"Axes": "YXY", "Senses": "-1,-1,-1"}

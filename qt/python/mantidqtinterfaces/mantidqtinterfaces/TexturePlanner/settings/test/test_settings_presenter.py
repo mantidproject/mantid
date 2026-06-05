@@ -32,6 +32,7 @@ SETTINGS_FIXTURE = {
     "mc_resimulate": True,
     "att_point": 2.5,
     "att_unit": "Wavelength",
+    "att_use_data_range": True,
 }
 
 
@@ -47,6 +48,7 @@ def _make_texture_model():
         "ResimulateTracksForDifferentWavelengths": False,
     }
     m.workspaces.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing"}
+    m.transmission_use_data_range = False
     return m
 
 
@@ -70,6 +72,7 @@ def _make_view_returning(settings):
     view.get_mc_resimulate.return_value = settings["mc_resimulate"]
     view.get_att_point.return_value = settings["att_point"]
     view.get_att_unit.return_value = settings["att_unit"]
+    view.get_att_use_data_range.return_value = settings["att_use_data_range"]
     return view
 
 
@@ -151,6 +154,7 @@ class TestTexturePlannerSettingsPresenter_Show(unittest.TestCase):
 
         view.set_att_point.assert_called_once_with(1.5)
         view.set_att_unit.assert_called_once_with("dSpacing")
+        view.set_att_use_data_range.assert_called_once_with(False)
 
         view.show.assert_called_once_with()
 
