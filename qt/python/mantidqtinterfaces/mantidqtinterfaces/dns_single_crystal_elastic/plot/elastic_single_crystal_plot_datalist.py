@@ -10,6 +10,7 @@ Sub widget for DNS single crystal elastic plot view handling of the list of plot
 """
 
 from qtpy.QtCore import QObject
+from qtpy.QtCore import Qt
 from qtpy.QtCore import Signal
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_plot_list import DNSPlotListModel
 
@@ -62,7 +63,7 @@ class DNSDatalist(QObject):
     def _item_clicked(self, item):
         self._model.itemChanged.disconnect()
         self._model.uncheck_items()
-        item.setCheckState(2)
+        item.setCheckState(Qt.CheckState.Checked)
         self._model.itemChanged.connect(self._item_clicked)
         if not self._old_item == item:  # prevents double triggering
             self.sig_datalist_changed.emit()
