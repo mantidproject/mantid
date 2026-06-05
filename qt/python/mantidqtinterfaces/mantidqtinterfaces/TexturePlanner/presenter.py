@@ -34,6 +34,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.settings_presenter.load_settings_from_file_or_default()
         self.settings_presenter.set_on_settings_applied(self.on_settings_applied)
         self.view.set_on_settings_clicked(self.open_settings)
+        self.view.set_on_close(self.on_close)
 
         self.set_instrument_options()
         self.set_view_with_default_texture_directions()
@@ -93,6 +94,10 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.update_custom_widgets_visibility()
         self.refresh_update_instrument_enabled()
         self.update_material_display()
+
+    def on_close(self):
+        # remove this instance's workspaces from the ADS so they don't linger after the window closes
+        self.model.workspaces.cleanup()
 
     def open_settings(self):
         self.settings_presenter.show()

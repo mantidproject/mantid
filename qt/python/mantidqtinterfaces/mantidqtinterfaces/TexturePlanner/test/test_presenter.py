@@ -100,6 +100,22 @@ class TestTexturePlannerPresenter_Init(unittest.TestCase):
 
         view.set_instrument_options.assert_called_once_with(("ENGINX", "IMAT"))
 
+    def test_connects_on_close_handler(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        view = _make_view()
+
+        presenter = TexturePlannerPresenter(model, view)
+
+        view.set_on_close.assert_called_once_with(presenter.on_close)
+
+    def test_on_close_cleans_up_workspaces(self, mock_settings_view, mock_settings_presenter):
+        model = _make_model()
+        presenter = TexturePlannerPresenter(model, _make_view())
+
+        presenter.on_close()
+
+        model.workspaces.cleanup.assert_called_once_with()
+
     def test_initialises_view_with_default_texture_directions(self, mock_settings_view, mock_settings_presenter):
         model = _make_model()
         view = _make_view()

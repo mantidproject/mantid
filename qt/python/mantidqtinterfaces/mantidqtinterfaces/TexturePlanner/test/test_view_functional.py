@@ -542,5 +542,28 @@ class TestMaterialAndSettings(_FunctionalTestBase):
         self.mock_TexturePlannerSettingsPresenter.return_value.show.assert_called_once_with()
 
 
+class TestWindowClose(_FunctionalTestBase):
+    def test_closing_window_removes_this_instances_workspaces(self):
+        wsm = self.model.workspaces
+        owned = [getattr(wsm, attr) for attr in wsm._OWNED_WS_NAME_ATTRS]
+        # the model bootstraps the persistent planner workspaces on construction
+        self.assertTrue(ADS.doesExist(wsm.wsname))
+
+        self.view.close()
+        QApplication.processEvents()
+
+        for name in owned:
+            self.assertFalse(ADS.doesExist(name), f"{name} should have been removed on close")
+
+    def test_two_windows_use_distinct_workspaces(self):
+        # a second planner can be open at the same time without clobbering the first's workspaces
+        other_model = TexturePlannerModel()
+        self.addCleanup(other_model.workspaces.cleanup)
+
+        self.assertNotEqual(self.model.workspaces.wsname, other_model.workspaces.wsname)
+        self.assertTrue(ADS.doesExist(self.model.workspaces.wsname))
+        self.assertTrue(ADS.doesExist(other_model.workspaces.wsname))
+
+
 if __name__ == "__main__":
     unittest.main()
