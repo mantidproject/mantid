@@ -314,8 +314,8 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view._selection_tab = MagicMock()
         self._view._selection_list_cache = {0: Qt.Checked, 1: Qt.Unchecked}
         self._view.enable_and_restore_selection_list()
-        mock_item_0.setCheckState.assert_called_once_with(2)
-        mock_item_1.setCheckState.assert_called_once_with(0)
+        mock_item_0.setCheckState.assert_called_once_with(Qt.Checked)
+        mock_item_1.setCheckState.assert_called_once_with(Qt.Unchecked)
         self._view._selection_tab.setEnabled.assert_called_once_with(True)
 
     def test_set_delete_all_selected_peaks_button_enabled(self):
