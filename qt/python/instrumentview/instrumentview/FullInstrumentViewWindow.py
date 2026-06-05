@@ -89,7 +89,7 @@ def _ensure_overlay_manager(method):
 
 
 class WorkspaceListWidget(QListWidget):
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setDragDropMode(QAbstractItemView.DropOnly)
 
@@ -195,7 +195,7 @@ class FullInstrumentViewView(QWidget):
         self._detector_spectrum_axes = self._detector_spectrum_fig.add_subplot(111, projection="mantid")
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
-        self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, self)
+        self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, None)
         # Unwrap matplotlib's internal callback wrappers (_StrongRef, WeakMethod)
         # to store the actual callables, so they can be re-connected later.
         # Must be done after toolbar creation so its callbacks are included.
@@ -224,7 +224,7 @@ class FullInstrumentViewView(QWidget):
         # Used as a single widget
         self._integration_limit_group_box = QGroupBox("Units")
         integration_box_layout = QVBoxLayout(self._integration_limit_group_box)
-        self._units_combo_box_sliders = NoWheelComboBox(self)
+        self._units_combo_box_sliders = NoWheelComboBox()
         self._units_combo_box_sliders.setToolTip("Select the units for the detectors shown.")
         integration_box_layout.addWidget(self._units_combo_box_sliders)
         (
@@ -242,7 +242,7 @@ class FullInstrumentViewView(QWidget):
         )
 
         self._projection_group_box = QGroupBox("Projection")
-        self._projection_combo_box = NoWheelComboBox(self)
+        self._projection_combo_box = NoWheelComboBox()
         self._reset_projection = QPushButton("Reset Projection")
         self._reset_projection.setToolTip("Resets the projection to default.")
         self._reset_projection.clicked.connect(self.reset_camera)
@@ -260,7 +260,7 @@ class FullInstrumentViewView(QWidget):
         self._aspect_ratio_check_box.setChecked(is_config_setting_true(self._ASPECT_RATIO_SETTING_STRING))
         self._show_monitors_check_box = QCheckBox()
         self._show_monitors_check_box.setText("Show Monitors?")
-        self._count_scale_combo_box = NoWheelComboBox(self)
+        self._count_scale_combo_box = NoWheelComboBox()
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
         self._flip_beam_check_box = QCheckBox()
         self._flip_beam_check_box.setText("Flip Beam")
@@ -282,7 +282,7 @@ class FullInstrumentViewView(QWidget):
         self._delete_all_selected_peaks_button = QPushButton("Delete All Peaks In Selected Detectors")
         self._start_adding_peaks_button = QPushButton("Adding/Deleting Peaks Mode")
         self._start_adding_peaks_button.setCheckable(True)
-        self._peak_ws_list = WorkspaceListWidget(self)
+        self._peak_ws_list = WorkspaceListWidget()
         self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
 
         self._grouping_masking_group_box = QGroupBox("Grouping and Masking")
@@ -338,10 +338,10 @@ class FullInstrumentViewView(QWidget):
         self.status_group_box = QGroupBox("Status")
 
         self._lineplot_options_group_box = QGroupBox("Line Plot")
-        self._units_combo_box_lineplot = NoWheelComboBox(self)
+        self._units_combo_box_lineplot = NoWheelComboBox()
         self._units_combo_box_lineplot.setToolTip("Select the units for the lineplot.")
-        self._export_workspace_button = QPushButton("Export Spectra to ADS", self)
-        self._sum_spectra_checkbox = QCheckBox(self)
+        self._export_workspace_button = QPushButton("Export Spectra to ADS")
+        self._sum_spectra_checkbox = QCheckBox()
         self._sum_spectra_checkbox.setChecked(True)
         self._sum_spectra_checkbox.setText("Sum Selected Spectra")
         self._sum_spectra_checkbox.setToolTip(
@@ -349,6 +349,9 @@ class FullInstrumentViewView(QWidget):
         )
 
         self._lists_vsplitter = QSplitter(Qt.Vertical)
+
+        self._spacer = QWidget()
+        self._spacer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 
     def _set_layouts(self):
         parent_horizontal_layout = QHBoxLayout(self)
@@ -401,9 +404,7 @@ class FullInstrumentViewView(QWidget):
 
         # TODO: Figure out if spacer still needed
         self._detector_info_group_box.setMaximumHeight(self._detector_info_group_box.sizeHint().height())
-        spacer = QWidget()
-        spacer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        self._lists_vsplitter.addWidget(spacer)
+        self._lists_vsplitter.addWidget(self._spacer)
         self._lists_vsplitter.setStretchFactor(0, 1)  # peak_ws_group_box stretches
         self._lists_vsplitter.setStretchFactor(1, 1)  # grouping_masking_group_box stretches
         self._lists_vsplitter.setStretchFactor(2, 0)  # detector_group_box fixed
@@ -641,7 +642,7 @@ class FullInstrumentViewView(QWidget):
         pre_list_layout = QHBoxLayout()
         pre_list_layout.addWidget(add_item_btn)
         pre_list_layout.addWidget(clear_items_btn)
-        item_list = WorkspaceListWidget(self)
+        item_list = WorkspaceListWidget()
         item_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         item_list.setSelectionMode(QAbstractItemView.NoSelection)
         post_list_layout = QHBoxLayout()
@@ -770,19 +771,19 @@ class FullInstrumentViewView(QWidget):
             self._shape_overlay_manager = None
         self._current_widget = None
 
-    def _setup_units_options(self, parent: QVBoxLayout):
-        """Add widgets for the units options"""
-        hBox = QHBoxLayout()
-        self._export_workspace_button = QPushButton("Export Spectra to ADS", self)
-        hBox.addWidget(self._export_workspace_button)
-        self._sum_spectra_checkbox = QCheckBox(self)
-        self._sum_spectra_checkbox.setChecked(True)
-        self._sum_spectra_checkbox.setText("Sum Selected Spectra")
-        self._sum_spectra_checkbox.setToolTip(
-            "Selected spectra will be converted to d-Spacing, summed, then converted back to the desired unit."
-        )
-        hBox.addWidget(self._sum_spectra_checkbox)
-        parent.addLayout(hBox)
+    # def _setup_units_options(self, parent: QVBoxLayout):
+    #     """Add widgets for the units options"""
+    #     hBox = QHBoxLayout()
+    #     self._export_workspace_button = QPushButton("Export Spectra to ADS", self)
+    #     hBox.addWidget(self._export_workspace_button)
+    #     self._sum_spectra_checkbox = QCheckBox(self)
+    #     self._sum_spectra_checkbox.setChecked(True)
+    #     self._sum_spectra_checkbox.setText("Sum Selected Spectra")
+    #     self._sum_spectra_checkbox.setToolTip(
+    #         "Selected spectra will be converted to d-Spacing, summed, then converted back to the desired unit."
+    #     )
+    #     hBox.addWidget(self._sum_spectra_checkbox)
+    #     parent.addLayout(hBox)
 
     def refresh_peaks_ws_list(self) -> None:
         # TODO: Very similar to other refresh list function, combine in one function
@@ -914,9 +915,11 @@ class FullInstrumentViewView(QWidget):
 
         self.main_plotter.scalar_bars[self._presenter._counts_label].SetTitle(display_title)
 
-    def set_projection_combo_options(self, default_index: int, options: list[str]) -> None:
+    def set_projection_combo_options(self, options: list[str]) -> None:
         self._projection_combo_box.addItems(options)
-        self._projection_combo_box.setCurrentIndex(default_index)
+
+    def set_default_projection(self, proj: ProjectionType):
+        self._projection_combo_box.setCurrentText(proj.value)
 
     def current_selected_projection(self) -> str:
         return self._projection_combo_box.currentText()

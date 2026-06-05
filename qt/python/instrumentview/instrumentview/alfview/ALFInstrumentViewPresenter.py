@@ -8,6 +8,7 @@
 from instrumentview.alfview.ALFInstrumentViewView import ALFInstrumentViewView
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
+from instrumentview.Projections.ProjectionType import ProjectionType
 
 from mantid.simpleapi import CreateSampleWorkspace
 
@@ -22,6 +23,7 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
     def __init__(self, view=None):
         _placeholder_ws = CreateSampleWorkspace(InstrumentName="ALF", StoreInADS=False)
         super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(_placeholder_ws))
+        self._view.set_default_projection(ProjectionType.SIDE_BY_SIDE)
 
     def selected_detector_ids(self):
         return []

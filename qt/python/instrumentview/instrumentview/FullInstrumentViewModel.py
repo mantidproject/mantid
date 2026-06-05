@@ -385,7 +385,10 @@ class FullInstrumentViewModel:
             for det in (self._workspace.getDetector(int(ws_index)),)
         ]
 
-    def get_default_projection_index_and_options(self) -> tuple[int, list[str]]:
+    def get_projection_options(self) -> list[str]:
+        return [p.value for p in ProjectionType]
+
+    def get_default_projection(self) -> ProjectionType:
         possible_returns_map = {
             "3D": ProjectionType.THREE_D,
             "SPHERICAL_X": ProjectionType.SPHERICAL_X,
@@ -395,9 +398,7 @@ class FullInstrumentViewModel:
             "CYLINDRICAL_Y": ProjectionType.CYLINDRICAL_Y,
             "CYLINDRICAL_Z": ProjectionType.CYLINDRICAL_Z,
         }
-        default_projection_type = possible_returns_map[self._workspace.getInstrument().getDefaultView()]
-        projection_options = [p.value for p in ProjectionType]
-        return projection_options.index(default_projection_type.value), projection_options
+        return possible_returns_map[self._workspace.getInstrument().getDefaultView()]
 
     @property
     def projection_type(self):
