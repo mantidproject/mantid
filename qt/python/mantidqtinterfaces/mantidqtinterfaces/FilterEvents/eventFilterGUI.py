@@ -9,7 +9,7 @@ import numpy as np
 
 from qtpy.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QVBoxLayout, QWidget
 from qtpy.QtGui import QDoubleValidator, QDesktopServices
-from qtpy.QtCore import QUrl, QLocale
+from qtpy.QtCore import QUrl, QLocale, Qt
 
 import mantid
 import mantid.simpleapi as api
@@ -337,14 +337,14 @@ class MainWindow(QMainWindow):
 
         # Set suggested processing scheme
         if numentries > HUGE_FAST:
-            self.ui.checkBox_fastLog.setCheckState(True)
+            self.ui.checkBox_fastLog.setCheckState(Qt.CheckState.Checked)
             if numentries > HUGE_PARALLEL:
-                self.ui.checkBox_doParallel.setCheckState(True)
+                self.ui.checkBox_doParallel.setCheckState(Qt.CheckState.Checked)
             else:
-                self.ui.checkBox_doParallel.setCheckState(False)
+                self.ui.checkBox_doParallel.setCheckState(Qt.CheckState.Unchecked)
         else:
-            self.ui.checkBox_fastLog.setCheckState(False)
-            self.ui.checkBox_doParallel.setCheckState(False)
+            self.ui.checkBox_fastLog.setCheckState(Qt.CheckState.Unchecked)
+            self.ui.checkBox_doParallel.setCheckState(Qt.CheckState.Unchecked)
 
         return
 
@@ -738,14 +738,14 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_tofCorr.setCurrentIndex(0)
         self.ui.leIncidentEnergy.clear()
 
-        self.ui.checkBox_fastLog.setCheckState(False)
-        self.ui.checkBox_doParallel.setCheckState(False)
+        self.ui.checkBox_fastLog.setCheckState(Qt.CheckState.Unchecked)
+        self.ui.checkBox_doParallel.setCheckState(Qt.CheckState.Unchecked)
 
         self.ui.comboBox_skipSpectrum.setCurrentIndex(0)
 
-        self.ui.checkBox_filterByPulse.setCheckState(False)
-        self.ui.checkBox_from1.setCheckState(False)
-        self.ui.checkBox_groupWS.setCheckState(True)
+        self.ui.checkBox_filterByPulse.setCheckState(Qt.CheckState.Unchecked)
+        self.ui.checkBox_from1.setCheckState(Qt.CheckState.Unchecked)
+        self.ui.checkBox_groupWS.setCheckState(Qt.CheckState.Checked)
 
         self.canvas.draw()
 
