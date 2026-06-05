@@ -130,6 +130,21 @@ clean_build_and_staging() {
     fi
 }
 
+setup_windows_rattler_dirs() {
+    if [[ $OSTYPE == "msys"* ]]; then
+        local build_step="$1"
+
+        export RATTLER_CACHE_DIR="${short_root_win}/${build_step}/rattler-cache"
+        export PIXI_CACHE_DIR="${short_root_win}/${build_step}/pixi-cache"
+        export TMP="${short_root_win}/${build_step}/tmp"
+        export TEMP="${short_root_win}/${build_step}/tmp"
+
+        mkdir -p "${short_root_bash}/${build_step}/rattler-cache" \
+            "${short_root_bash}/${build_step}/pixi-cache" \
+            "${short_root_bash}/${build_step}/tmp"
+    fi
+}
+
 if [[ -d $CONDA_BLD_PATH ]]; then
     pixi run -e rattler-builder --frozen rattler-index fs $CONDA_BLD_PATH
 fi
@@ -148,16 +163,7 @@ if [[ $OSTYPE == "msys"* ]]; then
     short_root_win="C:/Users/jenkins/mantid-ci/${branch_slug}"
     short_root_bash="/c/Users/jenkins/mantid-ci/${branch_slug}"
 
-    # Use short external cache and temp paths on Windows to reduce file locking and path issues.
-    export RATTLER_CACHE_DIR="${short_root_win}/rattler-cache"
-    export PIXI_CACHE_DIR="${short_root_win}/pixi-cache"
-    export TMP="${short_root_win}/tmp"
-    export TEMP="${short_root_win}/tmp"
-
-    mkdir -p "${short_root_bash}/rattler-cache" "${short_root_bash}/pixi-cache" "${short_root_bash}/tmp"
 fi
-
-clean_build_and_staging # clean build tree before everything
 
 export CONDA_SUBDIR=$PLATFORM
 
@@ -166,19 +172,28 @@ pixi list -e rattler-builder --frozen
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
+    setup_windows_rattler_dirs mantid-developer
+    clean_build_and_staging
     pixi run -e rattler-builder --frozen rattler-build build -r ./mantid-developer/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c neutrons $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
-    clean_build_and_staging # clean build tree again before this package
+    setup_windows_rattler_dirs mantid
+    clean_build_and_staging
     pixi run -e rattler-builder --frozen rattler-build build -r ./mantid/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_QT == true ]]; then
+    setup_windows_rattler_dirs mantidqt
+    clean_build_and_staging
     pixi run -e rattler-builder --frozen rattler-build build -r ./mantidqt/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_DOCS == true ]]; then
+    setup_windows_rattler_dirs mantiddocs
+    clean_build_and_staging
     pixi run -e rattler-builder --frozen rattler-build build -r ./mantiddocs/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH -c conda-forge -c neutrons -c mantid $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
+    setup_windows_rattler_dirs mantidworkbench
+    clean_build_and_staging
     pixi run -e rattler-builder --frozen rattler-build build -r ./mantidworkbench/ -m ./conda_build_config.yaml --output-dir $CONDA_BLD_PATH $EXTRA_BUILD_OPTIONS
 fi
 
