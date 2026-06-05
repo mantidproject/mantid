@@ -123,6 +123,8 @@ class TableModel(QAbstractTableModel):
             self._row_batch_size = MINIMUM_BATCH_SIZE_ROWS
 
     def flags(self, index):
+        if not index.isValid():
+            return super().flags(index)
         col = index.column()
         editable = self._data_model.is_editable_column(col)
         if editable:

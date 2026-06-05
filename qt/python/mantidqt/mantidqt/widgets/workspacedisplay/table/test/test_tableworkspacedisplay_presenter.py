@@ -11,7 +11,7 @@ import sys
 import unittest
 
 from qtpy.QtWidgets import QStatusBar
-from qtpy.QtCore import QItemSelectionModel
+from qtpy.QtCore import QItemSelectionModel, QModelIndex
 
 from unittest.mock import Mock, call, patch
 from mantid.simpleapi import CreateEmptyTableWorkspace
@@ -217,8 +217,16 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         # Mock the copy_to_clipboard function with a side_effect that stores the clipboard content in a member variable.
         table.copy_to_clipboard = Mock(side_effect=self._mock_clipboard)
 
+        # The model loads its rows lazily via fetchMore when the view is shown
+        # or scrolled. In this headless test that never happens, so rowCount()
+        # stays 0 and Qt6's selection model rejects the out-of-range index,
+        # leaving the selection empty. Load the rows explicitly first.
+        model = table.view.model()
+        while model.canFetchMore(QModelIndex()):
+            model.fetchMore(QModelIndex())
+
         selection = table.view.selectionModel()
-        model_index = table.view.model().createIndex(0, 0)
+        model_index = model.index(0, 0)
         selection.select(model_index, QItemSelectionModel.ClearAndSelect)
 
         # Copy data to clipboard
