@@ -61,7 +61,7 @@ bool RenameParDialog::isUnique(const QString &name) const {
 QString RenameParDialog::makeUniqueIndexedName(const QString &name) {
   int index = 1;
   QString base;
-  int i_ = name.indexOf('_');
+  int i_ = static_cast<int>(name.indexOf('_'));
   if (i_ >= 0) {
     QString old_index = name.mid(i_ + 1);
     bool ok;

@@ -122,13 +122,13 @@ RepoModel::RepoItem *RepoModel::RepoItem::child(int row) const { return childIte
 /** Return the number of children that this entry may find.
     @return Number of children
  */
-int RepoModel::RepoItem::childCount() const { return childItems.count(); }
+int RepoModel::RepoItem::childCount() const { return static_cast<int>(childItems.count()); }
 /** Provide the row number of this entry related to its parent.
     @return It's child position.
  */
 int RepoModel::RepoItem::row() const {
   if (parentItem)
-    return parentItem->childItems.indexOf(const_cast<RepoItem *>(this));
+    return static_cast<int>(parentItem->childItems.indexOf(const_cast<RepoItem *>(this)));
   return 0;
 }
 /** Remove the given child from the childItems. Used to allow removing rows from
@@ -262,7 +262,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
           } else
             return Icons::getIcon("mdi.folder-open-outline", "black", 1.2);
         } else {
-          int pos = QString(path).lastIndexOf('.');
+          int pos = static_cast<int>(QString(path).lastIndexOf('.'));
           if (pos < 0)
             return Icons::getIcon("mdi.file-question", "black", 1.2);
           if (path.contains("readme", Qt::CaseInsensitive))

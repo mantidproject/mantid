@@ -263,9 +263,9 @@ void ScriptEditor::saveScript(const QString &filename) {
  * @param index :: The position of text in a line number,default value is zero
  */
 void ScriptEditor::setText(int lineno, const QString &txt, int index) {
-  int line_length = txt.length();
+  int line_length = static_cast<int>(txt.length());
   // Index is max of the length of current/new text
-  setSelection(lineno, index, lineno, qMax(line_length, this->text(lineno).length()));
+  setSelection(lineno, index, lineno, qMax(line_length, static_cast<int>(this->text(lineno).length())));
   removeSelectedText();
   insertAt(txt, lineno, index);
   setCursorPosition(lineno, line_length);

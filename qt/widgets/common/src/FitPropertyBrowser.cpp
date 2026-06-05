@@ -1096,12 +1096,12 @@ std::string FitPropertyBrowser::workspaceName() const {
 
 /// Set the input workspace name
 void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
-  int i = m_workspaceNames.indexOf(wsName);
+  int i = static_cast<int>(m_workspaceNames.indexOf(wsName));
   if (i < 0) {
     // workspace may not be found because add notification hasn't been
     // processed yet
     populateWorkspaceNames();
-    i = m_workspaceNames.indexOf(wsName);
+    i = static_cast<int>(m_workspaceNames.indexOf(wsName));
   }
   if (i >= 0) {
     m_enumManager->setValue(m_workspace, i);
@@ -1815,7 +1815,7 @@ void FitPropertyBrowser::addHandle(const std::string &wsName, const std::shared_
       (!m_allowedSpectra.isEmpty() && !m_allowedSpectra.contains(qName) && m_allowedTableWorkspace.isEmpty()))
     return;
   QString oldName = QString::fromStdString(workspaceName());
-  int i = m_workspaceNames.indexOf(qName);
+  int i = static_cast<int>(m_workspaceNames.indexOf(qName));
 
   bool initialSignalsBlocked = m_enumManager->signalsBlocked();
 
@@ -1830,7 +1830,7 @@ void FitPropertyBrowser::addHandle(const std::string &wsName, const std::shared_
     m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
   }
   // get hold of index of oldName
-  i = m_workspaceNames.indexOf(oldName);
+  i = static_cast<int>(m_workspaceNames.indexOf(oldName));
   if (i >= 0) {
     m_enumManager->setValue(m_workspace, i);
   }
@@ -1843,7 +1843,7 @@ void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) { removeWor
 
 void FitPropertyBrowser::removeWorkspace(const std::string &wsName) {
   QString oldName = QString::fromStdString(workspaceName());
-  int iName = m_workspaceNames.indexOf(QString(wsName.c_str()));
+  int iName = static_cast<int>(m_workspaceNames.indexOf(QString(wsName.c_str())));
   if (iName >= 0) {
     m_workspaceNames.removeAt(iName);
   }
@@ -1856,7 +1856,7 @@ void FitPropertyBrowser::removeWorkspace(const std::string &wsName) {
 
   m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
 
-  iName = m_workspaceNames.indexOf(oldName);
+  iName = static_cast<int>(m_workspaceNames.indexOf(oldName));
   if (iName >= 0) {
     m_enumManager->setValue(m_workspace, iName);
   }
@@ -1885,7 +1885,7 @@ void FitPropertyBrowser::renameHandle(const std::string &oldName, const std::str
     m_allowedSpectra.remove(oldNameQ);
     m_allowedSpectra.insert(newNameQ, indices);
   }
-  int iWorkspace = m_workspaceNames.indexOf(oldNameQ);
+  int iWorkspace = static_cast<int>(m_workspaceNames.indexOf(oldNameQ));
   if (iWorkspace >= 0) {
     m_workspaceNames.replace(iWorkspace, newNameQ);
     m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
@@ -3018,25 +3018,25 @@ void FitPropertyBrowser::setWorkspaceProperties() {
     m_columnManager->setEnumNames(m_yColumn, columns);
     // set the column values
     if (!xName.isEmpty()) {
-      m_columnManager->setValue(m_xColumn, columns.indexOf(xName));
+      m_columnManager->setValue(m_xColumn, static_cast<int>(columns.indexOf(xName)));
     } else {
       if (auto name = std::find_if(std::cbegin(columns), std::cend(columns), [&](const auto x) { return x != yName; });
           name != std::cend(columns)) {
-        m_columnManager->setValue(m_xColumn, columns.indexOf(*name));
+        m_columnManager->setValue(m_xColumn, static_cast<int>(columns.indexOf(*name)));
       }
     }
     if (!yName.isEmpty()) {
-      m_columnManager->setValue(m_yColumn, columns.indexOf(yName));
+      m_columnManager->setValue(m_yColumn, static_cast<int>(columns.indexOf(yName)));
     } else {
       if (auto name = std::find_if(std::cbegin(columns), std::cend(columns), [&](const auto x) { return x != xName; });
           name != std::cend(columns)) {
-        m_columnManager->setValue(m_yColumn, columns.indexOf(*name));
+        m_columnManager->setValue(m_yColumn, static_cast<int>(columns.indexOf(*name)));
       }
     }
     columns.prepend("");
     m_columnManager->setEnumNames(m_errColumn, columns);
     if (!errName.isEmpty()) {
-      m_columnManager->setValue(m_errColumn, columns.indexOf(errName));
+      m_columnManager->setValue(m_errColumn, static_cast<int>(columns.indexOf(errName)));
     } else {
       m_columnManager->setValue(m_errColumn, 0);
     }
@@ -3244,7 +3244,7 @@ void FitPropertyBrowser::modifyFitMenu(QAction *fitAction, bool enabled) {
 }
 
 int MantidQt::MantidWidgets::FitPropertyBrowser::sizeOfFunctionsGroup() const {
-  return m_functionsGroup->children().size();
+  return static_cast<int>(m_functionsGroup->children().size());
 }
 
 void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<int> &wsSpectra) {

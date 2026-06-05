@@ -40,7 +40,7 @@ QStringList costFunctions() { return convertToQStringList(CostFunctionFactory::I
 
 int defaultMinimizerIndex() {
   auto const index = minimizers().indexOf(DEFAULT_MINIMIZER);
-  return index >= 0 ? index : 0;
+  return static_cast<int>(index >= 0 ? index : 0);
 }
 
 } // namespace
@@ -230,7 +230,7 @@ void FitScriptOptionsBrowser::setStringEnumProperty(QtProperty *prop, std::strin
   if (i < 0)
     throw std::invalid_argument("An invalid property value was provided.");
 
-  m_enumManager->setValue(prop, i);
+  m_enumManager->setValue(prop, static_cast<int>(i));
 }
 
 std::string FitScriptOptionsBrowser::getStringEnumProperty(QtProperty *prop) const {

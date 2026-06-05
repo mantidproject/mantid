@@ -373,10 +373,10 @@ bool MantidWSIndexWidget::validatePlotOptions() {
     }
 
     if (validOptions) {
-      int numCustomLogValues = values.size();
+      int numCustomLogValues = static_cast<int>(values.size());
       QString nCustomLogValues;
       nCustomLogValues.setNum(numCustomLogValues);
-      int numWorkspaces = m_wsNames.size();
+      int numWorkspaces = static_cast<int>(m_wsNames.size());
       if (m_plotOptions->currentText() == SURFACE_PLOT || m_plotOptions->currentText() == CONTOUR_PLOT) {
         QString nWorkspaces;
         nWorkspaces.setNum(numWorkspaces);
@@ -1070,7 +1070,7 @@ void IntervalList::addInterval(Interval interval) {
   bool added = false;
   QList<int> deleteList;
 
-  for (int i = m_list.size() - 1; i >= 0; i--) {
+  for (int i = static_cast<int>(m_list.size()) - 1; i >= 0; i--) {
     // if new interval is completely higher than this interval
     if (interval.start() > m_list.at(i).end() + 1) {
       // add new interval as a seperate interval
@@ -1106,7 +1106,7 @@ void IntervalList::addInterval(Interval interval) {
     using std::sort;
     sort(std::begin(deleteList), std::end(deleteList));
 
-    for (int i = deleteList.size() - 1; i >= 0; i--) {
+    for (int i = static_cast<int>(deleteList.size()) - 1; i >= 0; i--) {
       m_list.removeAt(deleteList[i]);
     }
   }

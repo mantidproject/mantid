@@ -99,7 +99,8 @@ void PropertyHandler::init() {
       m_browser->m_enumManager->setEnumNames(m_type, functionNames);
     }
   }
-  int itype = m_browser->m_enumManager->enumNames(m_type).indexOf(QString::fromStdString(m_fun->name()));
+  int itype =
+      static_cast<int>(m_browser->m_enumManager->enumNames(m_type).indexOf(QString::fromStdString(m_fun->name())));
   m_browser->m_enumManager->setValue(m_type, itype);
   // create worspace and workspace index properties if parent is a MultiBG
   initWorkspace();
@@ -739,7 +740,7 @@ protected:
     }
 
     int newSize = m_browser->m_vectorSizeManager->value(members[0]);
-    int vectorSize = members.size() - 1;
+    int vectorSize = static_cast<int>(members.size()) - 1;
     if (vectorSize > newSize) {
       vectorSize = newSize;
     }
@@ -1619,7 +1620,8 @@ void PropertyHandler::updateWorkspaces(const QStringList &oldWorkspaces) {
     }
     m_browser->m_enumManager->setEnumNames(m_workspace, names);
     if (m_browser->m_workspaceNames.contains(wsName)) {
-      m_browser->m_enumManager->setValue(m_workspace, m_browser->m_workspaceNames.indexOf(wsName) + 1);
+      m_browser->m_enumManager->setValue(m_workspace,
+                                         static_cast<int>(m_browser->m_workspaceNames.indexOf(wsName)) + 1);
     }
   }
   if (cfun()) {

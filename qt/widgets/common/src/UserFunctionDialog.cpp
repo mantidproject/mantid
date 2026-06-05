@@ -165,7 +165,7 @@ void UserFunctionDialog::selectFunction(const QString &fun) {
  */
 void UserFunctionDialog::addExpression() {
   QString expr = m_uiForm.teExpression->toPlainText();
-  int iBr = expr.indexOf('\n');
+  int iBr = static_cast<int>(expr.indexOf('\n'));
   if (iBr > 0) {
     expr.remove(iBr, expr.size());
   }

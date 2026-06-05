@@ -388,7 +388,7 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &opti
   layout->addWidget(m_treeWidget);
 
   m_options = options;
-  const int columnCount = 2 + m_options.size();
+  const int columnCount = 2 + static_cast<int>(m_options.size());
   m_treeWidget->setColumnCount(columnCount);
   QStringList labels;
   labels.append(translateUtf8Encoded("QtTreePropertyBrowser", "Property", nullptr));
