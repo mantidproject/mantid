@@ -1070,7 +1070,7 @@ class FullInstrumentViewWindow(QMainWindow):
         return [
             self._peak_ws_list.item(row_index).text()
             for row_index in range(self._peak_ws_list.count())
-            if self._peak_ws_list.item(row_index).checkState() > 0
+            if self._peak_ws_list.item(row_index).checkState() != Qt.CheckState.Unchecked
         ]
 
     @_skip_if_closing
@@ -1164,7 +1164,7 @@ class FullInstrumentViewWindow(QMainWindow):
         return [
             list_to_read_from.item(row_index).text()
             for row_index in range(list_to_read_from.count())
-            if list_to_read_from.item(row_index).checkState() > 0
+            if list_to_read_from.item(row_index).checkState() != Qt.CheckState.Unchecked
         ]
 
     def set_new_item_key(self, kind: CurrentTab, new_key: str) -> None:
