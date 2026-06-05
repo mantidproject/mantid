@@ -74,7 +74,7 @@ class DifferenceTableView(QtWidgets.QWidget):
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.add_diff_button)
         self.horizontal_layout.addWidget(self.remove_diff_button)
-        self.spacer_item = QtWidgets.QSpacerItem(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.spacer_item = QtWidgets.QSpacerItem(1, 1)
         self.horizontal_layout.addItem(self.spacer_item)
         self.horizontal_layout.setAlignment(QtCore.Qt.AlignLeft)
 
