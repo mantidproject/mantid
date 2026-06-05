@@ -100,30 +100,15 @@ class ShapeRenderer(InstrumentRenderer):
                         if quad is not None:
                             shape_cache[key] = (quad[0], quad[1], 4)
                         else:
-                            raw_mesh = shape_obj.getMesh()
-                            if raw_mesh.size == 0:
-                                shape_cache[key] = _make_fallback_shape()
-                            else:
-                                verts, faces = _triangles_to_verts_faces(raw_mesh)
-                                shape_cache[key] = (verts, faces, 3)
+                            shape_cache[key] = self._shape_from_raw_mesh(shape_obj)
                     elif self._use_optimised_shapes and shape_type == GeometryShape.CUBOID:
                         quad = _extract_quad_from_cuboid_shapeinfo(si)
                         if quad is not None:
                             shape_cache[key] = (quad[0], quad[1], 4)
                         else:
-                            raw_mesh = shape_obj.getMesh()
-                            if raw_mesh.size == 0:
-                                shape_cache[key] = _make_fallback_shape()
-                            else:
-                                verts, faces = _triangles_to_verts_faces(raw_mesh)
-                                shape_cache[key] = (verts, faces, 3)
+                            shape_cache[key] = self._shape_from_raw_mesh(shape_obj)
                     else:
-                        raw_mesh = shape_obj.getMesh()
-                        if raw_mesh.size == 0:
-                            shape_cache[key] = _make_fallback_shape()
-                        else:
-                            verts, faces = _triangles_to_verts_faces(raw_mesh)
-                            shape_cache[key] = (verts, faces, 3)
+                        shape_cache[key] = self._shape_from_raw_mesh(shape_obj)
                 except Exception:
                     shape_cache[key] = _make_fallback_shape()
                     logger.information("ShapeRenderer: failed to get mesh for shape, using fallback")
@@ -141,6 +126,16 @@ class ShapeRenderer(InstrumentRenderer):
         self._beam_axis = get_beam_axis(self._workspace)
         self._precomputed = True
         logger.information(f"ShapeRenderer: precomputed {n_det} detectors, {len(shape_cache)} unique shapes")
+
+    def _shape_from_raw_mesh(self, shape_obj) -> tuple[np.ndarray, np.ndarray, int]:
+        """Convert the mesh from ``shapeObj.getMesh()`` to
+        deduplicated vertices and faces, plus the face size (3 for triangles).
+        """
+        raw_mesh = shape_obj.getMesh()
+        if raw_mesh.size == 0:
+            return _make_fallback_shape()
+        verts, faces = _triangles_to_verts_faces(raw_mesh)
+        return verts, faces, 3
 
     # -----------------------------------------------------------------
     # Build meshes
