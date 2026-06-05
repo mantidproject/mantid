@@ -9,9 +9,7 @@ import os
 import numpy as np
 
 from mantid.simpleapi import (
-    CopySample,
     LoadEmptyInstrument,
-    RotateSampleShape,
     SaveNexus,
 )
 from mantid.api import AnalysisDataService as ADS
@@ -108,8 +106,6 @@ class OrientationExporter:
         ref_wsname = self._model.workspaces.WS_REFERENCE
         try:
             self._build_reference_ws(ref_wsname)
-            self._bake_initial_rotation_if_csg(ref_wsname)
-            self._reset_goniometer_to_identity(ref_wsname)
             save_file = os.path.join(save_dir, filename + ".nxs")
             SaveNexus(InputWorkspace=ref_wsname, Filename=save_file)
             logger.notice(f"Reference workspace saved to '{save_file}'")
@@ -118,33 +114,10 @@ class OrientationExporter:
                 ADS.remove(ref_wsname)
 
     def _build_reference_ws(self, ref_wsname):
-        LoadEmptyInstrument(InstrumentName=self._model.instrument.get_instrument(), OutputWorkspace=ref_wsname)
-        # Source from updated_mesh_ws (always identity goniometer) rather than wsname
-        # (which carries the current orientation R on its goniometer).
-        CopySample(
-            InputWorkspace=self._model.workspaces.updated_mesh_ws,
-            OutputWorkspace=ref_wsname,
-            CopyName=False,
-            CopyEnvironment=False,
-            CopyLattice=False,
-        )
-
-    def _bake_initial_rotation_if_csg(self, ref_wsname):
-        # CopySample bakes the destination goniometer matrix into the shape XML for CSG
-        # shapes, which strips the initial-orientation tag that RotateSampleShape adds in
-        # update_initial_shape. Re-apply the initial rotation so it is baked into the
-        # saved shape. Mesh shapes already have direct vertex transformations applied in
-        # update_initial_shape, so no extra rotation is needed.
-        shape = ADS.retrieve(ref_wsname).sample().getShape()
-        if type(shape).__name__ != "CSGObject":
-            return
-        rotvec = self._model.workspaces.init_R.as_rotvec(degrees=True)
-        ang = float(np.linalg.norm(rotvec))
-        if ang > 0:
-            vec = rotvec / ang
-            RotateSampleShape(ref_wsname, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
-
-    @staticmethod
-    def _reset_goniometer_to_identity(ref_wsname):
-        # ensure the saved sample is in its initial orientation, not under any current goniometer rotation
-        ADS.retrieve(ref_wsname).run().getGoniometer().setR(np.eye(3))
+        ref_ws = LoadEmptyInstrument(InstrumentName=self._model.instrument.get_instrument(), OutputWorkspace=ref_wsname)
+        # Source from updated_mesh_ws (always identity goniometer) rather than wsname (which carries
+        # the current orientation R on its goniometer). copy_sample_preserving_initial_rotation keeps
+        # the baked-in initial rotation - which a plain CopySample would strip from a CSG shape - and
+        # leaves the reference ws at an identity goniometer, i.e. already in its initial orientation
+        # ready to save.
+        self._model.workspaces.copy_sample_preserving_initial_rotation(self._model.workspaces.updated_mesh_ws, ref_ws)

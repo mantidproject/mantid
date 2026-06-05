@@ -13,8 +13,6 @@ from mantidqtinterfaces.TexturePlanner.helpers.detector_geometry import Detector
 
 file_path = "mantidqtinterfaces.TexturePlanner.helpers.detector_geometry"
 
-COPY_KWARGS = dict(CopyName=False, CopyEnvironment=False, CopyLattice=False)
-
 
 def _make_wsm(ws="ws", ungrouped_ws="ungrouped_ws", gauge_volume_str=None, scattering_centre=(0, 0, 0)):
     wsm = MagicMock()
@@ -54,26 +52,27 @@ class TestDetectorGeometry_GetGroupingPath(unittest.TestCase):
 
 
 @patch(file_path + ".define_gauge_volume")
-@patch(file_path + ".CopySample")
 @patch(file_path + ".GroupDetectors")
 class TestDetectorGeometry_ApplyGroupingToWss(unittest.TestCase):
-    def test_syncs_ws_into_ungrouped_before_regroup_when_ws_present(self, mock_group, mock_copy, mock_define_gv):
+    def test_syncs_ws_into_ungrouped_before_regroup_when_ws_present(self, mock_group, mock_define_gv):
         wsm = _make_wsm(ws="ws", ungrouped_ws="ungrouped_ws")
         mock_group.return_value = "new_ws"
 
         DetectorGeometry._apply_grouping_to_wss(wsm, "/path/grp.xml")
 
-        mock_copy.assert_called_once_with(InputWorkspace="ws", OutputWorkspace="ungrouped_ws", **COPY_KWARGS)
+        # the sync must preserve the sample's initial rotation, so it goes through the dedicated
+        # workspace-manager helper rather than a bare CopySample (which drops init_R for a CSG shape)
+        wsm.copy_sample_preserving_initial_rotation.assert_called_once_with("ws", "ungrouped_ws")
 
-    def test_skips_copysample_when_ws_is_none(self, mock_group, mock_copy, mock_define_gv):
+    def test_skips_sync_when_ws_is_none(self, mock_group, mock_define_gv):
         wsm = _make_wsm(ws=None)
         mock_group.return_value = "new_ws"
 
         DetectorGeometry._apply_grouping_to_wss(wsm, "/path/grp.xml")
 
-        mock_copy.assert_not_called()
+        wsm.copy_sample_preserving_initial_rotation.assert_not_called()
 
-    def test_regroups_from_ungrouped_into_wsname_and_assigns_back_to_wsm(self, mock_group, mock_copy, mock_define_gv):
+    def test_regroups_from_ungrouped_into_wsname_and_assigns_back_to_wsm(self, mock_group, mock_define_gv):
         wsm = _make_wsm()
         mock_group.return_value = "new_ws"
 
@@ -87,7 +86,7 @@ class TestDetectorGeometry_ApplyGroupingToWss(unittest.TestCase):
         self.assertEqual(wsm.ws, "new_ws")
         self.assertEqual(result, "new_ws")
 
-    def test_reapplies_gauge_volume_when_set(self, mock_group, mock_copy, mock_define_gv):
+    def test_reapplies_gauge_volume_when_set(self, mock_group, mock_define_gv):
         wsm = _make_wsm(gauge_volume_str="<gv/>")
         mock_group.return_value = "new_ws"
 
@@ -95,7 +94,7 @@ class TestDetectorGeometry_ApplyGroupingToWss(unittest.TestCase):
 
         mock_define_gv.assert_called_once_with("new_ws", "<gv/>")
 
-    def test_does_not_define_gauge_volume_when_unset(self, mock_group, mock_copy, mock_define_gv):
+    def test_does_not_define_gauge_volume_when_unset(self, mock_group, mock_define_gv):
         wsm = _make_wsm(gauge_volume_str=None)
         mock_group.return_value = "new_ws"
 

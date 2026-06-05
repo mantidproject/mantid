@@ -143,9 +143,15 @@ class WorkspaceManager:
             define_gauge_volume(self.ws, self.gauge_volume_str)
 
     def _update_existing_wss(self):
-        ws = self._create_new_ws_with_copied_sample(self.wsname, self.ws, clone=True)
+        # ws and updated_mesh_ws carry the user's initial shape rotation (init_R); it must survive the
+        # instrument switch, but a plain CopySample drops it for a CSG shape (see
+        # copy_sample_preserving_initial_rotation), so preserve it explicitly. mesh_ws is the pristine,
+        # un-rotated sample and is copied as-is.
+        ws = self._create_new_ws_with_copied_sample(self.wsname, self.ws, clone=True, preserve_initial_rotation=True)
         mesh_ws = self._create_new_ws_with_copied_sample(self.WS_MESH_RAW, self.mesh_ws, clone=True)
-        updated_mesh_ws = self._create_new_ws_with_copied_sample(self.WS_MESH_NEUTRAL, self.updated_mesh_ws, clone=True)
+        updated_mesh_ws = self._create_new_ws_with_copied_sample(
+            self.WS_MESH_NEUTRAL, self.updated_mesh_ws, clone=True, preserve_initial_rotation=True
+        )
         self.ws = ws
         self.mesh_ws = mesh_ws
         self.updated_mesh_ws = updated_mesh_ws
@@ -277,15 +283,39 @@ class WorkspaceManager:
         elif self.ws.run().hasProperty("GaugeVolume"):
             DeleteLog(Workspace=self.ws, Name="GaugeVolume")
 
-    def _create_new_ws_with_copied_sample(self, new_wsname, sample_to_copy, clone=False):
+    def _create_new_ws_with_copied_sample(self, new_wsname, sample_to_copy, clone=False, preserve_initial_rotation=False):
         if clone:
             shape_ws = CloneWorkspace(InputWorkspace=sample_to_copy, OutputWorkspace=self._SHAPE_TMP)
         else:
             shape_ws = sample_to_copy
         try:
             new_ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0,0.1,5", OutputWorkspace=new_wsname, UnitX="dSpacing")
-            CopySample(InputWorkspace=shape_ws, OutputWorkspace=new_wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+            if preserve_initial_rotation:
+                self.copy_sample_preserving_initial_rotation(shape_ws, new_ws)
+            else:
+                CopySample(InputWorkspace=shape_ws, OutputWorkspace=new_wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
         finally:
             if clone and ADS.doesExist(self._SHAPE_TMP):
                 ADS.remove(self._SHAPE_TMP)
         return new_ws
+
+    @staticmethod
+    def _shape_is_mesh(ws):
+        # a loaded STL becomes a MeshObject; the default cube and a loaded CSG xml are CSGObjects.
+        return type(ws.sample().getShape()).__name__ == "MeshObject"
+
+    def copy_sample_preserving_initial_rotation(self, source_ws, dest_ws):
+        """CopySample source_ws's sample onto dest_ws while keeping source_ws's baked-in initial
+        shape rotation (init_R).
+
+        CopySample re-bakes the *destination* workspace's run goniometer into the copied shape: for a
+        CSG shape it overwrites the <goniometer> tag that holds init_R (so a copy into an
+        identity-goniometer workspace silently strips init_R), while for a MeshObject it rotates the
+        vertices that already hold init_R. So the destination must carry init_R for a CSG shape, and
+        stay at identity for a mesh (otherwise init_R would be applied a second time). The destination
+        goniometer is only a vehicle for re-baking init_R into the shape, so it is restored to
+        identity afterwards - init_R must live in the shape, never in the run goniometer."""
+        gonio_R = np.eye(3) if self._shape_is_mesh(source_ws) else self.init_R.as_matrix()
+        dest_ws.run().getGoniometer().setR(gonio_R)
+        CopySample(InputWorkspace=source_ws, OutputWorkspace=dest_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+        dest_ws.run().getGoniometer().setR(np.eye(3))

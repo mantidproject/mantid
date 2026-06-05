@@ -17,7 +17,6 @@ from mantidqtinterfaces.TexturePlanner.helpers.exporter import OrientationExport
 file_path = "mantidqtinterfaces.TexturePlanner.helpers.exporter"
 
 WS_REFERENCE = "__texture_planning_reference_ws"
-COPY_KWARGS = dict(CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
 
 def _make_orientation(R=None, include=True, transmission=None):
@@ -282,11 +281,9 @@ class TestOrientationExporter_OutputTransmissionWeighting(unittest.TestCase):
         self.assertIn(save_file, mock_logger.notice.call_args.args[0])
 
 
-@patch(file_path + ".ADS")
-@patch(file_path + ".CopySample")
 @patch(file_path + ".LoadEmptyInstrument")
 class TestOrientationExporter_BuildReferenceWs(unittest.TestCase):
-    def test_loads_empty_instrument_into_reference_wsname(self, mock_load_instr, mock_copy, mock_ads):
+    def test_loads_empty_instrument_into_reference_wsname(self, mock_load_instr):
         model = _make_model(instr="ENGINX")
         exp = OrientationExporter(model)
 
@@ -294,69 +291,16 @@ class TestOrientationExporter_BuildReferenceWs(unittest.TestCase):
 
         mock_load_instr.assert_called_once_with(InstrumentName="ENGINX", OutputWorkspace=WS_REFERENCE)
 
-    def test_copies_sample_from_updated_mesh_ws(self, mock_load_instr, mock_copy, mock_ads):
+    def test_copies_sample_preserving_initial_rotation_from_updated_mesh_ws(self, mock_load_instr):
         model = _make_model(updated_mesh_ws="neutral")
         exp = OrientationExporter(model)
 
         exp._build_reference_ws(WS_REFERENCE)
 
-        mock_copy.assert_called_once_with(InputWorkspace="neutral", OutputWorkspace=WS_REFERENCE, **COPY_KWARGS)
-
-
-@patch(file_path + ".RotateSampleShape")
-@patch(file_path + ".ADS")
-class TestOrientationExporter_BakeInitialRotationIfCsg(unittest.TestCase):
-    def _set_shape_type(self, mock_ads, type_name):
-        shape = MagicMock()
-        type(shape).__name__ = type_name
-        mock_ads.retrieve.return_value.sample.return_value.getShape.return_value = shape
-
-    def test_no_rotate_when_shape_is_not_csg(self, mock_ads, mock_rotate):
-        self._set_shape_type(mock_ads, "MeshObject")
-        model = _make_model(init_R=Rotation.from_euler("x", 45, degrees=True))
-        exp = OrientationExporter(model)
-
-        exp._bake_initial_rotation_if_csg(WS_REFERENCE)
-
-        mock_rotate.assert_not_called()
-
-    def test_no_rotate_when_csg_but_identity_init_R(self, mock_ads, mock_rotate):
-        self._set_shape_type(mock_ads, "CSGObject")
-        model = _make_model(init_R=Rotation.identity())
-        exp = OrientationExporter(model)
-
-        exp._bake_initial_rotation_if_csg(WS_REFERENCE)
-
-        mock_rotate.assert_not_called()
-
-    def test_rotates_when_csg_and_nonzero_init_R(self, mock_ads, mock_rotate):
-        self._set_shape_type(mock_ads, "CSGObject")
-        init_R = Rotation.from_euler("x", 90, degrees=True)
-        model = _make_model(init_R=init_R)
-        exp = OrientationExporter(model)
-
-        exp._bake_initial_rotation_if_csg(WS_REFERENCE)
-
-        mock_rotate.assert_called_once()
-        ws_arg, rot_str = mock_rotate.call_args.args
-        self.assertEqual(ws_arg, WS_REFERENCE)
-        parts = rot_str.split(",")
-        self.assertAlmostEqual(float(parts[0]), 90.0)
-        np.testing.assert_allclose([float(parts[1]), float(parts[2]), float(parts[3])], [1.0, 0.0, 0.0], atol=1e-12)
-        self.assertEqual(parts[4], "1")
-
-
-@patch(file_path + ".ADS")
-class TestOrientationExporter_ResetGoniometerToIdentity(unittest.TestCase):
-    def test_sets_goniometer_R_to_identity(self, mock_ads):
-        gonio = MagicMock()
-        mock_ads.retrieve.return_value.run.return_value.getGoniometer.return_value = gonio
-
-        OrientationExporter._reset_goniometer_to_identity(WS_REFERENCE)
-
-        mock_ads.retrieve.assert_called_once_with(WS_REFERENCE)
-        gonio.setR.assert_called_once()
-        np.testing.assert_array_equal(gonio.setR.call_args.args[0], np.eye(3))
+        # the reference ws keeps the sample's initial rotation (which a plain CopySample would strip
+        # from a CSG shape) via the shared workspace-manager helper, sourcing from the
+        # identity-goniometer neutral mesh ws and writing into the freshly loaded empty-instrument ws
+        model.workspaces.copy_sample_preserving_initial_rotation.assert_called_once_with("neutral", mock_load_instr.return_value)
 
 
 @patch(file_path + ".logger")
@@ -367,20 +311,18 @@ class TestOrientationExporter_OutputAsReferenceWorkspace(unittest.TestCase):
         model = _make_model()
         exp = OrientationExporter(model)
         exp._build_reference_ws = MagicMock()
-        exp._bake_initial_rotation_if_csg = MagicMock()
-        exp._reset_goniometer_to_identity = MagicMock()
         return exp
 
-    def test_orchestrates_build_then_bake_then_reset_then_save(self, mock_save, mock_ads, mock_logger):
+    def test_orchestrates_build_then_save(self, mock_save, mock_ads, mock_logger):
         exp = self._make_exporter()
 
         with tempfile.TemporaryDirectory() as tmp:
             exp.output_as_reference_workspace(tmp, "out")
             expected_path = os.path.join(tmp, "out.nxs")
 
+            # _build_reference_ws now preserves the initial rotation itself (via the shared helper), so
+            # the orchestration is simply build-then-save
             exp._build_reference_ws.assert_called_once_with(WS_REFERENCE)
-            exp._bake_initial_rotation_if_csg.assert_called_once_with(WS_REFERENCE)
-            exp._reset_goniometer_to_identity.assert_called_once_with(WS_REFERENCE)
             mock_save.assert_called_once_with(InputWorkspace=WS_REFERENCE, Filename=expected_path)
             mock_logger.notice.assert_called_once()
 

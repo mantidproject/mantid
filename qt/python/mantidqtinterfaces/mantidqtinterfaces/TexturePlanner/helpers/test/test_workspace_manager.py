@@ -251,12 +251,14 @@ class TestWorkspaceManager_UpdateExistingWss(unittest.TestCase):
 
         wm._update_existing_wss()
 
+        # ws and updated_mesh_ws hold the initial shape rotation and must preserve it across the
+        # instrument switch; the raw mesh_ws is un-rotated and is copied as-is
         self.assertEqual(
             wm._create_new_ws_with_copied_sample.call_args_list,
             [
-                call(wm.WS_DATA, "old_ws", clone=True),
+                call(wm.WS_DATA, "old_ws", clone=True, preserve_initial_rotation=True),
                 call(wm.WS_MESH_RAW, "old_mesh", clone=True),
-                call(wm.WS_MESH_NEUTRAL, "old_neutral", clone=True),
+                call(wm.WS_MESH_NEUTRAL, "old_neutral", clone=True, preserve_initial_rotation=True),
             ],
         )
         self.assertEqual(wm.ws, "new_ws")
@@ -321,6 +323,60 @@ class TestWorkspaceManager_CreateNewWsWithCopiedSample(unittest.TestCase):
         mock_copy.assert_called_once_with(InputWorkspace=sample, OutputWorkspace="dest_ws", **COPY_KWARGS)
         mock_ads.remove.assert_not_called()
         self.assertEqual(result, "new_ws")
+
+    def test_preserve_initial_rotation_delegates_to_preserving_copy(self, mock_clone, mock_create_sim, mock_copy, mock_ads):
+        # when asked to preserve init_R, the bare CopySample is bypassed in favour of the helper that
+        # re-bakes init_R onto the destination (a plain CopySample drops it for a CSG shape)
+        wm = _make_manager("ENGINX")
+        mock_clone.return_value = "shape_tmp"
+        mock_create_sim.return_value = "new_ws"
+        wm.copy_sample_preserving_initial_rotation = MagicMock()
+
+        wm._create_new_ws_with_copied_sample("dest_ws", MagicMock(), clone=True, preserve_initial_rotation=True)
+
+        wm.copy_sample_preserving_initial_rotation.assert_called_once_with("shape_tmp", "new_ws")
+        mock_copy.assert_not_called()
+
+
+@patch(file_path + ".CopySample")
+class TestWorkspaceManager_CopySamplePreservingInitialRotation(unittest.TestCase):
+    @staticmethod
+    def _ws_with_shape(shape_type_name):
+        ws = MagicMock()
+        ws.sample.return_value.getShape.return_value = type(shape_type_name, (), {})()
+        return ws
+
+    def test_csg_source_bakes_init_R_onto_destination_then_restores_identity(self, mock_copy):
+        wm = _make_manager()
+        wm.init_R = Rotation.from_euler("x", 30, degrees=True)
+        source = self._ws_with_shape("CSGObject")
+        dest = MagicMock()
+        gonio = dest.run.return_value.getGoniometer.return_value
+
+        wm.copy_sample_preserving_initial_rotation(source, dest)
+
+        # CopySample overwrites a CSG shape's <goniometer> tag with the destination's run goniometer,
+        # so the destination must carry init_R while the sample is copied...
+        set_matrices = [c.args[0] for c in gonio.setR.call_args_list]
+        self.assertEqual(len(set_matrices), 2)
+        np.testing.assert_allclose(set_matrices[0], wm.init_R.as_matrix())
+        # ...then be restored to identity so init_R lives in the shape, not the run goniometer
+        np.testing.assert_array_equal(set_matrices[1], np.eye(3))
+        mock_copy.assert_called_once_with(InputWorkspace=source, OutputWorkspace=dest, **COPY_KWARGS)
+
+    def test_mesh_source_keeps_destination_at_identity(self, mock_copy):
+        # a MeshObject already holds init_R in its vertices, which CopySample re-rotates by the
+        # destination goniometer; leaving it at identity avoids applying init_R a second time
+        wm = _make_manager()
+        wm.init_R = Rotation.from_euler("x", 30, degrees=True)
+        source = self._ws_with_shape("MeshObject")
+        dest = MagicMock()
+        gonio = dest.run.return_value.getGoniometer.return_value
+
+        wm.copy_sample_preserving_initial_rotation(source, dest)
+
+        for c in gonio.setR.call_args_list:
+            np.testing.assert_array_equal(c.args[0], np.eye(3))
 
 
 @patch(file_path + ".CopySample")

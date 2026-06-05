@@ -156,6 +156,15 @@ class _FunctionalTestBase(unittest.TestCase):
 
         return self.view.tableWidget.cellWidget(row, col).findChild(QCheckBox)
 
+    @staticmethod
+    def _aabb_extent(ws):
+        # axis-aligned bounding-box size of a workspace's sample mesh. The default cube is cubic
+        # (equal extents) until an initial rotation is baked in, which is exactly what the direction
+        # labels' extents - and the drawn sample - read off the mesh, so it is a faithful proxy for
+        # "is the initial rotation still applied to this workspace's shape".
+        verts = ws.sample().getShape().getMesh().reshape(-1, 3)
+        return verts.max(axis=0) - verts.min(axis=0)
+
 
 class TestInitialState(_FunctionalTestBase):
     def test_instrument_combo_lists_supported_instruments_plus_custom(self):
@@ -256,6 +265,26 @@ class TestDirections(_FunctionalTestBase):
         expected = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
         self.assertTrue(np.allclose(self.model.ax_transform, expected))
         self.assertEqual(self.model.dir_names, ["RD", "ND", "TD"])
+
+    def test_updating_directions_preserves_initial_shape_rotation(self):
+        # bake a non-trivial initial rotation into the sample
+        self.view.spnInitX.setValue(30.0)
+        QApplication.processEvents()
+        rotated = self._aabb_extent(self.model.workspaces.ws)
+        # sanity: rotating the default cube makes its axis-aligned bounding box non-cubic
+        self.assertFalse(np.allclose(rotated, rotated[0]))
+
+        # push a new set of texture directions through the real Update Directions button
+        self.view.grpDirectionWidgets.setChecked(True)
+        QApplication.processEvents()
+        self.view.set_rd_dir((0, 1, 0))
+        self.view.set_nd_dir((0, 0, 1))
+        self.view.set_td_dir((1, 0, 0))
+        self._click(self.view.updateDirs)
+
+        # updating directions regroups the data ws; the initial rotation - which sets the extent of
+        # the direction-axis labels drawn from this ws - must survive that regroup
+        np.testing.assert_allclose(self._aabb_extent(self.model.workspaces.ws), rotated, atol=1e-9)
 
 
 class TestOrientationTable(_FunctionalTestBase):
@@ -458,6 +487,29 @@ class TestInstrumentSelection(_FunctionalTestBase):
 
         # a preset group is stored as the instrument config's enum, whose value is the group name
         self.assertEqual(self.model.instrument.group.value, "banks")
+
+    def test_applying_instrument_settings_preserves_initial_shape_rotation(self):
+        # Update Instrument rebuilds every sample workspace on the (re)selected instrument before
+        # regrouping - the same path a genuine instrument change takes. Both steps used to drop the
+        # baked-in initial rotation for the default CSG cube. ENGINX + banks is used so the grouping
+        # file is guaranteed present in the test environment (see the test above).
+        self._show_experiment_tab()
+        # bake a non-trivial initial rotation into the sample
+        self.view.spnInitX.setValue(30.0)
+        QApplication.processEvents()
+        rotated_data = self._aabb_extent(self.model.workspaces.ws)
+        rotated_neutral = self._aabb_extent(self.model.workspaces.updated_mesh_ws)
+        # sanity: rotating the default cube makes its axis-aligned bounding box non-cubic
+        self.assertFalse(np.allclose(rotated_data, rotated_data[0]))
+
+        self.view.cmbGroup.setCurrentText("banks")
+        QApplication.processEvents()
+        self._click(self.view.btnUpdateInstr)
+
+        # the initial rotation must survive the rebuild + regroup on both the data ws (used for the
+        # direction arrows) and the neutral mesh ws (used to draw the sample itself)
+        np.testing.assert_allclose(self._aabb_extent(self.model.workspaces.ws), rotated_data, atol=1e-9)
+        np.testing.assert_allclose(self._aabb_extent(self.model.workspaces.updated_mesh_ws), rotated_neutral, atol=1e-9)
 
 
 class TestExports(_FunctionalTestBase):

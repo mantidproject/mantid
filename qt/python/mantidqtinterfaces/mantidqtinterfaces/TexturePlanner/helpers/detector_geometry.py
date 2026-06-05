@@ -7,7 +7,7 @@
 
 import numpy as np
 
-from mantid.simpleapi import CopySample, GroupDetectors, LoadDetectorsGroupingFile
+from mantid.simpleapi import GroupDetectors, LoadDetectorsGroupingFile
 from Engineering.texture.texture_helper import define_gauge_volume
 
 
@@ -65,14 +65,10 @@ class DetectorGeometry:
         # ws by a new MapFile is very slow because each detector ID has to be located inside
         # the already-merged spectra. Sync current sample (shape + material) onto the
         # ungrouped baseline first so the regrouped ws inherits the user's latest sample state.
+        # The sync keeps the sample's initial rotation (init_R), which a plain CopySample would
+        # drop for a CSG shape (and which the directions/labels read off the regrouped ws).
         if wsm.ws is not None:
-            CopySample(
-                InputWorkspace=wsm.ws,
-                OutputWorkspace=wsm.ungrouped_ws,
-                CopyName=False,
-                CopyEnvironment=False,
-                CopyLattice=False,
-            )
+            wsm.copy_sample_preserving_initial_rotation(wsm.ws, wsm.ungrouped_ws)
         wsm.ws = GroupDetectors(
             InputWorkspace=wsm.ungrouped_ws,
             MapFile=grouping_path,
