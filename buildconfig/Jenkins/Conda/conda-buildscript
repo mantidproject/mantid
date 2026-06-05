@@ -116,21 +116,17 @@ pushd $WORKSPACE
 # install pixi if not already installed
 install_pixi "$WORKSPACE"
 
-# Check whether this is an incremental build that only changes rst files
-if [ -d $BUILD_DIR/Framework ]; then
-    if ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
-      ENABLE_BUILD_CODE=false
-      ENABLE_UNIT_TESTS=false
-      ENABLE_SYSTEM_TESTS=false
-    elif ${SCRIPT_DIR}/../check_for_changes dev-docs-only; then
-      ENABLE_BUILD_CODE=false
-      ENABLE_UNIT_TESTS=false
-      ENABLE_SYSTEM_TESTS=false
-      ENABLE_DOC_TESTS=false
-      ENABLE_DOCS=false
-    fi
-else
-  mkdir -p $BUILD_DIR
+# For a docs only change, don't need code build (doc targets include the code targets that they need)
+if ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
+    ENABLE_BUILD_CODE=false
+    ENABLE_UNIT_TESTS=false
+    ENABLE_SYSTEM_TESTS=false
+elif ${SCRIPT_DIR}/../check_for_changes dev-docs-only; then
+    ENABLE_BUILD_CODE=false
+    ENABLE_UNIT_TESTS=false
+    ENABLE_SYSTEM_TESTS=false
+    ENABLE_DOC_TESTS=false
+    ENABLE_DOCS=false
 fi
 
 # Remake the directory for the test logs.
