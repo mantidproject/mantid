@@ -14,10 +14,10 @@ from workbench.utils.gather_interfaces import gather_cpp_interface_names
 
 from qtpy.QtCore import Qt
 
-# Import sip after Qt. Modern versions of PyQt ship an internal sip module
-# located at PyQt5X.sip. Importing PyQt first sets a shim sip module to point
-# to the correct place
-import sip
+# Use qtpy's sip shim, which resolves to the active binding's internal sip module
+# (PyQt5.sip or PyQt6.sip) rather than the standalone "sip" module that only
+# existed for older PyQt5 builds.
+from qtpy import sip
 
 
 class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
