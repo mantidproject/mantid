@@ -118,7 +118,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.classic.changed.connect(self.matrix.UBmodel.updateOL)
         self.classic.changed.connect(self.updateUB)
         self.instrumentWidget.changed.connect(self.updateParams)
-        self.instrumentWidget.getInstrumentComboBox().activated[str].connect(self.instrumentUpdateEvent)
+        self.instrumentWidget.getInstrumentComboBox().textActivated.connect(self.instrumentUpdateEvent)
         self.instrumentWidget.getEditEi().textChanged.connect(self.eiWavelengthUpdateEvent)
         self.dimensionWidget.changed.connect(self.updateParams)
         self.plotButton.clicked.connect(self.updateFigure)

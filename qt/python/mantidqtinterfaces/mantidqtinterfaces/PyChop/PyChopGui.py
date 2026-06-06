@@ -861,7 +861,7 @@ class PyChopGui(QMainWindow):
                 self.droplabels.append(QLabel(widget[2]))
                 if "combo" in widget[3]:
                     self.dropboxes.append(QComboBox(self))
-                    self.dropboxes[-1].activated["QString"].connect(widget[5])
+                    self.dropboxes[-1].textActivated.connect(widget[5])
                     for item in widget[4]:
                         self.dropboxes[-1].addItem(item)
                     self.widgets[widget[-1]] = {"Combo": self.dropboxes[-1], "Label": self.droplabels[-1]}

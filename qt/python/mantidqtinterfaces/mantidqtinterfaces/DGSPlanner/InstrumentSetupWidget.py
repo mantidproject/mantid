@@ -293,7 +293,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.editS2.textEdited.connect(self.checkValidInputs)
         self.editDetZ.textEdited.connect(self.checkValidInputs)
         self.editMask.textEdited.connect(self.setMaskFile)
-        self.combo.activated[str].connect(self.instrumentSelected)
+        self.combo.textActivated.connect(self.instrumentSelected)
         self.fast.stateChanged.connect(self.updateFast)
         self.buttonMask.clicked.connect(self.loadMaskFromFile)
         self.editEi.textEdited.connect(self.checkValidInputs)
