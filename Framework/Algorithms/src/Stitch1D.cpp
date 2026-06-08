@@ -678,8 +678,7 @@ void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws, const Speci
  * @param rhs :: RHS workspace masked to contain only overlap-region values.
  * @param lhsSpecialValues :: Special value indexes recorded from the LHS workspace.
  * @param rhsSpecialValues :: Special value indexes recorded from the RHS workspace.
- * @param a1 :: Index of the bin containing the start of the overlap region.
- * @param a2 :: Index of the bin containing the end of the overlap region.
+ * @param bounds :: Indices of the bins containing the start and end of the overlap region.
  */
 void Stitch1D::useValidOverlapData(const MatrixWorkspace_sptr &overlap, const MatrixWorkspace_sptr &lhs,
                                    const MatrixWorkspace_sptr &rhs, const SpecialValueIndexes &lhsSpecialValues,
