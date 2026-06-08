@@ -100,9 +100,10 @@ def run_focus_script(
     match instrument:
         case "IMAT":
             TextureInstrument = IMAT
-        case _:
-            # default to ENGINX
+        case "ENGINX" | "ENGIN-X":
             TextureInstrument = EnginX
+        case _:
+            raise ValueError(f"Unsupported instrument '{instrument}' for texture focusing. Supported instruments are ENGINX and IMAT.")
     model = TextureInstrument(
         vanadium_run=van_run,
         ceria_run=ceria_run,
