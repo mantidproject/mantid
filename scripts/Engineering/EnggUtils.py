@@ -381,7 +381,7 @@ def create_output_files(calibration_dir, calibration, ws_foc):
         makedirs(calibration_dir)
 
     # save grouping ws if custom or cropped
-    if not calibration.group.banks:
+    if not calibration.get_group_banks():
         calibration.save_grouping_workspace(calibration_dir)
 
     # save prm file(s)
@@ -396,7 +396,7 @@ def create_output_files(calibration_dir, calibration, ws_foc):
     # if both banks calibrated save individual banks separately as well
     if calibration.group == calibration.config.group.BOTH:
         # output a separate prm for North and South when both banks included
-        for ibank, bank in enumerate(calibration.group.banks):
+        for ibank, bank in enumerate(calibration.get_group_banks()):
             # get prm filename for individual banks by passing group enum as argument to generate_output_file_name
             prm_filepath_bank = path.join(calibration_dir, calibration.generate_output_file_name(calibration.config.group(str(ibank + 1))))
             write_prm_file(ws_foc, prm_filepath_bank, calibration, spec_nums=[ibank])

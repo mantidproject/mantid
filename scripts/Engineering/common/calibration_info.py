@@ -12,7 +12,7 @@ from mantid.dataobjects import GroupingWorkspace
 from os import path
 from mantid.simpleapi import Load, LoadDetectorsGroupingFile, CreateGroupingWorkspace, SaveDetectorsGrouping
 from mantid.kernel import logger
-from typing import Optional
+from typing import Optional, Sequence
 from Engineering.common.instrument_config import get_instr_config
 from enum import Enum
 
@@ -50,28 +50,33 @@ class CalibrationInfo:
 
     # getters
     def get_foc_ws_suffix(self) -> str:
-        return self._get_suffix(self.config.group_foc_ws_suffix)
+        return self._get_suffix("foc_ws_suffix")
 
     def get_group_suffix(self) -> str:
-        return self._get_suffix(self.config.group_suffix)
+        return self._get_suffix("suffix")
 
     def get_group_ws_name(self) -> str:
-        return self._get_suffix(self.config.group_ws_names)
+        return self._get_suffix("ws_name")
 
-    def _get_suffix(self, suffix_dict: dict) -> str:
+    def _get_suffix(self, attr: str) -> str:
         """Get the full suffix for the current group"""
         if self.group:
             self.set_extra_group_suffix()
-            return f"{suffix_dict[self.group]}{self.extra_group_suffix}"
+            return f"{getattr(self.config.group_info[self.group], attr)}{self.extra_group_suffix}"
         return ""
+
+    def get_group_banks(self) -> Sequence[int]:
+        if self.group:
+            return self.config.group_info[self.group].banks
+        return []
 
     def get_group_description(self) -> Optional[str]:
         if self.group:
-            return self.config.group_descriptions[self.group]
+            return self.config.group_info[self.group].description
 
     def get_group_file(self) -> Optional[str]:
         if self.group:
-            return self.config.grouping_files[self.group]
+            return self.config.group_info[self.group].grouping_file
 
     def get_calibration_table(self) -> Optional[str]:
         return self.calibration_table
@@ -188,7 +193,7 @@ class CalibrationInfo:
             logger.error("Unable to load calibration file " + filepath + ". Error: " + str(e))
 
         # load in custom grouping - checks if applicable inside method
-        if not self.group.banks:
+        if not self.get_group_banks():
             self.load_custom_grouping_workspace()
         else:
             self.get_group_ws()  # creates group workspace
@@ -197,7 +202,7 @@ class CalibrationInfo:
         """
         Load a custom grouping workspace saved post calibration (e.g. when user supplied custom spectra numbers or .cal)
         """
-        if not self.group.banks:
+        if not self.get_group_banks():
             # no need to load grp ws for bank grouping
             ws_name = self.get_group_ws_name()
             self.set_grouping_filepath_from_prm_filepath()
@@ -208,7 +213,7 @@ class CalibrationInfo:
         Save grouping workspace created for custom spectra or .cal cropping.
         :param directory: directory in which to save grouping workspace
         """
-        if self.group and not self.group.banks:
+        if self.group and not self.get_group_banks():
             filename = self.generate_output_file_name(ext=".xml")
             SaveDetectorsGrouping(InputWorkspace=self.group_ws, OutputFile=path.join(directory, filename))
         else:
@@ -225,7 +230,7 @@ class CalibrationInfo:
         if not group:
             suffix = self.get_group_suffix()
         else:
-            suffix = self.config.group_suffix[group]
+            suffix = self.config.group_info[group].suffix
         return "_".join([self.instrument, self.get_ceria_runno(), suffix]) + ext
 
     def get_subplot_title(self, ispec: int) -> str:
@@ -237,9 +242,9 @@ class CalibrationInfo:
             return self.get_group_description()
         elif self.group == self.config.group.BOTH:
             return (
-                self.config.group_descriptions[self.config.group.NORTH]
+                self.config.group_info[self.config.group.NORTH].description
                 if ispec == 0
-                else self.config.group_descriptions[self.config.group.SOUTH]
+                else self.config.group_info[self.config.group.SOUTH].description
             )
         else:
             return f"{self.get_group_description()} spec: {ispec}"  # texture
@@ -255,7 +260,7 @@ class CalibrationInfo:
 
     def update_group_ws_from_group(self) -> None:
         if self.group:
-            if self.group.banks:
+            if self.get_group_banks():
                 self.create_bank_grouping_workspace()
             elif self.group == self.config.group.CROPPED:
                 self.create_grouping_workspace_from_spectra_list()
@@ -286,13 +291,13 @@ class CalibrationInfo:
         grp_ws = None
         try:
             grp_ws = LoadDetectorsGroupingFile(
-                InputFile=path.join(CALIB_DIR, self.config.grouping_files[self.group]), OutputWorkspace=ws_name
+                InputFile=path.join(CALIB_DIR, self.config.group_info[self.group].grouping_file), OutputWorkspace=ws_name
             )
         except ValueError:
             logger.notice("Grouping file not found in user directories - creating one")
-            if self.group.banks and self.group not in self.config.texture_groups:
+            if self.get_group_banks() and self.group not in self.config.texture_groups:
                 grp_ws, _, _ = CreateGroupingWorkspace(
-                    InstrumentName=self.instrument, OutputWorkspace=ws_name, GroupNames=self.config.group_bank_args[self.group]
+                    InstrumentName=self.instrument, OutputWorkspace=ws_name, GroupNames=self.config.group_info[self.group].bank_args
                 )
         if grp_ws:
             self.group_ws = grp_ws
