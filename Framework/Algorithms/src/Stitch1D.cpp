@@ -627,8 +627,9 @@ void Stitch1D::exec() {
 void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws, const SpecialValueIndexes &lhsSpecialValues,
                                      const SpecialValueIndexes &rhsSpecialValues, overlapBounds bounds = {}) {
   auto histogramCount = static_cast<int>(ws->getNumberHistograms());
+  bool defaultBounds = false;
   if (bounds.a1 == -1 && bounds.a2 == -1) {
-    bounds.a1 = histogramCount - 1;
+    defaultBounds = true;
     bounds.a2 = 0;
   } else if (bounds.a1 < 0 || bounds.a2 < 0) {
     throw std::runtime_error(
@@ -638,6 +639,9 @@ void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws, const Speci
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERRUPT_REGION
+    if (defaultBounds)
+      bounds.a1 = static_cast<int>(ws->y(i).size()) - 1;
+
     auto &sourceY = ws->mutableY(i);
     auto &sourceE = ws->mutableE(i);
 
