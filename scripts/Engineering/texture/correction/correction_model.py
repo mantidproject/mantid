@@ -146,8 +146,7 @@ class TextureCorrectionModel:
 
         # save files
         CloneWorkspace(temp_ws, OutputWorkspace=out_ws, StoreInADS=True)
-        is_texture = self.calibration.get_group() in self.calibration.config.texture_groups if self.calibration else False
-        save_filepath = self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", self.rb_num, is_texture)
+        save_filepath = self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", self.rb_num, self.is_texture(self.calibration))
 
         # optionally remove extra files
         if self.remove_ws_after_processing:
@@ -330,12 +329,7 @@ class TextureCorrectionModel:
                     vals[r],
                 ]
             )
-        is_texture = (
-            self.calibration.get_group() in self.calibration.config.texture_groups
-            if (self.calibration and self.calibration.config)
-            else False
-        )
-        self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, is_texture)
+        self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, self.is_texture(calibration))
 
     # ~~~~~ Reference Workspace Functions ~~~~~~~~~~~~~
 
@@ -344,9 +338,8 @@ class TextureCorrectionModel:
         LoadEmptyInstrument(InstrumentName=instr, OutputWorkspace=self.reference_ws)
 
     def save_reference_file(self, rb_num: str, current_calib: Optional[CalibrationInfo], root_dir: Optional[str]) -> None:
-        is_texture = current_calib.get_group() in current_calib.config.texture_groups if current_calib else False
         if self.reference_ws and ADS.doesExist(self.reference_ws):
-            self._save_corrected_files(self.reference_ws, root_dir, "ReferenceWorkspaces", rb_num, is_texture)
+            self._save_corrected_files(self.reference_ws, root_dir, "ReferenceWorkspaces", rb_num, self.is_texture(current_calib))
 
     def set_reference_ws(self, ws_name: str) -> None:
         self.reference_ws = ws_name
@@ -367,6 +360,12 @@ class TextureCorrectionModel:
     @staticmethod
     def _has_no_valid_shape(ws_name: str) -> bool:
         return not has_valid_shape(ws_name)
+
+    # ~~~~~~~~~ Texture Group Helper ~~~~~~~~~~~~~~~~~
+
+    @staticmethod
+    def is_texture(calibration):
+        return calibration.is_texture_group() if calibration else False
 
 
 def read_attenuation_coefficient_at_value(ws: str, val: float, unit: str) -> Sequence[float]:
