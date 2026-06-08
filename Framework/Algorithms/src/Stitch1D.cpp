@@ -53,26 +53,11 @@ bool hasInvalidY(const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &specia
          hasSpecialValue(specialValues.infY, spectrumIndex, binIndex);
 }
 
-bool hasInvalidE(const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &specialValues, const size_t spectrumIndex,
-                 const size_t binIndex) {
-  return hasSpecialValue(specialValues.nanE, spectrumIndex, binIndex) ||
-         hasSpecialValue(specialValues.infE, spectrumIndex, binIndex);
-}
-
 double specialYValue(const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &lhsSpecialValues,
                      const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &rhsSpecialValues,
                      const size_t spectrumIndex, const size_t binIndex) {
   if (hasSpecialValue(lhsSpecialValues.infY, spectrumIndex, binIndex) ||
       hasSpecialValue(rhsSpecialValues.infY, spectrumIndex, binIndex))
-    return std::numeric_limits<double>::infinity();
-  return std::numeric_limits<double>::quiet_NaN();
-}
-
-double specialEValue(const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &lhsSpecialValues,
-                     const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &rhsSpecialValues,
-                     const size_t spectrumIndex, const size_t binIndex) {
-  if (hasSpecialValue(lhsSpecialValues.infE, spectrumIndex, binIndex) ||
-      hasSpecialValue(rhsSpecialValues.infE, spectrumIndex, binIndex))
     return std::numeric_limits<double>::infinity();
   return std::numeric_limits<double>::quiet_NaN();
 }
@@ -600,13 +585,13 @@ void Stitch1D::exec() {
       MatrixWorkspace_sptr sum = overlap1 + overlap2;
       overlapMeans = sum * 0.5;
     }
-    if (m_useValidDataOnly)
-      useValidOverlapData(overlapMeans, overlap1, overlap2, m_lhsSpecialValues, m_rhsSpecialValues, a1, a2);
+    overlapBounds bounds;
+    if (m_useValidDataOnly) {
+      bounds = {a1, a2};
+      useValidOverlapData(overlapMeans, overlap1, overlap2, m_lhsSpecialValues, m_rhsSpecialValues, bounds);
+    }
     result = lhs + overlapMeans + rhs;
-    if (m_useValidDataOnly)
-      reinsertSpecialValuesWithoutValidData(result, m_lhsSpecialValues, m_rhsSpecialValues, a1, a2);
-    else
-      reinsertSpecialValues(result, m_lhsSpecialValues, m_rhsSpecialValues);
+    reinsertSpecialValues(result, m_lhsSpecialValues, m_rhsSpecialValues, bounds);
   } else { // The input workspaces are point data ... join & sort
     result = conjoinXAxis(lhs, rhs);
     if (!result)
@@ -632,55 +617,24 @@ void Stitch1D::exec() {
     AnalysisDataService::Instance().addOrReplace(scalingWsName, singleWS);
   }
 }
-/** Put all special values back into the output workspace.
- * @param ws :: MatrixWorkspace to reinsert special values into.
- * @param lhsSpecialValues :: Special value indexes recorded from the LHS workspace.
- * @param rhsSpecialValues :: Special value indexes recorded from the RHS workspace.
- */
-void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws, const SpecialValueIndexes &lhsSpecialValues,
-                                     const SpecialValueIndexes &rhsSpecialValues) {
-  auto histogramCount = static_cast<int>(ws->getNumberHistograms());
-  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
-  for (int i = 0; i < histogramCount; ++i) {
-    PARALLEL_START_INTERRUPT_REGION
-    auto &sourceY = ws->mutableY(i);
-    auto &sourceE = ws->mutableE(i);
-
-    for (auto j : lhsSpecialValues.nanY[i])
-      sourceY[j] = std::numeric_limits<double>::quiet_NaN();
-    for (auto j : rhsSpecialValues.nanY[i])
-      sourceY[j] = std::numeric_limits<double>::quiet_NaN();
-    for (auto j : lhsSpecialValues.nanE[i])
-      sourceE[j] = std::numeric_limits<double>::quiet_NaN();
-    for (auto j : rhsSpecialValues.nanE[i])
-      sourceE[j] = std::numeric_limits<double>::quiet_NaN();
-
-    for (auto j : lhsSpecialValues.infY[i])
-      sourceY[j] = std::numeric_limits<double>::infinity();
-    for (auto j : rhsSpecialValues.infY[i])
-      sourceY[j] = std::numeric_limits<double>::infinity();
-    for (auto j : lhsSpecialValues.infE[i])
-      sourceE[j] = std::numeric_limits<double>::infinity();
-    for (auto j : rhsSpecialValues.infE[i])
-      sourceE[j] = std::numeric_limits<double>::infinity();
-
-    PARALLEL_END_INTERRUPT_REGION
-  }
-  PARALLEL_CHECK_INTERRUPT_REGION
-}
 
 /** Put special values back only where the output has no valid data coverage.
  * @param ws :: MatrixWorkspace to reinsert special values into.
  * @param lhsSpecialValues :: Special value indexes recorded from the LHS workspace.
  * @param rhsSpecialValues :: Special value indexes recorded from the RHS workspace.
- * @param a1 :: Index of the bin containing the start of the overlap region.
- * @param a2 :: Index of the bin containing the end of the overlap region.
+ * @param bounds :: Indices of the bins containing the start and end of the overlap region.
  */
-void Stitch1D::reinsertSpecialValuesWithoutValidData(const MatrixWorkspace_sptr &ws,
-                                                     const SpecialValueIndexes &lhsSpecialValues,
-                                                     const SpecialValueIndexes &rhsSpecialValues, const int a1,
-                                                     const int a2) {
+void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws, const SpecialValueIndexes &lhsSpecialValues,
+                                     const SpecialValueIndexes &rhsSpecialValues, overlapBounds bounds = {}) {
   auto histogramCount = static_cast<int>(ws->getNumberHistograms());
+  if (bounds.a1 == -1 && bounds.a2 == -1) {
+    bounds.a1 = histogramCount - 1;
+    bounds.a2 = 0;
+  } else if (bounds.a1 < 0 || bounds.a2 < 0) {
+    throw std::runtime_error(
+        "Invalid bounds provided for re-inserting special values. Bounds must be either both -1 or both non-negative.");
+  }
+
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERRUPT_REGION
@@ -688,37 +642,30 @@ void Stitch1D::reinsertSpecialValuesWithoutValidData(const MatrixWorkspace_sptr 
     auto &sourceE = ws->mutableE(i);
 
     for (auto j : lhsSpecialValues.nanY[i])
-      if (static_cast<int>(j) <= a1)
+      if (static_cast<int>(j) <= bounds.a1)
         sourceY[j] = std::numeric_limits<double>::quiet_NaN();
     for (auto j : lhsSpecialValues.infY[i])
-      if (static_cast<int>(j) <= a1)
+      if (static_cast<int>(j) <= bounds.a1)
         sourceY[j] = std::numeric_limits<double>::infinity();
-    for (auto j : rhsSpecialValues.nanY[i])
-      if (static_cast<int>(j) >= a2)
-        sourceY[j] = std::numeric_limits<double>::quiet_NaN();
-    for (auto j : rhsSpecialValues.infY[i])
-      if (static_cast<int>(j) >= a2)
-        sourceY[j] = std::numeric_limits<double>::infinity();
-
     for (auto j : lhsSpecialValues.nanE[i])
-      if (static_cast<int>(j) <= a1)
+      if (static_cast<int>(j) <= bounds.a1)
         sourceE[j] = std::numeric_limits<double>::quiet_NaN();
     for (auto j : lhsSpecialValues.infE[i])
-      if (static_cast<int>(j) <= a1)
-        sourceE[j] = std::numeric_limits<double>::infinity();
-    for (auto j : rhsSpecialValues.nanE[i])
-      if (static_cast<int>(j) >= a2)
-        sourceE[j] = std::numeric_limits<double>::quiet_NaN();
-    for (auto j : rhsSpecialValues.infE[i])
-      if (static_cast<int>(j) >= a2)
+      if (static_cast<int>(j) <= bounds.a1)
         sourceE[j] = std::numeric_limits<double>::infinity();
 
-    for (size_t j = static_cast<size_t>(a1 + 1); j < static_cast<size_t>(a2); ++j) {
-      if (hasInvalidY(lhsSpecialValues, i, j) && hasInvalidY(rhsSpecialValues, i, j))
-        sourceY[j] = specialYValue(lhsSpecialValues, rhsSpecialValues, i, j);
-      if (hasInvalidE(lhsSpecialValues, i, j) && hasInvalidE(rhsSpecialValues, i, j))
-        sourceE[j] = specialEValue(lhsSpecialValues, rhsSpecialValues, i, j);
-    }
+    for (auto j : rhsSpecialValues.nanY[i])
+      if (static_cast<int>(j) >= bounds.a2)
+        sourceY[j] = std::numeric_limits<double>::quiet_NaN();
+    for (auto j : rhsSpecialValues.infY[i])
+      if (static_cast<int>(j) >= bounds.a2)
+        sourceY[j] = std::numeric_limits<double>::infinity();
+    for (auto j : rhsSpecialValues.nanE[i])
+      if (static_cast<int>(j) >= bounds.a2)
+        sourceE[j] = std::numeric_limits<double>::quiet_NaN();
+    for (auto j : rhsSpecialValues.infE[i])
+      if (static_cast<int>(j) >= bounds.a2)
+        sourceE[j] = std::numeric_limits<double>::infinity();
 
     PARALLEL_END_INTERRUPT_REGION
   }
@@ -736,7 +683,7 @@ void Stitch1D::reinsertSpecialValuesWithoutValidData(const MatrixWorkspace_sptr 
  */
 void Stitch1D::useValidOverlapData(const MatrixWorkspace_sptr &overlap, const MatrixWorkspace_sptr &lhs,
                                    const MatrixWorkspace_sptr &rhs, const SpecialValueIndexes &lhsSpecialValues,
-                                   const SpecialValueIndexes &rhsSpecialValues, const int a1, const int a2) {
+                                   const SpecialValueIndexes &rhsSpecialValues, const overlapBounds bounds) {
   auto histogramCount = static_cast<int>(overlap->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*overlap, *lhs, *rhs))
   for (int i = 0; i < histogramCount; ++i) {
@@ -748,18 +695,19 @@ void Stitch1D::useValidOverlapData(const MatrixWorkspace_sptr &overlap, const Ma
     const auto &rhsY = rhs->y(i);
     const auto &rhsE = rhs->e(i);
 
-    for (size_t j = static_cast<size_t>(a1 + 1); j < static_cast<size_t>(a2); ++j) {
-      const bool lhsInvalid = hasInvalidY(lhsSpecialValues, i, j);
-      const bool rhsInvalid = hasInvalidY(rhsSpecialValues, i, j);
-      if (lhsInvalid && !rhsInvalid) {
+    for (size_t j = static_cast<size_t>(bounds.a1 + 1); j < static_cast<size_t>(bounds.a2); ++j) {
+      const bool lhsInvalidY = hasInvalidY(lhsSpecialValues, i, j);
+      const bool rhsInvalidY = hasInvalidY(rhsSpecialValues, i, j);
+      if (lhsInvalidY && !rhsInvalidY) {
         overlapY[j] = rhsY[j];
         overlapE[j] = rhsE[j];
-      } else if (!lhsInvalid && rhsInvalid) {
+      } else if (!lhsInvalidY && rhsInvalidY) {
         overlapY[j] = lhsY[j];
         overlapE[j] = lhsE[j];
-      } else if (lhsInvalid && rhsInvalid) {
+      } else if (lhsInvalidY && rhsInvalidY) {
         overlapY[j] = specialYValue(lhsSpecialValues, rhsSpecialValues, i, j);
-        overlapE[j] = 0.0;
+        overlapE[j] = specialYValue(lhsSpecialValues, rhsSpecialValues, i,
+                                    j); // If both workspaces have invalid values, use invalid error.
       }
     }
 

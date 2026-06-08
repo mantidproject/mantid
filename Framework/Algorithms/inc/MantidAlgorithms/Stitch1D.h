@@ -50,6 +50,11 @@ public:
     }
   };
 
+  struct overlapBounds {
+    int a1 = -1;
+    int a2 = -1;
+  };
+
 private:
   /// Overwrites Algorithm method.
   void init() override;
@@ -83,18 +88,14 @@ private:
   Mantid::API::MatrixWorkspace_sptr maskAllBut(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
   /// Mask out everything but the data in the ranges, but do it inplace.
   void maskInPlace(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
-  /// Add back all special values recorded from the LHS and RHS workspaces
-  void reinsertSpecialValues(const Mantid::API::MatrixWorkspace_sptr &ws, const SpecialValueIndexes &lhsSpecialValues,
-                             const SpecialValueIndexes &rhsSpecialValues);
   /// Add back special values only where no valid data contributes to the output
-  void reinsertSpecialValuesWithoutValidData(const Mantid::API::MatrixWorkspace_sptr &ws,
-                                             const SpecialValueIndexes &lhsSpecialValues,
-                                             const SpecialValueIndexes &rhsSpecialValues, const int a1, const int a2);
+  void reinsertSpecialValues(const Mantid::API::MatrixWorkspace_sptr &ws, const SpecialValueIndexes &lhsSpecialValues,
+                             const SpecialValueIndexes &rhsSpecialValues, overlapBounds bounds);
   /// Use valid overlap values where exactly one workspace has an invalid signal value
   void useValidOverlapData(const Mantid::API::MatrixWorkspace_sptr &overlap,
                            const Mantid::API::MatrixWorkspace_sptr &lhs, const Mantid::API::MatrixWorkspace_sptr &rhs,
                            const SpecialValueIndexes &lhsSpecialValues, const SpecialValueIndexes &rhsSpecialValues,
-                           const int a1, const int a2);
+                           const overlapBounds bounds);
   /// Range tolerance
   static const double range_tolerance;
   /// Scaling factors
