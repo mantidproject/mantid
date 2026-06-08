@@ -40,6 +40,7 @@ class ALFInstrumentViewView(FullInstrumentViewView):
         options_layout.addWidget(self._select_bank_tube)
         options_layout.addWidget(self._add_rectangle)
         options_layout.addWidget(self._add_selection)
+        options_layout.addWidget(self._show_shapes_check_box)
         options_layout.addWidget(self._spacer)
         parent_layout.addWidget(options_widget)
         parent_layout.addWidget(self.main_plotter)

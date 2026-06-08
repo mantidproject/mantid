@@ -7,10 +7,13 @@
 #pragma once
 
 #include "ALFInstrumentViewBase.h"
+#include "ALFPythonCallbackRelay.h"
 #include "DllConfig.h"
 #include "IALFInstrumentView.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
+#include "StubInstrumentActor.h"
 
+#include <memory>
 #include <qwidget.h>
 #include <string>
 #include <vector>
@@ -32,6 +35,7 @@ class MANTIDQT_DIRECT_DLL ALFPythonInstrumentView final : public ALFInstrumentVi
 
 public:
   explicit ALFPythonInstrumentView(QWidget *parent = nullptr);
+  ~ALFPythonInstrumentView() noexcept override = default;
 
   void setUpInstrument(std::string const &fileName) override {};
 
@@ -43,6 +47,15 @@ public:
 
   void clearShapes() override {};
   void drawRectanglesAbove(std::vector<DetectorTube> const &tubes) override {};
+
+  void notifyWholeTubeSelected();
+
+private:
+  void ensureCallbackRelay(QWidget *instrumentView);
+
+  ALFPythonCallbackRelay *m_callbackRelay{nullptr};
+
+  mutable std::unique_ptr<MantidWidgets::StubInstrumentActor> m_actor;
 
   // private slots:
   //   void reconnectInstrumentActor();

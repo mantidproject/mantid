@@ -12,8 +12,15 @@ set(SRC_FILES
     ALFView.cpp
 )
 
-set(MOC_FILES ALFAnalysisView.h ALFInstrumentView.h ALFPythonInstrumentView.h ALFInstrumentViewBase.h
-              ALFInstrumentWidget.h ALFView.h
+set(MOC_FILES
+    ALFAnalysisView.h
+    ALFInstrumentView.h
+    ALFPythonInstrumentView.h
+    ALFPythonCallbackRelay.h
+    ALFInstrumentViewBase.h
+    ALFInstrumentWidget.h
+    ALFView.h
+    StubInstrumentActor.h
 )
 
 set(INC_FILES
@@ -25,6 +32,8 @@ set(INC_FILES
     ALFInstrumentPresenter.h
     DetectorTube.h
     DllConfig.h
+    ALFPythonCallbackRelay.h
+    StubInstrumentActor.h
     IALFAlgorithmManagerSubscriber.h
     IALFInstrumentView.h
 )
