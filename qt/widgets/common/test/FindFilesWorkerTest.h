@@ -128,8 +128,8 @@ public:
   }
 
   void test_that_a_non_ascii_symbol_does_not_cause_a_crash_when_file_searching_using_a_filename() {
-    const auto searchText = QString("£");
-    auto parameters = createFileSearch(searchText.toStdString());
+    const std::string searchText = "£";
+    auto parameters = createFileSearch(searchText);
     const auto worker = new FindFilesWorker(parameters);
     const auto widget = createWidget(worker);
 
@@ -142,8 +142,8 @@ public:
   }
 
   void test_that_a_non_ascii_symbol_does_not_cause_a_crash_when_file_searching_using_runs() {
-    const auto searchText = QString("£");
-    auto parameters = createFileSearch(searchText.toStdString());
+    const std::string searchText = "£";
+    auto parameters = createFileSearch(searchText);
     parameters.algorithmName = "";
     parameters.algorithmProperty = "";
     parameters.isForRunFiles = true;
